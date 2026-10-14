@@ -41,6 +41,12 @@ function inks(p) {
     learning: '#b7402a', // --state-learning, the same in both themes
     mastered: '#a97a25', // --state-mastered
     stateNew: p.paper ? '#1a1812' : '#beb3a0',
+    // What a list, a field or a sentence stands on: --surface by day, the
+    // panel's sumi by night, with the ink each reads in.
+    face: p.paper ? p.surface : p.panel,
+    faceLine: p.paper ? p.surfaceLine : p.panelLine,
+    faceInk: p.paper ? p.ink : p.onPanel,
+    faceSoft: p.paper ? p.ink2 : p.onPanelSoft,
   }
 }
 
@@ -191,9 +197,9 @@ export function ratingBar(ctx, p, x, y, w, u, labels, { pressed = null } = {}) {
 /** The choices as a run lists them: a row each, its number in a ring of
  *  the line's pigment. `right` the index of the right one, shown answered
  *  (the success ink) when `answered`. Returns the height. */
-export function choiceRows(ctx, p, x, y, w, u, choices, { line, right = -1, answered = false, jp = true } = {}) {
+export function choiceRows(ctx, p, x, y, w, u, choices, { line, right = -1, answered = false, jp = true, rowH: rowCss = 54 } = {}) {
   const c = inks(p)
-  const rowH = 54 * u
+  const rowH = rowCss * u
   const gap = 8 * u
   const success = p.paper ? '#4d7639' : '#74a15f'
   // Once answered the run folds the other rows away: the right one stays.
@@ -203,10 +209,10 @@ export function choiceRows(ctx, p, x, y, w, u, choices, { line, right = -1, answ
     const ry = y + at * (rowH + gap)
     const ok = answered && i === right
     const ink = ok ? success : line
-    ctx.fillStyle = ok ? mix(success, c.card, 0.12) : c.panel
+    ctx.fillStyle = ok ? mix(success, c.card, 0.12) : c.face
     rrect(ctx, x, ry, w, rowH, 6 * u)
     ctx.fill()
-    ctx.strokeStyle = ok ? success : p.panelLine
+    ctx.strokeStyle = ok ? success : c.faceLine
     ctx.lineWidth = u
     rrect(ctx, x + u / 2, ry + u / 2, w - u, rowH - u, 6 * u)
     ctx.stroke()
@@ -231,13 +237,13 @@ export function choiceRows(ctx, p, x, y, w, u, choices, { line, right = -1, answ
       ctx.stroke()
     }
     const nz = 12.8 * u
-    text(ctx, String(i + 1).padStart(2, '0'), cx, cy + nz * 0.36, { f: font(700, nz, 'latin'), color: ok ? p.bg : c.ink2, align: 'center' })
+    text(ctx, String(i + 1).padStart(2, '0'), cx, cy + nz * 0.36, { f: font(700, nz, 'latin'), color: ok ? p.bg : c.faceSoft, align: 'center' })
     const lz = 17 * u
     const tx = x + 57 * u
     const room = w - 57 * u - 16 * u
     let z = lz
     while (z > 12 * u && measure(ctx, label, font(600, z, jp ? 'jp' : 'latin')) > room) z -= u
-    text(ctx, label, tx, cy + z * 0.36, { f: font(600, z, jp ? 'jp' : 'latin'), color: ok ? success : c.onPanel })
+    text(ctx, label, tx, cy + z * 0.36, { f: font(600, z, jp ? 'jp' : 'latin'), color: ok ? success : c.faceInk })
   })
   return rows.length * rowH + (rows.length - 1) * gap
 }
@@ -582,8 +588,15 @@ export function departButton(ctx, p, x, y, w, u, label) {
     ctx.stroke()
   })
   ctx.restore()
-  const lz = 17.92 * u
-  text(ctx, label, x + w / 2, ry + lz * 0.36, { f: font(700, lz, 'latin'), color: '#1c1811', align: 'center' })
+  // The word centred on the pill, or in what the reader leaves of it
+  // when it is long, a size down rather than past its end.
+  const free = x + 8 * u + 48 * u + 16 * u
+  const room = x + w - 24 * u - free
+  let lz = 17.92 * u
+  while (lz > 13 * u && measure(ctx, label, font(700, lz, 'latin')) > room) lz -= 0.5 * u
+  const lw = measure(ctx, label, font(700, lz, 'latin'))
+  const cx = Math.max(x + w / 2, free + lw / 2)
+  text(ctx, label, cx, ry + lz * 0.36, { f: font(700, lz, 'latin'), color: '#1c1811', align: 'center' })
   return h
 }
 
@@ -679,7 +692,7 @@ export function pointCard(ctx, p, x, y, w, u, { n, pattern, level, gloss, parts 
   text(ctx, String(n), ix + 11 * u, y + 27 * u + 9.92 * u * 0.36, { f: font(700, 9.92 * u, 'latin'), color: c.card, align: 'center' })
   text(ctx, pattern, ix + 34 * u, y + 27 * u + 17.92 * u * 0.36, { f: font(700, 17.92 * u, 'serif'), color: c.ink })
   if (level) {
-    const lz = 8.5 * u
+    const lz = 9.92 * u
     const lw = measure(ctx, level, font(700, lz, 'latin')) + 8 * u
     ctx.strokeStyle = p.panelLine
     ctx.lineWidth = u
@@ -709,5 +722,11 @@ export function pointCard(ctx, p, x, y, w, u, { n, pattern, level, gloss, parts 
   return h
 }
 
-/** A hex ink at an opacity, for a scrim over the print. */
+/** What a panel of the app stands on, per ground: its fill, rule and inks. */
+export const faceOf = p => {
+  const c = inks(p)
+  return { bg: c.face, line: c.faceLine, ink: c.faceInk, soft: c.faceSoft }
+}
+
+/** A hex ink at an opacity, for a halo or a scrim over the print. */
 export const inkAlpha = alpha

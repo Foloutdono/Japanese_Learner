@@ -177,12 +177,22 @@ dialog::backdrop { background: var(--scrim); }
       <ul id="items" class="sentences"></ul>
     </div>
 
-    <div class="field">
+    <div class="field" data-promo="only">
+      <div class="label">Today’s print <span>the hour it is drawn at</span></div>
+      <div class="seg" role="group" aria-label="Hour">
+        <button type="button" data-set="hour:dawn">Dawn 曙</button>
+        <button type="button" data-set="hour:day">Day 帰帆</button>
+        <button type="button" data-set="hour:dusk">Dusk 落雁</button>
+        <button type="button" data-set="hour:night">Night 秋月</button>
+      </div>
+    </div>
+
+    <div class="field" data-promo="hide">
       <div class="label">Carousel type</div>
       <div id="types" class="dirs" role="group" aria-label="Carousel type"></div>
     </div>
 
-    <div class="field">
+    <div class="field" data-promo="hide">
       <div class="label">Last slide</div>
       <div id="endings" class="chips" role="group" aria-label="Last slide"></div>
     </div>
@@ -200,7 +210,7 @@ dialog::backdrop { background: var(--scrim); }
       </div>
     </div>
 
-    <div class="field">
+    <div class="field" data-promo="hide">
       <div class="label">Japanese as</div>
       <div class="seg" role="group" aria-label="Script">
         <button type="button" data-set="script:kanji" lang="ja">漢字</button>
@@ -210,7 +220,7 @@ dialog::backdrop { background: var(--scrim); }
       <label class="check"><input id="romaji" type="checkbox"> Romaji on the first slide</label>
     </div>
 
-    <div class="field">
+    <div class="field" data-promo="hide">
       <div class="label">Slides <span>station plates</span></div>
       <div id="toggles" class="toggles"></div>
     </div>
@@ -241,11 +251,11 @@ dialog::backdrop { background: var(--scrim); }
 
   <section class="work" aria-label="Slides">
     <div class="toolbar">
-      <div class="seg" role="group" aria-label="View">
+      <div class="seg" role="group" aria-label="View" data-promo="hide">
         <button type="button" data-set="view:compare">All types</button>
         <button type="button" data-set="view:single">One type</button>
       </div>
-      <div class="seg" role="group" aria-label="Format">
+      <div class="seg" role="group" aria-label="Format" data-promo="hide">
         <button type="button" data-set="format:post">4:5 post</button>
         <button type="button" data-set="format:story">9:16 full screen</button>
       </div>

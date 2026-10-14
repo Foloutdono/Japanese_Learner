@@ -1,4 +1,4 @@
-# The carousel studio (plans 210–210n)
+# The carousel studio (plans 210–210n, 212)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -334,6 +334,48 @@ Two grounds (washi and sumi, the app's two themes), two languages (the
 slides' Latin text in English or French, French punctuation welded), and
 the Japanese as written, with furigana, or in kana.
 
+## The promo stories (plan 212)
+
+宣伝, the last source, draws the app itself rather than what it teaches:
+five 9:16 stories, picked by the segments over the list (`promo.js`).
+Each frame is drawn with the app's own parts (`app.js`): the review card
+with its stage and band, the rating bar's four keys, a question's choice
+rows, the white pass, the Depart button, the analyser's boxed sentence
+and its point cards, and Today on the print of the hour.
+
+| Story | Picked from | Its frames |
+| --- | --- | --- |
+| The pitch | (one) | Today on its print, the four lines with their figures, how long to N5 at ten minutes a day, the gate |
+| One card | a word of the N5 deck | the card's face, its back with the rating bar and each rating's next review, Today, the gate |
+| The analyser | a sentence of the N5 reading bank | the sentence pasted, then cut word by word with its numbered points, the gate |
+| Could you pass N5? | an N5 sentence with a kanji-reading question | the question with its four readings, the answer folded as a run folds it, the N5 exam in figures, the gate |
+| Your pass | (one) | the pass with a name to write, what is free, the gate |
+
+**The parts are measured, not imagined.** Every figure in `app.js` is a
+CSS pixel of the running app on a 400px phone (the review card, the
+rating keys, the choice rows, the pass, the Depart button, the
+analyser), times `u`, the slide's pixels per CSS pixel. When the app
+redraws one of them, measure it again in the app and follow it: the
+colours come through `palette` and `APP_INKS`, which
+`src/carousel.test.js` holds to `index.css`.
+
+**Today's print is the app's own file.** `app.loadPrint` reads
+`public/today/print/<rev>/<hour>-phone.json`, its grain and its paper,
+and draws the layers still, as the app draws them with motion reduced
+(index.css's `.tpr-` rules and its reduced-motion block go into each
+layer): the train halfway across, the clouds at rest. The studio's
+"Today's print" picks the hour (曙 dawn, 帰帆 day, 落雁 dusk, 秋月 night).
+So the studio needs `public/today/print/`, `src/index.css` and the
+print's `print.json` beside it when it is served or published.
+
+**A story promises what the app does today.** Its figures are the
+bank's (`index.json`: the decks by level, the kana deck, the N5 exam,
+counted as the landing page counts them, and a test holds the two
+equal); its words are the app's where the app says them (the ratings,
+the stages, "due", Depart, a test holds them to `locales/`). It says
+"start free", the kana line free for good, no ads and no trackers; it
+never prices a mode nor says "early access", and a test fails if it does.
+
 ## The code
 
 | File | Does |
@@ -345,6 +387,8 @@ the Japanese as written, with furigana, or in kana.
 | `slides.js` | the slide kinds, drawn once, the types and their decks |
 | `draw.js` | the canvas primitives, the app's tokens at slide scale, the formats |
 | `strings.js` | every label a slide prints, in English and French |
+| `promo.js` | the promo stories: their plans from the bank, their frames (plan 212) |
+| `app.js` | the app's own parts, drawn at its measures, and Today's print (plan 212) |
 | `studio.js` | the page: the pickers, the previews, the export |
 
 ## Running it

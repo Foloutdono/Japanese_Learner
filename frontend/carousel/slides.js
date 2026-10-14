@@ -26,6 +26,7 @@ import { SELF_CHECK_JP, SITE, formOf, tr, weldIf } from './strings.js'
 import { picked } from './sources.js'
 import { withoutGiveaways } from './quizzes.js'
 import { furiganaOf } from './common.js'
+import { promoDeck } from './promo.js'
 
 export { FORMATS }
 
@@ -2711,6 +2712,7 @@ export const TYPES = [
   { id: 'talk', jp: '会話' },
   { id: 'spelling', jp: '表記' },
   { id: 'impostor', jp: '仲間外れ' },
+  { id: 'story', jp: '宣伝' },
 ]
 // What a type may leave out, and whether it is in by default.
 export const TYPE_OPTIONS = {
@@ -2721,6 +2723,8 @@ export const TYPE_OPTIONS = {
 /** Whether a plan can be drawn as a type: a question to ask, two things
  *  to tell apart, a sentence to build, a list, a scene. */
 export function available(type, pl) {
+  // A promo story is drawn as a story and nothing else (plan 212).
+  if (pl.source === 'promo' || type === 'story') return pl.source === 'promo' && type === 'story'
   switch (type) {
     case 'exam': return pl.quizzes.length > 0
     case 'compare': return !!pl.compare
@@ -2766,6 +2770,7 @@ function passagePages(plan, s, fmt, f) {
  *  `opts.picks` the questions picked for the item (else the first few),
  *  `opts.types[type]` the type's own options. */
 export function deck(type, plan, fmt, opts) {
+  if (plan.source === 'promo') return promoDeck(plan, FORMATS.story, opts).map(sl => ({ key: sl.key, draw: ctx => { noShadow(ctx); sl.draw(ctx) } }))
   const fr = frame(fmt)
   const p = palette(opts.ground)
   const t = plan.t

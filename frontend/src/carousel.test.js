@@ -7,6 +7,12 @@ import { assemblyQ, kanjiQuizzes, overlaps, withoutGiveaways } from '../carousel
 import { furiganaOf } from '../carousel/common.js'
 import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explain.js'
 import { STRINGS, weld, weldIf } from '../carousel/strings.js'
+import { APP_INKS } from '../carousel/app.js'
+import { PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
+import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
+import { arrivals as landingArrivals, readFacts, spanOf as landingSpan } from '../landing/content.mjs'
+import EN from './locales/en/index.js'
+import FR from './locales/fr/index.js'
 
 // ── カルーセル — the carousel studio (plans 210, 210b, 210c) ──
 // A static tool outside src/ (frontend/carousel/), so none of the app's
@@ -24,6 +30,8 @@ const FIGURES = bank('index.json').figures
 const OPTS = { lang: 'en', script: 'kanji', romaji: false, bonus: 'kanji', kanji: '', handle: '@tsuji.app', slides: {}, figures: FIGURES }
 const sentence = jp => LEVELS.flatMap(lv => banks[lv].sentences).find(s => s.jp === jp)
 const glossEn = r => (r.en || [])[0] || ''
+// The sources a carousel's last slide stands on: a promo story ends on its own gate.
+const STATIONED = SOURCES.filter(s => s.id !== 'promo')
 
 /** Every file a source reads: one per level, one per kana set, or one. */
 function filesOf(src) {
@@ -104,7 +112,9 @@ describe('the carousel studio', () => {
   const every = []
   for (const src of SOURCES) {
     for (const { data, filter } of filesOf(src)) {
-      for (const { id } of itemsOf(src.id, data, 'en', filter)) every.push({ src, id, p: plan(src.id, data, id, OPTS, depsFor(src, data, id)) })
+      // A promo story is picked by its set, the story (plan 212).
+      const opts = src.id === 'promo' ? { ...OPTS, story: filter } : OPTS
+      for (const { id } of itemsOf(src.id, data, 'en', filter)) every.push({ src, id, p: plan(src.id, data, id, opts, depsFor(src, data, id)) })
     }
   }
 
@@ -113,8 +123,9 @@ describe('the carousel studio', () => {
     for (const { src, id, p } of every) {
       for (const type of TYPES.map(x => x.id).filter(x => available(x, p))) {
         const slides = deck(type, p, FORMATS.post, { ground: 'paper' })
-        expect(slides.length, `${src.id} ${id} ${type}`).toBeGreaterThan(2)
-        expect(slides.at(-1).key, `${src.id} ${id} ${type}`).toBe('outro')
+        expect(slides.length, `${src.id} ${id} ${type}`).toBeGreaterThan(src.id === 'promo' ? 1 : 2)
+        // A promo story ends on its own gate, not on a station (plan 212).
+        expect(slides.at(-1).key, `${src.id} ${id} ${type}`).toBe(src.id === 'promo' ? (id === 'pass' ? 'free' : 'board') : 'outro')
         expect(new Set(slides.map(x => x.key)).size, `${src.id} ${id} ${type}`).toBe(slides.length)
       }
     }
@@ -124,7 +135,7 @@ describe('the carousel studio', () => {
     const had = globalThis.Path2D
     globalThis.Path2D = class {}
     try {
-      for (const src of SOURCES) {
+      for (const src of STATIONED) {
         const { p } = every.find(x => x.src === src)
         const type = TYPES.map(x => x.id).find(x => x !== 'plates' && available(x, p)) || 'plates'
         for (const fmt of Object.values(FORMATS)) {
@@ -247,7 +258,7 @@ describe('the carousel studio', () => {
   })
 
   it('marks the source’s own station on the route map, and only it', () => {
-    for (const src of SOURCES) {
+    for (const src of STATIONED) {
       const { p } = every.find(x => x.src === src)
       const here = p.map.flatMap(L => L.stops).filter(st => st.here)
       expect(here, src.id).toHaveLength(1)
@@ -589,5 +600,72 @@ describe('explaining a point in its own sentence', () => {
     const lit = h.items.filter(x => x.lit)
     expect(lit.map(x => x.t).join('')).toBe('ので')
     expect(lit.every(x => x.label === '')).toBe(true)
+  })
+
+  // ── 宣伝, the promo stories (plan 212) ──────────────────────
+  it('draws the pass in the band index.css prints it in', () => {
+    const css = read('src/index.css')
+    for (const [name, value] of Object.entries(APP_INKS)) expect(css, name).toMatch(new RegExp(`${name}:\\s*${value};`))
+  })
+
+  it('dates the print’s slip in the app’s own numerals', () => {
+    for (let n = 1; n <= 31; n++) expect(kanjiNumber(n), String(n)).toBe(appKanjiNumber(n))
+  })
+
+  it('says the app’s own words on its own parts, in both languages', () => {
+    for (const [lang, t] of [['en', EN], ['fr', FR]]) {
+      const P = PROMO[lang]
+      expect(P.ratings, lang).toEqual([t.wrongRated, t.wrongSeen, t.difficult, t.correctHesit])
+      expect(P.mastered, lang).toBe(t.mastered)
+      expect(P.tap, lang).toBe(t.tapToReveal)
+      expect(P.mode, lang).toBe(t.mode_vocab_flashcard_f2b)
+      expect(P.depart, lang).toBe(t.depart)
+      expect(P.unit, lang).toBe(t.dueUnit)
+      expect(P.doneBy('08:14'), lang).toBe(t.gateEndsAt('08:14'))
+    }
+  })
+
+  it('counts the way to N5 as the landing page counts it', () => {
+    const facts = readFacts()
+    expect(FIGURES.levels).toEqual(facts.levels)
+    expect(FIGURES.kanaDeck).toBe(facts.kana)
+    expect(FIGURES.examN5).toEqual({ questions: facts.exam.questions, minutes: facts.exam.minutes, pass: facts.exam.pass, max: facts.exam.max })
+    for (const perDay of [5, 10, 20]) {
+      expect(arrivals(FIGURES, perDay).map(a => spanOf(a.days)), String(perDay)).toEqual(landingArrivals(facts, perDay).map(a => landingSpan(a.days)))
+    }
+  })
+
+  it('picks every story’s card, sentence and question from the bank', () => {
+    for (const story of STORIES) {
+      const data = bank(STORY_FILES[story])
+      for (const lang of ['en', 'fr']) {
+        const items = promoItems(story, data, lang)
+        expect(items.length, `${story} ${lang}`).toBeGreaterThan(0)
+        for (const { id } of items) {
+          const pl = promoPlan(story, data, id, { ...OPTS, lang, story })
+          expect([...pl.title].length, `${story} ${id}`).toBeLessThanOrEqual(TITLE_MAX)
+          if (story === 'exam') {
+            const { choices, right, word } = pl.promo
+            expect(new Set(choices).size, id).toBe(4)
+            expect(choices[right], id).toBeTruthy()
+            expect(pl.promo.before + word + pl.promo.after, id).toBe(sentencesById[id].jp)
+          }
+          if (story === 'analyser') {
+            expect(pl.promo.points.length, id).toBeGreaterThan(0)
+            expect(pl.promo.points.every(pt => pt.gloss && pt.parts.length), id).toBe(true)
+            expect(pl.promo.toks.map(x => x.t).join(''), id).toBe(sentencesById[id].jp)
+          }
+        }
+      }
+    }
+  })
+
+  it('promises nothing the app does not do today (plan 212)', () => {
+    // No mode is priced and nothing is free "during early access": the
+    // free pass, the kana line and the privacy are what a story may say.
+    for (const lang of ['en', 'fr']) {
+      const words = JSON.stringify(PROMO[lang], (k, v) => (typeof v === 'function' ? String(v) : v))
+      expect(words, lang).not.toMatch(/early access|accès anticipé|unlimited|illimité|€|\$\d/i)
+    }
   })
 })

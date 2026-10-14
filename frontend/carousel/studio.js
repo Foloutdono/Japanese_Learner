@@ -10,6 +10,8 @@ import { ENDING_IDS, FORMATS, TYPES, TYPE_OPTIONS, available, deck, endingSlide 
 import { FONT_FACES, font, palette } from './draw.js'
 import { BONUS, LEVELS, MAX_QUESTIONS, OPTIONAL, SOURCES, TITLE_MAX, depsOf, itemsOf, picked, plan, sampleText, sourceOf, titleOf } from './sources.js'
 import { STRINGS } from './strings.js'
+import { PROMO, STORIES } from './promo.js'
+import { PRINT_HOURS, loadPrint } from './app.js'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 
 const STORE = 'tsuji-carousel'
@@ -27,10 +29,10 @@ const TOGGLE_LABELS = {
   apart: 'What tells them apart', pair: 'The two side by side', careful: 'Watch out',
 }
 const T = STRINGS.en
-const LIST_NAME = { sentence: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
+const LIST_NAME = { promo: 'Story', sentence: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
 
 const DEFAULTS = {
-  source: 'sentence', level: 'N5', kanaSet: 'hiragana', ids: { sentence: 'N5.4', translation: 'N5.4' },
+  source: 'sentence', level: 'N5', kanaSet: 'hiragana', story: 'pitch', hour: 'day', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20' },
   view: 'compare', type: 'plates', format: 'post', ground: 'paper',
   lang: 'en', script: 'kanji', romaji: false, bonus: 'kanji', kanji: '', handle: '', safe: false, slides: {},
   picks: {}, types: {}, ending: 'mark',
@@ -45,6 +47,8 @@ function load() {
     // Plan 210c retired the departure board and the study card.
     const type = TYPES.some(x => x.id === saved.type) ? saved.type : 'plates'
     if (saved.ending && !ENDING_IDS.includes(saved.ending)) delete saved.ending
+    if (saved.hour && !PRINT_HOURS.includes(saved.hour)) delete saved.hour
+    if (saved.story && !STORIES.includes(saved.story)) delete saved.story
     return {
       ...DEFAULTS, ...saved, type, ids: { ...DEFAULTS.ids, ...(saved.ids || {}) }, slides: { ...(saved.slides || {}) },
       picks: { ...(saved.picks || {}) }, types: { ...(saved.types || {}) },
@@ -70,8 +74,20 @@ function fetchJson(name) {
   }
   return files.get(name)
 }
-const fileFor = (source, level) => sourceOf(source).file(level)
-const dataNow = () => fetchJson(fileFor(state.source, state.level))
+// A source with sets of its own (kana's two scripts, the promo stories)
+// keeps the one picked under its own key.
+const setKey = src => (src.id === 'promo' ? 'story' : 'kanaSet')
+// A promo story keeps its own pick: a word, a sentence, a question.
+const idKey = () => (state.source === 'promo' ? `promo:${state.story}` : state.source)
+const fileFor = src => src.file(src.levels ? state[setKey(src)] : state.level)
+const dataNow = () => fetchJson(fileFor(sourceOf(state.source)))
+
+// Today's print of the hour, for the promo stories: fetched once an hour.
+const prints = new Map()
+function printFor(hour) {
+  if (!prints.has(hour)) prints.set(hour, loadPrint(hour, { base: '../' }).catch(e => { prints.delete(hour); throw e }))
+  return prints.get(hour)
+}
 
 // ── Fonts: the canvas draws only what the document has loaded ──
 const loaded = new Set()
@@ -93,7 +109,7 @@ function renderSources() {
     b.className = 'source'
     b.dataset.source = s.id
     b.setAttribute('aria-pressed', String(s.id === state.source))
-    b.style.setProperty('--src', lines[s.line])
+    b.style.setProperty('--src', lines[s.line] || palette(state.ground).gold)
     const jp = document.createElement('b')
     jp.lang = 'ja'
     jp.textContent = s.jp
@@ -112,13 +128,13 @@ function renderLevels() {
   box.hidden = !!src.noLevels
   if (src.noLevels) return
   const options = src.levels || LEVELS
-  const current = src.levels ? state.kanaSet : state.level
+  const current = src.levels ? state[setKey(src)] : state.level
   for (const lv of options) {
     const b = document.createElement('button')
     b.type = 'button'
     b.dataset.level = lv
-    b.textContent = lv === 'hiragana' ? 'ひらがな' : lv === 'katakana' ? 'カタカナ' : lv
-    if (src.levels) b.lang = 'ja'
+    b.textContent = src.levelNames?.[lv] || (lv === 'hiragana' ? 'ひらがな' : lv === 'katakana' ? 'カタカナ' : lv)
+    if (src.levels && !src.levelNames) b.lang = 'ja'
     b.setAttribute('aria-pressed', String(lv === current))
     box.append(b)
   }
@@ -135,7 +151,7 @@ async function renderList() {
   const data = await dataNow()
   if (mine !== listToken) return
   const src = sourceOf(state.source)
-  let items = itemsOf(state.source, data, state.lang, src.levels ? state.kanaSet : null)
+  let items = itemsOf(state.source, data, state.lang, src.levels ? state[setKey(src)] : null)
   if (src.byLevel) items = items.filter(x => x.tag === state.level)
   listCache = items
   const q = $('#search').value.trim().toLowerCase()
@@ -144,7 +160,7 @@ async function renderList() {
   const shown = items.filter(x => !q || [x.jp, x.sub, x.tag].some(v => String(v || '').toLowerCase().includes(q)))
   listShown = shown
   $('#count').textContent = shown.length > LIST_MAX ? `first ${LIST_MAX} of ${shown.length}` : `${shown.length}`
-  $('#list-name').textContent = LIST_NAME[state.source]
+  $('#list-name').textContent = state.source === 'promo' ? PROMO.en.lists[state.story] : LIST_NAME[state.source]
   const current = currentId(items)
   for (const x of shown.slice(0, LIST_MAX)) {
     const li = document.createElement('li')
@@ -171,7 +187,7 @@ async function renderList() {
   list.querySelector('[aria-pressed="true"]')?.scrollIntoView({ block: 'nearest' })
 }
 function currentId(items = listCache) {
-  const id = state.ids[state.source]
+  const id = state.ids[idKey()]
   return items.some(x => x.id === id) ? id : items[0]?.id
 }
 
@@ -253,7 +269,7 @@ function renderTypes(pl) {
     box.append(b)
   }
 }
-const pickKey = () => `${state.source}:${currentId()}`
+const pickKey = () => `${idKey()}:${currentId()}`
 function renderQuestions(pl) {
   const box = $('#questions')
   box.replaceChildren()
@@ -320,27 +336,36 @@ async function render() {
   const figures = (await fetchJson('index.json').catch(() => null))?.figures
   if (mine !== token) return
   const opts = { ...state, figures, ending: state.ending }
+  const promo = state.source === 'promo'
+  // A promo story's Today stands on the print of the hour (plan 212).
+  if (promo) {
+    opts.print = await printFor(state.hour).catch(e => { status(`Today's print did not load (${e.message}).`); return null })
+    if (mine !== token) return
+  }
   const pl = plan(state.source, data, id, opts, deps)
   if (!pl) return
   opts.picks = state.picks[pickKey()]
   // A type the item cannot be drawn as falls back to the walk.
   const types = TYPES.map(x => x.id).filter(x => available(x, pl))
-  if (!types.includes(state.type)) { state.type = 'plates'; renderToggles() }
+  if (!types.includes(state.type)) { state.type = types.includes('plates') ? 'plates' : types[0]; renderToggles() }
+  for (const el of document.querySelectorAll('[data-promo]')) el.hidden = el.dataset.promo === 'only' ? !promo : promo
   renderKanjiPicker(pl)
   renderTypes(pl)
   renderQuestions(pl)
   await fonts(sampleText(pl))
   if (mine !== token) return
-  const fmt = FORMATS[state.format]
+  // A story is 9:16, whatever the post's format.
+  const fmt = FORMATS[promo ? 'story' : state.format]
   const ids = state.view === 'compare' ? types : [state.type]
   current = { plan: pl, fmt, decks: ids.map(d => ({ id: d, slides: deck(d, pl, fmt, opts) })) }
-  $('#export-name').textContent = T.types[state.type].name
+  const typeName = id => (promo ? PROMO.en.names[state.story] : T.types[id].name)
+  $('#export-name').textContent = typeName(state.type)
   const stage = $('#stage')
   stage.replaceChildren()
   stage.dataset.view = state.view
   stage.style.setProperty('--ratio', `${fmt.w} / ${fmt.h}`)
   for (const d of current.decks) {
-    const dir = { ...TYPES.find(x => x.id === d.id), name: { en: T.types[d.id].name } }
+    const dir = { ...TYPES.find(x => x.id === d.id), name: { en: typeName(d.id) } }
     const row = document.createElement('section')
     row.className = 'deck'
     row.setAttribute('aria-label', dir.name.en)
@@ -357,7 +382,7 @@ async function render() {
     n.className = 'deck__count'
     n.textContent = `${d.slides.length} slides`
     head.append(name, n)
-    if (state.view === 'compare') {
+    if (state.view === 'compare' && !promo) {
       const keep = document.createElement('button')
       keep.type = 'button'
       keep.className = 'btn btn--quiet'
@@ -382,8 +407,8 @@ async function render() {
     row.append(head, strip)
     stage.append(row)
   }
-  // Every ending side by side, to pick the last slide from.
-  if (state.view === 'compare') {
+  // Every ending side by side, to pick the last slide from (a story ends on its own).
+  if (state.view === 'compare' && !promo) {
     const row = document.createElement('section')
     row.className = 'deck'
     row.setAttribute('aria-label', 'Last slide')
@@ -421,7 +446,7 @@ async function render() {
   }
   // The caption is written when the item or its language changes, never
   // over the reader's own edits on a redraw.
-  const captionKey = `${state.source}|${pl.id}|${state.lang}|${state.type === 'spelling'}|${state.type === 'impostor'}`
+  const captionKey = `${state.source}|${state.story}|${pl.id}|${state.lang}|${state.type === 'spelling'}|${state.type === 'impostor'}`
   if (captionKey !== captionFor) { $('#caption').value = captionOf(pl); captionFor = captionKey }
   // The title names the type and the questions asked too (plan 210l).
   const asked = state.type === 'exam' ? picked(pl, state.picks[pickKey()], 3).length : 1
@@ -548,14 +573,14 @@ async function offer(filename, blob) {
 }
 const png = canvas => new Promise(r => canvas.toBlob(r, 'image/png'))
 const safeName = s => String(s).replace(/[\\/:*?"<>|.\s]+/g, '-').replace(/^-+|-+$/g, '')
-const baseName = () => `tsuji-${state.source}-${safeName(current.plan.id)}-${state.type}-${state.format}`
+const baseName = () => `tsuji-${state.source}-${safeName(current.plan.id)}-${state.type}-${current.fmt.id}`
 
 async function exportZip() {
   // What was on screen when it started: a click during the export changes
   // neither the size the slides are drawn at nor the file's name.
   const d = current.decks.find(x => x.id === state.type) ?? current.decks[0]
   const fmt = current.fmt
-  const name = `tsuji-${state.source}-${safeName(current.plan.id)}-${d.id}-${state.format}`
+  const name = `tsuji-${state.source}-${safeName(current.plan.id)}-${d.id}-${fmt.id}`
   const btn = $('#export')
   btn.disabled = true
   status('Drawing the slides…')
@@ -668,14 +693,15 @@ function wire() {
   $('#levels').addEventListener('click', e => {
     const b = e.target.closest('[data-level]')
     if (!b) return
-    if (sourceOf(state.source).levels) state.kanaSet = b.dataset.level
+    const src = sourceOf(state.source)
+    if (src.levels) state[setKey(src)] = b.dataset.level
     else state.level = b.dataset.level
     switchList()
   })
   $('#items').addEventListener('click', e => {
     const b = e.target.closest('.sentence')
     if (!b) return
-    state.ids[state.source] = b.dataset.id
+    state.ids[idKey()] = b.dataset.id
     state.kanji = ''
     for (const x of document.querySelectorAll('#items .sentence')) x.setAttribute('aria-pressed', String(x === b))
     save()
@@ -685,7 +711,7 @@ function wire() {
   $('#random').addEventListener('click', async () => {
     const pool = listShown.slice(0, LIST_MAX).filter(x => x.id !== currentId())
     if (!pool.length) return
-    state.ids[state.source] = pool[Math.floor(Math.random() * pool.length)].id
+    state.ids[idKey()] = pool[Math.floor(Math.random() * pool.length)].id
     state.kanji = ''
     save()
     await renderList()

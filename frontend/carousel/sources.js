@@ -17,6 +17,7 @@ import {
   kanaQuizzes, kanjiQuizzes, lessonQuizzes, lookalikeQuizzes, overlaps, passageQuizzes, pictureQuizzes, sentenceQuizzes, spellingQuizzes,
   translationQuizzes, trapQuizzes, wordQuizzes,
 } from './quizzes.js'
+import { PROMO, STORIES, STORY_FILES, promoItems, promoPlan } from './promo.js'
 
 export { gloss, lineRomaji, readingMisses, seeded, shuffle, unpack }
 
@@ -38,6 +39,9 @@ export const SOURCES = [
   { id: 'lookalike', jp: '似た字', line: 'kanji', name: { en: 'Lookalike kanji', fr: 'Kanji jumeaux' }, file: () => 'lookalikes.json', noLevels: true },
   { id: 'dialogue', jp: '返事', line: 'grammar', name: { en: 'Your reply', fr: 'Ta réponse' }, file: () => 'dialogues.json', noLevels: true },
   { id: 'trap', jp: '落とし穴', line: 'grammar', name: { en: 'Traps', fr: 'Pièges' }, file: () => 'traps.json', byLevel: true },
+  // Plan 212: the app itself, in five stories (promo.js); its "levels"
+  // are the stories, each reading the file its pick comes from.
+  { id: 'promo', jp: '宣伝', line: 'gold', name: { en: 'Promo stories', fr: 'Stories promo' }, file: story => STORY_FILES[story] || 'index.json', levels: STORIES, levelNames: PROMO.en.names },
 ]
 export const sourceOf = id => SOURCES.find(s => s.id === id) ?? SOURCES[0]
 
@@ -756,6 +760,8 @@ export function itemsOf(sourceId, data, lang, filter) {
       return data.dialogues.map(d => ({ id: d.id, jp: d.place.jp, sub: tr(d.place, lang), tag: d.lv }))
     case 'trap':
       return data.traps.map(x => ({ id: x.id, jp: x.p, sub: tr(x.notion, lang), tag: x.lv }))
+    case 'promo':
+      return promoItems(filter || 'pitch', data, lang)
     default:
       return []
   }
@@ -797,6 +803,8 @@ export function plan(sourceId, data, id, opts, deps = {}) {
       return dialoguePlan(data, data.dialogues.find(d => d.id === id) ?? data.dialogues[0], opts)
     case 'trap':
       return trapPlan(data, data.traps.find(x => x.id === id) ?? data.traps[0], opts)
+    case 'promo':
+      return promoPlan(opts.story || 'pitch', data, id, opts)
     default:
       return null
   }
@@ -862,6 +870,8 @@ const TITLES = {
 }
 /** The title of a plan posted as `type` asking `n` questions. */
 export function titleOf(pl, type, n = 3) {
+  // A promo story names itself (promo.js), cut to the feed's limit.
+  if (pl.source === 'promo') return [...pl.title].slice(0, TITLE_MAX).join('')
   const say = TITLES[pl.lang] || TITLES.en
   const c = pl.caption
   const lv = /^N\d$/.test(pl.level) ? `JLPT ${pl.level}` : 'JLPT'
@@ -898,6 +908,8 @@ export function titleOf(pl, type, n = 3) {
 export function sampleText(pl) {
   const parts = [JSON.stringify(pl.t), JSON.stringify(pl.slides), JSON.stringify(pl.hook), JSON.stringify(pl.quizzes || []),
     JSON.stringify([pl.compare, pl.build, pl.list, pl.talk, pl.station, pl.figure]),
-    pl.handle, 'Tsuji問題もんだい正解解答0123456789/·（　）＿★→＋＝…']
+    pl.handle, 'Tsuji問題もんだい正解解答0123456789/·（　）＿★→＋＝…',
+    // A promo story's words, its functions' text with them, and the print's slip.
+    ...(pl.promo ? [JSON.stringify(pl.promo), ...Object.values(pl.P).map(v => (typeof v === 'function' ? String(v) : JSON.stringify(v))), '一二三四五六七八九十月日曙帰帆落雁秋月仮語漢文辻≈½'] : [])]
   return [...new Set(parts.join(''))].join('')
 }

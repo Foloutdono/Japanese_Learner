@@ -592,7 +592,11 @@ passage; since plan 210m a theme's words in pictures, lookalike kanji, a
 conversation to answer and a tour's trap) as a photo carousel for a
 social feed, as one of its types (the guided walk, a mock exam, this or
 that, build it, a top five, a conversation, kanji spelling, find the
-impostor), and exports the PNGs. Its hand-written content (the pictures,
+impostor), and exports the PNGs. Since plan 212 it also draws the app
+itself as 9:16 promo stories (`promo.js`), with the app's own parts
+measured in the running app (`app.js`) and Today on the real print of
+the hour: when the app redraws one of those parts, measure it again and
+follow it, and a story promises only what the app does today. Its hand-written content (the pictures,
 the lookalike sets, the conversations) is `frontend/carousel/content/`;
 a conversation's every line carries its furigana and its romaji. A point is explained in its own
 sentence, a particle by the one sense it has there (`explain.js`); its
