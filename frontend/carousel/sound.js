@@ -76,6 +76,20 @@ export async function clipAudio(sounds, seconds, voices = globalThis.TsujiVoices
   return mix
 }
 
+/** One app sound alone, at the app's own level and unscaled: a long
+ *  video's mix (plan 214) lays each where it falls and sets the whole
+ *  itself. [left, right] Float32Arrays at RATE, the voice's tail long. */
+export async function eventAudio(key, voices = globalThis.TsujiVoices) {
+  const { VOICE_EVENTS, voiceOut, voiceLevel } = voices
+  const event = VOICE_EVENTS.find(e => e.key === key)
+  if (!event) return null
+  const variant = event.variants[0]
+  const ctx = new OfflineAudioContext(2, TAIL * RATE, RATE)
+  variant.play(ctx, voiceOut(ctx, ctx.destination, voiceLevel(event, variant)))
+  const out = await ctx.startRendering()
+  return [out.getChannelData(0), out.getChannelData(Math.min(1, out.numberOfChannels - 1))]
+}
+
 /** A clip fetched and decoded at RATE (a mono clip plays on both sides). */
 export async function decoded(src) {
   const bytes = await (await fetch(src)).arrayBuffer()

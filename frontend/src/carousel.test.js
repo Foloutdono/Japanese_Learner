@@ -10,6 +10,7 @@ import { STRINGS, weld, weldIf } from '../carousel/strings.js'
 import { APP_INKS } from '../carousel/app.js'
 import { CLIP, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
+import { KINDS, PART, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longPlan, shortGloss, timeline } from '../carousel/long.js'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
@@ -841,4 +842,141 @@ describe('the word echo (plan 213)', () => {
       globalThis.Path2D = had
     }
   })
+})
+
+describe('the long videos (plan 214)', () => {
+  const files = {}
+  for (const lv of LEVELS) for (const f of [`${lv}.json`, `words-${lv}.json`, `kanji-${lv}.json`, `grammar-${lv}.json`]) files[f] = bank(f)
+  files['themes.json'] = bank('themes.json')
+  const withPath2D = fn => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class { constructor(d) { this.d = d } }
+    try { fn() } finally { globalThis.Path2D = had }
+  }
+  // Every part of a video drawn: at each segment's start, its middle, each mark and its end.
+  const drawsWhole = (pl, tl) => {
+    for (const sg of tl.segs) {
+      const marks = Object.values(sg.marks).flat().filter(x => typeof x === 'number')
+      for (const u of [0, sg.dur / 2, ...marks, ...marks.map(m => m + 0.5), sg.dur - 0.01]) {
+        expect(() => drawLong(stubContext().ctx, pl, tl, sg.start + Math.min(u, sg.dur - 0.01)), `${pl.title} ${sg.type} ${u}`).not.toThrow()
+      }
+    }
+  }
+
+  it('makes each kind, in both languages, and draws every part of it', () => withPath2D(() => {
+    for (const lang of ['en', 'fr']) {
+      for (const kind of KINDS) {
+        const pl = longPlan(kind, files, { lang, level: 'N5', point: '〜てください' })
+        const tl = timeline(pl)
+        expect(pl.items.length, kind).toBeGreaterThan(kind === 'grammar' ? 10 : 20)
+        expect(tl.segs[0].type).toBe('intro')
+        expect(tl.segs.at(-1).type).toBe('outro')
+        drawsWhole(pl, tl)
+      }
+    }
+  }), 120000)
+
+  it('lasts about ten minutes a part, its lines guessed', () => {
+    for (const kind of ['vocab', 'kanji', 'quiz']) {
+      for (const level of ['N5', 'N3']) {
+        const tl = timeline(longPlan(kind, files, { level }))
+        expect(tl.seconds / 60, `${kind} ${level}`).toBeGreaterThan(6)
+        expect(tl.seconds / 60, `${kind} ${level}`).toBeLessThan(13)
+      }
+    }
+  })
+
+  it('never deals one item in two parts of a level', () => {
+    for (const kind of ['vocab', 'kanji', 'quiz']) {
+      const key = it => it.t ? `${it.t}::${it.r}` : it.c || it.q.from
+      const one = longPlan(kind, files, { level: 'N5', part: 1 }).items.map(key)
+      const two = longPlan(kind, files, { level: 'N5', part: 2 }).items.map(key)
+      expect(two.length, kind).toBeGreaterThan(10)
+      expect(one.filter(x => two.includes(x)), kind).toEqual([])
+      expect(new Set(one).size, kind).toBe(one.length)
+    }
+    expect(longPlan('vocab', files, { level: 'N5', part: 1 }).items[0].t).toBe(bank('words-N5.json').words[0].t)
+  })
+
+  it('asks a quiz of four answers, one right, the word of a kanji at the level', () => {
+    for (const level of LEVELS) {
+      const pl = longPlan('quiz', files, { level })
+      expect(pl.items.length, level).toBe(PART.quiz)
+      const easy = Object.fromEntries(Object.entries(bank(`kanji-${level}.json`).kanji).map(([c, k]) => [c, new Set((k.words || []).filter(w => Number(String(w.lv).slice(1)) >= Number(level.slice(1))).map(w => w.t))]))
+      for (const { q } of pl.items) {
+        expect(q.choices.length).toBe(4)
+        expect(q.right).toBeGreaterThanOrEqual(0)
+        expect(q.right).toBeLessThan(4)
+        if (q.from.startsWith('kanji:') && [...(q.stem.specimen || '')].length > 1) expect(easy[q.from.slice(6)].has(q.stem.specimen), q.stem.specimen).toBe(true)
+        const said = answered(q)
+        if (said) expect(said, q.id).not.toMatch(/[＿_]/)
+      }
+    }
+  })
+
+  it('explains a whole point: rule, examples cut word by word, its questions', () => withPath2D(() => {
+    for (const level of LEVELS) {
+      const lessons = bank(`grammar-${level}.json`).lessons
+      for (const L of lessons.filter((_, i) => i % 9 === 0)) {
+        const pl = longPlan('grammar', files, { level, point: L.p })
+        const types = pl.items.map(x => x.type)
+        expect(types[0], L.p).toBe('gtitle')
+        expect(types.at(-1), L.p).toBe('grecap')
+        expect(types.filter(x => x === 'gex').length, L.p).toBeGreaterThanOrEqual(Math.min(3, (L.ex || []).length))
+        for (const it of pl.items.filter(x => x.type === 'q')) {
+          expect(it.q.choices[it.q.right], L.p).toBeTruthy()
+          // A twist's translation is held back until it is answered (CLAUDE.md, the quiz).
+          if (it.twist) expect(it.q.ask, L.p).not.toContain(it.q.explain.sense)
+        }
+        drawsWhole(pl, timeline(pl))
+      }
+    }
+  }), 120000)
+
+  it('glosses a word of the breakdown from the deck, or leaves it bare', () => {
+    expect(dictionaryForms('読んで')).toContain('読む')
+    expect(dictionaryForms('書いて')[0]).toBe('書く')
+    expect(dictionaryForms('行って')[0]).toBe('行く')
+    expect(dictionaryForms('したい')).toContain('する')
+    expect(dictionaryForms('ふったら')).toContain('ふる')
+    expect(shortGloss('please (give me, please do)')).toBe('please')
+    expect(shortGloss('to be, to have (used for inanimate objects)')).toBe('to be, to have')
+    const chips = longPlan('grammar', files, { level: 'N5', point: '〜たいです' }).items.filter(x => x.type === 'gex').flatMap(x => x.chips)
+    const of = t => chips.find(c => c.t === t)?.gloss
+    expect(of('飲みたい')).toBe('to drink')
+    expect(of('行きたい')).toBe('to go')
+    expect(of('したい')).toMatch(/^to do/)
+    // しゅうまつ cut in two by the tokenizer: neither half is a word of its own.
+    expect(of('しゅう')).toBe('')
+    expect(of('まつ')).toBe('')
+  })
+
+  it('times its chapters for YouTube and credits the voice', () => {
+    for (const kind of KINDS) {
+      const pl = longPlan(kind, files, { level: 'N5', point: 'は' })
+      const tl = timeline(pl)
+      const lines = chapterText(tl).split('\n')
+      expect(lines[0], kind).toMatch(/^0:00 /)
+      expect(lines.length, kind).toBeGreaterThanOrEqual(3)
+      const at = lines.map(l => l.split(' ')[0].split(':').reduce((m, s) => m * 60 + Number(s), 0))
+      for (let i = 1; i < at.length; i++) expect(at[i] - at[i - 1], `${kind} ${lines[i]}`).toBeGreaterThanOrEqual(10)
+      const { title, description } = describeVideo(pl, tl, 'https://example.org')
+      expect(title.length, kind).toBeLessThanOrEqual(100)
+      expect(description, kind).toMatch(/VOICEVOX Nemo/)
+      // The voice is measured line by line under the key long_video_audio.py files it by.
+      expect(new Set(tl.cues.map(cueKey)).size).toBeGreaterThan(0)
+    }
+    expect(read('../backend/scripts/long_video_audio.py')).toContain(`return f"{cue['who']}|{'slow' if cue.get('slow') else ''}|{cue['text']}"`)
+    expect(cueKey({ who: 'reader', slow: true, text: 'あ' })).toBe('reader|slow|あ')
+  })
+
+  it('draws a still once: two frames that look the same share a key', () => withPath2D(() => {
+    const pl = longPlan('vocab', files, { level: 'N5', count: 3 })
+    const tl = timeline(pl)
+    const sg = tl.segs[1]
+    const key = u => drawLong(stubContext().ctx, pl, tl, sg.start + u)
+    expect(key(1.1)).toBe(key(1.2))
+    expect(key(1.2)).not.toBe(key(2.2))
+    expect(key(sg.marks.meaning + 1)).not.toBe(key(1.2))
+  }))
 })

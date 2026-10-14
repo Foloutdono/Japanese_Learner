@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **214**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **215**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -599,7 +599,13 @@ the hour, each story's cover and its call to action also a seven-second MP4 clip
 since plan 213 the word echo (`echo.js`), a pictured word said over and
 over for ten seconds by the app's reader, livelier (`carousel/voices/`, written
 by `python -m scripts.carousel_voices --yes`, which needs the voice
-engine: rerun it after a change of voice or of the themes): when the app redraws one of those parts, measure it again and
+engine: rerun it after a change of voice or of the themes); since plan 214
+ten-minute 16:9 videos for YouTube (`long.js`, made by
+`node carousel/long/render.mjs`: a vocabulary or kanji drill, one grammar
+point whole, a quiz), voiced line by line by the app's voices and mixed
+with the app's sounds and a bed of music it plays itself
+(`scripts/long_video_audio.py`); a word in its breakdown is glossed
+from the deck or left bare, never guessed: when the app redraws one of those parts, measure it again and
 follow it, and a story promises only what the app does today. Its hand-written content (the pictures,
 the lookalike sets, the conversations) is `frontend/carousel/content/`;
 a conversation's every line carries its furigana and its romaji. A point is explained in its own

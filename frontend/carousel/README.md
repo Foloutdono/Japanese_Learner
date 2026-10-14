@@ -1,4 +1,4 @@
-# The carousel studio (plans 210–210n, 212, 213)
+# The carousel studio (plans 210–210n, 212, 213, 214)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -483,6 +483,75 @@ encoded (H.264, the voice as AAC or Opus), the voice mixed by
 `sound.clipAudio`, which takes a recorded clip (`src`) beside the app's
 own sounds (`key`).
 
+## The long videos (plan 214)
+
+Ten-minute 16:9 videos for YouTube (`long.js`, made by
+`long/render.mjs`), four kinds: a vocabulary drill, a kanji drill, one
+grammar point explained whole, and a quiz. The owner picked the look
+from two drawn directions, "platform board": the sumi ground, the app's
+card in the middle, the line of stations along the foot, one station a
+word, a kanji, a section or a question, the line's pigment the kind's
+(vocab blue, kanji violet, grammar green, the exam's for the quiz).
+Every Japanese line is said by the app's voices; English or French is on
+the screen.
+
+- **Vocabulary**, "think, then reveal": the word alone for three
+  seconds (three lamps go out), then its reading said twice, its
+  meaning, and the first bank sentence it is read in that asks nothing
+  above its level, the word underlined, said once. 48 words a part.
+- **Kanji**: its strokes drawn on in their order, numbered, then its
+  meaning, its ON and KUN readings and two words, each said. 36 a part.
+- **Grammar**, one point whole: its rule, its uses (the Japanese in
+  them said), every example said at its pace then slower and cut word
+  by word, each word said with its romaji and sense, the caution, its
+  rival, the twists asked as questions, the conversation (speakers A and
+  B), the tour's questions, a recap. Four to five minutes.
+- **Quiz**: the studio's own questions (`quizzes.js`), four answers
+  each, from the level's sentences, words and kanji, five seconds on a
+  ring, then the answer, why, and its sentence said; a kanji asked in a
+  word only in a word of the level or easier. A score check every ten,
+  40 a part.
+
+**Pick per video.** A level's `--part` walks the deck in its order (a
+quiz's part is a seeded deal), and two parts never share an item;
+`--theme`, `--point` or `--ids` pick exactly.
+
+**The breakdown glosses only what it knows.** A lesson's rows carry no
+senses, so a word's is the deck's, as written or from its dictionary
+form (`dictionaryForms`: 読んで → 読む), the entry read as the row is
+read; a kana word only an N5 or N4 word of its reading, three kana or
+more, not between two kana words (the tokenizer cuts しゅうまつ in two,
+and まつ is no 待つ); a particle only by its role there
+(`explain.particleLabel`). None found, none shown: a wrong gloss would
+be learnt.
+
+**The sound.** `backend/scripts/long_video_audio.py` voices each line
+(the reader for words and examples, a slow line at 0.82, speakers A and
+B for a scene) into `long/cache/`, keyed by the line and the voice's
+revision, and reports how long each lasts; the timeline is laid on
+those lengths, so a reveal lands on its voice. It then mixes the lines
+with the app's sounds (`sound.eventAudio`, the shipped recipes at the
+app's level) and a bed of music it plays itself, soft chords and a slow
+pluck, nothing recorded, stepping back while a line is said. The voice's
+credit "VOICEVOX Nemo" ends every description; never publish the clips
+or a video's sound as a dataset.
+
+```bash
+cd frontend
+VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --kind vocab --level N5 --part 1
+node carousel/long/render.mjs --kind grammar --level N5 --point 〜てください --lang fr
+node carousel/long/render.mjs --kind quiz --level N4 --part 2 --seconds 60   # a draft: the first minute
+node carousel/long/render.mjs --kind kanji --stills 12,40                    # two frames, no video
+```
+
+It writes, under `carousel/long/out/` (`--out` elsewhere), the MP4
+(1920×1080, 30 fps, H.264 and AAC), a thumbnail, and a text file: the
+title, then the description with its chapters (YouTube's: from 0:00,
+none under ten seconds) and the credit. Each still is drawn once
+(`drawLong` returns a key the same for two frames that look the same),
+so ten minutes take about four. It needs the voice engine, the
+backend's Python with numpy, ffmpeg and Playwright's Chromium.
+
 ## The code
 
 | File | Does |
@@ -497,7 +566,9 @@ own sounds (`key`).
 | `promo.js` | the promo stories: their plans from the bank, their frames (plan 212) |
 | `app.js` | the app's own parts, drawn at its measures, and Today's print (plan 212) |
 | `echo.js` | the word echo: its plan, its rhythm, its scatter and its clip (plan 213) |
-| `sound.js` | a clip's sound: the app's own events and recorded clips, mixed (plans 212, 213) |
+| `sound.js` | a clip's sound: the app's own events and recorded clips, mixed (plans 212, 213); one event alone for a long video (plan 214) |
+| `long.js` | the long videos: what each says, when, and each frame (plan 214) |
+| `long/render.mjs` | a long video made: voiced, mixed, drawn and encoded (plan 214) |
 | `studio.js` | the page: the pickers, the previews, the export |
 
 ## Running it

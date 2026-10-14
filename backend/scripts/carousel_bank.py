@@ -602,7 +602,8 @@ def _both(d: dict | None) -> dict:
 
 def lesson(level: str, entry: dict) -> dict:
     """A grammar point as the tour teaches it: its meaning and form, the
-    rule and the caution, the rival it is confused with, three examples,
+    rule, its uses and the caution, the rival it is confused with, three examples
+    (the rest as `ex_more`, for the long videos),
     two twists, the scene and two of its quiz questions. Every choice
     list keeps the catalogue's order, the right one first."""
     p = entry["pattern"]
@@ -613,13 +614,18 @@ def lesson(level: str, entry: dict) -> dict:
     if french:
         out["form_fr"] = french
     for step in entry.get("steps") or []:
-        if step.get("kind") in ("rule", "careful") and step["kind"] not in out:
+        if step.get("kind") in ("rule", "careful", "use") and step["kind"] not in out:
             out[step["kind"]] = _both(step)
     compare = (entry.get("compare") or [])[:1]
     if compare:
         out["compare"] = {"p": compare[0].get("pattern", ""), **_both(compare[0]), **_rival(compare[0].get("pattern", ""))}
     out["ex"] = [{"rows": text_rows(e["jp"], level, p), "en": e.get("en", ""), "fr": e.get("fr", "")}
                  for e in (entry.get("examples") or [])[:3]]
+    # The examples past the carousel's three, for the long video's whole lesson (plan 214).
+    more = [{"rows": text_rows(e["jp"], level, p), "en": e.get("en", ""), "fr": e.get("fr", "")}
+            for e in (entry.get("examples") or [])[3:]]
+    if more:
+        out["ex_more"] = more
     tour = entry.get("tour") or {}
     twists = []
     for t in (tour.get("twists") or [])[:3]:
