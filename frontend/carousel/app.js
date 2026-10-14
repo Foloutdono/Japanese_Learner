@@ -651,15 +651,8 @@ export function departButton(ctx, p, x, y, w, u, label, ready = null) {
     ctx.arc(rx, ry, rr * u, 0, Math.PI * 2)
     ctx.stroke()
   }
-  ctx.strokeStyle = '#e0b04f'
-  ctx.lineCap = 'round'
-  ;[[4, 1], [7.5, 0.75], [11, 0.55]].forEach(([rr, a]) => {
-    ctx.globalAlpha = base * a
-    ctx.lineWidth = 2 * u
-    ctx.beginPath()
-    ctx.arc(rx - 6 * u, ry, rr * u, -0.95, 0.95)
-    ctx.stroke()
-  })
+  ctx.globalAlpha = base
+  passWave(ctx, rx - 24 * u, ry, u)
   ctx.restore()
   // The word centred on the pill, or in what the reader leaves of it
   // when it is long, a size down rather than past its end.
@@ -671,6 +664,24 @@ export function departButton(ctx, p, x, y, w, u, label, ready = null) {
   const cx = Math.max(x + w / 2, free + lw / 2)
   text(ctx, label, cx, ry + lz * 0.36, { f: font(700, lz, 'latin'), color: '#1c1811', align: 'center' })
   return h
+}
+
+/** The pass's contactless mark as the reader wears it (.pass__wave.
+ *  btn-depart__wave): three circles 8, 15 and 22px across, their left
+ *  edges together 10px into the reader, each showing only its right
+ *  border, 2px of the lamp's gold, cut where the box's diagonals cut it
+ *  (±45°): a crescent, then two arcs. `x` is the reader's left, `y` its middle. */
+function passWave(ctx, x, y, u) {
+  ctx.fillStyle = '#dcad4e'
+  for (const d of [8, 15, 22]) {
+    const r = (d / 2) * u
+    const cx = x + (10 + d / 2) * u
+    ctx.beginPath()
+    ctx.arc(cx, y, r, -Math.PI / 4, Math.PI / 4)
+    ctx.arc(cx, y, r - 2 * u, Math.PI / 4, -Math.PI / 4, true)
+    ctx.closePath()
+    ctx.fill()
+  }
 }
 
 /** A CSS timing function (cubic-bezier(x1, y1, x2, y2)) as a function of
