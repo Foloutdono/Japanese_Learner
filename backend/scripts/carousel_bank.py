@@ -1093,6 +1093,7 @@ def figures(sentences: dict, kana: dict, comprehension: dict, extra: dict | None
     (plan 210c): how many sentences, points, words, kanji and kana it
     teaches, counted from the content itself, never written by hand."""
     from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
+    from content.kana_data import get_all_kana
     from content.kanji_data import KANJI_BY_LEVEL
     from content.vocab_data import VOCAB_BY_LEVEL
 
@@ -1104,8 +1105,25 @@ def figures(sentences: dict, kana: dict, comprehension: dict, extra: dict | None
         "hiragana": sum(1 for k in kana["kana"] if k["set"] == "hiragana"),
         "katakana": sum(1 for k in kana["kana"] if k["set"] == "katakana"),
         "passages": len(comprehension["passages"]),
+        # The promo stories (plan 212): each level's three decks, the kana
+        # deck whole and the N5 mock exam, as the landing page counts them
+        # (frontend/landing/content.mjs) for "how long to N5?".
+        "levels": {lv: {"words": len(VOCAB_BY_LEVEL.get(lv, [])), "kanji": len(KANJI_BY_LEVEL.get(lv, [])),
+                        "grammar": len(GRAMMAR_POINTS_BY_LEVEL.get(lv, []))} for lv in LEVELS},
+        "kanaDeck": len(get_all_kana()),
+        "examN5": _exam_n5(),
         **(extra or {}),
     }}
+
+
+def _exam_n5() -> dict:
+    """The N5 mock exam: its questions, its minutes, its pass mark out of its total."""
+    from study.exam_blueprint import LEVEL_BLUEPRINT, PASS_THRESHOLDS
+
+    sections = LEVEL_BLUEPRINT["N5"]["sections"]
+    return {"questions": sum(m["count"] for s in sections for m in s["mondai"]),
+            "minutes": sum(s["timeLimitMin"] for s in sections),
+            "pass": PASS_THRESHOLDS["N5"]["total_min"], "max": PASS_THRESHOLDS["N5"]["total_max"]}
 
 
 def _count(data: dict) -> str:
