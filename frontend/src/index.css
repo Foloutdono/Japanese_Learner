@@ -2148,19 +2148,22 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  animation: onb-arrival-leave calc(150ms * var(--onb-arrival-x)) linear calc(630ms * var(--onb-arrival-x)) backwards;
+  /* both, not backwards: the scene holds at opacity 0 once it has left,
+     so a late onDone can never draw it back for a frame. */
+  animation: onb-arrival-leave calc(150ms * var(--onb-arrival-x)) linear calc(630ms * var(--onb-arrival-x)) both;
 }
 @keyframes onb-arrival-leave { to { opacity: 0; } }
 .onb-arrival__scrim {
   position: absolute;
   inset: 0;
   background: var(--bg-main);
-  opacity: 0;
-  animation: onb-arrival-scrim calc(160ms * var(--onb-arrival-x)) ease-out forwards;
+  /* Down from the first frame, not faded in: the plan is mounted under
+     the scene at once, and a scrim rising from 0 let it show through
+     for its first frames -- the finished plan flashed, went dark, then
+     arrived. 0.995, not 1 -- the gate's own documented fix for a
+     light-theme scrim reading cream-on-cream. Same value, same reason. */
+  opacity: 0.995;
 }
-/* 0.995, not 1 — the gate's own documented fix for a light-theme
-   scrim reading cream-on-cream. Same value, same reason. */
-@keyframes onb-arrival-scrim { to { opacity: 0.995; } }
 
 .onb-arrival__board {
   position: relative;
