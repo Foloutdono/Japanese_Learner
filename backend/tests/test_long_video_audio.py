@@ -25,8 +25,24 @@ def test_cue_key_is_long_js_own():
     assert lva.cue_key({"who": "reader", "text": "あ"}) == "reader||あ"
     assert lva.cue_key({"who": "me", "slow": True, "text": "はい"}) == "me|slow|はい"
     # A new voice is a new clip, never the old one replayed.
-    cue = {"who": "reader", "text": "あ"}
+    cue = {"who": "reader", "text": "がっこう"}
     assert lva.clip_name(cue, "a") != lva.clip_name(cue, "b")
+
+
+def test_a_lone_syllable_is_the_kana_decks_recording():
+    for text, name in [("に", "ni"), ("ニ", "ni"), ("め", "me"), ("きゃ", "kya"), ("を", "wo")]:
+        assert lva.kana_clip(text) == lva.KANAS / f"{name}.mp3"
+    for text in ["にほん", "コウ", "〜て", "学"]:
+        assert lva.kana_clip(text) is None
+    # Filed under the recording, not the engine's revision.
+    cue = {"who": "reader", "text": "に"}
+    assert lva.clip_name(cue, "a") == lva.clip_name(cue, "b")
+    pcm = np.frombuffer(lva.from_kana_clip(lva.kana_clip("に")), dtype="<i2").astype(np.float64) / 32768
+    assert 0.1 < len(pcm) / lva.VOICE_RATE < 2.0
+    speech = pcm[np.abs(pcm) >= lva.GATE]
+    assert abs(np.sqrt(np.mean(speech ** 2)) - lva.SPEECH_RMS) < 0.01
+    # It starts on its sound, a breath in.
+    assert np.flatnonzero(np.abs(pcm) >= lva.GATE)[0] <= int(0.06 * lva.VOICE_RATE)
 
 
 def test_a_line_lands_on_its_time_over_a_quiet_bed(tmp_path):

@@ -503,7 +503,7 @@ the screen.
   meaning, its ON and KUN readings and two words, each said. 36 a part.
 - **Grammar**, one point whole: its rule, its uses (the Japanese in
   them said), every example said at its pace then slower and cut word
-  by word, each word said with its romaji and sense, the caution, its
+  by word, each word and particle said with its romaji and sense, the caution, its
   rival, the twists asked as questions, the conversation (speakers A and
   B), the tour's questions, a recap. Four to five minutes.
 - **Quiz**: the studio's own questions (`quizzes.js`), four answers
@@ -528,7 +528,11 @@ be learnt.
 **The sound.** `backend/scripts/long_video_audio.py` voices each line
 (the reader for words and examples, a slow line at 0.82, speakers A and
 B for a scene) into `long/cache/`, keyed by the line and the voice's
-revision, and reports how long each lasts; the timeline is laid on
+revision, and reports how long each lasts. A line of one syllable (め,
+ニ, the particle に, は said わ) is the kana deck's own recording
+(`public/sounds/kanas/`, as `kana_data.sound_of` names it), trimmed to
+its sound and brought to the engine's level, since a lone kana is what
+that deck was recorded for; the timeline is laid on
 those lengths, so a reveal lands on its voice. It then mixes the lines
 with the app's sounds (`sound.eventAudio`, the shipped recipes at the
 app's level) and a bed of music it plays itself, soft chords and a slow

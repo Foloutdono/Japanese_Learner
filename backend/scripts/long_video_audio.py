@@ -16,7 +16,12 @@ reveal lands on its voice. Who says a line is the app's casting
 (voice_engine.DEFAULT_VOICES): the reader (slot 0) says words and
 examples, as a card does; a scene's other person is speaker A (slot 1),
 the learner speaker B (slot 2), each at its tempo. A line marked slow is
-the reader again, a little slower, for a learner to follow.
+the reader again, a little slower, for a learner to follow. A line of one
+syllable (め, ニ, に, きゃ) is the kana deck's own recording instead
+(frontend/public/sounds/kanas/, the clip content/kana_data.sound_of
+names), started where the sound starts and brought to the engine's
+level, as the app's playKana does: a lone kana is what the deck was
+recorded for.
 
 `mix` lays the lines and the app's sounds (rendered from the app's own
 recipes by the page, one WAV a sound) on the timeline, under a bed of
@@ -41,6 +46,43 @@ RATE = 48000          # the mix's rate, the browser's
 VOICE_RATE = 24000    # the engine's, as the app's clips
 SLOW = 0.82           # a slow line's pace against the reader's own
 SLOTS = {"reader": 0, "them": 1, "me": 2}
+KANAS = Path(__file__).resolve().parents[2] / "frontend" / "public" / "sounds" / "kanas"
+SPEECH_RMS = 0.069    # the engine's level where it speaks; a kana clip is brought to it
+GATE = 0.0056         # -45dBFS, where a kana clip's sound starts and ends (playback.js)
+_kana_names: dict[str, str] | None = None
+
+
+def kana_clip(text: str) -> Path | None:
+    """The kana deck's recording of a one-syllable line, or None."""
+    global _kana_names
+    if _kana_names is None:
+        from content.kana_data import KANA_SETS, sound_of
+        _kana_names = {}
+        for entries in KANA_SETS.values():
+            for entry in entries:
+                _kana_names.setdefault(entry["kana"], sound_of(entry))
+    name = _kana_names.get(text.strip())
+    path = KANAS / f"{name}.mp3" if name else None
+    return path if path and path.exists() else None
+
+
+def from_kana_clip(path: Path) -> bytes:
+    """A kana clip as the engine's PCM: mono at VOICE_RATE, its silence
+    trimmed to a breath either side, at the engine's speaking level."""
+    import subprocess
+
+    import numpy as np
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(path), "-ac", "1", "-ar", str(VOICE_RATE), "-f", "s16le", "-"],
+                         capture_output=True, check=True).stdout
+    a = np.frombuffer(raw, dtype="<i2").astype(np.float32) / 32768
+    loud = np.flatnonzero(np.abs(a) >= GATE)
+    if loud.size:
+        pad = int(0.05 * VOICE_RATE)
+        a = a[max(0, loud[0] - pad):loud[-1] + pad]
+    speech = a[np.abs(a) >= GATE]
+    rms = float(np.sqrt(np.mean(speech ** 2))) if speech.size else 0
+    a = a * (min(4.0, SPEECH_RMS / rms) if rms else 1.0)
+    return (np.clip(a, -1, 1) * 32767).astype("<i2").tobytes()
 
 
 def cue_key(cue: dict) -> str:
@@ -49,6 +91,10 @@ def cue_key(cue: dict) -> str:
 
 
 def clip_name(cue: dict, rev: str) -> str:
+    """A line's file in the cache: new with a new voice, or a remade kana clip."""
+    kana = kana_clip(cue["text"])
+    if kana:
+        rev = "kana|" + hashlib.sha1(kana.read_bytes()).hexdigest()[:12]
     return hashlib.sha1(f"{rev}|{cue_key(cue)}".encode()).hexdigest()[:16] + ".wav"
 
 
@@ -79,6 +125,9 @@ def voice(cues_path: Path, cache: Path, out: Path) -> int:
     print(f"{len(unique)} line(s), {len(todo)} to voice (voice {rev}).")
     for i, cue in enumerate(unique.values(), 1):
         path = cache / clip_name(cue, rev)
+        kana = kana_clip(cue["text"])
+        if not path.exists() and kana:
+            write_wav(path, from_kana_clip(kana), VOICE_RATE)
         if not path.exists():
             slot = SLOTS.get(cue["who"], 0)
             speed = engine.tempo_for_slot(slot) * (SLOW if cue.get("slow") else 1.0)

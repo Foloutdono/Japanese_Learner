@@ -117,6 +117,9 @@ const joined = rows => rows.map(r => r.t).join('')
 const kanaOf = row => (row.fu ? row.fu.map(([t, r]) => r || t).join('') : row.t)
 // Harder levels have smaller numbers: N1 < N5.
 const levelNo = lv => Number(String(lv || 'N5').slice(1)) || 5
+// A particle said as it sounds: the topic は is "wa", the direction へ "e"
+// (a lone syllable is the kana deck's recording, long_video_audio.py).
+export const spoken = t => ({ は: 'わ', へ: 'え' })[t] ?? t
 // A row nobody reads aloud alone: punctuation, the blank of a question.
 const silent = row => row.k === 'punct' || /^[＿_]+$/.test(row.t)
 
@@ -290,7 +293,7 @@ function lessonItems(L, pl, banks, lang) {
     return particleLabel(rows, i, lang) || ''
   }
   const chips = rows => rows.map((r, i) => [r, i]).filter(([r]) => !silent(r)).map(([r, i]) => ({
-    t: r.t, ro: r.ro || '', kana: r.k === 'word' && hasKanji(r.t) ? kanaOf(r) : null, voice: r.k === 'word' ? kanaOf(r) : null,
+    t: r.t, ro: r.ro || '', kana: r.k === 'word' && hasKanji(r.t) ? kanaOf(r) : null, voice: r.k === 'word' ? kanaOf(r) : spoken(r.t),
     lit: !!r.lit, gloss: weldIf(lang, shortGloss(glossOf(rows, i))),
   }))
   const bullets = tr(L.use).split('\n').map(b => b.replace(/^\s*[-•]\s*/, '').trim()).filter(Boolean)

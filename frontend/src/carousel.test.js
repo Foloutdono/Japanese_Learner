@@ -949,6 +949,10 @@ describe('the long videos (plan 214)', () => {
     // しゅうまつ cut in two by the tokenizer: neither half is a word of its own.
     expect(of('しゅう')).toBe('')
     expect(of('まつ')).toBe('')
+    // Every chip is said, a particle as it sounds: the topic は is "wa".
+    const wa = longPlan('grammar', files, { level: 'N5', point: 'は' }).items.filter(x => x.type === 'gex').flatMap(x => x.chips)
+    expect(wa.find(c => c.t === 'は').voice).toBe('わ')
+    expect(wa.every(c => c.voice), 'a chip left unsaid').toBe(true)
   })
 
   it('times its chapters for YouTube and credits the voice', () => {
