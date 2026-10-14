@@ -77,7 +77,28 @@ export async function drawKanji(page, sel, hex, { msPerStroke = 650 } = {}) {
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: tp(pts[0]) })
     for (const p of pts.slice(1)) { await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: tp(p) }); await new Promise(r => setTimeout(r, msPerStroke / pts.length)) }
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-    await new Promise(r => setTimeout(r, 280))
+    await new Promise(r => setTimeout(r, 200))
   }
   await cdp.detach()
+}
+// the on-screen box of what a zoom should frame, logged with the time
+// (fractions of the viewport, so the edit can frame it exactly)
+export async function mark(page, name, target) {
+  const vp = page.viewportSize()
+  const r = typeof target === 'string'
+    ? await page.locator(target).first().boundingBox()
+    : await page.evaluate(texts => {   // the union of the elements holding these texts
+        let box = null
+        for (const t of texts) {
+          const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
+          let n; while ((n = w.nextNode())) if (n.textContent.includes(t)) {
+            const b = n.parentElement.getBoundingClientRect(); if (!b.width) continue
+            box = box ? { x: Math.min(box.x, b.x), y: Math.min(box.y, b.y), r: Math.max(box.r, b.right), b: Math.max(box.b, b.bottom) } : { x: b.x, y: b.y, r: b.right, b: b.bottom }
+            break }
+        }
+        return box && { x: box.x, y: box.y, width: box.r - box.x, height: box.b - box.y }
+      }, target.texts)
+  if (!r) { console.log('MARK MISS', name); return }
+  SFX_LOG.push({ kind: 'rect', name, rect: [r.x / vp.width, r.y / vp.height, r.width / vp.width, r.height / vp.height], t: Date.now() / 1000 })
+  console.log('mark', name, r.x.toFixed(0), r.y.toFixed(0), r.width.toFixed(0), r.height.toFixed(0))
 }

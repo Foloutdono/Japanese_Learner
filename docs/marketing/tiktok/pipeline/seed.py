@@ -42,10 +42,11 @@ tracks = [
 ]
 pools = {t: list(teaching_order.raw_ids(t[0], t[1], t[2])) for t in tracks}
 seen = {}  # (card, mode) -> True
-skip_days = {DAYS - 3, DAYS - 9, DAYS - 15}  # a few early gaps; last ~3 weeks unbroken
+STREAK = os.environ.get('STREAK') == '1'
+skip_days = set() if STREAK else {DAYS - 3, DAYS - 9, DAYS - 15}  # STREAK: unbroken, and nothing studied today
 new_per_day = {'kana': 6, 'vocab': 5, 'kanji': 2, 'grammar': 1}
 total = 0
-for d in range(DAYS, -1, -1):
+for d in range(DAYS, 0 if STREAK else -1, -1):
     if d in skip_days: continue
     day = now - timedelta(days=d)
     t = day.replace(hour=18, minute=random.randint(0, 50), second=0, microsecond=0)

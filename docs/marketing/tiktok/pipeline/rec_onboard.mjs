@@ -1,5 +1,5 @@
 import { phone, U_NEW } from './common.mjs'
-import { startRec, tap } from './rec.mjs'
+import { startRec, tap, mark } from './rec.mjs'
 const { browser, page } = await phone({ uid: U_NEW, signedIn: false })
 const btn = (n) => page.getByRole('button', { name: n }).first()
 const cont = async (p = 1100) => { await tap(page, page.locator('button:visible:has-text("Continue")').last(), p) }
@@ -21,7 +21,7 @@ for (let i = 0; i < 12; i++) {
   else if (/goal/.test(h)) { await tap(page, btn(/^N4/), 1100); await cont(1500) }
   else if (/rhythm/.test(h)) { await tap(page, btn(/Rapid/), 1000); await cont(1500) }
   else if (/When do you/.test(h)) { await tap(page, btn(/Evening/), 1100); await cont(1200) }
-  else if (/plan is ready/.test(h)) { await page.waitForTimeout(5200); log('plan shown'); await cont(1000) }
+  else if (/plan is ready/.test(h)) { await page.waitForTimeout(2200); await mark(page, 'plan-date', '.brd-plan__arrive'); await mark(page, 'plan-map', '.brd-map'); await page.waitForTimeout(3000); log('plan shown'); await cont(1000) }
   else if (/Keep your progress/.test(h)) {
     await page.waitForTimeout(1600)
     const em = page.locator('input[type=email]:visible'); await em.tap(); await em.pressSequentially('alex@mail.com', { delay: 55 })

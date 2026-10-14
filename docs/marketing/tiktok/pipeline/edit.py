@@ -18,7 +18,7 @@ SFX_DIR = f'{WORK}/sfx'
 os.makedirs(OUT, exist_ok=True)
 
 BPM = 128; B = 60 / BPM; FPS = 30
-END_BEAT = 114
+END_BEAT = 127
 T_END = END_BEAT * B
 PX, PY, PW, PH = 190, 400, 700, 1400
 def bt(b): return b * B
@@ -27,44 +27,36 @@ def bt(b): return b * B
 # Each anchor pins a moment of the recording to a beat; between anchors the
 # footage runs at whatever speed joins them. Taps are anchored on beats.
 SEGS = [
-    # 1 hook + 2 try: one take; the drop on beat 8, Board pressed on beat 10
-    dict(clip='onboard', a=[(1.95, 0), (5.6, 8), (7.15, 10), (9.9, 14), (10.6, 16)]),
+    # 1 hook + 2 try: the hub, Board pressed on beat 12.5
+    dict(clip='onboard', a=[(1.95, 0), (5.6, 8), (7.21, 12.5), (7.32, 14)]),
     # 3 the goal: N4 picked, Continue
-    dict(clip='onboard', a=[(18.3, 16), (19.62, 18.5), (20.83, 21), (21.1, 22)]),
-    #   the plan, held, the date brought close
-    dict(clip='onboard', a=[(29.0, 22), (34.5, 32)],
-         zoom=[(25.5, 1.0, .0, .3), (28.5, 1.24, .0, .3)]),
-    #   the progress: the pass, then the calendar and the streak
-    dict(clip='progress', a=[(1.0, 32), (4.3, 40)]),
-    # 4 connect: the account, filled, created
-    dict(clip='onboard', a=[(38.9, 40), (40.21, 42.6), (40.5, 43)]),
-    #   board: the pass ...
-    dict(clip='onboard', a=[(40.6, 43), (43.2, 48.5)]),
-    #   ... and the gate
-    dict(clip='onboard', a=[(46.4, 48.5), (46.82, 49), (49.4, 54)]),
-    #   on track: today's run, Depart, the first card turned and right
-    dict(clip='run', a=[(0.4, 54), (2.45, 57.5), (5.21, 61), (6.53, 63), (7.0, 64)],
-         zoom=[(54, 1.0, .5, .25), (55.5, 1.12, .5, .25), (57.0, 1.0, .5, .25)]),
-    # 5 modes: the kanji modes, Draw the kanji ...
-    dict(clip='draw', a=[(0.0, 64), (0.93, 66), (2.6, 68), (3.15, 69), (8.05, 77)],
-         zoom=[(68.5, 1.0, .5, .55), (69.5, 1.18, .5, .55), (76.6, 1.18, .5, .55), (77, 1.0, .5, .55)]),
+    dict(clip='onboard', a=[(18.8, 14), (19.70, 16), (20.92, 18.5), (21.1, 19)]),
+    #   the plan arrives under its sign (the chime on beat 19.5) and holds
+    dict(clip='onboard', a=[(29.05, 19), (29.39, 19.5), (30.1, 21), (35.4, 32)]),
+    # 4 connect, board: the pass ...
+    dict(clip='onboard', a=[(41.0, 32), (43.4, 35.5)]),
+    #   ... Enter the station, the gate, up to the station's sign
+    dict(clip='onboard', a=[(46.6, 35.5), (46.90, 36), (48.75, 40)]),
+    #   on track: Today, Depart, a card turned and right, the level up
+    dict(clip='clear', a=[(0.5, 40), (2.42, 43), (5.28, 47), (6.70, 49), (9.04, 53), (9.9, 54.5)]),
+    #   the day cleared on the 30th day: the stamp, 30 days, the 一ヶ月 ticket
+    dict(clip='clear', a=[(16.3, 54.5), (16.82, 55.5), (27.23, 75), (30.5, 80)]),
+    # 5 modes: Draw the kanji, 国 stroke by stroke ...
+    dict(clip='draw', a=[(3.6, 80), (3.96, 81), (12.95, 96)]),
     #   ... revealed and marked right
-    dict(clip='draw', a=[(9.6, 77), (12.02, 83), (12.5, 84)]),
-    # 6 practice: the list of practice modes ...
-    dict(clip='practice', a=[(0.2, 84), (1.3, 86.5)]),
-    #   ... timed reading: shown, read, typed, 100%, right
-    dict(clip='readprac', a=[(0.6, 86.5), (0.97, 87.5), (2.57, 89.5), (4.20, 92), (6.93, 97), (7.9, 100)],
-         zoom=[(92.2, 1.0, .5, .55), (93.5, 1.2, .5, .55), (96.0, 1.2, .5, .55), (96.8, 1.0, .5, .55)]),
+    dict(clip='draw', a=[(14.6, 96), (14.84, 96.5), (17.34, 100.5), (17.7, 101)]),
+    # 6 practice: timed reading, shown, typed, right
+    dict(clip='readprac', a=[(0.6, 101), (0.98, 102), (6.53, 110), (9.65, 115), (10.1, 116)]),
     # 7 join: back to the hub
-    dict(clip='onboard', a=[(1.95, 100), (5.6, END_BEAT)]),
+    dict(clip='onboard', a=[(1.95, 116), (5.6, END_BEAT)]),
 ]
-SCENE_BEATS = [16, 40, 64, 84, 100]          # train-pull slides land here
+SCENE_BEATS = [14, 32, 80, 101, 116]          # train-pull slides land here
 # captions: (beat, state); the first of a scene pops in, later ones cross-fade
-CAPS = [(0, 'hook'), (8, 'try'), (16, 'goalA'), (32, 'goalB'), (40, 'boardA'), (43, 'boardB'), (54, 'boardC'),
-        (64, 'modes'), (84, 'practice'), (100, 'join')]
-SAME_SCENE = {('goalA', 'goalB'), ('boardA', 'boardB'), ('boardB', 'boardC')}
-PILL_BEAT = 104
-FINAL_BEAT = 108
+CAPS = [(0, 'hook'), (8, 'try'), (14, 'goalA'), (27, 'goalB'), (32, 'boardAB'), (40, 'boardC'),
+        (80, 'modes'), (101, 'practice'), (116, 'join')]
+SAME_SCENE = {('goalA', 'goalB'), ('boardAB', 'boardC')}
+PILL_BEAT = 120
+FINAL_BEAT = 124
 
 # ── easing ───────────────────────────────────────────────────────────────
 def clamp(x, a=0.0, b=1.0): return max(a, min(b, x))
@@ -184,11 +176,7 @@ def screen(t):
     return cur.image(t)
 
 def phone_scale(t):
-    b = t / B
-    s = 1 + 0.035 * clamp(b / 8) if b < 8 else 1.0           # the hook's slow push in
-    for pb, amp, dur in ((8, 0.075, 0.45), (FINAL_BEAT, 0.035, 0.5)):  # the drop, the last chord
-        if bt(pb) <= t < bt(pb) + dur: s = 1 + amp * (1 - out_cubic((t - bt(pb)) / dur))
-    return s
+    return 1.0
 
 def with_alpha(im, k):
     if k >= 0.999: return im
@@ -328,7 +316,6 @@ def audio():
         if any(abs(tb - bt(b)) < 1e-6 for b in SCENE_BEATS) or S[k].clip == S[k - 1].clip and abs(S[k - 1].src(tb) - S[k].src(tb)) < 0.05: continue
         if snd('card-transition') is not None: put(snd('card-transition'), tb - 0.06, 0.9)
     put(snd('card-stamp'), bt(PILL_BEAT), 1.2); put(snd('pass-clip'), bt(PILL_BEAT) + 0.02, 0.7)
-    put(snd('pass-clip'), bt(8), 0.8)
     # levels: the app's sounds sit on top of the music, which dips under them
     sp = np.max(np.abs(sfx)); print(f'sfx peak {sp:.3f}, {len(placed)} app sounds placed')
     env = np.abs(sfx).max(1)

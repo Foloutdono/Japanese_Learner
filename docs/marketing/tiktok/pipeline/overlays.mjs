@@ -28,6 +28,7 @@ const caps = {
   goalA:     `<b>Set up your goal</b><br><span class="dim">and follow your progress</span>`,
   goalB:     `<span class="dim">Set up your goal</span><br>and <b>follow your progress</b>`,
   boardA:    `<b>Connect,</b> <span class="dim">board</span><br><span class="dim">and you are on track</span>`,
+  boardAB:   `<b>Connect, board</b><br><span class="dim">and you are on track</span>`,
   boardB:    `<span class="dim">Connect,</span> <b>board</b><br><span class="dim">and you are on track</span>`,
   boardC:    `<span class="dim">Connect, board</span><br>and <b>you are on track</b>`,
   modes:     `<span style="font-size:62px">Try <b>more complex</b><br><b>learning modes</b> if you like it</span>`,
