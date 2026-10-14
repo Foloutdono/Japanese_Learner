@@ -271,6 +271,10 @@ const DESK = {
     },
   },
 }
+// Today's gate is a print of a few dozen animated layers: filmed frame by
+// frame (deterministic.mjs), since a CPU-only machine paints it at 10 fps.
+CLIPS.aujourdhui.smooth = true
+DESK.aujourdhui.smooth = true
 for (const [id, desk] of Object.entries(DESK)) CLIPS[id].desk = desk
 CLIPS.kana.desk = { start: '/learn/kana/hiragana_basic', run: CLIPS.kana.run }
 

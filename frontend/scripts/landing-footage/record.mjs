@@ -36,7 +36,8 @@ export async function startRecording(page, { width, height }) {
         '-movflags', '+faststart', '-an', out], { encoding: 'utf8' })
       if (r.status) throw new Error(r.stderr)
       if (still) spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', keep[0].file, '-vf', `scale=${width}:${height}`, '-q:v', '3', still])
-      const info = { frames: keep.length, seconds: +(end - keep[0].t).toFixed(2), wall: (Date.now() - started) / 1000 }
+      const gaps = keep.slice(1).map((f, i) => f.t - keep[i].t).sort((a, b) => a - b)
+      const info = { frames: keep.length, medianGapMs: Math.round(gaps[gaps.length >> 1] * 1000), p90GapMs: Math.round(gaps[Math.floor(gaps.length * 0.9)] * 1000), seconds: +(end - keep[0].t).toFixed(2), wall: (Date.now() - started) / 1000 }
       rmSync(dir, { recursive: true, force: true })
       return info
     },

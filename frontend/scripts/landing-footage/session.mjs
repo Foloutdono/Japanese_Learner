@@ -2,6 +2,7 @@
 // (the backend, run with DEV_USER_ID, checks no token), the English
 // interface and the dark theme. Used by every clip's script.
 import { chromium } from 'playwright'
+import { launch as launchDeterministic, Driver } from './deterministic.mjs'
 
 const REF = new URL(process.env.VITE_SUPABASE_URL || 'https://llisnbgrckwxmmxspolo.supabase.co').hostname.split('.')[0]
 export const APP = process.env.APP_URL || 'http://127.0.0.1:5173'
@@ -28,12 +29,10 @@ export const DEVICES = {
   desk: { width: 1440, height: 900, scale: 1, touch: false },
 }
 
-export async function open(device = 'phone', { sound = false } = {}) {
-  const d = DEVICES[device]
-  const browser = await chromium.launch({
-    executablePath: '/opt/pw-browsers/chromium',
-    args: ['--autoplay-policy=no-user-gesture-required', '--enable-features=OverlayScrollbar', '--hide-scrollbars', `--force-device-scale-factor=${d.scale}`, `--window-size=${d.width},${d.height}`],
-  })
+export async function open(device = 'phone', { sound = false, deterministic = false } = {}) {
+  const d = { ...DEVICES[device], ...(process.env.SCALE ? { scale: Number(process.env.SCALE) } : {}) }
+  const flags = [...(process.env.CHROME_ARGS ? process.env.CHROME_ARGS.split(' ') : []), '--autoplay-policy=no-user-gesture-required', '--enable-features=OverlayScrollbar', '--hide-scrollbars', `--force-device-scale-factor=${d.scale}`, `--window-size=${d.width},${d.height}`]
+  const browser = deterministic ? await launchDeterministic(flags) : await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args: flags })
   const ctx = await browser.newContext({ viewport: null, hasTouch: d.touch, locale: 'en-GB', colorScheme: 'dark', reducedMotion: 'no-preference' })
   const session = JSON.stringify(fakeSession())
   await ctx.addInitScript(([k, s, muted]) => {
@@ -56,5 +55,7 @@ export async function open(device = 'phone', { sound = false } = {}) {
   const cdp = await ctx.newCDPSession(page)
   await cdp.send('Emulation.setDeviceMetricsOverride', { width: d.width, height: d.height, deviceScaleFactor: d.scale, mobile: d.touch })
   await cdp.send('Emulation.setScrollbarsHidden', { hidden: true })
-  return { browser, ctx, page, cdp, ...d }
+  const driver = deterministic ? new Driver(cdp, { width: d.width * d.scale, height: d.height * d.scale }) : null
+  if (driver) page.beat = ms => driver.beat(ms)
+  return { browser, ctx, page, cdp, driver, ...d }
 }

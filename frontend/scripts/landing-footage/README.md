@@ -49,6 +49,7 @@ hand (`landing/README.md`).
 | `clips.mjs` | One script per clip: the screen it starts on and what is pressed. Where the app allows it a clip ends on the screen it began on, so the loop is seamless. |
 | `helpers.mjs` | A press, a stroke, and the strokes of any glyph (KanjiVG, the app's own stroke-order data) drawn at a hand's pace. |
 | `session.mjs` | The demo learner's browser. |
+| `deterministic.mjs` | Frame-by-frame filming for the screens a CPU-only machine cannot paint in real time. Today's gate is a print of a few dozen animated layers: about 10 frames a second here (60 on a phone), so a real-time screencast of it is choppy. The clip is marked `smooth: true` and the browser's clock is made ours: every frame advances timers, animations and transitions by exactly 1/30 s, then renders, however long that takes (about 2 minutes a clip). Needs Playwright's `chromium_headless_shell`. |
 | `record.mjs` | The screencast, cut into constant 30 fps h264. The phone gets its 3x from the browser itself, since a screencast returns CSS pixels whatever the emulated scale. |
 | `seed.py` | The demo learner and a fortnight of reviews, through the app's own endpoints. |
 

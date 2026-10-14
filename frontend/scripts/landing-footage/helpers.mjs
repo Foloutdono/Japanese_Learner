@@ -1,5 +1,6 @@
 // What a finger does on the phone, as the page sees it.
-export const beat = (page, ms) => page.waitForTimeout(ms)
+// On the film's own clock when it has one (deterministic.mjs), else the wall's.
+export const beat = (page, ms) => (page.beat ? page.beat(ms) : page.waitForTimeout(ms))
 
 // A press: the pointer goes there and presses, the way a touch does.
 export async function press(page, locator, { before = 350, after = 700, steps = 8 } = {}) {
