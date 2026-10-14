@@ -94,7 +94,10 @@ describe('the gate on a full day', () => {
       expect(document.documentElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight)
       expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
       const hud = rect('.hud')
-      const dial = rect('.tdy-dial')
+      // The dial by its rings: on the print (plan 205) its box is the
+      // disc's glow, which runs under the HUD with the sky on a short
+      // phone.
+      const dial = rect('.tdy-dial__gate')
       const key = rect('.tdy-key--fare')
       const door = rect('.tdy-door')
       const go = rect('.btn-depart--gate')

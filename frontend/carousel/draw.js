@@ -1,4 +1,4 @@
-// ── カルーセル — drawing (plan 200) ──────────────────────────────
+// ── カルーセル — drawing (plan 210) ──────────────────────────────
 // The primitives every slide is drawn with: the app's scale at a post's
 // density, its palette in both grounds, its three faces, and the
 // sentence laid out word by word with furigana, rules and romaji.
@@ -49,7 +49,7 @@ const alpha = (hex, a) => `rgba(${rgb(hex).join(',')},${a})`
 // index.css's verdict inks that tokens.mjs does not carry (the landing
 // page has no rating bar): the same in both themes, held equal to
 // index.css by src/carousel.test.js.
-export const RATING_INKS = { '--rating-correct': '#22b89c' }
+export const RATING_INKS = { '--rating-correct': '#59b9c6' }
 
 export function palette(ground) {
   const paper = ground === 'paper'
@@ -94,7 +94,7 @@ const FAMILY = {
   serif: '"Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif',
   jp: '"Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif',
   latin: '"Space Grotesk", "Noto Sans JP", "Segoe UI", sans-serif',
-  // A theme's pictures (plan 200m): the one colour face, drawn as it is.
+  // A theme's pictures (plan 210m): the one colour face, drawn as it is.
   emoji: '"Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif',
 }
 export const FONT_FACES = [
@@ -315,7 +315,7 @@ function chevron(ctx, x, cy, w, color) {
 // its punctuation riding it), each word on its rule, furigana over the
 // kanji the script asks for, romaji under the word.
 // Furigana are set as the app sets them (ExampleSentence.jsx and its
-// rules in index.css, plan 200h): one word's readings as one ruby, がく
+// rules in index.css, plan 210h): one word's readings as one ruby, がく
 // and せい joined over 学生 rather than spreading it into 学 生; a reading
 // wider than its kanji leaning on the kana either side by half a reading
 // character, where there IS kana on both sides (a lone kana between two
@@ -544,7 +544,7 @@ function masthead(ctx, p, fr, ink = p.ink, sub = p.ink2) {
 }
 /** A slide's title: a name, set as a station prints its names. */
 function heading(ctx, p, fr, str, y, color = p.ink) {
-  // A long title steps down a rung rather than being cut (plan 200n).
+  // A long title steps down a rung rather than being cut (plan 210n).
   const b = fit(ctx, str, { sizes: [FS.heading, FS.display * 0.6, FS.title], maxW: fr.w, maxLines: 1 })
   text(ctx, b.lines[0], fr.x, y + b.size * 0.8, { f: b.f, color })
   return b.size * 1.1

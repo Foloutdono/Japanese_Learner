@@ -5,20 +5,18 @@ import { playUi } from '../lib/audio'
 import { board } from '../stores/boarding'
 import { Leave } from '../components/chrome/Bar'
 import SelectionScreen from '../components/selection/SelectionScreen'
-import LevelSelector from '../components/selection/LevelSelector'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import { listExams } from '../exam/examService'
 import { LEVELS } from '../domain/sentenceSource'
-import { KIND_ORDER, KIND_JP } from '../exam/examKinds'
 import { PageIcon } from '../components/ui/Icons'
 import { useDesk } from '../hooks/useDesk'
-import { StationSplit, LevelRedirect } from '../components/selection/StationSplit'
-import { ExamPapers } from '../components/practice/ExamPapers'
+import { LevelRedirect } from '../components/selection/StationSplit'
 import { usePracticeRecord } from '../stores/practiceRecord'
 import { useStationSamples } from '../stores/stationSamples'
 import { useProfileSummary } from '../stores/profileSummary'
 import { ExamStation } from '../exam/ExamStation'
+import { DeskStation } from '../exam/DeskStation'
 
 // Route: /practice/exam
 // Level first, then which paper — the same two-step every other study
@@ -83,9 +81,9 @@ export default function ExamScreen({ session }) {
     return () => { alive = false }
   }, [session])
 
-  // ── 机 — the grades beside a grade's papers (plan 114) ──
-  // On the desk the list of grades opens on the learner's own and stands
-  // beside that grade's papers; another grade swaps the papers in place.
+  // ── 机 — the grades over a grade's papers (plans 114, 200) ──
+  // On the desk the grades open on the learner's own, as tabs over that
+  // grade's papers; another grade swaps the papers in place.
   if (desk && !level && exams?.length > 0) {
     return (
       <SelectionScreen
@@ -112,7 +110,7 @@ export default function ExamScreen({ session }) {
     )
   }
 
-  // ── 机 — the grades beside a grade's papers, filled (plan 159) ──
+  // ── 机 — the grades over a grade's papers (plan 200) ──
   if (desk) return <DeskExams level={level} exams={exams} />
 
   // ── The phone: the grade and its papers on one screen (plan 171) ──
@@ -151,61 +149,34 @@ export default function ExamScreen({ session }) {
 }
 
 
-// The owner's pick A of the canvas "Practice screens — layout options":
-// the grades share the list's height, each counting its papers by name
-// (語彙 18 · 文法 9 …), with a bar and a figure of the papers sat and the
-// learner's record there; the papers share the page's
-// (components/practice/ExamPapers.jsx). Its own component so that the
-// record and the specimens are asked for on the desk only.
+// Its own component so that the record and the specimens are asked for
+// on the desk only (exam/DeskStation).
 function DeskExams({ level, exams }) {
   const { t } = useLang()
   const navigate = useNavigate()
-  const record = usePracticeRecord().data?.exam
+  const rec = usePracticeRecord().data?.exam?.[level] ?? null
   const samples = useStationSamples('exam')
-  const byLevel = lvl => (exams ?? [])
-    .filter(e => e.level === lvl)
-    .sort((a, b) => KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind))
-  const stopOf = lvl => {
-    const own = byLevel(lvl)
-    const sat = own.filter(e => e.last).length
-    const rec = record?.[lvl]
-    const pct = rec?.of > 0 ? Math.round((rec.right / rec.of) * 100) : null
-    return {
-      // A thin space inside each paper, so the sample's word spacing
-      // (desk-stop__sample) opens between the papers and not in them.
-      sample: own.map(e => `${KIND_JP[e.kind] ?? e.kind}\u2009${e.questionCount}`).join(' · '),
-      learned: sat,
-      started: sat,
-      total: own.length,
-      note: record === undefined ? undefined
-        : rec ? [t.practiceDone.papers(rec.done), pct == null ? null : t.practiceRight(pct)].filter(Boolean).join(' · ')
-        : t.practiceNotYet,
-    }
-  }
   return (
     <SelectionScreen
       title={t.examTitle}
       sub={level}
       aside={<Leave to={'/practice'}>{t.tabPractice}</Leave>}
     >
-      <StationSplit
-        className="desk-split--line desk-split--practice"
-        label={t.stationJlpt}
-        list={<LevelSelector selected={level} linkTo={lvl => `/practice/exam?level=${lvl}`} figured sampleSource={false} extra={stopOf} />}
-      >
-        {exams === null ? <Loading /> : (
-          <ExamPapers
-            level={level}
-            papers={byLevel(level)}
-            samples={samples?.[level]?.card ?? null}
-            onOpen={exam => {
-              playUi('click-screen-selection')
-              board(() => navigate(`/practice/exam/${exam.id}`))
-            }}
-            onFresh={exam => board(() => navigate(`/practice/exam/${exam.id}?exclude=${exam.revision}`))}
-          />
-        )}
-      </StationSplit>
+      {exams === null ? <Loading /> : (
+        <DeskStation
+          level={level}
+          exams={exams}
+          samples={samples?.[level]?.card ?? null}
+          rec={rec}
+          onOpen={exam => {
+            playUi('click-screen-selection')
+            // The last sitting rides along for the paper's cover, as on
+            // a phone.
+            board(() => navigate(`/practice/exam/${exam.id}`, { state: { last: exam.last ?? null } }))
+          }}
+          onFresh={exam => board(() => navigate(`/practice/exam/${exam.id}?exclude=${exam.revision}`, { state: { last: exam.last ?? null } }))}
+        />
+      )}
     </SelectionScreen>
   )
 }

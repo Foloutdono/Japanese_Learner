@@ -9,7 +9,7 @@ import { useSlotWidth, scaleVars, classLabel } from './cardScale'
 // three materials (domain/passCard.js's cardTier), replacing every pass
 // the app drew. Its face is the offers' (plan 172): the contactless mark
 // and "Pass", 辻 in the corner, the holder with the level under the name,
-// the struck 辻 whose road 辶 fills with the climb, and at its foot what
+// the struck 辻 which fills with the climb, and at its foot what
 // practice costs on it and the class. Whatever the old passes printed
 // that the face does not is on the back (PassBack.jsx): the route and
 // its validity, the contract, the three meters, the signature.

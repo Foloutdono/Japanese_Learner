@@ -7,6 +7,8 @@ import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
 import { Loading } from '../components/ui/Loading'
+import { ChevronIcon } from '../components/ui/Icons'
+import { useDesk } from '../hooks/useDesk'
 
 // ── A sat question, made something to study ──
 // Under each question the review opens: the question's sentence with
@@ -22,6 +24,7 @@ import { Loading } from '../components/ui/Loading'
 // desk opens a question on arrival and on every ←/→.
 export default function ExamStudy({ session, examId, revision, question }) {
   const { t, lang } = useLang()
+  const desk = useDesk()
   const [open, setOpen] = useState(false)
   const [study, setStudy] = useState(null)
   const [failed, setFailed] = useState(false)
@@ -88,7 +91,10 @@ export default function ExamStudy({ session, examId, revision, question }) {
         aria-expanded={open}
         onClick={toggle}
       >
-        {open ? t.examStudyHide : t.examStudyOpen}
+        {/* On the desk the result's panel (plan 200): its name whether
+            open or not, the chevron saying which. */}
+        {desk ? t.examStudyOpen : open ? t.examStudyHide : t.examStudyOpen}
+        {desk && <ChevronIcon direction={open ? 'up' : 'down'} size={14} />}
       </button>
 
       {open && (

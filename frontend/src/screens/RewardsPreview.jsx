@@ -132,9 +132,12 @@ export default function RewardsPreview() {
         <p className="preview-note">
           The level told by the card&apos;s engraving (進級, plan 173): the
           learner&apos;s card comes down, the struck 辻&apos;s road fills
-          from empty to full while the card trembles harder, bursts into
-          sparks of its own material, empties, and the level&apos;s figure
-          rolls over to the new one. Hung at
+          from empty to full while the card trembles harder and, as the
+          road nears full, the crossing 十 fills too (plan 200); the whole
+          辻 bursts into sparks of the card&apos;s own material out of the
+          crossing, empties, and the level&apos;s figure rolls over to the
+          new one. Sounded in two (plan 200): the build from the road&apos;s
+          first movement, the burst when the ring opens. Hung at
           the top of a phone, floating at the right of a wider screen; on
           the desk a run docks it at the top of its column, which this
           workbench has none of. Self-dismissing, and it never holds the

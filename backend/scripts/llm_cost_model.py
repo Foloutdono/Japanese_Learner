@@ -84,7 +84,9 @@ FEATURES = {
     "practice_ask": (
         40, 1400, 120,
         "Two questions a session, 20 sessions (plan 131): a desk-only panel "
-        "in the practice runs, opened after the grade. One short call each: "
+        "in the practice runs, opened after the grade, and on the phone a "
+        "page (plan 197); the grammar tour asks through it too, once a "
+        "stop is answered (plan 204), inside the same daily cap. One short call each: "
         "a stable system block (~1,100 tokens since the 2026-09-27 rework, "
         "around the ~1,024 a provider caches from) and the exercise in "
         "the user block -- the sentence, its translation, the answer, the "

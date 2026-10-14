@@ -342,7 +342,7 @@ def test_repeats_rotate_oldest_first(client, calls, empty_pool, monkeypatch):
     assert not calls
 
 
-# ── what is served first, and again (plan 201) ───────────────
+# ── what is served first, and again (plan 211) ───────────────
 
 def _make_seed(pool_id, key):
     _sql("UPDATE comprehension_pool SET seed_key = %s WHERE id = %s", (key, pool_id))

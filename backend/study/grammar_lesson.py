@@ -13,6 +13,7 @@ import logging
 import random
 
 from content.grammar_points_data import find, gloss, grammar_to_id, localise
+from study.grammar_choose import choose_items, choose_payload
 from study.grammar_examples import (
     blank_span, blanked_payload, example_payload, pattern_furigana, structure_furigana,
 )
@@ -72,7 +73,8 @@ def lesson_payload(level: str, entry: dict, lang: str) -> dict:
 
 def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: str,
                      rng: random.Random | None = None, turn: int | None = None,
-                     example: dict | None = None, offer: str | None = None) -> dict | None:
+                     example: dict | None = None, offer: str | None = None,
+                     authored: bool = True) -> dict | None:
     """
     {jp, tr, furigana (one blank part), choices: [pattern...], answer}
     `turn` picks the sentence deterministically where given (the
@@ -84,6 +86,12 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
     for one of the point's contrast examples, or None when it has none
     -- the pool filter (card_index.contrast_ok) should have kept such a
     point out, so None is defensive rather than expected.
+
+    The pool is the point's marked sentences and, where it has them, its
+    own `choose` questions (plan 201, study/grammar_choose.py), which are
+    drawn the same way and answered by their own fillings rather than by
+    patterns. `authored=False` leaves those out, for the one caller that
+    draws a specimen from the marked sentence beside it (routes/station).
 
     Choices are the rivals the lesson names, first; when fewer than
     CONTRAST_CHOICES - 1 of them exist, same-level verifiable patterns
@@ -104,6 +112,8 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
         pool = [ex for ex in entry.get("examples", []) if ex.get("contrast")]
         if not checkable:
             pool = [ex for ex in pool if blank_span(ex["jp"], pattern, level)]
+        if authored:
+            pool += choose_items(entry)
         if not pool:
             return None
         if turn is None:
@@ -114,6 +124,8 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
             order = list(pool)
             random.Random(f"contrast:{level}:{pattern}").shuffle(order)
             example = order[turn % len(order)]
+        if "choices" in example:
+            return choose_payload(level, entry, example, lang, rng)
     sentence = example["jp"]
 
     rivals = [

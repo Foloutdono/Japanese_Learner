@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLang } from '../../LangContext'
-import { playFareTick, playPassClip, FARE_BEAT } from '../../lib/audio'
+import { playFareTick, playLevelCharge, playLevelBurst, FARE_BEAT } from '../../lib/audio'
 import { rewardTier } from '../../domain/rewardTier'
 import { cardTier, xpClimb } from '../../domain/passCard'
+import { crossShare } from '../offers/markParts'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { useCredits } from '../../stores/credits'
 import { CardFace } from '../pass/PassCard'
@@ -24,9 +25,14 @@ import { isDesk } from '../../hooks/useDesk'
 //          173, the owner's drawing on the canvas page "The pocket pass
 //          & the level-up"): the learner's card comes down, the road 辶
 //          of its struck 辻 fills from empty to full, faster as it goes,
-//          the card trembling harder the fuller it gets; full, the road
-//          flashes and throws a ring and sparks; it empties in one
-//          breath and the level under the name rolls over to the next.
+//          the card trembling harder the fuller it gets, and as the road
+//          nears full the crossing 十 it leads to fills too (plan 200);
+//          full, the whole 辻 flashes and throws a ring and sparks out
+//          of the crossing; it empties in one breath, refills to what
+//          the new level already holds, and the level under the name
+//          rolls over to the next. Its sound is two voices on
+//          the card's own animations (plan 200): the build from the
+//          fill's start, the burst from the ring's.
 //          Gone on its own a second after the new figure lands; it does
 //          not hold the next card. It replaced plan 142's punch (改札鋏),
 //          which had replaced the split-flap board.
@@ -47,16 +53,19 @@ const FARE_MS  = 900
 // the owner asked for on the canvas -- the card had stayed too long.
 const LEVEL_MS = 3750
 
-// The sparks out of the road's sweep: an angle, a reach, a length (0
-// for a round one), a delay, a bend and whether it is the bright ink.
+// The sparks out of the crossing (plan 200): an angle, a reach, a length
+// (0 for a round one), a delay, a bend and whether it is the bright ink.
+// The crossing is high on the card, which hangs at the top of a phone, so
+// what flies upward has a short reach (it would leave the screen) and
+// what flies down across the card's face a long one.
 const SPARKS = [
-  [-170, 120, 15, 0, -8, 0], [-150, 150, 17, 0.02, 6, 1], [-128, 110, 12, 0.01, -4, 0],
-  [-112, 165, 17, 0.03, 10, 0], [-96, 130, 13, 0, -6, 1], [-80, 175, 19, 0.02, 4, 0],
-  [-64, 125, 12, 0.04, -10, 0], [-48, 160, 17, 0.01, 8, 1], [-30, 115, 13, 0.02, -5, 0],
-  [-14, 150, 16, 0, 6, 0], [4, 120, 13, 0.03, -8, 1], [22, 140, 15, 0.01, 10, 0],
-  [40, 95, 12, 0.02, -6, 0], [160, 100, 12, 0.03, 8, 0], [178, 135, 16, 0.01, -6, 1],
-  [-140, 70, 0, 0.05, 0, 0], [-88, 85, 0, 0.04, 0, 1], [-40, 78, 0, 0.06, 0, 0],
-  [10, 70, 0, 0.05, 0, 1], [-118, 60, 0, 0.07, 0, 0], [-60, 95, 0, 0.03, 0, 0],
+  [-172, 150, 15, 0, -8, 0], [-150, 95, 17, 0.02, 6, 1], [-124, 80, 12, 0.01, -4, 0],
+  [-98, 90, 17, 0.03, 10, 0], [-72, 85, 13, 0, -6, 1], [-48, 95, 19, 0.02, 4, 0],
+  [-24, 140, 12, 0.04, -10, 0], [-2, 170, 17, 0.01, 8, 1], [22, 150, 13, 0.02, -5, 0],
+  [46, 135, 16, 0, 6, 0], [70, 120, 13, 0.03, -8, 1], [94, 110, 15, 0.01, 10, 0],
+  [118, 125, 12, 0.02, -6, 0], [142, 140, 12, 0.03, 8, 0], [166, 165, 16, 0.01, -6, 1],
+  [-140, 60, 0, 0.05, 0, 0], [-80, 70, 0, 0.04, 0, 1], [-30, 90, 0, 0.06, 0, 0],
+  [40, 95, 0, 0.05, 0, 1], [110, 80, 0, 0.07, 0, 0], [-60, 65, 0, 0.03, 0, 0],
 ]
 
 export function XpToast({ toast, onDone, dock = null }) {
@@ -104,12 +113,13 @@ function RewardScene({ toast, dock, onDone }) {
   // flam. The timers below are safe by construction (cleanup clears
   // them), but these calls are immediate, so they need the guard.
   const sounded = useRef(false)
+  const charged = useRef(false)
   const tier = toast.tier
 
   useEffect(() => {
     // The fare's coin sounds as it lands, a beat after the rating's
     // answer (FARE_BEAT), which is played on the same press. A level's
-    // voice sounds on the burst itself (onBurst, below).
+    // voices sound on its own animations (onStart, below).
     if (tier === 'fare' && !sounded.current) {
       sounded.current = true
       playFareTick(FARE_BEAT)
@@ -166,12 +176,18 @@ function RewardScene({ toast, dock, onDone }) {
   const level = toast.newLevel
   const material = cardTier(credits)
 
-  // The voice sounds on the frame the road bursts: the ring's own
-  // animation start, after the fill and the beat it is held full.
-  const onBurst = e => {
-    if (e.animationName !== 'levelup-ring' || sounded.current) return
-    sounded.current = true
-    playPassClip()
+  // The level has two sounds (plan 200), each on the frame of its own
+  // animation, so both stay on the card's clock: the build when the road
+  // starts to fill, and the burst when the ring opens, after the fill and
+  // the beat it is held full.
+  const onStart = e => {
+    if (e.animationName === 'levelup-fill' && !charged.current) {
+      charged.current = true
+      playLevelCharge()
+    } else if (e.animationName === 'levelup-ring' && !sounded.current) {
+      sounded.current = true
+      playLevelBurst()
+    }
   }
   // onDone only ever fires on the real animationend of the exit, never
   // on a timer guessing how long the CSS will take. Every exit's name
@@ -186,9 +202,9 @@ function RewardScene({ toast, dock, onDone }) {
     <div
       className={`levelup levelup--${material}${leaving ? ' levelup--leaving' : ''}`}
       aria-live="polite"
-      onAnimationStart={onBurst}
+      onAnimationStart={onStart}
       onAnimationEnd={onExitEnd}
-      style={{ '--levelup-to': newShare(summary) }}
+      style={{ '--levelup-to': newShare(summary), '--levelup-to-cross': crossShare(newShare(summary)) }}
     >
       <span className="sr-only">{`${t.levelUp} ${t.level} ${level}`}</span>
       <div className="levelup__shake">

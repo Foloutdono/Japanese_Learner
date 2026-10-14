@@ -9,8 +9,8 @@ import './index.css'
 // across and two panels side by side came out a word wide. PracticePage
 // measures its box: under 600px the head stacks, the figures go two by
 // two, the panels one under the other, and the page takes its own
-// height and scrolls in the window; ExamPapers draws no well under
-// 720px, a paper's row its name over its figures. The full split is
+// height and scrolls in the window. The mock exam's papers (plan 200)
+// keep every name whole at that width. The full split is
 // practiceStation.wide.
 
 vi.mock('./lib/audio', async o => ({
@@ -195,20 +195,18 @@ describe('a practice station at 1100px (plan 159)', () => {
     expect($('.prc-spec__field').getBoundingClientRect().bottom).toBeLessThanOrEqual(well.bottom)
   })
 
-  it('draws no paper wells, each paper its name over its figures', async () => {
+  it('keeps the mock exam\'s grades and papers whole (plan 200)', async () => {
     await mount('/practice/exam?level=N5')
     await settle()
-    expect($$('.prc-paper')).toHaveLength(4)
-    expect($('.prc-papers--wells')).toBeNull()
-    expect($('.prc-paper__spec')).toBeNull()
-    const row = $('.prc-paper')
-    const name = row.querySelector('.prc-paper__door').getBoundingClientRect()
-    const figs = row.querySelector('.prc-paper__figs').getBoundingClientRect()
-    expect(figs.top).toBeGreaterThanOrEqual(name.bottom - 1)
-    expect(row.querySelector('.prc-paper__fig').textContent).toBe('13/ 18')
-    // The name keeps the JLPT's word on its own line with it, never a
-    // character to a line.
-    const jp = row.querySelector('.prc-paper__jp').getBoundingClientRect()
-    expect(jp.height).toBeLessThan(30)
+    expect($$('.desk-grade')).toHaveLength(5)
+    for (const grade of $$('.desk-grade')) expect(grade.scrollWidth, grade.textContent).toBeLessThanOrEqual(grade.clientWidth)
+    // The paper and its sample side by side, neither under a word wide.
+    const main = $('.desk-hero__main').getBoundingClientRect()
+    const sample = $('.desk-sample').getBoundingClientRect()
+    expect(sample.left).toBeGreaterThanOrEqual(main.right)
+    expect(sample.width).toBeGreaterThan(240)
+    expect($$('.desk-prow')).toHaveLength(3)
+    for (const name of $$('.desk-prow__name')) expect(name.scrollWidth, name.textContent).toBeLessThanOrEqual(name.clientWidth)
+    for (const cell of $$('.desk-rec > div')) expect(cell.scrollWidth, cell.textContent).toBeLessThanOrEqual(cell.clientWidth)
   })
 })

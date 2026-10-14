@@ -1,4 +1,4 @@
-// ── カルーセル — explaining a point in its own sentence (plan 200b) ──
+// ── カルーセル — explaining a point in its own sentence (plan 210b) ──
 // The catalogue says what a point means in general ("で: location of an
 // action, or means/method"). A carousel shows it at work in one sentence,
 // so the slide says it with that sentence's own words: what the particle
@@ -90,7 +90,7 @@ export const ROLES = {
 }
 
 // The one sense a particle has in a sentence, read from the word it marks
-// and, for に, the verb it ties it to (plan 200b). The catalogue's で
+// and, for に, the verb it ties it to (plan 210b). The catalogue's で
 // is "location of an action, or means/method"; 駅で says only the first.
 const words = s => new Set(s.split(/\s+/).filter(Boolean))
 const PLACES = words(`駅 学校 家 うち 部屋 公園 店 図書館 会社 病院 銀行 台所 教室 大学 喫茶店
@@ -161,7 +161,7 @@ const SAY = {
   after: { en: 'Here {R} comes after {Xq}: {meaning}.', fr: 'Ici, {R} vient après {Xq} : {meaning}.' },
 }
 
-// Two particles side by side, each keeping its own job (plan 200b). Only
+// Two particles side by side, each keeping its own job (plan 210b). Only
 // pairs that are not a pattern of their own (のは, でも, とは限らない
 // are points of the catalogue) and only after a noun, where the slots
 // below always read true. {X} the noun, {Y} the noun the の pairs
@@ -431,7 +431,7 @@ function negativeAfter(rows, i) {
   return /(ない|なかっ|ず|ません|ぬ)/.test(text)
 }
 
-// A particle's sense in a word, for the breakdown (plan 200l): 駅で is
+// A particle's sense in a word, for the breakdown (plan 210l): 駅で is
 // "place", where its general label says "where · with".
 const SENSE_LABEL = {
   で: { place: { en: 'place', fr: 'lieu' }, vehicle: { en: 'by (transport)', fr: 'en (transport)' },

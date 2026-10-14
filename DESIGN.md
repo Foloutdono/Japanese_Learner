@@ -23,12 +23,18 @@ with one dot on 辶 — the five strokes above, a form the font cannot set (it
 draws the two-dot 辻 of JIS2004), so the mark is cut from the font's own
 outlines, the 十 of 辻 and the 辶 of 込 (`frontend/scripts/build-mark.py`).
 辶's sweep — the road the radical stands for — is in the pass's metal
-(`--accent2`); the rest is the ground's ink, paper on the icon's sumi. One
+(`--accent2`); the rest is the ground's ink. One
 drawing, `components/ui/Mark.jsx`, wherever the app names itself — the icon and the splash (`frontend/brand/`), the rail's
 masthead, the Welcome and the sign-in, the boot screen, a notification's
 icon — set at 1em where the text glyph stood. Where 辻 is a *name* rather than
 the mark (the document title, 辻駅's plate, the dictionary's entry for 辻,
 which teaches its six strokes) it stays type, in the font's two-dot form.
+The icon is the one place the mark leaves the app's grounds (plan 204, the
+owner's pick): paper on a blue lit from the top and 紺 at the foot, its road
+in the lit gold (`--gate-gold-lit`), which holds on the blue where
+`--accent2` would not. On a launcher the mark fills about two thirds of the
+tile, as much as a round mask's safe zone allows: `build-mark.py` sizes it
+once for each platform's crop, and no generator pads it again.
 
 The app is a Japanese railway station. Learning is a journey: sections are
 **lines** (路線), screens are **stations**, choices are **platforms** (のりば),
@@ -119,8 +125,8 @@ all twelve in both themes — and the native widgets' copies follow.
 **The verdicts are one ramp** (状態, same round): the five state inks — 抹茶,
 琥珀, 緑青, 錆 and the rating's 臙脂 — run red to green at one strength
 (lightness .62 to .72), so no verdict shouts over another. The two pass
-verdicts step off it: Correct and
-Perfect are the rating bar's keys and wear their own brighter inks,
+verdicts step off it: Correct (新橋) and
+Perfect (若葉) are the rating bar's filled keys and wear their own brighter inks,
 `--rating-correct` and `--rating-perfect`, wherever a verdict's ink is
 drawn (the bar, the run's meter, the desk's verdict tiles). `--teal` and
 `--success` keep their place on the ramp for everything else.
@@ -640,7 +646,7 @@ neither a chip nor a key in the field, and the Library's Newest / Most followed
 is the case the rule was written for. `.console__band` is the object: the
 console's full width, options divided by its own `--surface-line` hairline
 rather than set in a pill of their own, the chosen one **washed in the
-selection's gold** (`--sel-wash`, `--sel-ink`) — the rating bar's construction at console width, and the
+selection's gold** (`--sel-wash`, `--sel-ink`) — the segmented toggle's construction at console width, and the
 same on state `.chip--on` wears. It sits **above row 1**, over everything it
 orders.
 
@@ -820,18 +826,33 @@ stage, not a new idiom:
 - **A track of stops at the head**, drawn in the line's pigment: where
   you are keeps the line's colour (the boarding's own track is the pass's
   gold, because the boarding is the learner's).
-- **One stop over its drawing**, the question set in the display face
-  bold at `--fs-title`, its pattern in the line's ink as Japanese.
+- **One card a stop** (一枚, plan 206, the owner's pick B of the canvas
+  "Tsuji — the tour, fuller"). The stops used to hang from the head in
+  boxes of one weight over an empty middle; each stop is now one card,
+  the run's own surface, taking the room between the track and the gate
+  as the study card does on a phone. Its **head** asks (the question in
+  the display face bold at `--fs-lead`, its pattern in the line's ink as
+  Japanese, a twist's notion or a question's kind over it); its
+  **middle**, the one part that grows, holds what is asked about,
+  centred: the sentence at the practice card's size (`--fs-title` on a
+  phone, `--fs-heading` on the desk), its voice in the card's corner;
+  its **foot** is what the tour says back, over a hairline, never a box
+  of its own. **Found turns the card to the point**: what happened at
+  its head, the point at `--fs-display` over its shape (or its chain)
+  and the rule in its middle, its first example at its foot. The
+  results are one card too: the dial over the point, every question at
+  its foot. The choices stand **under** the card, never on it.
 - **The gate button at the foot** (`GateButton`), docked over the run's
   floor through `--dock-bottom`, the outline until a guess is picked. At
   the results the point's sheet is a row of its own over it (plan 194),
   which opens the lesson's sheet.
 - **A guess is a tile**: picked, it wears the selection's gold; a wrong
-  one is answered at once by the lesson's own line for that rival, in a
-  card with the state's ring (`--rating-wrong`) and never a fill; the
-  right one is ringed in `--success`. A hint after one miss, the rule
-  given after two (its head in the selection's ink, because it is given,
-  not found).
+  one is answered at once by the lesson's own line for that rival, at
+  the card's foot behind the state's ring (`--rating-wrong`), never a
+  fill; the right one is ringed in `--success`. A hint after one miss,
+  the rule given after two (its head in the selection's ink, because it
+  is given, not found). Where every choice is short -- a form, a word --
+  the tiles stand **in a row** (four as two by two), as the exam's do.
 - **Where the tour is written** (plan 187c), its stops join before the
   results, in the owner's order (plan 194): **the scene** (the point in
   context), then **« C'est pas tout ! »**, a stop per usage (plan 189: a
@@ -975,7 +996,9 @@ its landings draws the tiles it always did.
 On the desk (plan 187f, the owner's pick F) the tour stands on the runs'
 three panels. The stop is the middle, with no track of its own: its gate
 centred at the boarding's width and docked at the column's foot, its
-guesses two across. At the left, under the run's figures, the point and
+guesses two across. Its card is composed in the column's middle at a
+card's height (`min(340px, 50vh)` at least), the room shared above and
+below it, rather than drawn down the whole column (plan 206). At the left, under the run's figures, the point and
 its stops as one line. Each stop is a dot on a rail in the line's
 pigment, drawn 3px once it is behind, and says how it went: a check, the
 tries ("1 miss" in the wrong ink while the guess is still in hand, the
@@ -1057,27 +1080,53 @@ So:
   boarding's gate button — see "The gate button".)
 - Every `transition` and `animation` needs a `prefers-reduced-motion` answer
   that keeps opacity and drops transform.
+- **Move HTML boxes, never shapes inside an `<svg>`.** "Transform and
+  opacity only" is cheap on a box: the compositor moves it. On a shape
+  inside an SVG it is not the compositor's, and every frame the browser
+  lays out, records and rasters that whole drawing on the main thread,
+  where everything else on the screen waits (the print of the hour
+  stuttered the gate this way, plan 208). A drawing that moves is lifted
+  into boxes (`print/liftPrint.js`), or the moving part is an `<svg>` of
+  its own and the animation goes on that element (the dial's glow), with
+  `transform`, not `scale`/`rotate`/`translate`: on an `<svg>` element
+  Chrome composites the one and not the others.
+- **Many loops on one screen are Web Animations, not CSS.** A looping
+  CSS animation fires an event each time it turns, React listens for
+  every event at its root, and the browser wakes the main thread to
+  dispatch it; each wake re-samples every running animation on the
+  page. A few loops are free. The print's ~250 were a wake on nearly
+  every frame, so they are handed to `element.animate()` once they run
+  (`handOver`, plan 207).
+- **Never change an inherited custom property on `<html>` during a
+  scene.** Every element that sets custom properties of its own is
+  restyled with everything under it. A value only `<html>` reads is
+  registered `inherits: false` (`--gate-ground`); a screen the scene
+  hides steps out of the page instead (`.tpr--under-gate`).
 - Every `:hover` rule needs a matching `:focus-visible`. Keyboard users get the
   same affordance, not just the global ring.
 
 ### Controls
 
 - **The rating bar** — the most-used control in the app — is **chrome**: the
-  same sumi as the top bar and the level HUD, with the panel inks. The misses
-  (Wrong, Almost, Difficult; Blackout on the six) are **one instrument**: one
-  bordered panel split by hairlines, each word under a pill in its verdict's
-  ink (the same ink and shape as its segment in the run's meter); a press
-  washes its segment and lights the pill, and that is the bar's whole
-  acknowledgement. The passes are **keys of their own**: Correct (and Perfect
-  on the six) stands beside the instrument a gap apart, filled in its own
-  verdict ink (`--rating-correct` 青竹, `--rating-perfect` 若葉), lit from the
-  top, the sumi type and a check where the pill was. Correct is the widest
-  target on the bar. **No tile is gold**: gold is the action's metal, and a
-  verdict is not an action. On a phone the bar docks on the run's floor, edge
-  to edge; four keys stay on one row, and the six puts its misses on one row
-  and its two keys under them. On the desk's panels the keys are unlit until
-  the reveal, and the card panel's Correct and Perfect tiles wear the same
-  inks.
+  same sumi as the top bar and the level HUD, with the panel inks. Since plan
+  203 (券売機, the owner's pick G) **every verdict is a key of the one make**,
+  as on a ticket machine's panel: a gap apart, each raised off the sumi on a
+  foot of its own material (`--key-foot`, 3px, an edge and not a shadow: no
+  blur), and a press travels down the foot (under reduced motion it does
+  not, and the lamp alone answers). The misses (Wrong, Almost, Difficult;
+  Blackout on the six) are dark keys, each word under a **lamp** in its
+  verdict's ink, dimmed into the sumi at rest and lit when pressed, and that
+  is the bar's whole acknowledgement. The passes are the same keys
+  **moulded in their own verdict ink** (`--rating-correct` 新橋,
+  `--rating-perfect` 若葉), lit from the top, the sumi type and a check
+  where the lamp would be, and no glow. Correct is the widest target on the
+  bar. Each key carries its own sumi, so the bar reads on paper as well as
+  on the dock. **No key is gold**: gold is the action's metal, and a verdict
+  is not an action. On a phone the bar docks on the run's floor, edge to
+  edge; four keys stay on one row, and the six puts its misses on one row
+  and its two passes under them. On the desk's panels the keys are unlit
+  until the reveal (a pass drawn as a miss), and the card panel's Correct
+  and Perfect tiles wear the same inks.
 - **The streak is a スタンプラリー stamp rally**, not a flame — a row of
   eki-stamp marks, one per day, today's freshly inked. It says what the
   learner *did* rather than decorating a number, and it is on-metaphor for a
@@ -1094,8 +1143,9 @@ So:
   days". A missing day is a dashed outline, not a
   gap — seven or thirty-five slots always exist, because the shape of the
   month is the information.
-- **A segmented toggle is the rating bar's construction at chip size** — one
-  pill, segments divided by hairlines rather than gaps, and the selected
+- **A segmented toggle is one pill at chip size** (the rating bar's
+  construction until plan 203 made its verdicts keys) — segments divided by
+  hairlines rather than gaps, and the selected
   segment *washed* in the selection's gold rather than filled (`--sel-wash`,
   plan 174), at `--r-card` like every control. The 番付's 今週/通算 switch is
   the first outside the quiz. Anything that picks one of two or three views of
@@ -1193,14 +1243,33 @@ moments, three objects, none waiting to be dismissed:
   full; a lapse re-inks the impression in vermillion with a shake. It holds
   the next card for under a second (`CardStamp.browser.test` pins every
   hold and the faintness), because the moment is the press, not a pageant.
+- **The struck 辻 is one vessel.** The climb fills it everywhere the
+  card is drawn (the pass, the HUD's strip, the desk's holder, a run's
+  floor) as **one line rising from the road's foot**: 辶's sweep, its
+  zigzag and dot, and the crossing 十, which stands on the road and is
+  reached once the line passes its foot, a fifth of the way up. 十 is
+  never filled on a line of its own (`markParts.crossShare` is the line
+  in 十's units; `StruckMark` sets both bars from the one share).
 - **The level** (進級) is **told by the card's engraving**. The learner's card comes down face
-  up in its own material, and the struck 辻 on it — whose road 辶 the
-  climb fills everywhere the card is drawn — fills from empty to full
-  over three seconds while the card trembles, harder as it fills; full,
-  it bursts in sparks of the card's own stuff (the band's indigo, the
-  charcoal's gold, the platinum's), the engraving empties, and the
-  level's figure rolls over to the new one. The punch's voice
-  (`pass-clip`) sounds on the burst. It is the People family
+  up in its own material, and the struck 辻 on it fills from empty to
+  full over three seconds while the card trembles, harder as it fills,
+  the road first and **the crossing 十 as the road nears full** (plan
+  200): 十 is lit from its foot up, full a beat before the burst, so a
+  level that turns over is the whole 辻 filled. Full, it
+  bursts in sparks of the card's own stuff (the band's indigo, the
+  charcoal's gold, the platinum's) out of the crossing, 辻's namesake,
+  the engraving empties — both parts in the one breath — and refills to
+  the line the new level's climb stands on, 十 included once the climb
+  has passed its foot, and the level's figure rolls over to the new one. **It is the one
+  sound in the app that is music** (plan 200), scored to the card's own
+  clock: a build (`level-charge`) from the road's first movement — a
+  swell, a run of bars struck as the road passes each eleventh of its
+  height and quickening with it, a roll to the tremble's steps, a riser,
+  all falling away just before the burst — and the burst (`level-burst`)
+  on the ring's opening: the gate's snip, a crash and a boom, C major in
+  bars over a pad, a glitter for the sparks and two bars as the figure
+  lands. It is the loudest sound in the app because it is the rarest.
+  The punch (`pass-clip`) is the milestone ticket's clipper now. It is the People family
   throughout: no line pigment. On a phone it hangs at the top inside the
   stage's gutters (the top bar is hidden while studying, so the edge is
   free and the docked rating bar stays usable), nothing stepping down
@@ -1548,7 +1617,7 @@ line here says otherwise.
   its switch, its count and its button.
   A long list scrolls in its own column; the
   stops are one tab stop, walked with ↑/↓. Every row of the lists above is
-  a link to what it opens (plan 117), the exam review's question included,
+  a link to what it opens (plan 117), the exam's marked sheet included,
   so it opens in a new tab as well as beside the list — and it wears the
   button's face it replaced, to the pixel; the phone keeps its buttons.
   A radical's page (plan 118) stands the radicals index beside the lesson
@@ -1605,14 +1674,14 @@ line here says otherwise.
 - **A practice station takes the window** (plan 159, the owner's picks A
   and S1 of the canvas "Practice screens — layout options"). Reading and
   translation opened on three source cards across the top of an empty
-  window, the one-axis platforms on their five grades in one short row,
-  the mock exam on four paper names. Each is now a line's split filled
+  window, the one-axis platforms on their five grades in one short row.
+  Each is now a line's split filled
   as plan 137 fills the Learn stations. The **list**: reading's and
   translation's source is a switch at its head (JLPT · Fréquence · Mes
   cartes), so the page that only chose a source is gone on the desk;
   under it the grades share the column's height, each with a sentence
-  (or the texts, the points, the papers) of its own bank, the bar of the
-  grade's words (the exam's: the papers sat) and the learner's record at
+  (or the texts, the points) of its own bank, the bar of the grade's
+  words and the learner's record at
   the foot ("24 phrases · 83 % justes"), "you are here" beside the name;
   or the tiers; or the learner's own cards. The **page** is the open
   stop's, the window's height beside the list: the stop's name and what
@@ -1624,12 +1693,9 @@ line here says otherwise.
   last ride), then two panels sharing what is left — the newest misses
   (comprehension: the texts read, with their score) and the grade's
   grammar points, those studied at Learn ringed and dotted, or a tier's
-  words — each scrolling inside itself. The mock exam's page is its
-  papers, a row each: the name with the JLPT's (語彙), the kinds of
-  question it holds, a question of the kind drawn from the grade's own
-  content, the questions and minutes, the last score and "Different
-  paper"; Board is the next paper not sat. Under 600px (measured) the
-  page stacks and scrolls; under 720px the papers draw no well. The
+  words — each scrolling inside itself. Under 600px (measured) the
+  page stacks and scrolls. (The mock exam left the split for its own
+  page in plan 200, below.) The
   phone keeps its screens.
 - **Every platform's specimen hangs on the Practice gate** (plan 165, the
   last board of the same canvas). The six plates were five grade rows
@@ -1700,8 +1766,7 @@ line here says otherwise.
   the wide column) stand side by side, the head spanning both; answered,
   the unused choices keep their place unseen instead of collapsing, so
   nothing under them moves. **The foot follows its content** (plan 123):
-  a run's action — Next, Check, the exam's Previous, flag and Next —
-  stands under what it acts on and sticks at the dock line when the
+  a run's action — Next, Check — stands under what it acts on and sticks at the dock line when the
   window is short, never on the window's floor half a screen away; only a
   browse's ← → keep their place, being pressed over and over.
 - **Above about 1460px the workspace is centred** (plan 123): the card and
@@ -1897,12 +1962,46 @@ line here says otherwise.
   out), never on the irreversible act; its actions share a row; a ✕ stands
   where the body has no way out of its own; and the rail's own sheets stand
   beside the rail at the side column's width.
-- **Comprehension and the mock exam are sat, not scrolled.** The text
-  stands whole beside its questions; a reading passage stands flat on a
-  card of its own beside the questions it serves and stays put across
-  them; the exam's answer sheet — clock, count, every question, Finish —
-  stands in the run's side the whole paper. The review is a list beside
-  the open question's revealed card, the first miss open on arrival.
+- **Comprehension is sat, not scrolled.** The text stands whole beside
+  its questions.
+- **The mock exam is a booklet and its answer sheet** (模試, plan 200,
+  the owner's mix of the canvas "Tsuji — the mock exam on the desk").
+  *The papers:* the grades are tabs across the head, each with what is
+  sat of its papers; the paper to sit next is a card the page's width —
+  its names and figures, its parts drawn as the line it rides (a leg
+  per part as long as its questions, a stop per question, each named as
+  the booklet names it, with what it asks while there are three legs or
+  fewer), the gate, and beside it a question of its kind as the paper
+  prints it; the grade's other papers stand in a row under it (one
+  pressed swaps into the card), the grade's record at its end. *The
+  paper* opens on its cover with the clock stopped — its names centred,
+  its parts as a table of contents, the gate (Enter) — and the blank
+  answer sheet already in the side. A question is a page of the
+  booklet: the part's plate (問題3), its name and what it asks in the
+  learner's words, the page's number; the question alone, its answers
+  printed under it in the sheet's bubbles, round as the phone's (four
+  across when each is a few signs, two when a few words, one a row past
+  twenty; two at most once marked); the page turning in its foot (←/→,
+  the neighbours' numbers). A listening question's ring stands under
+  it with its clock, its Space and Replay to its right.
+  A passage opens the booklet on two pages, the text on the left
+  standing while its questions turn on the right. The side is the
+  answer sheet (解答用紙): the clock and the count over each part's rows
+  reading down two columns, a row its number and its ovals, filled in
+  the pencil's ink (`--text-primary`); an oval answers its question and
+  opens it. Finishing with blanks is asked in the sheet, not over the
+  paper — the blanks to go back to, what a blank costs, the first blank
+  focused — and the owed rows dash their ovals in the warning's ink.
+  *The result* hands the sheet back marked — the right oval filled in
+  the verdict's green, a wrong pick filled in the danger's red, the
+  answer a blank owed ringed — under the score against the practice
+  target, and beside it the page of the question open, ←/→ walking the
+  misses ("miss 2 of 9"); both columns the window's height, the study a
+  panel under the page (bought on a press, its body scrolling inside
+  it) and the way on at the column's foot. None of the three prints a
+  title. The paper's
+  ink is `--line-exam` mixed toward the text ink, as every exam number
+  is, never the raw pigment.
 - **The way up is a crumb, and the rail is the way around.** A screen's ‹
   way out to a place the rail opens (a gate, the lit gate's stations) is
   not drawn on the desk; any other is a small crumb over the title, never
@@ -1963,7 +2062,7 @@ line here says otherwise.
   say "leave" while Esc closed the door.
 - **Lists are walked one way, and places are links** (plan 123). Every
   list beside a page — a station's stops, the grammar points, the tiers,
-  the library's shelf, the exam's review, Settings, Browse's results — is
+  the library's shelf, the exam's marked sheet, Settings, Browse's results — is
   one tab stop, walked with ↑/↓, Home and End, Space opening the row; the
   dictionary's grid is one stop walked in two dimensions, ↓ from the
   search entering it. Everything that is a place is a link wearing its
@@ -2167,7 +2266,10 @@ line here says otherwise.
 - **A backward-looking screen stays backward-looking.** The profile is a
   record of what was done. A goal
   measured in weeks belongs on the pass's back, where the ghost train already
-  measures it, and the day's work belongs at the fare gate.
+  measures it, and the day's work belongs at the fare gate. A door to a
+  page that looks ahead may stand in the holder, as the agenda's does
+  (plan 202), so long as its figure is what the page holds (the week's
+  hours) and never what is next.
 - Four column widths — and, on the desk, the rail's `--desk-rail-w`
   (256px) beside them, the canvas grown to `--desk-board-w` (1240px), a
   second column at `--desk-side-w` (360px) and the dictionary's entry at
@@ -2202,8 +2304,9 @@ line here says otherwise.
   the window scrolls — nothing is crushed or cut. A card never gives
   down under what it holds. A run's four choices are an answer sheet,
   two by two under the card, the tiles held at the column's floor; the
-  exam's four brief answers stand the same way (`mcq-list--brief`); a
-  drill's card stands beside its boxes or its board. A station page
+  exam's booklet page takes its air a rung closer, so its foot stands
+  above the level bar; a drill's card stands beside its boxes or its
+  board. A station page
   stands at its own height rather than the window's. The `short` test
   lane (1280×600) holds all of it.
 

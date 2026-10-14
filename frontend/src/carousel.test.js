@@ -8,7 +8,7 @@ import { furiganaOf } from '../carousel/common.js'
 import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explain.js'
 import { STRINGS, weld, weldIf } from '../carousel/strings.js'
 
-// ── カルーセル — the carousel studio (plans 200, 200b, 200c) ──
+// ── カルーセル — the carousel studio (plans 210, 210b, 210c) ──
 // A static tool outside src/ (frontend/carousel/), so none of the app's
 // guards see it. These are its own: the inks it adds to tokens.mjs stay
 // the app's, the bank backend/scripts/carousel_bank.py writes still
@@ -185,7 +185,7 @@ describe('the carousel studio', () => {
     }
   })
 
-  it('asks a kanji its readings and its words, never which kanji means this (plan 200l)', () => {
+  it('asks a kanji its readings and its words, never which kanji means this (plan 210l)', () => {
     for (const lv of ['N5', 'N4']) {
       const data = bank(`kanji-${lv}.json`)
       for (const lang of ['en', 'fr']) {
@@ -207,7 +207,7 @@ describe('the carousel studio', () => {
     }
   })
 
-  it('asks a word its spelling in the 表記 type, not in its mock exam (plan 200l)', () => {
+  it('asks a word its spelling in the 表記 type, not in its mock exam (plan 210l)', () => {
     let spelled = 0
     for (const { src, p } of every.filter(x => x.src.id === 'word')) {
       expect(p.quizzes.some(q => q.kind === 'orthography'), p.id).toBe(false)
@@ -221,7 +221,7 @@ describe('the carousel studio', () => {
     expect(spelled).toBeGreaterThan(0)
   })
 
-  it('never shows an answer before its question is asked (plan 200l)', () => {
+  it('never shows an answer before its question is asked (plan 210l)', () => {
     for (const { src, p } of every) {
       // Every question the plan has, as a mock exam would ask them all.
       const qs = withoutGiveaways(picked(p, p.quizzes.map(q => q.id), 3))
@@ -236,7 +236,7 @@ describe('the carousel studio', () => {
     }
   })
 
-  it('titles every carousel within the feed’s 90 characters (plan 200l)', () => {
+  it('titles every carousel within the feed’s 90 characters (plan 210l)', () => {
     for (const { src, p } of every) {
       for (const type of TYPES.map(x => x.id).filter(x => available(x, p))) {
         const title = titleOf(p, type, 3)
@@ -344,17 +344,17 @@ describe('the carousel studio', () => {
     }
   })
 
-  it('never deals a reading the word also takes (plan 200l)', () => {
+  it('never deals a reading the word also takes (plan 210l)', () => {
     // 店 is みせ and てん: a one-kanji word keeps its other readings out.
     expect(readingMisses({ t: '店', fu: [['店', 'みせ']] }, kanjiIndex)).not.toContain('てん')
     // 行く is いく and ゆく in the deck.
     expect(readingMisses({ t: '行く', fu: [['行', 'ゆ'], ['く', '']] }, kanjiIndex, ['いく'])).not.toContain('いく')
   })
 
-  // ── Plan 200m: a theme in pictures, lookalike kanji, a reply, a trap ──
+  // ── Plan 210m: a theme in pictures, lookalike kanji, a reply, a trap ──
   const plansOf = id => every.filter(x => x.src.id === id).map(x => x.p)
 
-  it('draws a theme’s words with their pictures, and hides one impostor a round (plan 200m)', () => {
+  it('draws a theme’s words with their pictures, and hides one impostor a round (plan 210m)', () => {
     const themes = bank('themes.json').themes
     const emoji = JSON.parse(read('carousel/content/emoji.json'))
     // Every picture names a word its theme has.
@@ -364,7 +364,7 @@ describe('the carousel studio', () => {
       expect(glosses.size, key).toBeGreaterThan(0)
     }
     const ps = plansOf('theme')
-    // Every theme, each in posts of four to eight pictures, none shown twice (plan 200n).
+    // Every theme, each in posts of four to eight pictures, none shown twice (plan 210n).
     expect(new Set(ps.map(p => themePartOf(p.id).key)).size).toBe(Object.keys(themes).length)
     const shown = {}
     for (const p of ps) {
@@ -390,7 +390,7 @@ describe('the carousel studio', () => {
     }
   })
 
-  it('asks which lookalike kanji means what, only where no other means it too (plan 200m)', () => {
+  it('asks which lookalike kanji means what, only where no other means it too (plan 210m)', () => {
     for (const p of plansOf('lookalike')) {
       expect(p.slides.filter(s => s.kind === 'lookchar').length, p.id).toBeGreaterThanOrEqual(2)
       for (const s of p.slides.filter(x => x.kind === 'lookchar')) expect(s.k.meaning, `${p.id} ${s.k.c}`).not.toMatch(/radical|\(no\./i)
@@ -402,13 +402,13 @@ describe('the carousel studio', () => {
     }
   })
 
-  it('sets every line of a conversation with its furigana and its romaji, for a beginner (plan 200m)', () => {
+  it('sets every line of a conversation with its furigana and its romaji, for a beginner (plan 210m)', () => {
     const ps = plansOf('dialogue')
     expect(ps.length).toBe(bank('dialogues.json').dialogues.length)
     for (const p of ps) {
       const turns = p.slides.filter(s => s.kind === 'turn' && !s.revealed).map(s => s.turn)
       expect(turns.length, p.id).toBeGreaterThanOrEqual(3)
-      // Romaji under every word for a beginner (N5, N4); furigana at every level (plan 200n).
+      // Romaji under every word for a beginner (N5, N4); furigana at every level (plan 210n).
       expect(p.slides.filter(s => s.kind === 'turn').every(s => s.romaji === ['N5', 'N4'].includes(p.level)), p.id).toBe(true)
       for (const tu of turns) {
         expect(tu.choices.length, p.id).toBe(3)
@@ -423,7 +423,7 @@ describe('the carousel studio', () => {
         expect(tu.them.rows.some(r => r.t === 'お' || r.t === 'ご'), p.id).toBe(false)
       }
     }
-    // Where the analyser misreads, the bank sets it right (plan 200n).
+    // Where the analyser misreads, the bank sets it right (plan 210n).
     const rows = ps.flatMap(p => p.slides.filter(s => s.kind === 'turn').flatMap(s => [s.turn.them.rows, ...s.turn.choices]).flat())
     const read = t => rows.filter(r => r.t === t).map(r => r.fu.map(([, x]) => x).join(''))
     expect(new Set(read('船便'))).toEqual(new Set(['ふなびん']))
@@ -431,7 +431,7 @@ describe('the carousel studio', () => {
     expect(rows.some(r => r.t === '御')).toBe(false)
   })
 
-  it('never prints a trap’s translation over its question (plan 200m)', () => {
+  it('never prints a trap’s translation over its question (plan 210m)', () => {
     for (const p of plansOf('trap')) {
       for (const q of p.quizzes) {
         expect(q.stem.tr, p.id).toBe('')
@@ -550,7 +550,7 @@ describe('explaining a point in its own sentence', () => {
     expect(stack.line).toMatch(/^に marks 日本の田舎 as where something is; は makes it the topic/)
   })
 
-  it('reads a number and its counter as one word (plan 200l)', () => {
+  it('reads a number and its counter as one word (plan 210l)', () => {
     const rows = sentence('駅で三十分待ちました。').rows
     const n = rows.find(r => r.t === '三十分')
     expect(n?.ro).toBe('sanjuppun')
@@ -558,7 +558,7 @@ describe('explaining a point in its own sentence', () => {
     expect(rows.some(r => r.t === '三十' || r.t === '分')).toBe(false)
   })
 
-  it('names a particle in the breakdown by what it does there (plan 200l)', () => {
+  it('names a particle in the breakdown by what it does there (plan 210l)', () => {
     const rows = sentence('駅で三十分待ちました。').rows
     expect(particleLabel(rows, rows.findIndex(r => r.t === 'で'), 'en')).toBe('place')
     expect(particleLabel(rows, rows.findIndex(r => r.t === 'で'), 'fr')).toBe('lieu')
@@ -568,7 +568,7 @@ describe('explaining a point in its own sentence', () => {
     for (const [rs, i] of why) expect(particleLabel(rs, i, 'en')).toBeNull()
   })
 
-  it('gives no stacked slide to a pair that is no two particles (plan 200l)', () => {
+  it('gives no stacked slide to a pair that is no two particles (plan 210l)', () => {
     const keys = jp => stacksIn(sentence(jp).rows, 'en', glossEn).map(x => x.key)
     expect(keys('この棚は古くて、今にも壊れそうです。')).not.toContain('にも')
     expect(keys('定期券を家に忘れたばかりに、往復とも切符を買わなければならなかった。')).not.toContain('とも')
@@ -576,7 +576,7 @@ describe('explaining a point in its own sentence', () => {
     expect(keys('住民への事前の説明なしに、会社は工場の建設に着工した。')).not.toContain('への')
   })
 
-  it('names the right words around a stacked pair (plan 200l)', () => {
+  it('names the right words around a stacked pair (plan 210l)', () => {
     const one = (jp, key) => stacksIn(sentence(jp).rows, 'en', glossEn).find(x => x.key === key)
     expect(one('地方への出張がてら、かつて赴任していた支店に立ち寄った。', 'への').next.t).toBe('出張')
     expect(one('何度飲んでも、この薬の苦さには慣れない。', 'には').host.t).toBe('薬の苦さ')

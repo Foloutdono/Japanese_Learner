@@ -1,4 +1,4 @@
-// ── カルーセル — the studio (plans 200, 200c) ──────────────────────
+// ── カルーセル — the studio (plans 210, 210c) ──────────────────────
 // Pick what to post (a sentence, a translation, a grammar lesson, a word,
 // a kanji, a kana, a passage), see it drawn as every type of carousel it
 // can be side by side, keep one, pick its questions, export its slides.
@@ -42,7 +42,7 @@ const work = document.createElement('canvas')
 function load() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) || '{}')
-    // Plan 200c retired the departure board and the study card.
+    // Plan 210c retired the departure board and the study card.
     const type = TYPES.some(x => x.id === saved.type) ? saved.type : 'plates'
     if (saved.ending && !ENDING_IDS.includes(saved.ending)) delete saved.ending
     return {
@@ -423,7 +423,7 @@ async function render() {
   // over the reader's own edits on a redraw.
   const captionKey = `${state.source}|${pl.id}|${state.lang}|${state.type === 'spelling'}|${state.type === 'impostor'}`
   if (captionKey !== captionFor) { $('#caption').value = captionOf(pl); captionFor = captionKey }
-  // The title names the type and the questions asked too (plan 200l).
+  // The title names the type and the questions asked too (plan 210l).
   const asked = state.type === 'exam' ? picked(pl, state.picks[pickKey()], 3).length : 1
   const titleKey = `${captionKey}|${state.type}|${asked}`
   if (titleKey !== titleFor) { $('#title').value = titleOf(pl, state.type, asked); titleFor = titleKey; countTitle() }

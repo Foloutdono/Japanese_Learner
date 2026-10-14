@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **201**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **213**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -56,7 +56,8 @@ runtime purpose.
 - **Bump the revision when the output changes.** Anything cached or stored
   per output carries a revision: `LOCAL_REV` in `study/analysis.py` (the
   breakdown), the `phrase_analysis_cache` version (the deep tier),
-  `TOUR_REV` in `study/grammar_tour.py`, `VOICE_REV` and `KANA_REV` (audio).
+  `TOUR_REV` in `study/grammar_tour.py`, `VOICE_REV` and `KANA_REV` (audio),
+  `REV` in `frontend/scripts/today-print/build.py` (Today's print, plan 205).
   A change to what any of them produces bumps it, or learners keep the old.
 - **The grammar detector and the lookups change by counter-case.** Every new
   rule or refusal is pinned in `tests/test_grammar_precision.py` /
@@ -71,6 +72,17 @@ runtime purpose.
   is answered), and never a sentence or a question twice in a tutorial.
   `study/grammar_check.py` holds it; `content/grammar/README.md`, "The
   quiz", is the style guide. Draft with `python -m scripts.check_tour_quiz`.
+- **Every grammar point is asked in Choisir.** The contrast drill needs a
+  sentence the matcher or the detector can blank and a rival that is
+  certainly wrong in the gap; a point with neither (は, も, ない形, 〜て（理由）)
+  carries `choose`, questions written by hand (`study/grammar_choose.py`,
+  plan 201; `content/grammar/README.md`, "Choisir's own questions") and
+  never falls back to the flashcard. `study/grammar_check.py` fails a point
+  with neither. What the gate cannot see is a second right answer, the
+  commonest defect there: write every wrong filling out in the sentence, let
+  the translation printed under it carry what the grammar does not, keep the
+  stem outside the hole (悲し＿＿＿ + み), and let an independent reviewer
+  attack the batch before it ships.
 - **One progress number.** A card's progress is `srs._progress`, 0 (new) to
   1 (mastered); every `learned / total`, bar and figure sums it. Never add a
   second curve beside it.
@@ -179,6 +191,8 @@ The one optional warm-up, and it needs no database:
 python -m scripts.build_dictation_audio --check   # what is missing
 python -m scripts.build_dictation_audio           # synthesize it
 python -m scripts.build_grammar_audio --tours     # the grammar tours' scenes (plan 187d)
+python -m scripts.prewarm_word_audio               # the card readings, N5-N3: report only (plan 209)
+python -m scripts.prewarm_word_audio --yes         # ... and make the missing ones
 ```
 
 The grammar tours (plan 187d) speak through `GET /api/grammar/audio`,
@@ -188,6 +202,16 @@ B for the learner. `build_grammar_audio` makes them ahead of the first
 learner, as `build_dictation_audio` does for dictation; without it each
 line is made on the request that wants it. Without `--tours` it also
 voices every example sentence in the catalogue (~2,400 lines).
+
+`prewarm_word_audio` does the same for the `/api/tts` card readings (plan
+209): the first reading of every vocab and kanji entry at the levels asked
+for, N5 to N3 by default, which is what a card sends. That is about 3,000
+clips, an hour and three quarters on the voice service at Starter and
+about 30 MB of the 100 MB the word store is capped at. It reports and
+makes nothing without `--yes`, resumes where an interrupted run stopped,
+and stops after five failures in a row, so run it from the backend's
+Render Shell in a quiet hour. Run it again after any change of voice:
+`revoice_audio` deletes the word clips.
 
 書取 (dictation, `/practice/dictation`) plays a clip per line of
 `content/listening_clips.py`. Nothing depends on having run this — a missing
@@ -243,7 +267,7 @@ python -m scripts.prewarm_exam_papers --dry-run         # one paper per exam id
 
 None of the three is what makes a fresh deploy usable: the comprehension
 pool is never empty, because `content/comprehension/*.json` (plan 111,
-six hand-written exercises per level since plan 201, in both languages,
+six hand-written exercises per level since plan 211, in both languages,
 held to the same checks as a model answer by
 `tests/test_comprehension_seed.py`, and served before any generated one) is
 upserted into `comprehension_pool` when `routes/reading.py` is imported,
@@ -383,7 +407,7 @@ SDK, and `frontend/public/privacy.html`'s "No advertising, no trackers, no sale
 of data" is a promise the design keeps rather than a line to amend. See
 `docs/adr/0012`.
 
-Two rules matter more than the rest:
+Three rules matter more than the rest:
 
 - **Never record anything a learner typed.** Not a dictation answer, not an
   analysed sentence, not a deck or theme name. `backend/core/events.py` holds a
@@ -395,10 +419,20 @@ Two rules matter more than the rest:
   `frontend/src/lib/routePattern.js` reduces a path to the route App.jsx
   declared, and a path matching none is not recorded at all. Adding a screen
   means adding its pattern to `ROUTES` there — a node-lane test fails otherwise.
+- **Never store an API path either.** `/api/decks/<id>` carries what a
+  learner named. `lib/apiTrail.js` records a failed request (`api_error`:
+  a 5xx or no answer, never a 4xx the endpoint meant) as its area alone,
+  `/api/decks`, through `apiArea` in `lib/routePattern.js`.
 
 Call `track(name, props)` from `lib/track.js`; never `fetch` an analytics
-endpoint from a screen. Reading the data: `scripts/weekly_digest.py` (weekly,
-from `.github/workflows/weekly-digest.yml`, into the run's step summary), or
+endpoint from a screen. `track` also stamps each event with the visit's random
+session id (`event_log.sid`, shape-checked by `events.clean_sid`, never a
+property) and opens a visit with `session_start`. Reading the data: `scripts/weekly_digest.py` (weekly,
+from `.github/workflows/weekly-digest.yml`, into the run's step summary:
+boarding, return, who is active (DAU/WAU/MAU), sessions (length, screens, a day), the boot, the fare gate, the
+offer door by door, the ride and guides, runs by kind and level, failed
+requests and the install prompt; `tests/test_weekly_digest.py` reads each
+back), or
 Metabase/the Supabase SQL editor pointed at the same database.
 
 ### Content audit
@@ -448,7 +482,7 @@ python -m scripts.reading_bank_report --rows N2     # each row's level words and
 python -m scripts.reading_bank_report --check rows.json  # candidate rows, before they enter the bank
 ```
 
-The comprehension seeds (plan 201) have one as well: every seed run
+The comprehension seeds (plan 211) have one as well: every seed run
 through the checks a model answer must pass, plus a review of what lets
 a reader answer without reading (a right option far longer or more
 specific than the wrong ones, an option echoing its question, a quoted
@@ -522,7 +556,13 @@ npm run build:native  # the Capacitor bundle (dist-native/, reads .env.native)
 npm run icons     # rasterise brand/*.svg and regenerate the icon set in public/ (the mark: scripts/build-mark.py)
 npm run landing   # the landing page (plan 167): public/landing/, sitemap.xml, robots.txt
 npm run landing:og  # its two share cards, rendered in Chromium
+python3 scripts/today-print/build.py  # Today's print of the hour (plan 205; numpy, Pillow)
 ```
+
+Today's gate stands on a print drawn ahead of time (plan 205):
+`scripts/today-print/` is its generator and writes `public/today/print/<REV>/`
+and `src/components/station/print/print.json`. Never edit those by hand;
+`scripts/today-print/README.md` has the modules and the rules.
 
 The landing page is the site's **`/`** (and `/en`), and the app's front
 door is **`/app`**: on the web the app's document is built as `app.html`
@@ -545,10 +585,10 @@ public Supabase Storage bucket by file name and needs no rebuild;
 `frontend/landing/README.md` has the slots, the bucket and what changes
 when the page goes live.
 
-The **carousel studio** (plans 200–200n, `frontend/carousel/`,
+The **carousel studio** (plans 210–210n, `frontend/carousel/`,
 its README) draws what the app teaches (a reading-bank sentence, its
 translation, a grammar lesson, a word, a kanji, a kana, a comprehension
-passage; since plan 200m a theme's words in pictures, lookalike kanji, a
+passage; since plan 210m a theme's words in pictures, lookalike kanji, a
 conversation to answer and a tour's trap) as a photo carousel for a
 social feed, as one of its types (the guided walk, a mock exam, this or
 that, build it, a top five, a conversation, kanji spelling, find the
@@ -601,7 +641,7 @@ Set `DEV_USER_ID` in `backend/.env` and every request is treated as that user wi
 - `routes/` — one file per feature area (kana, vocab, kanji, grammar, phrase, reading, translation, dictation, composition, practice, dictionary, decks, exams, today, stats, profile, frequency, theme_vocab, translations, onboarding, journey, tts, station). Thin FastAPI routers; business logic lives in `srs/` and `study/`.
 - `core/` — cross-cutting singletons: `auth.py` (identity), `db.py` (raw psycopg2 connections), `srs_instance.py` / `frequency_store_instance.py` (module-level singletons constructed once at import time from `DATABASE_URL`, imported by routes needing SRS/frequency state).
 - `srs/` — the spaced-repetition engine (`srs.py` is the large one — scheduling, review submission, card state), `scheduler.py` (interval/difficulty math), `storage.py` (DB access), `models.py` (`CardState`/`ReviewResult` dataclasses), `xp.py` (XP curve), `batch_cache.py`, `frequency_store.py`.
-- `study/` — content-generation and evaluation logic that sits above the SRS layer: exam generation (`exam_blueprint.py`, `exam_*_gen.py` per section — vocab/kanji/grammar/reading/listening — `exam_validation.py`, `exam_scoring.py`, `exam_tts.py`), card selection/lookup (`card_index.py`, `card_lookup.py`, `daily_queue.py` for the "Today" queue), difficulty modeling (`difficulty.py`), grammar detection (`grammar_detect.py` — which catalogue points a sentence actually uses, over the tokenizer and the catalogue's own example sentences; `difficulty.points_in` is its name to the rest of the app), Japanese text processing (`furigana.py`, `morphology.py`, `grammar_match.py`, `sound.py`, `romaji.py` — Hepburn conversion and the fold two romanizations are compared under), dictation (`dictation.py` — clip identity and the transcription measure), speech (`voice_engine.py` — the only client of the VOICEVOX Nemo engine; `exam_tts.py` — the clip store, content keys, the voice epoch and dialogue assembly; `word_tts.py` — the `/api/tts` card-reading clips), and study `modes.py`/`structures.py` defining the review-mode taxonomy per content type.
+- `study/` — content-generation and evaluation logic that sits above the SRS layer: exam generation (`exam_blueprint.py`, `exam_*_gen.py` per section — vocab/kanji/grammar/reading/listening — `exam_validation.py`, `exam_scoring.py`, `exam_tts.py`), card selection/lookup (`card_index.py`, `card_lookup.py`, `daily_queue.py` for the "Today" queue), difficulty modeling (`difficulty.py`), grammar detection (`grammar_detect.py` — which catalogue points a sentence actually uses, over the tokenizer and the catalogue's own example sentences; `difficulty.points_in` is its name to the rest of the app), a point's own Choisir questions (`grammar_choose.py`, plan 201), Japanese text processing (`furigana.py`, `morphology.py`, `grammar_match.py`, `sound.py`, `romaji.py` — Hepburn conversion and the fold two romanizations are compared under), dictation (`dictation.py` — clip identity and the transcription measure), speech (`voice_engine.py` — the only client of the VOICEVOX Nemo engine; `exam_tts.py` — the clip store, content keys, the voice epoch and dialogue assembly; `word_tts.py` — the `/api/tts` card-reading clips), and study `modes.py`/`structures.py` defining the review-mode taxonomy per content type.
 - `content/` — static/generated reference data (grammar points, vocab, kanji readings/meanings, frequency lists, reading sentences, the dictation bank in `listening_clips.py`) as Python modules or JSON, built/refreshed by scripts in `scripts/`. **The grammar catalogue is `content/grammar/N5.json … N1.json`** (plan 087, ADR 0016): one list per level, every text in both languages, the lesson (`steps`, `compare`, four examples) beside the gloss at the levels in `RICH_LEVELS`. Its text was drafted with an AI model and is audited by AI agents (the content audit below), never copied — no sentence from a published list — and it is held to `study/grammar_check.py`: run `python -m scripts.check_grammar --report` before every content commit. A pattern string is a card id, so a rename or a level move goes through `content/grammar/renames.py` and the migration script; `content/grammar/README.md` has the schema and the style guide. `content/grammar_data.py` is a dead scrape kept only as the provenance test's negative corpus. **The two big reference sets are SQLite, not JSON, and deliberately so**: `datas/vocab/vocab_jmdict.sqlite3` (212k JMdict entries, via `vocab_jmdict_data.py`) and `datas/kanji/kanji.sqlite3` (all 13,108 KANJIDIC2 characters, via `kanji_pool_data.py`). A dict held at import costs RSS on every worker for the whole process lifetime; SQLite reads only the pages a query touches. Do not "simplify" either back into a `json.load` at module scope — that is what the 512 MB Render budget cannot take. The JSON they are built from is gitignored (`backend/.gitignore`); restore the upstream export beside them and re-run `scripts/build_jmdict_db.py` / `scripts/build_kanji_db.py` to refresh.
 - `scripts/` — one-off data-pipeline scripts (build JMDict/frequency/theme/radical indexes, generate grammar sentences, migrate card IDs, wipe SRS data) and the database-maintenance tools below. Not part of the request path.
 - `translations/` — i18n string tables served to the frontend.

@@ -110,6 +110,10 @@ const nav = {
   gateTakeAllWord:   'all',
   gateEndsAt:        at => `done by ${at}`,
   gateAdjust:        'Adjust',
+  // 浮世絵 (plan 205): the print's title slip, said whole -- the day and
+  // the hour's view, as the print's series would name it.
+  printTitle:        (day, view) => `${day} — ${view}`,
+  printViews:        { dawn: 'dawn', day: 'sails coming home', dusk: 'geese coming down', night: 'the autumn moon' },
   gateServicesN:     n => (n === 1 ? '1 service' : `${n} services`),
   gateLineModes:     name => `Modes: ${name}`,
   gateLineNone:      'No service today',
@@ -122,6 +126,8 @@ const nav = {
   todayNewShort:     'new',
   todayLesson:       'unit',
   todayReviewed:     n => (n === 1 ? '1 card today' : `${n} cards today`),
+  // The same, its figure set apart on the print (plan 206).
+  todayReviewedUnit: n => (n === 1 ? 'card today' : 'cards today'),
   todayCardsUnit:    n => (n === 1 ? 'card' : 'cards'),
   todayWeekStamps:   n => `${n} days in a row, the last seven stamped`,
   // 基礎 — the basics course on the gate and in Settings › Level (plan 186f)
@@ -510,6 +516,7 @@ const quiz = {
   askPlaceholder:      'Your question…',
   askSealed:           'Questions open once your answer is graded.',
   askSealedText:       'Questions open with the results.',
+  askSealedTour:       'Questions open once this stop is answered.',
   askHint:             'A short, precise answer, about this exercise.',
   askSend:             'Ask',
   askThinking:         'Answering',
@@ -1995,7 +2002,6 @@ const exam = {
   examRetry:           'Try again',
 
   examSectionEmpty:    'This section has no questions yet.',
-  examAnswered:        'answered',
   examFinishSection:   'Finish',
   examQuestionAbbrev:  'Q',
   examResultMissing:   "This result isn't available — start the exam again.",
@@ -2016,15 +2022,10 @@ const exam = {
   // computed from official item parameters no third party has, so the
   // honest thing to show is raw proportion correct plus a practice
   // target — and to say plainly that that is what it is.
-  examScoreCorrect:    'correct',
   examPracticeTarget:  'Target',
-  examUnofficialNote:  'Unofficial practice score — raw proportion correct, not a JLPT scaled score.',
-  examReviewTitle:     'Review your answers',
-  examReviewHint:      'Tap a question to see it again with the correct answer.',
   // Wrong answers are what a review is for, so that's what opens by
   // default — a 21-question paper otherwise lists 21 identical rows to
   // click through before finding the two that went wrong.
-  examShowWrongOnly:   'Missed only',
   examShowAll:         'All questions',
   examAllCorrect:      'Nothing missed — every question correct.',
   // Colour alone can't carry which row was picked and which was right
@@ -2033,7 +2034,6 @@ const exam = {
   examYourAnswer:      'Your answer',
   examCorrectAnswer:   'Correct answer',
   examNotAnswered:     'Left blank',
-  examTimeTaken:       'Time taken',
   // The listening script ships inside every paper already (see
   // exam_listening_gen.py) and is exactly what makes a missed
   // listening question learnable — withheld during the exam, offered
@@ -2055,8 +2055,6 @@ const exam = {
   // stands in for: on a paper JLPT the answer sheet is what tells you
   // at a glance what you still owe.
   examSheetTitle:      'Answer sheet',
-  examSheetBlank:      'blank',
-  examSheetFlagged:    'flagged',
   // aria-label for one chip — the visual states (fill, outline, corner
   // mark) are meaningless to a screen reader, so each chip spells out
   // its own.
@@ -2688,6 +2686,29 @@ const onboarding = {
     '即時応答': 'Listen to the line and choose the best reply.',
   },
   examMinutes: n => `≈\u00a0${n}\u00a0min`,
+  // ── The mock exam at a desk (plan 200) ───────────────────────
+  // The booklet on the left, the answer sheet on the right; the page
+  // turns in its foot.
+  examQuit:            'Leave',
+  examMark:            'Flag',
+  examToAnswer:        'to answer',
+  examLastQuestion:    'Last question',
+  examThisText:        'This text',
+  examLikeThePaper:    'As on the paper',
+  examYourSheet:       'Your sheet',
+  examBlanksLeft: n => `${n} question${n > 1 ? 's' : ''} left blank`,
+  examBlankCounts:     'A blank question counts as wrong.',
+  examGoTo: n => `Go to ${n}`,
+  examHandIn:          'Hand it in anyway',
+  examMissOf: (i, n) => `mistake ${i} of ${n}`,
+  examPapersSat:       'papers',
+  examRightCap:        'right',
+  examLastSitting:     'the last',
+  examSheetRow: (n, answered) => `Question ${n}${answered ? '' : ', blank'}`,
+  examOval: (n, choice) => `Question ${n}, answer ${choice}`,
+  examAnsweredCap:     'answered',
+  examSheetResult: (n, state) => `Question ${n}, ${state === 'ok' ? 'right' : state === 'x' ? 'wrong' : 'left blank'}`,
+  examPlayPause:       'play, pause',
   settingsRedoDesc: 'Take it again once you’ve progressed — your level moves with you.',
   // ── Which rating bar to grade with ──────────────────────────
   // Two buttons, four or six. All three send the same rating to the

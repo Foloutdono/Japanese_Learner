@@ -12,6 +12,7 @@ import { render } from 'vitest-browser-react'
 vi.mock('../lib/track', () => ({ track: vi.fn() }))
 
 const { useCardSession, sessionKey } = await import('./useCardSession')
+const { track } = await import('../lib/track')
 
 const settle = ms => new Promise(r => setTimeout(r, ms))
 
@@ -160,5 +161,25 @@ describe('useCardSession and a queue saved by an older payload', () => {
     await vi.waitFor(() => expect(api.current?.card_id).toBe('fresh'))
     expect(seen, 'the v6 card was never on screen').toEqual(['fresh'])
     expect(api.current.review_preview[4].due_in).toBe(86400)
+  })
+})
+
+// 足跡 — a run says its level only when the key's segment is one.
+describe('useCardSession and the trail', () => {
+  beforeEach(() => track.mockClear())
+
+  it('records the level of a run whose key names one', async () => {
+    await render(<Probe storageKey={sessionKey('vocab', 'N4', 'm')} fetchBatch={vi.fn(pendingBatch)} mode="m" />)
+    expect(track).toHaveBeenCalledWith('run_start', { kind: 'vocab', mode: 'm', level: 'N4' })
+  })
+
+  it('records no level for a theme or a deck, whose segment is a name the learner chose', async () => {
+    await render(<Probe storageKey={sessionKey('vocab', 'theme', 'mes-animaux', 'N4', 'm')} fetchBatch={vi.fn(pendingBatch)} mode="m" />)
+    await render(<Probe storageKey={sessionKey('deck', 'N5-ma-liste', 'm')} fetchBatch={vi.fn(pendingBatch)} mode="m" />)
+    const starts = track.mock.calls.filter(c => c[0] === 'run_start').map(c => c[1])
+    expect(starts).toEqual([
+      { kind: 'vocab', mode: 'm', level: undefined },
+      { kind: 'deck', mode: 'm', level: undefined },
+    ])
   })
 })

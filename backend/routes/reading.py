@@ -196,7 +196,7 @@ class ResultPayload(BaseModel):
     source_word: dict | None = None
 
 
-def _chat(messages, timeout=60, max_tokens=3000, task=""):
+def _chat(messages, timeout=60, max_tokens=3000, task="", accept=None):
     """Thin adapter over study/llm_shared.chat -- kept as a local name so
     this module's many call sites are unchanged, and so the shared
     function's LLMUnavailable becomes the HTTPException(503) they already
@@ -206,9 +206,12 @@ def _chat(messages, timeout=60, max_tokens=3000, task=""):
     reasoning stays on: this endpoint asks for ONE passage plus a handful
     of questions in a single constrained blob, which is the shape
     llm_shared documents reasoning as helping with -- unlike the batched
-    generators, which pass reasoning=False."""
+    generators, which pass reasoning=False.
+
+    `accept` is llm_shared.chat's own: a reply it refuses is not
+    returned, the next model is asked."""
     try:
-        return chat(messages, timeout=timeout, max_tokens=max_tokens, task=task)
+        return chat(messages, timeout=timeout, max_tokens=max_tokens, task=task, accept=accept)
     except LLMUnavailable as e:
         raise HTTPException(503, detail=str(e))
 
@@ -1781,7 +1784,7 @@ def _init_comprehension_pool() -> None:
                 """
             )
             # The seeds' key (plan 111), here as well as in the seeding:
-            # _pool_take orders on it (plan 201), and a failed seeding
+            # _pool_take orders on it (plan 211), and a failed seeding
             # must not leave every read failing on a missing column.
             cur.execute("ALTER TABLE comprehension_pool ADD COLUMN IF NOT EXISTS seed_key TEXT")
             # Which learner has already read which exercise. A row per
@@ -1893,7 +1896,7 @@ else:
 def _pool_take(user_id: str, level: str, lang: str, avoid: set[str]) -> dict | None:
     """An exercise this learner has not been served, or None.
 
-    The hand-written seeds come first (plan 201): they are reviewed by
+    The hand-written seeds come first (plan 211): they are reviewed by
     hand, and a model's text is checked only by the gates, so a new
     learner reads the best the pool holds before anything generated --
     which, once the pool has grown, a random draw no longer promised.
@@ -2120,7 +2123,7 @@ def _pool_repeat(user_id: str, level: str, lang: str) -> dict | None:
     """An exercise this learner HAS read, or None if they have read none.
 
     What a learner past the day's ceiling is served instead of a
-    refusal, chosen to be worth reading again (plan 201): a text they
+    refusal, chosen to be worth reading again (plan 211): a text they
     have answered every question of right comes last, since there is
     least left in it for them; among the rest, the one read longest ago.
     And never the text they were just served, while there is another:

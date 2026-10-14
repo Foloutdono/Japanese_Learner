@@ -1,5 +1,5 @@
 """
-The carousel studio's sentence bank (plan 200). Read-only over the
+The carousel studio's sentence bank (plan 210). Read-only over the
 content, no database, no network; needs the tokenizer (fugashi +
 unidic-lite).
 
@@ -14,10 +14,10 @@ catalogue's rule and its tour's twists, KANJIDIC2's meanings and
 KanjiVG's strokes. This writes all of it, once, into
 frontend/carousel/bank/, one level a file so the page opens on N5
 without loading N1, and the studio is a static page with nothing to
-ask a server. Since plan 200b it writes the rest of what a carousel can
+ask a server. Since plan 210b it writes the rest of what a carousel can
 be drawn from too: the grammar lessons with their tours, the deck's
 words and kanji, the kana and the comprehension passages; since plan
-200c the wrong spellings the 表記 question deals (each checked against
+210c the wrong spellings the 表記 question deals (each checked against
 the deck and JMdict, so no wrong answer is a word) and index.json, the
 figures a carousel's last slide may quote.
 
@@ -105,7 +105,7 @@ def _furigana(tokens: list[dict]) -> list[list[str]]:
     return out
 
 
-# ── A number and its counter (plan 200l) ──────────────────────────
+# ── A number and its counter (plan 210l) ──────────────────────────
 # The tokenizer cuts 三十分 into 三十 (read さんじゅっ, no gloss) and
 # 分 (ぷん): read apart, neither is what the sentence says. A number and
 # the counter after it are one word, read and glossed as one: 三十分
@@ -315,7 +315,7 @@ def sentence(level: str, index: int, row: dict, kanji: set) -> dict:
     return out
 
 
-# ── 表記: how a word is written (plan 200c) ──────────────────────
+# ── 表記: how a word is written (plan 210c) ──────────────────────
 # The exam's 表記 question prints a word in kana and asks for its
 # kanji. Its wrong answers are the word with one kanji swapped for
 # another read the same way (学校 -> 学交): a learner who knows the
@@ -553,7 +553,7 @@ def build(level: str, deck: dict) -> dict:
     }
 
 
-# ── The rest of the app (plan 200b) ──────────────────────────────
+# ── The rest of the app (plan 210b) ──────────────────────────────
 # A carousel is not only a sentence of the reading bank: the studio also
 # draws a grammar lesson, a word of the deck, a kanji, a kana and a
 # comprehension passage. Each is written below from the app's own
@@ -583,7 +583,7 @@ def text_rows(jp: str, level: str | None = None, pattern: str | None = None) -> 
 def _rival(pattern: str) -> dict:
     """The point a point is confused with, as the catalogue teaches it:
     its level, meaning, form and one example, for the "this or that"
-    carousel (plan 200c); {} where the rival is not a catalogue point."""
+    carousel (plan 210c); {} where the rival is not a catalogue point."""
     found = find(pattern) if pattern else None
     if not found:
         return {}
@@ -905,7 +905,7 @@ def files(deck: dict):
     })
 
 
-# ── Four more modes (plan 200m) ───────────────────────────────────
+# ── Four more modes (plan 210m) ───────────────────────────────────
 # A theme's words with a picture each, lookalike kanji, a conversation to
 # answer turn by turn and the traps the catalogue writes down. The theme
 # words, the kanji and the traps are the app's own; the emoji, the
@@ -1019,7 +1019,7 @@ def _honorific(rows: list[list]) -> list[list]:
     return out
 
 
-# Where the analyser reads a conversation's word wrong (plan 200n), the
+# Where the analyser reads a conversation's word wrong (plan 210n), the
 # words as they are read: a run of rows, and the rows it becomes.
 _DIALOGUE_READINGS = [
     (["船便"], [["船便", "w", "funabin", [["船", "ふな"], ["便", "びん"]]]]),
@@ -1090,7 +1090,7 @@ def traps() -> dict:
 
 def figures(sentences: dict, kana: dict, comprehension: dict, extra: dict | None = None) -> dict:
     """What a carousel's last slide may say about each line of the app
-    (plan 200c): how many sentences, points, words, kanji and kana it
+    (plan 210c): how many sentences, points, words, kanji and kana it
     teaches, counted from the content itself, never written by hand."""
     from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
     from content.kanji_data import KANJI_BY_LEVEL

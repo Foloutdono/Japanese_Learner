@@ -135,7 +135,9 @@ def _vocab_line(lang: str) -> dict:
 
 
 def _grammar_card(level: str, entry: dict, points: list[dict], lang: str) -> dict | None:
-    contrast = contrast_payload(level, entry, points, lang, random.Random(0))
+    # The marked sentence only: the specimen pairs its blank with the
+    # point's first example, which an authored question (plan 201) is not.
+    contrast = contrast_payload(level, entry, points, lang, random.Random(0), authored=False)
     sentences = get_sentences(level, entry["pattern"])
     if contrast is None or not sentences:
         return None

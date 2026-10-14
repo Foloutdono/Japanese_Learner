@@ -39,7 +39,9 @@ import { ChevronIcon } from '../ui/Icons'
 //   open     whether it takes a question yet
 //   text     comprehension's wording: a text, not a sentence
 //   page     the phone's page: the same panel under the phone's names
-export function AskPanel({ ask, askKey, context, open, text = false, page = false }) {
+//   sealed   what the sealed line says, where it is not a grade that
+//            opens it (the grammar tour, plan 204)
+export function AskPanel({ ask, askKey, context, open, text = false, page = false, sealed = null }) {
   const c = page ? 'ask' : 'desk-ask'
   const { t, lang } = useLang()
   const [draft, setDraft] = useState('')
@@ -98,7 +100,7 @@ export function AskPanel({ ask, askKey, context, open, text = false, page = fals
           ))}
         </ol>
       ) : (
-        <p className={`${c}__hint`}>{open ? t.askHint : text ? t.askSealedText : t.askSealed}</p>
+        <p className={`${c}__hint`}>{open ? t.askHint : sealed ?? (text ? t.askSealedText : t.askSealed)}</p>
       )}
       <form className={`${c}__form`} onSubmit={submit}>
         <input

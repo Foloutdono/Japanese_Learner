@@ -3,6 +3,7 @@ import { render, cleanup } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
+import { PRINT } from './components/station/print/usePrint'
 import './index.css'
 
 // ── 机 — the day at a glance, on a wide desk (plan 199) ────────────
@@ -130,10 +131,13 @@ describe('the gate on a wide desk', () => {
     expect(desk.height).toBeGreaterThan(window.innerHeight * 0.85)
     expect(desk.bottom).toBeLessThanOrEqual(window.innerHeight)
     const hero = $('.tdy-desk__hero').getBoundingClientRect()
-    const dial = $('.tdy-dial--desk').getBoundingClientRect()
+    // The dial by its rings: on the print (plan 205) its box is the
+    // disc's glow.
+    const dial = $('.tdy-desk .tdy-dial__gate').getBoundingClientRect()
     const go = $('.tdy-desk__go .btn-depart').getBoundingClientRect()
-    // The dial at its full size, over the gate, both on the panel's axis.
-    expect(Math.round(dial.width)).toBe(384)
+    // The dial at the size the print draws it, over the gate, both on
+    // the panel's axis.
+    expect(Math.abs(dial.width - 2 * (PRINT.frames.desk.fare + 4))).toBeLessThan(3)
     expect(go.top).toBeGreaterThan(dial.bottom)
     expect(go.bottom).toBeLessThanOrEqual(hero.bottom)
     const axis = hero.left + hero.width / 2
@@ -264,7 +268,7 @@ describe('the gate on a wide desk', () => {
 })
 
 describe('the fare, inside the dial', () => {
-  const C = 2 * Math.PI * 104
+  const C = 2 * Math.PI * PRINT.frames.desk.fare
 
   it('rings what boards inside the lines, and says what boards, what waits and until when', async () => {
     await mount()

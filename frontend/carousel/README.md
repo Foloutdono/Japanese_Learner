@@ -1,4 +1,4 @@
-# The carousel studio (plans 200–200n)
+# The carousel studio (plans 210–210n)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -23,7 +23,7 @@ Each source is one of the app's own lines, and wears its pigment:
 | 返事 | Your reply | one of 36 conversations of three turns, N5 to N1, from a birthday to a business call (`content/dialogues.json`) | what they say, three replies to choose from, then the reply said and why; every line with its furigana, and at N5 and N4 its romaji under every word, for a beginner |
 | 落とし穴 | Traps | a catalogue tour's trap: a sentence that reads one way to the eye and means another | the sentence and what it says (three readings, its translation never printed over it), the answer and why, the two forms side by side, watch out |
 
-The four of plan 200m stop at the station the app teaches them on (a
+The four of plan 210m stop at the station the app teaches them on (a
 theme's words at 単語, lookalike kanji at 漢字, a reply and a trap at
 文法). A theme, a set and a conversation are one list each, picked
 without a level; a trap is picked by its point's level.
@@ -83,7 +83,7 @@ mock exam asks (three by default; the walk ends on them too where
 | Kana | its sound, which kana a sound is, its twin in the other script |
 | Comprehension | every question the seed writes (understanding, inference, vocabulary, grammar: eight to twelve a passage), then the reading of its words |
 
-No question is answered before it is asked (plan 200l). A mock exam
+No question is answered before it is asked (plan 210l). A mock exam
 shows each answer on the slide after its question, and that answer
 leaves out what a later question asks: the reading's answer prints no
 meaning when the meaning is asked next, and nothing an answer prints is
@@ -106,7 +106,7 @@ order is asked only over a pattern's own pieces after the word it takes
 sentence's phrases, which can be said in more than one order. Nothing is
 asked by blanking a particle out of a sentence.
 
-Plan 200l's review closed the ways a right answer still slipped in as a
+Plan 210l's review closed the ways a right answer still slipped in as a
 wrong one, or the answer showed through the question: a reading
 question never deals another reading of a one-kanji word (店 てん beside
 みせ) nor a reading the deck gives the same written word (行く いく,
@@ -208,8 +208,8 @@ right too.
 to choose from; "One type" keeps one and exports it. Each source lists
 the station plates' slides it may leave out, and each type its own
 options (the exam's cover and answer sheet, the list's recap), as
-toggles. The departure board and the study card of plan 200
-were styles, not types, and plan 200c retired them.
+toggles. The departure board and the study card of plan 210
+were styles, not types, and plan 210c retired them.
 
 ## Nothing leaves the frame
 
@@ -218,11 +218,11 @@ or below the smallest size a feed shows legibly: every block that could
 be long (a sentence, a choice, a bubble, a label, a station's name) is
 fitted, from its largest size down, to the room the others leave, and
 what can give way (a sense, a note, the romaji) gives way first; a
-sentence's translation is never cut. Plan 200d
+sentence's translation is never cut. Plan 210d
 checked this by drawing every slide of a sample of every source, as
 every type and every ending, in both formats, languages and grounds,
 with the real fonts, and measuring every line of text set; every
-issue it found was fixed. Since plan 200l the check also reads the
+issue it found was fixed. Since plan 210l the check also reads the
 pixels: nothing at all, a shape as much as a word, is drawn in the
 margin outside the safe area (the "Your turn" slide's cue, once an
 arrow pointing off the frame, is a speech bubble under the prompt,
@@ -235,7 +235,7 @@ keep clear of its circles, and a carousel asks six questions at most, so
 a mock exam keeps under a feed's twenty slides and its cover and sheet
 a readable row each.
 
-Plan 200m's slides are held the same way, and the check ran over every
+Plan 210m's slides are held the same way, and the check ran over every
 theme post, set and conversation and forty traps. A conversation's line
 carries its furigana (and at N5 and N4 its romaji), which do not shrink
 below their rung: on a long turn the call to comment gives way first,
@@ -245,7 +245,7 @@ line (read on the question) gives way, its translation first, before
 the why is ever cut, and at the least the why takes the 正解 stamp's
 room. A reply is written to keep to one line, a place's name to fit a
 title. A gloss on a picture is never broken inside a word, and a word
-too long beside its picture has the picture step down. Plan 200n added
+too long beside its picture has the picture step down. Plan 210n added
 a check the measure above does not make: no text set ends cut with
 “…” (a translation that ends in one on purpose aside).
 
@@ -359,7 +359,7 @@ cd frontend && python3 -m http.server 8123   # then http://localhost:8123/carous
 It draws on canvas, so the preview is the PNG: "Download (.zip)" writes
 every slide of the chosen direction, `title.txt` and `caption.txt` (the
 item, its romaji and translation, hashtags), and a slide opened full size
-can be saved alone. The title (plan 200l, `sources.titleOf`) is the hook a
+can be saved alone. The title (plan 210l, `sources.titleOf`) is the hook a
 feed asks for over the caption, 90 characters at most (TikTok's limit):
 one per source and type, in the post's language, naming the item and its
 level ("JLPT N5 mock exam: 3 questions on で. Your score?"); where it would

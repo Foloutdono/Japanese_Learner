@@ -399,7 +399,14 @@ class TheLowerTwinTests(unittest.TestCase):
         """たとえ, "even if", tokenizes as 仮令, and the N3 kana card たとえ
         is "simile": no gloss in common, so it never stands beside it."""
         self.assertEqual(matches("たとえ雨が降っても、試合は行う。")["たとえ"]["raw_id"], "vocab_N1_仮令_たとえ")
-        self.assertEqual(matches("百歳にして、なお創作を続けている。")["なお"]["raw_id"], "vocab_N1_尚_なお")
+
+    def test_a_corrected_gloss_makes_a_true_twin(self) -> None:
+        """The N3 kana cards なお and そば carried another word's gloss
+        (直 "straight, mischief"; 側 "third person") and stood apart from
+        their own word. Corrected, they share a gloss with it and the
+        lower card is the one a sentence shows."""
+        self.assertEqual(matches("百歳にして、なお創作を続けている。")["なお"]["raw_id"], "vocab_N3__なお")
+        self.assertEqual(matches("毎あさ、この川のそばをはしります。")["そば"]["raw_id"], "vocab_N5__そば")
         # いかん is not いかが, whatever lemma they share.
         found = matches("理由のいかんによらず、遅刻は認められない。").get("いかん")
         self.assertTrue(found is None or found["raw_id"] != "vocab_N5__いかが")

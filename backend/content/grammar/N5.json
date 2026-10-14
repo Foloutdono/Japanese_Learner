@@ -63,6 +63,88 @@
         "register": "casual"
       }
     ],
+    "choose": [
+      {
+        "jp": "あれは学校＿＿＿。",
+        "tr": {
+          "en": "That is a school.",
+          "fr": "C'est une école."
+        },
+        "choices": [
+          "です",
+          "あります",
+          "ます"
+        ],
+        "why": {
+          "en": "です says what something is. あります says that something exists, and ます ends a verb, never a noun.",
+          "fr": "です dit ce qu'est une chose. あります dit que quelque chose existe, et ます termine un verbe, jamais un nom."
+        }
+      },
+      {
+        "jp": "あの店は、三年前はほんや＿＿＿。",
+        "tr": {
+          "en": "That shop was a bookshop three years ago.",
+          "fr": "Ce magasin était une librairie il y a trois ans."
+        },
+        "choices": [
+          "でした",
+          "です",
+          "だ"
+        ],
+        "why": {
+          "en": "The past of です is でした. です and だ are not past forms, and 三年前 puts the sentence in the past.",
+          "fr": "Le passé de です est でした. です et だ ne sont pas des formes du passé, et 三年前 met la phrase au passé."
+        }
+      },
+      {
+        "jp": "それはわたしの本＿＿＿。わたしのは、あのあおい本です。",
+        "tr": {
+          "en": "That is not my book. Mine is that blue book.",
+          "fr": "Ce n'est pas mon livre. Le mien, c'est ce livre bleu."
+        },
+        "choices": [
+          "ではありません",
+          "ありません",
+          "ません"
+        ],
+        "why": {
+          "en": "To deny a noun, です becomes ではありません. ありません on its own says that something does not exist, and ません belongs to verbs.",
+          "fr": "Pour nier un nom, です devient ではありません. ありません seul dit que quelque chose n'existe pas, et ません appartient aux verbes."
+        }
+      },
+      {
+        "jp": "あしたは、休み＿＿＿か。",
+        "tr": {
+          "en": "Is tomorrow a day off?",
+          "fr": "Demain, est-ce un jour de congé ?"
+        },
+        "choices": [
+          "です",
+          "でした",
+          "だ"
+        ],
+        "why": {
+          "en": "The polite question is です + か. でした is the past, and だ is the plain form, which does not stand before か like this.",
+          "fr": "La question polie, c'est です + か. でした est le passé, et だ est la forme simple, qui ne se met pas ainsi devant か."
+        }
+      },
+      {
+        "jp": "この本は、ぜんぜんおもしろくなかった＿＿＿。",
+        "tr": {
+          "en": "This book wasn't interesting at all.",
+          "fr": "Ce livre n'était pas du tout intéressant."
+        },
+        "choices": [
+          "です",
+          "でした",
+          "だ"
+        ],
+        "why": {
+          "en": "After an い-adjective, です only adds politeness; the past is already in かった. でした would put the past on twice, and だ never follows an い-adjective.",
+          "fr": "Après un adjectif en い, です ne fait qu'ajouter la politesse ; le passé est déjà dans かった. でした mettrait le passé deux fois, et だ ne suit jamais un adjectif en い."
+        }
+      }
+    ],
     "tour": {
       "twists": [
         {
@@ -476,6 +558,72 @@
         "en": "I eat fish, but I do not eat meat.",
         "fr": "Je mange du poisson, mais pas de viande.",
         "register": "polite"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "テニスはしますが、ゴルフ＿＿＿しません。",
+        "tr": {
+          "en": "I play tennis, but I don't play golf.",
+          "fr": "Je joue au tennis, mais je ne joue pas au golf."
+        },
+        "choices": [
+          "は",
+          "が",
+          "も"
+        ],
+        "why": {
+          "en": "は sets golf against tennis: a contrast. が does not go with a verb like する here, and も would mean “not golf either”, which clashes with “I play tennis”.",
+          "fr": "は oppose le golf au tennis : un contraste. が ne va pas avec un verbe comme する ici, et も voudrait dire « le golf non plus », ce qui heurte « je joue au tennis »."
+        }
+      },
+      {
+        "jp": "うちで＿＿＿日本語を話しません。",
+        "tr": {
+          "en": "At home, I don't speak Japanese.",
+          "fr": "À la maison, je ne parle pas japonais."
+        },
+        "choices": [
+          "は",
+          "が",
+          "を"
+        ],
+        "why": {
+          "en": "は can sit after another particle (うちでは) to make a topic of the place. が and を cannot follow で.",
+          "fr": "は peut suivre une autre particule (うちでは) pour faire du lieu un thème. が et を ne peuvent pas suivre で."
+        }
+      },
+      {
+        "jp": "この本＿＿＿わたしが書きました。",
+        "tr": {
+          "en": "As for this book, I wrote it.",
+          "fr": "Ce livre, c'est moi qui l'ai écrit."
+        },
+        "choices": [
+          "は",
+          "が",
+          "も"
+        ],
+        "why": {
+          "en": "は can make the object the topic: it takes the place of を. Two が in a row would not work, and も would add “also”.",
+          "fr": "は peut faire du complément le thème : il prend la place de を. Deux が de suite ne marcheraient pas, et も ajouterait « aussi »."
+        }
+      },
+      {
+        "jp": "このまちに＿＿＿、ぎんこうが三つあります。",
+        "tr": {
+          "en": "In this town, there are three banks.",
+          "fr": "Dans cette ville, il y a trois banques."
+        },
+        "choices": [
+          "は",
+          "が",
+          "を"
+        ],
+        "why": {
+          "en": "は can follow に to make the place the topic (には). が and を cannot follow に.",
+          "fr": "は peut suivre に pour faire du lieu le thème (には). が et を ne peuvent pas suivre に."
+        }
       }
     ],
     "tour": {
@@ -2258,6 +2406,72 @@
         "register": "polite"
       }
     ],
+    "choose": [
+      {
+        "jp": "ひるやすみは、クラスの友だち＿＿＿いっしょにごはんを食べます。",
+        "tr": {
+          "en": "At lunch break, I eat together with my classmates.",
+          "fr": "À la pause de midi, je mange avec mes camarades de classe."
+        },
+        "choices": [
+          "と",
+          "や",
+          "に"
+        ],
+        "why": {
+          "en": "と marks the person you do something with. や cannot mean “with”, and に does not mark a companion.",
+          "fr": "と marque la personne avec qui l'on fait quelque chose. や ne peut pas vouloir dire « avec », et に ne marque pas un compagnon."
+        }
+      },
+      {
+        "jp": "あしたは、父＿＿＿わたしの二人で、山に行きます。",
+        "tr": {
+          "en": "Tomorrow, my father and I, just the two of us, are going to the mountains.",
+          "fr": "Demain, mon père et moi, rien que nous deux, allons à la montagne."
+        },
+        "choices": [
+          "と",
+          "や",
+          "も"
+        ],
+        "why": {
+          "en": "と closes the list: my father and me, and nobody else, which is why 二人 fits. や leaves the list open, and も cannot link two nouns.",
+          "fr": "と ferme la liste : mon père et moi, et personne d'autre, d'où 二人. や laisse la liste ouverte, et も ne peut pas relier deux noms."
+        }
+      },
+      {
+        "jp": "先生は、「あしたは休みです」＿＿＿言いました。",
+        "tr": {
+          "en": "The teacher said, “Tomorrow is a day off.”",
+          "fr": "Le professeur a dit : « Demain, c'est un jour de congé »."
+        },
+        "choices": [
+          "と",
+          "に",
+          "が"
+        ],
+        "why": {
+          "en": "と closes what is said and links it to 言う. に and が cannot close a quotation.",
+          "fr": "と ferme ce qui est dit et le relie à 言う. に et が ne peuvent pas fermer une citation."
+        }
+      },
+      {
+        "jp": "あの人は、たなかさん＿＿＿けっこんしました。",
+        "tr": {
+          "en": "That person married Mr. Tanaka.",
+          "fr": "Cette personne a épousé M. Tanaka."
+        },
+        "choices": [
+          "と",
+          "に",
+          "を"
+        ],
+        "why": {
+          "en": "けっこんする takes と for the person you marry, as every action done together does. に and を do not fit this verb.",
+          "fr": "けっこんする prend と pour la personne que l'on épouse, comme toute action faite à deux. に et を ne vont pas avec ce verbe."
+        }
+      }
+    ],
     "tour": {
       "twists": [
         {
@@ -2603,6 +2817,72 @@
         "register": "polite"
       }
     ],
+    "choose": [
+      {
+        "jp": "あには、日本語を話します。いもうと＿＿＿日本語を話します。",
+        "tr": {
+          "en": "My older brother speaks Japanese. My younger sister speaks Japanese too.",
+          "fr": "Mon frère aîné parle japonais. Ma petite sœur parle japonais aussi."
+        },
+        "choices": [
+          "も",
+          "は",
+          "が"
+        ],
+        "why": {
+          "en": "も adds one more thing to what was just said: “too”. は would only name a new topic, and が would point at it as new information.",
+          "fr": "も ajoute une chose de plus à ce qui vient d'être dit : « aussi ». は ne ferait que nommer un nouveau thème, et が le présenterait comme une information nouvelle."
+        }
+      },
+      {
+        "jp": "きょうは、だれ＿＿＿来ませんでした。",
+        "tr": {
+          "en": "Nobody came today.",
+          "fr": "Personne n'est venu aujourd'hui."
+        },
+        "choices": [
+          "も",
+          "は",
+          "が"
+        ],
+        "why": {
+          "en": "だれも with a negative means “nobody”. だれは is never said, and だれが does not make a negative statement like this.",
+          "fr": "だれも avec une négation veut dire « personne ». だれは ne se dit jamais, et だれが ne fait pas une phrase négative comme celle-ci."
+        }
+      },
+      {
+        "jp": "パンを食べました。ケーキ＿＿＿食べました。",
+        "tr": {
+          "en": "I ate bread. I ate cake too.",
+          "fr": "J'ai mangé du pain. J'ai mangé du gâteau aussi."
+        },
+        "choices": [
+          "も",
+          "は",
+          "が"
+        ],
+        "why": {
+          "en": "も adds one more thing to what was just said: “too”. は would only name a new topic, and が cannot mark what is eaten.",
+          "fr": "も ajoute une chose de plus à ce qui vient d'être dit : « aussi ». は ne ferait que nommer un nouveau thème, et が ne peut pas marquer ce qu'on mange."
+        }
+      },
+      {
+        "jp": "とうきょうに＿＿＿、おいしい店がたくさんあります。",
+        "tr": {
+          "en": "In Tokyo too, there are lots of good restaurants.",
+          "fr": "À Tokyo aussi, il y a beaucoup de bons restaurants."
+        },
+        "choices": [
+          "も",
+          "が",
+          "を"
+        ],
+        "why": {
+          "en": "も keeps the other particle and adds “too”: にも. が and を cannot follow に.",
+          "fr": "も garde l'autre particule et ajoute « aussi » : にも. が et を ne peuvent pas suivre に."
+        }
+      }
+    ],
     "tour": {
       "twists": [
         {
@@ -2941,6 +3221,72 @@
         "en": "That umbrella is mine.",
         "fr": "Ce parapluie est à moi.",
         "register": "polite"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "これは、友だち＿＿＿かさです。",
+        "tr": {
+          "en": "This is my friend's umbrella.",
+          "fr": "C'est le parapluie de mon ami."
+        },
+        "choices": [
+          "の",
+          "は",
+          "が"
+        ],
+        "why": {
+          "en": "の links two nouns: the first says whose or what kind. は and が mark a topic or a subject and cannot join 友だち to かさ.",
+          "fr": "の relie deux noms : le premier dit à qui est la chose ou de quelle sorte. は et が marquent un thème ou un sujet et ne peuvent pas relier 友だち à かさ."
+        }
+      },
+      {
+        "jp": "テーブル＿＿＿下に、ねこがいます。",
+        "tr": {
+          "en": "There is a cat under the table.",
+          "fr": "Il y a un chat sous la table."
+        },
+        "choices": [
+          "の",
+          "に",
+          "で"
+        ],
+        "why": {
+          "en": "A position word (上, 下, 前) hangs on its noun with の: テーブルの下. に and で cannot sit between the two.",
+          "fr": "Un mot de position (上, 下, 前) se rattache à son nom avec の : テーブルの下. に et で ne peuvent pas se placer entre les deux."
+        }
+      },
+      {
+        "jp": "この本は、たなかさん＿＿＿ですか。",
+        "tr": {
+          "en": "Is this book Mr. Tanaka's?",
+          "fr": "Ce livre est-il à M. Tanaka ?"
+        },
+        "choices": [
+          "の",
+          "は",
+          "を"
+        ],
+        "why": {
+          "en": "の alone stands for a noun already known: たなかさんの is “Mr. Tanaka's”. は and を cannot end a phrase before です.",
+          "fr": "の seul remplace un nom déjà connu : たなかさんの veut dire « celui de M. Tanaka ». は et を ne peuvent pas terminer un groupe devant です."
+        }
+      },
+      {
+        "jp": "これは、えいご＿＿＿本です。",
+        "tr": {
+          "en": "This is an English book.",
+          "fr": "C'est un livre en anglais."
+        },
+        "choices": [
+          "の",
+          "な",
+          "で"
+        ],
+        "why": {
+          "en": "の links two nouns, and 英語 is a noun. な is for な-adjectives, and で cannot join a noun to the one it describes.",
+          "fr": "の relie deux noms, et 英語 est un nom. な est réservé aux adjectifs en な, et で ne peut pas relier un nom à celui qu'il décrit."
+        }
       }
     ],
     "tour": {
@@ -4319,6 +4665,84 @@
         "register": "casual"
       }
     ],
+    "choose": [
+      {
+        "jp": "わたしは、さかなを＿＿＿人です。",
+        "tr": {
+          "en": "I am someone who doesn't eat fish.",
+          "fr": "Je suis quelqu'un qui ne mange pas de poisson."
+        },
+        "choices": [
+          "食べない",
+          "食べる",
+          "食べません"
+        ],
+        "why": {
+          "en": "Before a noun a verb takes its plain form, and “doesn't eat” needs the negative: 食べない人. 食べる would say “eats”, and ません is polite and cannot stand there.",
+          "fr": "Devant un nom, le verbe prend sa forme simple, et « ne mange pas » demande la négation : 食べない人. 食べる dirait « mange », et ません est poli et ne peut pas se mettre là."
+        }
+      },
+      {
+        "jp": "さいふの中に、お金が＿＿＿。",
+        "tr": {
+          "en": "There is no money in my wallet.",
+          "fr": "Il n'y a pas d'argent dans mon portefeuille."
+        },
+        "choices": [
+          "ない",
+          "あらない",
+          "ありない"
+        ],
+        "why": {
+          "en": "ある is the exception: its plain negative is ない alone. あらない and ありない apply a rule that does not hold for ある.",
+          "fr": "ある fait exception : sa forme négative simple est ない tout court. あらない et ありない appliquent une règle qui ne vaut pas pour ある."
+        },
+        "slips": [
+          "あらない",
+          "ありない"
+        ]
+      },
+      {
+        "jp": "きょうは、そとで＿＿＿よ。",
+        "tr": {
+          "en": "I'm not going to play outside today.",
+          "fr": "Aujourd'hui, je ne vais pas jouer dehors."
+        },
+        "choices": [
+          "あそばない",
+          "あそびない",
+          "あそぶない"
+        ],
+        "why": {
+          "en": "う-verbs take the あ-row before ない: あそぶ → あそばない. あそびない and あそぶない join ない to the wrong stem.",
+          "fr": "Les verbes en う prennent la ligne あ devant ない : あそぶ → あそばない. あそびない et あそぶない accolent ない au mauvais radical."
+        },
+        "slips": [
+          "あそびない",
+          "あそぶない"
+        ]
+      },
+      {
+        "jp": "きょうは、べんきょうを＿＿＿。",
+        "tr": {
+          "en": "I'm not studying today.",
+          "fr": "Aujourd'hui, je n'étudie pas."
+        },
+        "choices": [
+          "しない",
+          "せない",
+          "さない"
+        ],
+        "why": {
+          "en": "する is irregular: its plain negative is しない. せない and さない are not forms of する.",
+          "fr": "する est irrégulier : sa forme négative simple est しない. せない et さない ne sont pas des formes de する."
+        },
+        "slips": [
+          "せない",
+          "さない"
+        ]
+      }
+    ],
     "tour": {
       "twists": [
         {
@@ -4802,6 +5226,104 @@
         "en": "It rained, so I stayed home.",
         "fr": "Il a plu, alors je suis resté à la maison.",
         "register": "written"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "きのう＿＿＿本は、とてもおもしろかったです。",
+        "tr": {
+          "en": "The book I read yesterday was very interesting.",
+          "fr": "Le livre que j'ai lu hier était très intéressant."
+        },
+        "choices": [
+          "読んだ",
+          "読みました",
+          "読んで"
+        ],
+        "why": {
+          "en": "Before a noun a verb takes its plain form: 読んだ本. ました is polite and cannot stand there, and 読んで would link two actions.",
+          "fr": "Devant un nom, le verbe prend sa forme simple : 読んだ本. ました est poli et ne peut pas se mettre là, et 読んで relierait deux actions."
+        }
+      },
+      {
+        "jp": "えきで、友だちを一時間＿＿＿。",
+        "tr": {
+          "en": "I waited for a friend at the station for an hour.",
+          "fr": "J'ai attendu un ami à la gare pendant une heure."
+        },
+        "choices": [
+          "まった",
+          "まちた",
+          "まつた"
+        ],
+        "why": {
+          "en": "つ-verbs change つ to った: まつ → まった. まちた and まつた attach た to the wrong stem.",
+          "fr": "Les verbes en つ changent つ en った : まつ → まった. まちた et まつた accolent た au mauvais radical."
+        },
+        "slips": [
+          "まちた",
+          "まつた"
+        ]
+      },
+      {
+        "jp": "なつやすみに、うみで＿＿＿。",
+        "tr": {
+          "en": "During the summer holidays, I swam in the sea.",
+          "fr": "Pendant les vacances d'été, j'ai nagé dans la mer."
+        },
+        "choices": [
+          "およいだ",
+          "およんだ",
+          "およいた"
+        ],
+        "why": {
+          "en": "ぐ-verbs voice the ending: およぐ → およいだ. およんだ and およいた break that rule.",
+          "fr": "Les verbes en ぐ sonorisent la terminaison : およぐ → およいだ. およんだ et およいた brisent cette règle."
+        },
+        "slips": [
+          "およんだ",
+          "およいた"
+        ]
+      },
+      {
+        "jp": "きのうは、うちでしゅくだいを＿＿＿。",
+        "tr": {
+          "en": "Yesterday I did my homework at home.",
+          "fr": "Hier, j'ai fait mes devoirs à la maison."
+        },
+        "choices": [
+          "した",
+          "すた",
+          "しった"
+        ],
+        "why": {
+          "en": "する is irregular: its plain past is した. すた and しった are not forms of する.",
+          "fr": "する est irrégulier : son passé simple est した. すた et しった ne sont pas des formes de する."
+        },
+        "slips": [
+          "すた",
+          "しった"
+        ]
+      },
+      {
+        "jp": "せんしゅう、かぞくで日本に＿＿＿。",
+        "tr": {
+          "en": "Last week, my family and I went to Japan.",
+          "fr": "La semaine dernière, ma famille et moi sommes allés au Japon."
+        },
+        "choices": [
+          "行った",
+          "行いた",
+          "行んだ"
+        ],
+        "why": {
+          "en": "行く is the exception: its past is 行った, not 行いた. Verbs in う, つ and る make った; 行く joins them.",
+          "fr": "行く fait exception : son passé est 行った, et non 行いた. Les verbes en う, つ et る font った ; 行く les rejoint."
+        },
+        "slips": [
+          "行いた",
+          "行んだ"
+        ]
       }
     ],
     "tour": {
@@ -8080,6 +8602,72 @@
         "register": "polite"
       }
     ],
+    "choose": [
+      {
+        "jp": "日本＿＿＿のひこうきは、何時ですか。",
+        "tr": {
+          "en": "What time is the flight to Japan?",
+          "fr": "À quelle heure est le vol pour le Japon ?"
+        },
+        "choices": [
+          "へ",
+          "に",
+          "を"
+        ],
+        "why": {
+          "en": "Of the two destination particles, only へ can stand before の: 日本への (“to Japan”). に cannot, and を marks an object.",
+          "fr": "Des deux particules de destination, seul へ peut se placer devant の : 日本への (« vers le Japon »). に ne le peut pas, et を marque un complément."
+        }
+      },
+      {
+        "jp": "かぞく＿＿＿のてがみを書きました。",
+        "tr": {
+          "en": "I wrote a letter to my family.",
+          "fr": "J'ai écrit une lettre à ma famille."
+        },
+        "choices": [
+          "へ",
+          "に",
+          "を"
+        ],
+        "why": {
+          "en": "Of the two destination particles, only へ can stand before の: かぞくへの (“to the family”). に cannot, and を marks an object.",
+          "fr": "Des deux particules de destination, seul へ peut se placer devant の : かぞくへの (« à la famille »). に ne le peut pas, et を marque un complément."
+        }
+      },
+      {
+        "jp": "えき＿＿＿のバスは、あそこからのります。",
+        "tr": {
+          "en": "You take the bus to the station from over there.",
+          "fr": "Le bus pour la gare, c'est là-bas qu'on le prend."
+        },
+        "choices": [
+          "へ",
+          "に",
+          "を"
+        ],
+        "why": {
+          "en": "Of the two destination particles, only へ can stand before の: えきへの (“to the station”). に cannot, and を marks an object.",
+          "fr": "Des deux particules de destination, seul へ peut se placer devant の : えきへの (« vers la gare »). に ne le peut pas, et を marque un complément."
+        }
+      },
+      {
+        "jp": "たなかさん＿＿＿のメールを書いています。",
+        "tr": {
+          "en": "I am writing an e-mail to Mr. Tanaka.",
+          "fr": "J'écris un e-mail à M. Tanaka."
+        },
+        "choices": [
+          "へ",
+          "に",
+          "を"
+        ],
+        "why": {
+          "en": "Of the two destination particles, only へ can stand before の: たなかさんへの (“to Mr. Tanaka”). に cannot, and を marks an object.",
+          "fr": "Des deux particules de destination, seul へ peut se placer devant の : たなかさんへの (« à M. Tanaka »). に ne le peut pas, et を marque un complément."
+        }
+      }
+    ],
     "tour": {
       "twists": [
         {
@@ -8413,6 +9001,72 @@
         "en": "There are pens, keys and such in the bag.",
         "fr": "Il y a des stylos, des clés et d'autres choses dans le sac.",
         "register": "polite"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "りんご＿＿＿バナナなどを買いました。",
+        "tr": {
+          "en": "I bought apples, bananas and so on.",
+          "fr": "J'ai acheté des pommes, des bananes, etc."
+        },
+        "choices": [
+          "や",
+          "を",
+          "の"
+        ],
+        "why": {
+          "en": "や joins nouns as examples, and など closes the open list. を and の cannot link two nouns this way.",
+          "fr": "や relie des noms comme exemples, et など ferme la liste ouverte. を et の ne peuvent pas relier deux noms ainsi."
+        }
+      },
+      {
+        "jp": "休みの日は、えいが＿＿＿買いものに行きます。",
+        "tr": {
+          "en": "On my days off, I go to the movies, shopping and the like.",
+          "fr": "Pendant mes jours de congé, je vais au cinéma, faire les courses, etc."
+        },
+        "choices": [
+          "や",
+          "を",
+          "が"
+        ],
+        "why": {
+          "en": "や joins examples: “the movies, shopping, and so on”. を and が cannot join two nouns.",
+          "fr": "や relie des exemples : « le cinéma, les courses, etc. ». を et が ne peuvent pas relier deux noms."
+        }
+      },
+      {
+        "jp": "このまちには、がっこう＿＿＿びょういんがあります。",
+        "tr": {
+          "en": "This town has schools, hospitals and the like.",
+          "fr": "Dans cette ville, il y a des écoles, des hôpitaux, etc."
+        },
+        "choices": [
+          "や",
+          "を",
+          "が"
+        ],
+        "why": {
+          "en": "や joins nouns as examples of a bigger set. を and が cannot join two nouns.",
+          "fr": "や relie des noms comme exemples d'un ensemble plus grand. を et が ne peuvent pas relier deux noms."
+        }
+      },
+      {
+        "jp": "本だなに、ざっし＿＿＿じしょがあります。",
+        "tr": {
+          "en": "On the bookshelf there are magazines, dictionaries and so on.",
+          "fr": "Sur l'étagère, il y a des magazines, des dictionnaires, etc."
+        },
+        "choices": [
+          "や",
+          "を",
+          "が"
+        ],
+        "why": {
+          "en": "や joins nouns as examples of a bigger set. を and が cannot join two nouns.",
+          "fr": "や relie des noms comme exemples d'un ensemble plus grand. を et が ne peuvent pas relier deux noms."
+        }
       }
     ],
     "tour": {
@@ -9038,6 +9692,72 @@
         "register": "polite"
       }
     ],
+    "choose": [
+      {
+        "jp": "きょうは、さむいです＿＿＿。",
+        "tr": {
+          "en": "It's cold today, isn't it?",
+          "fr": "Il fait froid aujourd'hui, n'est-ce pas ?"
+        },
+        "choices": [
+          "ね",
+          "よ",
+          "か"
+        ],
+        "why": {
+          "en": "ね asks the listener to agree with what you both feel. よ would tell them something new, and か would ask a real question.",
+          "fr": "ね demande à l'interlocuteur d'être d'accord avec ce que vous ressentez tous les deux. よ lui apprendrait quelque chose, et か poserait une vraie question."
+        }
+      },
+      {
+        "jp": "しけんは、来週の月よう日です＿＿＿。",
+        "tr": {
+          "en": "The exam is next Monday, isn't it?",
+          "fr": "L'examen est lundi prochain, n'est-ce pas ?"
+        },
+        "choices": [
+          "ね",
+          "よ",
+          "か"
+        ],
+        "why": {
+          "en": "ね checks something you both believe you know: “isn't it?”. よ would announce it as news, and か would ask it as a real question.",
+          "fr": "ね vérifie quelque chose que vous pensez savoir tous les deux : « n'est-ce pas ? ». よ l'annoncerait comme une nouvelle, et か le demanderait comme une vraie question."
+        }
+      },
+      {
+        "jp": "うわあ、あの山は、高いです＿＿＿。",
+        "tr": {
+          "en": "Wow, that mountain is tall, isn't it?",
+          "fr": "Oh là là, cette montagne est haute, n'est-ce pas ?"
+        },
+        "choices": [
+          "ね",
+          "よ",
+          "か"
+        ],
+        "why": {
+          "en": "Both of you can see the mountain, so ね shares an impression. よ would inform, and か would ask.",
+          "fr": "Vous voyez tous les deux la montagne, donc ね partage une impression. よ informerait, et か demanderait."
+        }
+      },
+      {
+        "jp": "きのうのえいがは、おもしろかったです＿＿＿。",
+        "tr": {
+          "en": "Yesterday's film was good, wasn't it?",
+          "fr": "Le film d'hier était bien, n'est-ce pas ?"
+        },
+        "choices": [
+          "ね",
+          "よ",
+          "か"
+        ],
+        "why": {
+          "en": "You both saw the film, so ね asks the other to agree. よ would tell news the other lacks, and か would ask a real question.",
+          "fr": "Vous avez vu le film tous les deux, donc ね demande à l'autre d'être d'accord. よ apprendrait une nouvelle à l'autre, et か poserait une vraie question."
+        }
+      }
+    ],
     "tour": {
       "twists": [
         {
@@ -9350,6 +10070,72 @@
         "en": "That's my umbrella, you know.",
         "fr": "C'est mon parapluie, tu sais.",
         "register": "polite"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "そこは、あぶないです＿＿＿。",
+        "tr": {
+          "en": "That's dangerous, you know!",
+          "fr": "C'est dangereux, tu sais !"
+        },
+        "choices": [
+          "よ",
+          "ね",
+          "か"
+        ],
+        "why": {
+          "en": "よ gives the listener something they may not have noticed: here, a warning. ね would ask them to agree, and か would ask a question.",
+          "fr": "よ apprend à l'interlocuteur ce qu'il n'a peut-être pas remarqué : ici, un avertissement. ね lui demanderait d'être d'accord, et か poserait une question."
+        }
+      },
+      {
+        "jp": "この店は、日よう日は休みです＿＿＿。",
+        "tr": {
+          "en": "This shop is closed on Sundays, you know.",
+          "fr": "Ce magasin est fermé le dimanche, tu sais."
+        },
+        "choices": [
+          "よ",
+          "ね",
+          "か"
+        ],
+        "why": {
+          "en": "The listener may not know this, so よ tells them. ね would assume they already know, and か would turn it into a question.",
+          "fr": "L'interlocuteur ne le sait peut-être pas, donc よ le lui apprend. ね supposerait qu'il le sait déjà, et か en ferait une question."
+        }
+      },
+      {
+        "jp": "いいえ、ここは学校ではありません＿＿＿。",
+        "tr": {
+          "en": "No, this is not a school, you know.",
+          "fr": "Non, ce n'est pas une école, tu sais."
+        },
+        "choices": [
+          "よ",
+          "ね",
+          "か"
+        ],
+        "why": {
+          "en": "よ gently corrects what the listener believes. ね would ask them to agree, and か would ask a question.",
+          "fr": "よ corrige doucement ce que croit l'interlocuteur. ね lui demanderait d'être d'accord, et か poserait une question."
+        }
+      },
+      {
+        "jp": "このケーキは、とてもおいしいです＿＿＿。",
+        "tr": {
+          "en": "This cake is really good, I'm telling you!",
+          "fr": "Ce gâteau est vraiment bon, je t'assure !"
+        },
+        "choices": [
+          "よ",
+          "ね",
+          "か"
+        ],
+        "why": {
+          "en": "よ recommends: “trust me, it's good”. ね would ask the other to agree, and か would ask whether it is good.",
+          "fr": "よ recommande : « crois-moi, il est bon ». ね demanderait à l'autre d'être d'accord, et か demanderait s'il est bon."
+        }
       }
     ],
     "tour": {
@@ -11451,6 +12237,79 @@
         "en": "That person was a famous teacher.",
         "fr": "Cette personne était un professeur célèbre.",
         "register": "polite"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "しずか＿＿＿まちにすんでいます。",
+        "tr": {
+          "en": "I live in a quiet town.",
+          "fr": "J'habite dans une ville calme."
+        },
+        "choices": [
+          "な",
+          "い",
+          "の"
+        ],
+        "why": {
+          "en": "A な-adjective takes な before a noun: しずかな町. い belongs to い-adjectives, and の links two nouns.",
+          "fr": "Un adjectif en な prend な devant un nom : しずかな町. い appartient aux adjectifs en い, et の relie deux noms."
+        }
+      },
+      {
+        "jp": "先週は、とても＿＿＿です。",
+        "tr": {
+          "en": "Last week was very busy.",
+          "fr": "La semaine dernière, c'était très chargé."
+        },
+        "choices": [
+          "いそがしかった",
+          "いそがしい",
+          "いそがしいでした"
+        ],
+        "why": {
+          "en": "An い-adjective makes its own past: いそがしい → いそがしかった, and です only adds politeness. いそがしいです is the present, and いそがしいでした is not a form.",
+          "fr": "Un adjectif en い fait son passé tout seul : いそがしい → いそがしかった, et です ne fait qu'ajouter la politesse. いそがしいです est le présent, et いそがしいでした n'est pas une forme."
+        },
+        "slips": [
+          "いそがしいでした"
+        ]
+      },
+      {
+        "jp": "このスープは、あまりあつ＿＿＿です。",
+        "tr": {
+          "en": "This soup is not very hot.",
+          "fr": "Cette soupe n'est pas très chaude."
+        },
+        "choices": [
+          "くない",
+          "ではない",
+          "じゃない"
+        ],
+        "why": {
+          "en": "An い-adjective makes its negative by itself: あつい → あつくない. ではない and じゃない are for nouns and な-adjectives.",
+          "fr": "Un adjectif en い fait sa négation tout seul : あつい → あつくない. ではない et じゃない sont pour les noms et les adjectifs en な."
+        },
+        "slips": [
+          "ではない",
+          "じゃない"
+        ]
+      },
+      {
+        "jp": "あの店は、ゆうめい＿＿＿ラーメンの店です。",
+        "tr": {
+          "en": "That is a famous ramen shop.",
+          "fr": "C'est un restaurant de ramen célèbre."
+        },
+        "choices": [
+          "な",
+          "い",
+          "の"
+        ],
+        "why": {
+          "en": "ゆうめい ends in い but it is a な-adjective, like きれい: ゆうめいな店. い belongs to い-adjectives, and の links two nouns.",
+          "fr": "ゆうめい finit par い mais c'est un adjectif en な, comme きれい : ゆうめいな店. い appartient aux adjectifs en い, et の relie deux noms."
+        }
       }
     ],
     "tour": {
@@ -24185,6 +25044,72 @@
         "register": "polite"
       }
     ],
+    "choose": [
+      {
+        "jp": "あのレストランは、少し高いです＿＿＿、りょうりはとてもおいしいです。",
+        "tr": {
+          "en": "That restaurant is a bit expensive, but the food is very good.",
+          "fr": "Ce restaurant est un peu cher, mais la cuisine est très bonne."
+        },
+        "choices": [
+          "が",
+          "しかし",
+          "のに"
+        ],
+        "why": {
+          "en": "が joins two clauses with “but”, right after です or ます. しかし starts a new sentence, and のに needs the plain form (高いのに).",
+          "fr": "が relie deux propositions par « mais », juste après です ou ます. しかし commence une nouvelle phrase, et のに demande la forme simple (高いのに)."
+        }
+      },
+      {
+        "jp": "しつれいです＿＿＿、いま何時ですか。",
+        "tr": {
+          "en": "Excuse me, but what time is it?",
+          "fr": "Excusez-moi, mais quelle heure est-il ?"
+        },
+        "choices": [
+          "が",
+          "しかし",
+          "のに"
+        ],
+        "why": {
+          "en": "が also opens a polite request: しつれいですが…. しかし cannot stand inside the sentence, and のに does not follow です.",
+          "fr": "が ouvre aussi une demande polie : しつれいですが…. しかし ne peut pas se mettre dans la phrase, et のに ne suit pas です."
+        }
+      },
+      {
+        "jp": "雨がふっています＿＿＿、これから出かけます。",
+        "tr": {
+          "en": "It is raining, but I'm going out now.",
+          "fr": "Il pleut, mais je sors maintenant."
+        },
+        "choices": [
+          "が",
+          "しかし",
+          "のに"
+        ],
+        "why": {
+          "en": "が joins two clauses that go against each other. しかし starts a new sentence, and のに would need ふっている (the plain form).",
+          "fr": "が relie deux propositions qui s'opposent. しかし commence une nouvelle phrase, et のに demanderait ふっている (la forme simple)."
+        }
+      },
+      {
+        "jp": "ピアノはできます＿＿＿、うたはへたです。",
+        "tr": {
+          "en": "I can play the piano, but I'm bad at singing.",
+          "fr": "Je sais jouer du piano, mais je chante mal."
+        },
+        "choices": [
+          "が",
+          "しかし",
+          "のに"
+        ],
+        "why": {
+          "en": "が links the two sides of one thing with “but”. しかし begins a new sentence, and のに does not follow ます.",
+          "fr": "が relie les deux faces d'une même chose par « mais ». しかし commence une nouvelle phrase, et のに ne suit pas ます."
+        }
+      }
+    ],
     "tour": {
       "twists": [
         {
@@ -24848,6 +25773,88 @@
         "fr": "Désolé d'être en retard.",
         "register": "polite"
       }
+    ],
+    "choose": [
+      {
+        "jp": "このくつは小さ＿＿＿、はけませんでした。",
+        "tr": {
+          "en": "These shoes were too small, so I couldn't put them on.",
+          "fr": "Ces chaussures étaient trop petites, je n'ai pas pu les mettre."
+        },
+        "choices": [
+          "くて",
+          "いて",
+          "くで"
+        ],
+        "why": {
+          "en": "An い-adjective gives a cause with くて: 小さい → 小さくて. 小さいて and 小さくで are not forms.",
+          "fr": "Un adjectif en い donne une cause avec くて : 小さい → 小さくて. 小さいて et 小さくで ne sont pas des formes."
+        },
+        "slips": [
+          "いて",
+          "くで"
+        ]
+      },
+      {
+        "jp": "きのうは、ひま＿＿＿、えいがを見に行きました。",
+        "tr": {
+          "en": "I was free yesterday, so I went to see a film.",
+          "fr": "Hier, j'avais du temps libre, alors j'ai vu un film au cinéma."
+        },
+        "choices": [
+          "で",
+          "くて",
+          "て"
+        ],
+        "why": {
+          "en": "A な-adjective or a noun gives a cause with で: ひまで. くて belongs to い-adjectives, and a bare て does not attach to ひま.",
+          "fr": "Un adjectif en な ou un nom donne une cause avec で : ひまで. くて appartient aux adjectifs en い, et un て seul ne se rattache pas à ひま."
+        },
+        "slips": [
+          "くて",
+          "て"
+        ]
+      },
+      {
+        "jp": "バスがおくれ＿＿＿、がっこうにおくれました。",
+        "tr": {
+          "en": "The bus was late, so I was late for school.",
+          "fr": "Le bus avait du retard, alors j'ai eu du retard à l'école."
+        },
+        "choices": [
+          "て",
+          "で",
+          "ので"
+        ],
+        "why": {
+          "en": "A verb gives a cause with its て-form: おくれる → おくれて. で only ends the て-form of む-, ぶ-, ぬ- and ぐ-verbs, and ので needs the plain form (おくれるので).",
+          "fr": "Un verbe donne une cause avec sa forme en て : おくれる → おくれて. で ne termine que la forme en て des verbes en む, ぶ, ぬ et ぐ, et ので demande la forme simple (おくれるので)."
+        },
+        "slips": [
+          "で",
+          "ので"
+        ]
+      },
+      {
+        "jp": "きのうは、ほんを読ん＿＿＿、あたまがいたくなりました。",
+        "tr": {
+          "en": "I read a book yesterday, and it gave me a headache.",
+          "fr": "Hier, j'ai lu un livre et ça m'a donné mal à la tête."
+        },
+        "choices": [
+          "で",
+          "て",
+          "った"
+        ],
+        "why": {
+          "en": "む-verbs make the て-form with んで: 読む → 読んで, and the cause comes with it. 読んて and 読んった are not forms of 読む.",
+          "fr": "Les verbes en む font la forme en て avec んで : 読む → 読んで, et la cause vient avec. 読んて et 読んった ne sont pas des formes de 読む."
+        },
+        "slips": [
+          "て",
+          "った"
+        ]
+      }
     ]
   },
   {
@@ -25254,6 +26261,76 @@
         "en": "Let's meet on Saturday or Sunday.",
         "fr": "Voyons-nous samedi ou dimanche.",
         "register": "polite"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "ここで食べる＿＿＿、もってかえるか、きめてください。",
+        "tr": {
+          "en": "Please decide whether to eat here or take it away.",
+          "fr": "Décidez si vous mangez ici ou si vous emportez."
+        },
+        "choices": [
+          "か",
+          "や",
+          "を"
+        ],
+        "why": {
+          "en": "か … か offers two sides, even two verbs: 食べるか、もってかえるか, “eat here or take away”. や joins nouns only, and を does not follow a verb like this.",
+          "fr": "か … か propose deux côtés, même deux verbes : 食べるか、もってかえるか, « sur place ou à emporter ». や ne relie que des noms, et を ne suit pas un verbe ainsi."
+        },
+        "slips": [
+          "や",
+          "を"
+        ]
+      },
+      {
+        "jp": "この本を買う＿＿＿買わないか、まだ分かりません。",
+        "tr": {
+          "en": "I don't know yet whether I'll buy this book or not.",
+          "fr": "Je ne sais pas encore si j'achèterai ce livre ou non."
+        },
+        "choices": [
+          "か",
+          "と",
+          "や"
+        ],
+        "why": {
+          "en": "か … か offers two sides, even a verb and its negative: 買うか買わないか, “whether or not”. と and や cannot do that.",
+          "fr": "か … か propose deux côtés, même un verbe et sa négation : 買うか買わないか, « ou non ». と et や ne peuvent pas faire cela."
+        }
+      },
+      {
+        "jp": "えいがは、七時＿＿＿八時にはじまります。",
+        "tr": {
+          "en": "The film starts at seven or eight.",
+          "fr": "Le film commence à sept heures ou à huit heures."
+        },
+        "choices": [
+          "か",
+          "と",
+          "や"
+        ],
+        "why": {
+          "en": "か between two times means “or”: 七時か八時. と and や would list both, as if it started at each.",
+          "fr": "か entre deux heures veut dire « ou » : 七時か八時. と et や énuméreraient les deux, comme si le film commençait à chacune."
+        }
+      },
+      {
+        "jp": "さかな＿＿＿にくを食べます。",
+        "tr": {
+          "en": "I'll have fish or meat.",
+          "fr": "Je prendrai du poisson ou de la viande."
+        },
+        "choices": [
+          "か",
+          "と",
+          "や"
+        ],
+        "why": {
+          "en": "か joins the two choices: さかなかにく, one or the other. と says both, and や gives examples of a longer list.",
+          "fr": "か relie les deux choix : さかなかにく, l'un ou l'autre. と dit les deux, et や donne des exemples d'une liste plus longue."
+        }
       }
     ],
     "tour": {
@@ -26503,6 +27580,72 @@
         "register": "polite"
       }
     ],
+    "choose": [
+      {
+        "jp": "一週間＿＿＿三回、プールでおよぎます。",
+        "tr": {
+          "en": "I swim at the pool three times a week.",
+          "fr": "Je nage à la piscine trois fois par semaine."
+        },
+        "choices": [
+          "に",
+          "ずつ",
+          "を"
+        ],
+        "why": {
+          "en": "に after a period means “per”: 一週間に三回. ずつ means “each” and does not fit here, and を does not mark a period.",
+          "fr": "に après une période veut dire « par » : 一週間に三回. ずつ veut dire « chacun » et ne convient pas ici, et を ne marque pas une période."
+        }
+      },
+      {
+        "jp": "一か月＿＿＿一回、かみをきります。",
+        "tr": {
+          "en": "I get my hair cut once a month.",
+          "fr": "Je me fais couper les cheveux une fois par mois."
+        },
+        "choices": [
+          "に",
+          "ずつ",
+          "を"
+        ],
+        "why": {
+          "en": "に after a period means “per”: 一か月に一回. ずつ means “each”, and を does not mark a period.",
+          "fr": "に après une période veut dire « par » : 一か月に一回. ずつ veut dire « chacun », et を ne marque pas une période."
+        }
+      },
+      {
+        "jp": "一年＿＿＿二回、日本へ行きます。",
+        "tr": {
+          "en": "I go to Japan twice a year.",
+          "fr": "Je vais au Japon deux fois par an."
+        },
+        "choices": [
+          "に",
+          "ずつ",
+          "を"
+        ],
+        "why": {
+          "en": "に after a period means “per”: 一年に二回. ずつ means “each”, and を does not mark a period.",
+          "fr": "に après une période veut dire « par » : 一年に二回. ずつ veut dire « chacun », et を ne marque pas une période."
+        }
+      },
+      {
+        "jp": "一日＿＿＿三回、ねこにごはんをあげます。",
+        "tr": {
+          "en": "I feed the cat three times a day.",
+          "fr": "Je donne à manger au chat trois fois par jour."
+        },
+        "choices": [
+          "に",
+          "ずつ",
+          "を"
+        ],
+        "why": {
+          "en": "に after a period means “per”: 一日に三回. ずつ means “each”, and を does not mark a period.",
+          "fr": "に après une période veut dire « par » : 一日に三回. ずつ veut dire « chacun », et を ne marque pas une période."
+        }
+      }
+    ],
     "tour": {
       "twists": [
         {
@@ -26815,6 +27958,78 @@
         "en": "I cleaned the room nicely.",
         "fr": "J'ai bien nettoyé la chambre.",
         "register": "polite"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "毎日＿＿＿ねます。",
+        "tr": {
+          "en": "I go to bed late every day.",
+          "fr": "Je me couche tard tous les jours."
+        },
+        "choices": [
+          "おそく",
+          "おそい",
+          "おそに"
+        ],
+        "why": {
+          "en": "An い-adjective describes a verb by changing い to く: おそい → おそく. おそい would describe a noun, and おそに is not a form.",
+          "fr": "Un adjectif en い décrit un verbe en changeant い en く : おそい → おそく. おそい décrirait un nom, et おそに n'est pas une forme."
+        },
+        "slips": [
+          "おそに"
+        ]
+      },
+      {
+        "jp": "＿＿＿書いてください、ここはせまいですから。",
+        "tr": {
+          "en": "Please write small; it is cramped here.",
+          "fr": "Écrivez petit, s'il vous plaît ; il y a peu de place ici."
+        },
+        "choices": [
+          "小さく",
+          "小さい",
+          "小さに"
+        ],
+        "why": {
+          "en": "An い-adjective describes a verb by changing い to く: 小さい → 小さく. 小さい alone would describe a noun, and 小さに is not a form.",
+          "fr": "Un adjectif en い décrit un verbe en changeant い en く : 小さい → 小さく. 小さい seul décrirait un nom, et 小さに n'est pas une forme."
+        },
+        "slips": [
+          "小さに"
+        ]
+      },
+      {
+        "jp": "かんじを、ていねい＿＿＿かきました。",
+        "tr": {
+          "en": "I wrote the kanji carefully.",
+          "fr": "J'ai écrit les kanji avec soin."
+        },
+        "choices": [
+          "に",
+          "な",
+          "く"
+        ],
+        "why": {
+          "en": "A な-adjective describes a verb with に: ていねいに. な is for a noun that follows, and く is for い-adjectives.",
+          "fr": "Un adjectif en な décrit un verbe avec に : ていねいに. な est pour un nom qui suit, et く est pour les adjectifs en い."
+        }
+      },
+      {
+        "jp": "かんたん＿＿＿言ってください。",
+        "tr": {
+          "en": "Please say it simply.",
+          "fr": "Dites-le simplement, s'il vous plaît."
+        },
+        "choices": [
+          "に",
+          "な",
+          "く"
+        ],
+        "why": {
+          "en": "A な-adjective describes a verb with に: かんたんに. な is for a noun that follows, and く is for い-adjectives.",
+          "fr": "Un adjectif en な décrit un verbe avec に : かんたんに. な est pour un nom qui suit, et く est pour les adjectifs en い."
+        }
       }
     ],
     "tour": {
@@ -27437,6 +28652,72 @@
         "register": "polite"
       }
     ],
+    "choose": [
+      {
+        "jp": "この店は、りょうり＿＿＿サービスもいいです。",
+        "tr": {
+          "en": "At this restaurant both the food and the service are good.",
+          "fr": "Dans ce restaurant, la cuisine et le service sont tous les deux bons."
+        },
+        "choices": [
+          "も",
+          "が",
+          "を"
+        ],
+        "why": {
+          "en": "も … も means “both … and”. The second も is already there, so this one must answer it; が and を cannot pair with it.",
+          "fr": "も … も veut dire « et … et ». Le second も est déjà là, celui-ci doit lui répondre ; が et を ne s'y associent pas."
+        }
+      },
+      {
+        "jp": "テレビ＿＿＿ラジオも、ありません。",
+        "tr": {
+          "en": "There is neither a TV nor a radio.",
+          "fr": "Il n'y a ni télévision ni radio."
+        },
+        "choices": [
+          "も",
+          "が",
+          "を"
+        ],
+        "why": {
+          "en": "With a negative, も … も means “neither … nor”. が and を cannot pair with the second も.",
+          "fr": "Avec une négation, も … も veut dire « ni … ni ». が et を ne peuvent pas s'associer au second も."
+        }
+      },
+      {
+        "jp": "このまちは、あさ＿＿＿よるも、とてもしずかです。",
+        "tr": {
+          "en": "This town is very quiet both in the morning and at night.",
+          "fr": "Cette ville est très calme le matin comme la nuit."
+        },
+        "choices": [
+          "も",
+          "が",
+          "を"
+        ],
+        "why": {
+          "en": "も … も means “both … and”: あさもよるも. が and を cannot pair with the second も.",
+          "fr": "も … も veut dire « et … et » : あさもよるも. が et を ne peuvent pas s'associer au second も."
+        }
+      },
+      {
+        "jp": "たなかさん＿＿＿やまださんも、きょうは休みです。",
+        "tr": {
+          "en": "Both Mr. Tanaka and Ms. Yamada are off today.",
+          "fr": "M. Tanaka et Mme Yamada sont tous les deux en congé aujourd'hui."
+        },
+        "choices": [
+          "も",
+          "が",
+          "を"
+        ],
+        "why": {
+          "en": "も … も means “both … and”: one も on each name. が and を cannot pair with the second も.",
+          "fr": "も … も veut dire « et … et » : un も sur chaque nom. が et を ne peuvent pas s'associer au second も."
+        }
+      }
+    ],
     "tour": {
       "twists": [
         {
@@ -27747,6 +29028,72 @@
         "en": "I get off the train at the next station.",
         "fr": "Je descends du train à la prochaine gare.",
         "register": "polite"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "このはし＿＿＿わたって、右にまがってください。",
+        "tr": {
+          "en": "Cross this bridge and turn right.",
+          "fr": "Traversez ce pont et tournez à droite."
+        },
+        "choices": [
+          "を",
+          "に",
+          "が"
+        ],
+        "why": {
+          "en": "With a verb of movement, を marks the ground you cross: はしをわたる. に marks a goal, and が marks a subject; neither fits わたる here.",
+          "fr": "Avec un verbe de mouvement, を marque l'espace que l'on traverse : はしをわたる. に marque un but, et が un sujet ; ni l'un ni l'autre ne convient à わたる ici."
+        }
+      },
+      {
+        "jp": "あの店の前＿＿＿とおって、駅へ行きます。",
+        "tr": {
+          "en": "I go to the station, passing in front of that shop.",
+          "fr": "Je vais à la gare en passant devant ce magasin."
+        },
+        "choices": [
+          "を",
+          "に",
+          "で"
+        ],
+        "why": {
+          "en": "With a verb of movement, を marks the space you pass through: 前をとおる. に marks a goal, and で marks where an action happens.",
+          "fr": "Avec un verbe de mouvement, を marque l'espace que l'on traverse : 前をとおる. に marque un but, et で le lieu où se fait une action."
+        }
+      },
+      {
+        "jp": "えき＿＿＿出て、まっすぐ行ってください。",
+        "tr": {
+          "en": "Leave the station and go straight.",
+          "fr": "Sortez de la gare et allez tout droit."
+        },
+        "choices": [
+          "を",
+          "が",
+          "で"
+        ],
+        "why": {
+          "en": "With a verb of movement, を marks the place you leave: えきを出る. が marks a subject, and で marks where an action happens.",
+          "fr": "Avec un verbe de mouvement, を marque le lieu que l'on quitte : えきを出る. が marque un sujet, et で le lieu où se fait une action."
+        }
+      },
+      {
+        "jp": "バス＿＿＿おりて、あるきます。",
+        "tr": {
+          "en": "I get off the bus and walk.",
+          "fr": "Je descends du bus et je marche."
+        },
+        "choices": [
+          "を",
+          "に",
+          "で"
+        ],
+        "why": {
+          "en": "With a verb of movement, を marks what you leave: バスをおりる. に marks a goal, and で marks a means or a place of action.",
+          "fr": "Avec un verbe de mouvement, を marque ce que l'on quitte : バスをおりる. に marque un but, et で un moyen ou un lieu d'action."
+        }
       }
     ]
   },
@@ -28466,6 +29813,88 @@
         "register": "polite"
       }
     ],
+    "choose": [
+      {
+        "jp": "ケーキを＿＿＿ください。",
+        "tr": {
+          "en": "Four cakes, please.",
+          "fr": "Quatre gâteaux, s'il vous plaît."
+        },
+        "choices": [
+          "四つ",
+          "四人",
+          "四枚"
+        ],
+        "why": {
+          "en": "つ counts ordinary objects: 四つ. 人 is for people and 枚 for flat things, so neither fits cakes.",
+          "fr": "つ compte les objets ordinaires : 四つ. 人 est pour les personnes et 枚 pour les choses plates, donc aucun ne convient à des gâteaux."
+        }
+      },
+      {
+        "jp": "へやに、先生が＿＿＿います。",
+        "tr": {
+          "en": "There are two teachers in the room.",
+          "fr": "Il y a deux professeurs dans la salle."
+        },
+        "choices": [
+          "二人",
+          "二つ",
+          "二枚"
+        ],
+        "why": {
+          "en": "人 counts people: 二人 (ふたり). つ is for objects and 枚 for flat things.",
+          "fr": "人 compte les personnes : 二人 (ふたり). つ est pour les objets et 枚 pour les choses plates."
+        }
+      },
+      {
+        "jp": "しゃしんを＿＿＿とりました。",
+        "tr": {
+          "en": "I took three photos.",
+          "fr": "J'ai pris trois photos."
+        },
+        "choices": [
+          "三枚",
+          "三人",
+          "三本"
+        ],
+        "why": {
+          "en": "枚 counts flat things such as photos, paper and tickets: 三枚. 人 is for people and 本 for long things.",
+          "fr": "枚 compte les choses plates comme les photos, le papier et les billets : 三枚. 人 est pour les personnes et 本 pour les objets longs."
+        }
+      },
+      {
+        "jp": "パーティーに、友だちが＿＿＿来ました。",
+        "tr": {
+          "en": "Six friends came to the party.",
+          "fr": "Six amis sont venus à la fête."
+        },
+        "choices": [
+          "六人",
+          "六つ",
+          "六枚"
+        ],
+        "why": {
+          "en": "人 counts people: 六人. つ is for objects and 枚 for flat things.",
+          "fr": "人 compte les personnes : 六人. つ est pour les objets et 枚 pour les choses plates."
+        }
+      },
+      {
+        "jp": "テーブルの上に、りんごが＿＿＿あります。",
+        "tr": {
+          "en": "There are five apples on the table.",
+          "fr": "Il y a cinq pommes sur la table."
+        },
+        "choices": [
+          "五つ",
+          "五人",
+          "五枚"
+        ],
+        "why": {
+          "en": "つ counts ordinary objects: 五つ. 人 is for people and 枚 for flat things, so neither fits apples.",
+          "fr": "つ compte les objets ordinaires : 五つ. 人 est pour les personnes et 枚 pour les choses plates, donc aucun ne convient à des pommes."
+        }
+      }
+    ],
     "tour": {
       "twists": [
         {
@@ -29105,6 +30534,72 @@
         "en": "The trains stopped because of the snow.",
         "fr": "Les trains se sont arrêtés à cause de la neige.",
         "register": "polite"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "じこ＿＿＿、電車がおくれました。",
+        "tr": {
+          "en": "The train was late because of an accident.",
+          "fr": "Le train a eu du retard à cause d'un accident."
+        },
+        "choices": [
+          "で",
+          "に",
+          "を"
+        ],
+        "why": {
+          "en": "A noun + で gives the cause: じこで. に does not mark a cause here, and を marks an object.",
+          "fr": "Un nom + で donne la cause : じこで. に ne marque pas une cause ici, et を marque un complément."
+        }
+      },
+      {
+        "jp": "びょうき＿＿＿、一週間学校を休みました。",
+        "tr": {
+          "en": "I missed school for a week because of an illness.",
+          "fr": "J'ai manqué l'école pendant une semaine à cause d'une maladie."
+        },
+        "choices": [
+          "で",
+          "に",
+          "を"
+        ],
+        "why": {
+          "en": "A noun + で gives the cause: びょうきで. に does not mark a cause here, and を marks an object.",
+          "fr": "Un nom + で donne la cause : びょうきで. に ne marque pas une cause ici, et を marque un complément."
+        }
+      },
+      {
+        "jp": "ねつ＿＿＿、あたまがいたいです。",
+        "tr": {
+          "en": "I have a headache because of a fever.",
+          "fr": "J'ai mal à la tête à cause de la fièvre."
+        },
+        "choices": [
+          "で",
+          "に",
+          "を"
+        ],
+        "why": {
+          "en": "A noun + で gives the cause: ねつで. に does not mark a cause here, and を marks an object.",
+          "fr": "Un nom + で donne la cause : ねつで. に ne marque pas une cause ici, et を marque un complément."
+        }
+      },
+      {
+        "jp": "あつさ＿＿＿、よるはよくねられませんでした。",
+        "tr": {
+          "en": "Because of the heat, I couldn't sleep well at night.",
+          "fr": "À cause de la chaleur, je n'arrivais pas à bien dormir la nuit."
+        },
+        "choices": [
+          "で",
+          "が",
+          "を"
+        ],
+        "why": {
+          "en": "A noun + で gives the cause: あつさで. が would make the heat the one who sleeps, and を marks an object.",
+          "fr": "Un nom + で donne la cause : あつさで. が ferait de la chaleur celle qui dort, et を marque un complément."
+        }
       }
     ]
   },
@@ -29805,6 +31300,72 @@
         "en": "My brother is tall.",
         "fr": "Mon frère est grand.",
         "register": "polite"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "わたしは、日本のたべもの＿＿＿すきです。",
+        "tr": {
+          "en": "I like Japanese food.",
+          "fr": "J'aime la cuisine japonaise."
+        },
+        "choices": [
+          "が",
+          "を",
+          "に"
+        ],
+        "why": {
+          "en": "In は … が, the が marks the part the predicate describes: with すき, the thing liked takes が. を and に do not mark it.",
+          "fr": "Dans は … が, が marque la partie que décrit le prédicat : avec すき, la chose aimée prend が. を et に ne la marquent pas."
+        }
+      },
+      {
+        "jp": "友だちは、スペインご＿＿＿じょうずです。",
+        "tr": {
+          "en": "My friend is good at Spanish.",
+          "fr": "Mon ami parle bien l'espagnol."
+        },
+        "choices": [
+          "が",
+          "を",
+          "に"
+        ],
+        "why": {
+          "en": "In は … が, the が marks what the predicate describes: with じょうず, the skill takes が. を and に do not mark it.",
+          "fr": "Dans は … が, が marque ce que décrit le prédicat : avec じょうず, la compétence prend が. を et に ne la marquent pas."
+        }
+      },
+      {
+        "jp": "このクラスは、おんなの子＿＿＿おおいです。",
+        "tr": {
+          "en": "This class has a lot of girls.",
+          "fr": "Dans cette classe, il y a beaucoup de filles."
+        },
+        "choices": [
+          "が",
+          "を",
+          "に"
+        ],
+        "why": {
+          "en": "In は … が, the が marks the part of the topic being described: the class is the topic, the girls are what is many. を and に do not mark it.",
+          "fr": "Dans は … が, が marque la partie du thème que l'on décrit : la classe est le thème, les filles sont ce qui est nombreux. を et に ne la marquent pas."
+        }
+      },
+      {
+        "jp": "いもうとは、かみ＿＿＿ながいです。",
+        "tr": {
+          "en": "My younger sister has long hair.",
+          "fr": "Ma petite sœur a les cheveux longs."
+        },
+        "choices": [
+          "が",
+          "を",
+          "に"
+        ],
+        "why": {
+          "en": "In は … が, the が marks the part of the topic being described: いもうとは is the topic, かみが the part that is long. を and に do not mark it.",
+          "fr": "Dans は … が, が marque la partie du thème qui est décrite : いもうとは est le thème, かみ la partie qui est longue. を et に ne la marquent pas."
+        }
       }
     ],
     "tour": {

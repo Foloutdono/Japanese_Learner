@@ -1,5 +1,5 @@
-// ── カルーセル — the slides (plans 200, 200c) ───────────────────────
-// A plan (sources.js) drawn as slides. Since plan 200c a carousel's
+// ── カルーセル — the slides (plans 210, 210c) ───────────────────────
+// A plan (sources.js) drawn as slides. Since plan 210c a carousel's
 // type is what it does, not how it looks; each is the app's own idiom
 // (DESIGN.md, "The idea"):
 //   plates   駅名標  the guided walk: the item stop by stop, on its line
@@ -94,7 +94,7 @@ function levelTag(ctx, p, x, y, label) {
 }
 
 /** One word as a hanging 駅名標: its number in a ring, its furigana over
- *  its kanji (plan 200i: over the kanji only, never the word whole), its
+ *  its kanji (plan 210i: over the kanji only, never the word whole), its
  *  romaji and its level under it, its sense on the right, the line's
  *  stripe along its foot. */
 function plate(ctx, p, x, y, w, h, word) {
@@ -135,7 +135,7 @@ function plate(ctx, p, x, y, w, h, word) {
   // level tag under the sense: stacked under a word and its furigana the
   // romaji crowds both, and the furigana's least size leaves a kanji word
   // small. A word too long for the row beside its romaji keeps it on a
-  // line under it, clear of it (plan 200l).
+  // line under it, clear of it (plan 210l).
   const roAt = maxW => fit(ctx, word.ro, { weight: 500, sizes: [FS.sm, FS.xs], maxW, maxLines: 1, balanced: false })
   let ro = word.ro ? roAt(leftW * 0.45) : null
   const fu = word.kanji && word.reading ? word.fu || furiganaOf(word.t, word.reading) : null
@@ -436,7 +436,7 @@ const KIND_JP = {
   picture: ['ごい', '語彙'], kanjiPick: ['かんじ', '漢字'], trap: ['ぶんぽう', '文法'],
 }
 
-// ── Pictures (plan 200m) ──────────────────────────────────────
+// ── Pictures (plan 210m) ──────────────────────────────────────
 /** A theme's picture, an emoji, centred on (cx, cy) at `size`. */
 function picture(ctx, e, cx, cy, size) {
   if (!e) return
@@ -694,7 +694,7 @@ const KINDS = {
     y += L.h + SP[5]
     y += paragraph(ctx, trB, f.x, y, ink2) + SP[8]
     // A sentence longer than its room leaves the why less: it steps down
-    // into what is left, and gives way where nothing is (plan 200l).
+    // into what is left, and gives way where nothing is (plan 210l).
     if (why && paragraphH(why, 1.3) > f.bottom - y) {
       why = f.bottom - y >= FS.sm * 2.4 ? fit(ctx, s.why, { weight: 500, sizes: [FS.lead, FS.body, FS.sm], maxW: f.w, maxH: f.bottom - y, lh: 1.3, balanced: false }) : null
     }
@@ -986,7 +986,7 @@ const KINDS = {
       const w = text(ctx, `${kanaOnly ? 'もんだい' : '問題'}${i + 1}`, ix, ry + rowH * 0.62, { f: font(700, rs, 'jp'), color: ink })
       const jp = KIND_JP[q.kind]?.[kanaOnly ? 0 : 1] || ''
       const w2 = jp ? SP[5] + text(ctx, jp, ix + w + SP[5], ry + rowH * 0.62, { f: font(500, rs, 'jp'), color: ink }) : 0
-      // A question may name itself more briefly on the cover (plan 200n).
+      // A question may name itself more briefly on the cover (plan 210n).
       const lb = fit(ctx, q.cover || q.label || '', { weight: 500, sizes: [Math.max(FS.sm, Math.min(FS.body, rowH * 0.55)), FS.sm, FS.caption], maxW: iw - w - w2 - SP[7], maxLines: 1, balanced: false })
       text(ctx, lb.lines[0] || '', ix + iw, ry + rowH * 0.62, { f: lb.f, color: ink2, align: 'right' })
     })
@@ -1277,7 +1277,7 @@ const KINDS = {
     drawBubble(cur, y + Math.max(0, (f.bottom - y - cur.h) * 0.3), false)
   },
 
-  // ── Plan 200m's modes ─────────────────────────────────────────
+  // ── Plan 210m's modes ─────────────────────────────────────────
   /** 単語帳: a word of the theme, drawn: its picture on a card, the word
    *  with its reading over it, its romaji, its sense. */
   picture(c, s) {
@@ -1494,7 +1494,7 @@ const KINDS = {
     const room = f.bottom - y
     const r = 28
     // A beginner's conversation (N5, N4) sets its romaji under every word
-    // (plan 200n); a later level's, its furigana alone.
+    // (plan 210n); a later level's, its furigana alone.
     const ro = s.romaji !== false
     const say = (rows, max, maxW, romaji = ro) => layoutSentence(ctx, rows, { max, min: Math.min(max, FS.sm), maxW, maxLines: 3, script: 'furigana', romaji, rules: false, gap: 0.18 })
     // A bubble: who says it, the line, its translation (none where it gave way).
@@ -1659,13 +1659,13 @@ function pointSlide(c, s, name, howCaption) {
 }
 
 
-// ── Endings: the last slide, in six designs to pick from (plans 200d–200f) ──
+// ── Endings: the last slide, in six designs to pick from (plans 210d–210f) ──
 // Each closes on the source's own station and what its line teaches, in
 // figures the bank counts (index.json), and asks for what the type asks
 // (a score after an exam, a save after a list).
 /** The mark, the name and the handle, on one line centred on `cx` and
  *  no wider than `maxW`: a long handle steps down, and one too long for
- *  the line goes under it, never cut (plan 200l). Returns its height. */
+ *  the line goes under it, never cut (plan 210l). Returns its height. */
 function brandRow(ctx, p, cx, y, ms, ink, handle, maxW, nameSize = ms * 0.55) {
   const nf = font(700, nameSize, 'latin')
   const nw = measure(ctx, 'Tsuji', nf)
@@ -1720,7 +1720,7 @@ function icon(ctx, kind, cx, cy, s, color) {
 }
 
 /** The handle the studio was given, unless it only names the website
- *  the metal already prints (plan 200f). */
+ *  the metal already prints (plan 210f). */
 const bare = h => h.trim().replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/$/, '').toLowerCase()
 const handleBesides = plan => (plan.handle && bare(plan.handle) !== SITE ? plan.handle : '')
 
@@ -1773,7 +1773,7 @@ function stopPlate(c, color, maxW) {
 }
 
 /** A comment, as the feeds draw the way to one: a speech bubble in the
- *  metal's gold, three dots in it (plan 200l: it replaced a lone arrow
+ *  metal's gold, three dots in it (plan 210l: it replaced a lone arrow
  *  pointing down at nothing). `x` its left edge, `y` its top. */
 function commentMark(ctx, p, x, y, s) {
   const w = s
@@ -2010,7 +2010,7 @@ const ENDINGS = {
   },
 
   /** 辻: the mark, large, and what its name means; today's stop on its
-   *  plate, the post's ask, and the metal to the website (plan 200f),
+   *  plate, the post's ask, and the metal to the website (plan 210f),
    *  the handle under it when the studio was given one. */
   mark(c) {
     const { ctx, p, f, ink, ink2 } = c
@@ -2176,7 +2176,7 @@ const ENDINGS = {
 function quizSlide(c, q, revealed, head, number = 1) {
   const { ctx, p, f, ink, ink2 } = c
   // A question whose why answers every wrong choice shows, answered, the
-  // right one alone under its own number (a trap's, plan 200n): three
+  // right one alone under its own number (a trap's, plan 210n): three
   // sentence-long readings and the why do not fit a slide together.
   if (revealed && q.answerOnly) q = { ...q, choices: [q.choices[q.right]], right: 0, numbers: [q.right + 1] }
   const t = c.plan.t
@@ -2216,7 +2216,7 @@ function quizSlide(c, q, revealed, head, number = 1) {
     y += paragraph(ctx, a, f.x, y, ink)
   }
   if (q.ask && q.ask !== head) {
-    // Four lines where a question quotes a whole sentence (plan 201).
+    // Four lines where a question quotes a whole sentence (plan 211).
     const ask = fit(ctx, q.ask, { weight: q.askJp ? 500 : 700, sizes: q.askJp ? [FS.body, FS.sm] : roomy ? [FS.title, FS.lead, FS.body] : [FS.lead, FS.body], maxW: f.w, maxLines: 4, balanced: false })
     y += paragraph(ctx, ask, f.x, y, q.askJp ? ink2 : ink) + SP[7]
   }
@@ -2244,7 +2244,7 @@ function quizSlide(c, q, revealed, head, number = 1) {
   // Where the answer's why would crowd it out, the why gives way: the
   // stem and the circled answer are the slide.
   // A quoted translation keeps the room it takes at the body rung: it is
-  // the question, and is never cut (plan 200l).
+  // the question, and is never cut (plan 210l).
   const quoteMin = st?.text ? paragraphH(fit(ctx, `“${st.text}”`, { sizes: [FS.sm], maxW: f.w, lh: 1.15 }), 1.15) : 0
   const stemMin = st ? (st.cue ? FS.display * 2.4 : st.rows ? FS.display * 1.5 : Math.max(FS.display, quoteMin)) : 0
   if (exWhy && f.bottom - y - SP[7] * 2 - foot - stemMin < rowsN * FS.body * 1.6) { exWhy = null; foot = footOf() }
@@ -2260,7 +2260,7 @@ function quizSlide(c, q, revealed, head, number = 1) {
   const textW0 = (f.w - 3 * (cols + 1)) / cols - SP[5] - 60 - SP[4] * 2
   const texts = q.choices.filter(x => !x.rows)
   // A written answer keeps to three lines, a whole sentence's to `q.lines`
-  // (a trap's readings, plan 200n).
+  // (a trap's readings, plan 210n).
   const maxAnswer = q.lines || 3
   const rowOf = (x, z) => z * (1.1 + (Math.min(maxAnswer, fit(ctx, x.text, { weight: x.fam === 'jp' ? 500 : 700, fam: x.fam || 'latin', sizes: [z], maxW: textW0, maxLines: 9, balanced: false }).lines.length) - 1) * 1.18) + SP[3] * 2
   const textRow = z => Math.max(0, ...texts.map(x => rowOf(x, z)))
@@ -2603,7 +2603,7 @@ function hookContent(c, plan, maxW, maxH, fam, align, hook = plan.hook) {
     return { h: headH(head) + size * 0.02, draw: (x, y) => drawHead(ctx, head, x, y, ink, align) }
   }
   if (h.kind === 'prompt') {
-    // What to say, in the reader's language (plan 200k: the shuffled tiles under it are gone).
+    // What to say, in the reader's language (plan 210k: the shuffled tiles under it are gone).
     const b = fit(ctx, `“${h.text}”`, { sizes: [FS.display, FS.heading, FS.title], maxW, maxH, lh: 1.15 })
     return { h: paragraphH(b, 1.15), draw: (x, y) => paragraph(ctx, b, x, y, ink, align, 1.15) }
   }
@@ -2643,7 +2643,7 @@ function opening(ctx, p, fr, plan, hook = plan.hook, prompt = promptOf(plan)) {
   metal(ctx, p, fr.cx, fr.bottom - pill, plan.t.next)
 }
 
-// ── How did you do? (plan 200l) ───────────────────────────────
+// ── How did you do? (plan 210l) ───────────────────────────────
 /** A self-check a reader answers with a number in the comments: how much
  *  help they needed to read the sentence, from none to not yet. Four
  *  plates, one numbered choice each; never the app's own rating bar,
@@ -2743,7 +2743,7 @@ function passagePages(plan, s, fmt, f) {
   // The first page also carries the passage's title.
   const titled = FS.heading * 1.6 + SP[6]
   // A sentence is never cut between pages, so one too tall for a page of
-  // its own (n3-04's second, plan 201) steps down a size until it fits.
+  // its own (n3-04's second, plan 211) steps down a size until it fits.
   const layouts = s.sents.map(rows => {
     let L = null
     for (const z of [size, FS.title * 1.15, FS.title, FS.lead]) {
@@ -2798,7 +2798,7 @@ export function deck(type, plan, fmt, opts) {
     const ps = passagePages(plan, s, fmt, fr)
     ps.forEach((layouts, i) => add(`passage-${i + 1}`, kind(s, { layouts, page: i + 1, count: ps.length })))
   }
-  // A mock exam's answers never give away a later question's (plan 200l).
+  // A mock exam's answers never give away a later question's (plan 210l).
   const qs = withoutGiveaways(picked(plan, opts.picks, exam ? 3 : 1))
   const numbered = list => (n, i) => (list.length > 1 ? `${n} ${i}` : n)
 
@@ -2812,7 +2812,7 @@ export function deck(type, plan, fmt, opts) {
       break
     }
     case 'spelling': {
-      // 表記 (plan 200l): the word and its kin heard in kana, each asked
+      // 表記 (plan 210l): the word and its kin heard in kana, each asked
       // how it is written, then the sheet.
       const sp = plan.spelling
       add('hook', ctx => opening(ctx, p, fr, plan, { kind: 'listhead', head: '表記', title: t.spellingTitle(sp.length), line: 'vocab' }, t.spellingAsk))
@@ -2862,7 +2862,7 @@ export function deck(type, plan, fmt, opts) {
       break
     }
     case 'impostor': {
-      // 仲間外れ (plan 200m): rounds of six words, one not of the theme,
+      // 仲間外れ (plan 210m): rounds of six words, one not of the theme,
       // each asked, then answered.
       const I = plan.impostor
       const ask = t.modes.impostorAsk(I.name)

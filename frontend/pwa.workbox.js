@@ -100,6 +100,13 @@ export const workbox = {
       handler: 'CacheFirst',
       options: { cacheName: 'media', expiration: { maxEntries: 200, maxAgeSeconds: 31536000 },
                  cacheableResponse: { statuses: [200] } } },
+    // The print behind Today's gate (plan 205): a file per hour and
+    // frame under a revision's folder (public/today/print/<rev>/), so a
+    // changed print is a new URL and the old one can be kept for good.
+    { urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/today/print/'),
+      handler: 'CacheFirst',
+      options: { cacheName: 'print', expiration: { maxEntries: 16, maxAgeSeconds: 31536000 },
+                 cacheableResponse: { statuses: [200] } } },
     { urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.endsWith('.woff2'),
       handler: 'CacheFirst',
       options: { cacheName: 'fonts', expiration: { maxEntries: 80, maxAgeSeconds: 31536000 },

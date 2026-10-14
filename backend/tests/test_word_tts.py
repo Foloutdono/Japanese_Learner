@@ -207,3 +207,54 @@ def test_a_word_an_earlier_voice_said_is_said_again(store, fake_tts):
     assert word_tts.clip_for(PACKED_VOCAB) == path
     assert fake_tts.call_count == 2
     assert tts.is_current(path)
+
+
+# ── What a prewarm makes (plan 209) ──────────────────────────────
+# scripts/prewarm_word_audio.py asks word_tts for the list and for the
+# path of each clip, so what is tested here is that the list is what a
+# card would ask for and that the path is the one clip_for writes.
+def test_the_readings_a_learner_hears_are_each_speakable_and_listed_once():
+    forms = word_tts.deck_readings(["N5", "N4"])
+    assert forms, "N5 and N4 have cards"
+    assert len(forms) == len(set(forms))
+    assert all(word_tts.speakable(form) == form for form in forms)
+
+
+def test_a_packed_reading_field_lists_only_its_first_reading():
+    # A card speaks card.kana, and spoken_form takes the first reading of
+    # a packed field: the second one is never asked for, so it is not made.
+    entry = next(e for e in VOCAB_BY_LEVEL["N5"] if e["kana"] == PACKED_VOCAB)
+    forms = word_tts.deck_readings(["N5"])
+    assert "まいげつ" in forms
+    assert "まいつき" not in forms
+    assert word_tts.spoken_form(entry["kana"]) == "まいげつ"
+
+
+def test_a_word_shared_by_two_levels_is_listed_once_and_under_the_first():
+    both = word_tts.deck_readings(["N5", "N4"])
+    assert len(both) == len(set(both))
+    assert both[:len(word_tts.deck_readings(["N5"]))] == word_tts.deck_readings(["N5"])
+
+
+def test_the_written_form_of_a_word_is_not_in_the_list():
+    # No card speaks a headword's kanji, only its reading; the written
+    # form stays speakable (the dictionary may ask) and is made then.
+    entry = next(e for e in VOCAB_BY_LEVEL["N5"] if e.get("kanji") and e["kanji"] != e["kana"])
+    forms = word_tts.deck_readings(["N5"])
+    assert word_tts.spoken_form(entry["kana"]) in forms
+    assert word_tts.spoken_form(entry["kanji"]) not in forms
+
+
+def test_an_unknown_level_lists_nothing():
+    assert word_tts.deck_readings(["N0"]) == []
+
+
+def test_the_clip_path_is_where_clip_for_writes_and_is_made_follows_it(store, fake_tts):
+    assert not word_tts.is_made(PACKED_VOCAB := "まいげつ")
+    path = word_tts.clip_for(PACKED_VOCAB)
+    assert path == word_tts.clip_path(PACKED_VOCAB)
+    assert word_tts.is_made(PACKED_VOCAB)
+
+    past = tts.voice_epoch() - 3600
+    os.utime(path, (past, past))
+    assert not word_tts.is_made(PACKED_VOCAB), "a clip an earlier voice made is not made"

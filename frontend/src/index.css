@@ -70,34 +70,8 @@
   color: var(--text-secondary);
 }
 
-/* ── The runner (canvas ExamRunner, plan 072) ──
-   On the stage frame: both bars have left, and the exam's own head
-   row is the way out, the paper and the clock. The question card, the
-   way through the paper, and the sheet bar docked on the bottom edge
-   (the ≤768px block on .stage docks it the way it docks the rating
-   bar) follow in one column. Tokens only — DESIGN.md, the scales. */
-.exam-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-4);
-}
-.exam-meta__section {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-2);
-}
-.exam-meta__jp {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-body);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+/* ── The runner's clock (canvas ExamRunner, plan 072) ──
+   Tokens only — DESIGN.md, the scales. */
 .exam-timer {
   display: inline-flex;
   align-items: center;
@@ -115,58 +89,7 @@
   animation: exam-timer-pulse 1s ease-in-out infinite;
 }
 
-/* ── Part n · Show instructions ──
-   Instructions are byte-identical for every question inside a mondai,
-   so they open on its first question and fold away after — a row that
-   is the toggle, on every question. */
-.exam-mondai {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-3);
-  width: 100%;
-  min-height: 40px;
-  padding: 0 var(--sp-4);
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  color: var(--text-secondary);
-  font: inherit;
-  font-size: var(--fs-caption);
-  text-align: left;
-}
-.exam-mondai__part {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-sm);
-  color: var(--text-primary);
-}
-.exam-mondai__text {
-  margin: 0;
-  font-size: var(--fs-sm);
-  line-height: 1.6;
-  color: var(--text-secondary);
-  white-space: pre-line;
-  text-align: left;
-}
 
-/* ── The question card ──
-   The card is the stage's page (.prompt-card--ask, in the study block);
-   this only keeps the exam's own column. An exam question plus its MCQ
-   rows is denser than a flashcard, not sparser, so it earns no more
-   room than the rest of the study card column -- 640 is the right
-   number on purpose, not a default nobody chose (plan 049). */
-.exam-card.prompt-card {
-  --card-w: 640px;
-  width: 100%;
-}
-
-/* ── The way through the paper ── */
-.exam-nav {
-  display: grid;
-  grid-template-columns: 1fr 44px 1fr;
-  gap: var(--sp-3);
-}
 /* The flag ("come back to this one"): icon-only, so the box IS the
    target, and 44 is the minimum. */
 .exam-flag {
@@ -187,127 +110,7 @@
   background: color-mix(in srgb, var(--warning) 12%, transparent);
 }
 
-/* ── Answer sheet ──
-   The numbered grid, in the sheet the bar opens (the legend and the
-   chips below are its rows). */
-.exam-sheet {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-4);
-}
 
-/* ── The result (canvas ExamResult) ──
-   Under the shell: the bar names the paper; the ring and the figures
-   head the page; the review is a surface of parts and rows. */
-.exam-result-head {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-5);
-  padding: var(--sp-4) 0;
-}
-/* The score ring: an arc for the score and a tick for the practice
-   target, so "48% against 60%" is one glance instead of two numbers
-   to compare by reading. */
-.exam-score-ring {
-  position: relative;
-  flex: none;
-  width: 108px;
-  height: 108px;
-}
-.exam-score-ring__svg {
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
-.exam-score-ring__track { fill: none; stroke: var(--surface-line); stroke-width: 8; }
-.exam-score-ring__fill {
-  fill: none;
-  stroke: var(--success);
-  stroke-width: 8;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 0.6s ease;
-}
-.exam-score-ring--low .exam-score-ring__fill { stroke: var(--danger); }
-.exam-score-ring__tick { stroke: var(--text-secondary); stroke-width: 2; }
-.exam-score-ring__pct {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-heading);
-  font-variant-numeric: tabular-nums;
-}
-.exam-result-figs {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
-  min-width: 0;
-  text-align: left;
-}
-.exam-result-figs__score {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-title);
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-}
-.exam-result-figs__cap {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.exam-result-figs__note {
-  font-size: var(--fs-caption);
-  line-height: 1.5;
-  color: var(--text-secondary);
-}
-/* The Missed-only chip sits at the header's right edge. */
-.section-header__chip { margin-left: auto; }
-.exam-review {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-}
-.exam-review__part + .exam-review__part { border-top: 1px solid var(--surface-line); }
-.exam-group {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  padding: var(--sp-3) var(--sp-4) var(--sp-2);
-}
-.exam-group__part {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-sm);
-}
-.exam-group__score {
-  font-family: var(--font-display);
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
-}
-.exam-review-row {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-  width: 100%;
-  min-height: 44px;
-  padding: 0 var(--sp-4);
-  border: 0;
-  border-top: 1px solid var(--surface-line);
-  border-radius: 0;
-  background: transparent;
-  color: var(--text-primary);
-  font: inherit;
-  text-align: left;
-}
 /* The mark: three outcomes, not two — a question left blank scores
    like a wrong answer but isn't one. Pigment as ink is mixed toward
    the text ink (the raw pigments do not clear 3:1 on the light sheet). */
@@ -330,33 +133,6 @@
 }
 .exam-review-row__mark--blank {
   background: color-mix(in srgb, var(--text-secondary) 20%, transparent);
-  color: var(--text-secondary);
-}
-.exam-review-row__q {
-  flex: none;
-  width: 30px;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-sm);
-  font-variant-numeric: tabular-nums;
-}
-.exam-review-row__jp {
-  flex: 1;
-  min-width: 0;
-  font-family: var(--font-jp);
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.exam-review-row__blank {
-  flex: 1;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
   color: var(--text-secondary);
 }
 .exam-review-row__chev { flex: none; color: var(--text-secondary); }
@@ -761,29 +537,6 @@
 }
 
 
-.exam-sheet__legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 12px;
-  font-size: 0.68rem;
-  color: var(--text-secondary);
-}
-.exam-sheet__legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-.exam-sheet__swatch {
-  width: 11px;
-  height: 11px;
-  border-radius: 3px;
-  border: 1.5px solid var(--border);
-}
-.exam-sheet__swatch--answered {
-  background: var(--line-color, var(--line-exam));
-  border-color: var(--line-color, var(--line-exam));
-}
-.exam-sheet__legend-flag { color: var(--accent2); }
 .exam-sheet__grid {
   display: flex;
   flex-wrap: wrap;
@@ -829,10 +582,6 @@
   outline-offset: 2px;
 }
 
-
-@media (prefers-reduced-motion: reduce) {
-  .exam-score-ring__fill { transition: none; }
-}
 
 
 @media (max-width: 560px) {
@@ -2576,15 +2325,19 @@
   /* Dark ink text for use on light/mid-tone colour fills (success,
      warning) that stay legible with dark text regardless of theme. */
   --text-on-fill:       #1c1811;
-  /* 正解 (plan 180) — the pass verdicts' inks: Correct's 青竹 and
+  /* 正解 (plan 180) — the pass verdicts' inks: Correct's 新橋 and
      Perfect's 若葉, the two keys the rating bar fills. A step brighter
      than the state ramp the misses stand on (plan 174's 状態), by the
      owner's word ("a bit more vibrant"): the answer pressed most is the
      one thing on the bar in colour. Fixed, because the keys stand on
      sumi in both themes; the run's meter and the desk's verdict tiles
      wear the same two, as every verdict's segment wears its key's ink.
-     Dark text on both: 7.3:1 and 7.9:1. */
-  --rating-correct:     #22b89c;
+     Correct was 青竹 #22b89c, a mint off the palette's family, until
+     plan 203 (券売機): 新橋, the Meiji turquoise named for the station
+     Japan's first railway left from, a blue that the misses' red-to-amber
+     ramp never comes near and Perfect's green is told apart from.
+     Dark text on both: 7.7:1 and 7.9:1. */
+  --rating-correct:     #59b9c6;
   --rating-perfect:     #6cc24a;
 
   /* Washi (和紙) — the one bright surface reserved for diagrams that
@@ -2601,9 +2354,8 @@
      custom property declared only on .prompt-card would never reach
      it. .prompt-card (index.css:13659) and .deck-progress
      (index.css:7808) both just consume var(--card-w); an exception
-     (.prompt-card.drawing-quiz__card, .exam-card.prompt-card)
-     overrides --card-w on its own more specific selector rather than
-     fighting max-width directly. */
+     (.prompt-card.drawing-quiz__card) overrides --card-w on its own
+     more specific selector rather than fighting max-width directly. */
   --card-w:         640px;
   --offer-w:        390px;     /* the offers' stage, drawn for a phone (plan 172) */
   --offer-desk-w:   920px;     /* the offer's dialog on the desk: the stage beside the words */
@@ -2630,6 +2382,11 @@
   /* The run's floor on a phone (plan 174, RunConsole.jsx): the level as
      the card's struck 辻, so a rung taller than the bar it replaced. */
   --run-floor-h:    60px;
+  /* A rating key's foot (plan 203, 券売機): the key's own side under
+     it, the depth a press travels. Not a shadow -- no blur, the key's
+     material a shade down -- and 3px because an edge is 3px wherever
+     the app draws one (線: a plate's stripe, a row's rail). */
+  --key-foot:        3px;
   /* The desk's rail (plan 113, components/chrome/DeskRail.jsx): the
      second chrome's one width, at and above the desk's 1100px. Declared
      here rather than inside the desk's own section because every :root
@@ -4981,9 +4738,11 @@ textarea:focus-visible {
 
 /* ── 辻, struck into a pass, filling with the XP ──
    (components/offers/StruckMark.jsx) The bar clipping 辶 grows from
-   its foot to the share of the level climbed; 十 never fills. */
+   its foot to the share of the level climbed, and 十's bar rises on the
+   same line, in 十's own units (--ofr-xp-cross, set beside --ofr-xp). */
 .ofr-mark { display: block; }
 .ofr-mark__bar { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(var(--ofr-xp, 0)); }
+.ofr-mark__bar--cross { transform: scaleY(var(--ofr-xp-cross, 0)); }
 .ofr-mark--etched { filter: drop-shadow(0 0.8px 0 rgba(255, 255, 255, 0.75)); }
 .ofr-mark--etched .ofr-mark__xp { opacity: 0.72; }
 .ofr-mark:not(.ofr-mark--etched) .ofr-mark__ink { fill: rgba(255, 255, 255, 0.055); }
@@ -6373,6 +6132,7 @@ textarea:focus-visible {
 }
 /* The Pro side's 辻 fills as the card arrives; the turn keeps it. */
 .ofr-turn__face--pro .ofr-mark__bar { animation: ofr-turn-xp 8s cubic-bezier(0.3, 0.7, 0.3, 1) infinite both; }
+.ofr-turn__face--pro .ofr-mark__bar--cross { animation-name: ofr-turn-xp-cross; }
 @keyframes ofr-turn-hold { 0% { opacity: 0; } 6%, 95% { opacity: 1; } 99%, 100% { opacity: 0; } }
 @keyframes ofr-turn-flip {
   0% { transform: translateY(-12px) scale(1) rotateY(0deg) rotateX(0deg); }
@@ -6404,6 +6164,7 @@ textarea:focus-visible {
   76%, 100% { transform: skewX(-14deg) translateX(380px); }
 }
 @keyframes ofr-turn-xp { 0%, 5% { transform: scaleY(0); } 18%, 100% { transform: scaleY(var(--ofr-xp, 0)); } }
+@keyframes ofr-turn-xp-cross { 0%, 5% { transform: scaleY(0); } 18%, 100% { transform: scaleY(var(--ofr-xp-cross, 0)); } }
 
 /* 3C · what changes, as a hairline lattice: Max's column empty until
    the pass lands, then each figure revealed as its row lights. The
@@ -8860,6 +8621,407 @@ textarea:focus-visible {
 .tdy-next__n small { margin-left: var(--sp-1); font-size: var(--fs-caption); font-weight: 600; color: var(--text-secondary); }
 .tdy-next__min { font-size: var(--fs-sm); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 
+/* ── 浮世絵 — the print of the hour (plan 205) ────────────────────
+   The owner's pick of the canvas "Tsuji — Today, the visit card"
+   (round 9): Today's gate stands on a print of the hour
+   (components/station/TodayPrint.jsx), its dial the print's sun or
+   moon, the lines under it set on the sky, the title slip (題箋) down
+   the right edge. The print is drawn ahead of time
+   (scripts/today-print, public/today/print/<rev>/) and carries its own
+   colours: an illustration, not the app's chrome, so none of its inks
+   is a token and none of its pigments is a line's. What the app sets
+   on it reads the hour's inks (--tpr-*, components/station/print/
+   usePrint.js printVars), which the print's canvas measured at 4.5:1
+   or better on the sky under them at every hour.
+
+   Everything on the print is placed in its units: --tpr-u pixels to
+   the unit, the print's corner at (--tpr-x, --tpr-y) in the frame, an
+   element's place (--at-x, --at-y) set where it is drawn. */
+.tdy--print {
+  position: relative;
+  isolation: isolate;
+  /* The title slip's three inks: its paper, its sumi, the print's
+     vermilion (朱). */
+  --tpr-washi: #efe3bf;
+  --tpr-sumi: #1d1a16;
+  --tpr-shu: #a8382a;
+  /* A cleared day's seal (plan 206): its red, cut where the disc was,
+     and the light it sheds on the sky. */
+  --tpr-seal: #ce6153;
+  --tpr-seal-glow: #e98066;
+}
+/* The frame: the whole screen between the bars, under the gate; the
+   gate's own layer of placed things over it, in the same place. */
+.tpr,
+.tdy-hero--print {
+  position: absolute;
+  inset: calc(-1 * var(--sp-6)) calc(-1 * var(--sp-5)) 0;
+}
+.tpr {
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--tpr-top);
+}
+/* Under a departure's gate (TodayPrint): out of the page's style and
+   layout while the gate hides it (plan 207). */
+.tpr--under-gate { display: none; }
+.tpr__art {
+  position: absolute;
+  left: var(--tpr-x);
+  top: var(--tpr-y);
+  width: calc(var(--tpr-w) * var(--tpr-u));
+  height: calc(var(--tpr-h) * var(--tpr-u));
+  background: var(--tpr-sky);
+}
+.tpr__art > * {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+/* The two textures, tiles drawn once at the print's scale: the sky's
+   wood grain under the clouds, the paper's fibre over everything (on a
+   layer of its own, so the busy print under it never redraws it). */
+.tpr__grain {
+  height: calc(var(--tpr-sky-h) * 100%);
+  background: var(--tpr-grain) 0 0 / calc(640 * var(--tpr-u)) calc(120 * var(--tpr-u));
+}
+.tpr__paper {
+  background: var(--tpr-paper) 0 0 / calc(128 * var(--tpr-u)) calc(128 * var(--tpr-u));
+  will-change: transform;
+}
+/* A layer as drawn: for the moment it is measured, or when it cannot
+   be lifted. */
+.tpr__layer > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* A layer lifted (plan 208, print/liftPrint.js): a stack in the print's
+   units, zoomed to the frame, so every length the print's motion is
+   written in holds. Each moving part is a box with no size of its own,
+   at the print's corner, that the compositor turns about its pivot;
+   each still run an SVG set on what it draws. */
+.tpr-lift__root {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--tpr-w) * 1px);
+  height: calc(var(--tpr-h) * 1px);
+  zoom: var(--tpr-zoom);
+}
+.tpr-lift,
+.tpr-lift__run { position: absolute; left: 0; top: 0; }
+.tpr-lift { width: 0; height: 0; }
+.tpr__layer,
+.tpr__grain,
+.tpr__rail,
+.tpr__paper { animation: tpr-in 0.5s ease-out both; }
+@keyframes tpr-in { from { opacity: 0; } }
+/* The train on its own layer, carried across by the compositor at an
+   even pace and out of the print (its run and time are the print's
+   own: TodayPrint). */
+.tpr__rail { overflow: hidden; }
+.tpr__train {
+  overflow: visible;
+  will-change: transform;
+  animation-name: tpr-cross;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes tpr-cross { from { transform: translateX(0); } to { transform: translateX(var(--tpr-run)); } }
+
+/* What the gate places on the print: centred on its place, rising in
+   once as the print's disc does. */
+.tdy-hero--print { display: block; pointer-events: none; }
+.tpr-at {
+  position: absolute;
+  left: calc(var(--tpr-x) + var(--at-x) * var(--tpr-u));
+  top: calc(var(--tpr-y) + var(--at-y) * var(--tpr-u));
+  margin: 0;
+  translate: -50% -50%;
+  animation: tpr-rise 1.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.tpr-at--top { translate: -50% 0; }
+@keyframes tpr-rise { from { opacity: 0; transform: translateY(16px); } }
+
+/* The dial as the hour's disc (TodayDial, PrintDial): drawn in the
+   print's units, its glow breathing (a sheet of its own, so the
+   compositor breathes it), its halo glowing at dawn, dusk and night. */
+.tdy-dial--print { width: calc(var(--dial-units) * var(--tpr-u)); }
+.tdy-dial__disc,
+.tdy-dial__glow { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.tdy-dial__glow { animation: tpr-breathe 7s ease-in-out infinite alternate; }
+@keyframes tpr-breathe { from { opacity: 0.8; transform: scale(0.985); } to { opacity: 1; transform: scale(1.035); } }
+.tdy-dial__halo { opacity: var(--ho, 0); animation: tpr-halo 5.5s ease-in-out infinite alternate; }
+@keyframes tpr-halo { to { opacity: calc(var(--ho, 0) * 0.55); } }
+.tdy-dial--print .tdy-dial__fare-wait { stroke: var(--tpr-fare); stroke-opacity: 0.38; stroke-linecap: round; }
+.tdy-dial--print .tdy-dial__fare-ride { stroke: var(--tpr-fare); stroke-opacity: 0.78; }
+.tdy-dial--print .tdy-dial__fare-end { fill: var(--tpr-fare); }
+/* The count in the disc, in the hour's two golds (or the dawn sun's
+   cream); what it is under it. */
+.tdy-dial--print .tdy-dial__count {
+  background: linear-gradient(180deg, var(--tpr-count-a) 0%, var(--tpr-count-b) 100%);
+  background-clip: text;
+  color: transparent;
+}
+.tdy-dial--print .tdy-dial__unit { line-height: 1.2; color: var(--tpr-disc-soft); }
+/* A day with nothing reviewed and nothing due: no seal, the hour's own
+   disc saying so, in the count's golds. */
+.tdy-dial--print .tdy-dial__clear {
+  background: linear-gradient(180deg, var(--tpr-count-a) 0%, var(--tpr-count-b) 100%);
+  background-clip: text;
+  color: transparent;
+}
+/* 白文 — a cleared day's seal as the disc (TodayDial's CutSeal, plan
+   206): a disc of the seal's red, its rings and characters left in the
+   slip's paper, in the kit's rungs (dayclear/kit/Seal.jsx). At dawn
+   the face takes the sun's own red, inline. */
+.tdy-dial__seal-face { fill: var(--tpr-seal); }
+.tdy-dial__seal-cut { fill: none; stroke: var(--tpr-washi); }
+.tdy-dial__seal-band { fill: var(--tpr-washi); }
+.tdy-dial__seal text { fill: var(--tpr-washi); text-anchor: middle; dominant-baseline: central; }
+.tdy-dial__seal-top { font-family: var(--font-jp); font-size: var(--fs-sm); font-weight: 700; letter-spacing: var(--tr-reading); }
+.tdy-dial__seal-day { font-family: var(--font-serif); font-size: var(--fs-specimen-word); font-weight: 900; }
+.tdy-dial__seal-foot {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-name);
+  font-variant-numeric: tabular-nums;
+}
+/* The guide's mark (today.gate): the dial's rings, not its glow. */
+.tdy-dial__gate {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--dial-ring) * 100%);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+}
+/* Under the rings: the minutes and the hour they end, on one line (or,
+   on a cleared day, what the day reviewed: .tdy-recap). */
+.tdy-dial__line {
+  white-space: nowrap;
+  font-size: var(--fs-sm);
+  color: var(--tpr-soft);
+  font-variant-numeric: tabular-nums;
+}
+.tdy-dial__line b {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  font-weight: 700;
+  color: var(--tpr-ink);
+}
+.tdy-dial__line .tdy-dial__end { color: inherit; }
+/* The legend, set on the sky in the hour's inks. */
+.tdy--print .tdy-key { flex-wrap: nowrap; white-space: nowrap; line-height: 1.35; color: var(--tpr-soft); }
+/* :where() keeps the base rule's weight (it wins by coming later): a
+   heavier `… b` here would put every later `… b` in the sheet below it
+   (no-descending-specificity). The door's figure below does the same. */
+:where(.tdy--print) .tdy-key b { color: var(--tpr-ink); }
+.tdy--print .tdy-key__ride { background: var(--tpr-ink); }
+.tdy--print .tdy-key__wait { border-top-color: color-mix(in srgb, var(--tpr-ink) 55%, transparent); }
+
+/* The title slip (題箋): the day, and the hour's view in the print's
+   vermilion, down the print's right edge. */
+.tpr-title {
+  position: absolute;
+  top: var(--sp-5);
+  right: var(--sp-5);
+  z-index: 1;
+  margin: 0;
+  writing-mode: vertical-rl;
+  inline-size: max-content;
+  padding: var(--sp-3) var(--sp-1);
+  background: var(--tpr-washi);
+  color: var(--tpr-sumi);
+  border: 1px solid var(--tpr-sumi);
+  box-shadow: inset 0 0 0 2px var(--tpr-washi), inset 0 0 0 3px var(--tpr-shu);
+  font-family: var(--font-serif);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: var(--tr-term);
+}
+.tpr-title__view { margin-inline-start: var(--sp-2); font-weight: 900; color: var(--tpr-shu); }
+
+/* At the thumb, over the print's foreground: the row on a sumi glass
+   (its panel inks, in both themes), the gate as it is, and no fade of
+   the page's ground behind them. */
+.tdy--print .tdy__foot { border-image: none; }
+/* The air gives way first, down to the room the lines under the dial
+   take: a screen shorter than that scrolls rather than set the row
+   over the legend. */
+.tdy--phone.tdy--print .tdy__air { min-height: calc(var(--tpr-room) * var(--tpr-u) - var(--sp-6)); }
+.tdy--print .tdy-door {
+  border-color: var(--surface-line);
+  background: color-mix(in srgb, var(--bg-panel) 82%, transparent);
+  color: var(--text-on-panel-soft);
+}
+:where(.tdy--print) .tdy-door__what b,
+.tdy--print .tdy-door__go { color: var(--text-on-panel); }
+/* A cleared day (plan 206): its week of stamps set on the sky, the
+   kit's slots (WeekStamps) in the seal's red, their weekdays in the
+   hour's ink; tomorrow's row on the door's glass. The shut gate's own
+   glass is written with the gate's rules (.btn-depart--gate:disabled). */
+.tdy--print .tdy-rally {
+  width: max-content;
+  --stamp-ink: var(--tpr-seal);
+  --stamp-glyph: var(--tpr-ink);
+  --slot-ink: var(--tpr-ink);
+}
+.tdy--print .tdy-rally__n { color: var(--tpr-soft); }
+:where(.tdy--print) .tdy-rally__n b { color: var(--tpr-ink); }
+.tdy--print .tdy-next {
+  border-color: var(--surface-line);
+  background: color-mix(in srgb, var(--bg-panel) 82%, transparent);
+  color: var(--text-on-panel);
+}
+:where(.tdy--print) .tdy-next__n small,
+.tdy--print .tdy-next__min { color: var(--text-on-panel-soft); }
+
+/* The print's moving parts (the classes the print's build writes,
+   scripts/today-print/build.py): slowly and by little, transform and
+   opacity only. */
+.tpr-bird-arm { transform-box: view-box; transform-origin: 0 0; animation-duration: var(--beat, 1s); animation-delay: var(--ph, 0s); animation-iteration-count: infinite; animation-name: tpr-bird-fold; animation-timing-function: linear; }
+.tpr-bird-arm--far { animation-name: tpr-bird-fold-far; }
+.tpr-bird-arm--glide { animation-name: tpr-bird-fold-glide; }
+.tpr-bird-garm { transform-box: view-box; transform-origin: 0 0; animation-delay: var(--ph, 0s); animation-iteration-count: infinite; animation-name: tpr-bird-gull-arm; animation-timing-function: ease-in-out; animation-duration: calc(var(--beat, 1s) * 9); }
+.tpr-bird-garm--l { scale: 1 1; animation-name: tpr-bird-gull-arm-l; }
+.tpr-bird-garm--r { scale: 1 1; }
+.tpr-bird-ghand { transform-box: view-box; transform-origin: 0 0; animation-delay: var(--ph, 0s); animation-iteration-count: infinite; animation-name: tpr-bird-gull-hand; animation-timing-function: ease-in-out; animation-duration: calc(var(--beat, 1s) * 9); }
+.tpr-bird-ghand--l { animation-name: tpr-bird-gull-hand-l; }
+.tpr-bird-hand { transform-box: view-box; transform-origin: 0 0; animation-duration: var(--beat, 1s); animation-iteration-count: infinite; animation-name: tpr-bird-bend; animation-timing-function: ease-in-out; animation-delay: calc(var(--ph, 0s) - var(--beat, 1s) * 0.12); }
+.tpr-bird-hand--glide { animation-name: tpr-bird-bend-glide; }
+.tpr-bird-heave { transform-box: view-box; transform-origin: 0 0; animation-duration: var(--beat, 1s); animation-delay: var(--ph, 0s); animation-iteration-count: infinite; animation-name: tpr-bird-heave; animation-timing-function: ease-in-out; }
+.tpr-bird-heave--glide { animation-name: tpr-bird-heave-glide; }
+.tpr-flare { transform-box: fill-box; transform-origin: center; animation-name: tpr-flare; animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate; }
+.tpr-lamp { animation-name: tpr-lamp; animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate; }
+.tpr-meteor { opacity: 0; animation: tpr-meteor 11s linear infinite; }
+.tpr-star { opacity: var(--o, 1); animation-name: tpr-star-twinkle; animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate; }
+.tpr-bank { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: fill-box; transform-origin: center; animation-name: tpr-bank; animation-direction: alternate; }
+.tpr-cloud { animation-iteration-count: infinite; animation-name: tpr-cloud; animation-timing-function: linear; }
+.tpr-drift { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-drift-x; animation-direction: alternate; }
+.tpr-fall { animation-iteration-count: infinite; opacity: 0; animation-name: tpr-fall; animation-timing-function: linear; }
+.tpr-flock { animation-iteration-count: infinite; animation-name: tpr-flock; animation-timing-function: linear; }
+.tpr-flutter { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: view-box; animation-name: tpr-flutter; animation-direction: alternate; }
+.tpr-gust { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: view-box; animation-name: tpr-gust; }
+.tpr-heave { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-heave; animation-direction: alternate; }
+.tpr-keep { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-keep; animation-direction: alternate; }
+.tpr-nod { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: fill-box; transform-origin: center; animation-name: tpr-nod; animation-direction: alternate; }
+.tpr-pitch { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: fill-box; transform-origin: 50% 100%; animation-name: tpr-pitch; animation-direction: alternate; }
+.tpr-rise { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-rise-y; animation-direction: alternate; }
+.tpr-spin { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: fill-box; transform-origin: center; animation-name: tpr-spin; }
+.tpr-stretch { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: fill-box; transform-origin: center; animation-name: tpr-stretch; animation-direction: alternate; }
+.tpr-sweep-x { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-sweep-x; animation-direction: alternate; }
+.tpr-sweep-y { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-sweep-y; animation-direction: alternate; }
+.tpr-swing { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-swing; animation-direction: alternate; }
+.tpr-tilt { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: fill-box; transform-origin: center; animation-name: tpr-tilt; animation-direction: alternate; }
+.tpr-tilt--cranes { animation-direction: alternate-reverse; }
+.tpr-undulate { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-undulate; animation-direction: alternate; }
+.tpr-wake { animation-iteration-count: infinite; animation-timing-function: ease-in-out; opacity: 0.2; animation-name: tpr-wake; animation-direction: alternate; }
+.tpr-fog { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-fog; animation-direction: alternate; }
+.tpr-fog-breathe { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: fill-box; transform-origin: center; animation-name: tpr-fog-breathe; animation-direction: alternate; }
+.tpr-glint { animation-iteration-count: infinite; animation-timing-function: ease-in-out; opacity: 0; animation-name: tpr-glint; }
+.tpr-lap { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-lap; animation-direction: alternate; }
+.tpr-puff { animation-iteration-count: infinite; opacity: 0; transform-box: fill-box; transform-origin: center; animation-name: tpr-puff; animation-timing-function: ease-out; }
+.tpr-ripple { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-ripple; animation-direction: alternate; }
+.tpr-road { animation-iteration-count: infinite; animation-timing-function: ease-in-out; opacity: var(--o, 1); animation-name: tpr-road; animation-direction: alternate; }
+.tpr-row { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-row; animation-direction: alternate; }
+.tpr-twinkle { animation-iteration-count: infinite; animation-timing-function: ease-in-out; opacity: var(--o, 1); animation-name: tpr-twinkle; animation-direction: alternate; }
+.tpr-flame { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: fill-box; transform-origin: 50% 100%; animation-name: tpr-flame; animation-direction: alternate; }
+.tpr-lean { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: view-box; animation-name: tpr-lean; }
+.tpr-sail { transform-box: fill-box; transform-origin: 50% 0; animation: tpr-sail 5.3s ease-in-out infinite alternate; }
+.tpr-scull { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: view-box; animation-name: tpr-scull; }
+.tpr-spark { animation-iteration-count: infinite; opacity: 0; animation-name: tpr-spark; animation-timing-function: ease-out; }
+.tpr-glitter { opacity: 0; animation-name: tpr-glitter; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+@keyframes tpr-bird-bend { 0%, 100% { rotate: 14deg; } 42% { rotate: -22deg; } }
+@keyframes tpr-bird-bend-glide { 0%, 40%, 100% { rotate: 12deg; } 18%, 58% { rotate: -20deg; } 80% { rotate: 4deg; } }
+@keyframes tpr-bird-fold { 0% { scale: 1 1; animation-timing-function: cubic-bezier(0.55, 0, 0.7, 0.4); }
+  42% { scale: 1 -0.86; animation-timing-function: cubic-bezier(0.3, 0.5, 0.5, 1); }
+  100% { scale: 1 1; } }
+@keyframes tpr-bird-fold-far { 0% { scale: 1 0.82; animation-timing-function: cubic-bezier(0.55, 0, 0.7, 0.4); }
+  42% { scale: 1 -0.62; animation-timing-function: cubic-bezier(0.3, 0.5, 0.5, 1); }
+  100% { scale: 1 0.82; } }
+@keyframes tpr-bird-fold-glide { 0% { scale: 1 1; animation-timing-function: cubic-bezier(0.55, 0, 0.7, 0.4); }
+  18% { scale: 1 -0.8; animation-timing-function: cubic-bezier(0.3, 0.5, 0.5, 1); }
+  40% { scale: 1 1; animation-timing-function: cubic-bezier(0.55, 0, 0.7, 0.4); }
+  58% { scale: 1 -0.8; animation-timing-function: cubic-bezier(0.3, 0.5, 0.5, 1); }
+  80% { scale: 1 0.55; }
+  100% { scale: 1 1; } }
+@keyframes tpr-bird-gull-arm { 0%, 62%, 100% { rotate: 0deg; }
+  68% { rotate: -26deg; } 74% { rotate: 22deg; } 80% { rotate: -24deg; } 86% { rotate: 20deg; } 92% { rotate: -6deg; } }
+@keyframes tpr-bird-gull-arm-l { 0%, 62%, 100% { rotate: 0deg; }
+  68% { rotate: 26deg; } 74% { rotate: -22deg; } 80% { rotate: 24deg; } 86% { rotate: -20deg; } 92% { rotate: 6deg; } }
+@keyframes tpr-bird-gull-hand { 0%, 62%, 100% { rotate: 0deg; } 70% { rotate: 14deg; } 76% { rotate: -16deg; } 82% { rotate: 14deg; } 88% { rotate: -12deg; } }
+@keyframes tpr-bird-gull-hand-l { 0%, 62%, 100% { rotate: 0deg; } 70% { rotate: -14deg; } 76% { rotate: 16deg; } 82% { rotate: -14deg; } 88% { rotate: 12deg; } }
+@keyframes tpr-bird-heave { 0%, 100% { translate: 0 0.5px; } 30% { translate: 0 -0.7px; } }
+@keyframes tpr-bird-heave-glide { 0%, 40%, 100% { translate: 0 0.6px; } 14%, 54% { translate: 0 -0.9px; } 80% { translate: 0 0.2px; } }
+@keyframes tpr-flare { 0% { opacity: 0.72; scale: 0.9; } 40% { opacity: 1; scale: 1.08; } 70% { opacity: 0.8; scale: 0.96; } 100% { opacity: 0.95; scale: 1.03; } }
+@keyframes tpr-lamp { to { opacity: 0.3; } }
+@keyframes tpr-meteor { 0%, 80% { opacity: 0; translate: 0 0; } 82% { opacity: 1; } 90% { opacity: 0; translate: 150px 0; } 100% { opacity: 0; translate: 150px 0; } }
+@keyframes tpr-star-twinkle { to { opacity: calc(var(--o, 1) * 0.2); } }
+@keyframes tpr-bank { from { rotate: -15deg; } to { rotate: 15deg; } }
+@keyframes tpr-cloud { from { translate: var(--a, 0%) 0; } to { translate: var(--b, 0%) 0; } }
+@keyframes tpr-drift-x { from { translate: 0 0; } to { translate: var(--dx, 0%) 0; } }
+@keyframes tpr-fall { 0% { opacity: 0; translate: 0 0; } 8% { opacity: 0.95; } 86% { opacity: 0.95; } 100% { opacity: 0; translate: var(--dx, 0%) var(--dy, 0%); } }
+@keyframes tpr-flock { 0% { translate: var(--x0, 0%) var(--y0, 0%); opacity: 0; } 6% { opacity: 1; } 94% { opacity: 1; } 100% { translate: var(--x1, 0%) var(--y1, 0%); opacity: 0; } }
+@keyframes tpr-flutter { from { rotate: -3deg; } to { rotate: 4deg; } }
+@keyframes tpr-gust { 0%, 100% { rotate: calc(var(--a, 0deg) * -0.35); }
+  26% { rotate: var(--a, 0deg); }
+  44% { rotate: calc(var(--a, 0deg) * 0.1); }
+  60% { rotate: calc(var(--a, 0deg) * 0.5); }
+  78% { rotate: calc(var(--a, 0deg) * -0.2); } }
+@keyframes tpr-heave { from { translate: 0 -0.6px; } to { translate: 0 0.8px; } }
+@keyframes tpr-keep { from { translate: calc(var(--kx, 0%) * -1) calc(var(--ky, 0%) * -1); } to { translate: var(--kx, 0%) var(--ky, 0%); } }
+@keyframes tpr-nod { from { rotate: -7deg; } to { rotate: 9deg; } }
+@keyframes tpr-pitch { from { rotate: -2.6deg; } to { rotate: 2.2deg; } }
+@keyframes tpr-rise-y { from { translate: 0 -1.3px; } to { translate: 0 1.3px; } }
+@keyframes tpr-spin { 0%, 100% { scale: 1 1; } 50% { scale: -0.9 1; } }
+@keyframes tpr-stretch { from { scale: 0.985 1; } to { scale: 1.04 0.97; } }
+@keyframes tpr-sweep-x { from { translate: calc(var(--rx, 0%) * -1) 0; } to { translate: var(--rx, 0%) 0; } }
+@keyframes tpr-sweep-y { from { translate: 0 calc(var(--ry, 0%) * -1); } to { translate: 0 var(--ry, 0%); } }
+@keyframes tpr-swing { 0% { translate: -13px -3px; rotate: -34deg; }
+  50% { translate: 0 2px; rotate: 0deg; }
+  100% { translate: 13px -3px; rotate: 34deg; } }
+@keyframes tpr-tilt { from { rotate: -2.5deg; } to { rotate: 2.5deg; } }
+@keyframes tpr-undulate { from { translate: 0 calc(var(--u, 0%) * -1); } to { translate: 0 var(--u, 0%); } }
+@keyframes tpr-wake { to { opacity: 0.85; } }
+@keyframes tpr-fog { from { translate: calc(var(--fx, 0%) * -1) 0; } to { translate: var(--fx, 0%) 0; } }
+@keyframes tpr-fog-breathe { from { opacity: 0.75; scale: 0.97 1.08; } to { opacity: 1; scale: 1.04 0.9; } }
+@keyframes tpr-glint { 0% { opacity: 0; translate: -3px 0; } 45% { opacity: 0.75; } 100% { opacity: 0; translate: 4px 0; } }
+@keyframes tpr-lap { from { opacity: 0.45; translate: 0 -0.4px; } to { opacity: 1; translate: 0 0.3px; } }
+@keyframes tpr-puff { 0% { opacity: 0; translate: 0 0; scale: 0.5; } 14% { opacity: 0.4; } 60% { opacity: 0.22; } 100% { opacity: 0; translate: 18px -30px; scale: 3.4 2; } }
+@keyframes tpr-ripple { from { translate: calc(var(--r, 0%) * -1) 0; } to { translate: var(--r, 0%) 0; } }
+@keyframes tpr-road { from { translate: calc(var(--w, 0%) * -1) 0; } to { translate: var(--w, 0%) 0; } }
+@keyframes tpr-row { from { translate: calc(var(--d, 0%) * -1) 0; } to { translate: var(--d, 0%) 0; } }
+@keyframes tpr-twinkle { from { opacity: var(--o, 1); } to { opacity: calc(var(--o, 1) * 0.25); } }
+@keyframes tpr-flame { 0% { scale: 0.86 0.8; opacity: 0.85; } 45% { scale: 1.05 1.14; opacity: 1; } 100% { scale: 0.95 0.94; opacity: 0.92; } }
+@keyframes tpr-lean { 0%, 100% { rotate: -4deg; } 50% { rotate: 5deg; } }
+@keyframes tpr-sail { from { scale: 0.98 1; } to { scale: 1.035 1.01; } }
+@keyframes tpr-scull { 0%, 100% { rotate: -5deg; } 50% { rotate: 6deg; } }
+@keyframes tpr-spark { 0% { opacity: 0; translate: 0 0; } 15% { opacity: 1; } 100% { opacity: 0; translate: 1.6px -7px; } }
+@keyframes tpr-glitter { 0%, 50%, 100% { opacity: 0; } 68% { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  /* The still print: the moving parts at rest, the train halfway
+     across, a flock where its flight is halfway, the glints lit. */
+  .tpr [class*="tpr-"],
+  .tpr__layer,
+  .tpr__grain,
+  .tpr__rail,
+  .tpr__paper,
+  .tpr-at,
+  .tdy-dial__glow,
+  .tdy-dial__halo { animation: none; }
+  .tpr__train { animation: none; transform: translateX(calc(var(--tpr-run) * 0.45)); }
+  .tpr-flock { translate: var(--xm, 0%) var(--ym, 0%); }
+  .tpr-glint { opacity: 0.4; }
+  .tpr-glitter { opacity: 0.6; }
+  .tpr-puff { opacity: 0.25; }
+}
+
 /* The screen's one filled action. Gold, because Today is gold — and
    gold follows its own standing ruling, not .btn-primary's: the 60%
    mix toward the panel carrying the LIGHT ink is what the Today
@@ -9872,9 +10034,30 @@ textarea:focus-visible {
   border-radius: var(--r-pill);
   background: var(--surface);
   color: var(--text-on-fill);
-  box-shadow: none;
-  animation: btn-gate-breathe 2.8s ease-in-out infinite;
+  box-shadow: var(--gate-halo-rest);
   transition: transform 0.15s ease, color 270ms ease;
+  --gate-halo-rest: 0 6px 18px color-mix(in srgb, var(--gate-gold) 35%, transparent);
+}
+/* The halo's breath. It used to animate the button's own box-shadow,
+   which repaints the whole blurred shadow every frame for as long as
+   the gate is on screen -- and on a phone the gate never leaves it.
+   The rest halo is now the button's still shadow and the breath's
+   peak a layer under the fill (::after) whose opacity alone moves, so
+   the compositor plays it and the main thread is left to the screen.
+   The peak's glow is drawn lighter than the old 55% because it stacks
+   on the rest halo instead of replacing it. */
+.btn-depart--gate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 9px color-mix(in srgb, var(--gate-gold) 16%, transparent),
+    0 8px 28px color-mix(in srgb, var(--gate-gold) 40%, transparent);
+  opacity: 0;
+  animation: btn-gate-breathe 2.8s ease-in-out infinite;
 }
 .btn-depart--gate::before {
   content: "";
@@ -9923,12 +10106,13 @@ textarea:focus-visible {
 }
 .btn-depart__rip + .btn-depart__rip { animation-delay: 1.1s; }
 .btn-depart--gate:hover,
-.btn-depart--gate:focus-visible { transform: translateY(-2px); box-shadow: none; }
+.btn-depart--gate:focus-visible { transform: translateY(-2px); box-shadow: var(--gate-halo-rest); }
 .btn-depart--gate:active {
   transform: translateY(1px) scale(0.99);
-  animation: none;
   box-shadow: inset 0 2px 5px color-mix(in srgb, var(--bg-panel) 45%, transparent);
 }
+.btn-depart--gate:active::after,
+.btn-depart--gate:disabled::after { animation: none; opacity: 0; }
 .btn-depart--gate:active .btn-depart__reader { background: var(--text-on-panel); color: var(--text-on-fill); }
 /* The idle nudge: an action ready and not taken for four seconds, the
    reader steps toward the way on twice and rests. Never on the outline
@@ -9943,6 +10127,14 @@ textarea:focus-visible {
   animation: none;
 }
 .btn-depart--gate:disabled::before { opacity: 0; }
+/* On the print (plan 206) the shut gate stands on the sumi glass its
+   row does, in the panel's inks, in either theme: the print's bank
+   under a bare outline read as a hole in the screen. At the rule's own
+   weight, after it, so no later gate rule reads as lighter. */
+:where(.tdy--print) .btn-depart--gate:disabled {
+  color: var(--text-on-panel-soft);
+  background: color-mix(in srgb, var(--bg-panel) 82%, transparent);
+}
 .btn-depart--gate:disabled .btn-depart__reader {
   background: transparent;
   color: var(--text-secondary);
@@ -9951,11 +10143,11 @@ textarea:focus-visible {
 .btn-depart--gate:disabled .btn-depart__rip { display: none; }
 /* The wake: set by Continue for the one render after a pick enables it. */
 .btn-depart--waking {
-  animation: btn-gate-wake 540ms ease-out, btn-gate-breathe 2.8s ease-in-out infinite;
+  animation: btn-gate-wake 540ms ease-out;
 }
 @keyframes btn-gate-breathe {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--gate-gold) 0%, transparent), 0 6px 18px color-mix(in srgb, var(--gate-gold) 35%, transparent); }
-  50% { box-shadow: 0 0 0 9px color-mix(in srgb, var(--gate-gold) 16%, transparent), 0 8px 28px color-mix(in srgb, var(--gate-gold) 55%, transparent); }
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
 }
 @keyframes btn-gate-rip {
   from { transform: scale(1); opacity: 0.8; }
@@ -9974,9 +10166,10 @@ textarea:focus-visible {
    movement: no breath, no ripples, no nudge, no pop. */
 @media (prefers-reduced-motion: reduce) {
   .btn-depart--gate,
+  .btn-depart--gate::after,
   .btn-depart--waking,
   .btn-depart--gate .btn-depart__reader { animation: none; }
-  .btn-depart--gate { transition: color 270ms ease; }
+  .btn-depart--gate { transition: color 270ms ease; box-shadow: none; }
   .btn-depart--gate:hover,
   .btn-depart--gate:focus-visible,
   .btn-depart--gate:active { transform: none; }
@@ -12014,11 +12207,8 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-size: var(--fs-lead);
 }
 /* The action under it takes a bigger box than the family's default.
-   The rule is NOT here: `form.stage__foot > .btn-primary` outranks
-   `.exam-nav .btn-primary`, declared further down, so stylelint's
-   no-descending-specificity is right that it has to follow it. It
-   lives in the compound group at the end of the file -- search
-   `form.stage__foot`. */
+   The rule is NOT here: it lives in the compound group at the end of
+   the file -- search `form.stage__foot`. */
 
 /* ── The practice sessions (canvas Reading / Comprehension /
    Translation / ComprehensionResult, plan 072) ──
@@ -13218,16 +13408,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   grid-auto-columns: minmax(0, 1fr);
   gap: var(--sp-3);
 }
-/* The exam's way through the paper (canvas ExamRunner): the two
-   buttons either side of the flag drop to the small rung. Declared
-   here, after the button family, not in the exam section at the top
-   of the file: a compound must follow the plain selector it overrides. */
-.exam-nav .btn-secondary,
-.exam-nav .btn-primary {
-  min-height: 44px;
-  padding-inline: var(--sp-4);
-  font-size: var(--fs-sm);
-}
 /* A line of help under a title or in a sheet. */
 .hint {
   margin: 0;
@@ -13793,10 +13973,11 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    layered on top via a second, shorter-period animation so the climb
    reads as drifting smoke/spark rather than a scripted straight
    line. Combined with ember-rise via multiple animation-name entries
-   in .ember below. */
+   in .ember below. On `translate`, which adds to ember-rise's
+   transform: it was margin-left, a layout pass per ember per frame. */
 @keyframes ember-sway {
-  0%, 100% { margin-left: 0; }
-  50%      { margin-left: var(--ember-sway, 6px); }
+  0%, 100% { translate: 0 0; }
+  50%      { translate: var(--ember-sway, 6px) 0; }
 }
 .ember {
   animation-name: ember-rise, ember-sway;
@@ -14324,48 +14505,65 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
       own verdict ink (--rating-correct, --rating-perfect), lit from the
       top, a check where the pill was. Correct is the answer pressed most,
       so it is the widest target on the bar and the one thing in colour.
-      Not gold: gold is still the action's metal. */
+      Not gold: gold is still the action's metal.
+
+   7. EVERY VERDICT A KEY (plan 203, 券売機, the owner's pick G of the
+      canvas "Tsuji — the rating bar, new directions", over a ticket, two
+      tiers and bare words): the instrument and the key beside it read as
+      two widgets of two makes, the key's glow as neon on the quiet
+      sumi. So every verdict is a key of the one make, as on a ticket
+      machine's panel: raised off the sumi on a foot of its own material
+      (--key-foot), a gap apart, and a press travels down the foot. A
+      miss is a dark key with a lamp in its verdict's ink, dimmed at rest
+      and lit when pressed; a pass is the same key moulded in its own ink
+      (Correct's is 新橋 since this plan), half again as wide, and no
+      longer glows. Each key carries its own sumi, so the bar reads on
+      paper (the desk's light frame) as well as on the dock. */
 .rating-bar__buttons {
+  /* The key's face and its foot, shared by every miss (and the desk's
+     unlit pass, which is drawn as a miss until the reveal): the panel
+     ink lifted off the sumi, a shade lighter at the top, and the foot a
+     shade under the sumi. Declared here so the pass can override the
+     face alone and the unlit pass take it back. */
+  --key-face: linear-gradient(180deg, color-mix(in srgb, var(--text-on-panel) 10%, var(--bg-panel)) 0%, color-mix(in srgb, var(--text-on-panel) 6%, var(--bg-panel)) 100%);
+  --key-face-lift: linear-gradient(180deg, color-mix(in srgb, var(--text-on-panel) 14%, var(--bg-panel)) 0%, color-mix(in srgb, var(--text-on-panel) 9%, var(--bg-panel)) 100%);
+  --key-sole: color-mix(in srgb, var(--bg-panel) 40%, #000);
+  /* How far a press travels: the whole foot, or nothing under reduced
+     motion (the end of this block), where the lamp alone answers. */
+  --key-travel: var(--key-foot);
   display: flex;
   gap: var(--sp-3);
   max-width: 640px;
   margin: 0 auto;
+  /* The foot is drawn under the key, so the row keeps room for it:
+     the key's box is the hit target less its foot, the row the full
+     64px a run's slot reserves (.drawing-quiz__actions). */
+  padding-bottom: var(--key-foot);
 }
-/* The misses: the one instrument. Its hairline is an inset outline,
-   not a border: it takes no height (a run's column is measured to the
-   pixel on a laptop) and it paints over a washed segment's corner. */
-.rating-bar__misses {
-  display: flex;
-  flex: 3 1 0;
-  gap: 0;
-  min-width: 0;
-  overflow: hidden;
-  /* Its own sumi (plan 185). The words are the panel's inks, which
-     only read on sumi; the ground had been the wrapper's -- the
-     phone's dock, the desk floor's frame -- and the frame is
-     --surface, paper in the light theme, where the misses' words
-     stood at about 1.3:1. On the dock this is the dock's own ink. */
-  background: var(--bg-panel);
-  outline: 1px solid color-mix(in srgb, var(--text-on-panel) 14%, transparent);
-  outline-offset: -1px;
-  border-radius: var(--r-panel);
-}
-/* The passes: a key each, a gap apart. Each count says its share: the
-   four's Correct half again as wide as a miss, the two's pair equal
-   (a binary rating wants the biggest, least ambiguous targets), the
-   six's two keys beside four misses. */
+/* The misses and the passes: two groups of the same keys, kept apart
+   in the DOM because the six wraps between them on a phone. No ground
+   of their own: each key carries its sumi. */
+.rating-bar__misses,
 .rating-bar__keys {
   display: flex;
-  flex: 1.5 1 0;
-  gap: var(--sp-2);
+  gap: var(--sp-3);
   min-width: 0;
 }
+.rating-bar__misses { flex: 3 1 0; }
+/* Each count says its share: the four's Correct half again as wide as
+   a miss, the two's pair equal (a binary rating wants the biggest,
+   least ambiguous targets), the six's two keys beside four misses. */
+.rating-bar__keys { flex: 1.5 1 0; }
 .rating-bar__buttons--2 > .rating-bar__misses,
 .rating-bar__buttons--2 > .rating-bar__keys { flex: 1 1 0; }
 .rating-bar__buttons--6 > .rating-bar__misses { flex: 4 1 0; }
 .rating-bar__buttons--6 > .rating-bar__keys { flex: 2.4 1 0; }
 
 .rating-bar__btn {
+  /* The top's light and the foot's ink, per key: a pass reads them in
+     its own ink (below). */
+  --key-light: color-mix(in srgb, var(--text-on-panel) 8%, transparent);
+  --key-foot-ink: var(--key-sole);
   display: flex;
   flex: 1 1 0;
   min-width: 0; /* flex items refuse to shrink below their text's intrinsic
@@ -14374,88 +14572,78 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--sp-2);
-  min-height: 64px; /* a hit target, not a spacing rung -- the one literal this block keeps.
+  gap: var(--sp-3);
+  min-height: calc(64px - var(--key-foot)); /* a hit target, not a spacing rung -- the one literal this block keeps.
                        64, not 56: the tiles are the whole verdict and they are
                        pressed with a thumb at the bottom edge of a phone, so
-                       they get the extra rung rather than the minimum. */
+                       they get the extra rung rather than the minimum. The
+                       foot under the key makes up the 64. */
   padding: var(--sp-4) var(--sp-1);
-  background: transparent;
+  background: var(--key-face);
   border: 0;
-  border-left: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
-  border-radius: 0;
+  border-radius: var(--r-panel);
+  box-shadow:
+    inset 0 1px 0 var(--key-light),
+    0 var(--key-foot) 0 var(--key-foot-ink);
   color: var(--text-on-panel);
   text-align: center;
-  transition: background 0.15s ease;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.15s ease;
 }
-.rating-bar__btn:first-child { border-left: 0; }
 
 .rating-bar__btn:hover,
 .rating-bar__btn:focus-visible {
-  background: color-mix(in srgb, var(--rating-color, transparent) 14%, transparent);
+  background: var(--key-face-lift);
 }
 
-/* The mark. A pill in the rating's colour above each word (plan 174:
-   a dot until then), the run meter's segment at the bar's scale, nine
-   tenths strength at rest and full with a glow when that rating is
-   chosen -- the same gesture as pressing a hanko, and unlike a tint it
-   survives being glanced at. `flex: none` because a column flex item
-   shrinks to nothing next to a text run otherwise. */
-.rating-bar__btn-ring {
-  width: 26px;
-  height: 6px;
+/* The lamp. A round light in the rating's colour above each word (plan
+   203: a pill until then, a dot before that), dimmed into the sumi at
+   rest and lit with a glow when that rating is chosen -- the machine's
+   lamp coming on under the finger. `flex: none` because a column flex
+   item shrinks to nothing next to a text run otherwise. */
+.rating-bar__btn-lamp {
+  width: var(--sp-3);
+  height: var(--sp-3);
   border-radius: var(--r-pill);
-  border: 0;
-  background: var(--rating-color, var(--text-on-panel-soft));
-  opacity: 0.9;
+  background: color-mix(in srgb, var(--rating-color, var(--text-on-panel-soft)) 55%, var(--bg-panel));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rating-color, var(--text-on-panel-soft)) 85%, transparent);
   flex: none;
-  transition: opacity 0.15s ease, box-shadow 0.15s ease;
-}
-.rating-bar__btn:hover .rating-bar__btn-ring,
-.rating-bar__btn:focus-visible .rating-bar__btn-ring {
-  opacity: 1;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rating-color, transparent) 30%, transparent);
-}
-
-/* Pressed: the mark full and the segment washed, held for the moment
-   the bar takes to fade. Written at hover's own specificity so it
-   neither loses to it nor descends below it. */
-.rating-bar__btn.rating-bar__btn--pressed {
-  background: color-mix(in srgb, var(--rating-color, transparent) 20%, transparent);
-}
-.rating-bar__btn.rating-bar__btn--pressed .rating-bar__btn-ring {
-  opacity: 1;
-  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--rating-color, transparent) 70%, transparent);
-}
-
-/* The key (6, above): its verdict's ink as the fill, lit from the top
-   the way the metal is, the sumi type on it, a glow round it on the
-   bar's sumi. Hover and focus lift it; a press rings it in the panel
-   ink and widens the glow, held while the bar fades, as a segment's
-   press is. Written at the pressed rule's specificity so the segment's
-   wash never paints over the fill. */
-.rating-bar__btn.rating-bar__btn--key {
-  gap: var(--sp-1);
-  border: 0;
-  border-radius: var(--r-panel);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--rating-color) 78%, var(--text-on-panel)) 0%, var(--rating-color) 55%);
-  color: var(--text-on-fill);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--text-on-panel) 35%, transparent),
-    0 0 18px -4px color-mix(in srgb, var(--rating-color) 70%, transparent);
   transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.rating-bar__btn:hover .rating-bar__btn-lamp,
+.rating-bar__btn:focus-visible .rating-bar__btn-lamp {
+  background: var(--rating-color, var(--text-on-panel-soft));
+}
+
+/* Pressed: the key down its foot and the lamp lit, held for the moment
+   the bar takes to fade. Written at hover's own specificity so it
+   neither loses to it nor descends below it; a pass presses the same
+   way, its foot in its own ink. */
+.rating-bar__btn.rating-bar__btn--pressed {
+  transform: translateY(var(--key-travel));
+  box-shadow:
+    inset 0 1px 0 var(--key-light),
+    0 calc(var(--key-foot) - var(--key-travel)) 0 var(--key-foot-ink);
+}
+.rating-bar__btn.rating-bar__btn--pressed .rating-bar__btn-lamp {
+  background: var(--rating-color, var(--text-on-panel-soft));
+  box-shadow: 0 0 10px 2px color-mix(in srgb, var(--rating-color, transparent) 70%, transparent);
+}
+
+/* The pass (7, above): the same key moulded in its verdict's ink, lit
+   from the top the way the metal is, the sumi type on it, its foot the
+   ink a shade down. Hover lifts the ink toward the panel's. It sets no
+   travel or shadow of its own, only the inks they read, so the pressed
+   rule above moves it as it moves a miss. */
+.rating-bar__btn.rating-bar__btn--key {
+  --key-light: color-mix(in srgb, var(--text-on-panel) 35%, transparent);
+  --key-foot-ink: color-mix(in srgb, var(--rating-color) 40%, var(--key-sole));
+  gap: var(--sp-1);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--rating-color) 85%, var(--text-on-panel)) 0%, var(--rating-color) 100%);
+  color: var(--text-on-fill);
 }
 .rating-bar__btn.rating-bar__btn--key:hover,
 .rating-bar__btn.rating-bar__btn--key:focus-visible {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--rating-color) 65%, var(--text-on-panel)) 0%, color-mix(in srgb, var(--rating-color) 88%, var(--text-on-panel)) 60%);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--text-on-panel) 45%, transparent),
-    0 0 22px -2px color-mix(in srgb, var(--rating-color) 80%, transparent);
-}
-.rating-bar__btn.rating-bar__btn--key.rating-bar__btn--pressed {
-  box-shadow:
-    inset 0 0 0 2px var(--text-on-panel),
-    0 0 26px 4px color-mix(in srgb, var(--rating-color) 75%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--rating-color) 75%, var(--text-on-panel)) 0%, color-mix(in srgb, var(--rating-color) 92%, var(--text-on-panel)) 100%);
 }
 .rating-bar__btn-check { flex: none; }
 
@@ -14464,7 +14652,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-size: var(--fs-sm);
   font-weight: 700;
   /* Study.dc.html's .seg-word. Left at `normal` the label's own leading
-     pushed the ring off-centre against the segment's 64px box. */
+     pushed the mark above it off-centre against the key's box. */
   line-height: 1;
   overflow: hidden;
   white-space: nowrap;
@@ -14482,7 +14670,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    theme. See :root, above, for why this gets its own named colour. */
 .rating-bar__btn--q1 { --rating-color: var(--rating-wrong); }
 
-/* On a 375px phone this bar spans ~320px, so each segment is 53.3px --
+/* On a 375px phone this bar spans ~320px, so each of six is 53.3px --
    measured in the running app, not derived from the viewport, because the
    screen's own padding takes more than you would guess. The longest label
    is Blackout, NOT Difficile: 58px at --fs-sm and 50px at --fs-caption.
@@ -14493,21 +14681,21 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    hiding it is not either -- there is nothing behind it. If a longer
    locale string ever lands here, shorten the string rather than the type:
    --fs-caption-xs is a subtitle rung and is too small to carry a control
-   on its own. The 1px hairline between segments does the separating that
-   the padding used to. */
+   on its own. The gap between keys (plan 203; a 1px hairline before it)
+   does the separating that the padding used to. */
 
-/* Six segments across a phone is a squeeze at any width: at 375px each
+/* Six keys across a phone is a squeeze at any width: at 375px each
    is 54px, at 320px only 44px -- and Blackout alone needs 50px, so it
    truncates. Truncating is not available here, because the label IS the
-   control: the word carries the meaning and the ring only reinforces
-   it, so falling back to ring-only would leave colour as the sole
+   control: the word carries the meaning and the lamp only reinforces
+   it, so falling back to lamp-only would leave colour as the sole
    channel.
 
-   So below 560px the SIX wrap (plan 180): the four misses as the
-   instrument across a row, the two keys under it. Four and two stay on
-   one row: at 375px the four's misses are ~78px each, and the longest
-   word they carry (Difficile, ~62px at --fs-sm/700) fits; Correct's key
-   is half again as wide. One row is the shape a thumb sweeps along the
+   So below 560px the SIX wrap (plan 180): the four misses across a row,
+   the two passes under it. Four and two stay on one row: at 360px the
+   four's misses are 66px each and at 320px 57px, and the longest word
+   they carry (Presque, 51px at --fs-sm/700, measured in
+   RatingBar.phone.test.jsx) fits; Correct's key is half again as wide. One row is the shape a thumb sweeps along the
    bottom edge of a phone, worst to best, left to right — the same shape
    the bar has on a desktop, so nothing has to be relearnt between the
    two.
@@ -14522,14 +14710,23 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    inferred, because each count shares the row differently and
    nth-child cannot ask how many siblings there are. */
 @media (max-width: 560px) {
-  .rating-bar__btn { padding-inline: var(--sp-1); }
-  /* Six (plan 180): the four misses as the instrument across the row,
-     the two keys under them -- the passes on the bottom edge, nearest
-     the thumb, the bar still reading worst to best. Four and two stay
-     one row: the four's misses are ~78px at 375, room for Difficile. */
+  /* The whole key to the word (plan 203): the gaps between keys took
+     width the hairlines never did, and at 320px a miss is 57px, where
+     Presque (51px) lost two to a 4px side. The key's own edge does the
+     separating, so the padding goes. */
+  .rating-bar__btn { padding-inline: 0; }
+  /* Six (plan 180): the four misses across the row, the two passes
+     under them -- on the bottom edge, nearest the thumb, the bar still
+     reading worst to best. Four and two stay one row. */
   .rating-bar__buttons--6 { flex-wrap: wrap; }
   .rating-bar__buttons--6 > .rating-bar__misses,
   .rating-bar__buttons--6 > .rating-bar__keys { flex: 1 1 100%; }
+}
+/* No travel under reduced motion (plan 203): the key stays on its foot
+   and the lamp alone says which was pressed. */
+@media (prefers-reduced-motion: reduce) {
+  .rating-bar__buttons { --key-travel: calc(var(--key-foot) * 0); }
+  .rating-bar__btn { transition: background 0.15s ease; }
 }
 
 /* The mark (plan 158), in the page's ink: it wore --accent here, which
@@ -17780,7 +17977,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
      its own comment there for why) sets it, and an exception
      overrides --card-w rather than re-fighting max-width at a
      matching or higher specificity -- see
-     .prompt-card.drawing-quiz__card and .exam-card.prompt-card.
+     .prompt-card.drawing-quiz__card.
 
      width: 100% is load-bearing (see the identical note on
      .deck-progress, index.css:7830). Most modes reach this element
@@ -20384,6 +20581,14 @@ button.syllabary-cell:focus-visible {
    is the jolt you see as the doors open. Reserving the gutter costs
    nothing and removes the shift here, at the ticket gate, and behind
    every dialog in the app. */
+/* The gate's light on the gutter is html's alone: registered as not
+   inherited, so lending it and taking it back restyles html and not
+   every element under it (a whole page's style twice in each departure,
+   the print's thousands of shapes among them; plan 207). */
+@property --gate-ground {
+  syntax: '*';
+  inherits: false;
+}
 html {
   scrollbar-gutter: stable;
   /* The gutter's one cost: it is outside every fixed box, painted in
@@ -20529,7 +20734,9 @@ html {
     inset 0 1px 0 rgba(0, 0, 0, 0.16),
     inset 0 -1px 0 color-mix(in srgb, var(--bg-main) 62%, transparent),
     0 1px 0 color-mix(in srgb, var(--bg-main) 50%, transparent);
-  backdrop-filter: blur(1.5px) saturate(0.95);
+  /* No backdrop-filter: a blur under a pane that slides re-filters the
+     screen behind it every frame of the travel, which is what made the
+     doors stutter on a phone. The ink tint above is the glass. */
 }
 
 /* Light running across the glass. One pass, timed to cross while the
@@ -20548,10 +20755,13 @@ html {
   transform: skewX(-14deg);
   animation: door-sheen calc(820ms * var(--door-x)) cubic-bezier(0.4, 0, 0.3, 1) calc(240ms * var(--door-x)) backwards;
 }
+/* Run on transform, not `left` (a layout per frame while the leaves
+   move): from -55% to 118% of the glass is 173% of it, and the band
+   is 42% of it, so 173 / 42 of its own width. */
 @keyframes door-sheen {
-  0%        { left: -55%; opacity: 0; }
+  0%        { transform: translateX(0) skewX(-14deg); opacity: 0; }
   18%       { opacity: 1; }
-  72%, 100% { left: 118%; opacity: 0; }
+  72%, 100% { transform: translateX(411.9%) skewX(-14deg); opacity: 0; }
 }
 
 /* The livery band, in the line's own colour — the same pigment the
@@ -20650,25 +20860,25 @@ html {
   border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--text-primary) 16%, var(--bg-panel));
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+/* The lit lamp, a layer over the dark one that blinks by opacity
+   alone: blinking the lamp's own background and shadow repainted the
+   header it rides on, mid-travel. */
+.door__lamp::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--line-color, var(--accent));
+  box-shadow: 0 0 12px 2px color-mix(in srgb, var(--line-color, var(--accent)) 70%, transparent);
+  opacity: 0;
   animation: door-lamp calc(560ms * var(--door-x)) linear calc(260ms * var(--door-x)) forwards;
 }
 @keyframes door-lamp {
-  0%, 30% {
-    background: var(--line-color, var(--accent));
-    box-shadow: 0 0 12px 2px color-mix(in srgb, var(--line-color, var(--accent)) 70%, transparent);
-  }
-  31%, 45% {
-    background: color-mix(in srgb, var(--text-primary) 16%, var(--bg-panel));
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
-  }
-  46%, 90% {
-    background: var(--line-color, var(--accent));
-    box-shadow: 0 0 12px 2px color-mix(in srgb, var(--line-color, var(--accent)) 70%, transparent);
-  }
-  100% {
-    background: color-mix(in srgb, var(--text-primary) 16%, var(--bg-panel));
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
-  }
+  0%, 30% { opacity: 1; }
+  31%, 45% { opacity: 0; }
+  46%, 90% { opacity: 1; }
+  100% { opacity: 0; }
 }
 /* The threshold: the sill plate, with the tactile warning strip a
    real platform edge carries in the line's own colour. */
@@ -20755,10 +20965,17 @@ html {
    had replaced the split-flap board.
 
    One clock, from the card's arrival:
-     0.00–0.40  the card down, settling     2.30  the flash, the ring, sparks
-     0.55–2.15  辶 fills 0 → full, eased in  2.35–2.75  辶 empties
-     1.30–2.30  the tremble grows           2.55–2.95  12 rolls up, 13 lands
-     2.15–2.35  held full, shaking hardest  3.75–4.05  the card up (XpToast)
+     0.00–0.40  the card down, settling     2.28  the flash, the ring, sparks
+     0.55–2.15  辶 fills 0 → full, eased in  2.35–2.75  辻 empties
+     1.45–2.20  十 fills 0 → full, eased in  2.55–2.95  12 rolls up, 13 lands
+     1.30–2.30  the tremble grows           3.75–4.05  the card up (XpToast)
+     2.15–2.35  held full, shaking hardest
+
+   Plan 200: 十 fills too. The road is the way and the crossing is where
+   it leads, so as 辶 nears full the crossing is lit from its foot up and
+   is full a beat before the road bursts -- out of the crossing, 辻's
+   namesake. At rest 十 never fills, so both empty in the one breath and
+   only the road refills, to the new level's share.
 
    On a clock, never gating: the next card is already in hand. On a
    phone it hangs at the top over the run; wider, it floats at the
@@ -20810,7 +21027,8 @@ html {
   100% { transform: none; }
 }
 /* 辶 fills, is held full, empties, then takes what the new level
-   already holds (--levelup-to, a share). */
+   already holds (--levelup-to, a share; 十's is --levelup-to-cross, the
+   same line in its own units). */
 .levelup .pcf__seal .ofr-mark__bar { animation: levelup-fill 3000ms linear both; }
 @keyframes levelup-fill {
   0%, 18.33% { transform: scaleY(0); animation-timing-function: cubic-bezier(0.45, 0, 0.85, 0.65); }
@@ -20818,6 +21036,16 @@ html {
   78.33% { transform: scaleY(1); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
   91.67% { transform: scaleY(0); }
   100% { transform: scaleY(var(--levelup-to, 0)); }
+}
+/* 十 (plan 200): from its foot up as the road reaches it, full at 2.20s,
+   emptied with the road and left where the new level's line stands. The
+   same ease as the road's. */
+.levelup .pcf__seal .ofr-mark__bar--cross { animation: levelup-fill-cross 3000ms linear both; }
+@keyframes levelup-fill-cross {
+  0%, 48.33% { transform: scaleY(0); animation-timing-function: cubic-bezier(0.45, 0, 0.85, 0.65); }
+  73.33%, 78.33% { transform: scaleY(1); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+  91.67% { transform: scaleY(0); }
+  100% { transform: scaleY(var(--levelup-to-cross, 0)); }
 }
 /* The road lit as it fills, a flash when it is full. */
 .levelup .pcf__seal { animation: levelup-glow 3000ms linear both; }
@@ -20828,9 +21056,10 @@ html {
   91.67% { filter: drop-shadow(0 0 2px var(--levelup-flash)); }
   100% { filter: none; }
 }
-/* The ring and the sparks, out of the road's sweep. XpToast sounds the
-   level's voice on the ring's start. */
-.levelup__burst { position: absolute; left: 60%; top: 69%; z-index: 3; width: 0; height: 0; }
+/* The ring and the sparks, out of the crossing (plan 200: the road's
+   sweep until then). XpToast sounds the level's voice on the ring's
+   start. */
+.levelup__burst { position: absolute; left: 65.3%; top: 27.8%; z-index: 3; width: 0; height: 0; }
 .levelup__ring {
   position: absolute;
   left: -80px;
@@ -20908,6 +21137,7 @@ html {
   .levelup__shake,
   .levelup .pcf__seal { animation: none; }
   .levelup .pcf__seal .ofr-mark__bar { animation: none; transform: scaleY(var(--levelup-to, 0)); }
+  .levelup .pcf__seal .ofr-mark__bar--cross { animation: none; transform: scaleY(var(--levelup-to-cross, 0)); }
   .levelup__burst { display: none; }
   .levelup__was { animation: levelup-gone 160ms ease 800ms forwards; }
   .levelup__now { opacity: 0; animation: levelup-shown 160ms ease 880ms forwards; }
@@ -23213,7 +23443,10 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 .pace__timer { display: block; pointer-events: none; }
 .pace__timer .timer__fill { transition: none; }
 .rating-bar.rating-bar--specimen { display: block; pointer-events: none; }
-.rating-bar--specimen .rating-bar__buttons { max-width: none; margin: 0; gap: var(--sp-2); }
+.rating-bar--specimen .rating-bar__buttons,
+.rating-bar--specimen .rating-bar__misses,
+.rating-bar--specimen .rating-bar__keys { gap: var(--sp-2); }
+.rating-bar--specimen .rating-bar__buttons { max-width: none; margin: 0; }
 .rating-bar--specimen .rating-bar__btn { min-height: var(--sp-8); }
 .btn-depart--sheet { box-shadow: none; }
 .lvl-sheet__body { margin: 0; font-size: var(--fs-body); line-height: 1.5; color: var(--text-secondary); }
@@ -25317,7 +25550,7 @@ button.brd-stn { cursor: pointer; }
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--sp-5);
+  gap: var(--sp-4);
   animation: brd-in 360ms ease-out backwards;
 }
 .tour__q {
@@ -25332,11 +25565,10 @@ button.brd-stn { cursor: pointer; }
   word-break: auto-phrase;
   outline: none;
 }
-.tour__hint { margin: calc(var(--sp-3) - var(--sp-5)) 0 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: pretty; }
+.tour__hint { margin: 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: pretty; }
 /* A twist's notion over its question (plan 189): the one caption, and
    where there are several, which of them it is. */
-.tour__notion,
-.tour-found__notion {
+.tour__notion {
   margin: 0;
   display: flex;
   flex-wrap: wrap;
@@ -25347,23 +25579,68 @@ button.brd-stn { cursor: pointer; }
   letter-spacing: var(--tr-caption);
   color: var(--text-secondary);
 }
-.tour__notion { margin-bottom: calc(var(--sp-3) - var(--sp-5)); }
 .tour__notion-count { font-variant-numeric: tabular-nums; }
 .tour__notion-count::before { content: '·'; margin-right: var(--sp-2); }
 .tour-pattern { font-family: var(--font-jp); color: var(--tour-ink); }
-.tour-card {
+/* 一枚 — one card a stop (plan 206, the owner's pick B of the canvas
+   "Tsuji — the tour, fuller"). The stops hung from the head in boxes of
+   one weight and left the middle of the screen empty; the stop is now
+   the run's own card, the one surface, taking the room between the
+   track and the gate as the study card does on a phone. Its head asks,
+   its middle -- the one part that grows -- holds what is asked about,
+   centred, and its foot says what the tour says back, over a hairline,
+   never in a box of its own. The choices stand under it. */
+.tour-leaf {
+  position: relative;
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
   background: var(--surface);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-panel);
-  padding: var(--sp-5);
+}
+.tour-leaf__head { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-5) var(--sp-5) 0; }
+/* The question is the card's head, a rung under a screen's question. */
+.tour-leaf__head .tour__q { font-size: var(--fs-lead); }
+/* The sentence's voice in the card's corner; the head keeps clear of it. */
+.tour-leaf__corner { position: absolute; top: var(--sp-4); right: var(--sp-4); }
+.tour-leaf:has(> .tour-leaf__corner) > .tour-leaf__head { padding-inline-end: calc(var(--sp-8) + var(--sp-5)); }
+.tour-leaf__mid {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--sp-4);
+  justify-content: center;
+  gap: var(--sp-5);
   margin: 0;
+  padding: var(--sp-7) var(--sp-5);
+  list-style: none;
 }
-.tour-look--mini { padding-block: var(--sp-4); gap: var(--sp-3); font-size: var(--fs-sm); }
+.tour-leaf__foot { display: flex; flex-direction: column; gap: var(--sp-3); margin: 0; padding: var(--sp-4) var(--sp-5) var(--sp-5); border-top: 1px solid var(--surface-line); }
+/* The sentence asked about leads, as on the practice card: centred, at
+   --fs-title on a phone (--fs-heading on the desk), its translation under
+   it once it may be read. */
+.tour-leaf__mid--spec { align-items: center; text-align: center; }
+.tour-leaf__mid--spec .dict-ex { align-items: center; gap: var(--sp-3); }
+.tour-leaf__mid--spec .dict-ex__jp { justify-content: center; font-size: var(--fs-title); }
+.tour-leaf__mid--spec .dict-ex__tr { font-size: var(--fs-body); }
+.tour-look .dict-ex__jp { font-size: var(--fs-title); }
+.tour-look--mini { align-items: center; text-align: center; gap: var(--sp-2); padding-block: var(--sp-6); }
+.tour-look--mini .dict-ex__jp { justify-content: center; font-size: var(--fs-lead); }
 .tour-look--mini .dict-ex__tr { display: none; }
+/* Found: the card turns to the point -- what happened at its head, the
+   point over its shape and the rule in its middle, an example at its foot. */
+.tour-leaf--found .tour-leaf__mid { align-items: center; text-align: center; gap: var(--sp-2); }
+.tour-leaf--found .tour-pattern { font-size: var(--fs-display); font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
+.tour-leaf__structure { margin: 0; font-family: var(--font-jp); font-size: var(--fs-sm); color: var(--text-secondary); }
+.tour-leaf__rule { margin-top: var(--sp-4); font-size: var(--fs-lead); font-weight: 600; }
+.tour-verdict { margin: 0; display: flex; align-items: center; gap: var(--sp-3); font-size: var(--fs-body); font-weight: 700; }
+.tour-verdict--ok { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.tour-verdict--given { color: var(--sel-ink); }
+/* The scene's lines run from the card's head. */
+.tour-leaf--scene .tour-leaf__mid { justify-content: flex-start; padding-block: var(--sp-5); }
 .tour-guesses { display: grid; gap: var(--sp-3); }
+/* Short choices -- a form, a word -- stand in a row, four as two by two. */
+.tour-guesses--row { grid-template-columns: repeat(var(--tour-cols, 2), minmax(0, 1fr)); }
 .tour-guess {
   position: relative;
   display: flex;
@@ -25441,40 +25718,10 @@ button.brd-stn { cursor: pointer; }
 .tour-said--given .tour-said__mark { color: var(--sel-ink); }
 .tour-said__line { margin: 0; font-size: var(--fs-body); line-height: 1.5; text-wrap: pretty; }
 .tour-said__hint { margin: 0; font-size: var(--fs-sm); color: var(--text-secondary); }
-.tour-rule__text { margin: 0; font-size: var(--fs-lead); font-weight: 600; line-height: 1.45; text-wrap: pretty; }
-.tour-rule__structure { margin: 0; font-family: var(--font-jp); color: var(--text-secondary); }
 .tour-chain { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-3); font-family: var(--font-jp); font-size: var(--fs-lead); }
 .tour-chain__from { color: var(--text-secondary); }
 .tour-chain__arrow { color: var(--tour-ink); font-family: var(--font-display); }
 .tour-chain__to { color: var(--tour-ink); }
-.tour-head { display: flex; flex-direction: column; gap: var(--sp-2); }
-.tour-head .tour-pattern { font-size: var(--fs-heading); line-height: 1.2; overflow-wrap: anywhere; }
-.tour-found { list-style: none; gap: 0; }
-.tour-found__line {
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
-  gap: var(--sp-4);
-  padding-block: var(--sp-4);
-  border-top: 1px solid var(--surface-line);
-}
-.tour-found__line:first-child { border-top: none; padding-top: 0; }
-.tour-found__line:last-child { padding-bottom: 0; }
-.tour-found__n {
-  width: 28px;
-  height: 28px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--line-color);
-  border-radius: var(--r-pill);
-  color: var(--tour-ink);
-  font-weight: 700;
-  font-size: var(--fs-sm);
-  font-variant-numeric: tabular-nums;
-}
-.tour-found__body { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
-.tour-found__say { margin: 0; font-weight: 600; line-height: 1.45; }
-.tour-found__line-text { margin: 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--text-secondary); }
 /* Spoken lines (plan 187d): a sentence and its voice beside it. */
 .tour-ex { display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: start; gap: var(--sp-3); }
 .tour-speak {
@@ -25497,6 +25744,15 @@ button.brd-stn { cursor: pointer; }
 .tour-said__line--ja { font-family: var(--font-jp); font-weight: 600; }
 .tour-pair { margin: var(--sp-2) 0 0; display: flex; flex-wrap: wrap; gap: var(--sp-3); font-family: var(--font-jp); font-size: var(--fs-lead); }
 .tour-pair__bar { color: var(--text-secondary); }
+/* What the one card overrides of the pieces above (plan 206): what the
+   tour says back is the card's foot over a hairline, not a box of its
+   own; the found verdict's mark at the tile's size; the chain centred
+   under the point; a short form at a row tile's size. */
+.tour-leaf > .tour-said { border: 0; border-top: 1px solid var(--surface-line); border-radius: 0; background: none; }
+.tour-leaf--found .tour-chain { justify-content: center; }
+.tour-verdict .tour-said__mark { width: 24px; height: 24px; }
+.tour-verdict--ok .tour-said__mark { color: var(--success); }
+.tour-guesses--row .tour-guess__text--ja { font-size: var(--fs-title); }
 /* The scene's place, as the station's plate: its name over its caption
    on the 駅名標's white in either theme (the HUD's arrival plate's,
    .hud__dest), the line's edge under it. */
@@ -25534,17 +25790,6 @@ button.brd-stn { cursor: pointer; }
 .tour-line .tour-speak { align-self: center; }
 .tour-scene__all { align-self: flex-start; }
 .tour-note { margin: 0; font-size: var(--fs-body); line-height: 1.5; color: var(--text-secondary); text-wrap: pretty; }
-.tour-reply {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-1);
-  padding: var(--sp-4) var(--sp-5);
-  border: 2px solid var(--sel-line);
-  border-radius: var(--r-panel);
-  background: var(--sel-wash);
-}
-.tour-reply__who { font-size: var(--fs-caption); font-weight: 700; color: var(--sel-ink); }
-.tour-reply__ja { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 600; }
 
 /* 194 — Choisir and Construire on the run's own card (the owner's pick,
    option C): no plate inside the card and no band; the point's roundel
@@ -25897,16 +26142,16 @@ button.brd-stn { cursor: pointer; }
   text-transform: uppercase;
   color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary));
 }
-/* The results (plan 195): the point beside the score drawn as a dial, one
-   arc a question, then each question again as a row -- the mark, the
-   sentence with the right form in it, the kind at the end, and under a
-   miss what was taken, struck. */
-.tour-end { display: flex; align-items: center; gap: var(--sp-5); }
-.tour-end__who { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
-.tour-end__who .tour-pattern { font-size: var(--fs-heading); line-height: 1.2; overflow-wrap: anywhere; }
+/* The results (plan 195), one card since plan 206: the score drawn as a
+   dial over the point in its middle, one arc a question, then at its
+   foot each question again as a row -- the mark, the sentence with the
+   right form in it, the kind at the end, and under a miss what was
+   taken, struck. */
+.tour-end { align-items: center; text-align: center; gap: var(--sp-2); }
+.tour-end .tour-pattern { margin-top: var(--sp-3); font-size: var(--fs-heading); line-height: 1.2; overflow-wrap: anywhere; }
 .tour-end__structure { margin: 0; font-size: var(--fs-sm); color: var(--text-secondary); }
-.tour-tally { position: relative; flex: none; width: 96px; height: 96px; }
-.tour-tally__dial { display: block; }
+.tour-tally { position: relative; flex: none; width: 128px; height: 128px; }
+.tour-tally__dial { display: block; width: 100%; height: 100%; }
 .tour-tally__arc { fill: none; stroke: var(--surface-line); stroke-width: 6; }
 .tour-tally__arc--ok { stroke: var(--success); }
 .tour-tally__arc--no { stroke: var(--rating-wrong); }
@@ -28850,9 +29095,10 @@ button.brd-stn { cursor: pointer; }
 .btn-depart--gate.clrk-gate--compact .btn-depart__wave { transform: scale(0.75); }
 .btn-depart--gate.clrk-gate--compact .btn-depart__jp { font-size: var(--fs-body); font-weight: 600; }
 .btn-depart--gate.clrk-gate--arrive {
-  animation: clr-gate-in 0.6s var(--ease-out) backwards, btn-gate-breathe 2.8s ease-in-out 0.6s infinite;
-  animation-delay: var(--gate-d, 0ms), calc(var(--gate-d, 0ms) + 0.6s);
+  animation: clr-gate-in 0.6s var(--ease-out) backwards;
+  animation-delay: var(--gate-d, 0ms);
 }
+.btn-depart--gate.clrk-gate--arrive::after { animation-delay: calc(var(--gate-d, 0ms) + 0.6s); }
 
 /* ── one-shot utilities (each reads --d as its delay) ── */
 .clrk-arrive { animation: clr-arrive 0.5s var(--ease-out) backwards; animation-delay: var(--d, 0ms); }
@@ -29003,7 +29249,8 @@ button.brd-stn { cursor: pointer; }
 .clrk--skip .clrk-tk-chip--fall,
 .clrk--skip .clrk-clp-chip { animation: none !important; }
 .clrk--skip .clrk-clp { display: none; }
-.clrk--skip .btn-depart--gate.clrk-gate--arrive { animation: clr-fade 0.2s ease both, btn-gate-breathe 2.8s ease-in-out 0.2s infinite !important; }
+.clrk--skip .btn-depart--gate.clrk-gate--arrive { animation: clr-fade 0.2s ease both !important; }
+.clrk--skip .btn-depart--gate.clrk-gate--arrive::after { animation-delay: 0.2s; }
 .clrk--skip :where(*),
 .clrk--skip :where(*)::before,
 .clrk--skip :where(*)::after { transition-duration: 0.2s !important; transition-delay: 0s !important; }
@@ -29051,8 +29298,6 @@ button.brd-stn { cursor: pointer; }
 .clrdev-share { display: flex; justify-content: center; padding: var(--sp-8) var(--sp-5); }
 .clrdev-share img { max-width: 100%; height: auto; box-shadow: var(--elev-board); }
 /* ── 191:primitives end ── */
-
-
 
 
 /* ── 191:day ── */
@@ -29645,8 +29890,6 @@ button.brd-stn { cursor: pointer; }
 /* ── 191:day end ── */
 
 
-
-
 /* ── 191:partial ── */
 /* ══ 途中下車 — a run that ended with cards left today (plan 191) ═════
    PartialFinish (components/dayclear/PartialFinish.jsx), the canvas's
@@ -29767,8 +30010,6 @@ button.brd-stn { cursor: pointer; }
   .ptl__ripple { animation: none; }
 }
 /* ── 191:partial end ── */
-
-
 
 
 /* ── 191:milestones ── */
@@ -30850,8 +31091,6 @@ button.brd-stn { cursor: pointer; }
 /* ── 191:milestones end ── */
 
 
-
-
 /* ── 191:restday ── */
 /* ══ 運休 — the rest-day notice (plan 191) ══════════════════════════
    The canvas's RestDay board (components/dayclear/RestDayNotice.jsx),
@@ -31051,8 +31290,6 @@ button.brd-stn { cursor: pointer; }
   mask-composite: intersect;
 }
 /* ── 191:restday end ── */
-
-
 
 
 /* ── 191:tickets ── */
@@ -31406,7 +31643,6 @@ button.brd-stn { cursor: pointer; }
   font-size: var(--fs-caption);
   color: var(--text-secondary);
 }
-
 
 
 /* ═══ 机 — the desk (plan 113) ═══════════════════════════════════
@@ -32967,6 +33203,23 @@ button.brd-stn { cursor: pointer; }
   /* Slim under the services' board (plan 199b). */
   .tdy-desk__svc .desk-week__bars { min-height: calc(var(--desk-side-w) / 5); }
 
+  /* 浮世絵 — the gate on the print on the desk (plan 205): the print
+     across the whole window beside the rail, centred on the gate's
+     column so the dial stands over the gate; the gate at the window's
+     foot as the canvas set it; the services' board hung over the print
+     at its own elevation. The title slip stands where the canvas put
+     it, at the print's scale. */
+  .tdy-desk.tdy--print .tpr,
+  .tdy-desk.tdy--print .tdy-hero--print { inset: calc(-1 * var(--sp-6)) calc(-1 * var(--sp-7)); }
+  .tdy--print .tdy-desk__hero { justify-content: flex-end; background: none; border: 0; }
+  .tdy--print .tdy-desk__go { padding-bottom: calc(var(--sp-7) - var(--sp-6)); }
+  /* The board's shadow is the column's, as a drop shadow: the column
+     scrolls, and a scroller cuts a panel's box-shadow at its own edge,
+     a hard line down the print. */
+  .tdy--print .tdy-desk__col { position: relative; z-index: 1; filter: drop-shadow(var(--elev-board)); }
+  .tdy--desk .tpr-title { right: auto; left: calc(var(--tpr-x) + 664 * var(--tpr-u)); top: var(--sp-7); }
+  .tdy--desk .tdy-desk__keys { gap: var(--sp-4); }
+
 
   /* The profile: the holder opened flat — the pass and its stamp book
      on the left, the record (the figures, the ledger, the 番付) on the
@@ -33643,8 +33896,7 @@ button.brd-stn { cursor: pointer; }
   .desk-settings__page :is(.dest:not(.dest--on) .dest__dot, .svc-row__end) { background: var(--surface); }
   .desk-settings__page .dest--on .dest__dot { box-shadow: 0 0 0 3px var(--surface), 0 0 0 4px var(--text-primary); }
   .desk-settings .stg-row--on,
-  .desk-split .gl-index__row[aria-current="page"],
-  .desk-split .exam-review-row[aria-current="page"] {
+  .desk-split .gl-index__row[aria-current="page"] {
     background: color-mix(in srgb, var(--accent2) 8%, transparent);
     box-shadow: inset 3px 0 0 var(--accent2);
   }
@@ -33895,17 +34147,14 @@ button.brd-stn { cursor: pointer; }
      was drawn with, so the link reads exactly as the button it replaced
      (splitRows.desktop.test.jsx measures the two against each other):
      the button's weight and leading, where the row leaves its text to
-     them (the route and the cards; the index and the review rows set
-     `font: inherit` of their own), no underline, the button's hover
-     where the row keeps it (the review's), and its focus ring. */
+     them (the route and the cards; the index sets `font: inherit` of
+     its own), no underline, and its focus ring. */
   .desk-split__list a:is(.route-stop, .platform-card) {
     font-weight: 600;
     line-height: normal;
   }
-  .desk-split__list a:is(.route-stop, .platform-card, .gl-index__row, .exam-review-row) { text-decoration: none; }
-  .desk-split__list a.exam-review-row { transition: filter 0.15s; }
-  .desk-split__list a.exam-review-row:hover { filter: brightness(1.15); }
-  .desk-split__list a:is(.route-stop, .platform-card, .gl-index__row, .exam-review-row):focus-visible {
+  .desk-split__list a:is(.route-stop, .platform-card, .gl-index__row) { text-decoration: none; }
+  .desk-split__list a:is(.route-stop, .platform-card, .gl-index__row):focus-visible {
     outline: 2px solid var(--accent2);
     outline-offset: 2px;
   }
@@ -34632,10 +34881,6 @@ button.brd-stn { cursor: pointer; }
   .stage > .stage__foot,
   .stage > .timer,
   .stage > .result-lattice,
-  .stage > .exam-meta,
-  .stage > .exam-mondai,
-  .stage > .exam-mondai__text,
-  .stage > .exam-nav,
   .stage > .qrows,
   .stage > .loading {
     width: 100%;
@@ -34690,8 +34935,7 @@ button.brd-stn { cursor: pointer; }
      pressed over and over, and a target that moved with each card
      would be missed (it takes ←/→ instead). */
   .screen > .stage > .rating-bar,
-  .screen > .stage > .stage__foot:not(.browse-nav),
-  .desk-run--paper > .stage > .exam-nav {
+  .screen > .stage > .stage__foot:not(.browse-nav) {
     position: sticky;
     bottom: var(--dock-bottom);
     z-index: 10;
@@ -34699,18 +34943,6 @@ button.brd-stn { cursor: pointer; }
     padding-block: var(--sp-3);
     background: var(--bg-main);
   }
-  /* A question's four brief answers as an answer sheet, two by two
-     (plan 169, QuestionRenderer's `brief`), as a card run's choices
-     stand: a reading or a spelling is a few signs, and four rows of
-     them down the paper put the third and fourth under the docked
-     Previous and Next on a laptop's window. A sentence keeps its row.
-     Arrows still walk them in their order. */
-  .desk-run--paper .mcq-list--brief {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--sp-4);
-  }
-  .desk-run--paper .mcq-list--brief > .mcq-row + .mcq-row { margin-top: 0; }
   /* The card and its choices side by side: a question and the four
      answers to it read across, not down past the window's floor (the
      fourth kanji choice stood at 870px on a 1100×800 screen). The
@@ -34858,72 +35090,6 @@ button.brd-stn { cursor: pointer; }
   /* On a practice run's panels (plan 129) it is the column's one card,
      as tall as the column at least, as the pane beside a sentence is. */
   .desk-run--panels > .desk-run__side > .prompt-card { flex: 1 0 auto; }
-  /* ── the mock exam, sat at a desk (plan 115) ──
-     screens/ExamRunner: the answer sheet stands in the side — the clock
-     at the head of the column, the count, the grid, Finish — and the
-     paper is the page's scroll, from its top. A reading passage stands
-     flat on its own card beside its questions, which keep to a sticky
-     column so a choice is never a scroll away from the line it asks
-     about. */
-  .desk-run__side > .exam-timer {
-    align-self: flex-start;
-    font-size: var(--fs-heading);
-  }
-  .desk-answers {
-    display: flex;
-    align-items: baseline;
-    gap: var(--sp-3);
-  }
-  .desk-answers__fig {
-    font-family: var(--font-display);
-    font-size: var(--fs-lead);
-    font-variant-numeric: tabular-nums;
-  }
-  .desk-answers__cap {
-    font-family: var(--font-display);
-    font-size: var(--fs-caption);
-    font-weight: 700;
-    letter-spacing: var(--tr-caption);
-    text-transform: uppercase;
-    color: var(--text-secondary);
-  }
-  .stage > .desk-paper {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-    gap: var(--sp-5);
-    width: 100%;
-    max-width: var(--board-w);
-    margin-inline: auto;
-  }
-  /* A question beside its passage is the paper's width, not the card's:
-     the head, the part's instructions and the way through line up with
-     the two columns rather than a card column the paper overhangs. */
-  .stage:has(> .desk-paper) > :is(.exam-meta, .deck-progress, .exam-mondai, .exam-mondai__text, .exam-nav) { max-width: var(--board-w); }
-  /* The question fills its card: centred at its content's width it
-     drew the rows at half a 640px card. */
-  .exam-card > .exam-question { align-self: stretch; }
-  .desk-paper__text {
-    max-height: none;
-    margin: 0;
-    overflow: visible;
-  }
-  .desk-paper__ask {
-    position: sticky;
-    top: var(--sp-6);
-    min-width: 0;
-  }
-  /* The flag's corner dot is ringed in the ground it sits on: the
-     side's, not the sheet's card. */
-  .desk-run__side .exam-sheet__chip--flagged::after { border-color: var(--bg-main); }
-  /* The result's review (screens/ExamResult): the open question's
-     revealed card is the page beside the list, whole — the phone's
-     60vh inner scroll was for a card opened under its row. */
-  .desk-split__page > .exam-card {
-    max-height: none;
-    margin-inline: 0;
-    overflow: visible;
-  }
   .desk-split__page > .btn-row { max-width: var(--card-w); }
   /* The run's misses at its end (SessionPanel, plan 115): the cards as
      chips, each opening its entry under them. */
@@ -37393,14 +37559,9 @@ button.brd-stn { cursor: pointer; }
   :is(.pcard-lead__jp, .bkd-line, .bkd-row__word, .dict-word__jp, .furigana-word) rt { user-select: none; }
   /* Every hover has its focus twin (DESIGN.md, Controls) on the surfaces
      the desk sets in its pages and columns: a keyboard reader was given
-     the global ring and none of what the pointer is shown -- the answer
-     sheet's chips in an exam's side, the analyser's stops and chips,
+     the global ring and none of what the pointer is shown -- the
+     analyser's stops and chips,
      a word's kanji chips, Browse's rows in the deck's side. */
-  .desk-run__side .exam-sheet__chip:focus-visible {
-    border-color: var(--line-color, var(--line-exam));
-    color: color-mix(in srgb, var(--line-color, var(--line-exam)) 50%, var(--text-primary));
-  }
-  .desk-run__side .exam-sheet__chip--answered:focus-visible { color: var(--text-on-panel); }
   :is(.phone--desk, .desk-run__side) .anl-chip:focus-visible { color: var(--text-primary); }
   :is(.phone--desk, .desk-run__side) .anl-stop:focus-visible { background: var(--overlay-hover); color: var(--text-primary); }
   :is(.phone--desk, .desk-run__side) .phrase-kanji-chip:has(.phrase-kanji-chip__char:focus-visible) { border-color: var(--border); }
@@ -37646,13 +37807,14 @@ button.brd-stn { cursor: pointer; }
   }
   .desk-run--panels > .stage > .rating-bar--unlit { pointer-events: none; }
   .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn { opacity: 0.38; }
-  .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn-ring { background: var(--text-on-panel-soft); }
-  /* A key before the reveal is drawn unlit like the segments: its
-     ground the panel ink's wash, no fill and no glow (plan 180). */
+  .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn-lamp { background: var(--text-on-panel-soft); box-shadow: none; }
+  /* A pass before the reveal is drawn unlit as a miss is: the dark
+     key's face, light and foot, and no ink (plans 180, 203). */
   .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn.rating-bar__btn--key {
-    background: color-mix(in srgb, var(--text-on-panel) 10%, transparent);
+    --key-light: color-mix(in srgb, var(--text-on-panel) 8%, transparent);
+    --key-foot-ink: var(--key-sole);
+    background: var(--key-face);
     color: var(--text-on-panel);
-    box-shadow: none;
   }
   /* A panel: the surface, its hairline and corner. No caption: its
      figures, its stops and its tiles name themselves (owner's cut). */
@@ -38416,9 +38578,9 @@ button.brd-stn { cursor: pointer; }
      comprehension (`stage--comprehension`): the field and Check, the rating
      bar, Next and the review's pair under the card at its edges, with
      no surface, hairline or corner of their own -- the card is the one
-     panel in the column. The bar's misses keep their sumi
-     (.rating-bar__misses), which is what the frame's surface had been
-     standing in for. */
+     panel in the column. Each of the bar's keys carries its own sumi
+     (.rating-bar__btn, plan 203), which is what the frame's surface had
+     been standing in for. */
   .desk-run--panels > .stage:is(.stage--sentence, .stage--comprehension) > .stage__foot:not(.browse-nav),
   .desk-run--panels > .stage.stage--sentence > .rating-bar {
     padding: 0;
@@ -39188,24 +39350,23 @@ button.brd-stn { cursor: pointer; }
 
   /* ── 机 — the practice stations, filled (plan 159) ──
      The owner's picks A and S1 of the canvas "Practice screens — layout
-     options". Reading, translation, comprehension, dictation,
-     composition and the mock exam stood at the top of an empty window:
-     three source cards, a row of five grades, four paper names. Each is
+     options". Reading, translation, comprehension, dictation and
+     composition stood at the top of an empty window: three source
+     cards, a row of five grades. Each is
      now a line's split filled the way plan 137 filled the Learn
      stations (components/practice/):
 
      - the list: reading's and translation's source as a switch at its
        head (S1), then the stops sharing the column's height -- the
-       grades with a sentence (or the texts, the points, the papers) of
-       their own bank, the bar of the grade's words or of the papers sat,
-       and the learner's record in the caption; or the tiers, or the
-       learner's own cards;
+       grades with a sentence (or the texts, the points) of their own
+       bank, the bar of the grade's words, and the learner's record in
+       the caption; or the tiers, or the learner's own cards;
      - the page: the window's height beside it, sticky, as a deck's is
        (plan 154) -- the head with Board, the exercise as the run will
        ask it in a well, four figures in the profile's lattice, and two
        panels (the newest misses, the grade's points or the tier's
        words) sharing what is left, each scrolling inside itself. The
-       exam's page is its papers instead, each a row sharing the height. */
+       mock exam left the split for its own page (plan 200, 机 — 模試). */
   .desk-split--practice > .desk-split__list { gap: var(--sp-4); }
   .desk-split--practice > .desk-split__list > .seg { flex: none; }
   /* Three sources, and two word lists, in a column's width: each word
@@ -39734,201 +39895,6 @@ button.brd-stn { cursor: pointer; }
     background: var(--line-color);
   }
 
-  /* ── the mock exam's papers, a row each ── */
-  .prc-papers {
-    flex: 1 1 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-4);
-    min-height: 0;
-  }
-  .prc-paper {
-    position: relative;
-    flex: 1 1 0;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    min-height: calc(2 * var(--sp-8));
-    overflow: hidden;
-    background: var(--surface);
-    border: 1px solid var(--surface-line);
-    border-radius: var(--r-card);
-    transition: background 0.15s ease;
-  }
-  .prc-papers--wells .prc-paper { grid-template-columns: minmax(0, 12fr) minmax(0, 22fr) minmax(0, 13fr); }
-  .prc-paper:hover { background: var(--bg-card-hover); }
-  .prc-paper--next { border-color: color-mix(in srgb, var(--line-color) 60%, transparent); }
-  .prc-paper:has(> .prc-paper__door:focus-visible) {
-    outline: 2px solid var(--accent2);
-    outline-offset: 2px;
-  }
-  .prc-paper__door {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: var(--sp-2);
-    min-width: 0;
-    padding: var(--sp-4) var(--sp-5) var(--sp-4) var(--sp-6);
-    background: none;
-    border: 0;
-    font: inherit;
-    text-align: left;
-    color: inherit;
-    cursor: pointer;
-  }
-  /* The whole row is the paper's door; "Different paper" stands over it. */
-  .prc-paper__door::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-  }
-  .prc-paper__door:focus-visible { outline: none; }
-  .prc-paper__title {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    column-gap: var(--sp-3);
-    font-size: var(--fs-title);
-    font-weight: 700;
-  }
-  .prc-paper__jp {
-    white-space: nowrap;
-    font-family: var(--font-jp);
-    font-size: var(--fs-body);
-    font-weight: 500;
-    color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary));
-  }
-  .prc-paper__mondai {
-    font-family: var(--font-jp);
-    font-size: var(--fs-caption);
-    line-height: 1.6;
-    color: var(--text-secondary);
-  }
-  .prc-paper__spec {
-    display: flex;
-    align-items: stretch;
-    min-width: 0;
-    padding: var(--sp-4) 0;
-  }
-  .prc-paper__well {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--sp-3);
-    min-width: 0;
-    padding: var(--sp-3) var(--sp-5);
-    overflow: hidden;
-    background: var(--bg-main);
-    border: 1px solid var(--surface-line);
-    border-radius: var(--r-plate);
-    text-align: center;
-  }
-  .prc-paper__sentence {
-    max-width: 100%;
-    overflow: hidden;
-    font-family: var(--font-jp);
-    font-size: var(--fs-title);
-    line-height: 1.5;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-  .prc-paper__mark {
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
-    text-decoration-color: var(--line-color);
-    text-underline-offset: var(--sp-2);
-  }
-  .prc-paper__answer {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sp-3);
-    font-family: var(--font-jp);
-    font-size: var(--fs-lead);
-    color: var(--text-secondary);
-  }
-  .prc-paper__point {
-    padding: 0 var(--sp-3);
-    border: 1px solid var(--surface-line);
-    border-radius: var(--r-pill);
-    font-size: var(--fs-sm);
-  }
-  .prc-paper__heading {
-    font-family: var(--font-jp);
-    font-size: var(--fs-body);
-    font-weight: 700;
-  }
-  .prc-paper__passage {
-    display: -webkit-box;
-    overflow: hidden;
-    font-family: var(--font-jp);
-    font-size: var(--fs-sm);
-    line-height: 1.8;
-    text-align: left;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-  }
-  .prc-paper__figs {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: var(--sp-3);
-    min-width: 0;
-    padding: var(--sp-4) var(--sp-5);
-    border-inline-start: 1px solid var(--surface-line);
-  }
-  .prc-papers--wells .prc-paper__figs { margin-inline-start: var(--sp-5); }
-  .prc-paper__count {
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: var(--text-secondary);
-  }
-  .prc-paper__score {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-1);
-  }
-  .prc-paper__fig {
-    display: flex;
-    align-items: baseline;
-    gap: var(--sp-1);
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: var(--text-secondary);
-  }
-  .prc-paper__fig > b {
-    font-size: var(--fs-title);
-    color: var(--text-primary);
-  }
-  .prc-paper__none {
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    color: var(--text-secondary);
-  }
-  .prc-paper__fresh {
-    position: relative;
-    z-index: 1;
-    align-self: flex-start;
-    padding: 0;
-    background: none;
-    border: 0;
-    font: inherit;
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    color: var(--text-secondary);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    cursor: pointer;
-  }
-  .prc-paper__fresh:hover,
-  .prc-paper__fresh:focus-visible { color: var(--text-primary); }
-  .prc-paper__note {
-    font-size: var(--fs-caption);
-    color: var(--text-secondary);
-  }
-
   /* The narrow page (PracticePage's NARROW, measured): the head
      stacked, the figures two by two, the panels one under the other, the
      page its own height in the window rather than the window's. */
@@ -39954,21 +39920,6 @@ button.brd-stn { cursor: pointer; }
     grid-auto-flow: row;
   }
   .prc-page--narrow .prc-panel { max-height: calc(8 * var(--sp-8)); }
-  .prc-page--narrow .prc-papers { flex: none; }
-  .prc-page--narrow .prc-papers > .prc-paper {
-    flex: none;
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .prc-page--narrow .prc-paper__figs {
-    flex-flow: row wrap;
-    justify-content: flex-start;
-    align-items: baseline;
-    column-gap: var(--sp-5);
-    border-inline-start: 0;
-    border-top: 1px solid var(--surface-line);
-  }
-  .prc-page--narrow .prc-paper__score { flex-direction: row; align-items: baseline; gap: var(--sp-3); }
-  .prc-page--narrow .prc-paper__figs > .desk-line__bar { display: none; }
 }
 /* ── 低 — the short desk (plan 169) ──
    A laptop's window is wide enough for the desk and often not tall
@@ -40131,8 +40082,6 @@ button.brd-stn { cursor: pointer; }
     }
     .prc-lower { flex: none; }
     .prc-panel { max-height: calc(6 * var(--sp-8)); }
-    .prc-papers,
-    .prc-papers > .prc-paper { flex: none; }
     /* ── the analyser's typed Passage ──
        The sentence a rung under display size and its subtitle a rung
        under its own: at display size three lines of a sentence and its
@@ -40142,12 +40091,6 @@ button.brd-stn { cursor: pointer; }
     .anl-desk--text .anl-subs__stage { gap: var(--sp-4); }
     .anl-desk--text .anl-subs__line .tok { font-size: var(--fs-board-fluid); }
     .anl-desk--text .anl-subs__tr { font-size: var(--fs-title); }
-    /* ── the exam's paper ──
-       A row of the paper a rung shorter, and the rows a rung closer:
-       the fourth answer to a question in a sentence stood under the
-       docked Previous and Next on a 600px window. */
-    .desk-run--paper .mcq-row { padding-block: var(--sp-3); }
-    .desk-run--paper .mcq-list:not(.mcq-list--brief) > .mcq-row + .mcq-row { margin-top: var(--sp-3); }
     /* ── first contact ──
        The drawings take the room the question and the floor leave,
        down to a floor of their own that a 600px window holds. */
@@ -40443,7 +40386,15 @@ button.brd-stn { cursor: pointer; }
   .tour--desk .tour__foot { bottom: 0; align-items: center; }
   .tour--desk .btn-depart { width: var(--desk-side-w); max-width: 100%; }
   .tour--desk .tour-guesses { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tour--desk .tour-guesses--row { grid-template-columns: repeat(var(--tour-cols, 2), minmax(0, 1fr)); }
   .tour--desk[data-stop="scene"] .tour-guesses { grid-template-columns: minmax(0, 1fr); }
+  /* 一枚 on the desk (plan 206): the stop's card is the run's, composed in
+     the column's middle at a card's height rather than drawn down the
+     whole column, its sentence a step up. */
+  .tour--desk .tour__body { justify-content: safe center; }
+  .tour--desk .tour-leaf { flex: none; min-height: min(340px, 50vh); }
+  .tour--desk .tour-leaf__mid--spec .dict-ex__jp,
+  .tour--desk .tour-look:not(.tour-look--mini) .dict-ex__jp { font-size: var(--fs-heading); }
 
   .tour-route,
   .tour-ledger {
@@ -40458,6 +40409,11 @@ button.brd-stn { cursor: pointer; }
   .tour-route__pattern { font-family: var(--font-jp); font-size: var(--fs-heading); line-height: 1.3; color: var(--tour-ink); overflow-wrap: anywhere; }
   .tour-route__structure { font-size: var(--fs-sm); color: var(--text-secondary); }
   .tour-route__stops { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  /* 問 under the stops (plan 204), as the lines panel holds it (.desk-ask):
+     the stops and the asking take a half each of the column, the stops
+     scrolling in theirs and the thread in its own. */
+  .tour-route:has(> .desk-ask) { flex: 1 1 auto; min-height: 0; }
+  .tour-route:has(> .desk-ask) > .tour-route__stops { flex: 1 1 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
   .tour-route__stop {
     position: relative;
     display: grid;
@@ -40556,7 +40512,6 @@ button.brd-stn { cursor: pointer; }
   /* The compact gate's Enter cap (kit's gate, 52px): a rung closer to
      the pill's end than the 66px gate's. */
   .clrk-gate--compact .desk-kbd { margin-inline-end: var(--sp-3); }
-
 
 
   /* ── 191:desk-day ── */
@@ -41244,8 +41199,6 @@ button.brd-stn { cursor: pointer; }
   /* ── 191:desk-day end ── */
 
 
-
-
   /* ── 191:desk-milestones ── */
   /* The milestone ceremonies in the content area beside the rail: the
      frame starts at the rail's edge, the composition centred in what is
@@ -41256,8 +41209,6 @@ button.brd-stn { cursor: pointer; }
   .ms-ticket--desk,
   .ms-month--desk { left: var(--desk-rail-w); }
   /* ── 191:desk-milestones end ── */
-
-
 
 
   /* ── 191:desk-tickets ── */
@@ -41440,6 +41391,1292 @@ button.brd-stn { cursor: pointer; }
     .desk-card:has(.gl-map) .desk-verdict { padding-block: var(--sp-2); }
     .desk-card:has(.gl-map) .desk-verdict__value { font-size: var(--fs-title); }
     .desk-card:has(.gl-map) .desk-rhythm { padding-block: var(--sp-2); }
+  }
+}
+@media (min-width: 1100px) {
+  /* ── 模試 — the mock exam at a desk (plan 200) ──
+     The owner's mix of the canvas "Tsuji — the mock exam on the desk":
+     the papers as B1 drew them, without the title (exam/DeskStation);
+     the paper as direction A refined it -- the booklet on the page, a
+     question a page of it, and the answer sheet in the run's side
+     (screens/ExamRunner, exam/DeskSheet); and the result as the sheet
+     handed back marked beside the page of the question open
+     (screens/ExamResult). The paper's ink is the line's pigment mixed
+     toward the text ink, as the phone's numbers are (.exam-page__part
+     b), so the plates and the gaps read on both papers. */
+  .desk-exams,
+  .desk-run--exam,
+  .desk-res { --exam-ink: color-mix(in srgb, var(--line-exam) 65%, var(--text-primary)); }
+
+  /* A part's plate, 問題3: the booklet prints the part's number in a
+     box, and the sheet and the cover print the same box. */
+  .desk-mondai,
+  .desk-mark__no {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--sp-2);
+    border: 1.5px solid var(--exam-ink);
+    border-radius: var(--r-plate);
+    font-family: var(--font-jp);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    line-height: 1.6;
+    color: var(--exam-ink);
+    white-space: nowrap;
+  }
+  .desk-mark__no {
+    padding: 0 var(--sp-1);
+    border-width: 1px;
+  }
+
+  /* ── the papers: the grades over the grade's papers ── */
+  .desk-exams {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-height: calc(100dvh - 2 * var(--sp-6));
+    text-align: left;
+  }
+  .desk-grades {
+    flex: none;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    overflow: hidden;
+  }
+  .desk-grade {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: var(--sp-2) var(--sp-3);
+    padding: var(--sp-4) var(--sp-5);
+    border-inline-start: 1px solid var(--surface-line);
+    color: var(--text-secondary);
+    text-decoration: none;
+  }
+  .desk-grade:first-child { border-inline-start: 0; }
+  .desk-grade > b {
+    font-family: var(--font-display);
+    font-size: var(--fs-lead);
+    color: var(--text-primary);
+  }
+  .desk-grade__name {
+    font-size: var(--fs-sm);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .desk-grade__fig {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  /* The bar's fill is its ink, so the lit grade relights it. */
+  .desk-grade__bar {
+    grid-column: 1 / -1;
+    height: 3px;
+    border-radius: var(--r-pill);
+    background: var(--surface-line);
+    color: var(--text-secondary);
+    overflow: hidden;
+  }
+  .desk-grade__bar > i {
+    display: block;
+    height: 100%;
+    background: currentcolor;
+  }
+  .desk-grade:hover,
+  .desk-grade:focus-visible { background: var(--bg-card-hover); }
+  .desk-grade:focus-visible { outline: 2px solid var(--accent2); outline-offset: -2px; }
+  .desk-grade--on {
+    background: var(--sel-wash);
+    box-shadow: inset 0 -2px 0 var(--accent2);
+  }
+  .desk-grade--on:hover,
+  .desk-grade--on:focus-visible { background: var(--sel-wash); }
+  .desk-grade--on > b,
+  .desk-grade--on .desk-grade__name { color: var(--sel-ink); }
+  .desk-grade--on > .desk-grade__bar { color: var(--sel-ink); }
+
+  /* The paper to sit next: its names, its figures, its parts as the
+     line the paper rides, the gate; and beside them a question of the
+     kind as the paper prints it. Its edge is the selection's, the
+     paper the page proposes. */
+  .desk-hero {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: var(--sp-7);
+    padding: var(--sp-6) var(--sp-7);
+    background: var(--bg-card);
+    border: 1px solid var(--sel-line);
+    border-radius: var(--r-panel);
+  }
+  .desk-hero:not(:has(> .desk-sample)) { grid-template-columns: minmax(0, 1fr); }
+  .desk-hero__main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+  }
+  .desk-hero__tag { color: var(--sel-ink); }
+  .desk-hero__names {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-4);
+    margin-top: calc(-1 * var(--sp-3));
+  }
+  .desk-hero__name {
+    margin: 0;
+    font-size: var(--fs-heading);
+    font-weight: 700;
+  }
+  .desk-hero__jp {
+    font-family: var(--font-jp);
+    font-size: var(--fs-heading);
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+  .desk-hero__facts,
+  .desk-cover__facts {
+    display: flex;
+    gap: var(--sp-6);
+    margin: 0;
+    font-size: var(--fs-body);
+    color: var(--text-secondary);
+  }
+  .desk-hero__facts b,
+  .desk-cover__facts b {
+    margin-right: var(--sp-1);
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+  }
+  /* The parts as the line's legs: as long as their questions, a stop a
+     question, each named as the booklet names it. Five legs leave no
+     room for what each asks, which the cover says anyway. */
+  .desk-parts {
+    display: flex;
+    gap: var(--sp-5);
+    margin: 0;
+    padding: var(--sp-6) var(--sp-6) var(--sp-5);
+    list-style: none;
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+  }
+  .desk-part {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  .desk-part__rail {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 28px;
+    margin-bottom: var(--sp-2);
+    padding: 0 var(--sp-1);
+  }
+  .desk-part__rail::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    height: 2px;
+    margin-top: -1px;
+    border-radius: var(--r-pill);
+    background: var(--border);
+  }
+  .desk-part__rail > i {
+    position: relative;
+    flex: 0 1 12px;
+    min-width: 6px;
+    aspect-ratio: 1;
+    border: 2px solid var(--text-secondary);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+  }
+  .desk-part__no {
+    font-family: var(--font-jp);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    color: var(--exam-ink);
+  }
+  .desk-part__jp {
+    font-family: var(--font-jp);
+    font-size: var(--fs-sm);
+  }
+  .desk-part__fr { font-size: var(--fs-caption); color: var(--text-secondary); }
+  .desk-part__how {
+    margin-top: var(--sp-2);
+    font-size: var(--fs-sm);
+    line-height: 1.45;
+  }
+  .desk-parts:has(> .desk-part:nth-child(4)) .desk-part__how { display: none; }
+  .desk-hero__foot {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    margin-top: auto;
+  }
+  .desk-hero__note {
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  .desk-hero__go {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .desk-hero__fresh {
+    align-self: center;
+    padding: 0;
+    background: none;
+    border: 0;
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .desk-hero__fresh:hover,
+  .desk-hero__fresh:focus-visible { color: var(--text-primary); filter: none; }
+  /* One question of the kind, as the paper prints it: never one of the
+     paper about to be sat (/api/station/exam/samples). */
+  .desk-sample {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-6);
+    padding: var(--sp-6);
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+  }
+  .desk-sample > .cap { align-self: flex-start; }
+  .desk-sample__line {
+    margin: 0;
+    font-family: var(--font-jp);
+    font-size: var(--fs-heading);
+    font-weight: 500;
+    line-height: 1.6;
+    text-align: center;
+    text-wrap: balance;
+  }
+  .desk-sample__mark,
+  .desk-q .exam-underline {
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-color: var(--exam-ink);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.3em;
+  }
+  .desk-sample__answer {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    margin: 0;
+    font-family: var(--font-jp);
+    font-size: var(--fs-title);
+    font-weight: 600;
+  }
+  .desk-sample__answer > span { color: var(--exam-ink); }
+  .desk-sample__text {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    font-family: var(--font-jp);
+  }
+  .desk-sample__text > p {
+    display: -webkit-box;
+    margin: 0;
+    font-size: var(--fs-body);
+    line-height: 1.9;
+    -webkit-line-clamp: 8;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  /* The grade's other papers, and the learner's record of the grade. */
+  .desk-others {
+    flex: none;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--sp-5);
+  }
+  .desk-prow {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    padding: var(--sp-5);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    color: var(--text-primary);
+    font: inherit;
+    text-align: left;
+  }
+  .desk-prow:hover,
+  .desk-prow:focus-visible { background: var(--bg-card-hover); filter: none; }
+  /* A name too wide beside its glyph (a laptop's 1100px, a wider face)
+     goes under it rather than out of its card. */
+  .desk-prow__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+  .desk-prow__glyph {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 2.5px solid var(--line-exam);
+    border-radius: var(--r-pill);
+    font-family: var(--font-jp);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--exam-ink);
+  }
+  .desk-prow__names {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .desk-prow__name { font-size: var(--fs-lead); font-weight: 700; }
+  .desk-prow__sub { font-size: var(--fs-sm); color: var(--text-secondary); }
+  .desk-prow__parts {
+    font-family: var(--font-jp);
+    font-size: var(--fs-caption);
+    line-height: 1.7;
+    color: var(--text-secondary);
+  }
+  .desk-prow__end {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: var(--sp-3);
+    border-top: 1px solid var(--surface-line);
+  }
+  .desk-prow__fig,
+  .desk-rec b {
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-variant-numeric: tabular-nums;
+  }
+  .desk-prow__fig small,
+  .desk-rec small { font-size: var(--fs-sm); color: var(--text-secondary); }
+  .desk-rec {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--surface-line);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    overflow: hidden;
+  }
+  .desk-rec > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--sp-2);
+    padding: var(--sp-4) var(--sp-5);
+    background: var(--surface);
+  }
+  .desk-rec > div:last-child { grid-column: 1 / -1; }
+
+  /* ── the paper: the booklet on the page, the sheet in the side ── */
+  .desk-run--exam > .desk-run__side { background: var(--surface); }
+  .desk-exam {
+    gap: var(--sp-5);
+    text-align: left;
+  }
+  .desk-exam__head {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-5);
+    min-height: 44px;
+  }
+  .desk-exam__flag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    min-height: 44px;
+    padding: 0 var(--sp-4);
+    background: none;
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-exam__flag:hover,
+  .desk-exam__flag:focus-visible { color: var(--text-primary); filter: none; }
+  .desk-exam__flag--on,
+  .desk-exam__flag--on:hover,
+  .desk-exam__flag--on:focus-visible {
+    background: var(--sel-wash);
+    border-color: var(--sel-line);
+    color: var(--sel-ink);
+  }
+  /* The booklet's page: its head (the part's plate, its name, what it
+     asks, the page's number), the question alone with its answers
+     under it, a third of the way down, and the page turning in its
+     foot. A passage opens the booklet on two pages. */
+  .desk-book {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--r-panel);
+  }
+  .desk-book__head {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    min-height: 60px;
+    padding: 0 var(--sp-7);
+    border-bottom: 1px solid var(--border);
+  }
+  .desk-book__part {
+    font-family: var(--font-jp);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .desk-book__how {
+    min-width: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .desk-folio {
+    flex: none;
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--sp-1);
+    margin-inline-start: auto;
+    font-family: var(--font-display);
+    white-space: nowrap;
+  }
+  .desk-folio > b { font-size: var(--fs-title); font-variant-numeric: tabular-nums; }
+  .desk-folio > small { font-size: var(--fs-sm); font-weight: 700; color: var(--text-secondary); }
+  .desk-book__walk {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-inline-start: auto;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .desk-book__walk + .desk-folio { margin-inline-start: var(--sp-5); }
+  .desk-book__body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-8);
+    padding: var(--sp-8) var(--sp-9);
+  }
+  .desk-book__body::before { content: ''; flex: 1 1 0; }
+  .desk-book__body::after { content: ''; flex: 2 1 0; }
+  .desk-book--res .desk-book__body {
+    gap: var(--sp-7);
+    padding: var(--sp-7) var(--sp-8);
+  }
+  .desk-book--res .desk-book__body::after { flex-grow: 1; }
+  .desk-book--res .exam-ask__big { font-size: var(--fs-heading); }
+  .desk-book__foot {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 56px;
+    padding: 0 var(--sp-5);
+    border-top: 1px dashed var(--border);
+  }
+  .desk-turn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    min-height: 44px;
+    padding: 0 var(--sp-3);
+    background: none;
+    border: 0;
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .desk-turn > b { font-size: var(--fs-body); font-variant-numeric: tabular-nums; }
+  .desk-turn:disabled { opacity: 0.45; }
+  .desk-turn:not(:disabled):hover,
+  .desk-turn:not(:disabled):focus-visible { color: var(--text-primary); filter: none; }
+  .desk-book__hint {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--fs-caption);
+    color: var(--text-secondary);
+  }
+  /* The question, its number in the booklet's box beside it; what the
+     phone's page draws (.exam-ask) set on the page's left edge. */
+  .desk-q {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: var(--sp-6);
+  }
+  .desk-q__n {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border: 1.5px solid var(--text-secondary);
+    border-radius: var(--r-plate);
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+  }
+  .desk-q > :is(.exam-ask, .exam-question) {
+    min-width: 0;
+    align-items: stretch;
+    gap: var(--sp-5);
+    padding: 0;
+    overflow: visible;
+    text-align: left;
+  }
+  .desk-q > .exam-ask--centre > :first-child { margin-top: 0; }
+  .desk-q > .exam-ask--centre > :last-child { margin-bottom: 0; }
+  .desk-q .exam-ask__slots { justify-content: flex-start; }
+  .desk-q .exam-ask__scroll {
+    flex: none;
+    padding: 0;
+    overflow: visible;
+  }
+  .desk-q .exam-ask__foot { padding: var(--sp-4) 0 0; }
+  .desk-q .exam-ask__big { text-wrap: pretty; }
+  .desk-q .exam-gap { border-bottom-color: var(--exam-ink); }
+  /* A question asked alone on its page (a listening question's, an
+     ordering's context) at the heading's rung, as M3 and M5 set it. */
+  .desk-book__body .desk-q .exam-ask__line { font-size: var(--fs-heading); line-height: 1.5; }
+  /* A listening question as M5 draws it: its number beside the
+     question, and under them the ring, its clock, its key and Replay
+     standing to its right rather than stacked under it. */
+  .desk-q:has(.exam-ring) { align-items: start; }
+  /* The question and its player apart, two blocks (the owner's call). */
+  .desk-q > .exam-ask:has(> .exam-ring) { gap: var(--sp-8); }
+  .desk-q .exam-ring {
+    display: grid;
+    grid-template:
+      'dial clock' 1fr
+      'dial key' auto
+      'dial replay' 1fr
+      / auto auto;
+    align-self: center;
+    align-items: center;
+    gap: var(--sp-2) var(--sp-6);
+  }
+  .desk-q .exam-ring__dial { grid-area: dial; }
+  .desk-q .exam-ring__clock {
+    grid-area: clock;
+    align-self: end;
+    font-size: var(--fs-lead);
+  }
+  .desk-q .exam-ring__replay {
+    grid-area: replay;
+    place-self: start;
+    padding: 0;
+  }
+  .exam-ring__key {
+    grid-area: key;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  .desk-q .exam-transcript { grid-column: 1 / -1; }
+  /* The answers, printed under the question in the sheet's bubbles,
+     round as the phone's are (the owner's call): four across when each
+     is a few signs, two when a few words, one a row when a sentence. */
+  .desk-choices { display: grid; gap: var(--sp-4); }
+  .desk-choices--1 { grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
+  .desk-choices--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .desk-choices--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .desk-choices--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .desk-choice {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    min-height: 64px;
+    padding: var(--sp-3) var(--sp-5) var(--sp-3) var(--sp-4);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--r-panel);
+    color: var(--text-primary);
+    font: inherit;
+    text-align: left;
+  }
+  .desk-choices--1 .desk-choice { min-height: 54px; }
+  button.desk-choice:not(:disabled):hover,
+  button.desk-choice:not(:disabled):focus-visible {
+    border-color: var(--text-secondary);
+    background: var(--bg-card-hover);
+    filter: none;
+  }
+  .desk-choice__o {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--text-secondary);
+    border-radius: var(--r-pill);
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-secondary);
+  }
+  .desk-choice__t {
+    min-width: 0;
+    font-family: var(--font-jp);
+    font-size: var(--fs-title);
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .desk-choice__t--long { font-size: var(--fs-body); font-weight: 500; line-height: 1.5; }
+  .desk-choice__tag {
+    margin-inline-start: auto;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  /* Picked: the oval filled in the pencil's ink, the box a shade of it. */
+  .desk-choice--on,
+  button.desk-choice--on:not(:disabled):hover,
+  button.desk-choice--on:not(:disabled):focus-visible {
+    border-color: color-mix(in srgb, var(--text-primary) 70%, transparent);
+    background: color-mix(in srgb, var(--text-primary) 6%, var(--bg-card));
+  }
+  .desk-choice--on .desk-choice__o {
+    background: var(--text-primary);
+    border-color: var(--text-primary);
+    color: var(--bg-main);
+  }
+  .desk-choice--right {
+    border-color: var(--success);
+    background: color-mix(in srgb, var(--success) 12%, var(--bg-card));
+  }
+  .desk-choice--wrong {
+    border-color: var(--danger);
+    background: color-mix(in srgb, var(--danger) 12%, var(--bg-card));
+  }
+  .desk-choice--right .desk-choice__o {
+    background: var(--success);
+    border-color: var(--success);
+    color: var(--bg-main);
+  }
+  .desk-choice--wrong .desk-choice__o {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: var(--text-on-panel);
+  }
+  .desk-choice--right .desk-choice__tag { color: color-mix(in srgb, var(--success) 60%, var(--text-primary)); }
+  .desk-choice--wrong .desk-choice__tag { color: color-mix(in srgb, var(--danger) 45%, var(--text-primary)); }
+  .desk-choice--dim { opacity: 0.5; }
+  /* A passage: the text on the left page, standing while its questions
+     turn on the right. */
+  .desk-spread {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  }
+  .desk-spread__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    padding: var(--sp-7) var(--sp-8);
+    border-inline-end: 1px solid var(--border);
+    font-family: var(--font-jp);
+  }
+  .desk-spread__text .exam-passage__text {
+    margin: 0;
+    font-size: var(--fs-lead);
+    line-height: 2;
+  }
+  .desk-spread__ask {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-7);
+    padding: var(--sp-7);
+  }
+  .desk-spread__ask > .desk-q { align-items: start; }
+  .desk-serves {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    margin-top: auto;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-serves > span { margin-inline-end: var(--sp-2); }
+  .desk-serves__q {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 var(--sp-1);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--r-plate);
+    font: inherit;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+  .desk-serves__q:hover,
+  .desk-serves__q:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); filter: none; }
+  .desk-serves__q--done { color: var(--text-primary); border-color: var(--text-secondary); }
+  .desk-serves__q--here,
+  .desk-serves__q--here:hover,
+  .desk-serves__q--here:focus-visible {
+    background: var(--sel-wash);
+    border-color: var(--sel-line);
+    color: var(--sel-ink);
+  }
+
+  /* The cover: the paper's names centred as a booklet prints them, its
+     parts as a table of contents, the gate. */
+  .desk-cover {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-7);
+    padding: var(--sp-8) var(--sp-9);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--r-panel);
+  }
+  .desk-cover__names {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+  .desk-cover__jp {
+    margin: 0;
+    font-family: var(--font-jp);
+    font-size: var(--fs-display);
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .desk-cover__name { font-size: var(--fs-title); color: var(--text-secondary); }
+  .desk-toc {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    max-width: var(--card-w);
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--border);
+  }
+  .desk-toc__part {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: var(--sp-1) var(--sp-4);
+    padding: var(--sp-4) 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .desk-toc__jp { font-family: var(--font-jp); font-size: var(--fs-body); font-weight: 700; }
+  .desk-toc__fr {
+    min-width: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .desk-toc__n {
+    font-family: var(--font-display);
+    font-size: var(--fs-lead);
+    font-variant-numeric: tabular-nums;
+  }
+  .desk-toc__how {
+    grid-column: 2 / -1;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  .desk-cover__notes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    text-align: center;
+  }
+  .desk-cover__go {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-4);
+    width: 100%;
+    max-width: var(--desk-side-w);
+    margin-top: auto;
+  }
+  .desk-cover__last {
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  .desk-cover__last > b { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+
+  /* The side: the clock and the count over the answer sheet, the way
+     out of the paper at its foot. */
+  .desk-clock {
+    flex: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    row-gap: var(--sp-3);
+  }
+  .desk-clock > .exam-timer { font-size: var(--fs-display); line-height: 1; }
+  .desk-clock__wait { color: var(--text-secondary); }
+  .desk-clock__count {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--sp-1);
+  }
+  .desk-clock__count > b {
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-variant-numeric: tabular-nums;
+  }
+  .desk-clock__count small { font-size: var(--fs-sm); color: var(--text-secondary); }
+  .desk-clock__time {
+    grid-column: 1 / -1;
+    height: 4px;
+    border-radius: var(--r-pill);
+    background: var(--surface-line);
+    overflow: hidden;
+  }
+  .desk-clock__time > i {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--text-secondary);
+  }
+  .desk-clock__time--low > i { background: var(--warning); }
+  .desk-exam__finish { flex: none; margin-top: auto; }
+
+  /* The answer sheet (解答用紙): a part under its plate and name, its
+     rows reading down two columns, a row the question's number and its
+     ovals. */
+  .desk-marksheet {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .desk-mark {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .desk-mark__head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    padding-bottom: var(--sp-2);
+    border-bottom: 1px solid var(--surface-line);
+  }
+  .desk-mark--here .desk-mark__head { border-bottom-color: var(--exam-ink); }
+  .desk-mark__jp { font-family: var(--font-jp); font-size: var(--fs-sm); font-weight: 700; }
+  .desk-mark__fr {
+    min-width: 0;
+    font-size: var(--fs-caption);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .desk-mark__fig {
+    margin-inline-start: auto;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .desk-mark__low { color: color-mix(in srgb, var(--danger) 45%, var(--text-primary)); }
+  .desk-mark__rows {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* --rows is the part's own, set on the element (DeskSheet). */
+    grid-template-rows: repeat(var(--rows, 1), 28px);
+    grid-auto-flow: column;
+    gap: var(--sp-1) var(--sp-4);
+  }
+  .desk-mark-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-1);
+    height: 28px;
+    padding: 0 var(--sp-2);
+    border-radius: var(--r-plate);
+    color: inherit;
+    text-decoration: none;
+  }
+  .desk-mark-row__n {
+    flex: none;
+    width: 22px;
+    margin-inline-end: var(--sp-1);
+    padding: 0;
+    background: none;
+    border: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+    text-align: right;
+  }
+  button.desk-mark-row__n:hover,
+  button.desk-mark-row__n:focus-visible { color: var(--text-primary); filter: none; }
+  .desk-oval {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    background: none;
+    border: 1.5px solid var(--text-secondary);
+    border-radius: var(--r-pill);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-secondary);
+  }
+  button.desk-oval:not(.desk-oval--on):hover,
+  button.desk-oval:not(.desk-oval--on):focus-visible {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+    filter: none;
+  }
+  /* Filled as the page's ovals are: the pencil's mark, and on the
+     marked sheet the verdict's. */
+  .desk-oval--on {
+    background: var(--text-primary);
+    border-color: var(--text-primary);
+    color: var(--bg-main);
+  }
+  .desk-oval--got {
+    background: var(--success);
+    border-color: var(--success);
+    color: var(--bg-main);
+  }
+  .desk-oval--x {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: var(--text-on-panel);
+  }
+  /* A bubble's digit (DeskSheet's Figure) centred on its ink, not its
+     line box: a line box keeps room for the descenders a digit never
+     has, which sat every figure high in its circle. Trimmed on a box
+     of its own, since a bare text node in the bubble's flex box is
+     out of text-box's reach. */
+  .desk-bubble-fig {
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    text-box: trim-both cap alphabetic;
+  }
+  .desk-oval--right {
+    border: 2px solid var(--success);
+    color: color-mix(in srgb, var(--success) 60%, var(--text-primary));
+  }
+  .desk-mark-row__flag { margin-inline-start: auto; color: var(--accent2); }
+  .desk-mark-row--here {
+    background: var(--sel-wash);
+    box-shadow: inset 0 0 0 1px var(--sel-line);
+  }
+  .desk-mark-row--here .desk-mark-row__n { color: var(--sel-ink); }
+  /* Owed while the hand-in asks, and on the marked sheet left blank:
+     the ovals dashed in the warning's ink, the answer ringed. */
+  .desk-mark-row--owe .desk-mark-row__n { color: color-mix(in srgb, var(--warning) 60%, var(--text-primary)); }
+  .desk-mark-row--owe .desk-oval:not(.desk-oval--right) {
+    border-style: dashed;
+    border-color: var(--warning);
+    color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+  }
+  .desk-marksheet--marked .desk-mark-row:hover,
+  .desk-marksheet--marked .desk-mark-row:focus-visible { background: var(--bg-card-hover); }
+  .desk-marksheet--marked .desk-mark-row:focus-visible { outline: 2px solid var(--accent2); outline-offset: 1px; }
+  .desk-marksheet--marked .desk-mark-row--here:is(:hover, :focus-visible) { background: var(--sel-wash); }
+  /* The hand-in, asked in the sheet itself: the blanks to go back to,
+     what a blank costs, the way back first. */
+  .desk-handin {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    margin-top: auto;
+    padding: var(--sp-4);
+    border: 1px solid var(--warning);
+    border-radius: var(--r-card);
+  }
+  .desk-handin__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+  }
+  .desk-handin__title {
+    margin: 0;
+    font-size: var(--fs-body);
+    font-weight: 700;
+  }
+  .desk-handin__x {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: var(--text-secondary);
+  }
+  .desk-handin__x:hover,
+  .desk-handin__x:focus-visible { color: var(--text-primary); filter: none; }
+  .desk-handin__blanks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  .desk-handin__blank {
+    min-width: 32px;
+    height: 28px;
+    padding: 0 var(--sp-2);
+    background: none;
+    border: 1.5px dashed var(--warning);
+    border-radius: var(--r-plate);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+  }
+  .desk-handin__blank:hover,
+  .desk-handin__blank:focus-visible {
+    border-style: solid;
+    background: color-mix(in srgb, var(--warning) 12%, transparent);
+    filter: none;
+  }
+  .desk-handin__note {
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  .desk-handin__row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+
+  /* ── the result: the sheet marked, beside the question's page ──
+     As M7 draws it: both columns the window's height, the sheet a panel
+     down the whole of its column, the question's page growing to what
+     the study and the way on leave it, the way on at the column's foot. */
+  .desk-split--res {
+    grid-template-columns: 420px minmax(0, 1fr);
+    align-items: stretch;
+  }
+  .desk-split--res > .desk-split__page { min-height: calc(100dvh - 2 * var(--sp-6)); }
+  .desk-res__sheet {
+    min-height: calc(100dvh - 2 * var(--sp-6));
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    padding: var(--sp-5);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+    text-align: left;
+  }
+  .desk-res__paper {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    font-size: var(--fs-body);
+  }
+  .desk-score {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .desk-score__figs {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+  }
+  .desk-score__fig { font-size: var(--fs-display); line-height: 1; }
+  .desk-score__of { font-size: var(--fs-title); font-weight: 700; color: var(--text-secondary); }
+  .desk-score__pct {
+    margin-inline-start: auto;
+    font-size: var(--fs-heading);
+    font-weight: 700;
+    color: color-mix(in srgb, var(--success) 60%, var(--text-primary));
+  }
+  .desk-score__pct--low { color: color-mix(in srgb, var(--danger) 45%, var(--text-primary)); }
+  .desk-score__bar {
+    position: relative;
+    height: 8px;
+    border-radius: var(--r-pill);
+    background: var(--surface-line);
+  }
+  .desk-score__bar > i {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    border-radius: inherit;
+    background: var(--success);
+  }
+  .desk-score__bar > i.desk-score__low { background: var(--danger); }
+  .desk-score__tick {
+    position: absolute;
+    top: -5px;
+    bottom: -5px;
+    width: 2px;
+    background: var(--text-primary);
+  }
+  .desk-score__cap {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--sp-3);
+  }
+  .desk-score__time {
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .desk-score__time > small { font-weight: 600; color: var(--text-secondary); }
+  .desk-book--res { flex: 1 0 auto; }
+  /* The question made something to study (exam/ExamStudy), as a panel
+     under the page: its name and a chevron its head, bought on a press
+     (the first learner to ask pays its translation), its body scrolling
+     inside it so the way on stays at the column's foot. */
+  .desk-res .exam-study {
+    flex: none;
+    gap: var(--sp-3);
+    margin-top: 0;
+    padding: var(--sp-2) var(--sp-6);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+  }
+  .desk-res .exam-study__toggle,
+  .desk-res .exam-study__toggle:hover,
+  .desk-res .exam-study__toggle:focus-visible {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    padding: 0;
+    background: none;
+    border: 0;
+    box-shadow: none;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    filter: none;
+  }
+  .desk-res .exam-study__toggle:hover,
+  .desk-res .exam-study__toggle:focus-visible { color: var(--text-primary); }
+  .desk-res .exam-study__body {
+    max-height: calc(8 * var(--sp-8));
+    padding-bottom: var(--sp-4);
+    overflow-y: auto;
+  }
+  .desk-res__acts {
+    flex: none;
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--sp-3);
+  }
+  .desk-res__acts > .btn-primary { min-width: 240px; }
+
+  /* The short desk (plan 169): the page's air a rung less, so its foot
+     stands above the level bar on a laptop's 650px. */
+  @media (max-height: 799px) {
+    .desk-exam { gap: var(--sp-4); }
+    .desk-book__body {
+      gap: var(--sp-6);
+      padding: var(--sp-6) var(--sp-8);
+    }
+    .desk-spread__text,
+    .desk-spread__ask { padding: var(--sp-6); }
+    .desk-cover {
+      gap: var(--sp-5);
+      padding: var(--sp-6) var(--sp-8);
+    }
   }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

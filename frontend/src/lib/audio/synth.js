@@ -47,12 +47,15 @@ const FLOOR = 0.0001   // exponentialRamp cannot reach zero
  *   type   waveform — 'sine' (default), 'triangle', 'square', 'sawtooth'
  *   to     glide the pitch to this frequency across the note
  *   attack override the 4ms onset — longer reads as a swell, not a hit
+ *   floor  the share of `peak` it sounds at once it has started (default
+ *          0: it grows from silence, which for a long swell means nothing
+ *          is heard for most of it, the climb being exponential)
  */
 export function tones(ctx, bus, notes) {
   const now = ctx.currentTime + lead
 
   for (const n of notes) {
-    const { freq, at = 0, dur, peak, type = 'sine', to, attack = ATTACK } = n
+    const { freq, at = 0, dur, peak, type = 'sine', to, attack = ATTACK, floor = 0 } = n
     const start = now + at
     const osc = ctx.createOscillator()
     const env = ctx.createGain()
@@ -62,6 +65,7 @@ export function tones(ctx, bus, notes) {
     if (to && to !== freq) osc.frequency.exponentialRampToValueAtTime(to, start + dur)
 
     env.gain.setValueAtTime(FLOOR, start)
+    if (floor > 0) env.gain.exponentialRampToValueAtTime(peak * floor, start + ATTACK * 4)
     env.gain.exponentialRampToValueAtTime(peak, start + attack)
     env.gain.exponentialRampToValueAtTime(FLOOR, start + dur)
 
@@ -171,8 +175,11 @@ export function noiseTicks(ctx, bus, ticks) {
  * { at, dur, peak } plus the filter's journey: `from` → `mid` at
  * `mid_at` (a fraction of dur) → `to`. `q` sets how hollow it is;
  * `hold` is the fraction of dur spent at full level before the fall.
+ * `swell` (plan 200) makes it a riser: the level climbs for that
+ * fraction of dur (0.97 is nearly all of it) and the sweep is then
+ * cut, `attack` and `hold` unused -- the build before a hit.
  */
-export function noiseSweep(ctx, bus, { at = 0, dur, peak, from, mid, to, midAt = 0.45, q = 0.8, hold = 0.55, attack = 0.1 }) {
+export function noiseSweep(ctx, bus, { at = 0, dur, peak, from, mid, to, midAt = 0.45, q = 0.8, hold = 0.55, attack = 0.1, swell = 0 }) {
   const now = ctx.currentTime + lead
   const start = now + at
 
@@ -201,8 +208,8 @@ export function noiseSweep(ctx, bus, { at = 0, dur, peak, from, mid, to, midAt =
 
   const env = ctx.createGain()
   env.gain.setValueAtTime(FLOOR, start)
-  env.gain.exponentialRampToValueAtTime(peak, start + Math.min(attack, dur * 0.4))
-  env.gain.setValueAtTime(peak, start + dur * hold)
+  env.gain.exponentialRampToValueAtTime(peak, start + (swell ? dur * swell : Math.min(attack, dur * 0.4)))
+  env.gain.setValueAtTime(peak, start + dur * (swell || hold))
   env.gain.exponentialRampToValueAtTime(FLOOR, start + dur)
 
   src.connect(band); band.connect(env); env.connect(bus)
@@ -336,6 +343,11 @@ function hallInto(ctx, dest) {
     convolvers.set(dest, conv)
   }
   return conv
+}
+
+/** The hall made ahead for `dest` (voices.js warms it when idle, plan 207). */
+export function warmHall(ctx, dest) {
+  hallInto(ctx, dest)
 }
 
 // Longer than any voice plus the hall's tail, several times over.

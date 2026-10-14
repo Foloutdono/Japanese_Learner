@@ -87,3 +87,92 @@ export function askTarget(opened, now) {
   }
   return { key: now?.key ?? null, context: askContext({ ...(now?.base ?? {}), analysis: now?.analysis }), open: Boolean(now?.open) }
 }
+
+// ── 問 in the grammar tour (plan 204) ───────────────────────────────
+// The tutorial a never-met point opens with (components/study/
+// GrammarTour.jsx) asks through the same panel, mode "grammar". Each
+// stop is a thread of its own, keyed by the point, so two points toured
+// in one run never share one. Sealed while the stop's question is
+// unanswered, for the practice runs' reason: before the guess, "what
+// does it mean?" is the guess's answer key, and before a twist, the
+// scene's reply or a quiz question is checked, the question's. Open on
+// the rule once it is found, and on the results.
+
+/** The lesson's markup (**strong**) taken off, for the model. */
+const plain = s => (typeof s === 'string' ? s.replace(/\*\*/g, '') : '')
+const lines = xs => xs.filter(Boolean).join('\n')
+
+/** A quiz sentence as it reads answered: the blank filled with the right form. */
+function filled(q, right) {
+  if (!q.furigana?.length) return q.jp ?? ''
+  const answer = q.kind === 'gap' ? String(right?.pattern ?? '').replace(/^[〜～]/, '') : right?.jp ?? ''
+  return q.furigana.map(seg => (seg.blank ? answer : seg.text)).join('')
+}
+
+/** What a choice says, whichever kind of question offered it. */
+const said = c => (c ? c.text ?? c.jp ?? c.pattern ?? '' : '')
+
+/**
+ * The thread, its context and whether it takes a question, for the stop
+ * the tour stands on.
+ *
+ *   point  the gate's point, carrying `tour`
+ *   at     { stop, twist, twistPick, twistDone, sceneDone, scenePick,
+ *            qi, quizPick, quizDone }: the tour's own state at the stop
+ */
+export function tourAsk(point, at) {
+  const tour = point?.tour ?? {}
+  const stop = at?.stop ?? 'look'
+  const key = `tour:${point?.raw_id ?? point?.pattern}:${stop === 'quiz' ? `quiz-${at.qi ?? 0}` : stop}`
+  const base = {
+    level: point?.level,
+    point: `${point?.pattern ?? ''} — ${plain(point?.meaning)}`,
+  }
+  const examples = tour.look ?? []
+  const shown = {
+    ...base,
+    sentence: lines(examples.map(ex => ex.jp)),
+    translation: lines(examples.map(ex => ex.tr)),
+    review: plain(tour.rule ?? point?.meaning),
+  }
+  let context = shown
+  let open = false
+  if (stop === 'found' || stop === 'terminus') {
+    open = true
+  } else if (stop.startsWith('twist-') && at.twist) {
+    const tw = at.twist
+    const right = tw.choices.find(c => c.correct)
+    context = {
+      ...base,
+      sentence: tw.jp,
+      translation: tw.tr,
+      answer: said(tw.choices[at.twistPick]),
+      review: lines([tw.ask, said(right), plain(tw.why)]),
+    }
+    open = Boolean(at.twistDone)
+  } else if (stop === 'scene' && tour.scene) {
+    const scene = tour.scene
+    const right = scene.ask.choices.find(c => c.correct)
+    const heard = [...scene.lines, scene.ask.cue, right && { jp: right.jp }].filter(Boolean)
+    context = {
+      ...base,
+      sentence: lines(heard.map(l => l.jp)),
+      translation: lines(heard.map(l => l.tr)),
+      answer: said(scene.ask.choices[at.scenePick]),
+      review: lines([scene.ask.task, plain(scene.ask.why), plain(scene.note)]),
+    }
+    open = Boolean(at.sceneDone)
+  } else if (stop === 'quiz' && tour.quiz?.[at.qi ?? 0]) {
+    const q = tour.quiz[at.qi ?? 0]
+    const right = q.choices.find(c => c.correct)
+    context = {
+      ...base,
+      sentence: q.kind === 'use' ? said(right) : filled(q, right),
+      translation: q.tr,
+      answer: said(q.choices[at.quizPick]),
+      review: lines([q.ask, q.kind === 'meaning' ? said(right) : null, plain(q.why)]),
+    }
+    open = Boolean(at.quizDone)
+  }
+  return { key, context: askContext(context), open }
+}
