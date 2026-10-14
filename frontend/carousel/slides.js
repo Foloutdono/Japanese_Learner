@@ -1018,7 +1018,7 @@ const KINDS = {
     // lines in the room its row's answer circles leave it.
     const bw0 = r * 2.2
     const roomOf = q => f.right - SP[5] - q.choices.length * r * 2 - (q.choices.length - 1) * SP[4] - SP[4] - (f.x + SP[5] + bw0 + SP[5])
-    const labelSize = [FS.body, FS.sm, FS.caption].find(z => s.quizzes.every(q => !fit(ctx, q.label || '', { weight: 500, sizes: [z], maxW: roomOf(q), maxLines: 2, balanced: false }).cut)) || FS.caption
+    const labelSize = [FS.body, FS.sm, FS.caption, FS.xs].find(z => s.quizzes.every(q => !fit(ctx, q.label || '', { weight: 500, sizes: [z], maxW: roomOf(q), maxLines: 2, balanced: false }).cut)) || FS.caption
     ctx.fillStyle = p.surfaceLine
     ctx.fillRect(f.x, y, f.w, rowH * n + HL)
     s.quizzes.forEach((q, i) => {
@@ -2216,7 +2216,8 @@ function quizSlide(c, q, revealed, head, number = 1) {
     y += paragraph(ctx, a, f.x, y, ink)
   }
   if (q.ask && q.ask !== head) {
-    const ask = fit(ctx, q.ask, { weight: q.askJp ? 500 : 700, sizes: q.askJp ? [FS.body, FS.sm] : roomy ? [FS.title, FS.lead, FS.body] : [FS.lead, FS.body], maxW: f.w, maxLines: 3, balanced: false })
+    // Four lines where a question quotes a whole sentence (plan 201).
+    const ask = fit(ctx, q.ask, { weight: q.askJp ? 500 : 700, sizes: q.askJp ? [FS.body, FS.sm] : roomy ? [FS.title, FS.lead, FS.body] : [FS.lead, FS.body], maxW: f.w, maxLines: 4, balanced: false })
     y += paragraph(ctx, ask, f.x, y, q.askJp ? ink2 : ink) + SP[7]
   }
 
@@ -2738,11 +2739,21 @@ function passagePages(plan, s, fmt, f) {
   const ctx = document.createElement('canvas').getContext('2d')
   const top = FS.heading * 1.1 + SP[6]
   const size = fmt.id === 'story' ? FS.heading : FS.title * 1.15
-  const layouts = s.sents.map(rows => layoutSentence(ctx, rows, { max: size, min: size, maxW: f.w, maxLines: 20, script: plan.script, rules: false, gap: 0.02 }))
-  const out = [[]]
-  // The first page also carries the passage's title.
-  let used = FS.heading * 1.6 + SP[6]
   const room = f.h - top
+  // The first page also carries the passage's title.
+  const titled = FS.heading * 1.6 + SP[6]
+  // A sentence is never cut between pages, so one too tall for a page of
+  // its own (n3-04's second, plan 201) steps down a size until it fits.
+  const layouts = s.sents.map(rows => {
+    let L = null
+    for (const z of [size, FS.title * 1.15, FS.title, FS.lead]) {
+      L = layoutSentence(ctx, rows, { max: z, min: z, maxW: f.w, maxLines: 20, script: plan.script, rules: false, gap: 0.02 })
+      if (L.h <= room - titled) break
+    }
+    return L
+  })
+  const out = [[]]
+  let used = titled
   for (const L of layouts) {
     if (used + L.h > room && out[out.length - 1].length) { out.push([]); used = 0 }
     out[out.length - 1].push(L)
