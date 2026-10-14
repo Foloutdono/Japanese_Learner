@@ -137,24 +137,24 @@ const CORE = 0.7
  *  give or take a third, at its own tilt, and set where it is furthest
  *  from the ones before it, so the screen fills all over; one may run
  *  over another's edge, never over its middle (CORE), so each is read. */
-export function scatter(n, word, fmt, keep) {
+export function scatter(n, word, fmt, keep, { fill: from = 0.46, zMax = 270, core = CORE } = {}) {
   // The largest share of the screen at which every reading still finds
   // its place at nearly its own size; smaller and smaller until one does.
   let out = null
-  for (let fill = 0.46; fill > 0.12; fill *= 0.9) {
-    out = scatterAt(fill, n, word, fmt, keep)
+  for (let fill = from; fill > 0.12; fill *= 0.9) {
+    out = scatterAt(fill, n, word, fmt, keep, zMax, core)
     if (out.every(o => o.z >= o.want * 0.8)) break
   }
   return out
 }
-function scatterAt(fill, n, word, fmt, keep) {
+function scatterAt(fill, n, word, fmt, keep, zMax, core) {
   const rnd = seeded(word.r + word.t)
   const chars = [...word.r].length
-  const base = Math.min(230, Math.max(70, Math.sqrt((fill * fmt.w * fmt.h) / (n * chars))))
+  const base = Math.min(zMax * 0.85, Math.max(70, Math.sqrt((fill * fmt.w * fmt.h) / (n * chars))))
   const M = 12
   const out = []
   for (let i = 0; i < n; i++) {
-    const want = Math.min(270, Math.max(60, base * (0.8 + 0.45 * rnd())))
+    const want = Math.min(zMax, Math.max(60, base * (0.8 + 0.45 * rnd())))
     let z = want
     let best = null
     for (let tries = 0; !best && tries < 8; tries++, z *= 0.88) {
@@ -169,8 +169,8 @@ function scatterAt(fill, n, word, fmt, keep) {
         const y = M + bh / 2 + rnd() * (fmt.h - bh - 2 * M)
         const here = { x, y, w, h, tilt }
         if (keep.some(k => touches(here, centred(k)))) continue
-        const core = { x, y, w: w * CORE, h: h * CORE, tilt }
-        if (out.some(o => touches(core, { ...o, w: o.w * CORE, h: o.h * CORE }))) continue
+        const mid = { x, y, w: w * core, h: h * core, tilt }
+        if (out.some(o => touches(mid, { ...o, w: o.w * core, h: o.h * core }))) continue
         // Furthest from the readings already down, for its size; a little chance in it.
         const far = out.length ? Math.min(...out.map(o => Math.hypot(o.x - x, o.y - y) / ((o.z * chars + z * chars) / 4 + (o.z + z) / 4))) : 1
         const score = far * (0.8 + 0.4 * rnd())
@@ -219,17 +219,21 @@ export function echoDeck(plan, fmt, opts = {}) {
   const gz = 20 * U
   const blockH = size.pic + SP[4] + (kanji ? size.kz * 1.1 + SP[2] : 0) + size.rz * 1.2 + SP[3] + gz * 1.18
   const lines = [[size.pic, size.pic + SP[4]], ...(kanji ? [[size.kz * [...word.t].length, size.kz * 1.1 + SP[2]]] : []), [size.rz * [...word.r].length, size.rz * 1.2 + SP[3]], [0.6 * gz * [...word.gloss].length, gz * 1.18]]
+  // `opts.bold`: larger readings, closer, and over the card too: only the
+  // word itself (its kanji, else its reading), its meaning and the
+  // masthead kept clear.
+  const bold = !!opts.bold
   const keep = []
   let ky = inner.y + (inner.h - blockH) / 2
-  for (const [w, h] of lines) {
+  lines.forEach(([w, h], i) => {
     const lw = Math.min(inner.w, w)
-    keep.push({ x: inner.x + (inner.w - lw) / 2 - pad, y: ky - pad, w: lw + 2 * pad, h: h + 2 * pad })
+    if (!bold || i === 1 || i === lines.length - 1) keep.push({ x: inner.x + (inner.w - lw) / 2 - pad, y: ky - pad, w: lw + 2 * pad, h: h + 2 * pad })
     ky += h
-  }
+  })
   const credit = 0.6 * 11.52 * U * [...plan.echo.voice].length
-  keep.push({ x: card.x + card.w - 16 * U - credit - 8 * U, y: card.y + card.h - 35 * U - 4 * U, w: credit + 24 * U, h: 39 * U })
+  if (credit) keep.push({ x: card.x + card.w - 16 * U - credit - 8 * U, y: card.y + card.h - 35 * U - 4 * U, w: credit + 24 * U, h: 39 * U })
   keep.push({ x: fr.x - 12, y: fr.y - 12, w: 240, h: 64 + 24 })
-  const spots = scatter(at.length, word, fmt, keep)
+  const spots = scatter(at.length, word, fmt, keep, bold ? { fill: 0.8, zMax: 340, core: 0.6 } : {})
   const ease = x => 1 - (1 - x) ** 3
   const drawCard = (ctx, k) => {
     ctx.save()
