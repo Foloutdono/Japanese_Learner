@@ -68,19 +68,21 @@ for (const [k, v] of Object.entries(caps)) {
   }
 }
 fs.writeFileSync(`${WORK}/ov/captions.json`, JSON.stringify(manifest, null, 1))
-// the hook: a full-screen opener, one piece a beat (edit.py animates them)
-const hook = [
-  ['hook_1', 'top:470px;font-size:190px;color:#ece5d8', 'Fed up'],
-  ['hook_2', 'top:715px;font-size:84px;color:#ece5d8', 'with never reaching'],
-  ['hook_3', 'top:850px;font-size:124px;color:#e6b652', 'your Japanese'],
-  ['hook_4', 'top:1010px;font-size:250px;color:#e6b652', 'goal?'],
+// the hook: a full-screen opener, one word at a time (edit.py slams them in)
+const hookLines = [
+  ['top:440px;font-size:200px;color:#ece5d8', ['Fed', 'up']],
+  ['top:700px;font-size:92px;color:#ece5d8', ['with', 'never', 'reaching']],
+  ['top:845px;font-size:128px;color:#e6b652', ['your', 'Japanese']],
+  ['top:1000px;font-size:270px;color:#e6b652', ['goal?']],
 ]
-for (const [k, css, text] of hook) {
-  await shot(`<div style="position:absolute;left:0;right:0;${css};text-align:center;font-family:TsujiSerif;font-weight:900;line-height:1.05;letter-spacing:-1px;text-shadow:0 6px 30px rgba(0,0,0,.6)">${text}</div>`, `${WORK}/ov/${k}.png`)
+const hookHtml = hookLines.map(([css, words]) => `<div style="position:absolute;left:0;right:0;${css};text-align:center;font-family:TsujiSerif;font-weight:900;line-height:1.05;letter-spacing:-1px;text-shadow:0 8px 34px rgba(0,0,0,.65)">${words.map(w => `<span class="hw">${w}</span>`).join(' ')}</div>`).join('')
+await page.setContent(`<!doctype html><html><head>${head}</head><body>${hookHtml}</body></html>`, { waitUntil: 'load' })
+await page.evaluate(() => document.fonts.ready)
+const nHook = await page.locator('.hw').count()
+for (let i = 0; i < nHook; i++) {
+  await page.evaluate(i => document.querySelectorAll('.hw').forEach((e, j) => { e.style.visibility = j === i ? 'visible' : 'hidden' }), i)
+  await page.screenshot({ path: `${WORK}/ov/hookw_${i}.png`, omitBackground: true })
 }
-// the gold line under "goal?": the app's route, ending on a station ring
-await shot(`<div style="position:absolute;left:250px;top:1316px;width:560px;height:14px;border-radius:7px;background:linear-gradient(90deg,#c99a3e,#ecc56a);box-shadow:0 0 24px rgba(201,154,62,.45)"></div>
-  <div style="position:absolute;left:792px;top:1297px;width:52px;height:52px;border-radius:50%;box-sizing:border-box;border:12px solid #ecc56a;background:#17151a"></div>`, `${WORK}/ov/hook_line.png`)
 // background: sumi, a warm glow behind the phone, the mark as a faint watermark
 await shot(`<div style="position:absolute;inset:0;background:
   radial-gradient(ellipse 620px 760px at 540px 1120px, rgba(201,154,62,.20), transparent 70%),

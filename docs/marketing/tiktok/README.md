@@ -1,6 +1,6 @@
 # TikTok promo: "Fed up with never reaching your Japanese goal?"
 
-`tsuji-tiktok.mp4` is 1080×1920, 30 fps and 59.5 s long, with AAC audio at
+`tsuji-tiktok.mp4` is 1080×1920, 30 fps and 58.6 s long, with AAC audio at
 −14 LUFS (TikTok's playback level). Every phone shot in it is live footage of
 the app, recorded in a phone-sized browser (390×780 CSS px, 3× pixel density,
 English UI, dark theme).
@@ -9,8 +9,8 @@ English UI, dark theme).
 
 - **Music:** an original track written for this video, synthesized in
   `pipeline/music.py`. No sample or loop is borrowed, so there is nothing to
-  license. It runs at 128 BPM in D major: a filtered two-bar intro with a
-  riser, then a drop on "Try Tsuji!". After the drop it loops 王道進行
+  license. It runs at 128 BPM in D major: a six-beat hook of drone, riser and a
+  snare build under the word hits, then a drop on "Try Tsuji!". After the drop it loops 王道進行
   (G maj7, A7, F#m7, Bm7) under a koto-like pluck in the major pentatonic,
   and it resolves on D under the address (32 bars).
 - **The app's own sounds:** every click, card turn, "correct", fare tick,
@@ -39,15 +39,15 @@ no glow pulses with the beat.
 
 | Time | Beat | Caption | Footage |
 | --- | --- | --- | --- |
-| 0:00 | 0 | Fed up with never reaching **your Japanese goal?** | Full screen, no phone: "Fed up", "with never reaching", "your Japanese", then a big gold "goal?", one per beat, each with the app's wood pick (the hanko on "goal?"). The gold route line draws under it onto a station ring, then the words lift away as the phone rises in |
-| 0:03.8 | 8 (drop) | 辻 Try **Tsuji!** | The hub. Board is pressed on beat 12.5 |
-| 0:06.6 | 14 | **Set up your goal** and follow your progress | N4 picked, then the plan arrives under its 案内 sign: Apr 24, 2027 |
-| 0:12.7 | 27 | Set up your goal and **follow your progress** | The plan's route map: kana, ~450 words, ~900 words, N4 |
-| 0:15.0 | 32 | **Connect, board** and you are on track | The pass, Enter the station, the gate and the 辻 TSUJI sign |
-| 0:18.8 | 40 | Connect, board and **you are on track** | Today, Depart, a card turned and rated Correct, and the level-up (79 → 80). Then the day cleared on the 30th day in a row: Service complete, the stamp card filling to 30, fireworks, the 一ヶ月 ticket and +1,000 XP |
-| 0:37.5 | 80 | Try **more complex learning modes** if you like it | Draw the kanji: 国 ("Country") drawn stroke by stroke, revealed, Correct |
-| 0:47.3 | 101 | Assimilate your study with **the practice modes** | Timed reading: the sentence shown, its reading typed, 100%, Correct |
-| 0:54.4 | 116 | Join Tsuji right now on **tsuji.app** | The hub. The address stamps in on beat 120 and the last chord lands on beat 124 |
+| 0:00 | – | Fed up with never reaching **your Japanese goal?** | Full screen, no phone, 2.8 s. Each word slams in on an eighth note ("Fed", "up", "with", "never", "reaching", "your", "Japanese"), a little shake under each and a hit to match: a thump with the app's wood pick or click. A huge gold "goal?" lands on its own beat with a sub boom and the hanko, a snare build rises, and the words blow past the camera as the phone rises in on the drop's biggest hit |
+| 0:02.8 | 8 (drop) | 辻 Try **Tsuji!** | The hub. Board is pressed on beat 12.5 |
+| 0:05.6 | 14 | **Set up your goal** and follow your progress | N4 picked, then the plan arrives under its 案内 sign: Apr 24, 2027 |
+| 0:11.7 | 27 | Set up your goal and **follow your progress** | The plan's route map: kana, ~450 words, ~900 words, N4 |
+| 0:14.1 | 32 | **Connect, board** and you are on track | The pass, Enter the station, the gate and the 辻 TSUJI sign |
+| 0:17.8 | 40 | Connect, board and **you are on track** | Today, Depart, a card turned and rated Correct, and the level-up (79 → 80). Then the day cleared on the 30th day in a row: Service complete, the stamp card filling to 30, fireworks, the 一ヶ月 ticket and +1,000 XP |
+| 0:36.6 | 80 | Try **more complex learning modes** if you like it | Draw the kanji: 国 ("Country") drawn stroke by stroke, revealed, Correct |
+| 0:46.4 | 101 | Assimilate your study with **the practice modes** | Timed reading: the sentence shown, its reading typed, 100%, Correct |
+| 0:53.4 | 116 | Join Tsuji right now on **tsuji.app** | The hub. The address stamps in on beat 120 and the last chord lands on beat 124 |
 
 Left out on purpose: the name and account forms, the test ride after
 the gate, and the profile.

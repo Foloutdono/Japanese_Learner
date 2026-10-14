@@ -10,7 +10,7 @@ AUD = os.path.join(os.environ.get('FILM_DIR', '/tmp/tsuji-film'), 'audio'); os.m
 from scipy.signal import lfilter, butter, sosfilt, fftconvolve
 SR = 48000; BPM = 128; BEAT = 60 / BPM; BAR = 4 * BEAT; STEP = BEAT / 4
 BARS = 32; TAIL = 2.5
-N = int((BARS * BAR + TAIL) * SR)
+N = int((6 * (60 / 128) + (BARS - 2) * BAR + TAIL) * SR)
 rng = np.random.default_rng(11)
 def hz(n):  # note name -> Hz
     names = {'C': 0, 'C#': 1, 'D': 2, 'D#': 3, 'E': 4, 'F': 5, 'F#': 6, 'G': 7, 'G#': 8, 'A': 9, 'A#': 10, 'B': 11}
@@ -94,9 +94,11 @@ MOTIF = {0: [(0, 'B4'), (3, 'A4'), (6, 'F#4'), (8, 'A4'), (10, 'B4'), (14, 'D5')
 keys, bas, drum, pl, fx = buf(), buf(), buf(), buf(), buf()
 kicks = []
 DROP = 2; END = 31
+INTRO_T = 6 * BEAT   # the hook: six beats of tension, then the drop
 for b, ch in enumerate(prog):
-    t0 = b * BAR
-    intro, final = b < DROP, b >= END
+    if b < DROP: continue          # the hook's bars are tension, written below
+    t0 = INTRO_T + (b - DROP) * BAR
+    intro, final = False, b >= END
     # EP chords: one long voicing a bar, a softer push on step 10
     for k, n in enumerate(CH[ch]):
         pan = -0.35 + 0.7 * k / max(1, len(CH[ch]) - 1)
@@ -134,18 +136,15 @@ for b, ch in enumerate(prog):
     if b in (19, 28):  # fills into the modes and into the address
         for s in (12, 13, 14, 15): place(drum, snare(0.5 + 0.12 * (s - 12)), t0 + s * STEP, 0.28)
 
-# intro: filtered keys, a riser and a snare roll into the drop
-iN = at(DROP * BAR)
-sweep = np.zeros(iN); seg = 2048
-for ch in range(2):
-    x = keys[:iN, ch].copy(); y = np.zeros(iN)
-    for i in range(0, iN, seg):
-        fc = 500 * (16 ** (i / iN)); y[i:i + seg] = lp(x[max(0, i - 8192):i + seg], fc)[-len(y[i:i + seg]):]
-    keys[:iN, ch] = y
-place(fx, riser(BAR * 1.0), (DROP - 1) * BAR, 0.28)
-for s in range(8, 16): place(drum, snare(0.25 + 0.05 * (s - 8)), (DROP - 1) * BAR + s * STEP, 0.3)
-for s in (14, 15): place(drum, snare(0.6), (DROP - 1) * BAR + s * STEP + STEP / 2, 0.3)
-place(fx, crash(0.9), DROP * BAR, 0.35); place(fx, boom(1.0), DROP * BAR, 0.6)
+# the hook: a low drone, a riser, and a snare build from "goal?" into the drop
+tD = np.arange(at(INTRO_T)) / SR
+drone = sum(np.sin(2 * np.pi * hz(n) * tD) * g for n, g in (('B1', 1.0), ('F#2', 0.35), ('B2', 0.25)))
+drone = lp(np.tanh(1.2 * drone), 400) * np.minimum(1, tD / 0.3) * (0.55 + 0.45 * tD / tD[-1])
+place(fx, drone, 0, 0.16)
+place(fx, riser(INTRO_T), 0, 0.30)
+for k in range(16):  # 16ths from beat 4 to the drop, louder as it comes
+    place(drum, snare(0.25 + 0.05 * k), 4 * BEAT + k * BEAT / 8, 0.30)
+place(fx, crash(0.9), INTRO_T, 0.35); place(fx, boom(1.0), INTRO_T, 0.6)
 
 # sidechain: keys and bass breathe with the kick
 sc = np.ones(N)

@@ -19,9 +19,12 @@ os.makedirs(OUT, exist_ok=True)
 
 BPM = 128; B = 60 / BPM; FPS = 30
 END_BEAT = 127
-T_END = END_BEAT * B
 PX, PY, PW, PH = 190, 400, 700, 1400
-def bt(b): return b * B
+# The song's beats, numbered from its old two-bar intro: the hook is now six
+# beats, so beat b sounds at (b - 2) beats. The drop, beat 8, is at 2.81 s.
+SHIFT = 2
+def bt(b): return (b - SHIFT) * B
+T_END = bt(END_BEAT)
 
 # ── the cut: (clip, [(source seconds, beat)...]) ─────────────────────────
 # Each anchor pins a moment of the recording to a beat; between anchors the
@@ -231,37 +234,46 @@ def draw_run(frame, t, first, last, t_in, t_out):
         p = clamp((since + 0.1 - stagger * i) / 0.3)
         if p > 0: paste(frame, im, (x, y + 30 * (1 - out_cubic(p)) + exit_dy), k=out_cubic(p) * exit_k, s=0.9 + 0.1 * out_back(p))
 
-HOOK = [('hook_1', -0.3, 1.0), ('hook_2', 2, 1.0), ('hook_3', 4, 1.0), ('hook_4', 6, 1.5)]  # piece, beat, slam
-PHONE_IN = 7.7      # the phone rises in, landing on the drop (beat 8)
+# The hook, word by word on eighth notes: (word image, seconds, weight).
+# Weight sets the slam, the shake and the hit under it.
+E = B / 2
+HOOK = [(0, -0.12, 'big'), (1, 1 * E, 'mid'), (2, 2 * E, 'small'), (3, 3 * E, 'small'), (4, 4 * E, 'mid'),
+        (5, 5 * E, 'small'), (6, 6 * E, 'mid'), (7, 8 * E, 'goal')]
+SLAM = {'small': (1.6, 0.13, 5), 'mid': (1.8, 0.14, 9), 'big': (2.0, 0.15, 12), 'goal': (2.8, 0.2, 24)}  # scale, seconds, shake px
+DROP_T = bt(8)
 
 def hook_layer(frame, t):
     st = static()
-    if 'hook' not in st:
-        st['hook'] = {k: load_rgba(f'{OV}/{k}.png') for k, _, _ in HOOK}; st['hook_line'] = load_rgba(f'{OV}/hook_line.png')
-    p_out = clamp((t - bt(7.55)) / (bt(8.05) - bt(7.55)))
-    k_out, dy_out = 1 - out_cubic(p_out), -90 * out_cubic(p_out)
-    if k_out <= 0: return
-    for k, b, slam in HOOK:
-        p = clamp((t - bt(b)) / 0.24)
+    if 'hook' not in st: st['hook'] = [load_rgba(f'{OV}/hookw_{i}.png') for i in range(len(HOOK))]
+    if t > DROP_T: return
+    # every word landed shakes the block, briefly
+    dx = dy = 0.0
+    for _, t0, w in HOOK:
+        a = SLAM[w][2]; u = t - max(t0, 0)
+        if 0 <= u < 0.25:
+            d = a * math.exp(-u / 0.06); dx += d * math.sin(2 * math.pi * 23 * u); dy += 0.6 * d * math.cos(2 * math.pi * 19 * u)
+    # out: the words blow up past the camera as the phone comes in
+    p_out = clamp((t - (DROP_T - 0.22)) / 0.16)
+    block = Image.new('RGBA', frame.size, (0, 0, 0, 0)) if p_out > 0 else frame
+    for i, t0, w in HOOK:
+        s0, dur, _ = SLAM[w]
+        p = clamp((t - t0) / dur)
         if p <= 0: continue
-        im, (x, y) = st['hook'][k]
-        paste(frame, im, (x, y + dy_out), k=clamp(p * 2.5) * k_out, s=slam - (slam - 1) * out_cubic(p))
-    # the gold line runs out under "goal?", left to right, onto its ring
-    p = in_out((t - bt(6.5)) / (bt(7.3) - bt(6.5)))
-    if p > 0:
-        im, (x, y) = st['hook_line']
-        w = max(1, int(im.width * p)); paste(frame, im.crop((0, 0, w, im.height)), (x, y + dy_out), k=k_out)
+        im, (x, y) = st['hook'][i]
+        paste(block, im, (x + dx, y + dy), k=clamp(p * 4), s=s0 - (s0 - 1) * out_back(p, 1.2))
+    if p_out > 0:  # the block, as one, blows past the camera
+        paste(frame, block, (0, 0), k=1 - p_out, s=1 + 0.45 * out_cubic(p_out))
 
 def render(n):
     t = n / FPS; st = static()
     frame = st['bg'].convert('RGBA')
     hook_layer(frame, t)
-    if t >= bt(PHONE_IN):
+    if t >= DROP_T - 0.12:
         M = st['M']
         layer = Image.new('RGBA', (PW + 2 * M, PH + 2 * M), (0, 0, 0, 0))
         layer.paste(screen(t), (M, M), st['mask'])
         layer.alpha_composite(st['frame'])
-        rise = 1 - out_cubic(clamp((t - bt(PHONE_IN)) / (bt(8) - bt(PHONE_IN) + 0.12)))
+        rise = 1 - out_cubic(clamp((t - (DROP_T - 0.12)) / 0.36))
         paste(frame, layer, (PX - M, PY - M + int(1500 * rise)))
     caption_layer(frame, t)
     return frame.convert('RGB')
@@ -290,11 +302,13 @@ def audio():
     music = np.load(f'{AUD}/music.npy')[:N]
     music = np.pad(music, ((0, max(0, N - len(music))), (0, 0)))
     sfx = np.zeros((N, 2), np.float32)
+    hits = np.zeros((N, 2), np.float32)   # the hook's own hits, levelled on their own
+    bus = [sfx]
     def put(x, t, g):
         i = int(round(t * SR))
         if i >= N or i + len(x) <= 0: return
         if i < 0: x = x[-i:]; i = 0
-        j = min(N, i + len(x)); sfx[i:j] += g * x[:j - i]
+        j = min(N, i + len(x)); bus[0][i:j] += g * x[:j - i]
     cache = {}
     def snd(name):
         if name not in cache: cache[name] = read_wav(f'{SFX_DIR}/{name}.wav') if os.path.exists(f'{SFX_DIR}/{name}.wav') else None
@@ -333,17 +347,41 @@ def audio():
         tb = S[k].t0
         if any(abs(tb - bt(b)) < 1e-6 for b in SCENE_BEATS) or S[k].clip == S[k - 1].clip and abs(S[k - 1].src(tb) - S[k].src(tb)) < 0.05: continue
         if snd('card-transition') is not None: put(snd('card-transition'), tb - 0.06, 0.9)
-    for _, b, slam in HOOK[1:]:
-        if slam > 1.2: put(snd('card-stamp'), bt(b), 1.3)
-        else: put(snd('click-mode-selection'), bt(b), 1.1)
-    put(wh, bt(8) - len(wh) / SR + 0.03, 0.55)
+    # the hook: a hit under every word, heavier as the word is
+    bus[0] = hits
+    def thump(f0, f1, dur, k=0.004):
+        n = int(dur * SR); tt = np.arange(n) / SR
+        f = f1 + (f0 - f1) * np.exp(-tt / 0.03)
+        x = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-tt / (dur / 3)) + 0.5 * rng.uniform(-1, 1, n) * np.exp(-tt / k)
+        x = np.tanh(1.8 * x); return np.stack([x, x], 1)
+    def slam(dur=0.12):
+        from scipy.signal import butter, sosfilt
+        n = int(dur * SR); tt = np.arange(n) / SR
+        x = sosfilt(butter(2, 2200, 'low', fs=SR, output='sos'), rng.uniform(-1, 1, n)) * np.exp(-tt / 0.035)
+        return np.stack([x, x], 1) * 2.2
+    for _, t0, w in HOOK:
+        t0 = max(t0, 0)
+        if w == 'small':
+            put(thump(120, 60, 0.14), t0, 0.32); put(snd('click-mode-selection'), t0, 1.0)
+        elif w in ('mid', 'big'):
+            g = 1.0 if w == 'big' else 0.8
+            put(thump(140, 48, 0.2), t0, 0.5 * g); put(slam(), t0, 0.35 * g); put(snd('click'), t0, 0.9)
+        else:  # goal?
+            put(thump(110, 34, 1.1, 0.006), t0, 0.75); put(slam(0.25), t0, 0.5); put(snd('card-stamp'), t0, 1.4)
+    # the drop: the biggest hit of all, as the phone lands
+    put(thump(100, 30, 1.4, 0.008), DROP_T, 1.0); put(slam(0.3), DROP_T, 0.6)
+    bus[0] = sfx
+    put(wh, DROP_T - len(wh) / SR + 0.03, 0.55)
     put(snd('card-stamp'), bt(PILL_BEAT), 1.2); put(snd('pass-clip'), bt(PILL_BEAT) + 0.02, 0.7)
     # levels: the app's sounds sit on top of the music, which dips under them
     sp = np.max(np.abs(sfx)); print(f'sfx peak {sp:.3f}, {len(placed)} app sounds placed')
     env = np.abs(sfx).max(1)
     k = int(0.12 * SR); env = np.convolve(env, np.ones(k) / k, 'same')
     duck = 1 - 0.35 * np.clip(env / (env.max() + 1e-9) * 3, 0, 1)
-    mix = music * 0.42 * duck[:, None] + sfx * (0.62 / max(sp, 1e-6)) * 0.85
+    # the app's voices at the level they were mixed at before the hook had hits
+    SFX_GAIN = 0.62 / 0.414 * 0.85
+    hp_ = np.max(np.abs(hits)) or 1.0
+    mix = music * 0.42 * duck[:, None] + sfx * SFX_GAIN + hits * (0.62 / hp_)
     fade = int(0.9 * SR); mix[-fade:] *= np.linspace(1, 0, fade)[:, None] ** 2
     mix[:int(0.01 * SR)] *= np.linspace(0, 1, int(0.01 * SR))[:, None]
     pcm = (np.clip(mix / max(1.0, np.max(np.abs(mix)) / 0.97), -1, 1) * 32767).astype('<i2')
