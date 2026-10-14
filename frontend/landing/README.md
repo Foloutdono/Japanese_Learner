@@ -183,8 +183,10 @@ looks for its still, and only a still that loads brings in a player.
 - **The presentation:** 16:9, 1920×1080, 60 to 90 seconds, 25 MB at most.
   Its chapters start at the seconds in `config.mjs`'s
   `PRESENTATION.chapters`, so keep each chapter starting where it says.
-- **On screen:** a demo account, the French interface and the dark theme.
-  Show nothing personal.
+- **On screen:** a demo account, the English interface and the dark theme.
+  Show nothing personal. The clips are filmed from the running app by
+  `scripts/landing-footage/` (its README has the whole procedure), so a
+  clip is remade the day a screen changes.
 
 The shot list, with what to film in each slot, is the canvas's "Footage
 slots" board.
