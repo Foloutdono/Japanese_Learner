@@ -322,7 +322,13 @@ export function promoDeck(plan, fmt, opts) {
     if (of > 1) text(ctx, `${i} / ${of}`, fr.right, fr.y + 64 * 0.66, { f: font(700, FS.caption, 'latin'), color: p.ink2, align: 'right' })
   }
   // Its rings reach past the pill: the whole of them inside the frame.
-  const depart = (ctx, label) => A.departButton(ctx, p, fr.x, fr.bottom - DEP - 8 * U, fr.w, U, label)
+  // In a clip, given the moment it comes in (`at`), it rises in and then
+  // waits as the app's gate waits (app.js's departButton).
+  const depart = (ctx, label, at = null) => {
+    const draw = ready => A.departButton(ctx, p, fr.x, fr.bottom - DEP - 8 * U, fr.w, U, label, ready)
+    if (!clock || at == null) return draw(null)
+    part(ctx, k(at, GATE_RISE), () => draw(Math.max(0, clock.t - at - GATE_RISE)))
+  }
   // The studio's handle, under the words, unless it only names the site.
   const handle = (ctx, y) => {
     const h = (plan.handle || '').trim()
@@ -330,16 +336,18 @@ export function promoDeck(plan, fmt, opts) {
     return lead(ctx, h, y + SP[5], p.gold, [FS.lead, FS.body], { align: 'center', maxLines: 1 })
   }
   // The last frame of every story: the mark, the story's ask, the gate.
+  // In a clip the mark, the ask and its note come in one after another,
+  // then the gate, which waits (END below).
   const board = (ctx, i, of, head, note) => {
     page(ctx, i, of)
     centred(ctx, (c, y) => {
-      mark(c, fr.cx - 130, y, 260, p.ink, p.gold)
+      part(c, k(END.mark, 0.9), () => mark(c, fr.cx - 130, y, 260, p.ink, p.gold))
       y += 260 + SP[7]
-      y = lead(c, head, y, p.ink, [FS.display * 0.62, FS.heading], { align: 'center' })
-      y = lead(c, note, y + SP[5], p.ink2, [FS.lead, FS.body], { align: 'center', weight: 500 })
-      return handle(c, y)
+      y = part(c, k(END.head, 0.8), () => lead(c, head, y, p.ink, [FS.display * 0.62, FS.heading], { align: 'center' }))
+      y = part(c, k(END.note, 0.8), () => lead(c, note, y + SP[5], p.ink2, [FS.lead, FS.body], { align: 'center', weight: 500 }))
+      return part(c, k(END.note + 0.3, 0.8), () => handle(c, y))
     }, FOOT)
-    depart(ctx, P.board)
+    depart(ctx, P.board, END.gate)
   }
   // Today on its print, full-bleed: the hour's sun as the dial, its time
   // under it, the words in the open sky, the print's own ink.
@@ -666,42 +674,57 @@ export function promoDeck(plan, fmt, opts) {
       add('free', ctx => {
         page(ctx, 2, 2)
         centred(ctx, (c, y) => {
-          y = lead(c, P.startFree, y, p.ink, [FS.heading, FS.title], { maxLines: 1 })
+          y = part(c, k(0, 0.8), () => lead(c, P.startFree, y, p.ink, [FS.heading, FS.title], { maxLines: 1 }))
           y += SP[6]
-          for (const [h1, b1] of P.promises) {
+          // In a clip the promises come in one at a time (END.promise).
+          P.promises.forEach(([h1, b1], i) => {
             const h = 74 * U
-            panel(c, fr.x, y, fr.w, h)
-            const room = fr.w - 36 * U
-            const hb = fit(c, say(h1), { weight: 700, sizes: [17 * U, 15 * U], maxW: room, maxLines: 1, fam: 'latin' })
-            const bb = fit(c, say(b1), { weight: 400, sizes: [13.12 * U, 12 * U], maxW: room, maxLines: 1, fam: 'latin' })
-            text(c, hb.lines[0], fr.x + 18 * U, y + 31 * U, { f: hb.f, color: F.ink })
-            text(c, bb.lines[0], fr.x + 18 * U, y + 55 * U, { f: bb.f, color: F.soft })
+            part(c, k(END.promise(i), 0.7), () => {
+              panel(c, fr.x, y, fr.w, h)
+              const room = fr.w - 36 * U
+              const hb = fit(c, say(h1), { weight: 700, sizes: [17 * U, 15 * U], maxW: room, maxLines: 1, fam: 'latin' })
+              const bb = fit(c, say(b1), { weight: 400, sizes: [13.12 * U, 12 * U], maxW: room, maxLines: 1, fam: 'latin' })
+              text(c, hb.lines[0], fr.x + 18 * U, y + 31 * U, { f: hb.f, color: F.ink })
+              text(c, bb.lines[0], fr.x + 18 * U, y + 55 * U, { f: bb.f, color: F.soft })
+            })
             y += h + 8 * U
-          }
-          return handle(c, y)
+          })
+          return part(c, k(END.promise(P.promises.length), 0.8), () => handle(c, y))
         }, FOOT)
-        depart(ctx, P.board)
+        depart(ctx, P.board, END.gate)
       })
       break
     }
     default:
   }
-  // The cover in motion: CLIP.seconds of it, drawn at each moment.
-  const cover = out[0]
-  out.clip = {
+  // The cover and the call to action in motion: CLIP.seconds of each,
+  // drawn at each moment. `clip` is the cover's.
+  const inMotion = (slide, print, sounds) => ({
     ...CLIP,
-    print: plan.story === 'pitch',
-    get sounds() { return scoreOf(plan, shownPoints()) },
+    print,
+    get sounds() { return sounds() },
     draw: (ctx, t, moving = null) => {
       clock = { t, moving }
-      try { cover.draw(ctx) } finally { clock = null }
+      try { slide.draw(ctx) } finally { clock = null }
     },
+  })
+  out.clips = {
+    cover: inMotion(out[0], plan.story === 'pitch', () => scoreOf(plan, shownPoints())),
+    end: inMotion(out[out.length - 1], false, () => endScoreOf(plan)),
   }
+  out.clip = out.clips.cover
   return out
 }
 
 /** A cover clip's length and rate: seven seconds, at thirty frames. */
 export const CLIP = { seconds: 7, fps: 30 }
+
+// The call to action's clock: the mark, the ask, its note, then the
+// gate at GATE, risen GATE_RISE later and waiting from then on, so its
+// idle nudge (four seconds untaken) falls inside the clip. On the pass
+// story's last frame the three promises come in where the ask's note would.
+const GATE_RISE = 0.6
+export const END = { mark: 0, head: 0.5, note: 0.9, gate: 1.6, promise: i => 0.5 + 0.3 * i }
 
 // The level-up's clock (src/lib/audio/recipes.js, LEVEL_CLOCK, held equal
 // by carousel.test.js): the road fills for FILL_SPAN along FILL_CURVE,
@@ -709,20 +732,8 @@ export const CLIP = { seconds: 7, fps: 30 }
 export const LEVEL = { FILL_FROM: 0.55, FILL_SPAN: 1.6, FILL_CURVE: [0.45, 0, 0.85, 0.65], BURST_AT: 2.28 }
 const FILL_START = 2.0
 const LEVEL_UP = FILL_START + LEVEL.BURST_AT - LEVEL.FILL_FROM
-/** The share of the road filled `s` seconds into the fill: the CSS curve, solved for x. */
-function fillShare(s) {
-  const x = Math.min(1, Math.max(0, s / LEVEL.FILL_SPAN))
-  const [x1, y1, x2, y2] = LEVEL.FILL_CURVE
-  const at = (a, b, u) => 3 * a * u * (1 - u) ** 2 + 3 * b * u * u * (1 - u) + u ** 3
-  let lo = 0
-  let hi = 1
-  for (let i = 0; i < 30; i++) {
-    const mid = (lo + hi) / 2
-    if (at(x1, x2, mid) < x) lo = mid
-    else hi = mid
-  }
-  return at(y1, y2, (lo + hi) / 2)
-}
+/** The share of the road filled `s` seconds into the fill: the CSS curve. */
+const fillShare = s => A.cssEase(...LEVEL.FILL_CURVE)(s / LEVEL.FILL_SPAN)
 
 /** Each story's cover scored with the app's own sounds (sound.js): the
  *  event the app plays for that moment, at the moment the clip shows it. */
@@ -750,6 +761,15 @@ function scoreOf(plan, points = 0) {
     default:
       return []
   }
+}
+
+/** The call to action scored: the ask lands as the board's flap (or each
+ *  promise ticks in), and the gate opens on the platform's chime. */
+function endScoreOf(plan) {
+  const lead = plan.story === 'pass'
+    ? plan.P.promises.map((_, i) => ({ at: END.promise(i) + 0.1, key: 'toggle', gain: 0.7 }))
+    : [{ at: END.head + 0.1, key: 'board-flap' }]
+  return [...lead, { at: END.gate + 0.1, key: 'platform-chime' }]
 }
 
 let pad = null

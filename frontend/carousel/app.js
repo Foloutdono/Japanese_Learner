@@ -321,8 +321,9 @@ export function passCard(ctx, x, y, w, { name, level, meta, cls, brand = 'Pass',
   ctx.strokeStyle = 'rgba(34, 36, 40, 0.62)'
   ctx.lineWidth = 1.4 * k
   ctx.lineCap = 'round'
+  const base = ctx.globalAlpha
   ;[[4, 1], [7, 0.75], [10.5, 0.55]].forEach(([rr, a]) => {
-    ctx.globalAlpha = a
+    ctx.globalAlpha = base * a
     ctx.beginPath()
     ctx.arc(px, by, rr * k, -0.9, 0.9)
     ctx.stroke()
@@ -527,7 +528,7 @@ export function printDial(ctx, p, P, cx, cy, u, { parts, count, unit, time, end,
   }
   if (disc.haloGlow > 0) {
     ctx.save()
-    ctx.globalAlpha = disc.haloGlow
+    ctx.globalAlpha *= disc.haloGlow
     stroke(13 * u, `blur(${4.5 * u}px)`)
     ctx.restore()
   }
@@ -543,7 +544,7 @@ export function printDial(ctx, p, P, cx, cy, u, { parts, count, unit, time, end,
     ctx.beginPath()
     ctx.arc(cx, cy, r, 0, Math.PI * 2)
     ctx.clip()
-    ctx.globalAlpha = 0.2
+    ctx.globalAlpha *= 0.2
     ctx.filter = `blur(${2.4 * u}px)`
     ctx.fillStyle = '#c9b68a'
     for (const [mx, my, ms, mq] of MARIA) {
@@ -600,9 +601,28 @@ export function printTitle(ctx, x, y, u, { date, view }) {
 }
 
 /** The gate's Depart button: the gold pill, the reader's dark roundel at
- *  its left with the contactless mark in gold, the word centred. */
-export function departButton(ctx, p, x, y, w, u, label) {
+ *  its left with the contactless mark in gold, the word centred. Still,
+ *  its two ripples stand where they pass; with `ready` (seconds since the
+ *  button came to rest) it moves as .btn-depart--gate does: the halo
+ *  breathes (btn-gate-breathe, 2.8s), two ripples leave the reader 1.1s
+ *  apart (btn-gate-rip, 2.2s), and after four seconds untaken the reader
+ *  steps toward the way on twice (btn-gate-nudge, 720ms). */
+export function departButton(ctx, p, x, y, w, u, label, ready = null) {
   const h = 66 * u
+  const moving = ready != null
+  // Its own shades are of what it is given: a button coming in is faint whole.
+  const base = ctx.globalAlpha
+  if (moving) {
+    // The breath's peak, a layer under the fill: a 9px ring and a glow.
+    const b = 0.5 - 0.5 * Math.cos((2 * Math.PI * ready) / 2.8)
+    ctx.save()
+    ctx.globalAlpha *= b
+    shadow(ctx, `0px ${8 * u}px ${28 * u}px ${alpha(p.goldMid, 0.4)}`)
+    ctx.fillStyle = alpha(p.goldMid, 0.16)
+    rrect(ctx, x - 9 * u, y - 9 * u, w + 18 * u, h + 18 * u, h / 2 + 9 * u)
+    ctx.fill()
+    ctx.restore()
+  }
   ctx.save()
   shadow(ctx, `0px 4px 18px ${alpha(p.goldMid, 0.35)}`)
   const g = ctx.createLinearGradient(0, y, 0, y + h)
@@ -612,7 +632,8 @@ export function departButton(ctx, p, x, y, w, u, label) {
   rrect(ctx, x, y, w, h, h / 2)
   ctx.fill()
   ctx.restore()
-  const rx = x + 8 * u + 24 * u
+  const nudge = moving ? NUDGE(ready - 4) : 0
+  const rx = x + 8 * u + 24 * u + nudge * 6 * u
   const ry = y + h / 2
   ctx.fillStyle = '#100e13'
   ctx.beginPath()
@@ -621,7 +642,11 @@ export function departButton(ctx, p, x, y, w, u, label) {
   ctx.save()
   ctx.strokeStyle = alpha('#100e13', 0.55)
   ctx.lineWidth = 2 * u
-  for (const rr of [28.5, 39]) {
+  const rips = moving
+    ? [0, 1.1].filter(d => ready >= d).map(d => EASE_OUT(((ready - d) % 2.2) / 2.2)).map(e => [23 * (1 + 0.75 * e), 0.8 * (1 - e)])
+    : [[28.5, 1], [39, 1]]
+  for (const [rr, a] of rips) {
+    ctx.globalAlpha = base * a
     ctx.beginPath()
     ctx.arc(rx, ry, rr * u, 0, Math.PI * 2)
     ctx.stroke()
@@ -629,7 +654,7 @@ export function departButton(ctx, p, x, y, w, u, label) {
   ctx.strokeStyle = '#e0b04f'
   ctx.lineCap = 'round'
   ;[[4, 1], [7.5, 0.75], [11, 0.55]].forEach(([rr, a]) => {
-    ctx.globalAlpha = a
+    ctx.globalAlpha = base * a
     ctx.lineWidth = 2 * u
     ctx.beginPath()
     ctx.arc(rx - 6 * u, ry, rr * u, -0.95, 0.95)
@@ -646,6 +671,32 @@ export function departButton(ctx, p, x, y, w, u, label) {
   const cx = Math.max(x + w / 2, free + lw / 2)
   text(ctx, label, cx, ry + lz * 0.36, { f: font(700, lz, 'latin'), color: '#1c1811', align: 'center' })
   return h
+}
+
+/** A CSS timing function (cubic-bezier(x1, y1, x2, y2)) as a function of
+ *  the share of time gone, 0 to 1. */
+export function cssEase(x1, y1, x2, y2) {
+  const at = (a, b, s) => 3 * a * s * (1 - s) ** 2 + 3 * b * s * s * (1 - s) + s ** 3
+  return x => {
+    const t = Math.min(1, Math.max(0, x))
+    let lo = 0
+    let hi = 1
+    for (let i = 0; i < 30; i++) {
+      const mid = (lo + hi) / 2
+      if (at(x1, x2, mid) < t) lo = mid
+      else hi = mid
+    }
+    return at(y1, y2, (lo + hi) / 2)
+  }
+}
+const EASE_OUT = cssEase(0, 0, 0.58, 1)
+const EASE_IN_OUT = cssEase(0.42, 0, 0.58, 1)
+// btn-gate-nudge over 720ms: out at 25% and 75%, home at 0, 50% and 100%.
+function NUDGE(s) {
+  const x = s / 0.72
+  if (x <= 0 || x >= 1) return 0
+  const q = (x * 4) % 2
+  return EASE_IN_OUT(q <= 1 ? q : 2 - q)
 }
 
 // ── The analyser (.anl-subs__line, .bkd-point) ─────────────────────

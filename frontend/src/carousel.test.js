@@ -670,7 +670,7 @@ describe('explaining a point in its own sentence', () => {
     }
   })
 
-  it('draws every story’s cover as a seven-second clip, the last frame its still (plan 212)', () => {
+  it('draws every story’s cover and call to action as seven-second clips, each ending on its still (plan 212)', () => {
     expect(CLIP).toEqual({ seconds: 7, fps: 30 })
     const had = globalThis.Path2D
     globalThis.Path2D = class {}
@@ -693,25 +693,36 @@ describe('explaining a point in its own sentence', () => {
         const end = stubContext()
         frames.clip.draw(end.ctx, 6.99)
         for (const w of still.texts.filter(x => /[A-Za-z]{4}/.test(x) && !/Tap to/i.test(x))) expect(end.texts, `${story}: ${w}`).toContain(w)
+        // The call to action too, its gate waiting to the end.
+        const { end: cta } = frames.clips
+        expect(cta.print, story).toBe(false)
+        for (const t of [0, 0.5, 2, 4, 6.4]) expect(() => cta.draw(stubContext().ctx, t), `${story} end at ${t}s`).not.toThrow()
+        const last = stubContext()
+        frames[frames.length - 1].draw(last.ctx)
+        const ctaEnd = stubContext()
+        cta.draw(ctaEnd.ctx, 6.99)
+        for (const w of last.texts.filter(x => /[A-Za-z]{4}/.test(x))) expect(ctaEnd.texts, `${story} end: ${w}`).toContain(w)
       }
     } finally {
       globalThis.Path2D = had
     }
   })
 
-  it('scores every cover with the app’s own sounds, on its own clock (plan 212)', () => {
+  it('scores every clip with the app’s own sounds, on its own clock (plan 212)', () => {
     const { FILL_FROM, FILL_SPAN, FILL_CURVE, BURST_AT } = LEVEL_CLOCK
     expect(LEVEL).toEqual({ FILL_FROM, FILL_SPAN, FILL_CURVE, BURST_AT })
     const keys = new Set(VOICE_EVENTS.map(e => e.key))
     for (const story of STORIES) {
       const data = bank(STORY_FILES[story])
       const [{ id }] = promoItems(story, data, 'en')
-      const { clip } = promoDeck(promoPlan(story, data, id, { ...OPTS, story }), FORMATS.story, { ground: 'sumi' })
-      expect(clip.sounds.length, story).toBeGreaterThan(0)
-      for (const s of clip.sounds) {
-        expect(keys.has(s.key), `${story}: ${s.key}`).toBe(true)
-        expect(s.at, `${story}: ${s.key}`).toBeGreaterThanOrEqual(0)
-        expect(s.at, `${story}: ${s.key}`).toBeLessThan(CLIP.seconds)
+      const { clips } = promoDeck(promoPlan(story, data, id, { ...OPTS, story }), FORMATS.story, { ground: 'sumi' })
+      for (const [which, clip] of Object.entries(clips)) {
+        expect(clip.sounds.length, `${story} ${which}`).toBeGreaterThan(0)
+        for (const s of clip.sounds) {
+          expect(keys.has(s.key), `${story} ${which}: ${s.key}`).toBe(true)
+          expect(s.at, `${story} ${which}: ${s.key}`).toBeGreaterThanOrEqual(0)
+          expect(s.at, `${story} ${which}: ${s.key}`).toBeLessThan(CLIP.seconds)
+        }
       }
     }
   })

@@ -2772,7 +2772,7 @@ function passagePages(plan, s, fmt, f) {
 export function deck(type, plan, fmt, opts) {
   if (plan.source === 'promo') {
     const frames = promoDeck(plan, FORMATS.story, opts)
-    return Object.assign(frames.map(sl => ({ key: sl.key, draw: ctx => { noShadow(ctx); sl.draw(ctx) } })), { clip: frames.clip })
+    return Object.assign(frames.map(sl => ({ key: sl.key, draw: ctx => { noShadow(ctx); sl.draw(ctx) } })), { clip: frames.clip, clips: frames.clips })
   }
   const fr = frame(fmt)
   const p = palette(opts.ground)

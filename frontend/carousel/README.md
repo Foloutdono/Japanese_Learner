@@ -383,13 +383,28 @@ clip" encodes it in the browser as an H.264 MP4 (WebCodecs, muxed by
 mp4-muxer from jsDelivr): Chrome, Edge and Safari can, Firefox cannot
 yet, and the studio says so.
 
+**So does the call to action.** Each story's last frame is a clip too
+(`promo.clips.end`; `clips.cover` is the cover's, also `clip`): the mark,
+the ask and its note come in one after another (on the pass story the
+three promises, one at a time), then the Depart button rises in and
+waits as the app's gate waits (`app.departButton` given `ready`): its
+halo breathes (`btn-gate-breathe`), two ripples leave the reader 1.1s
+apart (`btn-gate-rip`) and, four seconds untaken, the reader steps
+toward the way on twice (`btn-gate-nudge`), inside the seven seconds
+(`promo.END`). "Download the call-to-action clip" encodes it as the
+cover's is encoded. A part drawn inside a fading one multiplies its own
+shade into the fade (`globalAlpha *=`), never sets it, or it shows
+before the part around it.
+
 **A clip's sounds are the app's own.** Each clip is scored (`promo.js`,
 `scoreOf`) with the events the app plays for the same moments: the
 platform chime as Today's dial lands and the hour board as the plate
 comes in, the card arriving and turned, a soft press per character
 typed, Analyze pressed and a tick per point the cut shows, a press per
 reading, the gate's punch and the level-up's own build and burst (the
-pass fills on recipes.js's `LEVEL_CLOCK`, held equal by a test).
+pass fills on recipes.js's `LEVEL_CLOCK`, held equal by a test). The call
+to action (`endScoreOf`) lands its ask on the board's flap, or ticks
+each promise in, and opens the gate on the platform chime.
 `sound.js` renders each from the shipped recipe (`public/landing/voices.js`,
 the landing page's bundle of `src/lib/audio/recipes.js`) at the app's
 level, mixes them at their moments and brings the whole to -6dBFS. The

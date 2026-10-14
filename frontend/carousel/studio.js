@@ -614,17 +614,20 @@ async function exportOne() {
   const result = await offer(`${baseName()}-${i + 1}.png`, await png(full(d.slides[i], current.fmt)))
   status(result === 'saved' ? `Saved slide ${i + 1}.` : MESSAGE[result])
 }
-// ── The cover clip (plan 212) ─────────────────────────────────
-// A promo story's cover in motion, seven seconds, encoded here as the
-// feeds take a video: H.264 in an MP4 (WebCodecs, muxed by mp4-muxer).
+// ── The clips (plan 212) ──────────────────────────────────────
+// A promo story's cover, or its call to action, in motion, seven
+// seconds, encoded here as the feeds take a video: H.264 in an MP4
+// (WebCodecs, muxed by mp4-muxer).
 const MUXER = 'https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/+esm'
-async function exportClip() {
+const CLIPS = { cover: { btn: '#export-clip', name: 'cover', said: 'cover clip' }, end: { btn: '#export-end-clip', name: 'cta', said: 'call-to-action clip' } }
+async function exportClip(which = 'cover') {
   const d = current.decks[0]
-  const clip = d?.slides.clip
+  const clip = d?.slides.clips?.[which]
   if (!clip) return
   const fmt = current.fmt
-  const name = `tsuji-cover-${state.story}-${safeName(current.plan.id)}-${state.lang}`
-  const btn = $('#export-clip')
+  const { btn: sel, name: kind, said } = CLIPS[which]
+  const name = `tsuji-${kind}-${state.story}-${safeName(current.plan.id)}-${state.lang}`
+  const btn = $(sel)
   btn.disabled = true
   try {
     const config = { codec: 'avc1.640028', width: fmt.w, height: fmt.h, bitrate: 8_000_000, framerate: clip.fps }
@@ -687,7 +690,7 @@ async function exportClip() {
     }
     muxer.finalize()
     const result = await offer(`${name}.mp4`, new Blob([target.buffer], { type: 'video/mp4' }))
-    status(result === 'saved' ? `Saved the cover clip${sound ? ', with its sounds' : ' (this browser encodes no sound)'}.` : MESSAGE[result])
+    status(result === 'saved' ? `Saved the ${said}${sound ? ', with its sounds' : ' (this browser encodes no sound)'}.` : MESSAGE[result])
   } catch (e) {
     status(`The clip failed (${e.message}).`)
   } finally {
@@ -809,7 +812,8 @@ function wire() {
     typing = setTimeout(() => { save(); render() }, 300)
   })
   $('#export').addEventListener('click', exportZip)
-  $('#export-clip').addEventListener('click', exportClip)
+  $('#export-clip').addEventListener('click', () => exportClip('cover'))
+  $('#export-end-clip').addEventListener('click', () => exportClip('end'))
   $('#copy').addEventListener('click', () => copyField('#caption', 'Caption'))
   $('#copy-title').addEventListener('click', () => copyField('#title', 'Title'))
   $('#title').addEventListener('input', countTitle)
