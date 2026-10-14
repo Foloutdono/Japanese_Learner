@@ -12,6 +12,7 @@ import { BONUS, LEVELS, MAX_QUESTIONS, OPTIONAL, SOURCES, TITLE_MAX, depsOf, ite
 import { STRINGS } from './strings.js'
 import { PROMO, STORIES } from './promo.js'
 import { PRINT_HOURS, loadPrint } from './app.js'
+import { RATE, clipAudio, loadVoices } from './sound.js'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 
 const STORE = 'tsuji-carousel'
@@ -82,10 +83,12 @@ const idKey = () => (state.source === 'promo' ? `promo:${state.story}` : state.s
 const fileFor = src => src.file(src.levels ? state[setKey(src)] : state.level)
 const dataNow = () => fetchJson(fileFor(sourceOf(state.source)))
 
+// Where the app's own files are, as the page sees them: the print, the voices.
+const BASE = '../'
 // Today's print of the hour, for the promo stories: fetched once an hour.
 const prints = new Map()
 function printFor(hour) {
-  if (!prints.has(hour)) prints.set(hour, loadPrint(hour, { base: '../' }).catch(e => { prints.delete(hour); throw e }))
+  if (!prints.has(hour)) prints.set(hour, loadPrint(hour, { base: BASE }).catch(e => { prints.delete(hour); throw e }))
   return prints.get(hour)
 }
 
@@ -629,9 +632,21 @@ async function exportClip() {
       status('This browser cannot encode H.264 video: open the studio in Chrome, Edge or Safari.')
       return
     }
+    // Its sound: AAC where the browser encodes it, else Opus, else none.
+    let sound = null
+    if (clip.sounds.length && typeof AudioEncoder !== 'undefined') {
+      for (const [codec, muxed] of [['mp4a.40.2', 'aac'], ['opus', 'opus']]) {
+        const audio = { codec, sampleRate: RATE, numberOfChannels: 2, bitrate: 160_000 }
+        if ((await AudioEncoder.isConfigSupported(audio)).supported) { sound = { audio, muxed }; break }
+      }
+    }
     const { Muxer, ArrayBufferTarget } = await import(MUXER)
     const target = new ArrayBufferTarget()
-    const muxer = new Muxer({ target, video: { codec: 'avc', width: fmt.w, height: fmt.h, frameRate: clip.fps }, fastStart: 'in-memory' })
+    const muxer = new Muxer({
+      target, fastStart: 'in-memory',
+      video: { codec: 'avc', width: fmt.w, height: fmt.h, frameRate: clip.fps },
+      ...(sound ? { audio: { codec: sound.muxed, numberOfChannels: 2, sampleRate: RATE } } : {}),
+    })
     let failed = null
     const encoder = new VideoEncoder({ output: (chunk, meta) => muxer.addVideoChunk(chunk, meta), error: e => { failed = e } })
     encoder.configure(config)
@@ -652,9 +667,27 @@ async function exportClip() {
     }
     await encoder.flush()
     if (failed) throw failed
+    if (sound) {
+      status('Scoring the clip…')
+      const mix = await clipAudio(clip.sounds, clip.seconds, await loadVoices(BASE))
+      const audio = new AudioEncoder({ output: (chunk, meta) => muxer.addAudioChunk(chunk, meta), error: e => { failed = e } })
+      audio.configure(sound.audio)
+      const step = RATE / 10
+      for (let at = 0; at < mix[0].length; at += step) {
+        const m = Math.min(step, mix[0].length - at)
+        const planar = new Float32Array(m * 2)
+        planar.set(mix[0].subarray(at, at + m), 0)
+        planar.set(mix[1].subarray(at, at + m), m)
+        const data = new AudioData({ format: 'f32-planar', sampleRate: RATE, numberOfFrames: m, numberOfChannels: 2, timestamp: Math.round((at / RATE) * 1e6), data: planar })
+        audio.encode(data)
+        data.close()
+      }
+      await audio.flush()
+      if (failed) throw failed
+    }
     muxer.finalize()
     const result = await offer(`${name}.mp4`, new Blob([target.buffer], { type: 'video/mp4' }))
-    status(result === 'saved' ? 'Saved the cover clip.' : MESSAGE[result])
+    status(result === 'saved' ? `Saved the cover clip${sound ? ', with its sounds' : ' (this browser encodes no sound)'}.` : MESSAGE[result])
   } catch (e) {
     status(`The clip failed (${e.message}).`)
   } finally {

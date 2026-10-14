@@ -8,7 +8,8 @@ import { furiganaOf } from '../carousel/common.js'
 import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explain.js'
 import { STRINGS, weld, weldIf } from '../carousel/strings.js'
 import { APP_INKS } from '../carousel/app.js'
-import { CLIP, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
+import { CLIP, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
+import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
 import { arrivals as landingArrivals, readFacts, spanOf as landingSpan } from '../landing/content.mjs'
 import EN from './locales/en/index.js'
@@ -695,6 +696,23 @@ describe('explaining a point in its own sentence', () => {
       }
     } finally {
       globalThis.Path2D = had
+    }
+  })
+
+  it('scores every cover with the app’s own sounds, on its own clock (plan 212)', () => {
+    const { FILL_FROM, FILL_SPAN, FILL_CURVE, BURST_AT } = LEVEL_CLOCK
+    expect(LEVEL).toEqual({ FILL_FROM, FILL_SPAN, FILL_CURVE, BURST_AT })
+    const keys = new Set(VOICE_EVENTS.map(e => e.key))
+    for (const story of STORIES) {
+      const data = bank(STORY_FILES[story])
+      const [{ id }] = promoItems(story, data, 'en')
+      const { clip } = promoDeck(promoPlan(story, data, id, { ...OPTS, story }), FORMATS.story, { ground: 'sumi' })
+      expect(clip.sounds.length, story).toBeGreaterThan(0)
+      for (const s of clip.sounds) {
+        expect(keys.has(s.key), `${story}: ${s.key}`).toBe(true)
+        expect(s.at, `${story}: ${s.key}`).toBeGreaterThanOrEqual(0)
+        expect(s.at, `${story}: ${s.key}`).toBeLessThan(CLIP.seconds)
+      }
     }
   })
 })

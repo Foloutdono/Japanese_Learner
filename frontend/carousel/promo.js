@@ -280,6 +280,7 @@ export function promoDeck(plan, fmt, opts) {
   // nothing, cubic-bezier(0.2, 0.7, 0.2, 1)), on the print the layers
   // move as the print moves. With no clock the cover stands still, whole.
   let clock = null
+  let shownPoints = () => 0
   const ease = x => 1 - (1 - x) ** 3
   const k = (start, dur) => (clock ? ease(Math.min(1, Math.max(0, (clock.t - start) / dur))) : 1)
   const part = (c, prog, fn) => {
@@ -561,6 +562,12 @@ export function promoDeck(plan, fmt, opts) {
         cutFrame(ctx, i => k(CUT + 0.4 + 0.35 * i, 0.6))
         ctx.restore()
       })
+      let pointsShown = null
+      // The score ticks each point the cut shows: as many as its room held.
+      shownPoints = () => {
+        if (pointsShown == null && typeof document !== 'undefined') cutFrame(document.createElement('canvas').getContext('2d'))
+        return pointsShown ?? Math.min(3, pr.points.length)
+      }
       const cutFrame = (ctx, pointIn = () => 1) => {
         page(ctx, 2, 3)
         centred(ctx, (c, y) => {
@@ -574,10 +581,13 @@ export function promoDeck(plan, fmt, opts) {
           y += SP[6]
           // As many of its points as the room holds, in the sentence's order.
           const room = fr.bottom - (fr.y + 64 + SP[7])
+          let shown = 0
           pr.points.forEach((pt, i) => {
             if (y - y0 + 102 * U > room) return
+            shown += 1
             y = part(c, pointIn(i), () => y + A.pointCard(c, p, fr.x, y, fr.w, U, pt) + 8 * U)
           })
+          pointsShown = shown
           return y
         })
       }
@@ -644,11 +654,11 @@ export function promoDeck(plan, fmt, opts) {
         centred(ctx, (c, y) => {
           y = part(c, k(0, 0.8), () => lead(c, P.passWaits, y, p.ink, [FS.display * 0.72, FS.heading], { maxLines: 2 }))
           y += SP[7]
-          // In a clip 辶 fills as reviews fill it, then the level turns and
-          // the road starts again.
-          const LEVEL_UP = 5.0
+          // In a clip 辶 fills on the level-up's own clock (recipes.js's
+          // LEVEL_CLOCK, which its sounds are scored against), then the
+          // level turns at the burst and the road starts again.
           const up = clock && clock.t >= LEVEL_UP
-          const xp = !clock ? 0.12 : up ? 0.06 : ease(Math.min(1, Math.max(0, (clock.t - 1.6) / (LEVEL_UP - 1.6))))
+          const xp = !clock ? 0.12 : up ? 0.06 : fillShare(clock.t - FILL_START)
           y += part(c, k(0.4, 1.2), () => A.passCard(c, fr.x, y, fr.w, { name: P.yourName, nameInk: 'rgba(34, 36, 40, 0.45)', level: up ? 2 : 1, cls: P.free, xp })) + SP[7]
           return part(c, k(1.0, 0.8), () => lead(c, P.passBody, y, p.ink2, [FS.lead, FS.body], { maxLines: 4, weight: 500 }))
         })
@@ -681,6 +691,7 @@ export function promoDeck(plan, fmt, opts) {
   out.clip = {
     ...CLIP,
     print: plan.story === 'pitch',
+    get sounds() { return scoreOf(plan, shownPoints()) },
     draw: (ctx, t, moving = null) => {
       clock = { t, moving }
       try { cover.draw(ctx) } finally { clock = null }
@@ -691,6 +702,55 @@ export function promoDeck(plan, fmt, opts) {
 
 /** A cover clip's length and rate: seven seconds, at thirty frames. */
 export const CLIP = { seconds: 7, fps: 30 }
+
+// The level-up's clock (src/lib/audio/recipes.js, LEVEL_CLOCK, held equal
+// by carousel.test.js): the road fills for FILL_SPAN along FILL_CURVE,
+// and the burst lands BURST_AT - FILL_FROM after the fill starts.
+export const LEVEL = { FILL_FROM: 0.55, FILL_SPAN: 1.6, FILL_CURVE: [0.45, 0, 0.85, 0.65], BURST_AT: 2.28 }
+const FILL_START = 2.0
+const LEVEL_UP = FILL_START + LEVEL.BURST_AT - LEVEL.FILL_FROM
+/** The share of the road filled `s` seconds into the fill: the CSS curve, solved for x. */
+function fillShare(s) {
+  const x = Math.min(1, Math.max(0, s / LEVEL.FILL_SPAN))
+  const [x1, y1, x2, y2] = LEVEL.FILL_CURVE
+  const at = (a, b, u) => 3 * a * u * (1 - u) ** 2 + 3 * b * u * u * (1 - u) + u ** 3
+  let lo = 0
+  let hi = 1
+  for (let i = 0; i < 30; i++) {
+    const mid = (lo + hi) / 2
+    if (at(x1, x2, mid) < x) lo = mid
+    else hi = mid
+  }
+  return at(y1, y2, (lo + hi) / 2)
+}
+
+/** Each story's cover scored with the app's own sounds (sound.js): the
+ *  event the app plays for that moment, at the moment the clip shows it. */
+function scoreOf(plan, points = 0) {
+  switch (plan.story) {
+    case 'pitch':
+      // The platform's sign lands as the dial rises; the hour board flaps as the plate comes in.
+      return [{ at: 0.1, key: 'platform-chime' }, { at: 1.1, key: 'board-flap' }]
+    case 'card':
+      // The card arriving, then turned.
+      return [{ at: 0.4, key: 'card-transition' }, { at: 4.2, key: 'card-flip' }]
+    case 'analyser': {
+      // Each character a soft press, Analyze pressed, the sentence back cut, a point at a time.
+      const chars = [...plan.promo.jp].length
+      const keys = Array.from({ length: chars }, (_, i) => ({ at: 0.8 + (2.0 * (i + 0.5)) / chars, key: 'click', gain: 0.35 }))
+      const ticks = Array.from({ length: points }, (_, i) => ({ at: 3.9 + 0.35 * i, key: 'toggle', gain: 0.7 }))
+      return [...keys, { at: 3.1, key: 'click' }, { at: 3.5, key: 'card-transition' }, ...ticks]
+    }
+    case 'exam':
+      // The question laid down, then each reading in with a press.
+      return [{ at: 0.6, key: 'card-transition' }, ...[0, 1, 2, 3].map(i => ({ at: 1.5 + 0.3 * i, key: 'click', gain: 0.6 }))]
+    case 'pass':
+      // The gate's punch as the pass comes in, then the level-up's build and its burst.
+      return [{ at: 0.4, key: 'pass-clip' }, { at: FILL_START, key: 'level-charge' }, { at: LEVEL_UP, key: 'level-burst' }]
+    default:
+      return []
+  }
+}
 
 let pad = null
 /** A canvas off the page, to measure a block before it is placed (the

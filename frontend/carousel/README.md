@@ -383,6 +383,18 @@ clip" encodes it in the browser as an H.264 MP4 (WebCodecs, muxed by
 mp4-muxer from jsDelivr): Chrome, Edge and Safari can, Firefox cannot
 yet, and the studio says so.
 
+**A clip's sounds are the app's own.** Each clip is scored (`promo.js`,
+`scoreOf`) with the events the app plays for the same moments: the
+platform chime as Today's dial lands and the hour board as the plate
+comes in, the card arriving and turned, a soft press per character
+typed, Analyze pressed and a tick per point the cut shows, a press per
+reading, the gate's punch and the level-up's own build and burst (the
+pass fills on recipes.js's `LEVEL_CLOCK`, held equal by a test).
+`sound.js` renders each from the shipped recipe (`public/landing/voices.js`,
+the landing page's bundle of `src/lib/audio/recipes.js`) at the app's
+level, mixes them at their moments and brings the whole to -6dBFS. The
+studio muxes it as AAC, or Opus where the browser has no AAC encoder.
+
 **A story promises what the app does today.** Its figures are the
 bank's (`index.json`: the decks by level, the kana deck, the N5 exam,
 counted as the landing page counts them, and a test holds the two
