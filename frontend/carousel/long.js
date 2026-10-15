@@ -28,6 +28,11 @@ import { particleLabel } from './explain.js'
 import * as A from './app.js'
 
 export const WIDE = { id: 'wide', w: 1920, h: 1080 }
+// A short (plan 214): the same video standing, under a minute, for
+// YouTube Shorts, Reels and TikTok; inside the feed's safe area, the
+// story format's (draw.js FORMATS.story).
+export const TALL = { id: 'tall', w: 1080, h: 1920, safe: { t: 250, r: 144, b: 430, l: 144 } }
+export const SHORT = { vocab: 6, kanji: 4, quiz: 3, seconds: 59 }
 // The site a description links to: landing/config.mjs's SITE_ORIGIN, which
 // reads the disk and cannot load in the studio (a test holds the two equal).
 export const LONG_SITE = 'https://japanese-learner-seven.vercel.app'
@@ -132,11 +137,39 @@ const silent = row => row.k === 'punct' || /^[＿_]+$/.test(row.t)
  *  'themes.json'). Pick a level's `part` (1, 2, … in the deck's order;
  *  a quiz's part is a seeded deal), or a `theme`, or exact `ids`; a
  *  grammar video takes a `point`. */
-export function longPlan(kind, banks, { lang = 'en', level = 'N5', part = 1, theme = null, ids = null, count = null, point = null } = {}) {
+export function longPlan(kind, banks, opts0 = {}) {
+  const pl = planOf(kind, banks, opts0)
+  return opts0.format === 'short' ? shorten(pl) : pl
+}
+
+/** A short: a few items, each said in fewer lines; a grammar point by its
+ *  form, two examples and one question. timeline() paces it, fitShort()
+ *  holds it under SHORT.seconds once its lines are measured. */
+function shorten(pl) {
+  const out = { ...pl, format: 'short' }
+  if (pl.kind === 'vocab') out.items = pl.items.map(x => ({ ...x, ex: null }))
+  if (pl.kind === 'kanji') out.items = pl.items.map(x => ({ ...x, on: x.on.slice(0, 1), kun: x.kun.slice(0, 1), words: x.words.slice(0, 1) }))
+  if (pl.kind === 'grammar') {
+    const title = pl.items.find(x => x.type === 'gtitle')
+    const ex = pl.items.filter(x => x.type === 'gex').slice(0, 2).map((x, i, all) => ({ ...x, n: i + 1, of: all.length, chips: [] }))
+    const q = pl.items.find(x => x.type === 'q' && !x.twist)
+    out.items = [title, ...ex, ...(q ? [q] : [])].filter(Boolean)
+  }
+  return out
+}
+
+/** A short under its minute: its last items let go until it fits. */
+export function fitShort(plan, dur = null, seconds = SHORT.seconds) {
+  let pl = plan
+  while (pl.items.length > 1 && timeline(pl, dur).seconds > seconds) pl = { ...pl, items: pl.items.slice(0, -1) }
+  return pl
+}
+
+function planOf(kind, banks, { lang = 'en', level = 'N5', part = 1, theme = null, ids = null, count = null, point = null, format = 'long' } = {}) {
   const S = SAY[lang] || SAY.en
   const opts = { lang, script: 'kanji', slides: {}, types: {} }
   const base = { kind, lang, level, line: LINE[kind], part, ids: !!ids, theme: null }
-  const n = count || PART[kind]
+  const n = count || (format === 'short' ? SHORT[kind] : PART[kind])
   const slice = list => (ids ? list : list.slice((part - 1) * n, part * n))
   if (kind === 'vocab') {
     let words
@@ -214,11 +247,14 @@ export function longItems(banks, level, lang = 'en') {
 }
 
 /** What a list id asks of longPlan: its kind and its options. */
-export function longPick(id, level, lang = 'en') {
+export function longPick(id, level, lang = 'en', format = 'long') {
   const [kind, rest] = [id.slice(0, id.indexOf(':')), id.slice(id.indexOf(':') + 1)]
-  if (kind === 'grammar') return { kind, opts: { lang, level, point: rest } }
-  if (kind === 'theme') return { kind: 'vocab', opts: { lang, level, theme: rest } }
-  return { kind, opts: { lang, level, part: Number(rest) || 1 } }
+  if (kind === 'grammar') return { kind, opts: { lang, level, point: rest, format } }
+  if (kind === 'theme') return { kind: 'vocab', opts: { lang, level, theme: rest, format } }
+  const part = Number(rest) || 1
+  // A drill's short starts where its long part starts: 語彙 3's short is that part's first six words.
+  const short = format === 'short' && kind !== 'quiz' ? ((part - 1) * PART[kind]) / SHORT[kind] + 1 : part
+  return { kind, opts: { lang, level, part: short, format } }
 }
 
 /** The bank files a video reads: a grammar point glosses its words from
@@ -234,8 +270,8 @@ export function longFiles(id, level) {
 }
 
 /** The command that makes the video, from frontend/. */
-export function longCommand(id, level, lang = 'en') {
-  const { kind, opts } = longPick(id, level, lang)
+export function longCommand(id, level, lang = 'en', format = 'long') {
+  const { kind, opts } = longPick(id, level, lang, format)
   const q = v => (/^[\w.-]+$/.test(v) ? v : `'${String(v).replace(/'/g, "'\\''")}'`)
   const args = [`--kind ${kind}`]
   if (opts.theme) args.push(`--theme ${q(opts.theme)}`)
@@ -243,6 +279,7 @@ export function longCommand(id, level, lang = 'en') {
   if (opts.point) args.push(`--point ${q(opts.point)}`)
   if (opts.part) args.push(`--part ${opts.part}`)
   args.push(`--lang ${lang}`)
+  if (format === 'short') args.push('--format short')
   return `VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs ${args.join(' ')}`
 }
 
@@ -500,9 +537,10 @@ export function timeline(plan, dur = null) {
   }
   const fx = (t, key, gain) => sfx.push({ at: +t.toFixed(3), key, ...(gain != null ? { gain } : {}) })
   const of = plan.items.length
+  const short = plan.format === 'short'
   chapters.push({ at: 0, title: S.chapters.intro })
   fx(0.3, 'board-flap')
-  seg('intro', 5.5, {})
+  seg('intro', short ? 2.5 : 5.5, {})
   plan.items.forEach((it, i) => {
     const start = at
     const n = i + 1
@@ -518,8 +556,8 @@ export function timeline(plan, dur = null) {
     }
     fx(start + 0.1, 'card-transition', 0.8)
     if (plan.kind === 'vocab') {
-      // Three seconds alone, the reading said twice, the meaning, a sentence.
-      const think = 3
+      // Three seconds alone (two in a short), the reading said twice, the meaning, a sentence.
+      const think = short ? 2 : 3
       let u = think + 0.2
       fx(start + think, 'card-flip', 0.6)
       u += say(start + u, it.r) + GAP
@@ -530,11 +568,11 @@ export function timeline(plan, dur = null) {
         marks.ex = u
         u += 0.5
         u += say(start + u, it.ex.jp) + 2.6
-      } else u += 3.0
+      } else u += short ? 1.2 : 3.0
       seg('vocab', u, it, marks, n)
     } else if (plan.kind === 'kanji') {
       // The strokes in their order, the meaning, the readings, two words.
-      const per = 0.5
+      const per = short ? 0.35 : 0.5
       const strokeAt = 0.5
       let u = strokeAt + it.strokes.d.length * per + 0.5
       const marks = { strokeAt, per, meaning: u }
@@ -548,7 +586,7 @@ export function timeline(plan, dur = null) {
       if (!it.kun.length) u += 0.6
       marks.words = []
       for (const w of it.words) { marks.words.push(u); u += 0.3 + say(start + u + 0.3, w.r) + 1.4 }
-      seg('kanji', u + 0.8, it, marks, n)
+      seg('kanji', u + (short ? 0.3 : 0.8), it, marks, n)
     } else if (it.type === 'q') {
       const q = it.q
       const show = 1.2 + Math.min(3, READ(q.ask) * 0.3)
@@ -563,7 +601,7 @@ export function timeline(plan, dur = null) {
       const e = q.explain || {}
       u = Math.max(u + 0.8, answer + READ(`${e.sense || ''} ${e.why || ''}`) * 0.8 + 1)
       seg('q', u, it, { show, count, reveal, answer }, n)
-      if (plan.kind === 'quiz' && (n % 10 === 0 || n === of)) {
+      if (plan.kind === 'quiz' && !short && (n % 10 === 0 || n === of)) {
         chapters.push({ at, title: n === of ? S.chapters.final : S.chapters.score })
         fx(at + 0.2, 'board-flap')
         seg('score', n === of ? 6 : 4.5, { n, of }, {}, n)
@@ -572,13 +610,13 @@ export function timeline(plan, dur = null) {
       // Said at its pace, then slower, then cut word by word, each word said.
       let u = 0.8
       u += say(start + u, joined(it.rows)) + GAP
-      u += say(start + u, joined(it.rows), 'reader', true) + GAP
+      if (!short) u += say(start + u, joined(it.rows), 'reader', true) + GAP
       const chipAt = []
       for (const c of it.chips) {
         chipAt.push(u)
         u += c.voice ? Math.max(1.0, say(start + u + 0.15, c.voice) + 0.45) : 0.8
       }
-      seg('gex', u + 2.2, it, { chipAt }, n)
+      seg('gex', u + (short ? READ(it.tr) * 0.5 : 2.2), it, { chipAt }, n)
     } else if (it.type === 'gcompare' || it.type === 'grecap') {
       const lead = it.type === 'grecap' ? 2.2 : READ(`${it.meaning} ${it.note}`) * 0.7 + 1
       let u = lead + 0.5
@@ -603,12 +641,12 @@ export function timeline(plan, dur = null) {
       seg('gscene', u + READ(it.note) * 0.8 + 0.6, it, { lines, note }, n)
     } else {
       const body = it.rule || it.text || it.meaning || ''
-      seg(it.type, Math.max(it.type === 'gtitle' ? 6 : 4, READ(body) + 1.5), it, {}, n)
+      seg(it.type, short ? 4 : Math.max(it.type === 'gtitle' ? 6 : 4, READ(body) + 1.5), it, {}, n)
     }
   })
   chapters.push({ at, title: S.chapters.outro })
   fx(at + 0.3, 'platform-chime')
-  seg('outro', 8, {})
+  seg('outro', short ? 4 : 8, {})
   return { seconds: +at.toFixed(3), segs, cues, sfx, chapters, kind: plan.kind, of }
 }
 
@@ -702,9 +740,36 @@ const PAGE = {
 }
 export const LONG_PAGE = PAGE
 
+// A short's page: a title to stop the scroll, a line, the app, the credits.
+const SHORT_PAGE = {
+  en: {
+    title: {
+      vocab: (lv, n, theme) => theme ? `${n} Japanese words: ${theme} #shorts` : `${n} JLPT ${lv} Japanese words in under a minute #shorts`,
+      kanji: (lv, n) => `${n} JLPT ${lv} kanji in under a minute #shorts`,
+      quiz: (lv, n) => `JLPT ${lv} quiz: ${n} questions, 5 seconds each #shorts`,
+      grammar: (lv, p, meaning) => `${p} (“${meaning}”) in under a minute · JLPT ${lv} #shorts`,
+    },
+    lead: { vocab: 'Read each word before it is revealed, then say it with the voice.', kanji: 'Watch the strokes, then read it.', quiz: 'Five seconds a question. How many did you get?', grammar: 'One grammar point: its form, two examples, one question.' },
+    app: (f, site) => `Keep going on Tsuji: ${f.words} words, ${f.kanji} kanji and ${f.points} grammar points with spaced repetition. No ads, no trackers.\n${site}`,
+    hashtags: lv => `#Shorts #LearnJapanese #Japanese${lv ? ` #JLPT${lv}` : ''} #日本語`,
+  },
+  fr: {
+    title: {
+      vocab: (lv, n, theme) => theme ? `${n} mots de japonais : ${theme} #shorts` : `${n} mots de japonais du JLPT ${lv} en moins d’une minute #shorts`,
+      kanji: (lv, n) => `${n} kanji du JLPT ${lv} en moins d’une minute #shorts`,
+      quiz: (lv, n) => `Quiz JLPT ${lv} : ${n} questions, 5 secondes chacune #shorts`,
+      grammar: (lv, p, meaning) => `${p} (« ${meaning} ») en moins d’une minute · JLPT ${lv} #shorts`,
+    },
+    lead: { vocab: 'Lis chaque mot avant qu’il soit révélé, puis répète-le avec la voix.', kanji: 'Regarde les traits, puis lis-le.', quiz: 'Cinq secondes par question. Combien en as-tu ?', grammar: 'Un point de grammaire : sa forme, deux exemples, une question.' },
+    app: (f, site) => `Continue sur Tsuji : ${f.words} mots, ${f.kanji} kanji et ${f.points} points de grammaire en répétition espacée. Sans pub, sans traqueur.\n${site}`,
+    hashtags: lv => `#Shorts #ApprendreLeJaponais #Japonais${lv ? ` #JLPT${lv}` : ''} #日本語`,
+  },
+}
+
 /** The video's title, description and tags. `figures` is the bank's
  *  index.json figures: the app's deck, as the description counts it. */
 export function describe(plan, tl, site, figures = null) {
+  if (plan.format === 'short') return describeShort(plan, tl, site, figures)
   const P = PAGE[plan.lang] || PAGE.en
   const n = plan.items.length
   const part = plan.part && !plan.ids && !plan.theme ? plan.part : 0
@@ -741,6 +806,24 @@ export function describe(plan, tl, site, figures = null) {
   return { title, description: body.join('\n'), tags }
 }
 
+function describeShort(plan, tl, site, figures) {
+  const P = SHORT_PAGE[plan.lang] || SHORT_PAGE.en
+  const lv = plan.level
+  const n = plan.items.length
+  const meaning = plan.items[0]?.meaning
+  const title = plan.kind === 'grammar' ? P.title.grammar(lv, plan.point, meaning) : P.title[plan.kind](lv, n, plan.theme)
+  const fmt = x => Number(x).toLocaleString(plan.lang === 'fr' ? 'fr-FR' : 'en-US')
+  const kana = tl.cues.some(c => LONE.test(c.text))
+  const body = [
+    P.lead[plan.kind], '',
+    figures ? P.app({ words: fmt(figures.words), kanji: fmt(figures.kanji), points: fmt(figures.points) }, site) : site, '',
+    (PAGE[plan.lang] || PAGE.en).credits(kana), '',
+    P.hashtags(plan.theme ? null : lv),
+  ]
+  const tags = [...new Set((PAGE[plan.lang] || PAGE.en).tags(lv, plan.kind).filter(t => !plan.theme || !/JLPT|N\d/.test(t)))].concat('shorts').join(', ')
+  return { title, description: body.join('\n'), tags }
+}
+
 // ── Drawing ───────────────────────────────────────────────────────
 const W = WIDE.w
 const H = WIDE.h
@@ -767,9 +850,10 @@ function strokeLength(d) {
   return len
 }
 
-/** The frame at second `t`, and its key: two frames with the same key
- *  are the same picture. */
-export function drawLong(ctx, plan, tl, t) {
+/** Where a frame stands: its segment, the second into it, and the two
+ *  helpers every part is drawn with (`k`, a part's share of the way in,
+ *  kept in the frame's key while it moves; `fade`, a part drawn at it). */
+function begin(ctx, plan, tl, t, w, h) {
   const p = palette('sumi')
   const S = SAY[plan.lang] || SAY.en
   const line = p.line[plan.line] || p.gold
@@ -778,7 +862,6 @@ export function drawLong(ctx, plan, tl, t) {
   const sg = tl.segs[i]
   const u = t - sg.start
   const state = [i]
-  // A part coming in: its share of the way, kept in the key while it moves.
   const k = (from, len = 0.35) => {
     const raw = ease((u - from) / len)
     const v = raw <= 0 ? 0 : raw >= 1 ? 1 : Math.round(raw * 15) / 15
@@ -793,16 +876,13 @@ export function drawLong(ctx, plan, tl, t) {
     fn()
     ctx.restore()
   }
-  // The ground, the masthead, the title, the line of stations.
   ctx.fillStyle = p.bg
-  ctx.fillRect(0, 0, W, H)
-  if (sg.type !== 'intro' && sg.type !== 'outro') {
-    mark(ctx, 80, 60, 64, p.ink, p.gold)
-    text(ctx, 'TSUJI', 160, 105, { f: font(700, 26, 'latin'), color: p.ink2, tr: 0.3 })
-    const b = fit(ctx, plan.title, { weight: 700, sizes: [30, 26], maxW: 1300, maxLines: 1, fam: 'latin', balanced: false })
-    text(ctx, b.lines[0], W - 80, 105, { f: b.f, color: p.ink2, align: 'right' })
-  }
-  if (sg.n) stations(ctx, p, line, sg.n, tl.of)
+  ctx.fillRect(0, 0, w, h)
+  return { p, S, line, sg, u, state, k, fade, d: sg.data, m: sg.marks }
+}
+
+/** The pieces both formats are drawn from: a card, a sentence, a paragraph, a pill. */
+function tools(ctx, p, line) {
   const card = (x, y, w, h, edge = p.surfaceLine, width = 2) => {
     ctx.fillStyle = p.card
     rrect(ctx, x, y, w, h, 24)
@@ -824,16 +904,34 @@ export function drawLong(ctx, plan, tl, t) {
     b.lines.forEach((l, j) => text(ctx, l, x, y + b.size * (0.8 + j * 1.22), { f: b.f, color, align }))
     return paragraphH(b, 1.22)
   }
-  const head = (str, color = line) => text(ctx, str.toUpperCase(), 120, 215, { f: font(700, 32, 'latin'), color, tr: 0.16 })
-  const pill = (str, x, y, size, align = 'left') => {
+  const pill = (str, x, y, size, align = 'left', maxW = 1680) => {
     const f = font(700, size, 'jp')
-    const w = Math.min(1680, measure(ctx, str, f) + size * 1.6)
+    const w = Math.min(maxW, measure(ctx, str, f) + size * 1.6)
     const x0 = align === 'center' ? x - w / 2 : x
     ctx.fillStyle = line
     rrect(ctx, x0, y, w, size * 1.9, size * 0.95)
     ctx.fill()
-    text(ctx, str, x0 + w / 2, y + size * 1.3, { f, color: p.onLine, align: 'center' })
+    const b = fit(ctx, str, { weight: 700, sizes: [size, size * 0.85, size * 0.72], maxW: w - size, maxLines: 1, fam: 'jp', balanced: false })
+    text(ctx, b.lines[0], x0 + w / 2, y + size * 1.3, { f: b.f, color: p.onLine, align: 'center' })
   }
+  return { card, sentence, para, pill }
+}
+
+/** The frame at second `t`, and its key: two frames with the same key
+ *  are the same picture. A short is drawn standing (drawTall). */
+export function drawLong(ctx, plan, tl, t) {
+  if (plan.format === 'short') return drawTall(ctx, plan, tl, t)
+  const { p, S, line, sg, u, state, k, fade } = begin(ctx, plan, tl, t, W, H)
+  // The masthead, the title, the line of stations.
+  if (sg.type !== 'intro' && sg.type !== 'outro') {
+    mark(ctx, 80, 60, 64, p.ink, p.gold)
+    text(ctx, 'TSUJI', 160, 105, { f: font(700, 26, 'latin'), color: p.ink2, tr: 0.3 })
+    const b = fit(ctx, plan.title, { weight: 700, sizes: [30, 26], maxW: 1300, maxLines: 1, fam: 'latin', balanced: false })
+    text(ctx, b.lines[0], W - 80, 105, { f: b.f, color: p.ink2, align: 'right' })
+  }
+  if (sg.n) stations(ctx, p, line, sg.n, tl.of)
+  const { card, sentence, para, pill } = tools(ctx, p, line)
+  const head = (str, color = line) => text(ctx, str.toUpperCase(), 120, 215, { f: font(700, 32, 'latin'), color, tr: 0.16 })
   const d = sg.data
   const m = sg.marks
   switch (sg.type) {
@@ -1257,6 +1355,254 @@ function drawQuestion(ctx, p, line, S, it, m, u, k, fade, sentence, para, card, 
       const first = [e.head, e.sense].filter(Boolean).join(' — ')
       if (first) ey += para(first, 120, ey, 1600, [44, 40, 36], p.gold, 'left', 700, 2) + 14
       if (e.why) para(e.why, 120, ey, 1600, [38, 34, 30, 28], p.ink2, 'left', 500, Math.max(1, Math.floor((940 - ey) / 38)))
+    })
+  }
+}
+
+// ── A short, standing (plan 214) ──────────────────────────────────
+// The same parts as the wide video, stacked in the 9:16 frame and kept
+// inside the feed's safe area (TALL.safe): the masthead and the line of
+// stations at the top, the card in the middle, nothing under the
+// caption and the buttons a feed lays over the foot.
+const TW = TALL.w
+const TH = TALL.h
+const TX = TALL.safe.l
+const TWIDE = TW - TALL.safe.l - TALL.safe.r
+
+/** The frame of a short at second `t`, and its key. */
+function drawTall(ctx, plan, tl, t) {
+  const { p, S, line, sg, u, state, k, fade, d, m } = begin(ctx, plan, tl, t, TW, TH)
+  const { card, sentence, para, pill } = tools(ctx, p, line)
+  const cx = TW / 2
+  if (sg.type !== 'intro' && sg.type !== 'outro') {
+    mark(ctx, TX, 250, 56, p.ink, p.gold)
+    text(ctx, 'TSUJI', TX + 70, 292, { f: font(700, 24, 'latin'), color: p.ink2, tr: 0.3 })
+    if (sg.n) {
+      text(ctx, `${sg.n} / ${tl.of}`, TW - TALL.safe.r, 292, { f: font(700, 30, 'latin'), color: p.ink2, align: 'right' })
+      // The line of stations, under the masthead.
+      const y = 352
+      const x0 = TX
+      const x1 = TW - TALL.safe.r
+      ctx.fillStyle = alpha(line, 0.25)
+      ctx.fillRect(x0, y - 4, x1 - x0, 8)
+      ctx.fillStyle = line
+      ctx.fillRect(x0, y - 4, (x1 - x0) * (sg.n - 0.5) / tl.of, 8)
+      for (let j = 0; j < tl.of; j++) {
+        ctx.beginPath()
+        ctx.arc(x0 + (x1 - x0) * (j + 0.5) / tl.of, y, j === sg.n - 1 ? 16 : 9, 0, 7)
+        ctx.fillStyle = j < sg.n ? line : p.surfaceLine
+        ctx.fill()
+      }
+    }
+  }
+  switch (sg.type) {
+    case 'intro': {
+      fade(k(0.1, 0.4), () => mark(ctx, cx - 90, 420, 180, p.ink, p.gold))
+      fade(k(0.3, 0.4), () => para(plan.title, cx, 700, TWIDE, [84, 72, 62, 54], p.ink, 'center', 700, 3))
+      fade(k(0.8, 0.4), () => para(S.hook[plan.kind], cx, 1080, TWIDE, [52, 46, 40], p.gold, 'center', 700, 2))
+      break
+    }
+    case 'outro': {
+      fade(k(0.1, 0.4), () => mark(ctx, cx - 80, 440, 160, p.ink, p.gold))
+      fade(k(0.3, 0.4), () => para(S.outro, cx, 700, TWIDE, [76, 64], p.ink, 'center', 700, 2))
+      fade(k(0.6, 0.4), () => para(S.outroSub, cx, 900, TWIDE, [40, 34], p.ink2, 'center', 500, 3))
+      if (plan.kind === 'quiz') fade(k(0.8, 0.4), () => para(S.comment, cx, 1060, TWIDE, [44, 38], p.gold, 'center', 700, 2))
+      fade(k(1.0, 0.4), () => A.departButton(ctx, p, cx - 330, 1200, 660, 2, S.depart))
+      break
+    }
+    case 'vocab': {
+      const kanji = hasKanji(d.t)
+      fade(k(0, 0.3), () => card(TX, 440, TWIDE, 720))
+      const f = font(700, 200, kanji ? 'serif' : 'jp')
+      const z = Math.min(200, 200 * (TWIDE - 80) / Math.max(1, measure(ctx, d.t, f)))
+      fade(k(0.1, 0.3), () => text(ctx, d.t, cx, 860, { f: font(700, z, kanji ? 'serif' : 'jp'), color: p.ink, align: 'center' }))
+      if (u < m.think) {
+        const left = Math.max(0, Math.ceil(m.think - u))
+        state.push(`L${left}`)
+        text(ctx, S.readIt, cx, 1010, { f: font(500, 40, 'latin'), color: p.ink2, align: 'center' })
+        for (let j = 0; j < 2; j++) {
+          ctx.beginPath()
+          ctx.arc(cx - 20 + j * 40, 1070, 10, 0, 7)
+          ctx.fillStyle = j < left ? p.gold : p.surfaceLine
+          ctx.fill()
+        }
+      }
+      fade(k(m.think, 0.3), () => {
+        if (kanji) text(ctx, d.r, cx, 620, { f: font(500, 56, 'jp'), color: p.ink2, align: 'center' })
+        text(ctx, d.ro, cx, 960, { f: font(500, 40, 'latin'), color: p.ink2, align: 'center' })
+      })
+      fade(k(m.meaning, 0.35), () => para(d.gloss, cx, 1010, TWIDE - 80, [60, 52, 44, 38], p.gold, 'center', 700, 2))
+      break
+    }
+    case 'kanji': {
+      const n = d.strokes.d.length
+      fade(k(0, 0.3), () => card(cx - 300, 420, 600, 600))
+      const kz = 540 / 109
+      ctx.save()
+      ctx.translate(cx - 270, 450)
+      ctx.scale(kz, kz)
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      d.strokes.d.forEach((path, j) => {
+        const from = m.strokeAt + j * m.per
+        const v = k(from, m.per * 0.85)
+        const shape = new Path2D(path)
+        ctx.lineWidth = 4.5
+        ctx.strokeStyle = alpha(p.ink, 0.09)
+        ctx.stroke(shape)
+        if (v <= 0) return
+        const len = strokeLength(path)
+        ctx.strokeStyle = u < from + m.per ? line : p.ink
+        if (len && v < 1) { ctx.setLineDash([len, len + 10]); ctx.lineDashOffset = len * (1 - v) }
+        ctx.globalAlpha = len ? 1 : v
+        ctx.stroke(shape)
+        ctx.setLineDash([])
+        ctx.globalAlpha = 1
+        const [nx, ny] = d.strokes.n[j] || [0, 0]
+        ctx.fillStyle = line
+        ctx.font = font(700, 6.5, 'latin')
+        ctx.fillText(String(j + 1), nx, ny)
+      })
+      ctx.restore()
+      fade(k(m.meaning, 0.35), () => {
+        text(ctx, S.strokes(n), cx, 1070, { f: font(500, 32, 'latin'), color: p.ink2, align: 'center' })
+        para(d.meaning, cx, 1100, TWIDE, [72, 60, 52], p.ink, 'center', 700, 1)
+      })
+      const reading = (label, y, parts, v) => fade(v, () => {
+        const f = font(700, 56, 'jp')
+        const str = parts.length ? parts.map(([a, b]) => a + b).join('、') : '—'
+        const lw = measure(ctx, label, font(700, 28, 'latin'), 0.2) + 24 + measure(ctx, str, f)
+        const x = cx - lw / 2
+        text(ctx, label, x, y - 6, { f: font(700, 28, 'latin'), color: line, tr: 0.2 })
+        text(ctx, str, x + lw - measure(ctx, str, f), y, { f, color: p.ink })
+      })
+      reading(S.on, 1270, d.on.map(r => [r, '']), k(m.on, 0.3))
+      reading(S.kun, 1350, d.kun, k(m.kun, 0.3))
+      d.words.forEach((w, j) => fade(k(m.words[j], 0.35), () => {
+        para(`${w.t}  ${w.r}`, cx, 1400, TWIDE, [48, 42], p.ink, 'center', 700, 1)
+        para(w.gloss, cx, 1460, TWIDE, [36, 32], p.gold, 'center', 500, 1)
+      }))
+      break
+    }
+    case 'gtitle': {
+      fade(k(0.1, 0.4), () => para(d.p, cx, 640, TWIDE, [120, 96, 80, 64], p.ink, 'center', 700, 2))
+      fade(k(0.5, 0.4), () => para(d.meaning, cx, 880, TWIDE, [56, 48, 40], p.ink2, 'center', 500, 2))
+      fade(k(0.9, 0.4), () => pill(d.form, cx, 1040, 40, 'center', TWIDE))
+      break
+    }
+    case 'gex': {
+      fade(k(0, 0.3), () => text(ctx, `${S.example} ${d.n} / ${d.of}`.toUpperCase(), TX, 480, { f: font(700, 30, 'latin'), color: line, tr: 0.16 }))
+      fade(k(0.2, 0.4), () => {
+        card(TX, 530, TWIDE, 600)
+        const h = sentence(d.rows, cx, 600, { max: 76, min: 44, maxW: TWIDE - 80, maxLines: 3, lit: line })
+        para(d.tr, cx, 640 + h, TWIDE - 80, [44, 38, 34], p.ink2, 'center', 500, 3)
+      })
+      break
+    }
+    case 'q': drawTallQuestion(ctx, p, line, S, d, m, u, k, fade, sentence, para, card, state); break
+    default:
+  }
+  return state.join(',')
+}
+
+/** A question standing: the ask, the stem, the answers one a line, five seconds, the answer and why. */
+function drawTallQuestion(ctx, p, line, S, it, m, u, k, fade, sentence, para, card, state) {
+  const q = it.q
+  const cx = TW / 2
+  const revealed = u >= m.reveal
+  const done = u >= m.answer
+  state.push(done ? 'A' : revealed ? 'R' : '')
+  const askB = fit(ctx, q.ask, { weight: 700, sizes: [48, 42, 36, 32], maxW: TWIDE, maxLines: 3, fam: 'latin', balanced: false })
+  fade(k(0, 0.35), () => askB.lines.forEach((l, j) => text(ctx, l, TX, 430 + askB.size * (0.8 + j * 1.22), { f: askB.f, color: p.ink })))
+  let y = 430 + paragraphH(askB, 1.22) + 50
+  const stem = q.stem || {}
+  if (stem.specimen) {
+    const top = y
+    fade(k(0.2, 0.35), () => {
+      const sp = stem.specimen
+      const f = font(700, 150, hasKanji(sp) ? 'serif' : 'jp')
+      const z = Math.min(150, 150 * TWIDE / Math.max(1, measure(ctx, sp, f)))
+      text(ctx, sp, cx, top + 140, { f: font(700, z, hasKanji(sp) ? 'serif' : 'jp'), color: p.ink, align: 'center' })
+    })
+    y += 200
+  } else if (stem.rows) {
+    let shown = done && stem.after ? stem.after : stem
+    const fill = q.choices[q.right]
+    const gap = shown.rows.findIndex(r => /^[＿_]+$/.test(r.t))
+    if (done && gap >= 0 && (fill.rows || /[ぁ-んァ-ン一-龯]/.test(fill.text || ''))) {
+      const rows = shown.rows.filter((r, i) => i <= gap || !/^[＿_]+$/.test(r.t))
+      rows.splice(gap, 1, ...(fill.rows ? fill.rows.map(r => ({ ...r, lit: true })) : [{ t: fill.text, k: 'word', lit: true }]))
+      shown = { rows }
+    }
+    const o = { max: 72, min: 40, maxW: TWIDE, maxLines: 3, script: done ? 'furigana' : stem.script || 'kanji' }
+    const L = layoutSentence(ctx, shown.rows, { ...o, rules: false, gap: 0.06, fam: 'jp', weight: 700 })
+    const top = y
+    fade(k(0.2, 0.35), () => sentence(shown.rows, cx, top, { ...o, under: shown.under ? shown.target : -1, lit: stem.lit || stem.underLit || shown !== stem ? line : null }))
+    y += (L?.h || 100) + 50
+  } else if (stem.cue) {
+    const L = layoutSentence(ctx, stem.cue.rows, { max: 52, min: 34, maxW: TWIDE - 60, maxLines: 2, script: 'furigana', rules: false, gap: 0.06, fam: 'jp', weight: 700 })
+    const top = y
+    fade(k(0.2, 0.35), () => {
+      ctx.fillStyle = p.card
+      rrect(ctx, TX, top, TWIDE, L.h + 90, 28)
+      ctx.fill()
+      drawSentence(ctx, L, TX + 30, top + 20, 'left', () => ({ ink: p.ink, ruby: p.ink2 }))
+      para(stem.cue.tr, TX + 30, top + L.h + 30, TWIDE - 60, [30, 26], p.ink2, 'left', 500, 1)
+    })
+    y += L.h + 110
+  }
+  const choiceText = c => c.text ?? joined(c.rows || [])
+  const famOf = c => (c.rows || c.fam === 'jp' ? 'jp' : 'latin')
+  const n = q.choices.length
+  if (!done) {
+    const ch = Math.max(84, Math.min(120, (1440 - y - 14 * (n - 1)) / n))
+    const top = y
+    q.choices.forEach((c, j) => fade(k(0.5 + j * 0.12, 0.3), () => {
+      const cy = top + j * (ch + 14)
+      const right = j === q.right
+      ctx.save()
+      if (revealed && !right) ctx.globalAlpha *= 0.35
+      card(TX, cy, TWIDE, ch, revealed && right ? p.gold : p.surfaceLine, revealed && right ? 6 : 2)
+      text(ctx, String(j + 1), TX + 46, cy + ch / 2 + 15, { f: font(700, 40, 'latin'), color: line, align: 'center' })
+      let b = fit(ctx, choiceText(c), { weight: 700, sizes: [48, 42, 36, 30], maxW: TWIDE - 120, maxLines: 1, fam: famOf(c), balanced: false })
+      if (b.cut) b = fit(ctx, choiceText(c), { weight: 700, sizes: [36, 30, 26], maxW: TWIDE - 120, maxLines: 2, fam: famOf(c), balanced: false })
+      const bh = paragraphH(b, 1.12)
+      b.lines.forEach((l, li) => text(ctx, l, TX + 92, cy + ch / 2 - bh / 2 + b.size * (0.84 + li * 1.12), { f: b.f, color: p.ink }))
+      ctx.restore()
+    }))
+    if (!revealed && u >= m.show) {
+      const left = m.reveal - u
+      const share = Math.max(0, left / m.count)
+      state.push(Math.round(share * 90))
+      const ry = Math.min(1420, top + n * (ch + 14) + 90)
+      ctx.lineWidth = 12
+      ctx.strokeStyle = p.surfaceLine
+      ctx.beginPath()
+      ctx.arc(cx, ry, 56, 0, 7)
+      ctx.stroke()
+      ctx.strokeStyle = p.gold
+      ctx.lineCap = 'round'
+      ctx.beginPath()
+      ctx.arc(cx, ry, 56, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * share)
+      ctx.stroke()
+      ctx.lineCap = 'butt'
+      text(ctx, String(Math.ceil(left)), cx, ry + 20, { f: font(700, 52, 'latin'), color: p.ink, align: 'center' })
+    }
+  } else {
+    const e = q.explain || {}
+    const top = y
+    fade(k(m.answer, 0.35), () => {
+      const c = q.choices[q.right]
+      card(TX, top, TWIDE, 120, p.gold, 6)
+      text(ctx, String(q.right + 1), TX + 46, top + 76, { f: font(700, 40, 'latin'), color: line, align: 'center' })
+      const b = fit(ctx, choiceText(c), { weight: 700, sizes: [52, 44, 38, 32, 28], maxW: TWIDE - 120, maxLines: 1, fam: famOf(c), balanced: false })
+      text(ctx, b.lines[0], TX + 92, top + 60 + b.size * 0.36, { f: b.f, color: p.ink })
+    })
+    fade(k(m.answer + 0.4, 0.4), () => {
+      let ey = top + 160
+      const first = [e.head, e.sense].filter(Boolean).join(' — ')
+      if (first) ey += para(first, TX, ey, TWIDE, [42, 38, 34], p.gold, 'left', 700, 3) + 14
+      if (e.why) para(e.why, TX, ey, TWIDE, [36, 32, 28], p.ink2, 'left', 500, Math.max(1, Math.floor((1480 - ey) / 38)))
     })
   }
 }

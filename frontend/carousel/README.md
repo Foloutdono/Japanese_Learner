@@ -577,6 +577,42 @@ theme's words span the levels, so its page names none. Each still is drawn once
 so ten minutes take about four. It needs the voice engine, the
 backend's Python with numpy, ffmpeg and Playwright's Chromium.
 
+## Short formats (plan 214)
+
+Two ways to a short video for YouTube Shorts, Reels or TikTok, 9:16 and
+inside the feed's safe area (the story format's):
+
+**A long video's short.** Each long video kind also comes standing and
+under a minute (`--format short`, or "9:16 short" in the studio's 長編
+source): six words, four kanji or three questions, or a grammar point
+by its form, two examples said once and one question; the same look,
+voices and sounds, the masthead and the line of stations at the top.
+`long.fitShort` lets the last items go until the video, its lines
+measured, holds under 59 seconds. A drill's short starts where its long
+part starts (語彙 3's short is that part's first six words). Its page is
+a short's: a title ending `#shorts`, a line, the app, the credits.
+
+**A carousel as a short video** (`short.js`). Any carousel the studio
+draws can be a video: its slides in their order, standing, each held
+as long as it reads (`slideSeconds`: what the slide writes, counted as
+it draws), a question four seconds longer with its seconds ticked,
+swiped to the next as a carousel is, with the app's sounds (the swipe,
+the ticks, the right answer, the chime). Its Japanese line
+(`spokenLine`: the sentence, the word, the kana; none for a kanji's
+readings or a set of lookalikes) is said on the slide that reveals it.
+The studio encodes it at once, with the app's sounds and no voice
+("Download as a short video", Chrome, Edge or Safari); "Copy the
+command: the short, voiced" gives the render command with the carousel
+as a recipe (`--carousel`, `short.recipeOf`), which makes it with the
+voice and the music bed and writes its page (the carousel's own title,
+its caption, `#shorts`).
+
+```bash
+cd frontend
+VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --format short --kind kanji --level N5
+node carousel/long/render.mjs --carousel <recipe from the studio>
+```
+
 ## The code
 
 | File | Does |
@@ -593,7 +629,8 @@ backend's Python with numpy, ffmpeg and Playwright's Chromium.
 | `echo.js` | the word echo: its plan, its rhythm, its scatter and its clip (plan 213) |
 | `sound.js` | a clip's sound: the app's own events and recorded clips, mixed (plans 212, 213); one event alone for a long video (plan 214) |
 | `long.js` | the long videos: what each says, when, each frame, their page, and the studio's list of them (plan 214) |
-| `long/render.mjs` | a long video made: voiced, mixed, drawn and encoded (plan 214) |
+| `short.js` | a carousel as a short video: its timing, its swipes, its line and page (plan 214) |
+| `long/render.mjs` | a long video, its short or a carousel's short made: voiced, mixed, drawn and encoded (plan 214) |
 | `studio.js` | the page: the pickers, the previews, the export |
 
 ## Running it

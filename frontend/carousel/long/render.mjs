@@ -12,6 +12,9 @@
 //   --out DIR         where the video goes (carousel/long/out/ by default)
 //   --seconds 60      make only the first minute (to look at a draft)
 //   --stills 12,40    draw those seconds as PNGs, and no video
+//   --format short    the short: 9:16, under a minute (YouTube Shorts, Reels, TikTok)
+//   --carousel RECIPE a carousel of the studio as a short video, voiced: the
+//                     studio's "Copy the command" writes the recipe (short.js)
 //
 // Writes <name>.mp4, <name>.txt (the title, then the description with
 // its chapters and the voice's credit) and <name>.jpg (a thumbnail).
@@ -26,7 +29,8 @@ import { dirname, extname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 import { SITE_ORIGIN } from '../../landing/config.mjs'
-import { FPS, cueKey, describe, longPlan, timeline } from '../long.js'
+import { FPS, TALL, WIDE, cueKey, describe, fitShort, longPlan, timeline } from '../long.js'
+import { fromRecipe, shortTimeline } from '../short.js'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const FRONT = resolve(HERE, '../..')
@@ -34,11 +38,13 @@ const BACKEND = resolve(FRONT, '../backend')
 const BANK = resolve(HERE, '../bank')
 
 const args = Object.fromEntries(process.argv.slice(2).reduce((a, x, i, all) => (x.startsWith('--') ? [...a, [x.slice(2), all[i + 1]?.startsWith('--') || all[i + 1] == null ? true : all[i + 1]]] : a), []))
+const recipe = args.carousel ? fromRecipe(String(args.carousel)) : null
 const kind = args.kind || 'vocab'
-const lang = args.lang || 'en'
+const lang = recipe?.lang || args.lang || 'en'
 const opts = {
   lang, level: args.level || 'N5', part: Number(args.part || 1), theme: args.theme || null, point: args.point || null,
   ids: args.ids ? String(args.ids).split(',') : null, count: args.count ? Number(args.count) : null,
+  format: args.format === 'short' ? 'short' : 'long',
 }
 const OUT = resolve(args.out || join(HERE, 'out'))
 const CACHE = join(HERE, 'cache')
@@ -46,21 +52,6 @@ const WORK = join(OUT, '.work')
 for (const d of [OUT, CACHE, WORK, join(WORK, 'sfx')]) mkdirSync(d, { recursive: true })
 const python = existsSync(join(BACKEND, '.venv/bin/python')) ? join(BACKEND, '.venv/bin/python') : 'python3'
 const log = (...a) => console.log(new Date().toISOString().slice(11, 19), ...a)
-
-// ── The plan, its lines voiced and measured, the timeline ──
-const banks = {}
-for (const f of readdirSync(BANK)) if (f.endsWith('.json')) banks[f] = JSON.parse(readFileSync(join(BANK, f), 'utf8'))
-const plan = longPlan(kind, banks, opts)
-const slug = [kind, opts.theme || opts.level, kind === 'grammar' ? plan.point : opts.ids ? 'pick' : `part${opts.part}`, lang].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
-log(`${plan.title}: ${plan.items.length} items`)
-const draft = timeline(plan)
-writeFileSync(join(WORK, 'cues.json'), JSON.stringify(draft.cues))
-const voiced = spawnSync(python, ['-m', 'scripts.long_video_audio', 'voice', join(WORK, 'cues.json'), '--cache', CACHE, '--out', join(WORK, 'durs.json')], { cwd: BACKEND, stdio: 'inherit' })
-if (voiced.status !== 0) log('some lines could not be voiced: they are timed by a guess and left unsaid')
-const { durs } = JSON.parse(readFileSync(join(WORK, 'durs.json'), 'utf8'))
-const tl = timeline(plan, c => durs[cueKey(c)])
-const seconds = Math.min(tl.seconds, Number(args.seconds) || Infinity)
-log(`${(tl.seconds / 60).toFixed(1)} min, ${tl.cues.length} lines, ${tl.sfx.length} sounds`)
 
 // ── A page to draw on: the frontend served as the studio is ──
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.woff2': 'font/woff2', '.woff': 'font/woff', '.svg': 'image/svg+xml' }
@@ -85,24 +76,91 @@ page.on('pageerror', e => log('page:', e.message))
 await page.route('https://fonts.googleapis.com/**', r => r.fulfill({ contentType: 'text/css', body: css.join('\n') }))
 await page.goto(`${ROOT}/carousel/index.html`)
 await page.addStyleTag({ content: css.join('\n') })
-await page.evaluate(async ({ plan, tl }) => {
+// ── Lines voiced and measured: how long each lasts ──
+function voiceAll(cues) {
+  writeFileSync(join(WORK, 'cues.json'), JSON.stringify(cues))
+  const voiced = spawnSync(python, ['-m', 'scripts.long_video_audio', 'voice', join(WORK, 'cues.json'), '--cache', CACHE, '--out', join(WORK, 'durs.json')], { cwd: BACKEND, stdio: 'inherit' })
+  if (voiced.status !== 0) log('some lines could not be voiced: they are timed by a guess and left unsaid')
+  const { durs } = JSON.parse(readFileSync(join(WORK, 'durs.json'), 'utf8'))
+  return c => durs[cueKey(c)]
+}
+const site = lang === 'en' ? `${SITE_ORIGIN}/en` : SITE_ORIGIN
+const banks = {}
+for (const f of readdirSync(BANK)) if (f.endsWith('.json')) banks[f] = JSON.parse(readFileSync(join(BANK, f), 'utf8'))
+const fontsFor = async text => page.evaluate(async text => {
   const W = await import('/carousel/draw.js')
-  window.__long = await import('/carousel/long.js')
-  window.__plan = plan
-  window.__tl = tl
-  const all = JSON.stringify(plan)
-  await Promise.all(W.FONT_FACES.map(([fam, w]) => document.fonts.load(W.font(w, 40, fam), all.slice(0, 20000))))
+  await Promise.all(W.FONT_FACES.map(([fam, w]) => document.fonts.load(W.font(w, 40, fam), text)))
   await document.fonts.ready
+}, text)
+const canvasOf = size => page.evaluate(size => {
   const c = document.createElement('canvas')
-  c.width = 1920
-  c.height = 1080
+  c.width = size.w
+  c.height = size.h
   window.__ctx = c.getContext('2d')
   window.__canvas = c
-}, { plan, tl })
+}, size)
+
+let tl, slug, SIZE, pageText, thumbAt
+if (recipe) {
+  // ── A carousel of the studio, standing, its line voiced ──
+  const made = await page.evaluate(async st => {
+    const S = await import('/carousel/short.js')
+    const W = await import('/carousel/draw.js')
+    const fetchJson = name => fetch(`/carousel/bank/${name}`).then(r => { if (!r.ok) throw new Error(name); return r.json() })
+    const { pl, slides } = await S.carouselShort(st, fetchJson)
+    const { sampleText } = await import('/carousel/sources.js')
+    await Promise.all(W.FONT_FACES.map(([fam, w]) => document.fonts.load(W.font(w, 40, fam), sampleText(pl))))
+    await document.fonts.ready
+    const c = document.createElement('canvas')
+    c.width = 1080
+    c.height = 1920
+    window.__ctx = c.getContext('2d')
+    window.__canvas = c
+    window.__short = S
+    window.__slides = slides
+    const counts = slides.map(sl => S.chars(sl, window.__ctx))
+    return { counts, keys: slides.map(sl => sl.key), spoken: S.spokenLine(pl), page: null, id: pl.id }
+  }, recipe)
+  const slides = made.keys.map(key => ({ key }))
+  const draft = shortTimeline(slides, made.counts, made.spoken)
+  const dur = voiceAll(draft.cues)
+  tl = shortTimeline(slides, made.counts, made.spoken, dur)
+  SIZE = TALL
+  slug = ['short', recipe.source, recipe.id, recipe.type, lang].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
+  pageText = await page.evaluate(async ({ st, site, voiced }) => {
+    const S = window.__short
+    const fetchJson = name => fetch(`/carousel/bank/${name}`).then(r => r.json())
+    const { pl } = await S.carouselShort(st, fetchJson)
+    return S.shortPage(pl, st.type, st.picks, site, voiced)
+  }, { st: recipe, site, voiced: tl.cues.length > 0 })
+  await page.evaluate(tl => { window.__draw = t => window.__short.drawShortFrame(window.__ctx, window.__slides, tl, t) }, tl)
+  thumbAt = 0.2
+  log(`${pageText.title}: ${made.keys.length} slides, ${tl.seconds.toFixed(1)} s${made.spoken ? `, says ${made.spoken}` : ''}`)
+} else {
+  // ── A long video, or its short: the plan, its lines voiced, the timeline ──
+  let plan = longPlan(kind, banks, opts)
+  slug = [...(opts.format === 'short' ? ['short'] : []), kind, opts.theme || opts.level, kind === 'grammar' ? plan.point : opts.ids ? 'pick' : `part${opts.part}`, lang].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
+  log(`${plan.title}: ${plan.items.length} items`)
+  const dur = voiceAll(timeline(plan).cues)
+  // A short holds under its minute on the lines as they are said.
+  if (opts.format === 'short') plan = fitShort(plan, dur)
+  tl = timeline(plan, dur)
+  SIZE = opts.format === 'short' ? TALL : WIDE
+  await fontsFor(JSON.stringify(plan).slice(0, 20000))
+  await canvasOf(SIZE)
+  await page.evaluate(async ({ plan, tl }) => {
+    const L = await import('/carousel/long.js')
+    window.__draw = t => L.drawLong(window.__ctx, plan, tl, t)
+  }, { plan, tl })
+  pageText = describe(plan, tl, site, banks['index.json']?.figures)
+  thumbAt = opts.format === 'short' ? 3.4 : 4.5
+  log(`${(tl.seconds / 60).toFixed(1)} min, ${tl.cues.length} lines, ${tl.sfx.length} sounds`)
+}
+const seconds = Math.min(tl.seconds, Number(args.seconds) || Infinity)
 
 if (args.stills) {
   for (const t of String(args.stills).split(',').map(Number)) {
-    const url = await page.evaluate(t => { window.__long.drawLong(window.__ctx, window.__plan, window.__tl, t); return window.__canvas.toDataURL('image/png') }, t)
+    const url = await page.evaluate(t => { window.__draw(t); return window.__canvas.toDataURL('image/png') }, t)
     writeFileSync(join(OUT, `${slug}-${t}.png`), Buffer.from(url.split(',')[1], 'base64'))
   }
   log(`wrote ${String(args.stills).split(',').length} still(s) to ${OUT}`)
@@ -152,7 +210,7 @@ for (let f = 0; f < frames; f += BATCH) {
     const res = []
     let key = prev
     for (let i = from; i < to; i++) {
-      const k = window.__long.drawLong(window.__ctx, window.__plan, window.__tl, i / fps)
+      const k = window.__draw(i / fps)
       if (k === key) { res.push(null); continue }
       key = k
       res.push(window.__canvas.toDataURL('image/jpeg', 0.93))
@@ -170,12 +228,9 @@ ff.stdin.end()
 await new Promise((r, j) => ff.on('close', code => (code === 0 ? r() : j(new Error(`ffmpeg exited ${code}`)))))
 
 // ── The thumbnail, the title and the description ──
-const thumb = await page.evaluate(() => {
-  window.__long.drawLong(window.__ctx, window.__plan, window.__tl, 4.5)
-  return window.__canvas.toDataURL('image/jpeg', 0.92)
-})
+const thumb = await page.evaluate(t => { window.__draw(t); return window.__canvas.toDataURL('image/jpeg', 0.92) }, thumbAt)
 writeFileSync(join(OUT, `${slug}.jpg`), Buffer.from(thumb.split(',')[1], 'base64'))
-const { title, description, tags } = describe(plan, tl, lang === 'en' ? `${SITE_ORIGIN}/en` : SITE_ORIGIN, banks['index.json']?.figures)
+const { title, description, tags } = pageText
 writeFileSync(join(OUT, `${slug}.txt`), `TITLE\n${title}\n\nDESCRIPTION\n${description}\n\nTAGS\n${tags}\n`)
 await browser.close()
 server.close()

@@ -215,6 +215,13 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
       <div id="questions" class="chips" role="group" aria-label="Questions"></div>
     </div>
 
+    <div class="field" data-long="only">
+      <div class="label">Format <span>YouTube, or a short for any feed</span></div>
+      <div class="seg" role="group" aria-label="Video format">
+        <button type="button" data-set="longFormat:long">16:9 video</button>
+        <button type="button" data-set="longFormat:short">9:16 short, under a minute</button>
+      </div>
+    </div>
     <div class="field">
       <div class="label">Language on the slides</div>
       <div class="seg" role="group" aria-label="Language">
@@ -296,6 +303,8 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
         <button id="export-thumb" type="button" class="btn btn--metal" data-long="only">Download the thumbnail (.png)</button>
         <button id="copy-command" type="button" class="btn" data-long="only">Copy the command</button>
         <button id="export" type="button" class="btn btn--metal" data-long="hide" disabled>Download <span id="export-name"></span> (.zip)</button>
+        <button id="export-short" type="button" class="btn btn--metal" data-long="hide" hidden>Download as a short video (.mp4, 9:16)</button>
+        <button id="copy-short" type="button" class="btn" data-long="hide" hidden>Copy the command: the short, voiced</button>
         <button id="export-clip" type="button" class="btn btn--metal" data-long="hide" hidden>Download the cover clip (.mp4, 7 s, with sound)</button>
         <button id="export-end-clip" type="button" class="btn btn--metal" data-promo="only" data-long="hide" hidden>Download the call-to-action clip (.mp4, 7 s, with sound)</button>
         <button id="copy-title" type="button" class="btn">Copy title</button>

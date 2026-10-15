@@ -10,7 +10,8 @@ import { STRINGS, weld, weldIf } from '../carousel/strings.js'
 import { APP_INKS } from '../carousel/app.js'
 import { CLIP, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
-import { KINDS, LONG_SITE, PART, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, timeline } from '../carousel/long.js'
+import { SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
+import { KINDS, LONG_SITE, PART, SHORT, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { VOICE_REV } from './lib/audio/speech.js'
@@ -1029,5 +1030,93 @@ describe('the long videos (plan 214)', () => {
     expect(key(1.1)).toBe(key(1.2))
     expect(key(1.2)).not.toBe(key(2.2))
     expect(key(sg.marks.meaning + 1)).not.toBe(key(1.2))
+  }))
+})
+
+describe('the short formats (plan 214)', () => {
+  const files = {}
+  for (const lv of LEVELS) for (const f of [`${lv}.json`, `words-${lv}.json`, `kanji-${lv}.json`, `grammar-${lv}.json`]) files[f] = bank(f)
+  files['themes.json'] = bank('themes.json')
+  const withPath2D = fn => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class { constructor(d) { this.d = d } }
+    try { fn() } finally { globalThis.Path2D = had }
+  }
+
+  it('cuts each long video to a standing minute, drawn whole', () => withPath2D(() => {
+    for (const lang of ['en', 'fr']) {
+      for (const kind of KINDS) {
+        for (const level of ['N5', 'N2']) {
+          const pl = fitShort(longPlan(kind, files, { lang, level, format: 'short', point: bank(`grammar-${level}.json`).lessons[1].p }))
+          const tl = timeline(pl)
+          expect(pl.format, kind).toBe('short')
+          expect(tl.seconds, `${kind} ${level}`).toBeLessThanOrEqual(SHORT.seconds)
+          expect(tl.seconds, `${kind} ${level}`).toBeGreaterThan(20)
+          if (kind !== 'grammar') expect(pl.items.length, kind).toBeLessThanOrEqual(SHORT[kind])
+          for (const sg of tl.segs) {
+            for (const u of [0, sg.dur / 2, ...Object.values(sg.marks).flat().filter(x => typeof x === 'number'), sg.dur - 0.01]) {
+              expect(() => drawLong(stubContext().ctx, pl, tl, sg.start + Math.min(u, sg.dur - 0.01)), `${kind} ${sg.type} ${u}`).not.toThrow()
+            }
+          }
+          const page = describeVideo(pl, tl, 'https://example.org', bank('index.json').figures)
+          expect(page.title.length, kind).toBeLessThanOrEqual(100)
+          expect(page.title, kind).toMatch(/#shorts$/)
+          expect(page.description, kind).toMatch(/VOICEVOX Nemo/)
+          expect(page.description, kind).toMatch(/#Shorts/)
+        }
+      }
+    }
+    // A grammar short: its form, two examples said once, one question.
+    const g = longPlan('grammar', files, { format: 'short', point: '〜てください' })
+    expect(g.items.map(x => x.type)).toEqual(['gtitle', 'gex', 'gex', 'q'])
+    expect(timeline(g).cues.filter(c => c.slow)).toEqual([])
+  }), 120000)
+
+  it('times a carousel as a short: each slide read, a question answered, its line said at the reveal', () => {
+    expect(slideSeconds(0, 'cover').hold).toBe(2.4)
+    expect(slideSeconds(400, 'point').hold).toBe(7)
+    expect(slideSeconds(40, 'question-1').hold - slideSeconds(40, 'answer-1').hold).toBe(4)
+    const slides = ['hook', 'question-1', 'answer-1', 'outro'].map(key => ({ key, draw: () => {} }))
+    const tl = shortTimeline(slides, [30, 40, 40, 20], '駅で友だちに会います。')
+    expect(tl.segs.map(x => x.key)).toEqual(['hook', 'question-1', 'answer-1', 'outro'])
+    expect(tl.cues).toHaveLength(1)
+    expect(tl.cues[0].at).toBeGreaterThan(tl.segs[2].start)
+    expect(tl.cues[0].at).toBeLessThan(tl.segs[2].start + tl.segs[2].dur)
+    expect(tl.sfx.filter(x => x.key === 'click')).toHaveLength(4)
+    expect(tl.sfx.some(x => x.key === 'correct' && x.at > tl.segs[2].start)).toBe(true)
+    expect(tl.seconds).toBeCloseTo(tl.segs.reduce((a, x) => a + x.dur, 0), 2)
+    // A swipe is two slides at once; a held slide one, and the same key while still.
+    const drawn = []
+    const live = slides.map((sl, i) => ({ ...sl, draw: () => drawn.push(i) }))
+    const { ctx } = stubContext()
+    expect(drawShortFrame(ctx, live, tl, tl.segs[1].start + SWIPE / 2)).toMatch(/^1\|/)
+    expect(drawn).toEqual([0, 1])
+    expect(drawShortFrame(ctx, live, tl, tl.segs[1].start + 1)).toBe(drawShortFrame(ctx, live, tl, tl.segs[1].start + 2))
+  })
+
+  it('makes a short of every source’s carousel, its line and page its own', () => withPath2D(() => {
+    for (const src of STATIONED) {
+      const { data, filter } = filesOf(src)[0]
+      const { id } = itemsOf(src.id, data, 'en', filter)[0]
+      const pl = plan(src.id, data, id, OPTS, depsFor(src, data, id))
+      const type = TYPES.map(x => x.id).find(x => available(x, pl))
+      const slides = deck(type, pl, FORMATS.story, { ground: 'paper' })
+      // Counted as each draws in the studio and the renderer (a browser's measure); here a fixed count.
+      const counts = slides.map(() => 40)
+      const line = spokenLine(pl)
+      if (['sentence', 'word', 'kana', 'translation', 'lesson', 'theme'].includes(src.id)) expect(line, src.id).toMatch(/[ぁ-んァ-ン一-龯]/)
+      if (line) expect(line, src.id).not.toMatch(/[（）a-z]/i)
+      const tl = shortTimeline(slides, counts, line)
+      expect(tl.segs).toHaveLength(slides.length)
+      const page = shortPage(pl, type, null, 'https://example.org', !!line)
+      expect(page.title.length, src.id).toBeLessThanOrEqual(100)
+      expect(page.title, src.id).toMatch(/#shorts$/)
+      expect(page.description.includes('VOICEVOX Nemo'), src.id).toBe(!!line)
+    }
+    // What a slide writes, each character once.
+    expect(chars({ draw: ctx => { ctx.fillText('駅で', 0, 0); ctx.fillText('station', 0, 0) } }, { fillText() {} })).toBe(9)
+    const st = { source: 'word', level: 'N5', id: '写真::しゃしん', type: 'plates', lang: 'fr', slides: { word: { strokes: false } } }
+    expect(fromRecipe(recipeOf(st))).toEqual(st)
+    expect(recipeOf(st)).toMatch(/^[\w-]+$/)
   }))
 })

@@ -8,13 +8,14 @@
 /* global JSZip */
 import { ENDING_IDS, FORMATS, TYPES, TYPE_OPTIONS, available, deck, endingSlide } from './slides.js'
 import { FONT_FACES, font, palette } from './draw.js'
-import { BONUS, LEVELS, MAX_QUESTIONS, OPTIONAL, SOURCES, TITLE_MAX, depsOf, itemsOf, picked, plan, sampleText, sourceOf, titleOf } from './sources.js'
+import { BONUS, LEVELS, MAX_QUESTIONS, OPTIONAL, SOURCES, TITLE_MAX, itemsOf, picked, plan, sampleText, sourceOf, titleOf } from './sources.js'
 import { STRINGS } from './strings.js'
 import { PROMO, STORIES } from './promo.js'
 import { PRINT_HOURS, loadPrint } from './app.js'
 import { RATE, clipAudio, decoded, loadVoices } from './sound.js'
 import { voiceSpan } from './echo.js'
-import { LONG_SITE, describe as describeLong, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, timeline, WIDE } from './long.js'
+import { FPS as SHORT_FPS, chars, depsFor as depsOfWord, drawShortFrame, recipeOf, shortTimeline } from './short.js'
+import { LONG_SITE, TALL, describe as describeLong, drawLong, fitShort, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, timeline, WIDE } from './long.js'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 
 const STORE = 'tsuji-carousel'
@@ -35,7 +36,7 @@ const T = STRINGS.en
 const LIST_NAME = { long: 'Video', promo: 'Story', echo: 'Word', sentence: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
 
 const DEFAULTS = {
-  source: 'sentence', level: 'N5', kanaSet: 'hiragana', story: 'pitch', hour: 'day', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20' },
+  source: 'sentence', level: 'N5', longFormat: 'long', kanaSet: 'hiragana', story: 'pitch', hour: 'day', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20' },
   view: 'compare', type: 'plates', format: 'post', ground: 'paper',
   lang: 'en', script: 'kanji', romaji: false, bonus: 'kanji', kanji: '', handle: '', safe: false, slides: {},
   picks: {}, types: {}, ending: 'mark',
@@ -328,21 +329,7 @@ function renderQuestions(pl) {
 }
 
 // ── What else a word's carousel reads ─────────────────────────
-async function depsFor(data, id) {
-  if (state.source !== 'word') return {}
-  const need = depsOf('word', data, id)
-  const index = await fetchJson('kanji-index.json')
-  const sentences = {}
-  for (const lv of need.levels) for (const s of (await fetchJson(`${lv}.json`)).sentences) sentences[s.id] = s
-  const strokes = {}
-  for (const c of need.chars) {
-    const lv = index.kanji[c]?.lv
-    if (!lv) continue
-    const k = (await fetchJson(`kanji-${lv}.json`)).kanji[c]
-    if (k) strokes[c] = k
-  }
-  return { index, sentences, strokes }
-}
+const depsFor = (data, id) => depsOfWord(state.source, data, id, fetchJson)
 
 // ── The slides ────────────────────────────────────────────────
 let current = { decks: [], plan: null }
@@ -398,7 +385,9 @@ async function render() {
   // A story is 9:16, whatever the post's format.
   const fmt = FORMATS[clipped ? 'story' : state.format]
   const ids = state.view === 'compare' ? types : [state.type]
-  current = { plan: pl, fmt, decks: ids.map(d => ({ id: d, slides: deck(d, pl, fmt, opts) })) }
+  current = { plan: pl, fmt, figures, decks: ids.map(d => ({ id: d, slides: deck(d, pl, fmt, opts) })) }
+  $('#export-short').hidden = clipped
+  $('#copy-short').hidden = clipped
   const typeName = id => (promo ? PROMO.en.names[state.story] : T.types[id].name)
   $('#export-name').textContent = typeName(state.type)
   const stage = $('#stage')
@@ -511,13 +500,16 @@ async function renderLong(mine) {
   const id = currentId()
   const banks = await banksOf([...longListFiles(state.level), ...longFiles(id, state.level), 'index.json'])
   if (mine !== token) return
-  const { kind, opts } = longPick(id, state.level, state.lang)
-  const pl = longPlan(kind, banks, opts)
+  // The video at its length, or its short: standing, under a minute.
+  const short = state.longFormat === 'short'
+  const size = short ? TALL : WIDE
+  const { kind, opts } = longPick(id, state.level, state.lang, short ? 'short' : 'long')
+  const pl = short ? fitShort(longPlan(kind, banks, opts)) : longPlan(kind, banks, opts)
   const tl = timeline(pl)
   const page = describeLong(pl, tl, state.lang === 'en' ? `${LONG_SITE}/en` : LONG_SITE, banks['index.json']?.figures)
   await fonts(JSON.stringify(pl.items).slice(0, 40000) + pl.title + page.title)
   if (mine !== token) return
-  current = { plan: pl, fmt: WIDE, decks: [], long: { id, page, tl } }
+  current = { plan: pl, fmt: size, decks: [], long: { id, page, tl } }
   const stage = $('#stage')
   stage.replaceChildren()
   stage.dataset.view = 'long'
@@ -535,13 +527,15 @@ async function renderLong(mine) {
   name.append(jp, ` ${pl.title}`)
   const n = document.createElement('span')
   n.className = 'deck__count'
-  n.textContent = `about ${clock(tl.seconds)} · ${pl.items.length} stations · 16:9`
+  n.textContent = `about ${clock(tl.seconds)} · ${pl.items.length} stations · ${short ? '9:16 short' : '16:9'}`
   head.append(name, n)
   const screen = document.createElement('div')
   screen.className = 'player'
   const c = document.createElement('canvas')
-  c.width = WIDE.w
-  c.height = WIDE.h
+  c.width = size.w
+  c.height = size.h
+  c.style.aspectRatio = `${size.w} / ${size.h}`
+  if (short) c.style.maxWidth = '420px'
   c.setAttribute('aria-label', 'The video, drawn frame by frame')
   screen.append(c)
   const bar = document.createElement('div')
@@ -601,7 +595,7 @@ async function renderLong(mine) {
   })
   draw()
   // The video's page: written when the video or its language changes.
-  const key = `long|${id}|${state.level}|${state.lang}`
+  const key = `long|${id}|${state.level}|${state.lang}|${state.longFormat}`
   if (key !== captionFor) {
     $('#caption').value = page.description
     $('#title').value = page.title
@@ -610,15 +604,15 @@ async function renderLong(mine) {
     titleFor = key
     countTitle()
   }
-  $('#command').textContent = longCommand(id, state.level, state.lang)
+  $('#command').textContent = longCommand(id, state.level, state.lang, short ? 'short' : 'long')
 }
 async function exportThumb() {
   if (!current.long) return
   const c = document.createElement('canvas')
-  c.width = WIDE.w
-  c.height = WIDE.h
-  drawLong(c.getContext('2d'), current.plan, current.long.tl, 4.5)
-  const name = `tsuji-${safeName(current.long.id.replace(':', '-'))}-${state.level}-${state.lang}.png`
+  c.width = current.fmt.w
+  c.height = current.fmt.h
+  drawLong(c.getContext('2d'), current.plan, current.long.tl, current.plan.format === 'short' ? 3.4 : 4.5)
+  const name = `tsuji-${current.plan.format === 'short' ? 'short-' : ''}${safeName(current.long.id.replace(':', '-'))}-${state.level}-${state.lang}.png`
   const result = await offer(name, await png(c))
   status(result === 'saved' ? 'Saved the thumbnail.' : MESSAGE[result])
 }
@@ -789,21 +783,55 @@ async function exportClip(which = 'cover') {
   const d = current.decks[0]
   const clip = d?.slides.clips?.[which]
   if (!clip) return
-  const fmt = current.fmt
   const echo = current.plan.source === 'echo'
-  const { btn: sel, name: kind, said } = echo ? { btn: '#export-clip', name: 'echo', said: 'clip' } : CLIPS[which]
+  const { btn, name: kind, said } = echo ? { btn: '#export-clip', name: 'echo', said: 'clip' } : CLIPS[which]
   const name = echo ? `tsuji-echo-${safeName(current.plan.id)}-${state.lang}` : `tsuji-${kind}-${state.story}-${safeName(current.plan.id)}-${state.lang}`
+  const print = clip.print ? await printFor(state.hour) : null
+  await encodeClip({
+    btn, name, said, fmt: current.fmt, fps: clip.fps, seconds: clip.seconds, sounds: clip.sounds,
+    frame: async (ctx, t) => { clip.draw(ctx, t, print ? await print.moment(t) : null) },
+  })
+}
+
+// ── A carousel as a short video (plan 214) ────────────────────
+// Its slides standing, each held as long as it reads, swiped to the
+// next, with the app's sounds (short.js). The voice and the music are
+// the render command's: long/render.mjs --carousel.
+function shortRecipe() {
+  // What the carousel is drawn from, without the studio's memory of every other one.
+  const rest = Object.fromEntries(Object.entries(state).filter(([key]) => !['ids', 'picks', 'kanaSet', 'story'].includes(key)))
+  const src = sourceOf(state.source)
+  return { ...rest, set: src.levels ? state[setKey(src)] : null, id: currentId(), picks: state.picks[pickKey()] }
+}
+async function exportShort() {
+  if (!current.plan || clippedSource()) return
+  const fmt = FORMATS.story
+  const slides = deck(state.type, current.plan, fmt, { ...state, figures: current.figures, picks: state.picks[pickKey()] })
+  work.width = fmt.w
+  work.height = fmt.h
+  const counts = slides.map(sl => chars(sl, work.getContext('2d')))
+  const tl = shortTimeline(slides, counts)
+  await encodeClip({
+    btn: '#export-short', name: `tsuji-short-${state.source}-${safeName(current.plan.id)}-${state.type}-${state.lang}`, said: 'short video',
+    fmt, fps: SHORT_FPS, seconds: tl.seconds, sounds: tl.sfx,
+    frame: (ctx, t) => { drawShortFrame(ctx, slides, tl, t, fmt) },
+  })
+}
+const clippedSource = () => ['promo', 'echo', 'long'].includes(state.source)
+
+/** A clip encoded as the feeds take a video, H.264 in an MP4 with its sounds. */
+async function encodeClip({ btn: sel, name, said, fmt, fps, seconds, sounds, frame }) {
   const btn = $(sel)
   btn.disabled = true
   try {
-    const config = { codec: 'avc1.640028', width: fmt.w, height: fmt.h, bitrate: 8_000_000, framerate: clip.fps }
+    const config = { codec: 'avc1.640028', width: fmt.w, height: fmt.h, bitrate: 8_000_000, framerate: fps }
     if (typeof VideoEncoder === 'undefined' || !(await VideoEncoder.isConfigSupported(config)).supported) {
       status('This browser cannot encode H.264 video: open the studio in Chrome, Edge or Safari.')
       return
     }
     // Its sound: AAC where the browser encodes it, else Opus, else none.
     let sound = null
-    if (clip.sounds.length && typeof AudioEncoder !== 'undefined') {
+    if (sounds.length && typeof AudioEncoder !== 'undefined') {
       for (const [codec, muxed] of [['mp4a.40.2', 'aac'], ['opus', 'opus']]) {
         const audio = { codec, sampleRate: RATE, numberOfChannels: 2, bitrate: 160_000 }
         if ((await AudioEncoder.isConfigSupported(audio)).supported) { sound = { audio, muxed }; break }
@@ -813,32 +841,30 @@ async function exportClip(which = 'cover') {
     const target = new ArrayBufferTarget()
     const muxer = new Muxer({
       target, fastStart: 'in-memory',
-      video: { codec: 'avc', width: fmt.w, height: fmt.h, frameRate: clip.fps },
+      video: { codec: 'avc', width: fmt.w, height: fmt.h, frameRate: fps },
       ...(sound ? { audio: { codec: sound.muxed, numberOfChannels: 2, sampleRate: RATE } } : {}),
     })
     let failed = null
     const encoder = new VideoEncoder({ output: (chunk, meta) => muxer.addVideoChunk(chunk, meta), error: e => { failed = e } })
     encoder.configure(config)
-    const print = clip.print ? await printFor(state.hour) : null
-    const frames = clip.seconds * clip.fps
+    const frames = Math.round(seconds * fps)
     work.width = fmt.w
     work.height = fmt.h
     const ctx = work.getContext('2d')
     for (let i = 0; i < frames && !failed; i++) {
-      const t = i / clip.fps
-      clip.draw(ctx, t, print ? await print.moment(t) : null)
-      const frame = new VideoFrame(work, { timestamp: Math.round((i * 1e6) / clip.fps), duration: Math.round(1e6 / clip.fps) })
-      encoder.encode(frame, { keyFrame: i % clip.fps === 0 })
-      frame.close()
-      if (i % 10 === 0) status(`Drawing the clip… ${Math.round((i / frames) * 100)}%`)
+      await frame(ctx, i / fps)
+      const vf = new VideoFrame(work, { timestamp: Math.round((i * 1e6) / fps), duration: Math.round(1e6 / fps) })
+      encoder.encode(vf, { keyFrame: i % fps === 0 })
+      vf.close()
+      if (i % 10 === 0) status(`Drawing the ${said}… ${Math.round((i / frames) * 100)}%`)
       // The encoder keeps up: never more than a second of frames waiting.
-      while (encoder.encodeQueueSize > clip.fps) await new Promise(r => setTimeout(r, 10))
+      while (encoder.encodeQueueSize > fps) await new Promise(r => setTimeout(r, 10))
     }
     await encoder.flush()
     if (failed) throw failed
     if (sound) {
-      status('Scoring the clip…')
-      const mix = await clipAudio(clip.sounds, clip.seconds, await loadVoices(BASE))
+      status(`Scoring the ${said}…`)
+      const mix = await clipAudio(sounds, seconds, await loadVoices(BASE))
       const audio = new AudioEncoder({ output: (chunk, meta) => muxer.addAudioChunk(chunk, meta), error: e => { failed = e } })
       audio.configure(sound.audio)
       const step = RATE / 10
@@ -858,7 +884,7 @@ async function exportClip(which = 'cover') {
     const result = await offer(`${name}.mp4`, new Blob([target.buffer], { type: 'video/mp4' }))
     status(result === 'saved' ? `Saved the ${said}${sound ? ', with its sounds' : ' (this browser encodes no sound)'}.` : MESSAGE[result])
   } catch (e) {
-    status(`The clip failed (${e.message}).`)
+    status(`The ${said} failed (${e.message}).`)
   } finally {
     btn.disabled = false
   }
@@ -989,6 +1015,11 @@ function wire() {
     try { await navigator.clipboard.writeText($('#command').textContent); status('Command copied: run it from frontend/.') } catch { status('Select the command and copy it.') }
   })
   $('#export-thumb').addEventListener('click', exportThumb)
+  $('#export-short').addEventListener('click', exportShort)
+  $('#copy-short').addEventListener('click', async () => {
+    const cmd = `VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --carousel ${recipeOf(shortRecipe())}`
+    try { await navigator.clipboard.writeText(cmd); status('Command copied: run it from frontend/ for the short with its voice and music.') } catch { status(cmd) }
+  })
   $('#copy-title').addEventListener('click', () => copyField('#title', 'Title'))
   $('#title').addEventListener('input', countTitle)
   $('#prev').addEventListener('click', () => step(-1))

@@ -605,7 +605,9 @@ ten-minute 16:9 videos for YouTube (`long.js`, made by
 point whole, a quiz), voiced line by line by the app's voices and mixed
 with the app's sounds and a bed of music it plays itself
 (`scripts/long_video_audio.py`), each also a source in the studio
-that previews it and gives its page and the command that makes it; a
+that previews it and gives its page and the command that makes it, and
+each also a 9:16 short under a minute, as any carousel can be too
+(`short.js`: its slides held and swiped, its line voiced); a
 word in its breakdown is glossed from the deck or left bare, never
 guessed: when the app redraws one of those parts, measure it again and
 follow it, and a story promises only what the app does today. Its hand-written content (the pictures,
