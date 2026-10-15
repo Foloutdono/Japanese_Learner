@@ -203,6 +203,30 @@ describe('the asking in a sentence run, on a phone', () => {
     expect(document.activeElement).toBe(field())
   })
 
+  it('offers questions over the field, asks one on a tap, and offers it no more', async () => {
+    await reading()
+    await settle(300)
+    await answer('denki')
+    await rate()
+    await openPage()
+    const offers = () => $$('.ask__offer').map(b => b.textContent)
+    expect($('.ask__offers').getAttribute('aria-label')).toBe('Questions suggérées')
+    expect(offers()).toEqual([
+      'Comment s’emploie 〜ましょうか ?',
+      'Un autre exemple avec 電気 ?',
+      'Comment le dire plus poliment ?',
+    ])
+    // Between the hint and the field, in the thumb's reach.
+    expect($('.ask__offers').nextElementSibling).toBe($('.ask__form'))
+    $$('.ask__offer')[0].click()
+    await settle(250)
+    expect(askCalls()).toHaveLength(1)
+    expect(askCalls()[0].question).toBe('Comment s’emploie 〜ましょうか ?')
+    expect(turns()).toHaveLength(1)
+    expect(offers()).not.toContain('Comment s’emploie 〜ましょうか ?')
+    expect(offers()).toContain('Et entre amis, à l’oral ?')
+  })
+
   // A long thread grew the page past the window: the field went off the
   // foot with it, and the thread, never short of room, never scrolled.
   it('keeps the field on the foot and scrolls the thread when it outgrows the window', async () => {
