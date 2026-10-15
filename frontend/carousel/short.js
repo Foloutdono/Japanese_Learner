@@ -72,7 +72,35 @@ export function shortTimeline(slides, counts, spoken = null, dur = null) {
     segs.push({ i, key: s.key, start: +at.toFixed(3), dur: +hold.toFixed(3), ask })
     at += hold
   })
-  return { seconds: +at.toFixed(3), segs, cues, sfx, chapters: [] }
+  return fitted({ seconds: +at.toFixed(3), segs, cues, sfx, chapters: [] })
+}
+
+// A short holds under a minute where it can: past it, every hold is
+// tightened alike (to three quarters at most), never under its floor:
+// a slide's least reading time, a question's four seconds, its line said.
+export const LIMIT = 59
+function fitted(tl) {
+  if (tl.seconds <= LIMIT) return tl
+  const k = Math.max(0.75, LIMIT / tl.seconds)
+  const floor = sg => Math.max(2.4, sg.ask ? 6 : 0, ...tl.cues.filter(c => c.at >= sg.start && c.at < sg.start + sg.dur).map(c => c.at - sg.start + 1.6))
+  let at = 0
+  const moved = []
+  const segs = tl.segs.map(sg => {
+    const dur = +Math.max(floor(sg), sg.dur * k).toFixed(3)
+    moved.push({ from: sg.start, to: at, dur, old: sg.dur })
+    const out = { ...sg, start: +at.toFixed(3), dur }
+    at += dur
+    return out
+  })
+  // Each sound and line keeps its place in its slide: from its start, or from its end for a question's ticks.
+  const place = x => {
+    const m = moved.findLast(mv => x.at >= mv.from) || moved[0]
+    const into = x.at - m.from
+    const fromEnd = m.old - into
+    const at2 = x.key === 'click' ? m.to + m.dur - fromEnd : m.to + Math.min(into, m.dur)
+    return { ...x, at: +at2.toFixed(3) }
+  }
+  return { ...tl, seconds: +at.toFixed(3), segs, cues: tl.cues.map(place), sfx: tl.sfx.map(place) }
 }
 
 /** The frame at second `t`: the slide, or two of them in a swipe. */

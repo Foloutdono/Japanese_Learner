@@ -294,7 +294,11 @@ def mix(tl_path: Path, cache: Path, sfx: Path, out: Path) -> int:
     # stepping back while a line is said (a quarter-second follower).
     peak = float(np.abs(voice_track).max()) or 1
     voice_track *= 0.7 / peak
-    music = bed(n / RATE) * MUSIC
+    # Where little is said (a carousel's short says one line), the bed
+    # carries the video: it rises, up to twice its level, still stepping
+    # back under the voice.
+    spoken = float(np.mean(np.abs(voice_track) > 0.02)) if n else 0.0
+    music = bed(n / RATE) * MUSIC * float(np.clip(0.12 / max(spoken, 0.06), 1.0, 2.0))
     level = np.abs(voice_track)
     win = int(0.25 * RATE)
     run = np.concatenate([[0], np.cumsum(level, dtype=np.float64)])

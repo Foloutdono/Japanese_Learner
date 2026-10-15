@@ -1085,6 +1085,18 @@ describe('the short formats (plan 214)', () => {
     expect(tl.sfx.filter(x => x.key === 'click')).toHaveLength(4)
     expect(tl.sfx.some(x => x.key === 'correct' && x.at > tl.segs[2].start)).toBe(true)
     expect(tl.seconds).toBeCloseTo(tl.segs.reduce((a, x) => a + x.dur, 0), 2)
+    // Past a minute every hold tightens alike, a question still four seconds to answer.
+    const exam = ['cover', 'question-1', 'answer-1', 'question-2', 'answer-2', 'question-3', 'answer-3', 'sheet', 'outro'].map(key => ({ key }))
+    const long = shortTimeline(exam, [60, 120, 160, 120, 160, 120, 160, 200, 80], 'まいげつ')
+    expect(long.seconds).toBeLessThanOrEqual(59.01)
+    for (const sg of long.segs.filter(x => x.ask)) {
+      const ticks = long.sfx.filter(x => x.key === 'click' && x.at >= sg.start && x.at < sg.start + sg.dur)
+      expect(ticks).toHaveLength(4)
+      expect(sg.start + sg.dur - ticks[0].at).toBeCloseTo(4, 2)
+    }
+    const reveal = long.segs.find(x => x.key === 'answer-3')
+    expect(long.cues[0].at).toBeGreaterThan(reveal.start)
+    expect(long.cues[0].at).toBeLessThan(reveal.start + reveal.dur)
     // A swipe is two slides at once; a held slide one, and the same key while still.
     const drawn = []
     const live = slides.map((sl, i) => ({ ...sl, draw: () => drawn.push(i) }))
