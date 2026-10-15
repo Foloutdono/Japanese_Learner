@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **210**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **211**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -101,6 +101,17 @@ runtime purpose.
   goes through `core/daily_limit.py` (`daily_usage`) for its daily ceiling and
   into `scripts/llm_cost_model.py` for its cost. Nothing the learner typed is
   kept.
+- **No learner can flood the server (plan 210).** The API is one worker:
+  `core/concurrency.py` runs a learner's requests a few at a time, and
+  both DB pools wait for a connection (`core/pool.py`) rather than fail.
+  What a route does is bounded by its parameters, never by the client:
+  a size, page, list or text param has a bound or an allowed set
+  (`tests/test_query_bounds.py`), learner-independent work is computed
+  once (`lru_cache`), an `async def` never blocks (blocking work is a
+  plain `def`), a model call counts against a daily ceiling, and a `lang`
+  that keys a cache goes through `reading.known_lang`. On the client a
+  selector's fetch goes through `lib/cachedJson.js`, a held arrow key
+  checks no radio, and a write that creates guards against a second press.
 - **A new per-learner table is erased with the account.** Add it to
   `DELETE /api/account` (`routes/account.py`) in the same change.
 - **One table's self-migration per transaction.** A failing `ALTER` must not

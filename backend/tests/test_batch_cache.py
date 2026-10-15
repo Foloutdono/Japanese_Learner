@@ -103,3 +103,30 @@ class BatchCacheTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class BoundedTests(unittest.TestCase):
+    """The pools and their locks are bounded (plan 210)."""
+
+    def setUp(self):
+        batch_cache._batches.clear()
+        batch_cache._locks.clear()
+
+    def test_the_pools_least_lately_refilled_are_dropped_past_the_bound(self):
+        cap = batch_cache._MAX_POOLS
+        for n in range(cap + 10):
+            batch_cache.take_batch(f"k{n}", lambda limit: ["a", "b"], count=1)
+        self.assertEqual(len(batch_cache._batches), cap)
+        self.assertNotIn("k0", batch_cache._batches)
+        self.assertIn(f"k{cap + 9}", batch_cache._batches)
+        self.assertLessEqual(len(batch_cache._locks), cap)
+
+    def test_a_held_lock_is_never_dropped(self):
+        held = batch_cache._lock_for("held")
+        held.acquire()
+        try:
+            for n in range(batch_cache._MAX_POOLS + 10):
+                batch_cache._lock_for(f"k{n}")
+            self.assertIs(batch_cache._lock_for("held"), held)
+        finally:
+            held.release()

@@ -41,7 +41,19 @@ class TestQueryBounds:
         ("/api/grammar/cards?level=N5&mode=grammar.flashcard.f2b", "count", 10, 100000),
         ("/api/dictionary", "limit", 10, 100000),
         ("/api/leaderboard", "limit", 10, 100000),
+        # plan 210: a learner flicking a selector, or crafting a URL,
+        # cannot ask for unbounded work.
+        ("/api/dictionary", "page", 1, 100000),
+        ("/api/frequency/vocab/tiers", "tier_size", 200, 1),
+        ("/api/frequency/vocab_jmdict/tiers", "tier_size", 500, 100000),
+        ("/api/frequency/vocab/tiers/started", "tier_size", 100, 7),
+        ("/api/frequency/vocab/stats?tier=1&mode=vocab.flashcard.f2b", "tier_size", 1000, 3),
+        ("/api/reading/batch?source=frequency&domain=vocab&tier=1", "tier_size", 200, 1),
     ]
+
+    def test_an_overlong_query_string_returns_422(self):
+        assert client.get("/api/dictionary?q=" + "a" * 201).status_code == 422
+        assert client.get("/api/dictionary?q=" + "a" * 20).status_code != 422
 
     def test_over_cap_value_returns_422(self):
         for path, param, _valid, over_cap in self.CASES:

@@ -1,11 +1,13 @@
 import hashlib
 import json
 import logging
+import os
 import threading
 from functools import partial
 
 from fastapi import APIRouter, Depends, HTTPException
-from core.credits import require_pass
+from core import daily_limit
+from core.credits import require_pass, resets_at
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
@@ -353,6 +355,9 @@ _UNAVAILABLE_COOLDOWN_SECONDS = 900
 # wrong moment would wedge that exam id as permanently "generating".
 _STALE_RUNNING_SECONDS = 900
 
+EXAM_PAPERS_FEATURE = "exam_paper"
+EXAM_PAPERS_DAILY_LIMIT = int(os.environ.get("EXAM_PAPERS_DAILY_LIMIT", "5"))
+
 
 def _mark_job_failed(exam_id: str, error: str, cooldown_seconds: int) -> None:
     conn = db_conn()
@@ -432,6 +437,17 @@ def _generation_worker(exam_id: str, revision: int) -> None:
             cur.execute("DELETE FROM exam_generation_jobs WHERE exam_id = %s", (exam_id,))
         conn.commit()
         logger.info("Exam %s revision %d generated and materialized", exam_id, revision)
+    finally:
+        conn.close()
+
+
+def _release_generation(exam_id: str) -> None:
+    """Gives back a claim _claim_generation granted and nobody used."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM exam_generation_jobs WHERE exam_id = %s AND status = 'running'", (exam_id,))
+        conn.commit()
     finally:
         conn.close()
 
@@ -612,7 +628,8 @@ def get_exam(exam_id: str, revision: int | None = None, exclude: str | None = No
             raise HTTPException(status_code=404, detail=f"Unknown revision {revision} for {exam_id}")
         return {**name_mondai(paper), "revision": revision}
 
-    selected = _select_paper(exam_id, user_id, _parse_exclude(exclude))
+    skipped = _parse_exclude(exclude)
+    selected = _select_paper(exam_id, user_id, skipped)
     if selected is not None:
         revision, paper = selected
         # The revision travels with the paper because the client needs
@@ -624,6 +641,20 @@ def get_exam(exam_id: str, revision: int | None = None, exclude: str | None = No
     revision = _next_revision(exam_id)
     outcome, detail = _claim_generation(exam_id, revision)
     if outcome == "claimed":
+        # A new paper is ~35 model calls, and "a different paper"
+        # listing every revision there is starts one (plan 210): a
+        # learner may start EXAM_PAPERS_DAILY_LIMIT such a day. An exam's
+        # first paper, and the one a generator change calls for, are not
+        # counted -- they are the paper everyone sits. Counted only when
+        # this request would start one, so the polls while it is written
+        # and joining another learner's cost nothing.
+        if skipped and daily_limit.claim(user_id, EXAM_PAPERS_FEATURE, EXAM_PAPERS_DAILY_LIMIT) > EXAM_PAPERS_DAILY_LIMIT:
+            _release_generation(exam_id)
+            raise HTTPException(
+                status_code=429,
+                detail=(f"Daily limit of {EXAM_PAPERS_DAILY_LIMIT} new papers reached; "
+                        f"resets {resets_at(user_id):%Y-%m-%dT%H:%MZ}"),
+            )
         _start_generation(exam_id, revision)
     if outcome == "cooldown":
         # The error text is the generator's own, safe to show: it names
@@ -797,9 +828,12 @@ def get_question_study(exam_id: str, revision: int, question_id: str, lang: str 
         raise HTTPException(status_code=404, detail=f"Unknown revision {revision} for {exam_id}")
     # Imported here: routes/reading.py seeds the comprehension pool at
     # import, which the exam router has no business triggering.
-    from routes.reading import LANG_NAMES
+    from routes.reading import LANG_NAMES, known_lang
+    # Known languages only (plan 210): the translations are cached by
+    # language, so any other string was a model call per new spelling.
+    lang = known_lang(lang)
     try:
-        study = study_question(paper, question_id, lang, LANG_NAMES.get(lang, lang))
+        study = study_question(paper, question_id, lang, LANG_NAMES[lang])
     except (LLMUnavailable, GenerationFailed) as e:
         logger.warning("exam study for %s/%s/%s failed: %s", exam_id, revision, question_id, e)
         raise HTTPException(status_code=503, detail="Translation unavailable")

@@ -75,6 +75,8 @@ class LocalJwtVerificationTests(unittest.TestCase):
         self.assertEqual(ctx.exception.status_code, 401)
 
     def test_jwks_resolution_failure_falls_back_to_http_check(self):
+        auth_mod._fallback.clear()
+        self.addCleanup(auth_mod._fallback.clear)
         token = _make_token(self.private_key)
         self.fake_jwks_client.get_signing_key_from_jwt.side_effect = jwt.PyJWKClientError("unreachable")
         with patch("core.auth.httpx.get") as mock_get:
@@ -82,6 +84,36 @@ class LocalJwtVerificationTests(unittest.TestCase):
             result = auth_mod.get_user_id(self._creds(token))
         self.assertEqual(result, "fallback-user")
         mock_get.assert_called_once()
+
+    def test_the_fallbacks_verdict_is_remembered_a_while(self):
+        # plan 210: a token no key matches cost a Supabase round trip on
+        # every request, and junk tokens need no account.
+        auth_mod._fallback.clear()
+        self.addCleanup(auth_mod._fallback.clear)
+        self.fake_jwks_client.get_signing_key_from_jwt.side_effect = jwt.PyJWKClientError("unknown kid")
+        good, junk = _make_token(self.private_key), _make_token(self.private_key, sub="x")
+        with patch("core.auth.httpx.get") as mock_get:
+            mock_get.side_effect = lambda url, headers, timeout: (
+                MagicMock(status_code=200, json=lambda: {"id": "fallback-user"})
+                if headers["Authorization"].endswith(good) else MagicMock(status_code=401)
+            )
+            for _ in range(3):
+                self.assertEqual(auth_mod.get_user_id(self._creds(good)), "fallback-user")
+                with self.assertRaises(HTTPException):
+                    auth_mod.get_user_id(self._creds(junk))
+        self.assertEqual(mock_get.call_count, 2)
+
+    def test_an_auth_service_failure_is_not_remembered(self):
+        auth_mod._fallback.clear()
+        self.addCleanup(auth_mod._fallback.clear)
+        self.fake_jwks_client.get_signing_key_from_jwt.side_effect = jwt.PyJWKClientError("unknown kid")
+        token = _make_token(self.private_key)
+        with patch("core.auth.httpx.get") as mock_get:
+            mock_get.return_value = MagicMock(status_code=503)
+            with self.assertRaises(HTTPException):
+                auth_mod.get_user_id(self._creds(token))
+            mock_get.return_value = MagicMock(status_code=200, json=lambda: {"id": "fallback-user"})
+            self.assertEqual(auth_mod.get_user_id(self._creds(token)), "fallback-user")
 
     def test_missing_credentials_still_rejected(self):
         with self.assertRaises(HTTPException) as ctx:

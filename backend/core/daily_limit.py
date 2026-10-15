@@ -31,6 +31,7 @@ import logging
 
 from core.credits import local_today
 from core.db import db_conn
+from core.pool import PoolBusy
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +71,11 @@ def claim(user_id: str, feature: str, limit: int) -> int:
     a ceiling being reached without a query."""
     try:
         conn = db_conn()
+    except PoolBusy:
+        # Not a hiccup but a server out of connections (plan 210): open
+        # here, a flood that dried the pool would also have lifted every
+        # model call's ceiling. The 503 refuses the call instead.
+        raise
     except Exception:
         logger.exception("daily_usage: no connection; %s counted as under the cap", feature)
         return 0
@@ -100,3 +106,4 @@ def claim(user_id: str, feature: str, limit: int) -> int:
     if count == limit + 1:
         logger.info("daily limit crossed feature=%s user=%s limit=%d", feature, user_id, limit)
     return count
+

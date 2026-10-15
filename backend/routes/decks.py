@@ -2705,11 +2705,17 @@ def _csv_unlead(value: str) -> str:
 # once as bytes and again as the decoded str) before any row is looked
 # at, on a backend sized for 512 MB.
 _MAX_IMPORT_BYTES = 5 * 1024 * 1024
+# Rows one file may land (plan 210): the Pass's whole card allowance.
+# 5 MB of CSV is ~100k rows, each an INSERT -- and each, before, a
+# COUNT of the learner's cards too.
+_MAX_IMPORT_ROWS = credits.PASS_CARDS
 
 
+# A plain def (plan 210): as an async def every row's queries ran on the
+# event loop, and a large file held the whole API for minutes.
 @router.post("/api/decks/{deck_id}/import")
-async def import_cards(deck_id: str, file: UploadFile = File(...),
-                       user_id: str = Depends(get_user_id)):
+def import_cards(deck_id: str, file: UploadFile = File(...),
+                 user_id: str = Depends(get_user_id)):
     access = resolve_deck(deck_id, user_id, need=OWNER)
     if not _allows_custom(access.type):
         raise HTTPException(
@@ -2717,7 +2723,7 @@ async def import_cards(deck_id: str, file: UploadFile = File(...),
             detail=f"This deck only accepts {access.type} cards — browse and add some instead",
         )
 
-    content = await file.read(_MAX_IMPORT_BYTES + 1)
+    content = file.file.read(_MAX_IMPORT_BYTES + 1)
     if len(content) > _MAX_IMPORT_BYTES:
         raise HTTPException(status_code=413, detail="CSV file is too large")
     try:
@@ -2733,32 +2739,46 @@ async def import_cards(deck_id: str, file: UploadFile = File(...),
 
     inserted = 0
     errors   = []
+    rows     = []
+    for i, row in enumerate(reader, start=2):
+        if len(rows) >= _MAX_IMPORT_ROWS:
+            errors.append(f"Row {i} on: past {_MAX_IMPORT_ROWS} cards a file — skipped")
+            break
+        front = _csv_unlead((row.get('front') or '').strip())
+        back  = _csv_unlead((row.get('back') or '').strip())
+        if not front or not back:
+            errors.append(f"Row {i}: missing front/back — skipped")
+            continue
+        rows.append((i, front, back, (row.get('notes') or '').strip()))
+
     conn     = db_conn()
     try:
         with conn.cursor() as cur:
-            for i, row in enumerate(reader, start=2):
-                front = _csv_unlead(row.get('front', '').strip())
-                back  = _csv_unlead(row.get('back',  '').strip())
-                if not front or not back:
-                    errors.append(f"Row {i}: missing front/back — skipped")
-                    continue
+            # The whole file against the free tier at once (plan 069);
+            # only a file that overruns it is checked row by row, so it
+            # lands what fits and reports the rest.
+            try:
+                credits.check_card_limit(cur, user_id, adding=len(rows))
+                per_row = False
+            except credits.LimitReached:
+                per_row = True
+            for i, front, back, notes in rows:
                 # CSV import writes `standard` cards: a spreadsheet of
                 # front/back columns is exactly that shape, and asking a
                 # CSV to carry a kanji card's four fields would need a
                 # per-structure column contract nobody has asked for.
-                # Per row against the free tier (plan 069): a file that
-                # overruns it lands what fits and reports the rest.
-                try:
-                    credits.check_card_limit(cur, user_id)
-                except credits.LimitReached as e:
-                    errors.append(f"Row {i}: the deck limit of {e.limit} cards is reached — skipped")
-                    continue
+                if per_row:
+                    try:
+                        credits.check_card_limit(cur, user_id)
+                    except credits.LimitReached as e:
+                        errors.append(f"Row {i}: the deck limit of {e.limit} cards is reached — skipped")
+                        continue
                 cur.execute("""
                     INSERT INTO custom_cards (deck_id, user_id, structure, fields, notes)
                     VALUES (%s, %s, 'standard', %s, %s)
                 """, (access.deck_id, access.owner_id,
                       json.dumps({"front": front, "back": back}, ensure_ascii=False),
-                      row.get('notes', '').strip()))
+                      notes))
                 inserted += 1
         conn.commit()
     finally:
