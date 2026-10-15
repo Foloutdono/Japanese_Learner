@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { refillClock } from '../../domain/credits'
-import { MAX_QUESTION, MAX_TURNS } from '../../domain/ask'
+import { askSuggestions, MAX_QUESTION, MAX_TURNS } from '../../domain/ask'
 import { Dots } from '../ui/Loading'
 import { ChevronIcon } from '../ui/Icons'
 
@@ -30,6 +30,11 @@ import { ChevronIcon } from '../ui/Icons'
 // Enter, so the run's Enter (next sentence) waits for the field to be
 // left. Nothing is kept past the run.
 //
+// Over the field, the questions offered (domain/ask's askSuggestions):
+// written from what the question carries, asked as they are on a tap,
+// each one a question like a typed one, and gone once asked. Drawn only
+// while the thread takes a question, so a sealed panel offers nothing.
+//
 // Keyed on the thread by its caller, so the draft belongs to the
 // sentence it was typed about.
 //
@@ -51,6 +56,7 @@ export function AskPanel({ ask, askKey, context, open, text = false, page = fals
   const full = thread.length >= MAX_TURNS
   const disabled = !open || Boolean(ask.spent) || full
   const last = thread.at(-1)
+  const offers = disabled ? [] : askSuggestions(context, t, { text, asked: thread.map(x => x.question) })
 
   // The newest exchange in view as the thread grows or an answer lands.
   useEffect(() => {
@@ -65,6 +71,11 @@ export function AskPanel({ ask, askKey, context, open, text = false, page = fals
       setDraft('')
       fieldRef.current?.focus()
     }
+  }
+
+  function offer(q) {
+    if (disabled || ask.pending) return
+    ask.ask(askKey, context, q)
   }
 
   const note = ask.spent
@@ -101,6 +112,17 @@ export function AskPanel({ ask, askKey, context, open, text = false, page = fals
         </ol>
       ) : (
         <p className={`${c}__hint`}>{open ? t.askHint : sealed ?? (text ? t.askSealedText : t.askSealed)}</p>
+      )}
+      {offers.length > 0 && (
+        <ul className={`${c}__offers`} aria-label={t.askSuggestLabel}>
+          {offers.map(q => (
+            <li key={q}>
+              <button type="button" className={`${c}__offer`} disabled={ask.pending} onClick={() => offer(q)}>
+                {q}
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
       <form className={`${c}__form`} onSubmit={submit}>
         <input
