@@ -516,6 +516,18 @@ the screen.
 quiz's part is a seeded deal), and two parts never share an item;
 `--theme`, `--point` or `--ids` pick exactly.
 
+**In the studio.** The videos are one of the studio's sources, 長編
+"Long video": at a level its list holds every video the level can make
+(`long.longItems`: the vocabulary and kanji parts, the quiz's parts,
+each grammar point, each theme), and picking one plays it in a 16:9
+player, its chapters a click away. The preview is the video's own
+frames on its own timeline, silent and timed on a guess, since the
+voices are made where it is rendered; below it, the video's page
+(title, description and tags, to copy), its thumbnail to download, and
+the command that makes it (`long.longCommand`), to run from
+`frontend/`. The slides' settings (types, endings, script, format,
+ground) do not apply to it and are hidden.
+
 **The breakdown glosses only what it knows.** A lesson's rows carry no
 senses, so a word's is the deck's, as written or from its dictionary
 form (`dictionaryForms`: 読んで → 読む), the entry read as the row is
@@ -580,7 +592,7 @@ backend's Python with numpy, ffmpeg and Playwright's Chromium.
 | `app.js` | the app's own parts, drawn at its measures, and Today's print (plan 212) |
 | `echo.js` | the word echo: its plan, its rhythm, its scatter and its clip (plan 213) |
 | `sound.js` | a clip's sound: the app's own events and recorded clips, mixed (plans 212, 213); one event alone for a long video (plan 214) |
-| `long.js` | the long videos: what each says, when, and each frame (plan 214) |
+| `long.js` | the long videos: what each says, when, each frame, their page, and the studio's list of them (plan 214) |
 | `long/render.mjs` | a long video made: voiced, mixed, drawn and encoded (plan 214) |
 | `studio.js` | the page: the pickers, the previews, the export |
 

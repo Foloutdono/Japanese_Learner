@@ -45,6 +45,8 @@ export const SOURCES = [
   { id: 'promo', jp: '宣伝', line: 'gold', name: { en: 'Promo stories', fr: 'Stories promo' }, file: story => STORY_FILES[story] || 'index.json', levels: STORIES, levelNames: PROMO.en.names },
   // Plan 213: a pictured word said over and over for ten seconds (echo.js).
   { id: 'echo', jp: '木霊', line: 'vocab', name: { en: 'Word echo', fr: 'Mot en écho' }, file: () => 'themes.json', noLevels: true },
+  // The long videos (plan 214): a level's videos, drawn by long.js, made by long/render.mjs.
+  { id: 'long', jp: '長編', line: 'exam', name: { en: 'Long video', fr: 'Vidéo longue' }, file: lv => `words-${lv}.json`, video: true },
 ]
 export const sourceOf = id => SOURCES.find(s => s.id === id) ?? SOURCES[0]
 

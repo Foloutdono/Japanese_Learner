@@ -14,6 +14,7 @@ import { PROMO, STORIES } from './promo.js'
 import { PRINT_HOURS, loadPrint } from './app.js'
 import { RATE, clipAudio, decoded, loadVoices } from './sound.js'
 import { voiceSpan } from './echo.js'
+import { LONG_SITE, describe as describeLong, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, timeline, WIDE } from './long.js'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 
 const STORE = 'tsuji-carousel'
@@ -31,7 +32,7 @@ const TOGGLE_LABELS = {
   apart: 'What tells them apart', pair: 'The two side by side', careful: 'Watch out',
 }
 const T = STRINGS.en
-const LIST_NAME = { promo: 'Story', echo: 'Word', sentence: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
+const LIST_NAME = { long: 'Video', promo: 'Story', echo: 'Word', sentence: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
 
 const DEFAULTS = {
   source: 'sentence', level: 'N5', kanaSet: 'hiragana', story: 'pitch', hour: 'day', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20' },
@@ -82,7 +83,13 @@ const setKey = src => (src.id === 'promo' ? 'story' : 'kanaSet')
 // A promo story keeps its own pick: a word, a sentence, a question.
 const idKey = () => (state.source === 'promo' ? `promo:${state.story}` : state.source)
 const fileFor = src => src.file(src.levels ? state[setKey(src)] : state.level)
-const dataNow = () => fetchJson(fileFor(sourceOf(state.source)))
+// A long video reads several bank files at once, by name (long.js says which).
+async function banksOf(names) {
+  const out = {}
+  await Promise.all([...new Set(names)].map(async n => { out[n] = await fetchJson(n) }))
+  return out
+}
+const dataNow = () => (state.source === 'long' ? banksOf(longListFiles(state.level)) : fetchJson(fileFor(sourceOf(state.source))))
 
 // Where the app's own files are, as the page sees them: the print, the voices.
 const BASE = '../'
@@ -172,7 +179,7 @@ async function renderList() {
   const data = await dataNow()
   if (mine !== listToken) return
   const src = sourceOf(state.source)
-  let items = itemsOf(state.source, data, state.lang, src.levels ? state[setKey(src)] : null)
+  let items = state.source === 'long' ? longItems(data, state.level, state.lang) : itemsOf(state.source, data, state.lang, src.levels ? state[setKey(src)] : null)
   if (src.byLevel) items = items.filter(x => x.tag === state.level)
   listCache = items
   const q = $('#search').value.trim().toLowerCase()
@@ -345,12 +352,15 @@ let titleFor = ''
 
 async function render() {
   const mine = ++token
+  stopPlayer()
+  document.body.dataset.mode = state.source === 'long' ? 'long' : ''
   // A render a newer one has overtaken stops at its next await, before it
   // touches the page or the state.
   const data = await dataNow()
   if (mine !== token) return
   if (!listCache.length) await renderList()
   if (mine !== token) return
+  if (state.source === 'long') return renderLong(mine)
   const id = currentId()
   const deps = await depsFor(data, id)
   if (mine !== token) return
@@ -484,6 +494,133 @@ async function render() {
   const titleKey = `${captionKey}|${state.type}|${asked}`
   if (titleKey !== titleFor) { $('#title').value = titleOf(pl, state.type, asked); titleFor = titleKey; countTitle() }
   $('#export').disabled = false
+}
+
+// ── The long videos (plan 214) ────────────────────────────────
+// A video is drawn here as it will be made: the same frames, the same
+// timeline, played in place. Its voices are made where it is rendered
+// (long/render.mjs, with the voice engine), so the preview is silent and
+// its timing a close guess: every line is measured when it is voiced.
+let player = null
+function stopPlayer() {
+  if (player?.raf) cancelAnimationFrame(player.raf)
+  if (player) player.raf = 0
+}
+const clock = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`
+async function renderLong(mine) {
+  const id = currentId()
+  const banks = await banksOf([...longListFiles(state.level), ...longFiles(id, state.level), 'index.json'])
+  if (mine !== token) return
+  const { kind, opts } = longPick(id, state.level, state.lang)
+  const pl = longPlan(kind, banks, opts)
+  const tl = timeline(pl)
+  const page = describeLong(pl, tl, state.lang === 'en' ? `${LONG_SITE}/en` : LONG_SITE, banks['index.json']?.figures)
+  await fonts(JSON.stringify(pl.items).slice(0, 40000) + pl.title + page.title)
+  if (mine !== token) return
+  current = { plan: pl, fmt: WIDE, decks: [], long: { id, page, tl } }
+  const stage = $('#stage')
+  stage.replaceChildren()
+  stage.dataset.view = 'long'
+  const row = document.createElement('section')
+  row.className = 'deck'
+  row.setAttribute('aria-label', 'Long video')
+  const head = document.createElement('div')
+  head.className = 'deck__head'
+  const name = document.createElement('h2')
+  name.className = 'deck__name'
+  const jp = document.createElement('span')
+  jp.lang = 'ja'
+  jp.className = 'deck__jp'
+  jp.textContent = '長編'
+  name.append(jp, ` ${pl.title}`)
+  const n = document.createElement('span')
+  n.className = 'deck__count'
+  n.textContent = `about ${clock(tl.seconds)} · ${pl.items.length} stations · 16:9`
+  head.append(name, n)
+  const screen = document.createElement('div')
+  screen.className = 'player'
+  const c = document.createElement('canvas')
+  c.width = WIDE.w
+  c.height = WIDE.h
+  c.setAttribute('aria-label', 'The video, drawn frame by frame')
+  screen.append(c)
+  const bar = document.createElement('div')
+  bar.className = 'player__bar'
+  const play = document.createElement('button')
+  play.type = 'button'
+  play.className = 'btn btn--quiet'
+  play.textContent = 'Play'
+  const scrub = document.createElement('input')
+  scrub.type = 'range'
+  scrub.min = '0'
+  scrub.max = String(tl.seconds)
+  scrub.step = '0.1'
+  scrub.setAttribute('aria-label', 'Where in the video')
+  const time = document.createElement('span')
+  time.className = 'player__time'
+  bar.append(play, scrub, time)
+  const note = document.createElement('p')
+  note.className = 'player__note'
+  note.textContent = 'A silent preview: the voices are made, and every line measured, when the video is rendered (the command below).'
+  const chapters = document.createElement('ol')
+  chapters.className = 'chapters'
+  row.append(head, screen, bar, note, chapters)
+  stage.append(row)
+  player = { c, pl, tl, t: Math.min(player?.id === id ? player.t : 4.5, tl.seconds), raf: 0, id, play, scrub, time }
+  const draw = () => {
+    drawLong(c.getContext('2d'), pl, tl, player.t)
+    scrub.value = String(player.t)
+    time.textContent = `${clock(player.t)} / ${clock(tl.seconds)}`
+  }
+  player.draw = draw
+  const seek = t => { player.t = Math.max(0, Math.min(tl.seconds, t)); draw() }
+  for (const ch of tl.chapters) {
+    const li = document.createElement('li')
+    const b = document.createElement('button')
+    b.type = 'button'
+    b.className = 'chip'
+    b.textContent = `${clock(ch.at)} ${ch.title}`
+    b.addEventListener('click', () => seek(ch.at + 0.01))
+    li.append(b)
+    chapters.append(li)
+  }
+  scrub.addEventListener('input', () => seek(Number(scrub.value)))
+  play.addEventListener('click', () => {
+    if (player.raf) { stopPlayer(); play.textContent = 'Play'; return }
+    if (player.t >= tl.seconds - 0.05) player.t = 0
+    play.textContent = 'Pause'
+    let last = performance.now()
+    const tick = now => {
+      player.t = Math.min(tl.seconds, player.t + (now - last) / 1000)
+      last = now
+      draw()
+      if (player.t >= tl.seconds) { player.raf = 0; play.textContent = 'Play'; return }
+      player.raf = requestAnimationFrame(tick)
+    }
+    player.raf = requestAnimationFrame(tick)
+  })
+  draw()
+  // The video's page: written when the video or its language changes.
+  const key = `long|${id}|${state.level}|${state.lang}`
+  if (key !== captionFor) {
+    $('#caption').value = page.description
+    $('#title').value = page.title
+    $('#tags').value = page.tags
+    captionFor = key
+    titleFor = key
+    countTitle()
+  }
+  $('#command').textContent = longCommand(id, state.level, state.lang)
+}
+async function exportThumb() {
+  if (!current.long) return
+  const c = document.createElement('canvas')
+  c.width = WIDE.w
+  c.height = WIDE.h
+  drawLong(c.getContext('2d'), current.plan, current.long.tl, 4.5)
+  const name = `tsuji-${safeName(current.long.id.replace(':', '-'))}-${state.level}-${state.lang}.png`
+  const result = await offer(name, await png(c))
+  status(result === 'saved' ? 'Saved the thumbnail.' : MESSAGE[result])
 }
 
 /** Draw a slide whole, at the post's own size, on the work canvas. */
@@ -761,7 +898,10 @@ async function copyField(id, name) {
 }
 /** The title's length against the feed's limit. */
 function countTitle() {
-  $('#title-count').textContent = `${[...$('#title').value].length}/${TITLE_MAX}`
+  // A video's title is YouTube's, a hundred characters at most.
+  const max = state.source === 'long' ? 100 : TITLE_MAX
+  $('#title').maxLength = max
+  $('#title-count').textContent = `${[...$('#title').value].length}/${max}`
 }
 
 // ── Controls ──────────────────────────────────────────────────
@@ -843,7 +983,12 @@ function wire() {
   $('#export').addEventListener('click', exportZip)
   $('#export-clip').addEventListener('click', () => exportClip('cover'))
   $('#export-end-clip').addEventListener('click', () => exportClip('end'))
-  $('#copy').addEventListener('click', () => copyField('#caption', 'Caption'))
+  $('#copy').addEventListener('click', () => copyField('#caption', state.source === 'long' ? 'Description' : 'Caption'))
+  $('#copy-tags').addEventListener('click', () => copyField('#tags', 'Tags'))
+  $('#copy-command').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText($('#command').textContent); status('Command copied: run it from frontend/.') } catch { status('Select the command and copy it.') }
+  })
+  $('#export-thumb').addEventListener('click', exportThumb)
   $('#copy-title').addEventListener('click', () => copyField('#title', 'Title'))
   $('#title').addEventListener('input', countTitle)
   $('#prev').addEventListener('click', () => step(-1))

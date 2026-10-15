@@ -152,6 +152,18 @@ dialog::backdrop { background: var(--scrim); }
 .viewer__bar .btn--metal { color: var(--on-fill); }
 #viewer-title { min-width: 4em; text-align: center; font-variant-numeric: tabular-nums; }
 @media (prefers-reduced-motion: reduce) { .strip { scroll-behavior: auto; } }
+/* The long videos (plan 214): a 16:9 player, its chapters, its page. */
+body:not([data-mode="long"]) [data-long="only"] { display: none !important; }
+body[data-mode="long"] [data-long="hide"] { display: none !important; }
+.player canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+.player__bar { display: flex; align-items: center; gap: 12px; }
+.player__bar input { flex: 1; min-width: 0; accent-color: var(--gold); }
+.player__time { color: var(--ink2); font-size: 13px; font-variant-numeric: tabular-nums; }
+.player__note { margin: 0; color: var(--ink2); font-size: 13px; }
+.chapters { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.chapters .chip { font-size: 13px; min-height: 32px; padding: 5px 12px; }
+.command { margin: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); font: 400 13px/1.5 ui-monospace, 'SFMono-Regular', Menlo, monospace; overflow-wrap: anywhere; white-space: pre-wrap; }
+body[data-mode="long"] .export textarea { min-height: 300px; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
@@ -188,17 +200,17 @@ dialog::backdrop { background: var(--scrim); }
       </div>
     </div>
 
-    <div class="field" data-promo="hide">
+    <div class="field" data-long="hide" data-promo="hide">
       <div class="label">Carousel type</div>
       <div id="types" class="dirs" role="group" aria-label="Carousel type"></div>
     </div>
 
-    <div class="field" data-promo="hide">
+    <div class="field" data-long="hide" data-promo="hide">
       <div class="label">Last slide</div>
       <div id="endings" class="chips" role="group" aria-label="Last slide"></div>
     </div>
 
-    <div class="field" hidden>
+    <div class="field" data-long="hide" hidden>
       <div class="label">Questions <span>mock exam, and the walk’s end · six at most</span></div>
       <div id="questions" class="chips" role="group" aria-label="Questions"></div>
     </div>
@@ -211,7 +223,7 @@ dialog::backdrop { background: var(--scrim); }
       </div>
     </div>
 
-    <div class="field" data-promo="hide">
+    <div class="field" data-long="hide" data-promo="hide">
       <div class="label">Japanese as</div>
       <div class="seg" role="group" aria-label="Script">
         <button type="button" data-set="script:kanji" lang="ja">漢字</button>
@@ -221,17 +233,17 @@ dialog::backdrop { background: var(--scrim); }
       <label class="check"><input id="romaji" type="checkbox"> Romaji on the first slide</label>
     </div>
 
-    <div class="field" data-promo="hide">
+    <div class="field" data-long="hide" data-promo="hide">
       <div class="label">Slides <span>station plates</span></div>
       <div id="toggles" class="toggles"></div>
     </div>
 
-    <div class="field">
+    <div class="field" data-long="hide">
       <div class="label"><span id="type-name"></span> <span>options</span></div>
       <div id="type-toggles" class="toggles"></div>
     </div>
 
-    <div class="field" id="bonus-field">
+    <div class="field" data-long="hide" id="bonus-field">
       <div class="label">Bonus</div>
       <div class="seg" role="group" aria-label="Bonus">
         <button type="button" data-set="bonus:kanji">Kanji strokes</button>
@@ -239,12 +251,12 @@ dialog::backdrop { background: var(--scrim); }
         <button type="button" data-set="bonus:none">None</button>
       </div>
     </div>
-    <div class="field" hidden>
+    <div class="field" data-long="hide" hidden>
       <div class="label">Kanji to write</div>
       <div id="kanji" class="seg" role="group" aria-label="Kanji"></div>
     </div>
 
-    <div class="field">
+    <div class="field" data-long="hide">
       <label class="label" for="handle">On the last slide</label>
       <input id="handle" class="text-input" type="text" maxlength="40" placeholder="@yourhandle or a link (optional)">
     </div>
@@ -252,19 +264,19 @@ dialog::backdrop { background: var(--scrim); }
 
   <section class="work" aria-label="Slides">
     <div class="toolbar">
-      <div class="seg" role="group" aria-label="View" data-promo="hide">
+      <div class="seg" role="group" aria-label="View" data-promo="hide" data-long="hide">
         <button type="button" data-set="view:compare">All types</button>
         <button type="button" data-set="view:single">One type</button>
       </div>
-      <div class="seg" role="group" aria-label="Format" data-promo="hide">
+      <div class="seg" role="group" aria-label="Format" data-promo="hide" data-long="hide">
         <button type="button" data-set="format:post">4:5 post</button>
         <button type="button" data-set="format:story">9:16 full screen</button>
       </div>
-      <div class="seg" role="group" aria-label="Ground">
+      <div class="seg" role="group" aria-label="Ground" data-long="hide">
         <button type="button" data-set="ground:paper">Washi</button>
         <button type="button" data-set="ground:sumi">Sumi</button>
       </div>
-      <label class="check"><input id="safe" type="checkbox"> Show the feed’s overlays</label>
+      <label class="check" data-long="hide"><input id="safe" type="checkbox"> Show the feed’s overlays</label>
     </div>
 
     <div id="stage" class="stage"></div>
@@ -276,13 +288,19 @@ dialog::backdrop { background: var(--scrim); }
           <span id="title-count" class="title-count" aria-hidden="true"></span>
         </div>
         <textarea id="caption" aria-label="Caption to post with the slides" spellcheck="false"></textarea>
+        <input id="tags" class="text-input" type="text" data-long="only" aria-label="Tags for the video" spellcheck="false">
+        <p class="label" data-long="only">Make it <span>from frontend/, with the voice engine running</span></p>
+        <pre id="command" class="command" data-long="only"></pre>
       </div>
       <div class="export__actions">
-        <button id="export" type="button" class="btn btn--metal" disabled>Download <span id="export-name"></span> (.zip)</button>
-        <button id="export-clip" type="button" class="btn btn--metal" hidden>Download the cover clip (.mp4, 7 s, with sound)</button>
-        <button id="export-end-clip" type="button" class="btn btn--metal" data-promo="only" hidden>Download the call-to-action clip (.mp4, 7 s, with sound)</button>
+        <button id="export-thumb" type="button" class="btn btn--metal" data-long="only">Download the thumbnail (.png)</button>
+        <button id="copy-command" type="button" class="btn" data-long="only">Copy the command</button>
+        <button id="export" type="button" class="btn btn--metal" data-long="hide" disabled>Download <span id="export-name"></span> (.zip)</button>
+        <button id="export-clip" type="button" class="btn btn--metal" data-long="hide" hidden>Download the cover clip (.mp4, 7 s, with sound)</button>
+        <button id="export-end-clip" type="button" class="btn btn--metal" data-promo="only" data-long="hide" hidden>Download the call-to-action clip (.mp4, 7 s, with sound)</button>
         <button id="copy-title" type="button" class="btn">Copy title</button>
-        <button id="copy" type="button" class="btn">Copy caption</button>
+        <button id="copy" type="button" class="btn">Copy <span data-long="hide">caption</span><span data-long="only">description</span></button>
+        <button id="copy-tags" type="button" class="btn" data-long="only">Copy tags</button>
       </div>
       <p id="status" class="status" role="status"></p>
     </div>

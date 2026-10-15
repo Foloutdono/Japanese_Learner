@@ -604,8 +604,10 @@ ten-minute 16:9 videos for YouTube (`long.js`, made by
 `node carousel/long/render.mjs`: a vocabulary or kanji drill, one grammar
 point whole, a quiz), voiced line by line by the app's voices and mixed
 with the app's sounds and a bed of music it plays itself
-(`scripts/long_video_audio.py`); a word in its breakdown is glossed
-from the deck or left bare, never guessed: when the app redraws one of those parts, measure it again and
+(`scripts/long_video_audio.py`), each also a source in the studio
+that previews it and gives its page and the command that makes it; a
+word in its breakdown is glossed from the deck or left bare, never
+guessed: when the app redraws one of those parts, measure it again and
 follow it, and a story promises only what the app does today. Its hand-written content (the pictures,
 the lookalike sets, the conversations) is `frontend/carousel/content/`;
 a conversation's every line carries its furigana and its romaji. A point is explained in its own

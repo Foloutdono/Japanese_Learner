@@ -10,7 +10,8 @@ import { STRINGS, weld, weldIf } from '../carousel/strings.js'
 import { APP_INKS } from '../carousel/app.js'
 import { CLIP, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
-import { KINDS, PART, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longPlan, shortGloss, timeline } from '../carousel/long.js'
+import { KINDS, LONG_SITE, PART, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, timeline } from '../carousel/long.js'
+import { SITE_ORIGIN } from '../landing/config.mjs'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
@@ -35,8 +36,9 @@ const OPTS = { lang: 'en', script: 'kanji', romaji: false, bonus: 'kanji', kanji
 const sentence = jp => LEVELS.flatMap(lv => banks[lv].sentences).find(s => s.jp === jp)
 const glossEn = r => (r.en || [])[0] || ''
 // The sources a carousel's last slide stands on: a promo story ends on
-// its own gate, a word echo is one frame and its clip.
-const STATIONED = SOURCES.filter(s => s.id !== 'promo' && s.id !== 'echo')
+// its own gate, a word echo is one frame and its clip, a long video is a
+// player of its own (plan 214).
+const STATIONED = SOURCES.filter(s => s.id !== 'promo' && s.id !== 'echo' && s.id !== 'long')
 const LAST = { promo: id => (id === 'pass' ? 'free' : 'board'), echo: () => 'echo' }
 
 /** Every file a source reads: one per level, one per kana set, or one. */
@@ -125,7 +127,8 @@ describe('the carousel studio', () => {
   }
 
   it('draws every item of every source as every type it can be', { timeout: 120000 }, () => {
-    for (const src of SOURCES) expect(every.some(x => x.src === src), src.id).toBe(true)
+    // A long video is no deck of slides: its own test draws it (plan 214).
+    for (const src of SOURCES.filter(x => !x.video)) expect(every.some(x => x.src === src), src.id).toBe(true)
     for (const { src, id, p } of every) {
       for (const type of TYPES.map(x => x.id).filter(x => available(x, p))) {
         const slides = deck(type, p, FORMATS.post, { ground: 'paper' })
@@ -989,6 +992,33 @@ describe('the long videos (plan 214)', () => {
     const page = describeVideo(theme, timeline(theme), 'x')
     expect(page.title).not.toMatch(/JLPT|N\d/)
     expect(page.tags).not.toMatch(/JLPT|N\d/)
+  })
+
+  it('offers every video a level can make in the studio, each made by its command', () => {
+    expect(SOURCES.find(s => s.id === 'long')?.video).toBe(true)
+    expect(LONG_SITE).toBe(SITE_ORIGIN)
+    for (const level of LEVELS) {
+      const listed = Object.fromEntries(longListFiles(level).map(f => [f, files[f]]))
+      const items = longItems(listed, level, 'en')
+      const kinds = new Set(items.map(x => x.kind))
+      expect([...kinds].sort(), level).toEqual(['grammar', 'kanji', 'quiz', 'theme', 'vocab'])
+      expect(new Set(items.map(x => x.id)).size, level).toBe(items.length)
+      expect(items.filter(x => x.kind === 'grammar').length, level).toBe(bank(`grammar-${level}.json`).lessons.length)
+      // Every listed video is drawn from the files it says it reads, the last part of each kind too.
+      const sample = ['vocab', 'kanji', 'quiz', 'grammar', 'theme'].flatMap(k => { const of = items.filter(x => x.kind === k); return [of[0], of.at(-1)] })
+      for (const it of sample) {
+        const own = Object.fromEntries([...longListFiles(level), ...longFiles(it.id, level)].map(f => [f, files[f]]))
+        const { kind, opts } = longPick(it.id, level, 'en')
+        const pl = longPlan(kind, own, opts)
+        expect(pl.items.length, `${level} ${it.id}`).toBeGreaterThan(0)
+        const cmd = longCommand(it.id, level, 'en')
+        expect(cmd, it.id).toMatch(new RegExp(`--kind ${kind}`))
+        if (opts.part) expect(cmd, it.id).toContain(`--part ${opts.part}`)
+      }
+    }
+    // A vocabulary part reads the sentences of its level and the easier ones only.
+    expect(longFiles('vocab:1', 'N3')).toEqual(['words-N3.json', 'N5.json', 'N4.json', 'N3.json'])
+    expect(longCommand('grammar:〜てください', 'N5', 'fr')).toBe("VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --kind grammar --level N5 --point '〜てください' --lang fr")
   })
 
   it('draws a still once: two frames that look the same share a key', () => withPath2D(() => {

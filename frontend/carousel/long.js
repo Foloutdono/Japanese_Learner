@@ -28,6 +28,9 @@ import { particleLabel } from './explain.js'
 import * as A from './app.js'
 
 export const WIDE = { id: 'wide', w: 1920, h: 1080 }
+// The site a description links to: landing/config.mjs's SITE_ORIGIN, which
+// reads the disk and cannot load in the studio (a test holds the two equal).
+export const LONG_SITE = 'https://japanese-learner-seven.vercel.app'
 export const FPS = 30
 export const KINDS = ['vocab', 'kanji', 'grammar', 'quiz']
 // A part of a drill or a quiz: about ten minutes each (timeline's pace).
@@ -169,6 +172,78 @@ export function longPlan(kind, banks, { lang = 'en', level = 'N5', part = 1, the
     return { ...base, title: S.title.quiz(level, ids ? 0 : part), items: qs.map(q => ({ type: 'q', q })) }
   }
   throw new Error(`no long video of kind ${kind}`)
+}
+
+// ── The studio's list (plan 214) ─────────────────────────────────
+// The carousel studio offers the long videos as one of its sources: at a
+// level, every video it can make, by an id the render command takes.
+const QUIZ_SHARE = { sentence: 0.5, word: 0.3, kanji: 0.25 }
+const LIST_KIND = { vocab: '語彙', kanji: '漢字', quiz: '試験', grammar: '文法', theme: '主題' }
+
+/** The bank files a level's list reads. */
+export const longListFiles = level => [`words-${level}.json`, `kanji-${level}.json`, `${level}.json`, `grammar-${level}.json`, 'themes.json']
+
+/** The videos a level can make: its vocabulary and kanji parts, its
+ *  quiz's parts, each grammar point, each theme. */
+export function longItems(banks, level, lang = 'en') {
+  const S = SAY[lang] || SAY.en
+  const out = []
+  const parts = (kind, list, name) => {
+    const n = PART[kind]
+    for (let p = 1; (p - 1) * n < list.length; p++) {
+      const some = list.slice((p - 1) * n, p * n)
+      out.push({ id: `${kind}:${p}`, kind, jp: `${LIST_KIND[kind]} ${p}`, sub: `${some.slice(0, 6).map(name).join('、')}…`, tag: S.count[kind](some.length) })
+    }
+  }
+  parts('vocab', (banks[`words-${level}.json`]?.words || []).filter(w => gloss(w, lang)[0]), w => w.t)
+  const kanji = banks[`kanji-${level}.json`]?.kanji || {}
+  parts('kanji', Object.keys(kanji).filter(c => kanji[c].s?.d?.length), c => c)
+  // A quiz part deals from its own slice of each list: as many parts as the shortest allows.
+  const k = src => Math.ceil(PART.quiz * QUIZ_SHARE[src])
+  const quizParts = Math.min(
+    Math.floor((banks[`${level}.json`]?.sentences.length || 0) / k('sentence')),
+    Math.floor((banks[`words-${level}.json`]?.words.length || 0) / k('word')),
+    Math.floor(Object.keys(kanji).length / k('kanji')),
+  )
+  for (let p = 1; p <= quizParts; p++) out.push({ id: `quiz:${p}`, kind: 'quiz', jp: `${LIST_KIND.quiz} ${p}`, sub: S.title.quiz(level, p), tag: S.count.quiz(PART.quiz) })
+  for (const L of banks[`grammar-${level}.json`]?.lessons || []) out.push({ id: `grammar:${L.p}`, kind: 'grammar', jp: L.p, sub: weldIf(lang, L[lang] || L.en), tag: LIST_KIND.grammar })
+  for (const [key, th] of Object.entries(banks['themes.json']?.themes || {})) {
+    out.push({ id: `theme:${key}`, kind: 'theme', jp: th.head?.t || key, sub: th.name?.[lang] || th.name?.en || key, tag: S.count.vocab(th.words.length) })
+  }
+  return out
+}
+
+/** What a list id asks of longPlan: its kind and its options. */
+export function longPick(id, level, lang = 'en') {
+  const [kind, rest] = [id.slice(0, id.indexOf(':')), id.slice(id.indexOf(':') + 1)]
+  if (kind === 'grammar') return { kind, opts: { lang, level, point: rest } }
+  if (kind === 'theme') return { kind: 'vocab', opts: { lang, level, theme: rest } }
+  return { kind, opts: { lang, level, part: Number(rest) || 1 } }
+}
+
+/** The bank files a video reads: a grammar point glosses its words from
+ *  every level's deck, a word's sentence may be an easier level's. */
+export function longFiles(id, level) {
+  const { kind, opts } = longPick(id, level)
+  const easier = LEVELS.slice(0, LEVELS.indexOf(level) + 1)
+  if (opts.theme) return ['themes.json']
+  if (kind === 'vocab') return [`words-${level}.json`, ...easier.map(lv => `${lv}.json`)]
+  if (kind === 'kanji') return [`kanji-${level}.json`]
+  if (kind === 'grammar') return [`grammar-${level}.json`, ...LEVELS.map(lv => `words-${lv}.json`)]
+  return [`${level}.json`, `words-${level}.json`, `kanji-${level}.json`]
+}
+
+/** The command that makes the video, from frontend/. */
+export function longCommand(id, level, lang = 'en') {
+  const { kind, opts } = longPick(id, level, lang)
+  const q = v => (/^[\w.-]+$/.test(v) ? v : `'${String(v).replace(/'/g, "'\\''")}'`)
+  const args = [`--kind ${kind}`]
+  if (opts.theme) args.push(`--theme ${q(opts.theme)}`)
+  else args.push(`--level ${level}`)
+  if (opts.point) args.push(`--point ${q(opts.point)}`)
+  if (opts.part) args.push(`--part ${opts.part}`)
+  args.push(`--lang ${lang}`)
+  return `VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs ${args.join(' ')}`
 }
 
 /** A word, with the first sentence of the bank it is read in that asks nothing above the word's level. */
