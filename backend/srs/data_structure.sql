@@ -242,7 +242,10 @@ CREATE TABLE user_profiles (
     -- The clock runs in the browser, which scales the server's
     -- standard figures; see routes/profile.py's READING_PACES and
     -- frontend/src/domain/readingPace.js.
-    reading_pace TEXT
+    reading_pace TEXT,
+    -- 足跡を残さない (plan 215): the account asked not to be counted.
+    -- core/events.opted_out reads it on both of the trail's write paths.
+    analytics_off BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 -- The Sentence bank: what the learner submitted, plus where it came

@@ -101,6 +101,12 @@ BY_AGE = [
     # except that one is excluded outright because its rows ARE the XP.
     ("event_log", "at", 365,
      "足跡 past a year; scripts/compact_events.py is the real retention"),
+    # The rolled-up half was kept for the life of the account until plan
+    # 215. It is still per learner (pseudonymous, not anonymous), and the
+    # CNIL's audience-measurement exemption bounds such data at 25
+    # months, which privacy.html now promises. 761 days is 25 months.
+    ("event_daily", "day", 761,
+     "足跡's daily counts past 25 months (the CNIL bound, plan 215)"),
 ]
 
 

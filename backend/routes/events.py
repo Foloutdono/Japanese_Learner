@@ -68,6 +68,12 @@ def post_events(batch: Batch, user_id: str = Depends(get_user_id)):
         # down is the same swallowed failure as a write that fails.
         conn = db_conn()
         with conn.cursor() as cur:
+            # An account that opted out on another device (plan 215):
+            # this browser's flag may not have caught up yet, and the
+            # account's answer is the one that counts.
+            if events.opted_out(cur, user_id):
+                conn.rollback()
+                return {"kept": 0}
             kept = events.write(cur, user_id, rows)
         conn.commit()
     except Exception:
