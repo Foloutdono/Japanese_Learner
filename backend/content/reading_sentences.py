@@ -1281,7 +1281,9 @@ def deck_gaps(jp: str, pattern: str) -> list[str]:
     for m, hit in _resolve_tokens(jp):
         if hit or m.pos not in CONTENT_POS or m.lemma in IGNORED_LEMMAS:
             continue
-        if _classify(m) in ("name", "numeral"):
+        if _classify(m) in ("name", "numeral", "homograph"):
+            # A homograph (plan 210) has its cards; the breakdown names
+            # neither rather than guess which.
             continue
         # The point's own word (余儀 in 〜を余儀なくされる) or a word the
         # point builds (支えあう).

@@ -101,6 +101,13 @@ def find(pattern: str) -> tuple[str, dict] | None:
     return _BY_PATTERN.get(pattern)
 
 
+def id_for(pattern: str) -> str | None:
+    """The card id of the point a pattern names, or None -- what a
+    screen opens the point's lesson by (plan 210)."""
+    found = find(pattern)
+    return grammar_to_id(found[1], found[0]) if found else None
+
+
 def entry_by_id(raw_id: str) -> tuple[str, dict] | None:
     """(level, entry) for a raw card id, or None -- a retired point, or a
     personal card's id that merely looks like one."""

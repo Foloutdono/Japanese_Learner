@@ -171,6 +171,8 @@ def test_ride_sentence_is_the_reading_batch_shape(client):
         assert s["romaji"].startswith("eki de")
         assert s["display_seconds"] > 0
         assert s["grammar"] == "で"
+        # Its card id, which the tag opens the lesson by (plan 210).
+        assert s["grammar_id"] == "grammar_N5_で"
 
 
 # ── POST /api/onboarding/ride/check ───────────────────────────────

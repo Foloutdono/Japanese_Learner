@@ -1,7 +1,9 @@
 import { Fragment } from 'react'
-import { CheckIcon, CrossIcon } from '../ui/Icons'
+import { CheckIcon, ChevronIcon, CrossIcon } from '../ui/Icons'
 import { useLang } from '../../LangContext'
-import { wordGloss } from '../analysis/tokens'
+import { CONTENT_POS, wordGloss } from '../analysis/tokens'
+import { grammarGloss } from '../analysis/grammarGloss'
+import { grammarLookup, tokenLookup } from '../analysis/lookup'
 import {
   diffWords, correctionFixes, refSpans, missMarks, missedWords, markPieces, joinWords, phrases,
 } from '../../domain/answerDiff'
@@ -34,18 +36,26 @@ import {
  *  card's top: a caption naming it and the pattern, its edge the line's
  *  pigment. `used` is a word on whether the learner's sentence uses it
  *  -- the tutor's (translation) or the detector's (composition): a check
- *  when it does, a cross when it does not, nothing when no one said. */
-export function PointTag({ point, label, used = null }) {
+ *  when it does, a cross when it does not, nothing when no one said.
+ *  With `onOpen` the tag is a door to the point's lesson (plan 210). */
+export function PointTag({ point, label, used = null, onOpen = null }) {
   const { t } = useLang()
   if (!point) return null
-  return (
-    <span className="pcard-tag">
+  const body = (
+    <>
       <span className="pcard-tag__cap">{label}</span>
       <span className="pcard-tag__jp" lang="ja">{point}</span>
       {used === true && <CheckIcon size={12} className="pcard-tag__used" />}
       {used === false && <CrossIcon size={12} className="pcard-tag__used pcard-tag__used--x" />}
       {typeof used === 'boolean' && <span className="sr-only">{used ? t.reviewGrammarUsed : t.reviewGrammarMissed}</span>}
-    </span>
+    </>
+  )
+  if (!onOpen) return <span className="pcard-tag">{body}</span>
+  return (
+    <button type="button" className="pcard-tag pcard-tag--door" onClick={onOpen} title={t.openDictionary}>
+      {body}
+      <ChevronIcon direction="right" size={14} className="pcard-tag__go" />
+    </button>
   )
 }
 
@@ -233,21 +243,45 @@ export function CorrectedInPlace({ given, parts, fixes }) {
 /** The words the answer missed, under the well (A2.2): each the word as
  *  the sentence writes it, its reading when a kanji needs one, and its
  *  meaning when the breakdown has it (`tokens`, its analysis's). Nothing
- *  when every word was right. */
-export function MissedWords({ words, tokens, label }) {
-  const { lang } = useLang()
+ *  when every word was right.
+ *
+ *  With `onOpen`, each is a door (plan 210): a word to its dictionary
+ *  entry, a particle -- は, が, which mean nothing alone -- to the point
+ *  it is, its gloss the point's. A tile whose meaning and door come from
+ *  one token, so it never names one word and opens another; a word the
+ *  breakdown has no meaning for names none. */
+export function MissedWords({ words, tokens, label, onOpen = null }) {
+  const { t, lang } = useLang()
   if (!words?.length) return null
   return (
     <ul className="pcard-misses" aria-label={label}>
       {words.map((w, i) => {
-        const gloss = glossAt(tokens, w.start, w.end, lang)
-        return (
-          <li key={i} className="pcard-missed">
-            <b className="pcard-missed__jp" lang="ja">{w.text}</b>
-            {HAS_KANJI.test(w.text) && w.kana && w.kana !== w.text && (
-              <span className="pcard-missed__kana" lang="ja">{w.kana}</span>
-            )}
+        const { gloss, lookup } = entryAt(tokens, w.start, w.end, lang)
+        const body = (
+          <>
+            <span className="pcard-missed__word">
+              <b className="pcard-missed__jp" lang="ja">{w.text}</b>
+              {HAS_KANJI.test(w.text) && w.kana && w.kana !== w.text && (
+                <span className="pcard-missed__kana" lang="ja">{w.kana}</span>
+              )}
+            </span>
             {gloss && <span className="pcard-missed__en">{gloss}</span>}
+          </>
+        )
+        return (
+          <li key={i} className="pcard-misses__item">
+            {onOpen && lookup ? (
+              <button
+                type="button"
+                className="pcard-missed pcard-missed--door"
+                onClick={() => onOpen(lookup)}
+                aria-label={[`${t.openDictionary}: ${w.text}`, gloss].filter(Boolean).join(' — ')}
+              >
+                {body}
+              </button>
+            ) : (
+              <span className="pcard-missed">{body}</span>
+            )}
           </li>
         )
       })}
@@ -257,15 +291,23 @@ export function MissedWords({ words, tokens, label }) {
 
 const HAS_KANJI = /[㐀-鿿々]/u
 
-// What the breakdown says a stretch of the sentence means: the first
-// word in it with a gloss.
-function glossAt(tokens, start, end, lang) {
-  for (const tok of tokens ?? []) {
-    if (tok.start == null || tok.end <= start || tok.start >= end) continue
+// What the breakdown says a stretch of the sentence is: the first word
+// in it with a meaning, and its entry; else, where the stretch holds no
+// word at all (a particle, a copula), the first point written on it --
+// a marker before a construction, は before 〜は〜が. Never a point for
+// a stretch with a word in it: おきます's ます is no gloss for おき.
+function entryAt(tokens, start, end, lang) {
+  const inside = (tokens ?? []).filter(tok => tok.start != null && tok.end > start && tok.start < end)
+  for (const tok of inside) {
     const gloss = wordGloss(tok, lang)
-    if (gloss) return gloss
+    if (gloss) return { gloss, lookup: tokenLookup(tok) }
   }
-  return ''
+  const word = inside.find(tok => tokenLookup(tok))
+  if (word) return { gloss: '', lookup: tokenLookup(word) }
+  if (inside.some(tok => CONTENT_POS.has(tok.pos))) return { gloss: '', lookup: null }
+  const points = inside.flatMap(tok => tok.grammar ?? [])
+  const point = points.find(g => g.kind === 'marker') ?? points[0]
+  return point ? { gloss: grammarGloss(point, lang), lookup: grammarLookup(point) } : { gloss: '', lookup: null }
 }
 
 /** The page a romaji answer is read against (reading, dictation, and
@@ -276,14 +318,18 @@ function glossAt(tokens, start, end, lang) {
  *  corrected; each miss is underlined in it where the server's `words`
  *  place it, and each word missed is named under the well, its meaning
  *  from the breakdown's `tokens` when they have come. The English is
- *  the bank's, whatever the app's language (`meaningLang`). */
-export function SentenceCheck({ point, parts, text, words, tokens, romaji, meaning, meaningLang, answer, accuracy, t }) {
+ *  the bank's, whatever the app's language (`meaningLang`). `onOpen`
+ *  takes a word's lookup (lookup.js) and `onPoint` opens the tag's
+ *  point: each makes its piece a door (plan 210). */
+export function SentenceCheck({
+  point, parts, text, words, tokens, romaji, meaning, meaningLang, answer, accuracy, t, onOpen = null, onPoint = null,
+}) {
   const segments = diffWords(answer, romaji)
   const spans = segments ? refSpans(romaji, words) : null
   const sentence = text ?? (parts ?? []).map(p => p.text).join('')
   return (
     <>
-      <PointTag point={point} label={t.pcardPoint} />
+      <PointTag point={point} label={t.pcardPoint} onOpen={onPoint} />
       <div className="pcard-group">
         <SentenceLead
           parts={parts}
@@ -296,7 +342,7 @@ export function SentenceCheck({ point, parts, text, words, tokens, romaji, meani
         <AnswerWell figure={accuracy ?? null} figureLabel={t.pcardMatched}>
           <MarkedAnswer answer={answer} reference={romaji} segments={segments} />
         </AnswerWell>
-        <MissedWords words={missedWords(segments, spans, words)} tokens={tokens} label={t.pcardMissed} />
+        <MissedWords words={missedWords(segments, spans, words)} tokens={tokens} label={t.pcardMissed} onOpen={onOpen} />
       </div>
     </>
   )

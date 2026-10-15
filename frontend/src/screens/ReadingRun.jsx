@@ -26,7 +26,7 @@ import { AskEntry } from '../components/study/AskPage'
 import { askTarget } from '../domain/ask'
 import { startTally, countReview } from '../stores/runTally'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
-import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
+import { vocabLookup, grammarLookup, pointLookup, docksInColumn, lookupKey } from '../components/analysis/lookup'
 import { tierLabelFor } from '../domain/tiers'
 import { paceFactor } from '../domain/readingPace'
 import { useReadingPace } from '../stores/readingPace'
@@ -557,6 +557,9 @@ function SessionView({
     onExitLookup: closeLookup,
     session,
   }
+  // The card's own doors (plan 210): the point's tag, and each word missed.
+  const point = pointLookup(data?.grammar_id, data?.grammar, analysis)
+  const docked = docksInColumn(desk, lines.opened, graded, analysis)
 
   return (
     <StudyStage
@@ -659,6 +662,8 @@ function SessionView({
                 answer={answer}
                 accuracy={feedback.accuracy}
                 point={data.grammar}
+                onPoint={point ? () => setLookup(point) : null}
+                onOpen={setLookup}
                 t={t}
               />
             )}
@@ -741,7 +746,7 @@ function SessionView({
 
       {/* On the desk a door in the docked breakdown opens in the side
           column (BreakdownSide → SideLookup, plan 115). */}
-      {lookup && !desk && (
+      {lookup && !docked && (
         <DictionaryLookupSheet key={lookupKey(lookup)} {...lookup} session={session} onClose={closeLookup} />
       )}
     </StudyStage>

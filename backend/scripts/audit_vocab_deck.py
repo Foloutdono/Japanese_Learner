@@ -38,6 +38,14 @@ only the last is a deck gap:
     numeral    a compound numeral (三十), which composes from the digits
     absent     no entry under any spelling -- the demand list (plan 105)
 
+and, beside them and counted apart from them, one the lookups refuse on
+purpose:
+
+    homograph  a verb in hiragana two deck verbs are spelled as in its
+               form (おきます: 起きる or 置く), which the breakdown names
+               neither of rather than guess (plan 210). Both cards
+               exist; it is neither a miss nor a gap
+
 The first three are plan 104's lookup repairs. Adding a deck entry for
 any of them would make a duplicate of a card that already exists.
 
@@ -434,7 +442,9 @@ def _classify(m) -> str:
     """Which of the four kinds an unmatched content word is (module
     docstring). Present-by-reading is tested against the kana index
     directly, so the answer is about the DECK, not about the gate."""
-    from study.card_lookup import _VOCAB_BY_KANA
+    from study.card_lookup import _VOCAB_BY_KANA, _deck_verbs_spelled
+    if _deck_verbs_spelled(m):
+        return "homograph"
     if _has_katakana(m.lemma) and (m.lemma in _VOCAB_BY_KANA or m.surface in _VOCAB_BY_KANA):
         return "katakana"
     if _has_katakana(m.lemma) and not _has_katakana(m.surface):
@@ -457,6 +467,7 @@ def corpus(sentences) -> dict:
         return {"available": False, "sentences": len(sentences)}
 
     counts = {kind: collections.Counter() for kind in ("katakana", "adverb", "gated", "name", "numeral", "absent")}
+    homographs = collections.Counter()
     levels = collections.defaultdict(set)
     sources = collections.defaultdict(set)
     for level, jp, source in sentences:
@@ -464,6 +475,9 @@ def corpus(sentences) -> dict:
             if hit or m.pos not in CONTENT_POS or m.lemma in IGNORED_LEMMAS:
                 continue
             kind = _classify(m)
+            if kind == "homograph":
+                homographs[m.lemma] += 1
+                continue
             counts[kind][m.lemma] += 1
             levels[m.lemma].add(level)
             sources[m.lemma].add(source)
@@ -485,6 +499,7 @@ def corpus(sentences) -> dict:
             kind: {"lemmas": len(c), "occurrences": sum(c.values())}
             for kind, c in counts.items()
         },
+        "homographs": {"lemmas": len(homographs), "occurrences": sum(homographs.values())},
         "absent": listing("absent"),
         "katakana": listing("katakana"),
         "adverb": listing("adverb"),
@@ -578,6 +593,8 @@ def render(report: dict) -> str:
                                 ("absent", "absent from the deck")):
                 n = c["kinds"][kind]
                 lines.append(f"    {label:28s} {n['lemmas']} lemmas, {n['occurrences']} occurrences")
+            h = c["homographs"]
+            lines.append(f"  {'homographs, refused (210)':30s}{h['lemmas']} lemmas, {h['occurrences']} occurrences")
             lines += ["", "  absent, most frequent first:", "    " + _fmt_lemmas(c["absent"], 40)]
             for kind in ("katakana", "adverb", "gated", "name", "numeral"):
                 if c[kind]:

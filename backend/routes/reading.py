@@ -19,7 +19,7 @@ from study.card_lookup import (
     find_segments_in_text, attach_stats_to_segments, VOCAB_STATUS_MODES,
     vocab_card_id_for_word,
 )
-from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, gloss as grammar_gloss, grammar_to_id
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, gloss as grammar_gloss, grammar_to_id, id_for
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content import vocab_extras
 from content import reading_sentences
@@ -603,6 +603,8 @@ def _finish_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None,
     # guessed one.
     if grammar:
         phrase["grammar"] = grammar
+        # Its card id, so the tag opens the point's lesson (plan 210).
+        phrase["grammar_id"] = id_for(grammar)
     return phrase
 
 

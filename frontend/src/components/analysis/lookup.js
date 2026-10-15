@@ -55,6 +55,26 @@ export function grammarLookup(point) {
   return { category: 'grammar', id: point.raw_id }
 }
 
+// The point a practice card's tag names (plan 210): by the card id the
+// sentence was served with, else by its pattern among the points the
+// breakdown found -- a sentence fetched before the id rode along.
+export function pointLookup(id, pattern, analysis) {
+  if (id) return { category: 'grammar', id }
+  if (!pattern) return null
+  return grammarLookup((analysis?.grammar ?? []).find(g => g.pattern === pattern))
+}
+
+// Whether a door opens in the desk's column (BreakdownSide → SideLookup,
+// plan 115) rather than as the sheet: on the desk, with a breakdown
+// standing there to open it in -- a line reopened from the run's lines
+// (`opened`), else the sentence on the stage once it is graded. A door
+// on the practice card (plan 210) is pressed before the grade too, when
+// the column is sealed, and the sheet opens it there as on a phone.
+export function docksInColumn(desk, opened, graded, analysis) {
+  if (!desk) return false
+  return opened ? Boolean(opened.analysis) : Boolean(graded && analysis)
+}
+
 export function lookupKey(lookup) {
   if (!lookup) return null
   return [lookup.category, lookup.id ?? '', lookup.term ?? '', lookup.kana ?? ''].join(':')

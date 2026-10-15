@@ -30,7 +30,7 @@ import { AskEntry } from '../components/study/AskPage'
 import { askTarget } from '../domain/ask'
 import { startTally, countReview } from '../stores/runTally'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
-import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
+import { vocabLookup, grammarLookup, pointLookup, docksInColumn, lookupKey } from '../components/analysis/lookup'
 import { tierLabelFor } from '../domain/tiers'
 
 const TRANSLATION_COLOR = 'var(--line-honyaku)'
@@ -501,6 +501,9 @@ function SessionView({
     onExitLookup: closeLookup,
     session,
   }
+  // The tag's door (plan 210): the point's lesson, before the answer and after.
+  const point = pointLookup(data?.grammar_id, data?.grammar, breakdown)
+  const docked = docksInColumn(desk, lines.opened, stage === 'feedback' && feedback?.correct != null, breakdown)
 
   return (
     <StudyStage
@@ -564,7 +567,7 @@ function SessionView({
               middle, the one thing on the card. */}
           <CardTransition cardKey={data._uiKey}>
             <PromptCard page prose>
-              <PointTag point={data.grammar} label={t.pcardUse} />
+              <PointTag point={data.grammar} label={t.pcardUse} onOpen={point ? () => setLookup(point) : null} />
               <div className="pcard-group">
                 <span className="pcard-ask" lang={data.translation_lang}>{data.translation}</span>
               </div>
@@ -615,7 +618,12 @@ function SessionView({
               the point of this mode. */}
           <PromptCard page prose>
             {!showBreakdown && (
-              <PointTag point={data.grammar} label={t.pcardPoint} used={analysis?.review?.grammar_used} />
+              <PointTag
+                point={data.grammar}
+                label={t.pcardPoint}
+                used={analysis?.review?.grammar_used}
+                onOpen={point ? () => setLookup(point) : null}
+              />
             )}
             <div className="pcard-group">
               {!showBreakdown && (
@@ -716,7 +724,7 @@ function SessionView({
 
       {/* On the desk a door in the docked breakdown opens in the side
           column (BreakdownSide → SideLookup, plan 115). */}
-      {lookup && !desk && (
+      {lookup && !docked && (
         <DictionaryLookupSheet key={lookupKey(lookup)} {...lookup} session={session} onClose={closeLookup} />
       )}
     </StudyStage>
