@@ -206,9 +206,11 @@ EVENTS: dict[str, frozenset[str]] = {
     # ── 発見 — a grammar point's tour (plan 187b) ────────────────
     # `level` is N5…N1, never the pattern: the funnel is read by level.
     # `stop` is look / guess / found / terminus; `outcome` first, retry
-    # (a wrong guess) or helped (the rule given after two). The done
-    # event carries the wrong guesses and whether the twist and scene
-    # were the point's own (`authored`, plan 187c).
+    # (a wrong guess) or helped (the rule given after two), or skipped
+    # (plan 222: the learner left the tour for its card at that stop,
+    # and no done event follows). The done event carries the wrong
+    # guesses and whether the twist and scene were the point's own
+    # (`authored`, plan 187c).
     "grammar_tour_step": frozenset({"level", "stop", "outcome"}),
     "grammar_tour_done": frozenset({"level", "tries", "helped", "authored"}),
     # ── 初見 — a kana or a kanji's first tour (plan 216) ─────────

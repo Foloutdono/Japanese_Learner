@@ -17,7 +17,7 @@ import { ATTRIBUTIONS } from '../../domain/attributions'
 import { SOURCES } from '../../domain/paywall'
 import {
   ChevronIcon, MonitorIcon, SpeakerIcon, BellIcon, StarIcon, HourglassIcon,
-  InfoIcon, UserIcon, BooksIcon, CalendarIcon, CardIcon,
+  InfoIcon, UserIcon, BooksIcon, CalendarIcon, CardIcon, MessageIcon,
 } from '../ui/Icons'
 import { SettingsDoor } from './SettingsDoor'
 import { ThemeSwatch, SoundMeter, RatingDots, PaceLine } from './RowSpecimens'
@@ -82,6 +82,7 @@ function useGroups(session) {
       { id: 'rating', Icon: StarIcon, iconProps: { filled: false }, label: t.settingsRatingShort, value: t.settingsRatingScaleOption[scale] ?? '', spec: <RatingDots scale={scale} /> },
       { id: 'reading', Icon: HourglassIcon, label: t.settingsReadingPace, value: t.readingPaceOption[pace], spec: <PaceLine factor={paceFactor(pace)} /> },
       { id: 'help', Icon: InfoIcon, label: t.settingsHelp, value: t.settingsHelpValue },
+      { id: 'write', Icon: MessageIcon, label: t.settingsWrite, value: t.settingsWriteValue },
     ],
     [
       { id: 'account', Icon: UserIcon, label: t.account, value: accountValue },

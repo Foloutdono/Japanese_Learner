@@ -219,6 +219,27 @@ describe('the tour in the day’s queue, on a phone', () => {
     expect(cached[0].lesson_seen).toBe(true)
   }, 20000)
 
+  // 飛ばす (plan 222): under the gate, inside the screen, the way past
+  // the lesson to its card -- which records no tour.
+  it('skips the tour for its card, recording nothing', async () => {
+    const screen = await mount([card()])
+    await settle()
+    const tour = () => screen.container.querySelector('.tour')
+    const skip = tour().querySelector('.tour__foot [data-action="skip"]')
+    const box = skip.getBoundingClientRect()
+    const gate = tour().querySelector('.tour__foot .btn-depart').getBoundingClientRect()
+    expect(box.top).toBeGreaterThanOrEqual(gate.bottom)
+    expect(box.bottom).toBeLessThanOrEqual(window.innerHeight)
+    expect(box.height).toBeGreaterThanOrEqual(44)
+    skip.click()
+    await settle()
+    expect(screen.container.querySelector('.tour')).toBeNull()
+    expect(screen.container.querySelector('.prompt-card')).toBeTruthy()
+    expect(apiJson.mock.calls.find(c => c[0] === '/api/grammar/tour')).toBeUndefined()
+    const cached = JSON.parse(localStorage.getItem(sessionKey('today', 'all', 'en')))
+    expect(cached[0].lesson_seen).toBe(true)
+  }, 20000)
+
   it('keeps the lesson for a point with no tour', async () => {
     const screen = await mount([card({ lesson: { ...LESSON, tour: null } })])
     await settle()

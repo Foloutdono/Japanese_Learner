@@ -340,17 +340,22 @@ function Twist({ twist, n, total, pick, done, onPick }) {
     217): `showTr` holds the translation back on a line still to be
     answered, `children` stand under the line (what the tutor said of
     the learner's), and `speak` voices a line the catalogue does not
-    hold. */
-export function SceneLine({ line, them, onSpeak, showTr = true, speak = null, children = null }) {
+    hold. Since plan 223 the talk draws its lines as bubbles: `className`
+    names a line's kind there (a reply taken, the one that was right),
+    `label` stands where who says it does (« La réponse » over the
+    right one), and `foot` is said under the line, past its voice (why
+    a reply was taken or right). The tour passes none of them. */
+export function SceneLine({ line, them, onSpeak, showTr = true, speak = null, children = null, className = '', label = null, foot = null }) {
   const { t } = useLang()
   return (
-    <li className={`tour-line tour-line--${line.who}`}>
-      <span className="tour-line__who">{line.who === 'me' ? t.tourMe : them}</span>
+    <li className={`tour-line tour-line--${line.who}${className ? ` ${className}` : ''}`}>
+      <span className="tour-line__who">{label ?? (line.who === 'me' ? t.tourMe : them)}</span>
       <div className="tour-line__text">
         <ExampleSentence ex={{ jp: line.jp, tr: line.tr, segments: line.furigana }} showTr={showTr} />
         {children}
       </div>
       <Speak text={line.jp} who={line.who} onSpeak={onSpeak} speak={speak} />
+      {foot && <p className="tour-line__foot">{foot}</p>}
     </li>
   )
 }
@@ -649,7 +654,12 @@ function useTourKeys(ref, on) {
 // phone the stop carries the button to the asking's page (AskEntry); on
 // the desk the panel stands under the stops at the left (TourRoute),
 // which reads the thread from `onView`. A replay asks nothing.
-export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt = null, desk = false, onView, ask = null }) {
+// `onSkip` (plan 222): the way past the lesson to its card, at any stop
+// before the terminus -- a quiet link under the gate, the one the glyph
+// tour's "show me" wears. A tour is minutes where a card is seconds, and
+// not every learner wants one; the point's sheet keeps it a tap away
+// (GrammarLesson's replay). A replay has its own way back, and no skip.
+export function GrammarTour({ point, onBoard, onSkip, onLesson, replay = false, startAt = null, desk = false, onView, ask = null }) {
   const { t } = useLang()
   const tour = point.tour
   const stops = stopsOf(tour)
@@ -741,6 +751,15 @@ export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt 
     onBoard?.({ tries: wrong.length, helped, quizRight: quiz.length ? score.right : null, quizTotal: quiz.length || null })
   }
 
+  // Where the learner left the lesson is the funnel's question: the
+  // stop, under grammar_tour_step's outcome `skipped` (plan 222).
+  function skip() {
+    track('grammar_tour_step', { level, stop: kind, outcome: 'skipped' })
+    playClick()
+    onSkip()
+  }
+  const skippable = Boolean(onSkip) && !replay && stop !== 'terminus'
+
   let gate
   if (stop === 'look') gate = <GateButton label={t.tourIdea} onClick={() => go('first')} data-action="continue" />
   else if (stop === 'guess' && helped) gate = <GateButton label={t.onbContinue} onClick={() => go('helped')} data-action="continue" />
@@ -778,6 +797,11 @@ export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt 
       </div>
       <div className="tour__foot">
         {gate}
+        {skippable && (
+          <button type="button" className="brd__link" onClick={skip} data-action="skip">
+            {t.tourSkip}
+          </button>
+        )}
       </div>
     </section>
   )
