@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 import '../index.css'
 
-// ── 訳 on a phone (plan 229) ──────────────────────────────────
+// ── 訳 on a phone (plan 235) ──────────────────────────────────
 // Every line of a video carries its translation under it, asked a block
 // of lines at a time (components/analysis/useLineTranslations.js), with
 // the video's title and channel the player knows; the line holds the

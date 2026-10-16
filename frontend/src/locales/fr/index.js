@@ -1002,7 +1002,7 @@ const phraseAnalyzer = {
   hideVideo:           'Masquer la vidéo',
   furiganaNow:         label => `Furigana : ${label}`,
   wordsInSentence:     'Les mots de la phrase',
-  // Le bureau du texte : la liste des mots repliée en une ligne (plan 229).
+  // Le bureau du texte : la liste des mots repliée en une ligne (plan 235).
   wordsFoldCap:        'Mots de la phrase',
   explanationTitle:    'Explication de la phrase',
   showExplanation:     'Voir l’explication',

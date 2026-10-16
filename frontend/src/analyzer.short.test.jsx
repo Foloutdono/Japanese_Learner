@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 畳 on the short desk (plan 229, the owner's pick C) ─────────────
+// ── 畳 on the short desk (plan 235, the owner's pick C) ─────────────
 // A typed Passage's words folded to one line under the sumi give the
 // stage the column, and at 1280×600 -- the board C-600 of the canvas
 // "Tsuji analyser — text desk stage" -- a line as wide as one gets, its

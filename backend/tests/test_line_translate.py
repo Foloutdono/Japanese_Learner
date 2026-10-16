@@ -1,5 +1,5 @@
 """A translation under every line of a video, and Explain told where the
-line stands (plan 229).
+line stands (plan 235).
 
 The translations are asked a block of lines at a time
 (study/line_translate.py) and kept on the session by the line's text

@@ -166,7 +166,7 @@ def _ensure_video_schema() -> None:
             # written before this column; NULL is such a row, and the
             # client falls back to its own line for it. Additive.
             cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS error_code TEXT")
-            # Each line's translation (plan 229), as {lang: {line text:
+            # Each line's translation (plan 235), as {lang: {line text:
             # translation}}: by the text, so a chorus is translated once
             # and a line cut again keeps what it had. Additive.
             cur.execute(
@@ -633,7 +633,7 @@ def _current(session_id: int, sentences: list[dict]) -> list[dict]:
     improvement on an older analysis.
 
     A line wider than study/line_cut.MAX_LINE_WIDTH, stored before the
-    lines were held to it (plan 229), is cut as a new session's would
+    lines were held to it (plan 235), is cut as a new session's would
     be, each piece analysed and timed on its own. The session's indices
     move with it, which is why every route that reads a line by its
     index reads it through here."""
@@ -876,7 +876,7 @@ def restore_video_session(session_id: int, user_id: str = Depends(get_user_id)):
 
 class ExplainPayload(BaseModel):
     lang: str = "en"
-    # What the player says the video is (plan 229), where it knows:
+    # What the player says the video is (plan 235), where it knows:
     # YouTube's own title and channel, read off the embed. The server
     # never fetches them -- the watch page goes through a metered proxy.
     title: str = Field("", max_length=200)
@@ -926,7 +926,7 @@ def explain_video_sentence(session_id: int, index: int, payload: ExplainPayload,
     (see study/analysis and docs/adr/0001). Shares phrase_analysis_cache
     with /api/phrase/analyze via _analyze_sentence.
 
-    Asked where the line stands (plan 229): the video's title and
+    Asked where the line stands (plan 235): the video's title and
     channel the client read off the player, the line's place and time,
     and the two lines either side -- cached with that context, so the
     same words in another video are explained again.
@@ -970,7 +970,7 @@ def explain_video_sentence(session_id: int, index: int, payload: ExplainPayload,
     return merged
 
 
-# ── 訳 — a translation under every line (plan 229) ──────────────
+# ── 訳 — a translation under every line (plan 235) ──────────────
 # Asked a block at a time as the learner reaches it (study/line_translate
 # .py has why not one line, and why not the deep tier), kept on the
 # session by the line's text, and rationed there: a block the session

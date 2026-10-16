@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 import '../index.css'
 
-// ── 訳 on the desk (plan 229) ─────────────────────────────────
+// ── 訳 on the desk (plan 235) ─────────────────────────────────
 // On the desk a video's line is the subtitle on the sumi, and its
 // translation stands under it there, a rung smaller than the line --
 // the line is a heading on the slab, not display size as on the text

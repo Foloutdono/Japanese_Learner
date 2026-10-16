@@ -298,7 +298,7 @@ export default function AnalyzerScreen({ session }) {
   const [dock, setDock] = useState(null)
   const closeDock = useCallback(() => setDock(null), [])
   // The text desk's words, folded to one line under the sumi, open as a
-  // list in a sheet (plan 229, the owner's pick C).
+  // list in a sheet (plan 235, the owner's pick C).
   const [wordsOpen, setWordsOpen] = useState(false)
   const closeWords = useCallback(() => setWordsOpen(false), [])
   // Every route into a new Passage starts the focus over: the first
@@ -360,7 +360,7 @@ export default function AnalyzerScreen({ session }) {
   // Where a grammar point sits, lit across the desk's three columns (the
   // subtitle line, the numbered points, the words list and the card).
   const light = useLight(analyzer.focused)
-  // 訳 (plan 229): what the player says the video is, where it knows --
+  // 訳 (plan 235): what the player says the video is, where it knows --
   // told to a line's translation and to its explanation -- and the
   // Passage's translations, asked a block of lines at a time where the
   // Passage is kept: a video's session, a typed Passage's history row.
@@ -1006,7 +1006,7 @@ export default function AnalyzerScreen({ session }) {
   }
 
   const focused = analyzer.focused
-  // The line's translation: the Passage's own (plan 229), or, before it
+  // The line's translation: the Passage's own (plan 235), or, before it
   // comes and on a Passage saved nowhere, the one Explain bought (plan
   // 161). A line holds its translation's place while it comes, so the
   // line over it does not move when it lands.
@@ -1335,7 +1335,7 @@ export default function AnalyzerScreen({ session }) {
   // the entry on the right is that card, and its deck action rides the
   // word's row. One sentence (B′): the words over the grammar on the
   // left. Several (B): the Passage's line over the grammar on the left,
-  // the words under the sentence -- folded to one line since plan 229
+  // the words under the sentence -- folded to one line since plan 235
   // (the owner's pick C of the canvas "Tsuji analyser — text desk
   // stage"), so the sentence, its translation and Explain have the
   // stage, and opened as the list in a sheet.
@@ -1886,7 +1886,7 @@ export default function AnalyzerScreen({ session }) {
           moves the same position the stepper reads from. */}
       {showResult && focused && wide && deskResult}
 
-      {/* The text desk's words, opened from their folded line (plan 229):
+      {/* The text desk's words, opened from their folded line (plan 235):
           the list that stood under the sumi, a row putting its word in
           focus -- the entry on the right follows -- and closing it. A
           sheet is portalled to the body, so the station's pigment is

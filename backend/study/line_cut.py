@@ -1,4 +1,4 @@
-# ── A subtitle line held to what reads at a glance (plan 229) ─────
+# ── A subtitle line held to what reads at a glance (plan 235) ─────
 # A Cue is a Sentence (study/cue_sentences.py), and most cues are a
 # line somebody sized for a screen. Some are not: a talk's hand-written
 # track can put forty-odd characters in one cue, which the analyser's

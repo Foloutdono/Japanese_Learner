@@ -127,7 +127,7 @@ FEATURES = {
     "line_translation": (
         30, 900, 700,
         "A translation under every line of a video, and every sentence of a "
-        "typed or photographed Passage (plan 229): one call for a block of "
+        "typed or photographed Passage (plan 235): one call for a block of "
         "20 lines as the learner reaches it, the two either side and the "
         "video's title as context. Four videos a month of ~150 lines is 30 "
         "blocks; a typed Passage is a block or two. In: a ~350-token system block (stable, "

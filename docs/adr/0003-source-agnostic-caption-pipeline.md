@@ -514,7 +514,7 @@ fetch never.
 
 ---
 
-## Amendment, 2026-10-16 — a Cue too wide to read is cut into lines (plan 229)
+## Amendment, 2026-10-16 — a Cue too wide to read is cut into lines (plan 235)
 
 The 2026-08-27 amendment made one Cue one Sentence, never split on its own
 punctuation. A talk's hand-written track disproved the half of that which

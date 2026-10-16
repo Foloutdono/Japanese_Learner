@@ -23,7 +23,7 @@
 # So: one Cue in, one Sentence out. Not split on its punctuation either
 # -- a subtitle line is what is on screen, and splitting it on an
 # internal ？ produced stops that no longer matched the file and shared
-# a timestamp with their other half. Except for width (plan 229): a cue
+# a timestamp with their other half. Except for width (plan 235): a cue
 # wider than study/line_cut.MAX_LINE_WIDTH is cut into the fewest lines
 # that fit, between two phrases, and its time with it, so no two stops
 # share a timestamp and every one reads at a glance.
@@ -51,7 +51,7 @@ def sentences_from_cues(cues: list[dict], start: float | None,
 
     EVERY Cue, in file order, one Sentence each -- or, a Japanese cue
     too wide to read at a glance, one per piece study/line_cut cuts it
-    into, in order and tiling its time (plan 229). This is a subtitle
+    into, in order and tiling its time (plan 235). This is a subtitle
     track: the learner is reading along with it, so a line that is
     missing from the list is a line they cannot find, and a line that
     has been merged no longer matches what is on screen. The output is

@@ -41231,7 +41231,7 @@ button.brd-stn { cursor: pointer; }
   .anl-desk__side > .anl-desk__points { flex: 0 1 auto; min-height: 0; }
   .anl-desk--text .anl-desk__rail { contain: none; }
   .anl-desk--text .anl-desk__points { align-self: stretch; max-height: none; }
-  /* 畳 (plan 229, the owner's pick C): several sentences' words folded
+  /* 畳 (plan 235, the owner's pick C): several sentences' words folded
      to one line under the sentence, which keeps the rest of the column,
      and opened as the list in a sheet (WordsList.jsx's WordsFold). */
   .anl-fold {
@@ -41294,7 +41294,7 @@ button.brd-stn { cursor: pointer; }
     min-height: 0;
     padding-bottom: var(--sp-7);
   }
-  /* Centred while it fits; once a sentence, its translation (plan 229)
+  /* Centred while it fits; once a sentence, its translation (plan 235)
      and Explain outgrow the stage, they start at its top and scroll,
      rather than overflowing above it where no scroll reaches. */
   .anl-subs__stage {
@@ -41322,7 +41322,7 @@ button.brd-stn { cursor: pointer; }
     text-align: center;
     text-wrap: balance;
   }
-  /* Under a video's subtitle (plan 229): a rung under the line, which
+  /* Under a video's subtitle (plan 235): a rung under the line, which
      is a heading on the slab rather than display size. */
   .anl-desk:not(.anl-desk--text) .anl-subs__tr {
     font-size: var(--fs-lead);

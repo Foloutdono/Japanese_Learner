@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { apiJson } from '../../lib/api'
 
-// ── 訳 — the translation under each line (plan 229) ─────────────────
+// ── 訳 — the translation under each line (plan 235) ─────────────────
 // A Passage's lines are translated a block at a time on the server
 // (backend/study/line_translate.py: one model call for BLOCK lines,
 // kept where the Passage is kept), so this asks for the block the line

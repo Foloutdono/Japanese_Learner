@@ -65,7 +65,7 @@ export function WordsList({ analysis, current, onSelect, t, action = null }) {
   )
 }
 
-// ── 畳 — the words folded to one line (plan 229, the owner's pick C) ──
+// ── 畳 — the words folded to one line (plan 235, the owner's pick C) ──
 // The canvas "Tsuji analyser — text desk stage": on the desk, a typed
 // Passage of several sentences gives its words list's height back to
 // the sumi, so the sentence, its translation and Explain stand whole on

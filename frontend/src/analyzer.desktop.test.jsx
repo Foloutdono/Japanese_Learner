@@ -16,7 +16,7 @@ import './index.css'
 // description's place. A typed Passage has no video, and its sentence
 // takes the video's place (plan 161): one sentence's words over its
 // grammar on the left, several's folded to one line under the sentence
-// (plan 229, the owner's pick C) and opened as a list in a sheet, the
+// (plan 235, the owner's pick C) and opened as a list in a sheet, the
 // translation under the sentence. The intake stands beside its history;
 // Ctrl+Enter analyses. And the dictionary,
 // finding no entry for a sentence typed into it, offers to take it to
@@ -32,7 +32,7 @@ const ONE = [{
   tokens: [tok('駅', '駅', 'えき', 'station'), tok('で'), tok('待つ', '待つ', 'まつ', 'to wait')],
 }]
 const TWO = [ONE[0], { ...ONE[0], text: '電車に乗る', tokens: [tok('電車', '電車', 'でんしゃ', 'train'), tok('に'), tok('乗る', '乗る', 'のる', 'to ride')] }]
-// A line as wide as plan 229 lets one be (22 characters), with the
+// A line as wide as plan 235 lets one be (22 characters), with the
 // translation it carries: what the text desk's stage must hold whole.
 const WIDE_LINE = {
   ...ONE[0], text: '昨日は雨が降っていたので、私は一日中家で',
@@ -184,7 +184,7 @@ describe('the analyser on the desk (plan 134)', () => {
     expect(head.right).toBeLessThanOrEqual(right.left)
     // Plan 161, several typed sentences (B): the Passage's line over the
     // grammar on the left, the words under the sentence in the middle --
-    // folded to one line since plan 229 -- and no card in focus beside
+    // folded to one line since plan 235 -- and no card in focus beside
     // them: the entry is that card.
     expect(points.top).toBeGreaterThan(rail.bottom - 1)
     expect(words.top).toBeGreaterThan(slab.bottom - 1)
@@ -369,7 +369,7 @@ describe('the analyser on the desk (plan 134)', () => {
     await expect.poll(() => $('.anl-subs__count').textContent).toContain('1 / 2')
   })
 
-  // Plan 229, the owner's pick C of "Tsuji analyser — text desk stage":
+  // Plan 235, the owner's pick C of "Tsuji analyser — text desk stage":
   // several sentences' words give their height back to the sumi, folded
   // to one line under it, and the line opens them as the list.
   it('folds several sentences\' words to one line under the sentence, and opens them as the list', async () => {

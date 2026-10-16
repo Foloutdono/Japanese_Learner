@@ -1038,7 +1038,7 @@ const phraseAnalyzer = {
   hideVideo:           'Hide the video',
   furiganaNow:         label => `Furigana: ${label}`,
   wordsInSentence:     'The words in the sentence',
-  // The text desk: the words list folded to one line (plan 229).
+  // The text desk: the words list folded to one line (plan 235).
   wordsFoldCap:        'Words in the sentence',
   explanationTitle:    'The sentence explained',
   showExplanation:     'Show the explanation',

@@ -286,7 +286,7 @@ CREATE TABLE phrase_history (
     source_ref TEXT NOT NULL DEFAULT '',
     kept BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    -- Each sentence's translation (plan 229), {lang: {sentence: translation}}.
+    -- Each sentence's translation (plan 235), {lang: {sentence: translation}}.
     translations JSONB NOT NULL DEFAULT '{}'::jsonb
 );
 
@@ -536,7 +536,7 @@ CREATE TABLE video_sessions (
     -- history's limit, and erased a day later (core/history.py). NULL is
     -- a session on the shelf.
     deleted_at    TIMESTAMPTZ,
-    -- Each line's translation (plan 229), {lang: {line text: translation}},
+    -- Each line's translation (plan 235), {lang: {line text: translation}},
     -- filled a block of lines at a time as the learner reaches them.
     translations  JSONB NOT NULL DEFAULT '{}'::jsonb
 );

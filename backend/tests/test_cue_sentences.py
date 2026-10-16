@@ -9,7 +9,7 @@ class SentencesFromCuesTests(unittest.TestCase):
     A Cue is a Sentence: it is a line somebody chose to put on screen
     together, which is the unit a learner studies. It is never split on
     its own punctuation and never merges with its neighbours; only a
-    cue too wide to read at a glance is cut into lines (plan 229).
+    cue too wide to read at a glance is cut into lines (plan 235).
     Cues with no Japanese in them are kept and flagged.
 
     This is the reverse of the original contract (concatenate the whole
@@ -58,7 +58,7 @@ class SentencesFromCuesTests(unittest.TestCase):
         # The auto-caption case: no 。！？ anywhere. Still one Sentence
         # per Cue, which is what it always should have produced -- or,
         # a cue too wide to read at a glance, the lines it is cut into
-        # (plan 229, tests/test_line_cut.py), never one merged with its
+        # (plan 235, tests/test_line_cut.py), never one merged with its
         # neighbour.
         cues = [
             {"start": 0.0, "end": 2.0, "text": "今日はみんなで駅前の喫茶店に行った"},

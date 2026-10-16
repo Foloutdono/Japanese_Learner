@@ -79,7 +79,7 @@ session.
 
 ---
 
-## Amendment, 2026-10-16 — a video's lines are translated a block at a time (plan 229)
+## Amendment, 2026-10-16 — a video's lines are translated a block at a time (plan 235)
 
 The owner asked for a translation under every line of a video. Since plan 161 a
 line's translation came with its deep tier, so a translation under every line

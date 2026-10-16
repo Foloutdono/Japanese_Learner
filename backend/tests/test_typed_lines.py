@@ -1,4 +1,4 @@
-"""A typed or photographed Passage read as a video's lines are (plan 229).
+"""A typed or photographed Passage read as a video's lines are (plan 235).
 
 The analyser's Passage is held to the line width (routes/phrase.py's
 passage_sentences, `lines`), each sentence translated a block at a time

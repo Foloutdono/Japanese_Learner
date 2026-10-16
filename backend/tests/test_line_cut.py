@@ -1,4 +1,4 @@
-"""A subtitle line held to what reads at a glance (plan 229).
+"""A subtitle line held to what reads at a glance (plan 235).
 
 study/line_cut.py cuts a cue wider than MAX_LINE_WIDTH into the fewest
 lines that fit, between two phrases, and shares the cue's time among

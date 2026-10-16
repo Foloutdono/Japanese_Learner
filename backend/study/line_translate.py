@@ -1,4 +1,4 @@
-# ── A translation under every line (plan 229) ────────────────────
+# ── A translation under every line (plan 235) ────────────────────
 # The owner (2026-10-16): "add the translation for each sentence". The
 # analyser's stage drew a line's translation only once Explain had
 # bought the line's deep tier (plan 161), one model call a line --

@@ -110,7 +110,7 @@ def _user_message(phrase: str, points: list[dict], context: str = "") -> str:
     return "\n".join(lines)
 
 
-# ── Where the phrase stands (plan 229) ─────────────────────────
+# ── Where the phrase stands (plan 235) ─────────────────────────
 # A video's line explained alone was explained as a sentence of its own:
 # みなさんがいてくれるので、 with nobody to be there and nothing it
 # was the reason for (the owner: "give a bit of context to it, not just
@@ -138,7 +138,7 @@ def deep_context(about: list[str], before: list[str], after: list[str]) -> str:
     return "\n".join(lines)
 
 
-# ── A typed Passage's sentences (plan 229) ─────────────────────
+# ── A typed Passage's sentences (plan 235) ─────────────────────
 # The analyser holds a typed or photographed Passage's sentences to a
 # video's line width too (study/line_cut.py): a sentence from a novel
 # drew nine rows of a phone at display size. Only the analyser's: the
@@ -230,7 +230,7 @@ CACHE_VERSION = 5
 
 
 def _phrase_key(phrase: str, lang: str, context: str = "") -> str:
-    # A phrase explained where it stands (plan 229) is its own entry:
+    # A phrase explained where it stands (plan 235) is its own entry:
     # the same line in another video, or with other lines around it, is
     # another explanation. The phrase alone keeps the key it always had,
     # so nothing cached under it moves.
@@ -311,7 +311,7 @@ def _migrate_history_schema() -> None:
                 CREATE UNIQUE INDEX IF NOT EXISTS idx_phrase_history_kept_unique
                 ON phrase_history(user_id, phrase) WHERE kept
             """)
-            # Each sentence's translation (plan 229), as a video session
+            # Each sentence's translation (plan 235), as a video session
             # keeps its lines': {lang: {sentence: translation}}. A
             # translation is a translation of text, not an analysis, so
             # ADR-0002 still holds: nothing here goes stale with the SRS.
@@ -418,7 +418,7 @@ class PhraseRequest(BaseModel):
     # Passage of two with no top-level tokens, and the run drew the bare
     # sentence where its breakdown should have been.
     whole: bool = False
-    # True for the analyser's own Passage (plan 229): each sentence
+    # True for the analyser's own Passage (plan 235): each sentence
     # held to the line width a video's lines are (passage_sentences).
     # Every other caller takes its sentences as they are.
     lines: bool = False
@@ -534,7 +534,7 @@ def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: s
     escalated to _call_llm.
 
     `context` (deep_context) is where the phrase stands, for a caller
-    that knows it (a video's line, plan 229): asked with the phrase and
+    that knows it (a video's line, plan 235): asked with the phrase and
     cached under a key of its own.
     """
     analysis = analyze_local(text)
@@ -709,7 +709,7 @@ def get_phrase_history_entry(entry_id: int, lang: str = "en", user_id: str = Dep
     # call just because the learner reopened an old entry.
     #
     # The shelf is the analyser's, so the Passage comes back in the lines
-    # the analyser reads it in (plan 229), each sentence's explanation
+    # the analyser reads it in (plan 235), each sentence's explanation
     # looked up where it stands -- the indices its translations and its
     # Explain are asked by.
     entry = _load_entry(entry_id, user_id)
@@ -753,7 +753,7 @@ class HistoryExplainPayload(BaseModel):
 def explain_history_sentence(entry_id: int, index: int, payload: HistoryExplainPayload,
                              user_id: str = Depends(get_user_id)):
     """The deep tier of ONE sentence of a typed or photographed Passage,
-    asked where it stands (plan 229): the two sentences either side of
+    asked where it stands (plan 235): the two sentences either side of
     it, its place, what kind of text it is. A Passage of one sentence is
     asked as the sentence alone. The answer is the sentence's analysis,
     as /api/phrase/analyze gives one; reopening the Passage
@@ -769,7 +769,7 @@ def explain_history_sentence(entry_id: int, index: int, payload: HistoryExplainP
                              context=passage_context(texts, index, entry["source"]))
 
 
-# ── 訳 — a translation under every sentence (plan 229) ──────────
+# ── 訳 — a translation under every sentence (plan 235) ──────────
 # A video session's lines and a typed Passage's sentences are translated
 # alike (study/line_translate.py): a block of lines at a time, kept on
 # the row the Passage is kept on, rationed by the same daily ceiling.

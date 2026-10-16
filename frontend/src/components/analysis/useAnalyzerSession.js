@@ -169,7 +169,7 @@ export function useAnalyzerSession(session) {
     try {
       const data = await apiJson('/api/phrase/analyze', session, {
         method: 'POST',
-        // `lines` (plan 229): each sentence held to the width a video's
+        // `lines` (plan 235): each sentence held to the width a video's
         // lines are, which only the analyser asks for.
         body: JSON.stringify({ phrase: trimmed, lang, source, lines: true }),
       })
@@ -178,7 +178,7 @@ export function useAnalyzerSession(session) {
         ...emptyPassage(),
         source,
         // The history row it was saved as: what its translations and its
-        // explanations are asked by (plan 229).
+        // explanations are asked by (plan 235).
         historyId: data.id ?? null,
         sentences: data.sentences ?? [],
         truncated: data.truncated ?? 0,
@@ -362,7 +362,7 @@ export function useAnalyzerSession(session) {
         }
         setPassage({
           ...emptyPassage(),
-          // What the line's translations are asked by (plan 229,
+          // What the line's translations are asked by (plan 235,
           // ./useLineTranslations.js).
           sessionId: videoSessionId,
           source: data.source ?? 'video',
@@ -397,7 +397,7 @@ export function useAnalyzerSession(session) {
   // .MAX_SENTENCES long, and `deep` on every one of them would
   // multiply the cost by that many. See docs/adr/0001.
   //
-  // A line is explained where it stands (plan 229): the server has its
+  // A line is explained where it stands (plan 235): the server has its
   // place and its neighbours -- a video's on its session, a typed
   // Passage's on its history row -- and `about` the video's title and
   // channel, which only the player knows. A Passage saved nowhere is
