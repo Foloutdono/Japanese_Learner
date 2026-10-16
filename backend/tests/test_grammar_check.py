@@ -329,7 +329,7 @@ def _tour(**over) -> dict:
             "place": "窓口",
             "them": {"en": "Clerk", "fr": "Agent"},
             "lines": [
-                {"who": "them", "jp": "いらっしゃいませ。", "en": "Good morning.", "fr": "Bonjour."},
+                {"who": "them", "jp": "いらっしゃいませ。", "en": "Welcome.", "fr": "Bienvenue."},
                 {"who": "them", "jp": "ここにすわってください。", "en": "Please sit here.", "fr": "Asseyez-vous ici, s'il vous plaît."},
             ],
             "note": {"en": "A thing: をください. An action: てください.", "fr": "Une chose : をください. Une action : てください."},
