@@ -89,12 +89,13 @@ describe('the song sheet', () => {
     const mining = miningWith(async (_kind, name) => DECK(name))
     const screen = await renderSheet(mining, { title: '夜に駆ける' })
     const dialog = document.querySelector('[role="dialog"]')
-    expect(dialog.querySelector('input').value).toBe('夜に駆ける')
+    expect(dialog.querySelector('input.field').value).toBe('夜に駆ける')
     // Two halves, each with what it would take: five words, two lines (a
     // chorus once).
-    const chips = [...dialog.querySelectorAll('.chip')]
-    expect(chips.map(c => c.querySelector('.chip__n').textContent)).toEqual(['5', '2'])
-    expect(chips.every(c => c.getAttribute('aria-pressed') === 'true')).toBe(true)
+    // S1 (plan 220): the halves are two cards to tick, both ticked.
+    const halves = [...dialog.querySelectorAll('.anl-song__half')]
+    expect(halves.map(h => h.querySelector('.anl-song__n').textContent)).toEqual(['· 5', '· 2'])
+    expect(halves.every(h => h.querySelector('input[type="checkbox"]').checked)).toBe(true)
 
     dialog.querySelector('.btn-primary').click()
     await settle(120)
@@ -129,11 +130,11 @@ describe('the song sheet', () => {
     const screen = await renderSheet(mining, { title: '' })
     const dialog = document.querySelector('[role="dialog"]')
     // No title from the player: the first line is proposed instead.
-    const input = dialog.querySelector('input')
+    const input = dialog.querySelector('input.field')
     expect(input.value).toBe('君の名前を呼ぶよ')
-    dialog.querySelectorAll('.chip')[0].click()
+    dialog.querySelectorAll('.anl-song__check')[0].click()
     await settle()
-    expect(dialog.querySelectorAll('.chip')[0].getAttribute('aria-pressed')).toBe('false')
+    expect(dialog.querySelectorAll('.anl-song__check')[0].checked).toBe(false)
 
     const proto = Object.getPrototypeOf(input)
     Object.getOwnPropertyDescriptor(proto, 'value').set.call(input, '  ')

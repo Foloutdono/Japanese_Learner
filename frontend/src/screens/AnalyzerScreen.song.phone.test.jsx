@@ -113,15 +113,15 @@ describe('the song door on a phone', () => {
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
 
     song.click()
-    await vi.waitFor(() => expect(document.querySelector('[role="dialog"] input')).not.toBeNull())
+    await vi.waitFor(() => expect(document.querySelector('[role="dialog"] input.field')).not.toBeNull())
     // The video stops for the sheet, which proposes the video's title.
     expect(player.pause).toHaveBeenCalled()
     const dialog = document.querySelector('[role="dialog"]')
-    expect(dialog.querySelector('input').value).toBe('YOASOBI「夜に駆ける」')
+    expect(dialog.querySelector('input.field').value).toBe('YOASOBI「夜に駆ける」')
     // The sheet lands on its first half, not on the field: no keyboard
     // opens over a name already proposed.
-    expect(document.activeElement).toBe(dialog.querySelector('.chip'))
-    expect([...dialog.querySelectorAll('.chip .chip__n')].map(n => n.textContent)).toEqual(['3', '2'])
+    expect(document.activeElement).toBe(dialog.querySelector('.anl-song__check'))
+    expect([...dialog.querySelectorAll('.anl-song__n')].map(n => n.textContent)).toEqual(['· 3', '· 2'])
   })
 
   it('opens on pasted lyrics too, proposing their first line', async () => {
@@ -134,8 +134,8 @@ describe('the song door on a phone', () => {
 
     await vi.waitFor(() => expect(screen.container.querySelector('.anl-m__head .anl-m__song')).not.toBeNull(), { timeout: 3000 })
     screen.container.querySelector('.anl-m__song').click()
-    await vi.waitFor(() => expect(document.querySelector('[role="dialog"] input')).not.toBeNull())
-    expect(document.querySelector('[role="dialog"] input').value).toBe('夜が来る')
+    await vi.waitFor(() => expect(document.querySelector('[role="dialog"] input.field')).not.toBeNull())
+    expect(document.querySelector('[role="dialog"] input.field').value).toBe('夜が来る')
   })
 
   it('leaves one line its keep alone', async () => {
