@@ -98,7 +98,7 @@ describe('the lesson gate in the day’s queue', () => {
     const stage = screen.container.querySelector('main.stage')
     expect(stage.querySelector('.gl--gate')).toBeTruthy()
     expect(stage.querySelector('.gl--gate .dict-plate__word').textContent).toBe('は')
-    expect(stage.querySelector('.gl-step--rule')).toBeTruthy()
+    expect(stage.querySelector('.gl-sec--rule')).toBeTruthy()
     // Nothing to rate and no help to reach for while the lesson is up.
     expect(stage.querySelector('.prompt-card')).toBeNull()
     expect(stage.querySelector('.rating-bar')).toBeNull()

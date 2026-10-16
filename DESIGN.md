@@ -410,19 +410,26 @@ visit has a layout problem, not a guide problem ("Say less").
 ### The entry plate, and a body that names itself
 
 The dictionary opens an entry as **the catalogue plate at reading size**:
-reading over headword over plain-language caption (the first gloss, or a
-kana's romaji), the stage word and the JLPT numeral in one corner, three ghost
-roundels (speak, add to a deck, close) in the other, and 辞書's gold as the 3px
-stripe along its bottom edge — the one colour on it.
+reading over headword over its meaning in the learner's words, the stage word
+and the JLPT numeral in one corner, three ghost roundels (speak, add to a
+deck, close) in the other, and 辞書's gold as the 3px stripe along its bottom
+edge — the one colour on it. A kanji's readings are half of what its entry is
+for: they print at the lead rung in the primary ink, not as the quietest line
+on the plate.
 
-**The caption prints only where the body does not repeat it** (plan 089). It
-used to be the first gloss always, clamped to two lines because the whole list
-lived below — so 土's plate said SOIL a rung above a line reading "Soil ·
-earth · ground · Turkey". A title the next line repeats in full is carrying
-nothing. Where the gloss line does print, the caption stands down; where it
-does not — a kanji with one meaning, a kana (whose caption is its romaji), a
-grammar point — the caption is the only copy, and it is therefore no longer
-clamped either.
+**The meaning is printed once** (plan 089, then plan 235). 土's plate said
+SOIL a rung above a line reading "Soil · earth · ground · Turkey", and 緊張's
+said TENSION over "Tension · contrainte · nervosité · stress": a title the
+next line repeats in full is carrying nothing. So the plate's third register
+is the meaning set as a line to read — the display face at the lead rung,
+never an uppercase caption — wherever the plate is the one place it can
+stand: a kanji's glosses, every one of them, a grammar point's gloss, a
+kana's romaji (at the title rung, the one thing a kana's plate has to say).
+The body prints no gloss line of its own. **A word with senses is defined by
+the body**: its plate names it and prints no caption, and the senses list
+opens on the first sense at the lead rung, where the caption would have
+stood, the senses after it at reading size. A word of one sense is not
+numbered — a list of one is not a list.
 
 **The ＋ is on every kind of entry, and it is the server that says so.** The
 roundel writes the entry into one of the learner's decks through the analyzer's
@@ -469,8 +476,27 @@ examples pass under it; on a phone the shell is the whole screen and this is
 the reading view. Under the stripe, blocks divided by hairlines and **no
 section headings**: a numbered list is a definition, a sentence over its
 translation is an example, strokes drawn on washi in a lattice beside their
-stroke count are how the character is written, and the reader's four figures
-are the profile's own `.record` cells.
+stroke count are how the character is written, and the reader's figures are
+the profile's own `.record` cells. (A grammar point's body is the one with
+heads: a lesson is read, not consulted — below.)
+
+**The record is under the stripe** (plan 235), in every layout — the phone,
+the dock, a lookup, the grammar page, a run's band: one slim row of the
+profile's lattice flush with the panel, its figures a rung down from the
+profile's (the lead, not the heading: about the reader, not the word, they
+were the largest type on the entry after the headword). It measures itself,
+not the screen: four across while every label holds its line, two by two
+under that (a small phone, the kana charts' column). A card nobody has
+reviewed prints none.
+
+**A tag is a word** (plan 235). A sense says what it means, then what it is,
+then how it is used: the gloss, then its grammatical tags as plain words
+between middots in the caption register, each still opening its JMdict note,
+then its sentences. JMdict's priority marks (the star, ichi, spec, newsNk)
+all say one thing, so they fold into one « courant », printed once, on the
+first sense. **A gloss stands beside its word**: the ledger's rows share
+their columns, so every gloss starts where the others do, after the longest
+word, rather than flush against the chevron.
 
 Three rulings inside that body, all from plan 089:
 
@@ -486,11 +512,14 @@ Three rulings inside that body, all from plan 089:
   caption hanging over a lattice it was not part of, beside a cell saying the
   next review was two days ago: one state, said twice, with the arithmetic
   left to the reader. The next-review cell says it, in the due ink.
-- **A due card names the one thing to do about it** — a ghost across the foot
-  of the record block, boarding that one card in every mode it owes
-  (`/today/run?only=…`). It prints only where a caller can offer the run: over
-  a quiz there is nothing to board, and an action with nowhere to go is a dead
-  control, not the inert fact a printed row is.
+- **A due card names the one thing to do about it**, boarding that one card in
+  every mode it owes (`/today/run?only=…`). Since plan 235 it is the
+  schedule's own cell: « Maintenant » in the due ink over what pressing it
+  does (« Réviser › »), a foot of the due ink its edge — the ghost that used
+  to cross the record's foot was a fifth block saying what the fourth cell
+  said. It is a door only where a caller can offer the run: over a quiz there
+  is nothing to board, and an action with nowhere to go is a dead control, so
+  there the cell is the figure it always was.
 
 A kana's form lattice is the kanji's, not a slab of its own: the washi sheet,
 its stroke count (counted off the diagram the app ships —
@@ -504,31 +533,53 @@ row, a ring on hover, and the sense numerals — mixed 60% toward the ambient
 ink, because raw 山吹 reads 2.9:1 on light paper.
 
 **A grammar lesson reads for its shape** (plan 146, the owner's pick B
-of three drawn directions). The lesson prints in four places (the
-dictionary's plate body, the sheet behind a card, the gate before a new
-card, the grammar station on the desk) and is one component in all of
-them:
+of three drawn directions), **in sections a reader finds by their heads**
+(plan 235: the owner found the marks over one wall of hairline-divided
+prose hard to read). The lesson prints in four places (the dictionary's
+plate body, the sheet behind a card, the gate before a new card, the
+grammar station on the desk) and is one component in all of them:
 
-- **The steps divide by one hairline each**, the mark (RULE, USE,
-  CAREFUL) at the caption rung with no rule under it: a rule under every
-  mark drew three lines where two divide. The rule is the lead, a rung
-  up, because it is the sentence every other block explains. The trap
-  stands on a 2px rail of the due ink, an edge.
-- **The Japanese in the prose is set as Japanese**: `lang="ja"` for the
-  face and the glyph forms, in the entry's ink (`--dict-ink`, which the
-  lesson names for itself where it is not inside an entry), and never
-  cut. A run of up to twelve characters does not break at all; a
-  sentence-length run breaks at its 、 first. A formula keeps its
-  placeholders (A は B です is one unit), a term that opens a sentence
-  keeps the word after it, and French punctuation is welded as the
-  string tables are.
-- **A use is its saying over its forms.** Nine use lines in ten are "what
-  it is for : the forms". The colon goes; the forms print on their own
-  line at the sentences' rung, each whole, its gloss beside it in the
-  secondary register. A paradigm (Négatif : …. Passé : ….) is its labels
-  beside its forms. A line that reads neither way prints as prose, and
-  the parser (`components/study/lessonText.js`) is held to losing no
-  character of Japanese over the whole catalogue.
+- **Each section opens on a head**: a glyph in the lesson's ink, the name
+  in the primary ink at the body rung (an `h3` under the plate's `h2`),
+  and a hairline running on to the column's edge — the label and the
+  divider in one line — with a section's room between one and the next.
+  A lesson is read rather than consulted, so it is the one entry body
+  with heads. In order: **Construction** (the formation), **Règle**,
+  **Formes** (a paradigm), **Emploi**, **Attention**, then **Exemples**
+  and **À ne pas confondre**. A section with nothing in it is not drawn:
+  a point whose lesson is not written yet prints its formula and its
+  sentences.
+- **The formation is a formula**, not a grey line on the plate: what the
+  learner brings, in plain words, as a dashed blank (the field's own
+  dash, an empty place to fill), a plus, and the pattern at the title
+  rung in the lesson's ink with its furigana — « verbe forme en て + から
+  ». A pattern that closes on a gloss in brackets (« 回 (combien de fois)
+  ») keeps it as a note after it. The plate is the pattern over its gloss.
+- **The rule is the lead**, a rung up, because it is the sentence every
+  other section explains. **The trap is a box**: a hairline ring, its
+  leading edge and its head in the due ink — an edge, never a fill — so
+  it reads as a warning before it is read.
+- **The gold is the pattern's**: the formula's pattern, the forms the
+  rule sets in bold, the rivals' patterns. The rest of the Japanese in
+  the prose is set as Japanese — `lang="ja"` for the face and the glyph
+  forms, never cut — in the prose's own ink: a lesson where every form
+  was gold had nothing gold. A run of up to twelve characters does not
+  break at all; a sentence-length run breaks at its 、 first. A formula
+  keeps its placeholders (A は B です is one unit), a term that opens a
+  sentence keeps the word after it, and French punctuation is welded as
+  the string tables are.
+- **A use is its saying over its forms**, a dot of the lesson's ink at
+  its start. Nine use lines in ten are "what it is for : the forms". The
+  colon goes; the forms print on their own line at the sentences' rung,
+  each whole, its gloss beside it in the secondary register. **A paradigm
+  (Négatif : …. Passé : ….) is the point's forms**, a section of its own
+  before the uses: a table, the labels down one column and the forms
+  beside them on their baseline, a hairline under each row, so « le passé
+  négatif » is found by running an eye down the left. A line that reads
+  neither way prints as prose, and the parser
+  (`components/study/lessonText.js`) is held to losing no character of
+  Japanese over the whole catalogue.
+- **The translations' one switch is on the sentences' head**, at its end.
 - **The sentences are numbered rows**, hairline-divided, the translation
   under each. A sentence in another register than a register-bound point
   carries its register as a ring-drawn tag (この店はしずかだ, FAMILIER,
@@ -542,7 +593,9 @@ them:
   character only where there is kana on both sides, and a lone kana
   for one reading only: never over a kanji or another reading, so two
   readings never meet, whatever width the face sets a kana. Closing
-  punctuation rides on the part before it, so no line opens on 。.
+  punctuation rides on the part before it, so no line opens on 。 or
+  、 — nor does a part that only opens on one: かぞくの中で | 、だれが…
+  gives its 、 to the highlight before it (plan 235).
   This is `ExampleSentence`, so it holds wherever an example sentence
   is printed.
 
@@ -1724,11 +1777,13 @@ line here says otherwise.
   over its gloss), the entry across the rest and never narrower than
   `--desk-entry-w`, its plate laid left with the marks beside the pattern
   (over it, for a pattern of seven characters or more), the record flush
-  under the stripe and the lesson in two columns where each holds
-  `--desk-run-col-min`, each column its own (plan 146): the rule, its
-  uses and its trap down the left, the sentences over the rivals down
-  the right — never one flow balanced across the two, which opened the
-  sentences at the left column's foot. The kana charts show the whole syllabary at once:
+  under the stripe and the lesson's sections in two columns where each
+  holds `--desk-run-col-min`, each column its own (plan 146): the formula,
+  the rule, the forms, the uses and the trap down the left, the sentences
+  over the rivals down the right — never one flow balanced across the
+  two, which opened the sentences at the left column's foot. The
+  sections stand a rung closer there than on a phone, so a typical point
+  (は) reads whole on a laptop with no scroll (plan 235). The kana charts show the whole syllabary at once:
   three columns of charts, unmarked (each grid keeps its name for a
   screen reader), every cell one width between `--sp-8` and `--sp-9` and
   its kana at the title rung, each cell marked with where the learner

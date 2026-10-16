@@ -55,21 +55,19 @@ describe('the grammar page on a wide desk (plan 128)', () => {
     // The list at the side column's width, here where there is room.
     const side = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--desk-side-w'))
     expect(Math.round(document.querySelector('.desk-dict__main').getBoundingClientRect().width)).toBe(side)
-    const body = dock.querySelector('.gl-body').getBoundingClientRect()
+    const body = dock.querySelector('.gl-cols').getBoundingClientRect()
     const middle = body.left + body.width / 2
     const boxes = sel => [...dock.querySelectorAll(sel)].map(p => p.getBoundingClientRect())
-    const [steps, sentences, rivals] = ['.gl-step', '.dict-ex', '.gl-door'].map(boxes)
-    expect(steps.length * sentences.length * rivals.length).toBeGreaterThan(0)
-    expect(steps.every(p => p.right <= middle + 1)).toBe(true)
+    // The lesson's sections down the left, the sentences over the
+    // rivals down the right (plan 146, set in sections by plan 235).
+    const [lesson, sentences, rivals] = ['.gl-col:first-child > .gl-sec', '.dict-ex', '.gl-door'].map(boxes)
+    expect(lesson.length * sentences.length * rivals.length).toBeGreaterThan(0)
+    expect(lesson.every(p => p.right <= middle + 1)).toBe(true)
     expect([...sentences, ...rivals].every(p => p.left >= middle - 1)).toBe(true)
-    // Each column opens under the stripe, the rivals under the sentences.
-    const [left, right] = ['.gl-block--steps', '.gl-block--examples'].map(s => dock.querySelector(s).getBoundingClientRect())
-    expect(Math.round(left.top)).toBe(Math.round(body.top))
-    expect(Math.abs(right.top - body.top)).toBeLessThanOrEqual(1)
+    // Both columns open at the body's top, the rivals under the sentences.
+    const [left, right] = boxes('.gl-col')
+    expect(Math.abs(right.top - left.top)).toBeLessThanOrEqual(1)
     expect(Math.min(...rivals.map(p => p.top))).toBeGreaterThan(Math.max(...sentences.map(p => p.bottom)))
-    // The hairline between them runs the body's height.
-    expect(getComputedStyle(dock.querySelector('.gl-block--steps')).borderInlineEndWidth).toBe('1px')
-    expect(Math.round(left.bottom)).toBe(Math.round(body.bottom))
     expect(dock.scrollHeight).toBeLessThanOrEqual(dock.clientHeight)
     expect(dock.getBoundingClientRect().bottom).toBeLessThanOrEqual(innerHeight)
   })

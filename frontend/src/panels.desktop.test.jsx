@@ -595,12 +595,13 @@ describe('the card\'s details', () => {
     press(' ')
     await settle(400)
     const word = rect('.dict-entry--band .dict-plate__word')
-    const structure = rect('.dict-entry--band .dict-plate__structure')
     const caption = rect('.dict-entry--band .dict-plate__caption')
     const row = rect('.dict-entry--band .dict-plate__row')
-    expect(structure.bottom).toBeLessThanOrEqual(word.top + 1)
+    // The marks over the pattern over its gloss; the formation opens the
+    // lesson in the panel under it (plan 235).
+    expect($('.dict-entry--band .dict-plate__structure')).toBeNull()
     expect(caption.top).toBeGreaterThanOrEqual(word.bottom - 1)
-    expect(row.bottom).toBeLessThanOrEqual(structure.top + 1)
+    expect(row.bottom).toBeLessThanOrEqual(word.top + 1)
     // The gloss reads in a line or two, not a word a line.
     const lineHeight = parseFloat(getComputedStyle($('.dict-entry--band .dict-plate__caption')).lineHeight)
     expect(caption.height).toBeLessThanOrEqual(2 * lineHeight + 1)

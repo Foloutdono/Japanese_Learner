@@ -249,11 +249,11 @@ describe('the plate — three registers, a seal, a level, two ghosts', () => {
     expect(door.getAttribute('aria-expanded')).toBe('false')
     expect(door.getAttribute('aria-label')).toBe('All readings')
 
-    // 木 has two glosses, so the line below the stripe prints them
-    // both — and the caption stands down rather than saying TREE a
-    // rung above "Tree · Wood" (plan 089).
-    expect(root.querySelector('.dict-plate__caption')).toBeNull()
-    expect(root.querySelector('.dict-gloss').textContent).toBe('Tree·wood')
+    // 木's glosses are the plate's caption, every one of them, set as a
+    // line to read (plan 235): the body prints no gloss line under it,
+    // so the meaning is said once, where the word is.
+    expect(root.querySelector('.dict-plate__caption').textContent).toBe('Tree·wood')
+    expect(root.querySelector('.dict-gloss')).toBeNull()
 
     expect(root.querySelector('.dict-plate__level').textContent).toBe('N5')
     // The stage is the word the study card carries, not a hanko.
@@ -269,7 +269,12 @@ describe('the plate — three registers, a seal, a level, two ghosts', () => {
     expect(word.querySelectorAll('ruby')).toHaveLength(1)
     expect(word.querySelector('rt').textContent).toBe('た')
     expect(getComputedStyle(word).fontSize).toBe(probe('fontSize', 'var(--fs-display)'))
-    expect(root.querySelector('.dict-plate__caption').textContent).toBe('To eat')
+    // A word with senses is defined by the body, its first sense at the
+    // lead rung; the plate names it and does not say it again (plan 235).
+    expect(root.querySelector('.dict-plate__caption')).toBeNull()
+    const first = root.querySelector('.dict-sense__gloss')
+    expect(first.textContent).toBe('To eat')
+    expect(getComputedStyle(first).fontSize).toBe(probe('fontSize', 'var(--fs-lead)'))
     // Not yet studied says so in a word, rather than saying nothing.
     expect(root.querySelector('.dict-plate__marks .stage-mark--new').textContent).toBe('New')
     // A word has no readings row and no door.
@@ -366,12 +371,17 @@ describe('the body — blocks that name themselves', () => {
     expect(getComputedStyle(hl).backgroundColor).toBe('rgba(0, 0, 0, 0)')
   })
 
-  it('prints a kanji\'s gloss list as prose only when there is more than the caption already says', async () => {
+  it('prints a kanji\'s glosses on its plate, all of them, and no gloss line under it', async () => {
     const { root, screen } = await renderEntry(KANJI)
-    expect(root.querySelector('.dict-gloss').textContent).toBe('Tree·wood')
+    const caption = root.querySelector('.dict-plate__caption')
+    expect(caption.textContent).toBe('Tree·wood')
+    // A line to read at the lead rung, not an uppercase label.
+    expect(getComputedStyle(caption).fontSize).toBe(probe('fontSize', 'var(--fs-lead)'))
+    expect(getComputedStyle(caption).textTransform).toBe('none')
+    expect(root.querySelector('.dict-gloss')).toBeNull()
+    expect(root.querySelector('section[aria-label="Meaning"]')).toBeNull()
     await screen.unmount()
     const one = await renderEntry({ ...KANJI, meaning: 'tree' })
-    expect(one.root.querySelector('.dict-gloss')).toBeNull()
     expect(one.root.querySelector('.dict-plate__caption').textContent).toBe('Tree')
   })
 
@@ -513,10 +523,10 @@ describe('the body — blocks that name themselves', () => {
     expect(kana.onVocabClick).toHaveBeenCalledWith('朝', 'あさ')
     rows[2].click()
     expect(kana.onVocabClick).toHaveBeenCalledWith('あそこ', 'あそこ')
-    // The drawing first, then the words, then the record — the kanji
-    // panel's order, since it is the same panel.
+    // The drawing first, then the words -- the kanji panel's order,
+    // since it is the same panel; the record is under the plate (plan 235).
     const order = [...kana.root.querySelectorAll('.dict-block')].map(b => b.getAttribute('aria-label'))
-    expect(order).toEqual(['Stroke order', 'Read in these words', 'Card stats'])
+    expect(order).toEqual(['Stroke order', 'Read in these words'])
   })
 
   it('draws no ledger for a kana ordinary writing has no word for', async () => {
@@ -534,9 +544,14 @@ describe('the body — blocks that name themselves', () => {
     expect(rows[1].querySelector('.dict-word__gloss').textContent).toBe('Lumber')
     rows[0].click()
     expect(kanji.onVocabClick).toHaveBeenCalledWith('木曜日', 'もくようび')
-    // Words before the record; the sheet before the words (a 漢和辞典's order).
+    // The sheet before the words (a 漢和辞典's order); the meaning is the
+    // plate's and the record under it (plan 235).
     const order = [...kanji.root.querySelectorAll('.dict-block')].map(b => b.getAttribute('aria-label'))
-    expect(order).toEqual(['Meaning', 'Stroke order', 'Used in these words', 'Card stats'])
+    expect(order).toEqual(['Stroke order', 'Used in these words'])
+    // Every gloss starts where the others do, beside its word.
+    const glosses = [...rows].map(r => r.querySelector('.dict-word__gloss').getBoundingClientRect().left)
+    for (const left of glosses) expect(left).toBeCloseTo(glosses[0], 0)
+    expect(getComputedStyle(rows[0].querySelector('.dict-word__gloss')).textAlign).not.toBe('right')
     await kanji.screen.unmount()
 
     // The other direction of the same relationship, in the same row:
@@ -580,54 +595,68 @@ describe('the body — blocks that name themselves', () => {
     expect(parts[0].tagName).toBe('DIV')
   })
 
-  it('prints the reader\'s record two by two, the due state in the schedule\'s own cell, and nothing for a card never reviewed', async () => {
+  it('prints the reader\'s record in one row under the plate, the due state in the schedule\'s own cell, and nothing for a card never reviewed', async () => {
     const { root, screen } = await renderEntry(KANJI)
-    const records = root.querySelector('.records')
-    const cells = [...records.querySelectorAll('.record')]
+    const record = root.querySelector('.dict-record')
+    // Under the stripe, before the body, in every layout (plan 235): it
+    // is about the reader, and it was the entry's foot.
+    expect(record.previousElementSibling.classList.contains('dict-plate')).toBe(true)
+    expect(record.getAttribute('aria-label')).toBe('Card stats')
+    const cells = [...record.querySelectorAll('.record')]
     expect(cells).toHaveLength(4)
     // The fourth cell is the schedule's, so it is the one that says the
-    // card is due — in the due ink, in place of a date the reader would
+    // card is due -- in the due ink, in place of a date the reader would
     // otherwise have to compare against today (plan 089).
     expect(cells.map(c => c.querySelector('.record__value').textContent)).toEqual(['86%', '12/14', '7days', 'Now'])
     const due = cells[3].querySelector('.record__value')
     expect(due.classList.contains('record__value--due')).toBe(true)
     expect(getComputedStyle(due).color)
       .toBe(probe('color', 'color-mix(in srgb, var(--state-due) 65%, var(--text-primary))'))
-    expect(cells.map(c => c.querySelector('.record__label').textContent)).toEqual(['Accuracy', 'Reviews', 'Interval', 'Next review'])
-    const [a, b, c, d] = cells.map(el => el.getBoundingClientRect())
-    expect(b.top).toBeCloseTo(a.top, 0)
-    expect(b.left).toBeGreaterThan(a.right - 1)
-    expect(c.top).toBeGreaterThan(a.bottom - 1)
-    expect(d.left).toBeCloseTo(b.left, 0)
-    // Figures are the profile's own cell: display face, the heading rung.
-    expect(getComputedStyle(cells[0].querySelector('.record__value')).fontSize).toBe(probe('fontSize', 'var(--fs-heading)'))
-    // The floating "DUE NOW" caption is gone; the block ends on the one
-    // thing to do about a due card instead.
+    // Where the run can be boarded the cell is the door, and says so.
+    expect(cells.map(c => c.querySelector('.record__label').textContent)).toEqual(['Accuracy', 'Reviews', 'Interval', 'Review'])
+    // One row, four across, flush with the panel.
+    const boxes = cells.map(el => el.getBoundingClientRect())
+    for (let i = 1; i < boxes.length; i++) {
+      expect(boxes[i].top).toBeCloseTo(boxes[0].top, 0)
+      expect(boxes[i].left).toBeGreaterThan(boxes[i - 1].right - 1)
+    }
+    const panel = root.querySelector('.dict-entry').getBoundingClientRect()
+    expect(boxes[0].left).toBeCloseTo(panel.left, 0)
+    expect(boxes[3].right).toBeCloseTo(panel.right, 0)
+    // The figures a rung down from the profile's: about the reader, not
+    // the word, they were the largest type after the headword.
+    expect(getComputedStyle(cells[0].querySelector('.record__value')).fontSize).toBe(probe('fontSize', 'var(--fs-lead)'))
+    // The floating "DUE NOW" caption and the ghost across the foot are
+    // both gone: the cell that owns the state is the thing to press.
     expect(root.querySelector('.dict-block__note')).toBeNull()
-    const action = root.querySelector('.dict-due')
-    expect(action.textContent).toContain('Review this card')
-    expect(action.getBoundingClientRect().top).toBeGreaterThan(records.getBoundingClientRect().bottom - 1)
-    // A ghost, never a fill: this panel has no primary action.
-    expect(getComputedStyle(action).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+    expect(root.querySelector('.dict-due')).toBeNull()
+    expect(cells[3].tagName).toBe('BUTTON')
+    expect(cells[3].getAttribute('aria-label')).toBe('Review this card')
+    // An edge of the due ink, never a fill.
+    expect(getComputedStyle(cells[3]).backgroundColor).toBe(getComputedStyle(cells[0]).backgroundColor)
     await screen.unmount()
 
     const fresh = await renderEntry(VOCAB)
+    expect(fresh.root.querySelector('.dict-record')).toBeNull()
     expect(fresh.root.querySelector('.records')).toBeNull()
-    expect(fresh.root.querySelector('.dict-due')).toBeNull()
   })
 
   it('boards the one card a due entry is, and only where a caller can offer the run', async () => {
     const { root, onReview, screen } = await renderEntry(KANJI)
-    root.querySelector('.dict-due').click()
+    root.querySelector('.record--due').click()
     expect(onReview).toHaveBeenCalledWith('kanji_N5_木')
     await screen.unmount()
 
     // Over a run there is nothing to board, and an action with nowhere
     // to go is a dead control rather than a fact the way an inert row
-    // is — so it does not print at all.
+    // is: the cell is the figure it always was.
     const sheet = await renderEntry(KANJI, { onClose: vi.fn() })
     expect(sheet.root.querySelector('.records')).toBeTruthy()
-    expect(sheet.root.querySelector('.dict-due')).toBeNull()
+    expect(sheet.root.querySelector('.record--due')).toBeNull()
+    const cells = [...sheet.root.querySelectorAll('.dict-record .record')]
+    expect(cells[3].tagName).toBe('DIV')
+    expect(cells[3].querySelector('.record__value--due').textContent).toBe('Now')
+    expect(cells[3].querySelector('.record__label').textContent).toBe('Next review')
   })
 })
 
@@ -1175,7 +1204,7 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     ruler.className = 'dict-word__jp'
     ruler.lang = 'ja'
     ruler.textContent = '承'
-    hit.closest('.dict-word').appendChild(ruler)
+    hit.closest('.dict-word__head').appendChild(ruler)
     const glyph = ruler.getBoundingClientRect().width
     ruler.remove()
     expect(rtBox.width).toBeGreaterThan(glyph)
@@ -1305,12 +1334,24 @@ describe('the shells — one panel, a column, a modal, the whole screen', () => 
   })
 
   it('keeps the lattices whole at phone width', async () => {
+    // The record measures itself (plan 235): one row of four on a large
+    // phone, two by two on a small one, every label whole either way --
+    // in French, whose INTERVALLE is the longest.
+    localStorage.setItem('lang', 'fr')
+    for (const [width, rows] of [[412, 1], [360, 2]]) {
+      await page.viewport(width, 844)
+      const { screen, root } = await renderEntry(KANJI, NAV(), { width: null })
+      const boxes = [...root.querySelectorAll('.dict-record .record')].map(el => el.getBoundingClientRect())
+      expect(new Set(boxes.map(box => Math.round(box.top))).size, `${width}px`).toBe(rows)
+      for (const box of boxes) expect(box.right).toBeLessThanOrEqual(vw() + 0.5)
+      for (const label of root.querySelectorAll('.dict-record .record__label')) {
+        expect(label.scrollWidth, `${label.textContent} at ${width}px`).toBeLessThanOrEqual(label.clientWidth)
+      }
+      await screen.unmount()
+    }
+    localStorage.setItem('lang', 'en')
     await page.viewport(390, 844)
     const { root } = await renderEntry(KANJI, NAV(), { width: null })
-    const [a, b, c, d] = [...root.querySelectorAll('.records .record')].map(el => el.getBoundingClientRect())
-    expect(b.top).toBeCloseTo(a.top, 0)
-    expect(c.top).toBeGreaterThan(a.bottom - 1)
-    expect(d.top).toBeCloseTo(c.top, 0)
     const form = root.querySelector('.dict-form')
     const sheet = form.querySelector('.dict-form__sheet').getBoundingClientRect()
     const figs = [...form.querySelectorAll('.record')].map(f => f.getBoundingClientRect())
@@ -1415,9 +1456,9 @@ describe('the lookup sheet — the same panel, over a quiz', () => {
     await settle(120)
     const dialog = document.querySelector('.dict-sheet[role="dialog"]')
 
-    // The run, from under the reader's own record: the one card this
-    // entry is, which a screen that is not itself a run can board.
-    dialog.querySelector('.dict-due').click()
+    // The run, from the reader's own record: the one card this entry
+    // is, which a screen that is not itself a run can board.
+    dialog.querySelector('.record--due').click()
     expect(onReview).toHaveBeenCalledWith('kanji_N5_木')
     expect(onClose).not.toHaveBeenCalled()
 
@@ -1467,11 +1508,11 @@ describe('the lookup sheet — the same panel, over a quiz', () => {
 })
 
 // ── 文法 — a grammar point on the plate ──────────────────────
-// The same plate, read differently: the formation in the reading's
-// place, the pattern as the headword, the gloss whole as the caption;
-// no speaker, an add roundel where a screen can offer one; a body of
-// formation, meaning and the two sentences; nothing drawn. And the
-// sheet opens it by its card id, insisting on the exact row.
+// The same plate, read differently: the pattern as the headword, the
+// gloss whole as the caption; no speaker, an add roundel where a screen
+// can offer one; a body opening on the formation as a formula (plan
+// 235), then the two sentences, each under its head; nothing drawn.
+// And the sheet opens it by its card id, insisting on the exact row.
 const GRAMMAR = {
   type: 'grammar', raw_id: 'grammar_N5_〜てから', level: 'N5',
   pattern: '〜てから', structure: 'verb て-form + から', meaning: 'after doing',
@@ -1496,21 +1537,24 @@ const MINING = () => ({
 })
 
 describe('the plate — a grammar point', () => {
-  it('sets the formation over the pattern over the whole gloss, with no speaker and no readings', async () => {
+  it('sets the pattern over its whole gloss, with no speaker and no readings, and opens the lesson on its formula', async () => {
     const { root } = await renderEntry(GRAMMAR)
     const plate = root.querySelector('.dict-plate')
-    const structure = plate.querySelector('.dict-plate__structure')
     const word = plate.querySelector('.dict-plate__word')
     const caption = plate.querySelector('.dict-plate__caption')
-    expect(structure.textContent).toBe('verb て-form + から')
     expect(word.textContent).toBe('〜てから')
     expect(caption.textContent).toBe('after doing')
-    // Formation, then the pattern, then the gloss — top to bottom.
-    expect(structure.getBoundingClientRect().bottom).toBeLessThanOrEqual(word.getBoundingClientRect().top + 1)
     expect(word.getBoundingClientRect().bottom).toBeLessThanOrEqual(caption.getBoundingClientRect().top + 1)
-    // The formation is the reading's register, in the secondary ink.
-    expect(getComputedStyle(structure).fontSize).toBe(probe('fontSize', 'var(--fs-sm)'))
-    expect(getComputedStyle(structure).color).toBe(probe('color', 'var(--text-secondary)'))
+    // The formation left the plate, where it was a grey line read as a
+    // caption, for the lesson's first section (plan 235): the slot to
+    // fill in plain words, then the pattern in the entry's ink.
+    expect(plate.querySelector('.dict-plate__structure')).toBeNull()
+    expect(plate.textContent).not.toContain('verb')
+    const formula = root.querySelector('.gl-sec--structure .gl-formula')
+    expect(formula.querySelector('.gl-formula__slot').textContent).toBe('verb て-form')
+    const pat = formula.querySelector('.gl-formula__pat')
+    expect(pat.textContent).toBe('から')
+    expect(getComputedStyle(pat).color).toBe(probe('color', 'color-mix(in srgb, var(--line-jisho) 60%, var(--text-primary))'))
     // A four-character pattern is a word, at the display rung.
     expect(word.classList.contains('dict-plate__word--word')).toBe(true)
     expect(plate.querySelector('.dict-plate__yomi')).toBeNull()
@@ -1533,14 +1577,16 @@ describe('the plate — a grammar point', () => {
     expect(word.querySelectorAll('ruby')).toHaveLength(1)
     expect(word.querySelector('rt').textContent).toBe('なか')
     expect(word.textContent).toBe('〜の中なかで')
-    const structure = root.querySelector('.dict-plate__structure')
-    expect(structure.querySelector('rt').textContent).toBe('なか')
-    // The formation's reading at the size readings in running text are
-    // set at, and the formation still above the headword it sits over.
-    expect(getComputedStyle(structure.querySelector('rt')).fontSize).toBe(probe('fontSize', 'var(--fs-caption)'))
-    expect(structure.getBoundingClientRect().bottom).toBeLessThanOrEqual(word.getBoundingClientRect().top + 1)
-    // and the headword's reading is not printed over the formation
-    expect(word.querySelector('rt').getBoundingClientRect().top).toBeGreaterThanOrEqual(structure.getBoundingClientRect().bottom - 1)
+    // The formula keeps the formation's reading over its own kanji, cut
+    // at the plus: the slot is "group", the pattern の中で under なか.
+    expect(root.querySelector('.gl-formula__slot').textContent).toBe('group')
+    const pat = root.querySelector('.gl-formula__pat')
+    expect(pat.querySelector('rt').textContent).toBe('なか')
+    expect(baseText(pat)).toBe('の中で')
+    // The reading at the size readings in running text are set at, and
+    // the formula under the plate it used to stand on.
+    expect(getComputedStyle(pat.querySelector('rt')).fontSize).toBe(probe('fontSize', 'var(--fs-caption)'))
+    expect(pat.getBoundingClientRect().top).toBeGreaterThan(word.getBoundingClientRect().bottom)
   })
 
   it('offers the add roundel where a screen can mine, as a ghost that adds to the remembered deck and says so', async () => {
@@ -1571,17 +1617,17 @@ describe('the plate — a grammar point', () => {
     expect(getComputedStyle(plate.querySelector('.analysis-mine-status')).fontSize).toBe(probe('fontSize', 'var(--fs-caption-xs)'))
   })
 
-  it('prints the two sentences alone, as a block that names itself, and draws nothing', async () => {
+  it('prints the formula and the two sentences, each under its head, and draws nothing', async () => {
     const { root } = await renderEntry(GRAMMAR)
-    const blocks = [...root.querySelectorAll('.dict-block')]
-    // The formation and the gloss are on the plate above, and were
-    // printed a second time here until plan 089.
-    expect(blocks.map(b => b.getAttribute('aria-label'))).toEqual(['Examples'])
-    expect(root.querySelector('h3, h4, .section-header')).toBeNull()
+    const secs = [...root.querySelectorAll('.gl-sec')]
+    // A lesson is read, not consulted: its sections are headed (plan
+    // 235), one h3 each under the plate's h2. The gloss stays the
+    // plate's, said once.
+    expect(secs.map(b => b.getAttribute('aria-label'))).toEqual(['Structure', 'Examples'])
+    expect([...root.querySelectorAll('h3')].map(h => h.textContent)).toEqual(['Structure', 'Examples'])
     expect(root.querySelector('.dict-formation')).toBeNull()
-    expect(root.querySelector('.dict-plate__structure').textContent).toBe('verb て-form + から')
     expect(root.querySelector('.dict-plate__caption').textContent).toBe('after doing')
-    const exs = [...blocks[0].querySelectorAll('.dict-ex')]
+    const exs = [...secs[1].querySelectorAll('.dict-ex')]
     expect(exs).toHaveLength(2)
     expect(baseText(exs[0].querySelector('.dict-ex__jp'))).toBe('手を洗ってから食べます。')
     expect(exs[0].querySelector('rt').textContent).toBe('て')
@@ -1594,9 +1640,9 @@ describe('the plate — a grammar point', () => {
   })
 })
 
-// The same point once its lesson is written (plan 087): the steps and
-// the neighbours arrive as blocks between the meaning and the examples,
-// a compare row is a door the shell opens (onGrammarClick), and the
+// The same point once its lesson is written (plan 087): the rule, the
+// uses and the neighbours arrive as sections around the sentences, a
+// compare row is a door the shell opens (onGrammarClick), and the
 // pattern is picked out of its sentences.
 const GRAMMAR_RICH = {
   ...GRAMMAR, register: 'polite',
@@ -1609,22 +1655,21 @@ describe('the plate — a grammar point with its lesson written', () => {
   it('prints the lesson, then the sentences, then the neighbours, and opens a rival', async () => {
     const onGrammarClick = vi.fn()
     const { root } = await renderEntry(GRAMMAR_RICH, { ...NAV(), onGrammarClick })
-    const blocks = [...root.querySelectorAll('.dict-block')]
+    const secs = [...root.querySelectorAll('.gl-sec')]
     // A rival is what you reach for once you have read the rule and
     // seen it work, so it closes the body rather than standing between
     // the reader and the sentences (plan 089).
-    expect(blocks.map(b => b.getAttribute('aria-label'))).toEqual(['Lesson', 'Examples', 'Compare'])
-    expect(root.querySelector('h3, h4, .section-header')).toBeNull()
-    // The step marks: the name alone since 2026-09-21 (the pair's
-    // Japanese half is gone app-wide), so no .dict-mark__jp survives.
-    expect(blocks[0].querySelector('.dict-mark__jp')).toBeNull()
-    expect([...blocks[0].querySelectorAll('.dict-mark__name')].map(m => m.textContent)).toEqual(['Rule', 'Use'])
-    expect(blocks[0].querySelector('strong').textContent).toBe('doing')
-    const door = blocks[2].querySelector('.gl-door')
+    expect(secs.map(b => b.getAttribute('aria-label'))).toEqual(['Structure', 'Rule', 'Use', 'Examples', 'Compare'])
+    expect([...root.querySelectorAll('.gl-sec__name')].map(h => h.textContent))
+      .toEqual(['Structure', 'Rule', 'Use', 'Examples', 'Not to be confused with'])
+    // The marks of plan 146 are the heads now; no pair's Japanese half.
+    expect(root.querySelector('.dict-mark__jp')).toBeNull()
+    expect(secs[1].querySelector('strong').textContent).toBe('doing')
+    const door = secs[4].querySelector('.gl-door')
     expect(door.tagName).toBe('BUTTON')
     door.click()
     expect(onGrammarClick).toHaveBeenCalledWith('grammar_N5_〜あとで')
-    const ex = blocks[1].querySelector('.dict-ex')
+    const ex = secs[3].querySelector('.dict-ex')
     expect(ex.querySelector('.dict-ex__hl').textContent).toBe('ってから')
     expect(ex.querySelector('.dict-ex__tr').textContent).toBe('I eat after washing my hands.')
   })
@@ -1649,7 +1694,7 @@ describe('the lookup sheet — a grammar point by its card id', () => {
     // Named by the pattern, not the id it was asked for.
     expect(dialog.getAttribute('aria-label')).toBe('Dictionary: 〜てから')
     expect(dialog.querySelector('.dict-plate__word').textContent).toBe('〜てから')
-    expect(dialog.querySelector('.dict-plate__structure')).toBeTruthy()
+    expect(dialog.querySelector('.gl-formula')).toBeTruthy()
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
     expect(onClose).toHaveBeenCalledTimes(1)
     await screen.unmount()

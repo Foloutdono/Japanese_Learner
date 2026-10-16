@@ -945,36 +945,63 @@ const Fixture = () => (
               </button>
             </div>
           </section>
-          <section className="dict-block">
-            {/* The due state, where plan 089 put it: the schedule's own
-                record cell, and the action under the lattice. The
-                floating note this used to measure is retired. */}
-            <div className="records">
-              <div className="record">
+          {/* The due state, where plan 089 put it: the schedule's own
+              record cell -- since plan 235 the door itself, under the
+              stripe, its label saying what pressing it does. The
+              floating note and the ghost under the lattice are retired. */}
+          <section className="dict-record">
+            <div className="records records--entry">
+              <button type="button" className="record record--due">
                 <span className="record__body">
-                  <span className="record__value record__value--due dj-due">Now</span>
-                  <span className="record__label">Next review</span>
+                  <span className="record__value record__value--due record__value--word dj-due">Now</span>
+                  <span className="record__label record__label--go dj-due-action">Review</span>
                 </span>
-              </div>
+              </button>
             </div>
-            <button type="button" className="dict-due dj-due-action">Review this card</button>
           </section>
         </div>
       </article>
     </aside>
-    {/* ── 文法 — the lesson in its sheet (plan 146) ──
-        Its own shell, under 文法's pine: the Japanese picked out of the
-        prose and a use's forms in the lesson's ink (--dict-ink, named on
-        .gl too), a form's gloss and a paradigm's label in the secondary
-        register, and a sentence's numeral and register tag. */}
+    {/* ── 文法 — the lesson in its sheet (plans 146, 235) ──
+        Its own shell, under 文法's pine: a section's head in the primary
+        ink and the trap's in the due ink; the formula's slot, plus and
+        note in the secondary register and its pattern in the lesson's
+        ink (--dict-ink, named on .gl too), as are the forms the rule
+        sets in bold and a rival's pattern; the rest of the Japanese in
+        the prose, and a use's forms, in the prose's own ink; a form's
+        gloss and a table's label in the secondary register; a
+        sentence's numeral and register tag; the translations' switch. */}
     <div className="dict-sheet gl-sheet" style={{ position: 'static' }}>
       <article className="gl gl--sheet">
         <div className="dict-entry__body gl-body">
-          <section className="dict-block gl-block gl-block--steps">
-            <ol className="gl-steps">
-              <li className="gl-step gl-step--use">
-                <div className="gl-step__body">
-                  <p className="gl-step__p"><span className="gl-ja dj-gl-ja" lang="ja">です</span> relie</p>
+          <div className="gl-cols">
+            <div className="gl-col">
+              <section className="gl-sec gl-sec--structure">
+                <div className="gl-sec__head"><h3 className="gl-sec__name dj-gl-head">Construction</h3></div>
+                <p className="gl-formula">
+                  <span className="gl-formula__slot dj-gl-slot">nombre</span>
+                  <span className="gl-formula__plus dj-gl-plus">+</span>
+                  <span className="gl-formula__pat dj-gl-pat" lang="ja">回</span>
+                  <span className="gl-formula__note dj-gl-note">(combien de fois)</span>
+                </p>
+              </section>
+              <section className="gl-sec gl-sec--rule">
+                <div className="gl-sec__body">
+                  <p className="gl-step__p">
+                    <strong><span className="gl-ja dj-gl-strong" lang="ja">です</span></strong> relie : <span className="gl-ja dj-gl-ja" lang="ja">A は B です</span>
+                  </p>
+                </div>
+              </section>
+              <section className="gl-sec gl-sec--forms">
+                <dl className="gl-table"><div className="gl-table__row">
+                  <dt className="gl-table__label dj-gl-label">Passé</dt>
+                  <dd className="gl-table__forms"><span className="gl-forms"><span className="gl-form">
+                    <span className="gl-form__ja" lang="ja">でした</span>
+                  </span></span></dd>
+                </div></dl>
+              </section>
+              <section className="gl-sec gl-sec--use">
+                <div className="gl-sec__body">
                   <ul className="gl-step__list">
                     <li className="gl-use">
                       <span className="gl-use__say">Pour dire ce qu'une chose est</span>
@@ -983,26 +1010,42 @@ const Fixture = () => (
                         <span className="gl-form__gloss dj-gl-gloss">je suis étudiant</span>
                       </span></span>
                     </li>
-                    <li className="gl-use">
-                      <dl className="gl-paradigm"><div className="gl-paradigm__row">
-                        <dt className="gl-paradigm__label dj-gl-label">Passé</dt>
-                        <dd className="gl-paradigm__forms">でした</dd>
-                      </div></dl>
-                    </li>
                   </ul>
                 </div>
-              </li>
-            </ol>
-          </section>
-          <section className="dict-block gl-block gl-block--examples">
-            <div className="dict-examples">
-              <div className="dict-ex">
-                <span className="dict-sense__n dict-ex__n dj-gl-n">5</span>
-                <div className="dict-ex__jp" lang="ja">この店はしずかだ。</div>
-                <span className="dict-ex__tag dj-gl-tag">Familier</span>
-              </div>
+              </section>
+              <section className="gl-sec gl-sec--careful">
+                <div className="gl-sec__head"><h3 className="gl-sec__name dj-gl-careful">Attention</h3></div>
+              </section>
             </div>
-          </section>
+            <div className="gl-col">
+              <section className="gl-sec gl-sec--examples">
+                <div className="gl-sec__head">
+                  <h3 className="gl-sec__name">Exemples</h3>
+                  <button type="button" className="gl-tr-toggle dj-gl-toggle">Masquer la traduction</button>
+                </div>
+                <div className="dict-examples">
+                  <div className="dict-ex">
+                    <span className="dict-sense__n dict-ex__n dj-gl-n">5</span>
+                    <div className="dict-ex__jp" lang="ja">この店はしずかだ。</div>
+                    <span className="dict-ex__tag dj-gl-tag">Familier</span>
+                  </div>
+                </div>
+              </section>
+              <section className="gl-sec gl-sec--compare">
+                <div className="gl-compare">
+                  <div className="gl-door gl-door--inert">
+                    <span className="gl-door__body">
+                      <span className="gl-door__head">
+                        <span className="gl-door__pattern dj-gl-rival" lang="ja">が</span>
+                        <span className="gl-door__level dj-gl-rival-level">N5</span>
+                        <span className="gl-door__gloss dj-gl-rival-gloss">marque le sujet</span>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
         </div>
       </article>
     </div>
@@ -1320,15 +1363,26 @@ const SITES = [
   ['.dj-fallback', 'stroke sheet fallback (fixed ink on washi)'],
   ['.dj-word-gloss', 'word row gloss'],
   ['.dj-hit', 'word row: the kanji picked out (辞書 pigment mixed toward the ink)'],
-  ['.dj-gl-ja', 'lesson: Japanese in the prose (文法 pigment mixed toward the ink)'],
-  ['.dj-gl-form', 'lesson: a use\'s form (文法 pigment mixed toward the ink)'],
+  ['.dj-gl-head', 'lesson: a section\'s head'],
+  ['.dj-gl-careful', 'lesson: the trap\'s head (due ink mixed toward the ink)'],
+  ['.dj-gl-slot', 'lesson: the formula\'s slot'],
+  ['.dj-gl-plus', 'lesson: the formula\'s plus'],
+  ['.dj-gl-pat', 'lesson: the formula\'s pattern (文法 pigment mixed toward the ink)'],
+  ['.dj-gl-note', 'lesson: the gloss a formula closes on'],
+  ['.dj-gl-strong', 'lesson: a form the rule sets in bold (文法 pigment mixed toward the ink)'],
+  ['.dj-gl-ja', 'lesson: Japanese in the prose'],
+  ['.dj-gl-form', 'lesson: a use\'s form'],
   ['.dj-gl-gloss', 'lesson: a form\'s gloss'],
-  ['.dj-gl-label', 'lesson: a paradigm\'s label'],
+  ['.dj-gl-label', 'lesson: a forms table\'s label'],
+  ['.dj-gl-toggle', 'lesson: the translations\' switch'],
+  ['.dj-gl-rival', 'lesson: a rival\'s pattern (文法 pigment mixed toward the ink)'],
+  ['.dj-gl-rival-level', 'lesson: a rival\'s level'],
+  ['.dj-gl-rival-gloss', 'lesson: a rival\'s gloss'],
   ['.dj-gl-n', 'lesson: a sentence\'s numeral (文法 pigment mixed toward the ink)'],
   ['.dj-gl-tag', 'lesson: a sentence\'s register tag (文法 pigment mixed toward the ink)'],
   ['.dj-hit-rt', 'word row: its furigana, in the same ink'],
   ['.dj-due', 'record cell: a card that is due (due ink mixed toward the ink)'],
-  ['.dj-due-action', 'the review action under the record (same ink, ghost ground)'],
+  ['.dj-due-action', 'the due cell\'s door label (same ink, the cell\'s ground)'],
   ['.dj-tip', 'tag note (panel ink on sumi)'],
   // Plan 173 -- the learner's card and the HUD's strip, on each material.
   ['.pc-free-value', 'card back: the print on white plastic'],

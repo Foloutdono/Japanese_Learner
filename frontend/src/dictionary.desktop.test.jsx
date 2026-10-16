@@ -382,11 +382,13 @@ describe('the catalogue and its entry (plan 128)', () => {
     ;[...document.querySelectorAll('.dict-entry-card')].find(c => c.textContent.includes('てください')).click()
     await settle()
     expect(getComputedStyle(plate()).display).toBe('flex')
-    // The pattern on one line, and its structure a line across the plate.
+    // The pattern on one line, over its gloss; its formation opens the
+    // lesson as a formula, on one line too (plan 235).
     const pattern = plate().querySelector('.dict-plate__word')
     expect(pattern.getBoundingClientRect().height).toBeLessThan(2 * parseFloat(getComputedStyle(pattern).fontSize))
-    expect(plate().querySelector('.dict-plate__structure').getBoundingClientRect().height)
-      .toBeLessThan(2 * parseFloat(getComputedStyle(plate().querySelector('.dict-plate__structure')).lineHeight))
+    expect(plate().querySelector('.dict-plate__structure')).toBeNull()
+    const pieces = [...document.querySelectorAll('.dict-dock .gl-formula > *')].map(el => el.getBoundingClientRect())
+    expect(Math.max(...pieces.map(p => p.top)) - Math.min(...pieces.map(p => p.top))).toBeLessThan(pieces[0].height)
   })
 
   it('holds its column under a search, and gives the width up to the radical index', async () => {
@@ -504,26 +506,20 @@ describe('the grammar page (plan 128)', () => {
   })
 
   // Plan 146: two columns where two fit (dictionary.wide), and here,
-  // where they do not, the one the phone reads -- the steps, then the
-  // sentences under their hairline, then the rivals, each the body's
-  // width. The rule that divides the two columns is clipped at the
-  // body's edge rather than drawn down the steps' right.
+  // where they do not, the one the phone reads -- the lesson's sections,
+  // then the sentences, then the rivals, each the column's width.
   it('sets the lesson in one column on the narrow desk', async () => {
     await serveGrammar()
     await mount('/dictionary?category=grammar')
-    const body = box('.dict-dock .gl-body')
-    const [steps, sentences, rivals] = ['steps', 'examples', 'compare'].map(k => box(`.dict-dock .gl-block--${k}`))
-    expect(getComputedStyle(document.querySelector('.dict-dock .gl-body')).gridTemplateColumns.split(' ')).toHaveLength(1)
-    for (const b of [steps, sentences, rivals]) {
-      expect(Math.round(b.left)).toBe(Math.round(body.left))
-      expect(b.right).toBeGreaterThanOrEqual(body.right - 1)
-    }
-    // Under the steps, its top hairline on their last pixel (the
-    // margin-top: -1px that clips it away in two columns).
-    expect(sentences.top).toBeCloseTo(steps.bottom - 1, 1)
-    expect(sentences.top).toBeGreaterThan(body.top)
+    const cols = document.querySelector('.dict-dock .gl-cols')
+    expect(getComputedStyle(cols).gridTemplateColumns.split(' ')).toHaveLength(1)
+    const [lesson, rest] = [...cols.querySelectorAll('.gl-col')].map(col => col.getBoundingClientRect())
+    expect(Math.round(rest.left)).toBe(Math.round(lesson.left))
+    expect(Math.round(rest.width)).toBe(Math.round(lesson.width))
+    expect(rest.top).toBeGreaterThan(lesson.bottom - 1)
+    const [rule, sentences, rivals] = ['rule', 'examples', 'compare'].map(k => box(`.dict-dock .gl-sec--${k}`))
+    expect(sentences.top).toBeGreaterThan(rule.bottom)
     expect(rivals.top).toBeGreaterThanOrEqual(sentences.bottom - 1)
-    expect(getComputedStyle(document.querySelector('.dict-dock .gl-block--examples')).borderTopWidth).toBe('1px')
   })
 })
 
