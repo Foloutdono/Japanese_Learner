@@ -46,6 +46,10 @@ unidic-lite
 # directory name (local-only, and pytest never runs outside CI/dev here,
 # but pinned as a floor regardless).
 pytest>=9.0.3
+# For tests/test_long_video_audio.py: scripts/long_video_audio.py mixes the
+# long videos' sound with it (plan 233), and imports it inside the functions
+# that need it, so the server never loads it.
+numpy
 # study/voice_engine.py's MP3 encoder: LAME, built into the wheel
 # (LGPL-3.0-or-later, see THIRD_PARTY_NOTICES.md), because Render's
 # native runtime has no ffmpeg. The speech itself comes from the voice

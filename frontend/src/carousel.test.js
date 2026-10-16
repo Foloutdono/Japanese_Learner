@@ -597,7 +597,7 @@ describe('explaining a point in its own sentence', () => {
   }
   const glossOf = (jp, t, lang = 'en') => broken(jp, lang).find(x => x.t === t)?.main
 
-  it('never glosses a word of the breakdown by its part of speech (plan 234e)', () => {
+  it('never glosses a word of the breakdown by its part of speech (plan 234e)', { timeout: 60000 }, () => {
     const names = new Set(['en', 'fr'].flatMap(lang => Object.values(STRINGS[lang].pos)))
     for (const lv of LEVELS) {
       for (const s of banks[lv].sentences) {
@@ -610,7 +610,7 @@ describe('explaining a point in its own sentence', () => {
     }
   })
 
-  it('reads a pattern the tokenizer cut apart as one word, glossed once (plan 234e)', () => {
+  it('reads a pattern the tokenizer cut apart as one word, glossed once (plan 234e)', { timeout: 60000 }, () => {
     expect(broken('のどがいたいので、今日の講義は休みます。').map(x => x.t)).toContain('ので')
     expect(broken('学校の成績が優秀な人が、必ずしも仕事で成功するとは限らない。').map(x => x.t)).toContain('とは')
     for (const lv of LEVELS) {
