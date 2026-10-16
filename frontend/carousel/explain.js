@@ -461,6 +461,101 @@ export function particleLabel(rows, at, lang) {
   return (key && SENSE_LABEL[r.t][key]?.[lang]) || role.label[lang]
 }
 
+// What a particle or a form of だ does where no point is written on it
+// and the noun-only roles above do not hold: after a verb, an adjective,
+// an adverb or another particle (plan 215e). Only the uses the sentence
+// settles by its shape: が before a comma after a clause is "but", まで
+// after a verb "until", と before a verb of saying "that". A row none of
+// them settles is left bare, never named by its part of speech; the
+// copula で, which the tokenizer also gives to the particle (店で), is
+// always left bare.
+const CLAUSE_LABEL = {
+  but: { en: 'but', fr: 'mais' },
+  because: { en: 'because', fr: 'parce que' },
+  after: { en: 'after', fr: 'après' },
+  until: { en: 'until', fr: 'jusqu’à ce que' },
+  even: { en: 'even · as far as', fr: 'même · jusqu’à' },
+  quote: { en: 'that (quoting)', fr: 'que (citation)' },
+  when: { en: 'when · if', fr: 'quand · si' },
+  tryTo: { en: '(trying) to', fr: '(chercher à)' },
+  so: { en: 'so (much)', fr: 'à ce point' },
+  how: { en: 'how (much)', fr: 'à quel point' },
+  about: { en: 'about', fr: 'environ' },
+  extent: { en: 'so … that', fr: 'au point de' },
+  possible: { en: 'as … as possible', fr: 'autant que possible' },
+  like: { en: 'such a thing as', fr: 'une chose comme' },
+  just: { en: 'just · merely', fr: 'juste' },
+  topic: { en: 'topic · contrast', fr: 'thème · contraste' },
+  too: { en: 'too · even', fr: 'aussi · même' },
+  purpose: { en: '(in order) to', fr: 'pour' },
+  describes: { en: 'links it to the noun', fr: 'le relie au nom' },
+  necessarily: { en: '(必ずしも) not necessarily', fr: '(必ずしも) pas forcément' },
+}
+// The verbs a quotation と stands before (言う, 思う, 聞く ...), by lemma.
+const SAYING = /^(言|思|聞|考|分か|わか|書|答|伝|叫|話|感じ|信じ|気付|知|いう|おもう|きく)/
+// に after a verb's stem, before a verb of going: what one goes to do (見に来る).
+const GOING_TO = /^(行|来|帰|参|まい|出かけ|いく|いき|いっ|くる)/
+// The adverbs a form of だ makes of a word (急に, 安全に): the particle's own and a few more.
+const ADVERB_STEMS = new Set([...ADVERBIAL, ...words('安全 慎重 誠実 正確 どんな 適当 積極的 具体的 自然 必死 素直 無事')])
+const NUMERAL = /[0-9０-９一二三四五六七八九十百千万何数]/
+export function clauseLabel(rows, at, lang) {
+  const r = rows[at]
+  const prev = rows[at - 1]
+  const next = rows[at + 1]
+  if (!r || !prev || r.k === 'word' || prev.k === 'punct') return null
+  const pv = prev.k === 'word' ? prev.pos : prev.k
+  const clause = pv === 'verb' || pv === 'adjective' || pv === 'auxiliary' || prev.k === 'copula'
+  const key = (() => {
+    if (r.k === 'copula') {
+      if (r.t === 'に') return ADVERB_STEMS.has(prev.t) ? 'adverb' : null
+      // な before the noun it describes (丁寧なあいさつ), else the copula's is (便利なので).
+      if (r.t === 'な') return next?.k === 'word' && (next.pos === 'noun' || next.pos === 'prefix') ? 'describes' : 'is'
+      return null
+    }
+    if (r.k !== 'particle') return null
+    switch (r.t) {
+      case 'が': return clause && next?.t === '、' ? 'but' : null
+      case 'から': return clause ? (/[てで]$/.test(prev.t) ? 'after' : 'because') : null
+      case 'まで': return pv === 'verb' ? 'until' : prev.t === 'に' ? 'even' : null
+      case 'と': {
+        if (pv === 'adverb') return 'adverb'
+        if (!clause) return null
+        // The volitional and と: what one sets out to do (謝ろうと).
+        if (pv === 'verb' && /[おこそとのほもよろごぞどぼぽ]う$/.test(prev.t)) return 'tryTo'
+        const said = next?.t === 'は' || next?.t === 'も' ? rows[at + 2] : next
+        if (said?.pos === 'verb' && verbIs(said, SAYING)) return 'quote'
+        if (next?.t === 'の' && rows[at + 2]?.t === 'こと') return 'quote'
+        return pv === 'verb' && next?.t === '、' ? 'when' : null
+      }
+      case 'ほど':
+        if (/^(これ|それ|あれ)$/.test(prev.t)) return 'so'
+        if (prev.t === 'どれ') return 'how'
+        if (pv === 'verb') return 'extent'
+        return NUMERAL.test(prev.t) ? 'about' : null
+      case 'だけ': return prev.t === 'できる' ? 'possible' : pv === 'verb' ? 'only' : null
+      case 'など': return pv === 'verb' ? 'like' : null
+      case 'くらい': case 'ぐらい': return pv === 'verb' ? 'just' : null
+      case 'は': return 'topic'
+      // よりも only stresses より, and も同然 is "as good as": both left bare.
+      case 'も': return prev.t === 'より' || next?.t === '同然' ? null : 'too'
+      case 'より': return 'than'
+      case 'に':
+        if (pv === 'adverb') return 'adverb'
+        return pv === 'verb' && next?.pos === 'verb' && verbIs(next, GOING_TO) ? 'purpose' : null
+      case 'の': return pv === 'adverb' || prev.t === 'して' ? 'of' : null
+      case 'しも': return prev.t === '必ず' ? 'necessarily' : null
+      default: return null
+    }
+  })()
+  if (!key) return null
+  if (key === 'adverb') return SENSE_LABEL.に.adverb[lang]
+  if (key === 'only') return ROLES.だけ.label[lang]
+  if (key === 'than') return ROLES.より.label[lang]
+  if (key === 'of') return ROLES.の.label[lang]
+  if (key === 'is') return ROLES.だ.label[lang]
+  return CLAUSE_LABEL[key][lang]
+}
+
 /**
  * The stacked particles of a sentence (には, への ...): the pairs that are
  * not a pattern of their own, standing after a noun, that STACKS knows.

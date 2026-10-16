@@ -11,7 +11,7 @@
 // node tests read it directly.
 import { hasKanji, reading } from './draw.js'
 import { STRINGS, count, formOf, tr, weldIf } from './strings.js'
-import { ROLES, howItWorks, lookalikesOf, particleLabel, stacksIn } from './explain.js'
+import { ROLES, clauseLabel, howItWorks, lookalikesOf, particleLabel, stacksIn } from './explain.js'
 import { deal, firstSense, furiganaOf, gloss, lineRomaji, readingMisses, seeded, shuffle, unpack } from './common.js'
 import {
   kanaQuizzes, kanjiQuizzes, lessonQuizzes, lookalikeQuizzes, overlaps, passageQuizzes, pictureQuizzes, sentenceQuizzes, spellingQuizzes,
@@ -128,23 +128,43 @@ function figureOf(source, figures, t, lang) {
 }
 
 // ── The parts every sentence-shaped source shares ────────────
+// The kana words a pattern is built of, which carry no meaning of their
+// own there (plan 215e): a formal noun (もの, こと, ため, わけ), or a verb
+// or an adjective of the few a pattern leans on (する, なる, いう, いい).
+// Any other word keeps its own gloss beside the pattern (とめられません
+// of しかとめられません).
+const PATTERN_VERBS = new Set(`する なる ある いる いう いく くる みる しまう おく いただく くださる もらう あげる
+  くれる できる かまう いける すむ ならない いい よい ない ほしい`.split(/\s+/))
+const grammatical = row => row.pos !== 'verb' && row.pos !== 'adjective' ? true
+  : [row.t, ...(row.lemma || [])].some(w => PATTERN_VERBS.has(w))
 function wordItems(s, points, lang, t) {
   const markers = new Set(s.gram.filter(g => g.kind === 'marker').map(g => g.p))
   const pointOf = row => {
     const g = row.g || []
     return g.find(p => p === row.t) ?? g.find(p => markers.has(p)) ?? g[0]
   }
-  return s.rows.map((row, i) => ({ row, i })).filter(({ row }) => row.k !== 'punct').map(({ row, i }, n) => {
+  // A pattern a row shares with the row beside it (もの and の of ものの,
+  // と and は of とは限らない): the row is a piece of it, whatever else is
+  // written on it (plan 215e).
+  const sharedOf = i => {
+    const near = [s.rows[i - 1], s.rows[i + 1]].filter(r => r && r.k !== 'punct')
+    return (s.rows[i].g || []).find(p => points[p] && p !== s.rows[i].t && near.some(r => (r.g || []).includes(p))) ?? null
+  }
+  const items = s.rows.map((row, i) => ({ row, i })).filter(({ row }) => row.k !== 'punct').map(({ row, i }) => {
     const grammar = row.k !== 'word'
+    const shared = sharedOf(i)
     let main, sub
     if (grammar) {
+      // Its own point here; the pattern it shares, where it is a piece of one, below.
       const p = pointOf(row)
       const pt = points[p]
       // A particle that is its own point (で, に) says what it does here,
       // in a word: the catalogue's general line is the lesson's, not a
-      // breakdown's (plan 210l).
+      // breakdown's (plan 210l). One no point is written on says what the
+      // sentence's shape settles, else nothing: never its part of speech
+      // (plan 215e).
       const label = (!p || p === row.t) && particleLabel(s.rows, i, lang)
-      main = label || (pt ? tr(pt, lang) : t.pos[row.k])
+      main = label || (pt ? tr(pt, lang) : clauseLabel(s.rows, i, lang) || '')
       sub = label ? '' : formOf(pt, lang)
     } else {
       [main, sub] = gloss(row, lang)
@@ -155,10 +175,38 @@ function wordItems(s, points, lang, t) {
       sub = weldIf(lang, sub)
     }
     return {
-      i, n: n + 1, t: row.t, reading: reading(row), ro: row.ro, main, sub,
+      i, j: i, t: row.t, reading: reading(row), ro: row.ro, main, sub, shared, fu: row.fu || [[row.t, '']],
       line: grammar ? 'grammar' : 'vocab', kanji: hasKanji(row.t),
       pos: t.pos[row.k === 'word' ? row.pos : row.k] || row.pos,
     }
+  })
+  // The pieces of one pattern the tokenizer cut apart (ので, とは, ものの,
+  // になる) are one word of the breakdown, glossed once by the pattern:
+  // never its line under each of them, nor の's "of" inside ものの. A word
+  // written in kanji keeps its own gloss beside the pattern (直す of
+  // 直すべきだ, 五台 of 五台も), and a run of words alone (して いない)
+  // stays as it is: each word says what it means.
+  const joins = it => it.shared && (it.line === 'grammar' || (!it.kanji && grammatical(s.rows[it.i])))
+  const runs = []
+  for (const it of items) {
+    const last = runs.at(-1)
+    if (last && joins(it) && joins(last[0]) && it.shared === last[0].shared && it.i === last.at(-1).j + 1) last.push(it)
+    else runs.push([it])
+  }
+  const out = runs.flatMap(run => {
+    if (run.length < 2 || run.every(x => x.line !== 'grammar')) return run
+    const pt = points[run[0].shared]
+    // Pieces of grammar run on (node, towa); a word stands apart (karato itte).
+    const ro = run.reduce((a, x, k) => (!k ? x.ro || '' : x.line === 'grammar' && run[k - 1].line === 'grammar' ? a + (x.ro || '') : `${a} ${x.ro || ''}`), '')
+    return [{
+      ...run[0], j: run.at(-1).i, t: run.map(x => x.t).join(''), reading: run.map(x => x.reading).join(''), ro,
+      fu: run.flatMap(x => x.fu), main: tr(pt, lang), sub: formOf(pt, lang), line: 'grammar', kanji: run.some(x => x.kanji),
+    }]
+  })
+  return out.map((it, n) => {
+    const rest = { ...it, n: n + 1 }
+    delete rest.shared
+    return rest
   })
 }
 

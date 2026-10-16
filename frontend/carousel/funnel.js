@@ -1117,7 +1117,8 @@ function glossGuess(items, rows, maxW) {
   const gz = Math.max(FS.xs, z * 0.5)
   const rs = Math.max(z * 0.4, FS.caption)
   const cells = items.map(it => {
-    const row = rows[it.i] || {}
+    // A pattern's pieces read as one word (ので, とは限らない), its ruby theirs.
+    const row = (it.j ?? it.i) > it.i ? { t: it.t, fu: it.fu } : rows[it.i] || {}
     const ruby = (row.fu || []).filter(([, r]) => r).reduce((a, [, r]) => a + [...r].length * rs, 0)
     const ww = Math.max([...it.t].reduce((a, ch) => a + (wide(ch) ? z : z * 0.6), 0), ruby)
     const rw = (it.ro || '').length * gz * 0.58
@@ -1186,7 +1187,8 @@ function glossBlock(c, s, { x, w, maxH }) {
   const layAt = z => {
     const gz = Math.max(FS.xs, z * 0.5)
     const cells = s.items.map(it => {
-      const row = s.rows[it.i] || { t: it.t, k: 'word' }
+      // A pattern's pieces read as one word (ので, plan 215e).
+      const row = (it.j ?? it.i) > it.i ? { t: it.t, k: 'word', ro: it.ro, fu: it.fu } : s.rows[it.i] || { t: it.t, k: 'word' }
       const L = layoutSentence(ctx, [row], { max: z, min: z, maxW: w, maxLines: 1, script: 'furigana', romaji: false, rules: false, under: 0.1, gap: 0, fam: 'jp', weight: 700 })
       const ww = L ? L.lineW(L.lines[0]) : measure(ctx, it.t, font(700, z, 'jp'))
       const rw = measure(ctx, it.ro || '', font(500, gz, 'latin'))

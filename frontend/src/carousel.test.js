@@ -590,6 +590,67 @@ describe('explaining a point in its own sentence', () => {
     for (const [rs, i] of why) expect(particleLabel(rs, i, 'en')).toBeNull()
   })
 
+  // A sentence's breakdown, as the gloss slide sets it (plan 215e).
+  const broken = (jp, lang = 'en') => {
+    const s = sentence(jp)
+    return plan('sentence', banks[s.lv], s.id, { ...OPTS, lang }).funnel.breakdown
+  }
+  const glossOf = (jp, t, lang = 'en') => broken(jp, lang).find(x => x.t === t)?.main
+
+  it('never glosses a word of the breakdown by its part of speech (plan 215e)', () => {
+    const names = new Set(['en', 'fr'].flatMap(lang => Object.values(STRINGS[lang].pos)))
+    for (const lv of LEVELS) {
+      for (const s of banks[lv].sentences) {
+        for (const lang of ['en', 'fr']) {
+          const items = plan('sentence', banks[lv], s.id, { ...OPTS, lang }).funnel.breakdown
+          // A grammar word's (名前 is glossed « nom » in French: a word's own gloss may be one).
+          for (const x of items.filter(y => y.line === 'grammar')) expect(names.has(x.main), `${s.id} ${lang} ${x.t}`).toBe(false)
+        }
+      }
+    }
+  })
+
+  it('reads a pattern the tokenizer cut apart as one word, glossed once (plan 215e)', () => {
+    expect(broken('のどがいたいので、今日の講義は休みます。').map(x => x.t)).toContain('ので')
+    expect(broken('学校の成績が優秀な人が、必ずしも仕事で成功するとは限らない。').map(x => x.t)).toContain('とは')
+    for (const lv of LEVELS) {
+      for (const s of banks[lv].sentences) {
+        const items = plan('sentence', banks[lv], s.id, OPTS).funnel.breakdown
+        // Never one pattern's line under two words side by side.
+        items.forEach((x, i) => {
+          const y = items[i + 1]
+          if (y && x.line === 'grammar' && y.line === 'grammar' && x.main) expect(y.main, `${s.id} ${x.t}${y.t}`).not.toBe(x.main)
+        })
+        // Every row of the sentence is in exactly one word of it, in order.
+        expect(items.map(x => x.t).join(''), s.id).toBe(s.rows.filter(r => r.k !== 'punct').map(r => r.t).join(''))
+      }
+    }
+  })
+
+  it('names a particle no point is written on by what the sentence settles, else leaves it bare (plan 215e)', () => {
+    // まで after a verb is “until”, after に “even”.
+    expect(glossOf('祖父は亡くなるまで、日記を書きつづけました。', 'まで')).toBe('until')
+    expect(glossOf('給与が高いからといって、会社の人間関係にまで恵まれているとは限らない。', 'まで')).toBe('even · as far as')
+    // と before a verb of saying quotes; after an adverb it makes one.
+    expect(glossOf('息子は注射を怖がるから、病院には行きたくないと言う。', 'と')).toBe('that (quoting)')
+    expect(glossOf('息子は注射を怖がるから、病院には行きたくないと言う。', 'と', 'fr')).toBe('que (citation)')
+    expect(glossOf('発車のベルが鳴ると、乗客が次々と列車に乗りこむ。', 'と')).not.toBe('that (quoting)')
+    // が before a comma after a clause is “but”; after a noun, the subject.
+    expect(glossOf('都会に引っ越してだいぶ経つが、夜の騒音にはなかなか慣れない。', 'が')).toBe('but')
+    expect(glossOf('この机は一人で持ち上げられないことはないが、腰を悪くしそうで心配だ。', 'が')).toBe('but')
+    expect(glossOf('規模が小さいがゆえに、その企業は景気の変動に柔軟に対応できた。', 'が')).not.toBe('but')
+    // ほど after これ, それ, あれ is “so”, after a number “about”.
+    expect(glossOf('あれほど努力したのだから、彼女は試験に合格するに違いない。', 'ほど')).toBe('so (much)')
+    expect(glossOf('医師の説明によると、手術の後は二週間ほど入院が必要らしい。', 'ほど')).toBe('about')
+    // できるだけ is “as … as possible”, never “only”.
+    expect(glossOf('会社の決まりにしたがって、休暇の予定をできるだけ早く上司に伝えた。', 'だけ')).toBe('as … as possible')
+    // A form of だ that makes an adverb of the word (急に), and one the tokenizer gave a particle: bare.
+    expect(glossOf('急に寒くなると、体の具合が悪くなります。', 'に')).toBe('makes an adverb')
+    expect(glossOf('本当は二人の秘密に気付いていたが、私はわざと知らないふりをした。', 'に')).toBe('')
+    // The copula で is the particle too often (この店で): always bare.
+    expect(glossOf('この店で、この本がいちばん高いです。', 'で')).toBe('')
+  })
+
   it('gives no stacked slide to a pair that is no two particles (plan 210l)', () => {
     const keys = jp => stacksIn(sentence(jp).rows, 'en', glossEn).map(x => x.key)
     expect(keys('この棚は古くて、今にも壊れそうです。')).not.toContain('にも')

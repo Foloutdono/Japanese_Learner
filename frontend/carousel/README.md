@@ -64,7 +64,17 @@ A sentence's carousel (the reading bank's, read or translated, plan
 sentence cut into its words, as a gloss is printed, each word with its
 furigana, ruled in its line's colour, its romaji and its first sense
 under it (the deck's gloss, its brackets left off), every word of the
-sentence. A long one goes over as many slides as it takes ("Word by
+sentence. The pieces of one pattern the tokenizer cut apart are one
+word there, glossed once by the pattern (ので, とは, ものの, ことにした,
+plan 215e): never the pattern's line under each piece, nor の's "of"
+inside ものの; a word in kanji (直す of 直すべきだ) or a verb the pattern
+does not lean on keeps its own gloss beside it. A particle or a form of
+だ no point is written on says what the sentence's shape settles
+(`clauseLabel` in `explain.js`: が before a comma after a clause "but",
+まで after a verb "until" and after に "even", と before a verb of saying
+"that (quoting)", ほど after これ "so (much)", 急に "makes an adverb"),
+else nothing: never its part of speech, and the copula で, which the
+tokenizer also gives the particle (この店で), always bare. A long one goes over as many slides as it takes ("Word by
 word · 1/2"), cut before a word and never before a particle or an
 ending, one where it sets at the body rung, else the fewest at the sm
 rung, all at the size the most crowded one takes; those slides are
