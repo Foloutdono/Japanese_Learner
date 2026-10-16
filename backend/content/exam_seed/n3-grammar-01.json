@@ -3,6 +3,641 @@
  "generatorVersion": "grammar-gen-2",
  "papers": [
   {
+   "n": 1,
+   "seed": 2884505784996837023,
+   "paper": {
+    "level": "N3",
+    "title": "N3 Grammar Practice",
+    "titleJp": "N3 文法",
+    "sections": [
+     {
+      "id": "grammar",
+      "label": "Grammar",
+      "labelJp": "文法",
+      "timeLimitMin": 34,
+      "mondai": [
+       {
+        "id": "bunpou_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word/form that best fits the blank.",
+        "questions": [
+         {
+          "id": "bunpou_1_q1",
+          "number": 1,
+          "promptJp": "はっきりとは覚えていないが、この道は前にも一度通った＿＿＿＿。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "気にする"
+           },
+           {
+            "id": "c2",
+            "textJp": "気がつく"
+           },
+           {
+            "id": "c3",
+            "textJp": "気がする"
+           },
+           {
+            "id": "c4",
+            "textJp": "気をつける"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "bunpou_1_q2",
+          "number": 2,
+          "promptJp": "この歌を聞く＿＿＿＿、遠くに住んでいる家族のことを思い出す。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "たびに"
+           },
+           {
+            "id": "c2",
+            "textJp": "ところに"
+           },
+           {
+            "id": "c3",
+            "textJp": "ばかりに"
+           },
+           {
+            "id": "c4",
+            "textJp": "わりに"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "bunpou_1_q3",
+          "number": 3,
+          "promptJp": "のどがかわいたので、ジュース＿＿＿＿飲みたい。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "か何も"
+           },
+           {
+            "id": "c2",
+            "textJp": "か何か"
+           },
+           {
+            "id": "c3",
+            "textJp": "も何か"
+           },
+           {
+            "id": "c4",
+            "textJp": "で何か"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "bunpou_1_q4",
+          "number": 4,
+          "promptJp": "毎日料理をしているが、料理が好きな＿＿＿＿。ほかに作る人がいないだけだ。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "わけにはいかない"
+           },
+           {
+            "id": "c2",
+            "textJp": "はずになっている"
+           },
+           {
+            "id": "c3",
+            "textJp": "わけではない"
+           },
+           {
+            "id": "c4",
+            "textJp": "ことにしている"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "bunpou_1_q5",
+          "number": 5,
+          "promptJp": "＿＿＿＿の休みなのに、雨で一日中家にいるしかなかった。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "わざわざ"
+           },
+           {
+            "id": "c2",
+            "textJp": "どうせ"
+           },
+           {
+            "id": "c3",
+            "textJp": "いっそ"
+           },
+           {
+            "id": "c4",
+            "textJp": "せっかく"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "bunpou_1_q6",
+          "number": 6,
+          "promptJp": "明日から夏休みなので、うれしくて＿＿＿＿。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "しかない"
+           },
+           {
+            "id": "c2",
+            "textJp": "ことがない"
+           },
+           {
+            "id": "c3",
+            "textJp": "しかたがない"
+           },
+           {
+            "id": "c4",
+            "textJp": "ほかない"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "bunpou_1_q7",
+          "number": 7,
+          "promptJp": "先生にはいつもお世話になっているので、たのまれた仕事を断り＿＿＿＿。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "づらい"
+           },
+           {
+            "id": "c2",
+            "textJp": "やすい"
+           },
+           {
+            "id": "c3",
+            "textJp": "がちだ"
+           },
+           {
+            "id": "c4",
+            "textJp": "っぽい"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "bunpou_1_q8",
+          "number": 8,
+          "promptJp": "足が痛かったが、ゴールまであきらめずに走り＿＿＿＿。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぬいた"
+           },
+           {
+            "id": "c2",
+            "textJp": "こんだ"
+           },
+           {
+            "id": "c3",
+            "textJp": "かけた"
+           },
+           {
+            "id": "c4",
+            "textJp": "あった"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "bunpou_1_q9",
+          "number": 9,
+          "promptJp": "今年の夏は、去年＿＿＿＿ずっと雨が多い。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "にくらべて"
+           },
+           {
+            "id": "c2",
+            "textJp": "にかわって"
+           },
+           {
+            "id": "c3",
+            "textJp": "にとって"
+           },
+           {
+            "id": "c4",
+            "textJp": "にしたがって"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "bunpou_1_q10",
+          "number": 10,
+          "promptJp": "弟は宿題をやりたくないので、おなかが痛い＿＿＿＿をしている。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ふり"
+           },
+           {
+            "id": "c2",
+            "textJp": "よう"
+           },
+           {
+            "id": "c3",
+            "textJp": "はず"
+           },
+           {
+            "id": "c4",
+            "textJp": "わけ"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "bunpou_1_q11",
+          "number": 11,
+          "promptJp": "わたしは英語の＿＿＿＿、中国語も少し話せます。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ために"
+           },
+           {
+            "id": "c2",
+            "textJp": "かわりに"
+           },
+           {
+            "id": "c3",
+            "textJp": "ほかに"
+           },
+           {
+            "id": "c4",
+            "textJp": "うちに"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "bunpou_1_q12",
+          "number": 12,
+          "promptJp": "すみません、この町のことはまだよく知らない＿＿＿＿、道を教えていただけませんか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ものの"
+           },
+           {
+            "id": "c2",
+            "textJp": "ものか"
+           },
+           {
+            "id": "c3",
+            "textJp": "ものを"
+           },
+           {
+            "id": "c4",
+            "textJp": "もので"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "bunpou_1_q13",
+          "number": 13,
+          "promptJp": "三年もアメリカに住んでいたのか。それなら、英語が上手な＿＿＿＿。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "はずがない"
+           },
+           {
+            "id": "c2",
+            "textJp": "わけがない"
+           },
+           {
+            "id": "c3",
+            "textJp": "ものか"
+           },
+           {
+            "id": "c4",
+            "textJp": "わけだ"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "bunpou_2",
+        "number": 2,
+        "type": "sentence-order",
+        "instructionsJp": "つぎの　ぶんを　ただしい　じゅんばんに　ならべて　ください。★に　はいる　ものを　えらんで　ください。",
+        "instructions": "Put the sentence pieces in the correct order and choose what belongs in the ★ position.",
+        "questions": [
+         {
+          "id": "bunpou_2_q1",
+          "number": 1,
+          "contextJp": "A：明日までにこのレポート、書けそう？",
+          "pieces": [
+           {
+            "id": "p3",
+            "textJp": "けど、あまり"
+           },
+           {
+            "id": "p4",
+            "textJp": "自信はないな。"
+           },
+           {
+            "id": "p1",
+            "textJp": "急げば"
+           },
+           {
+            "id": "p2",
+            "textJp": "書けないことはない"
+           }
+          ],
+          "order": [
+           "p1",
+           "p2",
+           "p3",
+           "p4"
+          ],
+          "starIndex": 1,
+          "answer": "p2"
+         },
+         {
+          "id": "bunpou_2_q2",
+          "number": 2,
+          "contextJp": "（会社のロビーで）",
+          "pieces": [
+           {
+            "id": "p3",
+            "textJp": "方が、"
+           },
+           {
+            "id": "p4",
+            "textJp": "田中先生です。"
+           },
+           {
+            "id": "p2",
+            "textJp": "待っていらっしゃる"
+           },
+           {
+            "id": "p1",
+            "textJp": "受付の前で"
+           }
+          ],
+          "order": [
+           "p1",
+           "p2",
+           "p3",
+           "p4"
+          ],
+          "starIndex": 1,
+          "answer": "p2"
+         },
+         {
+          "id": "bunpou_2_q3",
+          "number": 3,
+          "contextJp": "初めてケーキを作ってみた。",
+          "pieces": [
+           {
+            "id": "p2",
+            "textJp": "言われた"
+           },
+           {
+            "id": "p3",
+            "textJp": "通りに作ったら、"
+           },
+           {
+            "id": "p4",
+            "textJp": "とてもおいしくできた。"
+           },
+           {
+            "id": "p1",
+            "textJp": "母に"
+           }
+          ],
+          "order": [
+           "p1",
+           "p2",
+           "p3",
+           "p4"
+          ],
+          "starIndex": 2,
+          "answer": "p3"
+         },
+         {
+          "id": "bunpou_2_q4",
+          "number": 4,
+          "contextJp": "昨日、店でアルバイトをしていたとき、",
+          "pieces": [
+           {
+            "id": "p2",
+            "textJp": "失礼な"
+           },
+           {
+            "id": "p3",
+            "textJp": "ことを言って"
+           },
+           {
+            "id": "p1",
+            "textJp": "お客様に対して"
+           },
+           {
+            "id": "p4",
+            "textJp": "しまった。"
+           }
+          ],
+          "order": [
+           "p1",
+           "p2",
+           "p3",
+           "p4"
+          ],
+          "starIndex": 0,
+          "answer": "p1"
+         },
+         {
+          "id": "bunpou_2_q5",
+          "number": 5,
+          "contextJp": "A：あの先生は、どうしていつもあんなにきびしいんでしょうか。",
+          "pieces": [
+           {
+            "id": "p1",
+            "textJp": "みんなのことを"
+           },
+           {
+            "id": "p3",
+            "textJp": "からこそ、"
+           },
+           {
+            "id": "p2",
+            "textJp": "大切に思っている"
+           },
+           {
+            "id": "p4",
+            "textJp": "きびしいんですよ。"
+           }
+          ],
+          "order": [
+           "p1",
+           "p2",
+           "p3",
+           "p4"
+          ],
+          "starIndex": 2,
+          "answer": "p3"
+         }
+        ]
+       },
+       {
+        "id": "bunpou_3",
+        "number": 3,
+        "type": "cloze-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、【1】から【5】の　なかに　いれる　ものを　1・2・3・4から　えらんで　ください。",
+        "instructions": "Read the passage and choose the best word for each numbered blank.",
+        "passages": [
+         {
+          "id": "bunpou_3_p1",
+          "titleJp": "かさの忘れ物について",
+          "textTemplateJp": "先週の日曜日、上の会議室【1】、青いかさが見つかりました。持つところに、小さな赤いリボンがついています。心当たりのある方は、入り口の受付【2】お問い合わせください。受付は、月曜日【3】土曜日の午前九時から午後五時まで開いています。ただし、一か月たっても持ち主が見つからない【4】、こちらで処分させていただきます。早めに取りに来て【5】。",
+          "blanks": [
+           {
+            "id": "bunpou_3_b1",
+            "number": 1,
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "に"
+             },
+             {
+              "id": "c2",
+              "textJp": "で"
+             },
+             {
+              "id": "c3",
+              "textJp": "を"
+             },
+             {
+              "id": "c4",
+              "textJp": "まで"
+             }
+            ],
+            "answer": "c2"
+           },
+           {
+            "id": "bunpou_3_b2",
+            "number": 2,
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "までに"
+             },
+             {
+              "id": "c2",
+              "textJp": "より"
+             },
+             {
+              "id": "c3",
+              "textJp": "ほど"
+             },
+             {
+              "id": "c4",
+              "textJp": "まで"
+             }
+            ],
+            "answer": "c4"
+           },
+           {
+            "id": "bunpou_3_b3",
+            "number": 3,
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "まで"
+             },
+             {
+              "id": "c2",
+              "textJp": "でも"
+             },
+             {
+              "id": "c3",
+              "textJp": "から"
+             },
+             {
+              "id": "c4",
+              "textJp": "だけ"
+             }
+            ],
+            "answer": "c3"
+           },
+           {
+            "id": "bunpou_3_b4",
+            "number": 4,
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "ところで"
+             },
+             {
+              "id": "c2",
+              "textJp": "うえに"
+             },
+             {
+              "id": "c3",
+              "textJp": "とおりに"
+             },
+             {
+              "id": "c4",
+              "textJp": "場合は"
+             }
+            ],
+            "answer": "c4"
+           },
+           {
+            "id": "bunpou_3_b5",
+            "number": 5,
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "あげます"
+             },
+             {
+              "id": "c2",
+              "textJp": "しまいます"
+             },
+             {
+              "id": "c3",
+              "textJp": "みます"
+             },
+             {
+              "id": "c4",
+              "textJp": "ください"
+             }
+            ],
+            "answer": "c4"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
    "n": 2,
    "seed": 3355680148613235558,
    "paper": {
@@ -378,7 +1013,7 @@
          {
           "id": "bunpou_2_q2",
           "number": 2,
-          "contextJp": "この本は少しむずかしいが、",
+          "contextJp": "最初は少しむずかしいと思ったが、",
           "pieces": [
            {
             "id": "p3",
@@ -2287,19 +2922,19 @@
           "pieces": [
            {
             "id": "p4",
-            "textJp": "のです。"
+            "textJp": "気持ちになる。"
            },
            {
             "id": "p1",
-            "textJp": "国にいる"
+            "textJp": "家族の写真"
            },
            {
             "id": "p2",
-            "textJp": "家族"
+            "textJp": "を見ると、"
            },
            {
             "id": "p3",
-            "textJp": "に会いたくてしかたがない"
+            "textJp": "国に帰りたくてしかたがない"
            }
           ],
           "order": [
@@ -4591,26 +5226,26 @@
          {
           "id": "bunpou_1_q6",
           "number": 6,
-          "promptJp": "何が食べたいかと聞かれても、＿＿＿＿食べたいものはない。",
+          "promptJp": "「何か怒ってる？」と聞くと、妹は「＿＿＿＿怒ってないよ」と言った。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "別に"
-           },
-           {
-            "id": "c2",
             "textJp": "ぜひ"
            },
            {
+            "id": "c2",
+            "textJp": "別に"
+           },
+           {
             "id": "c3",
-            "textJp": "かならず"
+            "textJp": "ちょうど"
            },
            {
             "id": "c4",
-            "textJp": "たしか"
+            "textJp": "やっと"
            }
           ],
-          "answer": "c1"
+          "answer": "c2"
          },
          {
           "id": "bunpou_1_q7",
