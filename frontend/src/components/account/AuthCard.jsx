@@ -63,7 +63,7 @@ export function AuthCard({ initialMode = 'login', autoFocus = false, seg = true,
     // A refusal is worded from its code by the table every auth refusal
     // goes through (lib/authErrors.js), never Supabase's own English
     // ("Invalid login credentials", a dropped connection's "Failed to
-    // fetch"; plan 210).
+    // fetch"; plan 213).
     if (mode === 'signup') {
       // `lang` on the new user's metadata is what the dashboard's
       // confirmation template branches on ({{ .Data.lang }}), so the

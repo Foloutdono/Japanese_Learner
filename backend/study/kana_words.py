@@ -269,7 +269,7 @@ def kana_words(kana: str, lang: str) -> list[dict]:
             "kana":    reading,
             # A pool row (no level) is glossed from the pool's own
             # French, never VOCAB_FR's, which is keyed by written form
-            # and would give it a deck homograph's (plan 210).
+            # and would give it a deck homograph's (plan 213).
             "meaning": get_meaning(entry, lang, VOCAB_FR) if level else pool_meaning(entry, lang),
             "level":   level,
         })

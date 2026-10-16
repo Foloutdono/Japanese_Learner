@@ -44,7 +44,7 @@ datas/voice_audition/
 # committed, the bank never is: nothing needs it in the repository, and
 # 小春音アミ's terms forbid distributing her files.
 datas/kana_source/
-# The JSON drafts datas/vocab/jmdict_fr.sqlite3 is built from (plan 210,
+# The JSON drafts datas/vocab/jmdict_fr.sqlite3 is built from (plan 213,
 # scripts/build_jmdict_fr.py): the database is the shipped asset and
 # --export writes these back out for an edit.
 datas/vocab/fr_source/

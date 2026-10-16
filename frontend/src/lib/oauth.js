@@ -114,7 +114,7 @@ function refusalCode(url) {
  *                            for a broken round trip), which
  *                            lib/authErrors.js words for a learner;
  *                            `message` is English, for the console, and
- *                            never shown (plan 210)
+ *                            never shown (plan 213)
  *
  * `link` needs manual linking enabled on the project. Where losing the
  * current account would be silent data loss the caller must NOT retry

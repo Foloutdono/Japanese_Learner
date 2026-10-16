@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **211**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **214**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -118,7 +118,7 @@ runtime purpose.
   screen prints is a code mapped to a locale key — never a server's
   English `detail`, a third party's message or an API path printed raw.
   JMdict and Tatoeba text has its French in `datas/vocab/jmdict_fr.sqlite3`
-  (plan 210); a pool word is glossed from it (`jmdict_fr.pool_meaning`),
+  (plan 213); a pool word is glossed from it (`jmdict_fr.pool_meaning`),
   never from `VOCAB_FR`, which is the course's and keyed by written form.
 - **A width change is held on both sides.** A desk change keeps the phone's
   DOM unchanged (`src/deskfree.phone.test.jsx`), and the short desk
@@ -362,7 +362,7 @@ the export) and commit `datas/vocab/vocab_served.json`,
 on an id that left the deck without a `MOVES` line, and on a served id
 the snapshot has not seen.
 
-The French layer over JMdict (plan 210, `content/jmdict_fr.py`) is its
+The French layer over JMdict (plan 213, `content/jmdict_fr.py`) is its
 own small SQLite file, `datas/vocab/jmdict_fr.sqlite3`: the French of the
 deck's dictionary senses, of the Tatoeba sentences the dictionary and
 reading/translation practice serve, and a one-line gloss for the ~20k

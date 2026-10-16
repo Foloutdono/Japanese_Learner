@@ -1,4 +1,4 @@
 /* The two system prompts the analyzer's photo intake raises, in English
-   (plan 210); fr.lproj has the French. Keep these equal to Info.plist's. */
+   (plan 213); fr.lproj has the French. Keep these equal to Info.plist's. */
 "NSCameraUsageDescription" = "Take a photo of Japanese text for the analyzer to read.";
 "NSPhotoLibraryUsageDescription" = "Choose a photo of Japanese text for the analyzer to read.";

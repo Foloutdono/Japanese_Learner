@@ -4,7 +4,7 @@ import fr from '../../locales/fr/index.js'
 import { ApiError } from '../../lib/api'
 import { videoErrorMessage } from './videoErrors'
 
-// ── 動画 — the server names it, the table says it (plan 210) ─────
+// ── 動画 — the server names it, the table says it (plan 213) ─────
 // Every code routes/video.py and study/captions.py can send, against
 // the real tables: a code that maps to a missing key would render as
 // nothing, and a code missing here would fall to the screen's own line

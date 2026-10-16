@@ -99,7 +99,7 @@ export async function claimAccount({ email, password, lang }) {
     // `data` is the user's metadata, written before the confirmation is
     // sent: `lang` is what the dashboard's e-mail templates branch on
     // ({{ .Data.lang }}), so the learner who claimed the pass in French
-    // is mailed in French (plan 210). Omitted when unknown.
+    // is mailed in French (plan 213). Omitted when unknown.
     const { data, error } = await supabase.auth.updateUser({
       email, password, ...(lang ? { data: { lang } } : {}),
     })

@@ -25,7 +25,7 @@ Inputs (datas/kanji/, the shipped KANJIDIC2 export):
     kanji_query_codes.json  SKIP, SH descriptor, four-corner, De Roo
     kanji_deck.json         the app's own JLPT deck, for in_deck
     kanji_meanings_fr.json  the French KANJIDIC2 lacks for 219 deck
-                            characters (plan 210), tracked: it fills
+                            characters (plan 213), tracked: it fills
                             meaning_fr where the export has none
     ../../kanjivg/*.svg     which characters have a stroke diagram
 
@@ -251,7 +251,7 @@ def apply_french(conn: sqlite3.Connection, data_dir: str) -> int:
     name kanji, mostly (蒼, 聡, 鴻, 蓮) -- and a French learner read
     their cards, their choices and their dictionary plates in English
     (content/kanji_meanings.py). The file is the app's own French for
-    them (plan 210), written from the character's senses rather than
+    them (plan 213), written from the character's senses rather than
     copied from a published list. It never overrides a French meaning
     the export carries."""
     path = os.path.join(data_dir, "kanji_meanings_fr.json")

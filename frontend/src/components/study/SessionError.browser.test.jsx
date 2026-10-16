@@ -3,7 +3,7 @@ import { render } from 'vitest-browser-react'
 import fr from '../../locales/fr/index.js'
 import { ApiError } from '../../lib/api'
 
-// ── What a failed study session says (plan 210) ───────────────
+// ── What a failed study session says (plan 213) ───────────────
 // It used to print the backend's own sentence whenever the error
 // carried a status: FastAPI's English ("Invalid token", "Deck not
 // found") or lib/api.js's fallback, which names the request's path. A

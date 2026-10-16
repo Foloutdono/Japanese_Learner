@@ -1,6 +1,6 @@
 r"""
 Builds datas/vocab/jmdict_fr.sqlite3 -- the French layer over JMdict
-(content/jmdict_fr.py, plan 210) -- from three JSON files, and dumps it
+(content/jmdict_fr.py, plan 213) -- from three JSON files, and dumps it
 back to them for editing.
 
     senses.json      {"<english glossary, 'a; b; c'>": "<french>"}

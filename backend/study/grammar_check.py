@@ -81,7 +81,7 @@ def _text_problems(what: str, pair, rich: bool, max_chars: int, bullets: bool = 
     return out
 
 
-# ── The formation line in French (plan 210) ──
+# ── The formation line in French (plan 213) ──
 # `structure_fr` is the same formula as `structure` with its English
 # words in French: "verb て-form + ください" is "verbe forme en て +
 # ください". Its Japanese is the English line's, character for

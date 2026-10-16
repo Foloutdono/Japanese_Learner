@@ -181,7 +181,7 @@ def test_oversized_upload_returns_413(client):
     assert response.json()["detail"]["code"] == "file_too_large"
 
 
-# ── The refusals carry a code (plan 210) ──────────────────────────
+# ── The refusals carry a code (plan 213) ──────────────────────────
 # The learner reads a sentence in their own language, which the client
 # words from `code`; the English `message` beside it is for the logs and
 # never reaches a screen. These pin the codes the client has a sentence
@@ -228,7 +228,7 @@ def test_a_worker_failure_stores_its_code_beside_the_sentence(client):
 
 
 def test_a_session_failed_before_codes_still_reads_back(client):
-    """A row failed before plan 210 has an `error` and no `error_code`:
+    """A row failed before plan 213 has an `error` and no `error_code`:
     it reads back with code None, which the client words with its own
     line rather than the stored English."""
     conn = db_conn()

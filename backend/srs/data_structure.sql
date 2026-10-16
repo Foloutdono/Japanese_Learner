@@ -500,7 +500,7 @@ CREATE TABLE video_sessions (
     status        TEXT NOT NULL DEFAULT 'generating',  -- 'generating' | 'ready' | 'failed'
     error         TEXT,                         -- why it failed, in English: for the logs
     -- ... and as the stable snake_case code the client words in the
-    -- learner's language (plan 210). NULL on a row failed before it.
+    -- learner's language (plan 213). NULL on a row failed before it.
     error_code    TEXT,
     sentences     JSONB,
     truncated     INTEGER NOT NULL DEFAULT 0,

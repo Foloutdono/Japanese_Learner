@@ -14,7 +14,7 @@ const auth = {
   usernameInvalid:   'Username must be 3-20 characters (letters, numbers, underscore).',
   usernameTaken:     'This username is already taken.',
   // 改札 — sign-in refusals, named by their code (lib/authErrors.js)
-  // rather than by Supabase's English sentence (plan 210). The ones the
+  // rather than by Supabase's English sentence (plan 213). The ones the
   // guest claim shares (address taken, weak password, too many tries)
   // say the claim* lines.
   authBadCredentials:    'Wrong email address or password.',
@@ -1193,7 +1193,7 @@ const video = {
   analyzingVideo:      'Analyzing the subtitles…',
   captionsUnavailable: "Couldn't get this video's captions.",
   subtitleTooLarge:    'This subtitle file is too large.',
-  // 動画 — why a video did not open (plan 210). The server names each
+  // 動画 — why a video did not open (plan 213). The server names each
   // refusal with a code; these say it in the learner's language
   // (components/analysis/videoErrors.js), never the server's English.
   subtitleNotUtf8:     'This file is not UTF-8. Japanese .srt files are often Shift-JIS: save it again as UTF-8 (any text editor can), then try again.',

@@ -29,7 +29,7 @@ def get_meaning(entry: dict, lang: str, fr_map: dict) -> str:
     does) is answered from the pool's own French layer, never from
     `fr_map`: VOCAB_FR is the course's, keyed by written form, and gave
     1,184 pool words the French of a deck homograph -- 殿 どの "Mr." as
-    "arrière, garde arrière", 歩 ほ "step" as "pion" (plan 210)."""
+    "arrière, garde arrière", 歩 ほ "step" as "pion" (plan 213)."""
     if "seq" in entry:
         from content.jmdict_fr import pool_meaning
         return pool_meaning(entry, lang)

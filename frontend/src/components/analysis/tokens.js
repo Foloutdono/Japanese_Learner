@@ -69,7 +69,7 @@ export function lineState(tok, grammar) {
 // the card's own -- its French beside its English since the analysis
 // carries both (study/analysis._deck_match) -- else nothing. A pool word
 // carries the same pair where the pool's French layer has its line
-// (plan 210, study/analysis._pool_match), its English alone otherwise.
+// (plan 213, study/analysis._pool_match), its English alone otherwise.
 export function wordGloss(tok, lang) {
   if (tok?.meaning) return tok.meaning
   const entry = tok?.vocab_match?.entry

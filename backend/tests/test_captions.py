@@ -80,7 +80,7 @@ class ParseTrackTests(unittest.TestCase):
     def test_malformed_content_raises_caption_parse_error(self) -> None:
         with self.assertRaises(CaptionParseError) as caught:
             parse_track("this is not a subtitle file at all", "t.srt")
-        # The code is what the learner is told by (plan 210); the
+        # The code is what the learner is told by (plan 213); the
         # English message beside it is for the logs.
         self.assertEqual(caught.exception.code, "parse_failed")
 

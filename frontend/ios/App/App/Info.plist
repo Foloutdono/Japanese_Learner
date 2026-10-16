@@ -10,7 +10,7 @@
 	<string>fr</string>
 	<key>CFBundleDisplayName</key>
         <string>Tsuji</string>
-	<!-- The languages the shell speaks (plan 210): the usage prompts below
+	<!-- The languages the shell speaks (plan 213): the usage prompts below
 	     are said in each through fr.lproj / en.lproj's InfoPlist.strings. -->
 	<key>CFBundleLocalizations</key>
 	<array>

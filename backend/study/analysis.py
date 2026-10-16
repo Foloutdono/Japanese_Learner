@@ -103,7 +103,7 @@ def _grammar_entries(sentence: str, morphemes=None) -> list[dict]:
             # able to edit the catalogue through it.
             "meaning": dict(meaning) if isinstance(meaning, dict) else (meaning or ""),
             "structure": entry.get("structure", ""),
-            # The formation line in French (plan 210), beside the
+            # The formation line in French (plan 213), beside the
             # English, as `meaning` carries both: the analysis is shared
             # across learners and the screen reads its own.
             "structure_fr": entry.get("structure_fr", ""),
@@ -157,7 +157,7 @@ def _pool_match(entry: dict) -> dict:
         "pool": True,
     }
     # Its French line beside the English, where the pool's French layer
-    # has one (plan 210) -- the same two fields a deck word carries
+    # has one (plan 213) -- the same two fields a deck word carries
     # (_deck_match), so tokens.js's wordGloss reads it unchanged. An
     # affix row keeps the one sense it was chosen for, in English: the
     # French line is the word's, not that sense's.
@@ -404,7 +404,7 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 致す after お〜, 〜ばかりに after ん, 〜っぽい, 〜ずくめ, 〜手前, 〜どころ;
 # まま no ママ nor 間々; すぐ, ゆっくり, 良い, 赤ちゃん, 何も and 世論 their
 # lower or right cards; 〜不足 after a noun read ぶそく.
-# 14: French beside the English (plan 210) -- a JMdict pool word's
+# 14: French beside the English (plan 213) -- a JMdict pool word's
 # `meaning_fr` from the pool's French layer, and a grammar point's
 # `structure_fr`, so a stored breakdown is rebuilt to carry them.
 LOCAL_REV = 14

@@ -50,7 +50,7 @@ way a real 聴解 section does, never past what one listen can hold.
 `en`, `fr`
        the line's translation, shown with the answer in the learner's
        language (study/dictation.reveal). Both, on every line, as the
-       reading bank carries both (plan 210; until then this bank was
+       reading bank carries both (plan 213; until then this bank was
        English only and a French learner read English under every
        line). Translated from the Japanese, drafted with an AI model and
        audited like the rest of the taught content.

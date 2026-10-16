@@ -220,7 +220,7 @@ export async function decodeGrabHash(hash) {
 // fetch omits them) and it leaves the page for the app's analyzer
 // with the result in the hash.
 //
-// What it says when it cannot (plan 210) is in the learner's language,
+// What it says when it cannot (plan 213) is in the learner's language,
 // baked in when the bookmark is copied: on youtube.com it has no app
 // to ask, and a bookmark copied in French should not answer in English.
 // `t` is the locale table the copy button holds; only the grabAlert*

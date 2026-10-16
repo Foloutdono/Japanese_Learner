@@ -209,7 +209,7 @@ def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mo
         # call fill_in's sentence makes below -- and without it 〜の中で
         # asks a learner who cannot read 中 a kanji question.
         "grammar_furigana": pattern_furigana(pattern, entry.get("reading")),
-        # The formation line in the learner's language (plan 210), read
+        # The formation line in the learner's language (plan 213), read
         # the same way (`structure_reading`).
         "structure": structure_text(entry, lang),
         "structure_furigana": structure_furigana(entry, lang),

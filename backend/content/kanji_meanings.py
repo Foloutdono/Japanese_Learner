@@ -23,7 +23,7 @@ from the database row instead (kanji_pool_data.meaning_of).
 COVERAGE: KANJIDIC2's French is thinner than the old hand-maintained
 kanji_fr.json was -- 219 of the deck's 2,212 characters (mostly
 obscure/name-use ones like 蒼, 聡, 鴻, 蓮, 那, 也) have no "fr" entry
-there, and their cards rendered English. Since plan 210 the app's own
+there, and their cards rendered English. Since plan 213 the app's own
 French for those 219 (datas/kanji/kanji_meanings_fr.json) is folded into
 the database by scripts/build_kanji_db.py, so every deck character has
 one (tests/test_kanji_french.py). Outside the deck it is thinner still:

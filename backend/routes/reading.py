@@ -662,7 +662,7 @@ def get_reading_batch(
     NOTE on `lang`: the curated bank carries every sentence in English
     and French (plan 192), and a curated phrase comes back in `lang`
     when the bank holds it. Real example sentences (JMdict/Tatoeba-
-    sourced) carry the corpus's English, and since plan 210 a French
+    sourced) carry the corpus's English, and since plan 213 a French
     line from content/jmdict_fr.py for the ones the French layer holds
     (every sentence a deck word or a JMdict word shows); one without
     comes back with "translation_lang": "en", which the frontend marks

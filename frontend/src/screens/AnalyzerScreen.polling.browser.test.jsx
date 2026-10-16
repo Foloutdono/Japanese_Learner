@@ -356,7 +356,7 @@ describe('AnalyzerScreen polling', () => {
     // A file or paste we could not parse. The poll's 503 carries the
     // stored failure: its `code` is what the learner is told by, in
     // their own language, and the server's English `error` is the
-    // logs' (plan 210).
+    // logs' (plan 213).
     apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
     apiJson.mockRejectedValue(Object.assign(new Error('bad'), {
       status: 503,
@@ -524,7 +524,7 @@ describe('AnalyzerScreen polling', () => {
 
     // The table's own line, never the server's English: ApiError's
     // message is never empty, so `e.message || …` let it win every
-    // time (plan 210).
+    // time (plan 213).
     const text = screen.container.textContent
     expect([en.explainUnavailable, fr.explainUnavailable].some(s => text.includes(s))).toBe(true)
     expect(text).not.toContain('The AI service is temporarily unavailable.')

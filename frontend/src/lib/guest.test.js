@@ -121,7 +121,7 @@ describe('claiming the pass', () => {
 
   // The confirmation e-mail is written from the dashboard's template,
   // which branches on the user's metadata: `lang` rides along on the
-  // same call, before the mail goes (plan 210).
+  // same call, before the mail goes (plan 213).
   it('tells the template which language to write the confirmation in', async () => {
     auth.updateUser.mockResolvedValue({ data: { user: { email: null, is_anonymous: true } }, error: null })
     await claimAccount({ email: 'a@b.co', password: 'hunter22', lang: 'fr' })
