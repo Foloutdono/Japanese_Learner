@@ -90,26 +90,26 @@ async function renderScreen() {
 }
 
 describe('the song door on a phone', () => {
-  it('stands beside keep at the head\'s end on a video\'s track, and opens the sheet', async () => {
+  // Plan 219 (the owner's pick D): the head is about the whole Passage,
+  // and the deck it can become is the head's trailing door, named, while
+  // keep went down to the dock with the line's other tools.
+  it('stands named at the head\'s end on a video\'s track, and opens the sheet', async () => {
     const screen = await renderScreen()
     await vi.waitFor(() => expect(screen.container.querySelector('.anl-row__open')).not.toBeNull())
     screen.container.querySelector('.anl-row__open').click()
     // The poll answers, then the result draws: waited for, not timed.
-    await vi.waitFor(() => expect(screen.container.querySelector('.anl-m__head .anl-head__song')).not.toBeNull(), { timeout: 3000 })
+    await vi.waitFor(() => expect(screen.container.querySelector('.anl-m__head .anl-m__song')).not.toBeNull(), { timeout: 3000 })
 
     const head = screen.container.querySelector('.anl-m__head')
-    const song = head.querySelector('.anl-head__song')
-    const keep = head.querySelector('.anl-head__keep')
-    expect(song).not.toBeNull()
-    expect(song.nextElementSibling).toBe(keep)
+    const song = head.querySelector('.anl-m__song')
+    expect(head.querySelector('.anl-head__keep')).toBeNull()
+    expect(screen.container.querySelector('.anl-m__dock .anl-head__keep')).not.toBeNull()
+    expect(song.getAttribute('aria-haspopup')).toBe('dialog')
+    expect(song.textContent).toBe('Deck')
     const h = head.getBoundingClientRect()
     const s = song.getBoundingClientRect()
-    const k = keep.getBoundingClientRect()
-    // Together at the trailing end, the same 44px round door.
-    expect(Math.round(k.right)).toBe(Math.round(h.right))
-    expect(s.right).toBeLessThan(k.left)
-    expect(k.left - s.right).toBeLessThan(20)
-    expect([Math.round(s.width), Math.round(s.height)]).toEqual([44, 44])
+    expect(Math.round(s.right)).toBe(Math.round(h.right))
+    expect(s.height).toBeGreaterThanOrEqual(44 - 0.01)
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
 
     song.click()
@@ -132,8 +132,8 @@ describe('the song door on a phone', () => {
     field.dispatchEvent(new Event('input', { bubbles: true }))
     screen.container.querySelector('.anl-action').click()
 
-    await vi.waitFor(() => expect(screen.container.querySelector('.anl-m__head .anl-head__song')).not.toBeNull(), { timeout: 3000 })
-    screen.container.querySelector('.anl-head__song').click()
+    await vi.waitFor(() => expect(screen.container.querySelector('.anl-m__head .anl-m__song')).not.toBeNull(), { timeout: 3000 })
+    screen.container.querySelector('.anl-m__song').click()
     await vi.waitFor(() => expect(document.querySelector('[role="dialog"] input')).not.toBeNull())
     expect(document.querySelector('[role="dialog"] input').value).toBe('夜が来る')
   })
@@ -149,7 +149,7 @@ describe('the song door on a phone', () => {
     field.dispatchEvent(new Event('input', { bubbles: true }))
     screen.container.querySelector('.anl-action').click()
 
-    await vi.waitFor(() => expect(screen.container.querySelector('.anl-m__head .anl-head__keep')).not.toBeNull(), { timeout: 3000 })
-    expect(screen.container.querySelector('.anl-head__song')).toBeNull()
+    await vi.waitFor(() => expect(screen.container.querySelector('.anl-m__dock .anl-head__keep')).not.toBeNull(), { timeout: 3000 })
+    expect(screen.container.querySelector('.anl-m__song')).toBeNull()
   })
 })

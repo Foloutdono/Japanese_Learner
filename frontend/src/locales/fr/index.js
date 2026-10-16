@@ -1056,6 +1056,12 @@ const phraseAnalyzer = {
   unkeepSentence:      'Ne plus garder cette phrase',
   // 歌 (plan 215) — le deck d'une chanson, depuis le résultat de l'analyseur.
   songDeckOpen:        'Créer un deck à partir de cette chanson',
+  songDeckShort:       'Deck',
+  dockGrammar:         'Grammaire',
+  dockWords:           'Mots',
+  dockExplain:         'Expliquer',
+  dockKeep:            'Garder',
+  dockKept:            'Gardée',
   songDeckTitle:       'Apprends-la par cœur',
   songDeckName:        'Nom du deck',
   songDeckHolds:       'Contenu du deck',
