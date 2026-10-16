@@ -65,7 +65,7 @@ function stopsOf(stats, source) {
 }
 
 // A line is a place: on the desk (plan 123) its row is a link.
-export function LineLedger({ stats, t, navigate }) {
+export function LineLedger({ stats, t, lang, navigate }) {
   const desk = useDesk()
   const lines = getSections('learn', t).filter(s => TRACKED_LINES[s.path])
   if (!lines.length) return null
@@ -101,8 +101,8 @@ export function LineLedger({ stats, t, navigate }) {
               </span>
             )}
             <span className="pf-line__fig">
-              {learned.toLocaleString()}
-              <span className="pf-line__of">/ {total.toLocaleString()}</span>
+              {learned.toLocaleString(lang)}
+              <span className="pf-line__of">/ {total.toLocaleString(lang)}</span>
             </span>
           </SplitRow>
         )

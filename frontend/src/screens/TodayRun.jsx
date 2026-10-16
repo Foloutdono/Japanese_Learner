@@ -224,8 +224,10 @@ export default function TodayRun({ session }) {
   const { current: card, queueLength, loading, done, error, retry, advance, updateCurrent } = useCardSession({
     // The choice is part of the key: picking different lanes is a
     // different session, and resuming the previous one's cached queue
-    // would serve cards from lanes the learner just switched off.
-    storageKey: sessionKey('today', only ? `only:${only}` : unit ? `unit:${unit}` : capped ? `quota:${quotaRaw}` : allChosen ? 'all' : laneParam),
+    // would serve cards from lanes the learner just switched off. So is
+    // the language: the cards are localised server-side, so a switch is
+    // a fresh queue (as GrammarRun's).
+    storageKey: sessionKey('today', only ? `only:${only}` : unit ? `unit:${unit}` : capped ? `quota:${quotaRaw}` : allChosen ? 'all' : laneParam, lang),
     fetchBatch,
     batchSize: 10,
     cardKey,

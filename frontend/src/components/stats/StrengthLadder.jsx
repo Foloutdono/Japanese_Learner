@@ -15,7 +15,7 @@ import { useLang } from '../../LangContext'
 const TINT = [18, 34, 55, 78, 100]
 
 export function StrengthLadder({ rungs, total }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   if (!total) return null
   const labels = t.reportRungs
   return (
@@ -26,7 +26,7 @@ export function StrengthLadder({ rungs, total }) {
             className={`rep-ladder__rung${r.count === 0 ? ' rep-ladder__rung--empty' : ''}`}
             style={{ '--tint': `${TINT[r.index]}%` }}
           />
-          <b className="rep-ladder__n">{r.count.toLocaleString()}</b>
+          <b className="rep-ladder__n">{r.count.toLocaleString(lang)}</b>
           <span className="rep-ladder__reach">{labels[r.index]}</span>
         </span>
       ))}

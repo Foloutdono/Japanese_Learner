@@ -66,7 +66,7 @@ export function GrammarChips({ grammar, t, mining, quiet = false, label, onOpen,
   // from a caller that predates this and stays a chip.
   const points = withMarkers ? grammar : grammar?.filter(g => g.kind !== 'marker')
   if (!points?.length) return null
-  const caption = label === undefined ? (t.grammarSpotted ?? 'Grammar spotted') : label
+  const caption = label === undefined ? t.grammarSpotted : label
   return (
     <div className="analysis-grammar-chips">
       {caption && <span className="cap">{caption}</span>}
@@ -99,7 +99,7 @@ export function GrammarChips({ grammar, t, mining, quiet = false, label, onOpen,
                     className="analysis-grammar-chip__pattern analysis-grammar-chip__door"
                     lang="ja"
                     onClick={e => { e.stopPropagation(); onOpen(g) }}
-                    aria-label={`${t.openDictionary ?? 'Open dictionary entry'}: ${g.pattern}${gloss ? ` — ${gloss}` : ''}`}
+                    aria-label={`${t.openDictionary}: ${g.pattern}${gloss ? ` — ${gloss}` : ''}`}
                     title={t.openDictionary}
                   >
                     {g.pattern}
