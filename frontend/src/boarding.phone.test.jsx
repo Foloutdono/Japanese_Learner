@@ -99,11 +99,13 @@ describe('the boarding at 390×844', () => {
     expect(rect(action).height).toBe(height)
   })
 
-  // ── 改札, the gate button (plan 164) ──
-  // The owner's pick D: a 66 px gold pill with the pass's mark in a
-  // sumi reader at its left and the word on the pill's centre line; a
-  // pick wakes it with one overshoot, and only a pick -- a Continue
-  // that arrives ready does not pop.
+  // ── 改札, the gate button (plan 164, redrawn in plan 223) ──
+  // The owner's pick D: a 66 px gold pill with a sumi reader at its left
+  // and the word on the pill's centre line; since plan 223 the painted
+  // Practice gate's own, the reader holding a card scanner's mark and a
+  // hairline between it and the word, the pill still. A pick wakes it
+  // with one overshoot, and only a pick -- a Continue that arrives ready
+  // does not pop.
   it('draws Continue as the gate, and a pick wakes it once', async () => {
     const screen = await mountFlow()
     await click(screen.container, '[data-action="continue"]')
@@ -115,7 +117,8 @@ describe('the boarding at 390×844', () => {
     expect(getComputedStyle(go()).borderRadius).toBe('999px')
     const reader = go().querySelector('.btn-depart__reader')
     expect(Math.round(rect(reader).width)).toBe(48)
-    expect(reader.querySelectorAll('.pass__wave span')).toHaveLength(3)
+    expect(reader.querySelector('svg.btn-depart__scan')).not.toBeNull()
+    expect(getComputedStyle(reader, '::after').content).toBe('""')
     // The word on the pill's centre line, whatever stands at its ends.
     const word = rect(go().querySelector('.btn-depart__jp'))
     const pill = rect(go())
@@ -125,18 +128,16 @@ describe('the boarding at 390×844', () => {
     expect(go().disabled).toBe(false)
     expect(go().classList.contains('btn-depart--waking')).toBe(true)
     expect(getComputedStyle(go()).animationName).toContain('btn-gate-wake')
-    // The pop lets go once it has landed; the breath stays.
+    // The pop lets go once it has landed, and the gate stands still.
     await settle(700)
     expect(go().classList.contains('btn-depart--waking')).toBe(false)
-    // The breath is the halo layer's opacity, never the gate's own shadow.
     expect(getComputedStyle(go()).animationName).toBe('none')
-    expect(getComputedStyle(go(), '::after').animationName).toBe('btn-gate-breathe')
     expect(getComputedStyle(go(), '::before').opacity).toBe('1')
     // The idle nudge waits four seconds on a ready gate.
     expect(getComputedStyle(go().querySelector('.btn-depart__reader')).animationDelay).toBe('4s')
   })
 
-  it('arrives ready on the Welcome without the pop, the halo inside the frame', async () => {
+  it('arrives ready on the Welcome without the pop, and stands still', async () => {
     const screen = await render(
       <LangProvider><Welcome onBoard={() => {}} onSignIn={() => {}} /></LangProvider>
     )
@@ -144,7 +145,8 @@ describe('the boarding at 390×844', () => {
     const board = screen.container.querySelector('[data-action="board"]')
     expect(board.classList.contains('btn-depart--gate')).toBe(true)
     expect(board.classList.contains('btn-depart--waking')).toBe(false)
-    expect(getComputedStyle(board, '::after').animationName).toBe('btn-gate-breathe')
+    expect(getComputedStyle(board).animationName).toBe('none')
+    expect(getComputedStyle(board, '::after').content).toBe('none')
   })
 
   it('keeps a 44 px head: the back button, the line with its stops', async () => {

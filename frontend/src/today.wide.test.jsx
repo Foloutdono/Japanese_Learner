@@ -476,7 +476,7 @@ describe('the main flashcards alone', () => {
     await mount()
     const go = $('.tdy-desk__go .btn-depart')
     expect(go.classList.contains('btn-depart--gate')).toBe(true)
-    expect(go.querySelector('.btn-depart__reader .pass__wave')).not.toBeNull()
+    expect(go.querySelector('.btn-depart__reader .btn-depart__scan')).not.toBeNull()
     expect(text(go.querySelector('.btn-depart__jp'))).toBe('Embarquer')
     expect(go.querySelector('.desk-kbd')).not.toBeNull()
     expect(go.getAttribute('aria-keyshortcuts')).toBe('Enter')

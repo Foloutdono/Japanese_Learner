@@ -14,6 +14,7 @@ import { useDesk } from '../hooks/useDesk'
 import { useBoxSize } from '../hooks/useBoxWidth'
 import { useStationSamples } from '../stores/stationSamples'
 import { PracticeSpecimen } from '../components/practice/PracticeSpecimen'
+import PracticeGate from '../components/practice/gate/PracticeGate'
 import { LEVELS } from '../domain/sentenceSource'
 
 // ── 実践 — the Practice gate: seven platforms (plan 068, plates since 094, 作文 since 125, 会話 since 217) ──
@@ -78,6 +79,16 @@ import { LEVELS } from '../domain/sentenceSource'
 // their wells at 1100×800. Until a gate of seven is drawn for the
 // desk, the desk hangs the six and 会話 is the rail's seventh station;
 // the phone hangs it as the seventh plate, with its grade chips.
+//
+// ── On the phone, the painted platform (plan 223) ──
+// The owner drew the phone's gate again, from a painting of their own:
+// a platform, a car at it with its door open, and on the car's side the
+// two roll signs -- the grade and where the train goes -- where the
+// plates' chips and heads were (components/practice/gate). The lit
+// destination opens its station, as a plate's head did; the gold
+// button boards the train to the run, as a chip did, by the platform's
+// own departure rather than the boarding's door. The desk keeps its
+// plates: no platform was painted for it.
 const OFF_DESK = '/practice/conversation'
 
 const LEVEL_PATH = {
@@ -137,6 +148,21 @@ export default function PracticeScreen() {
 
   const guide = useGuide('practice', true)
   const uid = useId()
+
+  if (!desk) {
+    return (
+      <main id="main-content" className="practice">
+        <h1 className="sr-only">{t.tabPractice}</h1>
+        {guide.open && <Guide gate="practice" onEnd={guide.onEnd} />}
+        <PracticeGate
+          platforms={platforms}
+          here={here}
+          pathFor={(section, level) => LEVEL_PATH[section.path]?.(level)}
+          onStation={depart}
+        />
+      </main>
+    )
+  }
 
   return (
     <main id="main-content" className="practice">

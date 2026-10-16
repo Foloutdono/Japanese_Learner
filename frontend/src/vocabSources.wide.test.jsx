@@ -127,7 +127,7 @@ afterEach(() => {
 })
 
 describe('the vocabulary\'s sources on a wide desk (plan 183)', () => {
-  it('fills the strip with three stops beside the lead, the most met first, the gate and its halo in its card', async () => {
+  it('fills the strip with three stops beside the lead, the most met first, the gate and the air round it in its card', async () => {
     STATS.items.vocab.N4.started = 40
     await mount()
     expect($('.desk-sources--narrow')).toBeNull()

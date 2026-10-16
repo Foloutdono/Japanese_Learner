@@ -68,6 +68,14 @@ export const BASE_GAIN = {
     'card-flip':       1.17,
     'card-transition': 1.60,
     'door-slide':      1.10,
+    // 菱 — the Practice gate's pantograph (plan 223), written on its
+    // canvas. The air under the doors running open, at the hour's
+    // flaps' 0.024 by the window (0.011 at unity): it plays on every
+    // visit to the gate, so it is texture, not news. The spark by
+    // peak, as noise bursts are: 0.13 at unity, over the canvas's
+    // ratio to the flaps' 0.18, so unity it is.
+    'pantograph-air':   2.18,
+    'pantograph-spark': 1.00,
   },
   ui: {
     click:                    1.17,
