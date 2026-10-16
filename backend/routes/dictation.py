@@ -180,6 +180,9 @@ class CheckPayload(BaseModel):
     # Empty is a legitimate answer: it is a learner saying they caught
     # nothing, and it measures 0 rather than being rejected.
     answer: str = Field(default="", max_length=400)
+    # The language the translation is revealed in (plan 210). English
+    # when absent, which is what every client sent before it existed.
+    lang: str = Field(default="en", max_length=8)
 
 
 @router.post("/api/dictation/check")
@@ -196,7 +199,7 @@ def check_dictation(payload: CheckPayload, user_id: str = Depends(get_user_id)):
     return {
         "id": payload.clip_id,
         "level": row.get("level", ""),
-        **dictation.reveal(row),
+        **dictation.reveal(row, payload.lang),
         **dictation.measure(payload.answer, row),
     }
 

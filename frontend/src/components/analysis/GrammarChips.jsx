@@ -1,7 +1,7 @@
 import { useLang } from '../../LangContext'
 import { StatusBadge } from './StatusBadge'
 import { MineButton } from './MineButton'
-import { grammarGloss } from './grammarGloss'
+import { grammarGloss, grammarStructure } from './grammarGloss'
 import { pointKey } from './grammarSpans'
 
 // One chip per grammar point the LOCAL tier spotted in a Sentence
@@ -107,7 +107,7 @@ export function GrammarChips({ grammar, t, mining, quiet = false, label, onOpen,
                 )
                 : <span className="analysis-grammar-chip__pattern" lang="ja">{g.pattern}</span>}
               {gloss && (
-                <span className="analysis-grammar-chip__gloss" title={g.structure || undefined}>{gloss}</span>
+                <span className="analysis-grammar-chip__gloss" title={grammarStructure(g, lang) || undefined}>{gloss}</span>
               )}
               <span className="analysis-grammar-chip__level">{g.level}</span>
               {!quiet && g.stats && <StatusBadge status={g.stats.status} small t={t} />}

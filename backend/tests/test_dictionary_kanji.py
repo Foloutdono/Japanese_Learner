@@ -264,14 +264,15 @@ def test_the_french_map_still_covers_the_deck_it_always_covered():
     Every caller passes it to translations.get_meaning() for a DECK
     entry, and routes/translations.py already built its ENGLISH
     counterpart from the deck alone — the French map was the odd one
-    out. The 219 characters KANJIDIC2 has no French for are still
-    absent, so get_meaning()'s fallback to English still fires."""
+    out. The 219 characters KANJIDIC2 has no French for carry the
+    app's own since plan 210 (datas/kanji/kanji_meanings_fr.json, folded
+    into the database), so none of the deck falls back to English."""
     from content.kanji_meanings import KANJI_FR
 
     assert set(KANJI_FR) <= set(DECK_BY_CHAR)
     missing = set(DECK_BY_CHAR) - set(KANJI_FR)
-    assert len(missing) == 219
-    assert "蒼" in missing                       # a documented gap
+    assert missing == set()
+    assert KANJI_FR["蒼"] == "bleu; pâle"        # once a documented gap
     assert KANJI_FR["土"] == "sol; terre; terrain; Turquie"
 
 

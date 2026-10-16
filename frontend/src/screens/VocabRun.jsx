@@ -135,6 +135,15 @@ export default function VocabRun({ session }) {
   // since that's also how the backend's vocab translation map is keyed.
   function translateCard(cardToTranslate, targetLang) {
     if (!cardToTranslate) return
+    // A JMdict tier's words are not the course's: the per-word map is
+    // keyed by written form and would hand a pool word a deck
+    // homograph's French (plan 210 -- 殿 どの "Mr." as "arrière-garde").
+    // The card keeps the gloss it was served in until the next batch,
+    // which the server builds in the new language from the pool's own.
+    if (freqDomain === 'vocab_jmdict') {
+      updateCurrent(cur => ({ ...cur, lang: targetLang }))
+      return
+    }
     const words = [wordForm(cardToTranslate), ...(cardToTranslate.hints?.indice_1 ?? []).map(wordForm)]
     const unique = [...new Set(words.filter(Boolean))]
     Promise.all(unique.map(word =>

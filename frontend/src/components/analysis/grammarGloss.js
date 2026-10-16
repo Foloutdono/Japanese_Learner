@@ -17,3 +17,11 @@ export function grammarGloss(point, lang) {
   if (typeof meaning === 'string') return meaning
   return meaning[lang] || meaning.en || ''
 }
+
+// The formation line the same way: the analysis carries the English
+// `structure` and, since plan 210, the French `structure_fr` beside it
+// (study/analysis._grammar_entries) -- a stored breakdown from before
+// that has the English alone, and reads as it did.
+export function grammarStructure(point, lang) {
+  return (lang === 'fr' && point?.structure_fr) || point?.structure || ''
+}

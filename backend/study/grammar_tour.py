@@ -49,13 +49,13 @@ from content.grammar_sentences_data import translation
 from study.furigana import align_sentence, mark_spans
 from study.grammar_detect import hits
 from study.grammar_examples import (
-    BLANK, furigana_by_pattern, highlight_span, pattern_furigana, structure_furigana,
+    BLANK, furigana_by_pattern, highlight_span, pattern_furigana, structure_furigana, structure_text,
 )
 from study.grammar_match import contains_pattern, verifiable
 from study.morphology import tokenize
 
 # Bumped when the payload's shape or its seeding changes.
-TOUR_REV = 5
+TOUR_REV = 6  # 6: the formation line in the learner's language (plan 210)
 LOOK_COUNT = 3
 MIN_LIT = 2
 GUESS_COUNT = 4
@@ -524,8 +524,8 @@ def _tour(level: str, pattern: str, lang: str) -> dict | None:
         "look": look,
         "guesses": guesses,
         "rule": localise({"en": rule["en"], "fr": rule["fr"]}, lang) if rule else None,
-        "structure": entry.get("structure"),
-        "structure_furigana": structure_furigana(entry),
+        "structure": structure_text(entry, lang),
+        "structure_furigana": structure_furigana(entry, lang),
         "chain": _chain(entry, look),
         "rival": _rival(entry, lang),
         "twists": _twists(level, entry, lang),

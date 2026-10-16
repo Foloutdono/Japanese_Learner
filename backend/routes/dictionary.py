@@ -20,6 +20,7 @@ from content.kana_strokes import stroke_count as kana_stroke_count
 # than all 13,108 rows; anything outside the deck comes from the database.
 from content.radical_data import KANJI_RADICALS, RADICAL_BY_NUMBER, info_for as radical_info
 from translations import get_meaning, fr_gloss
+from content.jmdict_fr import pool_meaning
 from content.kanji_meanings import KANJI_FR
 from translations.fr.vocab_fr import VOCAB_FR
 from core.auth import get_user_id
@@ -29,6 +30,7 @@ from study.card_lookup import (
     GRAMMAR_STATUS_MODES,
 )
 from study.grammar_lesson import lesson_payload
+from study.grammar_examples import structure_text
 from study import search_match
 from study.kana_words import kana_words
 from study.kanji_words import full_shares, kanji_as_word, kanji_words, reading_of, word_furigana
@@ -240,11 +242,29 @@ def _off_deck_chars(word: str) -> list[str]:
     return [c for c in dict.fromkeys(_CJK.findall(word or "")) if c not in DECK_BY_CHAR]
 
 
+def _pool_kanji_meanings(chars, lang: str) -> dict[str, str]:
+    """{char: meaning} in `lang`, English where `lang` has none.
+
+    kanji_db.meanings_for omits a character with no entry in the language
+    asked -- the shape KANJI_FR needs -- and KANJIDIC2 has French for 73
+    of the 10,896 characters outside the deck. Read straight, a French
+    page printed those rows with no meaning at all, where the English
+    page printed one: the French learner got less than the English one
+    (plan 210). The deck's own rows already fall back through
+    get_meaning; this is the same rule for the pool's."""
+    out = kanji_db.meanings_for(chars, lang)
+    if lang != "en":
+        missing = [c for c in chars if c not in out]
+        if missing:
+            out.update(kanji_db.meanings_for(missing, "en"))
+    return out
+
+
 def _page_pool_meanings(words, lang: str) -> dict[str, str]:
     """The pool meanings every word on a page needs, in one query rather
     than one per word."""
     chars = dict.fromkeys(c for w in words for c in _off_deck_chars(w))
-    return kanji_db.meanings_for(chars, lang)
+    return _pool_kanji_meanings(chars, lang)
 
 
 def _word_kanji(word: str, furigana: list[dict], lang: str,
@@ -271,7 +291,7 @@ def _word_kanji(word: str, furigana: list[dict], lang: str,
     # `pool` is the page's own batch (_page_pool_meanings); a lone
     # lookup asks for its word's characters alone.
     if pool is None:
-        pool = kanji_db.meanings_for(_off_deck_chars(word), lang)
+        pool = _pool_kanji_meanings(_off_deck_chars(word), lang)
     out = []
     for char in chars:
         deck = DECK_BY_CHAR.get(char)
@@ -693,7 +713,7 @@ def _exact_vocab(q: str, kana: str, lang: str, states: dict, user_id: str) -> di
         entry = jmdict_db.get_by_key(kanji, reading)
         if entry is not None:
             raw_id = vocab_jmdict_to_id(entry)
-            return _vocab_result(entry, None, entry.get("meaning", ""), lang, own(raw_id),
+            return _vocab_result(entry, None, pool_meaning(entry, lang), lang, own(raw_id),
                                  user_id, raw_id)
     return None
 
@@ -779,11 +799,11 @@ def _vocab_collection(query, page: int, limit: int, lang: str, user_id: str,
                       vocab_to_id(entry, level), kanji_pool)
         for level, entry, meaning in deck_page
     ] + [
-        # The pool carries no French map (VOCAB_FR is the deck's own,
-        # keyed by kanji alone — a pool homograph would collect the
-        # deck word's translation), so its gloss is served as JMdict
-        # wrote it.
-        _vocab_result(entry, None, entry.get("meaning", ""), lang, states, user_id,
+        # Never VOCAB_FR (the deck's own, keyed by kanji alone — a pool
+        # homograph would collect the deck word's translation): the
+        # pool's own French line where it has one (plan 210), JMdict's
+        # English otherwise.
+        _vocab_result(entry, None, pool_meaning(entry, lang), lang, states, user_id,
                       vocab_jmdict_to_id(entry), kanji_pool)
         for entry in pool_page
     ]
@@ -858,7 +878,7 @@ def _grammar_result(entry: dict, level: str, states: dict, user_id: str, lang: s
         "raw_id":    raw_id,
         "level":     level,
         "pattern":   entry["pattern"],
-        "structure": entry.get("structure", ""),
+        "structure": structure_text(entry, lang),
         "meaning":   gloss(entry, lang),
         **lesson_payload(level, entry, lang),
         "status":    card_stats(states, user_id, raw_id, GRAMMAR_STATUS_MODES),

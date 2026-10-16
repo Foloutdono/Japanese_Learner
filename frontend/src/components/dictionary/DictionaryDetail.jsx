@@ -935,9 +935,14 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   const isGrammar = entry.type === 'grammar'
   // Kana has no semantic "meaning" to translate — its romaji is its
   // plain-language name and takes the plate's caption instead.
+  // A JMdict pool word (no level; its app card says `pool`) is not the
+  // course's, and the course's map is keyed by written form: read
+  // through it, 殿 どの "Mr." printed 殿 しんがり's "arrière-garde".
+  // Its gloss is the server's, from the pool's own French (plan 210).
+  const isPoolWord = entry.type === 'vocab' && (entry.app_card?.pool || !entry.level)
   const meaning = isKana
     ? null
-    : isGrammar
+    : isGrammar || isPoolWord
       ? entry.meaning
       : lang === 'fr'
         // The card's own line first (plan 107: "{kanji}::{kana}", the
@@ -1455,7 +1460,10 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
                           ))}
                         </div>
                       )}
-                      <div className="dict-sense__gloss">
+                      {/* English where the French layer has no line for
+                          this sense yet (plan 210): marked, so a screen
+                          reader reads it as English. */}
+                      <div className="dict-sense__gloss" lang={sense.glossary_lang && sense.glossary_lang !== lang ? sense.glossary_lang : undefined}>
                         <GlossList meaning={sense.glossary} />
                       </div>
                       {exs.length > 0 && (

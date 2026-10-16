@@ -55,6 +55,7 @@ specifically to prevent that.
 import os
 import sqlite3
 import threading
+import unicodedata
 from array import array
 from functools import lru_cache
 
@@ -79,14 +80,46 @@ def _row_to_entry(row: tuple) -> dict:
 _local = threading.local()
 
 
+_FR_PATH = os.path.join(_DATA_DIR, "jmdict_fr.sqlite3")
+
+
 def _conn() -> sqlite3.Connection:
     conn = getattr(_local, "conn", None)
     if conn is None:
         # uri=True + mode=ro: never accidentally write to the shipped DB.
         conn = sqlite3.connect(f"file:{_DB_PATH}?mode=ro", uri=True)
         search_match.register_sql(conn)
+        # The French layer (content/jmdict_fr.py, plan 210), attached so
+        # a French gloss query can be one predicate over the pool. Its
+        # absence only means a French query matches English glosses
+        # alone, as it did before it existed.
+        if os.path.exists(_FR_PATH):
+            conn.execute("ATTACH DATABASE ? AS fr", (f"file:{_FR_PATH}?mode=ro",))
+            _local.fr = True
+        else:
+            _local.fr = False
         _local.conn = conn
     return conn
+
+
+def _has_fr() -> bool:
+    _conn()
+    return bool(getattr(_local, "fr", False))
+
+
+def _french_clause(q: str, match: str) -> tuple[str, list]:
+    """The pool words whose French line (plan 210) holds `q` -- one
+    subquery over the ~20k lines, run once per query rather than per
+    pool row, on the line folded at build time (lowercase, no accents),
+    so « epee » finds « épée » without a Python call per row. "word"
+    and "start" keep the LIKE as the prefilter and ask search_match the
+    real question of what it finds, as the English clause does."""
+    needle = search_match.fold(q)
+    if match == "any":
+        return ("(kanji, kana) IN (SELECT kanji, kana FROM fr.pool_line WHERE fold LIKE ?)",
+                [f"%{needle}%"])
+    return ("(kanji, kana) IN (SELECT kanji, kana FROM fr.pool_line "
+            "WHERE fold LIKE ? AND sm_text(fr, ?, ?))", [f"%{needle}%", q, match])
 
 
 def vocab_jmdict_key(entry: dict) -> str:
@@ -343,6 +376,12 @@ def _match(q: str, kana_forms: tuple[str, ...], match: str = "any",
     look — letters that are not romaji, with the glosses turned off.
     """
     clauses, params = [], []
+    # A gloss query also reads the pool's French lines (plan 210), in
+    # either session language, as the deck half matches both glosses
+    # whichever is displayed (routes/dictionary._deck_matches). French
+    # is Latin script whether or not it is ASCII: « épée » is a gloss,
+    # never a kanji or a reading.
+    french = bool(q) and field != "japanese" and _is_latin(q) and _has_fr()
     if q:
         if q.isascii():
             if field != "japanese":
@@ -352,10 +391,14 @@ def _match(q: str, kana_forms: tuple[str, ...], match: str = "any",
                 else:
                     clauses.append("(meaning LIKE ? AND sm_text(meaning, ?, ?))")
                     params += [f"%{q}%", q, match]
-        elif field != "meaning":
+        elif field != "meaning" and not french:
             like = f"{q}%" if match == "start" else f"%{q}%"
             clauses.append("(kanji LIKE ? OR kana LIKE ?)")
             params += [like, like]
+        if french:
+            clause, extra = _french_clause(q, match)
+            clauses.append(clause)
+            params += extra
     if field != "meaning":
         for form in kana_forms:
             # The READING column alone. A kana form is a reading, and the
@@ -372,6 +415,13 @@ def _match(q: str, kana_forms: tuple[str, ...], match: str = "any",
     if not clauses:
         return ("0" if q else ""), ()
     return " OR ".join(clauses), tuple(params)
+
+
+def _is_latin(q: str) -> bool:
+    """Letters, and every one of them Latin -- "épée", "cheval", not
+    水 and not a stray digit run."""
+    return any(c.isalpha() for c in q) and all(
+        not c.isalpha() or "LATIN" in unicodedata.name(c, "") for c in q)
 
 
 def _order(q: str, kana_forms: tuple[str, ...]) -> tuple[str, tuple]:

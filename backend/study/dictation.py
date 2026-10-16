@@ -240,7 +240,7 @@ def measure(answer: str, row: dict) -> dict:
     )
 
 
-def reveal(row: dict) -> dict:
+def reveal(row: dict, lang: str = "en") -> dict:
     """Everything the screen shows once the answer is in: the line, its
     reading, its romaji, its gloss — and the furigana, which is the one
     part that is computed rather than stored.
@@ -257,13 +257,12 @@ def reveal(row: dict) -> dict:
         "romaji": row["romaji"],
         "furigana": parts,
         "words": bank_words(row["jp"], parts),
-        "translation": row["en"],
-        # English regardless of the UI language, exactly as reading
-        # practice reports its own: this app has no translation layer
-        # for its sentence data, and the screen labels what it shows
-        # rather than implying it is in the learner's language. See
-        # routes/reading.py's get_reading_batch docstring.
-        "translation_lang": "en",
+        # In the learner's language: every line carries both (plan 210;
+        # content/listening_clips.problems holds it). A language the
+        # bank does not hold falls back to the English, and says so,
+        # as reading practice reports its own.
+        "translation": row.get(lang) or row["en"],
+        "translation_lang": lang if row.get(lang) else "en",
     }
 
 

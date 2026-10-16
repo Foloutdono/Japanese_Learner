@@ -315,7 +315,9 @@ function Session({ session, level }) {
       method: 'POST',
       // No `plays` here: the reveal does not write a row, so the
       // listen count travels with the grade instead (see grade()).
-      body: JSON.stringify({ clip_id: clip.id, answer: answer.trim() }),
+      // `lang`: the translation comes back in the learner's language
+      // (plan 210); every line of the bank carries French and English.
+      body: JSON.stringify({ clip_id: clip.id, answer: answer.trim(), lang }),
     })
       .then(data => {
         setResult(data)

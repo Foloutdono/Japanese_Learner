@@ -115,6 +115,16 @@ class RevealTests(unittest.TestCase):
         self.assertEqual(revealed["translation"], N5["en"])
         self.assertEqual(revealed["translation_lang"], "en")
 
+    def test_the_reveal_speaks_the_learners_language(self) -> None:
+        """Every line carries French (plan 210), and a French learner
+        reads it; a language the bank does not hold falls back to the
+        English and says so."""
+        revealed = dictation.reveal(N5, "fr")
+        self.assertEqual(revealed["translation"], N5["fr"])
+        self.assertEqual(revealed["translation_lang"], "fr")
+        other = dictation.reveal(N5, "es")
+        self.assertEqual((other["translation"], other["translation_lang"]), (N5["en"], "en"))
+
     def test_the_furigana_spells_the_line_and_reads_it_exactly(self) -> None:
         """Built from the bank's own kana, so the ruby over 九時 is くじ
         rather than pykakasi's guess. The parts must also reconstruct
