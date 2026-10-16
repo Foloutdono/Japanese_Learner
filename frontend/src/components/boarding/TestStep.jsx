@@ -9,7 +9,7 @@ import { ClimbRungs } from '../onboarding/PlacementTest'
 import { useClimb } from '../onboarding/useClimb'
 import { LEVEL_HOW } from '../../domain/boarding'
 
-// ── 4 · the level, asked first (plan 221, the owner's B) ─────────
+// ── 4 · the level, asked first (plan 224, the owner's B) ─────────
 // A reader of both scripts used to be handed the level line and asked
 // to name their own stop, and the stops behind it were marked known on
 // that word alone: a learner who thought they were N3 started with
@@ -114,7 +114,7 @@ export function LevelHowStep({ value, onChange, onContinue, no = null }) {
   )
 }
 
-// ── 4 · the test, in the boarding's car (plan 221) ───────────────
+// ── 4 · the test, in the boarding's car (plan 224) ───────────────
 // The climb (study/placement.walk): N5 first, a level up each time one
 // is cleared, the first not cleared where the learner boards. The
 // question in the car's stage, the levels over it (ClimbRungs), the

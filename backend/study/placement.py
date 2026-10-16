@@ -1,5 +1,5 @@
 # ── 実力診断 — the onboarding placement test ──────────────────────
-# Since plan 221 the test CLIMBS (the owner's call): it asks at N5, and
+# Since plan 224 the test CLIMBS (the owner's call): it asks at N5, and
 # while the learner is good enough it goes on to the next level, as far
 # as N1; the first level they do not clear is where they board. Each
 # level asks until its verdict is certain -- three right in a row, or
@@ -188,7 +188,7 @@ def recommend_level(per_section: dict) -> str:
 
 
 
-# ── The climb (plan 221) ──────────────────────────────────────────
+# ── The climb (plan 224) ──────────────────────────────────────────
 # A level's questions, in the order they are asked. The first three
 # decide most levels, so they are three different kinds.
 CLIMB: dict[str, list[str]] = {

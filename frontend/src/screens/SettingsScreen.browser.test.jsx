@@ -325,7 +325,7 @@ describe('SettingsScreen — the level, the bar and the service', () => {
     expect(apiJson.mock.calls.some(c => c[0] === '/api/profile/learning')).toBe(false)
   })
 
-  it('a move down says how many assumed cards go back to new (plan 221)', async () => {
+  it('a move down says how many assumed cards go back to new (plan 224)', async () => {
     apiJson.mockImplementation(async path => (
       String(path).startsWith('/api/profile/learning/preview')
         ? { direction: 'down', setAside: 12, returned: 1347, deleted: 0 }

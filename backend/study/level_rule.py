@@ -11,7 +11,7 @@ meanwhile; see daily_queue.hold_above). A stop on the way to the
 learner's goal is never held: the line is the goal when it lies above
 the level (daily_queue.hold_line).
 
-An assumption is not history (plan 221). A card marked known that the
+An assumption is not history (plan 224). A card marked known that the
 learner has never been asked about is the app's guess, and a move down
 says the guess was wrong: from the new level up, those rows are given
 back (SRSEngine.forget_assumed) and the cards are new again. Kept, they
@@ -56,7 +56,7 @@ def stops_behind(level: str) -> list[str]:
 
 def stops_from(level: str) -> list[str]:
     """`level` and every stop above it, in line order -- where a move
-    down to `level` gives the untouched assumptions back (plan 221)."""
+    down to `level` gives the untouched assumptions back (plan 224)."""
     return list(LEVELS[LEVELS.index(level):])
 
 
@@ -73,7 +73,7 @@ def known_batches(stops) -> list[tuple[str, str, list[str]]]:
     does not exist, but the filter is the registry's, not ours) is
     simply not a card.
 
-    The stops are dealt in turn, each in deck order (plan 221): one card
+    The stops are dealt in turn, each in deck order (plan 224): one card
     from each, then the next from each. Stop after stop, an N3 boarder's
     first three weeks of checks were all N5 and the stop they were
     likeliest to have misjudged, N4, was not asked before the fourth;

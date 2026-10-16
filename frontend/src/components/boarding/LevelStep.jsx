@@ -252,7 +252,7 @@ function stopOf(t, lang, volumes, level) {
   }
 }
 
-// A level's score on the test (plan 221), as its stop's tag: right out
+// A level's score on the test (plan 224), as its stop's tag: right out
 // of asked, in the pass's gold where it was cleared.
 function scored(stop, result) {
   const tally = result?.perLevel?.[stop.key]
@@ -261,7 +261,7 @@ function scored(stop, result) {
 }
 
 // `no` is the desk's: the question's place on the strip, for its hub.
-// `placed` is the test's verdict when the learner took it (plan 221):
+// `placed` is the test's verdict when the learner took it (plan 224):
 // the line then says where the answers stopped, each level asked
 // carries its score, and the stop they reach is the pick -- still the
 // learner's to change.

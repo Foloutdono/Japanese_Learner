@@ -1,5 +1,5 @@
 """
-Does the level fit? (plan 221)
+Does the level fit? (plan 224)
 
 A learner chooses their level at the boarding on their own word, and
 nothing afterwards asked whether the word was right. The answers they
@@ -18,7 +18,7 @@ give already say it, and this module reads them two ways:
 
 A move down is never forced and never automatic: the verdict is a
 suggestion, and the learner's level is theirs (ADR 0005). It is also
-cheap to take since plan 221: a move down gives the assumptions back as
+cheap to take since plan 224: a move down gives the assumptions back as
 new cards and deletes no history.
 
 verdict() is pure; level_fit() reads the two through the engine.

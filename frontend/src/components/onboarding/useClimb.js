@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { apiJsonWithTimeout } from '../../lib/api'
 
-// ── 実力診断 — the climb, as a screen's state (plan 221) ──────────
+// ── 実力診断 — the climb, as a screen's state (plan 224) ──────────
 // The test asks at N5 and goes up a level each time the learner clears
 // one; the first level they do not clear is where they board
 // (study/placement.walk). The server is the judge and keeps nothing:

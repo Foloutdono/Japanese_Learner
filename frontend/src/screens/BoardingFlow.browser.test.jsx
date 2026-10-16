@@ -242,7 +242,7 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-kana="both"]')
     await settle()
     // Both read: the level is a stop of its own, and the track grows one.
-    // It is asked first how to find it (plan 221): chosen, or tested.
+    // It is asked first how to find it (plan 224): chosen, or tested.
     expect(stepOf(screen)).toBe('levelHow')
     expect(stepsOf(screen)).toBe('4/8')
     expect(q(screen, '[data-action="continue"]').disabled).toBe(true)
@@ -507,7 +507,7 @@ describe('BoardingFlow', () => {
     seedCredits(CREDITS)
   })
 
-  // ── 実力診断 in the boarding (plan 221, the owner's B) ──
+  // ── 実力診断 in the boarding (plan 224, the owner's B) ──
   // The climb, mocked as the server answers it: one question at a time,
   // then the verdict. The line comes back with the stop reached chosen
   // and each level asked carrying its score.

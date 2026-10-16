@@ -98,7 +98,7 @@ export function bucketFor(min) {
   return 'pm'
 }
 
-/** How a reader of both scripts finds their level (plan 221): they
+/** How a reader of both scripts finds their level (plan 224): they
  *  choose it on the line, or the test finds it. */
 export const LEVEL_HOW = ['pick', 'test']
 

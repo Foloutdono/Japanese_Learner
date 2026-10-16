@@ -150,7 +150,7 @@ def compact(cur, scope: str, params: dict, min_quality: int) -> int:
     # 1. First sightings, BEFORE the rows that carry them are deleted.
     #    LEAST on conflict: a card already in the table was met earlier
     #    than anything this run can see. A level-rule check the learner
-    #    passed is no sighting (plan 221, srs._NOT_A_KEPT_CHECK), here
+    #    passed is no sighting (plan 224, srs._NOT_A_KEPT_CHECK), here
     #    as in the live readers.
     cur.execute(
         f"""

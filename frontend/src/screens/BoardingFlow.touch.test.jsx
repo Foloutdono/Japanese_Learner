@@ -168,7 +168,7 @@ describe('the boarding on a 390x667 handset', () => {
     expect(Object.entries(over).filter(([, px]) => px > 0)).toEqual([])
   }, 90000)
 
-  // The test in the boarding (plan 221): its longest kind of question,
+  // The test in the boarding (plan 224): its longest kind of question,
   // a sentence with its gap, four words under it, the levels over it
   // and its two ways out over the gate -- on the small handset too.
   it('asks the test\'s longest question without scrolling', async () => {

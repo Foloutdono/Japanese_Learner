@@ -63,7 +63,7 @@ def _build_radical_index() -> dict[int, list[str]]:
     # the caller's seeded random -- so in set order the same seed drew
     # other distractors after a restart, and the placement test, which
     # rebuilds its questions from the seed at every answer, could grade
-    # an answer against a paper the learner was never shown (plan 221).
+    # an answer against a paper the learner was never shown (plan 224).
     index: dict[int, list[str]] = {}
     for char in sorted(_DECK_CHARS):
         info = KANJI_RADICALS.get(char)

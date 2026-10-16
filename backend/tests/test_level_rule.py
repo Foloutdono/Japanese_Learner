@@ -212,7 +212,7 @@ def test_settings_previews_then_applies_a_move_up_and_a_move_down(lclient):
     assert lclient.get("/api/profile").json()["jlptLevel"] == "N3"
 
     # Down to N5: the cards the move up assumed known, none of them ever
-    # asked, go back to new (plan 221); nothing with history is deleted,
+    # asked, go back to new (plan 224); nothing with history is deleted,
     # and here there is none to set aside.
     down = lclient.get("/api/profile/learning/preview", params={"jlptLevel": "N5"}).json()
     assert down == {"direction": "down", "setAside": 0, "returned": n5 + n4, "deleted": 0}

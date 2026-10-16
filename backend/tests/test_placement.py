@@ -123,7 +123,7 @@ def test_placement_partial_submission_is_legal(client):
     assert scored.json()["recommendedLevel"] == "N5"
 
 
-# ── The climb (plan 221) ──────────────────────────────────────────
+# ── The climb (plan 224) ──────────────────────────────────────────
 # Asked at N5 and going up while the learner clears each level: three
 # right in a row or four right clears it, a second miss does not, and
 # the learner boards at the first level not cleared.

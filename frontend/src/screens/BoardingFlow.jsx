@@ -157,7 +157,7 @@ function trackStops(answers) {
 
 // The stop a screen stands at on the track: the reveal is the kana's,
 // and the level's question asked first and its test are the level's
-// own (plan 221) -- one question, however it is answered.
+// own (plan 224) -- one question, however it is answered.
 const STOP_OF = { reveal: 'kana', levelHow: 'level', test: 'level' }
 const stopOf = step => STOP_OF[step] ?? step
 
@@ -179,7 +179,7 @@ export default function BoardingFlow({
     kana: null,
     levelChoice: null,   // 'novice' | 'N5'..'N1' on the level list
     jlpt: null,          // the level the office stores
-    levelHow: null,      // 'pick' | 'test': how the level is found (plan 221)
+    levelHow: null,      // 'pick' | 'test': how the level is found (plan 224)
     placed: null,        // the test's verdict, when it was taken
     goal: null,
     lines: LINES,        // what to learn: any of vocab / kanji / grammar
@@ -307,7 +307,7 @@ export default function BoardingFlow({
   // On past a screen that is not kept behind the next one: the test,
   // done or left, is not a question Back returns to -- Back from the
   // line goes to the question before it, whose answer can start a
-  // fresh test (plan 221).
+  // fresh test (plan 224).
   function goPast(next) {
     mark(step, next, 'fwd')
     if (!REDUCED) setLeaving({ step, dir: 'fwd' })
@@ -431,7 +431,7 @@ export default function BoardingFlow({
     }
   }
 
-  // Choose the level, or let the test find it (plan 221, the owner's B).
+  // Choose the level, or let the test find it (plan 224, the owner's B).
   // Choosing clears a verdict an earlier test left: the line is then
   // the learner's word alone.
   function continueHow() {
@@ -564,7 +564,7 @@ export default function BoardingFlow({
           // The chosen names joined, never text a learner typed.
           lines: answers.lines.join(','),
           notifications: answers.notifications,
-          // How the level was found (plan 221), and where the test placed
+          // How the level was found (plan 224), and where the test placed
           // the learner when they took it -- beside `level`, what they
           // boarded at, so the two can be read apart.
           ...(answers.levelHow ? { level_how: answers.placed ? 'test' : 'pick' } : {}),

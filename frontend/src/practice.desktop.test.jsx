@@ -204,7 +204,7 @@ const question = (id, sectionId, texts, answer) => ({
 })
 
 describe('the placement test on the desk', () => {
-  // The climb (plan 221): one question at a time, the server answering
+  // The climb (plan 224): one question at a time, the server answering
   // each with the next one or the verdict.
   const climb = (...steps) => {
     const queue = [...steps]

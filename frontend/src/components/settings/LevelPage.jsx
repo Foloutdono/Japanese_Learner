@@ -166,7 +166,7 @@ export function LevelPage({ session }) {
 
 // ── The confirm sheet (canvas SettingsLevelUp / SettingsLevelDown) ──
 // A move down gives back the cards the level assumed known and never
-// asked about (plan 221): they are new again. The sheet prints how many
+// asked about (plan 224): they are new again. The sheet prints how many
 // where it printed the zero deleted -- the body still says nothing is.
 // Shared with Today's level-fit line (station/LevelFitLine), whose Stay
 // is an answer of its own (`onStay`) where here it only closes.

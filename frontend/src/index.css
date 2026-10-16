@@ -2186,7 +2186,7 @@ a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; t
   align-items: baseline;
   justify-content: space-between;
 }
-/* The climb's levels (plan 221): how many questions the test asks is
+/* The climb's levels (plan 224): how many questions the test asks is
    the answers' doing, so its head draws the levels rather than a count
    -- the ones cleared in the pass's gold, the one being asked ringed,
    the rest ahead. In the boarding's test too. */
@@ -8559,7 +8559,7 @@ textarea:focus-visible {
 .tdy-door__what { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tdy-door__what b { font-weight: 700; color: var(--text-primary); }
 .tdy-door__go { display: inline-flex; align-items: center; gap: var(--sp-1); font-weight: 600; color: var(--text-primary); }
-/* The level that does not fit (plan 221): the run's row's shape, a ring
+/* The level that does not fit (plan 224): the run's row's shape, a ring
    in the state's ink before its figures -- a stop behind the level the
    checks say is not known, or a level already behind the learner. */
 .tdy-fit { flex: none; }
@@ -24483,7 +24483,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 }
 .brd-way__name { font-size: var(--fs-body); font-weight: 700; line-height: 1.25; text-wrap: balance; }
 
-/* ── 04 the level asked first, and its test (plan 221) ──
+/* ── 04 the level asked first, and its test (plan 224) ──
    Choose it or let the test find it: two ways on the junction's one
    rung, each with a line under its name. The test stands in the car's
    stage, the climb's levels over the question, its two ways out over
@@ -34464,7 +34464,7 @@ button.brd-stn { cursor: pointer; }
     overflow-y: auto;
   }
   .tdy-desk__col > * { flex-shrink: 0; }
-  /* The level-fit row (plan 221) heads the column, the board under it. */
+  /* The level-fit row (plan 224) heads the column, the board under it. */
   .tdy-desk__col > .tdy-fit { min-height: var(--sp-8); }
   .tdy-desk__panel {
     display: flex;
@@ -36795,7 +36795,7 @@ button.brd-stn { cursor: pointer; }
   .desk-brd .brd__car[data-dir="back"] { --pull: -1; }
   .desk-brd .brd__car--out { animation: desk-brd-pull-out 180ms cubic-bezier(0.4, 0, 1, 1) forwards; }
   .desk-brd .brd__car[data-car="reveal"] { --desk-brd-w: calc(3 * var(--desk-side-w) + var(--sp-8)); }
-  /* The test (plan 221): the stage as wide as its choices, so the word
+  /* The test (plan 224): the stage as wide as its choices, so the word
      asked stands over them rather than at the paper's edge. */
   .desk-brd .brd__car[data-car="test"] { --desk-brd-w: var(--card-w); }
   .desk-brd .brd__stage {

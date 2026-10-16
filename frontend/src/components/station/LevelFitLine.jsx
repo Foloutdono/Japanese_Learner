@@ -8,7 +8,7 @@ import { useLearningSave } from '../settings/learningSave'
 import { LevelSheet } from '../settings/LevelPage'
 import { ChevronIcon } from '../ui/Icons'
 
-// ── 乗り越し — the level that does not fit (plan 221, the owner's D) ──
+// ── 乗り越し — the level that does not fit (plan 224, the owner's D) ──
 // A level chosen at the boarding is the learner's word, and the stops
 // behind it are marked known on it. The answers say whether the word
 // was right (GET /api/profile/level-fit, study/level_fit.py): a stop

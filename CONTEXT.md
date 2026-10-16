@@ -39,7 +39,7 @@ read it through the resolver seam (`core/user_level.resolve_level`) rather
 than the column: an explicit per-request choice still beats the stored
 value — see `docs/adr/0005`.
 
-**Placement test** (実力診断) — since plan 221, the climb: asked at N5, a
+**Placement test** (実力診断) — since plan 224, the climb: asked at N5, a
 level up each time one is cleared (three right in a row, or four right;
 a second miss ends the level), the first level not cleared where the
 learner boards. Offered at the boarding beside choosing the level, and
@@ -53,7 +53,7 @@ stands at a level above its stop (`study/level_rule.py`): a mastered row
 the ones from the new level up back as new cards (`forget_assumed`).
 
 **Check** — the first answer to an assumed card, marked `review_log.assumed`
-(plan 221). Passed, the card stays known and spends nothing of the day's
+(plan 224). Passed, the card stays known and spends nothing of the day's
 pace; missed, the card starts as new, never as a lapse.
 
 **Level fit** — whether the learner level fits the answers

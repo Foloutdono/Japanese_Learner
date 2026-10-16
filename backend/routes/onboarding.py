@@ -1,11 +1,11 @@
 # ── みどりの窓口 — the onboarding endpoints ──────────────────────
 # Four routes, all synchronous, none touching the exam pipeline:
 #
-#   POST /api/onboarding/placement/start  the climb's first question (plan 221)
+#   POST /api/onboarding/placement/start  the climb's first question (plan 224)
 #   POST /api/onboarding/placement/answer the next one, or where to board
 #   POST /api/onboarding/placement        a fresh 12-question paper, and
 #   POST /api/onboarding/placement/score  its grade: the fixed test, kept
-#                                         for a client built before 221
+#                                         for a client built before 224
 #   POST /api/onboarding/complete         stamp level + pace + onboarded_at
 #                                         (+ the boarding's own answers,
 #                                         plan 075: motive, kana, rhythm,
@@ -267,7 +267,7 @@ class CompletePayload(BaseModel):
 @router.post("/api/onboarding/placement/start")
 def start_climb(user_id: str = Depends(get_user_id)):
     """The climb's first question, at N5, and the seed every later
-    answer is replayed from (plan 221)."""
+    answer is replayed from (plan 224)."""
     seed = random.randrange(2 ** _SEED_BITS)
     return {"seed": seed, **walk(seed, {})}
 
@@ -305,7 +305,7 @@ def score_placement(payload: ScorePayload, user_id: str = Depends(get_user_id)):
 def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_user_id)):
     ensure_profile_row(user_id)
     # A replay of the office below the level it last stored is a move
-    # down, and gives back what that level assumed (plan 221), as
+    # down, and gives back what that level assumed (plan 224), as
     # Settings' does; anything else seeds as the first boarding did.
     previous = _profile_row(user_id)[1]
     has_goal = payload.goalLevel is not None

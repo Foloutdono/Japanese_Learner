@@ -9,7 +9,7 @@ import { runKey } from '../../lib/keyGuards'
 import { useClimb } from './useClimb'
 
 // ── 実力診断 — the placement test ────────────────────────────────
-// The climb (plan 221): asked at N5, up a level each time one is
+// The climb (plan 224): asked at N5, up a level each time one is
 // cleared, as far as N1 -- one question at a time through the exam
 // screens' own QuestionRenderer (mcq-text hits McqBlock, which brings
 // the roving-tabindex radiogroup for free). How many questions it asks

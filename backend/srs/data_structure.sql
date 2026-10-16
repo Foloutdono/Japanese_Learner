@@ -72,7 +72,7 @@ CREATE TABLE review_log (
     -- change later.
     xp_earned INTEGER NOT NULL DEFAULT 0,
     reviewed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    -- The first answer to a card the level rule marked known (plan 221):
+    -- The first answer to a card the level rule marked known (plan 224):
     -- a check, not a first sighting. A check passed spends no new card
     -- of the day's pace, and the level-fit watch reads the checks per
     -- stop (study/level_fit.py).

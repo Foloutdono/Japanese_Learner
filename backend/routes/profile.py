@@ -405,7 +405,7 @@ class LearningPayload(BaseModel):
 # rows. Both halves answer in the same shape the settings sheets
 # print: "up" carries what would be (or was) marked known and the
 # spread, "down" what is set aside, what goes back to new (the
-# assumptions never checked, plan 221) and the zero that is deleted.
+# assumptions never checked, plan 224) and the zero that is deleted.
 def _level_direction(current: str | None, target: str) -> str:
     if current == target:
         return "same"
@@ -449,7 +449,7 @@ def apply_level_rule(user_id: str, current: str | None, target: str) -> dict:
     """Write the rule for a level just stored: seed every stop behind
     `target` (rows that exist are left alone, so the stops behind the
     previous level cost nothing a second time). A move down gives back
-    the assumptions it no longer stands behind (plan 221) and deletes
+    the assumptions it no longer stands behind (plan 224) and deletes
     no history."""
     direction = _level_direction(current, target)
     if direction == "same":
@@ -843,7 +843,7 @@ def preview_learning(jlptLevel: str = Query(...), user_id: str = Depends(get_use
 
 @router.get("/api/profile/level-fit")
 def get_level_fit(user_id: str = Depends(get_user_id)):
-    """Whether the stored level fits what the learner answers (plan 221,
+    """Whether the stored level fits what the learner answers (plan 224,
     study/level_fit.py): a stop to move down to when the checks behind
     the level mostly fail, the next one when the level's new words are
     known the first time they are asked, or nothing -- with the figures

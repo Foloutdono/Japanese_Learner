@@ -1,4 +1,4 @@
-# ── An assumption is not history (plan 221) ───────────────────────
+# ── An assumption is not history (plan 224) ───────────────────────
 # The level rule marks the stops behind a level known on the learner's
 # word. Three things followed from treating that guess as history, and
 # each is pinned here against the learner it hurt:

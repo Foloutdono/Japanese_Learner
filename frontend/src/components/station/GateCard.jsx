@@ -483,7 +483,7 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
       <span className="tdy__air" aria-hidden="true" />
 
       <div className="tdy__foot">
-        {/* The level that does not fit (plan 221), over the run's own row. */}
+        {/* The level that does not fit (plan 224), over the run's own row. */}
         <LevelFitLine session={session} />
         <button type="button" className="tdy-door" onClick={() => { playClick(); setOpen(true) }} aria-haspopup="dialog">
           <span className="tdy-door__what">

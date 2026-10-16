@@ -1,4 +1,4 @@
-# ── Does the level fit? (plan 221) ────────────────────────────────
+# ── Does the level fit? (plan 224) ────────────────────────────────
 # study/level_fit reads two things the learner's answers already say:
 # the level rule's checks behind the level (mostly failed: board lower)
 # and the level's words the first time they are asked (nearly all known:

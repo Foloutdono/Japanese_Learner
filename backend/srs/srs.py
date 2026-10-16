@@ -50,11 +50,11 @@ PACE_PRIOR_RUNS = 3
 MASTERED_DAYS = 21
 
 # The grade an answer to the level rule's check must reach to keep the
-# card known (plan 221): the scheduler's pass, and the ladder's.
+# card known (plan 224): the scheduler's pass, and the ladder's.
 CHECK_PASS = 3
 
 # A card's first sighting, for the pace and the journey, is never a
-# check it passed (plan 221): a word the learner already knew, confirmed,
+# check it passed (plan 224): a word the learner already knew, confirmed,
 # was learnt on no day here, and counted as met it spent the day's new
 # cards -- an N3 boarder answering the morning's N5 checks was then
 # served no N3 card at all. A check MISSED is met that day: the card
@@ -399,7 +399,7 @@ class SRSEngine:
                     ADD COLUMN IF NOT EXISTS xp_earned INTEGER NOT NULL DEFAULT 0
                 """)
 
-                # The level rule's check (plan 221): the row is the first
+                # The level rule's check (plan 224): the row is the first
                 # answer to a card seed_known marked known. A constant
                 # default, so Postgres adds it without rewriting the table.
                 self._log_sql("add_review_log_assumed", """
@@ -730,7 +730,7 @@ class SRSEngine:
         # this review is a learning step's repeat, which rides free
         # (core/credits.py, fare). Every review route prices on it.
         repeat = self.is_repeat(state.total_reviews, state.is_learning)
-        # The level rule's check (plan 221): a card the app assumed known
+        # The level rule's check (plan 224): a card the app assumed known
         # and the learner does not know was never learned, so it is not
         # a lapse. It starts as a new card met today and answered wrong:
         # no difficulty added for good, no mastered interval kept to
@@ -2485,7 +2485,7 @@ class SRSEngine:
     # was checked once at the mastered interval: a first real review
     # that passes grows it exactly as it would a card the learner
     # earned that state on (scheduler.py's _handle_review). One that
-    # fails does not lapse it (plan 221, review above): the card was
+    # fails does not lapse it (plan 224, review above): the card was
     # assumed, never learned, and starts as new. The single virtual
     # check is what get_bulk_stats and _classify_stage read -- a row
     # with no reviews is "new", whatever its interval -- and it is a
@@ -2500,7 +2500,7 @@ class SRSEngine:
     @classmethod
     def is_assumed(cls, state: CardState) -> bool:
         """Whether a row is still the level rule's assumption: written by
-        seed_known and never answered since (plan 221). Read off the row
+        seed_known and never answered since (plan 224). Read off the row
         itself, which nothing else can write: a card met from new has
         no graduated repetition after its first review, and KNOWN_STATE
         has three after one. The first answer, pass or miss, changes
@@ -2565,7 +2565,7 @@ class SRSEngine:
         return len(written)
 
     def forget_assumed(self, card_ids: list[str], mode: str, dry_run: bool = False) -> int:
-        """Give back the level rule's assumptions (plan 221): delete the
+        """Give back the level rule's assumptions (plan 224): delete the
         rows among these that seed_known wrote and no answer has touched
         since (is_assumed), so each is a new card again -- served by the
         day's ration in its deck's order, where a mastered row it was
@@ -2590,7 +2590,7 @@ class SRSEngine:
 
     def get_level_checks(self, user_id: str, days: int) -> list[tuple[str, int]]:
         """The level rule's checks the learner answered in the last
-        `days` days (plan 221): (raw card id, quality), one per card --
+        `days` days (plan 224): (raw card id, quality), one per card --
         a check is a card's first answer, and only ever one. What
         study/level_fit reads, stop by stop."""
         pattern = self._user_prefix_pattern(user_id)
@@ -2611,7 +2611,7 @@ class SRSEngine:
         whose raw id starts with `raw_prefix` (a deck: 'vocab_N4_') and
         first met in the last `days` days -- never a check, which is the
         level rule's question about a card it assumed, not a card met
-        (plan 221)."""
+        (plan 224)."""
         safe = (self._user_prefix_pattern(user_id)[:-1]
                 + raw_prefix.replace("\\", "\\\\").replace("%", r"\%").replace("_", r"\_") + "%")
         # A card whose first rows were compacted away (scripts/
@@ -2639,7 +2639,7 @@ class SRSEngine:
     def count_cards_with_history(self, card_ids: list[str]) -> int:
         """How many of these cards have a row under any mode that is more
         than an untouched assumption -- the cards a move down sets aside
-        once forget_assumed has given the rest back (plan 221)."""
+        once forget_assumed has given the rest back (plan 224)."""
         if not card_ids:
             return 0
         with self.storage.connection() as conn:

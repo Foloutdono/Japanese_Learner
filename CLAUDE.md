@@ -175,7 +175,7 @@ runtime purpose.
   DOM unchanged (`src/deskfree.phone.test.jsx`), and the short desk
   (1280×600, the `short` lane) is checked too. A phone bug fixed gets its own
   phone test.
-- **An assumption is not history (plan 221).** A card the level rule
+- **An assumption is not history (plan 224).** A card the level rule
   marked known and nobody has asked about (`SRSEngine.is_assumed`) is
   the app's guess about a self-declared level. Its first answer is a
   check (`review_log.assumed`): missed, the card starts as new, never as
@@ -185,7 +185,7 @@ runtime purpose.
   the new level up back as new cards (`forget_assumed`) and deletes no
   answered row; a new seeding path writes `KNOWN_STATE` or it is not
   read as an assumption.
-- **The placement test is replayed from its seed (plan 221).** The climb
+- **The placement test is replayed from its seed (plan 224).** The climb
   (`study/placement.walk`) keeps nothing between two answers: it is
   rebuilt from the seed at each one, in whatever process answers it. So
   every builder it calls is a pure function of (seed, content) across

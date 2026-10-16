@@ -81,7 +81,7 @@ EVENTS: dict[str, frozenset[str]] = {
     # `lines` is the chosen subset of vocab/kanji/grammar as one
     # comma-joined string of those three names -- enum values, never
     # text the learner typed (core/lines.py).
-    # `level_how` and `placed` (plan 221): whether the learner chose
+    # `level_how` and `placed` (plan 224): whether the learner chose
     # their level or took the test, and where the test placed them --
     # beside `level`, what they boarded at, so an override shows.
     "boarding_done":  frozenset({"motive", "kana_known", "level", "pace", "notifications", "lines", "ms",
@@ -320,7 +320,7 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         # a photo read. ask: a question to the tutor. explain: a
         # sentence's explanation opened. dictionary: a search run.
         # export: the progress downloaded. level_fit: Today's line that
-        # says the level does not fit (plan 221) -- opened, the move
+        # says the level does not fit (plan 224) -- opened, the move
         # taken, or the level kept.
         "feature": frozenset({"speech", "analyzer", "ocr", "ask", "explain",
                               "dictionary", "export", "level_fit"}),

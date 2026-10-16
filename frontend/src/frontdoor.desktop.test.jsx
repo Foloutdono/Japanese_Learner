@@ -1019,7 +1019,7 @@ describe('the digits at first contact (P12)', () => {
     expect(kbdOf(inCar('[data-kana="both"]'))).toBe('3')
     await userEvent.keyboard('3')
     await settle()
-    // Choose it or find it (plan 221): a road each, picked by its number.
+    // Choose it or find it (plan 224): a road each, picked by its number.
     expect(stepOf()).toBe('levelHow')
     expect(kbdOf(inCar('[data-how="pick"]'))).toBe('1')
     expect(kbdOf(inCar('[data-how="test"]'))).toBe('2')
