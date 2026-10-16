@@ -131,6 +131,9 @@ def cmd_stats() -> int:
     print(f"{len(fixes)} corrected ({sum(1 for k, f in fixes.items() if f['jp'] != k)} rewritten)")
     stale = [k for k in fixes if k not in originals]
     print(f"{len(stale)} corrections of a sentence the deck no longer shows")
+    written = example_fixes.written()
+    print(f"{sum(len(v) for v in written.values())} sentences written for {len(written)} words JMdict gives none; "
+          f"{words - len(with_examples | set(written))} deck words without a sentence")
     return 0
 
 

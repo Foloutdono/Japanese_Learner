@@ -102,7 +102,7 @@ def test_every_deck_word_shows_a_sentence(gap_cards):
     """Plan 227 wrote two for each of the 1,128 words JMdict gave none.
     Ratchet: lower the bound as words gain sentences, never raise it."""
     without = sorted(key for _, key in gap_cards if key not in example_fixes.written())
-    assert len(without) <= 1128, without[:20]
+    assert len(without) == 0, without[:20]
 
 
 def test_a_kana_card_reads_the_senses_of_its_own_word():

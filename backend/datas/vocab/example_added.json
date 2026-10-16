@@ -4240,8 +4240,8 @@
   "::モノレール": [
    {
     "jp": "空港までは、モノレールで行くのが便利です。",
-    "en": "To get to the airport, the monorail is the most convenient way.",
-    "fr": "Pour aller à l'aéroport, le plus pratique est de prendre le monorail."
+    "en": "To get to the airport, it's convenient to take the monorail.",
+    "fr": "Pour aller à l'aéroport, c'est pratique de prendre le monorail."
    },
    {
     "jp": "モノレールの窓から、町の景色がよく見えた。",
@@ -4540,7 +4540,7 @@
   "一昨昨日::さきおととい": [
    {
     "jp": "一昨昨日から、ずっと雨が降り続いている。",
-    "en": "It has been raining nonstop since three days ago.",
+    "en": "It has been raining nonstop for three days now.",
     "fr": "Il pleut sans arrêt depuis trois jours."
    },
    {
@@ -5276,9 +5276,9 @@
     "fr": "Si je peux vivre sans manquer de vêtements, de nourriture ni de logement, cela me suffit."
    },
    {
-    "jp": "会社の近くに引っ越して、職住近接の生活を始めた。",
-    "en": "I moved near my company and started a life where work and home are close together.",
-    "fr": "J'ai déménagé près de mon entreprise et commencé une vie où travail et logement sont proches."
+    "jp": "この雑誌には、食と住をテーマにした記事が多い。",
+    "en": "This magazine has many articles on food and housing.",
+    "fr": "Ce magazine publie beaucoup d'articles consacrés à l'alimentation et à l'habitat."
    }
   ],
   "住居::じゅうきょ": [
@@ -6915,9 +6915,9 @@
   ],
   "土俵::どひょう": [
    {
-    "jp": "名前を呼ばれた力士が、塩をまいて土俵に上がった。",
-    "en": "The wrestler whose name was called threw salt and stepped up into the ring.",
-    "fr": "Le lutteur dont le nom venait d'être annoncé a jeté du sel et est monté sur le ring."
+    "jp": "名前を呼ばれた力士が土俵に上がり、塩をまいた。",
+    "en": "The wrestler whose name had been called stepped up into the ring and threw salt.",
+    "fr": "Le lutteur dont le nom venait d'être annoncé est monté sur le ring et a jeté du sel."
    },
    {
     "jp": "両社はようやく同じ土俵で話し合えるようになった。",
@@ -7282,7 +7282,7 @@
    {
     "jp": "「考えておきます」は、断りの婉曲な言い方として使われることが多い。",
     "en": "\"I'll think about it\" is often used as an indirect way of saying no.",
-    "fr": "« J'y réfléchirai » sert souvent de façon détournée de refuser."
+    "fr": "« J'y réfléchirai » s'emploie souvent comme une manière détournée de refuser."
    }
   ],
   "婿::むこ": [
@@ -7580,8 +7580,8 @@
     "fr": "Convertissez les fractions suivantes en nombres décimaux."
    },
    {
-    "jp": "小数の計算では、点の位置を間違えやすい。",
-    "en": "In calculations with decimals, it is easy to put the point in the wrong place.",
+    "jp": "小数の計算では、小数点の位置を間違えやすい。",
+    "en": "In calculations with decimals, it is easy to put the decimal point in the wrong place.",
     "fr": "Dans les calculs avec des décimaux, on se trompe facilement sur la place de la virgule."
    }
   ],
@@ -7844,9 +7844,9 @@
     "fr": "Ma mère travaille à la préfecture, où elle s'occupe de l'aide sociale."
    },
    {
-    "jp": "環境を担当する庁の職員が、川の水を調べに来た。",
-    "en": "Staff from the agency in charge of the environment came to test the river water.",
-    "fr": "Des agents de l'administration chargée de l'environnement sont venus analyser l'eau de la rivière."
+    "jp": "気象庁は、明日は大雨になるおそれがあると発表した。",
+    "en": "The Japan Meteorological Agency announced that there is a risk of heavy rain tomorrow.",
+    "fr": "L'Agence météorologique du Japon a annoncé un risque de fortes pluies pour demain."
    }
   ],
   "床の間::とこのま": [
@@ -8235,9 +8235,9 @@
   ],
   "怒る::いかる": [
    {
-    "jp": "うそがばれると、祖父は烈火のごとく怒った。",
-    "en": "When the lie came out, my grandfather flew into a towering rage.",
-    "fr": "Quand le mensonge a été découvert, mon grand-père est entré dans une colère noire."
+    "jp": "怒れる市民たちが、市役所の前で抗議の声を上げた。",
+    "en": "Angry citizens raised their voices in protest in front of city hall.",
+    "fr": "Des citoyens en colère ont protesté haut et fort devant la mairie."
    },
    {
     "jp": "怒れる海が、小さな漁船を木の葉のように揺さぶった。",
@@ -8272,7 +8272,7 @@
   "情け深い::なさけぶかい": [
    {
     "jp": "情け深い店主は、お金が少し足りない子どもに、その分をまけてくれた。",
-    "en": "The kind-hearted shopkeeper let a child who was a little short of money off the difference.",
+    "en": "The kind-hearted shopkeeper waived the difference for a child who was a little short of money.",
     "fr": "Le commerçant, plein de compassion, a fait cadeau de la différence à un enfant à qui il manquait un peu d'argent."
    },
    {
@@ -8523,14 +8523,14 @@
   ],
   "折り返す::おりかえす": [
    {
-    "jp": "今は手が離せないので、あとで折り返し電話します。",
-    "en": "I'm busy right now, so I'll call you back later.",
+    "jp": "今は手が離せないので、あとでこちらから折り返します。",
+    "en": "I'm tied up right now, so I'll call you back later.",
     "fr": "Je suis occupé pour le moment, je vous rappellerai plus tard."
    },
    {
     "jp": "ズボンのすそを二センチ折り返した。",
     "en": "I turned up the hems of my trousers by two centimetres.",
-    "fr": "J'ai retroussé le bas de mon pantalon de deux centimètres."
+    "fr": "J'ai replié le bas de mon pantalon sur deux centimètres."
    }
   ],
   "折衷::せっちゅう": [
@@ -8816,9 +8816,9 @@
     "fr": "J'ai pris des cours d'auto-école pendant les vacances d'été et j'ai obtenu mon permis."
    },
    {
-    "jp": "新しい機械の使い方について、社員全員が教習を受けた。",
-    "en": "All the employees received training in how to use the new machine.",
-    "fr": "Tous les employés ont suivi une formation sur l'utilisation de la nouvelle machine."
+    "jp": "初めての路上教習の日は、緊張してハンドルを握る手が震えた。",
+    "en": "On the day of my first on-road driving lesson, I was so nervous that my hands shook on the wheel.",
+    "fr": "Le jour de ma première leçon de conduite sur la route, le stress me faisait trembler les mains sur le volant."
    }
   ],
   "敬具::けいぐ": [
@@ -9164,9 +9164,9 @@
     "fr": "J'achète des légumes cultivés en bio à un agriculteur du coin."
    },
    {
-    "jp": "庭の畑では、化学肥料を使わずに有機肥料だけで野菜を育てている。",
-    "en": "In the garden plot, I grow vegetables with organic fertilizer only, without chemical fertilizer.",
-    "fr": "Dans le potager du jardin, je cultive des légumes uniquement avec de l'engrais organique, sans engrais chimique."
+    "jp": "生ごみなどの有機物は、時間がたつと土に返る。",
+    "en": "Organic matter such as kitchen scraps returns to the soil over time.",
+    "fr": "Les matières organiques, comme les déchets de cuisine, retournent à la terre avec le temps."
    }
   ],
   "有能::ゆうのう": [
@@ -9675,9 +9675,9 @@
   ],
   "毎::ごと": [
    {
-    "jp": "このバスは、駅前から十五分毎に出ている。",
-    "en": "This bus leaves from in front of the station every fifteen minutes.",
-    "fr": "Ce bus part de devant la gare toutes les quinze minutes."
+    "jp": "ごみの出し方は、町毎に少しずつ違う。",
+    "en": "The rules for putting out the rubbish vary slightly from town to town.",
+    "fr": "Les règles pour sortir les poubelles varient légèrement d'une ville à l'autre."
    },
    {
     "jp": "薬は六時間毎に一回飲んでください。",
@@ -9975,9 +9975,9 @@
   ],
   "添う::そう": [
    {
-    "jp": "お客様のご要望に添う商品をご提案します。",
-    "en": "We will suggest products that meet your requirements.",
-    "fr": "Nous vous proposerons des produits qui répondent à vos souhaits."
+    "jp": "母は、熱を出した弟に一晩中添っていた。",
+    "en": "My mother stayed by my little brother's side all night when he had a fever.",
+    "fr": "Ma mère est restée toute la nuit auprès de mon petit frère, qui avait de la fièvre."
    },
    {
     "jp": "ご期待に添うことができず、申し訳ございません。",
@@ -10268,9 +10268,9 @@
     "fr": "Des cygnes nageaient paisiblement dans les douves du château."
    },
    {
-    "jp": "春になると、濠に沿って桜が咲き並ぶ。",
-    "en": "In spring, cherry trees bloom in a row along the moat.",
-    "fr": "Au printemps, les cerisiers fleurissent tout le long des douves."
+    "jp": "この遺跡からは、弥生時代の環濠集落の跡が見つかった。",
+    "en": "The remains of a moated settlement from the Yayoi period were found at this site.",
+    "fr": "On a découvert sur ce site les vestiges d'un village de l'époque Yayoi entouré de fossés."
    }
   ],
   "濠::ほり": [
@@ -11499,9 +11499,9 @@
   ],
   "紅葉::もみじ": [
    {
-    "jp": "週末、京都へ紅葉を見に行った。",
-    "en": "At the weekend, I went to Kyoto to see the autumn leaves.",
-    "fr": "Ce week-end, je suis allé à Kyoto voir les feuilles rouges d'automne."
+    "jp": "道で拾った紅葉の葉を、本にはさんだ。",
+    "en": "I slipped a maple leaf I'd picked up on the street between the pages of a book.",
+    "fr": "J'ai glissé entre les pages d'un livre une feuille d'érable ramassée dans la rue."
    },
    {
     "jp": "庭の紅葉の木が、赤く色づいてきた。",
@@ -11692,13 +11692,13 @@
   "罰::ばち": [
    {
     "jp": "食べ物を粗末にすると、罰が当たるよ。",
-    "en": "If you waste food, you'll be punished for it, you know.",
-    "fr": "Si tu gaspilles la nourriture, tu en seras puni, tu sais."
+    "en": "If you waste food, Heaven will punish you, you know.",
+    "fr": "Si tu gaspilles la nourriture, le ciel te punira, tu sais."
    },
    {
     "jp": "こんなに恵まれているのに文句を言ったら、罰が当たる。",
-    "en": "I'm so fortunate that I'd deserve to be punished if I complained.",
-    "fr": "J'ai tellement de chance que je mériterais d'être puni si je me plaignais."
+    "en": "If I complained when I'm this fortunate, Heaven would punish me.",
+    "fr": "Si je me plaignais alors que j'ai tant de chance, le ciel me punirait."
    }
   ],
   "習字::しゅうじ": [
@@ -12195,13 +12195,13 @@
   ],
   "見せ物::みせもの": [
    {
-    "jp": "昔の祭りでは、さまざまな見せ物の小屋が並んだ。",
-    "en": "At festivals long ago, all kinds of show booths stood in rows.",
+    "jp": "昔の祭りでは、さまざまな見せ物小屋が並んだ。",
+    "en": "At festivals long ago, all kinds of sideshow booths stood in rows.",
     "fr": "Autrefois, lors des fêtes, toutes sortes de baraques de spectacle s'alignaient."
    },
    {
     "jp": "見せ物じゃないんだから、じろじろ見ないでよ。",
-    "en": "I'm not some kind of show, so stop staring at me!",
+    "en": "I'm not some sideshow, so stop staring at me!",
     "fr": "Je ne suis pas une bête de foire, alors arrête de me dévisager !"
    }
   ],
@@ -12328,7 +12328,7 @@
   "謙る::へりくだる": [
    {
     "jp": "彼は目上の人にも目下の人にも、同じように謙った態度で接する。",
-    "en": "He treats his superiors and his juniors alike with the same humble manner.",
+    "en": "He treats superiors and juniors alike, with the same humility.",
     "fr": "Il traite ses supérieurs comme ses subordonnés avec la même humilité."
    },
    {
@@ -13172,9 +13172,9 @@
     "fr": "J'ai averti les enfants de ne pas s'approcher du bord de la falaise."
    },
    {
-    "jp": "窓際の席に座って、外の景色を眺めた。",
-    "en": "I sat in a seat by the window and gazed at the scenery outside.",
-    "fr": "J'ai pris une place près de la fenêtre et j'ai contemplé le paysage dehors."
+    "jp": "池の際まで行くと、魚が何匹も寄ってきた。",
+    "en": "When I walked right up to the edge of the pond, lots of fish swam over to me.",
+    "fr": "Quand j'ai marché jusqu'au bord de l'étang, de nombreux poissons sont venus vers moi."
    }
   ],
   "隠居::いんきょ": [
@@ -13508,9 +13508,9 @@
     "fr": "En été, les chemises en lin sont fraîches et agréables."
    },
    {
-    "jp": "このテーブルクロスは、麻でできている。",
-    "en": "This tablecloth is made of linen.",
-    "fr": "Cette nappe est en lin."
+    "jp": "昔は、麻の糸で網や縄を作っていた。",
+    "en": "In the old days, nets and ropes were made from hemp thread.",
+    "fr": "Autrefois, on fabriquait des filets et des cordes avec du fil de chanvre."
    }
   ],
   "黴菌::ばいきん": [

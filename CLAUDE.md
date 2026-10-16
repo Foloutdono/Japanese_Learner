@@ -185,7 +185,10 @@ runtime purpose.
   `content/example_fixes.py` (`datas/vocab/example_fixes.json`): a
   correction keeps every course word the sentence showed, carries its
   `en`, `fr` and `why`, and is drafted and checked with
-  `python -m scripts.vocab_examples check`.
+  `python -m scripts.vocab_examples check`. A word JMdict gives no
+  sentence has two written for it (`datas/vocab/example_added.json`,
+  `check-added`: its course spelling, no kanji above its level), so every
+  card shows one; a word the deck gains is written for in the same change.
 - **A width change is held on both sides.** A desk change keeps the phone's
   DOM unchanged (`src/deskfree.phone.test.jsx`), and the short desk
   (1280×600, the `short` lane) is checked too. A phone bug fixed gets its own
