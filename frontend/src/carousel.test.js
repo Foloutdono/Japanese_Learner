@@ -1135,6 +1135,8 @@ describe('the short formats (plan 214)', () => {
 })
 
 describe('the conversion carousels (plan 215)', () => {
+  // The slides after the call to action: the detail and the suite.
+  const SUITE = /^(more|question-|answer-)/
   const withPath2D = fn => {
     const had = globalThis.Path2D
     globalThis.Path2D = class { constructor(d) { this.d = d } }
@@ -1159,10 +1161,10 @@ describe('the conversion carousels (plan 215)', () => {
         for (const design of DESIGNS) {
           const five = deck(type, p, FORMATS.post, { design, length: '5' }).map(x => x.key)
           expect(five.slice(0, 3), where).toEqual(['ask', 'answer', 'cta'])
-          expect(five.slice(3).every(k => ['more', 'keys'].includes(k)), where).toBe(true)
+          expect(five.slice(3).every(k => k === 'keys' || SUITE.test(k)), where).toBe(true)
           // The studio's length: to the call to action, then the key points, then the detail.
           expect(deck(type, p, FORMATS.post, { design, length: '3' }).map(x => x.key), where).toEqual(['ask', 'answer', 'cta'])
-          expect(deck(type, p, FORMATS.post, { design, length: '4' }).map(x => x.key), where).toEqual(five.filter(k => k !== 'more'))
+          expect(deck(type, p, FORMATS.post, { design, length: '4' }).map(x => x.key), where).toEqual(five.filter(k => !SUITE.test(k)))
         }
         for (const [design, fmt] of [['clarte', FORMATS.post], ['defi', FORMATS.story], ['fiche', FORMATS.post]]) {
           for (const sl of deck(type, p, fmt, { design })) expect(() => sl.draw(stubContext().ctx), `${where} ${design} ${sl.key}`).not.toThrow()
@@ -1182,7 +1184,14 @@ describe('the conversion carousels (plan 215)', () => {
         // French punctuation is welded to its word (DESIGN.md).
         if (lang === 'fr') expect(k, `${src.id} ${id}`).not.toMatch(/ [:;!?]/)
       }
+      // Each says what kind of point it is, a kind the slide can name (plan 215c).
+      expect(p.funnel.notes.map(n => n.text), `${src.id} ${id}`).toEqual(keys)
+      for (const n of p.funnel.notes) expect(FUNNEL[lang].kinds[n.kind], `${src.id} ${id} ${n.kind}`).toBeTruthy()
     }
+    // A point that says again what one before it said gives way to it.
+    const lesson = some.find(x => x.src.id === 'lesson' && x.lang === 'en')
+    const prose = lesson.p.funnel.notes.filter(n => ['use', 'mean', 'careful', 'contrast'].includes(n.kind))
+    expect(new Set(prose.map(n => n.kind)).size, 'lesson').toBe(prose.length)
   })
 
   it('promotes the feature an item comes from, drawn, never a figure', () => withPath2D(() => {
@@ -1239,17 +1248,50 @@ describe('the conversion carousels (plan 215)', () => {
         if (asks(F.detail)) {
           expect(F.detail.yours, where).toBe(true)
           expect(!F.detail.revealed && !F.detail.reveal, where).toBe(true)
-          // ... and answered on the slide after it.
+          // ... and answered on the slide after it (unless an earlier slide
+          // had answered it, and another took its place).
           const slides = deck(type, p, FORMATS.post, { design: 'clarte', length: '5' })
-          expect(slides.map(x => x.key).slice(-2), where).toEqual(['more', 'keys'])
+          const keys = slides.map(x => x.key)
+          const at = keys.indexOf('question-2')
+          if (at >= 0) {
+            expect(keys[at + 1], where).toBe('keys')
+            const { ctx, texts } = stubContext()
+            slides.at(-1).draw(ctx)
+            // The kicker is set letter by letter: read it without its spaces.
+            const flat = t => t.replace(/\s/g, '')
+            expect(flat(texts.join('')), where).toContain(flat(FUNNEL[lang].yoursAnswer.toLocaleUpperCase()))
+          }
+        }
+        // The answer slide shows the solution alone, never the question again.
+        if (F.hook.kind === 'question' && F.solution.kind === 'question' && F.hook.q.ask) {
           const { ctx, texts } = stubContext()
-          slides.at(-1).draw(ctx)
-          // The kicker is set letter by letter: read it without its spaces.
-          const flat = t => t.replace(/\s/g, '')
-          expect(flat(texts.join('')), where).toContain(flat(FUNNEL[lang].yoursAnswer.toLocaleUpperCase()))
+          deck(type, p, FORMATS.post, { design: 'clarte', length: '3' })[1].draw(ctx)
+          expect(texts.join(' '), where).not.toContain(F.hook.q.ask)
         }
         // A text is asked its question before the slide that answers it.
         if (F.hook.kind === 'passage' && F.solution.kind === 'question') expect(F.hook.q, where).toBe(F.solution.q)
+      }
+    }
+  }))
+
+  it('deals longer carousels on request, each question answered on the slide after it', { timeout: 120000 }, () => withPath2D(() => {
+    for (const { src, id, lang, p } of some) {
+      for (const type of types(p)) {
+        const where = `${src.id} ${id} ${lang} ${type}`
+        let before = 0
+        for (const length of ['5', '6', '7', '8']) {
+          const keys = deck(type, p, FORMATS.post, { design: 'clarte', length }).map(x => x.key)
+          // Never more than asked, never fewer than a shorter one, the key points last.
+          expect(keys.length, where).toBeLessThanOrEqual(+length)
+          expect(keys.length, where).toBeGreaterThanOrEqual(before)
+          before = keys.length
+          expect(new Set(keys).size, where).toBe(keys.length)
+          keys.forEach((k, i) => {
+            // A question's answer is the next slide; the last question's, the key points.
+            if (k.startsWith('question-')) expect([`answer-${k.slice(9)}`, 'keys'], where).toContain(keys[i + 1])
+            if (k.startsWith('answer-')) expect(keys[i - 1], where).toBe(`question-${k.slice(7)}`)
+          })
+        }
       }
     }
   }))

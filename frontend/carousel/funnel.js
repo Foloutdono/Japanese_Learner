@@ -25,7 +25,7 @@ import { picked } from './sources.js'
 import { withoutGiveaways } from './quizzes.js'
 
 export const DESIGNS = ['clarte', 'defi', 'fiche']
-export const LENGTHS = [3, 4, 5]
+export const LENGTHS = [3, 4, 5, 6, 7, 8]
 // The app's features a call to action can show (plan 215b: every practice
 // mode, the analyser, the question after an exercise, Today).
 export const FEATURES = ['reading', 'comprehension', 'translation', 'listen', 'composition', 'exam', 'analyser', 'ask', 'today', 'words', 'kanji', 'grammar', 'kana']
@@ -56,6 +56,11 @@ export const WORDS = {
     yoursFoot: 'The answer is on the next slide',
     yoursAnswer: 'Your turn: the answer',
     keys: 'Key points',
+    kinds: {
+      use: ['🔧', 'How it works'], mean: ['📖', 'Meaning'], form: ['🧩', 'Form'], careful: ['⚠️', 'Watch out'], contrast: ['↔️', 'Don’t mix up'],
+      reading: ['🗣️', 'Reading'], word: ['📝', 'In a word'], example: ['💬', 'Example'], parts: ['🧱', 'Its parts'], sound: ['🔊', 'Sound'],
+      twin: ['🔁', 'Its twin'], why: ['💡', 'Why'], note: ['✨', 'Remember'],
+    },
     saveFor: 'Save it for your next review',
     or: 'or',
     them: 'Them', you: 'You',
@@ -99,6 +104,11 @@ export const WORDS = {
     yoursFoot: 'La réponse est juste après',
     yoursAnswer: 'À toi : la réponse',
     keys: 'À retenir',
+    kinds: {
+      use: ['🔧', 'Comment ça marche'], mean: ['📖', 'Sens'], form: ['🧩', 'Forme'], careful: ['⚠️', 'Attention'], contrast: ['↔️', 'À ne pas confondre'],
+      reading: ['🗣️', 'Lecture'], word: ['📝', 'Dans un mot'], example: ['💬', 'Exemple'], parts: ['🧱', 'Ses parties'], sound: ['🔊', 'Son'],
+      twin: ['🔁', 'Son jumeau'], why: ['💡', 'Pourquoi'], note: ['✨', 'À retenir'],
+    },
     saveFor: 'Enregistre-le pour ta prochaine révision',
     or: 'ou',
     them: 'En face', you: 'Toi',
@@ -155,14 +165,17 @@ const FEATURE_OF = {
 const whyOf = q => q.explain?.why || (q.explain?.head && q.explain?.sense ? `${q.explain.head}: ${q.explain.sense}` : '')
 export function funnelOf(type, pl, opts = {}) {
   const f = pl.funnel || {}
-  const base = { keys: f.keys || [], feature: FEATURE_OF[pl.source] || 'reading' }
+  const base = { keys: f.keys || [], notes: f.notes || (f.keys || []).map(text => ({ kind: 'note', text })), feature: FEATURE_OF[pl.source] || 'reading' }
+  const as = (kind, list) => list.filter(Boolean).map(text => ({ kind, text }))
   const whys = qs => qs.map(whyOf).filter(Boolean)
   const asked = (qs, extra = {}) => qs.length ? {
     ...base, feature: 'exam', ...extra,
     hook: { kind: 'question', q: qs[0], ask: 'answer', seconds: 10 },
     solution: { kind: 'question', q: qs[0], revealed: true },
     detail: qs.length > 1 ? { kind: 'question', q: qs[1], yours: true } : null,
+    further: qs.slice(2).map(q => ({ kind: 'question', q, yours: true })),
     keys: (whys(qs).length ? whys(qs) : base.keys).slice(0, 3),
+    notes: (whys(qs).length ? as('why', whys(qs)) : base.notes).slice(0, 3),
   } : null
   switch (type) {
     case 'exam': return asked(withoutGiveaways(picked(pl, opts.picks, 3)))
@@ -177,6 +190,7 @@ export function funnelOf(type, pl, opts = {}) {
         solution: { kind: 'sides', sides: C.sides },
         detail: ex.length ? { kind: 'examples', items: ex.map(x => ({ rows: x.ex.rows, tr: x.ex.tr, head: x.head })), label: 'sentences' } : null,
         keys: [C.diff, C.careful].filter(Boolean).slice(0, 3),
+        notes: [...as('contrast', [C.diff]), ...as('careful', [C.careful])],
       }
     }
     case 'build': {
@@ -212,6 +226,7 @@ export function funnelOf(type, pl, opts = {}) {
         solution: { kind: 'chat', lines: T.lines, them: T.them },
         detail: T.quiz ? { kind: 'question', q: T.quiz, yours: true } : null,
         keys: [T.why, T.note, ...base.keys].filter(Boolean).slice(0, 3),
+        notes: [...as('use', [T.why]), ...as('note', [T.note]), ...base.notes].slice(0, 3),
       }
     }
     case 'impostor': {
@@ -224,7 +239,9 @@ export function funnelOf(type, pl, opts = {}) {
         hook: { kind: 'pictures', words: r0.words, ask: 'odd', seconds: 5 },
         solution: { kind: 'pictures', words: r0.words, odd: r0.at, reveal: true, why: r0.why },
         detail: r1 ? { kind: 'pictures', words: r1.words, odd: r1.at, why: r1.why, ask: 'odd', yours: true } : null,
+        further: I.rounds.slice(2).map(r => ({ kind: 'pictures', words: r.words, odd: r.at, why: r.why, ask: 'odd', yours: true })),
         keys: I.rounds.map(r => r.why).slice(0, 3),
+        notes: as('why', I.rounds.map(r => r.why)).slice(0, 3),
       }
     }
     case 'plates':
@@ -303,6 +320,7 @@ function platesOf(pl, f, base) {
         hook: { kind: 'turn', turn: t0, them: f.them, romaji: f.romaji, ask: 'reply', seconds: 10 },
         solution: { kind: 'turn', turn: t0, them: f.them, romaji: f.romaji, revealed: true },
         detail: t1 ? { kind: 'turn', turn: t1, them: f.them, romaji: f.romaji, yours: true } : null,
+        further: f.turns.slice(2).map(turn => ({ kind: 'turn', turn, them: f.them, romaji: f.romaji, yours: true })),
       }
     }
     case 'trap': return {
@@ -328,12 +346,34 @@ export function funnelDeck(type, pl, fmt, opts = {}) {
     { key: 'answer', fn: c => solutionSlide(c, spec.solution) },
     { key: 'cta', fn: c => ctaSlide(c, feature) },
   ]
-  const more = n >= 5 && spec.detail
-  if (more) out.push({ key: 'more', fn: c => detailSlide(c, spec.detail) })
-  // A question left to the reader is answered on the slide after it.
-  const answer = more ? answerOf(spec.detail) : null
-  const keys = answer ? spec.keys.filter(k => k !== answer.why) : spec.keys
-  if (n >= 4 && (keys.length || answer)) out.push({ key: 'keys', fn: c => keysSlide(c, keys, answer) })
+  // After the call to action, the suite: the detail, then more of the
+  // item and more questions in turn, each question answered on the slide
+  // after it; as much of it as the length leaves room for, the key points
+  // last. A question with no room left for its answer has it on the key points.
+  const suite = n >= 5 ? suiteOf(spec, pl) : []
+  let room = n - 4
+  let answer = null
+  let q = 1
+  let m = 0
+  for (const d of suite) {
+    if (room <= 0) break
+    if (d.yours) {
+      q += 1
+      const k = q
+      out.push({ key: `question-${k}`, fn: c => detailSlide(c, d) })
+      room -= 1
+      if (room > 0) {
+        out.push({ key: `answer-${k}`, fn: c => solutionSlide(c, revealOf(d)) })
+        room -= 1
+      } else answer = answerOf(d)
+    } else {
+      m += 1
+      out.push({ key: m === 1 ? 'more' : `more-${m}`, fn: c => detailSlide(c, d) })
+      room -= 1
+    }
+  }
+  const notes = (spec.notes || spec.keys.map(text => ({ kind: 'note', text }))).filter(x => !answer || x.text !== answer.why)
+  if (n >= 4 && (notes.length || answer)) out.push({ key: 'keys', fn: c => keysSlide(c, notes, answer) })
   return out.map(sl => ({ key: sl.key, draw: ctx => sl.fn(context(ctx, look)) }))
 }
 
@@ -694,6 +734,68 @@ function questionBlock(c, q, { x, w, maxH, revealed = false }) {
       why.draw(at)
     },
   }
+}
+/** A question answered, on the slide after the one that asked it: what
+ *  it asked about as answered (the sentence completed, the word or the
+ *  kanji itself), the right answer large on its card, and why. Never the
+ *  question again, nor its other choices. */
+function solutionBlock(c, q, { x, w, maxH }) {
+  const { ctx, p } = c
+  const ch = q.choices[q.right]
+  const said = ch.rows ? ch.rows.map(r => r.t).join('') : ch.text
+  const fam = ch.rows || ch.fam === 'jp' ? 'jp' : ch.fam === 'serif' ? 'serif' : 'latin'
+  const whyText = q.explain?.why || (q.explain?.sense ? `${q.explain.head ? `${q.explain.head} · ` : ''}${q.explain.sense}` : '')
+  // What was asked about, as answered: a sentence's own completed form; a
+  // word, a kanji, a picture or a gloss as it was shown.
+  const st = q.stem?.after || (q.stem?.specimen || q.stem?.text || q.stem?.emoji ? q.stem : null)
+  const ok = success(p)
+  const r = 34
+  const pad = SP[6]
+  const card = z => {
+    // On one line where any size holds it: Japanese has no space to break at.
+    const maxW = w - pad * 2 - r * 2 - SP[5]
+    const sizes = [z, FS.title, FS.lead, FS.body].filter(v => v <= z)
+    const one = fit(ctx, said, { fam, weight: 700, sizes, maxW, maxLines: 1 })
+    const b = one.cut ? fit(ctx, said, { fam, weight: 700, sizes, maxW, maxLines: 2, balanced: false }) : one
+    const h = pad * 2 + Math.max(r * 2, paragraphH(b))
+    return {
+      h,
+      draw: y => {
+        ctx.fillStyle = mix(ok, cardInk(p), p.paper ? 0.14 : 0.2)
+        rrect(ctx, x, y, w, h, R.card * 2)
+        ctx.fill()
+        ctx.strokeStyle = ok
+        ctx.lineWidth = 4
+        rrect(ctx, x + 2, y + 2, w - 4, h - 4, R.card * 2)
+        ctx.stroke()
+        check(ctx, x + pad + r, y + h / 2, r, ok, cardInk(p))
+        paragraph(ctx, b, x + pad + r * 2 + SP[5], y + (h - paragraphH(b)) / 2, p.ink, 'left')
+      },
+    }
+  }
+  const itemOf = room => {
+    if (!st || room < FS.body * 1.6) return none
+    if (st.rows) {
+      const lit = st.target != null ? row => st.rows.indexOf(row) === st.target : () => false
+      return sentenceBlock(c, st.rows, { x, w, maxH: room, max: FS.heading, min: FS.body, script: st.script || c.pl.script, lit, lines: 3 })
+    }
+    if (st.specimen) return glyphBlock(c, st.specimen, { x, w, maxH: room, max: FS.word, rule: false })
+    if (st.text) return quoteBlock(c, st.text, { x, w, maxH: room, sizes: [FS.heading, FS.title, FS.lead] })
+    const z = Math.min(FS.glyph, room)
+    return { h: z, draw: y => emojiAt(ctx, st.emoji, x + w / 2, y + z / 2, z * 0.8) }
+  }
+  // The answer large, then why; the why gives way, then the item's room.
+  let out = none
+  for (const z of [FS.heading, FS.title, FS.lead]) {
+    const a = card(z)
+    for (const whyZ of [[FS.lead, FS.body], [FS.body, FS.sm], [FS.sm, FS.caption]]) {
+      const why = whyText ? textBlock(c, whyText, { x, w, sizes: whyZ, weight: 500, color: p.ink2, align: 'left', maxLines: 4 }) : none
+      const room = Math.min(maxH * 0.45, maxH - a.h - why.h - SP[7] - SP[6])
+      out = stackOf([itemOf(room), a, why], [SP[7], SP[6]])
+      if (out.h <= maxH) return out
+    }
+  }
+  return out
 }
 /** One line of a scene, in its bubble: who says it, the line, its sense. */
 function bubbleBlock(c, line, o) {
@@ -1282,7 +1384,8 @@ function content(c, s, box) {
       const ex = s.rows?.length ? sentenceBlock(c, s.rows, { ...box, maxH: box.maxH - g.h - SP[8], max: FS.title * 1.2, min: FS.body, lit: r => (r.g || []).includes(s.pattern) || r.lit, fam: 'jp' }) : none
       return stackOf([g, ex], [SP[8]])
     }
-    case 'question': return questionBlock(c, s.q, { ...box, revealed: !!s.revealed })
+    // Answered, a question is never asked again: its solution alone.
+    case 'question': return s.revealed ? solutionBlock(c, s.q, box) : questionBlock(c, s.q, box)
     case 'pair': return pairHeadsBlock(c, s, box)
     case 'pairs': return pairBlock(c, s, box)
     case 'chars': return charsBlock(c, s.chars, box)
@@ -1425,6 +1528,82 @@ function detailSlide(c, s) {
   place(c, b, y, bottom)
   if (s.yours) pill(c, weld(c.lang, W.yoursFoot), fr.cx, fr.bottom - 92)
 }
+/** The suite after the call to action: the funnel's detail, then the
+ *  item's further parts (its words, its sentences, its lookalikes) and
+ *  further questions (the type's own, then the source's catalogue) in
+ *  turn. Nothing twice: no part already dealt, no question already asked. */
+function suiteOf(spec, pl) {
+  const f = pl.funnel || {}
+  const seen = new Set([spec.hook?.q, spec.solution?.q, spec.detail?.q].filter(Boolean))
+  const same = (a, b) => a.kind === b.kind && (a.label || '') === (b.label || '')
+  const rowsOf = list => list.map(x => ({ t: x.t, reading: x.kanji ? x.reading : x.reading || '', ro: x.ro, main: x.main, sub: x.pos, line: x.line || 'vocab' }))
+  const parts = [
+    f.breakdown?.length ? { kind: 'rows', items: rowsOf(f.breakdown), label: 'words' } : null,
+    f.examples?.length ? { kind: 'examples', items: f.examples, label: 'sentences' } : null,
+    f.words?.length ? { kind: 'rows', items: f.words, label: pl.source === 'kanji' || pl.source === 'word' ? 'kanjiWords' : 'words' } : null,
+    f.lookalike?.length > 1 ? { kind: 'kanas', items: f.lookalike, here: f.kana?.k, label: 'lookalike' } : null,
+  ].filter(d => d && !(spec.detail && same(spec.detail, d)))
+  const asks = [
+    ...(spec.further || []),
+    ...withoutGiveaways(pl.quizzes || []).filter(q => !seen.has(q) && !(spec.further || []).some(d => d.q === q)).map(q => ({ kind: 'question', q, yours: true })),
+  ]
+  // What the slides dealt so far print: a question that one of them has
+  // already answered is not asked (the word's reading on the answer slide
+  // before "how is it read?").
+  let shown = `${shownOf(spec.hook)} ${shownOf(spec.solution)}`
+  const given = d => {
+    const a = answerOf(d)?.text?.toLowerCase().replace(/\s+/g, ' ').trim()
+    return !!a && shown.includes(a)
+  }
+  const deal = d => {
+    out.push(d)
+    shown += ` ${shownOf(d)} ${d.yours ? shownOf(revealOf(d)) : ''}`
+  }
+  const out = []
+  // The funnel's own detail leads its kind: first of the parts, or of the questions.
+  if (spec.detail) (spec.detail.yours ? asks : parts).unshift(spec.detail)
+  // In turn, a question after a part and a part after a question; of the
+  // parts, the one that answers the fewest questions still to ask, so that
+  // a question comes before the part that would answer it.
+  const answers = d => {
+    const t = shownOf(d)
+    return asks.filter(x => { const a = answerOf(x)?.text?.toLowerCase().replace(/\s+/g, ' ').trim(); return a && t.includes(a) }).length
+  }
+  for (;;) {
+    for (let i = asks.length - 1; i >= 0; i--) if (given(asks[i])) asks.splice(i, 1)
+    if (!parts.length && !asks.length) break
+    const last = out[out.length - 1]
+    if (asks.length && (!last || !last.yours || !parts.length)) deal(asks.shift())
+    else {
+      let at = 0
+      parts.forEach((d, i) => { if (answers(d) < answers(parts[at])) at = i })
+      deal(parts.splice(at, 1)[0])
+    }
+  }
+  return out
+}
+/** All a slide prints, as text: what a later question's answer is looked
+ *  for in. A question prints what it asks, its stem and its choices; answered,
+ *  its sentence completed and why; anything else, all it carries but its
+ *  stroke data (a kanji's record there lists words the slide never shows). */
+function shownOf(d) {
+  if (!d) return ''
+  const rowsText = rows => (rows || []).map(r => `${r.t} ${r.fu ? r.fu.map(x => x[1] || x[0]).join('') : ''}`).join(' ')
+  let t
+  if (d.kind === 'question') {
+    const q = d.q
+    const st = d.revealed ? q.stem?.after || q.stem : q.stem
+    t = [d.revealed ? '' : q.ask, rowsText(st?.rows), st?.specimen, st?.text, st?.tr,
+      ...(d.revealed ? [q.choices[q.right]?.text, rowsText(q.choices[q.right]?.rows), q.explain?.head, q.explain?.sense, q.explain?.why] : q.choices.map(ch => ch.text || rowsText(ch.rows)))].join(' ')
+  } else t = JSON.stringify(d, (k, v) => (k === 'strokes' ? undefined : v))
+  return t.toLowerCase().replace(/\s+/g, ' ')
+}
+/** A question left to the reader, answered: as the answer slide draws it. */
+function revealOf(d) {
+  if (d.kind === 'question') return { kind: 'question', q: d.q, revealed: true }
+  if (d.kind === 'pictures') return { kind: 'pictures', words: d.words, odd: d.odd, reveal: true, why: d.why }
+  return { kind: 'turn', turn: d.turn, them: d.them, romaji: d.romaji, revealed: true }
+}
 /** What a question left to the reader answers: the choice, the odd one
  *  out or the reply, and why. */
 function answerOf(d) {
@@ -1445,54 +1624,87 @@ function answerOf(d) {
 // A key point is a line or two: a long one gives way to the shorter ones.
 const KEY_MAX = 170
 function keysSlide(c, all, answer = null) {
-  const { ctx, p, fr, W } = c
-  const short = all.filter(k => k.length <= KEY_MAX)
-  const keys = short.length ? short : all.slice(0, 1)
+  const { p, fr, W } = c
+  const short = all.filter(k => k.text.length <= KEY_MAX)
+  const notes = short.length ? short : all.slice(0, 1)
   const top = c.design === 'fiche' ? chrome(c, { jp: '要点', label: W.keys, band: p.gold }) : chrome(c)
-  const pad = SP[6]
   const keep = saveBlock(c)
-  const foot = keep.h
-  const head = FS.title * 1.5 + SP[6]
-  const height = list => list.reduce((a, b) => a + paragraphH(b, 1.24) + SP[6], -SP[6])
-  // Every point at one size, the largest at which all of them fit; the
-  // last gives way where even the small rung does not hold them.
-  const notesIn = room => {
-    for (let k = keys.length; k >= 1; k--) {
-      for (const z of [FS.title, FS.lead, FS.body, FS.sm]) {
-        const notes = keys.slice(0, k).map(t => fit(ctx, t, { weight: 500, sizes: [z], maxW: fr.w - pad * 2 - 64, maxLines: 8, balanced: false, lh: 1.24 }))
-        if (height(notes) <= room) return notes
-      }
+  const x = fr.x - SP[4]
+  const w = fr.w + SP[4] * 2
+  const roomFor = ans => fr.bottom - top - keep.h - SP[7] - (ans.h ? ans.h + SP[7] : 0)
+  // As many points as fit, the most first; under an answer, its why gives
+  // way before them, and they before it.
+  const pointsIn = room => {
+    for (let k = notes.length; k >= 1; k--) {
+      const b = notesBlock(c, notes.slice(0, k), { x, w, maxH: room })
+      if (b) return b
     }
-    return []
+    return null
   }
-  const roomFor = ans => fr.bottom - top - foot - SP[7] - pad * 2 - head - (ans.h ? ans.h + SP[7] : 0)
-  // Under an answer, its why gives way first, then the key points.
-  const answers = answer ? [answerCard(c, answer, fr.w + SP[4] * 2, true), answerCard(c, answer, fr.w + SP[4] * 2, false)] : [none]
+  const answers = answer ? [answerCard(c, answer, w, true), answerCard(c, answer, w, false)] : [none]
   let ans = answers[0]
-  let notes = keys.length ? notesIn(roomFor(ans)) : []
-  if (answer && keys.length && !notes.length) {
-    const lean = notesIn(roomFor(answers[1]))
-    if (lean.length) { ans = answers[1]; notes = lean }
+  let pts = notes.length ? pointsIn(roomFor(ans)) : null
+  if (answer && notes.length && !pts) {
+    const lean = pointsIn(roomFor(answers[1]))
+    if (lean) { ans = answers[1]; pts = lean }
   }
-  const ch = notes.length ? pad * 2 + head + height(notes) : 0
-  const total = ans.h + (ans.h && ch ? SP[7] : 0) + ch + SP[7] + foot
+  const ph = pts ? pts.h : 0
+  const total = ans.h + (ans.h && ph ? SP[7] : 0) + ph + SP[7] + keep.h
   let y = top + Math.max(0, (fr.bottom - top - total) / 2)
   if (ans.h) {
-    ans.draw(fr.x - SP[4], y)
+    ans.draw(x, y)
     y += ans.h + SP[7]
   }
-  if (ch) {
-    card(c, fr.x - SP[4], y, fr.w + SP[4] * 2, ch)
-    emojiAt(ctx, '💡', fr.x + pad + 26, y + pad + FS.title * 0.6, 50)
-    text(ctx, weld(c.lang, W.keys), fr.x + pad + 70, y + pad + FS.title * 0.95, { f: font(700, FS.title, 'latin'), color: p.ink })
-    let at = y + pad + head
-    for (const b of notes) {
-      check(ctx, fr.x + pad + 22, at + b.size * 0.5, 22, p.gold, cardInk(p))
-      at += paragraph(ctx, b, fr.x + pad + 64, at, p.ink, 'left', 1.24) + SP[6]
-    }
-    y += ch + SP[7]
+  if (pts) {
+    pts.draw(y)
+    y += ph + SP[7]
   }
   keep.draw(y)
+}
+/** The accent a kind of point is marked in. */
+function kindInk(p, kind) {
+  return { careful: p.rating[0], contrast: p.line.kanji, use: p.line.grammar, form: p.line.grammar, mean: p.line.vocab, word: p.line.vocab, reading: p.line.vocab, example: p.line.reading, sound: p.line.kana, twin: p.line.kana, parts: p.line.kanji }[kind] || p.gold
+}
+/** A point's text as its kind's label leaves it: "Form: " is the label already. */
+const bare = n => (n.kind === 'form' ? n.text.replace(/^(Form|Forme)\s*:\s*/, '') : n.text)
+/** The key points, a card a point: its kind's mark and name in the
+ *  kind's ink over what it says, every text at one size. Null where they
+ *  do not fit in maxH. */
+function notesBlock(c, notes, { x, w, maxH }) {
+  const { ctx, p, W } = c
+  const pad = SP[5]
+  const r = 34
+  const tx = x + pad + r * 2 + SP[5]
+  const tw = x + w - pad - tx
+  for (const z of [FS.lead, FS.body, FS.sm]) {
+    const cards = notes.map(n => {
+      const [mark, name] = W.kinds[n.kind] || W.kinds.note
+      const b = fit(ctx, weld(c.lang, bare(n)), { weight: 500, sizes: [z], maxW: tw, maxLines: 6, balanced: false, lh: 1.22 })
+      const kh = FS.caption * 1.2
+      const h = pad * 2 + Math.max(r * 2, kh + SP[2] + paragraphH(b, 1.22))
+      return { n, mark, name, b, kh, h }
+    })
+    const h = cards.reduce((a, k) => a + k.h + SP[4], -SP[4])
+    if (h > maxH) continue
+    return {
+      h,
+      draw: y => {
+        for (const k of cards) {
+          const ink = kindInk(p, k.n.kind)
+          card(c, x, y, w, k.h, R.card * 2)
+          ctx.fillStyle = mix(ink, cardInk(p), 0.18)
+          ctx.beginPath()
+          ctx.arc(x + pad + r, y + pad + r, r, 0, Math.PI * 2)
+          ctx.fill()
+          emojiAt(ctx, k.mark, x + pad + r, y + pad + r, 36)
+          kicker(c, weld(c.lang, k.name), tx, y + pad, 'left', ink, tw)
+          paragraph(ctx, k.b, tx, y + pad + k.kh + SP[2], p.ink, 'left', 1.22)
+          y += k.h + SP[4]
+        }
+      },
+    }
+  }
+  return null
 }
 /** The save button's glyph: a bookmark, as the feed draws it. */
 function bookmark(ctx, cx, cy, h, color, { fill = false, lw = h * 0.1 } = {}) {

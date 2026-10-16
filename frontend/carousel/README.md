@@ -41,18 +41,27 @@ read:
 | Slide | Key | Shows |
 | --- | --- | --- |
 | The hook | `ask` | the item and the question it asks (can you read it? what does it mean? which one is the odd one out?); a text, with the question asked of it under it |
-| The answer | `answer` | the item answered as the app shows it: the analyser's line and its numbered points, the review card's word, a kanji's readings, a question's right choice and why |
+| The answer | `answer` | the item answered as the app shows it: the analyser's line and its numbered points, the review card's word, a kanji's readings; a question's solution alone (its sentence completed, or the word asked about, the right answer large, why), never the question again nor its other choices |
 | The call to action | `cta` | "Want more like this?": the feature the item comes from in one card, its picture (a schema of what it does) over its name and what it does; two more features beside it, the button to the site |
-| The detail | `more` | the item further: word by word, in sentences, the words a kanji writes; or "Your turn": the next question, turn or round, asked and left to the reader |
-| The key points | `keys` | the answer to "Your turn" where there was one, up to three lines the catalogue, the deck or the explainers already say, and "Save it for your next review" beside the save glyph, a short arrow down from it |
+| The detail | `more` | the item further: word by word, in sentences, the words a kanji writes; or "Your turn" (`question-2`): the next question, turn or round, asked and left to the reader, answered on the next slide (`answer-2`) |
+| The key points | `keys` | the answer to "Your turn" where no slide was left for it, up to three points the catalogue, the deck or the explainers already say, a card each, marked with its kind (how it works, form, watch out, don't mix up, reading, in a word…), and "Save it for your next review" beside the save glyph, a short arrow down from it |
 
 A question is never answered on the slide that asks it: the hook asks,
-the next slide answers. A second question (the exam's next one, the
-next round of the impostor, the next turn of a scene) is asked on the
-detail as "Your turn", its choices unmarked, and answered at the top of
-the key points (`answerOf`). A text is asked its question under it on
-the hook; where the text and the choices do not both hold, the choices
-wait for the answer, and the text is never the one cut short first.
+the next slide answers, with the solution alone. A further question (the
+exam's next one, the next round of the impostor, the next turn of a
+scene, the source's own questions) is asked as "Your turn", its choices
+unmarked, and answered on the slide after it, or at the top of the key
+points where the length leaves no slide for it (`answerOf`). A question
+an earlier slide already answered is not asked (the reading printed on
+the kanji's answer before "which is its reading?"), and a question goes
+before the part that would answer it (`suiteOf`). A text is asked its
+question under it on the hook; where the text and the choices do not
+both hold, the choices wait for the answer, and the text is never the
+one cut short first.
+
+Each key point carries its kind (`noted` in `sources.js`, plan 215c);
+a line of prose that says much what one before it said gives way to it
+(も: also, too. after its fuller how-it-works).
 
 A price on a call to action says only what the app says: the kana
 feature's tag reads "Free", flat and level beside the tiles, and its
@@ -60,7 +69,9 @@ sentence what the app tells a learner (`balanceKanaFree`, "Kana reviews
 cost nothing"), never a promise for good.
 
 The studio picks how many are dealt (Slides: 3 stops at the call to
-action, 4 adds the key points, 5 the detail before them), which feature
+action, 4 adds the key points, 5 the detail before them, 6 to 8 go on:
+more of the item and more questions in turn, each answered on the next
+slide, as far as the item has them), which feature
 the call to action shows, and the look, the three directions drawn for it.
 Every practice mode has its own call to action (plan 215b), and so do the
 analyser, the question asked after an exercise and Today:

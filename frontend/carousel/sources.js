@@ -202,13 +202,28 @@ const alike = (a, b) => {
   const shared = [...x].filter(w => y.has(w)).length
   return shared / Math.max(1, Math.min(x.size, y.size)) > 0.3
 }
-const uniq = list => [...new Set(list.map(x => String(x || '').trim()).filter(Boolean))]
 const KEYS = 3
+// A key point and its kind (plan 215c): how a point works, what it means,
+// its form, what to watch, what it is not to be confused with, a reading,
+// a word, an example, a sound, a twin, why an answer is right. The slide
+// shows each as what it is; a line of prose that says much what one before
+// it said gives way to it (も: also, too. after its fuller how-it-works).
+const PROSE = new Set(['use', 'mean', 'careful', 'contrast', 'why', 'note'])
+function noted(pairs, lang) {
+  const notes = []
+  for (const [kind, raw] of pairs) {
+    const text = raw ? weldIf(lang, String(raw).trim()) : ''
+    if (!text || notes.some(n => n.text === text || (PROSE.has(kind) && PROSE.has(n.kind) && alike(n.text, text)))) continue
+    notes.push({ kind, text })
+    if (notes.length === KEYS) break
+  }
+  return { keys: notes.map(n => n.text), notes }
+}
 function sentenceKeys(s, data, lang) {
   const pt = data.points[s.p]
   const how = pt ? howItWorks(s.rows, s.p, tr(pt, lang), lang, firstSense(lang)) : null
-  const stacks = stacksIn(s.rows, lang, firstSense(lang)).map(x => x.line)
-  return uniq([how?.line, ...stacks, pt && STRINGS[lang].keys.means(s.p, tr(pt, lang)), tr(pt?.careful, lang)].map(x => x && weldIf(lang, x))).slice(0, KEYS)
+  const stacks = stacksIn(s.rows, lang, firstSense(lang)).map(x => ['use', x.line])
+  return noted([['use', how?.line], ...stacks, ['mean', pt && STRINGS[lang].keys.means(s.p, tr(pt, lang))], ['careful', tr(pt?.careful, lang)]], lang)
 }
 /** Rows the catalogue unpacked (a lesson's example), one by one: each
  *  word's first sense, each particle's role here, the point's meaning. */
@@ -346,7 +361,7 @@ function closing(slides, o, t, p, extra = {}) {
 function sentenceFunnel(data, s, x, { t, lang }) {
   return {
     rows: s.rows, translation: x.translation, romaji: x.romaji, ...analysed(s, data, lang),
-    breakdown: wordItems(s, data.points, lang, t), examples: x.more, keys: sentenceKeys(s, data, lang),
+    breakdown: wordItems(s, data.points, lang, t), examples: x.more, ...sentenceKeys(s, data, lang),
     strokes: x.bonus.k ? { char: x.bonus.char, k: x.bonus.k } : null,
   }
 }
@@ -449,7 +464,7 @@ function lessonPlan(data, L, opts) {
     breakdown: first ? rowItems(first.rows, lang, t, L.p, meaning) : [],
     examples: [...ex.slice(1), ...usages].slice(0, 3),
     point: { pattern: L.p, meaning, form },
-    keys: uniq([t.keys.means(L.p, meaning), form && t.keys.form(form), how?.line, tr(L.careful, lang), compare?.diff].map(k => k && weldIf(lang, k))).slice(0, KEYS),
+    ...noted([['use', how?.line], ['mean', t.keys.means(L.p, meaning)], ['form', form && t.keys.form(form)], ['careful', tr(L.careful, lang)], ['contrast', compare?.diff]], lang),
   }
   return {
     ...p, hook: { kind: 'pattern', pattern: L.p, rows: first?.rows || [], meaning }, prompt: t.prompt.lesson, funnel,
@@ -530,11 +545,11 @@ function wordPlan(data, w, opts, deps) {
     word: { t: w.t, fu: w.fu, reading: w.r, ro: w.ro, main: weldIf(lang, main), sub: weldIf(lang, sub), level: data.level },
     examples: exItems.slice(0, 3),
     words: wordRowsOf(family.slice(1, 5).map(x => ({ ...x, main: weldIf(lang, gloss(x, lang)[0]) }))),
-    keys: uniq([
-      w.t !== w.r && t.keys.reads(w.t, w.r, w.ro),
-      main && t.keys.means(w.t, [main, sub].filter(Boolean).join('; ')),
-      chars.length > 1 ? t.keys.parts(chars.map(c => `${c} (${meaningOf(c)})`).join(' + ')) : ex0 && t.keys.example(ex0.rows.map(r => r.t).join(''), ex0.tr),
-    ].map(k => k && weldIf(lang, k))).slice(0, KEYS),
+    ...noted([
+      ['reading', w.t !== w.r && t.keys.reads(w.t, w.r, w.ro)],
+      ['mean', main && t.keys.means(w.t, [main, sub].filter(Boolean).join('; '))],
+      chars.length > 1 ? ['parts', t.keys.parts(chars.map(c => `${c} (${meaningOf(c)})`).join(' + '))] : ['example', ex0 && t.keys.example(ex0.rows.map(r => r.t).join(''), ex0.tr)],
+    ], lang),
     strokes: strokeChar ? { char: strokeChar, k: deps.strokes[strokeChar] } : null,
   }
   return {
@@ -570,11 +585,11 @@ function kanjiPlan(data, c, opts) {
   const funnel = {
     kanji: { c, on: k.on || [], kun: (k.kun || []).map(([a, b]) => a + b), meaning, level: k.lv },
     words: wordRowsOf(kw.slice(0, 4)),
-    keys: uniq([
-      k.on?.length && t.keys.on(k.on.slice(0, 3).join('、')),
-      k.kun?.length && t.keys.kun(k.kun.slice(0, 3).map(([a, b]) => a + b).join('、')),
-      shown && t.keys.inWord(shown.t, shown.r, shown.main),
-    ].map(x => x && weldIf(lang, x))).slice(0, KEYS),
+    ...noted([
+      ['reading', k.on?.length && t.keys.on(k.on.slice(0, 3).join('、'))],
+      ['reading', k.kun?.length && t.keys.kun(k.kun.slice(0, 3).map(([a, b]) => a + b).join('、'))],
+      ['word', shown && t.keys.inWord(shown.t, shown.r, shown.main)],
+    ], lang),
     strokes: k.s ? { char: c, k } : null,
   }
   return {
@@ -618,10 +633,10 @@ function kanaPlan(data, card, opts) {
     kana: { k: card.k, ro: card.ro, twin: card.twin, set: card.set },
     words: wordRowsOf((card.words || []).slice(0, 4).map(w => ({ ...w, main: weldIf(lang, gloss(w, lang)[0]) }))),
     lookalike: group ? group.set.filter(k => byKana[k]).map(k => ({ k, ro: byKana[k].ro })) : null,
-    keys: uniq([
-      t.keys.sound(card.k, card.ro), card.twin && t.keys.twin(card.set, card.twin), group && tr(group.tip, lang),
-      card.words?.[0] && t.keys.inWord(card.words[0].t, card.words[0].r, gloss(card.words[0], lang)[0]),
-    ].map(x => x && weldIf(lang, x))).slice(0, KEYS),
+    ...noted([
+      ['sound', t.keys.sound(card.k, card.ro)], ['twin', card.twin && t.keys.twin(card.set, card.twin)], ['contrast', group && tr(group.tip, lang)],
+      ['word', card.words?.[0] && t.keys.inWord(card.words[0].t, card.words[0].r, gloss(card.words[0], lang)[0])],
+    ], lang),
     strokes: card.s ? { char: card.k, k: { s: card.s } } : null,
   }
   return {
@@ -651,7 +666,7 @@ function passagePlan(data, P, opts) {
   const funnel = {
     title: P.title, sents,
     words: wordRowsOf(words.slice(0, 4).map(w => ({ t: w.head, r: w.reading, ro: w.ro, main: w.main }))),
-    keys: uniq(words.slice(0, KEYS).map(w => weldIf(lang, t.keys.means(`${w.head} (${w.reading})`, w.main)))),
+    ...noted(words.slice(0, KEYS).map(w => ['word', t.keys.means(`${w.head} (${w.reading})`, w.main)]), lang),
   }
   return {
     ...p, hook: { kind: 'specimen', text: P.title, small: true }, prompt: t.prompt.passage, funnel,
@@ -746,7 +761,7 @@ function themePlan(data, id, opts) {
     pictures: items,
     // The impostor's rounds again, of pictured words alone: the funnel draws them as pictures.
     impostor: impostorOf(data, key, lang, t, id, true),
-    keys: uniq(items.slice(0, KEYS).map(w => weldIf(lang, t.keys.means(`${w.e} ${w.t}${hasKanji(w.t) ? ` (${w.r})` : ''}`, w.main)))),
+    ...noted(items.slice(0, KEYS).map(w => ['word', t.keys.means(`${w.e} ${w.t}${hasKanji(w.t) ? ` (${w.r})` : ''}`, w.main)]), lang),
   }
   return {
     ...p, cta: t.cta.theme, funnel,
@@ -777,7 +792,7 @@ function lookalikePlan(data, set, opts) {
   const heads = chars.map(k => k.c).join(' ')
   const funnel = {
     chars,
-    keys: uniq(chars.map(k => k.note && weldIf(lang, t.keys.means(k.c, k.note)))).slice(0, KEYS),
+    ...noted(chars.map(k => ['mean', k.note && t.keys.means(k.c, k.note)]), lang),
   }
   return {
     ...p, cta: t.cta.lookalike, funnel,
@@ -810,7 +825,7 @@ function dialoguePlan(data, d, opts) {
   const romaji = ['N5', 'N4'].includes(d.lv)
   const slides = turns.flatMap((turn, i) => [false, true].map(revealed => ({ kind: 'turn', turn, n: i + 1, of: turns.length, revealed, place, them, romaji })))
   closing(slides, o, t, p)
-  const funnel = { turns, place, them, romaji, keys: uniq(turns.map(tu => tu.why)).slice(0, KEYS) }
+  const funnel = { turns, place, them, romaji, ...noted(turns.map(tu => ['use', tu.why]), lang) }
   return {
     ...p, cta: t.cta.dialogue, funnel,
     hook: { kind: 'place', place: d.place.jp, title: `${place} · ${t.modes.dialogueHook}`, line: 'grammar' },
@@ -835,7 +850,7 @@ function trapPlan(data, x, opts) {
   closing(slides, o, t, p)
   const why = q?.explain?.why
   const careful = tr(x.careful, lang)
-  const funnel = { notion, pair: x.pair || null, keys: uniq([why, why && careful && alike(why, careful) ? '' : careful]).slice(0, KEYS) }
+  const funnel = { notion, pair: x.pair || null, ...noted([['why', why], ['careful', careful]], lang) }
   return {
     ...p, cta: t.cta.trap, funnel,
     hook: { kind: 'listhead', head: x.p, title: notion, line: 'grammar' },
