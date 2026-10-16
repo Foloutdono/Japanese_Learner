@@ -45,6 +45,8 @@ import os
 import sqlite3
 import threading
 
+from content import example_fixes
+
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(_BASE_DIR, "datas", "vocab", "jmdict_fr.sqlite3")
 
@@ -104,13 +106,19 @@ def senses(glossaries) -> dict[str, str]:
 # ── Sentences ─────────────────────────────────────────────────
 
 def example(jp: str) -> str | None:
-    """A Tatoeba sentence's French, or None."""
-    return _one("SELECT fr FROM example WHERE jp = ?", (jp,)) if jp else None
+    """A Tatoeba sentence's French, or None. A sentence the course
+    corrected (content/example_fixes.py, plan 223) answers its own."""
+    return example_fixes.french(jp) or (_one("SELECT fr FROM example WHERE jp = ?", (jp,)) if jp else None)
 
 
 def examples(jps) -> dict[str, str]:
     keys = list(dict.fromkeys(j for j in jps if j))
-    return {jp: fr for jp, fr in _many("SELECT jp, fr FROM example WHERE jp", keys) if fr}
+    out = {jp: fr for jp, fr in _many("SELECT jp, fr FROM example WHERE jp", keys) if fr}
+    for jp in keys:
+        fixed = example_fixes.french(jp)
+        if fixed:
+            out[jp] = fixed
+    return out
 
 
 def translation(jp: str, en: str, lang: str) -> tuple[str, str]:

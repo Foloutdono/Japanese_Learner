@@ -101,7 +101,7 @@ _DATA_DIR = os.path.join(_BASE_DIR, "datas", "vocab")
 # more always-in-memory dict for either half of this module's data.
 # The deck's own curated senses still always win over the JMdict pool
 # when both exist, same as before (see _find_senses).
-from content import vocab_meanings_data
+from content import example_fixes, vocab_meanings_data
 try:
     import content.vocab_jmdict_data as _jmdict_db
 except ImportError:  # pragma: no cover - defensive only, always present in prod
@@ -1354,6 +1354,9 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
         num = numbers[id(sense)]
         gloss = "; ".join(sense.get("glossary", []))
         for ex in sense.get("examples", []):
+            # The course's correction of the sentence, where it has one
+            # and it still carries this word (content/example_fixes.py).
+            ex = example_fixes.for_word(ex, lambda s: _target_span(s, kanji, kana) is not None)
             jp = ex.get("jp")
             if not jp or jp in seen_jp:
                 continue
