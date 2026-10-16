@@ -26,7 +26,8 @@ card that is not a word, a duplicate -- for the deck's own migration
 (content/vocab_renames.py); `apply` only reports them.
 
 `apply` writes the English into the card and the French under the
-card's own key ("{kanji}::{kana}", fr_gloss reads it first); a bare
+card's own key ("{kanji}::{kana}", fr_gloss reads it first; a kana
+card's key is its kana); a bare
 written form that still carried a corrected wrong line is given the
 French of its most basic card, since /api/translations/vocab serves the
 map by form.
@@ -35,6 +36,7 @@ import argparse
 import glob
 import json
 import os
+import re
 import sys
 
 from content.vocab_data import VOCAB_BY_LEVEL
@@ -77,6 +79,9 @@ def problems(fix: dict, cards: dict) -> list[str]:
         value = fix.get(field)
         if field in fix and (not isinstance(value, str) or not value.strip() or "\n" in value):
             out.append(f"{where}: `{field}` is empty or has a line break")
+        elif field != "why" and isinstance(value, str) and re.search(r",(?! )", value):
+            # tests/test_audit_vocab_deck: senses are ", "-separated (plan 108).
+            out.append(f"{where}: `{field}` has a comma without a space after it")
     if not (fix.get("why") or "").strip():
         out.append(f"{where}: `why` is empty")
     word = cards[(fix["level"], fix["key"])]
@@ -162,12 +167,18 @@ def cmd_apply(in_dir: str) -> int:
                 continue
             if fix.get("en"):
                 w["meaning"] = fix["en"].strip()
+            # A corrected kanji card reads its own French line, even when
+            # only its English changed: a form two cards share is read by
+            # both until one of them means something else
+            # (audit_vocab_deck's shared_french, plan 107).
+            old = fr_gloss(w, french)
+            line = (fix.get("fr") or old or "").strip()
             if fix.get("fr"):
-                replaced.add(fr_gloss(w, french))
-                if w.get("kanji"):
-                    french[_key(w)] = fix["fr"].strip()
-                else:
-                    french[w["kana"]] = fix["fr"].strip()
+                replaced.add(old)
+            if w.get("kanji"):
+                french[_key(w)] = line
+            elif fix.get("fr"):
+                french[w["kana"]] = line
     # A bare form left holding a line just corrected takes its most
     # basic card's French.
     for level in LEVELS:
