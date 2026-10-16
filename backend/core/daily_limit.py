@@ -105,5 +105,13 @@ def claim(user_id: str, feature: str, limit: int) -> int:
         conn.close()
     if count == limit + 1:
         logger.info("daily limit crossed feature=%s user=%s limit=%d", feature, user_id, limit)
+    # 足跡 (plan 218): daily_usage is pruned at thirty days, so how much
+    # the rationed features are used, and how often a ceiling is met,
+    # would be a month's question only. The event folds into
+    # event_daily and outlives it. Never the prompt, only the count.
+    from core import events
+    events.record(user_id, "ai_use", {
+        "feature": feature, "count": count, "limit": limit, "over": count > limit,
+    })
     return count
 

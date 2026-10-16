@@ -1,4 +1,5 @@
 import { getBuffer, whenUnlocked } from './context'
+import { countUse } from '../screenTrail'
 import { playBuffer, fadeOutAndStop } from './mixer'
 import { getVolume, isMuted, trimFor } from './settings'
 import { api } from '../origin'
@@ -237,6 +238,9 @@ function startUtterance(synth, voice, text, fallbackPath) {
 export function speakJapanese(text) {
   const spoken = spokenForm(text)
   if (!spoken || isMuted()) return
+  // 足跡 (plan 218): a reading spoken, counted on the screen it was
+  // spoken on -- never the text.
+  countUse('speech', 'play')
   if (!isLoneKana(spoken) && !deviceSpeechBroken && speakOnDevice(spoken)) return
   playServerClip(spoken)
 }
@@ -273,6 +277,7 @@ export function stopSpeaking() {
 // engine on the server) so a scene can be played line after line.
 export function speakLine(text, who = 'reader') {
   if (!text || isMuted()) return Promise.resolve(false)
+  countUse('speech', 'play')
   if (typeof window !== 'undefined') window.speechSynthesis?.cancel()
   if (playing) {
     fadeOutAndStop(playing, 0.05)

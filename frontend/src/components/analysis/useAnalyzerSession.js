@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { countUse } from '../../lib/screenTrail'
 import { apiJson, apiUpload, apiFetch } from '../../lib/api'
 import { useLang } from '../../LangContext'
 import { videoErrorMessage } from './videoErrors'
@@ -159,6 +160,9 @@ export function useAnalyzerSession(session) {
   async function analyzeText(text, { source = 'typed' } = {}) {
     const trimmed = (text ?? '').trim()
     if (!trimmed || status === 'working') return
+    // 足跡 (plan 218): which door the breakdown was asked through, never
+    // the text. A photo's text arrives here too, after the OCR.
+    countUse('analyzer', source === 'typed' ? 'text' : 'photo')
 
     const run = beginRun()
     setVideoSessionId(null)
@@ -231,6 +235,7 @@ export function useAnalyzerSession(session) {
   // `url` is only ever the optional name of a video to play alongside
   // them. See docs/adr/0003's 2026-08-26 amendment.
   async function startVideoFromTranscript(transcript, { url, start, end }) {
+    countUse('analyzer', 'video')
     const run = beginRun()
     try {
       const data = await apiJson('/api/video/session', session, {
@@ -273,6 +278,7 @@ export function useAnalyzerSession(session) {
   async function startVideoFromLink(url, { start, end } = {}) {
     const trimmed = url?.trim()
     if (!trimmed) return
+    countUse('analyzer', 'video')
     const run = beginRun()
     try {
       const data = await apiJson('/api/video/session', session, {
@@ -299,6 +305,7 @@ export function useAnalyzerSession(session) {
 
   async function startVideoFromFile(file, { url, start, end, timing }) {
     if (!file) return
+    countUse('analyzer', 'video')
     const run = beginRun()
     try {
       const formData = new FormData()
@@ -383,6 +390,7 @@ export function useAnalyzerSession(session) {
   async function explain(index) {
     const sentence = passage?.sentences?.[index]
     if (!sentence || explaining[index]) return
+    countUse('explain', 'open')
 
     setExplaining(prev => ({ ...prev, [index]: true }))
     setExplainError(prev => ({ ...prev, [index]: null }))

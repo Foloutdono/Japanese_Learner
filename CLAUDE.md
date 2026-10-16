@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **218**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **219**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -458,7 +458,11 @@ is a one-shot, so it cannot drift from the scripts.
 Behaviour is recorded **first-party or not at all** — there is no third-party
 SDK, and `frontend/public/privacy.html`'s "No advertising, no trackers, no sale
 of data" is a promise the design keeps rather than a line to amend. See
-`docs/adr/0012`.
+`docs/adr/0012`, and `docs/adr/0022` for what plan 218 added (time, every
+run, visit context, feature counts) and the CNIL consent-exempt frame the
+whole trail stays inside: first-party, one purpose, coarse classes and no
+fingerprint, an objection honoured everywhere, 25 months at most. Anything
+that would need consent (replay, heatmaps, a third-party SDK) is out.
 
 Three rules matter more than the rest:
 
@@ -466,7 +470,11 @@ Three rules matter more than the rest:
   analysed sentence, not a deck or theme name. `backend/core/events.py` holds a
   closed set of event names, each with the property keys it may carry, and
   applies it to whatever a browser posts. `frontend/src/lib/track.js` mirrors
-  that set, and `backend/tests/test_events.py` fails if the two drift.
+  that set, and `backend/tests/test_events.py` fails if the two drift. Since
+  plan 218 the VALUES are closed too: a string-valued key is either listed in
+  `events.VALUES` (mirrored in `track.js`, held equal by the same test), a
+  `route` or `path` (held to a pattern's shape), or it is a design question —
+  never a free string.
 - **Never store a pathname.** `/learn/vocab/theme/animaux/…` names a theme the
   learner chose and `/learn/decks/:deck_id` a deck they named.
   `frontend/src/lib/routePattern.js` reduces a path to the route App.jsx
@@ -476,6 +484,33 @@ Three rules matter more than the rest:
   learner named. `lib/apiTrail.js` records a failed request (`api_error`:
   a 5xx or no answer, never a 4xx the endpoint meant) as its area alone,
   `/api/decks`, through `apiArea` in `lib/routePattern.js`.
+
+Since plan 218, too:
+
+- **Time is engaged time.** A duration a screen, a run or a step reports
+  comes from `lib/dwell.js` (hidden tabs do not count), never wall-clock.
+  Screen time is `lib/screenTrail.js`'s, sent on leaving; a run's is the
+  tally's (`stores/runTally.js` → `lib/runTrail.js`), which every run,
+  practice included, already goes through — a new run screen that calls
+  `startTally` is counted without knowing it.
+- **A small feature is counted, not logged.** `countUse(feature, action)`
+  from `lib/screenTrail.js` adds to the screen's tally and sends one
+  `feature_use` per pair when the screen is left; add the pair to
+  `VALUES.feature_use` on both sides first.
+- **The objection is the account's.** `user_profiles.analytics_off`, read
+  by both write paths (`events.opted_out`); a server-side `events.record`
+  needs no check of its own. Never record the switch itself.
+- **Bounded.** Raw rows 30 days (`compact_events`), the once-per-account
+  families a year, `event_daily` 25 months (`prune_logs`); the learner reads
+  theirs at `GET /api/profile/export/trail`. A new event that should outlive
+  30 days goes in `KEEP_LONG`, and in `privacy.html`'s list.
+- **The dashboards are code.** Nine Metabase dashboards, each a file in
+  `docs/analytics/metabase/` (`-- ==== question` blocks), built and updated
+  by `python -m scripts.metabase_sync` (report, `--check`, `--yes`; needs
+  `MB_API_KEY`). Change a question there, not only in Metabase's UI. Accounts
+  to leave out live in the Metabase snippet `internal_users`, not in the repo.
+  A screen added to `ROUTES` goes in `02-fonctionnalites.sql`'s list too (a
+  node-lane test holds them equal).
 
 Call `track(name, props)` from `lib/track.js`; never `fetch` an analytics
 endpoint from a screen. `track` also stamps each event with the visit's random

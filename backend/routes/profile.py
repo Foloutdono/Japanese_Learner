@@ -1,5 +1,6 @@
 import csv
 import io
+import json
 import logging
 import random
 import re
@@ -154,6 +155,12 @@ def _init_db() -> None:
                 # day, and an absence declared ahead. All NULL is the
                 # gate as it always was. See core/review_plan.py.
                 *review_plan.COLUMNS,
+                # 足跡を残さない — the account asked not to be counted
+                # (plan 218). Réglages › Données writes it beside the
+                # browser's own flag; core/events.opted_out reads it on
+                # both write paths, so the server's events and every
+                # other device stop too.
+                ("analytics_off", "BOOLEAN NOT NULL DEFAULT FALSE"),
             ):
                 cur.execute(
                     f"ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS {col} {typ}"
@@ -246,7 +253,7 @@ def ensure_profile_row(user_id: str) -> str:
 def _profile_row(user_id: str) -> tuple:
     """(username, jlpt_level, daily_new_target, onboarded_at,
     rating_scale, motive, kana_known, reminder_time, notifications,
-    lines, tutorial_at, guided, reading_pace) —
+    lines, tutorial_at, guided, reading_pace, analytics_off) —
     seeding the row lazily like _get_or_create_username, whose creation
     path it reuses. The onboarding fields are NULL until the flow runs,
     and rating_scale and reading_pace until the learner changes them."""
@@ -258,7 +265,7 @@ def _profile_row(user_id: str) -> tuple:
                 SELECT username, jlpt_level, daily_new_target, onboarded_at,
                        rating_scale, motive, kana_known, reminder_time,
                        notifications, lines, tutorial_at, guided,
-                       reading_pace
+                       reading_pace, analytics_off
                 FROM user_profiles WHERE user_id = %s
                 """,
                 (user_id,),
@@ -268,7 +275,7 @@ def _profile_row(user_id: str) -> tuple:
                 return row
     finally:
         conn.close()
-    return (_get_or_create_username(user_id), None, None, None, None, None, None, None, False, None, None, {}, None)
+    return (_get_or_create_username(user_id), None, None, None, None, None, None, None, False, None, None, {}, None, False)
 
 
 def usernames_for(user_ids: list[str]) -> dict[str, str]:
@@ -343,6 +350,10 @@ class LearningPayload(BaseModel):
     # The daily nudge on or off, from Settings › Notifications (plan
     # 156). The boarding asked once; this is where the answer changes.
     notifications: bool | None = None
+    # The trail's switch (plan 218), from Réglages › Données: True asks
+    # not to be counted, on every device and by the server too
+    # (core/events.opted_out).
+    analyticsOff: bool | None = None
 
     @field_validator("lines")
     @classmethod
@@ -528,7 +539,7 @@ def counted_from(figures: dict, cleared: bool) -> int:
 def get_profile(user_id: str = Depends(get_user_id)):
     (username, jlpt_level, daily_new_target, onboarded_at, rating_scale,
      motive, kana_known, reminder_time, notifications, lines,
-     tutorial_at, guided, reading_pace) = _profile_row(user_id)
+     tutorial_at, guided, reading_pace, analytics_off) = _profile_row(user_id)
     xp = srs.get_lifetime_xp(user_id)
     progress = level_progress(xp)
     bridge_rest_days(user_id)
@@ -585,6 +596,10 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # round trip.
         "tutorialAt": tutorial_at.isoformat() if tutorial_at else None,
         "guided": dict(guided or {}),
+        # 足跡を残さない (plan 218): the account's answer, which App.jsx
+        # copies onto this device's flag on boot so an opt-out made on
+        # the phone also stops the desk.
+        "analyticsOff": bool(analytics_off),
         "streak": streak["current"],
         "streakLongest": streak["longest"],
         "totalReviews": records["total_reviews"],
@@ -662,6 +677,51 @@ def export_progress(user_id: str = Depends(get_user_id)):
     )
 
 
+@router.get("/api/profile/export/trail")
+def export_trail(user_id: str = Depends(get_user_id)):
+    """
+    The learner's own 足跡 as one CSV (plan 218) -- the right of access
+    (GDPR art. 15) for the usage statistics, beside the progress export
+    in Réglages › Données. Both halves: the raw rows still inside their
+    thirty days (and the once-per-account ones kept a year), then the
+    per-day counts they were folded into. `props` is the JSON the row
+    holds -- enums and numbers only, which is what core/events.clean
+    lets in -- and the session id is left out: it is a random token that
+    means nothing outside the table.
+    """
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT at, name, props FROM event_log WHERE user_id = %s ORDER BY at, id",
+                (user_id,),
+            )
+            raw = cur.fetchall()
+            cur.execute(
+                "SELECT day, name, n FROM event_daily WHERE user_id = %s ORDER BY day, name",
+                (user_id,),
+            )
+            daily = cur.fetchall()
+    finally:
+        conn.close()
+
+    buf = io.StringIO()
+    writer = csv.writer(buf, lineterminator="\n")
+    writer.writerow(["at", "name", "count", "props"])
+    for at, name, props in raw:
+        writer.writerow([at.isoformat(), name, 1,
+                         json.dumps(props or {}, ensure_ascii=False, sort_keys=True)])
+    for day, name, n in daily:
+        writer.writerow([day.isoformat(), name, n, ""])
+
+    logger.info("trail export user_id=%s rows=%d days=%d", user_id, len(raw), len(daily))
+    return PlainTextResponse(
+        buf.getvalue(),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="tsuji-usage.csv"'},
+    )
+
+
 @router.patch("/api/profile")
 def update_profile(payload: UsernamePayload, user_id: str = Depends(get_user_id)):
     _get_or_create_username(user_id)  # ensure a row exists to update
@@ -712,6 +772,9 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
     if payload.notifications is not None:
         sets.append("notifications = %s")
         args.append(payload.notifications)
+    if payload.analyticsOff is not None:
+        sets.append("analytics_off = %s")
+        args.append(payload.analyticsOff)
     if not sets:
         raise HTTPException(status_code=422, detail="Nothing to update")
     conn = db_conn()
@@ -744,6 +807,7 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
         "tzOffsetMin": payload.tzOffsetMin,
         "lines": payload.lines,
         "notifications": payload.notifications,
+        "analyticsOff": payload.analyticsOff,
         "levelRule": level_rule_result,
     }
 

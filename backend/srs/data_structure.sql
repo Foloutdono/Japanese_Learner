@@ -255,7 +255,10 @@ CREATE TABLE user_profiles (
     catchup_from DATE,
     comeback_declined_on DATE,
     away_from DATE,
-    away_until DATE
+    away_until DATE,
+    -- 足跡を残さない (plan 218): the account asked not to be counted.
+    -- core/events.opted_out reads it on both of the trail's write paths.
+    analytics_off BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 -- The Sentence bank: what the learner submitted, plus where it came

@@ -1,4 +1,5 @@
 import { useEffect, useSyncExternalStore } from 'react'
+import { track } from '../lib/track'
 import { useProfileSummary, refreshSummary } from './profileSummary'
 import { apiJson } from '../lib/api'
 import { DEFAULT_READING_PACE, isReadingPace } from '../domain/readingPace'
@@ -64,6 +65,7 @@ export function useReadingPace() {
  *  back to the pace the learner just picked. */
 export function setReadingPace(id, session) {
   mirror(id)
+  track('setting_change', { setting: 'reading_pace', value: id })   // plan 218
   setPending(id)
   const saved = saving.then(() => apiJson('/api/profile/learning', session, {
     method: 'PATCH',

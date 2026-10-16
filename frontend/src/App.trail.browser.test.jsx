@@ -20,6 +20,12 @@ const track = vi.fn()
 vi.mock('./lib/track', () => ({ track }))
 
 const { Trail } = await import('./App')
+const { _resetScreen } = await import('./lib/screenTrail')
+
+// Trail records two names since plan 218: screen_view on arriving and,
+// through lib/screenTrail.js, screen_leave (and any feature counts) on
+// leaving. The per-render guard below is about arrivals.
+const views = () => track.mock.calls.filter(([name]) => name === 'screen_view')
 
 function Harness({ to }) {
   const navigate = useNavigate()
@@ -34,7 +40,7 @@ function Harness({ to }) {
   )
 }
 
-beforeEach(() => track.mockClear())
+beforeEach(() => { _resetScreen(); track.mockClear() })
 
 describe('Trail', () => {
   it('records the pattern, never the path', async () => {
@@ -57,7 +63,7 @@ describe('Trail', () => {
         <Harness to="/practice" />
       </MemoryRouter>,
     )
-    expect(track).toHaveBeenCalledTimes(1)
+    expect(views()).toHaveLength(1)
 
     await screen.getByRole('button', { name: 'go' }).click()
     // click() resolves when the click is dispatched -- React has still to
@@ -69,8 +75,8 @@ describe('Trail', () => {
     // Waiting on the pathname instead is not enough -- measured here, the DOM
     // can already say /practice while the effect is still queued. The effect
     // is the thing being counted, so it is the thing to wait for.
-    await vi.waitFor(() => expect(track).toHaveBeenCalledTimes(2))
-    expect(track.mock.calls[1]).toEqual(['screen_view', { route: '/practice', tab: 'practice' }])
+    await vi.waitFor(() => expect(views()).toHaveLength(2))
+    expect(views()[1]).toEqual(['screen_view', { route: '/practice', tab: 'practice' }])
   })
 
   it('says nothing at all about a path it does not recognise', async () => {
@@ -93,5 +99,25 @@ describe('Trail', () => {
     const [, props] = track.mock.calls[0]
     expect(props.route).toBe('/learn/decks/:deck_id/study')
     expect(props.route).not.toContain('8f21')
+  })
+
+  it('sends the screen left, as its pattern, with the time it was up', async () => {
+    // 滞在 (plan 218): the screen before is closed when the route
+    // changes, its engaged time measured by lib/dwell.js.
+    const screen = await render(
+      <MemoryRouter initialEntries={['/learn/decks/8f21/study']}>
+        <Harness to="/today" />
+      </MemoryRouter>,
+    )
+    await new Promise(resolve => setTimeout(resolve, 30))
+    await screen.getByRole('button', { name: 'go' }).click()
+    await vi.waitFor(() => expect(views()).toHaveLength(2))
+    const leaves = track.mock.calls.filter(([name]) => name === 'screen_leave')
+    expect(leaves).toHaveLength(1)
+    const [, props] = leaves[0]
+    expect(props.route).toBe('/learn/decks/:deck_id/study')
+    expect(props.tab).toBe('learn')
+    expect(props.ms).toBeGreaterThan(0)
+    expect(JSON.stringify(props)).not.toContain('8f21')
   })
 })
