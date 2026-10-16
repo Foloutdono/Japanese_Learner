@@ -281,7 +281,7 @@ export default function AnalyzerScreen({ session }) {
   const [explainOpen, setExplainOpen] = useState(false)
   const closeExplain = useCallback(() => setExplainOpen(false), [])
   // 歌 (plan 210): the song sheet, open over the result with the name it
-  // proposes -- the video's title, read off the player as it opens.
+  // proposes -- a video's title, read off the player as it opens.
   const [song, setSong] = useState(null)
   const closeSong = useCallback(() => setSong(null), [])
   // Every route into a new Passage starts the focus over: the first
@@ -1016,11 +1016,11 @@ export default function AnalyzerScreen({ session }) {
   const isKept = !!focused && analyzer.kept.has(focused.text)
 
   // 歌 — make the song yours (plan 210): beside 保存, which keeps the line
-  // in front of the learner, the door that takes the whole track into
-  // their decks -- its words and its lines with their readings
-  // (SongDeckSheet). A video's track, of more than one line: a typed
-  // sentence is not a song, and one line is not a deck.
-  const songPassage = Boolean(passage?.video) && sentences.length > 1
+  // in front of the learner, the door that takes the whole Passage into
+  // a deck -- its words and its lines with their readings
+  // (SongDeckSheet). A video's track, or lyrics pasted or photographed:
+  // any Passage of more than one line, since one line is not a deck.
+  const songPassage = sentences.length > 1
   function openSong() {
     playerRef.current?.pause()
     setSong({ title: playerRef.current?.title?.() ?? '' })

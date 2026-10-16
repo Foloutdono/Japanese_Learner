@@ -170,7 +170,7 @@ def test_the_two_filters_compose(client, a_small_library):
 
 def test_an_unknown_structure_is_refused(client):
     """Closed like the sort, and for the same reason: it reaches SQL."""
-    assert client.get("/api/decks/library", params={"type": "mixed"}).status_code == 400
+    assert client.get("/api/decks/library", params={"type": "banana"}).status_code == 400
 
 
 def test_the_library_reports_the_structures_it_holds(client, a_small_library):

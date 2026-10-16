@@ -11,21 +11,21 @@ import { composing } from '../../lib/keyGuards'
 import { songWords, songLines, songDeckName } from './songDeck'
 
 // ── 歌 — make the song yours (plan 210) ──────────────────────────
-// The video result's second door beside 保存: where keeping takes ONE
-// line into the bank, this takes the whole song into the learner's
-// decks -- its words, to understand it, and its lines with their
-// readings, to read it aloud in time (songDeck.js says what each holds).
+// The result's second door beside 保存: where keeping takes ONE line
+// into the bank, this takes the whole song -- a video's track, or lyrics
+// pasted or photographed -- into one of the learner's decks: its words,
+// to understand it, and its lines with their readings, to read it aloud
+// in time (songDeck.js says what each holds).
 //
-// A deck holds one structure (routes/decks.py), so the two are two
-// decks under the song's one name: a vocab deck of app cards and a
-// standard deck of written ones. Nothing here is a new endpoint. The
-// decks are made the way the analyser's ＋ makes one (useMining's
-// ensureDeck, which reuses a deck of the same name and type rather than
-// minting a clone), the words go in as one batch of app cards, and the
-// lines in the import dialog's slices. Pressed a second time for the
-// same song, it tops the decks up: a word already in its deck conflicts
-// and counts nothing on the server, and a line already in its deck is
-// not written again.
+// One deck, of the mixed type (routes/decks.py), which holds app cards
+// beside written ones and studies each in its own modes: the words as
+// vocab, the lines as front/back pairs. Nothing here is a new endpoint.
+// The deck is made the way the analyser's ＋ makes one (useMining's
+// ensureDeck, which reuses a deck of the same name rather than minting a
+// clone), the words go in as one batch of app cards, and the lines in
+// the import dialog's slices. Pressed a second time for the same song,
+// it tops the deck up: a word already there conflicts and counts nothing
+// on the server, and a line already there is not written again.
 
 // The written-card batch's ceiling (routes/decks.py's MAX_BATCH).
 const BATCH = 25
@@ -37,7 +37,7 @@ export function SongDeckSheet({ session, mining, sentences, title, t, onClose })
   const [pick, setPick] = useState({ words: true, lines: true })
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
-  // The decks made, once they are: the sheet turns into the doors to them.
+  // The deck made, once it is: the sheet turns into the door to it.
   const [made, setMade] = useState(null)
 
   const takes = {
@@ -46,21 +46,18 @@ export function SongDeckSheet({ session, mining, sentences, title, t, onClose })
   }
   const ready = Boolean(name.trim()) && (takes.words || takes.lines) && !busy
 
-  async function addWords(deckName) {
-    const deck = await mining.ensureDeck('vocab', deckName, { remember: false })
+  async function addWords(deck) {
     await apiJson(`/api/decks/${deck.id}/cards/app`, session, {
       method: 'POST',
       body: JSON.stringify({ cards: words }),
     })
-    return deck
   }
 
   // Returns whether the free tier's card ceiling stopped a slice: the
   // batch reports a refused row by its index rather than failing whole.
-  async function addLines(deckName) {
-    const deck = await mining.ensureDeck('cloze', deckName, { remember: false })
+  async function addLines(deck) {
     const held = await apiJson(`/api/decks/${deck.id}/cards`, session)
-    const have = new Set((held?.cards ?? []).map(c => c.front))
+    const have = new Set((held?.cards ?? []).filter(c => c.origin === 'custom').map(c => c.front))
     const fresh = lines.filter(line => !have.has(line.front))
     let refused = false
     for (let i = 0; i < fresh.length && !refused; i += BATCH) {
@@ -70,7 +67,7 @@ export function SongDeckSheet({ session, mining, sentences, title, t, onClose })
       })
       refused = (result?.errors ?? []).some(e => e.limit)
     }
-    return { deck, refused }
+    return refused
   }
 
   async function create(e) {
@@ -78,21 +75,17 @@ export function SongDeckSheet({ session, mining, sentences, title, t, onClose })
     if (!ready) return
     setBusy(true)
     setError(null)
-    const song = name.trim()
-    const decks = []
+    let deck = null
     try {
-      if (takes.words) decks.push({ key: 'words', deck: await addWords(t.songWordsDeck(song)), count: words.length })
-      if (takes.lines) {
-        const { deck, refused } = await addLines(t.songLinesDeck(song))
-        decks.push({ key: 'lines', deck, count: lines.length })
-        if (refused) setError(t.songDeckLimit)
-      }
+      deck = await mining.ensureDeck('mixed', name.trim(), { remember: false })
+      if (takes.words) await addWords(deck)
+      if (takes.lines && await addLines(deck)) setError(t.songDeckLimit)
       // Counts only: the song's name is the learner's own words.
       track('song_deck', { words: takes.words ? words.length : 0, lines: takes.lines ? lines.length : 0 })
-      setMade(decks)
+      setMade(deck)
     } catch (err) {
-      // A deck already made stays reachable when the second one fails.
-      if (decks.length) setMade(decks)
+      // A deck already made stays reachable when what goes in it fails.
+      if (deck) setMade(deck)
       setError(err?.code === 'limit_reached' ? t.songDeckLimit : t.songDeckFailed)
     } finally {
       setBusy(false)
@@ -101,27 +94,26 @@ export function SongDeckSheet({ session, mining, sentences, title, t, onClose })
 
   const wordsType = deckTypeOf('vocab', t)
   const linesType = deckTypeOf('standard', t)
-  const typeOf = key => (key === 'words' ? wordsType : linesType)
+  const deckType = deckTypeOf('mixed', t)
+  const count = (takes.words ? words.length : 0) + (takes.lines ? lines.length : 0)
 
   return (
     <Sheet open onClose={onClose} jp={t.songDeckTitle} label={t.songDeckTitle} className="anl-song-sheet" dismiss>
       {made ? (
         <div className="surface picker anl-song__made">
-          {made.map(({ key, deck, count }) => (
-            <Link key={key} to={`/learn/decks/${deck.id}`} className="picker-row anl-song__deck">
-              <span
-                className="wmap-roundel picker-row__roundel"
-                style={{ '--line-color': typeOf(key).color }}
-                lang="ja"
-                aria-hidden="true"
-              >
-                {typeOf(key).glyph}
-              </span>
-              <span className="picker-row__name">{deck.name}</span>
-              <span className="picker-row__count">{t.cardsUnit(count)}</span>
-              <ChevronIcon direction="right" size={16} />
-            </Link>
-          ))}
+          <Link to={`/learn/decks/${made.id}`} className="picker-row anl-song__deck">
+            <span
+              className="wmap-roundel picker-row__roundel"
+              style={{ '--line-color': deckType.color }}
+              lang="ja"
+              aria-hidden="true"
+            >
+              {deckType.glyph}
+            </span>
+            <span className="picker-row__name">{made.name}</span>
+            <span className="picker-row__count">{t.cardsUnit(count)}</span>
+            <ChevronIcon direction="right" size={16} />
+          </Link>
           {error && <p className="anl-song__error" role="alert">{error}</p>}
         </div>
       ) : (

@@ -143,6 +143,30 @@ describe('useMining', () => {
     expect(globalThis.fetch).toHaveBeenCalledTimes(1)
   })
 
+  // 混 (plan 210): a mixed deck takes every kind -- an app card of any
+  // source, and a written cloze -- so it is offered for each beside the
+  // decks of the kind's own type; a deck followed from the library takes
+  // no cards from a follower, and is reused for none.
+  it('offers a mixed deck for every kind, and reuses it by name', async () => {
+    const SONG = { id: 6, name: '夜に駆ける', type: 'mixed', role: 'owner' }
+    const FOLLOWED = { id: 7, name: 'Lyrics', type: 'mixed', role: 'follower' }
+    const getMining = await mountMining([...ALL_TYPE_DECKS, SONG, FOLLOWED])
+    for (const kind of ['vocab', 'kanji', 'grammar', 'kana', 'cloze']) {
+      expect(getMining().decksFor(kind).map(d => d.id), kind).toContain(6)
+    }
+    expect(getMining().decksFor('vocab').map(d => d.id)).toEqual([1, 6, 7])
+
+    globalThis.fetch = vi.fn()
+    const deck = await getMining().ensureDeck('mixed', '夜に駆ける', { remember: false })
+    expect(deck.id).toBe(6)
+    expect(globalThis.fetch).not.toHaveBeenCalled()
+    // Made without being remembered: the next ＋ goes where it went.
+    expect(getMining().targetFor('mixed')).toBeNull()
+
+    mockFetchOnce(200, { id: 8, name: 'Lyrics', type: 'mixed' })
+    expect((await getMining().ensureDeck('mixed', 'Lyrics')).id).toBe(8)
+  })
+
   it('mineCloze rejects (and never calls fetch) when back would be empty', async () => {
     const getMining = await mountMining(ALL_TYPE_DECKS)
     globalThis.fetch = vi.fn()

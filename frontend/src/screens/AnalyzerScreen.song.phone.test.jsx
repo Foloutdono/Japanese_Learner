@@ -5,10 +5,11 @@ import { LangProvider } from '../LangContext'
 import '../index.css'
 
 // ── 歌 on a phone (plan 210) ─────────────────────────────────
-// A video's track carries a second round door beside 保存 on the
-// result's head: the song sheet, which makes the song's decks. Both
-// stand at the head's trailing end, the way back alone at its start,
-// and a typed Passage -- not a song -- has keep alone, as it had.
+// A Passage of more than one line -- a video's track, or lyrics pasted
+// or photographed -- carries a second round door beside 保存 on the
+// result's head: the song sheet, which makes the song's deck. Both stand
+// at the head's trailing end, the way back alone at its start, and one
+// line, which is not a deck, has keep alone, as it had.
 
 const card = raw_id => ({ raw_id, level: 'N5', entry: {}, stats: { status: 'new' } })
 const tok = (surface, start, reading, pos, vocab_match = null) => ({
@@ -123,11 +124,28 @@ describe('the song door on a phone', () => {
     expect([...dialog.querySelectorAll('.chip .chip__n')].map(n => n.textContent)).toEqual(['3', '2'])
   })
 
-  it('leaves a typed Passage its keep alone', async () => {
+  it('opens on pasted lyrics too, proposing their first line', async () => {
     const screen = await renderScreen()
     const field = screen.container.querySelector('textarea')
     const proto = Object.getPrototypeOf(field)
-    Object.getOwnPropertyDescriptor(proto, 'value').set.call(field, '夜が来る。君を呼ぶ。')
+    Object.getOwnPropertyDescriptor(proto, 'value').set.call(field, '夜が来る\n君を呼ぶ')
+    field.dispatchEvent(new Event('input', { bubbles: true }))
+    screen.container.querySelector('.anl-action').click()
+
+    await vi.waitFor(() => expect(screen.container.querySelector('.anl-m__head .anl-head__song')).not.toBeNull(), { timeout: 3000 })
+    screen.container.querySelector('.anl-head__song').click()
+    await vi.waitFor(() => expect(document.querySelector('[role="dialog"] input')).not.toBeNull())
+    expect(document.querySelector('[role="dialog"] input').value).toBe('夜が来る')
+  })
+
+  it('leaves one line its keep alone', async () => {
+    apiJson.mockImplementation(async url => (url === '/api/phrase/analyze'
+      ? { sentences: [{ ...TRACK[0], cue_start: null, cue_end: null }], truncated: 0 }
+      : {}))
+    const screen = await renderScreen()
+    const field = screen.container.querySelector('textarea')
+    const proto = Object.getPrototypeOf(field)
+    Object.getOwnPropertyDescriptor(proto, 'value').set.call(field, '夜が来る')
     field.dispatchEvent(new Event('input', { bubbles: true }))
     screen.container.querySelector('.anl-action').click()
 

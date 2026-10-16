@@ -23,11 +23,9 @@ import { useLang } from '../../LangContext'
 
 const POLL_MS = 1200
 
-/** An empty Passage, so callers never have to null-check the shape.
- *  `video` says the Passage is a video session's track, whatever its
- *  `source` -- what the result offers the song sheet on (plan 210). */
+/** An empty Passage, so callers never have to null-check the shape. */
 function emptyPassage() {
-  return { sentences: [], truncated: 0, videoId: null, windowCapped: false, source: 'typed', video: false }
+  return { sentences: [], truncated: 0, videoId: null, windowCapped: false, source: 'typed' }
 }
 
 export function useAnalyzerSession(session) {
@@ -347,7 +345,6 @@ export function useAnalyzerSession(session) {
         }
         setPassage({
           ...emptyPassage(),
-          video: true,
           source: data.source ?? 'video',
           sourceRef: data.sourceRef,
           videoId: data.videoId ?? null,

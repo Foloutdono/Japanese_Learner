@@ -1735,8 +1735,8 @@
 }
 /* ── 歌 — the song sheet (plan 210) ──
    The two halves of the song as chips (its words, its lines), the name,
-   the one filled action; once made, the picker's own rows, each a door
-   to the deck it names. */
+   the one filled action; once made, the picker's own row, the door to
+   the deck. */
 .anl-song {
   display: flex;
   flex-direction: column;

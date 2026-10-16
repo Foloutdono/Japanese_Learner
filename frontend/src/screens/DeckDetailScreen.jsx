@@ -56,15 +56,20 @@ function filenameFromDisposition(header) {
 //
 // A deck has ONE STRUCTURE, and it decides both halves: which app cards
 // can be browsed in, and which personal cards can be written. `standard`
-// is a plain front/back pair with no app source behind it.
-const SOURCE_FOR_TYPE = { kanji: ['kanji'], vocab: ['vocab'], grammar: ['grammar'] }
-const STRUCTURES = ['standard', 'kanji', 'vocab', 'grammar']
+// is a plain front/back pair with no app source behind it; `mixed` (plan
+// 210) takes every source's cards, and writes front/back pairs.
+const SOURCE_FOR_TYPE = {
+  kanji: ['kanji'], vocab: ['vocab'], grammar: ['grammar'],
+  mixed: ['kana', 'kanji', 'vocab', 'grammar'],
+}
+const STRUCTURES = ['standard', 'kanji', 'vocab', 'grammar', 'mixed']
 
 // A browsed-in card is tagged with the pigment of the section it came
 // from — the same colours components/decks/deckTypes.js gives the deck
 // types, so "this card is from 漢字" reads identically wherever it's
 // shown.
 const SOURCE_COLOR = {
+  kana: 'var(--line-kana)',
   kanji: 'var(--line-kanji)',
   vocab: 'var(--line-vocab)',
   grammar: 'var(--line-grammar)',
@@ -1364,14 +1369,15 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
                         ("VOCABULARY · N5") until the badge was costing a
                         third of the row on a phone — and saying what the
                         deck's own type already says, in a deck that only
-                        accepts one source. The pigment still names it. */}
+                        accepts one source. The pigment still names it,
+                        which is how a mixed deck's rows tell apart. */}
                     {card.origin === 'app' && (
                       <span
                         className="card-row__badge"
                         style={{ '--rail': SOURCE_COLOR[card.source] ?? 'var(--text-secondary)' }}
                       >
                         {card.level
-                          || ({ kanji: t.kanjiType, vocab: t.vocabType, grammar: t.grammarType }[card.source] ?? card.source)}
+                          || ({ kana: t.kanaType, kanji: t.kanjiType, vocab: t.vocabType, grammar: t.grammarType }[card.source] ?? card.source)}
                       </span>
                     )}
                     {!selectMode && card.origin === 'custom' && (

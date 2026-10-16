@@ -1028,15 +1028,13 @@ const phraseAnalyzer = {
   // 保存 (plan 039) — épingler une phrase dans la banque.
   keepSentence:        'Garder cette phrase',
   unkeepSentence:      'Ne plus garder cette phrase',
-  // 歌 (plan 210) — les decks d'une chanson, depuis le résultat vidéo.
+  // 歌 (plan 210) — le deck d'une chanson, depuis le résultat de l'analyseur.
   songDeckOpen:        'Faire un deck de cette chanson',
   songDeckTitle:       'Fais-la tienne',
   songDeckName:        'Nom du deck',
   songDeckHolds:       'Ce que le deck contient',
   songDeckWords:       'Mots',
   songDeckLines:       'Paroles',
-  songWordsDeck:       name => `${name} · mots`,
-  songLinesDeck:       name => `${name} · paroles`,
   songDeckMaking:      'Création',
   songDeckFailed:      "Le deck n'a pas pu être créé. Réessaie.",
   songDeckLimit:       'La limite de decks ou de cartes de ton offre est atteinte : une partie de la chanson n’y est pas.',
@@ -1775,7 +1773,7 @@ const decks = {
   grammarType:       'Grammaire',
   deckGrammarDesc:   'Points de grammaire uniquement — issus des niveaux JLPT',
   mixedType:         'Mixte',
-  mixedDesc:         'Tes propres cartes, plus des kanji, du vocabulaire et de la grammaire, le tout mélangé',
+  mixedDesc:         'Mots, kanji, grammaire et tes propres cartes, dans un seul deck',
 
   // Parcourir les cartes existantes (BrowseCardsMenu.jsx)
   browseBtn:              'Parcourir',

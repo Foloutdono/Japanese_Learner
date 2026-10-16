@@ -136,9 +136,10 @@ EVENTS: dict[str, frozenset[str]] = {
     #
     # NOT A DECK NAME, and not a description: both are learner-typed,
     # which is the rule this whole module exists to keep. `structure` is
-    # the deck's type (one of four), `cards` is a count, `where` is
-    # which surface the follow came from (the shelf block or the library
-    # screen), and `sort` is which ordering was showing. A deck id is
+    # the deck's type (one of routes/decks.py's STRUCTURES), `cards` is
+    # a count, `where` is which surface the follow came from (the shelf
+    # block or the library screen), and `sort` is which ordering was
+    # showing. A deck id is
     # not carried either -- it would make the trail say who follows
     # whom, which is more than "is the library used" needs to know.
     "deck_publish":   frozenset({"structure", "cards"}),

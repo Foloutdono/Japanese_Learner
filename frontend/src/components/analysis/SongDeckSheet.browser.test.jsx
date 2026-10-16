@@ -3,11 +3,12 @@ import { render } from 'vitest-browser-react'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../../LangContext'
 
-// ── 歌 — the song sheet makes the song's decks (plan 210) ──
-// Through the endpoints the rest of the app already writes decks with:
-// the deck made (or found) by name, the words as one batch of app
-// cards, the lines in the import dialog's slices. What a second press
-// for the same song writes is what the decks do not hold yet.
+// ── 歌 — the song sheet makes the song's deck (plan 210) ──
+// One mixed deck, through the endpoints the rest of the app already
+// writes decks with: the deck made (or found) by name, the words as one
+// batch of app cards, the lines in the import dialog's slices. What a
+// second press for the same song writes is what the deck does not hold
+// yet.
 
 const apiJson = vi.fn()
 vi.mock('../../lib/api', () => ({
@@ -56,13 +57,16 @@ function miningWith(ensureDeck) {
 // already written into the lyrics deck.
 function server({ heldLines = [], batch = () => ({ inserted: 1, errors: [] }) } = {}) {
   apiJson.mockImplementation(async (url, _s, opts) => {
-    if (url === '/api/decks/1/cards/app') return { added: 4 }
-    if (url === '/api/decks/2/cards') return { cards: heldLines.map((front, i) => ({ id: i, origin: 'custom', front })) }
-    if (url === '/api/decks/2/cards/batch') return batch(JSON.parse(opts.body))
+    if (url === '/api/decks/3/cards/app') return { added: 4 }
+    // A word already in the deck is listed too, and is never a line.
+    if (url === '/api/decks/3/cards') {
+      return { cards: [{ origin: 'app', front: '夜が来る' }, ...heldLines.map((front, i) => ({ id: i, origin: 'custom', front }))] }
+    }
+    if (url === '/api/decks/3/cards/batch') return batch(JSON.parse(opts.body))
     throw new Error(`unexpected ${url}`)
   })
 }
-const DECKS = { vocab: { id: 1, name: '夜 · words', type: 'vocab' }, cloze: { id: 2, name: '夜 · lyrics', type: 'standard' } }
+const DECK = name => ({ id: 3, name, type: 'mixed' })
 
 async function renderSheet(mining, { title = '夜' } = {}) {
   return render(
@@ -80,9 +84,9 @@ beforeEach(() => {
 })
 
 describe('the song sheet', () => {
-  it('makes the words deck and the lyrics deck, and turns into the doors to them', async () => {
+  it('makes one mixed deck of the words and the lines, and turns into the door to it', async () => {
     server()
-    const mining = miningWith(async kind => DECKS[kind])
+    const mining = miningWith(async (_kind, name) => DECK(name))
     const screen = await renderSheet(mining, { title: '夜に駆ける' })
     const dialog = document.querySelector('[role="dialog"]')
     expect(dialog.querySelector('input').value).toBe('夜に駆ける')
@@ -95,13 +99,13 @@ describe('the song sheet', () => {
     dialog.querySelector('.btn-primary').click()
     await settle(120)
 
-    expect(mining.ensureDeck).toHaveBeenNthCalledWith(1, 'vocab', '夜に駆ける · words', { remember: false })
-    expect(mining.ensureDeck).toHaveBeenNthCalledWith(2, 'cloze', '夜に駆ける · lyrics', { remember: false })
-    const app = apiJson.mock.calls.find(([url]) => url === '/api/decks/1/cards/app')
+    expect(mining.ensureDeck).toHaveBeenCalledTimes(1)
+    expect(mining.ensureDeck).toHaveBeenCalledWith('mixed', '夜に駆ける', { remember: false })
+    const app = apiJson.mock.calls.find(([url]) => url === '/api/decks/3/cards/app')
     expect(JSON.parse(app[2].body).cards.map(c => c.raw_id)).toEqual([
       'vocab_N5_君_きみ', 'vocab_N5_名前_なまえ', 'vocab_N4_呼ぶ_よぶ', 'vocab_N5_夜_よる', 'vocab_N5_来る_くる',
     ])
-    const lines = apiJson.mock.calls.filter(([url]) => url === '/api/decks/2/cards/batch')
+    const lines = apiJson.mock.calls.filter(([url]) => url === '/api/decks/3/cards/batch')
     expect(lines).toHaveLength(1)
     expect(JSON.parse(lines[0][2].body).cards).toEqual([
       { front: '君の名前を呼ぶよ', back: 'きみのなまえをよぶよ', notes: '' },
@@ -109,16 +113,19 @@ describe('the song sheet', () => {
     ])
     expect(track).toHaveBeenCalledWith('song_deck', { words: 5, lines: 2 })
 
-    // Made: the form gives way to a door to each deck.
+    // Made: the form gives way to the door to the deck, 混 on its roundel
+    // and the seven cards the song gave it.
     const doors = [...document.querySelectorAll('a.anl-song__deck')]
-    expect(doors.map(a => a.getAttribute('href'))).toEqual(['/learn/decks/1', '/learn/decks/2'])
+    expect(doors.map(a => a.getAttribute('href'))).toEqual(['/learn/decks/3'])
+    expect(doors[0].querySelector('.picker-row__roundel').textContent).toBe('混')
+    expect(doors[0].querySelector('.picker-row__count').textContent).toBe(en.cardsUnit(7))
     expect(document.querySelector('form.anl-song')).toBeNull()
     screen.unmount()
   })
 
   it('takes only the half that is pressed, and nothing without a name', async () => {
     server()
-    const mining = miningWith(async kind => DECKS[kind])
+    const mining = miningWith(async (_kind, name) => DECK(name))
     const screen = await renderSheet(mining, { title: '' })
     const dialog = document.querySelector('[role="dialog"]')
     // No title from the player: the first line is proposed instead.
@@ -139,33 +146,32 @@ describe('the song sheet', () => {
     await settle()
     dialog.querySelector('.btn-primary').click()
     await settle(120)
-    expect(mining.ensureDeck).toHaveBeenCalledTimes(1)
-    expect(mining.ensureDeck).toHaveBeenCalledWith('cloze', 'Yoru · lyrics', { remember: false })
-    expect(apiJson.mock.calls.some(([url]) => url === '/api/decks/1/cards/app')).toBe(false)
+    expect(mining.ensureDeck).toHaveBeenCalledWith('mixed', 'Yoru', { remember: false })
+    expect(apiJson.mock.calls.some(([url]) => url === '/api/decks/3/cards/app')).toBe(false)
     expect(track).toHaveBeenCalledWith('song_deck', { words: 0, lines: 2 })
     screen.unmount()
   })
 
   it('tops a deck made before up with the lines it does not hold', async () => {
     server({ heldLines: ['君の名前を呼ぶよ'] })
-    const mining = miningWith(async kind => DECKS[kind])
+    const mining = miningWith(async (_kind, name) => DECK(name))
     const screen = await renderSheet(mining, { title: '夜' })
     document.querySelector('[role="dialog"] .btn-primary').click()
     await settle(120)
-    const lines = apiJson.mock.calls.filter(([url]) => url === '/api/decks/2/cards/batch')
+    const lines = apiJson.mock.calls.filter(([url]) => url === '/api/decks/3/cards/batch')
     expect(JSON.parse(lines[0][2].body).cards.map(c => c.front)).toEqual(['夜が来る'])
     screen.unmount()
   })
 
   it('says so when the plan\'s limit leaves part of the song out', async () => {
     server({ batch: () => ({ inserted: 0, errors: [{ index: 0, limit: 200 }] }) })
-    const mining = miningWith(async kind => DECKS[kind])
+    const mining = miningWith(async (_kind, name) => DECK(name))
     const screen = await renderSheet(mining, { title: '夜' })
     document.querySelector('[role="dialog"] .btn-primary').click()
     await settle(120)
     expect(document.querySelector('.anl-song__error').textContent).toBe(en.songDeckLimit)
-    // The decks were made all the same, and stay reachable.
-    expect(document.querySelectorAll('a.anl-song__deck')).toHaveLength(2)
+    // The deck was made all the same, and stays reachable.
+    expect(document.querySelectorAll('a.anl-song__deck')).toHaveLength(1)
     screen.unmount()
   })
 
