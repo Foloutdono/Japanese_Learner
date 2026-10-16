@@ -989,17 +989,13 @@ const KINDS = {
     // each section keeps a row it can be read in.
     // The name line gives way before the sections are cramped.
     const n = Math.max(1, s.quizzes.length)
-    const rowsRoom = (ts, named) => top + boxH - SP[7] - (named ? FS.caption + SP[5] + 4 + SP[4] : 0) - (y + ts * 1.08 + SP[3] + EDGE + SP[4])
+    const y0 = y
+    const rowsRoom = (ts, named) => top + boxH - SP[7] - (named ? FS.caption + SP[5] + 4 + SP[4] : 0) - (y0 + ts * 1.08 + SP[3] + EDGE + SP[4])
     // A title a size smaller rather than rows set over each other.
     const titles = [FS.display, FS.heading, FS.title, FS.lead]
     const named = titles.some(z => rowsRoom(z, true) / n >= FS.lead * 1.4)
-    const ts = titles.find(z => rowsRoom(z, named) / n >= FS.lead * 1.4) || titles.find(z => rowsRoom(z, named) / n >= FS.sm * 1.5) || FS.lead
+    let ts = titles.find(z => rowsRoom(z, named) / n >= FS.lead * 1.4) || titles.find(z => rowsRoom(z, named) / n >= FS.sm * 1.5) || FS.lead
     const rowH = Math.min(FS.lead * 1.7, rowsRoom(ts, named) / n)
-    text(ctx, '模擬試験', ix, y + ts * ASC, { f: font(900, ts, 'serif'), color: ink })
-    y += ts * 1.08 + SP[3]
-    ctx.fillStyle = p.line.exam
-    ctx.fillRect(ix, y, iw, EDGE)
-    y += EDGE + SP[4]
     // The sections: もんだい1 かんじよみ — Reading.
     const rsMax = Math.min(FS.lead, Math.max(FS.sm, rowH * 0.6), rowH / 1.5)
     // Each row: its number, its section, and the question's name (a
@@ -1017,14 +1013,23 @@ const KINDS = {
     const cramped = rs2 => s.quizzes.some((q, i) => { const lb = rowAt(q, i, rs2).lb; return lb.cut || lb.size < FS.sm })
     while (rs > FS.sm && cramped(rs)) rs -= 2
     // A name still cut on its row (the narrow 9:16 frame) goes under its
-    // section, where the booklet has the room for two lines a row.
+    // section, two lines a row, the paper's name a size down for the room.
     const under = (q, i) => {
       const { w } = rowAt(q, i, rs)
-      return fit(ctx, q.cover || q.label || '', { weight: 500, sizes: [FS.body, FS.sm], maxW: iw - w - SP[5], maxLines: 1, balanced: false })
+      return fit(ctx, q.cover || q.label || '', { weight: 500, sizes: [FS.sm, FS.caption], maxW: iw - w - SP[5], maxLines: 1, balanced: false })
     }
-    const twoH = rs * 1.3 + FS.body * 1.25
-    const stacked = cramped(rs) && rowsRoom(ts, named) / n >= twoH && s.quizzes.every((q, i) => !under(q, i).cut)
+    const twoH = rs * 1.3 + FS.sm * 1.25
+    let stacked = false
+    if (cramped(rs) && s.quizzes.every((q, i) => !under(q, i).cut)) {
+      const z = titles.find(z2 => z2 <= ts && rowsRoom(z2, named) / n >= twoH)
+      if (z) { ts = z; stacked = true }
+    }
     const stepH = stacked ? Math.min(twoH * 1.2, rowsRoom(ts, named) / n) : rowH
+    text(ctx, '模擬試験', ix, y + ts * ASC, { f: font(900, ts, 'serif'), color: ink })
+    y += ts * 1.08 + SP[3]
+    ctx.fillStyle = p.line.exam
+    ctx.fillRect(ix, y, iw, EDGE)
+    y += EDGE + SP[4]
     s.quizzes.forEach((q, i) => {
       const ry = y + i * stepH
       const { num, jp, w, lb } = rowAt(q, i, rs)

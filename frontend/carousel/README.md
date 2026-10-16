@@ -424,8 +424,9 @@ full width with its top ~110px under the status bar: the status and
 search bars cover its first ~330px and the page counter stands at the
 top right, the column of buttons stands from x ~920 below y ~1100, the
 author's picture at the bottom left and the caption from y ~1710. Its
-safe box is 350 at the top, 430 at the foot and 184 a side, so that a
-card reaching past the box's edge still stops short of the buttons.
+safe box is 350 at the top, 430 at the foot and 184 a side, and a card
+reaches past its sides by half what it does on a post (16 against 32),
+so it stops clear of the buttons.
 A change to the safe box is checked by drawing every slide of every
 source and type (a layout pass over real fonts: nothing outside the box,
 no text over text, nothing set tiny); a slide that no longer fits steps
@@ -441,12 +442,13 @@ be leaves the slide to the others, an answer's why leaves its card, a
 gloss leaves its last senses off (the deck's words, fewer of them), and
 a named picture tile widens into the room beside it. On the Classic
 decks the exam cover's caption drops "JLPT-style" and a section's name
-goes under its section, a station plate's neighbours drop their readings,
+goes under its section (the paper's name a size down for the room), a
+station plate's neighbours drop their readings,
 and a stop plate's code keeps to the caption-xs rung. Measured on a
 sample of every source, type and look in both 9:16 combinations and
 the post, the texts cut outside the call to action's miniatures (whose
 mock app clips as the app does) went from 1,230 before the box changed
-to 301.
+to 309, and nothing is drawn outside the box or over other text.
 
 Two grounds (washi and sumi, the app's two themes), two languages (the
 slides' Latin text in English or French, French punctuation welded), and

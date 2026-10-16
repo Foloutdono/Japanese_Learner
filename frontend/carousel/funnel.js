@@ -390,6 +390,9 @@ function context(ctx, look) {
   return { ctx, ...look }
 }
 const tall = c => c.fmt.h > c.fmt.w * 1.5
+/** How far a card reaches past the safe box's sides: less on the 9:16
+ *  frame, so it stops clear of the feed's column of buttons. */
+const reach = c => (tall(c) ? SP[2] : SP[4])
 // What a card stands on, and its edge, on either ground.
 const cardInk = p => (p.paper ? p.card : p.panel)
 const faceInk = p => (p.paper ? p.surface : mix(p.onPanel, p.panel, 0.06))
@@ -1500,7 +1503,7 @@ function hookLayout(c, s, { ask, secs, compact, centred }) {
         q.draw(top + nz * 0.95 + kh + SP[3])
         const ch = Math.min(bottom - y, b.h + pad * 2)
         const cy = y + (bottom - y - ch) / 2
-        if (centred) card(c, fr.x - SP[4], cy, fr.w + SP[4] * 2, ch)
+        if (centred) card(c, fr.x - reach(c), cy, fr.w + reach(c) * 2, ch)
         place(c, b, cy + pad, cy + ch - pad)
         text(ctx, weld(c.lang, W.count(s.seconds || 5)), fr.cx, fr.bottom - FS.body * 0.4, { f: font(500, FS.body, 'latin'), color: p.ink2, align: 'center' })
       },
@@ -1682,8 +1685,8 @@ function keysSlide(c, all, answer = null) {
   const notes = short.length ? short : all.slice(0, 1)
   const top = c.design === 'fiche' ? chrome(c, { jp: '要点', label: W.keys, band: p.gold }) : chrome(c)
   const keep = saveBlock(c)
-  const x = fr.x - SP[4]
-  const w = fr.w + SP[4] * 2
+  const x = fr.x - reach(c)
+  const w = fr.w + reach(c) * 2
   const roomFor = ans => fr.bottom - top - keep.h - SP[7] - (ans.h ? ans.h + SP[7] : 0)
   // As many points as fit, the most first; under an answer, its why gives
   // way before them, and they before it.
@@ -1848,8 +1851,8 @@ function ctaSlide(c, feature) {
   const head = textBlock(c, weld(c.lang, W.cta.head), { x: fr.x, w: fr.w, sizes: tall(c) ? [FS.display * 0.8, FS.heading] : [FS.heading, FS.display * 0.6], fam: 'serif', weight: 900, maxLines: 2, lh: 1.06 })
   // The feature in one card: its picture, its name and what it does.
   const pad = SP[6]
-  const cx = fr.x - SP[4]
-  const cw = fr.w + SP[4] * 2
+  const cx = fr.x - reach(c)
+  const cw = fr.w + reach(c) * 2
   // A long name (Écris tes propres phrases) steps down a size, then takes two lines; never cut.
   const name = textBlock(c, weld(c.lang, F.name), { x: cx + pad, w: cw - pad * 2, sizes: [FS.title, FS.lead, FS.body], maxLines: 2, color: p.paper ? mix(featureInk(p, feature), p.ink, 0.7) : p.ink })
   // What costs nothing is said in the sentence, its tag in the picture.
