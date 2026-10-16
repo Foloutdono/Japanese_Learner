@@ -326,11 +326,15 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
         <button type="button" data-set="format:post">4:5 post</button>
         <button type="button" data-set="format:story">9:16 full screen</button>
       </div>
+      <div class="seg" role="group" aria-label="Margins" data-promo="hide" data-long="hide">
+        <button type="button" data-set="fit:tiktok">For TikTok</button>
+        <button type="button" data-set="fit:normal">Normal</button>
+      </div>
       <div class="seg" role="group" aria-label="Ground" data-long="hide" data-funnel="hide">
         <button type="button" data-set="ground:paper">Washi</button>
         <button type="button" data-set="ground:sumi">Sumi</button>
       </div>
-      <label class="check" data-long="hide"><input id="safe" type="checkbox"> Show the feed’s overlays</label>
+      <label class="check" data-long="hide"><input id="safe" type="checkbox"> <span id="safe-label">Show the feed’s overlays</span></label>
     </div>
 
     <div id="stage" class="stage"></div>

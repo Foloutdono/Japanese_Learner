@@ -403,9 +403,9 @@ function context(ctx, look) {
   return { ctx, ...look }
 }
 const tall = c => c.fmt.h > c.fmt.w * 1.5
-/** How far a card reaches past the safe box's sides: less on the 9:16
- *  frame, so it stops clear of the feed's column of buttons. */
-const reach = c => (tall(c) ? SP[2] : SP[4])
+/** How far a card reaches past the safe box's sides: less on TikTok's
+ *  9:16 frame, so it stops clear of the feed's column of buttons. */
+const reach = c => (tall(c) && c.fmt.fit === 'tiktok' ? SP[2] : SP[4])
 // What a card stands on, and its edge, on either ground.
 const cardInk = p => (p.paper ? p.card : p.panel)
 const faceInk = p => (p.paper ? p.surface : mix(p.onPanel, p.panel, 0.06))

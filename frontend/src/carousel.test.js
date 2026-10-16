@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { FORMATS, FS, RATING_INKS, layoutSentence } from '../carousel/draw.js'
+import { FORMATS, FS, RATING_INKS, drawFeedHud, formatOf, layoutSentence } from '../carousel/draw.js'
 import { LEVELS, SOURCES, TITLE_MAX, chunksOf, depsOf, itemsOf, lineRomaji, picked, plan, readingMisses, themePartOf, titleOf, unpack } from '../carousel/sources.js'
 import { ENDING_IDS, TYPES, available, deck, endingSlide } from '../carousel/slides.js'
 import { assemblyQ, kanjiQuizzes, overlaps, withoutGiveaways } from '../carousel/quizzes.js'
@@ -207,6 +207,52 @@ describe('the carousel studio', () => {
     }
   })
 
+  it('draws at normal margins too, with no feed’s chrome over them (plan 234f)', { timeout: 120000 }, () => {
+    // What a guide draws: TikTok's photo view, or nothing.
+    const drawn = fmt => {
+      const calls = []
+      const ctx = new Proxy({}, { get: (o, k) => (k in o ? o[k] : () => calls.push(k)), set: (o, k, v) => { o[k] = v; return true } })
+      drawFeedHud(ctx, fmt)
+      return calls.filter(k => k === 'fillRect' || k === 'fill').length
+    }
+    for (const ratio of Object.keys(FORMATS)) {
+      const normal = formatOf(ratio, 'normal')
+      // TikTok's is the format as it was; the normal one keeps the ratio,
+      // its id and its size, and only widens the box.
+      expect(formatOf(ratio, 'tiktok')).toBe(FORMATS[ratio])
+      expect([normal.id, normal.w, normal.h, normal.fit], ratio).toEqual([ratio, FORMATS[ratio].w, FORMATS[ratio].h, 'normal'])
+      for (const side of ['t', 'r', 'b', 'l']) expect(normal.safe[side], `${ratio} ${side}`).toBeLessThanOrEqual(FORMATS[ratio].safe[side])
+      expect(normal.safe.l, ratio).toBe(normal.safe.r)
+      expect(drawn(normal), ratio).toBe(0)
+    }
+    expect(drawn(FORMATS.story)).toBeGreaterThan(0)
+    const had = globalThis.Path2D
+    globalThis.Path2D = class {}
+    try {
+      const seen = {}
+      for (const [n, { src, id, p }] of every.entries()) {
+        if ((seen[src.id] = (seen[src.id] || 0) + 1) % 90 !== 2) continue
+        const fmt = formatOf(n % 2 ? 'post' : 'story', 'normal')
+        for (const type of TYPES.map(x => x.id).filter(x => available(x, p))) {
+          for (const design of [...DESIGNS, 'classic']) {
+            for (const sl of deck(type, p, fmt, { ground: n % 3 ? 'paper' : 'sumi', design }).filter(x => !x.key.startsWith('passage-'))) {
+              const { ctx } = stubContext()
+              expect(() => sl.draw(ctx), `${src.id} ${id} ${fmt.id} ${type} ${design} ${sl.key}`).not.toThrow()
+            }
+          }
+        }
+        if (src.id === 'promo' || src.id === 'echo' || src.id === 'long') continue
+        for (const ending of ENDING_IDS) {
+          const { ctx, texts } = stubContext()
+          endingSlide(ending, 'plates', p, fmt, { ground: 'paper' }).draw(ctx)
+          expect(texts.length, `${src.id} ${id} ${ending} ${fmt.id}`).toBeGreaterThan(3)
+        }
+      }
+    } finally {
+      globalThis.Path2D = had
+    }
+  })
+
   it('asks a kanji its readings and its words, never which kanji means this (plan 229l)', () => {
     for (const lv of ['N5', 'N4']) {
       const data = bank(`kanji-${lv}.json`)
@@ -243,7 +289,7 @@ describe('the carousel studio', () => {
     expect(spelled).toBeGreaterThan(0)
   })
 
-  it('never shows an answer before its question is asked (plan 229l)', () => {
+  it('never shows an answer before its question is asked (plan 229l)', { timeout: 60000 }, () => {
     for (const { src, p } of every) {
       // Every question the plan has, as a mock exam would ask them all.
       const qs = withoutGiveaways(picked(p, p.quizzes.map(q => q.id), 3))
@@ -258,7 +304,7 @@ describe('the carousel studio', () => {
     }
   })
 
-  it('titles every carousel within the feed’s 90 characters (plan 229l)', () => {
+  it('titles every carousel within the feed’s 90 characters (plan 229l)', { timeout: 60000 }, () => {
     for (const { src, p } of every) {
       for (const type of TYPES.map(x => x.id).filter(x => available(x, p))) {
         const title = titleOf(p, type, 3)

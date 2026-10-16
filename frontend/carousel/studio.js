@@ -8,7 +8,7 @@
 /* global JSZip */
 import { ENDING_IDS, FORMATS, TYPES, TYPE_OPTIONS, available, deck, endingSlide } from './slides.js'
 import { DESIGNS, WORDS as FUNNEL } from './funnel.js'
-import { FONT_FACES, drawFeedHud, font, palette } from './draw.js'
+import { FITS, FONT_FACES, drawFeedHud, font, formatOf, palette } from './draw.js'
 import { BONUS, LEVELS, MAX_QUESTIONS, OPTIONAL, SOURCES, TITLE_MAX, itemsOf, picked, plan, sampleText, sourceOf, titleOf } from './sources.js'
 import { STRINGS } from './strings.js'
 import { PROMO, STORIES } from './promo.js'
@@ -38,7 +38,7 @@ const LIST_NAME = { long: 'Video', promo: 'Story', echo: 'Word', sentence: 'Sent
 
 const DEFAULTS = {
   source: 'sentence', level: 'N5', longFormat: 'long', kanaSet: 'hiragana', story: 'pitch', hour: 'day', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20' },
-  view: 'compare', type: 'plates', format: 'post', ground: 'paper',
+  view: 'compare', type: 'plates', format: 'post', fit: 'tiktok', ground: 'paper',
   lang: 'en', script: 'kanji', romaji: false, bonus: 'kanji', kanji: '', handle: '', safe: false, slides: {},
   picks: {}, types: {}, ending: 'mark',
   // Plan 234: the conversion carousel, its look, its length, the feature it shows.
@@ -57,6 +57,7 @@ function load() {
     if (saved.design && ![...DESIGNS, 'classic'].includes(saved.design)) delete saved.design
     if (saved.hour && !PRINT_HOURS.includes(saved.hour)) delete saved.hour
     if (saved.story && !STORIES.includes(saved.story)) delete saved.story
+    if (saved.fit && !FITS.includes(saved.fit)) delete saved.fit
     return {
       ...DEFAULTS, ...saved, type, ids: { ...DEFAULTS.ids, ...(saved.ids || {}) }, slides: { ...(saved.slides || {}) },
       picks: { ...(saved.picks || {}) }, types: { ...(saved.types || {}) },
@@ -389,8 +390,10 @@ async function render() {
   renderQuestions(pl)
   await fonts(sampleText(pl))
   if (mine !== token) return
-  // A story is 9:16, whatever the post's format.
-  const fmt = FORMATS[clipped ? 'story' : state.format]
+  // A story is 9:16 at TikTok's margins, whatever the post's format.
+  const fmt = clipped ? FORMATS.story : formatOf(state.format, state.fit)
+  // Nothing is laid over a slide at normal margins: the guide shows them alone.
+  $('#safe-label').textContent = fmt.fit === 'normal' ? 'Show the margins' : 'Show the feed’s overlays'
   // All looks (plan 234): the type kept, in each look, to pick one from.
   const looks = state.view === 'looks' && !clipped
   const ids = state.view === 'compare' ? types : [state.type]
@@ -655,7 +658,8 @@ function thumb(c, slide, fmt) {
   }
 }
 
-/** Where the feed's own chrome lands on a post: a guide, never exported. */
+/** Where the feed's own chrome lands on a post, or at normal margins the
+ *  margins alone: a guide, never exported. */
 function safeZone(fmt) {
   const z = document.createElement('span')
   z.className = 'safe'
@@ -665,8 +669,8 @@ function safeZone(fmt) {
   z.style.setProperty('--b', `${safe.b / h * 100}%`)
   z.style.setProperty('--l', `${safe.l / w * 100}%`)
   z.style.setProperty('--r', `${safe.r / w * 100}%`)
-  // On a 9:16 slide, TikTok's photo view itself: its bars, its buttons.
-  if (h === 1920) {
+  // On a 9:16 slide for TikTok, its photo view itself: its bars, its buttons.
+  if (h === 1920 && fmt.fit === 'tiktok') {
     const hud = document.createElement('canvas')
     hud.width = w
     hud.height = h
@@ -761,14 +765,16 @@ async function offer(filename, blob) {
 }
 const png = canvas => new Promise(r => canvas.toBlob(r, 'image/png'))
 const safeName = s => String(s).replace(/[\\/:*?"<>|.\s]+/g, '-').replace(/^-+|-+$/g, '')
-const baseName = () => `tsuji-${state.source}-${safeName(current.plan.id)}-${state.type}-${current.fmt.id}`
+// A slide at normal margins says so in its file's name.
+const fmtName = fmt => (fmt.fit === 'normal' ? `${fmt.id}-normal` : fmt.id)
+const baseName = () => `tsuji-${state.source}-${safeName(current.plan.id)}-${state.type}-${fmtName(current.fmt)}`
 
 async function exportZip() {
   // What was on screen when it started: a click during the export changes
   // neither the size the slides are drawn at nor the file's name.
   const d = current.decks.find(x => x.id === state.type) ?? current.decks[0]
   const fmt = current.fmt
-  const name = `tsuji-${state.source}-${safeName(current.plan.id)}-${d.id}-${fmt.id}`
+  const name = `tsuji-${state.source}-${safeName(current.plan.id)}-${d.id}-${fmtName(fmt)}`
   const btn = $('#export')
   btn.disabled = true
   status('Drawing the slides…')
