@@ -6,6 +6,7 @@ Author the exam pool's seed papers (plan 221) by replaying the generators.
     python -m scripts.exam_seed run n4-grammar-01 --n 3 # one of them (repeatable)
     python -m scripts.exam_seed run n4-grammar-01 --rebuild  # the built ones too
     python -m scripts.exam_seed check n4-grammar-01     # what the test holds the file to
+    python -m scripts.exam_seed reclip n4-listening-01  # clip names after a hand-corrected script
     python -m scripts.exam_seed kanji N4 "文を書く"       # characters outside N4's set
 
 A seed paper (content/exam_seed/<exam_id>.json, loaded into exam_papers
@@ -53,6 +54,7 @@ from study import exam_gen_utils, exam_grammar_gen, exam_listening_gen, exam_pip
 from study import exam_reading_gen, exam_vocab_gen, voice_engine
 from study.exam_catalogue import EXAM_GENERATORS
 from study.exam_seed import PER_EXAM, exam_problems, load, problems, seed_for, seed_path
+from study.exam_audio_repair import questions_with_audio, turns_from_script
 from study.exam_tts import content_key
 from study.llm_shared import offending_kanji
 
@@ -265,6 +267,32 @@ def status() -> int:
     return 1 if short else 0
 
 
+def reclip(exam_id: str) -> int:
+    """Rename every listening question's clip after its script: what a
+    hand correction of a dialogue (scriptJp) needs, since the clip's
+    name is the hash of the script it reads. Prints what it renamed."""
+    data = load(exam_id)
+    if not data:
+        print(f"{exam_id}: no seed file")
+        return 2
+    renamed = 0
+    for entry in data["papers"]:
+        for q in questions_with_audio(entry["paper"]):
+            turns = turns_from_script(q.get("scriptJp") or "")
+            if turns is None:
+                print(f"{exam_id} #{entry['n']} {q.get('id')}: scriptJp is not 'speaker: line' lines")
+                continue
+            src = _clip(turns)
+            if q.get("audioSrc") != src:
+                q["audioSrc"] = src
+                renamed += 1
+                print(f"{exam_id} #{entry['n']} {q.get('id')}: {src}")
+    if renamed:
+        seed_path(exam_id).write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    print(f"{renamed} clip(s) renamed")
+    return 0
+
+
 def check(exam_id: str | None) -> int:
     """study/exam_seed.exam_problems over one exam id, or every one --
     what tests/test_exam_seed.py holds the files to."""
@@ -289,6 +317,8 @@ def main(argv=None) -> int:
     r.add_argument("--rebuild", action="store_true", help="replay papers already built too")
     c = sub.add_parser("check")
     c.add_argument("exam_id", nargs="?")
+    rc = sub.add_parser("reclip")
+    rc.add_argument("exam_id")
     k = sub.add_parser("kanji")
     k.add_argument("level")
     k.add_argument("text")
@@ -298,6 +328,8 @@ def main(argv=None) -> int:
         return status()
     if args.command == "check":
         return check(args.exam_id)
+    if args.command == "reclip":
+        return reclip(args.exam_id)
     if args.command == "kanji":
         bad = offending_kanji(args.text, args.level)
         print(f"outside {args.level}: {bad}" if bad else f"all within {args.level}")
