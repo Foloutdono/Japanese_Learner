@@ -177,6 +177,17 @@ def test_the_grammar_tour_asks_as_a_tutorial(client, model):
     assert "guided tutorial" in user and "may contain mistakes" not in user
 
 
+def test_the_analyser_asks_about_a_line_the_learner_brought(client, model):
+    # Plan 220: the analyser's sheet, once the sentence is explained. The
+    # explanation rides as the review; the line is the learner's own find.
+    calls = model(ANSWER)
+    r = client.post("/api/ask", json=_payload(mode="analyser", answer="", review="The explanation."))
+    assert r.status_code == 200
+    user = calls[0][0][1]["content"]
+    assert "analyser" in user and "they brought themselves" in user
+    assert "may contain mistakes" not in user
+
+
 def test_the_empty_pieces_are_left_out(client, model):
     calls = model(ANSWER)
     client.post("/api/ask", json={"mode": "dictation", "sentence": "山へ行きます。", "question": "What is へ?"})

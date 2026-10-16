@@ -285,9 +285,34 @@ describe('the analyser result on a phone', () => {
     await analyze(screen)
     const words = [...screen.container.querySelectorAll('.anl-m__tool')].find(b => b.textContent.includes('Mots'))
     words.click()
-    await vi.waitFor(() => expect(document.querySelector('.anl-m__sheet .anl-words__row')).not.toBeNull())
-    document.querySelector('.anl-m__sheet .anl-words__row').click()
+    // W2 (plan 220): a card per word, the sheet naming how many.
+    await vi.waitFor(() => expect(document.querySelector('.anl-m__sheet .anl-tile')).not.toBeNull())
+    expect(document.querySelector('.anl-m__sheet .sheet__cap').textContent).toBe('1 mot · 1 nouveau')
+    document.querySelector('.anl-m__sheet .anl-tile').click()
     await vi.waitFor(() => expect(document.querySelector('.anl-m__sheet')).toBeNull())
+  })
+
+  // Plan 220: the explanation is a bottom sheet as tall as it holds. A
+  // call that failed says so with a full-width way to try again, where it
+  // was two lines of red on a card the screen's full height.
+  it('says when an explanation failed, and offers to try again at full width', async () => {
+    const screen = await renderScreen()
+    await analyze(screen)
+    apiJson.mockImplementation(async (url, _s, opts) => {
+      if (opts?.body && JSON.parse(opts.body).deep) throw Object.assign(new Error('down'), { status: 503 })
+      return { sentences: SENTENCES, truncated: 0 }
+    })
+    ;[...screen.container.querySelectorAll('.anl-m__tool')].find(b => b.textContent.includes('Expliquer')).click()
+    await vi.waitFor(() => expect(document.querySelector('.anl-explainsheet__fail')).not.toBeNull())
+    const sheet = document.querySelector('.sheet.anl-explainsheet')
+    expect(sheet.querySelector('.anl-explainsheet__failtitle').textContent).toBe('Pas d’explication pour l’instant')
+    const retry = sheet.querySelector('.anl-explainsheet__retry')
+    expect(retry.getBoundingClientRect().width).toBeGreaterThan(sheet.clientWidth * 0.8)
+    expect(retry.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+    // As tall as it holds, not the screen's height.
+    expect(sheet.getBoundingClientRect().height).toBeLessThan(window.innerHeight * 0.7)
+    // No explanation, nothing to ask about yet.
+    expect(sheet.querySelector('.ask')).toBeNull()
   })
 
   it('takes the stage while the result is up, and gives it back on the way out', async () => {

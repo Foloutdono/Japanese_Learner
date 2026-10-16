@@ -8,7 +8,10 @@ import { dialogOpen } from '../lib/dialogOpen'
 import { Seg } from '../components/chrome/Console'
 import { Sheet } from '../components/chrome/Sheet'
 import { stationFor } from '../config/stations'
-import { WordsList } from '../components/analysis/WordsList'
+import { WordsList, WordTiles } from '../components/analysis/WordsList'
+import { wordTileRows, isFreshWord } from '../components/analysis/rows'
+import { useAsk } from '../hooks/useAsk'
+import { askContext } from '../domain/ask'
 import { FocusCard } from '../components/analysis/FocusCard'
 import { MineButton } from '../components/analysis/MineButton'
 import { SongDeckSheet } from '../components/analysis/SongDeckSheet'
@@ -20,7 +23,6 @@ import { ExplainPanel, ExplainSheet } from '../components/analysis/ExplainPanel'
 import { GrammarPoints } from '../components/analysis/GrammarPoints'
 import { coversToken, numberedPointsOf } from '../components/analysis/grammarSpans'
 import { useLight } from '../components/analysis/useLight'
-import { wordRowsOf } from '../components/analysis/rows'
 import { useStageClaim } from '../stores/stage'
 import { Dots } from '../components/ui/Loading'
 import { DictionaryLookupSheet, DictionaryLookupBody } from '../components/dictionary/DictionaryDetail'
@@ -282,6 +284,9 @@ export default function AnalyzerScreen({ session }) {
   const [side, setSide] = useState('card')
   // The phone's explanation opens in a sheet (plan 134).
   const [explainOpen, setExplainOpen] = useState(false)
+  // 問 after the explanation (plan 220): the runs' asking, a thread per
+  // sentence, opened once the sentence has been explained.
+  const asking = useAsk(session, 'analyser')
   const closeExplain = useCallback(() => setExplainOpen(false), [])
   // 歌 (plan 215): the song sheet, open over the result with the name it
   // proposes -- a video's title, read off the player as it opens.
@@ -1172,6 +1177,12 @@ export default function AnalyzerScreen({ session }) {
   const deskEntry = lookup ?? tokenLookup(stageToken)
   const explainShown = side === 'explain'
   const hasExplanation = Boolean(focused?.explanation)
+  // What a question about the sentence carries (plan 220): the sentence,
+  // its translation and the explanation the learner has just read.
+  const sentenceAsk = focused && askContext({
+    sentence: focused.text, level: focused.level, translation: focused.translation,
+    review: focused.explanation, analysis: focused,
+  })
   const explainingHere = Boolean(explaining[focusIndex])
   const readable = Boolean(focused) && !focused.foreign && focused.available !== false
   const points = readable ? numberedPointsOf(focused) : []
@@ -1501,6 +1512,9 @@ export default function AnalyzerScreen({ session }) {
             explaining={explainingHere}
             error={explainError[focusIndex]}
             onExplain={() => analyzer.explain(focusIndex)}
+            ask={asking}
+            askKey={focused.text}
+            askContext={sentenceAsk}
             t={t}
           />
         )}
@@ -1560,7 +1574,7 @@ export default function AnalyzerScreen({ session }) {
       </button>
     )
     : <span className={`anl-m__line anl-m__line--${where} anl-m__line--none`} aria-hidden="true" />)
-  const wordRows = readable ? wordRowsOf(focused) : []
+  const wordRows = readable ? wordTileRows(focused) : []
   const mobileResult = focused && (
     <div
       ref={resultsRef}
@@ -1697,11 +1711,17 @@ export default function AnalyzerScreen({ session }) {
             onOpen={g => { closeDock(); openPoint(g) }} />
         </section>
       </Sheet>
-      <Sheet open={dock === 'words'} onClose={closeDock} jp={t.wordsInSentence} className="anl-m__sheet">
-        <section className="anl-m__words" style={{ '--line-color': KAISEKI }}>
-          <WordsList analysis={focused} current={null} t={t}
-            onSelect={row => { closeDock(); openTokenAt(stageTokens.indexOf(row.head)) }} />
-        </section>
+      {/* 札 (plan 220, the owner's W2): a card per word, two to a row. */}
+      <Sheet
+        open={dock === 'words'}
+        onClose={closeDock}
+        jp={t.wordsSheetTitle}
+        cap={t.wordsSheetCount(wordRows.length, wordRows.filter(isFreshWord).length)}
+        label={t.wordsInSentence}
+        className="anl-m__sheet"
+      >
+        <WordTiles analysis={focused} t={t}
+          onSelect={row => { closeDock(); openTokenAt(stageTokens.indexOf(row.head)) }} />
       </Sheet>
     </div>
   )
@@ -1832,11 +1852,15 @@ export default function AnalyzerScreen({ session }) {
       {explainOpen && !wide && focused && (
         <ExplainSheet
           sentence={focused.text}
+          translation={focused.translation}
           explanation={focused.explanation}
           explaining={explainingHere}
           error={explainError[focusIndex]}
           onExplain={() => analyzer.explain(focusIndex)}
           onClose={closeExplain}
+          ask={asking}
+          askKey={focused.text}
+          askContext={sentenceAsk}
           t={t}
         />
       )}
