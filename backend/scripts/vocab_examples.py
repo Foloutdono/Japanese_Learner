@@ -151,11 +151,26 @@ def cmd_merge(in_dir: str) -> int:
     originals = _originals()
     merged = dict(example_fixes.fixes())
     found = []
+    source: dict[str, str] = {}
     for path in sorted(glob.glob(os.path.join(in_dir, "fixes_*.json"))):
+        # A reviewer corrects their own batch: a fix for another batch's
+        # item is a crossed wire (two reviewers shared a helper script),
+        # and two files correcting one sentence would be settled by
+        # file order alone.
+        batch = path.replace("fixes_", "batch_")
+        own = {i["jp"] for i in _load(batch)} if os.path.exists(batch) else None
         for fix in _load(path).get("fixes") or []:
+            name = os.path.basename(path)
+            if own is not None and fix.get("orig") not in own:
+                found.append(f"{name}: {(fix.get('orig') or '?')[:30]}: not an item of {os.path.basename(batch)}")
+                continue
+            if fix.get("orig") in source:
+                found.append(f"{name}: {(fix.get('orig') or '?')[:30]}: also corrected in {source[fix['orig']]}")
+                continue
+            source[fix.get("orig")] = name
             issues = problems(fix, originals)
             if issues:
-                found += [f"{os.path.basename(path)}: {p}" for p in issues]
+                found += [f"{name}: {p}" for p in issues]
                 continue
             merged[fix["orig"]] = {k: fix[k].strip() for k in ("jp", "en", "fr", "why")}
     for line in found:
