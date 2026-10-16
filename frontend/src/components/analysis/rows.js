@@ -20,7 +20,7 @@
 // a component file exports components only (react-refresh), and the
 // tests read this directly.
 import { coversToken, isEnding } from './grammarSpans'
-import { lineState } from './tokens'
+import { lineState, tokState } from './tokens'
 
 const SKIP_POS = new Set(['symbol', 'punctuation', 'filler'])
 const FOLDS_AUXILIARY = new Set(['verb', 'adjective', 'auxiliary'])
@@ -100,3 +100,20 @@ export function partsOf(point, analysis) {
   const parts = covered.map(row => ({ surface: row.surface, in: true }))
   return before?.head.vocab_match ? [{ surface: before.surface, in: false }, ...parts] : parts
 }
+
+// The words the phone's Words sheet shows (plan 220): the list's rows
+// written in Japanese. A line of a song can carry English ("Oh what do
+// you mean"), which has no card, no reading and no gloss, and the sheet
+// listed it word by word.
+const JAPANESE = /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u
+
+export function wordTileRows(analysis) {
+  return wordRowsOf(analysis).filter(row => JAPANESE.test(row.surface))
+}
+
+/** Whether a word is new to the learner: no card studied yet. */
+export function isFreshWord(row) {
+  const state = tokState(row.head)
+  return state === 'unknown' || state === 'offdeck'
+}
+

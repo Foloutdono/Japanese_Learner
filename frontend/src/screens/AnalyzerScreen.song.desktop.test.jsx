@@ -107,10 +107,10 @@ describe('the song door on the desk', () => {
     expect([Math.round(s.width), Math.round(s.height)]).toEqual([44, 44])
 
     song.click()
-    await vi.waitFor(() => expect(document.querySelector('[role="dialog"] input')).not.toBeNull())
+    await vi.waitFor(() => expect(document.querySelector('[role="dialog"] input.field')).not.toBeNull())
     expect(player.pause).toHaveBeenCalled()
     const dialog = document.querySelector('[role="dialog"]')
-    expect(dialog.querySelector('input').value).toBe('YOASOBI「夜に駆ける」')
+    expect(dialog.querySelector('input.field').value).toBe('YOASOBI「夜に駆ける」')
     // The desk's sheet carries its own close.
     expect(dialog.querySelector('.desk-sheet__close')).not.toBeNull()
   })

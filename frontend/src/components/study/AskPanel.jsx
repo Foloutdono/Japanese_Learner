@@ -46,7 +46,9 @@ import { ChevronIcon } from '../ui/Icons'
 //   page     the phone's page: the same panel under the phone's names
 //   sealed   what the sealed line says, where it is not a grade that
 //            opens it (the grammar tour, plan 204)
-export function AskPanel({ ask, askKey, context, open, text = false, page = false, sealed = null }) {
+//   hint     what the open, empty panel says, where it is not an
+//            exercise asked about (the analyser's sentence, plan 220)
+export function AskPanel({ ask, askKey, context, open, text = false, page = false, sealed = null, hint = null }) {
   const c = page ? 'ask' : 'desk-ask'
   const { t, lang } = useLang()
   const [draft, setDraft] = useState('')
@@ -111,7 +113,7 @@ export function AskPanel({ ask, askKey, context, open, text = false, page = fals
           ))}
         </ol>
       ) : (
-        <p className={`${c}__hint`}>{open ? t.askHint : sealed ?? (text ? t.askSealedText : t.askSealed)}</p>
+        <p className={`${c}__hint`}>{open ? hint ?? t.askHint : sealed ?? (text ? t.askSealedText : t.askSealed)}</p>
       )}
       {offers.length > 0 && (
         <ul className={`${c}__offers`} aria-label={t.askSuggestLabel}>

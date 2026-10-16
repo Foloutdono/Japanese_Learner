@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Sheet } from '../chrome/Sheet'
-import { Chips, Chip } from '../chrome/Console'
 import { deckTypeOf } from '../decks/deckTypes'
-import { ChevronIcon } from '../ui/Icons'
+import { CheckIcon, ChevronIcon } from '../ui/Icons'
 import { Dots } from '../ui/Loading'
 import { apiJson } from '../../lib/api'
 import { track } from '../../lib/track'
@@ -118,43 +117,54 @@ export function SongDeckSheet({ session, mining, sentences, title, t, onClose })
         </div>
       ) : (
         <form className="anl-song" onSubmit={create} noValidate>
-          <Chips label={t.songDeckHolds} className="anl-song__kinds">
-            <Chip
-              on={takes.words}
-              glyph={wordsType.glyph}
-              color={wordsType.color}
-              disabled={words.length === 0}
-              onClick={() => setPick(p => ({ ...p, words: !p.words }))}
-            >
-              {t.songDeckWords}<span className="chip__n">{words.length}</span>
-            </Chip>
-            <Chip
-              on={takes.lines}
-              glyph={linesType.glyph}
-              color={linesType.color}
-              disabled={lines.length === 0}
-              onClick={() => setPick(p => ({ ...p, lines: !p.lines }))}
-            >
-              {t.songDeckLines}<span className="chip__n">{lines.length}</span>
-            </Chip>
-          </Chips>
+          {/* S1 (plan 220, the owner's pick of two drawn): the two halves
+              as two cards to tick, each saying what it is for, where they
+              were two chips whose being a choice nothing said. */}
+          <fieldset className="anl-song__halves">
+            <legend className="sr-only">{t.songDeckHolds}</legend>
+            {[
+              ['words', wordsType, t.songDeckWords, words.length, t.songDeckWordsDesc],
+              ['lines', linesType, t.songDeckLines, lines.length, t.songDeckLinesDesc],
+            ].map(([key, type, title, n, desc]) => (
+              <label
+                key={key}
+                className={`anl-song__half${takes[key] ? ' anl-song__half--on' : ''}${n === 0 ? ' anl-song__half--none' : ''}`}
+                style={{ '--line-color': type.color }}
+              >
+                <input
+                  type="checkbox"
+                  className="anl-song__check"
+                  checked={takes[key]}
+                  disabled={n === 0}
+                  onChange={() => setPick(p => ({ ...p, [key]: !p[key] }))}
+                />
+                <span className="wmap-roundel anl-song__roundel" lang="ja" aria-hidden="true">{type.glyph}</span>
+                <span className="anl-song__text">
+                  <span className="anl-song__title">{title} <span className="anl-song__n">· {n}</span></span>
+                  <span className="anl-song__desc">{desc}</span>
+                </span>
+                <span className="anl-song__box" aria-hidden="true">{takes[key] && <CheckIcon size={14} />}</span>
+              </label>
+            ))}
+          </fieldset>
           {/* After the halves, not before: a phone's sheet focuses its first
               control, and a field there would open the keyboard over a
               name the sheet already proposes. */}
-          <input
-            className="field"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            // The Enter that commits a conversion is the input method's,
-            // not the form's: a song named in Japanese is typed through one.
-            onKeyDown={e => { if (e.key === 'Enter' && composing(e)) e.preventDefault() }}
-            placeholder={t.songDeckName}
-            aria-label={t.songDeckName}
-            maxLength={120}
-          />
+          <label className="anl-song__name">
+            <span className="anl-song__label">{t.songDeckName}</span>
+            <input
+              className="field"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              // The Enter that commits a conversion is the input method's,
+              // not the form's: a song named in Japanese is typed through one.
+              onKeyDown={e => { if (e.key === 'Enter' && composing(e)) e.preventDefault() }}
+              maxLength={120}
+            />
+          </label>
           {error && <p className="anl-song__error" role="alert">{error}</p>}
           <button type="submit" className="btn-primary" disabled={!ready}>
-            {busy ? <>{t.songDeckMaking}<Dots /></> : t.createDeck}
+            {busy ? <>{t.songDeckMaking}<Dots /></> : t.songDeckCreate(count)}
           </button>
         </form>
       )}

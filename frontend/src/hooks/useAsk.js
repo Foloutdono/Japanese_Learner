@@ -82,11 +82,12 @@ export function useAsk(session, mode) {
 
   const pending = Object.values(threads).some(list => list.some(x => x.state === 'pending'))
   const message = useCallback(entry => {
-    if (entry.state === 'off') return t.askOffTopic
+    // The analyser asks about a sentence, not an exercise (plan 220).
+    if (entry.state === 'off') return mode === 'analyser' ? t.askOffTopicSentence : t.askOffTopic
     if (entry.error === 'unavailable') return t.askUnavailable
     if (entry.error === 'spent') return t.askSpent(null)
     return t.askFailed
-  }, [t])
+  }, [t, mode])
 
   return { thread, ask, reset, left, spent, pending, message }
 }

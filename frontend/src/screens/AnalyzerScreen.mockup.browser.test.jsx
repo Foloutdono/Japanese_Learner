@@ -252,16 +252,19 @@ describe('the result on a phone (plan 219, the owner\'s pick D)', () => {
     expect(document.querySelector('[role="dialog"]')).not.toBeNull()
   })
 
-  it('opens the explanation in a sheet of the dictionary\'s shape, and closes it on Esc', async () => {
+  // Plan 220: a bottom sheet like the line's other two, the asking under it.
+  it('opens the explanation in a bottom sheet, the asking under it, and closes it on Esc', async () => {
     const screen = await renderScreen()
     await analyze(screen)
     screen.container.querySelector('.anl-m__explain').click()
     await settle(100)
-    const sheet = document.querySelector('.dict-sheet.anl-explainsheet[role="dialog"]')
+    const sheet = document.querySelector('.sheet.anl-explainsheet[role="dialog"]')
     expect(sheet).not.toBeNull()
     expect(sheet.querySelector('.anl-explainsheet__jp').textContent).toBe(SENTENCES[0].text)
     // Bought already: no second call, the explanation printed.
     expect(sheet.querySelector('.anl-explainpanel__body').textContent).toBe(SENTENCES[0].explanation)
+    // Explained, the sentence takes a question.
+    expect(sheet.querySelector('.ask .ask__field').disabled).toBe(false)
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
     await settle(100)
     expect(document.querySelector('.anl-explainsheet')).toBeNull()
