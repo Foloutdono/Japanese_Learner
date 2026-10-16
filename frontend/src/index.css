@@ -27631,31 +27631,28 @@ button.brd-stn { cursor: pointer; }
   border-bottom-width: 3px;
   font-size: var(--fs-display-fluid);
 }
-/* A grammar point as the drawing has it: no frame, its number in the
-   reading's place over its words, and the rule under the words that
-   carry no record of their own (a particle, a word off the deck) in the
-   grammar's green. A word with a record keeps its state's rule. Where
-   one of its words has a reading, the number stands over the reading. */
+/* A grammar point as the owner picked it (G·A, "Highlighted"): no
+   frame, the point's words on a wash of the grammar's green, its number
+   on the wash's top corner. The rule under each word stays the state's
+   alone, so the wash says where a rule sits and the rule what the SRS
+   knows, both readable at once. */
 .anl-m__subs .anl-subs__pt {
   padding: 0;
+  background: color-mix(in srgb, var(--line-grammar) 30%, transparent);
+  border-radius: var(--r-card);
   box-shadow: none;
 }
-.anl-m__subs .anl-subs__pt .tok:is(.tok--particle, .tok--offdeck) {
-  --tok: var(--line-grammar);
-  border-bottom-style: solid;
-}
+/* On the wash a particle's quieter ink lost its contrast: it takes the
+   line's own. */
+.anl-m__subs .anl-subs__pt .tok--particle { color: var(--text-primary); }
 .anl-m__subs .anl-subs__n {
-  top: 0;
+  top: calc(-1 * var(--sp-2));
   right: auto;
-  left: 50%;
+  left: calc(-1 * var(--sp-2));
   min-width: var(--sp-5);
   height: var(--sp-5);
-  transform: translateX(-50%);
   font-size: var(--fs-caption-xs);
   color: var(--text-on-panel);
-}
-.anl-m__subs .anl-subs__pt:has(.tok__furi:not(:empty)) .anl-subs__n {
-  top: calc(-1 * var(--sp-5));
 }
 .anl-m__tr {
   margin: 0;
