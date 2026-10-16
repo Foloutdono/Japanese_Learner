@@ -894,6 +894,55 @@ essais ») and keeps the tour a tap away in two plain secondary buttons,
 the tour runs again in the lesson's place, its terminus « Retour à la
 leçon », and records nothing (plan 187e).
 
+### First sight (初見, plan 213)
+
+A kana or a kanji the learner has never met is **shown before it is
+drilled**, in the card's place, as a grammar point is asked: the tour's
+frame (`components/study/GlyphTour.jsx`, chosen by `GlyphGate` in
+Today's run and the kana and kanji runs), its track, one card a stop and
+the gate at the foot. Three stops, in the order a glyph is learned, each
+drawn only where there is something to show:
+
+- **Read.** The glyph as the study card's specimen (`CharDisplay`'s glyph
+  rung: the object the card will ask, not a fourth use of the rung). A
+  kana's romaji under it at `--fs-display` in the line's ink, its sound
+  played as it opens and in the card's corner, its twin in the other
+  script at the foot (« ア en katakana »). A kanji's meaning under it,
+  every gloss, and its readings at the foot as the card's reveal prints
+  them (`Readings`, on'yomi and kun'yomi apart).
+- **Write.** The strokes traced in turn on **the writing board's slab**
+  (the sumi square, sumi in both themes, the practice sheet's 田 over it)
+  with the brush's ink. The stroke asked is in the line's pigment lit
+  toward the ink, drawn in once along its way, **a full dot where it
+  starts and a ring where it ends**; the strokes ahead are faint, the
+  ones traced stand in the ink. A trace is judged in KanjiVG's units
+  (`domain/trace.js`): begun at the dot, ended at the ring, along the
+  stroke, a fingertip of slack. A miss is a line a moment in the miss's
+  ink and one line at the card's foot saying what to fix (« Pars du
+  point plein. », « Va jusqu'au rond. », « Suis le trait. »), the stroke
+  drawn in again; after three misses on one stroke the board draws it
+  and says so in the selection's ink (given, not found). « Montre-moi » is the quiet
+  way over the gate and draws the rest in order. As a writing run's
+  board is, **the board is the square the card leaves**: the middle
+  takes the card's free height and the board the smaller of its sides,
+  so a miss's word never lands under the gate (never under 200px, where
+  the screen scrolls instead). The gate is its outline until the glyph
+  is whole.
+- **Use.** Up to three simple words, as the dictionary's ledger has
+  them: the word at `--fs-heading` with the glyph picked out in the
+  line's ink (a kana's word printed as it is read, a kanji's with its
+  furigana), its first gloss at the row's end and its voice beside it.
+  A kanji's words are one a reading at or under its own level before
+  any reading's second (日 at N5: 日曜日, 火曜日, 五日). The gate is
+  « Commencer ».
+
+The line is the run's own: the stage sets it per card, so a kana is 朱
+and a kanji 藤 even in Today's queue, and the tour takes it back from
+the grammar line `.tour` names. Once per character, whatever platform
+first meets it; a combination (きゃ, えい) has none, being two
+characters already met. On the desk the tour stands in the run's middle
+with its track, the card panel stepping aside until the card is boarded.
+
 ### The ladder (梯子, plans 187e, 194)
 
 After the tour, a grammar card walks a fixed line (`srs/ladder.py`):

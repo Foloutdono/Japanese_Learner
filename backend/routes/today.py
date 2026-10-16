@@ -85,6 +85,7 @@ from routes.kanji import _build_kanji_card, FR_MAP as KANJI_FR_MAP     # noqa: E
 from routes.vocab import _build_vocab_card, FR_MAP as VOCAB_FR_MAP     # noqa: E402
 from translations import get_meaning                  # noqa: E402
 from routes.grammar import _build_grammar_card, ladder_positions, mark_tutorials   # noqa: E402
+from study.glyph_tour import mark_glyph_tours                  # noqa: E402
 from routes.decks import build_personal_card, build_pool_card, VISIBLE_DECKS_CTE   # noqa: E402
 from content.vocab_jmdict_data import POOL_ID_PREFIX                # noqa: E402
 from routes.profile import _profile_row, bridge_rest_days, counted_from   # noqa: E402
@@ -1138,6 +1139,7 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     # Each card's bar, new to mastered (plan 147).
     srs.attach_progress(cards, user_id)
     mark_tutorials(cards, user_id)
+    mark_glyph_tours(cards, user_id, lang)
     return {"cards": cards, "beyond": beyond}
 
 
@@ -1197,6 +1199,7 @@ def _unit_cards(user_id: str, unit_id: str, all_lanes, due_rows, count: int, exc
     logger.info("basics unit run user_id=%s unit=%s served=%d", user_id, unit_id, len(cards))
     srs.attach_progress(cards, user_id)
     mark_tutorials(cards, user_id)
+    mark_glyph_tours(cards, user_id, lang)
     return {"cards": cards, "beyond": beyond}
 
 

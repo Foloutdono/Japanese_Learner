@@ -174,6 +174,10 @@ EVENTS: dict[str, frozenset[str]] = {
     # were the point's own (`authored`, plan 187c).
     "grammar_tour_step": frozenset({"level", "stop", "outcome"}),
     "grammar_tour_done": frozenset({"level", "tries", "helped", "authored"}),
+    # ── 初見 — a kana or a kanji's first tour (plan 213) ─────────
+    # `source` is kana or kanji, never the character: whether the trace
+    # is finished, and how often it misses or is drawn for the learner.
+    "glyph_tour_done": frozenset({"source", "misses", "shown"}),
 
     # ── 終着 — the day cleared (plan 191) ────────────────────────
     # Both written server-side: day_clear by POST /api/today/clear on

@@ -7261,3 +7261,21 @@ Open: the six points no tour can light (〜て（理由）, 〜を（移動）, 
 to six questions where their catalogue holds too few contrast sentences
 and rivals' examples.
 
+
+## Plan 213 — 初見, a kana or a kanji met before it is drilled (2026-10-16)
+
+The owner: tutorials for kana and kanji the first time they are seen,
+like the grammar one -- a slide for how to read them and what they mean,
+one for how to write them (a guided exercise, each stroke dragged from
+point A to point B), one for how they are used (simple words). Built in
+the grammar tour's frame (the owner's "just like the grammar one"), not
+drawn on a canvas first: the trace board is a new piece of it, and the
+first thing to put in front of the owner.
+
+| Phase | What | Status |
+|---|---|---|
+| 213 | **Backend**: `study/glyph_tour.py` (KanjiVG's strokes in writing order, the kana and kanji payloads, the kanji's words one a reading at its level first, `mark_glyph_tours`: due once per character, never for a character reviewed on any kana or kanji track, two queries a batch), `glyph_tours` (first tour only: misses, shown), `POST /api/glyph/tour`, the tour on `/api/kana/cards` (now with `lang`), `/api/kanji/cards`, `/api/frequency/kanji/cards` and Today's queue, the account's erasure, `glyph_tour_done`. **Frontend**: `GlyphTour` (read, write, use), `TraceBoard`, `GlyphGate` in TodayRun, KanaRun and KanjiRun, `domain/strokePath.js` (KanjiVG's M/C/S read without the DOM) and `domain/trace.js` (the verdict: start, end, path), the `gt-*` rules and the desk's one. Tests: `test_glyph_tour.py`, `GlyphTour.browser`, `glyphTour.phone`, `strokePath`, `trace` | DONE (2026-10-16) |
+
+Open: personal decks (StudyRun) do not gate, as they do not for grammar;
+a combination (きゃ, えい) has no tour; the trace's tolerances
+(`domain/trace.TRACE`) were set by hand and want a learner's thumb.

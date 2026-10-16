@@ -15,6 +15,7 @@ from study.modes import (
 )
 from study.mcq import pick_distractors
 from study.kanji_words import course_shares
+from study.glyph_tour import mark_glyph_tours
 from study import teaching_order
 from content.kanji_readings import split_readings, display_reading
 from content.radical_data import (
@@ -365,7 +366,8 @@ def get_kanji_cards(level: str | None = None, lang: str = "fr", count: int = Que
     hasn't reviewed yet. `beyond_target` is the 臨時列車: the learner
     explicitly asking for new cards past today's pace (core/pace.py).
     `radical` scopes the batch to one radical's family instead of a
-    level (plan 086).
+    level (plan 086). A kanji never met before carries its first-sight
+    tour (初見, plan 213).
     """
     pace = resolve_pace(user_id)
     kanji_list, cards = _select_cards(
@@ -378,6 +380,7 @@ def get_kanji_cards(level: str | None = None, lang: str = "fr", count: int = Que
     )
     if kanji_list is None:
         return {"error": "Unknown level"}
+    mark_glyph_tours(cards, user_id, lang)
     return {"cards": cards, "pace": pace.payload() if pace else None}
 
 
