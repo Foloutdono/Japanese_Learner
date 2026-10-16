@@ -1811,6 +1811,10 @@ def _init_comprehension_pool() -> None:
                     ON comprehension_pool (level, lang, generator_version)
                 """
             )
+            # The seeds' key (plan 111), here as well as in the seeding:
+            # _pool_take orders on it (plan 230), and a failed seeding
+            # must not leave every read failing on a missing column.
+            cur.execute("ALTER TABLE comprehension_pool ADD COLUMN IF NOT EXISTS seed_key TEXT")
             # Which learner has already read which exercise. A row per
             # SERVE, not per completion: an exercise that was opened and
             # abandoned has still been read, and serving it again is the
@@ -1920,11 +1924,17 @@ else:
 def _pool_take(user_id: str, level: str, lang: str, avoid: set[str]) -> dict | None:
     """An exercise this learner has not been served, or None.
 
+    The hand-written seeds come first (plan 230): they are reviewed by
+    hand, and a model's text is checked only by the gates, so a new
+    learner reads the best the pool holds before anything generated --
+    which, once the pool has grown, a random draw no longer promised.
+
     `avoid` is the grammar they have just read (_recent_grammar_
     patterns): a candidate that uses none of it is preferred, and one
     that does is taken rather than paying for a generation -- the same
     trade _pick_grammar_seeds makes when the level has run out of fresh
-    points.
+    points. So a seed clear of it comes first, then a generated text
+    clear of it, then a seed that is not.
 
     A miss must never be an error. Every failure here returns None,
     which is the generate path, which is what this whole layer is an
@@ -1951,7 +1961,7 @@ def _pool_take(user_id: str, level: str, lang: str, avoid: set[str]) -> dict | N
                    AND NOT EXISTS (
                         SELECT 1 FROM comprehension_served s
                          WHERE s.pool_id = p.id AND s.user_id = %s)
-                 ORDER BY random()
+                 ORDER BY (p.seed_key IS NULL), random()
                  LIMIT %s
                 """,
                 (level, lang, _POOL_VERSION, user_id, _POOL_CANDIDATES),
@@ -2138,13 +2148,16 @@ def _claim_generation_slot(user_id: str) -> int:
 
 
 def _pool_repeat(user_id: str, level: str, lang: str) -> dict | None:
-    """An exercise this learner HAS read, the one they read longest ago,
-    or None if they have read none.
+    """An exercise this learner HAS read, or None if they have read none.
 
     What a learner past the day's ceiling is served instead of a
-    refusal. served_at is bumped, so a second repeat in the same
-    session moves on to the next-oldest rather than handing back the
-    same text twice."""
+    refusal, chosen to be worth reading again (plan 230): a text they
+    have answered every question of right comes last, since there is
+    least left in it for them; among the rest, the one read longest ago.
+    And never the text they were just served, while there is another:
+    served_at is bumped, so the same text twice in a row would read as
+    a bug. Answers are matched by the text, which is what
+    comprehension_log keeps."""
     try:
         conn = db_conn()
     except Exception:
@@ -2158,7 +2171,13 @@ def _pool_repeat(user_id: str, level: str, lang: str) -> dict | None:
                   JOIN comprehension_served s ON s.pool_id = p.id
                  WHERE s.user_id = %s AND p.level = %s AND p.lang = %s
                    AND p.generator_version = %s
-                 ORDER BY s.served_at
+                 ORDER BY s.served_at = (SELECT MAX(served_at) FROM comprehension_served
+                                          WHERE user_id = s.user_id),
+                          EXISTS (SELECT 1 FROM comprehension_log l
+                                   WHERE l.user_id = s.user_id AND l.level = p.level
+                                     AND l.text = p.exercise->>'text'
+                                     AND l.total > 0 AND l.score = l.total),
+                          s.served_at
                  LIMIT 1
                 """,
                 (user_id, level, lang, _POOL_VERSION),

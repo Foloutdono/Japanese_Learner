@@ -33,26 +33,26 @@
     "correct": 1
    },
    {
-    "type": "comprehension",
+    "type": "grammar",
     "question": {
-     "en": "How does the writer get to the station?",
-     "fr": "Comment l'auteur va-t-il jusqu'à la gare ?"
+     "en": "What does 「電車の中で本を読むのが好きです」 tell us?",
+     "fr": "Qu'apprend-on avec 「電車の中で本を読むのが好きです」 ?"
     },
     "options": {
      "en": [
-      "By train",
-      "By car",
-      "On foot",
-      "By bus"
+      "The writer enjoys reading books on the train",
+      "The writer wants to read a book on the train",
+      "The writer has to read books on the train",
+      "The writer likes the train more than books"
      ],
      "fr": [
-      "En train",
-      "En voiture",
-      "À pied",
-      "En bus"
+      "L'auteur aime lire des livres dans le train",
+      "L'auteur veut lire un livre dans le train",
+      "L'auteur doit lire des livres dans le train",
+      "L'auteur préfère le train aux livres"
      ]
     },
-    "correct": 2
+    "correct": 0
    },
    {
     "type": "vocabulary",
@@ -64,14 +64,14 @@
      "en": [
       "A class",
       "A test",
-      "A station",
-      "A meal"
+      "A break",
+      "Homework"
      ],
      "fr": [
       "Un cours",
       "Un examen",
-      "Une gare",
-      "Un repas"
+      "Une pause",
+      "Des devoirs"
      ]
     },
     "correct": 0
@@ -106,16 +106,16 @@
     },
     "options": {
      "en": [
-      "At home",
+      "In the school library",
       "On the train",
       "In the school cafeteria",
-      "In the library"
+      "At a friend's home"
      ],
      "fr": [
-      "À la maison",
+      "À la bibliothèque de l'école",
       "Dans le train",
       "À la cantine de l'école",
-      "À la bibliothèque"
+      "Chez un ami"
      ]
     },
     "correct": 2
@@ -129,15 +129,15 @@
     "options": {
      "en": [
       "I have not memorised all of them yet",
-      "I already memorised all of them",
-      "I will not memorise them",
-      "I do not want to memorise them"
+      "I have memorised all of them already",
+      "I will memorise all of them tomorrow",
+      "I have not started memorising them"
      ],
      "fr": [
       "Je ne les ai pas encore tous mémorisés",
       "Je les ai déjà tous mémorisés",
-      "Je ne les mémoriserai pas",
-      "Je ne veux pas les mémoriser"
+      "Je les mémoriserai tous demain",
+      "Je n'ai pas commencé à les mémoriser"
      ]
     },
     "correct": 0
@@ -151,15 +151,15 @@
     "options": {
      "en": [
       "They are learning Japanese as a foreign language",
-      "They teach Japanese at a university",
-      "They work in a library",
-      "They do not like reading"
+      "They teach Japanese classes at a university",
+      "They work at the library in the afternoons",
+      "They already know all the kanji they need"
      ],
      "fr": [
       "Cette personne apprend le japonais comme langue étrangère",
       "Cette personne enseigne le japonais à l'université",
-      "Cette personne travaille dans une bibliothèque",
-      "Cette personne n'aime pas lire"
+      "Cette personne travaille à la bibliothèque l'après-midi",
+      "Cette personne connaît déjà tous les kanji utiles"
      ]
     },
     "correct": 0
@@ -172,16 +172,16 @@
     },
     "options": {
      "en": [
-      "Studies kanji",
+      "Studies the new kanji again",
       "Watches a little television",
-      "Goes to the library",
-      "Meets a friend"
+      "Reads a book for a while",
+      "Goes straight to bed"
      ],
      "fr": [
-      "Étudie les kanji",
+      "Révise les nouveaux kanji",
       "Regarde un peu la télévision",
-      "Va à la bibliothèque",
-      "Retrouve un ami"
+      "Lit un livre un moment",
+      "Se couche tout de suite"
      ]
     },
     "correct": 1
@@ -564,7 +564,7 @@
     "jp": "じゅぎょうがおわってから、友だちと学校の食どうでごはんを食べます。",
     "translation": {
      "en": "After class ends, I eat lunch with a friend in the school cafeteria.",
-     "fr": "Une fois le cours fini, je mange avec un ami à la cantine de l'école."
+     "fr": "Une fois le cours fini, je déjeune avec un ami à la cantine de l'école."
     },
     "note": {
      "en": "The pattern 「〜てから」 in 「おわってから」 means after the class has ended.",
@@ -637,8 +637,8 @@
      {
       "surface": "ごはん",
       "meaning": {
-       "en": "meal",
-       "fr": "repas"
+       "en": "lunch (a meal)",
+       "fr": "repas (le déjeuner)"
       }
      },
      {
@@ -980,38 +980,16 @@
     },
     "options": {
      "en": [
-      "It is their mother's birthday next week",
-      "It is their friend's birthday",
-      "Their mother asked for a bag",
-      "It is a holiday"
+      "Their mother's birthday is next Monday",
+      "Their friend's birthday is next Monday",
+      "Their mother asked them for a red bag",
+      "Their mother's birthday was yesterday"
      ],
      "fr": [
-      "C'est l'anniversaire de sa mère la semaine prochaine",
-      "C'est l'anniversaire de son ami",
-      "Sa mère a demandé un sac",
-      "C'est un jour férié"
-     ]
-    },
-    "correct": 0
-   },
-   {
-    "type": "comprehension",
-    "question": {
-     "en": "Which bag was more expensive?",
-     "fr": "Quel sac était le plus cher ?"
-    },
-    "options": {
-     "en": [
-      "The red one",
-      "The blue one",
-      "They cost the same",
-      "The text does not say"
-     ],
-     "fr": [
-      "Le rouge",
-      "Le bleu",
-      "Ils coûtaient le même prix",
-      "Le texte ne le dit pas"
+      "L'anniversaire de sa mère est lundi prochain",
+      "L'anniversaire de son ami est lundi prochain",
+      "Sa mère lui a demandé un sac rouge",
+      "L'anniversaire de sa mère était hier"
      ]
     },
     "correct": 0
@@ -1019,21 +997,43 @@
    {
     "type": "grammar",
     "question": {
-     "en": "In 「あかいかばんのほうが…より」, what does 「〜のほうが〜より」 do?",
-     "fr": "Dans 「あかいかばんのほうが…より」, à quoi sert 「〜のほうが〜より」 ?"
+     "en": "In 「わたしは母にプレゼントを買いたいです」, what does 「〜たいです」 express?",
+     "fr": "Dans 「わたしは母にプレゼントを買いたいです」, qu'exprime 「〜たいです」 ?"
     },
     "options": {
      "en": [
-      "It compares two things",
-      "It lists two things",
-      "It asks a question",
-      "It gives a reason"
+      "What the writer wants to do",
+      "What the writer has already done",
+      "What the writer has to do",
+      "What the writer's mother wants"
      ],
      "fr": [
-      "Il compare deux choses",
-      "Il énumère deux choses",
-      "Il pose une question",
-      "Il donne une raison"
+      "Ce que l'auteur veut faire",
+      "Ce que l'auteur a déjà fait",
+      "Ce que l'auteur doit faire",
+      "Ce que la mère de l'auteur veut"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「あかいかばんのほうがあおいかばんより少し高かったです」 say?",
+     "fr": "Que dit 「あかいかばんのほうがあおいかばんより少し高かったです」 ?"
+    },
+    "options": {
+     "en": [
+      "The red bag cost a little more than the blue one",
+      "The blue bag cost a little more than the red one",
+      "The red bag cost much more than the blue one",
+      "The red bag and the blue one cost the same"
+     ],
+     "fr": [
+      "Le sac rouge coûtait un peu plus que le bleu",
+      "Le sac bleu coûtait un peu plus que le rouge",
+      "Le sac rouge coûtait bien plus que le bleu",
+      "Le sac rouge et le bleu coûtaient pareil"
      ]
     },
     "correct": 0
@@ -1046,16 +1046,16 @@
     },
     "options": {
      "en": [
-      "Because it was cheaper",
-      "Because the mother likes red",
-      "Because the friend chose it",
-      "Because it was bigger"
+      "Because it was cheaper than the blue one",
+      "Because their mother likes the colour red",
+      "Because their friend said red was nicer",
+      "Because the shop had no more blue ones"
      ],
      "fr": [
-      "Parce qu'il était moins cher",
+      "Parce qu'il était moins cher que le bleu",
       "Parce que sa mère aime le rouge",
-      "Parce que l'ami l'a choisi",
-      "Parce qu'il était plus grand"
+      "Parce que son ami préférait le rouge",
+      "Parce qu'il n'y avait plus de sac bleu"
      ]
     },
     "correct": 1
@@ -1069,15 +1069,15 @@
     "options": {
      "en": [
       "A clock or watch",
-      "A flower",
-      "A wallet",
-      "A hat"
+      "A ring or necklace",
+      "A hat or scarf",
+      "A cup or glass"
      ],
      "fr": [
-      "Une montre ou une horloge",
-      "Une fleur",
-      "Un portefeuille",
-      "Un chapeau"
+      "Une horloge ou une montre",
+      "Une bague ou un collier",
+      "Un chapeau ou une écharpe",
+      "Une tasse ou un verre"
      ]
     },
     "correct": 0
@@ -1091,14 +1091,14 @@
     "options": {
      "en": [
       "Suggesting they buy flowers too",
-      "Refusing to buy flowers",
-      "Asking the price of flowers",
-      "Saying flowers were already bought"
+      "Refusing to buy any flowers",
+      "Asking if the writer dislikes flowers",
+      "Saying the flowers were bought already"
      ],
      "fr": [
       "Il propose d'acheter aussi des fleurs",
       "Il refuse d'acheter des fleurs",
-      "Il demande le prix des fleurs",
+      "Il demande si l'auteur n'aime pas les fleurs",
       "Il dit que les fleurs sont déjà achetées"
      ]
     },
@@ -1115,13 +1115,13 @@
       "Three hundred yen",
       "Three thousand yen",
       "Thirty thousand yen",
-      "Three yen"
+      "Three thousand three hundred yen"
      ],
      "fr": [
       "Trois cents yens",
       "Trois mille yens",
       "Trente mille yens",
-      "Trois yens"
+      "Trois mille trois cents yens"
      ]
     },
     "correct": 1
@@ -1129,21 +1129,21 @@
    {
     "type": "inference",
     "question": {
-     "en": "How does the writer feel at the end of the text?",
-     "fr": "Comment se sent l'auteur à la fin du texte ?"
+     "en": "What will the writer most likely do next Monday?",
+     "fr": "Que va probablement faire l'auteur lundi prochain ?"
     },
     "options": {
      "en": [
-      "Confident the present will please their mother",
-      "Worried the bag was too expensive",
-      "Sorry they did not buy the blue bag",
-      "Angry with their friend"
+      "Give their mother a red bag and flowers",
+      "Give their mother a blue bag and flowers",
+      "Go back to the shop with their friend",
+      "Buy their mother a watch at the shop"
      ],
      "fr": [
-      "Sûr que le cadeau plaira à sa mère",
-      "Inquiet que le sac ait été trop cher",
-      "Déçu de ne pas avoir pris le sac bleu",
-      "Fâché contre son ami"
+      "Offrir à sa mère un sac rouge et des fleurs",
+      "Offrir à sa mère un sac bleu et des fleurs",
+      "Retourner au magasin avec son ami",
+      "Acheter une montre à sa mère au magasin"
      ]
     },
     "correct": 0
@@ -1374,7 +1374,7 @@
    {
     "jp": "店には花や、かばんや、とけいがありました。",
     "translation": {
-     "en": "In the shop there were flowers, bags, clocks and so on.",
+     "en": "In the shop there were flowers, bags, watches and so on.",
      "fr": "Dans le magasin, il y avait des fleurs, des sacs, des montres, etc."
     },
     "note": {
@@ -1427,7 +1427,7 @@
      {
       "surface": "とけい",
       "meaning": {
-       "en": "clocks",
+       "en": "watches",
        "fr": "montres"
       }
      },
@@ -1939,57 +1939,57 @@
       "Next Friday",
       "This Friday",
       "Next Monday",
-      "Tomorrow"
+      "Tomorrow morning"
      ],
      "fr": [
       "Vendredi prochain",
       "Ce vendredi",
       "Lundi prochain",
-      "Demain"
+      "Demain matin"
      ]
     },
     "correct": 0
    },
    {
-    "type": "comprehension",
+    "type": "grammar",
     "question": {
-     "en": "Where should the students gather?",
-     "fr": "Où les élèves doivent-ils se retrouver ?"
+     "en": "What does 「あさ八時に学校の前に来てください」 do?",
+     "fr": "Que fait 「あさ八時に学校の前に来てください」 ?"
     },
     "options": {
      "en": [
-      "At the station",
-      "In front of the school",
-      "At the foot of the mountain",
-      "At the bus stop"
+      "It asks the students to come at eight",
+      "It says the students came at eight",
+      "It asks if the students can come at eight",
+      "It says the teacher will come at eight"
      ],
      "fr": [
-      "À la gare",
-      "Devant l'école",
-      "Au pied de la montagne",
-      "À l'arrêt de bus"
+      "Il demande aux élèves de venir à huit heures",
+      "Il dit que les élèves sont venus à huit heures",
+      "Il demande si les élèves peuvent venir à huit heures",
+      "Il dit que le professeur viendra à huit heures"
      ]
     },
-    "correct": 1
+    "correct": 0
    },
    {
     "type": "grammar",
     "question": {
-     "en": "What does 「わすれないでください」 ask the students to do?",
-     "fr": "Que demande 「わすれないでください」 aux élèves ?"
+     "en": "In 「おべんとうと水をわすれないでください」, what are the students asked to do?",
+     "fr": "Dans 「おべんとうと水をわすれないでください」, que demande-t-on aux élèves ?"
     },
     "options": {
      "en": [
-      "Not to forget something",
-      "To forget something",
-      "To remember later",
-      "To bring nothing"
+      "To make sure they bring a lunch and water",
+      "To leave their lunch and water at home",
+      "To buy a lunch and water on the mountain",
+      "To give their lunch and water to the teacher"
      ],
      "fr": [
-      "De ne pas oublier quelque chose",
-      "D'oublier quelque chose",
-      "De s'en souvenir plus tard",
-      "De ne rien apporter"
+      "De bien apporter un repas et de l'eau",
+      "De laisser leur repas et leur eau à la maison",
+      "D'acheter un repas et de l'eau sur la montagne",
+      "De donner leur repas et leur eau au professeur"
      ]
     },
     "correct": 0
@@ -2002,16 +2002,16 @@
     },
     "options": {
      "en": [
-      "Because the mountain is cold",
-      "Because it will rain",
-      "Because the bus is cold",
-      "Because it is winter"
+      "Because it is cold on the mountain",
+      "Because it may rain that day",
+      "Because the bus will be cold",
+      "Because they leave early in the morning"
      ],
      "fr": [
-      "Parce que la montagne est froide",
-      "Parce qu'il va pleuvoir",
-      "Parce que le bus est froid",
-      "Parce que c'est l'hiver"
+      "Parce qu'il fait froid sur la montagne",
+      "Parce qu'il pleuvra peut-être ce jour-là",
+      "Parce qu'il fera froid dans le bus",
+      "Parce qu'ils partent tôt le matin"
      ]
     },
     "correct": 0
@@ -2025,15 +2025,15 @@
     "options": {
      "en": [
       "Voice",
-      "Hand",
-      "Foot",
-      "Face"
+      "Group",
+      "Laugh",
+      "Mouth"
      ],
      "fr": [
       "Voix",
-      "Main",
-      "Pied",
-      "Visage"
+      "Groupe",
+      "Rire",
+      "Bouche"
      ]
     },
     "correct": 0
@@ -2041,21 +2041,21 @@
    {
     "type": "grammar",
     "question": {
-     "en": "What does 「見ることができます」 mean?",
-     "fr": "Que signifie 「見ることができます」 ?"
+     "en": "What does 「古いまちと川を見ることができます」 tell the students?",
+     "fr": "Qu'apprend 「古いまちと川を見ることができます」 aux élèves ?"
     },
     "options": {
      "en": [
-      "You can see",
-      "You must see",
-      "Please look",
-      "You saw"
+      "They can see an old town and a river",
+      "They must look at the old town and river",
+      "They saw an old town and a river last time",
+      "They will walk to an old town and a river"
      ],
      "fr": [
-      "On peut voir",
-      "Il faut voir",
-      "Regardez, s'il vous plaît",
-      "On a vu"
+      "Qu'ils pourront voir une vieille ville et une rivière",
+      "Qu'ils devront regarder la vieille ville et la rivière",
+      "Qu'ils ont vu une vieille ville et une rivière la dernière fois",
+      "Qu'ils iront à pied jusqu'à une vieille ville et une rivière"
      ]
     },
     "correct": 0
@@ -2068,16 +2068,16 @@
     },
     "options": {
      "en": [
-      "The trip is cancelled and the teacher calls at seven",
-      "The trip starts later",
-      "The students go by train instead",
-      "The students wait at school"
+      "They do not go; the teacher phones at seven",
+      "They leave at eight; the teacher phones at seven",
+      "They do not go; the students phone the teacher",
+      "They still go, but come back at three"
      ],
      "fr": [
-      "La sortie est annulée et le professeur appelle à sept heures",
-      "La sortie commence plus tard",
-      "Les élèves y vont en train",
-      "Les élèves attendent à l'école"
+      "Ils n'y vont pas ; le professeur appelle à sept heures",
+      "Ils partent à huit heures ; le professeur appelle à sept heures",
+      "Ils n'y vont pas ; les élèves appellent le professeur",
+      "Ils y vont quand même, mais rentrent à trois heures"
      ]
     },
     "correct": 0
@@ -2091,15 +2091,15 @@
     "options": {
      "en": [
       "A teacher, to the class",
-      "A student, to a friend",
-      "A bus driver",
-      "A shopkeeper"
+      "A student, to the class",
+      "A parent, to the teacher",
+      "A bus driver, to the school"
      ],
      "fr": [
       "Un professeur, à sa classe",
-      "Un élève, à un ami",
-      "Un chauffeur de bus",
-      "Un commerçant"
+      "Un élève, à sa classe",
+      "Un parent, au professeur",
+      "Un chauffeur de bus, à l'école"
      ]
     },
     "correct": 0
@@ -2379,7 +2379,7 @@
     "jp": "おべんとうと水をわすれないでください。",
     "translation": {
      "en": "Please do not forget your lunch and water.",
-     "fr": "N'oubliez pas votre repas et de l'eau, s'il vous plaît."
+     "fr": "N'oubliez pas votre panier-repas ni votre eau, s'il vous plaît."
     },
     "note": {
      "en": "The pattern 「〜ないでください」 politely asks someone not to do something.",
@@ -2624,8 +2624,8 @@
      {
       "surface": "大きい",
       "meaning": {
-       "en": "loud, big",
-       "fr": "fort, grand"
+       "en": "loud",
+       "fr": "fort"
       }
      },
      {
@@ -2638,8 +2638,8 @@
      {
       "surface": "で",
       "meaning": {
-       "en": "with, in",
-       "fr": "avec, à"
+       "en": "marks the manner",
+       "fr": "marque la manière"
       }
      },
      {
@@ -2654,8 +2654,8 @@
    {
     "jp": "雨の日は行きません。",
     "translation": {
-     "en": "We will not go on a rainy day.",
-     "fr": "Nous n'irons pas un jour de pluie."
+     "en": "On a rainy day, we will not go.",
+     "fr": "S'il pleut ce jour-là, nous n'irons pas."
     },
     "note": {
      "en": "The negative polite ending 「〜ません」 says the trip will not happen.",
@@ -2874,6 +2874,2964 @@
       "meaning": {
        "en": "please ask",
        "fr": "demandez, s'il vous plaît"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "n5-04",
+  "level": "N5",
+  "title": "新しいまちから",
+  "grammar": [
+   "〜ています",
+   "〜で〜がいちばん",
+   "〜ましょう"
+  ],
+  "text": "ゆきさん、こんにちは。わたしは先月、この新しいまちに来ました。今、駅のちかくのアパートにすんでいます。このまちで、駅の前のこうえんがいちばんきれいです。日よう日には、たくさんの人がこうえんをさんぽしています。こうえんの中に、小さいきっさてんがあります。そこのコーヒーはとてもおいしいです。わたしは毎週土よう日に、そこで本を読んでいます。来月、ゆきさんは休みがありますね。わたしのまちへあそびに来てください。いっしょにこうえんをさんぽしましょう。そして、あのきっさてんでコーヒーを飲みましょう。メールをまっています。アンナより",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "When did Anna come to this town?",
+     "fr": "Quand Anna est-elle arrivée dans cette ville ?"
+    },
+    "options": {
+     "en": [
+      "Last month",
+      "Last week",
+      "Next month",
+      "Last Saturday"
+     ],
+     "fr": [
+      "Le mois dernier",
+      "La semaine dernière",
+      "Le mois prochain",
+      "Samedi dernier"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Where does Anna live now?",
+     "fr": "Où Anna habite-t-elle maintenant ?"
+    },
+    "options": {
+     "en": [
+      "In a flat near the station",
+      "In a flat above the café",
+      "In a house next to the park",
+      "In a house by the river"
+     ],
+     "fr": [
+      "Dans un appartement près de la gare",
+      "Dans un appartement au-dessus du café",
+      "Dans une maison à côté du parc",
+      "Dans une maison au bord de la rivière"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「このまちで、駅の前のこうえんがいちばんきれいです」 say?",
+     "fr": "Que dit 「このまちで、駅の前のこうえんがいちばんきれいです」 ?"
+    },
+    "options": {
+     "en": [
+      "The park is the prettiest place in the town",
+      "The park is prettier than the station",
+      "The park by the station is quite pretty",
+      "The town is as pretty as the park"
+     ],
+     "fr": [
+      "Le parc est le plus joli endroit de la ville",
+      "Le parc est plus joli que la gare",
+      "Le parc près de la gare est assez joli",
+      "La ville est aussi jolie que le parc"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What do many people do in the park on Sundays?",
+     "fr": "Que font beaucoup de gens au parc le dimanche ?"
+    },
+    "options": {
+     "en": [
+      "They take a walk",
+      "They read books",
+      "They drink coffee",
+      "They eat lunch"
+     ],
+     "fr": [
+      "Ils se promènent",
+      "Ils lisent des livres",
+      "Ils boivent du café",
+      "Ils déjeunent"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "In 「わたしは毎週土よう日に、そこで本を読んでいます」, what does 「読んでいます」 show?",
+     "fr": "Dans 「わたしは毎週土よう日に、そこで本を読んでいます」, que montre 「読んでいます」 ?"
+    },
+    "options": {
+     "en": [
+      "Something Anna does every week",
+      "Something Anna is doing as she writes",
+      "Something Anna did only once",
+      "Something Anna wants to do one day"
+     ],
+     "fr": [
+      "Une chose qu'Anna fait chaque semaine",
+      "Une chose qu'Anna fait en écrivant",
+      "Une chose qu'Anna a faite une seule fois",
+      "Une chose qu'Anna veut faire un jour"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「きっさてん」 mean in this text?",
+     "fr": "Que signifie 「きっさてん」 dans ce texte ?"
+    },
+    "options": {
+     "en": [
+      "A café",
+      "A bookshop",
+      "A bakery",
+      "A library"
+     ],
+     "fr": [
+      "Un café",
+      "Une librairie",
+      "Une boulangerie",
+      "Une bibliothèque"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What is Anna doing with 「いっしょにこうえんをさんぽしましょう」?",
+     "fr": "Que fait Anna avec 「いっしょにこうえんをさんぽしましょう」 ?"
+    },
+    "options": {
+     "en": [
+      "Suggesting a walk in the park together",
+      "Recalling a walk they took in the park",
+      "Asking whether Yuki likes walking",
+      "Telling Yuki to walk in the park alone"
+     ],
+     "fr": [
+      "Elle propose une promenade ensemble au parc",
+      "Elle rappelle une promenade faite au parc",
+      "Elle demande si Yuki aime se promener",
+      "Elle dit à Yuki de se promener seul au parc"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "Why does Anna mention that Yuki has a holiday next month?",
+     "fr": "Pourquoi Anna dit-elle que Yuki a des vacances le mois prochain ?"
+    },
+    "options": {
+     "en": [
+      "So that Yuki can come and visit her then",
+      "So that Yuki can look for a flat there",
+      "Because she is going on holiday too",
+      "Because the café is closed next month"
+     ],
+     "fr": [
+      "Pour que Yuki vienne la voir à ce moment-là",
+      "Pour que Yuki cherche un appartement là-bas",
+      "Parce qu'elle part elle aussi en vacances",
+      "Parce que le café ferme le mois prochain"
+     ]
+    },
+    "correct": 0
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "ゆきさん、こんにちは。",
+    "translation": {
+     "en": "Hello, Yuki.",
+     "fr": "Bonjour, Yuki."
+    },
+    "note": {
+     "en": "The suffix 「さん」 after a name is the polite way to address someone.",
+     "fr": "Le suffixe 「さん」 après un prénom est la façon polie de s'adresser à quelqu'un."
+    },
+    "words": [
+     {
+      "surface": "ゆき",
+      "meaning": {
+       "en": "Yuki (a name)",
+       "fr": "Yuki (prénom)"
+      }
+     },
+     {
+      "surface": "さん",
+      "meaning": {
+       "en": "(polite suffix)",
+       "fr": "(suffixe poli)"
+      }
+     },
+     {
+      "surface": "こんにちは",
+      "meaning": {
+       "en": "hello",
+       "fr": "bonjour"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "わたしは先月、この新しいまちに来ました。",
+    "translation": {
+     "en": "I came to this new town last month.",
+     "fr": "Je suis arrivée dans cette nouvelle ville le mois dernier."
+    },
+    "note": {
+     "en": "The particle 「に」 after 「まち」 marks where the writer came to.",
+     "fr": "La particule 「に」 après 「まち」 marque l'endroit où l'autrice est arrivée."
+    },
+    "words": [
+     {
+      "surface": "わたし",
+      "meaning": {
+       "en": "I",
+       "fr": "je"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "先月",
+      "meaning": {
+       "en": "last month",
+       "fr": "le mois dernier"
+      }
+     },
+     {
+      "surface": "この",
+      "meaning": {
+       "en": "this",
+       "fr": "cette"
+      }
+     },
+     {
+      "surface": "新しい",
+      "meaning": {
+       "en": "new",
+       "fr": "nouvelle"
+      }
+     },
+     {
+      "surface": "まち",
+      "meaning": {
+       "en": "town",
+       "fr": "ville"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks the destination",
+       "fr": "marque la destination"
+      }
+     },
+     {
+      "surface": "来ました",
+      "meaning": {
+       "en": "came",
+       "fr": "suis arrivée"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "今、駅のちかくのアパートにすんでいます。",
+    "translation": {
+     "en": "Now I live in a flat near the station.",
+     "fr": "Maintenant, j'habite dans un appartement près de la gare."
+    },
+    "note": {
+     "en": "The form 「すんでいます」 (〜ています) describes a lasting state: where the writer lives now.",
+     "fr": "La forme 「すんでいます」 (〜ています) décrit un état qui dure : là où l'autrice habite maintenant."
+    },
+    "words": [
+     {
+      "surface": "今",
+      "meaning": {
+       "en": "now",
+       "fr": "maintenant"
+      }
+     },
+     {
+      "surface": "駅",
+      "meaning": {
+       "en": "station",
+       "fr": "gare"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "links the nouns",
+       "fr": "relie les noms"
+      }
+     },
+     {
+      "surface": "ちかく",
+      "meaning": {
+       "en": "near",
+       "fr": "près"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "links the nouns",
+       "fr": "relie les noms"
+      }
+     },
+     {
+      "surface": "アパート",
+      "meaning": {
+       "en": "flat",
+       "fr": "appartement"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks where one lives",
+       "fr": "marque le lieu où l'on habite"
+      }
+     },
+     {
+      "surface": "すんでいます",
+      "meaning": {
+       "en": "live",
+       "fr": "habite"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "このまちで、駅の前のこうえんがいちばんきれいです。",
+    "translation": {
+     "en": "In this town, the park in front of the station is the prettiest.",
+     "fr": "Dans cette ville, c'est le parc devant la gare qui est le plus joli."
+    },
+    "note": {
+     "en": "The pattern 「〜で〜がいちばん」 picks the top one of a group: of all the town, the park is the prettiest.",
+     "fr": "La structure 「〜で〜がいちばん」 désigne le premier d'un ensemble : de toute la ville, le parc est le plus joli."
+    },
+    "words": [
+     {
+      "surface": "この",
+      "meaning": {
+       "en": "this",
+       "fr": "cette"
+      }
+     },
+     {
+      "surface": "まち",
+      "meaning": {
+       "en": "town",
+       "fr": "ville"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "marks the group compared",
+       "fr": "marque l'ensemble comparé"
+      }
+     },
+     {
+      "surface": "駅",
+      "meaning": {
+       "en": "station",
+       "fr": "gare"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "前",
+      "meaning": {
+       "en": "front",
+       "fr": "devant"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "links the nouns",
+       "fr": "relie les noms"
+      }
+     },
+     {
+      "surface": "こうえん",
+      "meaning": {
+       "en": "park",
+       "fr": "parc"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks the subject",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "いちばん",
+      "meaning": {
+       "en": "the most",
+       "fr": "le plus"
+      }
+     },
+     {
+      "surface": "きれいです",
+      "meaning": {
+       "en": "is pretty",
+       "fr": "est joli"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "日よう日には、たくさんの人がこうえんをさんぽしています。",
+    "translation": {
+     "en": "On Sundays, lots of people take walks in the park.",
+     "fr": "Le dimanche, beaucoup de gens se promènent dans le parc."
+    },
+    "note": {
+     "en": "The particle 「を」 with 「さんぽしています」 marks the place walked through, not an object.",
+     "fr": "La particule 「を」 avec 「さんぽしています」 marque le lieu parcouru, pas un objet."
+    },
+    "words": [
+     {
+      "surface": "日よう日",
+      "meaning": {
+       "en": "Sunday",
+       "fr": "dimanche"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "on (a day)",
+       "fr": "le (jour)"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "たくさん",
+      "meaning": {
+       "en": "many",
+       "fr": "beaucoup"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "links to the noun",
+       "fr": "relie au nom"
+      }
+     },
+     {
+      "surface": "人",
+      "meaning": {
+       "en": "people",
+       "fr": "gens"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks the subject",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "こうえん",
+      "meaning": {
+       "en": "park",
+       "fr": "parc"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the place walked through",
+       "fr": "marque le lieu parcouru"
+      }
+     },
+     {
+      "surface": "さんぽしています",
+      "meaning": {
+       "en": "take walks",
+       "fr": "se promènent"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "こうえんの中に、小さいきっさてんがあります。",
+    "translation": {
+     "en": "Inside the park, there is a small café.",
+     "fr": "Dans le parc, il y a un petit café."
+    },
+    "note": {
+     "en": "The particle 「に」 marks where the café is, and 「あります」 says that it is there.",
+     "fr": "La particule 「に」 marque où se trouve le café, et 「あります」 dit qu'il est là."
+    },
+    "words": [
+     {
+      "surface": "こうえん",
+      "meaning": {
+       "en": "park",
+       "fr": "parc"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "中",
+      "meaning": {
+       "en": "inside",
+       "fr": "intérieur"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks where it is",
+       "fr": "marque le lieu où il se trouve"
+      }
+     },
+     {
+      "surface": "小さい",
+      "meaning": {
+       "en": "small",
+       "fr": "petit"
+      }
+     },
+     {
+      "surface": "きっさてん",
+      "meaning": {
+       "en": "café",
+       "fr": "café"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks what exists",
+       "fr": "marque ce qui existe"
+      }
+     },
+     {
+      "surface": "あります",
+      "meaning": {
+       "en": "there is",
+       "fr": "il y a"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "そこのコーヒーはとてもおいしいです。",
+    "translation": {
+     "en": "The coffee there is very good.",
+     "fr": "Là-bas, le café est très bon."
+    },
+    "note": {
+     "en": "The word 「そこ」 points back to the café just mentioned.",
+     "fr": "Le mot 「そこ」 renvoie au café dont on vient de parler."
+    },
+    "words": [
+     {
+      "surface": "そこ",
+      "meaning": {
+       "en": "there",
+       "fr": "là-bas"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "コーヒー",
+      "meaning": {
+       "en": "coffee",
+       "fr": "café"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "とても",
+      "meaning": {
+       "en": "very",
+       "fr": "très"
+      }
+     },
+     {
+      "surface": "おいしいです",
+      "meaning": {
+       "en": "is good",
+       "fr": "est bon"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "わたしは毎週土よう日に、そこで本を読んでいます。",
+    "translation": {
+     "en": "Every Saturday, I read a book there.",
+     "fr": "Tous les samedis, j'y lis un livre."
+    },
+    "note": {
+     "en": "Here 「読んでいます」 (〜ています) describes a habit, as 「毎週」 shows.",
+     "fr": "Ici, 「読んでいます」 (〜ています) décrit une habitude, comme le montre 「毎週」."
+    },
+    "words": [
+     {
+      "surface": "わたし",
+      "meaning": {
+       "en": "I",
+       "fr": "je"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "毎週",
+      "meaning": {
+       "en": "every week",
+       "fr": "chaque semaine"
+      }
+     },
+     {
+      "surface": "土よう日",
+      "meaning": {
+       "en": "Saturday",
+       "fr": "samedi"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "on (a day)",
+       "fr": "le (jour)"
+      }
+     },
+     {
+      "surface": "そこ",
+      "meaning": {
+       "en": "there",
+       "fr": "là-bas"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "marks where the action happens",
+       "fr": "marque le lieu de l'action"
+      }
+     },
+     {
+      "surface": "本",
+      "meaning": {
+       "en": "book",
+       "fr": "livre"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "読んでいます",
+      "meaning": {
+       "en": "read (as a habit)",
+       "fr": "lis (par habitude)"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "来月、ゆきさんは休みがありますね。",
+    "translation": {
+     "en": "Yuki, you have a holiday next month, don't you?",
+     "fr": "Yuki, tu as des vacances le mois prochain, n'est-ce pas ?"
+    },
+    "note": {
+     "en": "The particle 「ね」 at the end checks something both people already know.",
+     "fr": "La particule 「ね」 en fin de phrase vérifie une chose que les deux savent déjà."
+    },
+    "words": [
+     {
+      "surface": "来月",
+      "meaning": {
+       "en": "next month",
+       "fr": "le mois prochain"
+      }
+     },
+     {
+      "surface": "ゆき",
+      "meaning": {
+       "en": "Yuki",
+       "fr": "Yuki"
+      }
+     },
+     {
+      "surface": "さん",
+      "meaning": {
+       "en": "(polite suffix)",
+       "fr": "(suffixe poli)"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "休み",
+      "meaning": {
+       "en": "holiday",
+       "fr": "vacances"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks what one has",
+       "fr": "marque ce que l'on a"
+      }
+     },
+     {
+      "surface": "あります",
+      "meaning": {
+       "en": "have",
+       "fr": "as"
+      }
+     },
+     {
+      "surface": "ね",
+      "meaning": {
+       "en": "don't you?",
+       "fr": "n'est-ce pas ?"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "わたしのまちへあそびに来てください。",
+    "translation": {
+     "en": "Please come and visit my town.",
+     "fr": "Viens donc me voir dans ma ville."
+    },
+    "note": {
+     "en": "The phrase 「あそびに来て」 means come for a visit: 「に」 gives the purpose of coming.",
+     "fr": "L'expression 「あそびに来て」 signifie venir en visite : 「に」 donne le but de la venue."
+    },
+    "words": [
+     {
+      "surface": "わたし",
+      "meaning": {
+       "en": "I",
+       "fr": "je"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "marks possession (my)",
+       "fr": "marque l'appartenance (ma)"
+      }
+     },
+     {
+      "surface": "まち",
+      "meaning": {
+       "en": "town",
+       "fr": "ville"
+      }
+     },
+     {
+      "surface": "へ",
+      "meaning": {
+       "en": "towards",
+       "fr": "vers"
+      }
+     },
+     {
+      "surface": "あそび",
+      "meaning": {
+       "en": "a visit (for fun)",
+       "fr": "une visite (pour le plaisir)"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks the purpose",
+       "fr": "marque le but"
+      }
+     },
+     {
+      "surface": "来てください",
+      "meaning": {
+       "en": "please come",
+       "fr": "viens"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "いっしょにこうえんをさんぽしましょう。",
+    "translation": {
+     "en": "Let's take a walk in the park together.",
+     "fr": "Promenons-nous ensemble dans le parc."
+    },
+    "note": {
+     "en": "The ending 「〜ましょう」 in 「さんぽしましょう」 invites the other person: let's.",
+     "fr": "La terminaison 「〜ましょう」 dans 「さんぽしましょう」 invite l'autre à faire la chose ensemble."
+    },
+    "words": [
+     {
+      "surface": "いっしょに",
+      "meaning": {
+       "en": "together",
+       "fr": "ensemble"
+      }
+     },
+     {
+      "surface": "こうえん",
+      "meaning": {
+       "en": "park",
+       "fr": "parc"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the place walked through",
+       "fr": "marque le lieu parcouru"
+      }
+     },
+     {
+      "surface": "さんぽしましょう",
+      "meaning": {
+       "en": "let's take a walk",
+       "fr": "promenons-nous"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "そして、あのきっさてんでコーヒーを飲みましょう。",
+    "translation": {
+     "en": "And then let's have a coffee at that café.",
+     "fr": "Et puis, prenons un café dans ce café-là."
+    },
+    "note": {
+     "en": "The word 「あの」 points to the café both people now know about.",
+     "fr": "Le mot 「あの」 désigne le café que les deux connaissent maintenant."
+    },
+    "words": [
+     {
+      "surface": "そして",
+      "meaning": {
+       "en": "and then",
+       "fr": "et puis"
+      }
+     },
+     {
+      "surface": "あの",
+      "meaning": {
+       "en": "that",
+       "fr": "ce…-là"
+      }
+     },
+     {
+      "surface": "きっさてん",
+      "meaning": {
+       "en": "café",
+       "fr": "café"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "marks where the action happens",
+       "fr": "marque le lieu de l'action"
+      }
+     },
+     {
+      "surface": "コーヒー",
+      "meaning": {
+       "en": "coffee",
+       "fr": "café"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "飲みましょう",
+      "meaning": {
+       "en": "let's drink",
+       "fr": "buvons"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "メールをまっています。",
+    "translation": {
+     "en": "I'm waiting for your email.",
+     "fr": "J'attends ton e-mail."
+    },
+    "note": {
+     "en": "The form 「まっています」 (〜ています) is an action going on now: I am waiting.",
+     "fr": "La forme 「まっています」 (〜ています) exprime une action en cours : j'attends."
+    },
+    "words": [
+     {
+      "surface": "メール",
+      "meaning": {
+       "en": "email",
+       "fr": "e-mail"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "まっています",
+      "meaning": {
+       "en": "am waiting for",
+       "fr": "attends"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "アンナより",
+    "translation": {
+     "en": "From Anna",
+     "fr": "Anna"
+    },
+    "note": {
+     "en": "The particle 「より」 after a name, at the end of a letter, means from.",
+     "fr": "La particule 「より」 après un nom, en fin de lettre, signifie de la part de."
+    },
+    "words": [
+     {
+      "surface": "アンナ",
+      "meaning": {
+       "en": "Anna (a name)",
+       "fr": "Anna (prénom)"
+      }
+     },
+     {
+      "surface": "より",
+      "meaning": {
+       "en": "from",
+       "fr": "de la part de"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "n5-05",
+  "level": "N5",
+  "title": "雨の日のかさ",
+  "grammar": [
+   "〜ないで",
+   "〜とき",
+   "もう〜ました"
+  ],
+  "text": "けさはいい天気でしたから、かさをもたないで、うちを出ました。でも、午後、学校を出たとき、雨がふっていました。わたしは駅まで、はしりました。駅の前で、おなじクラスのたなかさんに会いました。たなかさんには大きいかさがありました。「いっしょにかえりましょう。」とたなかさんが言いました。わたしたちは一本のかさで、ゆっくりあるきました。たなかさんのうちは、わたしのうちのちかくです。とてもうれしかったです。あした、たなかさんに「ありがとう。」と言います。わたしはもう新しいかさを買いました。",
+  "questions": [
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「かさをもたないで、うちを出ました」 tell us?",
+     "fr": "Qu'apprend-on avec 「かさをもたないで、うちを出ました」 ?"
+    },
+    "options": {
+     "en": [
+      "The writer left home without an umbrella",
+      "The writer left home with an umbrella",
+      "The writer left the umbrella at school",
+      "The writer lost the umbrella on the way"
+     ],
+     "fr": [
+      "L'auteur est sorti sans parapluie",
+      "L'auteur est sorti avec un parapluie",
+      "L'auteur a laissé son parapluie à l'école",
+      "L'auteur a perdu son parapluie en route"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「学校を出たとき」 mean?",
+     "fr": "Que signifie 「学校を出たとき」 ?"
+    },
+    "options": {
+     "en": [
+      "When I left school",
+      "Before I left school",
+      "Because I left school",
+      "When I got to school"
+     ],
+     "fr": [
+      "Quand je suis sorti de l'école",
+      "Avant de sortir de l'école",
+      "Parce que je suis sorti de l'école",
+      "Quand je suis arrivé à l'école"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「はしりました」 mean in 「わたしは駅まで、はしりました」?",
+     "fr": "Que signifie 「はしりました」 dans 「わたしは駅まで、はしりました」 ?"
+    },
+    "options": {
+     "en": [
+      "Ran",
+      "Walked",
+      "Waited",
+      "Took the bus"
+     ],
+     "fr": [
+      "A couru",
+      "A marché",
+      "A attendu",
+      "A pris le bus"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Where did the writer meet Tanaka?",
+     "fr": "Où l'auteur a-t-il rencontré Tanaka ?"
+    },
+    "options": {
+     "en": [
+      "In front of the station",
+      "In front of the school",
+      "In the classroom",
+      "Near the writer's home"
+     ],
+     "fr": [
+      "Devant la gare",
+      "Devant l'école",
+      "Dans la salle de classe",
+      "Près de chez l'auteur"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Who is Tanaka?",
+     "fr": "Qui est Tanaka ?"
+    },
+    "options": {
+     "en": [
+      "A classmate of the writer",
+      "The writer's teacher",
+      "The writer's older brother",
+      "A man who works at the station"
+     ],
+     "fr": [
+      "Un camarade de classe de l'auteur",
+      "Le professeur de l'auteur",
+      "Le grand frère de l'auteur",
+      "Un homme qui travaille à la gare"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "How did the two of them go home?",
+     "fr": "Comment sont-ils rentrés tous les deux ?"
+    },
+    "options": {
+     "en": [
+      "They walked slowly under one umbrella",
+      "They ran to the station in the rain",
+      "They took the train with two umbrellas",
+      "They waited at the station for the rain to stop"
+     ],
+     "fr": [
+      "Ils ont marché lentement sous un seul parapluie",
+      "Ils ont couru jusqu'à la gare sous la pluie",
+      "Ils ont pris le train avec deux parapluies",
+      "Ils ont attendu à la gare la fin de la pluie"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「もう新しいかさを買いました」 mean?",
+     "fr": "Que signifie 「もう新しいかさを買いました」 ?"
+    },
+    "options": {
+     "en": [
+      "I have already bought a new umbrella",
+      "I will buy a new umbrella soon",
+      "I have not bought a new umbrella yet",
+      "I want to buy one more new umbrella"
+     ],
+     "fr": [
+      "J'ai déjà acheté un nouveau parapluie",
+      "J'achèterai bientôt un nouveau parapluie",
+      "Je n'ai pas encore acheté de nouveau parapluie",
+      "Je veux acheter encore un nouveau parapluie"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "Why will the writer say 「ありがとう」 to Tanaka?",
+     "fr": "Pourquoi l'auteur va-t-il dire 「ありがとう」 à Tanaka ?"
+    },
+    "options": {
+     "en": [
+      "Tanaka shared an umbrella on the way home",
+      "Tanaka bought the writer a new umbrella",
+      "Tanaka waited for the writer at school",
+      "Tanaka ran with the writer to the station"
+     ],
+     "fr": [
+      "Tanaka a partagé son parapluie pour rentrer",
+      "Tanaka lui a acheté un nouveau parapluie",
+      "Tanaka l'a attendu à la sortie de l'école",
+      "Tanaka a couru avec lui jusqu'à la gare"
+     ]
+    },
+    "correct": 0
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "けさはいい天気でしたから、かさをもたないで、うちを出ました。",
+    "translation": {
+     "en": "The weather was nice this morning, so I left home without taking an umbrella.",
+     "fr": "Il faisait beau ce matin, alors je suis sorti de chez moi sans prendre de parapluie."
+    },
+    "note": {
+     "en": "The form 「もたないで」 (〜ないで) means without taking: the writer went out with no umbrella.",
+     "fr": "La forme 「もたないで」 (〜ないで) signifie sans prendre : l'auteur est sorti sans parapluie."
+    },
+    "words": [
+     {
+      "surface": "けさ",
+      "meaning": {
+       "en": "this morning",
+       "fr": "ce matin"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "いい",
+      "meaning": {
+       "en": "nice",
+       "fr": "beau"
+      }
+     },
+     {
+      "surface": "天気",
+      "meaning": {
+       "en": "weather",
+       "fr": "temps"
+      }
+     },
+     {
+      "surface": "でした",
+      "meaning": {
+       "en": "was",
+       "fr": "était"
+      }
+     },
+     {
+      "surface": "から",
+      "meaning": {
+       "en": "so (gives the reason)",
+       "fr": "donc (donne la raison)"
+      }
+     },
+     {
+      "surface": "かさ",
+      "meaning": {
+       "en": "umbrella",
+       "fr": "parapluie"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "もたないで",
+      "meaning": {
+       "en": "without taking",
+       "fr": "sans prendre"
+      }
+     },
+     {
+      "surface": "うち",
+      "meaning": {
+       "en": "home",
+       "fr": "maison"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the place left",
+       "fr": "marque le lieu quitté"
+      }
+     },
+     {
+      "surface": "出ました",
+      "meaning": {
+       "en": "left",
+       "fr": "suis sorti"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "でも、午後、学校を出たとき、雨がふっていました。",
+    "translation": {
+     "en": "But in the afternoon, when I left school, it was raining.",
+     "fr": "Mais l'après-midi, quand je suis sorti de l'école, il pleuvait."
+    },
+    "note": {
+     "en": "The pattern 「〜とき」 in 「学校を出たとき」 gives the moment: when I left school.",
+     "fr": "La structure 「〜とき」 dans 「学校を出たとき」 donne le moment : quand je suis sorti de l'école."
+    },
+    "words": [
+     {
+      "surface": "でも",
+      "meaning": {
+       "en": "but",
+       "fr": "mais"
+      }
+     },
+     {
+      "surface": "午後",
+      "meaning": {
+       "en": "in the afternoon",
+       "fr": "l'après-midi"
+      }
+     },
+     {
+      "surface": "学校",
+      "meaning": {
+       "en": "school",
+       "fr": "école"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the place left",
+       "fr": "marque le lieu quitté"
+      }
+     },
+     {
+      "surface": "出た",
+      "meaning": {
+       "en": "left",
+       "fr": "suis sorti"
+      }
+     },
+     {
+      "surface": "とき",
+      "meaning": {
+       "en": "when",
+       "fr": "quand"
+      }
+     },
+     {
+      "surface": "雨",
+      "meaning": {
+       "en": "rain",
+       "fr": "pluie"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks the subject",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "ふっていました",
+      "meaning": {
+       "en": "was falling",
+       "fr": "tombait"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "わたしは駅まで、はしりました。",
+    "translation": {
+     "en": "I ran to the station.",
+     "fr": "J'ai couru jusqu'à la gare."
+    },
+    "note": {
+     "en": "The particle 「まで」 marks how far the writer ran: as far as the station.",
+     "fr": "La particule 「まで」 marque jusqu'où l'auteur a couru : jusqu'à la gare."
+    },
+    "words": [
+     {
+      "surface": "わたし",
+      "meaning": {
+       "en": "I",
+       "fr": "je"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "駅",
+      "meaning": {
+       "en": "station",
+       "fr": "gare"
+      }
+     },
+     {
+      "surface": "まで",
+      "meaning": {
+       "en": "as far as",
+       "fr": "jusqu'à"
+      }
+     },
+     {
+      "surface": "はしりました",
+      "meaning": {
+       "en": "ran",
+       "fr": "ai couru"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "駅の前で、おなじクラスのたなかさんに会いました。",
+    "translation": {
+     "en": "In front of the station, I met Tanaka, who is in my class.",
+     "fr": "Devant la gare, j'ai rencontré Tanaka, qui est dans ma classe."
+    },
+    "note": {
+     "en": "The particle 「に」 marks the person met with 「会いました」.",
+     "fr": "La particule 「に」 marque la personne rencontrée avec 「会いました」."
+    },
+    "words": [
+     {
+      "surface": "駅",
+      "meaning": {
+       "en": "station",
+       "fr": "gare"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "前",
+      "meaning": {
+       "en": "front",
+       "fr": "devant"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "marks where the action happens",
+       "fr": "marque le lieu de l'action"
+      }
+     },
+     {
+      "surface": "おなじ",
+      "meaning": {
+       "en": "same",
+       "fr": "même"
+      }
+     },
+     {
+      "surface": "クラス",
+      "meaning": {
+       "en": "class",
+       "fr": "classe"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "links to the name",
+       "fr": "relie au nom"
+      }
+     },
+     {
+      "surface": "たなか",
+      "meaning": {
+       "en": "Tanaka (a name)",
+       "fr": "Tanaka (nom)"
+      }
+     },
+     {
+      "surface": "さん",
+      "meaning": {
+       "en": "(polite suffix)",
+       "fr": "(suffixe poli)"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks the person met",
+       "fr": "marque la personne rencontrée"
+      }
+     },
+     {
+      "surface": "会いました",
+      "meaning": {
+       "en": "met",
+       "fr": "ai rencontré"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "たなかさんには大きいかさがありました。",
+    "translation": {
+     "en": "Tanaka had a big umbrella.",
+     "fr": "Tanaka avait un grand parapluie."
+    },
+    "note": {
+     "en": "The pattern 「〜には〜があります」 says what someone has: here, Tanaka had an umbrella.",
+     "fr": "La structure 「〜には〜があります」 dit ce que quelqu'un a : ici, Tanaka avait un parapluie."
+    },
+    "words": [
+     {
+      "surface": "たなか",
+      "meaning": {
+       "en": "Tanaka",
+       "fr": "Tanaka"
+      }
+     },
+     {
+      "surface": "さん",
+      "meaning": {
+       "en": "(polite suffix)",
+       "fr": "(suffixe poli)"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks the owner",
+       "fr": "marque le possesseur"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "大きい",
+      "meaning": {
+       "en": "big",
+       "fr": "grand"
+      }
+     },
+     {
+      "surface": "かさ",
+      "meaning": {
+       "en": "umbrella",
+       "fr": "parapluie"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks what one has",
+       "fr": "marque ce que l'on a"
+      }
+     },
+     {
+      "surface": "ありました",
+      "meaning": {
+       "en": "had",
+       "fr": "avait"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "「いっしょにかえりましょう。」とたなかさんが言いました。",
+    "translation": {
+     "en": "\"Let's go home together,\" Tanaka said.",
+     "fr": "« Rentrons ensemble », a dit Tanaka."
+    },
+    "note": {
+     "en": "The ending 「〜ましょう」 in 「かえりましょう」 is an invitation, and 「と」 marks the words said.",
+     "fr": "La terminaison 「〜ましょう」 dans 「かえりましょう」 est une invitation, et 「と」 marque les paroles rapportées."
+    },
+    "words": [
+     {
+      "surface": "いっしょに",
+      "meaning": {
+       "en": "together",
+       "fr": "ensemble"
+      }
+     },
+     {
+      "surface": "かえりましょう",
+      "meaning": {
+       "en": "let's go home",
+       "fr": "rentrons"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "marks the quote",
+       "fr": "marque la citation"
+      }
+     },
+     {
+      "surface": "たなか",
+      "meaning": {
+       "en": "Tanaka",
+       "fr": "Tanaka"
+      }
+     },
+     {
+      "surface": "さん",
+      "meaning": {
+       "en": "(polite suffix)",
+       "fr": "(suffixe poli)"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks the subject",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "言いました",
+      "meaning": {
+       "en": "said",
+       "fr": "a dit"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "わたしたちは一本のかさで、ゆっくりあるきました。",
+    "translation": {
+     "en": "We walked slowly under one umbrella.",
+     "fr": "Nous avons marché lentement sous un seul parapluie."
+    },
+    "note": {
+     "en": "The particle 「で」 after 「一本のかさ」 marks what they used: one umbrella for two.",
+     "fr": "La particule 「で」 après 「一本のかさ」 marque ce qu'ils ont utilisé : un parapluie pour deux."
+    },
+    "words": [
+     {
+      "surface": "わたしたち",
+      "meaning": {
+       "en": "we",
+       "fr": "nous"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "一本",
+      "meaning": {
+       "en": "one (long thing)",
+       "fr": "un (objet long)"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "links the number to the noun",
+       "fr": "relie le nombre au nom"
+      }
+     },
+     {
+      "surface": "かさ",
+      "meaning": {
+       "en": "umbrella",
+       "fr": "parapluie"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "marks what is used",
+       "fr": "marque le moyen"
+      }
+     },
+     {
+      "surface": "ゆっくり",
+      "meaning": {
+       "en": "slowly",
+       "fr": "lentement"
+      }
+     },
+     {
+      "surface": "あるきました",
+      "meaning": {
+       "en": "walked",
+       "fr": "avons marché"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "たなかさんのうちは、わたしのうちのちかくです。",
+    "translation": {
+     "en": "Tanaka's house is near mine.",
+     "fr": "La maison de Tanaka est près de chez moi."
+    },
+    "note": {
+     "en": "The particle 「の」 links nouns three times: Tanaka's house, my house, near my house.",
+     "fr": "La particule 「の」 relie des noms trois fois : la maison de Tanaka, ma maison, près de ma maison."
+    },
+    "words": [
+     {
+      "surface": "たなか",
+      "meaning": {
+       "en": "Tanaka",
+       "fr": "Tanaka"
+      }
+     },
+     {
+      "surface": "さん",
+      "meaning": {
+       "en": "(polite suffix)",
+       "fr": "(suffixe poli)"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "marks possession ('s)",
+       "fr": "marque l'appartenance (de)"
+      }
+     },
+     {
+      "surface": "うち",
+      "meaning": {
+       "en": "house",
+       "fr": "maison"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "わたし",
+      "meaning": {
+       "en": "I",
+       "fr": "je"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "marks possession (my)",
+       "fr": "marque l'appartenance (ma)"
+      }
+     },
+     {
+      "surface": "うち",
+      "meaning": {
+       "en": "house",
+       "fr": "maison"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "links the nouns",
+       "fr": "relie les noms"
+      }
+     },
+     {
+      "surface": "ちかく",
+      "meaning": {
+       "en": "near",
+       "fr": "près"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "is",
+       "fr": "est"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "とてもうれしかったです。",
+    "translation": {
+     "en": "I was very happy.",
+     "fr": "J'étais très content."
+    },
+    "note": {
+     "en": "The ending 「〜かった」 in 「うれしかったです」 puts the adjective 「うれしい」 in the past.",
+     "fr": "La terminaison 「〜かった」 dans 「うれしかったです」 met l'adjectif 「うれしい」 au passé."
+    },
+    "words": [
+     {
+      "surface": "とても",
+      "meaning": {
+       "en": "very",
+       "fr": "très"
+      }
+     },
+     {
+      "surface": "うれしかったです",
+      "meaning": {
+       "en": "was happy",
+       "fr": "étais content"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "あした、たなかさんに「ありがとう。」と言います。",
+    "translation": {
+     "en": "Tomorrow, I will say \"thank you\" to Tanaka.",
+     "fr": "Demain, je dirai « merci » à Tanaka."
+    },
+    "note": {
+     "en": "The verb 「言います」 is not in the past, so with 「あした」 it speaks of the future.",
+     "fr": "Le verbe 「言います」 n'est pas au passé : avec 「あした」, il parle du futur."
+    },
+    "words": [
+     {
+      "surface": "あした",
+      "meaning": {
+       "en": "tomorrow",
+       "fr": "demain"
+      }
+     },
+     {
+      "surface": "たなか",
+      "meaning": {
+       "en": "Tanaka",
+       "fr": "Tanaka"
+      }
+     },
+     {
+      "surface": "さん",
+      "meaning": {
+       "en": "(polite suffix)",
+       "fr": "(suffixe poli)"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks who is spoken to",
+       "fr": "marque à qui l'on parle"
+      }
+     },
+     {
+      "surface": "ありがとう",
+      "meaning": {
+       "en": "thank you",
+       "fr": "merci"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "marks the quote",
+       "fr": "marque la citation"
+      }
+     },
+     {
+      "surface": "言います",
+      "meaning": {
+       "en": "will say",
+       "fr": "dirai"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "わたしはもう新しいかさを買いました。",
+    "translation": {
+     "en": "I have already bought a new umbrella.",
+     "fr": "J'ai déjà acheté un nouveau parapluie."
+    },
+    "note": {
+     "en": "The pattern 「もう〜ました」 says the action is already done.",
+     "fr": "La structure 「もう〜ました」 dit que l'action est déjà faite."
+    },
+    "words": [
+     {
+      "surface": "わたし",
+      "meaning": {
+       "en": "I",
+       "fr": "je"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "もう",
+      "meaning": {
+       "en": "already",
+       "fr": "déjà"
+      }
+     },
+     {
+      "surface": "新しい",
+      "meaning": {
+       "en": "new",
+       "fr": "nouveau"
+      }
+     },
+     {
+      "surface": "かさ",
+      "meaning": {
+       "en": "umbrella",
+       "fr": "parapluie"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "買いました",
+      "meaning": {
+       "en": "have bought",
+       "fr": "ai acheté"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "n5-06",
+  "level": "N5",
+  "title": "としょかんのおねがい",
+  "grammar": [
+   "〜てもいいです",
+   "〜てはいけません",
+   "〜なければなりません"
+  ],
+  "text": "このとしょかんは、あさ九時からよる七時までです。月よう日は休みです。本は一人十さつまで、二週間かりることができます。カードがない人は、カードをつくらなければなりません。カードは入り口のちかくでつくることができます。としょかんの中で、水を飲んでもいいです。でも、ごはんやおかしを食べてはいけません。それから、大きいこえで話してはいけません。電話は外でかけてください。二かいには子どものへやがあります。そこでは、小さいこえで話してもいいです。しつもんがあるときは、としょかんの人に聞いてください。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "When is the library open?",
+     "fr": "Quand la bibliothèque est-elle ouverte ?"
+    },
+    "options": {
+     "en": [
+      "9 a.m. to 7 p.m., closed on Mondays",
+      "7 a.m. to 9 p.m., closed on Mondays",
+      "9 a.m. to 7 p.m., open every day",
+      "9 a.m. to 7 p.m., closed on Sundays"
+     ],
+     "fr": [
+      "De 9 h à 19 h, fermée le lundi",
+      "De 7 h à 21 h, fermée le lundi",
+      "De 9 h à 19 h, ouverte tous les jours",
+      "De 9 h à 19 h, fermée le dimanche"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "How many books can one person borrow, and for how long?",
+     "fr": "Combien de livres une personne peut-elle emprunter, et pour combien de temps ?"
+    },
+    "options": {
+     "en": [
+      "Up to ten books, for two weeks",
+      "Up to two books, for ten days",
+      "Up to ten books, for one week",
+      "Up to twelve books, for two weeks"
+     ],
+     "fr": [
+      "Jusqu'à dix livres, pour deux semaines",
+      "Jusqu'à deux livres, pour dix jours",
+      "Jusqu'à dix livres, pour une semaine",
+      "Jusqu'à douze livres, pour deux semaines"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「かりる」 mean in this text?",
+     "fr": "Que signifie 「かりる」 dans ce texte ?"
+    },
+    "options": {
+     "en": [
+      "To borrow",
+      "To buy",
+      "To give back",
+      "To read"
+     ],
+     "fr": [
+      "Emprunter",
+      "Acheter",
+      "Rendre",
+      "Lire"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「カードをつくらなければなりません」 tell people with no card?",
+     "fr": "Que dit 「カードをつくらなければなりません」 aux personnes sans carte ?"
+    },
+    "options": {
+     "en": [
+      "They must make a card",
+      "They may make a card if they like",
+      "They do not need to make a card",
+      "They cannot make a card yet"
+     ],
+     "fr": [
+      "Ils doivent se faire une carte",
+      "Ils peuvent se faire une carte s'ils veulent",
+      "Ils n'ont pas besoin de carte",
+      "Ils ne peuvent pas encore se faire de carte"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "In 「としょかんの中で、水を飲んでもいいです」, what does the library say?",
+     "fr": "Dans 「としょかんの中で、水を飲んでもいいです」, que dit la bibliothèque ?"
+    },
+    "options": {
+     "en": [
+      "You may drink water inside",
+      "You must not drink water inside",
+      "You must drink water outside",
+      "You must bring your own water"
+     ],
+     "fr": [
+      "On peut boire de l'eau à l'intérieur",
+      "Il est interdit de boire de l'eau à l'intérieur",
+      "Il faut boire de l'eau dehors",
+      "Il faut apporter sa propre eau"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「ごはんやおかしを食べてはいけません」 mean?",
+     "fr": "Que signifie 「ごはんやおかしを食べてはいけません」 ?"
+    },
+    "options": {
+     "en": [
+      "You must not eat meals or snacks",
+      "You may eat meals but not snacks",
+      "You must eat meals before snacks",
+      "You may eat only a few snacks"
+     ],
+     "fr": [
+      "Il est interdit de manger repas ou friandises",
+      "On peut manger un repas, pas de friandises",
+      "Il faut manger le repas avant les friandises",
+      "On peut manger seulement quelques friandises"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What does the notice say about the children's room?",
+     "fr": "Que dit l'avis sur la salle des enfants ?"
+    },
+    "options": {
+     "en": [
+      "It is upstairs, and you may talk quietly there",
+      "It is upstairs, and you must not talk there",
+      "It is by the entrance, and you may eat there",
+      "It is by the entrance, and cards are made there"
+     ],
+     "fr": [
+      "Elle est à l'étage, et on peut y parler doucement",
+      "Elle est à l'étage, et il est interdit d'y parler",
+      "Elle est près de l'entrée, et on peut y manger",
+      "Elle est près de l'entrée, et on y fait les cartes"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "A visitor wants to eat a sandwich. Where should they most likely eat it?",
+     "fr": "Un visiteur veut manger un sandwich. Où devrait-il sans doute le manger ?"
+    },
+    "options": {
+     "en": [
+      "Outside the library",
+      "In the children's room",
+      "Near the entrance, inside",
+      "At a quiet table inside"
+     ],
+     "fr": [
+      "Hors de la bibliothèque",
+      "Dans la salle des enfants",
+      "Près de l'entrée, à l'intérieur",
+      "À une table calme, à l'intérieur"
+     ]
+    },
+    "correct": 0
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "このとしょかんは、あさ九時からよる七時までです。",
+    "translation": {
+     "en": "This library is open from nine in the morning until seven in the evening.",
+     "fr": "Cette bibliothèque est ouverte de neuf heures du matin à sept heures du soir."
+    },
+    "note": {
+     "en": "The pair 「から〜まで」 gives the start and the end: from nine until seven.",
+     "fr": "La paire 「から〜まで」 donne le début et la fin : de neuf heures à sept heures."
+    },
+    "words": [
+     {
+      "surface": "この",
+      "meaning": {
+       "en": "this",
+       "fr": "cette"
+      }
+     },
+     {
+      "surface": "としょかん",
+      "meaning": {
+       "en": "library",
+       "fr": "bibliothèque"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "あさ",
+      "meaning": {
+       "en": "morning",
+       "fr": "matin"
+      }
+     },
+     {
+      "surface": "九時",
+      "meaning": {
+       "en": "nine o'clock",
+       "fr": "neuf heures"
+      }
+     },
+     {
+      "surface": "から",
+      "meaning": {
+       "en": "from",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "よる",
+      "meaning": {
+       "en": "evening",
+       "fr": "soir"
+      }
+     },
+     {
+      "surface": "七時",
+      "meaning": {
+       "en": "seven o'clock",
+       "fr": "sept heures"
+      }
+     },
+     {
+      "surface": "まで",
+      "meaning": {
+       "en": "until",
+       "fr": "jusqu'à"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "is (open)",
+       "fr": "est (ouverte)"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "月よう日は休みです。",
+    "translation": {
+     "en": "It is closed on Mondays.",
+     "fr": "Elle est fermée le lundi."
+    },
+    "note": {
+     "en": "The noun 「休み」 here means a day the library is closed.",
+     "fr": "Le nom 「休み」 désigne ici un jour de fermeture."
+    },
+    "words": [
+     {
+      "surface": "月よう日",
+      "meaning": {
+       "en": "Monday",
+       "fr": "lundi"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "休み",
+      "meaning": {
+       "en": "closed day",
+       "fr": "jour de fermeture"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "is",
+       "fr": "est"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "本は一人十さつまで、二週間かりることができます。",
+    "translation": {
+     "en": "Each person can borrow up to ten books for two weeks.",
+     "fr": "Chaque personne peut emprunter jusqu'à dix livres pour deux semaines."
+    },
+    "note": {
+     "en": "The pattern 「〜ことができます」 after 「かりる」 says what you are able to do.",
+     "fr": "La structure 「〜ことができます」 après 「かりる」 dit ce que l'on peut faire."
+    },
+    "words": [
+     {
+      "surface": "本",
+      "meaning": {
+       "en": "books",
+       "fr": "livres"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "一人",
+      "meaning": {
+       "en": "per person",
+       "fr": "par personne"
+      }
+     },
+     {
+      "surface": "十さつ",
+      "meaning": {
+       "en": "ten (books)",
+       "fr": "dix (livres)"
+      }
+     },
+     {
+      "surface": "まで",
+      "meaning": {
+       "en": "up to",
+       "fr": "jusqu'à"
+      }
+     },
+     {
+      "surface": "二週間",
+      "meaning": {
+       "en": "for two weeks",
+       "fr": "pour deux semaines"
+      }
+     },
+     {
+      "surface": "かりる",
+      "meaning": {
+       "en": "borrow",
+       "fr": "emprunter"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "makes the verb a noun",
+       "fr": "nominalise le verbe"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks what is possible",
+       "fr": "marque ce qui est possible"
+      }
+     },
+     {
+      "surface": "できます",
+      "meaning": {
+       "en": "can",
+       "fr": "peut"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "カードがない人は、カードをつくらなければなりません。",
+    "translation": {
+     "en": "People who do not have a card must make one.",
+     "fr": "Les personnes qui n'ont pas de carte doivent s'en faire une."
+    },
+    "note": {
+     "en": "The pattern 「〜なければなりません」 in 「つくらなければなりません」 says something must be done.",
+     "fr": "La structure 「〜なければなりません」 dans 「つくらなければなりません」 dit qu'une chose doit être faite."
+    },
+    "words": [
+     {
+      "surface": "カード",
+      "meaning": {
+       "en": "card",
+       "fr": "carte"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks what one has (not)",
+       "fr": "marque ce que l'on (n')a (pas)"
+      }
+     },
+     {
+      "surface": "ない",
+      "meaning": {
+       "en": "do not have",
+       "fr": "n'ont pas"
+      }
+     },
+     {
+      "surface": "人",
+      "meaning": {
+       "en": "people",
+       "fr": "personnes"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "カード",
+      "meaning": {
+       "en": "card",
+       "fr": "carte"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "つくらなければなりません",
+      "meaning": {
+       "en": "must make",
+       "fr": "doivent faire"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "カードは入り口のちかくでつくることができます。",
+    "translation": {
+     "en": "You can make a card near the entrance.",
+     "fr": "On peut faire sa carte près de l'entrée."
+    },
+    "note": {
+     "en": "The particle 「は」 makes 「カード」 the topic: as for the card, you can make it near the entrance.",
+     "fr": "La particule 「は」 fait de 「カード」 le thème : la carte, on peut la faire près de l'entrée."
+    },
+    "words": [
+     {
+      "surface": "カード",
+      "meaning": {
+       "en": "card",
+       "fr": "carte"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "入り口",
+      "meaning": {
+       "en": "entrance",
+       "fr": "entrée"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "ちかく",
+      "meaning": {
+       "en": "near",
+       "fr": "près"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "marks where the action happens",
+       "fr": "marque le lieu de l'action"
+      }
+     },
+     {
+      "surface": "つくる",
+      "meaning": {
+       "en": "make",
+       "fr": "faire"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "makes the verb a noun",
+       "fr": "nominalise le verbe"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks what is possible",
+       "fr": "marque ce qui est possible"
+      }
+     },
+     {
+      "surface": "できます",
+      "meaning": {
+       "en": "can",
+       "fr": "peut"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "としょかんの中で、水を飲んでもいいです。",
+    "translation": {
+     "en": "Inside the library, you may drink water.",
+     "fr": "Dans la bibliothèque, on peut boire de l'eau."
+    },
+    "note": {
+     "en": "The pattern 「〜てもいいです」 in 「飲んでもいいです」 gives permission.",
+     "fr": "La structure 「〜てもいいです」 dans 「飲んでもいいです」 donne une permission."
+    },
+    "words": [
+     {
+      "surface": "としょかん",
+      "meaning": {
+       "en": "library",
+       "fr": "bibliothèque"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "中",
+      "meaning": {
+       "en": "inside",
+       "fr": "intérieur"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "marks where the action happens",
+       "fr": "marque le lieu de l'action"
+      }
+     },
+     {
+      "surface": "水",
+      "meaning": {
+       "en": "water",
+       "fr": "eau"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "飲んでもいいです",
+      "meaning": {
+       "en": "may drink",
+       "fr": "on peut boire"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "でも、ごはんやおかしを食べてはいけません。",
+    "translation": {
+     "en": "But you must not eat meals or snacks.",
+     "fr": "Mais il ne faut pas manger de repas ni de friandises."
+    },
+    "note": {
+     "en": "The pattern 「〜てはいけません」 in 「食べてはいけません」 forbids something.",
+     "fr": "La structure 「〜てはいけません」 dans 「食べてはいけません」 exprime une interdiction."
+    },
+    "words": [
+     {
+      "surface": "でも",
+      "meaning": {
+       "en": "but",
+       "fr": "mais"
+      }
+     },
+     {
+      "surface": "ごはん",
+      "meaning": {
+       "en": "meals",
+       "fr": "repas"
+      }
+     },
+     {
+      "surface": "や",
+      "meaning": {
+       "en": "and (among others)",
+       "fr": "et (entre autres)"
+      }
+     },
+     {
+      "surface": "おかし",
+      "meaning": {
+       "en": "snacks, sweets",
+       "fr": "friandises"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "食べてはいけません",
+      "meaning": {
+       "en": "must not eat",
+       "fr": "il ne faut pas manger"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "それから、大きいこえで話してはいけません。",
+    "translation": {
+     "en": "Also, you must not talk loudly.",
+     "fr": "Et puis, il ne faut pas parler fort."
+    },
+    "note": {
+     "en": "The word 「それから」 adds one more rule to the list.",
+     "fr": "Le mot 「それから」 ajoute une règle de plus à la liste."
+    },
+    "words": [
+     {
+      "surface": "それから",
+      "meaning": {
+       "en": "also, and then",
+       "fr": "et puis"
+      }
+     },
+     {
+      "surface": "大きい",
+      "meaning": {
+       "en": "loud",
+       "fr": "fort"
+      }
+     },
+     {
+      "surface": "こえ",
+      "meaning": {
+       "en": "voice",
+       "fr": "voix"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "marks the manner",
+       "fr": "marque la manière"
+      }
+     },
+     {
+      "surface": "話してはいけません",
+      "meaning": {
+       "en": "must not talk",
+       "fr": "il ne faut pas parler"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "電話は外でかけてください。",
+    "translation": {
+     "en": "Please make phone calls outside.",
+     "fr": "Téléphonez dehors, s'il vous plaît."
+    },
+    "note": {
+     "en": "The verb 「かけて」 goes with 「電話」: to make a phone call.",
+     "fr": "Le verbe 「かけて」 s'emploie avec 「電話」 : passer un appel."
+    },
+    "words": [
+     {
+      "surface": "電話",
+      "meaning": {
+       "en": "phone calls",
+       "fr": "appels"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "外",
+      "meaning": {
+       "en": "outside",
+       "fr": "dehors"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "marks where the action happens",
+       "fr": "marque le lieu de l'action"
+      }
+     },
+     {
+      "surface": "かけてください",
+      "meaning": {
+       "en": "please make (a call)",
+       "fr": "passez (un appel)"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "二かいには子どものへやがあります。",
+    "translation": {
+     "en": "On the second floor, there is a children's room.",
+     "fr": "Au premier étage, il y a une salle pour les enfants."
+    },
+    "note": {
+     "en": "The word 「二かい」 is a floor here: 「かい」 counts floors, and 「二かい」 is the one above the ground floor.",
+     "fr": "Le mot 「二かい」 est ici un étage : 「かい」 compte les étages, et 「二かい」 est le premier au-dessus du rez-de-chaussée."
+    },
+    "words": [
+     {
+      "surface": "二かい",
+      "meaning": {
+       "en": "second floor",
+       "fr": "premier étage"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks where it is",
+       "fr": "marque le lieu où elle se trouve"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "子ども",
+      "meaning": {
+       "en": "children",
+       "fr": "enfants"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "for",
+       "fr": "pour"
+      }
+     },
+     {
+      "surface": "へや",
+      "meaning": {
+       "en": "room",
+       "fr": "salle"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks what exists",
+       "fr": "marque ce qui existe"
+      }
+     },
+     {
+      "surface": "あります",
+      "meaning": {
+       "en": "there is",
+       "fr": "il y a"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "そこでは、小さいこえで話してもいいです。",
+    "translation": {
+     "en": "In there, you may talk in a quiet voice.",
+     "fr": "Là, on peut parler à voix basse."
+    },
+    "note": {
+     "en": "The pattern 「〜てもいいです」 gives permission again, but only in that room, as 「そこでは」 shows.",
+     "fr": "La structure 「〜てもいいです」 donne de nouveau une permission, mais seulement dans cette salle, comme le montre 「そこでは」."
+    },
+    "words": [
+     {
+      "surface": "そこ",
+      "meaning": {
+       "en": "there",
+       "fr": "là"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "marks the place",
+       "fr": "marque le lieu"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "marks a contrast",
+       "fr": "marque un contraste"
+      }
+     },
+     {
+      "surface": "小さい",
+      "meaning": {
+       "en": "quiet",
+       "fr": "basse"
+      }
+     },
+     {
+      "surface": "こえ",
+      "meaning": {
+       "en": "voice",
+       "fr": "voix"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "marks the manner",
+       "fr": "marque la manière"
+      }
+     },
+     {
+      "surface": "話してもいいです",
+      "meaning": {
+       "en": "may talk",
+       "fr": "on peut parler"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "しつもんがあるときは、としょかんの人に聞いてください。",
+    "translation": {
+     "en": "If you have a question, please ask the library staff.",
+     "fr": "Si vous avez une question, demandez au personnel de la bibliothèque."
+    },
+    "note": {
+     "en": "The word 「とき」 after 「ある」 means when: when you have a question.",
+     "fr": "Le mot 「とき」 après 「ある」 signifie quand : quand on a une question."
+    },
+    "words": [
+     {
+      "surface": "しつもん",
+      "meaning": {
+       "en": "question",
+       "fr": "question"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks what one has",
+       "fr": "marque ce que l'on a"
+      }
+     },
+     {
+      "surface": "ある",
+      "meaning": {
+       "en": "have",
+       "fr": "avoir"
+      }
+     },
+     {
+      "surface": "とき",
+      "meaning": {
+       "en": "when",
+       "fr": "quand"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "としょかん",
+      "meaning": {
+       "en": "library",
+       "fr": "bibliothèque"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "人",
+      "meaning": {
+       "en": "staff",
+       "fr": "personnel"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks the person asked",
+       "fr": "marque la personne interrogée"
+      }
+     },
+     {
+      "surface": "聞いてください",
+      "meaning": {
+       "en": "please ask",
+       "fr": "demandez"
       }
      }
     ]

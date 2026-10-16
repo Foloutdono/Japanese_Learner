@@ -342,6 +342,92 @@ def test_repeats_rotate_oldest_first(client, calls, empty_pool, monkeypatch):
     assert not calls
 
 
+# ── what is served first, and again (plan 230) ───────────────
+
+def _make_seed(pool_id, key):
+    _sql("UPDATE comprehension_pool SET seed_key = %s WHERE id = %s", (key, pool_id))
+
+
+def test_a_hand_written_seed_comes_before_a_generated_text(client, calls, empty_pool):
+    """A seed is reviewed by hand; a model's text only by the gates. A
+    new learner reads the seeds first, whatever else the pool holds."""
+    for i in range(4):
+        _seed_pool(f"生成された文{i}です。")
+    _make_seed(_seed_pool("手で書いた文です。"), "seed:test-201:en")
+    assert _get(client)["text"] == "手で書いた文です。"
+    assert not calls
+
+
+def test_a_generated_text_clear_of_the_grammar_beats_a_seed_that_is_not(
+    client, calls, empty_pool, monkeypatch
+):
+    """Seeds first, but not at the cost of the grammar the learner has
+    just read: the pool's one pedagogical promise stands above it."""
+    _make_seed(_seed_pool("手で書いた文です。", grammar=[MASHITA["pattern"]]), "seed:test-201:en")
+    _seed_pool("生成された文です。", grammar=[KUDASAI["pattern"]])
+    monkeypatch.setattr(reading, "_recent_grammar_patterns", lambda *a, **kw: {MASHITA["pattern"]})
+    assert _get(client)["text"] == "生成された文です。"
+    assert not calls
+
+
+def _answered(text, score, total):
+    _sql(
+        """
+        INSERT INTO comprehension_log
+            (user_id, level, text, translation, questions, answers, score, total, grammar)
+        VALUES (%s, 'N5', %s, 't', '[]', '[]', %s, %s, NULL)
+        """,
+        (DEV_USER_ID, text, score, total),
+    )
+
+
+@pytest.fixture
+def no_answers():
+    def wipe():
+        _sql("DELETE FROM comprehension_log WHERE user_id = %s AND text LIKE %s", (DEV_USER_ID, "%のテキストです。"))
+    wipe()
+    yield
+    wipe()
+
+
+def test_a_text_answered_perfectly_is_repeated_last(client, calls, empty_pool, no_answers, monkeypatch):
+    """Past the ceiling, the repeat worth having is a text with something
+    left in it: one answered without a mistake waits behind the others,
+    however long ago it was read."""
+    from datetime import datetime, timedelta, timezone
+
+    now = datetime.now(timezone.utc)
+    _seed_pool("満点だったテキストです。", served_by=DEV_USER_ID, served_at=now - timedelta(days=3))
+    _seed_pool("間違えたテキストです。", served_by=DEV_USER_ID, served_at=now - timedelta(days=2))
+    # What they read last, as a learner meeting the ceiling has: never
+    # handed straight back, whatever its score.
+    _seed_pool("今読んだテキストです。", served_by=DEV_USER_ID, served_at=now - timedelta(hours=1))
+    _answered("満点だったテキストです。", 8, 8)
+    _answered("間違えたテキストです。", 5, 8)
+
+    monkeypatch.setattr(reading, "_DAILY_GENERATION_LIMIT", 0)
+    assert _get(client)["text"] == "間違えたテキストです。"
+    assert not calls
+
+
+def test_the_text_just_repeated_never_comes_straight_back(client, calls, empty_pool, no_answers, monkeypatch):
+    """Even when it is the only one not yet mastered: the same text
+    twice in a row reads as a bug, so the mastered one takes a turn."""
+    from datetime import datetime, timedelta, timezone
+
+    now = datetime.now(timezone.utc)
+    _seed_pool("満点だったテキストです。", served_by=DEV_USER_ID, served_at=now - timedelta(days=3))
+    _seed_pool("間違えたテキストです。", served_by=DEV_USER_ID, served_at=now - timedelta(days=2))
+    _seed_pool("今読んだテキストです。", served_by=DEV_USER_ID, served_at=now - timedelta(hours=1))
+    _answered("満点だったテキストです。", 8, 8)
+    _answered("今読んだテキストです。", 8, 8)
+
+    monkeypatch.setattr(reading, "_DAILY_GENERATION_LIMIT", 0)
+    texts = [_get(client)["text"] for _ in range(3)]
+    assert texts == ["間違えたテキストです。", "満点だったテキストです。", "間違えたテキストです。"]
+    assert not calls
+
+
 def test_a_broken_counter_never_costs_the_exercise(client, calls, empty_pool, monkeypatch):
     # A database hiccup in the meter must not refuse a learner: the
     # pool miss that got here has already established the alternative
