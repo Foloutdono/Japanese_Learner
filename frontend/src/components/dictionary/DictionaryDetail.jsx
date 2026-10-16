@@ -654,7 +654,7 @@ function saveScope(scope) {
 
 // The counts over all of JMdict are a character's, not a learner's, so
 // they are kept for the page's life and asked for once, however fast
-// the scope is switched (lib/cachedJson, plan 210).
+// the scope is switched (lib/cachedJson, plan 211).
 function useAllShares(char, active) {
   const body = useCachedJson(active ? `/api/dictionary/readings-share?char=${encodeURIComponent(char)}` : null, null, { ttlMs: Infinity })
   return { data: body ?? null, failed: body === null }

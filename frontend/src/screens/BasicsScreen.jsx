@@ -110,7 +110,7 @@ function UnitPage({ unitId, session }) {
 
   useEffect(() => {
     let live = true
-    // Shared and kept briefly (lib/cachedJson, plan 210).
+    // Shared and kept briefly (lib/cachedJson, plan 211).
     cachedJson(`/api/basics/${encodeURIComponent(unitId)}?lang=${lang}`, session, { ttlMs: MINE_TTL_MS })
       .then(body => { if (live) setUnit(body) })
       .catch(() => { if (live) setFailed(true) })

@@ -333,7 +333,7 @@ function useLessonStack(id, initial, session) {
     let cancelled = false
     // eslint-disable-next-line react-hooks/set-state-in-effect -- start-of-fetch reset that must land with the fetch it announces.
     setError(null)
-    // One request per point however many sheets ask (lib/cachedJson, plan 210).
+    // One request per point however many sheets ask (lib/cachedJson, plan 211).
     cachedJson(`/api/grammar/point?id=${encodeURIComponent(here)}&lang=${lang}`, session, { ttlMs: MINE_TTL_MS })
       .then(data => { if (!cancelled) setCache(c => ({ ...c, [here]: data })) })
       .catch(err => { if (!cancelled) setError(err) })

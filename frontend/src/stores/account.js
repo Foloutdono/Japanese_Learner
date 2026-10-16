@@ -33,7 +33,7 @@ import { forgetToday } from './today'
 //                 at each stop of a practice station (plan 159)
 //   the guide     which gates opened their lesson THIS page load
 //   the answers   every path lib/cachedJson keeps for the learner
-//                 (the tiers met, a stop's figures, plan 210)
+//                 (the tiers met, a stop's figures, plan 211)
 //   the day ahead the reminders scheduled on this phone and the
 //                 widget's figures (plan 156): both name the leaving
 //                 learner's cards, so both are cleared on the device

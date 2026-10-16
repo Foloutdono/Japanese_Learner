@@ -61,7 +61,7 @@ def _lock_for(key: str) -> threading.Lock:
     with _locks_guard:
         lock = _locks.get(key)
         if lock is None:
-            # Bounded (plan 210): the route needs no account, and every
+            # Bounded (plan 211): the route needs no account, and every
             # well-formed name -- random ones too -- left a lock behind.
             # Only locks nobody holds are dropped.
             if len(_locks) >= _MAX_LOCKS:
@@ -71,7 +71,7 @@ def _lock_for(key: str) -> threading.Lock:
         return lock
 
 
-# Names no paper refers to, remembered a while (plan 210), and the paper
+# Names no paper refers to, remembered a while (plan 211), and the paper
 # scan two at a time: the route needs no account, so a flood of
 # well-formed names was a flood of full scans of exam_papers.
 _MISS_TTL = 600.0

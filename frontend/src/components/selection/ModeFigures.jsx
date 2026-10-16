@@ -30,7 +30,7 @@ export function ModeFigures({ source, deck, mode }) {
 // splits the cards by stage (new, in progress, mastered), where this
 // figure adds them up, as the stop's does.
 export function ScopeFigures({ url, session }) {
-  // Shared and kept briefly (lib/cachedJson, plan 210): a station's
+  // Shared and kept briefly (lib/cachedJson, plan 211): a station's
   // platforms used to ask again on every return to the stop. A figure
   // from the stop the learner just left is not this stop's.
   const body = useCachedJson(url, session, { ttlMs: MINE_TTL_MS })

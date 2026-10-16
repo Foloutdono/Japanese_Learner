@@ -66,7 +66,7 @@ export default function TierSelector({ domain, session, onSelect, color, tierSiz
   const [ownSize, setOwnSize] = useState(DEFAULT_TIER_SIZE)
   const tierSize = sizeProp ?? ownSize
   const setTierSize = size => { if (onTierSize) onTierSize(size); else setOwnSize(size) }
-  // Shared with the sources' plates (lib/cachedJson, plan 210): a size
+  // Shared with the sources' plates (lib/cachedJson, plan 211): a size
   // walked through fast asks each one once, and one walked back to is
   // drawn at once. undefined is the wait, null the failure.
   const got = useCachedJson(`/api/frequency/${domain}/tiers?tier_size=${tierSize}`, session, { ttlMs: CONTENT_TTL_MS })

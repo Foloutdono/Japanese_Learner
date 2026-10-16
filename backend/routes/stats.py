@@ -256,7 +256,7 @@ def get_report(user_id: str = Depends(get_user_id)):
 
 @router.delete("/api/stats/reset")
 def reset_stats(user_id: str = Depends(get_user_id),
-                # Bounded (plan 210): a level's whole deck is a few thousand.
+                # Bounded (plan 211): a level's whole deck is a few thousand.
                 card_ids: list[str] | None = Body(None, max_length=20000)):
     """
     Reset this user's progress.

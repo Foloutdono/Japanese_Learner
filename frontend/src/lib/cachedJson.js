@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { apiJson } from './api'
 
-// ── One answer per path, shared (plan 210) ─────────────────────
+// ── One answer per path, shared (plan 211) ─────────────────────
 // A learner walking a selector fast (the frequency plate's 100 / 200 /
 // 500 / 1000, the deck's words or the ones beyond, a radical, a tier)
 // used to send a request per step and per figure beside it: a desk

@@ -149,7 +149,7 @@ describe('retranslateSelection', () => {
   })
 })
 
-// Plan 210: every screen that mounted before the first answer landed
+// Plan 211: every screen that mounted before the first answer landed
 // asked for both tables again. Callers on the way share one request
 // per table, and a failure is not kept.
 describe('getTranslations', () => {

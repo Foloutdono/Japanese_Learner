@@ -62,7 +62,7 @@ export default function GrammarScreen({ session }) {
     let live = true
     // eslint-disable-next-line react-hooks/set-state-in-effect -- start-of-fetch reset that must land with the fetch it announces.
     setIndex(null)
-    // Shared and kept briefly (lib/cachedJson, plan 210): a level walked
+    // Shared and kept briefly (lib/cachedJson, plan 211): a level walked
     // back to asks nothing.
     cachedJson(`/api/grammar/points?level=${encodeURIComponent(level)}&lang=${lang}`, session, { ttlMs: MINE_TTL_MS })
       .then(data => { if (live) setIndex(data) })
@@ -245,7 +245,7 @@ export default function GrammarScreen({ session }) {
 // (plan 117): the rows are links, and a Ctrl/⌘-click that opens a point
 // in another tab changes nothing here, so it must not scroll this page.
 //
-// A held arrow walks at lib/keyRepeat's pace (plan 210): each point is
+// A held arrow walks at lib/keyRepeat's pace (plan 211): each point is
 // its lesson's request.
 function PointKeys({ points, point, onWalk }) {
   const stepped = useRef(null)

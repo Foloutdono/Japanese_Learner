@@ -106,7 +106,7 @@ if __name__ == "__main__":
 
 
 class BoundedTests(unittest.TestCase):
-    """The pools and their locks are bounded (plan 210)."""
+    """The pools and their locks are bounded (plan 211)."""
 
     def setUp(self):
         batch_cache._batches.clear()

@@ -106,7 +106,7 @@ function DecksShelf({ session, open }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // One deck per press (plan 210): Enter held, or a double click, sent
+  // One deck per press (plan 211): Enter held, or a double click, sent
   // a POST each and made as many decks of the same name. A ref, so two
   // presses in one frame cannot both pass; the state draws the button.
   const makingRef = useRef(false)

@@ -20,7 +20,7 @@ from collections import OrderedDict
 # now, so a database wipe no longer needs a restart.
 _batches: OrderedDict[str, list[str]] = OrderedDict()
 
-# Bounded (plan 210): a pool per (user, mode, deck) -- and a tier's per
+# Bounded (plan 211): a pool per (user, mode, deck) -- and a tier's per
 # tier size -- was kept for the process's life, so the maps grew with
 # every learner and every pool ever asked for. The pools least lately
 # refilled go first; a dropped pool is rebuilt by its next refill.

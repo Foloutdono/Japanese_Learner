@@ -4,7 +4,7 @@ vi.mock('./api', () => ({ apiJson: vi.fn() }))
 import { apiJson } from './api'
 import { cachedJson, forgetCachedJson, invalidateCachedJson, invalidateMine, MINE_TTL_MS } from './cachedJson'
 
-// ── One answer per path, shared (plan 210) ──────────────────────
+// ── One answer per path, shared (plan 211) ──────────────────────
 // A selector walked fast sent a request per step and per figure beside
 // it. A path is asked once per learner while its answer is on its way
 // and kept for a while after; a failure is never kept.

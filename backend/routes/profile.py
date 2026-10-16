@@ -748,7 +748,7 @@ def preview_learning(jlptLevel: str = Query(...), user_id: str = Depends(get_use
     return level_rule_preview(user_id, current, jlptLevel)
 
 
-# The 番付's sums, a minute old at most (plan 210). Each is an aggregate
+# The 番付's sums, a minute old at most (plan 211). Each is an aggregate
 # over every learner's whole review_log, review_daily and xp_ledger,
 # and the board asked them afresh on every open -- and twice over for a
 # learner outside the top. The top list is the same for everyone; a

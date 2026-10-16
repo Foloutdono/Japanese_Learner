@@ -35,7 +35,7 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 
 const { default: CompositionRun } = await import('./screens/CompositionRun')
 const { forgetCachedJson } = await import('./lib/cachedJson')
-// Each case asks for its lessons afresh: none is kept across (plan 210).
+// Each case asks for its lessons afresh: none is kept across (plan 211).
 afterEach(() => { forgetCachedJson() })
 
 const POINTS = [

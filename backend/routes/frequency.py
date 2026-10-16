@@ -410,7 +410,7 @@ class CustomizePayload(BaseModel):
     # (same key shape returned by /tier/{tier}/items). tier is always
     # interpreted under frequency_data.DEFAULT_TIER_SIZE — see that
     # module's docstring.
-    # Bounded (plan 210): each is a lookup and an upsert, and every
+    # Bounded (plan 211): each is a lookup and an upsert, and every
     # later tier read walks them.
     overrides: list[dict] = Field(max_length=2000)
 

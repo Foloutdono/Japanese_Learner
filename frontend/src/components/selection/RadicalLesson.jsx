@@ -72,7 +72,7 @@ export default function RadicalLesson({ number, session, platforms, browse, onBr
     setRadical(null)
     setError(null)
     setDrawFailed(false)
-    // Shared and kept briefly (lib/cachedJson, plan 210): walking the
+    // Shared and kept briefly (lib/cachedJson, plan 211): walking the
     // radicals back and forth asks each one once.
     cachedJson(`/api/kanji/radical/${number}?lang=${lang}`, session, { ttlMs: MINE_TTL_MS })
       .then(data => { if (!cancelled) { setRadical(data); onLoaded?.(data) } })

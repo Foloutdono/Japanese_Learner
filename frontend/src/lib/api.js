@@ -96,7 +96,7 @@ async function send(path, init) {
   return response
 }
 
-// ── 429, a learner asking too much at once (plan 210) ──────────
+// ── 429, a learner asking too much at once (plan 211) ──────────
 // The server holds each learner to a few requests at once, queues the
 // next ones and refuses past the queue: a 429, {"detail":
 // "too_many_requests"}, with Retry-After. It is not a failure of the

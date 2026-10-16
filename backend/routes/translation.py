@@ -16,7 +16,7 @@ from study.llm_shared import llm_configured
 # with 402 pass_required once CREDITS_ENFORCE=1; a no-op until then.
 router = APIRouter(dependencies=[Depends(require_pass)])
 
-# The tutor's reviews a learner may ask for in a day (plan 210). See
+# The tutor's reviews a learner may ask for in a day (plan 211). See
 # composition.py's COMPOSITION_DAILY_LIMIT, the same review's ceiling.
 FEATURE = "translation_review"
 TRANSLATION_DAILY_LIMIT = int(os.environ.get("TRANSLATION_DAILY_LIMIT", "60"))
@@ -239,7 +239,7 @@ def post_translation_analyze(payload: AnalyzePayload, user_id: str = Depends(get
     if not payload.user_answer.strip():
         raise HTTPException(status_code=400, detail="user_answer is required")
 
-    # A model call a review, and none was ever counted (plan 210): the
+    # A model call a review, and none was ever counted (plan 211): the
     # same ceiling composition's review has, its own allowance.
     used = daily_limit.claim(user_id, FEATURE, TRANSLATION_DAILY_LIMIT)
     if used > TRANSLATION_DAILY_LIMIT:

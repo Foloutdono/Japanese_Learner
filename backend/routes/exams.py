@@ -642,7 +642,7 @@ def get_exam(exam_id: str, revision: int | None = None, exclude: str | None = No
     outcome, detail = _claim_generation(exam_id, revision)
     if outcome == "claimed":
         # A new paper is ~35 model calls, and "a different paper"
-        # listing every revision there is starts one (plan 210): a
+        # listing every revision there is starts one (plan 211): a
         # learner may start EXAM_PAPERS_DAILY_LIMIT such a day. An exam's
         # first paper, and the one a generator change calls for, are not
         # counted -- they are the paper everyone sits. Counted only when
@@ -829,7 +829,7 @@ def get_question_study(exam_id: str, revision: int, question_id: str, lang: str 
     # Imported here: routes/reading.py seeds the comprehension pool at
     # import, which the exam router has no business triggering.
     from routes.reading import LANG_NAMES, known_lang
-    # Known languages only (plan 210): the translations are cached by
+    # Known languages only (plan 211): the translations are cached by
     # language, so any other string was a model call per new spelling.
     lang = known_lang(lang)
     try:

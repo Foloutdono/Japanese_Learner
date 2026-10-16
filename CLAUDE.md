@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **211**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **213**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -101,7 +101,7 @@ runtime purpose.
   goes through `core/daily_limit.py` (`daily_usage`) for its daily ceiling and
   into `scripts/llm_cost_model.py` for its cost. Nothing the learner typed is
   kept.
-- **No learner can flood the server (plan 210).** The API is one worker:
+- **No learner can flood the server (plan 211).** The API is one worker:
   `core/concurrency.py` runs a learner's requests a few at a time, and
   both DB pools wait for a connection (`core/pool.py`) rather than fail.
   What a route does is bounded by its parameters, never by the client:

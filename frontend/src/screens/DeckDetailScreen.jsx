@@ -362,7 +362,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     board(() => navigate(`/today/run?lanes=${encodeURIComponent(lanes)}`, { state: { from: pathname } }))
   }
 
-  // One DELETE however often the confirm is pressed (plan 210): a ref,
+  // One DELETE however often the confirm is pressed (plan 211): a ref,
   // so two presses in one frame cannot both pass.
   const deletingRef = useRef(false)
   const [deleting, setDeleting] = useState(false)
@@ -667,7 +667,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     if (desk) { setAdding(false); setShowBrowse(false) }
   }
 
-  // One save per press (plan 210): Enter held in the notes, or a double
+  // One save per press (plan 211): Enter held in the notes, or a double
   // click, posted the card as many times. A ref, so two presses in one
   // frame cannot both pass; the state draws the button.
   const savingRef = useRef(false)

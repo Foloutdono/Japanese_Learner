@@ -72,7 +72,7 @@ def claim(user_id: str, feature: str, limit: int) -> int:
     try:
         conn = db_conn()
     except PoolBusy:
-        # Not a hiccup but a server out of connections (plan 210): open
+        # Not a hiccup but a server out of connections (plan 211): open
         # here, a flood that dried the pool would also have lifted every
         # model call's ceiling. The 503 refuses the call instead.
         raise

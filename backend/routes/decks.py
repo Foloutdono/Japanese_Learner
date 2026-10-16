@@ -2705,13 +2705,13 @@ def _csv_unlead(value: str) -> str:
 # once as bytes and again as the decoded str) before any row is looked
 # at, on a backend sized for 512 MB.
 _MAX_IMPORT_BYTES = 5 * 1024 * 1024
-# Rows one file may land (plan 210): the Pass's whole card allowance.
+# Rows one file may land (plan 211): the Pass's whole card allowance.
 # 5 MB of CSV is ~100k rows, each an INSERT -- and each, before, a
 # COUNT of the learner's cards too.
 _MAX_IMPORT_ROWS = credits.PASS_CARDS
 
 
-# A plain def (plan 210): as an async def every row's queries ran on the
+# A plain def (plan 211): as an async def every row's queries ran on the
 # event loop, and a large file held the whole API for minutes.
 @router.post("/api/decks/{deck_id}/import")
 def import_cards(deck_id: str, file: UploadFile = File(...),

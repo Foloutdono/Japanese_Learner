@@ -48,7 +48,7 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: false, status: 404, json: asy
 
 const { default: KanjiScreen } = await import('./KanjiScreen')
 const { forgetCachedJson } = await import('../lib/cachedJson')
-// Each case asks with its own answers: none is kept across (plan 210).
+// Each case asks with its own answers: none is kept across (plan 211).
 afterEach(() => { forgetCachedJson() })
 const { apiFetch, apiJson, ApiError } = await import('../lib/api')
 const { default: fr } = await import('../locales/fr/index.js')

@@ -135,7 +135,7 @@ vi.mock('./lib/api', () => ({
     if (path.startsWith('/api/frequency/vocab/tier/1/items')) return json({ items: TIER_WORDS })
     return json({})
   }),
-  // The shared answers (lib/cachedJson, plan 210) ask through apiJson,
+  // The shared answers (lib/cachedJson, plan 211) ask through apiJson,
   // for the same answers apiFetch gives.
   apiJson: vi.fn(async (...a) => (await (await import('./lib/api')).apiFetch(...a)).json()),
   apiJsonWithTimeout: vi.fn(), apiUpload: vi.fn(),

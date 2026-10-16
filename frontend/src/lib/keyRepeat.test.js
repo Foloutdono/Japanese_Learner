@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { heldTooSoon, REPEAT_GAP_MS } from './keyRepeat'
 
-// ── A held key, paced (plan 210) ────────────────────────────────
+// ── A held key, paced (plan 211) ────────────────────────────────
 // A held arrow repeats thirty times a second; a walk steps on a fresh
 // press always, and on a repeat once per REPEAT_GAP_MS.
 describe('heldTooSoon', () => {

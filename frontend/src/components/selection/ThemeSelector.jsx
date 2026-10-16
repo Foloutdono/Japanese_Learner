@@ -49,7 +49,7 @@ export default function ThemeSelector({ session, onSelect, color }) {
   const { t } = useLang()
   const [query, setQuery] = useState('')
   // The same for every learner, and shared with the sources' plate and
-  // a theme's bands (lib/cachedJson, plan 210).
+  // a theme's bands (lib/cachedJson, plan 211).
   const got = useCachedJson('/api/themes', session, { ttlMs: CONTENT_TTL_MS })
   const themes = useMemo(() => (got ? got.themes ?? [] : null), [got])
   const failed = got === null

@@ -2,7 +2,7 @@ import { HINTS } from '../domain/studyModes'
 import { api } from './origin'
 
 const cache = {}
-// The tables on their way, by language (plan 210): every screen that
+// The tables on their way, by language (plan 211): every screen that
 // mounted before the first answer landed asked for both tables again.
 // A failure is not kept; the next caller asks afresh.
 const pending = {}

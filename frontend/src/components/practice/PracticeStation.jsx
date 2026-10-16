@@ -335,7 +335,7 @@ function missRows(misses, t, lang) {
 // tier swapped in place never shows the last tier's words.
 function useTierDetail(domain, tier, size, session, enabled) {
   const { lang } = useLang()
-  // Through the shared answers (lib/cachedJson, plan 210): walking the
+  // Through the shared answers (lib/cachedJson, plan 211): walking the
   // tiers asks each one once, and what was met is the same answer the
   // tiers' own plates hold.
   const items = useCachedJson(enabled ? `/api/frequency/${domain}/tier/${tier}/items?tier_size=${size}&lang=${lang}` : null, session, { ttlMs: MINE_TTL_MS })

@@ -1,4 +1,4 @@
-// ── A held key, paced (plan 210) ───────────────────────────────
+// ── A held key, paced (plan 211) ───────────────────────────────
 // A key held down repeats some thirty times a second, and a walk whose
 // every step asks the server something (the grammar index's next
 // lesson, the analyser's next sentence and its words) sent that many

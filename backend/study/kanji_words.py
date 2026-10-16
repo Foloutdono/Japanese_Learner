@@ -393,7 +393,7 @@ def course_shares(char: str, packed: str | None = None) -> dict:
     return _shares(counts, tokens)
 
 
-# As many as course_shares keeps (plan 210): an answer is a few
+# As many as course_shares keeps (plan 211): an answer is a few
 # readings' counts, and past 256 characters each new one was a scan of
 # the whole JMdict pool again -- on a route that needs no account.
 @lru_cache(maxsize=4096)

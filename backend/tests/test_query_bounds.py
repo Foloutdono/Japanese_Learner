@@ -41,7 +41,7 @@ class TestQueryBounds:
         ("/api/grammar/cards?level=N5&mode=grammar.flashcard.f2b", "count", 10, 100000),
         ("/api/dictionary", "limit", 10, 100000),
         ("/api/leaderboard", "limit", 10, 100000),
-        # plan 210: a learner flicking a selector, or crafting a URL,
+        # plan 211: a learner flicking a selector, or crafting a URL,
         # cannot ask for unbounded work.
         ("/api/dictionary", "page", 1, 100000),
         ("/api/frequency/vocab/tiers", "tier_size", 200, 1),

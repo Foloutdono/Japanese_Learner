@@ -116,7 +116,7 @@ export function useMining(session) {
       return existing
     }
     // A create already on its way under this name is the same deck
-    // (plan 210): Enter held in the picker, or two words mined into a
+    // (plan 211): Enter held in the picker, or two words mined into a
     // new deck at once, each posted one before the shelf knew of it.
     const key = `${session?.user?.id ?? ''} ${type} ${wanted}`
     let pending = creating.get(key)

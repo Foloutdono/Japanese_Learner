@@ -40,7 +40,7 @@ export async function postReview(path, session, body, { cleared = 0 } = {}) {
   } finally {
     inFlight.delete(request)
     // The figures beside the stops (the tiers met, a platform's own,
-    // plan 210) are the ones a review moves: the next screen asks again.
+    // plan 211) are the ones a review moves: the next screen asks again.
     invalidateMine()
   }
 }

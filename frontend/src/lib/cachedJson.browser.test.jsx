@@ -5,7 +5,7 @@ const apiJson = vi.hoisted(() => vi.fn())
 vi.mock('./api', () => ({ apiJson: (...a) => apiJson(...a) }))
 const { useCachedJson, forgetCachedJson } = await import('./cachedJson')
 
-// ── The hook over the shared answers (plan 210) ─────────────────
+// ── The hook over the shared answers (plan 211) ─────────────────
 // undefined while the CURRENT path's answer is on its way -- never the
 // answer to the path just left -- null when it failed, else the body;
 // a path walked back to is drawn on its first frame.

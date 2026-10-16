@@ -28,7 +28,7 @@ const apiFetch = vi.hoisted(() => vi.fn())
 vi.mock('./lib/api', () => ({
   api: p => p,
   apiFetch,
-  // The shared answers (lib/cachedJson, plan 210) ask through apiJson.
+  // The shared answers (lib/cachedJson, plan 211) ask through apiJson.
   apiJson: async (...a) => (await apiFetch(...a)).json(),
   apiJsonWithTimeout: vi.fn(), apiUpload: vi.fn(),
   ApiError: class extends Error {},
@@ -66,7 +66,7 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 
 const { default: VocabScreen } = await import('./screens/VocabScreen')
 const { forgetCachedJson } = await import('./lib/cachedJson')
-// Each case asks with its own answers: none is kept across (plan 210).
+// Each case asks with its own answers: none is kept across (plan 211).
 afterEach(() => { forgetCachedJson() })
 
 // Past the timer, the plates' staggered arrivals themselves: a plate a

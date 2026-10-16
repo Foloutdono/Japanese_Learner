@@ -305,7 +305,7 @@ export function JlptPlate({ t, source = 'vocab', base = BASE, compact = false, b
 }
 
 // One answer per path, shared with every plate and station that asks
-// the same (lib/cachedJson, plan 210): walking the size and the pool
+// the same (lib/cachedJson, plan 211): walking the size and the pool
 // fast asks each cut once, and a cut walked back to is drawn at once.
 // undefined while the path's answer is on its way, null when it failed.
 // What the learner has met moves when a run ends, so it is kept briefly.

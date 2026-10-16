@@ -86,7 +86,7 @@ class LocalJwtVerificationTests(unittest.TestCase):
         mock_get.assert_called_once()
 
     def test_the_fallbacks_verdict_is_remembered_a_while(self):
-        # plan 210: a token no key matches cost a Supabase round trip on
+        # plan 211: a token no key matches cost a Supabase round trip on
         # every request, and junk tokens need no account.
         auth_mod._fallback.clear()
         self.addCleanup(auth_mod._fallback.clear)

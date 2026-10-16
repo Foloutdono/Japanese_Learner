@@ -70,7 +70,7 @@ _MULTIPART_OVERHEAD_BYTES = 64 * 1024
 # would cost more than the duplication (see plan 019's own scope notes).
 _FAILED_COOLDOWN_SECONDS = 300
 _STALE_RUNNING_SECONDS = 900
-# Sessions one learner may have in preparation at once (plan 210). Each
+# Sessions one learner may have in preparation at once (plan 211). Each
 # is a thread analysing up to MAX_SENTENCES lines; the link fetch has a
 # daily budget, but a paste or an upload had none, so a learner could
 # start as many threads as they could post.
@@ -459,7 +459,7 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
         filename = upload.filename
     else:
         # A pasted transcript is held to _MAX_UPLOAD_BYTES characters
-        # below; refused on the declared length first (plan 210), so a
+        # below; refused on the declared length first (plan 211), so a
         # body far past it is never read whole. Japanese is three bytes
         # a character in UTF-8.
         try:

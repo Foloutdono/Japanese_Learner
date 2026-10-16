@@ -111,7 +111,7 @@ describe('Seg and the console\'s band on the desk', () => {
     expect(heard).toHaveBeenCalledWith('ArrowLeft')
   })
 
-  // Plan 210: a held arrow's auto-repeat checked a radio thirty times a
+  // Plan 211: a held arrow's auto-repeat checked a radio thirty times a
   // second, each one a request. The first press checks; the repeats are
   // taken and ignored, so the focus stays on the checked radio.
   for (const [name, Group] of [['Seg', Seg], ['ConsoleBand', ConsoleBand]]) {

@@ -33,7 +33,7 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 
 const { default: KanjiScreen } = await import('./screens/KanjiScreen')
 const { forgetCachedJson } = await import('./lib/cachedJson')
-// Each case asks with its own answers: none is kept across (plan 210).
+// Each case asks with its own answers: none is kept across (plan 211).
 afterEach(() => { forgetCachedJson() })
 
 // The index as /api/kanji/radicals serves it: two stroke pages, each in
@@ -66,7 +66,7 @@ beforeEach(() => {
   apiJson.mockReset()
   apiJson.mockImplementation(async url => {
     const m = String(url).match(/^\/api\/kanji\/radical\/(\d+)\?/)
-    // The shared answers (lib/cachedJson, plan 210) ask through apiJson.
+    // The shared answers (lib/cachedJson, plan 211) ask through apiJson.
     return m ? lesson(Number(m[1])) : (await apiFetch(url)).json()
   })
   apiFetch.mockReset()

@@ -974,7 +974,7 @@ def _kana_result(kind: str, entry: dict, meaning: str, lang: str,
     }
 
 
-# `q` and `page` bounded (plan 210): an unbounded query string was a
+# `q` and `page` bounded (plan 211): an unbounded query string was a
 # pass of a Python callback over the JMdict pool's 212k glosses per
 # request, and a page past the end an OFFSET scan through all of them.
 @router.get("/api/dictionary")

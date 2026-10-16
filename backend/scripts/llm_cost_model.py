@@ -72,7 +72,7 @@ FEATURES = {
         60, 600, 400,
         "3 reviewed attempts a session, 20 sessions. One call each, uncached "
         "(the learner's own answer is in the prompt, so it cannot be shared). "
-        "TRANSLATION_DAILY_LIMIT caps it at 60/day (plan 210), which bounds "
+        "TRANSLATION_DAILY_LIMIT caps it at 60/day (plan 211), which bounds "
         "the abuse row.",
     ),
     "composition_review": (
@@ -101,7 +101,7 @@ FEATURES = {
         50, 400, 500,
         "200 breakdowns/mo, ~75% served from phrase_analysis_cache (reading "
         "practice draws on ~220 fixed sentences). Only the misses bill. "
-        "DEEP_DAILY_LIMIT caps the misses at 150/day (plan 210) -- the "
+        "DEEP_DAILY_LIMIT caps the misses at 150/day (plan 211) -- the "
         "analyzer, the runs' explain and a video line alike -- which bounds "
         "the abuse row.",
     ),
@@ -119,7 +119,7 @@ FEATURES = {
         "exam_papers rows are picked per revision, not per user -- so the "
         "cost amortizes. 52 = 1.5 papers a month per user before sharing. "
         "A learner asking past every revision starts a new one; "
-        "EXAM_PAPERS_DAILY_LIMIT caps those at 5/day (plan 210).",
+        "EXAM_PAPERS_DAILY_LIMIT caps those at 5/day (plan 211).",
     ),
 }
 

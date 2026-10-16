@@ -19,7 +19,7 @@
 // Space checks, so walking past three levels asks nothing and sends
 // nothing.
 //
-// A held arrow is one step where the arrows check (plan 210): the key's
+// A held arrow is one step where the arrows check (plan 211): the key's
 // auto-repeat checked a radio thirty times a second, each check a
 // request (the frequency plate's sizes and pools), so a repeat is taken
 // and ignored there -- the focus and the checked radio stay together,

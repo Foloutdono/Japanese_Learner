@@ -539,7 +539,7 @@ export default function AnalyzerScreen({ session }) {
           : Math.max(0, i - 1))
       } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
         e.preventDefault()
-        // A held arrow at lib/keyRepeat's pace (plan 210): each sentence
+        // A held arrow at lib/keyRepeat's pace (plan 211): each sentence
         // seeks the player and asks ahead for its words.
         if (heldTooSoon(e, sentenceStepped)) return
         // Through goToStop, not setFocusIndex: walking the line by
@@ -925,7 +925,7 @@ export default function AnalyzerScreen({ session }) {
   // i+1 in one press. Sequential keepSentence calls, because that is
   // the exact act the pin performs and the pin is already optimistic --
   // a bespoke bulk endpoint would be a second way to keep a Sentence.
-  // Sequential in time too since plan 210 (useAnalyzerSession's
+  // Sequential in time too since plan 211 (useAnalyzerSession's
   // keepSentences): one at a time, the history asked once at the end.
   const iPlusOneStops = sentences.filter(s => !s.foreign && s.unknown_count === 1)
   const unkeptIPlusOne = iPlusOneStops.filter(s => !analyzer.kept.has(s.text))

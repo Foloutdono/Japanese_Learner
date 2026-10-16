@@ -131,7 +131,7 @@ def get_user_id(credentials: HTTPAuthorizationCredentials | None = Depends(secur
     return _network_check(token)
 
 
-# The network check's verdicts, a minute per token (plan 210). A token
+# The network check's verdicts, a minute per token (plan 211). A token
 # whose `kid` no key matches reaches it on every request, and that
 # needs no account: a caller sending junk tokens had the API make a
 # Supabase round trip each, on the bounded threadpool. A definitive

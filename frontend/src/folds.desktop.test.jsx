@@ -38,7 +38,7 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 
 const { default: GrammarScreen } = await import('./screens/GrammarScreen')
 const { forgetCachedJson } = await import('./lib/cachedJson')
-// Each case asks with its own answers: none is kept across (plan 210).
+// Each case asks with its own answers: none is kept across (plan 211).
 afterEach(() => { forgetCachedJson() })
 const { default: VocabScreen } = await import('./screens/VocabScreen')
 const { default: KanjiScreen } = await import('./screens/KanjiScreen')
@@ -64,7 +64,7 @@ beforeEach(() => {
       const id = new URLSearchParams(u.split('?')[1]).get('id')
       return lesson(POINTS.find(p => p.raw_id === id))
     }
-    // The shared answers (lib/cachedJson, plan 210) ask through apiJson.
+    // The shared answers (lib/cachedJson, plan 211) ask through apiJson.
     return (await apiFetch(url)).json()
   })
   apiFetch.mockReset()

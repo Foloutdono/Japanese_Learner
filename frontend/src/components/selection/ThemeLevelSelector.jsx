@@ -39,7 +39,7 @@ import Empty from '../ui/Empty'
 export default function ThemeLevelSelector({ session, theme, onSelect, selected = null, linkTo = null }) {
   const { t } = useLang()
   // One list for every theme, the one the sources' plate holds
-  // (lib/cachedJson, plan 210): the desk keeps this mounted from one
+  // (lib/cachedJson, plan 211): the desk keeps this mounted from one
   // theme's bands to the next, and another theme is drawn from it at
   // once.
   const data = useCachedJson('/api/themes', session, { ttlMs: CONTENT_TTL_MS })

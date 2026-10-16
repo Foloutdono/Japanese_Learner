@@ -421,7 +421,7 @@ export function useAnalyzerSession(session) {
   // reversible act and a spinner on it would cost more than the
   // occasional revert.
   //
-  // One request per Sentence at a time (plan 210): a double press
+  // One request per Sentence at a time (plan 211): a double press
   // pinned and unpinned it in two crossing requests. `refresh: false`
   // leaves the history to the caller (keepSentences, below).
   const keeping = useRef(new Set())
@@ -464,7 +464,7 @@ export function useAnalyzerSession(session) {
   // Several Sentences pinned at once (the analyser's "keep every i+1"):
   // one after another and the history asked once at the end, where a
   // keep each in parallel sent three requests per Sentence at once
-  // (plan 210). A failure leaves the rest to go on.
+  // (plan 211). A failure leaves the rest to go on.
   async function keepSentences(indices) {
     try {
       for (const index of indices) {

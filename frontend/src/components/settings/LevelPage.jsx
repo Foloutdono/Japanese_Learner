@@ -44,7 +44,7 @@ export function LevelPage({ session }) {
   const onWalk = useRadioWalk(desk, { check: false })
 
   // A level's preview is asked once however often it is pressed
-  // (lib/cachedJson, plan 210), and only the last level pressed opens
+  // (lib/cachedJson, plan 211), and only the last level pressed opens
   // its sheet: an earlier one answering late must not take its place.
   const asked = useRef(0)
   async function askLevel(level) {

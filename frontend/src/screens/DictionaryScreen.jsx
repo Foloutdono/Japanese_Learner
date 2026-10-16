@@ -241,7 +241,7 @@ export default function DictionaryScreen({ session }) {
 	// the older answer used to overwrite the newer one's results (and,
 	// on the desk, re-point the dock). Only the latest is applied.
 	const pageSeq     = useRef(0)
-	// The latest request's abort (plan 210): a new page 0 drops what the
+	// The latest request's abort (plan 211): a new page 0 drops what the
 	// last one is still waiting on, rather than letting the server
 	// answer a collection, a level or a spelling the learner has left.
 	const pageAbort   = useRef(null)
@@ -367,7 +367,7 @@ export default function DictionaryScreen({ session }) {
 			// A page 0 asked by a chip or a mode supersedes a typed search
 			// still waiting out its debounce, which would otherwise land
 			// after it with the parameters of the moment it was typed
-			// (plan 210); the query it was for is already in `q`.
+			// (plan 211); the query it was for is already in `q`.
 			clearTimeout(debounceRef.current)
 			pageAbort.current?.abort()
 		}

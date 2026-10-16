@@ -290,7 +290,7 @@ def _store_analysis(phrase: str, lang: str, result: dict) -> None:
 
 
 class PhraseRequest(BaseModel):
-    # Bounded (plan 210): split into at most MAX_SENTENCES, but read and
+    # Bounded (plan 211): split into at most MAX_SENTENCES, but read and
     # tokenized whole first. A long chapter pasted is ~20k characters.
     phrase: str = Field(max_length=20_000)
     # False for callers that just want the AI breakdown without adding
@@ -410,7 +410,7 @@ def _normalize_explanation_key(parsed: dict) -> dict:
     return parsed
 
 
-# The deep tier's model calls a learner may make in a day (plan 210):
+# The deep tier's model calls a learner may make in a day (plan 211):
 # a cache miss, never a hit -- the curated sentences are paid for once
 # for everyone. Every caller of the deep tier (the analyzer, the runs'
 # explain, a video line) counts here; before, none counted at all, and

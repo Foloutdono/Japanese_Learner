@@ -138,7 +138,7 @@ def _claim_daily_slot(user_id: str) -> int:
         conn.close()
 
 
-# A plain def, so FastAPI runs it on the threadpool (plan 210): as an
+# A plain def, so FastAPI runs it on the threadpool (plan 211): as an
 # async def, its daily claim and its vision call (up to 90s a try, two
 # tries a provider) ran on the event loop and held the whole API -- one
 # worker -- for as long. Read bounded: the size check below needs no

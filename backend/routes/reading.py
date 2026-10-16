@@ -170,7 +170,7 @@ LANG_NAMES = {
 def known_lang(value: object) -> str:
     """A language the app answers in, a region tag dropped ("fr-FR" is
     French); anything else is English (ask.py's rule). For a `lang` that
-    keys a cache of model answers (plan 210): taken as sent, `en1`,
+    keys a cache of model answers (plan 211): taken as sent, `en1`,
     `en2`, ... were each a fresh model call and a junk cache row."""
     code = str(value or "").strip().lower().replace("_", "-").split("-")[0]
     return code if code in LANG_NAMES else "en"
@@ -686,7 +686,7 @@ def get_reading_batch(
     count = max(MIN_BATCH, min(MAX_BATCH, count))
     exclude_seen = {p for p in exclude.split("|") if p}
 
-    # The page's sizes alone (plan 210): a free size over the JMdict
+    # The page's sizes alone (plan 211): a free size over the JMdict
     # pool was a random pick over as much of its 212k rows as asked.
     if tier_size not in freq.TIER_SIZES:
         raise HTTPException(status_code=422, detail=f"tier_size must be one of {list(freq.TIER_SIZES)}")

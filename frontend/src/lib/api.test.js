@@ -187,7 +187,7 @@ describe('onApiFailure', () => {
   })
 })
 
-// ── 429 — a learner asking too much at once (plan 210) ──────────────
+// ── 429 — a learner asking too much at once (plan 211) ──────────────
 // The server queues a learner past a few requests at once and refuses
 // past the queue. That is not a server failure, a read is asked once
 // more after the wait the server names, and a write is never repeated.
