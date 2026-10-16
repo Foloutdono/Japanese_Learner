@@ -31,6 +31,10 @@ export function wordsOf(text) {
 
 export function createCaptions(layer, { style = 'board' } = {}) {
   let current = null
+  // A caption asked for and still waiting for the last to leave: it
+  // counts as showing (the camera frames below it), and a later one
+  // asked for before it arrives replaces it.
+  let coming = null
 
   async function hide() {
     if (!current) return
@@ -47,7 +51,11 @@ export function createCaptions(layer, { style = 'board' } = {}) {
   // (2.4 by default; null keeps it until the next).
   async function show(text, { at = 'top', hold = 2.4, gap = 0.07 } = {}) {
     if (style === 'none' || !text) return
+    const ask = {}
+    coming = ask
     await hide()
+    if (coming !== ask) return
+    coming = null
     const el = document.createElement('div')
     el.className = `cap cap--${at} cap--${style}`
     const line = document.createElement('div')
@@ -76,5 +84,5 @@ export function createCaptions(layer, { style = 'board' } = {}) {
     }
   }
 
-  return { show, hide, get showing() { return current != null } }
+  return { show, hide, get showing() { return current != null || coming != null } }
 }

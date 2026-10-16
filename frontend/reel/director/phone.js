@@ -97,6 +97,8 @@ export function createPhone(rigLayer, { seed = 1, statusInk = '#ece5d8', clockTe
   }
 
   // ── The rig ──
+  let mover = null
+  let moving = Promise.resolve()
   const pose = { ...framing('pocket') }
   let shakeAmount = 0
   const dx = drift(seed * 11 + 1)
@@ -125,17 +127,27 @@ export function createPhone(rigLayer, { seed = 1, statusInk = '#ece5d8', clockTe
     get pose() { return { ...pose } },
     /** The rig set at once. */
     set(to) { Object.assign(pose, to) },
-    /** Glide the rig to `to` (a framing's pose, or part of one). */
+    /**
+     * Glide the rig to `to` (a framing's pose, or part of one). A newer
+     * move takes the rig from wherever this one has it: two never pull
+     * it at once.
+     */
     move(to, duration = 0.9, easing = ease.inOutCubic) {
       const from = { ...pose }
       const target = { ...from, ...to }
-      return tween(duration, k => {
+      const mine = {}
+      mover = mine
+      moving = tween(duration, k => {
+        if (mover !== mine) return
         pose.x = lerp(from.x, target.x, k)
         pose.y = lerp(from.y, target.y, k)
         pose.s = lerp(from.s, target.s, k)
         pose.r = lerp(from.r, target.r, k)
       }, easing)
+      return moving
     },
+    /** Resolves once the rig's latest move has landed. */
+    settled() { return moving },
     /** How much the hand holding the phone drifts: 0 still, 1 handheld. */
     shake(amount, duration = 0.6) {
       const from = shakeAmount

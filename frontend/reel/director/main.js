@@ -171,6 +171,7 @@ async function boot() {
     /** Make the app ready for `beat`: its route, its answers, its state. */
     async enterApp(beat, opts = {}) {
       if (!beat) return null
+      ctx.framed = null
       stage.setBeat(appBeats.findIndex(b => b.index === beat.index))
       const scene = APPS[beat.feature]
       const route = scene.route(beat, ctx)
@@ -203,6 +204,7 @@ async function boot() {
       const x1 = Math.max(...rects.map(r => r.x + r.w))
       const y1 = Math.max(...rects.map(r => r.y + r.h))
       const top = captions.showing ? 168 : 56
+      ctx.framed = { el, opts: { duration, margin, max, min, fill, bottom }, captioned: captions.showing }
       const band = BOARD_H_ - top - bottom
       const lo = min ?? framing('screen').s
       const zoom = Math.max(lo, Math.min(max, ((BOARD_W_ - 2 * margin) / (x1 - x0)) * fill, (band / (y1 - y0)) * fill))
@@ -229,13 +231,20 @@ async function boot() {
       if (!r || r.y < 30 || r.y + r.h > BOARD_H_ - 30 || r.x < 0 || r.x + r.w > BOARD_W_) {
         await ctx.look([target], { duration: 0.45, max: Math.max(phone.pose.s, framing('screen').s) })
       }
+      // A thumb waits for the screen it is aiming at to stop moving.
+      await phone.settled()
       return finger.tap(stage.point(target, opts), opts)
     },
     /** Show a beat's caption (a string, or { text, at, hold }). */
     say(caption, fallback = {}) {
       if (!caption) return
       const c = typeof caption === 'string' ? { text: caption } : caption
-      captions.show(c.text, { at: c.at ?? fallback.at ?? 'top', hold: c.hold === undefined ? (fallback.hold ?? 2.4) : c.hold })
+      const at = c.at ?? fallback.at ?? 'top'
+      captions.show(c.text, { at, hold: c.hold === undefined ? (fallback.hold ?? 2.4) : c.hold })
+      // A caption arriving over a shot framed without one: the shot
+      // eases down under it rather than reading through it.
+      const shot = ctx.framed
+      if (at === 'top' && shot && !shot.captioned) ctx.look(shot.el, { ...shot.opts, duration: 0.5 })
     },
     /** Paste `text` into the focused field. */
     async paste(text) { send({ kind: 'text', text }) },
@@ -327,6 +336,8 @@ async function start() {
 
 async function playBeat(beat, ctx) {
   const prev = ctx.beats[beat.index - 1]
+  // Off the app (a hook, a transition, the end), no shot is held.
+  if (beat.kind !== 'app') ctx.framed = null
   switch (beat.kind) {
     case 'hook': return playHook(beat, ctx)
     case 'app': {

@@ -102,10 +102,16 @@ export const decks = {
     await ctx.look(['.deck-identity', '.lib-preview'], { duration: 0.55, max: 1.2 }).catch(() => {})
     await wait(1.6)
     const follow = stage.find('.deck-identity__study')
-    if (follow) {
-      await ctx.tap(follow)
-      finger.rest()
-      await wait(1.6)
+    if (!follow) return
+    await ctx.tap(follow)
+    finger.rest()
+    // Following opens the deck's own page: Study, and its cards.
+    const mine = await stage.waitFor('.deckdetail-acts', { timeout: 6 }).catch(() => null)
+    if (mine) {
+      await wait(0.35)
+      await ctx.look(['.deck-identity', '.card-list, .dk-cards'], { duration: 0.55, max: 1.2 }).catch(() => {})
+      ctx.say(beat.reveal)
+      await wait(beat.hold ?? 1.8)
     }
   },
 }
@@ -118,26 +124,28 @@ export const pass = {
     ctx.say(beat.caption)
     await ctx.look(['.pcard'], { duration: 0.6, max: 1.25 })
     await wait(1.3)
+    // Turned over, and back: the face is one button; the back's own
+    // turn is the issuer's block (the rest of the back is doors).
     const turn = stage.find('.pcard__turn')
     if (turn) {
       await ctx.tap(turn)
       finger.rest()
-      await wait(1.8)
-      await ctx.tap(stage.find('.pcard__turn') ?? turn)
-      finger.rest()
-      await wait(0.8)
+      await wait(beat.back ?? 2)
+      const issued = stage.find('.pcb__issued')
+      if (issued) {
+        await ctx.tap(issued)
+        finger.rest()
+        await wait(0.8)
+      }
     }
-    const book = stage.find('.sbook')
-    if (book) {
-      await stage.scrollTo(book, { at: 0.4, duration: 0.7 })
-      await ctx.look([book], { duration: 0.5, max: 1.3 })
-      await wait(1.6)
-    }
-    const board = stage.find('.leaderboard-row')
-    if (board) {
-      await stage.scrollTo(board, { at: 0.35, duration: 0.7 })
-      await ctx.look(stage.all('.leaderboard-row'), { duration: 0.5, max: 1.3 })
-      await wait(1.6)
+    // Then down the holder: the stamp book, the lines, the ranking.
+    for (const [selector, hold] of [['.sbook', 1.6], ['.pf-ledger', 1.4], ['.banzuke, .leaderboard-row', 1.6]]) {
+      const el = stage.find(selector)
+      if (!el) continue
+      await stage.scrollTo(el, { at: 0.4, duration: 0.7 })
+      await ctx.look([el], { duration: 0.5, max: 1.3 })
+      if (selector === '.sbook') ctx.say(beat.reveal)
+      await wait(hold)
     }
   },
 }

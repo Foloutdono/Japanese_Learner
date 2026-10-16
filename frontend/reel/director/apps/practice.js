@@ -29,7 +29,7 @@ async function rateCorrect(ctx, q = 4) {
   await ctx.look(['.prompt-card', '.rating-bar'], { duration: 0.45, max: 1.25 })
   await ctx.tap(key)
   finger.rest()
-  const leveled = await stage.waitFor('.levelup', { timeout: 0.9 }).catch(() => null)
+  const leveled = await stage.waitFor('.levelup', { timeout: 1.2 }).catch(() => null)
   await wait(leveled ? 3.4 : 0.8)
 }
 

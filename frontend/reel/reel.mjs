@@ -79,7 +79,9 @@ export function requestOf(script) {
 }
 
 function fixtures(request, cacheDir) {
-  const hash = createHash('sha256').update(JSON.stringify(request)).digest('hex').slice(0, 16)
+  // Keyed on the builder too: a change to what it answers is a new bundle.
+  const builder = readFileSync(join(REPO, 'backend', 'scripts', 'reel_fixtures.py'))
+  const hash = createHash('sha256').update(JSON.stringify(request)).update(builder).digest('hex').slice(0, 16)
   const out = join(cacheDir, `bundle-${hash}.json`)
   if (existsSync(out)) return JSON.parse(readFileSync(out, 'utf8'))
   const reqFile = join(cacheDir, `request-${hash}.json`)

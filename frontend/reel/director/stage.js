@@ -45,23 +45,25 @@ export function createStage(phone, { host }) {
     },
 
     /** Wait, a frame at a time, for `selector` to be drawn. */
+    // The timeouts are seconds of the page's clock, whatever the frame
+    // rate: a film at 30 fps waits as long as a preview at 60.
     async waitFor(selector, { timeout = 10, test } = {}) {
-      const frames = Math.ceil(timeout * 60)
-      for (let i = 0; i < frames; i++) {
+      const until = performance.now() + timeout * 1000
+      for (;;) {
         const el = stage.find(selector)
         if (el && (!test || test(el))) return el
+        if (performance.now() >= until) throw new Error(`stage: ${selector} never appeared`)
         await nextFrame()
       }
-      throw new Error(`stage: ${selector} never appeared`)
     },
 
     async waitGone(selector, { timeout = 10 } = {}) {
-      const frames = Math.ceil(timeout * 60)
-      for (let i = 0; i < frames; i++) {
+      const until = performance.now() + timeout * 1000
+      for (;;) {
         if (!stage.find(selector)) return
+        if (performance.now() >= until) throw new Error(`stage: ${selector} never left`)
         await nextFrame()
       }
-      throw new Error(`stage: ${selector} never left`)
     },
 
     /** An element's box in the app's viewport. */

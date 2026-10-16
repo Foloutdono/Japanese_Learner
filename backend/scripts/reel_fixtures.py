@@ -203,10 +203,30 @@ def voice(texts: list[str], out_dir: str) -> dict:
     return out
 
 
+def deck_sizes() -> dict:
+    """Every deck /api/stats reports on, with what it holds: its cards
+    (`items`, what the profile's ledger and the Learn map count) and,
+    per graded mode, the cards that mode can reach (the statistics'
+    bars). The stage gives its learner a record over these, so the
+    figures on screen are fractions of the app's real decks."""
+    from study import card_index
+    from study.modes import KANA, VOCAB, KANJI, GRAMMAR, GRADED_FOR_SOURCE
+    return {
+        source: {
+            deck: {
+                "items": card_index.item_total(source, deck),
+                "modes": {m: card_index.total(source, deck, m) for m in sorted(GRADED_FOR_SOURCE[source])},
+            }
+            for deck in card_index.deck_keys(source)
+        }
+        for source in (KANA, VOCAB, KANJI, GRAMMAR)
+    }
+
+
 def bundle(request: dict, out_dir: str | None = None) -> dict:
     lang = request.get("lang", "en")
     out = {"lang": lang, "analyze": {}, "phrase": {}, "check": {}, "dictionary": {},
-           "words": {}, "kanji": {}, "grammar": {}}
+           "words": {}, "kanji": {}, "grammar": {}, "decks": deck_sizes()}
 
     def entry(category, q="", kana="", id="", level=None, limit=10):
         key = lookup_key(category, q, kana, id)

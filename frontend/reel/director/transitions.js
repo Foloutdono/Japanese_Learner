@@ -247,6 +247,8 @@ async function whip(beat, ctx) {
  */
 export async function swap(nextBeat, ctx) {
   const { phone, sfx, strings } = ctx
+  // The last scene's words leave with it.
+  ctx.captions.hide()
   const [jp, latin] = strings.stations[nextBeat.feature] ?? ['', '']
   const plate = document.createElement('div')
   plate.className = 'fx__plate'

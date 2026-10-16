@@ -59,6 +59,53 @@ const PREVIEW = lang => [
   { id: 5, front: '時刻表', kana: 'じこくひょう', back: lang === 'fr' ? 'horaires' : 'timetable' },
 ]
 
+// ── The learner's record, over the app's real decks ──
+// /api/stats' shape (routes/stats.py): per deck and graded mode a
+// bucket, and per deck `items`, its cards counted once. The decks and
+// their sizes are the bundle's (reel_fixtures.deck_sizes); how far the
+// learner has come in each is theirs: kana held, the levels under
+// theirs nearly done, their own level a third of the way.
+const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
+const KANA_HELD = { hiragana_basic: 1, hiragana_combos: 1, katakana_basic: 0.97, katakana_combos: 0.78 }
+
+function shareOf(source, deck, level) {
+  if (source === 'kana') return KANA_HELD[deck] ?? 0
+  const at = LEVELS.indexOf(level)
+  const i = LEVELS.indexOf(deck)
+  if (i < at) return source === 'grammar' ? 0.88 : 0.93
+  if (i === at) return source === 'grammar' ? 0.27 : 0.36
+  return 0
+}
+
+export function statsOf(decks, level) {
+  if (!decks) return STATS
+  const out = { items: {} }
+  for (const [source, byDeck] of Object.entries(decks)) {
+    out[source] = {}
+    out.items[source] = {}
+    for (const [deck, { items, modes }] of Object.entries(byDeck)) {
+      const share = shareOf(source, deck, level)
+      const learned = Math.round(items * share)
+      out.items[source][deck] = {
+        total: items, learned, started: Math.min(items, Math.round(items * Math.min(1, share * 1.08))),
+        score: Math.round(share * 10000) / 10000,
+      }
+      // The first two modes are the ones practised; the rest at half.
+      out[source][deck] = Object.fromEntries(Object.entries(modes).map(([mode, total], i) => {
+        const f = i < 2 ? share : share / 2
+        const mastered = Math.round(total * f * 0.6)
+        const learning = Math.round(total * f * 0.4)
+        const reviews = mastered * 7 + learning * 3
+        return [mode, {
+          total, new: total - mastered - learning, learning, mastered, learned: Math.round(total * f),
+          due_now: Math.round(learning * 0.08), reviews, correct: Math.round(reviews * 0.89),
+        }]
+      }))
+    }
+  }
+  return out
+}
+
 export function installMoreFixtures(part) {
   const lang = part.lang
 
@@ -99,7 +146,7 @@ export function installMoreFixtures(part) {
     const d = decks.find(x => x.id === Number(params.id)) ?? decks[0]
     return { ...d, followed: followed.has(d.id), preview: PREVIEW(lang) }
   })
-  route('POST', /^\/api\/decks\/library\/(?<id>\d+)\/subscribe$/, ({ params }) => {
+  route('POST', /^\/api\/decks\/(?<id>\d+)\/subscribe$/, ({ params }) => {
     followed.add(Number(params.id))
     const d = decks.find(x => x.id === Number(params.id)) ?? decks[0]
     return { ...d, role: 'follower', followed: true }
@@ -115,7 +162,7 @@ export function installMoreFixtures(part) {
   route('GET', /^\/api\/decks\/(?<id>\d+)\/modes$/, () => ({ modes: ['vocab.flashcard.f2b', 'vocab.flashcard.b2f'] }))
 
   // ── 定期券 — the pass's figures ──
-  route('GET', '/api/stats', () => STATS)
+  route('GET', '/api/stats', () => statsOf(part.bundle?.decks, part.level))
   route('GET', '/api/stats/report', () => REPORT)
   route('GET', '/api/dictionary/radicals', () => ({ groups: [] }))
   route('GET', '/api/basics', () => ({ units: [] }))
