@@ -420,9 +420,15 @@ export function useAnalyzerSession(session) {
   // 保存 -- pin or unpin ONE Sentence. Optimistic: pinning is a small,
   // reversible act and a spinner on it would cost more than the
   // occasional revert.
-  async function keepSentence(index) {
+  //
+  // One request per Sentence at a time (plan 210): a double press
+  // pinned and unpinned it in two crossing requests. `refresh: false`
+  // leaves the history to the caller (keepSentences, below).
+  const keeping = useRef(new Set())
+  async function keepSentence(index, { refresh = true } = {}) {
     const sentence = passage?.sentences?.[index]
-    if (!sentence) return
+    if (!sentence || keeping.current.has(sentence.text)) return
+    keeping.current.add(sentence.text)
     const alreadyKept = kept.has(sentence.text)
     setKept(prev => {
       const next = new Set(prev)
@@ -448,6 +454,21 @@ export function useAnalyzerSession(session) {
               : (passage.sourceRef ?? ''),
           }),
         })
+      }
+    } finally {
+      keeping.current.delete(sentence.text)
+      if (refresh) fetchHistory()
+    }
+  }
+
+  // Several Sentences pinned at once (the analyser's "keep every i+1"):
+  // one after another and the history asked once at the end, where a
+  // keep each in parallel sent three requests per Sentence at once
+  // (plan 210). A failure leaves the rest to go on.
+  async function keepSentences(indices) {
+    try {
+      for (const index of indices) {
+        await keepSentence(index, { refresh: false }).catch(() => {})
       }
     } finally {
       fetchHistory()
@@ -515,6 +536,7 @@ export function useAnalyzerSession(session) {
     explainError,
     kept,
     keepSentence,
+    keepSentences,
     analyzeText,
     startVideoFromFile,
     startVideoFromLink,

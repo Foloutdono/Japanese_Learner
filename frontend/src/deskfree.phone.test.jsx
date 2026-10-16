@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { LangProvider } from './LangContext'
 import ModeSelector from './components/selection/ModeSelector'
@@ -47,12 +47,17 @@ const apiFetch = vi.hoisted(() => vi.fn())
 vi.mock('./lib/api', () => ({
   api: p => p,
   apiFetch,
-  apiJson: vi.fn(),
+  // The shared answers (lib/cachedJson, plan 210) ask through apiJson;
+  // a case that answers apiJson itself overrides this.
+  apiJson: vi.fn(async (...a) => (await apiFetch(...a)).json()),
   apiJsonWithTimeout: vi.fn(async path => (path === '/api/stats' ? STATS : REPORT)),
   apiUpload: vi.fn(),
   ApiError: class extends Error {},
 }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
+const { forgetCachedJson } = await import('./lib/cachedJson')
+// Each case asks with its own answers: none is kept across (plan 210).
+afterEach(() => { forgetCachedJson() })
 
 const settle = (ms = 120) => new Promise(r => setTimeout(r, ms))
 

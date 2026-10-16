@@ -1,3 +1,4 @@
+import { forgetCachedJson } from '../lib/cachedJson'
 import { clearAhead } from '../lib/platform'
 import { forgetAheadPlan } from './ahead'
 import { forgetAgenda } from './agenda'
@@ -31,6 +32,8 @@ import { forgetToday } from './today'
 //                 platform (the desk's Practice gate, plan 130), and
 //                 at each stop of a practice station (plan 159)
 //   the guide     which gates opened their lesson THIS page load
+//   the answers   every path lib/cachedJson keeps for the learner
+//                 (the tiers met, a stop's figures, plan 210)
 //   the day ahead the reminders scheduled on this phone and the
 //                 widget's figures (plan 156): both name the leaving
 //                 learner's cards, so both are cleared on the device
@@ -58,5 +61,6 @@ export function forgetAccount() {
   forgetShown()
   forgetAheadPlan()
   forgetAgenda()
+  forgetCachedJson()
   clearAhead()
 }

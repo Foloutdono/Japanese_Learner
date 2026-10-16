@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import {
-  translatedMap, applyTranslations, retranslateSelection,
+  getTranslations, translatedMap, applyTranslations, retranslateSelection,
 } from './translationCache'
 
 // The bug this pins: `/api/translation/vocab?word=あびる&lang=fr`
@@ -146,5 +146,30 @@ describe('retranslateSelection', () => {
     const card = applyTranslations(vocabCard(), wordForm, FR)
     const selected = retranslateSelection('book', options, wordForm, FR)
     expect(card.hints.indice_1.map(c => c.meaning)).toContain(selected)
+  })
+})
+
+// Plan 210: every screen that mounted before the first answer landed
+// asked for both tables again. Callers on the way share one request
+// per table, and a failure is not kept.
+describe('getTranslations', () => {
+  it('shares the request on its way, and keeps no failure', async () => {
+    const real = globalThis.fetch
+    try {
+      globalThis.fetch = vi.fn(async url => ({ json: async () => ({ url }) }))
+      const [a, b] = await Promise.all([getTranslations('xx'), getTranslations('xx')])
+      expect(a).toBe(b)
+      expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+      await getTranslations('xx')
+      expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+
+      globalThis.fetch = vi.fn(async () => { throw new Error('offline') })
+      await expect(getTranslations('yy')).rejects.toThrow('offline')
+      globalThis.fetch = vi.fn(async url => ({ json: async () => ({ url }) }))
+      await expect(getTranslations('yy')).resolves.toBeTruthy()
+      expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+    } finally {
+      globalThis.fetch = real
+    }
   })
 })

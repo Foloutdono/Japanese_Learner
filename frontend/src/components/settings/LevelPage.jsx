@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { apiJson } from '../../lib/api'
+import { cachedJson, invalidateCachedJson, MINE_TTL_MS } from '../../lib/cachedJson'
 import { playClick, playUi } from '../../lib/audio'
 import { useProfileSummaryState } from '../../stores/profileSummary'
 import { useTodaySummary, refreshToday } from '../../stores/today'
@@ -42,21 +43,28 @@ export function LevelPage({ session }) {
   const desk = useDesk()
   const onWalk = useRadioWalk(desk, { check: false })
 
+  // A level's preview is asked once however often it is pressed
+  // (lib/cachedJson, plan 210), and only the last level pressed opens
+  // its sheet: an earlier one answering late must not take its place.
+  const asked = useRef(0)
   async function askLevel(level) {
     if (level === current || saving) return
     playClick()
     setFailed(false)
+    const ask = ++asked.current
     try {
-      const preview = await apiJson(`/api/profile/learning/preview?jlptLevel=${level}`, session)
-      setPending({ level, preview })
+      const preview = await cachedJson(`/api/profile/learning/preview?jlptLevel=${level}`, session, { ttlMs: MINE_TTL_MS })
+      if (ask === asked.current) setPending({ level, preview })
     } catch {
-      setFailed(true)
+      if (ask === asked.current) setFailed(true)
     }
   }
 
   function confirmLevel() {
     const { level } = pending
     setPending(null)
+    // What moving would do is measured from the level left behind.
+    invalidateCachedJson('/api/profile/learning/preview')
     playUi('click')
     save({ jlptLevel: level })
   }

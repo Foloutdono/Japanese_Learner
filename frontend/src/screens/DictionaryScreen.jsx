@@ -241,6 +241,10 @@ export default function DictionaryScreen({ session }) {
 	// the older answer used to overwrite the newer one's results (and,
 	// on the desk, re-point the dock). Only the latest is applied.
 	const pageSeq     = useRef(0)
+	// The latest request's abort (plan 210): a new page 0 drops what the
+	// last one is still waiting on, rather than letting the server
+	// answer a collection, a level or a spelling the learner has left.
+	const pageAbort   = useRef(null)
 	// The catalogue as the arrow keys see it (the key handler is bound
 	// once, so it reads the current rows through this).
 	const navRef      = useRef({ results: [], selected: null })
@@ -358,8 +362,18 @@ export default function DictionaryScreen({ session }) {
 	function fetchPage(p, q, cat, rad, lvl = level) {
 		if (p === 0) setLoading(true)
 		else setLoadingMore(true)
-		if (p === 0) pageSeq.current += 1
+		if (p === 0) {
+			pageSeq.current += 1
+			// A page 0 asked by a chip or a mode supersedes a typed search
+			// still waiting out its debounce, which would otherwise land
+			// after it with the parameters of the moment it was typed
+			// (plan 210); the query it was for is already in `q`.
+			clearTimeout(debounceRef.current)
+			pageAbort.current?.abort()
+		}
 		const seq = pageSeq.current
+		const controller = new AbortController()
+		pageAbort.current = controller
 
 		// A syllabary is small and fixed — 113 hiragana and 125 katakana,
 		// counting the voiced rows, the yōon, the long vowels and (in
@@ -390,7 +404,7 @@ export default function DictionaryScreen({ session }) {
 		const url = cat === FAVORITES
 			? `/api/dictionary/favorites?${new URLSearchParams({ page: p, limit, lang })}`
 			: `/api/dictionary?${params.toString()}`
-		apiFetch(url, session)
+		apiFetch(url, session, { signal: controller.signal })
 			.then(r => r.json())
 			.then(data => {
 				if (seq !== pageSeq.current) return

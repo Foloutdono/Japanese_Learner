@@ -1,7 +1,8 @@
 import { Fragment, useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useLang } from '../../LangContext'
-import { apiJson, ApiError } from '../../lib/api'
+import { ApiError } from '../../lib/api'
+import { cachedJson, MINE_TTL_MS } from '../../lib/cachedJson'
 import { playUi } from '../../lib/audio'
 import { useDialog } from '../../hooks/useDialog'
 import { ChevronIcon } from '../ui/Icons'
@@ -332,7 +333,8 @@ function useLessonStack(id, initial, session) {
     let cancelled = false
     // eslint-disable-next-line react-hooks/set-state-in-effect -- start-of-fetch reset that must land with the fetch it announces.
     setError(null)
-    apiJson(`/api/grammar/point?id=${encodeURIComponent(here)}&lang=${lang}`, session)
+    // One request per point however many sheets ask (lib/cachedJson, plan 210).
+    cachedJson(`/api/grammar/point?id=${encodeURIComponent(here)}&lang=${lang}`, session, { ttlMs: MINE_TTL_MS })
       .then(data => { if (!cancelled) setCache(c => ({ ...c, [here]: data })) })
       .catch(err => { if (!cancelled) setError(err) })
     return () => { cancelled = true }

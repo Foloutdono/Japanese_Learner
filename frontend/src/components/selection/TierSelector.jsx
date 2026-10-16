@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { apiFetch } from '../../lib/api'
+import { CONTENT_TTL_MS, useCachedJson } from '../../lib/cachedJson'
 import { useLang } from '../../LangContext'
 import { playUi } from '../../lib/audio'
 import { Loading } from '../ui/Loading'
@@ -11,6 +11,8 @@ import { useListWalk, useFollowFocus, WALK_KEYS } from '../../hooks/useListWalk'
 // The default size and the size options live with the tier maths in
 // domain/tiers.js (the practice pickers read them too, plan 072).
 import { DEFAULT_TIER_SIZE, TIER_SIZE_OPTIONS } from '../../domain/tiers'
+
+const NO_TIERS = []
 
 /**
  * TierSelector
@@ -35,7 +37,7 @@ import { DEFAULT_TIER_SIZE, TIER_SIZE_OPTIONS } from '../../domain/tiers'
  * Props:
  *   domain   — "kanji" | "vocab", passed straight through to the API
  *              path and used to pick the unit word in each row's desc.
- *   session  — forwarded to apiFetch, same as every other data-fetching
+ *   session  — forwarded to the request, same as every other data-fetching
  *              component in this app.
  *   onSelect(tier, label, tierSize) — called with the numeric tier, a
  *              display label ("1–200") the caller can hold onto for
@@ -64,20 +66,12 @@ export default function TierSelector({ domain, session, onSelect, color, tierSiz
   const [ownSize, setOwnSize] = useState(DEFAULT_TIER_SIZE)
   const tierSize = sizeProp ?? ownSize
   const setTierSize = size => { if (onTierSize) onTierSize(size); else setOwnSize(size) }
-  const [tiers, setTiers] = useState(null)
-  const [failed, setFailed] = useState(false)
-
-  useEffect(() => {
-    let cancelled = false
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- start-of-fetch reset (clears the previous tier_size's list and error flag so the "loading" state shows immediately) that must happen synchronously with kicking off the fetch below; not a standalone id-keyed reset.
-    setTiers(null)
-    setFailed(false)
-    apiFetch(`/api/frequency/${domain}/tiers?tier_size=${tierSize}`, session)
-      .then(r => r.json())
-      .then(data => { if (!cancelled) setTiers(data.tiers ?? []) })
-      .catch(() => { if (!cancelled) setFailed(true) })
-    return () => { cancelled = true }
-  }, [domain, session, tierSize])
+  // Shared with the sources' plates (lib/cachedJson, plan 210): a size
+  // walked through fast asks each one once, and one walked back to is
+  // drawn at once. undefined is the wait, null the failure.
+  const got = useCachedJson(`/api/frequency/${domain}/tiers?tier_size=${tierSize}`, session, { ttlMs: CONTENT_TTL_MS })
+  const tiers = got ? got.tiers ?? NO_TIERS : null
+  const failed = got === null
 
   // The open tier in view: tier 30 of a 43-stop list sits below the
   // column's fold, and a list that opens scrolled away from the page

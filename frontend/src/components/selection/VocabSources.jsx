@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useLang } from '../../LangContext'
-import { apiFetch } from '../../lib/api'
+import { CONTENT_TTL_MS, MINE_TTL_MS, useCachedJson } from '../../lib/cachedJson'
 import { playUi } from '../../lib/audio'
 import { useStats } from '../../stores/stats'
 import { useProfileSummary } from '../../stores/profileSummary'
@@ -304,21 +304,12 @@ export function JlptPlate({ t, source = 'vocab', base = BASE, compact = false, b
   )
 }
 
-function useJson(path, session) {
-  const [got, setGot] = useState(null)
-  useEffect(() => {
-    if (!path) return undefined
-    let live = true
-    apiFetch(path, session)
-      .then(r => (r.ok ? r.json() : null))
-      .then(body => { if (live) setGot({ path, body }) })
-      .catch(() => { if (live) setGot({ path, body: null }) })
-    return () => { live = false }
-  }, [path, session])
-  // An answer to the path the learner has just left is not this one's;
-  // no path asks nothing.
-  return path && got?.path === path ? got.body : undefined
-}
+// One answer per path, shared with every plate and station that asks
+// the same (lib/cachedJson, plan 210): walking the size and the pool
+// fast asks each cut once, and a cut walked back to is drawn at once.
+// undefined while the path's answer is on its way, null when it failed.
+// What the learner has met moves when a run ends, so it is kept briefly.
+const useJson = (path, session, ttlMs = CONTENT_TTL_MS) => useCachedJson(path, session, { ttlMs })
 
 // The tiers on show: the pool and the size from the page's URL, the
 // tiers of that cut and the cards the learner has met in each, how to
@@ -331,7 +322,7 @@ function useTierCut({ session, source = 'vocab', base = BASE, pools = true }) {
   const jmdict = pools && sp.get('domain') === 'jmdict'
   const domain = jmdict ? `${source}_jmdict` : source
   const tiers = useJson(`/api/frequency/${domain}/tiers?tier_size=${size}`, session)
-  const started = useJson(`/api/frequency/${domain}/tiers/started?tier_size=${size}`, session)?.started ?? {}
+  const started = useJson(`/api/frequency/${domain}/tiers/started?tier_size=${size}`, session, MINE_TTL_MS)?.started ?? {}
   const shown = (tiers?.tiers ?? []).filter(tr => tr.count > 0)
   // The rest of the page's query (a radical page's stroke, say) is kept.
   const choose = (pool, n) => setSp(prev => {
@@ -350,7 +341,7 @@ function useTierCut({ session, source = 'vocab', base = BASE, pools = true }) {
 function useDeckTiers(session, cut) {
   const apart = cut.jmdict
   const tiers = useJson(apart ? `/api/frequency/vocab/tiers?tier_size=${cut.size}` : null, session)
-  const started = useJson(apart ? `/api/frequency/vocab/tiers/started?tier_size=${cut.size}` : null, session)
+  const started = useJson(apart ? `/api/frequency/vocab/tiers/started?tier_size=${cut.size}` : null, session, MINE_TTL_MS)
   if (!apart) return { tiers: cut.tiers, started: cut.started }
   return { tiers: (tiers?.tiers ?? []).filter(tr => tr.count > 0), started: started?.started ?? {} }
 }

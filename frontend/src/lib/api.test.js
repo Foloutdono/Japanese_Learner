@@ -186,3 +186,68 @@ describe('onApiFailure', () => {
     expect(response.status).toBe(500)
   })
 })
+
+// ── 429 — a learner asking too much at once (plan 210) ──────────────
+// The server queues a learner past a few requests at once and refuses
+// past the queue. That is not a server failure, a read is asked once
+// more after the wait the server names, and a write is never repeated.
+describe('a 429', () => {
+  const answer = (status, headers = {}) => ({
+    ok: status >= 200 && status < 300,
+    status,
+    headers: new Headers(headers),
+    json: async () => (status === 429 ? { detail: 'too_many_requests' } : { fine: true }),
+  })
+
+  afterEach(() => {
+    onApiFailure(null)
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
+
+  it('asks a read once more after Retry-After, and is not a failure', async () => {
+    vi.useFakeTimers()
+    const seen = vi.fn()
+    onApiFailure(seen)
+    globalThis.fetch = vi.fn()
+      .mockResolvedValueOnce(answer(429, { 'Retry-After': '1' }))
+      .mockResolvedValueOnce(answer(200))
+    const pending = apiJson('/api/frequency/vocab/tiers?tier_size=200', null)
+    await vi.advanceTimersByTimeAsync(999)
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+    await vi.advanceTimersByTimeAsync(1)
+    await expect(pending).resolves.toEqual({ fine: true })
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+    expect(seen).not.toHaveBeenCalled()
+  })
+
+  it('asks a read only once more: a second 429 is the caller\'s', async () => {
+    vi.useFakeTimers()
+    globalThis.fetch = vi.fn().mockResolvedValue(answer(429))
+    const pending = apiJson('/api/stats', null).catch(e => e)
+    await vi.advanceTimersByTimeAsync(1000)
+    const err = await pending
+    expect(err).toBeInstanceOf(ApiError)
+    expect(err.status).toBe(429)
+    expect(err.code).toBe('too_many_requests')
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+  })
+
+  it('never sends a write twice', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue(answer(429))
+    const response = await apiFetch('/api/decks', null, { method: 'POST', body: '{}' })
+    expect(response.status).toBe(429)
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('stops waiting when the caller aborts', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue(answer(429))
+    const controller = new AbortController()
+    const pending = apiFetch('/api/dictionary?q=x', null, { signal: controller.signal })
+    await Promise.resolve()
+    await Promise.resolve()
+    controller.abort()
+    await expect(pending).rejects.toMatchObject({ name: 'AbortError' })
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+  })
+})

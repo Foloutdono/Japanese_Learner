@@ -28,7 +28,9 @@ const apiFetch = vi.hoisted(() => vi.fn())
 vi.mock('./lib/api', () => ({
   api: p => p,
   apiFetch,
-  apiJson: vi.fn(), apiJsonWithTimeout: vi.fn(), apiUpload: vi.fn(),
+  // The shared answers (lib/cachedJson, plan 210) ask through apiJson.
+  apiJson: async (...a) => (await apiFetch(...a)).json(),
+  apiJsonWithTimeout: vi.fn(), apiUpload: vi.fn(),
   ApiError: class extends Error {},
 }))
 const MET = { 1: 18, 3: 4, 5: 9, 7: 2 }
@@ -63,6 +65,9 @@ vi.mock('./stores/boarding', async o => ({ ...(await o()), board: vi.fn(commit =
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: VocabScreen } = await import('./screens/VocabScreen')
+const { forgetCachedJson } = await import('./lib/cachedJson')
+// Each case asks with its own answers: none is kept across (plan 210).
+afterEach(() => { forgetCachedJson() })
 
 // Past the timer, the plates' staggered arrivals themselves: a plate a
 // fraction of a pixel short of its place is a row out of line.

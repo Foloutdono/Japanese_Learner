@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams, Navigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { apiJson } from '../lib/api'
+import { cachedJson, MINE_TTL_MS } from '../lib/cachedJson'
 import { playUi } from '../lib/audio'
 import { board } from '../stores/boarding'
 import { useBasics, refreshBasics } from '../stores/basics'
@@ -110,7 +110,8 @@ function UnitPage({ unitId, session }) {
 
   useEffect(() => {
     let live = true
-    apiJson(`/api/basics/${encodeURIComponent(unitId)}?lang=${lang}`, session)
+    // Shared and kept briefly (lib/cachedJson, plan 210).
+    cachedJson(`/api/basics/${encodeURIComponent(unitId)}?lang=${lang}`, session, { ttlMs: MINE_TTL_MS })
       .then(body => { if (live) setUnit(body) })
       .catch(() => { if (live) setFailed(true) })
     return () => { live = false }

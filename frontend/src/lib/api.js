@@ -96,13 +96,41 @@ async function send(path, init) {
   return response
 }
 
+// ── 429, a learner asking too much at once (plan 210) ──────────
+// The server holds each learner to a few requests at once, queues the
+// next ones and refuses past the queue: a 429, {"detail":
+// "too_many_requests"}, with Retry-After. It is not a failure of the
+// server (lib/apiFailure counts 5xx and no answer only), and a read
+// is asked once more after the wait the server names, held to a few
+// seconds. A write is never sent twice: the caller hears the 429.
+const RETRY_CAP_MS = 5000
+
+function retryDelay(response) {
+  const seconds = Number(response.headers?.get?.('Retry-After'))
+  return seconds > 0 ? Math.min(RETRY_CAP_MS, seconds * 1000) : 1000
+}
+
+function wait(ms, signal) {
+  return new Promise((resolve, reject) => {
+    const abort = () => { clearTimeout(timer); reject(new DOMException('Aborted', 'AbortError')) }
+    const timer = setTimeout(() => { signal?.removeEventListener('abort', abort); resolve() }, ms)
+    if (signal?.aborted) abort()
+    else signal?.addEventListener('abort', abort, { once: true })
+  })
+}
+
 export async function apiFetch(path, session, options = {}) {
   const headers = {
     'Content-Type': 'application/json',
     ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
     ...options.headers,
   }
-  const response = await send(path, { ...options, headers })
+  let response = await send(path, { ...options, headers })
+  const method = (options.method ?? 'GET').toUpperCase()
+  if (response.status === 429 && (method === 'GET' || method === 'HEAD')) {
+    await wait(retryDelay(response), options.signal)
+    response = await send(path, { ...options, headers })
+  }
   // Only when a session was presented and refused — a 401 on a
   // sessionless call is the endpoint doing its job.
   if (response.status === 401 && session) recoverAuth()

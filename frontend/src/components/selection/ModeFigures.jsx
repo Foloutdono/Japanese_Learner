@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { useStats } from '../../stores/stats'
-import { apiFetch } from '../../lib/api'
+import { MINE_TTL_MS, useCachedJson } from '../../lib/cachedJson'
 import { bucketRow, modeRow } from '../../domain/statsModel'
 import { Composition } from '../stats/Composition'
 
@@ -31,17 +30,11 @@ export function ModeFigures({ source, deck, mode }) {
 // splits the cards by stage (new, in progress, mastered), where this
 // figure adds them up, as the stop's does.
 export function ScopeFigures({ url, session }) {
-  const [got, setGot] = useState(null)
-  useEffect(() => {
-    let live = true
-    apiFetch(url, session)
-      .then(r => (r.ok ? r.json() : null))
-      .then(body => { if (live) setGot({ url, row: bucketRow(body) }) })
-      .catch(() => { if (live) setGot({ url, row: null }) })
-    return () => { live = false }
-  }, [url, session])
-  // A figure from the stop the learner just left is not this stop's.
-  return <Figures row={got?.url === url ? got.row : null} />
+  // Shared and kept briefly (lib/cachedJson, plan 210): a station's
+  // platforms used to ask again on every return to the stop. A figure
+  // from the stop the learner just left is not this stop's.
+  const body = useCachedJson(url, session, { ttlMs: MINE_TTL_MS })
+  return <Figures row={body ? bucketRow(body) : null} />
 }
 
 // With nothing due, the cards in progress say what the bar's lighter

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
 import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'react-router-dom'
@@ -37,6 +37,9 @@ vi.mock('./stores/stats', () => ({ useStats: () => ({ data: { items: {} }, faile
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: GrammarScreen } = await import('./screens/GrammarScreen')
+const { forgetCachedJson } = await import('./lib/cachedJson')
+// Each case asks with its own answers: none is kept across (plan 210).
+afterEach(() => { forgetCachedJson() })
 const { default: VocabScreen } = await import('./screens/VocabScreen')
 const { default: KanjiScreen } = await import('./screens/KanjiScreen')
 const { default: StudyScreen } = await import('./screens/StudyScreen')
@@ -61,7 +64,8 @@ beforeEach(() => {
       const id = new URLSearchParams(u.split('?')[1]).get('id')
       return lesson(POINTS.find(p => p.raw_id === id))
     }
-    return {}
+    // The shared answers (lib/cachedJson, plan 210) ask through apiJson.
+    return (await apiFetch(url)).json()
   })
   apiFetch.mockReset()
   apiFetch.mockImplementation(async url => {

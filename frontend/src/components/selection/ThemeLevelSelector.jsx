@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
 import { useLang } from '../../LangContext'
-import { apiFetch } from '../../lib/api'
+import { CONTENT_TTL_MS, useCachedJson } from '../../lib/cachedJson'
 import { THEME_LEVELS, THEME_LEVEL_JP, themeLevelLabel } from '../../domain/themes'
 import { RouteStops } from './RouteStops'
 import { Loading } from '../ui/Loading'
@@ -39,28 +38,14 @@ import Empty from '../ui/Empty'
  */
 export default function ThemeLevelSelector({ session, theme, onSelect, selected = null, linkTo = null }) {
   const { t } = useLang()
-  // Held with the theme they answer for: the desk keeps this mounted
-  // from one theme's bands to the next, and another theme's counts —
-  // or its failure — are not this one's.
-  const [got, setGot] = useState(null)
-
-  useEffect(() => {
-    let cancelled = false
-    apiFetch('/api/themes', session)
-      .then(r => r.json())
-      .then(data => {
-        if (cancelled) return
-        const row = (data.themes ?? []).find(th => th.key === theme)
-        if (!row) { setGot({ theme, failed: true }); return }
-        setGot({ theme, counts: Object.fromEntries((row.levels ?? []).map(l => [l.level, l.count])) })
-      })
-      .catch(() => { if (!cancelled) setGot({ theme, failed: true }) })
-    return () => { cancelled = true }
-  }, [session, theme])
-
-  const mine = got?.theme === theme ? got : null
-  const counts = mine?.counts ?? null
-  if (mine?.failed) return <Empty tone="error" message={t.loadError} />
+  // One list for every theme, the one the sources' plate holds
+  // (lib/cachedJson, plan 210): the desk keeps this mounted from one
+  // theme's bands to the next, and another theme is drawn from it at
+  // once.
+  const data = useCachedJson('/api/themes', session, { ttlMs: CONTENT_TTL_MS })
+  const row = data ? (data.themes ?? []).find(th => th.key === theme) : undefined
+  const counts = row ? Object.fromEntries((row.levels ?? []).map(l => [l.level, l.count])) : null
+  if (data === null || (data && !row)) return <Empty tone="error" message={t.loadError} />
   if (!counts) return <Loading />
 
   const stops = THEME_LEVELS.map(key => ({

@@ -1,4 +1,5 @@
 import { apiJson, ApiError } from './api'
+import { invalidateMine } from './cachedJson'
 import { applySpend, reconcileCredits, markRunOut } from '../stores/credits'
 import { COST_PER_REVIEW, isFreeMode } from '../domain/credits'
 
@@ -38,6 +39,9 @@ export async function postReview(path, session, body, { cleared = 0 } = {}) {
     throw e
   } finally {
     inFlight.delete(request)
+    // The figures beside the stops (the tiers met, a platform's own,
+    // plan 210) are the ones a review moves: the next screen asks again.
+    invalidateMine()
   }
 }
 
