@@ -738,24 +738,32 @@ question and at the end of a first ride (`Continue` in
 Board's place (plan 168, phone and desk alike) — and Today's **Depart** on the fare
 gate (`components/station/GateCard.jsx`, owner-directed after plan 164) — and,
 on the desk, a deck's **Study** (`screens/DeckDetailScreen.jsx`'s gate, plan
-179) are drawn by one component, `components/ui/GateButton.jsx` (`.btn-depart--gate`),
+179) — and the painted Practice gate's **Embarquer** (plan 225, below) are
+drawn by one component, `components/ui/GateButton.jsx` (`.btn-depart--gate`),
 as a ticket gate you tap your pass on (改札, plan 164: the owner's pick D of four
 directions drawn for "more vibrant, the user must notice it and want to
-press it"):
+press it"; redrawn in plan 225 as the painted Practice gate drew its own,
+the owner's word being that every gate should be that one, its mark a card
+scanner — the pass's contactless arcs it carried read as a speaker's):
 
 - **A gold pill**, 66px on the 844px phone (56px under 800px of frame, 52px
-  under 740px, 66px always on the desk), its fill a top-lit ramp of 山吹
-  (`--gate-gold-lit` → `--gate-gold` → `--gate-gold-deep`) that holds the
-  same value in both themes, inked `--text-on-fill` (6.9:1 in the middle,
-  5.3:1 at the deep end).
-- **A sumi reader** at its left holding the pass's own contactless mark
-  (`PassWave`) in `--gate-lamp`; two ripples leave it, and pressing lights
-  it (`--text-on-panel`), the gate's ピッ. The word stands on the pill's
-  centre line; on the desk the printed Enter takes the right end.
-- **It breathes**: a halo that swells and settles every 2.8s.
+  under 740px, 66px always on the desk), its fill lit from above — a ramp
+  of 山吹 from the crest along its top edge (`--gate-gold-crest` →
+  `--gate-gold-lit` → `--gate-gold`), a light line at the top and a shade
+  at the foot inside it — that holds the same value in both themes, inked
+  `--text-on-fill`, and a drop under it, its own shadow.
+- **A sumi reader** at its left end (48px, 8px in, where the boarding's
+  gold road comes down into it; 40px in the 52px pill), holding the card
+  scanner's mark (a card in a scanner's frame, `ScanMark`) in
+  `--gate-lamp`; a hairline of the deep gold stands a rung right of it,
+  between it and the word. Pressing lights the reader (`--text-on-panel`),
+  the gate's ピッ. The word stands on the pill's centre line; on the desk
+  the printed Enter takes the right end.
+- **It stands still**, as the painted one does: plan 164's breathing halo
+  and the ripples off the reader went with the redraw.
 - **Not yet is its outline**, not a faded fill: `--surface`, a
-  `--surface-line` ring, the word and the reader's mark in
-  `--text-secondary`, nothing moving.
+  `--surface-line` ring, the word, the reader's mark and its hairline in
+  `--text-secondary` and the line's grey, nothing moving.
 - **A pick wakes it**: the fill fades in over the outline and the pill
   overshoots once (0.97 → 1.035 → 1). Only on that change — a gate that
   arrives ready does not pop.
@@ -776,9 +784,8 @@ press it"):
   `src/boarding.phone.test.jsx`.
 
 It stands outside three rulings on purpose, and nowhere else: the motion
-rule's "no scale, no glow" (the halo, the wake), `--elev-action`'s single
-shadow (the halo is its shadow), and the family's one disabled treatment
-(opacity 0.45). None of the three is precedent: every other `.btn-depart`
+rule's "no scale" (the wake), `--elev-action`'s single shadow (the drop is
+its own), and the family's one disabled treatment (opacity 0.45). None of the three is precedent: every other `.btn-depart`
 is the primary button above. On Today the gate is closed (its outline) when
 nothing is chosen or the balance cannot pay, and wakes when a line or a mode
 is switched back on; on a day with nothing due it stays shut and says when
@@ -1145,14 +1152,55 @@ adds no idiom of its own: it is the tour's scene made to answer back.
   then the run stands on the three panels: this run's figures at the
   left, the thread in the middle, the scene's brief (its plate,
   situation and errand) in the side.
-- **The gate: seven on the phone, six on the desk.** The phone hangs
-  会話 as the Practice gate's seventh plate with its grade chips. The
+- **The gate: seven on the phone, six on the desk.** The phone's painted
+  platform rolls 会話 as its seventh destination (plan 225). The
   desk's lattice is drawn for six specimens, and a seventh plate -- even
   a strip under them -- cut the exam's and N1 translation's cards in
   their wells at 1100×800, so the desk keeps the six and 会話 is the
   rail's seventh station (`PracticeScreen`'s `OFF_DESK`) until a gate of
   seven is drawn. The pigment is 縹 (`--line-kaiwa`), the dayflower blue
   between 緑青 and 藍.
+
+### The painted platform (練習の改札, plan 225)
+
+**Practice's gate on the phone is a painting, made live.** The owner
+painted the platform — the canopy, Fuji past it, a car standing with its
+door open — and picked it, its four hours too, on the canvas "Practice
+gate — five wheels" (board 4). `scripts/practice-gate/` cuts the painting
+into layers and lights them at Today's hours (曙 dawn, the day, 落雁 dusk,
+秋月 night, `domain/printHour`), and `components/practice/gate/` draws over
+it, where the painting has them, the things that move or say something:
+
+- **Two roll signs on the car's side**, the train's grade (種別) and where
+  it goes (行先): three rows each, the lit one in the middle, rolled by a
+  tap on the row above or below (or the arrow keys) with the flaps'
+  clatter. The learner's own grade carries a dot. The lit destination
+  opens its station, as a plate's head did. Under them an **LED** pages
+  between what the run asks and where the train goes.
+- **The band along the cars** takes the chosen line's pigment, through a
+  colour blend over the stripe's own mask, so it keeps its paint.
+- **The door's leaves, the pantograph, the clock**: the train wakes and
+  raises its pantograph to the wire, a spark where it touches, then
+  opens; a tap folds or raises it. The clock keeps the time; a tap on it
+  shows the next hour.
+- **The gate button** (above) at the painting's foot: the doors close,
+  the train pulls out on the wire, a veil says where it went, and the run
+  opens. A tap skips to it. When the learner comes back, the train comes
+  in again.
+
+It keeps its own rules:
+
+- **It is a picture, not a surface.** Its inks are the painting's and its
+  signs', the same in both themes; the lines' pigments on it are the washi
+  theme's (`--pg-ink-*`), the signs being boards in the platform's light.
+- **Its numbers are the painting's.** The scene is 390 × 724 units, one
+  px each inside a zoomed root (`gateFit.js` places it: it fills the
+  frame's width, gives up sky before anything else, and keeps the wire
+  to the button whole); its type is the scale's, zoomed with it.
+- **Regenerated, never edited**: change the generator and bump its `REV`.
+- **Reduced motion**: the train stands, door open, pantograph up; the
+  signs turn without rolling; Embarquer opens the run at once.
+- **The desk keeps its plates**: no platform was painted for it.
 
 ## Space
 

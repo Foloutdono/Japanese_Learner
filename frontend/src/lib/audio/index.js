@@ -32,7 +32,7 @@ export { preload } from './context'
 export { playKana, preloadKana, kanaSound, playSfx, playUi, playAnnouncement } from './playback'
 export {
   playClick, playToggle, playFlip, playCorrect, playWrong,
-  playGateChime, playDoorChime, playDoorSlide, playFareTick, FARE_BEAT, playPassClip, playLevelCharge, playLevelBurst, playStamp,
+  playGateChime, playDoorChime, playDoorSlide, playPantograph, playSpark, playFareTick, FARE_BEAT, playPassClip, playLevelCharge, playLevelBurst, playStamp,
   playArrival, playPlatformChime, playBoardFlap, playDayClear, playMilestone,
 } from './chimes'
 export { startAmbiance, stopAmbiance } from './ambiance'
