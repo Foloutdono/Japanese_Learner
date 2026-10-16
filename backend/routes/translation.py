@@ -1,7 +1,9 @@
 import logging
+import os
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from core.credits import require_pass
+from core import daily_limit
+from core.credits import require_pass, resets_at
 from pydantic import BaseModel, Field
 
 from core.db import db_conn
@@ -13,6 +15,11 @@ from study.llm_shared import llm_configured
 # A pass feature (plan 069): every route here refuses a free learner
 # with 402 pass_required once CREDITS_ENFORCE=1; a no-op until then.
 router = APIRouter(dependencies=[Depends(require_pass)])
+
+# The tutor's reviews a learner may ask for in a day (plan 211). See
+# composition.py's COMPOSITION_DAILY_LIMIT, the same review's ceiling.
+FEATURE = "translation_review"
+TRANSLATION_DAILY_LIMIT = int(os.environ.get("TRANSLATION_DAILY_LIMIT", "60"))
 logger = logging.getLogger(__name__)
 
 
@@ -232,9 +239,23 @@ def post_translation_analyze(payload: AnalyzePayload, user_id: str = Depends(get
     if not payload.user_answer.strip():
         raise HTTPException(status_code=400, detail="user_answer is required")
 
-    lang_name = reading.LANG_NAMES.get(payload.lang, payload.lang)
-    prompt_lang = payload.prompt_lang or payload.lang
-    prompt_lang_name = reading.LANG_NAMES.get(prompt_lang, prompt_lang)
+    # A model call a review, and none was ever counted (plan 211): the
+    # same ceiling composition's review has, its own allowance.
+    used = daily_limit.claim(user_id, FEATURE, TRANSLATION_DAILY_LIMIT)
+    if used > TRANSLATION_DAILY_LIMIT:
+        raise HTTPException(
+            status_code=429,
+            detail=(
+                f"Daily limit of {TRANSLATION_DAILY_LIMIT} translation reviews reached; "
+                f"resets {resets_at(user_id):%Y-%m-%dT%H:%MZ}"
+            ),
+        )
+
+    # Known languages only: these names land in the prompt.
+    lang = reading.known_lang(payload.lang)
+    lang_name = reading.LANG_NAMES[lang]
+    prompt_lang = reading.known_lang(payload.prompt_lang or lang)
+    prompt_lang_name = reading.LANG_NAMES[prompt_lang]
     # The one thing this endpoint knows that the learner does not, and
     # that the reference sentence alone does not say: WHY this sentence
     # was chosen. A curated sentence exists to demonstrate one grammar

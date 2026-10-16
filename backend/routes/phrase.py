@@ -1,13 +1,14 @@
 import hashlib
 import json
 import logging
+import os
 import re
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from core.credits import require_pass
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from core.db import db_conn
 from core.auth import get_user_id
@@ -17,7 +18,9 @@ from study.llm_shared import chat, LLMUnavailable
 from content.grammar_points_data import localise
 from study.analysis import analyze_local, attach_user_state, merge_deep
 from study.sentences import split_sentences, MAX_SENTENCES
-from routes.reading import LANG_NAMES
+from routes.reading import LANG_NAMES, known_lang
+from core import daily_limit
+from core.credits import resets_at
 
 # A pass feature (plan 069): every route here refuses a free learner
 # with 402 pass_required once CREDITS_ENFORCE=1; a no-op until then.
@@ -287,7 +290,9 @@ def _store_analysis(phrase: str, lang: str, result: dict) -> None:
 
 
 class PhraseRequest(BaseModel):
-    phrase: str
+    # Bounded (plan 211): split into at most MAX_SENTENCES, but read and
+    # tokenized whole first. A long chapter pasted is ~20k characters.
+    phrase: str = Field(max_length=20_000)
     # False for callers that just want the AI breakdown without adding
     # an entry to the user's phrase-analyzer history — added for reading
     # practice (see reading.py / ReadingScreen.jsx, 2026-08), which
@@ -405,6 +410,15 @@ def _normalize_explanation_key(parsed: dict) -> dict:
     return parsed
 
 
+# The deep tier's model calls a learner may make in a day (plan 211):
+# a cache miss, never a hit -- the curated sentences are paid for once
+# for everyone. Every caller of the deep tier (the analyzer, the runs'
+# explain, a video line) counts here; before, none counted at all, and
+# a request could buy fifty.
+DEEP_FEATURE = "deep_analysis"
+DEEP_DAILY_LIMIT = int(os.environ.get("DEEP_DAILY_LIMIT", "150"))
+
+
 def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: str,
                        allow_llm_call: bool = True) -> dict:
     """One Sentence through the full local (+ optional deep) pipeline,
@@ -419,6 +433,7 @@ def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: s
     escalated to _call_llm.
     """
     analysis = analyze_local(text)
+    lang = known_lang(lang)
 
     if deep:
         # The deep tier is bought explicitly, per call, per Sentence --
@@ -428,6 +443,14 @@ def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: s
         # onward is per-user and recomputed every time.
         llm_result = _cached_analysis(text, lang)
         if llm_result is None and allow_llm_call:
+            if daily_limit.claim(user_id, DEEP_FEATURE, DEEP_DAILY_LIMIT) > DEEP_DAILY_LIMIT:
+                raise HTTPException(
+                    status_code=429,
+                    detail=(
+                        f"Daily limit of {DEEP_DAILY_LIMIT} explanations reached; "
+                        f"resets {resets_at(user_id):%Y-%m-%dT%H:%MZ}"
+                    ),
+                )
             llm_result = _call_llm(text, lang, _deep_points(analysis, lang))
             _store_analysis(text, lang, llm_result)
         if llm_result is not None:

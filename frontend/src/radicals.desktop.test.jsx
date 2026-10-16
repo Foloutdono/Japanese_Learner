@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'react-router-dom'
 import { LangProvider } from './LangContext'
@@ -32,6 +32,9 @@ vi.mock('./stores/boarding', () => ({ board: commit => commit() }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: KanjiScreen } = await import('./screens/KanjiScreen')
+const { forgetCachedJson } = await import('./lib/cachedJson')
+// Each case asks with its own answers: none is kept across (plan 211).
+afterEach(() => { forgetCachedJson() })
 
 // The index as /api/kanji/radicals serves it: two stroke pages, each in
 // Kangxi order (the station ranks them by family size itself).
@@ -63,7 +66,8 @@ beforeEach(() => {
   apiJson.mockReset()
   apiJson.mockImplementation(async url => {
     const m = String(url).match(/^\/api\/kanji\/radical\/(\d+)\?/)
-    return m ? lesson(Number(m[1])) : {}
+    // The shared answers (lib/cachedJson, plan 211) ask through apiJson.
+    return m ? lesson(Number(m[1])) : (await apiFetch(url)).json()
   })
   apiFetch.mockReset()
   apiFetch.mockImplementation(async url => {

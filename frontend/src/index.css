@@ -7602,7 +7602,7 @@ textarea:focus-visible {
   background:
     radial-gradient(80% 70% at 22% 0%, rgba(255, 255, 255, 0.9), transparent 60%),
     linear-gradient(160deg, #f3f2ef 0%, #e2e0db 100%);
-  box-shadow: inset 0 0 0 1px rgba(30, 32, 36, 0.12), 0 14px 30px rgba(0, 0, 0, 0.5), 0 3px 7px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 0 1px rgba(30, 32, 36, 0.12), var(--pcs-lift, 0 14px 30px rgba(0, 0, 0, 0.5), 0 3px 7px rgba(0, 0, 0, 0.3));
 }
 /* 墨 soft-touch charcoal. */
 .pcs--pro,
@@ -7610,7 +7610,7 @@ textarea:focus-visible {
   background:
     radial-gradient(120% 90% at 18% -10%, rgba(255, 255, 255, 0.08), transparent 55%),
     linear-gradient(160deg, color-mix(in srgb, var(--pass-ink) 72%, #1a181d) 0%, color-mix(in srgb, var(--pass-ink) 38%, #141216) 62%, #141216 100%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 14px 30px rgba(0, 0, 0, 0.55), 0 3px 7px rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07), var(--pcs-lift, 0 14px 30px rgba(0, 0, 0, 0.55), 0 3px 7px rgba(0, 0, 0, 0.35));
 }
 .pcs--pro .pcs__grain,
 .jcard--pro .jcard__grain {
@@ -7626,8 +7626,7 @@ textarea:focus-visible {
     inset 0 -1px 0 rgba(40, 42, 48, 0.5),
     inset -1px 0 0 rgba(40, 42, 48, 0.3),
     inset 0 0 0 1px rgba(90, 94, 102, 0.3),
-    0 14px 30px rgba(0, 0, 0, 0.55),
-    0 0 30px rgba(214, 220, 232, 0.24);
+    var(--pcs-lift, 0 14px 30px rgba(0, 0, 0, 0.55), 0 0 30px rgba(214, 220, 232, 0.24));
 }
 .pcs--max .pcs__grain,
 .jcard--max .jcard__grain {
@@ -20118,7 +20117,17 @@ button.syllabary-cell:focus-visible {
   justify-content: center;
   /* The gate grows far past the screen's edges. */
   overflow: hidden;
-  animation: gate-leave calc(140ms * var(--gate-x)) linear calc(840ms * var(--gate-x)) forwards;
+}
+/* The fade off the destination, declared as it starts (TicketGate sets
+   data-leaving at LEAVE_MS, 840ms) rather than with that delay from the
+   mount. An opacity animation on the scene, even one still waiting out
+   its delay, has the browser draw the whole scene into a texture of its
+   own and then that texture onto the screen, every frame: a second
+   full-screen pass for the whole cutscene, where a phone has no fill to
+   spare. Declared at the fade, it costs that only for the fade
+   (plan 210). */
+.gate[data-leaving] {
+  animation: gate-leave calc(140ms * var(--gate-x)) linear forwards;
 }
 .gate[data-ink="fill"] { --gate-title-ink: var(--text-on-fill); }
 .gate__scrim {
@@ -20128,10 +20137,14 @@ button.syllabary-cell:focus-visible {
   opacity: 0;
   animation: gate-scrim calc(120ms * var(--gate-x)) ease-out forwards;
 }
-/* Effectively opaque. At 0.96 in the light theme this was cream over
-   cream and the board stayed legible through it, so the gate read as
-   a panel floating on the home screen rather than as a place. */
-@keyframes gate-scrim { to { opacity: 0.995; } }
+/* Opaque. At 0.96 in the light theme this was cream over cream and the
+   board stayed legible through it, so the gate read as a panel floating
+   on the home screen rather than as a place. It was 0.995 after that,
+   which looks the same and is not the same: under a layer short of
+   opaque the browser still draws the whole screen beneath it, every
+   frame of the scene, and under an opaque one it draws nothing
+   (plan 210). */
+@keyframes gate-scrim { to { opacity: 1; } }
 @keyframes gate-leave { to { opacity: 0; } }
 
 /* The gate itself: two pillars with a lane between them. At 110vw a
@@ -20148,6 +20161,13 @@ button.syllabary-cell:focus-visible {
   /* Its own stacking context, so the sill under it (::after) stays
      over the scrim once the arrive transform has ended. */
   isolation: isolate;
+  /* Two transform animations on one box, so the browser runs neither
+     on the compositor, and that is kept on purpose. Split across two
+     boxes, both went to the compositor, which rasters every layer under
+     a zoom at the zoom's largest scale before it draws a frame: the
+     rig, its flaps, the lane and the sill at ~3.4x from the tap. Measured
+     on a phone's throttle (plan 210) that dropped more frames than the
+     main thread costs the zoom, which rasters it at its own size. */
   animation:
     arrive calc(300ms * var(--gate-x)) cubic-bezier(0.22, 0.68, 0.32, 1) backwards,
     gate-through calc(180ms * var(--gate-x)) cubic-bezier(0.6, 0, 0.9, 0.55) calc(480ms * var(--gate-x)) forwards;
@@ -33834,6 +33854,9 @@ button.brd-stn { cursor: pointer; }
        the side's (above): on a 600px window the list's foot sat under
        the fold, beyond any scroll. */
     overflow-y: auto;
+    /* That scroll clips: the card's lift (.pcs) was cut to a grey box
+       at the column's edge, so the card lies flat here. */
+    --pcs-lift: 0 0 transparent;
   }
   /* The page takes the rest of the width (plan 139): it stopped at the
      card's width, and a 1440 window held a 640px page beside a 360px

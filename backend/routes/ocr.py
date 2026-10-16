@@ -138,13 +138,18 @@ def _claim_daily_slot(user_id: str) -> int:
         conn.close()
 
 
+# A plain def, so FastAPI runs it on the threadpool (plan 211): as an
+# async def, its daily claim and its vision call (up to 90s a try, two
+# tries a provider) ran on the event loop and held the whole API -- one
+# worker -- for as long. Read bounded: the size check below needs no
+# more than one byte past the limit.
 @router.post("/api/ocr")
-async def recognize_image(
+def recognize_image(
     file: UploadFile = File(...),
     vertical: str = Form("false"),
     user_id: str = Depends(get_user_id),
 ):
-    raw = await file.read()
+    raw = file.file.read(_MAX_IMAGE_BYTES + 1)
     if not raw:
         raise HTTPException(status_code=400, detail="No image received")
     if len(raw) > _MAX_IMAGE_BYTES:
