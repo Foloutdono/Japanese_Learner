@@ -526,6 +526,15 @@ const quiz = {
   askSpent:            at => (at ? `No more questions today: they come back at ${at}.` : 'No more questions today.'),
   askLeft:             n => `${n} question${n > 1 ? 's' : ''} left today`,
   askFull:             'That’s all for this sentence.',
+  askSuggestLabel:     'Suggested questions',
+  askSugContrast:      (a, b) => `Why ${a} and not ${b}?`,
+  askSugMarks:         p => `What does ${p} mark here?`,
+  askSugPoint:         p => `How is ${p} used?`,
+  askSugExample:       w => `Another example with ${w}?`,
+  askSugPolite:        'How would I say it more politely?',
+  askSugCasual:        'And casually, between friends?',
+  askSugWhyRight:      'Why is this the right answer?',
+  askSugWhere:         'Where does the text say it?',
 
   // Feedback — the ❌/✅/← glyphs these used to carry inline are now
   // real <Icon/>s rendered by whatever shows the text (see

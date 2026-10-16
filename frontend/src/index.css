@@ -31550,12 +31550,21 @@ button.brd-stn { cursor: pointer; }
   overscroll-behavior: contain;
   background: var(--bg-main);
 }
+/* The page is the window, never taller: with only a min-height, a long
+   thread grew the page past the floor, the field went with it and the
+   thread, never short of room, never scrolled. Held at the window, the
+   thread is what scrolls and the field stays on the foot. dvh, so a
+   WebView the keyboard resizes (Capacitor's native resize) shrinks it.
+   `flex: none`, or the stage's `flex: 1` takes the height for a basis
+   and sizes it by the thread again. */
 .ask-page {
   display: flex;
+  flex: none;
   flex-direction: column;
   gap: var(--sp-5);
   box-sizing: border-box;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
 }
 /* The page's ground is the field's own (--bg-main), so the field takes
    the card's, as it does on a page of cards. */
@@ -31664,6 +31673,34 @@ button.brd-stn { cursor: pointer; }
   font-size: var(--fs-caption);
   color: var(--text-secondary);
 }
+/* The questions offered, over the field (askSuggestions): a tap asks
+   one. Quiet until touched, as a chip is -- the second ink in a
+   hairline, the first on hover -- but a sentence, so it wraps and keeps
+   its case; a thumb's height each. */
+.ask__offers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  flex: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ask__offer {
+  min-height: 44px;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: var(--fs-sm);
+  text-align: start;
+  cursor: pointer;
+}
+.ask__offer:hover,
+.ask__offer:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); }
+.ask__offer:disabled { opacity: 0.45; cursor: not-allowed; }
 
 
 /* ═══ 机 — the desk (plan 113) ═══════════════════════════════════
@@ -38858,6 +38895,31 @@ button.brd-stn { cursor: pointer; }
     font-size: var(--fs-caption);
     color: var(--text-secondary);
   }
+  /* The questions offered, as the phone's page offers them (.ask__offer):
+     a hairline each, a click asks one; the column's smaller size. */
+  .desk-ask__offers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    flex: none;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .desk-ask__offer {
+    padding: var(--sp-1) var(--sp-3);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    background: none;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: var(--fs-caption);
+    text-align: start;
+    cursor: pointer;
+  }
+  .desk-ask__offer:hover,
+  .desk-ask__offer:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); }
+  .desk-ask__offer:disabled { opacity: 0.45; cursor: not-allowed; }
   /* ── 解析 — the analyser's result on three columns (plan 134) ──
      The owner's drawing (the "Choix" boards of the analyser canvas, drawn
      at 1877 × 930 as 410 | 830 | 541): the desk's rail steps aside for
