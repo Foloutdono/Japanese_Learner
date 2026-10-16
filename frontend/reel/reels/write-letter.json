@@ -1,0 +1,24 @@
+{
+  "lang": "en",
+  "learner": "Mika",
+  "clock": "22:05",
+  "beats": [
+    {
+      "hook": "page",
+      "style": "letter",
+      "to": "ミカさんへ",
+      "text": "来週、駅で会いましょう。",
+      "from": "ゆき",
+      "caption": "your pen pal writes by hand… *can you?* ✍️"
+    },
+    { "rise": true },
+    {
+      "app": "kanji",
+      "mode": "kanji.write_kanji",
+      "kanji": ["駅", "会"],
+      "caption": "every kanji, *stroke by stroke*",
+      "ratings": [4, 4]
+    },
+    { "end": true }
+  ]
+}

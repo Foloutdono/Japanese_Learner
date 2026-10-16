@@ -138,6 +138,36 @@ export function createFinger(layer, { kind = 'dot', seed = 7, send }) {
       await tween(0.12, k => { state.press = 1 - k }, ease.outCubic)
       if (input) send({ kind: 'mouse', type: 'mouseMoved', x: -40, y: -40 })
     },
+    /**
+     * Write one stroke: press at its first point, follow `points` (a
+     * polyline, in board pixels) at an even pace along its length, as a
+     * brush is drawn, and lift. Between strokes the finger travels in the
+     * air, the way a hand writing does.
+     */
+    async trace(points, { duration = 0.4, input = true } = {}) {
+      if (points.length < 2) return
+      await appear()
+      await moveTo(points[0], { duration: 0.16, arc: false })
+      await tween(0.05, k => { state.press = k }, ease.outCubic)
+      if (input) send({ kind: 'mouse', type: 'mousePressed', x: points[0].x, y: points[0].y })
+      // Arc length to each point, so the stroke moves at one speed.
+      const at = [0]
+      for (let i = 1; i < points.length; i++) at.push(at[i - 1] + Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y))
+      const total = at[at.length - 1] || 1
+      let i = 1
+      await tween(duration, k => {
+        const d = k * total
+        while (i < points.length - 1 && at[i] < d) i++
+        const span = at[i] - at[i - 1] || 1
+        const f = Math.min(1, Math.max(0, (d - at[i - 1]) / span))
+        state.x = lerp(points[i - 1].x, points[i].x, f)
+        state.y = lerp(points[i - 1].y, points[i].y, f)
+        if (input) send({ kind: 'mouse', type: 'mouseMoved', x: state.x, y: state.y, drag: true })
+      }, ease.inOutSine)
+      const last = points[points.length - 1]
+      if (input) send({ kind: 'mouse', type: 'mouseReleased', x: last.x, y: last.y })
+      await tween(0.06, k => { state.press = 1 - k }, ease.outCubic)
+    },
     /** Hover over a point without pressing (a thumb that hesitates). */
     async hover(target, seconds = 0.3) {
       await appear()

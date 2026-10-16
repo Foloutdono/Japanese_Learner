@@ -309,6 +309,28 @@ async function boot() {
       keyboard.candidates([])
       await clock.wait(0.15)
     },
+    /**
+     * Write `text` on a drawing board (its holder, the square the app's
+     * answer is laid over): each character's strokes, KanjiVG's own paths
+     * in their order, traced by the finger at a brush's pace. A pair of
+     * kana shares the board as the app's answer shares it, a square each.
+     */
+    async write(text, board, { pace = 1 } = {}) {
+      const chars = [...text]
+      for (const [n, ch] of chars.entries()) {
+        const box = stage.boardRect(board)
+        if (!box) return
+        const cell = { x: box.x + (box.w / chars.length) * n, y: box.y, w: box.w / chars.length, h: box.h }
+        const size = Math.min(cell.w, cell.h)
+        const ox = cell.x + (cell.w - size) / 2
+        const oy = cell.y + (cell.h - size) / 2
+        for (const stroke of await strokesOf(ch)) {
+          const points = stroke.points.map(p => ({ x: ox + (p.x / 109) * size, y: oy + (p.y / 109) * size }))
+          await finger.trace(points, { duration: (0.14 + 0.5 * Math.min(1, stroke.length / 90)) / pace })
+          await clock.wait(0.07 / pace)
+        }
+      }
+    },
     /** Return on the keyboard: the field's form is sent. */
     async submit() {
       keyboard.press('\n')
@@ -384,6 +406,34 @@ async function playBeat(beat, ctx) {
     case 'end': endClip(ctx); return playEnd(beat, ctx)
     default: return TRANSITIONS[beat.kind](beat, ctx)
   }
+}
+
+// ── A character's strokes, as KanjiVG draws them (0–109 square) ──
+const SVG = 'http://www.w3.org/2000/svg'
+let probe = null
+
+/** Each stroke of `ch` in order: points along it, and its length. */
+async function strokesOf(ch) {
+  const file = ch.codePointAt(0).toString(16).padStart(5, '0')
+  const text = await fetch(`/__reel/kanjivg/${file}.svg`).then(r => (r.ok ? r.text() : ''), () => '')
+  const paths = [...new DOMParser().parseFromString(text, 'image/svg+xml').querySelectorAll('path')]
+  if (!probe) {
+    const holder = document.createElementNS(SVG, 'svg')
+    holder.setAttribute('style', 'position:absolute;width:0;height:0;overflow:hidden')
+    probe = document.createElementNS(SVG, 'path')
+    holder.appendChild(probe)
+    document.body.appendChild(holder)
+  }
+  return paths.map(path => {
+    probe.setAttribute('d', path.getAttribute('d') ?? '')
+    const length = probe.getTotalLength()
+    const n = Math.max(2, Math.ceil(length / 2))
+    const points = Array.from({ length: n + 1 }, (_, i) => {
+      const p = probe.getPointAtLength((length * i) / n)
+      return { x: p.x, y: p.y }
+    })
+    return { points, length }
+  })
 }
 
 /** Every picture of the later video hooks, loaded and kept. */

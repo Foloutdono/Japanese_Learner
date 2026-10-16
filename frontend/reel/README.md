@@ -41,7 +41,8 @@ Every render of a script is the same film, frame for frame.
 | `manga-reading.json` | a raw manga panel → its line lifts off the page into reading practice: read aloud in romaji, checked, broken down | 34 s |
 | `station-words.json` | Shinjuku's station sign → vocabulary cards, a level-up, a card mastered | 27 s |
 | `menu-photo.json` | (French) an izakaya's menu in vertical kanji → snapped → analyzer | 33 s |
-| `first-ride.json` | the origin station's sign → the four lines → the kana line boarded → あ, い, う | 35 s |
+| `first-ride.json` | the origin station's sign → the four lines → the kana line boarded → あ, い, う | 37 s |
+| `write-letter.json` | a pen pal's handwritten letter → 駅 and 会 written stroke by stroke | 35 s |
 | `study-tour.json` | Today's gate, a day's cards and the day cleared; kana; kanji with its strokes; grammar's ladder | 86 s |
 | `practice-tour.json` | translation, composition, dictation, comprehension, a mock exam, the dictionary, the deck library, the pass | 133 s |
 
@@ -157,9 +158,9 @@ shows), `level` (instead of the script's), and seconds for `think`,
 | `dictation` | a clip listened to, what was heard typed in romaji, the check | `text`, `translation`, `answer`, `listens` |
 | `comprehension` | a passage read, its questions answered | `answers` (how many) |
 | `today`, `review` | Today's gate, the ticket gate, the day's cards, the day cleared | `words`, `kana`, `kanji` (the day's cards); `clear`; `ratings` |
-| `kana` | a run of kana | `kana`: `["か", "き", "く"]`; `ratings` |
-| `vocab` | a run of words | `words`: `["駅:えき", "電車:でんしゃ"]` (spelling:reading); `ratings` |
-| `kanji` | a run of kanji, the first one's strokes drawn | `kanji`: `["駅"]`; `strokes: false`; `ratings` |
+| `kana` | a run of kana; in `kana.write_kana`, each written by the finger, stroke by stroke | `kana`: `["か", "き", "く"]`; `mode`; `ratings` |
+| `vocab` | a run of words | `words`: `["駅:えき", "電車:でんしゃ"]` (spelling:reading); `mode`; `ratings` |
+| `kanji` | a run of kanji, the first one's strokes drawn; in `kanji.write_kanji`, each written by the finger | `kanji`: `["駅"]`; `mode`; `strokes: false`; `ratings` |
 | `grammar` | a point on its ladder: Choisir (its sentence, the endings that look alike), then Construire, each hole typed; the cards are the backend's own for the point | `point` (`grammar_N5_まだ〜ていません`: `grammar_<level>_<pattern>`, as `content/grammar/` names it; 〜てください when left out); `answer`, `typed` (what is chosen and typed, the right ones by default); `build: false` (Choisir alone) |
 | `exam` | a mock JLPT paper, answered and scored | `picks`: `[2, 1, 2, 2]` |
 | `dictionary` | a search typed in kana and converted, the entry, its strokes | `search`, `reading`, `category` (`kanji`, `vocab`, `grammar`, `hiragana`, `katakana`) |
@@ -168,7 +169,11 @@ shows), `level` (instead of the script's), and seconds for `think`,
 | `learn` | the Learn tab's four lines, their stops and what is due; one boarded, through the app's departure, to its platform | `line` (`kana`, `vocab`, `kanji`, `grammar`; `false` to only look) |
 
 `ratings` is the answer given each card in turn (`[4, 4, 3]`; 4, Correct,
-by default).
+by default). `mode` is the run's exercise, as the app names it
+(`kana.flashcard.f2b` by default; `kana.write_kana`, `kanji.write_kanji`,
+`vocab.flashcard.b2f`…). In a writing mode the finger writes each
+character on the board in its stroke order, along KanjiVG's own strokes,
+before the app lays the answer over it.
 
 #### The end
 

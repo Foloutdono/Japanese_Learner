@@ -22,19 +22,39 @@ const LINE_RUN = {
   kanji: (beat, ctx) => `/learn/kanji/${beat.level ?? ctx.script.level}/${beat.mode ?? 'kanji.flashcard.f2b'}`,
 }
 
-/** One card: think, turn, read, rate. */
+/** The character card `i` of a line's run asks for (its kana, its kanji). */
+const charOf = (beat, i) => (beat.feature === 'kana' ? beat.kana?.[i] : beat.feature === 'kanji' ? beat.kanji?.[i] : null)
+
+/** One card: think, turn (or write it), read, rate. */
 async function playCard(beat, ctx, i) {
   const { stage, finger } = ctx
-  const card = await stage.waitFor('.quiz-card-stage .flashcard, .flashcard', { timeout: 8 })
-  await ctx.look(['.prompt-card'], { duration: 0.5, max: 1.3 })
-  await wait(beat.think ?? 0.7)
-  await ctx.tap(card, { fy: 0.45 })
-  await stage.waitFor('.rating-bar:not(.rating-bar--idle) .rating-bar__btn', { timeout: 4 }).catch(() => {})
-  finger.rest()
-  await wait(beat.read ?? 1.1)
+  const card = await stage.waitFor('.quiz-card-stage .flashcard, .flashcard, .drawing-quiz', { timeout: 8 })
+  const writing = card.matches('.drawing-quiz')
+  if (writing) {
+    // Draw the kana / the kanji: written stroke by stroke on the board,
+    // then the answer laid over the hand's.
+    await ctx.look(['.prompt-card', '.drawing-quiz'], { duration: 0.5, max: 1.3 })
+    await wait(beat.think ?? 0.8)
+    const board = stage.find('.drawing-quiz .canvas-holder')
+    const char = charOf(beat, i)
+    if (board && char) await ctx.write(char, board)
+    await wait(0.3)
+    await ctx.tap('.drawing-quiz__validate')
+    finger.rest()
+    await stage.waitFor('.canvas-ghost', { timeout: 3 }).catch(() => {})
+    await wait(beat.read ?? 1.5)
+  } else {
+    await ctx.look(['.prompt-card'], { duration: 0.5, max: 1.3 })
+    await wait(beat.think ?? 0.7)
+    await ctx.tap(card, { fy: 0.45 })
+    await stage.waitFor('.rating-bar:not(.rating-bar--idle) .rating-bar__btn', { timeout: 4 }).catch(() => {})
+    finger.rest()
+    await wait(beat.read ?? 1.1)
+  }
 
-  // The kanji's own entry: its strokes, drawn as they are written.
-  if (beat.feature === 'kanji' && beat.strokes !== false && i === 0) {
+  // The kanji's own entry: its strokes, drawn as they are written (not
+  // after a card the hand has just written them on).
+  if (beat.feature === 'kanji' && beat.strokes !== false && i === 0 && !writing) {
     const lookup = stage.find('.reveal-action-btn[data-guide="card.lookup"]')
     if (lookup) {
       await ctx.tap(lookup)
@@ -66,7 +86,7 @@ export const cards = {
   },
   ready(beat) {
     if ((beat.feature === 'today' || beat.feature === 'review') && beat.gate !== false) return '.btn-depart--gate, .tdy-dial__count'
-    return '.flashcard'
+    return '.flashcard, .drawing-quiz'
   },
 
   async play(beat, ctx) {
