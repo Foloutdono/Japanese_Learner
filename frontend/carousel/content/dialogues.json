@@ -240,7 +240,7 @@
      "choices": ["はい、ここに書けばいいですか。", "はい、ここに書けばいいでしたか。", "はい、ここに書いたらいかがですか。"], "right": 0, "reply": {"en": "Sure. Do I write here?", "fr": "D'accord. J'écris ici ?"},
      "why": {"en": "〜ばいいですか asks what you should do. いいでした is no form, and 〜たらいかがですか suggests something to someone else.", "fr": "〜ばいいですか demande ce qu'il faut faire. いいでした n'existe pas, et 〜たらいかがですか suggère quelque chose à l'autre."}}]},
   {"id": "return", "lv": "N3", "place": {"jp": "返品", "en": "Returning an item", "fr": "Rendre un article"}, "them": {"en": "Shop assistant", "fr": "Vendeur"}, "turns": [
-    {"them": {"jp": "いらっしゃいませ。", "en": "Hello, can I help you?", "fr": "Bonjour, je peux vous aider ?"},
+    {"them": {"jp": "いらっしゃいませ。", "en": "Welcome. Can I help you?", "fr": "Bienvenue. Je peux vous aider ?"},
      "choices": ["昨日買ったシャツを返品したいんですが。", "昨日買うシャツを返品したいんですが。", "昨日買ったシャツを返品させたいんですが。"], "right": 0, "reply": {"en": "I'd like to return a shirt I bought yesterday.", "fr": "Je voudrais rendre une chemise achetée hier."},
      "why": {"en": "Bought yesterday is past: 買った. 返品させる would be making someone else return it.", "fr": "Acheté hier, c'est du passé : 買った. 返品させる, ce serait faire rendre l'article par quelqu'un d'autre."}},
     {"them": {"jp": "どうかなさいましたか。", "en": "Was something wrong with it?", "fr": "Il y avait un problème ?"},
