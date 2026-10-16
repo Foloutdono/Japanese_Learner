@@ -63,7 +63,7 @@ export function TokenCard({
       className={`card phrase-word-card${emphasize ? ' phrase-word-card--i-plus-one' : ''}`}
     >
       {emphasize && (
-        <div className="phrase-word-card__i-plus-one-flag">{t.iPlusOne ?? 'One step beyond you'}</div>
+        <div className="phrase-word-card__i-plus-one-flag">{t.iPlusOne}</div>
       )}
       <div className="phrase-word-card__top">
         {word.vocab_match ? (

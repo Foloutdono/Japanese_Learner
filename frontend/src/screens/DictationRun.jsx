@@ -25,7 +25,7 @@ import { askTarget } from '../domain/ask'
 import { startTally, countReview } from '../stores/runTally'
 import { RunStreak } from '../components/study/RunStreak'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
-import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
+import { vocabLookup, grammarLookup, docksInColumn, lookupKey } from '../components/analysis/lookup'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 
@@ -315,7 +315,9 @@ function Session({ session, level }) {
       method: 'POST',
       // No `plays` here: the reveal does not write a row, so the
       // listen count travels with the grade instead (see grade()).
-      body: JSON.stringify({ clip_id: clip.id, answer: answer.trim() }),
+      // `lang`: the translation comes back in the learner's language
+      // (plan 215); every line of the bank carries French and English.
+      body: JSON.stringify({ clip_id: clip.id, answer: answer.trim(), lang }),
     })
       .then(data => {
         setResult(data)
@@ -384,6 +386,7 @@ function Session({ session, level }) {
     onExitLookup: closeLookup,
     session,
   }
+  const docked = docksInColumn(desk, lines.opened, stage === 'feedback' && Boolean(result) && rated, analysis)
 
   return (
     <StudyStage
@@ -529,6 +532,7 @@ function Session({ session, level }) {
                 meaningLang={result.translation_lang}
                 answer={answer.trim()}
                 accuracy={result.accuracy}
+                onOpen={setLookup}
                 t={t}
               />
             )}
@@ -604,7 +608,7 @@ function Session({ session, level }) {
 
       {/* On the desk a door in the docked breakdown opens in the side
           column (BreakdownSide → SideLookup, plan 115). */}
-      {lookup && !desk && (
+      {lookup && !docked && (
         <DictionaryLookupSheet key={lookupKey(lookup)} {...lookup} session={session} onClose={closeLookup} />
       )}
     </StudyStage>

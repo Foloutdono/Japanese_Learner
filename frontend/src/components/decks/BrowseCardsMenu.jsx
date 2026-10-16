@@ -21,7 +21,7 @@ import { composing } from '../../lib/keyGuards'
 //
 // `deckType` restricts which of the three tabs are even offered —
 // mirrors decks.py's SOURCE_FOR_TYPE (a 'kanji' deck only ever gets
-// the kanji tab, 'mixed'/unset gets all three) — the server enforces
+// the kanji tab, a 'mixed' one all three) — the server enforces
 // the actual rule regardless, this is just so the picker doesn't
 // dangle options that would get rejected anyway.
 //
@@ -35,8 +35,13 @@ const SEARCH_DEBOUNCE_MS = 300
 // A deck has ONE STRUCTURE, and it browses only its own source.
 // Second hand-synced copy of decks.py's SOURCE_FOR_TYPE — see
 // DeckDetailScreen for the same table and why it is duplicated.
-// 'standard' has no app source, so its Browse menu offers nothing.
-const SOURCE_FOR_TYPE = { kanji: ['kanji'], vocab: ['vocab'], grammar: ['grammar'] }
+// 'standard' has no app source, so its Browse menu offers nothing; a
+// 'mixed' deck (plan 215) takes every source, kana through the
+// dictionary's ＋ since there is no kana tab.
+const SOURCE_FOR_TYPE = {
+  kanji: ['kanji'], vocab: ['vocab'], grammar: ['grammar'],
+  mixed: ['kanji', 'vocab', 'grammar', 'kana'],
+}
 
 function allowedSourcesFor(type) {
   return SOURCE_FOR_TYPE[type] ?? []
@@ -267,7 +272,7 @@ function BrowseBody({ deckId, deckType, session, onAdded, onClose, dock = false 
         {loading && <div className="import-preview__empty">{t.searching}</div>}
 
         {!loading && results.length === 0 && (
-          <div className="import-preview__empty">{t.noResults}</div>
+          <div className="import-preview__empty">{t.browseNoResults}</div>
         )}
 
         {!loading && results.length > 0 && (

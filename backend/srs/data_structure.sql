@@ -498,7 +498,10 @@ CREATE TABLE video_sessions (
     -- Retained so existing rows read back; nothing sets it any more.
     window_capped BOOLEAN NOT NULL DEFAULT FALSE,
     status        TEXT NOT NULL DEFAULT 'generating',  -- 'generating' | 'ready' | 'failed'
-    error         TEXT,
+    error         TEXT,                         -- why it failed, in English: for the logs
+    -- ... and as the stable snake_case code the client words in the
+    -- learner's language (plan 215). NULL on a row failed before it.
+    error_code    TEXT,
     sentences     JSONB,
     truncated     INTEGER NOT NULL DEFAULT 0,
     -- Optional YouTube id to embed alongside the transcript. Independent

@@ -89,7 +89,7 @@ export default function TierSelector({ domain, session, onSelect, color, tierSiz
   useFollowFocus(gridRef, selected, walked)
 
   const rowStyle = color ? { '--row-color': color } : undefined
-  const unit = domain === 'vocab' ? t.wordNoun : (t.kanjiUnit ?? 'kanji')
+  const unit = domain === 'vocab' ? t.wordNoun : t.kanjiUnit
   const visibleTiers = (tiers ?? []).filter(tr => tr.count > 0)
   const stop = visibleTiers.some(tr => tr.tier === selected) ? selected : visibleTiers[0]?.tier
 
@@ -101,7 +101,7 @@ export default function TierSelector({ domain, session, onSelect, color, tierSiz
       <div className="tier-picker__size">
         <Seg
           full
-          label={t.tierSizeLabel ?? 'Tier size'}
+          label={t.tierSizeLabel}
           value={tierSize}
           onChange={size => { playUi('click-mode-selection'); setTierSize(size) }}
           options={TIER_SIZE_OPTIONS.map(size => ({ key: size, label: String(size) }))}

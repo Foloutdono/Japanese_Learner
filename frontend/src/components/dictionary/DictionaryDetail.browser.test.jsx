@@ -50,7 +50,7 @@ globalThis.fetch = vi.fn(async url => ({
 
 const { DictionaryDetail, DictionaryLookupSheet } = await import('./DictionaryDetail')
 const { speakJapanese, playKana } = await import('../../lib/audio')
-const { apiFetch } = await import('../../lib/api')
+const { apiFetch, apiJson } = await import('../../lib/api')
 
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 
@@ -1800,3 +1800,96 @@ describe('the readings — each with the share of the words that use it', () => 
   })
 })
 
+
+// ── An example, broken down in the same sheet (plan 214) ─────────────
+// An entry's example sentence is a door: pressed, the sheet steps to
+// the sentence word by word (the local tier of /api/phrase/analyze,
+// saved nowhere), whose words and rules open into the same stack, ‹
+// walking back to the sentence and on to the entry.
+const BREAKFAST = {
+  text: '朝ご飯を食べました。', available: true,
+  tokens: [
+    { surface: '朝ご飯', start: 0, end: 3, reading: 'あさごはん', pos: 'noun', kanji_matches: [], grammar: [],
+      vocab_match: { level: 'N5', raw_id: 'vocab_N5_朝ご飯_あさごはん', entry: { kanji: '朝ご飯', kana: 'あさごはん', meaning: 'breakfast' }, stats: { status: 'not_started' } } },
+    { surface: 'を', start: 3, end: 4, reading: 'を', pos: 'particle', kanji_matches: [], vocab_match: null, grammar: [] },
+    { surface: '食べ', start: 4, end: 6, reading: 'たべ', pos: 'verb', kanji_matches: [], grammar: [],
+      vocab_match: { level: 'N5', raw_id: 'vocab_N5_食べる_たべる', entry: { kanji: '食べる', kana: 'たべる', meaning: 'to eat' }, stats: { status: 'not_started' } } },
+    { surface: 'ました', start: 6, end: 9, reading: 'ました', pos: 'auxiliary', kanji_matches: [], vocab_match: null, grammar: [] },
+    { surface: '。', start: 9, end: 10, reading: '', pos: 'symbol', kanji_matches: [], vocab_match: null, grammar: [] },
+  ],
+  grammar: [],
+}
+
+describe('an example, broken down (plan 214)', () => {
+  const BREAKFAST_ENTRY = { ...VOCAB, kanji: '朝ご飯', kana: 'あさごはん', meaning: 'breakfast', examples: [], senses: [],
+    furigana: [{ text: '朝', reading: 'あさ' }, { text: 'ご' }, { text: '飯', reading: 'はん' }], kanji_parts: [],
+    app_card: { source: 'vocab', level: 'N5', raw_id: 'vocab_N5_朝ご飯_あさごはん' } }
+
+  beforeEach(() => {
+    vi.mocked(apiFetch).mockImplementation(async url => ({
+      ok: true, status: 200,
+      json: async () => ({ results: [String(url).includes(encodeURIComponent('朝ご飯')) ? BREAKFAST_ENTRY : VOCAB] }),
+    }))
+    vi.mocked(apiJson).mockImplementation(async url => (url === '/api/phrase/analyze' ? BREAKFAST : {}))
+  })
+  afterEach(() => {
+    vi.mocked(apiJson).mockReset()
+    vi.mocked(apiJson).mockImplementation(async () => ({}))
+  })
+
+  it('opens each example as a door, and walks back from a word in it to the entry', async () => {
+    await page.viewport(390, 844)
+    const screen = await render(
+      <LangProvider>
+        <DictionaryLookupSheet term="食べる" category="vocab" session={{ access_token: 'tok' }} onClose={() => {}} />
+      </LangProvider>
+    )
+    await settle(120)
+    const doors = [...document.querySelectorAll('.dict-ex--door')]
+    // Both of the entry's examples: the one under its sense and the one
+    // whose sense is not listed.
+    expect(doors).toHaveLength(2)
+    expect(doors.every(d => d.tagName === 'BUTTON')).toBe(true)
+    expect(doors[0].getAttribute('aria-label')).toContain('朝ご飯を食べました。')
+    // A button holds phrasing content only: the lines are spans.
+    expect(doors[0].querySelector('div')).toBeNull()
+
+    doors[0].click()
+    await settle(120)
+    const call = vi.mocked(apiJson).mock.calls.find(([url]) => url === '/api/phrase/analyze')
+    const body = JSON.parse(call[2].body)
+    expect(body).toMatchObject({ phrase: '朝ご飯を食べました。', save: false, deep: false })
+    const frame = document.querySelector('.dict-sent')
+    expect(frame).not.toBeNull()
+    // The example's own translation under the line, and a row per word.
+    expect(frame.textContent).toContain('I ate breakfast.')
+    expect(frame.textContent).toContain('breakfast')
+    expect(frame.querySelector('.dict-plate__back')).not.toBeNull()
+    // Saved nowhere and bought from no model: no explanation offered.
+    expect(frame.querySelector('.bkd__explain-btn')).toBeNull()
+
+    // A word in it opens its entry on the same stack...
+    const row = [...frame.querySelectorAll('button')].find(b => b.textContent.includes('朝ご飯') && b.closest('.dict-sent') && !b.closest('.bkd-line, .anl-line'))
+    row.click()
+    await settle(120)
+    expect(document.querySelector('.dict-sent')).toBeNull()
+    expect(document.querySelector('.dict-plate').textContent).toContain('Breakfast')
+    // ...and ‹ walks back to the sentence, then to the entry.
+    document.querySelector('.dict-plate__back').click()
+    await settle(120)
+    expect(document.querySelector('.dict-sent')).not.toBeNull()
+    document.querySelector('.dict-plate__back').click()
+    await settle(120)
+    expect(document.querySelector('.dict-sent')).toBeNull()
+    expect(document.querySelectorAll('.dict-ex--door')).toHaveLength(2)
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth)
+    await screen.unmount()
+  })
+
+  it('prints an example as before where no shell can open one', async () => {
+    const screen = await render(<LangProvider><DictionaryDetail entry={VOCAB} /></LangProvider>)
+    expect(document.querySelector('.dict-ex--door')).toBeNull()
+    expect(document.querySelectorAll('div.dict-ex')).toHaveLength(2)
+    await screen.unmount()
+  })
+})

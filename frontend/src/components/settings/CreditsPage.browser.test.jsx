@@ -2,7 +2,8 @@ import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../../LangContext'
-import { ATTRIBUTIONS } from '../../domain/attributions'
+import { ATTRIBUTIONS, licenseLabel } from '../../domain/attributions'
+import fr from '../../locales/fr/index.js'
 import '../../index.css'
 
 const openExternal = vi.fn()
@@ -30,7 +31,9 @@ describe('the credits page', () => {
       expect(row.getAttribute('href')).toBe(ATTRIBUTIONS[i].url)
       expect(row.getAttribute('target')).toBe('_blank')
       expect(row.getAttribute('rel')).toContain('noreferrer')
-      expect(row.textContent).toContain(ATTRIBUTIONS[i].license)
+      // The lane is a French device (vite.config.js): terms of a source's
+      // own are said in French, a named licence as it is.
+      expect(row.textContent).toContain(licenseLabel(ATTRIBUTIONS[i], fr))
       expect(row.getBoundingClientRect().height).toBeGreaterThanOrEqual(60)
     })
   })

@@ -78,8 +78,8 @@ export default function ThemeSelector({ session, onSelect, color }) {
             value={query}
             onChange={e => setQuery(e.target.value)}
             onClear={() => setQuery('')}
-            placeholder={t.filterThemes ?? 'Filter…'}
-            aria-label={t.filterThemes ?? 'Filter themes'}
+            placeholder={t.filterThemes}
+            aria-label={t.filterThemes}
             clearLabel={t.cancel}
             count={`${visibleThemes.length} / ${labeled.length}`}
           />
@@ -93,7 +93,7 @@ export default function ThemeSelector({ session, onSelect, color }) {
         <Empty tone="error" message={t.loadError} />
       )}
       {themes && visibleThemes.length === 0 && (
-        <Empty message={t.themeNoResults ?? 'No matches'} />
+        <Empty message={t.themeNoResults} />
       )}
 
       {themes && visibleThemes.length > 0 && (

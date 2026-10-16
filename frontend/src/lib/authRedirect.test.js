@@ -90,9 +90,19 @@ describe('authRedirectMessage', () => {
     expect(en.oauthLinkingOff).toBeTruthy()
   })
 
-  it('falls back to Supabase’s own sentence, and only then to a shrug', () => {
+  // Plan 215: Supabase's `error_description` is English, written for a
+  // developer, and was the fallback here. A refusal worth explaining is
+  // named in lib/authErrors.js; anything else gets the generic line.
+  it('never falls back to Supabase’s own sentence', () => {
     expect(authRedirectMessage({ code: 'bad_oauth_state', description: 'Invalid state' }, en))
-      .toBe('Invalid state')
+      .toBe(en.genericError)
     expect(authRedirectMessage({ error: 'server_error' }, en)).toBe(en.genericError)
+  })
+
+  it('names a confirmation link that has expired', () => {
+    const back = parseAuthRedirect('https://app.test/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired')
+    // Not a learner backing out at Google: the code says what happened.
+    expect(isCancellation(back)).toBe(false)
+    expect(authRedirectMessage(back, en)).toBe(en.authLinkExpired)
   })
 })

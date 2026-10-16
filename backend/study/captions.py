@@ -35,15 +35,33 @@ logger = logging.getLogger(__name__)
 
 class CaptionParseError(Exception):
     """A subtitle file could not be parsed. Carries what failed, since
-    the caller (routes/video.py) shows this to the learner rather than
-    guessing at what went wrong."""
+    the caller (routes/video.py) tells the learner rather than guessing
+    at what went wrong.
+
+    Two halves (plan 215): `code`, a stable snake_case name the client
+    turns into a sentence in the learner's own language, and the English
+    message, which stays for the logs and for the rows stored before the
+    code existed. The message is never what a learner reads any more:
+    it was English on a French-first app, and some of them quote the
+    file back."""
+
+    def __init__(self, message: str, code: str = "parse_failed"):
+        super().__init__(message)
+        self.code = code
 
 
 class CaptionFetchError(Exception):
     """A caption fetch could not be completed. Deliberately NOT a
     subclass of CaptionParseError: nothing was malformed, so telling
     the learner their subtitles are broken would be a lie. The two are
-    caught together in routes/video.py and shown differently."""
+    caught together in routes/video.py and shown differently.
+
+    `code` as on CaptionParseError: what the client says, in the
+    learner's language; the message is for the logs."""
+
+    def __init__(self, message: str, code: str = "fetch_failed"):
+        super().__init__(message)
+        self.code = code
 
 
 # ── Markup stripping ──────────────────────────────────────────────
@@ -275,7 +293,7 @@ def _parse_vtt(content: str) -> list[dict]:
         if text:
             cues.append(_cue(start, end, text, words))
     if not cues and "-->" not in content:
-        raise CaptionParseError("No cue timestamps found in VTT content")
+        raise CaptionParseError("No cue timestamps found in VTT content", "no_cues")
     return cues
 
 
@@ -336,7 +354,7 @@ def _sniff_format(content: str) -> str:
         return "ass"
     if _SRT_ARROW_RE.search(head):
         return "srt"
-    raise CaptionParseError("Could not determine subtitle format from content")
+    raise CaptionParseError("Could not determine subtitle format from content", "unknown_format")
 
 
 def parse_track(content: str, filename: str) -> list[dict]:
@@ -360,7 +378,7 @@ def parse_track(content: str, filename: str) -> list[dict]:
         raise CaptionParseError(f"Failed to parse subtitle content: {e}") from e
 
     if not cues:
-        raise CaptionParseError("No usable cues found in subtitle content")
+        raise CaptionParseError("No usable cues found in subtitle content", "no_cues")
 
     return _merge_duplicate_consecutive(cues)
 
@@ -471,7 +489,8 @@ def fetch_youtube_track(video_id: str) -> list[dict]:
     proxy_config = _proxy_config()
     if proxy_config is None:
         raise CaptionFetchError(
-            "Fetching subtitles from a link is not enabled on this server."
+            "Fetching subtitles from a link is not enabled on this server.",
+            "link_fetch_disabled",
         )
 
     from youtube_transcript_api import YouTubeTranscriptApi
@@ -485,9 +504,9 @@ def fetch_youtube_track(video_id: str) -> list[dict]:
     try:
         available = api.list(video_id)
     except TranscriptsDisabled:
-        raise CaptionFetchError("This video has subtitles turned off.")
+        raise CaptionFetchError("This video has subtitles turned off.", "subtitles_disabled")
     except VideoUnavailable:
-        raise CaptionFetchError("This video is unavailable.")
+        raise CaptionFetchError("This video is unavailable.", "video_unavailable")
     except CouldNotRetrieveTranscript as e:
         # RequestBlocked and IpBlocked are both subclasses. Logged in
         # full because a rising rate of these is the signal that the
@@ -495,11 +514,12 @@ def fetch_youtube_track(video_id: str) -> list[dict]:
         # pointed back at the paths that always work.
         logger.warning("Caption fetch blocked for %s: %s", video_id, e)
         raise CaptionFetchError(
-            "YouTube refused the subtitle request for this video."
+            "YouTube refused the subtitle request for this video.",
+            "youtube_refused",
         )
     except Exception as e:  # pragma: no cover - defensive
         logger.exception("Unexpected error listing captions for %s", video_id)
-        raise CaptionFetchError(f"Could not reach YouTube: {e}")
+        raise CaptionFetchError(f"Could not reach YouTube: {e}", "youtube_unreachable")
 
     # Manual before generated. A human-written track is punctuated and
     # segmented by someone deciding what belongs on screen together,
@@ -515,7 +535,8 @@ def fetch_youtube_track(video_id: str) -> list[dict]:
         except NoTranscriptFound:
             raise CaptionFetchError(
                 "This video has no Japanese subtitles. Try another video, "
-                "or add a subtitle file yourself."
+                "or add a subtitle file yourself.",
+                "no_japanese_subtitles",
             )
 
     try:
@@ -523,11 +544,12 @@ def fetch_youtube_track(video_id: str) -> list[dict]:
     except CouldNotRetrieveTranscript as e:
         logger.warning("Caption download blocked for %s: %s", video_id, e)
         raise CaptionFetchError(
-            "YouTube refused the subtitle request for this video."
+            "YouTube refused the subtitle request for this video.",
+            "youtube_refused",
         )
     except Exception as e:  # pragma: no cover - defensive
         logger.exception("Unexpected error fetching captions for %s", video_id)
-        raise CaptionFetchError(f"Could not read the subtitles: {e}")
+        raise CaptionFetchError(f"Could not read the subtitles: {e}", "fetch_failed")
 
     cues = []
     for snippet in fetched:
@@ -545,7 +567,7 @@ def fetch_youtube_track(video_id: str) -> list[dict]:
         })
 
     if not cues:
-        raise CaptionFetchError("This video's Japanese subtitle track is empty.")
+        raise CaptionFetchError("This video's Japanese subtitle track is empty.", "subtitles_empty")
 
     # Auto-captions render as a ROLLING WINDOW, repeating most of each
     # neighbour's text. This is the function that exists for that; see
@@ -715,7 +737,8 @@ def parse_pasted_transcript(text: str) -> list[dict]:
     if not cues:
         raise CaptionParseError(
             "No timestamps found. Copy the whole transcript panel from YouTube "
-            "(each line should start with a time like 0:18)."
+            "(each line should start with a time like 0:18).",
+            "no_timestamps",
         )
 
     # Forgiving with input a human assembled by hand: a paste that got
@@ -729,7 +752,7 @@ def parse_pasted_transcript(text: str) -> list[dict]:
             cleaned.append(cue)
 
     if not cleaned:
-        raise CaptionParseError("The pasted transcript had timestamps but no text.")
+        raise CaptionParseError("The pasted transcript had timestamps but no text.", "no_cues")
 
     for index, cue in enumerate(cleaned):
         following = cleaned[index + 1]["start"] if index + 1 < len(cleaned) else None

@@ -167,12 +167,12 @@ export default function ProfileScreen({ session }) {
     // 時間割 (plan 202): the door to the agenda, under the tickets'.
     agenda: <AgendaDoor t={t} navigate={navigate} blocks={agenda} />,
     // Three figures: the reviews, the retention, the best perfect run.
-    records: <Records profile={profile} t={t} />,
-    ledger: stats && <LineLedger stats={stats} t={t} navigate={navigate} />,
+    records: <Records profile={profile} t={t} lang={lang} />,
+    ledger: stats && <LineLedger stats={stats} t={t} lang={lang} navigate={navigate} />,
     // Statistics and Settings — the phone's; the desk's rail hangs both
     // under the lit gate.
     doors: <ProfileDoors t={t} navigate={navigate} />,
-    board: <Banzuke all={leaderboard} week={weekBoard} t={t} both={desk} />,
+    board: <Banzuke all={leaderboard} week={weekBoard} t={t} lang={lang} both={desk} />,
   }
 
   return (

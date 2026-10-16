@@ -34,14 +34,14 @@ export function MineButton({ mining, kind, disabled, disabledReason, label, succ
   if (disabled) {
     return (
       <span className="analysis-mine-btn analysis-mine-btn--disabled" title={disabledReason}>
-        {label ?? (t.mineToDeck ?? 'Mine')}
+        {label ?? t.mineToDeck}
       </span>
     )
   }
 
   const words = act.addedOnce
-    ? (t.addToAnotherDeck ?? 'Add to another deck')
-    : (ariaLabel ?? label ?? (t.mineToDeck ?? 'Mine'))
+    ? t.addToAnotherDeck
+    : (ariaLabel ?? label ?? t.mineToDeck)
 
   return (
     <>

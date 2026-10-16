@@ -19,10 +19,12 @@ from study.card_lookup import (
     find_segments_in_text, attach_stats_to_segments, VOCAB_STATUS_MODES,
     vocab_card_id_for_word,
 )
-from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, gloss as grammar_gloss, grammar_to_id
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, gloss as grammar_gloss, grammar_to_id, id_for
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content import vocab_extras
 from content import reading_sentences
+from content import jmdict_fr
+from study.grammar_examples import structure_text
 from study import difficulty
 from study.analysis import analyze_with_glosses, attach_user_state
 from study.answer_balance import balance_answers, position_skew
@@ -562,6 +564,16 @@ def _pick_words_mastery(user_id: str, count: int) -> list[tuple[str, str, str | 
     return picked
 
 
+def _corpus_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None,
+                   lang: str) -> dict:
+    """A Tatoeba sentence as a phrase, translated into the learner's
+    language where the French layer has it (content/jmdict_fr.py, plan
+    210) and in the corpus's English otherwise -- `translation_lang`
+    says which, as it always has."""
+    text, text_lang = jmdict_fr.translation(jp, en, lang)
+    return _finish_phrase(jp, text, kanji, kana, level, translation_lang=text_lang)
+
+
 def _finish_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None,
                    grammar: str | None = None, translation_lang: str = "en") -> dict:
     """
@@ -612,6 +624,8 @@ def _finish_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None,
     # guessed one.
     if grammar:
         phrase["grammar"] = grammar
+        # Its card id, so the tag opens the point's lesson (plan 213).
+        phrase["grammar_id"] = id_for(grammar)
     return phrase
 
 
@@ -659,11 +673,12 @@ def get_reading_batch(
     NOTE on `lang`: the curated bank carries every sentence in English
     and French (plan 192), and a curated phrase comes back in `lang`
     when the bank holds it. Real example sentences (JMdict/Tatoeba-
-    sourced) only carry an English translation in this app's data —
-    there's no French/Spanish/etc. translation layer for them — so those
-    come back with "translation_lang": "en" regardless of `lang`, and
-    the frontend labels the translation by `translation_lang` rather
-    than silently implying it's in the UI language.
+    sourced) carry the corpus's English, and since plan 215 a French
+    line from content/jmdict_fr.py for the ones the French layer holds
+    (every sentence a deck word or a JMdict word shows); one without
+    comes back with "translation_lang": "en", which the frontend marks
+    on the element's `lang` rather than implying it is in the UI
+    language.
 
     NOTE on reading_log.phase: it now stores a compact label from
     _source_label() ("level:N3" / "freq:vocab:1" / "freq:vocab:1:500"
@@ -713,7 +728,7 @@ def get_reading_batch(
             word_pool = _pick_words_level(level, _LEVEL_CANDIDATE_SCAN_CAP)
             picked = _pick_level_appropriate_phrases(word_pool, level, count - len(phrases))
             phrases.extend(
-                _finish_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl)
+                _corpus_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl, lang)
                 for kanji, kana, lvl, example in picked
             )
     elif source == "frequency":
@@ -736,7 +751,7 @@ def get_reading_batch(
                     break
                 picked = _pick_level_appropriate_phrases(words, lvl, remaining, scan_cap=len(words))
                 phrases.extend(
-                    _finish_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl2)
+                    _corpus_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl2, lang)
                     for kanji, kana, lvl2, example in picked
                 )
                 remaining = count - len(phrases)
@@ -747,11 +762,11 @@ def get_reading_batch(
                 example = vocab_extras.pick_random_example(kanji, kana, "", "en")
                 if example is None:
                     continue
-                phrases.append(_finish_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl))
+                phrases.append(_corpus_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl, lang))
     elif source == "mastery":
         picked = _pick_words_mastery(user_id, count)
         phrases = [
-            _finish_phrase(jp, en, kanji, kana, lvl)
+            _corpus_phrase(jp, en, kanji, kana, lvl, lang)
             # `segments` here is only the internal gating result used to
             # verify the sentence is fully learning/mastered vocabulary
             # (see _pick_words_mastery) — not sent to the client anymore.
@@ -1644,7 +1659,7 @@ def _call_llm_comprehension(level: str, lang: str, *, grammar_seeds: list[dict] 
         data["grammar_points"] = [
             {
                 "pattern": p["pattern"],
-                "structure": p.get("structure", ""),
+                "structure": structure_text(p, lang),
                 "meaning": grammar_gloss(p, lang),
                 "level": level,
                 "raw_id": grammar_to_id(p, level),

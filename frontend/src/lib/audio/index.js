@@ -11,6 +11,7 @@
 //   playback.js   one-shots: kana, sfx, ui, announcements.
 //   ambiance.js   the looping track, crossfades and tab visibility.
 //   speech.js     TTS, which the browser plays outside our graph.
+//   reveal.js     whether a card speaks its answer once revealed.
 //
 // The export list is deliberately only what the app actually calls —
 // a barrel that re-exports everything each module happens to define
@@ -23,6 +24,7 @@
 import './mixer'
 
 export { SOUND_CATEGORIES, DEFAULT_VOLUMES, toggleMute, useMuted, setVolume, useVolumes } from './settings'
+export { isSpeakOnReveal, toggleSpeakOnReveal, useSpeakOnReveal } from './reveal'
 export { preload } from './context'
 // playClick/playToggle come from chimes, not playback: chimes is the
 // station's vocabulary — the names the app calls moments by — and
@@ -34,7 +36,7 @@ export {
   playArrival, playPlatformChime, playBoardFlap, playDayClear, playMilestone,
 } from './chimes'
 export { startAmbiance, stopAmbiance } from './ambiance'
-export { speakJapanese, speakLine, stopSpeaking, voicedUrl } from './speech'
+export { speakJapanese, speakSentence, speakLine, stopSpeaking, voicedUrl } from './speech'
 // The palette itself is not part of the app's own surface — nothing
 // but the /dev/sounds screen picks a voice, and it imports voices.js
 // directly. Only `playVoice` is exported here, for a caller that

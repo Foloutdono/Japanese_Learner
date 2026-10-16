@@ -152,10 +152,22 @@ if (typeof window !== 'undefined') whenUnlocked(primeDeviceSpeech)
 // way it stops an utterance.
 let playing = null
 
-function playServerClip(text) {
+// A word's clip, from /api/tts.
+function wordClipPath(text) {
+  return `/api/tts?text=${encodeURIComponent(text)}`
+}
+
+// A sentence's clip, from the grammar catalogue's reader (plan 187d):
+// the one server voice for a sentence, and only for a sentence the
+// catalogue says -- an example, a twist, a Choisir question.
+function sentenceClipPath(text) {
+  return `/api/grammar/audio?text=${encodeURIComponent(text)}&who=reader`
+}
+
+function playServerClip(text, path = wordClipPath(text)) {
   // Same-origin on the web, the Vercel origin in the native shell --
   // api() is the one place that knows (lib/origin.js, ADR 0008).
-  const url = api(voicedUrl(`/api/tts?text=${encodeURIComponent(text)}`))
+  const url = api(voicedUrl(path))
   getBuffer(url)
     .then(buffer => {
       if (buffer) playing = playBuffer(buffer, 'tts', text)
@@ -167,14 +179,14 @@ function playServerClip(text) {
     })
 }
 
-function speakOnDevice(text) {
+function speakOnDevice(text, fallbackPath) {
   const synth = synthOf()
   if (!synth) return false
   const voice = japaneseVoice()
   if (!voice) return false
 
   try {
-    return startUtterance(synth, voice, text)
+    return startUtterance(synth, voice, text, fallbackPath)
   } catch {
     // A speech API that throws while being set up is one to stop
     // asking: a WebView can expose `speechSynthesis` with nothing
@@ -185,7 +197,7 @@ function speakOnDevice(text) {
   }
 }
 
-function startUtterance(synth, voice, text) {
+function startUtterance(synth, voice, text, fallbackPath) {
   // Cancel only when there is something to cancel. cancel() followed
   // by speak() in the same tick is a documented way to get silence out
   // of Safari, and this used to do it before every single utterance.
@@ -206,7 +218,7 @@ function startUtterance(synth, voice, text) {
     settled = true
     deviceSpeechBroken = true
     try { synth.cancel() } catch { /* nothing to stop */ }
-    playServerClip(text)
+    playServerClip(text, fallbackPath)
   }
   // Neither `start` nor `error` inside the window: the browser took the
   // utterance and did nothing with it, which is how iOS says no. Take
@@ -227,6 +239,20 @@ export function speakJapanese(text) {
   if (!spoken || isMuted()) return
   if (!isLoneKana(spoken) && !deviceSpeechBroken && speakOnDevice(spoken)) return
   playServerClip(spoken)
+}
+
+// ── A sentence (on a grammar, reading or translation card) ──────
+// The same two ways as a word, in the same order, with one difference:
+// the server's fallback is the grammar catalogue's reader, not /api/tts,
+// which declines a sentence. A sentence neither the device nor the
+// catalogue can say (a reading sentence on a phone with no Japanese
+// voice) is silence, as an unknown word is. Not cut at its commas the
+// way spokenForm cuts a packed reading: a sentence's 、 is a pause.
+export function speakSentence(text) {
+  const spoken = typeof text === 'string' ? text.trim() : ''
+  if (!spoken || isMuted()) return
+  if (!deviceSpeechBroken && speakOnDevice(spoken, sentenceClipPath(spoken))) return
+  playServerClip(spoken, sentenceClipPath(spoken))
 }
 
 export function stopSpeaking() {

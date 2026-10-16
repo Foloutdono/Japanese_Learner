@@ -13,6 +13,8 @@ import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import RatingBar from '../components/study/RatingBar'
 import { RunStreak } from '../components/study/RunStreak'
+import SpeakToggle from '../components/study/SpeakToggle'
+import { useRevealSpeech } from '../hooks/useRevealSpeech'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { BreakdownSide, LineSide } from '../components/analysis/BreakdownSide'
 import { useDesk } from '../hooks/useDesk'
@@ -26,7 +28,7 @@ import { AskEntry } from '../components/study/AskPage'
 import { askTarget } from '../domain/ask'
 import { startTally, countReview } from '../stores/runTally'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
-import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
+import { vocabLookup, grammarLookup, pointLookup, docksInColumn, lookupKey } from '../components/analysis/lookup'
 import { tierLabelFor } from '../domain/tiers'
 import { paceFactor } from '../domain/readingPace'
 import { useReadingPace } from '../stores/readingPace'
@@ -115,6 +117,9 @@ export default function ReadingRun({ session }) {
   const lines = useRunLines(session, { held: Boolean(lookup) })
   // 問 (plan 131): a question about the sentence, once graded, on the desk.
   const asking = useAsk(session, 'reading')
+  // The answer is in: the sentence it was read from is said, unless the
+  // speak-on-reveal switch in the head is off.
+  useRevealSpeech(data?.phrase, stage === 'feedback')
 
   const [analysis, setAnalysis] = useState(null)
   const [analysisLoading, setAnalysisLoading] = useState(false)
@@ -557,6 +562,9 @@ function SessionView({
     onExitLookup: closeLookup,
     session,
   }
+  // The card's own doors (plan 213): the point's tag, and each word missed.
+  const point = pointLookup(data?.grammar_id, data?.grammar, analysis)
+  const docked = docksInColumn(desk, lines.opened, graded, analysis)
 
   return (
     <StudyStage
@@ -571,7 +579,7 @@ function SessionView({
       // On the desk the score is the run panel's figures (plan 129).
       remaining={desk ? undefined : `${score.correct} / ${score.total}`}
       pass={false}
-      aside={<RunStreak />}
+      aside={<><RunStreak /><SpeakToggle variant="head" /></>}
       toast={fare.toast}
       onToastDone={fare.toastDone}
       records
@@ -659,6 +667,8 @@ function SessionView({
                 answer={answer}
                 accuracy={feedback.accuracy}
                 point={data.grammar}
+                onPoint={point ? () => setLookup(point) : null}
+                onOpen={setLookup}
                 t={t}
               />
             )}
@@ -741,7 +751,7 @@ function SessionView({
 
       {/* On the desk a door in the docked breakdown opens in the side
           column (BreakdownSide → SideLookup, plan 115). */}
-      {lookup && !desk && (
+      {lookup && !docked && (
         <DictionaryLookupSheet key={lookupKey(lookup)} {...lookup} session={session} onClose={closeLookup} />
       )}
     </StudyStage>

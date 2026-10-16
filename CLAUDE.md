@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **214**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **217**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -130,6 +130,15 @@ runtime purpose.
   besides its grammar point, its focus one of them, its point found by the
   detector and a French translation (`row_problems`). Draft new rows
   through `python -m scripts.reading_bank_report --check FILE.json`.
+- **A French learner reads French end to end.** Every new learner-facing
+  text carries its French beside its English: a content field has its
+  `fr` (or `structure_fr`, the reading bank's `fr`, the dictation bank's
+  `fr`), a screen string its locale key in both tables, and an error a
+  screen prints is a code mapped to a locale key — never a server's
+  English `detail`, a third party's message or an API path printed raw.
+  JMdict and Tatoeba text has its French in `datas/vocab/jmdict_fr.sqlite3`
+  (plan 215); a pool word is glossed from it (`jmdict_fr.pool_meaning`),
+  never from `VOCAB_FR`, which is the course's and keyed by written form.
 - **A width change is held on both sides.** A desk change keeps the phone's
   DOM unchanged (`src/deskfree.phone.test.jsx`), and the short desk
   (1280×600, the `short` lane) is checked too. A phone bug fixed gets its own
@@ -371,6 +380,20 @@ the export) and commit `datas/vocab/vocab_served.json`,
 `vocab_frequency.json` and `vocab_jmdict.sqlite3` with it: `tests/test_vocab_deck.py` fails
 on an id that left the deck without a `MOVES` line, and on a served id
 the snapshot has not seen.
+
+The French layer over JMdict (plan 215, `content/jmdict_fr.py`) is its
+own small SQLite file, `datas/vocab/jmdict_fr.sqlite3`: the French of the
+deck's dictionary senses, of the Tatoeba sentences the dictionary and
+reading/translation practice serve, and a one-line gloss for the ~20k
+commonest pool words. It sits beside `vocab_jmdict.sqlite3` rather than
+in it, so a correction never re-commits the 76 MB pool. To correct a
+line, dump it to JSON, edit, rebuild (the JSON is gitignored):
+
+```bash
+python -m scripts.build_jmdict_fr --export   # -> datas/vocab/fr_source/
+python -m scripts.build_jmdict_fr            # -> datas/vocab/jmdict_fr.sqlite3
+python -m scripts.build_kanji_db --french-only  # kanji_meanings_fr.json into kanji.sqlite3
+```
 
 Two things are worth knowing before reaching for any of them:
 

@@ -493,10 +493,14 @@ const Fixture = () => (
             <span className="pcard-well__meter"><i style={{ inlineSize: '79%' }} /></span>
           </div>
           <ul className="pcard-misses">
-            <li className="pcard-missed">
-              <b className="pcard-missed__jp">少し</b>
-              <span className="pcard-missed__kana pr-missed-kana">すこし</span>
-              <span className="pcard-missed__en pr-missed-en">a little</span>
+            <li className="pcard-misses__item">
+              <button type="button" className="pcard-missed pcard-missed--door">
+                <span className="pcard-missed__word">
+                  <b className="pcard-missed__jp">少し</b>
+                  <span className="pcard-missed__kana pr-missed-kana">すこし</span>
+                </span>
+                <span className="pcard-missed__en pr-missed-en">a little</span>
+              </button>
             </li>
           </ul>
           <ol className="rvw__fixes">

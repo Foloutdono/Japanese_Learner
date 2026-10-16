@@ -21,7 +21,7 @@ import { CardTransition } from '../components/study/CardTransition'
 import PromptCard from '../components/study/PromptCard'
 import ReviewDeck from '../components/study/ReviewDeck'
 import SessionError from '../components/study/SessionError'
-import { playKana, kanaSound } from '../lib/audio'
+import { playKana, kanaSound, isSpeakOnReveal } from '../lib/audio'
 import {
   MODES as STUDY_MODES, RENDER, HINTS, FAST_REVIEW, modeLabel,
 } from '../domain/studyModes'
@@ -167,21 +167,21 @@ export default function KanaRun({ session }) {
     setSelected(choice)
     setAnswered(true)
     setShowRating(true)
-    playKana(kanaSound(card))
+    if (isSpeakOnReveal()) playKana(kanaSound(card))
   }
 
   function onFlashcardReveal() {
     if (answered) return
     setAnswered(true)
     setShowRating(true)
-    playKana(kanaSound(card))
+    if (isSpeakOnReveal()) playKana(kanaSound(card))
   }
 
   function onDrawValidate() {
     if (answered) return
     setAnswered(true)
     setShowRating(true)
-    playKana(kanaSound(card))
+    if (isSpeakOnReveal()) playKana(kanaSound(card))
   }
 
   // write_romaji. The comparison in lib/romaji is FEEDBACK only — the
@@ -191,7 +191,7 @@ export default function KanaRun({ session }) {
     if (answered || !typed.trim()) return
     setAnswered(true)
     setShowRating(true)
-    playKana(kanaSound(card))
+    if (isSpeakOnReveal()) playKana(kanaSound(card))
   }
 
   if (!valid) return <Navigate replace to={selectedSet ? platforms : '/learn/kana'} />
@@ -308,6 +308,7 @@ export default function KanaRun({ session }) {
               active={activeHints}
               onToggle={toggleHint}
               disabled={gates.locked}
+              speaks
             />
             <CardTransition
               className="specimen-card-stage"

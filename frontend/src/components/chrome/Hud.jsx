@@ -97,7 +97,7 @@ export function GoalRing({ status, model, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      aria-label={[t.hudStatusLabel, status.goalLevel, `${pct} %`, panel.days == null ? drift : (panel.status === 'ahead' ? t.cardDriftAhead(panel.days) : t.cardDriftLate(panel.days))].filter(Boolean).join(' · ')}
+      aria-label={[t.hudStatusLabel, status.goalLevel, t.percent(pct), panel.days == null ? drift : (panel.status === 'ahead' ? t.cardDriftAhead(panel.days) : t.cardDriftLate(panel.days))].filter(Boolean).join(' · ')}
       className={`hud__status hud__status--${panel.status} hud__status--ring`}
       data-guide="hud.status"
     >
@@ -109,7 +109,7 @@ export function GoalRing({ status, model, onClick }) {
         <text className="hud__ring-dest" x="17" y="17.5" textAnchor="middle" dominantBaseline="middle">{status.goalLevel}</text>
       </svg>
       <span className="hud__ring-figs" aria-hidden="true">
-        <b>{pct} %</b>
+        <b>{t.percent(pct)}</b>
         <span className="hud__status-word">{drift}</span>
       </span>
     </button>

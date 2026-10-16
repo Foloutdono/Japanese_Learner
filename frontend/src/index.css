@@ -1293,8 +1293,11 @@
    is gone below 1100px and the stage is where the Sentence is. A
    44px round target, wearing the rail pin's own + / ✓ — one pin, one
    pair of glyphs, wherever it sits.
-   Pressed, it spends the seal's ink exactly as the stamp does. */
-.anl-head__keep {
+   Pressed, it spends the seal's ink exactly as the stamp does.
+   歌 (plan 215), the song's decks, is the same round door beside it,
+   with no pressed state: it opens a sheet. */
+.anl-head__keep,
+.anl-head__song {
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -1308,14 +1311,20 @@
   color: var(--text-secondary);
   transition: color 0.15s ease, border-color 0.15s ease;
 }
+/* The two stand together at the head's trailing end, whatever spreads
+   the head's other parts apart. */
+.anl-head__song { margin-left: auto; }
 .anl-head__keep:hover,
-.anl-head__keep:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); }
+.anl-head__keep:focus-visible,
+.anl-head__song:hover,
+.anl-head__song:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); }
 .anl-head__keep--on {
   border-color: color-mix(in srgb, var(--stamp-ink) 55%, transparent);
   color: color-mix(in srgb, var(--stamp-ink) 65%, var(--text-primary));
 }
 @media (prefers-reduced-motion: reduce) {
-  .anl-head__keep { transition: none; }
+  .anl-head__keep,
+  .anl-head__song { transition: none; }
 }
 /* The Kept stamp: the seal's ink, as a caption pill. */
 .anl-kept {
@@ -1724,6 +1733,20 @@
   gap: var(--sp-3);
   padding-block: var(--sp-3);
 }
+/* ── 歌 — the song sheet (plan 215) ──
+   The two halves of the song as chips (its words, its lines), the name,
+   the one filled action; once made, the picker's own row, the door to
+   the deck. */
+.anl-song {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.anl-song__error { margin: 0; color: color-mix(in srgb, var(--danger) 50%, var(--text-primary)); }
+.anl-song__made .anl-song__error { padding: var(--sp-4); }
+a.anl-song__deck { color: var(--text-primary); text-decoration: none; }
+a.anl-song__deck:hover .picker-row__name,
+a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; text-underline-offset: 3px; }
 
 /* There is no rule for the rail under 1100px because there is no rail
    under 1100px (2026-09-11). It used to stack above the stage as a
@@ -10345,6 +10368,10 @@ textarea:focus-visible {
   color: color-mix(in srgb, var(--accent2) 60%, var(--text-primary));
 }
 .study-assist__toggle:disabled { opacity: 0.4; cursor: default; }
+/* The speak-on-reveal switch (SpeakToggle) stands at the end of the row
+   as the same pill drawn as an icon alone: the pill's block padding on
+   every side but its inline one, a rung under the labelled pills'. */
+.study-assist__toggle--icon { padding-inline: var(--sp-3); }
 /* A hand-written card has no distractors to offer, so it says why
    rather than showing a control that would do nothing. */
 .study-assist__na {
@@ -13109,6 +13136,25 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .pcard-tag__used { flex: none; color: color-mix(in srgb, var(--success) 60%, var(--text-primary)); }
 .pcard-tag__used--x { color: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); }
+/* The tag as a door to the point's lesson (plan 213): the same tag, a
+   chevron at its end saying where it leads, its edge's pigment taking
+   the border on hover as a breakdown's rule card does. */
+.pcard-tag--door {
+  max-width: 100%;
+  min-height: 44px; /* a hit target, not a spacing rung */
+  background: none;
+  color: inherit;
+  font-weight: 400;
+  text-align: left;
+  cursor: pointer;
+}
+.pcard-tag--door .pcard-tag__jp { overflow-wrap: anywhere; }
+.pcard-tag--door:hover {
+  filter: none;
+  border-color: var(--line-color, var(--accent2));
+}
+.pcard-tag--door:active { background: var(--chip-bg); }
+.pcard-tag__go { flex: none; color: var(--text-secondary); }
 /* The sentence, leading. Room in its leading for the readings over it;
    a line breaks between phrases where the browser can find them
    (auto-phrase), never inside a word it knows. */
@@ -13336,41 +13382,84 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-variant-numeric: tabular-nums;
 }
 /* The words missed, under the well (A2.2): each the word, its reading
-   and its meaning, the miss ink as its edge. */
+   and its meaning, the miss ink as its edge. Stacked, not side by side
+   (plan 213): the word and its reading on one line that wraps where it
+   must, the meaning under them across the tile's whole width -- two
+   columns inside a tile two to a phone's row left a long meaning a
+   column of single words beside the word. A row's tiles stand as tall
+   as its tallest, and a meaning past two lines is the entry's to say. */
 .pcard-misses {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem), 1fr));
   gap: var(--sp-2);
   margin: 0;
   padding: 0;
   list-style: none;
 }
+.pcard-misses__item {
+  display: flex;
+  min-width: 0;
+}
 .pcard-missed {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: 0 var(--sp-3);
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--sp-1);
   padding: var(--sp-2) var(--sp-3) var(--sp-2) var(--sp-4);
+  background: none;
   border: 1px solid var(--border);
   border-radius: var(--r-card);
   box-shadow: inset 3px 0 0 color-mix(in srgb, var(--danger) 70%, transparent);
+  color: inherit;
+  font-weight: 400;
+  text-align: left;
+}
+/* A door to the word's entry, or a particle's point. */
+.pcard-missed--door {
+  min-height: 44px; /* a hit target, not a spacing rung */
+  cursor: pointer;
+}
+.pcard-missed--door:hover {
+  filter: none;
+  border-color: color-mix(in srgb, var(--danger) 70%, transparent);
+}
+.pcard-missed--door:active { background: var(--chip-bg); }
+.pcard-missed--door:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: -2px;
+}
+.pcard-missed__word {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--sp-2);
+  max-width: 100%;
 }
 .pcard-missed__jp {
-  grid-row: span 2;
   font-family: var(--font-jp);
   font-size: var(--fs-title);
   font-weight: 600;
   line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 .pcard-missed__kana {
   font-family: var(--font-jp);
   font-size: var(--fs-sm);
   color: var(--text-secondary);
+  overflow-wrap: anywhere;
 }
 .pcard-missed__en {
+  display: -webkit-box;
+  max-width: 100%;
+  overflow: hidden;
   font-size: var(--fs-sm);
   line-height: 1.35;
   overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 /* The notes under the sentence (translation, composition), in the
    group with it, so a short review stands under what it reviews rather
@@ -15950,6 +16039,41 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-size: var(--fs-sm);
   line-height: 1.5;
   color: var(--text-secondary);
+}
+/* The example as a door to its breakdown (plan 214): the same lines,
+   a chevron at the end saying it leads somewhere, a wash under the
+   press. Its box reaches past the lines by a rung so the text stays on
+   the column it is printed on. */
+.dict-ex--door {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--sp-3);
+  width: calc(100% + 2 * var(--sp-3));
+  margin: 0 calc(-1 * var(--sp-3));
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-card);
+  font-weight: 400;
+  text-align: left;
+}
+.dict-ex--door:hover { filter: none; background: var(--chip-bg); }
+.dict-ex--door:active { background: var(--chip-bg); }
+.dict-ex--door .dict-ex__tr { display: block; }
+.dict-ex__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+.dict-ex__go { flex: none; color: var(--text-secondary); }
+
+/* An example broken down, in the lookup's stack (plan 214): the
+   entry's head with its ‹ and ✕, then the breakdown's rows. */
+.dict-sent__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5) var(--sp-8);
 }
 
 /* ── How it's written ──────────────────────────────────────
@@ -26666,7 +26790,8 @@ button.brd-stn { cursor: pointer; }
    than its point says so at the right (GrammarLesson's registerTag):
    a ring in the ink, as a chip is drawn, never a fill. */
 .gl-block--examples .dict-examples { gap: 0; }
-.gl-block--examples .dict-ex {
+.gl-block--examples .dict-ex,
+.gl-block--examples .dict-ex--door .dict-ex__body {
   display: grid;
   grid-template-columns: var(--sp-5) minmax(0, 1fr) auto;
   grid-template-areas:
@@ -26674,7 +26799,17 @@ button.brd-stn { cursor: pointer; }
     ". tr tr";
   align-items: baseline;
   column-gap: var(--sp-3);
-  padding-block: var(--sp-3);
+}
+.gl-block--examples .dict-ex { padding-block: var(--sp-3); }
+/* A sentence that opens its breakdown (plan 214): the row is the door,
+   its lines the grid above, the chevron at its end. */
+.gl-block--examples .dict-ex--door {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+  padding-inline: 0;
+  border-radius: 0;
 }
 .gl-block--examples .dict-ex:first-child { padding-top: 0; }
 .gl-block--examples .dict-ex + .dict-ex { border-top: 1px solid var(--surface-line); }
