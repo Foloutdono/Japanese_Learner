@@ -15,7 +15,8 @@
 //   --format short    the short: 9:16, under a minute (YouTube Shorts, Reels, TikTok)
 //   --music PATH      the bed: a recorded track's path, its credit file beside it
 //                     (music/README.md; music/cool-vibes.mp3 by default), or
-//                     trio or lofi, played by long_video_audio.py (plan 219)
+//                     trio or lofi, played by long_video_audio.py (plan 219),
+//                     or none: no music at all (plan 220)
 //   --carousel RECIPE a carousel of the studio as a short video, voiced: the
 //                     studio's "Copy the command" writes the recipe (short.js)
 //
@@ -57,7 +58,7 @@ for (const d of [OUT, CACHE, WORK, join(WORK, 'sfx')]) mkdirSync(d, { recursive:
 // without its credit file beside it, whose credit the video's description
 // prints (music/README.md); or one long_video_audio.py plays (trio, lofi).
 // The owner's pick is the default: "Cool Vibes", Kevin MacLeod, CC BY 4.0.
-const PLAYED = ['trio', 'lofi']
+const PLAYED = ['trio', 'lofi', 'none']
 const DEFAULT_MUSIC = join(HERE, 'music', 'cool-vibes.mp3')
 let music = args.music ? String(args.music) : DEFAULT_MUSIC
 let musicCredit = null
@@ -82,6 +83,8 @@ if (!PLAYED.includes(music)) {
     music = 'trio'
   }
 }
+// No music, no music credit: the description names none.
+if (music === 'none') musicCredit = false
 const python = existsSync(join(BACKEND, '.venv/bin/python')) ? join(BACKEND, '.venv/bin/python') : 'python3'
 const log = (...a) => console.log(new Date().toISOString().slice(11, 19), ...a)
 

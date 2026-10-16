@@ -30,7 +30,8 @@ piano comping over a walking bass and brushes (`--music trio`, the
 default) or the same tune over a lo-fi beat (`--music lofi`), nothing
 recorded, so the video owes no one for it; or a recorded track whose
 licence allows it (`--music PATH`, plan 219b), credited in the video's
-description. The music steps back while a
+description; or none (`--music none`, plan 220): the voice and the
+app's sounds alone. The music steps back while a
 line is said.
 
 It needs the voice engine (VOICEVOX_URL, CLAUDE.md "Speech") for
@@ -327,6 +328,8 @@ def bed(seconds: float, style: str = STYLE):
     """The bed, stereo: (samples, 2) at RATE, as loud as BED_RMS. `style`
     is one of STYLES, played here, or the path of a recorded track."""
     import numpy as np
+    if style == "none":
+        return np.zeros((int(seconds * RATE), 2), dtype=np.float32)
     if style not in STYLES:
         return recorded(Path(style), seconds)
     S = STYLES[style]
@@ -535,10 +538,10 @@ def main() -> int:
     m.add_argument("--cache", type=Path, required=True)
     m.add_argument("--sfx", type=Path, required=True)
     m.add_argument("--out", type=Path, required=True)
-    m.add_argument("--music", default=STYLE, help=f"the bed: {', '.join(sorted(STYLES))} (played here, plan 219) or a recorded track's path (219b)")
+    m.add_argument("--music", default=STYLE, help=f"the bed: {', '.join(sorted(STYLES))} (played here, plan 219), a recorded track's path (219b), or none (220)")
     args = ap.parse_args()
-    if args.step == "mix" and args.music not in STYLES and not Path(args.music).is_file():
-        ap.error(f"--music: {args.music} is neither {' nor '.join(sorted(STYLES))} nor a file")
+    if args.step == "mix" and args.music != "none" and args.music not in STYLES and not Path(args.music).is_file():
+        ap.error(f"--music: {args.music} is neither none, {' nor '.join(sorted(STYLES))} nor a file")
     if args.step == "voice":
         return voice(args.cues, args.cache, args.out)
     return mix(args.timeline, args.cache, args.sfx, args.out, args.music)

@@ -20,12 +20,12 @@
 // reveal lands on its voice), and `drawLong` draws the frame at any
 // second and returns a key that is the same for two frames that look
 // the same, so the renderer (long/render.mjs) draws each still once.
-import { K, alpha, drawSentence, fit, font, hasKanji, layoutSentence, mark, measure, noShadow, palette, paragraphH, roundel, rrect, text } from './draw.js'
-import { weldIf } from './strings.js'
+import { FORMATS, K, alpha, drawSentence, fit, font, hasKanji, layoutSentence, mark, measure, noShadow, palette, paragraphH, roundel, rrect, text } from './draw.js'
+import { SITE, weldIf } from './strings.js'
+import { videoCta } from './funnel.js'
 import { gloss, unpack } from './common.js'
 import { plan as sourcePlan, itemsOf } from './sources.js'
 import { particleLabel } from './explain.js'
-import * as A from './app.js'
 
 export const WIDE = { id: 'wide', w: 1920, h: 1080 }
 // A short (plan 214): the same video standing, under a minute, for
@@ -68,8 +68,8 @@ const SAY = {
     rule: 'What it does', use: 'How it is used', example: 'Example', careful: 'Watch out', compare: 'Don’t mix it up', twist: 'A twist', scene: 'In a conversation', quizHead: 'Your turn', recap: 'Recap',
     score: (n, of) => n === of ? `That’s all ${of}. How many did you get?` : `Score check: ${n} down, ${of - n} to go.`,
     comment: 'Comment your score.',
-    outro: 'Keep going on Tsuji', outroSub: 'The kana line, free for good · No ads, no trackers', depart: 'Depart',
-    chapters: { intro: 'Intro', outro: 'Keep going', score: 'Score check', final: 'Your score' },
+    outro: 'Keep going on Tsuji',
+    chapters: { intro: 'Intro', outro: 'Keep going', score: 'Score check', final: 'Your score', cta: 'More on Tsuji' },
     voices: 'Voices: VOICEVOX Nemo.',
     study: 'Study with Tsuji:',
   },
@@ -98,8 +98,8 @@ const SAY = {
     rule: 'Ce qu’il fait', use: 'Comment l’employer', example: 'Exemple', careful: 'Attention', compare: 'À ne pas confondre', twist: 'Une variante', scene: 'En conversation', quizHead: 'À toi', recap: 'Récap',
     score: (n, of) => n === of ? `Les ${of} sont passées. Combien en as-tu ?` : `Point d’étape : ${n} faites, encore ${of - n}.`,
     comment: 'Donne ton score en commentaire.',
-    outro: 'Continue sur Tsuji', outroSub: 'La ligne des kana, gratuite pour de bon · Sans pub, sans traqueur', depart: 'Embarquer',
-    chapters: { intro: 'Intro', outro: 'La suite', score: 'Point d’étape', final: 'Ton score' },
+    outro: 'Continue sur Tsuji',
+    chapters: { intro: 'Intro', outro: 'La suite', score: 'Point d’étape', final: 'Ton score', cta: 'Plus sur Tsuji' },
     voices: 'Voix : VOICEVOX Nemo.',
     study: 'Apprendre avec Tsuji :',
   },
@@ -107,6 +107,8 @@ const SAY = {
 export const LONG_SAY = SAY
 
 const LINE = { vocab: 'vocab', kanji: 'kanji', grammar: 'grammar', quiz: 'exam' }
+// The feature a video's call to action shows (funnel.js FEATURES): the one its items come from.
+const CTA_FEATURE = { vocab: 'words', kanji: 'kanji', grammar: 'grammar', quiz: 'exam' }
 
 // A seeded shuffle, so a video is the same each time it is made.
 function seeded(str) {
@@ -643,10 +645,17 @@ export function timeline(plan, dur = null) {
       const body = it.rule || it.text || it.meaning || ''
       seg(it.type, short ? 4 : Math.max(it.type === 'gtitle' ? 6 : 4, READ(body) + 1.5), it, {}, n)
     }
+    // The call to action in the middle, where the carousel deals it (plan 220):
+    // after the first half, to a viewer who has seen what the video does.
+    if (n === Math.ceil(of / 2)) {
+      chapters.push({ at, title: S.chapters.cta })
+      fx(at + 0.2, 'board-flap')
+      seg('cta', short ? 4.5 : 8, { feature: CTA_FEATURE[plan.kind] })
+    }
   })
   chapters.push({ at, title: S.chapters.outro })
   fx(at + 0.3, 'platform-chime')
-  seg('outro', short ? 4 : 8, {})
+  seg('outro', short ? 3 : 5, {})
   return { seconds: +at.toFixed(3), segs, cues, sfx, chapters, kind: plan.kind, of }
 }
 
@@ -707,7 +716,7 @@ const PAGE = {
     grammarParts: n => [`What it does and how to build it`, `How it is used`, `${n.ex} example sentences, each said twice and cut word by word`, n.careful && 'The mistake to avoid', n.compare && `Not to be confused with ${n.compare}`, n.twists && `${n.twists} twist${n.twists > 1 ? 's' : ''}: test your understanding`, n.scene && 'A short conversation', n.quiz && `${n.quiz} question${n.quiz > 1 ? 's' : ''} to check yourself`, 'A recap'].filter(Boolean),
     use: { vocab: 'Say every word out loud before you hear it. Come back in two or three days: what you still know then is what you have learned.', kanji: 'Trace each kanji with your finger as it is drawn. Come back in two or three days and pause on each one before it is revealed.', quiz: 'Pause if you need more time. Tell us your score in the comments!', grammar: 'Pause on each example and say it aloud before the voice does. Then try the questions without looking back.' },
     app: (f, site) => `Tsuji is a Japanese app built on spaced repetition: ${f.words} words, ${f.kanji} kanji and ${f.points} grammar points, from N5 to N1, each brought back just before you would forget it. The kana line is free for good, with no ads and no trackers.\n${site}`,
-    credits: (kana, music) => [`Voices: VOICEVOX Nemo.`, kana && 'Kana voice: 波音リツ (Canon).', music ? `Music: ${music}` : 'Music: made for Tsuji.'].filter(Boolean).join(' '),
+    credits: (kana, music) => [`Voices: VOICEVOX Nemo.`, kana && 'Kana voice: 波音リツ (Canon).', music === false ? null : music ? `Music: ${music}` : 'Music: made for Tsuji.'].filter(Boolean).join(' '),
     tags: (lv, kind) => ['learn Japanese', 'Japanese', `JLPT ${lv}`, 'JLPT', `${lv} ${({ vocab: 'vocabulary', kanji: 'kanji', quiz: 'quiz', grammar: 'grammar' })[kind]}`, ({ vocab: 'Japanese vocabulary', kanji: 'kanji stroke order', quiz: 'Japanese quiz', grammar: 'Japanese grammar' })[kind], 'Japanese for beginners', 'nihongo', '日本語'],
     hashtags: lv => lv ? `#LearnJapanese #Japanese #JLPT #JLPT${lv} #日本語` : '#LearnJapanese #Japanese #JapaneseVocabulary #日本語',
   },
@@ -733,7 +742,7 @@ const PAGE = {
     grammarParts: n => [`Ce qu’il fait et comment le former`, `Comment l’employer`, `${n.ex} phrases d’exemple, dites deux fois et découpées mot à mot`, n.careful && 'L’erreur à éviter', n.compare && `À ne pas confondre avec ${n.compare}`, n.twists && `${n.twists} variante${n.twists > 1 ? 's' : ''} pour tester ta compréhension`, n.scene && 'Une courte conversation', n.quiz && `${n.quiz} question${n.quiz > 1 ? 's' : ''} pour vérifier`, 'Un récap'].filter(Boolean),
     use: { vocab: 'Dis chaque mot à voix haute avant de l’entendre. Reviens dans deux ou trois jours : ce que tu sais encore, tu l’as appris.', kanji: 'Trace chaque kanji du doigt pendant qu’il se dessine. Reviens dans deux ou trois jours et mets pause avant chaque révélation.', quiz: 'Mets pause s’il te faut plus de temps. Donne ton score en commentaire !', grammar: 'Mets pause sur chaque exemple et dis-le avant la voix. Puis réponds aux questions sans revenir en arrière.' },
     app: (f, site) => `Tsuji est une appli de japonais fondée sur la répétition espacée : ${f.words} mots, ${f.kanji} kanji et ${f.points} points de grammaire, du N5 au N1, chacun ramené juste avant que tu l’oublies. La ligne des kana est gratuite pour de bon, sans pub et sans traqueur.\n${site}`,
-    credits: (kana, music) => [`Voix : VOICEVOX Nemo.`, kana && 'Voix des kana : 波音リツ (Canon).', music ? `Musique : ${music}` : 'Musique : faite pour Tsuji.'].filter(Boolean).join(' '),
+    credits: (kana, music) => [`Voix : VOICEVOX Nemo.`, kana && 'Voix des kana : 波音リツ (Canon).', music === false ? null : music ? `Musique : ${music}` : 'Musique : faite pour Tsuji.'].filter(Boolean).join(' '),
     tags: (lv, kind) => ['apprendre le japonais', 'japonais', `JLPT ${lv}`, 'JLPT', `${({ vocab: 'vocabulaire', kanji: 'kanji', quiz: 'quiz', grammar: 'grammaire' })[kind]} ${lv}`, ({ vocab: 'vocabulaire japonais', kanji: 'ordre des traits kanji', quiz: 'quiz japonais', grammar: 'grammaire japonaise' })[kind], 'japonais débutant', 'nihongo', '日本語'],
     hashtags: lv => lv ? `#ApprendreLeJaponais #Japonais #JLPT #JLPT${lv} #日本語` : '#ApprendreLeJaponais #Japonais #VocabulaireJaponais #日本語',
   },
@@ -844,6 +853,7 @@ const H = WIDE.h
 const ease = x => 1 - (1 - Math.min(1, Math.max(0, x))) ** 3
 const BAND = 124 // the door screen's sumi band
 const STRIPE = 12 // the line's pigment under it
+const TOP = BAND + STRIPE
 // The pass's metal on a sumi band, in either ground.
 const SUMI = palette('sumi')
 const PAPER = palette('paper')
@@ -1122,6 +1132,8 @@ function route(ctx, p, line, names, n, x, y0) {
 }
 
 const ROUTE_X = 1352 // where the route stands, right of the column's rule
+// The call to action's frame on the door screen: the room under the band.
+const CTA_WIDE = { id: 'wide', w: W, h: H, safe: { t: TOP + 64, r: 96, b: 72, l: 96 } }
 const COL_RULE = 1280
 
 /** The frame at second `t`, and its key: two frames with the same key
@@ -1139,6 +1151,8 @@ export function drawLong(ctx, plan, tl, t) {
     score: d && (d.n === d.of ? S.chapters.final : S.chapters.score),
     q: d?.q?.ask,
   }
+  // The call to action is the carousel's, laid out wide on the screen under the band.
+  if (sg.type === 'cta') videoCta(ctx, { fmt: CTA_WIDE, design: 'clarte', lang: plan.lang, line: plan.line, feature: d.feature })
   door(ctx, p, line, plan, sg, S, { next: sg.type === 'vocab' || sg.type === 'kanji', head: heads[sg.type] || null, fill })
   switch (sg.type) {
     case 'intro': {
@@ -1151,14 +1165,11 @@ export function drawLong(ctx, plan, tl, t) {
       break
     }
     case 'outro': {
-      fade(k(0.2, 0.6), () => mark(ctx, W / 2 - 90, 200, 180, p.ink, p.gold))
-      fade(k(0.6, 0.6), () => para(S.outro, W / 2, 460, 1500, [88, 76], p.ink, 'center', 700, 1))
-      fade(k(1.0, 0.6), () => para(S.outroSub, W / 2, 590, 1500, [44, 38], p.ink2, 'center', 500, 1))
-      if (plan.kind === 'quiz') fade(k(1.3, 0.6), () => para(S.comment, W / 2, 670, 1500, [44, 38], line, 'center', 700, 1))
-      fade(k(1.8, 0.6), () => {
-        const bw = 760
-        A.departButton(ctx, p, W / 2 - bw / 2, 780, bw, 2, S.depart)
-      })
+      // A sign-off: the call to action was made in the middle (plan 220).
+      fade(k(0.2, 0.6), () => mark(ctx, W / 2 - 80, 260, 160, p.ink, p.gold))
+      fade(k(0.6, 0.6), () => para(S.outro, W / 2, 500, 1500, [80, 68], p.ink, 'center', 700, 1))
+      if (plan.kind === 'quiz') fade(k(1.0, 0.6), () => para(S.comment, W / 2, 620, 1500, [44, 38], line, 'center', 700, 1))
+      fade(k(1.2, 0.6), () => para(SITE, W / 2, plan.kind === 'quiz' ? 720 : 620, 1500, [40], p.ink2, 'center', 500, 1))
       break
     }
     case 'vocab': drawWord(ctx, p, S, line, plan, sg, d, m, u, k, fade, sentence, para, state); break
@@ -1588,6 +1599,11 @@ function drawTall(ctx, plan, tl, t) {
   const { p, S, line, sg, u, state, k, fade, d, m } = begin(ctx, plan, tl, t, TW, TH, 'sumi')
   const { card, sentence, para } = tools(ctx, p, line)
   const cx = TW / 2
+  // The call to action is the carousel's own slide, in its story format.
+  if (sg.type === 'cta') {
+    videoCta(ctx, { fmt: FORMATS.story, design: 'defi', lang: plan.lang, line: plan.line, feature: d.feature })
+    return state.join(',')
+  }
   const box = sg.n ? [sg.type === 'q' ? 'Q' : plan.theme ? '' : plan.level, sg.n] : null
   if (sg.type !== 'intro' && sg.type !== 'outro') {
     mark(ctx, TX, 250, 56, p.ink, p.gold)
@@ -1625,11 +1641,11 @@ function drawTall(ctx, plan, tl, t) {
       break
     }
     case 'outro': {
-      fade(k(0.1, 0.4), () => mark(ctx, cx - 80, 440, 160, p.ink, p.gold))
-      fade(k(0.3, 0.4), () => para(S.outro, cx, 700, TWIDE, [76, 64], p.ink, 'center', 700, 2))
-      fade(k(0.6, 0.4), () => para(S.outroSub, cx, 900, TWIDE, [40, 34], p.ink2, 'center', 500, 3))
-      if (plan.kind === 'quiz') fade(k(0.8, 0.4), () => para(S.comment, cx, 1060, TWIDE, [44, 38], p.gold, 'center', 700, 2))
-      fade(k(1.0, 0.4), () => A.departButton(ctx, p, cx - 330, 1200, 660, 2, S.depart))
+      // A sign-off: the call to action was made in the middle (plan 220).
+      fade(k(0.1, 0.4), () => mark(ctx, cx - 80, 520, 160, p.ink, p.gold))
+      fade(k(0.3, 0.4), () => para(S.outro, cx, 760, TWIDE, [76, 64], p.ink, 'center', 700, 2))
+      if (plan.kind === 'quiz') fade(k(0.6, 0.4), () => para(S.comment, cx, 940, TWIDE, [44, 38], p.gold, 'center', 700, 2))
+      fade(k(0.8, 0.4), () => para(SITE, cx, plan.kind === 'quiz' ? 1080 : 940, TWIDE, [40], p.ink2, 'center', 500, 1))
       break
     }
     case 'vocab': {

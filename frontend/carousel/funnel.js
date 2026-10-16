@@ -1597,6 +1597,45 @@ function ctaSlide(c, feature) {
   if (showAlso) also(c, ALSO[feature], y)
   metal(ctx, p, fr.cx, fr.bottom - btn, weld(c.lang, W.cta.go), fr.w)
 }
+// ── The call to action in a video (plan 220) ─────────────────────
+/** The carousel's call to action, drawn in a video at the point the
+ *  carousel deals it, the middle: in a short (a story) the slide itself;
+ *  in a long video (a wide frame) its parts side by side, the words and
+ *  the button on the left, the feature's picture on the right. */
+export function videoCta(ctx, { fmt, design = 'clarte', lang = 'en', line, feature }) {
+  const c = context(ctx, lookOf(design, fmt, { lang, line, source: null }))
+  const f = FEATURES.includes(feature) ? feature : 'words'
+  if (fmt.w > fmt.h) ctaWide(c, f)
+  else ctaSlide(c, f)
+}
+function ctaWide(c, feature) {
+  const { ctx, p, fr, W } = c
+  const F = W.features[feature]
+  const lw = Math.round(fr.w * 0.42)
+  const rx = fr.x + lw + SP[7] * 2
+  const rw = fr.right - rx
+  const left = { ...c, fr: { ...fr, w: lw, cx: fr.x + lw / 2, right: fr.x + lw } }
+  const head = textBlock(c, weld(c.lang, W.cta.head), { x: fr.x, w: lw, sizes: [FS.display * 0.8, FS.heading], fam: 'serif', weight: 900, maxLines: 2, lh: 1.06, align: 'left' })
+  const name = textBlock(c, weld(c.lang, F.name), { x: fr.x, w: lw, sizes: [FS.title, FS.lead], maxLines: 2, align: 'left', color: p.paper ? mix(featureInk(p, feature), p.ink, 0.7) : p.ink })
+  const line = textBlock(c, weld(c.lang, F.freeLine ? `${F.line} ${F.freeLine}.` : F.line), { x: fr.x, w: lw, sizes: [FS.body, FS.sm], weight: 500, color: p.ink2, maxLines: 4, align: 'left' })
+  let y = fr.y
+  head.draw(y)
+  y += head.h + SP[4]
+  swoosh(c, fr.x + 200, y, 400)
+  y += SP[7]
+  name.draw(y)
+  y += name.h + SP[3]
+  line.draw(y)
+  y += line.h + SP[7]
+  // The two others just above the button, where the words leave the room.
+  const alsoY = fr.bottom - METAL_H - SP[6] - 72
+  if (alsoY >= y) also(left, ALSO[feature], alsoY)
+  metal(ctx, p, left.fr.cx, fr.bottom - METAL_H, weld(c.lang, W.cta.go), lw)
+  // The feature in its card, as large as the right side takes.
+  card(c, rx, fr.y, rw, fr.bottom - fr.y, R.card * 2, faceInk(p))
+  illustrate(c, feature, { x: rx + SP[6], y: fr.y + SP[6], w: rw - SP[6] * 2, h: fr.bottom - fr.y - SP[6] * 2 })
+}
+
 /** The two other features, a picture and a name each. */
 function also(c, list, y) {
   const { ctx, p, fr, W } = c
