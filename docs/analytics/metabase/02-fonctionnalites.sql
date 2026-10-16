@@ -221,3 +221,19 @@ WHERE name IN ('favorite_toggle', 'deck_publish', 'deck_unpublish', 'deck_subscr
   AND at >= now() - ({{days}} || ' days')::interval
   AND user_id NOT IN {{snippet: internal_users}}
 GROUP BY 1 ORDER BY 3 DESC, 2 DESC;
+
+-- ==== question
+-- title: Chansons mises en decks (歌)
+-- display: table
+-- size: 12x7
+-- description: song_deck (plan 215) : ce qui part dans les decks d'une chanson, depuis le résultat d'une vidéo. Le nom de la chanson n'est jamais enregistré.
+SELECT CASE WHEN (props->>'words')::int > 0 AND (props->>'lines')::int > 0 THEN 'Mots et lignes'
+            WHEN (props->>'words')::int > 0 THEN 'Mots seuls'
+            ELSE 'Lignes seules' END AS "Contenu",
+       count(*) AS "Chansons", count(DISTINCT user_id) AS "Apprenants",
+       round((percentile_cont(0.5) WITHIN GROUP (ORDER BY (props->>'words')::numeric))::numeric, 0) AS "Mots (médiane)",
+       round((percentile_cont(0.5) WITHIN GROUP (ORDER BY (props->>'lines')::numeric))::numeric, 0) AS "Lignes (médiane)"
+FROM event_log
+WHERE name = 'song_deck' AND at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}}
+GROUP BY 1 ORDER BY 2 DESC;

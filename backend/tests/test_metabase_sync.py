@@ -67,6 +67,23 @@ def test_the_unused_features_list_is_the_enum():
         assert action in events.VALUES["feature_use"]["action"]
 
 
+# Every event the app records is read by some question, or it lands in
+# event_log with nothing to show it -- as plans 215-217's did, until
+# their questions were written after the fact. The exceptions say why.
+UNREAD = {
+    # Declared for the guest's claim (lib/guest.js); nothing sends it yet.
+    "account_claimed",
+}
+
+
+def test_every_event_is_read_by_a_question():
+    literals = {w for _, q in QUESTIONS for w in re.findall(r"'(\w+)'", q["sql"])}
+    missing = set(events.EVENTS) - literals - UNREAD
+    assert not missing, f"no dashboard question reads {sorted(missing)}"
+    assert UNREAD <= set(events.EVENTS), "an exception names an event that no longer exists"
+    assert not UNREAD & literals, "a question reads it now: take it out of UNREAD"
+
+
 def test_the_layout_never_overlaps():
     for b in BOARDS:
         cells = set()

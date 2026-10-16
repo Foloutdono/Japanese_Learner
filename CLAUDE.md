@@ -544,13 +544,16 @@ Since plan 218, too:
   families a year, `event_daily` 25 months (`prune_logs`); the learner reads
   theirs at `GET /api/profile/export/trail`. A new event that should outlive
   30 days goes in `KEEP_LONG`, and in `privacy.html`'s list.
-- **The dashboards are code.** Nine Metabase dashboards, each a file in
+- **The dashboards are code.** Ten Metabase dashboards, each a file in
   `docs/analytics/metabase/` (`-- ==== question` blocks), built and updated
   by `python -m scripts.metabase_sync` (report, `--check`, `--yes`; needs
   `MB_API_KEY`). Change a question there, not only in Metabase's UI. Accounts
   to leave out live in the Metabase snippet `internal_users`, not in the repo.
   A screen added to `ROUTES` goes in `02-fonctionnalites.sql`'s list too (a
-  node-lane test holds them equal).
+  node-lane test holds them equal), an event added to `EVENTS` gets a
+  question that reads it (`tests/test_metabase_sync.py`, or a reason in its
+  `UNREAD`), and a new model feature's daily cap goes in
+  `08-ia-plafonds.sql`'s `caps` list.
 
 Call `track(name, props)` from `lib/track.js`; never `fetch` an analytics
 endpoint from a screen. `track` also stamps each event with the visit's random

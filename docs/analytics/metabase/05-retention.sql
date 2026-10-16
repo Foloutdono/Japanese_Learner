@@ -1,5 +1,5 @@
 -- dashboard: Tsuji — 足跡 · Rétention
--- description: Qui revient, et ce qui distingue ceux qui reviennent. Activité = au moins un événement ce jour-là (event_log ∪ event_daily, donc tout l'historique gardé). Plan 218.
+-- description: Qui revient, ce qui distingue ceux qui reviennent, et le plan de retour après une absence (回復運転, plan 217). Activité = au moins un événement ce jour-là (event_log ∪ event_daily, donc tout l'historique gardé). Plan 218.
 
 -- ==== question
 -- title: Cohortes hebdomadaires (% actifs la semaine N)
@@ -196,3 +196,61 @@ SELECT date_trunc('week', a.day)::date AS "Semaine",
 FROM active a JOIN firsts f USING (user_id)
 WHERE a.day >= current_date - 7 * 16 AND a.user_id NOT IN {{snippet: internal_users}}
 GROUP BY 1 ORDER BY 1;
+
+-- ==== question
+-- title: Plan de retour (回復運転) : proposé, choisi, tenu
+-- display: funnel
+-- size: 12x7
+-- description: catchup_offer (la feuille de retour ouverte), catchup_choice hors « tout d'un coup » (un plan étalé ou en douceur), catchup_done (le plan arrivé au bout).
+WITH e AS (
+  SELECT name, user_id, props FROM event_log
+  WHERE name IN ('catchup_offer', 'catchup_choice', 'catchup_done')
+    AND at >= now() - ({{days}} || ' days')::interval
+    AND user_id NOT IN {{snippet: internal_users}}
+)
+SELECT "Étape", "Apprenants" FROM (
+  SELECT 1 AS k, 'Plan proposé' AS "Étape", count(DISTINCT user_id) AS "Apprenants" FROM e WHERE name = 'catchup_offer'
+  UNION ALL
+  SELECT 2, 'Plan choisi', count(DISTINCT user_id) FROM e WHERE name = 'catchup_choice' AND props->>'choice' <> 'all'
+  UNION ALL
+  SELECT 3, 'Plan tenu jusqu''au bout', count(DISTINCT user_id) FROM e WHERE name = 'catchup_done'
+) s ORDER BY k;
+
+-- ==== question
+-- title: Plan de retour : les choix
+-- display: table
+-- size: 12x7
+-- description: spread = étalé sur des jours, gentle = en douceur, all = tout d'un coup (pas de plan). Le retard et l'absence viennent de la feuille proposée (catchup_offer).
+WITH offers AS (
+  SELECT round((percentile_cont(0.5) WITHIN GROUP (ORDER BY (props->>'owed')::numeric))::numeric, 0) AS owed,
+         round((percentile_cont(0.5) WITHIN GROUP (ORDER BY (props->>'away')::numeric))::numeric, 0) AS away
+  FROM event_log
+  WHERE name = 'catchup_offer' AND at >= now() - ({{days}} || ' days')::interval
+    AND user_id NOT IN {{snippet: internal_users}}
+)
+SELECT props->>'choice' AS "Choix", count(*) AS "Fois", count(DISTINCT user_id) AS "Apprenants",
+       round((percentile_cont(0.5) WITHIN GROUP (ORDER BY (props->>'days')::numeric))::numeric, 0) AS "Jours du plan (médiane)",
+       round((percentile_cont(0.5) WITHIN GROUP (ORDER BY (props->>'per_day')::numeric))::numeric, 0) AS "Par jour (médiane)",
+       max(o.owed) AS "Retard proposé (médiane)", max(o.away) AS "Jours d'absence (médiane)"
+FROM event_log, offers o
+WHERE name = 'catchup_choice' AND at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}}
+GROUP BY 1 ORDER BY 2 DESC;
+
+-- ==== question
+-- title: Absences déclarées et plafond de révisions
+-- display: table
+-- size: 12x7
+-- description: away_set (une absence déclarée, ou retirée), away_day_used (les jours d'absence que le pont a couverts), review_cap_set (le plafond choisi dans les Réglages, « aucun » s'il est retiré).
+SELECT CASE WHEN name = 'review_cap_set' THEN 'Plafond de révisions'
+            WHEN name = 'away_day_used' THEN 'Jours d''absence couverts'
+            WHEN (props->>'days')::int = 0 THEN 'Absence retirée'
+            ELSE 'Absence déclarée' END AS "Geste",
+       CASE WHEN name = 'review_cap_set' THEN coalesce(props->>'cap', 'aucun') ELSE '—' END AS "Plafond",
+       count(*) AS "Fois", count(DISTINCT user_id) AS "Apprenants",
+       round((percentile_cont(0.5) WITHIN GROUP (ORDER BY (props->>'days')::numeric))::numeric, 0) AS "Jours (médiane)"
+FROM event_log
+WHERE name IN ('away_set', 'away_day_used', 'review_cap_set')
+  AND at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}}
+GROUP BY 1, 2 ORDER BY 1, 3 DESC;
