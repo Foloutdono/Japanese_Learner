@@ -259,6 +259,7 @@ def problems() -> list[str]:
     found: list[str] = []
     seen: dict[str, str] = {}
     for level in LEVELS:
+        found += _length_tells(level, bank()[level])
         for i, row in enumerate(bank()[level]):
             if not isinstance(row, dict):
                 found.append(f"{level} #{i + 1}: not an object")
