@@ -41,7 +41,7 @@ export const BOARD_ENTRY = `${APP_ENTRY}?${BOARD_PARAM}`
 export const STORES = { appStore: null, googlePlay: null }
 
 // The contact address for the footer. Null prints no Contact link.
-export const CONTACT = null
+export const CONTACT = 'contact.tsujijapanese@gmail.com'
 
 // The footage lives in a public Supabase Storage bucket, uploaded from
 // the dashboard by file name (backend/scripts/sql/landing_media_bucket.sql
