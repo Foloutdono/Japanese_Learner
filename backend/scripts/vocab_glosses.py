@@ -173,6 +173,7 @@ def cmd_apply(in_dir: str) -> int:
     deck = _load(DECK)
     french = _load(FRENCH)
     replaced = set()
+    before = {(level, _key(w)): fr_gloss(w, french) for level in LEVELS for w in deck[level]}
     for level in LEVELS:
         for w in deck[level]:
             fix = fixes.get((level, _key(w)))
@@ -185,7 +186,8 @@ def cmd_apply(in_dir: str) -> int:
             # both until one of them means something else
             # (audit_vocab_deck's shared_french, plan 107).
             old = fr_gloss(w, french)
-            line = (fix.get("fr") or old or "").strip()
+            # French sets its semicolon apart, as the deck's French does.
+            line = re.sub(r"\s*;\s*", " ; ", (fix.get("fr") or old or "").strip())
             if fix.get("fr"):
                 replaced.add(old)
             if w.get("kanji"):
@@ -199,6 +201,19 @@ def cmd_apply(in_dir: str) -> int:
             form = w.get("kanji")
             if form and french.get(form) in replaced:
                 french[form] = fr_gloss(w, french)
+    # A card that shared its form's French with one whose English has
+    # now moved away keeps what it read, on a line of its own.
+    by_form: dict[str, list] = {}
+    for level in LEVELS:
+        for w in deck[level]:
+            if w.get("kanji"):
+                by_form.setdefault(w["kanji"], []).append((level, w))
+    for cards_of in by_form.values():
+        if len({w.get("meaning") for _, w in cards_of}) < 2:
+            continue
+        for level, w in cards_of:
+            if _key(w) not in french and (level, _key(w)) not in fixes and before.get((level, _key(w))):
+                french[_key(w)] = before[(level, _key(w))]
     _dump(DECK, deck)
     _dump(FRENCH, french)
     print(f"{len(fixes)} gloss correction(s) applied; {len(notes)} card note(s) to handle by migration:")
