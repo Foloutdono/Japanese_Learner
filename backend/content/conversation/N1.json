@@ -37,20 +37,20 @@
         },
         "wrong": [
           {
-            "jp": "来月末の納期の件で、ご相談なさりたいことがございまして。",
-            "kana": "らいげつまつののうきのけんで、ごそうだんなさりたいことがございまして。",
-            "en": "There is something I would graciously wish to discuss about the delivery date at the end of next month.",
-            "fr": "Il y a une chose dont je daignerais vous parler, au sujet de la livraison prévue fin du mois prochain.",
+            "jp": "来月末の納期の件で、ご相談なさりたいことがございまして、お時間をいただきました。",
+            "kana": "らいげつまつののうきのけんで、ごそうだんなさりたいことがございまして、おじかんをいただきました。",
+            "en": "I asked for some of your time because there is something I would graciously wish to discuss about the delivery date at the end of next month.",
+            "fr": "Je vous ai demandé un peu de votre temps, car il y a une chose dont je daignerais vous parler, au sujet de la livraison prévue fin du mois prochain.",
             "why": {
               "en": "「なさる」 is honorific and raises whoever acts, here yourself; your own wish to consult is 「ご相談したい」.",
               "fr": "「なさる」 est honorifique et élève celui qui agit, ici toi-même ; ton propre souhait de consulter, c'est 「ご相談したい」."
             }
           },
           {
-            "jp": "来月末の納期の件で、ご相談に乗ってさしあげたく参りました。",
-            "kana": "らいげつまつののうきのけんで、ごそうだんにのってさしあげたくまいりました。",
-            "en": "I have come to kindly offer you my advice about the delivery date at the end of next month.",
-            "fr": "Je viens vous accorder mes conseils au sujet de la livraison prévue fin du mois prochain.",
+            "jp": "来月末の納期の件で、御社のご相談に乗ってさしあげたく、本日はこちらに参りました。",
+            "kana": "らいげつまつののうきのけんで、おんしゃのごそうだんにのってさしあげたく、ほんじつはこちらにまいりました。",
+            "en": "I have come here today to kindly offer your company my advice about the delivery date at the end of next month.",
+            "fr": "Je viens aujourd'hui accorder à votre société mes conseils au sujet de la livraison prévue fin du mois prochain.",
             "why": {
               "en": "「相談に乗る」 is to advise someone who comes to you, so you offer the client counsel when it is you who need theirs.",
               "fr": "「相談に乗る」, c'est conseiller quelqu'un qui vient te voir : tu offres tes conseils au client alors que c'est toi qui as besoin de lui."
@@ -91,13 +91,13 @@
             }
           },
           {
-            "jp": "実は、部品の仕入れ先から、予定より早く入荷できることになりまして。",
-            "kana": "じつは、ぶひんのしいれさきから、よていよりはやくにゅうかできることになりまして。",
-            "en": "Actually, our parts supplier can now deliver earlier than planned.",
-            "fr": "En fait, notre fournisseur de pièces va pouvoir livrer plus tôt que prévu.",
+            "jp": "実は、部品の仕入れ先から、予定より一週間ほど早く入荷できることになりまして。",
+            "kana": "じつは、ぶひんのしいれさきから、よていよりいっしゅうかんほどはやくにゅうかできることになりまして。",
+            "en": "Actually, our parts supplier can now deliver about a week earlier than planned.",
+            "fr": "En fait, notre fournisseur de pièces va pouvoir livrer environ une semaine plus tôt que prévu.",
             "why": {
-              "en": "「予定より早く」 says the parts will arrive early, when you have come to announce that you will miss the date.",
-              "fr": "「予定より早く」 annonce des pièces en avance, alors que tu viens annoncer que la date ne sera pas tenue."
+              "en": "「予定より一週間ほど早く」 says the parts will arrive early, when you have come to announce that you will miss the date.",
+              "fr": "「予定より一週間ほど早く」 annonce des pièces en avance, alors que tu viens annoncer que la date ne sera pas tenue."
             }
           }
         ]
@@ -169,10 +169,10 @@
         },
         "wrong": [
           {
-            "jp": "全量は難しいのですが、完成した分から先に納品していただくことは可能です。",
-            "kana": "ぜんりょうはむずかしいのですが、かんせいしたぶんからさきにのうひんしていただくことはかのうです。",
-            "en": "The full quantity would be difficult, but you could deliver what is finished first.",
-            "fr": "La totalité serait difficile, mais vous pouvez nous livrer d'abord ce qui est terminé.",
+            "jp": "全量は難しいのですが、完成した分だけでも先に納品していただくことは可能です。",
+            "kana": "ぜんりょうはむずかしいのですが、かんせいしたぶんだけでもさきにのうひんしていただくことはかのうです。",
+            "en": "The full quantity would be difficult, but you could deliver at least what is finished first.",
+            "fr": "La totalité serait difficile, mais vous pouvez nous livrer d'abord au moins ce qui est terminé.",
             "why": {
               "en": "「納品していただく」 has the client do the delivering; your company delivering is 「納品させていただく」.",
               "fr": "「納品していただく」 fait livrer le client lui-même ; quand c'est ton entreprise qui livre, c'est 「納品させていただく」."
@@ -213,20 +213,20 @@
         },
         "wrong": [
           {
-            "jp": "いいえ、全部まとめて二週間後にお届けいたします。",
-            "kana": "いいえ、ぜんぶまとめてにしゅうかんごにおとどけいたします。",
-            "en": "No, we will deliver everything together in two weeks.",
-            "fr": "Non, nous livrerons tout en une fois dans deux semaines.",
+            "jp": "いいえ、分納はせず、全部まとめて二週間後にお届けいたします。",
+            "kana": "いいえ、ぶんのうはせず、ぜんぶまとめてにしゅうかんごにおとどけいたします。",
+            "en": "No, rather than a partial delivery, we will deliver everything together in two weeks.",
+            "fr": "Non, pas de livraison partielle : nous livrerons tout en une fois dans deux semaines.",
             "why": {
-              "en": "「全部まとめて」 withdraws the partial delivery you have just offered, and the quantity goes unanswered.",
-              "fr": "「全部まとめて」 retire la livraison partielle que tu viens de proposer, et la quantité reste sans réponse."
+              "en": "「分納はせず、全部まとめて」 withdraws the partial delivery you have just offered, and the quantity goes unanswered.",
+              "fr": "「分納はせず、全部まとめて」 retire la livraison partielle que tu viens de proposer, et la quantité reste sans réponse."
             }
           },
           {
-            "jp": "八割ぐらいなら、予定どおり出せると思うよ。",
-            "kana": "はちわりぐらいなら、よていどおりだせるとおもうよ。",
-            "en": "Eighty percent or so, I reckon we can get out on time.",
-            "fr": "Dans les quatre-vingts pour cent, je pense qu'on peut sortir ça à temps.",
+            "jp": "全体の八割ぐらいなら、たぶん最初の予定どおりに出せると思うよ。",
+            "kana": "ぜんたいのはちわりぐらいなら、たぶんさいしょのよていどおりにだせるとおもうよ。",
+            "en": "Eighty percent of the total or so, I reckon we can probably get out on the original date.",
+            "fr": "Dans les quatre-vingts pour cent du total, je pense qu'on peut sûrement sortir ça à la date prévue au départ.",
             "why": {
               "en": "「出せると思うよ」 is how you talk to a colleague you know well; to a client's project manager it breaks the formal register.",
               "fr": "「出せると思うよ」, c'est le ton qu'on prend avec un collègue proche ; face au chef de projet d'un client, il rompt le registre soutenu."
@@ -281,7 +281,7 @@
     ],
     "close": {
       "jp": "では、明日の夕方までにはお返事します。",
-      "kana": "では、あしたのゆうがたまでにはおへんじします。",
+      "kana": "では、あすのゆうがたまでにはおへんじします。",
       "en": "We'll give you an answer by tomorrow evening, then.",
       "fr": "Nous vous donnerons une réponse d'ici demain soir."
     }
@@ -368,10 +368,10 @@
         },
         "wrong": [
           {
-            "jp": "弊社の担当者が、出荷前の確認をお忘れになってしまいました。",
-            "kana": "へいしゃのたんとうしゃが、しゅっかまえのかくにんをおわすれになってしまいました。",
-            "en": "Our staff member graciously forgot to check before shipping.",
-            "fr": "Notre employé a daigné oublier la vérification avant l'expédition.",
+            "jp": "弊社の担当者が、出荷前の伝票と品番の確認をお忘れになってしまいました。",
+            "kana": "へいしゃのたんとうしゃが、しゅっかまえのでんぴょうとひんばんのかくにんをおわすれになってしまいました。",
+            "en": "Our staff member graciously forgot to check the delivery slip and product number before shipping.",
+            "fr": "Notre employé a daigné oublier de vérifier le bordereau et la référence avant l'expédition.",
             "why": {
               "en": "Before a client your own staff take no honorific, and 「お忘れになる」 raises the very person who made the mistake.",
               "fr": "Devant un client, tes propres collègues ne reçoivent aucun honorifique, et 「お忘れになる」 élève celui-là même qui a commis l'erreur."
@@ -412,23 +412,23 @@
         },
         "wrong": [
           {
-            "jp": "今後は、出荷前に二名で照合する体制に改めておりました。",
-            "kana": "こんごは、しゅっかまえににめいでしょうごうするたいせいにあらためておりました。",
-            "en": "From now on, we had changed to having two people check each shipment.",
-            "fr": "Désormais, nous étions passés à un contrôle de chaque expédition par deux personnes.",
+            "jp": "今後は、出荷前に二名で照合する体制に改め、二重チェックを徹底しておりました。",
+            "kana": "こんごは、しゅっかまえににめいでしょうごうするたいせいにあらため、にじゅうチェックをてっていしておりました。",
+            "en": "From now on, we had changed to having two people check each shipment, and had applied that double check without exception.",
+            "fr": "Désormais, nous étions passés à un contrôle de chaque expédition par deux personnes, et nous avions appliqué ce double contrôle sans exception.",
             "why": {
-              "en": "「改めておりました」 puts the change in the past, which clashes with 「今後は」 and with a mistake that has only just happened.",
-              "fr": "「改めておりました」 place le changement dans le passé, ce qui jure avec 「今後は」 et avec une erreur qui vient d'arriver."
+              "en": "「徹底しておりました」 puts the measure in the past, which clashes with 「今後は」 and with a mistake that has only just happened.",
+              "fr": "「徹底しておりました」 place la mesure dans le passé, ce qui jure avec 「今後は」 et avec une erreur qui vient d'arriver."
             }
           },
           {
-            "jp": "今後は、なるべく気をつけたいと思います。",
-            "kana": "こんごは、なるべくきをつけたいとおもいます。",
-            "en": "From now on, we would like to be careful as far as possible.",
-            "fr": "Désormais, nous aimerions faire attention dans la mesure du possible.",
+            "jp": "今後は、出荷前の商品の確認などに、なるべく気をつけるようにしたいと思います。",
+            "kana": "こんごは、しゅっかまえのしょうひんのかくにんなどに、なるべくきをつけるようにしたいとおもいます。",
+            "en": "From now on, we would like to try, as far as possible, to be careful with things like checking goods before shipping.",
+            "fr": "Désormais, nous aimerions essayer de faire attention, dans la mesure du possible, à des choses comme la vérification des articles avant expédition.",
             "why": {
-              "en": "「なるべく気をつけたい」 is a vague wish, not a measure, and the client asked what you will do: 「対策」.",
-              "fr": "「なるべく気をつけたい」 est un vague souhait, pas une mesure, et le client demandait ce que vous ferez : 「対策」."
+              "en": "「なるべく気をつけるようにしたい」 is a vague wish, not a measure, and the client asked what you will do: 「対策」.",
+              "fr": "「なるべく気をつけるようにしたい」 est un vague souhait, pas une mesure, et le client demandait ce que vous ferez : 「対策」."
             }
           }
         ]
@@ -485,11 +485,11 @@
           "fr": "Et pourriez-vous aussi nous remettre un rapport écrit sur le déroulement des faits ?"
         },
         "me": {
-          "jp": "承知いたしました。経緯と再発防止策をまとめ、今週中に書面でご報告いたします。",
-          "kana": "しょうちいたしました。けいいとさいはつぼうしさくをまとめ、こんしゅうちゅうにしょめんでごほうこくいたします。",
-          "romaji": "shouchi itashimashita. keii to saihatsu boushisaku o matome, konshuuchuu ni shomen de go houkoku itashimasu",
-          "en": "Certainly. We will set out what happened and our preventive measures, and report to you in writing this week.",
-          "fr": "Bien entendu. Nous rassemblerons le déroulement des faits et nos mesures préventives, et vous remettrons un rapport écrit cette semaine.",
+          "jp": "承知いたしました。今週中に書面でご報告いたします。",
+          "kana": "しょうちいたしました。こんしゅうちゅうにしょめんでごほうこくいたします。",
+          "romaji": "shouchi itashimashita. konshuuchuu ni shomen de go houkoku itashimasu",
+          "en": "Certainly. We will report to you in writing this week.",
+          "fr": "Bien entendu. Nous vous remettrons un rapport écrit cette semaine.",
           "note": {
             "en": "「承知いたしました」 accepts the request formally, and 「ご報告いたします」 promises the report in humble form.",
             "fr": "「承知いたしました」 accepte formellement la demande, et 「ご報告いたします」 promet le rapport sous une forme humble."
@@ -655,10 +655,10 @@
         },
         "wrong": [
           {
-            "jp": "先生の論文をお読みになり、ぜひ先生のもとで研究したいと思ったからです。",
-            "kana": "せんせいのろんぶんをおよみになり、ぜひせんせいのもとでけんきゅうしたいとおもったからです。",
-            "en": "Because I graciously read your papers and very much wanted to do my research under your supervision.",
-            "fr": "Parce que j'ai daigné lire vos articles et que je tiens à faire ma recherche sous votre direction.",
+            "jp": "先生の第二言語習得に関する論文をお読みになり、ぜひ先生のもとで研究したいと思ったからです。",
+            "kana": "せんせいのだいにげんごしゅうとくにかんするろんぶんをおよみになり、ぜひせんせいのもとでけんきゅうしたいとおもったからです。",
+            "en": "Because I graciously read your papers on second-language acquisition and very much wanted to do my research under your supervision.",
+            "fr": "Parce que j'ai daigné lire vos articles sur l'acquisition des langues secondes et que je tiens à faire ma recherche sous votre direction.",
             "why": {
               "en": "「お読みになり」 is the honorific 「読む」 and raises the reader, here yourself; your reading of his work is 「拝読し」.",
               "fr": "「お読みになり」 est le 「読む」 honorifique et élève le lecteur, ici toi-même ; ta lecture de ses travaux, c'est 「拝読し」."
@@ -738,28 +738,28 @@
             "fr": "「協力していただける企業」 parle avec l'humilité voulue des entreprises qui t'aideront, et 「予定です」 présente la méthode comme un projet."
           },
           "alt": [
-            {"jp": "企業にご協力いただき、職場での会話を録音して分析するつもりです。", "kana": "きぎょうにごきょうりょくいただき、しょくばでのかいわをろくおんしてぶんせきするつもりです。", "romaji": "kigyou ni go kyouryoku itadaki, shokuba de no kaiwa o rokuon shite bunseki suru tsumori desu"}
+            {"jp": "企業にご協力いただき、職場での会話を録音して、半年かけて分析するつもりです。", "kana": "きぎょうにごきょうりょくいただき、しょくばでのかいわをろくおんして、はんとしかけてぶんせきするつもりです。", "romaji": "kigyou ni go kyouryoku itadaki, shokuba de no kaiwa o rokuon shite, hantoshi kakete bunseki suru tsumori desu"}
           ]
         },
         "wrong": [
           {
-            "jp": "協力してさしあげる企業で会話を録音し、半年かけて分析する予定です。",
-            "kana": "きょうりょくしてさしあげるきぎょうでかいわをろくおんし、はんとしかけてぶんせきするよていです。",
-            "en": "I plan to record conversations at companies I will graciously help, and analyse them over six months.",
-            "fr": "Je prévois d'enregistrer des conversations dans des entreprises à qui je ferai l'honneur de mon aide, et de les analyser sur six mois.",
+            "jp": "協力してさしあげる企業で職場の会話を録音し、半年かけて分析する予定です。",
+            "kana": "きょうりょくしてさしあげるきぎょうでしょくばのかいわをろくおんし、はんとしかけてぶんせきするよていです。",
+            "en": "I plan to record workplace conversations at companies I will graciously help, and analyse them over six months.",
+            "fr": "Je prévois d'enregistrer des conversations au travail dans des entreprises à qui je ferai l'honneur de mon aide, et de les analyser sur six mois.",
             "why": {
               "en": "「協力してさしあげる」 makes you the one doing the companies a favour, when it is they who help you: 「協力していただける」.",
               "fr": "「協力してさしあげる」 fait de toi celui qui rend service aux entreprises, alors que ce sont elles qui t'aident : 「協力していただける」."
             }
           },
           {
-            "jp": "来年の四月から集め始める予定です。",
-            "kana": "らいねんのしがつからあつめはじめるよていです。",
-            "en": "I plan to start collecting it next April.",
-            "fr": "Je prévois de commencer la collecte en avril prochain.",
+            "jp": "来年の四月から集め始めて、修士一年目の終わりまでには終える予定です。",
+            "kana": "らいねんのしがつからあつめはじめて、しゅうしいちねんめのおわりまでにはおえるよていです。",
+            "en": "I plan to start collecting it next April and to finish by the end of my first year.",
+            "fr": "Je prévois de commencer la collecte en avril prochain et de la terminer d'ici la fin de ma première année.",
             "why": {
-              "en": "It says when you will start, but 「どのように」 asked how.",
-              "fr": "Tu dis quand tu commenceras, mais 「どのように」 demandait comment."
+              "en": "It says when you will start and finish, but 「どのように」 asked how.",
+              "fr": "Tu dis quand tu commenceras et finiras, mais 「どのように」 demandait comment."
             }
           }
         ]
@@ -841,10 +841,10 @@
             }
           },
           {
-            "jp": "いいえ、特にございません。研究室の雰囲気を教えていただけますか。",
-            "kana": "いいえ、とくにございません。けんきゅうしつのふんいきをおしえていただけますか。",
-            "en": "No, nothing in particular. Could you tell me about the atmosphere in the lab?",
-            "fr": "Non, rien de particulier. Pourriez-vous me parler de l'ambiance du laboratoire ?",
+            "jp": "いいえ、特にございません。研究室の雰囲気や一日の過ごし方を教えていただけますか。",
+            "kana": "いいえ、とくにございません。けんきゅうしつのふんいきやいちにちのすごしかたをおしえていただけますか。",
+            "en": "No, nothing in particular. Could you tell me about the atmosphere in the lab and what a typical day is like?",
+            "fr": "Non, rien de particulier. Pourriez-vous me parler de l'ambiance du laboratoire et du déroulement d'une journée type ?",
             "why": {
               "en": "「特にございません」 says you have no questions, and then you ask one.",
               "fr": "「特にございません」 dit que tu n'as pas de question, puis tu en poses une."
@@ -942,20 +942,20 @@
         },
         "wrong": [
           {
-            "jp": "その二つは、どちらが違うんでしょうか。",
-            "kana": "そのふたつは、どちらがちがうんでしょうか。",
-            "en": "Which of the two is the different one?",
-            "fr": "Lequel des deux est le différent ?",
+            "jp": "その二つは、具体的にどちらが違うんでしょうか。",
+            "kana": "そのふたつは、ぐたいてきにどちらがちがうんでしょうか。",
+            "en": "Concretely, which of the two is the different one?",
+            "fr": "Concrètement, lequel des deux est le différent ?",
             "why": {
               "en": "「どちらが違う」 asks which one is different, which has no answer when two things differ from each other; how is 「どう違う」.",
               "fr": "「どちらが違う」 demande lequel est différent, question sans réponse quand deux choses diffèrent l'une de l'autre ; « en quoi », c'est 「どう違う」."
             }
           },
           {
-            "jp": "では、両方お願いします。",
-            "kana": "では、りょうほうおねがいします。",
-            "en": "Then both, please.",
-            "fr": "Alors les deux, s'il vous plaît.",
+            "jp": "では、手術と薬の両方を、同時にお願いします。",
+            "kana": "では、しゅじゅつとくすりのりょうほうを、どうじにおねがいします。",
+            "en": "Then both, the surgery and the medication at the same time, please.",
+            "fr": "Alors les deux, l'opération et les médicaments en même temps, s'il vous plaît.",
             "why": {
               "en": "「両方」 asks for both, but once the gallbladder is removed there are no stones left to dissolve.",
               "fr": "「両方」 demande les deux, mais une fois la vésicule retirée, il n'y a plus de calculs à dissoudre."
@@ -986,20 +986,20 @@
         },
         "wrong": [
           {
-            "jp": "薬の場合、手術の傷は残りませんか。",
-            "kana": "くすりのばあい、しゅじゅつのきずはのこりませんか。",
-            "en": "With the medication, won't there be a scar from the surgery?",
-            "fr": "Avec les médicaments, il ne restera pas de cicatrice de l'opération ?",
+            "jp": "薬の場合、お腹に手術の傷は残りませんか。",
+            "kana": "くすりのばあい、おなかにしゅじゅつのきずはのこりませんか。",
+            "en": "With the medication, won't there be a scar on my abdomen from the surgery?",
+            "fr": "Avec les médicaments, il ne restera pas de cicatrice d'opération sur le ventre ?",
             "why": {
               "en": "「手術の傷」 is a scar from surgery, and the medication involves no surgery at all.",
               "fr": "「手術の傷」 est une cicatrice d'opération, et le traitement par médicaments n'en comporte aucune."
             }
           },
           {
-            "jp": "薬は楽しそうですね。",
-            "kana": "くすりはたのしそうですね。",
-            "en": "The medication sounds like fun.",
-            "fr": "Les médicaments, ça a l'air amusant.",
+            "jp": "薬のほうは、毎日飲むのが楽しそうですね。",
+            "kana": "くすりのほうは、まいにちのむのがたのしそうですね。",
+            "en": "Taking the medication every day sounds like fun.",
+            "fr": "Prendre les médicaments tous les jours, ça a l'air amusant.",
             "why": {
               "en": "「楽しそう」 means fun; the doctor's 「楽」 meant easy on the body, and no medicine is fun.",
               "fr": "「楽しそう」 veut dire amusant ; le 「楽」 du médecin voulait dire doux pour l'organisme, et aucun médicament n'est amusant."
@@ -1030,10 +1030,10 @@
         },
         "wrong": [
           {
-            "jp": "では、手術の場合は、どのくらい退院することになりますか。",
-            "kana": "では、しゅじゅつのばあいは、どのくらいたいいんすることになりますか。",
-            "en": "And with surgery, how long would I be discharged for?",
-            "fr": "Et dans le cas de l'opération, combien de temps durerait ma sortie de l'hôpital ?",
+            "jp": "では、手術を選んだ場合は、どのくらい退院することになりますか。",
+            "kana": "では、しゅじゅつをえらんだばあいは、どのくらいたいいんすることになりますか。",
+            "en": "And if I chose surgery, how long would I be discharged for?",
+            "fr": "Et si je choisissais l'opération, combien de temps durerait ma sortie de l'hôpital ?",
             "why": {
               "en": "「退院」 is leaving hospital, a single moment; a length of stay is asked with 「入院」.",
               "fr": "「退院」, c'est la sortie de l'hôpital, un moment unique ; une durée de séjour se demande avec 「入院」."
@@ -1118,10 +1118,10 @@
         },
         "wrong": [
           {
-            "jp": "ありがとうございます。ご家族とよく話し合って、来週までにお返事します。",
-            "kana": "ありがとうございます。ごかぞくとよくはなしあって、らいしゅうまでにおへんじします。",
-            "en": "Thank you. I'll talk it through properly with my honourable family and give you an answer by next week.",
-            "fr": "Merci. J'en discuterai sérieusement avec mon honorable famille et je vous donnerai ma réponse d'ici la semaine prochaine.",
+            "jp": "ありがとうございます。ご家族と話し合って、来週までにお返事します。",
+            "kana": "ありがとうございます。ごかぞくとはなしあって、らいしゅうまでにおへんじします。",
+            "en": "Thank you. I'll talk it through with my honourable family and give you an answer by next week.",
+            "fr": "Merci. J'en discuterai avec mon honorable famille et je vous donnerai ma réponse d'ici la semaine prochaine.",
             "why": {
               "en": "「ご家族」 is the respectful word for someone else's family, as the doctor used it for yours; your own is plain 「家族」.",
               "fr": "「ご家族」 est le mot respectueux pour la famille d'autrui, comme le médecin l'a dit de la tienne ; la tienne, c'est 「家族」 tout court."

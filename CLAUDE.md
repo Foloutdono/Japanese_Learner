@@ -70,6 +70,10 @@ runtime purpose.
   uses it?" (the eye answers that), never a translation printed over the
   question it answers (a twist's and a meaning's `tr` is held back until it
   is answered), and never a sentence or a question twice in a tutorial.
+  Nor may a bank's choices let length answer: written with care, the
+  right reply drifts to the longest (the conversation bank's first draft
+  won 42-75% on "pick the longest"), so across a bank the right one is
+  the longest about as often as a blind pick (plan 217, `LENGTH_TELL`).
   `study/grammar_check.py` holds it; `content/grammar/README.md`, "The
   quiz", is the style guide. Draft with `python -m scripts.check_tour_quiz`.
 - **Every grammar point is asked in Choisir.** The contrast drill needs a
@@ -527,7 +531,8 @@ The conversation bank (plan 217, `content/conversation/N5.json` … `N1.json`,
 its schema and style guide in that directory's README) holds itself to
 `study/conversation.problems`: every line's reading written by hand and
 checked against the line, every reply's romaji against its reading, two
-wrong replies a turn. Draft a scenario against it:
+wrong replies a turn, and a level whose Choose length cannot answer.
+Draft a scenario against it:
 
 ```bash
 cd backend

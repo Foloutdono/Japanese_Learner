@@ -81,10 +81,10 @@
         },
         "wrong": [
           {
-            "jp": "家賃は七万円しか払いたいです。",
-            "kana": "やちんはななまんえんしかはらいたいです。",
-            "en": "I want to pay only seventy thousand yen in rent.",
-            "fr": "Je veux payer seulement soixante-dix mille yens de loyer.",
+            "jp": "家賃は月七万円しか払いたいです。",
+            "kana": "やちんはつきななまんえんしかはらいたいです。",
+            "en": "I want to pay only seventy thousand yen a month in rent.",
+            "fr": "Je veux payer seulement soixante-dix mille yens de loyer par mois.",
             "why": {
               "en": "「しか」 only works with a negative verb after it (「七万円しか払えません」), so 「しか払いたいです」 is broken.",
               "fr": "「しか」 ne s'emploie qu'avec un verbe à la forme négative (「七万円しか払えません」) : 「しか払いたいです」 ne tient pas."
@@ -179,13 +179,13 @@
             }
           },
           {
-            "jp": "いいえ、二階以上がいいです。",
-            "kana": "いいえ、にかいいじょうがいいです。",
-            "en": "No, anything above the ground floor would be good.",
-            "fr": "Non, au-dessus du rez-de-chaussée, ce serait bien.",
+            "jp": "二階以上で、住みにくい部屋がいいです。",
+            "kana": "にかいいじょうで、すみにくいへやがいいです。",
+            "en": "Somewhere hard to live in, and not on the ground floor.",
+            "fr": "Un logement difficile à habiter, et pas au rez-de-chaussée.",
             "why": {
-              "en": "「いいえ」 says you have no other wishes, and then you name one: the two contradict each other.",
-              "fr": "「いいえ」 dit que tu n'as pas d'autre souhait, puis tu en donnes un : les deux se contredisent."
+              "en": "「〜にくい」 makes a verb hard to do, so 「住みにくい」 asks for a flat that is hard to live in; easy to live in is 「住みやすい」.",
+              "fr": "「〜にくい」 rend une action difficile : 「住みにくい」 demande un logement où il est difficile de vivre ; facile à habiter, c'est 「住みやすい」."
             }
           }
         ]
@@ -213,20 +213,20 @@
         },
         "wrong": [
           {
-            "jp": "はい、ぜひご覧になります。",
-            "kana": "はい、ぜひごらんになります。",
-            "en": "Yes, I shall graciously view it.",
-            "fr": "Oui, je daignerai le voir.",
+            "jp": "はい、ぜひ今日ご覧になります。",
+            "kana": "はい、ぜひきょうごらんになります。",
+            "en": "Yes, I shall graciously view it today.",
+            "fr": "Oui, je daignerai le voir aujourd'hui.",
             "why": {
               "en": "「ご覧になる」 honours the other person's looking and is never used for your own; for yourself, 「見せてください」 or 「拝見します」.",
               "fr": "「ご覧になる」 honore celui qui regarde et ne s'emploie jamais pour soi ; pour toi, 「見せてください」 ou 「拝見します」."
             }
           },
           {
-            "jp": "はい、ぜひ見てください。",
-            "kana": "はい、ぜひみてください。",
-            "en": "Yes, please do take a look at it.",
-            "fr": "Oui, regardez-le, je vous en prie.",
+            "jp": "はい、ぜひその部屋を見てください。",
+            "kana": "はい、ぜひそのへやをみてください。",
+            "en": "Yes, please do take a look at that flat.",
+            "fr": "Oui, regardez donc cet appartement, je vous en prie.",
             "why": {
               "en": "「見てください」 asks the agent to look at it; you want to be shown it, 「見せてください」.",
               "fr": "「見てください」 demande à l'agent de le regarder ; toi, tu veux qu'on te le montre : 「見せてください」."
@@ -412,20 +412,20 @@
         },
         "wrong": [
           {
-            "jp": "印鑑があるので、サインでお願いします。",
-            "kana": "いんかんがあるので、サインでおねがいします。",
-            "en": "I have a seal, so a signature, please.",
-            "fr": "J'ai un sceau, alors une signature, s'il vous plaît.",
+            "jp": "印鑑を持ってきたので、サインでお願いします。",
+            "kana": "いんかんをもってきたので、サインでおねがいします。",
+            "en": "I've brought my seal, so a signature, please.",
+            "fr": "J'ai apporté mon sceau, alors une signature, s'il vous plaît.",
             "why": {
-              "en": "「印鑑があるので」 gives having a seal as your reason for signing instead: the reason works against the choice.",
-              "fr": "「印鑑があるので」 donne le fait d'avoir un sceau comme raison de signer : la raison va contre ton choix."
+              "en": "「印鑑を持ってきたので」 gives having brought your seal as your reason for signing instead: the reason works against the choice.",
+              "fr": "「印鑑を持ってきたので」 donne le fait d'avoir apporté ton sceau comme raison de signer : la raison va contre ton choix."
             }
           },
           {
-            "jp": "持っていないので、サインしてください。",
-            "kana": "もっていないので、サインしてください。",
-            "en": "I don't have one, so please sign.",
-            "fr": "Je n'en ai pas, alors signez, s'il vous plaît.",
+            "jp": "印鑑を持っていないので、サインしてください。",
+            "kana": "いんかんをもっていないので、サインしてください。",
+            "en": "I don't have a seal, so please sign.",
+            "fr": "Je n'ai pas de sceau, alors signez, s'il vous plaît.",
             "why": {
               "en": "「サインしてください」 asks the clerk to sign; you are the one signing, 「サインでお願いします」.",
               "fr": "「サインしてください」 demande à l'employé de signer ; c'est toi qui signes : 「サインでお願いします」."
@@ -456,10 +456,10 @@
         },
         "wrong": [
           {
-            "jp": "会社に給料をあげるためです。",
-            "kana": "かいしゃにきゅうりょうをあげるためです。",
-            "en": "It's for giving my company a salary.",
-            "fr": "C'est pour donner un salaire à mon entreprise.",
+            "jp": "会社に毎月給料をあげるためです。",
+            "kana": "かいしゃにまいつききゅうりょうをあげるためです。",
+            "en": "It's for giving my company a salary every month.",
+            "fr": "C'est pour donner chaque mois un salaire à mon entreprise.",
             "why": {
               "en": "「あげる」 gives to someone else, so the money would go to your company; pay that comes to you is 「受け取る」 or 「もらう」.",
               "fr": "「あげる」 donne à quelqu'un d'autre : l'argent irait à ton entreprise ; la paie qu'on te verse, c'est 「受け取る」 ou 「もらう」."
@@ -554,13 +554,13 @@
             }
           },
           {
-            "jp": "ありがとうございます。家で書いてみます。",
-            "kana": "ありがとうございます。いえでかいてみます。",
-            "en": "Thank you. I'll try writing it at home.",
-            "fr": "Merci. J'essaierai de l'écrire à la maison.",
+            "jp": "ありがとうございます。家でこの紙に書いてみます。",
+            "kana": "ありがとうございます。いえでこのかみにかいてみます。",
+            "en": "Thank you. I'll try writing on this sheet at home.",
+            "fr": "Merci. J'essaierai d'écrire sur cette feuille à la maison.",
             "why": {
-              "en": "「書いてみます」 has you try writing something, but the sheet is there to be read: 「書いてあります」 says the instructions are already written on it.",
-              "fr": "「書いてみます」 te fait essayer d'écrire quelque chose, alors que la feuille est à lire : 「書いてあります」 dit que le mode d'emploi y est déjà écrit."
+              "en": "「書いてみます」 has you try writing on the sheet, but it is there to be read: 「書いてあります」 says the instructions are already written on it.",
+              "fr": "「書いてみます」 te fait essayer d'écrire sur la feuille, alors qu'elle est à lire : 「書いてあります」 dit que le mode d'emploi y est déjà écrit."
             }
           }
         ]
@@ -820,7 +820,7 @@
           "kana": "よろしくおねがいします。",
           "romaji": "yoroshiku onegai shimasu",
           "en": "Please do, thank you.",
-          "fr": "Volontiers, merci.",
+          "fr": "Très bien, merci.",
           "note": {
             "en": "「よろしくお願いします」 leaves the job in their hands with thanks: please do.",
             "fr": "「よろしくお願いします」 leur confie la tâche en remerciant : faites, je vous en prie."
@@ -831,23 +831,23 @@
         },
         "wrong": [
           {
-            "jp": "もう敷いてありますか。",
-            "kana": "もうしいてありますか。",
-            "en": "Is it already laid out?",
-            "fr": "Il est déjà installé ?",
+            "jp": "布団はもう敷いてありますか。",
+            "kana": "ふとんはもうしいてありますか。",
+            "en": "Is the futon already laid out?",
+            "fr": "Le futon est déjà installé ?",
             "why": {
               "en": "「敷いてありますか」 asks whether it is already done, when you have just been told it will be done during dinner.",
               "fr": "「敷いてありますか」 demande si c'est déjà fait, alors qu'on vient de te dire que ce sera pendant le dîner."
             }
           },
           {
-            "jp": "おかげさまで。",
-            "kana": "おかげさまで。",
+            "jp": "おかげさまで、元気です。",
+            "kana": "おかげさまで、げんきです。",
             "en": "I'm well, thanks to you.",
             "fr": "Je vais bien, grâce à vous.",
             "why": {
-              "en": "「おかげさまで」 answers when someone asks how you are or how something went, and nobody has asked.",
-              "fr": "「おかげさまで」 répond quand on te demande comment tu vas ou comment ça s'est passé, et personne ne l'a demandé."
+              "en": "「おかげさまで、元気です」 answers someone who has asked how you are, and nobody has asked.",
+              "fr": "「おかげさまで、元気です」 répond à quelqu'un qui t'a demandé comment tu vas, et personne ne l'a demandé."
             }
           }
         ]
@@ -994,10 +994,10 @@
             }
           },
           {
-            "jp": "明日の夜、七時から九時の間にお届けします。",
-            "kana": "あしたのよる、しちじからくじのあいだにおとどけします。",
-            "en": "I'll deliver it tomorrow evening, between seven and nine.",
-            "fr": "Je vous le livrerai demain soir, entre dix-neuf heures et vingt et une heures.",
+            "jp": "明日の夜、七時から九時の間に荷物をお届けします。",
+            "kana": "あしたのよる、しちじからくじのあいだににもつをおとどけします。",
+            "en": "I'll deliver the parcel tomorrow evening, between seven and nine.",
+            "fr": "Je vous livrerai le colis demain soir, entre dix-neuf heures et vingt et une heures.",
             "why": {
               "en": "「お届けします」 says you will do the delivering, the company's job; to ask for it, 「お願いします」.",
               "fr": "「お届けします」 dit que c'est toi qui livreras, le travail du transporteur ; pour le demander, 「お願いします」."
@@ -1057,15 +1057,18 @@
           "fr": "Pour vérifier, pouvez-vous me donner votre adresse ?"
         },
         "me": {
-          "jp": "はい、住所は中央三丁目、五の八です。",
-          "kana": "はい、じゅうしょはちゅうおうさんちょうめ、ごのはちです。",
-          "romaji": "hai, juusho wa chuuou sanchoume, go no hachi desu",
-          "en": "Yes, my address is 5-8 Chuo 3-chome.",
-          "fr": "Oui, mon adresse, c'est le 5-8, Chuo 3-chome.",
+          "jp": "はい、中央三丁目、五の八です。",
+          "kana": "はい、ちゅうおうさんちょうめ、ごのはちです。",
+          "romaji": "hai, chuuou sanchoume, go no hachi desu",
+          "en": "Yes, it's 5-8 Chuo 3-chome.",
+          "fr": "Oui, c'est le 5-8, Chuo 3-chome.",
           "note": {
             "en": "An address runs from the largest unit down: the district, its numbered section in 「丁目」, then the block and the house, with 「の」 between the two numbers.",
             "fr": "Une adresse va du plus grand au plus petit : le quartier, sa section numérotée en 「丁目」, puis le pâté de maisons et la maison, avec 「の」 entre les deux numéros."
-          }
+          },
+          "alt": [
+            {"jp": "はい、住所は中央三丁目、五の八です。", "kana": "はい、じゅうしょはちゅうおうさんちょうめ、ごのはちです。", "romaji": "hai, juusho wa chuuou sanchoume, go no hachi desu"}
+          ]
         },
         "wrong": [
           {
@@ -1268,10 +1271,10 @@
         },
         "wrong": [
           {
-            "jp": "金曜日なら大丈夫です。でも、行けません。",
-            "kana": "きんようびならだいじょうぶです。でも、いけません。",
-            "en": "Friday's fine for me. But I can't go.",
-            "fr": "Vendredi, ça me va. Mais je ne peux pas venir.",
+            "jp": "金曜日なら大丈夫です。でも、その日は行けません。",
+            "kana": "きんようびならだいじょうぶです。でも、そのひはいけません。",
+            "en": "Friday's fine for me. But I can't go that day.",
+            "fr": "Vendredi, ça me va. Mais ce jour-là, je ne peux pas venir.",
             "why": {
               "en": "「大丈夫です」 accepts Friday and 「行けません」 turns it down: the second sentence takes back the first.",
               "fr": "「大丈夫です」 accepte le vendredi et 「行けません」 le refuse : la seconde phrase reprend la première."
@@ -1364,28 +1367,29 @@
           "fr": "Merci d'avoir patienté. Qu'est-ce qui vous amène aujourd'hui ?"
         },
         "me": {
-          "jp": "引っ越してきたので、住所の手続きをお願いしたいんですが。",
-          "kana": "ひっこしてきたので、じゅうしょのてつづきをおねがいしたいんですが。",
-          "romaji": "hikkoshite kita node, juusho no tetsuzuki o onegai shitai n desu ga",
-          "en": "I've just moved here, so I'd like to register my new address.",
+          "jp": "引っ越してきたので、住所変更の手続きをお願いしたいんですが。",
+          "kana": "ひっこしてきたので、じゅうしょへんこうのてつづきをおねがいしたいんですが。",
+          "romaji": "hikkoshite kita node, juusho henkou no tetsuzuki o onegai shitai n desu ga",
+          "en": "I've just moved here, so I'd like to register my change of address.",
           "fr": "Je viens d'emménager ici, alors je voudrais faire mon changement d'adresse.",
           "note": {
-            "en": "「引っ越してきた」 uses 「〜てくる」: you moved here, into this town.",
-            "fr": "「引っ越してきた」 utilise 「〜てくる」 : tu as déménagé jusqu'ici, dans cette ville."
+            "en": "「引っ越してきた」 uses 「〜てくる」: you moved here, into this town, and 「住所変更の手続き」 names the errand, the change of address.",
+            "fr": "「引っ越してきた」 utilise 「〜てくる」 : tu as déménagé jusqu'ici, dans cette ville, et 「住所変更の手続き」 nomme la démarche, le changement d'adresse."
           },
           "alt": [
+            {"jp": "引っ越してきたので、住所変更の手続きをしたいんですが。", "kana": "ひっこしてきたので、じゅうしょへんこうのてつづきをしたいんですが。", "romaji": "hikkoshite kita node, juusho henkou no tetsuzuki o shitai n desu ga"},
             {"jp": "引っ越してきたので、住所の変更をしたいんですが。", "kana": "ひっこしてきたので、じゅうしょのへんこうをしたいんですが。", "romaji": "hikkoshite kita node, juusho no henkou o shitai n desu ga"}
           ]
         },
         "wrong": [
           {
-            "jp": "お待たせしました。",
-            "kana": "おまたせしました。",
-            "en": "Sorry to have kept you waiting.",
-            "fr": "Pardon de vous avoir fait attendre.",
+            "jp": "住所変更をしたいんですか。",
+            "kana": "じゅうしょへんこうをしたいんですか。",
+            "en": "Do you want to change your address?",
+            "fr": "Vous voulez changer d'adresse ?",
             "why": {
-              "en": "「お待たせしました」 apologises for keeping someone waiting, which is the clerk's line; you are the one who waited.",
-              "fr": "「お待たせしました」 s'excuse d'avoir fait attendre : c'est la phrase de l'agent, et c'est toi qui as attendu."
+              "en": "A question in 「〜たいんですか」 asks what the other person wants, so you are asking the clerk whether they want to change address; your own errand ends in 「〜たいんですが」.",
+              "fr": "Une question en 「〜たいんですか」 demande ce que veut l'autre : tu demandes à l'agent s'il veut changer d'adresse ; ta propre demande se termine par 「〜たいんですが」."
             }
           },
           {
@@ -1423,20 +1427,20 @@
         },
         "wrong": [
           {
-            "jp": "はい、拝見します。",
-            "kana": "はい、はいけんします。",
-            "en": "Yes, allow me to take a look.",
-            "fr": "Oui, permettez-moi d'y jeter un œil.",
+            "jp": "こちらこそ。",
+            "kana": "こちらこそ。",
+            "en": "Likewise.",
+            "fr": "Moi de même.",
             "why": {
-              "en": "「拝見します」 humbly says you will look at something, which is what the clerk is about to do; you are the one showing.",
-              "fr": "「拝見します」 dit humblement que tu vas regarder, ce que l'agent s'apprête à faire ; c'est toi qui montres."
+              "en": "「こちらこそ」 hands someone's thanks or greeting back to them (likewise), and nobody has thanked or greeted you: the clerk asked to see your card.",
+              "fr": "「こちらこそ」 renvoie à l'autre son remerciement ou sa salutation (« moi de même »), et personne ne t'a remercié ni salué : l'agent demandait à voir ta carte."
             }
           },
           {
-            "jp": "はい、見えます。",
-            "kana": "はい、みえます。",
-            "en": "Yes, I can see.",
-            "fr": "Oui, je vois.",
+            "jp": "はい、よく見えます。",
+            "kana": "はい、よくみえます。",
+            "en": "Yes, I can see well.",
+            "fr": "Oui, je vois bien.",
             "why": {
               "en": "「見えます」 says you can see; the clerk asked you to show the card, which takes 「見せる」.",
               "fr": "「見えます」 dit que tu vois ; l'agent te demandait de montrer la carte, ce qui se dit 「見せる」."
@@ -1467,13 +1471,13 @@
         },
         "wrong": [
           {
-            "jp": "大阪へ引っ越します。",
-            "kana": "おおさかへひっこします。",
-            "en": "I'm moving to Osaka.",
-            "fr": "Je déménage à Osaka.",
+            "jp": "大阪のアパートへ引っ越します。",
+            "kana": "おおさかのアパートへひっこします。",
+            "en": "I'm moving into a flat in Osaka.",
+            "fr": "Je déménage dans un appartement à Osaka.",
             "why": {
-              "en": "「大阪へ引っ越します」 says you are about to move to Osaka, when you have just moved here from there.",
-              "fr": "「大阪へ引っ越します」 dit que tu vas partir pour Osaka, alors que tu viens d'en arriver."
+              "en": "「引っ越します」 says you are about to move to Osaka, when you have just moved here from there.",
+              "fr": "「引っ越します」 dit que tu vas partir pour Osaka, alors que tu viens d'en arriver."
             }
           },
           {
@@ -1511,23 +1515,23 @@
         },
         "wrong": [
           {
-            "jp": "すみません、ペンを貸してもいいですか。",
-            "kana": "すみません、ペンをかしてもいいですか。",
-            "en": "Excuse me, may I lend you a pen?",
-            "fr": "Excusez-moi, je peux vous prêter un stylo ?",
+            "jp": "すみません、ボールペンを貸してもいいですか。",
+            "kana": "すみません、ボールペンをかしてもいいですか。",
+            "en": "Excuse me, may I lend you a ballpoint pen?",
+            "fr": "Excusez-moi, je peux vous prêter un stylo-bille ?",
             "why": {
               "en": "「貸す」 is to lend, so you are offering the clerk your pen; to borrow one, 「借りてもいいですか」.",
               "fr": "「貸す」, c'est prêter : tu proposes ton stylo à l'agent ; pour en emprunter un, 「借りてもいいですか」."
             }
           },
           {
-            "jp": "はい、書いてください。",
-            "kana": "はい、かいてください。",
-            "en": "Yes, please write it.",
-            "fr": "Oui, écrivez-la, s'il vous plaît.",
+            "jp": "すみません、この紙には何を書くつもりですか。",
+            "kana": "すみません、このかみにはなにをかくつもりですか。",
+            "en": "Excuse me, what are you planning to write on this sheet?",
+            "fr": "Excusez-moi, qu'est-ce que vous comptez écrire sur cette feuille ?",
             "why": {
-              "en": "「書いてください」 hands the clerk's request back to the clerk; it is you who has to fill in the form.",
-              "fr": "「書いてください」 renvoie à l'agent sa propre demande ; c'est à toi de remplir le formulaire."
+              "en": "「〜つもりですか」 asks what someone means to do, so you are asking what the clerk plans to write; what you should write is 「書けばいいですか」.",
+              "fr": "「〜つもりですか」 demande ce que quelqu'un compte faire : tu demandes ce que l'agent a l'intention d'écrire ; ce que tu dois écrire, c'est 「書けばいいですか」."
             }
           }
         ]
