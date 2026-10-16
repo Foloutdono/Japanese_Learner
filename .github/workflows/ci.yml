@@ -31,7 +31,10 @@ jobs:
           python-version: '3.12'
       - name: Install backend dependencies
         working-directory: backend
-        run: pip install -r requirements.txt
+        # numpy is not the app's (requirements.txt is Render's image): the
+        # operator scripts import it inside their functions, and
+        # tests/test_long_video_audio.py imports it to check their mix.
+        run: pip install -r requirements.txt numpy
       - name: Load schema
         run: psql "$DATABASE_URL" -f backend/srs/data_structure.sql
       - name: Run backend tests
