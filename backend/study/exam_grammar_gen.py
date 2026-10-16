@@ -69,7 +69,7 @@ def _pattern_core(pattern: str) -> str:
     # A label in full-width parentheses goes too ("〜も（強調）" -> "も",
     # "〜な（禁止）" -> "な"): kept, the core was text no sentence holds,
     # and those points could never be asked in 文の文法2 (found by the
-    # plan 225 seed papers' writers).
+    # plan 228 seed papers' writers).
     if "〜" in pattern:
         pattern = pattern.rsplit("〜", 1)[1]
     return re.split(r"[／(（]", pattern)[0].strip()
@@ -277,7 +277,7 @@ def _validate_star_item(point: dict, item, level: str, q_id: str, number: int, r
     # cover the whole sentence, so the last is the one ending in 。 and
     # the first the one that opens it, and a ★ on either was answered
     # by punctuation rather than by building the sentence (found by the
-    # plan 225 seed papers' review). A grammar piece in a middle slot
+    # plan 228 seed papers' review). A grammar piece in a middle slot
     # keeps the ★; one at either end hands it to its neighbour.
     star_index = star_slot(claimed_index)
     answer_id = order[star_index]

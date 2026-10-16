@@ -1,7 +1,7 @@
 # ── The exam catalogue ───────────────────────────────────────
 # Which exam ids exist, which generator (and generator_version) makes
 # each one's papers, and which blueprint mondai each kind is made of.
-# Moved out of routes/exams.py (plan 225) so that what needs only the
+# Moved out of routes/exams.py (plan 228) so that what needs only the
 # registry -- the seed papers' loader (study/exam_seed.py) and the
 # script that authors them (scripts/exam_seed.py) -- can read it without
 # importing the route, whose import migrates the exam tables. The route

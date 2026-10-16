@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 ensure_exam_schema()
 
-# The pool's floor (plan 225): every exam id's seed papers, stored as
+# The pool's floor (plan 228): every exam id's seed papers, stored as
 # ordinary revisions before any learner opens an exam. A bad seed file
 # must not stop the route from importing; the papers already stored
 # are served regardless.

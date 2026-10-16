@@ -371,7 +371,7 @@ upserted into `comprehension_pool` when `routes/reading.py` is imported,
 keyed on `seed_key` so a corrected seed updates its row. The prewarm
 scripts grow the pools past that floor; `prewarm_comprehension_pool`
 reports the seeded and the generated rows apart. Exam papers have
-seeds too (plan 225): `content/exam_seed/<exam_id>.json`, ten papers
+seeds too (plan 228): `content/exam_seed/<exam_id>.json`, ten papers
 per exam id (kind × level), stored into `exam_papers` as ordinary
 revisions of the current `generator_version` when `routes/exams.py` is
 imported (`study/exam_seed.py`, keyed on `seed_key`; a changed seed
