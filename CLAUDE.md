@@ -665,7 +665,7 @@ ledger to keep in sync and no state to corrupt. Read-only, no database, no `.env
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does
 not). `tests/test_audit_slice.py` holds the rotation to the playbook's
-promises. Vocab is the one bank too big to walk exhaustively — 8,091 entries
+promises. Vocab is the one bank too big to walk exhaustively — 7,971 entries
 at 40 a run — so its slices are ordered risk-first by the disagreements with
 JMdict the script can find on its own, and the `flags` it prints are a reason
 to look rather than findings.
