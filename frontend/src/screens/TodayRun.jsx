@@ -8,6 +8,7 @@ import { SessionPanel } from '../components/study/SessionPanel'
 import { SideLookup } from '../components/analysis/SideLookup'
 import { GrammarLessonSheet } from '../components/study/GrammarLesson'
 import { GrammarGate } from '../components/study/GrammarGate'
+import { GlyphGate, glyphGated } from '../components/study/GlyphGate'
 import { TourRoute, TourLedger } from '../components/study/TourPanels'
 import { useAsk } from '../hooks/useAsk'
 import { useDesk } from '../hooks/useDesk'
@@ -320,6 +321,10 @@ export default function TodayRun({ session }) {
     level: /^grammar_(N[1-5])_/.exec(c.raw_id ?? c.card_id)?.[1],
     pattern: c.grammar, structure: c.structure, meaning: c.meaning, stage: c.stage,
   })
+  // 初見 (plan 216): a kana or a kanji never met is shown before it is
+  // drilled -- what it reads, its strokes traced, a few words -- as a
+  // grammar point is asked. Seen is the same flag on the queued card.
+  const glyphing = (structureKey === 'kana' || structureKey === 'kanji') && glyphGated(card)
   // 発見 on the desk (plan 187f): a point's tour stands on the three
   // panels, its stops at the left and its plate at the right, from what
   // the tour says of where it stands.
@@ -455,7 +460,7 @@ export default function TodayRun({ session }) {
       onToastDone={gates.toastDone}
       records
       panel={touring ? <TourRoute point={lessonOf(card)} view={tourView} ask={asking} />
-        : card ? <CardPanel card={card} remaining={remaining} keys={structureKey === 'kanji' && renderer === RENDER.TYPE ? 'readings' : undefined} /> : null}
+        : card && !glyphing ? <CardPanel card={card} remaining={remaining} keys={structureKey === 'kanji' && renderer === RENDER.TYPE ? 'readings' : undefined} /> : null}
       done={done}
       side={error && !card ? null : (
         <SideLookup lookup={comparing} onExit={closeCompared} session={session}>
@@ -486,7 +491,13 @@ export default function TodayRun({ session }) {
           </div>
         )}
 
-        {card && !gated && (
+        {card && glyphing && (
+          <div className="gt-gate">
+            <GlyphGate card={card} session={session} onBoard={() => updateCurrent({ lesson_seen: true })} />
+          </div>
+        )}
+
+        {card && !gated && !glyphing && (
           <>
             {/* The help switch sits above the card, which is where the
                 section screens put it. Below the card it was past the

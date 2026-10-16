@@ -26411,6 +26411,137 @@ button.brd-stn { cursor: pointer; }
   .tour__done, .tour-guess { transition: none; }
 }
 
+/* ══ 初見 — a kana or a kanji met before it is drilled (plan 216) ══════
+   The tour's frame above for a glyph (components/study/GlyphTour.jsx):
+   three stops -- what it reads, its strokes traced, a few words -- one
+   card each, the gate at the foot. The line is the run's own: the stage
+   sets it per card (a kana from Today's queue is 朱, a kanji 藤), and the
+   tour above names grammar's only because Today's run is not 文法's, so
+   the glyph's tour takes the stage's back. */
+.tour--glyph { --line-color: inherit; }
+/* The gate in the card's place, as grammar's (.gl-gate): the tour takes
+   the stage's room under its head, its gate at the screen's foot. */
+.gt-gate { flex: 1; display: flex; flex-direction: column; }
+/* Read: the glyph as the study card's specimen (CharDisplay's glyph
+   rung, the same object the card will ask), then what it reads. */
+.gt-read { container-type: inline-size; align-items: center; text-align: center; gap: var(--sp-3); }
+.gt-romaji {
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--tour-ink);
+}
+.gt-meaning { font-size: var(--fs-title); text-wrap: balance; }
+.gt-twin {
+  flex-direction: row;
+  justify-content: center;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-size: var(--fs-body);
+  color: var(--text-secondary);
+}
+.gt-twin__glyph { font-family: var(--font-jp); font-size: var(--fs-title); color: var(--text-primary); }
+.gt-readings { align-items: center; }
+/* Write: the writing board's slab (sumi in both themes, the practice
+   sheet's 田 over it, DrawingCanvas) in the card's middle. As a writing
+   run's board is (DESIGN.md, "The study stage on a phone"), it is the
+   square the card's head, what the tour says back and the gate leave:
+   the middle takes the card's free height and the board the smaller of
+   its two sides, so a miss's word never lands under the gate. Never
+   under 200px, where the screen scrolls instead. The strokes are its
+   brush: traced ones in the brush's ink, the ones ahead faint, the one
+   asked in the line's pigment lit toward the ink so it reads on the
+   sumi, with a full dot where it starts and a ring where it ends. */
+.gt-write {
+  flex: 1 1 0;
+  min-height: 200px;
+  container-type: size;
+  align-items: center;
+  padding-block: var(--sp-3);
+}
+.gt-board {
+  --gt-now: color-mix(in srgb, var(--line-color) 70%, var(--text-on-panel));
+  position: relative;
+  width: min(100cqw, 100cqh, 360px);
+  aspect-ratio: 1;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: var(--bg-panel);
+}
+.gt-board .canvas-grid { border-radius: var(--r-card); }
+.gt-glyph,
+.gt-missed,
+.gt-pen { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.gt-glyph,
+.gt-missed { pointer-events: none; }
+.gt-stroke {
+  fill: none;
+  stroke: var(--brush-ink);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.gt-stroke--ahead,
+.gt-stroke--here { opacity: 0.2; }
+/* Drawn in along its way: the stroke asked (again after each miss),
+   a stroke the board traced for the learner, and « Montre-moi »'s,
+   one after the other. */
+.gt-stroke--now,
+.gt-stroke--given,
+.gt-stroke--shown { stroke-dasharray: 1; animation: gt-draw 600ms ease-in-out both; }
+.gt-stroke--now { stroke: var(--gt-now); }
+.gt-stroke--shown { animation-delay: calc(var(--i, 0) * 450ms); }
+@keyframes gt-draw {
+  from { stroke-dashoffset: 1; }
+  to   { stroke-dashoffset: 0; }
+}
+.gt-start { fill: var(--gt-now); }
+.gt-end { fill: none; stroke: var(--gt-now); stroke-width: 1.5; }
+/* The pen takes the pointer; a finger on it never scrolls the page. */
+.gt-pen { touch-action: none; cursor: crosshair; }
+.gt-pen--off { cursor: default; }
+.gt-pen polyline,
+.gt-missed polyline {
+  fill: none;
+  stroke: var(--brush-ink);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* A missed line, a moment in the miss's ink, then gone. */
+.gt-missed polyline { stroke: var(--rating-wrong); }
+.gt-missed { animation: gt-fade 700ms ease-out forwards; }
+@keyframes gt-fade {
+  from { opacity: 0.9; }
+  to   { opacity: 0; }
+}
+/* Use: the words as the dictionary's ledger has them (.dict-word): the
+   glyph picked out in the line's ink, the gloss at the row's end, the
+   voice beside it. */
+.gt-words { gap: 0; }
+.gt-word {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: var(--sp-4);
+  padding-block: var(--sp-4);
+  border-top: 1px solid var(--surface-line);
+}
+.gt-word:first-child { border-top: none; padding-top: 0; }
+.gt-word:last-child { padding-bottom: 0; }
+.gt-word__jp { font-family: var(--font-jp); font-size: var(--fs-heading); line-height: 1.5; }
+.gt-word__jp ruby { ruby-position: over; ruby-align: space-between; }
+.gt-word__jp rt { font-size: var(--fs-caption); font-weight: 500; color: var(--text-secondary); }
+.gt-word__hit,
+.gt-word__hit rt { color: var(--tour-ink); font-weight: 700; }
+.gt-word__gloss { font-size: var(--fs-body); line-height: 1.4; color: var(--text-secondary); text-align: end; text-wrap: pretty; }
+@media (prefers-reduced-motion: reduce) {
+  .gt-stroke--now,
+  .gt-stroke--given,
+  .gt-stroke--shown { animation: none; stroke-dasharray: none; }
+}
+
 /* The register, in the plate's corner: a word in the caption register,
    the way the level numeral beside it is. */
 .gl-register {
@@ -40790,6 +40921,9 @@ button.brd-stn { cursor: pointer; }
      whole column, its sentence a step up. */
   .tour--desk .tour__body { justify-content: safe center; }
   .tour--desk .tour-leaf { flex: none; min-height: min(340px, 50vh); }
+  /* 初見's writing stop (plan 216): its card takes the column's height,
+     so the board is the square the column leaves over the gate. */
+  .tour--desk .tour-leaf:has(> .gt-write) { flex: 1 1 auto; }
   .tour--desk .tour-leaf__mid--spec .dict-ex__jp,
   .tour--desk .tour-look:not(.tour-look--mini) .dict-ex__jp { font-size: var(--fs-heading); }
 

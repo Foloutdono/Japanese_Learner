@@ -47,6 +47,14 @@ row — `tutorial_at`, when the rides ended (finished or skipped), and
 `routes/onboarding.py`. A lesson is the real component fed a literal and
 writes nothing else — see `docs/adr/0017`.
 
+**First sight** (初見) — the tour a kana or a kanji opens on the first
+time it comes up, in the card's place: what it reads, its strokes traced
+from the dot to the ring, a few words it is met in. Once per character,
+never per mode; a combination (きゃ) has none. Carried on the card as
+`glyph_tour` while `tutorial` says it is due (`study/glyph_tour.py`),
+recorded in `glyph_tours`. The grammar point's counterpart is its tour
+(発見).
+
 **Ration** — the day's new cards on the daily queue: what is left of
 `daily_new_target` after today's first-ever reviews, offered beside the
 reviews (`study/daily_queue.ration`). Kana first for a learner who does not

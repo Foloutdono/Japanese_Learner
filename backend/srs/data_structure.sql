@@ -988,6 +988,21 @@ CREATE TABLE grammar_tours (
     PRIMARY KEY (user_id, card_id)
 );
 
+-- ── 初見 — how a kana or a kanji's first tour went ──────────────────
+-- Owned by study/glyph_tour.py (plan 216). One row per character a learner
+-- was toured through before its first card, the first tour only: the
+-- traces that missed and whether the board drew the strokes for them.
+-- Read by nothing the scheduler runs. No cascade from auth (ADR 0010):
+-- DELETE /api/account and scripts/purge_orphans.py clear it.
+CREATE TABLE glyph_tours (
+    user_id  TEXT NOT NULL,
+    card_id  TEXT NOT NULL,
+    misses   SMALLINT NOT NULL,
+    shown    BOOLEAN NOT NULL,
+    done_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, card_id)
+);
+
 -- ── 足跡 — the trail of screens a learner walked ─────────────────────
 -- Owned by core/events.py, written by routes/events.py (a batch the
 -- client queues and flushes) and by core/credits.py (the fare gate's

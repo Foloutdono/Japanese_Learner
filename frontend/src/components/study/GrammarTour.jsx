@@ -137,7 +137,7 @@ function Pattern({ point }) {
   )
 }
 
-function Track({ at, total }) {
+export function Track({ at, total }) {
   const { t } = useLang()
   const pos = n => (total > 1 ? (n / (total - 1)) * 100 : 0)
   return (

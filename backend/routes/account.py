@@ -110,6 +110,7 @@ PLAN = [
     ("dictionary_favorites", "user_id = %(user)s",      "the dictionary's shelf of kept entries"),
     ("agenda_blocks",       "user_id = %(user)s",       "the weekly agenda: study blocks and their reminders"),
     ("grammar_tours",       "user_id = %(user)s",       "how each grammar point's first tour went (plan 187)"),
+    ("glyph_tours",         "user_id = %(user)s",       "how each kana and kanji's first tour went (plan 216)"),
     ("credit_ledger",       "user_id = %(user)s",       "the credit ledger: refills, fares, grants"),
     ("credit_stops",        "user_id = %(user)s",       "where the credits stopped a run: the offer's week"),
     ("event_log",           "user_id = %(user)s",       "足跡: which screens were opened, and when"),

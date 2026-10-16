@@ -42,6 +42,7 @@ from routes.agenda          import router as agenda_router
 from routes.decks           import router as decks_router
 from routes.translations    import router as translations_router
 from routes.grammar         import router as grammar_router
+from routes.glyph           import router as glyph_router
 from routes.phrase           import router as phrase_router
 from routes.reading          import router as reading_router
 from routes.dictation        import router as dictation_router
@@ -191,6 +192,7 @@ app.include_router(agenda_router)
 app.include_router(decks_router)
 app.include_router(translations_router)
 app.include_router(grammar_router)
+app.include_router(glyph_router)
 app.include_router(phrase_router)
 app.include_router(reading_router)
 app.include_router(dictation_router)

@@ -1567,6 +1567,20 @@ const dictionary = {
   tourScore: (r, n) => `${r} of ${n}`,
   tourSheet: "The point's sheet",
   tourStart: 'Start: Choose 1',
+  // 初見 — a kana or a kanji met for the first time (plan 216)
+  glyphAria:         g => `Meet ${g}`,
+  glyphNew:          { kana: 'New kana', kanji: 'New kanji' },
+  glyphTwin:         { hiragana: 'in hiragana', katakana: 'in katakana' },
+  glyphStops:        { read: 'Read', write: 'Write', use: 'In words' },
+  glyphStrokeCount:  (n, total) => `Stroke ${n} of ${total}`,
+  glyphTraceQ:       'Trace each stroke from the dot to the ring.',
+  glyphMiss:         { start: 'Start on the full dot.', end: 'Go all the way to the ring.', path: 'Follow the stroke.' },
+  glyphGiven:        'This stroke is drawn for you.',
+  glyphTraced:       misses => (misses ? 'Traced.' : 'Traced first time.'),
+  glyphShowMe:       'Show me',
+  glyphShown:        'That is how it is written.',
+  glyphBoardAria:    (g, n, total) => `Trace ${g}, stroke ${n} of ${total}`,
+  glyphStart:        'Start',
   // 文法 — the lesson (plan 087): the pair marks over the steps, the
   // door on every card and the station's index, the gate's one button.
   glLesson:          'Lesson',

@@ -7,6 +7,7 @@ from core import credits
 from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
+from study.glyph_tour import mark_glyph_tours
 from study.modes import (
     B2F, GRADED_FOR_SOURCE, INDICE_CHOICES, KANA, Mode, require_mode, resolve_for_source,
 )
@@ -229,7 +230,7 @@ def get_kana_card(set_name: str, m: Mode = Depends(require_mode(KANA)),
 
 @router.get("/api/kana/cards")
 def get_kana_cards(set_name: str, count: int = Query(10, ge=1, le=100), exclude: str = "",
-                    beyond_target: bool = Query(False),
+                    beyond_target: bool = Query(False), lang: str = Query("fr", max_length=8),
                     m: Mode = Depends(require_mode(KANA)),
                     user_id: str = Depends(get_user_id)):
     """
@@ -239,6 +240,8 @@ def get_kana_cards(set_name: str, count: int = Query(10, ge=1, le=100), exclude:
     of raw (unprefixed) card ids the client already has queued but
     hasn't reviewed yet. `beyond_target` is the 臨時列車: the learner
     explicitly asking for new cards past today's pace (core/pace.py).
+    `lang` is the language of the words a first-sight tour shows (初見,
+    plan 216): a kana never met before carries its tour.
     """
     pace = resolve_pace(user_id)
     kana_list, cards = _select_cards(
@@ -250,6 +253,7 @@ def get_kana_cards(set_name: str, count: int = Query(10, ge=1, le=100), exclude:
     )
     if kana_list is None:
         return {"error": "Unknown set"}
+    mark_glyph_tours(cards, user_id, lang)
     return {"cards": cards, "pace": pace.payload() if pace else None}
 
 
