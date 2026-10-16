@@ -65,9 +65,14 @@ def _pattern_core(pattern: str) -> str:
     # Known-weak on 2-part patterns like "から〜まで" (reduces to just
     # "まで") -- accepted, documented limitation rather than a deeper
     # parse for a handful of entries.
+    #
+    # A label in full-width parentheses goes too ("〜も（強調）" -> "も",
+    # "〜な（禁止）" -> "な"): kept, the core was text no sentence holds,
+    # and those points could never be asked in 文の文法2 (found by the
+    # plan 228 seed papers' writers).
     if "〜" in pattern:
         pattern = pattern.rsplit("〜", 1)[1]
-    return pattern.split("／")[0].split("(")[0].strip()
+    return re.split(r"[／(（]", pattern)[0].strip()
 
 
 # ── 文の文法1: grammar-fill ──────────────────────────────────
@@ -221,6 +226,12 @@ of exactly {n} objects, ONE PER POINT IN THE SAME ORDER, each matching:
 """
 
 
+def star_slot(grammar_index: int) -> int:
+    """The ★'s slot for a sentence whose grammar piece is at
+    `grammar_index`: never the first or the last of the four."""
+    return min(max(grammar_index, 1), 2)
+
+
 def _validate_star_item(point: dict, item, level: str, q_id: str, number: int, rng: random.Random) -> dict:
     """Same validation _build_one_star_question used to do inline,
     split out so it can be applied to each element of a batch response
@@ -262,7 +273,13 @@ def _validate_star_item(point: dict, item, level: str, q_id: str, number: int, r
 
     ids = ["p1", "p2", "p3", "p4"]
     order = list(ids)  # pieces_text is already in correct grammatical (reading) order
-    star_index = claimed_index
+    # The ★ sits on a middle slot, as on the real paper: the pieces
+    # cover the whole sentence, so the last is the one ending in 。 and
+    # the first the one that opens it, and a ★ on either was answered
+    # by punctuation rather than by building the sentence (found by the
+    # plan 228 seed papers' review). A grammar piece in a middle slot
+    # keeps the ★; one at either end hands it to its neighbour.
+    star_index = star_slot(claimed_index)
     answer_id = order[star_index]
 
     display_pieces = [{"id": ids[i], "textJp": t} for i, t in enumerate(pieces_text)]

@@ -9,10 +9,10 @@ KANJIDIC2 in RAM — kanji_radicals.json three separate times — and two of
 those loads existed only to build an index immediately restricted to the
 app's own deck. A SQLite file read on demand keeps the footprint roughly
 constant however large the dump gets, which is what lets the dictionary
-serve all 13,108 characters instead of the deck's 2,212.
+serve all 13,108 characters instead of the deck's 2,383.
 
 The database holds EVERY character, not just the ones outside the deck.
-in_deck marks the 2,212 the app teaches. Keeping both halves in one table
+in_deck marks the 2,383 the app teaches. Keeping both halves in one table
 is what lets radical browsing be a single indexed query in a paper-漢和辞典
 order (by stroke count) rather than an in-memory merge of two sources.
 
@@ -39,6 +39,9 @@ Usage:
     cd backend && python -m scripts.build_kanji_db --french-only
         # kanji_meanings_fr.json into the shipped database, in place,
         # without the KANJIDIC2 export (which is not in a fresh clone)
+    cd backend && python -m scripts.build_kanji_db --deck-only
+        # ... and kanji_deck.json's membership (in_deck) with it: what
+        # adding a character to the deck needs (plan 226)
 """
 import argparse
 import glob
@@ -267,6 +270,23 @@ def apply_french(conn: sqlite3.Connection, data_dir: str) -> int:
     return cur.rowcount
 
 
+def apply_deck(conn: sqlite3.Connection, data_dir: str) -> int:
+    """kanji_deck.json's membership over in_deck, in place: what a deck
+    change needs from the database, without the KANJIDIC2 export a full
+    build reads (plan 226 added the 171 jōyō characters the deck lacked).
+    Every other column is KANJIDIC2's and does not move with the deck."""
+    with open(os.path.join(data_dir, "kanji_deck.json"), encoding="utf-8") as f:
+        deck = json.load(f)
+    chars = {e["kanji"] for level in LEVELS for e in deck.get(level, [])}
+    conn.execute("UPDATE kanji SET in_deck = 0")
+    cur = conn.executemany("UPDATE kanji SET in_deck = 1 WHERE char = ?", [(c,) for c in chars])
+    absent = chars - {c for (c,) in conn.execute("SELECT char FROM kanji WHERE in_deck = 1")}
+    if absent:
+        print(f"  ! {len(absent)} deck characters are not in the database: {''.join(sorted(absent))}")
+    print(f"  {len(chars) - len(absent)} characters marked in_deck")
+    return cur.rowcount
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--data-dir", default=_DATA_DIR)
@@ -274,9 +294,13 @@ def main() -> None:
     p.add_argument("--kanjivg-dir", default=_KANJIVG_DIR)
     p.add_argument("--french-only", action="store_true",
                    help="apply kanji_meanings_fr.json to the existing database and stop")
+    p.add_argument("--deck-only", action="store_true",
+                   help="apply kanji_deck.json (in_deck) and kanji_meanings_fr.json to the existing database and stop")
     a = p.parse_args()
-    if a.french_only:
+    if a.french_only or a.deck_only:
         conn = sqlite3.connect(a.out)
+        if a.deck_only:
+            apply_deck(conn, a.data_dir)
         apply_french(conn, a.data_dir)
         conn.commit()
         conn.execute("VACUUM")

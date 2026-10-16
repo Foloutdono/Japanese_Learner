@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **226**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **229**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -173,6 +173,24 @@ runtime purpose.
   JMdict and Tatoeba text has its French in `datas/vocab/jmdict_fr.sqlite3`
   (plan 215); a pool word is glossed from it (`jmdict_fr.pool_meaning`),
   never from `VOCAB_FR`, which is the course's and keyed by written form.
+- **The kanji deck is the course's and the gates'.** `datas/kanji/kanji_deck.json`
+  is what each level teaches and what every kanji gate admits
+  (`llm_shared.kanji_set_for_level`), so it holds the whole jōyō list
+  (plan 226 added the 171 it lacked, 的・無・身・誰 among them). After any
+  change to it run `python -m scripts.build_kanji_db --deck-only` (the
+  database's `in_deck` and French) and `python -m scripts.build_frequency_index
+  --kanji-db` (the teaching order); a new character carries its French in
+  `kanji_meanings_fr.json` where KANJIDIC2 has none. Adding is free;
+  moving a character between levels is a migration (`kanji_renames`).
+- **An example sentence is corrected in the layer, not in JMdict (plan
+  227).** The deck's Tatoeba sentences are read through
+  `content/example_fixes.py` (`datas/vocab/example_fixes.json`): a
+  correction keeps every course word the sentence showed, carries its
+  `en`, `fr` and `why`, and is drafted and checked with
+  `python -m scripts.vocab_examples check`. A word JMdict gives no
+  sentence has two written for it (`datas/vocab/example_added.json`,
+  `check-added`: its course spelling, no kanji above its level), so every
+  card shows one; a word the deck gains is written for in the same change.
 - **A width change is held on both sides.** A desk change keeps the phone's
   DOM unchanged (`src/deskfree.phone.test.jsx`), and the short desk
   (1280×600, the `short` lane) is checked too. A phone bug fixed gets its own
@@ -352,9 +370,32 @@ same checks as a model answer by `tests/test_comprehension_seed.py`) is
 upserted into `comprehension_pool` when `routes/reading.py` is imported,
 keyed on `seed_key` so a corrected seed updates its row. The prewarm
 scripts grow the pools past that floor; `prewarm_comprehension_pool`
-reports the seeded and the generated rows apart. Exam papers have no
-seed -- a paper is ~35 model calls -- so `prewarm_exam_papers` is the
-only thing that spares the first learner at each exam id the wait.
+reports the seeded and the generated rows apart. Exam papers have
+seeds too (plan 228): `content/exam_seed/<exam_id>.json`, ten papers
+per exam id (kind × level), stored into `exam_papers` as ordinary
+revisions of the current `generator_version` when `routes/exams.py` is
+imported (`study/exam_seed.py`, keyed on `seed_key`; a changed seed
+rewrites its row while nobody has sat it, and otherwise retires that
+revision and is stored as a new one). They are made by the generators
+themselves, with the model's replies written by Claude rather than
+bought: `scripts/exam_seed.py` replays an exam id's generator with every
+model call answered from a file, so a seed passes every check a
+generated paper does, and `tests/test_exam_seed.py` holds each exam id
+to ten complete papers whose choices' length says nothing. **A bump of
+an exam id's `generator_version` retires its seeds with its papers**:
+the test fails until they are rebuilt.
+
+```bash
+cd backend
+python -m scripts.exam_seed status                # seeds per exam id
+python -m scripts.exam_seed run n4-grammar-01     # replay; prints the next prompt to answer
+python -m scripts.exam_seed check n4-grammar-01   # what the test holds the file to
+```
+
+No seed ships its audio: a listening question's `audioSrc` names the
+clip of its own script, made on first request
+(`study/exam_audio_repair.py`); `python -m scripts.revoice_audio --yes`
+makes them all ahead of the first learner.
 
 Three are one-shots, each run once after a deploy that changed the ids a
 content set serves — `content/grammar/renames.py` for grammar points,
@@ -666,7 +707,7 @@ ledger to keep in sync and no state to corrupt. Read-only, no database, no `.env
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does
 not). `tests/test_audit_slice.py` holds the rotation to the playbook's
-promises. Vocab is the one bank too big to walk exhaustively — 8,091 entries
+promises. Vocab is the one bank too big to walk exhaustively — 7,971 entries
 at 40 a run — so its slices are ordered risk-first by the disagreements with
 JMdict the script can find on its own, and the `flags` it prints are a reason
 to look rather than findings.

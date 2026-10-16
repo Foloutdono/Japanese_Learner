@@ -240,7 +240,8 @@ def test_volumes_counts_items_not_cards(client):
     # plan 153: 時 じ, 年 ねん, 月 がつ, 杯 はい; plan 186c: the basics moved
     # down (円, 分, 日本, 週, 週間, five greetings) and the months added.
     assert body["vocab"]["N5"] == 704
-    assert body["kanji"]["N1"] == 1232
+    # plan 226: the 93 jōyō characters the deck lacked at N1.
+    assert body["kanji"]["N1"] == 1325
     # 238: the gojūon and the yōon of both scripts, and the fourteen
     # long vowels the syllabary was missing (content/kana_data.py).
     assert body["kana"] == 238

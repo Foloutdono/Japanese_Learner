@@ -40,7 +40,7 @@ from content.vocab_extras import get_vocab_extras, word_category
 from study.exam_blueprint import LEVEL_BLUEPRINT
 from study.exam_gen_utils import GenerationFailed, make_choices, kanji_instruction, call_llm_json_batch
 from study.exam_pipeline import generate_paper
-from study.llm_shared import chat, sentence_kanji_ok, llm_configured
+from study.llm_shared import chat, sentence_kanji_ok, llm_configured, offending_kanji
 import study.exam_kanji_gen as exam_kanji_gen
 
 logger = logging.getLogger(__name__)
@@ -349,6 +349,13 @@ of exactly {n} objects, ONE PER WORD IN THE SAME ORDER, each matching:
 """
 
 
+def _dropped(what: str, display: str, why: str) -> None:
+    """A model's item not kept, and why: the log line that tells a
+    prompt's failures apart (scripts/exam_seed.py prints them to whoever
+    is writing the replies, plan 228)."""
+    logger.warning("%s item for %s dropped: %s", what, display, why)
+
+
 def _pick_batch(candidates: list[dict], pos: int, batch_size: int,
                  used_words: set, used_prompts: set) -> tuple[list[dict], int]:
     """Walks `candidates` from `pos`, skipping words already used
@@ -394,20 +401,26 @@ def _build_vocab_paraphrase_mondai(spec: dict, pool: list[dict], used_words: set
         for word, item in zip(batch, items):
             display = _display(word)
             if not isinstance(item, dict):
+                _dropped("paraphrase", display, "not an object")
                 continue
             sentence = item.get("sentenceJp")
             choices_text = item.get("choices")
             correct_index = item.get("correctIndex")
             if not isinstance(sentence, str) or sentence.count("【") != 1 or sentence.count("】") != 1:
+                _dropped("paraphrase", display, "the sentence does not bracket the word exactly once")
                 continue
             clean, bracketed = _extract_bracket(sentence)
             if clean is None or not sentence_kanji_ok(clean, level):
+                _dropped("paraphrase", display, f"kanji outside {level}: {offending_kanji(clean or sentence, level)}")
                 continue
             if not isinstance(choices_text, list) or len(choices_text) != 4:
+                _dropped("paraphrase", display, "not 4 choices")
                 continue
             if not all(isinstance(c, str) and c.strip() for c in choices_text) or len(set(choices_text)) != 4:
+                _dropped("paraphrase", display, "an empty or repeated choice")
                 continue
             if not isinstance(correct_index, int) or not (0 <= correct_index < 4):
+                _dropped("paraphrase", display, "correctIndex is not 0-3")
                 continue
             if choice_repeats_target(choices_text, bracketed, word):
                 logger.warning("paraphrase item for %s offers the target word itself: %r", display, choices_text)
@@ -485,26 +498,32 @@ def _build_vocab_usage_mondai(spec: dict, pool: list[dict], used_words: set, use
                 break
             display = _display(word)
             if not isinstance(item, dict):
+                _dropped("usage", display, "not an object")
                 continue
             sentences = item.get("sentences")
             correct_index = item.get("correctIndex")
             if not isinstance(sentences, list) or len(sentences) != 4:
+                _dropped("usage", display, "not 4 sentences")
                 continue
             if not isinstance(correct_index, int) or not (0 <= correct_index < 4):
+                _dropped("usage", display, "correctIndex is not 0-3")
                 continue
 
             cleaned = []
-            valid = True
+            why = None
             for s in sentences:
                 if not isinstance(s, str) or s.count("【") != 1 or s.count("】") != 1:
-                    valid = False
+                    why = "a sentence does not bracket the word exactly once"
                     break
                 clean, _bracketed = _extract_bracket(s)
                 if clean is None or not sentence_kanji_ok(clean, level):
-                    valid = False
+                    why = f"kanji outside {level}: {offending_kanji(clean or s, level)}"
                     break
                 cleaned.append(clean)
-            if not valid or len(set(cleaned)) != 4:
+            if why is None and len(set(cleaned)) != 4:
+                why = "two sentences are the same"
+            if why is not None:
+                _dropped("usage", display, why)
                 continue
 
             ids = ["c1", "c2", "c3", "c4"]
