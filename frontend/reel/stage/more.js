@@ -64,11 +64,14 @@ const PREVIEW = lang => [
 // bucket, and per deck `items`, its cards counted once. The decks and
 // their sizes are the bundle's (reel_fixtures.deck_sizes); how far the
 // learner has come in each is theirs: kana held, the levels under
-// theirs nearly done, their own level a third of the way.
+// theirs nearly done, their own level a third of the way (and, at XP
+// level 1 or 2, barely begun).
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 const KANA_HELD = { hiragana_basic: 1, hiragana_combos: 1, katakana_basic: 0.97, katakana_combos: 0.78 }
 
-function shareOf(source, deck, level) {
+function shareOf(source, deck, level, novice) {
+  // A learner on their first days has barely begun the first set.
+  if (novice) return source === 'kana' && deck === 'hiragana_basic' ? 0.08 : 0
   if (source === 'kana') return KANA_HELD[deck] ?? 0
   const at = LEVELS.indexOf(level)
   const i = LEVELS.indexOf(deck)
@@ -77,14 +80,15 @@ function shareOf(source, deck, level) {
   return 0
 }
 
-export function statsOf(decks, level) {
+export function statsOf(decks, level, xpLevel = 12) {
   if (!decks) return STATS
+  const novice = xpLevel <= 2
   const out = { items: {} }
   for (const [source, byDeck] of Object.entries(decks)) {
     out[source] = {}
     out.items[source] = {}
     for (const [deck, { items, modes }] of Object.entries(byDeck)) {
-      const share = shareOf(source, deck, level)
+      const share = shareOf(source, deck, level, novice)
       const learned = Math.round(items * share)
       out.items[source][deck] = {
         total: items, learned, started: Math.min(items, Math.round(items * Math.min(1, share * 1.08))),
@@ -162,7 +166,7 @@ export function installMoreFixtures(part) {
   route('GET', /^\/api\/decks\/(?<id>\d+)\/modes$/, () => ({ modes: ['vocab.flashcard.f2b', 'vocab.flashcard.b2f'] }))
 
   // ── 定期券 — the pass's figures ──
-  route('GET', '/api/stats', () => statsOf(part.bundle?.decks, part.level))
+  route('GET', '/api/stats', () => statsOf(part.bundle?.decks, part.level, part.xpLevel))
   route('GET', '/api/stats/report', () => REPORT)
   route('GET', '/api/dictionary/radicals', () => ({ groups: [] }))
   route('GET', '/api/basics', () => ({ units: [] }))

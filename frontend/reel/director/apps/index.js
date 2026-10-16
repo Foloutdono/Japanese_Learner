@@ -9,7 +9,7 @@ import { reading } from './reading'
 import { cards } from './cards'
 import { grammar } from './grammar'
 import { translation, composition, dictation, comprehension } from './practice'
-import { exam, dictionary, decks, pass } from './more'
+import { exam, dictionary, decks, pass, learn } from './more'
 
 export const APPS = {
   analyzer,
@@ -28,4 +28,5 @@ export const APPS = {
   dictionary,
   decks,
   pass,
+  learn,
 }

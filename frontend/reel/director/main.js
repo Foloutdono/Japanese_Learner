@@ -51,7 +51,7 @@ const LINES = {
   translation: '--line-honyaku', composition: '--line-sakubun', comprehension: '--line-rikai',
   kana: '--line-kana', vocab: '--line-vocab', kanji: '--line-kanji', grammar: '--line-grammar',
   exam: '--line-exam', dictionary: '--line-jisho', decks: '--line-vocab', today: '--accent2',
-  review: '--accent2', pass: '--pass-ink',
+  review: '--accent2', pass: '--pass-ink', learn: '--accent2',
 }
 
 // `clips`: where a video hook's own sound plays in the film (the renderer

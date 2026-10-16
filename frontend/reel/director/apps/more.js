@@ -9,6 +9,7 @@
 //               opened, its cards previewed, followed
 //   pass        the learner's commuter pass, turned over; the stamp book
 //               of studied days; the ranking
+//   learn       the Learn tab's four lines, and one boarded
 //
 //   { "app": "exam" }   { "app": "dictionary", "search": "駅", "reading": "えき", "category": "kanji" }
 //   { "app": "decks" }  { "app": "pass" }
@@ -115,6 +116,37 @@ export const decks = {
       ctx.say(beat.reveal)
       await wait(beat.hold ?? 1.8)
     }
+  },
+}
+
+// The Learn tab: the four lines, each a plate with the stop the
+// learner stands at between the one behind and the one ahead, the cards
+// due on it, and how far along it they are. A plate boards its line:
+// the line's jingle and its name announced, the departure gate, and the
+// platform of the stop, where its exercises wait.
+export const learn = {
+  route() { return '/learn' },
+  ready() { return '.plate--line' },
+  async play(beat, ctx) {
+    const { stage, finger } = ctx
+    ctx.say(beat.caption)
+    await stage.still('.plate--line:last-of-type')
+    await ctx.look(stage.all('.plate--line'), { duration: 0.6, max: 1.15 })
+    await wait(beat.think ?? 1.8)
+    if (beat.line === false) return
+    const line = beat.line ?? 'vocab'
+    const plate = stage.all('.plate--line').find(el => el.style.getPropertyValue('--line-color').includes(`--line-${line}`))
+    if (!plate) return
+    await ctx.tap(plate.querySelector('.plate__head') ?? plate)
+    finger.rest()
+    // The gate runs; the platform arrives behind it.
+    const platform = await stage.waitFor('.platform-card, .route-stop', { timeout: 8 }).catch(() => null)
+    if (!platform) return
+    await wait(0.4)
+    await stage.still('.platform-card:last-of-type, .route-stop:last-of-type')
+    await ctx.look(stage.all('.platform-card, .route-stop'), { duration: 0.6, max: 1.2 })
+    ctx.say(beat.reveal)
+    await wait(beat.hold ?? 2)
   },
 }
 

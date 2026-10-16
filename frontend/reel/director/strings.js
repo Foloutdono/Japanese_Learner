@@ -15,7 +15,7 @@ export const STRINGS = {
       translation: ['翻訳', 'Translation'], composition: ['作文', 'Composition'], comprehension: ['理解', 'Comprehension'],
       today: ['本日', 'Today'], review: ['復習', 'Review'], kana: ['かな', 'Kana'], vocab: ['単語', 'Vocabulary'],
       kanji: ['漢字', 'Kanji'], grammar: ['文法', 'Grammar'], exam: ['模試', 'Mock exam'], dictionary: ['辞書', 'Dictionary'],
-      decks: ['教材', 'Decks'], pass: ['定期券', 'Your pass'],
+      decks: ['教材', 'Decks'], pass: ['定期券', 'Your pass'], learn: ['路線図', 'Your lines'],
     },
   },
   fr: {
@@ -29,7 +29,7 @@ export const STRINGS = {
       translation: ['翻訳', 'Traduction'], composition: ['作文', 'Composition'], comprehension: ['理解', 'Compréhension'],
       today: ['本日', "Aujourd'hui"], review: ['復習', 'Révisions'], kana: ['かな', 'Kana'], vocab: ['単語', 'Vocabulaire'],
       kanji: ['漢字', 'Kanji'], grammar: ['文法', 'Grammaire'], exam: ['模試', 'Examen blanc'], dictionary: ['辞書', 'Dictionnaire'],
-      decks: ['教材', 'Decks'], pass: ['定期券', 'Ton pass'],
+      decks: ['教材', 'Decks'], pass: ['定期券', 'Ton pass'], learn: ['路線図', 'Tes lignes'],
     },
   },
 }

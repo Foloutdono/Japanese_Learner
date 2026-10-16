@@ -150,11 +150,13 @@ export function decksOf(part) {
 
 export function todayOf(part, beat = {}) {
   // A Today beat runs its own cards, so the gate counts exactly those;
-  // otherwise the day is a learner's ordinary one.
+  // otherwise the day is a learner's ordinary one (on their first days,
+  // a few kana and nothing else).
   const own = beat.feature === 'today' || beat.feature === 'review'
+  const novice = (part.xpLevel ?? 12) <= 2
   const by = own
     ? { kana: beat.kana?.length ?? 0, vocab: beat.words?.length ?? 0, kanji: beat.kanji?.length ?? 0, grammar: 0 }
-    : { kana: 0, vocab: 12, kanji: 7, grammar: 5 }
+    : novice ? { kana: 5, vocab: 0, kanji: 0, grammar: 0 } : { kana: 0, vocab: 12, kanji: 7, grammar: 5 }
   const due = by.kana + by.vocab + by.kanji + by.grammar
   const MODES = { kana: 'kana.flashcard.f2b', vocab: 'vocab.flashcard.f2b', kanji: 'kanji.flashcard.f2b', grammar: 'grammar.ladder' }
   const deck = source => (source === 'kana' ? 'hiragana_basic' : part.level)

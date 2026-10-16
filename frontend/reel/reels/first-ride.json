@@ -1,0 +1,33 @@
+{
+  "lang": "en",
+  "learner": "Mika",
+  "level": "N5",
+  "xpLevel": 1,
+  "streak": 1,
+  "clock": "07:42",
+  "beats": [
+    {
+      "hook": "sign",
+      "style": "station",
+      "text": "辻",
+      "reading": "つじ",
+      "romaji": "Tsuji",
+      "prev": "ゼロ",
+      "next": "かな",
+      "caption": "zero Japanese? every line starts *here* 🚉"
+    },
+    { "rise": true },
+    {
+      "app": "learn",
+      "line": "kana",
+      "caption": "four lines, from your first kana to *N1*",
+      "reveal": "first stop: hiragana"
+    },
+    {
+      "app": "kana",
+      "kana": ["あ", "い", "う"],
+      "caption": "あ, い, う… read it, hear it, *keep* it"
+    },
+    { "end": true }
+  ]
+}

@@ -43,6 +43,7 @@ export const APPS = {
   dictionary: { needs: [] },
   decks: { needs: [] },
   pass: { needs: [] },
+  learn: { needs: [] },
 }
 
 export const DICTIONARY = ['kanji', 'vocab', 'grammar', 'hiragana', 'katakana']

@@ -37,12 +37,13 @@ Every render of a script is the same film, frame for frame.
 
 | script | the story | ≈ |
 | --- | --- | --- |
-| `sign-photo.json` | a construction notice nobody can read → snapped → the analyzer takes it apart: the words, a word's entry, 〜につき, the translation | 35 s |
-| `manga-reading.json` | a raw manga panel → its line lifts off the page into reading practice: read aloud in romaji, checked, broken down | 33 s |
+| `sign-photo.json` | a construction notice nobody can read → snapped → the analyzer takes it apart: the words, a word's entry, 〜につき, the translation | 38 s |
+| `manga-reading.json` | a raw manga panel → its line lifts off the page into reading practice: read aloud in romaji, checked, broken down | 34 s |
 | `station-words.json` | Shinjuku's station sign → vocabulary cards, a level-up, a card mastered | 27 s |
-| `menu-photo.json` | (French) an izakaya's menu in vertical kanji → snapped → analyzer | 30 s |
-| `study-tour.json` | Today's gate, a day's cards and the day cleared; kana; kanji with its strokes; grammar's ladder | 60 s |
-| `practice-tour.json` | translation, composition, dictation, comprehension, a mock exam, the dictionary, the deck library, the pass | 130 s |
+| `menu-photo.json` | (French) an izakaya's menu in vertical kanji → snapped → analyzer | 33 s |
+| `first-ride.json` | the origin station's sign → the four lines → the kana line boarded → あ, い, う | 35 s |
+| `study-tour.json` | Today's gate, a day's cards and the day cleared; kana; kanji with its strokes; grammar's ladder | 86 s |
+| `practice-tour.json` | translation, composition, dictation, comprehension, a mock exam, the dictionary, the deck library, the pass | 133 s |
 
 The first two are the two openings the generator was asked for; copy
 any of them to start a new reel.
@@ -164,6 +165,7 @@ shows), `level` (instead of the script's), and seconds for `think`,
 | `dictionary` | a search typed in kana and converted, the entry, its strokes | `search`, `reading`, `category` (`kanji`, `vocab`, `grammar`, `hiragana`, `katakana`) |
 | `decks` | the library, a deck opened and followed | `pick` (which deck) |
 | `pass` | the pass turned over, the stamp book, the lines, the ranking | |
+| `learn` | the Learn tab's four lines, their stops and what is due; one boarded, through the app's departure, to its platform | `line` (`kana`, `vocab`, `kanji`, `grammar`; `false` to only look) |
 
 `ratings` is the answer given each card in turn (`[4, 4, 3]`; 4, Correct,
 by default).
