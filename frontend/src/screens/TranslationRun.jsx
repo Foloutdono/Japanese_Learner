@@ -13,6 +13,8 @@ import Empty from '../components/ui/Empty'
 import { CardTransition } from '../components/study/CardTransition'
 import RatingBar from '../components/study/RatingBar'
 import { RunStreak } from '../components/study/RunStreak'
+import SpeakToggle from '../components/study/SpeakToggle'
+import { useRevealSpeech } from '../hooks/useRevealSpeech'
 // The tutor's review, drawn by the component 作文 shares (plan 125).
 import { TutorReview, TutorVerdict } from '../components/study/TutorReview'
 import { PointTag, SentenceLead, AnswerWell, CorrectedInPlace } from '../components/study/PracticeCard'
@@ -30,7 +32,7 @@ import { AskEntry } from '../components/study/AskPage'
 import { askTarget } from '../domain/ask'
 import { startTally, countReview } from '../stores/runTally'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
-import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
+import { vocabLookup, grammarLookup, pointLookup, docksInColumn, lookupKey } from '../components/analysis/lookup'
 import { tierLabelFor } from '../domain/tiers'
 
 const TRANSLATION_COLOR = 'var(--line-honyaku)'
@@ -111,6 +113,9 @@ export default function TranslationRun({ session }) {
   const lines = useRunLines(session, { held: Boolean(lookup) })
   // 問 (plan 131): a question about the sentence, once graded, on the desk.
   const asking = useAsk(session, 'translation')
+  // The answer is in: the Japanese reference is said, unless the
+  // speak-on-reveal switch in the head is off.
+  useRevealSpeech(data?.phrase, stage === 'feedback')
   // Which reference the in-flight breakdown belongs to, so a slow
   // answer for a phrase the learner has already left cannot overwrite
   // the one on screen (ReadingRun's analysisPhraseRef).
@@ -501,6 +506,9 @@ function SessionView({
     onExitLookup: closeLookup,
     session,
   }
+  // The tag's door (plan 213): the point's lesson, before the answer and after.
+  const point = pointLookup(data?.grammar_id, data?.grammar, breakdown)
+  const docked = docksInColumn(desk, lines.opened, stage === 'feedback' && feedback?.correct != null, breakdown)
 
   return (
     <StudyStage
@@ -515,7 +523,7 @@ function SessionView({
       // On the desk the score is the run panel's figures (plan 129).
       remaining={desk ? undefined : `${score.correct} / ${score.total}`}
       pass={false}
-      aside={<RunStreak />}
+      aside={<><RunStreak /><SpeakToggle variant="head" /></>}
       toast={fare.toast}
       onToastDone={fare.toastDone}
       records
@@ -564,7 +572,7 @@ function SessionView({
               middle, the one thing on the card. */}
           <CardTransition cardKey={data._uiKey}>
             <PromptCard page prose>
-              <PointTag point={data.grammar} label={t.pcardUse} />
+              <PointTag point={data.grammar} label={t.pcardUse} onOpen={point ? () => setLookup(point) : null} />
               <div className="pcard-group">
                 <span className="pcard-ask" lang={data.translation_lang}>{data.translation}</span>
               </div>
@@ -615,7 +623,12 @@ function SessionView({
               the point of this mode. */}
           <PromptCard page prose>
             {!showBreakdown && (
-              <PointTag point={data.grammar} label={t.pcardPoint} used={analysis?.review?.grammar_used} />
+              <PointTag
+                point={data.grammar}
+                label={t.pcardPoint}
+                used={analysis?.review?.grammar_used}
+                onOpen={point ? () => setLookup(point) : null}
+              />
             )}
             <div className="pcard-group">
               {!showBreakdown && (
@@ -716,7 +729,7 @@ function SessionView({
 
       {/* On the desk a door in the docked breakdown opens in the side
           column (BreakdownSide → SideLookup, plan 115). */}
-      {lookup && !desk && (
+      {lookup && !docked && (
         <DictionaryLookupSheet key={lookupKey(lookup)} {...lookup} session={session} onClose={closeLookup} />
       )}
     </StudyStage>

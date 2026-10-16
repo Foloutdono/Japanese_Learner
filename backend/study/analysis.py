@@ -404,10 +404,12 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 致す after お〜, 〜ばかりに after ん, 〜っぽい, 〜ずくめ, 〜手前, 〜どころ;
 # まま no ママ nor 間々; すぐ, ゆっくり, 良い, 赤ちゃん, 何も and 世論 their
 # lower or right cards; 〜不足 after a noun read ぶそく.
-# 14: French beside the English (plan 215) -- a JMdict pool word's
+# 14: no card for a verb in kana another deck verb is spelled as there
+# (plan 213): おきます no 置く, ふりました no 振る, はれる no 腫れる.
+# 15: French beside the English (plan 215) -- a JMdict pool word's
 # `meaning_fr` from the pool's French layer, and a grammar point's
 # `structure_fr`, so a stored breakdown is rebuilt to carry them.
-LOCAL_REV = 14
+LOCAL_REV = 15
 
 
 def analyze_local(text: str, level: str | None = None) -> dict:

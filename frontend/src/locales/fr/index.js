@@ -1582,6 +1582,11 @@ const misc = {
   hintSentencesHide:  'Masquer la phrase',
   hintFuriganaShow:   'Afficher les furigana',
   hintFuriganaHide:   'Masquer les furigana',
+  // L'interrupteur de la voix à côté (components/study/SpeakToggle.jsx) :
+  // le nom reste, le titre dit ce que fait un appui.
+  speakOnReveal:      'Lecture à la révélation',
+  speakOnRevealOn:    'Lire la réponse à voix haute quand elle est révélée',
+  speakOnRevealOff:   'Ne plus lire la réponse quand elle est révélée',
 
   // ── Modes d'étude (domain/studyModes.js) ──
   // Un libellé et une description par clé de mode. Le préfixe par source

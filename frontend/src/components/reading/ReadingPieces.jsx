@@ -192,10 +192,14 @@ export function AnswerForm({ answer, setAnswer, onSubmit, t, guide, disabled = f
  *  missed under it, meant by the breakdown's `tokens`. The grade is the
  *  rating bar's, under the card: the card no longer asks for it or
  *  repeats it. */
-export function ReadingRegisters({ phrase, parts, words, tokens, romaji, translation, translationLang, answer, accuracy, point, t }) {
+export function ReadingRegisters({
+  phrase, parts, words, tokens, romaji, translation, translationLang, answer, accuracy, point, t, onOpen = null, onPoint = null,
+}) {
   return (
     <SentenceCheck
       point={point}
+      onOpen={onOpen}
+      onPoint={onPoint}
       parts={parts}
       text={phrase}
       words={words}

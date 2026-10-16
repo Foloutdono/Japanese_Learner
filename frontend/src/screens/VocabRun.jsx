@@ -25,7 +25,7 @@ import PromptCard from '../components/study/PromptCard'
 import HintBar from '../components/study/HintBar'
 import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
-import { speakJapanese, playUi } from '../lib/audio'
+import { speakJapanese, playUi, isSpeakOnReveal } from '../lib/audio'
 import {
   MODES as STUDY_MODES, FAST_REVIEW, modeLabel,
 } from '../domain/studyModes'
@@ -237,14 +237,14 @@ export default function VocabRun({ session }) {
     setSelected(choice)
     setAnswered(true)
     setShowRating(true)
-    speakJapanese(card.kana)
+    if (isSpeakOnReveal()) speakJapanese(card.kana)
   }
 
   function onFlashcardReveal() {
     if (answered) return
     setAnswered(true)
     setShowRating(true)
-    speakJapanese(card.kana)
+    if (isSpeakOnReveal()) speakJapanese(card.kana)
   }
 
   if (!valid) return <Navigate replace to={studyBy ? platforms : '/learn/vocab'} />
@@ -337,7 +337,7 @@ export default function VocabRun({ session }) {
         {card && !loading && (
           <>
             <HintBar available={availableHints} active={activeHints}
-                     onToggle={toggleHint} disabled={gates.locked} />
+                     onToggle={toggleHint} disabled={gates.locked} speaks />
             <CardTransition
               className="vocab-card-boost"
               cardKey={card.card_id}
