@@ -3,6 +3,7 @@ import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider, useLang } from './LangContext'
+import fr from './locales/fr/index.js'
 import './index.css'
 
 // ── 机 — the practice runs without the pointer (plan 123, P6) ──────
@@ -129,9 +130,10 @@ describe('a sentence run on the desk', () => {
     expect(document.activeElement).toBe(play())
     expect(field().disabled).toBe(true)
     expect($('.sentence')).toBeNull()
-    expect($('.timer__label').textContent).toBe('30.0s')
+    // The lane is a French device: "30,0 s".
+    expect($('.timer__label').textContent).toBe(fr.timerSeconds(30))
     await settle(300)
-    expect($('.timer__label').textContent).toBe('30.0s')
+    expect($('.timer__label').textContent).toBe(fr.timerSeconds(30))
     // The run's lines list Space for it, first.
     expect($$('.run-help .desk-keys .desk-kbd').map(k => k.textContent)).toEqual(['Espace', 'Entrée', '1–4', 'Échap'])
 
@@ -141,7 +143,7 @@ describe('a sentence run on the desk', () => {
     expect($('.sentence').textContent).toBe(PHRASE.phrase)
     expect(document.activeElement).toBe(field())
     await settle(300)
-    expect(parseFloat($('.timer__label').textContent)).toBeLessThan(30)
+    expect(parseFloat($('.timer__label').textContent.replace(',', '.'))).toBeLessThan(30)
 
     await oneSentence('gakkou wa kuji desu')
     // The next one arrives behind its button too; Space shows it from

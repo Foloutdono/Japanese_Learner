@@ -69,7 +69,7 @@ export function GrammarPoints({ analysis, t, lit = null, onLight, onOpen }) {
         // line were all read as plain text before the card became the
         // control.
         const label = [
-          `${t.openDictionary ?? 'Open dictionary entry'}: ${g.pattern}`,
+          `${t.openDictionary}: ${g.pattern}`,
           gloss, parts.length > 1 ? parts.map(part => part.surface).join(' + ') : '', note, g.level,
         ].filter(Boolean).join(' — ')
         return (

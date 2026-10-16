@@ -267,7 +267,7 @@ function BrowseBody({ deckId, deckType, session, onAdded, onClose, dock = false 
         {loading && <div className="import-preview__empty">{t.searching}</div>}
 
         {!loading && results.length === 0 && (
-          <div className="import-preview__empty">{t.noResults}</div>
+          <div className="import-preview__empty">{t.browseNoResults}</div>
         )}
 
         {!loading && results.length > 0 && (

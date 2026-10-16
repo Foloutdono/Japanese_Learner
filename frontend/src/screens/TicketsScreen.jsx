@@ -116,7 +116,7 @@ export default function TicketsScreen({ session, profile: profileProp, stats: st
   // the gesture that asked for it (a browser forgets the tap while a
   // canvas is drawn and fonts load).
   const figures = shareFigures(profile, stats)
-  const input = held && { days: held.days, day: held.day, from: daysBefore(held.day, held.days - 1), stampDay: utcToday(), figures, t }
+  const input = held && { days: held.days, day: held.day, from: daysBefore(held.day, held.days - 1), stampDay: utcToday(), figures, t, lang }
   const inputKey = held ? `${held.days}:${held.day}:${figures.reviews}:${figures.words}:${figures.level}:${lang}` : ''
   const [png, setPng] = useState(null)
   useEffect(() => {

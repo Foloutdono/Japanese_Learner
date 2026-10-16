@@ -70,16 +70,16 @@ const nav = {
   balanceHolds:      (cap) => `jusqu’à ${cap}`,
   balanceKanaFree:   'Les révisions de kana ne coûtent rien',
   balanceStepsFree:  'Une carte en apprentissage se répète gratuitement : tu paies la première vue, puis chaque révision une fois la carte acquise',
-  gateShort:         (rides, due) => `Seulement ${rides} sur ${due} peuvent embarquer`,
+  gateShort:         (rides, due) => `Seulement ${rides} sur ${due} ${rides > 1 ? 'peuvent' : 'peut'} embarquer`,
   gateNoCredits:     (at) => (at ? `Plus de crédits — +1 à ${at}` : 'Plus de crédits'),
   runOutTitle:       'Plus de crédits',
-  runOutCleared:     (n) => `${n} révisées`,
-  runOutWaiting:     (n) => `${n} attendent la recharge`,
+  runOutCleared:     (n) => `${n} révisée${n > 1 ? 's' : ''}`,
+  runOutWaiting:     (n) => `${n} ${n > 1 ? 'attendent' : 'attend'} la recharge`,
   runOutWaits:       'en attente',
   // 補充 — ce que la recharge a versé, app fermée (plan 141)
   claimTitle:        'Pendant ton absence',
   claimButton:       'Récupérer',
-  claimBookLabel:    (n, cap) => `${n} crédits sur ${cap}`,
+  claimBookLabel:    (n, cap) => `${n} crédit${n > 1 ? 's' : ''} sur ${cap}`,
   // 無料 — a lane that costs nothing (domain/credits.js).
   freeFare:          'gratuit',
   laneNew:           n => `${n} nouv.`,
@@ -96,7 +96,7 @@ const nav = {
   gateServicesOf:    (on, all) => `${on} sur ${all}`,
   gateServicesTitle: 'Services du jour',
   gateMinutes:       'min',
-  gateMinutesLabel:  n => `environ ${n} minutes`,
+  gateMinutesLabel:  n => `environ ${n} minute${n > 1 ? 's' : ''}`,
   gateRides:         'embarquent',
   gateWaits:         (at) => (at ? `attendent · +1 à ${at}` : 'attendent'),
   gateBalance:       'crédits',
@@ -121,7 +121,7 @@ const nav = {
   gateOpensAt:       at => `Ouvre à ${at}`,
   gateOpensIn:       when => `Ouvre ${when}`,
   todayDayLabel:     'Ta journée',
-  todayStreakDays:   'jours de suite',
+  todayStreakDays:   n => (n > 1 ? 'jours de suite' : 'jour de suite'),
   todayStreakShort:  'de suite',
   todayNewToday:     'nouveautés aujourd’hui',
   todayNewShort:     'nouveautés',
@@ -130,15 +130,15 @@ const nav = {
   // The same, its figure set apart on the print (plan 206).
   todayReviewedUnit: n => (n === 1 ? 'carte aujourd’hui' : 'cartes aujourd’hui'),
   todayCardsUnit:    n => (n === 1 ? 'carte' : 'cartes'),
-  todayWeekStamps:   n => `${n} jours de suite, les sept derniers tamponnés`,
+  todayWeekStamps:   n => `${n} jour${n > 1 ? 's' : ''} de suite, les sept derniers tamponnés`,
   // 基礎 — le cursus de base sur le portillon et dans Réglages › Niveau (plan 186f)
   basicsUnit:        (n, of) => `Leçon ${n} sur ${of}`,
-  basicsMet:         (n, of) => `${n} leçons sur ${of} vues`,
+  basicsMet:         (n, of) => `${n} leçon${n > 1 ? 's' : ''} sur ${of} vue${n > 1 ? 's' : ''}`,
   basicsDone:        'Bases acquises — le reste du N5 est ouvert.',
   basicsSkip:        'Passer les bases',
   basicsSkipLabel:   'Bases',
   basicsSkipAct:     'Je les connais',
-  basicsSkipped:     n => `${n} cartes de base marquées connues.`,
+  basicsSkipped:     n => (n > 1 ? `${n} cartes de base marquées connues.` : `${n} carte de base marquée connue.`),
   // 基礎 — la station du cursus sur le portillon Apprendre (plan 186g)
   basicsTitle:       'Bases',
   basicsDesc:        'Le N5 dès sa première leçon\nUne leçon à la fois\nSes règles, ses mots, ses kanji',
@@ -161,7 +161,7 @@ const nav = {
   ofrCardFarePro:     'Pratique · 1 crédit',
   ofrCardFareMax:     'Pratique · sans crédit',
   // ── 定期券 — la carte, face et dos (plan 173) ──
-  cardFree:           'Free',
+  cardFree:           'Gratuit',
   cardFareFree:       'Pratique · verrouillée',
   cardTurn:           'Retourner la carte',
   cardLevelTo:        (a, b) => `Niveau ${a} → ${b}`,
@@ -207,7 +207,7 @@ const nav = {
   ofrWeekDone:        'révisées',
   ofrWeekWaiting:     'en attente',
   ofrWeekCeiling:     (n) => `limite : ${n} crédits / jour`,
-  ofrWeekGain:        (n) => `+${n} cartes révisées avec Pro`,
+  ofrWeekGain:        (n) => `+${n} carte${n > 1 ? 's' : ''} révisée${n > 1 ? 's' : ''} avec Pro`,
   ofrWeekChart:       (stops, waited) => `Tes 7 derniers jours : ${stops} jour${stops > 1 ? 's' : ''} où des cartes ont attendu, ${waited} carte${waited > 1 ? 's' : ''} en tout.`,
   ofrWeekEyebrow:     'Ta semaine',
   ofrWeekTitle:       (n) => (n === 1 ? 'Tes crédits t’ont arrêté une fois cette semaine.' : `Tes crédits t’ont arrêté ${n} fois cette semaine.`),
@@ -321,9 +321,7 @@ const home = {
   kanaTitle:         'Kana',
   kanaDesc:          'Hiragana et katakana, son par son\nReconnaître d\'abord, écrire à la main ensuite\nLe sol sur lequel tout le reste repose',
   vocabTitle:        'Vocabulaire JLPT',
-  vocabDesc:         'N5 → N1\nKanji + Kana → Sens\nProgression par phases',
   kanjiTitle:        'Kanji',
-  kanjiDesc:         'Apprentissage des kanji\nN5 → N1\nExercices d\'écriture',
   dictionaryTitle:   'Dictionnaire',
   dictionaryDesc:    'Un kanji, un kana, n\'importe quel mot\nLectures, radicaux, ordre des traits, exemples\nEt si tu l\'as déjà croisé',
   grammarTitle:      'Grammaire',
@@ -473,6 +471,9 @@ const quiz = {
   deskSealed:         'La fiche s’ouvre à la révélation.',
   keyEnter:           'Entrée',
   keyEscape:          'Échap',
+  // Un pourcentage : le français met une espace insécable avant le %
+  // (le statut du HUD, le score d'un examen, le relevé).
+  percent:            n => `${n}\u00a0%`,
   deskWayUp:          'Remonter',
   deskBreakdownWait:  'La décomposition de la phrase s’affiche ici une fois ta réponse notée.',
   // Un exercice sur trois panneaux (plan 129) : les phrases du trajet, chacune
@@ -540,7 +541,7 @@ const quiz = {
 
   // Mode labels
   modeQCM:           'QCM',
-  modeFlashcard:     'Flashcard',
+  modeFlashcard:     'Carte',
   modeFill:          'Compléter',
   // Extended mode labels used by vocab/kanji screens
   modeWrite:         'Écriture',
@@ -561,6 +562,8 @@ const quiz = {
   field_radical:    'Radical',
   field_word:       'Mot',
   field_reading:    'Lecture',
+  field_kana:       'Kana',
+  field_romaji:     'Rōmaji',
   field_rule:       'Règle de grammaire',
   field_sentences:  'Phrase d’exemple',
   field_sentences_group: 'Phrases d’exemple',
@@ -658,7 +661,6 @@ const quiz = {
   // Grammar screen
   revealMeaning:     'Que signifie cette règle ?',
   revealSentence:    'Complète la phrase ci-dessous',
-  revealAnswer:      'Révéler la réponse',
   revealMeaningBtn:  'Révéler le sens',
   showExamples:      'Voir les exemples',
   hideExamples:      'Masquer les exemples',
@@ -692,16 +694,16 @@ const stats = {
   backToStation:      'Retour à la gare',
   fareGate:           'Portique',
   dueUnit:            'à réviser',
-  newUnit:            'nouveaux',
+  newUnit:            'nouvelles',
   learningUnit:       'en cours',
   learnedLabel:       'Apprises',   // le chiffre d'une plateforme, lu à voix haute (plan 184)
-  sourceTiers:        n => `${n} paliers`,
-  sourceThemes:       n => `${n} thèmes`,
+  sourceTiers:        n => `${n} palier${n > 1 ? 's' : ''}`,
+  sourceThemes:       n => `${n} thème${n > 1 ? 's' : ''}`,
   // Les sources du vocabulaire sur le bureau (plan 183) : la bande de ce
   // que l'apprenant a commencé, au-dessus des trois sources.
   sourcesInProgress:  'En cours',
   sourcesResume:      'Reprendre',
-  unseenNote:         n => `${n} jamais vues`,
+  unseenNote:         n => `${n} jamais vue${n > 1 ? 's' : ''}`,
   tierWords:          range => `Mots ${range}`,
   originStop:         'Débutant',
   stageGate:          'Portique',
@@ -744,7 +746,6 @@ const stats = {
   practiceResult:     'Résultat',
   reference:          'Référence',
   // ── Dictionnaire et analyseur (plan 073) ──
-  allReadings:        'Toutes les lectures',
   dictCollections:    'Collections',
   analyzerDoorSub:    'Texte, photo, vidéo',
   passagesCount: (n) => `${n} passage${n === 1 ? '' : 's'}`,
@@ -761,7 +762,7 @@ const stats = {
   reportDelta:        (n, w) => `${n > 0 ? '+' : n < 0 ? '−' : '±'}${Math.abs(n)} · ${w} sem`,
   reportWeekOf:       (date, n) => `sem. du ${date} · ${n} ${n === 1 ? 'révision' : 'révisions'}`,
   reportRungs:        ['<1 j', '1 sem', '1 mois', '3 mois', '3 mois+'],
-  reportStrengthSummary: n => `${n} cartes selon leur avance`,
+  reportStrengthSummary: n => (n > 1 ? `${n} cartes selon leur avance` : `${n} carte selon son avance`),
   reportMisses:       (n, d) => `${n === 1 ? 'raté' : 'ratés'} · ${d} j`,
   // ── 路線別, les lignes du relevé (plan 138) ──
   reportWeekStart:    d => `sem. du ${d}`,
@@ -776,9 +777,9 @@ const stats = {
   reportTile:         (head, deck, mode, pct, lapses) => `${head} · ${deck} · ${mode} · ${pct} % · ${lapses} ${lapses === 1 ? 'raté' : 'ratés'}`,
   reportEmpty:        'Aucune révision encore',
   reportEmptyHint:    'La première semaine de révisions trace la ligne.',
-  startedNote:     n => `${n} commencées`,
+  startedNote:     n => `${n} commencée${n > 1 ? 's' : ''}`,
   reportError:        'Le relevé n\'a pas pu être lu',
-  daysUnit:           'jours',
+  daysUnit:           n => (n > 1 ? 'jours' : 'jour'),
   balanceRefillLine:  (at) => `+1 à ${at}`,
   balanceRefillRate:  (min) => `+1 toutes les ${min} min`,
   perDayUnit:         '/ jour',
@@ -814,7 +815,7 @@ const stats = {
   levelDownBody:      to => `Les cartes au-delà de ${to} sont mises de côté, pas effacées : elles gardent leur historique et reviennent dans le trajet quand tu remontes. Le trajet du jour se réduit aux arrêts ${to}.`,
   levelMarkedKnown:   'Marquées connues',
   levelSpreadOver:    'Réparties sur',
-  levelWeeks:         n => `${n} semaines`,
+  levelWeeks:         n => `${n} semaine${n > 1 ? 's' : ''}`,
   levelSetAside:      'Mises de côté',
   levelDeleted:       'Effacées',
   levelUpGo:          l => `Monter à ${l}`,
@@ -861,7 +862,6 @@ const stats = {
   total:              'Total',
   overview:           'Aperçu',
   streak:             'Série',
-  longestStreak:      'Meilleure série',
   resultNotSaved:  "Cette réponse n’a pas pu être enregistrée dans ton historique. Elle ne comptera pas.",
   runStreak:          (n, best) => `${n} de suite · record ${best}`,
   accuracy:           'Précision',
@@ -912,7 +912,7 @@ const phraseAnalyzer = {
   intakeVideoLead:     'Colle le lien, puis le favori 字幕取り rapporte les sous-titres — ou dépose un fichier.',
   shootPhoto:          'Photographier',
   pickPhoto:           'Choisir',
-  charCount:           n => `${n} caractères`,
+  charCount:           n => `${n} caractère${n > 1 ? 's' : ''}`,
   // Doit correspondre à routes/video.py:50 (_MAX_UPLOAD_BYTES = 1 Mo).
   subtitleAccepted:    'SRT, VTT et ASS · jusqu\'à 1 Mo',
   windowLabel:         'Extrait',
@@ -979,7 +979,7 @@ const phraseAnalyzer = {
   writtenHere:         s => `ici : ${s}`,
   dictAnalyseSentence: 'Analyser cette phrase',
   windowWhole:         'toute la vidéo',
-  windowSpan:          m => `${m} sélectionnées`,
+  windowSpan:          m => `Sélection : ${m}`,
   windowBackwards:     'La fin doit venir après le début.',
   historyTitle:        'Historique',
   dateToday:           'aujourd’hui',
@@ -1165,10 +1165,11 @@ const reading = {
   romajiPlaceholder:    'ex. konnichiwa',
   // Le bouton lecture derrière lequel arrive une phrase (PlayButton de ReadingPieces).
   readingPlay:          'Afficher la phrase et lancer le chrono',
+  // Le chrono de la lecture (ReadingTimer) : « 4,5 s ».
+  timerSeconds:         s => `${s.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}\u00a0s`,
   correct:              'Correct !',
   incorrect:            'Pas tout à fait',
   correctRomaji:        'Romaji attendu',
-  yourAnswer:           'Ta réponse',
   // The practice card (plan 185): the grammar point's tag at the card's
   // top, on the answer and (translation) on the prompt; and, for a screen
   // reader, what the figure in the answer's well counts and the name of
@@ -1179,8 +1180,6 @@ const reading = {
   pcardMissed:          'Mots manqués',
   nextPhrase:           'Phrase suivante',
   translation:          'Traduction',
-  gradeCorrect:         'C’était juste',
-  gradeIncorrect:       'C’était faux',
 
   // Décomposition mot par mot + sa navigation (ReadingRun.jsx,
   // DictationRun.jsx) — affichée une fois la phrase corrigée.
@@ -1458,11 +1457,13 @@ const dictionary = {
   dictModeSearch:    'Recherche',
   dictModeRadical:   'Radical',
   dictionaryPlaceholderRadical: 'Filtrer ces résultats par radical…',
-  dictionaryResults: n => `${n} résultats`,
+  dictionaryResults: n => `${n} résultat${n > 1 ? 's' : ''}`,
   dictRadicalNumber: (n) => `radical n°\u00A0${n}`,
   dictStrokesPlural: 'traits',
   dictStrokeSingular: 'trait',
   dictStrokeIndex:   'Index par nombre de traits',
+  // La fiche en train de s'ouvrir (DictionaryDetail.jsx).
+  loadingDictionary: 'Ouverture de la fiche…',
   dictStrokePrev:    'Moins de traits',
   dictStrokeNext:    'Plus de traits',
   syllabaryMain:     'Syllabaire principal',
@@ -1627,9 +1628,9 @@ const profile = {
   jourFootOnTime:    (a, p, dest, date) =>
     `**${a} par jour**, pile sur les **${p}** promis. L'arrivée à ${dest} tient au **${date}**.`,
   jourFootAhead:     (a, p, dest, days, date) =>
-    `**${a} par jour** contre **${p}** promis — ${dest} arrive **${days} jours en avance**, vers le **${date}**.`,
+    `**${a} par jour** contre **${p}** promis — ${dest} arrive **${days} jour${days > 1 ? 's' : ''} en avance**, vers le **${date}**.`,
   jourFootBehind:    (a, p, dest, date, days) =>
-    `14 derniers jours : **${a} par jour** contre **${p}** promis. À ce rythme, ${dest} arrive le **${date}** — **${days} jours** après la date de ta carte.`,
+    `14 derniers jours : **${a} par jour** contre **${p}** promis. À ce rythme, ${dest} arrive le **${date}** — **${days} jour${days > 1 ? 's' : ''}** après la date de ta carte.`,
   jourFootSuspended: (date) =>
     `Aucune étude en 14 jours. Le **${date}** de ta carte ne veut plus rien dire — reprends, ou réimprime-la avec une date qui compte.`,
   jourFootPaceKept:  (a, p) =>
@@ -1691,7 +1692,6 @@ const settings = {
   // N'apparaît que comme texte title/aria-label (NavControls.jsx) —
   // le bouton visible est déjà une vraie icône SVG IconSun/IconMoon.
 
-  volumeMaster:       'Volume principal',
   volumeKana:         'Volume kana',
   volumeVoice:        'Volume voix',
   volumeEffects:      'Volume effets',
@@ -1726,7 +1726,7 @@ const decks = {
   deckEdit:          'Modifier',
   deckAddCards:      'Ajouter des cartes',
   deckWriteCard:     'Écrire une carte',
-  deckAllCards:      n => `Les ${n} cartes`,
+  deckAllCards:      n => (n === 1 ? 'La carte' : `Les ${n} cartes`),
   deckFigs:          { due: 'À réviser', new: 'Nouvelles', learning: 'En cours', mastered: 'Maîtrisées' },
   deckCardState:     { due: 'À réviser', new: 'Nouvelle', learning: 'En cours', mastered: 'Maîtrisée' },
   deckToday:         'Aujourd’hui',
@@ -1776,6 +1776,7 @@ const decks = {
   browseResults:          'Résultats',
   browseSelectedCount:    '{n} sélectionnées',
   searching:              'Recherche…',
+  browseNoResults:        'Aucun résultat.',
   alreadyAdded:           'déjà ajouté',
   adding:                 'Ajout…',
   addSelected:            'Ajouter ({n})',
@@ -1838,7 +1839,7 @@ const decks = {
   gateShelfEmpty:        'Aucun deck sur ton étagère.',
   gateShelfEmptyHint:    'Crée le tien, ou suis un deck de la bibliothèque : il se révise avec le reste.',
   gateDeckPublished:     'publié',
-  librarySeeCards:       n => `Voir les ${n} carte${n === 1 ? '' : 's'}`,
+  librarySeeCards:       n => (n === 1 ? 'Voir la carte' : `Voir les ${n} cartes`),
   libraryFeatured:       'À la une',
   libraryFeaturedWhen:   'cette semaine',
   libraryFollowing:      'Abonnements',
@@ -2204,6 +2205,8 @@ const boarding = {
   nudgeTitle: (time, n) => `Ton train de ${time} · ${n} ${n > 1 ? 'cartes' : 'carte'}`,
   nudgeMinutes: (m) => (m <= 1 ? 'Environ une minute' : `Environ ${m} min`),
   nudgeNew: (n) => `${n} ${n > 1 ? 'nouvelles' : 'nouvelle'}`,
+  // Le nom du canal des rappels dans les réglages d'Android (lib/native.js).
+  nudgeChannel: 'Rappels',
   nudgeLine: { kana: 'Kana', vocab: 'Vocabulaire', kanji: 'Kanji', grammar: 'Grammaire' },
   nudgeWhen: { today: 'Aujourd’hui', tomorrow: 'Demain' },
   widgetTitle: 'Ton train du jour',
@@ -2445,7 +2448,7 @@ const onboarding = {
   onbTestFinish: 'Voir le résultat',
   onbTestError: 'Le test n’a pas pu être chargé. Réessaie dans un instant.',
   onbTestRetake: 'Repasser le test',
-  onbTestResult: (level, correct, total) => `${correct} bonnes réponses sur ${total} — on te conseille d’embarquer à ${level}.`,
+  onbTestResult: (level, correct, total) => `${correct} bonne${correct > 1 ? 's' : ''} réponse${correct > 1 ? 's' : ''} sur ${total} — on te conseille d’embarquer à ${level}.`,
   onbPaceRecommended: 'Recommandé',
   onbPassError: 'L’enregistrement a échoué — vérifie ta connexion et réessaie.',
   brdPassRefused: 'Le guichet n’a pas pu émettre ce titre — cela vient de nous, pas de ta connexion. Rien n’a été enregistré.',
@@ -2457,7 +2460,7 @@ const onboarding = {
   paceDoneBody: 'C’est la part de nouveautés du jour. Les révisions continuent comme d’habitude.',
   paceExtraTrain: 'Encore des nouveautés',
   paceGaugeLabel: 'Nouveautés',
-  paceGaugeAria: (n, target) => `${n} nouveautés apprises sur ${target} aujourd’hui`,
+  paceGaugeAria: (n, target) => `${n} nouveauté${n > 1 ? 's' : ''} apprise${n > 1 ? 's' : ''} sur ${target} aujourd’hui`,
   settingsLearning: 'Apprentissage',
   settingsJlptLevel: 'Niveau JLPT',
   settingsPace: 'Rythme quotidien',
@@ -2688,6 +2691,8 @@ const onboarding = {
   settingsYourPaceSub: n => `${n} / jour · 14 derniers jours`,
   settingsInsteadOf: d => `au lieu du ${d}`,
   creditsWhat: { dictionary: 'Dictionnaire', kanji: 'Kanji', strokes: 'Ordre des traits', sentences: 'Phrases d’exemple', voice: 'Voix des gares', speech: 'Voix japonaise', kana: 'Voix des kana', type: 'Polices' },
+  // La licence d'une source qui a ses propres conditions (domain/attributions.js).
+  creditsTerms: name => `conditions de ${name}`,
   themeDark: 'Sombre',
   themeLight: 'Clair',
   themeAuto: 'Système',
@@ -2860,9 +2865,9 @@ const clrDay = {
   clrSumUp: n => (n === 1 ? 'monte' : 'montent'),
   clrSumMastered: n => (n === 1 ? 'maîtrisée' : 'maîtrisées'),
   clrSumMin: 'min',
-  clrTomorrow: (cards, min) => `Demain · ~${cards} cartes · ${min} min`,
+  clrTomorrow: (cards, min) => `Demain · ~${cards} carte${cards > 1 ? 's' : ''} · ${min} min`,
   clrTomorrowDay: day => `Demain · ${day}`,
-  clrTomorrowSub: (cards, min) => `~${cards} cartes · ${min} min`,
+  clrTomorrowSub: (cards, min) => `~${cards} carte${cards > 1 ? 's' : ''} · ${min} min`,
   // "7ᵉ jour : billet de la semaine +250 xp": the ordinal's suffix is
   // set as a superscript, the jackpot in gold, by the component.
   clrOrdinalSuffix: n => (n === 1 ? 'er' : 'e'),
@@ -2881,7 +2886,7 @@ const clrDay = {
   // the streak's word by its count, the ticket to come when it is not
   // tomorrow's, the rest day's line in parts (the ordinal's suffix set
   // as a superscript), and a tomorrow with nothing due.
-  clrDeskGridAria: n => `Les ${n} carte${n === 1 ? '' : 's'} du trajet`,
+  clrDeskGridAria: n => (n === 1 ? 'La carte du trajet' : `Les ${n} cartes du trajet`),
   clrDeskStreakWord: n => (n === 1 ? 'jour de suite' : 'jours de suite'),
   clrDeskNextIn: n => `dans ${n}\u00a0j`,
   clrDeskNextAria: (days, inDays) => `Billet des ${days} jours, à gagner ${inDays === 1 ? 'demain' : `dans ${inDays} jours`}`,
@@ -2907,7 +2912,7 @@ const clrPartial = {
   ptlReviews: 'révisions',
   ptlRight: 'justes',
   ptlDayAria: 'La journée',
-  ptlLoopAria: (done, total, left) => `${done} cartes sur ${total} aujourd’hui ; le tampon du jour attend au bout des ${left} autres`,
+  ptlLoopAria: (done, total, left) => `${done} carte${done > 1 ? 's' : ''} sur ${total} aujourd’hui ; le tampon du jour attend au bout ${left === 1 ? 'de la dernière' : `des ${left} autres`}`,
   ptlLeft: n => (n === 1 ? 'carte reste aujourd’hui' : 'cartes restent aujourd’hui'),
   ptlTease: min => `~${min}\u00a0min pour le tampon du jour et la prime de série`,
   ptlContinue: n => `Continuer · ${n} carte${n === 1 ? '' : 's'}`,
@@ -2951,7 +2956,7 @@ const clrRestday = {
   rstHeld: 'en réserve',
   rstNextPre: 'le prochain au',
   rstNextPost: 'ᵉ jour',
-  rstTodayAria: (n, min) => `Aujourd’hui : ${n} carte${n === 1 ? '' : 's'}${min ? `, environ ${min} minutes` : ''}`,
+  rstTodayAria: (n, min) => `Aujourd’hui : ${n} carte${n === 1 ? '' : 's'}${min ? `, environ ${min} minute${min > 1 ? 's' : ''}` : ''}`,
   rstCards: n => (n === 1 ? 'carte' : 'cartes'),
   rstMin: 'min',
   rstDepart: 'Départ',
@@ -2974,7 +2979,7 @@ const clrTickets = {
   tkbRange: (from, to) => `du ${from} au ${to}`,
   tkbTicketAria: (days, no, range, record) => `Billet des ${days} jours, numéro ${no}, ${range}${record ? ', record' : ''}`,
   tkbCellAria: (days, record) => `Billet des ${days} jours${record ? ', record' : ''}`,
-  tkbLockedAria: (days, inDays) => `Billet des ${days} jours, pas encore gagné${inDays ? `, dans ${inDays} jours` : ''}`,
+  tkbLockedAria: (days, inDays) => `Billet des ${days} jours, pas encore gagné${inDays ? `, dans ${inDays} jour${inDays > 1 ? 's' : ''}` : ''}`,
   tkbShareTicket: 'Partager ce billet',
   tkbShareFigures: { reviews: 'cartes revues', words: 'mots appris', level: 'en route' },
   tkbShareAria: (days, no, range, stamped) => `Billet des ${days} jours, numéro ${no}, ${range}, tamponné le ${stamped}`,

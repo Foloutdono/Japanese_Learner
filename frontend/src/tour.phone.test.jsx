@@ -215,7 +215,7 @@ describe('the tour in the day’s queue, on a phone', () => {
     })
     expect(screen.container.querySelector('.tour')).toBeNull()
     expect(screen.container.querySelector('.prompt-card')).toBeTruthy()
-    const cached = JSON.parse(localStorage.getItem(sessionKey('today', 'all')))
+    const cached = JSON.parse(localStorage.getItem(sessionKey('today', 'all', 'en')))
     expect(cached[0].lesson_seen).toBe(true)
   }, 20000)
 

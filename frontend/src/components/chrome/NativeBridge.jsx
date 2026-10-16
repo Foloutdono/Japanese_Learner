@@ -123,7 +123,7 @@ function AheadPlanner({ enabled, time }) {
       const planned = hour
         ? planNudges({ ahead, time, t, kanaSetLabel, now, platform: nativePlatform() })
         : []
-      await syncNudges(enabled ? planned : [])
+      await syncNudges(enabled ? planned : [], t.nudgeChannel)
       if (!cancelled) setAheadPlan({ nudges: planned, failed: false })
     }, PLAN_DELAY_MS)
     return () => { cancelled = true; clearTimeout(handle) }
@@ -159,7 +159,7 @@ function AgendaPlanner() {
     let cancelled = false
     const handle = setTimeout(async () => {
       const planned = planAgenda({ blocks, t, now: new Date() })
-      if (!cancelled) await syncAgenda(planned).catch(() => {})
+      if (!cancelled) await syncAgenda(planned, t.nudgeChannel).catch(() => {})
     }, PLAN_DELAY_MS)
     return () => { cancelled = true; clearTimeout(handle) }
     // `t` follows `lang`; `front` is the app coming back.

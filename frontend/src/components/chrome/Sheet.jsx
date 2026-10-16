@@ -64,7 +64,7 @@ function Panel({ onClose, jp, cap, sumi, label, children, className, over = fals
         )}
         {children}
         {desk && dismiss && (
-          <button type="button" className="import-header__close desk-sheet__close" onClick={onClose} aria-label={t?.close} title={`${t?.close} (Esc)`}>
+          <button type="button" className="import-header__close desk-sheet__close" onClick={onClose} aria-label={t?.close} title={`${t?.close} (${t?.keyEscape})`}>
             <CrossIcon size={16} />
           </button>
         )}

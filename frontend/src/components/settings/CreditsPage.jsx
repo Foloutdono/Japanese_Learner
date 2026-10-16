@@ -1,6 +1,6 @@
 import { useLang } from '../../LangContext'
 import { isNative, openExternal } from '../../lib/platform'
-import { ATTRIBUTIONS } from '../../domain/attributions'
+import { ATTRIBUTIONS, licenseLabel } from '../../domain/attributions'
 import { SettingsPage } from './SettingsPage'
 
 // ── Credits ───────────────────────────────────────────────
@@ -28,7 +28,7 @@ export function CreditsPage() {
               <span className="stg-row__jp">{a.name}</span>
               <span className="stg-row__sub">{t.creditsWhat[a.what]}{a.by ? ` · ${a.by}` : ''}</span>
             </span>
-            <span className="stg-row__value">{a.license}</span>
+            <span className="stg-row__value">{licenseLabel(a, t)}</span>
             <span className="stg-row__ext" aria-hidden="true">↗</span>
           </a>
         ))}

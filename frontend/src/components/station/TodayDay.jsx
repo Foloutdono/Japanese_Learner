@@ -44,7 +44,7 @@ export function TodayDay({ today, strip = false }) {
           <Slot glyph={weekdayKanji(utcToday())} state="now" tilt={-4} aria-hidden="true" />
           {summary.streak}
         </span>
-        <span className="tdy-day__what">{strip ? t.todayStreakShort : t.todayStreakDays}</span>
+        <span className="tdy-day__what">{strip ? t.todayStreakShort : t.todayStreakDays(summary.streak)}</span>
       </div>,
     )
   }
