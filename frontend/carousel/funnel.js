@@ -1357,7 +1357,7 @@ function hookLayout(c, s, { ask, secs, compact, centred }) {
     const top = fr.y + 96 + SP[7]
     const head = compact ? none : textBlock(c, ask, { x: fr.x, w: fr.w, sizes: [FS.display, FS.heading], fam: 'serif', weight: 900, maxLines: 2, lh: 1.08 })
     const kh = compact ? FS.caption * 1.08 * 1.2 : 0
-    const y = top + (compact ? kh + SP[5] : head.h + SP[4] + SP[8])
+    const y = top + (compact ? kh + SP[5] : head.h + SP[8])
     const bottom = fr.bottom - 92 - (compact ? SP[5] : SP[7])
     const room = bottom - y
     const b = content(c, s, { x: fr.x, w: fr.w, maxH: room })
@@ -1365,11 +1365,9 @@ function hookLayout(c, s, { ask, secs, compact, centred }) {
       b, room,
       draw() {
         chrome(c, { jp: c.pl.station?.jp || '', label: c.pl.station?.name || '' })
+        // The question alone, unruled: the item under it carries the line.
         if (compact) kicker(c, ask, fr.cx, top, 'center')
-        else {
-          head.draw(top)
-          swoosh(c, fr.cx, top + head.h + SP[4], Math.min(fr.w * 0.5, 380))
-        }
+        else head.draw(top)
         place(c, b, y, bottom)
         pill(c, weld(c.lang, W.save), fr.cx, fr.bottom - 92, { icon: 'save', dot: p.gold })
       },
@@ -1513,35 +1511,22 @@ function bookmark(ctx, cx, cy, h, color, { fill = false, lw = h * 0.1 } = {}) {
   ctx.restore()
 }
 /** The reason to keep the post, under the key points: the call set large
- *  beside the save glyph, an arrow down to the corner where the feed keeps
- *  its save button. */
+ *  beside the save glyph, a short arrow down from it. */
 function saveBlock(c) {
   const { ctx, p, fr, W } = c
-  const b = fit(ctx, weld(c.lang, W.saveFor), { sizes: [FS.title, FS.lead], maxW: fr.w - 140, maxLines: 2 })
-  const h = Math.max(paragraphH(b), 96) + SP[7]
+  const b = fit(ctx, weld(c.lang, W.saveFor), { sizes: [FS.title, FS.lead], maxW: fr.w - 250, maxLines: 2 })
+  const bh = paragraphH(b)
+  const line = Math.max(bh, 96)
+  // Its height counts the arrow's head, under the line.
+  const h = line + SP[4]
   return {
     h,
     draw: y => {
-      const bh = paragraphH(b)
-      bookmark(ctx, fr.x + 34, y + bh / 2, 68, p.gold, { lw: 7 })
-      paragraph(ctx, b, fr.x + 92, y, p.ink, 'left')
-      ctx.save()
-      ctx.strokeStyle = p.gold
-      ctx.lineWidth = 7
-      ctx.lineCap = 'round'
-      ctx.lineJoin = 'round'
-      const ax = fr.right - 10
-      const ay = y + h
-      ctx.beginPath()
-      ctx.moveTo(fr.x + 110, y + bh + SP[3])
-      ctx.quadraticCurveTo(fr.right - 60, y + bh + SP[3], ax, ay)
-      ctx.stroke()
-      ctx.beginPath()
-      ctx.moveTo(ax - 24, ay - 18)
-      ctx.lineTo(ax, ay)
-      ctx.lineTo(ax + 8, ay - 28)
-      ctx.stroke()
-      ctx.restore()
+      const cy = y + line / 2
+      bookmark(ctx, fr.x + 34, cy, 68, p.gold, { lw: 7 })
+      paragraph(ctx, b, fr.x + 92, cy - bh / 2, p.ink, 'left')
+      const ex = fr.x + 92 + Math.max(...b.lines.map(l => measure(ctx, l, b.f))) + SP[5]
+      arrow(ctx, ex, cy - bh / 2 + b.size * 0.5, Math.min(ex + 110, fr.right - 8), y + h, p.gold, -0.35, 7)
     },
   }
 }
@@ -1582,27 +1567,33 @@ function ctaSlide(c, feature) {
   // the name, so the masthead gives its room to the picture.
   const top = chrome(c, { thin: true, band: p.gold })
   const head = textBlock(c, weld(c.lang, W.cta.head), { x: fr.x, w: fr.w, sizes: tall(c) ? [FS.display * 0.8, FS.heading] : [FS.heading, FS.display * 0.6], fam: 'serif', weight: 900, maxLines: 2, lh: 1.06 })
-  const name = textBlock(c, weld(c.lang, F.name), { x: fr.x, w: fr.w, sizes: [FS.title, FS.lead], maxLines: 1, color: p.paper ? mix(featureInk(p, feature), p.ink, 0.7) : p.ink })
+  // The feature in one card: its picture, its name and what it does.
+  const pad = SP[6]
+  const cx = fr.x - SP[4]
+  const cw = fr.w + SP[4] * 2
+  const name = textBlock(c, weld(c.lang, F.name), { x: cx + pad, w: cw - pad * 2, sizes: [FS.title, FS.lead], maxLines: 1, color: p.paper ? mix(featureInk(p, feature), p.ink, 0.7) : p.ink })
   // What costs nothing is said in the sentence, its tag in the picture.
-  const line = textBlock(c, weld(c.lang, F.freeLine ? `${F.line} ${F.freeLine}.` : F.line), { x: fr.x, w: fr.w, sizes: [FS.body, FS.sm], weight: 500, color: p.ink2, maxLines: 3 })
+  const line = textBlock(c, weld(c.lang, F.freeLine ? `${F.line} ${F.freeLine}.` : F.line), { x: cx + pad, w: cw - pad * 2, sizes: [FS.body, FS.sm], weight: 500, color: p.ink2, maxLines: 3 })
   const btn = METAL_H
   const alsoH = 72
+  const gap = SP[5]
   let y = top
   head.draw(y)
   y += head.h + SP[3]
   swoosh(c, fr.cx, y + 4, Math.min(fr.w * 0.62, 460))
   y += SP[6]
-  const gap = SP[5]
-  const fixed = name.h + SP[2] + line.h + gap + btn
-  let room = fr.bottom - y - fixed - gap
-  const showAlso = room - alsoH - gap >= 300
+  const words = name.h + SP[2] + line.h
+  // The card's margin above and below is lean: the picture keeps the room.
+  const edge = SP[4]
+  let room = fr.bottom - y - gap - btn - edge * 2 - SP[4] - words
+  const showAlso = room - alsoH - gap >= 280
   if (showAlso) room -= alsoH + gap
-  illustrate(c, feature, { x: fr.x, y, w: fr.w, h: room })
-  y += room + gap
-  name.draw(y)
-  y += name.h + SP[2]
-  line.draw(y)
-  y += line.h + gap
+  const ch = edge * 2 + room + SP[4] + words
+  card(c, cx, y, cw, ch, R.card * 2, faceInk(p))
+  illustrate(c, feature, { x: fr.x, y: y + edge, w: fr.w, h: room })
+  name.draw(y + edge + room + SP[4])
+  line.draw(y + edge + room + SP[4] + name.h + SP[2])
+  y += ch + gap
   if (showAlso) also(c, ALSO[feature], y)
   metal(ctx, p, fr.cx, fr.bottom - btn, weld(c.lang, W.cta.go), fr.w)
 }
@@ -2163,8 +2154,8 @@ function drawToday(c) {
     rrect(ctx, 560, y + 14, 220 * (n / 14), 16, 8)
     ctx.fill()
   })
-  // One tap.
-  departButton(ctx, p, 420, 300, 360, 1.3, F.depart)
+  // One tap, the button large enough to read at the card's scale.
+  departButton(ctx, p, 420, 296, 372, 1.7, F.depart)
 }
 // 書取: listen twice, write what you heard, checked letter by letter.
 function drawListen(c) {
@@ -2301,8 +2292,9 @@ function drawWords(c) {
   ctx.lineTo(x0, y0)
   ctx.lineTo(x1, y0)
   ctx.stroke()
-  label(c, F.memory, x0 + 16, 46, { size: 30, color: p.ink2, align: 'left', weight: 500 })
-  label(c, `${F.time} →`, x1, y0 + 46, { size: 30, color: p.ink2, align: 'right', weight: 500 })
+  // Set to read at the card's scale: the picture is drawn smaller inside it.
+  label(c, F.memory, x0 + 16, 46, { size: 34, color: p.ink2, align: 'left', weight: 500 })
+  label(c, `${F.time} →`, x1, y0 + 46, { size: 34, color: p.ink2, align: 'right', weight: 500 })
   // Without a review, it falls away.
   ctx.save()
   ctx.setLineDash([12, 14])
@@ -2334,9 +2326,9 @@ function drawWords(c) {
     check(ctx, x, top, 22, ink, cardInk(p))
   })
   // The bubble that names them.
-  boardCard(c, 300, 210, 190, 64, 32, faceInk(p))
-  emojiAt(ctx, '🔔', 336, 242, 32)
-  label(c, F.review, 362, 253, { size: 30, align: 'left', maxW: 120 })
+  boardCard(c, 290, 206, 226, 72, 36, faceInk(p))
+  emojiAt(ctx, '🔔', 330, 242, 38)
+  label(c, F.review, 360, 254, { size: 34, align: 'left', maxW: 146 })
   // The word on its card, coming back.
   const word = c.pl.funnel?.word?.t || c.pl.funnel?.pictures?.[0]?.t || c.pl.funnel?.words?.[0]?.t || '写真'
   tilt(ctx, 640, 260, 0.05, () => {
@@ -2388,7 +2380,7 @@ function drawKanji(c) {
     boardCard(c, x, 270, cw, 130, 24, faceInk(p))
     const tb = fit(ctx, w.t, { fam: 'jp', weight: 700, sizes: [52, 44, 36], maxW: cw - 30, maxLines: 1 })
     text(ctx, tb.lines[0], x + cw / 2, 330, { f: tb.f, color: p.ink, align: 'center' })
-    if (w.reading) label(c, w.reading, x + cw / 2, 378, { size: 30, color: p.ink2, fam: 'jp', weight: 500, maxW: cw - 30 })
+    if (w.reading) label(c, w.reading, x + cw / 2, 378, { size: 34, color: p.ink2, fam: 'jp', weight: 500, maxW: cw - 24 })
   })
 }
 // 文法: the rule, a scene, a quiz: three stops on the grammar line.
@@ -2512,8 +2504,8 @@ function drawKana(c) {
     const word = F.free.toLocaleUpperCase()
     const tf = font(700, 46, 'latin')
     const tw = measure(ctx, word, tf, 0.08) + 92
-    const tx = left ? 16 : 800 - 16 - tw
-    const ty = 22
+    const tx = left ? x0 : x0 + total - tw
+    const ty = 76
     const th = 92
     ctx.fillStyle = ink
     ctx.beginPath()

@@ -42,9 +42,9 @@ read:
 | --- | --- | --- |
 | The hook | `ask` | the item and the question it asks (can you read it? what does it mean? which one is the odd one out?); a text, with the question asked of it under it |
 | The answer | `answer` | the item answered as the app shows it: the analyser's line and its numbered points, the review card's word, a kanji's readings, a question's right choice and why |
-| The call to action | `cta` | "Want more like this?": the feature the item comes from, drawn as a schema of what it does, two more features beside it, the button to the site |
+| The call to action | `cta` | "Want more like this?": the feature the item comes from in one card, its picture (a schema of what it does) over its name and what it does; two more features beside it, the button to the site |
 | The detail | `more` | the item further: word by word, in sentences, the words a kanji writes; or "Your turn": the next question, turn or round, asked and left to the reader |
-| The key points | `keys` | the answer to "Your turn" where there was one, up to three lines the catalogue, the deck or the explainers already say, and "Save it for your next review" beside the feed's save glyph, an arrow down to its button |
+| The key points | `keys` | the answer to "Your turn" where there was one, up to three lines the catalogue, the deck or the explainers already say, and "Save it for your next review" beside the save glyph, a short arrow down from it |
 
 A question is never answered on the slide that asks it: the hook asks,
 the next slide answers. A second question (the exam's next one, the
