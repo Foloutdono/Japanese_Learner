@@ -189,14 +189,15 @@ describe('the result on a phone (plan 219, the owner\'s pick D)', () => {
     expect(prev().textContent).toBe(SENTENCES[0].text)
   })
 
-  it('rules every word with a record, 2px, in its state ink — and never re-inks the word', async () => {
+  // 3px since plan 219: at display size the owner asked for a heavier rule.
+  it('rules every word with a record, 3px, in its state ink — and never re-inks the word', async () => {
     const screen = await renderScreen()
     await analyze(screen)
 
     const [mastered, particle, learning, fresh] = tokens(screen)
     const resolve = resolver()
     for (const tok of [mastered, learning, fresh]) {
-      expect(getComputedStyle(tok).borderBottomWidth).toBe('2px')
+      expect(getComputedStyle(tok).borderBottomWidth).toBe('3px')
       expect(getComputedStyle(tok).borderBottomStyle).toBe('solid')
     }
     expect(getComputedStyle(mastered).borderBottomColor).toBe(resolve('var(--state-mastered)'))
