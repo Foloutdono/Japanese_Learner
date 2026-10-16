@@ -18,8 +18,8 @@
         "them": {
           "jp": "いらっしゃいませ。どのようなお部屋をお探しですか。",
           "kana": "いらっしゃいませ。どのようなおへやをおさがしですか。",
-          "en": "Hello. What kind of flat are you looking for?",
-          "fr": "Bonjour. Quel genre de logement cherchez-vous ?"
+          "en": "Welcome. What kind of flat are you looking for?",
+          "fr": "Bienvenue. Quel genre de logement cherchez-vous ?"
         },
         "me": {
           "jp": "一人で住むので、ワンルームを探しています。",
@@ -305,8 +305,8 @@
         "them": {
           "jp": "いらっしゃいませ。本日はどのようなご用件でしょうか。",
           "kana": "いらっしゃいませ。ほんじつはどのようなごようけんでしょうか。",
-          "en": "Hello. How may I help you today?",
-          "fr": "Bonjour. Que puis-je faire pour vous aujourd'hui ?"
+          "en": "Welcome. How may I help you today?",
+          "fr": "Bienvenue. Que puis-je faire pour vous aujourd'hui ?"
         },
         "me": {
           "jp": "口座を作りたいんですが。",

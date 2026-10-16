@@ -1083,8 +1083,8 @@
         "them": {
           "jp": "いらっしゃいませ。こちらはどちらまでですか。",
           "kana": "いらっしゃいませ。こちらはどちらまでですか。",
-          "en": "Hello. Where is this going?",
-          "fr": "Bonjour. C'est pour quelle destination ?"
+          "en": "Welcome. Where is this going?",
+          "fr": "Bienvenue. C'est pour quelle destination ?"
         },
         "me": {
           "jp": "フランスまでお願いします。",
@@ -1616,8 +1616,8 @@
         "them": {
           "jp": "いらっしゃいませ。今日はどうなさいますか。",
           "kana": "いらっしゃいませ。きょうはどうなさいますか。",
-          "en": "Hello. What would you like today?",
-          "fr": "Bonjour. Qu'est-ce que je vous fais aujourd'hui ?"
+          "en": "Welcome. What would you like today?",
+          "fr": "Bienvenue. Qu'est-ce que je vous fais aujourd'hui ?"
         },
         "me": {
           "jp": "カットをお願いします。",

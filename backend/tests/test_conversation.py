@@ -199,7 +199,7 @@ def test_a_script_carries_every_turn_with_its_furigana(client):
     body = r.json()
     assert body["place"]["jp"] == "コンビニ" and body["them"] == "Clerk"
     first = body["turns"][0]
-    assert first["them"]["translation"] == "Hello. Shall I heat up your bento?"
+    assert first["them"]["translation"] == "Welcome. Shall I heat up your bento?"
     assert {"text": "温", "reading": "あたた"} in first["them"]["parts"]
     assert first["me"]["romaji"] == "hai, onegai shimasu"
     assert [w["text"] for w in first["me"]["words"]][0].startswith("はい")
