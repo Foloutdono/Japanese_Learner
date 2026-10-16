@@ -61,6 +61,14 @@ LENGTH_CAP = {"N5": 40, "N4": 50, "N3": 60, "N2": 70, "N1": 80}
 # Every line is voiced through the tours' audio route
 # (study/grammar_audio, routes/tts.py), which takes eighty characters.
 MAX_LINE = 80
+# Choose must be answered by understanding, never by the eye (the
+# tour's quiz rule). Written with care, the model reply came out the
+# longest of the three in two turns of three and the shortest almost
+# never, so "pick the longest" won 42-75% of a level and "never the
+# shortest" was a free elimination. Across a level, picking by length
+# -- the longest, or the shortest, ties shared -- must win about as
+# often as a blind pick (a third): within these bounds.
+LENGTH_TELL = (0.25, 0.42)
 
 _JAPANESE = re.compile(r"[぀-ヿ㐀-鿿豈-﫿ｦ-ﾟ]")
 _LATIN_OR_DIGIT = re.compile(r"[A-Za-z0-9０-９Ａ-Ｚａ-ｚ]")
@@ -215,6 +223,37 @@ def _turn_problems(turn, where: str, level: str) -> list[str]:
     return out
 
 
+def _length_tells(level: str, rows: list) -> list[str]:
+    """Whether a level's Choose can be answered by length: how often
+    picking the longest reply, or the shortest, picks the right one,
+    ties shared. A reply is as long as it looks, its characters."""
+    longest = shortest = 0.0
+    turns = 0
+    for row in rows:
+        for turn in (row.get("turns") or []) if isinstance(row, dict) else []:
+            replies = [turn.get("me"), *(turn.get("wrong") or [])] if isinstance(turn, dict) else []
+            if len(replies) != 1 + WRONG or not all(isinstance(r, dict) and isinstance(r.get("jp"), str) for r in replies):
+                continue
+            sizes = [len(r["jp"]) for r in replies]
+            turns += 1
+            if sizes[0] == max(sizes):
+                longest += 1 / sizes.count(max(sizes))
+            if sizes[0] == min(sizes):
+                shortest += 1 / sizes.count(min(sizes))
+    if not turns:
+        return []
+    low, high = LENGTH_TELL
+    out = []
+    for name, wins in (("the longest", longest), ("the shortest", shortest)):
+        share = wins / turns
+        if not low <= share <= high:
+            out.append(
+                f"{level} choose: picking {name} reply wins {share:.0%} "
+                f"({wins:.1f} of {turns} turns); length must say nothing, {low:.0%} to {high:.0%}"
+            )
+    return out
+
+
 def problems() -> list[str]:
     """Every rule the bank breaks, as readable lines; empty is sound."""
     found: list[str] = []
@@ -335,12 +374,50 @@ def catalogue(lang: str) -> list[dict]:
 
 # ── The measure (translate) ───────────────────────────────────────────
 
+# The bank writes its numbers in kanji (a digit has no reading to put
+# furigana on), and a learner types 「3番線」 or 「1,100円」 as any
+# Japanese writer would. A run of digits is read as the kanji numeral
+# the bank writes for it -- 千百 for 1100, 一万 for 10000 -- so a
+# number typed in digits is the same answer. A run with a leading zero
+# (a code, not a quantity) is left as typed.
+_DIGIT_RUN = re.compile(r"[0-9０-９]+(?:[,，][0-9０-９]{3})*")
+_KANJI_DIGITS = "〇一二三四五六七八九"
+
+
+def _under_ten_thousand(n: int) -> str:
+    out = ""
+    for value, mark in ((1000, "千"), (100, "百"), (10, "十")):
+        digit, n = divmod(n, value)
+        if digit:
+            out += ("" if digit == 1 else _KANJI_DIGITS[digit]) + mark
+    return out + (_KANJI_DIGITS[n] if n else "")
+
+
+def kanji_number(n: int) -> str:
+    """0 <= n < 10**8 as the bank writes it: ゼロ, 十五, 千百, 一万二千."""
+    if n == 0:
+        return "ゼロ"
+    man, rest = divmod(n, 10_000)
+    return (_under_ten_thousand(man) + "万" if man else "") + _under_ten_thousand(rest)
+
+
+def kanji_numerals(text: str) -> str:
+    """`text` with every run of digits written as the bank's kanji."""
+    def spell(match: re.Match) -> str:
+        digits = match.group(0).translate(str.maketrans("０１２３４５６７８９", "0123456789")).replace(",", "").replace("，", "")
+        if (len(digits) > 1 and digits[0] == "0") or len(digits) > 8:
+            return match.group(0)
+        return kanji_number(int(digits))
+    return _DIGIT_RUN.sub(spell, text)
+
+
 def measure(scenario_id: str, turn: int, answer: str) -> dict | None:
     """How close `answer` came to the turn's reply or any of its `alt`s,
     the closest winning: {accuracy 0-100, matched form, target}, target
     0 the reply and k its k-th alt. None for a turn the bank does not
     have. dictation.measure_forms is the figure 書取 prints, so a
-    percentage means the same on both platforms."""
+    percentage means the same on both platforms; the answer is measured
+    as typed and with its digits in kanji, the better counting."""
     found = find(scenario_id)
     if found is None:
         return None
@@ -349,7 +426,12 @@ def measure(scenario_id: str, turn: int, answer: str) -> dict | None:
         return None
     me = turns[turn]["me"]
     targets = [me, *me.get("alt", [])]
-    scores = [measure_forms(answer, jp=t["jp"], kana=t["kana"], romaji=t["romaji"]) for t in targets]
+    answers = list(dict.fromkeys([answer, kanji_numerals(answer)]))
+    scores = [
+        max((measure_forms(a, jp=t["jp"], kana=t["kana"], romaji=t["romaji"]) for a in answers),
+            key=lambda score: score["accuracy"])
+        for t in targets
+    ]
     best = max(range(len(scores)), key=lambda i: (scores[i]["accuracy"], -i))
     return {"accuracy": scores[best]["accuracy"], "matched": scores[best]["matched"], "target": best}
 

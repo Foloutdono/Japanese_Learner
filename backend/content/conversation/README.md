@@ -99,8 +99,19 @@ reply. Make each fail for one clear reason:
 
 Never: a wrong reply that differs from `me` only by politeness a clerk
 would accept, a reply that is merely less common, two wrong replies that
-fail the same way, or a wrong reply longer and more careful than `me`
-(the eye learns to pick the longest).
+fail the same way, or a wrong reply more careful than `me` (politer,
+fuller of thanks and apology: the eye learns to pick the careful one).
+
+**Length says nothing.** The eye learns to pick the longest reply just
+as fast, and the first draft of this bank taught it to: written with
+care, `me` was the longest of the three in two turns of three and the
+shortest almost never. Across a level, `me` is the longest in about a
+third of the turns, the shortest in about a third and in the middle in
+the rest. A wrong reply is made longer with what keeps its fault — the
+object, the time, the reason, a second clause — never with politeness.
+`check_conversation` measures it: picking the longest reply, or the
+shortest, must win a level's Choose between 25% and 42% of the time
+(a blind pick wins a third; `LENGTH_TELL`).
 
 ## The level
 

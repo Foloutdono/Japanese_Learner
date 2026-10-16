@@ -9,6 +9,7 @@
 # rating as a rating, and no word the learner typed in the row. The one
 # network call is stubbed the way test_composition.py stubs it.
 import json
+import re
 
 import pytest
 from fastapi import HTTPException
@@ -94,6 +95,26 @@ def _talk(**over):
 
 def test_the_bank_breaks_none_of_its_rules():
     assert conversation.problems() == []
+
+
+def test_choose_cannot_be_answered_by_length():
+    # Written with care, the model reply came out the longest of the
+    # three in most turns, and "pick the longest" won three times in
+    # four at N1. A level whose length tells the answer is a problem.
+    def turn(me, *wrong):
+        return {"me": {"jp": me}, "wrong": [{"jp": w} for w in wrong]}
+    always_longest = [{"turns": [turn("あいうえお", "あい", "あいう")] * 6}]
+    found = conversation._length_tells("N9", always_longest)
+    assert any("the longest" in line and "100%" in line for line in found)
+    assert any("the shortest" in line and "0%" in line for line in found)
+    # Longest in a third of the turns, shortest in a third: length says nothing.
+    balanced = [{"turns": [turn("あいうえお", "あい", "あいう"),
+                           turn("あい", "あいう", "あいうえお"),
+                           turn("あいう", "あい", "あいうえお")] * 2}]
+    assert conversation._length_tells("N9", balanced) == []
+    # A tie is shared: two replies as long as the right one each take half.
+    tied = [{"turns": [turn("あいう", "あいう", "あ")] * 3}]
+    assert any("50%" in line for line in conversation._length_tells("N9", tied))
 
 
 def test_every_level_has_its_scenarios():
@@ -214,6 +235,50 @@ def test_the_measure_takes_romaji_kana_or_kanji_and_the_closest_reply(client):
     assert alt["accuracy"] == 100 and alt["target"] == 1 and alt["japanese"] is None
     assert check(3, "kaado de onegaishimasu")["accuracy"] == 100
     assert check(0, "")["accuracy"] < 50
+
+
+_NUMERAL_RUN = re.compile(r"[〇一二三四五六七八九十百千万]+")
+
+
+def _as_digits(text):
+    """`text` with each run of kanji numerals written in digits, the
+    way a learner types a number (a test's helper: the round trip below
+    keeps only the runs it reads right)."""
+    def value(match):
+        total = section = digit = 0
+        for c in match.group(0):
+            if c in "〇一二三四五六七八九":
+                digit = "〇一二三四五六七八九".index(c)
+            elif c == "万":
+                total += ((section + digit) or 1) * 10_000
+                section = digit = 0
+            else:
+                section += (digit or 1) * {"十": 10, "百": 100, "千": 1000}[c]
+                digit = 0
+        return str(total + section + digit)
+    return _NUMERAL_RUN.sub(value, text)
+
+
+def test_the_measure_reads_digits_as_the_bank_writes_its_numbers(client):
+    # The bank writes its numbers in kanji; a learner types 「3番線」 or
+    # 「1,100円」 as any Japanese writer would, and it is the same answer.
+    assert conversation.kanji_numerals("3番線") == "三番線"
+    assert conversation.kanji_numerals("1,100円です") == "千百円です"
+    assert conversation.kanji_numerals("１０分") == "十分"
+    assert conversation.kanji_numerals("12000円") == "一万二千円"
+    # A run with a leading zero is a code, not a quantity: left as typed.
+    assert conversation.kanji_numerals("090") == "090"
+    typed = 0
+    for rows in conversation.bank().values():
+        for row in rows:
+            for n, turn in enumerate(row["turns"]):
+                jp = turn["me"]["jp"]
+                digits = _as_digits(jp)
+                if digits == jp or conversation.kanji_numerals(digits) != jp:
+                    continue
+                typed += 1
+                assert conversation.measure(row["id"], n, digits)["accuracy"] == 100, (row["id"], n, digits)
+    assert typed >= 3
 
 
 def test_the_measure_refuses_what_the_bank_does_not_have(client):
