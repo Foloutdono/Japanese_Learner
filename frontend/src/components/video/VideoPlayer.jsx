@@ -187,6 +187,12 @@ export const VideoPlayer = forwardRef(function VideoPlayer({
       const player = playerRef.current
       return typeof player?.getVideoData === 'function' ? (player.getVideoData()?.title ?? '') : ''
     },
+    // ...and its channel, the same way: with the title, what a line's
+    // translation and its explanation are told the video is (plan 229).
+    channel() {
+      const player = playerRef.current
+      return typeof player?.getVideoData === 'function' ? (player.getVideoData()?.author ?? '') : ''
+    },
   }), [])
 
   return <div className="video-player__frame"><div ref={containerRef} /></div>

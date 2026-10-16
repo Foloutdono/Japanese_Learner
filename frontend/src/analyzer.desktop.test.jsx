@@ -15,8 +15,9 @@ import './index.css'
 // puts its point in focus, and Explain stands the explanation in the
 // description's place. A typed Passage has no video, and its sentence
 // takes the video's place (plan 161): one sentence's words over its
-// grammar on the left, several's under the sentence, the translation
-// under the sentence once Explain has bought it. The intake stands beside its history;
+// grammar on the left, several's folded to one line under the sentence
+// (plan 229, the owner's pick C) and opened as a list in a sheet, the
+// translation under the sentence. The intake stands beside its history;
 // Ctrl+Enter analyses. And the dictionary,
 // finding no entry for a sentence typed into it, offers to take it to
 // the analyser, which analyses it on arrival. The phone's side is
@@ -31,6 +32,18 @@ const ONE = [{
   tokens: [tok('駅', '駅', 'えき', 'station'), tok('で'), tok('待つ', '待つ', 'まつ', 'to wait')],
 }]
 const TWO = [ONE[0], { ...ONE[0], text: '電車に乗る', tokens: [tok('電車', '電車', 'でんしゃ', 'train'), tok('に'), tok('乗る', '乗る', 'のる', 'to ride')] }]
+// A line as wide as plan 229 lets one be (22 characters), with the
+// translation it carries: what the text desk's stage must hold whole.
+const WIDE_LINE = {
+  ...ONE[0], text: '昨日は雨が降っていたので、私は一日中家で',
+  translation: 'Hier, comme il pleuvait, je suis resté toute la journée chez moi à',
+  tokens: [
+    tok('昨日', '昨日', 'きのう', 'yesterday'), tok('は'), tok('雨', '雨', 'あめ', 'rain'), tok('が'),
+    tok('降っ', '降る', 'ふる', 'to fall'), tok('て'), tok('い'), tok('た'), tok('の'), tok('で'), tok('、'),
+    tok('私', '私', 'わたし', 'I'), tok('は'), tok('一日中', '一日中', 'いちにちじゅう', 'all day'),
+    tok('家', '家', 'いえ', 'home'), tok('で'),
+  ],
+}
 // A sentence built with a particle's marker (を) and a construction:
 // 〜ている written on て and いる -- listed after を, in the sentence's order.
 const GRAMMAR = [{
@@ -165,13 +178,14 @@ describe('the analyser on the desk (plan 134)', () => {
     const rail = box('.anl-desk__rail')
     const points = box('.anl-desk__points')
     const slab = box('.anl-slab')
-    const words = box('.anl-desk__words')
+    const words = box('.anl-fold')
     const right = box('.anl-desk__entry')
     expect(rail.right).toBeLessThanOrEqual(head.left)
     expect(head.right).toBeLessThanOrEqual(right.left)
     // Plan 161, several typed sentences (B): the Passage's line over the
-    // grammar on the left, the words under the sentence in the middle,
-    // and no card in focus beside them -- the entry is that card.
+    // grammar on the left, the words under the sentence in the middle --
+    // folded to one line since plan 229 -- and no card in focus beside
+    // them: the entry is that card.
     expect(points.top).toBeGreaterThan(rail.bottom - 1)
     expect(words.top).toBeGreaterThan(slab.bottom - 1)
     expect(Math.abs(words.left - slab.left)).toBeLessThan(2)
@@ -338,7 +352,9 @@ describe('the analyser on the desk (plan 134)', () => {
     passage = TWO
     await mount()
     await analyze('駅で待つ。電車に乗る。')
-    $$('.anl-words__row').at(-1).click()
+    $('.anl-fold').click()
+    await settle()
+    $$('[role="dialog"] .anl-words__row').at(-1).click()
     // The entry is fetched: waited for rather than read after a fixed
     // pause, which a slow CI runner outlasted (the plate still empty).
     await expect.poll(shown).toBe('待つ')
@@ -351,6 +367,54 @@ describe('the analyser on the desk (plan 134)', () => {
     // The subtitle's arrows walk back.
     $$('.anl-slab__arrow')[0].click()
     await expect.poll(() => $('.anl-subs__count').textContent).toContain('1 / 2')
+  })
+
+  // Plan 229, the owner's pick C of "Tsuji analyser — text desk stage":
+  // several sentences' words give their height back to the sumi, folded
+  // to one line under it, and the line opens them as the list.
+  it('folds several sentences\' words to one line under the sentence, and opens them as the list', async () => {
+    passage = TWO
+    await mount()
+    await analyze('駅で待つ。電車に乗る。')
+    await expect.poll(shown).toBe('駅')
+    expect($('.anl-desk__words')).toBeNull()
+    const fold = $('.anl-fold')
+    const f = fold.getBoundingClientRect()
+    const slab = box('.anl-slab')
+    expect(f.top).toBeGreaterThan(slab.bottom - 1)
+    expect(Math.abs(f.left - slab.left)).toBeLessThan(1)
+    expect(Math.abs(f.right - slab.right)).toBeLessThan(1)
+    expect(Math.abs(f.bottom - box('.anl-desk').bottom)).toBeLessThan(2)
+    expect(f.height).toBeLessThan(64)
+    expect($('.anl-fold__cap').textContent).toBe('Mots de la phrase2')
+    expect($$('.anl-fold__chip').map(c => c.textContent)).toEqual(['駅', '待つ'])
+    expect($('.anl-fold__chip--on').textContent).toBe('駅')
+    expect(fold.getAttribute('aria-haspopup')).toBe('dialog')
+
+    fold.click()
+    await settle()
+    const rows = $$('[role="dialog"] .anl-words__row')
+    expect(rows.map(r => r.querySelector('.anl-words__word').textContent)).toEqual(['駅', '待つ'])
+    expect($('[role="dialog"] .anl-words__add').textContent).toBe('Ajouter au deck')
+    expect(fold.getAttribute('aria-expanded')).toBe('true')
+    rows.at(-1).click()
+    await expect.poll(shown).toBe('待つ')
+    expect($('[role="dialog"]')).toBeNull()
+    expect($('.anl-fold__chip--on').textContent).toBe('待つ')
+  })
+
+  it('gives the stage the column: a line as wide as one gets, its translation and Explain stand whole', async () => {
+    passage = [WIDE_LINE, TWO[1]]
+    await mount()
+    await analyze('昨日は雨が降っていたので、私は一日中家で。電車に乗る。')
+    await expect.poll(() => $('.anl-subs__tr')?.textContent).toBe(WIDE_LINE.translation)
+    await settle(300)
+    const stage = $('.anl-subs__stage')
+    const bottom = stage.getBoundingClientRect().bottom
+    expect(stage.scrollHeight).toBeLessThanOrEqual(stage.clientHeight + 1)
+    expect(box('.anl-subs__tr').bottom).toBeLessThanOrEqual(bottom + 1)
+    expect(box('.anl-subs__stage .anl-desk__explain').bottom).toBeLessThanOrEqual(bottom + 1)
+    expect(document.scrollingElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight + 1)
   })
 
   it('stands the explanation in the description\'s place, and swaps back', async () => {

@@ -285,7 +285,9 @@ CREATE TABLE phrase_history (
     source TEXT NOT NULL DEFAULT 'typed',
     source_ref TEXT NOT NULL DEFAULT '',
     kept BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- Each sentence's translation (plan 229), {lang: {sentence: translation}}.
+    translations JSONB NOT NULL DEFAULT '{}'::jsonb
 );
 
 CREATE INDEX idx_phrase_history_user
@@ -533,7 +535,10 @@ CREATE TABLE video_sessions (
     -- Removed from the analyser's shelf, by the learner's ✕ or past the
     -- history's limit, and erased a day later (core/history.py). NULL is
     -- a session on the shelf.
-    deleted_at    TIMESTAMPTZ
+    deleted_at    TIMESTAMPTZ,
+    -- Each line's translation (plan 229), {lang: {line text: translation}},
+    -- filled a block of lines at a time as the learner reaches them.
+    translations  JSONB NOT NULL DEFAULT '{}'::jsonb
 );
 
 CREATE INDEX idx_video_sessions_user

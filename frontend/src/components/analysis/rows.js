@@ -87,6 +87,16 @@ export function wordRowsOf(analysis) {
     }))
 }
 
+// A row's word as the list names it: the dictionary's spelling where
+// the word has a card (話す, not the 話し of the sentence), else the
+// sentence's own; and its reading where that spelling is not kana.
+export function rowName(row) {
+  const entry = row.head.vocab_match?.entry
+  const name = entry ? (entry.kanji || entry.kana || row.surface) : row.surface
+  const reading = entry?.kana && entry.kana !== name ? entry.kana : ''
+  return { name, reading }
+}
+
 // The words a point is made of (plan 160), as a learner reads them
 // rather than as the tokenizer cut them: the rows it is written on
 // (て + は + いけません, not て + は + いけ + ませ + ん), after the word it

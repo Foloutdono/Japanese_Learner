@@ -7,9 +7,10 @@ class SentencesFromCuesTests(unittest.TestCase):
     """sentences_from_cues turns each Cue into one or more Sentences.
 
     A Cue is a Sentence: it is a line somebody chose to put on screen
-    together, which is the unit a learner studies. It splits FURTHER on
-    its own punctuation, and never merges with its neighbours. Cues with
-    no Japanese in them are dropped.
+    together, which is the unit a learner studies. It is never split on
+    its own punctuation and never merges with its neighbours; only a
+    cue too wide to read at a glance is cut into lines (plan 229).
+    Cues with no Japanese in them are kept and flagged.
 
     This is the reverse of the original contract (concatenate the whole
     Window, split on punctuation) -- see the module docstring and
@@ -55,14 +56,17 @@ class SentencesFromCuesTests(unittest.TestCase):
 
     def test_unpunctuated_cues_stay_one_sentence_each(self) -> None:
         # The auto-caption case: no 。！？ anywhere. Still one Sentence
-        # per Cue, which is what it always should have produced.
+        # per Cue, which is what it always should have produced -- or,
+        # a cue too wide to read at a glance, the lines it is cut into
+        # (plan 229, tests/test_line_cut.py), never one merged with its
+        # neighbour.
         cues = [
-            {"start": 0.0, "end": 2.0, "text": "あ" * 70},
-            {"start": 2.0, "end": 4.0, "text": "い" * 70},
+            {"start": 0.0, "end": 2.0, "text": "今日はみんなで駅前の喫茶店に行った"},
+            {"start": 2.0, "end": 4.0, "text": "そのあとで公園を散歩した"},
         ]
         result = sentences_from_cues(cues, 0.0, 10.0)
         self.assertEqual(len(result), 2)
-        self.assertEqual(result[0]["text"], "あ" * 70)
+        self.assertEqual(result[0]["text"], "今日はみんなで駅前の喫茶店に行った")
         self.assertEqual(result[1]["cue_end"], 4.0)
 
     def test_cues_with_no_japanese_are_kept_and_flagged(self) -> None:

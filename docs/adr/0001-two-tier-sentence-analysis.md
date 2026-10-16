@@ -76,3 +76,35 @@ what a dictionary cannot answer. Dropping it would gut the feature.
 behaviour and feels fast, but keeps paying for every sentence the learner only
 glanced at. Rejected for the video case, where that is 100 sentences per
 session.
+
+---
+
+## Amendment, 2026-10-16 — a video's lines are translated a block at a time (plan 229)
+
+The owner asked for a translation under every line of a video. Since plan 161 a
+line's translation came with its deep tier, so a translation under every line
+would have been the background auto-deepening this ADR rejects, at one call a
+line.
+
+**A translation is not the deep tier.** It is a third thing, asked for a block of
+20 lines in one call (`study/line_translate.py`) as the learner reaches them,
+with the two lines either side and the video's title as context, and kept on the
+session by the line's text (`video_sessions.translations`), so a chorus or a
+second viewing costs nothing. That is about a twentieth of the calls auto-deepening
+would make, and the translation is better for it: a line that is half a sentence
+is read as the half it is. It is rationed (`LINE_TRANSLATION_DAILY_LIMIT` blocks a
+day, `core/daily_limit.py`) and costed (`scripts/llm_cost_model.py`,
+`line_translation`). A typed or photographed Passage the analyser saved is
+translated the same way, its sentences kept on its `phrase_history` row; one
+saved nowhere still has its translation only from Explain.
+
+**The deep tier of a video's line is asked where the line stands.** Explained
+alone, a line like みなさんがいてくれるので、 was explained as a sentence of its own.
+Its explanation is now asked with the video's title and channel (read off the
+player; the server never fetches them), the line's place and time, and the two
+lines either side (`routes/phrase.deep_context`), and cached under a key that
+includes that context. A typed Passage's sentence is asked the same way, with the
+two sentences either side of it (`passage_context`), and found again under that
+key when the Passage is reopened -- or, bought before, under the plain one. The
+phrase alone keeps its old key, and a Passage of one sentence is asked as the
+sentence alone, so the reading bank's cached explanations are untouched.

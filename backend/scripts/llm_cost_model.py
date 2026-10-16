@@ -124,6 +124,19 @@ FEATURES = {
         "analyzer, the runs' explain and a video line alike -- which bounds "
         "the abuse row.",
     ),
+    "line_translation": (
+        30, 900, 700,
+        "A translation under every line of a video, and every sentence of a "
+        "typed or photographed Passage (plan 229): one call for a block of "
+        "20 lines as the learner reaches it, the two either side and the "
+        "video's title as context. Four videos a month of ~150 lines is 30 "
+        "blocks; a typed Passage is a block or two. In: a ~350-token system block (stable, "
+        "cached) and 20 lines with their context. Out: 20 short subtitles "
+        "and their keys. Kept on the session by the line's text, so a "
+        "chorus and a second viewing cost nothing. "
+        "LINE_TRANSLATION_DAILY_LIMIT caps it at 60 blocks/day (1,200 "
+        "lines), which bounds the abuse row.",
+    ),
     "ocr_vision": (
         20, 1400, 400,
         "20 photos/mo. An image is ~1.1k tokens plus OCR_PROMPT. The daily "

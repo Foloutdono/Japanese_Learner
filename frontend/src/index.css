@@ -41231,9 +41231,61 @@ button.brd-stn { cursor: pointer; }
   .anl-desk__side > .anl-desk__points { flex: 0 1 auto; min-height: 0; }
   .anl-desk--text .anl-desk__rail { contain: none; }
   .anl-desk--text .anl-desk__points { align-self: stretch; max-height: none; }
-  /* Several sentences' words under the sentence, never more than a
-     share of the window: the sentence keeps the rest. */
-  .anl-desk--text > .anl-desk__words { grid-area: work; max-height: 40dvh; }
+  /* 畳 (plan 229, the owner's pick C): several sentences' words folded
+     to one line under the sentence, which keeps the rest of the column,
+     and opened as the list in a sheet (WordsList.jsx's WordsFold). */
+  .anl-fold {
+    display: flex;
+    grid-area: work;
+    align-items: center;
+    gap: var(--sp-4);
+    min-width: 0;
+    padding: var(--sp-4) var(--sp-3) var(--sp-4) var(--sp-4);
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+    color: var(--text-primary);
+    text-align: left;
+  }
+  .anl-fold:hover,
+  .anl-fold:focus-visible { border-color: var(--line-color); }
+  .anl-fold__cap {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: var(--sp-3);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .anl-fold__n {
+    padding: 0 var(--sp-2);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    font-size: var(--fs-caption);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+  }
+  .anl-fold__words {
+    display: flex;
+    flex: 1 1 auto;
+    gap: var(--sp-2);
+    min-width: 0;
+    overflow: hidden;
+  }
+  .anl-fold__chip {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    padding: var(--sp-1) var(--sp-3);
+    background: var(--bg-main);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+  }
+  .anl-fold__chip--on { border-color: var(--text-primary); }
+  .anl-fold__chip .anl-words__word { font-size: var(--fs-body); }
+  .anl-fold > svg { flex: none; color: var(--text-secondary); }
   /* One typed sentence is printed at display size under the head, so
      its title is for a screen reader alone and Keep holds the corner. */
   .anl-desk--text .anl-desk__head > .anl-head__keep { margin-left: auto; }
@@ -41242,12 +41294,15 @@ button.brd-stn { cursor: pointer; }
     min-height: 0;
     padding-bottom: var(--sp-7);
   }
+  /* Centred while it fits; once a sentence, its translation (plan 229)
+     and Explain outgrow the stage, they start at its top and scroll,
+     rather than overflowing above it where no scroll reaches. */
   .anl-subs__stage {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: safe center;
     gap: var(--sp-6);
     min-height: 0;
     overflow-y: auto;
@@ -41266,6 +41321,12 @@ button.brd-stn { cursor: pointer; }
     color: var(--text-on-panel-soft);
     text-align: center;
     text-wrap: balance;
+  }
+  /* Under a video's subtitle (plan 229): a rung under the line, which
+     is a heading on the slab rather than display size. */
+  .anl-desk:not(.anl-desk--text) .anl-subs__tr {
+    font-size: var(--fs-lead);
+    font-weight: 400;
   }
   /* Explain on the sumi, in the panel's inks, as the arrows beside it. */
   .anl-slab .anl-explainbtn {

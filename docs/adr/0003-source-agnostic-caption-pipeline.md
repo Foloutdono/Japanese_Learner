@@ -511,3 +511,29 @@ fetch never.
   clean are the learner's own: a media file they hold, played and listened to in
   their own browser, or a tab's sound they choose to share (desktop Chromium
   only). Either is a new way into the analyser, to be drawn before it is built.
+
+---
+
+## Amendment, 2026-10-16 — a Cue too wide to read is cut into lines (plan 229)
+
+The 2026-08-27 amendment made one Cue one Sentence, never split on its own
+punctuation. A talk's hand-written track disproved the half of that which
+assumed a cue is always sized for a screen: one cue of 44 characters
+(今日はAyaseさんとバンドメンバーとそしてぷらそにかの合唱のみなさんがいてくれるので、)
+drew five rows at display size on a phone, pushing the line's tools off it. The
+owner: *"make sure the sentences can't get too long."*
+
+**The correction.** A Japanese cue wider than `study/line_cut.MAX_LINE_WIDTH`
+(22 full-width characters, a Latin letter or a space counting half: three rows
+on a phone's stage, a broadcast subtitle's two rows of thirteen with room) is
+cut into the fewest lines that fit. Never inside a word or a verb's chain, never
+before a particle, an auxiliary or a mark; at a mark or space the line already
+has, then a clause's end, then a phrase's, the pieces kept near one width. What
+the 2026-08-27 amendment feared from a split -- two stops sharing a timestamp --
+does not happen: each piece runs from where its first word is said (a time the
+track measured there, else placed by the beats of the words between the nearest
+two) to where the next piece's is, and the pieces tile the cue.
+
+Every other cue is still exactly one Sentence, and a cue with no Japanese is never
+cut. A session stored before this is cut the same way the next time it is opened
+(`routes/video._current`), its indices with it.
