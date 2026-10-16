@@ -348,8 +348,8 @@
            "p3",
            "p4"
           ],
-          "starIndex": 3,
-          "answer": "p4"
+          "starIndex": 2,
+          "answer": "p3"
          },
          {
           "id": "bunpou_8_q2",
@@ -472,8 +472,8 @@
            "p3",
            "p4"
           ],
-          "starIndex": 3,
-          "answer": "p4"
+          "starIndex": 2,
+          "answer": "p3"
          }
         ]
        },
@@ -1021,8 +1021,8 @@
            "p3",
            "p4"
           ],
-          "starIndex": 3,
-          "answer": "p4"
+          "starIndex": 2,
+          "answer": "p3"
          },
          {
           "id": "bunpou_8_q4",
@@ -1074,7 +1074,7 @@
            },
            {
             "id": "p1",
-            "textJp": "日本語が"
+            "textJp": "日本語を"
            }
           ],
           "order": [
@@ -1106,7 +1106,7 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "おかげで"
+              "textJp": "以上"
              },
              {
               "id": "c2",
@@ -1160,7 +1160,7 @@
              },
              {
               "id": "c3",
-              "textJp": "さて"
+              "textJp": "なぜなら"
              },
              {
               "id": "c4",
@@ -1198,7 +1198,7 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "わけ"
+              "textJp": "ところ"
              },
              {
               "id": "c2",
@@ -1570,13 +1570,13 @@
            "p3",
            "p4"
           ],
-          "starIndex": 3,
-          "answer": "p4"
+          "starIndex": 2,
+          "answer": "p3"
          },
          {
           "id": "bunpou_8_q2",
           "number": 2,
-          "contextJp": "優勝した選手の父親は、記者にこう話した。",
+          "contextJp": "優勝したチームのキャプテンは、記者にこう話した。",
           "pieces": [
            {
             "id": "p4",
@@ -1601,8 +1601,8 @@
            "p3",
            "p4"
           ],
-          "starIndex": 3,
-          "answer": "p4"
+          "starIndex": 2,
+          "answer": "p3"
          },
          {
           "id": "bunpou_8_q3",
@@ -1663,8 +1663,8 @@
            "p3",
            "p4"
           ],
-          "starIndex": 3,
-          "answer": "p4"
+          "starIndex": 2,
+          "answer": "p3"
          },
          {
           "id": "bunpou_8_q5",
@@ -1694,8 +1694,8 @@
            "p3",
            "p4"
           ],
-          "starIndex": 3,
-          "answer": "p4"
+          "starIndex": 2,
+          "answer": "p3"
          }
         ]
        },
@@ -1943,7 +1943,7 @@
            },
            {
             "id": "c3",
-            "textJp": "など"
+            "textJp": "ずつ"
            },
            {
             "id": "c4",
@@ -2212,8 +2212,8 @@
            "p3",
            "p4"
           ],
-          "starIndex": 3,
-          "answer": "p4"
+          "starIndex": 2,
+          "answer": "p3"
          },
          {
           "id": "bunpou_8_q3",
@@ -2305,8 +2305,8 @@
            "p3",
            "p4"
           ],
-          "starIndex": 3,
-          "answer": "p4"
+          "starIndex": 2,
+          "answer": "p3"
          }
         ]
        },
@@ -2428,11 +2428,11 @@
              },
              {
               "id": "c3",
-              "textJp": "ならでは"
+              "textJp": "にかけては"
              },
              {
               "id": "c4",
-              "textJp": "ぬきでは"
+              "textJp": "なしには"
              }
             ],
             "answer": "c4"
@@ -2502,7 +2502,7 @@
            },
            {
             "id": "c2",
-            "textJp": "ところで"
+            "textJp": "うえで"
            },
            {
             "id": "c3",
@@ -2550,7 +2550,7 @@
            },
            {
             "id": "c2",
-            "textJp": "うちに"
+            "textJp": "とたんに"
            },
            {
             "id": "c3",
@@ -2775,7 +2775,7 @@
            },
            {
             "id": "p3",
-            "textJp": "危なくて"
+            "textJp": "とても"
            },
            {
             "id": "p2",
@@ -2823,8 +2823,8 @@
            "p3",
            "p4"
           ],
-          "starIndex": 3,
-          "answer": "p4"
+          "starIndex": 2,
+          "answer": "p3"
          },
          {
           "id": "bunpou_8_q3",
@@ -2885,8 +2885,8 @@
            "p3",
            "p4"
           ],
-          "starIndex": 3,
-          "answer": "p4"
+          "starIndex": 2,
+          "answer": "p3"
          },
          {
           "id": "bunpou_8_q5",
@@ -2916,8 +2916,8 @@
            "p3",
            "p4"
           ],
-          "starIndex": 3,
-          "answer": "p4"
+          "starIndex": 2,
+          "answer": "p3"
          }
         ]
        },
@@ -3403,8 +3403,8 @@
            "p3",
            "p4"
           ],
-          "starIndex": 3,
-          "answer": "p4"
+          "starIndex": 2,
+          "answer": "p3"
          },
          {
           "id": "bunpou_8_q2",
@@ -3413,7 +3413,7 @@
           "pieces": [
            {
             "id": "p4",
-            "textJp": "強さが生まれるのだ。"
+            "textJp": "が生まれるのだ。"
            },
            {
             "id": "p1",
@@ -3425,7 +3425,7 @@
            },
            {
             "id": "p3",
-            "textJp": "本当の"
+            "textJp": "本当の強さ"
            }
           ],
           "order": [
@@ -3496,8 +3496,8 @@
            "p3",
            "p4"
           ],
-          "starIndex": 3,
-          "answer": "p4"
+          "starIndex": 2,
+          "answer": "p3"
          },
          {
           "id": "bunpou_8_q5",
@@ -3776,7 +3776,7 @@
            },
            {
             "id": "c3",
-            "textJp": "まいとする"
+            "textJp": "ずじまいだ"
            },
            {
             "id": "c4",
@@ -4045,8 +4045,8 @@
            "p3",
            "p4"
           ],
-          "starIndex": 3,
-          "answer": "p4"
+          "starIndex": 2,
+          "answer": "p3"
          },
          {
           "id": "bunpou_8_q3",
@@ -4107,8 +4107,8 @@
            "p3",
            "p4"
           ],
-          "starIndex": 3,
-          "answer": "p4"
+          "starIndex": 2,
+          "answer": "p3"
          },
          {
           "id": "bunpou_8_q5",
@@ -4625,8 +4625,8 @@
            "p3",
            "p4"
           ],
-          "starIndex": 0,
-          "answer": "p1"
+          "starIndex": 1,
+          "answer": "p2"
          },
          {
           "id": "bunpou_8_q2",
@@ -4635,7 +4635,7 @@
           "pieces": [
            {
             "id": "p3",
-            "textJp": "彼は最後まで"
+            "textJp": "彼は決して"
            },
            {
             "id": "p4",
@@ -5162,7 +5162,7 @@
            },
            {
             "id": "c2",
-            "textJp": "っぽい"
+            "textJp": "得る"
            },
            {
             "id": "c3",
@@ -5246,7 +5246,7 @@
           "pieces": [
            {
             "id": "p1",
-            "textJp": "シャワーを"
+            "textJp": "私がシャワーを"
            },
            {
             "id": "p2",
@@ -5456,7 +5456,7 @@
              },
              {
               "id": "c2",
-              "textJp": "ことには"
+              "textJp": "ものの"
              },
              {
               "id": "c3",
@@ -5483,7 +5483,7 @@
              },
              {
               "id": "c3",
-              "textJp": "ばかりだ"
+              "textJp": "ところだ"
              },
              {
               "id": "c4",
@@ -5605,15 +5605,15 @@
            },
            {
             "id": "c2",
-            "textJp": "っこない"
+            "textJp": "ずにすむ"
            },
            {
             "id": "c3",
-            "textJp": "かねない"
+            "textJp": "ずじまいだ"
            },
            {
             "id": "c4",
-            "textJp": "ようがない"
+            "textJp": "ないまでも"
            }
           ],
           "answer": "c1"
@@ -5940,8 +5940,8 @@
            "p3",
            "p4"
           ],
-          "starIndex": 3,
-          "answer": "p4"
+          "starIndex": 2,
+          "answer": "p3"
          },
          {
           "id": "bunpou_8_q5",
@@ -6025,11 +6025,11 @@
              },
              {
               "id": "c3",
-              "textJp": "っぽい"
+              "textJp": "そうにない"
              },
              {
               "id": "c4",
-              "textJp": "つつある"
+              "textJp": "ようがない"
              }
             ],
             "answer": "c2"

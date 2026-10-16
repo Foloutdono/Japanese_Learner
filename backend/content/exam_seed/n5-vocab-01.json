@@ -356,7 +356,7 @@
          {
           "id": "moji_3_q2",
           "number": 2,
-          "promptJp": "「みんな、少し休みましょう」とジョンは＿＿＿＿。",
+          "promptJp": "「みんな、ちょっと休みましょう」とジョンは＿＿＿＿。",
           "choices": [
            {
             "id": "c1",
@@ -428,7 +428,7 @@
          {
           "id": "moji_3_q5",
           "number": 5,
-          "promptJp": "母は１０分前に＿＿＿＿。今はうちにいません。",
+          "promptJp": "母は九時に＿＿＿＿。今はうちにいません。",
           "choices": [
            {
             "id": "c1",
@@ -464,7 +464,7 @@
            },
            {
             "id": "c3",
-            "textJp": "来ました"
+            "textJp": "いました"
            },
            {
             "id": "c4",
@@ -966,7 +966,7 @@
          {
           "id": "moji_3_q4",
           "number": 4,
-          "promptJp": "ことばのいみがわからないときは、＿＿＿＿を見ます。",
+          "promptJp": "ことばのいみがわからないときは、＿＿＿＿をひきます。",
           "choices": [
            {
             "id": "c1",
@@ -1072,7 +1072,7 @@
          {
           "id": "moji_4_q2",
           "number": 2,
-          "promptJp": "このシャツのいろはすきじゃありません。ほかのを見せてください。",
+          "promptJp": "このシャツのいろはすきじゃありません。ほかのはありますか。",
           "underlineJp": "ほか",
           "choices": [
            {
@@ -1504,7 +1504,7 @@
          {
           "id": "moji_3_q3",
           "number": 3,
-          "promptJp": "ごはんの前に、手を＿＿＿＿ください。",
+          "promptJp": "食べる前に、手を＿＿＿＿ください。",
           "choices": [
            {
             "id": "c1",
@@ -1889,23 +1889,23 @@
          {
           "id": "moji_2_q1",
           "number": 1,
-          "promptJp": "がっこう",
+          "promptJp": "ちゅうごく",
           "choices": [
            {
             "id": "c1",
-            "textJp": "字校"
+            "textJp": "申国"
            },
            {
             "id": "c2",
-            "textJp": "学枚"
+            "textJp": "中図"
            },
            {
             "id": "c3",
-            "textJp": "覚校"
+            "textJp": "中困"
            },
            {
             "id": "c4",
-            "textJp": "学校"
+            "textJp": "中国"
            }
           ],
           "answer": "c4"
@@ -2022,7 +2022,7 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "電話"
+            "textJp": "でんわ"
            },
            {
             "id": "c2",
@@ -2370,23 +2370,23 @@
          {
           "id": "moji_1_q5",
           "number": 5,
-          "promptJp": "毎週",
+          "promptJp": "西",
           "choices": [
            {
             "id": "c1",
-            "textJp": "まいじゅう"
+            "textJp": "にじ"
            },
            {
             "id": "c2",
-            "textJp": "まいしゅ"
+            "textJp": "にっし"
            },
            {
             "id": "c3",
-            "textJp": "まいっしゅう"
+            "textJp": "せい"
            },
            {
             "id": "c4",
-            "textJp": "まいしゅう"
+            "textJp": "にし"
            }
           ],
           "answer": "c4"
@@ -2628,7 +2628,7 @@
          {
           "id": "moji_3_q3",
           "number": 3,
-          "promptJp": "＿＿＿＿は二十四時間あいていますから、べんりです。",
+          "promptJp": "＿＿＿＿は２４時間あいていますから、べんりです。",
           "choices": [
            {
             "id": "c1",
@@ -3345,7 +3345,7 @@
          {
           "id": "moji_4_q3",
           "number": 3,
-          "promptJp": "あさごはんを食べました。それから、学校へ行きました。",
+          "promptJp": "あさ、パンを食べました。それから、学校へ行きました。",
           "underlineJp": "それから",
           "choices": [
            {
@@ -4469,12 +4469,12 @@
          {
           "id": "moji_4_q3",
           "number": 3,
-          "promptJp": "このにもつはおもいです。",
+          "promptJp": "このかばんはおもいです。",
           "underlineJp": "おもい",
           "choices": [
            {
             "id": "c1",
-            "textJp": "大きくない"
+            "textJp": "ながくない"
            },
            {
             "id": "c2",
@@ -5031,7 +5031,7 @@
          {
           "id": "moji_4_q3",
           "number": 3,
-          "promptJp": "きのうは、いえで本を読みました。",
+          "promptJp": "きのうは、いえで本をよみました。",
           "underlineJp": "いえ",
           "choices": [
            {
