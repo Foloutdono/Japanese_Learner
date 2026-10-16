@@ -43,7 +43,7 @@ import { startAmbiance, stopAmbiance } from '../lib/audio'
 // Everything this screen reads is shared: /api/today from the store
 // the tab bar's badge already reads. One request, every consumer.
 //
-// 湖の刻 (plan 218): the gate stands on the print of the hour, and the
+// 湖の刻 (plan 219): the gate stands on the print of the hour, and the
 // print is heard: the ambiance plays the same hour's lake behind it,
 // as it does behind every station page (SelectionScreen).
 

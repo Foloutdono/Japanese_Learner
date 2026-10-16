@@ -1,4 +1,4 @@
-"""Build the ambiance of the hour (plan 218).
+"""Build the ambiance of the hour (plan 219).
 
     cd frontend && python3 scripts/ambiance/build.py   # needs numpy and ffmpeg
 

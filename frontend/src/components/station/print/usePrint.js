@@ -12,7 +12,7 @@ import PRINT from './print.json'
 
 export { PRINT }
 
-// Which print the hour shows: one rule with the ambiance's (plan 218).
+// Which print the hour shows: one rule with the ambiance's (plan 219).
 export { printHour } from '../../../domain/printHour'
 
 // A print fetched once a visit: the hour's file is a few hundred

@@ -1,4 +1,4 @@
-"""The four hours of Today's print, as four loops (plan 218): a lake at
+"""The four hours of Today's print, as four loops (plan 219): a lake at
 the foot of Fuji in autumn, its stone shore, the pine, and the local
 line running along the water.
 

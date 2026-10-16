@@ -10,7 +10,7 @@ import AMBIANCE from './ambiance.json'
 // is longer than a keypress — which makes it the only one where
 // transitions, tab focus and navigation all actually matter.
 //
-// 湖の刻 (plan 218): what it plays is the lake on Today's print at
+// 湖の刻 (plan 219): what it plays is the lake on Today's print at
 // the print's own hour — a lake at the foot of Fuji in autumn, its
 // shore, the pine and the local line, at 曙 dawn, 帰帆 the day, 落雁
 // dusk and 秋月 night (domain/printHour.js, one rule for the picture
@@ -134,7 +134,7 @@ function reallyStop(fade = FADE_OUT) {
   current = null
 }
 
-/** Play the lake of the hour (plan 218). Every screen that wants it
+/** Play the lake of the hour (plan 219). Every screen that wants it
  *  calls this on mount and stopAmbiance() on unmount. */
 export function startAmbiance() {
   // A start cancels any pending stop — this is what makes navigation

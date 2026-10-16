@@ -1,6 +1,6 @@
 """What the lake under Fuji sounds like: the water at its stone shore,
 the pine, the birds of the hours, the temple across the water, the
-crickets, and the local line along the shore (plan 218).
+crickets, and the local line along the shore (plan 219).
 
 Every function here draws one thing, on kit's periodic loop or as a
 short event to be placed on it. The hours (hours.py) are mixes of them.

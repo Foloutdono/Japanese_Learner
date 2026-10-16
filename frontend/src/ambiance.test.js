@@ -4,7 +4,7 @@ import AMBIANCE from './lib/audio/ambiance.json'
 import { ambianceUrl } from './lib/audio/ambiance'
 import { printHour } from './domain/printHour'
 
-// ── 湖の刻 — the ambiance of the hour (plan 218) ─────────────────────
+// ── 湖の刻 — the ambiance of the hour (plan 219) ─────────────────────
 // The four loops are drawn ahead of time (scripts/ambiance/build.py)
 // into public/sounds/ambiant/<rev>/, and lib/audio/ambiance.js plays
 // the one the print's clock names. Written apart, held together here:

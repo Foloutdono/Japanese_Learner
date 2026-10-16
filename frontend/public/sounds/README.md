@@ -16,7 +16,7 @@ cost is that a missing file is also invisible. Hence this list.
 | `sfx/` | `sfx` | `playSfx(name)` → `/sounds/sfx/<name>.mp3` |
 | `announcements/` | `announcement` | `playAnnouncement(path)` → `/sounds/announcements/<path>.wav` |
 | `announcements/jingle.mp3` | `jingle` | played before every announcement |
-| `ambiant/<rev>/` | `ambiance` | `startAmbiance()`, the hour's loop (plan 218, `scripts/ambiance/`) |
+| `ambiant/<rev>/` | `ambiance` | `startAmbiance()`, the hour's loop (plan 219, `scripts/ambiance/`) |
 | `kanas/` | `kana` | `playKana(kanaSound(card))` → `/sounds/kanas/<sound>.mp3?v=<KANA_REV>` |
 
 Channel names come from `SOUND_CATEGORIES` in `src/lib/audio/settings.js`
@@ -300,7 +300,7 @@ generated one.
 eleven sections plus `jingle` · `kanas/`. Nothing else — `ui/` and
 `sfx/` are empty by design.
 
-The ambiance is drawn, not recorded (plan 218): the lake on Today's
+The ambiance is drawn, not recorded (plan 219): the lake on Today's
 print at the print's hour, built by `scripts/ambiance/build.py` into a
 revision's folder. Its README has the rules it keeps; the metro
 platform recordings it replaced (`home`, `selection`) are gone.

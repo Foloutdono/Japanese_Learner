@@ -22,7 +22,7 @@ import { startAmbiance, stopAmbiance } from '../../lib/audio'
  * prefix). Its pigment becomes the line colour for everything below
  * the bar — the roundels, the rails, the route diagram.
  *
- * Also plays the ambiance (the lake of the hour, plan 218) for as long
+ * Also plays the ambiance (the lake of the hour, plan 219) for as long
  * as it is mounted, so every station page has it without asking; the
  * Today gate is the one other screen that does (TodayScreen).
  */

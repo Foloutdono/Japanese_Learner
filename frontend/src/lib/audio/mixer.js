@@ -89,7 +89,7 @@ export function playBuffer(buffer, category, soundName, { when = 0, loop = false
   source.buffer = buffer
   source.loop = loop
   // A loop region rather than the whole buffer: the ambiance's files
-  // carry a pad of themselves at each end (plan 218), so the seam falls
+  // carry a pad of themselves at each end (plan 219), so the seam falls
   // inside the file wherever its decoder put the first sample.
   if (loop && loopEnd > loopStart) {
     source.loopStart = loopStart

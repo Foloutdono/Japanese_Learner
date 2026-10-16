@@ -1,4 +1,4 @@
-// ── 刻 — the hour of the print (plan 205, plan 218) ─────────────
+// ── 刻 — the hour of the print (plan 205, plan 219) ─────────────
 // Which of Today's four prints the clock shows, and so which of the
 // four ambiances plays: 曙 dawn from 5:00, 帰帆 the day from 9:00,
 // 落雁 dusk from 16:00, 秋月 the night from 19:30, all local. One rule
