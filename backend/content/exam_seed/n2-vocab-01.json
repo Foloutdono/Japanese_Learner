@@ -308,7 +308,7 @@
          {
           "id": "moji_4_q2",
           "number": 2,
-          "promptJp": "＿＿＿＿がはれました。",
+          "promptJp": "ドアにはさんだ＿＿＿＿がはれて、とても痛い。",
           "choices": [
            {
             "id": "c1",
@@ -336,19 +336,19 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "載る"
+            "textJp": "載った"
            },
            {
             "id": "c2",
-            "textJp": "留まる"
+            "textJp": "留まった"
            },
            {
             "id": "c3",
-            "textJp": "濡らす"
+            "textJp": "濡らした"
            },
            {
             "id": "c4",
-            "textJp": "暴れる"
+            "textJp": "暴れた"
            }
           ],
           "answer": "c4"
@@ -380,23 +380,23 @@
          {
           "id": "moji_4_q5",
           "number": 5,
-          "promptJp": "彼は＿＿＿＿で火をおこした。",
+          "promptJp": "彼はうちわで＿＿＿＿火をおこした。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "卸す"
+            "textJp": "卸して"
            },
            {
             "id": "c2",
-            "textJp": "扇ぐ"
+            "textJp": "扇いで"
            },
            {
             "id": "c3",
-            "textJp": "突っ込む"
+            "textJp": "錆びて"
            },
            {
             "id": "c4",
-            "textJp": "縮む"
+            "textJp": "縮んで"
            }
           ],
           "answer": "c2"
@@ -1025,7 +1025,7 @@
          {
           "id": "moji_4_q2",
           "number": 2,
-          "promptJp": "造られたもので、この方に＿＿＿＿できたものは一つもない。",
+          "promptJp": "けがの多くは、ちょっとした不注意に＿＿＿＿ものだ。",
           "choices": [
            {
             "id": "c1",
@@ -1037,7 +1037,7 @@
            },
            {
             "id": "c3",
-            "textJp": "停電"
+            "textJp": "溶ける"
            },
            {
             "id": "c4",
@@ -1085,7 +1085,7 @@
            },
            {
             "id": "c3",
-            "textJp": "追加"
+            "textJp": "占う"
            },
            {
             "id": "c4",
@@ -1105,15 +1105,15 @@
            },
            {
             "id": "c2",
-            "textJp": "請う"
+            "textJp": "下車"
            },
            {
             "id": "c3",
-            "textJp": "炊く"
+            "textJp": "開通"
            },
            {
             "id": "c4",
-            "textJp": "縮れる"
+            "textJp": "断水"
            }
           ],
           "answer": "c1"
@@ -1722,7 +1722,7 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "引返す"
+            "textJp": "しみじみ"
            },
            {
             "id": "c2",
@@ -1730,11 +1730,11 @@
            },
            {
             "id": "c3",
-            "textJp": "あいまい"
+            "textJp": "めっきり"
            },
            {
             "id": "c4",
-            "textJp": "おしゃれ"
+            "textJp": "ぎっしり"
            }
           ],
           "answer": "c2"
@@ -1742,7 +1742,7 @@
          {
           "id": "moji_4_q2",
           "number": 2,
-          "promptJp": "君の答えを彼のと＿＿＿＿わせなさい。",
+          "promptJp": "ライトで足元を＿＿＿＿と、道に小さなかえるがいた。",
           "choices": [
            {
             "id": "c1",
@@ -1750,7 +1750,7 @@
            },
            {
             "id": "c2",
-            "textJp": "激増"
+            "textJp": "散らかす"
            },
            {
             "id": "c3",
@@ -1758,7 +1758,7 @@
            },
            {
             "id": "c4",
-            "textJp": "仲直り"
+            "textJp": "略す"
            }
           ],
           "answer": "c3"
@@ -1798,15 +1798,15 @@
            },
            {
             "id": "c2",
-            "textJp": "目次"
+            "textJp": "大して"
            },
            {
             "id": "c3",
-            "textJp": "銅"
+            "textJp": "なんとも"
            },
            {
             "id": "c4",
-            "textJp": "調味料"
+            "textJp": "しいんと"
            }
           ],
           "answer": "c1"
@@ -1838,23 +1838,23 @@
          {
           "id": "moji_4_q6",
           "number": 6,
-          "promptJp": "お茶は中国から＿＿＿＿わった。",
+          "promptJp": "お茶は中国から＿＿＿＿。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "断水"
+            "textJp": "断水した"
            },
            {
             "id": "c2",
-            "textJp": "深まる"
+            "textJp": "深まった"
            },
            {
             "id": "c3",
-            "textJp": "生き生き"
+            "textJp": "生き生きした"
            },
            {
             "id": "c4",
-            "textJp": "伝わる"
+            "textJp": "伝わった"
            }
           ],
           "answer": "c4"
@@ -1996,7 +1996,7 @@
           "id": "moji_5_q5",
           "number": 5,
           "promptJp": "彼女は人にほめられても、いつもけんそんしている。",
-          "underlineJp": "けんそん",
+          "underlineJp": "けんそんして",
           "choices": [
            {
             "id": "c1",
@@ -2459,7 +2459,7 @@
          {
           "id": "moji_4_q2",
           "number": 2,
-          "promptJp": "＿＿＿＿したことは元どおりにならない。",
+          "promptJp": "レポートの＿＿＿＿は来週の金曜日なので、急いで書かなければならない。",
           "choices": [
            {
             "id": "c1",
@@ -2467,7 +2467,7 @@
            },
            {
             "id": "c2",
-            "textJp": "一旦"
+            "textJp": "締め切り"
            },
            {
             "id": "c3",
@@ -2507,7 +2507,7 @@
          {
           "id": "moji_4_q4",
           "number": 4,
-          "promptJp": "体積が大きいからといって常に＿＿＿＿も重いとは限らない。",
+          "promptJp": "体積が大きいからといって常に＿＿＿＿も大きいとは限らない。",
           "choices": [
            {
             "id": "c1",
@@ -2898,11 +2898,11 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "せい"
+            "textJp": "さひ"
            },
            {
             "id": "c2",
-            "textJp": "しょう"
+            "textJp": "さば"
            },
            {
             "id": "c3",
@@ -3248,23 +3248,23 @@
          {
           "id": "moji_4_q5",
           "number": 5,
-          "promptJp": "この構成において、三角形の代わりに長方形を用いても類似の困難が＿＿＿＿。",
+          "promptJp": "大雨が降ると、この川はすぐに＿＿＿＿。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "交じる"
+            "textJp": "ふざける"
            },
            {
             "id": "c2",
-            "textJp": "生ずる"
+            "textJp": "あふれる"
            },
            {
             "id": "c3",
-            "textJp": "行列"
+            "textJp": "縮む"
            },
            {
             "id": "c4",
-            "textJp": "ふざける"
+            "textJp": "威張る"
            }
           ],
           "answer": "c2"
@@ -3869,7 +3869,7 @@
          {
           "id": "moji_4_q1",
           "number": 1,
-          "promptJp": "それ以来彼は＿＿＿＿生活をしてきた。",
+          "promptJp": "毎日昼まで寝て、部屋も片付けないなんて、＿＿＿＿生活だ。",
           "choices": [
            {
             "id": "c1",
@@ -3877,15 +3877,15 @@
            },
            {
             "id": "c2",
-            "textJp": "センチ"
+            "textJp": "騒がしい"
            },
            {
             "id": "c3",
-            "textJp": "人造"
+            "textJp": "蒸し暑い"
            },
            {
             "id": "c4",
-            "textJp": "快晴"
+            "textJp": "塩辛い"
            }
           ],
           "answer": "c1"
@@ -3965,7 +3965,7 @@
          {
           "id": "moji_4_q5",
           "number": 5,
-          "promptJp": "石けんを付けてごしごし＿＿＿＿汚れが落ちます。",
+          "promptJp": "石けんを付けてごしごし＿＿＿＿と、汚れが落ちます。",
           "choices": [
            {
             "id": "c1",
@@ -3973,7 +3973,7 @@
            },
            {
             "id": "c2",
-            "textJp": "回答"
+            "textJp": "縛る"
            },
            {
             "id": "c3",
@@ -3989,19 +3989,19 @@
          {
           "id": "moji_4_q6",
           "number": 6,
-          "promptJp": "英国の＿＿＿＿法では４クオートは１ガロンだ。",
+          "promptJp": "新しい道路を作る前に、土地の＿＿＿＿が行われた。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "巻く"
+            "textJp": "送別"
            },
            {
             "id": "c2",
-            "textJp": "泊める"
+            "textJp": "反映"
            },
            {
             "id": "c3",
-            "textJp": "掃く"
+            "textJp": "仲直り"
            },
            {
             "id": "c4",
@@ -4013,7 +4013,7 @@
          {
           "id": "moji_4_q7",
           "number": 7,
-          "promptJp": "彼は大理石を＿＿＿＿で像を作った。",
+          "promptJp": "大きな石に名前を＿＿＿＿のは、時間のかかる仕事だ。",
           "choices": [
            {
             "id": "c1",
@@ -4025,11 +4025,11 @@
            },
            {
             "id": "c3",
-            "textJp": "送別"
+            "textJp": "編む"
            },
            {
             "id": "c4",
-            "textJp": "売買"
+            "textJp": "炊く"
            }
           ],
           "answer": "c2"
@@ -4694,7 +4694,7 @@
            },
            {
             "id": "c3",
-            "textJp": "日日"
+            "textJp": "日にち"
            },
            {
             "id": "c4",
@@ -4706,7 +4706,7 @@
          {
           "id": "moji_4_q6",
           "number": 6,
-          "promptJp": "危険が過ぎると＿＿＿＿は忘れられる。",
+          "promptJp": "困ったときだけ＿＿＿＿にお願いするのは、よくないと祖母に言われた。",
           "choices": [
            {
             "id": "c1",
@@ -4730,11 +4730,11 @@
          {
           "id": "moji_4_q7",
           "number": 7,
-          "promptJp": "子供らは二人一組になった＿＿＿＿した。",
+          "promptJp": "子供らは二人一組になって＿＿＿＿した。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "突く"
+            "textJp": "停電"
            },
            {
             "id": "c2",
@@ -4746,7 +4746,7 @@
            },
            {
             "id": "c4",
-            "textJp": "送別"
+            "textJp": "開通"
            }
           ],
           "answer": "c3"
@@ -5403,19 +5403,19 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "挟まる"
+            "textJp": "挟まった"
            },
            {
             "id": "c2",
-            "textJp": "歯磨き"
+            "textJp": "編んだ"
            },
            {
             "id": "c3",
-            "textJp": "占う"
+            "textJp": "占った"
            },
            {
             "id": "c4",
-            "textJp": "育児"
+            "textJp": "威張った"
            }
           ],
           "answer": "c1"
@@ -5447,7 +5447,7 @@
          {
           "id": "moji_4_q7",
           "number": 7,
-          "promptJp": "＿＿＿＿はたいへん小さかったです。",
+          "promptJp": "子どものころ休み時間に遊んだ＿＿＿＿は、たいへん小さかった。",
           "choices": [
            {
             "id": "c1",
@@ -6140,7 +6140,7 @@
          {
           "id": "moji_4_q6",
           "number": 6,
-          "promptJp": "この＿＿＿＿はとても高い。",
+          "promptJp": "この＿＿＿＿は薄くて、すぐに破れてしまう。",
           "choices": [
            {
             "id": "c1",
@@ -6741,15 +6741,15 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "高級"
+            "textJp": "厚かましい"
            },
            {
             "id": "c2",
-            "textJp": "長方形"
+            "textJp": "みっともない"
            },
            {
             "id": "c3",
-            "textJp": "生意気"
+            "textJp": "塩辛い"
            },
            {
             "id": "c4",
@@ -6765,11 +6765,11 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "お参り"
+            "textJp": "炊く"
            },
            {
             "id": "c2",
-            "textJp": "制作"
+            "textJp": "濡らす"
            },
            {
             "id": "c3",
@@ -6857,23 +6857,23 @@
          {
           "id": "moji_4_q6",
           "number": 6,
-          "promptJp": "＿＿＿＿かんだと思うとまた沈む。",
+          "promptJp": "波の中で、ボールが＿＿＿＿と思うとまた沈む。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "物語る"
+            "textJp": "物語った"
            },
            {
             "id": "c2",
-            "textJp": "プリント"
+            "textJp": "プリントした"
            },
            {
             "id": "c3",
-            "textJp": "浮かぶ"
+            "textJp": "浮かんだ"
            },
            {
             "id": "c4",
-            "textJp": "挟まる"
+            "textJp": "挟まった"
            }
           ],
           "answer": "c3"
