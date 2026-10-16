@@ -18,6 +18,7 @@ all.
 
 Usage:
     python build_frequency_index.py --kanji /path/to/kanji_basic.json /path/to/kanji_deck.json ./out
+    python -m scripts.build_frequency_index --kanji-db   # from kanji.sqlite3, in place
 """
 import sys
 import json
@@ -28,7 +29,22 @@ def build_kanji_frequency(kanji_basic_path, kanji_deck_path):
         kanji_basic = json.load(f)
     with open(kanji_deck_path, encoding="utf-8") as f:
         kanji_deck = json.load(f)
+    return kanji_frequency_order(kanji_basic, kanji_deck)
 
+
+def kanji_basic_from_db(db_path):
+    """{char: {"freq": rank}} out of the shipped kanji.sqlite3 -- the same
+    KANJIDIC2 field kanji_basic.json carries, for a checkout without the
+    export (plan 222, the jōyō characters the deck lacked)."""
+    import sqlite3
+    conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+    try:
+        return {char: {"freq": freq} for char, freq in conn.execute("SELECT char, freq FROM kanji")}
+    finally:
+        conn.close()
+
+
+def kanji_frequency_order(kanji_basic, kanji_deck):
     # Preserve JLPT deck order (N5 -> N1, then within-level order) as
     # the fallback ordering and as the source of "which kanji are even
     # in the deck" — freq ranks for kanji outside the deck are irrelevant
@@ -58,6 +74,20 @@ def build_kanji_frequency(kanji_basic_path, kanji_deck_path):
 
 if __name__ == "__main__":
     args = sys.argv[1:]
+    if args and args[0] == "--kanji-db":
+        # python -m scripts.build_frequency_index --kanji-db: the deck's
+        # order from the shipped database, no export needed.
+        base = __import__("os").path.dirname(__import__("os").path.dirname(__import__("os").path.abspath(__file__)))
+        kanji_dir = f"{base}/datas/kanji"
+        with open(f"{kanji_dir}/kanji_deck.json", encoding="utf-8") as f:
+            deck = json.load(f)
+        ordered, ranked_count, unranked_count = kanji_frequency_order(
+            kanji_basic_from_db(f"{kanji_dir}/kanji.sqlite3"), deck)
+        with open(f"{kanji_dir}/kanji_frequency.json", "w", encoding="utf-8") as f:
+            json.dump(ordered, f, ensure_ascii=False, indent=2)
+        print(f"{len(ordered)} deck kanji ordered ({ranked_count} by KANJIDIC2 freq rank, "
+              f"{unranked_count} appended in JLPT order).")
+        sys.exit(0)
     if args and args[0] == "--kanji":
         args = args[1:]
     if len(args) < 2:

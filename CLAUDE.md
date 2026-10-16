@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **222**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **224**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -152,6 +152,21 @@ runtime purpose.
   JMdict and Tatoeba text has its French in `datas/vocab/jmdict_fr.sqlite3`
   (plan 215); a pool word is glossed from it (`jmdict_fr.pool_meaning`),
   never from `VOCAB_FR`, which is the course's and keyed by written form.
+- **The kanji deck is the course's and the gates'.** `datas/kanji/kanji_deck.json`
+  is what each level teaches and what every kanji gate admits
+  (`llm_shared.kanji_set_for_level`), so it holds the whole jōyō list
+  (plan 222 added the 171 it lacked, 的・無・身・誰 among them). After any
+  change to it run `python -m scripts.build_kanji_db --deck-only` (the
+  database's `in_deck` and French) and `python -m scripts.build_frequency_index
+  --kanji-db` (the teaching order); a new character carries its French in
+  `kanji_meanings_fr.json` where KANJIDIC2 has none. Adding is free;
+  moving a character between levels is a migration (`kanji_renames`).
+- **An example sentence is corrected in the layer, not in JMdict (plan
+  223).** The deck's Tatoeba sentences are read through
+  `content/example_fixes.py` (`datas/vocab/example_fixes.json`): a
+  correction keeps every course word the sentence showed, carries its
+  `en`, `fr` and `why`, and is drafted and checked with
+  `python -m scripts.vocab_examples check`.
 - **A width change is held on both sides.** A desk change keeps the phone's
   DOM unchanged (`src/deskfree.phone.test.jsx`), and the short desk
   (1280×600, the `short` lane) is checked too. A phone bug fixed gets its own

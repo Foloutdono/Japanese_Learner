@@ -7,7 +7,7 @@ content/kanji_meanings.py, content/radical_data.py, routes/dictionary.py
 and study/exam_kanji_gen.py, which between them parsed ~6.7 MB of
 KANJIDIC2 into Python objects at import — kanji_radicals.json three
 separate times, and kanji_readings.json + kanji_meanings.json only to
-build indexes immediately restricted to the app's own 2,212-character
+build indexes immediately restricted to the app's own 2,383-character
 deck. Parsed into real objects (a dict plus strings per field, per row)
 that is several times the JSON's own size, on a 512 MB deploy. SQLite
 reads only the pages a query touches, so RSS stays roughly flat however
@@ -15,7 +15,7 @@ big the dump gets — the same trade content/vocab_jmdict_data.py made for
 the JMdict pool, and the reason the dictionary can now serve the whole
 of KANJIDIC2 rather than the deck alone.
 
-THE TABLE HOLDS BOTH HALVES. `in_deck` marks the 2,212 characters the app
+THE TABLE HOLDS BOTH HALVES. `in_deck` marks the 2,383 characters the app
 teaches; the other 10,896 are the pool. Keeping them in one table is what
 lets radical browsing be a single indexed query in stroke order (the way
 a paper 漢和辞典 files under a radical) instead of an in-memory merge of

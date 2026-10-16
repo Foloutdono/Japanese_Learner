@@ -147,7 +147,7 @@ def get_radical_grid(all: bool = False):
 # ── The kanji collection ─────────────────────────────────────────
 # ONE collection over two pools, for the same reason the vocabulary is
 # (see the block below, and commit 116ad2a). The app's own JLPT deck is
-# 2,212 characters, one entry each since plan 112; KANJIDIC2, which this repo has
+# 2,383 characters, one entry each since plan 112 (plan 222 added 171); KANJIDIC2, which this repo has
 # shipped all along, has 13,108. The other 10,896 were reachable from
 # nowhere in the app — not by search, not by radical, not on a plate — so
 # looking a character up and not finding it proved only that it was not
@@ -180,12 +180,12 @@ def _levels_of(by_level: dict, level: str | None):
 
 def _kanji_deck_matches(query, lang: str, level: str | None = None) -> list[tuple[str, dict, str]]:
     """(level, entry, display meaning) for every deck kanji the query
-    matches, in deck order — N5 first, N1 last. 2,212 rows, filtered in
+    matches, in deck order — N5 first, N1 last. 2,383 rows, filtered in
     memory.
 
     Matched against BOTH glosses; SHOWN in the session's language. The
     displayed meaning is now built for the matches alone rather than for
-    all 2,212 rows on the way past.
+    all 2,383 rows on the way past.
     """
     rows = [(lvl, k) for lvl, kanji_list in _levels_of(KANJI_BY_LEVEL, level) for k in kanji_list]
     hits = search_match.ranked(query, rows, lambda row: (
@@ -401,7 +401,7 @@ def _pool_kanji_result(row: dict, lang: str, states: dict, user_id: str) -> dict
 
 # Which deck characters have a stroke diagram, resolved in one bounded
 # query at import rather than a lookup per row per request. It is all
-# 2,212 of them today; asked rather than assumed so a KanjiVG refresh that
+# 2,383 of them today; asked rather than assumed so a KanjiVG refresh that
 # drops one cannot leave the plate pointing at a 404.
 _DECK_HAS_SVG = kanji_db.svg_chars(DECK_BY_CHAR)
 
