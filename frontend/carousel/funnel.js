@@ -208,7 +208,8 @@ export function funnelOf(type, pl, opts = {}) {
       }
     }
     case 'impostor': {
-      const I = pl.impostor
+      // Drawn as pictures: the rounds of pictured words, where the theme has them.
+      const I = f.impostor || pl.impostor
       if (!I) return null
       const [r0, r1] = I.rounds
       return {
@@ -279,7 +280,7 @@ function platesOf(pl, f, base) {
       ...base,
       hook: { kind: 'pictures', words: f.pictures, ask: 'pictures', seconds: 10 },
       solution: { kind: 'pictures', words: f.pictures, reveal: true },
-      detail: pl.impostor ? { kind: 'pictures', words: pl.impostor.rounds[0].words, odd: pl.impostor.rounds[0].at, reveal: true, why: pl.impostor.rounds[0].why, label: 'round' } : null,
+      detail: (f.impostor || pl.impostor) ? (r => ({ kind: 'pictures', words: r.words, odd: r.at, reveal: true, why: r.why, label: 'round' }))((f.impostor || pl.impostor).rounds[0]) : null,
     }
     case 'lookalike': return {
       ...base,
@@ -1090,7 +1091,12 @@ function picturesBlock(c, s, { x, w, maxH }) {
           ctx.stroke()
         }
         const es = (cell - label) * 0.62
-        emojiAt(ctx, wd.e, cx0 + cell / 2, cy0 + (cell - label) / 2 + SP[2], es)
+        if (wd.e) emojiAt(ctx, wd.e, cx0 + cell / 2, cy0 + (cell - label) / 2 + SP[2], es)
+        else if (!s.reveal) {
+          // No picture for it: the word itself, as large as the tile holds.
+          const wb = fit(ctx, wd.t, { fam: 'jp', weight: 700, sizes: [FS.display, FS.heading, FS.title, FS.lead, FS.body], maxW: cell - SP[5] * 2, maxLines: 2 })
+          paragraph(ctx, wb, cx0 + cell / 2, cy0 + (cell - paragraphH(wb)) / 2, odd && s.reveal ? p.stamp : p.ink, 'center')
+        }
         if (s.reveal) {
           const jb = fit(ctx, wd.t, { fam: 'jp', weight: 700, sizes: [FS.lead, FS.body, FS.sm, FS.caption], maxW: cell - SP[4], maxLines: 1 })
           text(ctx, jb.lines[0], cx0 + cell / 2, cy0 + cell - label + jb.size, { f: jb.f, color: odd ? p.stamp : p.ink, align: 'center' })
@@ -1595,6 +1601,7 @@ function itemOf(c) {
   const jp = rows ? rows.map(r => r.t).join('') : f.word?.t || ''
   return {
     jp,
+    rows: rows ? rows.map(r => r.t) : jp ? [jp] : [],
     ro: f.romaji || (f.word ? f.word.ro : '') || '',
     tr: f.translation || f.examples?.[0]?.tr || f.word?.main || '',
     pattern: f.point?.pattern || f.points?.[0]?.pattern || c.pl.caption?.point || '',
@@ -1668,58 +1675,138 @@ function tutor(c, x, y, w, ink) {
   check(ctx, x + w - 8, y + 64, 26, success(p), cardInk(p))
 }
 
-// 読書: read before the clock covers it, write its reading, see it cut.
+// 読書: the run as it goes (components/reading/ReadingPieces.jsx): the
+// sentence under its clock, covered when the clock runs out and written
+// from memory, then checked and cut word by word.
+const EYE_OFF = ['M3 3l18 18', 'M10.6 5.1A10.6 10.6 0 0 1 12 5c5 0 9 3.5 10 7-.4 1.4-1.2 2.7-2.2 3.8', 'M6.2 6.2C4.2 7.5 2.7 9.5 2 12c1 3.5 5 7 10 7 1.4 0 2.7-.25 3.9-.7', 'M9.5 10a3 3 0 0 0 4.2 4.2']
+/** The app's eye-off icon (Icons.jsx), stroked as the app strokes it. */
+function eyeOff(ctx, cx, cy, size, color) {
+  ctx.save()
+  ctx.translate(cx - size / 2, cy - size / 2)
+  ctx.scale(size / 24, size / 24)
+  ctx.strokeStyle = color
+  ctx.lineWidth = 2
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  for (const d of EYE_OFF) ctx.stroke(new Path2D(d))
+  ctx.restore()
+}
+/** Words to the width, the last cut short: a line that always fits. */
+function clipped(ctx, str, f, maxW) {
+  if (measure(ctx, str, f) <= maxW) return str
+  let out = str
+  while (out.length > 1 && measure(ctx, `${out}…`, f) > maxW) out = out.slice(0, -1)
+  return `${out.replace(/[\s,;:.]+$/, '')}…`
+}
+/** A sentence set by its words: a line breaks between two of them, and
+ *  inside one only when the word alone is wider than the line. The
+ *  largest of `sizes` that holds it in `maxLines`, else the last cut. */
+function wordLines(ctx, words, { sizes, maxW, maxLines, maxH = Infinity, fam = 'jp', weight = 700 }) {
+  let last
+  for (const size of sizes) {
+    const f = font(weight, size, fam)
+    const pieces = words.flatMap(w => (measure(ctx, w, f) > maxW ? [...w] : [w]))
+    const lines = []
+    for (const w of pieces) {
+      const cur = lines[lines.length - 1]
+      // A closing mark never starts a line: it stays with the word before it.
+      if (cur != null && (measure(ctx, cur + w, f) <= maxW || /^[、。！？」』）]/.test(w))) lines[lines.length - 1] = cur + w
+      else lines.push(w)
+    }
+    last = { size, f, lines }
+    if (lines.length <= maxLines && paragraphH(last) <= maxH) return last
+  }
+  const room = Math.max(1, Math.min(maxLines, Math.floor((maxH / last.size - 1.1) / 1.18) + 1))
+  if (last.lines.length <= room) return last
+  const kept = last.lines.slice(0, room)
+  kept[room - 1] = clipped(ctx, kept[room - 1] + '…', last.f, maxW)
+  return { ...last, lines: kept }
+}
 function drawReading(c) {
   const { ctx, p, W } = c
   const F = W.features.reading
   const ink = p.line.reading
   const it = itemOf(c)
-  panels(c, [
-    (x, y, w) => {
-      // The sentence, the clock's shutter coming over it.
-      const h = boardText(c, it.jp || '日本語', x, y + 4, w, { sizes: [46, 42, 38, 34, 30], lines: 4, fam: 'jp' })
-      // The clock's shutter comes over it from the right.
-      ctx.fillStyle = alpha(ink, 0.88)
-      rrect(ctx, x + w * 0.58, y - 8, w * 0.42 + 18, Math.min(236, Math.max(60, h + 20)), 10)
+  const ro = (it.ro || 'nihongo').toLowerCase()
+  // The run's clock (ReadingTimer): a hairline that empties, the seconds under it.
+  const clock = (x, y, w, fill, said) => {
+    ctx.fillStyle = p.paper ? p.surfaceLine : p.panelLine
+    rrect(ctx, x, y, w, 8, 4)
+    ctx.fill()
+    if (fill > 0) {
+      ctx.fillStyle = p.rating[2]
+      rrect(ctx, x, y, w * fill, 8, 4)
       ctx.fill()
-      ctx.strokeStyle = alpha(p.ink2, 0.35)
-      ctx.lineWidth = 7
-      ctx.beginPath()
-      ctx.arc(x + w - 8, y - 36, 18, 0, Math.PI * 2)
-      ctx.stroke()
-      ctx.strokeStyle = ink
-      ctx.lineCap = 'round'
-      ctx.beginPath()
-      ctx.arc(x + w - 8, y - 36, 18, -Math.PI / 2, Math.PI * 0.85)
-      ctx.stroke()
+    }
+    if (said) label(c, said, x + w / 2, y + 44, { size: 28, color: p.ink2, maxW: w })
+  }
+  // The sentence's card, as the run draws it.
+  const card = (x, y, w, h) => {
+    ctx.fillStyle = faceInk(p)
+    rrect(ctx, x, y, w, h, 16)
+    ctx.fill()
+  }
+  panels(c, [
+    (x, y, w, h) => {
+      // The clock runs; the sentence is there to read.
+      clock(x, y + 4, w, 0.62, '2.4s')
+      card(x, y + 70, w, h - 70)
+      const b = wordLines(ctx, it.rows.length ? it.rows : ['日本語'], { sizes: [40, 36, 32, 30, 28], maxW: w - 28, maxLines: 4, maxH: h - 70 - 24 })
+      paragraph(ctx, b, x + w / 2, y + 70 + (h - 70 - paragraphH(b)) / 2, p.ink, 'center')
     },
-    (x, y, w) => {
-      label(c, F.romaji, x, y + 22, { size: 30, color: p.ink2, align: 'left', weight: 500, maxW: w })
-      const b = fit(ctx, (it.ro || 'nihongo').toLowerCase(), { weight: 700, sizes: [38, 36, 34, 32, 30], maxW: w, maxLines: 4, balanced: false })
-      b.lines.forEach((ln, i) => {
-        const yy = y + 76 + i * b.size * 1.25
-        const tw = text(ctx, ln, x, yy, { f: b.f, color: p.ink })
-        if (i === b.lines.length - 1) caret(ctx, x + tw, yy, b.size, p.gold)
+    (x, y, w, h) => {
+      // The clock is out: the sentence covered, its reading written from memory.
+      clock(x, y + 4, w, 0, '')
+      card(x, y + 28, w, 92)
+      eyeOff(ctx, x + w / 2, y + 74, 52, p.ink2)
+      // The field, the reading being typed into it.
+      const fy = y + 136
+      ctx.fillStyle = cardInk(p)
+      rrect(ctx, x, fy, w, h - 136, 16)
+      ctx.fill()
+      ctx.strokeStyle = ink
+      ctx.lineWidth = 4
+      rrect(ctx, x, fy, w, h - 136, 16)
+      ctx.stroke()
+      const b = fit(ctx, ro, { weight: 700, sizes: [30], maxW: w - 40, balanced: false })
+      const lines = b.lines.slice(0, 2)
+      lines.forEach((ln, i) => {
+        const yy = fy + 40 + i * b.size * 1.2
+        const tw = text(ctx, ln, x + 16, yy, { f: b.f, color: p.ink })
+        if (i === lines.length - 1) caret(ctx, x + 16 + tw, yy, b.size, ink)
       })
     },
-    (x, y, w) => {
-      // Graded, then cut word by word.
-      check(ctx, x + w - 8, y - 36, 22, success(p), cardInk(p))
+    (x, y, w, h) => {
+      // Checked: what it said, then its words, each with its sense.
+      const ok = success(p)
+      const mb = fit(ctx, it.tr || '', { weight: 700, sizes: [28, 26], maxW: w - 66, maxLines: 2, balanced: false })
+      const wh = Math.max(64, paragraphH(mb) + 28)
+      ctx.fillStyle = mix(ok, cardInk(p), 0.16)
+      rrect(ctx, x, y + 4, w, wh, 16)
+      ctx.fill()
+      check(ctx, x + 30, y + 4 + wh / 2, 19, ok, cardInk(p))
+      if (it.tr) paragraph(ctx, mb, x + 58, y + 4 + (wh - paragraphH(mb)) / 2, p.ink, 'left')
       // A word's gloss on the board is its first sense, short.
       const short = g => String(g || '').split(/[,;(]/)[0].trim()
-      const words = it.breakdown.filter(r => r.t && r.line === 'vocab').slice(0, 3)
-      const list = words.length ? words : [{ t: it.jp.slice(0, 2) || '日本', main: '', line: 'vocab' }]
-      list.forEach((r, i) => {
-        const yy = y + 8 + i * 76
-        const pf = font(700, 34, 'jp')
-        const pw = Math.min(w, measure(ctx, r.t, pf) + 32)
+      // The words the deck glosses first, then the grammar the sentence
+      // uses; a word with no gloss is left bare, and only when none has one.
+      const glossed = [...it.breakdown.filter(r => r.t && r.main && r.line === 'vocab'), ...it.breakdown.filter(r => r.t && r.main && r.line !== 'vocab')]
+      const bare = it.breakdown.filter(r => r.t && r.line === 'vocab')
+      const list = glossed.length ? glossed : bare.length ? bare : [{ t: it.jp.slice(0, 2) || '日本', main: '', line: 'vocab' }]
+      const top = y + wh + 20
+      const room = Math.max(1, Math.floor((y + h - top + 8) / 66))
+      list.slice(0, room).forEach((r, i) => {
+        const yy = top + i * 66
+        // A row of the breakdown: its line's rule, the word, its sense.
         ctx.fillStyle = p.line[r.line] || p.line.vocab
-        rrect(ctx, x, yy, pw, 52, 26)
+        rrect(ctx, x, yy, 8, 58, 4)
         ctx.fill()
-        const tb = fit(ctx, r.t, { fam: 'jp', weight: 700, sizes: [34, 30], maxW: pw - 16, maxLines: 1 })
-        text(ctx, tb.lines[0], x + pw / 2, yy + 26 + tb.size * 0.36, { f: tb.f, color: p.onLine, align: 'center' })
-        // Beside a long word there is no room for its sense: the pill alone.
-        if (r.main && w - pw - 12 >= 90) label(c, short(r.main), x + pw + 12, yy + 37, { size: 32, align: 'left', weight: 700, maxW: w - pw - 12 })
+        const jf = font(700, 28, 'jp')
+        text(ctx, clipped(ctx, r.t, jf, w - 22), x + 22, yy + 24, { f: jf, color: p.ink })
+        if (r.main) {
+          const gf = font(500, 26, 'latin')
+          text(ctx, clipped(ctx, short(r.main), gf, w - 22), x + 22, yy + 54, { f: gf, color: p.ink2 })
+        }
       })
     },
   ], F.steps, ink)

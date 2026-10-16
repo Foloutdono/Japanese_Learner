@@ -54,7 +54,7 @@ analyser, the question asked after an exercise and Today:
 
 | Feature | The item's own for | Its picture |
 | --- | --- | --- |
-| Reading | a sentence | the run in three panels: the sentence and the clock's shutter coming over it, its reading typed in rōmaji, then checked and cut word by word |
+| Reading | a sentence | the run in three panels, as the app draws it (`ReadingPieces.jsx`): the sentence under the clock's hairline and its seconds; the clock out, the sentence covered by the eye-off icon and its reading typed in rōmaji; then what it means, checked, and its words with their senses |
 | Comprehension | a passage | a text, its questions, the answers checked |
 | Translation | a translation, a "build it" | the sentence in the reader's language, the Japanese typed, the tutor's read |
 | Dictation | | headphones, the rōmaji typed and checked, on its line of three stops |
@@ -64,6 +64,11 @@ analyser, the question asked after an exercise and Today:
 | Questions | | the exercise graded, a question (問) and its short answer (答): the bank's own line on the item's point, else one the bank teaches too |
 | Today | | the day's dial and its lines' arcs, the lines it deals from, and Depart |
 | Vocabulary, Kanji, Grammar, Kana | a word or a theme; a kanji or lookalikes; a lesson, a reply, a trap; a kana | the forgetting curve; a kanji stroke by stroke; rule, scene, quiz; the kana's row heard and traced |
+
+The impostor is drawn in pictures in these looks, so its rounds there are
+dealt from a theme's pictured words alone (`impostorOf(…, pictured)`, the
+theme's `funnel.impostor`); the classic rounds set every word as text and
+deal from all of them. A tile whose word has no picture shows the word.
 
 The looks:
 

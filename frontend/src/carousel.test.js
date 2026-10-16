@@ -1229,6 +1229,17 @@ describe('the conversion carousels (plan 215)', () => {
     }
   })
 
+  it('draws every word of the impostor as a picture, never an empty tile', () => {
+    const data = bank('themes.json')
+    for (const lang of ['en', 'fr']) {
+      for (const { id } of itemsOf('theme', data, lang)) {
+        const F = funnelOf('impostor', plan('theme', data, id, { ...OPTS, lang }))
+        if (!F) continue
+        for (const s of [F.hook, F.solution, F.detail].filter(Boolean)) expect(s.words.every(w => w.e), `${id} ${lang}`).toBe(true)
+      }
+    }
+  })
+
   it('holds a hook as long as a question in a short', () => {
     expect(slideSeconds(40, 'ask').ask).toBe(true)
     expect(slideSeconds(40, 'answer').ask).toBe(false)

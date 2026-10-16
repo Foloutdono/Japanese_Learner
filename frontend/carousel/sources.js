@@ -696,11 +696,12 @@ const pictureOf = (w, lang) => ({ t: w.t, r: w.r, ro: w.ro, fu: furiganaOf(w.t, 
 
 /** 仲間外れ: rounds of five words of the theme and one from another;
  *  each of a theme's posts deals its own (`seed`). */
-function impostorOf(data, key, lang, t, seed = key) {
+function impostorOf(data, key, lang, t, seed = key, pictured = false) {
   const th = data.themes[key]
   const other = data.themes[IMPOSTOR_FROM[key]]
   if (!other) return null
-  const plain = w => ['basic', 'medium'].includes(w.band) && !(w.en || []).some(g => EITHER.has(g))
+  // A round drawn as pictures (plan 215) deals pictured words only.
+  const plain = w => ['basic', 'medium'].includes(w.band) && !(w.en || []).some(g => EITHER.has(g)) && (!pictured || w.e)
   const mine = th.words.filter(w => w.t !== th.head.t && plain(w))
   const own = new Set(th.words.map(w => w.t))
   const senses = th.words.flatMap(w => w.en || [])
@@ -743,6 +744,8 @@ function themePlan(data, id, opts) {
   const headRo = th.words.find(w => w.t === th.head.t)?.ro || ''
   const funnel = {
     pictures: items,
+    // The impostor's rounds again, of pictured words alone: the funnel draws them as pictures.
+    impostor: impostorOf(data, key, lang, t, id, true),
     keys: uniq(items.slice(0, KEYS).map(w => weldIf(lang, t.keys.means(`${w.e} ${w.t}${hasKanji(w.t) ? ` (${w.r})` : ''}`, w.main)))),
   }
   return {
