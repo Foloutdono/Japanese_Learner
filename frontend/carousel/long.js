@@ -1,10 +1,10 @@
 // ── 長編 — the long videos (plan 214) ─────────────────────────────
-// Ten-minute 16:9 videos for YouTube, in the platform-board look the
-// owner picked (the sumi ground, the app's card, the line of stations
-// along the foot, one station a word, a kanji, a section or a
-// question): a vocabulary drill, a kanji drill, one grammar point
-// explained whole, and a quiz. Every Japanese line is said by the app's
-// voices; English or French is on the screen.
+// Ten-minute 16:9 videos for YouTube: a vocabulary drill, a kanji
+// drill, one grammar point explained whole, and a quiz, each also a 9:16
+// short. Since plan 218 a long video is drawn as the screen over a
+// train's door and a short as a station's name plate (see "Drawing"
+// below). Every Japanese line is said by the app's voices; English or
+// French is on the screen.
 //
 // The drills are "think, then reveal": a word alone for three seconds,
 // then its reading said twice, its meaning and a sentence it is read
@@ -20,7 +20,7 @@
 // reveal lands on its voice), and `drawLong` draws the frame at any
 // second and returns a key that is the same for two frames that look
 // the same, so the renderer (long/render.mjs) draws each still once.
-import { alpha, drawSentence, fit, font, hasKanji, layoutSentence, mark, measure, palette, paragraphH, rrect, text } from './draw.js'
+import { K, alpha, drawSentence, fit, font, hasKanji, layoutSentence, mark, measure, noShadow, palette, paragraphH, roundel, rrect, text } from './draw.js'
 import { weldIf } from './strings.js'
 import { gloss, unpack } from './common.js'
 import { plan as sourcePlan, itemsOf } from './sources.js'
@@ -64,7 +64,7 @@ const SAY = {
       grammar: 'Every sentence is said aloud.',
       quiz: 'Every answer is explained.',
     },
-    readIt: 'Read it…', on: 'ON', kun: 'KUN', strokes: n => `${n} stroke${n > 1 ? 's' : ''}`,
+    next: 'Next', readIt: 'Read it…', on: 'ON', kun: 'KUN', strokes: n => `${n} stroke${n > 1 ? 's' : ''}`,
     rule: 'What it does', use: 'How it is used', example: 'Example', careful: 'Watch out', compare: 'Don’t mix it up', twist: 'A twist', scene: 'In a conversation', quizHead: 'Your turn', recap: 'Recap',
     score: (n, of) => n === of ? `That’s all ${of}. How many did you get?` : `Score check: ${n} down, ${of - n} to go.`,
     comment: 'Comment your score.',
@@ -94,7 +94,7 @@ const SAY = {
       grammar: 'Chaque phrase est dite à voix haute.',
       quiz: 'Chaque réponse est expliquée.',
     },
-    readIt: 'Lis-le…', on: 'ON', kun: 'KUN', strokes: n => `${n} trait${n > 1 ? 's' : ''}`,
+    next: 'Prochain arrêt', readIt: 'Lis-le…', on: 'ON', kun: 'KUN', strokes: n => `${n} trait${n > 1 ? 's' : ''}`,
     rule: 'Ce qu’il fait', use: 'Comment l’employer', example: 'Exemple', careful: 'Attention', compare: 'À ne pas confondre', twist: 'Une variante', scene: 'En conversation', quizHead: 'À toi', recap: 'Récap',
     score: (n, of) => n === of ? `Les ${of} sont passées. Combien en as-tu ?` : `Point d’étape : ${n} faites, encore ${of - n}.`,
     comment: 'Donne ton score en commentaire.',
@@ -825,10 +825,28 @@ function describeShort(plan, tl, site, figures) {
 }
 
 // ── Drawing ───────────────────────────────────────────────────────
+// The look is plan 218's, the owner's two picks from the canvas "Tsuji —
+// video look, new directions":
+//
+// - The long video is the screen over a train's door (C, 車内案内): a
+//   sumi band across the top saying what comes next (the next word, the
+//   section, the question asked) beside the station's number, the line's
+//   pigment under it as the way along (a question's five seconds while
+//   they run), and the washi screen below. A drill's word is set as large
+//   as its column takes, the route of words down the side: the stops
+//   passed in grey, this one ringed, the next ahead on the line.
+// - The short is the station's name plate (A, 駅名標) on the sumi wall:
+//   the word is the station's name, the plate's band in the line's
+//   pigment carries the word before and the word after (a question's ask,
+//   an example's number), the station's number in its corner.
 const W = WIDE.w
 const H = WIDE.h
 const ease = x => 1 - (1 - Math.min(1, Math.max(0, x))) ** 3
-const STATION_Y = 1000
+const BAND = 124 // the door screen's sumi band
+const STRIPE = 12 // the line's pigment under it
+// The pass's metal on a sumi band, in either ground.
+const SUMI = palette('sumi')
+const PAPER = palette('paper')
 
 // A stroke's length, for drawing it on: the browser's own measure.
 const lengths = new Map()
@@ -853,8 +871,8 @@ function strokeLength(d) {
 /** Where a frame stands: its segment, the second into it, and the two
  *  helpers every part is drawn with (`k`, a part's share of the way in,
  *  kept in the frame's key while it moves; `fade`, a part drawn at it). */
-function begin(ctx, plan, tl, t, w, h) {
-  const p = palette('sumi')
+function begin(ctx, plan, tl, t, w, h, ground) {
+  const p = palette(ground)
   const S = SAY[plan.lang] || SAY.en
   const line = p.line[plan.line] || p.gold
   let i = tl.segs.findIndex(s => t < s.start + s.dur)
@@ -917,72 +935,263 @@ function tools(ctx, p, line) {
   return { card, sentence, para, pill }
 }
 
+// ── The parts of a station ──
+/** The station's number, as a plate prints it: a square ringed in the
+ *  line's pigment, the level (or Q) over the number. */
+function numBox(ctx, x, y, s, line, label, n, face, ink) {
+  const bw = s * 0.1
+  const r = s * 0.16
+  ctx.fillStyle = face
+  rrect(ctx, x, y, s, s, r)
+  ctx.fill()
+  ctx.strokeStyle = line
+  ctx.lineWidth = bw
+  rrect(ctx, x + bw / 2, y + bw / 2, s - bw, s - bw, r - bw / 2)
+  ctx.stroke()
+  const num = String(n).padStart(2, '0')
+  const nf = font(700, s * (num.length > 2 ? 0.3 : 0.38), 'latin')
+  if (label) {
+    text(ctx, label, x + s / 2, y + s * 0.4, { f: font(700, s * 0.2, 'latin'), color: ink, align: 'center' })
+    text(ctx, num, x + s / 2, y + s * 0.78, { f: nf, color: ink, align: 'center' })
+  } else text(ctx, num, x + s / 2, y + s * 0.64, { f: nf, color: ink, align: 'center' })
+}
+
+/** A plate's pointer to the station before (-1) or after (1). */
+function pointer(ctx, x, cy, s, dir, color) {
+  ctx.save()
+  ctx.strokeStyle = color
+  ctx.lineWidth = s * 0.24
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  ctx.beginPath()
+  ctx.moveTo(x - dir * s * 0.25, cy - s * 0.42)
+  ctx.lineTo(x + dir * s * 0.25, cy)
+  ctx.lineTo(x - dir * s * 0.25, cy + s * 0.42)
+  ctx.stroke()
+  ctx.restore()
+}
+
+/** Text as large as its box takes, from `size` down: a word, a glyph. */
+function sized(ctx, str, weight, size, fam, maxW) {
+  const f = font(weight, size, fam)
+  return Math.min(size, size * maxW / Math.max(1, measure(ctx, str, f)))
+}
+const famOf = str => (hasKanji(str) ? 'serif' : 'jp')
+
+/** A gloss and its note: "to appear, to leave (to go/come out by itself)"
+ *  is a meaning and, under it, what the parentheses add. */
+function glossParts(g) {
+  const m = /^(.+?)\s*(\([^()]+\))$/.exec(g || '')
+  return m ? [m[1], m[2]] : [g || '', '']
+}
+
+/** The circle of five seconds that empties, its figure in it. */
+function countdown(ctx, cx, cy, r, track, line, ink, share, left) {
+  ctx.lineWidth = r * 0.2
+  ctx.strokeStyle = track
+  ctx.beginPath()
+  ctx.arc(cx, cy, r, 0, 7)
+  ctx.stroke()
+  ctx.strokeStyle = line
+  ctx.lineCap = 'round'
+  ctx.beginPath()
+  ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * share)
+  ctx.stroke()
+  ctx.lineCap = 'butt'
+  text(ctx, String(Math.ceil(left)), cx, cy + r * 0.34, { f: font(700, r * 0.95, 'latin'), color: ink, align: 'center' })
+}
+
+/** A kanji's strokes drawn on in their order, numbered, in a box of side `s` at (x, y). */
+function strokesIn(ctx, d, m, u, k, x, y, s, ink, line) {
+  const kz = s / 109
+  ctx.save()
+  ctx.translate(x, y)
+  ctx.scale(kz, kz)
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  d.strokes.d.forEach((path, j) => {
+    const from = m.strokeAt + j * m.per
+    const v = k(from, m.per * 0.85)
+    const shape = new Path2D(path)
+    ctx.lineWidth = 4.5
+    ctx.strokeStyle = alpha(ink, 0.09)
+    ctx.stroke(shape)
+    if (v <= 0) return
+    const len = strokeLength(path)
+    ctx.strokeStyle = u < from + m.per ? line : ink
+    if (len && v < 1) { ctx.setLineDash([len, len + 10]); ctx.lineDashOffset = len * (1 - v) }
+    ctx.globalAlpha = len ? 1 : v
+    ctx.stroke(shape)
+    ctx.setLineDash([])
+    ctx.globalAlpha = 1
+    const [nx, ny] = d.strokes.n[j] || [0, 0]
+    ctx.fillStyle = line
+    ctx.font = font(700, 6.5, 'latin')
+    ctx.fillText(String(j + 1), nx, ny)
+  })
+  ctx.restore()
+}
+
+/** A practice sheet's guides through a box: the cross, dashed. */
+function guides(ctx, x, y, s, ink) {
+  ctx.save()
+  ctx.setLineDash([10, 12])
+  ctx.strokeStyle = alpha(ink, 0.1)
+  ctx.lineWidth = 2
+  ctx.beginPath()
+  ctx.moveTo(x + s / 2, y + 20); ctx.lineTo(x + s / 2, y + s - 20); ctx.moveTo(x + 20, y + s / 2); ctx.lineTo(x + s - 20, y + s / 2)
+  ctx.stroke()
+  ctx.restore()
+}
+
+// ── The long video: the door screen ──
+/** The band across the top, and the stripe under it. On the left what is
+ *  next (a drill's word), the section, or the question; the station's
+ *  number; on the right the video's name and the mark. */
+function door(ctx, p, line, plan, sg, S, { next = false, head = null, fill = 1 }) {
+  ctx.fillStyle = p.panel
+  ctx.fillRect(0, 0, W, BAND)
+  ctx.fillStyle = alpha(line, 0.28)
+  ctx.fillRect(0, BAND, W, STRIPE)
+  ctx.fillStyle = line
+  ctx.fillRect(0, BAND, W * Math.max(0, Math.min(1, fill)), STRIPE)
+  const nf = font(700, 22, 'latin')
+  const tw = measure(ctx, 'TSUJI', nf, 0.3)
+  text(ctx, 'TSUJI', W - 56 - tw, 78, { f: nf, color: p.onPanelSoft, tr: 0.3 })
+  const mx = W - 56 - tw - 18 - 58
+  mark(ctx, mx, 32, 58, p.onPanel, SUMI.gold)
+  let x = 56
+  if (next) {
+    const a = text(ctx, S.next, x, 62, { f: font(700, 32, 'latin'), color: p.onPanel })
+    const b = text(ctx, 'つぎは', x, 98, { f: font(500, 22, 'jp'), color: p.onPanelSoft })
+    x += Math.max(a, b) + 28
+  }
+  if (sg.n) {
+    const label = sg.type === 'q' || sg.type === 'score' ? 'Q' : plan.theme ? '' : plan.level
+    numBox(ctx, x, 20, 84, line, label, sg.n, p.bg, p.ink)
+    x += 84 + 30
+  }
+  const room = mx - 48 - x
+  if (head) {
+    const b = fit(ctx, head, { weight: 700, sizes: [40, 34, 30, 27], maxW: room, maxLines: 2, fam: 'latin', balanced: false })
+    const top = BAND / 2 - (b.lines.length * b.size * 1.16) / 2
+    b.lines.forEach((l, j) => text(ctx, l, x, top + b.size * (0.86 + j * 1.16), { f: b.f, color: p.onPanel }))
+  } else if (plan.title) {
+    const b = fit(ctx, plan.title, { weight: 700, sizes: [26, 22], maxW: room, maxLines: 1, fam: 'latin', balanced: false })
+    text(ctx, b.lines[0], mx - 40, 78, { f: b.f, color: p.onPanelSoft, align: 'right' })
+  }
+}
+
+/** The route down the screen's side: the stops passed in grey, this one
+ *  ringed, the next ones ahead on the line, five at most. */
+function route(ctx, p, line, names, n, x, y0) {
+  const of = names.length
+  const from = Math.max(0, Math.min(n - 3, of - 5))
+  const rows = names.slice(from, from + 5).map((t, j) => ({ t, i: from + j + 1 }))
+  const hs = rows.map(r => (r.i === n ? 150 : 104))
+  const ys = []
+  let y = y0
+  for (const h of hs) { ys.push(y + h / 2); y += h }
+  const dx = x + 22
+  const cur = Math.max(0, rows.findIndex(r => r.i === n))
+  ctx.fillStyle = p.surfaceLine
+  ctx.fillRect(dx - 3, ys[0], 6, ys[cur] - ys[0])
+  ctx.fillStyle = line
+  ctx.fillRect(dx - 3, ys[cur], 6, ys[ys.length - 1] - ys[cur])
+  const maxW = W - 80 - (x + 74)
+  rows.forEach((r, j) => {
+    const at = ys[j]
+    ctx.beginPath()
+    if (r.i < n) {
+      ctx.arc(dx, at, 12, 0, 7)
+      ctx.fillStyle = p.surfaceLine
+      ctx.fill()
+    } else {
+      ctx.arc(dx, at, r.i === n ? 21 : 13, 0, 7)
+      ctx.fillStyle = p.bg
+      ctx.fill()
+      ctx.lineWidth = r.i === n ? 10 : 5
+      ctx.strokeStyle = line
+      ctx.stroke()
+    }
+    const big = r.i === n
+    const z = sized(ctx, r.t, big ? 900 : 500, big ? 64 : 44, big ? famOf(r.t) : 'jp', maxW)
+    text(ctx, r.t, x + 74, at + z * 0.36, { f: font(big ? 900 : 500, z, big ? famOf(r.t) : 'jp'), color: r.i < n ? p.ink2 : p.ink })
+  })
+  text(ctx, `${n} / ${of}`, x + 74, y + 34, { f: font(700, 26, 'latin'), color: p.ink2 })
+}
+
+const ROUTE_X = 1352 // where the route stands, right of the column's rule
+const COL_RULE = 1280
+
 /** The frame at second `t`, and its key: two frames with the same key
  *  are the same picture. A short is drawn standing (drawTall). */
 export function drawLong(ctx, plan, tl, t) {
   if (plan.format === 'short') return drawTall(ctx, plan, tl, t)
-  const { p, S, line, sg, u, state, k, fade } = begin(ctx, plan, tl, t, W, H)
-  // The masthead, the title, the line of stations.
-  if (sg.type !== 'intro' && sg.type !== 'outro') {
-    mark(ctx, 80, 60, 64, p.ink, p.gold)
-    text(ctx, 'TSUJI', 160, 105, { f: font(700, 26, 'latin'), color: p.ink2, tr: 0.3 })
-    const b = fit(ctx, plan.title, { weight: 700, sizes: [30, 26], maxW: 1300, maxLines: 1, fam: 'latin', balanced: false })
-    text(ctx, b.lines[0], W - 80, 105, { f: b.f, color: p.ink2, align: 'right' })
-  }
-  if (sg.n) stations(ctx, p, line, sg.n, tl.of)
+  const { p, S, line, sg, u, state, k, fade, d, m } = begin(ctx, plan, tl, t, W, H, 'paper')
   const { card, sentence, para, pill } = tools(ctx, p, line)
-  const head = (str, color = line) => text(ctx, str.toUpperCase(), 120, 215, { f: font(700, 32, 'latin'), color, tr: 0.16 })
-  const d = sg.data
-  const m = sg.marks
+  // The stripe: the way along the video, or a question's seconds while they run.
+  let fill = sg.n ? sg.n / tl.of : 1
+  if (sg.type === 'q' && u >= m.show && u < m.reveal) fill = Math.round(Math.max(0, (m.reveal - u) / m.count) * 90) / 90
+  const heads = {
+    grule: S.rule, guse: S.use, gcareful: S.careful, gcompare: S.compare, grecap: S.recap,
+    gex: d && `${S.example} ${d.n} / ${d.of}`, gscene: d && `${S.scene} · ${d.place}`,
+    score: d && (d.n === d.of ? S.chapters.final : S.chapters.score),
+    q: d?.q?.ask,
+  }
+  door(ctx, p, line, plan, sg, S, { next: sg.type === 'vocab' || sg.type === 'kanji', head: heads[sg.type] || null, fill })
   switch (sg.type) {
     case 'intro': {
-      fade(k(0.2, 0.6), () => mark(ctx, W / 2 - 100, 200, 200, p.ink, p.gold))
+      fade(k(0.2, 0.6), () => mark(ctx, W / 2 - 90, 220, 180, p.ink, p.gold))
       fade(k(0.6, 0.6), () => para(plan.title, W / 2, 500, 1600, [96, 84, 72], p.ink, 'center', 700, 2))
       const count = S.count[plan.kind]
       if (count) fade(k(0.9, 0.6), () => para(count(plan.items.length), W / 2, 640, 1400, [48], p.ink2, 'center', 500, 1))
-      fade(k(1.6, 0.6), () => para(S.hook[plan.kind], W / 2, 780, 1500, [52, 44], p.gold, 'center', 700, 1))
+      fade(k(1.6, 0.6), () => para(S.hook[plan.kind], W / 2, 780, 1500, [52, 44], line, 'center', 700, 1))
       fade(k(2.2, 0.6), () => para(S.how[plan.kind], W / 2, 860, 1500, [40, 36], p.ink2, 'center', 500, 1))
       break
     }
     case 'outro': {
-      fade(k(0.2, 0.6), () => mark(ctx, W / 2 - 90, 170, 180, p.ink, p.gold))
-      fade(k(0.6, 0.6), () => para(S.outro, W / 2, 440, 1500, [88, 76], p.ink, 'center', 700, 1))
-      fade(k(1.0, 0.6), () => para(S.outroSub, W / 2, 570, 1500, [44, 38], p.ink2, 'center', 500, 1))
-      if (plan.kind === 'quiz') fade(k(1.3, 0.6), () => para(S.comment, W / 2, 650, 1500, [44, 38], p.gold, 'center', 700, 1))
+      fade(k(0.2, 0.6), () => mark(ctx, W / 2 - 90, 200, 180, p.ink, p.gold))
+      fade(k(0.6, 0.6), () => para(S.outro, W / 2, 460, 1500, [88, 76], p.ink, 'center', 700, 1))
+      fade(k(1.0, 0.6), () => para(S.outroSub, W / 2, 590, 1500, [44, 38], p.ink2, 'center', 500, 1))
+      if (plan.kind === 'quiz') fade(k(1.3, 0.6), () => para(S.comment, W / 2, 670, 1500, [44, 38], line, 'center', 700, 1))
       fade(k(1.8, 0.6), () => {
         const bw = 760
-        A.departButton(ctx, p, W / 2 - bw / 2, 760, bw, 2, S.depart)
+        A.departButton(ctx, p, W / 2 - bw / 2, 780, bw, 2, S.depart)
       })
       break
     }
-    case 'vocab': drawWord(ctx, p, S, d, m, u, k, fade, sentence, para, state); break
-    case 'kanji': drawKanji(ctx, p, S, line, d, m, u, k, fade, para); break
+    case 'vocab': drawWord(ctx, p, S, line, plan, sg, d, m, u, k, fade, sentence, para, state); break
+    case 'kanji': drawKanji(ctx, p, S, line, plan, sg, d, m, u, k, fade, para); break
     case 'gtitle': case 'grecap': {
-      if (sg.type === 'grecap') fade(k(0, 0.3), () => head(S.recap))
-      const top = sg.type === 'grecap' ? 230 : 300
-      fade(k(0.1, 0.5), () => para(d.p, W / 2, top, 1680, [150, 120, 96, 80], p.ink, 'center', 700, 1))
-      fade(k(0.6, 0.5), () => para(d.meaning, W / 2, top + 200, 1600, [56, 48, 40], p.ink2, 'center', 500, 2))
-      fade(k(1.1, 0.5), () => pill(d.form, W / 2, top + 340, 44, 'center'))
+      const top = sg.type === 'grecap' ? 200 : 330
+      fade(k(0.1, 0.5), () => {
+        const b = fit(ctx, d.p, { weight: 900, sizes: [180, 150, 120, 96, 80], maxW: 1680, maxLines: 1, fam: 'serif', balanced: false })
+        text(ctx, b.lines[0], W / 2, top + b.size * 0.9, { f: b.f, color: p.ink, align: 'center' })
+      })
+      fade(k(0.6, 0.5), () => para(d.meaning, W / 2, top + 230, 1600, [56, 48, 40], p.ink2, 'center', 500, 2))
+      fade(k(1.1, 0.5), () => pill(d.form, W / 2, top + 370, 44, 'center'))
       if (sg.type === 'grecap' && d.rows) fade(k(m.lead, 0.4), () => {
-        const h = sentence(d.rows, W / 2, 720, { max: 64, maxLines: 1, lit: line })
-        para(d.tr, W / 2, 730 + h, 1600, [40, 34], p.ink2, 'center', 500, 1)
+        ctx.fillStyle = p.card
+        ctx.fillRect(0, 860, W, H - 860)
+        ctx.fillStyle = p.surfaceLine
+        ctx.fillRect(0, 860, W, 2)
+        const h = sentence(d.rows, W / 2, 884, { max: 60, maxLines: 1, lit: line })
+        para(d.tr, W / 2, 894 + h, 1600, [36, 32], p.ink2, 'center', 500, 1)
       })
       break
     }
     case 'grule': {
-      fade(k(0, 0.3), () => head(S.rule))
-      fade(k(0.3, 0.4), () => pill(d.form, 120, 270, 48))
-      fade(k(0.8, 0.5), () => para(d.rule, 120, 440, 1680, [60, 54, 48, 42, 38], p.ink, 'left', 500, 7))
+      fade(k(0.3, 0.4), () => pill(d.form, 120, 200, 48))
+      fade(k(0.8, 0.5), () => para(d.rule, 120, 360, 1680, [60, 54, 48, 42, 38], p.ink, 'left', 500, 9))
       break
     }
     case 'gcareful': {
-      fade(k(0, 0.3), () => head(S.careful, p.gold))
-      fade(k(0.5, 0.5), () => para(d.text, 120, 300, 1680, [64, 56, 48, 42, 38], p.ink, 'left', 500, 9))
+      fade(k(0.5, 0.5), () => para(d.text, 120, 220, 1680, [64, 56, 48, 42, 38], p.ink, 'left', 500, 11))
       break
     }
     case 'guse': {
-      fade(k(0, 0.3), () => head(S.use))
-      let y = 290
+      let y = 220
       d.bullets.forEach((b, j) => {
         const v = k(m.at[j], 0.4)
         const bk = fit(ctx, b, { weight: 500, sizes: [50, 44, 40, 36], maxW: 1600, maxLines: 3, fam: 'latin', balanced: false })
@@ -999,56 +1208,53 @@ export function drawLong(ctx, plan, tl, t) {
       break
     }
     case 'gex': {
-      fade(k(0, 0.3), () => head(`${S.example} ${d.n} / ${d.of}`))
       fade(k(0.2, 0.4), () => {
-        card(120, 250, 1680, 330)
-        const h = sentence(d.rows, W / 2, 285, { max: 84, min: 48, maxW: 1560, maxLines: 1, lit: line })
-        para(d.tr, W / 2, 305 + h, 1560, [46, 40, 34], p.ink2, 'center', 500, 2)
+        card(120, 190, 1680, 330)
+        const h = sentence(d.rows, W / 2, 225, { max: 84, min: 48, maxW: 1560, maxLines: 1, lit: line })
+        para(d.tr, W / 2, 245 + h, 1560, [46, 40, 34], p.ink2, 'center', 500, 2)
       })
-      drawChips(ctx, p, line, d.chips, m.chipAt, k, fade)
+      drawChips(ctx, p, line, d.chips, m.chipAt, k, fade, 570)
       break
     }
     case 'gcompare': {
-      fade(k(0, 0.3), () => head(S.compare))
-      fade(k(0.3, 0.4), () => { text(ctx, d.p, 120, 360, { f: font(900, 96, 'serif'), color: p.ink }); para(d.meaning, 120, 400, 1680, [44, 38], p.ink2, 'left', 500, 1) })
-      fade(k(1.0, 0.4), () => para(d.note, 120, 490, 1680, [44, 38, 34], p.gold, 'left', 500, 3))
+      fade(k(0.3, 0.4), () => { text(ctx, d.p, 120, 300, { f: font(900, 96, 'serif'), color: p.ink }); para(d.meaning, 120, 340, 1680, [44, 38], p.ink2, 'left', 500, 1) })
+      fade(k(1.0, 0.4), () => para(d.note, 120, 430, 1680, [44, 38, 34], p.ink, 'left', 500, 3))
       if (d.rows) fade(k(m.lead, 0.4), () => {
-        card(120, 690, 1680, 250)
-        const h = sentence(d.rows, W / 2, 720, { max: 64, maxW: 1560, maxLines: 1, lit: line })
-        para(d.tr, W / 2, 735 + h, 1560, [40, 34], p.ink2, 'center', 500, 1)
+        card(120, 660, 1680, 250)
+        const h = sentence(d.rows, W / 2, 690, { max: 64, maxW: 1560, maxLines: 1, lit: line })
+        para(d.tr, W / 2, 705 + h, 1560, [40, 34], p.ink2, 'center', 500, 1)
       })
       break
     }
     case 'gscene': {
-      fade(k(0, 0.3), () => head(`${S.scene} · ${d.place}`))
-      fade(k(0.3, 0.4), () => para(d.them, 120, 240, 1680, [36, 32], p.ink2, 'left', 500, 1))
+      fade(k(0.3, 0.4), () => para(d.them, 120, 170, 1680, [36, 32], p.ink2, 'left', 500, 1))
       // A bubble a line, as many as fit above the note; the earlier ones go up.
       const lay = d.lines.map(l => layoutSentence(ctx, l.rows, { max: 52, min: 34, maxW: 1100, maxLines: 1, script: 'furigana', rules: false, gap: 0.06, fam: 'jp', weight: 700 }))
       const bh = Math.max(...lay.map(L => L.h)) + 70
-      const fitIn = Math.max(1, Math.floor((880 - 290) / (bh + 14)))
+      const fitIn = Math.max(1, Math.floor((900 - 230) / (bh + 14)))
       const said = m.lines.filter(x => u >= x).length
       const from = Math.max(0, said - fitIn)
       state.push(`s${from}`)
       d.lines.slice(from, from + fitIn).forEach((l, j) => fade(k(m.lines[from + j], 0.35), () => {
         const me = l.who === 'me'
-        const y = 290 + j * (bh + 14)
+        const y = 230 + j * (bh + 14)
         const L = lay[from + j]
         const tb = fit(ctx, l.tr, { weight: 500, sizes: [30, 26], maxW: 1100, maxLines: 1, fam: 'latin', balanced: false })
         const bw = Math.max(L.lineW(L.lines[0]), measure(ctx, tb.lines[0], tb.f)) + 80
         const x = me ? W - 120 - bw : 120
-        ctx.fillStyle = me ? alpha(line, 0.28) : p.card
+        ctx.fillStyle = me ? alpha(line, 0.2) : p.card
         rrect(ctx, x, y, bw, bh, 28)
         ctx.fill()
         drawSentence(ctx, L, x + 40, y + 16, 'left', ui => ({ ink: p.ink, ruby: p.ink2, rule: ui.row.lit ? line : null, ruleW: 6 }))
         text(ctx, tb.lines[0], x + 40, y + bh - 22, { f: tb.f, color: p.ink2 })
       }))
-      if (d.note) fade(k(m.note, 0.4), () => para(d.note, 120, 960 - 2 * 44, 1500, [36, 32], p.gold, 'left', 500, 2))
+      if (d.note) fade(k(m.note, 0.4), () => para(d.note, 120, 960 - 2 * 44, 1500, [36, 32], p.ink, 'left', 500, 2))
       break
     }
-    case 'q': drawQuestion(ctx, p, line, S, sg.data, m, u, k, fade, sentence, para, card, state); break
+    case 'q': drawQuestion(ctx, p, line, S, d, m, u, k, fade, sentence, para, card, state); break
     case 'score': {
-      fade(k(0.1, 0.5), () => para(S.score(d.n, d.of), W / 2, 380, 1600, [84, 72, 60], p.ink, 'center', 700, 2))
-      fade(k(0.6, 0.5), () => para(`${d.n} / ${d.of}`, W / 2, 620, 800, [96], p.gold, 'center', 700, 1))
+      fade(k(0.1, 0.5), () => para(S.score(d.n, d.of), W / 2, 330, 1600, [84, 72, 60], p.ink, 'center', 700, 2))
+      fade(k(0.6, 0.5), () => para(`${d.n} / ${d.of}`, W / 2, 580, 800, [120], line, 'center', 700, 1))
       if (d.n === d.of) fade(k(1.2, 0.5), () => para(S.comment, W / 2, 790, 1400, [48, 40], p.ink2, 'center', 500, 1))
       break
     }
@@ -1057,139 +1263,111 @@ export function drawLong(ctx, plan, tl, t) {
   return state.join(',')
 }
 
-/** The line of stations along the foot: one a word, a kanji, a section or a question. */
-function stations(ctx, p, line, n, of) {
-  const y = STATION_Y
-  const x0 = 120
-  const x1 = W - 120
-  ctx.fillStyle = alpha(line, 0.25)
-  ctx.fillRect(x0, y - 4, x1 - x0, 8)
-  ctx.fillStyle = line
-  ctx.fillRect(x0, y - 4, (x1 - x0) * (n - 0.5) / of, 8)
-  const r = of > 40 ? 6 : 8
-  for (let j = 0; j < of; j++) {
-    const x = x0 + (x1 - x0) * (j + 0.5) / of
-    ctx.beginPath()
-    ctx.arc(x, y, j === n - 1 ? r * 2 : r, 0, 7)
-    ctx.fillStyle = j < n ? line : p.surfaceLine
-    ctx.fill()
-  }
-  text(ctx, `${n} / ${of}`, W - 80, 960, { f: font(700, 30, 'latin'), color: p.ink2, align: 'right' })
-}
-
-/** A word: alone for three seconds, then its reading, its meaning and a sentence. */
-function drawWord(ctx, p, S, d, m, u, k, fade, sentence, para, state) {
+/** A word: alone for three seconds, then its reading, its meaning and a
+ *  sentence; the route of the part's words down the side. */
+function drawWord(ctx, p, S, line, plan, sg, d, m, u, k, fade, sentence, para, state) {
+  const X = 96
+  const COL = COL_RULE - X - 64
   const kanji = hasKanji(d.t)
-  fade(k(0, 0.3), () => {
-    ctx.fillStyle = p.card
-    rrect(ctx, 360, 160, 1200, 540, 24)
-    ctx.fill()
-    ctx.strokeStyle = p.surfaceLine
-    ctx.lineWidth = 2
-    rrect(ctx, 361, 161, 1198, 538, 24)
-    ctx.stroke()
-  })
-  const f = font(700, 180, kanji ? 'serif' : 'jp')
-  const z = Math.min(180, 180 * 1040 / Math.max(1, measure(ctx, d.t, f)))
-  fade(k(0.1, 0.3), () => text(ctx, d.t, W / 2, 470, { f: font(700, z, kanji ? 'serif' : 'jp'), color: p.ink, align: 'center' }))
-  const rv = k(m.think, 0.3)
+  const z = sized(ctx, d.t, 900, 300, famOf(d.t), COL)
+  fade(k(0.1, 0.3), () => text(ctx, d.t, X - z * 0.03, 540, { f: font(900, z, famOf(d.t)), color: p.ink }))
   if (u < m.think) {
     // Read it… and the seconds left to try, as three lamps going out.
     const left = Math.max(0, Math.ceil(m.think - u))
     state.push(`L${left}`)
-    text(ctx, S.readIt, W / 2, 600, { f: font(500, 40, 'latin'), color: p.ink2, align: 'center' })
-    for (let j = 0; j < 3; j++) {
-      ctx.beginPath()
-      ctx.arc(W / 2 - 40 + j * 40, 650, 9, 0, 7)
-      ctx.fillStyle = j < left ? p.gold : p.surfaceLine
-      ctx.fill()
-    }
+    fade(k(0.1, 0.3), () => {
+      const w = text(ctx, S.readIt, X, 626, { f: font(500, 36, 'latin'), color: p.ink2 })
+      for (let j = 0; j < 3; j++) {
+        ctx.beginPath()
+        ctx.arc(X + w + 40 + j * 36, 614, 10, 0, 7)
+        ctx.fillStyle = j < left ? line : p.surfaceLine
+        ctx.fill()
+      }
+    })
   }
-  fade(rv, () => {
-    if (kanji) text(ctx, d.r, W / 2, 285, { f: font(500, 52, 'jp'), color: p.ink2, align: 'center' })
-    text(ctx, d.ro, W / 2, 550, { f: font(500, 36, 'latin'), color: p.ink2, align: 'center' })
+  fade(k(m.think, 0.3), () => {
+    if (kanji) text(ctx, d.r, X + 6, 228, { f: font(500, 48, 'jp'), color: p.ink2, tr: 0.3 })
+    text(ctx, d.ro.toUpperCase(), X + 6, 626, { f: font(500, 34, 'latin'), color: p.ink2, tr: 0.24 })
   })
-  fade(k(m.meaning, 0.35), () => para(d.gloss, W / 2, 590, 1100, [60, 52, 44, 38], p.gold, 'center', 700, 1))
+  const [main, note] = glossParts(d.gloss)
+  fade(k(m.meaning, 0.35), () => {
+    const h = para(main, X, 668, COL, [72, 62, 54, 46], p.ink, 'left', 700, 2)
+    para(note, X, 668 + h + 2, COL, [34, 30], p.ink2, 'left', 500, 1)
+  })
+  ctx.fillStyle = p.surfaceLine
+  ctx.fillRect(COL_RULE, 176, 2, 680)
+  route(ctx, p, line, plan.items.map(x => x.t), sg.n, ROUTE_X, 190)
   if (d.ex && m.ex != null) fade(k(m.ex, 0.4), () => {
-    const h = sentence(d.ex.rows, W / 2, 735, { max: 60, min: 38, maxW: 1680, maxLines: 1, under: d.ex.at ?? -1, lit: p.gold })
-    para(d.ex.tr, W / 2, 750 + h, 1600, [40, 34], p.ink2, 'center', 500, 1)
+    ctx.fillStyle = p.card
+    ctx.fillRect(0, 900, W, H - 900)
+    ctx.fillStyle = p.surfaceLine
+    ctx.fillRect(0, 900, W, 2)
+    const h = sentence(d.ex.rows, X, 922, { max: 54, min: 34, maxW: W - 2 * X, maxLines: 1, under: d.ex.at ?? -1, lit: line, align: 'left' })
+    para(d.ex.tr, X, 930 + h, W - 2 * X, [32, 28], p.ink2, 'left', 500, 1)
   })
 }
 
-/** A kanji: its strokes drawn on in their order, its meaning, its readings, two words. */
-function drawKanji(ctx, p, S, line, d, m, u, k, fade, para) {
+/** A kanji: its strokes drawn on in their order, its meaning, its
+ *  readings, two words; the route of the part's kanji down the side. */
+function drawKanji(ctx, p, S, line, plan, sg, d, m, u, k, fade, para) {
   const n = d.strokes.d.length
+  const bx = 96
+  const by = 180
+  const bs = 690
   fade(k(0, 0.3), () => {
     ctx.fillStyle = p.card
-    rrect(ctx, 160, 160, 680, 680, 24)
+    rrect(ctx, bx, by, bs, bs, 24)
     ctx.fill()
     ctx.strokeStyle = p.surfaceLine
     ctx.lineWidth = 2
-    rrect(ctx, 161, 161, 678, 678, 24)
+    rrect(ctx, bx + 1, by + 1, bs - 2, bs - 2, 24)
     ctx.stroke()
-    // The box's guides, as a practice sheet's.
-    ctx.setLineDash([10, 12])
-    ctx.strokeStyle = alpha(p.ink, 0.08)
-    ctx.beginPath()
-    ctx.moveTo(500, 200); ctx.lineTo(500, 800); ctx.moveTo(200, 500); ctx.lineTo(800, 500)
-    ctx.stroke()
-    ctx.setLineDash([])
+    guides(ctx, bx, by, bs, p.ink)
   })
-  const kz = 600 / 109
-  ctx.save()
-  ctx.translate(200, 200)
-  ctx.scale(kz, kz)
-  ctx.lineCap = 'round'
-  ctx.lineJoin = 'round'
-  d.strokes.d.forEach((path, j) => {
-    const from = m.strokeAt + j * m.per
-    const v = k(from, m.per * 0.85)
-    const shape = new Path2D(path)
-    ctx.lineWidth = 4.5
-    ctx.strokeStyle = alpha(p.ink, 0.09)
-    ctx.stroke(shape)
-    if (v <= 0) return
-    const len = strokeLength(path)
-    ctx.strokeStyle = u < from + m.per ? line : p.ink
-    if (len && v < 1) { ctx.setLineDash([len, len + 10]); ctx.lineDashOffset = len * (1 - v) }
-    ctx.globalAlpha = len ? 1 : v
-    ctx.stroke(shape)
-    ctx.setLineDash([])
-    ctx.globalAlpha = 1
-    const [nx, ny] = d.strokes.n[j] || [0, 0]
-    ctx.fillStyle = line
-    ctx.font = font(700, 6.5, 'latin')
-    ctx.fillText(String(j + 1), nx, ny)
-  })
-  ctx.restore()
-  fade(k(m.meaning, 0.3), () => text(ctx, S.strokes(n), 500, 900, { f: font(500, 34, 'latin'), color: p.ink2, align: 'center' }))
-  const x = 920
-  fade(k(m.meaning, 0.35), () => para(d.meaning, x, 190, 880, [84, 72, 60, 52], p.ink, 'left', 700, 2))
-  const reading = (label, y, parts, v) => fade(v, () => {
-    text(ctx, label, x, y, { f: font(700, 30, 'latin'), color: line, tr: 0.2 })
-    let kx = x + 120
-    const f = font(700, 60, 'jp')
-    if (!parts.length) { text(ctx, '—', kx, y + 6, { f, color: p.ink2 }); return }
+  strokesIn(ctx, d, m, u, k, bx + 35, by + 35, bs - 70, p.ink, line)
+  const x = bx + bs + 64
+  const cw = COL_RULE - x - 48
+  const mh = fit(ctx, d.meaning, { weight: 700, sizes: [72, 60, 52, 44], maxW: cw, maxLines: 2, fam: 'latin', balanced: false })
+  fade(k(m.meaning, 0.35), () => para(d.meaning, x, 190, cw, [72, 60, 52, 44], p.ink, 'left', 700, 2))
+  let y = 190 + paragraphH(mh, 1.22) + 40
+  const reading = (label, top, parts, v) => fade(v, () => {
+    text(ctx, label, x, top + 26, { f: font(700, 26, 'latin'), color: line, tr: 0.2 })
+    const str = parts.length ? parts.map(([a, b]) => a + b).join('、') : '—'
+    const f = font(700, sized(ctx, str, 700, 52, 'jp', cw), 'jp')
+    let kx = x
+    if (!parts.length) { text(ctx, str, x, top + 92, { f, color: p.ink2 }); return }
     parts.forEach(([a, b], j) => {
-      if (j) kx += text(ctx, '、', kx, y + 6, { f, color: p.ink2 })
-      kx += text(ctx, a, kx, y + 6, { f, color: p.ink })
-      if (b) kx += text(ctx, b, kx, y + 6, { f, color: p.ink2 })
+      if (j) kx += text(ctx, '、', kx, top + 92, { f, color: p.ink2 })
+      kx += text(ctx, a, kx, top + 92, { f, color: p.ink })
+      if (b) kx += text(ctx, b, kx, top + 92, { f, color: p.ink2 })
     })
   })
-  reading(S.on, 430, d.on.map(r => [r, '']), k(m.on, 0.3))
-  reading(S.kun, 540, d.kun, k(m.kun, 0.3))
+  reading(S.on, y, d.on.map(r => [r, '']), k(m.on, 0.3))
+  y += 130
+  reading(S.kun, y, d.kun, k(m.kun, 0.3))
+  y += 150
+  fade(k(m.meaning, 0.3), () => text(ctx, S.strokes(n), x, y + 20, { f: font(500, 30, 'latin'), color: p.ink2 }))
+  ctx.fillStyle = p.surfaceLine
+  ctx.fillRect(COL_RULE, 176, 2, 694)
+  route(ctx, p, line, plan.items.map(x2 => x2.c), sg.n, ROUTE_X, 190)
+  // The words, side by side in the band along the foot, as a word's sentence is.
+  if (d.words.length) fade(k(m.words[0], 0.35), () => {
+    ctx.fillStyle = p.card
+    ctx.fillRect(0, 900, W, H - 900)
+    ctx.fillStyle = p.surfaceLine
+    ctx.fillRect(0, 900, W, 2)
+  })
+  const ww = (W - 2 * bx - 64) / 2
   d.words.forEach((w, j) => fade(k(m.words[j], 0.35), () => {
-    const y = 680 + j * 120
-    const tw = text(ctx, w.t, x, y, { f: font(700, 60, 'jp'), color: p.ink })
-    const rw = text(ctx, w.r, x + tw + 24, y, { f: font(500, 36, 'jp'), color: p.ink2 })
-    const room = 880 - tw - rw - 72
-    const b = fit(ctx, w.gloss, { weight: 500, sizes: [36, 30, 26], maxW: Math.max(160, room), maxLines: 1, fam: 'latin', balanced: false })
-    text(ctx, b.lines[0], x + tw + rw + 72, y, { f: b.f, color: p.gold })
+    const wx = bx + j * (ww + 64)
+    const tw = text(ctx, w.t, wx, 972, { f: font(700, sized(ctx, w.t, 700, 56, 'jp', ww * 0.55), 'jp'), color: p.ink })
+    text(ctx, w.r, wx + tw + 20, 972, { f: font(500, sized(ctx, w.r, 500, 32, 'jp', ww - tw - 20), 'jp'), color: p.ink2 })
+    para(w.gloss, wx, 994, ww, [30, 26], p.ink2, 'left', 500, 1)
   }))
 }
 
 /** An example cut word by word: each word, its romaji and what it does. */
-function drawChips(ctx, p, line, chips, at, k, fade) {
+function drawChips(ctx, p, line, chips, at, k, fade, y0) {
   const pad = 26
   const fits = scale => {
     const ft = font(700, 52 * scale, 'jp')
@@ -1216,11 +1394,11 @@ function drawChips(ctx, p, line, chips, at, k, fade) {
   L.rows.forEach((row, ri) => {
     const rw = row.reduce((a, b) => a + b.w, 0) + 16 * (row.length - 1)
     const x0 = W / 2 - rw / 2
-    const y = 620 + ri * (L.h + 16)
+    const y = y0 + ri * (L.h + 16)
     for (const { c, g, w, x } of row) {
       const v = k(at[idx++], 0.3)
       fade(v, () => {
-        ctx.fillStyle = c.lit ? alpha(line, 0.3) : p.card
+        ctx.fillStyle = c.lit ? alpha(line, 0.2) : p.card
         rrect(ctx, x0 + x, y, w, L.h, 18)
         ctx.fill()
         const cx = x0 + x + w / 2
@@ -1228,152 +1406,189 @@ function drawChips(ctx, p, line, chips, at, k, fade) {
         if (c.kana) text(ctx, c.kana, cx, y + 34 * s, { f: L.fk, color: p.ink2, align: 'center' })
         text(ctx, c.t, cx, y + 88 * s, { f: L.ft, color: p.ink, align: 'center' })
         text(ctx, c.ro, cx, y + 122 * s, { f: L.fo, color: p.ink2, align: 'center' })
-        text(ctx, g, cx, y + 154 * s, { f: L.fg, color: p.gold, align: 'center' })
+        text(ctx, g, cx, y + 154 * s, { f: L.fg, color: line, align: 'center' })
       })
     }
   })
 }
 
-/** A question: the ask, the stem, the answers, five seconds on a ring, the answer and why. */
+const choiceText = c => c.text ?? joined(c.rows || [])
+const choiceFam = c => (c.rows || c.fam === 'jp' ? 'jp' : 'latin')
+
+/** The sentence a question shows: once answered, as it really is, with
+ *  its readings and its blank filled. */
+function shownStem(q, done) {
+  const stem = q.stem
+  let shown = done && stem.after ? stem.after : stem
+  const fill = q.choices[q.right]
+  const gap = shown.rows.findIndex(r => /^[＿_]+$/.test(r.t))
+  if (done && gap >= 0 && (fill.rows || /[ぁ-んァ-ン一-龯]/.test(fill.text || ''))) {
+    const rows = shown.rows.filter((r, i) => i <= gap || !/^[＿_]+$/.test(r.t))
+    rows.splice(gap, 1, ...(fill.rows ? fill.rows.map(r => ({ ...r, lit: true })) : [{ t: fill.text, k: 'word', lit: true }]))
+    shown = { rows }
+  }
+  return shown
+}
+
+/** A question: the ask in the band, the stem on the left, the answers
+ *  down the right, five seconds draining from the stripe and a ring, then
+ *  the answer and why. */
 function drawQuestion(ctx, p, line, S, it, m, u, k, fade, sentence, para, card, state) {
   const q = it.q
   const revealed = u >= m.reveal
   const done = u >= m.answer
   state.push(done ? 'A' : revealed ? 'R' : '')
-  const label = it.twist ? `${S.twist} · ${q.notion}` : null
-  if (label) fade(k(0, 0.3), () => text(ctx, label.toUpperCase(), 120, 190, { f: font(700, 30, 'latin'), color: line, tr: 0.14 }))
-  const askY = label ? 220 : 180
-  const askB = fit(ctx, q.ask, { weight: 700, sizes: [50, 44, 38, 34], maxW: 1560, maxLines: 2, fam: 'latin', balanced: false })
-  fade(k(0, 0.35), () => askB.lines.forEach((l, j) => text(ctx, l, 120, askY + askB.size * (0.8 + j * 1.22), { f: askB.f, color: p.ink })))
-  let y = askY + paragraphH(askB, 1.22) + 50
+  const LX = 96
+  const LW = 900
+  const lc = LX + LW / 2
+  const RX = 1096
+  const RW = W - 96 - RX
+  if (it.twist) fade(k(0, 0.3), () => text(ctx, `${S.twist} · ${q.notion}`.toUpperCase(), LX, 206, { f: font(700, 28, 'latin'), color: line, tr: 0.14 }))
   // The stem: a word as a specimen, a sentence (its word underlined, never its
   // reading, which some questions ask), or what the other person said.
   const stem = q.stem || {}
+  const mid = 520
   if (stem.specimen) {
-    const top = y
     fade(k(0.2, 0.35), () => {
       const sp = stem.specimen
-      const f = font(700, 150, hasKanji(sp) ? 'serif' : 'jp')
-      const z = Math.min(150, 150 * 1400 / Math.max(1, measure(ctx, sp, f)))
-      text(ctx, sp, W / 2, top + 140, { f: font(700, z, hasKanji(sp) ? 'serif' : 'jp'), color: p.ink, align: 'center' })
+      const z = sized(ctx, sp, 900, 300, famOf(sp), LW)
+      text(ctx, sp, lc, mid + z * 0.34, { f: font(900, z, famOf(sp)), color: p.ink, align: 'center' })
     })
-    y += 200
   } else if (stem.rows) {
-    // Once answered, the sentence as it really is, with its readings and its blank filled.
-    let shown = done && stem.after ? stem.after : stem
-    const fill = q.choices[q.right]
-    const gap = shown.rows.findIndex(r => /^[＿_]+$/.test(r.t))
-    if (done && gap >= 0 && (fill.rows || /[ぁ-んァ-ン一-龯]/.test(fill.text || ''))) {
-      const rows = shown.rows.filter((r, i) => i <= gap || !/^[＿_]+$/.test(r.t))
-      rows.splice(gap, 1, ...(fill.rows ? fill.rows.map(r => ({ ...r, lit: true })) : [{ t: fill.text, k: 'word', lit: true }]))
-      shown = { rows }
-    }
-    const o = { max: 84, min: 44, maxW: 1680, maxLines: 2, script: done ? 'furigana' : stem.script || 'kanji' }
+    const shown = shownStem(q, done)
+    const o = { max: 80, min: 44, maxW: LW, maxLines: 3, script: done ? 'furigana' : stem.script || 'kanji' }
     const L = layoutSentence(ctx, shown.rows, { ...o, rules: false, gap: 0.06, fam: 'jp', weight: 700 })
-    const top = y
-    fade(k(0.2, 0.35), () => sentence(shown.rows, W / 2, top, { ...o, under: shown.under ? shown.target : -1, lit: stem.lit || stem.underLit || shown !== stem ? line : null }))
-    y += (L?.h || 100) + 50
+    const top = mid - (L?.h || 100) / 2
+    fade(k(0.2, 0.35), () => sentence(shown.rows, lc, top, { ...o, under: shown.under ? shown.target : -1, lit: stem.lit || stem.underLit || shown !== stem ? line : null }))
   } else if (stem.cue) {
-    const L = layoutSentence(ctx, stem.cue.rows, { max: 56, min: 36, maxW: 1500, maxLines: 1, script: 'furigana', rules: false, gap: 0.06, fam: 'jp', weight: 700 })
-    const top = y
+    const L = layoutSentence(ctx, stem.cue.rows, { max: 56, min: 34, maxW: LW - 80, maxLines: 2, script: 'furigana', rules: false, gap: 0.06, fam: 'jp', weight: 700 })
+    const bh = L.h + 90
+    const top = mid - bh / 2 - (stem.task ? 40 : 0)
     fade(k(0.2, 0.35), () => {
-      const bw = Math.max(L.lineW(L.lines[0]) + 80, 600)
       ctx.fillStyle = p.card
-      rrect(ctx, 120, top, bw, L.h + 90, 28)
+      rrect(ctx, LX, top, LW, bh, 28)
       ctx.fill()
-      drawSentence(ctx, L, 160, top + 20, 'left', () => ({ ink: p.ink, ruby: p.ink2 }))
-      para(stem.cue.tr, 160, top + L.h + 30, 1400, [30, 26], p.ink2, 'left', 500, 1)
+      drawSentence(ctx, L, LX + 40, top + 20, 'left', () => ({ ink: p.ink, ruby: p.ink2 }))
+      para(stem.cue.tr, LX + 40, top + L.h + 30, LW - 80, [30, 26], p.ink2, 'left', 500, 1)
     })
-    y += L.h + 110
-    if (stem.task) {
-      const ty = y
-      fade(k(0.3, 0.35), () => para(stem.task, 120, ty, 1680, [36, 32], p.gold, 'left', 500, 1))
-      y += 70
-    }
+    if (stem.task) fade(k(0.3, 0.35), () => para(stem.task, LX, top + bh + 30, LW, [34, 30], p.ink, 'left', 500, 2))
   }
-  const choiceText = c => c.text ?? joined(c.rows || [])
-  const famOf = c => (c.rows || c.fam === 'jp' ? 'jp' : 'latin')
+  ctx.fillStyle = p.surfaceLine
+  ctx.fillRect(RX - 40, 176, 2, 860)
   const n = q.choices.length
-  // The answers side by side when they are short, two by two, else one a line.
-  const widest = Math.max(...q.choices.map(c => measure(ctx, choiceText(c), font(700, 48, famOf(c)))))
-  const room = c => (1680 - 30 * (c - 1)) / c - 120
-  const cols = widest <= room(n) ? n : n === 4 && widest <= room(2) ? 2 : 1
   if (!done) {
-    const cw = room(cols) + 120
-    const rows = Math.ceil(n / cols)
-    const ch = cols > 1 ? 130 : Math.max(80, Math.min(110, (930 - y - 12 * (n - 1)) / n))
-    const top = y
+    const ch = Math.min(176, (1040 - 190 - 18 * (n - 1)) / n)
     q.choices.forEach((c, j) => fade(k(0.5 + j * 0.12, 0.3), () => {
-      const x = 120 + (j % cols) * (cw + 30)
-      const cy = top + Math.floor(j / cols) * (ch + 12)
+      const cy = 190 + j * (ch + 18)
       const right = j === q.right
       ctx.save()
       if (revealed && !right) ctx.globalAlpha *= 0.35
-      card(x, cy, cw, ch, revealed && right ? p.gold : p.surfaceLine, revealed && right ? 6 : 2)
-      text(ctx, String(j + 1), x + 50, cy + ch / 2 + 16, { f: font(700, 44, 'latin'), color: line, align: 'center' })
-      // One line where any size fits it, two else.
-      const sizes = cols > 1 ? [56, 48, 42, 36] : [44, 38, 32, 28]
-      let b = fit(ctx, choiceText(c), { weight: 700, sizes, maxW: cw - 130, maxLines: 1, fam: famOf(c), balanced: false })
-      if (b.cut && cols < 4) b = fit(ctx, choiceText(c), { weight: 700, sizes, maxW: cw - 130, maxLines: 2, fam: famOf(c), balanced: false })
+      card(RX, cy, RW, ch, revealed && right ? p.gold : p.surfaceLine, revealed && right ? 6 : 2)
+      roundel(ctx, RX + 58, cy + ch / 2, 30, line, String(j + 1), { ink: p.ink, size: 28 })
+      const sizes = choiceFam(c) === 'jp' ? [56, 48, 42, 36] : [44, 38, 32, 28]
+      let b = fit(ctx, choiceText(c), { weight: 700, sizes, maxW: RW - 140, maxLines: 1, fam: choiceFam(c), balanced: false })
+      if (b.cut) b = fit(ctx, choiceText(c), { weight: 700, sizes, maxW: RW - 140, maxLines: 2, fam: choiceFam(c), balanced: false })
       const bh = paragraphH(b, 1.12)
-      b.lines.forEach((l, li) => text(ctx, l, cols > 1 ? x + 50 + (cw - 50) / 2 : x + 100, cy + ch / 2 - bh / 2 + b.size * (0.84 + li * 1.12), { f: b.f, color: p.ink, align: cols > 1 ? 'center' : 'left' }))
+      b.lines.forEach((l, li) => text(ctx, l, RX + 112, cy + ch / 2 - bh / 2 + b.size * (0.84 + li * 1.12), { f: b.f, color: p.ink }))
       ctx.restore()
     }))
     if (!revealed && u >= m.show) {
-      // Five seconds, on a ring that empties: under the answers when there is room, else beside the ask.
       const left = m.reveal - u
       const share = Math.max(0, left / m.count)
       state.push(Math.round(share * 90))
-      const bottom = top + rows * (ch + 12)
-      const [cx, cy, r] = bottom + 170 < 950 ? [W / 2, bottom + 90, 60] : [W - 150, askY + 40, 48]
-      ctx.lineWidth = 12
-      ctx.strokeStyle = p.surfaceLine
-      ctx.beginPath()
-      ctx.arc(cx, cy, r, 0, 7)
-      ctx.stroke()
-      ctx.strokeStyle = p.gold
-      ctx.lineCap = 'round'
-      ctx.beginPath()
-      ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * share)
-      ctx.stroke()
-      ctx.lineCap = 'butt'
-      text(ctx, String(Math.ceil(left)), cx, cy + 20, { f: font(700, 56, 'latin'), color: p.ink, align: 'center' })
+      countdown(ctx, lc, 930, 54, alpha(line, 0.2), line, p.ink, share, left)
     }
   } else {
     // The answer alone, and why.
     const e = q.explain || {}
-    const top = y
     fade(k(m.answer, 0.35), () => {
       const c = q.choices[q.right]
-      card(120, top, 1680, 120, p.gold, 6)
-      text(ctx, String(q.right + 1), 170, top + 76, { f: font(700, 44, 'latin'), color: line, align: 'center' })
-      const b = fit(ctx, choiceText(c), { weight: 700, sizes: [56, 48, 40, 34, 30], maxW: 1520, maxLines: 1, fam: famOf(c), balanced: false })
-      text(ctx, b.lines[0], 230, top + 60 + b.size * 0.36, { f: b.f, color: p.ink })
+      card(RX, 190, RW, 150, p.gold, 6)
+      roundel(ctx, RX + 58, 265, 30, line, String(q.right + 1), { ink: p.ink, size: 28 })
+      const b = fit(ctx, choiceText(c), { weight: 700, sizes: [56, 48, 40, 34, 30], maxW: RW - 140, maxLines: 2, fam: choiceFam(c), balanced: false })
+      const bh = paragraphH(b, 1.12)
+      b.lines.forEach((l, li) => text(ctx, l, RX + 112, 265 - bh / 2 + b.size * (0.84 + li * 1.12), { f: b.f, color: p.ink }))
     })
     fade(k(m.answer + 0.4, 0.4), () => {
-      let ey = top + 160
+      let ey = 390
       const first = [e.head, e.sense].filter(Boolean).join(' — ')
-      if (first) ey += para(first, 120, ey, 1600, [44, 40, 36], p.gold, 'left', 700, 2) + 14
-      if (e.why) para(e.why, 120, ey, 1600, [38, 34, 30, 28], p.ink2, 'left', 500, Math.max(1, Math.floor((940 - ey) / 38)))
+      if (first) ey += para(first, RX, ey, RW, [40, 36, 32], p.ink, 'left', 700, 3) + 16
+      if (e.why) para(e.why, RX, ey, RW, [34, 30, 28, 26], p.ink2, 'left', 500, Math.max(1, Math.floor((1040 - ey) / 36)))
     })
   }
 }
 
-// ── A short, standing (plan 214) ──────────────────────────────────
-// The same parts as the wide video, stacked in the 9:16 frame and kept
-// inside the feed's safe area (TALL.safe): the masthead and the line of
-// stations at the top, the card in the middle, nothing under the
-// caption and the buttons a feed lays over the foot.
+// ── A short: the station plate (plan 214, drawn as plan 218's pick) ──
+// The plate stands on the sumi wall inside the feed's safe area
+// (TALL.safe): the masthead and the line of stations at the top, the
+// plate in the middle, its meaning or its answers under it, nothing under
+// the caption and the buttons a feed lays over the foot.
 const TW = TALL.w
 const TH = TALL.h
 const TX = TALL.safe.l
 const TWIDE = TW - TALL.safe.l - TALL.safe.r
+const PLATE_Y = 430
+const PLATE_BAND = 100
+const WORD_H = 640 // a word's plate, its face
+
+/** The plate's elevation, --elev-hang ("0 10px 26px rgba(…)": its first
+ *  length unitless, which draw.js's shadow() does not read). */
+function hang(ctx) {
+  const m = /^(-?[\d.]+)(?:px)?\s+(-?[\d.]+)px\s+([\d.]+)px\s+(rgba?\([^)]+\))/.exec(SUMI.hang || '')
+  if (!m) return
+  ctx.shadowOffsetX = +m[1] * K
+  ctx.shadowOffsetY = +m[2] * K
+  ctx.shadowBlur = +m[3] * K
+  ctx.shadowColor = m[4]
+}
+
+/** A plate: its face, the band at its foot in the line's pigment, the
+ *  station's number in its corner. `band` draws the band's contents. */
+function plate(ctx, line, y, h, { bandH = PLATE_BAND, box = null, band = null } = {}) {
+  ctx.save()
+  hang(ctx)
+  ctx.fillStyle = PAPER.bg
+  rrect(ctx, TX, y, TWIDE, h + bandH, 14)
+  ctx.fill()
+  noShadow(ctx)
+  rrect(ctx, TX, y, TWIDE, h + bandH, 14)
+  ctx.clip()
+  ctx.fillStyle = line
+  ctx.fillRect(TX, y + h, TWIDE, bandH)
+  ctx.restore()
+  if (box) numBox(ctx, TX + 28, y + 28, 100, line, box[0], box[1], PAPER.bg, PAPER.ink)
+  band?.(y + h, bandH)
+}
+
+/** The band's two neighbours: the station before on the left, after on the right. */
+function neighbours(ctx, p, names, n, by, bh) {
+  const cy = by + bh / 2
+  const f = name => font(700, sized(ctx, name, 700, 40, 'jp', TWIDE / 2 - 110), 'jp')
+  const prev = names[n - 2]
+  const next = names[n]
+  if (prev) {
+    pointer(ctx, TX + 44, cy, 30, -1, p.onLine)
+    text(ctx, prev, TX + 76, cy + 15, { f: f(prev), color: p.onLine })
+  }
+  if (next) {
+    pointer(ctx, TX + TWIDE - 44, cy, 30, 1, p.onLine)
+    text(ctx, next, TX + TWIDE - 76, cy + 15, { f: f(next), color: p.onLine, align: 'right' })
+  }
+}
+
+/** A line of the band, centred: an ask, an example's number. */
+function bandText(ctx, p, str, by, bh, sizes = [40, 34, 30]) {
+  const b = fit(ctx, str, { weight: 700, sizes, maxW: TWIDE - 80, maxLines: 2, fam: 'latin', balanced: true })
+  const top = by + bh / 2 - (b.lines.length * b.size * 1.16) / 2
+  b.lines.forEach((l, j) => text(ctx, l, TW / 2, top + b.size * (0.86 + j * 1.16), { f: b.f, color: p.onLine, align: 'center' }))
+}
 
 /** The frame of a short at second `t`, and its key. */
 function drawTall(ctx, plan, tl, t) {
-  const { p, S, line, sg, u, state, k, fade, d, m } = begin(ctx, plan, tl, t, TW, TH)
-  const { card, sentence, para, pill } = tools(ctx, p, line)
+  const { p, S, line, sg, u, state, k, fade, d, m } = begin(ctx, plan, tl, t, TW, TH, 'sumi')
+  const { card, sentence, para } = tools(ctx, p, line)
   const cx = TW / 2
+  const box = sg.n ? [sg.type === 'q' ? 'Q' : plan.theme ? '' : plan.level, sg.n] : null
   if (sg.type !== 'intro' && sg.type !== 'outro') {
     mark(ctx, TX, 250, 56, p.ink, p.gold)
     text(ctx, 'TSUJI', TX + 70, 292, { f: font(700, 24, 'latin'), color: p.ink2, tr: 0.3 })
@@ -1397,9 +1612,16 @@ function drawTall(ctx, plan, tl, t) {
   }
   switch (sg.type) {
     case 'intro': {
-      fade(k(0.1, 0.4), () => mark(ctx, cx - 90, 420, 180, p.ink, p.gold))
-      fade(k(0.3, 0.4), () => para(plan.title, cx, 700, TWIDE, [84, 72, 62, 54], p.ink, 'center', 700, 3))
-      fade(k(0.8, 0.4), () => para(S.hook[plan.kind], cx, 1080, TWIDE, [52, 46, 40], p.gold, 'center', 700, 2))
+      fade(k(0.1, 0.4), () => mark(ctx, cx - 70, 300, 140, p.ink, p.gold))
+      fade(k(0.3, 0.4), () => plate(ctx, line, 520, 420, {
+        bandH: 140,
+        band: (by, bh) => bandText(ctx, p, S.hook[plan.kind], by, bh, [42, 36, 32]),
+      }))
+      fade(k(0.3, 0.4), () => {
+        const b = fit(ctx, plan.title, { weight: 700, sizes: [84, 72, 62, 54], maxW: TWIDE - 100, maxLines: 3, fam: 'latin', balanced: true })
+        const top = 520 + 210 - paragraphH(b, 1.18) / 2
+        b.lines.forEach((l, j) => text(ctx, l, cx, top + b.size * (0.8 + j * 1.18), { f: b.f, color: PAPER.ink, align: 'center' }))
+      })
       break
     }
     case 'outro': {
@@ -1412,194 +1634,167 @@ function drawTall(ctx, plan, tl, t) {
     }
     case 'vocab': {
       const kanji = hasKanji(d.t)
-      fade(k(0, 0.3), () => card(TX, 440, TWIDE, 720))
-      const f = font(700, 200, kanji ? 'serif' : 'jp')
-      const z = Math.min(200, 200 * (TWIDE - 80) / Math.max(1, measure(ctx, d.t, f)))
-      fade(k(0.1, 0.3), () => text(ctx, d.t, cx, 860, { f: font(700, z, kanji ? 'serif' : 'jp'), color: p.ink, align: 'center' }))
+      const names = plan.items.map(x => x.t)
+      fade(k(0, 0.3), () => plate(ctx, line, PLATE_Y, WORD_H, { box, band: (by, bh) => neighbours(ctx, p, names, sg.n, by, bh) }))
+      const z = sized(ctx, d.t, 900, 290, famOf(d.t), TWIDE - 120)
+      fade(k(0.1, 0.3), () => text(ctx, d.t, cx, PLATE_Y + 450 + z * 0.1, { f: font(900, z, famOf(d.t)), color: PAPER.ink, align: 'center' }))
       if (u < m.think) {
         const left = Math.max(0, Math.ceil(m.think - u))
         state.push(`L${left}`)
-        text(ctx, S.readIt, cx, 1010, { f: font(500, 40, 'latin'), color: p.ink2, align: 'center' })
-        for (let j = 0; j < 2; j++) {
-          ctx.beginPath()
-          ctx.arc(cx - 20 + j * 40, 1070, 10, 0, 7)
-          ctx.fillStyle = j < left ? p.gold : p.surfaceLine
-          ctx.fill()
-        }
+        fade(k(0.1, 0.3), () => {
+          const w = measure(ctx, S.readIt, font(500, 38, 'latin'))
+          text(ctx, S.readIt, cx - 40, PLATE_Y + 580, { f: font(500, 38, 'latin'), color: PAPER.ink2, align: 'center' })
+          for (let j = 0; j < 2; j++) {
+            ctx.beginPath()
+            ctx.arc(cx - 40 + w / 2 + 34 + j * 32, PLATE_Y + 568, 10, 0, 7)
+            ctx.fillStyle = j < left ? line : PAPER.surfaceLine
+            ctx.fill()
+          }
+        })
       }
       fade(k(m.think, 0.3), () => {
-        if (kanji) text(ctx, d.r, cx, 620, { f: font(500, 56, 'jp'), color: p.ink2, align: 'center' })
-        text(ctx, d.ro, cx, 960, { f: font(500, 40, 'latin'), color: p.ink2, align: 'center' })
+        if (kanji) text(ctx, d.r, cx, PLATE_Y + 140, { f: font(500, 52, 'jp'), color: PAPER.ink2, align: 'center', tr: 0.3 })
+        text(ctx, d.ro.toUpperCase(), cx, PLATE_Y + 580, { f: font(500, 38, 'latin'), color: PAPER.ink2, align: 'center', tr: 0.24 })
       })
-      fade(k(m.meaning, 0.35), () => para(d.gloss, cx, 1010, TWIDE - 80, [60, 52, 44, 38], p.gold, 'center', 700, 2))
+      const [main, note] = glossParts(d.gloss)
+      fade(k(m.meaning, 0.35), () => {
+        const h = para(main, cx, PLATE_Y + WORD_H + PLATE_BAND + 60, TWIDE, [72, 62, 54, 46], p.ink, 'center', 700, 2)
+        para(note, cx, PLATE_Y + WORD_H + PLATE_BAND + 66 + h, TWIDE, [36, 32], p.ink2, 'center', 500, 2)
+      })
       break
     }
     case 'kanji': {
       const n = d.strokes.d.length
-      fade(k(0, 0.3), () => card(cx - 300, 420, 600, 600))
-      const kz = 540 / 109
-      ctx.save()
-      ctx.translate(cx - 270, 450)
-      ctx.scale(kz, kz)
-      ctx.lineCap = 'round'
-      ctx.lineJoin = 'round'
-      d.strokes.d.forEach((path, j) => {
-        const from = m.strokeAt + j * m.per
-        const v = k(from, m.per * 0.85)
-        const shape = new Path2D(path)
-        ctx.lineWidth = 4.5
-        ctx.strokeStyle = alpha(p.ink, 0.09)
-        ctx.stroke(shape)
-        if (v <= 0) return
-        const len = strokeLength(path)
-        ctx.strokeStyle = u < from + m.per ? line : p.ink
-        if (len && v < 1) { ctx.setLineDash([len, len + 10]); ctx.lineDashOffset = len * (1 - v) }
-        ctx.globalAlpha = len ? 1 : v
-        ctx.stroke(shape)
-        ctx.setLineDash([])
-        ctx.globalAlpha = 1
-        const [nx, ny] = d.strokes.n[j] || [0, 0]
-        ctx.fillStyle = line
-        ctx.font = font(700, 6.5, 'latin')
-        ctx.fillText(String(j + 1), nx, ny)
+      const names = plan.items.map(x => x.c)
+      const bodyH = 600
+      fade(k(0, 0.3), () => {
+        plate(ctx, line, PLATE_Y, bodyH, { box, band: (by, bh) => neighbours(ctx, p, names, sg.n, by, bh) })
+        guides(ctx, cx - 250, PLATE_Y + 40, 500, PAPER.ink)
       })
-      ctx.restore()
-      fade(k(m.meaning, 0.35), () => {
-        text(ctx, S.strokes(n), cx, 1070, { f: font(500, 32, 'latin'), color: p.ink2, align: 'center' })
-        para(d.meaning, cx, 1100, TWIDE, [72, 60, 52], p.ink, 'center', 700, 1)
-      })
+      strokesIn(ctx, d, m, u, k, cx - 250, PLATE_Y + 40, 500, PAPER.ink, line)
+      fade(k(m.meaning, 0.35), () => text(ctx, S.strokes(n), cx, PLATE_Y + bodyH - 22, { f: font(500, 28, 'latin'), color: PAPER.ink2, align: 'center' }))
+      const y0 = PLATE_Y + bodyH + PLATE_BAND
+      fade(k(m.meaning, 0.35), () => para(d.meaning, cx, y0 + 36, TWIDE, [64, 54, 46], p.ink, 'center', 700, 1))
       const reading = (label, y, parts, v) => fade(v, () => {
-        const f = font(700, 56, 'jp')
         const str = parts.length ? parts.map(([a, b]) => a + b).join('、') : '—'
-        const lw = measure(ctx, label, font(700, 28, 'latin'), 0.2) + 24 + measure(ctx, str, f)
-        const x = cx - lw / 2
-        text(ctx, label, x, y - 6, { f: font(700, 28, 'latin'), color: line, tr: 0.2 })
-        text(ctx, str, x + lw - measure(ctx, str, f), y, { f, color: p.ink })
+        const lf = font(700, 26, 'latin')
+        const lw = measure(ctx, label, lf, 0.2) + 24
+        const z = sized(ctx, str, 700, 52, 'jp', TWIDE - lw)
+        const f = font(700, z, 'jp')
+        const x = cx - (lw + measure(ctx, str, f)) / 2
+        text(ctx, label, x, y - 6, { f: lf, color: line, tr: 0.2 })
+        text(ctx, str, x + lw, y, { f, color: p.ink })
       })
-      reading(S.on, 1270, d.on.map(r => [r, '']), k(m.on, 0.3))
-      reading(S.kun, 1350, d.kun, k(m.kun, 0.3))
+      reading(S.on, y0 + 170, d.on.map(r => [r, '']), k(m.on, 0.3))
+      reading(S.kun, y0 + 235, d.kun, k(m.kun, 0.3))
       d.words.forEach((w, j) => fade(k(m.words[j], 0.35), () => {
-        para(`${w.t}  ${w.r}`, cx, 1400, TWIDE, [48, 42], p.ink, 'center', 700, 1)
-        para(w.gloss, cx, 1460, TWIDE, [36, 32], p.gold, 'center', 500, 1)
+        para(`${w.t}  ${w.r}`, cx, y0 + 268, TWIDE, [46, 40], p.ink, 'center', 700, 1)
+        para(w.gloss, cx, y0 + 326, TWIDE, [32, 28], p.ink2, 'center', 500, 1)
       }))
       break
     }
     case 'gtitle': {
-      fade(k(0.1, 0.4), () => para(d.p, cx, 640, TWIDE, [120, 96, 80, 64], p.ink, 'center', 700, 2))
-      fade(k(0.5, 0.4), () => para(d.meaning, cx, 880, TWIDE, [56, 48, 40], p.ink2, 'center', 500, 2))
-      fade(k(0.9, 0.4), () => pill(d.form, cx, 1040, 40, 'center', TWIDE))
+      // On one line where any size holds it: a point cut in two reads as two words.
+      const one = fit(ctx, d.p, { weight: 900, sizes: [150, 120, 96, 80, 64], maxW: TWIDE - 100, maxLines: 1, fam: 'serif', balanced: false })
+      const b = one.cut ? fit(ctx, d.p, { weight: 900, sizes: [96, 80, 64], maxW: TWIDE - 100, maxLines: 2, fam: 'serif', balanced: true }) : one
+      const bodyH = Math.max(380, paragraphH(b, 1.1) + 200)
+      fade(k(0, 0.3), () => plate(ctx, line, PLATE_Y + 60, bodyH, {
+        box,
+        bandH: 120,
+        band: (by, bh) => bandText(ctx, p, d.form, by, bh, [40, 34, 30]),
+      }))
+      fade(k(0.1, 0.4), () => {
+        const top = PLATE_Y + 60 + bodyH / 2 + 30 - paragraphH(b, 1.1) / 2
+        b.lines.forEach((l, j) => text(ctx, l, cx, top + b.size * (0.8 + j * 1.1), { f: b.f, color: PAPER.ink, align: 'center' }))
+      })
+      fade(k(0.5, 0.4), () => para(d.meaning, cx, PLATE_Y + 60 + bodyH + 120 + 70, TWIDE, [56, 48, 40], p.ink, 'center', 700, 3))
       break
     }
     case 'gex': {
-      fade(k(0, 0.3), () => text(ctx, `${S.example} ${d.n} / ${d.of}`.toUpperCase(), TX, 480, { f: font(700, 30, 'latin'), color: line, tr: 0.16 }))
-      fade(k(0.2, 0.4), () => {
-        card(TX, 530, TWIDE, 600)
-        const h = sentence(d.rows, cx, 600, { max: 76, min: 44, maxW: TWIDE - 80, maxLines: 3, lit: line })
-        para(d.tr, cx, 640 + h, TWIDE - 80, [44, 38, 34], p.ink2, 'center', 500, 3)
-      })
+      const o = { max: 76, min: 44, maxW: TWIDE - 100, maxLines: 3 }
+      const L = layoutSentence(ctx, d.rows, { ...o, script: 'furigana', rules: false, gap: 0.06, fam: 'jp', weight: 700 })
+      const bodyH = (L?.h || 120) + 240
+      fade(k(0, 0.3), () => plate(ctx, line, PLATE_Y + 40, bodyH, { box, band: (by, bh) => bandText(ctx, p, `${S.example} ${d.n} / ${d.of}`, by, bh) }))
+      fade(k(0.2, 0.4), () => sentence(d.rows, cx, PLATE_Y + 40 + 150, { ...o, lit: line, ink: PAPER.ink, ruby: PAPER.ink2 }))
+      fade(k(0.4, 0.4), () => para(d.tr, cx, PLATE_Y + 40 + bodyH + PLATE_BAND + 60, TWIDE, [46, 40, 34], p.ink2, 'center', 500, 3))
       break
     }
-    case 'q': drawTallQuestion(ctx, p, line, S, d, m, u, k, fade, sentence, para, card, state); break
+    case 'q': drawTallQuestion(ctx, p, line, S, d, m, u, k, fade, sentence, para, card, state, box); break
     default:
   }
   return state.join(',')
 }
 
-/** A question standing: the ask, the stem, the answers one a line, five seconds, the answer and why. */
-function drawTallQuestion(ctx, p, line, S, it, m, u, k, fade, sentence, para, card, state) {
+/** A question standing: the stem on the plate, the ask on its band, the
+ *  answers one a line under it, five seconds on a ring in the plate's
+ *  corner, then the answer and why. */
+function drawTallQuestion(ctx, p, line, S, it, m, u, k, fade, sentence, para, card, state, box) {
   const q = it.q
   const cx = TW / 2
   const revealed = u >= m.reveal
   const done = u >= m.answer
   state.push(done ? 'A' : revealed ? 'R' : '')
-  const askB = fit(ctx, q.ask, { weight: 700, sizes: [48, 42, 36, 32], maxW: TWIDE, maxLines: 3, fam: 'latin', balanced: false })
-  fade(k(0, 0.35), () => askB.lines.forEach((l, j) => text(ctx, l, TX, 430 + askB.size * (0.8 + j * 1.22), { f: askB.f, color: p.ink })))
-  let y = 430 + paragraphH(askB, 1.22) + 50
+  const askB = fit(ctx, q.ask, { weight: 700, sizes: [40, 34, 30], maxW: TWIDE - 80, maxLines: 2, fam: 'latin', balanced: true })
+  const bandH = askB.lines.length > 1 ? 130 : 100
+  // The stem on the plate's face: a word as a specimen, a sentence, or what the other person said.
   const stem = q.stem || {}
+  let bodyH = 320
+  let drawStem = () => {}
   if (stem.specimen) {
-    const top = y
-    fade(k(0.2, 0.35), () => {
-      const sp = stem.specimen
-      const f = font(700, 150, hasKanji(sp) ? 'serif' : 'jp')
-      const z = Math.min(150, 150 * TWIDE / Math.max(1, measure(ctx, sp, f)))
-      text(ctx, sp, cx, top + 140, { f: font(700, z, hasKanji(sp) ? 'serif' : 'jp'), color: p.ink, align: 'center' })
-    })
-    y += 200
+    const sp = stem.specimen
+    const z = sized(ctx, sp, 900, 220, famOf(sp), TWIDE - 280)
+    drawStem = top => text(ctx, sp, cx, top + 160 + z * 0.36, { f: font(900, z, famOf(sp)), color: PAPER.ink, align: 'center' })
   } else if (stem.rows) {
-    let shown = done && stem.after ? stem.after : stem
-    const fill = q.choices[q.right]
-    const gap = shown.rows.findIndex(r => /^[＿_]+$/.test(r.t))
-    if (done && gap >= 0 && (fill.rows || /[ぁ-んァ-ン一-龯]/.test(fill.text || ''))) {
-      const rows = shown.rows.filter((r, i) => i <= gap || !/^[＿_]+$/.test(r.t))
-      rows.splice(gap, 1, ...(fill.rows ? fill.rows.map(r => ({ ...r, lit: true })) : [{ t: fill.text, k: 'word', lit: true }]))
-      shown = { rows }
-    }
-    const o = { max: 72, min: 40, maxW: TWIDE, maxLines: 3, script: done ? 'furigana' : stem.script || 'kanji' }
+    const shown = shownStem(q, done)
+    const o = { max: 64, min: 38, maxW: TWIDE - 80, maxLines: 3, script: done ? 'furigana' : stem.script || 'kanji' }
     const L = layoutSentence(ctx, shown.rows, { ...o, rules: false, gap: 0.06, fam: 'jp', weight: 700 })
-    const top = y
-    fade(k(0.2, 0.35), () => sentence(shown.rows, cx, top, { ...o, under: shown.under ? shown.target : -1, lit: stem.lit || stem.underLit || shown !== stem ? line : null }))
-    y += (L?.h || 100) + 50
+    bodyH = Math.max(300, (L?.h || 100) + 190)
+    drawStem = top => sentence(shown.rows, cx, top + 150, { ...o, under: shown.under ? shown.target : -1, lit: stem.lit || stem.underLit || shown !== stem ? line : null, ink: PAPER.ink, ruby: PAPER.ink2 })
   } else if (stem.cue) {
-    const L = layoutSentence(ctx, stem.cue.rows, { max: 52, min: 34, maxW: TWIDE - 60, maxLines: 2, script: 'furigana', rules: false, gap: 0.06, fam: 'jp', weight: 700 })
-    const top = y
-    fade(k(0.2, 0.35), () => {
-      ctx.fillStyle = p.card
-      rrect(ctx, TX, top, TWIDE, L.h + 90, 28)
-      ctx.fill()
-      drawSentence(ctx, L, TX + 30, top + 20, 'left', () => ({ ink: p.ink, ruby: p.ink2 }))
-      para(stem.cue.tr, TX + 30, top + L.h + 30, TWIDE - 60, [30, 26], p.ink2, 'left', 500, 1)
-    })
-    y += L.h + 110
+    const L = layoutSentence(ctx, stem.cue.rows, { max: 48, min: 34, maxW: TWIDE - 80, maxLines: 2, script: 'furigana', rules: false, gap: 0.06, fam: 'jp', weight: 700 })
+    bodyH = L.h + 220
+    drawStem = top => {
+      drawSentence(ctx, L, cx, top + 150, 'center', () => ({ ink: PAPER.ink, ruby: PAPER.ink2 }))
+      para(stem.cue.tr, cx, top + 160 + L.h, TWIDE - 80, [30, 26], PAPER.ink2, 'center', 500, 1)
+    }
   }
-  const choiceText = c => c.text ?? joined(c.rows || [])
-  const famOf = c => (c.rows || c.fam === 'jp' ? 'jp' : 'latin')
+  const top = PLATE_Y
+  fade(k(0, 0.3), () => plate(ctx, line, top, bodyH, { box, bandH, band: (by, bh) => bandText(ctx, p, q.ask, by, bh) }))
+  fade(k(0.2, 0.35), () => drawStem(top))
   const n = q.choices.length
+  let y = top + bodyH + bandH + 40
   if (!done) {
-    const ch = Math.max(84, Math.min(120, (1440 - y - 14 * (n - 1)) / n))
-    const top = y
-    q.choices.forEach((c, j) => fade(k(0.5 + j * 0.12, 0.3), () => {
-      const cy = top + j * (ch + 14)
-      const right = j === q.right
-      ctx.save()
-      if (revealed && !right) ctx.globalAlpha *= 0.35
-      card(TX, cy, TWIDE, ch, revealed && right ? p.gold : p.surfaceLine, revealed && right ? 6 : 2)
-      text(ctx, String(j + 1), TX + 46, cy + ch / 2 + 15, { f: font(700, 40, 'latin'), color: line, align: 'center' })
-      let b = fit(ctx, choiceText(c), { weight: 700, sizes: [48, 42, 36, 30], maxW: TWIDE - 120, maxLines: 1, fam: famOf(c), balanced: false })
-      if (b.cut) b = fit(ctx, choiceText(c), { weight: 700, sizes: [36, 30, 26], maxW: TWIDE - 120, maxLines: 2, fam: famOf(c), balanced: false })
-      const bh = paragraphH(b, 1.12)
-      b.lines.forEach((l, li) => text(ctx, l, TX + 92, cy + ch / 2 - bh / 2 + b.size * (0.84 + li * 1.12), { f: b.f, color: p.ink }))
-      ctx.restore()
-    }))
     if (!revealed && u >= m.show) {
       const left = m.reveal - u
       const share = Math.max(0, left / m.count)
       state.push(Math.round(share * 90))
-      const ry = Math.min(1420, top + n * (ch + 14) + 90)
-      ctx.lineWidth = 12
-      ctx.strokeStyle = p.surfaceLine
-      ctx.beginPath()
-      ctx.arc(cx, ry, 56, 0, 7)
-      ctx.stroke()
-      ctx.strokeStyle = p.gold
-      ctx.lineCap = 'round'
-      ctx.beginPath()
-      ctx.arc(cx, ry, 56, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * share)
-      ctx.stroke()
-      ctx.lineCap = 'butt'
-      text(ctx, String(Math.ceil(left)), cx, ry + 20, { f: font(700, 52, 'latin'), color: p.ink, align: 'center' })
+      countdown(ctx, TX + TWIDE - 78, top + 78, 48, PAPER.surfaceLine, line, PAPER.ink, share, left)
     }
+    const ch = Math.max(84, Math.min(120, (1480 - y - 14 * (n - 1)) / n))
+    q.choices.forEach((c, j) => fade(k(0.5 + j * 0.12, 0.3), () => {
+      const cy = y + j * (ch + 14)
+      const right = j === q.right
+      ctx.save()
+      if (revealed && !right) ctx.globalAlpha *= 0.35
+      card(TX, cy, TWIDE, ch, revealed && right ? p.gold : p.surfaceLine, revealed && right ? 6 : 2)
+      roundel(ctx, TX + 52, cy + ch / 2, 28, line, String(j + 1), { ink: p.ink, size: 26 })
+      let b = fit(ctx, choiceText(c), { weight: 700, sizes: [48, 42, 36, 30], maxW: TWIDE - 130, maxLines: 1, fam: choiceFam(c), balanced: false })
+      if (b.cut) b = fit(ctx, choiceText(c), { weight: 700, sizes: [36, 30, 26], maxW: TWIDE - 130, maxLines: 2, fam: choiceFam(c), balanced: false })
+      const bh = paragraphH(b, 1.12)
+      b.lines.forEach((l, li) => text(ctx, l, TX + 100, cy + ch / 2 - bh / 2 + b.size * (0.84 + li * 1.12), { f: b.f, color: p.ink }))
+      ctx.restore()
+    }))
   } else {
     const e = q.explain || {}
-    const top = y
     fade(k(m.answer, 0.35), () => {
       const c = q.choices[q.right]
-      card(TX, top, TWIDE, 120, p.gold, 6)
-      text(ctx, String(q.right + 1), TX + 46, top + 76, { f: font(700, 40, 'latin'), color: line, align: 'center' })
-      const b = fit(ctx, choiceText(c), { weight: 700, sizes: [52, 44, 38, 32, 28], maxW: TWIDE - 120, maxLines: 1, fam: famOf(c), balanced: false })
-      text(ctx, b.lines[0], TX + 92, top + 60 + b.size * 0.36, { f: b.f, color: p.ink })
+      card(TX, y, TWIDE, 120, p.gold, 6)
+      roundel(ctx, TX + 52, y + 60, 28, line, String(q.right + 1), { ink: p.ink, size: 26 })
+      const b = fit(ctx, choiceText(c), { weight: 700, sizes: [52, 44, 38, 32, 28], maxW: TWIDE - 130, maxLines: 1, fam: choiceFam(c), balanced: false })
+      text(ctx, b.lines[0], TX + 100, y + 60 + b.size * 0.36, { f: b.f, color: p.ink })
     })
     fade(k(m.answer + 0.4, 0.4), () => {
-      let ey = top + 160
+      let ey = y + 160
       const first = [e.head, e.sense].filter(Boolean).join(' — ')
       if (first) ey += para(first, TX, ey, TWIDE, [42, 38, 34], p.gold, 'left', 700, 3) + 14
       if (e.why) para(e.why, TX, ey, TWIDE, [36, 32, 28], p.ink2, 'left', 500, Math.max(1, Math.floor((1480 - ey) / 38)))

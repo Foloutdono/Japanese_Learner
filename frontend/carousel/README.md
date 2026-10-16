@@ -559,11 +559,27 @@ own sounds (`key`).
 
 Ten-minute 16:9 videos for YouTube (`long.js`, made by
 `long/render.mjs`), four kinds: a vocabulary drill, a kanji drill, one
-grammar point explained whole, and a quiz. The owner picked the look
-from two drawn directions, "platform board": the sumi ground, the app's
-card in the middle, the line of stations along the foot, one station a
-word, a kanji, a section or a question, the line's pigment the kind's
-(vocab blue, kanji violet, grammar green, the exam's for the quiz).
+grammar point explained whole, and a quiz, the line's pigment the
+kind's (vocab blue, kanji violet, grammar green, the exam's for the
+quiz). Plan 218 redrew both formats from the owner's two picks on the
+canvas "Tsuji — video look, new directions" (four directions, each a
+long word, a long question and a short):
+
+- **The long video is the screen over a train's door** (車内案内): a
+  sumi band across the top says what is next (つぎは and the next word,
+  the section, or the question asked) beside the station's number, the
+  line's pigment under it is the way along (a question's five seconds
+  drain from it), and the washi screen below holds the word as large
+  as its column takes, with the route of words down the side: the stops
+  passed in grey, this one ringed, the next ones ahead. A word's
+  sentence, or a kanji's two words, ride in a band along the foot; a
+  question's stem stands on the left and its answers down the right.
+- **The short is the station's name plate** (駅名標) on the sumi wall,
+  inside the feed's safe area: the word is the station's name, the
+  plate's band in the line's pigment carries the word before and the
+  word after (a question's ask, an example's number), the station's
+  number in its corner, a question's five seconds on a ring in the
+  other. The meaning, or the answers, stand under the plate.
 Every Japanese line is said by the app's voices; English or French is on
 the screen.
 
