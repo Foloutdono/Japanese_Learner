@@ -105,3 +105,24 @@ def test_sessions_reads_length_and_screens_from_the_session_id():
     assert "_Nothing yet._" not in out
     assert "1 min 30 s" in out
     assert "**Sessions per day**" in out
+
+
+def test_time_spent_reads_engaged_minutes_per_screen_and_the_features():
+    # Plan 215: screen_leave carries engaged ms, feature_use a count per
+    # screen left. A route of its own so no other test's rows join it.
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            now = datetime.now(timezone.utc)
+            events.write(cur, USER, [
+                ("screen_leave", {"route": "/digest-test", "tab": "today", "ms": 90000}, now),
+                ("screen_leave", {"route": "/digest-test", "tab": "today", "ms": 30000}, now),
+                ("feature_use", {"feature": "speech", "action": "play", "route": "/digest-test", "n": 7}, now),
+            ])
+        conn.commit()
+    finally:
+        conn.close()
+    out = section(digest.time_spent)
+    assert "| /digest-test | 2.0 | 60.0 | 1 |" in out
+    assert "**Features used**" in out
+    assert "| speech | play |" in out

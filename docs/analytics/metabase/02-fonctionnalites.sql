@@ -28,7 +28,7 @@ WITH actifs AS (
 SELECT v.route AS "Écran", v.vues AS "Vues", v.apprenants AS "Apprenants",
        round(100.0 * v.apprenants / nullif((SELECT n FROM actifs), 0), 1) AS "% des actifs",
        round(coalesce(t.ms, 0) / 60000, 1) AS "Minutes au total",
-       round(t.med / 1000, 1) AS "Séjour médian (s)"
+       round((t.med / 1000)::numeric, 1) AS "Séjour médian (s)"
 FROM vues v LEFT JOIN temps t USING (route)
 ORDER BY v.apprenants DESC, v.vues DESC;
 

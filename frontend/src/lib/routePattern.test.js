@@ -160,3 +160,19 @@ describe('ROUTES against App.jsx', () => {
     }
   })
 })
+
+// ── 足跡 II (plan 215): the dashboard that lists the screens nobody opens ──
+// docs/analytics/metabase/02-fonctionnalites.sql left-joins the views
+// onto every route; a screen added here and not there would never show
+// up as unused, which is the one thing that question is for.
+describe('the unused-screens dashboard', () => {
+  it('lists exactly the routes App.jsx declares', () => {
+    const sql = readFileSync(
+      fileURLToPath(new URL('../../../docs/analytics/metabase/02-fonctionnalites.sql', import.meta.url)),
+      'utf8',
+    )
+    const block = sql.split('WITH routes(route) AS (VALUES')[1].split('), vues AS')[0]
+    const listed = [...block.matchAll(/\('([^']+)'\)/g)].map(m => m[1])
+    expect(listed).toEqual(ROUTES)
+  })
+})

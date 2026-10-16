@@ -427,11 +427,52 @@ def friction(cur, days: int) -> str:
     return "\n".join(out)
 
 
+def time_spent(cur, days: int) -> str:
+    """Where the engaged time goes, and which small features are used.
+
+    screen_leave's `ms` is ENGAGED time (lib/dwell.js: a hidden tab does
+    not count), sent on leaving a screen and on hiding the page (plan
+    215), so a screen's total is real attention, not an open tab.
+    feature_use is one row per (feature, action) per screen left, `n`
+    the presses. Raw rows only, so the window is the last 30 days at most.
+    """
+    cur.execute(
+        """
+        SELECT props->>'route',
+               ROUND(SUM((props->>'ms')::numeric) / 60000, 1),
+               ROUND((PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY (props->>'ms')::numeric) / 1000)::numeric, 1),
+               COUNT(DISTINCT user_id)
+          FROM event_log
+         WHERE name = 'screen_leave' AND at > NOW() - (%s || ' days')::interval
+         GROUP BY 1 ORDER BY 2 DESC LIMIT 12
+        """,
+        (days,),
+    )
+    screens = cur.fetchall()
+    if not screens:
+        return "_Nothing yet (screen_leave arrived with plan 215)._\n"
+    out = [table(["screen", "minutes", "median stay (s)", "learners"], screens)]
+    cur.execute(
+        """
+        SELECT props->>'feature', props->>'action', SUM((props->>'n')::int), COUNT(DISTINCT user_id)
+          FROM event_log
+         WHERE name = 'feature_use' AND at > NOW() - (%s || ' days')::interval
+         GROUP BY 1, 2 ORDER BY 4 DESC, 3 DESC
+        """,
+        (days,),
+    )
+    uses = cur.fetchall()
+    out.append("**Features used**\n")
+    out.append(table(["feature", "action", "uses", "learners"], uses) if uses else "_None yet._\n")
+    return "\n".join(out)
+
+
 SECTIONS = [
     ("みどりの窓口 — where boarding is lost", boarding),
     ("Coming back", retention),
     ("Who is active", engagement),
     ("Sessions", sessions),
+    ("Where the time goes", time_spent),
     ("The boot", boot),
     ("Who wanted more than the free allowance", fare),
     ("The offer, door by door", offer),

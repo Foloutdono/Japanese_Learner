@@ -2,6 +2,7 @@
 
 - **Status**: accepted
 - **Date**: 2026-09-10
+- **Extended by**: [0022](0022-the-trail-measures-time-and-use-and-stays-exempt.md) — time on screen, every run, visit context, feature counts, closed values, the account-wide objection and the 25-month bound (plan 215)
 
 ## Context
 
