@@ -40,6 +40,10 @@ already looking.
   8  FRICTION     the requests that failed (api_error) and the install
                   prompt's answers. Both were declared in core/events.py
                   from the start and sent by nothing until the client began to send them.
+  9  MESSAGES     what learners wrote to us (plan 221), COUNTED: by
+                  kind, who asked for an answer, the cards reported most.
+                  Never the words, which this page on GitHub is no place
+                  for: scripts/read_feedback.py reads them, run by a person.
 
 Each reads event_log and event_daily and adds the two together where a
 total is wanted, because scripts/compact_events.py moves rows from the
@@ -467,6 +471,42 @@ def time_spent(cur, days: int) -> str:
     return "\n".join(out)
 
 
+def messages(cur, days: int) -> str:
+    """What learners wrote to us (plan 221), counted and never read. The
+    words belong to scripts/read_feedback.py, run by a person in a
+    terminal, not to a run summary anyone with the repository can open.
+    A card's id is the content's key, not anything a learner typed."""
+    cur.execute(
+        """
+        SELECT kind, COUNT(*), COUNT(DISTINCT user_id), COUNT(*) FILTER (WHERE reply)
+          FROM feedback
+         WHERE created_at > NOW() - (%s || ' days')::interval
+         GROUP BY kind
+         ORDER BY 2 DESC, 1
+        """,
+        (days,),
+    )
+    out = [table(["kind", "messages", "learners", "want an answer"], cur.fetchall())]
+    cur.execute(
+        """
+        SELECT f.card_id, COUNT(DISTINCT f.id), COUNT(DISTINCT f.user_id),
+               STRING_AGG(DISTINCT r, ', ' ORDER BY r)
+          FROM feedback f
+          LEFT JOIN LATERAL UNNEST(f.reasons) AS r ON TRUE
+         WHERE f.kind = 'card'
+           AND f.created_at > NOW() - (%s || ' days')::interval
+         GROUP BY f.card_id
+         ORDER BY 3 DESC, 2 DESC, 1
+         LIMIT 10
+        """,
+        (days,),
+    )
+    out.append("**Cards reported**\n")
+    out.append(table(["card", "reports", "learners", "what is wrong"], cur.fetchall()))
+    out.append(f"_Read them: `python -m scripts.read_feedback --days {days}`._\n")
+    return "\n".join(out)
+
+
 SECTIONS = [
     ("みどりの窓口 — where boarding is lost", boarding),
     ("Coming back", retention),
@@ -479,6 +519,7 @@ SECTIONS = [
     ("The first ride and the guides", ride_and_guides),
     ("What gets finished", use),
     ("What broke", friction),
+    ("Written to us", messages),
 ]
 
 

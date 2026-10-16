@@ -19,10 +19,11 @@ QUESTIONS = [(b["file"], q) for b in BOARDS for q in b["questions"]]
 # The text a learner typed or was shown, by column name, across the
 # tables a dashboard may join: the practice logs' sentences and answers,
 # the analyser's phrases and results, a deck's name, the account's
-# e-mail and username.
+# e-mail and username, and a message's words and reply address (plan
+# 221: counted on 10-messages.sql, read only by scripts/read_feedback.py).
 TYPED = re.compile(
     r"\b(answer|answers|phrase|sentence|translation_prompt|romaji|result|review"
-    r"|username|email|title|description|transcript|source_ref)\b"
+    r"|username|email|title|description|transcript|source_ref|body|reply_to)\b"
 )
 
 

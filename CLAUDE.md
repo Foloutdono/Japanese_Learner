@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **221**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **222**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -133,6 +133,15 @@ runtime purpose.
   that keys a cache goes through `reading.known_lang`. On the client a
   selector's fetch goes through `lib/cachedJson.js`, a held arrow key
   checks no radio, and a write that creates guards against a second press.
+- **A learner's message is read by a person, never by a dashboard
+  (plan 221).** What is written through Nous écrire, a card's flag or
+  the link under a failure is the one text kept on purpose: it lives in
+  `feedback` (`routes/feedback.py`), is counted by the digest and
+  `10-messages.sql`, and its words are read with `scripts/read_feedback`
+  alone (`tests/test_metabase_sync.py` refuses a question that selects
+  them). The context beside it is the trail's closed classes, shown to
+  the learner before sending, and a reply's address is read from the
+  account, never taken from the request.
 - **A new per-learner table is erased with the account.** Add it to
   `DELETE /api/account` (`routes/account.py`) in the same change.
 - **One table's self-migration per transaction.** A failing `ALTER` must not
@@ -294,6 +303,7 @@ One more is read-only and needs no flag, so it is safe to run at any time:
 
 ```bash
 python -m scripts.weekly_digest        # the four numbers, as markdown
+python -m scripts.read_feedback        # what learners wrote to us (plan 221), newest first
 ```
 
 Two others fill a shared cache ahead of demand rather than maintaining

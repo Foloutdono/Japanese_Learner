@@ -457,6 +457,7 @@ export default function TodayRun({ session }) {
     <StudyStage
       color={color}
       onLeave={leaveToGate}
+      report={showRating && card ? { card, session } : null}
       leaveLabel={t.stageGate}
       where={where}
       sub={sub}
@@ -479,7 +480,7 @@ export default function TodayRun({ session }) {
           per-deck stage split to draw, so the bar is the run's. */}
       {length > 0 && <RunHairline pct={pct} color="var(--accent2)" />}
 
-      {error && !card && <SessionError error={error} onRetry={retry} />}
+      {error && !card && <SessionError error={error} onRetry={retry} session={session} />}
       {loading && !card && <Loading />}
 
         {card && gated && (

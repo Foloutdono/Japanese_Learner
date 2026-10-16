@@ -1,6 +1,7 @@
 import { useLang } from '../../LangContext'
 import Empty from '../ui/Empty'
 import { WarningIcon } from '../ui/Icons'
+import { ReportProblem } from '../feedback/FeedbackSheet'
 
 // ── When a study session can't load ──────────────────────────
 // Shared by all five study screens, because a study session that fails
@@ -46,9 +47,13 @@ function sessionErrorCode(error) {
   return null
 }
 
-export default function SessionError({ error, onRetry }) {
+// 「Signaler ce problème」 under the retry (plan 221, door C): the
+// sheet opens with the failure's area and status to join. Not under an
+// expired session, which cannot send it, nor where no session is given.
+export default function SessionError({ error, onRetry, session = null }) {
   const { t } = useLang()
-  const named = HINTS[sessionErrorCode(error)]
+  const code = sessionErrorCode(error)
+  const named = HINTS[code]
   return (
     <Empty
       tone="error"
@@ -56,6 +61,8 @@ export default function SessionError({ error, onRetry }) {
       message={t.errorTitle}
       hint={named ? named(t) : t.errorHint}
       action={onRetry ? { label: t.tryAgain, onClick: onRetry } : undefined}
-    />
+    >
+      {session && code !== 'session_expired' && <ReportProblem session={session} error={error} />}
+    </Empty>
   )
 }

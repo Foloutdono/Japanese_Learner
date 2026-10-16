@@ -317,6 +317,7 @@ export default function VocabRun({ session }) {
     <StudyStage
       color="var(--line-vocab)"
       onLeave={leave}
+      report={showRating && card ? { card, session } : null}
       leaveLabel={t.vocabTitle}
       where={`${t.vocabulary} ${sourceLabel}`}
       sub={title}
@@ -331,7 +332,7 @@ export default function VocabRun({ session }) {
     >
         <DeckProgress stats={progress} />
         {loading && <Loading />}
-        {error && !card && <SessionError error={error} onRetry={retry} />}
+        {error && !card && <SessionError error={error} onRetry={retry} session={session} />}
         {done    && <DoneMessage onBack={leave} pace={paceCtl.pace}
           onExtra={paceCtl.pacedOut ? () => paceCtl.boardExtra(retry) : undefined} />}
         {card && !loading && (

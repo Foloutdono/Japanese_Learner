@@ -78,6 +78,7 @@ def _wipe(user_id: str) -> None:
     try:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM deck_reports WHERE user_id = %s", (user_id,))
+            cur.execute("DELETE FROM feedback WHERE user_id = %s", (user_id,))
             cur.execute("DELETE FROM deck_subscriptions WHERE user_id = %s", (user_id,))
             # decks cascades to custom_cards, deck_cards and to any
             # subscription other learners hold on them.
