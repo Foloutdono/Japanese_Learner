@@ -16,7 +16,8 @@ import { depsOf, picked, plan as sourcePlan, sourceOf, titleOf } from './sources
 
 export const SWIPE = 0.35 // a swipe from one slide to the next
 export const FPS = 30
-const ASKS = /^(question-|scene-question|round-)/
+// A conversion carousel's hook asks too (plan 215).
+const ASKS = /^(question-|scene-question|round-|ask$)/
 const ease = x => 1 - (1 - Math.min(1, Math.max(0, x))) ** 3
 const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x))
 

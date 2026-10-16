@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **215**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **216**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -607,7 +607,14 @@ with the app's sounds and a bed of music it plays itself
 (`scripts/long_video_audio.py`), each also a source in the studio
 that previews it and gives its page and the command that makes it, and
 each also a 9:16 short under a minute, as any carousel can be too
-(`short.js`: its slides held and swiped, its line voiced); a
+(`short.js`: its slides held and swiped, its line voiced). Since plan
+215 a carousel is drawn by default on one path that converts
+(`funnel.js`): the hook, the answer as the app shows it, a call to
+action that draws the feature the item comes from as a schema (never a
+figure) with two more beside it, the detail, the key points, three to
+five slides, in one of three looks (Clarté, Défi, Fiche; "Classic"
+keeps the station-plate walk); a key point is a line the bank already
+says, never one written there; a
 word in its breakdown is glossed from the deck or left bare, never
 guessed: when the app redraws one of those parts, measure it again and
 follow it, and a story promises only what the app does today. Its hand-written content (the pictures,

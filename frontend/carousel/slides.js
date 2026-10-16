@@ -28,6 +28,7 @@ import { withoutGiveaways } from './quizzes.js'
 import { furiganaOf } from './common.js'
 import { promoDeck } from './promo.js'
 import { echoDeck } from './echo.js'
+import { DESIGNS, funnelDeck } from './funnel.js'
 
 export { FORMATS }
 
@@ -2836,6 +2837,11 @@ export function deck(type, plan, fmt, opts) {
   if (plan.source === 'echo') {
     const frames = echoDeck(plan, FORMATS.story, opts)
     return Object.assign(frames.map(sl => ({ key: sl.key, draw: ctx => { noShadow(ctx); sl.draw(ctx) } })), { clip: frames.clip, clips: frames.clips })
+  }
+  // Plan 215: hook, answer, the feature, the detail, the key points.
+  if (DESIGNS.includes(opts.design)) {
+    const slides = funnelDeck(type, plan, fmt, opts)
+    if (slides.length) return slides
   }
   const fr = frame(fmt)
   const p = palette(opts.ground)

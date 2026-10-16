@@ -17,7 +17,7 @@ import {
   kanaQuizzes, kanjiQuizzes, lessonQuizzes, lookalikeQuizzes, overlaps, passageQuizzes, pictureQuizzes, sentenceQuizzes, spellingQuizzes,
   translationQuizzes, trapQuizzes, wordQuizzes,
 } from './quizzes.js'
-import { PROMO, STORIES, STORY_FILES, promoItems, promoPlan } from './promo.js'
+import { PROMO, STORIES, STORY_FILES, analysed, promoItems, promoPlan } from './promo.js'
 import { echoItems, echoPlan } from './echo.js'
 
 export { gloss, lineRomaji, readingMisses, seeded, shuffle, unpack }
@@ -190,6 +190,40 @@ function grammarSlides(s, bank, lang, on) {
   return out
 }
 
+// ── What a funnel shows (plan 215) ───────────────────────────
+// A conversion carousel (funnel.js) shows the analyser's tokens, the
+// words one by one and a few key points besides the plan's questions:
+// each point is a line the catalogue, the deck or the explainers already
+// say, never one written here.
+// A trap's caution often says its why again: then the why alone.
+const wordsOf = x => new Set(String(x).toLowerCase().split(/[\s,.;:!?、。()「」“”]+/).filter(w => w.length > 1))
+const alike = (a, b) => {
+  const [x, y] = [wordsOf(a), wordsOf(b)]
+  const shared = [...x].filter(w => y.has(w)).length
+  return shared / Math.max(1, Math.min(x.size, y.size)) > 0.3
+}
+const uniq = list => [...new Set(list.map(x => String(x || '').trim()).filter(Boolean))]
+const KEYS = 3
+function sentenceKeys(s, data, lang) {
+  const pt = data.points[s.p]
+  const how = pt ? howItWorks(s.rows, s.p, tr(pt, lang), lang, firstSense(lang)) : null
+  const stacks = stacksIn(s.rows, lang, firstSense(lang)).map(x => x.line)
+  return uniq([how?.line, ...stacks, pt && STRINGS[lang].keys.means(s.p, tr(pt, lang)), tr(pt?.careful, lang)].map(x => x && weldIf(lang, x))).slice(0, KEYS)
+}
+/** Rows the catalogue unpacked (a lesson's example), one by one: each
+ *  word's first sense, each particle's role here, the point's meaning. */
+function rowItems(rows, lang, t, p, meaning) {
+  return rows.map((row, i) => ({ row, i })).filter(({ row }) => row.k !== 'punct').map(({ row, i }, n) => {
+    const grammar = row.k !== 'word'
+    const lit = (row.g || []).includes(p) || row.lit
+    const main = grammar ? (lit && row.t !== p ? meaning : particleLabel(rows, i, lang) || (lit ? meaning : t.pos[row.k] || '')) : weldIf(lang, gloss(row, lang)[0] || (lit ? meaning : ''))
+    return { i, n: n + 1, t: row.t, reading: reading(row), ro: row.ro, main, sub: '', line: grammar ? 'grammar' : 'vocab', kanji: hasKanji(row.t), pos: t.pos[row.k === 'word' ? row.pos : row.k] || row.pos || '' }
+  })
+}
+/** The analyser's tokens for rows the catalogue lit for point `p`. */
+const litToks = (rows, p) => rows.map(r => ({ t: r.t, fu: r.fu && hasKanji(r.t) ? reading(r) : '', k: r.k, point: (r.g || []).includes(p) || r.lit ? 1 : 0 }))
+const wordRowsOf = list => list.map((w, n) => ({ n: n + 1, t: w.t, reading: w.r || '', ro: w.ro || '', main: w.main, line: 'vocab' }))
+
 function base(source, item, opts, level) {
   const t = STRINGS[opts.lang]
   return {
@@ -309,6 +343,14 @@ function closing(slides, o, t, p, extra = {}) {
   return slides
 }
 
+function sentenceFunnel(data, s, x, { t, lang }) {
+  return {
+    rows: s.rows, translation: x.translation, romaji: x.romaji, ...analysed(s, data, lang),
+    breakdown: wordItems(s, data.points, lang, t), examples: x.more, keys: sentenceKeys(s, data, lang),
+    strokes: x.bonus.k ? { char: x.bonus.char, k: x.bonus.k } : null,
+  }
+}
+
 function sentencePlan(data, s, opts) {
   const src = sourceOf('sentence')
   const p = base(src, s, opts, s.lv)
@@ -332,6 +374,7 @@ function sentencePlan(data, s, opts) {
     ...p, kanjiChars: x.bonus.chars, kanjiChar: x.bonus.char,
     hook: { kind: 'sentence', rows: s.rows }, prompt: t.prompt.sentence,
     quizzes, quiz: quizzes[0] || null, slides, compare, build: x.build, list: x.list,
+    funnel: sentenceFunnel(data, s, x, p),
     caption: { jp: s.jp, romaji: x.romaji, tr: x.translation, ask: lang === 'fr' ? 'Tu l’as lue sans aide ?' : 'Could you read it without help?', tags: [`jlpt${s.lv.toLowerCase()}`], point: s.p },
   }
 }
@@ -361,6 +404,7 @@ function translationPlan(data, s, opts) {
     ...p, kanjiChars: x.bonus.chars, kanjiChar: x.bonus.char,
     hook: { kind: 'prompt', text: x.translation, tiles }, prompt: t.prompt.translation,
     quizzes, quiz: quizzes[0] || null, slides, compare, build: x.build, list: x.list,
+    funnel: sentenceFunnel(data, s, x, p),
     caption: { jp: x.translation, romaji: '', tr: '', ask: t.turn.translation, tags: [`jlpt${s.lv.toLowerCase()}`], point: s.p, answerJp: s.jp },
   }
 }
@@ -397,8 +441,18 @@ function lessonPlan(data, L, opts) {
   if (o.watch && (L.careful || L.compare)) slides.push({ kind: 'watch', pattern: L.p, pt: L })
   closing(slides, o, t, p, { yourturn: { kind: 'yourturn', text: t.turn.point(L.p), form: formOf(L, lang), model: ex[1] || first } })
   const sentences = [...ex, ...usages].slice(0, 5)
+  const form = formOf(L, lang)
+  const funnel = {
+    rows: first?.rows || [], translation: first?.tr || '', romaji: first ? lineRomaji(first.rows) : '',
+    toks: first ? litToks(first.rows, L.p) : [],
+    points: [{ n: 1, pattern: L.p.split('／')[0], level: L.lv, gloss: meaning, parts: (first?.rows || []).filter(r => (r.g || []).includes(L.p)).map(r => [r.t, 1]) }],
+    breakdown: first ? rowItems(first.rows, lang, t, L.p, meaning) : [],
+    examples: [...ex.slice(1), ...usages].slice(0, 3),
+    point: { pattern: L.p, meaning, form },
+    keys: uniq([t.keys.means(L.p, meaning), form && t.keys.form(form), how?.line, tr(L.careful, lang), compare?.diff].map(k => k && weldIf(lang, k))).slice(0, KEYS),
+  }
   return {
-    ...p, hook: { kind: 'pattern', pattern: L.p, rows: first?.rows || [], meaning }, prompt: t.prompt.lesson,
+    ...p, hook: { kind: 'pattern', pattern: L.p, rows: first?.rows || [], meaning }, prompt: t.prompt.lesson, funnel,
     quizzes, quiz: quizzes[0] || null, slides,
     compare: compare ? { ...compare, quiz: compareQuiz(compare, data.lessons.map(x => tr(x, lang)), L.p, t) || sceneQuiz } : null,
     build: first ? buildOf(first.rows, first.tr, how, L.p, lang, () => '', q => (q === L.p ? meaning : '')) : null,
@@ -470,8 +524,21 @@ function wordPlan(data, w, opts, deps) {
   const kin = [...data.words.filter(x => x.t !== w.t && [...x.t].some(c => chars.includes(c))), ...family.slice(1).filter(x => near(x) && !data.words.some(y => y.t === x.t))]
   const quizzes = wordQuizzes(w, data, lang, t, index, kin)
   const spelling = spellingQuizzes(w, data, lang, t)
+  const meaningOf = c => weldIf(lang, (lang === 'fr' && index[c].fr?.length ? index[c].fr : index[c].en)[0] || '')
+  const ex0 = exItems[0]
+  const funnel = {
+    word: { t: w.t, fu: w.fu, reading: w.r, ro: w.ro, main: weldIf(lang, main), sub: weldIf(lang, sub), level: data.level },
+    examples: exItems.slice(0, 3),
+    words: wordRowsOf(family.slice(1, 5).map(x => ({ ...x, main: weldIf(lang, gloss(x, lang)[0]) }))),
+    keys: uniq([
+      w.t !== w.r && t.keys.reads(w.t, w.r, w.ro),
+      main && t.keys.means(w.t, [main, sub].filter(Boolean).join('; ')),
+      chars.length > 1 ? t.keys.parts(chars.map(c => `${c} (${meaningOf(c)})`).join(' + ')) : ex0 && t.keys.example(ex0.rows.map(r => r.t).join(''), ex0.tr),
+    ].map(k => k && weldIf(lang, k))).slice(0, KEYS),
+    strokes: strokeChar ? { char: strokeChar, k: deps.strokes[strokeChar] } : null,
+  }
   return {
-    ...p, hook: { kind: 'specimen', text: w.t }, prompt: t.prompt.word, quizzes, quiz: quizzes[0] || null, slides,
+    ...p, hook: { kind: 'specimen', text: w.t }, prompt: t.prompt.word, quizzes, quiz: quizzes[0] || null, slides, funnel,
     spelling: spelling.length ? spelling : null,
     list: family.length >= 3 ? { title: t.listTitle.words(family.length, famChar), head: famChar, line: 'vocab', items: family.map((x, n) => wordItem(x, lang, n + 1)) } : null,
     caption: { jp: `${w.t}（${w.r}）`, romaji: w.ro, tr: weldIf(lang, main), ask: t.prompt.word, tags: [`jlpt${data.level.toLowerCase()}`, 'vocabulary'] },
@@ -497,8 +564,21 @@ function kanjiPlan(data, c, opts) {
   if (o.strokes && k.s) slides.push({ kind: 'strokes', char: c, k })
   closing(slides, o, t, p, { yourturn: { kind: 'yourturn', text: t.turn.kanji(c) } })
   const quizzes = kanjiQuizzes(c, data, lang, t)
+  const kw = (k.words || []).map(w => ({ ...w, main: weldIf(lang, gloss(w, lang)[0]) }))
+  // A word the kanji makes with others says more than the kanji alone.
+  const shown = kw.find(w => w.t !== c) || kw[0]
+  const funnel = {
+    kanji: { c, on: k.on || [], kun: (k.kun || []).map(([a, b]) => a + b), meaning, level: k.lv },
+    words: wordRowsOf(kw.slice(0, 4)),
+    keys: uniq([
+      k.on?.length && t.keys.on(k.on.slice(0, 3).join('、')),
+      k.kun?.length && t.keys.kun(k.kun.slice(0, 3).map(([a, b]) => a + b).join('、')),
+      shown && t.keys.inWord(shown.t, shown.r, shown.main),
+    ].map(x => x && weldIf(lang, x))).slice(0, KEYS),
+    strokes: k.s ? { char: c, k } : null,
+  }
   return {
-    ...p, hook: { kind: 'specimen', text: c }, prompt: t.prompt.kanji, quizzes, quiz: quizzes[0] || null, slides,
+    ...p, hook: { kind: 'specimen', text: c }, prompt: t.prompt.kanji, quizzes, quiz: quizzes[0] || null, slides, funnel,
     list: (k.words || []).length >= 3 ? { title: t.listTitle.words(k.words.length, c), head: c, line: 'kanji', items: k.words.map((w, n) => wordItem(w, lang, n + 1)) } : null,
     caption: { jp: c, romaji: '', tr: meaning, ask: t.prompt.kanji, tags: [`jlpt${data.level.toLowerCase()}`, 'kanji'] },
   }
@@ -534,8 +614,18 @@ function kanaPlan(data, card, opts) {
     diff: tr(group.tip, lang), careful: '',
     quiz: quizzes.find(q => q.kind === 'kanaReverse') || null,
   } : null
+  const funnel = {
+    kana: { k: card.k, ro: card.ro, twin: card.twin, set: card.set },
+    words: wordRowsOf((card.words || []).slice(0, 4).map(w => ({ ...w, main: weldIf(lang, gloss(w, lang)[0]) }))),
+    lookalike: group ? group.set.filter(k => byKana[k]).map(k => ({ k, ro: byKana[k].ro })) : null,
+    keys: uniq([
+      t.keys.sound(card.k, card.ro), card.twin && t.keys.twin(card.set, card.twin), group && tr(group.tip, lang),
+      card.words?.[0] && t.keys.inWord(card.words[0].t, card.words[0].r, gloss(card.words[0], lang)[0]),
+    ].map(x => x && weldIf(lang, x))).slice(0, KEYS),
+    strokes: card.s ? { char: card.k, k: { s: card.s } } : null,
+  }
   return {
-    ...p, hook: { kind: 'specimen', text: card.k }, prompt: t.prompt.kana, quizzes, quiz: quizzes[0] || null, slides,
+    ...p, hook: { kind: 'specimen', text: card.k }, prompt: t.prompt.kana, quizzes, quiz: quizzes[0] || null, slides, funnel,
     compare: compare && compare.sides.length >= 2 ? compare : null,
     list: (card.words || []).length >= 3 ? { title: t.listTitle.kana(card.words.length, card.k), head: card.k, line: 'kana', items: card.words.map((w, n) => wordItem(w, lang, n + 1)) } : null,
     caption: { jp: card.k, romaji: card.ro, tr: '', ask: t.prompt.kana, tags: [card.set] },
@@ -558,8 +648,13 @@ function passagePlan(data, P, opts) {
   slides.push({ kind: 'passage', sents, title: P.title })
   closing(slides, o, t, p)
   const quizzes = passageQuizzes(P, lang, t)
+  const funnel = {
+    title: P.title, sents,
+    words: wordRowsOf(words.slice(0, 4).map(w => ({ t: w.head, r: w.reading, ro: w.ro, main: w.main }))),
+    keys: uniq(words.slice(0, KEYS).map(w => weldIf(lang, t.keys.means(`${w.head} (${w.reading})`, w.main)))),
+  }
   return {
-    ...p, hook: { kind: 'specimen', text: P.title, small: true }, prompt: t.prompt.passage,
+    ...p, hook: { kind: 'specimen', text: P.title, small: true }, prompt: t.prompt.passage, funnel,
     quizzes, quiz: quizzes[0] || null, slides,
     list: words.length >= 3 ? { title: t.listTitle.passage(words.length), head: P.title, line: 'vocab', items: words } : null,
     caption: { jp: P.title, romaji: '', tr: quizzes[0]?.ask || '', ask: t.prompt.passage, tags: [`jlpt${P.lv.toLowerCase()}`, 'reading'] },
@@ -646,8 +741,12 @@ function themePlan(data, id, opts) {
   closing(slides, o, t, p)
   const quizzes = pictureQuizzes(items, id, lang, t)
   const headRo = th.words.find(w => w.t === th.head.t)?.ro || ''
+  const funnel = {
+    pictures: items,
+    keys: uniq(items.slice(0, KEYS).map(w => weldIf(lang, t.keys.means(`${w.e} ${w.t}${hasKanji(w.t) ? ` (${w.r})` : ''}`, w.main)))),
+  }
   return {
-    ...p, cta: t.cta.theme,
+    ...p, cta: t.cta.theme, funnel,
     hook: { kind: 'emojigrid', emoji: items.slice(0, 9).map(w => w.e), head: th.head.t, reading: th.head.r, title: t.modes.themeHook(name, items.length) },
     prompt: t.prompt.theme, quizzes, quiz: quizzes[0] || null, slides,
     impostor: impostorOf(data, key, lang, t, id),
@@ -673,8 +772,12 @@ function lookalikePlan(data, set, opts) {
   closing(slides, o, t, p)
   const quizzes = lookalikeQuizzes(set, lang, t)
   const heads = chars.map(k => k.c).join(' ')
+  const funnel = {
+    chars,
+    keys: uniq(chars.map(k => k.note && weldIf(lang, t.keys.means(k.c, k.note)))).slice(0, KEYS),
+  }
   return {
-    ...p, cta: t.cta.lookalike,
+    ...p, cta: t.cta.lookalike, funnel,
     hook: { kind: 'kanjirow', chars: chars.map(k => k.c), title: t.modes.lookalikeHook(chars.length) },
     prompt: t.prompt.lookalike, quizzes, quiz: quizzes[0] || null, slides,
     caption: { jp: heads, romaji: '', tr: chars.map(k => `${k.c} ${k.meaning.split(',')[0]}`).join(' · '), ask: t.prompt.lookalike, tags: [`jlpt${set.lv.toLowerCase()}`, 'kanji'], name: heads },
@@ -704,8 +807,9 @@ function dialoguePlan(data, d, opts) {
   const romaji = ['N5', 'N4'].includes(d.lv)
   const slides = turns.flatMap((turn, i) => [false, true].map(revealed => ({ kind: 'turn', turn, n: i + 1, of: turns.length, revealed, place, them, romaji })))
   closing(slides, o, t, p)
+  const funnel = { turns, place, them, romaji, keys: uniq(turns.map(tu => tu.why)).slice(0, KEYS) }
   return {
-    ...p, cta: t.cta.dialogue,
+    ...p, cta: t.cta.dialogue, funnel,
     hook: { kind: 'place', place: d.place.jp, title: `${place} · ${t.modes.dialogueHook}`, line: 'grammar' },
     prompt: t.prompt.dialogue, quizzes: [], quiz: null, slides,
     caption: { jp: d.place.jp, romaji: '', tr: place, ask: t.prompt.dialogue, tags: [`jlpt${d.lv.toLowerCase()}`, 'conversation'], name: place },
@@ -726,8 +830,11 @@ function trapPlan(data, x, opts) {
   if (o.pair && x.pair) slides.push({ kind: 'twist', notion, pair: x.pair, why: '' })
   if (o.careful && x.careful) slides.push({ kind: 'watch', pattern: x.p, pt: { careful: x.careful } })
   closing(slides, o, t, p)
+  const why = q?.explain?.why
+  const careful = tr(x.careful, lang)
+  const funnel = { notion, pair: x.pair || null, keys: uniq([why, why && careful && alike(why, careful) ? '' : careful]).slice(0, KEYS) }
   return {
-    ...p, cta: t.cta.trap,
+    ...p, cta: t.cta.trap, funnel,
     hook: { kind: 'listhead', head: x.p, title: notion, line: 'grammar' },
     prompt: t.prompt.trap, quizzes, quiz: q, slides,
     caption: { jp: x.p, romaji: '', tr: notion, ask: t.prompt.trap, tags: [`jlpt${x.lv.toLowerCase()}`, 'grammar'], point: x.p, name: x.p },
@@ -914,9 +1021,13 @@ export function titleOf(pl, type, n = 3) {
 }
 
 /** Every Japanese and Latin character a plan may set, for the font loader. */
+// The conversion carousel's own glyphs (funnel.js, plan 215): its
+// pictures' emoji, its bands' and its schemas' kanji, the kana table's rows.
+const KANA_ROWS = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ'
+const FUNNEL_GLYPHS = `💡🌱🔖📖🎧⏱️🔁✍️💬🔤📋▶️📷🔔🙂🙋🔊✏️解詳要点次模試語彙文法読解聴解字写真ō${KANA_ROWS}${[...KANA_ROWS].map(c => String.fromCharCode(c.charCodeAt(0) + 0x60)).join('')}`
 export function sampleText(pl) {
   const parts = [JSON.stringify(pl.t), JSON.stringify(pl.slides), JSON.stringify(pl.hook), JSON.stringify(pl.quizzes || []),
-    JSON.stringify([pl.compare, pl.build, pl.list, pl.talk, pl.station, pl.figure]),
+    JSON.stringify([pl.compare, pl.build, pl.list, pl.talk, pl.station, pl.figure, pl.impostor, pl.funnel]), FUNNEL_GLYPHS,
     pl.handle, 'Tsuji問題もんだい正解解答0123456789/·（　）＿★→＋＝…',
     // A promo story's words, its functions' text with them, and the print's slip.
     ...(pl.promo ? [JSON.stringify(pl.promo), ...Object.values(pl.P).map(v => (typeof v === 'function' ? String(v) : JSON.stringify(v))), '一二三四五六七八九十月日曙帰帆落雁秋月仮語漢文辻≈½'] : []),

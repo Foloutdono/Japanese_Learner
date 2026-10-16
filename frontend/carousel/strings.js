@@ -198,6 +198,19 @@ export const STRINGS = {
       copula: 'copula', pronoun: 'pronoun', auxiliary: 'ending', adnominal: 'determiner',
       conjunction: 'conjunction', interjection: 'interjection', prefix: 'prefix', suffix: 'suffix',
     },
+    // The funnel's key points (plan 215), each said from the bank's own fields.
+    keys: {
+      reads: (w, r, ro) => `${w} reads ${r}${ro ? ` (${ro})` : ''}.`,
+      means: (w, m) => `${w}: ${m}${/[.!?。]$/.test(m) ? '' : '.'}`,
+      example: (jp, m) => `${jp} ${m}`,
+      parts: list => `Written ${list}.`,
+      on: list => `On reading: ${list}.`,
+      kun: list => `Kun reading: ${list}.`,
+      inWord: (w, r, m) => `In ${w}${r && r !== w ? ` (${r})` : ''}: ${m}.`,
+      sound: (k, ro) => `${k} is said “${ro}”.`,
+      twin: (set, k) => (set === 'hiragana' ? `Its katakana: ${k}.` : `Its hiragana: ${k}.`),
+      form: f => `Form: ${f}.`,
+    },
   },
   fr: {
     prompt: {
@@ -390,6 +403,18 @@ export const STRINGS = {
       noun: 'nom', verb: 'verbe', adjective: 'adjectif', adverb: 'adverbe', particle: 'particule',
       copula: 'copule', pronoun: 'pronom', auxiliary: 'terminaison', adnominal: 'déterminant',
       conjunction: 'conjonction', interjection: 'interjection', prefix: 'préfixe', suffix: 'suffixe',
+    },
+    keys: {
+      reads: (w, r, ro) => `${w} se lit ${r}${ro ? ` (${ro})` : ''}.`,
+      means: (w, m) => `${w} : ${m}${/[.!?。]$/.test(m) ? '' : '.'}`,
+      example: (jp, m) => `${jp} ${m}`,
+      parts: list => `S’écrit ${list}.`,
+      on: list => `Lecture on : ${list}.`,
+      kun: list => `Lecture kun : ${list}.`,
+      inWord: (w, r, m) => `Dans ${w}${r && r !== w ? ` (${r})` : ''} : ${m}.`,
+      sound: (k, ro) => `${k} se dit « ${ro} ».`,
+      twin: (set, k) => (set === 'hiragana' ? `Son katakana : ${k}.` : `Son hiragana : ${k}.`),
+      form: f => `Forme : ${f}.`,
     },
   },
 }

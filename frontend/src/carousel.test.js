@@ -11,6 +11,7 @@ import { APP_INKS } from '../carousel/app.js'
 import { CLIP, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
 import { SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
+import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf } from '../carousel/funnel.js'
 import { KINDS, LONG_SITE, PART, SHORT, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
@@ -1131,4 +1132,88 @@ describe('the short formats (plan 214)', () => {
     expect(fromRecipe(recipeOf(st))).toEqual(st)
     expect(recipeOf(st)).toMatch(/^[\w-]+$/)
   }))
+})
+
+describe('the conversion carousels (plan 215)', () => {
+  const withPath2D = fn => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class { constructor(d) { this.d = d } }
+    try { fn() } finally { globalThis.Path2D = had }
+  }
+  // The first item of every file of every source, in English; of each
+  // source's first file, in French too.
+  const some = []
+  for (const src of STATIONED) {
+    filesOf(src).forEach(({ data, filter }, n) => {
+      const { id } = itemsOf(src.id, data, 'en', filter)[0]
+      for (const lang of n ? ['en'] : ['en', 'fr']) some.push({ src, id, lang, p: plan(src.id, data, id, { ...OPTS, lang }, depsFor(src, data, id)) })
+    })
+  }
+  const types = p => TYPES.map(x => x.id).filter(x => available(x, p))
+
+  it('walks every type of every source: the hook, the answer, the app, then the detail and the key points', { timeout: 120000 }, () => withPath2D(() => {
+    for (const { src, id, lang, p } of some) {
+      for (const type of types(p)) {
+        const where = `${src.id} ${id} ${lang} ${type}`
+        expect(funnelOf(type, p), where).toBeTruthy()
+        for (const design of DESIGNS) {
+          const five = deck(type, p, FORMATS.post, { design, length: '5' }).map(x => x.key)
+          expect(five.slice(0, 3), where).toEqual(['ask', 'answer', 'cta'])
+          expect(five.slice(3).every(k => ['more', 'keys'].includes(k)), where).toBe(true)
+          // The studio's length: to the call to action, then the key points, then the detail.
+          expect(deck(type, p, FORMATS.post, { design, length: '3' }).map(x => x.key), where).toEqual(['ask', 'answer', 'cta'])
+          expect(deck(type, p, FORMATS.post, { design, length: '4' }).map(x => x.key), where).toEqual(five.filter(k => k !== 'more'))
+        }
+        for (const [design, fmt] of [['clarte', FORMATS.post], ['defi', FORMATS.story], ['fiche', FORMATS.post]]) {
+          for (const sl of deck(type, p, fmt, { design })) expect(() => sl.draw(stubContext().ctx), `${where} ${design} ${sl.key}`).not.toThrow()
+        }
+      }
+    }
+  }))
+
+  it('says a few key points, each one the bank already says', () => {
+    for (const { src, id, lang, p } of some) {
+      const keys = p.funnel.keys
+      expect(keys.length, `${src.id} ${id}`).toBeGreaterThan(0)
+      expect(keys.length, `${src.id} ${id}`).toBeLessThanOrEqual(3)
+      expect(new Set(keys).size, `${src.id} ${id}`).toBe(keys.length)
+      for (const k of keys) {
+        expect(k, `${src.id} ${id}`).not.toMatch(/undefined|null|\[object|NaN/)
+        // French punctuation is welded to its word (DESIGN.md).
+        if (lang === 'fr') expect(k, `${src.id} ${id}`).not.toMatch(/ [:;!?]/)
+      }
+    }
+  })
+
+  it('promotes the feature an item comes from, drawn, never a figure', () => withPath2D(() => {
+    for (const lang of ['en', 'fr']) {
+      for (const f of FEATURES) {
+        const F = FUNNEL[lang].features[f]
+        expect(F.name && F.line && F.short, `${lang} ${f}`).toBeTruthy()
+        // What a feature does, not how many: a level's name (N5) is the one figure.
+        expect(F.line.replace(/N\d/g, ''), `${lang} ${f}`).not.toMatch(/\d/)
+      }
+    }
+    const sentencePlan = some.find(x => x.src.id === 'sentence' && x.lang === 'en').p
+    expect(funnelOf('plates', sentencePlan).feature).toBe('read')
+    expect(funnelOf('exam', sentencePlan).feature).toBe('exam')
+    const studied = { lesson: 'grammar', word: 'words', kanji: 'kanji', kana: 'kana', theme: 'words', lookalike: 'kanji', dialogue: 'grammar', trap: 'grammar', passage: 'read' }
+    for (const { src, p } of some) if (studied[src.id]) expect(funnelOf('plates', p).feature, src.id).toBe(studied[src.id])
+    // Any feature can stand in any carousel's call to action, on either ground.
+    for (const { p } of some.filter(x => x.lang === 'fr').slice(0, 4)) {
+      for (const feature of FEATURES) {
+        for (const design of DESIGNS) {
+          const cta = deck('plates', p, FORMATS.story, { design, feature }).find(x => x.key === 'cta')
+          const { ctx, texts } = stubContext()
+          cta.draw(ctx)
+          expect(texts.join(' '), feature).toContain(FUNNEL.fr.features[feature].name)
+        }
+      }
+    }
+  }))
+
+  it('holds a hook as long as a question in a short', () => {
+    expect(slideSeconds(40, 'ask').ask).toBe(true)
+    expect(slideSeconds(40, 'answer').ask).toBe(false)
+  })
 })

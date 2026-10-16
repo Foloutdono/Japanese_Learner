@@ -7,6 +7,7 @@
 // everything it looks like, from slides.js.
 /* global JSZip */
 import { ENDING_IDS, FORMATS, TYPES, TYPE_OPTIONS, available, deck, endingSlide } from './slides.js'
+import { DESIGNS, WORDS as FUNNEL } from './funnel.js'
 import { FONT_FACES, font, palette } from './draw.js'
 import { BONUS, LEVELS, MAX_QUESTIONS, OPTIONAL, SOURCES, TITLE_MAX, itemsOf, picked, plan, sampleText, sourceOf, titleOf } from './sources.js'
 import { STRINGS } from './strings.js'
@@ -40,6 +41,8 @@ const DEFAULTS = {
   view: 'compare', type: 'plates', format: 'post', ground: 'paper',
   lang: 'en', script: 'kanji', romaji: false, bonus: 'kanji', kanji: '', handle: '', safe: false, slides: {},
   picks: {}, types: {}, ending: 'mark',
+  // Plan 215: the conversion carousel, its look, its length, the feature it shows.
+  design: 'clarte', length: '5', feature: 'auto',
 }
 const state = load()
 const files = new Map()
@@ -51,6 +54,7 @@ function load() {
     // Plan 210c retired the departure board and the study card.
     const type = TYPES.some(x => x.id === saved.type) ? saved.type : 'plates'
     if (saved.ending && !ENDING_IDS.includes(saved.ending)) delete saved.ending
+    if (saved.design && ![...DESIGNS, 'classic'].includes(saved.design)) delete saved.design
     if (saved.hour && !PRINT_HOURS.includes(saved.hour)) delete saved.hour
     if (saved.story && !STORIES.includes(saved.story)) delete saved.story
     return {
@@ -341,6 +345,9 @@ async function render() {
   const mine = ++token
   stopPlayer()
   document.body.dataset.mode = state.source === 'long' ? 'long' : ''
+  const funnel = DESIGNS.includes(state.design)
+  document.body.dataset.design = funnel ? 'funnel' : 'classic'
+  if (state.view === 'looks' && !funnel) state.view = 'compare'
   // A render a newer one has overtaken stops at its next await, before it
   // touches the page or the state.
   const data = await dataNow()
@@ -384,8 +391,15 @@ async function render() {
   if (mine !== token) return
   // A story is 9:16, whatever the post's format.
   const fmt = FORMATS[clipped ? 'story' : state.format]
+  // All looks (plan 215): the type kept, in each look, to pick one from.
+  const looks = state.view === 'looks' && !clipped
   const ids = state.view === 'compare' ? types : [state.type]
-  current = { plan: pl, fmt, figures, decks: ids.map(d => ({ id: d, slides: deck(d, pl, fmt, opts) })) }
+  current = {
+    plan: pl, fmt, figures,
+    decks: looks
+      ? DESIGNS.map(design => ({ id: state.type, design, slides: deck(state.type, pl, fmt, { ...opts, design }) }))
+      : ids.map(d => ({ id: d, slides: deck(d, pl, fmt, opts) })),
+  }
   $('#export-short').hidden = clipped
   $('#copy-short').hidden = clipped
   const typeName = id => (promo ? PROMO.en.names[state.story] : T.types[id].name)
@@ -395,7 +409,9 @@ async function render() {
   stage.dataset.view = state.view
   stage.style.setProperty('--ratio', `${fmt.w} / ${fmt.h}`)
   for (const d of current.decks) {
-    const dir = { ...TYPES.find(x => x.id === d.id), name: { en: typeName(d.id) } }
+    const dir = d.design
+      ? { jp: { clarte: '清', defi: '挑', fiche: '札' }[d.design], name: { en: `${FUNNEL.en.design[d.design]} · ${typeName(d.id)}` } }
+      : { ...TYPES.find(x => x.id === d.id), name: { en: typeName(d.id) } }
     const row = document.createElement('section')
     row.className = 'deck'
     row.setAttribute('aria-label', dir.name.en)
@@ -412,12 +428,12 @@ async function render() {
     n.className = 'deck__count'
     n.textContent = `${d.slides.length} slides`
     head.append(name, n)
-    if (state.view === 'compare' && !clipped) {
+    if ((state.view === 'compare' || looks) && !clipped) {
       const keep = document.createElement('button')
       keep.type = 'button'
       keep.className = 'btn btn--quiet'
       keep.textContent = 'Use this one'
-      keep.addEventListener('click', () => { state.type = d.id; state.view = 'single'; sync(); render() })
+      keep.addEventListener('click', () => { state.type = d.id; if (d.design) state.design = d.design; state.view = 'single'; sync(); render() })
       head.append(keep)
     }
     const strip = document.createElement('div')
@@ -437,8 +453,9 @@ async function render() {
     row.append(head, strip)
     stage.append(row)
   }
-  // Every ending side by side, to pick the last slide from (a story ends on its own).
-  if (state.view === 'compare' && !clipped) {
+  // Every ending side by side, to pick the last slide from (a story ends
+  // on its own, a conversion carousel on its key points).
+  if (state.view === 'compare' && !clipped && !funnel) {
     const row = document.createElement('section')
     row.className = 'deck'
     row.setAttribute('aria-label', 'Last slide')

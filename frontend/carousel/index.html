@@ -154,6 +154,9 @@ dialog::backdrop { background: var(--scrim); }
 @media (prefers-reduced-motion: reduce) { .strip { scroll-behavior: auto; } }
 /* The long videos (plan 214): a 16:9 player, its chapters, its page. */
 body:not([data-mode="long"]) [data-long="only"] { display: none !important; }
+/* The conversion carousels (plan 215): the classic walk's settings stand aside. */
+body[data-design="funnel"] [data-funnel="hide"] { display: none !important; }
+body:not([data-design="funnel"]) [data-funnel="only"] { display: none !important; }
 body[data-mode="long"] [data-long="hide"] { display: none !important; }
 .player canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
 .player__bar { display: flex; align-items: center; gap: 12px; }
@@ -206,6 +209,39 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
     </div>
 
     <div class="field" data-long="hide" data-promo="hide">
+      <div class="label">Look <span>the hook, the answer, the app, the detail, the key points</span></div>
+      <div class="seg" role="group" aria-label="Look">
+        <button type="button" data-set="design:clarte">Clarté <span lang="ja">清</span></button>
+        <button type="button" data-set="design:defi">Défi <span lang="ja">挑</span></button>
+        <button type="button" data-set="design:fiche">Fiche <span lang="ja">札</span></button>
+        <button type="button" data-set="design:classic">Classic</button>
+      </div>
+    </div>
+
+    <div class="field" data-long="hide" data-promo="hide" data-funnel="only">
+      <div class="label">Slides <span>to the call to action, then the key points, then the detail</span></div>
+      <div class="seg" role="group" aria-label="Slides">
+        <button type="button" data-set="length:3">3</button>
+        <button type="button" data-set="length:4">4</button>
+        <button type="button" data-set="length:5">5</button>
+      </div>
+    </div>
+
+    <div class="field" data-long="hide" data-promo="hide" data-funnel="only">
+      <div class="label">The app in the call to action <span>the item’s own, or another</span></div>
+      <div class="chips" role="group" aria-label="Feature">
+        <button type="button" class="chip" data-set="feature:auto">The item’s</button>
+        <button type="button" class="chip" data-set="feature:read">Reading</button>
+        <button type="button" class="chip" data-set="feature:listen">Dictation</button>
+        <button type="button" class="chip" data-set="feature:exam">Mock exams</button>
+        <button type="button" class="chip" data-set="feature:words">Vocabulary</button>
+        <button type="button" class="chip" data-set="feature:kanji">Kanji</button>
+        <button type="button" class="chip" data-set="feature:grammar">Grammar</button>
+        <button type="button" class="chip" data-set="feature:kana">Kana</button>
+      </div>
+    </div>
+
+    <div class="field" data-long="hide" data-promo="hide" data-funnel="hide">
       <div class="label">Last slide</div>
       <div id="endings" class="chips" role="group" aria-label="Last slide"></div>
     </div>
@@ -240,7 +276,7 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
       <label class="check"><input id="romaji" type="checkbox"> Romaji on the first slide</label>
     </div>
 
-    <div class="field" data-long="hide" data-promo="hide">
+    <div class="field" data-long="hide" data-promo="hide" data-funnel="hide">
       <div class="label">Slides <span>station plates</span></div>
       <div id="toggles" class="toggles"></div>
     </div>
@@ -250,7 +286,7 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
       <div id="type-toggles" class="toggles"></div>
     </div>
 
-    <div class="field" data-long="hide" id="bonus-field">
+    <div class="field" data-long="hide" data-funnel="hide" id="bonus-field">
       <div class="label">Bonus</div>
       <div class="seg" role="group" aria-label="Bonus">
         <button type="button" data-set="bonus:kanji">Kanji strokes</button>
@@ -263,7 +299,7 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
       <div id="kanji" class="seg" role="group" aria-label="Kanji"></div>
     </div>
 
-    <div class="field" data-long="hide">
+    <div class="field" data-long="hide" data-funnel="hide">
       <label class="label" for="handle">On the last slide</label>
       <input id="handle" class="text-input" type="text" maxlength="40" placeholder="@yourhandle or a link (optional)">
     </div>
@@ -273,13 +309,14 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
     <div class="toolbar">
       <div class="seg" role="group" aria-label="View" data-promo="hide" data-long="hide">
         <button type="button" data-set="view:compare">All types</button>
+        <button type="button" data-set="view:looks" data-funnel="only">All looks</button>
         <button type="button" data-set="view:single">One type</button>
       </div>
       <div class="seg" role="group" aria-label="Format" data-promo="hide" data-long="hide">
         <button type="button" data-set="format:post">4:5 post</button>
         <button type="button" data-set="format:story">9:16 full screen</button>
       </div>
-      <div class="seg" role="group" aria-label="Ground" data-long="hide">
+      <div class="seg" role="group" aria-label="Ground" data-long="hide" data-funnel="hide">
         <button type="button" data-set="ground:paper">Washi</button>
         <button type="button" data-set="ground:sumi">Sumi</button>
       </div>

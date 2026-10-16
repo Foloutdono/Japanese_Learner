@@ -1,4 +1,4 @@
-# The carousel studio (plans 210–210n, 212, 213, 214)
+# The carousel studio (plans 210–210n, 212, 213, 214, 215)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -31,6 +31,50 @@ without a level; a trap is picked by its point's level.
 The practice modes a photo cannot hold (dictation needs sound) are left
 out; composition is the "your turn" slide, an invitation to write in the
 comments.
+
+## A carousel that converts (plan 215)
+
+By default a carousel is drawn on one path, five slides at most, so that a
+reader who stops on it leaves knowing what the app does for what it just
+read:
+
+| Slide | Key | Shows |
+| --- | --- | --- |
+| The hook | `ask` | the item and the question it asks (can you read it? what does it mean? which one is the odd one out?) |
+| The answer | `answer` | the item answered as the app shows it: the analyser's line and its numbered points, the review card's word, a kanji's readings, a question's right choice and why |
+| The call to action | `cta` | "Want more like this?": the feature the item comes from, drawn as a schema of what it does, two more features beside it, the button to the site |
+| The detail | `more` | the item further: word by word, in sentences, the words a kanji writes, the next turn or round |
+| The key points | `keys` | up to three lines the catalogue, the deck or the explainers already say, and a reason to save the post |
+
+The studio picks how many are dealt (Slides: 3 stops at the call to
+action, 4 adds the key points, 5 the detail before them), which feature
+the call to action shows (the item's own by default: reading for a
+sentence or a passage, grammar for a lesson, a reply or a trap, the
+vocabulary for a word or a theme, the kanji, the kana, the mock exams for
+an exam or a spelling quiz; or any other, dictation among them), and the
+look, the three directions drawn for it:
+
+| Look | | Is |
+| --- | --- | --- |
+| Clarté | 清 | the washi, the item large and underlined word by word, the analyser in a phone; the default |
+| Défi | 挑 | the sumi, a countdown in gold over the item on a card ("5 seconds to read it") |
+| Fiche | 札 | a sheet to keep: the line's band over every slide, its station and what the slide is |
+
+"All looks" draws the type kept in each of the three, to pick one;
+"Classic" keeps the station-plate walk below, with its last slides.
+
+What the call to action promises is the app's own description of the
+feature (its practice screens', its promo stories'), and its picture a
+schema of what the feature does (three ways in to one analysed sentence,
+two listens then the rōmaji checked, a paper in its four sections with
+its clock, the forgetting curve lifted by each review, a kanji built
+stroke by stroke, the rule then a scene then a quiz on the grammar line,
+the kana's row heard and traced), never a figure: a count is no reason
+to tap. Each picture is drawn on an 800 × 420 board scaled to its room,
+its words 30px at least on the board. A hook whose item needs the room
+(a question and its answers, a long sentence) takes a one-line heading
+instead of the large one; a block still too tall at its smallest rung is
+drawn smaller as a whole rather than past the foot.
 
 ## The types of carousel
 
@@ -622,6 +666,7 @@ node carousel/long/render.mjs --carousel <recipe from the studio>
 | `explain.js` | a point explained in its own sentence, stacked particles, lookalike kana |
 | `common.js` | seeded order, dealt choices, romaji, glosses, near-miss readings |
 | `slides.js` | the slide kinds, drawn once, the types and their decks |
+| `funnel.js` | the carousel that converts: each type's hook, answer, detail and key points, the three looks, the feature pictures (plan 215) |
 | `draw.js` | the canvas primitives, the app's tokens at slide scale, the formats |
 | `strings.js` | every label a slide prints, in English and French |
 | `promo.js` | the promo stories: their plans from the bank, their frames (plan 212) |
