@@ -474,3 +474,40 @@ YouTube's srv3 format (`<s t="…">` per word), in words that are often wrong.
   and an anime run 6–13% of their lines stamped); the aligner spreads their
   kana over their lines' times, which would be measured against itself, so
   every track with fewer than 60% of its lines stamped was left out.
+
+---
+
+## Amendment, 2026-10-16 — the link fetch brings the word times too, and the audio stays YouTube's to read (plan 220)
+
+Asked for subtitles that follow the words more closely ("analyse the audio to
+find the words"), the first thing measured was where the words went without
+any times at all. Since 2026-10-16 the link fetch leads the intake wherever the
+server can fetch, and it read one track through `youtube-transcript-api`, in the
+library's plain format: a line's start and end, no word in it timed. Every
+session made from a link had its words lit on the estimate alone, the grab's
+v2 having brought the recogniser's word times since 2026-09-27 and the link
+fetch never.
+
+- **The link fetch reads what the grab reads.** The library lists each track's
+  URL with YouTube's `fmt=srv3` and takes it off; `fetch_youtube_track` asks the
+  same URL for srv3, through the library's own session and so through the same
+  proxy, for the hand-written track and, beside it, the recognised one, whose
+  times `study/word_timing.py` lends to the lines they agree with. A recognised
+  track alone keeps its own word stamps. srv3 is now a fourth format of
+  `parse_track`, read to the very cues the grab's VTT conversion parses to
+  (`tests/test_captions.py` holds the two equal on the grab's own fixtures).
+  Best effort, each half: a track that will not come as srv3 is read as before.
+- **The cost is nothing to the budget**: a recognised track in srv3 runs about
+  a kilobyte a minute of speech (12 KB for a twelve-minute podcast), against
+  the 0.4 MB watch page a fetch already pulls.
+- **The recognised track is the reading of the audio this design allows.** It
+  is YouTube's own speech recognition run over the video's sound, with a time on
+  each word. Reading the sound ourselves was looked at again and stays out, for
+  the reasons this ADR already records and one more measured today: the player
+  is a cross-origin iframe whose sound no page can read; and a server (or the
+  grab) fetching the media itself meets a third wall, the media URLs answering
+  403 without a proof-of-origin token minted by YouTube's anti-bot check. Getting
+  past that check is not something this app does. The audio routes that remain
+  clean are the learner's own: a media file they hold, played and listened to in
+  their own browser, or a tab's sound they choose to share (desktop Chromium
+  only). Either is a new way into the analyser, to be drawn before it is built.
