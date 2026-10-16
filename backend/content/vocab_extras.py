@@ -470,12 +470,41 @@ def _collect_word_tags(senses: list, lang: str) -> list:
     return [_public_tag(t) for _, t in collected[:_MAX_TAGS]]
 
 
+# Kana cards whose curated row was matched to another word read alike
+# (plan 227): the N5 だんだん carried the dialect "thank you", いくら
+# "salted salmon roe", the N4 こと the sentence-final particle. Each
+# reads its senses from its own word's row instead, and keeps its own
+# sentences: the source row's are another card's, or were never read.
+_SENSES_OF: dict[str, tuple[str, str]] = {
+    "::なる": ("成る", "なる"),
+    "::だんだん": ("段々", "だんだん"),
+    "::いくら": ("幾ら", "いくら"),
+    "::こと": ("事", "こと"),
+    "::うち": ("内", "うち"),
+    "::ぼろ": ("襤褸", "ぼろ"),
+}
+
+
+def _senses_of_own_word(key: str, own: list[dict] | None) -> list[dict] | None:
+    src_kanji, src_kana = _SENSES_OF[key]
+    source = vocab_meanings_data.get(f"{src_kanji}::{src_kana}")
+    if not source and _jmdict_db is not None:
+        source = _jmdict_db.get_senses(src_kanji, src_kana)
+    if not source:
+        return own
+    senses = [{**sense, "examples": []} for sense in source]
+    senses[0]["examples"] = [ex for sense in (own or []) for ex in sense.get("examples", [])]
+    return senses
+
+
 def _find_senses(kanji: str, kana: str) -> list[dict] | None:
     # Fast path: curated_senses keys its rows with the exact same
     # packed kana string vocab_deck.json uses (see module docstring),
     # so most words resolve with a single indexed query — this only
     # ever covers the app's own (~8k word) deck.
     senses = vocab_meanings_data.get(f"{kanji}::{kana}")
+    if f"{kanji}::{kana}" in _SENSES_OF:
+        return _senses_of_own_word(f"{kanji}::{kana}", senses)
     if senses:
         return senses
     # Fallback for any mismatch in reading order/subset between the two

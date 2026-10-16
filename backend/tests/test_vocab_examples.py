@@ -103,3 +103,17 @@ def test_every_deck_word_shows_a_sentence(gap_cards):
     Ratchet: lower the bound as words gain sentences, never raise it."""
     without = sorted(key for _, key in gap_cards if key not in example_fixes.written())
     assert len(without) <= 1128, without[:20]
+
+
+def test_a_kana_card_reads_the_senses_of_its_own_word():
+    """Plan 227: six kana cards had a curated row matched to another
+    word read alike -- だんだん "thank you", いくら "salted salmon roe"."""
+    import re
+    from content.vocab_extras import _SENSES_OF, _find_senses
+    words = lambda text: set(re.findall(r"[a-z]+", text.lower())) - {"to", "of", "the", "a"}
+    cards = {f"{w.get('kanji') or ''}::{w['kana']}": w for ws in VOCAB_BY_LEVEL.values() for w in ws}
+    for key in _SENSES_OF:
+        kanji, kana = key.split("::")
+        first = "; ".join(_find_senses(kanji, kana)[0]["glossary"])
+        assert words(first) & words(cards[key]["meaning"]), (key, first)
+    assert "thank" not in "; ".join(_find_senses("", "だんだん")[0]["glossary"])
