@@ -126,7 +126,7 @@ async function snap(beat, ctx) {
   captions.hide()
 
   // And in, to the app.
-  recede(ctx, 0.66, 0.9)
+  recede(ctx, 0.84, 0.9)
   phone.shake(0.1, 0.9)
   finger.rest()
   await phone.move(framing('screen'), 0.9, ease.inOutCubic)
@@ -165,7 +165,7 @@ async function lift(beat, ctx) {
 
   // The phone rises under the hovering text, with the app made ready.
   const target = await ctx.enterApp(app, { lift: true })
-  recede(ctx, 0.66, 0.8)
+  recede(ctx, 0.84, 0.8)
   sfx.whoosh(0.5, 0.1)
   phone.shake(0.12, 0.8)
   await phone.move(framing('screen'), 0.85, ease.outCubic)
@@ -207,7 +207,7 @@ async function rise(beat, ctx) {
   const { phone, sfx } = ctx
   await ctx.enterApp(ctx.nextApp())
   ctx.say(beat.caption)
-  recede(ctx, 0.66, 0.85)
+  recede(ctx, 0.84, 0.85)
   sfx.whoosh(0.5, 0.1)
   phone.shake(0.12, 0.8)
   await phone.move(framing('screen'), 0.9, ease.outCubic)
@@ -216,7 +216,7 @@ async function rise(beat, ctx) {
 async function cut(beat, ctx) {
   const { phone, sfx } = ctx
   await ctx.enterApp(ctx.nextApp())
-  setOpacity(ctx.layers.dim, 0.7)
+  setOpacity(ctx.layers.dim, 0.84)
   sfx.whoosh(0.25, 0.12)
   const to = framing('screen')
   phone.set({ ...to, s: to.s * 1.08 })
@@ -236,7 +236,7 @@ async function whip(beat, ctx) {
     phone.move(to, 0.5, ease.outCubic),
   ])
   world.style.filter = ''
-  setOpacity(ctx.layers.dim, 0.7)
+  setOpacity(ctx.layers.dim, 0.84)
   ctx.say(beat.caption)
 }
 

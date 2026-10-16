@@ -159,9 +159,9 @@ function send(cdp, input) {
     case 'compose':
       return cdp.send('Input.imeSetComposition', { text: input.text, selectionStart: input.text.length, selectionEnd: input.text.length })
     case 'key': {
-      const key = { key: input.key, code: input.code ?? input.key, windowsVirtualKeyCode: input.keyCode ?? 0 }
+      const key = { key: input.key, code: input.code ?? input.key, windowsVirtualKeyCode: input.keyCode ?? 0, nativeVirtualKeyCode: input.keyCode ?? 0 }
       return Promise.all([
-        cdp.send('Input.dispatchKeyEvent', { type: 'keyDown', ...key }),
+        cdp.send('Input.dispatchKeyEvent', { type: 'keyDown', ...key, ...(input.text ? { text: input.text, unmodifiedText: input.text } : {}) }),
         cdp.send('Input.dispatchKeyEvent', { type: 'keyUp', ...key }),
       ])
     }

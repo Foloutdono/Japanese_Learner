@@ -92,6 +92,24 @@ export const sfx = {
     osc.stop(t + 0.14)
   },
 
+  /** A key under the thumb: a tiny tick. */
+  key() {
+    const ctx = getAudioContext()
+    if (!ctx) return
+    const t = ctx.currentTime
+    const src = ctx.createBufferSource()
+    src.buffer = noise(ctx, 0.02)
+    const band = ctx.createBiquadFilter()
+    band.type = 'highpass'
+    band.frequency.value = 2400
+    const env = ctx.createGain()
+    env.gain.setValueAtTime(0.0001, t)
+    env.gain.exponentialRampToValueAtTime(0.05, t + 0.002)
+    env.gain.exponentialRampToValueAtTime(0.0001, t + 0.018)
+    src.connect(band).connect(env).connect(out(ctx, 1))
+    src.start(t)
+  },
+
   /** The puzzled beat: a little falling "huh?". */
   huh(i = 0) {
     const ctx = getAudioContext()

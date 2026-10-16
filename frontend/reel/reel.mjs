@@ -64,10 +64,16 @@ export function requestOf(script) {
     for (const s of beat.sentences ?? []) {
       if (!seen.has(s.text)) { seen.add(s.text); req.sentences.push({ text: s.text, translation: s.translation ?? '', answer: s.answer ?? '' }) }
     }
-    if (beat.search) req.searches.push({ q: beat.search, category: beat.category ?? 'vocab', level: beat.searchLevel })
+    if (beat.feature === 'dictionary') {
+      // The page it opens on, and what is searched.
+      req.searches.push({ q: '', category: beat.category ?? 'kanji' })
+      if (beat.search) req.searches.push({ q: beat.search, category: beat.category ?? 'kanji' })
+    }
     req.words.push(...(beat.words ?? []))
     req.kanji.push(...(beat.kanji ?? []))
     if (beat.point) req.grammar.push(beat.point)
+    if (beat.feature === 'comprehension') (req.comprehension ??= []).push(beat.level ?? script.level)
+    if (beat.feature === 'dictation' && beat.text) (req.voice ??= []).push(beat.text.trim())
   }
   return req
 }
@@ -164,7 +170,9 @@ async function main() {
     if (hook.scene === 'media' && hook.style === 'photo') assets.photos[appIndex] = hook.file
     else snaps.push({ hookIndex, appIndex, file: `photo-${appIndex}.jpg` })
   })
-  script.maxSeconds = Number(args.max ?? 90)
+  // The longest the film may run: a ceiling, not a length (the film ends
+  // when its last beat does), and the sound's length is set from it.
+  script.maxSeconds = Number(args.max ?? script.max ?? 150)
   writeFileSync(join(cacheDir, 'reel.json'), JSON.stringify({ script, bundle, assets }))
 
   const { server, origin } = await startReelServer({ roots: [cacheDir], hmr: Boolean(args.preview) })

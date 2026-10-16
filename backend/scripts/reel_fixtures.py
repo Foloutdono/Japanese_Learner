@@ -32,10 +32,13 @@ written something raises.
 
 A request is {"lang", "sentences": [{"text", "translation", "answer"}],
 "searches": [{"q", "category", "level"}], "words": [...], "kanji": [...],
-"grammar": [raw_id, ...]}; every field is optional but lang.
+"grammar": [raw_id, ...], "comprehension": [level, ...], "voice": [text, ...]};
+every field is optional but lang. `voice` lines are read by the voice
+engine into MP3s beside --out, when one is configured (VOICEVOX_URL).
 """
 import argparse
 import json
+import os
 import sys
 import types
 
@@ -66,7 +69,7 @@ def _no_database():
 
 _no_database()
 
-from content.grammar_points_data import entry_by_id  # noqa: E402
+from content.grammar_points_data import entry_by_id, gloss  # noqa: E402
 from study.analysis import analyze_local, attach_user_state  # noqa: E402
 from study.dictation import measure_forms  # noqa: E402
 from study.furigana import align_sentence  # noqa: E402
@@ -74,6 +77,12 @@ from study.grammar_lesson import lesson_payload  # noqa: E402
 from study.romaji import sentence_romaji, sentence_words  # noqa: E402
 from study.sentences import MAX_SENTENCES, split_sentences  # noqa: E402
 from routes.dictionary import get_dictionary  # noqa: E402
+from content.comprehension_seed import entries as comprehension_entries, render as comprehension_render  # noqa: E402
+from study.analysis import analyze_with_glosses  # noqa: E402
+
+# routes/reading.py's reading time and question count per level.
+_READ_SECONDS = {"N5": 240, "N4": 270, "N3": 300}
+_QUESTIONS = {"N5": 8, "N4": 9, "N3": 10}
 
 _NOBODY = "reel"
 
@@ -150,7 +159,51 @@ def phrase(text: str, translation: str, lang: str) -> dict:
     }
 
 
-def bundle(request: dict) -> dict:
+def comprehension(level: str, lang: str, which: int = 0) -> dict | None:
+    """GET /api/reading/comprehension's answer, from the hand-written
+    seed the pool is filled with (content/comprehension/, plan 111),
+    decorated as routes/reading._decorate_for does, for no learner."""
+    seeds = [e for e in comprehension_entries() if e["level"] == level]
+    if not seeds:
+        return None
+    data = comprehension_render(seeds[which % len(seeds)], lang)
+    for part in data["breakdown"]:
+        local = analyze_with_glosses(part["jp"], part.pop("words", None), level)
+        part["analysis"] = attach_user_state(local, {}, _NOBODY)
+    return {
+        "level": level, "text": data["text"], "translation": data["translation"],
+        "breakdown": data["breakdown"], "questions": data["questions"],
+        "grammar_points": data.get("grammar_points", []),
+        "read_seconds": _READ_SECONDS.get(level, 300), "question_count": _QUESTIONS.get(level, 10),
+        "repeat": False,
+    }
+
+
+def voice(texts: list[str], out_dir: str) -> dict:
+    """Each line read by the app's own reader voice (study/voice_engine,
+    slot 0), as an MP3 beside the bundle -- when a VOICEVOX engine is
+    configured (VOICEVOX_URL) and answering. Without one, nothing."""
+    try:
+        from study import voice_engine
+    except Exception:  # noqa: BLE001 -- the engine's client is optional here
+        return {}
+    if not voice_engine.configured() or not voice_engine.ready():
+        return {}
+    import hashlib
+    import os
+    out = {}
+    for text in texts:
+        name = f"voice-{hashlib.sha1(text.encode('utf-8')).hexdigest()[:12]}.mp3"
+        path = os.path.join(out_dir, name)
+        if not os.path.exists(path):
+            pcm = voice_engine.say(text, voice_engine.style_for_slot(0), speed=voice_engine.tempo_for_slot(0))
+            with open(path, "wb") as f:
+                f.write(voice_engine.encode_mp3(pcm))
+        out[text] = name
+    return out
+
+
+def bundle(request: dict, out_dir: str | None = None) -> dict:
     lang = request.get("lang", "en")
     out = {"lang": lang, "analyze": {}, "phrase": {}, "check": {}, "dictionary": {},
            "words": {}, "kanji": {}, "grammar": {}}
@@ -191,11 +244,22 @@ def bundle(request: dict) -> dict:
         if hit:
             out["kanji"][char] = hit
 
+    for level in request.get("comprehension", []):
+        found = comprehension(level, lang)
+        if found:
+            out.setdefault("comprehension", {})[level] = found
+
+    if request.get("voice") and out_dir:
+        out["voice"] = voice(request["voice"], out_dir)
+
     for raw_id in request.get("grammar", []):
         hit = entry_by_id(raw_id)
         if hit:
             level, point = hit
-            out["grammar"][raw_id] = {"level": level, "pattern": point["pattern"], **lesson_payload(level, point, lang)}
+            out["grammar"][raw_id] = {
+                "level": level, "pattern": point["pattern"], "structure": point.get("structure", ""),
+                "meaning": gloss(point, lang), **lesson_payload(level, point, lang),
+            }
     return out
 
 
@@ -209,7 +273,8 @@ def main(argv=None) -> int:
     else:
         with open(args.request, encoding="utf-8") as f:
             request = json.load(f)
-    text = json.dumps(bundle(request), ensure_ascii=False, default=str)
+    out_dir = os.path.dirname(os.path.abspath(args.out)) if args.out else None
+    text = json.dumps(bundle(request, out_dir), ensure_ascii=False, default=str)
     if args.out:
         with open(args.out, "w", encoding="utf-8") as f:
             f.write(text)

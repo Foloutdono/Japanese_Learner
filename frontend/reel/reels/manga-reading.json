@@ -1,0 +1,23 @@
+{
+  "lang": "en",
+  "learner": "Mika",
+  "clock": "21:10",
+  "beats": [
+    {
+      "hook": "page",
+      "style": "manga",
+      "text": "明日は雨が降るかもしれない。",
+      "caption": "when the manga's raw and you can't read *a word* 💀"
+    },
+    { "lift": true, "caption": "so I practise reading, one line at a time" },
+    {
+      "app": "reading",
+      "text": "明日は雨が降るかもしれない。",
+      "translation": "It might rain tomorrow.",
+      "answer": "ashita wa ame ga furu kamoshirenai",
+      "reveal": "97% read right, first try",
+      "taps": ["降る"]
+    },
+    { "end": true }
+  ]
+}

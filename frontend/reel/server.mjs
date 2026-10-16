@@ -44,6 +44,18 @@ function reelRoutes(roots) {
             res.end(html)
             return
           }
+          // The stroke-order drawings the backend serves at /kanjivg/.
+          if (path.startsWith('/__reel/kanjivg/')) {
+            const file = resolve(REPO, 'backend', 'kanjivg', normalize(path.slice('/__reel/kanjivg/'.length)))
+            if (file.startsWith(resolve(REPO, 'backend', 'kanjivg')) && existsSync(file)) {
+              res.setHeader('Content-Type', 'image/svg+xml')
+              res.end(readFileSync(file))
+              return
+            }
+            res.statusCode = 404
+            res.end('not found')
+            return
+          }
           if (path.startsWith('/__reel/files/')) {
             const rel = normalize(decodeURIComponent(path.slice('/__reel/files/'.length)))
             for (const root of roots) {

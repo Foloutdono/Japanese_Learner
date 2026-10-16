@@ -30,10 +30,14 @@ const records = []
 let lengthSeconds = 120
 let clock = () => performance.now() / 1000
 
-/** The film's now on the newest context's own timeline (one per window). */
+/**
+ * The film's now. Every recorded context, in every window, runs on the
+ * film's own timeline from its first frame (a context made late is
+ * silent before it was made), so a time means the same moment on any of
+ * them and their sounds mix without an offset.
+ */
 function contextNow() {
-  const rec = records[records.length - 1]
-  return rec ? Math.max(0, clock() - rec.bornAt) : 0
+  return Math.max(0, clock())
 }
 
 /** The reel's clock, in seconds, shared by every window that records. */
@@ -54,7 +58,7 @@ export function installAudio() {
   class ReelAudioContext extends Offline {
     constructor() {
       super({ numberOfChannels: 2, length: Math.ceil(SR * lengthSeconds), sampleRate: SR })
-      records.push({ ctx: this, bornAt: clock() })
+      records.push({ ctx: this, bornAt: 0 })
     }
     get currentTime() { return contextNow() }
     get state() { return 'running' }

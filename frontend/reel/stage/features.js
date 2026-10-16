@@ -7,6 +7,10 @@
 // `part.current`, set by the director before each scene.
 
 import { route } from './backend'
+import { installStudyFixtures } from './study'
+import { installPracticeFixtures } from './practice'
+import { installMoreFixtures } from './more'
+import { award } from './fixtures'
 
 const EMPTY_PAGE = { results: [], total: 0, has_more: false }
 
@@ -60,11 +64,47 @@ export function installFeatureFixtures(part) {
     }
   })
 
+  // ── 読書 — reading practice ──
+  const phraseOf = b => {
+    const text = (b.text ?? '').trim()
+    const base = bundle.phrase?.[text] ?? { phrase: text, romaji: '', furigana: [{ text }], words: [], display_seconds: 12 }
+    const tokens = bundle.analyze?.[text]?.tokens ?? []
+    const word = tokens.find(t => t.vocab_match?.entry?.kanji) ?? tokens.find(t => t.vocab_match)
+    const point = bundle.analyze?.[text]?.grammar?.find(g => g.kind !== 'marker')
+    return {
+      ...base,
+      translation: b.translation ?? base.translation ?? '',
+      translation_lang: part.lang,
+      // Long enough that the clock never covers the sentence on film.
+      display_seconds: b.seconds ?? Math.max(14, base.display_seconds ?? 0),
+      source_word: word ? { kanji: word.vocab_match.entry.kanji, kana: word.vocab_match.entry.kana, level: word.vocab_match.level } : null,
+      ...(b.grammar !== false && point ? { grammar: point.pattern } : {}),
+    }
+  }
+  const batchOf = (feature, exclude) => {
+    const beats = beatsOf(feature)
+    const fresh = beats.filter(b => !exclude.includes(`reel:${(b.text ?? '').trim()}`))
+    // Never an empty batch (the run reads that as an error): the reel's
+    // sentences again, if every one has been served.
+    return (fresh.length ? fresh : beats).map(phraseOf)
+  }
+  route('GET', '/api/reading/batch', ({ query }) => ({ phrases: batchOf('reading', (query.get('exclude') ?? '').split('|')) }))
+  route('POST', '/api/reading/check', ({ body }) => {
+    const text = String(body?.phrase ?? '').trim()
+    return { body: bundle.check?.[text]?.[body?.answer] ?? { accuracy: 100, matched: 'romaji' }, delay: 350 }
+  })
+  route('POST', '/api/reading/result', () => { award(part.profile, 14); return { xp_earned: 14, correct: true } })
+  route('PATCH', '/api/profile/learning', () => ({ ok: true }))
+
   route('POST', /^\/api\/decks\/\d+\/cards\/app$/, ({ body }) => ({ added: body?.cards?.length ?? 1 }))
   route('GET', '/api/decks', () => ({ decks: decksOf(part) }))
 
   // ── The day's figures (the tab bar's badge, the Today gate) ──
-  route('GET', '/api/today', () => todayOf(part, beatsOf))
+  route('GET', '/api/today', () => todayOf(part, beat()))
+
+  installStudyFixtures(part, { beat, beatsOf })
+  installPracticeFixtures(part, { beat, beatsOf, phraseOf })
+  installMoreFixtures(part)
 }
 
 /** The analysis whose text is closest to `text` (an OCR'd or retyped line). */
@@ -83,16 +123,23 @@ export function decksOf(part) {
   ]
 }
 
-export function todayOf(part) {
-  const due = part.due ?? 24
+export function todayOf(part, beat = {}) {
+  // A Today beat runs its own cards, so the gate counts exactly those;
+  // otherwise the day is a learner's ordinary one.
+  const own = beat.feature === 'today' || beat.feature === 'review'
+  const by = own
+    ? { kana: beat.kana?.length ?? 0, vocab: beat.words?.length ?? 0, kanji: beat.kanji?.length ?? 0, grammar: 0 }
+    : { kana: 0, vocab: 12, kanji: 7, grammar: 5 }
+  const due = by.kana + by.vocab + by.kanji + by.grammar
+  const MODES = { kana: 'kana.flashcard.f2b', vocab: 'vocab.flashcard.f2b', kanji: 'kanji.flashcard.f2b', grammar: 'grammar.ladder' }
+  const deck = source => (source === 'kana' ? 'hiragana_basic' : part.level)
   return {
     total: due,
-    by_source: { kana: 0, vocab: Math.round(due * 0.5), kanji: Math.round(due * 0.3), grammar: due - Math.round(due * 0.5) - Math.round(due * 0.3), personal: 0 },
-    lanes: [
-      { id: `s~vocab~${part.level}~vocab.flashcard.f2b`, kind: 'section', source: 'vocab', deck: part.level, mode: 'vocab.flashcard.f2b', due: Math.round(due * 0.5), new: 4, free: 0, freeCards: 0 },
-      { id: `s~kanji~${part.level}~kanji.flashcard.f2b`, kind: 'section', source: 'kanji', deck: part.level, mode: 'kanji.flashcard.f2b', due: Math.round(due * 0.3), new: 2, free: 0, freeCards: 0 },
-      { id: `s~grammar~${part.level}~grammar.ladder`, kind: 'section', source: 'grammar', deck: part.level, mode: 'grammar.ladder', due: due - Math.round(due * 0.5) - Math.round(due * 0.3), new: 1, free: 0, freeCards: 0 },
-    ],
+    by_source: { ...by, personal: 0 },
+    lanes: Object.entries(by).filter(([, n]) => n > 0).map(([source, n]) => ({
+      id: `s~${source}~${deck(source)}~${MODES[source]}`, kind: 'section', source, deck: deck(source),
+      mode: MODES[source], due: n, new: 0, free: 0, freeCards: 0,
+    })),
     next_due: null,
     pace: { target: 10, newToday: 3, remaining: 7 },
     seconds_per_review: 9,

@@ -52,7 +52,7 @@ export function profileOf(part) {
     onboardedAt: iso(new Date(now.getTime() - 60 * DAY_MS)),
     tutorialAt: iso(new Date(now.getTime() - 60 * DAY_MS)),
     ratingScale: 'simple',
-    readingPace: 'untimed',
+    readingPace: part.pace ?? 'standard',
     kanaKnown: true,
     lines: ['kana', 'vocab', 'kanji', 'grammar'],
     guided: { learn: true, practice: true, today: true, dictionary: true, profile: true },
@@ -69,8 +69,23 @@ export function profileOf(part) {
   }
 }
 
+/**
+ * Pay `xp` into the profile, as the server's ledger would: past the
+ * threshold the learner is a level up, and every later answer about the
+ * profile says so (a film with three scenes levels up once).
+ */
+export function award(profile, xp) {
+  profile.xp += xp
+  while (profile.xp >= profile.xpForNext) {
+    profile.level += 1
+    profile.xpPrevLevel = xpFor(profile.level)
+    profile.xpForNext = xpFor(profile.level + 1)
+  }
+}
+
 export function installFixtures(part) {
   const profile = profileOf(part)
+  part.profile = profile
   route('GET', '/api/profile', () => profile)
   route('PATCH', '/api/profile', ({ body }) => Object.assign(profile, body ?? {}))
   route('PATCH', '/api/profile/learning', () => ({ ok: true }))

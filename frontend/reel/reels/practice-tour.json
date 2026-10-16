@@ -1,0 +1,15 @@
+{
+  "lang": "en",
+  "learner": "Mika",
+  "beats": [
+    { "app": "translation", "text": "駅はどこですか。", "translation": "Where is the station?", "caption": "say it in Japanese, get it *checked*" },
+    { "app": "composition", "point": "grammar_N5_〜てください", "text": "ゆっくり話してください。", "translation": "Please speak slowly.", "caption": "write your own sentences" },
+    { "app": "dictation", "text": "駅で友だちに会います。", "translation": "I meet a friend at the station.", "answer": "eki de tomodachi ni aimasu", "caption": "train your ear 🎧" },
+    { "app": "comprehension", "answers": 2, "caption": "real texts, real questions" },
+    { "app": "exam", "caption": "mock JLPT papers" },
+    { "app": "dictionary", "search": "駅", "reading": "えき", "caption": "a dictionary that *draws* every kanji" },
+    { "app": "decks", "caption": "decks other learners share" },
+    { "app": "pass", "caption": "your streak, on your pass" },
+    { "end": true }
+  ]
+}

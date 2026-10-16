@@ -20,6 +20,7 @@
 import { installBackend, unhandled, served } from './backend'
 import { installFixtures } from './fixtures'
 import { installAudio, audioClock } from './audio'
+import { installMedia } from './media'
 
 const PREFIX = '/__reel/stage'
 
@@ -56,6 +57,8 @@ function seedStorage() {
   ls.setItem('jp-app-volumes', JSON.stringify({ ambiance: part.ambiance ?? 0.35 }))
   // The deck a word goes to in one press (useMineAction).
   ls.setItem('jp-mine-target:vocab', '7')
+  ls.setItem('jl.readingPace', part.pace ?? 'standard')
+  ls.setItem('jl.ratingScale', 'simple')
   ls.removeItem('jp-guided')
   // supabase-js keeps its session under sb-<project>-auth-token
   // (SupabaseClient's defaultStorageKey) and, finding one that has not
@@ -86,6 +89,7 @@ try { seedStorage() } catch { /* a stage without storage plays signed out */ }
 
 if (host?.clock) audioClock.use(host.clock)
 installAudio()
+installMedia()
 installBackend()
 installFixtures(part)
 

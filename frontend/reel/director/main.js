@@ -26,9 +26,10 @@ import '@fontsource/noto-sans-jp/900.css'
 import { DARK, LIGHT, SCALE } from '../../landing/tokens.mjs'
 import { installAudio, audioClock } from '../stage/audio'
 import * as clock from './clock'
-import { createPhone, framing, BOARD_W as BOARD_W_, BOARD_H as BOARD_H_ } from './phone'
+import { createPhone, framing, BOARD_W as BOARD_W_, BOARD_H as BOARD_H_, APP_W as APP_W_ } from './phone'
 import { createFinger } from './finger'
 import { createCaptions } from './captions'
+import { createKeyboard } from './keyboard'
 import { createStage } from './stage'
 import { buildHook, puzzle } from './hooks'
 import { TRANSITIONS, swap, recede } from './transitions'
@@ -36,6 +37,7 @@ import { APPS } from './apps'
 import { playEnd } from './endcard'
 import { sfx } from './sfx'
 import { STRINGS } from './strings'
+import { kanaToRomaji } from '../../src/lib/romaji'
 
 const FONTS = {
   '--font-display': "'Space Grotesk', system-ui, sans-serif, 'Noto Color Emoji'",
@@ -140,6 +142,7 @@ async function boot() {
   const send = rendering ? input => inputs.push(input) : input => dispatchInPage(input, phone)
   const finger = createFinger(layers.finger, { kind: script.finger, seed: script.seed, send })
   const captions = createCaptions(layers.captions, { style: script.captions })
+  const keyboard = createKeyboard(phone, { sfx, lang: script.lang })
 
   const appBeats = beats.filter(b => b.kind === 'app')
   // The stage's part: what its backend answers, and for which beat.
@@ -155,7 +158,7 @@ async function boot() {
 
   const ctx = {
     script, bundle, strings, seed: script.seed, lang: script.lang,
-    layers, phone, finger, captions, stage, sfx, files,
+    layers, phone, finger, captions, keyboard, stage, sfx, files,
     hook: null,
     index: 0,
     drift: clock.drift,
@@ -186,7 +189,14 @@ async function boot() {
      */
     async look(el, { duration = 0.75, margin = 22, max = 1.75, min, fill = 1, bottom = 150 } = {}) {
       const els = (Array.isArray(el) ? el : [el]).map(e => stage.find(e)).filter(Boolean)
-      const rects = els.map(e => stage.appRect(e)).filter(r => r && r.w > 0)
+      // Only what the app is showing can be framed: a box running past
+      // the app's own fold is framed down to the fold.
+      const view = { w: stage.win?.innerWidth ?? 390, h: stage.win?.innerHeight ?? 800 }
+      const rects = els.map(e => stage.appRect(e)).filter(r => r && r.w > 0).map(r => {
+        const y = Math.max(0, r.y)
+        const h = Math.min(view.h, r.y + r.h) - y
+        return h > 0 ? { x: Math.max(0, r.x), y, w: Math.min(view.w, r.x + r.w) - Math.max(0, r.x), h } : null
+      }).filter(Boolean)
       if (!rects.length) return
       const x0 = Math.min(...rects.map(r => r.x))
       const y0 = Math.min(...rects.map(r => r.y))
@@ -197,9 +207,29 @@ async function boot() {
       const lo = min ?? framing('screen').s
       const zoom = Math.max(lo, Math.min(max, ((BOARD_W_ - 2 * margin) / (x1 - x0)) * fill, (band / (y1 - y0)) * fill))
       const pose = phone.focusOn((x0 + x1) / 2, (y0 + y1) / 2, zoom, { x: BOARD_W_ / 2, y: top + band / 2 })
-      // Never past the phone's own edge sideways when it is narrower than the board.
-      if (zoom * 412 < BOARD_W_) pose.x = BOARD_W_ / 2
+      // A phone smaller than the board stands in its middle; a larger one
+      // never leaves a gap at an edge (the world showing past the glass).
+      const halfW = (APP_W_ / 2) * zoom
+      const halfH = (844 / 2) * zoom
+      pose.x = halfW * 2 < BOARD_W_ ? BOARD_W_ / 2 : Math.min(halfW, Math.max(BOARD_W_ - halfW, pose.x))
+      pose.y = halfH * 2 < BOARD_H_ ? framing('screen').y : Math.min(halfH, Math.max(BOARD_H_ - halfH, pose.y))
       await phone.move(pose, duration)
+    },
+    /**
+     * Press an element of the app, as a thumb would: brought into view
+     * first if the app's scroller or the camera has it out of sight.
+     */
+    async tap(el, opts = {}) {
+      const target = typeof el === 'string' ? await stage.waitFor(el, { timeout: opts.timeout ?? 6 }) : el
+      if (!target) throw new Error(`stage: nothing to press (${el})`)
+      const inApp = stage.appRect(target)
+      const view = stage.win.innerHeight
+      if (inApp && (inApp.y < 0 || inApp.y + inApp.h > view)) await stage.scrollTo(target, { at: 0.5, duration: 0.45 })
+      const r = stage.boardRect(target)
+      if (!r || r.y < 30 || r.y + r.h > BOARD_H_ - 30 || r.x < 0 || r.x + r.w > BOARD_W_) {
+        await ctx.look([target], { duration: 0.45, max: Math.max(phone.pose.s, framing('screen').s) })
+      }
+      return finger.tap(stage.point(target, opts), opts)
     },
     /** Show a beat's caption (a string, or { text, at, hold }). */
     say(caption, fallback = {}) {
@@ -210,11 +240,45 @@ async function boot() {
     /** Paste `text` into the focused field. */
     async paste(text) { send({ kind: 'text', text }) },
     /** Type `text` a character at a time, as a thumb does. */
-    async type(text, { cps = 9 } = {}) {
+    async type(text, { cps = 11 } = {}) {
       for (const ch of [...text]) {
+        keyboard.press(ch)
         send({ kind: 'text', text: ch })
         await clock.wait((1 / cps) * finger.jitter(0.6, 1.5))
       }
+    },
+    /**
+     * Type Japanese as a phone does: each mora's romaji on the keys, the
+     * kana growing underlined in the field (the IME's composition), the
+     * candidates over the keys, and `commit` (kanji and all) chosen.
+     */
+    async typeJa(kana, { commit = kana, cps = 10 } = {}) {
+      const morae = [...kana].reduce((out, c) => {
+        if (/[ゃゅょぁぃぅぇぉ]/.test(c) && out.length) out[out.length - 1] += c
+        else out.push(c)
+        return out
+      }, [])
+      let typed = ''
+      for (const mora of morae) {
+        for (const key of kanaToRomaji(mora)) {
+          keyboard.press(key)
+          await clock.wait((1 / cps) * finger.jitter(0.6, 1.4))
+        }
+        typed += mora
+        if (rendering) send({ kind: 'compose', text: typed })
+      }
+      keyboard.candidates([commit, ...(commit === kana ? [] : [kana])])
+      await clock.wait(0.45)
+      if (rendering) send({ kind: 'compose', text: '' })
+      send({ kind: 'text', text: commit })
+      keyboard.candidates([])
+      await clock.wait(0.15)
+    },
+    /** Return on the keyboard: the field's form is sent. */
+    async submit() {
+      keyboard.press('\n')
+      send({ kind: 'key', key: 'Enter', code: 'Enter', keyCode: 13, text: '\r' })
+      await clock.wait(0.12)
     },
   }
 
@@ -234,7 +298,7 @@ async function boot() {
   }
   if (beats[0].kind !== 'hook') {
     phone.set(framing('screen'))
-    layers.dim.style.opacity = '0.7'
+    layers.dim.style.opacity = '0.84'
   }
   ctx.beats = beats
   window.__reelCtx = ctx

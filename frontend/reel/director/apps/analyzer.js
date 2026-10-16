@@ -33,7 +33,7 @@ function wordsToTap(beat, ctx) {
 /** Open a word or a point's entry, let it be read, close it. */
 async function openEntry(ctx, el, { hold }) {
   const { stage, finger } = ctx
-  await finger.tap(stage.point(el, { fy: 0.62 }))
+  await ctx.tap(el, { fy: 0.62 })
   const sheet = await stage.waitFor('.dict-sheet')
   await stage.waitFor('.dict-sheet .dict-plate', { timeout: 4 }).catch(() => {})
   finger.rest()
@@ -41,7 +41,7 @@ async function openEntry(ctx, el, { hold }) {
   await wait(hold)
   const close = stage.find(`.dict-sheet .dict-plate__btn[aria-label="${ctx.closeLabel}"]`)
     ?? stage.find('.dict-sheet .dict-entry__close')
-  if (close) await finger.tap(stage.point(close), { quick: true })
+  if (close) await ctx.tap(close, { quick: true })
   else stage.find('.dict-sheet__scrim')?.click()
   await stage.waitGone('.dict-sheet', { timeout: 3 }).catch(() => {})
   return sheet
@@ -80,18 +80,18 @@ export const analyzer = {
       await finger.drag(from, to, { duration: 0.6 })
       await wait(0.15)
       const read = stage.find('.phrase-analyze-btn:not([disabled])') ?? stage.find('.analysis-cropper .phrase-history-toggle')
-      await finger.tap(stage.point(read))
+      await ctx.tap(read)
       finger.rest()
       await stage.waitFor('textarea.anl-slip__field', { test: el => el.value.trim().length > 0, timeout: 10 })
       await wait(0.45)
-      await finger.tap(stage.point('.anl-sheet button.anl-action'))
+      await ctx.tap('.anl-sheet button.anl-action')
     } else {
       const field = await stage.waitFor('textarea.anl-entry__field')
-      await finger.tap(stage.point(field))
+      await ctx.tap(field)
       await wait(0.2)
       await ctx.paste(beat.text)
       await wait(0.3)
-      await finger.tap(stage.point('button.anl-action'))
+      await ctx.tap('button.anl-action')
     }
 
     // The breakdown: the sentence, its words read over it, big.
@@ -124,7 +124,7 @@ export const analyzer = {
       const explain = stage.find('.anl-explainbtn')
       if (explain) {
         await stage.scrollTo(explain, { at: 0.6, duration: 0.45 })
-        await finger.tap(stage.point(explain))
+        await ctx.tap(explain)
         finger.rest()
         await stage.waitFor('.anl-explainpanel__body', { timeout: 8 })
         await ctx.look(['.anl-explainsheet__jp', '.anl-explainpanel__body'], { duration: 0.6, max: 1.5 })

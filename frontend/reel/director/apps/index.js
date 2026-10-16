@@ -5,7 +5,27 @@
 // how a learner uses it (play). script.mjs's APPS lists the same names.
 
 import { analyzer } from './analyzer'
+import { reading } from './reading'
+import { cards } from './cards'
+import { grammar } from './grammar'
+import { translation, composition, dictation, comprehension } from './practice'
+import { exam, dictionary, decks, pass } from './more'
 
 export const APPS = {
   analyzer,
+  reading,
+  today: cards,
+  review: cards,
+  kana: cards,
+  vocab: cards,
+  kanji: cards,
+  grammar,
+  translation,
+  composition,
+  dictation,
+  comprehension,
+  exam,
+  dictionary,
+  decks,
+  pass,
 }

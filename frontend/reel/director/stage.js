@@ -127,6 +127,18 @@ export function createStage(phone, { host }) {
     /** The beat the stage's backend answers for. */
     setBeat(index) { host.stage.current = index },
 
+    /** A style of the director's own in the app (a veil), or none. */
+    style(id, css) {
+      const doc = stage.doc
+      if (!doc) return
+      doc.getElementById(`reel-${id}`)?.remove()
+      if (!css) return
+      const el = doc.createElement('style')
+      el.id = `reel-${id}`
+      el.textContent = css
+      doc.head.appendChild(el)
+    },
+
     /** Hide or show an element of the app (the text a lift carries in). */
     veil(el, hidden) {
       const target = stage.find(el)
