@@ -1,5 +1,5 @@
 """
-回復運転 -- the day's share of the reviews owed (plan 216).
+回復運転 -- the day's share of the reviews owed (plan 217).
 
 Pure functions, no database and no HTTP, beside study/daily_queue.py:
 core/review_plan.py reads what they need and routes/today.py calls them.

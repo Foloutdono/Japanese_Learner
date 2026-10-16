@@ -11,7 +11,7 @@ import { playClick } from '../../lib/audio'
 import { Slot } from '../dayclear/kit/WeekStamps'
 import { AGENDA_PATH } from '../agenda/AgendaNext'
 
-// Where a catch-up is changed or stopped (plan 216).
+// Where a catch-up is changed or stopped (plan 217).
 const REVIEWS_PATH = '/profile/settings/reviews'
 
 // ── 今日 — the day, in four figures (plan 199) ──────────────────
@@ -26,7 +26,7 @@ const REVIEWS_PATH = '/profile/settings/reviews'
 //   the basics     the unit the next new card comes from (N5 only)
 //   the agenda     the next block, its hour and its subject; a door
 //   the catch-up   which day of the spread, or the share a day for a
-//                  gentle one (plan 216); a door to Settings › Reviews
+//                  gentle one (plan 217); a door to Settings › Reviews
 //
 // A figure the learner does not have is not drawn, and the lattice
 // never shows a bare cell: an odd last one takes the row.

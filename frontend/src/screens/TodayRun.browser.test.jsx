@@ -237,7 +237,7 @@ describe('TodayRun with a quota', () => {
   }, 30000)
 })
 
-// ── 回復運転 — the run past the share (plan 216) ─────────────────
+// ── 回復運転 — the run past the share (plan 217) ─────────────────
 // Boarded from a cleared gate whose ceiling held reviews back: the
 // queue is asked for them (`extra=1`), as a session of its own.
 describe('TodayRun past the share', () => {

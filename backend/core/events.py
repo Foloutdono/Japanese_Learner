@@ -193,7 +193,7 @@ EVENTS: dict[str, frozenset[str]] = {
     "rest_day_used":  frozenset({"days"}),
     "ticket_share":   frozenset({"days"}),
 
-    # ── 回復運転 — the review plan (plan 216) ─────────────────────
+    # ── 回復運転 — the review plan (plan 217) ─────────────────────
     # catchup_offer is the client's, once a sheet: the gate opened on
     # the comeback sheet (`owed` the reviews it would have printed,
     # `away` the days since the learner last studied). The rest are

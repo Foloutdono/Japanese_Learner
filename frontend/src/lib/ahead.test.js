@@ -109,7 +109,7 @@ describe('planNudges', () => {
     expect(n.body).toBe(t.brdNotifText)
   })
 
-  it('invites back instead of counting a backlog the gate will open the comeback sheet on (plan 216)', () => {
+  it('invites back instead of counting a backlog the gate will open the comeback sheet on (plan 217)', () => {
     const [n] = plan(ahead([{ at: at(1).toISOString(), total: 412, new: 0, comeback: true, lanes: [lane('vocab', 'N5', 412)] }]))
     expect(n.title).toBe('Your 19:00 train · ease back in?')
     expect(n.body).toBe(t.nudgeComebackBody)

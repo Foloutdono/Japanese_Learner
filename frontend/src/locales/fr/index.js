@@ -3069,8 +3069,8 @@ const clrTickets = {
 // ── 191:tickets end ──
 
 
-// ── 216:reviews ──
-// 回復運転 — the review plan (plan 216): the comeback sheet on Today,
+// ── 217:reviews ──
+// 回復運転 — the review plan (plan 217): the comeback sheet on Today,
 // the catch-up's figure in the day, the run past the share, Settings ›
 // Reviews and the notification that invites back.
 const reviewPlan = {
@@ -3128,7 +3128,7 @@ const reviewPlan = {
   nudgeComebackTitle: time => `Ton train de ${time} · on reprend doucement ?`,
   nudgeComebackBody: 'Quelques minutes suffisent pour repartir.',
 }
-// ── 216:reviews end ──
+// ── 217:reviews end ──
 
 export default welded({
   ...auth,

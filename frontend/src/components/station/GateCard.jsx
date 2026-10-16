@@ -657,7 +657,7 @@ function ClearedGate({ today, desk }) {
           <span className="tdy-next__min">≈ {tomorrow.minutes} {t.gateMinutes}</span>
         </div>
       )}
-      {/* 回復運転 (plan 216): the share is spent and reviews wait past
+      {/* 回復運転 (plan 217): the share is spent and reviews wait past
           it -- the way on, for a learner who wants more, stands a rung
           over the shut gate as a quiet way. The ceiling is a default,
           never a lock. */}

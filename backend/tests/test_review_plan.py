@@ -1,4 +1,4 @@
-"""回復運転 — the review plan (plan 216).
+"""回復運転 — the review plan (plan 217).
 
 A learner back from a stretch away met a gate of hundreds of reviews,
 and a day cleared only on an empty gate: the wall, then a partial

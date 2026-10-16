@@ -34,7 +34,7 @@ import { restWeek, utcToday } from '../domain/dayClear'
 // while Today's summary names a rest day not yet seen (`rest.unseen`).
 // Any way out tells the server it was seen.
 //
-// 運転再開 (plan 216): a gate whose reviews piled up past a few days of
+// 運転再開 (plan 217): a gate whose reviews piled up past a few days of
 // the learner's own load opens on the comeback sheet (ComebackSheet),
 // over the gate and after the rest-day notice, never with it: the
 // paces to take the backlog at, chosen once.

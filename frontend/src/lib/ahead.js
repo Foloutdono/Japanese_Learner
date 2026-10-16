@@ -93,7 +93,7 @@ export function planNudges({ ahead, time, t, kanaSetLabel, now, platform }) {
     if (!point.total) continue
     if (ahead.rode_today && sameLocalDay(at, now)) continue
     if (point.comeback) {
-      // 回復運転 (plan 216): a backlog past a few days of the learner's
+      // 回復運転 (plan 217): a backlog past a few days of the learner's
       // load, with no ceiling to share it out. Counting it would be the
       // last reason not to open the app: the notification invites back,
       // and the gate opens on the comeback sheet.

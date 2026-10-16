@@ -119,7 +119,7 @@ export default function TodayRun({ session }) {
   // lane choice either, and its own session.
   const unit = only ? '' : (params.get('unit') ?? '')
   const allChosen = laneParam === ''
-  // 回復運転 (plan 216): the run past the day's share, boarded from the
+  // 回復運転 (plan 217): the run past the day's share, boarded from the
   // cleared gate -- the reviews the learner's ceiling held back today.
   // Its own session: it must not resume the day's.
   const extra = !only && !unit && params.get('extra') === '1'

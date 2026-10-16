@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **217**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **218**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -102,7 +102,7 @@ runtime purpose.
   those tables in the server (the stats reset, the account's deletion)
   calls `srs.forget_history(user_id)` after it commits. The cache is in
   process: the API runs one worker.
-- **The gate counts the day's share (plan 216).** A learner's ceiling
+- **The gate counts the day's share (plan 217).** A learner's ceiling
   or catch-up (`core/review_plan.py`) cuts the due reviews to the day's
   share before the ration joins them (`review_plan.cut`, over
   `study/review_cap.share`): `_day_queue` (the gate and the clear),

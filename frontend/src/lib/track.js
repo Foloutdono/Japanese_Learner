@@ -81,7 +81,7 @@ export const EVENTS = {
   day_clear: ['streak', 'milestone', 'tier'],
   rest_day_used: ['days'],
   ticket_share: ['days'],
-  // The review plan (plan 216): the comeback sheet opened (ours, once a
+  // The review plan (plan 217): the comeback sheet opened (ours, once a
   // sheet); its answer, a catch-up's end, the ceiling and an absence set
   // in Settings, and the absence's days bridged (the server's).
   catchup_offer: ['owed', 'away'],

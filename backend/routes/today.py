@@ -362,7 +362,7 @@ def _new_lanes(user_id: str, level: str, plan: review_plan.Plan = review_plan.NO
     is left of the pace. Empty when no target is stored, when today's
     is spent, or when the lookups fail -- a ration is a comfort, and
     nothing here may 500 the gate. Empty too while the review plan
-    pauses the new cards (plan 216): a catch-up under way, or a
+    pauses the new cards (plan 217): a catch-up under way, or a
     declared absence about to start or running.
     """
     if plan.new_paused(datetime.now(timezone.utc).date()):
@@ -477,7 +477,7 @@ def _new_pools(user_id: str, level: str, budget: int):
 class DayQueue(NamedTuple):
     """What the day's queue holds now: the lanes /api/today counts and
     the run serves, and what they were read from -- the review plan
-    (plan 216) and what its ceiling did to the reviews."""
+    (plan 217) and what its ceiling did to the reviews."""
     due_rows: list
     level: str
     lanes: "OrderedDict[tuple, list[str]]"
@@ -504,7 +504,7 @@ def _day_queue(user_id: str) -> DayQueue:
     # rule, plan 074; daily_queue.hold_line): moving down sets them
     # aside, and the badge must not count what the run will not serve.
     due = daily_queue.hold_above(daily_queue.lanes(user_id, due_rows, personal), _hold_line(user_id, level))
-    # 回復運転 (plan 216): the reviews cut to the day's share under the
+    # 回復運転 (plan 217): the reviews cut to the day's share under the
     # learner's ceiling or catch-up -- so the gate prints the share, the
     # run serves it and the day is cleared on it. A catch-up whose work
     # is done (what is owed fits in one share) ends here, and the day is
@@ -588,7 +588,7 @@ def get_today(user_id: str = Depends(get_user_id)):
     # bigger change than this one.
     next_due = srs.get_next_due_at(user_id) if total == 0 else None
     if total == 0 and queue.cut.held:
-        # A share spent with reviews still held back (plan 216): the
+        # A share spent with reviews still held back (plan 217): the
         # earliest of those is overdue, and "opens at" an hour gone by
         # would be a lie. The gate opens when the next share does, at
         # the queue's midnight.
@@ -648,7 +648,7 @@ def get_today(user_id: str = Depends(get_user_id)):
         # 終着 and 運休 (plan 191): whether the day is cleared and what
         # clearing it pays, and the rest days.
         **_day_status(user_id),
-        # 回復運転 (plan 216): the review plan and what it did today,
+        # 回復運転 (plan 217): the review plan and what it did today,
         # and the comeback sheet's offer when the gate opens on one.
         "review": _review_status(user_id, queue),
     }
@@ -742,7 +742,7 @@ def _tomorrow(user_id: str, level: str, queue: DayQueue | None = None) -> dict:
     ration of new ones, and the minutes they take at the learner's pace,
     rounded up. A figure, never a reason to fail the clear.
 
-    Under a review plan (plan 216) the reviews held back today ride
+    Under a review plan (plan 217) the reviews held back today ride
     tomorrow too, as much of them and of tomorrow's own as one share
     holds, and a plan that pauses the new cards tomorrow brings none."""
     plan = queue.plan if queue is not None else review_plan.read_plan(user_id)
@@ -1014,7 +1014,7 @@ def get_today_ahead(at: str = Query(..., description="comma-separated ISO instan
             later_new = _ration(pools, pace.target)
     today_utc = datetime.now(timezone.utc).date()
 
-    # 回復運転 (plan 216): what the gate will hold is the day's share
+    # 回復運転 (plan 217): what the gate will hold is the day's share
     # under the learner's ceiling or catch-up -- today's what is left of
     # it, a later day's a whole one -- and no new card on a day the plan
     # pauses them. Without a ceiling, a point whose reviews would open
@@ -1112,7 +1112,7 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     in the learner's lines, whatever the day's ration or the learner's
     level, since they chose the unit. Like `only`, not a day.
 
-    `extra` is the run past the day's share (plan 216): the reviews the
+    `extra` is the run past the day's share (plan 217): the reviews the
     learner's ceiling or catch-up held back today, boarded on purpose
     from a cleared gate -- the ceiling is a default, never a lock, as the
     pace's 臨時列車 is. It serves the due reviews uncut and no new card.
@@ -1138,7 +1138,7 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
         if extra:
             merged = due
         else:
-            # The day's share (plan 216), cut as the gate cut it: the
+            # The day's share (plan 217), cut as the gate cut it: the
             # run serves what the gate counted.
             plan = review_plan.read_plan(user_id)
             merged, _fresh = daily_queue.merge_new(

@@ -90,7 +90,7 @@ function useGroups(session) {
   ]
 }
 
-// What Settings › Reviews is set to (plan 216): an absence ahead, a
+// What Settings › Reviews is set to (plan 217): an absence ahead, a
 // catch-up under way, the ceiling, or none -- the first that holds.
 function reviewsValue(review, t, lang) {
   if (review?.away) {

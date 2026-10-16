@@ -7,7 +7,7 @@ import { Seg } from '../chrome/Console'
 import { Loading } from '../ui/Loading'
 import { SettingsPage, Slip } from './SettingsPage'
 
-// ── 回復運転 — Settings › Reviews (plan 216) ──────────────────────
+// ── 回復運転 — Settings › Reviews (plan 217) ──────────────────────
 // What bounds the day's reviews, as Service bounds its new cards
 // (core/review_plan.py). Up to three slips, each only where it says
 // something:

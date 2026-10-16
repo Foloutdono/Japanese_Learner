@@ -6,7 +6,7 @@ import { LangProvider } from '../../LangContext'
 import fr from '../../locales/fr/index.js'
 import '../../index.css'
 
-// ── Settings › Reviews (plan 216) ────────────────────────────────
+// ── Settings › Reviews (plan 217) ────────────────────────────────
 // The ceiling on the day's reviews, the catch-up under way and an
 // absence declared ahead. These pin what each slip sends, that the page
 // redraws from what the server answers, that a ceiling under the

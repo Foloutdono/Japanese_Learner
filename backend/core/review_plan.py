@@ -1,4 +1,4 @@
-# ── 回復運転 — the review plan (plan 216) ─────────────────────────
+# ── 回復運転 — the review plan (plan 217) ─────────────────────────
 # What bounds the day's REVIEWS, as core/pace.py bounds its new cards.
 # Three things a learner can set, all on user_profiles:
 #

@@ -814,7 +814,7 @@ dial round the day's 駅スタンプ (the seal the cleared day's ceremony
 presses), its ring the day's reviews by line, with the week's stamps under
 it and tomorrow as a row of a departure board over the shut gate.
 **A gate whose reviews piled up opens once on the comeback sheet**
-(運転再開, plan 216): Today's sheet holding a line of welcome, how many
+(運転再開, plan 217): Today's sheet holding a line of welcome, how many
 cards wait and three paces as Settings' service cards (`.svc`), a
 spread's days as the services sheet's seg. It never stands over the
 rest-day notice. A day whose share is spent with reviews held back

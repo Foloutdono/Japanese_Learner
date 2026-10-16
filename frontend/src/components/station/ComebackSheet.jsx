@@ -10,7 +10,7 @@ import { Seg } from '../chrome/Console'
 import { useDesk } from '../../hooks/useDesk'
 import { useRadioWalk, radioTab } from '../../hooks/useRadioWalk'
 
-// ── 運転再開 — the comeback sheet (plan 216) ──────────────────────
+// ── 運転再開 — the comeback sheet (plan 217) ──────────────────────
 // A learner back from a stretch away met a gate of hundreds of cards,
 // and a day that could not be cleared until they were all done. When
 // GET /api/today's `review.comeback` names an offer (the reviews the

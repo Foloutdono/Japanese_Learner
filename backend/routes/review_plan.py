@@ -1,4 +1,4 @@
-"""回復運転 — the review plan's routes (plan 216).
+"""回復運転 — the review plan's routes (plan 217).
 
 What the learner sets about the day's REVIEWS (core/review_plan.py has
 the model and the reasons): the comeback sheet's answer on Today, and

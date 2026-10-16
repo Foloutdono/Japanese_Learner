@@ -5,7 +5,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../../LangContext'
 import '../../index.css'
 
-// ── 運転再開 — the comeback sheet (plan 216) ──────────────────────
+// ── 運転再開 — the comeback sheet (plan 217) ──────────────────────
 // A gate whose reviews piled up opens on the paces to take them at:
 // spread over a few days (the default, five), gently, or all now --
 // each priced by the server. The answer is posted and the gate redrawn;

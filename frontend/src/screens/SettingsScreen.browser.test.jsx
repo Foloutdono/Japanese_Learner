@@ -178,7 +178,7 @@ describe('SettingsScreen — the card and the list', () => {
     expect(rows.map(r => r.dataset.page)).toEqual(['display', 'sound', 'agenda', 'reviews', 'rating', 'reading', 'help', 'account', 'credits', 'pass'])
     const value = i => rows[i].querySelector('.stg-row__value').textContent
     expect(value(2)).toBe(T.agdRowEmpty)
-    // The review plan (plan 216): no ceiling, no catch-up, no absence.
+    // The review plan (plan 217): no ceiling, no catch-up, no absence.
     expect(value(3)).toBe(T.rvRowNone)
     expect(value(4)).toBe(T.settingsRatingScaleOption.simple)
     expect(value(5)).toBe(T.readingPaceOption.standard)

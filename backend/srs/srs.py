@@ -1475,7 +1475,7 @@ class SRSEngine:
     def last_studied_day(self, user_id: str):
         """The latest day this learner showed up (a review or a practice
         answer, _studied_days' meaning), or None for one who never has:
-        what the comeback sheet counts the days away from (plan 216)."""
+        what the comeback sheet counts the days away from (plan 217)."""
         studied = self._studied_days(user_id)
         return max(studied) if studied else None
 
@@ -1530,7 +1530,7 @@ class SRSEngine:
         return missed
 
     def bridge_away_days(self, user_id: str, start, until) -> list:
-        """A declared absence (plan 216): the days of [start, until] that
+        """A declared absence (plan 217): the days of [start, until] that
         have passed (before today) and were neither studied nor already
         bridged, each written as a rest day of its own -- a rest_tickets
         row with milestone 0, earned and used on that day and seen at
@@ -2387,7 +2387,7 @@ class SRSEngine:
 
     def get_reviewed_today(self, user_id: str) -> tuple[set, set]:
         """
-        What today has already spent of a review ceiling (plan 216): the
+        What today has already spent of a review ceiling (plan 217): the
         (card_id, mode) pairs reviewed today, and the card ids first met
         today -- the same day, the same servable modes and the same
         `firsts` as get_new_items_today, whose budget those are. A pair

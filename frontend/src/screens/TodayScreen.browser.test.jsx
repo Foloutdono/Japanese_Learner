@@ -200,7 +200,7 @@ describe('TodayScreen — the gate', () => {
     await vi.waitFor(() => expect(screen.container.querySelector('.run-stub')).toBeTruthy())
   })
 
-  // 回復運転 (plan 216): a catch-up is a figure of the day, and a door to
+  // 回復運転 (plan 217): a catch-up is a figure of the day, and a door to
   // where it is changed; a share spent with reviews held back leaves a
   // quiet way on over the shut gate.
   it('counts the catch-up among the day\'s figures, a door to Settings › Reviews', async () => {
