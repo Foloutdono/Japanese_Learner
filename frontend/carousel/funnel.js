@@ -490,7 +490,8 @@ function sparks(c, cx, cy, r, color, side = 1) {
 function pill(c, label, cx, y, { icon = '→', fill = faceInk(c.p), ink = c.p.ink, dot = c.line, emoji = false } = {}) {
   const { ctx, p } = c
   const h = 92
-  const b = fit(ctx, label, { sizes: [FS.body, FS.sm], maxW: c.fr.w - h - SP[6] * 2, maxLines: 1 })
+  // A pill says its line whole: a size down where the frame is narrow, never cut.
+  const b = fit(ctx, label, { sizes: [FS.body, FS.sm, FS.caption], maxW: c.fr.w - h - SP[6] * 2, maxLines: 1 })
   const w = h + SP[3] + measure(ctx, b.lines[0], b.f) + SP[7]
   const x = cx - w / 2
   ctx.fillStyle = fill
@@ -1726,7 +1727,7 @@ function bookmark(ctx, cx, cy, h, color, { fill = false, lw = h * 0.1 } = {}) {
  *  beside the save glyph, a short arrow down from it. */
 function saveBlock(c) {
   const { ctx, p, fr, W } = c
-  const b = fit(ctx, weld(c.lang, W.saveFor), { sizes: [FS.title, FS.lead], maxW: fr.w - 250, maxLines: 2 })
+  const b = fit(ctx, weld(c.lang, W.saveFor), { sizes: [FS.title, FS.lead, FS.body], maxW: fr.w - 230, maxLines: 2 })
   const bh = paragraphH(b)
   const line = Math.max(bh, 96)
   // Its height counts the arrow's head, under the line.
@@ -1783,7 +1784,8 @@ function ctaSlide(c, feature) {
   const pad = SP[6]
   const cx = fr.x - SP[4]
   const cw = fr.w + SP[4] * 2
-  const name = textBlock(c, weld(c.lang, F.name), { x: cx + pad, w: cw - pad * 2, sizes: [FS.title, FS.lead], maxLines: 1, color: p.paper ? mix(featureInk(p, feature), p.ink, 0.7) : p.ink })
+  // A long name (Écris tes propres phrases) steps down a size, then takes two lines; never cut.
+  const name = textBlock(c, weld(c.lang, F.name), { x: cx + pad, w: cw - pad * 2, sizes: [FS.title, FS.lead, FS.body], maxLines: 2, color: p.paper ? mix(featureInk(p, feature), p.ink, 0.7) : p.ink })
   // What costs nothing is said in the sentence, its tag in the picture.
   const line = textBlock(c, weld(c.lang, F.freeLine ? `${F.line} ${F.freeLine}.` : F.line), { x: cx + pad, w: cw - pad * 2, sizes: [FS.body, FS.sm], weight: 500, color: p.ink2, maxLines: 3 })
   const btn = METAL_H

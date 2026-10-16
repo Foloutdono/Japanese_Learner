@@ -410,14 +410,22 @@ rules in `index.css`; `layoutSentence` in `draw.js`):
 - **4:5 post** (1080 × 1350), for a feed that shows the whole image.
 - **9:16 full screen** (1080 × 1920), its content kept out of the band a
   feed lays its own chrome over (`FORMATS[...].safe` in `draw.js`;
-  "Show the feed's overlays" tints that band on the previews, never on
-  the exported image).
+  "Show the feed's overlays" tints that band on the previews, and on a
+  9:16 slide draws TikTok's photo view over it, `FEED_HUD`; never on the
+  exported image).
 
 Both keep clear of what TikTok lays over a photo post, as measured on a
 phone (plan 213): a 4:5 post is shown at full width, its top ~70px above
 the screen's, so its search bar covers the post's first ~150px (the
 post's safe top is 170) and its buttons stand from x ~936 down the
 lower fifth (the sides are 144 each, so a centred slide stays centred).
+A 9:16 slide, measured on a posted carousel (plan 215c), is shown at
+full width with its top ~110px under the status bar: the status and
+search bars cover its first ~330px and the page counter stands at the
+top right, the column of buttons stands from x ~920 below y ~1100, the
+author's picture at the bottom left and the caption from y ~1710. Its
+safe box is 350 at the top, 430 at the foot and 184 a side, so that a
+card reaching past the box's edge still stops short of the buttons.
 A change to the safe box is checked by drawing every slide of every
 source and type (a layout pass over real fonts: nothing outside the box,
 no text over text, nothing set tiny); a slide that no longer fits steps
@@ -663,7 +671,8 @@ backend's Python with numpy, ffmpeg and Playwright's Chromium.
 ## Short formats (plan 214)
 
 Two ways to a short video for YouTube Shorts, Reels or TikTok, 9:16 and
-inside the feed's safe area (the story format's):
+inside a feed's safe area (a carousel's short, the story format's; a
+long video's, `TALL.safe`):
 
 **A long video's short.** Each long video kind also comes standing and
 under a minute (`--format short`, or "9:16 short" in the studio's 長編

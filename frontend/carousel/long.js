@@ -29,8 +29,8 @@ import * as A from './app.js'
 
 export const WIDE = { id: 'wide', w: 1920, h: 1080 }
 // A short (plan 214): the same video standing, under a minute, for
-// YouTube Shorts, Reels and TikTok; inside the feed's safe area, the
-// story format's (draw.js FORMATS.story).
+// YouTube Shorts, Reels and TikTok; inside a video feed's safe area (the
+// photo view's, draw.js FORMATS.story, reaches further down from the top).
 export const TALL = { id: 'tall', w: 1080, h: 1920, safe: { t: 250, r: 144, b: 430, l: 144 } }
 export const SHORT = { vocab: 6, kanji: 4, quiz: 3, seconds: 59 }
 // The site a description links to: landing/config.mjs's SITE_ORIGIN, which

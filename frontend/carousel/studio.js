@@ -8,7 +8,7 @@
 /* global JSZip */
 import { ENDING_IDS, FORMATS, TYPES, TYPE_OPTIONS, available, deck, endingSlide } from './slides.js'
 import { DESIGNS, WORDS as FUNNEL } from './funnel.js'
-import { FONT_FACES, font, palette } from './draw.js'
+import { FONT_FACES, drawFeedHud, font, palette } from './draw.js'
 import { BONUS, LEVELS, MAX_QUESTIONS, OPTIONAL, SOURCES, TITLE_MAX, itemsOf, picked, plan, sampleText, sourceOf, titleOf } from './sources.js'
 import { STRINGS } from './strings.js'
 import { PROMO, STORIES } from './promo.js'
@@ -665,6 +665,15 @@ function safeZone(fmt) {
   z.style.setProperty('--b', `${safe.b / h * 100}%`)
   z.style.setProperty('--l', `${safe.l / w * 100}%`)
   z.style.setProperty('--r', `${safe.r / w * 100}%`)
+  // On a 9:16 slide, TikTok's photo view itself: its bars, its buttons.
+  if (h === 1920) {
+    const hud = document.createElement('canvas')
+    hud.width = w
+    hud.height = h
+    hud.className = 'hud'
+    drawFeedHud(hud.getContext('2d'), fmt)
+    z.append(hud)
+  }
   return z
 }
 
