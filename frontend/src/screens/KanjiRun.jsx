@@ -27,7 +27,7 @@ import ReadingsInput from '../components/study/ReadingsInput'
 import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
 import {DrawingQuiz, DrawingOverlay} from '../components/study/DrawingCanvas'
-import { speakJapanese, playUi } from '../lib/audio'
+import { speakJapanese, playUi, isSpeakOnReveal } from '../lib/audio'
 import {
   MODES as STUDY_MODES, RENDER, FAST_REVIEW,
   modeLabel, usesWritingDrill,
@@ -504,7 +504,7 @@ export default function KanjiRun({ session }) {
                 onValidate={() => {
                   setAnswered(true)
                   setShowRating(true)
-                  speakJapanese(card.kana)
+                  if (isSpeakOnReveal()) speakJapanese(card.kana)
                 }}
               />
             )}

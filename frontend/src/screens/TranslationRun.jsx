@@ -13,6 +13,8 @@ import Empty from '../components/ui/Empty'
 import { CardTransition } from '../components/study/CardTransition'
 import RatingBar from '../components/study/RatingBar'
 import { RunStreak } from '../components/study/RunStreak'
+import SpeakToggle from '../components/study/SpeakToggle'
+import { useRevealSpeech } from '../hooks/useRevealSpeech'
 // The tutor's review, drawn by the component 作文 shares (plan 125).
 import { TutorReview, TutorVerdict } from '../components/study/TutorReview'
 import { PointTag, SentenceLead, AnswerWell, CorrectedInPlace } from '../components/study/PracticeCard'
@@ -111,6 +113,9 @@ export default function TranslationRun({ session }) {
   const lines = useRunLines(session, { held: Boolean(lookup) })
   // 問 (plan 131): a question about the sentence, once graded, on the desk.
   const asking = useAsk(session, 'translation')
+  // The answer is in: the Japanese reference is said, unless the
+  // speak-on-reveal switch in the head is off.
+  useRevealSpeech(data?.phrase, stage === 'feedback')
   // Which reference the in-flight breakdown belongs to, so a slow
   // answer for a phrase the learner has already left cannot overwrite
   // the one on screen (ReadingRun's analysisPhraseRef).
@@ -515,7 +520,7 @@ function SessionView({
       // On the desk the score is the run panel's figures (plan 129).
       remaining={desk ? undefined : `${score.correct} / ${score.total}`}
       pass={false}
-      aside={<RunStreak />}
+      aside={<><RunStreak /><SpeakToggle variant="head" /></>}
       toast={fare.toast}
       onToastDone={fare.toastDone}
       records
