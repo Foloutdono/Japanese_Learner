@@ -4,7 +4,8 @@ import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { Leave } from '../components/chrome/Bar'
 import { playUi } from '../lib/audio'
-import { apiJson } from '../lib/api'
+import { cachedJson, MINE_TTL_MS } from '../lib/cachedJson'
+import { heldTooSoon } from '../lib/keyRepeat'
 import { ChevronIcon } from '../components/ui/Icons'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import LevelSelector from '../components/selection/LevelSelector'
@@ -61,7 +62,9 @@ export default function GrammarScreen({ session }) {
     let live = true
     // eslint-disable-next-line react-hooks/set-state-in-effect -- start-of-fetch reset that must land with the fetch it announces.
     setIndex(null)
-    apiJson(`/api/grammar/points?level=${encodeURIComponent(level)}&lang=${lang}`, session)
+    // Shared and kept briefly (lib/cachedJson, plan 211): a level walked
+    // back to asks nothing.
+    cachedJson(`/api/grammar/points?level=${encodeURIComponent(level)}&lang=${lang}`, session, { ttlMs: MINE_TTL_MS })
       .then(data => { if (live) setIndex(data) })
       .catch(() => { if (live) setIndex({ points: [], learned: 0, started: 0, total: 0, totals: {} }) })
     return () => { live = false }
@@ -241,12 +244,17 @@ export default function GrammarScreen({ session }) {
 // now shows. On the change of point rather than in a click handler
 // (plan 117): the rows are links, and a Ctrl/⌘-click that opens a point
 // in another tab changes nothing here, so it must not scroll this page.
+//
+// A held arrow walks at lib/keyRepeat's pace (plan 211): each point is
+// its lesson's request.
 function PointKeys({ points, point, onWalk }) {
+  const stepped = useRef(null)
   useEffect(() => {
     const onKey = e => {
       if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
       if (e.metaKey || e.ctrlKey || e.altKey || dialogOpen()) return
       if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target?.tagName) || e.target?.isContentEditable) return
+      if (heldTooSoon(e, stepped)) { e.preventDefault(); return }
       const at = points.findIndex(p => p.raw_id === point)
       const next = points[Math.min(points.length - 1, Math.max(0, at + (e.key === 'ArrowRight' ? 1 : -1)))]
       if (!next || next.raw_id === point) return

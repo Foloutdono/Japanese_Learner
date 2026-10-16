@@ -19,6 +19,13 @@
 // Space checks, so walking past three levels asks nothing and sends
 // nothing.
 //
+// A held arrow is one step where the arrows check (plan 211): the key's
+// auto-repeat checked a radio thirty times a second, each check a
+// request (the frequency plate's sizes and pools), so a repeat is taken
+// and ignored there -- the focus and the checked radio stay together,
+// as the group promises. Where the arrows only move the focus, a held
+// key still runs along the group.
+//
 // The handler is the group's onKeyDown, or nothing where the group is
 // not walked (a phone, whose DOM stays as it was).
 const STEP = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }
@@ -42,6 +49,7 @@ function walk(e, check) {
   if (at < 0) return
   e.preventDefault()
   e.stopPropagation()
+  if (check && e.repeat) return
   const next = radios[(at + step + radios.length) % radios.length]
   next.focus()
   if (check && next.getAttribute('aria-checked') !== 'true') next.click()
