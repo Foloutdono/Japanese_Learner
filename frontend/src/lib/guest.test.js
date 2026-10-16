@@ -118,4 +118,13 @@ describe('claiming the pass', () => {
     await claimAccount({ email: 'a@b.co', password: 'hunter22' })
     expect(auth.updateUser).toHaveBeenCalledWith({ email: 'a@b.co', password: 'hunter22' })
   })
+
+  // The confirmation e-mail is written from the dashboard's template,
+  // which branches on the user's metadata: `lang` rides along on the
+  // same call, before the mail goes (plan 215).
+  it('tells the template which language to write the confirmation in', async () => {
+    auth.updateUser.mockResolvedValue({ data: { user: { email: null, is_anonymous: true } }, error: null })
+    await claimAccount({ email: 'a@b.co', password: 'hunter22', lang: 'fr' })
+    expect(auth.updateUser).toHaveBeenCalledWith({ email: 'a@b.co', password: 'hunter22', data: { lang: 'fr' } })
+  })
 })

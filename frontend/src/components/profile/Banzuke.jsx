@@ -16,7 +16,7 @@ import { Seg } from '../chrome/Console'
 // list after an elision row, exactly as before.
 const MEDAL = { 1: 'gold', 2: 'silver', 3: 'bronze' }
 
-function Row({ e, isMe }) {
+function Row({ e, isMe, lang }) {
   const medal = MEDAL[e.rank]
   return (
     <div className={`leaderboard-row${isMe ? ' leaderboard-row--me' : ''}`}>
@@ -24,7 +24,7 @@ function Row({ e, isMe }) {
         {e.rank ?? '—'}
       </span>
       <span className="leaderboard-row__name">{e.username}</span>
-      <span className="leaderboard-row__xp">{e.xp.toLocaleString()} XP</span>
+      <span className="leaderboard-row__xp">{e.xp.toLocaleString(lang)} XP</span>
     </div>
   )
 }
@@ -33,14 +33,14 @@ function Row({ e, isMe }) {
 // for the two boards at once, so neither hides behind a toggle — the
 // week beside lifetime where the column is wide enough for two, one
 // over the other where it is not (index.css, .desk-banzuke).
-export function Banzuke({ all, week, t, both = false }) {
+export function Banzuke({ all, week, t, lang, both = false }) {
   const [scope, setScope] = useState(week ? 'week' : 'all')
 
   if (both && week && all) {
     return (
       <div className="desk-banzuke" data-guide="profile.board">
         {[['week', week, t.periodWeek], ['all', all, t.periodAll]].map(([key, b, period]) => (
-          <Board key={key} board={b}>
+          <Board key={key} board={b} lang={lang}>
             <span className="desk-bz__period">{period}</span>
           </Board>
         ))}
@@ -57,7 +57,7 @@ export function Banzuke({ all, week, t, both = false }) {
       ]
     : [{ key: 'all', label: t.periodAll }]
   return (
-    <Board board={board} guide="profile.board">
+    <Board board={board} guide="profile.board" lang={lang}>
       {/* The label is the board's accessible name; the tabs show it. */}
       <Seg
         full
@@ -72,7 +72,7 @@ export function Banzuke({ all, week, t, both = false }) {
 }
 
 // One board: its head (the caller's), then the rows.
-function Board({ board, guide, children }) {
+function Board({ board, guide, lang, children }) {
   const { entries, me } = board
   const meInList = me && entries.some(e => e.username === me.username)
   const rows = meInList || !me ? [...entries] : [...entries, { ...me, elided: true }]
@@ -88,7 +88,7 @@ function Board({ board, guide, children }) {
           {r.elided && (
             <div className="leaderboard-row leaderboard-row__gap" aria-hidden="true">⋯</div>
           )}
-          <Row e={r} isMe={me != null && r.username === me.username} />
+          <Row e={r} isMe={me != null && r.username === me.username} lang={lang} />
         </Fragment>
       ))}
     </section>

@@ -109,9 +109,9 @@ export function StampBook({ calendar, streak, longest, t, lang = 'en' }) {
 
       <div className="sbook__side">
         <div className="sbook__figs">
-          <Figure value={streak ?? 0} unit={t.daysUnit} label={t.streak} />
-          <Figure value={longest ?? 0} unit={t.daysUnit} label={t.longestStreak} />
-          <Figure value={stamped} unit={`/ ${elapsed}`} label={t.daysStamped} />
+          <Figure value={streak ?? 0} unit={t.daysUnit(streak ?? 0)} label={t.streak} lang={lang} />
+          <Figure value={longest ?? 0} unit={t.daysUnit(longest ?? 0)} label={t.longestStreak} lang={lang} />
+          <Figure value={stamped} unit={`/ ${elapsed}`} label={t.daysStamped} lang={lang} />
         </div>
       </div>
     </section>
@@ -119,11 +119,11 @@ export function StampBook({ calendar, streak, longest, t, lang = 'en' }) {
 }
 
 // A bare figure: large numeral, small unit inline, caps label beneath.
-function Figure({ value, unit, label }) {
+function Figure({ value, unit, label, lang }) {
   return (
     <div className="fig">
       <span className="fig__v">
-        {value.toLocaleString()}
+        {value.toLocaleString(lang)}
         {unit && <span className="fig__u">{unit}</span>}
       </span>
       <span className="fig__l">{label}</span>
@@ -140,7 +140,7 @@ function Figure({ value, unit, label }) {
 // three across, so the count divides its content at every width
 // (DESIGN.md, Surfaces). A figure with nothing to count yet prints a
 // dash rather than leaving the lattice a bare slab.
-export function Records({ profile, t }) {
+export function Records({ profile, t, lang }) {
   const figures = [
     { key: 'reviews',   value: profile.totalReviews, label: t.totalReviews },
     {
@@ -159,7 +159,7 @@ export function Records({ profile, t }) {
       {figures.map(f => (
         <div key={f.key} className="record">
           <span className="record__value">
-            {typeof f.value === 'number' ? f.value.toLocaleString() : '—'}
+            {typeof f.value === 'number' ? f.value.toLocaleString(lang) : '—'}
             {f.unit && typeof f.value === 'number' && <span className="record__unit">{f.unit}</span>}
           </span>
           <span className="record__label">{f.label}</span>

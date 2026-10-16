@@ -178,6 +178,82 @@ def test_oversized_upload_returns_413(client):
         data={"start": "0", "end": "30"},
     )
     assert response.status_code == 413
+    assert response.json()["detail"]["code"] == "file_too_large"
+
+
+# ── The refusals carry a code (plan 215) ──────────────────────────
+# The learner reads a sentence in their own language, which the client
+# words from `code`; the English `message` beside it is for the logs and
+# never reaches a screen. These pin the codes the client has a sentence
+# for -- a renamed code is a learner shown the fallback line.
+def test_a_file_that_is_not_utf8_is_refused_by_name(client):
+    """Shift-JIS is the common case for a Japanese .srt saved on
+    Windows, and the client's sentence says so: the code is what lets
+    it, rather than a 'must be UTF-8' only a developer reads."""
+    sjis = "1\n00:00:01,000 --> 00:00:04,000\n私は学生です。\n".encode("shift_jis")
+    response = client.post(
+        "/api/video/session",
+        files={"file": ("sjis.srt", sjis, "text/plain")},
+    )
+    assert response.status_code == 400
+    detail = response.json()["detail"]
+    assert detail["code"] == "not_utf8"
+    assert "UTF-8" in detail["message"]
+
+
+def test_a_window_back_to_front_is_refused_by_name(client):
+    response = client.post(
+        "/api/video/session",
+        files={"file": ("test.srt", _SRT, "text/plain")},
+        data={"start": "30", "end": "10"},
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"]["code"] == "end_before_start"
+
+
+def test_a_worker_failure_stores_its_code_beside_the_sentence(client):
+    """A file that parses to nothing fails in the worker, off-request:
+    the code has to survive in the row for the poll to hand it back."""
+    response = client.post(
+        "/api/video/session",
+        files={"file": ("blank.srt", b"just some words, no cue timing at all", "text/plain")},
+    )
+    assert response.status_code == 202
+    final = _poll_until_settled(client, response.json()["sessionId"])
+    assert final.status_code == 503
+    body = final.json()
+    assert body["status"] == "failed"
+    assert body["code"] == "parse_failed"
+    assert body["error"]          # the English sentence, for the logs
+
+
+def test_a_session_failed_before_codes_still_reads_back(client):
+    """A row failed before plan 215 has an `error` and no `error_code`:
+    it reads back with code None, which the client words with its own
+    line rather than the stored English."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO video_sessions
+                    (user_id, source, source_ref, status, error)
+                VALUES ('ci-test-user', 'upload', 'old.srt', 'failed',
+                        'No usable cues found in subtitle content')
+                RETURNING id
+                """,
+            )
+            (session_id,) = cur.fetchone()
+        conn.commit()
+    finally:
+        conn.close()
+
+    result = client.get(f"/api/video/session/{session_id}")
+    assert result.status_code == 503
+    body = result.json()
+    assert body["code"] is None
+    assert body["error"] == "No usable cues found in subtitle content"
+    assert body["isYoutube"] is False
 
 
 def test_oversized_upload_is_refused_before_the_form_is_parsed(client, monkeypatch):
@@ -254,7 +330,9 @@ def test_a_bare_url_is_refused_up_front_when_the_server_cannot_fetch(client, mon
         json={"url": "https://youtu.be/dQw4w9WgXcQ", "start": 0, "end": 30},
     )
     assert response.status_code == 400
-    assert "subtitle file" in response.json()["detail"].lower()
+    detail = response.json()["detail"]
+    assert detail["code"] == "link_fetch_disabled"
+    assert "subtitle file" in detail["message"].lower()
 
 
 def test_a_bare_url_becomes_a_session_when_a_proxy_is_configured(client, monkeypatch):
@@ -300,7 +378,8 @@ def test_a_failed_fetch_does_not_call_the_learner_s_subtitles_broken(client, mon
     def _blocked(video_id):
         raise captions_module.CaptionFetchError(
             "This video has no Japanese subtitles. Try another video, "
-            "or add a subtitle file yourself."
+            "or add a subtitle file yourself.",
+            "no_japanese_subtitles",
         )
 
     monkeypatch.setattr(video_module, "fetch_youtube_track", _blocked)
@@ -314,6 +393,7 @@ def test_a_failed_fetch_does_not_call_the_learner_s_subtitles_broken(client, mon
     assert final.status_code == 503
     body = final.json()
     assert body["status"] == "failed"
+    assert body["code"] == "no_japanese_subtitles"
     assert "subtitle file" in body["error"].lower()
     assert body["isYoutube"] is True
 
@@ -334,7 +414,27 @@ def test_the_daily_cap_refuses_instead_of_spending(client, monkeypatch):
         "/api/video/session", json={"url": "https://youtu.be/dQw4w9WgXcQ"},
     )
     assert response.status_code == 429
-    assert "subtitle file" in response.json()["detail"].lower()
+    detail = response.json()["detail"]
+    assert detail["code"] == "link_allowance_mine"
+    assert "subtitle file" in detail["message"].lower()
+
+
+def test_the_app_wide_cap_is_its_own_refusal(client, monkeypatch):
+    """The learner's own allowance and the whole app's are different
+    facts -- one is theirs to wait out, the other is everybody's -- so
+    the client words them apart."""
+    _a_proxy(monkeypatch)
+    monkeypatch.setattr(video_module, "_FETCH_DAILY_CAP", 0)
+    # Out of the way, so a test database many runs old (the count is
+    # by day, from the rows) cannot answer with the learner's own cap.
+    monkeypatch.setattr(video_module, "_FETCH_DAILY_CAP_PER_USER", 10**6)
+    monkeypatch.setattr(video_module, "fetch_youtube_track", lambda video_id: [])
+
+    response = client.post(
+        "/api/video/session", json={"url": "https://youtu.be/dQw4w9WgXcQ"},
+    )
+    assert response.status_code == 429
+    assert response.json()["detail"]["code"] == "link_allowance_app"
 
 
 def test_non_youtube_url_returns_400(client):
@@ -346,6 +446,7 @@ def test_non_youtube_url_returns_400(client):
               "transcript": "0:00 これはテストです。", "start": 0, "end": 30},
     )
     assert response.status_code == 400
+    assert response.json()["detail"]["code"] == "not_youtube_url"
 
 
 def test_get_unknown_session_returns_404(client):
@@ -523,6 +624,7 @@ def test_unparseable_transcript_fails_the_session_with_a_reason(client):
     assert response.status_code == 202
     final = _poll_until_settled(client, response.json()["sessionId"])
     assert final.status_code == 503
+    assert final.json()["code"] == "no_timestamps"
     assert "0:18" in final.json()["error"]
 
 
@@ -611,6 +713,7 @@ def test_a_genuinely_lost_worker_is_still_reported_as_stalled(client, monkeypatc
 
     result = client.get(f"/api/video/session/{session_id}")
     assert result.status_code == 503
+    assert result.json()["code"] == "stalled"
     assert "stalled" in result.json()["error"].lower()
 
 

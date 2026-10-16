@@ -76,4 +76,15 @@ describe('postReview', () => {
     expect(new ApiError(400, { detail: "Invalid mode for kana: 'banana'" }, '/x').code).toBe(null)
     expect(new ApiError(500, null, '/x').code).toBe(null)
   })
+
+  // A refusal that explains itself for the logs (routes/video.py, plan
+  // 210): the code is read off the object, and the English message is
+  // the error's message rather than "[object Object]".
+  it('reads the code off a { code, message } detail', () => {
+    const e = new ApiError(400, { detail: { code: 'not_utf8', message: 'Subtitle file must be UTF-8 text' } }, '/x')
+    expect(e.code).toBe('not_utf8')
+    expect(e.message).toBe('Subtitle file must be UTF-8 text')
+    expect(new ApiError(422, { detail: { code: 'overlap', blocks: [] } }, '/x').code).toBe('overlap')
+    expect(new ApiError(400, { detail: { code: 'Not A Code' } }, '/x').code).toBe(null)
+  })
 })

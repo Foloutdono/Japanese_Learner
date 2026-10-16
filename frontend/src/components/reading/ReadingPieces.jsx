@@ -46,7 +46,7 @@ export function Clock({ fill, label, low = false, running = true, aside = null }
 export function ReadingTimer({ timeLeft, total, covered, t, untimed = false, aside = null }) {
   if (covered) return <Clock fill={0} label={t.writeWhatYouSaw} aside={aside} />
   if (untimed) return <Clock fill={1} label={t.readingUntimed} running={false} aside={aside} />
-  return <Clock fill={total > 0 ? timeLeft / total : 0} label={`${timeLeft.toFixed(1)}s`} aside={aside} />
+  return <Clock fill={total > 0 ? timeLeft / total : 0} label={t.timerSeconds(timeLeft)} aside={aside} />
 }
 
 /** The reading pace, on the clock (the owner's pick B of four drawn

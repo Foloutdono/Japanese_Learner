@@ -142,7 +142,10 @@ export function ExampleSentence({ ex, senseNumber, showTr = true, revealed = fal
           : ex.jp}
       </Line>
       {tag && <span className="dict-ex__tag">{tag}</span>}
-      {showTr && translation && <Line className="dict-ex__tr">{translation}</Line>}
+      {/* `tr` is in the learner's language; a sentence that has only
+          the corpus's English `en` (no French line yet, plan 215) is
+          marked as English. */}
+      {showTr && translation && <Line className="dict-ex__tr" lang={ex.tr ? undefined : 'en'}>{translation}</Line>}
     </>
   )
   if (!onOpen) return <div className="dict-ex">{lines}</div>

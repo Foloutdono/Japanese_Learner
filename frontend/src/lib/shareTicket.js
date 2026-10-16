@@ -31,7 +31,8 @@ import { lineTotals } from '../domain/lineProgress'
 //              shareFigures: the reviews, the vocabulary line's cards
 //              learned, the JLPT stop); a figure not known prints "—"
 //   t          the locale table (tkbShareFigures, clrTicketCaption, tkbShareText)
-//   blob       an image already drawn for this input (shareTicket only),
+//   lang       the UI language, which sets the figures' digit grouping
+//   blob      an image already drawn for this input (shareTicket only),
 //              so the share sheet opens inside the tap that asked for it
 // }
 /** The three figures under the shared ticket, from what the profile and
@@ -337,8 +338,8 @@ async function drawTicket({ days, day, stampDay, t }) {
 }
 
 // ── The image ─────────────────────────────────────────────────
-function figureText(v) {
-  return v == null || v === '' ? '—' : typeof v === 'number' ? v.toLocaleString() : String(v)
+function figureText(v, lang) {
+  return v == null || v === '' ? '—' : typeof v === 'number' ? v.toLocaleString(lang) : String(v)
 }
 
 function todayUtc() {
@@ -346,13 +347,13 @@ function todayUtc() {
 }
 
 /** The Share board on a 1080×1350 canvas (exported for the tests). */
-export async function drawShare(canvas, { days, day, stampDay, figures, t }) {
+export async function drawShare(canvas, { days, day, stampDay, figures, t, lang }) {
   const stamped = stampDay ?? todayUtc()
   const labels = t?.tkbShareFigures ?? {}
   const figs = [
-    [figureText(figures?.reviews), labels.reviews ?? ''],
-    [figureText(figures?.words), labels.words ?? ''],
-    [figureText(figures?.level), labels.level ?? ''],
+    [figureText(figures?.reviews, lang), labels.reviews ?? ''],
+    [figureText(figures?.words, lang), labels.words ?? ''],
+    [figureText(figures?.level, lang), labels.level ?? ''],
   ]
   await loadFonts([
     'TSUJI', '記念乗車券', 'N° 0123456789', ticketRoute(days), ticketName(days), t?.clrTicketCaption?.(days) ?? '',

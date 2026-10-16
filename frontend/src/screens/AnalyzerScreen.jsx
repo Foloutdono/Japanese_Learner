@@ -187,7 +187,7 @@ export default function AnalyzerScreen({ session }) {
   // on the desk rather than over the intake, and the copy state its
   // button shares with the panel's (both are on screen at once there).
   // A phone leaves both to IntakeVideo, whose dialog it is.
-  const grab = useBookmarkletCopy()
+  const grab = useBookmarkletCopy(t)
   const [tutorial, setTutorial] = useState(false)
   const closeTutorial = useCallback(() => setTutorial(false), [])
 
@@ -1007,9 +1007,9 @@ export default function AnalyzerScreen({ session }) {
     explaining[focusIndex] ? t.explaining
     : explainError[focusIndex] ? explainError[focusIndex]
     : mining.lastOutcome ? (
-        mining.lastOutcome.error ? (t.mineFailed ?? "Couldn't add this card.")
-        : mining.lastOutcome.count > 0 ? (t.mineAdded ?? 'Added to your deck')
-        : (t.mineAlready ?? 'That card was already in the deck')
+        mining.lastOutcome.error ? t.mineFailed
+        : mining.lastOutcome.count > 0 ? t.mineAdded
+        : t.mineAlready
       )
     : busy ? t[platform.busy]
     : status === 'failed' ? t.analysisFailed

@@ -30,8 +30,9 @@ export function getTranslations(lang) {
 // The per-word endpoints (`/api/translation/{kanji,vocab}`, used by
 // Kanji/VocabScreen's translateCard when the UI language changes
 // under a card already in hand) answer `{ translation: "" }` for a
-// word they have no entry for rather than omitting it — 313 of the
-// vocab deck's 8405 words have no French gloss, あびる among them.
+// word they have no entry for rather than omitting it — the deck's
+// words all have a French gloss now, but a form outside it (or one
+// renamed since the card was dealt) still comes back empty.
 // A caller that writes that answer straight onto the card replaces a
 // real meaning with nothing, and `??` never catches it, because ""
 // is not nullish: the card then reveals blank, while the dictionary

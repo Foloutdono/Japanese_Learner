@@ -17,18 +17,19 @@ study/grammar_sentence_gen.check_sentence, prefixed with the level and
 the pattern, so a failing build names the entry to fix.
 """
 import re
+import unicodedata
 
 from content.grammar_points_data import (
     GRAMMAR_POINTS_BY_LEVEL, LEVELS, RICH_LEVELS, find,
 )
 from study.furigana import is_kanji
-from study.grammar_examples import KANA_READING, blank_span, pattern_furigana
+from study.grammar_examples import KANA_READING, blank_span, pattern_furigana, structure_furigana
 from study.grammar_match import contains_pattern, verifiable
 from study.grammar_sentence_gen import check_sentence
 from study.llm_shared import sentence_kanji_ok
 
-ENTRY_KEYS = frozenset({"pattern", "reading", "structure", "structure_reading", "meaning", "register", "steps", "compare", "examples", "choose", "tour"})
-REQUIRED_KEYS = frozenset({"pattern", "structure", "meaning", "steps", "compare", "examples"})
+ENTRY_KEYS = frozenset({"pattern", "reading", "structure", "structure_reading", "structure_fr", "meaning", "register", "steps", "compare", "examples", "choose", "tour"})
+REQUIRED_KEYS = frozenset({"pattern", "structure", "structure_fr", "meaning", "steps", "compare", "examples"})
 STEP_KINDS = ("rule", "use", "careful")
 REGISTERS = frozenset({"neutral", "casual", "polite", "formal", "written"})
 EXAMPLE_KEYS = frozenset({"jp", "en", "fr", "register", "contrast"})
@@ -77,6 +78,47 @@ def _text_problems(what: str, pair, rich: bool, max_chars: int, bullets: bool = 
                     out.append(f"{what}.{lang}: a bullet line must start with '- '")
     if rich and isinstance(pair.get("en"), str) and pair.get("en") == pair.get("fr"):
         out.append(f"{what}: fr is a copy of en (rich levels are written in both languages)")
+    return out
+
+
+# ── The formation line in French (plan 215) ──
+# `structure_fr` is the same formula as `structure` with its English
+# words in French: "verb て-form + ください" is "verbe forme en て +
+# ください". Its Japanese is the English line's, character for
+# character and in order, because the French furigana is carried over
+# from `structure_reading` by matching those runs
+# (grammar_examples.structure_furigana) -- and because the formula is
+# the same formula. A word of English left in it is a line half done.
+_FR_ENGLISH = re.compile(
+    r"\b(verb|verbs|noun|nouns|form|stem|adjective|sentence|clause|the|or|and|with|without|plain|polite|dictionary)\b",
+    re.IGNORECASE)
+
+
+def _japanese_skeleton(text: str) -> str:
+    """What is left of a formation line once its Latin words, spaces and
+    their punctuation are gone: its Japanese, its + and its brackets."""
+    return "".join(
+        c for c in text
+        if not (c.isspace() or c in ".,'-" or "LATIN" in unicodedata.name(c, ""))
+    )
+
+
+def _structure_fr_problems(entry: dict) -> list[str]:
+    fr = entry.get("structure_fr")
+    if not isinstance(fr, str) or not fr.strip():
+        return ["structure_fr is empty"]
+    out = []
+    if fr != fr.strip():
+        out.append("structure_fr has surrounding whitespace")
+    english = entry["structure"]
+    if _japanese_skeleton(fr) != _japanese_skeleton(english):
+        out.append(f"structure_fr {fr!r} does not carry structure {english!r}'s Japanese, in order")
+    left = _FR_ENGLISH.findall(fr)
+    if left:
+        out.append(f"structure_fr {fr!r} still has English: {sorted(set(w.lower() for w in left))}")
+    if entry.get("structure_reading") and not any(
+            p.get("reading") for p in structure_furigana(entry, "fr")):
+        out.append(f"structure_fr {fr!r} takes no ruby from the English line's reading")
     return out
 
 
@@ -591,6 +633,7 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
     if isinstance(entry["structure"], str):
         out += [f"{tag}: {p}" for p in _reading_problems(
             "structure", "structure_reading", entry["structure"], entry.get("structure_reading"))]
+        out += [f"{tag}: {p}" for p in _structure_fr_problems(entry)]
     if isinstance(pattern, str) and ":" in pattern:
         # core.auth splits "{user_id}:{raw_id}" on the first colon.
         out.append(f"{tag}: pattern contains ':'")

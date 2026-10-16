@@ -227,12 +227,17 @@ class TestPoolWords:
             seen = [(w["kanji"], w["kana"]) for r in kanji_words(char, "en")["readings"] for w in r["words"]]
             assert len(seen) == len(set(seen)), char
 
-    def test_a_pool_word_is_glossed_as_jmdict_wrote_it_in_either_language(self):
+    def test_a_pool_word_is_glossed_from_the_pools_own_french(self):
         # vocab_fr is the deck's; a pool homograph would collect the deck
-        # word's French (routes/dictionary.py serves the pool the same way).
+        # word's French (routes/dictionary.py serves the pool the same
+        # way). Its French is the pool's own layer (plan 215), and the
+        # English where that has no line.
+        from content import jmdict_fr
         fr = {r["reading"]: r["words"] for r in kanji_words("桃", "fr")["readings"]}["もも"][0]
         en = {r["reading"]: r["words"] for r in kanji_words("桃", "en")["readings"]}["もも"][0]
-        assert fr["meaning"] == en["meaning"]
+        own = jmdict_fr.pool_line(fr["kanji"], fr["kana"])
+        assert fr["meaning"] == (own or en["meaning"])
+        assert en["meaning"].startswith("peach")
 
     def test_a_pool_word_is_filed_under_the_okurigana_it_writes(self):
         # 生かす and 生ける are both い; they used to file under the first

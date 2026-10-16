@@ -21,6 +21,7 @@ from content.grammar_points_data import (
     GRAMMAR_POINTS_BY_LEVEL as GRAMMAR_BY_LEVEL, gloss as grammar_gloss, grammar_to_id,
 )
 from translations import get_meaning
+from content.jmdict_fr import pool_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 from content.kanji_meanings import KANJI_FR
 from content.radical_data import RADICAL_BY_NUMBER, siblings_by_stroke
@@ -137,11 +138,13 @@ def _wrap_vocab(raw_id, entry, level, level_list, mode, lang, stage, preview):
         raise HTTPException(status_code=400, detail=f"Invalid vocab mode: {mode!r}")
     if jmdict_db.is_pool_id(raw_id):
         # A pool word (plan 148) and its neighbours, the distractors, in
-        # JMdict's own gloss: VOCAB_FR is the course's, keyed by written
-        # form, and would hand a pool word a deck homograph's French
-        # (routes/theme_vocab._entry_meaning, the same rule).
+        # the pool's own gloss -- its French line where it has one (plan
+        # 210), JMdict's English otherwise: VOCAB_FR is the course's,
+        # keyed by written form, and would hand a pool word a deck
+        # homograph's French (routes/theme_vocab._entry_meaning, the
+        # same rule).
         return _build_vocab_card(raw_id, entry, level_list, m, lang, stage, preview,
-                                 meaning_of=lambda e: e.get("meaning", ""))
+                                 meaning_of=lambda e: pool_meaning(e, lang))
     return _build_vocab_card(raw_id, entry, level_list, m, lang, stage, preview)
 
 
@@ -349,8 +352,9 @@ def _meaning_preview(source: str, entry: dict, lang: str) -> dict:
         return {"front": entry["kana"], "kana": entry["kana"], "meaning": entry["romaji"]}
     fr_map  = KANJI_FR if source == "kanji" else VOCAB_FR
     # A JMdict pool word (plan 148, an entry carrying its pool `seq`)
-    # has JMdict's gloss and no line in VOCAB_FR -- see _wrap_vocab.
-    meaning = entry.get("meaning", "") if "seq" in entry else get_meaning(entry, lang, fr_map)
+    # has no line in VOCAB_FR; get_meaning answers it from the pool's
+    # own French layer (plan 215) -- see _wrap_vocab.
+    meaning = get_meaning(entry, lang, fr_map)
     return {"front": entry.get("kanji") or entry.get("kana", ""), "kana": entry.get("kana", ""), "meaning": meaning}
 
 
