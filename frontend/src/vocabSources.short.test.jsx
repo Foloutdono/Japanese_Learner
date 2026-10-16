@@ -11,7 +11,7 @@ import './index.css'
 // A 600px window (plan 169): the first words give way, the strip's and
 // the line's, and the page shows whole -- the strip, the three plates to
 // the window's foot, JLPT's five rows each a row's height at least, the
-// gate and its halo in its card.
+// gate and the air round it in its card.
 
 vi.mock('./lib/audio', async o => ({
   ...(await o()),

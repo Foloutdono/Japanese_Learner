@@ -28,10 +28,16 @@ export const GUIDES = Object.freeze({
     { anchor: 'learn.shelf',  key: 'LearnShelf',  radius: 'plate' },
     { anchor: 'learn.library', key: 'LearnLibrary', radius: 'plate' },
   ],
+  // The plates' three stops are the desk's, the painted platform's three
+  // the phone's (plan 225): a gate draws one set, and the guide skips
+  // the other.
   practice: [
     { anchor: 'practice.plate', key: 'PracticePlate', radius: 'plate' },
     { anchor: 'practice.dests', key: 'PracticeDests', radius: 'flat' },
     { anchor: 'practice.exam',  key: 'PracticeExam',  radius: 'plate' },
+    { anchor: 'practice.sign',  key: 'PracticeSign',  radius: 'flat' },
+    { anchor: 'practice.grade', key: 'PracticeGrade', radius: 'flat' },
+    { anchor: 'practice.board', key: 'PracticeBoard', radius: 'pill' },
     { anchor: 'practice.pass',  key: 'PracticePass',  radius: 'pill' },
   ],
   today: [

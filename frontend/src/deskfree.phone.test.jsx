@@ -1808,31 +1808,31 @@ describe('the run\'s lines (plan 129)', () => {
 // ── plan 130 — the gates a phone keeps ──
 // On the desk the plates take the window, Learn's line stands upright
 // and Practice's plates hold their specimens (plan 165; the grades'
-// rows before it). A phone keeps its column: the chip row of five on
-// every platform, and no request for a record or a sample it has
-// nowhere to print.
+// rows before it). A phone keeps its own: since plan 225 Practice's is
+// the painted platform, its signs where the chips were, and no request
+// for a record or a sample it has nowhere to print.
 describe('the gates taking the window (plan 130)', () => {
-  it('keeps Practice\'s chip row and never asks for the record', async () => {
+  it('keeps Practice\'s painted platform and never asks for the record', async () => {
     apiFetch.mockReset()
     apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({}) }))
     const { MemoryRouter } = await import('react-router-dom')
     const { default: PracticeScreen } = await import('./screens/PracticeScreen')
-    // How many platforms, asked of the registry (PracticeScreen.phone.test's
-    // rule): the seventh, 会話, came with plan 217.
+    // How many platforms, asked of the registry: the seventh, 会話, came
+    // with plan 217.
     const { getSections } = await import('./config/tabs')
     await render(<LangProvider><MemoryRouter initialEntries={['/practice']}><PracticeScreen /></MemoryRouter></LangProvider>)
     await settle(250)
-    const feet = [...document.querySelectorAll('.plate__foot--dests')]
-    expect(feet).toHaveLength(getSections('practice', {}).length)
-    for (const foot of feet) expect(foot.querySelectorAll('.chip')).toHaveLength(5)
-    // Nor the desk's specimens (plan 165): no body in the plate's head,
-    // and no request for the samples it would draw from.
+    expect(document.querySelector('.practice > .pgate')).not.toBeNull()
+    expect(document.querySelector('.practice > .plates')).toBeNull()
+    // Every platform on the destination sign, five grades on the other.
+    const sign = document.querySelector('.pgate-sign--main')
+    expect(sign.querySelectorAll('.pgate-roll--dest .pgate-roll__row')).toHaveLength(getSections('practice', {}).length)
+    expect(sign.querySelectorAll('.pgate-roll--grade .pgate-roll__row')).toHaveLength(5)
+    // Nor the desk's specimens (plan 165), and no request for the
+    // samples they would draw from.
     expect(document.querySelector('.plate__body, .prc-spec')).toBeNull()
     expect(apiFetch.mock.calls.some(([path]) => path === '/api/practice/record')).toBe(false)
     expect(apiFetch.mock.calls.some(([path]) => path.startsWith('/api/station/'))).toBe(false)
-    // The column is the phone's, one plate to a row.
-    const plates = [...document.querySelectorAll('.practice > .plates > .plate')].map(p => p.getBoundingClientRect())
-    expect(new Set(plates.map(p => Math.round(p.left))).size).toBe(1)
   })
 })
 
