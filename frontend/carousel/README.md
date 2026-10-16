@@ -638,8 +638,15 @@ is tuned to be said (`long_video_audio.spoken`, `TUNE`): let go after
 level decaying, then brought to the engine's level; the timeline is laid on
 those lengths, so a reveal lands on its voice. It then mixes the lines
 with the app's sounds (`sound.eventAudio`, the shipped recipes at the
-app's level) and a bed of music it plays itself, soft chords and a slow
-pluck, nothing recorded, stepping back while a line is said. The voice's
+app's level) and a bed of music it plays itself, nothing recorded,
+stepping back while a line is said. Since plan 219 the bed is a small
+jazz band on an eight-bar tune in F (Fmaj9 Dm9 Gm9 C13 | Am9 D9 Gm9
+C13): an electric piano comping rootless voicings, swung, over a walking
+bass, brushes and a ride (`--music trio`, the default, at 92), or the
+same piano and tune over a soft boom-bap with a needle's crackle
+(`--music lofi`, at 80). Its notes come from one seed, so a video made
+again sounds the same; its bass carries overtones a phone's speaker
+plays, and it sits as loud as the first bed did. The voice's
 credit "VOICEVOX Nemo" ends every description; never publish the clips
 or a video's sound as a dataset.
 

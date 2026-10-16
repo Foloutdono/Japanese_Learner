@@ -13,6 +13,7 @@
 //   --seconds 60      make only the first minute (to look at a draft)
 //   --stills 12,40    draw those seconds as PNGs, and no video
 //   --format short    the short: 9:16, under a minute (YouTube Shorts, Reels, TikTok)
+//   --music lofi      the bed's feel: trio (the default, plan 219) or lofi
 //   --carousel RECIPE a carousel of the studio as a short video, voiced: the
 //                     studio's "Copy the command" writes the recipe (short.js)
 //
@@ -186,7 +187,7 @@ for (const key of keys) {
   else log(`no app sound named ${key}`)
 }
 writeFileSync(join(WORK, 'timeline.json'), JSON.stringify({ ...tl, seconds }))
-const mixed = spawnSync(python, ['-m', 'scripts.long_video_audio', 'mix', join(WORK, 'timeline.json'), '--cache', CACHE, '--sfx', join(WORK, 'sfx'), '--out', join(WORK, 'mix.wav')], { cwd: BACKEND, stdio: 'inherit' })
+const mixed = spawnSync(python, ['-m', 'scripts.long_video_audio', 'mix', join(WORK, 'timeline.json'), '--cache', CACHE, '--sfx', join(WORK, 'sfx'), '--out', join(WORK, 'mix.wav'), ...(args.music ? ['--music', String(args.music)] : [])], { cwd: BACKEND, stdio: 'inherit' })
 if (mixed.status !== 0) throw new Error('the mix failed')
 
 // ── YouTube's loudness, by one gain for the whole: a dynamic leveller would
