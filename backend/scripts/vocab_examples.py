@@ -6,6 +6,10 @@ Review the course's example sentences (plan 227), in batches.
     python -m scripts.vocab_examples check FILE            # a reviewer's corrections, before they are merged
     python -m scripts.vocab_examples merge DIR             # DIR/fixes_*.json, then verify_*.json, into datas/vocab/example_fixes.json
 
+    python -m scripts.vocab_examples gaps DIR --batches 16 # the deck words with no sentence, as writing batches
+    python -m scripts.vocab_examples check-added FILE      # a writer's sentences, before they are merged
+    python -m scripts.vocab_examples merge-added DIR       # DIR/added_*.json, then averify_*.json, into datas/vocab/example_added.json
+
 The sentences are the Tatoeba ones JMdict files under the deck's words,
 as get_vocab_extras shows them (at most five a word); a sentence that
 illustrates several deck words is one item listing them all. `prep`
@@ -29,16 +33,31 @@ same sentence when only a translation was wrong); `en`, `fr` its
 translations; `why` one line. `glosses` lists deck glosses found wrong
 on the way ({"key", "level", "lang", "now", "should", "why"}); they are
 not applied here.
+
+A word JMdict files no sentence under has sentences written for it
+(content/example_fixes.added). `gaps` lists those words, beside the
+senses JMdict gives them:
+
+    {"key", "level", "kanji", "kana", "meaning", "meaning_fr", "senses"}
+
+and a writer answers DIR/added_NN.json (a second reader DIR/averify_NN.json,
+whose entries replace the writer's for their word):
+
+    {"added": [{"key", "level", "jp", "en", "fr"}]}
+
+two sentences a word, each held to `added_problems`.
 """
 import argparse
 import glob
 import json
 import os
+import re
 import sys
 
 from content import example_fixes, jmdict_fr
 from content.vocab_data import VOCAB_BY_LEVEL
-from content.vocab_extras import _target_span, get_vocab_extras
+from content.vocab_extras import _find_senses, _target_span, get_vocab_extras
+from study.llm_shared import kanji_set_for_level
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 
@@ -47,8 +66,9 @@ LEVELS = ("N5", "N4", "N3", "N2", "N1")
 
 def _originals() -> dict[str, dict]:
     """jp -> {en, fr, words}: every sentence the deck shows, uncorrected."""
-    saved = example_fixes.fixes
+    saved, saved_written = example_fixes.fixes, example_fixes.written
     example_fixes.fixes = lambda: {}
+    example_fixes.written = lambda: {}
     # The French index is cached from fixes(): built while it is patched
     # out, it would stay empty for the rest of the process.
     example_fixes._french.cache_clear()
@@ -69,7 +89,7 @@ def _originals() -> dict[str, dict]:
                     })
         return out
     finally:
-        example_fixes.fixes = saved
+        example_fixes.fixes, example_fixes.written = saved, saved_written
         example_fixes._french.cache_clear()
 
 
@@ -223,6 +243,147 @@ def cmd_merge(in_dir: str) -> int:
     return 0
 
 
+# ── Sentences for the words JMdict gave none ─────────────────
+
+# The longest a written sentence may run, by the card's level: an N5
+# word is met in a short sentence (the brief asks ~20 characters).
+MAX_LEN = {"N5": 30, "N4": 35, "N3": 45, "N2": 55, "N1": 60}
+PER_WORD = (1, 3)
+_JAPANESE = re.compile(r"[\u3040-\u30ff\u4e00-\u9fff]")
+
+
+def _key(word: dict) -> str:
+    return f"{word.get('kanji') or ''}::{word['kana']}"
+
+
+def gap_words() -> list[tuple[str, dict]]:
+    """(level, card) for every deck word that shows no sentence of JMdict's."""
+    originals = _originals()
+    shown = {w["key"] for item in originals.values() for w in item["words"]}
+    return [(level, w) for level in LEVELS for w in VOCAB_BY_LEVEL[level] if _key(w) not in shown]
+
+
+def added_problems(entry: dict, cards: dict, taken: set) -> list[str]:
+    """What is wrong with one written sentence -- [] when it can be merged.
+    `cards` maps (level, key) to the gap words; `taken` holds every
+    sentence already shown or written."""
+    where = f"{entry.get('level')} {entry.get('key')}: {(entry.get('jp') or '?')[:24]}"
+    word = cards.get((entry.get("level"), entry.get("key")))
+    if word is None:
+        return [f"{where}: not a deck word without sentences"]
+    out = []
+    for field in ("jp", "en", "fr"):
+        value = entry.get(field)
+        if not isinstance(value, str) or not value.strip():
+            out.append(f"{where}: `{field}` is empty")
+        elif "\n" in value:
+            out.append(f"{where}: `{field}` has a line break")
+    jp = (entry.get("jp") or "").strip()
+    if not jp:
+        return out
+    if not jp.endswith(("。", "？", "！", "」")):
+        out.append(f"{where}: does not end with 。？！ or 」")
+    if _target_span(jp, word.get("kanji") or "", word["kana"]) is None:
+        out.append(f"{where}: does not carry the word where the page can mark it (course spelling)")
+    allowed = kanji_set_for_level(entry["level"]) | set(word.get("kanji") or "")
+    above = "".join(dict.fromkeys(c for c in jp if "\u4e00" <= c <= "\u9fff" and c not in allowed))
+    if above:
+        out.append(f"{where}: kanji above {entry['level']}: {above} (write them in kana)")
+    if len(jp) > MAX_LEN[entry["level"]]:
+        out.append(f"{where}: {len(jp)} characters, more than {MAX_LEN[entry['level']]} at {entry['level']}")
+    for field in ("en", "fr"):
+        if _JAPANESE.search(entry.get(field) or ""):
+            out.append(f"{where}: `{field}` has Japanese in it")
+    if jp in taken:
+        out.append(f"{where}: a sentence the course already shows")
+    return out
+
+
+def _gap_cards() -> dict:
+    return {(level, _key(w)): w for level, w in gap_words()}
+
+
+def _taken() -> set:
+    taken = set(_originals())
+    taken |= {fix["jp"] for fix in example_fixes.fixes().values()}
+    return taken
+
+
+def _added_found(entries: list[dict], cards: dict, taken: set) -> list[str]:
+    found = []
+    seen = set(taken)
+    per_word: dict[tuple, int] = {}
+    for entry in entries:
+        found += added_problems(entry, cards, seen)
+        seen.add((entry.get("jp") or "").strip())
+        pair = (entry.get("level"), entry.get("key"))
+        per_word[pair] = per_word.get(pair, 0) + 1
+    lo, hi = PER_WORD
+    found += [f"{lv} {k}: {n} sentences (between {lo} and {hi})" for (lv, k), n in per_word.items()
+              if not lo <= n <= hi]
+    return found
+
+
+def cmd_gaps(out_dir: str, batches: int) -> int:
+    items = []
+    for level, w in gap_words():
+        kanji, kana = w.get("kanji") or "", w["kana"]
+        senses = ["; ".join(s.get("glossary") or []) for s in (_find_senses(kanji, kana) or [])][:4]
+        items.append({"key": _key(w), "level": level, "kanji": kanji, "kana": kana,
+                      "meaning": w.get("meaning", ""), "meaning_fr": get_meaning(w, "fr", VOCAB_FR),
+                      "senses": senses})
+    os.makedirs(out_dir, exist_ok=True)
+    size = -(-len(items) // batches)
+    for n in range(batches):
+        chunk = items[n * size:(n + 1) * size]
+        if chunk:
+            with open(os.path.join(out_dir, f"words_{n + 1:02d}.json"), "w", encoding="utf-8") as f:
+                json.dump(chunk, f, ensure_ascii=False, indent=1)
+    print(f"{len(items)} words without a sentence, in batches of {size} under {out_dir}")
+    return 0
+
+
+def cmd_check_added(path: str) -> int:
+    entries = _load(path).get("added") or []
+    found = _added_found(entries, _gap_cards(), _taken())
+    for line in found:
+        print(line)
+    print(f"{len(entries)} sentence(s) for {len({(e.get('level'), e.get('key')) for e in entries})} word(s), "
+          f"{len(found)} problem(s)")
+    return 1 if found else 0
+
+
+def cmd_merge_added(in_dir: str) -> int:
+    cards, taken = _gap_cards(), _taken()
+    by_word: dict[tuple, list] = {}
+    for path in sorted(glob.glob(os.path.join(in_dir, "added_*.json"))):
+        for entry in _load(path).get("added") or []:
+            by_word.setdefault((entry.get("level"), entry.get("key")), []).append(entry)
+    # A second reader's entries replace the writer's for their word.
+    for path in sorted(glob.glob(os.path.join(in_dir, "averify_*.json"))):
+        amended: dict[tuple, list] = {}
+        for entry in _load(path).get("added") or []:
+            amended.setdefault((entry.get("level"), entry.get("key")), []).append(entry)
+        by_word.update(amended)
+    entries = [e for es in by_word.values() for e in es]
+    found = _added_found(entries, cards, taken)
+    for line in found:
+        print(line)
+    if found:
+        print(f"{len(found)} problem(s): nothing written")
+        return 1
+    out = {key: [{k: e[k].strip() for k in ("jp", "en", "fr")} for e in es]
+           for (_, key), es in sorted(by_word.items(), key=lambda kv: kv[0][1])}
+    data = {"_meta": "Sentences written for the deck words JMdict gives none (plan 227): content/example_fixes.py.",
+            "added": out}
+    with open(example_fixes.ADDED_PATH, "w", encoding="utf-8") as f:
+        f.write(json.dumps(data, ensure_ascii=False, indent=1) + "\n")
+    missing = len(cards) - len(out)
+    print(f"{len(entries)} sentence(s) for {len(out)} word(s) in {example_fixes.ADDED_PATH}; "
+          f"{missing} word(s) still without one")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[1])
     sub = ap.add_subparsers(dest="command", required=True)
@@ -234,6 +395,13 @@ def main(argv=None) -> int:
     c.add_argument("file")
     m = sub.add_parser("merge")
     m.add_argument("dir")
+    g = sub.add_parser("gaps")
+    g.add_argument("dir")
+    g.add_argument("--batches", type=int, default=16)
+    ca = sub.add_parser("check-added")
+    ca.add_argument("file")
+    ma = sub.add_parser("merge-added")
+    ma.add_argument("dir")
     args = ap.parse_args(argv)
     if args.command == "stats":
         return cmd_stats()
@@ -241,6 +409,12 @@ def main(argv=None) -> int:
         return cmd_prep(args.dir, args.batches)
     if args.command == "check":
         return cmd_check(args.file)
+    if args.command == "gaps":
+        return cmd_gaps(args.dir, args.batches)
+    if args.command == "check-added":
+        return cmd_check_added(args.file)
+    if args.command == "merge-added":
+        return cmd_merge_added(args.dir)
     return cmd_merge(args.dir)
 
 

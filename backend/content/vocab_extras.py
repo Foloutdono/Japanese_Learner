@@ -546,7 +546,7 @@ def has_examples(kanji: str, kana: str) -> bool:
     reading.py's frequency-tier picker already calls anyway — reuse
     that instead of a second round-trip to the DB when possible."""
     key = f"{kanji}::{kana}"
-    if key in _DECK_WORDS_WITH_EXAMPLES:
+    if key in _DECK_WORDS_WITH_EXAMPLES or example_fixes.added(kanji, kana):
         return True
     for reading in _readings(kana):
         if f"{kanji}::{reading}" in _DECK_WORDS_WITH_EXAMPLES:
@@ -1326,10 +1326,31 @@ def _annotate_sentence(sentence: str, kanji: str, kana: str) -> list:
     return out
 
 
+def _written(kanji: str, kana: str, seen_jp: set, number, gloss: str, room: int) -> list[dict]:
+    """The sentences written for a deck word JMdict gave none (plan 227,
+    content/example_fixes.added), in the shape of the word's own."""
+    out = []
+    for ex in example_fixes.added(kanji, kana):
+        if len(out) >= room or ex["jp"] in seen_jp:
+            continue
+        seen_jp.add(ex["jp"])
+        out.append({
+            "jp": ex["jp"],
+            "en": ex.get("en", ""),
+            "segments": _annotate_sentence(ex["jp"], kanji, kana),
+            "sense_number": number,
+            "sense_glossary": gloss,
+        })
+    return out
+
+
 def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = "fr") -> dict:
     all_senses = _find_senses(kanji, kana)
     if not all_senses:
-        return {"tags": [], "senses": [], "examples": []}
+        examples = _written(kanji, kana, set(), None, meaning_hint, _MAX_EXAMPLES)
+        if examples and lang == "fr":
+            _in_french([], examples)
+        return {"tags": [], "senses": [], "examples": examples}
 
     senses = all_senses[:_MAX_SENSES]
     primary_ids = {id(s) for s in _select_primary(senses, meaning_hint)}
@@ -1372,6 +1393,12 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
                 break
         if len(examples) >= _MAX_EXAMPLES:
             break
+    # Where JMdict's sentences run short, the course's own follow them,
+    # under the sense the card glosses.
+    first = ordered[0] if ordered else None
+    examples += _written(kanji, kana, seen_jp, numbers[id(first)] if first is not None else None,
+                         "; ".join(first.get("glossary", [])) if first is not None else meaning_hint,
+                         _MAX_EXAMPLES - len(examples))
 
     if lang == "fr":
         _in_french(senses_out, examples)

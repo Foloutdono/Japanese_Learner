@@ -1,5 +1,5 @@
 """
-The course's example sentences, corrected (plan 227).
+The course's example sentences, corrected, and written where JMdict had none (plan 227).
 
 Every word of the vocab deck shows the Tatoeba sentences JMdict files
 under its senses (content/vocab_extras.get_vocab_extras): on its card and
@@ -30,6 +30,18 @@ correction is checked against the course's words only
 word only where it still carries that word; anywhere else the original
 stands (`for_word`).
 
+A word JMdict files no sentence under -- 1,128 of the deck's, a kana
+card, a word Tatoeba never met -- has sentences written for it instead,
+two a word, in datas/vocab/example_added.json, keyed by the card:
+
+    {"added": {"<kanji>::<kana>": [{"jp": ..., "en": ..., "fr": ...}]}}
+
+get_vocab_extras shows them after the word's own (`added`), and
+content/jmdict_fr.py answers their French like a correction's. They
+were written by Claude and read again by a second reviewer, and are
+held to what tests/test_vocab_examples.py asks of them: the word in its
+course spelling, no kanji above its level, both translations.
+
 Loaded once, on first use: a few thousand short lines.
 """
 import json
@@ -38,6 +50,7 @@ from functools import lru_cache
 
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PATH = os.path.join(_BASE_DIR, "datas", "vocab", "example_fixes.json")
+ADDED_PATH = os.path.join(_BASE_DIR, "datas", "vocab", "example_added.json")
 
 
 @lru_cache(maxsize=1)
@@ -49,12 +62,29 @@ def fixes() -> dict[str, dict]:
 
 
 @lru_cache(maxsize=1)
+def written() -> dict[str, list[dict]]:
+    """"{kanji}::{kana}" -> the sentences written for a word JMdict
+    gave none."""
+    if not os.path.exists(ADDED_PATH):
+        return {}
+    with open(ADDED_PATH, encoding="utf-8") as f:
+        return json.load(f).get("added") or {}
+
+
+def added(kanji: str, kana: str) -> list[dict]:
+    """The sentences written for this deck word ({jp, en, fr}), or []."""
+    return written().get(f"{kanji}::{kana}", [])
+
+
+@lru_cache(maxsize=1)
 def _french() -> dict[str, str]:
-    return {fix["jp"]: fix["fr"] for fix in fixes().values() if fix.get("jp") and fix.get("fr")}
+    out = {ex["jp"]: ex["fr"] for exs in written().values() for ex in exs if ex.get("jp") and ex.get("fr")}
+    out.update({fix["jp"]: fix["fr"] for fix in fixes().values() if fix.get("jp") and fix.get("fr")})
+    return out
 
 
 def french(jp: str) -> str | None:
-    """The French of a corrected sentence, by the sentence shown."""
+    """The French of a corrected or written sentence, by the sentence shown."""
     return _french().get(jp) if jp else None
 
 
