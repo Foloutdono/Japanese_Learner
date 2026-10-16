@@ -155,7 +155,9 @@ describe('the boarding reached on a stale address', () => {
     await click(screen, '[data-action="continue"]')              // the name, already the profile's
     await click(screen, '[data-motive="trip"]')
     await click(screen, '[data-action="continue"]')              // why
-    await click(screen, '[data-kana="both"]')                    // → the level list
+    await click(screen, '[data-kana="both"]')                    // → choose or test
+    await click(screen, '[data-how="pick"]')
+    await click(screen, '[data-action="continue"]')              // → the level list
     await click(screen, '[data-level="N5"]')
     await click(screen, '[data-action="continue"]')              // the level
     await click(screen, 'button[data-goal]')                     // the first stop ahead

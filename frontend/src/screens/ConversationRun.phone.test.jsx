@@ -61,9 +61,15 @@ function submit(text) {
   field.dispatchEvent(new Event('input', { bubbles: true }))
   document.querySelector('form.stage__foot').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
 }
-const tile = jp => [...document.querySelectorAll('.tour-guess')].find(t => t.textContent.includes(jp))
+const tile = jp => [...document.querySelectorAll('.kaiwa-reply')].find(t => t.textContent.includes(jp))
 const primary = () => document.querySelector('.stage__foot .btn-primary')
 const talkBox = () => document.querySelector('.kaiwa-card > .prompt-card__body')
+/** A line's Japanese as written, its readings left out. */
+function written(line) {
+  const jp = line.querySelector('.dict-ex__jp').cloneNode(true)
+  jp.querySelectorAll('rt').forEach(rt => rt.remove())
+  return jp.textContent
+}
 
 /** On the screen, whole. */
 function onScreen(el) {
@@ -157,7 +163,7 @@ describe('a whole scene on a phone (plan 221)', () => {
     const box = talkBox()
     expect(box.scrollHeight).toBeGreaterThan(box.clientHeight)
     pageIsStill()
-    const tiles = document.querySelectorAll('.tour-guess')
+    const tiles = document.querySelectorAll('.kaiwa-reply')
     expect(tiles).toHaveLength(3)
     tiles.forEach(onScreen)
     // And the line they answer is the one in view.
@@ -165,19 +171,43 @@ describe('a whole scene on a phone (plan 221)', () => {
     screen.unmount()
   })
 
-  it('gives a pick\'s verdict the card\'s room, the reply taken struck, and Next under it', async () => {
+  it('draws the talk as bubbles: theirs at the left on the line\'s rail, the learner\'s at the right on the gold (plan 223)', async () => {
+    const screen = await board('choose')
+    await rideToLastTurn()
+    const talk = document.querySelector('.kaiwa-talk').getBoundingClientRect()
+    const theirs = document.querySelector('.kaiwa-talk > .tour-line--them:last-child > .tour-line__text')
+    const mine = [...document.querySelectorAll('.kaiwa-talk > .tour-line--me > .tour-line__text')].at(-1)
+    // Each on its own side, its voice on the far one.
+    expect(Math.abs(theirs.getBoundingClientRect().left - talk.left)).toBeLessThan(1)
+    expect(Math.abs(mine.getBoundingClientRect().right - talk.right)).toBeLessThan(1)
+    expect(mine.parentElement.querySelector('.tour-speak').getBoundingClientRect().right).toBeLessThanOrEqual(mine.getBoundingClientRect().left)
+    // The rails: an edge each, never a fill.
+    expect(getComputedStyle(theirs).borderLeftWidth).toBe('3px')
+    expect(getComputedStyle(mine).borderRightWidth).toBe('3px')
+    // Who says it is the side it stands on: the name stays for a reader.
+    const who = theirs.parentElement.querySelector('.tour-line__who')
+    expect(who.textContent).toBe(LONG_SCENE.them)
+    expect(who.getBoundingClientRect().width).toBeLessThanOrEqual(1)
+    screen.unmount()
+  })
+
+  it('sends a wrong pick into the talk struck, the right reply after it, the exchange in view and Next under it', async () => {
     const screen = await board('choose')
     await rideToLastTurn()
     const last = LONG_SCENE.turns.at(-1)
     const wrong = last.choices.find(c => !c.right)
     tile(wrong.jp).click()
     await landed()
-    // The tiles go; the verdict says what was taken and what was right.
-    expect(document.querySelector('.tour-guess')).toBeNull()
-    const said = document.querySelector('.kaiwa-card .tour-said--no')
-    expect(said.querySelector('.kaiwa-said__taken').textContent).toBe(wrong.jp)
-    expect(said.textContent).toContain(last.me.jp)
-    inTalk(said)
+    // The replies go; the pick is in the talk, and the right one after it.
+    expect(document.querySelector('.kaiwa-reply')).toBeNull()
+    const taken = document.querySelector('.kaiwa-talk > .kaiwa-line--taken')
+    const right = document.querySelector('.kaiwa-talk > .kaiwa-line--right')
+    expect(written(taken)).toBe(wrong.jp)
+    // (French copy is welded: its no-break spaces read as spaces here.)
+    expect(taken.querySelector('.tour-line__foot').textContent.replace(/[\u00a0\u202f]/g, ' ')).toBe(wrong.note)
+    expect(written(right)).toBe(last.me.jp)
+    inTalk(taken)
+    inTalk(right)
     onScreen(primary())
     pageIsStill()
     // The scene's end comes into view the same way.

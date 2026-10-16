@@ -5,17 +5,28 @@ Choosing a level -- at the boarding or in Settings › Learning -- marks
 every stop behind it KNOWN: those cards start mastered, with their first
 check spread evenly over the coming six weeks so no single day is
 flooded. Moving up does the same for the stops crossed; moving down
-deletes nothing -- the cards above keep their history and rejoin the
-run when the level rises again (routes/today.py holds their lanes back
+deletes no history -- the cards above keep theirs and rejoin the run
+when the level rises again (routes/today.py holds their lanes back
 meanwhile; see daily_queue.hold_above). A stop on the way to the
 learner's goal is never held: the line is the goal when it lies above
 the level (daily_queue.hold_line).
+
+An assumption is not history (plan 224). A card marked known that the
+learner has never been asked about is the app's guess, and a move down
+says the guess was wrong: from the new level up, those rows are given
+back (SRSEngine.forget_assumed) and the cards are new again. Kept, they
+stood mastered in the very deck the learner moved down to learn, and
+the day's ration, which deals only cards with no row, had nothing left
+to deal -- Today was empty. A check the learner misses is a new card
+too, not a lapse (SRSEngine.review).
 
 Pure arithmetic here: which stops, which cards, which mode. The rows
 themselves are written by SRSEngine.seed_known, and the routes that
 call it (routes/profile.py's PATCH and its preview, routes/onboarding.py's
 complete) own the request.
 """
+from itertools import zip_longest
+
 from study import card_index
 from study.difficulty import LEVELS
 from study.modes import KANA, KANJI, VOCAB, GRAMMAR, MODES_FOR_SOURCE
@@ -43,6 +54,12 @@ def stops_behind(level: str) -> list[str]:
     return list(LEVELS[:LEVELS.index(level)])
 
 
+def stops_from(level: str) -> list[str]:
+    """`level` and every stop above it, in line order -- where a move
+    down to `level` gives the untouched assumptions back (plan 224)."""
+    return list(LEVELS[LEVELS.index(level):])
+
+
 def stops_between(lower: str, upper: str) -> list[str]:
     """The stops strictly above `lower`, up to and including `upper` --
     what a move down from `upper` to `lower` sets aside."""
@@ -50,16 +67,23 @@ def stops_between(lower: str, upper: str) -> list[str]:
 
 
 def known_batches(stops) -> list[tuple[str, str, list[str]]]:
-    """(source, mode, raw ids) per source over `stops`, in deck order --
-    the units seed_known writes. An item the primary mode cannot serve
-    (a kana-only word under word→meaning does not exist, but the filter
-    is the registry's, not ours) is simply not a card."""
+    """(source, mode, raw ids) per source over `stops` -- the units
+    seed_known writes, whose first checks fall in this order. An item
+    the primary mode cannot serve (a kana-only word under word→meaning
+    does not exist, but the filter is the registry's, not ours) is
+    simply not a card.
+
+    The stops are dealt in turn, each in deck order (plan 224): one card
+    from each, then the next from each. Stop after stop, an N3 boarder's
+    first three weeks of checks were all N5 and the stop they were
+    likeliest to have misjudged, N4, was not asked before the fourth;
+    in turn, every stop behind the level is checked from the first day,
+    and study/level_fit can tell which one the learner stands on."""
     out = []
     for source in JLPT_SOURCES:
         mode = primary_mode(source)
-        ids: list[str] = []
-        for stop in stops:
-            ids.extend(card_index.raw_ids(source, stop, mode))
+        decks = [card_index.raw_ids(source, stop, mode) for stop in stops]
+        ids = [raw for dealt in zip_longest(*decks) for raw in dealt if raw is not None]
         # Once each: two kana-only words with the same reading share an
         # id (card_index's first-wins note), and to the scheduler they
         # are one card.

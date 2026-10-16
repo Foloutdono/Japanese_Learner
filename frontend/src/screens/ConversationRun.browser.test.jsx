@@ -14,9 +14,11 @@ import { LangProvider } from '../LangContext'
 // the tutor and nothing else. Free: the other person answers what was
 // written, the tutor's word stands under the line, the bar grades it,
 // and the day's ceiling closes the talk and says so. Since plan 221 the
-// talk is heard as it is said, under the run's speaker switch, and a
-// pick takes the tiles away (the layout itself is measured in
-// ConversationRun.phone.test.jsx). French copy: the lane's.
+// talk is heard as it is said, under the run's speaker switch (the
+// layout itself is measured in ConversationRun.phone.test.jsx); since
+// plan 223 a pick is sent into the talk as the learner's bubble,
+// marked, a wrong one struck with the right one after it. French copy:
+// the lane's.
 
 const apiFetch = vi.fn()
 const apiJson = vi.fn()
@@ -187,36 +189,60 @@ describe('Choose', () => {
     expect(root.querySelector('.kaiwa-talk .dict-ex__tr').textContent).toBe('Je vous réchauffe le bento.')
   })
 
-  it('takes a pick as the answer: the tiles go, what was taken struck, the right reply and why said, the pick graded', async () => {
+  it('sends a pick into the talk: a wrong one struck under its mark and why, the right one after it, the pick graded', async () => {
     const root = await started('choose')
-    const tiles = [...root.querySelectorAll('.tour-guess')]
-    expect(tiles.map(t => t.textContent)).toEqual(expect.arrayContaining(['1はい、温かいです。', '2はい、お願いします。', '3いただきます。']))
-    tiles[0].click()
+    const replies = [...root.querySelectorAll('.kaiwa-reply')]
+    expect(replies.map(r => r.textContent)).toEqual(expect.arrayContaining(['1はい、温かいです。', '2はい、お願いします。', '3いただきます。']))
+    replies[0].click()
     await settle(120)
-    // The verdict has the card's room: the tiles that showed the pick
-    // are gone, so it names the reply taken, struck.
-    expect(root.querySelector('.tour-guess')).toBeNull()
-    const said = root.querySelector('.kaiwa-card .tour-said--no')
-    expect(said).not.toBeNull()
-    expect(said.querySelector('.kaiwa-said__taken').textContent).toBe('はい、温かいです。')
-    expect(said.textContent).toContain('はい、お願いします。')
-    expect(said.textContent).toContain('dit que le bento est chaud')
+    // The replies go: the pick is the learner's bubble now.
+    expect(root.querySelector('.kaiwa-reply')).toBeNull()
+    const taken = root.querySelector('.kaiwa-talk > .kaiwa-line--taken')
+    expect(taken.querySelector('.dict-ex__jp').textContent).toBe('はい、温かいです。')
+    expect(taken.querySelector('.kaiwa-mark--no .sr-only').textContent).toBe('Faux')
+    expect(taken.querySelector('.tour-line__foot').textContent).toContain('dit que le bento est chaud')
+    // The reply that was right follows it, named, its own why inside.
+    const right = root.querySelector('.kaiwa-talk > .kaiwa-line--right')
+    expect(taken.nextElementSibling).toBe(right)
+    expect(right.querySelector('.tour-line__who').textContent).toBe('La réponse')
+    expect(right.querySelector('.dict-ex__jp').textContent).toBe('はい、お願いします。')
+    expect(right.querySelector('.kaiwa-why').textContent).toContain('accepte poliment une offre')
     const [call] = fetchCalls('/api/conversation/result')
     expect(body(call)).toEqual({ scenario: 'konbini-lunch', mode: 'choose', turn: 0, correct: false })
   })
 
+  it('keeps a miss in the talk once it goes on, and lets the notes go', async () => {
+    const root = await started('choose')
+    root.querySelectorAll('.kaiwa-reply')[0].click()
+    await settle(80)
+    root.querySelector('.stage__foot .btn-primary').click()
+    await settle(80)
+    // The struck reply, the right one and the next line: the talk's
+    // history, marks and all -- and no note left from the last turn.
+    expect(lineTexts(root)).toEqual(['お弁当は温めますか。', 'はい、温かいです。', 'はい、お願いします。', 'お箸はいりますか。'])
+    expect(root.querySelector('.kaiwa-line--taken .kaiwa-mark--no')).not.toBeNull()
+    expect(root.querySelector('.tour-line__foot')).toBeNull()
+    expect(root.querySelector('.kaiwa-why')).toBeNull()
+    // And the next turn's replies are back under it.
+    expect(root.querySelectorAll('.kaiwa-reply')).toHaveLength(3)
+  })
+
   it('goes on as the script has it, and ends on the scene\'s last word', async () => {
     const root = await started('choose')
-    root.querySelectorAll('.tour-guess')[1].click()
+    root.querySelectorAll('.kaiwa-reply')[1].click()
     await settle(80)
-    expect(root.querySelector('.tour-said--ok')).not.toBeNull()
+    // A right pick is the learner's line at once, ringed, its why inside.
+    const mine = root.querySelector('.kaiwa-talk > .tour-line--me')
+    expect(mine.querySelector('.kaiwa-mark--ok .sr-only').textContent).toBe('Juste')
+    expect(mine.querySelector('.kaiwa-why').textContent).toContain('accepte poliment une offre')
+    expect(root.querySelector('.kaiwa-line--taken')).toBeNull()
     root.querySelector('.stage__foot .btn-primary').click()
     await settle(80)
     // The learner is credited with the reply, and the next line follows.
     expect(lineTexts(root)).toEqual(['お弁当は温めますか。', 'はい、お願いします。', 'お箸はいりますか。'])
     // The line answered now shows what it said.
     expect(root.querySelector('.kaiwa-talk .dict-ex__tr').textContent).toBe('Je vous réchauffe le bento.')
-    root.querySelectorAll('.tour-guess')[0].click()
+    root.querySelectorAll('.kaiwa-reply')[0].click()
     await settle(80)
     const finish = root.querySelector('.stage__foot .btn-primary')
     expect(finish.textContent).toContain('Terminer')
@@ -243,7 +269,7 @@ describe('the talk heard as it is said (plan 221)', () => {
   it('voices the other person as they speak, and a right reply in the learner\'s voice once, at the pick', async () => {
     const root = await started('choose')
     expect(heard()).toEqual(['them:お弁当は温めますか。'])
-    root.querySelectorAll('.tour-guess')[1].click()
+    root.querySelectorAll('.kaiwa-reply')[1].click()
     await settle(60)
     expect(heard().at(-1)).toBe('me:はい、お願いします。')
     root.querySelector('.stage__foot .btn-primary').click()
@@ -252,12 +278,12 @@ describe('the talk heard as it is said (plan 221)', () => {
     expect(heard()).toEqual(['them:お弁当は温めますか。', 'me:はい、お願いします。', 'them:お箸はいりますか。'])
   })
 
-  it('says the reply the talk takes after a wrong pick, then the answer to it', async () => {
+  it('says the reply that was right at a wrong pick, never the one taken, then the answer to it', async () => {
     const root = await started('choose')
-    root.querySelectorAll('.tour-guess')[0].click()
+    root.querySelectorAll('.kaiwa-reply')[0].click()
     await settle(60)
-    // A wrong pick is not said.
-    expect(heard()).toEqual(['them:お弁当は温めますか。'])
+    // The reply the talk takes, in the learner's voice, as it appears.
+    expect(heard()).toEqual(['them:お弁当は温めますか。', 'me:はい、お願いします。'])
     root.querySelector('.stage__foot .btn-primary').click()
     await settle(80)
     expect(heard()).toEqual(['them:お弁当は温めますか。', 'me:はい、お願いします。', 'them:お箸はいりますか。'])
@@ -267,7 +293,7 @@ describe('the talk heard as it is said (plan 221)', () => {
     setSpeakOnReveal(false)
     const root = await started('choose')
     expect(root.querySelector('.stage__head [data-action="speak-on-reveal"]').getAttribute('aria-pressed')).toBe('false')
-    root.querySelectorAll('.tour-guess')[1].click()
+    root.querySelectorAll('.kaiwa-reply')[1].click()
     await settle(60)
     root.querySelector('.stage__foot .btn-primary').click()
     await settle(80)

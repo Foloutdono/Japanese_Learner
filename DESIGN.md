@@ -1093,14 +1093,22 @@ adds no idiom of its own: it is the tour's scene made to answer back.
   card too narrow to earn the aside's column keeps its long name whole).
   Both choices ride the address, replaced. On the desk the scenes go two
   across at every count.
-- **The talk is the tour's scene** (`ScenePlate` and `SceneLine`,
-  exported from `GrammarTour.jsx` and shared, never copied): the place
-  as a station plate at the card's head, then a line a row with who
-  says it, its furigana, its translation and its voice -- the other
-  person in A's voice and the learner in B's (the bank is in
-  `study/grammar_audio`'s catalogue). **The line just said is held
-  untranslated until it is answered**; a quiet link under it gives the
-  translation early.
+- **The talk is a thread of bubbles** (plan 223, the owner's pick B of
+  the canvas "Tsuji — la conversation en bulles"), drawn with the tour's
+  own pieces (`ScenePlate` and `SceneLine`, exported from
+  `GrammarTour.jsx` and shared, never copied: everything a bubble is
+  lives under `.kaiwa-talk`, and the tour's scene keeps its rows). The
+  place as a station plate at the thread's head, then a line a bubble on
+  the stage's own ground, the card's frame off: **the other person's at
+  the left on the line's rail, the learner's at the right on their
+  gold** -- an edge each, never a fill, in `--bg-card` -- with its
+  furigana, its translation inside it and its voice's ring beside it on
+  the far side; the other person in A's voice and the learner in B's
+  (the bank is in `study/grammar_audio`'s catalogue). Who says it is the
+  side it stands on, so the name is clipped for a reader rather than
+  printed. **The line just said is held untranslated until it is
+  answered**; a quiet link inside it gives the translation early, and
+  its voice's ring wears the line's ink.
 - **The talk stays on the screen** (plan 221). Once it is under way the
   run is bounded to the screen, as the passage is: the card takes what
   the head, the meter, the dock and the floor leave, the talk scrolls
@@ -1111,18 +1119,24 @@ adds no idiom of its own: it is the tour's scene made to answer back.
   where it fits, the lines before it filling what is left above, and
   from its top where it does not, so a long note is read from its head.
   A line arrives as a list's row does. The talk is **heard as it is
-  said**: the other person's lines play in A's voice as they come, a
-  right reply in the learner's at the pick (the tour's rule) and the
-  reply the talk takes before the next line otherwise, under the
-  sentence runs' speaker switch in the head (`SpeakToggle`). A free
-  reply is the device's voice, the catalogue having no such line.
-- **Three ways, one stage.** Choose: the replies as the tour's tiles
-  under the card; the pick is the answer, with no Check, and **takes
-  the tiles away**: the tour's verdict (`Said`) at the talk's foot,
-  over a hairline as the task and the end are, names the reply taken,
-  struck (as the tour's results print a miss), and says both replies'
-  translations and why, in the card's room rather than what the tiles
-  left it. Translate: what
+  said**: the other person's lines play in A's voice as they come, the
+  reply that was right in the learner's at the pick, whichever was
+  picked, and in Translate the reply the talk takes before the next
+  line, under the sentence runs' speaker switch in the head
+  (`SpeakToggle`). A free reply is the device's voice, the catalogue
+  having no such line.
+- **Three ways, one stage.** Choose: the replies as **quick replies**
+  under the talk, one surface panel, a row a reply between hairlines --
+  its number (the desk's key), its Japanese, and a gold arrow that
+  slides in on hover, saying a tap sends it; the pick is the answer,
+  with no Check, and **is sent**: the replies go and the pick joins the
+  talk as the learner's bubble, its mark at the corner (the tour's ring
+  in success, or the miss's cross). A wrong pick stays struck, on the
+  ground rather than a bubble's and on the miss's rail, why under it,
+  and **the reply that was right follows it**, named « La réponse » in
+  the learner's gold, its own why inside it; a right one carries its why
+  inside. The notes are shown while the exchange is in hand and leave
+  with Next: the thread keeps the bubbles and their marks. Translate: what
   to say, in the learner's language, at the talk's foot over the docked
   field; checked, translation's practice card (the reply over the
   answer's well, rōmaji misses marked, the tutor's verdict at the well's
@@ -1136,8 +1150,8 @@ adds no idiom of its own: it is the tour's scene made to answer back.
   answers it; in free talk, with what they wrote.
 - On the desk the brief stands alone, centred, until the talk starts;
   then the run stands on the three panels: this run's figures at the
-  left, the talk in the middle, the scene's brief (its plate, situation
-  and errand) in the side, the card then holding the talk alone.
+  left, the thread in the middle, the scene's brief (its plate,
+  situation and errand) in the side.
 - **The gate: seven on the phone, six on the desk.** The phone's painted
   platform rolls 会話 as its seventh destination (plan 223). The
   desk's lattice is drawn for six specimens, and a seventh plate -- even

@@ -162,7 +162,8 @@ GROUP BY 1, 2 ORDER BY 4 DESC, 3 DESC;
 -- size: 12x7
 WITH gestes(feature, action) AS (VALUES
   ('speech', 'play'), ('analyzer', 'text'), ('analyzer', 'photo'), ('analyzer', 'video'),
-  ('ocr', 'scan'), ('ask', 'send'), ('explain', 'open'), ('dictionary', 'search'), ('export', 'progress')
+  ('ocr', 'scan'), ('ask', 'send'), ('explain', 'open'), ('dictionary', 'search'), ('export', 'progress'),
+  ('level_fit', 'open'), ('level_fit', 'move'), ('level_fit', 'stay')
 ), used AS (
   SELECT props->>'feature' AS feature, props->>'action' AS action,
          count(DISTINCT user_id) AS apprenants, sum((props->>'n')::int) AS n

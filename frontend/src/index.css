@@ -2186,12 +2186,27 @@ a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; t
   align-items: baseline;
   justify-content: space-between;
 }
-.onb-test__level {
-  font-family: var(--font-serif);
-  font-size: 1.3rem;
+/* The climb's levels (plan 224): how many questions the test asks is
+   the answers' doing, so its head draws the levels rather than a count
+   -- the ones cleared in the pass's gold, the one being asked ringed,
+   the rest ahead. In the boarding's test too. */
+.onb-climb { display: flex; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
+.onb-climb__rung {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  box-sizing: border-box;
+  border: 1.5px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
   font-weight: 700;
+  color: var(--text-secondary);
 }
-.onb-test__progress { color: var(--text-secondary); font-size: 0.85rem; }
+.onb-climb__rung--done { border-color: var(--accent2); background: var(--accent2); color: var(--text-on-fill); }
+.onb-climb__rung--at { border: 2.5px solid var(--accent2); color: var(--text-primary); }
 .onb-test__instructions { color: var(--text-secondary); font-size: 0.9rem; }
 .onb-test__escape {
   display: flex;
@@ -8548,6 +8563,18 @@ textarea:focus-visible {
 .tdy-door__what { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tdy-door__what b { font-weight: 700; color: var(--text-primary); }
 .tdy-door__go { display: inline-flex; align-items: center; gap: var(--sp-1); font-weight: 600; color: var(--text-primary); }
+/* The level that does not fit (plan 224): the run's row's shape, a ring
+   in the state's ink before its figures -- a stop behind the level the
+   checks say is not known, or a level already behind the learner. */
+.tdy-fit { flex: none; }
+.tdy-fit__ring {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--warning);
+  border-radius: var(--r-pill);
+}
+.tdy-fit--up .tdy-fit__ring { border-color: var(--success); }
 
 /* ── The services: the sheet on a phone, the column on the desk ──
    No title over either choice (the owner's word): an option says what
@@ -24995,6 +25022,37 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 }
 .brd-way__name { font-size: var(--fs-body); font-weight: 700; line-height: 1.25; text-wrap: balance; }
 
+/* ── 04 the level asked first, and its test (plan 224) ──
+   Choose it or let the test find it: two ways on the junction's one
+   rung, each with a line under its name. The test stands in the car's
+   stage, the climb's levels over the question, its two ways out over
+   the gate. A level the test asked carries its score on the line, in
+   the pass's gold where it was cleared. */
+.brd-how__code { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; }
+.brd-how__desc { font-size: var(--fs-sm); line-height: 1.3; color: var(--text-secondary); text-wrap: balance; }
+/* A rung tighter than the stage's own gaps: a sentence, its four words,
+   the levels and the two ways out hold on a 667px handset. */
+.brd-test { gap: var(--sp-3); }
+.brd-test > .onb-climb { justify-content: center; }
+.brd-test > .onb-climb > .onb-climb__rung { width: 30px; height: 30px; }
+/* The word or sentence asked reads at a name's rank, not as a caption. */
+.brd-test .exam-question__prompt { margin-bottom: var(--sp-4); font-size: var(--fs-title); line-height: 1.4; }
+.brd-test .mcq-row + .mcq-row { margin-top: var(--sp-3); }
+/* A picked answer in the boarding is lit in the selection's gold (一選),
+   not the exam's pigment: the row's own colour, set for the car. */
+.brd-test .mcq-list > .mcq-row { --mcq-color: var(--accent2); }
+.brd-test__kind {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.brd-test__ways { display: flex; justify-content: space-between; gap: var(--sp-5); }
+.brd-tag--miss { border-color: var(--surface-line); color: var(--text-secondary); }
+
 /* ── 03 kana: the crossing ── */
 .brd-cross__words {
   display: flex;
@@ -32986,10 +33044,11 @@ button.brd-stn { cursor: pointer; }
   --tour-ink: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
   --dict-ink: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
 }
-/* The talk: a scene's lines, one a row, hairline between them. */
+/* The talk: a scene's lines, a bubble each (plan 223, below). */
 .kaiwa-talk {
   display: flex;
   flex-direction: column;
+  gap: var(--sp-4);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -33015,6 +33074,9 @@ button.brd-stn { cursor: pointer; }
   padding-bottom: var(--sp-5);
 }
 .stage--talk > :not(.kaiwa-card) { flex: none; }
+/* The card's frame comes off the talk (plan 223): its bubbles stand on
+   the stage's own ground, at the stage's gutter, as the canvas drew
+   them; the card is only the scroller now. The brief keeps its card. */
 .stage--talk > .kaiwa-card {
   flex: 1 1 auto;
   min-height: 0;
@@ -33022,19 +33084,22 @@ button.brd-stn { cursor: pointer; }
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: none;
+  border: 0;
+  border-radius: 0;
 }
 .stage--talk > .kaiwa-card > .prompt-card__body {
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
+  padding: var(--sp-3) 0;
   overflow-y: auto;
   overscroll-behavior: contain;
   scroll-padding-block: var(--sp-3);
 }
 /* A line arrives as a list's row does (Motion), the first with the
-   stage; a verdict, the task and the end come in the same way. */
+   stage; the task, the practice card and the end come in the same way. */
 .kaiwa-talk > .tour-line,
-.kaiwa-card .tour-said,
 .kaiwa-ask,
 .kaiwa-check,
 .kaiwa-over {
@@ -33042,33 +33107,184 @@ button.brd-stn { cursor: pointer; }
 }
 @media (prefers-reduced-motion: reduce) {
   .kaiwa-talk > .tour-line,
-  .kaiwa-card .tour-said,
   .kaiwa-ask,
   .kaiwa-check,
   .kaiwa-over { animation: arrive-soft 0.2s linear backwards; }
 }
-/* The other person answering a free line: their row, the wait's three
-   dots where their words will be. */
-.kaiwa-pending .tour-line__text { display: flex; align-items: center; min-height: 44px; }
-/* Choose's verdict at the talk's foot: the hairline its door, as the
-   task's, the practice card's and the end's are, not a box in the card
-   (the tour's own card says back the same way, .tour-leaf > .tour-said);
-   the reply taken, struck, now the tiles that showed it have gone. */
-.kaiwa-card .tour-said {
-  padding: var(--sp-4) 0 0;
-  border: 0;
-  border-top: 1px solid var(--surface-line);
-  border-radius: 0;
-  background: none;
+/* ── 223 — the talk as bubbles ──
+   The owner's pick B of the canvas "Tsuji — la conversation en bulles"
+   (2026-10-16). A line is a bubble on the stage's ground: the other
+   person's at the left on the line's own rail (a 3px edge in the line's
+   pigment, as a row's rail is), the learner's at the right on their
+   gold, the voice's ring beside each on the far side. Who says it is
+   the side it stands on, so the name is left to a reader (clipped with
+   .sr-only, not removed). A reply chosen wears its mark at its corner,
+   the tour's ring in success or the miss's ink; a reply taken in error
+   is struck, on the ground rather than a bubble's, its why under it,
+   and the reply that was right follows it, named. The tour's scene
+   keeps its rows: everything here is under .kaiwa-talk. */
+.kaiwa-talk > .tour-line {
+  grid-template-columns: minmax(0, 1fr) 44px;
+  grid-template-areas: "who who" "text speak" "foot foot";
+  row-gap: 0;
+  align-items: end;
+  padding-block: 0;
+  border-top: 0;
 }
-.kaiwa-said__taken { color: var(--text-secondary); text-decoration-color: var(--rating-wrong); }
-/* Above the phone the card stops at --card-w and centres, and what
-   answers it shares that column: the tiles and Next ran the stage's
-   width, 120px past the card on each side of a 900px window. (The
+.kaiwa-talk > .tour-line--me {
+  grid-template-columns: 44px minmax(0, 1fr);
+  grid-template-areas: "who who" "speak text" "foot foot";
+}
+/* The name, clipped for a reader (the side says who to the eye): the
+   talk's own copy of .sr-only, as the analyser keeps its own. */
+.kaiwa-talk .tour-line__who {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.kaiwa-talk > .tour-line > .tour-line__text {
+  grid-area: text;
+  position: relative;
+  justify-self: start;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: var(--sp-4) var(--sp-5);
+  background: var(--bg-card);
+  border-left: 3px solid var(--line-color);
+  border-radius: 0 var(--r-card) var(--r-card) 0;
+}
+.kaiwa-talk > .tour-line--me > .tour-line__text {
+  justify-self: end;
+  border-left: 0;
+  border-right: 3px solid var(--accent2);
+  border-radius: var(--r-card) 0 0 var(--r-card);
+}
+.kaiwa-talk > .tour-line > .tour-speak { grid-area: speak; align-self: end; }
+/* The line just said to the learner: its voice ringed in the line's ink. */
+.kaiwa-talk > .tour-line--them:last-child > .tour-speak { border-color: var(--line-color); }
+.kaiwa-talk > .tour-line > .tour-line__foot {
+  grid-area: foot;
+  justify-self: end;
+  max-width: calc(100% - 44px - var(--sp-3));
+  margin: var(--sp-2) 0 0;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-align: end;
+  text-wrap: pretty;
+}
+/* A reply's mark at the bubble's free corner, cut out of the ground. */
+.kaiwa-mark {
+  position: absolute;
+  top: calc(-1 * var(--sp-3));
+  left: calc(-1 * var(--sp-3));
+  display: inline-flex;
+}
+.kaiwa-mark > .tour-said__mark { width: 24px; height: 24px; background: var(--bg-main); }
+/* What a reply says of itself while its exchange is in hand. */
+.kaiwa-why {
+  display: block;
+  margin-top: var(--sp-2);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+/* A reply taken in error: struck, on the ground, the miss's rail. */
+.kaiwa-talk > .kaiwa-line--taken > .tour-line__text {
+  background: none;
+  border: 1px dashed color-mix(in srgb, var(--rating-wrong) 35%, var(--bg-main));
+  border-right: 3px solid var(--rating-wrong);
+}
+.kaiwa-line--taken .dict-ex__jp {
+  color: var(--text-secondary);
+  text-decoration: line-through;
+  text-decoration-color: var(--rating-wrong);
+}
+/* The reply that was right, named over its bubble in the learner's gold. */
+.kaiwa-talk > .kaiwa-line--right > .tour-line__who {
+  position: static;
+  grid-area: who;
+  justify-self: end;
+  width: auto; height: auto;
+  margin: 0 0 var(--sp-1);
+  overflow: visible;
+  clip-path: none;
+  white-space: normal;
+}
+.kaiwa-cap { color: var(--sel-ink); }
+/* The other person answering a free line: their bubble, the wait's
+   three dots where their words will be. */
+.kaiwa-talk > .kaiwa-pending > .tour-line__text { display: flex; align-items: center; min-height: 44px; }
+/* Choose's quick replies under the talk: one surface panel, a row a
+   reply between hairlines -- its number (the desk's key), its Japanese
+   and the arrow that says a tap sends it, sliding in on hover as a
+   card's ▶ does. */
+.kaiwa-replies {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+}
+.kaiwa-reply {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  min-height: 52px;
+  padding: var(--sp-3) var(--sp-4);
+  background: none;
+  border: 0;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.kaiwa-reply + .kaiwa-reply { border-top: 1px solid var(--surface-line); }
+.kaiwa-reply:focus-visible { outline: 2px solid var(--accent2); outline-offset: -2px; }
+.kaiwa-reply__n {
+  flex: none;
+  min-width: var(--sp-6);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--text-secondary);
+}
+.kaiwa-reply__jp {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 500;
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+.kaiwa-reply__send {
+  flex: none;
+  color: var(--sel-ink);
+  transform: translateX(calc(-1 * var(--sp-1)));
+  transition: transform 0.15s ease;
+}
+.kaiwa-reply:hover .kaiwa-reply__send,
+.kaiwa-reply:focus-visible .kaiwa-reply__send { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .kaiwa-reply__send { transform: none; transition: none; }
+}
+/* Above the phone the talk stops at --card-w and centres, and what
+   answers it shares that column: the replies and Next ran the stage's
+   width, 120px past the talk on each side of a 900px window. (The
    phone's dock bleeds edge to edge by its own rule; the desk's panels
    size the column themselves.) */
 @media (min-width: 769px) {
-  .stage--kaiwa > .tour-guesses,
+  .stage--kaiwa > .kaiwa-replies,
   .stage--kaiwa > .stage__foot {
     width: 100%;
     max-width: var(--card-w);
@@ -33134,8 +33350,6 @@ button.brd-stn { cursor: pointer; }
   color: var(--text-secondary);
   text-wrap: pretty;
 }
-/* Choose's verdict: each reply's translation leads its note. */
-.kaiwa-said__tr { font-weight: 700; }
 /* The free talk's refusals and its end (its wait is a row of the talk,
    .kaiwa-pending above). */
 .kaiwa-alert {
@@ -34802,6 +35016,8 @@ button.brd-stn { cursor: pointer; }
     overflow-y: auto;
   }
   .tdy-desk__col > * { flex-shrink: 0; }
+  /* The level-fit row (plan 224) heads the column, the board under it. */
+  .tdy-desk__col > .tdy-fit { min-height: var(--sp-8); }
   .tdy-desk__panel {
     display: flex;
     flex-direction: column;
@@ -37131,6 +37347,9 @@ button.brd-stn { cursor: pointer; }
   .desk-brd .brd__car[data-dir="back"] { --pull: -1; }
   .desk-brd .brd__car--out { animation: desk-brd-pull-out 180ms cubic-bezier(0.4, 0, 1, 1) forwards; }
   .desk-brd .brd__car[data-car="reveal"] { --desk-brd-w: calc(3 * var(--desk-side-w) + var(--sp-8)); }
+  /* The test (plan 224): the stage as wide as its choices, so the word
+     asked stands over them rather than at the paper's edge. */
+  .desk-brd .brd__car[data-car="test"] { --desk-brd-w: var(--card-w); }
   .desk-brd .brd__stage {
     --desk-at: var(--desk-brd-w);
     width: 100%;
