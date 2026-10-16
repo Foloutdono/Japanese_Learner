@@ -15,7 +15,8 @@ call the generator makes is answered from a file,
 
     datas/exam_seed/answers/<key>.json    (the reply, exactly as a model would send it)
 
-keyed by a hash of the prompt. A call with no answer stops the paper and
+keyed by a hash of the prompt and the paper (two papers asking the same
+prompt are two model calls, and get two replies). A call with no answer stops the paper and
 leaves its prompt in datas/exam_seed/prompts/<key>.txt; whoever is
 writing the seeds reads it, writes the reply under the key, and runs
 this again. A reply the generator rejects (a kanji outside the level,
@@ -43,6 +44,7 @@ import fcntl
 import hashlib
 import json
 import logging
+import os
 import sys
 from contextlib import contextmanager
 from pathlib import Path
@@ -73,16 +75,38 @@ class Pending(BaseException):
         self.key, self.task = key, task
 
 
-def prompt_key(messages: list[dict]) -> str:
+# The paper being replayed, "{exam_id}#{n}": part of every reply's key.
+# Two seeds can draw the same subject for the same mondai, and a model
+# asked the same prompt twice writes two different texts; a key of the
+# prompt alone handed both papers one reply, so one passage in two
+# papers.
+_PAPER = {"id": ""}
+
+
+def prompt_key(messages: list[dict], paper: str = "") -> str:
     raw = "\n\x00\n".join(f"{m['role']}:{m['content']}" for m in messages)
+    if paper:
+        raw = f"{paper}\n\x00\n{raw}"
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def _claim_unkeyed(messages: list[dict], answer: Path) -> bool:
+    """A reply written before keys named their paper, taken by the first
+    paper replayed onto it: moved, so a second paper asking the same
+    prompt is asked for a reply of its own."""
+    old = ANSWERS / f"{prompt_key(messages)}.json"
+    try:
+        os.replace(old, answer)
+        return True
+    except FileNotFoundError:
+        return False
 
 
 def replay_chat(messages, timeout=60, max_tokens=3000, reasoning=True, *,
                 vision=False, task="", accept=None) -> str:
-    key = prompt_key(messages)
+    key = prompt_key(messages, _PAPER["id"])
     answer = ANSWERS / f"{key}.json"
-    if answer.exists():
+    if answer.exists() or _claim_unkeyed(messages, answer):
         return answer.read_text(encoding="utf-8")
     PROMPTS.mkdir(parents=True, exist_ok=True)
     body = "\n\n".join(f"=== {m['role']} ===\n{m['content']}" for m in messages)
@@ -156,6 +180,7 @@ def build(exam_id: str, n: int) -> tuple[str, object, list[str]]:
     ("built", paper), ("pending", Pending), ("failed", message) or
     ("unfit", [problems])."""
     _version, _kind, _level, generate = EXAM_GENERATORS[exam_id]
+    _PAPER["id"] = f"{exam_id}#{n}"
     with replaying() as collect:
         try:
             paper = generate(seed_for(exam_id, n))
@@ -163,6 +188,8 @@ def build(exam_id: str, n: int) -> tuple[str, object, list[str]]:
             return "pending", p, collect.lines
         except exam_gen_utils.GenerationFailed as e:
             return "failed", str(e), collect.lines
+        finally:
+            _PAPER["id"] = ""
     found = problems(exam_id, paper)
     if found:
         return "unfit", found, collect.lines

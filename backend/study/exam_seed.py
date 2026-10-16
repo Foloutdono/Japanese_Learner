@@ -168,6 +168,27 @@ def length_tells(papers: list[dict]) -> list[str]:
     return out
 
 
+def authored_texts(paper: dict) -> list[str]:
+    """The texts of a paper a model wrote (passages, scripts, sentences),
+    not the deck-built items: no two seeds of an exam id may share one.
+    A shared text is two papers that are one paper in part -- what a
+    learner who sits both notices first."""
+    out = []
+    for section in paper.get("sections") or []:
+        for m in section.get("mondai") or []:
+            for p in m.get("passages") or []:
+                out.append(p.get("textJp") or p.get("textTemplateJp") or "")
+            for q in m.get("questions") or []:
+                if q.get("scriptJp"):
+                    out.append(q["scriptJp"])
+                elif m.get("type") == "sentence-order":
+                    by_id = {piece["id"]: piece["textJp"] for piece in q.get("pieces") or []}
+                    out.append((q.get("contextJp") or "") + "".join(by_id.get(i, "") for i in q.get("order") or []))
+                elif q.get("underlineJp") or section.get("id") == "grammar":
+                    out.append(q.get("promptJp") or "")
+    return [t for t in out if t]
+
+
 def exam_problems(exam_id: str) -> list[str]:
     """Everything wrong with an exam id's seed file -- [] when it holds
     PER_EXAM sound papers made by the generator_version it registers."""
@@ -185,6 +206,7 @@ def exam_problems(exam_id: str) -> list[str]:
     if sorted(numbers) != list(range(1, len(numbers) + 1)) or len(numbers) < PER_EXAM:
         out.append(f"{exam_id}: seeds {numbers}, not 1 to {PER_EXAM} at least")
     texts = set()
+    seen: dict[str, int] = {}
     for e in entries:
         if e.get("seed") != seed_for(exam_id, e.get("n")):
             out.append(f"{exam_id} #{e.get('n')}: seed is not seed_for({e.get('n')})")
@@ -193,6 +215,10 @@ def exam_problems(exam_id: str) -> list[str]:
         if text in texts:
             out.append(f"{exam_id} #{e.get('n')}: the same paper as another seed")
         texts.add(text)
+        for t in dict.fromkeys(authored_texts(e["paper"])):
+            if t in seen and seen[t] != e.get("n"):
+                out.append(f"{exam_id} #{e.get('n')}: shares a text with #{seen[t]}: {t[:40]}...")
+            seen.setdefault(t, e.get("n"))
     out += [f"{exam_id}: {t}" for t in length_tells([e["paper"] for e in entries])]
     return out
 
