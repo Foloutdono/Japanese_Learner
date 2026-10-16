@@ -508,6 +508,15 @@ const quiz = {
   askSpent:           at => (at ? `Plus de questions aujourd’hui : elles reviennent à ${at}.` : 'Plus de questions aujourd’hui.'),
   askLeft:            n => `${n} question${n > 1 ? 's' : ''} encore aujourd’hui`,
   askFull:            'C’est tout pour cette phrase.',
+  askSuggestLabel:    'Questions suggérées',
+  askSugContrast:     (a, b) => `Pourquoi ${a} et pas ${b} ?`,
+  askSugMarks:        p => `Que marque ${p} ici ?`,
+  askSugPoint:        p => `Comment s’emploie ${p} ?`,
+  askSugExample:      w => `Un autre exemple avec ${w} ?`,
+  askSugPolite:       'Comment le dire plus poliment ?',
+  askSugCasual:       'Et entre amis, à l’oral ?',
+  askSugWhyRight:     'Pourquoi est-ce la bonne réponse ?',
+  askSugWhere:        'Où le texte le dit-il ?',
 
   // Feedback — les glyphes ❌/✅/← qu'elles portaient autrefois en
   // ligne sont maintenant de vraies <Icon/> rendues par ce qui
@@ -1028,7 +1037,7 @@ const phraseAnalyzer = {
   // 保存 (plan 039) — épingler une phrase dans la banque.
   keepSentence:        'Garder cette phrase',
   unkeepSentence:      'Ne plus garder cette phrase',
-  // 歌 (plan 210) — le deck d'une chanson, depuis le résultat de l'analyseur.
+  // 歌 (plan 215) — le deck d'une chanson, depuis le résultat de l'analyseur.
   songDeckOpen:        'Créer un deck à partir de cette chanson',
   songDeckTitle:       'Apprends-la par cœur',
   songDeckName:        'Nom du deck',
@@ -1533,6 +1542,11 @@ const misc = {
   hintSentencesHide:  'Masquer la phrase',
   hintFuriganaShow:   'Afficher les furigana',
   hintFuriganaHide:   'Masquer les furigana',
+  // L'interrupteur de la voix à côté (components/study/SpeakToggle.jsx) :
+  // le nom reste, le titre dit ce que fait un appui.
+  speakOnReveal:      'Lecture à la révélation',
+  speakOnRevealOn:    'Lire la réponse à voix haute quand elle est révélée',
+  speakOnRevealOff:   'Ne plus lire la réponse quand elle est révélée',
 
   // ── Modes d'étude (domain/studyModes.js) ──
   // Un libellé et une description par clé de mode. Le préfixe par source

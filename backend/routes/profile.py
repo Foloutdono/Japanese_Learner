@@ -3,6 +3,8 @@ import io
 import logging
 import random
 import re
+import threading
+import time
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 
@@ -746,6 +748,32 @@ def preview_learning(jlptLevel: str = Query(...), user_id: str = Depends(get_use
     return level_rule_preview(user_id, current, jlptLevel)
 
 
+# The 番付's sums, a minute old at most (plan 211). Each is an aggregate
+# over every learner's whole review_log, review_daily and xp_ledger,
+# and the board asked them afresh on every open -- and twice over for a
+# learner outside the top. The top list is the same for everyone; a
+# learner's own rank is kept per learner, the map dropped when it fills.
+_BOARD_TTL = 60.0
+_BOARD_RANKS_MAX = 2048
+_board_lock = threading.Lock()
+_board_tops: dict[tuple, tuple[float, list]] = {}
+_board_ranks: dict[tuple, tuple[float, dict]] = {}
+
+
+def _board_cached(store: dict, key: tuple, build, cap: int | None = None):
+    now = time.monotonic()
+    with _board_lock:
+        hit = store.get(key)
+    if hit is not None and now - hit[0] < _BOARD_TTL:
+        return hit[1]
+    value = build()
+    with _board_lock:
+        if cap is not None and len(store) >= cap:
+            store.clear()
+        store[key] = (now, value)
+    return value
+
+
 @router.get("/api/leaderboard")
 def get_leaderboard(
     limit: int = Query(20, ge=1, le=200),
@@ -756,7 +784,7 @@ def get_leaderboard(
     user_id: str = Depends(get_user_id),
 ):
     days = 7 if period == "week" else None
-    top = srs.get_leaderboard(limit=limit, days=days)
+    top = _board_cached(_board_tops, (limit, days), lambda: srs.get_leaderboard(limit=limit, days=days))
     names = usernames_for([e["user_id"] for e in top])
 
     entries = [
@@ -774,7 +802,8 @@ def get_leaderboard(
     # #47" instead of just omitting them.
     me = next((e for e in entries if e["username"] == names.get(user_id)), None)
     if me is None:
-        mine = srs.get_user_rank(user_id, days=days)
+        mine = _board_cached(_board_ranks, (user_id, days),
+                             lambda: srs.get_user_rank(user_id, days=days), cap=_BOARD_RANKS_MAX)
         me = {
             "rank": mine["rank"],
             "username": _get_or_create_username(user_id),

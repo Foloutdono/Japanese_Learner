@@ -1,4 +1,4 @@
-# ── A mixed deck (plan 210) ────────────────────────────────────────
+# ── A mixed deck (plan 215) ────────────────────────────────────────
 # A song is its words and its lines: one deck holding app cards of any
 # source beside written front/back pairs. What came back with the type
 # is the rule the first mixed deck lacked -- a card, not the deck,

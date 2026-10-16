@@ -145,7 +145,7 @@ export function HourglassIcon({ size = 18, className }) {
   )
 }
 
-// A note: the song (plan 210), the analyser's door to a song's decks.
+// A note: the song (plan 215), the analyser's door to a song's decks.
 export function SongIcon({ size = 18, className }) {
   return (
     <svg {...base} width={size} height={size} className={className}>

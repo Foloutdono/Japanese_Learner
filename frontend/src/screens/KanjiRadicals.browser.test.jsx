@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
@@ -47,6 +47,9 @@ const SHELL_ORIGIN = 'https://shell.test'
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: false, status: 404, json: async () => ({}), text: async () => '' })
 
 const { default: KanjiScreen } = await import('./KanjiScreen')
+const { forgetCachedJson } = await import('../lib/cachedJson')
+// Each case asks with its own answers: none is kept across (plan 211).
+afterEach(() => { forgetCachedJson() })
 const { apiFetch, apiJson, ApiError } = await import('../lib/api')
 const { default: fr } = await import('../locales/fr/index.js')
 

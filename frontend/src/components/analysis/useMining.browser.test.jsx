@@ -143,7 +143,7 @@ describe('useMining', () => {
     expect(globalThis.fetch).toHaveBeenCalledTimes(1)
   })
 
-  // 混 (plan 210): a mixed deck takes every kind -- an app card of any
+  // 混 (plan 215): a mixed deck takes every kind -- an app card of any
   // source, and a written cloze -- so it is offered for each beside the
   // decks of the kind's own type; a deck followed from the library takes
   // no cards from a follower, and is reused for none.

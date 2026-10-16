@@ -5,7 +5,7 @@ import { shortDate } from '../../lib/formatDate'
 import { useLang } from '../../LangContext'
 import { cachedLookup, fetchLookup, pickEntry } from '../../lib/dictionaryLookup'
 import { api } from '../../lib/origin'
-import { apiJson } from '../../lib/api'
+import { useCachedJson } from '../../lib/cachedJson'
 import { Seg } from '../chrome/Console'
 import {
   SCOPE_ALL, SCOPE_COURSE, formatPct, readingRows,
@@ -13,6 +13,8 @@ import {
 import { FuriganaParts, splitReadingTokens } from '../study/Readings'
 import { joinRuns } from '../../domain/rubyRuns'
 import { ExampleSentence, SenseNumeral } from './ExampleSentence'
+import { SentenceFrame } from './SentenceFrame'
+import { tokenLookup } from '../analysis/lookup'
 import { GrammarLesson } from '../study/GrammarLesson'
 import { StrokeOrderAnimation } from '../study/StrokeOrderAnimation'
 import { StageMark } from '../study/StageMark'
@@ -653,25 +655,11 @@ function saveScope(scope) {
 }
 
 // The counts over all of JMdict are a character's, not a learner's, so
-// they are kept for the page's life and asked for once.
-const allSharesCache = new Map()
-
+// they are kept for the page's life and asked for once, however fast
+// the scope is switched (lib/cachedJson, plan 211).
 function useAllShares(char, active) {
-  const [failed, setFailed] = useState(null)
-  const [, bump] = useState(0)
-  const cached = allSharesCache.get(char) ?? null
-  useEffect(() => {
-    if (!active || cached) return undefined
-    let cancelled = false
-    apiJson(`/api/dictionary/readings-share?char=${encodeURIComponent(char)}`, null)
-      .then(data => {
-        allSharesCache.set(char, data)
-        if (!cancelled) bump(n => n + 1)
-      })
-      .catch(() => { if (!cancelled) setFailed(char) })
-    return () => { cancelled = true }
-  }, [char, active, cached])
-  return { data: cached, failed: !cached && failed === char }
+  const body = useCachedJson(active ? `/api/dictionary/readings-share?char=${encodeURIComponent(char)}` : null, null, { ttlMs: Infinity })
+  return { data: body ?? null, failed: body === null }
 }
 
 function ReadingsByShare({ entry, groups, onClose, jump }) {
@@ -918,7 +906,7 @@ function headwordSize(text) {
 // without `favorites`, no deck row without `mining` and a card — and
 // with neither there is no ＋ at all: a sheet over a quiz files
 // nowhere.
-export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onKanaClick, onReview, mining, favorites, band = false }) {
+export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onKanaClick, onSentenceClick, onReview, mining, favorites, band = false }) {
   const { t, lang, contentMaps } = useLang()
   const map = entry.type === 'vocab' ? contentMaps?.vocab
     : entry.type === 'kanji' ? contentMaps?.kanji
@@ -1019,6 +1007,9 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
     ? examples.filter(ex => !senseNumbers.has(ex.sense_number))
     : examples
   const examplesBySense = numbers => examples.filter(ex => numbers.includes(ex.sense_number))
+  // An example is a door to its breakdown where the shell can open one
+  // (plan 214, SentenceFrame).
+  const sentenceDoor = ex => (onSentenceClick && ex?.jp ? () => onSentenceClick(ex) : undefined)
 
   // With no senses list, the definition is the app's own gloss line —
   // and it only earns a block when there is more to say than the one
@@ -1429,7 +1420,7 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
             blocks it always had. A compare row is a door where the
             shell can open one (`onGrammarClick`). */}
         {isGrammar && (
-          <GrammarLesson variant="plate" point={entry} onCompare={onGrammarClick} />
+          <GrammarLesson variant="plate" point={entry} onCompare={onGrammarClick} onExample={onSentenceClick} />
         )}
 
         {/* ── What it means ────────────────────────────────
@@ -1460,7 +1451,9 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
                       </div>
                       {exs.length > 0 && (
                         <div className="dict-sense__examples">
-                          {exs.map((ex, i) => <ExampleSentence key={i} ex={ex} />)}
+                          {exs.map((ex, i) => (
+                            <ExampleSentence key={i} ex={ex} onOpen={sentenceDoor(ex)} openLabel={t.showBreakdown} />
+                          ))}
                         </div>
                       )}
                     </div>
@@ -1485,7 +1478,8 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
           <section className="dict-block" aria-label={t.examples}>
             <div className="dict-examples">
               {flatExamples.map((ex, i) => (
-                <ExampleSentence key={i} ex={ex} senseNumber={senses.length > 0 ? ex.sense_number : null} />
+                <ExampleSentence key={i} ex={ex} senseNumber={senses.length > 0 ? ex.sense_number : null}
+                                 onOpen={sentenceDoor(ex)} openLabel={t.showBreakdown} />
               ))}
             </div>
           </section>
@@ -1731,15 +1725,16 @@ function useDictionaryLookup(session, term, category, lang, active, kana, id, ex
 // entry at its head. Shared by the sheet (a portal over a quiz or the
 // catalogue) and the body the desk docks beside the catalogue (plan
 // 114), so the two walk their doors the same way.
-function useLookupStack(session, { term, kana, category, id }, exact = false, cached = false) {
+function useLookupStack(session, { term, kana, category, id, tr }, exact = false, cached = false) {
   const { lang } = useLang()
   // Reset by the caller remounting on a new term (the key it is opened
   // with is the term itself).
-  const [stack, setStack] = useState([{ term, kana, category, id }])
+  const [stack, setStack] = useState([{ term, kana, category, id, tr }])
   const here = stack[stack.length - 1]
   // Only the first lookup is the unasked one: a door opened from it is
-  // the learner's own tap and keeps the nearest match.
-  const { entry, loading, error } = useDictionaryLookup(session, here.term, here.category, lang, true, here.kana, here.id, exact && stack.length === 1, cached)
+  // the learner's own tap and keeps the nearest match. A sentence (plan
+  // 214) is no entry and asks the dictionary nothing.
+  const { entry, loading, error } = useDictionaryLookup(session, here.term, here.category, lang, here.category !== SENTENCE, here.kana, here.id, exact && stack.length === 1, cached)
 
   const open = (nextTerm, nextCategory, nextKana) => {
     if (!nextTerm) return
@@ -1751,18 +1746,45 @@ function useLookupStack(session, { term, kana, category, id }, exact = false, ca
     if (!nextId) return
     setStack(s => [...s, { category: 'grammar', id: nextId }])
   }
+  // An example sentence, broken down (plan 214): the same stack, so ‹
+  // walks back from a word in it to the sentence and on to the entry.
+  const openSentence = ex => {
+    if (!ex?.jp) return
+    setStack(s => [...s, { category: SENTENCE, term: ex.jp, tr: ex.tr ?? ex.en }])
+  }
   const back = stack.length > 1 ? () => setStack(s => s.slice(0, -1)) : undefined
   // Straight back to the entry the stack was opened on, however many
   // doors deep (plan 123): the run's docked entry's Esc.
   const root = stack.length > 1 ? () => setStack(s => s.slice(0, 1)) : undefined
-  return { here, entry, loading, error, open, openId, back, root }
+  return { here, entry, loading, error, open, openId, openSentence, back, root, session }
 }
+
+// The stack's frame for an example sentence (plan 214): a lookup
+// opened as {category: 'sentence', term: jp, tr} is its breakdown.
+const SENTENCE = 'sentence'
 
 // What a lookup shows: the loading line, the "not available" answer, or
 // the entry with its doors opening into the same stack.
 function LookupContent({ look, onClose, onRadicalClick, onReview, mining, favorites, band = false }) {
   const { t } = useLang()
-  const { entry, loading, error, open, openId, back } = look
+  const { here, entry, loading, error, open, openId, openSentence, back, session } = look
+  if (here.category === SENTENCE) {
+    return (
+      <SentenceFrame
+        key={here.term}
+        jp={here.term}
+        tr={here.tr}
+        session={session}
+        onBack={back}
+        onClose={onClose}
+        onToken={token => {
+          const next = tokenLookup(token)
+          if (next) open(next.term, next.category, next.kana)
+        }}
+        onGrammar={point => openId(point?.raw_id)}
+      />
+    )
+  }
   return (
     <>
       {loading && (
@@ -1796,6 +1818,7 @@ function LookupContent({ look, onClose, onRadicalClick, onReview, mining, favori
           // the card does.
           onVocabClick={(k, r) => open(k || r, 'vocab', r)}
           onGrammarClick={openId}
+          onSentenceClick={openSentence}
           mining={mining}
           favorites={favorites}
         />
@@ -1804,9 +1827,9 @@ function LookupContent({ look, onClose, onRadicalClick, onReview, mining, favori
   )
 }
 
-export function DictionaryLookupSheet({ term, kana, category, id, session, mining, favorites, onClose, over = false, onRadicalClick, onReview }) {
+export function DictionaryLookupSheet({ term, kana, category, id, tr, session, mining, favorites, onClose, over = false, onRadicalClick, onReview }) {
   const { t } = useLang()
-  const look = useLookupStack(session, { term, kana, category, id })
+  const look = useLookupStack(session, { term, kana, category, id, tr })
   const { here, entry } = look
   const dialogRef = useDialog(onClose, { capture: over })
 
@@ -1839,8 +1862,8 @@ export function DictionaryLookupSheet({ term, kana, category, id, session, minin
 // way. No portal, no scrim, no dialog: it is a column's content.
 // `band` (plan 126): the entry in the desk run's band layout -- the plate
 // and the learner's record in a top panel, the dictionary under it.
-export function DictionaryLookupBody({ term, kana, category, id, session, mining, favorites, onExit, onRadicalClick, onReview, exact = false, escBack = false, band = false, cached = false }) {
-  const look = useLookupStack(session, { term, kana, category, id }, exact, cached)
+export function DictionaryLookupBody({ term, kana, category, id, tr, session, mining, favorites, onExit, onRadicalClick, onReview, exact = false, escBack = false, band = false, cached = false }) {
+  const look = useLookupStack(session, { term, kana, category, id, tr }, exact, cached)
   // `escBack` (plan 123): a host with no way out of its own -- the run's
   // session panel, docked beside the card -- lets Escape step back out
   // of the doors opened in it, to the entry it was opened on. The key

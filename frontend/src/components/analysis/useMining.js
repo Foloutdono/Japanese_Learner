@@ -17,16 +17,18 @@ const DECK_TYPE_FOR_KIND = {
   kanji: 'kanji',
   grammar: 'grammar',
   cloze: 'standard',
-  // The song sheet's own deck (plan 210), which holds both halves.
+  // The song sheet's own deck (plan 215), which holds both halves.
   mixed: 'mixed',
 }
-// A mixed deck (plan 210) takes every kind above: an app card of any
+// A mixed deck (plan 215) takes every kind above: an app card of any
 // source, and a written front/back pair -- so it is offered beside the
 // decks of the kind's own type, wherever something can be added.
 const MIXED = 'mixed'
 
 const STORAGE_PREFIX = 'jp-mine-target'
 const BLANK = '＿＿＿'
+// The deck creates on their way, by learner, type and name (ensureDeck).
+const creating = new Map()
 
 // A cloze card built from ONE Token within a Sentence -- entirely
 // client-side, from data the analysis already carries. Exported as a
@@ -115,7 +117,7 @@ export function useMining(session) {
   // from anyone but its author.
   //
   // `remember: false` makes a deck without making it where the next ＋
-  // goes: the song sheet (plan 210) makes a song's decks in one press,
+  // goes: the song sheet (plan 215) makes a song's decks in one press,
   // and a word mined afterwards should still land where the learner
   // last sent one.
   async function ensureDeck(kind, name, { remember = true } = {}) {
@@ -127,11 +129,20 @@ export function useMining(session) {
       if (remember) rememberTarget(kind, existing.id)
       return existing
     }
-    const deck = await apiJson('/api/decks', session, {
-      method: 'POST',
-      body: JSON.stringify({ name, type }),
-    })
-    setDecks(prev => [deck, ...prev])
+    // A create already on its way under this name is the same deck
+    // (plan 211): Enter held in the picker, or two words mined into a
+    // new deck at once, each posted one before the shelf knew of it.
+    const key = `${session?.user?.id ?? ''} ${type} ${wanted}`
+    let pending = creating.get(key)
+    if (!pending) {
+      pending = apiJson('/api/decks', session, {
+        method: 'POST',
+        body: JSON.stringify({ name, type }),
+      }).finally(() => creating.delete(key))
+      creating.set(key, pending)
+    }
+    const deck = await pending
+    setDecks(prev => (prev.some(d => d.id === deck.id) ? prev : [deck, ...prev]))
     if (remember) rememberTarget(kind, deck.id)
     return deck
   }

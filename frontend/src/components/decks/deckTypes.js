@@ -26,7 +26,7 @@
 //
 // 'mixed' went, because a mixed deck had to union two sources' study
 // modes and then answer what a kanji-only mode means for a grammar card
-// sitting beside it. It is back (plan 210, for a song's words and lines
+// sitting beside it. It is back (plan 215, for a song's words and lines
 // in one deck) with that answered: each card studies in its own source's
 // modes (decks.py's _mode_source). It has no section behind it, so it
 // takes the neutral rail, as `standard` does, and 混 for its name.

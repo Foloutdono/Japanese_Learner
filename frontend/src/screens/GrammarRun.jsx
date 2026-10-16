@@ -20,7 +20,8 @@ import { useAsk } from '../hooks/useAsk'
 import { GrammarWrite } from '../components/study/GrammarWork'
 import { BuildEntry, GrammarChoose, GrammarConstruire, GrammarTiles, PointLine } from '../components/study/GrammarPlate'
 import { useBuild } from '../hooks/useBuild'
-import { cardShape, choiceAnswer } from '../domain/cardShape'
+import { cardShape, choiceAnswer, grammarSentence } from '../domain/cardShape'
+import { useRevealSpeech } from '../hooks/useRevealSpeech'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
 import { ExampleSentence } from '../components/dictionary/ExampleSentence'
 import { Loading } from '../components/ui/Loading'
@@ -39,6 +40,7 @@ import {
   MODES as STUDY_MODES, HINTS, FAST_REVIEW, modeLabel,
 } from '../domain/studyModes'
 import HintBar from '../components/study/HintBar'
+import SpeakToggle from '../components/study/SpeakToggle'
 import { joinRuns } from '../domain/rubyRuns'
 import { ChevronIcon } from '../components/ui/Icons'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
@@ -210,6 +212,10 @@ export default function GrammarRun({ session }) {
   // Construire's answer (plan 194): typed into the entry under the card,
   // shown in the card's hole as it is typed.
   const entry = useBuild(card && cardShape(card).isBuild ? card : null, { session, lang, onDone: onFlashcardReveal })
+  // The card's sentence, said once the answer is out (unless the switch
+  // beside the hints is off).
+  const sentence = card ? grammarSentence(card, entry?.verdict) : null
+  useRevealSpeech(sentence, answered)
 
   if (!valid) return <Navigate replace to={level ? platforms : '/learn/grammar'} />
 
@@ -317,6 +323,11 @@ export default function GrammarRun({ session }) {
       leaveLabel={t.grammarTitle}
       where={`${t.grammarTitle} ${level}`}
       sub={currentModeLabel}
+      // The speak-on-reveal switch, for a card that says a sentence: in
+      // the head, as the sentence runs keep it, rather than in a row of
+      // its own over a Choisir that has no hint to stand beside and no
+      // height to spare on a short desk.
+      aside={card && !gated && (isFill || isContrast || isBuild || isWrite) ? <SpeakToggle variant="head" /> : undefined}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
       records

@@ -3,7 +3,7 @@ import { render } from 'vitest-browser-react'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../../LangContext'
 
-// ── 歌 — the song sheet makes the song's deck (plan 210) ──
+// ── 歌 — the song sheet makes the song's deck (plan 215) ──
 // One mixed deck, through the endpoints the rest of the app already
 // writes decks with: the deck made (or found) by name, the words as one
 // batch of app cards, the lines in the import dialog's slices. What a

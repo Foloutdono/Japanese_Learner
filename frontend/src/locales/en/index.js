@@ -526,6 +526,15 @@ const quiz = {
   askSpent:            at => (at ? `No more questions today: they come back at ${at}.` : 'No more questions today.'),
   askLeft:             n => `${n} question${n > 1 ? 's' : ''} left today`,
   askFull:             'That’s all for this sentence.',
+  askSuggestLabel:     'Suggested questions',
+  askSugContrast:      (a, b) => `Why ${a} and not ${b}?`,
+  askSugMarks:         p => `What does ${p} mark here?`,
+  askSugPoint:         p => `How is ${p} used?`,
+  askSugExample:       w => `Another example with ${w}?`,
+  askSugPolite:        'How would I say it more politely?',
+  askSugCasual:        'And casually, between friends?',
+  askSugWhyRight:      'Why is this the right answer?',
+  askSugWhere:         'Where does the text say it?',
 
   // Feedback — the ❌/✅/← glyphs these used to carry inline are now
   // real <Icon/>s rendered by whatever shows the text (see
@@ -1062,7 +1071,7 @@ const phraseAnalyzer = {
   // 保存 (plan 039) — pinning a Sentence into the bank.
   keepSentence:        'Keep this sentence',
   unkeepSentence:      'Stop keeping this sentence',
-  // 歌 (plan 210) — a song's own deck, from the analyser's result.
+  // 歌 (plan 215) — a song's own deck, from the analyser's result.
   songDeckOpen:        'Make a deck of this song',
   songDeckTitle:       'Make it yours',
   songDeckName:        'Deck name',
@@ -1575,6 +1584,11 @@ const misc = {
   hintSentencesHide:  'Hide the sentence',
   hintFuriganaShow:   'Show furigana',
   hintFuriganaHide:   'Hide furigana',
+  // The speak-on-reveal switch beside them (components/study/SpeakToggle.jsx):
+  // the name stays, the title says what a tap does.
+  speakOnReveal:      'Speak on reveal',
+  speakOnRevealOn:    'Speak the answer when it is revealed',
+  speakOnRevealOff:   'Stop speaking the answer when it is revealed',
 
   // ── Study modes (domain/studyModes.js) ──
   // One label + description per mode key. Namespacing means these need no

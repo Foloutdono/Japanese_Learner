@@ -1,7 +1,8 @@
 import { Fragment, useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useLang } from '../../LangContext'
-import { apiJson, ApiError } from '../../lib/api'
+import { ApiError } from '../../lib/api'
+import { cachedJson, MINE_TTL_MS } from '../../lib/cachedJson'
 import { playUi } from '../../lib/audio'
 import { useDialog } from '../../hooks/useDialog'
 import { ChevronIcon } from '../ui/Icons'
@@ -133,7 +134,7 @@ function registerTag(point, ex, t) {
   return t.glRegister?.[ex.register] ?? ex.register
 }
 
-export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, onClose, onBack }) {
+export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, onClose, onBack, onExample }) {
   const { t, lang } = useLang()
   const [showTr, setShowTr] = useState(true)
   // 発見 again (plan 187e): the plate keeps the tour a tap away, from its
@@ -254,6 +255,7 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
             <div className="dict-examples">
               {examples.map((ex, i) => (
                 <ExampleSentence key={i} ex={{ ...ex, segments: ex.furigana }} showTr={showTr}
+                                 onOpen={onExample ? () => onExample(ex) : undefined} openLabel={t.showBreakdown}
                                  senseNumber={i + 1} tag={registerTag(point, ex, t)} />
               ))}
             </div>
@@ -332,7 +334,8 @@ function useLessonStack(id, initial, session) {
     let cancelled = false
     // eslint-disable-next-line react-hooks/set-state-in-effect -- start-of-fetch reset that must land with the fetch it announces.
     setError(null)
-    apiJson(`/api/grammar/point?id=${encodeURIComponent(here)}&lang=${lang}`, session)
+    // One request per point however many sheets ask (lib/cachedJson, plan 211).
+    cachedJson(`/api/grammar/point?id=${encodeURIComponent(here)}&lang=${lang}`, session, { ttlMs: MINE_TTL_MS })
       .then(data => { if (!cancelled) setCache(c => ({ ...c, [here]: data })) })
       .catch(err => { if (!cancelled) setError(err) })
     return () => { cancelled = true }

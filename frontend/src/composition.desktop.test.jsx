@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
@@ -34,6 +34,9 @@ vi.mock('./stores/stats', () => ({
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: CompositionRun } = await import('./screens/CompositionRun')
+const { forgetCachedJson } = await import('./lib/cachedJson')
+// Each case asks for its lessons afresh: none is kept across (plan 211).
+afterEach(() => { forgetCachedJson() })
 
 const POINTS = [
   { raw_id: 'grammar_N4_〜ながら', level: 'N4', pattern: '〜ながら', structure: 'V-ます + ながら', meaning: 'en faisant', register: null, stage: 'learning' },

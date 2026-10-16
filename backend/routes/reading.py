@@ -19,7 +19,7 @@ from study.card_lookup import (
     find_segments_in_text, attach_stats_to_segments, VOCAB_STATUS_MODES,
     vocab_card_id_for_word,
 )
-from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, gloss as grammar_gloss, grammar_to_id
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, gloss as grammar_gloss, grammar_to_id, id_for
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content import vocab_extras
 from content import reading_sentences
@@ -165,6 +165,15 @@ LANG_NAMES = {
     "it": "Italian",
     "pt": "Portuguese",
 }
+
+
+def known_lang(value: object) -> str:
+    """A language the app answers in, a region tag dropped ("fr-FR" is
+    French); anything else is English (ask.py's rule). For a `lang` that
+    keys a cache of model answers (plan 211): taken as sent, `en1`,
+    `en2`, ... were each a fresh model call and a junk cache row."""
+    code = str(value or "").strip().lower().replace("_", "-").split("-")[0]
+    return code if code in LANG_NAMES else "en"
 
 MIN_BATCH = 1
 MAX_BATCH = 10
@@ -603,6 +612,8 @@ def _finish_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None,
     # guessed one.
     if grammar:
         phrase["grammar"] = grammar
+        # Its card id, so the tag opens the point's lesson (plan 213).
+        phrase["grammar_id"] = id_for(grammar)
     return phrase
 
 
@@ -677,6 +688,10 @@ def get_reading_batch(
     count = max(MIN_BATCH, min(MAX_BATCH, count))
     exclude_seen = {p for p in exclude.split("|") if p}
 
+    # The page's sizes alone (plan 211): a free size over the JMdict
+    # pool was a random pick over as much of its 212k rows as asked.
+    if tier_size not in freq.TIER_SIZES:
+        raise HTTPException(status_code=422, detail=f"tier_size must be one of {list(freq.TIER_SIZES)}")
     if source == "level":
         if not level:
             raise HTTPException(status_code=400, detail="level is required for source=level")

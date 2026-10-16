@@ -57,6 +57,7 @@ from fastapi import APIRouter, Depends, HTTPException
 import core.auth as auth
 from core.auth import get_user_id
 from core.db import db_conn
+from core.srs_instance import srs
 from core.user_level import forget_stored_level
 
 router = APIRouter()
@@ -221,6 +222,7 @@ def delete_account(user_id: str = Depends(get_user_id)):
     finally:
         conn.close()
     forget_stored_level(user_id)
+    srs.forget_history(user_id)
     try:
         auth_deleted = _delete_auth_user(user_id)
     except AuthDeleteError:

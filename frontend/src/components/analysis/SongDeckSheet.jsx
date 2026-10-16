@@ -10,7 +10,7 @@ import { track } from '../../lib/track'
 import { composing } from '../../lib/keyGuards'
 import { songWords, songLines, songDeckName } from './songDeck'
 
-// ── 歌 — make the song yours (plan 210) ──────────────────────────
+// ── 歌 — make the song yours (plan 215) ──────────────────────────
 // The result's second door beside 保存: where keeping takes ONE line
 // into the bank, this takes the whole song -- a video's track, or lyrics
 // pasted or photographed -- into one of the learner's decks: its words,

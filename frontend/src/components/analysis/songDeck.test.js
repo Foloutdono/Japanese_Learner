@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { lineReading, songWords, songLines, songDeckName } from './songDeck'
 
-// ── 歌 — what the song sheet reads off a Passage (plan 210) ──
+// ── 歌 — what the song sheet reads off a Passage (plan 215) ──
 const card = (raw_id, level = 'N5') => ({ raw_id, level, entry: {}, stats: { status: 'new' } })
 const tok = (surface, start, reading, pos, vocab_match = null) => ({
   surface, start, end: start + surface.length, reading, pos, vocab_match, grammar: [],

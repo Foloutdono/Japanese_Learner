@@ -29,6 +29,7 @@ import logging
 import os
 import re
 import threading
+import time
 
 from core.db import db_conn
 from study import dictation
@@ -53,9 +54,43 @@ _locks_guard = threading.Lock()
 _locks: dict[str, threading.Lock] = {}
 
 
+_MAX_LOCKS = 1024
+
+
 def _lock_for(key: str) -> threading.Lock:
     with _locks_guard:
-        return _locks.setdefault(key, threading.Lock())
+        lock = _locks.get(key)
+        if lock is None:
+            # Bounded (plan 211): the route needs no account, and every
+            # well-formed name -- random ones too -- left a lock behind.
+            # Only locks nobody holds are dropped.
+            if len(_locks) >= _MAX_LOCKS:
+                for k in [k for k, held in _locks.items() if not held.locked()][: _MAX_LOCKS // 2]:
+                    del _locks[k]
+            lock = _locks[key] = threading.Lock()
+        return lock
+
+
+# Names no paper refers to, remembered a while (plan 211), and the paper
+# scan two at a time: the route needs no account, so a flood of
+# well-formed names was a flood of full scans of exam_papers.
+_MISS_TTL = 600.0
+_MAX_MISSES = 4096
+_misses: dict[str, float] = {}
+_scans = threading.BoundedSemaphore(2)
+_SCAN_WAIT = 5.0
+
+
+def _missed_lately(key: str) -> bool:
+    at = _misses.get(key)
+    return at is not None and time.monotonic() - at < _MISS_TTL
+
+
+def _remember_miss(key: str) -> None:
+    with _locks_guard:
+        if len(_misses) >= _MAX_MISSES:
+            _misses.clear()
+        _misses[key] = time.monotonic()
 
 
 def turns_from_script(script_jp: str) -> list[dict] | None:
@@ -155,12 +190,20 @@ def restore_clip(filename: str) -> bool:
             logger.info("Re-synthesized missing audio %s", filename)
             return True
 
+        if _missed_lately(key):
+            return False
+        if not _scans.acquire(timeout=_SCAN_WAIT):
+            logger.warning("Audio %s not looked up: the paper scans are busy", filename)
+            return False
         try:
             turns = _turns_for_clip(filename, key)
         except Exception:
             logger.exception("Could not look up the script for audio %s", filename)
             return False
+        finally:
+            _scans.release()
         if turns is None:
+            _remember_miss(key)
             logger.warning("No shipped line and no stored script matches audio %s", filename)
             return False
 

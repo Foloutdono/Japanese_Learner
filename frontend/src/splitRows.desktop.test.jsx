@@ -24,7 +24,8 @@ const TIERS = [1, 2, 3].map(n => ({ tier: n, start_rank: (n - 1) * 200 + 1, end_
 vi.mock('./lib/api', () => ({
   api: p => p,
   apiFetch: vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ tiers: TIERS }) })),
-  apiJson: vi.fn(), apiJsonWithTimeout: vi.fn(), apiUpload: vi.fn(),
+  // The shared answers (lib/cachedJson, plan 211) ask through apiJson.
+  apiJson: vi.fn(async () => ({ tiers: TIERS })), apiJsonWithTimeout: vi.fn(), apiUpload: vi.fn(),
   ApiError: class extends Error {},
 }))
 

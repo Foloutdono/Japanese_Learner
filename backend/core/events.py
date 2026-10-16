@@ -155,7 +155,7 @@ EVENTS: dict[str, frozenset[str]] = {
     # The kind of entry and the direction, never the key: a key names
     # the word a learner looked up, which is theirs.
     "favorite_toggle": frozenset({"kind", "on"}),
-    # ── 歌 — a song's decks, from the video result (plan 210) ────
+    # ── 歌 — a song's decks, from the video result (plan 215) ────
     # How many words and lines went in (0 for the half not taken),
     # never the song's name: the learner typed it, or the video's title
     # said it, and either is theirs.

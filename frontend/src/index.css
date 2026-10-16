@@ -1294,7 +1294,7 @@
    44px round target, wearing the rail pin's own + / ✓ — one pin, one
    pair of glyphs, wherever it sits.
    Pressed, it spends the seal's ink exactly as the stamp does.
-   歌 (plan 210), the song's decks, is the same round door beside it,
+   歌 (plan 215), the song's decks, is the same round door beside it,
    with no pressed state: it opens a sheet. */
 .anl-head__keep,
 .anl-head__song {
@@ -1733,7 +1733,7 @@
   gap: var(--sp-3);
   padding-block: var(--sp-3);
 }
-/* ── 歌 — the song sheet (plan 210) ──
+/* ── 歌 — the song sheet (plan 215) ──
    The two halves of the song as chips (its words, its lines), the name,
    the one filled action; once made, the picker's own row, the door to
    the deck. */
@@ -7625,7 +7625,7 @@ textarea:focus-visible {
   background:
     radial-gradient(80% 70% at 22% 0%, rgba(255, 255, 255, 0.9), transparent 60%),
     linear-gradient(160deg, #f3f2ef 0%, #e2e0db 100%);
-  box-shadow: inset 0 0 0 1px rgba(30, 32, 36, 0.12), 0 14px 30px rgba(0, 0, 0, 0.5), 0 3px 7px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 0 1px rgba(30, 32, 36, 0.12), var(--pcs-lift, 0 14px 30px rgba(0, 0, 0, 0.5), 0 3px 7px rgba(0, 0, 0, 0.3));
 }
 /* 墨 soft-touch charcoal. */
 .pcs--pro,
@@ -7633,7 +7633,7 @@ textarea:focus-visible {
   background:
     radial-gradient(120% 90% at 18% -10%, rgba(255, 255, 255, 0.08), transparent 55%),
     linear-gradient(160deg, color-mix(in srgb, var(--pass-ink) 72%, #1a181d) 0%, color-mix(in srgb, var(--pass-ink) 38%, #141216) 62%, #141216 100%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 14px 30px rgba(0, 0, 0, 0.55), 0 3px 7px rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07), var(--pcs-lift, 0 14px 30px rgba(0, 0, 0, 0.55), 0 3px 7px rgba(0, 0, 0, 0.35));
 }
 .pcs--pro .pcs__grain,
 .jcard--pro .jcard__grain {
@@ -7649,8 +7649,7 @@ textarea:focus-visible {
     inset 0 -1px 0 rgba(40, 42, 48, 0.5),
     inset -1px 0 0 rgba(40, 42, 48, 0.3),
     inset 0 0 0 1px rgba(90, 94, 102, 0.3),
-    0 14px 30px rgba(0, 0, 0, 0.55),
-    0 0 30px rgba(214, 220, 232, 0.24);
+    var(--pcs-lift, 0 14px 30px rgba(0, 0, 0, 0.55), 0 0 30px rgba(214, 220, 232, 0.24));
 }
 .pcs--max .pcs__grain,
 .jcard--max .jcard__grain {
@@ -10369,6 +10368,10 @@ textarea:focus-visible {
   color: color-mix(in srgb, var(--accent2) 60%, var(--text-primary));
 }
 .study-assist__toggle:disabled { opacity: 0.4; cursor: default; }
+/* The speak-on-reveal switch (SpeakToggle) stands at the end of the row
+   as the same pill drawn as an icon alone: the pill's block padding on
+   every side but its inline one, a rung under the labelled pills'. */
+.study-assist__toggle--icon { padding-inline: var(--sp-3); }
 /* A hand-written card has no distractors to offer, so it says why
    rather than showing a control that would do nothing. */
 .study-assist__na {
@@ -13133,6 +13136,25 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .pcard-tag__used { flex: none; color: color-mix(in srgb, var(--success) 60%, var(--text-primary)); }
 .pcard-tag__used--x { color: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); }
+/* The tag as a door to the point's lesson (plan 213): the same tag, a
+   chevron at its end saying where it leads, its edge's pigment taking
+   the border on hover as a breakdown's rule card does. */
+.pcard-tag--door {
+  max-width: 100%;
+  min-height: 44px; /* a hit target, not a spacing rung */
+  background: none;
+  color: inherit;
+  font-weight: 400;
+  text-align: left;
+  cursor: pointer;
+}
+.pcard-tag--door .pcard-tag__jp { overflow-wrap: anywhere; }
+.pcard-tag--door:hover {
+  filter: none;
+  border-color: var(--line-color, var(--accent2));
+}
+.pcard-tag--door:active { background: var(--chip-bg); }
+.pcard-tag__go { flex: none; color: var(--text-secondary); }
 /* The sentence, leading. Room in its leading for the readings over it;
    a line breaks between phrases where the browser can find them
    (auto-phrase), never inside a word it knows. */
@@ -13360,41 +13382,84 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-variant-numeric: tabular-nums;
 }
 /* The words missed, under the well (A2.2): each the word, its reading
-   and its meaning, the miss ink as its edge. */
+   and its meaning, the miss ink as its edge. Stacked, not side by side
+   (plan 213): the word and its reading on one line that wraps where it
+   must, the meaning under them across the tile's whole width -- two
+   columns inside a tile two to a phone's row left a long meaning a
+   column of single words beside the word. A row's tiles stand as tall
+   as its tallest, and a meaning past two lines is the entry's to say. */
 .pcard-misses {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem), 1fr));
   gap: var(--sp-2);
   margin: 0;
   padding: 0;
   list-style: none;
 }
+.pcard-misses__item {
+  display: flex;
+  min-width: 0;
+}
 .pcard-missed {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: 0 var(--sp-3);
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--sp-1);
   padding: var(--sp-2) var(--sp-3) var(--sp-2) var(--sp-4);
+  background: none;
   border: 1px solid var(--border);
   border-radius: var(--r-card);
   box-shadow: inset 3px 0 0 color-mix(in srgb, var(--danger) 70%, transparent);
+  color: inherit;
+  font-weight: 400;
+  text-align: left;
+}
+/* A door to the word's entry, or a particle's point. */
+.pcard-missed--door {
+  min-height: 44px; /* a hit target, not a spacing rung */
+  cursor: pointer;
+}
+.pcard-missed--door:hover {
+  filter: none;
+  border-color: color-mix(in srgb, var(--danger) 70%, transparent);
+}
+.pcard-missed--door:active { background: var(--chip-bg); }
+.pcard-missed--door:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: -2px;
+}
+.pcard-missed__word {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--sp-2);
+  max-width: 100%;
 }
 .pcard-missed__jp {
-  grid-row: span 2;
   font-family: var(--font-jp);
   font-size: var(--fs-title);
   font-weight: 600;
   line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 .pcard-missed__kana {
   font-family: var(--font-jp);
   font-size: var(--fs-sm);
   color: var(--text-secondary);
+  overflow-wrap: anywhere;
 }
 .pcard-missed__en {
+  display: -webkit-box;
+  max-width: 100%;
+  overflow: hidden;
   font-size: var(--fs-sm);
   line-height: 1.35;
   overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 /* The notes under the sentence (translation, composition), in the
    group with it, so a short review stands under what it reviews rather
@@ -15974,6 +16039,41 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-size: var(--fs-sm);
   line-height: 1.5;
   color: var(--text-secondary);
+}
+/* The example as a door to its breakdown (plan 214): the same lines,
+   a chevron at the end saying it leads somewhere, a wash under the
+   press. Its box reaches past the lines by a rung so the text stays on
+   the column it is printed on. */
+.dict-ex--door {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--sp-3);
+  width: calc(100% + 2 * var(--sp-3));
+  margin: 0 calc(-1 * var(--sp-3));
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-card);
+  font-weight: 400;
+  text-align: left;
+}
+.dict-ex--door:hover { filter: none; background: var(--chip-bg); }
+.dict-ex--door:active { background: var(--chip-bg); }
+.dict-ex--door .dict-ex__tr { display: block; }
+.dict-ex__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+.dict-ex__go { flex: none; color: var(--text-secondary); }
+
+/* An example broken down, in the lookup's stack (plan 214): the
+   entry's head with its ‹ and ✕, then the breakdown's rows. */
+.dict-sent__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5) var(--sp-8);
 }
 
 /* ── How it's written ──────────────────────────────────────
@@ -20137,7 +20237,17 @@ button.syllabary-cell:focus-visible {
   justify-content: center;
   /* The gate grows far past the screen's edges. */
   overflow: hidden;
-  animation: gate-leave calc(140ms * var(--gate-x)) linear calc(840ms * var(--gate-x)) forwards;
+}
+/* The fade off the destination, declared as it starts (TicketGate sets
+   data-leaving at LEAVE_MS, 840ms) rather than with that delay from the
+   mount. An opacity animation on the scene, even one still waiting out
+   its delay, has the browser draw the whole scene into a texture of its
+   own and then that texture onto the screen, every frame: a second
+   full-screen pass for the whole cutscene, where a phone has no fill to
+   spare. Declared at the fade, it costs that only for the fade
+   (plan 210). */
+.gate[data-leaving] {
+  animation: gate-leave calc(140ms * var(--gate-x)) linear forwards;
 }
 .gate[data-ink="fill"] { --gate-title-ink: var(--text-on-fill); }
 .gate__scrim {
@@ -20147,10 +20257,14 @@ button.syllabary-cell:focus-visible {
   opacity: 0;
   animation: gate-scrim calc(120ms * var(--gate-x)) ease-out forwards;
 }
-/* Effectively opaque. At 0.96 in the light theme this was cream over
-   cream and the board stayed legible through it, so the gate read as
-   a panel floating on the home screen rather than as a place. */
-@keyframes gate-scrim { to { opacity: 0.995; } }
+/* Opaque. At 0.96 in the light theme this was cream over cream and the
+   board stayed legible through it, so the gate read as a panel floating
+   on the home screen rather than as a place. It was 0.995 after that,
+   which looks the same and is not the same: under a layer short of
+   opaque the browser still draws the whole screen beneath it, every
+   frame of the scene, and under an opaque one it draws nothing
+   (plan 210). */
+@keyframes gate-scrim { to { opacity: 1; } }
 @keyframes gate-leave { to { opacity: 0; } }
 
 /* The gate itself: two pillars with a lane between them. At 110vw a
@@ -20167,6 +20281,13 @@ button.syllabary-cell:focus-visible {
   /* Its own stacking context, so the sill under it (::after) stays
      over the scrim once the arrive transform has ended. */
   isolation: isolate;
+  /* Two transform animations on one box, so the browser runs neither
+     on the compositor, and that is kept on purpose. Split across two
+     boxes, both went to the compositor, which rasters every layer under
+     a zoom at the zoom's largest scale before it draws a frame: the
+     rig, its flaps, the lane and the sill at ~3.4x from the tap. Measured
+     on a phone's throttle (plan 210) that dropped more frames than the
+     main thread costs the zoom, which rasters it at its own size. */
   animation:
     arrive calc(300ms * var(--gate-x)) cubic-bezier(0.22, 0.68, 0.32, 1) backwards,
     gate-through calc(180ms * var(--gate-x)) cubic-bezier(0.6, 0, 0.9, 0.55) calc(480ms * var(--gate-x)) forwards;
@@ -26538,7 +26659,8 @@ button.brd-stn { cursor: pointer; }
    than its point says so at the right (GrammarLesson's registerTag):
    a ring in the ink, as a chip is drawn, never a fill. */
 .gl-block--examples .dict-examples { gap: 0; }
-.gl-block--examples .dict-ex {
+.gl-block--examples .dict-ex,
+.gl-block--examples .dict-ex--door .dict-ex__body {
   display: grid;
   grid-template-columns: var(--sp-5) minmax(0, 1fr) auto;
   grid-template-areas:
@@ -26546,7 +26668,17 @@ button.brd-stn { cursor: pointer; }
     ". tr tr";
   align-items: baseline;
   column-gap: var(--sp-3);
-  padding-block: var(--sp-3);
+}
+.gl-block--examples .dict-ex { padding-block: var(--sp-3); }
+/* A sentence that opens its breakdown (plan 214): the row is the door,
+   its lines the grid above, the chevron at its end. */
+.gl-block--examples .dict-ex--door {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+  padding-inline: 0;
+  border-radius: 0;
 }
 .gl-block--examples .dict-ex:first-child { padding-top: 0; }
 .gl-block--examples .dict-ex + .dict-ex { border-top: 1px solid var(--surface-line); }
@@ -31552,12 +31684,21 @@ button.brd-stn { cursor: pointer; }
   overscroll-behavior: contain;
   background: var(--bg-main);
 }
+/* The page is the window, never taller: with only a min-height, a long
+   thread grew the page past the floor, the field went with it and the
+   thread, never short of room, never scrolled. Held at the window, the
+   thread is what scrolls and the field stays on the foot. dvh, so a
+   WebView the keyboard resizes (Capacitor's native resize) shrinks it.
+   `flex: none`, or the stage's `flex: 1` takes the height for a basis
+   and sizes it by the thread again. */
 .ask-page {
   display: flex;
+  flex: none;
   flex-direction: column;
   gap: var(--sp-5);
   box-sizing: border-box;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
 }
 /* The page's ground is the field's own (--bg-main), so the field takes
    the card's, as it does on a page of cards. */
@@ -31666,6 +31807,34 @@ button.brd-stn { cursor: pointer; }
   font-size: var(--fs-caption);
   color: var(--text-secondary);
 }
+/* The questions offered, over the field (askSuggestions): a tap asks
+   one. Quiet until touched, as a chip is -- the second ink in a
+   hairline, the first on hover -- but a sentence, so it wraps and keeps
+   its case; a thumb's height each. */
+.ask__offers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  flex: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ask__offer {
+  min-height: 44px;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: var(--fs-sm);
+  text-align: start;
+  cursor: pointer;
+}
+.ask__offer:hover,
+.ask__offer:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); }
+.ask__offer:disabled { opacity: 0.45; cursor: not-allowed; }
 
 
 /* ═══ 机 — the desk (plan 113) ═══════════════════════════════════
@@ -33816,6 +33985,9 @@ button.brd-stn { cursor: pointer; }
        the side's (above): on a 600px window the list's foot sat under
        the fold, beyond any scroll. */
     overflow-y: auto;
+    /* That scroll clips: the card's lift (.pcs) was cut to a grey box
+       at the column's edge, so the card lies flat here. */
+    --pcs-lift: 0 0 transparent;
   }
   /* The page takes the rest of the width (plan 139): it stopped at the
      card's width, and a 1440 window held a 640px page beside a 360px
@@ -38860,6 +39032,31 @@ button.brd-stn { cursor: pointer; }
     font-size: var(--fs-caption);
     color: var(--text-secondary);
   }
+  /* The questions offered, as the phone's page offers them (.ask__offer):
+     a hairline each, a click asks one; the column's smaller size. */
+  .desk-ask__offers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    flex: none;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .desk-ask__offer {
+    padding: var(--sp-1) var(--sp-3);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    background: none;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: var(--fs-caption);
+    text-align: start;
+    cursor: pointer;
+  }
+  .desk-ask__offer:hover,
+  .desk-ask__offer:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); }
+  .desk-ask__offer:disabled { opacity: 0.45; cursor: not-allowed; }
   /* ── 解析 — the analyser's result on three columns (plan 134) ──
      The owner's drawing (the "Choix" boards of the analyser canvas, drawn
      at 1877 × 930 as 410 | 830 | 541): the desk's rail steps aside for

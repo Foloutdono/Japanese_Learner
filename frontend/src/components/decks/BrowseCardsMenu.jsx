@@ -36,7 +36,7 @@ const SEARCH_DEBOUNCE_MS = 300
 // Second hand-synced copy of decks.py's SOURCE_FOR_TYPE — see
 // DeckDetailScreen for the same table and why it is duplicated.
 // 'standard' has no app source, so its Browse menu offers nothing; a
-// 'mixed' deck (plan 210) takes every source, kana through the
+// 'mixed' deck (plan 215) takes every source, kana through the
 // dictionary's ＋ since there is no kana tab.
 const SOURCE_FOR_TYPE = {
   kanji: ['kanji'], vocab: ['vocab'], grammar: ['grammar'],

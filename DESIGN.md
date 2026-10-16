@@ -1102,6 +1102,13 @@ So:
   restyled with everything under it. A value only `<html>` reads is
   registered `inherits: false` (`--gate-ground`); a screen the scene
   hides steps out of the page instead (`.tpr--under-gate`).
+- **A scene's fade is declared when it starts; a cover is opaque.** An
+  opacity animation on a whole scene, even one still waiting out a delay,
+  has the browser draw the scene into a texture and that onto the screen
+  every frame: the gate's fade is set at its beat (`data-leaving`), not
+  with an 840ms delay from the mount. A scrim that hides the screen ends at
+  `opacity: 1`, never 0.995: under anything short of opaque the browser
+  draws the whole screen beneath it, every frame (plan 210).
 - Every `:hover` rule needs a matching `:focus-visible`. Keyboard users get the
   same affordance, not just the global ring.
 

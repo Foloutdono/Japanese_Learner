@@ -36,3 +36,18 @@ class PhraseFuriganaTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PhrasePointTests(unittest.TestCase):
+    """Plan 213: a bank sentence carries its point's card id, which the
+    practice card's tag opens the lesson by; a corpus sentence, which
+    names no point, carries neither."""
+
+    def test_a_bank_sentence_carries_its_points_id(self) -> None:
+        phrase = _finish_phrase("ここで少し休みましょう。", "", "少し", "すこし", "N5", grammar="〜ましょう")
+        self.assertEqual(phrase["grammar_id"], "grammar_N5_〜ましょう")
+
+    def test_a_corpus_sentence_names_no_point(self) -> None:
+        phrase = _finish_phrase("ここで少し休みましょう。", "", "少し", "すこし", "N5")
+        self.assertNotIn("grammar", phrase)
+        self.assertNotIn("grammar_id", phrase)

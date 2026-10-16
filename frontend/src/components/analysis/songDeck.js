@@ -1,7 +1,7 @@
 import { wordRowsOf } from './rows'
 import { tokFurigana } from './tokens'
 
-// ── 歌 — a song made the learner's own (plan 210) ────────────────
+// ── 歌 — a song made the learner's own (plan 215) ────────────────
 // A learner who likes a song wants two things of it: to understand it
 // and to read it, aloud, in time -- karaoke. The analyser already holds
 // both halves of that for every line of a video Passage: the words, each
