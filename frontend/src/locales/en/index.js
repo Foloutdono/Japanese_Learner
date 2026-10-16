@@ -1432,6 +1432,8 @@ const conversationMode = {
   cvsGoal:             'Your errand',
   cvsSay:              'Say',
   cvsTheReply:         'The reply',
+  cvsRightMark:        'Right',
+  cvsWrongMark:        'Wrong',
   cvsNext:             'Next',
   cvsFinish:           'Finish',
   cvsReplyLabel:       'Your reply',

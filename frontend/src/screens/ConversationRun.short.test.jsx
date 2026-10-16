@@ -44,7 +44,7 @@ async function landed() {
     .map(a => a.finished.catch(() => {})))
   await settle(700)
 }
-const tile = jp => [...document.querySelectorAll('.tour-guess')].find(t => t.textContent.includes(jp))
+const tile = jp => [...document.querySelectorAll('.kaiwa-reply')].find(t => t.textContent.includes(jp))
 const primary = () => document.querySelector('.stage__foot .btn-primary')
 const talkBox = () => document.querySelector('.kaiwa-card > .prompt-card__body')
 function inWindow(el) {
@@ -70,7 +70,7 @@ beforeEach(() => {
 })
 
 describe('a whole scene on a short window (plan 221)', () => {
-  it('keeps the replies, then the verdict and Next, in the window at the scene\'s last turn', async () => {
+  it('keeps the replies, then the reply sent and Next, in the window at the scene\'s last turn', async () => {
     const screen = await render(
       <LangProvider>
         <MemoryRouter initialEntries={[`/practice/conversation/${LONG_SCENE.id}/choose`]}>
@@ -94,14 +94,15 @@ describe('a whole scene on a short window (plan 221)', () => {
       await landed()
     }
     expect(talkBox().scrollHeight).toBeGreaterThan(talkBox().clientHeight)
-    const tiles = document.querySelectorAll('.tour-guess')
+    const tiles = document.querySelectorAll('.kaiwa-reply')
     expect(tiles).toHaveLength(3)
     tiles.forEach(inWindow)
     inTalk(document.querySelector('.kaiwa-talk > .tour-line:last-child'))
 
     tile(LONG_SCENE.turns.at(-1).choices.find(c => !c.right).jp).click()
     await landed()
-    inTalk(document.querySelector('.kaiwa-card .tour-said'))
+    inTalk(document.querySelector('.kaiwa-talk > .kaiwa-line--taken'))
+    inTalk(document.querySelector('.kaiwa-talk > .kaiwa-line--right'))
     inWindow(primary())
     screen.unmount()
   })
