@@ -13,7 +13,7 @@ import { FOLD_MS, RAISE_MS, TOUCH_MS } from './pantograph'
 import { fitScene } from './gateFit'
 import { ClockFace, Leaves, Pantograph, Rivets, Spark, Spill } from './GateParts'
 
-// ── 練習の改札 — the painted platform (plan 223) ──────────────────────
+// ── 練習の改札 — the painted platform (plan 225) ──────────────────────
 // The Practice gate on the phone, as the owner chose it on the canvas
 // "Practice gate — five wheels" (board 4, 方向幕 "Le quai peint"): the
 // owner's own painting of the platform, a car standing at it with its

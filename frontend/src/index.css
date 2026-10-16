@@ -2687,7 +2687,7 @@ a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; t
   --gate-gold-deep: #b0852f;
   --gate-lamp:      #e0b04f;
   /* The light along the pill's top edge, where the painted Practice
-     gate drew its button catching the canopy's lamps (plan 223): the
+     gate drew its button catching the canopy's lamps (plan 225): the
      gate's fill runs from it down through the lit gold to the gold. */
   --gate-gold-crest: #f3cb68;
   /* 一金 — one metal (plan 174, the harmony round): every primary
@@ -9522,7 +9522,7 @@ textarea:focus-visible {
   .practice > .plates > .plate { flex: 1 1 auto; }
 }
 
-/* ── 練習の改札 — the painted platform (plan 223) ──────────────────────
+/* ── 練習の改札 — the painted platform (plan 225) ──────────────────────
    The Practice gate on the phone: the owner's painting of the platform,
    cut into layers by scripts/practice-gate and made live by
    components/practice/gate/PracticeGate.jsx. The scene is 390 × 724
@@ -10719,7 +10719,7 @@ textarea:focus-visible {
   color: var(--text-secondary);
 }
 
-/* ── 改札 — the gate you tap your pass on (plan 164; redrawn, plan 223) ──
+/* ── 改札 — the gate you tap your pass on (plan 164; redrawn, plan 225) ──
    The boarding's one action -- Board on the Welcome, Continue on every
    question and at a ride's end (components/boarding/BoardFrame.jsx's
    Continue) -- and Today's Depart, a deck's Study on the desk and the
@@ -30401,7 +30401,7 @@ button.brd-stn { cursor: pointer; }
   animation: clr-gate-in 0.6s var(--ease-out) backwards;
   animation-delay: var(--gate-d, 0ms);
 }
-/* 練習の改札 (plan 223): the painted Practice gate's own, where the
+/* 練習の改札 (plan 225): the painted Practice gate's own, where the
    painting has it, at its drawn size, its word where the painting set it
    (components/practice/gate, the gate's section above). */
 .pgate .pgate__go {

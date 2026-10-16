@@ -60,7 +60,7 @@ runtime purpose.
   `REV` in `frontend/scripts/today-print/build.py` (Today's print, plan 205),
   `REV` in `frontend/scripts/ambiance/build.py` (the ambiance, plan 219),
   `REV` in `frontend/scripts/practice-gate/build.py` (the painted platform,
-  plan 223).
+  plan 225).
   A change to what any of them produces bumps it, or learners keep the old.
 - **The grammar detector and the lookups change by counter-case.** Every new
   rule or refusal is pinned in `tests/test_grammar_precision.py` /
@@ -684,7 +684,7 @@ npm run landing   # the landing page (plan 167): public/landing/, sitemap.xml, r
 npm run landing:og  # its two share cards, rendered in Chromium
 python3 scripts/today-print/build.py  # Today's print of the hour (plan 205; numpy, Pillow)
 python3 scripts/ambiance/build.py     # the ambiance of the hour (plan 219; numpy, ffmpeg)
-python3 scripts/practice-gate/build.py  # Practice's painted platform (plan 223; numpy, Pillow, opencv-contrib)
+python3 scripts/practice-gate/build.py  # Practice's painted platform (plan 225; numpy, Pillow, opencv-contrib)
 ```
 
 Today's gate stands on a print drawn ahead of time (plan 205):
@@ -699,7 +699,7 @@ and `src/lib/audio/ambiance.json`. Same rules: never by hand, and
 `scripts/ambiance/README.md` has them. Keep it sparse.
 
 Practice's gate on the phone stands on the owner's own painting of a
-platform (plan 223): `scripts/practice-gate/` cuts it into layers and
+platform (plan 225): `scripts/practice-gate/` cuts it into layers and
 lights them at Today's four hours, into `public/practice/gate/<REV>/`
 and `src/components/practice/gate/gate.json`. Same rules again, and
 `scripts/practice-gate/README.md` has them; the roll signs, the door,

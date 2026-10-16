@@ -68,7 +68,7 @@ export const BASE_GAIN = {
     'card-flip':       1.17,
     'card-transition': 1.60,
     'door-slide':      1.10,
-    // 菱 — the Practice gate's pantograph (plan 223), written on its
+    // 菱 — the Practice gate's pantograph (plan 225), written on its
     // canvas. The air under the doors running open, at the hour's
     // flaps' 0.024 by the window (0.011 at unity): it plays on every
     // visit to the gate, so it is texture, not news. The spark by

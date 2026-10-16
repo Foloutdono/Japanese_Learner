@@ -1,13 +1,14 @@
-# 練習の改札 — the painted platform (plan 223)
+# 練習の改札 — the painted platform (plan 225)
 
 The Practice gate on the phone stands on a platform the owner painted: a
 car at the platform, its door open, Fuji past the canopy. It was drawn as
 board 4, "Le quai peint", on the canvas "Practice gate — five wheels",
-where the owner picked it and its four hours. This folder cuts the two paintings
-into the layers the app moves, and lights them at each of Today's hours
-(曙 dawn, 帰帆 the day, 落雁 dusk, 秋月 the night, the hours of Today's
-print, plan 205). The app draws everything else itself: the roll signs,
-the door's two leaves, the pantograph, the clock, the gate button.
+where the owner picked it and its four hours. This folder cuts the two
+paintings into the layers the app moves, and lights them at each of
+Today's hours (曙 dawn, 帰帆 the day, 落雁 dusk, 秋月 the night, the hours
+of Today's print, plan 205). The app draws everything else itself: the
+roll signs, the door's two leaves, the pantograph, the clock, the gate
+button.
 
 ```bash
 cd frontend && python3 scripts/practice-gate/build.py

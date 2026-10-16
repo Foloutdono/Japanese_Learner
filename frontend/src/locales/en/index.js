@@ -2628,7 +2628,7 @@ const guide = {
   guidePracticePlate: 'A practice mode: read, understand, translate, listen to or write real sentences.',
   guidePracticeDests: 'The levels. Yours is marked. Tap another to try it anyway.',
   guidePracticePass: 'These modes come with the pass.',
-  // The painted platform (plan 223): its two signs and its gate.
+  // The painted platform (plan 225): its two signs and its gate.
   guidePracticeSign: 'Where the train goes. Tap the row above or below to turn the sign, the lit one to open its station.',
   guidePracticeGrade: 'The train’s level. Yours carries a dot: turn the sign to try another.',
   guidePracticeBoard: 'Depart: the doors close and the train takes you to the exercise.',
@@ -2657,7 +2657,7 @@ const guide = {
   // skipped there, but its note is still worded for a pointer.
   guidePracticeDestsDesk: 'The levels. Yours is marked. Click another to try it anyway.',
   guidePracticePlateDesk: 'A practice mode, and what it asks of you at your level. Click it to open it.',
-  // The painted platform stands only on the phone (plan 223): its note is
+  // The painted platform stands only on the phone (plan 225): its note is
   // still worded for a pointer, as the levels' is.
   guidePracticeSignDesk: 'Where the train goes. Click the row above or below to turn the sign, the lit one to open its station.',
   guideDictEntryDesk: 'An entry, open beside the list. ← and → move through the list.',
@@ -2740,7 +2740,7 @@ const onboarding = {
     // well shows.
     exam: 'A question in the JLPT’s format, here 漢字読み: the reading of the underlined word.',
   },
-  // ── The painted platform, on the phone (plan 223) ─────────
+  // ── The painted platform, on the phone (plan 225) ─────────
   // Each platform's short name, under its Japanese on the train's sign;
   // the names a screen reader reads.
   practiceGateShort: {

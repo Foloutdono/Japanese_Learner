@@ -114,7 +114,7 @@ const plates = () => [...document.querySelectorAll('.desk-sources__lower > .desk
 const rows = plate => [...plate.querySelectorAll('.desk-source__rows > a')]
 const cells = () => [...plates()[1].querySelectorAll('.desk-source__cells > a')]
 const near = (a, b) => Math.abs(a - b) < 2
-// The gate stood in a breathing ring 9px out of its pill until plan 223
+// The gate stood in a breathing ring 9px out of its pill until plan 225
 // stilled it; the card keeps that air round it, so the drop it stands on
 // now (index.css, --gate-drop) falls on the card, not past it.
 const RING = 9

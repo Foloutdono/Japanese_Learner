@@ -1,4 +1,4 @@
-"""The owner's two paintings, cut into the gate's layers (plan 223).
+"""The owner's two paintings, cut into the gate's layers (plan 225).
 
   bg      the scene: its clock, its gate button, its pantograph's arms and
           head and its roof unit painted out (the app draws the first three,

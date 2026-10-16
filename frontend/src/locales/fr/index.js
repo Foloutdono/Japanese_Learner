@@ -2563,7 +2563,7 @@ const guide = {
   guidePracticePlate: 'Un exercice : lire, comprendre, traduire, écouter ou écrire de vraies phrases.',
   guidePracticeDests: 'Les niveaux. Le tien est marqué : touche-en un autre pour l’essayer quand même.',
   guidePracticePass: 'Ces exercices font partie de l’abonnement.',
-  // Le quai peint (plan 223) : ses deux panneaux et son portique.
+  // Le quai peint (plan 225) : ses deux panneaux et son portique.
   guidePracticeSign: 'La destination du train. Touche la ligne du dessus ou du dessous pour la faire tourner, celle qui est allumée pour ouvrir sa station.',
   guidePracticeGrade: 'Le niveau du train. Le tien porte un point : fais-le tourner pour en essayer un autre.',
   guidePracticeBoard: 'Embarque : les portes se ferment et le train t’emmène à l’exercice.',
@@ -2592,7 +2592,7 @@ const guide = {
   // y est sauté, mais sa note reste dite pour un pointeur.
   guidePracticeDestsDesk: 'Les niveaux. Le tien est marqué : clique sur un autre pour l’essayer quand même.',
   guidePracticePlateDesk: 'Un exercice, et ce qu’il te demandera à ton niveau. Clique dessus pour l’ouvrir.',
-  // Le quai peint ne se tient qu'au téléphone (plan 223) : sa note reste
+  // Le quai peint ne se tient qu'au téléphone (plan 225) : sa note reste
   // dite pour un pointeur, comme celle des niveaux.
   guidePracticeSignDesk: 'La destination du train. Clique sur la ligne du dessus ou du dessous pour la faire tourner, sur celle qui est allumée pour ouvrir sa station.',
   guideDictEntryDesk: 'Une entrée, ouverte à côté de la liste. ← et → pour parcourir la liste.',
@@ -2672,7 +2672,7 @@ const onboarding = {
     // puits montre.
     exam: 'Une question au format JLPT, ici 漢字読み : la lecture du mot souligné.',
   },
-  // ── Le quai peint, au téléphone (plan 223) ─────────────────
+  // ── Le quai peint, au téléphone (plan 225) ─────────────────
   // Le nom court de chaque quai, sous son japonais sur le panneau du
   // train ; les noms que lit un lecteur d'écran.
   practiceGateShort: {

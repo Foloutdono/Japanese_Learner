@@ -99,9 +99,9 @@ describe('the boarding at 390×844', () => {
     expect(rect(action).height).toBe(height)
   })
 
-  // ── 改札, the gate button (plan 164, redrawn in plan 223) ──
+  // ── 改札, the gate button (plan 164, redrawn in plan 225) ──
   // The owner's pick D: a 66 px gold pill with a sumi reader at its left
-  // and the word on the pill's centre line; since plan 223 the painted
+  // and the word on the pill's centre line; since plan 225 the painted
   // Practice gate's own, the reader holding a card scanner's mark and a
   // hairline between it and the word, the pill still. A pick wakes it
   // with one overshoot, and only a pick -- a Continue that arrives ready

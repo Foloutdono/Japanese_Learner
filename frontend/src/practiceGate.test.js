@@ -5,7 +5,7 @@ import { KEEP, PILLAR, SCENE, fitScene } from './components/practice/gate/gateFi
 import { FOLDED, RAISED, folding, pose, rising } from './components/practice/gate/pantograph'
 import { workbox } from '../pwa.workbox.js'
 
-// ── 練習の改札 — the painted platform (plan 223) ──────────────────────
+// ── 練習の改札 — the painted platform (plan 225) ──────────────────────
 // The platform is the owner's painting, cut and lit ahead of time
 // (scripts/practice-gate/build.py) into public/practice/gate/<rev>/,
 // and drawn over by the app (components/practice/gate). The two are

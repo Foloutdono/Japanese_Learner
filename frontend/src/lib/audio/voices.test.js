@@ -199,7 +199,7 @@ describe('choosing a voice', () => {
       'gate-chime': 'three-step',
       'door-chime': 'falling-pair',
       'door-slide': 'soft-rush',
-      // 菱 (plan 223): not yet by ear -- the pantograph's air and its
+      // 菱 (plan 225): not yet by ear -- the pantograph's air and its
       // spark ship the voices its canvas played until the owner's round
       // on the listening panel.
       'pantograph-air': 'air',

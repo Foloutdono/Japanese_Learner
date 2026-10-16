@@ -107,7 +107,7 @@ export const workbox = {
       handler: 'CacheFirst',
       options: { cacheName: 'print', expiration: { maxEntries: 16, maxAgeSeconds: 31536000 },
                  cacheableResponse: { statuses: [200] } } },
-    // The painted platform behind Practice's gate (plan 223): its layers
+    // The painted platform behind Practice's gate (plan 225): its layers
     // at each hour under a revision's folder (public/practice/gate/<rev>/),
     // so a repainted platform is a new URL, as Today's print is.
     { urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/practice/gate/'),

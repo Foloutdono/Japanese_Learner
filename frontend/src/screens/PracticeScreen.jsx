@@ -80,7 +80,7 @@ import { LEVELS } from '../domain/sentenceSource'
 // desk, the desk hangs the six and 会話 is the rail's seventh station;
 // the phone hangs it as the seventh plate, with its grade chips.
 //
-// ── On the phone, the painted platform (plan 223) ──
+// ── On the phone, the painted platform (plan 225) ──
 // The owner drew the phone's gate again, from a painting of their own:
 // a platform, a car at it with its door open, and on the car's side the
 // two roll signs -- the grade and where the train goes -- where the

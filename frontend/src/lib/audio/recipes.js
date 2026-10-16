@@ -539,7 +539,7 @@ const EVENTS = [
         } },
     ],
   },
-  // 菱 — the Practice gate's pantograph (plan 223): the air that lifts
+  // 菱 — the Practice gate's pantograph (plan 225): the air that lifts
   // it to the wire or lets it fold, and the spark where its head meets
   // the wire. Written on the canvas that drew the gate, at its levels;
   // shipped with their first voices until the listening panel's round.

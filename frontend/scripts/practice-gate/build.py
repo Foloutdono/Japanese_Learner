@@ -1,4 +1,4 @@
-"""The Practice gate's painted platform (plan 223), from the owner's two
+"""The Practice gate's painted platform (plan 225), from the owner's two
 paintings: source/open.png (the car standing, its door open) and
 source/closed.png (the same platform, the door shut: the next cars).
 

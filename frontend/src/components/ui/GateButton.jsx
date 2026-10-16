@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 
-/** 改札 — the gate you tap your pass on (plan 164, redrawn in plan 223;
+/** 改札 — the gate you tap your pass on (plan 164, redrawn in plan 225;
     DESIGN.md, "The gate button"): a gold pill lit from above, a sumi
     reader at its left end holding the card scanner's mark, a hairline
     between the reader and the word. Pressing it lights the reader.

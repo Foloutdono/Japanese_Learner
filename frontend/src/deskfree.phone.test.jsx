@@ -1808,7 +1808,7 @@ describe('the run\'s lines (plan 129)', () => {
 // ── plan 130 — the gates a phone keeps ──
 // On the desk the plates take the window, Learn's line stands upright
 // and Practice's plates hold their specimens (plan 165; the grades'
-// rows before it). A phone keeps its own: since plan 223 Practice's is
+// rows before it). A phone keeps its own: since plan 225 Practice's is
 // the painted platform, its signs where the chips were, and no request
 // for a record or a sample it has nowhere to print.
 describe('the gates taking the window (plan 130)', () => {

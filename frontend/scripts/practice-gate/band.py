@@ -1,4 +1,4 @@
-"""The stripe's own mask (plan 223), from the painted car layers: every pixel
+"""The stripe's own mask (plan 225), from the painted car layers: every pixel
 of the blue band along the cars and its soft rim, nothing else -- not the
 blue seats seen through the open door, not the lake at the roof line, not
 the painted sign. The app lays the line's pigment over it with a colour

@@ -5,7 +5,7 @@ import { LangProvider } from '../LangContext'
 import '../index.css'
 
 // ── 実践 — the gate's platforms, at 390px ────────────────────
-// Since plan 223 the phone's gate is the owner's painting of a
+// Since plan 225 the phone's gate is the owner's painting of a
 // platform, made live (components/practice/gate): a car at the
 // platform, and on its side two roll signs -- the train's grade and
 // where it goes -- where the plates' chips and heads were. The lit
@@ -84,7 +84,7 @@ async function rollTo(root, path) {
   expect(litPath(root)).toBe(path)
 }
 
-describe('the painted platform at phone width (plan 223)', () => {
+describe('the painted platform at phone width (plan 225)', () => {
   it('stands where the plates stood, the painting filling the screen', async () => {
     const screen = await gate()
     const root = screen.container

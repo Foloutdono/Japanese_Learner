@@ -1,4 +1,4 @@
-"""時刻 — the painted platform at the four hours of Today's print (plan 223,
+"""時刻 — the painted platform at the four hours of Today's print (plan 225,
 after plan 205): 曙 dawn, 帰帆 the day (the owner's painting itself), 落雁
 dusk, 秋月 the night.
 

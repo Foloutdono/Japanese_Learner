@@ -738,11 +738,11 @@ question and at the end of a first ride (`Continue` in
 Board's place (plan 168, phone and desk alike) — and Today's **Depart** on the fare
 gate (`components/station/GateCard.jsx`, owner-directed after plan 164) — and,
 on the desk, a deck's **Study** (`screens/DeckDetailScreen.jsx`'s gate, plan
-179) — and the painted Practice gate's **Embarquer** (plan 223, below) are
+179) — and the painted Practice gate's **Embarquer** (plan 225, below) are
 drawn by one component, `components/ui/GateButton.jsx` (`.btn-depart--gate`),
 as a ticket gate you tap your pass on (改札, plan 164: the owner's pick D of four
 directions drawn for "more vibrant, the user must notice it and want to
-press it"; redrawn in plan 223 as the painted Practice gate drew its own,
+press it"; redrawn in plan 225 as the painted Practice gate drew its own,
 the owner's word being that every gate should be that one, its mark a card
 scanner — the pass's contactless arcs it carried read as a speaker's):
 
@@ -1153,7 +1153,7 @@ adds no idiom of its own: it is the tour's scene made to answer back.
   left, the thread in the middle, the scene's brief (its plate,
   situation and errand) in the side.
 - **The gate: seven on the phone, six on the desk.** The phone's painted
-  platform rolls 会話 as its seventh destination (plan 223). The
+  platform rolls 会話 as its seventh destination (plan 225). The
   desk's lattice is drawn for six specimens, and a seventh plate -- even
   a strip under them -- cut the exam's and N1 translation's cards in
   their wells at 1100×800, so the desk keeps the six and 会話 is the
@@ -1161,7 +1161,7 @@ adds no idiom of its own: it is the tour's scene made to answer back.
   seven is drawn. The pigment is 縹 (`--line-kaiwa`), the dayflower blue
   between 緑青 and 藍.
 
-### The painted platform (練習の改札, plan 223)
+### The painted platform (練習の改札, plan 225)
 
 **Practice's gate on the phone is a painting, made live.** The owner
 painted the platform — the canopy, Fuji past it, a car standing with its

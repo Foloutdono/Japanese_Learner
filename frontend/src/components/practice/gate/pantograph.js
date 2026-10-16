@@ -1,4 +1,4 @@
-// ── 菱 — the pantograph, to the painting's measurements (plan 223) ──
+// ── 菱 — the pantograph, to the painting's measurements (plan 225) ──
 // The painted gate draws its pantograph so it can move: the arms fold
 // onto the roof and rise to the wire, each part turning about its own
 // joint, every pose solved here from the head's height. A transform

@@ -1,7 +1,7 @@
 import { useId, useLayoutEffect, useRef, useState } from 'react'
 import { FOLD_MS, FOLDED, RAISE_MS, RAISED, folding, pose, rising } from './pantograph'
 
-// ── The painted gate's drawn parts (plan 223) ─────────────────────────
+// ── The painted gate's drawn parts (plan 225) ─────────────────────────
 // What PracticeGate draws over the owner's painting, where the painting
 // has it, because it moves or says something: the door's two leaves,
 // the pantograph's arms and head, the spark at the wire, the light the

@@ -1,4 +1,4 @@
-"""The scene's parts as masks on the day's layers (plan 223), so each hour can
+"""The scene's parts as masks on the day's layers (plan 225), so each hour can
 light them on their own: the sky and its clouds, the land under it (Fuji's
 snow, the mountains, the forest), the canopy and its two lamps, the wires,
 the platform and its tactile strip; on the cars, their body, glass, lit

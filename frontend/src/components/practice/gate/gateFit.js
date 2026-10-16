@@ -1,4 +1,4 @@
-// ── The painted gate in a frame of any shape (plan 223) ──────────────
+// ── The painted gate in a frame of any shape (plan 225) ──────────────
 // The scene is 390 × 724 units, drawn for the phone's gate between the
 // HUD and the tab bar. A frame is rarely that shape: a tall phone has
 // more height, a browser with its bars has less, a tablet more width.
