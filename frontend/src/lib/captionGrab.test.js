@@ -5,6 +5,8 @@ import {
   encodeGrabPayload,
   decodeGrabHash,
 } from './captionGrab'
+import en from '../locales/en/index.js'
+import fr from '../locales/fr/index.js'
 
 // ── The measured facts this module rides on (2026-09-01) ──
 // From the app's origin, every caption route is walled off: the
@@ -134,7 +136,7 @@ describe('the grab hash codec', () => {
 
 describe('buildBookmarklet', () => {
   it('is a javascript: URL carrying the app origin and the measured client', () => {
-    const bm = buildBookmarklet('https://example.app')
+    const bm = buildBookmarklet('https://example.app', en)
     expect(bm.startsWith('javascript:')).toBe(true)
     const src = decodeURIComponent(bm.slice('javascript:'.length))
     expect(src).toContain('https://example.app/analyzer#grab=')
@@ -148,5 +150,32 @@ describe('buildBookmarklet', () => {
     expect(src).toContain("languageCode==='ja'&&t.kind==='asr'")
     expect(src).toContain("'&fmt=srv3'")
     expect(src).toContain('#grab=v2.')
+  })
+
+  // On youtube.com the bookmark has no app to ask, so it says what it
+  // says in the language of the table it was copied from (plan 210):
+  // a French learner's alerts are French, and tutoient.
+  it('speaks the language it was copied in', () => {
+    const said = lang => decodeURIComponent(buildBookmarklet('https://example.app', lang).slice('javascript:'.length))
+    for (const key of ['grabAlertNotYoutube', 'grabAlertNoVideo', 'grabAlertNotReady', 'grabAlertNoSubtitles',
+      'grabAlertNoJapanese', 'grabAlertEmpty', 'grabAlertFailed']) {
+      expect(fr[key]).toBeTruthy()
+      expect(said(fr)).toContain(JSON.stringify(fr[key]).slice(1, -1))
+      expect(said(en)).toContain(JSON.stringify(en[key]).slice(1, -1))
+    }
+    expect(said(fr)).not.toContain('No Japanese subtitles')
+    expect(said(fr)).not.toMatch(/Ouvrez/)
+    expect(fr.grabAlertNotYoutube).toMatch(/^Ouvre /)
+  })
+
+  // The walkthrough tells the learner what the alerts mean by quoting
+  // them, so a reworded alert would leave it quoting a sentence the
+  // bookmark no longer says.
+  it('is quoted word for word by the walkthrough', () => {
+    for (const t of [fr, en]) {
+      const firstSentence = s => s.split(/[.:\u00a0]/)[0].trim()
+      expect(t.tutTrouble1).toContain(firstSentence(t.grabAlertNoJapanese))
+      expect(t.tutTrouble1).toContain(firstSentence(t.grabAlertNotReady))
+    }
   })
 })

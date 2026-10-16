@@ -13,6 +13,16 @@ const auth = {
   signOut:           'Sign out',
   usernameInvalid:   'Username must be 3-20 characters (letters, numbers, underscore).',
   usernameTaken:     'This username is already taken.',
+  // 改札 — sign-in refusals, named by their code (lib/authErrors.js)
+  // rather than by Supabase's English sentence (plan 210). The ones the
+  // guest claim shares (address taken, weak password, too many tries)
+  // say the claim* lines.
+  authBadCredentials:    'Wrong email address or password.',
+  authEmailNotConfirmed: 'Confirm your address first: the link is in your inbox.',
+  authEmailInvalid:      'That email address is not valid. Check it, or try another one.',
+  authCheckFields:       'Check your email address and your password.',
+  authSignupDisabled:    'Sign-ups are closed for now.',
+  authLinkExpired:       'This link has expired or was already used. Try signing in; if that fails, start again to get a new one.',
 }
 
 // ── Landing screen ────────────────────────────────────────
@@ -40,6 +50,12 @@ const nav = {
   waitingServer:     'Waking the server…',
   errorTitle:        'That didn’t work',
   errorHint:         'Check your connection — your progress is safe.',
+  // The two refusals a session has a line of its own for
+  // (components/study/SessionError.jsx): a pass the server no longer
+  // recognises, a deck that is no longer there. Everything else says
+  // errorHint.
+  sessionExpired:    'Your session has expired. Sign in again to carry on — your progress is safe.',
+  deckGone:          'This deck is no longer on your shelf.',
   // ── The chrome (plan 068): the five gates and the HUD ──
   tabLearn:          'Learn',
   tabPractice:       'Practice',
@@ -1128,6 +1144,17 @@ const video = {
   bookmarkletCopied:   'Copied! Now do step 2',
   downsubHint:         'Downloads a .vtt file to choose here — useful when the bookmark will not work.',
   grabEmpty:           'The grabbed subtitles were empty — try again from the video page.',
+  // The bookmark's own alerts, on youtube.com: baked in the learner's
+  // language at the moment of copying (lib/captionGrab.js). tutTrouble1
+  // quotes the first sentences of grabAlertNoJapanese and
+  // grabAlertNotReady -- a test holds them in step.
+  grabAlertNotYoutube:  'Open the YouTube video first.',
+  grabAlertNoVideo:     'No video on this page.',
+  grabAlertNotReady:    'Page not ready: reload it and try again.',
+  grabAlertNoSubtitles: 'This video has no subtitles.',
+  grabAlertNoJapanese:  'No Japanese subtitles. Available: ',
+  grabAlertEmpty:       'The subtitles came back empty: try again.',
+  grabAlertFailed:      'Subtitle grab failed: ',
   // ── The bookmark tutorial ──
   tutTitle:            'Set up the 字幕取り bookmark',
   tutWhat:             'The idea: we save a small "magic address" as a bookmark in your browser. Opening that bookmark while you are on a YouTube video grabs its Japanese subtitles and brings you back here with the analysis started. Nothing to install, no extension, no account.',
@@ -1166,6 +1193,26 @@ const video = {
   analyzingVideo:      'Analyzing the subtitles…',
   captionsUnavailable: "Couldn't get this video's captions.",
   subtitleTooLarge:    'This subtitle file is too large.',
+  // 動画 — why a video did not open (plan 210). The server names each
+  // refusal with a code; these say it in the learner's language
+  // (components/analysis/videoErrors.js), never the server's English.
+  subtitleNotUtf8:     'This file is not UTF-8. Japanese .srt files are often Shift-JIS: save it again as UTF-8 (any text editor can), then try again.',
+  subtitleParseFailed: 'This subtitle file is malformed and could not be read.',
+  subtitleUnknownFormat: 'Unrecognised subtitle format. Choose an SRT, VTT or ASS file.',
+  subtitleNoCues:      'There are no lines to read in these subtitles.',
+  transcriptNoTimestamps: 'No timestamps found. Copy the whole transcript panel from YouTube (each line should start with a time, like 0:18).',
+  videoNotYoutube:     'That link is not a YouTube video.',
+  videoLinkFetchOff:   'This server cannot fetch subtitles from a link. Use the 字幕取り bookmark, or add a subtitle file.',
+  videoLinkAllowanceMine: 'You have used today’s link allowance. Add a subtitle file, or come back tomorrow.',
+  videoLinkAllowanceApp: 'Today’s link allowance for the whole app is used up. Add a subtitle file, or come back tomorrow.',
+  videoNoJapanese:     'This video has no Japanese subtitles. Try another video, or add a subtitle file yourself.',
+  videoSubtitlesOff:   'This video has its subtitles turned off.',
+  videoSubtitlesEmpty: 'This video’s Japanese subtitle track is empty.',
+  videoUnavailable:    'This video is unavailable.',
+  videoYoutubeRefused: 'YouTube refused to hand over this video’s subtitles. The 字幕取り bookmark or a subtitle file will get through.',
+  videoYoutubeUnreachable: 'Could not reach YouTube. Try again in a moment.',
+  videoTranscriptFailed: 'Reading these subtitles went wrong. Try again.',
+  videoStalled:        'Preparing the subtitles stalled on the way. Try again.',
   breakThisDown:       'Break this down',
   seekToSentence:      'Jump to this sentence',
   // 案内表示 — the notices under the intake. An `info` notice is a fact

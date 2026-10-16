@@ -123,21 +123,28 @@ export async function apiFetch(path, session, options = {}) {
 // matters most.
 export class ApiError extends Error {
   constructor(status, body, path) {
-    // `detail` is FastAPI's own error shape (HTTPException) — worth
-    // surfacing verbatim, since the backend's messages name the actual
-    // problem ("Invalid mode for kana: 'banana'").
+    // `detail` is FastAPI's own error shape (HTTPException). The message
+    // is for the console and the logs, never for a screen: the backend
+    // writes it in English, and a learner reads French first (plan 210).
+    // What a screen may say comes from `code`, below, through its own
+    // locale table.
     const detail = typeof body === 'object' && body !== null ? body.detail : null
-    super(detail ? String(detail) : `Request failed (${status}) for ${path}`)
+    const said = detail && typeof detail === 'object' ? detail.message : detail
+    super(said ? String(said) : `Request failed (${status}) for ${path}`)
     this.name = 'ApiError'
     this.status = status
     this.body = body
     this.path = path
-    // The fare gate's refusals (plan 069) arrive as a bare string in
-    // `detail` — 'out_of_credits', 'pass_required', 'limit_reached' —
-    // with their figures beside it in the body. `code` is that string
-    // when there is one, so a caller can tell them apart without
-    // matching on a sentence; every other error keeps code null.
-    this.code = typeof detail === 'string' && /^[a-z_]+$/.test(detail) ? detail : null
+    // Two shapes carry a code. The fare gate's refusals (plan 069)
+    // arrive as a bare string in `detail` — 'out_of_credits',
+    // 'pass_required', 'limit_reached' — with their figures beside it
+    // in the body; a refusal that also explains itself in English for
+    // the logs arrives as `detail: { code, message }` (routes/video.py,
+    // routes/agenda.py). `code` is the name either way, so a caller can
+    // tell refusals apart without matching on a sentence; every other
+    // error keeps code null.
+    const code = detail && typeof detail === 'object' ? detail.code : detail
+    this.code = typeof code === 'string' && /^[a-z][a-z0-9_]*$/.test(code) ? code : null
   }
 }
 

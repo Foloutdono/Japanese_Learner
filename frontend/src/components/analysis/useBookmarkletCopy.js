@@ -20,12 +20,16 @@ export function watchUrlFor(url) {
 // → paste is the flow that works everywhere. `copied` confirms it for
 // a moment. One state for every copy button that is the same act: the
 // panel's and the walkthrough's.
-export function useBookmarkletCopy() {
+//
+// The bookmark speaks the learner's language on youtube.com, where it
+// cannot ask the app: its alerts are the table's at the moment of the
+// copy (lib/captionGrab.js) -- `t`, the table the caller already holds.
+export function useBookmarkletCopy(t) {
   const [copied, setCopied] = useState(false)
   const copiedTimer = useRef(null)
   const copy = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(buildBookmarklet(window.location.origin))
+      await navigator.clipboard.writeText(buildBookmarklet(window.location.origin, t))
       setCopied(true)
       clearTimeout(copiedTimer.current)
       copiedTimer.current = setTimeout(() => setCopied(false), 2400)
@@ -33,6 +37,6 @@ export function useBookmarkletCopy() {
       // Clipboard refused (permissions, insecure context) — the
       // button simply doesn't confirm, and the file path remains.
     }
-  }, [])
+  }, [t])
   return { copied, copy }
 }
