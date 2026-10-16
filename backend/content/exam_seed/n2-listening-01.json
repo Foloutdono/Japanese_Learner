@@ -2188,15 +2188,15 @@
            },
            {
             "id": "c3",
-            "textJp": "面接の間はチャイムに出られないから"
+            "textJp": "荷物がとても重いから"
            },
            {
             "id": "c4",
-            "textJp": "荷物がとても重いから"
+            "textJp": "面接の間はチャイムに出られないから"
            }
           ],
           "choiceType": "text",
-          "answer": "c3"
+          "answer": "c4"
          },
          {
           "id": "choukai_2_q2",
@@ -2261,15 +2261,15 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "今週の土曜日の午前"
+            "textJp": "木曜日の仕事の帰り"
            },
            {
             "id": "c2",
-            "textJp": "来週の土曜日の午前"
+            "textJp": "今週の土曜日の午前"
            },
            {
             "id": "c3",
-            "textJp": "木曜日の仕事の帰り"
+            "textJp": "来週の土曜日の午前"
            },
            {
             "id": "c4",
@@ -2277,7 +2277,7 @@
            }
           ],
           "choiceType": "text",
-          "answer": "c3"
+          "answer": "c1"
          },
          {
           "id": "choukai_2_q5",
@@ -3065,15 +3065,15 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "乗り換えのある電車"
-           },
-           {
-            "id": "c2",
             "textJp": "駅前から出るバス"
            },
            {
-            "id": "c3",
+            "id": "c2",
             "textJp": "タクシー"
+           },
+           {
+            "id": "c3",
+            "textJp": "乗り換えのある電車"
            },
            {
             "id": "c4",
@@ -3081,7 +3081,7 @@
            }
           ],
           "choiceType": "text",
-          "answer": "c1"
+          "answer": "c3"
          },
          {
           "id": "choukai_1_q3",
@@ -3263,15 +3263,15 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "男の人と一緒に入る"
-           },
-           {
-            "id": "c2",
             "textJp": "子ども用のプールに入る"
            },
            {
-            "id": "c3",
+            "id": "c2",
             "textJp": "水泳教室に申し込む"
+           },
+           {
+            "id": "c3",
+            "textJp": "男の人と一緒に入る"
            },
            {
             "id": "c4",
@@ -3279,7 +3279,7 @@
            }
           ],
           "choiceType": "text",
-          "answer": "c1"
+          "answer": "c3"
          },
          {
           "id": "choukai_2_q5",
