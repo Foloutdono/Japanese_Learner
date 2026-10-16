@@ -7291,3 +7291,14 @@ The owner: irregular learners need a way back in, so they are not discouraged an
 | 217c | **The screens**: `ComebackSheet` over the gate (Today's sheet, the paces as `.svc` cards, a spread's days as Today's seg), the catch-up a figure of the day (`TodayDay`, a door to Settings), « Réviser plus » over the cleared gate (`QuietButton`, `/today/run?extra=1`), Settings › Révisions (`ReviewsPage`: the ceiling and its warning under the load, the catch-up and its stop, an absence's two dates), the notification inviting back instead of counting a backlog (`ahead.js`). Tests: `ComebackSheet.browser`, `ReviewsPage.browser`, `TodayScreen.browser`, `TodayRun.browser`, `ahead.test` | DONE |
 
 Open: the screens were built without a canvas; if the owner wants them drawn, the comeback sheet is the one to draw first. The comeback's thresholds (3 days of load, 60 cards, a week's quiet after "all now") are first guesses for the weekly digest to correct once `catchup_offer` / `catchup_choice` have a few weeks behind them.
+
+## Plan 218 — 湖の刻, the ambiance of the hour (2026-10-16)
+
+The owner: change the ambiance to be in tune with the new Today screen; options to choose from; long enough and looping nicely. Measured first: the one ambiance was a 15-second metro-platform recording (`ambiant/selection`) behind the station pages only, `ambiant/home` played nowhere, and Today had none. Three rounds on an audition page (an Artifact): six directions drawn from the print (round 1); the owner's call, one per hour of the print, the setting a lake near Fuji with a train line (round 2); then less dense, and the train and birds reworked (round 3). Then: behind Today and the station pages.
+
+| Phase | What | Status |
+|---|---|---|
+| 218a | **The generator**: `frontend/scripts/ambiance/` (kit: the loop as a circle, so the seam is none; sounds; the four hours; build: `public/sounds/ambiant/<REV>/`, `src/lib/audio/ambiance.json`, each file the loop padded with a second of itself either side) | DONE |
+| 218b | **The player**: `lib/audio/ambiance.js` plays the hour's loop between its pads (`playBuffer`'s `loopStart`/`loopEnd`), from a random point, crossfades when the print's hour turns (`domain/printHour.js`, the print's rule moved out of `usePrint`), decodes at 24 kHz and holds one hour. `TodayScreen` and `SelectionScreen` start it. Test: `src/ambiance.test.js` | DONE |
+
+Open: synthesised, and checked by measurement rather than by ear; the owner's ear is the next round. The print's train crosses every 46 s and the sound's once a loop, unsynchronised.

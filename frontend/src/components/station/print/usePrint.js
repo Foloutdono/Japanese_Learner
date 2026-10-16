@@ -12,15 +12,8 @@ import PRINT from './print.json'
 
 export { PRINT }
 
-/** Which print the hour shows: 曙 dawn from 5:00, 帰帆 the day from
- *  9:00, 落雁 dusk from 16:00, 秋月 the night from 19:30, all local. */
-const FROM = [[5 * 60, 'dawn'], [9 * 60, 'day'], [16 * 60, 'dusk'], [19 * 60 + 30, 'night']]
-export function printHour(now) {
-  const m = now.getHours() * 60 + now.getMinutes()
-  let hour = 'night'
-  for (const [at, name] of FROM) if (m >= at) hour = name
-  return hour
-}
+// Which print the hour shows: one rule with the ambiance's (plan 218).
+export { printHour } from '../../../domain/printHour'
 
 // A print fetched once a visit: the hour's file is a few hundred
 // kilobytes, and an hour's turn is the only reason to fetch another.

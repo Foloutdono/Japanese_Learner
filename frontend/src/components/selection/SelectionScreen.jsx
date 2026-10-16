@@ -22,15 +22,16 @@ import { startAmbiance, stopAmbiance } from '../../lib/audio'
  * prefix). Its pigment becomes the line colour for everything below
  * the bar — the roundels, the rails, the route diagram.
  *
- * Also owns the 'selection' ambiance track for as long as it is
- * mounted, so this is the one place that needs the start/stop effect.
+ * Also plays the ambiance (the lake of the hour, plan 218) for as long
+ * as it is mounted, so every station page has it without asking; the
+ * Today gate is the one other screen that does (TodayScreen).
  */
 export default function SelectionScreen({ title, sub, aside, children }) {
   const { t } = useLang()
   const { pathname } = useLocation()
 
   useEffect(() => {
-    startAmbiance('selection')
+    startAmbiance()
     return () => stopAmbiance()
   }, [])
 

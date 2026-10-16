@@ -13,6 +13,7 @@ import RestDayNotice from '../components/dayclear/RestDayNotice'
 import { ComebackSheet } from '../components/station/ComebackSheet'
 import { InkFilters } from '../components/dayclear/kit'
 import { restWeek, utcToday } from '../domain/dayClear'
+import { startAmbiance, stopAmbiance } from '../lib/audio'
 
 // ── 本日 — the gate (plan 070) ────────────────────────────────
 // The Today tab: the fare gate, the day's lanes as the run's picker.
@@ -41,6 +42,10 @@ import { restWeek, utcToday } from '../domain/dayClear'
 //
 // Everything this screen reads is shared: /api/today from the store
 // the tab bar's badge already reads. One request, every consumer.
+//
+// 湖の刻 (plan 218): the gate stands on the print of the hour, and the
+// print is heard: the ambiance plays the same hour's lake behind it,
+// as it does behind every station page (SelectionScreen).
 
 export default function TodayScreen({ session }) {
   const { t } = useLang()
@@ -50,6 +55,11 @@ export default function TodayScreen({ session }) {
   const summary = useProfileSummary()
   // 案内 — the gate's guide, once, after the lanes have painted (plan 100).
   const guide = useGuide('today', Boolean(today) || failed)
+
+  useEffect(() => {
+    startAmbiance()
+    return () => stopAmbiance()
+  }, [])
 
   // 運休 — the rest days the learner has not been told of, once.
   const restKey = (today?.rest?.unseen ?? []).join(',')

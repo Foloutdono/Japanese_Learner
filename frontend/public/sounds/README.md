@@ -16,7 +16,7 @@ cost is that a missing file is also invisible. Hence this list.
 | `sfx/` | `sfx` | `playSfx(name)` → `/sounds/sfx/<name>.mp3` |
 | `announcements/` | `announcement` | `playAnnouncement(path)` → `/sounds/announcements/<path>.wav` |
 | `announcements/jingle.mp3` | `jingle` | played before every announcement |
-| `ambiant/` | `ambiance` | `startAmbiance(name)`, looped |
+| `ambiant/<rev>/` | `ambiance` | `startAmbiance()`, the hour's loop (plan 218, `scripts/ambiance/`) |
 | `kanas/` | `kana` | `playKana(kanaSound(card))` → `/sounds/kanas/<sound>.mp3?v=<KANA_REV>` |
 
 Channel names come from `SOUND_CATEGORIES` in `src/lib/audio/settings.js`
@@ -296,12 +296,16 @@ generated one.
 
 ## Present
 
-`ambiant/home`, `selection` · `announcements/` for all eleven sections
-plus `jingle` · `kanas/`. Nothing else — `ui/` and `sfx/` are empty by
-design.
+`ambiant/<rev>/` dawn, day, dusk and night · `announcements/` for all
+eleven sections plus `jingle` · `kanas/`. Nothing else — `ui/` and
+`sfx/` are empty by design.
 
-Not everything present is played. Nothing asks for `ambiant/home`
-(1.7MB; only `selection` loops, from `SelectionScreen`), and of the
+The ambiance is drawn, not recorded (plan 218): the lake on Today's
+print at the print's hour, built by `scripts/ambiance/build.py` into a
+revision's folder. Its README has the rules it keeps; the metro
+platform recordings it replaced (`home`, `selection`) are gone.
+
+Not everything present is played. Of the
 announcements `dictionary` and `analyzer` are named in `config/tabs.js`
 but no screen calls them, while `stats` and `dictation` are named
 nowhere. They cost nothing at run time -- a file is fetched only when
@@ -324,7 +328,8 @@ those to mp3 would save more bandwidth than the entire ticket gate
 feature costs, and nothing but the extension needs to change
 (`ANNOUNCEMENT()` in `playback.js`).
 
-Mono is fine for everything except the ambiance loops. Normalise to
+Mono is fine for everything except the ambiance loops, which are
+stereo and generated (`scripts/ambiance/`), never dropped in. Normalise to
 around −16 LUFS: the mixer applies its own gain per channel, so
 material that arrives already loud only removes headroom from the
 sliders.
