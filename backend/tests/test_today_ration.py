@@ -60,7 +60,7 @@ def _board(client, level, kana, target, lines):
 
 def _studied_yesterday(user_id: str) -> None:
     """A day of study behind the learner, which the ration waits for
-    before it opens a rule (plan 221). A review row on no card the queue
+    before it opens a rule (plan 222). A review row on no card the queue
     serves, so nothing it deals or counts as met moves."""
     from core.srs_instance import srs
     conn = db_conn()
@@ -191,7 +191,7 @@ def test_the_ration_deals_each_deck_in_the_order_it_teaches(client):
     by_source = {}
     for c in cards:
         by_source.setdefault(c["source"], []).append(c["card_id"])
-    # Two rules a day at most (plan 221); the words and kanji take the rest.
+    # Two rules a day at most (plan 222); the words and kanji take the rest.
     assert len(by_source["grammar"]) == daily_queue.GRAMMAR_PER_DAY
     for source, mode in (("vocab", "vocab.flashcard.f2b"), ("kanji", "kanji.flashcard.f2b"),
                          ("grammar", "grammar.flashcard.f2b")):
@@ -243,7 +243,7 @@ def test_an_n5_learner_is_dealt_the_first_unit_in_course_order(client):
     cards = client.get("/api/today/cards?count=10").json()["cards"]
     sequence = [raw_id for _, raw_id, _ in basics.sequence()]
     assert sequence[:3] == ["grammar_N5_です／だ", "grammar_N5_は", "grammar_N5_か"]
-    # The unit's first two rules (the day's allowance, plan 221), and
+    # The unit's first two rules (the day's allowance, plan 222), and
     # its words after them in the course's order; か waits a day.
     words = [raw_id for raw_id in sequence if not raw_id.startswith("grammar_")][:4]
     assert sorted(_new_ids(cards)) == sorted(sequence[:2] + words)
@@ -254,7 +254,7 @@ def test_an_n5_learner_is_dealt_the_first_unit_in_course_order(client):
     assert status["done"] is False and status["unit"] == 1 and status["title"]["fr"] == "Enchanté"
 
 
-# ── 文法の日割り — the rules a day opens (plan 221) ────────────────
+# ── 文法の日割り — the rules a day opens (plan 222) ────────────────
 
 def test_the_allowance_waits_for_a_day_of_study_then_opens_two_rules():
     assert daily_queue.grammar_allowance(False, 0) == 0
@@ -374,7 +374,7 @@ def test_a_learner_above_n5_never_rides_the_course(client):
 def test_a_met_unit_gives_way_to_the_next(client):
     # Meet every card of unit 1 in the learner's lines; the gate moves
     # to unit 2 and the ration starts there -- at its words, since the
-    # three rules met today spent the day's allowance (plan 221).
+    # three rules met today spent the day's allowance (plan 222).
     from study import basics
     _board(client, "N5", "both", 50, ["grammar", "vocab"])
     _studied_yesterday(RATION_USER)

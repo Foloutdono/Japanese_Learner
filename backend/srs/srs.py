@@ -1482,7 +1482,7 @@ class SRSEngine:
     def first_studied_day(self, user_id: str):
         """The first day this learner showed up, or None for one who never
         has: the ration opens no new rule before a day of study is behind
-        them (plan 221, daily_queue.grammar_allowance)."""
+        them (plan 222, daily_queue.grammar_allowance)."""
         studied = self._studied_days(user_id)
         return min(studied) if studied else None
 
@@ -2358,7 +2358,7 @@ class SRSEngine:
         `source` counts one line's items alone, by the raw id's first
         segment (`grammar` for grammar_N5_は): the rules the day has
         opened, which the ration holds to daily_queue.GRAMMAR_PER_DAY
-        (plan 221).
+        (plan 222).
         """
         pattern = self._user_prefix_pattern(user_id)
         if source:

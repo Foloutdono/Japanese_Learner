@@ -19,7 +19,7 @@ import { GrammarTour } from './GrammarTour'
 // and boards like the lesson's button does. The record is a courtesy to
 // the plate: a failed post never holds the run.
 //
-// Skipped (plan 221), the tour boards its card and records nothing: the
+// Skipped (plan 222), the tour boards its card and records nothing: the
 // point was not met by its tour, and once its card is rated it is
 // studied, which is what stops the tour being asked again (routes/
 // grammar.py's mark_tutorials). Left before the card is rated, the

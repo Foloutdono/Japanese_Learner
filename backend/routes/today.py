@@ -363,7 +363,7 @@ def _holds_rules(pools: Pools) -> bool:
 
 
 def _grammar_allowance(user_id: str, pools: Pools, day) -> int | None:
-    """How many never-met rules the ration may open on `day` (plan 221,
+    """How many never-met rules the ration may open on `day` (plan 222,
     daily_queue.grammar_allowance): none before a day of study is behind
     the learner, then GRAMMAR_PER_DAY less those met already today. The
     gate, the run, tomorrow and the ahead all ask it here, so they count
@@ -1150,7 +1150,7 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     """
     count = max(1, min(count, MAX_BATCH))
     # The day's never-met rules, each a lesson: spaced out in the batch
-    # (daily_queue.space_rules, plan 221).
+    # (daily_queue.space_rules, plan 222).
     new_rules: set[str] = set()
 
     due_rows = srs.get_due_rows(user_id)

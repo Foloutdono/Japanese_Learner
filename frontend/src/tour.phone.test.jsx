@@ -219,7 +219,7 @@ describe('the tour in the day’s queue, on a phone', () => {
     expect(cached[0].lesson_seen).toBe(true)
   }, 20000)
 
-  // 飛ばす (plan 221): under the gate, inside the screen, the way past
+  // 飛ばす (plan 222): under the gate, inside the screen, the way past
   // the lesson to its card -- which records no tour.
   it('skips the tour for its card, recording nothing', async () => {
     const screen = await mount([card()])

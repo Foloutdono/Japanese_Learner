@@ -203,7 +203,7 @@ EVENTS: dict[str, frozenset[str]] = {
     # `level` is N5…N1, never the pattern: the funnel is read by level.
     # `stop` is look / guess / found / terminus; `outcome` first, retry
     # (a wrong guess) or helped (the rule given after two), or skipped
-    # (plan 221: the learner left the tour for its card at that stop,
+    # (plan 222: the learner left the tour for its card at that stop,
     # and no done event follows). The done event carries the wrong
     # guesses and whether the twist and scene were the point's own
     # (`authored`, plan 187c).

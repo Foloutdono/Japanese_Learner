@@ -300,7 +300,7 @@ def parse_exclude(exclude: str) -> set:
 FIRST_KANA_SET = "hiragana_basic"
 KANA_EVERY = 3
 
-# 文法の日割り — the rules a day opens (plan 221). A rule never met opens
+# 文法の日割り — the rules a day opens (plan 222). A rule never met opens
 # on its tour (components/study/GrammarTour.jsx, plan 187): minutes of
 # sentences, twists, a scene and a quiz where a new word takes seconds.
 # The ration once dealt the basics' three first rules on a learner's
@@ -394,7 +394,7 @@ def ration(kana_lanes, line_lanes, budget: int, course=None,
     `grammar` is how many never-met rules may be among them
     (grammar_allowance; None for no cap). A rule past it is not dealt
     and its place goes to the next card; the rules dealt come in the
-    lanes after every other (plan 221).
+    lanes after every other (plan 222).
     """
     if course is not None:
         return _rules_last(_ration_course(kana_lanes, line_lanes, budget, course, grammar))

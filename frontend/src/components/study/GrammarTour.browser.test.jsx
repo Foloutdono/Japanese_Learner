@@ -154,7 +154,7 @@ describe('the tour', () => {
     expect(track).toHaveBeenCalledWith('grammar_tour_step', { level: 'N5', stop: 'guess', outcome: 'first' })
   })
 
-  // 飛ばす (plan 221): a quiet way past the lesson to its card, at every
+  // 飛ばす (plan 222): a quiet way past the lesson to its card, at every
   // stop but the terminus, which boards anyway. Nothing is recorded but
   // the stop it was left at.
   it('can be skipped at any stop before the terminus, for its card', async () => {

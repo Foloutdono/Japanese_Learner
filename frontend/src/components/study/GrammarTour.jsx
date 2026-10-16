@@ -649,7 +649,7 @@ function useTourKeys(ref, on) {
 // phone the stop carries the button to the asking's page (AskEntry); on
 // the desk the panel stands under the stops at the left (TourRoute),
 // which reads the thread from `onView`. A replay asks nothing.
-// `onSkip` (plan 221): the way past the lesson to its card, at any stop
+// `onSkip` (plan 222): the way past the lesson to its card, at any stop
 // before the terminus -- a quiet link under the gate, the one the glyph
 // tour's "show me" wears. A tour is minutes where a card is seconds, and
 // not every learner wants one; the point's sheet keeps it a tap away
@@ -747,7 +747,7 @@ export function GrammarTour({ point, onBoard, onSkip, onLesson, replay = false, 
   }
 
   // Where the learner left the lesson is the funnel's question: the
-  // stop, under grammar_tour_step's outcome `skipped` (plan 221).
+  // stop, under grammar_tour_step's outcome `skipped` (plan 222).
   function skip() {
     track('grammar_tour_step', { level, stop: kind, outcome: 'skipped' })
     playClick()
