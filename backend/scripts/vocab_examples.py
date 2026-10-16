@@ -4,7 +4,7 @@ Review the course's example sentences (plan 223), in batches.
     python -m scripts.vocab_examples stats                 # the sentences, the corrections, the gaps
     python -m scripts.vocab_examples prep DIR --batches 24 # every sentence the deck shows, as review batches
     python -m scripts.vocab_examples check FILE            # a reviewer's corrections, before they are merged
-    python -m scripts.vocab_examples merge DIR             # every DIR/fixes_*.json into datas/vocab/example_fixes.json
+    python -m scripts.vocab_examples merge DIR             # DIR/fixes_*.json, then verify_*.json, into datas/vocab/example_fixes.json
 
 The sentences are the Tatoeba ones JMdict files under the deck's words,
 as get_vocab_extras shows them (at most five a word); a sentence that
@@ -173,6 +173,27 @@ def cmd_merge(in_dir: str) -> int:
                 found += [f"{name}: {p}" for p in issues]
                 continue
             merged[fix["orig"]] = {k: fix[k].strip() for k in ("jp", "en", "fr", "why")}
+    # A second reader's DIR/verify_NN.json amends batch NN's corrections:
+    # an entry replaces the first reviewer's for its sentence.
+    amended: dict[str, str] = {}
+    for path in sorted(glob.glob(os.path.join(in_dir, "verify_*.json"))):
+        name = os.path.basename(path)
+        batch = path.replace("verify_", "batch_")
+        own = {i["jp"] for i in _load(batch)} if os.path.exists(batch) else None
+        for fix in _load(path).get("fixes") or []:
+            orig = fix.get("orig")
+            if own is not None and orig not in own:
+                found.append(f"{name}: {(orig or '?')[:30]}: not an item of {os.path.basename(batch)}")
+                continue
+            if orig in amended:
+                found.append(f"{name}: {(orig or '?')[:30]}: also amended in {amended[orig]}")
+                continue
+            amended[orig] = name
+            issues = problems(fix, originals)
+            if issues:
+                found += [f"{name}: {p}" for p in issues]
+                continue
+            merged[orig] = {k: fix[k].strip() for k in ("jp", "en", "fr", "why")}
     for line in found:
         print(line)
     if found:
