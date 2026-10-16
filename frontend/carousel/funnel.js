@@ -1540,7 +1540,8 @@ const label = (c, str, x, y, { size = 30, color = c.p.ink, align = 'center', wei
 /** The words the item says, as the analyser would draw them. */
 function sampleToks(c) {
   const f = c.pl.funnel || {}
-  if (f.toks?.length) return f.toks
+  // The closing stop stays off, as on the answer's analyser.
+  if (f.toks?.length) return f.toks.filter((tk, i, all) => !(i === all.length - 1 && tk.k === 'punct'))
   // A word in a sentence of its own, else alone with its reading.
   const rows = f.examples?.[0]?.rows || f.sents?.[0] || (f.word ? [{ t: f.word.t, fu: f.word.fu, k: 'word' }] : null)
   if (rows) return rows.map(r => ({ t: r.t, fu: r.fu && hasKanji(r.t) ? r.fu.map(([a, b]) => b || a).join('') : '', k: r.k, point: 0 }))
