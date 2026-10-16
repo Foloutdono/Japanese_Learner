@@ -104,13 +104,21 @@ export function useMining(session) {
   // picker used to POST unconditionally and mint a clone every time —
   // eleven identical « Mots du boulot » decks in one real account. A
   // same-type deck whose name matches (trimmed, case-insensitively) IS
-  // the deck the learner meant.
-  async function ensureDeck(kind, name) {
+  // the deck the learner meant -- one of their own: a deck followed from
+  // the library shares the shelf (GET /api/decks) but takes no cards
+  // from anyone but its author.
+  //
+  // `remember: false` makes a deck without making it where the next ＋
+  // goes: the song sheet (plan 210) makes a song's decks in one press,
+  // and a word mined afterwards should still land where the learner
+  // last sent one.
+  async function ensureDeck(kind, name, { remember = true } = {}) {
     const type = DECK_TYPE_FOR_KIND[kind]
     const wanted = name.trim().toLowerCase()
-    const existing = decksOfType(type).find(d => (d.name ?? '').trim().toLowerCase() === wanted)
+    const existing = decksOfType(type).find(d => (d.role ?? 'owner') === 'owner'
+      && (d.name ?? '').trim().toLowerCase() === wanted)
     if (existing) {
-      rememberTarget(kind, existing.id)
+      if (remember) rememberTarget(kind, existing.id)
       return existing
     }
     const deck = await apiJson('/api/decks', session, {
@@ -118,7 +126,7 @@ export function useMining(session) {
       body: JSON.stringify({ name, type }),
     })
     setDecks(prev => [deck, ...prev])
-    rememberTarget(kind, deck.id)
+    if (remember) rememberTarget(kind, deck.id)
     return deck
   }
 

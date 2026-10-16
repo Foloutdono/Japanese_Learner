@@ -64,6 +64,8 @@ export const EVENTS = {
   // The dictionary's shelf (plan 093): the kind of entry kept or let
   // go, never its key — a key names the word a learner looked up.
   favorite_toggle: ['kind', 'on'],
+  // A song's decks (plan 210): the counts that went in, never its name.
+  song_deck: ['words', 'lines'],
   // The app opened from its notification or its widget (plan 156).
   nudge_opened: ['via'],
   // The basics course (plan 186f): its own unit number, never a card.

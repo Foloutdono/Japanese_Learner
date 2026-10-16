@@ -145,6 +145,17 @@ export function HourglassIcon({ size = 18, className }) {
   )
 }
 
+// A note: the song (plan 210), the analyser's door to a song's decks.
+export function SongIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <path d="M9 18V5l11-2v13" />
+      <circle cx="6" cy="18" r="3" />
+      <circle cx="17" cy="16" r="3" />
+    </svg>
+  )
+}
+
 export function CardIcon({ size = 18, className }) {
   return (
     <svg {...base} width={size} height={size} className={className}>

@@ -1062,6 +1062,18 @@ const phraseAnalyzer = {
   // 保存 (plan 039) — pinning a Sentence into the bank.
   keepSentence:        'Keep this sentence',
   unkeepSentence:      'Stop keeping this sentence',
+  // 歌 (plan 210) — the song's own decks, from the video result.
+  songDeckOpen:        'Make a deck of this song',
+  songDeckTitle:       'Make it yours',
+  songDeckName:        'Deck name',
+  songDeckHolds:       'What the deck holds',
+  songDeckWords:       'Words',
+  songDeckLines:       'Lyrics',
+  songWordsDeck:       name => `${name} · words`,
+  songLinesDeck:       name => `${name} · lyrics`,
+  songDeckMaking:      'Making it',
+  songDeckFailed:      "Couldn't make the deck. Try again.",
+  songDeckLimit:       "Your plan's deck or card limit is reached: part of the song is left out.",
   grammarSpotted:      'Grammar spotted',
   explainSentence:     'Explain',
   explainAgain:        'Explain again',

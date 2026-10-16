@@ -11,6 +11,7 @@ import { stationFor } from '../config/stations'
 import { WordsList } from '../components/analysis/WordsList'
 import { FocusCard } from '../components/analysis/FocusCard'
 import { MineButton } from '../components/analysis/MineButton'
+import { SongDeckSheet } from '../components/analysis/SongDeckSheet'
 import { SubtitleLine } from '../components/analysis/SubtitleLine'
 import { PlayerBar } from '../components/analysis/PlayerBar'
 import { createPlayhead } from '../components/analysis/playhead'
@@ -40,7 +41,7 @@ import { parseVideoId } from '../lib/youtube'
 import { apiJson } from '../lib/api'
 import { VideoPlayer } from '../components/video/VideoPlayer'
 import { decodeGrabHash, transcriptXmlToVtt } from '../lib/captionGrab'
-import { ChevronIcon, PlusIcon, CheckIcon, OpenBookIcon, TextLinesIcon, CameraIcon, VideoIcon, SearchIcon } from '../components/ui/Icons'
+import { ChevronIcon, PlusIcon, CheckIcon, OpenBookIcon, TextLinesIcon, CameraIcon, VideoIcon, SearchIcon, SongIcon } from '../components/ui/Icons'
 import { readVideoSound, saveVideoSound, DEFAULT_VIDEO_SOUND } from '../lib/videoVolume'
 
 const KAISEKI = 'var(--line-kaiseki)'
@@ -279,6 +280,10 @@ export default function AnalyzerScreen({ session }) {
   // The phone's explanation opens in a sheet (plan 134).
   const [explainOpen, setExplainOpen] = useState(false)
   const closeExplain = useCallback(() => setExplainOpen(false), [])
+  // 歌 (plan 210): the song sheet, open over the result with the name it
+  // proposes -- the video's title, read off the player as it opens.
+  const [song, setSong] = useState(null)
+  const closeSong = useCallback(() => setSong(null), [])
   // Every route into a new Passage starts the focus over: the first
   // word, its own entry, the card rather than an explanation.
   const clearFocus = useCallback(() => { setLookup(null); setSide('card'); setTokenIndex(0); setExplainOpen(false) }, [])
@@ -1010,6 +1015,29 @@ export default function AnalyzerScreen({ session }) {
   const isI1 = !!focused && !focused.foreign && focused.unknown_count === 1
   const isKept = !!focused && analyzer.kept.has(focused.text)
 
+  // 歌 — make the song yours (plan 210): beside 保存, which keeps the line
+  // in front of the learner, the door that takes the whole track into
+  // their decks -- its words and its lines with their readings
+  // (SongDeckSheet). A video's track, of more than one line: a typed
+  // sentence is not a song, and one line is not a deck.
+  const songPassage = Boolean(passage?.video) && sentences.length > 1
+  function openSong() {
+    playerRef.current?.pause()
+    setSong({ title: playerRef.current?.title?.() ?? '' })
+  }
+  const songButton = songPassage && (
+    <button
+      type="button"
+      className="anl-head__song"
+      aria-label={t.songDeckOpen}
+      title={t.songDeckOpen}
+      aria-haspopup="dialog"
+      onClick={openSong}
+    >
+      <SongIcon size={16} />
+    </button>
+  )
+
   // The video intake, in the desk's column or a phone's sheet. The
   // walkthrough opens where the screen keeps it: in the column on the
   // desk (plan 120), as a dialog from the sheet on a phone.
@@ -1332,6 +1360,7 @@ export default function AnalyzerScreen({ session }) {
       <div className="anl-desk__head">
         <Leave onClick={() => setIntakeOpen(true)}>{t.leaveAnalyzer}</Leave>
         <h1 className={`anl-desk__title${textDesk && !several ? ' sr-only' : ''}`} lang="ja">{sentences[0]?.text}</h1>
+        {songButton}
         <button
           type="button"
           className={`anl-head__keep${isKept ? ' anl-head__keep--on' : ''}`}
@@ -1523,6 +1552,7 @@ export default function AnalyzerScreen({ session }) {
       <div className="anl-m__head">
         <Leave onClick={() => setIntakeOpen(true)}>{t.leaveAnalyzer}</Leave>
         <h1 className="sr-only" lang="ja">{sentences[0]?.text}</h1>
+        {songButton}
         <button
           type="button"
           className={`anl-head__keep${isKept ? ' anl-head__keep--on' : ''}`}
@@ -1740,6 +1770,17 @@ export default function AnalyzerScreen({ session }) {
           onExplain={() => analyzer.explain(focusIndex)}
           onClose={closeExplain}
           t={t}
+        />
+      )}
+
+      {song && showResult && (
+        <SongDeckSheet
+          session={session}
+          mining={mining}
+          sentences={sentences}
+          title={song.title}
+          t={t}
+          onClose={closeSong}
         />
       )}
     </main>
