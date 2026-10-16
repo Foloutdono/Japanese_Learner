@@ -281,11 +281,11 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         # analyzer: a text, photo or video sent to the breakdown. ocr:
         # a photo read. ask: a question to the tutor. explain: a
         # sentence's explanation opened. dictionary: a search run.
-        # export: the progress or the trail downloaded.
+        # export: the progress downloaded.
         "feature": frozenset({"speech", "analyzer", "ocr", "ask", "explain",
                               "dictionary", "export"}),
         "action":  frozenset({"play", "text", "photo", "video", "scan", "send",
-                              "open", "search", "progress", "trail"}),
+                              "open", "search", "progress"}),
     },
     "setting_change": {
         "setting": frozenset({"theme", "lang", "rating_scale", "reading_pace", "sound",

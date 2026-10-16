@@ -470,8 +470,8 @@ def _js_values():
     block = block[:-1]
     block = block.replace("'", '"')
     block = re.sub(r"(\b\w+)\s*:", r'"\1":', block)
-    block = re.sub(r",\s*([}\]])", r"\1", block)
-    return json.loads("{" + block + "}")
+    block = re.sub(r",\s*([}\]])", r"\1", "{" + block + "}")
+    return json.loads(block)
 
 
 def test_the_frontend_and_backend_agree_on_the_values():
