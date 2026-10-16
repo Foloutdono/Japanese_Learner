@@ -18,6 +18,12 @@ import { GrammarTour } from './GrammarTour'
 // /api/grammar/tour: the first tour only, never read by the scheduler)
 // and boards like the lesson's button does. The record is a courtesy to
 // the plate: a failed post never holds the run.
+//
+// Skipped (plan 222), the tour boards its card and records nothing: the
+// point was not met by its tour, and once its card is rated it is
+// studied, which is what stops the tour being asked again (routes/
+// grammar.py's mark_tutorials). Left before the card is rated, the
+// tour is offered again next time, with its skip.
 export function GrammarGate({ point, session, onCompare, onBoard, onLesson, onView, ask = null }) {
   const desk = useDesk()
   if (point.tour) {
@@ -31,7 +37,7 @@ export function GrammarGate({ point, session, onCompare, onBoard, onLesson, onVi
       }).catch(() => {})
       onBoard?.()
     }
-    return <GrammarTour point={point} onBoard={board} onLesson={onLesson} desk={desk} onView={onView} ask={ask} />
+    return <GrammarTour point={point} onBoard={board} onSkip={() => onBoard?.()} onLesson={onLesson} desk={desk} onView={onView} ask={ask} />
   }
   // A point no tour can be drawn on is met by its lesson; that is its
   // tutorial, recorded so that it is due once per point (plan 194).

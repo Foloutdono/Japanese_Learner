@@ -71,7 +71,9 @@ FEATURES = {
     "translation_review": (
         60, 600, 400,
         "3 reviewed attempts a session, 20 sessions. One call each, uncached "
-        "(the learner's own answer is in the prompt, so it cannot be shared).",
+        "(the learner's own answer is in the prompt, so it cannot be shared). "
+        "TRANSLATION_DAILY_LIMIT caps it at 60/day (plan 211), which bounds "
+        "the abuse row.",
     ),
     "composition_review": (
         90, 900, 400,
@@ -81,12 +83,31 @@ FEATURES = {
         "serves (~60% of the input). COMPOSITION_DAILY_LIMIT caps it at "
         "30/day, which bounds the abuse row.",
     ),
+    "conversation_talk": (
+        48, 1700, 450,
+        "Two free talks a week of six lines each (plan 217): every learner "
+        "line is one call answering twice, the other person's next line and "
+        "the review of the learner's line. In: a stable system block (~1,000 "
+        "tokens, cached) and the scene -- its script of up to fourteen lines, "
+        "the talk so far, the line. Out: two short Japanese lines and the "
+        "review's shape. CONVERSATION_DAILY_LIMIT caps it at 80/day, which "
+        "bounds the abuse row.",
+    ),
+    "conversation_review": (
+        40, 1100, 400,
+        "Two translated replies reviewed a session, 20 sessions (plan 217): "
+        "translation's review with the scene in the user block. One call "
+        "each, the system block a stable prefix. "
+        "CONVERSATION_REVIEW_DAILY_LIMIT caps it at 60/day, which bounds "
+        "the abuse row.",
+    ),
     "practice_ask": (
         40, 1400, 120,
         "Two questions a session, 20 sessions (plan 131): a desk-only panel "
         "in the practice runs, opened after the grade, and on the phone a "
         "page (plan 197); the grammar tour asks through it too, once a "
-        "stop is answered (plan 204), inside the same daily cap. One short call each: "
+        "stop is answered (plan 204), and the analyser's explanation sheet "
+        "after the explanation (plan 220), inside the same daily cap. One short call each: "
         "a stable system block (~1,100 tokens since the 2026-09-27 rework, "
         "around the ~1,024 a provider caches from) and the exercise in "
         "the user block -- the sentence, its translation, the answer, the "
@@ -98,7 +119,10 @@ FEATURES = {
     "phrase_analysis": (
         50, 400, 500,
         "200 breakdowns/mo, ~75% served from phrase_analysis_cache (reading "
-        "practice draws on ~220 fixed sentences). Only the misses bill.",
+        "practice draws on ~220 fixed sentences). Only the misses bill. "
+        "DEEP_DAILY_LIMIT caps the misses at 150/day (plan 211) -- the "
+        "analyzer, the runs' explain and a video line alike -- which bounds "
+        "the abuse row.",
     ),
     "ocr_vision": (
         20, 1400, 400,
@@ -112,7 +136,9 @@ FEATURES = {
         "~35 calls build one N3 exam set (vocab 6, grammar+reading ~19, "
         "listening ~10, batched 4-8 items a call). Papers are SHARED -- "
         "exam_papers rows are picked per revision, not per user -- so the "
-        "cost amortizes. 52 = 1.5 papers a month per user before sharing.",
+        "cost amortizes. 52 = 1.5 papers a month per user before sharing. "
+        "A learner asking past every revision starts a new one; "
+        "EXAM_PAPERS_DAILY_LIMIT caps those at 5/day (plan 211).",
     ),
 }
 

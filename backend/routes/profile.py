@@ -1,8 +1,11 @@
 import csv
 import io
+import json
 import logging
 import random
 import re
+import threading
+import time
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 
@@ -15,10 +18,10 @@ from core.db import db_conn
 from core.auth import get_user_id, prefixed
 from core.srs_instance import srs
 from core.user_level import LEVELS, note_stored_level
-from core import credits, events
+from core import credits, events, review_plan
 from core.lines import clean_lines
 from srs.xp import level_progress, next_milestone
-from study import level_rule
+from study import level_fit, level_rule
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -146,6 +149,18 @@ def _init_db() -> None:
                 # (display_seconds, read_seconds) stay the standard
                 # pace's: the client scales them.
                 ("reading_pace", "TEXT"),
+                # 回復運転 — the review plan (plan 217): the learner's
+                # own ceiling on the day's reviews, a catch-up chosen
+                # on the comeback sheet, "all of them now" said on a
+                # day, and an absence declared ahead. All NULL is the
+                # gate as it always was. See core/review_plan.py.
+                *review_plan.COLUMNS,
+                # 足跡を残さない — the account asked not to be counted
+                # (plan 218). Réglages › Données writes it beside the
+                # browser's own flag; core/events.opted_out reads it on
+                # both write paths, so the server's events and every
+                # other device stop too.
+                ("analytics_off", "BOOLEAN NOT NULL DEFAULT FALSE"),
             ):
                 cur.execute(
                     f"ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS {col} {typ}"
@@ -238,7 +253,7 @@ def ensure_profile_row(user_id: str) -> str:
 def _profile_row(user_id: str) -> tuple:
     """(username, jlpt_level, daily_new_target, onboarded_at,
     rating_scale, motive, kana_known, reminder_time, notifications,
-    lines, tutorial_at, guided, reading_pace) —
+    lines, tutorial_at, guided, reading_pace, analytics_off) —
     seeding the row lazily like _get_or_create_username, whose creation
     path it reuses. The onboarding fields are NULL until the flow runs,
     and rating_scale and reading_pace until the learner changes them."""
@@ -250,7 +265,7 @@ def _profile_row(user_id: str) -> tuple:
                 SELECT username, jlpt_level, daily_new_target, onboarded_at,
                        rating_scale, motive, kana_known, reminder_time,
                        notifications, lines, tutorial_at, guided,
-                       reading_pace
+                       reading_pace, analytics_off
                 FROM user_profiles WHERE user_id = %s
                 """,
                 (user_id,),
@@ -260,7 +275,7 @@ def _profile_row(user_id: str) -> tuple:
                 return row
     finally:
         conn.close()
-    return (_get_or_create_username(user_id), None, None, None, None, None, None, None, False, None, None, {}, None)
+    return (_get_or_create_username(user_id), None, None, None, None, None, None, None, False, None, None, {}, None, False)
 
 
 def usernames_for(user_ids: list[str]) -> dict[str, str]:
@@ -335,6 +350,10 @@ class LearningPayload(BaseModel):
     # The daily nudge on or off, from Settings › Notifications (plan
     # 156). The boarding asked once; this is where the answer changes.
     notifications: bool | None = None
+    # The trail's switch (plan 218), from Réglages › Données: True asks
+    # not to be counted, on every device and by the server too
+    # (core/events.opted_out).
+    analyticsOff: bool | None = None
 
     @field_validator("lines")
     @classmethod
@@ -385,7 +404,8 @@ class LearningPayload(BaseModel):
 # study/level_rule.py for the rule and SRSEngine.seed_known for the
 # rows. Both halves answer in the same shape the settings sheets
 # print: "up" carries what would be (or was) marked known and the
-# spread, "down" what is set aside and the zero that is deleted.
+# spread, "down" what is set aside, what goes back to new (the
+# assumptions never checked, plan 224) and the zero that is deleted.
 def _level_direction(current: str | None, target: str) -> str:
     if current == target:
         return "same"
@@ -404,21 +424,38 @@ def level_rule_preview(user_id: str, current: str | None, target: str) -> dict:
             full = prefixed(ids, user_id)
             marked += len(full) - srs.count_rows(full, mode)
         return {"direction": "up", "markedKnown": marked, "spreadWeeks": level_rule.SPREAD_WEEKS}
+    return _level_down(user_id, current, target, dry_run=True)
+
+
+def _level_down(user_id: str, current: str, target: str, dry_run: bool) -> dict:
+    """A move down: the assumptions from `target` up go back to new
+    (SRSEngine.forget_assumed -- counted under `dry_run`), and what has
+    history beyond `target` is set aside. "returned" is in rows, one per
+    card in its line's primary mode, the unit seed_known wrote them in."""
+    returned = sum(
+        srs.forget_assumed(prefixed(ids, user_id), mode, dry_run=dry_run)
+        for _source, mode, ids in level_rule.known_batches(level_rule.stops_from(target))
+    )
     set_aside = sum(
-        srs.count_cards_with_rows(prefixed(ids, user_id))
+        srs.count_cards_with_history(prefixed(ids, user_id))
         for ids in level_rule.item_batches(level_rule.stops_between(target, current))
     )
-    return {"direction": "down", "setAside": set_aside, "deleted": 0}
+    if not dry_run:
+        logger.info("level rule user_id=%s %s -> %s returned=%d", user_id, current, target, returned)
+    return {"direction": "down", "setAside": set_aside, "returned": returned, "deleted": 0}
 
 
 def apply_level_rule(user_id: str, current: str | None, target: str) -> dict:
     """Write the rule for a level just stored: seed every stop behind
     `target` (rows that exist are left alone, so the stops behind the
-    previous level cost nothing a second time). A move down writes
-    nothing and says so in the same shape."""
+    previous level cost nothing a second time). A move down gives back
+    the assumptions it no longer stands behind (plan 224) and deletes
+    no history."""
     direction = _level_direction(current, target)
-    if direction != "up":
-        return level_rule_preview(user_id, current, target)
+    if direction == "same":
+        return {"direction": "same"}
+    if direction == "down":
+        return _level_down(user_id, current, target, dry_run=False)
     marked = 0
     for _source, mode, ids in level_rule.known_batches(level_rule.stops_behind(target)):
         marked += srs.seed_known(prefixed(ids, user_id), mode, spread_days=level_rule.SPREAD_DAYS)
@@ -491,7 +528,12 @@ def bridge_rest_days(user_id: str) -> list:
     """srs.bridge_rest_days, with its event: the missed days a rest
     ticket covers, spent lazily on the learner's next visit: GET
     /api/profile, GET /api/today and POST /api/today/clear. A comfort,
-    never a reason to fail the screen that asked."""
+    never a reason to fail the screen that asked.
+
+    A declared absence is bridged first (plan 217,
+    review_plan.bridge_away): its days are the learner's to keep, and a
+    ticket must not be spent on one of them."""
+    review_plan.bridge_away(user_id)
     try:
         days = srs.bridge_rest_days(user_id)
     except Exception:
@@ -515,7 +557,7 @@ def counted_from(figures: dict, cleared: bool) -> int:
 def get_profile(user_id: str = Depends(get_user_id)):
     (username, jlpt_level, daily_new_target, onboarded_at, rating_scale,
      motive, kana_known, reminder_time, notifications, lines,
-     tutorial_at, guided, reading_pace) = _profile_row(user_id)
+     tutorial_at, guided, reading_pace, analytics_off) = _profile_row(user_id)
     xp = srs.get_lifetime_xp(user_id)
     progress = level_progress(xp)
     bridge_rest_days(user_id)
@@ -572,6 +614,10 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # round trip.
         "tutorialAt": tutorial_at.isoformat() if tutorial_at else None,
         "guided": dict(guided or {}),
+        # 足跡を残さない (plan 218): the account's answer, which App.jsx
+        # copies onto this device's flag on boot so an opt-out made on
+        # the phone also stops the desk.
+        "analyticsOff": bool(analytics_off),
         "streak": streak["current"],
         "streakLongest": streak["longest"],
         "totalReviews": records["total_reviews"],
@@ -649,6 +695,51 @@ def export_progress(user_id: str = Depends(get_user_id)):
     )
 
 
+@router.get("/api/profile/export/trail")
+def export_trail(user_id: str = Depends(get_user_id)):
+    """
+    The learner's own 足跡 as one CSV (plan 218) -- the right of access
+    (GDPR art. 15) for the usage statistics, beside the progress export
+    in Réglages › Données. Both halves: the raw rows still inside their
+    thirty days (and the once-per-account ones kept a year), then the
+    per-day counts they were folded into. `props` is the JSON the row
+    holds -- enums and numbers only, which is what core/events.clean
+    lets in -- and the session id is left out: it is a random token that
+    means nothing outside the table.
+    """
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT at, name, props FROM event_log WHERE user_id = %s ORDER BY at, id",
+                (user_id,),
+            )
+            raw = cur.fetchall()
+            cur.execute(
+                "SELECT day, name, n FROM event_daily WHERE user_id = %s ORDER BY day, name",
+                (user_id,),
+            )
+            daily = cur.fetchall()
+    finally:
+        conn.close()
+
+    buf = io.StringIO()
+    writer = csv.writer(buf, lineterminator="\n")
+    writer.writerow(["at", "name", "count", "props"])
+    for at, name, props in raw:
+        writer.writerow([at.isoformat(), name, 1,
+                         json.dumps(props or {}, ensure_ascii=False, sort_keys=True)])
+    for day, name, n in daily:
+        writer.writerow([day.isoformat(), name, n, ""])
+
+    logger.info("trail export user_id=%s rows=%d days=%d", user_id, len(raw), len(daily))
+    return PlainTextResponse(
+        buf.getvalue(),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="tsuji-usage.csv"'},
+    )
+
+
 @router.patch("/api/profile")
 def update_profile(payload: UsernamePayload, user_id: str = Depends(get_user_id)):
     _get_or_create_username(user_id)  # ensure a row exists to update
@@ -699,6 +790,9 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
     if payload.notifications is not None:
         sets.append("notifications = %s")
         args.append(payload.notifications)
+    if payload.analyticsOff is not None:
+        sets.append("analytics_off = %s")
+        args.append(payload.analyticsOff)
     if not sets:
         raise HTTPException(status_code=422, detail="Nothing to update")
     conn = db_conn()
@@ -731,6 +825,7 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
         "tzOffsetMin": payload.tzOffsetMin,
         "lines": payload.lines,
         "notifications": payload.notifications,
+        "analyticsOff": payload.analyticsOff,
         "levelRule": level_rule_result,
     }
 
@@ -746,6 +841,42 @@ def preview_learning(jlptLevel: str = Query(...), user_id: str = Depends(get_use
     return level_rule_preview(user_id, current, jlptLevel)
 
 
+@router.get("/api/profile/level-fit")
+def get_level_fit(user_id: str = Depends(get_user_id)):
+    """Whether the stored level fits what the learner answers (plan 224,
+    study/level_fit.py): a stop to move down to when the checks behind
+    the level mostly fail, the next one when the level's new words are
+    known the first time they are asked, or nothing -- with the figures
+    it read. A suggestion only: nothing is written."""
+    return level_fit.level_fit(srs, user_id, _profile_row(user_id)[1])
+
+
+# The 番付's sums, a minute old at most (plan 211). Each is an aggregate
+# over every learner's whole review_log, review_daily and xp_ledger,
+# and the board asked them afresh on every open -- and twice over for a
+# learner outside the top. The top list is the same for everyone; a
+# learner's own rank is kept per learner, the map dropped when it fills.
+_BOARD_TTL = 60.0
+_BOARD_RANKS_MAX = 2048
+_board_lock = threading.Lock()
+_board_tops: dict[tuple, tuple[float, list]] = {}
+_board_ranks: dict[tuple, tuple[float, dict]] = {}
+
+
+def _board_cached(store: dict, key: tuple, build, cap: int | None = None):
+    now = time.monotonic()
+    with _board_lock:
+        hit = store.get(key)
+    if hit is not None and now - hit[0] < _BOARD_TTL:
+        return hit[1]
+    value = build()
+    with _board_lock:
+        if cap is not None and len(store) >= cap:
+            store.clear()
+        store[key] = (now, value)
+    return value
+
+
 @router.get("/api/leaderboard")
 def get_leaderboard(
     limit: int = Query(20, ge=1, le=200),
@@ -756,7 +887,7 @@ def get_leaderboard(
     user_id: str = Depends(get_user_id),
 ):
     days = 7 if period == "week" else None
-    top = srs.get_leaderboard(limit=limit, days=days)
+    top = _board_cached(_board_tops, (limit, days), lambda: srs.get_leaderboard(limit=limit, days=days))
     names = usernames_for([e["user_id"] for e in top])
 
     entries = [
@@ -774,7 +905,8 @@ def get_leaderboard(
     # #47" instead of just omitting them.
     me = next((e for e in entries if e["username"] == names.get(user_id)), None)
     if me is None:
-        mine = srs.get_user_rank(user_id, days=days)
+        mine = _board_cached(_board_ranks, (user_id, days),
+                             lambda: srs.get_user_rank(user_id, days=days), cap=_BOARD_RANKS_MAX)
         me = {
             "rank": mine["rank"],
             "username": _get_or_create_username(user_id),

@@ -25,14 +25,14 @@
    "key": "本当::ほんとう",
    "level": "N3",
    "lists_say": "N5",
-   "meaning": "truth, reality",
+   "meaning": "truth, reality; real, genuine",
    "rank": 75
   },
   {
    "key": "通り::とおり",
    "level": "N3",
    "lists_say": "N4",
-   "meaning": "in accordance with ~, following ~, ~ Street, ~ Avenue",
+   "meaning": "street, road; traffic; as, in accordance with (…の通り)",
    "rank": 118
   },
   {
@@ -46,7 +46,7 @@
    "key": "捜査::そうさ",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "search (esp. in criminal investigations), investigation",
+   "meaning": "(criminal) investigation, inquiry, search",
    "rank": 184
   },
   {
@@ -60,7 +60,7 @@
    "key": "::うち",
    "level": "N4",
    "lists_say": "N5",
-   "meaning": "within",
+   "meaning": "inside, within; while (…うちに); among",
    "rank": 299
   },
   {
@@ -95,7 +95,7 @@
    "key": "住::じゅう",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "dwelling, living",
+   "meaning": "dwelling, housing",
    "rank": 487
   },
   {
@@ -132,13 +132,6 @@
    "lists_say": "N3",
    "meaning": "seal, stamp, monogram signature, judgment",
    "rank": 600
-  },
-  {
-   "key": "最も::もっとも",
-   "level": "N3",
-   "lists_say": "N4",
-   "meaning": "most, extremely",
-   "rank": 655
   },
   {
    "key": "内::うち",
@@ -179,7 +172,7 @@
    "key": "掛ける::かける",
    "level": "N4",
    "lists_say": "N5",
-   "meaning": "to hang something",
+   "meaning": "to hang (up), to put on (glasses), to make (a call), to spend (time)",
    "rank": 1020
   },
   {
@@ -193,7 +186,7 @@
    "key": "汚す::よごす",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "(1) to disgrace, to dishonour, (2) to pollute, to contaminate, to soil, to make dirty, to stain",
+   "meaning": "to make dirty, to soil, to stain, to pollute; to disgrace, to dishonour",
    "rank": 1102
   },
   {
@@ -221,7 +214,7 @@
    "key": "怒り::いかり",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "anger, hatred",
+   "meaning": "anger, rage, fury, indignation",
    "rank": 1201
   },
   {
@@ -235,35 +228,35 @@
    "key": "発射::はっしゃ",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "firing, shooting, discharge, catapult",
+   "meaning": "firing, launch (of a rocket), shooting, discharge",
    "rank": 1466
   },
   {
    "key": "負う::おう",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "to bear, to owe",
+   "meaning": "to carry on one's back, to bear (responsibility), to suffer (an injury), to owe",
    "rank": 1512
   },
   {
    "key": "::アップ",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "up",
+   "meaning": "rise, increase; close-up; upload",
    "rank": 1654
   },
   {
    "key": "::ほっと",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "feel relieved",
+   "meaning": "(feeling) relieved, with a sigh of relief",
    "rank": 1661
   },
   {
    "key": "核::かく",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "nucleus, kernel",
+   "meaning": "nucleus, core, nuclear weapons",
    "rank": 1667
   },
   {
@@ -284,7 +277,7 @@
    "key": "保障::ほしょう",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "guarantee, security, assurance, pledge, warranty",
+   "meaning": "guarantee, security, assurance",
    "rank": 1687
   },
   {
@@ -347,42 +340,42 @@
    "key": "応援::おうえん",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "aid, assistance, help, reinforcement",
+   "meaning": "support, cheering; aid, help, reinforcement",
    "rank": 2004
   },
   {
    "key": "押さえる::おさえる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to stop, to restrain, to seize, to repress, to suppress, to press down",
+   "meaning": "to hold down, to press down; to cover (with one's hand); to seize, to secure",
    "rank": 2021
   },
   {
    "key": "動揺::どうよう",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "disturbance, unrest, shaking, trembling, pitching, rolling, oscillation, agitation, excitement, commotion",
+   "meaning": "agitation, being shaken, unrest; shaking, trembling",
    "rank": 2046
   },
   {
    "key": "角::かく",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "1. angle, 2. bishop (shogi)",
+   "meaning": "angle; square; bishop (shogi)",
    "rank": 2056
   },
   {
    "key": "着ける::つける",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "(1) to attach, to join, to add, to append",
+   "meaning": "to put on, to wear (accessories, a mask); to attach",
    "rank": 2073
   },
   {
    "key": "外れる::はずれる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to be disconnected, to get out of place, to be off, to be out (e.g. of gear)",
+   "meaning": "to come off; to miss (the mark), to be wrong (guess); to be excluded",
    "rank": 2079
   },
   {
@@ -403,7 +396,7 @@
    "key": "載る::のる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to appear (in print), to be recorded",
+   "meaning": "to appear (in print), to be recorded; to be placed on",
    "rank": 2115
   },
   {
@@ -445,14 +438,14 @@
    "key": "::ダウン",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "down",
+   "meaning": "fall, drop, decrease; knockdown; being laid up (ill); crash (of a system)",
    "rank": 2378
   },
   {
    "key": "進行::しんこう",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "advance",
+   "meaning": "progress, advance, moving forward",
    "rank": 2413
   },
   {
@@ -473,7 +466,7 @@
    "key": "挙げる::あげる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to raise, to fly",
+   "meaning": "to raise (one's hand), to give (an example), to cite; to hold (a ceremony)",
    "rank": 2490
   },
   {
@@ -487,7 +480,7 @@
    "key": "操縦::そうじゅう",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "management, handling, control, manipulation",
+   "meaning": "piloting, steering, operation (of a machine); handling, manipulation (of people)",
    "rank": 2530
   },
   {
@@ -501,7 +494,7 @@
    "key": "票::ひょう",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "label, ballot, ticket, sign",
+   "meaning": "vote, ballot; label, ticket",
    "rank": 2672
   },
   {
@@ -522,7 +515,7 @@
    "key": "意地::いじ",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "disposition, spirit, willpower, obstinacy, backbone, appetite",
+   "meaning": "obstinacy, pride, willpower; disposition, nature",
    "rank": 2743
   },
   {
@@ -557,7 +550,7 @@
    "key": "築く::きずく",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "to build, to pile up, to amass",
+   "meaning": "to build, to construct; to build up (a career, reputation), to establish (a relationship)",
    "rank": 2898
   },
   {
@@ -613,14 +606,14 @@
    "key": "広げる::ひろげる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to spread, to extend, to expand, to enlarge",
+   "meaning": "to spread, to extend, to widen, to enlarge; to unfold, to open",
    "rank": 3226
   },
   {
    "key": "亡くす::なくす",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to lose someone, wife, child, etc",
+   "meaning": "to lose (a relative, etc. through death)",
    "rank": 3277
   },
   {
@@ -648,14 +641,14 @@
    "key": "郡::ぐん",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "country, district",
+   "meaning": "district, county",
    "rank": 3390
   },
   {
    "key": "同志::どうし",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "same mind, comrade, kindred soul",
+   "meaning": "comrade, kindred spirit, like-minded person",
    "rank": 3390
   },
   {
@@ -676,14 +669,14 @@
    "key": "鳴らす::ならす",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to ring, to sound, to chime, to beat, to snort (nose)",
+   "meaning": "to ring, to sound, to chime, to beat (a drum), to snap (fingers)",
    "rank": 3495
   },
   {
    "key": "停電::ていでん",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "failure of electricity",
+   "meaning": "power outage, power cut, blackout",
    "rank": 3594
   },
   {
@@ -697,7 +690,7 @@
    "key": "慌てる::あわてる",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "to become confused (disconcerted disorganized)",
+   "meaning": "to be flustered, to panic; to hurry, to rush",
    "rank": 3677
   },
   {
@@ -711,7 +704,7 @@
    "key": "期限::きげん",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "term, period",
+   "meaning": "time limit, deadline, term, period",
    "rank": 3713
   },
   {
@@ -725,7 +718,7 @@
    "key": "::ぶつける",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to knock, to run into, to nail on, to strike hard, to hit and attack",
+   "meaning": "to hit, to knock, to bump (into), to crash (into); to throw (at); to vent (anger)",
    "rank": 3744
   },
   {
@@ -767,14 +760,14 @@
    "key": "派手::はで",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "showy, loud, gay, flashy, gaudy",
+   "meaning": "showy, loud, flashy, gaudy",
    "rank": 4080
   },
   {
    "key": "::マスコミ",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "mass communication",
+   "meaning": "mass media, the press",
    "rank": 4153
   },
   {
@@ -795,7 +788,7 @@
    "key": "縁::えん",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "chance, fate, destiny, relation, bonds, connection, karma",
+   "meaning": "fate, destiny (binding people); relationship, bond, connection; chance (to meet)",
    "rank": 4288
   },
   {
@@ -809,14 +802,14 @@
    "key": "伝わる::つたわる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to be handed down, to be introduced, to be transmitted",
+   "meaning": "to be conveyed, to spread; to be handed down; to be introduced",
    "rank": 4367
   },
   {
    "key": "宣伝::せんでん",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "propaganda, publicity",
+   "meaning": "publicity, advertising, propaganda",
    "rank": 4367
   },
   {
@@ -851,14 +844,14 @@
    "key": "分かれる::わかれる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to branch off, to diverge from, to fork, to split, to dispense, to scatter, to divide into",
+   "meaning": "to branch off, to fork, to diverge; to split, to be divided; to scatter",
    "rank": 4418
   },
   {
    "key": "群::ぐん",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "group (math)",
+   "meaning": "group, crowd, herd, swarm",
    "rank": 4444
   },
   {
@@ -893,7 +886,7 @@
    "key": "溶ける::とける",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to melt, to thaw, to fuse, to dissolve",
+   "meaning": "to melt, to thaw, to dissolve",
    "rank": 4581
   },
   {
@@ -907,14 +900,14 @@
    "key": "箇所::かしょ",
    "level": "N1",
    "lists_say": "N2",
-   "meaning": "passage, place, point, part",
+   "meaning": "place, point, part, spot, passage; (counter for places)",
    "rank": 4610
   },
   {
    "key": "::オーバー",
    "level": "N3",
    "lists_say": "N4",
-   "meaning": "(1) overcoat, (2) over",
+   "meaning": "overcoat; exceeding, going over; exaggerated",
    "rank": 4636
   },
   {
@@ -942,7 +935,7 @@
    "key": "褒める::ほめる",
    "level": "N3",
    "lists_say": "N4",
-   "meaning": "to praise, to admire, to speak well",
+   "meaning": "to praise, to compliment, to speak well of",
    "rank": 4753
   },
   {
@@ -977,7 +970,7 @@
    "key": "盾::たて",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "shield, buckler, escutcheon, pretext",
+   "meaning": "shield; pretext, excuse",
    "rank": 4951
   },
   {
@@ -998,14 +991,14 @@
    "key": "生える::はえる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "(1) to grow, to spring up, (2) to cut (teeth)",
+   "meaning": "to grow, to spring up, to sprout; to cut (teeth)",
    "rank": 5061
   },
   {
    "key": "通訳::つうやく",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "interpretation",
+   "meaning": "interpretation (oral translation); interpreter",
    "rank": 5061
   },
   {
@@ -1019,7 +1012,7 @@
    "key": "寄せる::よせる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to collect, to gather, to add, to put aside",
+   "meaning": "to bring near, to draw closer; to gather, to collect; to send (an opinion, a letter)",
    "rank": 5113
   },
   {
@@ -1033,7 +1026,7 @@
    "key": "活躍::かつやく",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "activity",
+   "meaning": "being active, playing an active part, success, great efforts",
    "rank": 5231
   },
   {
@@ -1054,7 +1047,7 @@
    "key": "継ぐ::つぐ",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "to succeed",
+   "meaning": "to succeed (to), to inherit, to take over; to patch, to mend",
    "rank": 5320
   },
   {
@@ -1110,7 +1103,7 @@
    "key": "揃える::そろえる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to put things in order, to arrange, to make uniform, to get something ready",
+   "meaning": "to gather, to complete (a set); to put in order; to make uniform, to match",
    "rank": 5607
   },
   {
@@ -1124,7 +1117,7 @@
    "key": "切り::きり",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "limits, end, bounds, period, place to leave off, closing sentence, all there is, only, since",
+   "meaning": "end, finish, place to stop; limit, bounds",
    "rank": 5651
   },
   {
@@ -1159,7 +1152,7 @@
    "key": "退学::たいがく",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "dropping out of school",
+   "meaning": "dropping out of school; expulsion from school",
    "rank": 5787
   },
   {
@@ -1180,7 +1173,7 @@
    "key": "反省::はんせい",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "reflection, reconsideration, introspection, meditation, contemplation",
+   "meaning": "reflection (on one's conduct), soul-searching; regret, remorse",
    "rank": 5980
   },
   {
@@ -1201,7 +1194,7 @@
    "key": "羽根::はね",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "shuttlecock",
+   "meaning": "feather, plume; wing; shuttlecock",
    "rank": 6040
   },
   {
@@ -1215,7 +1208,7 @@
    "key": "::マイナス",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "minus",
+   "meaning": "minus, negative; deficit; disadvantage",
    "rank": 6146
   },
   {
@@ -1229,7 +1222,7 @@
    "key": "乾燥::かんそう",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "dry, arid, insipid, dehydrated",
+   "meaning": "dryness, drying, dehydration; aridity",
    "rank": 6209
   },
   {
@@ -1257,7 +1250,7 @@
    "key": "実力::じつりょく",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "merit, efficiency, arms, force",
+   "meaning": "(real) ability, capability, competence; force (of arms)",
    "rank": 6463
   },
   {
@@ -1285,21 +1278,21 @@
    "key": "悔しい::くやしい",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "regrettable, mortifying, vexing",
+   "meaning": "frustrating, vexing, galling; frustrated, mortified",
    "rank": 6641
   },
   {
    "key": "溶く::とく",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to dissolve (paint)",
+   "meaning": "to mix (with liquid), to dissolve; to beat (eggs)",
    "rank": 6641
   },
   {
    "key": "視点::してん",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "opinion, point of view, visual point",
+   "meaning": "point of view, viewpoint, perspective",
    "rank": 6641
   },
   {
@@ -1320,7 +1313,7 @@
    "key": "生理::せいり",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "physiology, menses",
+   "meaning": "physiology; menstruation, period",
    "rank": 6967
   },
   {
@@ -1397,7 +1390,7 @@
    "key": "墨::すみ",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "ink",
+   "meaning": "ink (India ink), ink stick; squid ink",
    "rank": 7397
   },
   {
@@ -1460,7 +1453,7 @@
    "key": "湿る::しめる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to be wet, to become wet, to be damp",
+   "meaning": "to become damp, to become moist, to get wet",
    "rank": 7878
   },
   {
@@ -1481,8 +1474,15 @@
    "key": "欠く::かく",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "to lack, to break, to crack, to chip",
+   "meaning": "to lack; to chip, to break, to crack",
    "rank": 8064
+  },
+  {
+   "key": "著す::あらわす",
+   "level": "N2",
+   "lists_say": "N3",
+   "meaning": "to write, to publish",
+   "rank": 8286
   },
   {
    "key": "包装::ほうそう",
@@ -1530,7 +1530,7 @@
    "key": "湧く::わく",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to boil, to grow hot, to get excited, to gush forth",
+   "meaning": "to well up, to gush out; to arise (feelings, ideas); to breed (insects)",
    "rank": 8653
   },
   {
@@ -1551,7 +1551,7 @@
    "key": "揚げる::あげる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to lift, to fry",
+   "meaning": "to deep-fry; to hoist (a flag), to fly (a kite), to launch (fireworks)",
    "rank": 8870
   },
   {
@@ -1572,14 +1572,14 @@
    "key": "重なる::かさなる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to be piled up, lie on top of one another, overlap each other",
+   "meaning": "to be piled up, to overlap; to happen one after another; to coincide",
    "rank": 8870
   },
   {
    "key": "預かる::あずかる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to keep in custody, to receive on deposit, to take charge of",
+   "meaning": "to look after, to keep, to hold on to; to be entrusted with",
    "rank": 8870
   },
   {
@@ -1600,14 +1600,14 @@
    "key": "先行::せんこう",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "preceding, going first",
+   "meaning": "going ahead, going first, preceding",
    "rank": 9113
   },
   {
    "key": "間隔::かんかく",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "space, interval, SPC",
+   "meaning": "space, interval, gap",
    "rank": 9255
   },
   {
@@ -1621,7 +1621,7 @@
    "key": "有無::うむ",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "yes or no, existence, flag indicator (comp), presence or absence marker",
+   "meaning": "existence or nonexistence, presence or absence; yes or no",
    "rank": 9404
   },
   {
@@ -1663,7 +1663,7 @@
    "key": "代える::かえる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to exchange, to interchange, to substitute, to replace",
+   "meaning": "to replace, to substitute, to exchange",
    "rank": 9690
   },
   {
@@ -1691,7 +1691,7 @@
    "key": "異動::いどう",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "a change",
+   "meaning": "personnel change, transfer, reassignment",
    "rank": 9856
   },
   {
@@ -1761,7 +1761,7 @@
    "key": "付き合う::つきあう",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to associate with, to keep company with, to get on with",
+   "meaning": "to associate with, to keep company with; to date; to go along with",
    "rank": 10409
   },
   {
@@ -1803,21 +1803,21 @@
    "key": "枠::わく",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "frame, slide",
+   "meaning": "frame, border; limit, quota; category",
    "rank": 10591
   },
   {
    "key": "辞退::じたい",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "refusal",
+   "meaning": "declining, turning down, withdrawal",
    "rank": 10591
   },
   {
    "key": "決行::けっこう",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "doing (with resolve), carrying out (i.e. a plan)",
+   "meaning": "carrying out (e.g. a plan) with resolve, going ahead with",
    "rank": 10591
   },
   {
@@ -1831,14 +1831,14 @@
    "key": "協調::きょうちょう",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "co-operation, conciliation, harmony, firm (market) tone",
+   "meaning": "cooperation, conciliation, harmony, coordination",
    "rank": 10980
   },
   {
    "key": "建つ::たつ",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to erect, to be erected, to be built",
+   "meaning": "to be built, to be erected, to stand",
    "rank": 11188
   },
   {
@@ -1852,7 +1852,7 @@
    "key": "器官::きかん",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "organ (of body), instrument",
+   "meaning": "organ (of the body)",
    "rank": 11188
   },
   {
@@ -1873,7 +1873,7 @@
    "key": "治める::おさめる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "(1) to govern, to manage, (2) to subdue",
+   "meaning": "to govern, to rule, to manage; to subdue, to settle (a dispute)",
    "rank": 11434
   },
   {
@@ -1887,14 +1887,14 @@
    "key": "呆れる::あきれる",
    "level": "N1",
    "lists_say": "N2",
-   "meaning": "to be amazed, to be shocked",
+   "meaning": "to be dumbfounded, to be appalled, to be disgusted, to be fed up",
    "rank": 11681
   },
   {
    "key": "汲む::くむ",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "(1) to draw (water), to dip, to scoop, to pump",
+   "meaning": "to draw (water), to scoop, to ladle; to take into account (feelings)",
    "rank": 11931
   },
   {
@@ -1915,7 +1915,7 @@
    "key": "納める::おさめる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to obtain, to reap, to pay, to supply, to accept",
+   "meaning": "to pay (taxes, fees), to deliver, to supply; to put away, to store",
    "rank": 12215
   },
   {
@@ -1929,7 +1929,7 @@
    "key": "格::かく",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "status, character, case",
+   "meaning": "status, rank, position; (grammatical) case",
    "rank": 12215
   },
   {
@@ -2055,7 +2055,7 @@
    "key": "発::はつ",
    "level": "N1",
    "lists_say": "N2",
-   "meaning": "departure, beginning, counter for gunshots",
+   "meaning": "departure (from), leaving at; sent from; (counter for shots, bullets, blows)",
    "rank": 13808
   },
   {
@@ -2076,7 +2076,7 @@
    "key": "延びる::のびる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to be prolonged",
+   "meaning": "to be prolonged, to be extended, to be postponed",
    "rank": 14216
   },
   {
@@ -2104,7 +2104,7 @@
    "key": "因る::よる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to come from",
+   "meaning": "to be due to, to be caused by; to depend on; to be based on",
    "rank": 14216
   },
   {
@@ -2113,13 +2113,6 @@
    "lists_say": "N3",
    "meaning": "(small) table, tray, meal",
    "rank": 14216
-  },
-  {
-   "key": "著す::あらわす",
-   "level": "N2",
-   "lists_say": "N3",
-   "meaning": "to write, to publish",
-   "rank": 14661
   },
   {
    "key": "湿度::しつど",
@@ -2171,6 +2164,13 @@
    "rank": 15115
   },
   {
+   "key": "転々::てんてん",
+   "level": "N1",
+   "lists_say": "N2",
+   "meaning": "rolling about, moving from place to place, being passed around repeatedly",
+   "rank": 15115
+  },
+  {
    "key": "::かゆい",
    "level": "N2",
    "lists_say": "N3",
@@ -2209,7 +2209,7 @@
    "key": "馴れる::なれる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to become domesticated, to become tame",
+   "meaning": "to become tame; to get used to, to become familiar with",
    "rank": 16184
   },
   {
@@ -2223,7 +2223,7 @@
    "key": "駆ける::かける",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "to run (race esp. horse), to gallop, to canter",
+   "meaning": "to run, to dash; to gallop (on horseback)",
    "rank": 16184
   },
   {
@@ -2272,7 +2272,7 @@
    "key": "粋::いき",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "chic, style, purity, essence",
+   "meaning": "chic, stylish, refined; considerate, understanding",
    "rank": 16794
   },
   {
@@ -2286,7 +2286,7 @@
    "key": "気体::きたい",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "vapour, gas",
+   "meaning": "gas, gaseous body, vapor",
    "rank": 17469
   },
   {
@@ -2300,7 +2300,7 @@
    "key": "突く::つく",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "(1) to thrust, to strike, (2) to poke",
+   "meaning": "to poke, to thrust, to strike; to prick, to stab; to prop oneself on (a cane)",
    "rank": 18226
   },
   {
@@ -2321,21 +2321,21 @@
    "key": "女史::じょし",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "Ms.",
+   "meaning": "Ms., Madam (title for a distinguished woman)",
    "rank": 18226
   },
   {
    "key": "問う::とう",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "to ask, to question, to charge (i.e. with a crime), to accuse, without regard to (neg)",
+   "meaning": "to ask, to question; to accuse of, to charge with; (+ negative) regardless of",
    "rank": 18226
   },
   {
    "key": "遭う::あう",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to meet, to encounter (undesirable nuance)",
+   "meaning": "to encounter (something unpleasant), to meet with (an accident, etc.)",
    "rank": 19085
   },
   {
@@ -2363,7 +2363,7 @@
    "key": "争う::あらそう",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to dispute, to argue, to be at variance, to compete",
+   "meaning": "to compete, to contend; to quarrel, to argue, to dispute",
    "rank": 20078
   },
   {
@@ -2384,21 +2384,21 @@
    "key": "放れる::はなれる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to leave, to get free, to cut oneself off",
+   "meaning": "to get free (from), to be released, to get loose",
    "rank": 21138
   },
   {
    "key": "琴::こと",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "koto (Japanese harp)",
+   "meaning": "koto (13-stringed Japanese zither)",
    "rank": 21138
   },
   {
    "key": "酌む::くむ",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to serve sake",
+   "meaning": "to pour (sake), to drink together; to take into account (feelings)",
    "rank": 21138
   },
   {
@@ -2440,7 +2440,7 @@
    "key": "蒸す::むす",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to steam, to poultice, to be sultry",
+   "meaning": "to steam (food, etc.); to be hot and humid, to be sultry",
    "rank": 22428
   },
   {
@@ -2454,7 +2454,7 @@
    "key": "享受::きょうじゅ",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "reception, acceptance, enjoyment, being given",
+   "meaning": "enjoyment (of rights, freedom, etc.), being granted",
    "rank": 22428
   },
   {
@@ -2482,14 +2482,14 @@
    "key": "沿う::そう",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "to run along, to follow",
+   "meaning": "to run along, to follow; to meet (wishes, expectations)",
    "rank": 22428
   },
   {
    "key": "茶碗::ちゃわん",
    "level": "N2",
    "lists_say": "N5",
-   "meaning": "rice bowl, tea cup, teacup",
+   "meaning": "rice bowl, teacup",
    "rank": 24128
   },
   {
@@ -2517,21 +2517,21 @@
    "key": "慌ただしい::あわただしい",
    "level": "N1",
    "lists_say": "N2",
-   "meaning": "busy, hurried, confused, flurried",
+   "meaning": "busy, hurried, hectic, flurried",
    "rank": 24128
   },
   {
    "key": "卸す::おろす",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to sell wholesale, grated (vegetables)",
+   "meaning": "to sell wholesale; to grate (vegetables)",
    "rank": 26164
   },
   {
    "key": "延ばす::のばす",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to lengthen, to stretch, to reach out, to grow (beard)",
+   "meaning": "to extend, to prolong, to postpone, to delay",
    "rank": 26164
   },
   {
@@ -2573,7 +2573,7 @@
    "key": "::アンケート",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "(fr:) (n) questionnaire (fr: enquete), survey",
+   "meaning": "questionnaire, survey",
    "rank": 28883
   },
   {
@@ -2622,7 +2622,7 @@
    "key": "熱心::ねっしん",
    "level": "N3",
    "lists_say": "N4",
-   "meaning": "zeal, enthusiasm",
+   "meaning": "eager, keen, enthusiastic, zealous",
    "rank": null
   },
   {
@@ -2636,7 +2636,7 @@
    "key": "大変::たいへん",
    "level": "N3",
    "lists_say": "N5",
-   "meaning": "awful, dreadful, terrible, very",
+   "meaning": "very, greatly; serious, terrible; hard, difficult",
    "rank": null
   },
   {
@@ -2657,7 +2657,7 @@
    "key": "具える::そなえる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to be furnished with",
+   "meaning": "to furnish with, to equip; to be endowed with, to possess",
    "rank": null
   },
   {
@@ -2685,7 +2685,7 @@
    "key": "広める::ひろめる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to broaden, to propagate",
+   "meaning": "to spread, to propagate, to popularize; to broaden",
    "rank": null
   },
   {
@@ -2699,7 +2699,7 @@
    "key": "流行る::はやる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to flourish, to thrive, to be popular, to come into fashion",
+   "meaning": "to be popular, to be in fashion; to spread (disease); to thrive",
    "rank": null
   },
   {
@@ -2734,7 +2734,7 @@
    "key": "畳む::たたむ",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to fold (clothes)",
+   "meaning": "to fold (clothes, an umbrella); to close (a business)",
    "rank": null
   },
   {
@@ -2766,17 +2766,10 @@
    "rank": null
   },
   {
-   "key": "反る::かえる",
-   "level": "N2",
-   "lists_say": "N3",
-   "meaning": "to warp, to be warped, to curve",
-   "rank": null
-  },
-  {
    "key": "::こぼす",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to spill",
+   "meaning": "to spill, to drop; to grumble, to complain",
    "rank": null
   },
   {
@@ -2804,7 +2797,7 @@
    "key": "注す::さす",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to pour (drink), to serve (drinks)",
+   "meaning": "to add (a liquid), to put in (eye drops); to pour (a drink)",
    "rank": null
   },
   {
@@ -2818,7 +2811,7 @@
    "key": "溜まる::たまる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to collect, to gather, to save",
+   "meaning": "to collect, to gather, to accumulate, to pile up",
    "rank": null
   },
   {
@@ -2839,28 +2832,28 @@
    "key": "炊く::たく",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to boil, to cook",
+   "meaning": "to cook (rice, grains); to boil, to simmer",
    "rank": null
   },
   {
    "key": "超す::こす",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to cross, to pass, to tide over",
+   "meaning": "to exceed, to surpass, to be more than",
    "rank": null
   },
   {
    "key": "退く::どく",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "(1) to retreat, to recede, to withdraw",
+   "meaning": "to step aside, to move (out of the way), to make way",
    "rank": null
   },
   {
    "key": "意地悪::いじわる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "malicious, ill-tempered, unkind",
+   "meaning": "mean, nasty, unkind, spiteful",
    "rank": null
   },
   {
@@ -2874,7 +2867,7 @@
    "key": "::もしかすると",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "perhaps, maybe, by some chance",
+   "meaning": "perhaps, maybe, possibly",
    "rank": null
   },
   {
@@ -2923,14 +2916,14 @@
    "key": "助かる::たすかる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to be saved, to be rescued, to survive, to be helpful",
+   "meaning": "to be saved, to be rescued, to survive; to be helped, to be a relief",
    "rank": null
   },
   {
    "key": "片付く::かたづく",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to put in order, to dispose of, to solve",
+   "meaning": "to be tidied up, to be put in order; to be settled, to be finished",
    "rank": null
   },
   {
@@ -2944,21 +2937,21 @@
    "key": "交ぜる::まぜる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to be mixed, to be blended with",
+   "meaning": "to mix, to blend, to mingle",
    "rank": null
   },
   {
    "key": "生長::せいちょう",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "growth, increment",
+   "meaning": "growth (of a plant)",
    "rank": null
   },
   {
    "key": "交じる::まじる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to be mixed, to be blended with, to associate with",
+   "meaning": "to be mixed, to be blended (with); to mingle with, to join",
    "rank": null
   },
   {
@@ -2972,7 +2965,7 @@
    "key": "映る::うつる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "to be reflected, to harmonize with, to come out (photo)",
+   "meaning": "to be reflected, to be projected, to appear (on screen, in a photo)",
    "rank": null
   },
   {
@@ -2993,7 +2986,7 @@
    "key": "::もったいない",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "too good, more than one deserves, wasteful, sacrilegious, unworthy of",
+   "meaning": "wasteful, a waste; too good for, more than one deserves",
    "rank": null
   },
   {
@@ -3049,7 +3042,7 @@
    "key": "一昨昨日::さきおととい",
    "level": "N1",
    "lists_say": "N2",
-   "meaning": "two days before yesterday",
+   "meaning": "three days ago (the day before the day before yesterday)",
    "rank": null
   },
   {
@@ -3140,7 +3133,7 @@
    "key": "::ずれる",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "to slide, to slip off",
+   "meaning": "to slip, to slide, to shift; to be out of alignment, to deviate",
    "rank": null
   },
   {
@@ -3168,7 +3161,7 @@
    "key": "弱まる::よわまる",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "to abate, to weaken, to be emaciated, to be dejected, to be perplexed",
+   "meaning": "to weaken, to abate, to die down",
    "rank": null
   },
   {
@@ -3182,21 +3175,21 @@
    "key": "生やす::はやす",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "to grow, to cultivate, to wear beard",
+   "meaning": "to grow (a beard, etc.), to let grow",
    "rank": null
   },
   {
    "key": "お先に::おさきに",
    "level": "N1",
    "lists_say": "N2",
-   "meaning": "before, ahead, previously",
+   "meaning": "ahead, before (you); excuse me for leaving first",
    "rank": null
   },
   {
    "key": "ご苦労様::ごくろうさま",
    "level": "N1",
    "lists_say": "N2",
-   "meaning": "Thank you very much for your....",
+   "meaning": "thank you for your hard work",
    "rank": null
   },
   {
@@ -3207,17 +3200,10 @@
    "rank": null
   },
   {
-   "key": "市::いち",
-   "level": "N1",
-   "lists_say": "N3",
-   "meaning": "market, fair",
-   "rank": null
-  },
-  {
    "key": "お邪魔します::おじゃまします",
    "level": "N1",
    "lists_say": "N2",
-   "meaning": "Excuse me for disturbing (interrupting) you",
+   "meaning": "excuse me for intruding (said on entering someone's home)",
    "rank": null
   },
   {
@@ -3231,28 +3217,28 @@
    "key": "経る::へる",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "to pass, to elapse, to experience",
+   "meaning": "to pass, to elapse; to go through, to experience",
    "rank": null
   },
   {
    "key": "お大事に::おだいじに",
    "level": "N1",
    "lists_say": "N2",
-   "meaning": "Take care of yourself",
+   "meaning": "take care of yourself, get well soon",
    "rank": null
   },
   {
    "key": "高まる::たかまる",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "to rise, to swell, to be promoted",
+   "meaning": "to rise, to swell, to intensify, to grow stronger",
    "rank": null
   },
   {
    "key": "可愛がる::かわいがる",
    "level": "N1",
    "lists_say": "N2",
-   "meaning": "to love, to be affectionate",
+   "meaning": "to dote on, to treat tenderly, to cherish, to pet",
    "rank": null
   },
   {
@@ -3266,7 +3252,7 @@
    "key": "節::せつ",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "node, section, occasion, time",
+   "meaning": "occasion, time; section, paragraph; clause (grammar); principles",
    "rank": null
   },
   {
@@ -3280,7 +3266,7 @@
    "key": "脅かす::おどかす",
    "level": "N1",
    "lists_say": "N2",
-   "meaning": "to threaten, to coerce",
+   "meaning": "to scare, to startle, to threaten",
    "rank": null
   },
   {
@@ -3294,7 +3280,7 @@
    "key": "図る::はかる",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "to plot, to attempt, to plan, to take in, to deceive, to devise, to design, to refer A to B",
+   "meaning": "to plan, to attempt, to aim for; to plot; to deceive",
    "rank": null
   },
   {
@@ -3308,14 +3294,14 @@
    "key": "棟::とう",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "place, section, building",
+   "meaning": "(large) building, block, wing; counter for buildings",
    "rank": null
   },
   {
    "key": "当てはまる::あてはまる",
    "level": "N1",
    "lists_say": "N2",
-   "meaning": "to apply (a rule)",
+   "meaning": "to apply (of a rule), to hold true, to fit",
    "rank": null
   },
   {
@@ -3329,7 +3315,7 @@
    "key": "例え::たとえ",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "example, even if, if, though, although",
+   "meaning": "example, simile, metaphor, allegory",
    "rank": null
   },
   {
@@ -3350,21 +3336,21 @@
    "key": "修飾::しゅうしょく",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "ornamentation, embellishment, decoration, adornment, polish up (writing), modification (gram)",
+   "meaning": "decoration, embellishment; modification (grammar)",
    "rank": null
   },
   {
    "key": "::と",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "1. if (conjunction), 2. promoted pawn (shogi) (abbr)",
+   "meaning": "and, with; (quotative); if, when",
    "rank": null
   },
   {
    "key": "露::つゆ",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "dew",
+   "meaning": "dew; tears; (not) at all",
    "rank": null
   },
   {
@@ -3378,7 +3364,7 @@
    "key": "水洗::すいせん",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "flushing",
+   "meaning": "washing with water, rinsing, flushing",
    "rank": null
   },
   {
@@ -3392,7 +3378,7 @@
    "key": "加味::かみ",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "seasoning, flavoring",
+   "meaning": "taking into account, adding; seasoning",
    "rank": null
   },
   {
@@ -3406,7 +3392,7 @@
    "key": "お休み::おやすみ",
    "level": "N1",
    "lists_say": "N2",
-   "meaning": "holiday, absence, rest, Good night",
+   "meaning": "holiday, day off, absence; rest, sleep; good night",
    "rank": null
   },
   {
@@ -3420,7 +3406,7 @@
    "key": "馴らす::ならす",
    "level": "N1",
    "lists_say": "N3",
-   "meaning": "to domesticate, to tame",
+   "meaning": "to tame, to domesticate; to accustom, to train (e.g. one's ear)",
    "rank": null
   },
   {
@@ -3898,10 +3884,10 @@
    "rank": 8516
   },
   {
-   "expression": "ひたすら",
-   "reading": "ひたすら",
-   "level": "N1",
-   "rank": 8516
+   "expression": "供",
+   "reading": "とも",
+   "level": "N3",
+   "rank": 8758
   },
   {
    "expression": "洗面",
@@ -4016,6 +4002,12 @@
    "reading": "ひとかげ",
    "level": "N1",
    "rank": 10773
+  },
+  {
+   "expression": "優",
+   "reading": "ゆう",
+   "level": "N3",
+   "rank": 11188
   },
   {
    "expression": "ブル",
@@ -4134,12 +4126,6 @@
   {
    "expression": "関西",
    "reading": "かんさい",
-   "level": "N2",
-   "rank": 15115
-  },
-  {
-   "expression": "転々",
-   "reading": "てんてん",
    "level": "N2",
    "rank": 15115
   },
@@ -4528,12 +4514,6 @@
    "rank": null
   },
   {
-   "expression": "トン",
-   "reading": "トン",
-   "level": "N3",
-   "rank": null
-  },
-  {
    "expression": "まとまる",
    "reading": "まとまる",
    "level": "N3",
@@ -4918,6 +4898,12 @@
    "rank": null
   },
   {
+   "expression": "副",
+   "reading": "とりわけ",
+   "level": "N1",
+   "rank": null
+  },
+  {
    "expression": "とろける",
    "reading": "とろける",
    "level": "N1",
@@ -5022,12 +5008,6 @@
   {
    "expression": "いびき",
    "reading": "いびき",
-   "level": "N1",
-   "rank": null
-  },
-  {
-   "expression": "いやらしい",
-   "reading": "いやらしい",
    "level": "N1",
    "rank": null
   },
@@ -5208,12 +5188,6 @@
   {
    "expression": "くじびき",
    "reading": "くじびき",
-   "level": "N1",
-   "rank": null
-  },
-  {
-   "expression": "くすぐったい",
-   "reading": "くすぐったい",
    "level": "N1",
    "rank": null
   },
@@ -5550,12 +5524,6 @@
   {
    "expression": "ほっぺた",
    "reading": "ほっぺた",
-   "level": "N1",
-   "rank": null
-  },
-  {
-   "expression": "ほとり",
-   "reading": "ほとり",
    "level": "N1",
    "rank": null
   },
@@ -6730,12 +6698,6 @@
    "reading": "にせ",
    "rank": 2033,
    "meaning": "imitation"
-  },
-  {
-   "lemma": "諜報",
-   "reading": "ちょうほう",
-   "rank": 2037,
-   "meaning": "secret information"
   },
   {
    "lemma": "人殺し",
@@ -9886,6 +9848,12 @@
    "reading": "ひだりがわ",
    "rank": 5018,
    "meaning": "left side"
+  },
+  {
+   "lemma": "将校",
+   "reading": "しょうこう",
+   "rank": 5025,
+   "meaning": "commissioned officer"
   },
   {
    "lemma": "浮き",

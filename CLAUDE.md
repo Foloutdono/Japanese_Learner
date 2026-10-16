@@ -57,7 +57,10 @@ runtime purpose.
   per output carries a revision: `LOCAL_REV` in `study/analysis.py` (the
   breakdown), the `phrase_analysis_cache` version (the deep tier),
   `TOUR_REV` in `study/grammar_tour.py`, `VOICE_REV` and `KANA_REV` (audio),
-  `REV` in `frontend/scripts/today-print/build.py` (Today's print, plan 205).
+  `REV` in `frontend/scripts/today-print/build.py` (Today's print, plan 205),
+  `REV` in `frontend/scripts/ambiance/build.py` (the ambiance, plan 219),
+  `REV` in `frontend/scripts/practice-gate/build.py` (the painted platform,
+  plan 225).
   A change to what any of them produces bumps it, or learners keep the old.
 - **The grammar detector and the lookups change by counter-case.** Every new
   rule or refusal is pinned in `tests/test_grammar_precision.py` /
@@ -70,6 +73,10 @@ runtime purpose.
   uses it?" (the eye answers that), never a translation printed over the
   question it answers (a twist's and a meaning's `tr` is held back until it
   is answered), and never a sentence or a question twice in a tutorial.
+  Nor may a bank's choices let length answer: written with care, the
+  right reply drifts to the longest (the conversation bank's first draft
+  won 42-75% on "pick the longest"), so across a bank the right one is
+  the longest about as often as a blind pick (plan 217, `LENGTH_TELL`).
   `study/grammar_check.py` holds it; `content/grammar/README.md`, "The
   quiz", is the style guide. Draft with `python -m scripts.check_tour_quiz`.
 - **Every grammar point is asked in Choisir.** The contrast drill needs a
@@ -94,6 +101,32 @@ runtime purpose.
   saying where each rating leaves the point (`review_preview[q].step`,
   plan 198) so the client never copies the pass rule. Never store the
   step beside the row; a row written before plan 194 reads onto the walk.
+- **A write to a learner's history goes through the engine (plan 212).**
+  Lifetime XP, the total of reviews, the days studied, the best run and
+  the review pace are kept per learner in `SRSEngine` until a write moves
+  them: `review_log` is written by `_log_review`, `xp_ledger` by
+  `award_xp`/`record_day_clear`, and anything else that writes or erases
+  those tables in the server (the stats reset, the account's deletion)
+  calls `srs.forget_history(user_id)` after it commits. The cache is in
+  process: the API runs one worker.
+- **The gate counts the day's share (plan 217).** A learner's ceiling
+  or catch-up (`core/review_plan.py`) cuts the due reviews to the day's
+  share before the ration joins them (`review_plan.cut`, over
+  `study/review_cap.share`): `_day_queue` (the gate and the clear),
+  `/api/today/cards` and `/api/today/ahead` all cut, and anything new
+  that counts or serves the day's reviews cuts too, or a learner on a
+  catch-up is shown, served or notified the wall again. The cut never
+  writes a schedule: lifted, the gate is what it was.
+- **A lesson waits its turn (plan 222).** A never-met rule opens on its
+  tour, minutes long, so the day's ration opens at most
+  `daily_queue.GRAMMAR_PER_DAY` rules, none before the learner has a
+  day of study behind them, and deals them after the other new cards
+  (`space_rules`: a few quick cards before each). The allowance is read
+  in one place, `_grammar_allowance` in `routes/today.py`: the gate, the
+  run, tomorrow and the ahead all spend it, and anything new that counts
+  or serves the ration does too. A tour can always be skipped for its
+  card; a run the learner boards on purpose (a grammar run, a unit) is
+  not capped.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.
@@ -101,6 +134,26 @@ runtime purpose.
   goes through `core/daily_limit.py` (`daily_usage`) for its daily ceiling and
   into `scripts/llm_cost_model.py` for its cost. Nothing the learner typed is
   kept.
+- **No learner can flood the server (plan 211).** The API is one worker:
+  `core/concurrency.py` runs a learner's requests a few at a time, and
+  both DB pools wait for a connection (`core/pool.py`) rather than fail.
+  What a route does is bounded by its parameters, never by the client:
+  a size, page, list or text param has a bound or an allowed set
+  (`tests/test_query_bounds.py`), learner-independent work is computed
+  once (`lru_cache`), an `async def` never blocks (blocking work is a
+  plain `def`), a model call counts against a daily ceiling, and a `lang`
+  that keys a cache goes through `reading.known_lang`. On the client a
+  selector's fetch goes through `lib/cachedJson.js`, a held arrow key
+  checks no radio, and a write that creates guards against a second press.
+- **A learner's message is read by a person, never by a dashboard
+  (plan 222).** What is written through Nous écrire, a card's flag or
+  the link under a failure is the one text kept on purpose: it lives in
+  `feedback` (`routes/feedback.py`), is counted by the digest and
+  `10-messages.sql`, and its words are read with `scripts/read_feedback`
+  alone (`tests/test_metabase_sync.py` refuses a question that selects
+  them). The context beside it is the trail's closed classes, shown to
+  the learner before sending, and a reply's address is read from the
+  account, never taken from the request.
 - **A new per-learner table is erased with the account.** Add it to
   `DELETE /api/account` (`routes/account.py`) in the same change.
 - **One table's self-migration per transaction.** A failing `ALTER` must not
@@ -111,10 +164,54 @@ runtime purpose.
   besides its grammar point, its focus one of them, its point found by the
   detector and a French translation (`row_problems`). Draft new rows
   through `python -m scripts.reading_bank_report --check FILE.json`.
+- **A French learner reads French end to end.** Every new learner-facing
+  text carries its French beside its English: a content field has its
+  `fr` (or `structure_fr`, the reading bank's `fr`, the dictation bank's
+  `fr`), a screen string its locale key in both tables, and an error a
+  screen prints is a code mapped to a locale key — never a server's
+  English `detail`, a third party's message or an API path printed raw.
+  JMdict and Tatoeba text has its French in `datas/vocab/jmdict_fr.sqlite3`
+  (plan 215); a pool word is glossed from it (`jmdict_fr.pool_meaning`),
+  never from `VOCAB_FR`, which is the course's and keyed by written form.
+- **The kanji deck is the course's and the gates'.** `datas/kanji/kanji_deck.json`
+  is what each level teaches and what every kanji gate admits
+  (`llm_shared.kanji_set_for_level`), so it holds the whole jōyō list
+  (plan 226 added the 171 it lacked, 的・無・身・誰 among them). After any
+  change to it run `python -m scripts.build_kanji_db --deck-only` (the
+  database's `in_deck` and French) and `python -m scripts.build_frequency_index
+  --kanji-db` (the teaching order); a new character carries its French in
+  `kanji_meanings_fr.json` where KANJIDIC2 has none. Adding is free;
+  moving a character between levels is a migration (`kanji_renames`).
+- **An example sentence is corrected in the layer, not in JMdict (plan
+  227).** The deck's Tatoeba sentences are read through
+  `content/example_fixes.py` (`datas/vocab/example_fixes.json`): a
+  correction keeps every course word the sentence showed, carries its
+  `en`, `fr` and `why`, and is drafted and checked with
+  `python -m scripts.vocab_examples check`. A word JMdict gives no
+  sentence has two written for it (`datas/vocab/example_added.json`,
+  `check-added`: its course spelling, no kanji above its level), so every
+  card shows one; a word the deck gains is written for in the same change.
 - **A width change is held on both sides.** A desk change keeps the phone's
   DOM unchanged (`src/deskfree.phone.test.jsx`), and the short desk
   (1280×600, the `short` lane) is checked too. A phone bug fixed gets its own
   phone test.
+- **An assumption is not history (plan 224).** A card the level rule
+  marked known and nobody has asked about (`SRSEngine.is_assumed`) is
+  the app's guess about a self-declared level. Its first answer is a
+  check (`review_log.assumed`): missed, the card starts as new, never as
+  a lapse; passed, it spends nothing of the day's pace, so anything new
+  that counts a card's first sighting excludes a kept check
+  (`srs._NOT_A_KEPT_CHECK`). A move down gives the untouched ones from
+  the new level up back as new cards (`forget_assumed`) and deletes no
+  answered row; a new seeding path writes `KNOWN_STATE` or it is not
+  read as an assumption.
+- **The placement test is replayed from its seed (plan 224).** The climb
+  (`study/placement.walk`) keeps nothing between two answers: it is
+  rebuilt from the seed at each one, in whatever process answers it. So
+  every builder it calls is a pure function of (seed, content) across
+  processes -- a set, or anything built by iterating one, is sorted
+  before a seeded random touches it (`tests/test_placement.py` builds
+  the climb under two hash seeds).
 
 ## Commands
 
@@ -253,6 +350,7 @@ One more is read-only and needs no flag, so it is safe to run at any time:
 
 ```bash
 python -m scripts.weekly_digest        # the four numbers, as markdown
+python -m scripts.read_feedback        # what learners wrote to us (plan 222), newest first
 ```
 
 Two others fill a shared cache ahead of demand rather than maintaining
@@ -273,9 +371,32 @@ held to the same checks as a model answer by
 upserted into `comprehension_pool` when `routes/reading.py` is imported,
 keyed on `seed_key` so a corrected seed updates its row. The prewarm
 scripts grow the pools past that floor; `prewarm_comprehension_pool`
-reports the seeded and the generated rows apart. Exam papers have no
-seed -- a paper is ~35 model calls -- so `prewarm_exam_papers` is the
-only thing that spares the first learner at each exam id the wait.
+reports the seeded and the generated rows apart. Exam papers have
+seeds too (plan 228): `content/exam_seed/<exam_id>.json`, ten papers
+per exam id (kind × level), stored into `exam_papers` as ordinary
+revisions of the current `generator_version` when `routes/exams.py` is
+imported (`study/exam_seed.py`, keyed on `seed_key`; a changed seed
+rewrites its row while nobody has sat it, and otherwise retires that
+revision and is stored as a new one). They are made by the generators
+themselves, with the model's replies written by Claude rather than
+bought: `scripts/exam_seed.py` replays an exam id's generator with every
+model call answered from a file, so a seed passes every check a
+generated paper does, and `tests/test_exam_seed.py` holds each exam id
+to ten complete papers whose choices' length says nothing. **A bump of
+an exam id's `generator_version` retires its seeds with its papers**:
+the test fails until they are rebuilt.
+
+```bash
+cd backend
+python -m scripts.exam_seed status                # seeds per exam id
+python -m scripts.exam_seed run n4-grammar-01     # replay; prints the next prompt to answer
+python -m scripts.exam_seed check n4-grammar-01   # what the test holds the file to
+```
+
+No seed ships its audio: a listening question's `audioSrc` names the
+clip of its own script, made on first request
+(`study/exam_audio_repair.py`); `python -m scripts.revoice_audio --yes`
+makes them all ahead of the first learner.
 
 Three are one-shots, each run once after a deploy that changed the ids a
 content set serves — `content/grammar/renames.py` for grammar points,
@@ -354,6 +475,20 @@ the export) and commit `datas/vocab/vocab_served.json`,
 on an id that left the deck without a `MOVES` line, and on a served id
 the snapshot has not seen.
 
+The French layer over JMdict (plan 215, `content/jmdict_fr.py`) is its
+own small SQLite file, `datas/vocab/jmdict_fr.sqlite3`: the French of the
+deck's dictionary senses, of the Tatoeba sentences the dictionary and
+reading/translation practice serve, and a one-line gloss for the ~20k
+commonest pool words. It sits beside `vocab_jmdict.sqlite3` rather than
+in it, so a correction never re-commits the 76 MB pool. To correct a
+line, dump it to JSON, edit, rebuild (the JSON is gitignored):
+
+```bash
+python -m scripts.build_jmdict_fr --export   # -> datas/vocab/fr_source/
+python -m scripts.build_jmdict_fr            # -> datas/vocab/jmdict_fr.sqlite3
+python -m scripts.build_kanji_db --french-only  # kanji_meanings_fr.json into kanji.sqlite3
+```
+
 Two things are worth knowing before reaching for any of them:
 
 - **`review_log` is not an audit log.** Lifetime XP, the level, total reviews,
@@ -405,7 +540,11 @@ is a one-shot, so it cannot drift from the scripts.
 Behaviour is recorded **first-party or not at all** — there is no third-party
 SDK, and `frontend/public/privacy.html`'s "No advertising, no trackers, no sale
 of data" is a promise the design keeps rather than a line to amend. See
-`docs/adr/0012`.
+`docs/adr/0012`, and `docs/adr/0022` for what plan 218 added (time, every
+run, visit context, feature counts) and the CNIL consent-exempt frame the
+whole trail stays inside: first-party, one purpose, coarse classes and no
+fingerprint, an objection honoured everywhere, 25 months at most. Anything
+that would need consent (replay, heatmaps, a third-party SDK) is out.
 
 Three rules matter more than the rest:
 
@@ -413,7 +552,11 @@ Three rules matter more than the rest:
   analysed sentence, not a deck or theme name. `backend/core/events.py` holds a
   closed set of event names, each with the property keys it may carry, and
   applies it to whatever a browser posts. `frontend/src/lib/track.js` mirrors
-  that set, and `backend/tests/test_events.py` fails if the two drift.
+  that set, and `backend/tests/test_events.py` fails if the two drift. Since
+  plan 218 the VALUES are closed too: a string-valued key is either listed in
+  `events.VALUES` (mirrored in `track.js`, held equal by the same test), a
+  `route` or `path` (held to a pattern's shape), or it is a design question —
+  never a free string.
 - **Never store a pathname.** `/learn/vocab/theme/animaux/…` names a theme the
   learner chose and `/learn/decks/:deck_id` a deck they named.
   `frontend/src/lib/routePattern.js` reduces a path to the route App.jsx
@@ -423,6 +566,33 @@ Three rules matter more than the rest:
   learner named. `lib/apiTrail.js` records a failed request (`api_error`:
   a 5xx or no answer, never a 4xx the endpoint meant) as its area alone,
   `/api/decks`, through `apiArea` in `lib/routePattern.js`.
+
+Since plan 218, too:
+
+- **Time is engaged time.** A duration a screen, a run or a step reports
+  comes from `lib/dwell.js` (hidden tabs do not count), never wall-clock.
+  Screen time is `lib/screenTrail.js`'s, sent on leaving; a run's is the
+  tally's (`stores/runTally.js` → `lib/runTrail.js`), which every run,
+  practice included, already goes through — a new run screen that calls
+  `startTally` is counted without knowing it.
+- **A small feature is counted, not logged.** `countUse(feature, action)`
+  from `lib/screenTrail.js` adds to the screen's tally and sends one
+  `feature_use` per pair when the screen is left; add the pair to
+  `VALUES.feature_use` on both sides first.
+- **The objection is the account's.** `user_profiles.analytics_off`, read
+  by both write paths (`events.opted_out`); a server-side `events.record`
+  needs no check of its own. Never record the switch itself.
+- **Bounded.** Raw rows 30 days (`compact_events`), the once-per-account
+  families a year, `event_daily` 25 months (`prune_logs`); the learner reads
+  theirs at `GET /api/profile/export/trail`. A new event that should outlive
+  30 days goes in `KEEP_LONG`, and in `privacy.html`'s list.
+- **The dashboards are code.** Nine Metabase dashboards, each a file in
+  `docs/analytics/metabase/` (`-- ==== question` blocks), built and updated
+  by `python -m scripts.metabase_sync` (report, `--check`, `--yes`; needs
+  `MB_API_KEY`). Change a question there, not only in Metabase's UI. Accounts
+  to leave out live in the Metabase snippet `internal_users`, not in the repo.
+  A screen added to `ROUTES` goes in `02-fonctionnalites.sql`'s list too (a
+  node-lane test holds them equal).
 
 Call `track(name, props)` from `lib/track.js`; never `fetch` an analytics
 endpoint from a screen. `track` also stamps each event with the visit's random
@@ -498,6 +668,19 @@ python -m scripts.comprehension_seed_report --check new.json  # candidates, befo
 python -m scripts.comprehension_seed_report --draft new.json  # a breakdown to correct, as new.draft.json
 ```
 
+The conversation bank (plan 217, `content/conversation/N5.json` … `N1.json`,
+its schema and style guide in that directory's README) holds itself to
+`study/conversation.problems`: every line's reading written by hand and
+checked against the line, every reply's romaji against its reading, two
+wrong replies a turn, and a level whose Choose length cannot answer.
+Draft a scenario against it:
+
+```bash
+cd backend
+python -m scripts.check_conversation            # every level; exit 1 on a problem
+python -m scripts.check_conversation --level N4
+```
+
 One more read-only report measures the vocab deck itself (plan 103) —
 its shape, duplicates, readings, glosses, and every content word in the
 taught sentences that resolves to no card, split into the present cards
@@ -534,13 +717,14 @@ python -m scripts.placement_report --write-lists    # placement_lists.json, for 
 The slice is a pure function of the date — grammar, vocab, sentences,
 since plan 109 placement (the three candidate lists, read from
 `datas/vocab/placement_lists.json`, which `placement_report --write-lists`
-writes) and since plan 187g tours (each grammar point's written twist and
-scene) in rotation, each area walking its own list — so there is no
+writes), since plan 187g tours (each grammar point's written twist and
+scene) and since plan 217 conversation (the 会話 bank's scenarios) in
+rotation, each area walking its own list — so there is no
 ledger to keep in sync and no state to corrupt. Read-only, no database, no `.env`, no network:
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does
 not). `tests/test_audit_slice.py` holds the rotation to the playbook's
-promises. Vocab is the one bank too big to walk exhaustively — 8,091 entries
+promises. Vocab is the one bank too big to walk exhaustively — 7,971 entries
 at 40 a run — so its slices are ordered risk-first by the disagreements with
 JMdict the script can find on its own, and the `flags` it prints are a reason
 to look rather than findings.
@@ -557,12 +741,28 @@ npm run icons     # rasterise brand/*.svg and regenerate the icon set in public/
 npm run landing   # the landing page (plan 167): public/landing/, sitemap.xml, robots.txt
 npm run landing:og  # its two share cards, rendered in Chromium
 python3 scripts/today-print/build.py  # Today's print of the hour (plan 205; numpy, Pillow)
+python3 scripts/ambiance/build.py     # the ambiance of the hour (plan 219; numpy, ffmpeg)
+python3 scripts/practice-gate/build.py  # Practice's painted platform (plan 225; numpy, Pillow, opencv-contrib)
 ```
 
 Today's gate stands on a print drawn ahead of time (plan 205):
 `scripts/today-print/` is its generator and writes `public/today/print/<REV>/`
 and `src/components/station/print/print.json`. Never edit those by hand;
 `scripts/today-print/README.md` has the modules and the rules.
+
+The ambiance is that print heard (plan 219): a two-minute loop per
+hour of the lake under Fuji, behind Today and every station page,
+generated by `scripts/ambiance/` into `public/sounds/ambiant/<REV>/`
+and `src/lib/audio/ambiance.json`. Same rules: never by hand, and
+`scripts/ambiance/README.md` has them. Keep it sparse.
+
+Practice's gate on the phone stands on the owner's own painting of a
+platform (plan 225): `scripts/practice-gate/` cuts it into layers and
+lights them at Today's four hours, into `public/practice/gate/<REV>/`
+and `src/components/practice/gate/gate.json`. Same rules again, and
+`scripts/practice-gate/README.md` has them; the roll signs, the door,
+the pantograph and the clock are drawn by the app over the painting
+(`components/practice/gate/`). The desk keeps the plates.
 
 The landing page is the site's **`/`** (and `/en`), and the app's front
 door is **`/app`**: on the web the app's document is built as `app.html`

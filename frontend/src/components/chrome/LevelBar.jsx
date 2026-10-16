@@ -31,7 +31,7 @@ import { FareFigure } from './Hud'
 // bar (plan 124): a progressbar's children are presentational, and the
 // bar has had figures beside its track.
 export function LevelBar() {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const summary = useProfileSummary()
   const { gain, clear } = useXpGain(summary)
 
@@ -64,7 +64,7 @@ export function LevelBar() {
       </span>
       <span className="lvlbar__xp" aria-hidden="true">
         <FareFigure gain={gain} className="hud-fare hud-fare--bar" onEnd={clear} />
-        {summary ? `${into.toLocaleString()} / ${span.toLocaleString()}` : ''}
+        {summary ? `${into.toLocaleString(lang)} / ${span.toLocaleString(lang)}` : ''}
         <span className="lvlbar__unit">xp</span>
       </span>
     </div>

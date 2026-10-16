@@ -23,7 +23,16 @@ def fr_gloss(entry: dict, fr_map: dict) -> str | None:
 
 
 def get_meaning(entry: dict, lang: str, fr_map: dict) -> str:
-    """Return meaning in requested language, fallback to English."""
+    """Return meaning in requested language, fallback to English.
+
+    A JMdict pool row (it carries its pool `seq`; a deck entry never
+    does) is answered from the pool's own French layer, never from
+    `fr_map`: VOCAB_FR is the course's, keyed by written form, and gave
+    1,184 pool words the French of a deck homograph -- 殿 どの "Mr." as
+    "arrière, garde arrière", 歩 ほ "step" as "pion" (plan 215)."""
+    if "seq" in entry:
+        from content.jmdict_fr import pool_meaning
+        return pool_meaning(entry, lang)
     if lang == "fr":
         return fr_gloss(entry, fr_map) or entry.get("meaning", "")
     return entry.get("meaning", "")

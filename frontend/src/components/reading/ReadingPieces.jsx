@@ -46,7 +46,7 @@ export function Clock({ fill, label, low = false, running = true, aside = null }
 export function ReadingTimer({ timeLeft, total, covered, t, untimed = false, aside = null }) {
   if (covered) return <Clock fill={0} label={t.writeWhatYouSaw} aside={aside} />
   if (untimed) return <Clock fill={1} label={t.readingUntimed} running={false} aside={aside} />
-  return <Clock fill={total > 0 ? timeLeft / total : 0} label={`${timeLeft.toFixed(1)}s`} aside={aside} />
+  return <Clock fill={total > 0 ? timeLeft / total : 0} label={t.timerSeconds(timeLeft)} aside={aside} />
 }
 
 /** The reading pace, on the clock (the owner's pick B of four drawn
@@ -192,10 +192,14 @@ export function AnswerForm({ answer, setAnswer, onSubmit, t, guide, disabled = f
  *  missed under it, meant by the breakdown's `tokens`. The grade is the
  *  rating bar's, under the card: the card no longer asks for it or
  *  repeats it. */
-export function ReadingRegisters({ phrase, parts, words, tokens, romaji, translation, translationLang, answer, accuracy, point, t }) {
+export function ReadingRegisters({
+  phrase, parts, words, tokens, romaji, translation, translationLang, answer, accuracy, point, t, onOpen = null, onPoint = null,
+}) {
   return (
     <SentenceCheck
       point={point}
+      onOpen={onOpen}
+      onPoint={onPoint}
       parts={parts}
       text={phrase}
       words={words}

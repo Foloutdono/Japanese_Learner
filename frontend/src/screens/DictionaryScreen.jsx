@@ -1,6 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useRef, useMemo, Fragment, createContext, useContext } from 'react'
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
+import { countUse } from '../lib/screenTrail'
 import { useMining } from '../components/analysis/useMining'
 import { useFavorites } from '../hooks/useFavorites'
 import { useLang } from '../LangContext'
@@ -241,6 +242,10 @@ export default function DictionaryScreen({ session }) {
 	// the older answer used to overwrite the newer one's results (and,
 	// on the desk, re-point the dock). Only the latest is applied.
 	const pageSeq     = useRef(0)
+	// The latest request's abort (plan 211): a new page 0 drops what the
+	// last one is still waiting on, rather than letting the server
+	// answer a collection, a level or a spelling the learner has left.
+	const pageAbort   = useRef(null)
 	// The catalogue as the arrow keys see it (the key handler is bound
 	// once, so it reads the current rows through this).
 	const navRef      = useRef({ results: [], selected: null })
@@ -358,8 +363,18 @@ export default function DictionaryScreen({ session }) {
 	function fetchPage(p, q, cat, rad, lvl = level) {
 		if (p === 0) setLoading(true)
 		else setLoadingMore(true)
-		if (p === 0) pageSeq.current += 1
+		if (p === 0) {
+			pageSeq.current += 1
+			// A page 0 asked by a chip or a mode supersedes a typed search
+			// still waiting out its debounce, which would otherwise land
+			// after it with the parameters of the moment it was typed
+			// (plan 211); the query it was for is already in `q`.
+			clearTimeout(debounceRef.current)
+			pageAbort.current?.abort()
+		}
 		const seq = pageSeq.current
+		const controller = new AbortController()
+		pageAbort.current = controller
 
 		// A syllabary is small and fixed — 113 hiragana and 125 katakana,
 		// counting the voiced rows, the yōon, the long vowels and (in
@@ -390,11 +405,14 @@ export default function DictionaryScreen({ session }) {
 		const url = cat === FAVORITES
 			? `/api/dictionary/favorites?${new URLSearchParams({ page: p, limit, lang })}`
 			: `/api/dictionary?${params.toString()}`
-		apiFetch(url, session)
+		apiFetch(url, session, { signal: controller.signal })
 			.then(r => r.json())
 			.then(data => {
 				if (seq !== pageSeq.current) return
 				const newResults = data.results || []
+				// 足跡 (plan 218): a search that answered, counted -- never
+				// what was searched for.
+				if (p === 0 && q) countUse('dictionary', 'search')
 				if (p === 0) setResults(newResults)
 				else setResults(prev => [...prev, ...newResults])
 				setTotal(data.total)
@@ -612,6 +630,12 @@ export default function DictionaryScreen({ session }) {
 		setLookup({ id: rawId, category: 'grammar' })
 	}
 
+	// An example sentence, broken down, in the same sheet (plan 214).
+	function openSentence(ex) {
+		if (!ex?.jp) return
+		setLookup({ category: 'sentence', term: ex.jp, tr: ex.tr ?? ex.en })
+	}
+
 	// The one card this entry is, in every mode it owes — what the
 	// panel's "review this card" boards when the record says the card
 	// is due (plan 089). The run is the Today run, filtered to one id
@@ -689,6 +713,7 @@ export default function DictionaryScreen({ session }) {
 			entry={selected}
 			onRadicalClick={jumpToRadical} onKanjiClick={char => openEntry(char, 'kanji')}
 			onVocabClick={(k, r) => openEntry(k || r, 'vocab', r)} onGrammarClick={openGrammar}
+			onSentenceClick={openSentence}
 			onKanaClick={(k, type) => openEntry(k, type)} onReview={reviewCard}
 			mining={mining} favorites={shelf}
 		/>
@@ -1005,6 +1030,7 @@ export default function DictionaryScreen({ session }) {
 						onVocabClick={(k, r) => openEntry(k || r, 'vocab', r)}
 						onKanaClick={(k, type) => openEntry(k, type)}
 						onGrammarClick={openGrammar}
+						onSentenceClick={openSentence}
 						onReview={reviewCard}
 						mining={mining}
 						favorites={shelf}
@@ -1025,7 +1051,7 @@ export default function DictionaryScreen({ session }) {
 			{lookup && !desk && (
 				<DictionaryLookupSheet
 					key={lookupKey(lookup)}
-					term={lookup.term} kana={lookup.kana} id={lookup.id} category={lookup.category}
+					term={lookup.term} kana={lookup.kana} id={lookup.id} category={lookup.category} tr={lookup.tr}
 					session={session} mining={mining} favorites={shelf} over
 					onRadicalClick={jumpToRadical}
 					onReview={reviewCard}
@@ -1162,7 +1188,7 @@ const doorsIn = node => [...node.querySelectorAll('button:not([disabled]), a[hre
 // entry opens INTO the dock (DictionaryLookupBody, the lookup sheet's own
 // body) with ✕ stepping back out to this entry — the catalogue, the
 // search and the scroll never move and nothing covers them.
-function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onKanaClick, onReview, mining, favorites }) {
+function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onSentenceClick, onKanaClick, onReview, mining, favorites }) {
 	const deskDock = useContext(DeskDockContext)
 	const dockRef = useRef(null)
 	const lookup = deskDock?.lookup ?? null
@@ -1208,7 +1234,7 @@ function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick
 				{lookup ? (
 					<DictionaryLookupBody
 						key={lookupKey(lookup)}
-						term={lookup.term} kana={lookup.kana} id={lookup.id} category={lookup.category}
+						term={lookup.term} kana={lookup.kana} id={lookup.id} category={lookup.category} tr={lookup.tr}
 						session={deskDock.session} mining={deskDock.mining} favorites={deskDock.favorites}
 						onRadicalClick={deskDock.onRadicalClick}
 						onReview={deskDock.onReview}
@@ -1222,6 +1248,7 @@ function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick
 					onKanjiClick={onKanjiClick}
 					onVocabClick={onVocabClick}
 					onGrammarClick={onGrammarClick}
+					onSentenceClick={onSentenceClick}
 					onKanaClick={onKanaClick}
 					onReview={onReview}
 					mining={mining}
@@ -1241,7 +1268,7 @@ function cardHeadword(entry) {
 
 function ResultsSection({
 	loading, loadingMore, hasMore, results, total, query,
-	selected, setSelected, sentinelRef, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick,
+	selected, setSelected, sentinelRef, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onSentenceClick,
 	onKanaClick, onReview, mining, favorites, shelf = false, t,
 }) {
 	const desk = useDesk()
@@ -1370,7 +1397,7 @@ function ResultsSection({
 						<DetailDock
 							entry={selected} onClose={() => { playUi('click-close-menu'); setSelected(null) }}
 							onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick}
-							onGrammarClick={onGrammarClick} onKanaClick={onKanaClick} onReview={onReview}
+							onGrammarClick={onGrammarClick} onSentenceClick={onSentenceClick} onKanaClick={onKanaClick} onReview={onReview}
 							mining={mining} favorites={favorites}
 						/>
 					)}

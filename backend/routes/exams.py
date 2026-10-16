@@ -1,11 +1,12 @@
 import hashlib
 import json
 import logging
+import os
 import threading
-from functools import partial
 
 from fastapi import APIRouter, Depends, HTTPException
-from core.credits import require_pass
+from core import daily_limit
+from core.credits import require_pass, resets_at
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
@@ -13,6 +14,7 @@ from core.db import db_conn
 from core.srs_instance import srs
 from core.auth import get_user_id
 from study.exam_schema import ensure_exam_schema
+from study.exam_seed import seed_exam_papers
 from study.exam_scoring import flatten_questions, score_attempt
 from study.exam_blueprint import LEVEL_BLUEPRINT, name_mondai
 from study.exam_gen_utils import GenerationFailed
@@ -20,96 +22,23 @@ from study.exam_validation import paper_gives_answer_away
 from study.exam_study import study_question
 from study.llm_shared import LLMUnavailable
 from study import exam_grammar_gen, exam_listening_gen, exam_reading_gen, exam_vocab_gen
-from study.exam_vocab_gen import generate_vocabulary_paper
-from study.exam_reading_gen import generate_reading_paper
-from study.exam_grammar_gen import generate_grammar_paper
-from study.exam_listening_gen import generate_listening_paper
+from study.exam_catalogue import EXAM_GENERATORS, KIND_META as _KIND_META
 
 # A pass feature (plan 069): every route here refuses a free learner
 # with 402 pass_required once CREDITS_ENFORCE=1; a no-op until then.
 router = APIRouter(dependencies=[Depends(require_pass)])
 logger = logging.getLogger(__name__)
 
-_LEVELS = ["N5", "N4", "N3", "N2", "N1"]
-
-# kind -> (title label, JP title label, blueprint mondai `type`s this
-# generator builds). Single source of truth for both EXAM_GENERATORS
-# below and list_exams()'s static estimate — must stay in sync with
-# each generator's own title strings (exam_vocab_gen.py /
-# exam_reading_gen.py / exam_grammar_gen.py's f"{level} ... Practice" /
-# f"{level} ..." literals) since those are what actually gets served
-# once a paper materializes; this is only the pre-materialization guess.
-_KIND_META = {
-    "vocab": (
-        "Vocabulary Practice", "語彙",
-        {"kanji-reading", "kanji-orthography", "vocab-context", "vocab-paraphrase", "vocab-usage"},
-    ),
-    "reading": ("Reading Practice", "読解", {"reading-passage"}),
-    "grammar": ("Grammar Practice", "文法", {"grammar-fill", "sentence-order", "cloze-passage"}),
-    # Only "listening-mcq" (課題理解/ポイント理解) is actually generated
-    # today -- 発話表現/即時応答/概要理解/統合理解 are still skipped by
-    # exam_listening_gen.py (see its own module docstring), so counting
-    # them here would make the pre-materialization estimate promise more
-    # items than a real generation attempt can currently deliver. Widen
-    # this set as each of those ships its own generator.
-    "listening": ("Listening Practice", "聴解", {"listening-mcq"}),
-}
-
-# id -> (generator_version, kind, level, callable(seed) -> paper).
-# generator_version is stored per row in exam_papers AND filtered on
-# when a paper is served (see _select_paper): bumping the string here
-# retires every paper an older generator produced, in one edit, without
-# deleting a thing -- past attempts still render against the revision
-# they were taken on, and nothing new is ever served from the old
-# prompt. That is what the reading/listening/grammar "-gen-2" bumps
-# below are for: the papers generated before study/exam_topics.py
-# existed all drew on the same handful of subjects, and the reading
-# ones frequently failed to generate at all.
-#
-# kind/level are needed by list_exams() to describe a not-yet-
-# materialized exam without generating it.
-#
-# study/exam_stub.py's hand-written preview paper is deliberately NOT
-# registered here anymore: it existed to prove the generation pipe end
-# to end before any real generator existed ("once the real generator
-# lands, this stops being registered" — its own module docstring), and
-# with all four real generators shipped it was just a fifth, fake entry
-# cluttering every learner's exam picker.
-EXAM_GENERATORS = {
-    **{
-        # "-vocab-01", not "-kanji-01": this generator now covers the
-        # whole vocabulary section (漢字読み/表記/文脈規定/言い換え類義/
-        # 用法 where each has a generator), not kanji items alone — see
-        # exam_vocab_gen.py. Renamed rather than kept for continuity
-        # since nothing has shipped to real users under the old id yet.
-        f"{level.lower()}-vocab-01": ("vocab-gen-1", "vocab", level, partial(generate_vocabulary_paper, level))
-        for level in _LEVELS
-    },
-    **{
-        # A separate paper from "-vocab-01" at every level, including
-        # N1/N2 where the real exam presents vocab/grammar/reading in
-        # one booklet — accepted simplification, see
-        # exam_reading_gen.py's module docstring.
-        f"{level.lower()}-reading-01": ("reading-gen-2", "reading", level, partial(generate_reading_paper, level))
-        for level in _LEVELS
-    },
-    **{
-        # Same accepted simplification as "-reading-01": its own paper
-        # at every level rather than merged into the real exam's
-        # combined booklet at N1/N2.
-        f"{level.lower()}-grammar-01": ("grammar-gen-2", "grammar", level, partial(generate_grammar_paper, level))
-        for level in _LEVELS
-    },
-    **{
-        # Same accepted simplification as "-reading-01"/"-grammar-01".
-        # Needs an LLM provider configured (dialogue text) and a voice
-        # engine (VOICEVOX_URL, study/voice_engine.py) for the audio.
-        f"{level.lower()}-listening-01": ("listening-gen-2", "listening", level, partial(generate_listening_paper, level))
-        for level in _LEVELS
-    },
-}
-
 ensure_exam_schema()
+
+# The pool's floor (plan 228): every exam id's seed papers, stored as
+# ordinary revisions before any learner opens an exam. A bad seed file
+# must not stop the route from importing; the papers already stored
+# are served regardless.
+try:
+    seed_exam_papers()
+except Exception:  # pragma: no cover - logged, never fatal
+    logger.exception("exam seed papers could not be stored")
 
 # kind -> the generator's own time rule, (level, items) -> minutes: the
 # catalogue's estimate for a paper not yet generated is the limit the
@@ -353,6 +282,9 @@ _UNAVAILABLE_COOLDOWN_SECONDS = 900
 # wrong moment would wedge that exam id as permanently "generating".
 _STALE_RUNNING_SECONDS = 900
 
+EXAM_PAPERS_FEATURE = "exam_paper"
+EXAM_PAPERS_DAILY_LIMIT = int(os.environ.get("EXAM_PAPERS_DAILY_LIMIT", "5"))
+
 
 def _mark_job_failed(exam_id: str, error: str, cooldown_seconds: int) -> None:
     conn = db_conn()
@@ -432,6 +364,17 @@ def _generation_worker(exam_id: str, revision: int) -> None:
             cur.execute("DELETE FROM exam_generation_jobs WHERE exam_id = %s", (exam_id,))
         conn.commit()
         logger.info("Exam %s revision %d generated and materialized", exam_id, revision)
+    finally:
+        conn.close()
+
+
+def _release_generation(exam_id: str) -> None:
+    """Gives back a claim _claim_generation granted and nobody used."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM exam_generation_jobs WHERE exam_id = %s AND status = 'running'", (exam_id,))
+        conn.commit()
     finally:
         conn.close()
 
@@ -612,7 +555,8 @@ def get_exam(exam_id: str, revision: int | None = None, exclude: str | None = No
             raise HTTPException(status_code=404, detail=f"Unknown revision {revision} for {exam_id}")
         return {**name_mondai(paper), "revision": revision}
 
-    selected = _select_paper(exam_id, user_id, _parse_exclude(exclude))
+    skipped = _parse_exclude(exclude)
+    selected = _select_paper(exam_id, user_id, skipped)
     if selected is not None:
         revision, paper = selected
         # The revision travels with the paper because the client needs
@@ -624,6 +568,20 @@ def get_exam(exam_id: str, revision: int | None = None, exclude: str | None = No
     revision = _next_revision(exam_id)
     outcome, detail = _claim_generation(exam_id, revision)
     if outcome == "claimed":
+        # A new paper is ~35 model calls, and "a different paper"
+        # listing every revision there is starts one (plan 211): a
+        # learner may start EXAM_PAPERS_DAILY_LIMIT such a day. An exam's
+        # first paper, and the one a generator change calls for, are not
+        # counted -- they are the paper everyone sits. Counted only when
+        # this request would start one, so the polls while it is written
+        # and joining another learner's cost nothing.
+        if skipped and daily_limit.claim(user_id, EXAM_PAPERS_FEATURE, EXAM_PAPERS_DAILY_LIMIT) > EXAM_PAPERS_DAILY_LIMIT:
+            _release_generation(exam_id)
+            raise HTTPException(
+                status_code=429,
+                detail=(f"Daily limit of {EXAM_PAPERS_DAILY_LIMIT} new papers reached; "
+                        f"resets {resets_at(user_id):%Y-%m-%dT%H:%MZ}"),
+            )
         _start_generation(exam_id, revision)
     if outcome == "cooldown":
         # The error text is the generator's own, safe to show: it names
@@ -797,9 +755,12 @@ def get_question_study(exam_id: str, revision: int, question_id: str, lang: str 
         raise HTTPException(status_code=404, detail=f"Unknown revision {revision} for {exam_id}")
     # Imported here: routes/reading.py seeds the comprehension pool at
     # import, which the exam router has no business triggering.
-    from routes.reading import LANG_NAMES
+    from routes.reading import LANG_NAMES, known_lang
+    # Known languages only (plan 211): the translations are cached by
+    # language, so any other string was a model call per new spelling.
+    lang = known_lang(lang)
     try:
-        study = study_question(paper, question_id, lang, LANG_NAMES.get(lang, lang))
+        study = study_question(paper, question_id, lang, LANG_NAMES[lang])
     except (LLMUnavailable, GenerationFailed) as e:
         logger.warning("exam study for %s/%s/%s failed: %s", exam_id, revision, question_id, e)
         raise HTTPException(status_code=503, detail="Translation unavailable")

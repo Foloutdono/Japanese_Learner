@@ -120,7 +120,7 @@ strength (.09), each keeping its hue, so **the hue alone says which line**.
 朱 keeps a step more strength as the app's accent and 茶 a step less, as a
 tea is; 山吹 is not recut, because it is the metal (below). A new line's
 pigment is minted at that lightness — `src/harmony.css.test.js` measures
-all twelve in both themes — and the native widgets' copies follow.
+all thirteen in both themes — and the native widgets' copies follow.
 
 **The verdicts are one ramp** (状態, same round): the five state inks — 抹茶,
 琥珀, 緑青, 錆 and the rating's 臙脂 — run red to green at one strength
@@ -738,24 +738,32 @@ question and at the end of a first ride (`Continue` in
 Board's place (plan 168, phone and desk alike) — and Today's **Depart** on the fare
 gate (`components/station/GateCard.jsx`, owner-directed after plan 164) — and,
 on the desk, a deck's **Study** (`screens/DeckDetailScreen.jsx`'s gate, plan
-179) are drawn by one component, `components/ui/GateButton.jsx` (`.btn-depart--gate`),
+179) — and the painted Practice gate's **Embarquer** (plan 225, below) are
+drawn by one component, `components/ui/GateButton.jsx` (`.btn-depart--gate`),
 as a ticket gate you tap your pass on (改札, plan 164: the owner's pick D of four
 directions drawn for "more vibrant, the user must notice it and want to
-press it"):
+press it"; redrawn in plan 225 as the painted Practice gate drew its own,
+the owner's word being that every gate should be that one, its mark a card
+scanner — the pass's contactless arcs it carried read as a speaker's):
 
 - **A gold pill**, 66px on the 844px phone (56px under 800px of frame, 52px
-  under 740px, 66px always on the desk), its fill a top-lit ramp of 山吹
-  (`--gate-gold-lit` → `--gate-gold` → `--gate-gold-deep`) that holds the
-  same value in both themes, inked `--text-on-fill` (6.9:1 in the middle,
-  5.3:1 at the deep end).
-- **A sumi reader** at its left holding the pass's own contactless mark
-  (`PassWave`) in `--gate-lamp`; two ripples leave it, and pressing lights
-  it (`--text-on-panel`), the gate's ピッ. The word stands on the pill's
-  centre line; on the desk the printed Enter takes the right end.
-- **It breathes**: a halo that swells and settles every 2.8s.
+  under 740px, 66px always on the desk), its fill lit from above — a ramp
+  of 山吹 from the crest along its top edge (`--gate-gold-crest` →
+  `--gate-gold-lit` → `--gate-gold`), a light line at the top and a shade
+  at the foot inside it — that holds the same value in both themes, inked
+  `--text-on-fill`, and a drop under it, its own shadow.
+- **A sumi reader** at its left end (48px, 8px in, where the boarding's
+  gold road comes down into it; 40px in the 52px pill), holding the card
+  scanner's mark (a card in a scanner's frame, `ScanMark`) in
+  `--gate-lamp`; a hairline of the deep gold stands a rung right of it,
+  between it and the word. Pressing lights the reader (`--text-on-panel`),
+  the gate's ピッ. The word stands on the pill's centre line; on the desk
+  the printed Enter takes the right end.
+- **It stands still**, as the painted one does: plan 164's breathing halo
+  and the ripples off the reader went with the redraw.
 - **Not yet is its outline**, not a faded fill: `--surface`, a
-  `--surface-line` ring, the word and the reader's mark in
-  `--text-secondary`, nothing moving.
+  `--surface-line` ring, the word, the reader's mark and its hairline in
+  `--text-secondary` and the line's grey, nothing moving.
 - **A pick wakes it**: the fill fades in over the outline and the pill
   overshoots once (0.97 → 1.035 → 1). Only on that change — a gate that
   arrives ready does not pop.
@@ -776,9 +784,8 @@ press it"):
   `src/boarding.phone.test.jsx`.
 
 It stands outside three rulings on purpose, and nowhere else: the motion
-rule's "no scale, no glow" (the halo, the wake), `--elev-action`'s single
-shadow (the halo is its shadow), and the family's one disabled treatment
-(opacity 0.45). None of the three is precedent: every other `.btn-depart`
+rule's "no scale" (the wake), `--elev-action`'s single shadow (the drop is
+its own), and the family's one disabled treatment (opacity 0.45). None of the three is precedent: every other `.btn-depart`
 is the primary button above. On Today the gate is closed (its outline) when
 nothing is chosen or the balance cannot pay, and wakes when a line or a mode
 is switched back on; on a day with nothing due it stays shut and says when
@@ -813,6 +820,13 @@ main flashcards are the default. **A day with nothing due** closes the
 dial round the day's 駅スタンプ (the seal the cleared day's ceremony
 presses), its ring the day's reviews by line, with the week's stamps under
 it and tomorrow as a row of a departure board over the shut gate.
+**A gate whose reviews piled up opens once on the comeback sheet**
+(運転再開, plan 217): Today's sheet holding a line of welcome, how many
+cards wait and three paces as Settings' service cards (`.svc`), a
+spread's days as the services sheet's seg. It never stands over the
+rest-day notice. A day whose share is spent with reviews held back
+keeps its shut gate, and the way on to them is a quiet way a rung over
+it, never a second button.
 
 ### The tour (発見, plan 187)
 
@@ -893,6 +907,55 @@ essais ») and keeps the tour a tap away in two plain secondary buttons,
 « Refaire le tutoriel » and, where there is a scene, « Rejouer la scène »:
 the tour runs again in the lesson's place, its terminus « Retour à la
 leçon », and records nothing (plan 187e).
+
+### First sight (初見, plan 216)
+
+A kana or a kanji the learner has never met is **shown before it is
+drilled**, in the card's place, as a grammar point is asked: the tour's
+frame (`components/study/GlyphTour.jsx`, chosen by `GlyphGate` in
+Today's run and the kana and kanji runs), its track, one card a stop and
+the gate at the foot. Three stops, in the order a glyph is learned, each
+drawn only where there is something to show:
+
+- **Read.** The glyph as the study card's specimen (`CharDisplay`'s glyph
+  rung: the object the card will ask, not a fourth use of the rung). A
+  kana's romaji under it at `--fs-display` in the line's ink, its sound
+  played as it opens and in the card's corner, its twin in the other
+  script at the foot (« ア en katakana »). A kanji's meaning under it,
+  every gloss, and its readings at the foot as the card's reveal prints
+  them (`Readings`, on'yomi and kun'yomi apart).
+- **Write.** The strokes traced in turn on **the writing board's slab**
+  (the sumi square, sumi in both themes, the practice sheet's 田 over it)
+  with the brush's ink. The stroke asked is in the line's pigment lit
+  toward the ink, drawn in once along its way, **a full dot where it
+  starts and a ring where it ends**; the strokes ahead are faint, the
+  ones traced stand in the ink. A trace is judged in KanjiVG's units
+  (`domain/trace.js`): begun at the dot, ended at the ring, along the
+  stroke, a fingertip of slack. A miss is a line a moment in the miss's
+  ink and one line at the card's foot saying what to fix (« Pars du
+  point plein. », « Va jusqu'au rond. », « Suis le trait. »), the stroke
+  drawn in again; after three misses on one stroke the board draws it
+  and says so in the selection's ink (given, not found). « Montre-moi » is the quiet
+  way over the gate and draws the rest in order. As a writing run's
+  board is, **the board is the square the card leaves**: the middle
+  takes the card's free height and the board the smaller of its sides,
+  so a miss's word never lands under the gate (never under 200px, where
+  the screen scrolls instead). The gate is its outline until the glyph
+  is whole.
+- **Use.** Up to three simple words, as the dictionary's ledger has
+  them: the word at `--fs-heading` with the glyph picked out in the
+  line's ink (a kana's word printed as it is read, a kanji's with its
+  furigana), its first gloss at the row's end and its voice beside it.
+  A kanji's words are one a reading at or under its own level before
+  any reading's second (日 at N5: 日曜日, 火曜日, 五日). The gate is
+  « Commencer ».
+
+The line is the run's own: the stage sets it per card, so a kana is 朱
+and a kanji 藤 even in Today's queue, and the tour takes it back from
+the grammar line `.tour` names. Once per character, whatever platform
+first meets it; a combination (きゃ, えい) has none, being two
+characters already met. On the desk the tour stands in the run's middle
+with its track, the card panel stepping aside until the card is boarded.
 
 ### The ladder (梯子, plans 187e, 194)
 
@@ -1014,6 +1077,131 @@ the learner's own line rather than the plate again. Enter presses the
 gate and a digit the tile it numbers, on either keyboard row, and **no key
 is printed** on any of the three (the owner's word).
 
+### The conversation (会話, plan 217)
+
+Someone speaks to the learner in a place, and they answer
+(`screens/ConversationStation.jsx`, `screens/ConversationRun.jsx`). It
+adds no idiom of its own: it is the tour's scene made to answer back.
+
+- **The station is a console over platform cards.** How the learner
+  will answer applies to every scene below, so it is the console's band
+  (Choose · Translate · Free talk); the grades are its chips, opening on
+  the learner's own; one quiet line under it says what the way asks. A
+  scene is a platform card: its title, its situation, its first line as
+  the card's specimen (what the train stops at), and the learner's
+  record there at the end of the title's row (ModeSelector's `meta`: a
+  card too narrow to earn the aside's column keeps its long name whole).
+  Both choices ride the address, replaced. On the desk the scenes go two
+  across at every count.
+- **The talk is a thread of bubbles** (plan 223, the owner's pick B of
+  the canvas "Tsuji — la conversation en bulles"), drawn with the tour's
+  own pieces (`ScenePlate` and `SceneLine`, exported from
+  `GrammarTour.jsx` and shared, never copied: everything a bubble is
+  lives under `.kaiwa-talk`, and the tour's scene keeps its rows). The
+  place as a station plate at the thread's head, then a line a bubble on
+  the stage's own ground, the card's frame off: **the other person's at
+  the left on the line's rail, the learner's at the right on their
+  gold** -- an edge each, never a fill, in `--bg-card` -- with its
+  furigana, its translation inside it and its voice's ring beside it on
+  the far side; the other person in A's voice and the learner in B's
+  (the bank is in `study/grammar_audio`'s catalogue). Who says it is the
+  side it stands on, so the name is clipped for a reader rather than
+  printed. **The line just said is held untranslated until it is
+  answered**; a quiet link inside it gives the translation early, and
+  its voice's ring wears the line's ink.
+- **The talk stays on the screen** (plan 221). Once it is under way the
+  run is bounded to the screen, as the passage is: the card takes what
+  the head, the meter, the dock and the floor leave, the talk scrolls
+  inside its body, and what answers it -- the tiles, the field, the bar,
+  Next -- stands under the card at every length of scene, on the phone
+  and in the desk's middle column alike. The page never scrolls. The
+  newest exchange is followed in the card **from its start**: whole
+  where it fits, the lines before it filling what is left above, and
+  from its top where it does not, so a long note is read from its head.
+  A line arrives as a list's row does. The talk is **heard as it is
+  said**: the other person's lines play in A's voice as they come, the
+  reply that was right in the learner's at the pick, whichever was
+  picked, and in Translate the reply the talk takes before the next
+  line, under the sentence runs' speaker switch in the head
+  (`SpeakToggle`). A free reply is the device's voice, the catalogue
+  having no such line.
+- **Three ways, one stage.** Choose: the replies as **quick replies**
+  under the talk, one surface panel, a row a reply between hairlines --
+  its number (the desk's key), its Japanese, and a gold arrow that
+  slides in on hover, saying a tap sends it; the pick is the answer,
+  with no Check, and **is sent**: the replies go and the pick joins the
+  talk as the learner's bubble, its mark at the corner (the tour's ring
+  in success, or the miss's cross). A wrong pick stays struck, on the
+  ground rather than a bubble's and on the miss's rail, why under it,
+  and **the reply that was right follows it**, named « La réponse » in
+  the learner's gold, its own why inside it; a right one carries its why
+  inside. The notes are shown while the exchange is in hand and leave
+  with Next: the thread keeps the bubbles and their marks. Translate: what
+  to say, in the learner's language, at the talk's foot over the docked
+  field; checked, translation's practice card (the reply over the
+  answer's well, rōmaji misses marked, the tutor's verdict at the well's
+  end or the measure where there is none), the bar the grade. Free: the
+  field docked; the other person's answer below the learner's line and
+  the tutor's notes under that line, the line put right where it needed
+  it, the bar the grade; eight lines at most, a refusal said in the card
+  and the line kept.
+- **The talk goes on as written.** The learner is credited with the
+  model reply, or the alternative their answer matched, so the next line
+  answers it; in free talk, with what they wrote.
+- On the desk the brief stands alone, centred, until the talk starts;
+  then the run stands on the three panels: this run's figures at the
+  left, the thread in the middle, the scene's brief (its plate,
+  situation and errand) in the side.
+- **The gate: seven on the phone, six on the desk.** The phone's painted
+  platform rolls 会話 as its seventh destination (plan 225). The
+  desk's lattice is drawn for six specimens, and a seventh plate -- even
+  a strip under them -- cut the exam's and N1 translation's cards in
+  their wells at 1100×800, so the desk keeps the six and 会話 is the
+  rail's seventh station (`PracticeScreen`'s `OFF_DESK`) until a gate of
+  seven is drawn. The pigment is 縹 (`--line-kaiwa`), the dayflower blue
+  between 緑青 and 藍.
+
+### The painted platform (練習の改札, plan 225)
+
+**Practice's gate on the phone is a painting, made live.** The owner
+painted the platform — the canopy, Fuji past it, a car standing with its
+door open — and picked it, its four hours too, on the canvas "Practice
+gate — five wheels" (board 4). `scripts/practice-gate/` cuts the painting
+into layers and lights them at Today's hours (曙 dawn, the day, 落雁 dusk,
+秋月 night, `domain/printHour`), and `components/practice/gate/` draws over
+it, where the painting has them, the things that move or say something:
+
+- **Two roll signs on the car's side**, the train's grade (種別) and where
+  it goes (行先): three rows each, the lit one in the middle, rolled by a
+  tap on the row above or below (or the arrow keys) with the flaps'
+  clatter. The learner's own grade carries a dot. The lit destination
+  opens its station, as a plate's head did. Under them an **LED** pages
+  between what the run asks and where the train goes.
+- **The band along the cars** takes the chosen line's pigment, through a
+  colour blend over the stripe's own mask, so it keeps its paint.
+- **The door's leaves, the pantograph, the clock**: the train wakes and
+  raises its pantograph to the wire, a spark where it touches, then
+  opens; a tap folds or raises it. The clock keeps the time; a tap on it
+  shows the next hour.
+- **The gate button** (above) at the painting's foot: the doors close,
+  the train pulls out on the wire, a veil says where it went, and the run
+  opens. A tap skips to it. When the learner comes back, the train comes
+  in again.
+
+It keeps its own rules:
+
+- **It is a picture, not a surface.** Its inks are the painting's and its
+  signs', the same in both themes; the lines' pigments on it are the washi
+  theme's (`--pg-ink-*`), the signs being boards in the platform's light.
+- **Its numbers are the painting's.** The scene is 390 × 724 units, one
+  px each inside a zoomed root (`gateFit.js` places it: it fills the
+  frame's width, gives up sky before anything else, and keeps the wire
+  to the button whole); its type is the scale's, zoomed with it.
+- **Regenerated, never edited**: change the generator and bump its `REV`.
+- **Reduced motion**: the train stands, door open, pantograph up; the
+  signs turn without rolling; Embarquer opens the run at once.
+- **The desk keeps its plates**: no platform was painted for it.
+
 ## Space
 
 Nine rungs, `--sp-1` … `--sp-9`. The upper rungs carry meaning:
@@ -1102,6 +1290,13 @@ So:
   restyled with everything under it. A value only `<html>` reads is
   registered `inherits: false` (`--gate-ground`); a screen the scene
   hides steps out of the page instead (`.tpr--under-gate`).
+- **A scene's fade is declared when it starts; a cover is opaque.** An
+  opacity animation on a whole scene, even one still waiting out a delay,
+  has the browser draw the scene into a texture and that onto the screen
+  every frame: the gate's fade is set at its beat (`data-leaving`), not
+  with an 840ms delay from the mount. A scrim that hides the screen ends at
+  `opacity: 1`, never 0.995: under anything short of opaque the browser
+  draws the whole screen beneath it, every frame (plan 210).
 - Every `:hover` rule needs a matching `:focus-visible`. Keyboard users get the
   same affordance, not just the global ring.
 
@@ -1194,7 +1389,9 @@ named it (`.prompt-card--passage`, 2026-09-11): a card that is always taller
 than the phone read as a sentence cut in half by the foot's own ground, with
 the card's bottom edge somewhere off the page. The scroll is the **body's**,
 never the card's — the foot strip is what names the card, and it has to stay
-on screen. A prompt keeps the ordinary ruling; only a passage is bounded.
+on screen. A prompt keeps the ordinary ruling; only a passage is bounded —
+and a conversation's talk (plan 221, `.stage--talk`), which grows a line at
+a time past any screen and has its replies to keep under it.
 
 Above 768px the column is the centred `--card-w` it always was, with the
 progress legend back — on the desk too, where the run also prints its keys
@@ -1918,7 +2115,13 @@ line here says otherwise.
   standing the explanation in its description's place with a swap on the
   column's edge. The desk's rail steps aside for this one screen, so the
   three columns have the window at the drawing's shares (410 | 830 | 541);
-  under the desk the same result is one column, drawn by the owner too.
+  under the desk the same result is a stage (plan 219, the owner's pick D
+  of four drawn): no HUD and no tab bar while it is up, the head about
+  the whole Passage (the way back, where it is, the song's deck), the
+  video edge to edge, the line at display size in the middle, and a
+  thumb's dock at the foot about the line alone (grammar, words, Explain,
+  keep) over the transport. A screen under the shell takes the stage
+  through `stores/stage.js`; the desk's rail never leaves.
   A typed or photographed Passage has no video, and its sentence takes the
   video's place (plan 161, the owner's picks B and B′): the sumi object to
   the middle column's foot, the sentence at `--fs-display-fluid`, its

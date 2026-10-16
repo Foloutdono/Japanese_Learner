@@ -141,7 +141,7 @@ function ClimbLine({ stops, answers, at = null, value, onChange, label, attr, ca
                 </span>
                 <span className="desk-brd__stop-lab">
                   <span className="desk-brd__stop-name">{stop.name}</span>
-                  {stop.tag && <span className="brd-tag">{stop.tag}</span>}
+                  {stop.tag && <span className={`brd-tag${stop.tagClass ? ` ${stop.tagClass}` : ''}`}>{stop.tag}</span>}
                   <span className="desk-brd__stop-desc">
                     {stop.desc.split(' · ').map(part => <span key={part}>{part}</span>)}
                   </span>
@@ -228,7 +228,7 @@ function Climb({ shape, stops, answers, at = null, value, onChange, label, attr,
             <span className="brd-stn__lab">
               <span className="brd-stn__name">
                 {stop.name}
-                {stop.tag && <span className="brd-tag brd-stn__tag">{stop.tag}</span>}
+                {stop.tag && <span className={`brd-tag brd-stn__tag${stop.tagClass ? ` ${stop.tagClass}` : ''}`}>{stop.tag}</span>}
               </span>
               <span className="brd-stn__desc">{stop.desc}</span>
               {k === pick && note && <span className="brd-stn__note" aria-live="polite">{note}</span>}
@@ -252,15 +252,28 @@ function stopOf(t, lang, volumes, level) {
   }
 }
 
+// A level's score on the test (plan 224), as its stop's tag: right out
+// of asked, in the pass's gold where it was cleared.
+function scored(stop, result) {
+  const tally = result?.perLevel?.[stop.key]
+  if (!tally || !tally.total) return stop
+  return { ...stop, tag: `${tally.correct} / ${tally.total}`, tagClass: tally.cleared ? null : 'brd-tag--miss' }
+}
+
 // `no` is the desk's: the question's place on the strip, for its hub.
-export function LevelStep({ volumes, value, onChange, onContinue, no = null }) {
+// `placed` is the test's verdict when the learner took it (plan 224):
+// the line then says where the answers stopped, each level asked
+// carries its score, and the stop they reach is the pick -- still the
+// learner's to change.
+export function LevelStep({ volumes, value, onChange, onContinue, no = null, placed = null }) {
   const { t, lang } = useLang()
   const desk = useDesk()
-  const stops = LINE.map(level => stopOf(t, lang, volumes, level))
+  const stops = LINE.map(level => scored(stopOf(t, lang, volumes, level), placed))
+  const question = placed ? t.brdPlacedQ(placed.recommendedLevel) : t.brdLevelQ
   return (
     <>
       <div className="brd__body">
-        <BoardQuestion hint={desk ? t.brdLevelHint : null}>{t.brdLevelQ}</BoardQuestion>
+        <BoardQuestion hint={desk ? t.brdLevelHint : null}>{question}</BoardQuestion>
         <div className="brd__stage">
           {desk
             ? (
@@ -269,7 +282,7 @@ export function LevelStep({ volumes, value, onChange, onContinue, no = null }) {
                 answers={LINE}
                 value={value}
                 onChange={onChange}
-                label={t.brdLevelQ}
+                label={question}
                 attr="data-level"
                 call={{ cap: t.levelCurrentMark, fig: value === 'novice' ? t.brdNovice : value }}
                 no={no}
@@ -282,7 +295,7 @@ export function LevelStep({ volumes, value, onChange, onContinue, no = null }) {
                 answers={LINE}
                 value={value}
                 onChange={onChange}
-                label={t.brdLevelQ}
+                label={question}
                 attr="data-level"
                 note={t.levelCurrentMark}
                 no={no}

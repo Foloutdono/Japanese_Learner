@@ -21,6 +21,7 @@ from content.grammar_points_data import (
     GRAMMAR_POINTS_BY_LEVEL as GRAMMAR_BY_LEVEL, gloss as grammar_gloss, grammar_to_id,
 )
 from translations import get_meaning
+from content.jmdict_fr import pool_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 from content.kanji_meanings import KANJI_FR
 from content.radical_data import RADICAL_BY_NUMBER, siblings_by_stroke
@@ -65,6 +66,7 @@ from study.modes import (
     VOCAB as MODE_VOCAB,
     GRADED_FOR_SOURCE,
     GRADED_ORDER_FOR_SOURCE,
+    SOURCES as MODE_SOURCES,
     resolve_for_source,
 )
 import psycopg2.extras
@@ -136,11 +138,13 @@ def _wrap_vocab(raw_id, entry, level, level_list, mode, lang, stage, preview):
         raise HTTPException(status_code=400, detail=f"Invalid vocab mode: {mode!r}")
     if jmdict_db.is_pool_id(raw_id):
         # A pool word (plan 148) and its neighbours, the distractors, in
-        # JMdict's own gloss: VOCAB_FR is the course's, keyed by written
-        # form, and would hand a pool word a deck homograph's French
-        # (routes/theme_vocab._entry_meaning, the same rule).
+        # the pool's own gloss -- its French line where it has one (plan
+        # 210), JMdict's English otherwise: VOCAB_FR is the course's,
+        # keyed by written form, and would hand a pool word a deck
+        # homograph's French (routes/theme_vocab._entry_meaning, the
+        # same rule).
         return _build_vocab_card(raw_id, entry, level_list, m, lang, stage, preview,
-                                 meaning_of=lambda e: e.get("meaning", ""))
+                                 meaning_of=lambda e: pool_meaning(e, lang))
     return _build_vocab_card(raw_id, entry, level_list, m, lang, stage, preview)
 
 
@@ -186,21 +190,33 @@ SOURCES = {
 # ── A deck has ONE STRUCTURE ──────────────────────────────────
 # `type` is the deck's structure, and it decides everything: which app
 # cards can be browsed in, which personal cards can be written, and which
-# study modes the deck offers. There is no 'mixed' any more.
+# study modes the deck offers.
 #
-# Mixed decks were dropped because they made every other question harder
-# for no gain. A deck holding kanji and grammar had to union two sources'
-# modes, and then answer what a mode means for a card from the other
-# source -- which is how a hand-written pair ended up eligible for a
+# Mixed decks were dropped once because they made every other question
+# harder for no gain. A deck holding kanji and grammar had to union two
+# sources' modes, and then answer what a mode means for a card from the
+# other source -- which is how a hand-written pair ended up eligible for a
 # grammar session (see _eligible). One structure per deck makes the deck's
 # modes simply the structure's modes.
+#
+# 'mixed' is back (plan 215) because a song is both: its words, studied
+# as the words they are, and its lines, written cards read aloud -- one
+# deck, not two (owner-directed). It comes back with the answer the first
+# one lacked: in a mixed deck a CARD, not the deck, decides its modes. A
+# written card is a `standard` pair and studies under standard's modes, an
+# app card under its own source's, and a session in one mode serves only
+# the cards whose source that mode belongs to (_mode_source). The deck's
+# modes are the union over the sources it actually holds, in the
+# registry's order.
 #
 # The old model also had this exactly backwards for personal cards: a
 # kanji-typed deck accepted app kanji and NO hand-written cards at all,
 # so a kanji deck was the one place a personal kanji card could not go.
 # Now every structure accepts personal cards OF ITS OWN STRUCTURE, which
-# is what makes "write your own kanji card" a thing that exists.
-STRUCTURES = ("standard", "kana", "kanji", "vocab", "grammar")
+# is what makes "write your own kanji card" a thing that exists; a mixed
+# deck's are front/back pairs.
+MIXED = "mixed"
+STRUCTURES = ("standard", "kana", "kanji", "vocab", "grammar", MIXED)
 
 # Structure -> the one app source it browses in. `standard` is a plain
 # front/back pair with no app source behind it.
@@ -209,17 +225,21 @@ SOURCE_FOR_TYPE = {
     "kanji":   {"kanji"},
     "vocab":   {"vocab"},
     "grammar": {"grammar"},
+    MIXED:     {"kana", "kanji", "vocab", "grammar"},
 }
 
 # Structure -> the registry source its cards study under. A personal
 # kanji-structure card gets kanji's modes, which is the whole point of
-# giving personal cards a structure.
+# giving personal cards a structure. A mixed deck's written cards are
+# standard pairs; its app cards study under their own sources
+# (_mode_source).
 REGISTRY_SOURCE_FOR_TYPE = {
     "standard": MODE_STANDARD,
     "kana":     MODE_KANA,
     "kanji":    MODE_KANJI,
     "vocab":    MODE_VOCAB,
     "grammar":  MODE_GRAMMAR,
+    MIXED:      MODE_STANDARD,
 }
 
 
@@ -241,6 +261,29 @@ def _allows_custom(deck_type: str) -> bool:
 def _registry_source(deck_type: str) -> str:
     """The study-mode source for a deck, falling back to `standard`."""
     return REGISTRY_SOURCE_FOR_TYPE.get(deck_type, MODE_STANDARD)
+
+
+def _mode_source(deck_type: str, card_source: str) -> str:
+    """The registry source ONE card of this deck studies under: the
+    deck's own for every structure but mixed, where a card brings its
+    own -- an app card its source's, a written card ("custom") the
+    standard pair's (plan 215)."""
+    if deck_type == MIXED:
+        return MODE_STANDARD if card_source == "custom" else card_source
+    return _registry_source(deck_type)
+
+
+def _deck_modes(deck_type: str, held: set[str]) -> list[str]:
+    """The modes a deck offers, given the card sources it holds ("custom"
+    for a written card): its structure's, or, for a mixed deck, every
+    held source's in the registry's order -- the 種別 ladder of each, the
+    written cards' last with standard."""
+    if not held:
+        return []
+    if deck_type != MIXED:
+        return list(GRADED_ORDER_FOR_SOURCE[_registry_source(deck_type)])
+    sources = {_mode_source(MIXED, s) for s in held}
+    return [m for src in MODE_SOURCES if src in sources for m in GRADED_ORDER_FOR_SOURCE[src]]
 
 
 # Card stage promotions worth a visual "stamp" on the frontend — same
@@ -309,8 +352,9 @@ def _meaning_preview(source: str, entry: dict, lang: str) -> dict:
         return {"front": entry["kana"], "kana": entry["kana"], "meaning": entry["romaji"]}
     fr_map  = KANJI_FR if source == "kanji" else VOCAB_FR
     # A JMdict pool word (plan 148, an entry carrying its pool `seq`)
-    # has JMdict's gloss and no line in VOCAB_FR -- see _wrap_vocab.
-    meaning = entry.get("meaning", "") if "seq" in entry else get_meaning(entry, lang, fr_map)
+    # has no line in VOCAB_FR; get_meaning answers it from the pool's
+    # own French layer (plan 215) -- see _wrap_vocab.
+    meaning = get_meaning(entry, lang, fr_map)
     return {"front": entry.get("kanji") or entry.get("kana", ""), "kana": entry.get("kana", ""), "meaning": meaning}
 
 
@@ -843,13 +887,27 @@ class AddAppCardsPayload(BaseModel):
     cards: list[AppCardRef]
 
 
-# One structure per deck. 'mixed' and 'flashcard' are gone: 'mixed' was
-# dropped outright, and 'flashcard' is now called 'standard' to match the
-# study-mode registry's name for the same thing.
+# One structure per deck. 'flashcard' is gone, now called 'standard' to
+# match the study-mode registry's name for the same thing; 'mixed' was
+# dropped and came back with a rule (see STRUCTURES).
 DECK_TYPES = STRUCTURES
 
 
 # ── DECK CRUD ─────────────────────────────────────────────
+
+# A deck's counts, each read for the deck in hand on its own index
+# (plan 212). They were joins against a GROUP BY over the whole of
+# custom_cards, deck_cards and deck_subscriptions -- every learner's
+# cards, private decks too -- which Postgres builds in full before the
+# join, so the shelf and the library cost more as anyone, anywhere,
+# added a card. `d` is the deck; a followed deck's app cards are its
+# author's rows (a followed deck is a link, not a copy).
+_CARD_COUNT = """(
+    (SELECT COUNT(*) FROM custom_cards cc WHERE cc.deck_id = d.id)
+  + (SELECT COUNT(*) FROM deck_cards dk WHERE dk.deck_id = d.id AND dk.user_id = d.user_id)
+)"""
+_FOLLOWERS = "(SELECT COUNT(*) FROM deck_subscriptions fs WHERE fs.deck_id = d.id)"
+
 
 @router.get("/api/decks")
 def get_decks(user_id: str = Depends(get_user_id)):
@@ -869,25 +927,15 @@ def get_decks(user_id: str = Depends(get_user_id)):
                 SELECT d.id, d.name, d.type, d.created_at, d.description,
                        d.visibility, d.user_id AS owner_id, m.role,
                        (d.withdrawn_at IS NOT NULL) AS withdrawn,
-                       COALESCE(c.custom_count, 0) AS custom_count,
-                       COALESCE(dc.app_count, 0)   AS app_count
+                       {_CARD_COUNT} AS card_count
                 FROM mine m
                 JOIN decks d ON d.id = m.deck_id
-                LEFT JOIN (
-                    SELECT deck_id, COUNT(*) AS custom_count
-                    FROM custom_cards GROUP BY deck_id
-                ) c  ON c.deck_id  = d.id
-                LEFT JOIN (
-                    SELECT deck_id, user_id, COUNT(*) AS app_count
-                    FROM deck_cards GROUP BY deck_id, user_id
-                ) dc ON dc.deck_id = d.id AND dc.user_id = d.user_id
                 ORDER BY d.created_at DESC
             """, {"me": user_id})
             decks = [dict(row) for row in cur.fetchall()]
 
         authors = usernames_for([d["owner_id"] for d in decks if d["role"] != "owner"])
         for d in decks:
-            d["card_count"] = d.pop("custom_count") + d.pop("app_count")
             d["author"] = authors.get(d.pop("owner_id"))
         return {"decks": decks}
     finally:
@@ -1076,22 +1124,10 @@ def get_library(page: int = 0, limit: int = Query(LIBRARY_LIMIT, ge=1, le=100),
             cur.execute(f"""
                 SELECT d.id, d.name, d.description, d.type, d.published_at,
                        d.user_id AS owner_id,
-                       COALESCE(c.custom_count, 0) + COALESCE(dc.app_count, 0) AS card_count,
-                       COALESCE(f.followers, 0) AS followers,
+                       {_CARD_COUNT} AS card_count,
+                       {_FOLLOWERS} AS followers,
                        (mine.user_id IS NOT NULL) AS followed
                 FROM decks d
-                LEFT JOIN (
-                    SELECT deck_id, COUNT(*) AS custom_count
-                    FROM custom_cards GROUP BY deck_id
-                ) c  ON c.deck_id = d.id
-                LEFT JOIN (
-                    SELECT deck_id, user_id, COUNT(*) AS app_count
-                    FROM deck_cards GROUP BY deck_id, user_id
-                ) dc ON dc.deck_id = d.id AND dc.user_id = d.user_id
-                LEFT JOIN (
-                    SELECT deck_id, COUNT(*) AS followers
-                    FROM deck_subscriptions GROUP BY deck_id
-                ) f  ON f.deck_id = d.id
                 LEFT JOIN deck_subscriptions mine
                        ON mine.deck_id = d.id AND mine.user_id = %(me)s
                 WHERE d.visibility = 'public' AND d.withdrawn_at IS NULL
@@ -1163,33 +1199,25 @@ def get_library_home(user_id: str = Depends(get_user_id)):
     conn = db_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("""
+            cur.execute(f"""
                 SELECT d.id, d.name, d.description, d.type, d.published_at,
                        d.user_id AS owner_id,
-                       COALESCE(c.custom_count, 0) + COALESCE(dc.app_count, 0) AS card_count,
-                       COALESCE(f.followers, 0) AS followers
+                       {_CARD_COUNT} AS card_count,
+                       f.followers
                 FROM decks d
-                LEFT JOIN (
-                    SELECT deck_id, COUNT(*) AS custom_count
-                    FROM custom_cards GROUP BY deck_id
-                ) c  ON c.deck_id = d.id
-                LEFT JOIN (
-                    SELECT deck_id, user_id, COUNT(*) AS app_count
-                    FROM deck_cards GROUP BY deck_id, user_id
-                ) dc ON dc.deck_id = d.id AND dc.user_id = d.user_id
-                LEFT JOIN (
-                    SELECT deck_id, COUNT(*) AS followers,
+                CROSS JOIN LATERAL (
+                    SELECT COUNT(*) AS followers,
                            COUNT(*) FILTER (
                                WHERE subscribed_at > NOW() - INTERVAL '7 days') AS lately
-                    FROM deck_subscriptions GROUP BY deck_id
-                ) f  ON f.deck_id = d.id
+                    FROM deck_subscriptions fs WHERE fs.deck_id = d.id
+                ) f
                 WHERE d.visibility = 'public' AND d.withdrawn_at IS NULL
                   AND d.user_id <> %(me)s
                   AND NOT EXISTS (
                       SELECT 1 FROM deck_subscriptions s
                       WHERE s.deck_id = d.id AND s.user_id = %(me)s
                   )
-                ORDER BY COALESCE(f.lately, 0) DESC, COALESCE(f.followers, 0) DESC,
+                ORDER BY f.lately DESC, f.followers DESC,
                          d.published_at DESC NULLS LAST, d.id DESC
                 LIMIT 1
             """, {"me": user_id})
@@ -1860,16 +1888,20 @@ _CARD_STATE = {"not_started": "new", "new": "new", "learning": "learning", "mast
 def _with_states(cards: list[dict], access: DeckAccess, viewer_id: str) -> list[dict]:
     """Set `state` -- due, new, learning or mastered -- on each listed
     card, for the VIEWER: a follower's schedule is their own, under the
-    ids _build_pool studies the cards by."""
-    modes = GRADED_ORDER_FOR_SOURCE[_registry_source(access.type)]
-    raw = [
-        f"custom_{access.deck_id}_{c['id']}" if c["origin"] == "custom" else c["raw_id"]
-        for c in cards
-    ]
-    states = srs.get_states_for(prefixed(raw, viewer_id), modes)
-    for card, raw_id in zip(cards, raw):
-        stats = card_stats(states, viewer_id, raw_id, modes)
-        card["state"] = "due" if stats["due"] else _CARD_STATE.get(stats["status"], "new")
+    ids _build_pool studies the cards by. Each card is read in its own
+    modes, which in a mixed deck are its source's (_mode_source)."""
+    groups: dict[str, list[tuple[dict, str]]] = {}
+    for card in cards:
+        custom = card["origin"] == "custom"
+        raw_id = f"custom_{access.deck_id}_{card['id']}" if custom else card["raw_id"]
+        source = _mode_source(access.type, "custom" if custom else card["source"])
+        groups.setdefault(source, []).append((card, raw_id))
+    for source, members in groups.items():
+        modes = GRADED_ORDER_FOR_SOURCE[source]
+        states = srs.get_states_for(prefixed([raw_id for _, raw_id in members], viewer_id), modes)
+        for card, raw_id in members:
+            stats = card_stats(states, viewer_id, raw_id, modes)
+            card["state"] = "due" if stats["due"] else _CARD_STATE.get(stats["status"], "new")
     return cards
 
 
@@ -2175,7 +2207,8 @@ def add_app_cards(deck_id: str, payload: AddAppCardsPayload, user_id: str = Depe
 def get_deck_modes(deck_id: str, user_id: str = Depends(get_user_id)):
     """
     The study modes this deck offers: its STRUCTURE's modes, from the
-    registry, provided it has at least one card.
+    registry, provided it has at least one card -- or, for a mixed deck,
+    the modes of each source it holds (_deck_modes, plan 215).
 
     This used to union the modes of every source present in the deck,
     which is what made mixed decks expensive. Two sources meant two mode
@@ -2206,11 +2239,11 @@ def get_deck_modes(deck_id: str, user_id: str = Depends(get_user_id)):
     finally:
         conn.close()
 
-    total = custom_count + sum(source_counts.values())
     # In the registry's own order, which is the 種別 ladder — not
     # sorted(), which is the alphabet and put b2f (recall) above f2b
     # (recognition) on every deck in the app.
-    modes = list(GRADED_ORDER_FOR_SOURCE[_registry_source(deck_type)]) if total else []
+    held = {source for source, n in source_counts.items() if n} | ({"custom"} if custom_count else set())
+    modes = _deck_modes(deck_type, held)
 
     return {
         "modes": modes,
@@ -2484,7 +2517,9 @@ def _eligible(pool_entry: dict, mode: str, deck_type: str) -> bool:
     One rule now, because a deck has one structure: the mode must belong
     to that structure's registry source, and the card must be either a
     hand-written card (of that structure) or an app card from the source
-    the structure browses in.
+    the structure browses in. In a mixed deck the mode must belong to the
+    CARD's source (_mode_source), so a vocab session serves its words and
+    a standard one its written pairs, and neither is asked of the other.
 
     What this replaces was `return "flashcard" in mode` for custom cards
     -- a substring test that namespacing quietly broke, since
@@ -2492,7 +2527,7 @@ def _eligible(pool_entry: dict, mode: str, deck_type: str) -> bool:
     could be handed to the branch that renders a rule and its example
     sentences.
     """
-    if mode not in GRADED_FOR_SOURCE[_registry_source(deck_type)]:
+    if mode not in GRADED_FOR_SOURCE[_mode_source(deck_type, pool_entry["source"])]:
         return False
 
     if pool_entry["source"] == "custom":
@@ -2705,11 +2740,17 @@ def _csv_unlead(value: str) -> str:
 # once as bytes and again as the decoded str) before any row is looked
 # at, on a backend sized for 512 MB.
 _MAX_IMPORT_BYTES = 5 * 1024 * 1024
+# Rows one file may land (plan 211): the Pass's whole card allowance.
+# 5 MB of CSV is ~100k rows, each an INSERT -- and each, before, a
+# COUNT of the learner's cards too.
+_MAX_IMPORT_ROWS = credits.PASS_CARDS
 
 
+# A plain def (plan 211): as an async def every row's queries ran on the
+# event loop, and a large file held the whole API for minutes.
 @router.post("/api/decks/{deck_id}/import")
-async def import_cards(deck_id: str, file: UploadFile = File(...),
-                       user_id: str = Depends(get_user_id)):
+def import_cards(deck_id: str, file: UploadFile = File(...),
+                 user_id: str = Depends(get_user_id)):
     access = resolve_deck(deck_id, user_id, need=OWNER)
     if not _allows_custom(access.type):
         raise HTTPException(
@@ -2717,7 +2758,7 @@ async def import_cards(deck_id: str, file: UploadFile = File(...),
             detail=f"This deck only accepts {access.type} cards — browse and add some instead",
         )
 
-    content = await file.read(_MAX_IMPORT_BYTES + 1)
+    content = file.file.read(_MAX_IMPORT_BYTES + 1)
     if len(content) > _MAX_IMPORT_BYTES:
         raise HTTPException(status_code=413, detail="CSV file is too large")
     try:
@@ -2733,32 +2774,46 @@ async def import_cards(deck_id: str, file: UploadFile = File(...),
 
     inserted = 0
     errors   = []
+    rows     = []
+    for i, row in enumerate(reader, start=2):
+        if len(rows) >= _MAX_IMPORT_ROWS:
+            errors.append(f"Row {i} on: past {_MAX_IMPORT_ROWS} cards a file — skipped")
+            break
+        front = _csv_unlead((row.get('front') or '').strip())
+        back  = _csv_unlead((row.get('back') or '').strip())
+        if not front or not back:
+            errors.append(f"Row {i}: missing front/back — skipped")
+            continue
+        rows.append((i, front, back, (row.get('notes') or '').strip()))
+
     conn     = db_conn()
     try:
         with conn.cursor() as cur:
-            for i, row in enumerate(reader, start=2):
-                front = _csv_unlead(row.get('front', '').strip())
-                back  = _csv_unlead(row.get('back',  '').strip())
-                if not front or not back:
-                    errors.append(f"Row {i}: missing front/back — skipped")
-                    continue
+            # The whole file against the free tier at once (plan 069);
+            # only a file that overruns it is checked row by row, so it
+            # lands what fits and reports the rest.
+            try:
+                credits.check_card_limit(cur, user_id, adding=len(rows))
+                per_row = False
+            except credits.LimitReached:
+                per_row = True
+            for i, front, back, notes in rows:
                 # CSV import writes `standard` cards: a spreadsheet of
                 # front/back columns is exactly that shape, and asking a
                 # CSV to carry a kanji card's four fields would need a
                 # per-structure column contract nobody has asked for.
-                # Per row against the free tier (plan 069): a file that
-                # overruns it lands what fits and reports the rest.
-                try:
-                    credits.check_card_limit(cur, user_id)
-                except credits.LimitReached as e:
-                    errors.append(f"Row {i}: the deck limit of {e.limit} cards is reached — skipped")
-                    continue
+                if per_row:
+                    try:
+                        credits.check_card_limit(cur, user_id)
+                    except credits.LimitReached as e:
+                        errors.append(f"Row {i}: the deck limit of {e.limit} cards is reached — skipped")
+                        continue
                 cur.execute("""
                     INSERT INTO custom_cards (deck_id, user_id, structure, fields, notes)
                     VALUES (%s, %s, 'standard', %s, %s)
                 """, (access.deck_id, access.owner_id,
                       json.dumps({"front": front, "back": back}, ensure_ascii=False),
-                      row.get('notes', '').strip()))
+                      notes))
                 inserted += 1
         conn.commit()
     finally:

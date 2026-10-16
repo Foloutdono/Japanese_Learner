@@ -223,7 +223,8 @@ describe('the HUD', () => {
     expect(panel.classList.contains('hud__status--delayed')).toBe(true)
     expect(panel.classList.contains('hud__status--ring')).toBe(true)
     expect(panel.querySelector('.hud__ring-dest').textContent).toBe('N4')
-    expect(panel.querySelector('.hud__ring-figs b').textContent).toBe('16 %')
+    // French sets the sign after a no-break space (t.percent).
+    expect(panel.querySelector('.hud__ring-figs b').textContent).toBe('16\u00a0%')
     expect(panel.querySelector('.hud__status-word').textContent).toMatch(/^−\d+j$/)
     // The arc is the share done, in the state's ink; no white plate.
     const arc = panel.querySelector('.hud__ring-arc')
@@ -232,7 +233,7 @@ describe('the HUD', () => {
     expect(getComputedStyle(arc).stroke).toBe(getComputedStyle(panel.querySelector('.hud__status-word')).color)
     expect(panel.querySelector('.hud__dest')).toBeNull()
     // Said whole for a screen reader.
-    expect(panel.getAttribute('aria-label')).toMatch(/N4 · 16 %/)
+    expect(panel.getAttribute('aria-label')).toMatch(/N4 · 16\u00a0%/)
     // Inside the HUD, beside the card's strip.
     const hb = document.querySelector('.hud__inner').getBoundingClientRect()
     const pb = panel.getBoundingClientRect()

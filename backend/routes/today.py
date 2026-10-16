@@ -60,7 +60,7 @@ from pydantic import BaseModel, Field
 import psycopg2.extras
 
 from core.auth import get_user_id, prefixed, unprefixed
-from core import credits, events
+from core import credits, events, review_plan
 from core.db import db_conn
 from core.lines import lines_or_all
 from core.pace import resolve_pace
@@ -68,7 +68,7 @@ from core.srs_instance import srs
 from core.user_level import resolve_level
 from srs import xp as xp_math
 from study import basics, card_index, daily_queue, teaching_order
-from study import level_rule
+from study import level_rule, review_cap
 from study.level_rule import kana_sets_for, primary_mode
 from study.modes import KANA, KANJI, VOCAB, GRAMMAR, MODES, try_resolve
 
@@ -85,6 +85,7 @@ from routes.kanji import _build_kanji_card, FR_MAP as KANJI_FR_MAP     # noqa: E
 from routes.vocab import _build_vocab_card, FR_MAP as VOCAB_FR_MAP     # noqa: E402
 from translations import get_meaning                  # noqa: E402
 from routes.grammar import _build_grammar_card, ladder_positions, mark_tutorials   # noqa: E402
+from study.glyph_tour import mark_glyph_tours                  # noqa: E402
 from routes.decks import build_personal_card, build_pool_card, VISIBLE_DECKS_CTE   # noqa: E402
 from content.vocab_jmdict_data import POOL_ID_PREFIX                # noqa: E402
 from routes.profile import _profile_row, bridge_rest_days, counted_from   # noqa: E402
@@ -227,11 +228,16 @@ def _build_section_card(source, deck_key, raw_id, mode, lang, stage, preview, pr
     return card
 
 
-def _personal_rows(user_id: str) -> dict:
+def _personal_rows(user_id: str, due_rows: list[dict]) -> dict:
     """
-    (raw_id -> {deck_id, deck_name, structure, card}) for every personal
-    card on this learner's shelf — their own decks and the ones they
-    follow from the library alike.
+    (raw_id -> {deck_id, deck_name, structure, card}) for the personal
+    cards among `due_rows` that are on this learner's shelf — their own
+    decks and the ones they follow from the library alike.
+
+    Only those (plan 212): every caller looks a due row up here and
+    nothing else, and the whole shelf, each card's fields with it, was
+    read on every open of Today -- a learner following a few big decks
+    paid for all of their cards to count the dozen due.
 
     Looked up rather than parsed out of the id: a personal card's raw id
     is "custom_{deck_id}_{card_id}" and a deck id is free to contain an
@@ -245,6 +251,18 @@ def _personal_rows(user_id: str) -> dict:
     deck whose cards are due but which the shelf never shows, or the
     reverse.
     """
+    prefix_len = len(user_id) + 1
+    wanted = {row["card_id"][prefix_len:] for row in due_rows}
+    # custom_{deck_id}_{card id}: the card's own id is its row's BIGSERIAL,
+    # the one segment that cannot hold an underscore, so it is read off
+    # the end and the whole raw id checked against the row below.
+    card_ids = sorted({int(tail) for raw in wanted if raw.startswith("custom_")
+                       for tail in [raw.rsplit("_", 1)[-1]] if tail.isdigit()})
+    pool_ids = sorted(raw for raw in wanted if raw.startswith(POOL_ID_PREFIX))
+    if not card_ids and not pool_ids:
+        return {}
+
+    rows, pooled = [], []
     conn = db_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
@@ -257,43 +275,48 @@ def _personal_rows(user_id: str) -> dict:
             # its author's whoever is reading — and it is still what
             # keeps a stray custom_cards row whose user_id disagrees with
             # its deck out of the queue.
-            cur.execute(
-                f"""
-                WITH visible AS ({VISIBLE_DECKS_CTE})
-                SELECT c.id, c.deck_id, c.structure, c.fields, c.notes,
-                       d.name AS deck_name, d.type AS deck_type
-                FROM visible v
-                JOIN decks d        ON d.id = v.deck_id
-                JOIN custom_cards c ON c.deck_id = d.id AND c.user_id = d.user_id
-                """,
-                {"me": user_id},
-            )
-            rows = [dict(r) for r in cur.fetchall()]
+            if card_ids:
+                cur.execute(
+                    f"""
+                    WITH visible AS ({VISIBLE_DECKS_CTE})
+                    SELECT c.id, c.deck_id, c.structure, c.fields, c.notes,
+                           d.name AS deck_name, d.type AS deck_type
+                    FROM visible v
+                    JOIN decks d        ON d.id = v.deck_id
+                    JOIN custom_cards c ON c.deck_id = d.id AND c.user_id = d.user_id
+                    WHERE c.id = ANY(%(ids)s)
+                    """,
+                    {"me": user_id, "ids": card_ids},
+                )
+                rows = [dict(r) for r in cur.fetchall()]
             # A JMdict pool word linked into a deck (plan 148) comes back
             # in that deck's lane too: the course's cards have their JLPT
             # stop's lane (card_index.locate), and a pool word has none,
             # so without this it would be learnt in a deck and never
             # asked again. Only the deck is looked up here; the word is
             # the pool's (build_pool_card).
-            cur.execute(
-                f"""
-                WITH visible AS ({VISIBLE_DECKS_CTE})
-                SELECT dk.raw_id, dk.deck_id, d.name AS deck_name
-                FROM visible v
-                JOIN decks d       ON d.id = v.deck_id
-                JOIN deck_cards dk ON dk.deck_id = d.id AND dk.user_id = d.user_id
-                WHERE dk.source = 'vocab' AND left(dk.raw_id, %(plen)s) = %(prefix)s
-                ORDER BY dk.added_at
-                """,
-                {"me": user_id, "plen": len(POOL_ID_PREFIX), "prefix": POOL_ID_PREFIX},
-            )
-            pooled = [dict(r) for r in cur.fetchall()]
+            if pool_ids:
+                cur.execute(
+                    f"""
+                    WITH visible AS ({VISIBLE_DECKS_CTE})
+                    SELECT dk.raw_id, dk.deck_id, d.name AS deck_name
+                    FROM visible v
+                    JOIN decks d       ON d.id = v.deck_id
+                    JOIN deck_cards dk ON dk.deck_id = d.id AND dk.user_id = d.user_id
+                    WHERE dk.source = 'vocab' AND dk.raw_id = ANY(%(ids)s)
+                    ORDER BY dk.added_at
+                    """,
+                    {"me": user_id, "ids": pool_ids},
+                )
+                pooled = [dict(r) for r in cur.fetchall()]
     finally:
         conn.close()
 
     out = {
-        f"custom_{r['deck_id']}_{r['id']}": r
+        raw: r
         for r in rows
+        for raw in [f"custom_{r['deck_id']}_{r['id']}"]
+        if raw in wanted
     }
     for r in pooled:
         # A word in two decks is asked once, in the deck it went into
@@ -330,24 +353,54 @@ class Pools(NamedTuple):
     course: list | None
 
 
-def _ration(pools: Pools, budget: int):
-    return daily_queue.ration(pools.kana, pools.lines, budget, course=pools.course)
+def _ration(pools: Pools, budget: int, grammar: int | None = None):
+    return daily_queue.ration(pools.kana, pools.lines, budget, course=pools.course, grammar=grammar)
 
 
-def _new_lanes(user_id: str, level: str):
+def _holds_rules(pools: Pools) -> bool:
+    return any(key[1] == daily_queue.GRAMMAR for key in pools.lines) or any(
+        key[1] == daily_queue.GRAMMAR for key, _ in (pools.course or ()))
+
+
+def _grammar_allowance(user_id: str, pools: Pools, day) -> int | None:
+    """How many never-met rules the ration may open on `day` (plan 222,
+    daily_queue.grammar_allowance): none before a day of study is behind
+    the learner, then GRAMMAR_PER_DAY less those met already today. The
+    gate, the run, tomorrow and the ahead all ask it here, so they count
+    the same cards. None (no cap) when the pools hold no rule, and
+    nothing is read for it; 0 when the reads fail -- a lesson is the one
+    new card that can wait."""
+    if not _holds_rules(pools):
+        return None
+    try:
+        first = srs.first_studied_day(user_id)
+        today = datetime.now(timezone.utc).date()
+        opened = srs.get_new_items_today(user_id, source=daily_queue.GRAMMAR) if day == today else 0
+    except Exception:
+        logger.exception("grammar allowance failed")
+        return 0
+    return daily_queue.grammar_allowance(first is not None and first < day, opened)
+
+
+def _new_lanes(user_id: str, level: str, plan: review_plan.Plan = review_plan.NO_PLAN):
     """
     lane key -> new raw ids the run may introduce today, at most what
     is left of the pace. Empty when no target is stored, when today's
     is spent, or when the lookups fail -- a ration is a comfort, and
-    nothing here may 500 the gate.
+    nothing here may 500 the gate. Empty too while the review plan
+    pauses the new cards (plan 217): a catch-up under way, or a
+    declared absence about to start or running.
     """
+    if plan.new_paused(datetime.now(timezone.utc).date()):
+        return OrderedDict()
     pace = resolve_pace(user_id)
     if pace is None or pace.remaining <= 0:
         return OrderedDict()
     pools = _new_pools(user_id, level, pace.remaining)
     if pools is None:
         return OrderedDict()
-    return _ration(pools, pace.remaining)
+    today = datetime.now(timezone.utc).date()
+    return _ration(pools, pace.remaining, _grammar_allowance(user_id, pools, today))
 
 
 def _course(user_id: str, lines) -> list[tuple[tuple, str, int]]:
@@ -450,11 +503,14 @@ def _new_pools(user_id: str, level: str, budget: int):
 
 class DayQueue(NamedTuple):
     """What the day's queue holds now: the lanes /api/today counts and
-    the run serves, and what they were read from."""
+    the run serves, and what they were read from -- the review plan
+    (plan 217) and what its ceiling did to the reviews."""
     due_rows: list
     level: str
     lanes: "OrderedDict[tuple, list[str]]"
     fresh: dict
+    plan: review_plan.Plan = review_plan.NO_PLAN
+    cut: review_plan.Cut | None = None
 
     @property
     def total(self) -> int:
@@ -469,18 +525,27 @@ def _day_queue(user_id: str) -> DayQueue:
     on exactly the count the gate prints, never on a second reading of
     it that could drift."""
     due_rows = srs.get_due_rows(user_id)
-    personal = _personal_rows(user_id)
+    personal = _personal_rows(user_id, due_rows)
     level = resolve_level(user_id)
     # The stops beyond the learner's level AND goal wait (the level
     # rule, plan 074; daily_queue.hold_line): moving down sets them
     # aside, and the badge must not count what the run will not serve.
+    due = daily_queue.hold_above(daily_queue.lanes(user_id, due_rows, personal), _hold_line(user_id, level))
+    # 回復運転 (plan 217): the reviews cut to the day's share under the
+    # learner's ceiling or catch-up -- so the gate prints the share, the
+    # run serves it and the day is cleared on it. A catch-up whose work
+    # is done (what is owed fits in one share) ends here, and the day is
+    # cut again under what is left of the plan.
+    plan = review_plan.read_plan(user_id)
+    cut = review_plan.cut(user_id, due, due_rows, plan)
+    settled = review_plan.settle(user_id, plan, cut.owed)
+    if settled is not plan:
+        plan = settled
+        cut = review_plan.cut(user_id, due, due_rows, plan)
     # The day's ration of new cards rides beside the reviews (plan
     # 098): at the learner's own level, so the hold never touches it.
-    lanes, fresh = daily_queue.merge_new(
-        daily_queue.hold_above(daily_queue.lanes(user_id, due_rows, personal), _hold_line(user_id, level)),
-        _new_lanes(user_id, level),
-    )
-    return DayQueue(due_rows, level, lanes, fresh)
+    lanes, fresh = daily_queue.merge_new(cut.lanes, _new_lanes(user_id, level, plan))
+    return DayQueue(due_rows, level, lanes, fresh, plan, cut)
 
 
 @router.get("/api/today")
@@ -496,7 +561,7 @@ def get_today(user_id: str = Depends(get_user_id)):
     # before anything reads the streak.
     bridge_rest_days(user_id)
     queue = _day_queue(user_id)
-    due_rows, level, lanes, fresh = queue
+    due_rows, level, lanes, fresh = queue.due_rows, queue.level, queue.lanes, queue.fresh
 
     repeats = _repeats(user_id, due_rows)
     by_source: dict[str, int] = defaultdict(int)
@@ -549,6 +614,13 @@ def get_today(user_id: str = Depends(get_user_id)):
     # means asking the queue what it would actually build, which is a
     # bigger change than this one.
     next_due = srs.get_next_due_at(user_id) if total == 0 else None
+    if total == 0 and queue.cut.held:
+        # A share spent with reviews still held back (plan 217): the
+        # earliest of those is overdue, and "opens at" an hour gone by
+        # would be a lie. The gate opens when the next share does, at
+        # the queue's midnight.
+        next_due = datetime.combine(datetime.now(timezone.utc).date() + timedelta(days=1),
+                                    datetime.min.time(), tzinfo=timezone.utc)
 
     logger.info(
         "today summary user_id=%s due_rows=%d served=%d lanes=%d",
@@ -573,7 +645,7 @@ def get_today(user_id: str = Depends(get_user_id)):
             done["reviewed"] = srs.get_reviews_today_by_line(user_id)
         except Exception:
             logger.exception("today's reviews failed")
-        done["tomorrow"] = _tomorrow(user_id, level)
+        done["tomorrow"] = _tomorrow(user_id, level, queue)
     return {
         **done,
         "seconds_per_review": spr,
@@ -603,6 +675,31 @@ def get_today(user_id: str = Depends(get_user_id)):
         # 終着 and 運休 (plan 191): whether the day is cleared and what
         # clearing it pays, and the rest days.
         **_day_status(user_id),
+        # 回復運転 (plan 217): the review plan and what it did today,
+        # and the comeback sheet's offer when the gate opens on one.
+        "review": _review_status(user_id, queue),
+    }
+
+
+def _review_status(user_id: str, queue: DayQueue) -> dict:
+    """GET /api/today's `review`: the learner's ceiling, how many reviews
+    it holds back today (`held`, what an extra run would serve), the
+    catch-up under way, the absence declared, and the comeback offer
+    (core/review_plan.comeback) -- asked only past its floor and outside
+    a declined week, so an ordinary day costs no forecast."""
+    plan, cut = queue.plan, queue.cut
+    today = datetime.now(timezone.utc).date()
+    owed = cut.owed if plan.cap is not None else review_cap.owed(cut.lanes, set())
+    offer = None
+    if owed > review_plan.COMEBACK_FLOOR and not plan.catching_up and not plan.quiet(today):
+        offer = review_plan.comeback(user_id, plan, owed, review_plan.daily_load(user_id),
+                                     review_plan.days_away(user_id))
+    return {
+        "cap": plan.review_cap,
+        "held": cut.held,
+        "catchup": plan.catchup_payload(today),
+        "away": plan.away_payload(),
+        "comeback": offer,
     }
 
 
@@ -666,23 +763,34 @@ def _day_status(user_id: str) -> dict:
     }
 
 
-def _tomorrow(user_id: str, level: str) -> dict:
+def _tomorrow(user_id: str, level: str, queue: DayQueue | None = None) -> dict:
     """Tomorrow's ride, as a cleared day prints it: the cards that fall
     due tomorrow (srs.get_due_forecast's second day) and a whole day's
     ration of new ones, and the minutes they take at the learner's pace,
-    rounded up. A figure, never a reason to fail the clear."""
+    rounded up. A figure, never a reason to fail the clear.
+
+    Under a review plan (plan 217) the reviews held back today ride
+    tomorrow too, as much of them and of tomorrow's own as one share
+    holds, and a plan that pauses the new cards tomorrow brings none."""
+    plan = queue.plan if queue is not None else review_plan.read_plan(user_id)
+    held = queue.cut.held if queue is not None and queue.cut is not None else 0
     try:
         due = srs.get_due_forecast(user_id, 2)[1]["count"]
     except Exception:
         logger.exception("tomorrow's forecast failed")
         due = 0
+    due += held
+    if plan.cap is not None:
+        due = min(due, plan.cap)
     fresh = 0
     try:
         pace = resolve_pace(user_id)
-        if pace is not None:
+        if pace is not None and not plan.new_paused(datetime.now(timezone.utc).date() + timedelta(days=1)):
             pools = _new_pools(user_id, level, pace.target)
             if pools is not None:
-                fresh = sum(len(ids) for ids in _ration(pools, pace.target).values())
+                tomorrow = datetime.now(timezone.utc).date() + timedelta(days=1)
+                grammar = _grammar_allowance(user_id, pools, tomorrow)
+                fresh = sum(len(ids) for ids in _ration(pools, pace.target, grammar).values())
     except Exception:
         logger.exception("tomorrow's ration failed")
     cards = due + fresh
@@ -781,7 +889,7 @@ def post_today_clear(user_id: str = Depends(get_user_id)):
         "month": srs.week_row(user_id, 30) if xp_math.clear_tier(milestone) == "month" else None,
         "xp": xp,
         "level": level,
-        "tomorrow": _tomorrow(user_id, queue.level),
+        "tomorrow": _tomorrow(user_id, queue.level, queue),
     }
 
 
@@ -919,7 +1027,7 @@ def get_today_ahead(at: str = Query(..., description="comma-separated ISO instan
             raise HTTPException(status_code=422, detail="since needs its offset")
 
     due_rows = srs.get_due_rows(user_id, until=max(instants))
-    personal = _personal_rows(user_id)
+    personal = _personal_rows(user_id, due_rows)
     level = resolve_level(user_id)
     line = _hold_line(user_id, level)
 
@@ -931,17 +1039,42 @@ def get_today_ahead(at: str = Query(..., description="comma-separated ISO instan
     if pace is not None:
         pools = _new_pools(user_id, level, pace.target)
         if pools is not None:
-            today_new = _ration(pools, pace.remaining)
-            later_new = _ration(pools, pace.target)
+            now_day = datetime.now(timezone.utc).date()
+            today_new = _ration(pools, pace.remaining, _grammar_allowance(user_id, pools, now_day))
+            later_new = _ration(pools, pace.target,
+                                _grammar_allowance(user_id, pools, now_day + timedelta(days=1)))
     today_utc = datetime.now(timezone.utc).date()
+
+    # 回復運転 (plan 217): what the gate will hold is the day's share
+    # under the learner's ceiling or catch-up -- today's what is left of
+    # it, a later day's a whole one -- and no new card on a day the plan
+    # pauses them. Without a ceiling, a point whose reviews would open
+    # the gate on the comeback sheet says so (`comeback`), and the
+    # notification invites back rather than counting the backlog.
+    plan = review_plan.read_plan(user_id)
+    prefix = len(user_id) + 1
+    row_of = {(r["card_id"][prefix:], r["mode"]): r for r in due_rows}
+    load = None
 
     points = []
     for t in instants:
         rows = [r for r in due_rows if r["next_review"] <= t]
-        lanes, fresh = daily_queue.merge_new(
-            daily_queue.hold_above(daily_queue.lanes(user_id, rows, personal), line),
-            today_new if t.date() == today_utc else later_new,
-        )
+        due = daily_queue.hold_above(daily_queue.lanes(user_id, rows, personal), line)
+        if plan.cap is not None:
+            if t.date() == today_utc:
+                due = review_plan.cut(user_id, due, rows, plan).lanes
+            else:
+                due, _held = review_cap.share(due, row_of, plan.cap, 0, set(), t)
+        offered = today_new if t.date() == today_utc else later_new
+        if plan.new_paused(t.date()):
+            offered = OrderedDict()
+        lanes, fresh = daily_queue.merge_new(due, offered)
+        reviews = review_cap.owed(due, set())
+        comeback = False
+        if plan.cap is None and reviews > review_plan.COMEBACK_FLOOR:
+            if load is None:
+                load = review_plan.daily_load(user_id)
+            comeback = reviews > review_plan.COMEBACK_LOADS * load
         breakdown = []
         for key, ids in lanes.items():
             lane = daily_queue.label(key)
@@ -954,6 +1087,7 @@ def get_today_ahead(at: str = Query(..., description="comma-separated ISO instan
             "total": sum(len(ids) for ids in lanes.values()),
             "new": sum(fresh.values()),
             "lanes": breakdown,
+            "comeback": comeback,
         })
 
     try:
@@ -977,7 +1111,8 @@ def get_today_ahead(at: str = Query(..., description="comma-separated ISO instan
 
 @router.get("/api/today/cards")
 def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "", lanes: str = "", lang: str = "fr",
-                    only: str = "", quota: str = "", unit: str = "", user_id: str = Depends(get_user_id)):
+                    only: str = "", quota: str = "", unit: str = "", extra: bool = False,
+                    user_id: str = Depends(get_user_id)):
     """
     The queue itself: up to `count` due cards, mixed across sections and
     personal decks, each carrying the mode it must be reviewed under.
@@ -1007,11 +1142,19 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     rules, each opening on its lesson, then its words, then its kanji --
     in the learner's lines, whatever the day's ration or the learner's
     level, since they chose the unit. Like `only`, not a day.
+
+    `extra` is the run past the day's share (plan 217): the reviews the
+    learner's ceiling or catch-up held back today, boarded on purpose
+    from a cleared gate -- the ceiling is a default, never a lock, as the
+    pace's 臨時列車 is. It serves the due reviews uncut and no new card.
     """
     count = max(1, min(count, MAX_BATCH))
+    # The day's never-met rules, each a lesson: spaced out in the batch
+    # (daily_queue.space_rules, plan 222).
+    new_rules: set[str] = set()
 
     due_rows = srs.get_due_rows(user_id)
-    personal = _personal_rows(user_id)
+    personal = _personal_rows(user_id, due_rows)
     all_lanes = daily_queue.lanes(user_id, due_rows, personal)
     level = resolve_level(user_id)
     riding = _riding_basics(level)
@@ -1025,9 +1168,19 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
         # has met three new cards is offered three fewer. The lane
         # choice applies to it like any lane -- a switched-off line
         # offers nothing new either.
-        merged, _fresh = daily_queue.merge_new(
-            daily_queue.hold_above(all_lanes, _hold_line(user_id, level)), _new_lanes(user_id, level),
-        )
+        due = daily_queue.hold_above(all_lanes, _hold_line(user_id, level))
+        if extra:
+            merged = due
+        else:
+            # The day's share (plan 217), cut as the gate cut it: the
+            # run serves what the gate counted.
+            plan = review_plan.read_plan(user_id)
+            new_lanes = _new_lanes(user_id, level, plan)
+            new_rules = {raw_id for key, ids in new_lanes.items()
+                         if key[1] == daily_queue.GRAMMAR for raw_id in ids}
+            merged, _fresh = daily_queue.merge_new(
+                review_plan.cut(user_id, due, due_rows, plan).lanes, new_lanes,
+            )
         chosen = daily_queue.keep_lanes(merged, daily_queue.parse_lane_ids(lanes))
     chosen = daily_queue.drop_seen(chosen, daily_queue.parse_exclude(exclude))
     if quota and not only:
@@ -1040,7 +1193,7 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     # kana in it is cleared too. A pass has no balance to stop at, and
     # in shadow mode the queue is untouched.
     repeats = _repeats(user_id, due_rows)
-    picked = _affordable(user_id, daily_queue.interleave(chosen, count), repeats)
+    picked = _affordable(user_id, daily_queue.space_rules(daily_queue.interleave(chosen, count), new_rules), repeats)
     if not picked:
         return {"cards": [], "beyond": 0}
     # 残り — what the queue still holds past this batch and past what
@@ -1116,6 +1269,7 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     # Each card's bar, new to mastered (plan 147).
     srs.attach_progress(cards, user_id)
     mark_tutorials(cards, user_id)
+    mark_glyph_tours(cards, user_id, lang)
     return {"cards": cards, "beyond": beyond}
 
 
@@ -1175,6 +1329,7 @@ def _unit_cards(user_id: str, unit_id: str, all_lanes, due_rows, count: int, exc
     logger.info("basics unit run user_id=%s unit=%s served=%d", user_id, unit_id, len(cards))
     srs.attach_progress(cards, user_id)
     mark_tutorials(cards, user_id)
+    mark_glyph_tours(cards, user_id, lang)
     return {"cards": cards, "beyond": beyond}
 
 

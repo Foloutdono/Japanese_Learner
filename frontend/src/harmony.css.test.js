@@ -103,7 +103,7 @@ describe('調和 — the harmony rules (plan 174)', () => {
   it('一族: the line pigments are one lightness in each theme', () => {
     // 山吹 is the metal and stays it; 鶯 is no longer a line.
     const lines = Object.keys(DARK).filter(k => k.startsWith('line-') && !['line-jisho', 'line-douga'].includes(k))
-    expect(lines.length).toBe(12)
+    expect(lines.length).toBe(13)
     for (const k of lines) {
       const d = oklch(DARK[k])
       const l = oklch(LIGHT[k])

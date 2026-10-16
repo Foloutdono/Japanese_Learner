@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLang } from '../../LangContext'
 import { connectProvider } from '../../lib/oauth'
+import { authErrorMessage } from '../../lib/authErrors'
 
 // ── 改札 — the one button that is Google's ───────────────────────
 // Google's mark is the one graphic in this app that is not ours to
@@ -47,7 +48,10 @@ export function ProviderButton({
     setBusy(false)
     if (r.ok) { onDone?.(); return }
     // Backing out of the system browser is an answer, not a fault.
-    if (!r.cancelled) onError?.(r.message || t.genericError)
+    // A refusal is worded from its code by the table every auth
+    // refusal goes through (lib/authErrors.js): Supabase's message, or
+    // this module's own debugging line, is never what a learner reads.
+    if (!r.cancelled) onError?.(authErrorMessage(r, t))
   }
 
   return (

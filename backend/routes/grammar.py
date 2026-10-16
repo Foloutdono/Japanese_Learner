@@ -13,7 +13,7 @@ from content.grammar_sentences_data import get_sentences
 from study import card_index
 from study.card_lookup import GRAMMAR_STATUS_MODES, card_stats
 from study.grammar_examples import (
-    example_payload, furigana_by_pattern, pattern_furigana, structure_furigana,
+    example_payload, furigana_by_pattern, pattern_furigana, structure_furigana, structure_text,
 )
 from study.grammar_lesson import contrast_payload, lesson_payload
 from study.grammar_tour import tour_payload
@@ -209,9 +209,10 @@ def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mo
         # call fill_in's sentence makes below -- and without it 〜の中で
         # asks a learner who cannot read 中 a kanji question.
         "grammar_furigana": pattern_furigana(pattern, entry.get("reading")),
-        "structure": entry["structure"],
-        # The formation line read the same way (`structure_reading`).
-        "structure_furigana": structure_furigana(entry),
+        # The formation line in the learner's language (plan 215), read
+        # the same way (`structure_reading`).
+        "structure": structure_text(entry, lang),
+        "structure_furigana": structure_furigana(entry, lang),
         "meaning":   gloss(entry, lang),
         "register":  entry.get("register"),
         # Current SRS stage, so the client can hand it straight back as
@@ -524,8 +525,8 @@ def get_grammar_review_cards(level: str, lang: str = "fr", user_id: str = Depend
             "raw_id":    raw_id,
             "grammar":   entry["pattern"],
             "grammar_furigana": pattern_furigana(entry["pattern"], entry.get("reading")),
-            "structure": entry["structure"],
-            "structure_furigana": structure_furigana(entry),
+            "structure": structure_text(entry, lang),
+            "structure_furigana": structure_furigana(entry, lang),
             "meaning":   gloss(entry, lang),
             "stage":     stage,
         })
@@ -598,7 +599,7 @@ def get_grammar_point(id: str, lang: str = "fr", user_id: str = Depends(get_user
         "raw_id":    id,
         "level":     level,
         "pattern":   entry["pattern"],
-        "structure": entry["structure"],
+        "structure": structure_text(entry, lang),
         "meaning":   gloss(entry, lang),
         **lesson_payload(level, entry, lang),
         "tour":      tour_payload(level, entry, lang),

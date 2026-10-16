@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { track } from '../lib/track'
+import { runFigures, runWhere } from '../lib/runTrail'
 
 // Once the queue drops to this many unreviewed cards, kick off a
 // background refill — small enough that a refill is rarely idle for
@@ -294,21 +295,27 @@ export function useCardSession({
   // screen makes per card. A run that unmounts with answers behind it
   // and no `done` is an abandonment -- which is the number that
   // matters, since a session nobody finishes is a mode nobody likes.
-  const runRef = useRef({ at: 0, answered: 0, done: false })
+  //
+  // Since plan 218 each end also carries how the run went, read off the
+  // run's tally (stores/runTally.js, which useReviewGates starts with
+  // the run): engaged ms, the time per card's median and slow tail, how
+  // many were right (lib/runTrail.js runFigures). `where` is the door,
+  // from the screen the run is on, read once at its start.
+  const runRef = useRef({ at: 0, answered: 0, done: false, where: 'other' })
 
   useEffect(() => {
     if (storageKey === IDLE_KEY) return undefined
-    const run = { at: Date.now(), answered: 0, done: false }
+    const run = { at: Date.now(), answered: 0, done: false, where: runWhere() }
     runRef.current = run
     const kind = runKind(storageKey)
     const level = runLevel(storageKey)
-    track('run_start', { kind, mode, level })
+    track('run_start', { kind, mode, level, where: run.where })
     return () => {
       // Finished runs report themselves below; a run nobody answered a
       // single card in is a screen someone glanced at, and screen_view
       // already said so.
       if (run.done || run.answered === 0) return
-      track('run_abandon', { kind, mode, level, done: run.answered })
+      track('run_abandon', { kind, mode, level, done: run.answered, where: run.where, ...runFigures() })
     }
   }, [storageKey, mode])
 
@@ -323,6 +330,8 @@ export function useCardSession({
       level: runLevel(storageKey),
       items: run.answered,
       secs: Math.round((Date.now() - run.at) / 1000),
+      where: run.where,
+      ...runFigures(),
     })
   }, [done, storageKey, mode])
 

@@ -17,7 +17,7 @@ import { StrengthLadder } from './StrengthLadder'
 const STRIP_H = 64
 
 export function ReportStrip({ series, asked, askedLabel, describe, selected, onSelect, onPreview, misses, missWindow, strength }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const pct = asked?.pct ?? null
   return (
     <section className="rep-strip" aria-label={t.reportRetention}>
@@ -53,11 +53,11 @@ export function ReportStrip({ series, asked, askedLabel, describe, selected, onS
         />
       </div>
       <div className="rep-strip__cell">
-        <span className="rep-fig rep-fig--heading">{(asked?.reviews ?? 0).toLocaleString()}</span>
+        <span className="rep-fig rep-fig--heading">{(asked?.reviews ?? 0).toLocaleString(lang)}</span>
         <span className="rep-cap">{t.reportReviewsCap}</span>
       </div>
       <div className="rep-strip__cell">
-        <span className="rep-fig rep-fig--heading">{misses.toLocaleString()}</span>
+        <span className="rep-fig rep-fig--heading">{misses.toLocaleString(lang)}</span>
         <span className="rep-cap">{t.reportMisses(misses, missWindow)}</span>
       </div>
       <div className="rep-strip__cell rep-strip__cell--ladder">

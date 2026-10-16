@@ -14,6 +14,8 @@ import { useDesk } from '../../hooks/useDesk'
 import { useMinute } from '../../hooks/useMinute'
 import { Loading } from '../ui/Loading'
 import { CheckIcon, ChevronIcon } from '../ui/Icons'
+import LevelFitLine from './LevelFitLine'
+import { QuietButton } from '../dayclear/kit'
 import { useCredits } from '../../stores/credits'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { publishLeft } from '../../stores/gateRun'
@@ -75,7 +77,7 @@ const LINE_TITLE = {
 }
 const titlesOf = t => Object.fromEntries(Object.entries(LINE_TITLE).map(([k, f]) => [k, f(t)]))
 
-export default function GateCard({ today, failed }) {
+export default function GateCard({ today, failed, session = null }) {
   const { t, lang } = useLang()
   const desk = useDesk()
   const credits = useCredits()
@@ -163,6 +165,7 @@ export default function GateCard({ today, failed }) {
       toggle={toggle} toggleLine={toggleLine} take={take} setTake={setTake}
       main={main} setMain={setMain} chosen={lanes.filter(l => !off.has(l.id))}
       credits={credits} metered={metered} enforced={Boolean(credits?.enforced)} t={t} lang={lang}
+      session={session}
     />
   )
 }
@@ -443,7 +446,7 @@ function Services({ lines, isOn, share, toggle, toggleLine, choices, main, setMa
 // row that says what the run is (and opens the services) over the gate.
 // The foot never leaves the screen (owner-directed): it docks on the
 // tab bar on the page's own ground, and the air gives way first.
-function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, setTake, main, setMain, chosen, credits, metered, enforced, t, lang }) {
+function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, setTake, main, setMain, chosen, credits, metered, enforced, t, lang, session }) {
   const [open, setOpen] = useState(false)
   const run = runOf({ today, isOn, take, metered, credits, enforced, lang })
   const choices = choicesOf(chosen, run.chosenTotal, run.spr, t)
@@ -480,6 +483,8 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
       <span className="tdy__air" aria-hidden="true" />
 
       <div className="tdy__foot">
+        {/* The level that does not fit (plan 224), over the run's own row. */}
+        <LevelFitLine session={session} />
         <button type="button" className="tdy-door" onClick={() => { playClick(); setOpen(true) }} aria-haspopup="dialog">
           <span className="tdy-door__what">
             <b>{main ? t.gateModesMainName : t.gateModesAllName}</b>
@@ -514,7 +519,7 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
 // of the canvas): a line a row, the day a strip of four figures over a
 // slim week, so the column holds a five-line day without scrolling
 // down to the short desk.
-function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, main, setMain, chosen, credits, metered, enforced, t, lang }) {
+function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, main, setMain, chosen, credits, metered, enforced, t, lang, session }) {
   const run = runOf({ today, isOn, take, metered, credits, enforced, lang })
   const choices = choicesOf(chosen, run.chosenTotal, run.spr, t)
   const { mix, parts, short, fare } = dialOf({ lines, isOn, run, metered })
@@ -556,6 +561,7 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
         </div>
       </div>
       <aside className="tdy-desk__col">
+        <LevelFitLine session={session} />
         <section className="tdy-desk__panel tdy-desk__svc" aria-label={t.gateServicesTitle}>
           <Services
             lines={lines} isOn={isOn} share={run.share} toggle={toggle} toggleLine={toggleLine}
@@ -614,6 +620,11 @@ function ClearedGate({ today, desk }) {
   const week = summary?.streak > 0 ? restWeek(summary.week, [], day) : null
   const tomorrow = today.tomorrow
   const opens = opensWords(today.next_due, t, lang)
+  const held = today.review?.held ?? 0
+  function rideExtra() {
+    playAnnouncement('today')
+    beginDeparture({ ...sectionFor('/today', t), path: '/today/run?extra=1', stage: true })
+  }
   // On the desk the print centres on the gate's column, as DeskGate's does.
   const heroRef = useRef(null)
   const p = usePrint(desk ? 'desk' : 'phone', desk ? heroRef : null)
@@ -637,7 +648,7 @@ function ClearedGate({ today, desk }) {
       {week && (
         <div className="tdy-rally tpr-at" style={at(frame.cx, frame.cy + frame.fare + BELOW.week)}>
           <WeekStamps week={week} label={t.todayWeekStamps(summary.streak)} />
-          <span className="tdy-rally__n" aria-hidden="true"><b>{summary.streak}</b>{t.todayStreakDays}</span>
+          <span className="tdy-rally__n" aria-hidden="true"><b>{summary.streak}</b>{t.todayStreakDays(summary.streak)}</span>
         </div>
       )}
     </section>
@@ -650,6 +661,15 @@ function ClearedGate({ today, desk }) {
           <b className="tdy-next__n">{tomorrow.cards}<small>{t.todayCardsUnit(tomorrow.cards)}</small></b>
           <span className="tdy-next__min">≈ {tomorrow.minutes} {t.gateMinutes}</span>
         </div>
+      )}
+      {/* 回復運転 (plan 217): the share is spent and reviews wait past
+          it -- the way on, for a learner who wants more, stands a rung
+          over the shut gate as a quiet way. The ceiling is a default,
+          never a lock. */}
+      {held > 0 && (
+        <QuietButton className="tdy-extra" data-action="review-extra" onClick={rideExtra}>
+          {t.todayExtra(held)}
+        </QuietButton>
       )}
       <GateButton label={opens ?? t.depart} aria-label={opens ?? t.todayNothingDueShort} disabled />
     </>

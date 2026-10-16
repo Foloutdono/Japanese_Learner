@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { track } from '../lib/track'
 
 // ── The theme choice (plan 074) ──────────────────────────────
 // Three-valued — dark, light, or auto — while the <html data-theme>
@@ -40,6 +41,7 @@ export function getThemeChoice() {
 // what used to freeze a detected OS preference into an explicit saved
 // choice, so later OS changes stopped being honoured.
 export function setThemeChoice(next) {
+  track('setting_change', { setting: 'theme', value: next })   // plan 218
   try {
     if (next === 'auto') window.localStorage.removeItem(THEME_KEY)
     else window.localStorage.setItem(THEME_KEY, next)

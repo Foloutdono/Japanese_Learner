@@ -57,6 +57,7 @@ from fastapi import APIRouter, Depends, HTTPException
 import core.auth as auth
 from core.auth import get_user_id
 from core.db import db_conn
+from core.srs_instance import srs
 from core.user_level import forget_stored_level
 
 router = APIRouter()
@@ -101,6 +102,7 @@ PLAN = [
     ("translation_log",     "user_id = %(user)s",       "translation practice history"),
     ("dictation_log",       "user_id = %(user)s",       "dictation practice history"),
     ("composition_log",     "user_id = %(user)s",       "composition practice history"),
+    ("conversation_log",    "user_id = %(user)s",       "conversation practice history (plan 217)"),
     ("exam_attempts",       "user_id = %(user)s",       "exam history (the papers are a shared pool and stay)"),
     ("frequency_overrides", "user_id = %(user)s",       "per-user frequency-tier tweaks"),
     ("ocr_usage",           "user_id = %(user)s",       "the OCR daily counters"),
@@ -108,10 +110,12 @@ PLAN = [
     ("dictionary_favorites", "user_id = %(user)s",      "the dictionary's shelf of kept entries"),
     ("agenda_blocks",       "user_id = %(user)s",       "the weekly agenda: study blocks and their reminders"),
     ("grammar_tours",       "user_id = %(user)s",       "how each grammar point's first tour went (plan 187)"),
+    ("glyph_tours",         "user_id = %(user)s",       "how each kana and kanji's first tour went (plan 216)"),
     ("credit_ledger",       "user_id = %(user)s",       "the credit ledger: refills, fares, grants"),
     ("credit_stops",        "user_id = %(user)s",       "where the credits stopped a run: the offer's week"),
     ("event_log",           "user_id = %(user)s",       "足跡: which screens were opened, and when"),
     ("event_daily",         "user_id = %(user)s",       "the rolled-up half of that same trail"),
+    ("feedback",            "user_id = %(user)s",       "the messages written to us: problems, ideas, cards reported (plan 222)"),
     ("user_profiles",       "user_id = %(user)s",       "identity: username, level, goal, preferences"),
 ]
 
@@ -221,6 +225,7 @@ def delete_account(user_id: str = Depends(get_user_id)):
     finally:
         conn.close()
     forget_stored_level(user_id)
+    srs.forget_history(user_id)
     try:
         auth_deleted = _delete_auth_user(user_id)
     except AuthDeleteError:

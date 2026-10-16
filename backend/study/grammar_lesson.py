@@ -60,7 +60,7 @@ def lesson_payload(level: str, entry: dict, lang: str) -> dict:
         })
     return {
         "pattern_furigana": pattern_furigana(pattern, entry.get("reading")),
-        "structure_furigana": structure_furigana(entry),
+        "structure_furigana": structure_furigana(entry, lang),
         "register": entry.get("register"),
         "steps": [
             {"kind": step["kind"], "text": localise({"en": step["en"], "fr": step["fr"]}, lang)}

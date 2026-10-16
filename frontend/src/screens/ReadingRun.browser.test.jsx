@@ -438,9 +438,9 @@ describe('ReadingRun — the play button', () => {
     expect(button(root).getAttribute('aria-label')).toBe(translations.fr.readingPlay)
     expect(root.textContent).not.toContain(PHRASE.phrase)
     expect(root.querySelector('input').disabled).toBe(true)
-    expect(clock(root)).toBe('30.0s')
+    expect(clock(root)).toBe(translations.fr.timerSeconds(30))
     await settle(300)
-    expect(clock(root)).toBe('30.0s')
+    expect(clock(root)).toBe(translations.fr.timerSeconds(30))
 
     // Nothing is taken before the press, not even a forced submit.
     root.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
@@ -455,7 +455,7 @@ describe('ReadingRun — the play button', () => {
     expect(field.disabled).toBe(false)
     expect(document.activeElement).toBe(field)
     await settle(300)
-    expect(parseFloat(clock(root))).toBeLessThan(30)
+    expect(parseFloat(clock(root).replace(',', '.'))).toBeLessThan(30)
   })
 
   it('holds the next phrase back too', async () => {
@@ -466,7 +466,7 @@ describe('ReadingRun — the play button', () => {
     expect(button(root)).toBeTruthy()
     expect(root.querySelector('.sentence')).toBeNull()
     expect(root.querySelector('input').disabled).toBe(true)
-    expect(clock(root)).toBe('30.0s')
+    expect(clock(root)).toBe(translations.fr.timerSeconds(30))
   })
 })
 
@@ -480,11 +480,11 @@ describe('ReadingRun — the reading pace', () => {
   it('gives a slow reader twice the time, counted down in real seconds', async () => {
     paced.pace = 'slow'
     const root = await run()
-    expect(clock(root)).toBe('60.0s')
+    expect(clock(root)).toBe(translations.fr.timerSeconds(60))
 
     await play(root)
     await settle(500)
-    const left = parseFloat(clock(root))
+    const left = parseFloat(clock(root).replace(',', '.'))
     expect(left).toBeLessThan(60)
     // Half a second gone, not a whole one: the clock is the reader's.
     expect(left).toBeGreaterThan(59)
@@ -516,7 +516,7 @@ describe('ReadingRun — the reading pace', () => {
     const chip = () => root.querySelector('.timer .pace-chip')
     expect(chip().textContent).toBe('×1')
     expect(chip().getAttribute('aria-label')).toBe(translations.fr.readingPaceChip(translations.fr.readingPaceOption.standard))
-    expect(clock(root)).toBe('30.0s')
+    expect(clock(root)).toBe(translations.fr.timerSeconds(30))
 
     const seen = []
     for (let i = 0; i < 4; i++) {
@@ -525,10 +525,10 @@ describe('ReadingRun — the reading pace', () => {
       seen.push([chip().textContent, clock(root)])
     }
     expect(seen).toEqual([
-      ['×1,5', '45.0s'],
-      ['×2', '60.0s'],
+      ['×1,5', translations.fr.timerSeconds(45)],
+      ['×2', translations.fr.timerSeconds(60)],
       ['∞', translations.fr.readingUntimed],
-      ['×1', '30.0s'],
+      ['×1', translations.fr.timerSeconds(30)],
     ])
   })
 

@@ -253,6 +253,8 @@ describe('DictationRun', () => {
     expect(check).toBeTruthy()
     expect(JSON.parse(check[2].body)).toEqual({
       clip_id: 'clip-one', answer: 'gakkou wa kuji desu',
+      // The reveal's translation comes back in the UI's language (plan 215).
+      lang: document.documentElement.lang,
     })
   })
 

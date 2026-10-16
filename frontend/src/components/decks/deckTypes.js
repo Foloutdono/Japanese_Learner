@@ -21,11 +21,15 @@
 // colour live here while the label/description stay in the locales.
 //
 // ── A deck has ONE STRUCTURE ──
-// 'mixed' is gone. A mixed deck had to union two sources' study modes and
-// then answer what a kanji-only mode means for a grammar card sitting
-// beside it — a question one structure per deck removes rather than
-// answers. 'flashcard' is renamed 'standard', matching what the study-mode
+// 'flashcard' is renamed 'standard', matching what the study-mode
 // registry calls the same thing (domain/studyModes.js).
+//
+// 'mixed' went, because a mixed deck had to union two sources' study
+// modes and then answer what a kanji-only mode means for a grammar card
+// sitting beside it. It is back (plan 215, for a song's words and lines
+// in one deck) with that answered: each card studies in its own source's
+// modes (decks.py's _mode_source). It has no section behind it, so it
+// takes the neutral rail, as `standard` does, and 混 for its name.
 //
 // 'kana' joined them with plan 089, and for the same reason the others
 // exist: the dictionary's panel grew a ＋ on every entry, and a kana
@@ -44,6 +48,7 @@ export function deckTypes(t) {
     { value: 'vocab',    label: t.vocabType,    desc: t.deckVocabDesc,    glyph: '単', color: 'var(--line-vocab)' },
     { value: 'kanji',    label: t.kanjiType,    desc: t.deckKanjiDesc,    glyph: '漢', color: 'var(--line-kanji)' },
     { value: 'grammar',  label: t.grammarType,  desc: t.deckGrammarDesc,  glyph: '文', color: 'var(--line-grammar)' },
+    { value: 'mixed',    label: t.mixedType,    desc: t.mixedDesc,        glyph: '混', color: 'var(--text-secondary)' },
   ]
 }
 

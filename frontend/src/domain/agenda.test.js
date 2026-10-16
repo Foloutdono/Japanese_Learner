@@ -153,7 +153,7 @@ describe('editing the list', () => {
 
 describe('the subjects', () => {
   it('are the server\'s eleven, each opening a place a notification may open', () => {
-    expect(SUBJECTS).toHaveLength(11)
+    expect(SUBJECTS).toHaveLength(12)
     for (const subject of SUBJECTS) expect(OPENABLE_PATHS.has(SUBJECT_PATH[subject])).toBe(true)
   })
 })

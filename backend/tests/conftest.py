@@ -22,6 +22,15 @@ def client():
     return TestClient(app)
 
 
+@pytest.fixture(autouse=True)
+def _fresh_history():
+    """The SRS engine keeps each learner's history aggregates until a
+    write through it moves them (plan 212); the tests also write
+    review_log and xp_ledger by hand, so each starts with none kept."""
+    from core.srs_instance import srs
+    srs.forget_all_history()
+
+
 # ── A second learner ──────────────────────────────────────────
 #
 # The library is the first feature in this app where one request reads
@@ -69,6 +78,7 @@ def _wipe(user_id: str) -> None:
     try:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM deck_reports WHERE user_id = %s", (user_id,))
+            cur.execute("DELETE FROM feedback WHERE user_id = %s", (user_id,))
             cur.execute("DELETE FROM deck_subscriptions WHERE user_id = %s", (user_id,))
             # decks cascades to custom_cards, deck_cards and to any
             # subscription other learners hold on them.

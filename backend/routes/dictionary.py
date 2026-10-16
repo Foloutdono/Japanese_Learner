@@ -20,6 +20,7 @@ from content.kana_strokes import stroke_count as kana_stroke_count
 # than all 13,108 rows; anything outside the deck comes from the database.
 from content.radical_data import KANJI_RADICALS, RADICAL_BY_NUMBER, info_for as radical_info
 from translations import get_meaning, fr_gloss
+from content.jmdict_fr import pool_meaning
 from content.kanji_meanings import KANJI_FR
 from translations.fr.vocab_fr import VOCAB_FR
 from core.auth import get_user_id
@@ -29,6 +30,7 @@ from study.card_lookup import (
     GRAMMAR_STATUS_MODES,
 )
 from study.grammar_lesson import lesson_payload
+from study.grammar_examples import structure_text
 from study import search_match
 from study.kana_words import kana_words
 from study.kanji_words import full_shares, kanji_as_word, kanji_words, reading_of, word_furigana
@@ -145,7 +147,7 @@ def get_radical_grid(all: bool = False):
 # ── The kanji collection ─────────────────────────────────────────
 # ONE collection over two pools, for the same reason the vocabulary is
 # (see the block below, and commit 116ad2a). The app's own JLPT deck is
-# 2,212 characters, one entry each since plan 112; KANJIDIC2, which this repo has
+# 2,383 characters, one entry each since plan 112 (plan 226 added 171); KANJIDIC2, which this repo has
 # shipped all along, has 13,108. The other 10,896 were reachable from
 # nowhere in the app — not by search, not by radical, not on a plate — so
 # looking a character up and not finding it proved only that it was not
@@ -178,12 +180,12 @@ def _levels_of(by_level: dict, level: str | None):
 
 def _kanji_deck_matches(query, lang: str, level: str | None = None) -> list[tuple[str, dict, str]]:
     """(level, entry, display meaning) for every deck kanji the query
-    matches, in deck order — N5 first, N1 last. 2,212 rows, filtered in
+    matches, in deck order — N5 first, N1 last. 2,383 rows, filtered in
     memory.
 
     Matched against BOTH glosses; SHOWN in the session's language. The
     displayed meaning is now built for the matches alone rather than for
-    all 2,212 rows on the way past.
+    all 2,383 rows on the way past.
     """
     rows = [(lvl, k) for lvl, kanji_list in _levels_of(KANJI_BY_LEVEL, level) for k in kanji_list]
     hits = search_match.ranked(query, rows, lambda row: (
@@ -240,11 +242,29 @@ def _off_deck_chars(word: str) -> list[str]:
     return [c for c in dict.fromkeys(_CJK.findall(word or "")) if c not in DECK_BY_CHAR]
 
 
+def _pool_kanji_meanings(chars, lang: str) -> dict[str, str]:
+    """{char: meaning} in `lang`, English where `lang` has none.
+
+    kanji_db.meanings_for omits a character with no entry in the language
+    asked -- the shape KANJI_FR needs -- and KANJIDIC2 has French for 73
+    of the 10,896 characters outside the deck. Read straight, a French
+    page printed those rows with no meaning at all, where the English
+    page printed one: the French learner got less than the English one
+    (plan 215). The deck's own rows already fall back through
+    get_meaning; this is the same rule for the pool's."""
+    out = kanji_db.meanings_for(chars, lang)
+    if lang != "en":
+        missing = [c for c in chars if c not in out]
+        if missing:
+            out.update(kanji_db.meanings_for(missing, "en"))
+    return out
+
+
 def _page_pool_meanings(words, lang: str) -> dict[str, str]:
     """The pool meanings every word on a page needs, in one query rather
     than one per word."""
     chars = dict.fromkeys(c for w in words for c in _off_deck_chars(w))
-    return kanji_db.meanings_for(chars, lang)
+    return _pool_kanji_meanings(chars, lang)
 
 
 def _word_kanji(word: str, furigana: list[dict], lang: str,
@@ -271,7 +291,7 @@ def _word_kanji(word: str, furigana: list[dict], lang: str,
     # `pool` is the page's own batch (_page_pool_meanings); a lone
     # lookup asks for its word's characters alone.
     if pool is None:
-        pool = kanji_db.meanings_for(_off_deck_chars(word), lang)
+        pool = _pool_kanji_meanings(_off_deck_chars(word), lang)
     out = []
     for char in chars:
         deck = DECK_BY_CHAR.get(char)
@@ -381,7 +401,7 @@ def _pool_kanji_result(row: dict, lang: str, states: dict, user_id: str) -> dict
 
 # Which deck characters have a stroke diagram, resolved in one bounded
 # query at import rather than a lookup per row per request. It is all
-# 2,212 of them today; asked rather than assumed so a KanjiVG refresh that
+# 2,383 of them today; asked rather than assumed so a KanjiVG refresh that
 # drops one cannot leave the plate pointing at a 404.
 _DECK_HAS_SVG = kanji_db.svg_chars(DECK_BY_CHAR)
 
@@ -693,7 +713,7 @@ def _exact_vocab(q: str, kana: str, lang: str, states: dict, user_id: str) -> di
         entry = jmdict_db.get_by_key(kanji, reading)
         if entry is not None:
             raw_id = vocab_jmdict_to_id(entry)
-            return _vocab_result(entry, None, entry.get("meaning", ""), lang, own(raw_id),
+            return _vocab_result(entry, None, pool_meaning(entry, lang), lang, own(raw_id),
                                  user_id, raw_id)
     return None
 
@@ -779,11 +799,11 @@ def _vocab_collection(query, page: int, limit: int, lang: str, user_id: str,
                       vocab_to_id(entry, level), kanji_pool)
         for level, entry, meaning in deck_page
     ] + [
-        # The pool carries no French map (VOCAB_FR is the deck's own,
-        # keyed by kanji alone — a pool homograph would collect the
-        # deck word's translation), so its gloss is served as JMdict
-        # wrote it.
-        _vocab_result(entry, None, entry.get("meaning", ""), lang, states, user_id,
+        # Never VOCAB_FR (the deck's own, keyed by kanji alone — a pool
+        # homograph would collect the deck word's translation): the
+        # pool's own French line where it has one (plan 215), JMdict's
+        # English otherwise.
+        _vocab_result(entry, None, pool_meaning(entry, lang), lang, states, user_id,
                       vocab_jmdict_to_id(entry), kanji_pool)
         for entry in pool_page
     ]
@@ -858,7 +878,7 @@ def _grammar_result(entry: dict, level: str, states: dict, user_id: str, lang: s
         "raw_id":    raw_id,
         "level":     level,
         "pattern":   entry["pattern"],
-        "structure": entry.get("structure", ""),
+        "structure": structure_text(entry, lang),
         "meaning":   gloss(entry, lang),
         **lesson_payload(level, entry, lang),
         "status":    card_stats(states, user_id, raw_id, GRAMMAR_STATUS_MODES),
@@ -974,10 +994,14 @@ def _kana_result(kind: str, entry: dict, meaning: str, lang: str,
     }
 
 
+# `q` and `page` bounded (plan 211): an unbounded query string was a
+# pass of a Python callback over the JMdict pool's 212k glosses per
+# request, and a page past the end an OFFSET scan through all of them.
 @router.get("/api/dictionary")
-def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=200), lang: str = "fr",
-                    category: str = "all", radical: int | None = None, kana: str = "",
-                    level: str | None = None, id: str = "",
+def get_dictionary(q: str = Query("", max_length=200), page: int = Query(0, ge=0, le=10000),
+                    limit: int = Query(50, ge=1, le=200), lang: str = "fr",
+                    category: str = "all", radical: int | None = None, kana: str = Query("", max_length=200),
+                    level: str | None = None, id: str = Query("", max_length=200),
                     match: str = "word", field: str = "all", one: bool = False,
                     user_id: str = Depends(get_user_id)):
     """

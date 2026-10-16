@@ -1,5 +1,5 @@
 import { useLang } from '../../LangContext'
-import { wordRowsOf } from './rows'
+import { wordRowsOf, wordTileRows } from './rows'
 import { tokState, wordGloss } from './tokens'
 
 // ── 語 — the sentence's words, on the desk (plan 134) ─────────────
@@ -61,6 +61,44 @@ export function WordsList({ analysis, current, onSelect, t, action = null }) {
             </div>
           )
           : button
+      })}
+    </div>
+  )
+}
+
+// ── 札 — the sentence's words on a phone (plan 220, the owner's W2) ──
+// The dock's Words sheet: a card per word, two to a row -- its level in
+// the corner, its reading over it, the word large, its gloss under it,
+// and its state as the bar along the card's foot (the subtitle's rule,
+// laid flat). A card opens the word's dictionary entry (`onSelect`).
+// Only the words written in Japanese (rows.js's wordTileRows).
+export function WordTiles({ analysis, onSelect, t }) {
+  const lang = useLang()?.lang
+  const rows = wordTileRows(analysis)
+  return (
+    <div className="anl-tiles">
+      {rows.map((row, i) => {
+        const head = row.head
+        const entry = head.vocab_match?.entry
+        const name = entry ? (entry.kanji || entry.kana || row.surface) : row.surface
+        const reading = entry?.kana && entry.kana !== name ? entry.kana : ''
+        const meaning = wordGloss(head, lang)
+        const level = head.vocab_match?.level ?? null
+        return (
+          <button
+            key={i}
+            type="button"
+            className="anl-tile"
+            onClick={() => onSelect(row)}
+            aria-label={[t.jumpToTokenNamed(row.surface), reading, meaning, level].filter(Boolean).join(' — ')}
+          >
+            {level && <span className="anl-tile__lvl" aria-hidden="true">{level}</span>}
+            <span className="anl-tile__reading" lang="ja" aria-hidden="true">{reading}</span>
+            <span className="anl-tile__word" lang="ja" aria-hidden="true">{name}</span>
+            {meaning && <span className="anl-tile__gloss" aria-hidden="true">{meaning}</span>}
+            <span className={`anl-tile__state anl-tile__state--${tokState(head)}`} aria-hidden="true" />
+          </button>
+        )
       })}
     </div>
   )

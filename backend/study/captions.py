@@ -24,6 +24,7 @@
 # can name a video with no fetch involved at all, which is what every
 # uploaded .srt does.
 
+import html
 import logging
 import os
 import re
@@ -35,15 +36,33 @@ logger = logging.getLogger(__name__)
 
 class CaptionParseError(Exception):
     """A subtitle file could not be parsed. Carries what failed, since
-    the caller (routes/video.py) shows this to the learner rather than
-    guessing at what went wrong."""
+    the caller (routes/video.py) tells the learner rather than guessing
+    at what went wrong.
+
+    Two halves (plan 215): `code`, a stable snake_case name the client
+    turns into a sentence in the learner's own language, and the English
+    message, which stays for the logs and for the rows stored before the
+    code existed. The message is never what a learner reads any more:
+    it was English on a French-first app, and some of them quote the
+    file back."""
+
+    def __init__(self, message: str, code: str = "parse_failed"):
+        super().__init__(message)
+        self.code = code
 
 
 class CaptionFetchError(Exception):
     """A caption fetch could not be completed. Deliberately NOT a
     subclass of CaptionParseError: nothing was malformed, so telling
     the learner their subtitles are broken would be a lie. The two are
-    caught together in routes/video.py and shown differently."""
+    caught together in routes/video.py and shown differently.
+
+    `code` as on CaptionParseError: what the client says, in the
+    learner's language; the message is for the logs."""
+
+    def __init__(self, message: str, code: str = "fetch_failed"):
+        super().__init__(message)
+        self.code = code
 
 
 # ── Markup stripping ──────────────────────────────────────────────
@@ -275,7 +294,7 @@ def _parse_vtt(content: str) -> list[dict]:
         if text:
             cues.append(_cue(start, end, text, words))
     if not cues and "-->" not in content:
-        raise CaptionParseError("No cue timestamps found in VTT content")
+        raise CaptionParseError("No cue timestamps found in VTT content", "no_cues")
     return cues
 
 
@@ -325,18 +344,89 @@ def _parse_ass(content: str) -> list[dict]:
     return cues
 
 
-_PARSERS = {"srt": _parse_srt, "vtt": _parse_vtt, "ass": _parse_ass, "ssa": _parse_ass}
+# ── srv3 ────────────────────────────────────────────────────────
+# YouTube's own timed text, the format that keeps the recogniser's time
+# on every word (plan 221): <p t="ms" d="ms">…</p>, and in a recognised
+# track each word an <s> whose t is its offset from the paragraph's.
+# The link fetch reads it here; the grab converts the same XML to VTT in
+# the browser (frontend/src/lib/captionGrab.js, srv3Cues), and this
+# reads it to the cues that VTT parses to, word for word: the words
+# after the first are anchored where they start, the first at the
+# paragraph's start, and a paragraph is cut where the next one starts
+# (a recognised track's lines roll together on screen, two at a time).
+_SRV3_P_RE = re.compile(r"<p\b([^>]*?)(?:/>|>(.*?)</p>)", re.S)
+_SRV3_S_RE = re.compile(r"<s\b([^>]*)>(.*?)</s>", re.S)
+_SRV3_BR_RE = re.compile(r"<br\s*/?>")
+_ANY_TAG_RE = re.compile(r"<[^>]*>")
+
+
+def _srv3_attr(attrs: str, name: str) -> float | None:
+    m = re.search(rf'\b{name}="([^"]*)"', attrs)
+    try:
+        return float(m.group(1)) if m else None
+    except ValueError:
+        return None
+
+
+def _srv3_text(raw: str) -> str:
+    # The endpoint double-escapes (an apostrophe arrives as &amp;#39;);
+    # a line break on screen is a space, as in every other parser here.
+    text = html.unescape(html.unescape(raw))
+    return re.sub(r"\s*\n\s*", " ", text)
+
+
+def _parse_srv3(content: str) -> list[dict]:
+    paras = []
+    for m in _SRV3_P_RE.finditer(content):
+        t = _srv3_attr(m.group(1), "t")
+        if t is None or m.group(2) is None:
+            continue
+        d = _srv3_attr(m.group(1), "d") or 0
+        start = t / 1000
+        inner = m.group(2)
+        if re.search(r"<s\b", inner):
+            text, anchors = "", []
+            for seg in _SRV3_S_RE.finditer(inner):
+                word = _strip_tags(_srv3_text(_ANY_TAG_RE.sub("", seg.group(2))))
+                if not word.strip():
+                    continue
+                offset = _srv3_attr(seg.group(1), "t") or 0
+                if text and offset > 0:
+                    anchors.append((len(text), (t + offset) / 1000))
+                text += word if text else word.lstrip()
+            stripped = text.strip()
+            lead = len(text) - len(text.lstrip())
+            if anchors:
+                anchors.insert(0, (0, start))
+            words = _tidy_anchors(stripped, anchors, lead)
+        else:
+            stripped = _strip_markup(_srv3_text(_ANY_TAG_RE.sub("", _SRV3_BR_RE.sub(" ", inner))))
+            words = []
+        if stripped:
+            paras.append((start, (t + (d or 2000)) / 1000, stripped, words))
+    cues = []
+    for i, (start, end, text, words) in enumerate(paras):
+        nxt = paras[i + 1][0] if i + 1 < len(paras) else None
+        if nxt is not None and start < nxt < end:
+            end = nxt
+        cues.append(_cue(start, end, text, words))
+    return cues
+
+
+_PARSERS = {"srt": _parse_srt, "vtt": _parse_vtt, "ass": _parse_ass, "ssa": _parse_ass, "srv3": _parse_srv3}
 
 
 def _sniff_format(content: str) -> str:
     head = content[:2000]
     if head.lstrip().upper().startswith("WEBVTT"):
         return "vtt"
+    if "<timedtext" in head:
+        return "srv3"
     if "[Script Info]" in head or "[Events]" in head:
         return "ass"
     if _SRT_ARROW_RE.search(head):
         return "srt"
-    raise CaptionParseError("Could not determine subtitle format from content")
+    raise CaptionParseError("Could not determine subtitle format from content", "unknown_format")
 
 
 def parse_track(content: str, filename: str) -> list[dict]:
@@ -360,7 +450,7 @@ def parse_track(content: str, filename: str) -> list[dict]:
         raise CaptionParseError(f"Failed to parse subtitle content: {e}") from e
 
     if not cues:
-        raise CaptionParseError("No usable cues found in subtitle content")
+        raise CaptionParseError("No usable cues found in subtitle content", "no_cues")
 
     return _merge_duplicate_consecutive(cues)
 
@@ -471,7 +561,8 @@ def fetch_youtube_track(video_id: str) -> list[dict]:
     proxy_config = _proxy_config()
     if proxy_config is None:
         raise CaptionFetchError(
-            "Fetching subtitles from a link is not enabled on this server."
+            "Fetching subtitles from a link is not enabled on this server.",
+            "link_fetch_disabled",
         )
 
     from youtube_transcript_api import YouTubeTranscriptApi
@@ -485,9 +576,9 @@ def fetch_youtube_track(video_id: str) -> list[dict]:
     try:
         available = api.list(video_id)
     except TranscriptsDisabled:
-        raise CaptionFetchError("This video has subtitles turned off.")
+        raise CaptionFetchError("This video has subtitles turned off.", "subtitles_disabled")
     except VideoUnavailable:
-        raise CaptionFetchError("This video is unavailable.")
+        raise CaptionFetchError("This video is unavailable.", "video_unavailable")
     except CouldNotRetrieveTranscript as e:
         # RequestBlocked and IpBlocked are both subclasses. Logged in
         # full because a rising rate of these is the signal that the
@@ -495,11 +586,18 @@ def fetch_youtube_track(video_id: str) -> list[dict]:
         # pointed back at the paths that always work.
         logger.warning("Caption fetch blocked for %s: %s", video_id, e)
         raise CaptionFetchError(
-            "YouTube refused the subtitle request for this video."
+            "YouTube refused the subtitle request for this video.",
+            "youtube_refused",
         )
     except Exception as e:  # pragma: no cover - defensive
         logger.exception("Unexpected error listing captions for %s", video_id)
-        raise CaptionFetchError(f"Could not reach YouTube: {e}")
+        raise CaptionFetchError(f"Could not reach YouTube: {e}", "youtube_unreachable")
+
+    def find(finder):
+        try:
+            return finder(_JAPANESE_LANGUAGE_CODES)
+        except NoTranscriptFound:
+            return None
 
     # Manual before generated. A human-written track is punctuated and
     # segmented by someone deciding what belongs on screen together,
@@ -507,27 +605,59 @@ def fetch_youtube_track(video_id: str) -> list[dict]:
     # (docs/adr/0003, 2026-08-27). An auto-caption is rougher, and
     # still a usable study unit -- so it is the fallback, not a
     # refusal.
-    try:
-        transcript = available.find_manually_created_transcript(_JAPANESE_LANGUAGE_CODES)
-    except NoTranscriptFound:
-        try:
-            transcript = available.find_generated_transcript(_JAPANESE_LANGUAGE_CODES)
-        except NoTranscriptFound:
-            raise CaptionFetchError(
-                "This video has no Japanese subtitles. Try another video, "
-                "or add a subtitle file yourself."
-            )
+    manual = find(available.find_manually_created_transcript)
+    generated = find(available.find_generated_transcript)
+    transcript = manual if manual is not None else generated
+    if transcript is None:
+        raise CaptionFetchError(
+            "This video has no Japanese subtitles. Try another video, "
+            "or add a subtitle file yourself.",
+            "no_japanese_subtitles",
+        )
+
+    # When each word is said (plan 221). Until then this path read the
+    # track in the library's plain format, which keeps a line's start
+    # and end and nothing else, so every session made from a link had
+    # its words lit on an estimate: the grab's v2 had brought the
+    # recogniser's word times since 2026-09-27, the link fetch never
+    # did. Now it reads what the grab reads: the track in srv3 and,
+    # beside a hand-written one, the recognised one, whose times
+    # study/word_timing.py lends to the lines they agree with. The
+    # recognised track is YouTube's speech recognition run over the
+    # video's sound: the one reading of the audio this server can have
+    # (docs/adr/0003, 2026-10-16). Best effort, each half: a track that
+    # will not come as srv3 is read as before, and a recognised one that
+    # will not come costs the words their times, never the session.
+    cues = _srv3_cues(transcript, video_id)
+    if cues is None:
+        cues = _plain_cues(transcript, video_id)
+    if manual is not None and generated is not None:
+        heard = _srv3_cues(generated, video_id)
+        if heard:
+            from study.word_timing import align_cues
+            try:
+                cues = align_cues(cues, heard)
+            except Exception:
+                logger.warning("Word timing skipped for %s", video_id, exc_info=True)
+    return cues
+
+
+# The library's own fetch, in its plain format: a line's start and
+# length, and no word in it timed.
+def _plain_cues(transcript, video_id: str) -> list[dict]:
+    from youtube_transcript_api import CouldNotRetrieveTranscript
 
     try:
         fetched = transcript.fetch()
     except CouldNotRetrieveTranscript as e:
         logger.warning("Caption download blocked for %s: %s", video_id, e)
         raise CaptionFetchError(
-            "YouTube refused the subtitle request for this video."
+            "YouTube refused the subtitle request for this video.",
+            "youtube_refused",
         )
     except Exception as e:  # pragma: no cover - defensive
         logger.exception("Unexpected error fetching captions for %s", video_id)
-        raise CaptionFetchError(f"Could not read the subtitles: {e}")
+        raise CaptionFetchError(f"Could not read the subtitles: {e}", "fetch_failed")
 
     cues = []
     for snippet in fetched:
@@ -545,12 +675,40 @@ def fetch_youtube_track(video_id: str) -> list[dict]:
         })
 
     if not cues:
-        raise CaptionFetchError("This video's Japanese subtitle track is empty.")
+        raise CaptionFetchError("This video's Japanese subtitle track is empty.", "subtitles_empty")
 
     # Auto-captions render as a ROLLING WINDOW, repeating most of each
     # neighbour's text. This is the function that exists for that; see
     # its own docstring.
     return _merge_duplicate_consecutive(cues)
+
+
+# How long the srv3 read may take before the plain one is tried.
+_SRV3_TIMEOUT_SECONDS = 20
+
+
+def _srv3_cues(transcript, video_id: str) -> list[dict] | None:
+    """A track read in srv3 (`_parse_srv3`), or None where it cannot be.
+
+    The library asks for each track without the `fmt=srv3` YouTube
+    lists it with, and parses the plainer format that comes back; this
+    asks the same URL for srv3, through the same session, so through
+    the same proxy. The URL and the session are the library's own
+    attributes rather than its API: a version that moves them costs the
+    words their times, and the track is read as before."""
+    url = getattr(transcript, "_url", None)
+    client = getattr(transcript, "_http_client", None)
+    # The library's own sign that the track wants a token from the
+    # player, which no request from here can carry.
+    if not isinstance(url, str) or client is None or "&exp=xpe" in url:
+        return None
+    try:
+        response = client.get(url + "&fmt=srv3", timeout=_SRV3_TIMEOUT_SECONDS)
+        response.raise_for_status()
+        return parse_track(response.text, "track.srv3")
+    except Exception as e:
+        logger.warning("srv3 read failed for %s: %s", video_id, e)
+        return None
 
 # ── YouTube URL parsing (for the PLAYER, not for fetching) ────────
 # `.search`, not `.match`, so m.youtube.com / music.youtube.com and a
@@ -715,7 +873,8 @@ def parse_pasted_transcript(text: str) -> list[dict]:
     if not cues:
         raise CaptionParseError(
             "No timestamps found. Copy the whole transcript panel from YouTube "
-            "(each line should start with a time like 0:18)."
+            "(each line should start with a time like 0:18).",
+            "no_timestamps",
         )
 
     # Forgiving with input a human assembled by hand: a paste that got
@@ -729,7 +888,7 @@ def parse_pasted_transcript(text: str) -> list[dict]:
             cleaned.append(cue)
 
     if not cleaned:
-        raise CaptionParseError("The pasted transcript had timestamps but no text.")
+        raise CaptionParseError("The pasted transcript had timestamps but no text.", "no_cues")
 
     for index, cue in enumerate(cleaned):
         following = cleaned[index + 1]["start"] if index + 1 < len(cleaned) else None

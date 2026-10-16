@@ -75,9 +75,9 @@ export function useMineAction({ mining, kind, onMine, t, successLabel, owner = n
 
   const outcomeText =
     outcome === null ? null
-    : outcome === 'error' ? (t.mineFailed ?? "Couldn't add this card.")
-    : outcome > 0 ? (successLabel ?? (t.inDeck ?? 'In deck'))
-    : (t.alreadyInDeck ?? 'Already there')
+    : outcome === 'error' ? t.mineFailed
+    : outcome > 0 ? (successLabel ?? t.inDeck)
+    : t.alreadyInDeck
   const outcomeClassName =
     `analysis-mine-status${outcome > 0 ? ' analysis-mine-status--added' : ''}`
 

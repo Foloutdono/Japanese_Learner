@@ -28,6 +28,7 @@ from fastapi.staticfiles import StaticFiles                      # noqa: E402
 from starlette.concurrency import run_in_threadpool               # noqa: E402
 from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
+from core.concurrency import PerCallerConcurrency                # noqa: E402
 from study.exam_tts import audio_dir, is_stale                    # noqa: E402
 from study.exam_audio_repair import restore_clip                  # noqa: E402
 
@@ -41,10 +42,12 @@ from routes.agenda          import router as agenda_router
 from routes.decks           import router as decks_router
 from routes.translations    import router as translations_router
 from routes.grammar         import router as grammar_router
+from routes.glyph           import router as glyph_router
 from routes.phrase           import router as phrase_router
 from routes.reading          import router as reading_router
 from routes.dictation        import router as dictation_router
 from routes.composition      import router as composition_router
+from routes.conversation     import router as conversation_router
 from routes.ask              import router as ask_router
 from routes.practice         import router as practice_router
 from routes.profile          import router as profile_router
@@ -58,11 +61,13 @@ from routes.video           import router as video_router
 from routes.ocr             import router as ocr_router
 from routes.onboarding      import router as onboarding_router
 from routes.journey         import router as journey_router
+from routes.review_plan     import router as review_plan_router
 from routes.account         import router as account_router
 from routes.credits         import router as credits_router
 from routes.events          import router as events_router
 from routes.tts             import router as tts_router
 from routes.station         import router as station_router
+from routes.feedback        import router as feedback_router
 from routes.events          import router as events_router
 from core.credits import OutOfCredits, PassRequired, LimitReached
 # The shared daily counter's table is made here, at the app's start,
@@ -159,6 +164,12 @@ CORS_ORIGINS = ["https://japanese-learner-seven.vercel.app", *NATIVE_ORIGINS] + 
     o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()
 ]
 
+# A few requests at a time per learner (core/concurrency.py), so one
+# learner flicking a selector cannot hold every worker thread and
+# database connection. Added before CORS, which then wraps it: a 429
+# still carries the CORS headers the native shell needs to read it.
+app.add_middleware(PerCallerConcurrency)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
@@ -183,10 +194,12 @@ app.include_router(agenda_router)
 app.include_router(decks_router)
 app.include_router(translations_router)
 app.include_router(grammar_router)
+app.include_router(glyph_router)
 app.include_router(phrase_router)
 app.include_router(reading_router)
 app.include_router(dictation_router)
 app.include_router(composition_router)
+app.include_router(conversation_router)
 app.include_router(ask_router)
 app.include_router(practice_router)
 app.include_router(profile_router)
@@ -203,6 +216,7 @@ app.include_router(credits_router)
 app.include_router(events_router)
 app.include_router(tts_router)
 app.include_router(station_router)
+app.include_router(feedback_router)
 
 
 # ── 402 — the fare gate's three refusals (plan 069) ──
@@ -227,6 +241,7 @@ async def _limit_reached(request, exc: LimitReached):
         "detail": "limit_reached", "what": exc.what, "limit": exc.limit,
     })
 app.include_router(journey_router)
+app.include_router(review_plan_router)
 app.include_router(account_router)
 app.include_router(events_router)
 

@@ -145,6 +145,17 @@ export function HourglassIcon({ size = 18, className }) {
   )
 }
 
+// A note: the song (plan 215), the analyser's door to a song's decks.
+export function SongIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <path d="M9 18V5l11-2v13" />
+      <circle cx="6" cy="18" r="3" />
+      <circle cx="17" cy="16" r="3" />
+    </svg>
+  )
+}
+
 export function CardIcon({ size = 18, className }) {
   return (
     <svg {...base} width={size} height={size} className={className}>
@@ -556,8 +567,9 @@ export function RetryIcon({ size = 16, className }) {
 
 export function ArrowIcon({ direction = 'down', size = 16, className }) {
   const paths = {
-    down: ['M12 5v14', 'm19 12-7 7-7-7'],
-    up:   ['m5 12 7-7 7 7', 'M12 19V5'],
+    down:  ['M12 5v14', 'm19 12-7 7-7-7'],
+    up:    ['m5 12 7-7 7 7', 'M12 19V5'],
+    right: ['M5 12h14', 'm12 5 7 7-7 7'],
   }[direction]
   return (
     <svg {...base} width={size} height={size} className={className} strokeWidth={2.4}>
@@ -617,6 +629,18 @@ export function InfoIcon({ size = 16, className }) {
       <circle cx="12" cy="12" r="8.5" />
       <line x1="12" y1="11" x2="12" y2="16.5" />
       <line x1="12" y1="7.6" x2="12" y2="8" />
+    </svg>
+  )
+}
+
+// A message: a speech balloon with two lines in it, Settings' 「Nous
+// écrire」 row (plan 222).
+export function MessageIcon({ size = 16, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <path d="M4 5h16v11H9.5L4 20z" />
+      <line x1="8" y1="9" x2="16" y2="9" />
+      <line x1="8" y1="12.5" x2="13" y2="12.5" />
     </svg>
   )
 }

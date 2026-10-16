@@ -274,7 +274,8 @@ describe('the catalogue tile\'s edge (plan 147)', () => {
 })
 
 describe('the analyzer at phone width', () => {
-  it('the line: a 2px rule per state, dashed for a word without a card, none for a particle; the furigana setting governs the readings', async () => {
+  // 3px since plan 219: the stage's line is at display size.
+  it('the line: a 3px rule per state, dashed for a word without a card, none for a particle; the furigana setting governs the readings', async () => {
     const screen = await render(
       <main className="dictionary analyzer">
         <section className="anl-m__subs" data-furigana="all">
@@ -294,9 +295,9 @@ describe('the analyzer at phone width', () => {
       const cs = getComputedStyle(tok)
       return [cs.borderBottomWidth, cs.borderBottomStyle, cs.borderBottomColor]
     }
-    expect(rule(mastered)).toEqual(['2px', 'solid', resolve('color', 'var(--state-mastered)')])
-    expect(rule(learning)).toEqual(['2px', 'solid', resolve('color', 'var(--state-learning)')])
-    expect(rule(unknown)).toEqual(['2px', 'solid', resolve('color', 'var(--state-new)')])
+    expect(rule(mastered)).toEqual(['3px', 'solid', resolve('color', 'var(--state-mastered)')])
+    expect(rule(learning)).toEqual(['3px', 'solid', resolve('color', 'var(--state-learning)')])
+    expect(rule(unknown)).toEqual(['3px', 'solid', resolve('color', 'var(--state-new)')])
     expect(rule(offdeck)[1]).toBe('dashed')
     expect(rule(particle)[2]).toBe('rgba(0, 0, 0, 0)')
     // The empty reading slot keeps the particle on the line's baseline.

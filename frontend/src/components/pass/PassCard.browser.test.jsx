@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { LangProvider } from '../../LangContext'
+import fr from '../../locales/fr/index.js'
 import { PassCard, CardFace } from './PassCard'
 import { PassBack } from './PassBack'
 import '../../index.css'
@@ -142,7 +143,7 @@ describe('the card (plan 173)', () => {
   it('is cut from its plan’s material: the white plastic’s band, the charcoal, the platinum’s etched 辻', async () => {
     await mount({ tier: 'free' })
     expect($('.pcs--free .pcs__band')).not.toBeNull()
-    expect($('.pcf__class').textContent).toBe('Free')
+    expect($('.pcf__class').textContent).toBe(fr.cardFree)
     await mount({ tier: 'pro' })
     expect($('.pcs--pro')).not.toBeNull()
     expect($('.pcs__band')).toBeNull()

@@ -133,7 +133,8 @@ class ThePagesSpellingTests(unittest.TestCase):
         # The glosses meet: one word, two spellings.
         for sentence, word, expected in (
             ("眼が痛い。", "眼", "vocab_N5_目_め"),
-            ("競り合ったお陰で、彼が勝った。", "お陰", "vocab_N1_お蔭_おかげ"),
+            # The N1 お蔭 folded into the N4 おかげ, its word (plan 227).
+            ("競り合ったお陰で、彼が勝った。", "お陰", "vocab_N4__おかげ"),
         ):
             with self.subTest(word=word):
                 self.assertEqual(matches(sentence)[word]["raw_id"], expected)
@@ -396,9 +397,12 @@ class TheLowerTwinTests(unittest.TestCase):
         self.assertTrue(matches("為る")["為る"]["raw_id"].startswith("vocab_N3_為る_"))
 
     def test_a_homograph_is_not_a_twin(self) -> None:
-        """たとえ, "even if", tokenizes as 仮令, and the N3 kana card たとえ
-        is "simile": no gloss in common, so it never stands beside it."""
-        self.assertEqual(matches("たとえ雨が降っても、試合は行う。")["たとえ"]["raw_id"], "vocab_N1_仮令_たとえ")
+        """たとえ, "even if", tokenizes as 仮令. The N3 kana card たとえ
+        carried 例え's gloss, "simile", until plan 227 gave it the list's
+        word and folded the N1 仮令 into it; 例え, "simile", stays a card
+        of its own and never answers for the adverb."""
+        self.assertEqual(matches("たとえ雨が降っても、試合は行う。")["たとえ"]["raw_id"], "vocab_N3__たとえ")
+        self.assertEqual(matches("上手な例えだ。")["例え"]["raw_id"], "vocab_N1_例え_たとえ")
 
     def test_a_corrected_gloss_makes_a_true_twin(self) -> None:
         """The N3 kana cards なお and そば carried another word's gloss
@@ -456,6 +460,75 @@ class EdgeInputTests(unittest.TestCase):
     def test_a_word_in_kana_is_not_a_row_read_otherwise(self) -> None:
         # まじか ("seriously?") comes back from UniDic as 間近, read まぢか.
         self.assertNotIn("まじか", matches("まじか"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class KanaStemTests(unittest.TestCase):
+    """Plan 213. A verb in hiragana says nothing of which verb it is
+    where two deck verbs are spelled alike in its form: 書取's 毎日、六時
+    におきます ("I get up at six") was glossed 置く, "poser", since UniDic
+    reads おき as 置く. The deck's own N5 kana sentences had 明日ははれる as
+    腫れる "to swell" and 雨がふりました as 振る "to wave". No card, and
+    no pool card in its place: the gap is visible, the error is learned."""
+
+    def test_a_stem_two_deck_verbs_share_has_no_card(self) -> None:
+        for sentence, word in (
+            ("毎日、六時におきます。", "おき"),          # 起きる or 置く
+            ("あさおきて、ごはんを食べて、学校へ行きます。", "おき"),
+            ("きのうは雨がふりませんでした。", "ふり"),   # 降る or 振る
+            ("明日ははれるかな。", "はれる"),            # 晴れる or 腫れる
+            ("子どもに早くねるように言いました。", "ねる"),  # was the N1 練る
+            ("つぎの駅で電車をおります。", "おり"),        # was 居る (おる)
+            ("春になると、さくらがさきます。", "さき"),    # was 裂く
+            ("すみませんけど、まどをしめてください。", "しめ"),  # 閉める or 締める
+            ("この薬はちっともきかない。", "きか"),        # 効く or 聞く
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(word, matches(sentence))
+
+    def test_a_form_only_one_deck_verb_spells_keeps_its_card(self) -> None:
+        for sentence, word, raw_id in (
+            # おきない: a godan verb's stem before ない is おか, so 起きる.
+            ("七時におきない。", "おき", "vocab_N5_起きる_おきる"),
+            # The kanji tells them apart.
+            ("毎朝六時に起きます。", "起き", "vocab_N5_起きる_おきる"),
+            ("机の上に本を置きます。", "置き", "vocab_N5_置く_おく"),
+            # A sound-changed stem is a godan verb's alone: すいて is すく,
+            # never 吸う (すいます), はいた 履く, never 這う (はいます).
+            ("朝から何も食べていなくて、おなかがすいてたまらない。", "すい", "vocab_N4__すく"),
+            ("くつをはいたまま、家に入らないでください。", "はい", "vocab_N3_履く_はく"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(matches(sentence)[word]["raw_id"], raw_id)
+
+    def test_a_rarer_rival_leaves_the_card(self) -> None:
+        for sentence, word, raw_id in (
+            ("あした、とうきょうへかえります。", "かえり", "vocab_N5_帰る_かえる"),  # not the N2 反る
+            ("ねるまえに、本を読みます。", "ねる", "vocab_N5_寝る_ねる"),            # not the N1 練る
+            ("駅まであるいて、電車にのります。", "のり", "vocab_N5_乗る_のる"),      # not the N2 載る
+            ("まどをあけましょうか。", "あけ", "vocab_N5_開ける_あける"),            # not the N3 明ける
+            ("めがねをかけたあの男性は、まじめな公務員に見える。", "かけ", "vocab_N4_掛ける_かける"),  # not the N3 欠ける
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(matches(sentence)[word]["raw_id"], raw_id)
+
+    def test_a_kana_card_the_page_spells_keeps_it(self) -> None:
+        for sentence, word, raw_id in (
+            ("子どもは大きくなりました。", "なり", "vocab_N5__なる"),        # not 鳴る
+            ("しゅうまつは何をするつもりですか。", "する", "vocab_N5__する"),  # not 刷る
+            ("駅まで五分ぐらいかかります。", "かかり", "vocab_N5__かかる"),    # not 罹る
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(matches(sentence)[word]["raw_id"], raw_id)
+
+    def test_the_refusal_never_trades_one_card_for_another(self) -> None:
+        for sentence in _corpus()[::7]:
+            morphemes = morphology.tokenize(sentence)
+            for i, m in enumerate(morphemes):
+                before = card_lookup._resolve_morpheme(morphemes, i)
+                after = card_lookup.resolve_morpheme(morphemes, i)
+                with self.subTest(sentence=sentence, word=m.surface):
+                    self.assertIn(after, (before, None))
 
 
 def _corpus() -> list[str]:

@@ -52,13 +52,22 @@ describe('IntakeVideo — the link ingest is gated on the server', () => {
       .toBeInTheDocument()
   })
 
-  it('stays hidden for a link that is not a YouTube video', async () => {
+  it('waits, disabled, for a link that names a YouTube video', async () => {
     // Capability is necessary, not sufficient: with nothing to fetch
-    // the button would fail at the API rather than at the door.
+    // the button would fail at the API rather than at the door. It
+    // still leads, so the column does not change under a paste.
     const { screen } = await setup({ linkFetch: true, url: 'https://example.com/nope' })
     await expect
       .element(screen.getByRole('button', { name: en.analyzeThisLink }))
-      .not.toBeInTheDocument()
+      .toBeDisabled()
+  })
+
+  it('leads with the fetch before any link is pasted', async () => {
+    const { screen } = await setup({ linkFetch: true, url: '' })
+    const filled = screen.container.querySelectorAll('.btn-primary')
+    expect(filled).toHaveLength(1)
+    expect(filled[0].textContent).toContain(en.analyzeThisLink)
+    expect(filled[0].disabled).toBe(true)
   })
 
   it('hands the link up rather than reading captions itself', async () => {

@@ -29,6 +29,15 @@ class SentenceBankTests(unittest.TestCase):
             with self.subTest(level=level):
                 self.assertGreaterEqual(len(rows), 30)
 
+    def test_every_point_opens_its_card(self) -> None:
+        # The practice card's tag opens the point's lesson by its card id
+        # (plan 213): a pattern the catalogue does not name opens nothing.
+        from content.grammar_points_data import id_for
+        for level, rows in BY_LEVEL.items():
+            for row in rows:
+                with self.subTest(level=level, jp=row["jp"]):
+                    self.assertIsNotNone(id_for(row["grammar"]))
+
     def test_no_duplicate_sentences(self) -> None:
         seen = {}
         for level, rows in BY_LEVEL.items():
@@ -90,8 +99,15 @@ class LevelVocabularyTests(unittest.TestCase):
 
     # Distinct deck words of each level the bank uses, and distinct
     # kanji the kanji deck files at it -- before plan 192: N4 17 / 81,
-    # N3 24 / 63, N2 11 / 16, N1 25 / 34. Ratchets: raise, never lower.
-    LEVEL_WORDS_FLOOR = {"N4": 316, "N3": 397, "N2": 406, "N1": 491}
+    # N3 24 / 63, N2 11 / 16, N1 25 / 34. Ratchets: raise, never lower
+    # for a rewrite of the bank; N2's 406 went to 405 when the lookups
+    # stopped guessing a kana よる (plan 213): 因る was counted only in
+    # によると and により, the points' own letters, and 寄る reads alike.
+    # N3's 397 went to 395 and N1's 491 to 489 with plan 227's glosses
+    # and cards: a kana うち and ごみ are the N4 cards now that 内 and 塵
+    # share their gloss, 仮令 folded into the N3 たとえ and 率直 into the
+    # N2 card.
+    LEVEL_WORDS_FLOOR = {"N4": 316, "N3": 395, "N2": 405, "N1": 489}
     LEVEL_KANJI_FLOOR = {"N4": 106, "N3": 236, "N2": 145, "N1": 235}
 
     def test_every_graded_point_has_two_sentences(self) -> None:

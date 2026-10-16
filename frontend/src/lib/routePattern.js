@@ -100,6 +100,10 @@ export const ROUTES = [
   '/practice/dictation/:level',
   '/practice/composition',
   '/practice/composition/:level',
+  // 会話 (plan 217): its own station, and a run named by its scene
+  // and the way it is ridden.
+  '/practice/conversation',
+  '/practice/conversation/:scenario/:mode',
 
   '/dictionary',
   '/dictionary/analyzer',

@@ -2,6 +2,7 @@
   {
     "pattern": "〜んばかりに",
     "structure": "verb ない-stem + んばかりに",
+    "structure_fr": "radical en ない + んばかりに",
     "meaning": {
       "en": "as if about to, practically doing",
       "fr": "comme sur le point de, pour ainsi dire"
@@ -402,6 +403,7 @@
   {
     "pattern": "〜べからず",
     "structure": "verb dictionary form + べからず",
+    "structure_fr": "verbe forme du dictionnaire + べからず",
     "meaning": {
       "en": "must not (formal, literary/signage)",
       "fr": "interdit de (formel, pancartes)"
@@ -732,6 +734,7 @@
   {
     "pattern": "〜ゆえに",
     "structure": "plain form/noun + ゆえに",
+    "structure_fr": "forme neutre/nom + ゆえに",
     "meaning": {
       "en": "because of, on account of (formal)",
       "fr": "en raison de, du fait de (formel)"
@@ -1094,6 +1097,7 @@
   {
     "pattern": "〜なくして(は)",
     "structure": "noun + なくして(は)",
+    "structure_fr": "nom + なくして(は)",
     "meaning": {
       "en": "without (formal)",
       "fr": "sans (formel)"
@@ -1377,6 +1381,7 @@
     "reading": "〜きわまりない",
     "structure": "な-adjective stem + 極まりない",
     "structure_reading": "な-adjective stem + きわまりない",
+    "structure_fr": "radical d'adjectif en な + 極まりない",
     "meaning": {
       "en": "extremely, in the extreme",
       "fr": "extrêmement, au plus haut point"
@@ -1680,6 +1685,7 @@
   {
     "pattern": "〜きらいがある",
     "structure": "verb dictionary form/noun + の + きらいがある",
+    "structure_fr": "verbe forme du dictionnaire/nom + の + きらいがある",
     "meaning": {
       "en": "tend to (a negative tendency)",
       "fr": "avoir tendance à (fâcheusement)"
@@ -2013,6 +2019,7 @@
   {
     "pattern": "〜にたえない",
     "structure": "noun + にたえない",
+    "structure_fr": "nom + にたえない",
     "meaning": {
       "en": "can't bear to, unable to endure",
       "fr": "insupportable à, ne pas pouvoir supporter de"
@@ -2337,6 +2344,7 @@
   {
     "pattern": "〜てやまない",
     "structure": "verb て-form + やまない",
+    "structure_fr": "verbe forme en て + やまない",
     "meaning": {
       "en": "never stop doing, deeply and continuously",
       "fr": "ne jamais cesser de, du fond du cœur"
@@ -2670,6 +2678,7 @@
   {
     "pattern": "〜まみれ",
     "structure": "noun + まみれ",
+    "structure_fr": "nom + まみれ",
     "meaning": {
       "en": "covered in, smeared with",
       "fr": "couvert de, maculé de"
@@ -2988,6 +2997,7 @@
   {
     "pattern": "〜だに",
     "structure": "verb dictionary form/noun + だに",
+    "structure_fr": "verbe forme du dictionnaire/nom + だに",
     "meaning": {
       "en": "even (emphatic, formal)",
       "fr": "même (emphatique, formel)"
@@ -3321,6 +3331,7 @@
   {
     "pattern": "〜あっての",
     "structure": "noun + あっての + noun",
+    "structure_fr": "nom + あっての + nom",
     "meaning": {
       "en": "exists only thanks to, made possible by",
       "fr": "qui n'existe que grâce à"
@@ -3643,6 +3654,7 @@
   {
     "pattern": "〜なしに",
     "structure": "noun + なしに",
+    "structure_fr": "nom + なしに",
     "meaning": {
       "en": "without (formal)",
       "fr": "sans (formel)"
@@ -3989,6 +4001,7 @@
   {
     "pattern": "〜いかんによらず",
     "structure": "noun + いかんによらず",
+    "structure_fr": "nom + いかんによらず",
     "meaning": {
       "en": "regardless of",
       "fr": "quel que soit, indépendamment de"
@@ -4314,6 +4327,7 @@
   {
     "pattern": "〜をおいて",
     "structure": "noun + をおいて",
+    "structure_fr": "nom + をおいて",
     "meaning": {
       "en": "except for, other than",
       "fr": "à part, en dehors de"
@@ -4642,6 +4656,7 @@
   {
     "pattern": "〜たりとも",
     "structure": "counter/noun + たりとも",
+    "structure_fr": "classificateur/nom + たりとも",
     "meaning": {
       "en": "not even (a single ...)",
       "fr": "pas même un seul"
@@ -4964,6 +4979,7 @@
   {
     "pattern": "〜ないまでも",
     "structure": "verb ない-form + までも",
+    "structure_fr": "verbe forme en ない + までも",
     "meaning": {
       "en": "even if not quite, if not necessarily",
       "fr": "même si ce n'est pas, à défaut de"
@@ -5279,6 +5295,7 @@
   {
     "pattern": "〜ずじまい",
     "structure": "verb ない-stem + ずじまい",
+    "structure_fr": "radical en ない + ずじまい",
     "meaning": {
       "en": "ended up never doing (despite intending to)",
       "fr": "finir par ne jamais (malgré l'intention)"
@@ -5600,6 +5617,7 @@
     "reading": "〜がはやいか",
     "structure": "verb dictionary form + が早いか",
     "structure_reading": "verb dictionary form + がはやいか",
+    "structure_fr": "verbe forme du dictionnaire + が早いか",
     "meaning": {
       "en": "no sooner than, the instant",
       "fr": "à peine... que, aussitôt"
@@ -5935,6 +5953,7 @@
     "reading": "〜やいなや",
     "structure": "verb dictionary form + や否や",
     "structure_reading": "verb dictionary form + やいなや",
+    "structure_fr": "verbe forme du dictionnaire + や否や",
     "meaning": {
       "en": "as soon as, hardly ... when",
       "fr": "dès que, à peine... que"
@@ -6254,6 +6273,7 @@
   {
     "pattern": "〜そばから",
     "structure": "verb dictionary/た form + そばから",
+    "structure_fr": "verbe forme du dictionnaire/en た + そばから",
     "meaning": {
       "en": "no sooner done than it comes undone again",
       "fr": "à peine fait que c'est déjà défait"
@@ -6514,6 +6534,7 @@
   {
     "pattern": "〜なり",
     "structure": "verb dictionary form + なり",
+    "structure_fr": "verbe forme du dictionnaire + なり",
     "meaning": {
       "en": "immediately upon doing (literary)",
       "fr": "aussitôt que (littéraire)"
@@ -6829,6 +6850,7 @@
   {
     "pattern": "〜がてら",
     "structure": "verb stem / noun + がてら",
+    "structure_fr": "radical verbal / nom + がてら",
     "meaning": {
       "en": "while also, taking the chance to",
       "fr": "en profitant de, tout en"
@@ -7149,6 +7171,7 @@
   {
     "pattern": "〜かたわら",
     "structure": "verb dictionary form / noun + の + かたわら",
+    "structure_fr": "verbe forme du dictionnaire / nom + の + かたわら",
     "meaning": {
       "en": "alongside one's main occupation",
       "fr": "parallèlement à (son activité principale)"
@@ -7464,6 +7487,7 @@
   {
     "pattern": "〜ごとき／〜ごとく",
     "structure": "noun + の + ごとき・ごとく",
+    "structure_fr": "nom + の + ごとき・ごとく",
     "meaning": {
       "en": "like, as if — an archaic ような・ように",
       "fr": "tel, comme (un ような・ように archaïque)"
@@ -7821,6 +7845,7 @@
   {
     "pattern": "〜ずくめ",
     "structure": "noun + ずくめ",
+    "structure_fr": "nom + ずくめ",
     "meaning": {
       "en": "entirely, nothing but",
       "fr": "rien que, tout en"
@@ -8149,6 +8174,7 @@
   {
     "pattern": "〜めく",
     "structure": "noun + めく",
+    "structure_fr": "nom + めく",
     "meaning": {
       "en": "take on the air of, turn ...-like",
       "fr": "prendre un air de"
@@ -8473,6 +8499,7 @@
   {
     "pattern": "〜まじき",
     "structure": "verb dictionary form + まじき + noun",
+    "structure_fr": "verbe forme du dictionnaire + まじき + nom",
     "meaning": {
       "en": "unbecoming, not befitting a role",
       "fr": "indigne de, qui ne sied pas à"
@@ -8754,6 +8781,7 @@
   {
     "pattern": "〜べく",
     "structure": "verb dictionary form + べく",
+    "structure_fr": "verbe forme du dictionnaire + べく",
     "meaning": {
       "en": "in order to, so as to (formal)",
       "fr": "afin de (formel)"
@@ -9125,6 +9153,7 @@
   {
     "pattern": "〜てしかるべきだ",
     "structure": "verb て-form + しかるべきだ",
+    "structure_fr": "verbe forme en て + しかるべきだ",
     "meaning": {
       "en": "ought properly to be, only right that",
       "fr": "il est légitime que, il serait normal que"
@@ -9446,6 +9475,7 @@
   {
     "pattern": "〜ならでは",
     "structure": "noun + ならでは",
+    "structure_fr": "nom + ならでは",
     "meaning": {
       "en": "distinctive to, possible only for",
       "fr": "propre à, qu'on ne trouve que"
@@ -9778,6 +9808,7 @@
     "reading": "〜ならいざしらず",
     "structure": "noun / plain form + ならいざ知らず",
     "structure_reading": "noun / plain form + ならいざしらず",
+    "structure_fr": "nom / forme neutre + ならいざ知らず",
     "meaning": {
       "en": "I couldn't say about that, but ...",
       "fr": "passe encore pour..., mais"
@@ -10098,6 +10129,7 @@
   {
     "pattern": "〜とはいえ",
     "structure": "plain form / noun + とはいえ",
+    "structure_fr": "forme neutre / nom + とはいえ",
     "meaning": {
       "en": "even so, that said",
       "fr": "cela dit, bien que"
@@ -10384,6 +10416,7 @@
   {
     "pattern": "〜といえども",
     "structure": "plain form / noun + といえども",
+    "structure_fr": "forme neutre / nom + といえども",
     "meaning": {
       "en": "even though, granted that",
       "fr": "même si, quand bien même"
@@ -10747,6 +10780,7 @@
   {
     "pattern": "〜とばかりに",
     "structure": "quoted phrase / plain form + とばかりに",
+    "structure_fr": "phrase citée / forme neutre + とばかりに",
     "meaning": {
       "en": "as if to say, as though declaring",
       "fr": "comme pour dire"
@@ -11071,6 +11105,7 @@
   {
     "pattern": "〜をものともせず",
     "structure": "noun + をものともせず",
+    "structure_fr": "nom + をものともせず",
     "meaning": {
       "en": "undaunted by, in defiance of",
       "fr": "sans se laisser arrêter par, bravant"
@@ -11402,6 +11437,7 @@
     "reading": "〜をよぎなくされる",
     "structure": "noun + を余儀なくされる",
     "structure_reading": "noun + をよぎなくされる",
+    "structure_fr": "nom + を余儀なくされる",
     "meaning": {
       "en": "be forced into, left with no other choice",
       "fr": "être contraint de"
@@ -11699,6 +11735,7 @@
     "reading": "〜をかわきりに",
     "structure": "noun + を皮切りに",
     "structure_reading": "noun + をかわきりに",
+    "structure_fr": "nom + を皮切りに",
     "meaning": {
       "en": "starting from, with ... as the opening",
       "fr": "à partir de, en commençant par"
@@ -11996,6 +12033,7 @@
     "reading": "〜にいたる",
     "structure": "verb dictionary form / noun + に至る",
     "structure_reading": "verb dictionary form / noun + にいたる",
+    "structure_fr": "verbe forme du dictionnaire / nom + に至る",
     "meaning": {
       "en": "reach the point of, culminate in",
       "fr": "aboutir à, en arriver à"
@@ -12357,6 +12395,7 @@
     "reading": "〜のきわみ",
     "structure": "noun + の極み",
     "structure_reading": "noun + のきわみ",
+    "structure_fr": "nom + の極み",
     "meaning": {
       "en": "the height of, the utmost",
       "fr": "le comble de"
@@ -12652,6 +12691,7 @@
   {
     "pattern": "〜はおろか",
     "structure": "noun + はおろか",
+    "structure_fr": "nom + はおろか",
     "meaning": {
       "en": "let alone, far from even",
       "fr": "sans parler de, encore moins"
@@ -13001,6 +13041,7 @@
   {
     "pattern": "〜もさることながら",
     "structure": "noun + もさることながら",
+    "structure_fr": "nom + もさることながら",
     "meaning": {
       "en": "that goes without saying, but even more so",
       "fr": "certes... mais surtout"
@@ -13325,6 +13366,7 @@
   {
     "pattern": "〜であれ",
     "structure": "noun / question word + であれ",
+    "structure_fr": "nom / mot interrogatif + であれ",
     "meaning": {
       "en": "no matter which it is",
       "fr": "quel que soit"
@@ -13654,6 +13696,7 @@
   {
     "pattern": "〜といったらない",
     "structure": "noun / い-adj + といったらない",
+    "structure_fr": "nom / adj. en い + といったらない",
     "meaning": {
       "en": "beyond anything one could say",
       "fr": "indescriptible, au-delà des mots"
@@ -13965,6 +14008,7 @@
   {
     "pattern": "〜ともなると",
     "structure": "noun + ともなると",
+    "structure_fr": "nom + ともなると",
     "meaning": {
       "en": "once it reaches that stage, naturally",
       "fr": "une fois qu'on en est là, forcément"
@@ -14289,6 +14333,7 @@
   {
     "pattern": "〜ともなく",
     "structure": "verb dictionary form + ともなく",
+    "structure_fr": "verbe forme du dictionnaire + ともなく",
     "meaning": {
       "en": "without meaning to, absently",
       "fr": "sans vraiment, distraitement"
@@ -14600,6 +14645,7 @@
   {
     "pattern": "〜つ〜つ",
     "structure": "verb stem + つ + opposite verb stem + つ",
+    "structure_fr": "radical verbal + つ + radical verbal contraire + つ",
     "meaning": {
       "en": "alternating back and forth",
       "fr": "tantôt... tantôt..."
@@ -15003,6 +15049,7 @@
   {
     "pattern": "〜んがため",
     "structure": "verb ない-stem + んがため",
+    "structure_fr": "radical en ない + んがため",
     "meaning": {
       "en": "with the express aim of",
       "fr": "dans le seul but de"
@@ -15358,6 +15405,7 @@
   {
     "pattern": "〜べくもない",
     "structure": "verb dictionary form + べくもない",
+    "structure_fr": "verbe forme du dictionnaire + べくもない",
     "meaning": {
       "en": "there is no possibility of it whatever",
       "fr": "aucune possibilité de"
@@ -15683,6 +15731,7 @@
   {
     "pattern": "〜すべがない",
     "structure": "verb dictionary form + すべがない",
+    "structure_fr": "verbe forme du dictionnaire + すべがない",
     "meaning": {
       "en": "no method remains open",
       "fr": "n'avoir aucun moyen de"
@@ -16008,6 +16057,7 @@
   {
     "pattern": "〜こととて",
     "structure": "plain form / noun + の + こととて",
+    "structure_fr": "forme neutre / nom + の + こととて",
     "meaning": {
       "en": "seeing that it is so, formally offered",
       "fr": "étant donné que (excuse formelle)"
@@ -16332,6 +16382,7 @@
   {
     "pattern": "〜とあって",
     "structure": "plain form / noun + とあって",
+    "structure_fr": "forme neutre / nom + とあって",
     "meaning": {
       "en": "the situation being what it is",
       "fr": "vu que, la situation étant"
@@ -16627,6 +16678,7 @@
   {
     "pattern": "〜とあれば",
     "structure": "plain form / noun + とあれば",
+    "structure_fr": "forme neutre / nom + とあれば",
     "meaning": {
       "en": "if that is truly the case, then",
       "fr": "s'il s'agit de, si vraiment"
@@ -16922,6 +16974,7 @@
   {
     "pattern": "〜たるもの",
     "structure": "noun + たるもの",
+    "structure_fr": "nom + たるもの",
     "meaning": {
       "en": "one who holds that position ought to",
       "fr": "quiconque occupe cette position doit"
@@ -17217,6 +17270,7 @@
   {
     "pattern": "〜にして",
     "structure": "noun + にして",
+    "structure_fr": "nom + にして",
     "meaning": {
       "en": "only at that stage; also: being that very thing",
       "fr": "seulement à ce stade ; en étant"
@@ -17537,6 +17591,7 @@
   {
     "pattern": "〜にあって",
     "structure": "noun + にあって",
+    "structure_fr": "nom + にあって",
     "meaning": {
       "en": "placed in that situation",
       "fr": "placé dans (une situation)"
@@ -17836,6 +17891,7 @@
   {
     "pattern": "〜をよそに",
     "structure": "noun + をよそに",
+    "structure_fr": "nom + をよそに",
     "meaning": {
       "en": "paying it no regard",
       "fr": "sans se soucier de"
@@ -18135,6 +18191,7 @@
   {
     "pattern": "〜かたがた",
     "structure": "noun + かたがた",
+    "structure_fr": "nom + かたがた",
     "meaning": {
       "en": "and taking the occasion to, formally",
       "fr": "et par la même occasion (formel)"
@@ -18450,6 +18507,7 @@
   {
     "pattern": "〜しまつだ",
     "structure": "plain form + しまつだ",
+    "structure_fr": "forme neutre + しまつだ",
     "meaning": {
       "en": "and it came to this sorry pass",
       "fr": "et voilà où on en est arrivé"
@@ -18753,6 +18811,7 @@
   {
     "pattern": "〜ずにはおかない",
     "structure": "verb ない-stem + ずにはおかない",
+    "structure_fr": "radical en ない + ずにはおかない",
     "meaning": {
       "en": "it cannot but bring that about",
       "fr": "ne pas pouvoir manquer de provoquer"
@@ -19068,6 +19127,7 @@
   {
     "pattern": "〜てはばからない",
     "structure": "verb て-form + はばからない",
+    "structure_fr": "verbe forme en て + はばからない",
     "meaning": {
       "en": "says or does it without a qualm",
       "fr": "sans la moindre gêne"
@@ -19348,6 +19408,7 @@
   {
     "pattern": "〜なりに",
     "structure": "noun + なりに",
+    "structure_fr": "nom + なりに",
     "meaning": {
       "en": "in the way proper to what it is",
       "fr": "à sa manière, dans la mesure de ses moyens"
@@ -19749,6 +19810,7 @@
   {
     "pattern": "〜ながらに",
     "structure": "noun / verb stem + ながらに",
+    "structure_fr": "nom / radical verbal + ながらに",
     "meaning": {
       "en": "staying just as it was",
       "fr": "tout en, tel quel"
@@ -20142,6 +20204,7 @@
   {
     "pattern": "〜にかたくない",
     "structure": "noun / verb dictionary form + にかたくない",
+    "structure_fr": "nom / verbe forme du dictionnaire + にかたくない",
     "meaning": {
       "en": "one can readily do so",
       "fr": "il n'est pas difficile de"
@@ -20462,6 +20525,7 @@
   {
     "pattern": "〜にとどまらず",
     "structure": "noun + にとどまらず",
+    "structure_fr": "nom + にとどまらず",
     "meaning": {
       "en": "and it does not stop there",
       "fr": "ne pas s'arrêter à, au-delà de"
@@ -20829,6 +20893,7 @@
   {
     "pattern": "〜にひきかえ",
     "structure": "noun / plain form + の + にひきかえ",
+    "structure_fr": "nom / forme neutre + の + にひきかえ",
     "meaning": {
       "en": "set against that, by contrast",
       "fr": "à l'inverse de, par contraste avec"
@@ -21183,6 +21248,7 @@
   {
     "pattern": "〜のなんのって",
     "structure": "plain form + のなんのって",
+    "structure_fr": "forme neutre + のなんのって",
     "meaning": {
       "en": "to an absurd degree",
       "fr": "à un point incroyable"
@@ -21533,6 +21599,7 @@
   {
     "pattern": "〜はさておき",
     "structure": "noun + はさておき",
+    "structure_fr": "nom + はさておき",
     "meaning": {
       "en": "setting that aside for now",
       "fr": "laissant de côté"
@@ -21878,6 +21945,7 @@
   {
     "pattern": "〜までのことだ",
     "structure": "verb dictionary form + までのことだ",
+    "structure_fr": "verbe forme du dictionnaire + までのことだ",
     "meaning": {
       "en": "then that is all there is to do",
       "fr": "il n'y a qu'à, on n'aura qu'à"
@@ -22271,6 +22339,7 @@
     "reading": "〜をきんじえない",
     "structure": "emotion noun + を禁じ得ない",
     "structure_reading": "emotion noun + をきんじえない",
+    "structure_fr": "nom d'émotion + を禁じ得ない",
     "meaning": {
       "en": "one cannot hold the feeling back",
       "fr": "ne pas pouvoir réprimer (un sentiment)"
@@ -22629,6 +22698,7 @@
   {
     "pattern": "〜ばこそ",
     "structure": "verb ば-form + こそ",
+    "structure_fr": "verbe forme en ば + こそ",
     "meaning": {
       "en": "it is only because of that",
       "fr": "c'est précisément parce que"
@@ -22982,6 +23052,7 @@
   {
     "pattern": "〜ようが〜まいが",
     "structure": "verb volitional form + が + verb dictionary form + まいが",
+    "structure_fr": "verbe forme volitive + が + verbe forme du dictionnaire + まいが",
     "meaning": {
       "en": "whether it happens or not",
       "fr": "que... ou non"
@@ -23335,6 +23406,7 @@
   {
     "pattern": "〜すら",
     "structure": "noun (+ particle) + すら",
+    "structure_fr": "nom (+ particule) + すら",
     "meaning": {
       "en": "even (an extreme example)",
       "fr": "même (exemple extrême)"
@@ -23684,6 +23756,7 @@
   {
     "pattern": "〜といい〜といい",
     "structure": "noun + といい + noun + といい",
+    "structure_fr": "nom + といい + nom + といい",
     "meaning": {
       "en": "both... and... (evaluation)",
       "fr": "que ce soit... ou..., aussi bien... que"
@@ -24013,6 +24086,7 @@
   {
     "pattern": "〜といわず〜といわず",
     "structure": "noun + といわず + noun + といわず",
+    "structure_fr": "nom + といわず + nom + といわず",
     "meaning": {
       "en": "not only... but everywhere, whether... or...",
       "fr": "que ce soit... ou..., partout sans distinction"
@@ -24336,6 +24410,7 @@
   {
     "pattern": "〜にしたところで",
     "structure": "noun / plain form + にしたところで",
+    "structure_fr": "nom / forme neutre + にしたところで",
     "meaning": {
       "en": "even (someone), even if (something)",
       "fr": "même (pour quelqu'un), même en admettant"
@@ -24699,6 +24774,7 @@
   {
     "pattern": "〜ないものでもない",
     "structure": "verb ない-form + ものでもない",
+    "structure_fr": "verbe forme en ない + ものでもない",
     "meaning": {
       "en": "it's not impossible, might (reluctantly)",
       "fr": "ce n'est pas exclu, il n'est pas impossible que"
@@ -25048,6 +25124,7 @@
   {
     "pattern": "〜ずにはすまない",
     "structure": "verb ない-stem + ずにはすまない／ないではすまない",
+    "structure_fr": "radical en ない + ずにはすまない／ないではすまない",
     "meaning": {
       "en": "can't get away without, will have to",
       "fr": "ne pas pouvoir se dispenser de, devoir absolument"
@@ -25453,6 +25530,7 @@
   {
     "pattern": "〜なり〜なり",
     "structure": "noun / verb dictionary form + なり + ... + なり",
+    "structure_fr": "nom / verbe forme du dictionnaire + なり + ... + なり",
     "meaning": {
       "en": "either... or... (for instance)",
       "fr": "soit... soit..., ou bien... ou bien"
@@ -25811,6 +25889,7 @@
   {
     "pattern": "〜にかかわる",
     "structure": "noun + にかかわる",
+    "structure_fr": "nom + にかかわる",
     "meaning": {
       "en": "concerning, affecting (something vital)",
       "fr": "qui touche à, qui engage (quelque chose de vital)"
@@ -26132,6 +26211,7 @@
     "reading": "〜にそくして",
     "structure": "noun + に即して／に即した",
     "structure_reading": "noun + にそくして／にそくした",
+    "structure_fr": "nom + に即して／に即した",
     "meaning": {
       "en": "in line with, in accordance with (facts, rules)",
       "fr": "conformément à, en fonction de (faits, règles)"
@@ -26481,6 +26561,7 @@
     "reading": "〜にたる",
     "structure": "verb dictionary form / noun + に足る",
     "structure_reading": "verb dictionary form / noun + にたる",
+    "structure_fr": "verbe forme du dictionnaire / nom + に足る",
     "meaning": {
       "en": "worthy of, enough to",
       "fr": "digne de, qui mérite"
@@ -26836,6 +26917,7 @@
   {
     "pattern": "〜にもまして",
     "structure": "noun + にもまして",
+    "structure_fr": "nom + にもまして",
     "meaning": {
       "en": "even more than, above all",
       "fr": "plus encore que, davantage que"
@@ -27149,6 +27231,7 @@
     "reading": "〜のいたり",
     "structure": "noun + の至り",
     "structure_reading": "noun + のいたり",
+    "structure_fr": "nom + の至り",
     "meaning": {
       "en": "the height of (a feeling), utterly (formal)",
       "fr": "le comble de, extrêmement (formel)"
@@ -27473,6 +27556,7 @@
   {
     "pattern": "〜ばそれまでだ",
     "structure": "verb ば-form + それまでだ",
+    "structure_fr": "verbe forme en ば + それまでだ",
     "meaning": {
       "en": "if..., then it's all over",
       "fr": "si..., c'en est fini"
@@ -27824,6 +27908,7 @@
     "reading": "〜ひとつ〜ない",
     "structure": "noun + 一つ + verb ない-form",
     "structure_reading": "noun + ひとつ + verb ない-form",
+    "structure_fr": "nom + 一つ + verbe forme en ない",
     "meaning": {
       "en": "not even a single",
       "fr": "pas même un seul"
@@ -28134,6 +28219,7 @@
   {
     "pattern": "〜までもない",
     "structure": "verb dictionary form + までもない",
+    "structure_fr": "verbe forme du dictionnaire + までもない",
     "meaning": {
       "en": "no need to, goes without",
       "fr": "inutile de, pas besoin de"
@@ -28483,6 +28569,7 @@
   {
     "pattern": "〜ものを",
     "structure": "plain form + ものを",
+    "structure_fr": "forme neutre + ものを",
     "meaning": {
       "en": "if only..., (and yet)",
       "fr": "si seulement..., et pourtant"
@@ -28844,6 +28931,7 @@
     "reading": "〜をかぎりに",
     "structure": "noun (a time) + を限りに",
     "structure_reading": "noun (a time) + をかぎりに",
+    "structure_fr": "nom (un moment) + を限りに",
     "meaning": {
       "en": "as of, from... on (the last time)",
       "fr": "à compter de, (pour la dernière fois) à partir de"
@@ -29174,6 +29262,7 @@
     "reading": "〜をふまえて",
     "structure": "noun + を踏まえて",
     "structure_reading": "noun + をふまえて",
+    "structure_fr": "nom + を踏まえて",
     "meaning": {
       "en": "on the basis of, taking into account",
       "fr": "en s'appuyant sur, compte tenu de"
@@ -29498,6 +29587,7 @@
   {
     "pattern": "〜てもさしつかえない",
     "structure": "verb て-form + もさしつかえない",
+    "structure_fr": "verbe forme en て + もさしつかえない",
     "meaning": {
       "en": "it is all right to, no harm in",
       "fr": "il n'y a pas d'inconvénient à, on peut sans problème"
@@ -29807,6 +29897,7 @@
   {
     "pattern": "〜といったところだ",
     "structure": "noun (quantity) + といったところだ",
+    "structure_fr": "nom (quantité) + といったところだ",
     "meaning": {
       "en": "roughly, about (a modest estimate)",
       "fr": "environ, à peu près (estimation modeste)"
@@ -30119,6 +30210,7 @@
     "reading": "〜といってもかごんではない",
     "structure": "plain form + といっても過言ではない",
     "structure_reading": "plain form + といってもかごんではない",
+    "structure_fr": "forme neutre + といっても過言ではない",
     "meaning": {
       "en": "it is no exaggeration to say",
       "fr": "il n'est pas exagéré de dire que"
@@ -30414,6 +30506,7 @@
   {
     "pattern": "〜とは",
     "structure": "plain form + とは",
+    "structure_fr": "forme neutre + とは",
     "meaning": {
       "en": "to think that... (surprise)",
       "fr": "dire que..., (surprise) que..."
@@ -30763,6 +30856,7 @@
   {
     "pattern": "〜ままに",
     "structure": "verb dictionary form / passive + ままに",
+    "structure_fr": "verbe forme du dictionnaire / passif + ままに",
     "meaning": {
       "en": "as (told), at the mercy of",
       "fr": "comme (on le dit), au gré de"
@@ -31127,6 +31221,7 @@
     "reading": "〜とおもいきや",
     "structure": "plain form + と思いきや",
     "structure_reading": "plain form + とおもいきや",
+    "structure_fr": "forme neutre + と思いきや",
     "meaning": {
       "en": "I thought..., but contrary to expectation",
       "fr": "je croyais que..., mais en fait"
@@ -31454,6 +31549,7 @@
   {
     "pattern": "〜ようにも〜ない",
     "structure": "verb volitional + にも + verb potential ない-form",
+    "structure_fr": "verbe forme volitive + にも + verbe forme potentielle en ない",
     "meaning": {
       "en": "even if I try to, I can't",
       "fr": "même en voulant..., impossible de"
@@ -31810,6 +31906,7 @@
   {
     "pattern": "〜ようものなら",
     "structure": "verb volitional + ものなら",
+    "structure_fr": "verbe forme volitive + ものなら",
     "meaning": {
       "en": "if one were to (dare)..., (dire consequence)",
       "fr": "si jamais on osait..., (conséquence grave)"
@@ -32091,6 +32188,7 @@
   {
     "pattern": "〜でなくてなんだろう",
     "structure": "noun + でなくてなんだろう",
+    "structure_fr": "nom + でなくてなんだろう",
     "meaning": {
       "en": "if this is not..., what is?",
       "fr": "si ce n'est pas..., qu'est-ce que c'est ?"
@@ -32366,6 +32464,7 @@
   {
     "pattern": "〜ではあるまいし",
     "structure": "noun + ではあるまいし／じゃあるまいし",
+    "structure_fr": "nom + ではあるまいし／じゃあるまいし",
     "meaning": {
       "en": "it's not as if (someone/something were)",
       "fr": "ce n'est pas comme si (c'était)"
@@ -32723,6 +32822,7 @@
   {
     "pattern": "〜てからというもの",
     "structure": "verb て-form + からというもの",
+    "structure_fr": "verbe forme en て + からというもの",
     "meaning": {
       "en": "ever since (a change began)",
       "fr": "depuis que (un changement s'est installé)"
@@ -33078,6 +33178,7 @@
     "reading": "〜とあいまって",
     "structure": "noun + と相まって",
     "structure_reading": "noun + とあいまって",
+    "structure_fr": "nom + と相まって",
     "meaning": {
       "en": "combined with, coupled with",
       "fr": "conjugué à, allié à"
@@ -33411,6 +33512,7 @@
   {
     "pattern": "〜ときたら",
     "structure": "noun + ときたら",
+    "structure_fr": "nom + ときたら",
     "meaning": {
       "en": "when it comes to (someone), (criticism)",
       "fr": "quant à (quelqu'un), (reproche)"
@@ -33706,6 +33808,7 @@
   {
     "pattern": "〜ないものか",
     "structure": "verb ない-form + ものか／ものだろうか (〜ないものか)",
+    "structure_fr": "verbe forme en ない + ものか／ものだろうか (〜ないものか)",
     "meaning": {
       "en": "isn't there some way to...? (a wish)",
       "fr": "n'y aurait-il pas moyen de... ? (souhait)"
@@ -34009,6 +34112,7 @@
   {
     "pattern": "〜をいいことに",
     "structure": "noun / plain form + の + をいいことに",
+    "structure_fr": "nom / forme neutre + の + をいいことに",
     "meaning": {
       "en": "taking advantage of (something)",
       "fr": "profitant de (quelque chose), sous prétexte que"
@@ -34292,6 +34396,7 @@
     "reading": "〜たがさいご",
     "structure": "verb た-form + が最後／ら最後 (〜たが最後／〜たら最後)",
     "structure_reading": "verb た-form + がさいご／らさいご (〜たがさいご／〜たらさいご)",
+    "structure_fr": "verbe forme en た + が最後／ら最後 (〜たが最後／〜たら最後)",
     "meaning": {
       "en": "once (something happens), there's no going back",
       "fr": "une fois que..., c'est irrémédiable"
@@ -34613,6 +34718,7 @@
     "reading": "〜てまえ",
     "structure": "verb た-form / noun + の + 手前",
     "structure_reading": "verb た-form / noun + の + てまえ",
+    "structure_fr": "verbe forme en た / nom + の + 手前",
     "meaning": {
       "en": "given one's position (I can't back out)",
       "fr": "vu ma position, par égard pour"
@@ -34943,6 +35049,7 @@
     "reading": "〜にこしたことはない",
     "structure": "plain form / noun + に越したことはない",
     "structure_reading": "plain form / noun + にこしたことはない",
+    "structure_fr": "forme neutre / nom + に越したことはない",
     "meaning": {
       "en": "nothing beats, it's best to",
       "fr": "rien ne vaut, le mieux est de"
@@ -35260,6 +35367,7 @@
     "reading": "〜ないともかぎらない",
     "structure": "verb ない-form + とも限らない",
     "structure_reading": "verb ない-form + ともかぎらない",
+    "structure_fr": "verbe forme en ない + とも限らない",
     "meaning": {
       "en": "it's not impossible that, might just",
       "fr": "il n'est pas exclu que, on ne sait jamais"
@@ -35579,6 +35687,7 @@
   {
     "pattern": "〜にはあたらない",
     "structure": "verb dictionary form + にはあたらない",
+    "structure_fr": "verbe forme du dictionnaire + にはあたらない",
     "meaning": {
       "en": "there is no need to (be surprised etc.)",
       "fr": "il n'y a pas lieu de (s'étonner etc.)"
@@ -35876,6 +35985,7 @@
     "reading": "〜にはおよばない",
     "structure": "verb dictionary form / noun + には及ばない",
     "structure_reading": "verb dictionary form / noun + にはおよばない",
+    "structure_fr": "verbe forme du dictionnaire / nom + には及ばない",
     "meaning": {
       "en": "no need to; not as good as",
       "fr": "inutile de ; ne pas égaler"
@@ -36195,6 +36305,7 @@
   {
     "pattern": "〜ではすまない",
     "structure": "noun / verb plain form + ではすまない／じゃすまない",
+    "structure_fr": "nom / verbe forme neutre + ではすまない／じゃすまない",
     "meaning": {
       "en": "won't get away with just, will not end with",
       "fr": "ne pas s'en tirer avec seulement"
@@ -36523,6 +36634,7 @@
   {
     "pattern": "〜ずして",
     "structure": "verb ない-stem + ずして",
+    "structure_fr": "radical en ない + ずして",
     "meaning": {
       "en": "without doing (literary)",
       "fr": "sans (faire), (littéraire)"
@@ -36928,6 +37040,7 @@
   {
     "pattern": "〜ならまだしも",
     "structure": "noun / plain form + ならまだしも",
+    "structure_fr": "nom / forme neutre + ならまだしも",
     "meaning": {
       "en": "if it were... that would be one thing, but",
       "fr": "passe encore si..., mais"
@@ -37247,6 +37360,7 @@
   {
     "pattern": "〜とて",
     "structure": "noun + とて",
+    "structure_fr": "nom + とて",
     "meaning": {
       "en": "even (someone), (someone) too",
       "fr": "même (quelqu'un), (quelqu'un) non plus"
@@ -37614,6 +37728,7 @@
   {
     "pattern": "〜ではあるまいか",
     "structure": "noun / plain form + (の)ではあるまいか",
+    "structure_fr": "nom / forme neutre + (の)ではあるまいか",
     "meaning": {
       "en": "might it not be that...? (a tentative view)",
       "fr": "ne serait-ce pas que... ? (supposition prudente)"
@@ -37949,6 +38064,7 @@
     "reading": "〜にかぎったことではない",
     "structure": "noun + に限ったことではない",
     "structure_reading": "noun + にかぎったことではない",
+    "structure_fr": "nom + に限ったことではない",
     "meaning": {
       "en": "not limited to, not just",
       "fr": "ne se limite pas à, pas seulement"
@@ -38311,6 +38427,7 @@
   {
     "pattern": "〜きっての",
     "structure": "noun (a group) + きっての",
+    "structure_fr": "nom (un groupe) + きっての",
     "meaning": {
       "en": "the foremost in (a group)",
       "fr": "le plus... de (tout un groupe)"

@@ -1,6 +1,9 @@
 import copy
+import itertools
 import logging
 import math
+import threading
+from collections import OrderedDict
 from datetime import datetime, timedelta, timezone
 from psycopg2.extras import execute_values
 from typing import Any
@@ -45,6 +48,18 @@ PACE_PRIOR_RUNS = 3
 # The interval, in days, at which a card counts as mastered. The SQL
 # counts below spell the same 21 out inline.
 MASTERED_DAYS = 21
+
+# The grade an answer to the level rule's check must reach to keep the
+# card known (plan 224): the scheduler's pass, and the ladder's.
+CHECK_PASS = 3
+
+# A card's first sighting, for the pace and the journey, is never a
+# check it passed (plan 224): a word the learner already knew, confirmed,
+# was learnt on no day here, and counted as met it spent the day's new
+# cards -- an N3 boarder answering the morning's N5 checks was then
+# served no N3 card at all. A check MISSED is met that day: the card
+# starts as new (review above) and is the pace's like any other.
+_NOT_A_KEPT_CHECK = f" AND NOT (assumed AND quality >= {CHECK_PASS})"
 
 
 def seconds_per_review(times) -> int | None:
@@ -156,7 +171,66 @@ class SRSEngine:
         # _servable_filter for what it is for and why it arrives as an
         # argument rather than an import.
         self._servable_modes = list(servable_modes) if servable_modes is not None else None
+        self._history_lock = threading.Lock()
+        self._history_gen: dict[str, int] = {}
+        self._history: OrderedDict[tuple, tuple[int, Any]] = OrderedDict()
         self._init_db()
+
+    # -- The learner's history, read once per change (plan 212) ----
+    #
+    # Lifetime XP, the total of reviews, the days studied and the best
+    # run are each an aggregate over the learner's whole history, and
+    # Today and the profile asked them on every open -- the best run a
+    # window function over every review ever, ~40 ms at 40k reviews.
+    # None of them moves until the learner writes to that history, so
+    # each is kept under the learner's GENERATION, which every write
+    # moves on once it has committed (_history_changed): a write
+    # committed while a value was being read leaves it under a
+    # generation already gone, so it is never served.
+    #
+    # The writes are review_log (_log_review), xp_ledger (award_xp,
+    # record_day_clear), and the erasures (forget_history: the stats
+    # reset, the account's deletion). scripts/compact_review_log moves
+    # rows without changing any of these figures, so a value kept
+    # across it is still true. In process: the API is one worker
+    # (render.yaml's start command); a second would need this moved.
+    _HISTORY_MAX = 8192
+    _gen_counter = itertools.count(1)
+
+    def _remembered(self, user_id: str, name: tuple, compute):
+        with self._history_lock:
+            gen = self._history_gen.get(user_id, 0)
+            hit = self._history.get((user_id, *name))
+            if hit is not None and hit[0] == gen:
+                self._history.move_to_end((user_id, *name))
+                return hit[1]
+        value = compute()
+        with self._history_lock:
+            self._history[(user_id, *name)] = (gen, value)
+            self._history.move_to_end((user_id, *name))
+            while len(self._history) > self._HISTORY_MAX:
+                self._history.popitem(last=False)
+        return value
+
+    def _history_changed(self, user_id: str) -> None:
+        with self._history_lock:
+            if len(self._history_gen) >= self._HISTORY_MAX:
+                # Forgetting the generations forgets what they guarded.
+                self._history_gen.clear()
+                self._history.clear()
+            self._history_gen[user_id] = next(self._gen_counter)
+
+    def forget_all_history(self) -> None:
+        """Every learner's kept history (the tests, which write the
+        tables directly between requests)."""
+        with self._history_lock:
+            self._history_gen.clear()
+            self._history.clear()
+
+    def forget_history(self, user_id: str) -> None:
+        """The learner's history was erased or rewritten outside a
+        review or an award (the stats reset, the account's deletion)."""
+        self._history_changed(user_id)
 
     # -- Servable modes ----------------------------------------
     #
@@ -323,6 +397,18 @@ class SRSEngine:
                 cur.execute("""
                     ALTER TABLE review_log
                     ADD COLUMN IF NOT EXISTS xp_earned INTEGER NOT NULL DEFAULT 0
+                """)
+
+                # The level rule's check (plan 224): the row is the first
+                # answer to a card seed_known marked known. A constant
+                # default, so Postgres adds it without rewriting the table.
+                self._log_sql("add_review_log_assumed", """
+                    ALTER TABLE review_log
+                    ADD COLUMN IF NOT EXISTS assumed BOOLEAN NOT NULL DEFAULT FALSE
+                """)
+                cur.execute("""
+                    ALTER TABLE review_log
+                    ADD COLUMN IF NOT EXISTS assumed BOOLEAN NOT NULL DEFAULT FALSE
                 """)
 
                 # XP that isn't a review. review_log.xp_earned used to
@@ -644,9 +730,18 @@ class SRSEngine:
         # this review is a learning step's repeat, which rides free
         # (core/credits.py, fare). Every review route prices on it.
         repeat = self.is_repeat(state.total_reviews, state.is_learning)
+        # The level rule's check (plan 224): a card the app assumed known
+        # and the learner does not know was never learned, so it is not
+        # a lapse. It starts as a new card met today and answered wrong:
+        # no difficulty added for good, no mastered interval kept to
+        # show it full on every bar, and on the grammar ladder the whole
+        # walk rather than the relapse's two steps back to mastered.
+        assumed = self.is_assumed(state)
+        if assumed and quality < CHECK_PASS:
+            state = CardState(card_id=card_id, mode=mode)
         updated = self._schedule(state, quality)
         self._save_state(updated)
-        xp_info = self._log_review(card_id, mode, quality)
+        xp_info = self._log_review(card_id, mode, quality, assumed=assumed)
         result = self._to_dict(updated)
         result.update(xp_info)  # xp_earned, leveled_up, new_level
         # updated.total_reviews/interval_days are already in hand from
@@ -753,7 +848,7 @@ class SRSEngine:
         work and reads what the stop's figure reads."""
         return self.whole_cards(self.get_bulk_progress(card_ids, mode).values())
 
-    def _log_review(self, card_id: str, mode: str, quality: int) -> dict[str, Any]:
+    def _log_review(self, card_id: str, mode: str, quality: int, assumed: bool = False) -> dict[str, Any]:
         # card_id is always "{user_id}:{raw_id}" (see auth.prefixed) and
         # user_id itself is assumed colon-free everywhere else in this
         # codebase (e.g. _user_prefix_pattern's LIKE '{user_id}:%'), so
@@ -769,9 +864,10 @@ class SRSEngine:
         xp_earned = self._compute_review_xp(user_id, quality)
 
         with self.storage.cursor() as cur:
-            sql = "INSERT INTO review_log(card_id, mode, quality, xp_earned) VALUES (%s, %s, %s, %s)"
-            self._log_sql("log_review", sql, (card_id, mode, quality, xp_earned))
-            cur.execute(sql, (card_id, mode, quality, xp_earned))
+            sql = "INSERT INTO review_log(card_id, mode, quality, xp_earned, assumed) VALUES (%s, %s, %s, %s, %s)"
+            self._log_sql("log_review", sql, (card_id, mode, quality, xp_earned, assumed))
+            cur.execute(sql, (card_id, mode, quality, xp_earned, assumed))
+        self._history_changed(user_id)
 
         prior_level = xp_math.level_from_xp(prior_xp)
         new_level = xp_math.level_from_xp(prior_xp + xp_earned)
@@ -830,6 +926,9 @@ class SRSEngine:
         return xp_math.compute_review_xp(quality, self.get_reviews_today(user_id))
 
     def get_lifetime_xp(self, user_id: str) -> int:
+        return self._remembered(user_id, ("lifetime_xp",), lambda: self._lifetime_xp(user_id))
+
+    def _lifetime_xp(self, user_id: str) -> int:
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
@@ -863,10 +962,13 @@ class SRSEngine:
         sql = "INSERT INTO xp_ledger(user_id, source, ref, xp) VALUES (%s, %s, %s, %s)"
         self._log_sql("award_xp", sql, (user_id, source, ref, xp))
         if cur is not None:
+            # Committed by the caller, which moves the generation on
+            # once it has (record_day_clear).
             cur.execute(sql, (user_id, source, ref, xp))
         else:
             with self.storage.cursor() as own:
                 own.execute(sql, (user_id, source, ref, xp))
+            self._history_changed(user_id)
 
         prior_level = xp_math.level_from_xp(prior_xp)
         new_level = xp_math.level_from_xp(prior_xp + xp)
@@ -1348,11 +1450,16 @@ class SRSEngine:
         xp_ledger row, and being paid for a day is not studying on it.
 
         `cur` reads on a connection the caller holds (bridge_rest_days,
-        under its lock)."""
+        under its lock). Kept per change (_remembered); a copy is
+        handed out, so a caller's union never reaches the kept set."""
+        return set(self._remembered(user_id, ("studied_days",),
+                                    lambda: frozenset(self._read_studied_days(user_id, cur))))
+
+    def _read_studied_days(self, user_id: str, cur=None) -> set:
         if cur is None:
             with self.storage.connection() as conn:
                 with conn.cursor() as own:
-                    return self._studied_days(user_id, own)
+                    return self._read_studied_days(user_id, own)
         pattern = self._user_prefix_pattern(user_id)
         # UNION (not UNION ALL): a day the learner studied is a
         # day whether it is still a row, already a rollup, or —
@@ -1397,6 +1504,20 @@ class SRSEngine:
         figures = streak_of(studied, rested, today)
         figures["today"] = streak_of(studied | {today}, rested, today)["current"]
         return figures
+
+    def last_studied_day(self, user_id: str):
+        """The latest day this learner showed up (a review or a practice
+        answer, _studied_days' meaning), or None for one who never has:
+        what the comeback sheet counts the days away from (plan 217)."""
+        studied = self._studied_days(user_id)
+        return max(studied) if studied else None
+
+    def first_studied_day(self, user_id: str):
+        """The first day this learner showed up, or None for one who never
+        has: the ration opens no new rule before a day of study is behind
+        them (plan 222, daily_queue.grammar_allowance)."""
+        studied = self._studied_days(user_id)
+        return min(studied) if studied else None
 
     def get_streak(self, user_id: str) -> dict[str, int]:
         """Current and longest consecutive-day streak of having at least
@@ -1447,6 +1568,40 @@ class SRSEngine:
                     self._log_sql("rest_use", sql, (day, ticket))
                     cur.execute(sql, (day, ticket))
         return missed
+
+    def bridge_away_days(self, user_id: str, start, until) -> list:
+        """A declared absence (plan 217): the days of [start, until] that
+        have passed (before today) and were neither studied nor already
+        bridged, each written as a rest day of its own -- a rest_tickets
+        row with milestone 0, earned and used on that day and seen at
+        once, so the streak walks through it, the week draws its 運休
+        stub, and no ticket the learner earned is spent on it, nor any
+        notice shown. Earned on the missed day itself, which no
+        day_clears row can name (nothing was studied), so no clear reads
+        it as a ticket kept. Lazy and idempotent like bridge_rest_days,
+        and run before it, so a ticket is never spent on a day the
+        absence covers. Returns the days written, oldest first."""
+        today = datetime.now(timezone.utc).date()
+        last = min(until, today - timedelta(days=1))
+        if last < start:
+            return []
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                # The same lock bridge_rest_days takes, so the two never
+                # bridge one day twice.
+                cur.execute("SELECT id FROM rest_tickets WHERE user_id = %s AND used_on IS NULL FOR UPDATE",
+                            (user_id,))
+                shown = self._studied_days(user_id, cur) | self._rest_days(user_id, cur)
+                days = [start + timedelta(days=n) for n in range((last - start).days + 1)]
+                days = [d for d in days if d not in shown]
+                sql = """
+                    INSERT INTO rest_tickets (user_id, earned_on, milestone, used_on, seen_at)
+                    VALUES (%s, %s, 0, %s, NOW())
+                """
+                for day in days:
+                    self._log_sql("away_day", sql, (user_id, day, day))
+                    cur.execute(sql, (user_id, day, day))
+        return days
 
     def get_rest_days(self, user_id: str, days: int = 30) -> list[str]:
         """The days a rest ticket bridged in the last `days` days, oldest
@@ -1548,6 +1703,7 @@ class SRSEngine:
                         self._log_sql("rest_earn", sql, (user_id, day, milestone))
                         cur.execute(sql, (user_id, day, milestone))
                         rest_earned = True
+        self._history_changed(user_id)
         return {"xp": xp, "rest_earned": rest_earned}
 
     def get_day_tickets(self, user_id: str) -> list[dict[str, Any]]:
@@ -1709,6 +1865,9 @@ class SRSEngine:
         return {"xp": int(row[0]), "rank": int(row[1])}
 
     def get_total_reviews(self, user_id: str) -> int:
+        return self._remembered(user_id, ("total_reviews",), lambda: self._total_reviews(user_id))
+
+    def _total_reviews(self, user_id: str) -> int:
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
@@ -1932,6 +2091,10 @@ class SRSEngine:
         return (correct / total) if total else None
 
     def get_best_quality_streak(self, user_id: str, min_quality: int = 4) -> int:
+        return self._remembered(user_id, ("best_run", min_quality),
+                                lambda: self._best_quality_streak(user_id, min_quality))
+
+    def _best_quality_streak(self, user_id: str, min_quality: int = 4) -> int:
         """Longest run of consecutive reviews (by time, across all cards/
         modes) with quality >= min_quality — a classic gaps-and-islands
         query: the difference between two row-number sequences is
@@ -2164,7 +2327,15 @@ class SRSEngine:
         the pace now, not the pace of a first week -- and what a card
         cost in each of the last RUNS_KEPT runs, which carries the
         pauses a run really holds.
+
+        Kept per change and per UTC day (plan 212): the windows are days
+        long, so a day-old reading of an unchanged history is the same
+        figure, and Today asks it on every open.
         """
+        today = datetime.now(timezone.utc).date()
+        return self._remembered(user_id, ("review_pace", today), lambda: self._review_pace(user_id))
+
+    def _review_pace(self, user_id: str) -> int | None:
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
@@ -2209,15 +2380,23 @@ class SRSEngine:
                 rows = cur.fetchall()
         return [{"days": int(days), "count": int(count)} for days, count in rows]
 
-    def get_new_items_today(self, user_id: str) -> int:
+    def get_new_items_today(self, user_id: str, source: str | None = None) -> int:
         """
         Distinct ITEMS (card ids, not card×mode pairs) whose first-ever
         review happened today — the number the onboarding pace
         (user_profiles.daily_new_target, see core/pace.py) is spent
         against. Day boundary is UTC, matching get_reviews_today / get_streak /
         the stats screen — "today" means one thing app-wide.
+
+        `source` counts one line's items alone, by the raw id's first
+        segment (`grammar` for grammar_N5_は): the rules the day has
+        opened, which the ration holds to daily_queue.GRAMMAR_PER_DAY
+        (plan 222).
         """
         pattern = self._user_prefix_pattern(user_id)
+        if source:
+            safe = source.replace("\\", "\\\\").replace("%", r"\%").replace("_", r"\_")
+            pattern = f"{pattern[:-1]}{safe}\\_%"
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 # Servable modes only: this is the deck queue's budget, not
@@ -2236,7 +2415,7 @@ class SRSEngine:
                     WITH events AS (
                         SELECT card_id, reviewed_at AS at
                         FROM review_log
-                        WHERE card_id LIKE %s{mode_sql}
+                        WHERE card_id LIKE %s{mode_sql}{_NOT_A_KEPT_CHECK}
                         UNION ALL
                         SELECT card_id, first_at AS at
                         FROM card_first_review
@@ -2254,20 +2433,93 @@ class SRSEngine:
                 (count,) = cur.fetchone()
         return int(count)
 
+    def get_reviewed_today(self, user_id: str) -> tuple[set, set]:
+        """
+        What today has already spent of a review ceiling (plan 217): the
+        (card_id, mode) pairs reviewed today, and the card ids first met
+        today -- the same day, the same servable modes and the same
+        `firsts` as get_new_items_today, whose budget those are. A pair
+        counts once however often it came back today (a lapse is one
+        card, not four), and a card met today is the pace's, never the
+        ceiling's.
+        """
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                mode_sql, mode_params = self._servable_filter()
+                sql = f"""
+                    SELECT DISTINCT card_id, mode FROM review_log
+                    WHERE card_id LIKE %s{mode_sql}
+                      AND reviewed_at >= date_trunc('day', NOW())
+                """
+                params = (pattern,) + mode_params
+                self._log_sql("get_reviewed_today", sql, params)
+                cur.execute(sql, params)
+                pairs = {(row[0], row[1]) for row in cur.fetchall()}
+                if not pairs:
+                    return set(), set()
+                sql = f"""
+                    WITH events AS (
+                        SELECT card_id, reviewed_at AS at
+                        FROM review_log
+                        WHERE card_id LIKE %s{mode_sql}{_NOT_A_KEPT_CHECK}
+                        UNION ALL
+                        SELECT card_id, first_at AS at
+                        FROM card_first_review
+                        WHERE card_id LIKE %s{mode_sql}
+                    ),
+                    firsts AS (
+                        SELECT card_id, MIN(at) AS first_at FROM events GROUP BY card_id
+                    )
+                    SELECT card_id FROM firsts
+                    WHERE first_at >= date_trunc('day', NOW())
+                """
+                params = (pattern,) + mode_params + (pattern,) + mode_params
+                self._log_sql("get_met_today", sql, params)
+                cur.execute(sql, params)
+                met = {row[0] for row in cur.fetchall()}
+        return pairs, met
+
     # ── The level rule (plan 074) ───────────────────────────────
     # A card marked KNOWN gets the state of a card that graduated and
-    # was checked once at the mastered interval: the first real review
-    # then grows or lapses it exactly as it would a card the learner
-    # earned that state on (scheduler.py's _handle_review). The single
-    # virtual check is what get_bulk_stats and _classify_stage read --
-    # a row with no reviews is "new", whatever its interval -- and it
-    # is a card_modes count only: the review log, and so the profile's
+    # was checked once at the mastered interval: a first real review
+    # that passes grows it exactly as it would a card the learner
+    # earned that state on (scheduler.py's _handle_review). One that
+    # fails does not lapse it (plan 224, review above): the card was
+    # assumed, never learned, and starts as new. The single virtual
+    # check is what get_bulk_stats and _classify_stage read -- a row
+    # with no reviews is "new", whatever its interval -- and it is a
+    # card_modes count only: the review log, and so the profile's
     # reviews, retention and XP, never sees it.
     KNOWN_STATE = {
         "difficulty": 2.5, "stability": 4.0, "interval_days": 21,
         "repetitions": 3, "lapses": 0, "learning_step": 0, "is_learning": False,
         "total_reviews": 1, "correct_reviews": 1, "last_quality": 4,
     }
+
+    @classmethod
+    def is_assumed(cls, state: CardState) -> bool:
+        """Whether a row is still the level rule's assumption: written by
+        seed_known and never answered since (plan 224). Read off the row
+        itself, which nothing else can write: a card met from new has
+        no graduated repetition after its first review, and KNOWN_STATE
+        has three after one. The first answer, pass or miss, changes
+        both."""
+        k = cls.KNOWN_STATE
+        return (
+            state.total_reviews == k["total_reviews"]
+            and state.repetitions == k["repetitions"]
+            and state.lapses == 0
+            and not state.is_learning
+        )
+
+    # The same signature as a SQL condition over card_modes, for the
+    # move down that gives the assumed cards back (forget_assumed).
+    _ASSUMED_SQL = (
+        f"total_reviews = {KNOWN_STATE['total_reviews']} "
+        f"AND repetitions = {KNOWN_STATE['repetitions']} "
+        "AND lapses = 0 AND NOT is_learning"
+    )
 
     def seed_known(self, card_ids: list[str], mode: str, spread_days: int = 42,
                    now: datetime | None = None) -> int:
@@ -2311,6 +2563,92 @@ class SRSEngine:
             self._log_sql("seed_known", sql, (mode, n))
             written = execute_values(cur, sql, rows, page_size=1000, fetch=True)
         return len(written)
+
+    def forget_assumed(self, card_ids: list[str], mode: str, dry_run: bool = False) -> int:
+        """Give back the level rule's assumptions (plan 224): delete the
+        rows among these that seed_known wrote and no answer has touched
+        since (is_assumed), so each is a new card again -- served by the
+        day's ration in its deck's order, where a mastered row it was
+        never asked about kept it out for good. A row the learner has
+        answered is history, and is never touched. `dry_run` counts
+        instead. Returns how many rows went (or would go)."""
+        if not card_ids:
+            return 0
+        if dry_run:
+            sql = f"SELECT COUNT(*) FROM card_modes WHERE mode = %s AND card_id = ANY(%s) AND {self._ASSUMED_SQL}"
+            with self.storage.connection() as conn:
+                with conn.cursor() as cur:
+                    self._log_sql("count_assumed", sql, (mode, len(card_ids)))
+                    cur.execute(sql, (mode, list(card_ids)))
+                    row = cur.fetchone()
+            return int(row[0]) if row else 0
+        sql = f"DELETE FROM card_modes WHERE mode = %s AND card_id = ANY(%s) AND {self._ASSUMED_SQL}"
+        with self.storage.cursor() as cur:
+            self._log_sql("forget_assumed", sql, (mode, len(card_ids)))
+            cur.execute(sql, (mode, list(card_ids)))
+            return cur.rowcount
+
+    def get_level_checks(self, user_id: str, days: int) -> list[tuple[str, int]]:
+        """The level rule's checks the learner answered in the last
+        `days` days (plan 224): (raw card id, quality), one per card --
+        a check is a card's first answer, and only ever one. What
+        study/level_fit reads, stop by stop."""
+        pattern = self._user_prefix_pattern(user_id)
+        prefix_len = len(user_id) + 1
+        sql = """
+            SELECT card_id, quality FROM review_log
+            WHERE card_id LIKE %s AND assumed
+              AND reviewed_at >= NOW() - make_interval(days => %s)
+        """
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                self._log_sql("get_level_checks", sql, (pattern, days))
+                cur.execute(sql, (pattern, days))
+                return [(row[0][prefix_len:], int(row[1])) for row in cur.fetchall()]
+
+    def get_first_answers(self, user_id: str, mode: str, raw_prefix: str, days: int) -> list[int]:
+        """The grade of each card's FIRST answer in `mode`, for the cards
+        whose raw id starts with `raw_prefix` (a deck: 'vocab_N4_') and
+        first met in the last `days` days -- never a check, which is the
+        level rule's question about a card it assumed, not a card met
+        (plan 224)."""
+        safe = (self._user_prefix_pattern(user_id)[:-1]
+                + raw_prefix.replace("\\", "\\\\").replace("%", r"\%").replace("_", r"\_") + "%")
+        # A card whose first rows were compacted away (scripts/
+        # compact_review_log.py) has a first sighting older than any row
+        # left, so it is no first answer in the window.
+        sql = """
+            SELECT quality FROM (
+                SELECT DISTINCT ON (card_id) card_id, quality, assumed, reviewed_at
+                FROM review_log
+                WHERE card_id LIKE %s AND mode = %s
+                ORDER BY card_id, reviewed_at, id
+            ) firsts
+            WHERE NOT assumed AND reviewed_at >= NOW() - make_interval(days => %s)
+              AND NOT EXISTS (
+                SELECT 1 FROM card_first_review f
+                WHERE f.card_id = firsts.card_id AND f.mode = %s
+              )
+        """
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                self._log_sql("get_first_answers", sql, (safe, mode, days, mode))
+                cur.execute(sql, (safe, mode, days, mode))
+                return [int(row[0]) for row in cur.fetchall()]
+
+    def count_cards_with_history(self, card_ids: list[str]) -> int:
+        """How many of these cards have a row under any mode that is more
+        than an untouched assumption -- the cards a move down sets aside
+        once forget_assumed has given the rest back (plan 224)."""
+        if not card_ids:
+            return 0
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = f"SELECT COUNT(DISTINCT card_id) FROM card_modes WHERE card_id = ANY(%s) AND NOT ({self._ASSUMED_SQL})"
+                self._log_sql("count_cards_with_history", sql, (len(card_ids),))
+                cur.execute(sql, (list(card_ids),))
+                row = cur.fetchone()
+        return int(row[0]) if row else 0
 
     def count_rows(self, card_ids: list[str], mode: str) -> int:
         """How many of these (card, mode) pairs already have a scheduler
@@ -2393,7 +2731,7 @@ class SRSEngine:
                     WITH events AS (
                         SELECT card_id, reviewed_at AS at
                         FROM review_log
-                        WHERE card_id LIKE %s{mode_sql}
+                        WHERE card_id LIKE %s{mode_sql}{_NOT_A_KEPT_CHECK}
                           AND ({scope})
                         UNION ALL
                         SELECT card_id, first_at AS at

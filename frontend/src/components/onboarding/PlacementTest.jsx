@@ -1,26 +1,26 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLang } from '../../LangContext'
-import { apiJsonWithTimeout } from '../../lib/api'
 import { playUi } from '../../lib/audio'
 import QuestionRenderer from '../../exam/QuestionRenderer'
 import { Loading } from '../ui/Loading'
 import { useDesk } from '../../hooks/useDesk'
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
 import { runKey } from '../../lib/keyGuards'
+import { useClimb } from './useClimb'
 
 // ── 実力診断 — the placement test ────────────────────────────────
-// Twelve deterministic questions laddering N5→N1, one at a time,
-// through the exam screens' own QuestionRenderer (mcq-text hits
-// McqBlock, which brings the roving-tabindex radiogroup for free).
-// Synchronous by design: the paper builds in milliseconds server-side
-// (study/placement.py), so there is no 202 polling here and must never
-// be — see that module's header for why the exam pipeline is the wrong
-// tool for a first-run experience.
+// The climb (plan 224): asked at N5, up a level each time one is
+// cleared, as far as N1 -- one question at a time through the exam
+// screens' own QuestionRenderer (mcq-text hits McqBlock, which brings
+// the roving-tabindex radiogroup for free). How many questions it asks
+// is the learner's answers' doing, so the head draws the levels rather
+// than a count: the ones cleared, the one being asked. useClimb holds
+// the round trips; this is Settings' frame for them, and the boarding
+// draws its own (boarding/TestStep).
 //
-// Self-contained on purpose: fetches its own paper, reports the score
-// result through onResult(result), renders no follow-up of its own —
-// the onboarding flow offers the boarding-station override, Settings
-// offers "apply?", and both reuse this same component.
+// Self-contained on purpose: reports the verdict through
+// onResult(result) and renders no follow-up of its own -- Settings
+// offers "apply?".
 //
 // Props:
 //   session    — Supabase session for the API calls
@@ -28,81 +28,48 @@ import { runKey } from '../../lib/keyGuards'
 //   onCancel   — optional; renders a quiet leave link when present
 export default function PlacementTest({ session, onResult, onCancel }) {
   const { t } = useLang()
-  const [phase, setPhase] = useState('loading') // loading | question | scoring | error
-  const [paper, setPaper] = useState(null)      // {seed, questions}
-  const [index, setIndex] = useState(0)
-  const answersRef = useRef({})
-  const [selected, setSelected] = useState(null)
+  const climb = useClimb(session, onResult)
+  const [picked, setPicked] = useState({ id: null, choice: null })
   const desk = useDesk()
 
-  // Initial phase is already 'loading', so the effect only reports the
-  // fetch's outcome — no synchronous setState on mount.
-  useEffect(() => {
-    let cancelled = false
-    apiJsonWithTimeout('/api/onboarding/placement', session, { method: 'POST', timeoutMs: 10000 })
-      .then(body => { if (!cancelled) { setPaper(body); setPhase('question') } })
-      .catch(() => { if (!cancelled) setPhase('error') })
-    return () => { cancelled = true }
-  }, [session])
-
-  function submit(answers) {
-    setPhase('scoring')
-    apiJsonWithTimeout('/api/onboarding/placement/score', session, {
-      method: 'POST',
-      timeoutMs: 10000,
-      body: JSON.stringify({ seed: paper.seed, answers }),
-    })
-      .then(onResult)
-      .catch(() => setPhase('error'))
-  }
-
-  if (phase === 'loading' || phase === 'scoring') return <Loading />
-  if (phase === 'error') {
+  if (climb.phase === 'loading') return <Loading />
+  if (climb.phase === 'error') {
     return (
       <div className="onb-test__error">
         <p>{t.onbTestError}</p>
-        {onCancel && (
-          <button type="button" className="onb-link" onClick={onCancel}>{t.back}</button>
-        )}
+        <div className="onb-test__escape">
+          <button type="button" className="onb-link" onClick={climb.retry}>{t.retry}</button>
+          {onCancel && <button type="button" className="onb-link" onClick={onCancel}>{t.back}</button>}
+        </div>
       </div>
     )
   }
 
-  const questions = paper.questions
-  const question = questions[index]
-  const isLast = index === questions.length - 1
-  // The early exit: past the N5 block, a learner deep over their head
-  // can stop and be placed on what they've answered — unanswered
-  // questions score as wrong server-side, which is exactly what "it
-  // got too hard here" should mean.
-  const pastFirstSection = question.sectionId !== questions[0].sectionId
+  const question = climb.question
+  const waiting = climb.phase === 'waiting'
+  // The choice belongs to the question it was made on: the next one
+  // arrives with nothing picked.
+  const selected = picked.id === question.id ? picked.choice : null
 
   function advance() {
+    if (selected == null || waiting) return
     playUi('click')
-    if (isLast) {
-      submit(answersRef.current)
-    } else {
-      setIndex(i => i + 1)
-      setSelected(answersRef.current[questions[index + 1].id] ?? null)
-    }
+    climb.answer(selected)
   }
   function pick(id) {
-    answersRef.current[question.id] = id
-    setSelected(id)
+    if (!waiting) setPicked({ id: question.id, choice: id })
   }
 
   return (
-    <div className="onb-test">
+    <div className="onb-test" aria-busy={waiting}>
       <div className="onb-test__meta">
-        {/* The section id IS the level — one section per level is the
-            paper's whole structure (study/placement.py). */}
-        <span className="onb-test__level" lang="ja">{question.sectionId}</span>
-        <span className="onb-test__progress">{t.onbTestProgress(index + 1, questions.length)}</span>
+        <ClimbRungs level={climb.level} perLevel={climb.perLevel} />
       </div>
 
       <div className="onb-test__instructions">{t.onbTestKind[question.kind] ?? ''}</div>
 
       <QuestionRenderer
+        key={question.id}
         question={question}
         selected={selected}
         onSelect={pick}
@@ -114,21 +81,21 @@ export default function PlacementTest({ session, onResult, onCancel }) {
         <button
           type="button"
           className="onb-action"
-          disabled={selected == null}
+          disabled={selected == null || waiting}
           onClick={advance}
           aria-keyshortcuts={desk ? 'Enter' : undefined}
         >
-          {isLast ? t.onbTestFinish : t.onbContinue}
+          {t.onbContinue}
           {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
         </button>
       </div>
 
       <div className="onb-test__escape">
-        {pastFirstSection && (
-          <button type="button" className="onb-link" onClick={() => submit(answersRef.current)}>
-            {t.onbTestStop}
-          </button>
-        )}
+        {/* The early exit: the level being asked is not cleared, and the
+            learner boards there -- what "it got too hard here" means. */}
+        <button type="button" className="onb-link" disabled={waiting} onClick={climb.stop} data-action="climb-stop">
+          {t.onbTestStop}
+        </button>
         {onCancel && (
           <button type="button" className="onb-link" onClick={onCancel}>{t.cancel}</button>
         )}
@@ -137,13 +104,37 @@ export default function PlacementTest({ session, onResult, onCancel }) {
   )
 }
 
-// ── 机 — the retake's keys (plan 123) ──────────────────────────────
-// The retake in Settings answers keys the way the mock exam on the same
-// questions does -- a digit picks, Enter goes on -- where it was twelve
-// questions by pointer while the rows printed digits that did nothing.
-// Enter from a choice the pointer or the arrows left focused goes on
-// too; Stop and Cancel keep their own. Rendered on the desk only.
-function PlacementKeys({ choices, selected, onPick, onAdvance }) {
+// ── The climb's levels, as the test's head ───────────────────────
+// N5 to N1, the ones cleared in the pass's gold, the one being asked
+// ringed, the rest ahead. Shared with the boarding's test.
+const CLIMB_LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
+
+export function ClimbRungs({ level, perLevel = {} }) {
+  const { t } = useLang()
+  return (
+    <ol className="onb-climb" aria-label={t.onbClimbLabel}>
+      {CLIMB_LEVELS.map(code => {
+        const state = perLevel[code]?.cleared ? 'done' : code === level ? 'at' : 'ahead'
+        return (
+          <li
+            key={code}
+            className={`onb-climb__rung onb-climb__rung--${state}`}
+            aria-current={state === 'at' ? 'step' : undefined}
+          >
+            {code}
+          </li>
+        )
+      })}
+    </ol>
+  )
+}
+
+// ── 机 — the test's keys (plan 123) ────────────────────────────────
+// The test in Settings answers keys the way the mock exam on the same
+// questions does -- a digit picks, Enter goes on. Enter from a choice
+// the pointer or the arrows left focused goes on too; Stop and Cancel
+// keep their own. Rendered on the desk only, here and in the boarding.
+export function PlacementKeys({ choices, selected, onPick, onAdvance }) {
   useEffect(() => {
     const onKey = e => {
       if (!runKey(e)) return

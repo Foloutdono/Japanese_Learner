@@ -45,11 +45,28 @@ EVENTS: dict[str, frozenset[str]] = {
 
     # ── Where people go ──────────────────────────────────────────
     "screen_view":    frozenset({"route", "tab"}),
-    # 訪問 — a visit began. No properties: the session id rides beside
-    # the event (event_log.sid), not inside it. One row per session, so
+    # 滞在 — how long the screen was in front of someone (plan 218).
+    # Sent when the route changes and when the page is hidden, `ms`
+    # ENGAGED time from lib/dwell.js (a hidden tab does not count), so
+    # the sum over a visit is the visit's real length. Returning to a
+    # hidden tab starts a new stretch on the same route, which sends no
+    # second screen_view: views count arrivals, leaves count time.
+    "screen_leave":   frozenset({"route", "tab", "ms"}),
+    # 訪問 — a visit began. The session id rides beside the event
+    # (event_log.sid), not inside it. One row per session, so
     # event_daily's count of this name is "sessions per learner per
     # day" for the life of the account, after the raw rows are gone.
-    "session_start":  frozenset(),
+    #
+    # Since plan 218 it carries the visit's context, each a COARSE
+    # class read once (lib/visitContext.js), never a raw value: no user
+    # agent, no resolution, no time zone, nothing that narrows a device
+    # down -- the CNIL exemption this design relies on forbids
+    # fingerprinting, and a dashboard needs no more than these. `vp` is
+    # the viewport's class (phone / tablet / desk / wide; desk is
+    # hooks/useDesk's 1100px line), `os` the family, `input` whether
+    # the primary pointer is coarse, `reduced` prefers-reduced-motion.
+    "session_start":  frozenset({"platform", "vp", "os", "lang", "theme", "input",
+                                 "standalone", "reduced"}),
 
     # ── みどりの窓口 — the boarding flow ─────────────────────────
     # Emitted from go()/back() in BoardingFlow.jsx, which is every
@@ -64,7 +81,11 @@ EVENTS: dict[str, frozenset[str]] = {
     # `lines` is the chosen subset of vocab/kanji/grammar as one
     # comma-joined string of those three names -- enum values, never
     # text the learner typed (core/lines.py).
-    "boarding_done":  frozenset({"motive", "kana_known", "level", "pace", "notifications", "lines", "ms"}),
+    # `level_how` and `placed` (plan 224): whether the learner chose
+    # their level or took the test, and where the test placed them --
+    # beside `level`, what they boarded at, so an override shows.
+    "boarding_done":  frozenset({"motive", "kana_known", "level", "pace", "notifications", "lines", "ms",
+                                 "level_how", "placed"}),
     # "Embarquer" mints an anonymous Supabase guest (lib/guest.js), so an
     # abandoned boarding leaves an auth user with no profile row. `from`
     # tells the two apart.
@@ -89,9 +110,19 @@ EVENTS: dict[str, frozenset[str]] = {
     "guide_done":     frozenset({"gate", "skipped", "stops", "ms"}),
 
     # ── Study runs ───────────────────────────────────────────────
-    "run_start":      frozenset({"kind", "mode", "level"}),
-    "run_complete":   frozenset({"kind", "mode", "level", "items", "secs"}),
-    "run_abandon":    frozenset({"kind", "mode", "level", "done"}),
+    # Since plan 218 the sentence runs (reading, translation,
+    # comprehension, dictation, composition) report here too, through
+    # hooks/useRunTrail.js, and every run carries how it went: `ms` is
+    # engaged time (lib/dwell.js; `secs` stays the wall-clock it always
+    # was, so older rows still compare), `card_p50` / `card_p90` the
+    # median and slow tail of the time per item, `right` how many were
+    # answered right, `where` the door the run was entered by. A count
+    # and a duration, never an item.
+    "run_start":      frozenset({"kind", "mode", "level", "where"}),
+    "run_complete":   frozenset({"kind", "mode", "level", "items", "secs",
+                                 "ms", "card_p50", "card_p90", "right", "where"}),
+    "run_abandon":    frozenset({"kind", "mode", "level", "done",
+                                 "ms", "card_p50", "card_p90", "right", "where"}),
 
     # ── The fare gate ────────────────────────────────────────────
     # fare_blocked is written server-side by core/credits.py, from the
@@ -136,9 +167,10 @@ EVENTS: dict[str, frozenset[str]] = {
     #
     # NOT A DECK NAME, and not a description: both are learner-typed,
     # which is the rule this whole module exists to keep. `structure` is
-    # the deck's type (one of four), `cards` is a count, `where` is
-    # which surface the follow came from (the shelf block or the library
-    # screen), and `sort` is which ordering was showing. A deck id is
+    # the deck's type (one of routes/decks.py's STRUCTURES), `cards` is
+    # a count, `where` is which surface the follow came from (the shelf
+    # block or the library screen), and `sort` is which ordering was
+    # showing. A deck id is
     # not carried either -- it would make the trail say who follows
     # whom, which is more than "is the library used" needs to know.
     "deck_publish":   frozenset({"structure", "cards"}),
@@ -154,6 +186,11 @@ EVENTS: dict[str, frozenset[str]] = {
     # The kind of entry and the direction, never the key: a key names
     # the word a learner looked up, which is theirs.
     "favorite_toggle": frozenset({"kind", "on"}),
+    # ── 歌 — a song's decks, from the video result (plan 215) ────
+    # How many words and lines went in (0 for the half not taken),
+    # never the song's name: the learner typed it, or the video's title
+    # said it, and either is theirs.
+    "song_deck":       frozenset({"words", "lines"}),
     # ── 発車案内 — the app opened from outside it (plan 156) ──────
     # `via` is `notification` (the daily nudge or an agenda block's
     # reminder, plan 181) or `widget` (a home or
@@ -169,11 +206,17 @@ EVENTS: dict[str, frozenset[str]] = {
     # ── 発見 — a grammar point's tour (plan 187b) ────────────────
     # `level` is N5…N1, never the pattern: the funnel is read by level.
     # `stop` is look / guess / found / terminus; `outcome` first, retry
-    # (a wrong guess) or helped (the rule given after two). The done
-    # event carries the wrong guesses and whether the twist and scene
-    # were the point's own (`authored`, plan 187c).
+    # (a wrong guess) or helped (the rule given after two), or skipped
+    # (plan 222: the learner left the tour for its card at that stop,
+    # and no done event follows). The done event carries the wrong
+    # guesses and whether the twist and scene were the point's own
+    # (`authored`, plan 187c).
     "grammar_tour_step": frozenset({"level", "stop", "outcome"}),
     "grammar_tour_done": frozenset({"level", "tries", "helped", "authored"}),
+    # ── 初見 — a kana or a kanji's first tour (plan 216) ─────────
+    # `source` is kana or kanji, never the character: whether the trace
+    # is finished, and how often it misses or is drawn for the learner.
+    "glyph_tour_done": frozenset({"source", "misses", "shown"}),
 
     # ── 終着 — the day cleared (plan 191) ────────────────────────
     # Both written server-side: day_clear by POST /api/today/clear on
@@ -187,11 +230,124 @@ EVENTS: dict[str, frozenset[str]] = {
     "rest_day_used":  frozenset({"days"}),
     "ticket_share":   frozenset({"days"}),
 
+    # ── 回復運転 — the review plan (plan 217) ─────────────────────
+    # catchup_offer is the client's, once a sheet: the gate opened on
+    # the comeback sheet (`owed` the reviews it would have printed,
+    # `away` the days since the learner last studied). The rest are
+    # written server-side: catchup_choice
+    # the answer (`choice` spread | gentle | all, `days` a spread's,
+    # `per_day` its share); catchup_done the day its share stopped
+    # holding anything back (`days` it took). review_cap_set is the
+    # ceiling chosen in Settings (`cap`, null for none); away_set an
+    # absence declared or withdrawn (`days` long, 0 withdrawn), and
+    # away_day_used the lazy bridge writing its days (`days`). Every
+    # value a figure or an enum -- never a date the learner typed.
+    "catchup_offer":  frozenset({"owed", "away"}),
+    "catchup_choice": frozenset({"choice", "days", "per_day"}),
+    "catchup_done":   frozenset({"days"}),
+    "review_cap_set": frozenset({"cap"}),
+    "away_set":       frozenset({"days"}),
+    "away_day_used":  frozenset({"days"}),
+    # ── 利用 — the small features, counted per screen (plan 218) ──
+    # Whether anyone plays the audio, scans a photo, asks the tutor,
+    # searches the dictionary. Not one row per press: lib/screenTrail.js
+    # counts presses while a screen is up and sends one row per
+    # (feature, action) when it is left, `n` the count and `route` the
+    # screen's pattern. `feature` and `action` are closed enums (VALUES
+    # below). The dictionary's search is a count of searches, never
+    # the query.
+    "feature_use":    frozenset({"feature", "action", "route", "n"}),
+    # A setting changed, to which of the app's own values. Never the
+    # trail's own switch: an objection is not recorded by the thing it
+    # objects to.
+    "setting_change": frozenset({"setting", "value"}),
+    # ── AI — a rationed model call claimed (plan 218) ─────────────
+    # Written server-side by core/daily_limit.claim, so the use of the
+    # ceilinged features outlives daily_usage's thirty days (prune_logs)
+    # in event_daily. `count` is the day's slots taken, this one
+    # included; `over` whether it is past `limit`.
+    "ai_use":         frozenset({"feature", "count", "limit", "over"}),
+
     # ── Friction ─────────────────────────────────────────────────
+    # An uncaught error or rejected promise, by screen. NO MESSAGE AND
+    # NO STACK: either can quote what was on the screen or typed into
+    # it. `where` says which of the two it was.
+    "client_error":   frozenset({"route", "where"}),
+    # The page's own speed, once per page load, from the browser's
+    # PerformanceObserver (lib/vitals.js, no library): largest paint,
+    # the slowest interaction, layout shift (x1000, an integer) and
+    # time to first byte, on the route the page was loaded on.
+    "vitals":         frozenset({"route", "lcp", "inp", "cls", "ttfb"}),
     # `path` is a route pattern, never a URL with ids in it, and no
     # response body is ever carried.
     "api_error":      frozenset({"path", "status"}),
     "install_prompt": frozenset({"outcome"}),
+}
+
+# 選択肢 — the values a string property may take, where it is an enum
+# (plan 218). `clean` keeps a key only if the name allows it; for the
+# keys listed here it also keeps the VALUE only if it is one of these,
+# and drops the key otherwise. That is what makes "nothing a learner
+# typed" structural rather than a call site's good manners: a string
+# that is not on this list cannot reach the table under these keys,
+# however it was sent. lib/track.js mirrors this map and
+# tests/test_events.py holds the two equal.
+#
+# Keys not listed are numbers, booleans, or the older events' own
+# enums, which their call sites own (a run's `kind` comes from the
+# run keys, a boarding step from BoardingFlow). Two keys are held to a
+# SHAPE instead, on every name, below: `route` and `path`.
+_RUN_DOORS = frozenset({"today", "learn", "practice", "deck", "ride", "exam", "other"})
+VALUES: dict[str, dict[str, frozenset[str]]] = {
+    "session_start": {
+        "platform": frozenset({"web", "native"}),
+        "vp":       frozenset({"phone", "tablet", "desk", "wide"}),
+        "os":       frozenset({"ios", "android", "windows", "mac", "linux", "chromeos", "other"}),
+        "lang":     frozenset({"fr", "en"}),
+        "theme":    frozenset({"light", "dark", "auto"}),
+        "input":    frozenset({"touch", "mouse"}),
+    },
+    "boarding_done": {
+        "level_how": frozenset({"pick", "test"}),
+        "placed":    frozenset({"N5", "N4", "N3", "N2", "N1"}),
+    },
+    "run_start":    {"where": _RUN_DOORS},
+    "run_complete": {"where": _RUN_DOORS},
+    "run_abandon":  {"where": _RUN_DOORS},
+    "feature_use": {
+        # speech: a Japanese reading spoken (a card's, a sentence's).
+        # analyzer: a text, photo or video sent to the breakdown. ocr:
+        # a photo read. ask: a question to the tutor. explain: a
+        # sentence's explanation opened. dictionary: a search run.
+        # export: the progress downloaded. level_fit: Today's line that
+        # says the level does not fit (plan 224) -- opened, the move
+        # taken, or the level kept.
+        "feature": frozenset({"speech", "analyzer", "ocr", "ask", "explain",
+                              "dictionary", "export", "level_fit"}),
+        "action":  frozenset({"play", "text", "photo", "video", "scan", "send",
+                              "open", "search", "progress", "move", "stay"}),
+    },
+    "setting_change": {
+        "setting": frozenset({"theme", "lang", "rating_scale", "reading_pace", "sound",
+                              "notifications", "level", "lines", "daily_target"}),
+        "value":   frozenset({"light", "dark", "auto", "fr", "en",
+                              "binary", "simple", "full",
+                              "standard", "relaxed", "slow", "untimed",
+                              "on", "off", "N5", "N4", "N3", "N2", "N1", "changed"}),
+    },
+    "ai_use":       {"feature": frozenset({"ask", "composition", "translation_review",
+                                         "deep_analysis", "exam_paper"})},
+    "client_error": {"where": frozenset({"error", "rejection"})},
+}
+
+# The two keys held to a shape on every name. A route is a pattern
+# App.jsx declared (lib/routePattern.js) and an API path an area
+# (`/api/decks`); neither has room for a space, an accent, a dot or
+# anything else a learner's words are made of, so a value that does
+# not fit is dropped rather than stored.
+SHAPES = {
+    "route": re.compile(r"^/[A-Za-z0-9/:_-]{0,63}$"),
+    "path":  re.compile(r"^/api/[a-z][a-z0-9_-]{0,30}$"),
 }
 
 # Names that survive the thirty-day cut in scripts/compact_events.py.
@@ -254,9 +410,15 @@ def clean(name, props) -> dict | None:
     if not isinstance(props, dict):
         return {}
     out: dict = {}
+    enums = VALUES.get(name, {})
     for key, value in props.items():
         if key not in allowed:
             continue
+        if isinstance(value, str):
+            if key in enums and value not in enums[key]:
+                continue
+            if key in SHAPES and not SHAPES[key].fullmatch(value):
+                continue
         if isinstance(value, bool) or value is None:
             out[key] = value
         elif isinstance(value, (int, float)):
@@ -380,6 +542,39 @@ def write(cur, user_id: str, rows: list[tuple]) -> int:
     return kept
 
 
+def opted_out(cur, user_id: str) -> bool:
+    """Whether this account asked not to be counted (plan 218).
+
+    The switch in Réglages › Données was a localStorage flag until plan
+    218, which stopped the browser it was flipped in and nothing else:
+    the server's own events (a blocked fare, a cleared day, a basics
+    unit) kept being written, and so did every other device's. It is
+    the account's now, `user_profiles.analytics_off`, and both write
+    paths ask it first.
+
+    Inside a SAVEPOINT, because `cur` may be a caller's transaction
+    (core/credits.py records inside its own) and a failing read --
+    the column not there yet on a database mid-deploy -- must not
+    abort it. A failed read counts as NOT opted out only because the
+    column is then absent, which means nobody can have opted out yet.
+    """
+    try:
+        cur.execute("SAVEPOINT trail_optout")
+        cur.execute("SELECT analytics_off FROM user_profiles WHERE user_id = %s", (user_id,))
+        row = cur.fetchone()
+        cur.execute("RELEASE SAVEPOINT trail_optout")
+    except Exception:
+        try:
+            cur.execute("ROLLBACK TO SAVEPOINT trail_optout")
+        except Exception:
+            pass
+        return False
+    if not row:
+        return False
+    value = row["analytics_off"] if isinstance(row, dict) else row[0]
+    return bool(value)
+
+
 def _json(props: dict) -> str:
     import json
     return json.dumps(props, separators=(",", ":"))
@@ -403,12 +598,14 @@ def record(user_id: str, name: str, props: dict | None = None, cur=None) -> None
     row = [(name, cleaned, datetime.now(timezone.utc))]
     try:
         if cur is not None:
-            write(cur, user_id, row)
+            if not opted_out(cur, user_id):
+                write(cur, user_id, row)
             return
         conn = db_conn()
         try:
             with conn.cursor() as c:
-                write(c, user_id, row)
+                if not opted_out(c, user_id):
+                    write(c, user_id, row)
             conn.commit()
         except Exception:
             conn.rollback()

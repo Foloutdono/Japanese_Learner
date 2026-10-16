@@ -71,7 +71,12 @@ CREATE TABLE review_log (
     -- just SUM(xp_earned) and never drift if the formula's constants
     -- change later.
     xp_earned INTEGER NOT NULL DEFAULT 0,
-    reviewed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    reviewed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- The first answer to a card the level rule marked known (plan 224):
+    -- a check, not a first sighting. A check passed spends no new card
+    -- of the day's pace, and the level-fit watch reads the checks per
+    -- stop (study/level_fit.py).
+    assumed BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE INDEX idx_review_log_card_id
@@ -242,7 +247,23 @@ CREATE TABLE user_profiles (
     -- The clock runs in the browser, which scales the server's
     -- standard figures; see routes/profile.py's READING_PACES and
     -- frontend/src/domain/readingPace.js.
-    reading_pace TEXT
+    reading_pace TEXT,
+    -- 回復運転 — the review plan (plan 217, core/review_plan.py): a
+    -- ceiling on the day's reviews (NULL none), a catch-up chosen on
+    -- the comeback sheet (its share a day, its days -- NULL for gentle,
+    -- which has no end -- and its first day; all NULL when none runs),
+    -- the day "all of them now" was answered, and an absence declared
+    -- ahead. All NULL is the gate as it always was.
+    review_cap INTEGER,
+    catchup_cap INTEGER,
+    catchup_days SMALLINT,
+    catchup_from DATE,
+    comeback_declined_on DATE,
+    away_from DATE,
+    away_until DATE,
+    -- 足跡を残さない (plan 218): the account asked not to be counted.
+    -- core/events.opted_out reads it on both of the trail's write paths.
+    analytics_off BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 -- The Sentence bank: what the learner submitted, plus where it came
@@ -498,7 +519,10 @@ CREATE TABLE video_sessions (
     -- Retained so existing rows read back; nothing sets it any more.
     window_capped BOOLEAN NOT NULL DEFAULT FALSE,
     status        TEXT NOT NULL DEFAULT 'generating',  -- 'generating' | 'ready' | 'failed'
-    error         TEXT,
+    error         TEXT,                         -- why it failed, in English: for the logs
+    -- ... and as the stable snake_case code the client words in the
+    -- learner's language (plan 215). NULL on a row failed before it.
+    error_code    TEXT,
     sentences     JSONB,
     truncated     INTEGER NOT NULL DEFAULT 0,
     -- Optional YouTube id to embed alongside the transcript. Independent
@@ -606,8 +630,15 @@ CREATE TABLE exam_papers (
     section_count     INTEGER NOT NULL,
     question_count    INTEGER NOT NULL,
     created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- The identity of a seed paper (plan 228, study/exam_seed.seed_key):
+    -- "{exam_id}#{n}@{hash}", NULL for every paper generated on demand.
+    -- study/exam_seed.py stores the seeds at import, a new hash being a
+    -- changed paper; NULLed when a changed seed retires a sat revision.
+    seed_key          TEXT,
     PRIMARY KEY (exam_id, revision)
 );
+
+CREATE UNIQUE INDEX exam_papers_seed ON exam_papers (seed_key);
 
 CREATE TABLE exam_attempts (
     id          BIGSERIAL PRIMARY KEY,
@@ -872,6 +903,40 @@ CREATE TABLE composition_log (
 CREATE INDEX idx_composition_log_user
 ON composition_log(user_id, created_at);
 
+-- 会話 (conversation, plan 217): one row per graded turn of a scenario
+-- (content/conversation), however it was ridden. Owned by
+-- routes/conversation.py, created there at import time.
+--
+-- Nothing the learner typed: which scenario, which turn, the mode and
+-- how it went, never the words -- the free talk's lines live on the
+-- learner's screen and in one request, and nowhere else.
+--   mode       choose | translate | free
+--   turn       the scenario's turn (choose, translate), or the line of
+--              the free talk, from 0
+--   accuracy   translate: the measure the learner saw, 0..100; NULL
+--              elsewhere and where the check never answered
+--   verdict    translate and free: the tutor's, as the model answered;
+--              NULL where there was no review
+--   quality    choose: 4 for the reply, 1 for a wrong one (a question's
+--              rates, comprehension's); else the learner's rating 0..5
+-- `correct` is derived from quality (q > 2 is a pass), as everywhere.
+CREATE TABLE conversation_log (
+    id         BIGSERIAL PRIMARY KEY,
+    user_id    TEXT NOT NULL,
+    level      TEXT NOT NULL DEFAULT '',
+    scenario   TEXT NOT NULL,
+    mode       TEXT NOT NULL,
+    turn       SMALLINT NOT NULL,
+    accuracy   SMALLINT,
+    verdict    TEXT,
+    correct    BOOLEAN NOT NULL,
+    quality    SMALLINT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_conversation_log_user
+ON conversation_log(user_id, created_at);
+
 -- Owned by routes/ocr.py -- per-user daily counter for the vision OCR
 -- endpoint. Nothing here costs money (NVIDIA's vision models are on the
 -- free tier), so this bounds draw on the SHARED free quota that the
@@ -951,6 +1016,21 @@ CREATE TABLE grammar_tours (
     PRIMARY KEY (user_id, card_id)
 );
 
+-- ── 初見 — how a kana or a kanji's first tour went ──────────────────
+-- Owned by study/glyph_tour.py (plan 216). One row per character a learner
+-- was toured through before its first card, the first tour only: the
+-- traces that missed and whether the board drew the strokes for them.
+-- Read by nothing the scheduler runs. No cascade from auth (ADR 0010):
+-- DELETE /api/account and scripts/purge_orphans.py clear it.
+CREATE TABLE glyph_tours (
+    user_id  TEXT NOT NULL,
+    card_id  TEXT NOT NULL,
+    misses   SMALLINT NOT NULL,
+    shown    BOOLEAN NOT NULL,
+    done_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, card_id)
+);
+
 -- ── 足跡 — the trail of screens a learner walked ─────────────────────
 -- Owned by core/events.py, written by routes/events.py (a batch the
 -- client queues and flushes) and by core/credits.py (the fare gate's
@@ -999,3 +1079,37 @@ CREATE TABLE event_daily (
     n       INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, day, name)
 );
+
+-- A learner's message to the people who make the app (plan 222): a
+-- problem, an idea, a fault in what is taught, or a card reported from
+-- its flag. Self-migrated by routes/feedback.py. Unlike event_log, `body`
+-- IS what the learner typed -- the one table that keeps words on
+-- purpose, which is why it is its own table and route: the dashboards
+-- and the weekly digest count it, scripts/read_feedback.py is what reads
+-- it, by hand. Every other column is a closed class or a
+-- shape (core/events.VALUES, events.SHAPES): `route` a pattern App.jsx
+-- declared, `area`/`status` a failure's API area and HTTP status,
+-- `platform`/`vp`/`os`/`lang` the visit's classes. `card_id` is
+-- unprefixed (the content key), `reasons` a card's, from
+-- feedback.CARD_REASONS. `reply_to` is read from the account when the
+-- learner asks for an answer, never from the request. Erased with the
+-- account (routes/account.py).
+CREATE TABLE feedback (
+    id         BIGSERIAL PRIMARY KEY,
+    user_id    TEXT NOT NULL,
+    kind       TEXT NOT NULL,
+    body       TEXT NOT NULL DEFAULT '',
+    reasons    TEXT[] NOT NULL DEFAULT '{}',
+    card_id    TEXT,
+    route      TEXT,
+    area       TEXT,
+    status     SMALLINT,
+    platform   TEXT,
+    vp         TEXT,
+    os         TEXT,
+    lang       TEXT,
+    reply      BOOLEAN NOT NULL DEFAULT FALSE,
+    reply_to   TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX feedback_user_at ON feedback (user_id, created_at);

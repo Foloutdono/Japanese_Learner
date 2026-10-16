@@ -34,6 +34,10 @@ import { forgetAccount } from './stores/account'
 import { track } from './lib/track'
 import { routePattern } from './lib/routePattern'
 import { watchApiFailures } from './lib/apiTrail'
+import { watchClientErrors } from './lib/clientErrors'
+import { watchVitals } from './lib/vitals'
+import { enterScreen } from './lib/screenTrail'
+import { syncOptOut } from './stores/analyticsOptOut'
 import { useDesk } from './hooks/useDesk'
 import { LangProvider, useLang } from './LangContext'
 
@@ -69,6 +73,8 @@ import ReadingRun from './screens/ReadingRun'
 import ComprehensionRun from './screens/ComprehensionRun'
 import DictationRun from './screens/DictationRun'
 import CompositionRun from './screens/CompositionRun'
+import ConversationStation from './screens/ConversationStation'
+import ConversationRun from './screens/ConversationRun'
 import ProfileScreen from './screens/ProfileScreen'
 import SettingsScreen from './screens/SettingsScreen'
 import ExamScreen from './screens/ExamScreen'
@@ -76,6 +82,7 @@ import ExamRunner from './screens/ExamRunner'
 import ExamResult from './screens/ExamResult'
 import TranslationRun from './screens/TranslationRun'
 import AppLoading from './screens/AppLoading'
+import { FeedbackHost } from './components/feedback/FeedbackSheet'
 
 // Renders nothing — keeps <html lang> and document.title in step with
 // the current route and language. Beside <Routes/> rather than inside
@@ -111,6 +118,10 @@ function DocumentHead() {
 }
 
 watchApiFailures()
+// Plan 218: uncaught errors by screen (never their text) and the page's
+// own speed, once per load.
+watchClientErrors()
+watchVitals()
 
 // 足跡 — renders nothing; records which screen was opened.
 //
@@ -134,7 +145,11 @@ export function Trail() {
   useEffect(() => {
     const route = routePattern(pathname)
     if (!route) return
-    track('screen_view', { route, tab: tabFor(pathname) })
+    const tab = tabFor(pathname)
+    track('screen_view', { route, tab })
+    // 滞在 (plan 218): the screen before is left -- its engaged time and
+    // its feature counts sent -- and this one's clock starts.
+    enterScreen(route, tab)
   }, [pathname])
 
   return null
@@ -421,6 +436,9 @@ export default function App({ front = NO_FRONT }) {
           standalone: typeof window !== 'undefined'
             && window.matchMedia?.('(display-mode: standalone)').matches === true,
         })
+        // 足跡を残さない (plan 218): the account's switch onto this
+        // device, or this device's older local switch up to the account.
+        syncOptOut(p.analyticsOff, session)
         // A real answer: the device now knows this learner is past
         // the gate, and may wave them through on a day the server is
         // not answering (stores/onboarded.js).
@@ -715,6 +733,9 @@ export default function App({ front = NO_FRONT }) {
                 />
               ))
             )}
+            {/* 会話 (plan 217): chosen by scene and by grade, so its
+                station is its own rather than SentenceStation's. */}
+            <Route path="/practice/conversation" element={<ConversationStation session={session} />} />
             <Route path="/dictionary"           element={<DictionaryScreen session={session} />} />
             <Route path="/dictionary/analyzer"  element={<AnalyzerScreen session={session} />} />
             <Route path="/profile"              element={<ProfileScreen session={session} />} />
@@ -760,6 +781,7 @@ export default function App({ front = NO_FRONT }) {
             <Route path="/practice/comprehension/:level"     element={<ComprehensionRun session={session} />} />
             <Route path="/practice/dictation/:level"          element={<DictationRun session={session} />} />
             <Route path="/practice/composition/:level"        element={<CompositionRun session={session} />} />
+            <Route path="/practice/conversation/:scenario/:mode" element={<ConversationRun session={session} />} />
             <Route path="/practice/translation/level/:level" element={<TranslationRun session={session} />} />
             <Route path="/practice/translation/tier/:tier"   element={<TranslationRun session={session} />} />
             <Route path="/practice/translation/mastery"      element={<TranslationRun session={session} />} />
@@ -823,6 +845,10 @@ export default function App({ front = NO_FRONT }) {
             second is raised by a review the screen fired and forgot. */}
         <BalanceSheet />
         <RunOutSheet />
+        {/* Nous écrire, raised from inside a run (plan 222): a failure's
+            link and a card's flag. Here for RunOutSheet's reason -- the
+            run's own retry unmounts the failure that raised it. */}
+        <FeedbackHost session={session} />
         <OfferScreen />
         {/* 補充 — what the refill landed while the app was closed, on
             arrival (plan 141). Held through the 改札 cutscene and the

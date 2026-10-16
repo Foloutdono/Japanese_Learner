@@ -150,6 +150,9 @@ async function walkToPlan(screen) {
   await passName(screen)
   await click(screen, '[data-kana="both"]')
   await settle()
+  await click(screen, '[data-how="pick"]')
+  await click(screen, '[data-action="continue"]')
+  await settle()
   await click(screen, '[data-level="N1"]')
   await click(screen, '[data-action="continue"]')
   await settle()
@@ -239,6 +242,13 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-kana="both"]')
     await settle()
     // Both read: the level is a stop of its own, and the track grows one.
+    // It is asked first how to find it (plan 224): chosen, or tested.
+    expect(stepOf(screen)).toBe('levelHow')
+    expect(stepsOf(screen)).toBe('4/8')
+    expect(q(screen, '[data-action="continue"]').disabled).toBe(true)
+    await click(screen, '[data-how="pick"]')
+    await click(screen, '[data-action="continue"]')
+    await settle()
     expect(stepOf(screen)).toBe('level')
     expect(stepsOf(screen)).toBe('4/8')
     expect(q(screen, '[data-level="novice"] .brd-stn__ring').textContent).toBe('あ')
@@ -497,10 +507,119 @@ describe('BoardingFlow', () => {
     seedCredits(CREDITS)
   })
 
+  // ── 実力診断 in the boarding (plan 224, the owner's B) ──
+  // The climb, mocked as the server answers it: one question at a time,
+  // then the verdict. The line comes back with the stop reached chosen
+  // and each level asked carrying its score.
+  const question = (id, level) => ({
+    id, sectionId: level, kind: 'reading', type: 'mcq-text', promptJp: `${id}の問題`,
+    choices: ['一', '二', '三', '四'].map((textJp, i) => ({ id: `c${i + 1}`, textJp })),
+  })
+  function climb(...steps) {
+    const queue = [...steps]
+    apiJsonWithTimeout.mockImplementation(async (path, _s, opts) => {
+      if (path === '/api/onboarding/complete') return { jlptLevel: 'N4', dailyNewTarget: 10, onboardedAt: 'x' }
+      if (path.startsWith('/api/onboarding/placement/')) return queue.shift()
+      throw new Error(`unexpected ${path} ${opts?.body ?? ''}`)
+    })
+  }
+  const asking = (id, level, perLevel = {}) => ({ seed: 9, done: false, question: question(id, level), level, perLevel })
+  const sent = () => apiJsonWithTimeout.mock.calls
+    .filter(c => c[0] === '/api/onboarding/placement/answer')
+    .map(c => JSON.parse(c[2].body))
+
+  async function toTest(screen) {
+    await passName(screen)
+    await click(screen, '[data-kana="both"]')
+    await settle()
+    await click(screen, '[data-how="test"]')
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    expect(stepOf(screen)).toBe('test')
+    expect(stepsOf(screen)).toBe('4/8')
+  }
+
+  it('finds the level by the test, and lands on the line with the stop it reached chosen', async () => {
+    climb(
+      asking('q1', 'N5'),
+      asking('q2', 'N4', { N5: { correct: 3, total: 3, cleared: true } }),
+      { seed: 9, done: true, recommendedLevel: 'N4', correct: 4, total: 6, perLevel: {
+        N5: { correct: 3, total: 3, cleared: true }, N4: { correct: 1, total: 3, cleared: false },
+      } },
+    )
+    const { screen, onComplete } = await renderFlow({ dryRun: false })
+    await toTest(screen)
+    expect(q(screen, '.onb-climb__rung--at').textContent).toBe('N5')
+    // Nothing picked, no way on.
+    expect(q(screen, '[data-action="continue"]').disabled).toBe(true)
+    await click(screen, '.mcq-row')
+    await click(screen, '[data-action="continue"]')
+    await settle(60)
+    expect(sent()[0]).toEqual({ seed: 9, answers: { q1: 'c1' } })
+    expect(q(screen, '.onb-climb__rung--done').textContent).toBe('N5')
+    expect(q(screen, '[data-action="continue"]').disabled).toBe(true)
+    await click(screen, '.mcq-row:nth-child(2)')
+    await click(screen, '[data-action="continue"]')
+    await settle()
+
+    expect(stepOf(screen)).toBe('level')
+    expect(stepsOf(screen)).toBe('4/8')
+    expect(q(screen, '[data-level="N4"]').getAttribute('aria-pressed')).toBe('true')
+    expect(q(screen, '.brd__q').textContent).toContain('N4')
+    expect(q(screen, '[data-level="N5"] .brd-tag').textContent).toBe('3 / 3')
+    expect(q(screen, '[data-level="N5"] .brd-tag--miss')).toBeNull()
+    expect(q(screen, '[data-level="N4"] .brd-tag--miss').textContent).toBe('1 / 3')
+    expect(q(screen, '[data-level="N3"] .brd-tag')).toBeNull()
+
+    // Back goes to the question before the test, never into a test run.
+    await click(screen, '.brd__back')
+    await settle()
+    expect(stepOf(screen)).toBe('levelHow')
+    expect(q(screen, '[data-how="test"]').getAttribute('aria-pressed')).toBe('true')
+    // Choosing instead forgets the verdict: the line is the learner's word.
+    await click(screen, '[data-how="pick"]')
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    expect(stepOf(screen)).toBe('level')
+    expect(q(screen, '.brd-tag')).toBeNull()
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    expect(stepOf(screen)).toBe('goal')
+    expect(onComplete).not.toHaveBeenCalled()
+  })
+
+  it('stops where it gets too hard, and leaves for the line without a verdict', async () => {
+    climb(asking('q1', 'N5'), { seed: 9, done: true, recommendedLevel: 'N5', correct: 0, total: 0, perLevel: {
+      N5: { correct: 0, total: 0, cleared: false },
+    } })
+    const { screen } = await renderFlow()
+    await toTest(screen)
+    await click(screen, '[data-action="climb-stop"]')
+    await settle()
+    expect(sent()[0]).toEqual({ seed: 9, answers: {}, stop: true })
+    expect(stepOf(screen)).toBe('level')
+    expect(q(screen, '[data-level="N5"]').getAttribute('aria-pressed')).toBe('true')
+
+    // "I know my level" from the test: the plain line, nothing chosen.
+    climb(asking('q1', 'N5'))
+    await click(screen, '.brd__back')
+    await settle()
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    expect(stepOf(screen)).toBe('test')
+    await click(screen, '[data-action="climb-pick"]')
+    await settle()
+    expect(stepOf(screen)).toBe('level')
+    expect(q(screen, '.brd-tag')).toBeNull()
+  })
+
   it('a reader of both scripts at N1 has no stop ahead: the goal is skipped and the track shortens', async () => {
     const { screen } = await renderFlow()
     await passName(screen)
     await click(screen, '[data-kana="both"]')
+    await settle()
+    await click(screen, '[data-how="pick"]')
+    await click(screen, '[data-action="continue"]')
     await settle()
     await click(screen, '[data-level="N1"]')
     await click(screen, '[data-action="continue"]')
@@ -589,6 +708,9 @@ describe('BoardingFlow', () => {
     await passName(screen)
     await click(screen, '[data-kana="both"]')
     await settle()
+    await click(screen, '[data-how="pick"]')
+    await click(screen, '[data-action="continue"]')
+    await settle()
     await click(screen, '[data-level="N4"]')
     await click(screen, '[data-action="continue"]')
     await settle()
@@ -621,6 +743,9 @@ describe('BoardingFlow', () => {
     const { screen, onComplete } = await renderFlow()
     await passName(screen)
     await click(screen, '[data-kana="both"]')
+    await settle()
+    await click(screen, '[data-how="pick"]')
+    await click(screen, '[data-action="continue"]')
     await settle()
     await click(screen, '[data-level="N4"]')
     await click(screen, '[data-action="continue"]')
@@ -908,7 +1033,9 @@ describe('BoardingFlow', () => {
     await settle(60)
 
     const said = live(screen).textContent
-    expect(updateUser).toHaveBeenCalledWith({ email: 'patou@gmail.com', password: 'hunter22' })
+    // The learner's language rides along, for the confirmation mail's
+    // template (lib/guest.js, plan 215).
+    expect(updateUser).toHaveBeenCalledWith({ email: 'patou@gmail.com', password: 'hunter22', data: { lang: 'fr' } })
     expect(said).not.toContain('""')
     expect(said).toContain(fr.claimEmailUnreachable)
     // The older line steps aside rather than stacking under the new one…
@@ -937,7 +1064,7 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-action="account-create"]')
     await settle()
 
-    expect(updateUser).toHaveBeenCalledWith({ email: 'patou@gmail.com', password: 'hunter22' })
+    expect(updateUser).toHaveBeenCalledWith({ email: 'patou@gmail.com', password: 'hunter22', data: { lang: 'fr' } })
     expect(stepOf(screen)).toBe('pass')
   })
 })

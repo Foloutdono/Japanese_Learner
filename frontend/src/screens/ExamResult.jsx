@@ -285,7 +285,7 @@ export default function ExamResult({ session }) {
                 <div className="desk-score__figs">
                   <b className="desk-score__fig">{sectionStats.correct}</b>
                   <span className="desk-score__of">/ {sectionStats.total}</span>
-                  <span className={metTarget ? 'desk-score__pct' : 'desk-score__pct desk-score__pct--low'}>{pct} %</span>
+                  <span className={metTarget ? 'desk-score__pct' : 'desk-score__pct desk-score__pct--low'}>{t.percent(pct)}</span>
                 </div>
                 <div className="desk-score__bar" role="img" aria-label={t.examScoreAgainst(pct, PRACTICE_TARGET_PCT)}>
                   <i className={metTarget ? undefined : 'desk-score__low'} style={{ width: `${Math.min(100, Math.max(0, pct))}%` }} />
@@ -376,7 +376,7 @@ export default function ExamResult({ session }) {
         <div className="exam-res__figs">
           <b className="exam-res__fig">{sectionStats.correct}</b>
           <span className="exam-res__of">/ {sectionStats.total}</span>
-          <span className={metTarget ? 'exam-res__pct' : 'exam-res__pct exam-res__pct--low'}>{pct} %</span>
+          <span className={metTarget ? 'exam-res__pct' : 'exam-res__pct exam-res__pct--low'}>{t.percent(pct)}</span>
         </div>
         <div className="exam-res__bar" role="img" aria-label={t.examScoreAgainst(pct, PRACTICE_TARGET_PCT)}>
           <span className={metTarget ? 'exam-res__fill' : 'exam-res__fill exam-res__fill--low'} style={{ width: `${Math.min(100, Math.max(0, pct))}%` }} />

@@ -18,8 +18,9 @@ EXAM_AUDIO_DIR (where to write, optional), and writes the names
 study/grammar_audio.py derives, so the app finds every file it makes.
 
 `--tours` is the authored half alone -- the scenes, their replies and the
-twists, a few hundred lines -- where the default also voices every
-example sentence of the catalogue (~2,200).
+twists, and since plan 217 the conversation bank's scenes, a thousand
+lines or so -- where the default also voices every example sentence of
+the catalogue (~2,200).
 """
 import argparse
 import logging
@@ -52,6 +53,11 @@ def _tour_lines() -> set[tuple[str, str]]:
             for line in [*scene["lines"], scene["ask"]["cue"]]:
                 out.add((line["jp"], line["who"]))
             out.update((jp, "me") for jp in scene["ask"]["choices"])
+    # The conversation bank's scenes (plan 217) are authored the same
+    # way, and voiced by the same two speakers.
+    for them, me in grammar_audio.conversation_lines():
+        out.update((jp, "them") for jp in them)
+        out.update((jp, "me") for jp in me)
     return out
 
 

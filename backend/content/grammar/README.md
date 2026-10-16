@@ -22,6 +22,7 @@ python -m pytest tests/test_grammar_points.py tests/test_grammar_sentences.py
   // "reading": "〜のなかで",                  // only where the pattern has a kanji (this is 〜の中で's; 〜てください has none)
   "structure": "verb て-form + ください",     // what it attaches to, one line
   // "structure_reading": "group + のなかで",  // only where the structure has a kanji (〜の中で's "group + の中で")
+  "structure_fr": "verbe forme en て + ください", // the same line in French (plan 215)
   "meaning":   {"en": "please do", "fr": "faites…, s'il vous plaît"},
   "register":  "polite",                       // optional: neutral | casual | polite | formal | written
   "steps": [                                   // the lesson, read top to bottom
@@ -43,6 +44,7 @@ python -m pytest tests/test_grammar_points.py tests/test_grammar_sentences.py
 | `pattern` | unique across all five levels; no `:`. The structure names it (`tests/test_grammar_points.py`). |
 | `reading` | on every pattern with a kanji and on no other: the pattern spelled with each kanji run in kana, everything else (〜, kana, brackets, spaces) exactly as written — 〜が（逆接） is 〜が（ぎゃくせつ）. It is the furigana every card, lesson and dictionary plate prints over the pattern (`study/grammar_examples.pattern_furigana`), so it is the reading the lesson teaches: 〜気味 is 〜ぎみ, 〜方 is 〜かた, 〜得る is 〜うる. Two readings of one kanji are joined by ・ (〜中 is 〜ちゅう・じゅう). Written by hand, never taken from the tokenizer, which guesses on a fragment. |
 | `structure_reading` | the same rule for the formation line: on every `structure` with a kanji and on no other, spelled exactly as the structure is (its English too) with each kanji run in kana — "group + の中で" is "group + のなかで". The card, the lesson and the dictionary print it over the formation. |
+| `structure_fr` | the formation line in French, on every point: the same formula with its English words in French, its Japanese runs (kana, kanji, 〜, ・, ／, brackets) and its `+` joints exactly as `structure` has them and in the same order. The French furigana is carried over from `structure_reading` by matching those runs, so there is no French reading field. Keep the lessons' own terms: "verbe forme en て", "forme du dictionnaire", "forme neutre", "radical verbal", "adj. en い／な", "nom", "proposition", "classificateur". `structure` itself stays English and is never translated in place — the detector reads what a point attaches to from it. |
 | `meaning` | one line, both languages, no Japanese in it. |
 | `steps` | kinds `rule`, `use`, `careful`, each at most once, `rule` first. `**bold**` allowed; a bullet is a line starting `- `. |
 | `compare` | every `pattern` is a real point (any level), never the entry itself. |

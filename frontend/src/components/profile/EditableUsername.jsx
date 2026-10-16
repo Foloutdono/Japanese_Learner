@@ -39,17 +39,23 @@ export function EditableUsername({ username, session, onChange, t, ground = 'pan
 
     setSaving(true)
     setError(null)
+    // Only a sentence from the table reaches the field. A dropped
+    // connection rejects with the browser's own English ("Failed to
+    // fetch", "Load failed"), which used to be printed as it stood
+    // (plan 215): the refusal is decided here, and anything else is
+    // the generic line.
+    let refused = t.genericError
     apiFetch('/api/profile', session, { method: 'PATCH', body: JSON.stringify({ username: value }) })
       .then(r => {
-        if (r.status === 409) throw new Error(t.usernameTaken)
-        if (!r.ok) throw new Error()
+        if (r.status === 409) refused = t.usernameTaken
+        if (!r.ok) throw new Error(`profile ${r.status}`)
         return r.json()
       })
       .then(data => {
         onChange(data.username)
         setEditing(false)
       })
-      .catch(err => setError(err.message || (t.genericError)))
+      .catch(() => setError(refused))
       .finally(() => setSaving(false))
   }
 

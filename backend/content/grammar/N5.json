@@ -2,6 +2,7 @@
   {
     "pattern": "です／だ",
     "structure": "Noun/な-adj + です・だ",
+    "structure_fr": "Nom/adj. en な + です・だ",
     "meaning": {
       "en": "the copula: is/am/are",
       "fr": "la copule : être"
@@ -501,6 +502,7 @@
   {
     "pattern": "は",
     "structure": "topic + は",
+    "structure_fr": "thème + は",
     "meaning": {
       "en": "marks the sentence topic",
       "fr": "marque le thème de la phrase"
@@ -968,6 +970,7 @@
   {
     "pattern": "が",
     "structure": "subject + が",
+    "structure_fr": "sujet + が",
     "meaning": {
       "en": "marks the grammatical subject",
       "fr": "marque le sujet grammatical"
@@ -1321,6 +1324,7 @@
   {
     "pattern": "を",
     "structure": "object + を",
+    "structure_fr": "complément d'objet + を",
     "meaning": {
       "en": "marks the direct object",
       "fr": "marque le complément d'objet direct"
@@ -1629,6 +1633,7 @@
   {
     "pattern": "に",
     "structure": "noun + に",
+    "structure_fr": "nom + に",
     "meaning": {
       "en": "time, destination, or indirect object",
       "fr": "le moment, la destination ou le destinataire"
@@ -1994,6 +1999,7 @@
   {
     "pattern": "で",
     "structure": "noun + で",
+    "structure_fr": "nom + で",
     "meaning": {
       "en": "location of an action, or means/method",
       "fr": "le lieu d'une action, ou le moyen"
@@ -2347,6 +2353,7 @@
     "pattern": "と",
     "structure": "noun + と + noun ／ 「quotation」 + と + 言う・思う",
     "structure_reading": "noun + と + noun ／ 「quotation」 + と + いう・おもう",
+    "structure_fr": "nom + と + nom ／ 「citation」 + と + 言う・思う",
     "meaning": {
       "en": "and (nouns); with, together with; marks what is said or thought",
       "fr": "et (entre noms) ; avec, en compagnie de ; introduit ce qui est dit ou pensé"
@@ -2758,6 +2765,7 @@
   {
     "pattern": "も",
     "structure": "noun + も, replacing は or が",
+    "structure_fr": "nom + も, à la place de は ou が",
     "meaning": {
       "en": "also, too",
       "fr": "aussi, également"
@@ -3169,6 +3177,7 @@
   {
     "pattern": "の",
     "structure": "noun + の + noun",
+    "structure_fr": "nom + の + nom",
     "meaning": {
       "en": "possessive, or links two nouns",
       "fr": "possessif, ou relie deux noms"
@@ -3609,6 +3618,7 @@
   {
     "pattern": "から〜まで",
     "structure": "noun + から〜noun + まで",
+    "structure_fr": "nom + から〜nom + まで",
     "meaning": {
       "en": "from ... to ...",
       "fr": "de... à..., depuis... jusqu'à..."
@@ -3917,6 +3927,7 @@
   {
     "pattern": "〜ます／〜ません",
     "structure": "verb stem + ます・ません",
+    "structure_fr": "radical verbal + ます・ません",
     "meaning": {
       "en": "polite present/future, affirmative and negative",
       "fr": "présent/futur poli, affirmatif et négatif"
@@ -4286,6 +4297,7 @@
   {
     "pattern": "〜ました／〜ませんでした",
     "structure": "verb stem + ました・ませんでした",
+    "structure_fr": "radical verbal + ました・ませんでした",
     "meaning": {
       "en": "polite past, affirmative and negative",
       "fr": "passé poli, affirmatif et négatif"
@@ -4605,6 +4617,7 @@
     "pattern": "ない形 〜ない",
     "reading": "ないけい 〜ない",
     "structure": "う-verb あ-row ・ る-verb stem + ない",
+    "structure_fr": "verbe en う au son en あ ・ radical d'un verbe en る + ない",
     "meaning": {
       "en": "the plain negative: don't, doesn't",
       "fr": "la négation neutre : ne… pas"
@@ -5168,6 +5181,7 @@
     "pattern": "た形 〜た",
     "reading": "たけい 〜た",
     "structure": "verb て-form with た for て (…た・だ)",
+    "structure_fr": "verbe forme en て avec た à la place de て (…た・だ)",
     "meaning": {
       "en": "the plain past: did",
       "fr": "le passé neutre : j'ai fait"
@@ -5677,6 +5691,7 @@
   {
     "pattern": "〜たいです",
     "structure": "verb stem + たいです",
+    "structure_fr": "radical verbal + たいです",
     "meaning": {
       "en": "want to do something",
       "fr": "vouloir faire quelque chose"
@@ -6068,6 +6083,7 @@
   {
     "pattern": "〜てください",
     "structure": "verb て-form + ください",
+    "structure_fr": "verbe forme en て + ください",
     "meaning": {
       "en": "please do",
       "fr": "faites..., s'il vous plaît"
@@ -6437,6 +6453,7 @@
   {
     "pattern": "〜ています",
     "structure": "verb て-form + います",
+    "structure_fr": "verbe forme en て + います",
     "meaning": {
       "en": "ongoing action, or a resulting state",
       "fr": "action en cours, ou état qui en résulte"
@@ -6792,6 +6809,7 @@
   {
     "pattern": "〜てもいいです",
     "structure": "verb て-form + もいいです",
+    "structure_fr": "verbe forme en て + もいいです",
     "meaning": {
       "en": "it's okay to / may I",
       "fr": "il est permis de / puis-je"
@@ -7145,6 +7163,7 @@
   {
     "pattern": "〜てはいけません",
     "structure": "verb て-form + はいけません",
+    "structure_fr": "verbe forme en て + はいけません",
     "meaning": {
       "en": "must not do",
       "fr": "il est interdit de"
@@ -7464,6 +7483,7 @@
   {
     "pattern": "〜ことができます",
     "structure": "verb dictionary form + ことができます",
+    "structure_fr": "verbe forme du dictionnaire + ことができます",
     "meaning": {
       "en": "can do, is able to",
       "fr": "pouvoir, être capable de"
@@ -7817,6 +7837,7 @@
   {
     "pattern": "〜ないでください",
     "structure": "verb ない-form + でください",
+    "structure_fr": "verbe forme en ない + でください",
     "meaning": {
       "en": "please don't do",
       "fr": "ne faites pas..., s'il vous plaît"
@@ -8170,6 +8191,7 @@
   {
     "pattern": "〜なければなりません",
     "structure": "verb ない-form (drop い) + ければなりません",
+    "structure_fr": "verbe forme en ない (sans い) + ければなりません",
     "meaning": {
       "en": "must do",
       "fr": "devoir, il faut"
@@ -8548,6 +8570,7 @@
   {
     "pattern": "へ",
     "structure": "noun + へ",
+    "structure_fr": "nom + へ",
     "meaning": {
       "en": "direction of movement: to, toward",
       "fr": "direction d'un déplacement : vers, à"
@@ -8944,6 +8967,7 @@
   {
     "pattern": "や",
     "structure": "noun + や + noun",
+    "structure_fr": "nom + や + nom",
     "meaning": {
       "en": "and — an open-ended list, unlike と",
       "fr": "et... (liste ouverte, à la différence de と)"
@@ -9316,6 +9340,7 @@
   {
     "pattern": "か",
     "structure": "sentence + か",
+    "structure_fr": "phrase + か",
     "meaning": {
       "en": "turns a statement into a question; also 'or' between nouns",
       "fr": "transforme une phrase en question ; aussi « ou » entre noms"
@@ -9633,6 +9658,7 @@
   {
     "pattern": "ね",
     "structure": "sentence + ね",
+    "structure_fr": "phrase + ね",
     "meaning": {
       "en": "seeks agreement: right?, isn't it?",
       "fr": "cherche l'accord : n'est-ce pas ?"
@@ -10018,6 +10044,7 @@
   {
     "pattern": "よ",
     "structure": "sentence + よ",
+    "structure_fr": "phrase + よ",
     "meaning": {
       "en": "asserts something the listener may not know yet",
       "fr": "affirme quelque chose que l'autre ignore peut-être"
@@ -10418,6 +10445,7 @@
   {
     "pattern": "〜から",
     "structure": "plain/polite form + から",
+    "structure_fr": "forme neutre/polie + から",
     "meaning": {
       "en": "because, since (gives the reason first)",
       "fr": "parce que, puisque (la raison d'abord)"
@@ -10770,6 +10798,7 @@
   {
     "pattern": "〜ませんか",
     "structure": "verb stem + ませんか",
+    "structure_fr": "radical verbal + ませんか",
     "meaning": {
       "en": "won't you? — an invitation",
       "fr": "voulez-vous... ? (une invitation)"
@@ -11080,6 +11109,7 @@
   {
     "pattern": "〜ましょう",
     "structure": "verb stem + ましょう",
+    "structure_fr": "radical verbal + ましょう",
     "meaning": {
       "en": "let's do",
       "fr": "faisons..., allons-y"
@@ -11434,6 +11464,7 @@
   {
     "pattern": "〜ましょうか",
     "structure": "verb stem + ましょうか",
+    "structure_fr": "radical verbal + ましょうか",
     "meaning": {
       "en": "shall I?, shall we?",
       "fr": "voulez-vous que je... ? et si nous... ?"
@@ -11792,6 +11823,7 @@
   {
     "pattern": "〜があります／います",
     "structure": "noun + が + あります・います",
+    "structure_fr": "nom + が + あります・います",
     "meaning": {
       "en": "there is/are — あります for things, います for the living",
       "fr": "il y a : あります pour les choses, います pour les êtres vivants"
@@ -12174,6 +12206,7 @@
     "pattern": "い形容詞／な形容詞",
     "reading": "いけいようし／なけいようし",
     "structure": "い-adj + noun / な-adj + な + noun",
+    "structure_fr": "adj. en い + nom / adj. en な + な + nom",
     "meaning": {
       "en": "the two adjective classes, and how each attaches to a noun",
       "fr": "les deux classes d'adjectifs, et leur accroche au nom"
@@ -12639,6 +12672,7 @@
   {
     "pattern": "〜くて／〜で",
     "structure": "い-adj (drop い) + くて / な-adj + で",
+    "structure_fr": "adj. en い (sans い) + くて / adj. en な + で",
     "meaning": {
       "en": "joins two adjectives or clauses: and",
       "fr": "relie deux adjectifs ou propositions : et"
@@ -13030,6 +13064,7 @@
   {
     "pattern": "〜くなる／〜になる",
     "structure": "い-adj (drop い) + くなる / noun・な-adj + になる",
+    "structure_fr": "adj. en い (sans い) + くなる / nom・adj. en な + になる",
     "meaning": {
       "en": "become, turn into",
       "fr": "devenir"
@@ -13416,6 +13451,7 @@
   {
     "pattern": "〜より〜のほうが",
     "structure": "noun + より + noun + のほうが + adjective",
+    "structure_fr": "nom + より + nom + のほうが + adjectif",
     "meaning": {
       "en": "comparison: the second one is more ...",
       "fr": "comparaison : le second est plus..."
@@ -13802,6 +13838,7 @@
   {
     "pattern": "〜で〜がいちばん",
     "structure": "group + で + noun + が + いちばん + adjective",
+    "structure_fr": "groupe + で + nom + が + いちばん + adjectif",
     "meaning": {
       "en": "the most ... within a group",
       "fr": "le plus... d'un ensemble"
@@ -14150,6 +14187,7 @@
   {
     "pattern": "〜ほうがいいです",
     "structure": "verb た-form/ない-form + ほうがいいです",
+    "structure_fr": "verbe forme en た/forme en ない + ほうがいいです",
     "meaning": {
       "en": "had better, it would be better to",
       "fr": "il vaut mieux, tu ferais mieux de"
@@ -14469,6 +14507,7 @@
   {
     "pattern": "〜なくてもいいです",
     "structure": "verb ない-form (drop い) + くてもいいです",
+    "structure_fr": "verbe forme en ない (sans い) + くてもいいです",
     "meaning": {
       "en": "don't have to, need not",
       "fr": "ne pas être obligé de"
@@ -14822,6 +14861,7 @@
   {
     "pattern": "〜てから",
     "structure": "verb て-form + から",
+    "structure_fr": "verbe forme en て + から",
     "meaning": {
       "en": "after doing, and then",
       "fr": "après avoir fait, puis"
@@ -15175,6 +15215,7 @@
   {
     "pattern": "〜まえに",
     "structure": "verb dictionary form / noun + の + まえに",
+    "structure_fr": "verbe forme du dictionnaire / nom + の + まえに",
     "meaning": {
       "en": "before doing",
       "fr": "avant de faire"
@@ -15484,6 +15525,7 @@
   {
     "pattern": "〜あとで",
     "structure": "verb た-form / noun + の + あとで",
+    "structure_fr": "verbe forme en た / nom + の + あとで",
     "meaning": {
       "en": "after doing",
       "fr": "après avoir fait"
@@ -15799,6 +15841,7 @@
   {
     "pattern": "〜とき",
     "structure": "plain form / noun + の + とき",
+    "structure_fr": "forme neutre / nom + の + とき",
     "meaning": {
       "en": "when, at the time of",
       "fr": "quand, au moment de"
@@ -16114,6 +16157,7 @@
     "reading": "〜がすきです",
     "structure": "Noun + が好きです",
     "structure_reading": "Noun + がすきです",
+    "structure_fr": "Nom + が好きです",
     "meaning": {
       "en": "like something",
       "fr": "aimer quelque chose"
@@ -16525,6 +16569,7 @@
   {
     "pattern": "〜がきらいです",
     "structure": "Noun + がきらいです",
+    "structure_fr": "Nom + がきらいです",
     "meaning": {
       "en": "dislike something",
       "fr": "ne pas aimer quelque chose"
@@ -16880,6 +16925,7 @@
     "reading": "〜がじょうずです／へたです",
     "structure": "Noun + が上手です・が下手です",
     "structure_reading": "Noun + がじょうずです・がへたです",
+    "structure_fr": "Nom + が上手です・が下手です",
     "meaning": {
       "en": "be skilled at / poor at",
       "fr": "être doué / ne pas être doué pour"
@@ -17223,6 +17269,7 @@
   {
     "pattern": "〜がほしいです",
     "structure": "Noun + がほしいです",
+    "structure_fr": "Nom + がほしいです",
     "meaning": {
       "en": "want to have a thing",
       "fr": "vouloir avoir une chose"
@@ -17576,6 +17623,7 @@
   {
     "pattern": "〜でしょう",
     "structure": "plain form + でしょう",
+    "structure_fr": "forme neutre + でしょう",
     "meaning": {
       "en": "probably, I expect",
       "fr": "probablement, je suppose"
@@ -17896,6 +17944,7 @@
   {
     "pattern": "まだ〜ていません",
     "structure": "まだ + verb て-form + いません",
+    "structure_fr": "まだ + verbe forme en て + いません",
     "meaning": {
       "en": "has not done it yet",
       "fr": "ne pas encore avoir fait"
@@ -18249,6 +18298,7 @@
   {
     "pattern": "もう〜ました",
     "structure": "もう + verb stem + ました",
+    "structure_fr": "もう + radical verbal + ました",
     "meaning": {
       "en": "has already done it",
       "fr": "avoir déjà fait"
@@ -18531,6 +18581,7 @@
   {
     "pattern": "〜くらい／〜ぐらい",
     "structure": "quantity + くらい・ぐらい",
+    "structure_fr": "quantité + くらい・ぐらい",
     "meaning": {
       "en": "roughly that much",
       "fr": "environ, à peu près"
@@ -18850,6 +18901,7 @@
   {
     "pattern": "〜ごろ",
     "structure": "point in time + ごろ",
+    "structure_fr": "moment + ごろ",
     "meaning": {
       "en": "at about that time",
       "fr": "vers (une heure, un moment)"
@@ -19173,6 +19225,7 @@
   {
     "pattern": "〜ずつ",
     "structure": "quantity + ずつ",
+    "structure_fr": "quantité + ずつ",
     "meaning": {
       "en": "that many apiece",
       "fr": "chacun, à raison de"
@@ -19502,6 +19555,7 @@
   {
     "pattern": "〜だけ",
     "structure": "noun/quantity + だけ",
+    "structure_fr": "nom/quantité + だけ",
     "meaning": {
       "en": "nothing more than that",
       "fr": "seulement, rien de plus"
@@ -19855,6 +19909,7 @@
   {
     "pattern": "〜など",
     "structure": "noun + など",
+    "structure_fr": "nom + など",
     "meaning": {
       "en": "and things of that sort",
       "fr": "et autres choses du même genre"
@@ -20170,6 +20225,7 @@
   {
     "pattern": "〜でも",
     "structure": "noun + でも",
+    "structure_fr": "nom + でも",
     "meaning": {
       "en": "or something along those lines",
       "fr": "ou quelque chose comme ça"
@@ -20492,6 +20548,7 @@
     "reading": "〜とおもいます",
     "structure": "plain form + と思います",
     "structure_reading": "plain form + とおもいます",
+    "structure_fr": "forme neutre + と思います",
     "meaning": {
       "en": "I think that",
       "fr": "je pense que"
@@ -20879,6 +20936,7 @@
     "reading": "〜といいます",
     "structure": "quoted words + と言います",
     "structure_reading": "quoted words + といいます",
+    "structure_fr": "paroles citées + と言います",
     "meaning": {
       "en": "says that",
       "fr": "dire que"
@@ -21192,6 +21250,7 @@
     "reading": "〜のがすきです",
     "structure": "verb dictionary form + のが好きです",
     "structure_reading": "verb dictionary form + のがすきです",
+    "structure_fr": "verbe forme du dictionnaire + のが好きです",
     "meaning": {
       "en": "enjoy doing something",
       "fr": "aimer faire quelque chose"
@@ -21545,6 +21604,7 @@
   {
     "pattern": "〜ないで",
     "structure": "verb ない-form + で",
+    "structure_fr": "verbe forme en ない + で",
     "meaning": {
       "en": "without doing it",
       "fr": "sans faire"
@@ -21898,6 +21958,7 @@
   {
     "pattern": "〜をください",
     "structure": "Noun + をください",
+    "structure_fr": "Nom + をください",
     "meaning": {
       "en": "asking to be given something",
       "fr": "demander qu'on vous donne quelque chose"
@@ -22271,6 +22332,7 @@
     "reading": "〜がわかります",
     "structure": "Noun + が分かります",
     "structure_reading": "Noun + がわかります",
+    "structure_fr": "Nom + が分かります",
     "meaning": {
       "en": "grasp or understand something",
       "fr": "comprendre quelque chose"
@@ -22624,6 +22686,7 @@
   {
     "pattern": "〜ができます",
     "structure": "Noun + ができます",
+    "structure_fr": "Nom + ができます",
     "meaning": {
       "en": "be capable of something",
       "fr": "savoir, être capable de"
@@ -22935,6 +22998,7 @@
   {
     "pattern": "〜たくないです",
     "structure": "verb stem + たくないです",
+    "structure_fr": "radical verbal + たくないです",
     "meaning": {
       "en": "have no wish to do",
       "fr": "ne pas vouloir faire"
@@ -23290,6 +23354,7 @@
     "reading": "〜のなかで",
     "structure": "group + の中で",
     "structure_reading": "group + のなかで",
+    "structure_fr": "groupe + の中で",
     "meaning": {
       "en": "within a given set",
       "fr": "parmi, au sein d'un ensemble"
@@ -23642,6 +23707,7 @@
   {
     "pattern": "そして",
     "structure": "sentence + 。 そして + sentence",
+    "structure_fr": "phrase + 。 そして + phrase",
     "meaning": {
       "en": "and then, joining two statements",
       "fr": "et puis, relie deux énoncés"
@@ -23967,6 +24033,7 @@
   {
     "pattern": "それから",
     "structure": "sentence + 。 それから + sentence",
+    "structure_fr": "phrase + 。 それから + phrase",
     "meaning": {
       "en": "after that, next",
       "fr": "après cela, ensuite"
@@ -24282,6 +24349,7 @@
   {
     "pattern": "しかし",
     "structure": "sentence + 。 しかし + sentence",
+    "structure_fr": "phrase + 。 しかし + phrase",
     "meaning": {
       "en": "but, marking a reversal",
       "fr": "mais, cependant"
@@ -24603,6 +24671,7 @@
     "reading": "〜にいきます",
     "structure": "verb stem + に行きます",
     "structure_reading": "verb stem + にいきます",
+    "structure_fr": "radical verbal + に行きます",
     "meaning": {
       "en": "go somewhere in order to do",
       "fr": "aller quelque part pour faire"
@@ -24979,6 +25048,7 @@
     "reading": "〜が（ぎゃくせつ）",
     "structure": "clause + が（逆接） + clause",
     "structure_reading": "clause + が（ぎゃくせつ） + clause",
+    "structure_fr": "proposition + が（逆接） + proposition",
     "meaning": {
       "en": "but; and yet (joins two clauses)",
       "fr": "mais ; pourtant (relie deux propositions)"
@@ -25367,6 +25437,7 @@
   {
     "pattern": "〜て、〜て",
     "structure": "verb て-form + 、 + verb て-form + …",
+    "structure_fr": "verbe forme en て + 、 + verbe forme en て + …",
     "meaning": {
       "en": "and then (linking actions in order)",
       "fr": "puis, et (enchaîne des actions dans l'ordre)"
@@ -25714,6 +25785,7 @@
     "reading": "〜て（りゆう）",
     "structure": "cause as て（理由）: verb て-form ／ い-adj + くて ／ noun + で, then the result",
     "structure_reading": "cause as て（りゆう）: verb て-form ／ い-adj + くて ／ noun + で, then the result",
+    "structure_fr": "la cause en て（理由） : verbe forme en て ／ adj. en い + くて ／ nom + で, puis le résultat",
     "meaning": {
       "en": "because …, and so (the て-form giving a reason)",
       "fr": "parce que…, alors (la forme en て qui donne la cause)"
@@ -25860,6 +25932,7 @@
   {
     "pattern": "〜けど",
     "structure": "clause + けど + clause",
+    "structure_fr": "proposition + けど + proposition",
     "meaning": {
       "en": "but (spoken); also softens a request",
       "fr": "mais (à l'oral) ; adoucit aussi une demande"
@@ -26203,6 +26276,7 @@
   {
     "pattern": "〜か〜か",
     "structure": "A + か + B + か",
+    "structure_fr": "A + か + B + か",
     "meaning": {
       "en": "A or B (a choice between two)",
       "fr": "A ou B (un choix entre deux)"
@@ -26585,6 +26659,7 @@
   {
     "pattern": "あまり〜ない",
     "structure": "あまり + negative predicate (〜ない／〜ません)",
+    "structure_fr": "あまり + prédicat négatif (〜ない／〜ません)",
     "meaning": {
       "en": "not very, not much",
       "fr": "pas très, pas beaucoup"
@@ -26882,6 +26957,7 @@
   {
     "pattern": "ぜんぜん〜ない",
     "structure": "ぜんぜん + verb / adjective ない-form",
+    "structure_fr": "ぜんぜん + verbe / adjectif forme en ない",
     "meaning": {
       "en": "not at all",
       "fr": "pas du tout"
@@ -27199,6 +27275,7 @@
     "reading": "〜とおなじ",
     "structure": "noun + と同じ (+ noun／です)",
     "structure_reading": "noun + とおなじ (+ noun／です)",
+    "structure_fr": "nom + と同じ (+ nom／です)",
     "meaning": {
       "en": "the same as",
       "fr": "le même que, pareil à"
@@ -27520,6 +27597,7 @@
     "reading": "〜に〜かい",
     "structure": "period + に + number + 回 (how often)",
     "structure_reading": "period + に + number + かい (how often)",
+    "structure_fr": "période + に + nombre + 回 (combien de fois)",
     "meaning": {
       "en": "N times per (day, week…)",
       "fr": "N fois par (jour, semaine…)"
@@ -27900,6 +27978,7 @@
     "reading": "〜く／〜に（ふくしけい）",
     "structure": "い-adj (drop い) + く ／ な-adj + に（副詞形） + verb",
     "structure_reading": "い-adj (drop い) + く ／ な-adj + に（ふくしけい） + verb",
+    "structure_fr": "adj. en い (sans い) + く ／ adj. en な + に（副詞形） + verbe",
     "meaning": {
       "en": "turning an adjective into an adverb",
       "fr": "transformer un adjectif en adverbe"
@@ -28282,6 +28361,7 @@
   {
     "pattern": "〜にします",
     "structure": "noun + にします",
+    "structure_fr": "nom + にします",
     "meaning": {
       "en": "I'll have…, I'll go with… (choosing)",
       "fr": "je prends…, je choisis…"
@@ -28592,6 +28672,7 @@
   {
     "pattern": "〜も〜も",
     "structure": "A + も + B + も (+ predicate)",
+    "structure_fr": "A + も + B + も (+ prédicat)",
     "meaning": {
       "en": "both A and B; with a negative, neither A nor B",
       "fr": "A et B aussi ; avec une négation, ni A ni B"
@@ -28970,6 +29051,7 @@
     "reading": "〜を（いどう）",
     "structure": "place + を（移動） + verb of movement",
     "structure_reading": "place + を（いどう） + verb of movement",
+    "structure_fr": "lieu + を（移動） + verbe de déplacement",
     "meaning": {
       "en": "the space passed through or left (walk along, leave)",
       "fr": "l'espace parcouru ou quitté (marcher dans, sortir de)"
@@ -29100,6 +29182,7 @@
   {
     "pattern": "これ／それ／あれ／どれ",
     "structure": "これ／それ／あれ／どれ + は／が… (this one, that one, that one over there, which one)",
+    "structure_fr": "これ／それ／あれ／どれ + は／が… (ceci, cela, cela là-bas, lequel)",
     "meaning": {
       "en": "this, that, that over there, which (things)",
       "fr": "ceci, cela, cela là-bas, lequel (des objets)"
@@ -29452,6 +29535,7 @@
   {
     "pattern": "この／その／あの／どの",
     "structure": "この／その／あの／どの + noun",
+    "structure_fr": "この／その／あの／どの + nom",
     "meaning": {
       "en": "this, that, that over there, which (before a noun)",
       "fr": "ce…-ci, ce…-là, ce…-là-bas, quel (devant un nom)"
@@ -29753,6 +29837,7 @@
     "reading": "じょすうし 〜つ／〜にん／〜まい",
     "structure": "number + つ／人／枚 (a counter per kind of thing)",
     "structure_reading": "number + つ／にん／まい (a counter per kind of thing)",
+    "structure_fr": "nombre + つ／人／枚 (un classificateur par genre de chose)",
     "meaning": {
       "en": "counters: general things, people, flat things",
       "fr": "les classificateurs : objets, personnes, choses plates"
@@ -30145,6 +30230,7 @@
   {
     "pattern": "〜と〜とどちらが",
     "structure": "A + と + B + とどちらが + adjective",
+    "structure_fr": "A + と + B + とどちらが + adjectif",
     "meaning": {
       "en": "which of A and B is more…",
       "fr": "lequel de A et B est plus…"
@@ -30471,6 +30557,7 @@
     "reading": "〜で（りゆう）",
     "structure": "noun + で（理由） + result",
     "structure_reading": "noun + で（りゆう） + result",
+    "structure_fr": "nom + で（理由） + résultat",
     "meaning": {
       "en": "because of (a cause stated as a noun)",
       "fr": "à cause de (la cause est un nom)"
@@ -30608,6 +30695,7 @@
     "reading": "なにか／だれか／どこか",
     "structure": "何か／誰か／どこか (+ particle) + predicate",
     "structure_reading": "なにか／だれか／どこか (+ particle) + predicate",
+    "structure_fr": "何か／誰か／どこか (+ particule) + prédicat",
     "meaning": {
       "en": "something, someone, somewhere",
       "fr": "quelque chose, quelqu'un, quelque part"
@@ -30929,6 +31017,7 @@
     "reading": "なにも／だれも〜ない",
     "structure": "何も／誰も + negative predicate (〜ない)",
     "structure_reading": "なにも／だれも + negative predicate (〜ない)",
+    "structure_fr": "何も／誰も + prédicat négatif (〜ない)",
     "meaning": {
       "en": "nothing, nobody (with a negative)",
       "fr": "rien, personne (avec une négation)"
@@ -31242,6 +31331,7 @@
   {
     "pattern": "〜は〜が",
     "structure": "topic + は + subject + が + predicate",
+    "structure_fr": "thème + は + sujet + が + prédicat",
     "meaning": {
       "en": "topic first, then what is true of it (elephants: their trunks are long)",
       "fr": "d'abord le thème, puis ce qui en est dit (l'éléphant : sa trompe est longue)"
@@ -31625,6 +31715,7 @@
   {
     "pattern": "だから",
     "structure": "sentence。だから + sentence",
+    "structure_fr": "phrase。だから + phrase",
     "meaning": {
       "en": "so, therefore (sentence-initial)",
       "fr": "donc, c'est pourquoi (en tête de phrase)"
@@ -31978,6 +32069,7 @@
   {
     "pattern": "もう〜ない",
     "structure": "もう + negative predicate (〜ない／〜ません)",
+    "structure_fr": "もう + prédicat négatif (〜ない／〜ません)",
     "meaning": {
       "en": "not any more",
       "fr": "ne … plus"
@@ -32297,6 +32389,7 @@
   {
     "pattern": "〜はどうですか",
     "structure": "noun + はどうですか",
+    "structure_fr": "nom + はどうですか",
     "meaning": {
       "en": "how about…? (a suggestion, or asking an opinion)",
       "fr": "et si… ? / que pensez-vous de… ?"

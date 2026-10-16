@@ -22,6 +22,7 @@ export const SUBJECT_PATH = {
   translation: '/practice/translation',
   dictation: '/practice/dictation',
   composition: '/practice/composition',
+  conversation: '/practice/conversation',
   comprehension: '/practice/comprehension',
   exam: '/practice/exam',
 }
@@ -55,7 +56,7 @@ export const AXIS_TO = DAY_MINUTES
  *  gate's lines, then the Practice gate's platforms. */
 export const SUBJECT_GROUPS = {
   learn: ['review', 'kana', 'vocab', 'kanji', 'grammar'],
-  practice: ['reading', 'translation', 'dictation', 'composition', 'comprehension', 'exam'],
+  practice: ['reading', 'translation', 'dictation', 'composition', 'conversation', 'comprehension', 'exam'],
 }
 
 /** JavaScript's Date#getDay (Sunday = 0) as the agenda's day (Monday = 0). */

@@ -1,7 +1,8 @@
 import os
 import psycopg2
 import psycopg2.extras
-from psycopg2.pool import ThreadedConnectionPool
+
+from core.pool import WaitingPool
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -12,8 +13,10 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 #
 # minconn=1 opens one real connection immediately at import time, same as
 # before (db_conn() always paid a fresh connection cost on first use
-# anyway). maxconn=20 matches srs/storage.py's own pool size.
-_pool = ThreadedConnectionPool(1, 20, DATABASE_URL)
+# anyway). maxconn=20 matches srs/storage.py's own pool size. A WaitingPool
+# (core/pool.py): when all twenty are out, the next caller waits for one
+# rather than failing.
+_pool = WaitingPool(1, 20, DATABASE_URL)
 
 
 class _PooledConnection:
@@ -35,6 +38,11 @@ class _PooledConnection:
         object.__setattr__(self, "_conn", conn)
 
     def close(self):
+        # Once: a second putconn would hand the pool back a slot it
+        # never lent (core/pool.py counts them).
+        if self.__dict__.get("_closed"):
+            return
+        object.__setattr__(self, "_closed", True)
         self._pool.putconn(self._conn)
 
     def __getattr__(self, name):

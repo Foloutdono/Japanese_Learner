@@ -55,6 +55,7 @@ from core.credits import require_pass, resets_at
 from core.db import db_conn
 from core.srs_instance import srs
 from study import grammar_detect, tutor_review
+from study.grammar_examples import structure_text
 from study.romaji import is_romaji, kana_of
 from study.llm_shared import llm_configured
 
@@ -179,7 +180,7 @@ def get_composition_batch(
                 "raw_id":    raw_id,
                 "level":     level,
                 "pattern":   entry["pattern"],
-                "structure": entry.get("structure", ""),
+                "structure": structure_text(entry, lang),
                 "meaning":   gloss(entry, lang),
                 "register":  entry.get("register"),
                 "stage":     stages[raw_id],

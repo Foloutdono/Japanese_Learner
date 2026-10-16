@@ -1,4 +1,5 @@
 import { useLang } from '../../LangContext'
+import { track } from '../../lib/track'
 import { useMuted, toggleMute, useVolumes, setVolume, playToggle, DEFAULT_VOLUMES } from '../../lib/audio'
 import { SoundMixer } from '../ui/NavControls'
 import { SpeakerIcon, SpeakerOffIcon } from '../ui/Icons'
@@ -50,7 +51,7 @@ export function SoundPage() {
           type="button"
           className={`${muted ? 'btn-primary' : 'btn-secondary'} slip__act`}
           data-action="mute"
-          onClick={() => { toggleMute(); playToggle() }}
+          onClick={() => { track('setting_change', { setting: 'sound', value: muted ? 'on' : 'off' }); toggleMute(); playToggle() }}
         >
           {muted ? t.unmute : t.mute}
         </button>

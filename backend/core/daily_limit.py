@@ -31,6 +31,7 @@ import logging
 
 from core.credits import local_today
 from core.db import db_conn
+from core.pool import PoolBusy
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +71,11 @@ def claim(user_id: str, feature: str, limit: int) -> int:
     a ceiling being reached without a query."""
     try:
         conn = db_conn()
+    except PoolBusy:
+        # Not a hiccup but a server out of connections (plan 211): open
+        # here, a flood that dried the pool would also have lifted every
+        # model call's ceiling. The 503 refuses the call instead.
+        raise
     except Exception:
         logger.exception("daily_usage: no connection; %s counted as under the cap", feature)
         return 0
@@ -99,4 +105,13 @@ def claim(user_id: str, feature: str, limit: int) -> int:
         conn.close()
     if count == limit + 1:
         logger.info("daily limit crossed feature=%s user=%s limit=%d", feature, user_id, limit)
+    # 足跡 (plan 218): daily_usage is pruned at thirty days, so how much
+    # the rationed features are used, and how often a ceiling is met,
+    # would be a month's question only. The event folds into
+    # event_daily and outlives it. Never the prompt, only the count.
+    from core import events
+    events.record(user_id, "ai_use", {
+        "feature": feature, "count": count, "limit": limit, "over": count > limit,
+    })
     return count
+

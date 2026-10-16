@@ -131,6 +131,24 @@ export function choiceAnswer(card) {
 }
 
 /**
+ * The Japanese sentence a grammar card says once its answer is out
+ * (hooks/useRevealSpeech), or null for a card that has none: a rule or
+ * a meaning flipped is not a sentence. Fill-in's is on the card from
+ * the start, Choisir's is its question with the hole filled (the
+ * payload's `jp`), Écrire's is its model; Construire's comes back with
+ * the verdict on what was typed (`verdict`), the answer never leaving
+ * the server before it.
+ */
+export function grammarSentence(card, verdict = null) {
+  const shape = cardShape(card)
+  if (shape.isFill) return card.fill_sentence?.jp ?? null
+  if (shape.isContrast) return card.contrast?.jp ?? null
+  if (shape.isBuild) return verdict?.jp ?? null
+  if (shape.isWrite) return card.write?.model?.jp ?? null
+  return null
+}
+
+/**
  * Which hints this CARD can actually offer, not the ones its mode
  * declares. A hand-written card without a matching extra (no
  * distractors to build, no cached sentences) has no entry for that

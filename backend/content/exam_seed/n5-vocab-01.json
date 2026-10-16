@@ -1,0 +1,5626 @@
+{
+ "examId": "n5-vocab-01",
+ "generatorVersion": "vocab-gen-1",
+ "papers": [
+  {
+   "n": 1,
+   "seed": 2721464994914936888,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Vocabulary Practice",
+    "titleJp": "N5 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 20,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "初め",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぱじめ"
+           },
+           {
+            "id": "c2",
+            "textJp": "はじめ"
+           },
+           {
+            "id": "c3",
+            "textJp": "はしめ"
+           },
+           {
+            "id": "c4",
+            "textJp": "ばじめ"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "暖かい",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "あたったかい"
+           },
+           {
+            "id": "c2",
+            "textJp": "あたたかい"
+           },
+           {
+            "id": "c3",
+            "textJp": "あだたかい"
+           },
+           {
+            "id": "c4",
+            "textJp": "あたたっかい"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "返す",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "かえす"
+           },
+           {
+            "id": "c2",
+            "textJp": "がえす"
+           },
+           {
+            "id": "c3",
+            "textJp": "かえっす"
+           },
+           {
+            "id": "c4",
+            "textJp": "かえず"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "町",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "まぢ"
+           },
+           {
+            "id": "c2",
+            "textJp": "まっち"
+           },
+           {
+            "id": "c3",
+            "textJp": "まち"
+           },
+           {
+            "id": "c4",
+            "textJp": "むら"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "窓",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "まど"
+           },
+           {
+            "id": "c2",
+            "textJp": "す"
+           },
+           {
+            "id": "c3",
+            "textJp": "まどう"
+           },
+           {
+            "id": "c4",
+            "textJp": "まっど"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "嫌",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "げん"
+           },
+           {
+            "id": "c2",
+            "textJp": "けん"
+           },
+           {
+            "id": "c3",
+            "textJp": "きら"
+           },
+           {
+            "id": "c4",
+            "textJp": "いや"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q7",
+          "number": 7,
+          "promptJp": "出す",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "だず"
+           },
+           {
+            "id": "c2",
+            "textJp": "だすう"
+           },
+           {
+            "id": "c3",
+            "textJp": "だす"
+           },
+           {
+            "id": "c4",
+            "textJp": "たす"
+           }
+          ],
+          "answer": "c3"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばを　漢字で　書く　とき、最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the correct kanji spelling for the word.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "くもる",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "曇る"
+           },
+           {
+            "id": "c2",
+            "textJp": "昧る"
+           },
+           {
+            "id": "c3",
+            "textJp": "晩る"
+           },
+           {
+            "id": "c4",
+            "textJp": "明る"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "くる",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "来る"
+           },
+           {
+            "id": "c2",
+            "textJp": "束る"
+           },
+           {
+            "id": "c3",
+            "textJp": "松る"
+           },
+           {
+            "id": "c4",
+            "textJp": "棚る"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "あつい",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "炊い"
+           },
+           {
+            "id": "c2",
+            "textJp": "燵い"
+           },
+           {
+            "id": "c3",
+            "textJp": "烈い"
+           },
+           {
+            "id": "c4",
+            "textJp": "熱い"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "おぼえる",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "覗える"
+           },
+           {
+            "id": "c2",
+            "textJp": "視える"
+           },
+           {
+            "id": "c3",
+            "textJp": "覚える"
+           },
+           {
+            "id": "c4",
+            "textJp": "親える"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "かわ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "巡"
+           },
+           {
+            "id": "c2",
+            "textJp": "川"
+           },
+           {
+            "id": "c3",
+            "textJp": "州"
+           },
+           {
+            "id": "c4",
+            "textJp": "巣"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "＿＿＿＿テレビを見てもいいですか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "りんご"
+           },
+           {
+            "id": "c2",
+            "textJp": "少し"
+           },
+           {
+            "id": "c3",
+            "textJp": "あまり"
+           },
+           {
+            "id": "c4",
+            "textJp": "とても"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "「みんな、ちょっと休みましょう」とジョンは＿＿＿＿。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "食べました"
+           },
+           {
+            "id": "c2",
+            "textJp": "買いました"
+           },
+           {
+            "id": "c3",
+            "textJp": "見ました"
+           },
+           {
+            "id": "c4",
+            "textJp": "言いました"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "子どもたち、＿＿＿＿ですよ。しずかにしてください。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "とおい"
+           },
+           {
+            "id": "c2",
+            "textJp": "せまい"
+           },
+           {
+            "id": "c3",
+            "textJp": "うるさい"
+           },
+           {
+            "id": "c4",
+            "textJp": "つめたい"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "１０時４０＿＿＿＿から１１時まで休み時間です。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "分"
+           },
+           {
+            "id": "c2",
+            "textJp": "弟"
+           },
+           {
+            "id": "c3",
+            "textJp": "五日"
+           },
+           {
+            "id": "c4",
+            "textJp": "十"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "母は九時に＿＿＿＿。今はうちにいません。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "かえりました"
+           },
+           {
+            "id": "c2",
+            "textJp": "ねました"
+           },
+           {
+            "id": "c3",
+            "textJp": "出かけました"
+           },
+           {
+            "id": "c4",
+            "textJp": "はじまりました"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "外は、だんだんくらく＿＿＿＿。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "見ました"
+           },
+           {
+            "id": "c2",
+            "textJp": "なりました"
+           },
+           {
+            "id": "c3",
+            "textJp": "いました"
+           },
+           {
+            "id": "c4",
+            "textJp": "出ました"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "きのう、えいがかんに行きました。",
+          "underlineJp": "えいがかん",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "本をかりるところ"
+           },
+           {
+            "id": "c2",
+            "textJp": "ふくをかうところ"
+           },
+           {
+            "id": "c3",
+            "textJp": "てがみを出すところ"
+           },
+           {
+            "id": "c4",
+            "textJp": "えいがを見るところ"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "このりょうりは、おいしくないです。",
+          "underlineJp": "おいしくない",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "まずい"
+           },
+           {
+            "id": "c2",
+            "textJp": "からい"
+           },
+           {
+            "id": "c3",
+            "textJp": "あまい"
+           },
+           {
+            "id": "c4",
+            "textJp": "やすい"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "わたしのりょうしんは、いなかにすんでいます。",
+          "underlineJp": "りょうしん",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "父とあに"
+           },
+           {
+            "id": "c2",
+            "textJp": "あにとあね"
+           },
+           {
+            "id": "c3",
+            "textJp": "父と母"
+           },
+           {
+            "id": "c4",
+            "textJp": "母とあね"
+           }
+          ],
+          "answer": "c3"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 2,
+   "seed": 2422307572493659837,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Vocabulary Practice",
+    "titleJp": "N5 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 20,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "写真",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "しゃしん"
+           },
+           {
+            "id": "c2",
+            "textJp": "しゃっしん"
+           },
+           {
+            "id": "c3",
+            "textJp": "じゃしん"
+           },
+           {
+            "id": "c4",
+            "textJp": "しゃじん"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "遊ぶ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "あそぶ"
+           },
+           {
+            "id": "c2",
+            "textJp": "あそふ"
+           },
+           {
+            "id": "c3",
+            "textJp": "あっそぶ"
+           },
+           {
+            "id": "c4",
+            "textJp": "あぞぶ"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "牛肉",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぎゅうにっく"
+           },
+           {
+            "id": "c2",
+            "textJp": "ぎゅうにくう"
+           },
+           {
+            "id": "c3",
+            "textJp": "きゅうにく"
+           },
+           {
+            "id": "c4",
+            "textJp": "ぎゅうにく"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "もう一度",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "もういちと"
+           },
+           {
+            "id": "c2",
+            "textJp": "もういっちど"
+           },
+           {
+            "id": "c3",
+            "textJp": "もういちど"
+           },
+           {
+            "id": "c4",
+            "textJp": "もういちどう"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "右",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "みき"
+           },
+           {
+            "id": "c2",
+            "textJp": "ゆう"
+           },
+           {
+            "id": "c3",
+            "textJp": "みぎ"
+           },
+           {
+            "id": "c4",
+            "textJp": "う"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "葉書",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ばがき"
+           },
+           {
+            "id": "c2",
+            "textJp": "ぱがき"
+           },
+           {
+            "id": "c3",
+            "textJp": "はがき"
+           },
+           {
+            "id": "c4",
+            "textJp": "はがっき"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q7",
+          "number": 7,
+          "promptJp": "来月",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "らいげつ"
+           },
+           {
+            "id": "c2",
+            "textJp": "らいけつ"
+           },
+           {
+            "id": "c3",
+            "textJp": "らいげつう"
+           },
+           {
+            "id": "c4",
+            "textJp": "らいげづ"
+           }
+          ],
+          "answer": "c1"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばを　漢字で　書く　とき、最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the correct kanji spelling for the word.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "あぶない",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "印ない"
+           },
+           {
+            "id": "c2",
+            "textJp": "卵ない"
+           },
+           {
+            "id": "c3",
+            "textJp": "卯ない"
+           },
+           {
+            "id": "c4",
+            "textJp": "危ない"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "みる",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "覚る"
+           },
+           {
+            "id": "c2",
+            "textJp": "見る"
+           },
+           {
+            "id": "c3",
+            "textJp": "貝る"
+           },
+           {
+            "id": "c4",
+            "textJp": "親る"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "かびん",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "芥瓶"
+           },
+           {
+            "id": "c2",
+            "textJp": "花瓶"
+           },
+           {
+            "id": "c3",
+            "textJp": "董瓶"
+           },
+           {
+            "id": "c4",
+            "textJp": "芸瓶"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "すう",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "吸う"
+           },
+           {
+            "id": "c2",
+            "textJp": "唸う"
+           },
+           {
+            "id": "c3",
+            "textJp": "営う"
+           },
+           {
+            "id": "c4",
+            "textJp": "否う"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "おりる",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "陵りる"
+           },
+           {
+            "id": "c2",
+            "textJp": "障りる"
+           },
+           {
+            "id": "c3",
+            "textJp": "陳りる"
+           },
+           {
+            "id": "c4",
+            "textJp": "降りる"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "目がわるいので、＿＿＿＿をかけています。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぼうし"
+           },
+           {
+            "id": "c2",
+            "textJp": "くつ"
+           },
+           {
+            "id": "c3",
+            "textJp": "ふく"
+           },
+           {
+            "id": "c4",
+            "textJp": "めがね"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "＿＿＿＿、そこのきみ！",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ちょっと"
+           },
+           {
+            "id": "c2",
+            "textJp": "よく"
+           },
+           {
+            "id": "c3",
+            "textJp": "どう"
+           },
+           {
+            "id": "c4",
+            "textJp": "いちばん"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "きのうは雨でしたが、今日はいい＿＿＿＿です。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "かさ"
+           },
+           {
+            "id": "c2",
+            "textJp": "天気"
+           },
+           {
+            "id": "c3",
+            "textJp": "むら"
+           },
+           {
+            "id": "c4",
+            "textJp": "ドア"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "ことばのいみがわからないときは、＿＿＿＿をひきます。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ちず"
+           },
+           {
+            "id": "c2",
+            "textJp": "じしょ"
+           },
+           {
+            "id": "c3",
+            "textJp": "ざっし"
+           },
+           {
+            "id": "c4",
+            "textJp": "カレンダー"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "駅から、バスに＿＿＿＿。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "しめます"
+           },
+           {
+            "id": "c2",
+            "textJp": "のります"
+           },
+           {
+            "id": "c3",
+            "textJp": "あらいます"
+           },
+           {
+            "id": "c4",
+            "textJp": "なきます"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "母は＿＿＿＿で、ばんごはんをつくっています。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "げんかん"
+           },
+           {
+            "id": "c2",
+            "textJp": "おふろ"
+           },
+           {
+            "id": "c3",
+            "textJp": "だいどころ"
+           },
+           {
+            "id": "c4",
+            "textJp": "エレベーター"
+           }
+          ],
+          "answer": "c3"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "いいえ、ごはんはもうけっこうです。",
+          "underlineJp": "けっこうです",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ありません"
+           },
+           {
+            "id": "c2",
+            "textJp": "できました"
+           },
+           {
+            "id": "c3",
+            "textJp": "ほしいです"
+           },
+           {
+            "id": "c4",
+            "textJp": "いりません"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "このシャツのいろはすきじゃありません。ほかのはありますか。",
+          "underlineJp": "ほか",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ちがう"
+           },
+           {
+            "id": "c2",
+            "textJp": "おなじ"
+           },
+           {
+            "id": "c3",
+            "textJp": "やすい"
+           },
+           {
+            "id": "c4",
+            "textJp": "あたらしい"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "おととい、デパートへ行きました。",
+          "underlineJp": "おととい",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ふつかまえに"
+           },
+           {
+            "id": "c2",
+            "textJp": "きのう"
+           },
+           {
+            "id": "c3",
+            "textJp": "ふつかあとに"
+           },
+           {
+            "id": "c4",
+            "textJp": "みっかまえに"
+           }
+          ],
+          "answer": "c1"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 3,
+   "seed": 6042076260632835820,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Vocabulary Practice",
+    "titleJp": "N5 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 20,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "朝御飯",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "あさこはん"
+           },
+           {
+            "id": "c2",
+            "textJp": "あさごはん"
+           },
+           {
+            "id": "c3",
+            "textJp": "あさごぱん"
+           },
+           {
+            "id": "c4",
+            "textJp": "あさごばん"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "飴",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "やしな"
+           },
+           {
+            "id": "c2",
+            "textJp": "い"
+           },
+           {
+            "id": "c3",
+            "textJp": "し"
+           },
+           {
+            "id": "c4",
+            "textJp": "あめ"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "働く",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "はたらっく"
+           },
+           {
+            "id": "c2",
+            "textJp": "はったらく"
+           },
+           {
+            "id": "c3",
+            "textJp": "はたらく"
+           },
+           {
+            "id": "c4",
+            "textJp": "はたらぐ"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "勉強",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "べんっきょう"
+           },
+           {
+            "id": "c2",
+            "textJp": "へんきょう"
+           },
+           {
+            "id": "c3",
+            "textJp": "べんぎょう"
+           },
+           {
+            "id": "c4",
+            "textJp": "べんきょう"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "歌う",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "うだう"
+           },
+           {
+            "id": "c2",
+            "textJp": "うったう"
+           },
+           {
+            "id": "c3",
+            "textJp": "うた"
+           },
+           {
+            "id": "c4",
+            "textJp": "うたう"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "物",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぼの"
+           },
+           {
+            "id": "c2",
+            "textJp": "もの"
+           },
+           {
+            "id": "c3",
+            "textJp": "ものう"
+           },
+           {
+            "id": "c4",
+            "textJp": "もつ"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q7",
+          "number": 7,
+          "promptJp": "吹く",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ふぐ"
+           },
+           {
+            "id": "c2",
+            "textJp": "ぶく"
+           },
+           {
+            "id": "c3",
+            "textJp": "ふく"
+           },
+           {
+            "id": "c4",
+            "textJp": "ぷく"
+           }
+          ],
+          "answer": "c3"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばを　漢字で　書く　とき、最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the correct kanji spelling for the word.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "かんじ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "漢存"
+           },
+           {
+            "id": "c2",
+            "textJp": "漢字"
+           },
+           {
+            "id": "c3",
+            "textJp": "渋字"
+           },
+           {
+            "id": "c4",
+            "textJp": "濠字"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "すいようび",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "沼曜日"
+           },
+           {
+            "id": "c2",
+            "textJp": "水曜日"
+           },
+           {
+            "id": "c3",
+            "textJp": "水曜曇"
+           },
+           {
+            "id": "c4",
+            "textJp": "水昨日"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "てがみ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "排紙"
+           },
+           {
+            "id": "c2",
+            "textJp": "手纏"
+           },
+           {
+            "id": "c3",
+            "textJp": "手紙"
+           },
+           {
+            "id": "c4",
+            "textJp": "手繍"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "えき",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "駐"
+           },
+           {
+            "id": "c2",
+            "textJp": "騒"
+           },
+           {
+            "id": "c3",
+            "textJp": "馳"
+           },
+           {
+            "id": "c4",
+            "textJp": "駅"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "き",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "模"
+           },
+           {
+            "id": "c2",
+            "textJp": "概"
+           },
+           {
+            "id": "c3",
+            "textJp": "検"
+           },
+           {
+            "id": "c4",
+            "textJp": "木"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "父はまだ＿＿＿＿います。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "くもって"
+           },
+           {
+            "id": "c2",
+            "textJp": "はれて"
+           },
+           {
+            "id": "c3",
+            "textJp": "休んで"
+           },
+           {
+            "id": "c4",
+            "textJp": "さいて"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "としょかんでは、＿＿＿＿にしてください。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "しずか"
+           },
+           {
+            "id": "c2",
+            "textJp": "にぎやか"
+           },
+           {
+            "id": "c3",
+            "textJp": "ゆうめい"
+           },
+           {
+            "id": "c4",
+            "textJp": "げんき"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "食べる前に、手を＿＿＿＿ください。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "あらって"
+           },
+           {
+            "id": "c2",
+            "textJp": "はいて"
+           },
+           {
+            "id": "c3",
+            "textJp": "ならべて"
+           },
+           {
+            "id": "c4",
+            "textJp": "しめて"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "はじめまして。わたしの＿＿＿＿はマリアです。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "しごと"
+           },
+           {
+            "id": "c2",
+            "textJp": "ばんごう"
+           },
+           {
+            "id": "c3",
+            "textJp": "国"
+           },
+           {
+            "id": "c4",
+            "textJp": "名前"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "このりんごは＿＿＿＿おいしくないです。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "たくさん"
+           },
+           {
+            "id": "c2",
+            "textJp": "ちょうど"
+           },
+           {
+            "id": "c3",
+            "textJp": "すぐ"
+           },
+           {
+            "id": "c4",
+            "textJp": "あまり"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "あのハンサムな＿＿＿＿を見て。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "カメラ"
+           },
+           {
+            "id": "c2",
+            "textJp": "交差点"
+           },
+           {
+            "id": "c3",
+            "textJp": "男の子"
+           },
+           {
+            "id": "c4",
+            "textJp": "カップ"
+           }
+          ],
+          "answer": "c3"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "こんばん、いっしょにえいがを見に行きませんか。",
+          "underlineJp": "こんばん",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "きのうのよる"
+           },
+           {
+            "id": "c2",
+            "textJp": "あしたのあさ"
+           },
+           {
+            "id": "c3",
+            "textJp": "きょうのよる"
+           },
+           {
+            "id": "c4",
+            "textJp": "きょうのひる"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "あのビルはひくいです。",
+          "underlineJp": "ひくい",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "新しくない"
+           },
+           {
+            "id": "c2",
+            "textJp": "古くない"
+           },
+           {
+            "id": "c3",
+            "textJp": "ひろくない"
+           },
+           {
+            "id": "c4",
+            "textJp": "高くない"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "あには、ことしはたちになりました。",
+          "underlineJp": "はたち",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "十二さい"
+           },
+           {
+            "id": "c2",
+            "textJp": "十八さい"
+           },
+           {
+            "id": "c3",
+            "textJp": "二十二さい"
+           },
+           {
+            "id": "c4",
+            "textJp": "二十さい"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 4,
+   "seed": 7932281428060193163,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Vocabulary Practice",
+    "titleJp": "N5 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 20,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "年",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "とし"
+           },
+           {
+            "id": "c2",
+            "textJp": "とじ"
+           },
+           {
+            "id": "c3",
+            "textJp": "どし"
+           },
+           {
+            "id": "c4",
+            "textJp": "とっし"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "半",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぱん"
+           },
+           {
+            "id": "c2",
+            "textJp": "ばん"
+           },
+           {
+            "id": "c3",
+            "textJp": "はん"
+           },
+           {
+            "id": "c4",
+            "textJp": "なか"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "食べる",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "たへる"
+           },
+           {
+            "id": "c2",
+            "textJp": "たべるう"
+           },
+           {
+            "id": "c3",
+            "textJp": "たべる"
+           },
+           {
+            "id": "c4",
+            "textJp": "だべる"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "飛行機",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "びこうき"
+           },
+           {
+            "id": "c2",
+            "textJp": "ひこうき"
+           },
+           {
+            "id": "c3",
+            "textJp": "ひこうぎ"
+           },
+           {
+            "id": "c4",
+            "textJp": "ひごうき"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "短い",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "みじっかい"
+           },
+           {
+            "id": "c2",
+            "textJp": "みしかい"
+           },
+           {
+            "id": "c3",
+            "textJp": "みじかい"
+           },
+           {
+            "id": "c4",
+            "textJp": "みじがい"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "頭",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "あったま"
+           },
+           {
+            "id": "c2",
+            "textJp": "がしら"
+           },
+           {
+            "id": "c3",
+            "textJp": "あだま"
+           },
+           {
+            "id": "c4",
+            "textJp": "あたま"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q7",
+          "number": 7,
+          "promptJp": "起きる",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "おぎる"
+           },
+           {
+            "id": "c2",
+            "textJp": "おきる"
+           },
+           {
+            "id": "c3",
+            "textJp": "おっきる"
+           },
+           {
+            "id": "c4",
+            "textJp": "おきるう"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばを　漢字で　書く　とき、最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the correct kanji spelling for the word.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "ちゅうごく",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "申国"
+           },
+           {
+            "id": "c2",
+            "textJp": "中図"
+           },
+           {
+            "id": "c3",
+            "textJp": "中困"
+           },
+           {
+            "id": "c4",
+            "textJp": "中国"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "じぶん",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "臭分"
+           },
+           {
+            "id": "c2",
+            "textJp": "自剣"
+           },
+           {
+            "id": "c3",
+            "textJp": "自分"
+           },
+           {
+            "id": "c4",
+            "textJp": "自刻"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "ふる",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "隅る"
+           },
+           {
+            "id": "c2",
+            "textJp": "隠る"
+           },
+           {
+            "id": "c3",
+            "textJp": "阻る"
+           },
+           {
+            "id": "c4",
+            "textJp": "降る"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "かいしゃ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "会禄"
+           },
+           {
+            "id": "c2",
+            "textJp": "会社"
+           },
+           {
+            "id": "c3",
+            "textJp": "例社"
+           },
+           {
+            "id": "c4",
+            "textJp": "会祖"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "でんしゃ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "雨車"
+           },
+           {
+            "id": "c2",
+            "textJp": "電車"
+           },
+           {
+            "id": "c3",
+            "textJp": "電軋"
+           },
+           {
+            "id": "c4",
+            "textJp": "電軽"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "きのうのよる、＿＿＿＿で母と話しました。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "でんわ"
+           },
+           {
+            "id": "c2",
+            "textJp": "しんぶん"
+           },
+           {
+            "id": "c3",
+            "textJp": "はがき"
+           },
+           {
+            "id": "c4",
+            "textJp": "きって"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "日よう日に、友だちと＿＿＿＿を見に行きました。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "えいが"
+           },
+           {
+            "id": "c2",
+            "textJp": "しゅくだい"
+           },
+           {
+            "id": "c3",
+            "textJp": "せんたく"
+           },
+           {
+            "id": "c4",
+            "textJp": "ざっし"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "今日はたくさんあるきました。＿＿＿＿がいたいです。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "目"
+           },
+           {
+            "id": "c2",
+            "textJp": "足"
+           },
+           {
+            "id": "c3",
+            "textJp": "耳"
+           },
+           {
+            "id": "c4",
+            "textJp": "口"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "あつい日は、＿＿＿＿水が飲みたいです。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "くろい"
+           },
+           {
+            "id": "c2",
+            "textJp": "ながい"
+           },
+           {
+            "id": "c3",
+            "textJp": "まるい"
+           },
+           {
+            "id": "c4",
+            "textJp": "つめたい"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "今のアナウンスは＿＿＿＿だったのですか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "年"
+           },
+           {
+            "id": "c2",
+            "textJp": "いす"
+           },
+           {
+            "id": "c3",
+            "textJp": "夕方"
+           },
+           {
+            "id": "c4",
+            "textJp": "何"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "きのうは＿＿＿＿さむかったです。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "あまり"
+           },
+           {
+            "id": "c2",
+            "textJp": "とても"
+           },
+           {
+            "id": "c3",
+            "textJp": "ちょうど"
+           },
+           {
+            "id": "c4",
+            "textJp": "どうぞ"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "では、またあした。",
+          "underlineJp": "では",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "でも"
+           },
+           {
+            "id": "c2",
+            "textJp": "じゃあ"
+           },
+           {
+            "id": "c3",
+            "textJp": "それから"
+           },
+           {
+            "id": "c4",
+            "textJp": "だから"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "わたしのたんじょうびは、五月十日です。",
+          "underlineJp": "たんじょうび",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "けっこんした日"
+           },
+           {
+            "id": "c2",
+            "textJp": "学校に入った日"
+           },
+           {
+            "id": "c3",
+            "textJp": "生まれた日"
+           },
+           {
+            "id": "c4",
+            "textJp": "日本に来た日"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "おそくなって、すみません。",
+          "underlineJp": "すみません",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ありがとう"
+           },
+           {
+            "id": "c2",
+            "textJp": "ごめんなさい"
+           },
+           {
+            "id": "c3",
+            "textJp": "おねがいします"
+           },
+           {
+            "id": "c4",
+            "textJp": "どういたしまして"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 5,
+   "seed": 7188647780645636282,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Vocabulary Practice",
+    "titleJp": "N5 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 20,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "晴れる",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぱれる"
+           },
+           {
+            "id": "c2",
+            "textJp": "はれるう"
+           },
+           {
+            "id": "c3",
+            "textJp": "はれる"
+           },
+           {
+            "id": "c4",
+            "textJp": "ばれる"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "地下鉄",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ちがてつ"
+           },
+           {
+            "id": "c2",
+            "textJp": "ちかてっつ"
+           },
+           {
+            "id": "c3",
+            "textJp": "ちかてづ"
+           },
+           {
+            "id": "c4",
+            "textJp": "ちかてつ"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "黒",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "くろう"
+           },
+           {
+            "id": "c2",
+            "textJp": "くろ"
+           },
+           {
+            "id": "c3",
+            "textJp": "こく"
+           },
+           {
+            "id": "c4",
+            "textJp": "ぐろ"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "二",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ふたたび"
+           },
+           {
+            "id": "c2",
+            "textJp": "じ"
+           },
+           {
+            "id": "c3",
+            "textJp": "に"
+           },
+           {
+            "id": "c4",
+            "textJp": "ふた"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "西",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "にじ"
+           },
+           {
+            "id": "c2",
+            "textJp": "にっし"
+           },
+           {
+            "id": "c3",
+            "textJp": "せい"
+           },
+           {
+            "id": "c4",
+            "textJp": "にし"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "外国人",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "がいこっくじん"
+           },
+           {
+            "id": "c2",
+            "textJp": "がいこくしん"
+           },
+           {
+            "id": "c3",
+            "textJp": "がいこぐじん"
+           },
+           {
+            "id": "c4",
+            "textJp": "がいこくじん"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q7",
+          "number": 7,
+          "promptJp": "角",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "かどう"
+           },
+           {
+            "id": "c2",
+            "textJp": "かど"
+           },
+           {
+            "id": "c3",
+            "textJp": "かと"
+           },
+           {
+            "id": "c4",
+            "textJp": "がど"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばを　漢字で　書く　とき、最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the correct kanji spelling for the word.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "くに",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "国"
+           },
+           {
+            "id": "c2",
+            "textJp": "回"
+           },
+           {
+            "id": "c3",
+            "textJp": "図"
+           },
+           {
+            "id": "c4",
+            "textJp": "圏"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "いう",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "誕う"
+           },
+           {
+            "id": "c2",
+            "textJp": "言う"
+           },
+           {
+            "id": "c3",
+            "textJp": "諮う"
+           },
+           {
+            "id": "c4",
+            "textJp": "請う"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "ひがし",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "束"
+           },
+           {
+            "id": "c2",
+            "textJp": "果"
+           },
+           {
+            "id": "c3",
+            "textJp": "東"
+           },
+           {
+            "id": "c4",
+            "textJp": "車"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "いそがしい",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "慶しい"
+           },
+           {
+            "id": "c2",
+            "textJp": "忙しい"
+           },
+           {
+            "id": "c3",
+            "textJp": "慰しい"
+           },
+           {
+            "id": "c4",
+            "textJp": "悲しい"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "ごぜん",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "単前"
+           },
+           {
+            "id": "c2",
+            "textJp": "午前"
+           },
+           {
+            "id": "c3",
+            "textJp": "午副"
+           },
+           {
+            "id": "c4",
+            "textJp": "十前"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "ジョンのことが＿＿＿＿に出ていた。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "新聞"
+           },
+           {
+            "id": "c2",
+            "textJp": "つくえ"
+           },
+           {
+            "id": "c3",
+            "textJp": "お茶"
+           },
+           {
+            "id": "c4",
+            "textJp": "時計"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "先生は、学校で日本語を＿＿＿＿います。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "あびて"
+           },
+           {
+            "id": "c2",
+            "textJp": "おしえて"
+           },
+           {
+            "id": "c3",
+            "textJp": "かして"
+           },
+           {
+            "id": "c4",
+            "textJp": "はいて"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "＿＿＿＿は２４時間あいていますから、べんりです。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "コンビニ"
+           },
+           {
+            "id": "c2",
+            "textJp": "ぎんこう"
+           },
+           {
+            "id": "c3",
+            "textJp": "としょかん"
+           },
+           {
+            "id": "c4",
+            "textJp": "ゆうびんきょく"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "雨ですから、今日は＿＿＿＿であそびません。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "中"
+           },
+           {
+            "id": "c2",
+            "textJp": "外"
+           },
+           {
+            "id": "c3",
+            "textJp": "へや"
+           },
+           {
+            "id": "c4",
+            "textJp": "エレベーター"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "時間がありますから、＿＿＿＿食べてください。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "すぐ"
+           },
+           {
+            "id": "c2",
+            "textJp": "ゆっくり"
+           },
+           {
+            "id": "c3",
+            "textJp": "はやく"
+           },
+           {
+            "id": "c4",
+            "textJp": "まっすぐ"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "へやがくらいですから、電気を＿＿＿＿ください。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "けして"
+           },
+           {
+            "id": "c2",
+            "textJp": "つけて"
+           },
+           {
+            "id": "c3",
+            "textJp": "あらって"
+           },
+           {
+            "id": "c4",
+            "textJp": "しめて"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "おてあらいはそちらです。",
+          "underlineJp": "そちら",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "こっち"
+           },
+           {
+            "id": "c2",
+            "textJp": "あっち"
+           },
+           {
+            "id": "c3",
+            "textJp": "そっち"
+           },
+           {
+            "id": "c4",
+            "textJp": "どっち"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "なつ休みに、日本にひとつきいました。",
+          "underlineJp": "ひとつき",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "一週間"
+           },
+           {
+            "id": "c2",
+            "textJp": "一か月"
+           },
+           {
+            "id": "c3",
+            "textJp": "一年間"
+           },
+           {
+            "id": "c4",
+            "textJp": "十日間"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "わたしは、やさいがきらいです。",
+          "underlineJp": "きらい",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "すきじゃない"
+           },
+           {
+            "id": "c2",
+            "textJp": "きれいじゃない"
+           },
+           {
+            "id": "c3",
+            "textJp": "大すき"
+           },
+           {
+            "id": "c4",
+            "textJp": "やすくない"
+           }
+          ],
+          "answer": "c1"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 6,
+   "seed": 6983730194970059766,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Vocabulary Practice",
+    "titleJp": "N5 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 20,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "警官",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "けいがん"
+           },
+           {
+            "id": "c2",
+            "textJp": "けいかん"
+           },
+           {
+            "id": "c3",
+            "textJp": "けいっかん"
+           },
+           {
+            "id": "c4",
+            "textJp": "げいかん"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "始まる",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぱじまる"
+           },
+           {
+            "id": "c2",
+            "textJp": "はしまる"
+           },
+           {
+            "id": "c3",
+            "textJp": "はじまる"
+           },
+           {
+            "id": "c4",
+            "textJp": "はじまるう"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "昼御飯",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ひるごはん"
+           },
+           {
+            "id": "c2",
+            "textJp": "ひるごぱん"
+           },
+           {
+            "id": "c3",
+            "textJp": "ひるごばん"
+           },
+           {
+            "id": "c4",
+            "textJp": "びるごはん"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "全部",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぜんぶう"
+           },
+           {
+            "id": "c2",
+            "textJp": "ぜんふ"
+           },
+           {
+            "id": "c3",
+            "textJp": "ぜんぶ"
+           },
+           {
+            "id": "c4",
+            "textJp": "せんぶ"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "後ろ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "うっしろ"
+           },
+           {
+            "id": "c2",
+            "textJp": "うじろ"
+           },
+           {
+            "id": "c3",
+            "textJp": "うしろう"
+           },
+           {
+            "id": "c4",
+            "textJp": "うしろ"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "忙しい",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "いそかしい"
+           },
+           {
+            "id": "c2",
+            "textJp": "いそがじい"
+           },
+           {
+            "id": "c3",
+            "textJp": "いっそがしい"
+           },
+           {
+            "id": "c4",
+            "textJp": "いそがしい"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q7",
+          "number": 7,
+          "promptJp": "時計",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "とっけい"
+           },
+           {
+            "id": "c2",
+            "textJp": "とけい"
+           },
+           {
+            "id": "c3",
+            "textJp": "どけい"
+           },
+           {
+            "id": "c4",
+            "textJp": "とげい"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばを　漢字で　書く　とき、最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the correct kanji spelling for the word.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "あに",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "児"
+           },
+           {
+            "id": "c2",
+            "textJp": "党"
+           },
+           {
+            "id": "c3",
+            "textJp": "免"
+           },
+           {
+            "id": "c4",
+            "textJp": "兄"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "ながい",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "帳い"
+           },
+           {
+            "id": "c2",
+            "textJp": "長い"
+           },
+           {
+            "id": "c3",
+            "textJp": "張い"
+           },
+           {
+            "id": "c4",
+            "textJp": "艮い"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "いけ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "涸"
+           },
+           {
+            "id": "c2",
+            "textJp": "池"
+           },
+           {
+            "id": "c3",
+            "textJp": "潰"
+           },
+           {
+            "id": "c4",
+            "textJp": "河"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "うわぎ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "上着"
+           },
+           {
+            "id": "c2",
+            "textJp": "上督"
+           },
+           {
+            "id": "c3",
+            "textJp": "上瞳"
+           },
+           {
+            "id": "c4",
+            "textJp": "不着"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "しろい",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "百い"
+           },
+           {
+            "id": "c2",
+            "textJp": "自い"
+           },
+           {
+            "id": "c3",
+            "textJp": "臼い"
+           },
+           {
+            "id": "c4",
+            "textJp": "白い"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "かぜをひいたので、＿＿＿＿を飲みました。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "パン"
+           },
+           {
+            "id": "c2",
+            "textJp": "くすり"
+           },
+           {
+            "id": "c3",
+            "textJp": "にく"
+           },
+           {
+            "id": "c4",
+            "textJp": "やさい"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "としょかんで本を＿＿＿＿。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ねました"
+           },
+           {
+            "id": "c2",
+            "textJp": "のりました"
+           },
+           {
+            "id": "c3",
+            "textJp": "かりました"
+           },
+           {
+            "id": "c4",
+            "textJp": "はきました"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "＿＿＿＿は、一年でいちばんあついです。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ふゆ"
+           },
+           {
+            "id": "c2",
+            "textJp": "はる"
+           },
+           {
+            "id": "c3",
+            "textJp": "なつ"
+           },
+           {
+            "id": "c4",
+            "textJp": "あき"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "きれいな花を、＿＿＿＿ありがとうございました。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "どう"
+           },
+           {
+            "id": "c2",
+            "textJp": "どうぞ"
+           },
+           {
+            "id": "c3",
+            "textJp": "どこ"
+           },
+           {
+            "id": "c4",
+            "textJp": "どうも"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "あの＿＿＿＿で新しいコートを買いたい。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "デパート"
+           },
+           {
+            "id": "c2",
+            "textJp": "こうえん"
+           },
+           {
+            "id": "c3",
+            "textJp": "ぎんこう"
+           },
+           {
+            "id": "c4",
+            "textJp": "としょかん"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "今日はたくさんはたらいたので、とても＿＿＿＿。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "はれました"
+           },
+           {
+            "id": "c2",
+            "textJp": "ふきました"
+           },
+           {
+            "id": "c3",
+            "textJp": "つかれました"
+           },
+           {
+            "id": "c4",
+            "textJp": "さきました"
+           }
+          ],
+          "answer": "c3"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "きんようびに、友だちと会います。",
+          "underlineJp": "きんようび",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "もくようびのまえの日"
+           },
+           {
+            "id": "c2",
+            "textJp": "どようびのつぎの日"
+           },
+           {
+            "id": "c3",
+            "textJp": "すいようびのつぎの日"
+           },
+           {
+            "id": "c4",
+            "textJp": "もくようびのつぎの日"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "わたしは、ねこがだいすきです。",
+          "underlineJp": "だいすき",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "すこしすき"
+           },
+           {
+            "id": "c2",
+            "textJp": "とてもすき"
+           },
+           {
+            "id": "c3",
+            "textJp": "あまりすきじゃない"
+           },
+           {
+            "id": "c4",
+            "textJp": "とてもきらい"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "あさ、パンを食べました。それから、学校へ行きました。",
+          "underlineJp": "それから",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "そのまえに"
+           },
+           {
+            "id": "c2",
+            "textJp": "だから"
+           },
+           {
+            "id": "c3",
+            "textJp": "でも"
+           },
+           {
+            "id": "c4",
+            "textJp": "そのあとで"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 7,
+   "seed": 8973725190175072729,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Vocabulary Practice",
+    "titleJp": "N5 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 20,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "背広",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "せひろ"
+           },
+           {
+            "id": "c2",
+            "textJp": "せびろ"
+           },
+           {
+            "id": "c3",
+            "textJp": "せびろう"
+           },
+           {
+            "id": "c4",
+            "textJp": "ぜびろ"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "今月",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "こんげづ"
+           },
+           {
+            "id": "c2",
+            "textJp": "こんけつ"
+           },
+           {
+            "id": "c3",
+            "textJp": "ごんげつ"
+           },
+           {
+            "id": "c4",
+            "textJp": "こんげつ"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "午後",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "こご"
+           },
+           {
+            "id": "c2",
+            "textJp": "ごごう"
+           },
+           {
+            "id": "c3",
+            "textJp": "ごっご"
+           },
+           {
+            "id": "c4",
+            "textJp": "ごご"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "答える",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ごたえる"
+           },
+           {
+            "id": "c2",
+            "textJp": "こたえる"
+           },
+           {
+            "id": "c3",
+            "textJp": "こったえる"
+           },
+           {
+            "id": "c4",
+            "textJp": "こたえるう"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "誰か",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "だれか"
+           },
+           {
+            "id": "c2",
+            "textJp": "たれか"
+           },
+           {
+            "id": "c3",
+            "textJp": "だれっか"
+           },
+           {
+            "id": "c4",
+            "textJp": "だれが"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "難しい",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "むずかしい"
+           },
+           {
+            "id": "c2",
+            "textJp": "むずかっしい"
+           },
+           {
+            "id": "c3",
+            "textJp": "むすかしい"
+           },
+           {
+            "id": "c4",
+            "textJp": "むずかじい"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q7",
+          "number": 7,
+          "promptJp": "今年",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ことし"
+           },
+           {
+            "id": "c2",
+            "textJp": "ごとし"
+           },
+           {
+            "id": "c3",
+            "textJp": "こっとし"
+           },
+           {
+            "id": "c4",
+            "textJp": "こどし"
+           }
+          ],
+          "answer": "c1"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばを　漢字で　書く　とき、最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the correct kanji spelling for the word.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "わかい",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "蒔い"
+           },
+           {
+            "id": "c2",
+            "textJp": "若い"
+           },
+           {
+            "id": "c3",
+            "textJp": "蔑い"
+           },
+           {
+            "id": "c4",
+            "textJp": "蓋い"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "じゅういちがつ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "十一月"
+           },
+           {
+            "id": "c2",
+            "textJp": "協一月"
+           },
+           {
+            "id": "c3",
+            "textJp": "十一朝"
+           },
+           {
+            "id": "c4",
+            "textJp": "単一月"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "さらいねん",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "さ枕年"
+           },
+           {
+            "id": "c2",
+            "textJp": "さ梯年"
+           },
+           {
+            "id": "c3",
+            "textJp": "さ東年"
+           },
+           {
+            "id": "c4",
+            "textJp": "さ来年"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "かいもの",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "買い牧"
+           },
+           {
+            "id": "c2",
+            "textJp": "買い物"
+           },
+           {
+            "id": "c3",
+            "textJp": "買い特"
+           },
+           {
+            "id": "c4",
+            "textJp": "買い牲"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "わるい",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "憤い"
+           },
+           {
+            "id": "c2",
+            "textJp": "怠い"
+           },
+           {
+            "id": "c3",
+            "textJp": "憶い"
+           },
+           {
+            "id": "c4",
+            "textJp": "悪い"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "ここに＿＿＿＿のないナベがある。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "本棚"
+           },
+           {
+            "id": "c2",
+            "textJp": "手"
+           },
+           {
+            "id": "c3",
+            "textJp": "そちら"
+           },
+           {
+            "id": "c4",
+            "textJp": "灰皿"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "日よう日に、ふくを＿＿＿＿しました。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "りょこう"
+           },
+           {
+            "id": "c2",
+            "textJp": "けっこん"
+           },
+           {
+            "id": "c3",
+            "textJp": "さんぽ"
+           },
+           {
+            "id": "c4",
+            "textJp": "せんたく"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "つぎのかどを右に＿＿＿＿ください。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "わたって"
+           },
+           {
+            "id": "c2",
+            "textJp": "まがって"
+           },
+           {
+            "id": "c3",
+            "textJp": "とまって"
+           },
+           {
+            "id": "c4",
+            "textJp": "ならんで"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "きのう、友だちと山に＿＿＿＿。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ふりました"
+           },
+           {
+            "id": "c2",
+            "textJp": "のぼりました"
+           },
+           {
+            "id": "c3",
+            "textJp": "はれました"
+           },
+           {
+            "id": "c4",
+            "textJp": "ふきました"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "毎ばん、へやで＿＿＿＿を聞きます。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "しゃしん"
+           },
+           {
+            "id": "c2",
+            "textJp": "カレンダー"
+           },
+           {
+            "id": "c3",
+            "textJp": "ちず"
+           },
+           {
+            "id": "c4",
+            "textJp": "おんがく"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "今日はとても＿＿＿＿ですから、コートをきて出かけます。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "あつい"
+           },
+           {
+            "id": "c2",
+            "textJp": "あたたかい"
+           },
+           {
+            "id": "c3",
+            "textJp": "あかるい"
+           },
+           {
+            "id": "c4",
+            "textJp": "さむい"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "このかさはいくらですか。",
+          "underlineJp": "いくら",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "だれの"
+           },
+           {
+            "id": "c2",
+            "textJp": "なん円"
+           },
+           {
+            "id": "c3",
+            "textJp": "どこの"
+           },
+           {
+            "id": "c4",
+            "textJp": "なんぼん"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "あなたのたんじょうびはいつですか。",
+          "underlineJp": "いつ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "なんようび"
+           },
+           {
+            "id": "c2",
+            "textJp": "なんさい"
+           },
+           {
+            "id": "c3",
+            "textJp": "なん月なん日"
+           },
+           {
+            "id": "c4",
+            "textJp": "どんな日"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "みかんを一つください。",
+          "underlineJp": "一つ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "一まい"
+           },
+           {
+            "id": "c2",
+            "textJp": "一本"
+           },
+           {
+            "id": "c3",
+            "textJp": "一こ"
+           },
+           {
+            "id": "c4",
+            "textJp": "一さつ"
+           }
+          ],
+          "answer": "c3"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 8,
+   "seed": 385416390909031407,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Vocabulary Practice",
+    "titleJp": "N5 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 20,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "食べ物",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "たべもの"
+           },
+           {
+            "id": "c2",
+            "textJp": "だべもの"
+           },
+           {
+            "id": "c3",
+            "textJp": "たへもの"
+           },
+           {
+            "id": "c4",
+            "textJp": "たべものう"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "体",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "からた"
+           },
+           {
+            "id": "c2",
+            "textJp": "からだ"
+           },
+           {
+            "id": "c3",
+            "textJp": "かだら"
+           },
+           {
+            "id": "c4",
+            "textJp": "がらだ"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "走る",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぱしる"
+           },
+           {
+            "id": "c2",
+            "textJp": "はしる"
+           },
+           {
+            "id": "c3",
+            "textJp": "ばしる"
+           },
+           {
+            "id": "c4",
+            "textJp": "はっしる"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "荷物",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "にもつ"
+           },
+           {
+            "id": "c2",
+            "textJp": "にもづ"
+           },
+           {
+            "id": "c3",
+            "textJp": "にもっつ"
+           },
+           {
+            "id": "c4",
+            "textJp": "にもつう"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "魚",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "さがな"
+           },
+           {
+            "id": "c2",
+            "textJp": "さかな"
+           },
+           {
+            "id": "c3",
+            "textJp": "さかなう"
+           },
+           {
+            "id": "c4",
+            "textJp": "さっかな"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "汚い",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "きたない"
+           },
+           {
+            "id": "c2",
+            "textJp": "きだない"
+           },
+           {
+            "id": "c3",
+            "textJp": "ぎたない"
+           },
+           {
+            "id": "c4",
+            "textJp": "きったない"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q7",
+          "number": 7,
+          "promptJp": "欲しい",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ほっしい"
+           },
+           {
+            "id": "c2",
+            "textJp": "ぼしい"
+           },
+           {
+            "id": "c3",
+            "textJp": "ほじい"
+           },
+           {
+            "id": "c4",
+            "textJp": "ほしい"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばを　漢字で　書く　とき、最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the correct kanji spelling for the word.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "おおきい",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "夫きい"
+           },
+           {
+            "id": "c2",
+            "textJp": "失きい"
+           },
+           {
+            "id": "c3",
+            "textJp": "大きい"
+           },
+           {
+            "id": "c4",
+            "textJp": "奇きい"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "やさい",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "野葬"
+           },
+           {
+            "id": "c2",
+            "textJp": "重菜"
+           },
+           {
+            "id": "c3",
+            "textJp": "野菜"
+           },
+           {
+            "id": "c4",
+            "textJp": "野蔵"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "おなじ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "喜じ"
+           },
+           {
+            "id": "c2",
+            "textJp": "同じ"
+           },
+           {
+            "id": "c3",
+            "textJp": "嗽じ"
+           },
+           {
+            "id": "c4",
+            "textJp": "向じ"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "かぜ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "風郡"
+           },
+           {
+            "id": "c2",
+            "textJp": "風邪"
+           },
+           {
+            "id": "c3",
+            "textJp": "風部"
+           },
+           {
+            "id": "c4",
+            "textJp": "風郷"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "のむ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "飯む"
+           },
+           {
+            "id": "c2",
+            "textJp": "欽む"
+           },
+           {
+            "id": "c3",
+            "textJp": "餃む"
+           },
+           {
+            "id": "c4",
+            "textJp": "飲む"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "あした、友だちが来ますから、へやを＿＿＿＿します。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "コピー"
+           },
+           {
+            "id": "c2",
+            "textJp": "りょうり"
+           },
+           {
+            "id": "c3",
+            "textJp": "そうじ"
+           },
+           {
+            "id": "c4",
+            "textJp": "せんたく"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "うちを出るとき、ドアに＿＿＿＿をかけます。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "でんわ"
+           },
+           {
+            "id": "c2",
+            "textJp": "はし"
+           },
+           {
+            "id": "c3",
+            "textJp": "かぎ"
+           },
+           {
+            "id": "c4",
+            "textJp": "えんぴつ"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "りんごやバナナなどの＿＿＿＿がすきです。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "のみもの"
+           },
+           {
+            "id": "c2",
+            "textJp": "おかし"
+           },
+           {
+            "id": "c3",
+            "textJp": "にく"
+           },
+           {
+            "id": "c4",
+            "textJp": "くだもの"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "マリアさんはピアノがとても＿＿＿＿です。毎日れんしゅうしていますから。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "しずか"
+           },
+           {
+            "id": "c2",
+            "textJp": "じょうず"
+           },
+           {
+            "id": "c3",
+            "textJp": "べんり"
+           },
+           {
+            "id": "c4",
+            "textJp": "ゆうめい"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "さむいので、セーターを＿＿＿＿。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "はきました"
+           },
+           {
+            "id": "c2",
+            "textJp": "きました"
+           },
+           {
+            "id": "c3",
+            "textJp": "ぬぎました"
+           },
+           {
+            "id": "c4",
+            "textJp": "しめました"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "＿＿＿＿ヨーロッパへ行くつもりなんです。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "先週"
+           },
+           {
+            "id": "c2",
+            "textJp": "来週"
+           },
+           {
+            "id": "c3",
+            "textJp": "先月"
+           },
+           {
+            "id": "c4",
+            "textJp": "きょねん"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "かぜで、学校をいつか休みました。",
+          "underlineJp": "いつか",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "四日間"
+           },
+           {
+            "id": "c2",
+            "textJp": "九日間"
+           },
+           {
+            "id": "c3",
+            "textJp": "八日間"
+           },
+           {
+            "id": "c4",
+            "textJp": "五日間"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "わたしの父のあには、先生です。",
+          "underlineJp": "父のあに",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "おばさん"
+           },
+           {
+            "id": "c2",
+            "textJp": "おじいさん"
+           },
+           {
+            "id": "c3",
+            "textJp": "おじさん"
+           },
+           {
+            "id": "c4",
+            "textJp": "おにいさん"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "このかばんはおもいです。",
+          "underlineJp": "おもい",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ながくない"
+           },
+           {
+            "id": "c2",
+            "textJp": "かるくない"
+           },
+           {
+            "id": "c3",
+            "textJp": "小さくない"
+           },
+           {
+            "id": "c4",
+            "textJp": "高くない"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 9,
+   "seed": 2309701430922703378,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Vocabulary Practice",
+    "titleJp": "N5 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 20,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "左",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ひたり"
+           },
+           {
+            "id": "c2",
+            "textJp": "さ"
+           },
+           {
+            "id": "c3",
+            "textJp": "ひだっり"
+           },
+           {
+            "id": "c4",
+            "textJp": "ひだり"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "銀行",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぎんっこう"
+           },
+           {
+            "id": "c2",
+            "textJp": "きんこう"
+           },
+           {
+            "id": "c3",
+            "textJp": "ぎんごう"
+           },
+           {
+            "id": "c4",
+            "textJp": "ぎんこう"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "大使館",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "たいじかん"
+           },
+           {
+            "id": "c2",
+            "textJp": "だいしかん"
+           },
+           {
+            "id": "c3",
+            "textJp": "たいっしかん"
+           },
+           {
+            "id": "c4",
+            "textJp": "たいしかん"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "先週",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "せんしゅう"
+           },
+           {
+            "id": "c2",
+            "textJp": "せんじゅう"
+           },
+           {
+            "id": "c3",
+            "textJp": "せんっしゅう"
+           },
+           {
+            "id": "c4",
+            "textJp": "ぜんしゅう"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "教室",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "きょうっしつ"
+           },
+           {
+            "id": "c2",
+            "textJp": "きょうしつ"
+           },
+           {
+            "id": "c3",
+            "textJp": "きょうしつう"
+           },
+           {
+            "id": "c4",
+            "textJp": "きょうしづ"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "空",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "あ"
+           },
+           {
+            "id": "c2",
+            "textJp": "そらう"
+           },
+           {
+            "id": "c3",
+            "textJp": "そら"
+           },
+           {
+            "id": "c4",
+            "textJp": "ぞら"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q7",
+          "number": 7,
+          "promptJp": "上",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "しょう"
+           },
+           {
+            "id": "c2",
+            "textJp": "うわ"
+           },
+           {
+            "id": "c3",
+            "textJp": "しゃん"
+           },
+           {
+            "id": "c4",
+            "textJp": "うえ"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばを　漢字で　書く　とき、最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the correct kanji spelling for the word.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "よむ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "評む"
+           },
+           {
+            "id": "c2",
+            "textJp": "誕む"
+           },
+           {
+            "id": "c3",
+            "textJp": "語む"
+           },
+           {
+            "id": "c4",
+            "textJp": "読む"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "やすい",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "宏い"
+           },
+           {
+            "id": "c2",
+            "textJp": "安い"
+           },
+           {
+            "id": "c3",
+            "textJp": "案い"
+           },
+           {
+            "id": "c4",
+            "textJp": "妥い"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "いっしょ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "丘緒"
+           },
+           {
+            "id": "c2",
+            "textJp": "一綻"
+           },
+           {
+            "id": "c3",
+            "textJp": "万緒"
+           },
+           {
+            "id": "c4",
+            "textJp": "一緒"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "ろく",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "八"
+           },
+           {
+            "id": "c2",
+            "textJp": "六"
+           },
+           {
+            "id": "c3",
+            "textJp": "其"
+           },
+           {
+            "id": "c4",
+            "textJp": "共"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "こども",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "子供"
+           },
+           {
+            "id": "c2",
+            "textJp": "子個"
+           },
+           {
+            "id": "c3",
+            "textJp": "季供"
+           },
+           {
+            "id": "c4",
+            "textJp": "子催"
+           }
+          ],
+          "answer": "c1"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "わたしの＿＿＿＿はねこです。名前はタマです。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "にわ"
+           },
+           {
+            "id": "c2",
+            "textJp": "テーブル"
+           },
+           {
+            "id": "c3",
+            "textJp": "ペット"
+           },
+           {
+            "id": "c4",
+            "textJp": "車"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "本の１０ページを＿＿＿＿ください。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "わたって"
+           },
+           {
+            "id": "c2",
+            "textJp": "きえて"
+           },
+           {
+            "id": "c3",
+            "textJp": "しって"
+           },
+           {
+            "id": "c4",
+            "textJp": "見て"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "いもうとは、きょねんの十月に＿＿＿＿。今、一さいです。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "生まれました"
+           },
+           {
+            "id": "c2",
+            "textJp": "さきました"
+           },
+           {
+            "id": "c3",
+            "textJp": "はれました"
+           },
+           {
+            "id": "c4",
+            "textJp": "ふりました"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "ここにあなたの名前を＿＿＿＿ください。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "おして"
+           },
+           {
+            "id": "c2",
+            "textJp": "ならべて"
+           },
+           {
+            "id": "c3",
+            "textJp": "書いて"
+           },
+           {
+            "id": "c4",
+            "textJp": "はいて"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "おじいさんは＿＿＿＿がわるいので、大きいこえで話してください。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "目"
+           },
+           {
+            "id": "c2",
+            "textJp": "手"
+           },
+           {
+            "id": "c3",
+            "textJp": "足"
+           },
+           {
+            "id": "c4",
+            "textJp": "耳"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "しゅくだいは、もう＿＿＿＿か。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "くもりました"
+           },
+           {
+            "id": "c2",
+            "textJp": "やりました"
+           },
+           {
+            "id": "c3",
+            "textJp": "とびました"
+           },
+           {
+            "id": "c4",
+            "textJp": "けっこんしました"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "駅で、さいふをなくしました。",
+          "underlineJp": "さいふ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "お金を入れるもの"
+           },
+           {
+            "id": "c2",
+            "textJp": "ふくを入れるもの"
+           },
+           {
+            "id": "c3",
+            "textJp": "本を入れるもの"
+           },
+           {
+            "id": "c4",
+            "textJp": "ごはんを入れるもの"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "母は毎日りょうりをします。",
+          "underlineJp": "りょうりをします",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ごはんをつくります"
+           },
+           {
+            "id": "c2",
+            "textJp": "ごはんをたべます"
+           },
+           {
+            "id": "c3",
+            "textJp": "へやをそうじします"
+           },
+           {
+            "id": "c4",
+            "textJp": "ふくをせんたくします"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "きのうは、いえで本をよみました。",
+          "underlineJp": "いえ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "にわ"
+           },
+           {
+            "id": "c2",
+            "textJp": "としょかん"
+           },
+           {
+            "id": "c3",
+            "textJp": "こうえん"
+           },
+           {
+            "id": "c4",
+            "textJp": "うち"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 10,
+   "seed": 1552232891841265606,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Vocabulary Practice",
+    "titleJp": "N5 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 20,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "暇",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "びま"
+           },
+           {
+            "id": "c2",
+            "textJp": "ぴま"
+           },
+           {
+            "id": "c3",
+            "textJp": "か"
+           },
+           {
+            "id": "c4",
+            "textJp": "ひま"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "女の子",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "おんなのこ"
+           },
+           {
+            "id": "c2",
+            "textJp": "おんなのっこ"
+           },
+           {
+            "id": "c3",
+            "textJp": "おんなのこう"
+           },
+           {
+            "id": "c4",
+            "textJp": "おんなのご"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "伯父さん",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "おじざん"
+           },
+           {
+            "id": "c2",
+            "textJp": "おじさん"
+           },
+           {
+            "id": "c3",
+            "textJp": "おしさん"
+           },
+           {
+            "id": "c4",
+            "textJp": "おじっさん"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "話す",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "はなすう"
+           },
+           {
+            "id": "c2",
+            "textJp": "はなす"
+           },
+           {
+            "id": "c3",
+            "textJp": "はなっす"
+           },
+           {
+            "id": "c4",
+            "textJp": "はなず"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "聞く",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぎく"
+           },
+           {
+            "id": "c2",
+            "textJp": "きくう"
+           },
+           {
+            "id": "c3",
+            "textJp": "きく"
+           },
+           {
+            "id": "c4",
+            "textJp": "きっく"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "服",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぶく"
+           },
+           {
+            "id": "c2",
+            "textJp": "ふく"
+           },
+           {
+            "id": "c3",
+            "textJp": "ふぐ"
+           },
+           {
+            "id": "c4",
+            "textJp": "ふっく"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q7",
+          "number": 7,
+          "promptJp": "二月",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "にがつう"
+           },
+           {
+            "id": "c2",
+            "textJp": "にがっつ"
+           },
+           {
+            "id": "c3",
+            "textJp": "にがつ"
+           },
+           {
+            "id": "c4",
+            "textJp": "にがづ"
+           }
+          ],
+          "answer": "c3"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばを　漢字で　書く　とき、最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the correct kanji spelling for the word.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "ゆうびんきょく",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "郵便尽"
+           },
+           {
+            "id": "c2",
+            "textJp": "郵便履"
+           },
+           {
+            "id": "c3",
+            "textJp": "郵便届"
+           },
+           {
+            "id": "c4",
+            "textJp": "郵便局"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "おとこ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "男"
+           },
+           {
+            "id": "c2",
+            "textJp": "申"
+           },
+           {
+            "id": "c3",
+            "textJp": "甲"
+           },
+           {
+            "id": "c4",
+            "textJp": "畳"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "ねん",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "年"
+           },
+           {
+            "id": "c2",
+            "textJp": "幸"
+           },
+           {
+            "id": "c3",
+            "textJp": "幹"
+           },
+           {
+            "id": "c4",
+            "textJp": "干"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "まつ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "復つ"
+           },
+           {
+            "id": "c2",
+            "textJp": "循つ"
+           },
+           {
+            "id": "c3",
+            "textJp": "得つ"
+           },
+           {
+            "id": "c4",
+            "textJp": "待つ"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "ちかく",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "遅く"
+           },
+           {
+            "id": "c2",
+            "textJp": "違く"
+           },
+           {
+            "id": "c3",
+            "textJp": "逃く"
+           },
+           {
+            "id": "c4",
+            "textJp": "近く"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "あの人はとても＿＿＿＿ですから、みんな名前をしっています。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "しずか"
+           },
+           {
+            "id": "c2",
+            "textJp": "ゆうめい"
+           },
+           {
+            "id": "c3",
+            "textJp": "じょうぶ"
+           },
+           {
+            "id": "c4",
+            "textJp": "いや"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "さむいですから、まどを＿＿＿＿ください。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "しめて"
+           },
+           {
+            "id": "c2",
+            "textJp": "あけて"
+           },
+           {
+            "id": "c3",
+            "textJp": "あらって"
+           },
+           {
+            "id": "c4",
+            "textJp": "おぼえて"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "このケーキは、さとうが多くて、とても＿＿＿＿です。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "からい"
+           },
+           {
+            "id": "c2",
+            "textJp": "うすい"
+           },
+           {
+            "id": "c3",
+            "textJp": "あまい"
+           },
+           {
+            "id": "c4",
+            "textJp": "ひくい"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "駅のそばのアパートは、＿＿＿＿です。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "べんり"
+           },
+           {
+            "id": "c2",
+            "textJp": "へた"
+           },
+           {
+            "id": "c3",
+            "textJp": "げんき"
+           },
+           {
+            "id": "c4",
+            "textJp": "じょうず"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "うちの＿＿＿＿は、毎あさワンワンとなきます。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ねこ"
+           },
+           {
+            "id": "c2",
+            "textJp": "とり"
+           },
+           {
+            "id": "c3",
+            "textJp": "さかな"
+           },
+           {
+            "id": "c4",
+            "textJp": "いぬ"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "てがみを出すまえに、ふうとうに＿＿＿＿をはります。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "きっぷ"
+           },
+           {
+            "id": "c2",
+            "textJp": "ざっし"
+           },
+           {
+            "id": "c3",
+            "textJp": "きって"
+           },
+           {
+            "id": "c4",
+            "textJp": "くすり"
+           }
+          ],
+          "answer": "c3"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "こうえんに、人がおおぜいいます。",
+          "underlineJp": "おおぜい",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "すこし"
+           },
+           {
+            "id": "c2",
+            "textJp": "たくさん"
+           },
+           {
+            "id": "c3",
+            "textJp": "ひとりだけ"
+           },
+           {
+            "id": "c4",
+            "textJp": "ふたりだけ"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "すいようびに、としょかんへ行きます。",
+          "underlineJp": "すいようび",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "かようびのつぎの日"
+           },
+           {
+            "id": "c2",
+            "textJp": "かようびのまえの日"
+           },
+           {
+            "id": "c3",
+            "textJp": "もくようびのつぎの日"
+           },
+           {
+            "id": "c4",
+            "textJp": "げつようびのつぎの日"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "きょうしつには、まだだれもいません。",
+          "underlineJp": "きょうしつ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ごはんをたべるへや"
+           },
+           {
+            "id": "c2",
+            "textJp": "じゅぎょうをするへや"
+           },
+           {
+            "id": "c3",
+            "textJp": "先生がやすむへや"
+           },
+           {
+            "id": "c4",
+            "textJp": "おきゃくさんがまつへや"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

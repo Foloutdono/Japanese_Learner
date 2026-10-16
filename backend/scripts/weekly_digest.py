@@ -40,6 +40,10 @@ already looking.
   8  FRICTION     the requests that failed (api_error) and the install
                   prompt's answers. Both were declared in core/events.py
                   from the start and sent by nothing until the client began to send them.
+  9  MESSAGES     what learners wrote to us (plan 222), COUNTED: by
+                  kind, who asked for an answer, the cards reported most.
+                  Never the words, which this page on GitHub is no place
+                  for: scripts/read_feedback.py reads them, run by a person.
 
 Each reads event_log and event_daily and adds the two together where a
 total is wanted, because scripts/compact_events.py moves rows from the
@@ -427,17 +431,95 @@ def friction(cur, days: int) -> str:
     return "\n".join(out)
 
 
+def time_spent(cur, days: int) -> str:
+    """Where the engaged time goes, and which small features are used.
+
+    screen_leave's `ms` is ENGAGED time (lib/dwell.js: a hidden tab does
+    not count), sent on leaving a screen and on hiding the page (plan
+    218), so a screen's total is real attention, not an open tab.
+    feature_use is one row per (feature, action) per screen left, `n`
+    the presses. Raw rows only, so the window is the last 30 days at most.
+    """
+    cur.execute(
+        """
+        SELECT props->>'route',
+               ROUND(SUM((props->>'ms')::numeric) / 60000, 1),
+               ROUND((PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY (props->>'ms')::numeric) / 1000)::numeric, 1),
+               COUNT(DISTINCT user_id)
+          FROM event_log
+         WHERE name = 'screen_leave' AND at > NOW() - (%s || ' days')::interval
+         GROUP BY 1 ORDER BY 2 DESC LIMIT 12
+        """,
+        (days,),
+    )
+    screens = cur.fetchall()
+    if not screens:
+        return "_Nothing yet (screen_leave arrived with plan 218)._\n"
+    out = [table(["screen", "minutes", "median stay (s)", "learners"], screens)]
+    cur.execute(
+        """
+        SELECT props->>'feature', props->>'action', SUM((props->>'n')::int), COUNT(DISTINCT user_id)
+          FROM event_log
+         WHERE name = 'feature_use' AND at > NOW() - (%s || ' days')::interval
+         GROUP BY 1, 2 ORDER BY 4 DESC, 3 DESC
+        """,
+        (days,),
+    )
+    uses = cur.fetchall()
+    out.append("**Features used**\n")
+    out.append(table(["feature", "action", "uses", "learners"], uses) if uses else "_None yet._\n")
+    return "\n".join(out)
+
+
+def messages(cur, days: int) -> str:
+    """What learners wrote to us (plan 222), counted and never read. The
+    words belong to scripts/read_feedback.py, run by a person in a
+    terminal, not to a run summary anyone with the repository can open.
+    A card's id is the content's key, not anything a learner typed."""
+    cur.execute(
+        """
+        SELECT kind, COUNT(*), COUNT(DISTINCT user_id), COUNT(*) FILTER (WHERE reply)
+          FROM feedback
+         WHERE created_at > NOW() - (%s || ' days')::interval
+         GROUP BY kind
+         ORDER BY 2 DESC, 1
+        """,
+        (days,),
+    )
+    out = [table(["kind", "messages", "learners", "want an answer"], cur.fetchall())]
+    cur.execute(
+        """
+        SELECT f.card_id, COUNT(DISTINCT f.id), COUNT(DISTINCT f.user_id),
+               STRING_AGG(DISTINCT r, ', ' ORDER BY r)
+          FROM feedback f
+          LEFT JOIN LATERAL UNNEST(f.reasons) AS r ON TRUE
+         WHERE f.kind = 'card'
+           AND f.created_at > NOW() - (%s || ' days')::interval
+         GROUP BY f.card_id
+         ORDER BY 3 DESC, 2 DESC, 1
+         LIMIT 10
+        """,
+        (days,),
+    )
+    out.append("**Cards reported**\n")
+    out.append(table(["card", "reports", "learners", "what is wrong"], cur.fetchall()))
+    out.append(f"_Read them: `python -m scripts.read_feedback --days {days}`._\n")
+    return "\n".join(out)
+
+
 SECTIONS = [
     ("みどりの窓口 — where boarding is lost", boarding),
     ("Coming back", retention),
     ("Who is active", engagement),
     ("Sessions", sessions),
+    ("Where the time goes", time_spent),
     ("The boot", boot),
     ("Who wanted more than the free allowance", fare),
     ("The offer, door by door", offer),
     ("The first ride and the guides", ride_and_guides),
     ("What gets finished", use),
     ("What broke", friction),
+    ("Written to us", messages),
 ]
 
 

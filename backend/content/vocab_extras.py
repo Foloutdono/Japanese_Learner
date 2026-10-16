@@ -101,7 +101,7 @@ _DATA_DIR = os.path.join(_BASE_DIR, "datas", "vocab")
 # more always-in-memory dict for either half of this module's data.
 # The deck's own curated senses still always win over the JMdict pool
 # when both exist, same as before (see _find_senses).
-from content import vocab_meanings_data
+from content import example_fixes, vocab_meanings_data
 try:
     import content.vocab_jmdict_data as _jmdict_db
 except ImportError:  # pragma: no cover - defensive only, always present in prod
@@ -284,6 +284,132 @@ def _is_recognized(code: str) -> bool:
     return code in _RECOGNIZED_CODES or bool(_NEWS_RANK_RE.match(code))
 
 
+# The tooltip behind each chip, in French (plan 215): JMdict's own
+# "notes" are English, and a French learner hovering "v. godan" read
+# "Godan verb with 'ku' ending". Every code that earns a chip is here;
+# a code missing from it falls back to the English note.
+_TOOLTIPS_FR = {
+    "abbr": "abréviation",
+    "adj-f": "nom ou verbe employé en position prénominale (devant le nom qu'il qualifie)",
+    "adj-i": "adjectif en い (keiyōshi)",
+    "adj-ix": "adjectif en い (keiyōshi) du type よい / いい",
+    "adj-na": "adjectif en な (keiyōdōshi) : nom adjectival ou quasi-adjectif",
+    "adj-no": "nom pouvant prendre la particule du génitif の",
+    "adj-t": "adjectif en たる",
+    "adv": "adverbe (fukushi)",
+    "adv-to": "adverbe pouvant prendre la particule と",
+    "anat": "terme d'anatomie",
+    "arch": "archaïque",
+    "archit": "terme d'architecture",
+    "art": "terme d'art ou d'esthétique",
+    "astron": "terme d'astronomie",
+    "aux": "auxiliaire",
+    "aux-adj": "adjectif auxiliaire",
+    "aux-v": "verbe auxiliaire",
+    "baseb": "terme de baseball",
+    "biol": "terme de biologie",
+    "bot": "terme de botanique",
+    "Buddh": "terme du bouddhisme",
+    "bus": "terme des affaires",
+    "chem": "terme de chimie",
+    "col": "familier",
+    "comp": "terme d'informatique",
+    "conj": "conjonction",
+    "cop": "copule",
+    "ctr": "compteur (classificateur numéral)",
+    "dated": "terme désuet",
+    "derog": "péjoratif",
+    "econ": "terme d'économie",
+    "exp": "expression (locution, proposition, etc.)",
+    "finc": "terme de finance",
+    "food": "terme de cuisine ou d'alimentation",
+    "gai": "emprunt courant à une langue étrangère (gairaigo・外来語)",
+    "geol": "terme de géologie",
+    "go": "terme du jeu de go",
+    "hon": "langage honorifique ou respectueux (sonkeigo)",
+    "hum": "langage humble (kenjōgo)",
+    "ichi": "figure dans l'Ichimango Goi Bunruishū (１万語語彙分類集), lexique classé de 10 000 mots",
+    "id": "expression idiomatique",
+    "int": "interjection (kandōshi)",
+    "internet": "terme d'Internet",
+    "law": "terme de droit",
+    "ling": "terme de linguistique",
+    "MA": "terme d'arts martiaux",
+    "math": "terme de mathématiques",
+    "med": "terme de médecine",
+    "mil": "terme militaire",
+    "music": "terme de musique",
+    "n": "nom commun (futsū meishi)",
+    "n-pref": "nom employé comme préfixe",
+    "n-suf": "nom employé comme suffixe",
+    "num": "numéral",
+    "obs": "terme obsolète",
+    "on-mim": "onomatopée ou mot mimétique (giongo, gitaigo)",
+    "photo": "terme de photographie",
+    "physics": "terme de physique",
+    "pn": "pronom",
+    "pol": "langage poli (teineigo)",
+    "politics": "terme de politique",
+    "pref": "préfixe",
+    "proverb": "proverbe",
+    "prt": "particule",
+    "psych": "terme de psychologie",
+    "rare": "terme rare",
+    "Shinto": "terme du shintoïsme",
+    "shogi": "terme de shogi",
+    "spec": "désigné comme courant par les éditeurs de JMdict",
+    "sports": "terme de sport",
+    "suf": "suffixe",
+    "sumo": "terme de sumo",
+    "uk": "mot qui s'écrit généralement en kana seuls",
+    "v1": "verbe ichidan",
+    "v1-s": "verbe ichidan, classe spéciale de くれる",
+    "v5aru": "verbe godan, classe spéciale en -aru (くださる, なさる…)",
+    "v5b": "verbe godan en -bu",
+    "v5g": "verbe godan en -gu",
+    "v5k": "verbe godan en -ku",
+    "v5k-s": "verbe godan, classe spéciale de いく / ゆく",
+    "v5m": "verbe godan en -mu",
+    "v5n": "verbe godan en -nu",
+    "v5r": "verbe godan en -ru",
+    "v5r-i": "verbe godan en -ru (verbe irrégulier)",
+    "v5s": "verbe godan en -su",
+    "v5t": "verbe godan en -tsu",
+    "v5u": "verbe godan en -u",
+    "v5u-s": "verbe godan en -u (classe spéciale)",
+    "v5uru": "verbe godan, ancienne classe en -uru (forme ancienne de える)",
+    "vi": "verbe intransitif",
+    "vk": "verbe くる (来る), classe spéciale",
+    "vn": "verbe irrégulier en -nu",
+    "vr": "verbe irrégulier en -ru, dont la forme neutre se termine en -ri",
+    "vs": "nom ou participe employé avec l'auxiliaire する",
+    "vs-c": "verbe en -su, ancêtre du する moderne",
+    "vs-i": "verbe en する (する fait partie du mot)",
+    "vs-s": "verbe en する, classe spéciale",
+    "vt": "verbe transitif",
+    "vz": "verbe ichidan en ずる (variante des verbes en じる)",
+    "zool": "terme de zoologie",
+    "⭐": "terme de haute priorité (mot courant)",
+}
+# The newspaper-frequency ranks (news1k … news24k) share one sentence.
+_NEWS_TOOLTIP_FR = "classé entre les rangs {lo} et {hi} d'une analyse de fréquence du Mainichi Shimbun (années 1990)"
+
+
+def _tooltip(code: str, info: dict, lang: str) -> str:
+    english = info.get("notes") or code
+    if lang != "fr":
+        return english
+    if code in _TOOLTIPS_FR:
+        return _TOOLTIPS_FR[code]
+    m = _NEWS_RANK_RE.match(code)
+    if m:
+        n = int(m.group(1))
+        lo = 1 if n == 1 else (n - 1) * 1000
+        sep = "\u202f"  # French thousands: a narrow no-break space
+        return _NEWS_TOOLTIP_FR.format(lo=f"{lo:,}".replace(",", sep), hi=f"{n * 1000:,}".replace(",", sep))
+    return english
+
+
 def _build_tag(code: str, is_term_tag: bool, lang: str) -> dict:
     info = _VOCAB_TAGS.get(code) or {}
     if is_term_tag:
@@ -293,7 +419,7 @@ def _build_tag(code: str, is_term_tag: bool, lang: str) -> dict:
     return {
         "code": code,
         "label": _short_label(code, lang),
-        "tooltip": info.get("notes") or code,
+        "tooltip": _tooltip(code, info, lang),
         "_kind": kind,
         "_score": info.get("score") or 0,
     }
@@ -344,12 +470,41 @@ def _collect_word_tags(senses: list, lang: str) -> list:
     return [_public_tag(t) for _, t in collected[:_MAX_TAGS]]
 
 
+# Kana cards whose curated row was matched to another word read alike
+# (plan 227): the N5 だんだん carried the dialect "thank you", いくら
+# "salted salmon roe", the N4 こと the sentence-final particle. Each
+# reads its senses from its own word's row instead, and keeps its own
+# sentences: the source row's are another card's, or were never read.
+_SENSES_OF: dict[str, tuple[str, str]] = {
+    "::なる": ("成る", "なる"),
+    "::だんだん": ("段々", "だんだん"),
+    "::いくら": ("幾ら", "いくら"),
+    "::こと": ("事", "こと"),
+    "::うち": ("内", "うち"),
+    "::ぼろ": ("襤褸", "ぼろ"),
+}
+
+
+def _senses_of_own_word(key: str, own: list[dict] | None) -> list[dict] | None:
+    src_kanji, src_kana = _SENSES_OF[key]
+    source = vocab_meanings_data.get(f"{src_kanji}::{src_kana}")
+    if not source and _jmdict_db is not None:
+        source = _jmdict_db.get_senses(src_kanji, src_kana)
+    if not source:
+        return own
+    senses = [{**sense, "examples": []} for sense in source]
+    senses[0]["examples"] = [ex for sense in (own or []) for ex in sense.get("examples", [])]
+    return senses
+
+
 def _find_senses(kanji: str, kana: str) -> list[dict] | None:
     # Fast path: curated_senses keys its rows with the exact same
     # packed kana string vocab_deck.json uses (see module docstring),
     # so most words resolve with a single indexed query — this only
     # ever covers the app's own (~8k word) deck.
     senses = vocab_meanings_data.get(f"{kanji}::{kana}")
+    if f"{kanji}::{kana}" in _SENSES_OF:
+        return _senses_of_own_word(f"{kanji}::{kana}", senses)
     if senses:
         return senses
     # Fallback for any mismatch in reading order/subset between the two
@@ -420,7 +575,7 @@ def has_examples(kanji: str, kana: str) -> bool:
     reading.py's frequency-tier picker already calls anyway — reuse
     that instead of a second round-trip to the DB when possible."""
     key = f"{kanji}::{kana}"
-    if key in _DECK_WORDS_WITH_EXAMPLES:
+    if key in _DECK_WORDS_WITH_EXAMPLES or example_fixes.added(kanji, kana):
         return True
     for reading in _readings(kana):
         if f"{kanji}::{reading}" in _DECK_WORDS_WITH_EXAMPLES:
@@ -1200,10 +1355,31 @@ def _annotate_sentence(sentence: str, kanji: str, kana: str) -> list:
     return out
 
 
+def _written(kanji: str, kana: str, seen_jp: set, number, gloss: str, room: int) -> list[dict]:
+    """The sentences written for a deck word JMdict gave none (plan 227,
+    content/example_fixes.added), in the shape of the word's own."""
+    out = []
+    for ex in example_fixes.added(kanji, kana):
+        if len(out) >= room or ex["jp"] in seen_jp:
+            continue
+        seen_jp.add(ex["jp"])
+        out.append({
+            "jp": ex["jp"],
+            "en": ex.get("en", ""),
+            "segments": _annotate_sentence(ex["jp"], kanji, kana),
+            "sense_number": number,
+            "sense_glossary": gloss,
+        })
+    return out
+
+
 def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = "fr") -> dict:
     all_senses = _find_senses(kanji, kana)
     if not all_senses:
-        return {"tags": [], "senses": [], "examples": []}
+        examples = _written(kanji, kana, set(), None, meaning_hint, _MAX_EXAMPLES)
+        if examples and lang == "fr":
+            _in_french([], examples)
+        return {"tags": [], "senses": [], "examples": examples}
 
     senses = all_senses[:_MAX_SENSES]
     primary_ids = {id(s) for s in _select_primary(senses, meaning_hint)}
@@ -1228,6 +1404,9 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
         num = numbers[id(sense)]
         gloss = "; ".join(sense.get("glossary", []))
         for ex in sense.get("examples", []):
+            # The course's correction of the sentence, where it has one
+            # and it still carries this word (content/example_fixes.py).
+            ex = example_fixes.for_word(ex, lambda s: _target_span(s, kanji, kana) is not None)
             jp = ex.get("jp")
             if not jp or jp in seen_jp:
                 continue
@@ -1243,9 +1422,46 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
                 break
         if len(examples) >= _MAX_EXAMPLES:
             break
+    # Where JMdict's sentences run short, the course's own follow them.
+    # Under no sense of JMdict's: a kana card can draw its senses from
+    # another word read alike (だんだん's are the dialect "thank you"),
+    # and a written sentence teaches the card's gloss, so the page lists
+    # it with the word rather than under a sense.
+    examples += _written(kanji, kana, seen_jp, None, meaning_hint, _MAX_EXAMPLES - len(examples))
+
+    if lang == "fr":
+        _in_french(senses_out, examples)
 
     return {
         "tags": _collect_word_tags(senses, lang),
         "senses": senses_out,
         "examples": examples,
     }
+
+
+def _in_french(senses_out: list[dict], examples: list[dict]) -> None:
+    """The French layer over an entry (content/jmdict_fr.py, plan 215),
+    in place: a sense's glossary where its English line has French, and
+    each example's translation as `tr` -- the field ExampleSentence
+    already prefers to `en`. What has no French keeps its English, and
+    says so in `glossary_lang` / `tr_lang`, so the page can mark it
+    rather than pass it off as French. `sense_glossary` and `en` stay
+    English: they are what the primary-sense scoring and the practice
+    screens read."""
+    from content import jmdict_fr
+    glosses = jmdict_fr.senses(s["glossary"] for s in senses_out)
+    for sense in senses_out:
+        fr = glosses.get(sense["glossary"])
+        if fr:
+            sense["glossary"] = fr
+            sense["glossary_lang"] = "fr"
+        else:
+            sense["glossary_lang"] = "en"
+    sentences = jmdict_fr.examples(ex["jp"] for ex in examples)
+    for ex in examples:
+        fr = sentences.get(ex["jp"])
+        if fr:
+            ex["tr"] = fr
+            ex["tr_lang"] = "fr"
+        else:
+            ex["tr_lang"] = "en"

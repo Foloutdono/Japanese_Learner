@@ -370,6 +370,20 @@ describe('settings on the desk', () => {
 // install row explains the two taps. An iPad on its side reaches the
 // desk, and there the explanation opens in the page under the row
 // rather than in a sheet over it. The phone's side is deskfree.phone.
+describe('Nous écrire on the desk (plan 222)', () => {
+  it('opens beside the list as a page, no dialog, its row lit', async () => {
+    await mount('/profile/settings/write')
+    await settle()
+    const page = document.querySelector('.desk-settings__page')
+    expect(page?.querySelector('.fb-form')).not.toBeNull()
+    expect(document.querySelector('[role="dialog"]')).toBeNull()
+    expect(document.querySelector('.stg-row[data-page="write"]').classList.contains('stg-row--on')).toBe(true)
+    // The send stands at its own width, not the page's.
+    const send = page.querySelector('.fb-form__send').getBoundingClientRect()
+    expect(send.width).toBeLessThan(page.querySelector('.fb-form').getBoundingClientRect().width)
+  })
+})
+
 describe('the install row on the desk', () => {
   it('opens the two taps in the page, and folds them again', async () => {
     install.ios = true
@@ -412,7 +426,7 @@ describe('the list under the pass (plan 182)', () => {
     const lists = [...document.querySelectorAll('.desk-settings__list .stg-list')]
     expect(lists.map(l => [...l.querySelectorAll('.stg-row')].map(r => r.dataset.page))).toEqual([
       ['display', 'sound'],
-      ['agenda', 'rating', 'reading', 'help'],
+      ['agenda', 'reviews', 'rating', 'reading', 'help', 'write'],
       ['account', 'credits'],
       ['pass'],
     ])

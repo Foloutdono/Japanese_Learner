@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { LangProvider } from './LangContext'
 import ModeSelector from './components/selection/ModeSelector'
@@ -47,12 +47,17 @@ const apiFetch = vi.hoisted(() => vi.fn())
 vi.mock('./lib/api', () => ({
   api: p => p,
   apiFetch,
-  apiJson: vi.fn(),
+  // The shared answers (lib/cachedJson, plan 211) ask through apiJson;
+  // a case that answers apiJson itself overrides this.
+  apiJson: vi.fn(async (...a) => (await apiFetch(...a)).json()),
   apiJsonWithTimeout: vi.fn(async path => (path === '/api/stats' ? STATS : REPORT)),
   apiUpload: vi.fn(),
   ApiError: class extends Error {},
 }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
+const { forgetCachedJson } = await import('./lib/cachedJson')
+// Each case asks with its own answers: none is kept across (plan 211).
+afterEach(() => { forgetCachedJson() })
 
 const settle = (ms = 120) => new Promise(r => setTimeout(r, ms))
 
@@ -1406,6 +1411,55 @@ describe('the composition run (plan 125)', () => {
   })
 })
 
+// ── plan 217 — 会話, the conversation run a phone keeps ──
+// On the desk the run stands the scene's brief in the side column once
+// the talk is under way, and the card holds the talk alone. A phone
+// keeps its single column: the place's plate heads the card, and no
+// column is drawn.
+describe('the conversation run (plan 217)', () => {
+  it('keeps the phone\'s column, the place on the card and no column', async () => {
+    const { apiJson } = await import('./lib/api')
+    const plain = text => [{ text }]
+    const SCRIPT = {
+      id: 'konbini-lunch', level: 'N5', title: 'Le déjeuner', situation: 'À la caisse.', goal: 'Payer.', them: 'Vendeur', register: 'polite',
+      place: { jp: 'コンビニ', parts: plain('コンビニ'), name: 'Supérette' },
+      turns: [{
+        them: { jp: 'お弁当は温めますか。', parts: plain('お弁当は温めますか。'), translation: 'Je vous le réchauffe.' },
+        me: { jp: 'はい、お願いします。', parts: plain('はい、お願いします。'), romaji: 'hai, onegai shimasu', words: [], translation: 'Oui.', note: 'Poli.' },
+        alt: [],
+        choices: [
+          { jp: 'はい、お願いします。', parts: plain('はい、お願いします。'), translation: 'Oui.', note: 'Poli.', right: true },
+          { jp: 'いただきます。', parts: plain('いただきます。'), translation: 'Bon appétit.', note: 'À table.', right: false },
+          { jp: 'はい、温かいです。', parts: plain('はい、温かいです。'), translation: 'Il est chaud.', note: 'Une autre question.', right: false },
+        ],
+      }],
+      close: null,
+    }
+    apiJson.mockImplementation(async url => (String(url).startsWith('/api/conversation/scenario/') ? SCRIPT : {}))
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: ConversationRun } = await import('./screens/ConversationRun')
+    document.body.innerHTML = ''
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/practice/conversation/konbini-lunch/choose']}>
+          <Routes><Route path="/practice/conversation/:scenario/:mode" element={<ConversationRun session={null} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(300)
+    document.querySelector('.stage__foot .btn-primary').click()
+    await settle(200)
+    expect(document.querySelector('.screen').className).toBe('screen')
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    expect(document.querySelector('.desk-run__side')).toBeNull()
+    // The place heads the card, over the talk.
+    const card = document.querySelector('.kaiwa-card')
+    expect(card.querySelector('.tour-plate')).not.toBeNull()
+    expect(card.querySelector('.kaiwa-talk .tour-line')).not.toBeNull()
+    apiJson.mockReset()
+  })
+})
+
 // ── plan 123, P17 — a phone's radio groups are tapped ──
 // On the desk a radio group is one tab stop walked with the arrows; a
 // phone's keeps a stop per radio, no tabindex written, and leaves the
@@ -1754,28 +1808,31 @@ describe('the run\'s lines (plan 129)', () => {
 // ── plan 130 — the gates a phone keeps ──
 // On the desk the plates take the window, Learn's line stands upright
 // and Practice's plates hold their specimens (plan 165; the grades'
-// rows before it). A phone keeps its column: the chip row of five on
-// every platform, and no request for a record or a sample it has
-// nowhere to print.
+// rows before it). A phone keeps its own: since plan 225 Practice's is
+// the painted platform, its signs where the chips were, and no request
+// for a record or a sample it has nowhere to print.
 describe('the gates taking the window (plan 130)', () => {
-  it('keeps Practice\'s chip row and never asks for the record', async () => {
+  it('keeps Practice\'s painted platform and never asks for the record', async () => {
     apiFetch.mockReset()
     apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({}) }))
     const { MemoryRouter } = await import('react-router-dom')
     const { default: PracticeScreen } = await import('./screens/PracticeScreen')
+    // How many platforms, asked of the registry: the seventh, 会話, came
+    // with plan 217.
+    const { getSections } = await import('./config/tabs')
     await render(<LangProvider><MemoryRouter initialEntries={['/practice']}><PracticeScreen /></MemoryRouter></LangProvider>)
     await settle(250)
-    const feet = [...document.querySelectorAll('.plate__foot--dests')]
-    expect(feet).toHaveLength(6)
-    for (const foot of feet) expect(foot.querySelectorAll('.chip')).toHaveLength(5)
-    // Nor the desk's specimens (plan 165): no body in the plate's head,
-    // and no request for the samples it would draw from.
+    expect(document.querySelector('.practice > .pgate')).not.toBeNull()
+    expect(document.querySelector('.practice > .plates')).toBeNull()
+    // Every platform on the destination sign, five grades on the other.
+    const sign = document.querySelector('.pgate-sign--main')
+    expect(sign.querySelectorAll('.pgate-roll--dest .pgate-roll__row')).toHaveLength(getSections('practice', {}).length)
+    expect(sign.querySelectorAll('.pgate-roll--grade .pgate-roll__row')).toHaveLength(5)
+    // Nor the desk's specimens (plan 165), and no request for the
+    // samples they would draw from.
     expect(document.querySelector('.plate__body, .prc-spec')).toBeNull()
     expect(apiFetch.mock.calls.some(([path]) => path === '/api/practice/record')).toBe(false)
     expect(apiFetch.mock.calls.some(([path]) => path.startsWith('/api/station/'))).toBe(false)
-    // The column is the phone's, one plate to a row.
-    const plates = [...document.querySelectorAll('.practice > .plates > .plate')].map(p => p.getBoundingClientRect())
-    expect(new Set(plates.map(p => Math.round(p.left))).size).toBe(1)
   })
 })
 
