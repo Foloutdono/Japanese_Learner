@@ -301,6 +301,27 @@ describe('the analyser on the desk (plan 134)', () => {
     expect($('.anl-words__item .anl-words__add').textContent).toBe('Ajouter au deck')
   })
 
+  // A gloss longer than the column: the row in focus shrinks to its
+  // ground and cuts the gloss after two lines, where it ran past the
+  // ground on one and the panel's edge clipped it mid-word (果て, "la fin, l'extrémité, la ou
+  // les limites, le…").
+  it('keeps a long gloss inside the word in focus\'s ground', async () => {
+    passage = [{ ...ONE[0], tokens: [ONE[0].tokens[0], ONE[0].tokens[1],
+      tok('待つ', '待つ', 'まつ', 'to wait, to await, to look forward to, to hold off, to hold on, to put up with')] }]
+    await mount()
+    await analyze()
+    $$('.anl-words__row').at(-1).click()
+    await settle()
+    const item = $('.anl-words__item')
+    const row = $('.anl-words__item .anl-words__row--on')
+    expect(row.getBoundingClientRect().right).toBeLessThanOrEqual(item.getBoundingClientRect().right + 0.5)
+    expect(item.scrollWidth).toBeLessThanOrEqual(item.clientWidth + 1)
+    // Two lines of it, then the cut.
+    const gloss = row.querySelector('.anl-words__gloss')
+    expect(gloss.scrollHeight).toBeGreaterThan(gloss.clientHeight)
+    expect(gloss.clientHeight / parseFloat(getComputedStyle(gloss).lineHeight)).toBeCloseTo(2, 0)
+  })
+
   it('draws no ring round the result while the arrows walk it', async () => {
     await mount()
     await analyze()
