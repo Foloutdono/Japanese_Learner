@@ -32,8 +32,7 @@ import { createServer } from 'node:http'
 import { dirname, extname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
-import { SITE_ORIGIN } from '../../landing/config.mjs'
-import { FPS, TALL, WIDE, cueKey, describe, fitShort, longPlan, timeline } from '../long.js'
+import { FPS, LONG_SITE, TALL, WIDE, cueKey, describe, fitShort, longPlan, timeline } from '../long.js'
 import { fromRecipe, shortTimeline } from '../short.js'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -119,7 +118,7 @@ function voiceAll(cues) {
   const { durs } = JSON.parse(readFileSync(join(WORK, 'durs.json'), 'utf8'))
   return c => durs[cueKey(c)]
 }
-const site = lang === 'en' ? `${SITE_ORIGIN}/en` : SITE_ORIGIN
+const site = lang === 'en' ? `${LONG_SITE}/en` : LONG_SITE
 const banks = {}
 for (const f of readdirSync(BANK)) if (f.endsWith('.json')) banks[f] = JSON.parse(readFileSync(join(BANK, f), 'utf8'))
 const fontsFor = async text => page.evaluate(async text => {

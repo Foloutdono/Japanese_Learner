@@ -6,14 +6,13 @@ import { ENDING_IDS, TYPES, available, deck, endingSlide } from '../carousel/sli
 import { assemblyQ, kanjiQuizzes, overlaps, withoutGiveaways } from '../carousel/quizzes.js'
 import { furiganaOf } from '../carousel/common.js'
 import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explain.js'
-import { STRINGS, weld, weldIf } from '../carousel/strings.js'
+import { SITE, STRINGS, weld, weldIf } from '../carousel/strings.js'
 import { APP_INKS } from '../carousel/app.js'
 import { CLIP, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
 import { SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf } from '../carousel/funnel.js'
 import { KINDS, LONG_SITE, PART, SHORT, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, timeline } from '../carousel/long.js'
-import { SITE_ORIGIN } from '../landing/config.mjs'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
@@ -998,7 +997,7 @@ describe('the long videos (plan 214)', () => {
 
   it('offers every video a level can make in the studio, each made by its command', () => {
     expect(SOURCES.find(s => s.id === 'long')?.video).toBe(true)
-    expect(LONG_SITE).toBe(SITE_ORIGIN)
+    expect(LONG_SITE).toBe(`https://${SITE}`)
     for (const level of LEVELS) {
       const listed = Object.fromEntries(longListFiles(level).map(f => [f, files[f]]))
       const items = longItems(listed, level, 'en')

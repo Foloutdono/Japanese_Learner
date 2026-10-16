@@ -20,7 +20,7 @@
 // reveal lands on its voice), and `drawLong` draws the frame at any
 // second and returns a key that is the same for two frames that look
 // the same, so the renderer (long/render.mjs) draws each still once.
-import { FORMATS, K, alpha, drawSentence, fit, font, hasKanji, layoutSentence, mark, measure, noShadow, palette, paragraphH, roundel, rrect, text } from './draw.js'
+import { FORMATS, K, alpha, drawSentence, mix, fit, font, hasKanji, layoutSentence, mark, measure, noShadow, palette, paragraphH, roundel, rrect, text } from './draw.js'
 import { SITE, weldIf } from './strings.js'
 import { videoCta } from './funnel.js'
 import { gloss, unpack } from './common.js'
@@ -33,9 +33,10 @@ export const WIDE = { id: 'wide', w: 1920, h: 1080 }
 // story format's (draw.js FORMATS.story).
 export const TALL = { id: 'tall', w: 1080, h: 1920, safe: { t: 250, r: 144, b: 430, l: 144 } }
 export const SHORT = { vocab: 6, kanji: 4, quiz: 3, seconds: 59 }
-// The site a description links to: landing/config.mjs's SITE_ORIGIN, which
-// reads the disk and cannot load in the studio (a test holds the two equal).
-export const LONG_SITE = 'https://japanese-learner-seven.vercel.app'
+// The site a description links to: the name the call to action's button
+// and the sign-off print (strings.js SITE, tsuji.app), so a viewer types
+// the address they were shown (plan 221).
+export const LONG_SITE = `https://${SITE}`
 export const FPS = 30
 export const KINDS = ['vocab', 'kanji', 'grammar', 'quiz']
 // A part of a drill or a quiz: about ten minutes each (timeline's pace).
@@ -649,14 +650,26 @@ export function timeline(plan, dur = null) {
     // after the first half, to a viewer who has seen what the video does.
     if (n === Math.ceil(of / 2)) {
       chapters.push({ at, title: S.chapters.cta })
-      fx(at + 0.2, 'board-flap')
       seg('cta', short ? 4.5 : 8, { feature: CTA_FEATURE[plan.kind] })
     }
   })
   chapters.push({ at, title: S.chapters.outro })
   fx(at + 0.3, 'platform-chime')
   seg('outro', short ? 3 : 5, {})
-  return { seconds: +at.toFixed(3), segs, cues, sfx, chapters, kind: plan.kind, of }
+  // The transitions (plan 221): how each part is entered, and their sounds.
+  // A part the doors or the train open onto has their chime, not a card's turn.
+  const quiet = new Set()
+  for (let j = 1; j < segs.length; j++) {
+    const kind = transitionOf(segs[j - 1], segs[j])
+    const s0 = segs[j].start
+    segs[j].enter = kind
+    if (kind === 'slide') continue
+    quiet.add(+(s0 + 0.1).toFixed(3))
+    fx(s0 - (kind === 'train' ? TRAIN_S : CLOSE_S), 'door-slide', kind === 'train' ? 0.7 : 0.5)
+    if (segs[j].type !== 'outro') fx(s0 + 0.05, 'door-chime', 0.8)
+  }
+  const heard = sfx.filter(x => !(x.key === 'card-transition' && quiet.has(x.at)))
+  return { seconds: +at.toFixed(3), segs, cues, sfx: heard, chapters, kind: plan.kind, of }
 }
 
 function grammarChapter(it, S) {
@@ -881,7 +894,7 @@ function strokeLength(d) {
 /** Where a frame stands: its segment, the second into it, and the two
  *  helpers every part is drawn with (`k`, a part's share of the way in,
  *  kept in the frame's key while it moves; `fade`, a part drawn at it). */
-function begin(ctx, plan, tl, t, w, h, ground) {
+function begin(ctx, plan, tl, t, w, h, ground, paint = true) {
   const p = palette(ground)
   const S = SAY[plan.lang] || SAY.en
   const line = p.line[plan.line] || p.gold
@@ -904,8 +917,10 @@ function begin(ctx, plan, tl, t, w, h, ground) {
     fn()
     ctx.restore()
   }
-  ctx.fillStyle = p.bg
-  ctx.fillRect(0, 0, w, h)
+  if (paint) {
+    ctx.fillStyle = p.bg
+    ctx.fillRect(0, 0, w, h)
+  }
   return { p, S, line, sg, u, state, k, fade, d: sg.data, m: sg.marks }
 }
 
@@ -1136,11 +1151,196 @@ const ROUTE_X = 1352 // where the route stands, right of the column's rule
 const CTA_WIDE = { id: 'wide', w: W, h: H, safe: { t: TOP + 64, r: 96, b: 72, l: 96 } }
 const COL_RULE = 1280
 
+// ── Transitions (plan 221) ──────────────────────────────────────
+// Where one part of a video meets the next, the station moves:
+// - between two items the train pulls, as the app's screens do (DESIGN.md,
+//   "Motion"): the screen that was slides off to the left as the next comes
+//   in from the right, the band, the masthead and the line of stations
+//   standing still;
+// - into and out of the call to action, and into the sign-off, the doors
+//   close over the end of a part and part onto the next, drawn as the
+//   app's own (index.css .door: the leaves unlock, stand a crack apart,
+//   then run), with its chime;
+// - at the end of the intro the train comes in from the right and stops
+//   with its door in front of the viewer, which opens onto the first item.
+// Each plays inside the time its parts already have: nothing said moves.
+const SLIDE_S = 0.45
+const CLOSE_S = 0.5
+const OPEN_S = 0.85
+const TRAIN_S = 1.4
+const inOut = x => (x < 0.5 ? 4 * x ** 3 : 1 - (-2 * x + 2) ** 3 / 2)
+
+/** How a part is entered from the one before it: train, doors or slide. */
+export function transitionOf(prev, cur) {
+  if (!prev) return null
+  if (prev.type === 'intro') return 'train'
+  if (cur.type === 'cta' || prev.type === 'cta' || cur.type === 'outro') return 'doors'
+  return 'slide'
+}
+
+/** A carriage's panel, the door leaves' and the windows' ground: the
+ *  surface lit from the top and shaded at its foot, the line's belt
+ *  across it with its pinstripe. */
+function panel(ctx, x, w, h, pal, line) {
+  const g = ctx.createLinearGradient(0, 0, 0, h)
+  g.addColorStop(0, mix(pal.ink, pal.surface, 0.12))
+  g.addColorStop(0.16, pal.surface)
+  g.addColorStop(0.68, pal.surface)
+  g.addColorStop(1, mix(pal.ink, pal.surface, 0.16))
+  ctx.fillStyle = g
+  ctx.fillRect(x, 0, w, h)
+  ctx.fillStyle = alpha(pal.ink, 0.02)
+  for (let gx = x; gx < x + w; gx += 4 * h / 1080) ctx.fillRect(gx, 0, 1, h)
+  const bh = h * 0.022
+  const by = h * 0.79 - bh
+  const bg = ctx.createLinearGradient(0, by, 0, by + bh)
+  bg.addColorStop(0, mix(line, pal.bg, 0.86))
+  bg.addColorStop(0.38, line)
+  bg.addColorStop(1, mix(line, '#000000', 0.88))
+  ctx.fillStyle = bg
+  ctx.fillRect(x, by, w, bh)
+  ctx.fillStyle = alpha(line, 0.85)
+  ctx.fillRect(x, by - h * 0.012, w, h * 0.004)
+}
+/** A window set into a panel: darker than the panel round it, its recess at the top. */
+function pane(ctx, x, y, w, h, pal, r) {
+  const g = ctx.createLinearGradient(x, y, x + w * 0.4, y + h)
+  g.addColorStop(0, alpha(pal.ink, 0.13))
+  g.addColorStop(0.52, alpha(pal.ink, 0.05))
+  g.addColorStop(1, alpha(pal.ink, 0.1))
+  ctx.fillStyle = g
+  rrect(ctx, x, y, w, h, r)
+  ctx.fill()
+  ctx.save()
+  rrect(ctx, x, y, w, h, r)
+  ctx.clip()
+  const s = ctx.createLinearGradient(0, y, 0, y + h * 0.08)
+  s.addColorStop(0, 'rgba(0,0,0,0.26)')
+  s.addColorStop(1, 'rgba(0,0,0,0)')
+  ctx.fillStyle = s
+  ctx.fillRect(x, y, w, h * 0.08)
+  ctx.restore()
+  ctx.strokeStyle = alpha(pal.ink, 0.28)
+  ctx.lineWidth = 2
+  rrect(ctx, x, y, w, h, r)
+  ctx.stroke()
+}
+/** The door, at `x0`: two leaves `shut` of the way closed (1 shut), a
+ *  `crack` apart (the unlock, before they run), the lamp over the seam
+ *  lit while they open. */
+function doors(ctx, x0, w, h, pal, line, shut, crack = 0, lamp = false) {
+  if (shut <= 0) return
+  const lw = w / 2
+  const gap = crack * h * 0.006
+  const travel = lw * (1 - shut)
+  const r = h * 0.011
+  for (const side of [-1, 1]) {
+    const x = side < 0 ? x0 - travel - gap : x0 + lw + travel + gap
+    ctx.save()
+    // The shadow a leaf throws into the opening.
+    if (shut < 1 || gap > 0) {
+      const sx = side < 0 ? x + lw : x
+      const sg = ctx.createLinearGradient(sx, 0, sx - side * 40, 0)
+      sg.addColorStop(0, 'rgba(0,0,0,0.32)')
+      sg.addColorStop(1, 'rgba(0,0,0,0)')
+      ctx.fillStyle = sg
+      ctx.fillRect(side < 0 ? sx : sx - 40, 0, 40, h)
+    }
+    panel(ctx, x, lw, h, pal, line)
+    pane(ctx, x + lw * 0.15, h * 0.11, lw * 0.7, h * 0.53, pal, r)
+    // The seal, half on each leaf, so it splits as they part.
+    const ex = side < 0 ? x + lw - 3 : x
+    ctx.fillStyle = alpha(pal.bg, 0.55)
+    ctx.fillRect(ex, 0, 3, h)
+    const ig = ctx.createLinearGradient(side < 0 ? x + lw : x, 0, side < 0 ? x + lw - 10 : x + 10, 0)
+    ig.addColorStop(0, 'rgba(0,0,0,0.5)')
+    ig.addColorStop(1, 'rgba(0,0,0,0)')
+    ctx.fillStyle = ig
+    ctx.fillRect(side < 0 ? x + lw - 10 : x, 0, 10, h)
+    ctx.restore()
+  }
+  // The head over the door, and its lamp.
+  const hh = h * 0.035
+  ctx.fillStyle = pal.panel
+  ctx.fillRect(x0 - travel - gap, 0, w + 2 * (travel + gap), hh)
+  ctx.fillStyle = lamp ? pal.goldLit : alpha(pal.onPanel, 0.18)
+  rrect(ctx, x0 + w / 2 - hh * 1.4, hh * 0.25, hh * 2.8, hh * 0.5, hh * 0.25)
+  ctx.fill()
+}
+/** The train, its door's left edge at `o`: a panel of windows either side of the door. */
+function train(ctx, o, w, h, pal, line) {
+  for (const x of [o - w, o + w]) {
+    panel(ctx, x, w, h, pal, line)
+    const r = h * 0.011
+    pane(ctx, x + w * 0.08, h * 0.14, w * 0.34, h * 0.41, pal, r)
+    pane(ctx, x + w * 0.58, h * 0.14, w * 0.34, h * 0.41, pal, r)
+    ctx.fillStyle = alpha(pal.ink, 0.35)
+    ctx.fillRect(x, 0, 3, h)
+  }
+  doors(ctx, o, w, h, pal, line, 1)
+}
+
 /** The frame at second `t`, and its key: two frames with the same key
- *  are the same picture. A short is drawn standing (drawTall). */
+ *  are the same picture. A long video is drawn on the door screen
+ *  (drawWide), a short standing (drawTall); where two parts meet, the
+ *  transition between them is drawn over both. */
 export function drawLong(ctx, plan, tl, t) {
-  if (plan.format === 'short') return drawTall(ctx, plan, tl, t)
-  const { p, S, line, sg, u, state, k, fade, d, m } = begin(ctx, plan, tl, t, W, H, 'paper')
+  const tall = plan.format === 'short'
+  const w = tall ? TW : W
+  const h = tall ? TH : H
+  const draw = (tt, mode) => (tall ? drawTall : drawWide)(ctx, plan, tl, tt, mode)
+  let i = tl.segs.findIndex(s => t < s.start + s.dur)
+  if (i < 0) i = tl.segs.length - 1
+  const sg = tl.segs[i]
+  const prev = tl.segs[i - 1]
+  const next = tl.segs[i + 1]
+  const u = t - sg.start
+  const left = sg.start + sg.dur - t
+  // The train is the washi's, cream in both formats, so it stands out on the sumi wall too.
+  const pal = PAPER
+  const ground = (tall ? SUMI : PAPER).bg
+  const line = pal.line[plan.line] || pal.gold
+  const q = v => Math.round(v * 40) / 40
+  if (sg.enter === 'slide' && prev && u < SLIDE_S) {
+    const e = q(ease(u / SLIDE_S))
+    ctx.fillStyle = ground
+    ctx.fillRect(0, 0, w, h)
+    ctx.save()
+    ctx.translate(-w * e, 0)
+    const a = draw(prev.start + prev.dur - 0.001, 'body')
+    ctx.restore()
+    ctx.save()
+    ctx.translate(w * (1 - e), 0)
+    // The screen comes in whole: its own fade-in is the slide.
+    const b = draw(Math.max(t, sg.start + SLIDE_S), 'body')
+    ctx.restore()
+    return `slide${e}|${a}|${b}|${draw(t, 'chrome')}`
+  }
+  let key = draw(t, 'all')
+  if (next?.enter === 'doors' && left < CLOSE_S) {
+    const v = q(inOut(1 - left / CLOSE_S))
+    doors(ctx, 0, w, h, pal, line, v)
+    key += `|close${v}`
+  }
+  if (next?.enter === 'train' && left < TRAIN_S) {
+    const v = q(ease(1 - left / TRAIN_S))
+    train(ctx, w * 2.4 * (1 - v), w, h, pal, line)
+    key += `|train${v}`
+  }
+  if ((sg.enter === 'doors' || sg.enter === 'train') && u < OPEN_S) {
+    const r = u / OPEN_S
+    const crack = q(Math.min(1, r / 0.14))
+    const v = q(r < 0.14 ? 1 : 1 - inOut((r - 0.14) / 0.86))
+    doors(ctx, 0, w, h, pal, line, v, crack, r < 0.7)
+    key += `|open${v},${crack}`
+  }
+  return key
+}
+
+/** A long video's frame on the door screen: `mode` is all of it, its body
+ *  alone (what a transition moves) or its chrome alone (what stays). */
+function drawWide(ctx, plan, tl, t, mode = 'all') {
+  const { p, S, line, sg, u, state, k, fade, d, m } = begin(ctx, plan, tl, t, W, H, 'paper', mode !== 'chrome')
   const { card, sentence, para, pill } = tools(ctx, p, line)
   // The stripe: the way along the video, or a question's seconds while they run.
   let fill = sg.n ? sg.n / tl.of : 1
@@ -1152,8 +1352,9 @@ export function drawLong(ctx, plan, tl, t) {
     q: d?.q?.ask,
   }
   // The call to action is the carousel's, laid out wide on the screen under the band.
-  if (sg.type === 'cta') videoCta(ctx, { fmt: CTA_WIDE, design: 'clarte', lang: plan.lang, line: plan.line, feature: d.feature })
-  door(ctx, p, line, plan, sg, S, { next: sg.type === 'vocab' || sg.type === 'kanji', head: heads[sg.type] || null, fill })
+  if (sg.type === 'cta' && mode !== 'chrome') videoCta(ctx, { fmt: CTA_WIDE, design: 'clarte', lang: plan.lang, line: plan.line, feature: d.feature })
+  if (mode !== 'body') door(ctx, p, line, plan, sg, S, { next: sg.type === 'vocab' || sg.type === 'kanji', head: heads[sg.type] || null, fill })
+  if (mode === 'chrome') return state.join(',')
   switch (sg.type) {
     case 'intro': {
       fade(k(0.2, 0.6), () => mark(ctx, W / 2 - 90, 220, 180, p.ink, p.gold))
@@ -1595,17 +1796,17 @@ function bandText(ctx, p, str, by, bh, sizes = [40, 34, 30]) {
 }
 
 /** The frame of a short at second `t`, and its key. */
-function drawTall(ctx, plan, tl, t) {
-  const { p, S, line, sg, u, state, k, fade, d, m } = begin(ctx, plan, tl, t, TW, TH, 'sumi')
+function drawTall(ctx, plan, tl, t, mode = 'all') {
+  const { p, S, line, sg, u, state, k, fade, d, m } = begin(ctx, plan, tl, t, TW, TH, 'sumi', mode !== 'chrome')
   const { card, sentence, para } = tools(ctx, p, line)
   const cx = TW / 2
   // The call to action is the carousel's own slide, in its story format.
   if (sg.type === 'cta') {
-    videoCta(ctx, { fmt: FORMATS.story, design: 'defi', lang: plan.lang, line: plan.line, feature: d.feature })
+    if (mode !== 'chrome') videoCta(ctx, { fmt: FORMATS.story, design: 'defi', lang: plan.lang, line: plan.line, feature: d.feature })
     return state.join(',')
   }
   const box = sg.n ? [sg.type === 'q' ? 'Q' : plan.theme ? '' : plan.level, sg.n] : null
-  if (sg.type !== 'intro' && sg.type !== 'outro') {
+  if (mode !== 'body' && sg.type !== 'intro' && sg.type !== 'outro') {
     mark(ctx, TX, 250, 56, p.ink, p.gold)
     text(ctx, 'TSUJI', TX + 70, 292, { f: font(700, 24, 'latin'), color: p.ink2, tr: 0.3 })
     if (sg.n) {
@@ -1626,6 +1827,7 @@ function drawTall(ctx, plan, tl, t) {
       }
     }
   }
+  if (mode === 'chrome') return state.join(',')
   switch (sg.type) {
     case 'intro': {
       fade(k(0.1, 0.4), () => mark(ctx, cx - 70, 300, 140, p.ink, p.gold))

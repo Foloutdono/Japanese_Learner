@@ -591,6 +591,19 @@ its story format on the sumi; a long video lays the same parts out wide
 on the door screen, the words and the button on the left, the picture on
 the right. The video ends on a sign-off: the mark, the name and the
 site (and, after a quiz, the call to comment the score).
+
+**The station moves between parts** (plan 221), each transition inside
+the time its parts already have, so nothing said moves: between two
+items the train pulls, as the app's screens do (the screen that was
+slides off left as the next comes in from the right; the band, the
+masthead and the line of stations stand still); into and out of the
+call to action and into the sign-off the doors close and part, drawn
+as the app's own door (the leaves unlock, stand a crack apart, then
+run, the lamp lit over the seam) with its `door-slide` and
+`door-chime`; and at the end of the intro the train comes in and stops
+with its door in front of the viewer, which opens onto the first item.
+The carriage is cream in both formats. A description links to
+`tsuji.app` (`LONG_SITE`), the address the call to action shows.
 Every Japanese line is said by the app's voices; English or French is on
 the screen.
 
