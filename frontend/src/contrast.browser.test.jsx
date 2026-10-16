@@ -266,6 +266,20 @@ const Fixture = () => (
       </button>
     </div>
 
+    {/* 会話 (plan 217) -- the fourteenth pigment, 縹, measured where it
+        prints as an ink: its plate's roundel on the gate, and on the
+        run's card a scene line's voice ring, in the line's ink mixed
+        toward the text's as the tour's is. */}
+    <div className="plate" style={{ '--line-color': 'var(--line-kaiwa)' }}>
+      <button type="button" className="plate__head">
+        <span className="pf-line__roundel plate__roundel kw-roundel">KW</span>
+        <span className="plate__names"><span className="plate__title">Conversation</span></span>
+      </button>
+    </div>
+    <div className="stage--kaiwa" style={{ '--line-color': 'var(--line-kaiwa)', background: 'var(--surface)' }}>
+      <button type="button" className="tour-speak kw-speak">♪</button>
+    </div>
+
     {/* --surface cards carrying secondary text */}
     <div className="station-sign">
       <span className="station-sign__kana">えき</span>
@@ -1043,6 +1057,9 @@ const SITES = [
   ['.sb-btn', "composition's filled action at rest (the metal, under 紫)"],
   ['.sb-btn-hover', "composition's filled action hovering (the metal's lit stop)"],
   ['.sb-roundel', "composition's plate roundel (紫 mixed toward the ink)"],
+  // Plan 217 -- 縹, the conversation platform's pigment (see the fixture).
+  ['.kw-roundel', "conversation's plate roundel (縹 mixed toward the ink)"],
+  ['.kw-speak', "a conversation line's voice ring (縹 mixed toward the ink)"],
   ['.station-sign__kana', 'station sign kana'],
   ['.station-sign__romaji', 'station sign romaji'],
   ['.record__label', 'record label'],

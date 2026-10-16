@@ -1,7 +1,7 @@
 """実践の記録 — the Practice gate's record by grade (plan 130).
 
 Each platform's figure is read from its own log, and the tests below
-write rows into all six and read them back: what counts as one done,
+write rows into every one and read them back: what counts as one done,
 what counts as right, and what is left out (another learner's rows, a
 run with no grade, a grade never practised) -- and, since plan 159,
 `last`, when the newest of them was done.
@@ -26,7 +26,7 @@ def _wipe() -> None:
         with conn.cursor() as cur:
             for user in (DEV_USER_ID, OTHER):
                 for table in ("reading_log", "comprehension_log", "translation_log",
-                              "dictation_log", "composition_log", "exam_attempts"):
+                              "dictation_log", "composition_log", "conversation_log", "exam_attempts"):
                     cur.execute(f"DELETE FROM {table} WHERE user_id = %s", (user,))
             cur.execute("DELETE FROM exam_attempts WHERE exam_id = %s", (PAPER,))
             cur.execute("DELETE FROM exam_papers WHERE exam_id = %s", (PAPER,))
@@ -78,6 +78,14 @@ def _seed() -> None:
                 " VALUES (%s, 'N4', 'grammar_N4_x', 'x', '文', FALSE, 1)",
                 (DEV_USER_ID,),
             )
+            # 会話 (plan 217): a graded turn is one done -- two at N5, one
+            # right; a choose pick and a rated free line count alike.
+            for mode, correct, quality in (("choose", True, 4), ("free", False, 1)):
+                cur.execute(
+                    "INSERT INTO conversation_log (user_id, level, scenario, mode, turn, correct, quality)"
+                    " VALUES (%s, 'N5', 'konbini-lunch', %s, 0, %s, %s)",
+                    (DEV_USER_ID, mode, correct, quality),
+                )
 
             # One N4 paper, sat twice: 30 of 40, then 34 of 40.
             cur.execute(
@@ -112,12 +120,12 @@ class PracticeRecordTests(unittest.TestCase):
         self.addCleanup(_wipe)
         self.client = TestClient(app)
 
-    def test_a_learner_with_no_practice_has_six_empty_platforms(self) -> None:
+    def test_a_learner_with_no_practice_has_every_platform_empty(self) -> None:
         res = self.client.get("/api/practice/record")
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.json(), {
             "reading": {}, "comprehension": {}, "translation": {},
-            "dictation": {}, "composition": {}, "exam": {},
+            "dictation": {}, "composition": {}, "conversation": {}, "exam": {},
         })
 
     def test_each_platform_counts_its_own_log_by_grade(self) -> None:
@@ -138,6 +146,7 @@ class PracticeRecordTests(unittest.TestCase):
         self.assertEqual(record["translation"], {"N3": {"done": 1, "right": 1, "of": 1}})
         self.assertEqual(record["dictation"], {"N5": {"done": 1, "right": 1, "of": 1}})
         self.assertEqual(record["composition"], {"N4": {"done": 1, "right": 0, "of": 1}})
+        self.assertEqual(record["conversation"], {"N5": {"done": 2, "right": 1, "of": 2}})
         # Papers: the paper's grade, every sitting counted.
         self.assertEqual(record["exam"], {"N4": {"done": 2, "right": 64, "of": 80}})
 

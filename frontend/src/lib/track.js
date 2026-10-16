@@ -98,6 +98,15 @@ export const EVENTS = {
   day_clear: ['streak', 'milestone', 'tier'],
   rest_day_used: ['days'],
   ticket_share: ['days'],
+  // The review plan (plan 217): the comeback sheet opened (ours, once a
+  // sheet); its answer, a catch-up's end, the ceiling and an absence set
+  // in Settings, and the absence's days bridged (the server's).
+  catchup_offer: ['owed', 'away'],
+  catchup_choice: ['choice', 'days', 'per_day'],
+  catchup_done: ['days'],
+  review_cap_set: ['cap'],
+  away_set: ['days'],
+  away_day_used: ['days'],
   // The small features, counted per screen and sent on leaving it
   // (lib/screenTrail.js countUse), and a setting changed to one of the
   // app's own values (plan 218). Both closed by VALUES below.

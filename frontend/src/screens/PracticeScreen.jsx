@@ -16,12 +16,12 @@ import { useStationSamples } from '../stores/stationSamples'
 import { PracticeSpecimen } from '../components/practice/PracticeSpecimen'
 import { LEVELS } from '../domain/sentenceSource'
 
-// ── 実践 — the Practice gate: six platforms (plan 068, plates since 094, 作文 since 125) ──
+// ── 実践 — the Practice gate: seven platforms (plan 068, plates since 094, 作文 since 125, 会話 since 217) ──
 // Reading practice, reading comprehension, translation, dictation,
-// the mock exam — the sentence-level sections, which schedule words
-// rather than levels and so have no line on the map. One station
-// plate per section, the same plate the Learn
-// gate hangs (components/station/LinePlate.jsx), so the two gates are
+// composition, the mock exam, conversation — the sentence-level
+// sections, which schedule words rather than levels and so have no
+// line on the map. One station plate per section, the same plate the
+// Learn gate hangs (components/station/LinePlate.jsx), so the two gates are
 // one screen twice rather than a map you read beside a grid you
 // press. Boarding one announces it and departs through the gate, like
 // any other section. The pass tags the canvas draws on these cards
@@ -69,6 +69,17 @@ import { LEVELS } from '../domain/sentenceSource'
 // paper's four choices. The plate is one door: the well stands inside
 // its head, and the whole plate departs to the station. The phone
 // keeps the chips.
+//
+// ── On the desk, the six (plan 217) ──
+// 会話 came to the gate as its seventh platform, and the desk's lattice
+// is drawn for six: a seventh plate made a third row at 1440px and a
+// fourth at 1100px, and even a strip under the six took 70px from
+// their rows, enough to cut the exam's card and N1's translation in
+// their wells at 1100×800. Until a gate of seven is drawn for the
+// desk, the desk hangs the six and 会話 is the rail's seventh station;
+// the phone hangs it as the seventh plate, with its grade chips.
+const OFF_DESK = '/practice/conversation'
+
 const LEVEL_PATH = {
   '/practice/reading':       lvl => `/practice/reading/level/${lvl}`,
   '/practice/comprehension': lvl => `/practice/comprehension/${lvl}`,
@@ -78,7 +89,10 @@ const LEVEL_PATH = {
   '/practice/dictation':     lvl => `/practice/dictation/${lvl}`,
   // One axis too (plan 125): a 作文 run is picked by grade alone.
   '/practice/composition':   lvl => `/practice/composition/${lvl}`,
-  // The one that is not a run: the exam's grades open that grade's
+  // 会話 (plan 217) is picked by grade and by scene: the grade opens
+  // its station on that grade's scenes, as the exam's opens its papers.
+  '/practice/conversation':  lvl => `/practice/conversation?level=${lvl}`,
+  // The other that is not a run: the exam's grades open that grade's
   // papers (screens/ExamScreen reads the same ?level=), so there is no
   // train to board yet.
   '/practice/exam':          lvl => `/practice/exam?level=${lvl}`,
@@ -100,6 +114,7 @@ export default function PracticeScreen() {
   const navigate = useNavigate()
   const desk = useDesk()
   const platforms = getSections('practice', t)
+  const plated = desk ? platforms.filter(section => section.path !== OFF_DESK) : platforms
   // The learner's own grade, marked on every platform's row the way
   // the route stops mark it: a landmark, never a lock (ADR 0005), and
   // aria-current='location' because that is the word this app uses
@@ -115,7 +130,8 @@ export default function PracticeScreen() {
     const to = LEVEL_PATH[section.path]?.(level)
     if (!to) return
     playUi('click-mode-selection')
-    if (section.path === '/practice/exam') navigate(to)
+    // A station rather than a run: no door to board through.
+    if (section.path === '/practice/exam' || section.path === '/practice/conversation') navigate(to)
     else board(() => navigate(to))
   }
 
@@ -127,7 +143,7 @@ export default function PracticeScreen() {
       <h1 className="sr-only">{t.tabPractice}</h1>
       {guide.open && <Guide gate="practice" onEnd={guide.onEnd} />}
       <div className="plates">
-        {platforms.map((section, i) => (
+        {plated.map((section, i) => (
           <Plate
             key={section.path}
             section={section}

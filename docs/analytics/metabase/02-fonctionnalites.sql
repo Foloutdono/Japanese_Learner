@@ -108,6 +108,8 @@ WITH routes(route) AS (VALUES
     ('/practice/dictation/:level'),
     ('/practice/composition'),
     ('/practice/composition/:level'),
+    ('/practice/conversation'),
+    ('/practice/conversation/:scenario/:mode'),
     ('/dictionary'),
     ('/dictionary/analyzer'),
     ('/profile'),

@@ -9,6 +9,7 @@ import { AgendaPage } from '../components/settings/AgendaPage'
 import { LevelPage } from '../components/settings/LevelPage'
 import { DestinationPage } from '../components/settings/DestinationPage'
 import { ServicePage } from '../components/settings/ServicePage'
+import { ReviewsPage } from '../components/settings/ReviewsPage'
 import { HourPage } from '../components/settings/HourPage'
 import { LinesPage } from '../components/settings/LinesPage'
 import { DisplayPage } from '../components/settings/DisplayPage'
@@ -39,6 +40,7 @@ const PAGES = {
   level: LevelPage,
   destination: DestinationPage,
   service: ServicePage,
+  reviews: ReviewsPage,
   hour: HourPage,
   lines: LinesPage,
   display: DisplayPage,

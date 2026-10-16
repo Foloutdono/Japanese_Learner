@@ -73,6 +73,8 @@ import ReadingRun from './screens/ReadingRun'
 import ComprehensionRun from './screens/ComprehensionRun'
 import DictationRun from './screens/DictationRun'
 import CompositionRun from './screens/CompositionRun'
+import ConversationStation from './screens/ConversationStation'
+import ConversationRun from './screens/ConversationRun'
 import ProfileScreen from './screens/ProfileScreen'
 import SettingsScreen from './screens/SettingsScreen'
 import ExamScreen from './screens/ExamScreen'
@@ -730,6 +732,9 @@ export default function App({ front = NO_FRONT }) {
                 />
               ))
             )}
+            {/* 会話 (plan 217): chosen by scene and by grade, so its
+                station is its own rather than SentenceStation's. */}
+            <Route path="/practice/conversation" element={<ConversationStation session={session} />} />
             <Route path="/dictionary"           element={<DictionaryScreen session={session} />} />
             <Route path="/dictionary/analyzer"  element={<AnalyzerScreen session={session} />} />
             <Route path="/profile"              element={<ProfileScreen session={session} />} />
@@ -775,6 +780,7 @@ export default function App({ front = NO_FRONT }) {
             <Route path="/practice/comprehension/:level"     element={<ComprehensionRun session={session} />} />
             <Route path="/practice/dictation/:level"          element={<DictationRun session={session} />} />
             <Route path="/practice/composition/:level"        element={<CompositionRun session={session} />} />
+            <Route path="/practice/conversation/:scenario/:mode" element={<ConversationRun session={session} />} />
             <Route path="/practice/translation/level/:level" element={<TranslationRun session={session} />} />
             <Route path="/practice/translation/tier/:tier"   element={<TranslationRun session={session} />} />
             <Route path="/practice/translation/mastery"      element={<TranslationRun session={session} />} />

@@ -2839,6 +2839,17 @@ a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; t
      floor with more room than any pigment in this list; measured by
      src/contrast.browser.test.jsx's sakubun sites. */
   --line-sakubun:   #8c6296;  /* 紫       murasaki,    purple      */
+  /* 縹色 hanada — 会話, the conversation platform (plan 217), added when
+     that section was: a fourteenth section, a fourteenth pigment. The
+     stretch between 緑青 (194°) and 藍 (242°) was the widest left on the
+     wheel where no reserved ink stands (鶯's, the video chips', sits in
+     the other one); this is its middle, ~218°, minted at the family's
+     lightness and strength (一族: .56 here, .48 on paper, .085). At
+     roundel size 緑青 reads as a grey-teal, 藍 as a deep indigo and this
+     as a dayflower blue between them. The verdict nearest it, 新橋
+     (--rating-correct, 207°), is a pass key's fill at .73 -- a lit tile,
+     never an edge or a ring at this lightness. */
+  --line-kaiwa:     #2c8096;  /* 縹色     hanada-iro,  dayflower   */
   /* 鶯色 uguisu — no longer a board line (plan 027 merged 動画 into
      解析). Kept, and reserved for exactly one thing: the timestamp
      chips on video Sentences, the only data that exists for that
@@ -2970,6 +2981,7 @@ a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; t
   --line-exam:      #72583b;
   --line-kakitori:  #226d4c;
   --line-sakubun:   #744c7e;
+  --line-kaiwa:     #05697d;
   /* Retired as a board line by plan 027 — see the dark-theme value. */
   --line-douga:     #6a7a35;
   --pass-ink:       #4a4452;
@@ -3446,6 +3458,13 @@ button:focus-visible {
   display: flex;
   align-items: baseline;
   gap: var(--sp-3);
+}
+/* A figure at the row's far end (ModeSelector's `meta`), where a card
+   too narrow for the aside's column carries it: the name keeps the
+   row, and wraps before the figure moves. */
+.platform-card__meta {
+  flex: none;
+  margin-left: auto;
 }
 
 /* The right-hand column a wide card must earn (DESIGN.md's density
@@ -8471,6 +8490,14 @@ textarea:focus-visible {
   background: linear-gradient(to bottom, transparent, var(--surface) var(--sp-4));
 }
 .tdy-asks { display: flex; flex-direction: column; gap: var(--sp-3); }
+/* 運転再開 — the comeback sheet (plan 217, components/station/
+   ComebackSheet.jsx): Today's sheet (.tdy-sheet, its docked foot) round
+   a welcome, the cards waiting, the three paces as the service cards
+   Settings draws (.svc) and, for a spread, its days as Today's seg. */
+.cb-lead { display: flex; flex-direction: column; gap: var(--sp-2); }
+.cb-lead__hello { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; text-wrap: pretty; }
+/* The run past the share, a rung over the cleared gate (plan 217). */
+.tdy-extra { align-self: center; }
 .tdy-seg .seg__opt { height: auto; min-height: 44px; gap: var(--sp-2); padding-inline: var(--sp-3); white-space: nowrap; }
 .tdy-seg .seg__opt-latin {
   font-size: var(--fs-body);
@@ -31975,6 +32002,160 @@ button.brd-stn { cursor: pointer; }
 .ask__offer:disabled { opacity: 0.45; cursor: not-allowed; }
 
 
+/* ══ 217 — 会話, the conversation platform ═══════════════════════════
+   Someone speaks to the learner in a place, and they answer
+   (screens/ConversationStation.jsx, screens/ConversationRun.jsx). Built
+   of what the app already draws: the station is the console (the way of
+   riding as its band, the grades as its chips) over the platform cards;
+   the run is a practice card holding a scene as the grammar tour draws
+   one -- the place as a station plate, a line a row with who says it,
+   its furigana and its voice (.tour-plate, .tour-line) -- with the
+   tour's tiles under it for Choose, translation's practice card for
+   Translate and the tutor's notes under each free line. What is here is
+   only what the scene needed to become a conversation: the talk's
+   column, the line still owed a reply, the task, the brief, the end. */
+
+/* What the chosen way of riding asks, under the console: one quiet line. */
+.kaiwa-how {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+/* A scene's record at its card's end: the replies right, over those
+   graded -- a figure and its unit (DESIGN.md, Figures). */
+.kaiwa-record { display: inline-flex; align-items: baseline; }
+.kaiwa-record__fig,
+.kaiwa-record__of {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.kaiwa-record__fig { font-size: var(--fs-title); color: var(--text-primary); }
+.kaiwa-record__of { font-size: var(--fs-sm); color: var(--text-secondary); }
+
+/* The run's stage names the line's ink for the tour's pieces it holds
+   (.tour-speak's ring, a highlight in a line), as .tour does for 文法. */
+.stage--kaiwa {
+  --tour-ink: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
+  --dict-ink: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
+}
+/* The talk: a scene's lines, one a row, hairline between them. */
+.kaiwa-talk {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* The line still owed a reply holds its translation behind a quiet
+   link, the boarding's own (.brd__link), set flush with the line. */
+.kaiwa-tr {
+  align-self: flex-start;
+  padding-inline: 0;
+  font-size: var(--fs-sm);
+}
+/* A free line typed in rōmaji: what was typed, under the Japanese the
+   tutor read it as. */
+.kaiwa-typed {
+  display: block;
+  margin-top: var(--sp-1);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+/* What the tutor said of a free line, under it: the line put right,
+   then the notes. */
+.kaiwa-review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--surface-line);
+}
+.kaiwa-review__better {
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  line-height: 2;
+}
+/* Translate: what the learner is asked to say, at the talk's foot. */
+.kaiwa-ask {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin: 0;
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--surface-line);
+}
+.kaiwa-ask__line {
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+/* Translate's practice card under the talk, the hairline its door. */
+.kaiwa-check {
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--surface-line);
+}
+/* The model reply's own note, under the answer's well. */
+.kaiwa-note {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+/* Choose's verdict: each reply's translation leads its note. */
+.kaiwa-said__tr { font-weight: 700; }
+/* The free talk's wait, its refusals and its end. */
+.kaiwa-pending { align-self: flex-start; }
+.kaiwa-alert {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+.kaiwa-end {
+  margin: 0;
+  text-align: center;
+  text-indent: var(--tr-caption);
+}
+/* The brief: the place's plate, what is going on, the errand, the way. */
+.kaiwa-brief {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.kaiwa-brief__situation {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+.kaiwa-brief__goal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin: 0;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+/* The talk over: its figures, two cells of the profile's lattice. */
+.kaiwa-over {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--surface-line);
+}
+
 /* ═══ 机 — the desk (plan 113) ═══════════════════════════════════
    The computer's design, at and above 1100px (hooks/useDesk.js's
    DESK_QUERY). Tsuji has two chromes: the phone's (車内, above), which
@@ -40320,6 +40501,10 @@ button.brd-stn { cursor: pointer; }
       padding-top: calc(var(--safe-top) + var(--sp-4));
     }
     .desk-sec { min-height: 28px; }
+    /* Seven stations (Practice's, since 会話, plan 217) were a row more
+       than a 600px window holds: a gate of seven closes its rows to
+       24px, still a pointer's target, and every other gate keeps 28. */
+    .desk-rail__stations:has(> li:nth-child(7)) .desk-sec { min-height: 24px; }
     .desk-rail__foot {
       padding: var(--sp-3) var(--sp-4);
       padding-bottom: calc(var(--sp-3) + var(--safe-bottom));
@@ -43038,6 +43223,26 @@ button.brd-stn { cursor: pointer; }
       gap: var(--sp-5);
       padding: var(--sp-6) var(--sp-8);
     }
+  }
+}
+@media (min-width: 1100px) {
+  /* ── 机 — 会話 (plan 217) ──
+     The station's scenes go two across at every count: a scene's card
+     carries its name, its situation and its first line, and a third of
+     the page held a word a line of them when a grade has three. The
+     odd one out still takes the row. (The Practice gate keeps its six
+     plates on the desk, screens/PracticeScreen's OFF_DESK.) */
+  .learn:has(> .kaiwa-console) > .platform-grid,
+  .learn:has(> .kaiwa-console) > .platform-grid:has(> .platform-slot:nth-child(3):last-child) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .learn:has(> .kaiwa-console) > .platform-grid:has(> .platform-slot:nth-child(3):last-child) > .platform-slot:last-child { grid-column: 1 / -1; }
+  /* The brief beside the talk, in the run's side column: the side's
+     own padding, the brief's own rhythm. */
+  .desk-pane--kaiwa {
+    display: flex;
+    flex-direction: column;
+    padding: var(--sp-5);
   }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

@@ -47,6 +47,7 @@ from routes.phrase           import router as phrase_router
 from routes.reading          import router as reading_router
 from routes.dictation        import router as dictation_router
 from routes.composition      import router as composition_router
+from routes.conversation     import router as conversation_router
 from routes.ask              import router as ask_router
 from routes.practice         import router as practice_router
 from routes.profile          import router as profile_router
@@ -60,6 +61,7 @@ from routes.video           import router as video_router
 from routes.ocr             import router as ocr_router
 from routes.onboarding      import router as onboarding_router
 from routes.journey         import router as journey_router
+from routes.review_plan     import router as review_plan_router
 from routes.account         import router as account_router
 from routes.credits         import router as credits_router
 from routes.events          import router as events_router
@@ -196,6 +198,7 @@ app.include_router(phrase_router)
 app.include_router(reading_router)
 app.include_router(dictation_router)
 app.include_router(composition_router)
+app.include_router(conversation_router)
 app.include_router(ask_router)
 app.include_router(practice_router)
 app.include_router(profile_router)
@@ -236,6 +239,7 @@ async def _limit_reached(request, exc: LimitReached):
         "detail": "limit_reached", "what": exc.what, "limit": exc.limit,
     })
 app.include_router(journey_router)
+app.include_router(review_plan_router)
 app.include_router(account_router)
 app.include_router(events_router)
 

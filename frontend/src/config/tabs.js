@@ -168,7 +168,7 @@ function sections(t) {
     // Learn gate hangs its plate itself (screens/LearnScreen.jsx).
     { icon: '基礎', title: t.basicsTitle,     desc: t.basicsDesc,     path: '/learn/basics',  color: 'var(--text-secondary)', tab: 'basics' },
 
-    // ── 実践 — the six platforms ──
+    // ── 実践 — the seven platforms ──
     { icon: '読書', title: t.readingTitle,    desc: t.readingDesc,    path: '/practice/reading',       clip: 'reading', color: 'var(--line-reading)', tab: 'practice' },
     { icon: '理解', title: t.readingComprehensionTitle, desc: t.readingComprehensionDesc, path: '/practice/comprehension', clip: 'reading-comprehension', color: 'var(--line-rikai)', tab: 'practice' },
     // Translation mode: given a phrase in the UI's foreign language,
@@ -196,6 +196,17 @@ function sections(t) {
     // the official JLPT blueprint but never copied from a real past
     // paper) — see src/exam/.
     { icon: '模試', title: t.examTitle, desc: t.examDesc, path: '/practice/exam', clip: 'exam', color: 'var(--line-exam)', tab: 'practice' },
+    // 会話 — conversation (plan 217): someone speaks to the learner in
+    // a place and they answer -- choosing among three replies, writing
+    // what they are told to say, or freely, the other person played by
+    // the model (screens/ConversationRun.jsx). Chosen by scene and by
+    // grade, so its station is its own (screens/ConversationStation.jsx)
+    // rather than the sentence platforms'. No `clip`, for dictation's
+    // reason. After 模試, the seventh: the phone's gate hangs it as a
+    // plate, while the desk's keeps the six plates in the rows they were
+    // drawn in and this one is the rail's seventh station
+    // (screens/PracticeScreen.jsx's OFF_DESK).
+    { icon: '会話', title: t.conversationTitle, desc: t.conversationDesc, path: '/practice/conversation', color: 'var(--line-kaiwa)', tab: 'practice' },
 
     // ── 辞書 — the dictionary, and the analyzer behind its door ──
     { icon: '辞書', title: t.dictionaryTitle, desc: t.dictionaryDesc, path: '/dictionary',          clip: 'dictionary', color: 'var(--line-jisho)',   tab: 'dictionary' },

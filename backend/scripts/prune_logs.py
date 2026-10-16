@@ -21,6 +21,11 @@ from a guess about what looks old:
                      reasoning.
   dictation_log      /api/dictation/history, ceiling 100 (Query(le=100)).
                      Row 101 back has never been servable.
+  conversation_log   read by nothing row by row: the conversation
+                     station's record is a sum over it (plan 217). So
+                     its cap is not a reader's ceiling but a bound, set
+                     far past what a learner rides (2,000 graded turns),
+                     on a table every graded turn posts a row to.
   phrase_history     /api/phrase/history, ceiling 200, ordered
                      `kept DESC, created_at DESC`. KEPT rows are the
                      learner's own pins (保存) and are never touched --
@@ -74,6 +79,8 @@ PER_USER = [
     ("translation_log",   200, "", "/api/translation/history caps at 200"),
     ("dictation_log",     100, "", "/api/dictation/history caps at 100"),
     ("composition_log",   100, "", "/api/composition/history caps at 100"),
+    ("conversation_log",  2000, "",
+     "read only as sums (the station's record); a bound on a table a result posts one row a turn to"),
     ("phrase_history",    200, " AND NOT kept",
      "/api/phrase/history caps at 200; pinned (保存) rows are never touched"),
     ("video_sessions",    100, "", "/api/video/sessions caps at 100; the heaviest rows here"),

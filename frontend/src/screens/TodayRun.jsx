@@ -120,6 +120,10 @@ export default function TodayRun({ session }) {
   // lane choice either, and its own session.
   const unit = only ? '' : (params.get('unit') ?? '')
   const allChosen = laneParam === ''
+  // 回復運転 (plan 217): the run past the day's share, boarded from the
+  // cleared gate -- the reviews the learner's ceiling held back today.
+  // Its own session: it must not resume the day's.
+  const extra = !only && !unit && params.get('extra') === '1'
   // 区間 (plan 135): a run of a chosen length carries each lane's share
   // (`?quota=id:n,...`, domain/lanes.splitTake). The run counts what it
   // has answered and holds per lane and asks only for the rest.
@@ -196,6 +200,7 @@ export default function TodayRun({ session }) {
       + `&exclude=${encodeURIComponent(excludeIds.join(','))}`
       + (only ? `&only=${encodeURIComponent(only)}` : '')
       + (unit ? `&unit=${encodeURIComponent(unit)}` : '')
+      + (extra ? '&extra=1' : '')
       // Omitted when everything is chosen: an empty `lanes` already
       // means the whole queue on the backend, and sending the full list
       // would make the session key churn as lanes empty out mid-run.
@@ -208,7 +213,7 @@ export default function TodayRun({ session }) {
     for (const c of cards) if (c.lane?.id) laneOfRef.current.set(cardKey(c), c.lane.id)
     setBeyond(Number.isInteger(data.beyond) ? data.beyond : null)
     return cards
-  }, [lang, session, laneParam, allChosen, only, unit, capped, quota, cardKey])
+  }, [lang, session, laneParam, allChosen, only, unit, extra, capped, quota, cardKey])
 
   const extraExcludeIds = useCallback(
     () => Array.from(recentlyReviewedRef.current.keys()),
@@ -228,7 +233,7 @@ export default function TodayRun({ session }) {
     // would serve cards from lanes the learner just switched off. So is
     // the language: the cards are localised server-side, so a switch is
     // a fresh queue (as GrammarRun's).
-    storageKey: sessionKey('today', only ? `only:${only}` : unit ? `unit:${unit}` : capped ? `quota:${quotaRaw}` : allChosen ? 'all' : laneParam, lang),
+    storageKey: sessionKey('today', only ? `only:${only}` : unit ? `unit:${unit}` : extra ? 'extra' : capped ? `quota:${quotaRaw}` : allChosen ? 'all' : laneParam, lang),
     fetchBatch,
     batchSize: 10,
     cardKey,

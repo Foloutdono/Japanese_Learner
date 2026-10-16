@@ -92,6 +92,22 @@ export function planNudges({ ahead, time, t, kanaSetLabel, now, platform }) {
     if (at.getTime() - now.getTime() < LEAD_MS) continue
     if (!point.total) continue
     if (ahead.rode_today && sameLocalDay(at, now)) continue
+    if (point.comeback) {
+      // 回復運転 (plan 217): a backlog past a few days of the learner's
+      // load, with no ceiling to share it out. Counting it would be the
+      // last reason not to open the app: the notification invites back,
+      // and the gate opens on the comeback sheet.
+      out.push({
+        id: NUDGE_IDS[out.length],
+        at,
+        title: t.nudgeComebackTitle(time),
+        body: t.nudgeComebackBody,
+        summary: t.nudgeComebackBody,
+        lines: [],
+        extra: { to: '/today' },
+      })
+      continue
+    }
     const minutes = minutesFor(point.total, ahead.seconds_per_review)
     const summary = [minutes && t.nudgeMinutes(minutes), point.new > 0 && t.nudgeNew(point.new)]
       .filter(Boolean).join(' · ') || t.brdNotifText

@@ -70,6 +70,10 @@ runtime purpose.
   uses it?" (the eye answers that), never a translation printed over the
   question it answers (a twist's and a meaning's `tr` is held back until it
   is answered), and never a sentence or a question twice in a tutorial.
+  Nor may a bank's choices let length answer: written with care, the
+  right reply drifts to the longest (the conversation bank's first draft
+  won 42-75% on "pick the longest"), so across a bank the right one is
+  the longest about as often as a blind pick (plan 217, `LENGTH_TELL`).
   `study/grammar_check.py` holds it; `content/grammar/README.md`, "The
   quiz", is the style guide. Draft with `python -m scripts.check_tour_quiz`.
 - **Every grammar point is asked in Choisir.** The contrast drill needs a
@@ -102,6 +106,14 @@ runtime purpose.
   those tables in the server (the stats reset, the account's deletion)
   calls `srs.forget_history(user_id)` after it commits. The cache is in
   process: the API runs one worker.
+- **The gate counts the day's share (plan 217).** A learner's ceiling
+  or catch-up (`core/review_plan.py`) cuts the due reviews to the day's
+  share before the ration joins them (`review_plan.cut`, over
+  `study/review_cap.share`): `_day_queue` (the gate and the clear),
+  `/api/today/cards` and `/api/today/ahead` all cut, and anything new
+  that counts or serves the day's reviews cuts too, or a learner on a
+  catch-up is shown, served or notified the wall again. The cut never
+  writes a schedule: lifted, the gate is what it was.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.
@@ -558,6 +570,19 @@ python -m scripts.reading_bank_report --rows N2     # each row's level words and
 python -m scripts.reading_bank_report --check rows.json  # candidate rows, before they enter the bank
 ```
 
+The conversation bank (plan 217, `content/conversation/N5.json` … `N1.json`,
+its schema and style guide in that directory's README) holds itself to
+`study/conversation.problems`: every line's reading written by hand and
+checked against the line, every reply's romaji against its reading, two
+wrong replies a turn, and a level whose Choose length cannot answer.
+Draft a scenario against it:
+
+```bash
+cd backend
+python -m scripts.check_conversation            # every level; exit 1 on a problem
+python -m scripts.check_conversation --level N4
+```
+
 One more read-only report measures the vocab deck itself (plan 103) —
 its shape, duplicates, readings, glosses, and every content word in the
 taught sentences that resolves to no card, split into the present cards
@@ -594,8 +619,9 @@ python -m scripts.placement_report --write-lists    # placement_lists.json, for 
 The slice is a pure function of the date — grammar, vocab, sentences,
 since plan 109 placement (the three candidate lists, read from
 `datas/vocab/placement_lists.json`, which `placement_report --write-lists`
-writes) and since plan 187g tours (each grammar point's written twist and
-scene) in rotation, each area walking its own list — so there is no
+writes), since plan 187g tours (each grammar point's written twist and
+scene) and since plan 217 conversation (the 会話 bank's scenarios) in
+rotation, each area walking its own list — so there is no
 ledger to keep in sync and no state to corrupt. Read-only, no database, no `.env`, no network:
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does

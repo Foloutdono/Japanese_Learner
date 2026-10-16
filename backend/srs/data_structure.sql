@@ -243,6 +243,19 @@ CREATE TABLE user_profiles (
     -- standard figures; see routes/profile.py's READING_PACES and
     -- frontend/src/domain/readingPace.js.
     reading_pace TEXT,
+    -- 回復運転 — the review plan (plan 217, core/review_plan.py): a
+    -- ceiling on the day's reviews (NULL none), a catch-up chosen on
+    -- the comeback sheet (its share a day, its days -- NULL for gentle,
+    -- which has no end -- and its first day; all NULL when none runs),
+    -- the day "all of them now" was answered, and an absence declared
+    -- ahead. All NULL is the gate as it always was.
+    review_cap INTEGER,
+    catchup_cap INTEGER,
+    catchup_days SMALLINT,
+    catchup_from DATE,
+    comeback_declined_on DATE,
+    away_from DATE,
+    away_until DATE,
     -- 足跡を残さない (plan 218): the account asked not to be counted.
     -- core/events.opted_out reads it on both of the trail's write paths.
     analytics_off BOOLEAN NOT NULL DEFAULT FALSE
@@ -877,6 +890,40 @@ CREATE TABLE composition_log (
 
 CREATE INDEX idx_composition_log_user
 ON composition_log(user_id, created_at);
+
+-- 会話 (conversation, plan 217): one row per graded turn of a scenario
+-- (content/conversation), however it was ridden. Owned by
+-- routes/conversation.py, created there at import time.
+--
+-- Nothing the learner typed: which scenario, which turn, the mode and
+-- how it went, never the words -- the free talk's lines live on the
+-- learner's screen and in one request, and nowhere else.
+--   mode       choose | translate | free
+--   turn       the scenario's turn (choose, translate), or the line of
+--              the free talk, from 0
+--   accuracy   translate: the measure the learner saw, 0..100; NULL
+--              elsewhere and where the check never answered
+--   verdict    translate and free: the tutor's, as the model answered;
+--              NULL where there was no review
+--   quality    choose: 4 for the reply, 1 for a wrong one (a question's
+--              rates, comprehension's); else the learner's rating 0..5
+-- `correct` is derived from quality (q > 2 is a pass), as everywhere.
+CREATE TABLE conversation_log (
+    id         BIGSERIAL PRIMARY KEY,
+    user_id    TEXT NOT NULL,
+    level      TEXT NOT NULL DEFAULT '',
+    scenario   TEXT NOT NULL,
+    mode       TEXT NOT NULL,
+    turn       SMALLINT NOT NULL,
+    accuracy   SMALLINT,
+    verdict    TEXT,
+    correct    BOOLEAN NOT NULL,
+    quality    SMALLINT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_conversation_log_user
+ON conversation_log(user_id, created_at);
 
 -- Owned by routes/ocr.py -- per-user daily counter for the vision OCR
 -- endpoint. Nothing here costs money (NVIDIA's vision models are on the

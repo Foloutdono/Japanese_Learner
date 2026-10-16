@@ -224,6 +224,24 @@ EVENTS: dict[str, frozenset[str]] = {
     "rest_day_used":  frozenset({"days"}),
     "ticket_share":   frozenset({"days"}),
 
+    # ── 回復運転 — the review plan (plan 217) ─────────────────────
+    # catchup_offer is the client's, once a sheet: the gate opened on
+    # the comeback sheet (`owed` the reviews it would have printed,
+    # `away` the days since the learner last studied). The rest are
+    # written server-side: catchup_choice
+    # the answer (`choice` spread | gentle | all, `days` a spread's,
+    # `per_day` its share); catchup_done the day its share stopped
+    # holding anything back (`days` it took). review_cap_set is the
+    # ceiling chosen in Settings (`cap`, null for none); away_set an
+    # absence declared or withdrawn (`days` long, 0 withdrawn), and
+    # away_day_used the lazy bridge writing its days (`days`). Every
+    # value a figure or an enum -- never a date the learner typed.
+    "catchup_offer":  frozenset({"owed", "away"}),
+    "catchup_choice": frozenset({"choice", "days", "per_day"}),
+    "catchup_done":   frozenset({"days"}),
+    "review_cap_set": frozenset({"cap"}),
+    "away_set":       frozenset({"days"}),
+    "away_day_used":  frozenset({"days"}),
     # ── 利用 — the small features, counted per screen (plan 218) ──
     # Whether anyone plays the audio, scans a photo, asks the tutor,
     # searches the dictionary. Not one row per press: lib/screenTrail.js

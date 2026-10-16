@@ -1355,6 +1355,53 @@ const compositionMode = {
   compositionLimitReached: "Le tuteur a fini sa journée : ton indice et ta note comptent toujours. Reviens demain.",
 }
 
+// ── 会話 — conversation (plan 217) ──────────────────────────────
+// Quelqu'un parle à l'apprenant dans un lieu (la caisse d'un konbini,
+// les portiques d'une gare, le bureau d'un client) et il répond : en
+// choisissant parmi trois répliques, en écrivant ce qu'on lui dit de
+// dire, ou librement, l'interlocuteur joué par le modèle.
+// ConversationStation liste les scènes, ConversationRun en joue une ;
+// l'avis du tuteur, la carte d'exercice et la barre de notes gardent
+// leurs clés partagées.
+const conversationMode = {
+  conversationTitle:   'Conversation',
+  conversationDesc:    'On te parle : réponds\nChoisis, traduis ou parle librement\nDe N5 à N1',
+  cvsFetchError:       'Impossible de charger la conversation. Réessaie.',
+  cvsModeLabel:        'Comment tu réponds',
+  cvsLevelLabel:       'Niveau',
+  cvsModes:            { choose: 'Choisir', translate: 'Traduire', free: 'Libre' },
+  cvsHow: {
+    choose:    'On te parle : choisis la bonne réplique parmi trois.',
+    translate: 'On te dit quoi répondre : écris-le en japonais, en kana, en kanji ou en rōmaji.',
+    free:      'Réponds avec tes mots : ton interlocuteur réagit à ce que tu dis, et le tuteur relit chaque réplique.',
+  },
+  cvsEmpty:            'Pas encore de conversation à ce niveau.',
+  cvsRecordAria:       (right, done) => `${right} répliques justes sur ${done}`,
+  cvsLeave:            'Scènes',
+  cvsRepliesRated:     'Répliques',
+  cvsStart:            'Commencer',
+  cvsGoal:             'Ta mission',
+  cvsSay:              'Dis',
+  cvsTheReply:         'La réponse',
+  cvsNext:             'Suivant',
+  cvsFinish:           'Terminer',
+  cvsReplyLabel:       'Ta réponse',
+  cvsReplyPlaceholder: 'Ta réponse, en japonais ou en rōmaji…',
+  cvsSend:             'Envoyer',
+  cvsAnswering:        who => `${who} répond…`,
+  cvsReading:          'Lecture de ta réponse…',
+  // Le tuteur a fini sa journée (routes/conversation.py, 429) : la
+  // session continue, mesurée et notée.
+  cvsReviewLimit:      'Le tuteur a fini sa journée : la mesure et ta note comptent toujours. Il revient demain.',
+  cvsTalkLimit:        'C’est tout pour la conversation libre aujourd’hui. Choisir et Traduire marchent toujours : elle revient demain.',
+  cvsTalkOff:          'La conversation libre a besoin du tuteur, et il n’est pas disponible pour l’instant. Choisir et Traduire marchent toujours.',
+  cvsTalkFailed:       'Aucune réponse n’est venue. Réessaie.',
+  cvsTalkOver:         'Huit répliques : la conversation s’arrête ici.',
+  cvsOver:             'La conversation est finie',
+  cvsAgain:            'Recommencer',
+  cvsOther:            'Une autre scène',
+}
+
 // ── Dictionary ────────────────────────────────────────────
 const dictionary = {
   dictionaryPlaceholder: 'Rechercher un kanji, un kana ou un sens…',
@@ -2359,7 +2406,7 @@ const boarding = {
   agdSubjectName: {
     review: 'Révisions', kana: 'Kana', vocab: 'Vocabulaire', kanji: 'Kanji', grammar: 'Grammaire',
     reading: 'Lecture', translation: 'Traduction', dictation: 'Dictée', composition: 'Rédaction',
-    comprehension: 'Compréhension', exam: 'Examen blanc',
+    conversation: 'Conversation', comprehension: 'Compréhension', exam: 'Examen blanc',
   },
   agdGo: 'Commencer',
   agdUntil: (end) => `jusqu’à ${end}`,
@@ -2582,6 +2629,7 @@ const onboarding = {
     comprehension: 'Un texte court, puis ses questions — l’épreuve de lecture de l’examen, en répétition.',
     dictation: 'Deux écoutes, pas une de plus : écris en rōmaji ce que tu entends.',
     composition: 'Un point de grammaire est donné : écris une phrase qui l’emploie, un tuteur la relit.',
+    conversation: 'On te parle dans une scène : choisis ta réponse, écris-la ou réponds librement.',
     // Sur la plaque du quai, au bureau (plan 165) : la question que son
     // puits montre.
     exam: 'Une question au format JLPT, ici 漢字読み : la lecture du mot souligné.',
@@ -3083,6 +3131,68 @@ const clrTickets = {
 }
 // ── 191:tickets end ──
 
+
+// ── 217:reviews ──
+// 回復運転 — the review plan (plan 217): the comeback sheet on Today,
+// the catch-up's figure in the day, the run past the share, Settings ›
+// Reviews and the notification that invites back.
+const reviewPlan = {
+  cbJp: '運転再開',
+  cbCap: 'Reprise du service',
+  cbLabel: 'Reprendre à ton rythme',
+  cbAway: n => `Bon retour ! ${n} jour${n > 1 ? 's' : ''} sans réviser.`,
+  cbPiled: 'Tes révisions se sont accumulées.',
+  cbOwed: n => `${n} cartes attendent. Inutile de tout faire aujourd’hui : choisis ton rythme.`,
+  cbChoices: 'Ton rythme',
+  cbSpread: 'Étaler',
+  cbGentle: 'En douceur',
+  cbAll: 'Tout de suite',
+  cbPerDay: n => `${n} par jour`,
+  cbOverDays: n => `en ${n} jours`,
+  cbNoEnd: 'sans échéance',
+  cbCards: n => `${n} carte${n > 1 ? 's' : ''}`,
+  cbMinutes: m => `≈ ${m} min`,
+  cbDays: 'Sur combien de jours',
+  cbDaysN: n => `${n} jours`,
+  cbNewPaused: 'Les nouvelles cartes reprennent dès que tu es à jour.',
+  cbGo: 'C’est parti',
+  cbError: 'Ton choix n’a pas pu être enregistré. Réessaie.',
+  todayCatchupDay: 'jour de rattrapage',
+  todayCatchupGentle: 'par jour, en rattrapage',
+  todayCatchupShort: 'rattrapage',
+  todayExtra: n => `Réviser plus · ${n} carte${n > 1 ? 's' : ''}`,
+  settingsReviews: 'Révisions',
+  rvRowNone: 'Sans plafond',
+  rvRowCap: n => `${n} au plus par jour`,
+  rvRowCatchup: 'Rattrapage en cours',
+  rvRowAway: from => `Absent à partir du ${from}`,
+  rvCapLabel: 'Révisions par jour',
+  rvCapHint: 'Au-delà, les cartes attendent le lendemain, et ta journée se boucle sur ta part.',
+  rvCapNone: 'Aucun',
+  rvCapUnder: load => `Environ ${load} cartes arrivent chaque jour : sous ce plafond, le retard grandira.`,
+  rvCatchupLabel: 'Rattrapage',
+  rvCatchupSpread: (perDay, day, of) => `${perDay} cartes par jour · jour ${day} sur ${of}`,
+  rvCatchupGentle: perDay => `${perDay} cartes par jour, sans échéance`,
+  rvCatchupNew: 'Les nouvelles cartes sont en pause jusqu’à la fin.',
+  rvCatchupStop: 'Arrêter le rattrapage',
+  rvAwayLabel: 'Absence prévue',
+  rvAwayHint: n => `Tes jours d’absence gardent ta série, et les nouvelles cartes s’arrêtent deux jours avant ton départ. ${n} jours au plus.`,
+  rvAwayFrom: 'Du',
+  rvAwayUntil: 'Au',
+  rvAwaySave: 'Enregistrer',
+  rvAwayCancel: 'Annuler l’absence',
+  rvAwaySet: (from, until) => `Du ${from} au ${until}`,
+  rvAwayErr: {
+    past: 'Le premier jour ne peut pas être passé.',
+    order: 'Le dernier jour vient après le premier.',
+    long: n => `${n} jours au plus.`,
+  },
+  rvError: 'Le changement n’a pas pu être enregistré.',
+  nudgeComebackTitle: time => `Ton train de ${time} · on reprend doucement ?`,
+  nudgeComebackBody: 'Quelques minutes suffisent pour repartir.',
+}
+// ── 217:reviews end ──
+
 export default welded({
   ...auth,
   ...landing,
@@ -3101,6 +3211,7 @@ export default welded({
   ...translationMode,
   ...dictationMode,
   ...compositionMode,
+  ...conversationMode,
   ...profile,
   ...settings,
   ...decks,
@@ -3116,4 +3227,5 @@ export default welded({
   ...clrMilestones,
   ...clrRestday,
   ...clrTickets,
+  ...reviewPlan,
 })

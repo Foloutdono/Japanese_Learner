@@ -168,6 +168,28 @@ class TourSliceTests(unittest.TestCase):
                             p for p in audit.grammar_points(level) if p["pattern"] == e["pattern"]))
 
 
+class ConversationSliceTests(unittest.TestCase):
+    """Plan 217: the 会話 bank is an area of its own, whole scenarios a
+    run, since no gate can tell a wrong reply from a second right one."""
+
+    def test_every_scenario_is_in_a_slice_once(self) -> None:
+        for level in audit.LEVELS:
+            banked = [s["id"] for s in audit.conversation_scenarios(level)]
+            sliced = [e["id"] for s in audit.slices("conversation") if s["level"] == level
+                      for e in audit.entries_of(s)]
+            self.assertEqual(sliced, banked, level)
+
+    def test_a_conversation_slice_hands_the_run_whole_scenarios(self) -> None:
+        for chosen in audit.slices("conversation"):
+            entries = audit.entries_of(chosen)
+            self.assertLessEqual(len(entries), audit.CHUNK_CONVERSATION)
+            for entry in entries:
+                self.assertTrue(entry["turns"])
+                for turn in entry["turns"]:
+                    self.assertIn("me", turn)
+                    self.assertEqual(len(turn["wrong"]), 2)
+
+
 class DumpTests(unittest.TestCase):
     def test_the_payload_is_what_the_playbook_tells_a_run_to_read(self) -> None:
         payload = audit.payload(audit.slice_for(0))

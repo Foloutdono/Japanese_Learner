@@ -16,12 +16,19 @@
 # The clip is named by content_key over (speaker label, text), the same
 # derivation the exam and dictation clips use, so
 # scripts/build_grammar_audio.py and the request derive one name.
+#
+# Since plan 217 the catalogue holds the conversation bank's scenes too
+# (content/conversation): the other person's lines in A's voice, and in
+# B's every reply the learner can give -- the model reply, its
+# alternatives and the two wrong ones, as a tour's scene voices every
+# choice. The same two voices, the same store: a scene is a scene.
 import logging
 import os
 import threading
 from functools import lru_cache
 
 from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
+from study import conversation
 from study import voice_engine as engine
 from study.exam_tts import (  # noqa: F401 -- TTSFailed: clip_for's contract
     FIXED_SLOTS, READER_SLOT, TTSFailed, audio_dir, content_key, is_current, write_clip,
@@ -67,7 +74,29 @@ def catalog() -> dict[str, frozenset[str]]:
             # The learner's reply, whichever they pick, is heard in
             # their own voice.
             said["me"].update(scene["ask"]["choices"])
+    for them, me in conversation_lines():
+        said["them"].update(them)
+        said["me"].update(me)
     return {who: frozenset(lines) for who, lines in said.items()}
+
+
+def conversation_lines() -> list[tuple[list[str], list[str]]]:
+    """Each conversation scenario's lines as (said to the learner, said
+    by the learner): its turns' `them` and its closing line, then every
+    reply of every turn."""
+    out = []
+    for rows in conversation.bank().values():
+        for row in rows:
+            them = [turn["them"]["jp"] for turn in row["turns"]]
+            if row.get("close"):
+                them.append(row["close"]["jp"])
+            me = [
+                reply["jp"]
+                for turn in row["turns"]
+                for reply in (turn["me"], *turn["me"].get("alt", []), *turn["wrong"])
+            ]
+            out.append((them, me))
+    return out
 
 
 def speakable(text: str, who: str) -> bool:
@@ -125,4 +154,4 @@ def clip_for(text: str, who: str, *, force: bool = False) -> str:
     return path
 
 
-__all__ = ["SPEAKERS", "READER_SLOT", "TTSFailed", "catalog", "speakable", "clip_for", "clip_dir", "clip_name"]
+__all__ = ["SPEAKERS", "READER_SLOT", "TTSFailed", "catalog", "conversation_lines", "speakable", "clip_for", "clip_dir", "clip_name"]
