@@ -1,5 +1,5 @@
 -- dashboard: Tsuji — 足跡 · Entonnoirs
--- description: Où l'on perd les apprenants : activation, embarquement, premier trajet, guides, cours de base, tours de grammaire, offre. Plan 218.
+-- description: Où l'on perd les apprenants : activation, embarquement, premier trajet, guides, cours de base, tours de grammaire, premier regard sur un kana ou un kanji, offre. Plan 218.
 
 -- ==== question
 -- title: Activation des nouveaux apprenants
@@ -120,6 +120,18 @@ WHERE name = 'guide_done' AND at >= now() - ({{days}} || ' days')::interval
 GROUP BY 1 ORDER BY 1;
 
 -- ==== question
+-- title: Guides : arrêt par arrêt
+-- display: table
+-- size: 12x7
+-- description: guide_step : combien d'apprenants voient chaque arrêt du guide d'un portail. La chute d'un rang au suivant, c'est là qu'on ferme le guide.
+SELECT props->>'gate' AS "Portail", (props->>'index')::int AS "Rang", props->>'stop' AS "Arrêt",
+       count(DISTINCT user_id) AS "Apprenants"
+FROM event_log
+WHERE name = 'guide_step' AND at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}}
+GROUP BY 1, 2, 3 ORDER BY 1, 2;
+
+-- ==== question
 -- title: Cours de base : unités terminées
 -- display: bar
 -- size: 12x6
@@ -141,6 +153,19 @@ FROM event_log
 WHERE name = 'grammar_tour_step' AND at >= now() - ({{days}} || ' days')::interval
   AND user_id NOT IN {{snippet: internal_users}}
 GROUP BY 1, 2, 3 ORDER BY 1, 4 DESC;
+
+-- ==== question
+-- title: Premier regard (初見) : kana et kanji
+-- display: table
+-- size: 12x7
+-- description: glyph_tour_done (plan 216) : le tracé d'un caractère montré avant qu'il soit drillé. « Montré » = l'app a dû tracer elle-même (Montre-moi, ou trois ratés sur un trait).
+SELECT props->>'source' AS "Type", count(*) AS "Tours finis", count(DISTINCT user_id) AS "Apprenants",
+       round(avg((props->>'misses')::numeric), 1) AS "Ratés (moyenne)",
+       round(100.0 * count(*) FILTER (WHERE (props->>'shown')::boolean) / count(*), 0) AS "Montré %"
+FROM event_log
+WHERE name = 'glyph_tour_done' AND at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}}
+GROUP BY 1 ORDER BY 2 DESC;
 
 -- ==== question
 -- title: Offre par porte

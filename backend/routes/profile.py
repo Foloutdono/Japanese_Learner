@@ -227,15 +227,31 @@ def _get_or_create_username(user_id: str) -> str:
             # Lazily seed a profile the first time this user is seen —
             # retry on the (very unlikely) random-name collision rather
             # than failing the request.
+            #
+            # A new account's boot asks twice at once (App.jsx's PATCH
+            # /api/profile/learning beside its GET /api/profile), and
+            # both find no row. The second INSERT then collides on
+            # user_id, not on the name: without ON CONFLICT it read as
+            # five name collisions and answered 500, the first request
+            # of every new learner. The row the other request wrote is
+            # the one to return.
             for _ in range(5):
                 candidate = _random_username()
                 try:
                     cur.execute(
-                        "INSERT INTO user_profiles(user_id, username) VALUES (%s, %s)",
+                        """
+                        INSERT INTO user_profiles(user_id, username) VALUES (%s, %s)
+                        ON CONFLICT (user_id) DO NOTHING
+                        RETURNING username
+                        """,
                         (user_id, candidate),
                     )
+                    created = cur.fetchone()
                     conn.commit()
-                    return candidate
+                    if created:
+                        return created[0]
+                    cur.execute("SELECT username FROM user_profiles WHERE user_id = %s", (user_id,))
+                    return cur.fetchone()[0]
                 except pg_errors.UniqueViolation:
                     conn.rollback()
             raise HTTPException(status_code=500, detail="Could not allocate a username")

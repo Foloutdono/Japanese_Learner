@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **229**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **235**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -365,8 +365,9 @@ python -m scripts.prewarm_exam_papers --dry-run         # one paper per exam id
 
 None of the three is what makes a fresh deploy usable: the comprehension
 pool is never empty, because `content/comprehension/*.json` (plan 111,
-three hand-written exercises per level in both languages, held to the
-same checks as a model answer by `tests/test_comprehension_seed.py`) is
+six hand-written exercises per level since plan 230, in both languages,
+held to the same checks as a model answer by
+`tests/test_comprehension_seed.py`, and served before any generated one) is
 upserted into `comprehension_pool` when `routes/reading.py` is imported,
 keyed on `seed_key` so a corrected seed updates its row. The prewarm
 scripts grow the pools past that floor; `prewarm_comprehension_pool`
@@ -585,13 +586,16 @@ Since plan 218, too:
   families a year, `event_daily` 25 months (`prune_logs`); the learner reads
   theirs at `GET /api/profile/export/trail`. A new event that should outlive
   30 days goes in `KEEP_LONG`, and in `privacy.html`'s list.
-- **The dashboards are code.** Nine Metabase dashboards, each a file in
+- **The dashboards are code.** Ten Metabase dashboards, each a file in
   `docs/analytics/metabase/` (`-- ==== question` blocks), built and updated
   by `python -m scripts.metabase_sync` (report, `--check`, `--yes`; needs
   `MB_API_KEY`). Change a question there, not only in Metabase's UI. Accounts
   to leave out live in the Metabase snippet `internal_users`, not in the repo.
   A screen added to `ROUTES` goes in `02-fonctionnalites.sql`'s list too (a
-  node-lane test holds them equal).
+  node-lane test holds them equal), an event added to `EVENTS` gets a
+  question that reads it (`tests/test_metabase_sync.py`, or a reason in its
+  `UNREAD`), and a new model feature's daily cap goes in
+  `08-ia-plafonds.sql`'s `caps` list.
 
 Call `track(name, props)` from `lib/track.js`; never `fetch` an analytics
 endpoint from a screen. `track` also stamps each event with the visit's random
@@ -649,6 +653,22 @@ cd backend
 python -m scripts.reading_bank_report               # the figures, per level
 python -m scripts.reading_bank_report --rows N2     # each row's level words and problems
 python -m scripts.reading_bank_report --check rows.json  # candidate rows, before they enter the bank
+```
+
+The comprehension seeds (plan 230) have one as well: every seed run
+through the checks a model answer must pass, plus a review of what lets
+a reader answer without reading (a right option far longer or more
+specific than the wrong ones, an option echoing its question, a quoted
+fragment the text lacks); `--draft` cuts a new text into sentences and
+glossed words to correct. It imports `routes/reading`, which opens
+`DATABASE_URL` and upserts the seeds, so point that at a scratch
+database:
+
+```bash
+cd backend
+python -m scripts.comprehension_seed_report               # every seed, and what to look at
+python -m scripts.comprehension_seed_report --check new.json  # candidates, before they enter a level file
+python -m scripts.comprehension_seed_report --draft new.json  # a breakdown to correct, as new.draft.json
 ```
 
 The conversation bank (plan 217, `content/conversation/N5.json` … `N1.json`,
@@ -767,6 +787,54 @@ writes. Its footage is uploaded to a
 public Supabase Storage bucket by file name and needs no rebuild;
 `frontend/landing/README.md` has the slots, the bucket and what changes
 when the page goes live.
+
+The **carousel studio** (plans 229–229n, `frontend/carousel/`,
+its README) draws what the app teaches (a reading-bank sentence, its
+translation, a grammar lesson, a word, a kanji, a kana, a comprehension
+passage; since plan 229m a theme's words in pictures, lookalike kanji, a
+conversation to answer and a tour's trap) as a photo carousel for a
+social feed, as one of its types (the guided walk, a mock exam, this or
+that, build it, a top five, a conversation, kanji spelling, find the
+impostor), and exports the PNGs. Since plan 231 it also draws the app
+itself as 9:16 promo stories (`promo.js`), with the app's own parts
+measured in the running app (`app.js`) and Today on the real print of
+the hour, each story's cover and its call to action also a seven-second MP4 clip;
+since plan 232 the word echo (`echo.js`), a pictured word said over and
+over for ten seconds by the app's reader, livelier (`carousel/voices/`, written
+by `python -m scripts.carousel_voices --yes`, which needs the voice
+engine: rerun it after a change of voice or of the themes); since plan 233
+ten-minute 16:9 videos for YouTube (`long.js`, made by
+`node carousel/long/render.mjs`: a vocabulary or kanji drill, one grammar
+point whole, a quiz), voiced line by line by the app's voices and mixed
+with the app's sounds and a bed of music it plays itself
+(`scripts/long_video_audio.py`), each also a source in the studio
+that previews it and gives its page and the command that makes it, and
+each also a 9:16 short under a minute, as any carousel can be too
+(`short.js`: its slides held and swiped, its line voiced). Since plan
+234 a carousel is drawn by default on one path that converts
+(`funnel.js`): the hook, the answer as the app shows it, a call to
+action that draws the feature the item comes from as a schema (never a
+figure) with two more beside it, the detail, the key points, three to
+five slides, in one of three looks (Clarté, Défi, Fiche; "Classic"
+keeps the station-plate walk); a key point is a line the bank already
+says, never one written there; a
+word in its breakdown is glossed from the deck or left bare, never
+guessed: when the app redraws one of those parts, measure it again and
+follow it, and a story promises only what the app does today. Its hand-written content (the pictures,
+the lookalike sets, the conversations) is `frontend/carousel/content/`;
+a conversation's every line carries its furigana and its romaji. A point is explained in its own
+sentence, a particle by the one sense it has there (`explain.js`); its
+questions (`quizzes.js`) deal a wrong answer only where it cannot be
+right too, and none is answered on the slide that asks it; a sentence's
+carousel asks none after its call to action, where every word of the
+sentence is glossed instead. A slide fits its text to the format's safe area rather than
+let it overflow (its README, "Nothing leaves the frame"): a new slide
+kind, ending or label is fitted the same way. Like the landing page it
+is a static page outside `src/` and never ships. Its data is `frontend/carousel/bank/*.json`, written by
+`python -m scripts.carousel_bank` (backend, needs the tokenizer and the
+JMdict database): rerun it after a change to the reading bank, the deck,
+the kanji, the catalogue or its tours, the comprehension seeds, the
+theme decks or `frontend/carousel/content/`, and commit the files.
 
 `npm run lint` is not the whole lint story: `npm run lint:css` (stylelint,
 ratcheted against a checked-in baseline) and `npm run lint:scale` (a

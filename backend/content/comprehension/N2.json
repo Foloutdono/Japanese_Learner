@@ -21,13 +21,13 @@
       "About twenty percent",
       "About two percent",
       "About half",
-      "It did not fall"
+      "About ten percent"
      ],
      "fr": [
       "D'environ vingt pour cent",
       "D'environ deux pour cent",
       "De moitié environ",
-      "Elle n'a pas baissé"
+      "D'environ dix pour cent"
      ]
     },
     "correct": 0
@@ -62,16 +62,16 @@
     },
     "options": {
      "en": [
-      "What follows goes against what the situation would lead one to expect",
-      "What follows is caused by the situation",
-      "What follows is an example of the situation",
-      "What follows happened before the situation"
+      "What follows is the opposite of what one would expect",
+      "What follows is a result of the situation",
+      "What follows is one example of the situation",
+      "What follows came before the situation arose"
      ],
      "fr": [
-      "Ce qui suit va à l'encontre de ce que la situation laisserait attendre",
-      "Ce qui suit est causé par la situation",
-      "Ce qui suit est un exemple de la situation",
-      "Ce qui suit s'est produit avant la situation"
+      "Ce qui suit est l'inverse de ce qu'on attendrait",
+      "Ce qui suit est une conséquence de la situation",
+      "Ce qui suit est un exemple de cette situation",
+      "Ce qui suit précède l'apparition de la situation"
      ]
     },
     "correct": 0
@@ -85,15 +85,15 @@
     "options": {
      "en": [
       "A scheme renting out empty houses cheaply",
-      "A new factory",
-      "A new railway line",
-      "A larger festival"
+      "A scheme selling empty houses cheaply",
+      "A festival prepared by all the residents",
+      "New cafés and shops opened by the town"
      ],
      "fr": [
       "Un dispositif louant à bas prix les maisons vides",
-      "Une nouvelle usine",
-      "Une nouvelle ligne de train",
-      "Un festival plus grand"
+      "Un dispositif vendant à bas prix les maisons vides",
+      "Un festival préparé par tous les habitants",
+      "De nouveaux cafés et boutiques ouverts par la mairie"
      ]
     },
     "correct": 0
@@ -102,20 +102,20 @@
     "type": "comprehension",
     "question": {
      "en": "Who moved to the town through the scheme?",
-     "fr": "Qui s'est installé en ville grâce au dispositif ?"
+     "fr": "Qui s'est installé dans la ville grâce au dispositif ?"
     },
     "options": {
      "en": [
       "People tired of city life",
-      "Young people from the town",
-      "Retired farmers",
-      "Tourists"
+      "Young people back from the cities",
+      "Retired people seeking quiet",
+      "Café owners seeking cheap premises"
      ],
      "fr": [
       "Des gens fatigués de la vie urbaine",
-      "Des jeunes de la ville",
-      "Des agriculteurs retraités",
-      "Des touristes"
+      "Des jeunes revenus des grandes villes",
+      "Des retraités en quête de calme",
+      "Des patrons de café cherchant un local"
      ]
     },
     "correct": 0
@@ -129,14 +129,14 @@
     "options": {
      "en": [
       "Liveliness, energy",
-      "Population",
-      "Money",
+      "Its population",
+      "Income, money",
       "Housing"
      ],
      "fr": [
       "Vitalité, animation",
-      "Population",
-      "Argent",
+      "Sa population",
+      "Revenus, argent",
       "Logement"
      ]
     },
@@ -150,16 +150,16 @@
     },
     "options": {
      "en": [
-      "Repaired them themselves and opened cafés and small shops",
-      "Demolished them",
-      "Sold them to the city",
-      "Left them empty"
+      "Repaired them themselves and opened cafés and shops",
+      "Had the town repair them, then rented them out",
+      "Rented them cheaply to young people from the town",
+      "Sold them and opened cafés in the city instead"
      ],
      "fr": [
-      "Ils les ont réparées eux-mêmes et ont ouvert des cafés et de petites boutiques",
-      "Ils les ont démolies",
-      "Ils les ont vendues à la ville",
-      "Ils les ont laissées vides"
+      "Ils les ont réparées eux-mêmes et ont ouvert cafés et boutiques",
+      "Ils les ont fait réparer par la mairie, puis les ont louées",
+      "Ils les ont louées à bas prix aux jeunes de la ville",
+      "Ils les ont vendues pour ouvrir des cafés en grande ville"
      ]
     },
     "correct": 0
@@ -195,15 +195,15 @@
     "options": {
      "en": [
       "Preparing the festival together",
-      "Sharing the same houses",
-      "Working in the same shops",
-      "Town meetings"
+      "Sharing the same old houses",
+      "Working in the same cafés",
+      "Holding town meetings together"
      ],
      "fr": [
       "Préparer le festival ensemble",
-      "Partager les mêmes maisons",
-      "Travailler dans les mêmes boutiques",
-      "Des réunions municipales"
+      "Partager les mêmes vieilles maisons",
+      "Travailler dans les mêmes cafés",
+      "Tenir ensemble des réunions municipales"
      ]
     },
     "correct": 0
@@ -216,16 +216,16 @@
     },
     "options": {
      "en": [
-      "Decline may be inevitable, but how it happens can be shaped",
-      "The population has stopped falling",
-      "The town has solved its problems",
-      "Other towns should copy the scheme"
+      "Decline may be unstoppable, but its course can be shaped",
+      "The decline has stopped, thanks to the newcomers' efforts",
+      "The decline can be stopped if other towns copy the scheme",
+      "Decline is unstoppable, so the town should simply accept it"
      ],
      "fr": [
-      "Le déclin est peut-être inévitable, mais on peut en modeler la forme",
-      "La population a cessé de baisser",
-      "La ville a résolu ses problèmes",
-      "Les autres villes devraient copier le dispositif"
+      "Le déclin est peut-être inévitable, mais on peut en modeler le cours",
+      "Le déclin s'est arrêté grâce aux efforts des nouveaux venus",
+      "Le déclin peut être stoppé si d'autres villes copient le dispositif",
+      "Le déclin est inévitable, la ville doit donc simplement l'accepter"
      ]
     },
     "correct": 0
@@ -238,16 +238,16 @@
     },
     "options": {
      "en": [
-      "Cautiously hopeful",
-      "Despairing",
-      "Indifferent",
-      "Angry at the newcomers"
+      "Hopeful, though the decline itself will go on",
+      "Confident the population will soon grow again",
+      "Resigned to the town slowly emptying out",
+      "Worried the newcomers will change the town"
      ],
      "fr": [
-      "Prudemment optimiste",
-      "Désespérée",
-      "Indifférente",
-      "En colère contre les nouveaux arrivants"
+      "De l'espoir, même si le déclin va se poursuivre",
+      "La certitude que la population va bientôt remonter",
+      "De la résignation devant une ville qui se vide",
+      "La crainte que les nouveaux venus changent la ville"
      ]
     },
     "correct": 0
@@ -362,7 +362,7 @@
     "jp": "若い人の多くが仕事を求めて都市へ出ていき、残った住民の平均年齢は上がりつつある。",
     "translation": {
      "en": "Many young people leave for the cities in search of work, and the average age of those who remain is rising.",
-     "fr": "Beaucoup de jeunes partent en ville chercher du travail, et l'âge moyen des habitants restants ne cesse de monter."
+     "fr": "Beaucoup de jeunes partent vers les grandes villes chercher du travail, et l'âge moyen des habitants restants ne cesse de monter."
     },
     "note": {
      "en": "The pattern 「〜つつある」 on the stem 「上がり」 describes a change that is under way.",
@@ -646,7 +646,7 @@
     "jp": "都会の生活に疲れた人が、この制度を通じて町に移り住むようになったのだ。",
     "translation": {
      "en": "People worn out by city life began moving to the town through this scheme.",
-     "fr": "Des gens lassés de la vie urbaine ont commencé à s'installer en ville grâce à ce dispositif."
+     "fr": "Des gens lassés de la vie urbaine ont commencé à s'installer dans la ville grâce à ce dispositif."
     },
     "note": {
      "en": "The pattern 「〜を通じて」 means through or by means of; 「〜ようになった」 marks the start of a new pattern.",
@@ -867,8 +867,8 @@
    {
     "jp": "祭りの準備を一緒に行ううちに、互いを理解する機会は確実に増えている。",
     "translation": {
-     "en": "As they prepare the festival together, the chances to understand one another are steadily increasing.",
-     "fr": "À force de préparer le festival ensemble, les occasions de se comprendre augmentent nettement."
+     "en": "As they prepare the festival together, the chances to understand one another are surely increasing.",
+     "fr": "À force de préparer le festival ensemble, les occasions de se comprendre augmentent sans aucun doute."
     },
     "note": {
      "en": "The pattern 「〜うちに」 means while or in the course of doing something, a change happens.",
@@ -962,8 +962,8 @@
      {
       "surface": "確実に",
       "meaning": {
-       "en": "steadily, surely",
-       "fr": "nettement"
+       "en": "surely, definitely",
+       "fr": "sans aucun doute"
       }
      },
      {
@@ -1169,16 +1169,16 @@
     },
     "options": {
      "en": [
-      "No commuting time and flexible hours",
-      "Higher pay",
-      "Fewer meetings",
-      "Cheaper offices"
+      "No commute and working to one's own schedule",
+      "Shorter working days and an easier workload",
+      "A clearer line between work and private life",
+      "More office space for those who still come in"
      ],
      "fr": [
-      "Pas de trajet et des horaires souples",
-      "Un meilleur salaire",
-      "Moins de réunions",
-      "Des bureaux moins chers"
+      "Aucun trajet et des horaires à sa convenance",
+      "Des journées plus courtes et un travail plus facile",
+      "Une frontière plus nette entre travail et vie privée",
+      "Plus de place au bureau pour ceux qui y viennent"
      ]
     },
     "correct": 0
@@ -1191,16 +1191,16 @@
     },
     "options": {
      "en": [
-      "Just because one can work at home does not mean the work gets easier",
-      "Because one works at home, the work becomes easy",
-      "One should not work at home",
-      "Work at home is always harder"
+      "Being able to work at home does not make the work easier",
+      "Being able to work at home naturally makes the work easier",
+      "One should work at home only if the work becomes easier",
+      "One can work at home, but only when the work is easy"
      ],
      "fr": [
-      "Ce n'est pas parce qu'on peut travailler chez soi que le travail devient plus facile",
-      "Comme on travaille chez soi, le travail devient facile",
-      "On ne devrait pas travailler chez soi",
-      "Le travail à domicile est toujours plus dur"
+      "Pouvoir travailler chez soi ne rend pas pour autant le travail plus facile",
+      "Comme on peut travailler chez soi, le travail devient forcément plus facile",
+      "On ne devrait travailler chez soi que si le travail devient plus facile",
+      "On peut travailler chez soi, mais seulement quand le travail est facile"
      ]
     },
     "correct": 0
@@ -1213,16 +1213,16 @@
     },
     "options": {
      "en": [
-      "They end up working longer because work and life blur",
-      "They cannot connect to the office",
-      "They earn less",
-      "They lose their jobs"
+      "They end up working longer as work and private life blur",
+      "They work fewer hours since nobody is watching them",
+      "They miss the office, where work and life stayed apart",
+      "They lose the freedom to work to their own schedule"
      ],
      "fr": [
-      "Ils finissent par travailler plus longtemps car travail et vie privée se confondent",
-      "Ils ne peuvent pas se connecter au bureau",
-      "Ils gagnent moins",
-      "Ils perdent leur emploi"
+      "Ils finissent par travailler plus longtemps, travail et vie privée se confondant",
+      "Ils travaillent moins d'heures, puisque personne ne les surveille",
+      "Le bureau leur manque, où travail et vie privée restaient séparés",
+      "Ils perdent la liberté de travailler selon leurs propres horaires"
      ]
     },
     "correct": 0
@@ -1230,21 +1230,21 @@
    {
     "type": "vocabulary",
     "question": {
-     "en": "What does 「境目」 mean?",
-     "fr": "Que signifie 「境目」 ?"
+     "en": "What does 「境目」 mean in 「仕事と生活の境目」?",
+     "fr": "Que signifie 「境目」 dans 「仕事と生活の境目」 ?"
     },
     "options": {
      "en": [
-      "Boundary",
-      "Schedule",
-      "Salary",
-      "Office"
+      "Boundary, dividing line",
+      "Balance",
+      "Order of priority",
+      "Schedule"
      ],
      "fr": [
       "Frontière, limite",
-      "Emploi du temps",
-      "Salaire",
-      "Bureau"
+      "Équilibre",
+      "Ordre de priorité",
+      "Emploi du temps"
      ]
     },
     "correct": 0
@@ -1258,15 +1258,15 @@
     "options": {
      "en": [
       "Over seventy percent want to keep working from home",
-      "Most people want to return to the office",
-      "Seventy percent of companies closed offices",
-      "Nobody answered"
+      "Most people want to return to the office full time",
+      "Seventy percent found their work easier at home",
+      "Over seventy percent of companies allow home working"
      ],
      "fr": [
       "Plus de soixante-dix pour cent veulent continuer à télétravailler",
-      "La plupart veulent retourner au bureau",
-      "Soixante-dix pour cent des entreprises ont fermé leurs bureaux",
-      "Personne n'a répondu"
+      "La plupart veulent retourner au bureau à plein temps",
+      "Soixante-dix pour cent trouvent leur travail plus facile chez eux",
+      "Plus de soixante-dix pour cent des entreprises autorisent le télétravail"
      ]
     },
     "correct": 0
@@ -1282,13 +1282,13 @@
       "That they cannot afford not to listen",
       "That they are unable to listen",
       "That they must not listen",
-      "That they listened by chance"
+      "That they listened only by chance"
      ],
      "fr": [
-      "Qu'ils ne peuvent pas se permettre de ne pas écouter",
-      "Qu'ils sont incapables d'écouter",
-      "Qu'ils ne doivent pas écouter",
-      "Qu'ils ont écouté par hasard"
+      "Qu'elle ne peut pas se permettre de ne pas écouter",
+      "Qu'elle est incapable d'écouter",
+      "Qu'elle ne doit pas écouter",
+      "Qu'elle n'a écouté que par hasard"
      ]
     },
     "correct": 0
@@ -1301,16 +1301,16 @@
     },
     "options": {
      "en": [
-      "The office is not big enough",
-      "Productivity rises",
-      "The company saves money",
-      "The survey is repeated"
+      "There is not enough space for them all",
+      "The trains are full and the commute takes longer",
+      "Work and private life become clearly separate",
+      "They all work shorter hours than at home"
      ],
      "fr": [
-      "Le bureau n'est pas assez grand",
-      "La productivité augmente",
-      "L'entreprise économise",
-      "L'enquête est refaite"
+      "L'espace ne suffit pas pour accueillir chacun",
+      "Les trains sont bondés et le trajet s'allonge",
+      "Travail et vie privée se séparent nettement",
+      "Tous travaillent moins longtemps qu'à la maison"
      ]
     },
     "correct": 0
@@ -1324,15 +1324,15 @@
     "options": {
      "en": [
       "There is no choice but to search",
-      "It is easy to search",
-      "Searching is forbidden",
-      "Searching is optional"
+      "It is worth searching if there is time",
+      "There is no need to search any further",
+      "The search has been put off for now"
      ],
      "fr": [
       "Il n'y a pas d'autre choix que de chercher",
-      "Il est facile de chercher",
-      "Chercher est interdit",
-      "Chercher est facultatif"
+      "Il vaut la peine de chercher si l'on a le temps",
+      "Il n'est plus nécessaire de chercher",
+      "La recherche est remise à plus tard"
      ]
     },
     "correct": 0
@@ -1346,15 +1346,15 @@
     "options": {
      "en": [
       "It introduces the other side of the matter",
-      "It gives a conclusion",
-      "It gives an example",
-      "It repeats the previous point"
+      "It sums up the argument so far",
+      "It gives an example of the previous point",
+      "It restates the previous point in other words"
      ],
      "fr": [
       "Il introduit l'autre facette de la question",
-      "Il donne une conclusion",
-      "Il donne un exemple",
-      "Il répète le point précédent"
+      "Il résume l'argument jusque-là",
+      "Il illustre le point précédent par un exemple",
+      "Il reformule le point précédent autrement"
      ]
     },
     "correct": 0
@@ -1362,21 +1362,21 @@
    {
     "type": "inference",
     "question": {
-     "en": "What is the writer's conclusion?",
-     "fr": "Quelle est la conclusion de l'auteur ?"
+     "en": "Why does the writer mention how big the office is?",
+     "fr": "Pourquoi l'auteur évoque-t-il la taille des bureaux ?"
     },
     "options": {
      "en": [
-      "Each company must find a working style suited to its own situation",
-      "Everyone should work from home",
-      "Everyone should return to the office",
-      "Surveys are unreliable"
+      "To show that bringing everyone back is no answer either",
+      "To argue that companies should rent larger offices",
+      "To explain why seventy percent prefer home working",
+      "To show that home working saves companies money"
      ],
      "fr": [
-      "Chaque entreprise doit trouver un mode de travail adapté à sa situation",
-      "Tout le monde devrait télétravailler",
-      "Tout le monde devrait retourner au bureau",
-      "Les enquêtes ne sont pas fiables"
+      "Pour montrer que faire revenir tout le monde n'est pas non plus une solution",
+      "Pour plaider en faveur de bureaux plus grands",
+      "Pour expliquer pourquoi soixante-dix pour cent préfèrent le télétravail",
+      "Pour montrer que le télétravail fait faire des économies aux entreprises"
      ]
     },
     "correct": 0
@@ -1392,13 +1392,13 @@
       "Balanced, weighing both sides",
       "Strongly against home working",
       "Strongly in favour of home working",
-      "Humorous"
+      "Light-hearted, mocking office life"
      ],
      "fr": [
       "Équilibré, pesant les deux côtés",
       "Nettement contre le télétravail",
       "Nettement pour le télétravail",
-      "Humoristique"
+      "Léger, moqueur envers la vie de bureau"
      ]
     },
     "correct": 0
@@ -2234,7 +2234,7 @@
       "More household rubbish",
       "Warmer weather",
       "Fewer natural enemies",
-      "More trees in cities"
+      "More trees in the cities"
      ],
      "fr": [
       "Davantage de déchets ménagers",
@@ -2276,15 +2276,15 @@
     "options": {
      "en": [
       "The colour of rubbish bags and the collection time",
-      "The faces of residents",
-      "The names of streets",
-      "The weather forecast"
+      "The faces of the people who put the rubbish out",
+      "The streets where the collection truck stops",
+      "The days when no rubbish is collected"
      ],
      "fr": [
       "La couleur des sacs poubelle et l'heure de la collecte",
-      "Les visages des habitants",
-      "Les noms des rues",
-      "La météo"
+      "Le visage des gens qui sortent les poubelles",
+      "Les rues où s'arrête le camion de collecte",
+      "Les jours où les déchets ne sont pas ramassés"
      ]
     },
     "correct": 0
@@ -2297,16 +2297,16 @@
     },
     "options": {
      "en": [
-      "It is no more than a very small part",
-      "It is the largest part",
-      "It is exactly half",
-      "It is more than expected"
+      "It is only a very small part of their life",
+      "It is the main part of their daily life",
+      "It is a part that grows every year",
+      "It is a part researchers cannot explain"
      ],
      "fr": [
-      "Ce n'est qu'une toute petite partie",
-      "C'est la plus grande partie",
-      "C'est exactement la moitié",
-      "C'est plus que prévu"
+      "Ce n'est qu'une infime partie de leur vie",
+      "C'est l'essentiel de leur vie quotidienne",
+      "C'est une partie qui grandit chaque année",
+      "C'est une partie que les chercheurs n'expliquent pas"
      ]
     },
     "correct": 0
@@ -2319,16 +2319,16 @@
     },
     "options": {
      "en": [
-      "It gives the leading example of a longer list",
-      "It excludes nuts from the list",
-      "It says nuts are the only food",
-      "It says nuts come last"
+      "It names the first example of a longer list",
+      "It names the only thing crows eat",
+      "It names something crows no longer eat",
+      "It names the food crows like least"
      ],
      "fr": [
-      "Il donne l'exemple principal d'une liste plus longue",
-      "Il exclut les fruits des arbres de la liste",
-      "Il dit que les fruits des arbres sont la seule nourriture",
-      "Il dit que les fruits des arbres viennent en dernier"
+      "Il cite le premier exemple d'une liste plus longue",
+      "Il cite la seule chose que mangent les corbeaux",
+      "Il cite ce que les corbeaux ne mangent plus",
+      "Il cite l'aliment que les corbeaux aiment le moins"
      ]
     },
     "correct": 0
@@ -2364,14 +2364,14 @@
     "options": {
      "en": [
       "Human rubbish",
-      "Insects only",
-      "Fish",
+      "Nuts from city trees",
+      "Small animals in parks",
       "Farm crops"
      ],
      "fr": [
       "Les déchets humains",
-      "Uniquement des insectes",
-      "Du poisson",
+      "Les fruits des arbres en ville",
+      "Les petits animaux des parcs",
       "Les récoltes agricoles"
      ]
     },
@@ -2385,16 +2385,16 @@
     },
     "options": {
      "en": [
-      "Removing the reasons crows approach rubbish",
-      "Chasing crows away",
-      "Catching crows",
-      "Feeding crows elsewhere"
+      "Removing the reasons crows come near rubbish",
+      "Chasing the crows away from the rubbish",
+      "Changing the colour of the rubbish bags",
+      "Changing the time the collection truck comes"
      ],
      "fr": [
-      "Supprimer les raisons pour lesquelles les corbeaux s'approchent des déchets",
-      "Chasser les corbeaux",
-      "Capturer les corbeaux",
-      "Nourrir les corbeaux ailleurs"
+      "Ôter aux corbeaux toute raison d'approcher des déchets",
+      "Chasser les corbeaux loin des sacs poubelle",
+      "Changer la couleur des sacs poubelle",
+      "Changer l'heure de passage du camion"
      ]
     },
     "correct": 0
@@ -2407,16 +2407,16 @@
     },
     "options": {
      "en": [
-      "To show that scavenging rubbish is not their normal way of life",
-      "To show crows are dangerous",
-      "To prove crows cannot be controlled",
-      "To recommend feeding them nuts"
+      "To show rubbish is not their natural diet",
+      "To show they are dangerous to small animals",
+      "To suggest feeding them nuts instead",
+      "To prove they are cleverer than people think"
      ],
      "fr": [
-      "Pour montrer que fouiller les déchets n'est pas leur mode de vie normal",
-      "Pour montrer que les corbeaux sont dangereux",
-      "Pour prouver qu'on ne peut pas les contrôler",
-      "Pour recommander de les nourrir de fruits"
+      "Pour montrer que les déchets ne sont pas leur nourriture naturelle",
+      "Pour montrer qu'ils sont dangereux pour les petits animaux",
+      "Pour conseiller de plutôt les nourrir de fruits",
+      "Pour prouver qu'ils sont plus malins qu'on ne le croit"
      ]
     },
     "correct": 0
@@ -2424,21 +2424,21 @@
    {
     "type": "inference",
     "question": {
-     "en": "What is the writer's view of the crow problem?",
-     "fr": "Quel est le point de vue de l'auteur sur le problème des corbeaux ?"
+     "en": "What view of the crow situation does the writer take?",
+     "fr": "Quel regard l'auteur porte-t-il sur la situation des corbeaux ?"
     },
     "options": {
      "en": [
-      "It is largely a human-made problem to be solved by changing human habits",
-      "It is the crows' fault",
-      "It cannot be solved",
-      "It is exaggerated by the media"
+      "People created it, and people's habits must change",
+      "Crows created it, so they must be driven away",
+      "No one created it, so it cannot really be fixed",
+      "Reports created it by exaggerating the numbers"
      ],
      "fr": [
-      "C'est surtout un problème créé par l'homme, à résoudre en changeant les habitudes humaines",
-      "C'est la faute des corbeaux",
-      "Il est insoluble",
-      "Il est exagéré par les médias"
+      "Les humains l'ont créée, à eux de changer leurs habitudes",
+      "Les corbeaux l'ont créée, il faut donc les chasser",
+      "Personne ne l'a créée, on ne peut donc rien y faire",
+      "Les signalements l'ont créée en exagérant les chiffres"
      ]
     },
     "correct": 0
@@ -3288,6 +3288,3030 @@
       "meaning": {
        "en": "it is that",
        "fr": "c'est que"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "n2-04",
+  "level": "N2",
+  "title": "中央図書館の休館",
+  "grammar": [
+   "〜に先立って",
+   "〜を問わず",
+   "〜のみ"
+  ],
+  "text": "中央図書館は、建物の工事のため、来年一月から六月まで休館いたします。工事に先立って、十二月の二週間は、一人が借りられる本を二十冊まで増やします。休館中も、本の予約はインターネットで受け付けます。予約した本の受け取りと返却は、駅前の市民センターに設ける小さな窓口でのみ行います。返却期限が休館中になる本は、七月の再開まで返さなくても構いません。また、工事の後には、年齢を問わず利用できる学習室が二階に新しくできる予定です。皆様にはご不便をおかけしますが、ご理解とご協力をお願いいたします。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "When will the library be closed?",
+     "fr": "Quand la bibliothèque sera-t-elle fermée ?"
+    },
+    "options": {
+     "en": [
+      "From January to June next year",
+      "From December to June next year",
+      "For two weeks in December",
+      "From June to July next year"
+     ],
+     "fr": [
+      "De janvier à juin l'an prochain",
+      "De décembre à juin l'an prochain",
+      "Pendant deux semaines en décembre",
+      "De juin à juillet l'an prochain"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「工事に先立って」 say about the two weeks in December?",
+     "fr": "Que dit 「工事に先立って」 des deux semaines de décembre ?"
+    },
+    "options": {
+     "en": [
+      "They come before the work begins",
+      "They come once the work is over",
+      "They fall in the middle of the work",
+      "They depend on how the work goes"
+     ],
+     "fr": [
+      "Elles ont lieu avant le début des travaux",
+      "Elles ont lieu une fois les travaux finis",
+      "Elles tombent en plein milieu des travaux",
+      "Elles dépendent de l'avancée des travaux"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What changes during those two weeks in December?",
+     "fr": "Qu'est-ce qui change pendant ces deux semaines de décembre ?"
+    },
+    "options": {
+     "en": [
+      "Each person may borrow up to twenty books",
+      "Each person may reserve up to twenty books online",
+      "A counter opens at the community centre",
+      "Books may be returned in front of the station"
+     ],
+     "fr": [
+      "Chacun peut emprunter jusqu'à vingt livres",
+      "Chacun peut réserver jusqu'à vingt livres en ligne",
+      "Un guichet ouvre au centre municipal",
+      "On peut rendre ses livres devant la gare"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What can be done at the counter near the station?",
+     "fr": "Que peut-on faire au guichet près de la gare ?"
+    },
+    "options": {
+     "en": [
+      "Collect reserved books and return books",
+      "Reserve books and borrow up to twenty",
+      "Return books and use a study room",
+      "Reserve books and collect them later"
+     ],
+     "fr": [
+      "Retirer les livres réservés et rendre des livres",
+      "Réserver des livres et en emprunter vingt",
+      "Rendre des livres et utiliser une salle d'étude",
+      "Réserver des livres et les retirer plus tard"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「のみ」 add in 「窓口でのみ行います」?",
+     "fr": "Qu'ajoute 「のみ」 dans 「窓口でのみ行います」 ?"
+    },
+    "options": {
+     "en": [
+      "That counter and nowhere else",
+      "That counter, among other places",
+      "That counter first, then elsewhere",
+      "That counter, when time allows"
+     ],
+     "fr": [
+      "Ce guichet et nulle part ailleurs",
+      "Ce guichet, entre autres endroits",
+      "D'abord ce guichet, puis ailleurs",
+      "Ce guichet, quand le temps le permet"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What is a 「窓口」 in this notice?",
+     "fr": "Qu'est-ce qu'un 「窓口」 dans cet avis ?"
+    },
+    "options": {
+     "en": [
+      "A service counter",
+      "A waiting room",
+      "A reading corner",
+      "A notice board"
+     ],
+     "fr": [
+      "Un guichet",
+      "Une salle d'attente",
+      "Un coin lecture",
+      "Un panneau d'affichage"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What happens to a book that falls due while the library is closed?",
+     "fr": "Qu'en est-il d'un livre à rendre pendant la fermeture ?"
+    },
+    "options": {
+     "en": [
+      "It may be kept until the reopening in July",
+      "It must be returned before January",
+      "It must go back to the counter by June",
+      "Its loan is extended by two weeks"
+     ],
+     "fr": [
+      "On peut le garder jusqu'à la réouverture en juillet",
+      "Il faut le rendre avant janvier",
+      "Il faut le rapporter au guichet avant juin",
+      "Son prêt est prolongé de deux semaines"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「構いません」 mean in 「返さなくても構いません」?",
+     "fr": "Que signifie 「構いません」 dans 「返さなくても構いません」 ?"
+    },
+    "options": {
+     "en": [
+      "That is fine",
+      "That is not allowed",
+      "There is a fee for that",
+      "That is required"
+     ],
+     "fr": [
+      "Cela ne pose pas de problème",
+      "Ce n'est pas autorisé",
+      "Cela entraîne des frais",
+      "C'est obligatoire"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「年齢を問わず利用できる」 say about the study room?",
+     "fr": "Que dit 「年齢を問わず利用できる」 de la salle d'étude ?"
+    },
+    "options": {
+     "en": [
+      "Anyone may use it, whatever their age",
+      "Only people over a set age may use it",
+      "Users must give their age to use it",
+      "Its opening hours differ by age"
+     ],
+     "fr": [
+      "Tout le monde peut l'utiliser, quel que soit l'âge",
+      "Seules les personnes d'un certain âge y ont accès",
+      "Il faut indiquer son âge pour l'utiliser",
+      "Ses horaires varient selon l'âge"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "Why does the library most likely raise the loan limit in December?",
+     "fr": "Pourquoi la bibliothèque relève-t-elle sans doute la limite de prêt en décembre ?"
+    },
+    "options": {
+     "en": [
+      "So readers can stock up before months of reduced service",
+      "Because December is when people read the most",
+      "Because books borrowed then need not be returned",
+      "To mark the opening of the new study room"
+     ],
+     "fr": [
+      "Pour que les lecteurs fassent des réserves avant des mois de service réduit",
+      "Parce que décembre est le mois où l'on lit le plus",
+      "Parce que les livres empruntés alors n'ont pas à être rendus",
+      "Pour fêter l'ouverture de la nouvelle salle d'étude"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What would a reader who wants a new book in March have to do?",
+     "fr": "Que devra faire un lecteur qui veut un nouveau livre en mars ?"
+    },
+    "options": {
+     "en": [
+      "Reserve it online, then collect it near the station",
+      "Wait until the library reopens in July",
+      "Ask for it in the new second-floor study room",
+      "Reserve it at the station counter and collect it there"
+     ],
+     "fr": [
+      "Le réserver en ligne, puis le retirer près de la gare",
+      "Attendre la réouverture de la bibliothèque en juillet",
+      "Le demander dans la nouvelle salle d'étude du premier étage",
+      "Le réserver au guichet de la gare et l'y retirer"
+     ]
+    },
+    "correct": 0
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "中央図書館は、建物の工事のため、来年一月から六月まで休館いたします。",
+    "translation": {
+     "en": "The Central Library will be closed from January to June next year for building work.",
+     "fr": "La bibliothèque centrale sera fermée de janvier à juin l'an prochain en raison de travaux sur le bâtiment."
+    },
+    "note": {
+     "en": "The humble verb 「いたします」 replaces 「します」, the polite register of an official notice; 「〜のため」 here gives the reason.",
+     "fr": "Le verbe humble 「いたします」 remplace 「します」, registre poli d'un avis officiel ; 「〜のため」 donne ici la cause."
+    },
+    "words": [
+     {
+      "surface": "中央図書館",
+      "meaning": {
+       "en": "Central Library",
+       "fr": "bibliothèque centrale"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "建物",
+      "meaning": {
+       "en": "building",
+       "fr": "bâtiment"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "工事",
+      "meaning": {
+       "en": "construction work",
+       "fr": "travaux"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "links the noun to ため",
+       "fr": "relie le nom à ため"
+      }
+     },
+     {
+      "surface": "ため",
+      "meaning": {
+       "en": "because of",
+       "fr": "en raison de"
+      }
+     },
+     {
+      "surface": "来年",
+      "meaning": {
+       "en": "next year",
+       "fr": "l'an prochain"
+      }
+     },
+     {
+      "surface": "一月",
+      "meaning": {
+       "en": "January",
+       "fr": "janvier"
+      }
+     },
+     {
+      "surface": "から",
+      "meaning": {
+       "en": "from",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "六月",
+      "meaning": {
+       "en": "June",
+       "fr": "juin"
+      }
+     },
+     {
+      "surface": "まで",
+      "meaning": {
+       "en": "until",
+       "fr": "jusqu'à"
+      }
+     },
+     {
+      "surface": "休館",
+      "meaning": {
+       "en": "closing (of the library)",
+       "fr": "fermeture (de la bibliothèque)"
+      }
+     },
+     {
+      "surface": "いたします",
+      "meaning": {
+       "en": "will do (humble)",
+       "fr": "ferons (humble)"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "工事に先立って、十二月の二週間は、一人が借りられる本を二十冊まで増やします。",
+    "translation": {
+     "en": "Ahead of the work, for two weeks in December, the number of books one person can borrow will be raised to twenty.",
+     "fr": "Avant les travaux, pendant deux semaines en décembre, le nombre de livres qu'une personne peut emprunter passera à vingt."
+    },
+    "note": {
+     "en": "The pattern 「〜に先立って」 means ahead of something formal that is about to begin; 「まで」 after 「二十冊」 sets the upper limit.",
+     "fr": "La structure 「〜に先立って」 signifie avant, en préalable à quelque chose d'officiel ; 「まで」 après 「二十冊」 fixe la limite haute."
+    },
+    "words": [
+     {
+      "surface": "工事",
+      "meaning": {
+       "en": "the work",
+       "fr": "les travaux"
+      }
+     },
+     {
+      "surface": "に先立って",
+      "meaning": {
+       "en": "ahead of",
+       "fr": "avant"
+      }
+     },
+     {
+      "surface": "十二月",
+      "meaning": {
+       "en": "December",
+       "fr": "décembre"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "二週間",
+      "meaning": {
+       "en": "two weeks",
+       "fr": "deux semaines"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker (time frame)",
+       "fr": "marque le thème (période)"
+      }
+     },
+     {
+      "surface": "一人",
+      "meaning": {
+       "en": "one person",
+       "fr": "une personne"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker (in a clause)",
+       "fr": "marque le sujet (dans une proposition)"
+      }
+     },
+     {
+      "surface": "借りられる",
+      "meaning": {
+       "en": "can borrow",
+       "fr": "peut emprunter"
+      }
+     },
+     {
+      "surface": "本",
+      "meaning": {
+       "en": "books",
+       "fr": "livres"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "二十冊",
+      "meaning": {
+       "en": "twenty books",
+       "fr": "vingt livres"
+      }
+     },
+     {
+      "surface": "まで",
+      "meaning": {
+       "en": "up to",
+       "fr": "jusqu'à"
+      }
+     },
+     {
+      "surface": "増やします",
+      "meaning": {
+       "en": "will increase",
+       "fr": "augmenterons"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "休館中も、本の予約はインターネットで受け付けます。",
+    "translation": {
+     "en": "Even during the closure, book reservations will be accepted online.",
+     "fr": "Même pendant la fermeture, les réservations de livres seront acceptées sur Internet."
+    },
+    "note": {
+     "en": "The suffix 「中」 in 「休館中」 means during, and 「も」 adds even; 「受け付けます」 means the library accepts requests.",
+     "fr": "Le suffixe 「中」 dans 「休館中」 signifie pendant, et 「も」 ajoute même ; 「受け付けます」 signifie que la bibliothèque accepte les demandes."
+    },
+    "words": [
+     {
+      "surface": "休館中",
+      "meaning": {
+       "en": "during the closure",
+       "fr": "pendant la fermeture"
+      }
+     },
+     {
+      "surface": "も",
+      "meaning": {
+       "en": "even",
+       "fr": "même"
+      }
+     },
+     {
+      "surface": "本",
+      "meaning": {
+       "en": "books",
+       "fr": "livres"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "予約",
+      "meaning": {
+       "en": "reservations",
+       "fr": "réservations"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "インターネット",
+      "meaning": {
+       "en": "the internet",
+       "fr": "Internet"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "by means of",
+       "fr": "au moyen de"
+      }
+     },
+     {
+      "surface": "受け付けます",
+      "meaning": {
+       "en": "will accept",
+       "fr": "acceptons"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "予約した本の受け取りと返却は、駅前の市民センターに設ける小さな窓口でのみ行います。",
+    "translation": {
+     "en": "Collecting reserved books and returning books will be handled only at a small counter set up in the community centre in front of the station.",
+     "fr": "Le retrait des livres réservés et les retours se feront uniquement à un petit guichet installé au centre municipal devant la gare."
+    },
+    "note": {
+     "en": "The pattern 「のみ」 is a written form of だけ: at that counter only; 「設ける」 means to set up.",
+     "fr": "La structure 「のみ」 est une forme écrite de だけ : à ce guichet uniquement ; 「設ける」 signifie installer."
+    },
+    "words": [
+     {
+      "surface": "予約した",
+      "meaning": {
+       "en": "reserved",
+       "fr": "réservés"
+      }
+     },
+     {
+      "surface": "本",
+      "meaning": {
+       "en": "books",
+       "fr": "livres"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "受け取り",
+      "meaning": {
+       "en": "collection",
+       "fr": "retrait"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "and",
+       "fr": "et"
+      }
+     },
+     {
+      "surface": "返却",
+      "meaning": {
+       "en": "returning",
+       "fr": "retour"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "駅前",
+      "meaning": {
+       "en": "in front of the station",
+       "fr": "devant la gare"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "市民センター",
+      "meaning": {
+       "en": "community centre",
+       "fr": "centre municipal"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks where it is set up",
+       "fr": "marque le lieu d'installation"
+      }
+     },
+     {
+      "surface": "設ける",
+      "meaning": {
+       "en": "will set up",
+       "fr": "installerons"
+      }
+     },
+     {
+      "surface": "小さな",
+      "meaning": {
+       "en": "small",
+       "fr": "petit"
+      }
+     },
+     {
+      "surface": "窓口",
+      "meaning": {
+       "en": "service counter",
+       "fr": "guichet"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "at (place of action)",
+       "fr": "à (lieu de l'action)"
+      }
+     },
+     {
+      "surface": "のみ",
+      "meaning": {
+       "en": "only",
+       "fr": "uniquement"
+      }
+     },
+     {
+      "surface": "行います",
+      "meaning": {
+       "en": "will handle",
+       "fr": "effectuerons"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "返却期限が休館中になる本は、七月の再開まで返さなくても構いません。",
+    "translation": {
+     "en": "Books whose due date falls during the closure need not be returned until the library reopens in July.",
+     "fr": "Les livres dont la date de retour tombe pendant la fermeture peuvent être gardés jusqu'à la réouverture en juillet."
+    },
+    "note": {
+     "en": "The pattern 「〜なくても構いません」 means it is all right not to do it; 「返却期限」 is the due date.",
+     "fr": "La structure 「〜なくても構いません」 signifie qu'on peut ne pas le faire ; 「返却期限」 est la date de retour."
+    },
+    "words": [
+     {
+      "surface": "返却期限",
+      "meaning": {
+       "en": "due date",
+       "fr": "date de retour"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker (in a clause)",
+       "fr": "marque le sujet (dans une proposition)"
+      }
+     },
+     {
+      "surface": "休館中",
+      "meaning": {
+       "en": "during the closure",
+       "fr": "pendant la fermeture"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks the result of なる",
+       "fr": "marque le résultat de なる"
+      }
+     },
+     {
+      "surface": "なる",
+      "meaning": {
+       "en": "falls",
+       "fr": "tombe"
+      }
+     },
+     {
+      "surface": "本",
+      "meaning": {
+       "en": "books",
+       "fr": "livres"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "七月",
+      "meaning": {
+       "en": "July",
+       "fr": "juillet"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "再開",
+      "meaning": {
+       "en": "reopening",
+       "fr": "réouverture"
+      }
+     },
+     {
+      "surface": "まで",
+      "meaning": {
+       "en": "until",
+       "fr": "jusqu'à"
+      }
+     },
+     {
+      "surface": "返さなくても",
+      "meaning": {
+       "en": "even without returning",
+       "fr": "même sans les rendre"
+      }
+     },
+     {
+      "surface": "構いません",
+      "meaning": {
+       "en": "it is fine",
+       "fr": "cela ne pose pas de problème"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "また、工事の後には、年齢を問わず利用できる学習室が二階に新しくできる予定です。",
+    "translation": {
+     "en": "Also, after the work, a new study room open to people of any age is planned on the second floor.",
+     "fr": "Par ailleurs, après les travaux, une nouvelle salle d'étude ouverte à tous les âges doit voir le jour au premier étage."
+    },
+    "note": {
+     "en": "The pattern 「〜を問わず」 means regardless of: whatever the user's age; 「予定です」 marks a plan.",
+     "fr": "La structure 「〜を問わず」 signifie sans distinction de : quel que soit l'âge ; 「予定です」 marque un projet."
+    },
+    "words": [
+     {
+      "surface": "また",
+      "meaning": {
+       "en": "also",
+       "fr": "par ailleurs"
+      }
+     },
+     {
+      "surface": "工事",
+      "meaning": {
+       "en": "the work",
+       "fr": "les travaux"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "後",
+      "meaning": {
+       "en": "after",
+       "fr": "après"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "at (time)",
+       "fr": "à (temps)"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "年齢",
+      "meaning": {
+       "en": "age",
+       "fr": "âge"
+      }
+     },
+     {
+      "surface": "を問わず",
+      "meaning": {
+       "en": "regardless of",
+       "fr": "sans distinction de"
+      }
+     },
+     {
+      "surface": "利用できる",
+      "meaning": {
+       "en": "can be used",
+       "fr": "utilisable"
+      }
+     },
+     {
+      "surface": "学習室",
+      "meaning": {
+       "en": "study room",
+       "fr": "salle d'étude"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "二階",
+      "meaning": {
+       "en": "second floor",
+       "fr": "premier étage"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks the location",
+       "fr": "marque le lieu"
+      }
+     },
+     {
+      "surface": "新しく",
+      "meaning": {
+       "en": "newly",
+       "fr": "nouvellement"
+      }
+     },
+     {
+      "surface": "できる",
+      "meaning": {
+       "en": "will be built",
+       "fr": "sera créée"
+      }
+     },
+     {
+      "surface": "予定です",
+      "meaning": {
+       "en": "is planned",
+       "fr": "est prévu"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "皆様にはご不便をおかけしますが、ご理解とご協力をお願いいたします。",
+    "translation": {
+     "en": "This will cause you all some inconvenience, and we ask for your understanding and cooperation.",
+     "fr": "Ces travaux vous causeront des désagréments ; nous vous demandons votre compréhension et votre coopération."
+    },
+    "note": {
+     "en": "The humble pattern 「お〜します」 in 「おかけします」 and 「お願いいたします」 lowers the library before its readers.",
+     "fr": "La forme humble 「お〜します」 dans 「おかけします」 et 「お願いいたします」 place la bibliothèque en retrait face à ses lecteurs."
+    },
+    "words": [
+     {
+      "surface": "皆様",
+      "meaning": {
+       "en": "everyone (honorific)",
+       "fr": "vous tous (honorifique)"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "to",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "ご不便",
+      "meaning": {
+       "en": "inconvenience",
+       "fr": "désagrément"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "おかけします",
+      "meaning": {
+       "en": "will cause (humble)",
+       "fr": "causerons (humble)"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "but",
+       "fr": "mais"
+      }
+     },
+     {
+      "surface": "ご理解",
+      "meaning": {
+       "en": "understanding",
+       "fr": "compréhension"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "and",
+       "fr": "et"
+      }
+     },
+     {
+      "surface": "ご協力",
+      "meaning": {
+       "en": "cooperation",
+       "fr": "coopération"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "お願いいたします",
+      "meaning": {
+       "en": "we ask for (humble)",
+       "fr": "nous demandons (humble)"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "n2-05",
+  "level": "N2",
+  "title": "先生への手紙",
+  "grammar": [
+   "〜をきっかけに",
+   "〜てならない",
+   "〜てこそ"
+  ],
+  "text": "山田先生、ごぶさたしております。高校を卒業してから、もう十年になります。実は、この春から私も中学校で英語を教えております。先生の授業をきっかけに英語が好きになった私にとって、教師になることは長い間の夢でした。ところが、実際に教えてみると、毎日が失敗の連続です。生徒が話を聞いてくれない日には、自分はこの仕事に向いていないのではないかと思えてならないのです。そんなとき思い出すのは、間違えてこそ人は学ぶのだという先生の言葉です。今年の夏に町へ戻りましたら、ぜひお目にかかりたいと思っております。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "When did the writer finish high school?",
+     "fr": "Quand l'auteur de la lettre a-t-il terminé le lycée ?"
+    },
+    "options": {
+     "en": [
+      "Ten years ago",
+      "Last spring",
+      "Three years ago",
+      "Last summer"
+     ],
+     "fr": [
+      "Il y a dix ans",
+      "Au printemps dernier",
+      "Il y a trois ans",
+      "L'été dernier"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What has the writer been doing since this spring?",
+     "fr": "Que fait l'auteur de la lettre depuis ce printemps ?"
+    },
+    "options": {
+     "en": [
+      "Teaching English at a junior high school",
+      "Teaching English at the old high school",
+      "Studying English to become a teacher",
+      "Teaching at a junior high, but not English"
+     ],
+     "fr": [
+      "Il enseigne l'anglais dans un collège",
+      "Il enseigne l'anglais dans son ancien lycée",
+      "Il étudie l'anglais pour devenir professeur",
+      "Il enseigne dans un collège, mais pas l'anglais"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「先生の授業をきっかけに英語が好きになった」 tell us?",
+     "fr": "Que nous apprend 「先生の授業をきっかけに英語が好きになった」 ?"
+    },
+    "options": {
+     "en": [
+      "The classes are what made the writer like English",
+      "The writer liked English before those classes",
+      "The writer chose the classes out of love for English",
+      "The writer liked the teacher more than English"
+     ],
+     "fr": [
+      "Ce sont ces cours qui lui ont fait aimer l'anglais",
+      "Il aimait déjà l'anglais avant ces cours",
+      "Il a choisi ces cours par amour de l'anglais",
+      "Il aimait le professeur plus que l'anglais"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「ごぶさたしております」 say?",
+     "fr": "Que dit 「ごぶさたしております」 ?"
+    },
+    "options": {
+     "en": [
+      "I have been out of touch for a long time",
+      "I am sorry to write to you so suddenly",
+      "Thank you for all you did for me",
+      "I hope this letter finds you well"
+     ],
+     "fr": [
+      "Je ne vous ai pas donné de nouvelles depuis longtemps",
+      "Pardonnez-moi de vous écrire si soudainement",
+      "Merci pour tout ce que vous avez fait pour moi",
+      "J'espère que cette lettre vous trouvera en forme"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「連続」 mean in 「毎日が失敗の連続です」?",
+     "fr": "Que signifie 「連続」 dans 「毎日が失敗の連続です」 ?"
+    },
+    "options": {
+     "en": [
+      "An unbroken series",
+      "A single cause",
+      "A sudden end",
+      "A useful lesson"
+     ],
+     "fr": [
+      "Une suite ininterrompue",
+      "Une cause unique",
+      "Une fin soudaine",
+      "Une leçon utile"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "When does the writer feel unsuited to the job?",
+     "fr": "Quand l'auteur doute-t-il d'être fait pour ce métier ?"
+    },
+    "options": {
+     "en": [
+      "On days when the pupils do not listen",
+      "On days when the writer gets the English wrong",
+      "On days when the writer misses high school",
+      "On days when the classes run late"
+     ],
+     "fr": [
+      "Les jours où les élèves n'écoutent pas",
+      "Les jours où il se trompe en anglais",
+      "Les jours où le lycée lui manque",
+      "Les jours où les cours finissent tard"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「思えてならないのです」 convey?",
+     "fr": "Que traduit 「思えてならないのです」 ?"
+    },
+    "options": {
+     "en": [
+      "A feeling too strong to push away",
+      "A thought the writer is unsure of",
+      "A thought the writer must not have",
+      "A feeling that came once and passed"
+     ],
+     "fr": [
+      "Un sentiment trop fort pour être chassé",
+      "Une pensée dont il n'est pas sûr",
+      "Une pensée qu'il ne doit pas avoir",
+      "Un sentiment venu une fois, puis parti"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「間違えてこそ人は学ぶ」 mean?",
+     "fr": "Que signifie 「間違えてこそ人は学ぶ」 ?"
+    },
+    "options": {
+     "en": [
+      "It is by making mistakes that people learn",
+      "People learn even though they make mistakes",
+      "People who make mistakes cannot learn",
+      "People learn so as not to make mistakes"
+     ],
+     "fr": [
+      "C'est en se trompant qu'on apprend",
+      "On apprend même si l'on se trompe",
+      "Qui se trompe ne peut pas apprendre",
+      "On apprend pour ne plus se tromper"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What does the writer hope to do this summer?",
+     "fr": "Qu'espère faire l'auteur cet été ?"
+    },
+    "options": {
+     "en": [
+      "Return to the town and meet the teacher",
+      "Invite the teacher to the writer's school",
+      "Write to the teacher again after the summer",
+      "Return to teach at the old high school"
+     ],
+     "fr": [
+      "Revenir dans sa ville et voir le professeur",
+      "Inviter le professeur dans son école",
+      "Lui écrire de nouveau après l'été",
+      "Revenir enseigner dans son ancien lycée"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "Why does the writer bring up the teacher's words?",
+     "fr": "Pourquoi l'auteur évoque-t-il les paroles du professeur ?"
+    },
+    "options": {
+     "en": [
+      "They help the writer keep going despite failures",
+      "They show the pupils are to blame for not listening",
+      "They explain why the writer first liked English",
+      "They suggest the writer should change jobs"
+     ],
+     "fr": [
+      "Elles l'aident à tenir bon malgré ses échecs",
+      "Elles montrent que la faute revient aux élèves",
+      "Elles expliquent pourquoi il a aimé l'anglais",
+      "Elles lui suggèrent de changer de métier"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What does the writer seem to feel towards the teacher?",
+     "fr": "Que semble ressentir l'auteur envers son professeur ?"
+    },
+    "options": {
+     "en": [
+      "Gratitude, and a wish to meet again",
+      "Disappointment with the old classes",
+      "Guilt at becoming a teacher so late",
+      "Envy of the teacher's easy career"
+     ],
+     "fr": [
+      "De la gratitude, et l'envie de le revoir",
+      "De la déception envers ses anciens cours",
+      "De la culpabilité d'enseigner si tard",
+      "De l'envie devant sa carrière facile"
+     ]
+    },
+    "correct": 0
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "山田先生、ごぶさたしております。",
+    "translation": {
+     "en": "Yamada-sensei, I have been out of touch for a long time.",
+     "fr": "Yamada-sensei, je ne vous ai pas donné de nouvelles depuis bien longtemps."
+    },
+    "note": {
+     "en": "The set phrase 「ごぶさたしております」 apologises for a long silence; 「おります」 is the humble form of いる.",
+     "fr": "La formule 「ごぶさたしております」 s'excuse d'un long silence ; 「おります」 est la forme humble de いる."
+    },
+    "words": [
+     {
+      "surface": "山田",
+      "meaning": {
+       "en": "Yamada (surname)",
+       "fr": "Yamada (nom)"
+      }
+     },
+     {
+      "surface": "先生",
+      "meaning": {
+       "en": "teacher (as a title)",
+       "fr": "professeur (titre)"
+      }
+     },
+     {
+      "surface": "ごぶさた",
+      "meaning": {
+       "en": "long silence",
+       "fr": "long silence"
+      }
+     },
+     {
+      "surface": "しております",
+      "meaning": {
+       "en": "have been keeping (humble)",
+       "fr": "ai gardé (humble)"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "高校を卒業してから、もう十年になります。",
+    "translation": {
+     "en": "It has already been ten years since I finished high school.",
+     "fr": "Cela fait déjà dix ans que j'ai terminé le lycée."
+    },
+    "note": {
+     "en": "The pattern 「〜てから」 counts time from an event; 「もう十年になります」 means it is already ten years.",
+     "fr": "La structure 「〜てから」 compte le temps depuis un événement ; 「もう十年になります」 signifie que cela fait déjà dix ans."
+    },
+    "words": [
+     {
+      "surface": "高校",
+      "meaning": {
+       "en": "high school",
+       "fr": "lycée"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks what is completed",
+       "fr": "marque ce que l'on termine"
+      }
+     },
+     {
+      "surface": "卒業してから",
+      "meaning": {
+       "en": "since finishing",
+       "fr": "depuis la fin de"
+      }
+     },
+     {
+      "surface": "もう",
+      "meaning": {
+       "en": "already",
+       "fr": "déjà"
+      }
+     },
+     {
+      "surface": "十年",
+      "meaning": {
+       "en": "ten years",
+       "fr": "dix ans"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks the result",
+       "fr": "marque le résultat"
+      }
+     },
+     {
+      "surface": "なります",
+      "meaning": {
+       "en": "it comes to",
+       "fr": "cela fait"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "実は、この春から私も中学校で英語を教えております。",
+    "translation": {
+     "en": "In fact, since this spring I too have been teaching English at a junior high school.",
+     "fr": "En fait, depuis ce printemps, j'enseigne moi aussi l'anglais dans un collège."
+    },
+    "note": {
+     "en": "The word 「実は」 introduces news the reader does not know yet; 「教えております」 is the humble form of 教えています.",
+     "fr": "Le mot 「実は」 introduit une nouvelle que le lecteur ignore ; 「教えております」 est la forme humble de 教えています."
+    },
+    "words": [
+     {
+      "surface": "実は",
+      "meaning": {
+       "en": "in fact",
+       "fr": "en fait"
+      }
+     },
+     {
+      "surface": "この",
+      "meaning": {
+       "en": "this",
+       "fr": "ce"
+      }
+     },
+     {
+      "surface": "春",
+      "meaning": {
+       "en": "spring",
+       "fr": "printemps"
+      }
+     },
+     {
+      "surface": "から",
+      "meaning": {
+       "en": "since",
+       "fr": "depuis"
+      }
+     },
+     {
+      "surface": "私",
+      "meaning": {
+       "en": "I",
+       "fr": "je"
+      }
+     },
+     {
+      "surface": "も",
+      "meaning": {
+       "en": "too",
+       "fr": "moi aussi"
+      }
+     },
+     {
+      "surface": "中学校",
+      "meaning": {
+       "en": "junior high school",
+       "fr": "collège"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "at (place of action)",
+       "fr": "à (lieu de l'action)"
+      }
+     },
+     {
+      "surface": "英語",
+      "meaning": {
+       "en": "English",
+       "fr": "anglais"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "教えております",
+      "meaning": {
+       "en": "have been teaching (humble)",
+       "fr": "enseigne (humble)"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "先生の授業をきっかけに英語が好きになった私にとって、教師になることは長い間の夢でした。",
+    "translation": {
+     "en": "For me, who came to love English through your classes, becoming a teacher had long been a dream.",
+     "fr": "Pour moi, qui ai pris goût à l'anglais grâce à vos cours, devenir professeur était un rêve de longue date."
+    },
+    "note": {
+     "en": "The pattern 「〜をきっかけに」 names what set something off, here your classes; 「〜にとって」 means for, from someone's point of view.",
+     "fr": "La structure 「〜をきっかけに」 désigne ce qui a tout déclenché, ici vos cours ; 「〜にとって」 signifie pour, du point de vue de quelqu'un."
+    },
+    "words": [
+     {
+      "surface": "先生",
+      "meaning": {
+       "en": "you (the teacher)",
+       "fr": "vous (le professeur)"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "授業",
+      "meaning": {
+       "en": "classes",
+       "fr": "cours"
+      }
+     },
+     {
+      "surface": "をきっかけに",
+      "meaning": {
+       "en": "as what set it off",
+       "fr": "à la suite de"
+      }
+     },
+     {
+      "surface": "英語",
+      "meaning": {
+       "en": "English",
+       "fr": "anglais"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks what is liked",
+       "fr": "marque ce qu'on aime"
+      }
+     },
+     {
+      "surface": "好きになった",
+      "meaning": {
+       "en": "came to love",
+       "fr": "a pris goût à"
+      }
+     },
+     {
+      "surface": "私",
+      "meaning": {
+       "en": "me",
+       "fr": "moi"
+      }
+     },
+     {
+      "surface": "にとって",
+      "meaning": {
+       "en": "for",
+       "fr": "pour"
+      }
+     },
+     {
+      "surface": "教師",
+      "meaning": {
+       "en": "teacher",
+       "fr": "professeur"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks the result",
+       "fr": "marque le résultat"
+      }
+     },
+     {
+      "surface": "なる",
+      "meaning": {
+       "en": "to become",
+       "fr": "devenir"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "the act of",
+       "fr": "le fait de"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "長い間",
+      "meaning": {
+       "en": "a long time",
+       "fr": "longtemps"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "夢",
+      "meaning": {
+       "en": "dream",
+       "fr": "rêve"
+      }
+     },
+     {
+      "surface": "でした",
+      "meaning": {
+       "en": "was",
+       "fr": "était"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "ところが、実際に教えてみると、毎日が失敗の連続です。",
+    "translation": {
+     "en": "Yet now that I actually teach, every day is one failure after another.",
+     "fr": "Pourtant, maintenant que j'enseigne vraiment, chaque jour est une suite d'échecs."
+    },
+    "note": {
+     "en": "The conjunction 「ところが」 marks an unexpected turn; 「〜てみると」 means on actually trying it.",
+     "fr": "La conjonction 「ところが」 marque un retournement inattendu ; 「〜てみると」 signifie en essayant réellement."
+    },
+    "words": [
+     {
+      "surface": "ところが",
+      "meaning": {
+       "en": "yet",
+       "fr": "pourtant"
+      }
+     },
+     {
+      "surface": "実際に",
+      "meaning": {
+       "en": "actually",
+       "fr": "réellement"
+      }
+     },
+     {
+      "surface": "教えてみると",
+      "meaning": {
+       "en": "on trying to teach",
+       "fr": "en essayant d'enseigner"
+      }
+     },
+     {
+      "surface": "毎日",
+      "meaning": {
+       "en": "every day",
+       "fr": "chaque jour"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "失敗",
+      "meaning": {
+       "en": "failure",
+       "fr": "échec"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "連続",
+      "meaning": {
+       "en": "unbroken series",
+       "fr": "suite"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "is",
+       "fr": "est"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "生徒が話を聞いてくれない日には、自分はこの仕事に向いていないのではないかと思えてならないのです。",
+    "translation": {
+     "en": "On days when the pupils won't listen to me, I can't help feeling that I may not be suited to this work.",
+     "fr": "Les jours où les élèves ne m'écoutent pas, je ne peux m'empêcher de penser que ce métier n'est peut-être pas pour moi."
+    },
+    "note": {
+     "en": "The pattern 「〜てならない」 on 「思える」 says the thought keeps coming back; 「〜のではないか」 voices a fear.",
+     "fr": "La structure 「〜てならない」 sur 「思える」 dit que la pensée revient sans cesse ; 「〜のではないか」 exprime une crainte."
+    },
+    "words": [
+     {
+      "surface": "生徒",
+      "meaning": {
+       "en": "pupils",
+       "fr": "élèves"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker (in a clause)",
+       "fr": "marque le sujet (dans une proposition)"
+      }
+     },
+     {
+      "surface": "話",
+      "meaning": {
+       "en": "what I say",
+       "fr": "ce que je dis"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "聞いてくれない",
+      "meaning": {
+       "en": "won't listen (to me)",
+       "fr": "ne m'écoutent pas"
+      }
+     },
+     {
+      "surface": "日",
+      "meaning": {
+       "en": "days",
+       "fr": "jours"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks the time",
+       "fr": "marque le moment"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "自分",
+      "meaning": {
+       "en": "I, myself",
+       "fr": "moi-même"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "この",
+      "meaning": {
+       "en": "this",
+       "fr": "ce"
+      }
+     },
+     {
+      "surface": "仕事",
+      "meaning": {
+       "en": "work",
+       "fr": "métier"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks what one suits",
+       "fr": "marque ce à quoi on convient"
+      }
+     },
+     {
+      "surface": "向いていない",
+      "meaning": {
+       "en": "not suited",
+       "fr": "ne pas convenir"
+      }
+     },
+     {
+      "surface": "のではないか",
+      "meaning": {
+       "en": "perhaps, I fear",
+       "fr": "peut-être, je le crains"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "marks the content",
+       "fr": "marque le contenu"
+      }
+     },
+     {
+      "surface": "思えてならない",
+      "meaning": {
+       "en": "cannot help feeling",
+       "fr": "ne pas pouvoir s'empêcher de penser"
+      }
+     },
+     {
+      "surface": "のです",
+      "meaning": {
+       "en": "it is that",
+       "fr": "c'est que"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "そんなとき思い出すのは、間違えてこそ人は学ぶのだという先生の言葉です。",
+    "translation": {
+     "en": "At such times, what I remember are your words: it is by making mistakes that people learn.",
+     "fr": "Dans ces moments-là, je me rappelle vos paroles : c'est en se trompant qu'on apprend."
+    },
+    "note": {
+     "en": "The pattern 「〜てこそ」 stresses that the result comes only that way: only through mistakes do people learn.",
+     "fr": "La structure 「〜てこそ」 souligne que le résultat ne vient que de cette façon : c'est par les erreurs qu'on apprend."
+    },
+    "words": [
+     {
+      "surface": "そんな",
+      "meaning": {
+       "en": "such",
+       "fr": "de tels"
+      }
+     },
+     {
+      "surface": "とき",
+      "meaning": {
+       "en": "times",
+       "fr": "moments"
+      }
+     },
+     {
+      "surface": "思い出す",
+      "meaning": {
+       "en": "remember",
+       "fr": "me rappelle"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "what (nominaliser)",
+       "fr": "ce que (nominalisateur)"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "間違えてこそ",
+      "meaning": {
+       "en": "precisely by making mistakes",
+       "fr": "justement en se trompant"
+      }
+     },
+     {
+      "surface": "人",
+      "meaning": {
+       "en": "people",
+       "fr": "on"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "学ぶ",
+      "meaning": {
+       "en": "learn",
+       "fr": "apprend"
+      }
+     },
+     {
+      "surface": "のだ",
+      "meaning": {
+       "en": "it is that",
+       "fr": "c'est que"
+      }
+     },
+     {
+      "surface": "という",
+      "meaning": {
+       "en": "saying that",
+       "fr": "selon lesquelles"
+      }
+     },
+     {
+      "surface": "先生",
+      "meaning": {
+       "en": "you (the teacher)",
+       "fr": "vous (le professeur)"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "言葉",
+      "meaning": {
+       "en": "words",
+       "fr": "paroles"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "is",
+       "fr": "est"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "今年の夏に町へ戻りましたら、ぜひお目にかかりたいと思っております。",
+    "translation": {
+     "en": "When I go back to the town this summer, I would very much like to see you.",
+     "fr": "Quand je reviendrai dans ma ville cet été, j'aimerais beaucoup vous voir."
+    },
+    "note": {
+     "en": "The humble expression 「お目にかかる」 means to meet someone one looks up to; 「〜ましたら」 is the polite form of たら.",
+     "fr": "L'expression humble 「お目にかかる」 signifie rencontrer une personne qu'on respecte ; 「〜ましたら」 est la forme polie de たら."
+    },
+    "words": [
+     {
+      "surface": "今年",
+      "meaning": {
+       "en": "this year",
+       "fr": "cette année"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "夏",
+      "meaning": {
+       "en": "summer",
+       "fr": "été"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "in (time)",
+       "fr": "en (temps)"
+      }
+     },
+     {
+      "surface": "町",
+      "meaning": {
+       "en": "town",
+       "fr": "ville"
+      }
+     },
+     {
+      "surface": "へ",
+      "meaning": {
+       "en": "to (direction)",
+       "fr": "vers"
+      }
+     },
+     {
+      "surface": "戻りましたら",
+      "meaning": {
+       "en": "when I return",
+       "fr": "quand je reviendrai"
+      }
+     },
+     {
+      "surface": "ぜひ",
+      "meaning": {
+       "en": "by all means",
+       "fr": "absolument"
+      }
+     },
+     {
+      "surface": "お目にかかりたい",
+      "meaning": {
+       "en": "would like to meet (humble)",
+       "fr": "voudrais rencontrer (humble)"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "marks the content",
+       "fr": "marque le contenu"
+      }
+     },
+     {
+      "surface": "思っております",
+      "meaning": {
+       "en": "I think (humble)",
+       "fr": "je pense (humble)"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "n2-06",
+  "level": "N2",
+  "title": "祖父の時計",
+  "grammar": [
+   "〜末に",
+   "〜かのようだ",
+   "〜ずにはいられない"
+  ],
+  "text": "祖父が亡くなって一年が過ぎたころ、引き出しの奥から古い腕時計が出てきた。針は止まったままで、ガラスには細かい傷がついている。直すかどうか迷った末に、私は駅の裏にある小さな時計店を訪ねた。店の主人は時計を手に取ると、しばらく黙って見ていた。そして、「これは長い間大切に使われてきた時計ですね」と静かに言った。修理には一か月かかったが、戻ってきた時計は、まるで新品であるかのように正確に動いていた。腕にはめてみると、この時計を祖父に見せたいと思わずにはいられなかった。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "When did the writer find the watch?",
+     "fr": "Quand l'auteur a-t-il trouvé la montre ?"
+    },
+    "options": {
+     "en": [
+      "About a year after the grandfather died",
+      "Shortly before the grandfather died",
+      "A month after the grandfather died",
+      "On the day the grandfather died"
+     ],
+     "fr": [
+      "Environ un an après la mort du grand-père",
+      "Peu avant la mort du grand-père",
+      "Un mois après la mort du grand-père",
+      "Le jour même de la mort du grand-père"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What state was the watch in when it was found?",
+     "fr": "Dans quel état était la montre quand il l'a trouvée ?"
+    },
+    "options": {
+     "en": [
+      "Stopped, with fine scratches on the glass",
+      "Running, but with a cracked glass",
+      "Stopped, with both hands missing",
+      "Running slow, with a broken strap"
+     ],
+     "fr": [
+      "Arrêtée, le verre couvert de fines rayures",
+      "En marche, mais le verre fêlé",
+      "Arrêtée, et sans ses aiguilles",
+      "En retard, et le bracelet cassé"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「迷った末に」 say about the visit to the shop?",
+     "fr": "Que dit 「迷った末に」 de la visite chez l'horloger ?"
+    },
+    "options": {
+     "en": [
+      "It came after a long hesitation",
+      "It came without any hesitation",
+      "It came before any hesitation",
+      "It came in the middle of a hesitation"
+     ],
+     "fr": [
+      "Elle a suivi une longue hésitation",
+      "Elle s'est faite sans hésitation",
+      "Elle a précédé toute hésitation",
+      "Elle a eu lieu en pleine hésitation"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Where was the watch shop?",
+     "fr": "Où se trouvait l'horlogerie ?"
+    },
+    "options": {
+     "en": [
+      "Behind the station",
+      "In front of the station",
+      "Next to the writer's home",
+      "Near the grandfather's house"
+     ],
+     "fr": [
+      "Derrière la gare",
+      "Devant la gare",
+      "À côté de chez l'auteur",
+      "Près de la maison du grand-père"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「黙って」 mean in 「しばらく黙って見ていた」?",
+     "fr": "Que signifie 「黙って」 dans 「しばらく黙って見ていた」 ?"
+    },
+    "options": {
+     "en": [
+      "Without saying a word",
+      "With a puzzled frown",
+      "With great care",
+      "With a smile"
+     ],
+     "fr": [
+      "Sans dire un mot",
+      "Les sourcils froncés",
+      "Avec un grand soin",
+      "Avec un sourire"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What did the owner say about the watch?",
+     "fr": "Qu'a dit l'horloger de la montre ?"
+    },
+    "options": {
+     "en": [
+      "That someone had looked after it for years",
+      "That it was too old to be repaired",
+      "That it was worth a great deal of money",
+      "That it had hardly ever been worn"
+     ],
+     "fr": [
+      "Que quelqu'un en avait pris soin pendant des années",
+      "Qu'elle était trop vieille pour être réparée",
+      "Qu'elle valait beaucoup d'argent",
+      "Qu'elle n'avait presque jamais été portée"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「新品であるかのように」 say about the repaired watch?",
+     "fr": "Que dit 「新品であるかのように」 de la montre réparée ?"
+    },
+    "options": {
+     "en": [
+      "It ran as if it were new, which it was not",
+      "It had been made into a new watch",
+      "It ran better than a new watch would",
+      "It ran less well than a new watch would"
+     ],
+     "fr": [
+      "Elle marchait comme si elle était neuve, ce qu'elle n'était pas",
+      "Elle était devenue une montre neuve",
+      "Elle marchait mieux qu'une montre neuve",
+      "Elle marchait moins bien qu'une montre neuve"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「正確に」 mean in 「正確に動いていた」?",
+     "fr": "Que signifie 「正確に」 dans 「正確に動いていた」 ?"
+    },
+    "options": {
+     "en": [
+      "Accurately, keeping good time",
+      "Quietly, without a sound",
+      "Slowly, losing a little time",
+      "Brightly, shining like new"
+     ],
+     "fr": [
+      "Avec précision, à l'heure exacte",
+      "Sans bruit, en silence",
+      "Lentement, en prenant du retard",
+      "En brillant comme une neuve"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「思わずにはいられなかった」 express?",
+     "fr": "Qu'exprime 「思わずにはいられなかった」 ?"
+    },
+    "options": {
+     "en": [
+      "The writer could not help thinking it",
+      "The writer tried hard not to think it",
+      "The writer thought it only for a moment",
+      "The writer was told not to think it"
+     ],
+     "fr": [
+      "L'auteur n'a pas pu s'empêcher de le penser",
+      "L'auteur s'est efforcé de ne pas le penser",
+      "L'auteur ne l'a pensé qu'un instant",
+      "On a dit à l'auteur de ne pas le penser"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "Why does the writer wish the grandfather could see it?",
+     "fr": "Pourquoi l'auteur voudrait-il que son grand-père la voie ?"
+    },
+    "options": {
+     "en": [
+      "He would be glad to see his old timepiece running again",
+      "He had asked for it to be repaired before he died",
+      "He had bought it from that same shop long ago",
+      "He had told the writer to sell it one day"
+     ],
+     "fr": [
+      "Il serait heureux de revoir sa vieille montre marcher",
+      "Il avait demandé qu'on la répare avant sa mort",
+      "Il l'avait achetée dans cette même boutique jadis",
+      "Il avait dit à l'auteur de la vendre un jour"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "How does the writer most likely feel at the end?",
+     "fr": "Que ressent sans doute l'auteur à la fin ?"
+    },
+    "options": {
+     "en": [
+      "Moved, as if close to the grandfather again",
+      "Sorry to have paid so much for the repair",
+      "Relieved to be rid of the grandfather's things",
+      "Annoyed at having waited a whole month"
+     ],
+     "fr": [
+      "De l'émotion, comme si son grand-père était proche",
+      "Du regret d'avoir payé si cher la réparation",
+      "Du soulagement d'être débarrassé de ses affaires",
+      "De l'agacement d'avoir attendu un mois entier"
+     ]
+    },
+    "correct": 0
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "祖父が亡くなって一年が過ぎたころ、引き出しの奥から古い腕時計が出てきた。",
+    "translation": {
+     "en": "About a year after my grandfather died, an old wristwatch turned up at the back of a drawer.",
+     "fr": "Environ un an après la mort de mon grand-père, une vieille montre est apparue au fond d'un tiroir."
+    },
+    "note": {
+     "en": "The word 「ころ」 after 「過ぎた」 marks an approximate time; 「出てきた」 means turned up.",
+     "fr": "Le mot 「ころ」 après 「過ぎた」 marque un moment approximatif ; 「出てきた」 signifie est réapparu."
+    },
+    "words": [
+     {
+      "surface": "祖父",
+      "meaning": {
+       "en": "my grandfather",
+       "fr": "mon grand-père"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker (in a clause)",
+       "fr": "marque le sujet (dans une proposition)"
+      }
+     },
+     {
+      "surface": "亡くなって",
+      "meaning": {
+       "en": "since dying",
+       "fr": "depuis sa mort"
+      }
+     },
+     {
+      "surface": "一年",
+      "meaning": {
+       "en": "a year",
+       "fr": "un an"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "過ぎた",
+      "meaning": {
+       "en": "had passed",
+       "fr": "s'était écoulé"
+      }
+     },
+     {
+      "surface": "ころ",
+      "meaning": {
+       "en": "around the time",
+       "fr": "vers le moment où"
+      }
+     },
+     {
+      "surface": "引き出し",
+      "meaning": {
+       "en": "drawer",
+       "fr": "tiroir"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "奥",
+      "meaning": {
+       "en": "back, depths",
+       "fr": "fond"
+      }
+     },
+     {
+      "surface": "から",
+      "meaning": {
+       "en": "from",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "古い",
+      "meaning": {
+       "en": "old",
+       "fr": "vieille"
+      }
+     },
+     {
+      "surface": "腕時計",
+      "meaning": {
+       "en": "wristwatch",
+       "fr": "montre"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "出てきた",
+      "meaning": {
+       "en": "turned up",
+       "fr": "est apparue"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "針は止まったままで、ガラスには細かい傷がついている。",
+    "translation": {
+     "en": "The hands have stayed stopped, and the glass has fine scratches on it.",
+     "fr": "Les aiguilles sont restées arrêtées, et le verre porte de fines rayures."
+    },
+    "note": {
+     "en": "The pattern 「〜たまま」 means left in that state: the hands stopped and stayed stopped.",
+     "fr": "La structure 「〜たまま」 signifie resté dans cet état : les aiguilles se sont arrêtées et le sont restées."
+    },
+    "words": [
+     {
+      "surface": "針",
+      "meaning": {
+       "en": "hands (of the watch)",
+       "fr": "aiguilles"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "止まった",
+      "meaning": {
+       "en": "stopped",
+       "fr": "arrêtées"
+      }
+     },
+     {
+      "surface": "まま",
+      "meaning": {
+       "en": "as they were",
+       "fr": "telles quelles"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "and (linking)",
+       "fr": "et (liaison)"
+      }
+     },
+     {
+      "surface": "ガラス",
+      "meaning": {
+       "en": "glass",
+       "fr": "verre"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "on",
+       "fr": "sur"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker (contrast)",
+       "fr": "marque le thème (contraste)"
+      }
+     },
+     {
+      "surface": "細かい",
+      "meaning": {
+       "en": "fine",
+       "fr": "fines"
+      }
+     },
+     {
+      "surface": "傷",
+      "meaning": {
+       "en": "scratches",
+       "fr": "rayures"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "ついている",
+      "meaning": {
+       "en": "are on it",
+       "fr": "sont présentes"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "直すかどうか迷った末に、私は駅の裏にある小さな時計店を訪ねた。",
+    "translation": {
+     "en": "After long hesitating over whether to have it repaired, I went to a small watch shop behind the station.",
+     "fr": "Après avoir longtemps hésité à la faire réparer, j'ai poussé la porte d'une petite horlogerie derrière la gare."
+    },
+    "note": {
+     "en": "The pattern 「〜末に」 means at the end of a long process; 「〜かどうか」 means whether or not.",
+     "fr": "La structure 「〜末に」 signifie au terme d'un long processus ; 「〜かどうか」 signifie si oui ou non."
+    },
+    "words": [
+     {
+      "surface": "直す",
+      "meaning": {
+       "en": "repair",
+       "fr": "réparer"
+      }
+     },
+     {
+      "surface": "かどうか",
+      "meaning": {
+       "en": "whether",
+       "fr": "si oui ou non"
+      }
+     },
+     {
+      "surface": "迷った",
+      "meaning": {
+       "en": "hesitated",
+       "fr": "avoir hésité"
+      }
+     },
+     {
+      "surface": "末に",
+      "meaning": {
+       "en": "after (a long while)",
+       "fr": "au terme de"
+      }
+     },
+     {
+      "surface": "私",
+      "meaning": {
+       "en": "I",
+       "fr": "je"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "駅",
+      "meaning": {
+       "en": "station",
+       "fr": "gare"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "裏",
+      "meaning": {
+       "en": "back, behind",
+       "fr": "derrière"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks the location",
+       "fr": "marque le lieu"
+      }
+     },
+     {
+      "surface": "ある",
+      "meaning": {
+       "en": "that stands",
+       "fr": "qui se trouve"
+      }
+     },
+     {
+      "surface": "小さな",
+      "meaning": {
+       "en": "small",
+       "fr": "petite"
+      }
+     },
+     {
+      "surface": "時計店",
+      "meaning": {
+       "en": "watch shop",
+       "fr": "horlogerie"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the place visited",
+       "fr": "marque le lieu visité"
+      }
+     },
+     {
+      "surface": "訪ねた",
+      "meaning": {
+       "en": "visited",
+       "fr": "ai visité"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "店の主人は時計を手に取ると、しばらく黙って見ていた。",
+    "translation": {
+     "en": "The shop owner picked up the watch and looked at it in silence for a while.",
+     "fr": "L'horloger a pris la montre en main et l'a regardée un moment sans rien dire."
+    },
+    "note": {
+     "en": "The particle 「と」 in 「手に取ると」 links one action to the next that follows at once; 「黙って」 means without a word.",
+     "fr": "La particule 「と」 dans 「手に取ると」 enchaîne une action sur celle qui suit aussitôt ; 「黙って」 signifie sans un mot."
+    },
+    "words": [
+     {
+      "surface": "店",
+      "meaning": {
+       "en": "shop",
+       "fr": "boutique"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "主人",
+      "meaning": {
+       "en": "owner",
+       "fr": "patron"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "時計",
+      "meaning": {
+       "en": "watch",
+       "fr": "montre"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "手",
+      "meaning": {
+       "en": "hand",
+       "fr": "main"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "into",
+       "fr": "dans"
+      }
+     },
+     {
+      "surface": "取る",
+      "meaning": {
+       "en": "take",
+       "fr": "prendre"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "and then",
+       "fr": "puis"
+      }
+     },
+     {
+      "surface": "しばらく",
+      "meaning": {
+       "en": "for a while",
+       "fr": "un moment"
+      }
+     },
+     {
+      "surface": "黙って",
+      "meaning": {
+       "en": "in silence",
+       "fr": "sans rien dire"
+      }
+     },
+     {
+      "surface": "見ていた",
+      "meaning": {
+       "en": "was looking",
+       "fr": "regardait"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "そして、「これは長い間大切に使われてきた時計ですね」と静かに言った。",
+    "translation": {
+     "en": "Then the owner said quietly: \"This watch has been used with great care for a long time, I can tell.\"",
+     "fr": "Puis l'horloger a dit doucement : « Voilà une montre dont on a pris grand soin pendant longtemps. »"
+    },
+    "note": {
+     "en": "The passive 「使われてきた」 with 「〜てきた」 describes use that went on from the past up to now.",
+     "fr": "Le passif 「使われてきた」 avec 「〜てきた」 décrit un usage qui s'est poursuivi du passé jusqu'à maintenant."
+    },
+    "words": [
+     {
+      "surface": "そして",
+      "meaning": {
+       "en": "then",
+       "fr": "puis"
+      }
+     },
+     {
+      "surface": "これ",
+      "meaning": {
+       "en": "this",
+       "fr": "ceci"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "長い間",
+      "meaning": {
+       "en": "for a long time",
+       "fr": "longtemps"
+      }
+     },
+     {
+      "surface": "大切に",
+      "meaning": {
+       "en": "with care",
+       "fr": "avec soin"
+      }
+     },
+     {
+      "surface": "使われてきた",
+      "meaning": {
+       "en": "has been used",
+       "fr": "a été utilisée"
+      }
+     },
+     {
+      "surface": "時計",
+      "meaning": {
+       "en": "watch",
+       "fr": "montre"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "is",
+       "fr": "est"
+      }
+     },
+     {
+      "surface": "ね",
+      "meaning": {
+       "en": "I can tell (shared view)",
+       "fr": "n'est-ce pas"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "marks the quotation",
+       "fr": "marque la citation"
+      }
+     },
+     {
+      "surface": "静かに",
+      "meaning": {
+       "en": "quietly",
+       "fr": "doucement"
+      }
+     },
+     {
+      "surface": "言った",
+      "meaning": {
+       "en": "said",
+       "fr": "a dit"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "修理には一か月かかったが、戻ってきた時計は、まるで新品であるかのように正確に動いていた。",
+    "translation": {
+     "en": "The repair took a month, but the watch that came back ran accurately, just as if it were new.",
+     "fr": "La réparation a pris un mois, mais la montre qui m'est revenue marchait avec précision, comme si elle était neuve."
+    },
+    "note": {
+     "en": "The pattern 「まるで〜かのように」 compares to something that is not really so: the watch is not new.",
+     "fr": "La structure 「まるで〜かのように」 compare à ce qui n'est pas réellement le cas : la montre n'est pas neuve."
+    },
+    "words": [
+     {
+      "surface": "修理",
+      "meaning": {
+       "en": "the repair",
+       "fr": "la réparation"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "for",
+       "fr": "pour"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "一か月",
+      "meaning": {
+       "en": "one month",
+       "fr": "un mois"
+      }
+     },
+     {
+      "surface": "かかった",
+      "meaning": {
+       "en": "took",
+       "fr": "a pris"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "but",
+       "fr": "mais"
+      }
+     },
+     {
+      "surface": "戻ってきた",
+      "meaning": {
+       "en": "came back",
+       "fr": "revenue"
+      }
+     },
+     {
+      "surface": "時計",
+      "meaning": {
+       "en": "watch",
+       "fr": "montre"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "まるで",
+      "meaning": {
+       "en": "just (as if)",
+       "fr": "tout à fait (comme si)"
+      }
+     },
+     {
+      "surface": "新品",
+      "meaning": {
+       "en": "brand-new item",
+       "fr": "objet neuf"
+      }
+     },
+     {
+      "surface": "である",
+      "meaning": {
+       "en": "were",
+       "fr": "était"
+      }
+     },
+     {
+      "surface": "かのように",
+      "meaning": {
+       "en": "as if",
+       "fr": "comme si"
+      }
+     },
+     {
+      "surface": "正確に",
+      "meaning": {
+       "en": "accurately",
+       "fr": "avec précision"
+      }
+     },
+     {
+      "surface": "動いていた",
+      "meaning": {
+       "en": "was running",
+       "fr": "marchait"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "腕にはめてみると、この時計を祖父に見せたいと思わずにはいられなかった。",
+    "translation": {
+     "en": "When I put it on my wrist, I couldn't help wishing I could show this watch to my grandfather.",
+     "fr": "En la mettant à mon poignet, je n'ai pas pu m'empêcher de penser que j'aimerais la montrer à mon grand-père."
+    },
+    "note": {
+     "en": "The pattern 「〜ずにはいられない」 on 「思う」 means the thought could not be held back.",
+     "fr": "La structure 「〜ずにはいられない」 sur 「思う」 signifie que la pensée ne pouvait être retenue."
+    },
+    "words": [
+     {
+      "surface": "腕",
+      "meaning": {
+       "en": "wrist",
+       "fr": "poignet"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "on",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "はめてみると",
+      "meaning": {
+       "en": "on putting it on",
+       "fr": "en la mettant"
+      }
+     },
+     {
+      "surface": "この",
+      "meaning": {
+       "en": "this",
+       "fr": "cette"
+      }
+     },
+     {
+      "surface": "時計",
+      "meaning": {
+       "en": "watch",
+       "fr": "montre"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "祖父",
+      "meaning": {
+       "en": "grandfather",
+       "fr": "grand-père"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "to",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "見せたい",
+      "meaning": {
+       "en": "want to show",
+       "fr": "vouloir montrer"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "marks the content",
+       "fr": "marque le contenu"
+      }
+     },
+     {
+      "surface": "思わずにはいられなかった",
+      "meaning": {
+       "en": "could not help thinking",
+       "fr": "n'ai pu m'empêcher de penser"
       }
      }
     ]
