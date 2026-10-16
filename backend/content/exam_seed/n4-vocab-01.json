@@ -332,23 +332,23 @@
          {
           "id": "moji_3_q1",
           "number": 1,
-          "promptJp": "この手紙を日本に＿＿＿＿んか。",
+          "promptJp": "この手紙を日本に＿＿＿＿ください。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "連絡"
+            "textJp": "建てて"
            },
            {
             "id": "c2",
-            "textJp": "花見"
+            "textJp": "うえて"
            },
            {
             "id": "c3",
-            "textJp": "送る"
+            "textJp": "送って"
            },
            {
             "id": "c4",
-            "textJp": "似る"
+            "textJp": "にて"
            }
           ],
           "answer": "c3"
@@ -356,7 +356,7 @@
          {
           "id": "moji_3_q2",
           "number": 2,
-          "promptJp": "時間通りに行かなければならないから、明日は待たさないで＿＿＿＿よ。",
+          "promptJp": "時間通りに行かなければならないから、明日は待たせないで＿＿＿＿？",
           "choices": [
            {
             "id": "c1",
@@ -368,11 +368,11 @@
            },
            {
             "id": "c3",
-            "textJp": "失敗"
+            "textJp": "にる"
            },
            {
             "id": "c4",
-            "textJp": "続ける"
+            "textJp": "おちる"
            }
           ],
           "answer": "c1"
@@ -384,15 +384,15 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "相談"
+            "textJp": "ガソリン"
            },
            {
             "id": "c2",
-            "textJp": "楽しむ"
+            "textJp": "火"
            },
            {
             "id": "c3",
-            "textJp": "起こす"
+            "textJp": "紙"
            },
            {
             "id": "c4",
@@ -412,15 +412,15 @@
            },
            {
             "id": "c2",
-            "textJp": "特別"
+            "textJp": "ガラス"
            },
            {
             "id": "c3",
-            "textJp": "もっとも"
+            "textJp": "川"
            },
            {
             "id": "c4",
-            "textJp": "不便"
+            "textJp": "カーテン"
            }
           ],
           "answer": "c1"
@@ -480,7 +480,7 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "合う"
+            "textJp": "くび"
            },
            {
             "id": "c2",
@@ -492,7 +492,7 @@
            },
            {
             "id": "c4",
-            "textJp": "立てる"
+            "textJp": "字"
            }
           ],
           "answer": "c3"
@@ -608,12 +608,12 @@
          {
           "id": "moji_4_q4",
           "number": 4,
-          "promptJp": "デパートの売り場で、母にあげるセーターをえらびました。",
-          "underlineJp": "売り場",
+          "promptJp": "デパートのちゅうしゃじょうは、とても広いです。",
+          "underlineJp": "ちゅうしゃじょう",
           "choices": [
            {
             "id": "c1",
-            "textJp": "車をとめるところ"
+            "textJp": "ものを売っているところ"
            },
            {
             "id": "c2",
@@ -625,7 +625,7 @@
            },
            {
             "id": "c4",
-            "textJp": "ものを売っているところ"
+            "textJp": "車をとめておくところ"
            }
           ],
           "answer": "c4"
@@ -706,7 +706,7 @@
            },
            {
             "id": "c4",
-            "textJp": "田中さん、つまはお元気ですか。"
+            "textJp": "つまは、わたしの母の妹です。"
            }
           ],
           "answer": "c3"
@@ -1072,23 +1072,23 @@
          {
           "id": "moji_3_q1",
           "number": 1,
-          "promptJp": "とにかく、＿＿＿＿が終わってほっとしたよ。",
+          "promptJp": "走ったので、九時の電車に＿＿＿＿。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "試験"
+            "textJp": "まにあいました"
            },
            {
             "id": "c2",
-            "textJp": "建てる"
+            "textJp": "にあいました"
            },
            {
             "id": "c3",
-            "textJp": "訪ねる"
+            "textJp": "ひっこしました"
            },
            {
             "id": "c4",
-            "textJp": "間違える"
+            "textJp": "われました"
            }
           ],
           "answer": "c1"
@@ -1096,23 +1096,23 @@
          {
           "id": "moji_3_q2",
           "number": 2,
-          "promptJp": "この本は＿＿＿＿の書店で買ったんだ。",
+          "promptJp": "友だちがみんな国へ帰ってしまって、毎日＿＿＿＿です。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "地震"
+            "textJp": "にがい"
            },
            {
             "id": "c2",
-            "textJp": "気分"
+            "textJp": "やわらかい"
            },
            {
             "id": "c3",
-            "textJp": "台風"
+            "textJp": "あさい"
            },
            {
             "id": "c4",
-            "textJp": "駅前"
+            "textJp": "さびしい"
            }
           ],
           "answer": "c4"
@@ -1120,7 +1120,7 @@
          {
           "id": "moji_3_q3",
           "number": 3,
-          "promptJp": "イチゴは＿＿＿＿に作られる。",
+          "promptJp": "パンにイチゴの＿＿＿＿をぬって食べました。",
           "choices": [
            {
             "id": "c1",
@@ -1148,7 +1148,7 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "はっきり"
+            "textJp": "建てる"
            },
            {
             "id": "c2",
@@ -1168,23 +1168,23 @@
          {
           "id": "moji_3_q5",
           "number": 5,
-          "promptJp": "この手紙を日本に＿＿＿＿んか。",
+          "promptJp": "雨の中を歩いたので、くつが＿＿＿＿しまいました。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "過ぎる"
+            "textJp": "ふとって"
            },
            {
             "id": "c2",
-            "textJp": "汚れる"
+            "textJp": "にて"
            },
            {
             "id": "c3",
-            "textJp": "暮れる"
+            "textJp": "こんで"
            },
            {
             "id": "c4",
-            "textJp": "送る"
+            "textJp": "よごれて"
            }
           ],
           "answer": "c4"
@@ -1208,7 +1208,7 @@
            },
            {
             "id": "c4",
-            "textJp": "売り場"
+            "textJp": "きせつ"
            }
           ],
           "answer": "c2"
@@ -1220,15 +1220,15 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "付く"
+            "textJp": "ガソリンスタンド"
            },
            {
             "id": "c2",
-            "textJp": "過ぎる"
+            "textJp": "火事"
            },
            {
             "id": "c3",
-            "textJp": "尋ねる"
+            "textJp": "空気"
            },
            {
             "id": "c4",
@@ -1248,7 +1248,7 @@
            },
            {
             "id": "c2",
-            "textJp": "科学"
+            "textJp": "けす"
            },
            {
             "id": "c3",
@@ -1332,7 +1332,7 @@
            },
            {
             "id": "c2",
-            "textJp": "やり方"
+            "textJp": "やりかた"
            },
            {
             "id": "c3",
@@ -1840,7 +1840,7 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "光る"
+            "textJp": "台風"
            },
            {
             "id": "c2",
@@ -1848,11 +1848,11 @@
            },
            {
             "id": "c3",
-            "textJp": "受ける"
+            "textJp": "火事"
            },
            {
             "id": "c4",
-            "textJp": "別れる"
+            "textJp": "天気"
            }
           ],
           "answer": "c2"
@@ -1860,19 +1860,19 @@
          {
           "id": "moji_3_q3",
           "number": 3,
-          "promptJp": "スミスさんは＿＿＿＿な語り口の人物です。",
+          "promptJp": "スミスさんは、いつも＿＿＿＿な話し方をする人です。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "季節"
+            "textJp": "ふべん"
            },
            {
             "id": "c2",
-            "textJp": "最後"
+            "textJp": "さかん"
            },
            {
             "id": "c3",
-            "textJp": "親"
+            "textJp": "十分"
            },
            {
             "id": "c4",
@@ -1884,23 +1884,23 @@
          {
           "id": "moji_3_q4",
           "number": 4,
-          "promptJp": "こういう＿＿＿＿の人はおもしろくない。",
+          "promptJp": "日本に来る外国人が、年々＿＿＿＿います。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "タイプ"
+            "textJp": "ふえて"
            },
            {
             "id": "c2",
-            "textJp": "勝つ"
+            "textJp": "われて"
            },
            {
             "id": "c3",
-            "textJp": "チェック"
+            "textJp": "ひかって"
            },
            {
             "id": "c4",
-            "textJp": "始める"
+            "textJp": "すべって"
            }
           ],
           "answer": "c1"
@@ -1908,23 +1908,23 @@
          {
           "id": "moji_3_q5",
           "number": 5,
-          "promptJp": "その男は少年の手を＿＿＿＿。",
+          "promptJp": "この川は＿＿＿＿から、子どもでもあそべます。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "投げる"
+            "textJp": "ふかい"
            },
            {
             "id": "c2",
-            "textJp": "祈る"
+            "textJp": "にがい"
            },
            {
             "id": "c3",
-            "textJp": "捕まえる"
+            "textJp": "あさい"
            },
            {
             "id": "c4",
-            "textJp": "飾る"
+            "textJp": "かたい"
            }
           ],
           "answer": "c3"
@@ -1956,23 +1956,23 @@
          {
           "id": "moji_3_q7",
           "number": 7,
-          "promptJp": "その本を＿＿＿＿なさい。",
+          "promptJp": "やぶれた本を、テープで＿＿＿＿なさい。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "直す"
+            "textJp": "なおし"
            },
            {
             "id": "c2",
-            "textJp": "止む"
+            "textJp": "ふみ"
            },
            {
             "id": "c3",
-            "textJp": "育てる"
+            "textJp": "そだて"
            },
            {
             "id": "c4",
-            "textJp": "進む"
+            "textJp": "すすみ"
            }
           ],
           "answer": "c1"
@@ -1984,7 +1984,7 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "治る"
+            "textJp": "食事"
            },
            {
             "id": "c2",
@@ -1992,7 +1992,7 @@
            },
            {
             "id": "c3",
-            "textJp": "関係"
+            "textJp": "旅行"
            },
            {
             "id": "c4",
@@ -2576,23 +2576,23 @@
          {
           "id": "moji_3_q2",
           "number": 2,
-          "promptJp": "１日中テニスをしていたの＿＿＿＿。",
+          "promptJp": "この川でおよぐのは＿＿＿＿ですから、やめてください。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "まず"
+            "textJp": "しんせつ"
            },
            {
             "id": "c2",
-            "textJp": "やっと"
+            "textJp": "ていねい"
            },
            {
             "id": "c3",
-            "textJp": "だから"
+            "textJp": "きけん"
            },
            {
             "id": "c4",
-            "textJp": "君"
+            "textJp": "あんぜん"
            }
           ],
           "answer": "c3"
@@ -2628,11 +2628,11 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "紹介"
+            "textJp": "ひろう"
            },
            {
             "id": "c2",
-            "textJp": "無理"
+            "textJp": "あらう"
            },
            {
             "id": "c3",
@@ -2656,15 +2656,15 @@
            },
            {
             "id": "c2",
-            "textJp": "引っ越す"
+            "textJp": "そつぎょう"
            },
            {
             "id": "c3",
-            "textJp": "見える"
+            "textJp": "あいさつ"
            },
            {
             "id": "c4",
-            "textJp": "眠る"
+            "textJp": "へんじ"
            }
           ],
           "answer": "c1"
@@ -2696,23 +2696,23 @@
          {
           "id": "moji_3_q7",
           "number": 7,
-          "promptJp": "あなたのお名前はどのように＿＿＿＿するのですか。",
+          "promptJp": "この町は＿＿＿＿がべんりで、住みやすいです。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "発音"
+            "textJp": "こうつう"
            },
            {
             "id": "c2",
-            "textJp": "払う"
+            "textJp": "けしき"
            },
            {
             "id": "c3",
-            "textJp": "変わる"
+            "textJp": "げんいん"
            },
            {
             "id": "c4",
-            "textJp": "食事"
+            "textJp": "ばんぐみ"
            }
           ],
           "answer": "c1"
@@ -3296,7 +3296,7 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "研究"
+            "textJp": "にる"
            },
            {
             "id": "c2",
@@ -3316,7 +3316,7 @@
          {
           "id": "moji_3_q2",
           "number": 2,
-          "promptJp": "＿＿＿＿が風になびいた。",
+          "promptJp": "まどを開けたら、＿＿＿＿が風でゆれました。",
           "choices": [
            {
             "id": "c1",
@@ -3332,7 +3332,7 @@
            },
            {
             "id": "c4",
-            "textJp": "指輪"
+            "textJp": "本屋"
            }
           ],
           "answer": "c2"
@@ -3340,7 +3340,7 @@
          {
           "id": "moji_3_q3",
           "number": 3,
-          "promptJp": "＿＿＿＿たちはたのしそうにさえずっています。",
+          "promptJp": "朝、まどの外で＿＿＿＿がないていました。",
           "choices": [
            {
             "id": "c1",
@@ -3372,15 +3372,15 @@
            },
            {
             "id": "c2",
-            "textJp": "水泳"
+            "textJp": "親切"
            },
            {
             "id": "c3",
-            "textJp": "釣る"
+            "textJp": "有名"
            },
            {
             "id": "c4",
-            "textJp": "踏む"
+            "textJp": "元気"
            }
           ],
           "answer": "c1"
@@ -3392,19 +3392,19 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "参る"
+            "textJp": "まいります"
            },
            {
             "id": "c2",
-            "textJp": "比べる"
+            "textJp": "くらべます"
            },
            {
             "id": "c3",
-            "textJp": "講義"
+            "textJp": "こわします"
            },
            {
             "id": "c4",
-            "textJp": "壊す"
+            "textJp": "はいけんします"
            }
           ],
           "answer": "c1"
@@ -3412,23 +3412,23 @@
          {
           "id": "moji_3_q6",
           "number": 6,
-          "promptJp": "ごめんね。明日は朝から＿＿＿＿があるのよ。",
+          "promptJp": "このくすりはとても＿＿＿＿ので、飲みにくいです。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "パート"
+            "textJp": "にがい"
            },
            {
             "id": "c2",
-            "textJp": "親切"
+            "textJp": "あさい"
            },
            {
             "id": "c3",
-            "textJp": "大体"
+            "textJp": "ふかい"
            },
            {
             "id": "c4",
-            "textJp": "厳しい"
+            "textJp": "さびしい"
            }
           ],
           "answer": "c1"
@@ -3436,23 +3436,23 @@
          {
           "id": "moji_3_q7",
           "number": 7,
-          "promptJp": "お＿＿＿＿に行きませんか？",
+          "promptJp": "プレゼントをきれいな紙で＿＿＿＿ください。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "花見"
+            "textJp": "つつんで"
            },
            {
             "id": "c2",
-            "textJp": "返事"
+            "textJp": "そだてて"
            },
            {
             "id": "c3",
-            "textJp": "試験"
+            "textJp": "うえて"
            },
            {
             "id": "c4",
-            "textJp": "乾く"
+            "textJp": "ほめて"
            }
           ],
           "answer": "c1"
@@ -3464,7 +3464,7 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "悲しい"
+            "textJp": "もし"
            },
            {
             "id": "c2",
@@ -3476,7 +3476,7 @@
            },
            {
             "id": "c4",
-            "textJp": "国際"
+            "textJp": "きっと"
            }
           ],
           "answer": "c3"
@@ -4080,23 +4080,23 @@
          {
           "id": "moji_3_q3",
           "number": 3,
-          "promptJp": "何の＿＿＿＿でここに来たのですか。",
+          "promptJp": "さむいので、＿＿＿＿をつけましょう。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "道具"
+            "textJp": "れいぼう"
            },
            {
             "id": "c2",
-            "textJp": "用"
+            "textJp": "だんぼう"
            },
            {
             "id": "c3",
-            "textJp": "絹"
+            "textJp": "でんぽう"
            },
            {
             "id": "c4",
-            "textJp": "今度"
+            "textJp": "ちゅうしゃ"
            }
           ],
           "answer": "c2"
@@ -4120,7 +4120,7 @@
            },
            {
             "id": "c4",
-            "textJp": "用意"
+            "textJp": "われる"
            }
           ],
           "answer": "c3"
@@ -4152,23 +4152,23 @@
          {
           "id": "moji_3_q6",
           "number": 6,
-          "promptJp": "スミスさんは＿＿＿＿な語り口の人物です。",
+          "promptJp": "夜空にたくさんのほしが＿＿＿＿います。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ソフト"
+            "textJp": "ひかって"
            },
            {
             "id": "c2",
-            "textJp": "近所"
+            "textJp": "ふとって"
            },
            {
             "id": "c3",
-            "textJp": "火事"
+            "textJp": "われて"
            },
            {
             "id": "c4",
-            "textJp": "珍しい"
+            "textJp": "すべって"
            }
           ],
           "answer": "c1"
@@ -4176,23 +4176,23 @@
          {
           "id": "moji_3_q7",
           "number": 7,
-          "promptJp": "時間通りに行かなければならないから、明日は待たさないで＿＿＿＿よ。",
+          "promptJp": "この中から、すきなケーキを一つ＿＿＿＿ください。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "増える"
+            "textJp": "うえて"
            },
            {
             "id": "c2",
-            "textJp": "生産"
+            "textJp": "あやまって"
            },
            {
             "id": "c3",
-            "textJp": "くれる"
+            "textJp": "えらんで"
            },
            {
             "id": "c4",
-            "textJp": "開く"
+            "textJp": "そだてて"
            }
           ],
           "answer": "c3"
@@ -4200,7 +4200,7 @@
          {
           "id": "moji_3_q8",
           "number": 8,
-          "promptJp": "＿＿＿＿はどこですか。",
+          "promptJp": "すみません、＿＿＿＿はどこですか。お金をはらいたいんですが。",
           "choices": [
            {
             "id": "c1",
@@ -4772,23 +4772,23 @@
          {
           "id": "moji_3_q1",
           "number": 1,
-          "promptJp": "この手紙を日本に＿＿＿＿んか。",
+          "promptJp": "ゆきの日は道が＿＿＿＿から、気をつけてください。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "経験"
+            "textJp": "ふえる"
            },
            {
             "id": "c2",
-            "textJp": "はっきり"
+            "textJp": "にる"
            },
            {
             "id": "c3",
-            "textJp": "約束"
+            "textJp": "ふとる"
            },
            {
             "id": "c4",
-            "textJp": "送る"
+            "textJp": "すべる"
            }
           ],
           "answer": "c4"
@@ -4796,23 +4796,23 @@
          {
           "id": "moji_3_q2",
           "number": 2,
-          "promptJp": "もう私は大人だから、＿＿＿＿は考えない。",
+          "promptJp": "このことは、＿＿＿＿だれにも言わないでください。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "きっと"
+            "textJp": "ぜひ"
            },
            {
             "id": "c2",
-            "textJp": "もし"
+            "textJp": "とうとう"
            },
            {
             "id": "c3",
-            "textJp": "眠い"
+            "textJp": "やっと"
            },
            {
             "id": "c4",
-            "textJp": "そう"
+            "textJp": "けっして"
            }
           ],
           "answer": "c4"
@@ -4820,23 +4820,23 @@
          {
           "id": "moji_3_q3",
           "number": 3,
-          "promptJp": "来月タクシー料金が＿＿＿＿。",
+          "promptJp": "くうこうまで、友だちを＿＿＿＿に行きます。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "予習"
+            "textJp": "うえ"
            },
            {
             "id": "c2",
-            "textJp": "上がる"
+            "textJp": "むかえ"
            },
            {
             "id": "c3",
-            "textJp": "申す"
+            "textJp": "つつみ"
            },
            {
             "id": "c4",
-            "textJp": "集める"
+            "textJp": "ぬり"
            }
           ],
           "answer": "c2"
@@ -4868,23 +4868,23 @@
          {
           "id": "moji_3_q5",
           "number": 5,
-          "promptJp": "イチゴは＿＿＿＿に作られる。",
+          "promptJp": "じしんで、家が大きく＿＿＿＿。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "事故"
+            "textJp": "ふとりました"
            },
            {
             "id": "c2",
-            "textJp": "台風"
+            "textJp": "なれました"
            },
            {
             "id": "c3",
-            "textJp": "景色"
+            "textJp": "ひかりました"
            },
            {
             "id": "c4",
-            "textJp": "ジャム"
+            "textJp": "ゆれました"
            }
           ],
           "answer": "c4"
@@ -4892,7 +4892,7 @@
          {
           "id": "moji_3_q6",
           "number": 6,
-          "promptJp": "デパートの＿＿＿＿にアドバルーンが上がっている。",
+          "promptJp": "デパートの＿＿＿＿から、町がよく見えます。",
           "choices": [
            {
             "id": "c1",
@@ -4916,23 +4916,23 @@
          {
           "id": "moji_3_q7",
           "number": 7,
-          "promptJp": "二人の医者が＿＿＿＿の話をしていた。",
+          "promptJp": "火事の＿＿＿＿は、たばこだったそうです。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "似る"
+            "textJp": "じゅうしょ"
            },
            {
             "id": "c2",
-            "textJp": "踏む"
+            "textJp": "ばんぐみ"
            },
            {
             "id": "c3",
-            "textJp": "医学"
+            "textJp": "げんいん"
            },
            {
             "id": "c4",
-            "textJp": "祈る"
+            "textJp": "しゅみ"
            }
           ],
           "answer": "c3"
@@ -5512,23 +5512,23 @@
          {
           "id": "moji_3_q1",
           "number": 1,
-          "promptJp": "イチゴは＿＿＿＿に作られる。",
+          "promptJp": "毎ばんおそく、あまい物を食べていたら、三キロも＿＿＿＿しまいました。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "電報"
+            "textJp": "やせて"
            },
            {
             "id": "c2",
-            "textJp": "点"
+            "textJp": "すべって"
            },
            {
             "id": "c3",
-            "textJp": "ジャム"
+            "textJp": "ふとって"
            },
            {
             "id": "c4",
-            "textJp": "泳ぎ方"
+            "textJp": "ゆれて"
            }
           ],
           "answer": "c3"
@@ -5536,23 +5536,23 @@
          {
           "id": "moji_3_q2",
           "number": 2,
-          "promptJp": "＿＿＿＿、なるほど！",
+          "promptJp": "日本に来たら、＿＿＿＿わたしの家にあそびに来てください。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "はず"
+            "textJp": "とうとう"
            },
            {
             "id": "c2",
-            "textJp": "まじめ"
+            "textJp": "けっして"
            },
            {
             "id": "c3",
-            "textJp": "もし"
+            "textJp": "やっと"
            },
            {
             "id": "c4",
-            "textJp": "ああ"
+            "textJp": "ぜひ"
            }
           ],
           "answer": "c4"
@@ -5584,23 +5584,23 @@
          {
           "id": "moji_3_q4",
           "number": 4,
-          "promptJp": "＿＿＿＿だったらどれくらいかかりますか。",
+          "promptJp": "エレベーターが＿＿＿＿しているので、かいだんを使ってください。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "眠い"
+            "textJp": "ちゅうしゃ"
            },
            {
             "id": "c2",
-            "textJp": "珍しい"
+            "textJp": "はんたい"
            },
            {
             "id": "c3",
-            "textJp": "似る"
+            "textJp": "しんぱい"
            },
            {
             "id": "c4",
-            "textJp": "サンドイッチ"
+            "textJp": "こしょう"
            }
           ],
           "answer": "c4"
@@ -5608,23 +5608,23 @@
          {
           "id": "moji_3_q5",
           "number": 5,
-          "promptJp": "もう私は大人だから、＿＿＿＿は考えない。",
+          "promptJp": "日本の食べ物にはもう＿＿＿＿か。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ずいぶん"
+            "textJp": "ひかりました"
            },
            {
             "id": "c2",
-            "textJp": "凄い"
+            "textJp": "われました"
            },
            {
             "id": "c3",
-            "textJp": "そう"
+            "textJp": "なれました"
            },
            {
             "id": "c4",
-            "textJp": "珍しい"
+            "textJp": "すべりました"
            }
           ],
           "answer": "c3"
@@ -5632,11 +5632,11 @@
          {
           "id": "moji_3_q6",
           "number": 6,
-          "promptJp": "雨が＿＿＿＿いいのになあ。",
+          "promptJp": "雨が＿＿＿＿といいのになあ。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "直す"
+            "textJp": "にる"
            },
            {
             "id": "c2",
@@ -5644,11 +5644,11 @@
            },
            {
             "id": "c3",
-            "textJp": "始める"
+            "textJp": "ふとる"
            },
            {
             "id": "c4",
-            "textJp": "拝見"
+            "textJp": "生きる"
            }
           ],
           "answer": "c2"
@@ -5688,7 +5688,7 @@
            },
            {
             "id": "c2",
-            "textJp": "心"
+            "textJp": "くび"
            },
            {
             "id": "c3",
@@ -5850,7 +5850,7 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "友だちのそふさんは、とてもやさしい人です。"
+            "textJp": "そふは、わたしの父のむすこです。"
            },
            {
             "id": "c2",
@@ -6252,23 +6252,23 @@
          {
           "id": "moji_3_q1",
           "number": 1,
-          "promptJp": "こういう＿＿＿＿の人はおもしろくない。",
+          "promptJp": "すみません、この＿＿＿＿は空いていますか。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "タイプ"
+            "textJp": "せき"
            },
            {
             "id": "c2",
-            "textJp": "遠慮"
+            "textJp": "じ"
            },
            {
             "id": "c3",
-            "textJp": "別れる"
+            "textJp": "ねつ"
            },
            {
             "id": "c4",
-            "textJp": "写す"
+            "textJp": "け"
            }
           ],
           "answer": "c1"
@@ -6300,23 +6300,23 @@
          {
           "id": "moji_3_q3",
           "number": 3,
-          "promptJp": "デパートの＿＿＿＿にアドバルーンが上がっている。",
+          "promptJp": "旅行の＿＿＿＿は、もうできましたか。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "事故"
+            "textJp": "けしき"
            },
            {
             "id": "c2",
-            "textJp": "夢"
+            "textJp": "げんいん"
            },
            {
             "id": "c3",
-            "textJp": "屋上"
+            "textJp": "じゅんび"
            },
            {
             "id": "c4",
-            "textJp": "葉"
+            "textJp": "れきし"
            }
           ],
           "answer": "c3"
@@ -6348,23 +6348,23 @@
          {
           "id": "moji_3_q5",
           "number": 5,
-          "promptJp": "１日中＿＿＿＿をしていたのだから。",
+          "promptJp": "道でさいふを＿＿＿＿、けいさつにとどけました。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "星"
+            "textJp": "うえて"
            },
            {
             "id": "c2",
-            "textJp": "水道"
+            "textJp": "そだてて"
            },
            {
             "id": "c3",
-            "textJp": "テニス"
+            "textJp": "ひろって"
            },
            {
             "id": "c4",
-            "textJp": "時代"
+            "textJp": "ほめて"
            }
           ],
           "answer": "c3"
@@ -6420,11 +6420,11 @@
          {
           "id": "moji_3_q8",
           "number": 8,
-          "promptJp": "私は仕事を一つ終えるごとにリストの上で＿＿＿＿する。",
+          "promptJp": "仕事が一つ終わったら、リストに＿＿＿＿をつけます。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "漬ける"
+            "textJp": "あいさつ"
            },
            {
             "id": "c2",
@@ -6432,11 +6432,11 @@
            },
            {
             "id": "c3",
-            "textJp": "心配"
+            "textJp": "しんぱい"
            },
            {
             "id": "c4",
-            "textJp": "植える"
+            "textJp": "えんりょ"
            }
           ],
           "answer": "c2"
@@ -6992,7 +6992,7 @@
          {
           "id": "moji_3_q1",
           "number": 1,
-          "promptJp": "とても＿＿＿＿がリフレッシュされる。",
+          "promptJp": "おふろに入ると、＿＿＿＿がよくなります。",
           "choices": [
            {
             "id": "c1",
@@ -7004,7 +7004,7 @@
            },
            {
             "id": "c3",
-            "textJp": "こう"
+            "textJp": "地理"
            },
            {
             "id": "c4",
@@ -7016,23 +7016,23 @@
          {
           "id": "moji_3_q2",
           "number": 2,
-          "promptJp": "「＿＿＿＿だいじょうぶ？」といわれました。「だいじょうぶ」とこたえました。",
+          "promptJp": "ドアのかぎを＿＿＿＿かけてから、出かけてください。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "僕"
+            "textJp": "しっかり"
            },
            {
             "id": "c2",
-            "textJp": "似る"
+            "textJp": "とうとう"
            },
            {
             "id": "c3",
-            "textJp": "踏む"
+            "textJp": "ずいぶん"
            },
            {
             "id": "c4",
-            "textJp": "祈る"
+            "textJp": "なかなか"
            }
           ],
           "answer": "c1"
@@ -7040,23 +7040,23 @@
          {
           "id": "moji_3_q3",
           "number": 3,
-          "promptJp": "私はいつの日か＿＿＿＿に行きたい。",
+          "promptJp": "この問題は＿＿＿＿で、よくわかりません。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "鏡"
+            "textJp": "あんぜん"
            },
            {
             "id": "c2",
-            "textJp": "産業"
+            "textJp": "ていねい"
            },
            {
             "id": "c3",
-            "textJp": "アフリカ"
+            "textJp": "ふくざつ"
            },
            {
             "id": "c4",
-            "textJp": "訳"
+            "textJp": "さかん"
            }
           ],
           "answer": "c3"
@@ -7064,23 +7064,23 @@
          {
           "id": "moji_3_q4",
           "number": 4,
-          "promptJp": "この手紙を日本に＿＿＿＿んか。",
+          "promptJp": "パーティーの料理がたくさん＿＿＿＿しまいました。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "植える"
+            "textJp": "ふとって"
            },
            {
             "id": "c2",
-            "textJp": "拾う"
+            "textJp": "にて"
            },
            {
             "id": "c3",
-            "textJp": "空く"
+            "textJp": "ひかって"
            },
            {
             "id": "c4",
-            "textJp": "送る"
+            "textJp": "のこって"
            }
           ],
           "answer": "c4"
@@ -7088,23 +7088,23 @@
          {
           "id": "moji_3_q5",
           "number": 5,
-          "promptJp": "ここから海の＿＿＿＿が聞こえる。",
+          "promptJp": "なくしたかぎを一時間も＿＿＿＿が、見つかりませんでした。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ジャム"
+            "textJp": "うえました"
            },
            {
             "id": "c2",
-            "textJp": "乗り物"
+            "textJp": "ひろいました"
            },
            {
             "id": "c3",
-            "textJp": "音"
+            "textJp": "さがしました"
            },
            {
             "id": "c4",
-            "textJp": "人口"
+            "textJp": "つつみました"
            }
           ],
           "answer": "c3"
@@ -7116,15 +7116,15 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "お見舞い"
+            "textJp": "うえる"
            },
            {
             "id": "c2",
-            "textJp": "試合"
+            "textJp": "そだてる"
            },
            {
             "id": "c3",
-            "textJp": "足りる"
+            "textJp": "わかす"
            },
            {
             "id": "c4",
@@ -7136,23 +7136,23 @@
          {
           "id": "moji_3_q7",
           "number": 7,
-          "promptJp": "あなたを見るとお兄さんを＿＿＿＿。",
+          "promptJp": "わたしは母にかおがよく＿＿＿＿います。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "経験"
+            "textJp": "なれて"
            },
            {
             "id": "c2",
-            "textJp": "思い出す"
+            "textJp": "にて"
            },
            {
             "id": "c3",
-            "textJp": "行う"
+            "textJp": "ひかって"
            },
            {
             "id": "c4",
-            "textJp": "焼ける"
+            "textJp": "われて"
            }
           ],
           "answer": "c2"
@@ -7160,7 +7160,7 @@
          {
           "id": "moji_3_q8",
           "number": 8,
-          "promptJp": "時計がおくれていたので、私は＿＿＿＿にのりそこねた。",
+          "promptJp": "時計がおくれていたので、私は＿＿＿＿にのれなかった。",
           "choices": [
            {
             "id": "c1",
@@ -7176,7 +7176,7 @@
            },
            {
             "id": "c4",
-            "textJp": "時代"
+            "textJp": "けしき"
            }
           ],
           "answer": "c1"
@@ -7281,7 +7281,7 @@
            },
            {
             "id": "c3",
-            "textJp": "食べ物"
+            "textJp": "たべもの"
            },
            {
             "id": "c4",

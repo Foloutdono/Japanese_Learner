@@ -110,7 +110,8 @@ def problems(exam_id: str, paper: dict) -> list[str]:
     """Why `paper` is not fit to be one of `exam_id`'s seeds -- [] when
     it is. The paper-level checks the generators run (exam_pipeline:
     validate_content, the answer-position balance), the one the route
-    runs before serving (paper_gives_answer_away), completeness, and,
+    runs before serving (paper_gives_answer_away), completeness, a
+    sentence-order ★ on a middle slot (exam_grammar_gen.star_slot), and,
     for listening, that every clip can be remade from its own script
     (study/exam_audio_repair.py), since no seed ships its audio."""
     _version, kind, level, _generate = EXAM_GENERATORS[exam_id]
@@ -125,6 +126,9 @@ def problems(exam_id: str, paper: dict) -> list[str]:
     out += validate_answer_balance(flat)
     if paper_gives_answer_away(paper):
         out.append("a choice repeats the underlined word")
+    for q in flat:
+        if "pieces" in q and q.get("starIndex") not in (1, 2):
+            out.append(f"{q.get('id')}: the ★ is on the first or last piece, answered by punctuation")
     for q in questions_with_audio(paper):
         turns = turns_from_script(q.get("scriptJp") or "")
         if turns is None or q.get("audioSrc") != f"/exam-audio/{content_key(turns)}.mp3":

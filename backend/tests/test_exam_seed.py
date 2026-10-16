@@ -44,6 +44,19 @@ def test_a_listening_clip_must_be_the_clip_of_its_script():
     assert any("audioSrc" in p for p in exam_seed.problems("n4-listening-01", paper))
 
 
+def test_a_star_on_the_last_piece_is_answered_by_its_full_stop():
+    paper = _first("n4-grammar-01")
+    order_mondai = next(m for m in paper["sections"][0]["mondai"] if m["type"] == "sentence-order")
+    q = order_mondai["questions"][0]
+    q["starIndex"], q["answer"] = 3, q["order"][3]
+    assert any("★" in p for p in exam_seed.problems("n4-grammar-01", paper))
+
+
+def test_the_generator_never_puts_the_star_at_either_end():
+    from study.exam_grammar_gen import star_slot
+    assert [star_slot(i) for i in range(4)] == [1, 1, 2, 2]
+
+
 def _mcq(sizes: list[int], right: int) -> dict:
     ids = ["c1", "c2", "c3", "c4"]
     return {"id": "q", "choices": [{"id": i, "textJp": "あ" * n} for i, n in zip(ids, sizes)],
