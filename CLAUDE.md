@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **235**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **236**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -290,7 +290,18 @@ python -m scripts.build_dictation_audio           # synthesize it
 python -m scripts.build_grammar_audio --tours     # the grammar tours' scenes (plan 187d)
 python -m scripts.prewarm_word_audio               # the card readings, N5-N3: report only (plan 209)
 python -m scripts.prewarm_word_audio --yes         # ... and make the missing ones
+python -m scripts.prewarm_all_audio                # everything above, N5-N1, conversation too: report (plan 235)
+python -m scripts.prewarm_all_audio --yes          # ... and make it (--part, --level to narrow)
 ```
+
+`prewarm_all_audio` gathers the three warm-ups into one run over every
+line the app can say, at every level: the card readings (`words`),
+dictation, the catalogue's examples, the tours and the 会話 bank
+(`conversation`). All of it is about 15,500 clips and 14 hours on the
+engine at Starter. The words, N5 to N1, fit their store's cap; the
+grammar store (examples, tours, conversation) is estimated past its
+120 MB, so it makes the examples first, and the conversation lines,
+made last, are the last the store would evict.
 
 The grammar tours (plan 187d) speak through `GET /api/grammar/audio`,
 which voices only lines the catalogue says, by who says them: the reader
