@@ -26392,7 +26392,7 @@ button.brd-stn { cursor: pointer; }
   .tour__done, .tour-guess { transition: none; }
 }
 
-/* ══ 初見 — a kana or a kanji met before it is drilled (plan 213) ══════
+/* ══ 初見 — a kana or a kanji met before it is drilled (plan 216) ══════
    The tour's frame above for a glyph (components/study/GlyphTour.jsx):
    three stops -- what it reads, its strokes traced, a few words -- one
    card each, the gate at the foot. The line is the run's own: the stage
@@ -40744,7 +40744,7 @@ button.brd-stn { cursor: pointer; }
      whole column, its sentence a step up. */
   .tour--desk .tour__body { justify-content: safe center; }
   .tour--desk .tour-leaf { flex: none; min-height: min(340px, 50vh); }
-  /* 初見's writing stop (plan 213): its card takes the column's height,
+  /* 初見's writing stop (plan 216): its card takes the column's height,
      so the board is the square the column leaves over the gate. */
   .tour--desk .tour-leaf:has(> .gt-write) { flex: 1 1 auto; }
   .tour--desk .tour-leaf__mid--spec .dict-ex__jp,

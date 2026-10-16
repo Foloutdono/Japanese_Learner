@@ -1,5 +1,5 @@
 """
-初見 (plan 213): a kana or a kanji met before it is drilled -- what it
+初見 (plan 216): a kana or a kanji met before it is drilled -- what it
 reads, its strokes to trace and a few words it is met in, once per
 character.
 """

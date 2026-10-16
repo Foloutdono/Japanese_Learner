@@ -241,7 +241,7 @@ def get_kana_cards(set_name: str, count: int = Query(10, ge=1, le=100), exclude:
     hasn't reviewed yet. `beyond_target` is the 臨時列車: the learner
     explicitly asking for new cards past today's pace (core/pace.py).
     `lang` is the language of the words a first-sight tour shows (初見,
-    plan 213): a kana never met before carries its tour.
+    plan 216): a kana never met before carries its tour.
     """
     pace = resolve_pace(user_id)
     kana_list, cards = _select_cards(

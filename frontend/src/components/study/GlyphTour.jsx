@@ -12,7 +12,7 @@ import { CharDisplay } from './QuizComponents'
 import { TraceBoard } from './TraceBoard'
 import { firstGloss, formatGlossLine } from './gloss'
 
-// ── 初見 — a kana or a kanji met before it is drilled (plan 213) ──
+// ── 初見 — a kana or a kanji met before it is drilled (plan 216) ──
 // The grammar tour's frame (GrammarTour, plan 187) for the other half
 // of the catalogue: a track of stops at the head, one card a stop, the
 // gate at the foot. Where the grammar tour asks, this one shows, then

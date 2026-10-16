@@ -5,7 +5,7 @@ import tours from '../../testing/glyphTour.json'
 import { sampleStroke } from '../../domain/strokePath'
 import '../../index.css'
 
-// ── 初見 — a kana or a kanji met before it is drilled (plan 213) ──
+// ── 初見 — a kana or a kanji met before it is drilled (plan 216) ──
 // Read, write, use: the glyph and what it reads, its strokes traced in
 // turn from the dot to the ring -- a miss answered by what to fix, the
 // stroke drawn for the learner after three, « Show me » drawing the rest

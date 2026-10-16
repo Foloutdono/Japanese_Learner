@@ -100,7 +100,7 @@ export default function KanaRun({ session }) {
   // open, and the advance once they all close. See hooks/useReviewGates.
   const gates = useReviewGates({ advance, sessionKey: storageKey })
 
-  // 初見 (plan 213): a kana never met is shown before it is drilled --
+  // 初見 (plan 216): a kana never met is shown before it is drilled --
   // what it reads, its strokes traced, a few words it is read in.
   const glyphing = glyphGated(card)
 

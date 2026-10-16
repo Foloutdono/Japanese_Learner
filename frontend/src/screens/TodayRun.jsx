@@ -321,7 +321,7 @@ export default function TodayRun({ session }) {
     level: /^grammar_(N[1-5])_/.exec(c.raw_id ?? c.card_id)?.[1],
     pattern: c.grammar, structure: c.structure, meaning: c.meaning, stage: c.stage,
   })
-  // 初見 (plan 213): a kana or a kanji never met is shown before it is
+  // 初見 (plan 216): a kana or a kanji never met is shown before it is
   // drilled -- what it reads, its strokes traced, a few words -- as a
   // grammar point is asked. Seen is the same flag on the queued card.
   const glyphing = (structureKey === 'kana' || structureKey === 'kanji') && glyphGated(card)

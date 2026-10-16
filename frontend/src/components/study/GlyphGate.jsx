@@ -2,7 +2,7 @@ import { apiJson } from '../../lib/api'
 import { useDesk } from '../../hooks/useDesk'
 import { GlyphTour } from './GlyphTour'
 
-// ── The gate before a never-met kana or kanji (plan 213) ──────────
+// ── The gate before a never-met kana or kanji (plan 216) ──────────
 // What a run shows in the card's place the first time a character comes
 // up (TodayRun, KanaRun, KanjiRun), as GrammarGate does for a point: its
 // tour (components/study/GlyphTour.jsx), carried on the card as

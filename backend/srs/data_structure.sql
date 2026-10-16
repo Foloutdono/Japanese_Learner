@@ -955,7 +955,7 @@ CREATE TABLE grammar_tours (
 );
 
 -- ── 初見 — how a kana or a kanji's first tour went ──────────────────
--- Owned by study/glyph_tour.py (plan 213). One row per character a learner
+-- Owned by study/glyph_tour.py (plan 216). One row per character a learner
 -- was toured through before its first card, the first tour only: the
 -- traces that missed and whether the board drew the strokes for them.
 -- Read by nothing the scheduler runs. No cascade from auth (ADR 0010):

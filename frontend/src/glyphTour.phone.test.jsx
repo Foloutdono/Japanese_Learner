@@ -6,7 +6,7 @@ import { sessionKey } from './hooks/useCardSession'
 import tours from './testing/glyphTour.json'
 import './index.css'
 
-// ── 初見 on a phone (plan 213) ────────────────────────────────────
+// ── 初見 on a phone (plan 216) ────────────────────────────────────
 // A kana or a kanji never met opens on its tour in the card's place,
 // in the day's queue and on its own line's run: the track, one card a
 // stop, the board a square inside the screen, the gate docked in reach,
@@ -168,7 +168,7 @@ describe('a kana never met, in the day’s queue, on a phone', () => {
     expect(JSON.parse(post[2].body)).toEqual({ raw_id: 'kana_あ', misses: 0, shown: true })
     expect(screen.container.querySelector('.tour')).toBeNull()
     expect(screen.container.querySelector('.prompt-card')).toBeTruthy()
-    const cached = JSON.parse(localStorage.getItem(sessionKey('today', 'all')))
+    const cached = JSON.parse(localStorage.getItem(sessionKey('today', 'all', 'en')))
     expect(cached[0].lesson_seen).toBe(true)
   }, 20000)
 

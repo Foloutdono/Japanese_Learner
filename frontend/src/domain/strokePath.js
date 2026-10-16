@@ -1,4 +1,4 @@
-// ── 初見 — a KanjiVG stroke as points (plan 213) ─────────────────
+// ── 初見 — a KanjiVG stroke as points (plan 216) ─────────────────
 // The trace is judged against the stroke itself (domain/trace.js), so
 // the stroke is walked here from its start to its end. Without the DOM:
 // a path's getPointAtLength wants the path laid out in a document, and

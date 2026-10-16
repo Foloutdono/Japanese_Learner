@@ -6,7 +6,7 @@ const A1 = 'M31.01,33c0.88,0.88,2.75,1.82,5.25,1.75c8.62-0.25,20-2.12,29.5-4.25c
 // A stroke of 丗 (04e17.svg), whose second curve is a smooth one (s).
 const SMOOTH = 'M52.75,15.25c1.25,0.5,2,2.25,2.25,3.25s0,66.75-0.25,73'
 
-describe('parseStroke (plan 213)', () => {
+describe('parseStroke (plan 216)', () => {
   it('reads relative curves from where the last one ended', () => {
     const segments = parseStroke(A1)
     expect(segments).toHaveLength(3)

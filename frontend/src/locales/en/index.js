@@ -1521,7 +1521,7 @@ const dictionary = {
   tourScore: (r, n) => `${r} of ${n}`,
   tourSheet: "The point's sheet",
   tourStart: 'Start: Choose 1',
-  // 初見 — a kana or a kanji met for the first time (plan 213)
+  // 初見 — a kana or a kanji met for the first time (plan 216)
   glyphAria:         g => `Meet ${g}`,
   glyphNew:          { kana: 'New kana', kanji: 'New kanji' },
   glyphTwin:         { hiragana: 'in hiragana', katakana: 'in katakana' },

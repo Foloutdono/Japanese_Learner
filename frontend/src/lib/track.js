@@ -74,7 +74,7 @@ export const EVENTS = {
   // A grammar point's tour (plan 187b): the level, never the pattern.
   grammar_tour_step: ['level', 'stop', 'outcome'],
   grammar_tour_done: ['level', 'tries', 'helped', 'authored'],
-  // A kana or a kanji's first tour (plan 213): its line, never the character.
+  // A kana or a kanji's first tour (plan 216): its line, never the character.
   glyph_tour_done: ['source', 'misses', 'shown'],
   // The day cleared (plan 191). day_clear and rest_day_used are written
   // by the server (POST /api/today/clear, the rest-day bridge);

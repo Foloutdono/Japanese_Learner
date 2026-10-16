@@ -367,7 +367,7 @@ def get_kanji_cards(level: str | None = None, lang: str = "fr", count: int = Que
     explicitly asking for new cards past today's pace (core/pace.py).
     `radical` scopes the batch to one radical's family instead of a
     level (plan 086). A kanji never met before carries its first-sight
-    tour (初見, plan 213).
+    tour (初見, plan 216).
     """
     pace = resolve_pace(user_id)
     kanji_list, cards = _select_cards(

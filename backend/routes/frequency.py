@@ -359,7 +359,7 @@ def get_frequency_cards(domain: str, tier: int, mode: str, lang: str = "fr", cou
     )
     if not pool:
         return {"error": "Empty tier"}
-    # A kanji never met carries its first-sight tour (初見, plan 213); a
+    # A kanji never met carries its first-sight tour (初見, plan 216); a
     # vocab card is not a glyph and is left as it is.
     mark_glyph_tours(cards, user_id, lang)
     return {"cards": cards, "pace": pace.payload() if pace else None}

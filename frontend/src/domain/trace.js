@@ -1,4 +1,4 @@
-// ── 初見 — whether a traced stroke is the stroke (plan 213) ──────
+// ── 初見 — whether a traced stroke is the stroke (plan 216) ──────
 // The glyph tour's writing stop asks each stroke to be drawn from its
 // start (the full dot) to its end (the ring), along it. Pure geometry
 // in KanjiVG's own units, the 109-unit square its paths are drawn in,
@@ -6,7 +6,7 @@
 // 390px phone a unit is about three pixels.
 //
 // `drawn` is the learner's line as points, `guide` the stroke sampled
-// from its start to its end (TraceBoard reads it off the path itself).
+// from its start to its end (domain/strokePath's sampleStroke).
 
 /** The tolerances, in KanjiVG units. `reach`: how far from the dot a
     stroke may start, or from the ring end -- a fingertip's width.

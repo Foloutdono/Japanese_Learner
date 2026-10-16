@@ -1,4 +1,4 @@
-# ── 初見 — the record of a glyph's first tour (plan 213) ─────────
+# ── 初見 — the record of a glyph's first tour (plan 216) ─────────
 # The tour itself rides on the kana or kanji card that is due one
 # (study/glyph_tour.mark_glyph_tours); this is its terminus, which keeps
 # the first tour and grades nothing. A failed post never holds the run:

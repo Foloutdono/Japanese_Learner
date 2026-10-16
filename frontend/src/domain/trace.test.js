@@ -14,7 +14,7 @@ function arc(n = 40) {
   })
 }
 
-describe('traceVerdict (plan 213)', () => {
+describe('traceVerdict (plan 216)', () => {
   const stroke = line(20, 30, 90, 30)
 
   it('takes a line drawn from the dot to the ring along the stroke', () => {

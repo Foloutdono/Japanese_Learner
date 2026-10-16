@@ -894,7 +894,7 @@ essais ») and keeps the tour a tap away in two plain secondary buttons,
 the tour runs again in the lesson's place, its terminus « Retour à la
 leçon », and records nothing (plan 187e).
 
-### First sight (初見, plan 213)
+### First sight (初見, plan 216)
 
 A kana or a kanji the learner has never met is **shown before it is
 drilled**, in the card's place, as a grammar point is asked: the tour's

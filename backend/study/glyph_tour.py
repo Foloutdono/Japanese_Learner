@@ -1,5 +1,5 @@
 """
-初見 — a kana or a kanji met before it is drilled (plan 213).
+初見 — a kana or a kanji met before it is drilled (plan 216).
 
 A grammar point the learner has never met is asked before it is drilled
 (study/grammar_tour.py, plan 187). A kana or a kanji had no such moment:

@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import { sampleStroke } from '../../domain/strokePath'
 import { traceVerdict } from '../../domain/trace'
 
-// ── 初見 — the trace board (plan 213) ──────────────────────────────
+// ── 初見 — the trace board (plan 216) ──────────────────────────────
 // The glyph tour's writing stop: the glyph's strokes as KanjiVG draws
 // them, each to be traced in its turn from its start (a full dot) to its
 // end (a ring). The board is the writing board's slab (the sumi square

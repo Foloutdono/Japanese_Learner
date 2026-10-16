@@ -293,7 +293,7 @@ export default function KanjiRun({ session }) {
   // comparison against one key ('write') that used to stand in for it.
   const renderer = STUDY_MODES[mode]?.renderer ?? RENDER.FLASHCARD
   const isRadical = STUDY_MODES[mode]?.base === 'radical'
-  // 初見 (plan 213): a kanji never met is shown before it is drilled --
+  // 初見 (plan 216): a kanji never met is shown before it is drilled --
   // what it means and reads, its strokes traced, a few simple words.
   const glyphing = glyphGated(card)
 
