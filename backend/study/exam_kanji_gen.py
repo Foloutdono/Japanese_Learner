@@ -57,8 +57,15 @@ def _build_radical_index() -> dict[int, list[str]]:
     # should look like a character the learner could plausibly
     # confuse the right one for, not an obscure character they've
     # never seen.
+    #
+    # In code-point order: _DECK_CHARS is a set, whose order changes with
+    # every process's string hashing, and a radical's list is shuffled by
+    # the caller's seeded random -- so in set order the same seed drew
+    # other distractors after a restart, and the placement test, which
+    # rebuilds its questions from the seed at every answer, could grade
+    # an answer against a paper the learner was never shown (plan 221).
     index: dict[int, list[str]] = {}
-    for char in _DECK_CHARS:
+    for char in sorted(_DECK_CHARS):
         info = KANJI_RADICALS.get(char)
         if not info:
             continue

@@ -166,6 +166,13 @@ runtime purpose.
   the new level up back as new cards (`forget_assumed`) and deletes no
   answered row; a new seeding path writes `KNOWN_STATE` or it is not
   read as an assumption.
+- **The placement test is replayed from its seed (plan 221).** The climb
+  (`study/placement.walk`) keeps nothing between two answers: it is
+  rebuilt from the seed at each one, in whatever process answers it. So
+  every builder it calls is a pure function of (seed, content) across
+  processes -- a set, or anything built by iterating one, is sorted
+  before a seeded random touches it (`tests/test_placement.py` builds
+  the climb under two hash seeds).
 
 ## Commands
 

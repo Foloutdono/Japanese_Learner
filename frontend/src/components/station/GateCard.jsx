@@ -14,6 +14,7 @@ import { useDesk } from '../../hooks/useDesk'
 import { useMinute } from '../../hooks/useMinute'
 import { Loading } from '../ui/Loading'
 import { CheckIcon, ChevronIcon } from '../ui/Icons'
+import LevelFitLine from './LevelFitLine'
 import { QuietButton } from '../dayclear/kit'
 import { useCredits } from '../../stores/credits'
 import { useProfileSummary } from '../../stores/profileSummary'
@@ -76,7 +77,7 @@ const LINE_TITLE = {
 }
 const titlesOf = t => Object.fromEntries(Object.entries(LINE_TITLE).map(([k, f]) => [k, f(t)]))
 
-export default function GateCard({ today, failed }) {
+export default function GateCard({ today, failed, session = null }) {
   const { t, lang } = useLang()
   const desk = useDesk()
   const credits = useCredits()
@@ -164,6 +165,7 @@ export default function GateCard({ today, failed }) {
       toggle={toggle} toggleLine={toggleLine} take={take} setTake={setTake}
       main={main} setMain={setMain} chosen={lanes.filter(l => !off.has(l.id))}
       credits={credits} metered={metered} enforced={Boolean(credits?.enforced)} t={t} lang={lang}
+      session={session}
     />
   )
 }
@@ -444,7 +446,7 @@ function Services({ lines, isOn, share, toggle, toggleLine, choices, main, setMa
 // row that says what the run is (and opens the services) over the gate.
 // The foot never leaves the screen (owner-directed): it docks on the
 // tab bar on the page's own ground, and the air gives way first.
-function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, setTake, main, setMain, chosen, credits, metered, enforced, t, lang }) {
+function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, setTake, main, setMain, chosen, credits, metered, enforced, t, lang, session }) {
   const [open, setOpen] = useState(false)
   const run = runOf({ today, isOn, take, metered, credits, enforced, lang })
   const choices = choicesOf(chosen, run.chosenTotal, run.spr, t)
@@ -481,6 +483,8 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
       <span className="tdy__air" aria-hidden="true" />
 
       <div className="tdy__foot">
+        {/* The level that does not fit (plan 221), over the run's own row. */}
+        <LevelFitLine session={session} />
         <button type="button" className="tdy-door" onClick={() => { playClick(); setOpen(true) }} aria-haspopup="dialog">
           <span className="tdy-door__what">
             <b>{main ? t.gateModesMainName : t.gateModesAllName}</b>
@@ -515,7 +519,7 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
 // of the canvas): a line a row, the day a strip of four figures over a
 // slim week, so the column holds a five-line day without scrolling
 // down to the short desk.
-function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, main, setMain, chosen, credits, metered, enforced, t, lang }) {
+function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, main, setMain, chosen, credits, metered, enforced, t, lang, session }) {
   const run = runOf({ today, isOn, take, metered, credits, enforced, lang })
   const choices = choicesOf(chosen, run.chosenTotal, run.spr, t)
   const { mix, parts, short, fare } = dialOf({ lines, isOn, run, metered })
@@ -557,6 +561,7 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
         </div>
       </div>
       <aside className="tdy-desk__col">
+        <LevelFitLine session={session} />
         <section className="tdy-desk__panel tdy-desk__svc" aria-label={t.gateServicesTitle}>
           <Services
             lines={lines} isOn={isOn} share={run.share} toggle={toggle} toggleLine={toggleLine}

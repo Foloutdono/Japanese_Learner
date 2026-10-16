@@ -138,6 +138,9 @@ describe('the boarding on a 390x667 handset', () => {
     // prose. It is the case that failed, and the goal behind it is the
     // same rows, one fewer.
     await click(screen, '[data-kana="both"]')
+    await record()                                    // choose it or find it
+    await click(screen, '[data-how="pick"]')
+    await click(screen, '[data-action="continue"]')
     await record()                                    // level
     await click(screen, '[data-level="novice"]')
     await click(screen, '[data-action="continue"]')
@@ -161,9 +164,44 @@ describe('the boarding on a 390x667 handset', () => {
     await record()                                    // pass
 
     expect(Object.keys(over)).toEqual(
-      ['name', 'why', 'kana', 'level', 'goal', 'lines', 'rhythm', 'time', 'plan', 'pass'])
+      ['name', 'why', 'kana', 'levelHow', 'level', 'goal', 'lines', 'rhythm', 'time', 'plan', 'pass'])
     expect(Object.entries(over).filter(([, px]) => px > 0)).toEqual([])
   }, 90000)
+
+  // The test in the boarding (plan 221): its longest kind of question,
+  // a sentence with its gap, four words under it, the levels over it
+  // and its two ways out over the gate -- on the small handset too.
+  it('asks the test\'s longest question without scrolling', async () => {
+    apiJsonWithTimeout.mockImplementation(async () => ({
+      seed: 1, done: false, level: 'N3', perLevel: { N5: { correct: 3, total: 3, cleared: true }, N4: { correct: 4, total: 5, cleared: true } },
+      question: {
+        id: 'q', sectionId: 'N3', kind: 'context', type: 'mcq-text',
+        promptJp: 'この地域では、毎年夏になると大勢の観光客が（　　）ので、道路がとても混雑する。',
+        choices: ['押し寄せる', '打ち明ける', '立ち去る', '見落とす'].map((textJp, i) => ({ id: `c${i + 1}`, textJp })),
+      },
+    }))
+    const screen = await render(
+      <LangProvider>
+        <BoardingFlow
+          session={{ access_token: 'tok' }}
+          initialProfile={{ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 }}
+          onComplete={vi.fn()}
+          dryRun
+        />
+      </LangProvider>
+    )
+    await settle()
+    await click(screen, '[data-action="continue"]')
+    await click(screen, '[data-motive="trip"]')
+    await click(screen, '[data-action="continue"]')
+    await click(screen, '[data-kana="both"]')
+    await click(screen, '[data-how="test"]')
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    expect(stepOf(screen)).toBe('test')
+    expect(screen.container.querySelectorAll('.brd__car:not(.brd__car--out) .mcq-row')).toHaveLength(4)
+    expect(overflowOf(screen)).toBe(0)
+  }, 30000)
 
   // The other road out of the kana (plan 168): one script read, the two
   // words read out as lines, and the first stop under them.

@@ -22,6 +22,7 @@ import NameStep from '../components/boarding/NameStep'
 import WhyStep from '../components/boarding/WhyStep'
 import { KanaStep, KanaReveal } from '../components/boarding/KanaStep'
 import { LevelStep, GoalStep } from '../components/boarding/LevelStep'
+import { LevelHowStep, TestStep } from '../components/boarding/TestStep'
 import LinesStep from '../components/boarding/LinesStep'
 import RhythmStep from '../components/boarding/RhythmStep'
 import TimeStep from '../components/boarding/TimeStep'
@@ -154,8 +155,11 @@ function trackStops(answers) {
   ]
 }
 
-// The stop a screen stands at on the track: the reveal is the kana's.
-const stopOf = step => (step === 'reveal' ? 'kana' : step)
+// The stop a screen stands at on the track: the reveal is the kana's,
+// and the level's question asked first and its test are the level's
+// own (plan 221) -- one question, however it is answered.
+const STOP_OF = { reveal: 'kana', levelHow: 'level', test: 'level' }
+const stopOf = step => STOP_OF[step] ?? step
 
 export default function BoardingFlow({
   session, initialProfile, onComplete, onExit = null, onSignIn = null,
@@ -175,6 +179,8 @@ export default function BoardingFlow({
     kana: null,
     levelChoice: null,   // 'novice' | 'N5'..'N1' on the level list
     jlpt: null,          // the level the office stores
+    levelHow: null,      // 'pick' | 'test': how the level is found (plan 221)
+    placed: null,        // the test's verdict, when it was taken
     goal: null,
     lines: LINES,        // what to learn: any of vocab / kanji / grammar
     rhythm: RECOMMENDED_RHYTHM,
@@ -298,6 +304,16 @@ export default function BoardingFlow({
     setStep(next)
   }
 
+  // On past a screen that is not kept behind the next one: the test,
+  // done or left, is not a question Back returns to -- Back from the
+  // line goes to the question before it, whose answer can start a
+  // fresh test (plan 221).
+  function goPast(next) {
+    mark(step, next, 'fwd')
+    if (!REDUCED) setLeaving({ step, dir: 'fwd' })
+    setStep(next)
+  }
+
   function back() {
     if (history.length === 0) return
     const prev = history[history.length - 1]
@@ -411,8 +427,32 @@ export default function BoardingFlow({
       go('reveal')
     } else {
       set({ kana })
+      go('levelHow')
+    }
+  }
+
+  // Choose the level, or let the test find it (plan 221, the owner's B).
+  // Choosing clears a verdict an earlier test left: the line is then
+  // the learner's word alone.
+  function continueHow() {
+    if (answers.levelHow === 'test') {
+      go('test')
+    } else {
+      set({ placed: null })
       go('level')
     }
+  }
+
+  // The verdict: the line with the stop the answers reached chosen,
+  // still the learner's to change.
+  function placedBy(result) {
+    set({ placed: result, levelChoice: result.recommendedLevel })
+    goPast('level')
+  }
+
+  function skipTest() {
+    set({ placed: null })
+    goPast('level')
   }
 
   function continueReveal() {
@@ -524,6 +564,11 @@ export default function BoardingFlow({
           // The chosen names joined, never text a learner typed.
           lines: answers.lines.join(','),
           notifications: answers.notifications,
+          // How the level was found (plan 221), and where the test placed
+          // the learner when they took it -- beside `level`, what they
+          // boarded at, so the two can be read apart.
+          ...(answers.levelHow ? { level_how: answers.placed ? 'test' : 'pick' } : {}),
+          ...(answers.placed ? { placed: answers.placed.recommendedLevel } : {}),
           // The same measure across the whole line: does the boarding
           // as a whole ask for too much of someone's evening?
           ms: watches.current?.total.read() ?? 0,
@@ -561,7 +606,9 @@ export default function BoardingFlow({
   const lineStops = stops
   const hubNo = key => String(lineStops.indexOf(key) + 1).padStart(2, '0')
 
-  function renderStep(key) {
+  // `leaving`: the car pulling out, drawn for the pull and dropped --
+  // a screen that fetches as it mounts (the test) is drawn still there.
+  function renderStep(key, leaving = false) {
     switch (key) {
       case 'name':
         return (
@@ -585,8 +632,12 @@ export default function BoardingFlow({
         return <KanaStep value={answers.kana} onAnswer={answerKana} />
       case 'reveal':
         return <KanaReveal onContinue={continueReveal} first={kanaStop} />
+      case 'levelHow':
+        return <LevelHowStep value={answers.levelHow} onChange={v => pick({ levelHow: v })} onContinue={continueHow} no={hubNo('level')} />
+      case 'test':
+        return <TestStep session={session} onResult={placedBy} onPick={skipTest} still={leaving} />
       case 'level':
-        return <LevelStep volumes={volumes} value={answers.levelChoice} onChange={v => pick({ levelChoice: v })} onContinue={continueLevel} no={hubNo('level')} />
+        return <LevelStep volumes={volumes} value={answers.levelChoice} onChange={v => pick({ levelChoice: v })} onContinue={continueLevel} no={hubNo('level')} placed={answers.placed} />
       case 'goal':
         return (
           <GoalStep
@@ -766,7 +817,7 @@ export default function BoardingFlow({
         <div className="brd__cars">
           {leaving && (
             <div key={`out:${leaving.step}`} className="brd__car brd__car--out" data-dir={leaving.dir} data-car={desk ? leaving.step : undefined} aria-hidden="true" inert>
-              {renderStep(leaving.step)}
+              {renderStep(leaving.step, true)}
             </div>
           )}
           <div key={step} className={`brd__car${leaving ? ' brd__car--in' : ''}`} data-dir={leaving?.dir ?? 'none'} data-car={desk ? step : undefined}>

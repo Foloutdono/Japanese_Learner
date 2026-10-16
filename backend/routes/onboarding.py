@@ -1,8 +1,11 @@
 # ── みどりの窓口 — the onboarding endpoints ──────────────────────
 # Four routes, all synchronous, none touching the exam pipeline:
 #
-#   POST /api/onboarding/placement        a fresh 12-question paper
-#   POST /api/onboarding/placement/score  grade it, recommend a level
+#   POST /api/onboarding/placement/start  the climb's first question (plan 221)
+#   POST /api/onboarding/placement/answer the next one, or where to board
+#   POST /api/onboarding/placement        a fresh 12-question paper, and
+#   POST /api/onboarding/placement/score  its grade: the fixed test, kept
+#                                         for a client built before 221
 #   POST /api/onboarding/complete         stamp level + pace + onboarded_at
 #                                         (+ the boarding's own answers,
 #                                         plan 075: motive, kana, rhythm,
@@ -51,7 +54,7 @@ from study.dictation import measure_forms
 from study.exam_scoring import flatten_questions, score_attempt
 from study.level_rule import KANA_KNOWN
 from study.modes import resolve as resolve_mode
-from study.placement import build_placement_paper, recommend_level, strip_answers
+from study.placement import PER_LEVEL, build_placement_paper, recommend_level, strip_answers, walk
 from study.romaji import sentence_romaji, sentence_words
 
 router = APIRouter()
@@ -78,6 +81,24 @@ class ScorePayload(BaseModel):
     # Partial submissions are legal — "stop here, this is too hard" is
     # the early exit, and unanswered questions simply score as wrong.
     answers: dict[str, str] = {}
+
+
+class ClimbPayload(BaseModel):
+    seed: int = Field(ge=0, lt=2 ** _SEED_BITS)
+    # Every answer so far, question id -> choice id: the climb is
+    # replayed from its seed over them (study/placement.walk), so the
+    # server keeps nothing between two questions. Five levels of five
+    # questions at most, each id and choice a short token.
+    answers: dict[str, str] = Field(default_factory=dict, max_length=len(LEVELS) * PER_LEVEL)
+    # "Too hard? Stop here": the level being asked is not cleared.
+    stop: bool = False
+
+    @field_validator("answers")
+    @classmethod
+    def short_tokens(cls, v: dict[str, str]) -> dict[str, str]:
+        if any(len(k) > 40 or len(c) > 8 for k, c in v.items()):
+            raise ValueError("an answer is a question id and a choice id")
+        return v
 
 
 DEPARTURES = ("am", "noon", "pm")
@@ -241,6 +262,21 @@ class CompletePayload(BaseModel):
         if self.goalTargetDate is not None and self.goalLevel is None:
             raise ValueError("goalTargetDate needs a goalLevel — a date with no destination is not a goal")
         return self
+
+
+@router.post("/api/onboarding/placement/start")
+def start_climb(user_id: str = Depends(get_user_id)):
+    """The climb's first question, at N5, and the seed every later
+    answer is replayed from (plan 221)."""
+    seed = random.randrange(2 ** _SEED_BITS)
+    return {"seed": seed, **walk(seed, {})}
+
+
+@router.post("/api/onboarding/placement/answer")
+def answer_climb(payload: ClimbPayload, user_id: str = Depends(get_user_id)):
+    """The next question, or, once a level is not cleared (or N1 is),
+    where to board. Never the answer key."""
+    return {"seed": payload.seed, **walk(payload.seed, payload.answers, stop=payload.stop)}
 
 
 @router.post("/api/onboarding/placement")

@@ -203,11 +203,21 @@ const question = (id, sectionId, texts, answer) => ({
   choices: texts.map((textJp, i) => ({ id: `${id}-c${i + 1}`, textJp })), answer,
 })
 
-describe('the placement retake on the desk', () => {
+describe('the placement test on the desk', () => {
+  // The climb (plan 221): one question at a time, the server answering
+  // each with the next one or the verdict.
+  const climb = (...steps) => {
+    const queue = [...steps]
+    apiJsonWithTimeout.mockImplementation(async () => queue.shift())
+  }
+  const asking = (q, level = q.sectionId) => ({ seed: 7, done: false, question: q, level, perLevel: {} })
+
   it('picks with a digit and goes on with Enter, from a clicked choice too', async () => {
-    apiJsonWithTimeout.mockImplementation(async path => path === '/api/onboarding/placement'
-      ? { seed: 7, questions: [question('q1', 'N5', ['一', '二', '三', '四'], 'q1-c2'), question('q2', 'N4', ['東', '西', '南', '北'], 'q2-c1')] }
-      : { recommendedLevel: 'N5', correct: 2, total: 2, perLevel: {} })
+    climb(
+      asking(question('q1', 'N5', ['一', '二', '三', '四'], undefined)),
+      { ...asking(question('q2', 'N4', ['東', '西', '南', '北'], undefined)), perLevel: { N5: { correct: 3, total: 3, cleared: true } } },
+      { seed: 7, done: true, recommendedLevel: 'N4', correct: 4, total: 5, perLevel: {} },
+    )
     const onResult = vi.fn()
     await render(
       <LangProvider>
@@ -219,30 +229,37 @@ describe('the placement retake on the desk', () => {
     expect(go.getAttribute('aria-keyshortcuts')).toBe('Enter')
     expect(go.querySelector('.desk-kbd')).not.toBeNull()
     expect($$('.mcq-row').map(r => r.getAttribute('aria-keyshortcuts'))).toEqual(['1', '2', '3', '4'])
+    expect($('.onb-climb__rung--at').textContent).toBe('N5')
 
     await userEvent.keyboard('2')
     await settle()
     expect($$('.mcq-row')[1].getAttribute('aria-checked')).toBe('true')
     await userEvent.keyboard('{Enter}')
-    await settle()
-    expect($('.exam-question, .mcq-list')?.textContent ?? document.body.textContent).toContain('東')
+    await settle(100)
+    const first = apiJsonWithTimeout.mock.calls.find(c => c[0] === '/api/onboarding/placement/answer')
+    expect(JSON.parse(first[2].body)).toEqual({ seed: 7, answers: { q1: 'q1-c2' } })
+    expect(document.body.textContent).toContain('東')
+    // The next question arrives with nothing picked, a level up.
+    expect($$('.mcq-row').some(r => r.getAttribute('aria-checked') === 'true')).toBe(false)
+    expect($('.onb-climb__rung--done').textContent).toBe('N5')
+    expect($('.onb-climb__rung--at').textContent).toBe('N4')
 
     await userEvent.click($$('.mcq-row')[0])
     await userEvent.keyboard('{Enter}')
     await settle(200)
-    const score = apiJsonWithTimeout.mock.calls.find(c => c[0] === '/api/onboarding/placement/score')
-    expect(JSON.parse(score[2].body).answers).toEqual({ q1: 'q1-c2', q2: 'q2-c1' })
+    const calls = apiJsonWithTimeout.mock.calls.filter(c => c[0] === '/api/onboarding/placement/answer')
+    expect(JSON.parse(calls.at(-1)[2].body).answers).toEqual({ q1: 'q1-c2', q2: 'q2-c1' })
     expect(onResult).toHaveBeenCalledTimes(1)
+    expect(onResult.mock.calls[0][0].recommendedLevel).toBe('N4')
   })
 
-  it('leaves Stop its own Enter', async () => {
-    apiJsonWithTimeout.mockImplementation(async path => path === '/api/onboarding/placement'
-      ? { seed: 7, questions: [question('q1', 'N5', ['一', '二', '三', '四'], 'q1-c2'), question('q2', 'N4', ['東', '西', '南', '北'], 'q2-c1')] }
-      : { recommendedLevel: 'N5', correct: 0, total: 2, perLevel: {} })
+  it('leaves Stop and Cancel their own Enter', async () => {
+    climb(asking(question('q1', 'N5', ['一', '二', '三', '四'], undefined)), { seed: 7, done: true, recommendedLevel: 'N5', correct: 0, total: 0, perLevel: {} })
     const onCancel = vi.fn()
+    const onResult = vi.fn()
     await render(
       <LangProvider>
-        <div className="phone phone--desk"><div className="phone__content"><PlacementTest session={{}} onResult={() => {}} onCancel={onCancel} /></div></div>
+        <div className="phone phone--desk"><div className="phone__content"><PlacementTest session={{}} onResult={onResult} onCancel={onCancel} /></div></div>
       </LangProvider>
     )
     await settle(200)
@@ -252,6 +269,14 @@ describe('the placement retake on the desk', () => {
     await userEvent.keyboard('{Enter}')
     await settle()
     expect(onCancel).toHaveBeenCalledTimes(1)
+    expect(apiJsonWithTimeout.mock.calls.some(c => c[0] === '/api/onboarding/placement/answer')).toBe(false)
+
+    $('[data-action="climb-stop"]').focus()
+    await userEvent.keyboard('{Enter}')
+    await settle(100)
+    const stop = apiJsonWithTimeout.mock.calls.find(c => c[0] === '/api/onboarding/placement/answer')
+    expect(JSON.parse(stop[2].body)).toEqual({ seed: 7, answers: {}, stop: true })
+    expect(onResult).toHaveBeenCalledTimes(1)
   })
 })
 

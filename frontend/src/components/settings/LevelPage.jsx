@@ -168,7 +168,9 @@ export function LevelPage({ session }) {
 // A move down gives back the cards the level assumed known and never
 // asked about (plan 221): they are new again. The sheet prints how many
 // where it printed the zero deleted -- the body still says nothing is.
-function LevelSheet({ from, to, preview, t, lang, onConfirm, onClose }) {
+// Shared with Today's level-fit line (station/LevelFitLine), whose Stay
+// is an answer of its own (`onStay`) where here it only closes.
+export function LevelSheet({ from, to, preview, t, lang, onConfirm, onClose, onStay = onClose }) {
   const up = preview.direction !== 'down'
   const returned = preview.returned ?? 0
   const title = up ? t.levelUpTitle(to) : t.levelDownTitle(to)
@@ -196,7 +198,7 @@ function LevelSheet({ from, to, preview, t, lang, onConfirm, onClose }) {
         <span className="btn-depart__jp">{up ? t.levelUpGo(to) : t.levelDownGo(to)}</span>
         <span className="btn-depart__go" aria-hidden="true">▶</span>
       </button>
-      <button type="button" className="btn-secondary" onClick={onClose}>
+      <button type="button" className="btn-secondary" onClick={onStay}>
         {t.levelStay(from ?? to)}
       </button>
     </Sheet>

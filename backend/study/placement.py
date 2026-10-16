@@ -1,5 +1,15 @@
 # ── 実力診断 — the onboarding placement test ──────────────────────
-# Twelve deterministic questions laddering N5→N1, built entirely from
+# Since plan 221 the test CLIMBS (the owner's call): it asks at N5, and
+# while the learner is good enough it goes on to the next level, as far
+# as N1; the first level they do not clear is where they board. Each
+# level asks until its verdict is certain -- three right in a row, or
+# four right, clears it; a second miss ends it -- so at most five
+# questions a level, and a learner who knows nothing is done in two.
+# level_block() and walk() below are that test; the fixed paper of
+# twelve (PLACEMENT_LADDER, build_placement_paper, recommend_level)
+# still answers the two routes a client built before it calls.
+#
+# The questions are built entirely from
 # data this project already owns and scored by study/exam_scoring.py's
 # pure functions. No LLM, no network, no database: a paper builds in
 # milliseconds, which is the whole reason this module exists instead of
@@ -19,12 +29,14 @@
 # it draws from the module-global `random`, which would make the
 # score-time regeneration disagree with the paper the learner saw.
 import random
+from functools import lru_cache
 
 from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
 from content.grammar_sentences_data import get_sentences
 from content.vocab_data import VOCAB_BY_LEVEL
 from study.difficulty import LEVELS
 from study.exam_gen_utils import GenerationFailed, make_choices
+from study.exam_scoring import flatten_questions
 from study.exam_kanji_gen import build_orthography_mondai, build_reading_mondai
 from study.exam_vocab_gen import build_vocab_context_mondai
 from study.grammar_match import contains_pattern, verifiable
@@ -173,3 +185,139 @@ def recommend_level(per_section: dict) -> str:
     if cleared_up_to is None:
         return LEVELS[0]
     return LEVELS[min(LEVELS.index(cleared_up_to) + 1, len(LEVELS) - 1)]
+
+
+
+# ── The climb (plan 221) ──────────────────────────────────────────
+# A level's questions, in the order they are asked. The first three
+# decide most levels, so they are three different kinds.
+CLIMB: dict[str, list[str]] = {
+    "N5": ["reading", "context", "grammar", "orthography", "reading"],
+    "N4": ["reading", "grammar", "context", "orthography", "reading"],
+    "N3": ["reading", "context", "grammar", "orthography", "context"],
+    "N2": ["orthography", "grammar", "reading", "context", "grammar"],
+    "N1": ["reading", "context", "grammar", "orthography", "reading"],
+}
+
+# A level is CLEARED by three right before any miss, or by four right;
+# it is NOT cleared at the second miss. Five questions always settle it.
+# Guessing clears a level about one time in forty; a learner who knows
+# 60% of a level clears it about half the time, and one who knows 90%
+# nineteen times in twenty -- where the old two-of-three cleared that
+# 60% learner four times in five, and the level rule then marked the
+# whole level known.
+CLEAR_STRAIGHT = 3
+CLEAR_RIGHT = 4
+FAIL_WRONG = 2
+PER_LEVEL = CLEAR_RIGHT + FAIL_WRONG - 1
+
+assert all(len(kinds) == PER_LEVEL for kinds in CLIMB.values())
+
+
+def judge(results: list[bool]) -> str | None:
+    """A level's answers so far -> "cleared", "failed", or None while
+    undecided."""
+    right = sum(1 for r in results if r)
+    wrong = len(results) - right
+    if wrong == 0 and right >= CLEAR_STRAIGHT:
+        return "cleared"
+    if right >= CLEAR_RIGHT:
+        return "cleared"
+    if wrong >= FAIL_WRONG:
+        return "failed"
+    return None
+
+
+@lru_cache(maxsize=256)
+def _climb_block(seed: int, level: str) -> tuple[tuple[dict, ...], frozenset, frozenset]:
+    """The level's questions for this seed, and the words and prompts
+    used up to and including it -- so a later level never repeats one.
+
+    Each level has a random stream of its own, so the test builds only
+    the levels it reaches: a context question costs a tenth of a
+    second, and the score of every answer rebuilds the test from its
+    seed. Cached, since the same seed is asked again at every answer
+    (learner-independent work, computed once: plan 211). A pure
+    function of (seed, level, content data), like the whole paper."""
+    index = LEVELS.index(level)
+    if index:
+        _, used_words, used_prompts = _climb_block(seed, LEVELS[index - 1])
+        used_words, used_prompts = set(used_words), set(used_prompts)
+    else:
+        used_words, used_prompts = set(), set()
+    rng = random.Random(f"{seed}:{level}")
+    pool = rng.sample(VOCAB_BY_LEVEL[level], len(VOCAB_BY_LEVEL[level]))
+    mondai = []
+    for i, kind in enumerate(CLIMB[level]):
+        number = index * PER_LEVEL + i + 1
+        built = None
+        for attempt in (kind, "reading", "orthography"):
+            spec = {"id": f"pl_{level}_{attempt}_{number}", "official_number": number, "count": 1}
+            try:
+                built = _build_one(attempt, level, spec, pool, used_words, used_prompts, rng)
+                actual_kind = attempt
+                break
+            except GenerationFailed:
+                continue
+        if built is None:
+            raise GenerationFailed(f"placement: every builder failed for {level}/{kind}")
+        for q in built["questions"]:
+            q["kind"] = actual_kind
+        mondai.append(built)
+    questions = flatten_questions({"sections": [{"id": level, "label": level, "mondai": mondai}]})
+    return tuple(questions), frozenset(used_words), frozenset(used_prompts)
+
+
+def level_block(seed: int, level: str) -> list[dict]:
+    """The questions the climb asks at `level`, answers included."""
+    return list(_climb_block(seed, level)[0])
+
+
+def walk(seed: int, answers: dict[str, str], stop: bool = False) -> dict:
+    """The climb replayed from its seed over the answers given.
+
+    Returns either the next question to ask -- {"done": False,
+    "question", "level", "perLevel"} -- or the verdict -- {"done": True,
+    "recommendedLevel", "perLevel", "correct", "total"}. `perLevel`
+    holds each level reached: {"correct", "total", "cleared"}, cleared
+    None while it is being asked. `stop` is the learner's "too hard":
+    the level being asked is not cleared, and they board there.
+
+    The learner boards at the first level they do not clear, where
+    there is still something to learn; clearing N1 boards at N1, which
+    has no level above. A level is asked only once the one under it is
+    cleared, so an answer to a level never reached is ignored."""
+    per_level: dict[str, dict] = {}
+    for level in LEVELS:
+        results: list[bool] = []
+        verdict = None
+        for q in level_block(seed, level):
+            verdict = judge(results)
+            if verdict:
+                break
+            if q["id"] not in answers:
+                if stop:
+                    verdict = "failed"
+                    break
+                per_level[level] = _tally(results, None)
+                return {"done": False, "question": strip_answers([q])[0], "level": level, "perLevel": per_level}
+            results.append(answers[q["id"]] == q["answer"])
+        verdict = verdict or judge(results)
+        per_level[level] = _tally(results, verdict == "cleared")
+        if verdict != "cleared":
+            return _verdict(level, per_level)
+    return _verdict(LEVELS[-1], per_level)
+
+
+def _tally(results: list[bool], cleared: bool | None) -> dict:
+    return {"correct": sum(1 for r in results if r), "total": len(results), "cleared": cleared}
+
+
+def _verdict(level: str, per_level: dict) -> dict:
+    return {
+        "done": True,
+        "recommendedLevel": level,
+        "perLevel": per_level,
+        "correct": sum(t["correct"] for t in per_level.values()),
+        "total": sum(t["total"] for t in per_level.values()),
+    }

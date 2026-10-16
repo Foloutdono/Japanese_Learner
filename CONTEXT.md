@@ -39,6 +39,13 @@ read it through the resolver seam (`core/user_level.resolve_level`) rather
 than the column: an explicit per-request choice still beats the stored
 value — see `docs/adr/0005`.
 
+**Placement test** (実力診断) — since plan 221, the climb: asked at N5, a
+level up each time one is cleared (three right in a row, or four right;
+a second miss ends the level), the first level not cleared where the
+learner boards. Offered at the boarding beside choosing the level, and
+in Settings › Level. Stateless: `study/placement.walk` replays it from
+its seed over the answers so far.
+
 **Assumed card** — a card the level rule marked known because the learner
 stands at a level above its stop (`study/level_rule.py`): a mastered row
 `SRSEngine.seed_known` wrote and no answer has touched since
