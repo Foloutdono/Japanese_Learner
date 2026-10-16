@@ -325,6 +325,30 @@ describe('SettingsScreen — the level, the bar and the service', () => {
     expect(apiJson.mock.calls.some(c => c[0] === '/api/profile/learning')).toBe(false)
   })
 
+  it('a move down says how many assumed cards go back to new (plan 224)', async () => {
+    apiJson.mockImplementation(async path => (
+      String(path).startsWith('/api/profile/learning/preview')
+        ? { direction: 'down', setAside: 12, returned: 1347, deleted: 0 }
+        : {}
+    ))
+    // N3 to N4: a level no other test here previews, since a preview is
+    // asked once per level (lib/cachedJson).
+    profile = { ...PROFILE, jlptLevel: 'N3' }
+    await refreshSummary()
+    const screen = await mount('/profile/settings/level')
+    await settle()
+    const stops = [...screen.container.querySelectorAll('.lvlstrip__stop')]
+    stops.find(s => s.textContent.startsWith('N4')).click()
+    await settle()
+    const sheet = document.querySelector('[role="dialog"].lvl-sheet')
+    const figs = [...sheet.querySelectorAll('.lvl-sheet__fig')].map(f => f.textContent)
+    expect(figs).toHaveLength(2)
+    expect(figs[0]).toContain('12')
+    expect(figs[1]).toMatch(/1\D?347/)
+    expect(figs[1]).toContain('Redevenues nouvelles')
+    expect(sheet.querySelector('.lvl-sheet__body').textContent).toContain('nouvelles')
+  })
+
   it('the bars write, and are the bars they offer', async () => {
     const screen = await mount('/profile/settings/rating')
     await settle()

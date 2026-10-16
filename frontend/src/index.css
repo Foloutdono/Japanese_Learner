@@ -2186,12 +2186,27 @@ a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; t
   align-items: baseline;
   justify-content: space-between;
 }
-.onb-test__level {
-  font-family: var(--font-serif);
-  font-size: 1.3rem;
+/* The climb's levels (plan 224): how many questions the test asks is
+   the answers' doing, so its head draws the levels rather than a count
+   -- the ones cleared in the pass's gold, the one being asked ringed,
+   the rest ahead. In the boarding's test too. */
+.onb-climb { display: flex; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
+.onb-climb__rung {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  box-sizing: border-box;
+  border: 1.5px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
   font-weight: 700;
+  color: var(--text-secondary);
 }
-.onb-test__progress { color: var(--text-secondary); font-size: 0.85rem; }
+.onb-climb__rung--done { border-color: var(--accent2); background: var(--accent2); color: var(--text-on-fill); }
+.onb-climb__rung--at { border: 2.5px solid var(--accent2); color: var(--text-primary); }
 .onb-test__instructions { color: var(--text-secondary); font-size: 0.9rem; }
 .onb-test__escape {
   display: flex;
@@ -8544,6 +8559,18 @@ textarea:focus-visible {
 .tdy-door__what { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tdy-door__what b { font-weight: 700; color: var(--text-primary); }
 .tdy-door__go { display: inline-flex; align-items: center; gap: var(--sp-1); font-weight: 600; color: var(--text-primary); }
+/* The level that does not fit (plan 224): the run's row's shape, a ring
+   in the state's ink before its figures -- a stop behind the level the
+   checks say is not known, or a level already behind the learner. */
+.tdy-fit { flex: none; }
+.tdy-fit__ring {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--warning);
+  border-radius: var(--r-pill);
+}
+.tdy-fit--up .tdy-fit__ring { border-color: var(--success); }
 
 /* ── The services: the sheet on a phone, the column on the desk ──
    No title over either choice (the owner's word): an option says what
@@ -24456,6 +24483,37 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 }
 .brd-way__name { font-size: var(--fs-body); font-weight: 700; line-height: 1.25; text-wrap: balance; }
 
+/* ── 04 the level asked first, and its test (plan 224) ──
+   Choose it or let the test find it: two ways on the junction's one
+   rung, each with a line under its name. The test stands in the car's
+   stage, the climb's levels over the question, its two ways out over
+   the gate. A level the test asked carries its score on the line, in
+   the pass's gold where it was cleared. */
+.brd-how__code { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; }
+.brd-how__desc { font-size: var(--fs-sm); line-height: 1.3; color: var(--text-secondary); text-wrap: balance; }
+/* A rung tighter than the stage's own gaps: a sentence, its four words,
+   the levels and the two ways out hold on a 667px handset. */
+.brd-test { gap: var(--sp-3); }
+.brd-test > .onb-climb { justify-content: center; }
+.brd-test > .onb-climb > .onb-climb__rung { width: 30px; height: 30px; }
+/* The word or sentence asked reads at a name's rank, not as a caption. */
+.brd-test .exam-question__prompt { margin-bottom: var(--sp-4); font-size: var(--fs-title); line-height: 1.4; }
+.brd-test .mcq-row + .mcq-row { margin-top: var(--sp-3); }
+/* A picked answer in the boarding is lit in the selection's gold (一選),
+   not the exam's pigment: the row's own colour, set for the car. */
+.brd-test .mcq-list > .mcq-row { --mcq-color: var(--accent2); }
+.brd-test__kind {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.brd-test__ways { display: flex; justify-content: space-between; gap: var(--sp-5); }
+.brd-tag--miss { border-color: var(--surface-line); color: var(--text-secondary); }
+
 /* ── 03 kana: the crossing ── */
 .brd-cross__words {
   display: flex;
@@ -34406,6 +34464,8 @@ button.brd-stn { cursor: pointer; }
     overflow-y: auto;
   }
   .tdy-desk__col > * { flex-shrink: 0; }
+  /* The level-fit row (plan 224) heads the column, the board under it. */
+  .tdy-desk__col > .tdy-fit { min-height: var(--sp-8); }
   .tdy-desk__panel {
     display: flex;
     flex-direction: column;
@@ -36735,6 +36795,9 @@ button.brd-stn { cursor: pointer; }
   .desk-brd .brd__car[data-dir="back"] { --pull: -1; }
   .desk-brd .brd__car--out { animation: desk-brd-pull-out 180ms cubic-bezier(0.4, 0, 1, 1) forwards; }
   .desk-brd .brd__car[data-car="reveal"] { --desk-brd-w: calc(3 * var(--desk-side-w) + var(--sp-8)); }
+  /* The test (plan 224): the stage as wide as its choices, so the word
+     asked stands over them rather than at the paper's edge. */
+  .desk-brd .brd__car[data-car="test"] { --desk-brd-w: var(--card-w); }
   .desk-brd .brd__stage {
     --desk-at: var(--desk-brd-w);
     width: 100%;

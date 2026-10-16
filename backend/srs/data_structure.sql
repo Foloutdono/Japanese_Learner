@@ -71,7 +71,12 @@ CREATE TABLE review_log (
     -- just SUM(xp_earned) and never drift if the formula's constants
     -- change later.
     xp_earned INTEGER NOT NULL DEFAULT 0,
-    reviewed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    reviewed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- The first answer to a card the level rule marked known (plan 224):
+    -- a check, not a first sighting. A check passed spends no new card
+    -- of the day's pace, and the level-fit watch reads the checks per
+    -- stop (study/level_fit.py).
+    assumed BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE INDEX idx_review_log_card_id

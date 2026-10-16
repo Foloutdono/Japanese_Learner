@@ -345,6 +345,9 @@ describe('the boarding at 390×844', () => {
 
     await click(screen.container, '[data-kana="both"]')
     await settle()
+    await click(screen.container, '[data-how="pick"]')
+    await click(screen.container, '[data-action="continue"]')
+    await settle()
     await click(screen.container, '[data-level="N5"]')
     await click(screen.container, '[data-action="continue"]')
     await settle()
@@ -424,6 +427,9 @@ describe('the boarding at 390×844', () => {
       measure()                                   // the reasons
       await on('[data-action="continue"]')
       await on('[data-kana="both"]')
+      await on('[data-how="pick"]')
+      measure()                                   // choose it or find it
+      await on('[data-action="continue"]')
       await on('[data-level="N5"]')
       measure()                                   // the level
       await on('[data-action="continue"]')
@@ -445,7 +451,7 @@ describe('the boarding at 390×844', () => {
       await on('[data-action="account-skip"]')
       measure()                                   // the pass, the offer over it
       expect(live(screen.container).querySelector('.brd__foot > [data-action="paywall-open"].brd__link')).not.toBeNull()
-      expect(seen).toEqual(['name', 'why', 'level', 'goal', 'lines', 'rhythm', 'time', 'nudge', 'plan', 'account', 'pass'])
+      expect(seen).toEqual(['name', 'why', 'levelHow', 'level', 'goal', 'lines', 'rhythm', 'time', 'nudge', 'plan', 'account', 'pass'])
     } finally {
       shell.nudge = false
       localStorage.removeItem('lang')
