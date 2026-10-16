@@ -40,7 +40,8 @@ import { composing } from '../../lib/keyGuards'
 // quiet line of the rest. The paragraph that explained the bookmark on
 // every visit is gone; which action is filled says it instead:
 //
-//   the server can fetch the link   ->  Get the subtitles
+//   the server can fetch links      ->  Get the subtitles (waiting,
+//                                        disabled, for a video's link)
 //   the bookmark has never been used ->  Set up the bookmark (the
 //                                        walkthrough, where the copy is)
 //   otherwise                        ->  Open on YouTube, then the
@@ -93,6 +94,10 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
   // text platform's Ctrl/⌘+Enter does -- only where the button it
   // presses is drawn.
   const desk = useDesk()
+  // Where the server can fetch, the fetch is the lead whether or not a
+  // link has been pasted yet: the button waits, disabled, for a link
+  // that names a video, rather than the column leading with the
+  // bookmark and switching under the learner's paste.
   const canFetch = Boolean(linkFetch && parsedVideoId)
   const grabbable = !isNative()
   const startLink = () => onStartFromLink(url, { start: startSec, end: endSec })
@@ -107,7 +112,7 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
   const popup = onTutorial ? tutorialPopup : 'dialog'
 
   // Which of the three is the one filled action (see the head).
-  const lead = canFetch ? 'fetch' : !grabbable ? 'file' : grabUsed ? 'open' : 'install'
+  const lead = linkFetch ? 'fetch' : !grabbable ? 'file' : grabUsed ? 'open' : 'install'
 
   const openLink = (className, children) => (
     <a className={className} href={watchUrl ?? 'https://www.youtube.com/'} target="_blank" rel="noopener noreferrer">
@@ -146,6 +151,7 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
             type="button"
             className="btn-primary"
             onClick={startLink}
+            disabled={!canFetch}
             aria-keyshortcuts={desk ? 'Enter' : undefined}
           >
             {t.analyzeThisLink}
