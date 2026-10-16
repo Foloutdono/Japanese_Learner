@@ -13,7 +13,11 @@ import { CloseIcon, OpenBookIcon } from '../ui/Icons'
 // The deep tier is bought once per sentence and cached per language
 // (routes/phrase.py), so "Explain again" is here too: a learner who
 // switched the interface's language gets it in the new one.
-export function ExplainPanel({ explanation, explaining, error, onExplain, t }) {
+//
+// Under an explanation, the asking (plan 220): the runs' own panel
+// (components/study/AskPanel.jsx, mode "analyser"), as on the phone's
+// sheet, a short question about the sentence answered from it.
+export function ExplainPanel({ explanation, explaining, error, onExplain, t, ask = null, askKey = '', askContext = null }) {
   return (
     <section className="anl-explainpanel" aria-label={t.explanationTitle} aria-busy={explaining || undefined}>
       {explanation ? (
@@ -27,6 +31,9 @@ export function ExplainPanel({ explanation, explaining, error, onExplain, t }) {
           {explaining ? t.explaining : explanation ? t.explainAgain : t.explainSentence}
         </button>
       </div>
+      {explanation && ask && (
+        <AskPanel ask={ask} askKey={askKey} context={askContext} open hint={t.askHintSentence} />
+      )}
     </section>
   )
 }

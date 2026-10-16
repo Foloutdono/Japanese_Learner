@@ -1177,6 +1177,12 @@ export default function AnalyzerScreen({ session }) {
   const deskEntry = lookup ?? tokenLookup(stageToken)
   const explainShown = side === 'explain'
   const hasExplanation = Boolean(focused?.explanation)
+  // What a question about the sentence carries (plan 220): the sentence,
+  // its translation and the explanation the learner has just read.
+  const sentenceAsk = focused && askContext({
+    sentence: focused.text, level: focused.level, translation: focused.translation,
+    review: focused.explanation, analysis: focused,
+  })
   const explainingHere = Boolean(explaining[focusIndex])
   const readable = Boolean(focused) && !focused.foreign && focused.available !== false
   const points = readable ? numberedPointsOf(focused) : []
@@ -1506,6 +1512,9 @@ export default function AnalyzerScreen({ session }) {
             explaining={explainingHere}
             error={explainError[focusIndex]}
             onExplain={() => analyzer.explain(focusIndex)}
+            ask={asking}
+            askKey={focused.text}
+            askContext={sentenceAsk}
             t={t}
           />
         )}
@@ -1851,10 +1860,7 @@ export default function AnalyzerScreen({ session }) {
           onClose={closeExplain}
           ask={asking}
           askKey={focused.text}
-          askContext={askContext({
-            sentence: focused.text, level: focused.level, translation: focused.translation,
-            review: focused.explanation, analysis: focused,
-          })}
+          askContext={sentenceAsk}
           t={t}
         />
       )}

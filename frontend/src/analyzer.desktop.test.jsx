@@ -369,6 +369,34 @@ describe('the analyser on the desk (plan 134)', () => {
     expect($('.anl-explainpanel')).toBeNull()
   })
 
+  // Plan 220: under the explanation, a short question about the sentence,
+  // asked through the runs' own /api/ask in the analyser's mode.
+  it('takes a question under the explanation, and the arrows stay in the field', async () => {
+    await mount()
+    await analyze()
+    $('.anl-desk__explain').click()
+    await settle(300)
+    const field = $('.anl-explainpanel .desk-ask__field')
+    expect(field).not.toBeNull()
+    expect(field.disabled).toBe(false)
+    apiFetch.mockImplementation(async (url, _s, opts) => (String(url) === '/api/ask'
+      ? ok({ answer: 'Ici, 「は」 marque le thème.', off_topic: false, left: 39 })
+      : ok([])))
+    field.focus()
+    // An arrow typed in the field walks no token behind it.
+    const before = shown()
+    press('ArrowRight')
+    await settle()
+    expect(shown()).toBe(before)
+    $('.anl-explainpanel .desk-ask__offer').click()
+    await expect.poll(() => $('.anl-explainpanel .desk-ask__a')?.textContent ?? '').toContain('marque le thème')
+    const [, , init] = apiFetch.mock.calls.find(([u]) => String(u) === '/api/ask')
+    const body = JSON.parse(init.body)
+    expect(body.mode).toBe('analyser')
+    expect(body.review).toBe(EXPLANATION)
+    expect(body.translation).toBe(TRANSLATION)
+  })
+
   it('numbers every point, the particles too, on its card and on the words it sits on, and puts it in focus', async () => {
     passage = GRAMMAR
     await mount()

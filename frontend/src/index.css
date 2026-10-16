@@ -40138,6 +40138,9 @@ button.brd-stn { cursor: pointer; }
     border-radius: var(--r-panel);
   }
   .anl-desk__entry--explain .dict-entry--band > .dict-entry__body { display: none; }
+  /* The asking under the explanation (plan 220): the panel scrolls, so
+     the thread takes the height it holds rather than sharing it. */
+  .anl-explainpanel > .desk-ask { flex: none; }
   /* The swap on the column's edge, as drawn: the card's description and
      the explanation, one press apart. */
   .anl-swap {
