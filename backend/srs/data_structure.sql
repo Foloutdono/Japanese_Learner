@@ -625,8 +625,15 @@ CREATE TABLE exam_papers (
     section_count     INTEGER NOT NULL,
     question_count    INTEGER NOT NULL,
     created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- The identity of a seed paper (plan 221, study/exam_seed.seed_key):
+    -- "{exam_id}#{n}@{hash}", NULL for every paper generated on demand.
+    -- study/exam_seed.py stores the seeds at import, a new hash being a
+    -- changed paper; NULLed when a changed seed retires a sat revision.
+    seed_key          TEXT,
     PRIMARY KEY (exam_id, revision)
 );
+
+CREATE UNIQUE INDEX exam_papers_seed ON exam_papers (seed_key);
 
 CREATE TABLE exam_attempts (
     id          BIGSERIAL PRIMARY KEY,
