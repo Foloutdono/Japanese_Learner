@@ -19,6 +19,9 @@
 //                                         `kana` parameter)
 //   {category: 'kanji',   term}        -- one character
 //   {category: 'grammar', id}          -- a rule, by its card id
+//   {category: 'sentence', term, tr}   -- an entry's example sentence,
+//                                         broken down (plan 211,
+//                                         dictionary/SentenceFrame)
 // `lookupKey` is the React key the sheet is mounted under: a new entry
 // starts a new ‹ stack rather than pushing onto the last one's.
 //

@@ -16014,6 +16014,41 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   line-height: 1.5;
   color: var(--text-secondary);
 }
+/* The example as a door to its breakdown (plan 211): the same lines,
+   a chevron at the end saying it leads somewhere, a wash under the
+   press. Its box reaches past the lines by a rung so the text stays on
+   the column it is printed on. */
+.dict-ex--door {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--sp-3);
+  width: calc(100% + 2 * var(--sp-3));
+  margin: 0 calc(-1 * var(--sp-3));
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-card);
+  font-weight: 400;
+  text-align: left;
+}
+.dict-ex--door:hover { filter: none; background: var(--chip-bg); }
+.dict-ex--door:active { background: var(--chip-bg); }
+.dict-ex--door .dict-ex__tr { display: block; }
+.dict-ex__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+.dict-ex__go { flex: none; color: var(--text-secondary); }
+
+/* An example broken down, in the lookup's stack (plan 211): the
+   entry's head with its ‹ and ✕, then the breakdown's rows. */
+.dict-sent__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5) var(--sp-8);
+}
 
 /* ── How it's written ──────────────────────────────────────
    One hairline lattice: the stroke-order sheet spanning every figure
@@ -26577,7 +26612,8 @@ button.brd-stn { cursor: pointer; }
    than its point says so at the right (GrammarLesson's registerTag):
    a ring in the ink, as a chip is drawn, never a fill. */
 .gl-block--examples .dict-examples { gap: 0; }
-.gl-block--examples .dict-ex {
+.gl-block--examples .dict-ex,
+.gl-block--examples .dict-ex--door .dict-ex__body {
   display: grid;
   grid-template-columns: var(--sp-5) minmax(0, 1fr) auto;
   grid-template-areas:
@@ -26585,7 +26621,17 @@ button.brd-stn { cursor: pointer; }
     ". tr tr";
   align-items: baseline;
   column-gap: var(--sp-3);
-  padding-block: var(--sp-3);
+}
+.gl-block--examples .dict-ex { padding-block: var(--sp-3); }
+/* A sentence that opens its breakdown (plan 211): the row is the door,
+   its lines the grid above, the chevron at its end. */
+.gl-block--examples .dict-ex--door {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+  padding-inline: 0;
+  border-radius: 0;
 }
 .gl-block--examples .dict-ex:first-child { padding-top: 0; }
 .gl-block--examples .dict-ex + .dict-ex { border-top: 1px solid var(--surface-line); }

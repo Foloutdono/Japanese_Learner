@@ -133,7 +133,7 @@ function registerTag(point, ex, t) {
   return t.glRegister?.[ex.register] ?? ex.register
 }
 
-export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, onClose, onBack }) {
+export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, onClose, onBack, onExample }) {
   const { t, lang } = useLang()
   const [showTr, setShowTr] = useState(true)
   // 発見 again (plan 187e): the plate keeps the tour a tap away, from its
@@ -254,6 +254,7 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
             <div className="dict-examples">
               {examples.map((ex, i) => (
                 <ExampleSentence key={i} ex={{ ...ex, segments: ex.furigana }} showTr={showTr}
+                                 onOpen={onExample ? () => onExample(ex) : undefined} openLabel={t.showBreakdown}
                                  senseNumber={i + 1} tag={registerTag(point, ex, t)} />
               ))}
             </div>
