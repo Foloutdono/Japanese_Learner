@@ -1020,7 +1020,9 @@ const phraseAnalyzer = {
   status_new:          'Nouveau',
   status_not_started:  'Pas dans le deck',
   status_due:          'À réviser',
-  sentenceLevel:       'Niveau estimé',
+  // The label and its level as one string, so the French colon is
+  // welded to its word (frenchSpacing) rather than joined in JSX.
+  sentenceLevel:       level => `Niveau estimé : ${level}`,
   unknownWords:        'mots inconnus',
   offDeckWords:        'non enseignés par l\'application',
   iPlusOne:            'Un cran au-dessus de toi',

@@ -1054,7 +1054,7 @@ const phraseAnalyzer = {
   status_new:          'New',
   status_not_started:  'Not in deck',
   status_due:          'Due now',
-  sentenceLevel:       'Estimated level',
+  sentenceLevel:       level => `Estimated level: ${level}`,
   unknownWords:        'unknown words',
   offDeckWords:        'not taught by the app',
   iPlusOne:            'One step beyond you',

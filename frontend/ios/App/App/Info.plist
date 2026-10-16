@@ -4,8 +4,10 @@
 <dict>
   <key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
+	<!-- fr, as the web app is: a device in neither of the two languages
+	     gets French (lib/locale.js pickInitialLang), here as there. -->
 	<key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
+	<string>fr</string>
 	<key>CFBundleDisplayName</key>
         <string>Tsuji</string>
 	<!-- The languages the shell speaks (plan 210): the usage prompts below

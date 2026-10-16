@@ -1,5 +1,6 @@
 /* The two system prompts the analyzer's photo intake raises, in French
-   (plan 210). The English ones are en.lproj's; Info.plist keeps them too,
-   as the fallback for any other language. */
+   (plan 210). The English ones are en.lproj's. French is also what a
+   device in any other language gets: CFBundleDevelopmentRegion is fr,
+   as the web app falls back to French (lib/locale.js). */
 "NSCameraUsageDescription" = "Prends en photo un texte japonais pour que l’analyseur le lise.";
 "NSPhotoLibraryUsageDescription" = "Choisis la photo d’un texte japonais pour que l’analyseur la lise.";

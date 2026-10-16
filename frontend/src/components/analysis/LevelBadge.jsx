@@ -13,7 +13,7 @@ export function LevelBadge({ level, unknownCount, offDeckCount, t }) {
     <div className="analysis-level-badge">
       {level && (
         <span className="analysis-level-badge__level">
-          {t.sentenceLevel}: {level}
+          {t.sentenceLevel(level)}
         </span>
       )}
       {typeof unknownCount === 'number' && (
