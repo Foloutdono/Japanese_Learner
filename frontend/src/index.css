@@ -1293,8 +1293,11 @@
    is gone below 1100px and the stage is where the Sentence is. A
    44px round target, wearing the rail pin's own + / ✓ — one pin, one
    pair of glyphs, wherever it sits.
-   Pressed, it spends the seal's ink exactly as the stamp does. */
-.anl-head__keep {
+   Pressed, it spends the seal's ink exactly as the stamp does.
+   歌 (plan 215), the song's decks, is the same round door beside it,
+   with no pressed state: it opens a sheet. */
+.anl-head__keep,
+.anl-head__song {
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -1308,14 +1311,20 @@
   color: var(--text-secondary);
   transition: color 0.15s ease, border-color 0.15s ease;
 }
+/* The two stand together at the head's trailing end, whatever spreads
+   the head's other parts apart. */
+.anl-head__song { margin-left: auto; }
 .anl-head__keep:hover,
-.anl-head__keep:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); }
+.anl-head__keep:focus-visible,
+.anl-head__song:hover,
+.anl-head__song:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); }
 .anl-head__keep--on {
   border-color: color-mix(in srgb, var(--stamp-ink) 55%, transparent);
   color: color-mix(in srgb, var(--stamp-ink) 65%, var(--text-primary));
 }
 @media (prefers-reduced-motion: reduce) {
-  .anl-head__keep { transition: none; }
+  .anl-head__keep,
+  .anl-head__song { transition: none; }
 }
 /* The Kept stamp: the seal's ink, as a caption pill. */
 .anl-kept {
@@ -1724,6 +1733,20 @@
   gap: var(--sp-3);
   padding-block: var(--sp-3);
 }
+/* ── 歌 — the song sheet (plan 215) ──
+   The two halves of the song as chips (its words, its lines), the name,
+   the one filled action; once made, the picker's own row, the door to
+   the deck. */
+.anl-song {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.anl-song__error { margin: 0; color: color-mix(in srgb, var(--danger) 50%, var(--text-primary)); }
+.anl-song__made .anl-song__error { padding: var(--sp-4); }
+a.anl-song__deck { color: var(--text-primary); text-decoration: none; }
+a.anl-song__deck:hover .picker-row__name,
+a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; text-underline-offset: 3px; }
 
 /* There is no rule for the rail under 1100px because there is no rail
    under 1100px (2026-09-11). It used to stack above the stage as a

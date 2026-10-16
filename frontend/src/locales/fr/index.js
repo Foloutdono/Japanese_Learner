@@ -1037,6 +1037,16 @@ const phraseAnalyzer = {
   // 保存 (plan 039) — épingler une phrase dans la banque.
   keepSentence:        'Garder cette phrase',
   unkeepSentence:      'Ne plus garder cette phrase',
+  // 歌 (plan 215) — le deck d'une chanson, depuis le résultat de l'analyseur.
+  songDeckOpen:        'Créer un deck à partir de cette chanson',
+  songDeckTitle:       'Apprends-la par cœur',
+  songDeckName:        'Nom du deck',
+  songDeckHolds:       'Contenu du deck',
+  songDeckWords:       'Mots',
+  songDeckLines:       'Paroles',
+  songDeckMaking:      'Création du deck',
+  songDeckFailed:      'Impossible de créer le deck. Réessaie.',
+  songDeckLimit:       'Tu as atteint la limite de decks ou de cartes de ton offre : une partie de la chanson n’a pas été ajoutée.',
   grammarSpotted:      'Grammaire repérée',
   explainSentence:     'Expliquer',
   explainAgain:        'Expliquer à nouveau',
@@ -1777,7 +1787,7 @@ const decks = {
   grammarType:       'Grammaire',
   deckGrammarDesc:   'Points de grammaire uniquement — issus des niveaux JLPT',
   mixedType:         'Mixte',
-  mixedDesc:         'Tes propres cartes, plus des kanji, du vocabulaire et de la grammaire, le tout mélangé',
+  mixedDesc:         'Un peu de tout : mots, kanji, grammaire et tes propres cartes',
 
   // Parcourir les cartes existantes (BrowseCardsMenu.jsx)
   browseBtn:              'Parcourir',

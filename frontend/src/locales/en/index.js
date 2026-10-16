@@ -1071,6 +1071,16 @@ const phraseAnalyzer = {
   // 保存 (plan 039) — pinning a Sentence into the bank.
   keepSentence:        'Keep this sentence',
   unkeepSentence:      'Stop keeping this sentence',
+  // 歌 (plan 215) — a song's own deck, from the analyser's result.
+  songDeckOpen:        'Make a deck of this song',
+  songDeckTitle:       'Make it yours',
+  songDeckName:        'Deck name',
+  songDeckHolds:       'What the deck holds',
+  songDeckWords:       'Words',
+  songDeckLines:       'Lyrics',
+  songDeckMaking:      'Making it',
+  songDeckFailed:      "Couldn't make the deck. Try again.",
+  songDeckLimit:       "Your plan's deck or card limit is reached: part of the song is left out.",
   grammarSpotted:      'Grammar spotted',
   explainSentence:     'Explain',
   explainAgain:        'Explain again',
@@ -1841,7 +1851,7 @@ const decks = {
   grammarType:       'Grammar',
   deckGrammarDesc:   'Grammar points only — from JLPT levels',
   mixedType:         'Mixed',
-  mixedDesc:         'Your own cards plus kanji, vocab and grammar, all mixed',
+  mixedDesc:         'Words, kanji, grammar and your own cards, in one deck',
 
   // Browse existing cards (BrowseCardsMenu.jsx)
   browseBtn:              'Browse',

@@ -136,9 +136,10 @@ EVENTS: dict[str, frozenset[str]] = {
     #
     # NOT A DECK NAME, and not a description: both are learner-typed,
     # which is the rule this whole module exists to keep. `structure` is
-    # the deck's type (one of four), `cards` is a count, `where` is
-    # which surface the follow came from (the shelf block or the library
-    # screen), and `sort` is which ordering was showing. A deck id is
+    # the deck's type (one of routes/decks.py's STRUCTURES), `cards` is
+    # a count, `where` is which surface the follow came from (the shelf
+    # block or the library screen), and `sort` is which ordering was
+    # showing. A deck id is
     # not carried either -- it would make the trail say who follows
     # whom, which is more than "is the library used" needs to know.
     "deck_publish":   frozenset({"structure", "cards"}),
@@ -154,6 +155,11 @@ EVENTS: dict[str, frozenset[str]] = {
     # The kind of entry and the direction, never the key: a key names
     # the word a learner looked up, which is theirs.
     "favorite_toggle": frozenset({"kind", "on"}),
+    # ── 歌 — a song's decks, from the video result (plan 215) ────
+    # How many words and lines went in (0 for the half not taken),
+    # never the song's name: the learner typed it, or the video's title
+    # said it, and either is theirs.
+    "song_deck":       frozenset({"words", "lines"}),
     # ── 発車案内 — the app opened from outside it (plan 156) ──────
     # `via` is `notification` (the daily nudge or an agenda block's
     # reminder, plan 181) or `widget` (a home or

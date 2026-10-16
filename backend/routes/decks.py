@@ -65,6 +65,7 @@ from study.modes import (
     VOCAB as MODE_VOCAB,
     GRADED_FOR_SOURCE,
     GRADED_ORDER_FOR_SOURCE,
+    SOURCES as MODE_SOURCES,
     resolve_for_source,
 )
 import psycopg2.extras
@@ -186,21 +187,33 @@ SOURCES = {
 # ── A deck has ONE STRUCTURE ──────────────────────────────────
 # `type` is the deck's structure, and it decides everything: which app
 # cards can be browsed in, which personal cards can be written, and which
-# study modes the deck offers. There is no 'mixed' any more.
+# study modes the deck offers.
 #
-# Mixed decks were dropped because they made every other question harder
-# for no gain. A deck holding kanji and grammar had to union two sources'
-# modes, and then answer what a mode means for a card from the other
-# source -- which is how a hand-written pair ended up eligible for a
+# Mixed decks were dropped once because they made every other question
+# harder for no gain. A deck holding kanji and grammar had to union two
+# sources' modes, and then answer what a mode means for a card from the
+# other source -- which is how a hand-written pair ended up eligible for a
 # grammar session (see _eligible). One structure per deck makes the deck's
 # modes simply the structure's modes.
+#
+# 'mixed' is back (plan 215) because a song is both: its words, studied
+# as the words they are, and its lines, written cards read aloud -- one
+# deck, not two (owner-directed). It comes back with the answer the first
+# one lacked: in a mixed deck a CARD, not the deck, decides its modes. A
+# written card is a `standard` pair and studies under standard's modes, an
+# app card under its own source's, and a session in one mode serves only
+# the cards whose source that mode belongs to (_mode_source). The deck's
+# modes are the union over the sources it actually holds, in the
+# registry's order.
 #
 # The old model also had this exactly backwards for personal cards: a
 # kanji-typed deck accepted app kanji and NO hand-written cards at all,
 # so a kanji deck was the one place a personal kanji card could not go.
 # Now every structure accepts personal cards OF ITS OWN STRUCTURE, which
-# is what makes "write your own kanji card" a thing that exists.
-STRUCTURES = ("standard", "kana", "kanji", "vocab", "grammar")
+# is what makes "write your own kanji card" a thing that exists; a mixed
+# deck's are front/back pairs.
+MIXED = "mixed"
+STRUCTURES = ("standard", "kana", "kanji", "vocab", "grammar", MIXED)
 
 # Structure -> the one app source it browses in. `standard` is a plain
 # front/back pair with no app source behind it.
@@ -209,17 +222,21 @@ SOURCE_FOR_TYPE = {
     "kanji":   {"kanji"},
     "vocab":   {"vocab"},
     "grammar": {"grammar"},
+    MIXED:     {"kana", "kanji", "vocab", "grammar"},
 }
 
 # Structure -> the registry source its cards study under. A personal
 # kanji-structure card gets kanji's modes, which is the whole point of
-# giving personal cards a structure.
+# giving personal cards a structure. A mixed deck's written cards are
+# standard pairs; its app cards study under their own sources
+# (_mode_source).
 REGISTRY_SOURCE_FOR_TYPE = {
     "standard": MODE_STANDARD,
     "kana":     MODE_KANA,
     "kanji":    MODE_KANJI,
     "vocab":    MODE_VOCAB,
     "grammar":  MODE_GRAMMAR,
+    MIXED:      MODE_STANDARD,
 }
 
 
@@ -241,6 +258,29 @@ def _allows_custom(deck_type: str) -> bool:
 def _registry_source(deck_type: str) -> str:
     """The study-mode source for a deck, falling back to `standard`."""
     return REGISTRY_SOURCE_FOR_TYPE.get(deck_type, MODE_STANDARD)
+
+
+def _mode_source(deck_type: str, card_source: str) -> str:
+    """The registry source ONE card of this deck studies under: the
+    deck's own for every structure but mixed, where a card brings its
+    own -- an app card its source's, a written card ("custom") the
+    standard pair's (plan 215)."""
+    if deck_type == MIXED:
+        return MODE_STANDARD if card_source == "custom" else card_source
+    return _registry_source(deck_type)
+
+
+def _deck_modes(deck_type: str, held: set[str]) -> list[str]:
+    """The modes a deck offers, given the card sources it holds ("custom"
+    for a written card): its structure's, or, for a mixed deck, every
+    held source's in the registry's order -- the 種別 ladder of each, the
+    written cards' last with standard."""
+    if not held:
+        return []
+    if deck_type != MIXED:
+        return list(GRADED_ORDER_FOR_SOURCE[_registry_source(deck_type)])
+    sources = {_mode_source(MIXED, s) for s in held}
+    return [m for src in MODE_SOURCES if src in sources for m in GRADED_ORDER_FOR_SOURCE[src]]
 
 
 # Card stage promotions worth a visual "stamp" on the frontend — same
@@ -843,9 +883,9 @@ class AddAppCardsPayload(BaseModel):
     cards: list[AppCardRef]
 
 
-# One structure per deck. 'mixed' and 'flashcard' are gone: 'mixed' was
-# dropped outright, and 'flashcard' is now called 'standard' to match the
-# study-mode registry's name for the same thing.
+# One structure per deck. 'flashcard' is gone, now called 'standard' to
+# match the study-mode registry's name for the same thing; 'mixed' was
+# dropped and came back with a rule (see STRUCTURES).
 DECK_TYPES = STRUCTURES
 
 
@@ -1844,16 +1884,20 @@ _CARD_STATE = {"not_started": "new", "new": "new", "learning": "learning", "mast
 def _with_states(cards: list[dict], access: DeckAccess, viewer_id: str) -> list[dict]:
     """Set `state` -- due, new, learning or mastered -- on each listed
     card, for the VIEWER: a follower's schedule is their own, under the
-    ids _build_pool studies the cards by."""
-    modes = GRADED_ORDER_FOR_SOURCE[_registry_source(access.type)]
-    raw = [
-        f"custom_{access.deck_id}_{c['id']}" if c["origin"] == "custom" else c["raw_id"]
-        for c in cards
-    ]
-    states = srs.get_states_for(prefixed(raw, viewer_id), modes)
-    for card, raw_id in zip(cards, raw):
-        stats = card_stats(states, viewer_id, raw_id, modes)
-        card["state"] = "due" if stats["due"] else _CARD_STATE.get(stats["status"], "new")
+    ids _build_pool studies the cards by. Each card is read in its own
+    modes, which in a mixed deck are its source's (_mode_source)."""
+    groups: dict[str, list[tuple[dict, str]]] = {}
+    for card in cards:
+        custom = card["origin"] == "custom"
+        raw_id = f"custom_{access.deck_id}_{card['id']}" if custom else card["raw_id"]
+        source = _mode_source(access.type, "custom" if custom else card["source"])
+        groups.setdefault(source, []).append((card, raw_id))
+    for source, members in groups.items():
+        modes = GRADED_ORDER_FOR_SOURCE[source]
+        states = srs.get_states_for(prefixed([raw_id for _, raw_id in members], viewer_id), modes)
+        for card, raw_id in members:
+            stats = card_stats(states, viewer_id, raw_id, modes)
+            card["state"] = "due" if stats["due"] else _CARD_STATE.get(stats["status"], "new")
     return cards
 
 
@@ -2159,7 +2203,8 @@ def add_app_cards(deck_id: str, payload: AddAppCardsPayload, user_id: str = Depe
 def get_deck_modes(deck_id: str, user_id: str = Depends(get_user_id)):
     """
     The study modes this deck offers: its STRUCTURE's modes, from the
-    registry, provided it has at least one card.
+    registry, provided it has at least one card -- or, for a mixed deck,
+    the modes of each source it holds (_deck_modes, plan 215).
 
     This used to union the modes of every source present in the deck,
     which is what made mixed decks expensive. Two sources meant two mode
@@ -2190,11 +2235,11 @@ def get_deck_modes(deck_id: str, user_id: str = Depends(get_user_id)):
     finally:
         conn.close()
 
-    total = custom_count + sum(source_counts.values())
     # In the registry's own order, which is the 種別 ladder — not
     # sorted(), which is the alphabet and put b2f (recall) above f2b
     # (recognition) on every deck in the app.
-    modes = list(GRADED_ORDER_FOR_SOURCE[_registry_source(deck_type)]) if total else []
+    held = {source for source, n in source_counts.items() if n} | ({"custom"} if custom_count else set())
+    modes = _deck_modes(deck_type, held)
 
     return {
         "modes": modes,
@@ -2468,7 +2513,9 @@ def _eligible(pool_entry: dict, mode: str, deck_type: str) -> bool:
     One rule now, because a deck has one structure: the mode must belong
     to that structure's registry source, and the card must be either a
     hand-written card (of that structure) or an app card from the source
-    the structure browses in.
+    the structure browses in. In a mixed deck the mode must belong to the
+    CARD's source (_mode_source), so a vocab session serves its words and
+    a standard one its written pairs, and neither is asked of the other.
 
     What this replaces was `return "flashcard" in mode` for custom cards
     -- a substring test that namespacing quietly broke, since
@@ -2476,7 +2523,7 @@ def _eligible(pool_entry: dict, mode: str, deck_type: str) -> bool:
     could be handed to the branch that renders a rule and its example
     sentences.
     """
-    if mode not in GRADED_FOR_SOURCE[_registry_source(deck_type)]:
+    if mode not in GRADED_FOR_SOURCE[_mode_source(deck_type, pool_entry["source"])]:
         return False
 
     if pool_entry["source"] == "custom":
