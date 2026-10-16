@@ -45,6 +45,7 @@ export const DARK = {
   '--line-exam': '#8a6f51',
   '--line-kakitori': '#3d8562',
   '--line-sakubun': '#8c6296',
+  '--line-kaiwa': '#2c8096',
   '--gate-gold-lit': '#e6bd62',
   '--gate-gold': '#c99a3e',
   '--gate-gold-deep': '#b0852f',
@@ -85,6 +86,7 @@ export const LIGHT = {
   '--line-exam': '#72583b',
   '--line-kakitori': '#226d4c',
   '--line-sakubun': '#744c7e',
+  '--line-kaiwa': '#05697d',
 }
 
 // The scales, the same in both themes.

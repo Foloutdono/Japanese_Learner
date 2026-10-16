@@ -108,11 +108,12 @@ analyser, the question asked after an exercise and Today:
 | Translation | a translation, a "build it" | the sentence in the reader's language, the Japanese typed, the tutor's read |
 | Dictation | | headphones, the rōmaji typed and checked, on its line of three stops |
 | Composition | | the point given, a sentence with it, the tutor's read |
+| Conversation (plan 235) | a reply | the talk as the run draws it (`ConversationRun.jsx`, plan 223's bubbles): their line at the left on the 会話 line's rail, the reply picked at the right on the learner's gold, ticked, each with its voice; under it the three replies, the one picked sent up into the talk. The carousel's own exchange, its most compact one, every reply whole (a reply too long for the panel beside the arrow takes the board's width); any other carousel borrows the restaurant's opening |
 | Mock exams | a mock exam, a spelling quiz | the paper in its four sections, its clock, its score |
 | Analyser | | text, YouTube and photo into one analysed sentence |
 | Questions | | the exercise graded, a question (問) and its short answer (答): the bank's own line on the item's point, else one the bank teaches too |
 | Today | | the day's dial and its lines' arcs, the lines it deals from, and Depart |
-| Vocabulary, Kanji, Grammar, Kana | a word or a theme; a kanji or lookalikes; a lesson, a reply, a trap; a kana | the forgetting curve; a kanji stroke by stroke; rule, scene, quiz; the kana's row, the kana lit in it and being written, stroke by stroke from its stroke data, the pencil's point where the last stroke has got to and its body leaning where it hides the least of the kana; its sound in a bubble over it, the Free tag under the row: drawn alike wherever the kana stands in its row |
+| Vocabulary, Kanji, Grammar, Kana | a word or a theme; a kanji or lookalikes; a lesson, a trap; a kana | the forgetting curve; a kanji stroke by stroke; rule, scene, quiz; the kana's row, the kana lit in it and being written, stroke by stroke from its stroke data, the pencil's point where the last stroke has got to and its body leaning where it hides the least of the kana; its sound in a bubble over it, the Free tag under the row: drawn alike wherever the kana stands in its row |
 
 The impostor is drawn in pictures in these looks, so its rounds there are
 dealt from a theme's pictured words alone (`impostorOf(…, pictured)`, the

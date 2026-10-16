@@ -1317,7 +1317,7 @@ describe('the conversion carousels (plan 234)', () => {
     expect(funnelOf('build', sentencePlan).feature).toBe('translation')
     const studied = {
       translation: 'translation', passage: 'comprehension', lesson: 'grammar', word: 'words', kanji: 'kanji', kana: 'kana',
-      theme: 'words', lookalike: 'kanji', dialogue: 'grammar', trap: 'grammar',
+      theme: 'words', lookalike: 'kanji', dialogue: 'conversation', trap: 'grammar',
     }
     for (const { src, p } of some) if (studied[src.id]) expect(funnelOf('plates', p).feature, src.id).toBe(studied[src.id])
     // Any feature can stand in any carousel's call to action, on either ground.
@@ -1331,6 +1331,30 @@ describe('the conversion carousels (plan 234)', () => {
         }
       }
     }
+  }))
+
+  it('draws a conversation’s call to action as its run: one of its exchanges, every reply whole (plan 235)', () => withPath2D(() => {
+    const joined = rows => rows.map(r => r.t).join('')
+    const dialogues = some.filter(x => x.src.id === 'dialogue')
+    expect(dialogues.length).toBeGreaterThan(0)
+    for (const { p, lang } of dialogues) {
+      expect(funnelOf('plates', p).feature, lang).toBe('conversation')
+      const exchanges = p.funnel.turns.map(tu => [joined(tu.them.rows), ...tu.choices.map(joined)])
+      for (const fmt of [FORMATS.post, FORMATS.story]) {
+        const { ctx, texts } = stubContext()
+        deck('plates', p, fmt, { design: 'clarte' }).find(x => x.key === 'cta').draw(ctx)
+        // Their line (whole, or cut between its sentences) and the three replies, uncut.
+        const drawn = exchanges.find(ex => ex.slice(1).every(jp => texts.includes(jp)))
+        expect(drawn, `${lang} ${fmt.id}`).toBeTruthy()
+        expect(drawn[0].split(/(?<=[。？！])/).every(s => texts.some(t => t.includes(s))), drawn[0]).toBe(true)
+        expect(texts, lang).toContain(FUNNEL[lang].features.conversation.name)
+      }
+    }
+    // Another carousel promoting it borrows a conversation's opening.
+    const { p } = some.find(x => x.src.id === 'sentence' && x.lang === 'en')
+    const { ctx, texts } = stubContext()
+    deck('plates', p, FORMATS.post, { design: 'fiche', feature: 'conversation' }).find(x => x.key === 'cta').draw(ctx)
+    expect(texts).toContain('二人です。')
   }))
 
   it('has a call to action for every practice mode, the questions after them and Today', () => {
