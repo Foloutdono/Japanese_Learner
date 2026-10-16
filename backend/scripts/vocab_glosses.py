@@ -3,7 +3,7 @@ Review the course's glosses (plan 223), in batches.
 
     python -m scripts.vocab_glosses prep DIR --batches 14  # every deck card, as review batches
     python -m scripts.vocab_glosses check FILE             # a reviewer's corrections, before they are applied
-    python -m scripts.vocab_glosses apply DIR              # every DIR/glosses_*.json into the deck
+    python -m scripts.vocab_glosses apply DIR              # DIR/glosses_*.json, then gverify_*.json, into the deck
 
 A card's English gloss is its `meaning` in vocab_deck.json, its French
 the line fr_gloss reads in vocab_fr.json. Both came from an old import
@@ -68,7 +68,7 @@ def _senses(word: dict) -> list[str]:
     return out[:6]
 
 
-def problems(fix: dict, cards: dict) -> list[str]:
+def problems(fix: dict, cards: dict, amending: bool = False) -> list[str]:
     where = f"{fix.get('level')} {fix.get('key')}"
     if (fix.get("level"), fix.get("key")) not in cards:
         return [f"{where}: not a deck card"]
@@ -85,7 +85,8 @@ def problems(fix: dict, cards: dict) -> list[str]:
     if not (fix.get("why") or "").strip():
         out.append(f"{where}: `why` is empty")
     word = cards[(fix["level"], fix["key"])]
-    if fix.get("en") == word.get("meaning") and fix.get("fr", fr_gloss(word, VOCAB_FR)) == fr_gloss(word, VOCAB_FR):
+    # A second reader may put a gloss back as it was.
+    if not amending and fix.get("en") == word.get("meaning") and fix.get("fr", fr_gloss(word, VOCAB_FR)) == fr_gloss(word, VOCAB_FR):
         out.append(f"{where}: changes nothing")
     return out
 
@@ -111,8 +112,8 @@ def _load(path: str) -> dict:
         return json.load(f)
 
 
-def _found(data: dict, cards: dict) -> list[str]:
-    found = [p for fix in data.get("fixes") or [] for p in problems(fix, cards)]
+def _found(data: dict, cards: dict, amending: bool = False) -> list[str]:
+    found = [p for fix in data.get("fixes") or [] for p in problems(fix, cards, amending)]
     seen = set()
     for fix in data.get("fixes") or []:
         pair = (fix.get("level"), fix.get("key"))
@@ -127,7 +128,7 @@ def _found(data: dict, cards: dict) -> list[str]:
 
 def cmd_check(path: str) -> int:
     data = _load(path)
-    found = _found(data, _cards())
+    found = _found(data, _cards(), os.path.basename(path).startswith("gverify_"))
     for line in found:
         print(line)
     print(f"{len(data.get('fixes') or [])} correction(s), {len(data.get('cards') or [])} card note(s), "
@@ -152,6 +153,18 @@ def cmd_apply(in_dir: str) -> int:
                 found.append(f"{os.path.basename(path)}: {pair[0]} {pair[1]}: also corrected elsewhere")
             fixes[pair] = fix
         notes += data.get("cards") or []
+    # A second reader's DIR/gverify_NN.json replaces the first
+    # reviewer's correction of a card, both languages given.
+    amended = set()
+    for path in sorted(glob.glob(os.path.join(in_dir, "gverify_*.json"))):
+        data = _load(path)
+        found += [f"{os.path.basename(path)}: {p}" for p in _found(data, cards, amending=True)]
+        for fix in data.get("fixes") or []:
+            pair = (fix["level"], fix["key"])
+            if pair in amended:
+                found.append(f"{os.path.basename(path)}: {pair[0]} {pair[1]}: also amended elsewhere")
+            amended.add(pair)
+            fixes[pair] = fix
     for line in found:
         print(line)
     if found:
