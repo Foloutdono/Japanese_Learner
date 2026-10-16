@@ -13,8 +13,9 @@
 //   --seconds 60      make only the first minute (to look at a draft)
 //   --stills 12,40    draw those seconds as PNGs, and no video
 //   --format short    the short: 9:16, under a minute (YouTube Shorts, Reels, TikTok)
-//   --music lofi      the bed: trio (the default, plan 219), lofi, or a recorded
-//                     track's path, its credit file beside it (music/README.md)
+//   --music PATH      the bed: a recorded track's path, its credit file beside it
+//                     (music/README.md; music/cool-vibes.mp3 by default), or
+//                     trio or lofi, played by long_video_audio.py (plan 219)
 //   --carousel RECIPE a carousel of the studio as a short video, voiced: the
 //                     studio's "Copy the command" writes the recipe (short.js)
 //
@@ -52,21 +53,34 @@ const OUT = resolve(args.out || join(HERE, 'out'))
 const CACHE = join(HERE, 'cache')
 const WORK = join(OUT, '.work')
 for (const d of [OUT, CACHE, WORK, join(WORK, 'sfx')]) mkdirSync(d, { recursive: true })
-// The bed: played by long_video_audio.py (trio, lofi), or a recorded track
-// whose licence allows it (plan 219b), never without its credit file beside
-// it, whose credit the video's description prints (music/README.md).
+// The bed: a recorded track whose licence allows it (plan 219b), never
+// without its credit file beside it, whose credit the video's description
+// prints (music/README.md); or one long_video_audio.py plays (trio, lofi).
+// The owner's pick is the default: "Cool Vibes", Kevin MacLeod, CC BY 4.0.
 const PLAYED = ['trio', 'lofi']
-let music = args.music ? String(args.music) : null
+const DEFAULT_MUSIC = join(HERE, 'music', 'cool-vibes.mp3')
+let music = args.music ? String(args.music) : DEFAULT_MUSIC
 let musicCredit = null
-if (music && !PLAYED.includes(music)) {
+if (!PLAYED.includes(music)) {
   const file = resolve(music)
   const meta = file.replace(/\.[^./]+$/, '') + '.json'
-  if (!existsSync(file)) throw new Error(`--music: no file ${file}`)
   if (!existsSync(meta)) throw new Error(`--music: ${meta} is missing: a track is used only with its licence and credit written down (carousel/long/music/README.md)`)
   const m = JSON.parse(readFileSync(meta, 'utf8'))
   for (const key of ['title', 'artist', 'licence', 'source', 'credit']) if (!m[key]) throw new Error(`--music: ${meta} has no ${key}`)
-  music = file
-  musicCredit = m.credit
+  // The audio stays out of git: a clone fetches it from its source, where the source is the file itself.
+  if (!existsSync(file) && /\.(mp3|ogg|wav|flac)$/i.test(m.source)) {
+    console.log(`fetching ${m.title} from ${m.source}`)
+    const got = spawnSync('curl', ['-sSLf', '-m', '300', '-o', file, m.source], { stdio: 'inherit' })
+    if (got.status !== 0) spawnSync('rm', ['-f', file])
+  }
+  if (existsSync(file)) {
+    music = file
+    musicCredit = m.credit
+  } else if (args.music) throw new Error(`--music: no file ${file}; fetch it from ${m.source}`)
+  else {
+    console.log(`no ${file} (its source: ${m.source}): the bed is played instead (trio)`)
+    music = 'trio'
+  }
 }
 const python = existsSync(join(BACKEND, '.venv/bin/python')) ? join(BACKEND, '.venv/bin/python') : 'python3'
 const log = (...a) => console.log(new Date().toISOString().slice(11, 19), ...a)

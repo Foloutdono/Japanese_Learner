@@ -1,9 +1,12 @@
 # Recorded music for the videos (plan 219b)
 
 The long videos and the shorts play a bed under the voice. By default it
-is played by `backend/scripts/long_video_audio.py` itself (`--music trio`
-or `--music lofi`, plan 219), and the video owes no one for it. A
-recorded track can take its place:
+is **“Cool Vibes” by Kevin MacLeod** (`cool-vibes.mp3`, CC BY 4.0, the
+owner's pick); the renderer fetches it from its `source` when a clone
+does not have it, and plays the generated trio if it cannot. Any other
+track here takes its place with `--music`, and `--music trio` or
+`--music lofi` is the bed `backend/scripts/long_video_audio.py` plays
+itself (plan 219):
 
 ```bash
 cd frontend
