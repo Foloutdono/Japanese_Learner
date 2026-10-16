@@ -284,7 +284,7 @@ def _is_recognized(code: str) -> bool:
     return code in _RECOGNIZED_CODES or bool(_NEWS_RANK_RE.match(code))
 
 
-# The tooltip behind each chip, in French (plan 213): JMdict's own
+# The tooltip behind each chip, in French (plan 215): JMdict's own
 # "notes" are English, and a French learner hovering "v. godan" read
 # "Godan verb with 'ku' ending". Every code that earns a chip is here;
 # a code missing from it falls back to the English note.
@@ -1381,7 +1381,7 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
 
 
 def _in_french(senses_out: list[dict], examples: list[dict]) -> None:
-    """The French layer over an entry (content/jmdict_fr.py, plan 213),
+    """The French layer over an entry (content/jmdict_fr.py, plan 215),
     in place: a sense's glossary where its English line has French, and
     each example's translation as `tr` -- the field ExampleSentence
     already prefers to `en`. What has no French keeps its English, and

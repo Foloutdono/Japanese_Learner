@@ -89,7 +89,7 @@ def _conn() -> sqlite3.Connection:
         # uri=True + mode=ro: never accidentally write to the shipped DB.
         conn = sqlite3.connect(f"file:{_DB_PATH}?mode=ro", uri=True)
         search_match.register_sql(conn)
-        # The French layer (content/jmdict_fr.py, plan 213), attached so
+        # The French layer (content/jmdict_fr.py, plan 215), attached so
         # a French gloss query can be one predicate over the pool. Its
         # absence only means a French query matches English glosses
         # alone, as it did before it existed.
@@ -108,7 +108,7 @@ def _has_fr() -> bool:
 
 
 def _french_clause(q: str, match: str) -> tuple[str, list]:
-    """The pool words whose French line (plan 213) holds `q` -- one
+    """The pool words whose French line (plan 215) holds `q` -- one
     subquery over the ~20k lines, run once per query rather than per
     pool row, on the line folded at build time (lowercase, no accents),
     so « epee » finds « épée » without a Python call per row. "word"
@@ -376,7 +376,7 @@ def _match(q: str, kana_forms: tuple[str, ...], match: str = "any",
     look — letters that are not romaji, with the glosses turned off.
     """
     clauses, params = [], []
-    # A gloss query also reads the pool's French lines (plan 213), in
+    # A gloss query also reads the pool's French lines (plan 215), in
     # either session language, as the deck half matches both glosses
     # whichever is displayed (routes/dictionary._deck_matches). French
     # is Latin script whether or not it is ASCII: « épée » is a gloss,

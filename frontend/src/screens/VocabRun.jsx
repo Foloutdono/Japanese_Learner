@@ -137,7 +137,7 @@ export default function VocabRun({ session }) {
     if (!cardToTranslate) return
     // A JMdict tier's words are not the course's: the per-word map is
     // keyed by written form and would hand a pool word a deck
-    // homograph's French (plan 213 -- 殿 どの "Mr." as "arrière-garde").
+    // homograph's French (plan 215 -- 殿 どの "Mr." as "arrière-garde").
     // The card keeps the gloss it was served in until the next batch,
     // which the server builds in the new language from the pool's own.
     if (freqDomain === 'vocab_jmdict') {

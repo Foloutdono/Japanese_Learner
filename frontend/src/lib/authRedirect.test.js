@@ -90,7 +90,7 @@ describe('authRedirectMessage', () => {
     expect(en.oauthLinkingOff).toBeTruthy()
   })
 
-  // Plan 213: Supabase's `error_description` is English, written for a
+  // Plan 215: Supabase's `error_description` is English, written for a
   // developer, and was the fallback here. A refusal worth explaining is
   // named in lib/authErrors.js; anything else gets the generic line.
   it('never falls back to Supabase’s own sentence', () => {

@@ -909,7 +909,7 @@ describe('BoardingFlow', () => {
 
     const said = live(screen).textContent
     // The learner's language rides along, for the confirmation mail's
-    // template (lib/guest.js, plan 213).
+    // template (lib/guest.js, plan 215).
     expect(updateUser).toHaveBeenCalledWith({ email: 'patou@gmail.com', password: 'hunter22', data: { lang: 'fr' } })
     expect(said).not.toContain('""')
     expect(said).toContain(fr.claimEmailUnreachable)

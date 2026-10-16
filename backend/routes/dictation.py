@@ -180,7 +180,7 @@ class CheckPayload(BaseModel):
     # Empty is a legitimate answer: it is a learner saying they caught
     # nothing, and it measures 0 rather than being rejected.
     answer: str = Field(default="", max_length=400)
-    # The language the translation is revealed in (plan 213). English
+    # The language the translation is revealed in (plan 215). English
     # when absent, which is what every client sent before it existed.
     lang: str = Field(default="en", max_length=8)
 

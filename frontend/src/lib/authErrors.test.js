@@ -53,7 +53,7 @@ describe('authErrorMessage', () => {
     expect(en.claimEmailUnreachable).not.toContain('""')
   })
 
-  // Plan 213: the sign-in form printed Supabase's message as it came —
+  // Plan 215: the sign-in form printed Supabase's message as it came —
   // "Invalid login credentials", "Email not confirmed", "Unable to
   // validate email address: invalid format" — to a French learner.
   // Each is named by its code, and the same code passes the same

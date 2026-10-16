@@ -370,7 +370,7 @@ export default function BoardingFlow({
     setNameError(null)
     // Only a sentence from the table reaches the field: a dropped
     // connection rejects with the browser's own English ("Failed to
-    // fetch"), which used to be printed as it stood (plan 213).
+    // fetch"), which used to be printed as it stood (plan 215).
     let refused = t.genericError
     apiFetch('/api/profile', session, { method: 'PATCH', body: JSON.stringify({ username: name }) })
       .then(r => {

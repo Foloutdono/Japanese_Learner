@@ -230,7 +230,7 @@ class TestPoolWords:
     def test_a_pool_word_is_glossed_from_the_pools_own_french(self):
         # vocab_fr is the deck's; a pool homograph would collect the deck
         # word's French (routes/dictionary.py serves the pool the same
-        # way). Its French is the pool's own layer (plan 213), and the
+        # way). Its French is the pool's own layer (plan 215), and the
         # English where that has no line.
         from content import jmdict_fr
         fr = {r["reading"]: r["words"] for r in kanji_words("桃", "fr")["readings"]}["もも"][0]

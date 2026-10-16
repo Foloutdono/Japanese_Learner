@@ -6,7 +6,7 @@ import en from './en/index.js'
 // ── One key, one value ─────────────────────────────────────────
 // Each table is a row of groups spread into one object, so a key written
 // in two groups is no error anywhere: the later spread silently wins, and
-// the earlier copy is dead text a reviewer reads as live (plan 213 found
+// the earlier copy is dead text a reviewer reads as live (plan 215 found
 // nine in French, eleven in English -- `noResults` among them, whose
 // later copy took the dictionary's "No results for «…»" from it). Read
 // from the source, since the exported table has already collapsed them.

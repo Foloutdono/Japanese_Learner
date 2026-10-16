@@ -250,7 +250,7 @@ def _pool_kanji_meanings(chars, lang: str) -> dict[str, str]:
     of the 10,896 characters outside the deck. Read straight, a French
     page printed those rows with no meaning at all, where the English
     page printed one: the French learner got less than the English one
-    (plan 213). The deck's own rows already fall back through
+    (plan 215). The deck's own rows already fall back through
     get_meaning; this is the same rule for the pool's."""
     out = kanji_db.meanings_for(chars, lang)
     if lang != "en":
@@ -801,7 +801,7 @@ def _vocab_collection(query, page: int, limit: int, lang: str, user_id: str,
     ] + [
         # Never VOCAB_FR (the deck's own, keyed by kanji alone — a pool
         # homograph would collect the deck word's translation): the
-        # pool's own French line where it has one (plan 213), JMdict's
+        # pool's own French line where it has one (plan 215), JMdict's
         # English otherwise.
         _vocab_result(entry, None, pool_meaning(entry, lang), lang, states, user_id,
                       vocab_jmdict_to_id(entry), kanji_pool)

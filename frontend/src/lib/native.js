@@ -139,7 +139,7 @@ async function cancelNudges() {
   } catch { /* nothing scheduled */ }
 }
 
-// ── The reminders' channel (Android 8 and up, plan 213) ──────────
+// ── The reminders' channel (Android 8 and up, plan 215) ──────────
 // Android files every notification under a channel, and the app's
 // notification settings list the channels by name: the plugin's own is
 // called "Default", in English whatever the learner speaks. Both kinds

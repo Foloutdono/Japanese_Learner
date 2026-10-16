@@ -1,4 +1,4 @@
-"""Every kanji the course teaches has a French meaning (plan 213).
+"""Every kanji the course teaches has a French meaning (plan 215).
 
 KANJIDIC2's French stopped short of 219 deck characters, and a French
 learner read their cards, their choices and their dictionary plates in

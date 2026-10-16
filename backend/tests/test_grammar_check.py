@@ -549,7 +549,7 @@ class QuizRuleTests(_TourCase):
         self.assertTrue(any("tour has no quiz" in p for p in check_entry("N5", entry, _catalogue("N5", entry))))
 
 
-# ── structure_fr (plan 213) ──────────────────────────────────
+# ── structure_fr (plan 215) ──────────────────────────────────
 
 def _fr_problems(**over):
     entry = _good(**over)

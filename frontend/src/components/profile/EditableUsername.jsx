@@ -42,7 +42,7 @@ export function EditableUsername({ username, session, onChange, t, ground = 'pan
     // Only a sentence from the table reaches the field. A dropped
     // connection rejects with the browser's own English ("Failed to
     // fetch", "Load failed"), which used to be printed as it stood
-    // (plan 213): the refusal is decided here, and anything else is
+    // (plan 215): the refusal is decided here, and anything else is
     // the generic line.
     let refused = t.genericError
     apiFetch('/api/profile', session, { method: 'PATCH', body: JSON.stringify({ username: value }) })

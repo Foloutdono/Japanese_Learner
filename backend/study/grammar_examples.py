@@ -172,7 +172,7 @@ def pattern_furigana(pattern: str, reading: str | None) -> list[dict]:
 
 
 def structure_text(entry: dict, lang: str = "en") -> str:
-    """The formation line in the learner's language (plan 213):
+    """The formation line in the learner's language (plan 215):
     `structure_fr` for French, `structure` otherwise.
 
     `structure` itself stays English and is never localised in place:

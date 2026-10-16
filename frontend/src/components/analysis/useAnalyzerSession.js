@@ -417,7 +417,7 @@ export function useAnalyzerSession(session) {
         // 503 is the provider being down, which is temporary and worth
         // saying so. Anything else is a generic failure. Never the
         // server's own sentence: ApiError's message is never empty, so
-        // the backend's English used to win every time (plan 213).
+        // the backend's English used to win every time (plan 215).
         [index]: e?.status === 503 ? t.explainUnavailable : t.explainFailed,
       }))
     } finally {

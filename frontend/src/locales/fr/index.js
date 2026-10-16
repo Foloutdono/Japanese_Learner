@@ -17,7 +17,7 @@ const auth = {
   usernameTaken:     'Ce nom d\'utilisateur est déjà pris.',
   // 改札 — les refus de la connexion, nommés par leur code
   // (lib/authErrors.js) plutôt que par la phrase anglaise de Supabase
-  // (plan 213). Les refus partagés avec la carte invité (adresse déjà
+  // (plan 215). Les refus partagés avec la carte invité (adresse déjà
   // prise, mot de passe faible, trop de tentatives) disent les claim*.
   authBadCredentials:    'Adresse e-mail ou mot de passe incorrect.',
   authEmailNotConfirmed: 'Confirme d’abord ton adresse : le lien est dans ta boîte mail.',
@@ -1160,7 +1160,7 @@ const video = {
   analyzingVideo:      'Analyse des sous-titres…',
   captionsUnavailable: "Impossible de récupérer les sous-titres de cette vidéo.",
   subtitleTooLarge:    'Ce fichier de sous-titres est trop volumineux.',
-  // 動画 — pourquoi une vidéo ne s’est pas ouverte (plan 213). Le
+  // 動画 — pourquoi une vidéo ne s’est pas ouverte (plan 215). Le
   // serveur nomme chaque refus par un code ; ces phrases le disent
   // dans la langue de l’apprenant (components/analysis/videoErrors.js),
   // jamais l’anglais du serveur.

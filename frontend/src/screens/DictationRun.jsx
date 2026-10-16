@@ -316,7 +316,7 @@ function Session({ session, level }) {
       // No `plays` here: the reveal does not write a row, so the
       // listen count travels with the grade instead (see grade()).
       // `lang`: the translation comes back in the learner's language
-      // (plan 213); every line of the bank carries French and English.
+      // (plan 215); every line of the bank carries French and English.
       body: JSON.stringify({ clip_id: clip.id, answer: answer.trim(), lang }),
     })
       .then(data => {

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import fr from '../../locales/fr/index.js'
 
-// ── The name on the pass, refused (plan 213) ──────────────────
+// ── The name on the pass, refused (plan 215) ──────────────────
 // A dropped connection rejects the PATCH with the browser's own English
 // ("Failed to fetch", Safari's "Load failed"), and the field printed it
 // as it stood. Only sentences from the table may reach it.

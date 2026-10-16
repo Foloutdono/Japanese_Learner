@@ -23,7 +23,7 @@ conformance with the Group's license.
 License: Creative Commons Attribution-ShareAlike 4.0 International (CC
 BY-SA 4.0). https://www.edrdg.org/edrdg/licence.html
 
-`backend/datas/vocab/jmdict_fr.sqlite3` (plan 213) is a French translation
+`backend/datas/vocab/jmdict_fr.sqlite3` (plan 215) is a French translation
 of part of that material — JMdict's English senses and the one-line
 glosses of its words — together with French translations of the Tatoeba
 sentences below. As an adaptation of JMdict it is shared under the same
@@ -41,7 +41,7 @@ as JMdict above. (It replaced a set of per-topic JSON files —
 `kanji_readings.json`, `kanji_radicals.json` and the rest — which the
 database now carries in full.) `datas/kanji/kanji_meanings_fr.json`, the
 French meanings the app adds for 219 deck characters KANJIDIC2 has none
-for (plan 213), is folded into the same database and shared under the
+for (plan 215), is folded into the same database and shared under the
 same licence.
 
 License: Creative Commons Attribution-ShareAlike 4.0 International (CC
@@ -61,7 +61,7 @@ License: Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA
 Example sentences served through `backend/routes/reading.py` include
 sentences from the Tatoeba Project (https://tatoeba.org), contributed by
 its community of volunteers. Their French translations in
-`backend/datas/vocab/jmdict_fr.sqlite3` (plan 213) are this project's own,
+`backend/datas/vocab/jmdict_fr.sqlite3` (plan 215) are this project's own,
 made from the Japanese, and are shared under the same terms.
 
 License: Creative Commons Attribution 2.0 France (CC BY 2.0 FR).

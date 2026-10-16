@@ -265,7 +265,7 @@ def test_the_french_map_still_covers_the_deck_it_always_covered():
     entry, and routes/translations.py already built its ENGLISH
     counterpart from the deck alone — the French map was the odd one
     out. The 219 characters KANJIDIC2 has no French for carry the
-    app's own since plan 213 (datas/kanji/kanji_meanings_fr.json, folded
+    app's own since plan 215 (datas/kanji/kanji_meanings_fr.json, folded
     into the database), so none of the deck falls back to English."""
     from content.kanji_meanings import KANJI_FR
 

@@ -22,7 +22,7 @@ python -m pytest tests/test_grammar_points.py tests/test_grammar_sentences.py
   // "reading": "〜のなかで",                  // only where the pattern has a kanji (this is 〜の中で's; 〜てください has none)
   "structure": "verb て-form + ください",     // what it attaches to, one line
   // "structure_reading": "group + のなかで",  // only where the structure has a kanji (〜の中で's "group + の中で")
-  "structure_fr": "verbe forme en て + ください", // the same line in French (plan 213)
+  "structure_fr": "verbe forme en て + ください", // the same line in French (plan 215)
   "meaning":   {"en": "please do", "fr": "faites…, s'il vous plaît"},
   "register":  "polite",                       // optional: neutral | casual | polite | formal | written
   "steps": [                                   // the lesson, read top to bottom

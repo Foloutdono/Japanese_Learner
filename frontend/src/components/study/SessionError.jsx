@@ -23,7 +23,7 @@ import { WarningIcon } from '../ui/Icons'
 // problem is worth more than an apology. But the backend's sentence is
 // English ("Invalid token", "Deck not found") and lib/api.js's own
 // fallback carries an API path, and this app is read in French first
-// (plan 213). So the intent is kept by name instead: a refusal the
+// (plan 215). So the intent is kept by name instead: a refusal the
 // learner can act on is recognised by what it IS, and gets its own
 // line from the table; everything else, the network's failures
 // included, gets the sheet's line — the connection, and that nothing

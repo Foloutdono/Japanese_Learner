@@ -54,7 +54,7 @@ def test_a_tour_has_its_shape():
         # The authored half is there exactly where the point's tour is
         # written (plan 187c).
         assert (not tour["twists"]) == (tour["scene"] is None) == ("tour" not in entry)
-        # The formation line in the tour's language (plan 213).
+        # The formation line in the tour's language (plan 215).
         assert tour["structure"] == entry["structure_fr"]
 
 

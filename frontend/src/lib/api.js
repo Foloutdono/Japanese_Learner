@@ -153,7 +153,7 @@ export class ApiError extends Error {
   constructor(status, body, path) {
     // `detail` is FastAPI's own error shape (HTTPException). The message
     // is for the console and the logs, never for a screen: the backend
-    // writes it in English, and a learner reads French first (plan 213).
+    // writes it in English, and a learner reads French first (plan 215).
     // What a screen may say comes from `code`, below, through its own
     // locale table.
     const detail = typeof body === 'object' && body !== null ? body.detail : null

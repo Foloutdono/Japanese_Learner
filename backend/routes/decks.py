@@ -313,7 +313,7 @@ def _meaning_preview(source: str, entry: dict, lang: str) -> dict:
     fr_map  = KANJI_FR if source == "kanji" else VOCAB_FR
     # A JMdict pool word (plan 148, an entry carrying its pool `seq`)
     # has no line in VOCAB_FR; get_meaning answers it from the pool's
-    # own French layer (plan 213) -- see _wrap_vocab.
+    # own French layer (plan 215) -- see _wrap_vocab.
     meaning = get_meaning(entry, lang, fr_map)
     return {"front": entry.get("kanji") or entry.get("kana", ""), "kana": entry.get("kana", ""), "meaning": meaning}
 

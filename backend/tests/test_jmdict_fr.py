@@ -1,4 +1,4 @@
-"""The French layer over JMdict (content/jmdict_fr.py, plan 213).
+"""The French layer over JMdict (content/jmdict_fr.py, plan 215).
 
 What it promises a French learner: the dictionary entry of every word the
 course teaches reads in French -- its senses and its sentences -- a word

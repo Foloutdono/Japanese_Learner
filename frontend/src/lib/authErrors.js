@@ -13,7 +13,7 @@
 // browser's "Failed to fetch") — gets the table's generic line. It
 // used to get Supabase's own sentence instead, as "a fact rather than
 // a shrug"; but that sentence is English and written for developers,
-// and this app is read in French first (plan 213). A refusal worth
+// and this app is read in French first (plan 215). A refusal worth
 // explaining is worth a line here.
 //
 // `email_address_invalid` is the code that made this file, and it is

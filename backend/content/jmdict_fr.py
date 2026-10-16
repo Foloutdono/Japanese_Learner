@@ -1,5 +1,5 @@
 """
-The French layer over JMdict (plan 213).
+The French layer over JMdict (plan 215).
 
 JMdict, as this app ships it (JMdict_english_with_examples), is English
 only, and so was everything drawn from it: the numbered senses of a

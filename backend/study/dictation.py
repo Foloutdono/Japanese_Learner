@@ -257,7 +257,7 @@ def reveal(row: dict, lang: str = "en") -> dict:
         "romaji": row["romaji"],
         "furigana": parts,
         "words": bank_words(row["jp"], parts),
-        # In the learner's language: every line carries both (plan 213;
+        # In the learner's language: every line carries both (plan 215;
         # content/listening_clips.problems holds it). A language the
         # bank does not hold falls back to the English, and says so,
         # as reading practice reports its own.

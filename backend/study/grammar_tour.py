@@ -55,7 +55,7 @@ from study.grammar_match import contains_pattern, verifiable
 from study.morphology import tokenize
 
 # Bumped when the payload's shape or its seeding changes.
-TOUR_REV = 6  # 6: the formation line in the learner's language (plan 213)
+TOUR_REV = 6  # 6: the formation line in the learner's language (plan 215)
 LOOK_COUNT = 3
 MIN_LIT = 2
 GUESS_COUNT = 4

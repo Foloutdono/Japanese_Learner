@@ -38,7 +38,7 @@ class CaptionParseError(Exception):
     the caller (routes/video.py) tells the learner rather than guessing
     at what went wrong.
 
-    Two halves (plan 213): `code`, a stable snake_case name the client
+    Two halves (plan 215): `code`, a stable snake_case name the client
     turns into a sentence in the learner's own language, and the English
     message, which stays for the logs and for the rows stored before the
     code existed. The message is never what a learner reads any more:

@@ -158,7 +158,7 @@ def _ensure_video_schema() -> None:
             # NULL is a session on the shelf. Additive and idempotent.
             cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ")
             # Why a session failed, as a stable snake_case code the
-            # client words in the learner's language (plan 213). `error`
+            # client words in the learner's language (plan 215). `error`
             # keeps the English sentence for the logs and for the rows
             # written before this column; NULL is such a row, and the
             # client falls back to its own line for it. Additive.
@@ -711,7 +711,7 @@ def get_video_session(session_id: int, user_id: str = Depends(get_user_id)):
             status_code=503,
             content={
                 "status": "failed",
-                # What the client words (plan 213); None on a row that
+                # What the client words (plan 215); None on a row that
                 # failed before the code was stored, which the client
                 # answers with its own line. `error` is the English
                 # sentence, kept for the logs and for an older client.

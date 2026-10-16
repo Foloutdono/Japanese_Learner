@@ -149,7 +149,7 @@ describe('in the shell', () => {
 
   // The web reads a refusal's code off the URL it comes back on
   // (lib/authRedirect.js); the shell's callback carries the same one,
-  // and it reaches the same sentence (plan 213).
+  // and it reaches the same sentence (plan 215).
   it('names the refusal the callback carried', async () => {
     openAuthTab.mockResolvedValue(
       'app.tsuji://auth-callback#error=server_error&error_code=identity_already_exists&error_description=Identity+is+already+linked',

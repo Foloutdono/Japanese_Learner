@@ -153,7 +153,7 @@ describe('buildBookmarklet', () => {
   })
 
   // On youtube.com the bookmark has no app to ask, so it says what it
-  // says in the language of the table it was copied from (plan 213):
+  // says in the language of the table it was copied from (plan 215):
   // a French learner's alerts are French, and tutoient.
   it('speaks the language it was copied in', () => {
     const said = lang => decodeURIComponent(buildBookmarklet('https://example.app', lang).slice('javascript:'.length))
