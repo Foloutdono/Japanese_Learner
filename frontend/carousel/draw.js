@@ -40,8 +40,19 @@ const RING = 2.5 * K // a roundel's ring
 // author's picture at the bottom left and the caption from y 1710.
 // Instagram's story and Reels chrome sits inside the same margins.
 export const FORMATS = {
-  post: { id: 'post', w: 1080, h: 1350, safe: { t: 170, r: 144, b: 112, l: 144 } },
-  story: { id: 'story', w: 1080, h: 1920, safe: { t: 350, r: 184, b: 430, l: 184 } },
+  post: { id: 'post', fit: 'tiktok', w: 1080, h: 1350, safe: { t: 170, r: 144, b: 112, l: 144 } },
+  story: { id: 'story', fit: 'tiktok', w: 1080, h: 1920, safe: { t: 350, r: 184, b: 430, l: 184 } },
+}
+// Normal margins (plan 234f): a slide for anywhere that lays nothing over
+// it (an Instagram post, a site, a message), on either ratio. The margins
+// are the post's own before plan 232 fitted it to TikTok.
+const NORMAL = { t: 104, r: 92, b: 112, l: 92 }
+export const FITS = ['tiktok', 'normal']
+/** A format at its margins: TikTok's (FORMATS), or the normal ones. The id
+ *  stays the ratio's, so whatever a slide reads from the ratio holds. */
+export function formatOf(id, fit = 'tiktok') {
+  const f = FORMATS[id]
+  return fit === 'normal' ? { ...f, fit, safe: NORMAL } : f
 }
 /** Where TikTok's photo view lays its own chrome over a 9:16 slide, in the
  *  slide's pixels: the studio draws it over a slide on request, never on
@@ -52,7 +63,7 @@ export const FEED_HUD = {
   dots: [{ x: 995, y: 1180, r: 58 }, { x: 995, y: 1335, r: 46 }, { x: 995, y: 1500, r: 44 }, { x: 995, y: 1665, r: 40 }, { x: 100, y: 1612, r: 64 }],
 }
 export function drawFeedHud(ctx, fmt) {
-  if (fmt.h !== 1920) return
+  if (fmt.h !== 1920 || fmt.fit !== 'tiktok') return
   ctx.save()
   ctx.fillStyle = 'rgba(16, 14, 19, 0.55)'
   for (const r of FEED_HUD.bars) ctx.fillRect(r.x, r.y, r.w, r.h)
