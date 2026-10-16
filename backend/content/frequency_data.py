@@ -81,6 +81,10 @@ import content.vocab_jmdict_data as jmdict_db
 from content.vocab_jmdict_data import vocab_jmdict_key, vocab_jmdict_to_id
 
 DEFAULT_TIER_SIZE = 200
+# The sizes the tiers are cut at (frontend/src/domain/tiers.js's
+# TIER_SIZE_OPTIONS). The routes take no other: a tier of one word over
+# the JMdict pool was ~292k tiers in a single answer.
+TIER_SIZES = (100, 200, 500, 1000)
 
 # Overrides (see frequency_store.py) are always interpreted as tier
 # numbers under THIS tier size, regardless of what tier_size a given

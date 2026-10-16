@@ -176,3 +176,58 @@ export function tourAsk(point, at) {
   }
   return { key, context: askContext(context), open }
 }
+
+// ── 問 — the questions offered (recommended questions) ──────────────
+// A thumb on a phone types a question slowly, and the questions a
+// learner asks about a sentence are mostly the same few: why this
+// particle and not its neighbour, how the point works, one more example
+// of a word. So the panel offers up to SUGGESTIONS of them, written from
+// what the question already carries -- the breakdown's words, the point
+// -- and never from a model call: an offer costs nothing until it is
+// tapped, and then it is one question like any typed one, under the
+// same limits. Worded by the string table, so they are asked in the
+// learner's language; one already asked is not offered again.
+
+/** How many questions are offered at once. */
+export const SUGGESTIONS = 3
+
+// The particles a learner asks about, in the order they are offered, and
+// the neighbour each is mistaken for (null: what does it mark here?).
+const PARTICLES = [['は', 'が'], ['が', 'は'], ['へ', 'に'], ['に', null], ['で', null], ['を', null], ['も', null]]
+
+/** A word entry's surface: "surface (reading): meaning" → "surface". */
+const surfaceOf = w => (typeof w === 'string' ? w.split(/ \(|: /)[0].trim() : '')
+
+// A content word worth another example: written in kanji, so not a
+// particle, an ending or a kana-only filler.
+const KANJI = /[一-龯㐀-䶿々]/
+
+/**
+ * The questions offered for a thread, in the order they are offered.
+ *
+ *   context  askContext's output (sentence, point, words …)
+ *   t        the string table
+ *   text     comprehension's wording: a text and its question
+ *   asked    the questions the thread already holds
+ */
+export function askSuggestions(context, t, { text = false, asked = [] } = {}) {
+  const out = []
+  const words = (context?.words ?? []).map(surfaceOf).filter(Boolean)
+  if (text) {
+    out.push(t.askSugWhyRight, t.askSugWhere)
+  } else {
+    const present = new Set(words)
+    const particle = PARTICLES.find(([p]) => present.has(p))
+    if (particle) out.push(particle[1] ? t.askSugContrast(particle[0], particle[1]) : t.askSugMarks(particle[0]))
+  }
+  const point = (context?.point ?? '').split(' — ')[0].trim()
+  if (point) out.push(t.askSugPoint(point))
+  const word = words.find(w => KANJI.test(w))
+  if (word) out.push(t.askSugExample(word))
+  if (!text) out.push(t.askSugPolite, t.askSugCasual)
+  // Typed or tapped, the same question: French copy welds its spaces
+  // (locales/frenchSpacing), a typed one does not.
+  const same = q => (q ?? '').replace(/\s+/g, ' ').trim().toLowerCase()
+  const seen = new Set(asked.map(same))
+  return [...new Set(out)].filter(q => q && !seen.has(same(q))).slice(0, SUGGESTIONS)
+}

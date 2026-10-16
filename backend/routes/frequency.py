@@ -25,8 +25,9 @@ touching (and re-risking) those already-working endpoints. Worth
 consolidating into one shared module later if the three files drift.
 """
 import logging
+from functools import lru_cache
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from core.auth import get_user_id, prefixed, unprefixed
 from core.pace import new_card_limit, resolve_pace
@@ -58,6 +59,11 @@ MAX_BATCH = 25
 def _require_domain(domain: str) -> None:
     if domain not in freq.VALID_DOMAINS:
         raise HTTPException(status_code=404, detail=f"Unknown domain: {domain!r}")
+
+
+def _require_tier_size(tier_size: int) -> None:
+    if tier_size not in freq.TIER_SIZES:
+        raise HTTPException(status_code=422, detail=f"tier_size must be one of {list(freq.TIER_SIZES)}")
 
 
 # domain is a PATH parameter here, so modes.require_mode() -- which is
@@ -182,12 +188,21 @@ def _select_cards(domain: str, tier: int, m: Mode, lang: str, count: int, exclud
 @router.get("/api/frequency/{domain}/tiers")
 def get_tiers(domain: str, tier_size: int = freq.DEFAULT_TIER_SIZE):
     _require_domain(domain)
-    if tier_size < 1:
-        return {"error": "tier_size must be a positive integer"}
+    _require_tier_size(tier_size)
+    return _tier_list(domain, tier_size)
 
-    order = freq.standard_order(domain)
-    total = len(order)
+
+# The same for every learner and every request -- the content is fixed
+# for the process's life -- so cut once per (domain, size): 3 x 4
+# answers at most. A selector flicked between the sizes used to rebuild
+# each one per click, the JMdict pool's by reading its whole ranking.
+@lru_cache(maxsize=len(freq.VALID_DOMAINS) * len(freq.TIER_SIZES))
+def _tier_list(domain: str, tier_size: int) -> dict:
+    total = freq.domain_count(domain)
     n_tiers = freq.tier_count(domain, tier_size)
+    # The JMdict pool's order is never read here: 292k keys out of
+    # sqlite for a sample its rows do not print.
+    order = freq.standard_order(domain) if domain != "vocab_jmdict" else None
 
     tiers = []
     for t in range(1, n_tiers + 1):
@@ -199,7 +214,7 @@ def get_tiers(domain: str, tier_size: int = freq.DEFAULT_TIER_SIZE):
         # started is offered again. The deck's domains only: a key there
         # resolves from a dict, while the JMdict pool's 1,464 tiers
         # would each be a sqlite read for a sample nobody is shown.
-        if domain != "vocab_jmdict":
+        if order is not None:
             tier["sample"] = _tier_sample(domain, order[start - 1:start - 1 + TIER_SAMPLE_SIZE])
         tiers.append(tier)
 
@@ -245,8 +260,7 @@ def get_tiers_started(domain: str, tier_size: int = freq.DEFAULT_TIER_SIZE,
     absent rather than 0.
     """
     _require_domain(domain)
-    if tier_size < 1:
-        raise HTTPException(status_code=422, detail="tier_size must be a positive integer")
+    _require_tier_size(tier_size)
     started: dict[str, int] = {}
     if domain != "vocab_jmdict":
         prefix_len = len(user_id) + 1
@@ -261,12 +275,19 @@ def get_tiers_started(domain: str, tier_size: int = freq.DEFAULT_TIER_SIZE,
             # an override puts a key in its target tier and nowhere else,
             # every other key sits in the tier its rank falls in.
             overrides = frequency_store.get_overrides(user_id, domain)
-            for rank, key in enumerate(freq.standard_order(domain)):
-                if freq.to_id(domain, key) not in met:
+            for rank, (key, card_id) in enumerate(_ids_in_order(domain)):
+                if card_id not in met:
                     continue
                 tier = str(overrides.get(key) or rank // tier_size + 1)
                 started[tier] = started.get(tier, 0) + 1
     return {"domain": domain, "tier_size": tier_size, "started": started}
+
+
+# Each key of a deck domain's order beside its card id, resolved once:
+# /tiers/started walked the 8k keys resolving each, on every call.
+@lru_cache(maxsize=2)
+def _ids_in_order(domain: str) -> tuple[tuple[str, str | None], ...]:
+    return tuple((key, freq.to_id(domain, key)) for key in freq.standard_order(domain))
 
 
 @router.get("/api/frequency/{domain}/tier/{tier}/items")
@@ -276,6 +297,7 @@ def get_tier_items(domain: str, tier: int, lang: str = "fr", tier_size: int = fr
     browse/manage UI (e.g. to let the user see and reorder items),
     not for studying (see /tier/{tier}/card(s) for that)."""
     _require_domain(domain)
+    _require_tier_size(tier_size)
 
     overrides = frequency_store.get_overrides(user_id, domain)
     keys = freq.tier_keys(domain, tier, tier_size=tier_size, overrides=overrides)
@@ -304,6 +326,7 @@ def get_tier_items(domain: str, tier: int, lang: str = "fr", tier_size: int = fr
 def get_frequency_card(domain: str, tier: int, mode: str, lang: str = "fr", tier_size: int = freq.DEFAULT_TIER_SIZE,
                        user_id: str = Depends(get_user_id)):
     _require_domain(domain)
+    _require_tier_size(tier_size)
     m = _resolve_mode(domain, mode)
 
     pool, cards = _select_cards(domain, tier, m, lang, count=1, exclude_ids=set(), user_id=user_id, tier_size=tier_size)
@@ -321,6 +344,7 @@ def get_frequency_cards(domain: str, tier: int, mode: str, lang: str = "fr", cou
                         beyond_target: bool = Query(False),
                         user_id: str = Depends(get_user_id)):
     _require_domain(domain)
+    _require_tier_size(tier_size)
     m = _resolve_mode(domain, mode)
 
     pace = resolve_pace(user_id)
@@ -341,6 +365,7 @@ def get_frequency_cards(domain: str, tier: int, mode: str, lang: str = "fr", cou
 def get_frequency_stats(domain: str, tier: int, mode: str, tier_size: int = freq.DEFAULT_TIER_SIZE,
                         user_id: str = Depends(get_user_id)):
     _require_domain(domain)
+    _require_tier_size(tier_size)
     m = _resolve_mode(domain, mode)
 
     overrides = frequency_store.get_overrides(user_id, domain)
@@ -385,7 +410,9 @@ class CustomizePayload(BaseModel):
     # (same key shape returned by /tier/{tier}/items). tier is always
     # interpreted under frequency_data.DEFAULT_TIER_SIZE — see that
     # module's docstring.
-    overrides: list[dict]
+    # Bounded (plan 211): each is a lookup and an upsert, and every
+    # later tier read walks them.
+    overrides: list[dict] = Field(max_length=2000)
 
 
 @router.post("/api/frequency/{domain}/customize")
@@ -414,7 +441,7 @@ def customize_tiers(domain: str, payload: CustomizePayload, user_id: str = Depen
 
 class ResetPayload(BaseModel):
     # Omit or send an empty list to reset ALL overrides for this domain.
-    keys: list[str] = []
+    keys: list[str] = Field(default_factory=list, max_length=2000)
 
 
 @router.post("/api/frequency/{domain}/reset")

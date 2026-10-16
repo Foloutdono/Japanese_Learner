@@ -855,6 +855,20 @@ DECK_TYPES = STRUCTURES
 
 # ── DECK CRUD ─────────────────────────────────────────────
 
+# A deck's counts, each read for the deck in hand on its own index
+# (plan 212). They were joins against a GROUP BY over the whole of
+# custom_cards, deck_cards and deck_subscriptions -- every learner's
+# cards, private decks too -- which Postgres builds in full before the
+# join, so the shelf and the library cost more as anyone, anywhere,
+# added a card. `d` is the deck; a followed deck's app cards are its
+# author's rows (a followed deck is a link, not a copy).
+_CARD_COUNT = """(
+    (SELECT COUNT(*) FROM custom_cards cc WHERE cc.deck_id = d.id)
+  + (SELECT COUNT(*) FROM deck_cards dk WHERE dk.deck_id = d.id AND dk.user_id = d.user_id)
+)"""
+_FOLLOWERS = "(SELECT COUNT(*) FROM deck_subscriptions fs WHERE fs.deck_id = d.id)"
+
+
 @router.get("/api/decks")
 def get_decks(user_id: str = Depends(get_user_id)):
     """
@@ -873,25 +887,15 @@ def get_decks(user_id: str = Depends(get_user_id)):
                 SELECT d.id, d.name, d.type, d.created_at, d.description,
                        d.visibility, d.user_id AS owner_id, m.role,
                        (d.withdrawn_at IS NOT NULL) AS withdrawn,
-                       COALESCE(c.custom_count, 0) AS custom_count,
-                       COALESCE(dc.app_count, 0)   AS app_count
+                       {_CARD_COUNT} AS card_count
                 FROM mine m
                 JOIN decks d ON d.id = m.deck_id
-                LEFT JOIN (
-                    SELECT deck_id, COUNT(*) AS custom_count
-                    FROM custom_cards GROUP BY deck_id
-                ) c  ON c.deck_id  = d.id
-                LEFT JOIN (
-                    SELECT deck_id, user_id, COUNT(*) AS app_count
-                    FROM deck_cards GROUP BY deck_id, user_id
-                ) dc ON dc.deck_id = d.id AND dc.user_id = d.user_id
                 ORDER BY d.created_at DESC
             """, {"me": user_id})
             decks = [dict(row) for row in cur.fetchall()]
 
         authors = usernames_for([d["owner_id"] for d in decks if d["role"] != "owner"])
         for d in decks:
-            d["card_count"] = d.pop("custom_count") + d.pop("app_count")
             d["author"] = authors.get(d.pop("owner_id"))
         return {"decks": decks}
     finally:
@@ -1080,22 +1084,10 @@ def get_library(page: int = 0, limit: int = Query(LIBRARY_LIMIT, ge=1, le=100),
             cur.execute(f"""
                 SELECT d.id, d.name, d.description, d.type, d.published_at,
                        d.user_id AS owner_id,
-                       COALESCE(c.custom_count, 0) + COALESCE(dc.app_count, 0) AS card_count,
-                       COALESCE(f.followers, 0) AS followers,
+                       {_CARD_COUNT} AS card_count,
+                       {_FOLLOWERS} AS followers,
                        (mine.user_id IS NOT NULL) AS followed
                 FROM decks d
-                LEFT JOIN (
-                    SELECT deck_id, COUNT(*) AS custom_count
-                    FROM custom_cards GROUP BY deck_id
-                ) c  ON c.deck_id = d.id
-                LEFT JOIN (
-                    SELECT deck_id, user_id, COUNT(*) AS app_count
-                    FROM deck_cards GROUP BY deck_id, user_id
-                ) dc ON dc.deck_id = d.id AND dc.user_id = d.user_id
-                LEFT JOIN (
-                    SELECT deck_id, COUNT(*) AS followers
-                    FROM deck_subscriptions GROUP BY deck_id
-                ) f  ON f.deck_id = d.id
                 LEFT JOIN deck_subscriptions mine
                        ON mine.deck_id = d.id AND mine.user_id = %(me)s
                 WHERE d.visibility = 'public' AND d.withdrawn_at IS NULL
@@ -1167,33 +1159,25 @@ def get_library_home(user_id: str = Depends(get_user_id)):
     conn = db_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("""
+            cur.execute(f"""
                 SELECT d.id, d.name, d.description, d.type, d.published_at,
                        d.user_id AS owner_id,
-                       COALESCE(c.custom_count, 0) + COALESCE(dc.app_count, 0) AS card_count,
-                       COALESCE(f.followers, 0) AS followers
+                       {_CARD_COUNT} AS card_count,
+                       f.followers
                 FROM decks d
-                LEFT JOIN (
-                    SELECT deck_id, COUNT(*) AS custom_count
-                    FROM custom_cards GROUP BY deck_id
-                ) c  ON c.deck_id = d.id
-                LEFT JOIN (
-                    SELECT deck_id, user_id, COUNT(*) AS app_count
-                    FROM deck_cards GROUP BY deck_id, user_id
-                ) dc ON dc.deck_id = d.id AND dc.user_id = d.user_id
-                LEFT JOIN (
-                    SELECT deck_id, COUNT(*) AS followers,
+                CROSS JOIN LATERAL (
+                    SELECT COUNT(*) AS followers,
                            COUNT(*) FILTER (
                                WHERE subscribed_at > NOW() - INTERVAL '7 days') AS lately
-                    FROM deck_subscriptions GROUP BY deck_id
-                ) f  ON f.deck_id = d.id
+                    FROM deck_subscriptions fs WHERE fs.deck_id = d.id
+                ) f
                 WHERE d.visibility = 'public' AND d.withdrawn_at IS NULL
                   AND d.user_id <> %(me)s
                   AND NOT EXISTS (
                       SELECT 1 FROM deck_subscriptions s
                       WHERE s.deck_id = d.id AND s.user_id = %(me)s
                   )
-                ORDER BY COALESCE(f.lately, 0) DESC, COALESCE(f.followers, 0) DESC,
+                ORDER BY f.lately DESC, f.followers DESC,
                          d.published_at DESC NULLS LAST, d.id DESC
                 LIMIT 1
             """, {"me": user_id})
@@ -2709,11 +2693,17 @@ def _csv_unlead(value: str) -> str:
 # once as bytes and again as the decoded str) before any row is looked
 # at, on a backend sized for 512 MB.
 _MAX_IMPORT_BYTES = 5 * 1024 * 1024
+# Rows one file may land (plan 211): the Pass's whole card allowance.
+# 5 MB of CSV is ~100k rows, each an INSERT -- and each, before, a
+# COUNT of the learner's cards too.
+_MAX_IMPORT_ROWS = credits.PASS_CARDS
 
 
+# A plain def (plan 211): as an async def every row's queries ran on the
+# event loop, and a large file held the whole API for minutes.
 @router.post("/api/decks/{deck_id}/import")
-async def import_cards(deck_id: str, file: UploadFile = File(...),
-                       user_id: str = Depends(get_user_id)):
+def import_cards(deck_id: str, file: UploadFile = File(...),
+                 user_id: str = Depends(get_user_id)):
     access = resolve_deck(deck_id, user_id, need=OWNER)
     if not _allows_custom(access.type):
         raise HTTPException(
@@ -2721,7 +2711,7 @@ async def import_cards(deck_id: str, file: UploadFile = File(...),
             detail=f"This deck only accepts {access.type} cards — browse and add some instead",
         )
 
-    content = await file.read(_MAX_IMPORT_BYTES + 1)
+    content = file.file.read(_MAX_IMPORT_BYTES + 1)
     if len(content) > _MAX_IMPORT_BYTES:
         raise HTTPException(status_code=413, detail="CSV file is too large")
     try:
@@ -2737,32 +2727,46 @@ async def import_cards(deck_id: str, file: UploadFile = File(...),
 
     inserted = 0
     errors   = []
+    rows     = []
+    for i, row in enumerate(reader, start=2):
+        if len(rows) >= _MAX_IMPORT_ROWS:
+            errors.append(f"Row {i} on: past {_MAX_IMPORT_ROWS} cards a file — skipped")
+            break
+        front = _csv_unlead((row.get('front') or '').strip())
+        back  = _csv_unlead((row.get('back') or '').strip())
+        if not front or not back:
+            errors.append(f"Row {i}: missing front/back — skipped")
+            continue
+        rows.append((i, front, back, (row.get('notes') or '').strip()))
+
     conn     = db_conn()
     try:
         with conn.cursor() as cur:
-            for i, row in enumerate(reader, start=2):
-                front = _csv_unlead(row.get('front', '').strip())
-                back  = _csv_unlead(row.get('back',  '').strip())
-                if not front or not back:
-                    errors.append(f"Row {i}: missing front/back — skipped")
-                    continue
+            # The whole file against the free tier at once (plan 069);
+            # only a file that overruns it is checked row by row, so it
+            # lands what fits and reports the rest.
+            try:
+                credits.check_card_limit(cur, user_id, adding=len(rows))
+                per_row = False
+            except credits.LimitReached:
+                per_row = True
+            for i, front, back, notes in rows:
                 # CSV import writes `standard` cards: a spreadsheet of
                 # front/back columns is exactly that shape, and asking a
                 # CSV to carry a kanji card's four fields would need a
                 # per-structure column contract nobody has asked for.
-                # Per row against the free tier (plan 069): a file that
-                # overruns it lands what fits and reports the rest.
-                try:
-                    credits.check_card_limit(cur, user_id)
-                except credits.LimitReached as e:
-                    errors.append(f"Row {i}: the deck limit of {e.limit} cards is reached — skipped")
-                    continue
+                if per_row:
+                    try:
+                        credits.check_card_limit(cur, user_id)
+                    except credits.LimitReached as e:
+                        errors.append(f"Row {i}: the deck limit of {e.limit} cards is reached — skipped")
+                        continue
                 cur.execute("""
                     INSERT INTO custom_cards (deck_id, user_id, structure, fields, notes)
                     VALUES (%s, %s, 'standard', %s, %s)
                 """, (access.deck_id, access.owner_id,
                       json.dumps({"front": front, "back": back}, ensure_ascii=False),
-                      row.get('notes', '').strip()))
+                      notes))
                 inserted += 1
         conn.commit()
     finally:

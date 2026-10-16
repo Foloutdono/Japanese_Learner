@@ -994,10 +994,14 @@ def _kana_result(kind: str, entry: dict, meaning: str, lang: str,
     }
 
 
+# `q` and `page` bounded (plan 211): an unbounded query string was a
+# pass of a Python callback over the JMdict pool's 212k glosses per
+# request, and a page past the end an OFFSET scan through all of them.
 @router.get("/api/dictionary")
-def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=200), lang: str = "fr",
-                    category: str = "all", radical: int | None = None, kana: str = "",
-                    level: str | None = None, id: str = "",
+def get_dictionary(q: str = Query("", max_length=200), page: int = Query(0, ge=0, le=10000),
+                    limit: int = Query(50, ge=1, le=200), lang: str = "fr",
+                    category: str = "all", radical: int | None = None, kana: str = Query("", max_length=200),
+                    level: str | None = None, id: str = Query("", max_length=200),
                     match: str = "word", field: str = "all", one: bool = False,
                     user_id: str = Depends(get_user_id)):
     """

@@ -174,16 +174,38 @@ describe('the gate grows into view and holds on its name', () => {
     await gate()
     const gateEl = document.querySelector('.gate')
     const lane = document.querySelector('.gate__lane')
-    const hold = named('gate-leave').effect.getComputedTiming().delay
     expect(end(named('gate-flood'))).toBeLessThan(end(named('gate-through')))
     expect(end(named('gate-through'))).toBeLessThanOrEqual(660 * X + 1)
-    // A beat on the full light before it fades: 180ms, times the dial.
-    expect(hold - end(named('gate-through'))).toBeGreaterThanOrEqual(180 * X - 1)
     const push = parseFloat(gateEl.style.getPropertyValue('--gate-push'))
     expect(lane.clientWidth * push).toBeGreaterThanOrEqual(gateEl.clientWidth)
     expect(lane.clientHeight * push).toBeGreaterThanOrEqual(gateEl.clientHeight)
-    // And the fade keeps its end until the scene is taken down.
-    expect(['forwards', 'both']).toContain(named('gate-leave').effect.getComputedTiming().fill)
+  })
+
+  // The fade is declared on its beat, by the scene's own timer, not with
+  // a delay from the mount: a waiting opacity animation on the scene had
+  // the browser draw the whole scene twice a frame (plan 210).
+  it('holds a beat on the full light, then fades off it and keeps its end', async () => {
+    vi.useFakeTimers()
+    try {
+      await render(<LangProvider><TicketGate section={{ color: 'var(--line-kana)', icon: 'あ', title: 'Kana' }} station={{ code: 'KN' }} onNavigate={() => {}} onDone={() => {}} /></LangProvider>)
+      const through = end(named('gate-through'))
+      // A beat on the full light before it fades: 180ms, times the dial.
+      await vi.advanceTimersByTimeAsync(through + 180 * X - 5)
+      expect(named('gate-leave')).toBeUndefined()
+      await vi.advanceTimersByTimeAsync(10)
+      // And the fade keeps its end until the scene is taken down.
+      expect(['forwards', 'both']).toContain(named('gate-leave').effect.getComputedTiming().fill)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('draws nothing of the scene twice before it leaves, and covers the screen whole', async () => {
+    await gate()
+    expect(named('gate-leave')).toBeUndefined()
+    const scrim = named('gate-scrim')
+    scrim.finish()
+    expect(getComputedStyle(document.querySelector('.gate__scrim')).opacity).toBe('1')
   })
 
   it('hands the name out of the lane where it stood, and holds it across the screen', async () => {

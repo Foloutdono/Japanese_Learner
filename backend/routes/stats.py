@@ -1,5 +1,5 @@
 import logging
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Body
 from core.db import db_conn
 from core.auth import get_user_id, prefixed
 from core.srs_instance import srs
@@ -255,7 +255,9 @@ def get_report(user_id: str = Depends(get_user_id)):
 
 
 @router.delete("/api/stats/reset")
-def reset_stats(user_id: str = Depends(get_user_id), card_ids: list[str] | None = None):
+def reset_stats(user_id: str = Depends(get_user_id),
+                # Bounded (plan 211): a level's whole deck is a few thousand.
+                card_ids: list[str] | None = Body(None, max_length=20000)):
     """
     Reset this user's progress.
 
@@ -309,5 +311,6 @@ def reset_stats(user_id: str = Depends(get_user_id), card_ids: list[str] | None 
         raise
     finally:
         conn.close()
+    srs.forget_history(user_id)
     srs.delete_cards(keys_to_delete)
     return {"ok": True}

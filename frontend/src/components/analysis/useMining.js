@@ -21,6 +21,8 @@ const DECK_TYPE_FOR_KIND = {
 
 const STORAGE_PREFIX = 'jp-mine-target'
 const BLANK = '＿＿＿'
+// The deck creates on their way, by learner, type and name (ensureDeck).
+const creating = new Map()
 
 // A cloze card built from ONE Token within a Sentence -- entirely
 // client-side, from data the analysis already carries. Exported as a
@@ -113,11 +115,20 @@ export function useMining(session) {
       rememberTarget(kind, existing.id)
       return existing
     }
-    const deck = await apiJson('/api/decks', session, {
-      method: 'POST',
-      body: JSON.stringify({ name, type }),
-    })
-    setDecks(prev => [deck, ...prev])
+    // A create already on its way under this name is the same deck
+    // (plan 211): Enter held in the picker, or two words mined into a
+    // new deck at once, each posted one before the shelf knew of it.
+    const key = `${session?.user?.id ?? ''} ${type} ${wanted}`
+    let pending = creating.get(key)
+    if (!pending) {
+      pending = apiJson('/api/decks', session, {
+        method: 'POST',
+        body: JSON.stringify({ name, type }),
+      }).finally(() => creating.delete(key))
+      creating.set(key, pending)
+    }
+    const deck = await pending
+    setDecks(prev => (prev.some(d => d.id === deck.id) ? prev : [deck, ...prev]))
     rememberTarget(kind, deck.id)
     return deck
   }

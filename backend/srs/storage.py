@@ -1,4 +1,4 @@
-from psycopg2.pool import ThreadedConnectionPool
+from core.pool import WaitingPool
 from psycopg2.extras import RealDictCursor
 from contextlib import contextmanager
 
@@ -7,7 +7,8 @@ class Storage:
 
     def __init__(self, database_url: str):
 
-        self.pool = ThreadedConnectionPool(
+        # Waits for a connection when all are out (core/pool.py).
+        self.pool = WaitingPool(
             1,
             20,
             database_url

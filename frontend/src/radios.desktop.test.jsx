@@ -110,6 +110,29 @@ describe('Seg and the console\'s band on the desk', () => {
     expect(checked($('[role="radiogroup"]'))).toBe('Photo')
     expect(heard).toHaveBeenCalledWith('ArrowLeft')
   })
+
+  // Plan 211: a held arrow's auto-repeat checked a radio thirty times a
+  // second, each one a request. The first press checks; the repeats are
+  // taken and ignored, so the focus stays on the checked radio.
+  for (const [name, Group] of [['Seg', Seg], ['ConsoleBand', ConsoleBand]]) {
+    it(`${name}: a held arrow checks once`, async () => {
+      const onChange = vi.fn()
+      await render(<LangProvider><Group options={OPTS} value="texte" onChange={onChange} label="group" /></LangProvider>)
+      await settle()
+      window.addEventListener('keydown', listen)
+      $('[aria-checked="true"]').focus()
+      const press = repeat => document.activeElement.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'ArrowRight', repeat, bubbles: true, cancelable: true }),
+      )
+      expect(press(false)).toBe(false)
+      expect(onChange.mock.calls).toEqual([['photo']])
+      expect(document.activeElement.textContent).toBe('Photo')
+      for (let i = 0; i < 5; i += 1) expect(press(true)).toBe(false)
+      expect(onChange).toHaveBeenCalledTimes(1)
+      expect(document.activeElement.textContent).toBe('Photo')
+      expect(heard).not.toHaveBeenCalled()
+    })
+  }
 })
 
 function Page({ children }) {

@@ -2,20 +2,28 @@ import { HINTS } from '../domain/studyModes'
 import { api } from './origin'
 
 const cache = {}
+// The tables on their way, by language (plan 211): every screen that
+// mounted before the first answer landed asked for both tables again.
+// A failure is not kept; the next caller asks afresh.
+const pending = {}
 
-export async function getTranslations(lang) {
-    if (cache[lang]) return cache[lang]
+export function getTranslations(lang) {
+    if (cache[lang]) return Promise.resolve(cache[lang])
+    if (pending[lang]) return pending[lang]
 
-    const [kanji, vocab] = await Promise.all([
+    pending[lang] = Promise.all([
     // Through api() like every other backend path — the native shell
     // resolves it to the web origin (lib/api.js). Still a bare fetch,
     // not apiFetch: these two endpoints are public and carry no token.
     fetch(api(`/api/translations/kanji?lang=${lang}`)).then(r => r.json()),
     fetch(api(`/api/translations/vocab?lang=${lang}`)).then(r => r.json()),
     ])
-
-    cache[lang] = { kanji, vocab }
-    return cache[lang]
+        .then(([kanji, vocab]) => {
+            cache[lang] = { kanji, vocab }
+            return cache[lang]
+        })
+        .finally(() => { delete pending[lang] })
+    return pending[lang]
 }
 
 // ── One word at a time ────────────────────────────────────

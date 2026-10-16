@@ -23,6 +23,7 @@ import threading
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from core.credits import require_pass
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
 from core.db import db_conn
@@ -69,6 +70,11 @@ _MULTIPART_OVERHEAD_BYTES = 64 * 1024
 # would cost more than the duplication (see plan 019's own scope notes).
 _FAILED_COOLDOWN_SECONDS = 300
 _STALE_RUNNING_SECONDS = 900
+# Sessions one learner may have in preparation at once (plan 211). Each
+# is a thread analysing up to MAX_SENTENCES lines; the link fetch has a
+# daily budget, but a paste or an upload had none, so a learner could
+# start as many threads as they could post.
+_MAX_PREPARING_PER_USER = 2
 
 # ── The fetch budget ───────────────────────────────────────────
 # The link ingest is the one path here that spends METERED money: a
@@ -382,6 +388,48 @@ def video_capabilities(user_id: str = Depends(get_user_id)):
 
 
 # ── Session creation ───────────────────────────────────────────
+def _open_session(user_id, source, source_ref, window_start, window_end, window_capped, video_id) -> int:
+    """The session's row and its job's, or a 429 while the learner
+    already has _MAX_PREPARING_PER_USER sessions in preparation."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT COUNT(*)
+                  FROM video_session_jobs j
+                  JOIN video_sessions s ON s.id = j.session_id
+                 WHERE s.user_id = %s
+                   AND j.status = 'running'
+                   AND j.updated_at >= NOW() - make_interval(secs => %s)
+                """,
+                (user_id, _STALE_RUNNING_SECONDS),
+            )
+            if cur.fetchone()[0] >= _MAX_PREPARING_PER_USER:
+                raise HTTPException(
+                    status_code=429,
+                    detail="A session is still being prepared. Wait for it, then add the next one.",
+                )
+            cur.execute(
+                """
+                INSERT INTO video_sessions
+                    (user_id, source, source_ref, window_start, window_end, window_capped, video_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+                """,
+                (user_id, source, source_ref, window_start, window_end, window_capped, video_id),
+            )
+            (session_id,) = cur.fetchone()
+            cur.execute(
+                "INSERT INTO video_session_jobs (session_id, status) VALUES (%s, 'running')",
+                (session_id,),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+    return session_id
+
+
 @router.post("/api/video/session")
 async def create_video_session(request: Request, user_id: str = Depends(get_user_id)):
     """Accepts EITHER a JSON body ({url} to fetch, or {transcript, url}
@@ -437,6 +485,16 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
             raise _refusal(400, "bad_window", "start/end must be numbers")
         filename = upload.filename
     else:
+        # A pasted transcript is held to _MAX_UPLOAD_BYTES characters
+        # below; refused on the declared length first (plan 211), so a
+        # body far past it is never read whole. Japanese is three bytes
+        # a character in UTF-8.
+        try:
+            declared = int(request.headers.get("content-length", ""))
+        except ValueError:
+            declared = None
+        if declared is not None and declared > 3 * _MAX_UPLOAD_BYTES + _MULTIPART_OVERHEAD_BYTES:
+            raise HTTPException(status_code=413, detail="Transcript is too long")
         try:
             body = await request.json()
         except Exception:
@@ -459,6 +517,8 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
         if url and video_id is None:
             raise _refusal(400, "not_youtube_url", "Not a recognized YouTube URL")
 
+        if len(pasted) > _MAX_UPLOAD_BYTES:
+            raise HTTPException(status_code=413, detail="Transcript is too long")
         if pasted:
             source = "paste"
             content = pasted
@@ -473,7 +533,7 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
             # Budget checked HERE rather than in the worker: a refusal
             # the learner can act on immediately beats a session that
             # spends thirty seconds to tell them the same thing.
-            refusal = _fetch_refusal(user_id)
+            refusal = await run_in_threadpool(_fetch_refusal, user_id)
             if refusal:
                 raise _refusal(429, *refusal)
             source = "youtube"
@@ -502,26 +562,12 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
     # but nothing sets it any more -- the Window is uncapped.
     window_capped = False
 
-    conn = db_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO video_sessions
-                    (user_id, source, source_ref, window_start, window_end, window_capped, video_id)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-                RETURNING id
-                """,
-                (user_id, source, source_ref, window_start, window_end, window_capped, video_id),
-            )
-            (session_id,) = cur.fetchone()
-            cur.execute(
-                "INSERT INTO video_session_jobs (session_id, status) VALUES (%s, 'running')",
-                (session_id,),
-            )
-        conn.commit()
-    finally:
-        conn.close()
+    # The database on the threadpool: this handler is async (it reads the
+    # raw request), and a blocking call here held the event loop -- the
+    # whole API, on one worker -- for its duration.
+    session_id = await run_in_threadpool(
+        _open_session, user_id, source, source_ref, window_start, window_end, window_capped, video_id,
+    )
 
     _start_worker(session_id, source, source_ref, content, filename, window_start, window_end, timing)
     return JSONResponse(

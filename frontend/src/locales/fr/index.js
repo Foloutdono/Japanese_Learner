@@ -524,6 +524,15 @@ const quiz = {
   askSpent:           at => (at ? `Plus de questions aujourd’hui : elles reviennent à ${at}.` : 'Plus de questions aujourd’hui.'),
   askLeft:            n => `${n} question${n > 1 ? 's' : ''} encore aujourd’hui`,
   askFull:            'C’est tout pour cette phrase.',
+  askSuggestLabel:    'Questions suggérées',
+  askSugContrast:     (a, b) => `Pourquoi ${a} et pas ${b} ?`,
+  askSugMarks:        p => `Que marque ${p} ici ?`,
+  askSugPoint:        p => `Comment s’emploie ${p} ?`,
+  askSugExample:      w => `Un autre exemple avec ${w} ?`,
+  askSugPolite:       'Comment le dire plus poliment ?',
+  askSugCasual:       'Et entre amis, à l’oral ?',
+  askSugWhyRight:     'Pourquoi est-ce la bonne réponse ?',
+  askSugWhere:        'Où le texte le dit-il ?',
 
   // Feedback — les glyphes ❌/✅/← qu'elles portaient autrefois en
   // ligne sont maintenant de vraies <Icon/> rendues par ce qui
