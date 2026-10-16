@@ -28,7 +28,7 @@ import { wordForm, structureKeyOf, normalizeCard, cardShape, choiceAnswer } from
 import SessionError from '../components/study/SessionError'
 import ReadingsInput from '../components/study/ReadingsInput'
 import { DrawingQuiz, DrawingOverlay } from '../components/study/DrawingCanvas'
-import { speakJapanese } from '../lib/audio'
+import { speakJapanese, isSpeakOnReveal } from '../lib/audio'
 import {
   MODES as STUDY_MODES, RENDER, HINTS,
   modeLabel, usesWritingDrill,
@@ -440,7 +440,7 @@ export default function StudyRun({ session }) {
                 onValidate={() => {
                   setAnswered(true)
                   setShowRating(true)
-                  speakJapanese(nc.kana)
+                  if (isSpeakOnReveal()) speakJapanese(nc.kana)
                 }}
               />
             )}

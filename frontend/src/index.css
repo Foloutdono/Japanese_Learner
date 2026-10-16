@@ -10345,6 +10345,10 @@ textarea:focus-visible {
   color: color-mix(in srgb, var(--accent2) 60%, var(--text-primary));
 }
 .study-assist__toggle:disabled { opacity: 0.4; cursor: default; }
+/* The speak-on-reveal switch (SpeakToggle) stands at the end of the row
+   as the same pill drawn as an icon alone: the pill's block padding on
+   every side but its inline one, a rung under the labelled pills'. */
+.study-assist__toggle--icon { padding-inline: var(--sp-3); }
 /* A hand-written card has no distractors to offer, so it says why
    rather than showing a control that would do nothing. */
 .study-assist__na {

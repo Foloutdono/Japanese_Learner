@@ -13,6 +13,8 @@ import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import RatingBar from '../components/study/RatingBar'
 import { RunStreak } from '../components/study/RunStreak'
+import SpeakToggle from '../components/study/SpeakToggle'
+import { useRevealSpeech } from '../hooks/useRevealSpeech'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { BreakdownSide, LineSide } from '../components/analysis/BreakdownSide'
 import { useDesk } from '../hooks/useDesk'
@@ -115,6 +117,9 @@ export default function ReadingRun({ session }) {
   const lines = useRunLines(session, { held: Boolean(lookup) })
   // 問 (plan 131): a question about the sentence, once graded, on the desk.
   const asking = useAsk(session, 'reading')
+  // The answer is in: the sentence it was read from is said, unless the
+  // speak-on-reveal switch in the head is off.
+  useRevealSpeech(data?.phrase, stage === 'feedback')
 
   const [analysis, setAnalysis] = useState(null)
   const [analysisLoading, setAnalysisLoading] = useState(false)
@@ -574,7 +579,7 @@ function SessionView({
       // On the desk the score is the run panel's figures (plan 129).
       remaining={desk ? undefined : `${score.correct} / ${score.total}`}
       pass={false}
-      aside={<RunStreak />}
+      aside={<><RunStreak /><SpeakToggle variant="head" /></>}
       toast={fare.toast}
       onToastDone={fare.toastDone}
       records

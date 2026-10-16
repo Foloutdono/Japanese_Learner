@@ -4,6 +4,7 @@ import { useDesk } from '../../hooks/useDesk'
 import { dialogOpen } from '../../lib/dialogOpen'
 import { RunPanelsContext } from './runPanels'
 import { PlusIcon } from '../ui/Icons'
+import SpeakToggle from './SpeakToggle'
 
 // ── The hint switch ───────────────────────────────────────────
 // A hint is something you reach for on a card you are stuck on, so it
@@ -28,11 +29,14 @@ import { PlusIcon } from '../ui/Icons'
 //   active    — Set/array of hint keys currently switched on
 //   onToggle  — (hintKey) => void
 //   disabled  — true while the card is locked mid-review
+//   speaks    — true when this card says its answer once revealed: the
+//               speak-on-reveal switch (SpeakToggle) then stands last in
+//               the row, and the row shows even with no hint to offer
 //
 // On the desk (plan 115) C shows and hides the choices, the one hint a
 // learner reaches for card after card — never Ctrl+C, never from a
 // field, never under a dialog — and the switch prints its cap.
-export default function HintBar({ available = [], active = [], onToggle, disabled = false }) {
+export default function HintBar({ available = [], active = [], onToggle, disabled = false, speaks = false }) {
   const { t } = useLang()
   const desk = useDesk()
   // On the run's panels the card panel lists the keys (plan 126).
@@ -49,7 +53,7 @@ export default function HintBar({ available = [], active = [], onToggle, disable
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [choices, onToggle])
-  if (available.length === 0) return null
+  if (available.length === 0 && !speaks) return null
 
   const isOn = key => (active instanceof Set ? active.has(key) : active.includes(key))
 
@@ -88,6 +92,7 @@ export default function HintBar({ available = [], active = [], onToggle, disable
           </button>
         )
       })}
+      {speaks && <SpeakToggle />}
     </div>
   )
 }

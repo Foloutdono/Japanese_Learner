@@ -1574,6 +1574,11 @@ const misc = {
   hintSentencesHide:  'Hide the sentence',
   hintFuriganaShow:   'Show furigana',
   hintFuriganaHide:   'Hide furigana',
+  // The speak-on-reveal switch beside them (components/study/SpeakToggle.jsx):
+  // the name stays, the title says what a tap does.
+  speakOnReveal:      'Speak on reveal',
+  speakOnRevealOn:    'Speak the answer when it is revealed',
+  speakOnRevealOff:   'Stop speaking the answer when it is revealed',
 
   // ── Study modes (domain/studyModes.js) ──
   // One label + description per mode key. Namespacing means these need no
