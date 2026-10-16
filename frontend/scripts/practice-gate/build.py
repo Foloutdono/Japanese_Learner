@@ -30,7 +30,7 @@ from band import mask         # noqa: E402
 import parts                  # noqa: E402
 from hours import Lighter, HOUR_ORDER, LEAF   # noqa: E402
 
-REV = 1
+REV = 2
 FRONT = HERE.parent.parent
 PRINT = FRONT / 'src/components/station/print/print.json'
 OUT = FRONT / 'public/practice/gate'
