@@ -94,6 +94,14 @@ runtime purpose.
   saying where each rating leaves the point (`review_preview[q].step`,
   plan 198) so the client never copies the pass rule. Never store the
   step beside the row; a row written before plan 194 reads onto the walk.
+- **A write to a learner's history goes through the engine (plan 212).**
+  Lifetime XP, the total of reviews, the days studied, the best run and
+  the review pace are kept per learner in `SRSEngine` until a write moves
+  them: `review_log` is written by `_log_review`, `xp_ledger` by
+  `award_xp`/`record_day_clear`, and anything else that writes or erases
+  those tables in the server (the stats reset, the account's deletion)
+  calls `srs.forget_history(user_id)` after it commits. The cache is in
+  process: the API runs one worker.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.
@@ -101,6 +109,17 @@ runtime purpose.
   goes through `core/daily_limit.py` (`daily_usage`) for its daily ceiling and
   into `scripts/llm_cost_model.py` for its cost. Nothing the learner typed is
   kept.
+- **No learner can flood the server (plan 211).** The API is one worker:
+  `core/concurrency.py` runs a learner's requests a few at a time, and
+  both DB pools wait for a connection (`core/pool.py`) rather than fail.
+  What a route does is bounded by its parameters, never by the client:
+  a size, page, list or text param has a bound or an allowed set
+  (`tests/test_query_bounds.py`), learner-independent work is computed
+  once (`lru_cache`), an `async def` never blocks (blocking work is a
+  plain `def`), a model call counts against a daily ceiling, and a `lang`
+  that keys a cache goes through `reading.known_lang`. On the client a
+  selector's fetch goes through `lib/cachedJson.js`, a held arrow key
+  checks no radio, and a write that creates guards against a second press.
 - **A new per-learner table is erased with the account.** Add it to
   `DELETE /api/account` (`routes/account.py`) in the same change.
 - **One table's self-migration per transaction.** A failing `ALTER` must not

@@ -1,5 +1,6 @@
 import random
 import threading
+from collections import OrderedDict
 
 # In-process only: not shared between workers, lost on restart. That is
 # fine for what it holds — a shuffled pool of not-yet-served "new" card
@@ -17,7 +18,13 @@ import threading
 # never re-ran, `get_new_cards` found nothing, and every session returned
 # empty until the API was restarted. Nothing here can be stale like that
 # now, so a database wipe no longer needs a restart.
-_batches: dict[str, list[str]] = {}
+_batches: OrderedDict[str, list[str]] = OrderedDict()
+
+# Bounded (plan 211): a pool per (user, mode, deck) -- and a tier's per
+# tier size -- was kept for the process's life, so the maps grew with
+# every learner and every pool ever asked for. The pools least lately
+# refilled go first; a dropped pool is rebuilt by its next refill.
+_MAX_POOLS = 4096
 
 # One lock per pool. Every pick_ids caller is a sync `def` route, which
 # FastAPI runs in a threadpool, so two requests for the same
@@ -36,7 +43,17 @@ _locks: dict[str, threading.Lock] = {}
 
 def _lock_for(cache_key: str) -> threading.Lock:
     with _locks_guard:
-        return _locks.setdefault(cache_key, threading.Lock())
+        lock = _locks.get(cache_key)
+        if lock is None:
+            if len(_locks) >= _MAX_POOLS:
+                # Only the locks nobody holds: at worst a lock taken up
+                # but not yet acquired is dropped, and its pool is served
+                # twice over once -- the race the lock exists for, rare
+                # and harmless (a card handed out twice).
+                for k in [k for k, held in _locks.items() if not held.locked()][: _MAX_POOLS // 2]:
+                    del _locks[k]
+            lock = _locks[cache_key] = threading.Lock()
+        return lock
 
 
 def key(*parts: object) -> str:
@@ -50,11 +67,12 @@ def reset(prefix: str | None = None) -> None:
     a bulk change (a wipe, a deck edit) so a pool built against the old
     contents isn't served.
     """
-    if prefix is None:
-        _batches.clear()
-        return
-    for cache_key in [k for k in _batches if k.startswith(prefix)]:
-        del _batches[cache_key]
+    with _locks_guard:
+        if prefix is None:
+            _batches.clear()
+            return
+        for cache_key in [k for k in _batches if k.startswith(prefix)]:
+            del _batches[cache_key]
 
 
 
@@ -94,7 +112,11 @@ def take_batch(cache_key: str, fetch_fn, count: int, limit: int = 10) -> list[st
         if len(result) < count:
             taken = set(result)
             batch = [i for i in fetch_fn(limit=max(limit, count)) if i not in taken]
-            _batches[cache_key] = batch
+            with _locks_guard:
+                _batches[cache_key] = batch
+                _batches.move_to_end(cache_key)
+                while len(_batches) > _MAX_POOLS:
+                    _batches.popitem(last=False)
             take = min(count - len(result), len(batch))
             result += batch[:take]
             del batch[:take]

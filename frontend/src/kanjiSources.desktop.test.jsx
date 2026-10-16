@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'react-router-dom'
 import { LangProvider } from './LangContext'
@@ -26,7 +26,9 @@ const apiFetch = vi.hoisted(() => vi.fn())
 vi.mock('./lib/api', () => ({
   api: p => p,
   apiFetch,
-  apiJson: vi.fn(), apiJsonWithTimeout: vi.fn(), apiUpload: vi.fn(),
+  // The shared answers (lib/cachedJson, plan 211) ask through apiJson.
+  apiJson: async (...a) => (await apiFetch(...a)).json(),
+  apiJsonWithTimeout: vi.fn(), apiUpload: vi.fn(),
   ApiError: class extends Error {},
 }))
 const answer = path => {
@@ -47,6 +49,9 @@ vi.mock('./stores/stats', () => ({ useStats: () => ({ data: STATS, failed: false
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: KanjiScreen } = await import('./screens/KanjiScreen')
+const { forgetCachedJson } = await import('./lib/cachedJson')
+// Each case asks with its own answers: none is kept across (plan 211).
+afterEach(() => { forgetCachedJson() })
 
 const settle = async (ms = 300) => {
   await new Promise(r => setTimeout(r, ms))

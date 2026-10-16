@@ -137,7 +137,7 @@ export const VALUES = {
     setting: ['theme', 'lang', 'rating_scale', 'reading_pace', 'sound', 'notifications', 'level', 'lines', 'daily_target'],
     value: ['light', 'dark', 'auto', 'fr', 'en', 'binary', 'simple', 'full', 'standard', 'relaxed', 'slow', 'untimed', 'on', 'off', 'N5', 'N4', 'N3', 'N2', 'N1', 'changed'],
   },
-  ai_use: { feature: ['ask', 'composition'] },
+  ai_use: { feature: ['ask', 'composition', 'translation_review', 'deep_analysis', 'exam_paper'] },
   client_error: { where: ['error', 'rejection'] },
 }
 // end VALUES

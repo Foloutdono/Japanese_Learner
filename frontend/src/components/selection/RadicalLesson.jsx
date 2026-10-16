@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useId, useState } from 'react'
 import { Navigate } from 'react-router-dom'
-import { apiJson, ApiError } from '../../lib/api'
+import { ApiError } from '../../lib/api'
+import { cachedJson, MINE_TTL_MS } from '../../lib/cachedJson'
 import { api } from '../../lib/origin'
 import { useLang } from '../../LangContext'
 import { playUi } from '../../lib/audio'
@@ -71,7 +72,9 @@ export default function RadicalLesson({ number, session, platforms, browse, onBr
     setRadical(null)
     setError(null)
     setDrawFailed(false)
-    apiJson(`/api/kanji/radical/${number}?lang=${lang}`, session)
+    // Shared and kept briefly (lib/cachedJson, plan 211): walking the
+    // radicals back and forth asks each one once.
+    cachedJson(`/api/kanji/radical/${number}?lang=${lang}`, session, { ttlMs: MINE_TTL_MS })
       .then(data => { if (!cancelled) { setRadical(data); onLoaded?.(data) } })
       .catch(err => { if (!cancelled) setError(err) })
     return () => { cancelled = true }

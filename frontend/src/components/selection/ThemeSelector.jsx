@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { apiFetch } from '../../lib/api'
+import { useMemo, useState } from 'react'
+import { CONTENT_TTL_MS, useCachedJson } from '../../lib/cachedJson'
 import { useLang } from '../../LangContext'
 import { playUi } from '../../lib/audio'
 import { Console, ConsoleIndex } from '../chrome/Console'
@@ -33,7 +33,7 @@ import { themeLabelFor } from '../../domain/themes'
  * problem to begin with.
  *
  * Props:
- *   session  — forwarded to apiFetch, same as every other
+ *   session  — forwarded to the request, same as every other
  *              data-fetching component in this app.
  *   onSelect(themeKey, label) — called with the theme's key (what
  *              /api/vocab/theme/{theme}/... expects) and its resolved
@@ -47,18 +47,12 @@ import { themeLabelFor } from '../../domain/themes'
  */
 export default function ThemeSelector({ session, onSelect, color }) {
   const { t } = useLang()
-  const [themes, setThemes] = useState(null)
-  const [failed, setFailed] = useState(false)
   const [query, setQuery] = useState('')
-
-  useEffect(() => {
-    let cancelled = false
-    apiFetch('/api/themes', session)
-      .then(r => r.json())
-      .then(data => { if (!cancelled) setThemes(data.themes ?? []) })
-      .catch(() => { if (!cancelled) setFailed(true) })
-    return () => { cancelled = true }
-  }, [session])
+  // The same for every learner, and shared with the sources' plate and
+  // a theme's bands (lib/cachedJson, plan 211).
+  const got = useCachedJson('/api/themes', session, { ttlMs: CONTENT_TTL_MS })
+  const themes = useMemo(() => (got ? got.themes ?? [] : null), [got])
+  const failed = got === null
 
   // Labels resolved once per themes fetch (not per render/per
   // keystroke) — the list itself never changes after mount, only

@@ -106,8 +106,16 @@ function DecksShelf({ session, open }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // One deck per press (plan 211): Enter held, or a double click, sent
+  // a POST each and made as many decks of the same name. A ref, so two
+  // presses in one frame cannot both pass; the state draws the button.
+  const makingRef = useRef(false)
+  const [making, setMaking] = useState(false)
+
   function createDeck() {
-    if (!newName.trim()) return
+    if (!newName.trim() || makingRef.current) return
+    makingRef.current = true
+    setMaking(true)
     apiFetch('/api/decks', session, {
       method: 'POST',
       body: JSON.stringify({ name: newName.trim(), type: newType }),
@@ -139,6 +147,7 @@ function DecksShelf({ session, open }) {
         setTypeFilter('all')
       })
       .catch(() => {})
+      .finally(() => { makingRef.current = false; setMaking(false) })
   }
 
   // Only the types actually on the shelf get a chip: a filter for a
@@ -221,7 +230,7 @@ function DecksShelf({ session, open }) {
           )
         })}
       </div>
-      <button type="button" onClick={createDeck} className="btn-primary" disabled={!newName.trim()}>
+      <button type="button" onClick={createDeck} className="btn-primary" disabled={!newName.trim() || making}>
         {t.createDeck}
       </button>
     </div>

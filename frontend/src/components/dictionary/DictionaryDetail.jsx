@@ -5,7 +5,7 @@ import { shortDate } from '../../lib/formatDate'
 import { useLang } from '../../LangContext'
 import { cachedLookup, fetchLookup, pickEntry } from '../../lib/dictionaryLookup'
 import { api } from '../../lib/origin'
-import { apiJson } from '../../lib/api'
+import { useCachedJson } from '../../lib/cachedJson'
 import { Seg } from '../chrome/Console'
 import {
   SCOPE_ALL, SCOPE_COURSE, formatPct, readingRows,
@@ -653,25 +653,11 @@ function saveScope(scope) {
 }
 
 // The counts over all of JMdict are a character's, not a learner's, so
-// they are kept for the page's life and asked for once.
-const allSharesCache = new Map()
-
+// they are kept for the page's life and asked for once, however fast
+// the scope is switched (lib/cachedJson, plan 211).
 function useAllShares(char, active) {
-  const [failed, setFailed] = useState(null)
-  const [, bump] = useState(0)
-  const cached = allSharesCache.get(char) ?? null
-  useEffect(() => {
-    if (!active || cached) return undefined
-    let cancelled = false
-    apiJson(`/api/dictionary/readings-share?char=${encodeURIComponent(char)}`, null)
-      .then(data => {
-        allSharesCache.set(char, data)
-        if (!cancelled) bump(n => n + 1)
-      })
-      .catch(() => { if (!cancelled) setFailed(char) })
-    return () => { cancelled = true }
-  }, [char, active, cached])
-  return { data: cached, failed: !cached && failed === char }
+  const body = useCachedJson(active ? `/api/dictionary/readings-share?char=${encodeURIComponent(char)}` : null, null, { ttlMs: Infinity })
+  return { data: body ?? null, failed: body === null }
 }
 
 function ReadingsByShare({ entry, groups, onClose, jump }) {

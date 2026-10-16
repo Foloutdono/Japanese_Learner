@@ -23,6 +23,9 @@ vi.mock('../stores/boarding', () => ({ board: fn => fn() }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: GrammarScreen } = await import('./GrammarScreen')
+const { forgetCachedJson } = await import('../lib/cachedJson')
+// Each case asks with its own answers: none is kept across (plan 211).
+afterEach(() => { forgetCachedJson() })
 
 const INDEX = {
   level: 'N5',
