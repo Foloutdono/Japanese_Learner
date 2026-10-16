@@ -656,17 +656,17 @@ export function timeline(plan, dur = null) {
   chapters.push({ at, title: S.chapters.outro })
   fx(at + 0.3, 'platform-chime')
   seg('outro', short ? 3 : 5, {})
-  // The transitions (plan 221): how each part is entered, and their sounds.
-  // A part the doors or the train open onto has their chime, not a card's turn.
+  // The door onto the call to action (plan 221): its chime as the lamp lights,
+  // its slide as the leaves run, in place of a card's turn.
   const quiet = new Set()
   for (let j = 1; j < segs.length; j++) {
     const kind = transitionOf(segs[j - 1], segs[j])
+    if (!kind) continue
     const s0 = segs[j].start
     segs[j].enter = kind
-    if (kind === 'slide') continue
     quiet.add(+(s0 + 0.1).toFixed(3))
-    fx(s0 - (kind === 'train' ? TRAIN_S : CLOSE_S), 'door-slide', kind === 'train' ? 0.7 : 0.5)
-    if (segs[j].type !== 'outro') fx(s0 + 0.05, 'door-chime', 0.8)
+    fx(s0 + 0.02, 'door-chime', 0.8)
+    fx(s0 + OPEN_S * 0.14, 'door-slide', 0.6)
   }
   const heard = sfx.filter(x => !(x.key === 'card-transition' && quiet.has(x.at)))
   return { seconds: +at.toFixed(3), segs, cues, sfx: heard, chapters, kind: plan.kind, of }
@@ -894,7 +894,7 @@ function strokeLength(d) {
 /** Where a frame stands: its segment, the second into it, and the two
  *  helpers every part is drawn with (`k`, a part's share of the way in,
  *  kept in the frame's key while it moves; `fade`, a part drawn at it). */
-function begin(ctx, plan, tl, t, w, h, ground, paint = true) {
+function begin(ctx, plan, tl, t, w, h, ground) {
   const p = palette(ground)
   const S = SAY[plan.lang] || SAY.en
   const line = p.line[plan.line] || p.gold
@@ -917,10 +917,8 @@ function begin(ctx, plan, tl, t, w, h, ground, paint = true) {
     fn()
     ctx.restore()
   }
-  if (paint) {
-    ctx.fillStyle = p.bg
-    ctx.fillRect(0, 0, w, h)
-  }
+  ctx.fillStyle = p.bg
+  ctx.fillRect(0, 0, w, h)
   return { p, S, line, sg, u, state, k, fade, d: sg.data, m: sg.marks }
 }
 
@@ -1151,31 +1149,21 @@ const ROUTE_X = 1352 // where the route stands, right of the column's rule
 const CTA_WIDE = { id: 'wide', w: W, h: H, safe: { t: TOP + 64, r: 96, b: 72, l: 96 } }
 const COL_RULE = 1280
 
-// ── Transitions (plan 221) ──────────────────────────────────────
-// Where one part of a video meets the next, the station moves:
-// - between two items the train pulls, as the app's screens do (DESIGN.md,
-//   "Motion"): the screen that was slides off to the left as the next comes
-//   in from the right, the band, the masthead and the line of stations
-//   standing still;
-// - into and out of the call to action, and into the sign-off, the doors
-//   close over the end of a part and part onto the next, drawn as the
-//   app's own (index.css .door: the leaves unlock, stand a crack apart,
-//   then run), with its chime;
-// - at the end of the intro the train comes in from the right and stops
-//   with its door in front of the viewer, which opens onto the first item.
-// Each plays inside the time its parts already have: nothing said moves.
-const SLIDE_S = 0.45
-const CLOSE_S = 0.5
+// ── The door (plan 221) ─────────────────────────────────────────
+// The call to action is boarded through the app's door (index.css .door,
+// TrainDoor.jsx): over the end of the part before it the door fades in,
+// settling from a touch larger, as the app's does over a menu; then it
+// opens itself onto the call to action: the lamp over the seam lights with
+// the chime, the leaves unlock and stand a crack apart, then run. Nothing
+// else moves: every other part cuts to the next. It plays inside the time
+// the parts already have, so no line moves.
+const APPEAR_S = 0.5
 const OPEN_S = 0.85
-const TRAIN_S = 1.4
 const inOut = x => (x < 0.5 ? 4 * x ** 3 : 1 - (-2 * x + 2) ** 3 / 2)
 
-/** How a part is entered from the one before it: train, doors or slide. */
+/** How a part is entered: the call to action through the door, the rest by a cut. */
 export function transitionOf(prev, cur) {
-  if (!prev) return null
-  if (prev.type === 'intro') return 'train'
-  if (cur.type === 'cta' || prev.type === 'cta' || cur.type === 'outro') return 'doors'
-  return 'slide'
+  return prev && cur.type === 'cta' ? 'door' : null
 }
 
 /** A carriage's panel, the door leaves' and the windows' ground: the
@@ -1267,67 +1255,37 @@ function doors(ctx, x0, w, h, pal, line, shut, crack = 0, lamp = false) {
   rrect(ctx, x0 + w / 2 - hh * 1.4, hh * 0.25, hh * 2.8, hh * 0.5, hh * 0.25)
   ctx.fill()
 }
-/** The train, its door's left edge at `o`: a panel of windows either side of the door. */
-function train(ctx, o, w, h, pal, line) {
-  for (const x of [o - w, o + w]) {
-    panel(ctx, x, w, h, pal, line)
-    const r = h * 0.011
-    pane(ctx, x + w * 0.08, h * 0.14, w * 0.34, h * 0.41, pal, r)
-    pane(ctx, x + w * 0.58, h * 0.14, w * 0.34, h * 0.41, pal, r)
-    ctx.fillStyle = alpha(pal.ink, 0.35)
-    ctx.fillRect(x, 0, 3, h)
-  }
-  doors(ctx, o, w, h, pal, line, 1)
-}
-
 /** The frame at second `t`, and its key: two frames with the same key
  *  are the same picture. A long video is drawn on the door screen
- *  (drawWide), a short standing (drawTall); where two parts meet, the
- *  transition between them is drawn over both. */
+ *  (drawWide), a short standing (drawTall); the door, where it plays, over it. */
 export function drawLong(ctx, plan, tl, t) {
   const tall = plan.format === 'short'
+  let key = (tall ? drawTall : drawWide)(ctx, plan, tl, t)
   const w = tall ? TW : W
   const h = tall ? TH : H
-  const draw = (tt, mode) => (tall ? drawTall : drawWide)(ctx, plan, tl, tt, mode)
   let i = tl.segs.findIndex(s => t < s.start + s.dur)
   if (i < 0) i = tl.segs.length - 1
   const sg = tl.segs[i]
-  const prev = tl.segs[i - 1]
   const next = tl.segs[i + 1]
   const u = t - sg.start
   const left = sg.start + sg.dur - t
-  // The train is the washi's, cream in both formats, so it stands out on the sumi wall too.
+  // The door is the washi's, cream in both formats, so it stands out on the sumi wall too.
   const pal = PAPER
-  const ground = (tall ? SUMI : PAPER).bg
   const line = pal.line[plan.line] || pal.gold
   const q = v => Math.round(v * 40) / 40
-  if (sg.enter === 'slide' && prev && u < SLIDE_S) {
-    const e = q(ease(u / SLIDE_S))
-    ctx.fillStyle = ground
-    ctx.fillRect(0, 0, w, h)
+  if (next?.enter === 'door' && left < APPEAR_S) {
+    const v = q(ease(1 - left / APPEAR_S))
     ctx.save()
-    ctx.translate(-w * e, 0)
-    const a = draw(prev.start + prev.dur - 0.001, 'body')
+    ctx.globalAlpha = v
+    const z = 1.045 - 0.045 * v
+    ctx.translate(w / 2, h / 2)
+    ctx.scale(z, z)
+    ctx.translate(-w / 2, -h / 2)
+    doors(ctx, 0, w, h, pal, line, 1)
     ctx.restore()
-    ctx.save()
-    ctx.translate(w * (1 - e), 0)
-    // The screen comes in whole: its own fade-in is the slide.
-    const b = draw(Math.max(t, sg.start + SLIDE_S), 'body')
-    ctx.restore()
-    return `slide${e}|${a}|${b}|${draw(t, 'chrome')}`
+    key += `|door${v}`
   }
-  let key = draw(t, 'all')
-  if (next?.enter === 'doors' && left < CLOSE_S) {
-    const v = q(inOut(1 - left / CLOSE_S))
-    doors(ctx, 0, w, h, pal, line, v)
-    key += `|close${v}`
-  }
-  if (next?.enter === 'train' && left < TRAIN_S) {
-    const v = q(ease(1 - left / TRAIN_S))
-    train(ctx, w * 2.4 * (1 - v), w, h, pal, line)
-    key += `|train${v}`
-  }
-  if ((sg.enter === 'doors' || sg.enter === 'train') && u < OPEN_S) {
+  if (sg.enter === 'door' && u < OPEN_S) {
     const r = u / OPEN_S
     const crack = q(Math.min(1, r / 0.14))
     const v = q(r < 0.14 ? 1 : 1 - inOut((r - 0.14) / 0.86))
@@ -1337,10 +1295,9 @@ export function drawLong(ctx, plan, tl, t) {
   return key
 }
 
-/** A long video's frame on the door screen: `mode` is all of it, its body
- *  alone (what a transition moves) or its chrome alone (what stays). */
-function drawWide(ctx, plan, tl, t, mode = 'all') {
-  const { p, S, line, sg, u, state, k, fade, d, m } = begin(ctx, plan, tl, t, W, H, 'paper', mode !== 'chrome')
+/** A long video's frame on the door screen. */
+function drawWide(ctx, plan, tl, t) {
+  const { p, S, line, sg, u, state, k, fade, d, m } = begin(ctx, plan, tl, t, W, H, 'paper')
   const { card, sentence, para, pill } = tools(ctx, p, line)
   // The stripe: the way along the video, or a question's seconds while they run.
   let fill = sg.n ? sg.n / tl.of : 1
@@ -1352,9 +1309,8 @@ function drawWide(ctx, plan, tl, t, mode = 'all') {
     q: d?.q?.ask,
   }
   // The call to action is the carousel's, laid out wide on the screen under the band.
-  if (sg.type === 'cta' && mode !== 'chrome') videoCta(ctx, { fmt: CTA_WIDE, design: 'clarte', lang: plan.lang, line: plan.line, feature: d.feature })
-  if (mode !== 'body') door(ctx, p, line, plan, sg, S, { next: sg.type === 'vocab' || sg.type === 'kanji', head: heads[sg.type] || null, fill })
-  if (mode === 'chrome') return state.join(',')
+  if (sg.type === 'cta') videoCta(ctx, { fmt: CTA_WIDE, design: 'clarte', lang: plan.lang, line: plan.line, feature: d.feature })
+  door(ctx, p, line, plan, sg, S, { next: sg.type === 'vocab' || sg.type === 'kanji', head: heads[sg.type] || null, fill })
   switch (sg.type) {
     case 'intro': {
       fade(k(0.2, 0.6), () => mark(ctx, W / 2 - 90, 220, 180, p.ink, p.gold))
@@ -1796,17 +1752,17 @@ function bandText(ctx, p, str, by, bh, sizes = [40, 34, 30]) {
 }
 
 /** The frame of a short at second `t`, and its key. */
-function drawTall(ctx, plan, tl, t, mode = 'all') {
-  const { p, S, line, sg, u, state, k, fade, d, m } = begin(ctx, plan, tl, t, TW, TH, 'sumi', mode !== 'chrome')
+function drawTall(ctx, plan, tl, t) {
+  const { p, S, line, sg, u, state, k, fade, d, m } = begin(ctx, plan, tl, t, TW, TH, 'sumi')
   const { card, sentence, para } = tools(ctx, p, line)
   const cx = TW / 2
   // The call to action is the carousel's own slide, in its story format.
   if (sg.type === 'cta') {
-    if (mode !== 'chrome') videoCta(ctx, { fmt: FORMATS.story, design: 'defi', lang: plan.lang, line: plan.line, feature: d.feature })
+    videoCta(ctx, { fmt: FORMATS.story, design: 'defi', lang: plan.lang, line: plan.line, feature: d.feature })
     return state.join(',')
   }
   const box = sg.n ? [sg.type === 'q' ? 'Q' : plan.theme ? '' : plan.level, sg.n] : null
-  if (mode !== 'body' && sg.type !== 'intro' && sg.type !== 'outro') {
+  if (sg.type !== 'intro' && sg.type !== 'outro') {
     mark(ctx, TX, 250, 56, p.ink, p.gold)
     text(ctx, 'TSUJI', TX + 70, 292, { f: font(700, 24, 'latin'), color: p.ink2, tr: 0.3 })
     if (sg.n) {
@@ -1827,7 +1783,6 @@ function drawTall(ctx, plan, tl, t, mode = 'all') {
       }
     }
   }
-  if (mode === 'chrome') return state.join(',')
   switch (sg.type) {
     case 'intro': {
       fade(k(0.1, 0.4), () => mark(ctx, cx - 70, 300, 140, p.ink, p.gold))
