@@ -1393,12 +1393,12 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
                 break
         if len(examples) >= _MAX_EXAMPLES:
             break
-    # Where JMdict's sentences run short, the course's own follow them,
-    # under the sense the card glosses.
-    first = ordered[0] if ordered else None
-    examples += _written(kanji, kana, seen_jp, numbers[id(first)] if first is not None else None,
-                         "; ".join(first.get("glossary", [])) if first is not None else meaning_hint,
-                         _MAX_EXAMPLES - len(examples))
+    # Where JMdict's sentences run short, the course's own follow them.
+    # Under no sense of JMdict's: a kana card can draw its senses from
+    # another word read alike (だんだん's are the dialect "thank you"),
+    # and a written sentence teaches the card's gloss, so the page lists
+    # it with the word rather than under a sense.
+    examples += _written(kanji, kana, seen_jp, None, meaning_hint, _MAX_EXAMPLES - len(examples))
 
     if lang == "fr":
         _in_french(senses_out, examples)
