@@ -153,7 +153,10 @@ def cmd_check(path: str) -> int:
 
 def cmd_merge(in_dir: str) -> int:
     originals = _originals()
-    merged = dict(example_fixes.fixes())
+    # A sentence the deck no longer shows (its card retired or
+    # respelled) has nothing to correct: its correction is dropped.
+    merged = {k: v for k, v in example_fixes.fixes().items() if k in originals}
+    stale: set[str] = set()
     found = []
     source: dict[str, str] = {}
     for path in sorted(glob.glob(os.path.join(in_dir, "fixes_*.json"))):
@@ -172,6 +175,9 @@ def cmd_merge(in_dir: str) -> int:
                 found.append(f"{name}: {(fix.get('orig') or '?')[:30]}: also corrected in {source[fix['orig']]}")
                 continue
             source[fix.get("orig")] = name
+            if fix.get("orig") not in originals:
+                stale.add(fix.get("orig"))
+                continue
             issues = problems(fix, originals)
             if issues:
                 found += [f"{name}: {p}" for p in issues]
@@ -193,6 +199,9 @@ def cmd_merge(in_dir: str) -> int:
                 found.append(f"{name}: {(orig or '?')[:30]}: also amended in {amended[orig]}")
                 continue
             amended[orig] = name
+            if orig not in originals:
+                stale.add(orig)
+                continue
             issues = problems(fix, originals)
             if issues:
                 found += [f"{name}: {p}" for p in issues]
@@ -209,7 +218,8 @@ def cmd_merge(in_dir: str) -> int:
     }
     with open(example_fixes.PATH, "w", encoding="utf-8") as f:
         f.write(json.dumps(data, ensure_ascii=False, indent=1) + "\n")
-    print(f"{len(merged)} correction(s) in {example_fixes.PATH}")
+    print(f"{len(merged)} correction(s) in {example_fixes.PATH}"
+          f" ({len(stale)} of a sentence the deck no longer shows, left out)")
     return 0
 
 
