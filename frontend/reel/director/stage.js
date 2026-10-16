@@ -57,6 +57,25 @@ export function createStage(phone, { host }) {
       }
     },
 
+    /**
+     * Wait for `selector` to stop moving (a sheet sliding up, a card
+     * arriving): its box the same two frames running. The camera frames
+     * where a thing comes to rest, not where it was mid-flight.
+     */
+    async still(selector, { timeout = 1.5 } = {}) {
+      const until = performance.now() + timeout * 1000
+      let last = null
+      let same = 0
+      while (performance.now() < until) {
+        const r = stage.find(selector)?.getBoundingClientRect()
+        const box = r ? `${r.left.toFixed(1)},${r.top.toFixed(1)},${r.width.toFixed(1)},${r.height.toFixed(1)}` : null
+        same = box && box === last ? same + 1 : 0
+        if (same >= 2) return
+        last = box
+        await nextFrame()
+      }
+    },
+
     async waitGone(selector, { timeout = 10 } = {}) {
       const until = performance.now() + timeout * 1000
       for (;;) {

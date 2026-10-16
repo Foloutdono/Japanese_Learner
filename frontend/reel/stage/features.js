@@ -33,10 +33,19 @@ export function installFeatureFixtures(part) {
     return { body: hit ?? EMPTY_PAGE, delay: 140 }
   })
 
+  // ── 読み上げ — a card's word, spoken as it turns ──
+  // Voiced by the bundle when a VOICEVOX engine was configured; without
+  // one, the server's own answer: 503, and the card is silent.
+  route('GET', '/api/tts', async ({ query, realFetch }) => {
+    const file = bundle.voice?.[query.get('text') ?? '']
+    if (!file) return { status: 503, body: { detail: 'reel: no voice engine' } }
+    return realFetch(`/__reel/files/${file}`)
+  })
+
   // ── 解析 — the analyzer ──
   route('POST', '/api/ocr', () => {
     const b = beat()
-    return { body: { text: b.ocr ?? b.text ?? '', chars: [] }, delay: 1150 }
+    return { body: { text: b.ocr ?? b.text ?? '', chars: [] }, delay: 850 }
   })
 
   const kept = new Set()
@@ -53,7 +62,7 @@ export function installFeatureFixtures(part) {
     const text = String(body?.phrase ?? '').trim()
     const answer = answerFor(bundle.analyze, text)
     if (!answer) return { status: 404, body: { detail: 'reel: no breakdown for this text' } }
-    if (!body?.deep) return { body: answer, delay: body?.whole ? 250 : 650 }
+    if (!body?.deep) return { body: answer, delay: body?.whole ? 250 : 450 }
     // The deep tier: what a model would have added, written by the script.
     const b = (part.beats ?? []).find(x => (x.text ?? '').trim() === text) ?? beat()
     const explanation = b.explain ?? b.translation ?? ''

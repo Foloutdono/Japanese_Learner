@@ -15,7 +15,8 @@
       "text": "本日のおすすめ、焼き魚定食",
       "translation": "La suggestion du jour : le menu poisson grillé.",
       "caption": "…et *Tsuji* te la décortique",
-      "taps": ["焼き魚"]
+      "taps": ["焼き魚"],
+      "point": false
     },
     { "end": true }
   ]

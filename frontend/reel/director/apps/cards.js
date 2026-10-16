@@ -40,7 +40,7 @@ async function playCard(beat, ctx, i) {
       await ctx.tap(lookup)
       await stage.waitFor('.dict-sheet .dict-plate', { timeout: 5 })
       finger.rest()
-      await wait(0.35)
+      await stage.still('.dict-sheet .dict-plate')
       await ctx.look(['.dict-sheet .dict-plate', '.dict-sheet svg, .dict-sheet .dict-block'], { duration: 0.55, max: 1.5 })
       await wait(beat.strokesHold ?? 3.4)
       const close = stage.find(`.dict-sheet .dict-plate__btn[aria-label="${ctx.closeLabel}"]`) ?? stage.find('.dict-sheet .dict-entry__close')

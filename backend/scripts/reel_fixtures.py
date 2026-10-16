@@ -269,8 +269,12 @@ def bundle(request: dict, out_dir: str | None = None) -> dict:
         if found:
             out.setdefault("comprehension", {})[level] = found
 
-    if request.get("voice") and out_dir:
-        out["voice"] = voice(request["voice"], out_dir)
+    # The lines a voice reads: a dictation's clips, and each word card's
+    # reading, which a card speaks as it turns (/api/tts).
+    spoken = list(request.get("voice", []))
+    spoken += [w["kana"] for w in out["words"].values() if w.get("kana") and w["kana"] not in spoken]
+    if spoken and out_dir:
+        out["voice"] = voice(spoken, out_dir)
 
     for raw_id in request.get("grammar", []):
         hit = entry_by_id(raw_id)

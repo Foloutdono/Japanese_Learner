@@ -419,7 +419,8 @@ export async function puzzle(hook, fxLayer, { count = 3, seed = 7, sound } = {})
   for (let i = 0; i < count; i++) {
     const el = document.createElement('span')
     el.className = 'fx__q'
-    el.textContent = i === count - 1 ? '？' : '?'
+    el.textContent = '?'
+    el.style.setProperty('--q-size', `${46 + i * 10}px`)
     const spot = spots[i % spots.length]
     el.style.left = `${Math.max(6, Math.min(396, spot.x + (rnd() - 0.5) * 8))}px`
     el.style.top = `${Math.max(36, spot.y + (rnd() - 0.5) * 8)}px`

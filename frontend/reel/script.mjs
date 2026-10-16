@@ -27,7 +27,7 @@ export const TRANSITIONS = ['snap', 'lift', 'rise', 'cut', 'whip']
 // Every feature the app has, as a scene the director can play
 // (director/scenes/*.js), and what each one needs from the script.
 export const APPS = {
-  analyzer: { needs: ['text'], from: ['photo', 'text', 'video'] },
+  analyzer: { needs: ['text'], from: ['photo', 'text'] },
   reading: { needs: ['text'] },
   dictation: { needs: ['text'] },
   translation: { needs: ['text'] },
@@ -45,6 +45,7 @@ export const APPS = {
   pass: { needs: [] },
 }
 
+export const DICTIONARY = ['kanji', 'vocab', 'grammar', 'hiragana', 'katakana']
 export const LANGS = ['fr', 'en']
 export const PLANS = ['free', 'pro', 'max']
 export const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
@@ -127,6 +128,9 @@ function normalizeBeat(beat, index) {
     if (!(value in APPS)) throw new ScriptError(where, `app "${value}" is not one of ${Object.keys(APPS).join(', ')}`)
     out.feature = value
     for (const field of APPS[value].needs) needString(rest, field, where)
+    if (value === 'dictionary' && rest.category != null && !DICTIONARY.includes(rest.category)) {
+      throw new ScriptError(where, `a dictionary beat's category is one of ${DICTIONARY.join(', ')}`)
+    }
     if (APPS[value].from) {
       out.from = rest.from ?? APPS[value].from[0]
       if (!APPS[value].from.includes(out.from)) {

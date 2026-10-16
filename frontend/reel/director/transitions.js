@@ -33,10 +33,8 @@ async function focusSquare(cam, at) {
     f.style.opacity = String(k)
     f.style.transform = `scale(${lerp(1.5, 1, k)})`
   }, ease.outCubic)
-  for (let i = 0; i < 2; i++) {
-    await tween(0.12, k => setOpacity(f, lerp(1, 0.45, k)), ease.linear)
-    await tween(0.12, k => setOpacity(f, lerp(0.45, 1, k)), ease.linear)
-  }
+  await tween(0.12, k => setOpacity(f, lerp(1, 0.45, k)), ease.linear)
+  await tween(0.12, k => setOpacity(f, lerp(0.45, 1, k)), ease.linear)
 }
 
 async function snap(beat, ctx) {
@@ -59,7 +57,7 @@ async function snap(beat, ctx) {
   sfx.whoosh(0.55, 0.11)
   phone.shake(1, 0.5)
   await phone.move(framing('hand'), 0.8, ease.outCubic)
-  await wait(0.2)
+  await wait(0.1)
 
   // Focus on the text: a tap on the viewfinder.
   const focusAt = { x: 195, y: 260 }
@@ -67,7 +65,7 @@ async function snap(beat, ctx) {
     input: false,
     onPress: () => { focusSquare(cam, focusAt) },
   })
-  await wait(0.28)
+  await wait(0.22)
 
   // The picture. The app is told now, so the photo is waiting for the
   // learner on the other side of the switch.

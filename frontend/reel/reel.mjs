@@ -274,6 +274,12 @@ async function main() {
     if (!encoder) return
     encoder.proc.stdin.end()
 
+    // What the app asked for and the stage could not answer (each one a
+    // 404 the film showed): a new screen's requests, named, not guessed.
+    const asked = await page.evaluate(() => [...new Set(document.querySelector('iframe')?.contentWindow?.__reelStage?.unhandled ?? [])])
+    if (asked.length) {
+      console.log(`  (the stage answered ${asked.length} request${asked.length > 1 ? 's' : ''} 404, unknown to it: ${asked.slice(0, 6).join(', ')}${asked.length > 6 ? ', …' : ''})`)
+    }
     // The sound renders while the page's clock keeps running.
     await page.evaluate(() => window.__reel.mix())
     await sp.pump(() => page.evaluate(() => Boolean(window.__reel.sound || window.__reel.error)), { label: 'soundtrack', max: 3000 })

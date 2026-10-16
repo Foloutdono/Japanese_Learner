@@ -37,6 +37,7 @@ async function openEntry(ctx, el, { hold }) {
   const sheet = await stage.waitFor('.dict-sheet')
   await stage.waitFor('.dict-sheet .dict-plate', { timeout: 4 }).catch(() => {})
   finger.rest()
+  await stage.still('.dict-sheet .dict-plate')
   await ctx.look(['.dict-sheet .dict-plate', '.dict-sheet .dict-sense, .dict-sheet .dict-block'], { duration: 0.6, max: 1.5 })
   await wait(hold)
   const close = stage.find(`.dict-sheet .dict-plate__btn[aria-label="${ctx.closeLabel}"]`)
@@ -111,7 +112,11 @@ export const analyzer = {
     }
 
     if (beat.point !== false) {
-      const point = stage.find('.bkd-point--door, .bkd-point')
+      // The point the script names (its pattern, e.g. "〜につき"), or the first.
+      const named = typeof beat.point === 'string'
+        ? stage.all('.bkd-point').find(el => strip(el.textContent).includes(strip(beat.point)))
+        : null
+      const point = named ?? stage.find('.bkd-point--door, .bkd-point')
       if (point) {
         await stage.scrollTo(point, { at: 0.5, duration: 0.5 })
         await ctx.look(stage.all('.bkd-point'), { duration: 0.6, max: 1.3 })

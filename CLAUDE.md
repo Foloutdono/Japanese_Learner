@@ -540,7 +540,17 @@ npm run icons     # rasterise brand/*.svg and regenerate the icon set in public/
 npm run landing   # the landing page (plan 167): public/landing/, sitemap.xml, robots.txt
 npm run landing:og  # its two share cards, rendered in Chromium
 python3 scripts/today-print/build.py  # Today's print of the hour (plan 205; numpy, Pillow)
+npm run reel -- reel/reels/sign-photo.json  # a short promo video of the real app (plan 210): reel/out/*.mp4
 ```
+
+The reel generator (plan 210, `frontend/reel/`, its `README.md` the
+script format) films the real app from `src/` in a phone, driven by a
+JSON script: a hook, a transition, the app played, an end card. Like the
+landing page it lives outside `src/`, with a stylesheet of its own.
+`src/reel.test.js` holds every scene to a route `App.jsx` declares, so a
+renamed route the reel films fails there: move the scene's `route` with
+it. A screen whose requests change may need its stand-in answers in
+`reel/stage/` updated; a render names any request nobody answered.
 
 Today's gate stands on a print drawn ahead of time (plan 205):
 `scripts/today-print/` is its generator and writes `public/today/print/<REV>/`

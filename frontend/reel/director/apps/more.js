@@ -10,7 +10,7 @@
 //   pass        the learner's commuter pass, turned over; the stamp book
 //               of studied days; the ranking
 //
-//   { "app": "exam" }   { "app": "dictionary", "search": "駅", "reading": "えき" }
+//   { "app": "exam" }   { "app": "dictionary", "search": "駅", "reading": "えき", "category": "kanji" }
 //   { "app": "decks" }  { "app": "pass" }
 
 import { wait } from '../clock'
@@ -59,7 +59,9 @@ export const exam = {
 }
 
 export const dictionary = {
-  route() { return '/dictionary' },
+  // The collection it opens on (kanji, vocab, grammar, hiragana,
+  // katakana): the screen reads it from the address once, on mount.
+  route(beat) { return beat.category && beat.category !== 'kanji' ? `/dictionary?category=${beat.category}` : '/dictionary' },
   ready() { return '.dict-entry-card, .console__field' },
   async play(beat, ctx) {
     const { stage, finger, keyboard } = ctx
@@ -79,7 +81,7 @@ export const dictionary = {
     await ctx.tap(card)
     finger.rest()
     await stage.waitFor('.dict-plate', { timeout: 6 })
-    await wait(0.4)
+    await stage.still('.dict-plate')
     await ctx.look(['.dict-plate', '.dict-dock svg, .dict-block'], { duration: 0.6, max: 1.45 }).catch(() => {})
     ctx.say(beat.reveal)
     await wait(beat.hold ?? 3.4)

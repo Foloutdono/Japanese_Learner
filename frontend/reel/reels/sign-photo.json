@@ -18,7 +18,8 @@
       "translation": "Road closed ahead due to construction.",
       "explain": "“Road closed ahead due to construction.” 通行止め is 通行 (traffic) + 止め (a stop): the road is shut. 〜につき is the formal “due to” of signs and notices.",
       "caption": "…and *Tsuji* takes it apart, word by word",
-      "taps": ["工事", "通行"]
+      "taps": ["工事"],
+      "point": "〜につき"
     },
     { "end": true }
   ]
