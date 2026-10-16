@@ -311,5 +311,6 @@ def reset_stats(user_id: str = Depends(get_user_id),
         raise
     finally:
         conn.close()
+    srs.forget_history(user_id)
     srs.delete_cards(keys_to_delete)
     return {"ok": True}

@@ -851,6 +851,20 @@ DECK_TYPES = STRUCTURES
 
 # ── DECK CRUD ─────────────────────────────────────────────
 
+# A deck's counts, each read for the deck in hand on its own index
+# (plan 212). They were joins against a GROUP BY over the whole of
+# custom_cards, deck_cards and deck_subscriptions -- every learner's
+# cards, private decks too -- which Postgres builds in full before the
+# join, so the shelf and the library cost more as anyone, anywhere,
+# added a card. `d` is the deck; a followed deck's app cards are its
+# author's rows (a followed deck is a link, not a copy).
+_CARD_COUNT = """(
+    (SELECT COUNT(*) FROM custom_cards cc WHERE cc.deck_id = d.id)
+  + (SELECT COUNT(*) FROM deck_cards dk WHERE dk.deck_id = d.id AND dk.user_id = d.user_id)
+)"""
+_FOLLOWERS = "(SELECT COUNT(*) FROM deck_subscriptions fs WHERE fs.deck_id = d.id)"
+
+
 @router.get("/api/decks")
 def get_decks(user_id: str = Depends(get_user_id)):
     """
@@ -869,25 +883,15 @@ def get_decks(user_id: str = Depends(get_user_id)):
                 SELECT d.id, d.name, d.type, d.created_at, d.description,
                        d.visibility, d.user_id AS owner_id, m.role,
                        (d.withdrawn_at IS NOT NULL) AS withdrawn,
-                       COALESCE(c.custom_count, 0) AS custom_count,
-                       COALESCE(dc.app_count, 0)   AS app_count
+                       {_CARD_COUNT} AS card_count
                 FROM mine m
                 JOIN decks d ON d.id = m.deck_id
-                LEFT JOIN (
-                    SELECT deck_id, COUNT(*) AS custom_count
-                    FROM custom_cards GROUP BY deck_id
-                ) c  ON c.deck_id  = d.id
-                LEFT JOIN (
-                    SELECT deck_id, user_id, COUNT(*) AS app_count
-                    FROM deck_cards GROUP BY deck_id, user_id
-                ) dc ON dc.deck_id = d.id AND dc.user_id = d.user_id
                 ORDER BY d.created_at DESC
             """, {"me": user_id})
             decks = [dict(row) for row in cur.fetchall()]
 
         authors = usernames_for([d["owner_id"] for d in decks if d["role"] != "owner"])
         for d in decks:
-            d["card_count"] = d.pop("custom_count") + d.pop("app_count")
             d["author"] = authors.get(d.pop("owner_id"))
         return {"decks": decks}
     finally:
@@ -1076,22 +1080,10 @@ def get_library(page: int = 0, limit: int = Query(LIBRARY_LIMIT, ge=1, le=100),
             cur.execute(f"""
                 SELECT d.id, d.name, d.description, d.type, d.published_at,
                        d.user_id AS owner_id,
-                       COALESCE(c.custom_count, 0) + COALESCE(dc.app_count, 0) AS card_count,
-                       COALESCE(f.followers, 0) AS followers,
+                       {_CARD_COUNT} AS card_count,
+                       {_FOLLOWERS} AS followers,
                        (mine.user_id IS NOT NULL) AS followed
                 FROM decks d
-                LEFT JOIN (
-                    SELECT deck_id, COUNT(*) AS custom_count
-                    FROM custom_cards GROUP BY deck_id
-                ) c  ON c.deck_id = d.id
-                LEFT JOIN (
-                    SELECT deck_id, user_id, COUNT(*) AS app_count
-                    FROM deck_cards GROUP BY deck_id, user_id
-                ) dc ON dc.deck_id = d.id AND dc.user_id = d.user_id
-                LEFT JOIN (
-                    SELECT deck_id, COUNT(*) AS followers
-                    FROM deck_subscriptions GROUP BY deck_id
-                ) f  ON f.deck_id = d.id
                 LEFT JOIN deck_subscriptions mine
                        ON mine.deck_id = d.id AND mine.user_id = %(me)s
                 WHERE d.visibility = 'public' AND d.withdrawn_at IS NULL
@@ -1163,33 +1155,25 @@ def get_library_home(user_id: str = Depends(get_user_id)):
     conn = db_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("""
+            cur.execute(f"""
                 SELECT d.id, d.name, d.description, d.type, d.published_at,
                        d.user_id AS owner_id,
-                       COALESCE(c.custom_count, 0) + COALESCE(dc.app_count, 0) AS card_count,
-                       COALESCE(f.followers, 0) AS followers
+                       {_CARD_COUNT} AS card_count,
+                       f.followers
                 FROM decks d
-                LEFT JOIN (
-                    SELECT deck_id, COUNT(*) AS custom_count
-                    FROM custom_cards GROUP BY deck_id
-                ) c  ON c.deck_id = d.id
-                LEFT JOIN (
-                    SELECT deck_id, user_id, COUNT(*) AS app_count
-                    FROM deck_cards GROUP BY deck_id, user_id
-                ) dc ON dc.deck_id = d.id AND dc.user_id = d.user_id
-                LEFT JOIN (
-                    SELECT deck_id, COUNT(*) AS followers,
+                CROSS JOIN LATERAL (
+                    SELECT COUNT(*) AS followers,
                            COUNT(*) FILTER (
                                WHERE subscribed_at > NOW() - INTERVAL '7 days') AS lately
-                    FROM deck_subscriptions GROUP BY deck_id
-                ) f  ON f.deck_id = d.id
+                    FROM deck_subscriptions fs WHERE fs.deck_id = d.id
+                ) f
                 WHERE d.visibility = 'public' AND d.withdrawn_at IS NULL
                   AND d.user_id <> %(me)s
                   AND NOT EXISTS (
                       SELECT 1 FROM deck_subscriptions s
                       WHERE s.deck_id = d.id AND s.user_id = %(me)s
                   )
-                ORDER BY COALESCE(f.lately, 0) DESC, COALESCE(f.followers, 0) DESC,
+                ORDER BY f.lately DESC, f.followers DESC,
                          d.published_at DESC NULLS LAST, d.id DESC
                 LIMIT 1
             """, {"me": user_id})

@@ -94,6 +94,14 @@ runtime purpose.
   saying where each rating leaves the point (`review_preview[q].step`,
   plan 198) so the client never copies the pass rule. Never store the
   step beside the row; a row written before plan 194 reads onto the walk.
+- **A write to a learner's history goes through the engine (plan 212).**
+  Lifetime XP, the total of reviews, the days studied, the best run and
+  the review pace are kept per learner in `SRSEngine` until a write moves
+  them: `review_log` is written by `_log_review`, `xp_ledger` by
+  `award_xp`/`record_day_clear`, and anything else that writes or erases
+  those tables in the server (the stats reset, the account's deletion)
+  calls `srs.forget_history(user_id)` after it commits. The cache is in
+  process: the API runs one worker.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.

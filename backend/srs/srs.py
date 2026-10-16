@@ -1,6 +1,9 @@
 import copy
+import itertools
 import logging
 import math
+import threading
+from collections import OrderedDict
 from datetime import datetime, timedelta, timezone
 from psycopg2.extras import execute_values
 from typing import Any
@@ -156,7 +159,66 @@ class SRSEngine:
         # _servable_filter for what it is for and why it arrives as an
         # argument rather than an import.
         self._servable_modes = list(servable_modes) if servable_modes is not None else None
+        self._history_lock = threading.Lock()
+        self._history_gen: dict[str, int] = {}
+        self._history: OrderedDict[tuple, tuple[int, Any]] = OrderedDict()
         self._init_db()
+
+    # -- The learner's history, read once per change (plan 212) ----
+    #
+    # Lifetime XP, the total of reviews, the days studied and the best
+    # run are each an aggregate over the learner's whole history, and
+    # Today and the profile asked them on every open -- the best run a
+    # window function over every review ever, ~40 ms at 40k reviews.
+    # None of them moves until the learner writes to that history, so
+    # each is kept under the learner's GENERATION, which every write
+    # moves on once it has committed (_history_changed): a write
+    # committed while a value was being read leaves it under a
+    # generation already gone, so it is never served.
+    #
+    # The writes are review_log (_log_review), xp_ledger (award_xp,
+    # record_day_clear), and the erasures (forget_history: the stats
+    # reset, the account's deletion). scripts/compact_review_log moves
+    # rows without changing any of these figures, so a value kept
+    # across it is still true. In process: the API is one worker
+    # (render.yaml's start command); a second would need this moved.
+    _HISTORY_MAX = 8192
+    _gen_counter = itertools.count(1)
+
+    def _remembered(self, user_id: str, name: tuple, compute):
+        with self._history_lock:
+            gen = self._history_gen.get(user_id, 0)
+            hit = self._history.get((user_id, *name))
+            if hit is not None and hit[0] == gen:
+                self._history.move_to_end((user_id, *name))
+                return hit[1]
+        value = compute()
+        with self._history_lock:
+            self._history[(user_id, *name)] = (gen, value)
+            self._history.move_to_end((user_id, *name))
+            while len(self._history) > self._HISTORY_MAX:
+                self._history.popitem(last=False)
+        return value
+
+    def _history_changed(self, user_id: str) -> None:
+        with self._history_lock:
+            if len(self._history_gen) >= self._HISTORY_MAX:
+                # Forgetting the generations forgets what they guarded.
+                self._history_gen.clear()
+                self._history.clear()
+            self._history_gen[user_id] = next(self._gen_counter)
+
+    def forget_all_history(self) -> None:
+        """Every learner's kept history (the tests, which write the
+        tables directly between requests)."""
+        with self._history_lock:
+            self._history_gen.clear()
+            self._history.clear()
+
+    def forget_history(self, user_id: str) -> None:
+        """The learner's history was erased or rewritten outside a
+        review or an award (the stats reset, the account's deletion)."""
+        self._history_changed(user_id)
 
     # -- Servable modes ----------------------------------------
     #
@@ -772,6 +834,7 @@ class SRSEngine:
             sql = "INSERT INTO review_log(card_id, mode, quality, xp_earned) VALUES (%s, %s, %s, %s)"
             self._log_sql("log_review", sql, (card_id, mode, quality, xp_earned))
             cur.execute(sql, (card_id, mode, quality, xp_earned))
+        self._history_changed(user_id)
 
         prior_level = xp_math.level_from_xp(prior_xp)
         new_level = xp_math.level_from_xp(prior_xp + xp_earned)
@@ -830,6 +893,9 @@ class SRSEngine:
         return xp_math.compute_review_xp(quality, self.get_reviews_today(user_id))
 
     def get_lifetime_xp(self, user_id: str) -> int:
+        return self._remembered(user_id, ("lifetime_xp",), lambda: self._lifetime_xp(user_id))
+
+    def _lifetime_xp(self, user_id: str) -> int:
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
@@ -863,10 +929,13 @@ class SRSEngine:
         sql = "INSERT INTO xp_ledger(user_id, source, ref, xp) VALUES (%s, %s, %s, %s)"
         self._log_sql("award_xp", sql, (user_id, source, ref, xp))
         if cur is not None:
+            # Committed by the caller, which moves the generation on
+            # once it has (record_day_clear).
             cur.execute(sql, (user_id, source, ref, xp))
         else:
             with self.storage.cursor() as own:
                 own.execute(sql, (user_id, source, ref, xp))
+            self._history_changed(user_id)
 
         prior_level = xp_math.level_from_xp(prior_xp)
         new_level = xp_math.level_from_xp(prior_xp + xp)
@@ -1348,11 +1417,16 @@ class SRSEngine:
         xp_ledger row, and being paid for a day is not studying on it.
 
         `cur` reads on a connection the caller holds (bridge_rest_days,
-        under its lock)."""
+        under its lock). Kept per change (_remembered); a copy is
+        handed out, so a caller's union never reaches the kept set."""
+        return set(self._remembered(user_id, ("studied_days",),
+                                    lambda: frozenset(self._read_studied_days(user_id, cur))))
+
+    def _read_studied_days(self, user_id: str, cur=None) -> set:
         if cur is None:
             with self.storage.connection() as conn:
                 with conn.cursor() as own:
-                    return self._studied_days(user_id, own)
+                    return self._read_studied_days(user_id, own)
         pattern = self._user_prefix_pattern(user_id)
         # UNION (not UNION ALL): a day the learner studied is a
         # day whether it is still a row, already a rollup, or —
@@ -1548,6 +1622,7 @@ class SRSEngine:
                         self._log_sql("rest_earn", sql, (user_id, day, milestone))
                         cur.execute(sql, (user_id, day, milestone))
                         rest_earned = True
+        self._history_changed(user_id)
         return {"xp": xp, "rest_earned": rest_earned}
 
     def get_day_tickets(self, user_id: str) -> list[dict[str, Any]]:
@@ -1709,6 +1784,9 @@ class SRSEngine:
         return {"xp": int(row[0]), "rank": int(row[1])}
 
     def get_total_reviews(self, user_id: str) -> int:
+        return self._remembered(user_id, ("total_reviews",), lambda: self._total_reviews(user_id))
+
+    def _total_reviews(self, user_id: str) -> int:
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
@@ -1932,6 +2010,10 @@ class SRSEngine:
         return (correct / total) if total else None
 
     def get_best_quality_streak(self, user_id: str, min_quality: int = 4) -> int:
+        return self._remembered(user_id, ("best_run", min_quality),
+                                lambda: self._best_quality_streak(user_id, min_quality))
+
+    def _best_quality_streak(self, user_id: str, min_quality: int = 4) -> int:
         """Longest run of consecutive reviews (by time, across all cards/
         modes) with quality >= min_quality — a classic gaps-and-islands
         query: the difference between two row-number sequences is
@@ -2164,7 +2246,15 @@ class SRSEngine:
         the pace now, not the pace of a first week -- and what a card
         cost in each of the last RUNS_KEPT runs, which carries the
         pauses a run really holds.
+
+        Kept per change and per UTC day (plan 212): the windows are days
+        long, so a day-old reading of an unchanged history is the same
+        figure, and Today asks it on every open.
         """
+        today = datetime.now(timezone.utc).date()
+        return self._remembered(user_id, ("review_pace", today), lambda: self._review_pace(user_id))
+
+    def _review_pace(self, user_id: str) -> int | None:
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
