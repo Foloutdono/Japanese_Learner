@@ -49,6 +49,9 @@ def _originals() -> dict[str, dict]:
     """jp -> {en, fr, words}: every sentence the deck shows, uncorrected."""
     saved = example_fixes.fixes
     example_fixes.fixes = lambda: {}
+    # The French index is cached from fixes(): built while it is patched
+    # out, it would stay empty for the rest of the process.
+    example_fixes._french.cache_clear()
     try:
         out: dict[str, dict] = {}
         for level in LEVELS:
@@ -67,6 +70,7 @@ def _originals() -> dict[str, dict]:
         return out
     finally:
         example_fixes.fixes = saved
+        example_fixes._french.cache_clear()
 
 
 def _carries(jp: str, word: dict) -> bool:
