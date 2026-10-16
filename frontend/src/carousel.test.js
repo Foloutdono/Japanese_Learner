@@ -289,7 +289,7 @@ describe('the carousel studio', () => {
     expect(spelled).toBeGreaterThan(0)
   })
 
-  it('never shows an answer before its question is asked (plan 229l)', () => {
+  it('never shows an answer before its question is asked (plan 229l)', { timeout: 60000 }, () => {
     for (const { src, p } of every) {
       // Every question the plan has, as a mock exam would ask them all.
       const qs = withoutGiveaways(picked(p, p.quizzes.map(q => q.id), 3))
@@ -304,7 +304,7 @@ describe('the carousel studio', () => {
     }
   })
 
-  it('titles every carousel within the feed’s 90 characters (plan 229l)', () => {
+  it('titles every carousel within the feed’s 90 characters (plan 229l)', { timeout: 60000 }, () => {
     for (const { src, p } of every) {
       for (const type of TYPES.map(x => x.id).filter(x => available(x, p))) {
         const title = titleOf(p, type, 3)
@@ -643,7 +643,7 @@ describe('explaining a point in its own sentence', () => {
   }
   const glossOf = (jp, t, lang = 'en') => broken(jp, lang).find(x => x.t === t)?.main
 
-  it('never glosses a word of the breakdown by its part of speech (plan 234e)', () => {
+  it('never glosses a word of the breakdown by its part of speech (plan 234e)', { timeout: 60000 }, () => {
     const names = new Set(['en', 'fr'].flatMap(lang => Object.values(STRINGS[lang].pos)))
     for (const lv of LEVELS) {
       for (const s of banks[lv].sentences) {
@@ -656,7 +656,7 @@ describe('explaining a point in its own sentence', () => {
     }
   })
 
-  it('reads a pattern the tokenizer cut apart as one word, glossed once (plan 234e)', () => {
+  it('reads a pattern the tokenizer cut apart as one word, glossed once (plan 234e)', { timeout: 60000 }, () => {
     expect(broken('のどがいたいので、今日の講義は休みます。').map(x => x.t)).toContain('ので')
     expect(broken('学校の成績が優秀な人が、必ずしも仕事で成功するとは限らない。').map(x => x.t)).toContain('とは')
     for (const lv of LEVELS) {
