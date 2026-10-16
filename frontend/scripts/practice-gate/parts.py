@@ -25,6 +25,7 @@ GLASS = {'car': [(24.65, 377.0, 37.6, 465.0), (359.4, 377.0, 365.5, 465.0)],
          'car2': [(38.0, 379.0, 63.2, 462.0), (76.4, 379.0, 101.2, 462.0), (356.8, 377.0, 365.5, 463.5)]}
 DOORWAY = {'car': (50.8, 360.6, 136.2, 549.0)}
 FAR_WINDOW = {'car': (96.0, 403.0, 135.5, 457.0)}
+PANE_R = 7          # px: the far pane's rounded corners, on the car layer
 
 
 def load(work, name):
@@ -95,6 +96,34 @@ def scene(work):
                    tube=tube, wires=wires, platform=platform, tactile=tactile, horizon=h)
 
 
+def _glass(where, rgb):
+    """The far window's glass whole: what of it is sky or hill (bluer than
+    red) is only most of it, its light rim against the gasket and its
+    darkest trees are not, so the glass is the pane the blue spans: a
+    rounded rectangle on its bounds (square where the doorway cuts it),
+    grown a pixel into the dark gasket."""
+    blue = (where & (rgb[..., 2] > rgb[..., 0] + 0.04)).astype(np.uint8)
+    n, lab, stats, _ = cv2.connectedComponentsWithStats(blue, 8)
+    if n < 2:
+        return blue > 0
+    k = 1 + int(np.argmax(stats[1:, cv2.CC_STAT_AREA]))
+    x0, y0 = stats[k, cv2.CC_STAT_LEFT], stats[k, cv2.CC_STAT_TOP]
+    x1, y1 = x0 + stats[k, cv2.CC_STAT_WIDTH] - 1, y0 + stats[k, cv2.CC_STAT_HEIGHT] - 1
+    # a side the doorway cuts (the pane runs on behind the door's frame) is square
+    cols = np.nonzero(where.any(axis=0))[0]
+    rl = 0 if x0 <= cols.min() + 2 else PANE_R
+    rr = 0 if x1 >= cols.max() - 2 else PANE_R
+    m = np.zeros(blue.shape, np.uint8)
+    cv2.rectangle(m, (x0 + rl, y0), (x1 - rr, y1), 1, -1)
+    cv2.rectangle(m, (x0, y0 + rl), (x0 + rl, y1 - rl), 1, -1)
+    cv2.rectangle(m, (x1 - rr, y0 + rr), (x1, y1 - rr), 1, -1)
+    for cx, cy, r in ((x0 + rl, y0 + rl, rl), (x0 + rl, y1 - rl, rl), (x1 - rr, y0 + rr, rr), (x1 - rr, y1 - rr, rr)):
+        if r:
+            cv2.circle(m, (cx, cy), r, 1, -1)
+    m = cv2.dilate(m, np.ones((3, 3), np.uint8))
+    return (m > 0) & where
+
+
 def car(work, name):
     a = load(work, name)
     rgb, al = a[..., :3], a[..., 3]
@@ -116,6 +145,6 @@ def car(work, name):
         glass |= box(b)
     glass &= side & (L < 0.62)
     inside = (box(DOORWAY[name]) & side) if name in DOORWAY else np.zeros((H, W), bool)
-    far = (box(FAR_WINDOW[name]) & inside & (rgb[..., 2] > rgb[..., 0] + 0.04)) if name in FAR_WINDOW else np.zeros((H, W), bool)
+    far = _glass(box(FAR_WINDOW[name]) & inside, rgb) if name in FAR_WINDOW else np.zeros((H, W), bool)
     body = side & ~glass & ~inside
     return a, dict(roof=roof, under=under, glass=glass, inside=inside, far=far, body=body)
