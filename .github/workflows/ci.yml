@@ -31,10 +31,13 @@ jobs:
           python-version: '3.12'
       - name: Install backend dependencies
         working-directory: backend
-        # numpy is not the app's (requirements.txt is Render's image): the
-        # operator scripts import it inside their functions, and
-        # tests/test_long_video_audio.py imports it to check their mix.
-        run: pip install -r requirements.txt numpy
+        # numpy and ffmpeg are not the app's (requirements.txt is Render's
+        # image): scripts/long_video_audio.py imports numpy inside its
+        # functions and decodes the kana clips with ffmpeg, and
+        # tests/test_long_video_audio.py checks its mix with both.
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          pip install -r requirements.txt numpy
       - name: Load schema
         run: psql "$DATABASE_URL" -f backend/srs/data_structure.sql
       - name: Run backend tests
