@@ -460,7 +460,7 @@ class EdgeInputTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class KanaStemTests(unittest.TestCase):
-    """Plan 210. A verb in hiragana says nothing of which verb it is
+    """Plan 213. A verb in hiragana says nothing of which verb it is
     where two deck verbs are spelled alike in its form: 書取's 毎日、六時
     におきます ("I get up at six") was glossed 置く, "poser", since UniDic
     reads おき as 置く. The deck's own N5 kana sentences had 明日ははれる as

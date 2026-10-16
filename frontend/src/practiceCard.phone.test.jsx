@@ -186,7 +186,7 @@ describe('the practice card at 390×844', () => {
   })
 })
 
-// ── The words missed, as doors (plan 210) ──────────────────────────────
+// ── The words missed, as doors (plan 213) ──────────────────────────────
 // わたしは魚が好きです, every word missed: the tiles stood two to a phone's
 // row with the word on the left and its reading and meaning squeezed in a
 // column beside it, so a long meaning ("apprécié, aimer (quelque chose)")
@@ -217,7 +217,7 @@ const MANY_TOKENS = [
   { surface: 'です', start: 8, end: 10, pos: 'auxiliary', grammar: [
     { pattern: 'です／だ', kind: 'marker', raw_id: 'grammar_N5_です／だ', meaning: { en: 'is', fr: 'être' } },
   ] },
-  // A verb the lookups would not name (plan 210: おき is 起きる or 置く),
+  // A verb the lookups would not name (plan 213: おき is 起きる or 置く),
   // and its ending's point: the tile names nothing rather than the ending.
   { surface: 'おき', start: 10, end: 12, pos: 'verb', vocab_match: null },
   { surface: 'ます', start: 12, end: 14, pos: 'auxiliary', grammar: [
@@ -241,7 +241,7 @@ function Misses({ onOpen, onPoint, width }) {
 
 const tiles = root => [...root.querySelectorAll('.pcard-misses .pcard-missed')]
 
-describe('the words missed on a phone (plan 210)', () => {
+describe('the words missed on a phone (plan 213)', () => {
   for (const width of [undefined, '320px']) {
     it(`stacks each tile, its meaning under the word across its width${width ? ` (${width})` : ''}`, async () => {
       const root = (await render(<LangProvider><Misses onOpen={() => {}} width={width} /></LangProvider>)).container

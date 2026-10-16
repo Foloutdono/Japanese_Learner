@@ -1801,7 +1801,7 @@ describe('the readings — each with the share of the words that use it', () => 
 })
 
 
-// ── An example, broken down in the same sheet (plan 211) ─────────────
+// ── An example, broken down in the same sheet (plan 214) ─────────────
 // An entry's example sentence is a door: pressed, the sheet steps to
 // the sentence word by word (the local tier of /api/phrase/analyze,
 // saved nowhere), whose words and rules open into the same stack, ‹
@@ -1820,7 +1820,7 @@ const BREAKFAST = {
   grammar: [],
 }
 
-describe('an example, broken down (plan 211)', () => {
+describe('an example, broken down (plan 214)', () => {
   const BREAKFAST_ENTRY = { ...VOCAB, kanji: '朝ご飯', kana: 'あさごはん', meaning: 'breakfast', examples: [], senses: [],
     furigana: [{ text: '朝', reading: 'あさ' }, { text: 'ご' }, { text: '飯', reading: 'はん' }], kanji_parts: [],
     app_card: { source: 'vocab', level: 'N5', raw_id: 'vocab_N5_朝ご飯_あさごはん' } }

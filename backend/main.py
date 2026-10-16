@@ -28,6 +28,7 @@ from fastapi.staticfiles import StaticFiles                      # noqa: E402
 from starlette.concurrency import run_in_threadpool               # noqa: E402
 from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
+from core.concurrency import PerCallerConcurrency                # noqa: E402
 from study.exam_tts import audio_dir, is_stale                    # noqa: E402
 from study.exam_audio_repair import restore_clip                  # noqa: E402
 
@@ -158,6 +159,12 @@ NATIVE_ORIGINS = ["capacitor://localhost", "https://localhost"]
 CORS_ORIGINS = ["https://japanese-learner-seven.vercel.app", *NATIVE_ORIGINS] + [
     o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()
 ]
+
+# A few requests at a time per learner (core/concurrency.py), so one
+# learner flicking a selector cannot hold every worker thread and
+# database connection. Added before CORS, which then wraps it: a 429
+# still carries the CORS headers the native shell needs to read it.
+app.add_middleware(PerCallerConcurrency)
 
 app.add_middleware(
     CORSMiddleware,

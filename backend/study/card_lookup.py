@@ -1082,7 +1082,7 @@ def _deck_verbs_spelled(m) -> list[tuple[str, dict, str]]:
 
 def _kana_verb(m, hit):
     """The card for a verb the page writes in hiragana, where its
-    spelling alone could be another deck verb's (plan 210). A kana stem
+    spelling alone could be another deck verb's (plan 213). A kana stem
     says nothing of the verb it belongs to: 毎日六時におきます is 起きる,
     "to get up", and UniDic reads おき as 置く, "to put" -- the dictation
     clip was glossed "poser" under a translation that says "I get up".
@@ -1476,7 +1476,7 @@ def resolve_pool_morpheme(morphemes, i: int) -> dict | None:
         return None
     if _deck_verbs_spelled(m):
         # A kana verb a deck verb could be spelled as, and the deck path
-        # gave no card: two deck verbs share its stem (plan 210), or
+        # gave no card: two deck verbs share its stem (plan 213), or
         # UniDic read it as a word the deck does not hold and the deck's
         # own reads the same. The pool's guess is no better.
         return None

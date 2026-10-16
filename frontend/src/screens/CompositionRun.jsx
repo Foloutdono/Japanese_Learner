@@ -416,7 +416,7 @@ function Session({ session, level }) {
   // The asking's thread: a reopened line's, else the sentence on the
   // stage's, open once it is graded (plan 131).
   const target = askTarget(lines.opened, { key: point?._uiKey, base: askBase(), analysis, open: rated })
-  // The tag's door to the point's lesson (plan 210): the sheet on a
+  // The tag's door to the point's lesson (plan 213): the sheet on a
   // phone, the column on the desk once the breakdown holds it -- before
   // that the column IS the lesson, and the tag needs no door to it.
   const tagDoor = point && (!desk || docksInColumn(desk, lines.opened, rated, analysis))

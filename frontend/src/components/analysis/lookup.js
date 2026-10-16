@@ -20,7 +20,7 @@
 //   {category: 'kanji',   term}        -- one character
 //   {category: 'grammar', id}          -- a rule, by its card id
 //   {category: 'sentence', term, tr}   -- an entry's example sentence,
-//                                         broken down (plan 211,
+//                                         broken down (plan 214,
 //                                         dictionary/SentenceFrame)
 // `lookupKey` is the React key the sheet is mounted under: a new entry
 // starts a new ‹ stack rather than pushing onto the last one's.
@@ -58,7 +58,7 @@ export function grammarLookup(point) {
   return { category: 'grammar', id: point.raw_id }
 }
 
-// The point a practice card's tag names (plan 210): by the card id the
+// The point a practice card's tag names (plan 213): by the card id the
 // sentence was served with, else by its pattern among the points the
 // breakdown found -- a sentence fetched before the id rode along.
 export function pointLookup(id, pattern, analysis) {
@@ -71,7 +71,7 @@ export function pointLookup(id, pattern, analysis) {
 // plan 115) rather than as the sheet: on the desk, with a breakdown
 // standing there to open it in -- a line reopened from the run's lines
 // (`opened`), else the sentence on the stage once it is graded. A door
-// on the practice card (plan 210) is pressed before the grade too, when
+// on the practice card (plan 213) is pressed before the grade too, when
 // the column is sealed, and the sheet opens it there as on a phone.
 export function docksInColumn(desk, opened, graded, analysis) {
   if (!desk) return false

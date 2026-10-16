@@ -100,7 +100,7 @@ export function SenseNumeral({ number, className = '' }) {
   )
 }
 
-// `onOpen` makes the sentence a door to its breakdown (plan 211): the
+// `onOpen` makes the sentence a door to its breakdown (plan 214): the
 // whole example is the button, a chevron at its end saying it leads
 // somewhere, and inside it the same lines as a printed example, as
 // spans -- a button holds phrasing content only.

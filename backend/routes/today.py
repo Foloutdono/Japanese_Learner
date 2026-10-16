@@ -227,11 +227,16 @@ def _build_section_card(source, deck_key, raw_id, mode, lang, stage, preview, pr
     return card
 
 
-def _personal_rows(user_id: str) -> dict:
+def _personal_rows(user_id: str, due_rows: list[dict]) -> dict:
     """
-    (raw_id -> {deck_id, deck_name, structure, card}) for every personal
-    card on this learner's shelf — their own decks and the ones they
-    follow from the library alike.
+    (raw_id -> {deck_id, deck_name, structure, card}) for the personal
+    cards among `due_rows` that are on this learner's shelf — their own
+    decks and the ones they follow from the library alike.
+
+    Only those (plan 212): every caller looks a due row up here and
+    nothing else, and the whole shelf, each card's fields with it, was
+    read on every open of Today -- a learner following a few big decks
+    paid for all of their cards to count the dozen due.
 
     Looked up rather than parsed out of the id: a personal card's raw id
     is "custom_{deck_id}_{card_id}" and a deck id is free to contain an
@@ -245,6 +250,18 @@ def _personal_rows(user_id: str) -> dict:
     deck whose cards are due but which the shelf never shows, or the
     reverse.
     """
+    prefix_len = len(user_id) + 1
+    wanted = {row["card_id"][prefix_len:] for row in due_rows}
+    # custom_{deck_id}_{card id}: the card's own id is its row's BIGSERIAL,
+    # the one segment that cannot hold an underscore, so it is read off
+    # the end and the whole raw id checked against the row below.
+    card_ids = sorted({int(tail) for raw in wanted if raw.startswith("custom_")
+                       for tail in [raw.rsplit("_", 1)[-1]] if tail.isdigit()})
+    pool_ids = sorted(raw for raw in wanted if raw.startswith(POOL_ID_PREFIX))
+    if not card_ids and not pool_ids:
+        return {}
+
+    rows, pooled = [], []
     conn = db_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
@@ -257,43 +274,48 @@ def _personal_rows(user_id: str) -> dict:
             # its author's whoever is reading — and it is still what
             # keeps a stray custom_cards row whose user_id disagrees with
             # its deck out of the queue.
-            cur.execute(
-                f"""
-                WITH visible AS ({VISIBLE_DECKS_CTE})
-                SELECT c.id, c.deck_id, c.structure, c.fields, c.notes,
-                       d.name AS deck_name, d.type AS deck_type
-                FROM visible v
-                JOIN decks d        ON d.id = v.deck_id
-                JOIN custom_cards c ON c.deck_id = d.id AND c.user_id = d.user_id
-                """,
-                {"me": user_id},
-            )
-            rows = [dict(r) for r in cur.fetchall()]
+            if card_ids:
+                cur.execute(
+                    f"""
+                    WITH visible AS ({VISIBLE_DECKS_CTE})
+                    SELECT c.id, c.deck_id, c.structure, c.fields, c.notes,
+                           d.name AS deck_name, d.type AS deck_type
+                    FROM visible v
+                    JOIN decks d        ON d.id = v.deck_id
+                    JOIN custom_cards c ON c.deck_id = d.id AND c.user_id = d.user_id
+                    WHERE c.id = ANY(%(ids)s)
+                    """,
+                    {"me": user_id, "ids": card_ids},
+                )
+                rows = [dict(r) for r in cur.fetchall()]
             # A JMdict pool word linked into a deck (plan 148) comes back
             # in that deck's lane too: the course's cards have their JLPT
             # stop's lane (card_index.locate), and a pool word has none,
             # so without this it would be learnt in a deck and never
             # asked again. Only the deck is looked up here; the word is
             # the pool's (build_pool_card).
-            cur.execute(
-                f"""
-                WITH visible AS ({VISIBLE_DECKS_CTE})
-                SELECT dk.raw_id, dk.deck_id, d.name AS deck_name
-                FROM visible v
-                JOIN decks d       ON d.id = v.deck_id
-                JOIN deck_cards dk ON dk.deck_id = d.id AND dk.user_id = d.user_id
-                WHERE dk.source = 'vocab' AND left(dk.raw_id, %(plen)s) = %(prefix)s
-                ORDER BY dk.added_at
-                """,
-                {"me": user_id, "plen": len(POOL_ID_PREFIX), "prefix": POOL_ID_PREFIX},
-            )
-            pooled = [dict(r) for r in cur.fetchall()]
+            if pool_ids:
+                cur.execute(
+                    f"""
+                    WITH visible AS ({VISIBLE_DECKS_CTE})
+                    SELECT dk.raw_id, dk.deck_id, d.name AS deck_name
+                    FROM visible v
+                    JOIN decks d       ON d.id = v.deck_id
+                    JOIN deck_cards dk ON dk.deck_id = d.id AND dk.user_id = d.user_id
+                    WHERE dk.source = 'vocab' AND dk.raw_id = ANY(%(ids)s)
+                    ORDER BY dk.added_at
+                    """,
+                    {"me": user_id, "ids": pool_ids},
+                )
+                pooled = [dict(r) for r in cur.fetchall()]
     finally:
         conn.close()
 
     out = {
-        f"custom_{r['deck_id']}_{r['id']}": r
+        raw: r
         for r in rows
+        for raw in [f"custom_{r['deck_id']}_{r['id']}"]
+        if raw in wanted
     }
     for r in pooled:
         # A word in two decks is asked once, in the deck it went into
@@ -469,7 +491,7 @@ def _day_queue(user_id: str) -> DayQueue:
     on exactly the count the gate prints, never on a second reading of
     it that could drift."""
     due_rows = srs.get_due_rows(user_id)
-    personal = _personal_rows(user_id)
+    personal = _personal_rows(user_id, due_rows)
     level = resolve_level(user_id)
     # The stops beyond the learner's level AND goal wait (the level
     # rule, plan 074; daily_queue.hold_line): moving down sets them
@@ -919,7 +941,7 @@ def get_today_ahead(at: str = Query(..., description="comma-separated ISO instan
             raise HTTPException(status_code=422, detail="since needs its offset")
 
     due_rows = srs.get_due_rows(user_id, until=max(instants))
-    personal = _personal_rows(user_id)
+    personal = _personal_rows(user_id, due_rows)
     level = resolve_level(user_id)
     line = _hold_line(user_id, level)
 
@@ -1011,7 +1033,7 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     count = max(1, min(count, MAX_BATCH))
 
     due_rows = srs.get_due_rows(user_id)
-    personal = _personal_rows(user_id)
+    personal = _personal_rows(user_id, due_rows)
     all_lanes = daily_queue.lanes(user_id, due_rows, personal)
     level = resolve_level(user_id)
     riding = _riding_basics(level)

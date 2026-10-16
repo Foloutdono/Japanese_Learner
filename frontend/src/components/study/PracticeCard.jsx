@@ -37,7 +37,7 @@ import {
  *  pigment. `used` is a word on whether the learner's sentence uses it
  *  -- the tutor's (translation) or the detector's (composition): a check
  *  when it does, a cross when it does not, nothing when no one said.
- *  With `onOpen` the tag is a door to the point's lesson (plan 210). */
+ *  With `onOpen` the tag is a door to the point's lesson (plan 213). */
 export function PointTag({ point, label, used = null, onOpen = null }) {
   const { t } = useLang()
   if (!point) return null
@@ -245,7 +245,7 @@ export function CorrectedInPlace({ given, parts, fixes }) {
  *  meaning when the breakdown has it (`tokens`, its analysis's). Nothing
  *  when every word was right.
  *
- *  With `onOpen`, each is a door (plan 210): a word to its dictionary
+ *  With `onOpen`, each is a door (plan 213): a word to its dictionary
  *  entry, a particle -- は, が, which mean nothing alone -- to the point
  *  it is, its gloss the point's. A tile whose meaning and door come from
  *  one token, so it never names one word and opens another; a word the
@@ -320,7 +320,7 @@ function entryAt(tokens, start, end, lang) {
  *  from the breakdown's `tokens` when they have come. The English is
  *  the bank's, whatever the app's language (`meaningLang`). `onOpen`
  *  takes a word's lookup (lookup.js) and `onPoint` opens the tag's
- *  point: each makes its piece a door (plan 210). */
+ *  point: each makes its piece a door (plan 213). */
 export function SentenceCheck({
   point, parts, text, words, tokens, romaji, meaning, meaningLang, answer, accuracy, t, onOpen = null, onPoint = null,
 }) {

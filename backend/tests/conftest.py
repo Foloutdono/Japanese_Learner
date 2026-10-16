@@ -22,6 +22,15 @@ def client():
     return TestClient(app)
 
 
+@pytest.fixture(autouse=True)
+def _fresh_history():
+    """The SRS engine keeps each learner's history aggregates until a
+    write through it moves them (plan 212); the tests also write
+    review_log and xp_ledger by hand, so each starts with none kept."""
+    from core.srs_instance import srs
+    srs.forget_all_history()
+
+
 # ── A second learner ──────────────────────────────────────────
 #
 # The library is the first feature in this app where one request reads

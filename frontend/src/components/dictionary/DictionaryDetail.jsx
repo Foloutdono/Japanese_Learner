@@ -5,7 +5,7 @@ import { shortDate } from '../../lib/formatDate'
 import { useLang } from '../../LangContext'
 import { cachedLookup, fetchLookup, pickEntry } from '../../lib/dictionaryLookup'
 import { api } from '../../lib/origin'
-import { apiJson } from '../../lib/api'
+import { useCachedJson } from '../../lib/cachedJson'
 import { Seg } from '../chrome/Console'
 import {
   SCOPE_ALL, SCOPE_COURSE, formatPct, readingRows,
@@ -655,25 +655,11 @@ function saveScope(scope) {
 }
 
 // The counts over all of JMdict are a character's, not a learner's, so
-// they are kept for the page's life and asked for once.
-const allSharesCache = new Map()
-
+// they are kept for the page's life and asked for once, however fast
+// the scope is switched (lib/cachedJson, plan 211).
 function useAllShares(char, active) {
-  const [failed, setFailed] = useState(null)
-  const [, bump] = useState(0)
-  const cached = allSharesCache.get(char) ?? null
-  useEffect(() => {
-    if (!active || cached) return undefined
-    let cancelled = false
-    apiJson(`/api/dictionary/readings-share?char=${encodeURIComponent(char)}`, null)
-      .then(data => {
-        allSharesCache.set(char, data)
-        if (!cancelled) bump(n => n + 1)
-      })
-      .catch(() => { if (!cancelled) setFailed(char) })
-    return () => { cancelled = true }
-  }, [char, active, cached])
-  return { data: cached, failed: !cached && failed === char }
+  const body = useCachedJson(active ? `/api/dictionary/readings-share?char=${encodeURIComponent(char)}` : null, null, { ttlMs: Infinity })
+  return { data: body ?? null, failed: body === null }
 }
 
 function ReadingsByShare({ entry, groups, onClose, jump }) {
@@ -1022,7 +1008,7 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
     : examples
   const examplesBySense = numbers => examples.filter(ex => numbers.includes(ex.sense_number))
   // An example is a door to its breakdown where the shell can open one
-  // (plan 211, SentenceFrame).
+  // (plan 214, SentenceFrame).
   const sentenceDoor = ex => (onSentenceClick && ex?.jp ? () => onSentenceClick(ex) : undefined)
 
   // With no senses list, the definition is the app's own gloss line —
@@ -1747,7 +1733,7 @@ function useLookupStack(session, { term, kana, category, id, tr }, exact = false
   const here = stack[stack.length - 1]
   // Only the first lookup is the unasked one: a door opened from it is
   // the learner's own tap and keeps the nearest match. A sentence (plan
-  // 211) is no entry and asks the dictionary nothing.
+  // 214) is no entry and asks the dictionary nothing.
   const { entry, loading, error } = useDictionaryLookup(session, here.term, here.category, lang, here.category !== SENTENCE, here.kana, here.id, exact && stack.length === 1, cached)
 
   const open = (nextTerm, nextCategory, nextKana) => {
@@ -1760,7 +1746,7 @@ function useLookupStack(session, { term, kana, category, id, tr }, exact = false
     if (!nextId) return
     setStack(s => [...s, { category: 'grammar', id: nextId }])
   }
-  // An example sentence, broken down (plan 211): the same stack, so ‹
+  // An example sentence, broken down (plan 214): the same stack, so ‹
   // walks back from a word in it to the sentence and on to the entry.
   const openSentence = ex => {
     if (!ex?.jp) return
@@ -1773,7 +1759,7 @@ function useLookupStack(session, { term, kana, category, id, tr }, exact = false
   return { here, entry, loading, error, open, openId, openSentence, back, root, session }
 }
 
-// The stack's frame for an example sentence (plan 211): a lookup
+// The stack's frame for an example sentence (plan 214): a lookup
 // opened as {category: 'sentence', term: jp, tr} is its breakdown.
 const SENTENCE = 'sentence'
 

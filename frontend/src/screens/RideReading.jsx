@@ -230,7 +230,7 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
   const graded = step === 'graded'
   const panels = desk && Boolean(sentence) && step !== 'pass'
   const measured = step === 'measure' || graded
-  // The card's own doors (plan 210): the point's tag and each word missed
+  // The card's own doors (plan 213): the point's tag and each word missed
   // open in the column once it holds the breakdown, else as the sheet.
   const point = sentence ? pointLookup(sentence.grammar_id, sentence.grammar, analysis) : null
   const docked = docksInColumn(panels, null, graded, analysis)

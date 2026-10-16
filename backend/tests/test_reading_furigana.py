@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
 
 class PhrasePointTests(unittest.TestCase):
-    """Plan 210: a bank sentence carries its point's card id, which the
+    """Plan 213: a bank sentence carries its point's card id, which the
     practice card's tag opens the lesson by; a corpus sentence, which
     names no point, carries neither."""
 

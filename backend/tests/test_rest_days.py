@@ -62,6 +62,8 @@ def _studied(uid, days_ago):
         conn.commit()
     finally:
         conn.close()
+    # Written beside the engine, so it is told (plan 212).
+    srs.forget_history(uid)
 
 
 def _ticket(uid, earned_ago, milestone=7, used_ago=None):

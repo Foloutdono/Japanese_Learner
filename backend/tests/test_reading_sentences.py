@@ -31,7 +31,7 @@ class SentenceBankTests(unittest.TestCase):
 
     def test_every_point_opens_its_card(self) -> None:
         # The practice card's tag opens the point's lesson by its card id
-        # (plan 210): a pattern the catalogue does not name opens nothing.
+        # (plan 213): a pattern the catalogue does not name opens nothing.
         from content.grammar_points_data import id_for
         for level, rows in BY_LEVEL.items():
             for row in rows:
@@ -101,7 +101,7 @@ class LevelVocabularyTests(unittest.TestCase):
     # kanji the kanji deck files at it -- before plan 192: N4 17 / 81,
     # N3 24 / 63, N2 11 / 16, N1 25 / 34. Ratchets: raise, never lower
     # for a rewrite of the bank; N2's 406 went to 405 when the lookups
-    # stopped guessing a kana よる (plan 210): 因る was counted only in
+    # stopped guessing a kana よる (plan 213): 因る was counted only in
     # によると and により, the points' own letters, and 寄る reads alike.
     LEVEL_WORDS_FLOOR = {"N4": 316, "N3": 397, "N2": 405, "N1": 491}
     LEVEL_KANJI_FLOOR = {"N4": 106, "N3": 236, "N2": 145, "N1": 235}

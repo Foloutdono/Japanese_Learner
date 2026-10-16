@@ -43,7 +43,7 @@ purpose:
 
     homograph  a verb in hiragana two deck verbs are spelled as in its
                form (おきます: 起きる or 置く), which the breakdown names
-               neither of rather than guess (plan 210). Both cards
+               neither of rather than guess (plan 213). Both cards
                exist; it is neither a miss nor a gap
 
 The first three are plan 104's lookup repairs. Adding a deck entry for
@@ -594,7 +594,7 @@ def render(report: dict) -> str:
                 n = c["kinds"][kind]
                 lines.append(f"    {label:28s} {n['lemmas']} lemmas, {n['occurrences']} occurrences")
             h = c["homographs"]
-            lines.append(f"  {'homographs, refused (210)':30s}{h['lemmas']} lemmas, {h['occurrences']} occurrences")
+            lines.append(f"  {'homographs, refused (213)':30s}{h['lemmas']} lemmas, {h['occurrences']} occurrences")
             lines += ["", "  absent, most frequent first:", "    " + _fmt_lemmas(c["absent"], 40)]
             for kind in ("katakana", "adverb", "gated", "name", "numeral"):
                 if c[kind]:

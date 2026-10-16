@@ -557,7 +557,7 @@ function SessionView({
     onExitLookup: closeLookup,
     session,
   }
-  // The card's own doors (plan 210): the point's tag, and each word missed.
+  // The card's own doors (plan 213): the point's tag, and each word missed.
   const point = pointLookup(data?.grammar_id, data?.grammar, analysis)
   const docked = docksInColumn(desk, lines.opened, graded, analysis)
 

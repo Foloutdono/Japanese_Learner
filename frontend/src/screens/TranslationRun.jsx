@@ -501,7 +501,7 @@ function SessionView({
     onExitLookup: closeLookup,
     session,
   }
-  // The tag's door (plan 210): the point's lesson, before the answer and after.
+  // The tag's door (plan 213): the point's lesson, before the answer and after.
   const point = pointLookup(data?.grammar_id, data?.grammar, breakdown)
   const docked = docksInColumn(desk, lines.opened, stage === 'feedback' && feedback?.correct != null, breakdown)
 

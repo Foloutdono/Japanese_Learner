@@ -5,7 +5,7 @@ import { useDesk } from '../../hooks/useDesk'
 import { SentenceBreakdown } from '../analysis/SentenceBreakdown'
 import { ChevronIcon, CloseIcon } from '../ui/Icons'
 
-// ── An example sentence, broken down, in the lookup's stack (plan 211) ──
+// ── An example sentence, broken down, in the lookup's stack (plan 214) ──
 // An entry's example is a door: pressed, the sentence opens over the
 // entry in the same sheet (or the same docked column), word by word --
 // the practice runs' breakdown (SentenceBreakdown's rows: the line with
