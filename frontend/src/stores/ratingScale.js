@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { track } from '../lib/track'
 import { useProfileSummary, refreshSummary } from './profileSummary'
 import { apiJson } from '../lib/api'
 import { DEFAULT_RATING_SCALE, RATING_SCALES } from '../domain/ratingScales'
@@ -52,6 +53,7 @@ export function useRatingScale() {
  *  still comes back to the bar the learner just picked. */
 export function setRatingScale(id, session) {
   mirror(id)
+  track('setting_change', { setting: 'rating_scale', value: id })   // plan 215
   return apiJson('/api/profile/learning', session, {
     method: 'PATCH',
     body: JSON.stringify({ ratingScale: id }),

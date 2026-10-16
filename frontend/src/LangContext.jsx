@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { track } from './lib/track'
 import { translations } from './i18n'
 import { getTranslations } from './lib/translationCache'
 import { pickInitialLang } from './lib/locale'
@@ -33,6 +34,7 @@ export function LangProvider({ children }) {
     }, [lang])
 
     function switchLang(code) {
+        if (code !== lang) track('setting_change', { setting: 'lang', value: code })   // plan 215
         setLang(code)
         localStorage.setItem('lang', code)
     }

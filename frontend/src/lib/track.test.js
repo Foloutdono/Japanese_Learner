@@ -20,7 +20,7 @@ const apiFetch = vi.fn()
 vi.mock('./supabase', () => ({ supabase: { auth: { getSession } } }))
 vi.mock('./api', () => ({ apiFetch }))
 
-const { track, flush, EVENTS, _peek, _reset } = await import('./track')
+const { track, flush, EVENTS, VALUES, _peek, _reset } = await import('./track')
 
 // The queue as the events the test tracked: the first one of a visit
 // brings its own session_start, which the session tests below read.
@@ -81,8 +81,8 @@ describe('what a property may carry', () => {
   })
 
   it('cuts a long string rather than carrying it', () => {
-    track('screen_view', { route: '/' + 'ね'.repeat(500) })
-    expect(peek()[0].props.route.length).toBe(64)
+    track('boarding_step', { step: 'ね'.repeat(500) })
+    expect(peek()[0].props.step.length).toBe(64)
   })
 
   it('survives props that are not an object at all', () => {
@@ -249,5 +249,40 @@ describe('the session', () => {
     setOptedOut(true)
     track('screen_view', { route: '/today' })
     expect(_peek()).toEqual([])
+  })
+})
+
+// ── 足跡 II (plan 215): enums and shapes ──────────────────────────
+
+describe('the values a property may take', () => {
+  it('drops an enum value that is not on its list', () => {
+    // The structural half of "nothing a learner typed": under an
+    // enumerated key, only the app's own words get through.
+    track('feature_use', { feature: 'speech', action: 'play', route: '/today/run', n: 2 })
+    track('feature_use', { feature: 'mon mot', action: 'search', n: 1 })
+    track('setting_change', { setting: 'theme', value: 'rose' })
+    expect(peek().map(e => e.props)).toEqual([
+      { feature: 'speech', action: 'play', route: '/today/run', n: 2 },
+      { action: 'search', n: 1 },
+      { setting: 'theme' },
+    ])
+  })
+
+  it('holds a route to the shape of a pattern', () => {
+    track('screen_view', { route: '/learn/vocab/theme/:theme', tab: 'learn' })
+    track('screen_view', { route: '/learn/vocab/theme/mes mots préférés' })
+    track('api_error', { path: '/api/decks/9f3a', status: 500 })
+    expect(peek().map(e => e.props)).toEqual([
+      { route: '/learn/vocab/theme/:theme', tab: 'learn' },
+      {},
+      { status: 500 },
+    ])
+  })
+
+  it('names only keys its event declares', () => {
+    for (const [name, keys] of Object.entries(VALUES)) {
+      expect(EVENTS[name], name).toBeDefined()
+      for (const key of Object.keys(keys)) expect(EVENTS[name], `${name}.${key}`).toContain(key)
+    }
   })
 })

@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
+import { countUse } from '../lib/screenTrail'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { askHistory, askResetsAt, MAX_TURNS } from '../domain/ask'
@@ -47,6 +48,7 @@ export function useAsk(session, mode) {
     if (!q || busy.current || spent || current.length >= MAX_TURNS) return false
     const id = ++counter.current
     busy.current = true
+    countUse('ask', 'send')   // 足跡 (plan 215): asked, never the question
     setThreads(all => ({ ...all, [key]: [...(all[key] ?? []), { id, question: q, answer: null, state: 'pending' }] }))
     apiFetch('/api/ask', session, {
       method: 'POST',

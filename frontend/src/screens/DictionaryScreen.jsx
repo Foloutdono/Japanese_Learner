@@ -1,6 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useRef, useMemo, Fragment, createContext, useContext } from 'react'
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
+import { countUse } from '../lib/screenTrail'
 import { useMining } from '../components/analysis/useMining'
 import { useFavorites } from '../hooks/useFavorites'
 import { useLang } from '../LangContext'
@@ -395,6 +396,9 @@ export default function DictionaryScreen({ session }) {
 			.then(data => {
 				if (seq !== pageSeq.current) return
 				const newResults = data.results || []
+				// 足跡 (plan 215): a search that answered, counted -- never
+				// what was searched for.
+				if (p === 0 && q) countUse('dictionary', 'search')
 				if (p === 0) setResults(newResults)
 				else setResults(prev => [...prev, ...newResults])
 				setTotal(data.total)

@@ -170,7 +170,9 @@ describe('useCardSession and the trail', () => {
 
   it('records the level of a run whose key names one', async () => {
     await render(<Probe storageKey={sessionKey('vocab', 'N4', 'm')} fetchBatch={vi.fn(pendingBatch)} mode="m" />)
-    expect(track).toHaveBeenCalledWith('run_start', { kind: 'vocab', mode: 'm', level: 'N4' })
+    // `where` is the door, from the screen the run is on (plan 215);
+    // this harness runs on no route the app declared.
+    expect(track).toHaveBeenCalledWith('run_start', { kind: 'vocab', mode: 'm', level: 'N4', where: 'other' })
   })
 
   it('records no level for a theme or a deck, whose segment is a name the learner chose', async () => {
@@ -178,8 +180,8 @@ describe('useCardSession and the trail', () => {
     await render(<Probe storageKey={sessionKey('deck', 'N5-ma-liste', 'm')} fetchBatch={vi.fn(pendingBatch)} mode="m" />)
     const starts = track.mock.calls.filter(c => c[0] === 'run_start').map(c => c[1])
     expect(starts).toEqual([
-      { kind: 'vocab', mode: 'm', level: undefined },
-      { kind: 'deck', mode: 'm', level: undefined },
+      { kind: 'vocab', mode: 'm', level: undefined, where: 'other' },
+      { kind: 'deck', mode: 'm', level: undefined, where: 'other' },
     ])
   })
 })

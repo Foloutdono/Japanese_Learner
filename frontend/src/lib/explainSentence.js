@@ -1,4 +1,5 @@
 import { apiFetch } from './api'
+import { countUse } from './screenTrail'
 
 // ── The deep tier, bought on demand (plan 095, owner-directed) ──
 // The practice modes fetch the local tier for every sentence they
@@ -13,6 +14,7 @@ import { apiFetch } from './api'
 // back a Passage of two with no rows to draw (routes/phrase.py's
 // PhraseRequest.whole). Every practice fetch of the local tier sends it too.
 export async function explainSentence(session, phrase, lang) {
+  countUse('explain', 'open')   // 足跡 (plan 215): opened, never the sentence
   const r = await apiFetch('/api/phrase/analyze', session, {
     method: 'POST',
     body: JSON.stringify({ phrase, save: false, deep: true, whole: true, lang }),

@@ -6,6 +6,7 @@ import { saveBlob } from '../../lib/platform'
 import { playClick } from '../../lib/audio'
 import { refreshSummary } from '../../stores/profileSummary'
 import { useOptedOut, setOptedOut } from '../../stores/analyticsOptOut'
+import { countUse } from '../../lib/screenTrail'
 import { forgetOnboarded } from '../../stores/onboarded'
 import { Seg } from '../chrome/Console'
 import { Slip, SlipRow } from './SettingsPage'
@@ -43,10 +44,30 @@ export function DataSlips({ session }) {
       const blob = await r.blob()
       // A download on the web, the share sheet in the shell (plan 076).
       await saveBlob(blob, 'nihongo-progress.csv')
+      countUse('export', 'progress')
     } catch {
       setExportFailed(true)
     } finally {
       setExporting(false)
+    }
+  }
+
+  // The learner's own usage statistics (plan 215), the right of access
+  // beside the right to object: GET /api/profile/export/trail, both the
+  // raw rows and the daily counts, as one CSV.
+  const [trailing, setTrailing] = useState(false)
+  const [trailFailed, setTrailFailed] = useState(false)
+  async function exportTrail() {
+    setTrailing(true)
+    setTrailFailed(false)
+    try {
+      const r = await apiFetch('/api/profile/export/trail', session)
+      if (!r.ok) throw new Error(String(r.status))
+      await saveBlob(await r.blob(), 'tsuji-usage.csv')
+    } catch {
+      setTrailFailed(true)
+    } finally {
+      setTrailing(false)
     }
   }
 
@@ -96,9 +117,13 @@ export function DataSlips({ session }) {
             full
             label={t.settingsTrail}
             value={optedOut ? 'off' : 'on'}
-            onChange={key => { playClick(); setOptedOut(key === 'off') }}
+            onChange={key => { playClick(); setOptedOut(key === 'off', session) }}
             options={[{ key: 'on', label: t.settingsTrailOn }, { key: 'off', label: t.settingsTrailOff }]}
           />
+          <button type="button" className="btn-secondary slip__act" data-action="trail-export" disabled={trailing} onClick={() => { playClick(); exportTrail() }}>
+            {trailing ? '…' : t.settingsTrailExportBtn}
+          </button>
+          {trailFailed && <span className="hint" role="alert">{t.onbPassError}</span>}
         </Slip>
 
         <Slip label={t.settingsExport}>
