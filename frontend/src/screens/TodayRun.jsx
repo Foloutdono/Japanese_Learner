@@ -457,7 +457,7 @@ export default function TodayRun({ session }) {
     <StudyStage
       color={color}
       onLeave={leaveToGate}
-      report={showRating && card ? { card, session } : null}
+      report={showRating && card ? { card } : null}
       leaveLabel={t.stageGate}
       where={where}
       sub={sub}

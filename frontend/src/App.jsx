@@ -82,6 +82,7 @@ import ExamRunner from './screens/ExamRunner'
 import ExamResult from './screens/ExamResult'
 import TranslationRun from './screens/TranslationRun'
 import AppLoading from './screens/AppLoading'
+import { FeedbackHost } from './components/feedback/FeedbackSheet'
 
 // Renders nothing — keeps <html lang> and document.title in step with
 // the current route and language. Beside <Routes/> rather than inside
@@ -844,6 +845,10 @@ export default function App({ front = NO_FRONT }) {
             second is raised by a review the screen fired and forgot. */}
         <BalanceSheet />
         <RunOutSheet />
+        {/* Nous écrire, raised from inside a run (plan 222): a failure's
+            link and a card's flag. Here for RunOutSheet's reason -- the
+            run's own retry unmounts the failure that raised it. */}
+        <FeedbackHost session={session} />
         <OfferScreen />
         {/* 補充 — what the refill landed while the app was closed, on
             arrival (plan 141). Held through the 改札 cutscene and the

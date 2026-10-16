@@ -279,7 +279,7 @@ export default function KanaRun({ session }) {
     <StudyStage
       color="var(--line-kana)"
       onLeave={leave}
-      report={showRating && card ? { card, session } : null}
+      report={showRating && card ? { card } : null}
       leaveLabel={t.kanaTitle}
       where={selectedSet.label}
       sub={title}

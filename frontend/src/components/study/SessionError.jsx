@@ -62,7 +62,7 @@ export default function SessionError({ error, onRetry, session = null }) {
       hint={named ? named(t) : t.errorHint}
       action={onRetry ? { label: t.tryAgain, onClick: onRetry } : undefined}
     >
-      {session && code !== 'session_expired' && <ReportProblem session={session} error={error} />}
+      {session && code !== 'session_expired' && <ReportProblem error={error} />}
     </Empty>
   )
 }

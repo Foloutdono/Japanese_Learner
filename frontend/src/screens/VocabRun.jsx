@@ -317,7 +317,7 @@ export default function VocabRun({ session }) {
     <StudyStage
       color="var(--line-vocab)"
       onLeave={leave}
-      report={showRating && card ? { card, session } : null}
+      report={showRating && card ? { card } : null}
       leaveLabel={t.vocabTitle}
       where={`${t.vocabulary} ${sourceLabel}`}
       sub={title}

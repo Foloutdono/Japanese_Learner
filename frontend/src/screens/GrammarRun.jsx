@@ -320,7 +320,7 @@ export default function GrammarRun({ session }) {
     <StudyStage
       color="var(--line-grammar)"
       onLeave={leave}
-      report={showRating && card ? { card, session } : null}
+      report={showRating && card ? { card } : null}
       leaveLabel={t.grammarTitle}
       where={`${t.grammarTitle} ${level}`}
       sub={currentModeLabel}

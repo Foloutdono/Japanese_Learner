@@ -32586,7 +32586,7 @@ button.brd-stn { cursor: pointer; }
   color: var(--text-secondary);
   cursor: pointer;
 }
-.fb-check__box { flex: none; margin: var(--sp-1) 0 0; accent-color: var(--accent2); }
+.fb-check__box { flex: none; margin: var(--sp-1) 0 0; }
 .fb-check__words { display: flex; flex-direction: column; min-width: 0; }
 .fb-check__what {
   overflow-wrap: anywhere;

@@ -288,7 +288,7 @@ export default function StudyRun({ session }) {
     <StudyStage
       color="var(--line-decks)"
       onLeave={leave}
-      report={showRating && card ? { card, session } : null}
+      report={showRating && card ? { card } : null}
       leaveLabel={t.decksTitle}
       where={deck?.name ?? ''}
       sub={title}

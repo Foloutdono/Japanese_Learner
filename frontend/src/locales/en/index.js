@@ -2906,7 +2906,7 @@ const onboarding = {
   settingsWrite: 'Write to us',
   settingsWriteValue: 'A problem, an idea',
   fbKindLabel: 'What it is',
-  fbKind: { problem: 'A problem', idea: 'An idea', fault: 'A mistake' },
+  fbKind: { problem: 'Problem', idea: 'Idea', fault: 'Mistake' },
   fbPlaceholder: {
     problem: 'What happened, and where.',
     idea: 'What you would like to find here.',

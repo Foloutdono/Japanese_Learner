@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { Sheet } from '../chrome/Sheet'
 import { Seg, Chip } from '../chrome/Console'
@@ -7,6 +8,7 @@ import {
   KINDS, CARD_REASONS, TEXT_MAX,
   feedbackContext, contextWords, failureOf, cardFace, reportable, sendFeedback,
 } from '../../lib/feedback'
+import { useFeedbackSheet, openFeedback, openCardReport, closeFeedback } from '../../stores/feedbackSheet'
 
 // ── Nous écrire (plan 222) ─────────────────────────────────────────
 // The owner's pick A + B + C of the canvas "Tsuji — the feedback door,
@@ -149,18 +151,19 @@ export function FeedbackSheet({ open, onClose, session, failure = null }) {
   )
 }
 
-/** "Signaler ce problème" under a failure, beside its retry. */
-export function ReportProblem({ session, error }) {
+/** "Signaler ce problème" under a failure, beside its retry. The sheet
+ *  is FeedbackHost's: the failure is unmounted by the run's own retry. */
+export function ReportProblem({ error }) {
   const { t } = useLang()
-  const [open, setOpen] = useState(false)
-  const failure = useMemo(() => failureOf(error?.path, error?.status), [error?.path, error?.status])
   return (
-    <>
-      <button type="button" className="fb-link" onClick={() => setOpen(true)} aria-haspopup="dialog">
-        {t.reportProblem}
-      </button>
-      <FeedbackSheet open={open} onClose={() => setOpen(false)} session={session} failure={failure} />
-    </>
+    <button
+      type="button"
+      className="fb-link"
+      onClick={() => openFeedback(failureOf(error?.path, error?.status))}
+      aria-haspopup="dialog"
+    >
+      {t.reportProblem}
+    </button>
   )
 }
 
@@ -222,28 +225,41 @@ function CardReport({ session, card, onClose }) {
   )
 }
 
-/** The flag on an answered card, in the run's head, and its sheet.
- *  Nothing for a card that is not the app's to correct (a personal
- *  card is reported with its deck). */
-export function CardFlag({ card, session }) {
+/** The flag on an answered card, in the run's head. Nothing for a card
+ *  that is not the app's to correct (a personal card is reported with
+ *  its deck). The sheet is FeedbackHost's, holding the card it was
+ *  opened on: the flag itself goes with the rating. */
+export function CardFlag({ card }) {
   const { t } = useLang()
-  const [open, setOpen] = useState(null)
   if (!reportable(card)) return null
   return (
-    <>
-      <button
-        type="button"
-        className="fb-flag"
-        aria-label={t.cardReport}
-        title={t.cardReport}
-        aria-haspopup="dialog"
-        onClick={() => setOpen(card)}
-      >
-        <FlagIcon size={16} />
-      </button>
-      <Sheet open={open != null} onClose={() => setOpen(null)} cap={t.cardReport} label={t.cardReport} className="fb-sheet" dismiss>
-        {open && <CardReport session={session} card={open} onClose={() => setOpen(null)} />}
-      </Sheet>
-    </>
+    <button
+      type="button"
+      className="fb-flag"
+      aria-label={t.cardReport}
+      title={t.cardReport}
+      aria-haspopup="dialog"
+      onClick={() => openCardReport(card)}
+    >
+      <FlagIcon size={16} />
+    </button>
   )
+}
+
+/** The sheets a run raises (stores/feedbackSheet), rendered once by App
+ *  beside <Routes/> so that nothing on the screen can take them away
+ *  mid-sentence. A navigation shuts them: they were about that screen. */
+export function FeedbackHost({ session }) {
+  const { t } = useLang()
+  const open = useFeedbackSheet()
+  const { pathname } = useLocation()
+  useEffect(() => closeFeedback, [pathname])
+  if (open?.card) {
+    return (
+      <Sheet open onClose={closeFeedback} cap={t.cardReport} label={t.cardReport} className="fb-sheet" dismiss>
+        <CardReport session={session} card={open.card} onClose={closeFeedback} />
+      </Sheet>
+    )
+  }
+  return <FeedbackSheet open={open != null} onClose={closeFeedback} session={session} failure={open?.failure ?? null} />
 }

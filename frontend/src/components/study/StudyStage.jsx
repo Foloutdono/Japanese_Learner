@@ -62,11 +62,11 @@ import { CardFlag } from '../feedback/FeedbackSheet'
 // pill goes (the meter carries it) and so does the run's own hairline
 // (RunConsoleContext). `meter={false}` keeps a run on the old floor: the
 // comprehension run, whose answers are graded together at its end.
-// `report` (plan 222, door B): `{ card, session }` once a card is
-// answered, and the head draws the card's flag after the screen's own
-// aside (components/feedback/FeedbackSheet.jsx, CardFlag); null before
-// the answer and after the rating, so the flag is there only while the
-// card's answer is.
+// `report` (plan 222, door B): `{ card }` once a card is answered, and
+// the head draws the card's flag after the screen's own aside
+// (components/feedback/FeedbackSheet.jsx, CardFlag); null before the
+// answer and after the rating, so the flag is there only while the
+// card's answer is. Its sheet is App's (FeedbackHost).
 export function StudyStage({
   color, onLeave, leaveLabel, where, sub, remaining, pass = true, aside,
   toast, onToastDone, className = '', levelBar = true, side, sideLabel, records = false, done = false,
@@ -101,7 +101,7 @@ export function StudyStage({
             onLeave={onLeave} leaveLabel={leaveLabel}
             where={where} sub={sub} remaining={panels || runConsole ? undefined : remaining}
             pass={pass} onPass={openBalance} keys={!panels} help={panels}
-            aside={report ? <>{aside}<CardFlag card={report.card} session={report.session} /></> : aside}
+            aside={report ? <>{aside}<CardFlag card={report.card} /></> : aside}
           />
           {runConsole && <RunMeter remaining={remaining ?? null} />}
           {children}

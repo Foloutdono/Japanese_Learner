@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
+import { useState } from 'react'
+import { MemoryRouter } from 'react-router-dom'
 import fr from '../../locales/fr/index.js'
 import { ApiError } from '../../lib/api'
 import '../../index.css'
@@ -16,7 +18,10 @@ vi.mock('../../LangContext', () => ({ useLang: () => ({ t: fr, lang: 'fr' }) }))
 const apiJson = vi.fn()
 vi.mock('../../lib/api', async (o) => ({ ...(await o()), apiJson: (...a) => apiJson(...a) }))
 
-const { FeedbackSheet, CardFlag, ReportProblem } = await import('./FeedbackSheet')
+const { FeedbackSheet, CardFlag, ReportProblem, FeedbackHost } = await import('./FeedbackSheet')
+const { closeFeedback } = await import('../../stores/feedbackSheet')
+// A run's doors raise their sheet in App's host, beside <Routes/>.
+const inApp = node => <MemoryRouter>{node}<FeedbackHost session={LEARNER} /></MemoryRouter>
 const { default: SessionError } = await import('../study/SessionError')
 
 const LEARNER = { access_token: 'tok', user: { id: 'u1', email: 'aiko@example.com' } }
@@ -26,6 +31,7 @@ const $ = sel => document.querySelector(sel)
 const sent = () => JSON.parse(apiJson.mock.calls.at(-1)[2].body)
 
 beforeEach(() => {
+  closeFeedback()
   apiJson.mockReset()
   apiJson.mockResolvedValue({ ok: true, at: '2026-10-16T09:30:00+00:00' })
 })
@@ -113,7 +119,7 @@ describe('the form, in its sheet', () => {
 describe('the link under a failure (door C)', () => {
   it('joins the failure’s area and status, never its path', async () => {
     const error = new ApiError(503, null, '/api/decks/9f3a/study?mode=f2b')
-    await render(<ReportProblem session={LEARNER} error={error} />)
+    await render(inApp(<ReportProblem error={error} />))
     await userEvent.click($('.fb-link'))
     expect($('.fb-check__what').textContent).toContain(fr.fbFailure(503, '/api/decks'))
     await userEvent.type($('.fb-form__text'), 'La séance ne charge pas.')
@@ -121,6 +127,26 @@ describe('the link under a failure (door C)', () => {
     await settle()
     expect(sent()).toMatchObject({ kind: 'problem', area: '/api/decks', status: 503 })
     expect(JSON.stringify(sent())).not.toContain('9f3a')
+  })
+
+  it('stays open while the run retries and the failure that raised it goes', async () => {
+    // hooks/useCardSession clears its error to retry after 1, 2, 4 and
+    // 8 seconds, which unmounts SessionError: the sheet must not go too.
+    let setFailed
+    function Run() {
+      const [failed, set] = useState(true)
+      setFailed = set
+      return failed
+        ? <SessionError error={new ApiError(503, null, '/api/today/queue')} onRetry={() => {}} session={LEARNER} />
+        : <p>…</p>
+    }
+    await render(inApp(<Run />))
+    await userEvent.click($('.fb-link'))
+    await userEvent.type($('.fb-form__text'), 'Ça ne charge pas.')
+    setFailed(false)
+    await settle(60)
+    expect($('.fb-link')).toBeNull()
+    expect($('[role="dialog"] .fb-form__text')?.value).toBe('Ça ne charge pas.')
   })
 
   it('stands under a session’s failure, and not under an expired one', async () => {
@@ -141,7 +167,7 @@ describe('the flag on an answered card (door B)', () => {
   const CARD = { card_id: 'vocab_N5_先生_せんせい', kanji: '先生', kana: 'せんせい', meaning: 'professeur', mode: 'vocab.flashcard.f2b' }
 
   it('opens the card’s sheet and sends the card and what is wrong with it', async () => {
-    await render(<CardFlag card={CARD} session={LEARNER} />)
+    await render(inApp(<CardFlag card={CARD} />))
     const flag = $('.fb-flag')
     expect(flag.getAttribute('aria-label')).toBe(fr.cardReport)
     await userEvent.click(flag)
@@ -160,12 +186,12 @@ describe('the flag on an answered card (door B)', () => {
   })
 
   it('is not drawn on a personal card', async () => {
-    const screen = await render(<CardFlag card={{ card_id: 'custom_12_7', kanji: '駅' }} session={LEARNER} />)
+    const screen = await render(inApp(<CardFlag card={{ card_id: 'custom_12_7', kanji: '駅' }} />))
     expect(screen.container.querySelector('.fb-flag')).toBeNull()
   })
 
   it('keeps the head’s height on a phone, its target a thumb’s', async () => {
-    await render(<div className="stage__head"><CardFlag card={CARD} session={LEARNER} /></div>)
+    await render(<div className="stage__head"><CardFlag card={CARD} /></div>)
     const box = $('.fb-flag').getBoundingClientRect()
     expect(box.height).toBeLessThanOrEqual(40)
     const hit = getComputedStyle($('.fb-flag'), '::after')

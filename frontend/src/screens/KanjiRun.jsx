@@ -301,7 +301,7 @@ export default function KanjiRun({ session }) {
     <StudyStage
       color="var(--line-kanji)"
       onLeave={leave}
-      report={showRating && card ? { card, session } : null}
+      report={showRating && card ? { card } : null}
       leaveLabel={t.kanjiTitle}
       where={`${t.kanjiTitle} ${sourceLabel}`}
       sub={title}
