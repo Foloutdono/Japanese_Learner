@@ -633,7 +633,7 @@ export function InfoIcon({ size = 16, className }) {
 }
 
 // A message: a speech balloon with two lines in it, Settings' 「Nous
-// écrire」 row (plan 221).
+// écrire」 row (plan 222).
 export function MessageIcon({ size = 16, className }) {
   return (
     <svg {...base} width={size} height={size} className={className}>

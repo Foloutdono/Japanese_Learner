@@ -2835,7 +2835,7 @@ const onboarding = {
   },
   settingsHelp: 'Aide',
   settingsHelpValue: 'Essai · Guide',
-  // Nous écrire (plan 221) : un problème, une idée, une faute dans ce
+  // Nous écrire (plan 222) : un problème, une idée, une faute dans ce
   // qui est enseigné, et la carte signalée depuis son drapeau. Rien n'est
   // envoyé de l'appareil sans être écrit ici en clair.
   settingsWrite: 'Nous écrire',

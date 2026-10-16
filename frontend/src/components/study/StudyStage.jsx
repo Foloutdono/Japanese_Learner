@@ -62,7 +62,7 @@ import { CardFlag } from '../feedback/FeedbackSheet'
 // pill goes (the meter carries it) and so does the run's own hairline
 // (RunConsoleContext). `meter={false}` keeps a run on the old floor: the
 // comprehension run, whose answers are graded together at its end.
-// `report` (plan 221, door B): `{ card, session }` once a card is
+// `report` (plan 222, door B): `{ card, session }` once a card is
 // answered, and the head draws the card's flag after the screen's own
 // aside (components/feedback/FeedbackSheet.jsx, CardFlag); null before
 // the answer and after the rating, so the flag is there only while the

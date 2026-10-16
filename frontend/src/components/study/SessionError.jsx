@@ -47,7 +47,7 @@ function sessionErrorCode(error) {
   return null
 }
 
-// 「Signaler ce problème」 under the retry (plan 221, door C): the
+// 「Signaler ce problème」 under the retry (plan 222, door C): the
 // sheet opens with the failure's area and status to join. Not under an
 // expired session, which cannot send it, nor where no session is given.
 export default function SessionError({ error, onRetry, session = null }) {

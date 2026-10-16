@@ -115,7 +115,7 @@ PLAN = [
     ("credit_stops",        "user_id = %(user)s",       "where the credits stopped a run: the offer's week"),
     ("event_log",           "user_id = %(user)s",       "足跡: which screens were opened, and when"),
     ("event_daily",         "user_id = %(user)s",       "the rolled-up half of that same trail"),
-    ("feedback",            "user_id = %(user)s",       "the messages written to us: problems, ideas, cards reported (plan 221)"),
+    ("feedback",            "user_id = %(user)s",       "the messages written to us: problems, ideas, cards reported (plan 222)"),
     ("user_profiles",       "user_id = %(user)s",       "identity: username, level, goal, preferences"),
 ]
 

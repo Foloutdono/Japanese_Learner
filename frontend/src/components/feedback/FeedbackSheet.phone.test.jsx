@@ -5,7 +5,7 @@ import fr from '../../locales/fr/index.js'
 import { ApiError } from '../../lib/api'
 import '../../index.css'
 
-// ── Nous écrire on a phone (plan 221) ────────────────────────────────
+// ── Nous écrire on a phone (plan 222) ────────────────────────────────
 // The owner's pick A + B + C: the form in a sheet (Settings' row, the
 // link under a failure) and the card's own sheet behind the flag. What
 // the learner sees is what is sent -- the classes printed under their

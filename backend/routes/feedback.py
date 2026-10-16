@@ -1,6 +1,6 @@
 """
 POST /api/feedback — a learner writes to the people who make the app
-(plan 221, the owner's pick A + B + C of the canvas "Tsuji — the
+(plan 222, the owner's pick A + B + C of the canvas "Tsuji — the
 feedback door, new directions").
 
 Three doors open the one sheet (frontend/src/components/feedback/):

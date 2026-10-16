@@ -40,7 +40,7 @@ already looking.
   8  FRICTION     the requests that failed (api_error) and the install
                   prompt's answers. Both were declared in core/events.py
                   from the start and sent by nothing until the client began to send them.
-  9  MESSAGES     what learners wrote to us (plan 221), COUNTED: by
+  9  MESSAGES     what learners wrote to us (plan 222), COUNTED: by
                   kind, who asked for an answer, the cards reported most.
                   Never the words, which this page on GitHub is no place
                   for: scripts/read_feedback.py reads them, run by a person.
@@ -472,7 +472,7 @@ def time_spent(cur, days: int) -> str:
 
 
 def messages(cur, days: int) -> str:
-    """What learners wrote to us (plan 221), counted and never read. The
+    """What learners wrote to us (plan 222), counted and never read. The
     words belong to scripts/read_feedback.py, run by a person in a
     terminal, not to a run summary anyone with the repository can open.
     A card's id is the content's key, not anything a learner typed."""

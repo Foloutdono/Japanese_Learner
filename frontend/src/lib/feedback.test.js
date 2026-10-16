@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import fr from '../locales/fr/index.js'
 import { cardFace, reportable, contextWords, failureOf } from './feedback'
 
-// ── Nous écrire, the pure half (plan 221) ───────────────────────────
+// ── Nous écrire, the pure half (plan 222) ───────────────────────────
 // What a card's strip prints, which cards the flag may report, the
 // joined classes in words, and a failure's area -- never its path.
 

@@ -103,7 +103,7 @@ export default function SettingsScreen({ session }) {
     )
   }
 
-  // Nous écrire (plan 221): on a phone the form is a sheet over the
+  // Nous écrire (plan 222): on a phone the form is a sheet over the
   // list, as the canvas drew it, not a page pushed over it. Its address
   // is the page's, so the way back closes it; a sheet opened from a
   // link has no list behind it in the history, and goes to it instead.

@@ -164,7 +164,7 @@ describe('Settings\' doors on the desk', () => {
     expect(door('sound').tabIndex).toBe(-1)
     door('account').focus()
     await userEvent.keyboard('{ArrowUp}')
-    // Nous écrire (plan 221) is the study card's last row, over the account.
+    // Nous écrire (plan 222) is the study card's last row, over the account.
     expect(document.activeElement).toBe(door('write'))
     // One walk for the column: Home is the pass's first door.
     await userEvent.keyboard('{Home}')

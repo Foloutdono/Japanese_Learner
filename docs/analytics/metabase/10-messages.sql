@@ -1,5 +1,5 @@
 -- dashboard: Tsuji — 足跡 · Messages
--- description: Ce que les apprenants nous écrivent (plan 221), compté et jamais lu ici : les mots se lisent avec backend/scripts/read_feedback.py. Par sorte, ceux qui attendent une réponse, les cartes les plus signalées.
+-- description: Ce que les apprenants nous écrivent (plan 222), compté et jamais lu ici : les mots se lisent avec backend/scripts/read_feedback.py. Par sorte, ceux qui attendent une réponse, les cartes les plus signalées.
 
 -- ==== question
 -- title: Messages par semaine

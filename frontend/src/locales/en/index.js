@@ -2900,7 +2900,7 @@ const onboarding = {
   },
   settingsHelp: 'Help',
   settingsHelpValue: 'Ride · Guide',
-  // Write to us (plan 221): a problem, an idea, a mistake in what is
+  // Write to us (plan 222): a problem, an idea, a mistake in what is
   // taught, and a card reported from its flag. Nothing leaves the
   // device without being written out here first.
   settingsWrite: 'Write to us',

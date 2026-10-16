@@ -1,5 +1,5 @@
 """
-What learners wrote to us (plan 221), newest first, as markdown.
+What learners wrote to us (plan 222), newest first, as markdown.
 
     python -m scripts.read_feedback                 # the last 7 days
     python -m scripts.read_feedback --days 30

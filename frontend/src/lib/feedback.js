@@ -2,7 +2,7 @@ import { apiJson } from './api'
 import { routePattern, apiArea } from './routePattern'
 import { visitContext } from './visitContext'
 
-// ── Nous écrire — what a message carries (plan 221) ─────────────────
+// ── Nous écrire — what a message carries (plan 222) ─────────────────
 // backend/routes/feedback.py holds the same lists and bounds, and
 // backend/tests/test_feedback.py holds the two equal. The
 // context beside the words is the trail's own coarse classes

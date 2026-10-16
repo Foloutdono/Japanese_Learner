@@ -1068,7 +1068,7 @@ CREATE TABLE event_daily (
     PRIMARY KEY (user_id, day, name)
 );
 
--- A learner's message to the people who make the app (plan 221): a
+-- A learner's message to the people who make the app (plan 222): a
 -- problem, an idea, a fault in what is taught, or a card reported from
 -- its flag. Self-migrated by routes/feedback.py. Unlike event_log, `body`
 -- IS what the learner typed -- the one table that keeps words on

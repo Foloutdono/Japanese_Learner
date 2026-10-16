@@ -1,5 +1,5 @@
 """scripts/read_feedback.py -- the one place a message's words are read
-(plan 221): newest first, each with what it carried, the address to
+(plan 222): newest first, each with what it carried, the address to
 answer only when one was asked for, and nothing from anyone else's
 window or kind."""
 from datetime import datetime, timezone

@@ -70,7 +70,7 @@ async function mount(path) {
 
 const box = el => el.getBoundingClientRect()
 
-describe('Nous écrire at phone width (plan 221)', () => {
+describe('Nous écrire at phone width (plan 222)', () => {
   it('opens as a sheet over the list, and Escape goes back to the list', async () => {
     await mount('/profile/settings/write')
     const sheet = document.querySelector('[role="dialog"].sheet')

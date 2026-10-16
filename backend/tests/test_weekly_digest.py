@@ -129,7 +129,7 @@ def test_time_spent_reads_engaged_minutes_per_screen_and_the_features():
 
 
 def test_messages_are_counted_by_kind_and_card_and_never_read():
-    # Plan 221: the digest lands on a GitHub run page, so the words a
+    # Plan 222: the digest lands on a GitHub run page, so the words a
     # learner wrote never appear in it -- the kinds, the cards and how
     # many asked for an answer do.
     conn = db_conn()

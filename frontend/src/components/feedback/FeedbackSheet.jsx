@@ -8,7 +8,7 @@ import {
   feedbackContext, contextWords, failureOf, cardFace, reportable, sendFeedback,
 } from '../../lib/feedback'
 
-// ── Nous écrire (plan 221) ─────────────────────────────────────────
+// ── Nous écrire (plan 222) ─────────────────────────────────────────
 // The owner's pick A + B + C of the canvas "Tsuji — the feedback door,
 // new directions": one sheet behind three doors -- Settings' row (A),
 // the flag on an answered card (B) and the link under a failure (C).

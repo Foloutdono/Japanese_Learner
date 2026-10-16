@@ -182,7 +182,7 @@ describe('SettingsScreen — the card and the list', () => {
     expect(value(3)).toBe(T.rvRowNone)
     expect(value(4)).toBe(T.settingsRatingScaleOption.simple)
     expect(value(5)).toBe(T.readingPaceOption.standard)
-    // Nous écrire (plan 221): a door, its value what it is for.
+    // Nous écrire (plan 222): a door, its value what it is for.
     expect(value(7)).toBe(T.settingsWriteValue)
     expect(value(8)).toBe('dev@…')
     expect(value(9)).toBe(T.settingsCreditsCount(ATTRIBUTIONS.length))

@@ -370,7 +370,7 @@ describe('settings on the desk', () => {
 // install row explains the two taps. An iPad on its side reaches the
 // desk, and there the explanation opens in the page under the row
 // rather than in a sheet over it. The phone's side is deskfree.phone.
-describe('Nous écrire on the desk (plan 221)', () => {
+describe('Nous écrire on the desk (plan 222)', () => {
   it('opens beside the list as a page, no dialog, its row lit', async () => {
     await mount('/profile/settings/write')
     await settle()

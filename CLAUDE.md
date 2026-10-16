@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **222**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **223**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -134,7 +134,7 @@ runtime purpose.
   selector's fetch goes through `lib/cachedJson.js`, a held arrow key
   checks no radio, and a write that creates guards against a second press.
 - **A learner's message is read by a person, never by a dashboard
-  (plan 221).** What is written through Nous écrire, a card's flag or
+  (plan 222).** What is written through Nous écrire, a card's flag or
   the link under a failure is the one text kept on purpose: it lives in
   `feedback` (`routes/feedback.py`), is counted by the digest and
   `10-messages.sql`, and its words are read with `scripts/read_feedback`
@@ -303,7 +303,7 @@ One more is read-only and needs no flag, so it is safe to run at any time:
 
 ```bash
 python -m scripts.weekly_digest        # the four numbers, as markdown
-python -m scripts.read_feedback        # what learners wrote to us (plan 221), newest first
+python -m scripts.read_feedback        # what learners wrote to us (plan 222), newest first
 ```
 
 Two others fill a shared cache ahead of demand rather than maintaining
