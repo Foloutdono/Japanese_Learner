@@ -94,9 +94,15 @@ export async function startGuest() {
  * that points at the routes which still work, rather than repeating
  * a quoted blank back at someone with their address on screen.
  */
-export async function claimAccount({ email, password }) {
+export async function claimAccount({ email, password, lang }) {
   try {
-    const { data, error } = await supabase.auth.updateUser({ email, password })
+    // `data` is the user's metadata, written before the confirmation is
+    // sent: `lang` is what the dashboard's e-mail templates branch on
+    // ({{ .Data.lang }}), so the learner who claimed the pass in French
+    // is mailed in French (plan 210). Omitted when unknown.
+    const { data, error } = await supabase.auth.updateUser({
+      email, password, ...(lang ? { data: { lang } } : {}),
+    })
     // `code` is the part worth having: the message is English-only and
     // sometimes describes the wrong field (see above).
     if (error) return { ok: false, code: error.code, message: error.message }

@@ -78,8 +78,21 @@ class ParseTrackTests(unittest.TestCase):
         self.assertEqual(result[0]["end"], 4.0)
 
     def test_malformed_content_raises_caption_parse_error(self) -> None:
-        with self.assertRaises(CaptionParseError):
+        with self.assertRaises(CaptionParseError) as caught:
             parse_track("this is not a subtitle file at all", "t.srt")
+        # The code is what the learner is told by (plan 210); the
+        # English message beside it is for the logs.
+        self.assertEqual(caught.exception.code, "parse_failed")
+
+    def test_an_unknown_format_is_named_as_one(self) -> None:
+        with self.assertRaises(CaptionParseError) as caught:
+            parse_track("this is not a subtitle file at all", "notes.txt")
+        self.assertEqual(caught.exception.code, "unknown_format")
+
+    def test_a_file_with_nothing_to_read_is_named_as_one(self) -> None:
+        with self.assertRaises(CaptionParseError) as caught:
+            parse_track("1\n00:00:01,000 --> 00:00:02,000\n<i></i>\n", "t.srt")
+        self.assertEqual(caught.exception.code, "no_cues")
 
     def test_empty_cues_after_stripping_are_dropped(self) -> None:
         srt = (
@@ -304,6 +317,7 @@ class FetchYouTubeTrackTests(unittest.TestCase):
         with self.assertRaises(CaptionFetchError) as caught:
             self._fetch()
         self.assertIn("japanese", str(caught.exception).lower())
+        self.assertEqual(caught.exception.code, "no_japanese_subtitles")
 
     def test_the_rolling_window_of_auto_captions_is_merged(self) -> None:
         """Auto-captions repeat most of each neighbour's text, one or
@@ -320,8 +334,9 @@ class FetchYouTubeTrackTests(unittest.TestCase):
         )
 
     def test_an_empty_track_is_an_error_rather_than_an_empty_session(self) -> None:
-        with self.assertRaises(CaptionFetchError):
+        with self.assertRaises(CaptionFetchError) as caught:
             self._fetch(manual=self._snippets(("   ", 0.0, 1.0)))
+        self.assertEqual(caught.exception.code, "subtitles_empty")
 
     def test_unconfigured_is_the_shipped_state(self) -> None:
         """No proxy anywhere means the ingest is off, and says so."""
@@ -331,8 +346,9 @@ class FetchYouTubeTrackTests(unittest.TestCase):
         )}
         with mock.patch.dict("os.environ", cleared, clear=False):
             self.assertFalse(proxy_configured())
-            with self.assertRaises(CaptionFetchError):
+            with self.assertRaises(CaptionFetchError) as caught:
                 fetch_youtube_track("dQw4w9WgXcQ")
+            self.assertEqual(caught.exception.code, "link_fetch_disabled")
 
 
 if __name__ == "__main__":

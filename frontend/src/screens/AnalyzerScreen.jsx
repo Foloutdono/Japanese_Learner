@@ -185,7 +185,7 @@ export default function AnalyzerScreen({ session }) {
   // on the desk rather than over the intake, and the copy state its
   // button shares with the panel's (both are on screen at once there).
   // A phone leaves both to IntakeVideo, whose dialog it is.
-  const grab = useBookmarkletCopy()
+  const grab = useBookmarkletCopy(t)
   const [tutorial, setTutorial] = useState(false)
   const closeTutorial = useCallback(() => setTutorial(false), [])
 

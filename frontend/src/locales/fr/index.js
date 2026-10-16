@@ -15,6 +15,16 @@ const auth = {
   signOut:           'Déconnexion',
   usernameInvalid:   "Le nom d'utilisateur doit contenir 3 à 20 caractères (lettres, chiffres, tiret bas).",
   usernameTaken:     'Ce nom d\'utilisateur est déjà pris.',
+  // 改札 — les refus de la connexion, nommés par leur code
+  // (lib/authErrors.js) plutôt que par la phrase anglaise de Supabase
+  // (plan 210). Les refus partagés avec la carte invité (adresse déjà
+  // prise, mot de passe faible, trop de tentatives) disent les claim*.
+  authBadCredentials:    'Adresse e-mail ou mot de passe incorrect.',
+  authEmailNotConfirmed: 'Confirme d’abord ton adresse : le lien est dans ta boîte mail.',
+  authEmailInvalid:      'Cette adresse e-mail n’est pas valide. Vérifie-la, ou essaie-en une autre.',
+  authCheckFields:       'Vérifie ton adresse e-mail et ton mot de passe.',
+  authSignupDisabled:    'Les inscriptions sont fermées pour le moment.',
+  authLinkExpired:       'Ce lien a expiré ou a déjà servi. Essaie de te connecter ; sinon, recommence pour en recevoir un nouveau.',
 }
 
 // ── Landing screen ────────────────────────────────────────
@@ -43,6 +53,11 @@ const nav = {
   waitingServer:     'Réveil du serveur…',
   errorTitle:        'Ça n’a pas fonctionné',
   errorHint:         'Vérifie ta connexion — ta progression est en sécurité.',
+  // Les deux refus d’une session qui ont leur propre ligne
+  // (components/study/SessionError.jsx) : un passe que le serveur ne
+  // reconnaît plus, un deck qui n’est plus là. Le reste dit errorHint.
+  sessionExpired:    'Ta session a expiré. Reconnecte-toi pour reprendre — ta progression est en sécurité.',
+  deckGone:          'Ce deck n’est plus sur ton étagère.',
   // ── Le chrome (plan 068) : les cinq portillons et le HUD ──
   tabLearn:          'Apprendre',
   tabPractice:       'Pratique',
@@ -1090,6 +1105,17 @@ const video = {
   bookmarkletCopied:   'Copié ! Passe à l\'étape 2',
   downsubHint:         'Télécharge un fichier .vtt à choisir ici — utile quand le favori ne passe pas.',
   grabEmpty:           'Les sous-titres rapportés étaient vides — réessaie depuis la page de la vidéo.',
+  // Les alertes du favori lui-même, sur youtube.com : figées dans la
+  // langue de l’apprenant au moment de la copie (lib/captionGrab.js).
+  // tutTrouble1 cite les deux premières phrases de grabAlertNoJapanese
+  // et de grabAlertNotReady — un test les tient d’accord.
+  grabAlertNotYoutube:  'Ouvre d’abord la vidéo sur YouTube.',
+  grabAlertNoVideo:     'Pas de vidéo sur cette page.',
+  grabAlertNotReady:    'Page pas prête : recharge-la et réessaie.',
+  grabAlertNoSubtitles: 'Cette vidéo n’a pas de sous-titres.',
+  grabAlertNoJapanese:  'Pas de sous-titres japonais. Langues disponibles : ',
+  grabAlertEmpty:       'Les sous-titres sont revenus vides : réessaie.',
+  grabAlertFailed:      'La récupération des sous-titres a échoué : ',
   // ── Le tutoriel du favori ──
   tutTitle:            'Installer le favori 字幕取り',
   tutWhat:             'Le principe : on va enregistrer une petite « adresse magique » comme favori dans ton navigateur. Ouvrir ce favori pendant que tu es sur une vidéo YouTube récupère ses sous-titres japonais et te ramène ici, analyse lancée. Rien à installer, aucune extension, aucun compte.',
@@ -1113,7 +1139,7 @@ const video = {
   tutStep3b:           'Ordinateur : clique 字幕取り dans la barre de favoris. Téléphone : tape 字幕取り dans la barre d\'adresse et touche le favori proposé.',
   tutStep3c:           'La page revient ici toute seule et l\'analyse démarre avec les sous-titres japonais — la vidéo lisible à côté.',
   tutTroubleTitle:     'Si ça ne marche pas',
-  tutTrouble1:         'Le favori explique lui-même : « No Japanese subtitles » veut dire que la vidéo n\'a pas de piste japonaise — il n\'y a rien à récupérer. « Page not ready » : recharge la page de la vidéo et réessaie.',
+  tutTrouble1:         'Le favori explique lui-même : « Pas de sous-titres japonais » veut dire que la vidéo n\'a pas de piste japonaise — il n\'y a rien à récupérer. « Page pas prête » : recharge la page de la vidéo et réessaie.',
   tutTrouble2:         'En dernier recours, le lien DownSub de cette page télécharge un fichier .vtt : dépose-le dans la zone 字幕 ci-dessous, le résultat est le même.',
   uploadSubtitles:     'Importe un fichier de sous-titres (.srt, .vtt, .ass)',
   openOnYoutube:       'Ouvrir sur YouTube',
@@ -1125,6 +1151,27 @@ const video = {
   analyzingVideo:      'Analyse des sous-titres…',
   captionsUnavailable: "Impossible de récupérer les sous-titres de cette vidéo.",
   subtitleTooLarge:    'Ce fichier de sous-titres est trop volumineux.',
+  // 動画 — pourquoi une vidéo ne s’est pas ouverte (plan 210). Le
+  // serveur nomme chaque refus par un code ; ces phrases le disent
+  // dans la langue de l’apprenant (components/analysis/videoErrors.js),
+  // jamais l’anglais du serveur.
+  subtitleNotUtf8:     'Ce fichier n’est pas en UTF-8. Les .srt japonais sont souvent en Shift-JIS : réenregistre-le en UTF-8 (un éditeur de texte suffit), puis réessaie.',
+  subtitleParseFailed: 'Ce fichier de sous-titres est mal formé : impossible de le lire.',
+  subtitleUnknownFormat: 'Format de sous-titres non reconnu. Choisis un fichier SRT, VTT ou ASS.',
+  subtitleNoCues:      'Aucune réplique à lire dans ces sous-titres.',
+  transcriptNoTimestamps: 'Aucun horodatage trouvé. Copie tout le panneau de transcription de YouTube (chaque ligne doit commencer par une heure, comme 0:18).',
+  videoNotYoutube:     'Ce lien n’est pas une vidéo YouTube.',
+  videoLinkFetchOff:   'Ce serveur ne sait pas récupérer les sous-titres d’un lien. Utilise le favori 字幕取り, ou ajoute un fichier de sous-titres.',
+  videoLinkAllowanceMine: 'Tu as utilisé tes liens du jour. Ajoute un fichier de sous-titres, ou reviens demain.',
+  videoLinkAllowanceApp: 'Les liens du jour sont épuisés pour toute l’application. Ajoute un fichier de sous-titres, ou reviens demain.',
+  videoNoJapanese:     'Cette vidéo n’a pas de sous-titres japonais. Essaie une autre vidéo, ou ajoute toi-même un fichier de sous-titres.',
+  videoSubtitlesOff:   'Les sous-titres de cette vidéo sont désactivés.',
+  videoSubtitlesEmpty: 'La piste de sous-titres japonais de cette vidéo est vide.',
+  videoUnavailable:    'Cette vidéo est indisponible.',
+  videoYoutubeRefused: 'YouTube a refusé de donner les sous-titres de cette vidéo. Le favori 字幕取り ou un fichier de sous-titres passeront.',
+  videoYoutubeUnreachable: 'Impossible de joindre YouTube. Réessaie dans un instant.',
+  videoTranscriptFailed: 'La lecture de ces sous-titres a échoué. Réessaie.',
+  videoStalled:        'La préparation s’est arrêtée en route. Réessaie.',
   breakThisDown:       'Décomposer cette phrase',
   seekToSentence:      'Aller à cette phrase',
   // 案内表示 — the notices under the intake. An `info` notice is a fact

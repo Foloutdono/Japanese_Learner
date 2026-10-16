@@ -93,6 +93,15 @@ _FETCH_DAILY_CAP_PER_USER = int(os.environ.get("YOUTUBE_FETCH_DAILY_CAP_PER_USER
 
 
 
+def _refusal(status: int, code: str, message: str) -> HTTPException:
+    """A refusal the learner reads, as `detail: {code, message}` (plan
+    210). The client words the `code` in the learner's own language
+    (lib/api.js's ApiError reads it); the English `message` is for the
+    logs, the tests and anyone reading the API by hand, and never
+    reaches a screen -- it was English on a French-first app."""
+    return HTTPException(status_code=status, detail={"code": code, "message": message})
+
+
 def _optional_seconds(raw, field: str) -> float | None:
     """A Window bound the learner may simply not have given. Absent or
     blank is None ("no bound"), which is the common case -- not 0.0,
@@ -104,7 +113,7 @@ def _optional_seconds(raw, field: str) -> float | None:
     try:
         return float(raw)
     except (TypeError, ValueError):
-        raise HTTPException(status_code=400, detail=f"{field} must be a number")
+        raise _refusal(400, "bad_window", f"{field} must be a number")
 
 
 def _ensure_video_schema() -> None:
@@ -142,10 +151,21 @@ def _ensure_video_schema() -> None:
             # history's limit -- and erased a day later (core/history.py).
             # NULL is a session on the shelf. Additive and idempotent.
             cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ")
+            # Why a session failed, as a stable snake_case code the
+            # client words in the learner's language (plan 210). `error`
+            # keeps the English sentence for the logs and for the rows
+            # written before this column; NULL is such a row, and the
+            # client falls back to its own line for it. Additive.
+            cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS error_code TEXT")
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_video_sessions_user
                 ON video_sessions(user_id, created_at DESC)
             """)
+        conn.commit()
+        # One table's self-migration per transaction (CLAUDE.md): a
+        # failing ALTER above must not roll back the jobs table, nor
+        # the jobs table's the sessions'.
+        with conn.cursor() as cur:
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS video_session_jobs (
                     session_id  BIGINT PRIMARY KEY REFERENCES video_sessions(id) ON DELETE CASCADE,
@@ -168,9 +188,9 @@ except Exception:  # pragma: no cover - a missing DB must not stop import
 
 
 # ── The fetch budget, enforced ─────────────────────────────────
-def _fetch_refusal(user_id: str) -> str | None:
-    """None when a link fetch is within budget, else the sentence to
-    refuse with. Refusing is not the same as failing: every caller of
+def _fetch_refusal(user_id: str) -> tuple[str, str] | None:
+    """None when a link fetch is within budget, else the (code, sentence)
+    to refuse with -- the code is what the client words. Refusing is not the same as failing: every caller of
     this points the learner back at the two ingests that are always
     free and always work, so a spent budget costs a convenience rather
     than the feature."""
@@ -192,25 +212,27 @@ def _fetch_refusal(user_id: str) -> str | None:
 
     if mine >= _FETCH_DAILY_CAP_PER_USER:
         return (
+            "link_allowance_mine",
             "You have used today's link allowance. Add a subtitle file, "
-            "or come back tomorrow."
+            "or come back tomorrow.",
         )
     if everyone >= _FETCH_DAILY_CAP:
         return (
+            "link_allowance_app",
             "Today's link allowance for the whole app is used up. Add a "
-            "subtitle file, or come back tomorrow."
+            "subtitle file, or come back tomorrow.",
         )
     return None
 
 
 # ── The worker ─────────────────────────────────────────────────
-def _fail_session(session_id: int, message: str) -> None:
+def _fail_session(session_id: int, message: str, code: str) -> None:
     conn = db_conn()
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "UPDATE video_sessions SET status = 'failed', error = %s WHERE id = %s",
-                (message[:2000], session_id),
+                "UPDATE video_sessions SET status = 'failed', error = %s, error_code = %s WHERE id = %s",
+                (message[:2000], code, session_id),
             )
             cur.execute(
                 """
@@ -253,21 +275,24 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
         # do instead, because every one of these is recoverable by
         # adding a file.
         logger.warning("Caption fetch failed for session %s: %s", session_id, e)
-        _fail_session(session_id, str(e))
+        _fail_session(session_id, str(e), e.code)
         return
     except CaptionParseError as e:
         logger.warning("Subtitle parse failed for session %s: %s", session_id, e)
-        _fail_session(session_id, str(e))
+        _fail_session(session_id, str(e), e.code)
         return
     except Exception:  # pragma: no cover - defensive
         # The exception text is deliberately NOT stored: get_video_session
-        # hands `error` straight back to the client, and the two branches
-        # above put a sentence there that was written to be read. An
-        # arbitrary exception's str() is not that -- it can carry a driver
-        # repr or a path. The traceback is logged instead, which is where a
+        # hands `error` back to the client, and the two branches above
+        # put a sentence there that was written to be read. An arbitrary
+        # exception's str() is not that -- it can carry a driver repr or
+        # a path. The traceback is logged instead, which is where a
         # diagnosis actually comes from.
         logger.exception("Unexpected error building track for session %s", session_id)
-        _fail_session(session_id, "Something went wrong reading this transcript. Please try again.")
+        _fail_session(
+            session_id, "Something went wrong reading this transcript. Please try again.",
+            "transcript_failed",
+        )
         return
 
     # The recognised track beside a hand-written one (the grab sends
@@ -376,18 +401,20 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
             declared = None
         # Two files at most: the track and its timing.
         if declared is not None and declared > 2 * _MAX_UPLOAD_BYTES + _MULTIPART_OVERHEAD_BYTES:
-            raise HTTPException(status_code=413, detail="Subtitle file is too large")
+            raise _refusal(413, "file_too_large", "Subtitle file is too large")
         form = await request.form()
         upload = form.get("file")
         if upload is None:
-            raise HTTPException(status_code=400, detail="file is required for an upload")
+            raise _refusal(400, "file_required", "file is required for an upload")
         raw = await upload.read(_MAX_UPLOAD_BYTES + 1)
         if len(raw) > _MAX_UPLOAD_BYTES:
-            raise HTTPException(status_code=413, detail="Subtitle file is too large")
+            raise _refusal(413, "file_too_large", "Subtitle file is too large")
         try:
             content = raw.decode("utf-8")
         except UnicodeDecodeError:
-            raise HTTPException(status_code=400, detail="Subtitle file must be UTF-8 text")
+            # Shift-JIS is the usual culprit: Japanese .srt files made on
+            # Windows are often saved in it, and the client says so.
+            raise _refusal(400, "not_utf8", "Subtitle file must be UTF-8 text")
         # Optional: the recognised track of the same video, with a time
         # on every word (the grab's srv3, as VTT). Never the lines
         # studied -- only the clock they are read out on.
@@ -396,7 +423,7 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
         if timing_upload is not None and hasattr(timing_upload, "read"):
             raw_timing = await timing_upload.read(_MAX_UPLOAD_BYTES + 1)
             if len(raw_timing) > _MAX_UPLOAD_BYTES:
-                raise HTTPException(status_code=413, detail="Subtitle file is too large")
+                raise _refusal(413, "file_too_large", "Subtitle file is too large")
             timing = raw_timing.decode("utf-8", errors="replace")
         source = "upload"
         source_ref = upload.filename or "upload"
@@ -407,13 +434,13 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
             window_start = _optional_seconds(form.get("start"), "start")
             window_end = _optional_seconds(form.get("end"), "end")
         except (TypeError, ValueError):
-            raise HTTPException(status_code=400, detail="start/end must be numbers")
+            raise _refusal(400, "bad_window", "start/end must be numbers")
         filename = upload.filename
     else:
         try:
             body = await request.json()
         except Exception:
-            raise HTTPException(status_code=400, detail="Expected a JSON body or a multipart upload")
+            raise _refusal(400, "bad_body", "Expected a JSON body or a multipart upload")
         # JSON means one of two things, and which one depends on what
         # is in the body rather than on a mode flag:
         #
@@ -430,7 +457,7 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
         url = body.get("url") or ""
         video_id = parse_video_id(url)
         if url and video_id is None:
-            raise HTTPException(status_code=400, detail="Not a recognized YouTube URL")
+            raise _refusal(400, "not_youtube_url", "Not a recognized YouTube URL")
 
         if pasted:
             source = "paste"
@@ -438,26 +465,24 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
             source_ref = video_id or "paste"
         elif video_id:
             if not proxy_configured():
-                raise HTTPException(
-                    status_code=400,
-                    detail=(
-                        "This server cannot fetch subtitles from a link. Use the "
-                        "grab bookmarklet, or add a subtitle file."
-                    ),
+                raise _refusal(
+                    400, "link_fetch_disabled",
+                    "This server cannot fetch subtitles from a link. Use the "
+                    "grab bookmarklet, or add a subtitle file.",
                 )
             # Budget checked HERE rather than in the worker: a refusal
             # the learner can act on immediately beats a session that
             # spends thirty seconds to tell them the same thing.
             refusal = _fetch_refusal(user_id)
             if refusal:
-                raise HTTPException(status_code=429, detail=refusal)
+                raise _refusal(429, *refusal)
             source = "youtube"
             content = None
             source_ref = video_id
         else:
-            raise HTTPException(
-                status_code=400,
-                detail="A YouTube link or a subtitle file is required.",
+            raise _refusal(
+                400, "link_or_file_required",
+                "A YouTube link or a subtitle file is required.",
             )
         filename = None
         timing = None
@@ -465,13 +490,13 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
             window_start = _optional_seconds(body.get("start"), "start")
             window_end = _optional_seconds(body.get("end"), "end")
         except (TypeError, ValueError):
-            raise HTTPException(status_code=400, detail="start/end must be numbers")
+            raise _refusal(400, "bad_window", "start/end must be numbers")
 
     # Only a Window with BOTH bounds can be back-to-front. One bound on
     # its own ("from 2:30 on", "up to 4:00") is a perfectly good Window,
     # and no bounds at all is the default.
     if window_start is not None and window_end is not None and window_end <= window_start:
-        raise HTTPException(status_code=400, detail="end must be after start")
+        raise _refusal(400, "end_before_start", "end must be after start")
 
     # Kept in the row and the response so old sessions still read back,
     # but nothing sets it any more -- the Window is uncapped.
@@ -512,7 +537,8 @@ def _load_session(session_id: int, user_id: str) -> dict | None:
             cur.execute(
                 """
                 SELECT source, source_ref, window_start, window_end, window_capped,
-                       status, error, sentences, truncated, created_at, video_id
+                       status, error, sentences, truncated, created_at, video_id,
+                       error_code
                   FROM video_sessions
                  WHERE id = %s AND user_id = %s AND deleted_at IS NULL
                 """,
@@ -524,11 +550,12 @@ def _load_session(session_id: int, user_id: str) -> dict | None:
     if row is None:
         return None
     (source, source_ref, window_start, window_end, window_capped,
-     status, error, sentences, truncated, created_at, video_id) = row
+     status, error, sentences, truncated, created_at, video_id, error_code) = row
     return {
         "source": source, "source_ref": source_ref,
         "window_start": window_start, "window_end": window_end, "window_capped": window_capped,
-        "status": status, "error": error, "sentences": sentences, "truncated": truncated,
+        "status": status, "error": error, "error_code": error_code,
+        "sentences": sentences, "truncated": truncated,
         "created_at": created_at, "video_id": video_id,
     }
 
@@ -626,7 +653,10 @@ def get_video_session(session_id: int, user_id: str = Depends(get_user_id)):
             if job == "stale":
                 return JSONResponse(
                     status_code=503,
-                    content={"status": "failed", "error": "Generation stalled -- please try again."},
+                    content={
+                        "status": "failed", "code": "stalled",
+                        "error": "Generation stalled -- please try again.",
+                    },
                 )
             return JSONResponse(status_code=202, content={"status": "generating"})
 
@@ -635,6 +665,11 @@ def get_video_session(session_id: int, user_id: str = Depends(get_user_id)):
             status_code=503,
             content={
                 "status": "failed",
+                # What the client words (plan 210); None on a row that
+                # failed before the code was stored, which the client
+                # answers with its own line. `error` is the English
+                # sentence, kept for the logs and for an older client.
+                "code": session.get("error_code"),
                 "error": session["error"],
                 "isYoutube": session["source"] == "youtube",
             },

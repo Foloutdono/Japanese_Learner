@@ -17,7 +17,7 @@ import { authErrorMessage } from '../lib/authErrors'
 // branch — signing in as someone else is a different action, offered
 // beside this one rather than inside it.
 export function useClaim({ onDone } = {}) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
@@ -25,20 +25,21 @@ export function useClaim({ onDone } = {}) {
   const [busy, setBusy] = useState(false)
 
   // Enough to catch a typo before the round trip; the real check is
-  // Supabase's, whose message is shown verbatim when it disagrees.
+  // Supabase's, whose refusal is said through lib/authErrors.js when it
+  // disagrees.
   const filled = /.+@.+\..+/.test(email.trim()) && password.length >= 6
 
   async function submit() {
     if (!filled || busy) return
     setBusy(true)
     setError(null)
-    const r = await claimAccount({ email: email.trim(), password })
+    const r = await claimAccount({ email: email.trim(), password, lang })
     setBusy(false)
     // Through the same table the provider button's refusals go through
     // (lib/authErrors.js), and for the same reason: Supabase's own
-    // sentence is a developer's, and on this call it can quote an
-    // empty address instead of the one in the field above it.
-    if (!r.ok) { setError(authErrorMessage(r, t, r.message)); return }
+    // sentence is a developer's, in English, and on this call it can
+    // quote an empty address instead of the one in the field above it.
+    if (!r.ok) { setError(authErrorMessage(r, t)); return }
     setDone(r.needsConfirmation ? t.guestClaimConfirm : t.guestClaimDone)
     onDone?.(r)
   }

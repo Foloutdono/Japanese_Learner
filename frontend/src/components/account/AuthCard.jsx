@@ -4,6 +4,7 @@ import { useLang } from '../../LangContext'
 import { Seg } from '../chrome/Console'
 import { ProviderButton } from './ProviderButton'
 import { authRedirectError, authRedirectMessage } from '../../lib/authRedirect'
+import { authErrorMessage } from '../../lib/authErrors'
 import { playUi } from '../../lib/audio'
 
 // ── The sign-in card (plan 075; lifted out of AuthScreen, plan 122) ──
@@ -29,7 +30,7 @@ import { playUi } from '../../lib/audio'
 //                Welcome's Board did (the desk) or on the gold road
 //                round the form (a phone)
 export function AuthCard({ initialMode = 'login', autoFocus = false, seg = true, frame = null }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const [mode, setMode]         = useState(initialMode) // 'login' | 'signup'
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
@@ -59,13 +60,20 @@ export function AuthCard({ initialMode = 'login', autoFocus = false, seg = true,
     setError(null)
     setSuccess(null)
     setLoading(true)
+    // A refusal is worded from its code by the table every auth refusal
+    // goes through (lib/authErrors.js), never Supabase's own English
+    // ("Invalid login credentials", a dropped connection's "Failed to
+    // fetch"; plan 210).
     if (mode === 'signup') {
-      const { error } = await supabase.auth.signUp({ email, password })
-      if (error) setError(error.message)
+      // `lang` on the new user's metadata is what the dashboard's
+      // confirmation template branches on ({{ .Data.lang }}), so the
+      // mail is written in the language the learner signed up in.
+      const { error } = await supabase.auth.signUp({ email, password, options: { data: { lang } } })
+      if (error) setError(authErrorMessage(error, t, { form: true }))
       else setSuccess(t.signupSuccess)
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) setError(error.message)
+      if (error) setError(authErrorMessage(error, t, { form: true }))
     }
     setLoading(false)
   }
