@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { askWords, askContext, askHistory, askResetsAt, askTarget, tourAsk, MAX_HISTORY } from './ask'
+import { askWords, askContext, askHistory, askResetsAt, askTarget, tourAsk, askSuggestions, MAX_HISTORY, SUGGESTIONS } from './ask'
+import fr from '../locales/fr/index.js'
+import en from '../locales/en/index.js'
 import tours from '../testing/grammarTour.json'
 
 describe('what a question carries (plan 131)', () => {
@@ -115,5 +117,42 @@ describe('the tour’s asking (plan 204)', () => {
 
   it('keeps two points’ threads apart', () => {
     expect(tourAsk({ ...POINT, raw_id: 'grammar_N5_も' }, { stop: 'found' }).key).not.toBe(tourAsk(POINT, { stop: 'found' }).key)
+  })
+})
+
+describe('the questions offered', () => {
+  const words = ['父 (ちち): father', 'は: topic marker', '車 (くるま): car', 'で: by means of', '会社 (かいしゃ): company', 'へ: towards', '行きます (いきます): to go']
+  const ctx = askContext({ sentence: '父は車で会社へ行きます。', translation: 'My father goes to the office by car.' })
+
+  it('asks about the sentence\'s particle, its first kanji word and its register', () => {
+    expect(askSuggestions({ ...ctx, words }, en)).toEqual([
+      'Why は and not が?',
+      'Another example with 父?',
+      'How would I say it more politely?',
+    ])
+    // In the learner's language.
+    expect(askSuggestions({ ...ctx, words }, fr)[0]).toBe('Pourquoi は et pas が ?')
+  })
+
+  it('puts the point before the words, and the contrast it has for へ', () => {
+    const out = askSuggestions({ ...ctx, point: '〜へ行きます — going to', words: ['会社 (かいしゃ): company', 'へ: towards'] }, en)
+    expect(out).toEqual(['Why へ and not に?', 'How is 〜へ行きます used?', 'Another example with 会社?'])
+  })
+
+  it('offers nothing already asked, and never more than SUGGESTIONS', () => {
+    const out = askSuggestions({ ...ctx, words }, en, { asked: ['Why は and not が?', 'Another example with 父?'] })
+    expect(out).toEqual(['How would I say it more politely?', 'And casually, between friends?'])
+    expect(askSuggestions({ ...ctx, words, point: 'x' }, en).length).toBe(SUGGESTIONS)
+    // A typed question is the offer it matches, whatever its spaces and case.
+    expect(askSuggestions({ ...ctx, words }, fr, { asked: ['pourquoi は et pas が ?'] })[0]).toBe('Un autre exemple avec 父\u00A0?')
+  })
+
+  it('asks about the text\'s answer in comprehension, and not its register', () => {
+    const out = askSuggestions(askContext({ sentence: '駅で待ちました。', review: 'Where?' }), en, { text: true })
+    expect(out).toEqual(['Why is this the right answer?', 'Where does the text say it?'])
+  })
+
+  it('has its register questions to offer without a breakdown', () => {
+    expect(askSuggestions(ctx, en)).toEqual(['How would I say it more politely?', 'And casually, between friends?'])
   })
 })

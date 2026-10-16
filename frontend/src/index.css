@@ -20113,7 +20113,17 @@ button.syllabary-cell:focus-visible {
   justify-content: center;
   /* The gate grows far past the screen's edges. */
   overflow: hidden;
-  animation: gate-leave calc(140ms * var(--gate-x)) linear calc(840ms * var(--gate-x)) forwards;
+}
+/* The fade off the destination, declared as it starts (TicketGate sets
+   data-leaving at LEAVE_MS, 840ms) rather than with that delay from the
+   mount. An opacity animation on the scene, even one still waiting out
+   its delay, has the browser draw the whole scene into a texture of its
+   own and then that texture onto the screen, every frame: a second
+   full-screen pass for the whole cutscene, where a phone has no fill to
+   spare. Declared at the fade, it costs that only for the fade
+   (plan 210). */
+.gate[data-leaving] {
+  animation: gate-leave calc(140ms * var(--gate-x)) linear forwards;
 }
 .gate[data-ink="fill"] { --gate-title-ink: var(--text-on-fill); }
 .gate__scrim {
@@ -20123,10 +20133,14 @@ button.syllabary-cell:focus-visible {
   opacity: 0;
   animation: gate-scrim calc(120ms * var(--gate-x)) ease-out forwards;
 }
-/* Effectively opaque. At 0.96 in the light theme this was cream over
-   cream and the board stayed legible through it, so the gate read as
-   a panel floating on the home screen rather than as a place. */
-@keyframes gate-scrim { to { opacity: 0.995; } }
+/* Opaque. At 0.96 in the light theme this was cream over cream and the
+   board stayed legible through it, so the gate read as a panel floating
+   on the home screen rather than as a place. It was 0.995 after that,
+   which looks the same and is not the same: under a layer short of
+   opaque the browser still draws the whole screen beneath it, every
+   frame of the scene, and under an opaque one it draws nothing
+   (plan 210). */
+@keyframes gate-scrim { to { opacity: 1; } }
 @keyframes gate-leave { to { opacity: 0; } }
 
 /* The gate itself: two pillars with a lane between them. At 110vw a
@@ -20143,6 +20157,13 @@ button.syllabary-cell:focus-visible {
   /* Its own stacking context, so the sill under it (::after) stays
      over the scrim once the arrive transform has ended. */
   isolation: isolate;
+  /* Two transform animations on one box, so the browser runs neither
+     on the compositor, and that is kept on purpose. Split across two
+     boxes, both went to the compositor, which rasters every layer under
+     a zoom at the zoom's largest scale before it draws a frame: the
+     rig, its flaps, the lane and the sill at ~3.4x from the tap. Measured
+     on a phone's throttle (plan 210) that dropped more frames than the
+     main thread costs the zoom, which rasters it at its own size. */
   animation:
     arrive calc(300ms * var(--gate-x)) cubic-bezier(0.22, 0.68, 0.32, 1) backwards,
     gate-through calc(180ms * var(--gate-x)) cubic-bezier(0.6, 0, 0.9, 0.55) calc(480ms * var(--gate-x)) forwards;
@@ -31528,12 +31549,21 @@ button.brd-stn { cursor: pointer; }
   overscroll-behavior: contain;
   background: var(--bg-main);
 }
+/* The page is the window, never taller: with only a min-height, a long
+   thread grew the page past the floor, the field went with it and the
+   thread, never short of room, never scrolled. Held at the window, the
+   thread is what scrolls and the field stays on the foot. dvh, so a
+   WebView the keyboard resizes (Capacitor's native resize) shrinks it.
+   `flex: none`, or the stage's `flex: 1` takes the height for a basis
+   and sizes it by the thread again. */
 .ask-page {
   display: flex;
+  flex: none;
   flex-direction: column;
   gap: var(--sp-5);
   box-sizing: border-box;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
 }
 /* The page's ground is the field's own (--bg-main), so the field takes
    the card's, as it does on a page of cards. */
@@ -31642,6 +31672,34 @@ button.brd-stn { cursor: pointer; }
   font-size: var(--fs-caption);
   color: var(--text-secondary);
 }
+/* The questions offered, over the field (askSuggestions): a tap asks
+   one. Quiet until touched, as a chip is -- the second ink in a
+   hairline, the first on hover -- but a sentence, so it wraps and keeps
+   its case; a thumb's height each. */
+.ask__offers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  flex: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ask__offer {
+  min-height: 44px;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: var(--fs-sm);
+  text-align: start;
+  cursor: pointer;
+}
+.ask__offer:hover,
+.ask__offer:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); }
+.ask__offer:disabled { opacity: 0.45; cursor: not-allowed; }
 
 
 /* ═══ 机 — the desk (plan 113) ═══════════════════════════════════
@@ -38839,6 +38897,31 @@ button.brd-stn { cursor: pointer; }
     font-size: var(--fs-caption);
     color: var(--text-secondary);
   }
+  /* The questions offered, as the phone's page offers them (.ask__offer):
+     a hairline each, a click asks one; the column's smaller size. */
+  .desk-ask__offers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    flex: none;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .desk-ask__offer {
+    padding: var(--sp-1) var(--sp-3);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    background: none;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: var(--fs-caption);
+    text-align: start;
+    cursor: pointer;
+  }
+  .desk-ask__offer:hover,
+  .desk-ask__offer:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); }
+  .desk-ask__offer:disabled { opacity: 0.45; cursor: not-allowed; }
   /* ── 解析 — the analyser's result on three columns (plan 134) ──
      The owner's drawing (the "Choix" boards of the analyser canvas, drawn
      at 1877 × 930 as 410 | 830 | 541): the desk's rail steps aside for
