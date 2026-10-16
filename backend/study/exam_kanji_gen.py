@@ -57,8 +57,15 @@ def _build_radical_index() -> dict[int, list[str]]:
     # should look like a character the learner could plausibly
     # confuse the right one for, not an obscure character they've
     # never seen.
+    #
+    # Sorted, not the set's own order: a set of str iterates in an order
+    # that changes with every process's hash seed, and the 表記 builder
+    # shuffles each radical's list with the paper's rng -- so the same
+    # seed made different distractors on every start, and a paper was
+    # not the pure function of (exam_id, revision) it is meant to be
+    # (found by plan 221, whose seed papers are replayed).
     index: dict[int, list[str]] = {}
-    for char in _DECK_CHARS:
+    for char in sorted(_DECK_CHARS):
         info = KANJI_RADICALS.get(char)
         if not info:
             continue
