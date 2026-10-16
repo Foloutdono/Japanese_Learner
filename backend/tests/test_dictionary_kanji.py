@@ -1,6 +1,6 @@
 """The dictionary's kanji collection, over both of its pools.
 
-The app's own JLPT deck (content/kanji_data.py) is 2,212 characters,
+The app's own JLPT deck (content/kanji_data.py) is 2,383 characters,
 one entry each since plan 112 took the 23 it listed twice down to their
 lowest level. KANJIDIC2, which this repo has shipped all along, has
 13,108 — so 10,896 characters were reachable from nowhere in the app,
@@ -260,7 +260,7 @@ def test_the_readings_share_over_all_of_jmdict_is_one_cheap_route(client):
 
 def test_the_french_map_still_covers_the_deck_it_always_covered():
     """KANJI_FR was a comprehension over all 10,384 characters with a
-    French entry; it is the deck's 2,212 now, resolved in one query.
+    French entry; it is the deck's 2,383 now, resolved in one query.
     Every caller passes it to translations.get_meaning() for a DECK
     entry, and routes/translations.py already built its ENGLISH
     counterpart from the deck alone — the French map was the odd one
@@ -311,7 +311,7 @@ def test_the_exam_distractor_tables_still_cover_every_deck_character():
 def test_a_term_answers_in_either_language(client):
     """Both app languages are searched, whichever one is on screen.
 
-    璽 is "emperor's seal" in English and "sceau impérial" in French, so
+    烏 is "crow; raven" in English and "corneille; corbeau" in French, so
     it has a term in each that the other has not got. Both must find it,
     in both sessions — a learner thinks vocabulary in whichever language
     taught it to them, and the session language is a display setting,
@@ -324,12 +324,12 @@ def test_a_term_answers_in_either_language(client):
     now, so there is no half left to protect.
     """
     for lang in ("fr", "en"):
-        seal = _page(client, q="sceau", lang=lang, limit=200)
-        assert "璽" in [r["kanji"] for r in seal["results"]], lang
-        # ...and it is in the POOL half: the deck answers "sceau" too
-        # (印, 判), and those come first, which is the order the whole
-        # merge is about.
-        assert next(r for r in seal["results"] if r["kanji"] == "璽")["level"] is None
+        crow = _page(client, q="corbeau", lang=lang, limit=200)
+        assert "烏" in [r["kanji"] for r in crow["results"]], lang
+        # ...and it is in the POOL half, whichever session asked. (璽,
+        # "sceau impérial", stood here until plan 226 put it in the deck.)
+        assert next(r for r in crow["results"] if r["kanji"] == "烏")["level"] is None
+        assert "烏" in [r["kanji"] for r in _page(client, q="raven", lang=lang, limit=200)["results"]], lang
 
     # The same query, the same collection, whichever language is shown:
     # what differs between the two sessions is the gloss printed on the

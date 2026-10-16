@@ -173,6 +173,24 @@ runtime purpose.
   JMdict and Tatoeba text has its French in `datas/vocab/jmdict_fr.sqlite3`
   (plan 215); a pool word is glossed from it (`jmdict_fr.pool_meaning`),
   never from `VOCAB_FR`, which is the course's and keyed by written form.
+- **The kanji deck is the course's and the gates'.** `datas/kanji/kanji_deck.json`
+  is what each level teaches and what every kanji gate admits
+  (`llm_shared.kanji_set_for_level`), so it holds the whole jōyō list
+  (plan 226 added the 171 it lacked, 的・無・身・誰 among them). After any
+  change to it run `python -m scripts.build_kanji_db --deck-only` (the
+  database's `in_deck` and French) and `python -m scripts.build_frequency_index
+  --kanji-db` (the teaching order); a new character carries its French in
+  `kanji_meanings_fr.json` where KANJIDIC2 has none. Adding is free;
+  moving a character between levels is a migration (`kanji_renames`).
+- **An example sentence is corrected in the layer, not in JMdict (plan
+  227).** The deck's Tatoeba sentences are read through
+  `content/example_fixes.py` (`datas/vocab/example_fixes.json`): a
+  correction keeps every course word the sentence showed, carries its
+  `en`, `fr` and `why`, and is drafted and checked with
+  `python -m scripts.vocab_examples check`. A word JMdict gives no
+  sentence has two written for it (`datas/vocab/example_added.json`,
+  `check-added`: its course spelling, no kanji above its level), so every
+  card shows one; a word the deck gains is written for in the same change.
 - **A width change is held on both sides.** A desk change keeps the phone's
   DOM unchanged (`src/deskfree.phone.test.jsx`), and the short desk
   (1280×600, the `short` lane) is checked too. A phone bug fixed gets its own
@@ -347,14 +365,38 @@ python -m scripts.prewarm_exam_papers --dry-run         # one paper per exam id
 
 None of the three is what makes a fresh deploy usable: the comprehension
 pool is never empty, because `content/comprehension/*.json` (plan 111,
-three hand-written exercises per level in both languages, held to the
-same checks as a model answer by `tests/test_comprehension_seed.py`) is
+six hand-written exercises per level since plan 230, in both languages,
+held to the same checks as a model answer by
+`tests/test_comprehension_seed.py`, and served before any generated one) is
 upserted into `comprehension_pool` when `routes/reading.py` is imported,
 keyed on `seed_key` so a corrected seed updates its row. The prewarm
 scripts grow the pools past that floor; `prewarm_comprehension_pool`
-reports the seeded and the generated rows apart. Exam papers have no
-seed -- a paper is ~35 model calls -- so `prewarm_exam_papers` is the
-only thing that spares the first learner at each exam id the wait.
+reports the seeded and the generated rows apart. Exam papers have
+seeds too (plan 228): `content/exam_seed/<exam_id>.json`, ten papers
+per exam id (kind × level), stored into `exam_papers` as ordinary
+revisions of the current `generator_version` when `routes/exams.py` is
+imported (`study/exam_seed.py`, keyed on `seed_key`; a changed seed
+rewrites its row while nobody has sat it, and otherwise retires that
+revision and is stored as a new one). They are made by the generators
+themselves, with the model's replies written by Claude rather than
+bought: `scripts/exam_seed.py` replays an exam id's generator with every
+model call answered from a file, so a seed passes every check a
+generated paper does, and `tests/test_exam_seed.py` holds each exam id
+to ten complete papers whose choices' length says nothing. **A bump of
+an exam id's `generator_version` retires its seeds with its papers**:
+the test fails until they are rebuilt.
+
+```bash
+cd backend
+python -m scripts.exam_seed status                # seeds per exam id
+python -m scripts.exam_seed run n4-grammar-01     # replay; prints the next prompt to answer
+python -m scripts.exam_seed check n4-grammar-01   # what the test holds the file to
+```
+
+No seed ships its audio: a listening question's `audioSrc` names the
+clip of its own script, made on first request
+(`study/exam_audio_repair.py`); `python -m scripts.revoice_audio --yes`
+makes them all ahead of the first learner.
 
 Three are one-shots, each run once after a deploy that changed the ids a
 content set serves — `content/grammar/renames.py` for grammar points,
@@ -544,13 +586,16 @@ Since plan 218, too:
   families a year, `event_daily` 25 months (`prune_logs`); the learner reads
   theirs at `GET /api/profile/export/trail`. A new event that should outlive
   30 days goes in `KEEP_LONG`, and in `privacy.html`'s list.
-- **The dashboards are code.** Nine Metabase dashboards, each a file in
+- **The dashboards are code.** Ten Metabase dashboards, each a file in
   `docs/analytics/metabase/` (`-- ==== question` blocks), built and updated
   by `python -m scripts.metabase_sync` (report, `--check`, `--yes`; needs
   `MB_API_KEY`). Change a question there, not only in Metabase's UI. Accounts
   to leave out live in the Metabase snippet `internal_users`, not in the repo.
   A screen added to `ROUTES` goes in `02-fonctionnalites.sql`'s list too (a
-  node-lane test holds them equal).
+  node-lane test holds them equal), an event added to `EVENTS` gets a
+  question that reads it (`tests/test_metabase_sync.py`, or a reason in its
+  `UNREAD`), and a new model feature's daily cap goes in
+  `08-ia-plafonds.sql`'s `caps` list.
 
 Call `track(name, props)` from `lib/track.js`; never `fetch` an analytics
 endpoint from a screen. `track` also stamps each event with the visit's random
@@ -610,6 +655,22 @@ python -m scripts.reading_bank_report --rows N2     # each row's level words and
 python -m scripts.reading_bank_report --check rows.json  # candidate rows, before they enter the bank
 ```
 
+The comprehension seeds (plan 230) have one as well: every seed run
+through the checks a model answer must pass, plus a review of what lets
+a reader answer without reading (a right option far longer or more
+specific than the wrong ones, an option echoing its question, a quoted
+fragment the text lacks); `--draft` cuts a new text into sentences and
+glossed words to correct. It imports `routes/reading`, which opens
+`DATABASE_URL` and upserts the seeds, so point that at a scratch
+database:
+
+```bash
+cd backend
+python -m scripts.comprehension_seed_report               # every seed, and what to look at
+python -m scripts.comprehension_seed_report --check new.json  # candidates, before they enter a level file
+python -m scripts.comprehension_seed_report --draft new.json  # a breakdown to correct, as new.draft.json
+```
+
 The conversation bank (plan 217, `content/conversation/N5.json` … `N1.json`,
 its schema and style guide in that directory's README) holds itself to
 `study/conversation.problems`: every line's reading written by hand and
@@ -666,7 +727,7 @@ ledger to keep in sync and no state to corrupt. Read-only, no database, no `.env
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does
 not). `tests/test_audit_slice.py` holds the rotation to the playbook's
-promises. Vocab is the one bank too big to walk exhaustively — 8,091 entries
+promises. Vocab is the one bank too big to walk exhaustively — 7,971 entries
 at 40 a run — so its slices are ordered risk-first by the disagreements with
 JMdict the script can find on its own, and the `flags` it prints are a reason
 to look rather than findings.
@@ -726,6 +787,54 @@ writes. Its footage is uploaded to a
 public Supabase Storage bucket by file name and needs no rebuild;
 `frontend/landing/README.md` has the slots, the bucket and what changes
 when the page goes live.
+
+The **carousel studio** (plans 229–229n, `frontend/carousel/`,
+its README) draws what the app teaches (a reading-bank sentence, its
+translation, a grammar lesson, a word, a kanji, a kana, a comprehension
+passage; since plan 229m a theme's words in pictures, lookalike kanji, a
+conversation to answer and a tour's trap) as a photo carousel for a
+social feed, as one of its types (the guided walk, a mock exam, this or
+that, build it, a top five, a conversation, kanji spelling, find the
+impostor), and exports the PNGs. Since plan 231 it also draws the app
+itself as 9:16 promo stories (`promo.js`), with the app's own parts
+measured in the running app (`app.js`) and Today on the real print of
+the hour, each story's cover and its call to action also a seven-second MP4 clip;
+since plan 232 the word echo (`echo.js`), a pictured word said over and
+over for ten seconds by the app's reader, livelier (`carousel/voices/`, written
+by `python -m scripts.carousel_voices --yes`, which needs the voice
+engine: rerun it after a change of voice or of the themes); since plan 233
+ten-minute 16:9 videos for YouTube (`long.js`, made by
+`node carousel/long/render.mjs`: a vocabulary or kanji drill, one grammar
+point whole, a quiz), voiced line by line by the app's voices and mixed
+with the app's sounds and a bed of music it plays itself
+(`scripts/long_video_audio.py`), each also a source in the studio
+that previews it and gives its page and the command that makes it, and
+each also a 9:16 short under a minute, as any carousel can be too
+(`short.js`: its slides held and swiped, its line voiced). Since plan
+234 a carousel is drawn by default on one path that converts
+(`funnel.js`): the hook, the answer as the app shows it, a call to
+action that draws the feature the item comes from as a schema (never a
+figure) with two more beside it, the detail, the key points, three to
+five slides, in one of three looks (Clarté, Défi, Fiche; "Classic"
+keeps the station-plate walk); a key point is a line the bank already
+says, never one written there; a
+word in its breakdown is glossed from the deck or left bare, never
+guessed: when the app redraws one of those parts, measure it again and
+follow it, and a story promises only what the app does today. Its hand-written content (the pictures,
+the lookalike sets, the conversations) is `frontend/carousel/content/`;
+a conversation's every line carries its furigana and its romaji. A point is explained in its own
+sentence, a particle by the one sense it has there (`explain.js`); its
+questions (`quizzes.js`) deal a wrong answer only where it cannot be
+right too, and none is answered on the slide that asks it; a sentence's
+carousel asks none after its call to action, where every word of the
+sentence is glossed instead. A slide fits its text to the format's safe area rather than
+let it overflow (its README, "Nothing leaves the frame"): a new slide
+kind, ending or label is fitted the same way. Like the landing page it
+is a static page outside `src/` and never ships. Its data is `frontend/carousel/bank/*.json`, written by
+`python -m scripts.carousel_bank` (backend, needs the tokenizer and the
+JMdict database): rerun it after a change to the reading bank, the deck,
+the kanji, the catalogue or its tours, the comprehension seeds, the
+theme decks or `frontend/carousel/content/`, and commit the files.
 
 `npm run lint` is not the whole lint story: `npm run lint:css` (stylelint,
 ratcheted against a checked-in baseline) and `npm run lint:scale` (a

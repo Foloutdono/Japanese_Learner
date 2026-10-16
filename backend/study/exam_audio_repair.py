@@ -31,7 +31,6 @@ import re
 import threading
 import time
 
-from core.db import db_conn
 from study import dictation
 from study.exam_tts import TTSFailed, audio_dir, content_key, is_current, synthesize_dialogue
 
@@ -134,9 +133,16 @@ def _turns_for_clip(filename: str, key: str) -> list[dict] | None:
     it was first synthesized.
 
     The LIKE scan reads every paper row. That is fine here and nowhere
-    else: exam_papers holds a handful of rows per exam id, and this runs
+    else: exam_papers holds a few dozen rows per exam id at most (ten
+    seeds, plan 228, and what learners asked past them), and this runs
     only when a file is actually missing. `filename` is checked against
     _CLIP_NAME before it gets here, so it carries no LIKE wildcards."""
+    # Imported here rather than at the top: core.db opens its pool on
+    # import, and the pure helpers below (turns_from_script,
+    # questions_with_audio) are read by scripts that have no database
+    # (scripts/exam_seed.py, plan 228).
+    from core.db import db_conn
+
     src = f"/exam-audio/{filename}"
     conn = db_conn()
     try:

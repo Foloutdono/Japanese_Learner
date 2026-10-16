@@ -174,14 +174,17 @@ class DeckAlignmentTests(unittest.TestCase):
             self.assertEqual(_flat(align_deck(text, reading)), expected, text)
 
     def test_a_kanji_the_deck_does_not_teach_reads_from_kanjidic(self) -> None:
-        # 身 and 的 are jōyō kanji the deck has no card for, and with no
+        # 蟹 and 鰻 are kanji the deck has no card for, and with no
         # readings to try every word containing one came back undivided.
+        # (身 and 的 stood here until plan 226 put them in the deck.)
         from content.kanji_data import KANJI_BY_LEVEL
 
         taught = {e["kanji"] for entries in KANJI_BY_LEVEL.values() for e in entries}
-        self.assertNotIn("身", taught, "pick another untaught kanji for this test")
-        self.assertEqual(_flat(align_deck("独身", "どくしん")), [("独", "どく"), ("身", "しん")])
-        self.assertEqual(_flat(align_deck("目的", "もくてき")), [("目", "もく"), ("的", "てき")])
+        for char in "蟹鰻":
+            self.assertNotIn(char, taught, "pick another untaught kanji for this test")
+        self.assertEqual(_flat(align_deck("蟹座", "かにざ")), [("蟹", "かに"), ("座", "ざ")])
+        self.assertEqual(_flat(align_deck("鰻屋", "うなぎや")), [("鰻", "うなぎ"), ("屋", "や")])
+        self.assertEqual(_flat(align_deck("毛蟹", "けがに")), [("毛", "け"), ("蟹", "がに")])
 
     def test_a_reading_that_belongs_to_the_whole_word_stays_whole(self) -> None:
         # 熟字訓: け is no reading of 今, and no rule may pretend it is.

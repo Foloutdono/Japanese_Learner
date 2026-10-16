@@ -170,6 +170,12 @@ def _migrate_to_revisions(cur) -> None:
         ON exam_attempts(exam_id, revision, user_id)
     """)
 
+    # The seed papers' identity (plan 228, study/exam_seed.py). Unique,
+    # and NULL for every generated paper: Postgres treats NULLs as
+    # distinct in a unique index, so generated rows never collide.
+    cur.execute("ALTER TABLE exam_papers ADD COLUMN IF NOT EXISTS seed_key TEXT")
+    cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS exam_papers_seed ON exam_papers (seed_key)")
+
     cur.execute("""
         SELECT 1 FROM pg_constraint
          WHERE conrelid = 'exam_attempts'::regclass AND contype = 'f'

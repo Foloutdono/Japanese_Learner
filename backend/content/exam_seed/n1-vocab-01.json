@@ -1,0 +1,6616 @@
+{
+ "examId": "n1-vocab-01",
+ "generatorVersion": "vocab-gen-1",
+ "papers": [
+  {
+   "n": 1,
+   "seed": 8640217356689549652,
+   "paper": {
+    "level": "N1",
+    "title": "N1 Vocabulary Practice",
+    "titleJp": "N1 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 39,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "革命",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "かくみょう"
+           },
+           {
+            "id": "c2",
+            "textJp": "かくめい"
+           },
+           {
+            "id": "c3",
+            "textJp": "がくめい"
+           },
+           {
+            "id": "c4",
+            "textJp": "かぐめい"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "粥",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "かゆ"
+           },
+           {
+            "id": "c2",
+            "textJp": "じゅく"
+           },
+           {
+            "id": "c3",
+            "textJp": "かや"
+           },
+           {
+            "id": "c4",
+            "textJp": "こゆ"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "限定",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "げんでい"
+           },
+           {
+            "id": "c2",
+            "textJp": "げんてい"
+           },
+           {
+            "id": "c3",
+            "textJp": "げんじょう"
+           },
+           {
+            "id": "c4",
+            "textJp": "けんてい"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "私物",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "しぶつ"
+           },
+           {
+            "id": "c2",
+            "textJp": "しふつ"
+           },
+           {
+            "id": "c3",
+            "textJp": "しもつ"
+           },
+           {
+            "id": "c4",
+            "textJp": "しぶづ"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "期末",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ごまつ"
+           },
+           {
+            "id": "c2",
+            "textJp": "きすえ"
+           },
+           {
+            "id": "c3",
+            "textJp": "きまつ"
+           },
+           {
+            "id": "c4",
+            "textJp": "きまづ"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "中立",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぢゅうりつ"
+           },
+           {
+            "id": "c2",
+            "textJp": "ちゅうりつ"
+           },
+           {
+            "id": "c3",
+            "textJp": "ちゅうりづ"
+           },
+           {
+            "id": "c4",
+            "textJp": "ちゅりつ"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "親に対する子どもの＿＿＿＿が大きくなればなるほど子どもを育てるのは難しくなる。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "仏"
+           },
+           {
+            "id": "c2",
+            "textJp": "主人公"
+           },
+           {
+            "id": "c3",
+            "textJp": "蔵"
+           },
+           {
+            "id": "c4",
+            "textJp": "比率"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "一時は大人気だったそのブームも、今ではすっかり＿＿＿＿になった。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "採算"
+           },
+           {
+            "id": "c2",
+            "textJp": "下火"
+           },
+           {
+            "id": "c3",
+            "textJp": "壷"
+           },
+           {
+            "id": "c4",
+            "textJp": "与党"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "同書を一部ご＿＿＿＿いただければ幸いに存じます。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "寄贈"
+           },
+           {
+            "id": "c2",
+            "textJp": "墜落"
+           },
+           {
+            "id": "c3",
+            "textJp": "導く"
+           },
+           {
+            "id": "c4",
+            "textJp": "採集"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "その＿＿＿＿工場を建てるのは非常に大変な事業だった。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "製鉄"
+           },
+           {
+            "id": "c2",
+            "textJp": "整列"
+           },
+           {
+            "id": "c3",
+            "textJp": "転居"
+           },
+           {
+            "id": "c4",
+            "textJp": "交渉"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "雲の＿＿＿＿から、日の光が差し込んできた。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "切れ目"
+           },
+           {
+            "id": "c2",
+            "textJp": "勧め"
+           },
+           {
+            "id": "c3",
+            "textJp": "皇居"
+           },
+           {
+            "id": "c4",
+            "textJp": "お休み"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q6",
+          "number": 6,
+          "promptJp": "犯人は、銀行員になりすまして電話をかけるという新しい＿＿＿＿で、多くの人をだました。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "手法"
+           },
+           {
+            "id": "c2",
+            "textJp": "悪日"
+           },
+           {
+            "id": "c3",
+            "textJp": "ニュアンス"
+           },
+           {
+            "id": "c4",
+            "textJp": "満月"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q7",
+          "number": 7,
+          "promptJp": "まさかのときに備えて＿＿＿＿せよ。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "漂流"
+           },
+           {
+            "id": "c2",
+            "textJp": "貯蓄"
+           },
+           {
+            "id": "c3",
+            "textJp": "退屈"
+           },
+           {
+            "id": "c4",
+            "textJp": "開幕"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "十年後に人口が半分になるという学者の予言は、残念ながら現実のものとなった。",
+          "underlineJp": "予言",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "予測"
+           },
+           {
+            "id": "c2",
+            "textJp": "宣言"
+           },
+           {
+            "id": "c3",
+            "textJp": "証言"
+           },
+           {
+            "id": "c4",
+            "textJp": "伝言"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "明日は始発に乗らないと、九時の会議に間に合わない。",
+          "underlineJp": "始発",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "終電"
+           },
+           {
+            "id": "c2",
+            "textJp": "一番電車"
+           },
+           {
+            "id": "c3",
+            "textJp": "急行"
+           },
+           {
+            "id": "c4",
+            "textJp": "夜行列車"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "行き詰まった事態の打開を目指して、両国の首脳が直接会談した。",
+          "underlineJp": "打開",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "悪化"
+           },
+           {
+            "id": "c2",
+            "textJp": "把握"
+           },
+           {
+            "id": "c3",
+            "textJp": "解決"
+           },
+           {
+            "id": "c4",
+            "textJp": "長期化"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "自分が皿を割ったのに、弟は澄ました顔でテレビを見ている。",
+          "underlineJp": "澄ました",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "気まずそうな"
+           },
+           {
+            "id": "c2",
+            "textJp": "青ざめた"
+           },
+           {
+            "id": "c3",
+            "textJp": "得意げな"
+           },
+           {
+            "id": "c4",
+            "textJp": "平気な"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "会議の司会者は、出席者に発言を促した。",
+          "underlineJp": "促した",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "求めた"
+           },
+           {
+            "id": "c2",
+            "textJp": "禁じた"
+           },
+           {
+            "id": "c3",
+            "textJp": "許可した"
+           },
+           {
+            "id": "c4",
+            "textJp": "断った"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "課長は、部下の失敗をかばってくれた。",
+          "underlineJp": "部下",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "自分の上に立つ人"
+           },
+           {
+            "id": "c2",
+            "textJp": "取引先の担当者"
+           },
+           {
+            "id": "c3",
+            "textJp": "自分の下で働く人"
+           },
+           {
+            "id": "c4",
+            "textJp": "同じ時期に入った人"
+           }
+          ],
+          "answer": "c3"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　つかいかたで　もっとも　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the sentence that uses the word correctly.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "対応",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "彼は駅の改札で、昔の友人と偶然対応した。"
+           },
+           {
+            "id": "c2",
+            "textJp": "毎朝ジョギングをして、体を対応している。"
+           },
+           {
+            "id": "c3",
+            "textJp": "会議の資料を、昨夜遅くまでかかって対応した。"
+           },
+           {
+            "id": "c4",
+            "textJp": "お問い合わせには、係の者が対応いたします。"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "修了",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "今日の会議は、予定より一時間も早く、五時に修了した。"
+           },
+           {
+            "id": "c2",
+            "textJp": "彼女は大学院の博士課程を修了し、研究者になった。"
+           },
+           {
+            "id": "c3",
+            "textJp": "壊れた自転車を、近所の店で修了してもらった。"
+           },
+           {
+            "id": "c4",
+            "textJp": "長い冬が修了して、ようやく春が来た。"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "戦術",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "医者は、患者の病気を治すために難しい戦術を行った。"
+           },
+           {
+            "id": "c2",
+            "textJp": "この国は、長い戦術の末にようやく平和を取り戻した。"
+           },
+           {
+            "id": "c3",
+            "textJp": "監督は、相手チームの弱点をついた戦術で試合に臨んだ。"
+           },
+           {
+            "id": "c4",
+            "textJp": "彼女は幼いころから、ピアノの戦術を学んでいる。"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_4_q4",
+          "number": 4,
+          "promptJp": "重役",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "この荷物はかなり重役なので、二人で運んでください。"
+           },
+           {
+            "id": "c2",
+            "textJp": "風邪が重役になって、一週間入院した。"
+           },
+           {
+            "id": "c3",
+            "textJp": "彼は四十代の若さで、会社の重役に選ばれた。"
+           },
+           {
+            "id": "c4",
+            "textJp": "この問題は、国にとって重役な課題だ。"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_4_q5",
+          "number": 5,
+          "promptJp": "意向",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "彼女の意向は、背が高くてやさしい男性だ。"
+           },
+           {
+            "id": "c2",
+            "textJp": "住民の意向を確かめたうえで、計画を進めるべきだ。"
+           },
+           {
+            "id": "c3",
+            "textJp": "彼は意向が強く、最後まであきらめなかった。"
+           },
+           {
+            "id": "c4",
+            "textJp": "来週から、本社の機能を新しいビルへ意向することになった。"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_4_q6",
+          "number": 6,
+          "promptJp": "派遣",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "大切な書類を、郵便で取引先に派遣した。"
+           },
+           {
+            "id": "c2",
+            "textJp": "長年の研究の結果、新しい薬が派遣された。"
+           },
+           {
+            "id": "c3",
+            "textJp": "毎朝、子どもを幼稚園まで車で派遣している。"
+           },
+           {
+            "id": "c4",
+            "textJp": "被災地に、救助隊が派遣された。"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 2,
+   "seed": 1685729980124051159,
+   "paper": {
+    "level": "N1",
+    "title": "N1 Vocabulary Practice",
+    "titleJp": "N1 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 39,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "前途",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぜんと"
+           },
+           {
+            "id": "c2",
+            "textJp": "ぜんとう"
+           },
+           {
+            "id": "c3",
+            "textJp": "せんと"
+           },
+           {
+            "id": "c4",
+            "textJp": "ぜんど"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "傑",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "けづ"
+           },
+           {
+            "id": "c2",
+            "textJp": "けつ"
+           },
+           {
+            "id": "c3",
+            "textJp": "げつ"
+           },
+           {
+            "id": "c4",
+            "textJp": "かつ"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "成熟",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "じょうじゅく"
+           },
+           {
+            "id": "c2",
+            "textJp": "せじゅく"
+           },
+           {
+            "id": "c3",
+            "textJp": "せいしゅく"
+           },
+           {
+            "id": "c4",
+            "textJp": "せいじゅく"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "人目",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "じんめ"
+           },
+           {
+            "id": "c2",
+            "textJp": "にんもく"
+           },
+           {
+            "id": "c3",
+            "textJp": "ひとみ"
+           },
+           {
+            "id": "c4",
+            "textJp": "ひとめ"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "近付く",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ちかづぐ"
+           },
+           {
+            "id": "c2",
+            "textJp": "ちかづく"
+           },
+           {
+            "id": "c3",
+            "textJp": "ちかつく"
+           },
+           {
+            "id": "c4",
+            "textJp": "ちかよる"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "徴収",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ちょうしゅ"
+           },
+           {
+            "id": "c2",
+            "textJp": "ちょうじゅう"
+           },
+           {
+            "id": "c3",
+            "textJp": "ちょしゅう"
+           },
+           {
+            "id": "c4",
+            "textJp": "ちょうしゅう"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "彼の＿＿＿＿の悪い発言で、抗議が一層激しくなった。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "単"
+           },
+           {
+            "id": "c2",
+            "textJp": "不当"
+           },
+           {
+            "id": "c3",
+            "textJp": "意地"
+           },
+           {
+            "id": "c4",
+            "textJp": "盾"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "彼らは＿＿＿＿された宝物を求めて砂漠を探検した。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "衰退"
+           },
+           {
+            "id": "c2",
+            "textJp": "埋蔵"
+           },
+           {
+            "id": "c3",
+            "textJp": "沈黙"
+           },
+           {
+            "id": "c4",
+            "textJp": "着陸"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "くれぐれもお体を＿＿＿＿。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "お元気に"
+           },
+           {
+            "id": "c2",
+            "textJp": "お気の毒に"
+           },
+           {
+            "id": "c3",
+            "textJp": "お見事に"
+           },
+           {
+            "id": "c4",
+            "textJp": "お大事に"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "彼は私を違った＿＿＿＿から見るようになった。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "語彙"
+           },
+           {
+            "id": "c2",
+            "textJp": "戸"
+           },
+           {
+            "id": "c3",
+            "textJp": "観点"
+           },
+           {
+            "id": "c4",
+            "textJp": "受け入れ"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "留学の経験を＿＿＿＿、通訳の仕事を始めた。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "仕えて"
+           },
+           {
+            "id": "c2",
+            "textJp": "生かして"
+           },
+           {
+            "id": "c3",
+            "textJp": "下調べして"
+           },
+           {
+            "id": "c4",
+            "textJp": "破壊して"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q6",
+          "number": 6,
+          "promptJp": "ようやく各店舗に監視カメラが＿＿＿＿されることになった。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "沈没"
+           },
+           {
+            "id": "c2",
+            "textJp": "閉口"
+           },
+           {
+            "id": "c3",
+            "textJp": "着席"
+           },
+           {
+            "id": "c4",
+            "textJp": "設置"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q7",
+          "number": 7,
+          "promptJp": "温度計や気圧計などの＿＿＿＿を使って、天気の変化を調べる。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "目論見"
+           },
+           {
+            "id": "c2",
+            "textJp": "溝"
+           },
+           {
+            "id": "c3",
+            "textJp": "計器"
+           },
+           {
+            "id": "c4",
+            "textJp": "熱意"
+           }
+          ],
+          "answer": "c3"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "このホテルは、客の要望に柔軟に対応してくれる。",
+          "underlineJp": "対応して",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "逆らって"
+           },
+           {
+            "id": "c2",
+            "textJp": "応じて"
+           },
+           {
+            "id": "c3",
+            "textJp": "気づいて"
+           },
+           {
+            "id": "c4",
+            "textJp": "甘えて"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "彼女は来月、初めてソロでコンサートを開く。",
+          "underlineJp": "ソロ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "合同"
+           },
+           {
+            "id": "c2",
+            "textJp": "無料"
+           },
+           {
+            "id": "c3",
+            "textJp": "一人"
+           },
+           {
+            "id": "c4",
+            "textJp": "野外"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "会社の規定により、出張費は後日まとめて支払われる。",
+          "underlineJp": "規定",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "都合"
+           },
+           {
+            "id": "c2",
+            "textJp": "伝統"
+           },
+           {
+            "id": "c3",
+            "textJp": "予算"
+           },
+           {
+            "id": "c4",
+            "textJp": "決まり"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "この施設では、家庭で暮らせない子どもたちを養護している。",
+          "underlineJp": "養護",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "保護"
+           },
+           {
+            "id": "c2",
+            "textJp": "指導"
+           },
+           {
+            "id": "c3",
+            "textJp": "監視"
+           },
+           {
+            "id": "c4",
+            "textJp": "募集"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "エアコンの修理を業者に頼んだ。",
+          "underlineJp": "業者",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "家の持ち主"
+           },
+           {
+            "id": "c2",
+            "textJp": "専門の会社"
+           },
+           {
+            "id": "c3",
+            "textJp": "近所の知人"
+           },
+           {
+            "id": "c4",
+            "textJp": "会社の同僚"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "この薬には、痛みを和らげる効果がある。",
+          "underlineJp": "和らげる",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "引き起こす"
+           },
+           {
+            "id": "c2",
+            "textJp": "確かめる"
+           },
+           {
+            "id": "c3",
+            "textJp": "長引かせる"
+           },
+           {
+            "id": "c4",
+            "textJp": "軽くする"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　つかいかたで　もっとも　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the sentence that uses the word correctly.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "運搬",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "工事に使う大量の土砂を、トラックで運搬した。"
+           },
+           {
+            "id": "c2",
+            "textJp": "今年は運搬がよく、商店街のくじで一等が当たった。"
+           },
+           {
+            "id": "c3",
+            "textJp": "会議の内容を、部長に口頭で運搬した。"
+           },
+           {
+            "id": "c4",
+            "textJp": "彼は、けがをした友人を背中に運搬して病院まで歩いた。"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "心掛け",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "彼の心掛けは、将来は父と同じように医者になることだ。"
+           },
+           {
+            "id": "c2",
+            "textJp": "壁に絵を飾るための心掛けを取り付けた。"
+           },
+           {
+            "id": "c3",
+            "textJp": "急に心掛けが痛くなって、病院へ行った。"
+           },
+           {
+            "id": "c4",
+            "textJp": "毎日少しずつでも貯金するとは、よい心掛けだ。"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "切ない",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "このナイフはよく切ないので、新しいのを買った。"
+           },
+           {
+            "id": "c2",
+            "textJp": "遠く離れた家族のことを思うと、切ない気持ちになる。"
+           },
+           {
+            "id": "c3",
+            "textJp": "この肉はとても切なくて、なかなかかみ切れない。"
+           },
+           {
+            "id": "c4",
+            "textJp": "時間が切ないので、急いでください。"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_4_q4",
+          "number": 4,
+          "promptJp": "真下",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "彼は真下な人で、うそをついたことが一度もない。"
+           },
+           {
+            "id": "c2",
+            "textJp": "この道を真下に進むと、駅に着きます。"
+           },
+           {
+            "id": "c3",
+            "textJp": "私の部屋の真下には、大家さんが住んでいる。"
+           },
+           {
+            "id": "c4",
+            "textJp": "テストの点数は、クラスで真下だった。"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_4_q5",
+          "number": 5,
+          "promptJp": "如何にも",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "試験まで、如何にも一週間しかない。"
+           },
+           {
+            "id": "c2",
+            "textJp": "如何にもがんばったが、試合には負けてしまった。"
+           },
+           {
+            "id": "c3",
+            "textJp": "その言い訳は、如何にも彼が言いそうなことだ。"
+           },
+           {
+            "id": "c4",
+            "textJp": "たとえ如何にも反対されても、私はこの計画をやめない。"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_4_q6",
+          "number": 6,
+          "promptJp": "逃亡",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "財布をどこかで逃亡してしまい、交番に届けた。"
+           },
+           {
+            "id": "c2",
+            "textJp": "刑務所から逃亡した男が、三日後に逮捕された。"
+           },
+           {
+            "id": "c3",
+            "textJp": "選手たちは、ゴールに向かって全力で逃亡した。"
+           },
+           {
+            "id": "c4",
+            "textJp": "楽しい時間が逃亡するのは早いものだ。"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 3,
+   "seed": 2336039846926595060,
+   "paper": {
+    "level": "N1",
+    "title": "N1 Vocabulary Practice",
+    "titleJp": "N1 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 39,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "民俗",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "みんそく"
+           },
+           {
+            "id": "c2",
+            "textJp": "みんぞく"
+           },
+           {
+            "id": "c3",
+            "textJp": "びんぞく"
+           },
+           {
+            "id": "c4",
+            "textJp": "みんぞぐ"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "任す",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "にんす"
+           },
+           {
+            "id": "c2",
+            "textJp": "まがす"
+           },
+           {
+            "id": "c3",
+            "textJp": "まかす"
+           },
+           {
+            "id": "c4",
+            "textJp": "まかず"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "辿り着く",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "たどりきる"
+           },
+           {
+            "id": "c2",
+            "textJp": "たどりつく"
+           },
+           {
+            "id": "c3",
+            "textJp": "たどりちゃく"
+           },
+           {
+            "id": "c4",
+            "textJp": "たどりづく"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "定まる",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "さたまる"
+           },
+           {
+            "id": "c2",
+            "textJp": "ていまる"
+           },
+           {
+            "id": "c3",
+            "textJp": "さだまる"
+           },
+           {
+            "id": "c4",
+            "textJp": "ざだまる"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "判決",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ばんけつ"
+           },
+           {
+            "id": "c2",
+            "textJp": "はんけつ"
+           },
+           {
+            "id": "c3",
+            "textJp": "はんげつ"
+           },
+           {
+            "id": "c4",
+            "textJp": "はんけい"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "携わる",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "たずさえる"
+           },
+           {
+            "id": "c2",
+            "textJp": "たずわる"
+           },
+           {
+            "id": "c3",
+            "textJp": "たずさわる"
+           },
+           {
+            "id": "c4",
+            "textJp": "たずさる"
+           }
+          ],
+          "answer": "c3"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "両国の関係改善に向けた＿＿＿＿は遅いが、確実に進んでいる。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "見地"
+           },
+           {
+            "id": "c2",
+            "textJp": "年号"
+           },
+           {
+            "id": "c3",
+            "textJp": "証拠"
+           },
+           {
+            "id": "c4",
+            "textJp": "歩み"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "これで彼女も＿＿＿＿だろう。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "涸れる"
+           },
+           {
+            "id": "c2",
+            "textJp": "懲りる"
+           },
+           {
+            "id": "c3",
+            "textJp": "沈殿"
+           },
+           {
+            "id": "c4",
+            "textJp": "漏れる"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "彼女は＿＿＿＿してパーティーに出かけて行った。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "暗示"
+           },
+           {
+            "id": "c2",
+            "textJp": "整列"
+           },
+           {
+            "id": "c3",
+            "textJp": "盛装"
+           },
+           {
+            "id": "c4",
+            "textJp": "革新"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "私たちはとても＿＿＿＿な討論をした。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "小柄"
+           },
+           {
+            "id": "c2",
+            "textJp": "活発"
+           },
+           {
+            "id": "c3",
+            "textJp": "優美"
+           },
+           {
+            "id": "c4",
+            "textJp": "情緒"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "これが最近＿＿＿＿の服ですか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "残酷"
+           },
+           {
+            "id": "c2",
+            "textJp": "レギュラー"
+           },
+           {
+            "id": "c3",
+            "textJp": "流行"
+           },
+           {
+            "id": "c4",
+            "textJp": "独自"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_2_q6",
+          "number": 6,
+          "promptJp": "彼は私の話を途中で＿＿＿＿、自分の意見を言い始めた。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "遮って"
+           },
+           {
+            "id": "c2",
+            "textJp": "励まして"
+           },
+           {
+            "id": "c3",
+            "textJp": "耕して"
+           },
+           {
+            "id": "c4",
+            "textJp": "賄って"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q7",
+          "number": 7,
+          "promptJp": "年来の経済病には＿＿＿＿にきく万能薬などありません。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "手軽"
+           },
+           {
+            "id": "c2",
+            "textJp": "難い"
+           },
+           {
+            "id": "c3",
+            "textJp": "無言"
+           },
+           {
+            "id": "c4",
+            "textJp": "闇"
+           }
+          ],
+          "answer": "c1"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "この映画の原作は、百年前に書かれた小説だ。",
+          "underlineJp": "原作",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "最初の公開"
+           },
+           {
+            "id": "c2",
+            "textJp": "もとの作品"
+           },
+           {
+            "id": "c3",
+            "textJp": "続きの作品"
+           },
+           {
+            "id": "c4",
+            "textJp": "主演の俳優"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "会議の途中で、彼はこっそり部屋を抜け出した。",
+          "underlineJp": "抜け出した",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "のぞいた"
+           },
+           {
+            "id": "c2",
+            "textJp": "片付けた"
+           },
+           {
+            "id": "c3",
+            "textJp": "離れた"
+           },
+           {
+            "id": "c4",
+            "textJp": "見回した"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "話を切り出すタイミングが、なかなかつかめない。",
+          "underlineJp": "タイミング",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "方法"
+           },
+           {
+            "id": "c2",
+            "textJp": "相手"
+           },
+           {
+            "id": "c3",
+            "textJp": "雰囲気"
+           },
+           {
+            "id": "c4",
+            "textJp": "機会"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "あの連中とは、あまり関わらないほうがいい。",
+          "underlineJp": "連中",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "人たち"
+           },
+           {
+            "id": "c2",
+            "textJp": "事件"
+           },
+           {
+            "id": "c3",
+            "textJp": "計画"
+           },
+           {
+            "id": "c4",
+            "textJp": "うわさ"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "古い木の床が、歩くたびにきしむ。",
+          "underlineJp": "きしむ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "大きく揺れる"
+           },
+           {
+            "id": "c2",
+            "textJp": "ぎしぎし鳴る"
+           },
+           {
+            "id": "c3",
+            "textJp": "少し沈み込む"
+           },
+           {
+            "id": "c4",
+            "textJp": "ほこりが立つ"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "配る前の資料にミスプリントが見つかったので、刷り直した。",
+          "underlineJp": "ミスプリント",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "盗用"
+           },
+           {
+            "id": "c2",
+            "textJp": "矛盾"
+           },
+           {
+            "id": "c3",
+            "textJp": "誤植"
+           },
+           {
+            "id": "c4",
+            "textJp": "空白"
+           }
+          ],
+          "answer": "c3"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　つかいかたで　もっとも　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the sentence that uses the word correctly.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "写し",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "鏡に映った自分の写しを見て、髪を直した。"
+           },
+           {
+            "id": "c2",
+            "textJp": "旅行先で撮った写しを、友人に見せた。"
+           },
+           {
+            "id": "c3",
+            "textJp": "申込書を出す前に、念のため写しを取っておいた。"
+           },
+           {
+            "id": "c4",
+            "textJp": "風邪の写しを防ぐため、マスクをつけた。"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "タイマー",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "腕のタイマーを見ると、もう三時を過ぎていた。"
+           },
+           {
+            "id": "c2",
+            "textJp": "料理中に忘れないよう、タイマーを五分にセットした。"
+           },
+           {
+            "id": "c3",
+            "textJp": "彼はいつも、話しかけるタイマーが悪い。"
+           },
+           {
+            "id": "c4",
+            "textJp": "毎朝同じタイマーに起きるようにしている。"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "棄権",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "危ないので、その道を通るのは棄権したほうがいい。"
+           },
+           {
+            "id": "c2",
+            "textJp": "使わなくなった古い家具を、まとめて棄権した。"
+           },
+           {
+            "id": "c3",
+            "textJp": "大切な約束を棄権して、友人を怒らせてしまった。"
+           },
+           {
+            "id": "c4",
+            "textJp": "足をけがしたため、彼は決勝戦を棄権した。"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_4_q4",
+          "number": 4,
+          "promptJp": "他意",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "彼は、遠い他意の国から来た留学生だ。"
+           },
+           {
+            "id": "c2",
+            "textJp": "あの発言に他意はなかったが、彼女を傷つけてしまった。"
+           },
+           {
+            "id": "c3",
+            "textJp": "この問題には、他意の解き方もある。"
+           },
+           {
+            "id": "c4",
+            "textJp": "会議では、自分と立場の違う他意の人の意見もよく聞くべきだ。"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_4_q5",
+          "number": 5,
+          "promptJp": "茶の間",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "駅前の茶の間で、友人とコーヒーを飲んだ。"
+           },
+           {
+            "id": "c2",
+            "textJp": "仕事の合間の茶の間に、同僚とお菓子を食べた。"
+           },
+           {
+            "id": "c3",
+            "textJp": "夕食後は、家族で茶の間に集まる。"
+           },
+           {
+            "id": "c4",
+            "textJp": "お客さんに、温かい茶の間を一杯出した。"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_4_q6",
+          "number": 6,
+          "promptJp": "提示",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "宿題は、明日の朝までに先生に提示してください。"
+           },
+           {
+            "id": "c2",
+            "textJp": "今日は仕事が少なかったので、提示に帰ることができた。"
+           },
+           {
+            "id": "c3",
+            "textJp": "体の具合が悪かったので、医者に薬を提示してもらった。"
+           },
+           {
+            "id": "c4",
+            "textJp": "入場の際は、受付で会員証を提示してください。"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 4,
+   "seed": 7607415229759231201,
+   "paper": {
+    "level": "N1",
+    "title": "N1 Vocabulary Practice",
+    "titleJp": "N1 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 39,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "労る",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ねぎらう"
+           },
+           {
+            "id": "c2",
+            "textJp": "いたわる"
+           },
+           {
+            "id": "c3",
+            "textJp": "いだわる"
+           },
+           {
+            "id": "c4",
+            "textJp": "いたる"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "正規",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぜいき"
+           },
+           {
+            "id": "c2",
+            "textJp": "しょうき"
+           },
+           {
+            "id": "c3",
+            "textJp": "せいぎ"
+           },
+           {
+            "id": "c4",
+            "textJp": "せいき"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "切開",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "せっかい"
+           },
+           {
+            "id": "c2",
+            "textJp": "さいかい"
+           },
+           {
+            "id": "c3",
+            "textJp": "せかい"
+           },
+           {
+            "id": "c4",
+            "textJp": "ぜっかい"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "終始",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "しゅうじ"
+           },
+           {
+            "id": "c2",
+            "textJp": "しゅうし"
+           },
+           {
+            "id": "c3",
+            "textJp": "しゅし"
+           },
+           {
+            "id": "c4",
+            "textJp": "じゅうし"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "手掛かり",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "てががり"
+           },
+           {
+            "id": "c2",
+            "textJp": "てかかり"
+           },
+           {
+            "id": "c3",
+            "textJp": "でがかり"
+           },
+           {
+            "id": "c4",
+            "textJp": "てがかり"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "連日",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "れんじづ"
+           },
+           {
+            "id": "c2",
+            "textJp": "れんしつ"
+           },
+           {
+            "id": "c3",
+            "textJp": "れんじつ"
+           },
+           {
+            "id": "c4",
+            "textJp": "れんにち"
+           }
+          ],
+          "answer": "c3"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "決勝で敗れた瞬間、彼は＿＿＿＿とひざをついた。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "がっくり"
+           },
+           {
+            "id": "c2",
+            "textJp": "しっとり"
+           },
+           {
+            "id": "c3",
+            "textJp": "さっぱり"
+           },
+           {
+            "id": "c4",
+            "textJp": "すっきり"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "経済学は経済の＿＿＿＿を研究する学問である。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "割"
+           },
+           {
+            "id": "c2",
+            "textJp": "物議"
+           },
+           {
+            "id": "c3",
+            "textJp": "タイム"
+           },
+           {
+            "id": "c4",
+            "textJp": "仕組み"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "彼の不注意な運転が事故を＿＿＿＿。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "言い聞かせた"
+           },
+           {
+            "id": "c2",
+            "textJp": "引き起こした"
+           },
+           {
+            "id": "c3",
+            "textJp": "掘り起こした"
+           },
+           {
+            "id": "c4",
+            "textJp": "取り寄せた"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "東京は今や世界経済の＿＿＿＿だ。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "用件"
+           },
+           {
+            "id": "c2",
+            "textJp": "継ぎ目"
+           },
+           {
+            "id": "c3",
+            "textJp": "だらけ"
+           },
+           {
+            "id": "c4",
+            "textJp": "中枢"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "彼は法学＿＿＿＿の学位を得た。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "版画"
+           },
+           {
+            "id": "c2",
+            "textJp": "渡り鳥"
+           },
+           {
+            "id": "c3",
+            "textJp": "土手"
+           },
+           {
+            "id": "c4",
+            "textJp": "修士"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q6",
+          "number": 6,
+          "promptJp": "彼はこれまでいとも簡単にたくさんの挑戦者をリングに＿＿＿＿。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "受かってきた"
+           },
+           {
+            "id": "c2",
+            "textJp": "沈めてきた"
+           },
+           {
+            "id": "c3",
+            "textJp": "恋してきた"
+           },
+           {
+            "id": "c4",
+            "textJp": "有してきた"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q7",
+          "number": 7,
+          "promptJp": "トムは＿＿＿＿になるのに向いている。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "漁船"
+           },
+           {
+            "id": "c2",
+            "textJp": "張り紙"
+           },
+           {
+            "id": "c3",
+            "textJp": "楽譜"
+           },
+           {
+            "id": "c4",
+            "textJp": "実業家"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "社長は新しい計画を役員会に諮った。",
+          "underlineJp": "諮った",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "任せた"
+           },
+           {
+            "id": "c2",
+            "textJp": "隠した"
+           },
+           {
+            "id": "c3",
+            "textJp": "報告した"
+           },
+           {
+            "id": "c4",
+            "textJp": "相談した"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "夜更かしが続いて、最近体調がよくない。",
+          "underlineJp": "夜更かし",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "夜遅くまで起きていること"
+           },
+           {
+            "id": "c2",
+            "textJp": "夜中に何度も目を覚ますこと"
+           },
+           {
+            "id": "c3",
+            "textJp": "朝早くから外出すること"
+           },
+           {
+            "id": "c4",
+            "textJp": "寝る前に夜食を食べること"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "住民の提案は、議会で否決された。",
+          "underlineJp": "否決",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "可決"
+           },
+           {
+            "id": "c2",
+            "textJp": "却下"
+           },
+           {
+            "id": "c3",
+            "textJp": "審議"
+           },
+           {
+            "id": "c4",
+            "textJp": "延期"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "駅前に新しい駐輪場が設けられた。",
+          "underlineJp": "設けられた",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "移された"
+           },
+           {
+            "id": "c2",
+            "textJp": "閉鎖された"
+           },
+           {
+            "id": "c3",
+            "textJp": "作られた"
+           },
+           {
+            "id": "c4",
+            "textJp": "拡張された"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "新しい橋の完成を祝うセレモニーが行われた。",
+          "underlineJp": "セレモニー",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "演説"
+           },
+           {
+            "id": "c2",
+            "textJp": "点検"
+           },
+           {
+            "id": "c3",
+            "textJp": "工事"
+           },
+           {
+            "id": "c4",
+            "textJp": "式典"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "この村では、昔から年長者を尊ぶ習慣がある。",
+          "underlineJp": "尊ぶ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "敬う"
+           },
+           {
+            "id": "c2",
+            "textJp": "頼る"
+           },
+           {
+            "id": "c3",
+            "textJp": "避ける"
+           },
+           {
+            "id": "c4",
+            "textJp": "恐れる"
+           }
+          ],
+          "answer": "c1"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　つかいかたで　もっとも　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the sentence that uses the word correctly.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "統率",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "隊長は、百人を超える隊員を見事に統率した。"
+           },
+           {
+            "id": "c2",
+            "textJp": "国によって電気の規格が統率されていないので、旅行には変換器が必要だ。"
+           },
+           {
+            "id": "c3",
+            "textJp": "本棚の本を、作者ごとに統率した。"
+           },
+           {
+            "id": "c4",
+            "textJp": "朝早く起きて、自分の健康を統率している。"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "告げる",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "彼は友人の誕生日に、赤いバラの花を告げた。"
+           },
+           {
+            "id": "c2",
+            "textJp": "駅員は、電車が三十分遅れることを乗客に告げた。"
+           },
+           {
+            "id": "c3",
+            "textJp": "私は毎朝、六時に目覚まし時計を告げている。"
+           },
+           {
+            "id": "c4",
+            "textJp": "お客さんにお茶を告げてから、話を始めた。"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "責務",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "彼女は責務な性格で、いつも約束を守る。"
+           },
+           {
+            "id": "c2",
+            "textJp": "彼は酒を飲んで騒ぎ、警察に責務された。"
+           },
+           {
+            "id": "c3",
+            "textJp": "国民の安全を守ることは、政府の重大な責務だ。"
+           },
+           {
+            "id": "c4",
+            "textJp": "毎月の責務を返すため、アルバイトを増やした。"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_4_q4",
+          "number": 4,
+          "promptJp": "意図",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "彼は意図が強く、何があっても計画を変えない。"
+           },
+           {
+            "id": "c2",
+            "textJp": "台風の意図が東にそれて、町は被害を受けなかった。"
+           },
+           {
+            "id": "c3",
+            "textJp": "彼女は、医者になるという意図をかなえるため、毎日勉強している。"
+           },
+           {
+            "id": "c4",
+            "textJp": "彼の発言の意図がわからず、もう一度聞き返した。"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_4_q5",
+          "number": 5,
+          "promptJp": "用件",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "電話では用件だけを手短に伝えて、すぐに切った。"
+           },
+           {
+            "id": "c2",
+            "textJp": "旅行に必要な用件を、かばんに詰めた。"
+           },
+           {
+            "id": "c3",
+            "textJp": "この仕事に応募するための用件は、英語が話せることだ。"
+           },
+           {
+            "id": "c4",
+            "textJp": "彼は用件がよく、何でも手早く片付ける。"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_4_q6",
+          "number": 6,
+          "promptJp": "一息",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "彼女は一息な性格で、何でもすぐに決めてしまう。"
+           },
+           {
+            "id": "c2",
+            "textJp": "仕事が一段落したので、コーヒーを飲んで一息ついた。"
+           },
+           {
+            "id": "c3",
+            "textJp": "風邪をひいて、一晩中一息が止まらなかった。"
+           },
+           {
+            "id": "c4",
+            "textJp": "この店のケーキは、どれも一息五百円だ。"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 5,
+   "seed": 7556988188466273024,
+   "paper": {
+    "level": "N1",
+    "title": "N1 Vocabulary Practice",
+    "titleJp": "N1 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 39,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "把握",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぱあく"
+           },
+           {
+            "id": "c2",
+            "textJp": "ばあく"
+           },
+           {
+            "id": "c3",
+            "textJp": "はあく"
+           },
+           {
+            "id": "c4",
+            "textJp": "はあぐ"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "突っ張る",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "つっはる"
+           },
+           {
+            "id": "c2",
+            "textJp": "づっぱる"
+           },
+           {
+            "id": "c3",
+            "textJp": "つぱる"
+           },
+           {
+            "id": "c4",
+            "textJp": "つっぱる"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "選考",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぜんこう"
+           },
+           {
+            "id": "c2",
+            "textJp": "せんこ"
+           },
+           {
+            "id": "c3",
+            "textJp": "せんこう"
+           },
+           {
+            "id": "c4",
+            "textJp": "せんごう"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "清算",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "せいざん"
+           },
+           {
+            "id": "c2",
+            "textJp": "ぜいさん"
+           },
+           {
+            "id": "c3",
+            "textJp": "しょうさん"
+           },
+           {
+            "id": "c4",
+            "textJp": "せいさん"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "体付き",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "からだつき"
+           },
+           {
+            "id": "c2",
+            "textJp": "たいつき"
+           },
+           {
+            "id": "c3",
+            "textJp": "からだつぎ"
+           },
+           {
+            "id": "c4",
+            "textJp": "がらだつき"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "局限",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "きょげん"
+           },
+           {
+            "id": "c2",
+            "textJp": "きょぐげん"
+           },
+           {
+            "id": "c3",
+            "textJp": "ぎょくげん"
+           },
+           {
+            "id": "c4",
+            "textJp": "きょくげん"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "この＿＿＿＿では、牛や豚を育てるほか、野菜も作っている。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "農場"
+           },
+           {
+            "id": "c2",
+            "textJp": "聴診器"
+           },
+           {
+            "id": "c3",
+            "textJp": "アルカリ"
+           },
+           {
+            "id": "c4",
+            "textJp": "所々"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "我々は地方の＿＿＿＿を尊重しなくてはならない。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "上陸"
+           },
+           {
+            "id": "c2",
+            "textJp": "墜落"
+           },
+           {
+            "id": "c3",
+            "textJp": "慣習"
+           },
+           {
+            "id": "c4",
+            "textJp": "気圧"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "ご家族の皆さんがお元気で＿＿＿＿です。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "巧妙"
+           },
+           {
+            "id": "c2",
+            "textJp": "何より"
+           },
+           {
+            "id": "c3",
+            "textJp": "領地"
+           },
+           {
+            "id": "c4",
+            "textJp": "真っ最中"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "同じことを何回繰り返すの。屋上屋を架すようなくどい説明は＿＿＿＿してよ。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "体験"
+           },
+           {
+            "id": "c2",
+            "textJp": "老衰"
+           },
+           {
+            "id": "c3",
+            "textJp": "勘弁"
+           },
+           {
+            "id": "c4",
+            "textJp": "蓄積"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "彼は、＿＿＿＿バスで学校へ行きます。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "甚だ"
+           },
+           {
+            "id": "c2",
+            "textJp": "生真面目"
+           },
+           {
+            "id": "c3",
+            "textJp": "通常"
+           },
+           {
+            "id": "c4",
+            "textJp": "余暇"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_2_q6",
+          "number": 6,
+          "promptJp": "その＿＿＿＿は、毎朝早く起きて寺の庭を掃き、お経を読む。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "沼"
+           },
+           {
+            "id": "c2",
+            "textJp": "赤字"
+           },
+           {
+            "id": "c3",
+            "textJp": "盗み"
+           },
+           {
+            "id": "c4",
+            "textJp": "僧"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q7",
+          "number": 7,
+          "promptJp": "その教授はシェイクスピアの＿＿＿＿である。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "権威"
+           },
+           {
+            "id": "c2",
+            "textJp": "目録"
+           },
+           {
+            "id": "c3",
+            "textJp": "短大"
+           },
+           {
+            "id": "c4",
+            "textJp": "チャイム"
+           }
+          ],
+          "answer": "c1"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "反対されると分かっていたが、彼は敢えてその意見を口にした。",
+          "underlineJp": "敢えて",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "思い切って"
+           },
+           {
+            "id": "c2",
+            "textJp": "仕方なく"
+           },
+           {
+            "id": "c3",
+            "textJp": "ついうっかり"
+           },
+           {
+            "id": "c4",
+            "textJp": "いきなり"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "その小説には、未来の社会を予言するような場面がいくつもある。",
+          "underlineJp": "予言する",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "笑い飛ばす"
+           },
+           {
+            "id": "c2",
+            "textJp": "言い当てる"
+           },
+           {
+            "id": "c3",
+            "textJp": "書き残す"
+           },
+           {
+            "id": "c4",
+            "textJp": "批判する"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "豊かな自然を破壊するような開発には、反対の声が多い。",
+          "underlineJp": "破壊する",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "守る"
+           },
+           {
+            "id": "c2",
+            "textJp": "荒らす"
+           },
+           {
+            "id": "c3",
+            "textJp": "生かす"
+           },
+           {
+            "id": "c4",
+            "textJp": "取り戻す"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "子どもたちにとって、広い庭のあるこの家は天国のような場所だ。",
+          "underlineJp": "天国",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "迷路"
+           },
+           {
+            "id": "c2",
+            "textJp": "戦場"
+           },
+           {
+            "id": "c3",
+            "textJp": "秘密基地"
+           },
+           {
+            "id": "c4",
+            "textJp": "楽園"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "子どもを守ることは、大人の責務だ。",
+          "underlineJp": "責務",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "権利"
+           },
+           {
+            "id": "c2",
+            "textJp": "特技"
+           },
+           {
+            "id": "c3",
+            "textJp": "義務"
+           },
+           {
+            "id": "c4",
+            "textJp": "楽しみ"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "脳の中で、言葉を司る部分はどこだろうか。",
+          "underlineJp": "司る",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "忘れる"
+           },
+           {
+            "id": "c2",
+            "textJp": "傷つける"
+           },
+           {
+            "id": "c3",
+            "textJp": "真似る"
+           },
+           {
+            "id": "c4",
+            "textJp": "担当する"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　つかいかたで　もっとも　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the sentence that uses the word correctly.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "赴任",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "子どもが熱を出したので、今日は会社を赴任した。"
+           },
+           {
+            "id": "c2",
+            "textJp": "彼は長い旅行を終えて、昨日日本に赴任した。"
+           },
+           {
+            "id": "c3",
+            "textJp": "新入生たちは、春休みの間に大学の寮へ赴任した。"
+           },
+           {
+            "id": "c4",
+            "textJp": "父は来月、九州の支社に赴任する。"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "弁論",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "高校生の弁論大会で、彼女は環境問題について話した。"
+           },
+           {
+            "id": "c2",
+            "textJp": "交通事故を起こした弁論として、相手に十万円を払った。"
+           },
+           {
+            "id": "c3",
+            "textJp": "彼は口が悪く、すぐに人の弁論を言う。"
+           },
+           {
+            "id": "c4",
+            "textJp": "裁判で自分が犯人でないことを証明するため、弁論を集めた。"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "お宮",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "旅行のお宮に、地元のお菓子を買って帰った。"
+           },
+           {
+            "id": "c2",
+            "textJp": "友人の家を訪ねる前に、お宮に電話をかけた。"
+           },
+           {
+            "id": "c3",
+            "textJp": "正月には、近所のお宮へ初もうでに行く。"
+           },
+           {
+            "id": "c4",
+            "textJp": "寺のお宮さんが、毎朝お経を読んでいる。"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_4_q4",
+          "number": 4,
+          "promptJp": "カンニング",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "彼はカンニングな男で、人をだましてお金を得ている。"
+           },
+           {
+            "id": "c2",
+            "textJp": "体力をつけるため、毎朝公園でカンニングをしている。"
+           },
+           {
+            "id": "c3",
+            "textJp": "店の前で、店員が新商品のカンニングをしていた。"
+           },
+           {
+            "id": "c4",
+            "textJp": "試験中にカンニングをして、その科目は零点になった。"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_4_q5",
+          "number": 5,
+          "promptJp": "根回し",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "会議で反対されないよう、事前に関係者へ根回しをしておいた。"
+           },
+           {
+            "id": "c2",
+            "textJp": "彼は根回しが強く、一度決めたら考えを変えない。"
+           },
+           {
+            "id": "c3",
+            "textJp": "気分を変えるため、週末に部屋の根回しをして、家具の位置を大きく変えた。"
+           },
+           {
+            "id": "c4",
+            "textJp": "旅行の前の晩に、すべての荷物の根回しをした。"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_4_q6",
+          "number": 6,
+          "promptJp": "大ざっぱ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "この公園は大ざっぱで、子どもたちが自由に走り回れる。"
+           },
+           {
+            "id": "c2",
+            "textJp": "台風が近づき、海が大ざっぱに荒れている。"
+           },
+           {
+            "id": "c3",
+            "textJp": "彼は大ざっぱな性格で、細かいことは気にしない。"
+           },
+           {
+            "id": "c4",
+            "textJp": "彼女は大ざっぱな声で歌うので、遠くまでよく聞こえる。"
+           }
+          ],
+          "answer": "c3"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 6,
+   "seed": 1364592826074389776,
+   "paper": {
+    "level": "N1",
+    "title": "N1 Vocabulary Practice",
+    "titleJp": "N1 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 39,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "腹立ち",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "はらだち"
+           },
+           {
+            "id": "c2",
+            "textJp": "ぱらだち"
+           },
+           {
+            "id": "c3",
+            "textJp": "はらたち"
+           },
+           {
+            "id": "c4",
+            "textJp": "ばらだち"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "小児科",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "しょにか"
+           },
+           {
+            "id": "c2",
+            "textJp": "しょうにか"
+           },
+           {
+            "id": "c3",
+            "textJp": "じょうにか"
+           },
+           {
+            "id": "c4",
+            "textJp": "しょうにが"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "賄う",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "まがなう"
+           },
+           {
+            "id": "c2",
+            "textJp": "まかう"
+           },
+           {
+            "id": "c3",
+            "textJp": "まかなう"
+           },
+           {
+            "id": "c4",
+            "textJp": "まかなる"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "通常",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "つうしょう"
+           },
+           {
+            "id": "c2",
+            "textJp": "つうじょう"
+           },
+           {
+            "id": "c3",
+            "textJp": "づうじょう"
+           },
+           {
+            "id": "c4",
+            "textJp": "つうじょ"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "投げ出す",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "なげたす"
+           },
+           {
+            "id": "c2",
+            "textJp": "なげいだす"
+           },
+           {
+            "id": "c3",
+            "textJp": "なげだす"
+           },
+           {
+            "id": "c4",
+            "textJp": "なげだず"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "奮闘",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ふんとう"
+           },
+           {
+            "id": "c2",
+            "textJp": "ぷんとう"
+           },
+           {
+            "id": "c3",
+            "textJp": "ふんどう"
+           },
+           {
+            "id": "c4",
+            "textJp": "ぶんとう"
+           }
+          ],
+          "answer": "c1"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "その内気な少年はぼそぼそと自分の名前を＿＿＿＿。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "拾った"
+           },
+           {
+            "id": "c2",
+            "textJp": "つぶやいた"
+           },
+           {
+            "id": "c3",
+            "textJp": "荒廃した"
+           },
+           {
+            "id": "c4",
+            "textJp": "放り出した"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "運動会では、まず全校の児童が校庭を＿＿＿＿する。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "停滞"
+           },
+           {
+            "id": "c2",
+            "textJp": "沈没"
+           },
+           {
+            "id": "c3",
+            "textJp": "行進"
+           },
+           {
+            "id": "c4",
+            "textJp": "着陸"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "その日本語に＿＿＿＿する英語はない。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "対応"
+           },
+           {
+            "id": "c2",
+            "textJp": "類推"
+           },
+           {
+            "id": "c3",
+            "textJp": "家出"
+           },
+           {
+            "id": "c4",
+            "textJp": "混血"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "不通＿＿＿＿の開通の見込みはまだない。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "対辺"
+           },
+           {
+            "id": "c2",
+            "textJp": "区間"
+           },
+           {
+            "id": "c3",
+            "textJp": "利潤"
+           },
+           {
+            "id": "c4",
+            "textJp": "遅れ"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "報告書には、事故の原因が詳しく＿＿＿＿ある。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "了承して"
+           },
+           {
+            "id": "c2",
+            "textJp": "記して"
+           },
+           {
+            "id": "c3",
+            "textJp": "届けて"
+           },
+           {
+            "id": "c4",
+            "textJp": "磨いて"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q6",
+          "number": 6,
+          "promptJp": "乙が受託＿＿＿＿の実施により得た成果は、甲乙双方に帰属するものとする。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "業務"
+           },
+           {
+            "id": "c2",
+            "textJp": "天才"
+           },
+           {
+            "id": "c3",
+            "textJp": "実態"
+           },
+           {
+            "id": "c4",
+            "textJp": "エアメール"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q7",
+          "number": 7,
+          "promptJp": "私たちは内臓＿＿＿＿を調べるためにカエルを解剖した。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "天災"
+           },
+           {
+            "id": "c2",
+            "textJp": "共産"
+           },
+           {
+            "id": "c3",
+            "textJp": "器官"
+           },
+           {
+            "id": "c4",
+            "textJp": "イエス"
+           }
+          ],
+          "answer": "c3"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "彼の行動は、明らかに会社の規則に反している。",
+          "underlineJp": "反して",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "背いて"
+           },
+           {
+            "id": "c2",
+            "textJp": "従って"
+           },
+           {
+            "id": "c3",
+            "textJp": "基づいて"
+           },
+           {
+            "id": "c4",
+            "textJp": "合わせて"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "その決定に異議のある人は、手を挙げてください。",
+          "underlineJp": "異議",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "賛成意見"
+           },
+           {
+            "id": "c2",
+            "textJp": "反対意見"
+           },
+           {
+            "id": "c3",
+            "textJp": "質問"
+           },
+           {
+            "id": "c4",
+            "textJp": "感想"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "社会の秩序を守るため、法に反した者には刑罰が与えられる。",
+          "underlineJp": "刑罰",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "補償"
+           },
+           {
+            "id": "c2",
+            "textJp": "警告"
+           },
+           {
+            "id": "c3",
+            "textJp": "制裁"
+           },
+           {
+            "id": "c4",
+            "textJp": "免除"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "何事も始めが肝心だ。",
+          "underlineJp": "始め",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "結果"
+           },
+           {
+            "id": "c2",
+            "textJp": "準備"
+           },
+           {
+            "id": "c3",
+            "textJp": "継続"
+           },
+           {
+            "id": "c4",
+            "textJp": "最初"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "工場の生産能力を増強するため、新しい機械を導入した。",
+          "underlineJp": "増強する",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "高める"
+           },
+           {
+            "id": "c2",
+            "textJp": "維持する"
+           },
+           {
+            "id": "c3",
+            "textJp": "調査する"
+           },
+           {
+            "id": "c4",
+            "textJp": "見直す"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "会議の資料は、ホチキスでとじてから配ってください。",
+          "underlineJp": "とじて",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "破って"
+           },
+           {
+            "id": "c2",
+            "textJp": "留めて"
+           },
+           {
+            "id": "c3",
+            "textJp": "広げて"
+           },
+           {
+            "id": "c4",
+            "textJp": "折って"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　つかいかたで　もっとも　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the sentence that uses the word correctly.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "囀る",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "春になると、庭の木で小鳥がさえずる声が聞こえる。"
+           },
+           {
+            "id": "c2",
+            "textJp": "夜中に隣の犬が大きな声でさえずっていて、眠れなかった。"
+           },
+           {
+            "id": "c3",
+            "textJp": "猫が足もとでさえずって、えさをねだっている。"
+           },
+           {
+            "id": "c4",
+            "textJp": "風が強く、古い窓ががたがたとさえずっている。"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "心強い",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "彼は心強い性格で、どんなに批判されても意見を変えない。"
+           },
+           {
+            "id": "c2",
+            "textJp": "経験豊かな先輩が一緒に来てくれるので、とても心強い。"
+           },
+           {
+            "id": "c3",
+            "textJp": "この橋は心強く作られているので、地震にも耐えられる。"
+           },
+           {
+            "id": "c4",
+            "textJp": "友人が遠くへ引っ越すと聞いて、心強い気持ちになった。"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "追い込む",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "駅まで走ったが、乗りたかった電車に追い込めなかった。"
+           },
+           {
+            "id": "c2",
+            "textJp": "急いでいたので、前を歩く人を追い込んで先に進んだ。"
+           },
+           {
+            "id": "c3",
+            "textJp": "相手の攻撃に、チームは不利な状況へ追い込まれた。"
+           },
+           {
+            "id": "c4",
+            "textJp": "雨が急に降ってきたので、近くの店に追い込んだ。"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_4_q4",
+          "number": 4,
+          "promptJp": "書評",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "書評の上に、辞書や参考書が並んでいる。"
+           },
+           {
+            "id": "c2",
+            "textJp": "新聞の日曜版に、その小説の書評が載っていた。"
+           },
+           {
+            "id": "c3",
+            "textJp": "駅前の書評で、雑誌を二冊買った。"
+           },
+           {
+            "id": "c4",
+            "textJp": "この本の書評は、千五百円です。"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_4_q5",
+          "number": 5,
+          "promptJp": "季刊",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "日本には四つの季刊があり、それぞれに違う美しさがある。"
+           },
+           {
+            "id": "c2",
+            "textJp": "この切符の季刊は、今月末までだ。"
+           },
+           {
+            "id": "c3",
+            "textJp": "この雑誌は季刊で、年に四回発行されている。"
+           },
+           {
+            "id": "c4",
+            "textJp": "毎朝届く季刊で、その日のニュースを読む。"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_4_q6",
+          "number": 6,
+          "promptJp": "持ち切り",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "このパンは、今朝焼いた分はもう持ち切りです。"
+           },
+           {
+            "id": "c2",
+            "textJp": "朝から雨が持ち切りで、外に出られない。"
+           },
+           {
+            "id": "c3",
+            "textJp": "あの店のラーメンは人気で、いつ行っても客で持ち切りだ。"
+           },
+           {
+            "id": "c4",
+            "textJp": "町中が、地元チームの優勝の話で持ち切りだ。"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 7,
+   "seed": 493088317544587891,
+   "paper": {
+    "level": "N1",
+    "title": "N1 Vocabulary Practice",
+    "titleJp": "N1 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 39,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "悪",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "わく"
+           },
+           {
+            "id": "c2",
+            "textJp": "がく"
+           },
+           {
+            "id": "c3",
+            "textJp": "あか"
+           },
+           {
+            "id": "c4",
+            "textJp": "あく"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "物体",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぶたい"
+           },
+           {
+            "id": "c2",
+            "textJp": "ぶっだい"
+           },
+           {
+            "id": "c3",
+            "textJp": "ぶったい"
+           },
+           {
+            "id": "c4",
+            "textJp": "ふったい"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "背景",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ばいけい"
+           },
+           {
+            "id": "c2",
+            "textJp": "はいげい"
+           },
+           {
+            "id": "c3",
+            "textJp": "はいけい"
+           },
+           {
+            "id": "c4",
+            "textJp": "はけい"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "途上",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "とじょ"
+           },
+           {
+            "id": "c2",
+            "textJp": "としょう"
+           },
+           {
+            "id": "c3",
+            "textJp": "とじょう"
+           },
+           {
+            "id": "c4",
+            "textJp": "どじょう"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "入賞",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "にゅうじょう"
+           },
+           {
+            "id": "c2",
+            "textJp": "にゅうしょう"
+           },
+           {
+            "id": "c3",
+            "textJp": "にゅしょう"
+           },
+           {
+            "id": "c4",
+            "textJp": "にゅうしょ"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "室",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "せつ"
+           },
+           {
+            "id": "c2",
+            "textJp": "じつ"
+           },
+           {
+            "id": "c3",
+            "textJp": "しつ"
+           },
+           {
+            "id": "c4",
+            "textJp": "しち"
+           }
+          ],
+          "answer": "c3"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "昨年は異常な冷夏で、稲作は１０年ぶりの＿＿＿＿だった。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "レギュラー"
+           },
+           {
+            "id": "c2",
+            "textJp": "凶作"
+           },
+           {
+            "id": "c3",
+            "textJp": "パジャマ"
+           },
+           {
+            "id": "c4",
+            "textJp": "館内"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "後半に二点を入れて、試合の＿＿＿＿は一気に逆転した。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "形勢"
+           },
+           {
+            "id": "c2",
+            "textJp": "田園"
+           },
+           {
+            "id": "c3",
+            "textJp": "露"
+           },
+           {
+            "id": "c4",
+            "textJp": "海峡"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "会社は、新しい工場を立ち上げるため、三人の技術者をタイに＿＿＿＿した。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "派遣"
+           },
+           {
+            "id": "c2",
+            "textJp": "指摘"
+           },
+           {
+            "id": "c3",
+            "textJp": "却下"
+           },
+           {
+            "id": "c4",
+            "textJp": "断言"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "その船にはレーダーが＿＿＿＿されていた。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "退屈"
+           },
+           {
+            "id": "c2",
+            "textJp": "刊行"
+           },
+           {
+            "id": "c3",
+            "textJp": "装備"
+           },
+           {
+            "id": "c4",
+            "textJp": "宣教"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "人類の＿＿＿＿については、アフリカで生まれたという説が有力だ。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "汽船"
+           },
+           {
+            "id": "c2",
+            "textJp": "道場"
+           },
+           {
+            "id": "c3",
+            "textJp": "日夜"
+           },
+           {
+            "id": "c4",
+            "textJp": "起源"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q6",
+          "number": 6,
+          "promptJp": "その光景を見て私は驚異の＿＿＿＿にうたれた。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "念"
+           },
+           {
+            "id": "c2",
+            "textJp": "丘陵"
+           },
+           {
+            "id": "c3",
+            "textJp": "盾"
+           },
+           {
+            "id": "c4",
+            "textJp": "漁船"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q7",
+          "number": 7,
+          "promptJp": "我々の＿＿＿＿を破ったのは君のほうだ。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "苗"
+           },
+           {
+            "id": "c2",
+            "textJp": "協定"
+           },
+           {
+            "id": "c3",
+            "textJp": "気圧"
+           },
+           {
+            "id": "c4",
+            "textJp": "境内"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "犯人は巧妙な手口で、多くの人からお金をだまし取った。",
+          "underlineJp": "巧妙な",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "よく知られた"
+           },
+           {
+            "id": "c2",
+            "textJp": "乱暴で強引な"
+           },
+           {
+            "id": "c3",
+            "textJp": "よく練られた"
+           },
+           {
+            "id": "c4",
+            "textJp": "単純で古い"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "この靴は、私にはサイズが合わない。",
+          "underlineJp": "サイズ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "色合い"
+           },
+           {
+            "id": "c2",
+            "textJp": "好み"
+           },
+           {
+            "id": "c3",
+            "textJp": "重さ"
+           },
+           {
+            "id": "c4",
+            "textJp": "大きさ"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "両社は、協力の道を模索している。",
+          "underlineJp": "模索して",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "探って"
+           },
+           {
+            "id": "c2",
+            "textJp": "閉ざして"
+           },
+           {
+            "id": "c3",
+            "textJp": "歩んで"
+           },
+           {
+            "id": "c4",
+            "textJp": "断って"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "新しい首相の政策に、国民の期待が集まっている。",
+          "underlineJp": "政策",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "発言"
+           },
+           {
+            "id": "c2",
+            "textJp": "方針"
+           },
+           {
+            "id": "c3",
+            "textJp": "経歴"
+           },
+           {
+            "id": "c4",
+            "textJp": "人柄"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "彼女は子どものころから、クラシック音楽に親しんできた。",
+          "underlineJp": "親しんで",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "なじんで"
+           },
+           {
+            "id": "c2",
+            "textJp": "飽きて"
+           },
+           {
+            "id": "c3",
+            "textJp": "苦しんで"
+           },
+           {
+            "id": "c4",
+            "textJp": "背を向けて"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "彼は警察官としての職務を、最後まで忠実に果たした。",
+          "underlineJp": "職務",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "職業"
+           },
+           {
+            "id": "c2",
+            "textJp": "役目"
+           },
+           {
+            "id": "c3",
+            "textJp": "権限"
+           },
+           {
+            "id": "c4",
+            "textJp": "誓い"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　つかいかたで　もっとも　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the sentence that uses the word correctly.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "慕う",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "試験に合格するよう、神社で慕った。"
+           },
+           {
+            "id": "c2",
+            "textJp": "遅刻した理由を、先生に正直に慕った。"
+           },
+           {
+            "id": "c3",
+            "textJp": "彼は面倒見がよく、多くの後輩に慕われている。"
+           },
+           {
+            "id": "c4",
+            "textJp": "部長は、会議で私の意見に慕ってくれた。"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "運輸",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "彼は車の運輸が上手で、長い距離でも疲れない。"
+           },
+           {
+            "id": "c2",
+            "textJp": "健康のための運輸として、近くのジムに通っている。"
+           },
+           {
+            "id": "c3",
+            "textJp": "この手紙を、明日までに先方へ運輸してください。"
+           },
+           {
+            "id": "c4",
+            "textJp": "この町の経済は、運輸業に支えられている。"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "兼用",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "この傘は晴れの日にも使える、晴雨兼用のものだ。"
+           },
+           {
+            "id": "c2",
+            "textJp": "彼は医者と作家を兼用している。"
+           },
+           {
+            "id": "c3",
+            "textJp": "この本は、図書館から二週間の約束で兼用している。"
+           },
+           {
+            "id": "c4",
+            "textJp": "二つの会社が兼用して、新しい商品を作った。"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_4_q4",
+          "number": 4,
+          "promptJp": "通常",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "この道は、毎朝通常で混んでいる。"
+           },
+           {
+            "id": "c2",
+            "textJp": "この店は通常、夜十時まで営業している。"
+           },
+           {
+            "id": "c3",
+            "textJp": "会議の資料を、出席者全員に通常してください。"
+           },
+           {
+            "id": "c4",
+            "textJp": "彼は通常がうまく、どの国の人とも話せる。"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_4_q5",
+          "number": 5,
+          "promptJp": "志向",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "彼は志向が深く、物事をよく考えてから行動する。"
+           },
+           {
+            "id": "c2",
+            "textJp": "今年はパーティーの志向を変えて、庭で行うことにした。"
+           },
+           {
+            "id": "c3",
+            "textJp": "最近は健康志向の人が増え、野菜の売り上げが伸びている。"
+           },
+           {
+            "id": "c4",
+            "textJp": "夏休みに志向した旅行は、雨で中止になった。"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_4_q6",
+          "number": 6,
+          "promptJp": "ずれ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "親と子の考え方のずれは、なかなか埋まらない。"
+           },
+           {
+            "id": "c2",
+            "textJp": "雨が降ったので、試合を一週間ずれにした。"
+           },
+           {
+            "id": "c3",
+            "textJp": "彼はずれがよく、どんな仕事もすぐに覚える。"
+           },
+           {
+            "id": "c4",
+            "textJp": "彼女は時間にずれな人で、待ち合わせにいつも遅れる。"
+           }
+          ],
+          "answer": "c1"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 8,
+   "seed": 6192213505279494081,
+   "paper": {
+    "level": "N1",
+    "title": "N1 Vocabulary Practice",
+    "titleJp": "N1 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 39,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "然しながら",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぜんしながら"
+           },
+           {
+            "id": "c2",
+            "textJp": "しがしながら"
+           },
+           {
+            "id": "c3",
+            "textJp": "しかしなから"
+           },
+           {
+            "id": "c4",
+            "textJp": "しかしながら"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "準じる",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "じゅんしる"
+           },
+           {
+            "id": "c2",
+            "textJp": "しゅんじる"
+           },
+           {
+            "id": "c3",
+            "textJp": "じゅんじる"
+           },
+           {
+            "id": "c4",
+            "textJp": "じゅじる"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "中程",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "なかほど"
+           },
+           {
+            "id": "c2",
+            "textJp": "ちゅうほど"
+           },
+           {
+            "id": "c3",
+            "textJp": "なかぼど"
+           },
+           {
+            "id": "c4",
+            "textJp": "なかてい"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "且つ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "また"
+           },
+           {
+            "id": "c2",
+            "textJp": "かつ"
+           },
+           {
+            "id": "c3",
+            "textJp": "かづ"
+           },
+           {
+            "id": "c4",
+            "textJp": "がつ"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "土手",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "つちて"
+           },
+           {
+            "id": "c2",
+            "textJp": "どで"
+           },
+           {
+            "id": "c3",
+            "textJp": "とて"
+           },
+           {
+            "id": "c4",
+            "textJp": "どて"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "漂う",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "たたよう"
+           },
+           {
+            "id": "c2",
+            "textJp": "ただよう"
+           },
+           {
+            "id": "c3",
+            "textJp": "ただう"
+           },
+           {
+            "id": "c4",
+            "textJp": "ただよる"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "彼女は＿＿＿＿よく料理を作り、あっという間にテーブルに五品も並べた。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "措置"
+           },
+           {
+            "id": "c2",
+            "textJp": "根拠"
+           },
+           {
+            "id": "c3",
+            "textJp": "領地"
+           },
+           {
+            "id": "c4",
+            "textJp": "手際"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "鉄の＿＿＿＿番号は26です。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "原子"
+           },
+           {
+            "id": "c2",
+            "textJp": "名簿"
+           },
+           {
+            "id": "c3",
+            "textJp": "世"
+           },
+           {
+            "id": "c4",
+            "textJp": "腿"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "その食事で彼は＿＿＿＿を満たした。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "小柄"
+           },
+           {
+            "id": "c2",
+            "textJp": "空腹"
+           },
+           {
+            "id": "c3",
+            "textJp": "粋"
+           },
+           {
+            "id": "c4",
+            "textJp": "オートマチック"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "卒業して二十年ぶりに＿＿＿＿を訪れ、恩師に会った。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "母校"
+           },
+           {
+            "id": "c2",
+            "textJp": "灰皿"
+           },
+           {
+            "id": "c3",
+            "textJp": "取り締まり"
+           },
+           {
+            "id": "c4",
+            "textJp": "スラックス"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "おもってたのと＿＿＿＿違いますねえ。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "てっきり"
+           },
+           {
+            "id": "c2",
+            "textJp": "うっかり"
+           },
+           {
+            "id": "c3",
+            "textJp": "丸っきり"
+           },
+           {
+            "id": "c4",
+            "textJp": "せっかく"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_2_q6",
+          "number": 6,
+          "promptJp": "彼は私を中に入れるのを＿＿＿＿と断った。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "きっぱり"
+           },
+           {
+            "id": "c2",
+            "textJp": "うっとり"
+           },
+           {
+            "id": "c3",
+            "textJp": "しっとり"
+           },
+           {
+            "id": "c4",
+            "textJp": "ぐっすり"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q7",
+          "number": 7,
+          "promptJp": "あの博物館は、一度は訪れるに＿＿＿＿。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "果てる"
+           },
+           {
+            "id": "c2",
+            "textJp": "値する"
+           },
+           {
+            "id": "c3",
+            "textJp": "仕える"
+           },
+           {
+            "id": "c4",
+            "textJp": "倹約する"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "彼は高校生のころから、医者を志していた。",
+          "underlineJp": "志して",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "尊敬して"
+           },
+           {
+            "id": "c2",
+            "textJp": "恐れて"
+           },
+           {
+            "id": "c3",
+            "textJp": "目指して"
+           },
+           {
+            "id": "c4",
+            "textJp": "避けて"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "明日、改めてお礼に参上いたします。",
+          "underlineJp": "参上いたします",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "申し上げます"
+           },
+           {
+            "id": "c2",
+            "textJp": "存じます"
+           },
+           {
+            "id": "c3",
+            "textJp": "差し上げます"
+           },
+           {
+            "id": "c4",
+            "textJp": "伺います"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "係員は、道に迷った観光客を出口まで導いた。",
+          "underlineJp": "導いた",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "案内した"
+           },
+           {
+            "id": "c2",
+            "textJp": "見送った"
+           },
+           {
+            "id": "c3",
+            "textJp": "呼び止めた"
+           },
+           {
+            "id": "c4",
+            "textJp": "追いかけた"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "この地方には、結婚式の前の晩に親類が集まって歌う風習がある。",
+          "underlineJp": "風習",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "伝説"
+           },
+           {
+            "id": "c2",
+            "textJp": "習わし"
+           },
+           {
+            "id": "c3",
+            "textJp": "規則"
+           },
+           {
+            "id": "c4",
+            "textJp": "物語"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "山頂から見た景色は、言葉にできないほど壮大だった。",
+          "underlineJp": "壮大",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "繊細"
+           },
+           {
+            "id": "c2",
+            "textJp": "平凡"
+           },
+           {
+            "id": "c3",
+            "textJp": "雄大"
+           },
+           {
+            "id": "c4",
+            "textJp": "単調"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "大学を卒業したら、親から自立したい。",
+          "underlineJp": "自立",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "相続"
+           },
+           {
+            "id": "c2",
+            "textJp": "借金"
+           },
+           {
+            "id": "c3",
+            "textJp": "逃亡"
+           },
+           {
+            "id": "c4",
+            "textJp": "独立"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　つかいかたで　もっとも　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the sentence that uses the word correctly.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "規格",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "来月の社員旅行の規格を、みんなで話し合って決めた。"
+           },
+           {
+            "id": "c2",
+            "textJp": "この学校の規格では、髪を染めることは禁止されている。"
+           },
+           {
+            "id": "c3",
+            "textJp": "社長の規格によって、新しい支店が開かれることになった。"
+           },
+           {
+            "id": "c4",
+            "textJp": "この部品は国際規格に合っていないため、輸出できない。"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "妥結",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "長い交渉の末、賃金の話し合いが妥結した。"
+           },
+           {
+            "id": "c2",
+            "textJp": "二つの会社が妥結して、新しい会社が生まれた。"
+           },
+           {
+            "id": "c3",
+            "textJp": "割れた花びんを、接着剤で妥結した。"
+           },
+           {
+            "id": "c4",
+            "textJp": "けんかしていた兄弟は、すぐに妥結して仲良く遊び始めた。"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "名付ける",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "会議の前に、出席者全員の名前を名簿に名付けた。"
+           },
+           {
+            "id": "c2",
+            "textJp": "生まれた娘を、祖母の名前から一字とって「花子」と名付けた。"
+           },
+           {
+            "id": "c3",
+            "textJp": "はじめまして、私は田中と名付けます。"
+           },
+           {
+            "id": "c4",
+            "textJp": "先生は、テストの答案に一人ずつ点数を名付けた。"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_4_q4",
+          "number": 4,
+          "promptJp": "心情",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "家族を亡くした彼の心情を思うと、胸が痛む。"
+           },
+           {
+            "id": "c2",
+            "textJp": "彼は心情が強く、一度決めたことは必ずやり通す。"
+           },
+           {
+            "id": "c3",
+            "textJp": "医者に、心情の音を聞いてもらった。"
+           },
+           {
+            "id": "c4",
+            "textJp": "彼女は心情深い人で、毎週欠かさず教会に通っている。"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_4_q5",
+          "number": 5,
+          "promptJp": "健やか",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "このスープは味が健やかで、とても飲みやすい。"
+           },
+           {
+            "id": "c2",
+            "textJp": "子どもたちが健やかに育つよう、地域全体で見守っている。"
+           },
+           {
+            "id": "c3",
+            "textJp": "今日は風が健やかで、散歩にちょうどいい。"
+           },
+           {
+            "id": "c4",
+            "textJp": "彼は健やかな態度で、遅刻したことを謝った。"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_4_q6",
+          "number": 6,
+          "promptJp": "待遇",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "駅前で、友人と六時に待遇する約束をした。"
+           },
+           {
+            "id": "c2",
+            "textJp": "台風の待遇で、電車が止まってしまった。"
+           },
+           {
+            "id": "c3",
+            "textJp": "この会社は給料などの待遇がよいので、応募者が多い。"
+           },
+           {
+            "id": "c4",
+            "textJp": "先生の待遇をよく聞いて、問題を解いてください。"
+           }
+          ],
+          "answer": "c3"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 9,
+   "seed": 4176151017101129258,
+   "paper": {
+    "level": "N1",
+    "title": "N1 Vocabulary Practice",
+    "titleJp": "N1 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 39,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "兵器",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "へいき"
+           },
+           {
+            "id": "c2",
+            "textJp": "ひょうき"
+           },
+           {
+            "id": "c3",
+            "textJp": "へいぎ"
+           },
+           {
+            "id": "c4",
+            "textJp": "ぺいき"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "該当",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "かいとう"
+           },
+           {
+            "id": "c2",
+            "textJp": "がいと"
+           },
+           {
+            "id": "c3",
+            "textJp": "がいどう"
+           },
+           {
+            "id": "c4",
+            "textJp": "がいとう"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "兆し",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "きざじ"
+           },
+           {
+            "id": "c2",
+            "textJp": "きざし"
+           },
+           {
+            "id": "c3",
+            "textJp": "ぎざし"
+           },
+           {
+            "id": "c4",
+            "textJp": "きさし"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "放出",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ほしゅつ"
+           },
+           {
+            "id": "c2",
+            "textJp": "ぽうしゅつ"
+           },
+           {
+            "id": "c3",
+            "textJp": "ぼうしゅつ"
+           },
+           {
+            "id": "c4",
+            "textJp": "ほうしゅつ"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "共産",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぎょうさん"
+           },
+           {
+            "id": "c2",
+            "textJp": "きょうさん"
+           },
+           {
+            "id": "c3",
+            "textJp": "きょさん"
+           },
+           {
+            "id": "c4",
+            "textJp": "きょうざん"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "売り出し",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "うりたし"
+           },
+           {
+            "id": "c2",
+            "textJp": "ばいだし"
+           },
+           {
+            "id": "c3",
+            "textJp": "うりだじ"
+           },
+           {
+            "id": "c4",
+            "textJp": "うりだし"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "彼には以前助けてもらった＿＿＿＿があるので、頼みを断れない。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "届け"
+           },
+           {
+            "id": "c2",
+            "textJp": "裏返し"
+           },
+           {
+            "id": "c3",
+            "textJp": "門"
+           },
+           {
+            "id": "c4",
+            "textJp": "借り"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "この歌は哀調を＿＿＿＿。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "鍛えている"
+           },
+           {
+            "id": "c2",
+            "textJp": "耕している"
+           },
+           {
+            "id": "c3",
+            "textJp": "辛抱している"
+           },
+           {
+            "id": "c4",
+            "textJp": "帯びている"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "これはミラー氏の最新の＿＿＿＿ですが、これが最後のものでないことを望みます。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "目蓋"
+           },
+           {
+            "id": "c2",
+            "textJp": "著書"
+           },
+           {
+            "id": "c3",
+            "textJp": "地方"
+           },
+           {
+            "id": "c4",
+            "textJp": "浮力"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "その店は＿＿＿＿ワインをたくさん在庫している。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "受身"
+           },
+           {
+            "id": "c2",
+            "textJp": "心細い"
+           },
+           {
+            "id": "c3",
+            "textJp": "球根"
+           },
+           {
+            "id": "c4",
+            "textJp": "各種"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "金をためるには＿＿＿＿を切りつめないと。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "気配"
+           },
+           {
+            "id": "c2",
+            "textJp": "余地"
+           },
+           {
+            "id": "c3",
+            "textJp": "出費"
+           },
+           {
+            "id": "c4",
+            "textJp": "登校"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_2_q6",
+          "number": 6,
+          "promptJp": "彼女は会社の床掃除より＿＿＿＿な仕事を望んだ。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "円満"
+           },
+           {
+            "id": "c2",
+            "textJp": "生真面目"
+           },
+           {
+            "id": "c3",
+            "textJp": "内気"
+           },
+           {
+            "id": "c4",
+            "textJp": "増し"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q7",
+          "number": 7,
+          "promptJp": "彼らは税金を逃れるために帳じりを＿＿＿＿。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "拒否した"
+           },
+           {
+            "id": "c2",
+            "textJp": "予感した"
+           },
+           {
+            "id": "c3",
+            "textJp": "待ち構えた"
+           },
+           {
+            "id": "c4",
+            "textJp": "誤魔化した"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "長年の争いが、両国の間に深い憎しみを生んだ。",
+          "underlineJp": "憎しみ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "恨み"
+           },
+           {
+            "id": "c2",
+            "textJp": "悲しみ"
+           },
+           {
+            "id": "c3",
+            "textJp": "疑い"
+           },
+           {
+            "id": "c4",
+            "textJp": "誤解"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "事故の瞬間の映像が、夜のニュースで流された。",
+          "underlineJp": "映像",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "音声"
+           },
+           {
+            "id": "c2",
+            "textJp": "動画"
+           },
+           {
+            "id": "c3",
+            "textJp": "記事"
+           },
+           {
+            "id": "c4",
+            "textJp": "証言"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "ご来場の皆様に、記念品を進呈いたします。",
+          "underlineJp": "進呈いたします",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "頂戴します"
+           },
+           {
+            "id": "c2",
+            "textJp": "お見せします"
+           },
+           {
+            "id": "c3",
+            "textJp": "差し上げます"
+           },
+           {
+            "id": "c4",
+            "textJp": "お預かりします"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "富士山を背景に、家族で記念写真を撮った。",
+          "underlineJp": "背景",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "目印"
+           },
+           {
+            "id": "c2",
+            "textJp": "正面"
+           },
+           {
+            "id": "c3",
+            "textJp": "中心"
+           },
+           {
+            "id": "c4",
+            "textJp": "バック"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "患者の命を救うことが、医師の使命だ。",
+          "underlineJp": "使命",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "務め"
+           },
+           {
+            "id": "c2",
+            "textJp": "特権"
+           },
+           {
+            "id": "c3",
+            "textJp": "憧れ"
+           },
+           {
+            "id": "c4",
+            "textJp": "手柄"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "先生は、冗談を交えながら授業を進めた。",
+          "underlineJp": "交えながら",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "控えながら"
+           },
+           {
+            "id": "c2",
+            "textJp": "挟みながら"
+           },
+           {
+            "id": "c3",
+            "textJp": "我慢しながら"
+           },
+           {
+            "id": "c4",
+            "textJp": "聞き流しながら"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　つかいかたで　もっとも　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the sentence that uses the word correctly.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "提携",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "宿題の提携は、来週の月曜日までです。"
+           },
+           {
+            "id": "c2",
+            "textJp": "駅前で、新商品の試供品を通行人に提携していた。"
+           },
+           {
+            "id": "c3",
+            "textJp": "その会社は海外の企業と提携して、新しい製品を開発した。"
+           },
+           {
+            "id": "c4",
+            "textJp": "新しい法律が、国会で提携された。"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "剥ぐ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "髪が伸びたので、美容院で短くはいでもらった。"
+           },
+           {
+            "id": "c2",
+            "textJp": "テストで間違えた答えを、消しゴムではいだ。"
+           },
+           {
+            "id": "c3",
+            "textJp": "食事の前に、テーブルの上を布ではいだ。"
+           },
+           {
+            "id": "c4",
+            "textJp": "寒い夜なのに、寝相の悪い弟が私の布団をはいでしまった。"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "整える",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "面接の前に、鏡の前で服装を整えた。"
+           },
+           {
+            "id": "c2",
+            "textJp": "動かなくなった時計を、時計屋で整えてもらった。"
+           },
+           {
+            "id": "c3",
+            "textJp": "風邪をひいたので、薬を飲んで一日中整えていた。"
+           },
+           {
+            "id": "c4",
+            "textJp": "道に迷った人に、駅までの道を整えてあげた。"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_4_q4",
+          "number": 4,
+          "promptJp": "墜落",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "今年に入って、会社の売り上げが大きく墜落した。"
+           },
+           {
+            "id": "c2",
+            "textJp": "エンジンの故障で、小型飛行機が山の中に墜落した。"
+           },
+           {
+            "id": "c3",
+            "textJp": "強い風で、庭の木の葉がたくさん墜落した。"
+           },
+           {
+            "id": "c4",
+            "textJp": "自信のあった入学試験に墜落して、ひどく落ち込んだ。"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_4_q5",
+          "number": 5,
+          "promptJp": "極楽",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "この料理は極楽に辛いので、気をつけてください。"
+           },
+           {
+            "id": "c2",
+            "textJp": "マラソンの途中で極楽に達し、足がまったく動かなくなった。"
+           },
+           {
+            "id": "c3",
+            "textJp": "仕事の後に温泉にゆっくりつかるのは、まさに極楽だ。"
+           },
+           {
+            "id": "c4",
+            "textJp": "冬の北海道は、極楽の寒さだった。"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_4_q6",
+          "number": 6,
+          "promptJp": "立法",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "この箱の立法は、一辺が三十センチだ。"
+           },
+           {
+            "id": "c2",
+            "textJp": "社長は、年始のあいさつで、来年の事業の立法を発表した。"
+           },
+           {
+            "id": "c3",
+            "textJp": "彼は立法な人で、困っている人をいつも助ける。"
+           },
+           {
+            "id": "c4",
+            "textJp": "ネット上の問題に対し、新たな立法が求められている。"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 10,
+   "seed": 8100360068879539013,
+   "paper": {
+    "level": "N1",
+    "title": "N1 Vocabulary Practice",
+    "titleJp": "N1 語彙",
+    "sections": [
+     {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "語彙",
+      "timeLimitMin": 39,
+      "mondai": [
+       {
+        "id": "moji_1",
+        "number": 1,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the best reading (in hiragana) for the word.",
+        "questions": [
+         {
+          "id": "moji_1_q1",
+          "number": 1,
+          "promptJp": "一筋",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "いちすじ"
+           },
+           {
+            "id": "c2",
+            "textJp": "ひとすじ"
+           },
+           {
+            "id": "c3",
+            "textJp": "ひとずじ"
+           },
+           {
+            "id": "c4",
+            "textJp": "ぴとすじ"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_1_q2",
+          "number": 2,
+          "promptJp": "化する",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "けする"
+           },
+           {
+            "id": "c2",
+            "textJp": "かずる"
+           },
+           {
+            "id": "c3",
+            "textJp": "かする"
+           },
+           {
+            "id": "c4",
+            "textJp": "かいする"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q3",
+          "number": 3,
+          "promptJp": "対決",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ついけつ"
+           },
+           {
+            "id": "c2",
+            "textJp": "たいげつ"
+           },
+           {
+            "id": "c3",
+            "textJp": "たいけつ"
+           },
+           {
+            "id": "c4",
+            "textJp": "たいけい"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_1_q4",
+          "number": 4,
+          "promptJp": "成る丈",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "なりたけ"
+           },
+           {
+            "id": "c2",
+            "textJp": "せいじょう"
+           },
+           {
+            "id": "c3",
+            "textJp": "なるたげ"
+           },
+           {
+            "id": "c4",
+            "textJp": "なるたけ"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_1_q5",
+          "number": 5,
+          "promptJp": "回送",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "かいそう"
+           },
+           {
+            "id": "c2",
+            "textJp": "かいおく"
+           },
+           {
+            "id": "c3",
+            "textJp": "がいそう"
+           },
+           {
+            "id": "c4",
+            "textJp": "かいそ"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_1_q6",
+          "number": 6,
+          "promptJp": "転校",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "てんこう"
+           },
+           {
+            "id": "c2",
+            "textJp": "てんこ"
+           },
+           {
+            "id": "c3",
+            "textJp": "でんこう"
+           },
+           {
+            "id": "c4",
+            "textJp": "てんごう"
+           }
+          ],
+          "answer": "c1"
+         }
+        ]
+       },
+       {
+        "id": "moji_2",
+        "number": 2,
+        "type": "mcq-text",
+        "instructionsJp": "（　＿＿＿＿　）に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Choose the word that best fits the blank.",
+        "questions": [
+         {
+          "id": "moji_2_q1",
+          "number": 1,
+          "promptJp": "あの大学は私の第１＿＿＿＿だった。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "勤労"
+           },
+           {
+            "id": "c2",
+            "textJp": "休める"
+           },
+           {
+            "id": "c3",
+            "textJp": "腐敗"
+           },
+           {
+            "id": "c4",
+            "textJp": "志望"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q2",
+          "number": 2,
+          "promptJp": "彼には物事の＿＿＿＿を見抜く力がある。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "余暇"
+           },
+           {
+            "id": "c2",
+            "textJp": "赤字"
+           },
+           {
+            "id": "c3",
+            "textJp": "本場"
+           },
+           {
+            "id": "c4",
+            "textJp": "本質"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q3",
+          "number": 3,
+          "promptJp": "この会の＿＿＿＿はＥ．Ｓ．Ｓ．とする。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "勤め先"
+           },
+           {
+            "id": "c2",
+            "textJp": "名称"
+           },
+           {
+            "id": "c3",
+            "textJp": "眉"
+           },
+           {
+            "id": "c4",
+            "textJp": "仕掛け"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_2_q4",
+          "number": 4,
+          "promptJp": "海外向け食品の輸出は農業関連産業の＿＿＿＿の一つです。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "柱"
+           },
+           {
+            "id": "c2",
+            "textJp": "株式"
+           },
+           {
+            "id": "c3",
+            "textJp": "一人"
+           },
+           {
+            "id": "c4",
+            "textJp": "相場"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q5",
+          "number": 5,
+          "promptJp": "秋の＿＿＿＿が感じられた。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "磁器"
+           },
+           {
+            "id": "c2",
+            "textJp": "負債"
+           },
+           {
+            "id": "c3",
+            "textJp": "盾"
+           },
+           {
+            "id": "c4",
+            "textJp": "気配"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_2_q6",
+          "number": 6,
+          "promptJp": "その説には、はっきりとした＿＿＿＿が何もない。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "根拠"
+           },
+           {
+            "id": "c2",
+            "textJp": "漁船"
+           },
+           {
+            "id": "c3",
+            "textJp": "苗"
+           },
+           {
+            "id": "c4",
+            "textJp": "境内"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_2_q7",
+          "number": 7,
+          "promptJp": "それで疑いをさしはさむ＿＿＿＿はなくなる。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "余地"
+           },
+           {
+            "id": "c2",
+            "textJp": "与党"
+           },
+           {
+            "id": "c3",
+            "textJp": "蕾"
+           },
+           {
+            "id": "c4",
+            "textJp": "ナプキン"
+           }
+          ],
+          "answer": "c1"
+         }
+        ]
+       },
+       {
+        "id": "moji_3",
+        "number": 3,
+        "type": "mcq-text",
+        "instructionsJp": "＿＿＿＿の　ことばに　いちばん　ちかい　いみの　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the word or phrase closest in meaning to the underlined one.",
+        "questions": [
+         {
+          "id": "moji_3_q1",
+          "number": 1,
+          "promptJp": "父は来年、三十年勤めた会社を退職する。",
+          "underlineJp": "退職する",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "支える"
+           },
+           {
+            "id": "c2",
+            "textJp": "訪れる"
+           },
+           {
+            "id": "c3",
+            "textJp": "辞める"
+           },
+           {
+            "id": "c4",
+            "textJp": "経営する"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q2",
+          "number": 2,
+          "promptJp": "子犬のうちからしつけをしっかりしておくことが大切だ。",
+          "underlineJp": "しつけ",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "散歩"
+           },
+           {
+            "id": "c2",
+            "textJp": "手入れ"
+           },
+           {
+            "id": "c3",
+            "textJp": "健康診断"
+           },
+           {
+            "id": "c4",
+            "textJp": "訓練"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_3_q3",
+          "number": 3,
+          "promptJp": "お風呂でよく体をこすって、あかを落とした。",
+          "underlineJp": "あか",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "汚れ"
+           },
+           {
+            "id": "c2",
+            "textJp": "体重"
+           },
+           {
+            "id": "c3",
+            "textJp": "化粧"
+           },
+           {
+            "id": "c4",
+            "textJp": "疲れ"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_3_q4",
+          "number": 4,
+          "promptJp": "川の土手に沿って、桜の木が並んでいる。",
+          "underlineJp": "土手",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "流れ"
+           },
+           {
+            "id": "c2",
+            "textJp": "堤防"
+           },
+           {
+            "id": "c3",
+            "textJp": "上流"
+           },
+           {
+            "id": "c4",
+            "textJp": "河口"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_3_q5",
+          "number": 5,
+          "promptJp": "子どもたちは、夏休みが待ち遠しくてしかたがない。",
+          "underlineJp": "待ち遠しくて",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "終わるのが惜しくて"
+           },
+           {
+            "id": "c2",
+            "textJp": "長くて退屈で"
+           },
+           {
+            "id": "c3",
+            "textJp": "早く来てほしくて"
+           },
+           {
+            "id": "c4",
+            "textJp": "忙しくて面倒で"
+           }
+          ],
+          "answer": "c3"
+         },
+         {
+          "id": "moji_3_q6",
+          "number": 6,
+          "promptJp": "試験の結果を聞いた彼は、急に厳しい顔付きになった。",
+          "underlineJp": "顔付き",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "口調"
+           },
+           {
+            "id": "c2",
+            "textJp": "姿勢"
+           },
+           {
+            "id": "c3",
+            "textJp": "性格"
+           },
+           {
+            "id": "c4",
+            "textJp": "表情"
+           }
+          ],
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "moji_4",
+        "number": 4,
+        "type": "mcq-text",
+        "instructionsJp": "つぎの　ことばの　つかいかたで　もっとも　よい　ものを　1・2・3・4から　一つ　えらんで　ください。",
+        "instructions": "Choose the sentence that uses the word correctly.",
+        "questions": [
+         {
+          "id": "moji_4_q1",
+          "number": 1,
+          "promptJp": "上空",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "この山の上空まで歩いて登るには、三時間かかる。"
+           },
+           {
+            "id": "c2",
+            "textJp": "彼は成績がいつもクラスの上空にいる、優秀な学生だ。"
+           },
+           {
+            "id": "c3",
+            "textJp": "棚の上空に置いた箱を、はしごを使って下ろした。"
+           },
+           {
+            "id": "c4",
+            "textJp": "都市の上空を、毎日たくさんの飛行機が飛んでいる。"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_4_q2",
+          "number": 2,
+          "promptJp": "富",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "彼は一代で、巨大な富を築いた。"
+           },
+           {
+            "id": "c2",
+            "textJp": "この地方は自然が富で、観光客に人気がある。"
+           },
+           {
+            "id": "c3",
+            "textJp": "宝くじに当たって、富な暮らしができるようになった。"
+           },
+           {
+            "id": "c4",
+            "textJp": "毎月の富から、少しずつ貯金している。"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_4_q3",
+          "number": 3,
+          "promptJp": "控除",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "大雪のため、明日の試合は控除になった。"
+           },
+           {
+            "id": "c2",
+            "textJp": "医療費が多かった年は、所得税の控除を受けられることがある。"
+           },
+           {
+            "id": "c3",
+            "textJp": "けがをした選手を、試合のメンバーから控除した。"
+           },
+           {
+            "id": "c4",
+            "textJp": "会議中は、私語を控除するようにお願いします。"
+           }
+          ],
+          "answer": "c2"
+         },
+         {
+          "id": "moji_4_q4",
+          "number": 4,
+          "promptJp": "見込み",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "窓からの見込みがよく、遠くの山まで見える。"
+           },
+           {
+            "id": "c2",
+            "textJp": "テストの前に、教科書を一通り見込みした。"
+           },
+           {
+            "id": "c3",
+            "textJp": "雨が降っていたので、外出を見込みにした。"
+           },
+           {
+            "id": "c4",
+            "textJp": "この調子なら、工事は予定より早く終わる見込みだ。"
+           }
+          ],
+          "answer": "c4"
+         },
+         {
+          "id": "moji_4_q5",
+          "number": 5,
+          "promptJp": "音色",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "このバイオリンは、やわらかく美しい音色を出す。"
+           },
+           {
+            "id": "c2",
+            "textJp": "テレビの音色が大きすぎるので、少し下げてください。"
+           },
+           {
+            "id": "c3",
+            "textJp": "彼女の着ている服は、明るい音色でよく似合っている。"
+           },
+           {
+            "id": "c4",
+            "textJp": "隣の部屋から、夜中まで大きな音色が聞こえてうるさかった。"
+           }
+          ],
+          "answer": "c1"
+         },
+         {
+          "id": "moji_4_q6",
+          "number": 6,
+          "promptJp": "過ち",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "この時計は五分過ちているので、直してください。"
+           },
+           {
+            "id": "c2",
+            "textJp": "若いころに犯した過ちを、彼は今でも後悔している。"
+           },
+           {
+            "id": "c3",
+            "textJp": "彼女の唯一の過ちは、少し怒りっぽいところだ。"
+           },
+           {
+            "id": "c4",
+            "textJp": "工場の古い機械の過ちで、製品の生産が丸一日止まってしまった。"
+           }
+          ],
+          "answer": "c2"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

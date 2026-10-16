@@ -42,7 +42,8 @@ LEVELS = ("N5", "N4", "N3", "N2", "N1")
 def _build_deck_by_char() -> dict[str, tuple[str, dict]]:
     """char -> (native level, entry), first occurrence wins, N5 -> N1.
 
-    The deck lists each of its 2,212 characters once. It used to list
+    The deck lists each of its 2,383 characters once (2,212 until plan 226
+    added the 171 jōyō characters it lacked). It used to list
     23 of them twice (会 at N5 and N4, 耳 at N5 and N3), and since
     kanji_to_id keys on the level those were two SRS cards; plan 112
     kept the lower one (content/kanji_renames.py carries the other's

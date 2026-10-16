@@ -1,0 +1,1516 @@
+{
+ "examId": "n5-reading-01",
+ "generatorVersion": "reading-gen-2",
+ "papers": [
+  {
+   "n": 1,
+   "seed": 5902323201275903939,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Reading Practice",
+    "titleJp": "N5 読解",
+    "sections": [
+     {
+      "id": "reading",
+      "label": "Reading",
+      "labelJp": "読解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "dokkai_4",
+        "number": 4,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_4_p1",
+          "textJp": "十月二十日（月）\n今日は、あさからさむかったです。先週は、まだあつい日が多かったですが、今日はセーターをきて学校へ行きました。午後は雨もふって、もっとさむくなりました。もうあきですね。",
+          "questions": [
+           {
+            "id": "dokkai_4_p1_q1",
+            "number": 1,
+            "promptJp": "今日の天気は、どうでしたか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "一日中さむくて、午後には雨もふりました。"
+             },
+             {
+              "id": "c2",
+              "textJp": "あさはあつかったですが、午後からさむくなりました。"
+             },
+             {
+              "id": "c3",
+              "textJp": "先週とおなじで、とてもあつい日でした。"
+             },
+             {
+              "id": "c4",
+              "textJp": "あさは雨でしたが、午後はあたたかくなりました。"
+             }
+            ],
+            "answer": "c1"
+           }
+          ]
+         },
+         {
+          "id": "dokkai_4_p2",
+          "textJp": "けんたさんへ\n今日は、かぜで休みましたね。だいじょうぶですか。先生から、おしらせが二つあります。あしたの午後、テストがあります。それから、金よう日は、たいいくのふくをもってきてください。\nさとう",
+          "questions": [
+           {
+            "id": "dokkai_4_p2_q1",
+            "number": 2,
+            "promptJp": "このメモについて、ただしいものはどれですか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "あしたの午前に、テストがあります。"
+             },
+             {
+              "id": "c2",
+              "textJp": "金よう日に、テストがあります。"
+             },
+             {
+              "id": "c3",
+              "textJp": "金よう日に、ふくを買いに行きます。"
+             },
+             {
+              "id": "c4",
+              "textJp": "あしたの午後に、テストがあります。"
+             }
+            ],
+            "answer": "c4"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "id": "dokkai_5",
+        "number": 5,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_5_p1",
+          "textJp": "山中さんのおばあさんへ\n先週は、おいしいりんごを、どうもありがとうございました。はこの中に、りんごが二十あって、びっくりしました。わたしは一人ですんでいますから、半分を、となりのへやのはやしさんにあげました。はやしさんは、きのう、そのりんごでつくったケーキをもってきました。とてもおいしかったです。のこりのりんごは、毎日あさごはんに食べています。来年のはるは、りんごの花を見に行きたいです。さむくなりましたから、どうぞおからだに気をつけてください。\nマリア",
+          "questions": [
+           {
+            "id": "dokkai_5_p1_q1",
+            "number": 1,
+            "promptJp": "マリアさんは、もらったりんごをどうしましたか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "ぜんぶ、毎日のあさごはんに食べました。"
+             },
+             {
+              "id": "c2",
+              "textJp": "半分で、じぶんでケーキをつくりました。"
+             },
+             {
+              "id": "c3",
+              "textJp": "半分を、はやしさんにあげました。"
+             },
+             {
+              "id": "c4",
+              "textJp": "ぜんぶ、となりのはやしさんにあげました。"
+             }
+            ],
+            "answer": "c3"
+           },
+           {
+            "id": "dokkai_5_p1_q2",
+            "number": 2,
+            "promptJp": "はやしさんは、きのう何をしましたか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "マリアさんに、りんごを半分あげました。"
+             },
+             {
+              "id": "c2",
+              "textJp": "マリアさんと、ケーキをつくりました。"
+             },
+             {
+              "id": "c3",
+              "textJp": "マリアさんと、りんごを買いに行きました。"
+             },
+             {
+              "id": "c4",
+              "textJp": "りんごでつくったケーキを、もってきました。"
+             }
+            ],
+            "answer": "c4"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 2,
+   "seed": 3696900553954368590,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Reading Practice",
+    "titleJp": "N5 読解",
+    "sections": [
+     {
+      "id": "reading",
+      "label": "Reading",
+      "labelJp": "読解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "dokkai_4",
+        "number": 4,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_4_p1",
+          "textJp": "わたしは、四月からうちでトマトをつくっています。毎日、学校へ行く前に水をあげます。先週、小さいきいろい花がさきました。七月ごろには、あかいトマトができるでしょう。",
+          "questions": [
+           {
+            "id": "dokkai_4_p1_q1",
+            "number": 1,
+            "promptJp": "この人は、いつトマトに水をあげますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "毎日、学校からかえったあとで"
+             },
+             {
+              "id": "c2",
+              "textJp": "毎日、学校へ行く前に"
+             },
+             {
+              "id": "c3",
+              "textJp": "毎週、学校が休みの日に"
+             },
+             {
+              "id": "c4",
+              "textJp": "四月と七月に"
+             }
+            ],
+            "answer": "c2"
+           }
+          ]
+         },
+         {
+          "id": "dokkai_4_p2",
+          "textJp": "わたしは毎日、七時半にうちを出ます。駅まで十分ぐらいあるいて、電車に二十分のります。でも、雨の日は駅までバスにのります。バスはよくおくれますから、いつもより十五分はやくうちを出ます。",
+          "questions": [
+           {
+            "id": "dokkai_4_p2_q1",
+            "number": 2,
+            "promptJp": "雨の日、この人は何時にうちを出ますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "七時半"
+             },
+             {
+              "id": "c2",
+              "textJp": "七時四十五分"
+             },
+             {
+              "id": "c3",
+              "textJp": "七時十五分"
+             },
+             {
+              "id": "c4",
+              "textJp": "七時二十分"
+             }
+            ],
+            "answer": "c3"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "id": "dokkai_5",
+        "number": 5,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_5_p1",
+          "textJp": "わたしのうちには、とても古い時けいがあります。そふが五十年前に、駅の前の店で買いました。そふはもういませんが、時けいは今もうごいています。この時けいは、一時間に一かい、大きいおとでなります。小さいとき、わたしはそのおとがきらいでした。よる、ねている時もなって、目がさめたからです。でも、今はそのおとを聞くと、やさしかったそふのことをおもいだします。先月、時けいがとまりました。父が、それを駅の前の店へもっていきました。店の人は、一週間でなおしました。",
+          "questions": [
+           {
+            "id": "dokkai_5_p1_q1",
+            "number": 1,
+            "promptJp": "小さいとき、この人はどうして時けいのおとがきらいでしたか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "そふのことをおもいだしたから"
+             },
+             {
+              "id": "c2",
+              "textJp": "よる、そのおとで目がさめたから"
+             },
+             {
+              "id": "c3",
+              "textJp": "時けいがよくとまったから"
+             },
+             {
+              "id": "c4",
+              "textJp": "時けいがとても古かったから"
+             }
+            ],
+            "answer": "c2"
+           },
+           {
+            "id": "dokkai_5_p1_q2",
+            "number": 2,
+            "promptJp": "先月、時けいはどうなりましたか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "とまって、父がなおしました。"
+             },
+             {
+              "id": "c2",
+              "textJp": "とまって、新しいのを買いました。"
+             },
+             {
+              "id": "c3",
+              "textJp": "とまって、店の人がなおしました。"
+             },
+             {
+              "id": "c4",
+              "textJp": "とまって、そふがなおしました。"
+             }
+            ],
+            "answer": "c3"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 3,
+   "seed": 2498281863997359144,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Reading Practice",
+    "titleJp": "N5 読解",
+    "sections": [
+     {
+      "id": "reading",
+      "label": "Reading",
+      "labelJp": "読解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "dokkai_4",
+        "number": 4,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_4_p1",
+          "textJp": "おばあちゃん、おげんきですか。わたしは四月から、新しい学校に行っています。学校までは電車で三十分です。クラスに友だちが五人できました。休みの日には、みんなでサッカーをします。八月に、会いに行きますね。",
+          "questions": [
+           {
+            "id": "dokkai_4_p1_q1",
+            "number": 1,
+            "promptJp": "この人について、ただしいものはどれですか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "学校まで、あるいて三十分かかります。"
+             },
+             {
+              "id": "c2",
+              "textJp": "新しい学校には、まだ友だちがいません。"
+             },
+             {
+              "id": "c3",
+              "textJp": "学校まで、電車で三十分かかります。"
+             },
+             {
+              "id": "c4",
+              "textJp": "休みの日には、一人でサッカーをします。"
+             }
+            ],
+            "answer": "c3"
+           }
+          ]
+         },
+         {
+          "id": "dokkai_4_p2",
+          "textJp": "プールのきまり\n・入る前に、シャワーをあびてください。\n・プールのそばで、はしらないでください。\n・食べものは、もって入らないでください。\n・小学生は、大人といっしょに入ってください。",
+          "questions": [
+           {
+            "id": "dokkai_4_p2_q1",
+            "number": 2,
+            "promptJp": "小学生がこのプールに入るとき、どうしますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "大人といっしょに入ります。"
+             },
+             {
+              "id": "c2",
+              "textJp": "小学生の友だちといっしょに入ります。"
+             },
+             {
+              "id": "c3",
+              "textJp": "シャワーをあびないで入ります。"
+             },
+             {
+              "id": "c4",
+              "textJp": "一人でプールに入ってもいいです。"
+             }
+            ],
+            "answer": "c1"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "id": "dokkai_5",
+        "number": 5,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_5_p1",
+          "textJp": "わたしには、フランスにペンフレンドがいます。名前はルカさんで、わたしとおなじ十五さいです。一年前から、毎月手がみを書いています。ルカさんは日本語を、わたしはフランス語をべんきょうしていますから、二人とも、手がみの半分を日本語で、半分をフランス語で書きます。先月の手がみには、ルカさんのまちのしゃしんが入っていました。川のそばに古いたてものがたくさんあって、とてもきれいでした。ルカさんは、来年の八月に、かぞくと日本へ来ます。そのとき、いっしょに山にのぼりたいです。",
+          "questions": [
+           {
+            "id": "dokkai_5_p1_q1",
+            "number": 1,
+            "promptJp": "二人は、どうやって手がみを書きますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "ぜんぶ日本語で書きます。"
+             },
+             {
+              "id": "c2",
+              "textJp": "ルカさんはフランス語だけで書きます。"
+             },
+             {
+              "id": "c3",
+              "textJp": "二人とも、フランス語で書きます。"
+             },
+             {
+              "id": "c4",
+              "textJp": "半分を日本語で、半分をフランス語で書きます。"
+             }
+            ],
+            "answer": "c4"
+           },
+           {
+            "id": "dokkai_5_p1_q2",
+            "number": 2,
+            "promptJp": "来年の八月に、何がありますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "ルカさんが日本へ来ます。"
+             },
+             {
+              "id": "c2",
+              "textJp": "わたしがフランスへ行きます。"
+             },
+             {
+              "id": "c3",
+              "textJp": "ルカさんが、まちのしゃしんをおくります。"
+             },
+             {
+              "id": "c4",
+              "textJp": "二人で、フランスの山にのぼります。"
+             }
+            ],
+            "answer": "c1"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 4,
+   "seed": 1779855970307544524,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Reading Practice",
+    "titleJp": "N5 読解",
+    "sections": [
+     {
+      "id": "reading",
+      "label": "Reading",
+      "labelJp": "読解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "dokkai_4",
+        "number": 4,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_4_p1",
+          "textJp": "わたしは、雨の日はどこへも出かけません。午前中は、へやで本を読みます。午後は、母といっしょにケーキをつくります。よるは、二人でそのケーキを食べて、テレビを見ます。",
+          "questions": [
+           {
+            "id": "dokkai_4_p1_q1",
+            "number": 1,
+            "promptJp": "この人は、雨の日の午後、何をしますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "へやで一人で本を読みます。"
+             },
+             {
+              "id": "c2",
+              "textJp": "母といっしょにテレビを見ます。"
+             },
+             {
+              "id": "c3",
+              "textJp": "友だちと店へ出かけます。"
+             },
+             {
+              "id": "c4",
+              "textJp": "母とケーキをつくります。"
+             }
+            ],
+            "answer": "c4"
+           }
+          ]
+         },
+         {
+          "id": "dokkai_4_p2",
+          "textJp": "としょかんの新しい時間\n四月一日から、としょかんの時間がかわります。\n火よう日〜金よう日　午前九時〜午後七時\n土よう日・日よう日　午前十時〜午後五時\n月よう日は休みです。",
+          "questions": [
+           {
+            "id": "dokkai_4_p2_q1",
+            "number": 2,
+            "promptJp": "四月から、金よう日のとしょかんは、何時から何時までですか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "午前九時から午後五時まで"
+             },
+             {
+              "id": "c2",
+              "textJp": "午前九時から午後七時まで"
+             },
+             {
+              "id": "c3",
+              "textJp": "午前十時から午後五時まで"
+             },
+             {
+              "id": "c4",
+              "textJp": "午前十時から午後七時まで"
+             }
+            ],
+            "answer": "c2"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "id": "dokkai_5",
+        "number": 5,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_5_p1",
+          "textJp": "日本語学校からのおしらせ\n今週は、三かいの三〇五きょうしつをつかいません。エアコンがこわれたからです。月よう日から木よう日まで、午前のクラスは、二かいの二〇一きょうしつでべんきょうします。金よう日は、みんなで外へ行って、古いおてらを見ます。午前九時に、駅の東口に来てください。おべんとうとのみものをもってきてください。三〇五きょうしつは、来週の月よう日から、またつかいます。しつもんは、一かいのじむしょで聞いてください。",
+          "questions": [
+           {
+            "id": "dokkai_5_p1_q1",
+            "number": 1,
+            "promptJp": "水よう日の午前のクラスは、どこでべんきょうしますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "三かいの三〇五きょうしつ"
+             },
+             {
+              "id": "c2",
+              "textJp": "一かいのじむしょ"
+             },
+             {
+              "id": "c3",
+              "textJp": "二かいの二〇一きょうしつ"
+             },
+             {
+              "id": "c4",
+              "textJp": "学校の外のおてら"
+             }
+            ],
+            "answer": "c3"
+           },
+           {
+            "id": "dokkai_5_p1_q2",
+            "number": 2,
+            "promptJp": "金よう日に、学生はどうしますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "九時に駅の東口へ行きます。"
+             },
+             {
+              "id": "c2",
+              "textJp": "九時に二〇一きょうしつへ行きます。"
+             },
+             {
+              "id": "c3",
+              "textJp": "九時に一かいのじむしょへ行きます。"
+             },
+             {
+              "id": "c4",
+              "textJp": "九時に三〇五きょうしつへ行きます。"
+             }
+            ],
+            "answer": "c1"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 5,
+   "seed": 5925113975188894269,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Reading Practice",
+    "titleJp": "N5 読解",
+    "sections": [
+     {
+      "id": "reading",
+      "label": "Reading",
+      "labelJp": "読解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "dokkai_4",
+        "number": 4,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_4_p1",
+          "textJp": "雨の日は、そふのへやで、いっしょにしょうぎをします。そふはとてもつよくて、わたしはいつもまけます。でも、先週の雨の日には、はじめてかちました。そふは「つぎはまけないよ」と言って、わらいました。",
+          "questions": [
+           {
+            "id": "dokkai_4_p1_q1",
+            "number": 1,
+            "promptJp": "先週の雨の日に、何がありましたか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "この人が、はじめてかちました。"
+             },
+             {
+              "id": "c2",
+              "textJp": "いつもとおなじで、そふにまけました。"
+             },
+             {
+              "id": "c3",
+              "textJp": "そふといっしょに、外へ出かけました。"
+             },
+             {
+              "id": "c4",
+              "textJp": "そふのへやで、一人で本を読みました。"
+             }
+            ],
+            "answer": "c1"
+           }
+          ]
+         },
+         {
+          "id": "dokkai_4_p2",
+          "textJp": "先週の日よう日、はじめてオムライスをつくりました。父といっしょにつくりました。ごはんはかんたんでしたが、たまごはむずかしかったです。でも、母は「おいしい」と言って、ぜんぶ食べました。",
+          "questions": [
+           {
+            "id": "dokkai_4_p2_q1",
+            "number": 2,
+            "promptJp": "オムライスをつくったとき、何がむずかしかったですか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "ごはん"
+             },
+             {
+              "id": "c2",
+              "textJp": "ケチャップ"
+             },
+             {
+              "id": "c3",
+              "textJp": "たまご"
+             },
+             {
+              "id": "c4",
+              "textJp": "にく"
+             }
+            ],
+            "answer": "c3"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "id": "dokkai_5",
+        "number": 5,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_5_p1",
+          "textJp": "わたしのペンフレンドは、メキシコにすんでいるアナさんです。二年前に、学校のじゅぎょうで、はじめてアナさんにメールを書きました。アナさんは日本のアニメが大すきで、日本語をべんきょうしています。わたしたちは、一週間に一かいメールを書きます。アナさんは日本語で書いて、わたしはえい語で書きます。先週、アナさんから小さいにもつが来ました。中には、メキシコのおかしと、アナさんがかいたえが入っていました。えには、アナさんのいぬと大きい木がかいてありました。わたしも、日本のおかしとゆかたをおくりたいです。いつか、メキシコでアナさんに会いたいです。",
+          "questions": [
+           {
+            "id": "dokkai_5_p1_q1",
+            "number": 1,
+            "promptJp": "先週、アナさんから何が来ましたか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "メキシコのおかしと、いぬのしゃしん"
+             },
+             {
+              "id": "c2",
+              "textJp": "日本のおかしと、ゆかた"
+             },
+             {
+              "id": "c3",
+              "textJp": "メキシコのおかしと、アナさんがかいたえ"
+             },
+             {
+              "id": "c4",
+              "textJp": "アニメの本と、アナさんのしゃしん"
+             }
+            ],
+            "answer": "c3"
+           },
+           {
+            "id": "dokkai_5_p1_q2",
+            "number": 2,
+            "promptJp": "この人は、これから何をしたいですか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "メキシコのおかしを、もっと食べたいです。"
+             },
+             {
+              "id": "c2",
+              "textJp": "アナさんと、日本のアニメを見たいです。"
+             },
+             {
+              "id": "c3",
+              "textJp": "スペイン語を、べんきょうしたいです。"
+             },
+             {
+              "id": "c4",
+              "textJp": "ゆかたをおくりたいです。"
+             }
+            ],
+            "answer": "c4"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 6,
+   "seed": 8411165033118033499,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Reading Practice",
+    "titleJp": "N5 読解",
+    "sections": [
+     {
+      "id": "reading",
+      "label": "Reading",
+      "labelJp": "読解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "dokkai_4",
+        "number": 4,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_4_p1",
+          "textJp": "さくらとしょかん　五月から時間がかわります\n月よう日〜金よう日：午前十時〜午後八時\n土よう日・日よう日：午前九時〜午後五時\n※毎月さいごの月よう日は、休みです。",
+          "questions": [
+           {
+            "id": "dokkai_4_p1_q1",
+            "number": 1,
+            "promptJp": "五月から、としょかんについて、ただしいものはどれですか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "月よう日は、九時からあいています。"
+             },
+             {
+              "id": "c2",
+              "textJp": "金よう日は、午後八時まであいています。"
+             },
+             {
+              "id": "c3",
+              "textJp": "日よう日は、八時まであいています。"
+             },
+             {
+              "id": "c4",
+              "textJp": "毎週月よう日は、休みです。"
+             }
+            ],
+            "answer": "c2"
+           }
+          ]
+         },
+         {
+          "id": "dokkai_4_p2",
+          "textJp": "山川先生\nきむらです。きのうの日本語のじゅぎょうのあと、きょうかしょがなくなりました。きょうかしょの後ろに、わたしの名前を書きました。先生は、きょうしつで見ませんでしたか。",
+          "questions": [
+           {
+            "id": "dokkai_4_p2_q1",
+            "number": 2,
+            "promptJp": "きむらさんは、どうして山川先生にメールを書きましたか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "きのう、じゅぎょうを休んだから"
+             },
+             {
+              "id": "c2",
+              "textJp": "きょうかしょに名前がないから"
+             },
+             {
+              "id": "c3",
+              "textJp": "先生のきょうかしょをかりたいから"
+             },
+             {
+              "id": "c4",
+              "textJp": "日本語のきょうかしょがなくなったから"
+             }
+            ],
+            "answer": "c4"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "id": "dokkai_5",
+        "number": 5,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_5_p1",
+          "textJp": "わたしのうちのちかくに、大きいこうえんがあります。日よう日は、あさはやく、よくそこへ行きます。あさ五時半のこうえんは、人が少なくて、とてもしずかです。いけのそばでは、おじいさんたちがたいそうをしています。わたしは、いけのまわりを、ゆっくり二かいあるきます。一かいは、十五分ぐらいです。六時ごろには、いぬのさんぽをする人や、はしる人が来て、少しにぎやかになります。かえりに、こうえんの前のパンやで、あたたかいパンを買います。その店は、あさ六時からあいています。",
+          "questions": [
+           {
+            "id": "dokkai_5_p1_q1",
+            "number": 1,
+            "promptJp": "この人は、こうえんで何をしますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "いぬといっしょに、はしります。"
+             },
+             {
+              "id": "c2",
+              "textJp": "いけのまわりを、ゆっくり二かいあるきます。"
+             },
+             {
+              "id": "c3",
+              "textJp": "おじいさんたちと、たいそうをします。"
+             },
+             {
+              "id": "c4",
+              "textJp": "いけのそばで、本を読みます。"
+             }
+            ],
+            "answer": "c2"
+           },
+           {
+            "id": "dokkai_5_p1_q2",
+            "number": 2,
+            "promptJp": "六時ごろ、こうえんはどうなりますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "人が来て、少しにぎやかになります。"
+             },
+             {
+              "id": "c2",
+              "textJp": "人がいなくなって、しずかになります。"
+             },
+             {
+              "id": "c3",
+              "textJp": "まだ、とてもしずかです。"
+             },
+             {
+              "id": "c4",
+              "textJp": "おじいさんたちがかえって、しずかになります。"
+             }
+            ],
+            "answer": "c1"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 7,
+   "seed": 5358832235680884223,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Reading Practice",
+    "titleJp": "N5 読解",
+    "sections": [
+     {
+      "id": "reading",
+      "label": "Reading",
+      "labelJp": "読解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "dokkai_4",
+        "number": 4,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_4_p1",
+          "textJp": "わたしのじてん車は、父が二十年前に買った古いものです。先月はブレーキがこわれて、今週はまえのタイヤがパンクしました。父は新しいのを買いたいと言いますが、わたしはこのじてん車がいちばんすきです。",
+          "questions": [
+           {
+            "id": "dokkai_4_p1_q1",
+            "number": 1,
+            "promptJp": "今週、じてん車はどうなりましたか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "まえのタイヤがパンクしました。"
+             },
+             {
+              "id": "c2",
+              "textJp": "ブレーキがまたこわれました。"
+             },
+             {
+              "id": "c3",
+              "textJp": "父が新しいじてん車を買いました。"
+             },
+             {
+              "id": "c4",
+              "textJp": "父がまえのタイヤをなおしました。"
+             }
+            ],
+            "answer": "c1"
+           }
+          ]
+         },
+         {
+          "id": "dokkai_4_p2",
+          "textJp": "ゆうたさんへ\nあしたから三日間、りょこうに行きます。ねこのミミのごはんを、おねがいします。ごはんは、あさとよるにあげてください。水は毎日、新しいのにかえてください。ミミは、さかながすきです。\nりん",
+          "questions": [
+           {
+            "id": "dokkai_4_p2_q1",
+            "number": 2,
+            "promptJp": "ゆうたさんは、毎日何をしますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "あさだけごはんをあげて、水をかえます。"
+             },
+             {
+              "id": "c2",
+              "textJp": "あさとよるにごはんをあげて、水をかえます。"
+             },
+             {
+              "id": "c3",
+              "textJp": "ねこにさかなを買って、あげます。"
+             },
+             {
+              "id": "c4",
+              "textJp": "あさとよるに、ねこといっしょにさんぽをします。"
+             }
+            ],
+            "answer": "c2"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "id": "dokkai_5",
+        "number": 5,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_5_p1",
+          "textJp": "わたしは先月、あにから古いじてん車をもらいました。あには、四月から外国の大学に行っています。でも、このじてん車はよくこわれます。はじめの週に、ライトがつかなくなりました。つぎの週は、学校へ行く時にチェーンがはずれて、じゅぎょうにおくれました。きのう、駅のそばのじてん車やへもっていきました。店の人は、「なおすのは一万円、新しいじてん車は三万円です」と言いました。でも、わたしは新しいのを買いません。来週、その店でなおします。",
+          "questions": [
+           {
+            "id": "dokkai_5_p1_q1",
+            "number": 1,
+            "promptJp": "この人は、どうしてじゅぎょうにおくれましたか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "はじめの週に、ライトがつかなくなったから"
+             },
+             {
+              "id": "c2",
+              "textJp": "じてん車やへ行ったから"
+             },
+             {
+              "id": "c3",
+              "textJp": "あにのじてん車をさがしていたから"
+             },
+             {
+              "id": "c4",
+              "textJp": "学校へ行く時に、チェーンがはずれたから"
+             }
+            ],
+            "answer": "c4"
+           },
+           {
+            "id": "dokkai_5_p1_q2",
+            "number": 2,
+            "promptJp": "この人は、来週何をしますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "三万円の新しいじてん車を買います。"
+             },
+             {
+              "id": "c2",
+              "textJp": "外国のあにに会いに行きます。"
+             },
+             {
+              "id": "c3",
+              "textJp": "店でじてん車をなおします。"
+             },
+             {
+              "id": "c4",
+              "textJp": "一万円の新しいじてん車を買います。"
+             }
+            ],
+            "answer": "c3"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 8,
+   "seed": 3814705400836988675,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Reading Practice",
+    "titleJp": "N5 読解",
+    "sections": [
+     {
+      "id": "reading",
+      "label": "Reading",
+      "labelJp": "読解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "dokkai_4",
+        "number": 4,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_4_p1",
+          "textJp": "今年の一月から、日よう日の午前に、ギターをならっています。先生は大学生の男の人です。はじめはむずかしかったですが、今はとてもたのしいです。来年は、友だちの前でひきたいです。",
+          "questions": [
+           {
+            "id": "dokkai_4_p1_q1",
+            "number": 1,
+            "promptJp": "この人は、来年何をしたいですか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "友だちの前でギターをひきたいです。"
+             },
+             {
+              "id": "c2",
+              "textJp": "大学に入って、ギターをならいたいです。"
+             },
+             {
+              "id": "c3",
+              "textJp": "日よう日の午後もギターをならいたいです。"
+             },
+             {
+              "id": "c4",
+              "textJp": "友だちにギターをおしえたいです。"
+             }
+            ],
+            "answer": "c1"
+           }
+          ]
+         },
+         {
+          "id": "dokkai_4_p2",
+          "textJp": "駅前としょかんからのおしらせ\n来月から、水よう日だけ、よる九時まであいています。ほかの日は、今までとおなじで、午前九時から午後六時までです。日よう日は休みです。しごとや学校のあとに、どうぞ来てください。",
+          "questions": [
+           {
+            "id": "dokkai_4_p2_q1",
+            "number": 2,
+            "promptJp": "来月から、としょかんは何がかわりますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "毎日、よる九時まであいています。"
+             },
+             {
+              "id": "c2",
+              "textJp": "日よう日も、午前九時から午後六時まであいています。"
+             },
+             {
+              "id": "c3",
+              "textJp": "水よう日は、よる九時まであいています。"
+             },
+             {
+              "id": "c4",
+              "textJp": "水よう日は、休みになります。"
+             }
+            ],
+            "answer": "c3"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "id": "dokkai_5",
+        "number": 5,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_5_p1",
+          "textJp": "わたしは毎日、六時におきます。まず、水を一ぱい飲みます。それから、いぬのタロウと、ちかくのこうえんを三十分さんぽします。タロウは、さんぽが大すきです。うちにかえると、シャワーをあびて、あさごはんを食べます。あさごはんは、いつもパンとたまごとコーヒーです。七時四十分にうちを出て、バスで会社へ行きます。バスの中では、いつも本を読みます。会社は八時半からです。でも、土よう日と日よう日は、九時までねています。その日のさんぽには、父が行きます。",
+          "questions": [
+           {
+            "id": "dokkai_5_p1_q1",
+            "number": 1,
+            "promptJp": "この人は、さんぽからうちにかえって、まず何をしますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "水を飲みます。"
+             },
+             {
+              "id": "c2",
+              "textJp": "シャワーをあびます。"
+             },
+             {
+              "id": "c3",
+              "textJp": "あさごはんを食べます。"
+             },
+             {
+              "id": "c4",
+              "textJp": "いぬにごはんをあげます。"
+             }
+            ],
+            "answer": "c2"
+           },
+           {
+            "id": "dokkai_5_p1_q2",
+            "number": 2,
+            "promptJp": "土よう日のあさ、この人はどうしますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "六時におきて、いぬといっしょにさんぽに行きます。"
+             },
+             {
+              "id": "c2",
+              "textJp": "七時四十分に、バスで会社へ行きます。"
+             },
+             {
+              "id": "c3",
+              "textJp": "父といっしょに、さんぽに行きます。"
+             },
+             {
+              "id": "c4",
+              "textJp": "九時までねていて、さんぽには行きません。"
+             }
+            ],
+            "answer": "c4"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 9,
+   "seed": 4349099422768613080,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Reading Practice",
+    "titleJp": "N5 読解",
+    "sections": [
+     {
+      "id": "reading",
+      "label": "Reading",
+      "labelJp": "読解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "dokkai_4",
+        "number": 4,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_4_p1",
+          "textJp": "ゆいさんへ\n来週の土よう日は、わたしのたんじょう日です。午後二時から、うちで小さいパーティーをします。ケーキは母がつくりますから、何もいりません。駅まで、父が車でむかえに行きます。\nまり",
+          "questions": [
+           {
+            "id": "dokkai_4_p1_q1",
+            "number": 1,
+            "promptJp": "ゆいさんは、駅からまりさんのうちまで、どうやって行きますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "まりさんといっしょにあるいて行きます。"
+             },
+             {
+              "id": "c2",
+              "textJp": "まりさんのお父さんの車で行きます。"
+             },
+             {
+              "id": "c3",
+              "textJp": "一人でバスにのって行きます。"
+             },
+             {
+              "id": "c4",
+              "textJp": "まりさんのお母さんの車で行きます。"
+             }
+            ],
+            "answer": "c2"
+           }
+          ]
+         },
+         {
+          "id": "dokkai_4_p2",
+          "textJp": "わたしのあさは、いそがしいです。六時半におきて、母とあさごはんをつくります。七時から、みんなで食べます。そのあと、父の新聞を少し読んで、八時に学校へ行きます。",
+          "questions": [
+           {
+            "id": "dokkai_4_p2_q1",
+            "number": 2,
+            "promptJp": "「そのあと」とありますが、何のあとですか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "みんなであさごはんを食べたあと"
+             },
+             {
+              "id": "c2",
+              "textJp": "六時半におきたあと"
+             },
+             {
+              "id": "c3",
+              "textJp": "母といっしょに、あさごはんをつくったあと"
+             },
+             {
+              "id": "c4",
+              "textJp": "父の新聞を読んだあと"
+             }
+            ],
+            "answer": "c1"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "id": "dokkai_5",
+        "number": 5,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_5_p1",
+          "textJp": "みなさんへ\n今週は、たいいくかんをつかいません。ゆかをなおすからです。たいいくのじゅぎょうは、外のグラウンドでします。雨の日は、きょうしつでビデオを見ます。バスケットボールのれんしゅうは、月よう日と水よう日は休みです。金よう日は、駅のちかくの大きいたいいくかんで、れんしゅうします。午後四時に、学校のもんの前に来てください。みんなでそこまであるいて行きます。たいいくかんは、来週の火よう日から、またつかいます。",
+          "questions": [
+           {
+            "id": "dokkai_5_p1_q1",
+            "number": 1,
+            "promptJp": "今週、雨の日のたいいくのじゅぎょうは、どうなりますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "外のグラウンドでじゅぎょうをします。"
+             },
+             {
+              "id": "c2",
+              "textJp": "駅のちかくのたいいくかんでします。"
+             },
+             {
+              "id": "c3",
+              "textJp": "じゅぎょうは休みになって、うちへかえります。"
+             },
+             {
+              "id": "c4",
+              "textJp": "きょうしつでビデオを見ます。"
+             }
+            ],
+            "answer": "c4"
+           },
+           {
+            "id": "dokkai_5_p1_q2",
+            "number": 2,
+            "promptJp": "金よう日に、バスケットボールのれんしゅうをする人は、どうしますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "午後四時に、学校のもんの前に行きます。"
+             },
+             {
+              "id": "c2",
+              "textJp": "午後四時に、駅の前に行きます。"
+             },
+             {
+              "id": "c3",
+              "textJp": "午後四時に、学校のたいいくかんへ行きます。"
+             },
+             {
+              "id": "c4",
+              "textJp": "れんしゅうは休みですから、かえります。"
+             }
+            ],
+            "answer": "c1"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 10,
+   "seed": 1551324759567596360,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Reading Practice",
+    "titleJp": "N5 読解",
+    "sections": [
+     {
+      "id": "reading",
+      "label": "Reading",
+      "labelJp": "読解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "dokkai_4",
+        "number": 4,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_4_p1",
+          "textJp": "わたしは毎日、バスと電車で会社へ行きます。うちから駅まではバスで十五分、駅から会社までは電車で四十分です。でも、かえりは、おそい時間にはバスがありませんから、駅からうちまで三十分あるきます。",
+          "questions": [
+           {
+            "id": "dokkai_4_p1_q1",
+            "number": 1,
+            "promptJp": "かえりは、会社からうちまでどのぐらいかかりますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "五十五分"
+             },
+             {
+              "id": "c2",
+              "textJp": "一時間十分"
+             },
+             {
+              "id": "c3",
+              "textJp": "三十分"
+             },
+             {
+              "id": "c4",
+              "textJp": "一時間二十五分"
+             }
+            ],
+            "answer": "c2"
+           }
+          ]
+         },
+         {
+          "id": "dokkai_4_p2",
+          "textJp": "おじさん、たんじょう日のプレゼント、ありがとうございました。あおいかさは、とてもきれいで、すぐに気に入りました。きのうは雨でしたから、そのかさをさして学校へ行きました。友だちも「いいね」と言いました。",
+          "questions": [
+           {
+            "id": "dokkai_4_p2_q1",
+            "number": 2,
+            "promptJp": "この人は、きのう何をしましたか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "友だちと、あおいかさを買いに行きました。"
+             },
+             {
+              "id": "c2",
+              "textJp": "おじさんと、ごはんを食べに行きました。"
+             },
+             {
+              "id": "c3",
+              "textJp": "もらったかさをさして、学校へ行きました。"
+             },
+             {
+              "id": "c4",
+              "textJp": "おじさんに、かさをプレゼントしました。"
+             }
+            ],
+            "answer": "c3"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "id": "dokkai_5",
+        "number": 5,
+        "type": "reading-passage",
+        "instructionsJp": "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。",
+        "instructions": "Read the passage and answer the questions.",
+        "passages": [
+         {
+          "id": "dokkai_5_p1",
+          "textJp": "七月十日（水）\n先月は、雨の日がとても多かったです。毎日かさをもって学校へ行きましたから、たいへんでした。でも、今週から、きゅうにあつくなりました。今日は、あさから空があおくて、くもが一つもありませんでした。午後は、三十五どまで上がりました。学校からかえって、すぐにつめたい水を飲みました。よるも、あまりすずしくなりませんでした。来週から、なつ休みです。今年は、父と山へ行きます。山の上は、すずしいでしょう。たのしみです。",
+          "questions": [
+           {
+            "id": "dokkai_5_p1_q1",
+            "number": 1,
+            "promptJp": "今日の天気について、ただしいものはどれですか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "あさは雨でしたが、午後ははれました。"
+             },
+             {
+              "id": "c2",
+              "textJp": "くもが一つもなくて、午後はとてもあつかったです。"
+             },
+             {
+              "id": "c3",
+              "textJp": "くもが多くて、すずしい一日でした。"
+             },
+             {
+              "id": "c4",
+              "textJp": "一日中雨で、少しさむかったです。"
+             }
+            ],
+            "answer": "c2"
+           },
+           {
+            "id": "dokkai_5_p1_q2",
+            "number": 2,
+            "promptJp": "この人は、なつ休みに何をしますか。",
+            "choices": [
+             {
+              "id": "c1",
+              "textJp": "父とうみへ行きます。"
+             },
+             {
+              "id": "c2",
+              "textJp": "友だちと山にのぼります。"
+             },
+             {
+              "id": "c3",
+              "textJp": "母といっしょに、山の上のホテルにとまります。"
+             },
+             {
+              "id": "c4",
+              "textJp": "父といっしょに山へ行きます。"
+             }
+            ],
+            "answer": "c4"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

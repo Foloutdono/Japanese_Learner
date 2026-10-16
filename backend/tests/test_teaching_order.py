@@ -102,3 +102,20 @@ def test_a_section_run_serves_a_level_in_teaching_order_with_each_card_its_own(c
         app.dependency_overrides.pop(get_user_id, None)
         batch_cache.reset()
         _wipe(user)
+
+
+def test_the_kanji_order_is_the_deck_in_kanjidic_frequency():
+    # kanji_frequency.json is what `python -m scripts.build_frequency_index
+    # --kanji-db` writes from the deck: a character the deck gained and
+    # the file missed is taught after every ranked one (分 was, until
+    # plan 226 rebuilt it with the 171 jōyō characters the deck lacked).
+    import json
+    import os
+
+    from scripts.build_frequency_index import kanji_basic_from_db, kanji_frequency_order
+
+    base = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "datas", "kanji")
+    with open(os.path.join(base, "kanji_deck.json"), encoding="utf-8") as f:
+        deck = json.load(f)
+    ordered, _ranked, _unranked = kanji_frequency_order(kanji_basic_from_db(os.path.join(base, "kanji.sqlite3")), deck)
+    assert KANJI_FREQUENCY_ORDER == ordered, "run python -m scripts.build_frequency_index --kanji-db"

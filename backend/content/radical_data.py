@@ -25,7 +25,7 @@ MEMORY NOTE (2026-09): KANJI_RADICALS used to be all 13,108 rows of
 kanji_radicals.json, loaded here AND again in routes/dictionary.py AND
 again in study/exam_kanji_gen.py — three copies of the same dump, despite
 this module's whole reason for owning it being to read it once. It is now
-the 2,212 deck characters, resolved in one query against
+the 2,383 deck characters, resolved in one query against
 datas/kanji/kanji.sqlite3, and radical_for() falls through to that same
 database for anything else. Callers see no change: every character
 KANJIDIC2 covers still resolves, it just isn't all held in RAM to do it.
@@ -64,7 +64,7 @@ def radical_for(kanji: str) -> dict | None:
     {number, char, stroke_count} for a kanji, or None when the KANJIDIC2
     dump doesn't cover it. stroke_count here is the RADICAL's.
 
-    Answers for ANY character, not just a deck one: the deck's 2,212 come
+    Answers for ANY character, not just a deck one: the deck's 2,383 come
     from the table above, everything else from the database. A personal
     card written around an obscure character resolves its radical exactly
     as it did when the whole dump was in memory.
