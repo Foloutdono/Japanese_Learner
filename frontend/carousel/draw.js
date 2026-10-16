@@ -129,7 +129,8 @@ function noShadow(ctx) {
 
 function rrect(ctx, x, y, w, h, r) {
   ctx.beginPath()
-  ctx.roundRect(x, y, w, h, Math.min(r, h / 2, w / 2))
+  // A box squeezed to nothing has no corner to round, never a negative one.
+  ctx.roundRect(x, y, w, h, Math.max(0, Math.min(r, Math.abs(h) / 2, Math.abs(w) / 2)))
 }
 
 function measure(ctx, text, f, tr = 0) {

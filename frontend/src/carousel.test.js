@@ -1195,9 +1195,14 @@ describe('the conversion carousels (plan 215)', () => {
       }
     }
     const sentencePlan = some.find(x => x.src.id === 'sentence' && x.lang === 'en').p
-    expect(funnelOf('plates', sentencePlan).feature).toBe('read')
+    // A sentence shows the reading practice, its own run (plan 215b).
+    expect(funnelOf('plates', sentencePlan).feature).toBe('reading')
     expect(funnelOf('exam', sentencePlan).feature).toBe('exam')
-    const studied = { lesson: 'grammar', word: 'words', kanji: 'kanji', kana: 'kana', theme: 'words', lookalike: 'kanji', dialogue: 'grammar', trap: 'grammar', passage: 'read' }
+    expect(funnelOf('build', sentencePlan).feature).toBe('translation')
+    const studied = {
+      translation: 'translation', passage: 'comprehension', lesson: 'grammar', word: 'words', kanji: 'kanji', kana: 'kana',
+      theme: 'words', lookalike: 'kanji', dialogue: 'grammar', trap: 'grammar',
+    }
     for (const { src, p } of some) if (studied[src.id]) expect(funnelOf('plates', p).feature, src.id).toBe(studied[src.id])
     // Any feature can stand in any carousel's call to action, on either ground.
     for (const { p } of some.filter(x => x.lang === 'fr').slice(0, 4)) {
@@ -1211,6 +1216,18 @@ describe('the conversion carousels (plan 215)', () => {
       }
     }
   }))
+
+  it('has a call to action for every practice mode, the questions after them and Today', () => {
+    for (const f of ['reading', 'comprehension', 'translation', 'listen', 'composition', 'exam', 'ask', 'today', 'analyser']) expect(FEATURES, f).toContain(f)
+    // The question asked after an exercise is answered by the bank's own line on its point.
+    const { p } = some.find(x => x.src.id === 'sentence' && x.lang === 'en')
+    const { ctx, texts } = stubContext()
+    deck('plates', p, FORMATS.post, { design: 'clarte', feature: 'ask' }).find(x => x.key === 'cta').draw(ctx)
+    const point = p.funnel.points[0]?.pattern
+    if (point && p.funnel.keys.some(k => k.includes(point) && k.length <= 140)) {
+      expect(texts.join(' '), point).toContain(FUNNEL.en.features.ask.ask(point))
+    }
+  })
 
   it('holds a hook as long as a question in a short', () => {
     expect(slideSeconds(40, 'ask').ask).toBe(true)

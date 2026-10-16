@@ -48,11 +48,24 @@ read:
 
 The studio picks how many are dealt (Slides: 3 stops at the call to
 action, 4 adds the key points, 5 the detail before them), which feature
-the call to action shows (the item's own by default: reading for a
-sentence or a passage, grammar for a lesson, a reply or a trap, the
-vocabulary for a word or a theme, the kanji, the kana, the mock exams for
-an exam or a spelling quiz; or any other, dictation among them), and the
-look, the three directions drawn for it:
+the call to action shows, and the look, the three directions drawn for it.
+Every practice mode has its own call to action (plan 215b), and so do the
+analyser, the question asked after an exercise and Today:
+
+| Feature | The item's own for | Its picture |
+| --- | --- | --- |
+| Reading | a sentence | the run in three panels: the sentence and the clock's shutter coming over it, its reading typed in rōmaji, then checked and cut word by word |
+| Comprehension | a passage | a text, its questions, the answers checked |
+| Translation | a translation, a "build it" | the sentence in the reader's language, the Japanese typed, the tutor's read |
+| Dictation | | headphones, the rōmaji typed and checked, on its line of three stops |
+| Composition | | the point given, a sentence with it, the tutor's read |
+| Mock exams | a mock exam, a spelling quiz | the paper in its four sections, its clock, its score |
+| Analyser | | text, YouTube and photo into one analysed sentence |
+| Questions | | the exercise graded, a question (問) and its short answer (答): the bank's own line on the item's point, else one the bank teaches too |
+| Today | | the day's dial and its lines' arcs, the lines it deals from, and Depart |
+| Vocabulary, Kanji, Grammar, Kana | a word or a theme; a kanji or lookalikes; a lesson, a reply, a trap; a kana | the forgetting curve; a kanji stroke by stroke; rule, scene, quiz; the kana's row heard and traced |
+
+The looks:
 
 | Look | | Is |
 | --- | --- | --- |
@@ -65,13 +78,10 @@ look, the three directions drawn for it:
 
 What the call to action promises is the app's own description of the
 feature (its practice screens', its promo stories'), and its picture a
-schema of what the feature does (three ways in to one analysed sentence,
-two listens then the rōmaji checked, a paper in its four sections with
-its clock, the forgetting curve lifted by each review, a kanji built
-stroke by stroke, the rule then a scene then a quiz on the grammar line,
-the kana's row heard and traced), never a figure: a count is no reason
-to tap. Each picture is drawn on an 800 × 420 board scaled to its room,
-its words 30px at least on the board. A hook whose item needs the room
+schema of what the feature does, never a figure: a count is no reason
+to tap. Each picture is drawn on an 800 × 420 board (800 × 340 for a run
+told in three panels) scaled to its room, its words 30px at least on the
+board. A hook whose item needs the room
 (a question and its answers, a long sentence) takes a one-line heading
 instead of the large one; a block still too tall at its smallest rung is
 drawn smaller as a whole rather than past the foot.

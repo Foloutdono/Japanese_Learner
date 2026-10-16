@@ -19,14 +19,16 @@ import {
   ASC, FS, SP, R, alpha, fit, font, frame, hasKanji, layoutSentence, drawSentence, mark, measure, metal, METAL_H,
   mix, palette, paragraph, paragraphH, rrect, strokeBox, text,
 } from './draw.js'
-import { analyserLine, pointCard } from './app.js'
+import { analyserLine, departButton, pointCard } from './app.js'
 import { SITE } from './strings.js'
 import { picked } from './sources.js'
 import { withoutGiveaways } from './quizzes.js'
 
 export const DESIGNS = ['clarte', 'defi', 'fiche']
 export const LENGTHS = [3, 4, 5]
-export const FEATURES = ['read', 'listen', 'exam', 'words', 'kanji', 'grammar', 'kana']
+// The app's features a call to action can show (plan 215b: every practice
+// mode, the analyser, the question after an exercise, Today).
+export const FEATURES = ['reading', 'comprehension', 'translation', 'listen', 'composition', 'exam', 'analyser', 'ask', 'today', 'words', 'kanji', 'grammar', 'kana']
 
 // ── The words ─────────────────────────────────────────────────
 export const WORDS = {
@@ -56,7 +58,13 @@ export const WORDS = {
     them: 'Them', you: 'You',
     cta: { head: 'Want more like this?', also: 'Also', go: `Go to ${SITE}`, band: 'More on Tsuji' },
     features: {
-      read: { name: 'Read anything', line: 'Paste a sentence, a YouTube link or a photo: Tsuji cuts it word by word.', short: 'Reading', inputs: ['Text', 'YouTube', 'Photo'] },
+      reading: { name: 'Read against the clock', line: 'Read the sentence before the clock covers it, write its reading in rōmaji, then see it cut word by word.', short: 'Reading', steps: ['Read', 'Write', 'Check'], romaji: 'rōmaji' },
+      comprehension: { name: 'Read a whole text', line: 'A short text, then its questions: the exam’s reading section, rehearsed.', short: 'Comprehension', steps: ['Read', 'Answer', 'Check'] },
+      translation: { name: 'Say it in Japanese', line: 'A sentence to put into Japanese, then a reference answer and the tutor’s read on yours.', short: 'Translation', steps: ['Read', 'Say it', 'Tutor'] },
+      composition: { name: 'Write your own sentences', line: 'You are given a grammar point: write a sentence that uses it, and a tutor reads it back.', short: 'Composition', steps: ['Point', 'Write', 'Tutor'] },
+      analyser: { name: 'Read anything', line: 'Paste a sentence, a YouTube link or a photo: Tsuji cuts it word by word.', short: 'Analyser', inputs: ['Text', 'YouTube', 'Photo'] },
+      ask: { name: 'Ask about it', line: 'After an exercise, ask a short question about it: a short, precise answer comes back.', short: 'Questions', ask: p => `What does ${p} do here?`, fallback: ['Why に here, and not で?', 'に marks where something is; で, where an action takes place.'] },
+      today: { name: 'Today, in one run', line: 'Every review due, across every section, in one queue: one tap on Depart.', short: 'Today', depart: 'Depart', unit: 'due', lines: ['かな', '単語', '漢字', '文法'] },
       listen: { name: 'Train your ear', line: 'Two listens, no more: write what you hear, in rōmaji. N5 to N1.', short: 'Dictation', steps: ['Listen', 'Write', 'Check'] },
       exam: { name: 'Mock JLPT exams', line: 'Whole papers in the JLPT’s format, timed and scored, listening included.', short: 'Mock exams' },
       words: { name: 'Never lose a word', line: 'Words from N5 to N1, brought back by spaced repetition. Nothing to set up.', short: 'Vocabulary', memory: 'memory', time: 'time', review: 'review' },
@@ -91,7 +99,13 @@ export const WORDS = {
     them: 'En face', you: 'Toi',
     cta: { head: 'Envie d’en voir plus ?', also: 'Et aussi', go: `Va sur ${SITE}`, band: 'Plus sur Tsuji' },
     features: {
-      read: { name: 'Tout lire', line: 'Colle une phrase, un lien YouTube ou une photo : Tsuji la découpe mot à mot.', short: 'Lecture', inputs: ['Texte', 'YouTube', 'Photo'] },
+      reading: { name: 'Lis contre la montre', line: 'Lis la phrase avant que le chrono ne la couvre, écris sa lecture en rōmaji, puis découvre-la mot à mot.', short: 'Lecture', steps: ['Lis', 'Écris', 'Vérifie'], romaji: 'rōmaji' },
+      comprehension: { name: 'Lis un texte entier', line: 'Un texte court, puis ses questions : l’épreuve de lecture de l’examen, en répétition.', short: 'Compréhension', steps: ['Lis', 'Réponds', 'Vérifie'] },
+      translation: { name: 'Dis-le en japonais', line: 'Une phrase à dire en japonais, puis une réponse de référence et l’avis du tuteur sur la tienne.', short: 'Traduction', steps: ['Lis', 'Dis-le', 'Tuteur'] },
+      composition: { name: 'Écris tes propres phrases', line: 'Un point de grammaire est donné : écris une phrase qui l’emploie, un tuteur te la relit.', short: 'Rédaction', steps: ['Le point', 'Écris', 'Tuteur'] },
+      analyser: { name: 'Tout lire', line: 'Colle une phrase, un lien YouTube ou une photo : Tsuji la découpe mot à mot.', short: 'Analyseur', inputs: ['Texte', 'YouTube', 'Photo'] },
+      ask: { name: 'Pose ta question', line: 'Après un exercice, pose une courte question dessus : une réponse courte et précise arrive.', short: 'Questions', ask: p => `Que fait ${p} ici ?`, fallback: ['Pourquoi に ici, et pas で ?', 'に marque où se trouve une chose ; で, où se fait une action.'] },
+      today: { name: 'Aujourd’hui, en un trajet', line: 'Toutes les révisions dues, toutes sections confondues, dans une file unique : un geste sur Embarquer.', short: 'Aujourd’hui', depart: 'Embarquer', unit: 'à réviser', lines: ['かな', '単語', '漢字', '文法'] },
       listen: { name: 'Entraîne ton oreille', line: 'Deux écoutes, pas plus : écris en rōmaji ce que tu entends. Du N5 au N1.', short: 'Dictée', steps: ['Écoute', 'Écris', 'Vérifie'] },
       exam: { name: 'Des JLPT blancs', line: 'Des épreuves entières au format du JLPT, chronométrées et notées, écoute comprise.', short: 'Examens blancs' },
       words: { name: 'Ne perds plus un mot', line: 'Les mots du N5 au N1, ramenés par la répétition espacée. Rien à régler.', short: 'Vocabulaire', memory: 'mémoire', time: 'temps', review: 'révision' },
@@ -107,12 +121,26 @@ const weld = (lang, s) => (lang === 'fr' ? String(s).replace(/ ([:;!?»])/g, ' 
 const wordsOf = lang => WORDS[lang === 'fr' ? 'fr' : 'en']
 
 // Each feature's line (config/tabs.js) and its picture in the "also" row.
-const FEATURE_LINE = { read: 'reading', listen: 'kakitori', exam: 'exam', words: 'vocab', kanji: 'kanji', grammar: 'grammar', kana: 'kana' }
-const FEATURE_ICON = { read: '📖', listen: '🎧', exam: '⏱️', words: '🔁', kanji: '✍️', grammar: '💬', kana: '🔤' }
+const FEATURE_LINE = {
+  reading: 'reading', comprehension: 'rikai', translation: 'honyaku', listen: 'kakitori', composition: 'sakubun', exam: 'exam',
+  analyser: 'reading', ask: 'gold', today: 'gold', words: 'vocab', kanji: 'kanji', grammar: 'grammar', kana: 'kana',
+}
+const FEATURE_ICON = {
+  reading: '📖', comprehension: '📰', translation: '🌐', listen: '🎧', composition: '✍️', exam: '⏱️',
+  analyser: '🔍', ask: '💬', today: '🌅', words: '🔁', kanji: '🖌️', grammar: '🧩', kana: '🔤',
+}
+const featureInk = (p, f) => p.line[FEATURE_LINE[f]] || p.gold
 // The two features shown beside the one a post promotes: reading,
 // dictation and the mock exams first, as the owner asked (plan 215).
-const ALSO = { read: ['listen', 'exam'], listen: ['read', 'exam'], exam: ['read', 'listen'], words: ['read', 'exam'], kanji: ['words', 'listen'], grammar: ['read', 'exam'], kana: ['listen', 'words'] }
-const FEATURE_OF = { sentence: 'read', translation: 'read', passage: 'read', lesson: 'grammar', dialogue: 'grammar', trap: 'grammar', word: 'words', theme: 'words', kanji: 'kanji', lookalike: 'kanji', kana: 'kana' }
+const ALSO = {
+  reading: ['listen', 'ask'], comprehension: ['reading', 'exam'], translation: ['composition', 'ask'], listen: ['reading', 'exam'],
+  composition: ['translation', 'ask'], exam: ['comprehension', 'listen'], analyser: ['reading', 'ask'], ask: ['reading', 'translation'],
+  today: ['words', 'reading'], words: ['today', 'reading'], kanji: ['words', 'listen'], grammar: ['composition', 'exam'], kana: ['listen', 'words'],
+}
+const FEATURE_OF = {
+  sentence: 'reading', translation: 'translation', passage: 'comprehension', lesson: 'grammar', dialogue: 'grammar', trap: 'grammar',
+  word: 'words', theme: 'words', kanji: 'kanji', lookalike: 'kanji', kana: 'kana',
+}
 
 // ── What each slide shows ─────────────────────────────────────
 /** The path of a type over a plan: { hook, solution, detail, keys,
@@ -120,7 +148,7 @@ const FEATURE_OF = { sentence: 'read', translation: 'read', passage: 'read', les
  *  has nothing to draw it from. */
 export function funnelOf(type, pl, opts = {}) {
   const f = pl.funnel || {}
-  const base = { keys: f.keys || [], feature: FEATURE_OF[pl.source] || 'read' }
+  const base = { keys: f.keys || [], feature: FEATURE_OF[pl.source] || 'reading' }
   const whys = qs => qs.map(q => q.explain?.why || (q.explain?.head && q.explain?.sense ? `${q.explain.head}: ${q.explain.sense}` : '')).filter(Boolean)
   const asked = (qs, extra = {}) => qs.length ? {
     ...base, feature: 'exam', ...extra,
@@ -149,6 +177,7 @@ export function funnelOf(type, pl, opts = {}) {
       if (!b) return null
       return {
         ...base,
+        feature: 'translation',
         hook: { kind: 'quote', text: b.translation, ask: 'build', seconds: 10 },
         solution: { kind: 'answer', rows: b.rows, romaji: b.romaji, translation: b.translation },
         detail: { kind: 'rows', items: b.steps.flatMap(s => s.items).filter(x => x.t && x.label).map(x => ({ t: x.t, main: x.label, line: x.line })), label: 'words' },
@@ -298,7 +327,7 @@ export function funnelDeck(type, pl, fmt, opts = {}) {
 // ── The look ──────────────────────────────────────────────────
 function lookOf(design, fmt, pl) {
   const p = palette(design === 'defi' ? 'sumi' : 'paper')
-  return { design, fmt, fr: frame(fmt), p, pl, W: wordsOf(pl.lang), lang: pl.lang, line: p.line[pl.line] || p.line[FEATURE_LINE[FEATURE_OF[pl.source]]] || p.gold }
+  return { design, fmt, fr: frame(fmt), p, pl, W: wordsOf(pl.lang), lang: pl.lang, line: p.line[pl.line] || featureInk(p, FEATURE_OF[pl.source]) }
 }
 function context(ctx, look) {
   ctx.shadowColor = 'transparent'
@@ -1396,7 +1425,7 @@ function ctaSlide(c, feature) {
   // the name, so the masthead gives its room to the picture.
   const top = chrome(c, { thin: true, band: p.gold })
   const head = textBlock(c, weld(c.lang, W.cta.head), { x: fr.x, w: fr.w, sizes: tall(c) ? [FS.display * 0.8, FS.heading] : [FS.heading, FS.display * 0.6], fam: 'serif', weight: 900, maxLines: 2, lh: 1.06 })
-  const name = textBlock(c, weld(c.lang, F.name), { x: fr.x, w: fr.w, sizes: [FS.title, FS.lead], maxLines: 1, color: p.line[FEATURE_LINE[feature]] && p.paper ? mix(p.line[FEATURE_LINE[feature]], p.ink, 0.7) : p.ink })
+  const name = textBlock(c, weld(c.lang, F.name), { x: fr.x, w: fr.w, sizes: [FS.title, FS.lead], maxLines: 1, color: p.paper ? mix(featureInk(p, feature), p.ink, 0.7) : p.ink })
   const line = textBlock(c, weld(c.lang, F.line), { x: fr.x, w: fr.w, sizes: [FS.body, FS.sm], weight: 500, color: p.ink2, maxLines: 3 })
   const btn = METAL_H
   const alsoH = 72
@@ -1442,7 +1471,7 @@ function also(c, list, y) {
     ctx.fillStyle = faceInk(p)
     rrect(ctx, x, at, ch.w, r * 2, r)
     ctx.fill()
-    ctx.fillStyle = mix(p.line[FEATURE_LINE[ch.k]], cardInk(p), 0.25)
+    ctx.fillStyle = mix(featureInk(p, ch.k), cardInk(p), 0.25)
     ctx.beginPath()
     ctx.arc(x + r, at + r, r, 0, Math.PI * 2)
     ctx.fill()
@@ -1457,13 +1486,20 @@ function also(c, list, y) {
 // centred in it: its words keep 30px at least on the board, so they stay
 // readable at a post's smallest scale.
 const BOARD = { w: 800, h: 420 }
+// A run told in three panels is a wider board, so it is drawn larger.
+const STORY_H = 340
+const STORIES = new Set(['reading', 'comprehension', 'translation', 'composition'])
 function illustrate(c, feature, box) {
   const { ctx } = c
-  const s = Math.min(box.w / BOARD.w, box.h / BOARD.h)
+  const bh = STORIES.has(feature) ? STORY_H : BOARD.h
+  const s = Math.min(box.w / BOARD.w, box.h / bh)
   ctx.save()
-  ctx.translate(box.x + (box.w - BOARD.w * s) / 2, box.y + (box.h - BOARD.h * s) / 2)
+  ctx.translate(box.x + (box.w - BOARD.w * s) / 2, box.y + (box.h - bh * s) / 2)
   ctx.scale(s, s)
-  const draw = { read: drawRead, listen: drawListen, exam: drawExam, words: drawWords, kanji: drawKanji, grammar: drawGrammar, kana: drawKana }[feature]
+  const draw = {
+    reading: drawReading, comprehension: drawComprehension, translation: drawTranslation, listen: drawListen, composition: drawComposition,
+    exam: drawExam, analyser: drawRead, ask: drawAsk, today: drawToday, words: drawWords, kanji: drawKanji, grammar: drawGrammar, kana: drawKana,
+  }[feature]
   draw(c)
   ctx.restore()
 }
@@ -1515,7 +1551,7 @@ function sampleToks(c) {
 // 読: three ways in, one analysed sentence out.
 function drawRead(c) {
   const { ctx, p, W } = c
-  const F = W.features.read
+  const F = W.features.analyser
   const reading = p.line.reading
   const icons = ['📋', '▶️', '📷']
   F.inputs.forEach((name, i) => {
@@ -1538,7 +1574,8 @@ function drawRead(c) {
     const ghost = v => measured(ctx, m => analyserLine(m, p, 0, 0, inner, v, toks))
     while (u > 1.2 && ghost(u) > (said ? 190 : 300)) u -= 0.1
     const ah = analyserLine(ctx, p, 360, said ? 50 : 210 - ghost(u) / 2, inner, u, toks)
-    if (!said) return
+    // A long sentence's analysis takes the card: its sense gives way.
+    if (!said || 360 - ah - 60 < 70) return
     ctx.fillStyle = faceInk(p)
     rrect(ctx, 352, 74 + ah, inner + 16, 360 - ah - 60, 16)
     ctx.fill()
@@ -1547,6 +1584,347 @@ function drawRead(c) {
   })
   sparks(c, 735, 40, 22, p.line.grammar, 1)
   sparks(c, 330, 380, 22, p.line.grammar, -1)
+}
+// ── The practice modes, each a storyboard of its run (plan 215b) ──
+/** What the item gives the pictures to show: its Japanese, its rōmaji,
+ *  its sense, its point; each where the plan has it, else nothing. */
+function itemOf(c) {
+  const f = c.pl.funnel || {}
+  const rows = f.rows?.length ? f.rows : f.examples?.[0]?.rows || f.sents?.[0] || null
+  const jp = rows ? rows.map(r => r.t).join('') : f.word?.t || ''
+  return {
+    jp,
+    ro: f.romaji || (f.word ? f.word.ro : '') || '',
+    tr: f.translation || f.examples?.[0]?.tr || f.word?.main || '',
+    pattern: f.point?.pattern || f.points?.[0]?.pattern || c.pl.caption?.point || '',
+    breakdown: f.breakdown || [],
+  }
+}
+/** Text on the board: fitted to its box, its height returned. */
+function boardText(c, str, x, y, w, { sizes = [32, 30], lines = 3, fam = 'latin', weight = 700, color = c.p.ink, align = 'left', balanced = false } = {}) {
+  if (!str) return 0
+  const b = fit(c.ctx, str, { weight, fam, sizes, maxW: w, maxLines: lines, balanced })
+  const ax = align === 'center' ? x + w / 2 : x
+  return paragraph(c.ctx, b, ax, y, color, align)
+}
+/** A run's three steps, on its line (dictation's picture). */
+function stops(c, steps, ink) {
+  const { ctx } = c
+  ctx.fillStyle = ink
+  rrect(ctx, 90, 352, 620, 12, 6)
+  ctx.fill()
+  steps.forEach((step, i) => {
+    const x = 130 + i * 270
+    ctx.fillStyle = cardInk(c.p)
+    ctx.beginPath()
+    ctx.arc(x, 358, 22, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.strokeStyle = ink
+    ctx.lineWidth = 8
+    ctx.stroke()
+    label(c, step, x, 412, { size: 32, maxW: 250 })
+  })
+}
+/** Three panels a run goes through, each headed by its step, an arrow
+ *  from each to the next. */
+function panels(c, draws, steps, ink) {
+  const { ctx, p } = c
+  const w = 236
+  draws.forEach((draw, i) => {
+    const x = 6 + i * 270
+    tilt(ctx, x + w / 2, 170, [-0.025, 0.015, -0.01][i], () => {
+      boardCard(c, x, 8, w, 324, 24)
+      ctx.fillStyle = ink
+      ctx.beginPath()
+      ctx.arc(x + 38, 48, 22, 0, Math.PI * 2)
+      ctx.fill()
+      text(ctx, String(i + 1), x + 38, 48 + 11, { f: font(700, 30, 'latin'), color: cardInk(p), align: 'center' })
+      label(c, steps[i], x + 70, 59, { size: 32, color: ink, align: 'left', maxW: w - 84 })
+      draw(x + 18, 84, w - 36, 236)
+    })
+    if (i < draws.length - 1) arrow(ctx, x + w + 2, 176, x + 270 - 4, 176, p.gold, 0, 5)
+  })
+}
+const caret = (ctx, x, y, size, color) => { ctx.fillStyle = color; ctx.fillRect(x + 4, y - size * 0.8, 4, size) }
+/** The tutor's read on an answer: a bubble, its lines, a check. */
+function tutor(c, x, y, w, ink) {
+  const { ctx, p } = c
+  emojiAt(ctx, '🧑‍🏫', x + 28, y + 22, 48)
+  ctx.fillStyle = mix(ink, cardInk(p), 0.14)
+  rrect(ctx, x, y + 64, w, 156, 20)
+  ctx.fill()
+  ctx.fillStyle = mix(ink, cardInk(p), 0.14)
+  ctx.beginPath()
+  ctx.moveTo(x + 18, y + 66)
+  ctx.lineTo(x + 30, y + 46)
+  ctx.lineTo(x + 46, y + 66)
+  ctx.fill()
+  ctx.fillStyle = alpha(p.ink2, 0.55)
+  for (const [k, lw] of [[0, 0.82], [1, 0.66], [2, 0.74]]) {
+    rrect(ctx, x + 20, y + 92 + k * 34, (w - 40) * lw, 10, 5)
+    ctx.fill()
+  }
+  check(ctx, x + w - 8, y + 64, 26, success(p), cardInk(p))
+}
+
+// 読書: read before the clock covers it, write its reading, see it cut.
+function drawReading(c) {
+  const { ctx, p, W } = c
+  const F = W.features.reading
+  const ink = p.line.reading
+  const it = itemOf(c)
+  panels(c, [
+    (x, y, w) => {
+      // The sentence, the clock's shutter coming over it.
+      const h = boardText(c, it.jp || '日本語', x, y + 4, w, { sizes: [46, 42, 38, 34, 30], lines: 4, fam: 'jp' })
+      // The clock's shutter comes over it from the right.
+      ctx.fillStyle = alpha(ink, 0.88)
+      rrect(ctx, x + w * 0.58, y - 8, w * 0.42 + 18, Math.min(236, Math.max(60, h + 20)), 10)
+      ctx.fill()
+      ctx.strokeStyle = alpha(p.ink2, 0.35)
+      ctx.lineWidth = 7
+      ctx.beginPath()
+      ctx.arc(x + w - 8, y - 36, 18, 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.strokeStyle = ink
+      ctx.lineCap = 'round'
+      ctx.beginPath()
+      ctx.arc(x + w - 8, y - 36, 18, -Math.PI / 2, Math.PI * 0.85)
+      ctx.stroke()
+    },
+    (x, y, w) => {
+      label(c, F.romaji, x, y + 22, { size: 30, color: p.ink2, align: 'left', weight: 500, maxW: w })
+      const b = fit(ctx, (it.ro || 'nihongo').toLowerCase(), { weight: 700, sizes: [38, 36, 34, 32, 30], maxW: w, maxLines: 4, balanced: false })
+      b.lines.forEach((ln, i) => {
+        const yy = y + 76 + i * b.size * 1.25
+        const tw = text(ctx, ln, x, yy, { f: b.f, color: p.ink })
+        if (i === b.lines.length - 1) caret(ctx, x + tw, yy, b.size, p.gold)
+      })
+    },
+    (x, y, w) => {
+      // Graded, then cut word by word.
+      check(ctx, x + w - 8, y - 36, 22, success(p), cardInk(p))
+      // A word's gloss on the board is its first sense, short.
+      const short = g => String(g || '').split(/[,;(]/)[0].trim()
+      const words = it.breakdown.filter(r => r.t && r.line === 'vocab').slice(0, 3)
+      const list = words.length ? words : [{ t: it.jp.slice(0, 2) || '日本', main: '', line: 'vocab' }]
+      list.forEach((r, i) => {
+        const yy = y + 8 + i * 76
+        const pf = font(700, 34, 'jp')
+        const pw = Math.min(w, measure(ctx, r.t, pf) + 32)
+        ctx.fillStyle = p.line[r.line] || p.line.vocab
+        rrect(ctx, x, yy, pw, 52, 26)
+        ctx.fill()
+        const tb = fit(ctx, r.t, { fam: 'jp', weight: 700, sizes: [34, 30], maxW: pw - 16, maxLines: 1 })
+        text(ctx, tb.lines[0], x + pw / 2, yy + 26 + tb.size * 0.36, { f: tb.f, color: p.onLine, align: 'center' })
+        // Beside a long word there is no room for its sense: the pill alone.
+        if (r.main && w - pw - 12 >= 90) label(c, short(r.main), x + pw + 12, yy + 37, { size: 32, align: 'left', weight: 700, maxW: w - pw - 12 })
+      })
+    },
+  ], F.steps, ink)
+}
+// 理解: a whole text, then its questions.
+function drawComprehension(c) {
+  const { ctx, p, W } = c
+  const F = W.features.comprehension
+  const ink = p.line.rikai
+  const it = itemOf(c)
+  const title = c.pl.funnel?.title || ''
+  panels(c, [
+    (x, y, w) => {
+      let at = y + 6
+      if (title) at += boardText(c, title, x, at, w, { sizes: [36, 32, 30], lines: 1, fam: 'serif' }) + 8
+      at += boardText(c, it.jp, x, at, w, { sizes: [32, 30], lines: 3, fam: 'jp', weight: 700 }) + 10
+      ctx.fillStyle = alpha(p.ink2, 0.45)
+      for (let k = 0; k < 5 && at + 18 < y + 250; k++) {
+        rrect(ctx, x, at + 4, w * [0.95, 0.82, 0.9, 0.7, 0.86][k], 10, 5)
+        ctx.fill()
+        at += 30
+      }
+    },
+    (x, y, w) => {
+      ctx.fillStyle = alpha(p.ink, 0.7)
+      rrect(ctx, x, y + 8, w * 0.8, 12, 6)
+      ctx.fill()
+      for (let i = 0; i < 3; i++) {
+        const yy = y + 50 + i * 64
+        const right = i === 1
+        ctx.fillStyle = right ? mix(success(p), cardInk(p), 0.2) : faceInk(p)
+        rrect(ctx, x, yy, w, 50, 14)
+        ctx.fill()
+        if (right) check(ctx, x + 26, yy + 25, 17, success(p), cardInk(p))
+        else {
+          ctx.strokeStyle = alpha(p.ink2, 0.6)
+          ctx.lineWidth = 4
+          ctx.beginPath()
+          ctx.arc(x + 26, yy + 25, 15, 0, Math.PI * 2)
+          ctx.stroke()
+        }
+        ctx.fillStyle = right ? success(p) : alpha(p.ink2, 0.5)
+        rrect(ctx, x + 54, yy + 20, w - 80, 10, 5)
+        ctx.fill()
+      }
+    },
+    (x, y, w) => {
+      // The results: every answer checked, the text's words glossed.
+      for (let i = 0; i < 3; i++) {
+        const yy = y + 20 + i * 58
+        check(ctx, x + 22, yy + 18, 20, i === 2 ? p.stamp : success(p), cardInk(p))
+        ctx.fillStyle = alpha(p.ink2, 0.5)
+        rrect(ctx, x + 56, yy + 13, w - 70, 10, 5)
+        ctx.fill()
+      }
+      const word = c.pl.funnel?.words?.[0]
+      if (word) {
+        ctx.fillStyle = p.line.vocab
+        rrect(ctx, x, y + 180, w, 52, 26)
+        ctx.fill()
+        const tb = fit(ctx, `${word.t} ${word.main || ''}`.trim(), { weight: 700, sizes: [32, 30], maxW: w - 24, maxLines: 1 })
+        text(ctx, tb.lines[0], x + w / 2, y + 206 + tb.size * 0.36, { f: tb.f, color: p.onLine, align: 'center' })
+      }
+    },
+  ], F.steps, ink)
+}
+// 翻訳: the sentence in the reader's language, theirs, the tutor's read.
+function drawTranslation(c) {
+  const { ctx, p, W } = c
+  const F = W.features.translation
+  const ink = p.line.honyaku
+  const it = itemOf(c)
+  panels(c, [
+    (x, y, w) => boardText(c, `“${it.tr || '…'}”`, x, y + 4, w, { sizes: [38, 36, 34, 32, 30], lines: 5, fam: 'serif', balanced: true }),
+    (x, y, w) => {
+      const b = fit(ctx, it.jp || '日本語', { fam: 'jp', weight: 700, sizes: [42, 38, 34, 32, 30], maxW: w, maxLines: 4, balanced: false })
+      b.lines.forEach((ln, i) => {
+        const yy = y + 40 + i * b.size * 1.3
+        const tw = text(ctx, ln, x, yy, { f: b.f, color: p.ink })
+        if (i === b.lines.length - 1) caret(ctx, x + tw, yy, b.size, p.gold)
+      })
+    },
+    (x, y, w) => tutor(c, x, y, w, ink),
+  ], F.steps, ink)
+}
+// 作文: the point given, a sentence with it, the tutor's read.
+function drawComposition(c) {
+  const { ctx, p, W } = c
+  const F = W.features.composition
+  const ink = p.line.sakubun
+  const it = itemOf(c)
+  panels(c, [
+    (x, y, w) => {
+      const b = fit(ctx, it.pattern || '〜ている', { fam: 'serif', weight: 700, sizes: [96, 80, 64, 52, 40, 34], maxW: w, maxLines: 2 })
+      paragraph(ctx, b, x + w / 2, y + 96 - paragraphH(b) / 2, p.ink, 'center')
+      ctx.fillStyle = p.line.grammar
+      rrect(ctx, x + w * 0.2, y + 186, w * 0.6, 10, 5)
+      ctx.fill()
+    },
+    (x, y, w) => {
+      const said = it.jp
+      if (said) {
+        const b = fit(ctx, said, { fam: 'jp', weight: 700, sizes: [42, 38, 34, 32, 30], maxW: w, maxLines: 4, balanced: false })
+        b.lines.forEach((ln, i) => {
+          const yy = y + 40 + i * b.size * 1.3
+          const tw = text(ctx, ln, x, yy, { f: b.f, color: p.ink })
+          if (i === b.lines.length - 1) caret(ctx, x + tw, yy, b.size, p.gold)
+        })
+      } else {
+        emojiAt(ctx, '✍️', x + w / 2, y + 100, 80)
+      }
+    },
+    (x, y, w) => tutor(c, x, y, w, ink),
+  ], F.steps, ink)
+}
+// 問: after the exercise, a short question and its short answer.
+function drawAsk(c) {
+  const { ctx, p, W } = c
+  const F = W.features.ask
+  const it = itemOf(c)
+  const keys = c.pl.funnel?.keys || []
+  // The answer is the bank's own line on the point (its most particular,
+  // where several name it), else a question and answer the bank teaches too.
+  const said = it.pattern ? keys.filter(k => k.includes(it.pattern) && k.length <= 140).sort((a, b) => b.length - a.length)[0] : null
+  const [q, a] = said ? [F.ask(it.pattern), said] : F.fallback
+  const qb = fit(ctx, q, { weight: 700, sizes: [38, 36, 34, 32], maxW: 540, maxLines: 2, balanced: false })
+  const ab = fit(ctx, a, { weight: 500, sizes: [36, 34, 32, 30], maxW: 620, maxLines: 4, maxH: 190, balanced: false })
+  const qh = paragraphH(qb) + 44
+  const ah = paragraphH(ab) + 44
+  const total = 84 + 22 + qh + 22 + ah
+  const top = Math.max(0, (420 - total) / 2)
+  // The exercise, graded.
+  boardCard(c, 0, top, 580, 84, 20, faceInk(p))
+  check(ctx, 42, top + 42, 26, success(p), cardInk(p))
+  boardText(c, it.jp || it.tr, 82, top + 22, 470, { sizes: [36, 32, 30], lines: 1, fam: 'jp', weight: 700 })
+  // 問, in the learner's voice.
+  const qy = top + 106
+  const qx = 800 - 660
+  ctx.fillStyle = mix(p.gold, cardInk(p), 0.16)
+  rrect(ctx, qx, qy, 660, qh, 26)
+  ctx.fill()
+  ctx.strokeStyle = p.gold
+  ctx.lineWidth = 3
+  rrect(ctx, qx + 1.5, qy + 1.5, 657, qh - 3, 26)
+  ctx.stroke()
+  roundTag(c, '問', qx + 44, qy + qh / 2, p.gold)
+  paragraph(ctx, qb, qx + 88, qy + 22, p.ink, 'left')
+  // 答, short and precise.
+  const ay = qy + qh + 22
+  boardCard(c, 0, ay, 740, ah, 26)
+  roundTag(c, '答', 44, ay + ah / 2, success(p))
+  paragraph(ctx, ab, 88, ay + 22, p.ink, 'left')
+}
+function roundTag(c, ch, cx, cy, color) {
+  c.ctx.fillStyle = color
+  c.ctx.beginPath()
+  c.ctx.arc(cx, cy, 28, 0, Math.PI * 2)
+  c.ctx.fill()
+  text(c.ctx, ch, cx, cy + 12, { f: font(700, 32, 'jp'), color: cardInk(c.p), align: 'center' })
+}
+// 本日: the day's dial, its lines, and Depart.
+function drawToday(c) {
+  const { ctx, p, W } = c
+  const F = W.features.today
+  const cx = 200, cy = 200
+  // The dial: the lines' arcs round the day's disc.
+  const parts = [['kana', 4], ['vocab', 14], ['kanji', 8], ['grammar', 6]]
+  const total = parts.reduce((a, [, n]) => a + n, 0)
+  let at = -Math.PI / 2
+  ctx.lineCap = 'round'
+  for (const [line, n] of parts) {
+    const span = (n / total) * Math.PI * 2
+    ctx.strokeStyle = p.line[line]
+    ctx.lineWidth = 16
+    ctx.beginPath()
+    ctx.arc(cx, cy, 168, at + 0.06, at + span - 0.06)
+    ctx.stroke()
+    at += span
+  }
+  const g = ctx.createRadialGradient(cx - 40, cy - 50, 10, cx, cy, 150)
+  g.addColorStop(0, p.goldLit)
+  g.addColorStop(1, p.goldMid)
+  ctx.fillStyle = g
+  ctx.beginPath()
+  ctx.arc(cx, cy, 140, 0, Math.PI * 2)
+  ctx.fill()
+  text(ctx, String(total), cx, cy + 30, { f: font(700, 96, 'latin'), color: p.onFill, align: 'center' })
+  label(c, F.unit.toLocaleUpperCase(), cx, cy + 76, { size: 30, color: p.onFill, maxW: 200 })
+  // The lines it deals from.
+  F.lines.forEach((name, i) => {
+    const y = 40 + i * 64
+    const [line, n] = parts[i]
+    ctx.fillStyle = p.line[line]
+    ctx.beginPath()
+    ctx.arc(440, y + 22, 14, 0, Math.PI * 2)
+    ctx.fill()
+    text(ctx, name, 470, y + 34, { f: font(700, 32, 'jp'), color: p.ink })
+    ctx.fillStyle = alpha(p.line[line], 0.35)
+    rrect(ctx, 560, y + 14, 220, 16, 8)
+    ctx.fill()
+    ctx.fillStyle = p.line[line]
+    rrect(ctx, 560, y + 14, 220 * (n / 14), 16, 8)
+    ctx.fill()
+  })
+  // One tap.
+  departButton(ctx, p, 420, 300, 360, 1.3, F.depart)
 }
 // 書取: listen twice, write what you heard, checked letter by letter.
 function drawListen(c) {
@@ -1590,20 +1968,7 @@ function drawListen(c) {
   })
   arrow(ctx, 280, 120, 372, 150, p.gold, -0.15)
   // Listen → write → check, a line with its three stops.
-  ctx.fillStyle = ink
-  rrect(ctx, 90, 352, 640, 12, 6)
-  ctx.fill()
-  F.steps.forEach((step, i) => {
-    const x = 120 + i * 290
-    ctx.fillStyle = cardInk(p)
-    ctx.beginPath()
-    ctx.arc(x, 358, 22, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.strokeStyle = ink
-    ctx.lineWidth = 8
-    ctx.stroke()
-    label(c, step, x, 412, { size: 32, maxW: 240 })
-  })
+  stops(c, F.steps, ink)
 }
 // 模試: the paper in its four sections, the clock, the score.
 function drawExam(c) {
@@ -1896,7 +2261,7 @@ function drawKana(c) {
         ctx.stroke()
       }
       ctx.restore()
-      emojiAt(ctx, '✏️', fx + s + 26, y + 20, 46)
+      emojiAt(ctx, '✏️', Math.min(fx + s + 26, 770), y + 20, 46)
       label(c, K.ro, fx + s / 2, y + s + 56, { size: 40, color: ink, maxW: 200 })
     }
   })

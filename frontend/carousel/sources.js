@@ -1024,7 +1024,7 @@ export function titleOf(pl, type, n = 3) {
 // The conversion carousel's own glyphs (funnel.js, plan 215): its
 // pictures' emoji, its bands' and its schemas' kanji, the kana table's rows.
 const KANA_ROWS = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ'
-const FUNNEL_GLYPHS = `💡🌱🔖📖🎧⏱️🔁✍️💬🔤📋▶️📷🔔🙂🙋🔊✏️解詳要点次模試語彙文法読解聴解字写真ō${KANA_ROWS}${[...KANA_ROWS].map(c => String.fromCharCode(c.charCodeAt(0) + 0x60)).join('')}`
+const FUNNEL_GLYPHS = `💡🌱🔖📖🎧⏱️🔁✍️💬🔤📋▶️📷🔔🙂🙋🔊✏️📰🌐🔍🌅🖌️🧩🧑‍🏫問答かな単語漢字文法日本語解詳要点次模試語彙文法読解聴解字写真ō${KANA_ROWS}${[...KANA_ROWS].map(c => String.fromCharCode(c.charCodeAt(0) + 0x60)).join('')}`
 export function sampleText(pl) {
   const parts = [JSON.stringify(pl.t), JSON.stringify(pl.slides), JSON.stringify(pl.hook), JSON.stringify(pl.quizzes || []),
     JSON.stringify([pl.compare, pl.build, pl.list, pl.talk, pl.station, pl.figure, pl.impostor, pl.funnel]), FUNNEL_GLYPHS,
