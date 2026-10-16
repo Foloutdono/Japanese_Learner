@@ -1093,11 +1093,29 @@ adds no idiom of its own: it is the tour's scene made to answer back.
   person in A's voice and the learner in B's (the bank is in
   `study/grammar_audio`'s catalogue). **The line just said is held
   untranslated until it is answered**; a quiet link under it gives the
-  translation early. The newest line stays in view.
+  translation early.
+- **The talk stays on the screen** (plan 221). Once it is under way the
+  run is bounded to the screen, as the passage is: the card takes what
+  the head, the meter, the dock and the floor leave, the talk scrolls
+  inside its body, and what answers it -- the tiles, the field, the bar,
+  Next -- stands under the card at every length of scene, on the phone
+  and in the desk's middle column alike. The page never scrolls. The
+  newest exchange is followed in the card **from its start**: whole
+  where it fits, the lines before it filling what is left above, and
+  from its top where it does not, so a long note is read from its head.
+  A line arrives as a list's row does. The talk is **heard as it is
+  said**: the other person's lines play in A's voice as they come, a
+  right reply in the learner's at the pick (the tour's rule) and the
+  reply the talk takes before the next line otherwise, under the
+  sentence runs' speaker switch in the head (`SpeakToggle`). A free
+  reply is the device's voice, the catalogue having no such line.
 - **Three ways, one stage.** Choose: the replies as the tour's tiles
-  under the card; the pick is the answer, with no Check, the right one
-  ringed and a wrong one crossed, the tour's verdict (`Said`) at the
-  card's foot saying both replies' translations and why. Translate: what
+  under the card; the pick is the answer, with no Check, and **takes
+  the tiles away**: the tour's verdict (`Said`) at the talk's foot,
+  over a hairline as the task and the end are, names the reply taken,
+  struck (as the tour's results print a miss), and says both replies'
+  translations and why, in the card's room rather than what the tiles
+  left it. Translate: what
   to say, in the learner's language, at the talk's foot over the docked
   field; checked, translation's practice card (the reply over the
   answer's well, rōmaji misses marked, the tutor's verdict at the well's
@@ -1309,7 +1327,9 @@ named it (`.prompt-card--passage`, 2026-09-11): a card that is always taller
 than the phone read as a sentence cut in half by the foot's own ground, with
 the card's bottom edge somewhere off the page. The scroll is the **body's**,
 never the card's — the foot strip is what names the card, and it has to stay
-on screen. A prompt keeps the ordinary ruling; only a passage is bounded.
+on screen. A prompt keeps the ordinary ruling; only a passage is bounded —
+and a conversation's talk (plan 221, `.stage--talk`), which grows a line at
+a time past any screen and has its replies to keep under it.
 
 Above 768px the column is the centred `--card-w` it always was, with the
 progress legend back — on the desk too, where the run also prints its keys

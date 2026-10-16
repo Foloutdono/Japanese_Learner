@@ -13,8 +13,10 @@ import { LangProvider } from '../LangContext'
 // the tutor go out together, the bar is the grade, a spent day loses
 // the tutor and nothing else. Free: the other person answers what was
 // written, the tutor's word stands under the line, the bar grades it,
-// and the day's ceiling closes the talk and says so. French copy: the
-// lane's.
+// and the day's ceiling closes the talk and says so. Since plan 221 the
+// talk is heard as it is said, under the run's speaker switch, and a
+// pick takes the tiles away (the layout itself is measured in
+// ConversationRun.phone.test.jsx). French copy: the lane's.
 
 const apiFetch = vi.fn()
 const apiJson = vi.fn()
@@ -40,6 +42,8 @@ vi.mock('../lib/audio', async importOriginal => ({
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: ConversationRun } = await import('./ConversationRun')
+const { speakLine, speakSentence } = await import('../lib/audio')
+const { setSpeakOnReveal } = await import('../lib/audio/reveal')
 
 const plain = text => [{ text }]
 const SCRIPT = {
@@ -183,18 +187,20 @@ describe('Choose', () => {
     expect(root.querySelector('.kaiwa-talk .dict-ex__tr').textContent).toBe('Je vous réchauffe le bento.')
   })
 
-  it('takes a pick as the answer: the right reply ringed, why said, the pick graded', async () => {
+  it('takes a pick as the answer: the tiles go, what was taken struck, the right reply and why said, the pick graded', async () => {
     const root = await started('choose')
     const tiles = [...root.querySelectorAll('.tour-guess')]
     expect(tiles.map(t => t.textContent)).toEqual(expect.arrayContaining(['1はい、温かいです。', '2はい、お願いします。', '3いただきます。']))
     tiles[0].click()
     await settle(120)
-    const said = root.querySelector('.tour-said--no')
+    // The verdict has the card's room: the tiles that showed the pick
+    // are gone, so it names the reply taken, struck.
+    expect(root.querySelector('.tour-guess')).toBeNull()
+    const said = root.querySelector('.kaiwa-card .tour-said--no')
     expect(said).not.toBeNull()
+    expect(said.querySelector('.kaiwa-said__taken').textContent).toBe('はい、温かいです。')
     expect(said.textContent).toContain('はい、お願いします。')
     expect(said.textContent).toContain('dit que le bento est chaud')
-    expect(root.querySelector('.tour-guess--ok').textContent).toContain('はい、お願いします。')
-    expect(root.querySelectorAll('.tour-guess:disabled')).toHaveLength(3)
     const [call] = fetchCalls('/api/conversation/result')
     expect(body(call)).toEqual({ scenario: 'konbini-lunch', mode: 'choose', turn: 0, correct: false })
   })
@@ -222,6 +228,62 @@ describe('Choose', () => {
     // Another scene: back to the station, on the scene's grade.
     ;[...root.querySelectorAll('.stage__foot .btn-primary')].at(-1).click()
     await vi.waitFor(() => expect(here.path).toBe('/practice/conversation?level=N5'))
+  })
+})
+
+describe('the talk heard as it is said (plan 221)', () => {
+  const heard = () => speakLine.mock.calls.map(([jp, who]) => `${who}:${jp}`)
+
+  beforeEach(() => {
+    speakLine.mockClear()
+    speakSentence.mockClear()
+    setSpeakOnReveal(true)
+  })
+
+  it('voices the other person as they speak, and a right reply in the learner\'s voice once, at the pick', async () => {
+    const root = await started('choose')
+    expect(heard()).toEqual(['them:お弁当は温めますか。'])
+    root.querySelectorAll('.tour-guess')[1].click()
+    await settle(60)
+    expect(heard().at(-1)).toBe('me:はい、お願いします。')
+    root.querySelector('.stage__foot .btn-primary').click()
+    await settle(80)
+    // The reply was said at the pick: Next says only what answers it.
+    expect(heard()).toEqual(['them:お弁当は温めますか。', 'me:はい、お願いします。', 'them:お箸はいりますか。'])
+  })
+
+  it('says the reply the talk takes after a wrong pick, then the answer to it', async () => {
+    const root = await started('choose')
+    root.querySelectorAll('.tour-guess')[0].click()
+    await settle(60)
+    // A wrong pick is not said.
+    expect(heard()).toEqual(['them:お弁当は温めますか。'])
+    root.querySelector('.stage__foot .btn-primary').click()
+    await settle(80)
+    expect(heard()).toEqual(['them:お弁当は温めますか。', 'me:はい、お願いします。', 'them:お箸はいりますか。'])
+  })
+
+  it('stays quiet with the run\'s speaker switched off, and the switch is in the head', async () => {
+    setSpeakOnReveal(false)
+    const root = await started('choose')
+    expect(root.querySelector('.stage__head [data-action="speak-on-reveal"]').getAttribute('aria-pressed')).toBe('false')
+    root.querySelectorAll('.tour-guess')[1].click()
+    await settle(60)
+    root.querySelector('.stage__foot .btn-primary').click()
+    await settle(80)
+    expect(speakLine).not.toHaveBeenCalled()
+    setSpeakOnReveal(true)
+  })
+
+  it('voices a free reply on the device, as it lands', async () => {
+    talk = () => ok({
+      reply: { jp: '温めますね。', parts: plain('温めますね。'), translation: 'Je le réchauffe.', done: false },
+      review: null, analysis: 'Naturel.', japanese: 'はい',
+    })
+    const root = await started('free')
+    submit(root, 'hai')
+    await settle(160)
+    expect(speakSentence).toHaveBeenCalledWith('温めますね。')
   })
 })
 
@@ -326,5 +388,21 @@ describe('Free talk', () => {
     await settle(160)
     expect(root.querySelector('.kaiwa-alert').textContent).toContain('Réessaie')
     expect(root.querySelector('.stage__foot input').value).toBe('hai')
+  })
+
+  it('waits in the other person\'s row while they answer', async () => {
+    let answer
+    talk = () => new Promise(r => { answer = () => r(ok(REPLY)) })
+    const root = await started('free')
+    submit(root, 'hai')
+    await settle(80)
+    const wait = root.querySelector('.kaiwa-talk > .kaiwa-pending')
+    expect(wait.querySelector('.tour-line__who').textContent).toBe('Vendeur')
+    expect(wait.querySelector('.loading')).not.toBeNull()
+    expect(wait.querySelector('.sr-only').textContent).toBe('Vendeur répond…')
+    answer()
+    await settle(120)
+    expect(root.querySelector('.kaiwa-pending')).toBeNull()
+    expect(lineTexts(root).at(-1)).toBe('温めますね。')
   })
 })
