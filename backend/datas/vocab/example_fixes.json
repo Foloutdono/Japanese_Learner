@@ -3848,10 +3848,10 @@
    "why": "verify: sending a postal money order abroad from Japan is not a current service one can assert; kept the sentence domestic"
   },
   "この無限の空間に漂う永遠の沈黙が私を恐怖に陥れる。": {
-   "jp": "海の上に小さなボートが漂っている。",
-   "en": "A small boat is drifting on the sea.",
-   "fr": "Un petit bateau dérive sur la mer.",
-   "why": "translated Pascal quote, figurative"
+   "jp": "宇宙ステーションの中では、水の玉が空間に漂う。",
+   "en": "Aboard the space station, drops of water float in mid-air.",
+   "fr": "À bord de la station spatiale, des gouttes d'eau flottent en l'air.",
+   "why": "translated Pascal quote, figurative; must carry 空間 and 漂う"
   },
   "この爆弾はたくさんの人を殺すことができる。": {
    "jp": "工事現場で古い爆弾が見つかり、付近の住民が一時避難した。",
@@ -4999,12 +4999,6 @@
    "fr": "Les cours des légumes varient beaucoup selon la météo.",
    "why": "typo そこ知らず, fragment"
   },
-  "そして、どうすることも出来ない物憂さに、ふっとため息をつく。": {
-   "jp": "彼は社長の補佐として働いている。",
-   "en": "He works as the company president's assistant.",
-   "fr": "Il travaille comme assistant du président de l'entreprise.",
-   "why": "word absent (only the suffix さ)"
-  },
   "そして各チームはボールを蹴ってこの穴に通そうと互いに競い合ったのです。": {
    "jp": "靴下に穴があいている。",
    "en": "There's a hole in my sock.",
@@ -6115,12 +6109,6 @@
    "fr": "Ce projet comporte trop de risques.",
    "why": "too hard for N4"
   },
-  "その晩と次の日とその夜中ずっと地下室で過ごしたのよ。": {
-   "jp": "嵐の間、私たちは夜中ずっと地下室にいた。",
-   "en": "During the storm, we stayed in the basement all night long.",
-   "fr": "Pendant la tempête, nous sommes restés à la cave toute la nuit.",
-   "why": "garbled time sequence, mistranslated"
-  },
   "その晩私はテーブルの上で逆さにしたコーヒーカップの下にチップを置いて出た。": {
    "jp": "コップを逆さにして、棚にしまった。",
    "en": "I turned the glasses upside down and put them away on the shelf.",
@@ -7158,12 +7146,6 @@
    "en": "Lately, the decline in children's physical fitness has become an issue.",
    "fr": "Ces derniers temps, la baisse de la condition physique des enfants pose problème.",
    "why": "contentious opinion, overlong"
-  },
-  "ただ、面白いブログを書くために、人のブログを読むのなら今日から出来る。": {
-   "jp": "駅までたった三分なので、歩いて行きましょう。",
-   "en": "The station is only three minutes away, so let's walk.",
-   "fr": "La gare n'est qu'à trois minutes, allons-y à pied.",
-   "why": "word absent (ただ, not たった)"
   },
   "ただし、列をつくって並ばなくてはならないが・・・。": {
    "jp": "入場は無料です。ただし、予約が必要です。",
@@ -10207,12 +10189,6 @@
    "fr": "Il ne faut pas se moquer des gens qui échouent.",
    "why": "bizarre, rare kanji 嗤う"
   },
-  "ベストをつくしたら後はくよくよ考えないことさ。": {
-   "jp": "新しい部長を補佐するのが私の役目だ。",
-   "en": "My role is to assist the new department head.",
-   "fr": "Mon rôle est d'assister le nouveau chef de service.",
-   "why": "word absent (only the particle さ)"
-  },
   "ベストを裏返さなくちゃ。表裏逆ですよ。": {
    "jp": "寒いので、シャツの上にベストを着た。",
    "en": "It was cold, so I put a vest on over my shirt.",
@@ -11563,12 +11539,6 @@
    "fr": "Il existe diverses théories sur la chute de l'Empire romain.",
    "why": "nuclear war"
   },
-  "仮のブリッジをいれます。": {
-   "jp": "仮のブリッジをいれます。",
-   "en": "I'll put in a temporary bridge.",
-   "fr": "Je vais vous poser un bridge provisoire.",
-   "why": "EN mistranslation"
-  },
   "仮の議事内容を送付しました。": {
    "jp": "この本の内容を簡単に説明してください。",
    "en": "Please explain briefly what this book is about.",
@@ -12906,12 +12876,6 @@
    "en": "You look smart in that shirt.",
    "fr": "Tu as l'air chic avec cette chemise.",
    "why": "stiff 君は, みえる"
-  },
-  "君はただ皿を洗いさえすればいい。": {
-   "jp": "たった五分で宿題が終わった。",
-   "en": "I finished my homework in just five minutes.",
-   "fr": "J'ai fini mes devoirs en cinq minutes à peine.",
-   "why": "word absent (ただ, not たった)"
   },
   "君はどのくらい高く跳べますか。": {
    "jp": "どのくらい高く跳べますか。",
@@ -15379,12 +15343,6 @@
    "fr": "Enfant, j'adorais les travaux manuels et je fabriquais souvent des voitures en carton.",
    "why": "unnatural"
   },
-  "彼は平衡を失ってはしごから落ちた。": {
-   "jp": "梯子を使って、屋根に上った。",
-   "en": "I used a ladder to climb onto the roof.",
-   "fr": "J'ai pris une échelle pour monter sur le toit.",
-   "why": "word not shown (はしご), stiff 平衡"
-  },
   "彼は幼児虐待で罰せられた。": {
    "jp": "この公園は、幼児も安全に遊べる。",
    "en": "Even young children can play safely in this park.",
@@ -16266,12 +16224,6 @@
    "en": "The store replaced my broken TV with a new one.",
    "fr": "Le magasin m'a remplacé ma télé en panne par une neuve.",
    "why": "hard 欠陥, kana spelling 取りかえ"
-  },
-  "彼らは次の日曜日で二ヶ月当地に滞在していることになる。": {
-   "jp": "この店は６時で閉まります。",
-   "en": "This shop closes at six.",
-   "fr": "Ce magasin ferme à 18 heures.",
-   "why": "too hard (当地に滞在)"
   },
   "彼らは水瓶を縁まで一杯にした。": {
    "jp": "コップの縁が少し欠けている。",
@@ -20491,12 +20443,6 @@
    "fr": "Avez-vous d'autres questions ?",
    "why": "word absent (その他)"
   },
-  "私はその切符をただで手にいれた。": {
-   "jp": "たった一度会っただけなのに、彼女の顔をよく覚えている。",
-   "en": "I only met her once, but I remember her face well.",
-   "fr": "Je ne l'ai rencontrée qu'une fois, mais je me souviens bien de son visage.",
-   "why": "word absent (ただ, not たった)"
-  },
   "私はその問がたいへんやさしいことを発見した。": {
    "jp": "次の問いに答えなさい。",
    "en": "Answer the following questions.",
@@ -20538,12 +20484,6 @@
    "en": "Animals move around every day in search of food.",
    "fr": "Les animaux se déplacent chaque jour à la recherche de nourriture.",
    "why": "ungrammatical 私は…ろう"
-  },
-  "私はただの名無しの権兵衛です。": {
-   "jp": "財布にはたった百円しか残っていない。",
-   "en": "I have only 100 yen left in my wallet.",
-   "fr": "Il ne me reste que cent yens dans mon portefeuille.",
-   "why": "word absent (ただ, not たった)"
   },
   "私はときどき悲しく感じる。": {
    "jp": "一人でいると、ときどき寂しさを感じる。",
@@ -21390,12 +21330,6 @@
    "en": "Moisture in the air cools and turns into clouds.",
    "fr": "L'humidité de l'air se refroidit et forme des nuages.",
    "why": "too hard (粒子), health scare"
-  },
-  "空港までお伴しましょう。": {
-   "jp": "空港までお供しましょう。",
-   "en": "I'll accompany you to the airport.",
-   "fr": "Je vais vous accompagner jusqu'à l'aéroport.",
-   "why": "word absent (お伴)"
   },
   "空腹は最上のソースである。": {
    "jp": "ハンバーグにソースをかけて食べた。",
@@ -22386,12 +22320,6 @@
    "en": "If you have a question, please raise your right hand.",
    "fr": "Si vous avez une question, levez la main droite.",
    "why": "上げる unmarked (挙げて); 下さい"
-  },
-  "賭け率２対１でレッズが勝つだろう。": {
-   "jp": "バスで学校に行きます。",
-   "en": "I go to school by bus.",
-   "fr": "Je vais à l'école en bus.",
-   "why": "gambling odds"
   },
   "赤ん坊が毛糸の玉をもつれさせた。": {
    "jp": "祖母は毛糸でマフラーを編んでくれた。",
