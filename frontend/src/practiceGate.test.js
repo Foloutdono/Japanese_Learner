@@ -24,12 +24,15 @@ const HEX = /^#[0-9a-f]{6}$/
 describe('the painted platform on disk', () => {
   it('holds every layer at every hour, at the revision the app asks for', () => {
     for (const hour of HOURS) {
-      for (const layer of ['bg', 'car', 'car2', 'near']) {
+      for (const layer of ['bg', 'clouds', 'car', 'car2', 'near']) {
         expect(existsSync(new URL(`${layer}-${hour}.webp`, ROOT)), `${layer}-${hour}`).toBe(true)
       }
     }
     expect(existsSync(new URL('band-car.png', ROOT))).toBe(true)
     expect(existsSync(new URL('band-car2.png', ROOT))).toBe(true)
+    expect(existsSync(new URL('sky.png', ROOT))).toBe(true)
+    expect(GATE.sky.top).toBeGreaterThanOrEqual(0)
+    expect(GATE.sky.top + GATE.sky.height).toBeLessThanOrEqual(SCENE.h)
   })
 
   it('lights the door and fills the frame at every hour', () => {

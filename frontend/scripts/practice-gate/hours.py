@@ -182,7 +182,9 @@ class Lighter:
         return out
 
     # ── the three layers ──
-    def scene(self, hour, a, M):
+    def scene(self, hour, a, M, clouds=True):
+        """The scene lit at the hour; without its clouds (clouds=False), the
+        same sky they drift over (clouds.py), its stars where they were."""
         T = self.H[hour]
         rgb = a[..., :3]
         L, S = lum(rgb), sat(rgb)
@@ -209,7 +211,7 @@ class Lighter:
         under = np.clip(1 - shade, 0, 1) ** 1.4 * cl['under']
         cbody = mix(np.broadcast_to(cl['body'], base.shape), np.broadcast_to(cl['lit'], base.shape),
                     np.clip(shade * (1 - cl['under']) + under, 0, 1))
-        skyc = mix(base, cbody, cloud * cl['amount'])
+        skyc = mix(base, cbody, cloud * cl['amount']) if clouds else base
         out = rgb.copy()
         out[sky] = skyc[sky]
 
