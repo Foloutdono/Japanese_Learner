@@ -76,7 +76,7 @@ analyser, the question asked after an exercise and Today:
 | Analyser | | text, YouTube and photo into one analysed sentence |
 | Questions | | the exercise graded, a question (問) and its short answer (答): the bank's own line on the item's point, else one the bank teaches too |
 | Today | | the day's dial and its lines' arcs, the lines it deals from, and Depart |
-| Vocabulary, Kanji, Grammar, Kana | a word or a theme; a kanji or lookalikes; a lesson, a reply, a trap; a kana | the forgetting curve; a kanji stroke by stroke; rule, scene, quiz; the kana's row, the kana lit in it, its sound in a bubble over it and the pencil on it, the Free tag under the row: drawn alike wherever the kana stands in its row |
+| Vocabulary, Kanji, Grammar, Kana | a word or a theme; a kanji or lookalikes; a lesson, a reply, a trap; a kana | the forgetting curve; a kanji stroke by stroke; rule, scene, quiz; the kana's row, the kana lit in it and being written, stroke by stroke from its stroke data, the pencil's point where the last stroke has got to and its body leaning where it hides the least of the kana; its sound in a bubble over it, the Free tag under the row: drawn alike wherever the kana stands in its row |
 
 The impostor is drawn in pictures in these looks, so its rounds there are
 dealt from a theme's pictured words alone (`impostorOf(…, pictured)`, the

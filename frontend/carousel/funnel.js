@@ -2473,7 +2473,7 @@ function drawKana(c) {
   const size = 112
   const big = 156
   const gap = 22
-  const foot = 300
+  const foot = 290
   let x = (800 - ((tiles.length - 1) * (size + gap) + big)) / 2
   const spots = tiles.map((k, i) => {
     const sz = i === at ? big : size
@@ -2481,12 +2481,18 @@ function drawKana(c) {
     x += sz + gap
     return spot
   })
+  // Its strokes only where they are this kana's (a kanji's carousel has its own).
+  const st = c.pl.funnel?.strokes
+  const strokes = st?.char === K.k ? st.k?.s?.d : null
   for (const t of spots) {
     boardCard(c, t.x, t.y, t.s, t.s, 22, t.lit ? ink : cardInk(p))
-    text(ctx, t.k, t.x + t.s / 2, t.y + t.s / 2 + t.s * 0.6 * 0.36, { f: font(700, t.s * 0.6, 'jp'), color: t.lit ? p.onLine : p.ink, align: 'center' })
+    if (!(t.lit && strokes?.length)) text(ctx, t.k, t.x + t.s / 2, t.y + t.s / 2 + t.s * 0.6 * 0.36, { f: font(700, t.s * 0.6, 'jp'), color: t.lit ? p.onLine : p.ink, align: 'center' })
   }
   const L = spots[at]
   const mid = L.x + L.s / 2
+  // Traced: the lit kana written stroke by stroke, its last stroke under
+  // way and the pencil's point where it has got to (chosen below).
+  const glyph = { x: L.x + 18, y: L.y + 18, k: (L.s - 36) / 109 }
   // Heard: the speaker and the sound, in a bubble over the lit kana.
   const rf = font(700, 54, 'latin')
   const bh = 90
@@ -2502,15 +2508,13 @@ function drawKana(c) {
   ctx.fill()
   speaker(ctx, bx + 30 + 25, by + bh / 2, 50, ink)
   text(ctx, K.ro, bx + 30 + 50 + SP[3], by + bh / 2 + 54 * 0.36, { f: rf, color: ink })
-  // Traced: the pencil on the lit tile's corner, its point on the tile.
-  emojiAt(ctx, '✏️', L.x + L.s - 12, L.y + L.s - 18, 50)
   // The price tag, flat and level, in one place under the row.
   const word = F.free.toLocaleUpperCase()
   const tf = font(700, 44, 'latin')
   const th = 82
   const tw = measure(ctx, word, tf, 0.08) + 90
   const tx = 400 - tw / 2
-  const ty = foot + 30
+  const ty = foot + 34
   ctx.fillStyle = ink
   ctx.beginPath()
   ctx.moveTo(tx + 32, ty)
@@ -2525,6 +2529,133 @@ function drawKana(c) {
   ctx.arc(tx + 28, ty + th / 2, 8, 0, Math.PI * 2)
   ctx.fill()
   text(ctx, word, tx + 52, ty + th / 2 + 44 * 0.36, { f: tf, color: p.onLine, tr: 0.08 })
+  // The pencil over all of it, its point on the stroke being drawn and
+  // its body turned where it hides the least: of the kana, the bubble, the
+  // other tiles and the tag (laid out below), a writer's slant preferred.
+  const keepOff = [...spots.filter(t => !t.lit).map(t => ({ x: t.x, y: t.y, w: t.s, h: t.s })), { x: bx, y: by, w: bw, h: bh + 18 }, { x: tx, y: ty, w: tw, h: th }]
+  const pose = strokes?.length ? penPose(ctx, strokes, glyph, keepOff, 84) : null
+  if (strokes?.length) writing(ctx, strokes, glyph, p.onLine, pose?.share)
+  if (pose) pencil(ctx, pose.x, pose.y, pose.a, 84)
+  else pencil(ctx, L.x + L.s - 24, L.y + L.s - 24, -Math.PI / 4, 84)
+}
+/** A kana being written in its box: the whole of it faint, its strokes
+ *  done, its last one `share` of the way (whole where nothing can measure a
+ *  path). */
+function writing(ctx, strokes, box, color, share) {
+  ctx.save()
+  ctx.translate(box.x, box.y)
+  ctx.scale(box.k, box.k)
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  ctx.lineWidth = 9
+  ctx.strokeStyle = alpha(color, 0.3)
+  for (const d of strokes) ctx.stroke(new Path2D(d))
+  ctx.strokeStyle = color
+  strokes.slice(0, -1).forEach(d => ctx.stroke(new Path2D(d)))
+  const last = strokes[strokes.length - 1]
+  const at = share ? pathPoint(last, share) : null
+  if (at) ctx.setLineDash([at.done, at.len * 2])
+  ctx.stroke(new Path2D(last))
+  ctx.restore()
+}
+let PATHS = null
+/** How long a stroke is, and the point a share of the way along it. */
+function pathPoint(d, share) {
+  if (typeof document === 'undefined' || !document.body) return null
+  if (!PATHS) {
+    PATHS = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    PATHS.setAttribute('width', '0')
+    PATHS.setAttribute('height', '0')
+    PATHS.style.position = 'absolute'
+    document.body.appendChild(PATHS)
+  }
+  const el = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+  el.setAttribute('d', d)
+  PATHS.appendChild(el)
+  const len = el.getTotalLength()
+  const pt = el.getPointAtLength(len * share)
+  el.remove()
+  return { x: pt.x, y: pt.y, len, done: len * share }
+}
+/** Where the pencil writes and how it leans: a point along the last
+ *  stroke (near four fifths of it) and an angle a right hand holds a pencil
+ *  at (from up and left to level right), the pair whose body covers the
+ *  least of the kana's strokes and of the boxes to keep clear, the board's
+ *  edge included. Without a document to measure strokes on: none. */
+function penPose(ctx, strokes, box, keepOff, len) {
+  const last = strokes[strokes.length - 1]
+  const tips = [0.8, 0.66, 0.9, 0.52].map(share => ({ share, at: pathPoint(last, share) })).filter(t => t.at)
+  if (!tips.length) return null
+  const testable = typeof ctx.isPointInStroke === 'function' && typeof DOMPoint !== 'undefined'
+  const board = testable ? ctx.getTransform() : null
+  const paths = strokes.map(d => new Path2D(d))
+  const inside = (r, px, py) => px > r.x - 4 && px < r.x + r.w + 4 && py > r.y - 4 && py < r.y + r.h + 4
+  const writer = -Math.PI / 4
+  let best = null
+  for (const { share, at } of tips) {
+    const x = box.x + at.x * box.k
+    const y = box.y + at.y * box.k
+    for (let deg = -135; deg <= 0; deg += 9) {
+      const a = (deg * Math.PI) / 180
+      let cost = Math.abs(a - writer) * 1.2 + Math.abs(share - 0.8) * 4
+      for (let t = 0.16; t <= 1; t += 0.07) {
+        const px = x + Math.cos(a) * len * t
+        const py = y + Math.sin(a) * len * t
+        if (px < 6 || px > 794 || py < 6 || py > 414) cost += 2
+        if (keepOff.some(r => inside(r, px, py))) cost += 2
+        if (!testable) continue
+        const dev = board.transformPoint(new DOMPoint(px, py))
+        ctx.save()
+        ctx.translate(box.x, box.y)
+        ctx.scale(box.k, box.k)
+        ctx.lineWidth = 9 + 14
+        if (paths.some(p => ctx.isPointInStroke(p, dev.x, dev.y))) cost += 3
+        ctx.restore()
+      }
+      if (!best || cost < best.cost) best = { cost, share, x, y, a }
+    }
+  }
+  return best
+}
+/** A pencil, its point at (x, y), its body running off at angle `a`. */
+function pencil(ctx, x, y, a, len) {
+  const w = len * 0.11
+  ctx.save()
+  ctx.translate(x, y)
+  ctx.rotate(a)
+  ctx.shadowColor = 'rgba(0,0,0,0.28)'
+  ctx.shadowBlur = 8
+  ctx.shadowOffsetY = 3
+  const body = len * 0.62
+  const cone = len * 0.2
+  // Body, band, eraser, under one shadow; then the cut wood and the lead.
+  ctx.fillStyle = '#f2b53a'
+  ctx.fillRect(cone, -w, body, w * 2)
+  ctx.shadowColor = 'transparent'
+  ctx.fillStyle = '#d9962b'
+  ctx.fillRect(cone, w * 0.25, body, w * 0.75)
+  ctx.fillStyle = '#f7cf6a'
+  ctx.fillRect(cone, -w, body, w * 0.45)
+  ctx.fillStyle = '#c7c9cc'
+  ctx.fillRect(cone + body, -w, len * 0.07, w * 2)
+  ctx.fillStyle = '#ef8fa0'
+  rrect(ctx, cone + body + len * 0.07, -w, len * 0.11, w * 2, w * 0.6)
+  ctx.fill()
+  ctx.fillStyle = '#f1d3a3'
+  ctx.beginPath()
+  ctx.moveTo(0, 0)
+  ctx.lineTo(cone, -w)
+  ctx.lineTo(cone, w)
+  ctx.closePath()
+  ctx.fill()
+  ctx.fillStyle = '#2b2622'
+  ctx.beginPath()
+  ctx.moveTo(0, 0)
+  ctx.lineTo(cone * 0.38, -w * 0.38)
+  ctx.lineTo(cone * 0.38, w * 0.38)
+  ctx.closePath()
+  ctx.fill()
+  ctx.restore()
 }
 /** A speaker sounding: its cone filled, two waves beside it. */
 function speaker(ctx, cx, cy, s, color) {
