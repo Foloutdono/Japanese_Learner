@@ -81,7 +81,11 @@ EVENTS: dict[str, frozenset[str]] = {
     # `lines` is the chosen subset of vocab/kanji/grammar as one
     # comma-joined string of those three names -- enum values, never
     # text the learner typed (core/lines.py).
-    "boarding_done":  frozenset({"motive", "kana_known", "level", "pace", "notifications", "lines", "ms"}),
+    # `level_how` and `placed` (plan 224): whether the learner chose
+    # their level or took the test, and where the test placed them --
+    # beside `level`, what they boarded at, so an override shows.
+    "boarding_done":  frozenset({"motive", "kana_known", "level", "pace", "notifications", "lines", "ms",
+                                 "level_how", "placed"}),
     # "Embarquer" mints an anonymous Supabase guest (lib/guest.js), so an
     # abandoned boarding leaves an auth user with no profile row. `from`
     # tells the two apart.
@@ -202,9 +206,11 @@ EVENTS: dict[str, frozenset[str]] = {
     # ── 発見 — a grammar point's tour (plan 187b) ────────────────
     # `level` is N5…N1, never the pattern: the funnel is read by level.
     # `stop` is look / guess / found / terminus; `outcome` first, retry
-    # (a wrong guess) or helped (the rule given after two). The done
-    # event carries the wrong guesses and whether the twist and scene
-    # were the point's own (`authored`, plan 187c).
+    # (a wrong guess) or helped (the rule given after two), or skipped
+    # (plan 222: the learner left the tour for its card at that stop,
+    # and no done event follows). The done event carries the wrong
+    # guesses and whether the twist and scene were the point's own
+    # (`authored`, plan 187c).
     "grammar_tour_step": frozenset({"level", "stop", "outcome"}),
     "grammar_tour_done": frozenset({"level", "tries", "helped", "authored"}),
     # ── 初見 — a kana or a kanji's first tour (plan 216) ─────────
@@ -301,6 +307,10 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         "theme":    frozenset({"light", "dark", "auto"}),
         "input":    frozenset({"touch", "mouse"}),
     },
+    "boarding_done": {
+        "level_how": frozenset({"pick", "test"}),
+        "placed":    frozenset({"N5", "N4", "N3", "N2", "N1"}),
+    },
     "run_start":    {"where": _RUN_DOORS},
     "run_complete": {"where": _RUN_DOORS},
     "run_abandon":  {"where": _RUN_DOORS},
@@ -309,11 +319,13 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         # analyzer: a text, photo or video sent to the breakdown. ocr:
         # a photo read. ask: a question to the tutor. explain: a
         # sentence's explanation opened. dictionary: a search run.
-        # export: the progress downloaded.
+        # export: the progress downloaded. level_fit: Today's line that
+        # says the level does not fit (plan 224) -- opened, the move
+        # taken, or the level kept.
         "feature": frozenset({"speech", "analyzer", "ocr", "ask", "explain",
-                              "dictionary", "export"}),
+                              "dictionary", "export", "level_fit"}),
         "action":  frozenset({"play", "text", "photo", "video", "scan", "send",
-                              "open", "search", "progress"}),
+                              "open", "search", "progress", "move", "stay"}),
     },
     "setting_change": {
         "setting": frozenset({"theme", "lang", "rating_scale", "reading_pace", "sound",

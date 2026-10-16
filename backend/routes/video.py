@@ -81,7 +81,9 @@ _MAX_PREPARING_PER_USER = 2
 # rotating residential proxy bills by the gigabyte, and the tier this
 # is sized for is 1 GB/month. A fetch pulls the watch page plus the
 # cue track -- call it 0.4 MB -- so 60 a day is ~24 MB/day, ~720 MB a
-# month, inside that tier with room left.
+# month, inside that tier with room left. Since plan 221 it pulls the
+# recognised track beside a hand-written one, for its word times: a
+# dozen kilobytes for twelve minutes of speech, lost in the watch page.
 #
 # This is not only thrift. Credits stop when they run out; gigabytes
 # just keep billing, so a retry storm or a loop is a bill rather than
@@ -302,9 +304,10 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
         return
 
     # The recognised track beside a hand-written one (the grab sends
-    # both): its word times lent to the lines it agrees with. Best
-    # effort -- a timing track that will not read costs the words their
-    # times, never the session.
+    # both; the link fetch reads both itself and returns its lines
+    # timed, plan 221): its word times lent to the lines it agrees with.
+    # Best effort -- a timing track that will not read costs the words
+    # their times, never the session.
     if timing:
         try:
             cues = align_cues(cues, parse_track(timing, "timing.vtt"))

@@ -119,7 +119,7 @@ export default function TodayScreen({ session }) {
           action={{ label: t.tryAgain, onClick: refreshToday }}
         />
       ) : (
-        <GateCard today={today} failed={failed && !today} />
+        <GateCard today={today} failed={failed && !today} session={session} />
       )}
       {showComeback && (
         <ComebackSheet

@@ -70,6 +70,21 @@ async function mount(path) {
 
 const box = el => el.getBoundingClientRect()
 
+describe('Nous écrire at phone width (plan 222)', () => {
+  it('opens as a sheet over the list, and Escape goes back to the list', async () => {
+    await mount('/profile/settings/write')
+    const sheet = document.querySelector('[role="dialog"].sheet')
+    expect(sheet?.querySelector('.fb-form')).not.toBeNull()
+    // The list stays under it, its new row among the study's.
+    expect(document.querySelector('.stg-row[data-page="write"]')).not.toBeNull()
+    expect(sheet.querySelector('.fb-check__what')?.textContent).toBeTruthy()
+    document.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle(100)
+    expect(document.querySelector('[role="dialog"]')).toBeNull()
+    expect(document.querySelector('.stg-row[data-page="write"]')).not.toBeNull()
+  })
+})
+
 describe('Settings at phone width', () => {
   it('prints the card with its back up, its doors buttons each', async () => {
     await mount('/profile/settings')

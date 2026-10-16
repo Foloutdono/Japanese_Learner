@@ -15,7 +15,7 @@ import { InboxIcon } from './Icons'
 //   hint    — the sentence under it (optional)
 //   action  — { label, onClick } (optional; at most one)
 //   tone    — 'error' for the danger register
-export default function Empty({ icon = <InboxIcon size={28} />, message, hint, action, tone, className = '' }) {
+export default function Empty({ icon = <InboxIcon size={28} />, message, hint, action, tone, className = '', children = null }) {
   const error = tone === 'error'
   return (
     <div className={`empty${error ? ' empty--error' : ''}${className ? ` ${className}` : ''}`} role={error ? 'alert' : undefined}>
@@ -27,6 +27,7 @@ export default function Empty({ icon = <InboxIcon size={28} />, message, hint, a
           {action.label}
         </button>
       )}
+      {children}
     </div>
   )
 }

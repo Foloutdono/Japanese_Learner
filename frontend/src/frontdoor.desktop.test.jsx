@@ -144,6 +144,9 @@ describe('Enter at first contact (P8)', () => {
     await settle()
     await userEvent.click(inCar('[data-kana="both"]'))
     await settle()
+    await userEvent.click(inCar('[data-how="pick"]'))
+    await enter()
+    await settle()
     expect(stepOf()).toBe('level')
     await userEvent.click(inCar('[data-level="N1"]'))
     await enter()
@@ -244,6 +247,8 @@ async function toLevel() {
   await next()
   await pick('[data-kana="both"]')
   await settle()
+  await pick('[data-how="pick"]')
+  await next()
   expect(stepOf()).toBe('level')
 }
 /** From the level list, N3, to the hour. */
@@ -321,6 +326,8 @@ describe('the boarding frame on the desk (P9, plans 140, 163)', () => {
     await next()
     await pick('[data-kana="both"]')
     await settle()
+    await pick('[data-how="pick"]')
+    await next()
     expect(stateOf('kana')).toBe('done')
     expect(stateOf('level')).toBe('now')
     await pick('[data-level="N3"]')
@@ -664,6 +671,8 @@ describe('the boarding frame on the desk (P9, plans 140, 163)', () => {
     await next()
     await pick('[data-kana="both"]')
     await settle()
+    await pick('[data-how="pick"]')
+    await next()
     await check()       // level
     await pick('[data-level="N5"]')
     await next()
@@ -1010,6 +1019,16 @@ describe('the digits at first contact (P12)', () => {
     expect(kbdOf(inCar('[data-kana="both"]'))).toBe('3')
     await userEvent.keyboard('3')
     await settle()
+    // Choose it or find it (plan 224): a road each, picked by its number.
+    expect(stepOf()).toBe('levelHow')
+    expect(kbdOf(inCar('[data-how="pick"]'))).toBe('1')
+    expect(kbdOf(inCar('[data-how="test"]'))).toBe('2')
+    await userEvent.keyboard('2')
+    expect(inCar('[data-how="test"]').getAttribute('aria-pressed')).toBe('true')
+    await userEvent.keyboard('1')
+    expect(inCar('[data-how="pick"]').getAttribute('aria-pressed')).toBe('true')
+    await userEvent.keyboard('{Enter}')
+    await settle()
     expect(stepOf()).toBe('level')
     expect(kbdOf(inCar('[data-level="N5"]'))).toBe('5')
     expect(kbdOf(inCar('[data-level="novice"]'))).toBe('0')
@@ -1070,6 +1089,8 @@ describe('first contact, finished (P13, plan 155)', () => {
     await next()
     await pick('[data-kana="both"]')
     await settle()
+    await pick('[data-how="pick"]')
+    await next()
     await pick('[data-level="N3"]')
     await read()                          // level, the canvas
     await next()
@@ -1148,6 +1169,9 @@ describe('first contact, finished (P13, plan 155)', () => {
     // A station's on its ring's shoulder, clear of its code and the rail
     // through its middle (the climbing line, plan 163).
     await pick('[data-kana="both"]')
+    await settle()
+    await pick('[data-how="pick"]')
+    await next()
     await landed()
     const ring = box(inCar('[data-level="N5"] .desk-brd__stop-ring'))
     const mark = box(inCar('[data-level="N5"] .desk-brd__mark'))

@@ -48,7 +48,7 @@ export const EVENTS = {
   // context (lib/visitContext.js), never a raw value.
   session_start: ['platform', 'vp', 'os', 'lang', 'theme', 'input', 'standalone', 'reduced'],
   boarding_step: ['step', 'to', 'index', 'dir', 'ms'],
-  boarding_done: ['motive', 'kana_known', 'level', 'pace', 'notifications', 'lines', 'ms'],
+  boarding_done: ['motive', 'kana_known', 'level', 'pace', 'notifications', 'lines', 'ms', 'level_how', 'placed'],
   account_claimed: ['from'],
   // The first ride (plan 097): the two lessons after the boarding and
   // the guide over each gate. Step and stop names are the app's own,
@@ -139,12 +139,13 @@ export const VALUES = {
     theme: ['light', 'dark', 'auto'],
     input: ['touch', 'mouse'],
   },
+  boarding_done: { level_how: ['pick', 'test'], placed: ['N5', 'N4', 'N3', 'N2', 'N1'] },
   run_start: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
   run_complete: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
   run_abandon: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
   feature_use: {
-    feature: ['speech', 'analyzer', 'ocr', 'ask', 'explain', 'dictionary', 'export'],
-    action: ['play', 'text', 'photo', 'video', 'scan', 'send', 'open', 'search', 'progress'],
+    feature: ['speech', 'analyzer', 'ocr', 'ask', 'explain', 'dictionary', 'export', 'level_fit'],
+    action: ['play', 'text', 'photo', 'video', 'scan', 'send', 'open', 'search', 'progress', 'move', 'stay'],
   },
   setting_change: {
     setting: ['theme', 'lang', 'rating_scale', 'reading_pace', 'sound', 'notifications', 'level', 'lines', 'daily_target'],

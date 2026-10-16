@@ -98,6 +98,10 @@ export function bucketFor(min) {
   return 'pm'
 }
 
+/** How a reader of both scripts finds their level (plan 224): they
+ *  choose it on the line, or the test finds it. */
+export const LEVEL_HOW = ['pick', 'test']
+
 /** The kana branch sets the level: a reader of both scripts earns the
  *  level list; anyone else is a NOVICE — one script or none is short of
  *  N5, which asks for both kana and ~100 kanji.

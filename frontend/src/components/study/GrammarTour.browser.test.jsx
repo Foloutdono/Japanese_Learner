@@ -35,12 +35,12 @@ const settle = (ms = 80) => new Promise(r => setTimeout(r, ms))
 const idx = pattern => TOUR.guesses.findIndex(g => g.pattern === pattern)
 const right = TOUR.guesses.findIndex(g => g.correct)
 
-async function mount(over = {}) {
+async function mount(over = {}, props = {}) {
   const onBoard = vi.fn()
   const onLesson = vi.fn()
   const screen = await render(
     <LangProvider>
-      <GrammarTour point={{ ...POINT, ...over }} onBoard={onBoard} onLesson={onLesson} />
+      <GrammarTour point={{ ...POINT, ...over }} onBoard={onBoard} onLesson={onLesson} {...props} />
     </LangProvider>
   )
   await settle()
@@ -152,6 +152,40 @@ describe('the tour', () => {
     gate().click()
     expect(onBoard).toHaveBeenCalledWith({ tries: 0, helped: false, quizRight: null, quizTotal: null })
     expect(track).toHaveBeenCalledWith('grammar_tour_step', { level: 'N5', stop: 'guess', outcome: 'first' })
+  })
+
+  // 飛ばす (plan 222): a quiet way past the lesson to its card, at every
+  // stop but the terminus, which boards anyway. Nothing is recorded but
+  // the stop it was left at.
+  it('can be skipped at any stop before the terminus, for its card', async () => {
+    const onSkip = vi.fn()
+    const { root, gate, guess, onBoard } = await mount({}, { onSkip })
+    const skip = () => root().querySelector('.tour__foot [data-action="skip"]')
+    expect(skip().textContent).toBe('Skip the lesson')
+    gate().click()
+    await settle()
+    guess(right).click()
+    await settle()
+    expect(skip()).toBeTruthy()
+    gate().click()
+    await settle()
+    expect(root().dataset.stop).toBe('found')
+    skip().click()
+    expect(onSkip).toHaveBeenCalledTimes(1)
+    expect(onBoard).not.toHaveBeenCalled()
+    expect(track).toHaveBeenCalledWith('grammar_tour_step', { level: 'N5', stop: 'found', outcome: 'skipped' })
+    expect(track).not.toHaveBeenCalledWith('grammar_tour_done', expect.anything())
+    gate().click()
+    await settle()
+    expect(root().dataset.stop).toBe('terminus')
+    expect(skip()).toBeNull()
+  })
+
+  it('offers no skip in a replay, nor where the run gave none', async () => {
+    const { root } = await mount({}, { onSkip: vi.fn(), replay: true })
+    expect(root().querySelector('[data-action="skip"]')).toBeNull()
+    const plain = await mount()
+    expect(plain.root().querySelector('[data-action="skip"]')).toBeNull()
   })
 
   it('a point with no chain prints its formation', async () => {

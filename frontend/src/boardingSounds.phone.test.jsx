@@ -95,6 +95,8 @@ async function toTime() {
   await press('[data-motive="trip"]')
   await press('[data-action="continue"]')
   await press('[data-kana="both"]')
+  await press('[data-how="pick"]')
+  await press('[data-action="continue"]')
   await press('[data-level="N1"]')
   await press('[data-action="continue"]')   // → lines (N1: no goal)
   await press('[data-action="continue"]')   // → rhythm
@@ -140,7 +142,7 @@ describe('the questions', () => {
 
     quiet()
     await press('[data-kana="both"]')
-    expect(stepOf()).toBe('level')
+    expect(stepOf()).toBe('levelHow')
     expect(ui('click-screen-selection')).toBe(1)
     expect(ui('click-mode-selection')).toBe(0)
 
@@ -157,6 +159,8 @@ describe('the questions', () => {
     await press('[data-motive="trip"]')
     await press('[data-action="continue"]')
     await press('[data-kana="both"]')
+    await press('[data-how="pick"]')
+    await press('[data-action="continue"]')
     await press('[data-level="N1"]')
     await press('[data-action="continue"]')
     expect(stepOf()).toBe('lines')

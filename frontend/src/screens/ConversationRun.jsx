@@ -1,22 +1,24 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
 import { postResult } from '../lib/postResult'
 import { useLang } from '../LangContext'
-import { playUi, speakSentence, stopSpeaking } from '../lib/audio'
+import { isSpeakOnReveal, playClick, playUi, speakLine, speakSentence, stopSpeaking } from '../lib/audio'
 import { runKey } from '../lib/keyGuards'
 import { welded } from '../locales/frenchSpacing'
 import { StudyStage } from '../components/study/StudyStage'
 import PromptCard from '../components/study/PromptCard'
 import RatingBar from '../components/study/RatingBar'
 import { RunStreak } from '../components/study/RunStreak'
+import SpeakToggle from '../components/study/SpeakToggle'
 import { TutorReview, TutorVerdict } from '../components/study/TutorReview'
 import { SentenceLead, AnswerWell, CorrectedInPlace, MarkedAnswer } from '../components/study/PracticeCard'
-import { SceneLine, ScenePlate, Choices, Said } from '../components/study/GrammarTour'
+import { SceneLine, ScenePlate, Mark } from '../components/study/GrammarTour'
+import { ArrowIcon } from '../components/ui/Icons'
 import { DeskPane } from '../components/analysis/BreakdownSide'
 import { FuriganaParts } from '../components/study/Readings'
 import { EnterKey, KeyCap } from '../components/chrome/DeskKeys'
-import { Loading } from '../components/ui/Loading'
+import { Dots, Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import { usePracticeXp } from '../hooks/usePracticeXp'
 import { useDesk } from '../hooks/useDesk'
@@ -41,10 +43,11 @@ const KAIWA_COLOR = 'var(--line-kaiwa)'
 // one voice, the learner in another), and grows a line at a time:
 //
 //   choose      the other person's line, and the three replies under
-//               the card as the tour's tiles. A pick is the answer: the
-//               right one ringed, a wrong one crossed, and why said at
-//               the card's foot. Graded by the pick (4 or 1, a question's
-//               rates), as comprehension's questions are.
+//               the talk as quick replies. A pick is the answer, and is
+//               said: it joins the talk as the learner's line, marked --
+//               a wrong one struck, why under it, and the reply that was
+//               right after it (plan 223). Graded by the pick (4 or 1, a
+//               question's rates), as comprehension's questions are.
 //   translate   the other person's line, and what the learner wants to
 //               say in their own language. Written in Japanese -- kana,
 //               kanji or rōmaji -- it is measured against the model reply
@@ -63,6 +66,29 @@ const KAIWA_COLOR = 'var(--line-kaiwa)'
 // learner is credited with saying is the model reply (or the
 // alternative their answer matched), so the next thing said to them is
 // an answer to it. In free talk it is what they wrote.
+//
+// ── The talk on the screen (plan 221) ──
+// A scene is five or six exchanges, and the talk used to grow down the
+// page: by the fourth line the replies stood under the fold and the
+// learner scrolled to find what to answer with. Once the talk is under
+// way the run is bounded to the screen (index.css, .stage--talk): the
+// talk scrolls inside its card, and what answers it -- the tiles, the
+// field, the bar, Next -- stands under the card at every length. The
+// newest exchange is followed in the card from its start (`follow`),
+// the other person is heard as they speak when the run's speaker
+// switch is on (`voice`), and a pick takes the replies away, so what
+// it says has the talk's room rather than what the replies leave.
+//
+// ── The talk as bubbles (plan 223) ──
+// The owner's pick B of the canvas "Tsuji — la conversation en bulles":
+// the other person's lines at the left on the line's rail, the
+// learner's at the right on their gold one, each with its voice beside
+// it, on the stage's own ground (the card's frame comes off the talk).
+// A reply chosen is sent: the learner's bubble, its mark at its corner;
+// a wrong one stays in the talk struck, with the reply that was right
+// under it. What a reply says of itself (its note) is shown while its
+// exchange is in hand and leaves with Next, so the talk keeps the
+// bubbles and their marks, not every note.
 export default function ConversationRun({ session }) {
   const { scenario, mode } = useParams()
   const { lang } = useLang()
@@ -120,6 +146,14 @@ function Run({ session, id, mode }) {
   // "Again" boards the talk straight away rather than the brief.
   const restartRef = useRef(false)
   const talkRef = useRef(null)
+  // The first line of the newest exchange: where `follow` starts it.
+  const freshRef = useRef(null)
+  // Which voicing is current: a line tapped, or the next one said,
+  // ends the one before it (`voice`).
+  const voiceRef = useRef(0)
+  // Whether the reply in hand was heard at the pick (Choose's right
+  // one), so Next does not say it twice.
+  const heardRef = useRef(false)
 
   useEffect(() => {
     let live = true
@@ -147,13 +181,36 @@ function Run({ session, id, mode }) {
 
   useEffect(() => () => stopSpeaking(), [])
 
-  // The newest line stays in view as the talk grows.
-  useEffect(() => {
-    const last = talkRef.current?.lastElementChild
-    if (!last) return
-    const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    last.scrollIntoView?.({ block: 'nearest', behavior: still ? 'auto' : 'smooth' })
-  }, [lines.length, pick, said, waiting])
+  // The newest exchange in view, from its start: what follows the talk
+  // in the card (a verdict, the task, the practice card, the end) or,
+  // with nothing there, the first line the exchange added. Shown whole
+  // when it fits the card -- the lines before it fill what is left
+  // above -- and from its top when it does not, so a long tutor's note
+  // is read from its head, never caught halfway down. Before the paint,
+  // so a line never lands out of view and then slides in.
+  useLayoutEffect(() => {
+    const talk = talkRef.current
+    if (!talk) return
+    const fresh = lines.findIndex(l => l.key === freshRef.current)
+    const anchor = talk.nextElementSibling ?? talk.children[fresh] ?? talk.lastElementChild
+    if (anchor) follow(talk.parentElement, anchor)
+  }, [lines, pick, said, measure, tutor, tutorLoading, limited, rated, waiting, talkError, ended, stage])
+
+  // ── The talk heard as it is said ──
+  // Lines in turn, each in its speaker's voice (the catalogue's, a free
+  // line on the device), when the run's speaker switch is on -- the
+  // sentence runs' switch, SpeakToggle in the head. A newer voicing or
+  // a line tapped ends the run of lines before it.
+  function voice(...spoken) {
+    const run = (voiceRef.current += 1)
+    if (!isSpeakOnReveal()) return
+    spoken.filter(Boolean).reduce((prev, line) => prev.then(() => {
+      if (voiceRef.current !== run) return undefined
+      if (line.speak) return line.speak(line.jp)
+      return speakLine(line.jp, line.who)
+    }), Promise.resolve()).catch(() => {})
+  }
+  const hush = () => { voiceRef.current += 1 }
 
   function resetTurn() {
     flightRef.current += 1
@@ -164,6 +221,7 @@ function Run({ session, id, mode }) {
     setMeasure(null)
     setTutor(null)
     setTutorLoading(false)
+    heardRef.current = false
   }
 
   function begin(data) {
@@ -176,8 +234,11 @@ function Run({ session, id, mode }) {
     setWaiting(false)
     setTalkError(null)
     setEnded(null)
-    setLines([sceneLine(nextKey(), 'them', data.turns[0].them)])
+    const opening = sceneLine(nextKey(), 'them', data.turns[0].them)
+    freshRef.current = opening.key
+    setLines([opening])
     setStage('talk')
+    voice(opening)
   }
 
   function start() {
@@ -209,11 +270,26 @@ function Run({ session, id, mode }) {
   }
 
   // ── Choose ──
+  // The pick is said: it joins the talk as the learner's line, marked.
+  // A wrong one stays struck, why under it, and the reply that was
+  // right follows it, which is the line the talk takes and the one the
+  // learner hears in their own voice (the tour's scene says a right one
+  // the same way).
   function choose(i) {
     if (pick != null) return
-    const choice = script.turns[turn].choices[i]
+    const step = script.turns[turn]
+    const choice = step.choices[i]
+    const right = step.choices.find(c => c.right)
     setPick(i)
     grade(choice.right ? 4 : 1, { turn, correct: choice.right })
+    const taken = { ...sceneLine(nextKey(), 'me', choice), turn, mark: choice.right ? 'ok' : 'no', note: choice.note }
+    const added = choice.right
+      ? [taken]
+      : [{ ...taken, kind: 'taken' }, { ...sceneLine(nextKey(), 'me', right), turn, kind: 'right', note: right.note }]
+    freshRef.current = taken.key
+    setLines(ls => [...ls, ...added])
+    heardRef.current = true
+    voice({ jp: right.jp, who: 'me' })
   }
 
   // ── Translate ──
@@ -265,16 +341,24 @@ function Run({ session, id, mode }) {
   }
 
   // The scripted turn is done: the learner's line joins the talk -- the
-  // model reply, or the alternative a translation matched -- and the
-  // next thing said to them follows, or the scene's last word.
+  // model reply, or the alternative a translation matched; Choose's
+  // joined it at the pick -- and the next thing said to them follows,
+  // or the scene's last word.
   function next() {
     const step = script.turns[turn]
     const credited = mode === 'translate' && measure?.target > 0 ? step.alt[measure.target - 1] : step.me
-    const added = [sceneLine(nextKey(), 'me', { ...credited, translation: step.me.translation })]
+    const mine = mode === 'choose' ? null : sceneLine(nextKey(), 'me', { ...credited, translation: step.me.translation })
     const following = script.turns[turn + 1]
-    if (following) added.push(sceneLine(nextKey(), 'them', following.them))
-    else if (script.close) added.push(sceneLine(nextKey(), 'them', script.close))
-    setLines(ls => [...ls, ...added])
+    const reply = following ? sceneLine(nextKey(), 'them', following.them)
+      : script.close ? sceneLine(nextKey(), 'them', script.close) : null
+    const added = [mine, reply].filter(Boolean)
+    if (added.length) {
+      freshRef.current = added[0].key
+      setLines(ls => [...ls, ...added])
+    }
+    // The reply as the talk takes it (unless the pick already said
+    // it), then the answer to it.
+    voice(heardRef.current ? null : mine, reply)
     resetTurn()
     if (following) setTurn(turn + 1)
     else setStage('over')
@@ -288,6 +372,7 @@ function Run({ session, id, mode }) {
     const flight = (flightRef.current += 1)
     const history = talkHistory(lines)
     const mine = { ...sceneLine(nextKey(), 'me', { jp: line }, speakSentence), index: linesSaid(lines) }
+    freshRef.current = mine.key
     setLines(ls => [...ls, mine])
     setAnswer('')
     setWaiting(true)
@@ -314,6 +399,7 @@ function Run({ session, id, mode }) {
         }
         const reply = sceneLine(nextKey(), 'them', d.reply, speakSentence)
         setLines(ls => [...ls.map(l => (l.key === mine.key ? heard : l)), reply])
+        voice(reply)
         if (d.reply.done) setEnded('done')
         else if (mine.index + 1 >= MAX_TALK_TURNS) setEnded('max')
       })
@@ -371,6 +457,9 @@ function Run({ session, id, mode }) {
     <ol className="kaiwa-talk" ref={talkRef}>
       {lines.map(line => {
         const held = line.key === owed && !early.has(line.key)
+        // A reply's note while its exchange is in hand: under a reply
+        // taken, inside the one that was right.
+        const open = stage === 'talk' && pick != null && line.turn === turn && line.note
         return (
           <SceneLine
             key={line.key}
@@ -378,7 +467,18 @@ function Run({ session, id, mode }) {
             them={script.them}
             showTr={!held && Boolean(line.tr)}
             speak={line.speak}
+            onSpeak={hush}
+            className={line.kind ? `kaiwa-line--${line.kind}` : ''}
+            label={line.kind === 'right' ? <span className="cap kaiwa-cap">{t.cvsTheReply}</span> : null}
+            foot={open && line.kind === 'taken' ? line.note : null}
           >
+            {line.mark && (
+              <span className={`kaiwa-mark kaiwa-mark--${line.mark}`}>
+                <Mark kind={line.mark} />
+                <span className="sr-only">{line.mark === 'ok' ? t.cvsRightMark : t.cvsWrongMark}</span>
+              </span>
+            )}
+            {open && line.kind !== 'taken' && <span className="kaiwa-why">{line.note}</span>}
             {held && line.tr && (
               <button type="button" className="brd__link kaiwa-tr" onClick={() => reveal(line.key)}>
                 {t.showTranslation}
@@ -390,6 +490,14 @@ function Run({ session, id, mode }) {
           </SceneLine>
         )
       })}
+      {/* The other person answering a free line: their row, the wait's
+          dots where their words will be (the words said for a reader). */}
+      {stage === 'talk' && mode === 'free' && waiting && (
+        <li className="tour-line tour-line--them kaiwa-pending">
+          <span className="tour-line__who" aria-hidden="true">{script.them}</span>
+          <div className="tour-line__text"><Dots /><span className="sr-only">{t.cvsAnswering(script.them)}</span></div>
+        </li>
+      )}
     </ol>
   )
 
@@ -473,7 +581,7 @@ function Run({ session, id, mode }) {
   return (
     <StudyStage
       color={KAIWA_COLOR}
-      className="stage--sentence stage--kaiwa"
+      className={`stage--sentence stage--kaiwa${stage === 'talk' || stage === 'over' ? ' stage--talk' : ''}`}
       onLeave={leave}
       leaveLabel={t.cvsLeave}
       where={where}
@@ -481,7 +589,7 @@ function Run({ session, id, mode }) {
       // On the desk the score is the run panel's figures.
       remaining={desk ? undefined : `${score.right} / ${score.total}`}
       pass={false}
-      aside={<RunStreak />}
+      aside={<><RunStreak /><SpeakToggle variant="head" /></>}
       toast={fare.toast}
       onToastDone={fare.toastDone}
       records
@@ -508,9 +616,6 @@ function Run({ session, id, mode }) {
           )}
           {talk}
 
-          {stage === 'talk' && mode === 'free' && waiting && (
-            <Loading inline copy={t.cvsAnswering(script.them)} className="kaiwa-pending" />
-          )}
           {stage === 'talk' && mode === 'free' && talkError && (
             <p className="kaiwa-alert" role="status">
               {{ limit: t.cvsTalkLimit, off: t.cvsTalkOff, failed: t.cvsTalkFailed }[talkError]}
@@ -518,10 +623,6 @@ function Run({ session, id, mode }) {
           )}
           {stage === 'talk' && mode === 'free' && ended && (
             <p className="cap kaiwa-end">{ended === 'max' ? t.cvsTalkOver : t.cvsOver}</p>
-          )}
-
-          {stage === 'talk' && mode === 'choose' && pick != null && (
-            <Picked step={step} pick={pick} t={t} />
           )}
 
           {stage === 'talk' && mode === 'translate' && said == null && (
@@ -561,20 +662,39 @@ function Run({ session, id, mode }) {
         </PromptCard>
       )}
 
-      {stage === 'talk' && mode === 'choose' && step && (
-        <Choices
-          items={step.choices.map(c => ({ jp: c.jp, correct: c.right }))}
-          pick={pick}
-          done={pick != null}
-          onPick={choose}
-          label={t.cvsReplyLabel}
-          ja
-        />
+      {/* Picked, the replies go: the pick is in the talk, and what it
+          says has the talk's room to say it in. */}
+      {stage === 'talk' && mode === 'choose' && step && pick == null && (
+        <Replies choices={step.choices} onPick={choose} label={t.cvsReplyLabel} />
       )}
 
       {foot}
     </StudyStage>
   )
+}
+
+/** Scrolls the talk's card body so `anchor` -- the newest exchange's
+ *  start -- is in view: the box's end when everything from the anchor
+ *  down fits, the anchor at the top (less the box's scroll-padding)
+ *  when it does not. Measured by layout offsets, not boxes: a line
+ *  still arriving is drawn 10px low (the `arrive` keyframes), and its
+ *  box would land it that much under the top (the body is positioned,
+ *  index.css, so the offsets add up to it). A body that is not a
+ *  scroller (no bound on the stage) hands the job to the page. */
+function follow(box, anchor) {
+  const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  const behavior = still ? 'auto' : 'smooth'
+  const style = box && window.getComputedStyle(box)
+  if (!style || !/auto|scroll/.test(style.overflowY)) {
+    anchor.scrollIntoView?.({ block: 'nearest', behavior })
+    return
+  }
+  let at = 0
+  for (let node = anchor; node && node !== box; node = node.offsetParent) at += node.offsetTop
+  const end = box.scrollHeight - box.clientHeight
+  const top = Math.max(0, Math.min(end, at - (parseFloat(style.scrollPaddingTop) || 0)))
+  if (Math.abs(top - box.scrollTop) < 1) return
+  box.scrollTo({ top, behavior })
 }
 
 /** The scene before it starts, and beside it on the desk once it has:
@@ -622,27 +742,20 @@ function Field({ value, onChange, onSubmit, label, action, t }) {
   )
 }
 
-/** What Choose says back: right or not, and why -- the pick's own note,
- *  and for a wrong one the reply that was right with its note. */
-function Picked({ step, pick, t }) {
-  const picked = step.choices[pick]
-  const right = step.choices.find(c => c.right)
+/** Choose's quick replies, under the talk: each a row of the tray, its
+ *  number (the desk's key) and its Japanese, and the arrow that says a
+ *  tap sends it -- there is no Check: the pick is the answer. */
+function Replies({ choices, onPick, label }) {
   return (
-    <Said kind={picked.right ? 'ok' : 'no'} head={picked.right ? t.tourRight : t.tourNotQuite}>
-      {!picked.right && (
-        <p className="tour-said__line">
-          <span className="kaiwa-said__tr">{picked.translation}</span> {picked.note}
-        </p>
-      )}
-      {!picked.right && (
-        <p className="tour-said__line tour-said__line--ja" lang="ja">
-          <span className="cap">{t.cvsTheReply}</span> {right.jp}
-        </p>
-      )}
-      <p className="tour-said__line">
-        <span className="kaiwa-said__tr">{right.translation}</span> {right.note}
-      </p>
-    </Said>
+    <div className="kaiwa-replies" role="group" aria-label={label}>
+      {choices.map((c, i) => (
+        <button key={c.jp} type="button" className="kaiwa-reply" onClick={() => { playClick(); onPick(i) }} data-choice={i}>
+          <span className="kaiwa-reply__n" aria-hidden="true">{i + 1}</span>
+          <span className="kaiwa-reply__jp" lang="ja">{c.jp}</span>
+          <ArrowIcon direction="right" size={18} className="kaiwa-reply__send" />
+        </button>
+      ))}
+    </div>
   )
 }
 

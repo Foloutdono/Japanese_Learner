@@ -165,13 +165,19 @@ export function LevelPage({ session }) {
 }
 
 // ── The confirm sheet (canvas SettingsLevelUp / SettingsLevelDown) ──
-function LevelSheet({ from, to, preview, t, lang, onConfirm, onClose }) {
+// A move down gives back the cards the level assumed known and never
+// asked about (plan 224): they are new again. The sheet prints how many
+// where it printed the zero deleted -- the body still says nothing is.
+// Shared with Today's level-fit line (station/LevelFitLine), whose Stay
+// is an answer of its own (`onStay`) where here it only closes.
+export function LevelSheet({ from, to, preview, t, lang, onConfirm, onClose, onStay = onClose }) {
   const up = preview.direction !== 'down'
+  const returned = preview.returned ?? 0
   const title = up ? t.levelUpTitle(to) : t.levelDownTitle(to)
   return (
     <Sheet open onClose={onClose} jp={title} label={title} className="lvl-sheet" initialFocus=".btn-secondary">
       <p className="lvl-sheet__body">
-        <Emphasized text={up ? t.levelUpBody(to, preview.spreadWeeks ?? 6) : t.levelDownBody(to)} strongClassName="lvl-sheet__strong" />
+        <Emphasized text={up ? t.levelUpBody(to, preview.spreadWeeks ?? 6) : t.levelDownBody(to, returned)} strongClassName="lvl-sheet__strong" />
       </p>
       <div className="lvl-sheet__figs">
         {up ? (
@@ -182,7 +188,9 @@ function LevelSheet({ from, to, preview, t, lang, onConfirm, onClose }) {
         ) : (
           <>
             <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">{(preview.setAside ?? 0).toLocaleString(lang)}</b><span className="lvl-sheet__fig-l">{t.levelSetAside}</span></div>
-            <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">0</b><span className="lvl-sheet__fig-l">{t.levelDeleted}</span></div>
+            {returned > 0
+              ? <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">{returned.toLocaleString(lang)}</b><span className="lvl-sheet__fig-l">{t.levelBackToNew}</span></div>
+              : <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">0</b><span className="lvl-sheet__fig-l">{t.levelDeleted}</span></div>}
           </>
         )}
       </div>
@@ -190,7 +198,7 @@ function LevelSheet({ from, to, preview, t, lang, onConfirm, onClose }) {
         <span className="btn-depart__jp">{up ? t.levelUpGo(to) : t.levelDownGo(to)}</span>
         <span className="btn-depart__go" aria-hidden="true">▶</span>
       </button>
-      <button type="button" className="btn-secondary" onClick={onClose}>
+      <button type="button" className="btn-secondary" onClick={onStay}>
         {t.levelStay(from ?? to)}
       </button>
     </Sheet>

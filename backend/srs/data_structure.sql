@@ -71,7 +71,12 @@ CREATE TABLE review_log (
     -- just SUM(xp_earned) and never drift if the formula's constants
     -- change later.
     xp_earned INTEGER NOT NULL DEFAULT 0,
-    reviewed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    reviewed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- The first answer to a card the level rule marked known (plan 224):
+    -- a check, not a first sighting. A check passed spends no new card
+    -- of the day's pace, and the level-fit watch reads the checks per
+    -- stop (study/level_fit.py).
+    assumed BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE INDEX idx_review_log_card_id
@@ -1074,3 +1079,37 @@ CREATE TABLE event_daily (
     n       INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, day, name)
 );
+
+-- A learner's message to the people who make the app (plan 222): a
+-- problem, an idea, a fault in what is taught, or a card reported from
+-- its flag. Self-migrated by routes/feedback.py. Unlike event_log, `body`
+-- IS what the learner typed -- the one table that keeps words on
+-- purpose, which is why it is its own table and route: the dashboards
+-- and the weekly digest count it, scripts/read_feedback.py is what reads
+-- it, by hand. Every other column is a closed class or a
+-- shape (core/events.VALUES, events.SHAPES): `route` a pattern App.jsx
+-- declared, `area`/`status` a failure's API area and HTTP status,
+-- `platform`/`vp`/`os`/`lang` the visit's classes. `card_id` is
+-- unprefixed (the content key), `reasons` a card's, from
+-- feedback.CARD_REASONS. `reply_to` is read from the account when the
+-- learner asks for an answer, never from the request. Erased with the
+-- account (routes/account.py).
+CREATE TABLE feedback (
+    id         BIGSERIAL PRIMARY KEY,
+    user_id    TEXT NOT NULL,
+    kind       TEXT NOT NULL,
+    body       TEXT NOT NULL DEFAULT '',
+    reasons    TEXT[] NOT NULL DEFAULT '{}',
+    card_id    TEXT,
+    route      TEXT,
+    area       TEXT,
+    status     SMALLINT,
+    platform   TEXT,
+    vp         TEXT,
+    os         TEXT,
+    lang       TEXT,
+    reply      BOOLEAN NOT NULL DEFAULT FALSE,
+    reply_to   TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX feedback_user_at ON feedback (user_id, created_at);

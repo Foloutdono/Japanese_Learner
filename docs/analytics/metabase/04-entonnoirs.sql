@@ -73,6 +73,18 @@ WHERE name = 'boarding_done' AND at >= now() - ({{days}} || ' days')::interval
 GROUP BY 1, 2, 3 ORDER BY 4 DESC;
 
 -- ==== question
+-- title: Niveau : choisi ou trouvé par le test
+-- display: table
+-- size: 12x7
+-- description: boarding_done depuis le plan 224 : level_how (pick = choisi sur la ligne, test = trouvé par le test), placed = où le test plaçait, level = où l'apprenant a embarqué. Un écart entre les deux est un niveau corrigé à la main.
+SELECT coalesce(props->>'level_how', '—') AS "Comment", coalesce(props->>'placed', '—') AS "Placé par le test",
+       coalesce(props->>'level', '—') AS "Embarqué à", count(DISTINCT user_id) AS "Apprenants"
+FROM event_log
+WHERE name = 'boarding_done' AND at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}}
+GROUP BY 1, 2, 3 ORDER BY 4 DESC;
+
+-- ==== question
 -- title: Premier trajet (試乗)
 -- display: table
 -- size: 12x7

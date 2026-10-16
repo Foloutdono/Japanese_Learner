@@ -9,6 +9,7 @@ import { EntryDockContext } from './entryDock'
 import { RunPanelsContext, RunConsoleContext } from './runPanels'
 import { RunPanel } from './RunPanel'
 import { RunMeter, RunFloor } from './RunConsole'
+import { CardFlag } from '../feedback/FeedbackSheet'
 
 // ── The run's frame (plan 070) ────────────────────────────────
 // The canvas's <main class="stage">: both bars have left, the head
@@ -61,10 +62,15 @@ import { RunMeter, RunFloor } from './RunConsole'
 // pill goes (the meter carries it) and so does the run's own hairline
 // (RunConsoleContext). `meter={false}` keeps a run on the old floor: the
 // comprehension run, whose answers are graded together at its end.
+// `report` (plan 222, door B): `{ card }` once a card is answered, and
+// the head draws the card's flag after the screen's own aside
+// (components/feedback/FeedbackSheet.jsx, CardFlag); null before the
+// answer and after the rating, so the flag is there only while the
+// card's answer is. Its sheet is App's (FeedbackHost).
 export function StudyStage({
   color, onLeave, leaveLabel, where, sub, remaining, pass = true, aside,
   toast, onToastDone, className = '', levelBar = true, side, sideLabel, records = false, done = false,
-  panel = null, progress = null, recordsLabel = null, meter = true, children,
+  panel = null, progress = null, recordsLabel = null, meter = true, report = null, children,
 }) {
   const desk = useDesk()
   const { t } = useLang()
@@ -94,7 +100,8 @@ export function StudyStage({
           <StageHead
             onLeave={onLeave} leaveLabel={leaveLabel}
             where={where} sub={sub} remaining={panels || runConsole ? undefined : remaining}
-            pass={pass} onPass={openBalance} aside={aside} keys={!panels} help={panels}
+            pass={pass} onPass={openBalance} keys={!panels} help={panels}
+            aside={report ? <>{aside}<CardFlag card={report.card} /></> : aside}
           />
           {runConsole && <RunMeter remaining={remaining ?? null} />}
           {children}

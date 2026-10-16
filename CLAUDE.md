@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **224**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **228**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -115,6 +115,16 @@ runtime purpose.
   that counts or serves the day's reviews cuts too, or a learner on a
   catch-up is shown, served or notified the wall again. The cut never
   writes a schedule: lifted, the gate is what it was.
+- **A lesson waits its turn (plan 222).** A never-met rule opens on its
+  tour, minutes long, so the day's ration opens at most
+  `daily_queue.GRAMMAR_PER_DAY` rules, none before the learner has a
+  day of study behind them, and deals them after the other new cards
+  (`space_rules`: a few quick cards before each). The allowance is read
+  in one place, `_grammar_allowance` in `routes/today.py`: the gate, the
+  run, tomorrow and the ahead all spend it, and anything new that counts
+  or serves the ration does too. A tour can always be skipped for its
+  card; a run the learner boards on purpose (a grammar run, a unit) is
+  not capped.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.
@@ -133,6 +143,15 @@ runtime purpose.
   that keys a cache goes through `reading.known_lang`. On the client a
   selector's fetch goes through `lib/cachedJson.js`, a held arrow key
   checks no radio, and a write that creates guards against a second press.
+- **A learner's message is read by a person, never by a dashboard
+  (plan 222).** What is written through Nous écrire, a card's flag or
+  the link under a failure is the one text kept on purpose: it lives in
+  `feedback` (`routes/feedback.py`), is counted by the digest and
+  `10-messages.sql`, and its words are read with `scripts/read_feedback`
+  alone (`tests/test_metabase_sync.py` refuses a question that selects
+  them). The context beside it is the trail's closed classes, shown to
+  the learner before sending, and a reply's address is read from the
+  account, never taken from the request.
 - **A new per-learner table is erased with the account.** Add it to
   `DELETE /api/account` (`routes/account.py`) in the same change.
 - **One table's self-migration per transaction.** A failing `ALTER` must not
@@ -171,6 +190,23 @@ runtime purpose.
   DOM unchanged (`src/deskfree.phone.test.jsx`), and the short desk
   (1280×600, the `short` lane) is checked too. A phone bug fixed gets its own
   phone test.
+- **An assumption is not history (plan 224).** A card the level rule
+  marked known and nobody has asked about (`SRSEngine.is_assumed`) is
+  the app's guess about a self-declared level. Its first answer is a
+  check (`review_log.assumed`): missed, the card starts as new, never as
+  a lapse; passed, it spends nothing of the day's pace, so anything new
+  that counts a card's first sighting excludes a kept check
+  (`srs._NOT_A_KEPT_CHECK`). A move down gives the untouched ones from
+  the new level up back as new cards (`forget_assumed`) and deletes no
+  answered row; a new seeding path writes `KNOWN_STATE` or it is not
+  read as an assumption.
+- **The placement test is replayed from its seed (plan 224).** The climb
+  (`study/placement.walk`) keeps nothing between two answers: it is
+  rebuilt from the seed at each one, in whatever process answers it. So
+  every builder it calls is a pure function of (seed, content) across
+  processes -- a set, or anything built by iterating one, is sorted
+  before a seeded random touches it (`tests/test_placement.py` builds
+  the climb under two hash seeds).
 
 ## Commands
 
@@ -309,6 +345,7 @@ One more is read-only and needs no flag, so it is safe to run at any time:
 
 ```bash
 python -m scripts.weekly_digest        # the four numbers, as markdown
+python -m scripts.read_feedback        # what learners wrote to us (plan 222), newest first
 ```
 
 Two others fill a shared cache ahead of demand rather than maintaining

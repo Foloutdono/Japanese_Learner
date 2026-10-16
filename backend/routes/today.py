@@ -353,8 +353,33 @@ class Pools(NamedTuple):
     course: list | None
 
 
-def _ration(pools: Pools, budget: int):
-    return daily_queue.ration(pools.kana, pools.lines, budget, course=pools.course)
+def _ration(pools: Pools, budget: int, grammar: int | None = None):
+    return daily_queue.ration(pools.kana, pools.lines, budget, course=pools.course, grammar=grammar)
+
+
+def _holds_rules(pools: Pools) -> bool:
+    return any(key[1] == daily_queue.GRAMMAR for key in pools.lines) or any(
+        key[1] == daily_queue.GRAMMAR for key, _ in (pools.course or ()))
+
+
+def _grammar_allowance(user_id: str, pools: Pools, day) -> int | None:
+    """How many never-met rules the ration may open on `day` (plan 222,
+    daily_queue.grammar_allowance): none before a day of study is behind
+    the learner, then GRAMMAR_PER_DAY less those met already today. The
+    gate, the run, tomorrow and the ahead all ask it here, so they count
+    the same cards. None (no cap) when the pools hold no rule, and
+    nothing is read for it; 0 when the reads fail -- a lesson is the one
+    new card that can wait."""
+    if not _holds_rules(pools):
+        return None
+    try:
+        first = srs.first_studied_day(user_id)
+        today = datetime.now(timezone.utc).date()
+        opened = srs.get_new_items_today(user_id, source=daily_queue.GRAMMAR) if day == today else 0
+    except Exception:
+        logger.exception("grammar allowance failed")
+        return 0
+    return daily_queue.grammar_allowance(first is not None and first < day, opened)
 
 
 def _new_lanes(user_id: str, level: str, plan: review_plan.Plan = review_plan.NO_PLAN):
@@ -374,7 +399,8 @@ def _new_lanes(user_id: str, level: str, plan: review_plan.Plan = review_plan.NO
     pools = _new_pools(user_id, level, pace.remaining)
     if pools is None:
         return OrderedDict()
-    return _ration(pools, pace.remaining)
+    today = datetime.now(timezone.utc).date()
+    return _ration(pools, pace.remaining, _grammar_allowance(user_id, pools, today))
 
 
 def _course(user_id: str, lines) -> list[tuple[tuple, str, int]]:
@@ -762,7 +788,9 @@ def _tomorrow(user_id: str, level: str, queue: DayQueue | None = None) -> dict:
         if pace is not None and not plan.new_paused(datetime.now(timezone.utc).date() + timedelta(days=1)):
             pools = _new_pools(user_id, level, pace.target)
             if pools is not None:
-                fresh = sum(len(ids) for ids in _ration(pools, pace.target).values())
+                tomorrow = datetime.now(timezone.utc).date() + timedelta(days=1)
+                grammar = _grammar_allowance(user_id, pools, tomorrow)
+                fresh = sum(len(ids) for ids in _ration(pools, pace.target, grammar).values())
     except Exception:
         logger.exception("tomorrow's ration failed")
     cards = due + fresh
@@ -1011,8 +1039,10 @@ def get_today_ahead(at: str = Query(..., description="comma-separated ISO instan
     if pace is not None:
         pools = _new_pools(user_id, level, pace.target)
         if pools is not None:
-            today_new = _ration(pools, pace.remaining)
-            later_new = _ration(pools, pace.target)
+            now_day = datetime.now(timezone.utc).date()
+            today_new = _ration(pools, pace.remaining, _grammar_allowance(user_id, pools, now_day))
+            later_new = _ration(pools, pace.target,
+                                _grammar_allowance(user_id, pools, now_day + timedelta(days=1)))
     today_utc = datetime.now(timezone.utc).date()
 
     # 回復運転 (plan 217): what the gate will hold is the day's share
@@ -1119,6 +1149,9 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     pace's 臨時列車 is. It serves the due reviews uncut and no new card.
     """
     count = max(1, min(count, MAX_BATCH))
+    # The day's never-met rules, each a lesson: spaced out in the batch
+    # (daily_queue.space_rules, plan 222).
+    new_rules: set[str] = set()
 
     due_rows = srs.get_due_rows(user_id)
     personal = _personal_rows(user_id, due_rows)
@@ -1142,8 +1175,11 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
             # The day's share (plan 217), cut as the gate cut it: the
             # run serves what the gate counted.
             plan = review_plan.read_plan(user_id)
+            new_lanes = _new_lanes(user_id, level, plan)
+            new_rules = {raw_id for key, ids in new_lanes.items()
+                         if key[1] == daily_queue.GRAMMAR for raw_id in ids}
             merged, _fresh = daily_queue.merge_new(
-                review_plan.cut(user_id, due, due_rows, plan).lanes, _new_lanes(user_id, level, plan),
+                review_plan.cut(user_id, due, due_rows, plan).lanes, new_lanes,
             )
         chosen = daily_queue.keep_lanes(merged, daily_queue.parse_lane_ids(lanes))
     chosen = daily_queue.drop_seen(chosen, daily_queue.parse_exclude(exclude))
@@ -1157,7 +1193,7 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     # kana in it is cleared too. A pass has no balance to stop at, and
     # in shadow mode the queue is untouched.
     repeats = _repeats(user_id, due_rows)
-    picked = _affordable(user_id, daily_queue.interleave(chosen, count), repeats)
+    picked = _affordable(user_id, daily_queue.space_rules(daily_queue.interleave(chosen, count), new_rules), repeats)
     if not picked:
         return {"cards": [], "beyond": 0}
     # 残り — what the queue still holds past this batch and past what
