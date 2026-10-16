@@ -2466,60 +2466,88 @@ function drawKana(c) {
   const kata = K.set === 'katakana'
   const row = GOJUON.find(r => r.includes(toHira(K.k)))
   const tiles = row ? [...(kata ? toKata(row) : row)] : [K.k]
-  const size = 118
-  const gap = 18
-  const total = tiles.length * size + (tiles.length - 1) * gap
-  const x0 = (800 - total) / 2
-  tiles.forEach((k, i) => {
-    const here = k === K.k
-    const x = x0 + i * (size + gap)
-    const y = here ? 190 : 230
-    const s = here ? size + 40 : size
-    const fx = here ? x - 20 : x
-    tilt(ctx, fx + s / 2, y + s / 2, here ? -0.06 : 0, () => {
-      boardCard(c, fx, y, s, s, 22, here ? ink : cardInk(p))
-      text(ctx, k, fx + s / 2, y + s / 2 + s * 0.6 * 0.36, { f: font(700, s * 0.6, 'jp'), color: here ? p.onLine : p.ink, align: 'center' })
-    })
-    if (here) {
-      // Heard: the speaker over it; traced: the pencil beside it.
-      emojiAt(ctx, '🔊', fx + s / 2 - 34, 120, 52)
-      ctx.save()
-      ctx.strokeStyle = ink
-      ctx.lineWidth = 7
-      ctx.lineCap = 'round'
-      for (const r of [40, 62]) {
-        ctx.beginPath()
-        ctx.arc(fx + s / 2 - 10, 120, r, -0.5, 0.5)
-        ctx.stroke()
-      }
-      ctx.restore()
-      emojiAt(ctx, '✏️', Math.min(fx + s + 26, 770), y + 20, 46)
-      label(c, K.ro, fx + s / 2, y + s + 56, { size: 40, color: ink, maxW: 200 })
-    }
+  // One drawing whatever the kana's place in its row: the lit tile larger,
+  // its sound in a bubble over it, the pencil at its corner, the tag under
+  // the row; nothing that moves with it reaches a neighbour.
+  const at = Math.max(0, tiles.indexOf(K.k))
+  const size = 112
+  const big = 156
+  const gap = 22
+  const foot = 300
+  let x = (800 - ((tiles.length - 1) * (size + gap) + big)) / 2
+  const spots = tiles.map((k, i) => {
+    const sz = i === at ? big : size
+    const spot = { k, x, s: sz, y: foot - sz, lit: i === at }
+    x += sz + gap
+    return spot
   })
-  // The price tag, flat and level, on the side the lit kana leaves free.
-  {
-    const at = tiles.indexOf(K.k)
-    const left = at >= tiles.length / 2
-    const word = F.free.toLocaleUpperCase()
-    const tf = font(700, 46, 'latin')
-    const tw = measure(ctx, word, tf, 0.08) + 92
-    const tx = left ? x0 : x0 + total - tw
-    const ty = 76
-    const th = 92
-    ctx.fillStyle = ink
-    ctx.beginPath()
-    ctx.moveTo(tx + 34, ty)
-    ctx.lineTo(tx + tw, ty)
-    ctx.lineTo(tx + tw, ty + th)
-    ctx.lineTo(tx + 34, ty + th)
-    ctx.lineTo(tx, ty + th / 2)
-    ctx.closePath()
-    ctx.fill()
-    ctx.fillStyle = cardInk(p)
-    ctx.beginPath()
-    ctx.arc(tx + 30, ty + th / 2, 9, 0, Math.PI * 2)
-    ctx.fill()
-    text(ctx, word, tx + 54, ty + th / 2 + 46 * 0.36, { f: tf, color: p.onLine, tr: 0.08 })
+  for (const t of spots) {
+    boardCard(c, t.x, t.y, t.s, t.s, 22, t.lit ? ink : cardInk(p))
+    text(ctx, t.k, t.x + t.s / 2, t.y + t.s / 2 + t.s * 0.6 * 0.36, { f: font(700, t.s * 0.6, 'jp'), color: t.lit ? p.onLine : p.ink, align: 'center' })
   }
+  const L = spots[at]
+  const mid = L.x + L.s / 2
+  // Heard: the speaker and the sound, in a bubble over the lit kana.
+  const rf = font(700, 54, 'latin')
+  const bh = 90
+  const bw = 30 + 50 + SP[3] + measure(ctx, K.ro, rf) + 38
+  const bx = Math.max(8, Math.min(792 - bw, mid - bw / 2))
+  const by = L.y - bh - 24
+  boardCard(c, bx, by, bw, bh, bh / 2)
+  ctx.fillStyle = cardInk(p)
+  ctx.beginPath()
+  ctx.moveTo(mid - 16, by + bh - 2)
+  ctx.lineTo(mid, by + bh + 18)
+  ctx.lineTo(mid + 16, by + bh - 2)
+  ctx.fill()
+  speaker(ctx, bx + 30 + 25, by + bh / 2, 50, ink)
+  text(ctx, K.ro, bx + 30 + 50 + SP[3], by + bh / 2 + 54 * 0.36, { f: rf, color: ink })
+  // Traced: the pencil on the lit tile's corner, its point on the tile.
+  emojiAt(ctx, '✏️', L.x + L.s - 12, L.y + L.s - 18, 50)
+  // The price tag, flat and level, in one place under the row.
+  const word = F.free.toLocaleUpperCase()
+  const tf = font(700, 44, 'latin')
+  const th = 82
+  const tw = measure(ctx, word, tf, 0.08) + 90
+  const tx = 400 - tw / 2
+  const ty = foot + 30
+  ctx.fillStyle = ink
+  ctx.beginPath()
+  ctx.moveTo(tx + 32, ty)
+  ctx.lineTo(tx + tw, ty)
+  ctx.lineTo(tx + tw, ty + th)
+  ctx.lineTo(tx + 32, ty + th)
+  ctx.lineTo(tx, ty + th / 2)
+  ctx.closePath()
+  ctx.fill()
+  ctx.fillStyle = cardInk(p)
+  ctx.beginPath()
+  ctx.arc(tx + 28, ty + th / 2, 8, 0, Math.PI * 2)
+  ctx.fill()
+  text(ctx, word, tx + 52, ty + th / 2 + 44 * 0.36, { f: tf, color: p.onLine, tr: 0.08 })
+}
+/** A speaker sounding: its cone filled, two waves beside it. */
+function speaker(ctx, cx, cy, s, color) {
+  const x = cx - s / 2
+  ctx.save()
+  ctx.fillStyle = color
+  ctx.strokeStyle = color
+  ctx.lineWidth = s * 0.11
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  ctx.beginPath()
+  ctx.moveTo(x, cy - s * 0.15)
+  ctx.lineTo(x + s * 0.2, cy - s * 0.15)
+  ctx.lineTo(x + s * 0.44, cy - s * 0.38)
+  ctx.lineTo(x + s * 0.44, cy + s * 0.38)
+  ctx.lineTo(x + s * 0.2, cy + s * 0.15)
+  ctx.lineTo(x, cy + s * 0.15)
+  ctx.closePath()
+  ctx.fill()
+  for (const r of [0.2, 0.4]) {
+    ctx.beginPath()
+    ctx.arc(x + s * 0.5, cy, s * r, -0.85, 0.85)
+    ctx.stroke()
+  }
+  ctx.restore()
 }
