@@ -109,6 +109,10 @@ def _seed(uid):
                 "INSERT INTO phrase_history (user_id, phrase, created_at) VALUES (%s, %s, NOW())",
                 (uid, "駅で待っています。"),
             )
+            cur.execute(
+                "INSERT INTO feedback (user_id, kind, body) VALUES (%s, 'idea', %s)",
+                (uid, "Un mode nuit pour le dictionnaire."),
+            )
         conn.commit()
     finally:
         conn.close()

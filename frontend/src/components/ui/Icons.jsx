@@ -632,6 +632,18 @@ export function InfoIcon({ size = 16, className }) {
   )
 }
 
+// A message: a speech balloon with two lines in it, Settings' 「Nous
+// écrire」 row (plan 222).
+export function MessageIcon({ size = 16, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <path d="M4 5h16v11H9.5L4 20z" />
+      <line x1="8" y1="9" x2="16" y2="9" />
+      <line x1="8" y1="12.5" x2="13" y2="12.5" />
+    </svg>
+  )
+}
+
 // The answer sheet: a page of bubbles and their lines (plan 171).
 export function SheetIcon({ size = 18, className }) {
   return (

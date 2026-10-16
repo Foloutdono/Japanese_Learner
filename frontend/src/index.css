@@ -32629,6 +32629,171 @@ button.brd-stn { cursor: pointer; }
   border-top: 1px solid var(--surface-line);
 }
 
+/* ══ 222 — Nous écrire, the feedback door ═══════════════════════════
+   The owner's pick A + B + C of the canvas "Tsuji — the feedback door,
+   new directions": one form behind three doors (Settings' row, the
+   flag on an answered card, the link under a failure), in a sheet on a
+   phone and as Settings' page on the desk (components/feedback/,
+   components/settings/WritePage.jsx). Its parts are the app's own: the
+   sheet, the full-width seg, the field, the chips, the gold button. */
+.fb-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.fb-form__text { resize: none; line-height: 1.5; }
+/* The count under the field's corner, closer to it than the rhythm. */
+.fb-form__count {
+  align-self: flex-end;
+  margin-top: calc(-1 * var(--sp-3));
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.fb-form__error {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: color-mix(in srgb, var(--danger) 50%, var(--text-primary));
+}
+.fb-form__send { width: 100%; }
+
+/* What is joined and the reply: a box, then what it sends in words. */
+.fb-check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  min-height: 44px; /* a hit target, not a spacing rung */
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.fb-check__box { flex: none; margin: var(--sp-1) 0 0; }
+.fb-check__words { display: flex; flex-direction: column; min-width: 0; }
+.fb-check__what {
+  overflow-wrap: anywhere;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* 受付 — received: the station's date stamp, in the seal's ink. */
+.fb-sent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-4);
+  padding-block: var(--sp-6) var(--sp-3);
+  text-align: center;
+}
+.fb-stamp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 4.6em;
+  height: 4.6em;
+  font-size: var(--fs-title);
+  color: var(--stamp-ink);
+  border: 0.14em solid var(--stamp-ink);
+  border-radius: var(--r-pill);
+  transform: rotate(-8deg);
+}
+.fb-stamp__jp {
+  font-family: var(--font-serif);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: var(--tr-term);
+}
+.fb-stamp__date {
+  margin-top: var(--sp-1);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.fb-sent__say { margin: 0; font-weight: 600; text-wrap: balance; }
+.fb-sent__sub {
+  max-width: 32ch;
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+.fb-sent__close { align-self: stretch; }
+
+/* The card being reported: a strip of its own face. */
+.fb-card {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--bg-main);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.fb-card__face {
+  font-family: var(--font-jp);
+  font-size: var(--fs-heading);
+  font-weight: 700;
+  line-height: 1.1;
+}
+.fb-card__names { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.fb-card__reading { font-size: var(--fs-sm); color: var(--text-secondary); }
+.fb-card__gloss {
+  overflow: hidden;
+  font-size: var(--fs-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fb-card__level {
+  flex: none;
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  color: var(--text-secondary);
+}
+.fb-reasons { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+
+/* The flag in a run's head, once the card is answered: drawn at the
+   desk's "?" size so the head keeps its height, its target the 44px a
+   thumb needs, spread past the ring. */
+.fb-flag {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--sp-7);
+  height: var(--sp-7);
+  padding: 0;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.fb-flag::after { content: ''; position: absolute; inset: calc(-1 * var(--sp-3)); }
+.fb-flag:hover,
+.fb-flag:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); filter: none; }
+
+/* Under a failure, beside its retry: a door, said as one. */
+.fb-link {
+  min-height: 44px; /* a hit target, not a spacing rung */
+  padding: 0 var(--sp-3);
+  border: 0;
+  background: none;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--sel-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.fb-link:hover,
+.fb-link:focus-visible { color: var(--text-primary); filter: none; }
+
+/* Settings' page on the desk: the form at a card's width, the send at
+   its own. */
+.fb-page { max-width: var(--card-w); }
+.fb-page .fb-form__send { align-self: flex-start; width: auto; }
+
 /* ═══ 机 — the desk (plan 113) ═══════════════════════════════════
    The computer's design, at and above 1100px (hooks/useDesk.js's
    DESK_QUERY). Tsuji has two chromes: the phone's (車内, above), which
