@@ -80,6 +80,22 @@ answers in, rationed by the day through `core/daily_limit`), and the learner
 *grades* it — `docs/adr/0013`'s split, a third time. Say *composition*, never
 "writing mode": 書取 is writing too.
 
+**Conversation** (会話) — the practice mode where someone speaks to the
+learner in a place and they answer (plan 217). A *scenario* is ridden one
+of three ways: **Choose** (pick the reply among three, graded by the
+pick), **Translate** (write what you are told to say: measured, read by
+the tutor, graded by the learner) or **Free talk** (the other person
+played by the model, every line reviewed by the tutor and graded by the
+learner). Say *conversation*, never "chat" or "dialogue mode": the exam's
+聴解 has dialogues too, and a grammar tour has its scene.
+
+**Scenario** — one exchange of the conversation bank
+(`backend/content/conversation/N5.json` …): a place, the person who
+speaks to the learner there, the learner's errand (`goal`), and four to
+seven *turns*, each the other person's line, the model reply with its
+alternatives and two wrong replies with why. Its `id` keys the learner's
+history (`conversation_log`) and is never renamed.
+
 **Pace** — the learner's chosen number of NEW items per day
 (`user_profiles.daily_new_target`), set at onboarding as a service type
 (各駅停車 5 / 快速 10 / 特急 20) and adjustable from Settings. Today it

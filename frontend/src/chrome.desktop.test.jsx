@@ -4,7 +4,7 @@ import { page } from 'vitest/browser'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import { DESK_QUERY } from './hooks/useDesk'
-import { DESK_TAB_IDS } from './config/tabs'
+import { DESK_TAB_IDS, getSections } from './config/tabs'
 import './index.css'
 
 // ── 机 — the desk's chrome at its tightest (plan 113) ───────────
@@ -258,7 +258,10 @@ describe('the rail', () => {
   it('prints a French station name whole', async () => {
     await mountShell('/practice')
     await settle()
-    expect(stations()).toHaveLength(6)
+    // Every platform of the gate, 会話 (plan 217) among them: the desk's
+    // gate hangs six plates, and the rail is where the seventh stands.
+    expect(stations()).toHaveLength(getSections('practice', {}).length)
+    expect(stations().map(s => s.getAttribute('href'))).toContain('/practice/conversation')
     for (const s of stations()) expect(s.scrollWidth, s.textContent).toBeLessThanOrEqual(s.clientWidth)
   })
 
