@@ -39,6 +39,22 @@ read it through the resolver seam (`core/user_level.resolve_level`) rather
 than the column: an explicit per-request choice still beats the stored
 value — see `docs/adr/0005`.
 
+**Assumed card** — a card the level rule marked known because the learner
+stands at a level above its stop (`study/level_rule.py`): a mastered row
+`SRSEngine.seed_known` wrote and no answer has touched since
+(`SRSEngine.is_assumed`). An assumption, never history: a move down gives
+the ones from the new level up back as new cards (`forget_assumed`).
+
+**Check** — the first answer to an assumed card, marked `review_log.assumed`
+(plan 221). Passed, the card stays known and spends nothing of the day's
+pace; missed, the card starts as new, never as a lapse.
+
+**Level fit** — whether the learner level fits the answers
+(`study/level_fit.py`, `GET /api/profile/level-fit`): a stop behind the
+level whose checks mostly fail is where to board, and words known the
+first time they are asked at the level point to the next. A suggestion;
+nothing moves the level but the learner.
+
 **First ride** — the lesson after the boarding (wave 21): the card ride and
 the reading ride, then the guide on each gate. Its state is on the profile
 row — `tutorial_at`, when the rides ended (finished or skipped), and

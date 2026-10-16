@@ -21,7 +21,7 @@ from core.user_level import LEVELS, note_stored_level
 from core import credits, events, review_plan
 from core.lines import clean_lines
 from srs.xp import level_progress, next_milestone
-from study import level_rule
+from study import level_fit, level_rule
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -404,7 +404,8 @@ class LearningPayload(BaseModel):
 # study/level_rule.py for the rule and SRSEngine.seed_known for the
 # rows. Both halves answer in the same shape the settings sheets
 # print: "up" carries what would be (or was) marked known and the
-# spread, "down" what is set aside and the zero that is deleted.
+# spread, "down" what is set aside, what goes back to new (the
+# assumptions never checked, plan 221) and the zero that is deleted.
 def _level_direction(current: str | None, target: str) -> str:
     if current == target:
         return "same"
@@ -423,21 +424,38 @@ def level_rule_preview(user_id: str, current: str | None, target: str) -> dict:
             full = prefixed(ids, user_id)
             marked += len(full) - srs.count_rows(full, mode)
         return {"direction": "up", "markedKnown": marked, "spreadWeeks": level_rule.SPREAD_WEEKS}
+    return _level_down(user_id, current, target, dry_run=True)
+
+
+def _level_down(user_id: str, current: str, target: str, dry_run: bool) -> dict:
+    """A move down: the assumptions from `target` up go back to new
+    (SRSEngine.forget_assumed -- counted under `dry_run`), and what has
+    history beyond `target` is set aside. "returned" is in rows, one per
+    card in its line's primary mode, the unit seed_known wrote them in."""
+    returned = sum(
+        srs.forget_assumed(prefixed(ids, user_id), mode, dry_run=dry_run)
+        for _source, mode, ids in level_rule.known_batches(level_rule.stops_from(target))
+    )
     set_aside = sum(
-        srs.count_cards_with_rows(prefixed(ids, user_id))
+        srs.count_cards_with_history(prefixed(ids, user_id))
         for ids in level_rule.item_batches(level_rule.stops_between(target, current))
     )
-    return {"direction": "down", "setAside": set_aside, "deleted": 0}
+    if not dry_run:
+        logger.info("level rule user_id=%s %s -> %s returned=%d", user_id, current, target, returned)
+    return {"direction": "down", "setAside": set_aside, "returned": returned, "deleted": 0}
 
 
 def apply_level_rule(user_id: str, current: str | None, target: str) -> dict:
     """Write the rule for a level just stored: seed every stop behind
     `target` (rows that exist are left alone, so the stops behind the
-    previous level cost nothing a second time). A move down writes
-    nothing and says so in the same shape."""
+    previous level cost nothing a second time). A move down gives back
+    the assumptions it no longer stands behind (plan 221) and deletes
+    no history."""
     direction = _level_direction(current, target)
-    if direction != "up":
-        return level_rule_preview(user_id, current, target)
+    if direction == "same":
+        return {"direction": "same"}
+    if direction == "down":
+        return _level_down(user_id, current, target, dry_run=False)
     marked = 0
     for _source, mode, ids in level_rule.known_batches(level_rule.stops_behind(target)):
         marked += srs.seed_known(prefixed(ids, user_id), mode, spread_days=level_rule.SPREAD_DAYS)
@@ -821,6 +839,16 @@ def preview_learning(jlptLevel: str = Query(...), user_id: str = Depends(get_use
         raise HTTPException(status_code=422, detail=f"jlptLevel must be one of {', '.join(LEVELS)}")
     current = _profile_row(user_id)[1]
     return level_rule_preview(user_id, current, jlptLevel)
+
+
+@router.get("/api/profile/level-fit")
+def get_level_fit(user_id: str = Depends(get_user_id)):
+    """Whether the stored level fits what the learner answers (plan 221,
+    study/level_fit.py): a stop to move down to when the checks behind
+    the level mostly fail, the next one when the level's new words are
+    known the first time they are asked, or nothing -- with the figures
+    it read. A suggestion only: nothing is written."""
+    return level_fit.level_fit(srs, user_id, _profile_row(user_id)[1])
 
 
 # The 番付's sums, a minute old at most (plan 211). Each is an aggregate

@@ -873,12 +873,15 @@ const stats = {
   levelUpTitle:       l => `Move up to ${l}?`,
   levelUpBody:        (to, weeks) => `The stops behind ${to} are marked **known**: their cards start mastered, with a first check spread over the next ${weeks} weeks. Cards you are already learning keep their place. **Nothing is deleted.**`,
   levelDownTitle:     l => `Move down to ${l}?`,
-  levelDownBody:      to => `The cards beyond ${to} are set aside, not deleted: they keep their history and rejoin the run when you move up again. Today's run shrinks to the ${to} stops.`,
+  levelDownBody:      (to, returned) => (returned > 0
+    ? `What you studied beyond ${to} is set aside, not deleted. The cards marked known from ${to} up that you were never asked about become **new** again.`
+    : `The cards beyond ${to} are set aside, not deleted: they keep their history and rejoin the run when you move up again. Today's run shrinks to the ${to} stops.`),
   levelMarkedKnown:   'Marked known',
   levelSpreadOver:    'Spread over',
   levelWeeks:         n => `${n} week${n === 1 ? '' : 's'}`,
   levelSetAside:      'Set aside',
   levelDeleted:       'Deleted',
+  levelBackToNew:     'Back to new',
   levelUpGo:          l => `Move up to ${l}`,
   levelDownGo:        l => `Move down to ${l}`,
   levelStay:          l => `Stay at ${l}`,

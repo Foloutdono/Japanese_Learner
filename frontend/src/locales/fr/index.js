@@ -836,12 +836,15 @@ const stats = {
   levelUpTitle:       l => `Monter à ${l} ?`,
   levelUpBody:        (to, weeks) => `Les arrêts avant ${to} sont marqués **connus** : leurs cartes démarrent maîtrisées, avec un premier contrôle réparti sur les ${weeks} prochaines semaines. Les cartes déjà en cours gardent leur place. **Rien n'est effacé.**`,
   levelDownTitle:     l => `Descendre à ${l} ?`,
-  levelDownBody:      to => `Les cartes au-delà de ${to} sont mises de côté, pas effacées : elles gardent leur historique et reviennent dans le trajet quand tu remontes. Le trajet du jour se réduit aux arrêts ${to}.`,
+  levelDownBody:      (to, returned) => (returned > 0
+    ? `Ce que tu as étudié au-delà de ${to} est mis de côté, pas effacé. Les cartes marquées connues à partir de ${to} sur lesquelles tu n’as jamais été interrogé redeviennent **nouvelles**.`
+    : `Les cartes au-delà de ${to} sont mises de côté, pas effacées : elles gardent leur historique et reviennent dans le trajet quand tu remontes. Le trajet du jour se réduit aux arrêts ${to}.`),
   levelMarkedKnown:   'Marquées connues',
   levelSpreadOver:    'Réparties sur',
   levelWeeks:         n => `${n} semaine${n > 1 ? 's' : ''}`,
   levelSetAside:      'Mises de côté',
   levelDeleted:       'Effacées',
+  levelBackToNew:     'Redevenues nouvelles',
   levelUpGo:          l => `Monter à ${l}`,
   levelDownGo:        l => `Descendre à ${l}`,
   levelStay:          l => `Rester à ${l}`,

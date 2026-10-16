@@ -71,6 +71,7 @@ import scripts._env  # noqa: F401  -- must precede core.db, which reads
 #                       DATABASE_URL at module scope. See scripts/_env.py.
 from core.db import db_conn
 from routes.account import prefix_pattern
+from srs.srs import _NOT_A_KEPT_CHECK
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("compact-review-log")
@@ -148,13 +149,15 @@ def compact(cur, scope: str, params: dict, min_quality: int) -> int:
 
     # 1. First sightings, BEFORE the rows that carry them are deleted.
     #    LEAST on conflict: a card already in the table was met earlier
-    #    than anything this run can see.
+    #    than anything this run can see. A level-rule check the learner
+    #    passed is no sighting (plan 221, srs._NOT_A_KEPT_CHECK), here
+    #    as in the live readers.
     cur.execute(
         f"""
         INSERT INTO card_first_review (card_id, mode, first_at)
         SELECT card_id, mode, MIN(reviewed_at)
           FROM review_log
-         WHERE TRUE{bounded}
+         WHERE TRUE{bounded}{_NOT_A_KEPT_CHECK}
          GROUP BY card_id, mode
             ON CONFLICT (card_id, mode) DO UPDATE
            SET first_at = LEAST(card_first_review.first_at, EXCLUDED.first_at)

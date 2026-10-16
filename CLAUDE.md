@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **221**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **222**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -156,6 +156,16 @@ runtime purpose.
   DOM unchanged (`src/deskfree.phone.test.jsx`), and the short desk
   (1280×600, the `short` lane) is checked too. A phone bug fixed gets its own
   phone test.
+- **An assumption is not history (plan 221).** A card the level rule
+  marked known and nobody has asked about (`SRSEngine.is_assumed`) is
+  the app's guess about a self-declared level. Its first answer is a
+  check (`review_log.assumed`): missed, the card starts as new, never as
+  a lapse; passed, it spends nothing of the day's pace, so anything new
+  that counts a card's first sighting excludes a kept check
+  (`srs._NOT_A_KEPT_CHECK`). A move down gives the untouched ones from
+  the new level up back as new cards (`forget_assumed`) and deletes no
+  answered row; a new seeding path writes `KNOWN_STATE` or it is not
+  read as an assumption.
 
 ## Commands
 

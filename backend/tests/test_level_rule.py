@@ -211,17 +211,16 @@ def test_settings_previews_then_applies_a_move_up_and_a_move_down(lclient):
     assert moved.json()["levelRule"] == {"direction": "up", "markedKnown": n5 + n4, "spreadWeeks": 6}
     assert lclient.get("/api/profile").json()["jlptLevel"] == "N3"
 
-    # Down to N5: the N4 cards are set aside, none deleted -- and the
-    # rows are still there afterwards.
+    # Down to N5: the cards the move up assumed known, none of them ever
+    # asked, go back to new (plan 221); nothing with history is deleted,
+    # and here there is none to set aside.
     down = lclient.get("/api/profile/learning/preview", params={"jlptLevel": "N5"}).json()
-    n4_items = sum(len(ids) for ids in level_rule.item_batches(["N4"]))
-    assert down["direction"] == "down" and down["deleted"] == 0
-    assert 0 < down["setAside"] <= n4_items
+    assert down == {"direction": "down", "setAside": 0, "returned": n5 + n4, "deleted": 0}
     kanji_mode = level_rule.primary_mode("kanji")
-    rows_before = len(_rows(LUID, kanji_mode))
+    assert len(_rows(LUID, kanji_mode)) > 0
     moved_down = lclient.patch("/api/profile/learning", json={"jlptLevel": "N5"})
-    assert moved_down.json()["levelRule"]["direction"] == "down"
-    assert len(_rows(LUID, kanji_mode)) == rows_before
+    assert moved_down.json()["levelRule"] == down
+    assert len(_rows(LUID, kanji_mode)) == 0
 
 
 def test_the_run_holds_the_stops_above_the_level_back(lclient):
