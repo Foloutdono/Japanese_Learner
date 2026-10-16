@@ -1243,54 +1243,55 @@
       },
       {
         "them": {
-          "jp": "かしこまりました。念のため、お電話番号を伺ってもよろしいでしょうか。",
-          "kana": "かしこまりました。ねんのため、おでんわばんごうをうかがってもよろしいでしょうか。",
-          "en": "Certainly. Just in case, may I ask your phone number?",
-          "fr": "Très bien. Par précaution, puis-je avoir votre numéro de téléphone ?"
+          "jp": "かしこまりました。差し支えなければ、ご用件を伺ってもよろしいでしょうか。",
+          "kana": "かしこまりました。さしつかえなければ、ごようけんをうかがってもよろしいでしょうか。",
+          "en": "Certainly. If you don't mind my asking, what is it regarding?",
+          "fr": "Très bien. Si ce n'est pas indiscret, puis-je vous demander l'objet de votre appel ?"
         },
         "me": {
-          "jp": "はい、ゼロ三の一二三四の五六七八でございます。",
-          "kana": "はい、ゼロさんのいちにさんよんのごろくななはちでございます。",
-          "romaji": "hai, zero san no ichi ni san yon no go roku nana hachi de gozaimasu",
-          "en": "Yes, it's 03-1234-5678.",
-          "fr": "Oui, c'est le 03 1234 5678.",
+          "jp": "はい、来週の打ち合わせの件でございます。",
+          "kana": "はい、らいしゅうのうちあわせのけんでございます。",
+          "romaji": "hai, raishuu no uchiawase no ken de gozaimasu",
+          "en": "Yes, it's about next week's meeting.",
+          "fr": "Oui, c'est au sujet de la réunion de la semaine prochaine.",
           "note": {
-            "en": "A phone number is read digit by digit, with 「の」 between the groups, and 「でございます」 keeps it formal.",
-            "fr": "Un numéro se lit chiffre par chiffre, avec 「の」 entre les groupes, et 「でございます」 le garde soutenu."
+            "en": "「〜の件でございます」 names the matter of your call, with 「でございます」, the formal 「です」.",
+            "fr": "「〜の件でございます」 indique l'objet de ton appel, avec 「でございます」, le 「です」 soutenu."
           },
           "alt": [
-            {"jp": "はい、ゼロ三の一二三四の五六七八です。", "kana": "はい、ゼロさんのいちにさんよんのごろくななはちです。", "romaji": "hai, zero san no ichi ni san yon no go roku nana hachi desu"}
+            {"jp": "はい、来週の打ち合わせの件です。", "kana": "はい、らいしゅうのうちあわせのけんです。", "romaji": "hai, raishuu no uchiawase no ken desu"},
+            {"jp": "来週の打ち合わせの件でお電話いたしました。", "kana": "らいしゅうのうちあわせのけんでおでんわいたしました。", "romaji": "raishuu no uchiawase no ken de odenwa itashimashita"}
           ]
         },
         "wrong": [
           {
-            "jp": "はい、田中様の番号をお願いします。",
-            "kana": "はい、たなかさまのばんごうをおねがいします。",
-            "en": "Yes, Mr Tanaka's number, please.",
-            "fr": "Oui, le numéro de M. Tanaka, s'il vous plaît.",
+            "jp": "はい、ご用件をおっしゃってください。",
+            "kana": "はい、ごようけんをおっしゃってください。",
+            "en": "Yes, please tell me what it is regarding.",
+            "fr": "Oui, veuillez m'indiquer l'objet de votre appel.",
             "why": {
-              "en": "「田中様の番号」 asks for Mr Tanaka's number, when the receptionist asked for yours.",
-              "fr": "「田中様の番号」 demande le numéro de M. Tanaka, alors que le standard te demandait le tien."
+              "en": "「おっしゃってください」 asks the receptionist to state the matter of the call, when it is you who are being asked for it.",
+              "fr": "「おっしゃってください」 demande au standard d'exposer l'objet de l'appel, alors que c'est à toi qu'on le demande."
             }
           },
           {
-            "jp": "はい、ゼロ三の一二三四の五六七八でいらっしゃいます。",
-            "kana": "はい、ゼロさんのいちにさんよんのごろくななはちでいらっしゃいます。",
-            "en": "Yes, my honourable number is 03-1234-5678.",
-            "fr": "Oui, mon honorable numéro est le 03 1234 5678.",
+            "jp": "はい、来週の打ち合わせの件でいらっしゃいます。",
+            "kana": "はい、らいしゅうのうちあわせのけんでいらっしゃいます。",
+            "en": "Yes, it is most honourably about next week's meeting.",
+            "fr": "Oui, il s'agit très honorablement de la réunion de la semaine prochaine.",
             "why": {
-              "en": "「でいらっしゃいます」 is the honorific 「です」 that raises a person; for your own number it is 「でございます」.",
-              "fr": "「でいらっしゃいます」 est le 「です」 honorifique qui élève une personne ; pour ton propre numéro, c'est 「でございます」."
+              "en": "「でいらっしゃいます」 is the honorific 「です」 that raises a person; for the matter of your call it is 「でございます」.",
+              "fr": "「でいらっしゃいます」 est le 「です」 honorifique qui élève une personne ; pour l'objet de ton appel, c'est 「でございます」."
             }
           }
         ]
       },
       {
         "them": {
-          "jp": "復唱いたします。ゼロ三の一二三四の五六七八、ミナト商事のマルタン様でいらっしゃいますね。",
-          "kana": "ふくしょういたします。ゼロさんのいちにさんよんのごろくななはち、ミナトしょうじのマルタンさまでいらっしゃいますね。",
-          "en": "Let me read that back: 03-1234-5678, Martin of Minato Trading. Is that right?",
-          "fr": "Je répète : 03 1234 5678, Martin, de Minato Trading, c'est bien cela ?"
+          "jp": "復唱いたします。来週のお打ち合わせの件で、田中より折り返しお電話をさしあげる、ということでよろしいでしょうか。",
+          "kana": "ふくしょういたします。らいしゅうのおうちあわせのけんで、たなかよりおりかえしおでんわをさしあげる、ということでよろしいでしょうか。",
+          "en": "Let me read that back: about next week's meeting, Tanaka is to call you back. Is that right?",
+          "fr": "Je répète : au sujet de la réunion de la semaine prochaine, M. Tanaka doit vous rappeler, c'est bien cela ?"
         },
         "me": {
           "jp": "はい、さようでございます。よろしくお願いいたします。",

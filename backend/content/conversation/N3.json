@@ -368,13 +368,13 @@
         },
         "wrong": [
           {
-            "jp": "はい、お持ちです。こちらです。",
-            "kana": "はい、おもちです。こちらです。",
-            "en": "Yes, I graciously have it. Here it is.",
-            "fr": "Oui, je daigne l'avoir sur moi. La voici.",
+            "jp": "はい、持ちます。こちらです。",
+            "kana": "はい、もちます。こちらです。",
+            "en": "Yes, I'll hold it. Here it is.",
+            "fr": "Oui, je vais la tenir. La voici.",
             "why": {
-              "en": "「お持ちです」 honours the one who has it, as the clerk did you; about yourself, 「持ってきました」 or 「持っています」.",
-              "fr": "「お持ちです」 honore celui qui possède, comme l'employé l'a fait pour toi ; pour toi-même, 「持ってきました」 ou 「持っています」."
+              "en": "「持ちます」 is the act of picking something up or carrying it, still to come; having it on you is 「持っています」, and having brought it, 「持ってきました」.",
+              "fr": "「持ちます」, c'est l'action de prendre ou de porter quelque chose, encore à venir ; l'avoir sur toi, c'est 「持っています」, et l'avoir apportée, 「持ってきました」."
             }
           },
           {
@@ -554,13 +554,13 @@
             }
           },
           {
-            "jp": "はい、もう使っています。",
-            "kana": "はい、もうつかっています。",
-            "en": "Yes, I'm already using it.",
-            "fr": "Oui, je l'utilise déjà.",
+            "jp": "ありがとうございます。家で書いてみます。",
+            "kana": "ありがとうございます。いえでかいてみます。",
+            "en": "Thank you. I'll try writing it at home.",
+            "fr": "Merci. J'essaierai de l'écrire à la maison.",
             "why": {
-              "en": "「もう使っています」 says you already use it, yet the account has only just been opened.",
-              "fr": "「もう使っています」 dit que tu l'utilises déjà, alors que le compte vient tout juste d'être ouvert."
+              "en": "「書いてみます」 has you try writing something, but the sheet is there to be read: 「書いてあります」 says the instructions are already written on it.",
+              "fr": "「書いてみます」 te fait essayer d'écrire quelque chose, alors que la feuille est à lire : 「書いてあります」 dit que le mode d'emploi y est déjà écrit."
             }
           }
         ]
@@ -585,7 +585,7 @@
       "en": "Settle in: choose your dinner time and find out about the baths and breakfast.",
       "fr": "Installe-toi : choisis l'heure du dîner et renseigne-toi sur les bains et le petit-déjeuner."
     },
-    "them": {"en": "Innkeeper", "fr": "Personnel de l'auberge"},
+    "them": {"en": "Inn staff", "fr": "Personnel de l'auberge"},
     "register": "polite",
     "turns": [
       {
@@ -893,7 +893,8 @@
             "fr": "「入っていた」 dit que l'avis était dans ta boîte, et 「再配達」 est le mot pour une nouvelle livraison."
           },
           "alt": [
-            {"jp": "不在票が入っていたので、再配達をお願いできますか。", "kana": "ふざいひょうがはいっていたので、さいはいたつをおねがいできますか。", "romaji": "fuzaihyou ga haitte ita node, saihaitatsu o onegai dekimasu ka"}
+            {"jp": "不在票が入っていたので、再配達をお願いできますか。", "kana": "ふざいひょうがはいっていたので、さいはいたつをおねがいできますか。", "romaji": "fuzaihyou ga haitte ita node, saihaitatsu o onegai dekimasu ka"},
+            {"jp": "不在票が入っていたので、もう一度届けてもらえますか。", "kana": "ふざいひょうがはいっていたので、もういちどとどけてもらえますか。", "romaji": "fuzaihyou ga haitte ita node, mou ichido todokete moraemasu ka"}
           ]
         },
         "wrong": [
@@ -939,13 +940,13 @@
         },
         "wrong": [
           {
-            "jp": "はい、番号を教えていただけますか。",
-            "kana": "はい、ばんごうをおしえていただけますか。",
-            "en": "Yes, could you tell me the number?",
-            "fr": "Oui, pouvez-vous me donner le numéro ?",
+            "jp": "はい、番号を教えてください。",
+            "kana": "はい、ばんごうをおしえてください。",
+            "en": "Yes, please tell me the number.",
+            "fr": "Oui, donnez-moi le numéro, s'il vous plaît.",
             "why": {
-              "en": "「教えていただけますか」 asks the operator for the number, the very thing they have just asked you for.",
-              "fr": "「教えていただけますか」 demande le numéro à l'opérateur, précisément ce qu'il vient de te demander."
+              "en": "「教えてください」 asks the operator for the number, the very thing they have just asked you for.",
+              "fr": "「教えてください」 demande le numéro à l'opérateur, précisément ce qu'il vient de te demander."
             }
           },
           {
@@ -1062,8 +1063,8 @@
           "en": "Yes, my address is 5-8 Chuo 3-chome.",
           "fr": "Oui, mon adresse, c'est le 5-8, Chuo 3-chome.",
           "note": {
-            "en": "An address runs from the largest unit down: the district, its block in 「丁目」, then the house number.",
-            "fr": "Une adresse va du plus grand au plus petit : le quartier, son bloc en 「丁目」, puis le numéro de la maison."
+            "en": "An address runs from the largest unit down: the district, its numbered section in 「丁目」, then the block and the house, with 「の」 between the two numbers.",
+            "fr": "Une adresse va du plus grand au plus petit : le quartier, sa section numérotée en 「丁目」, puis le pâté de maisons et la maison, avec 「の」 entre les deux numéros."
           }
         },
         "wrong": [

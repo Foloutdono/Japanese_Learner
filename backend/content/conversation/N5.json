@@ -184,8 +184,8 @@
             "en": "Yes, it's eight hundred yen.",
             "fr": "Oui, ça fait huit cents yens.",
             "why": {
-              "en": "It repeats the clerk's price back, the way the clerk would; they are waiting to know how you pay.",
-              "fr": "Tu répètes le prix comme le ferait le vendeur ; il attend de savoir comment tu paies."
+              "en": "「八百円です」 only repeats the clerk's price back, the way the clerk would; they are waiting to know how you pay.",
+              "fr": "「八百円です」 ne fait que répéter le prix, comme le ferait le vendeur ; il attend de savoir comment tu paies."
             }
           }
         ]
@@ -797,7 +797,7 @@
           "kana": "はじめまして。アレックスです。",
           "romaji": "hajimemashite. arekkusu desu",
           "en": "Nice to meet you. I'm Alex.",
-          "fr": "Bonjour ! Moi, c'est Alex.",
+          "fr": "Enchanté ! Moi, c'est Alex.",
           "note": {
             "en": "「はじめまして」 is said the first time you meet someone, and 「アレックスです」 gives your name.",
             "fr": "「はじめまして」 se dit quand on rencontre quelqu'un pour la première fois, et 「アレックスです」 donne ton nom."
@@ -811,7 +811,7 @@
             "jp": "はじめまして。アレックスさんです。",
             "kana": "はじめまして。アレックスさんです。",
             "en": "Nice to meet you. I'm the honourable Alex.",
-            "fr": "Bonjour ! Moi, c'est l'honorable Alex.",
+            "fr": "Enchanté ! Moi, c'est l'honorable Alex.",
             "why": {
               "en": "「さん」 is a courtesy for other people's names, never for your own.",
               "fr": "「さん」 est une marque de politesse pour le nom des autres, jamais pour le sien."
@@ -935,7 +935,7 @@
             "fr": "「よく」 dit que tu le fais souvent, et la forme en 「〜ます」 dit ce que tu fais d'habitude."
           },
           "alt": [
-            {"jp": "映画を見るのが好きです。", "kana": "えいがをみるのがすきです。", "romaji": "eiga o miru no ga suki desu"}
+            {"jp": "よく映画を見ます。", "kana": "よくえいがをみます。", "romaji": "yoku eiga o mimasu"}
           ]
         },
         "wrong": [
@@ -977,10 +977,7 @@
           "note": {
             "en": "「こちらこそ」 returns the wish to the one who made it first: likewise.",
             "fr": "「こちらこそ」 renvoie le souhait à celui qui l'a fait en premier : de même."
-          },
-          "alt": [
-            {"jp": "よろしくお願いします。", "kana": "よろしくおねがいします。", "romaji": "yoroshiku onegai shimasu"}
-          ]
+          }
         },
         "wrong": [
           {
@@ -1090,7 +1087,7 @@
             "fr": "「〜はありますか」 demande si le magasin l'a : ici, en bleu."
           },
           "alt": [
-            {"jp": "青がいいです。", "kana": "あおがいいです。", "romaji": "ao ga ii desu"}
+            {"jp": "青いのはありますか。", "kana": "あおいのはありますか。", "romaji": "aoi no wa arimasu ka"}
           ]
         },
         "wrong": [
@@ -1765,13 +1762,13 @@
             }
           },
           {
-            "jp": "千円でもいいですか。",
-            "kana": "せんえんでもいいですか。",
-            "en": "Is a thousand yen all right?",
-            "fr": "Mille yens, ça va ?",
+            "jp": "ごちそうさまでした。",
+            "kana": "ごちそうさまでした。",
+            "en": "Thank you for the meal.",
+            "fr": "Merci pour le repas.",
             "why": {
-              "en": "「千円」 is less than the 「千百円」 you owe, so it cannot be enough.",
-              "fr": "「千円」, c'est moins que les 「千百円」 que tu dois : ça ne peut pas suffire."
+              "en": "「ごちそうさまでした」 thanks someone for a meal you have finished, and you are paying before you have eaten.",
+              "fr": "「ごちそうさまでした」 remercie pour un repas qu'on a fini, et tu paies avant d'avoir mangé."
             }
           }
         ]
@@ -1948,7 +1945,7 @@
             "fr": "「けど」 relie deux phrases simples par mais : sympa, mais un peu difficile."
           },
           "alt": [
-            {"jp": "難しいけど、楽しい。", "kana": "むずかしいけど、たのしい。", "romaji": "muzukashii kedo, tanoshii"}
+            {"jp": "楽しい。でも、ちょっと難しい。", "kana": "たのしい。でも、ちょっとむずかしい。", "romaji": "tanoshii. demo, chotto muzukashii"}
           ]
         },
         "wrong": [

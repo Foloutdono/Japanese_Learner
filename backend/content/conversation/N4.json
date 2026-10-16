@@ -230,7 +230,7 @@
             "fr": "Non, je ne peux pas les porter.",
             "why": {
               "en": "「いいえ」 turns the help down while 「持てません」 says you cannot carry it: the two pull against each other.",
-              "fr": "「いいえ」 refuse l'aide, mais 「持てません」 dit que tu ne peux pas le porter : les deux se contredisent."
+              "fr": "「いいえ」 refuse l'aide, mais 「持てません」 dit que tu ne peux pas les porter : les deux se contredisent."
             }
           }
         ]
@@ -724,44 +724,45 @@
       },
       {
         "them": {
-          "jp": "では、お名前とお電話番号をお願いします。",
-          "kana": "では、おなまえとおでんわばんごうをおねがいします。",
-          "en": "Then may I have your name and phone number?",
-          "fr": "Puis-je avoir votre nom et votre numéro de téléphone ?"
+          "jp": "では、お名前をお願いします。お電話番号は、今おかけの番号でよろしいですか。",
+          "kana": "では、おなまえをおねがいします。おでんわばんごうは、いまおかけのばんごうでよろしいですか。",
+          "en": "Then may I have your name? And can we use the number you're calling from?",
+          "fr": "Puis-je avoir votre nom ? Et comme numéro, je note celui d'où vous appelez ?"
         },
         "me": {
-          "jp": "ロペスです。電話番号は、ゼロ九ゼロの一二三四の五六七八です。",
-          "kana": "ロペスです。でんわばんごうは、ゼロきゅうゼロのいちにさんよんのごろくななはちです。",
-          "romaji": "ropesu desu. denwa bangou wa, zero kyuu zero no ichi ni san yon no go roku nana hachi desu",
-          "en": "It's Lopez. My number is 090 1234 5678.",
-          "fr": "Lopez. Mon numéro, c'est le 090 1234 5678.",
+          "jp": "ロペスです。はい、この番号で大丈夫です。",
+          "kana": "ロペスです。はい、このばんごうでだいじょうぶです。",
+          "romaji": "ropesu desu. hai, kono bangou de daijoubu desu",
+          "en": "It's Lopez. Yes, this number is fine.",
+          "fr": "Lopez. Oui, ce numéro convient très bien.",
           "note": {
-            "en": "A phone number is read digit by digit, with 「の」 between the groups.",
-            "fr": "Un numéro de téléphone se lit chiffre par chiffre, avec 「の」 entre les groupes."
+            "en": "「この番号で大丈夫です」 accepts the number you are calling from: 「〜で大丈夫です」 says that something will do.",
+            "fr": "「この番号で大丈夫です」 accepte le numéro d'où tu appelles : 「〜で大丈夫です」 dit qu'une chose convient."
           },
           "alt": [
-            {"jp": "ロペスです。ゼロ九ゼロの一二三四の五六七八です。", "kana": "ロペスです。ゼロきゅうゼロのいちにさんよんのごろくななはちです。", "romaji": "ropesu desu. zero kyuu zero no ichi ni san yon no go roku nana hachi desu"}
+            {"jp": "ロペスです。はい、この番号でお願いします。", "kana": "ロペスです。はい、このばんごうでおねがいします。", "romaji": "ropesu desu. hai, kono bangou de onegai shimasu"},
+            {"jp": "ロペスです。はい、それで大丈夫です。", "kana": "ロペスです。はい、それでだいじょうぶです。", "romaji": "ropesu desu. hai, sore de daijoubu desu"}
           ]
         },
         "wrong": [
           {
-            "jp": "お電話ありがとうございます。ロペスでございます。",
-            "kana": "おでんわありがとうございます。ロペスでございます。",
-            "en": "Thank you for calling. Lopez speaking.",
-            "fr": "Merci de votre appel, ici Lopez.",
+            "jp": "お電話ありがとうございます。",
+            "kana": "おでんわありがとうございます。",
+            "en": "Thank you for calling.",
+            "fr": "Merci de votre appel.",
             "why": {
               "en": "「お電話ありがとうございます」 is what the business says when it picks up, and you are the caller.",
               "fr": "「お電話ありがとうございます」 est ce que dit l'établissement en décrochant, et c'est toi qui appelles."
             }
           },
           {
-            "jp": "ロペスです。電話番号を教えてください。",
-            "kana": "ロペスです。でんわばんごうをおしえてください。",
-            "en": "It's Lopez. Could you tell me the phone number?",
-            "fr": "Lopez. Vous pouvez me donner le numéro de téléphone ?",
+            "jp": "ロペスです。はい、今かけます。",
+            "kana": "ロペスです。はい、いまかけます。",
+            "en": "It's Lopez. Yes, I'll call now.",
+            "fr": "Lopez. Oui, j'appelle tout de suite.",
             "why": {
-              "en": "「教えてください」 asks for their number, when it is yours they need.",
-              "fr": "「教えてください」 demande leur numéro, alors que c'est le tien qu'on te demande."
+              "en": "「今かけます」 says you are about to make a call, and you are already on the line: 「今おかけの番号」 is the number you are calling from.",
+              "fr": "「今かけます」 dit que tu vas passer un appel, alors que tu es déjà en ligne : 「今おかけの番号」, c'est le numéro d'où tu appelles."
             }
           }
         ]
@@ -955,13 +956,13 @@
             }
           },
           {
-            "jp": "窓側になります。",
-            "kana": "まどがわになります。",
-            "en": "That will be the window side.",
-            "fr": "Ce sera côté hublot.",
+            "jp": "窓を開けてください。",
+            "kana": "まどをあけてください。",
+            "en": "Please open the window.",
+            "fr": "Ouvrez la fenêtre, s'il vous plaît.",
             "why": {
-              "en": "「になります」 is how the agent presents a seat; to choose one yourself, say 「にします」 or 「をお願いします」.",
-              "fr": "「になります」 est la formule de l'agent qui présente une place ; pour choisir toi-même, dis 「にします」 ou 「をお願いします」."
+              "en": "「窓を開けてください」 asks someone to open a window; the agent asked which seat you want, and the window side is 「窓側」.",
+              "fr": "「窓を開けてください」 demande qu'on ouvre une fenêtre ; l'agent te demandait quelle place tu veux, et le côté hublot, c'est 「窓側」."
             }
           }
         ]

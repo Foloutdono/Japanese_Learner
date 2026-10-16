@@ -96,8 +96,8 @@
             "en": "Actually, our parts supplier can now deliver earlier than planned.",
             "fr": "En fait, notre fournisseur de pièces va pouvoir livrer plus tôt que prévu.",
             "why": {
-              "en": "「予定より早く」 is good news: nothing in it calls for discussing the delivery date, let alone delaying it.",
-              "fr": "「予定より早く」 est une bonne nouvelle : rien qui oblige à parler de la livraison, encore moins à la repousser."
+              "en": "「予定より早く」 says the parts will arrive early, when you have come to announce that you will miss the date.",
+              "fr": "「予定より早く」 annonce des pièces en avance, alors que tu viens annoncer que la date ne sera pas tenue."
             }
           }
         ]
@@ -181,11 +181,11 @@
           {
             "jp": "はい、では二週間前倒しで納品いたします。",
             "kana": "はい、ではにしゅうかんまえだおしでのうひんいたします。",
-            "en": "Yes, then we will deliver two weeks early.",
-            "fr": "Oui, alors nous livrerons avec deux semaines d'avance.",
+            "en": "Yes, then we will bring delivery forward by two weeks.",
+            "fr": "Oui, alors nous avancerons la livraison de deux semaines.",
             "why": {
-              "en": "「二週間前倒し」 promises delivery two weeks early, when you have just said you cannot make even the original date.",
-              "fr": "「二週間前倒し」 promet une livraison avec deux semaines d'avance, alors que tu viens de dire que même la date prévue est intenable."
+              "en": "「二週間前倒し」 promises to win back the whole two weeks, a promise the supplier's breakdown you have just described leaves no way to keep.",
+              "fr": "「二週間前倒し」 promet de rattraper les deux semaines entières, une promesse que la panne du fournisseur, que tu viens d'expliquer, ne permet pas de tenir."
             }
           }
         ]
@@ -360,7 +360,7 @@
           "fr": "Nos vérifications avant expédition étaient insuffisantes, et nous avons confondu votre article avec un autre au numéro de référence proche.",
           "note": {
             "en": "「不十分で」 names the failure as your own, and 「取り違えてしまいました」 says exactly what went wrong.",
-            "fr": "「不十分で」 reconnaît la défaillance comme la vôtre, et 「取り違えてしまいました」 dit exactement ce qui s'est mal passé."
+            "fr": "「不十分で」 reconnaît la défaillance comme celle de ton entreprise, et 「取り違えてしまいました」 dit exactement ce qui s'est mal passé."
           },
           "alt": [
             {"jp": "弊社の確認不足により、品番の似た商品を誤って出荷してしまいました。", "kana": "へいしゃのかくにんぶそくにより、ひんばんのにたしょうひんをあやまってしゅっかしてしまいました。", "romaji": "heisha no kakunin busoku ni yori, hinban no nita shouhin o ayamatte shukka shite shimaimashita"}
@@ -893,7 +893,7 @@
             "fr": "「んでしょうか」 demande doucement une explication, le ton d'un patient inquiet qui veut comprendre."
           },
           "alt": [
-            {"jp": "そうですか。治療は必要なんでしょうか。", "kana": "そうですか。ちりょうはひつようなんでしょうか。", "romaji": "sou desu ka. chiryou wa hitsuyou na n deshou ka"}
+            {"jp": "そうですか。すぐに治療が必要なんでしょうか。", "kana": "そうですか。すぐにちりょうがひつようなんでしょうか。", "romaji": "sou desu ka. sugu ni chiryou ga hitsuyou na n deshou ka"}
           ]
         },
         "wrong": [
