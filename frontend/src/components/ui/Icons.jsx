@@ -660,6 +660,31 @@ export function SheetIcon({ size = 18, className }) {
   )
 }
 
+// A grammar point's construction (plan 235): a slot, joined to the
+// pattern by a plus -- the lesson's formula drawn as its head's glyph.
+export function SlotsIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <rect x="2" y="7.5" width="6" height="9" rx="1.5" strokeDasharray="2 1.6" />
+      <rect x="16" y="7.5" width="6" height="9" rx="1.5" />
+      <line x1="12" y1="9.6" x2="12" y2="14.4" />
+      <line x1="9.6" y1="12" x2="14.4" y2="12" />
+    </svg>
+  )
+}
+
+// A table of forms (plan 235): a header column beside three rows.
+export function TableIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <rect x="3.5" y="4.5" width="17" height="15" rx="1.5" />
+      <line x1="3.5" y1="9.5" x2="20.5" y2="9.5" />
+      <line x1="3.5" y1="14.5" x2="20.5" y2="14.5" />
+      <line x1="9.5" y1="4.5" x2="9.5" y2="19.5" />
+    </svg>
+  )
+}
+
 // ── Settings' list (plan 182) ──
 // One glyph a row, so the list reads by its left edge before its words.
 // On the same `base` as the rest of the set.

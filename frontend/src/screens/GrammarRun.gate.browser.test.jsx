@@ -110,7 +110,7 @@ describe('the lesson gate', () => {
     expect(stage.querySelector('.rating-bar')).toBeNull()
     // the lesson is the card's own: its pattern, its rule
     expect(stage.querySelector('.gl--gate .dict-plate__word').textContent).toBe('〜てください')
-    expect(stage.querySelector('.gl-step--rule')).toBeTruthy()
+    expect(stage.querySelector('.gl-sec--rule')).toBeTruthy()
 
     stage.querySelector('.gl-gate__board').click()
     await settle()

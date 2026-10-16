@@ -42,8 +42,11 @@ import { ChevronIcon } from '../ui/Icons'
 // A part that is only closing punctuation rides on the part before it
 // (`tail`): 。 alone on a line is a line opening on a full stop, which
 // Japanese never sets, and the backend cuts it off where the pattern's
-// highlight ends.
+// highlight ends. A plain part that only OPENS on it gives its marks to
+// the part before and keeps the rest (plan 235): かぞくの中で | 、だれが…
+// broke after the highlight and opened its second line on the comma.
 const CLOSING = /^[、。，．！？」』）〕】]+$/
+const LEADING_CLOSING = /^([、。，．！？」』）〕】]+)(.+)$/su
 // Kana, the long-vowel mark and full-width punctuation: what a reading
 // may overhang. Not a kanji, and not Latin, whose letters are narrower.
 const OVERHANGABLE = /^[\u3000-\u303f\u3041-\u30ff\uff01-\uff0f\uff1a-\uff20\uff5b-\uff65]$/u
@@ -52,8 +55,13 @@ function wordRuby(segments) {
   const out = []
   for (const seg of segments ?? []) {
     const prev = out[out.length - 1]
+    const lead = prev && !prev.blank && !seg.blank && !seg.reading && !seg.highlight
+      ? LEADING_CLOSING.exec(seg.text) : null
     if (prev && !prev.blank && !seg.blank && !seg.reading && !seg.highlight && CLOSING.test(seg.text)) {
       out[out.length - 1] = { ...prev, tail: (prev.tail ?? '') + seg.text }
+    } else if (lead) {
+      out[out.length - 1] = { ...prev, tail: (prev.tail ?? '') + lead[1] }
+      out.push({ ...seg, text: lead[2] })
     } else if (
       prev && prev.reading && seg.reading && !prev.tail && !prev.blank && !seg.blank
       && prev.word != null && prev.word === seg.word

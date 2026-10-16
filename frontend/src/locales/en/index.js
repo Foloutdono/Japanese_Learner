@@ -927,6 +927,11 @@ const stats = {
   // schedule: a figure, so one word rather than a phrase (plan 089).
   dueValue:          'Now',
   reviewThisCard:    'Review this card',
+  // The entry's record (plan 235): the schedule's cell, when the card is
+  // due, is the door to its review; and the word that replaces JMdict's
+  // star on a common word.
+  dictReview:        'Review',
+  dictCommon:        'common',
   total:             'Total',
   overview:        'Overview',
   streak:          'Streak',
@@ -1614,6 +1619,10 @@ const dictionary = {
   glUse:             'Use',
   glCareful:         'Careful',
   glCompare:         'Compare',
+  // The lesson's section heads (plan 235): each part found at a glance.
+  glStructure:       'Structure',
+  glForms:           'Forms',
+  glConfuse:         'Not to be confused with',
   glBoard:           'Understood — board',
   glBlank:           'gap',
   glRegister: { neutral: 'Neutral', casual: 'Casual', polite: 'Polite', formal: 'Formal', written: 'Written' },

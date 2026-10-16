@@ -54,6 +54,12 @@ const SENTENCES = {
   latin: [
     K('ＡＢ'), P('社', 'しゃ', 1), K('は'), K('3'), P('本', 'ぼん', 3), P('目', 'め', 4), K('です'),
   ],
+  // The backend cuts a part where the pattern's highlight ends, so the
+  // comma after it opens the next part (plan 235).
+  comma: [
+    K('かぞく'), K('の', { highlight: true }), P('中', 'なか', 2, { highlight: true }), K('で', { highlight: true }),
+    K('、だれがりょうりをしますか。'),
+  ],
   // Long enough to wrap at a phone's width.
   long: [
     P('毎', 'まい', 0), P('朝', 'あさ', 0), K('、'), P('駅', 'えき', 2), P('前', 'まえ', 2), K('の'),
@@ -181,6 +187,13 @@ describe('ExampleSentence furigana', () => {
     const shinbun = [...root.querySelectorAll('ruby')].find(r => r.firstChild.nodeValue === '新聞')
     expect(kissaten.classList.contains('dict-ex__ruby--over')).toBe(true)
     expect(shinbun.classList.contains('dict-ex__ruby--over')).toBe(false)
+  })
+
+  it('never opens a part on a comma: the part before it takes it', async () => {
+    const root = await lay(SENTENCES.comma, 1300)
+    const parts = [...root.querySelectorAll('.dict-ex__seg')].map(baseText)
+    expect(parts).toContain('で、')
+    expect(parts.filter(text => /^[、。]/.test(text))).toEqual([])
   })
 
   it('keeps parts that do not name their word apart', async () => {
