@@ -109,7 +109,14 @@ export function DataSlips({ session }) {
             here is new CSS -- .slip__hint and .slip__act are the same
             two the three panels below use. */}
         <Slip label={t.settingsTrail}>
-          <span className="slip__hint">{t.settingsTrailHint}</span>
+          {/* The trail's own download sits in the hint, as text: the
+              slip's one action stays the switch (plan 215). */}
+          <span className="slip__hint">
+            {t.settingsTrailHint}{' '}
+            <button type="button" className="slip__more" data-action="trail-export" disabled={trailing} onClick={() => { playClick(); exportTrail() }}>
+              {trailing ? '…' : t.settingsTrailExportBtn}
+            </button>
+          </span>
           {/* One of two, so the rating bar's construction at chip size
               (DESIGN.md, Controls) rather than a button whose label has
               to say which way it will flip. */}
@@ -120,9 +127,6 @@ export function DataSlips({ session }) {
             onChange={key => { playClick(); setOptedOut(key === 'off', session) }}
             options={[{ key: 'on', label: t.settingsTrailOn }, { key: 'off', label: t.settingsTrailOff }]}
           />
-          <button type="button" className="btn-secondary slip__act" data-action="trail-export" disabled={trailing} onClick={() => { playClick(); exportTrail() }}>
-            {trailing ? '…' : t.settingsTrailExportBtn}
-          </button>
           {trailFailed && <span className="hint" role="alert">{t.onbPassError}</span>}
         </Slip>
 
