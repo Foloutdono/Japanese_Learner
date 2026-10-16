@@ -340,17 +340,22 @@ function Twist({ twist, n, total, pick, done, onPick }) {
     217): `showTr` holds the translation back on a line still to be
     answered, `children` stand under the line (what the tutor said of
     the learner's), and `speak` voices a line the catalogue does not
-    hold. */
-export function SceneLine({ line, them, onSpeak, showTr = true, speak = null, children = null }) {
+    hold. Since plan 223 the talk draws its lines as bubbles: `className`
+    names a line's kind there (a reply taken, the one that was right),
+    `label` stands where who says it does (« La réponse » over the
+    right one), and `foot` is said under the line, past its voice (why
+    a reply was taken or right). The tour passes none of them. */
+export function SceneLine({ line, them, onSpeak, showTr = true, speak = null, children = null, className = '', label = null, foot = null }) {
   const { t } = useLang()
   return (
-    <li className={`tour-line tour-line--${line.who}`}>
-      <span className="tour-line__who">{line.who === 'me' ? t.tourMe : them}</span>
+    <li className={`tour-line tour-line--${line.who}${className ? ` ${className}` : ''}`}>
+      <span className="tour-line__who">{label ?? (line.who === 'me' ? t.tourMe : them)}</span>
       <div className="tour-line__text">
         <ExampleSentence ex={{ jp: line.jp, tr: line.tr, segments: line.furigana }} showTr={showTr} />
         {children}
       </div>
       <Speak text={line.jp} who={line.who} onSpeak={onSpeak} speak={speak} />
+      {foot && <p className="tour-line__foot">{foot}</p>}
     </li>
   )
 }

@@ -1398,6 +1398,8 @@ const conversationMode = {
   cvsGoal:             'Ta mission',
   cvsSay:              'Dis',
   cvsTheReply:         'La réponse',
+  cvsRightMark:        'Juste',
+  cvsWrongMark:        'Faux',
   cvsNext:             'Suivant',
   cvsFinish:           'Terminer',
   cvsReplyLabel:       'Ta réponse',

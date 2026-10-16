@@ -567,8 +567,9 @@ export function RetryIcon({ size = 16, className }) {
 
 export function ArrowIcon({ direction = 'down', size = 16, className }) {
   const paths = {
-    down: ['M12 5v14', 'm19 12-7 7-7-7'],
-    up:   ['m5 12 7-7 7 7', 'M12 19V5'],
+    down:  ['M12 5v14', 'm19 12-7 7-7-7'],
+    up:    ['m5 12 7-7 7 7', 'M12 19V5'],
+    right: ['M5 12h14', 'm12 5 7 7-7 7'],
   }[direction]
   return (
     <svg {...base} width={size} height={size} className={className} strokeWidth={2.4}>
