@@ -8,6 +8,7 @@
 //   npm run reel -- reel/reels/sign-photo.json --preview       → plays in your browser
 //   npm run reel -- reel/reels/sign-photo.json --still 6.5     → one frame, as PNG
 //   npm run reel -- reel/reels/sign-photo.json --frames dir --every 15
+//   npm run reel -- reel/reels/sign-photo.json --width 540     → a quick look
 //
 // The steps: the script is checked (script.mjs); the app's backend code
 // answers for its sentences, words and searches
@@ -126,7 +127,7 @@ async function main() {
   const args = parseArgs(process.argv.slice(2))
   const file = args._[0]
   if (!file) {
-    console.log('usage: npm run reel -- <script.json> [--out file.mp4] [--preview] [--still seconds] [--frames dir --every n]')
+    console.log('usage: npm run reel -- <script.json> [--out file.mp4] [--width 540] [--fps 60] [--max seconds] [--preview] [--still seconds] [--frames dir --every n]\n(reel/README.md has the script format)')
     process.exit(1)
   }
   const scriptPath = resolve(file)
@@ -262,8 +263,13 @@ async function main() {
       const tick = await page.evaluate(() => window.__reel.tick())
       if (tick.error) throw new Error(`the reel stopped at ${tick.t.toFixed(2)}s:\n${tick.error}`)
       const pressed = dispatchInputs(cdp, tick.inputs)
+      pressed.catch(() => {})
       const jpeg = await sp.draw({ format: 'jpeg', quality: 94 })
-      await pressed
+      // The presses land with this frame. One Chrome holds for a frame of
+      // its own (a move is rAF-aligned) lands with the next: waited for
+      // here, it would wait for a frame that never comes (a stroke's last
+      // move and the lift in one frame stalled a film for good).
+      await Promise.race([pressed, new Promise(r => setTimeout(r, 60))])
       t = tick.t
       if (still != null && t >= still) {
         const png = join(REEL, 'out', `${name}-${still}s.png`)

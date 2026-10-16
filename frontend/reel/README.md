@@ -30,8 +30,9 @@ database, no network, no model calls. With `VOICEVOX_URL` set in
 `backend/.env` a dictation reel's clip is voiced by the engine; without
 it the clip is silence.
 
-A film renders at about real time at `--width 540`, slower at full size.
-Every render of a script is the same film, frame for frame.
+A film renders at about real time at `--width 540` and about four
+times its length at full size. It runs on its own clock, not the
+machine's: a slower machine makes the same film, only more slowly.
 
 ## The samples
 
