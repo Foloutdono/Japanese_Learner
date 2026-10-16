@@ -1229,6 +1229,31 @@ describe('the conversion carousels (plan 215)', () => {
     }
   })
 
+  it('never asks a question and answers it on the same slide', () => withPath2D(() => {
+    const asks = d => d && (d.kind === 'question' || d.kind === 'turn' || (d.kind === 'pictures' && d.odd != null))
+    for (const { src, id, lang, p } of some) {
+      for (const type of types(p)) {
+        const F = funnelOf(type, p)
+        const where = `${src.id} ${id} ${lang} ${type}`
+        // A question after the call to action is left to the reader, never shown answered...
+        if (asks(F.detail)) {
+          expect(F.detail.yours, where).toBe(true)
+          expect(!F.detail.revealed && !F.detail.reveal, where).toBe(true)
+          // ... and answered on the slide after it.
+          const slides = deck(type, p, FORMATS.post, { design: 'clarte', length: '5' })
+          expect(slides.map(x => x.key).slice(-2), where).toEqual(['more', 'keys'])
+          const { ctx, texts } = stubContext()
+          slides.at(-1).draw(ctx)
+          // The kicker is set letter by letter: read it without its spaces.
+          const flat = t => t.replace(/\s/g, '')
+          expect(flat(texts.join('')), where).toContain(flat(FUNNEL[lang].yoursAnswer.toLocaleUpperCase()))
+        }
+        // A text is asked its question before the slide that answers it.
+        if (F.hook.kind === 'passage' && F.solution.kind === 'question') expect(F.hook.q, where).toBe(F.solution.q)
+      }
+    }
+  }))
+
   it('draws every word of the impostor as a picture, never an empty tile', () => {
     const data = bank('themes.json')
     for (const lang of ['en', 'fr']) {

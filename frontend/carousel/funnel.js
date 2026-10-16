@@ -51,9 +51,12 @@ export const WORDS = {
       words: 'Word by word', sentences: 'In sentences', kanjiWords: 'Words written with it', more: 'More', scene: 'The whole scene',
       pair: 'Side by side', lookalike: 'Its lookalikes', list: 'The list', next: 'Next turn', round: 'Next round', question: 'One more',
     },
+    // A question the carousel leaves to its reader: answered on the slide after.
+    yours: 'Your turn',
+    yoursFoot: 'The answer is on the next slide',
+    yoursAnswer: 'Your turn: the answer',
     keys: 'Key points',
-    small: 'Small details. Big progress.',
-    saveNext: 'Save this for your next review.',
+    saveFor: 'Save it for your next review',
     or: 'or',
     them: 'Them', you: 'You',
     cta: { head: 'Want more like this?', also: 'Also', go: `Go to ${SITE}`, band: 'More on Tsuji' },
@@ -70,7 +73,7 @@ export const WORDS = {
       words: { name: 'Never lose a word', line: 'Words from N5 to N1, brought back by spaced repetition. Nothing to set up.', short: 'Vocabulary', memory: 'memory', time: 'time', review: 'review' },
       kanji: { name: 'Kanji, stroke by stroke', line: 'Draw each kanji in its stroke order, with its readings and the words it makes.', short: 'Kanji' },
       grammar: { name: 'Grammar that clicks', line: 'Every JLPT pattern: what it attaches to, what it does, a scene and a quiz.', short: 'Grammar', steps: ['The rule', 'A scene', 'A quiz'] },
-      kana: { name: 'Kana, sound by sound', line: 'Every kana heard and traced. The kana line is free for good.', short: 'Kana', free: ['Free', 'for good'] },
+      kana: { name: 'Kana, sound by sound', line: 'Every kana heard and traced.', short: 'Kana', free: 'Free', freeLine: 'Kana reviews cost nothing' },
     },
   },
   fr: {
@@ -92,9 +95,11 @@ export const WORDS = {
       words: 'Mot à mot', sentences: 'En phrases', kanjiWords: 'Des mots qui l’écrivent', more: 'Encore', scene: 'Toute la scène',
       pair: 'Côte à côte', lookalike: 'Ses sosies', list: 'La liste', next: 'Le tour suivant', round: 'La manche suivante', question: 'Encore une',
     },
+    yours: 'À toi',
+    yoursFoot: 'La réponse est juste après',
+    yoursAnswer: 'À toi : la réponse',
     keys: 'À retenir',
-    small: 'Petits détails. Grands progrès.',
-    saveNext: 'Enregistre-le pour ta prochaine révision.',
+    saveFor: 'Enregistre-le pour ta prochaine révision',
     or: 'ou',
     them: 'En face', you: 'Toi',
     cta: { head: 'Envie d’en voir plus ?', also: 'Et aussi', go: `Va sur ${SITE}`, band: 'Plus sur Tsuji' },
@@ -111,7 +116,7 @@ export const WORDS = {
       words: { name: 'Ne perds plus un mot', line: 'Les mots du N5 au N1, ramenés par la répétition espacée. Rien à régler.', short: 'Vocabulaire', memory: 'mémoire', time: 'temps', review: 'révision' },
       kanji: { name: 'Les kanji, trait par trait', line: 'Trace chaque kanji dans l’ordre de ses traits, avec ses lectures et les mots qu’il écrit.', short: 'Kanji' },
       grammar: { name: 'La grammaire qui fait tilt', line: 'Chaque point du JLPT : à quoi il s’attache, ce qu’il fait, une scène et un quiz.', short: 'Grammaire', steps: ['La règle', 'Une scène', 'Un quiz'] },
-      kana: { name: 'Les kana, son par son', line: 'Chaque kana écouté et tracé. La ligne des kana est gratuite pour de bon.', short: 'Kana', free: ['Gratuit', 'pour de bon'] },
+      kana: { name: 'Les kana, son par son', line: 'Chaque kana écouté et tracé.', short: 'Kana', free: 'Gratuit', freeLine: 'Les révisions de kana ne coûtent rien' },
     },
   },
 }
@@ -146,15 +151,17 @@ const FEATURE_OF = {
 /** The path of a type over a plan: { hook, solution, detail, keys,
  *  feature }, each a spec the slides below draw. Null where the plan
  *  has nothing to draw it from. */
+/** Why a question's answer is the right one, in a line. */
+const whyOf = q => q.explain?.why || (q.explain?.head && q.explain?.sense ? `${q.explain.head}: ${q.explain.sense}` : '')
 export function funnelOf(type, pl, opts = {}) {
   const f = pl.funnel || {}
   const base = { keys: f.keys || [], feature: FEATURE_OF[pl.source] || 'reading' }
-  const whys = qs => qs.map(q => q.explain?.why || (q.explain?.head && q.explain?.sense ? `${q.explain.head}: ${q.explain.sense}` : '')).filter(Boolean)
+  const whys = qs => qs.map(whyOf).filter(Boolean)
   const asked = (qs, extra = {}) => qs.length ? {
     ...base, feature: 'exam', ...extra,
     hook: { kind: 'question', q: qs[0], ask: 'answer', seconds: 10 },
     solution: { kind: 'question', q: qs[0], revealed: true },
-    detail: qs.length > 1 ? { kind: 'question', q: qs[1], revealed: true, label: 'question' } : null,
+    detail: qs.length > 1 ? { kind: 'question', q: qs[1], yours: true } : null,
     keys: (whys(qs).length ? whys(qs) : base.keys).slice(0, 3),
   } : null
   switch (type) {
@@ -203,7 +210,7 @@ export function funnelOf(type, pl, opts = {}) {
         ...base,
         hook: { kind: 'bubble', line: T.lines[0], them: T.them, place: T.place, ask: 'reply', seconds: 10 },
         solution: { kind: 'chat', lines: T.lines, them: T.them },
-        detail: T.quiz ? { kind: 'question', q: T.quiz, revealed: true, label: 'question' } : null,
+        detail: T.quiz ? { kind: 'question', q: T.quiz, yours: true } : null,
         keys: [T.why, T.note, ...base.keys].filter(Boolean).slice(0, 3),
       }
     }
@@ -216,7 +223,7 @@ export function funnelOf(type, pl, opts = {}) {
         ...base,
         hook: { kind: 'pictures', words: r0.words, ask: 'odd', seconds: 5 },
         solution: { kind: 'pictures', words: r0.words, odd: r0.at, reveal: true, why: r0.why },
-        detail: r1 ? { kind: 'pictures', words: r1.words, odd: r1.at, reveal: true, why: r1.why, label: 'round' } : null,
+        detail: r1 ? { kind: 'pictures', words: r1.words, odd: r1.at, why: r1.why, ask: 'odd', yours: true } : null,
         keys: I.rounds.map(r => r.why).slice(0, 3),
       }
     }
@@ -271,7 +278,8 @@ function platesOf(pl, f, base) {
       const q = pl.quizzes.find(x => x.kind === 'passage') || pl.quizzes[0]
       return {
         ...base,
-        hook: { kind: 'passage', title: f.title, sents: f.sents, ask: 'passage', seconds: 30 },
+        // The question is asked under the text, and answered on the next slide.
+        hook: { kind: 'passage', title: f.title, sents: f.sents, q, ask: 'passage', seconds: 30 },
         solution: q ? { kind: 'question', q, revealed: true } : { kind: 'rows', items: f.words },
         detail: q && f.words?.length ? { kind: 'rows', items: f.words, label: 'words' } : null,
       }
@@ -280,13 +288,13 @@ function platesOf(pl, f, base) {
       ...base,
       hook: { kind: 'pictures', words: f.pictures, ask: 'pictures', seconds: 10 },
       solution: { kind: 'pictures', words: f.pictures, reveal: true },
-      detail: (f.impostor || pl.impostor) ? (r => ({ kind: 'pictures', words: r.words, odd: r.at, reveal: true, why: r.why, label: 'round' }))((f.impostor || pl.impostor).rounds[0]) : null,
+      detail: (f.impostor || pl.impostor) ? (r => ({ kind: 'pictures', words: r.words, odd: r.at, why: r.why, ask: 'odd', yours: true }))((f.impostor || pl.impostor).rounds[0]) : null,
     }
     case 'lookalike': return {
       ...base,
       hook: { kind: 'chars', chars: f.chars.map(k => k.c), ask: 'apart', seconds: 5 },
       solution: { kind: 'apart', chars: f.chars },
-      detail: pl.quizzes[0] ? { kind: 'question', q: pl.quizzes[0], revealed: true, label: 'question' } : null,
+      detail: pl.quizzes[0] ? { kind: 'question', q: pl.quizzes[0], yours: true } : null,
     }
     case 'dialogue': {
       const [t0, t1] = f.turns
@@ -294,7 +302,7 @@ function platesOf(pl, f, base) {
         ...base,
         hook: { kind: 'turn', turn: t0, them: f.them, romaji: f.romaji, ask: 'reply', seconds: 10 },
         solution: { kind: 'turn', turn: t0, them: f.them, romaji: f.romaji, revealed: true },
-        detail: t1 ? { kind: 'turn', turn: t1, them: f.them, romaji: f.romaji, revealed: true, label: 'next' } : null,
+        detail: t1 ? { kind: 'turn', turn: t1, them: f.them, romaji: f.romaji, yours: true } : null,
       }
     }
     case 'trap': return {
@@ -320,8 +328,12 @@ export function funnelDeck(type, pl, fmt, opts = {}) {
     { key: 'answer', fn: c => solutionSlide(c, spec.solution) },
     { key: 'cta', fn: c => ctaSlide(c, feature) },
   ]
-  if (n >= 5 && spec.detail) out.push({ key: 'more', fn: c => detailSlide(c, spec.detail) })
-  if (n >= 4 && spec.keys.length) out.push({ key: 'keys', fn: c => keysSlide(c, spec.keys) })
+  const more = n >= 5 && spec.detail
+  if (more) out.push({ key: 'more', fn: c => detailSlide(c, spec.detail) })
+  // A question left to the reader is answered on the slide after it.
+  const answer = more ? answerOf(spec.detail) : null
+  const keys = answer ? spec.keys.filter(k => k !== answer.why) : spec.keys
+  if (n >= 4 && (keys.length || answer)) out.push({ key: 'keys', fn: c => keysSlide(c, keys, answer) })
   return out.map(sl => ({ key: sl.key, draw: ctx => sl.fn(context(ctx, look)) }))
 }
 
@@ -449,6 +461,7 @@ function pill(c, label, cx, y, { icon = '→', fill = faceInk(c.p), ink = c.p.in
   ctx.arc(x + h / 2, y + h / 2, h / 2 - 10, 0, Math.PI * 2)
   ctx.fill()
   if (emoji) text(ctx, icon, x + h / 2, y + h / 2 + 15, { f: font(400, 40, 'emoji'), color: p.onLine, align: 'center' })
+  else if (icon === 'save') bookmark(ctx, x + h / 2, y + h / 2, 36, p.onLine, { fill: true })
   else chevronIcon(ctx, x + h / 2, y + h / 2, 18, p.onLine)
   text(ctx, b.lines[0], x + h + SP[3], y + h / 2 + b.size * 0.36, { f: b.f, color: ink })
   return h
@@ -1168,32 +1181,58 @@ function pairBlock(c, s, { x, w }) {
   return stackOf([head, ...cards], [SP[7], SP[5]])
 }
 /** A passage to read, as large as it fits. */
-function passageBlock(c, s, { x, w, maxH }) {
+/** A text, and under it the question asked of it: its choices too where
+ *  the text keeps a size that reads, else the question alone; the
+ *  choices come with the answer. */
+function passageBlock(c, s, box) {
+  if (!s.q) return passageOnce(c, s, box)
+  const { x, w, maxH } = box
+  const ask = textBlock(c, s.q.ask, { x, w, sizes: [FS.lead, FS.body], align: 'left', maxLines: 3 })
+  const choices = choicesBlock(c, s.q, { x, w, sizes: [FS.body, FS.sm] })
+  const both = stackOf([ask, choices], [SP[5]])
+  // The whole text before anything else: the choices give way, then the
+  // title's size, then the text's; only past all of them is it cut.
+  const lean = textBlock(c, s.q.ask, { x, w, sizes: [FS.body, FS.sm], align: 'left', maxLines: 3 })
+  const tries = [
+    [both, FS.sm, [FS.heading, FS.title]], [ask, FS.sm, [FS.heading, FS.title]], [ask, FS.caption, [FS.heading, FS.title]],
+    [ask, FS.caption, [FS.title]], [lean, FS.caption, [FS.title], true], [lean, FS.xs, [FS.title], true],
+  ]
+  for (const [asked, least, heads, tight] of tries) {
+    const text = passageOnce(c, s, { x, w, maxH: maxH - asked.h - SP[6], least, heads, tight })
+    if (!text.cut) return stackOf([text, asked], [SP[6]])
+  }
+  return stackOf([passageOnce(c, s, { x, w, maxH: maxH - lean.h - SP[6], least: FS.xs, heads: [FS.title], tight: true }), lean], [SP[6]])
+}
+function passageOnce(c, s, { x, w, maxH, least = FS.caption, heads = [FS.heading, FS.title], tight = false }) {
   const { ctx, p } = c
-  const title = textBlock(c, s.title, { x, w, sizes: [FS.heading, FS.title], fam: 'serif', maxLines: 2 })
-  const room = maxH - title.h - SP[6] - SP[7] * 2
+  // Tight: the card's margin and the space between sentences give way.
+  const pad = tight ? SP[5] : SP[7]
+  const sep = tight ? SP[1] : SP[3]
+  const title = textBlock(c, s.title, { x, w, sizes: heads, fam: 'serif', maxLines: 2 })
+  const room = maxH - title.h - SP[6] - pad * 2
   let lays = null
-  for (const z of [FS.title, FS.lead, FS.body, FS.sm, FS.caption]) {
-    lays = s.sents.map(rows => layoutSentence(ctx, rows, { max: z, min: z, maxW: w - SP[7] * 2, maxLines: 20, script: c.pl.script, rules: false, gap: 0.02, fam: 'jp', weight: 500 }))
-    if (lays.reduce((a, L) => a + (L?.h || 0) + SP[3], 0) <= room) break
+  for (const z of [FS.title, FS.lead, FS.body, FS.sm, FS.caption, FS.xs].filter(z => z >= least)) {
+    lays = s.sents.map(rows => layoutSentence(ctx, rows, { max: z, min: z, maxW: w - pad * 2, maxLines: 20, script: c.pl.script, rules: false, gap: 0.02, fam: 'jp', weight: 500 }))
+    if (lays.reduce((a, L) => a + (L?.h || 0) + sep, 0) <= room) break
   }
   // A passage longer than the slide at the caption rung is cut at a
   // sentence: the answer's slide quotes what the question asks of.
   let used = 0
-  lays = lays.filter(L => (used += (L?.h || 0) + SP[3]) <= room + SP[3])
-  const body = lays.reduce((a, L) => a + (L?.h || 0) + SP[3], -SP[3])
-  const h = title.h + SP[6] + body + SP[7] * 2
+  const all = lays.length
+  lays = lays.filter(L => (used += (L?.h || 0) + sep) <= room + sep)
+  const body = lays.reduce((a, L) => a + (L?.h || 0) + sep, -sep)
+  const h = title.h + SP[6] + body + pad * 2
   return {
-    h,
+    h, cut: lays.length < all,
     draw: y => {
       title.draw(y)
       const cy = y + title.h + SP[6]
-      card(c, x, cy, w, body + SP[7] * 2)
-      let at = cy + SP[7]
+      card(c, x, cy, w, body + pad * 2)
+      let at = cy + pad
       for (const L of lays) {
         if (!L) continue
-        drawSentence(ctx, L, x + SP[7], at, 'left', () => ({ ink: p.ink, ruby: p.ink2 }))
-        at += L.h + SP[3]
+        drawSentence(ctx, L, x + pad, at, 'left', () => ({ ink: p.ink, ruby: p.ink2 }))
+        at += L.h + sep
       }
     },
   }
@@ -1332,7 +1371,7 @@ function hookLayout(c, s, { ask, secs, compact, centred }) {
           swoosh(c, fr.cx, top + head.h + SP[4], Math.min(fr.w * 0.5, 380))
         }
         place(c, b, y, bottom)
-        pill(c, weld(c.lang, W.save), fr.cx, fr.bottom - 92, { icon: '🔖', emoji: true, dot: p.gold })
+        pill(c, weld(c.lang, W.save), fr.cx, fr.bottom - 92, { icon: 'save', dot: p.gold })
       },
     }
   }
@@ -1367,58 +1406,170 @@ function solutionSlide(c, s) {
 /** The content suite: the item in more detail. */
 function detailSlide(c, s) {
   const { fr, W, p } = c
-  const label = weld(c.lang, W.detail[s.label] || W.detail.more)
-  const top = c.design === 'fiche' ? chrome(c, { jp: '詳', label, band: p.line.grammar }) : chrome(c)
+  const label = weld(c.lang, s.yours ? W.yours : W.detail[s.label] || W.detail.more)
+  const top = c.design === 'fiche' ? chrome(c, { jp: s.yours ? '問' : '詳', label, band: s.yours ? p.gold : p.line.grammar }) : chrome(c)
   let y = top
   if (c.design !== 'fiche') y += kicker(c, label, fr.x, y, 'left') + SP[6]
-  const b = content(c, s, { x: fr.x, w: fr.w, maxH: fr.bottom - y })
-  place(c, b, y, fr.bottom)
+  // A question left to the reader: asked, never answered here.
+  const ask = s.ask ? textBlock(c, weld(c.lang, W.ask[s.ask]), { x: fr.x, w: fr.w, sizes: [FS.title, FS.lead], align: 'left', maxLines: 2 }) : none
+  if (ask.h) { ask.draw(y); y += ask.h + SP[6] }
+  const bottom = s.yours ? fr.bottom - 92 - SP[7] : fr.bottom
+  const b = content(c, s, { x: fr.x, w: fr.w, maxH: bottom - y })
+  // Where the question needs the pill's room, the way on is said in a
+  // line over it instead.
+  if (s.yours && b.h > bottom - y) {
+    const hint = textBlock(c, weld(c.lang, W.yoursFoot), { x: fr.x, w: fr.w, sizes: [FS.body, FS.sm], weight: 500, color: p.ink2, align: 'left', maxLines: 1 })
+    hint.draw(y)
+    y += hint.h + SP[5]
+    place(c, content(c, s, { x: fr.x, w: fr.w, maxH: fr.bottom - y }), y, fr.bottom)
+    return
+  }
+  place(c, b, y, bottom)
+  if (s.yours) pill(c, weld(c.lang, W.yoursFoot), fr.cx, fr.bottom - 92)
+}
+/** What a question left to the reader answers: the choice, the odd one
+ *  out or the reply, and why. */
+function answerOf(d) {
+  if (!d?.yours) return null
+  const rowsText = rows => rows.map(r => r.t).join('')
+  if (d.kind === 'question') {
+    const ch = d.q.choices[d.q.right]
+    return { text: ch.rows ? rowsText(ch.rows) : ch.text, fam: ch.rows || ch.fam === 'jp' ? 'jp' : 'latin', why: whyOf(d.q) }
+  }
+  if (d.kind === 'pictures') {
+    const odd = d.words[d.odd]
+    return { text: odd.main ? `${odd.t} · ${odd.main}` : odd.t, fam: 'jp', why: d.why || '', e: odd.e }
+  }
+  if (d.kind === 'turn') return { text: rowsText(d.turn.choices[d.turn.right]), fam: 'jp', why: d.turn.why || '' }
+  return null
 }
 /** The key points, and a reason to keep the post. */
 // A key point is a line or two: a long one gives way to the shorter ones.
 const KEY_MAX = 170
-function keysSlide(c, all) {
+function keysSlide(c, all, answer = null) {
   const { ctx, p, fr, W } = c
   const short = all.filter(k => k.length <= KEY_MAX)
   const keys = short.length ? short : all.slice(0, 1)
   const top = c.design === 'fiche' ? chrome(c, { jp: '要点', label: W.keys, band: p.gold }) : chrome(c)
   const pad = SP[6]
-  const fpad = SP[5]
-  const foot = FS.lead * 1.25 + FS.body * 1.3 + fpad * 2 + SP[2]
-  const room = fr.bottom - top - foot - SP[7] - pad * 2 - FS.title * 1.5 - SP[6]
-  // Every point at one size, the largest at which all of them fit; the
-  // last gives way where even the caption rung does not hold them.
-  let notes = null
+  const keep = saveBlock(c)
+  const foot = keep.h
+  const head = FS.title * 1.5 + SP[6]
   const height = list => list.reduce((a, b) => a + paragraphH(b, 1.24) + SP[6], -SP[6])
-  for (let k = keys.length; k >= 1; k--) {
-    for (const z of [FS.title, FS.lead, FS.body, FS.sm]) {
-      notes = keys.slice(0, k).map(t => fit(ctx, t, { weight: 500, sizes: [z], maxW: fr.w - pad * 2 - 64, maxLines: 8, balanced: false, lh: 1.24 }))
-      if (height(notes) <= room) break
+  // Every point at one size, the largest at which all of them fit; the
+  // last gives way where even the small rung does not hold them.
+  const notesIn = room => {
+    for (let k = keys.length; k >= 1; k--) {
+      for (const z of [FS.title, FS.lead, FS.body, FS.sm]) {
+        const notes = keys.slice(0, k).map(t => fit(ctx, t, { weight: 500, sizes: [z], maxW: fr.w - pad * 2 - 64, maxLines: 8, balanced: false, lh: 1.24 }))
+        if (height(notes) <= room) return notes
+      }
     }
-    if (height(notes) <= room) break
+    return []
   }
-  const body = notes.reduce((a, b) => a + paragraphH(b, 1.24) + SP[6], -SP[6])
-  const ch = pad * 2 + FS.title * 1.5 + SP[6] + body
-  const total = ch + SP[7] + foot
+  const roomFor = ans => fr.bottom - top - foot - SP[7] - pad * 2 - head - (ans.h ? ans.h + SP[7] : 0)
+  // Under an answer, its why gives way first, then the key points.
+  const answers = answer ? [answerCard(c, answer, fr.w + SP[4] * 2, true), answerCard(c, answer, fr.w + SP[4] * 2, false)] : [none]
+  let ans = answers[0]
+  let notes = keys.length ? notesIn(roomFor(ans)) : []
+  if (answer && keys.length && !notes.length) {
+    const lean = notesIn(roomFor(answers[1]))
+    if (lean.length) { ans = answers[1]; notes = lean }
+  }
+  const ch = notes.length ? pad * 2 + head + height(notes) : 0
+  const total = ans.h + (ans.h && ch ? SP[7] : 0) + ch + SP[7] + foot
   let y = top + Math.max(0, (fr.bottom - top - total) / 2)
-  card(c, fr.x - SP[4], y, fr.w + SP[4] * 2, ch)
-  emojiAt(ctx, '💡', fr.x + pad + 26, y + pad + FS.title * 0.6, 50)
-  text(ctx, weld(c.lang, W.keys), fr.x + pad + 70, y + pad + FS.title * 0.95, { f: font(700, FS.title, 'latin'), color: p.ink })
-  let at = y + pad + FS.title * 1.5 + SP[6]
-  for (const b of notes) {
-    check(ctx, fr.x + pad + 22, at + b.size * 0.5, 22, p.gold, cardInk(p))
-    at += paragraph(ctx, b, fr.x + pad + 64, at, p.ink, 'left', 1.24) + SP[6]
+  if (ans.h) {
+    ans.draw(fr.x - SP[4], y)
+    y += ans.h + SP[7]
   }
-  y += ch + SP[7]
-  ctx.fillStyle = alpha(p.line.grammar, p.paper ? 0.14 : 0.22)
-  rrect(ctx, fr.x - SP[4], y, fr.w + SP[4] * 2, foot, R.card * 2)
-  ctx.fill()
-  emojiAt(ctx, '🌱', fr.x + fpad + 26, y + foot / 2, 52)
-  const tx = fr.x + fpad + 76
-  const small = fit(ctx, weld(c.lang, W.small), { sizes: [FS.lead, FS.body], maxW: fr.right - fpad - tx, maxLines: 1 })
-  text(ctx, small.lines[0], tx, y + fpad + small.size * 0.85, { f: small.f, color: p.paper ? p.line.grammar : p.ink })
-  const save = fit(ctx, weld(c.lang, W.saveNext), { weight: 500, sizes: [FS.body, FS.sm, FS.caption], maxW: fr.right - fpad - tx, maxLines: 1 })
-  text(ctx, save.lines[0], tx, y + fpad + small.size * 1.25 + SP[2] + save.size * 0.85, { f: save.f, color: p.ink2 })
+  if (ch) {
+    card(c, fr.x - SP[4], y, fr.w + SP[4] * 2, ch)
+    emojiAt(ctx, '💡', fr.x + pad + 26, y + pad + FS.title * 0.6, 50)
+    text(ctx, weld(c.lang, W.keys), fr.x + pad + 70, y + pad + FS.title * 0.95, { f: font(700, FS.title, 'latin'), color: p.ink })
+    let at = y + pad + head
+    for (const b of notes) {
+      check(ctx, fr.x + pad + 22, at + b.size * 0.5, 22, p.gold, cardInk(p))
+      at += paragraph(ctx, b, fr.x + pad + 64, at, p.ink, 'left', 1.24) + SP[6]
+    }
+    y += ch + SP[7]
+  }
+  keep.draw(y)
+}
+/** The save button's glyph: a bookmark, as the feed draws it. */
+function bookmark(ctx, cx, cy, h, color, { fill = false, lw = h * 0.1 } = {}) {
+  const w = h * 0.74
+  ctx.save()
+  ctx.beginPath()
+  ctx.moveTo(cx - w / 2, cy - h / 2)
+  ctx.lineTo(cx + w / 2, cy - h / 2)
+  ctx.lineTo(cx + w / 2, cy + h / 2)
+  ctx.lineTo(cx, cy + h * 0.2)
+  ctx.lineTo(cx - w / 2, cy + h / 2)
+  ctx.closePath()
+  ctx.lineJoin = 'round'
+  if (fill) { ctx.fillStyle = color; ctx.fill() }
+  else { ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.stroke() }
+  ctx.restore()
+}
+/** The reason to keep the post, under the key points: the call set large
+ *  beside the save glyph, an arrow down to the corner where the feed keeps
+ *  its save button. */
+function saveBlock(c) {
+  const { ctx, p, fr, W } = c
+  const b = fit(ctx, weld(c.lang, W.saveFor), { sizes: [FS.title, FS.lead], maxW: fr.w - 140, maxLines: 2 })
+  const h = Math.max(paragraphH(b), 96) + SP[7]
+  return {
+    h,
+    draw: y => {
+      const bh = paragraphH(b)
+      bookmark(ctx, fr.x + 34, y + bh / 2, 68, p.gold, { lw: 7 })
+      paragraph(ctx, b, fr.x + 92, y, p.ink, 'left')
+      ctx.save()
+      ctx.strokeStyle = p.gold
+      ctx.lineWidth = 7
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      const ax = fr.right - 10
+      const ay = y + h
+      ctx.beginPath()
+      ctx.moveTo(fr.x + 110, y + bh + SP[3])
+      ctx.quadraticCurveTo(fr.right - 60, y + bh + SP[3], ax, ay)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(ax - 24, ay - 18)
+      ctx.lineTo(ax, ay)
+      ctx.lineTo(ax + 8, ay - 28)
+      ctx.stroke()
+      ctx.restore()
+    },
+  }
+}
+/** The answer to the question left to the reader: what it is, with a
+ *  check, and why. */
+function answerCard(c, a, w, withWhy = true) {
+  const { ctx, p, W } = c
+  const ok = success(p)
+  const pad = SP[5]
+  const kh = FS.caption * 1.2
+  const tb = fit(ctx, a.text, { fam: a.fam, weight: 700, sizes: [FS.title, FS.lead, FS.body], maxW: w - pad * 2 - 64, maxLines: 2, balanced: false })
+  const why = withWhy && a.why && a.why !== a.text ? fit(ctx, weld(c.lang, a.why), { weight: 500, sizes: [FS.body, FS.sm], maxW: w - pad * 2, maxLines: 3, balanced: false }) : null
+  const th = Math.max(paragraphH(tb), 44)
+  const h = pad * 2 + kh + SP[4] + th + (why ? SP[4] + paragraphH(why) : 0)
+  return {
+    h,
+    draw: (x, y) => {
+      // Tinted, unruled: it reaches into the margin as the key points' card does.
+      ctx.fillStyle = mix(ok, cardInk(p), p.paper ? 0.12 : 0.2)
+      rrect(ctx, x, y, w, h, R.card * 2)
+      ctx.fill()
+      kicker(c, weld(c.lang, W.yoursAnswer), x + pad, y + pad, 'left', ok, w - pad * 2)
+      const ty = y + pad + kh + SP[4]
+      check(ctx, x + pad + 22, ty + th / 2, 22, ok, cardInk(p))
+      paragraph(ctx, tb, x + pad + 64, ty + (th - paragraphH(tb)) / 2, p.ink, 'left')
+      if (why) paragraph(ctx, why, x + pad, ty + th + SP[4], p.ink2, 'left')
+    },
+  }
 }
 
 // ── The call to action ────────────────────────────────────────
@@ -1432,7 +1583,8 @@ function ctaSlide(c, feature) {
   const top = chrome(c, { thin: true, band: p.gold })
   const head = textBlock(c, weld(c.lang, W.cta.head), { x: fr.x, w: fr.w, sizes: tall(c) ? [FS.display * 0.8, FS.heading] : [FS.heading, FS.display * 0.6], fam: 'serif', weight: 900, maxLines: 2, lh: 1.06 })
   const name = textBlock(c, weld(c.lang, F.name), { x: fr.x, w: fr.w, sizes: [FS.title, FS.lead], maxLines: 1, color: p.paper ? mix(featureInk(p, feature), p.ink, 0.7) : p.ink })
-  const line = textBlock(c, weld(c.lang, F.line), { x: fr.x, w: fr.w, sizes: [FS.body, FS.sm], weight: 500, color: p.ink2, maxLines: 3 })
+  // What costs nothing is said in the sentence, its tag in the picture.
+  const line = textBlock(c, weld(c.lang, F.freeLine ? `${F.line} ${F.freeLine}.` : F.line), { x: fr.x, w: fr.w, sizes: [FS.body, FS.sm], weight: 500, color: p.ink2, maxLines: 3 })
   const btn = METAL_H
   const alsoH = 72
   let y = top
@@ -2353,20 +2505,29 @@ function drawKana(c) {
       label(c, K.ro, fx + s / 2, y + s + 56, { size: 40, color: ink, maxW: 200 })
     }
   })
-  // The sticker: the kana line costs nothing, for good.
-  tilt(ctx, 690, 90, 0.18, () => {
-    ctx.fillStyle = p.gold
+  // The price tag, flat and level, on the side the lit kana leaves free.
+  {
+    const at = tiles.indexOf(K.k)
+    const left = at >= tiles.length / 2
+    const word = F.free.toLocaleUpperCase()
+    const tf = font(700, 46, 'latin')
+    const tw = measure(ctx, word, tf, 0.08) + 92
+    const tx = left ? 16 : 800 - 16 - tw
+    const ty = 22
+    const th = 92
+    ctx.fillStyle = ink
     ctx.beginPath()
-    ctx.arc(690, 90, 82, 0, Math.PI * 2)
+    ctx.moveTo(tx + 34, ty)
+    ctx.lineTo(tx + tw, ty)
+    ctx.lineTo(tx + tw, ty + th)
+    ctx.lineTo(tx + 34, ty + th)
+    ctx.lineTo(tx, ty + th / 2)
+    ctx.closePath()
     ctx.fill()
-    ctx.strokeStyle = cardInk(p)
-    ctx.lineWidth = 4
-    ctx.setLineDash([8, 8])
+    ctx.fillStyle = cardInk(p)
     ctx.beginPath()
-    ctx.arc(690, 90, 70, 0, Math.PI * 2)
-    ctx.stroke()
-    ctx.setLineDash([])
-    label(c, F.free[0], 690, 86, { size: 34, color: p.onFill, maxW: 130 })
-    label(c, F.free[1], 690, 124, { size: 30, color: p.onFill, weight: 500, maxW: 136 })
-  })
+    ctx.arc(tx + 30, ty + th / 2, 9, 0, Math.PI * 2)
+    ctx.fill()
+    text(ctx, word, tx + 54, ty + th / 2 + 46 * 0.36, { f: tf, color: p.onLine, tr: 0.08 })
+  }
 }
