@@ -11,6 +11,7 @@ import {
 import { usePace } from '../components/study/usePace'
 import HintBar from '../components/study/HintBar'
 import { DrawingQuiz } from '../components/study/DrawingCanvas'
+import { GlyphGate, glyphGated } from '../components/study/GlyphGate'
 import { Loading } from '../components/ui/Loading'
 import { StudyStage } from '../components/study/StudyStage'
 import { useRunExit } from '../hooks/useRunExit'
@@ -43,7 +44,7 @@ import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 // charged after the scheduler accepts (lib/reviews).
 
 export default function KanaRun({ session }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const { set, mode } = useParams()
 
   const SETS = kanaSets(t)
@@ -77,17 +78,17 @@ export default function KanaRun({ session }) {
   const fetchBatch = useCallback(async (count, excludeIds, signal) => {
     if (!valid || reviewing) return []
     const data = capturePace(await apiJson(
-      `/api/kana/cards?set_name=${encodeURIComponent(selectedSet.slug)}&mode=${mode}&count=${count}&exclude=${excludeIds.join(',')}${paceQuery}`,
+      `/api/kana/cards?set_name=${encodeURIComponent(selectedSet.slug)}&mode=${mode}&count=${count}&exclude=${excludeIds.join(',')}&lang=${lang}${paceQuery}`,
       session,
       { signal },
     ))
     return data.cards ?? []
-  }, [valid, reviewing, selectedSet, mode, session, paceQuery, capturePace])
+  }, [valid, reviewing, selectedSet, mode, session, paceQuery, capturePace, lang])
 
   // What the saved queue must not replay: cards answered since, here
   // or anywhere else (lib/reviews, staleCards).
   const checkCached = useCallback((cards, signal) => staleCards(session, cards, signal), [session])
-  const { current: card, loading, done, error, retry, advance } = useCardSession({
+  const { current: card, loading, done, error, retry, advance, updateCurrent } = useCardSession({
     storageKey,
     fetchBatch,
     batchSize: 10,
@@ -98,6 +99,10 @@ export default function KanaRun({ session }) {
   // Every screen's rating flow: the lock, the gates the celebrations
   // open, and the advance once they all close. See hooks/useReviewGates.
   const gates = useReviewGates({ advance, sessionKey: storageKey })
+
+  // 初見 (plan 216): a kana never met is shown before it is drilled --
+  // what it reads, its strokes traced, a few words it is read in.
+  const glyphing = glyphGated(card)
 
   // Reset per-card UI state whenever the card in hand changes.
   useEffect(() => {
@@ -281,7 +286,7 @@ export default function KanaRun({ session }) {
       onToastDone={gates.toastDone}
       records
       progress={progress}
-      panel={card ? <CardPanel card={card} /> : null}
+      panel={card && !glyphing ? <CardPanel card={card} /> : null}
       done={done}
       side={error && !card ? null : <SessionPanel done={done} />}
       sideLabel={t.dictionaryTitle}
@@ -291,7 +296,12 @@ export default function KanaRun({ session }) {
         {error && !card && <SessionError error={error} onRetry={retry} />}
         {done    && <DoneMessage onBack={leave} pace={paceCtl.pace}
           onExtra={paceCtl.pacedOut ? () => paceCtl.boardExtra(retry) : undefined} />}
-        {card && !loading && (
+        {card && !loading && glyphing && (
+          <div className="gt-gate">
+            <GlyphGate card={card} session={session} onBoard={() => updateCurrent({ lesson_seen: true })} />
+          </div>
+        )}
+        {card && !loading && !glyphing && (
           <>
             <HintBar
               available={availableHints}

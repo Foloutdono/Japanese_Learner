@@ -134,7 +134,7 @@ function Pattern({ point }) {
   )
 }
 
-function Track({ at, total }) {
+export function Track({ at, total }) {
   const { t } = useLang()
   const pos = n => (total > 1 ? (n / (total - 1)) * 100 : 0)
   return (
@@ -159,7 +159,7 @@ function Track({ at, total }) {
   )
 }
 
-function Mark({ kind }) {
+export function Mark({ kind }) {
   return (
     <span className={`tour-said__mark tour-said__mark--${kind}`} aria-hidden="true">
       {kind === 'ok'
@@ -170,7 +170,7 @@ function Mark({ kind }) {
 }
 
 /** What the tour says back: a verdict over its line. */
-function Said({ kind, head, children }) {
+export function Said({ kind, head, children }) {
   return (
     <div className={`tour-said tour-said--${kind}`} role="status">
       <Mark kind={kind === 'no' ? 'no' : 'ok'} />
