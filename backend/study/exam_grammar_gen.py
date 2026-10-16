@@ -65,9 +65,14 @@ def _pattern_core(pattern: str) -> str:
     # Known-weak on 2-part patterns like "から〜まで" (reduces to just
     # "まで") -- accepted, documented limitation rather than a deeper
     # parse for a handful of entries.
+    #
+    # A label in full-width parentheses goes too ("〜も（強調）" -> "も",
+    # "〜な（禁止）" -> "な"): kept, the core was text no sentence holds,
+    # and those points could never be asked in 文の文法2 (found by the
+    # plan 221 seed papers' writers).
     if "〜" in pattern:
         pattern = pattern.rsplit("〜", 1)[1]
-    return pattern.split("／")[0].split("(")[0].strip()
+    return re.split(r"[／(（]", pattern)[0].strip()
 
 
 # ── 文の文法1: grammar-fill ──────────────────────────────────
