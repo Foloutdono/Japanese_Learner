@@ -1479,6 +1479,13 @@ class SRSEngine:
         studied = self._studied_days(user_id)
         return max(studied) if studied else None
 
+    def first_studied_day(self, user_id: str):
+        """The first day this learner showed up, or None for one who never
+        has: the ration opens no new rule before a day of study is behind
+        them (plan 222, daily_queue.grammar_allowance)."""
+        studied = self._studied_days(user_id)
+        return min(studied) if studied else None
+
     def get_streak(self, user_id: str) -> dict[str, int]:
         """Current and longest consecutive-day streak of having at least
         one review, a day a rest ticket bridged keeping it unbroken
@@ -2340,15 +2347,23 @@ class SRSEngine:
                 rows = cur.fetchall()
         return [{"days": int(days), "count": int(count)} for days, count in rows]
 
-    def get_new_items_today(self, user_id: str) -> int:
+    def get_new_items_today(self, user_id: str, source: str | None = None) -> int:
         """
         Distinct ITEMS (card ids, not card×mode pairs) whose first-ever
         review happened today — the number the onboarding pace
         (user_profiles.daily_new_target, see core/pace.py) is spent
         against. Day boundary is UTC, matching get_reviews_today / get_streak /
         the stats screen — "today" means one thing app-wide.
+
+        `source` counts one line's items alone, by the raw id's first
+        segment (`grammar` for grammar_N5_は): the rules the day has
+        opened, which the ration holds to daily_queue.GRAMMAR_PER_DAY
+        (plan 222).
         """
         pattern = self._user_prefix_pattern(user_id)
+        if source:
+            safe = source.replace("\\", "\\\\").replace("%", r"\%").replace("_", r"\_")
+            pattern = f"{pattern[:-1]}{safe}\\_%"
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 # Servable modes only: this is the deck queue's budget, not

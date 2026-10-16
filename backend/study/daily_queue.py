@@ -300,8 +300,85 @@ def parse_exclude(exclude: str) -> set:
 FIRST_KANA_SET = "hiragana_basic"
 KANA_EVERY = 3
 
+# 文法の日割り — the rules a day opens (plan 222). A rule never met opens
+# on its tour (components/study/GrammarTour.jsx, plan 187): minutes of
+# sentences, twists, a scene and a quiz where a new word takes seconds.
+# The ration once dealt the basics' three first rules on a learner's
+# first run, the first of them before anything else, and the learners
+# who left on their third card left at the second lesson. So the ration
+# opens at most GRAMMAR_PER_DAY rules a day, none until the learner has
+# a day of study behind them (the rest of the app is met first, and the
+# rules wait in the grammar line for anyone who goes looking), and its
+# rules come after the other new cards, so no run opens on a lesson.
+# The cap is the day's ration's, the queue that is dealt to the learner:
+# a grammar run or a basics unit boarded on purpose is not held to it.
+GRAMMAR = "grammar"
+GRAMMAR_PER_DAY = 2
+# The other cards a run deals before its first new rule, and between two
+# (space_rules): a lesson, a few quick cards, the next lesson.
+RULE_GAP = 3
 
-def ration(kana_lanes, line_lanes, budget: int, course=None) -> "OrderedDict[tuple, list[str]]":
+
+def space_rules(order: list[tuple], new_rules: set) -> list[tuple]:
+    """A batch's (lane key, raw id) order with its never-met rules
+    (`new_rules`, raw ids) dealt one after every RULE_GAP other cards,
+    the rest in their order; rules left over when the others run out
+    close the batch. The same cards, in another order: the gate's count
+    and the batch's membership are untouched. A rule that is due, a
+    review, is not a lesson and keeps its place."""
+    rules = [item for item in order if _is_rule(item[0]) and item[1] in new_rules]
+    if not rules:
+        return order
+    others = [item for item in order if not (_is_rule(item[0]) and item[1] in new_rules)]
+    out: list[tuple] = []
+    for n, item in enumerate(others, start=1):
+        out.append(item)
+        if rules and n % RULE_GAP == 0:
+            out.append(rules.pop(0))
+    return out + rules
+
+
+def grammar_allowance(studied_before: bool, opened_today: int) -> int:
+    """How many never-met rules the ration may still open on a day:
+    none on the learner's first day of study (`studied_before` false),
+    else GRAMMAR_PER_DAY less the rules already met that day."""
+    if not studied_before:
+        return 0
+    return max(0, GRAMMAR_PER_DAY - opened_today)
+
+
+def _is_rule(key: tuple) -> bool:
+    return key[0] == SECTION and key[1] == GRAMMAR
+
+
+def _cap_rules(line_lanes, allowance: int | None) -> "OrderedDict[tuple, list[str]]":
+    """The line lanes with at most `allowance` rules among them, the
+    first ones in each grammar lane's order; a lane left empty drops."""
+    if allowance is None:
+        return line_lanes
+    left = max(0, allowance)
+    out: "OrderedDict[tuple, list[str]]" = OrderedDict()
+    for key, ids in line_lanes.items():
+        if _is_rule(key):
+            ids = ids[:left]
+            left -= len(ids)
+        if ids:
+            out[key] = ids
+    return out
+
+
+def _rules_last(lanes_out) -> "OrderedDict[tuple, list[str]]":
+    """The ration's lanes with the grammar lanes moved after the others,
+    so the round-robin (interleave) never deals a new rule first while
+    anything else is new today."""
+    return OrderedDict(
+        [(key, ids) for key, ids in lanes_out.items() if not _is_rule(key)]
+        + [(key, ids) for key, ids in lanes_out.items() if _is_rule(key)]
+    )
+
+
+def ration(kana_lanes, line_lanes, budget: int, course=None,
+           grammar: int | None = None) -> "OrderedDict[tuple, list[str]]":
     """
     kana lane -> new ids (set order), line lane -> new ids -> the lanes
     of new cards the run may introduce today, at most `budget` cards.
@@ -313,9 +390,14 @@ def ration(kana_lanes, line_lanes, budget: int, course=None) -> "OrderedDict[tup
     `line_lanes` must then hold none of them: the basic hiragana first,
     then the course with the other kana one in KANA_EVERY, then the
     lines in turn once both run dry.
+
+    `grammar` is how many never-met rules may be among them
+    (grammar_allowance; None for no cap). A rule past it is not dealt
+    and its place goes to the next card; the rules dealt come in the
+    lanes after every other (plan 222).
     """
     if course is not None:
-        return _ration_course(kana_lanes, line_lanes, budget, course)
+        return _rules_last(_ration_course(kana_lanes, line_lanes, budget, course, grammar))
     out: "OrderedDict[tuple, list[str]]" = OrderedDict()
     left = max(0, budget)
     for key, ids in kana_lanes.items():
@@ -325,13 +407,15 @@ def ration(kana_lanes, line_lanes, budget: int, course=None) -> "OrderedDict[tup
         if take:
             out[key] = take
             left -= len(take)
+    line_lanes = _cap_rules(line_lanes, grammar)
     if left > 0 and line_lanes:
         for key, raw_id in interleave(line_lanes, left):
             out.setdefault(key, []).append(raw_id)
-    return out
+    return _rules_last(out)
 
 
-def _ration_course(kana_lanes, line_lanes, budget: int, course) -> "OrderedDict[tuple, list[str]]":
+def _ration_course(kana_lanes, line_lanes, budget: int, course,
+                   grammar: int | None = None) -> "OrderedDict[tuple, list[str]]":
     out: "OrderedDict[tuple, list[str]]" = OrderedDict()
     left = max(0, budget)
     for key, ids in kana_lanes.items():
@@ -343,7 +427,16 @@ def _ration_course(kana_lanes, line_lanes, budget: int, course) -> "OrderedDict[
     if left <= 0:
         return out
     kana = [(key, raw_id) for key, ids in kana_lanes.items() if key[2] != FIRST_KANA_SET for raw_id in ids]
-    queue = list(course)
+    # The course's rules past the day's allowance wait for a later day,
+    # in their place; the unit's words and kanji go on being dealt.
+    rules = None if grammar is None else max(0, grammar)
+    queue = []
+    for key, raw_id in course:
+        if rules is not None and _is_rule(key):
+            if rules <= 0:
+                continue
+            rules -= 1
+        queue.append((key, raw_id))
     dealt = 0
     while left > 0 and (queue or kana):
         dealt += 1
@@ -354,6 +447,9 @@ def _ration_course(kana_lanes, line_lanes, budget: int, course) -> "OrderedDict[
         out.setdefault(key, []).append(raw_id)
         left -= 1
     if left > 0 and line_lanes:
+        # What the course left of the allowance, for the line's own rules.
+        spent = sum(len(ids) for key, ids in out.items() if _is_rule(key))
+        line_lanes = _cap_rules(line_lanes, None if grammar is None else grammar - spent)
         for key, raw_id in interleave(line_lanes, left):
             out.setdefault(key, []).append(raw_id)
     return out
