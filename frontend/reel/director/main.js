@@ -180,7 +180,15 @@ async function boot() {
       if (route !== ctx.appRoute) {
         ctx.appRoute = route
         stage.navigate(route)
+      } else if (ctx.enteredBeat != null && ctx.enteredBeat !== beat.index) {
+        // The same place for another beat (two runs of one line): the
+        // screen is left and come back to, so it starts afresh.
+        stage.navigate('/learn')
+        await clock.nextFrame()
+        await clock.nextFrame()
+        stage.navigate(route)
       }
+      ctx.enteredBeat = beat.index
       await stage.waitFor(scene.ready(beat, ctx), { timeout: 12 })
       return (await scene.before?.(beat, ctx, opts)) ?? null
     },

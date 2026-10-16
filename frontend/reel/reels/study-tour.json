@@ -6,7 +6,7 @@
     { "app": "today", "words": ["駅", "電車", "切符:きっぷ"], "clear": true, "caption": "5 minutes on the train every morning 🚃" },
     { "app": "kana", "kana": ["か", "き", "く"], "caption": "every kana, *read aloud*" },
     { "app": "kanji", "kanji": ["駅"], "caption": "kanji with their *stroke order*" },
-    { "app": "grammar", "caption": "grammar you *build*, not memorise" },
+    { "app": "grammar", "point": "grammar_N5_〜てください", "caption": "grammar you *build*, not memorise" },
     { "end": true }
   ]
 }

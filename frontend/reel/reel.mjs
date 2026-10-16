@@ -149,6 +149,13 @@ async function main() {
   mkdirSync(cacheDir, { recursive: true })
 
   const bundle = fixtures(requestOf(script), cacheDir)
+  // A grammar point the catalogue does not hold would film another one.
+  for (const [i, beat] of script.beats.entries()) {
+    if (beat.point && (beat.feature === 'grammar' || beat.feature === 'composition') && !bundle.grammar?.[beat.point]) {
+      console.error(`✗ ${file}: beat ${i + 1}: no grammar point "${beat.point}" (an id is grammar_<level>_<pattern>, e.g. grammar_N5_〜てください)`)
+      process.exit(2)
+    }
+  }
 
   // The script's own media, beside it; served from the cache as copies,
   // and a video as its frames and its sound.

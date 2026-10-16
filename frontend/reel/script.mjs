@@ -208,7 +208,11 @@ export function requestOf(script) {
     }
     req.words.push(...(beat.words ?? []))
     req.kanji.push(...(beat.kanji ?? []))
-    if (beat.point) req.grammar.push(beat.point)
+    // A point a grammar or composition beat names (an analyzer's `point`
+    // is the pattern it opens, not an id).
+    if (beat.point && (beat.feature === 'grammar' || beat.feature === 'composition') && !req.grammar.includes(beat.point)) {
+      req.grammar.push(beat.point)
+    }
     if (beat.feature === 'comprehension') (req.comprehension ??= []).push(beat.level ?? script.level)
     if (beat.feature === 'dictation' && beat.text) (req.voice ??= []).push(beat.text.trim())
   }

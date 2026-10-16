@@ -71,11 +71,19 @@ export function kanjiCard(entry, { mode = 'kanji.flashcard.f2b', last = false } 
   }
 }
 
-/** The ladder's own cards (src/testing/grammarLadder.json): 〜てください. */
-export function grammarCards() {
-  const choose = { ...LADDER.choose, lesson_seen: true, tutorial: false, lane: lane('grammar', 'N5', 'grammar.ladder') }
-  const build = { ...LADDER.build, card_id: 'grammar_N5_〜てください#build', lesson_seen: true, tutorial: false, lane: lane('grammar', 'N5', 'grammar.ladder') }
-  return [choose, build]
+/**
+ * The beat's point on its ladder: Choisir, then Construire. The cards the
+ * backend's own builder made for the point (the bundle's `ladder`), or,
+ * for a beat that names none, the app's test fixture (〜てください,
+ * src/testing/grammarLadder.json). The two are one point in one mode,
+ * so Construire's id is told apart, or the run would take it for a
+ * card it already holds.
+ */
+export function grammarCards(bundle = {}, b = {}) {
+  const ladder = bundle.grammar?.[b.point]?.ladder
+  const [choose, build, level] = ladder?.choose ? [ladder.choose, ladder.build, ladder.level] : [LADDER.choose, LADDER.build, 'N5']
+  const dealt = c => ({ ...c, lesson_seen: true, tutorial: false, lane: lane('grammar', level, 'grammar.ladder') })
+  return [dealt(choose), ...(build ? [{ ...dealt(build), card_id: `${build.card_id}#build` }] : [])]
 }
 
 /** The cards a beat runs through, in its order. */
@@ -131,7 +139,7 @@ export function installStudyFixtures(part, { beat, beatsOf }) {
   // ── 本日 — the day's run, and the day cleared ──
   route('GET', '/api/today/cards', ({ query }) => {
     const b = beat()
-    const cards = b.feature === 'grammar' ? grammarCards() : cardsOf(b, bundle, 'today')
+    const cards = b.feature === 'grammar' ? grammarCards(bundle, b) : cardsOf(b, bundle, 'today')
     return { cards: batch(cards, query, reviewed()), beyond: 0 }
   })
   const paid = (xp, extra = {}) => { award(part.profile, xp); return { xp_earned: xp, credits: { balance: 41, unlimited: false }, ...extra } }
@@ -170,11 +178,15 @@ export function installStudyFixtures(part, { beat, beatsOf }) {
   }
 
   // ── 文法 — the ladder ──
-  route('GET', '/api/grammar/cards', ({ query }) => ({ cards: batch(grammarCards(), query, reviewed()), pace: null }))
+  route('GET', '/api/grammar/cards', ({ query }) => ({ cards: batch(grammarCards(bundle, beat()), query, reviewed()), pace: null }))
   route('GET', '/api/grammar/level-stats', () => ({ total: 93, new: 61, learning: 22, mastered: 10, due_now: 3 }))
   route('POST', '/api/grammar/review', ({ body }) => { review(body); return paid(8) })
   route('POST', '/api/grammar/tour', () => ({ ok: true }))
-  route('POST', '/api/grammar/build/check', () => ({ body: LADDER.checks.right, delay: 420 }))
+  // Construire's verdict: the backend's own for the right answer (what
+  // the film types), as the bundle asked it.
+  route('POST', '/api/grammar/build/check', ({ body }) => ({
+    body: bundle.grammar?.[body?.raw_id]?.ladder?.right ?? LADDER.checks.right, delay: 420,
+  }))
   route('POST', '/api/composition/check', () => ({ found: true, japanese: null }))
   route('GET', '/api/grammar/point', ({ query }) => bundle.grammar?.[query.get('id')] ?? { status: 404, body: { detail: 'reel: no lesson' } })
 

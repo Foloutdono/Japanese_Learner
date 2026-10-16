@@ -159,7 +159,7 @@ shows), `level` (instead of the script's), and seconds for `think`,
 | `kana` | a run of kana | `kana`: `["か", "き", "く"]`; `ratings` |
 | `vocab` | a run of words | `words`: `["駅:えき", "電車:でんしゃ"]` (spelling:reading); `ratings` |
 | `kanji` | a run of kanji, the first one's strokes drawn | `kanji`: `["駅"]`; `strokes: false`; `ratings` |
-| `grammar` | the ladder on 〜てください (N5): Choisir, then Construire typed | `answer` (the ending chosen), `typed` (what Construire is given), `build: false` (Choisir alone) |
+| `grammar` | a point on its ladder: Choisir (its sentence, the endings that look alike), then Construire, each hole typed; the cards are the backend's own for the point | `point` (`grammar_N5_まだ〜ていません`: `grammar_<level>_<pattern>`, as `content/grammar/` names it; 〜てください when left out); `answer`, `typed` (what is chosen and typed, the right ones by default); `build: false` (Choisir alone) |
 | `exam` | a mock JLPT paper, answered and scored | `picks`: `[2, 1, 2, 2]` |
 | `dictionary` | a search typed in kana and converted, the entry, its strokes | `search`, `reading`, `category` (`kanji`, `vocab`, `grammar`, `hiragana`, `katakana`) |
 | `decks` | the library, a deck opened and followed | `pick` (which deck) |

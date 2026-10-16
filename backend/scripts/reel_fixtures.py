@@ -203,6 +203,76 @@ def voice(texts: list[str], out_dir: str) -> dict:
     return out
 
 
+def ladder(raw_id: str, lang: str) -> dict | None:
+    """A grammar point on its ladder, as /api/grammar/cards deals it to a
+    learner part-way up: a Choisir card (step 2 of 3) and a Construire
+    card (step 2 of 4), built by the route's own builder at those steps,
+    each with the forecast of every rating (srs/ladder.py), and
+    Construire's verdict for the right answer (grammar_ladder.check_build),
+    whose gaps the film types. The same cards every time: the builder's
+    choice of sentence is seeded by the point."""
+    import copy
+    import random
+    from datetime import datetime, timezone
+
+    import routes.grammar as grammar_route
+    from srs import ladder as steps
+    from srs.models import CardState
+    from srs.srs import SRSEngine
+    from study import grammar_ladder
+    from study.modes import MODES
+
+    found = entry_by_id(raw_id)
+    if found is None:
+        return None
+    level, entry = found
+    mode = MODES[steps.LADDER_MODE]
+    now = datetime.now(timezone.utc)
+    random.seed(f"reel:{raw_id}")
+
+    def at(step):
+        state = CardState(card_id=entry["pattern"], mode=mode.key)
+        state.total_reviews = step + 1
+        return steps._place(state, step, now)
+
+    def forecast(state):
+        out = {}
+        for quality in range(6):
+            after = steps.review(copy.deepcopy(state), quality, now)
+            out[str(quality)] = {
+                "xp_earned": 8 if quality >= steps.PASS_QUALITY else 2, "leveled_up": False, "new_level": None,
+                "stage_up": None, "stage_down": None,
+                "due_in": max(0, int((after.next_review - now).total_seconds())),
+                "progress": SRSEngine._progress(after.total_reviews, after.interval_days, after.is_learning, after.learning_step),
+                "step": steps.position(after), "passed": quality >= steps.PASS_QUALITY,
+            }
+        return out
+
+    def card(step):
+        state = at(step)
+        built = grammar_route._build_ladder_card(entry, level, grammar_route.GRAMMAR_BY_LEVEL[level], mode, lang,
+                                                 "learning", None, state)
+        if built is not None:
+            built["review_preview"] = forecast(state)
+            built["progress"] = SRSEngine._progress(state.total_reviews, state.interval_days,
+                                                    state.is_learning, state.learning_step)
+        return built
+
+    out = {"level": level, "choose": card(1), "build": card(4)}
+    build = out["build"]
+    if not build or build.get("exercise") != "grammar.build":
+        out["build"] = None
+        return out
+    piece = build["build"]
+    holes = sum(1 for p in piece["pieces"] if "gap" in p)
+    # Asked with nothing in the holes, the verdict says what goes in them.
+    asked = grammar_ladder.check_build(level, entry["pattern"], piece["key"], ["？"] * holes, lang) or {}
+    answers = [g["answer"] for g in asked.get("gaps", [])]
+    out["typed"] = [g.get("reading") or g["answer"] for g in asked.get("gaps", [])]
+    out["right"] = grammar_ladder.check_build(level, entry["pattern"], piece["key"], answers, lang) if answers else None
+    return out
+
+
 def deck_sizes() -> dict:
     """Every deck /api/stats reports on, with what it holds: its cards
     (`items`, what the profile's ledger and the Learn map count) and,
@@ -283,6 +353,7 @@ def bundle(request: dict, out_dir: str | None = None) -> dict:
             out["grammar"][raw_id] = {
                 "level": level, "pattern": point["pattern"], "structure": point.get("structure", ""),
                 "meaning": gloss(point, lang), **lesson_payload(level, point, lang),
+                "ladder": ladder(raw_id, lang),
             }
     return out
 

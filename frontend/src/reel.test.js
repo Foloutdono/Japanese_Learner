@@ -132,6 +132,15 @@ describe('the reel', () => {
       expect(req.voice).toEqual(['駅で友だちに会います。'])
     })
 
+    it('is the grammar point a grammar or composition beat names, and not an analyzer\'s pattern', () => {
+      const asked = requestOf(normalize({ beats: [
+        { app: 'grammar', point: 'grammar_N5_は' },
+        { app: 'composition', point: 'grammar_N5_は', text: 'わたしは学生です。' },
+        { app: 'analyzer', text: '工事中につき', point: '〜につき' },
+      ] }))
+      expect(asked.grammar).toEqual(['grammar_N5_は'])
+    })
+
     it('is a hook\'s own text too (its words are where its lines break)', () => {
       const asked = requestOf(normalize(load('sign-photo.json'))).sentences.map(s => s.text)
       expect(asked).toContain(load('sign-photo.json').beats[0].text)

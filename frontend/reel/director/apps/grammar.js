@@ -1,11 +1,12 @@
 // ── 文法 — the grammar ladder, played (plan 210) ──────────────────────
-// The point climbs its ladder: Choisir, a sentence with a gap and four
+// The point climbs its ladder: Choisir, a sentence with a gap and the
 // endings that all look plausible (one pressed, the card turns: right,
 // and why the rivals are not), then Construire, the gap typed in
-// Japanese and checked. The cards are the app's own (〜てください, the
-// test fixtures of the ladder, src/testing/grammarLadder.json).
+// Japanese and checked. The cards are the backend's own for the point
+// the beat names (the bundle's `ladder`); without one, the app's test
+// fixture, 〜てください.
 //
-//   { "app": "grammar", "caption": "…", "build": true }
+//   { "app": "grammar", "point": "grammar_N5_は", "caption": "…" }
 
 import { wait } from '../clock'
 
@@ -20,8 +21,8 @@ async function rate(ctx, q = 4) {
 }
 
 export const grammar = {
-  route(beat) {
-    return `/learn/grammar/${beat.level ?? 'N5'}/grammar.ladder`
+  route(beat, ctx) {
+    return `/learn/grammar/${beat.level ?? ctx?.bundle?.grammar?.[beat.point]?.ladder?.level ?? 'N5'}/grammar.ladder`
   },
   ready() { return '.gl-tile, .gl-card' },
 
@@ -34,8 +35,12 @@ export const grammar = {
     await ctx.look(['.gl-card', '.gl-dock'], { duration: 0.6, max: 1.35 })
     await wait(beat.think ?? 1.2)
     const card = ctx.stage.win.document.querySelector('.gl-card')
-    const answer = beat.answer ?? 'てください'
-    const tile = stage.all('.gl-tile').find(el => el.querySelector('.gl-tile__t')?.textContent.trim() === answer.replace(/^〜/, ''))
+    const ladder = ctx.bundle.grammar?.[beat.point]?.ladder
+    // The right ending (or the script's): a tile is its index in the choices.
+    const contrast = ladder?.choose?.contrast
+    const answer = beat.answer ?? contrast?.answer ?? 'てください'
+    const tile = (contrast && stage.find(`.gl-tile[data-choice="${contrast.choices.indexOf(answer)}"]`))
+      ?? stage.all('.gl-tile').find(el => el.querySelector('.gl-tile__t')?.textContent.trim() === answer.replace(/^〜/, ''))
       ?? stage.find('.gl-tile[data-choice="1"]')
     if (tile) await ctx.tap(tile)
     finger.rest()
@@ -46,14 +51,19 @@ export const grammar = {
     await rate(ctx, beat.rate ?? 4)
     if (card && beat.build === false) return
 
-    // Construire: the ending, typed.
+    // Construire: each hole typed (a point in two pieces has two).
     const field = await stage.waitFor('.gl-entry input, input[data-gap]', { timeout: 6 }).catch(() => null)
     if (!field) return
     await ctx.look(['.prompt-card', '.gl-entry'], { duration: 0.5, max: 1.3 })
     await wait(0.6)
-    await ctx.tap(field)
-    await keyboard.show('ja')
-    await ctx.typeJa(beat.typed ?? 'てください')
+    const typed = [beat.typed ?? ladder?.typed ?? 'てください'].flat()
+    for (const [n, text] of typed.entries()) {
+      const hole = stage.find(`input[data-gap="${n}"]`) ?? (n === 0 ? field : null)
+      if (!hole) break
+      await ctx.tap(hole)
+      if (n === 0) await keyboard.show('ja')
+      await ctx.typeJa(text)
+    }
     await wait(0.3)
     await keyboard.hide()
     await ctx.tap('.gl-entry .btn-primary, form.stage__foot .btn-primary')
