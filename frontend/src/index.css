@@ -22743,15 +22743,17 @@ form.stage__foot > .btn-primary {
 .records--entry .record__value { font-size: var(--fs-lead); }
 .records--entry .record__value--word { font-size: var(--fs-body); }
 /* The record measures itself, not the screen: a dock, a phone, a side
-   column. Four across while every label holds its line -- INTERVALLE is
-   the longest, and it is the one that runs out first -- the cells a
-   rung tighter under a dock's width, and two by two under a large
-   phone's (an iPhone SE, a 360px Android, the kana charts' column). */
+   column. Four across from a desk dock's width (--desk-entry-w), the
+   cells a rung tighter until there is room to spare; two by two under
+   it, on every phone and in the kana charts' column. A label is one
+   caption word that cannot break -- INTERVALLE is the longest -- and
+   four across a phone left it a few pixels in the app's face and none
+   in a fallback one, where it was cut. */
 .dict-record { container-type: inline-size; }
-@container (max-width: 419px) {
+@container (max-width: 479px) {
   .records--entry .record { padding-inline: var(--sp-3); }
 }
-@container (max-width: 379px) {
+@container (max-width: 429px) {
   .records--entry { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 /* ── 期限 — a card that is due, and the one thing to do about it ──

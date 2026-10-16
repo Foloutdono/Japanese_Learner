@@ -485,9 +485,10 @@ the dock, a lookup, the grammar page, a run's band: one slim row of the
 profile's lattice flush with the panel, its figures a rung down from the
 profile's (the lead, not the heading: about the reader, not the word, they
 were the largest type on the entry after the headword). It measures itself,
-not the screen: four across while every label holds its line, two by two
-under that (a small phone, the kana charts' column). A card nobody has
-reviewed prints none.
+not the screen: four across from a desk dock's width, two by two under it
+(every phone, the kana charts' column) — a label is a caption word that
+cannot break, and four across a phone left INTERVALLE no room in a fallback
+face. A card nobody has reviewed prints none.
 
 **A tag is a word** (plan 235). A sense says what it means, then what it is,
 then how it is used: the gloss, then its grammatical tags as plain words

@@ -596,7 +596,9 @@ describe('the body — blocks that name themselves', () => {
   })
 
   it('prints the reader\'s record in one row under the plate, the due state in the schedule\'s own cell, and nothing for a card never reviewed', async () => {
-    const { root, screen } = await renderEntry(KANJI)
+    // At a desk dock's width; a phone sets the same cells two by two
+    // (the shells' block, below).
+    const { root, screen } = await renderEntry(KANJI, NAV(), { width: 460 })
     const record = root.querySelector('.dict-record')
     // Under the stripe, before the body, in every layout (plan 235): it
     // is about the reader, and it was the entry's foot.
@@ -1334,18 +1336,19 @@ describe('the shells — one panel, a column, a modal, the whole screen', () => 
   })
 
   it('keeps the lattices whole at phone width', async () => {
-    // The record measures itself (plan 235): one row of four on a large
-    // phone, two by two on a small one, every label whole either way --
-    // in French, whose INTERVALLE is the longest.
+    // The record measures itself (plan 235): two by two on any phone,
+    // one row of four from a desk dock's width, every label whole either
+    // way -- in French, whose INTERVALLE is the longest, and in whatever
+    // face the runner falls back to.
     localStorage.setItem('lang', 'fr')
-    for (const [width, rows] of [[412, 1], [360, 2]]) {
-      await page.viewport(width, 844)
-      const { screen, root } = await renderEntry(KANJI, NAV(), { width: null })
+    for (const [viewport, width, rows] of [[430, null, 2], [412, null, 2], [360, null, 2], [1300, 460, 1]]) {
+      await page.viewport(viewport, 844)
+      const { screen, root } = await renderEntry(KANJI, NAV(), { width })
       const boxes = [...root.querySelectorAll('.dict-record .record')].map(el => el.getBoundingClientRect())
-      expect(new Set(boxes.map(box => Math.round(box.top))).size, `${width}px`).toBe(rows)
+      expect(new Set(boxes.map(box => Math.round(box.top))).size, `${width ?? viewport}px`).toBe(rows)
       for (const box of boxes) expect(box.right).toBeLessThanOrEqual(vw() + 0.5)
       for (const label of root.querySelectorAll('.dict-record .record__label')) {
-        expect(label.scrollWidth, `${label.textContent} at ${width}px`).toBeLessThanOrEqual(label.clientWidth)
+        expect(label.scrollWidth, `${label.textContent} at ${width ?? viewport}px`).toBeLessThanOrEqual(label.clientWidth)
       }
       await screen.unmount()
     }
