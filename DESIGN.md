@@ -2033,7 +2033,13 @@ line here says otherwise.
   standing the explanation in its description's place with a swap on the
   column's edge. The desk's rail steps aside for this one screen, so the
   three columns have the window at the drawing's shares (410 | 830 | 541);
-  under the desk the same result is one column, drawn by the owner too.
+  under the desk the same result is a stage (plan 219, the owner's pick D
+  of four drawn): no HUD and no tab bar while it is up, the head about
+  the whole Passage (the way back, where it is, the song's deck), the
+  video edge to edge, the line at display size in the middle, and a
+  thumb's dock at the foot about the line alone (grammar, words, Explain,
+  keep) over the transport. A screen under the shell takes the stage
+  through `stores/stage.js`; the desk's rail never leaves.
   A typed or photographed Passage has no video, and its sentence takes the
   video's place (plan 161, the owner's picks B and B′): the sumi object to
   the middle column's foot, the sentence at `--fs-display-fluid`, its

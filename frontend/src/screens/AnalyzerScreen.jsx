@@ -13,13 +13,15 @@ import { FocusCard } from '../components/analysis/FocusCard'
 import { MineButton } from '../components/analysis/MineButton'
 import { SongDeckSheet } from '../components/analysis/SongDeckSheet'
 import { SubtitleLine } from '../components/analysis/SubtitleLine'
-import { PlayerBar } from '../components/analysis/PlayerBar'
+import { PlayerBar, PlayerTrack } from '../components/analysis/PlayerBar'
 import { createPlayhead } from '../components/analysis/playhead'
 import { passageTiming } from '../components/analysis/wordTimes'
 import { ExplainPanel, ExplainSheet } from '../components/analysis/ExplainPanel'
 import { GrammarPoints } from '../components/analysis/GrammarPoints'
 import { coversToken, numberedPointsOf } from '../components/analysis/grammarSpans'
 import { useLight } from '../components/analysis/useLight'
+import { wordRowsOf } from '../components/analysis/rows'
+import { useStageClaim } from '../stores/stage'
 import { Dots } from '../components/ui/Loading'
 import { DictionaryLookupSheet, DictionaryLookupBody } from '../components/dictionary/DictionaryDetail'
 import { grammarLookup, lookupKey, tokenLookup } from '../components/analysis/lookup'
@@ -285,6 +287,10 @@ export default function AnalyzerScreen({ session }) {
   // proposes -- a video's title, read off the player as it opens.
   const [song, setSong] = useState(null)
   const closeSong = useCallback(() => setSong(null), [])
+  // The phone's dock opens the line's grammar or its words as a sheet
+  // (plan 219).
+  const [dock, setDock] = useState(null)
+  const closeDock = useCallback(() => setDock(null), [])
   // Every route into a new Passage starts the focus over: the first
   // word, its own entry, the card rather than an explanation.
   const clearFocus = useCallback(() => { setLookup(null); setSide('card'); setTokenIndex(0); setExplainOpen(false) }, [])
@@ -1514,14 +1520,18 @@ export default function AnalyzerScreen({ session }) {
     </div>
   )
 
-  // ── 手 — the result on a phone (plan 134) ─────────────────
-  // The owner's drawing for every width under the desk: the way back and
-  // keep; the video with a trimmed bar under it; the subtitles -- the
-  // next sentence over the current one, the previous one under it, both
-  // quieter and neither lit, each a tap away; the grammar points,
-  // numbered; Explain. A word tapped on the line opens its dictionary
-  // card, a point its lesson, both in the dictionary's sheet; Explain
-  // opens the explanation in a sheet of the same shape.
+  // ── 舞台 — the result on a phone (plan 219, the owner's pick D) ──
+  // Drawn like a run, under the shell's two bars taken away (stores/
+  // stage.js): at the head the way back, where the Passage is, and the
+  // door that makes it a deck -- what the head holds is about the whole
+  // video; the video edge to edge with its track along its foot; the
+  // line in the middle of the screen at display size, the sentence
+  // before over it and the one after under it, quieter, each a tap
+  // away, the translation once Explain has bought it; and at the foot
+  // the thumb's dock, what it holds about the line alone -- its grammar
+  // and its words (each a sheet), Explain, keep -- over the transport.
+  // A word tapped on the line opens its dictionary card, a point its
+  // lesson, both in the dictionary's sheet.
   const nextText = sentences[focusIndex + 1]?.text
   const prevText = sentences[focusIndex - 1]?.text
   function openTokenAt(i) {
@@ -1534,18 +1544,23 @@ export default function AnalyzerScreen({ session }) {
     playerRef.current?.pause()
     setLookup(target)
   }
+  function openDock(which) {
+    playerRef.current?.pause()
+    setDock(which)
+  }
   function openExplain() {
     playerRef.current?.pause()
     setExplainOpen(true)
     if (!hasExplanation && !explainingHere) analyzer.explain(focusIndex)
   }
-  const sideLine = (text, dir, go) => (text
+  const sideLine = (text, dir, go, where) => (text
     ? (
-      <button type="button" className="anl-m__line" onClick={go} aria-label={`${dir}: ${text}`} lang="ja">
+      <button type="button" className={`anl-m__line anl-m__line--${where}`} onClick={go} aria-label={`${dir}: ${text}`} lang="ja">
         {text}
       </button>
     )
-    : <span className="anl-m__line anl-m__line--none" aria-hidden="true" />)
+    : <span className={`anl-m__line anl-m__line--${where} anl-m__line--none`} aria-hidden="true" />)
+  const wordRows = readable ? wordRowsOf(focused) : []
   const mobileResult = focused && (
     <div
       ref={resultsRef}
@@ -1557,17 +1572,25 @@ export default function AnalyzerScreen({ session }) {
       <div className="anl-m__head">
         <Leave onClick={() => setIntakeOpen(true)}>{t.leaveAnalyzer}</Leave>
         <h1 className="sr-only" lang="ja">{sentences[0]?.text}</h1>
-        {songButton}
-        <button
-          type="button"
-          className={`anl-head__keep${isKept ? ' anl-head__keep--on' : ''}`}
-          aria-pressed={isKept}
-          aria-label={isKept ? t.unkeepSentence : t.keepSentence}
-          title={isKept ? t.unkeepSentence : t.keepSentence}
-          onClick={() => analyzer.keepSentence(focusIndex)}
-        >
-          {isKept ? <CheckIcon size={16} /> : <PlusIcon size={16} />}
-        </button>
+        <span className="anl-m__where" aria-hidden="true">
+          <span className="anl-m__track">
+            <span className="anl-m__fill" style={{ width: `${(100 * (focusIndex + 1)) / sentences.length}%` }} />
+          </span>
+          <span className="anl-m__count">{focusIndex + 1} / {sentences.length}</span>
+        </span>
+        {songPassage && (
+          <button
+            type="button"
+            className="anl-m__song"
+            aria-haspopup="dialog"
+            aria-label={t.songDeckOpen}
+            title={t.songDeckOpen}
+            onClick={openSong}
+          >
+            <SongIcon size={16} />
+            <span aria-hidden="true">{t.songDeckShort}</span>
+          </button>
+        )}
       </div>
 
       {playerVideoId && (
@@ -1584,31 +1607,12 @@ export default function AnalyzerScreen({ session }) {
               onDurationChange={setDuration}
             />
           </div>
-          <PlayerBar
-            compact
-            t={t}
-            playing={playing}
-            // Play takes the line back to the clock: the phone has no
-            // 追従 toggle, so a stop picked by hand lets go of it until
-            // the learner plays again.
-            onToggle={() => { if (!playing) setFollowPlayback(true); togglePassagePlayback() }}
-            onPrev={() => goToStop(focusIndex - 1)}
-            onNext={() => goToStop(focusIndex + 1)}
-            canPrev={focusIndex > 0}
-            canNext={focusIndex < sentences.length - 1}
-            onReplay={replaySentence}
-            canReplay={focused.cue_start != null}
-            loop={loop}
-            onLoop={() => setLoop(v => !v)}
-            playhead={playhead}
-            span={span}
-            onSeek={seekFromTrack}
-          />
+          <PlayerTrack playhead={playhead} span={span} onSeek={seekFromTrack} />
         </div>
       )}
 
       <section className="anl-m__subs" data-furigana={furigana} aria-label={t.stopNumber(focusIndex + 1, sentences.length)}>
-        {sideLine(nextText, t.nextSentence, () => goToStop(focusIndex + 1))}
+        {sideLine(prevText, t.prevSentence, () => goToStop(focusIndex - 1), 'prev')}
         {focused.foreign ? (
           <p className="anl-m__note">
             <span lang="ja">{focused.text}</span>
@@ -1628,23 +1632,82 @@ export default function AnalyzerScreen({ session }) {
             timing={timing}
           />
         )}
-        {sideLine(prevText, t.prevSentence, () => goToStop(focusIndex - 1))}
+        {focused.translation && <p className="anl-m__tr" lang={lang}>{focused.translation}</p>}
+        {sideLine(nextText, t.nextSentence, () => goToStop(focusIndex + 1), 'next')}
       </section>
 
-      {points.length > 0 && (
-        <section className="anl-m__points anl-points" aria-label={t.grammarSpotted}>
-          <GrammarPoints analysis={focused} t={t} lit={light.litKey} onLight={light.onLight} onOpen={openPoint} />
-        </section>
-      )}
+      <div className="anl-m__dock">
+        <div className="anl-m__tools">
+          {points.length > 0 && (
+            <button type="button" className="anl-m__tool" aria-haspopup="dialog" onClick={() => openDock('grammar')}>
+              <span className="anl-num" aria-hidden="true">{points.length}</span>
+              {t.dockGrammar}
+            </button>
+          )}
+          {wordRows.length > 0 && (
+            <button type="button" className="anl-m__tool" aria-haspopup="dialog" onClick={() => openDock('words')}>
+              <span className="anl-m__toolnum" aria-hidden="true">{wordRows.length}</span>
+              {t.dockWords}
+            </button>
+          )}
+          {readable && (
+            <button type="button" className="anl-m__tool anl-m__tool--explain anl-m__explain" aria-haspopup="dialog" onClick={openExplain}>
+              <OpenBookIcon size={18} />
+              {explainingHere && !hasExplanation ? <span>{t.explaining}</span> : t.dockExplain}
+            </button>
+          )}
+          <button
+            type="button"
+            className={`anl-m__tool anl-head__keep${isKept ? ' anl-head__keep--on' : ''}`}
+            aria-pressed={isKept}
+            aria-label={isKept ? t.unkeepSentence : t.keepSentence}
+            title={isKept ? t.unkeepSentence : t.keepSentence}
+            onClick={() => analyzer.keepSentence(focusIndex)}
+          >
+            {isKept ? <CheckIcon size={18} /> : <PlusIcon size={18} />}
+            <span aria-hidden="true">{isKept ? t.dockKept : t.dockKeep}</span>
+          </button>
+        </div>
+        <PlayerBar
+          stage
+          t={t}
+          playing={playing}
+          // Play takes the line back to the clock: the phone has no
+          // 追従 toggle, so a stop picked by hand lets go of it until
+          // the learner plays again. A typed Passage has no clock: its
+          // dock is the stops alone.
+          onToggle={() => { if (!playing) setFollowPlayback(true); togglePassagePlayback() }}
+          onPrev={() => goToStop(focusIndex - 1)}
+          onNext={() => goToStop(focusIndex + 1)}
+          canPrev={focusIndex > 0}
+          canNext={focusIndex < sentences.length - 1}
+          onReplay={replaySentence}
+          canReplay={Boolean(playerVideoId) && focused.cue_start != null}
+          loop={loop}
+          onLoop={() => setLoop(v => !v)}
+          video={Boolean(playerVideoId)}
+        />
+      </div>
 
-      {readable && (
-        <button type="button" className="anl-explainbtn anl-m__explain" onClick={openExplain}>
-          <OpenBookIcon size={14} />
-          {explainingHere && !hasExplanation ? <>{t.explaining}<Dots /></> : t.explainThisSentence}
-        </button>
-      )}
+      {/* The line's two lists, each a sheet over the stage; a row pressed
+          in either opens the dictionary's sheet in its place. */}
+      <Sheet open={dock === 'grammar'} onClose={closeDock} jp={t.grammarSpotted} className="anl-m__sheet">
+        <section className="anl-m__points anl-points" style={{ '--line-color': KAISEKI }}>
+          <GrammarPoints analysis={focused} t={t} lit={light.litKey} onLight={light.onLight}
+            onOpen={g => { closeDock(); openPoint(g) }} />
+        </section>
+      </Sheet>
+      <Sheet open={dock === 'words'} onClose={closeDock} jp={t.wordsInSentence} className="anl-m__sheet">
+        <section className="anl-m__words" style={{ '--line-color': KAISEKI }}>
+          <WordsList analysis={focused} current={null} t={t}
+            onSelect={row => { closeDock(); openTokenAt(stageTokens.indexOf(row.head)) }} />
+        </section>
+      </Sheet>
     </div>
   )
+
+  // The phone's result takes the stage: no HUD, no tab bar (plan 219).
+  useStageClaim(Boolean(showResult && focused && !wide))
 
   return (
     <main id="main-content" className="dictionary analyzer" style={{ '--line-color': KAISEKI }}>

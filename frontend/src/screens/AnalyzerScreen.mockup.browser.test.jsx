@@ -150,40 +150,43 @@ beforeEach(() => {
   apiFetch.mockResolvedValue({ ok: true, status: 200, json: async () => [] })
 })
 
-describe('the result on a phone (plan 134, the owner\'s drawing)', () => {
+describe('the result on a phone (plan 219, the owner\'s pick D)', () => {
   beforeEach(async () => { await page.viewport(414, 900) })
 
-  it('stands the head, the subtitles, the grammar and Explain, in that order, and nothing more', async () => {
+  it('stands the head, the subtitles and the dock, in that order, and nothing more', async () => {
     const screen = await renderScreen()
     await analyze(screen)
     const m = screen.container.querySelector('.anl-m')
+    // A typed Passage has no video; the grammar and the words are the
+    // dock's sheets, not built until opened.
     expect([...m.children].map(el => el.className.split(' ')[0]))
-      .toEqual(['anl-m__head', 'anl-m__subs', 'anl-m__points', 'anl-explainbtn'])
+      .toEqual(['anl-m__head', 'anl-m__subs', 'anl-m__dock'])
     // The stage it replaced is gone: no stepper, no dials, no card, no
     // table, no legend, no key map, no ✕.
     expect(screen.container.querySelector('.anl-stepper, .anl-dials, .token-card, .anl-toktable, .anl-legend, .anl-kbd, .anl-clear')).toBeNull()
   })
 
-  it('draws the next sentence over the current one and the previous under it, quieter and unlit', async () => {
+  it('draws the previous sentence over the current one and the next under it, quieter and unlit', async () => {
     const screen = await renderScreen()
     await analyze(screen)
-    const lines = () => [...screen.container.querySelectorAll('.anl-m__subs > .anl-m__line')]
-    // On the first sentence: the next one above, no previous one below.
-    expect(lines()[0].textContent).toBe('犬も好き。')
-    expect(lines()[1].classList.contains('anl-m__line--none')).toBe(true)
+    const prev = () => screen.container.querySelector('.anl-m__subs > .anl-m__line--prev')
+    const next = () => screen.container.querySelector('.anl-m__subs > .anl-m__line--next')
+    // On the first sentence: no previous one above, the next one below.
+    expect(prev().classList.contains('anl-m__line--none')).toBe(true)
+    expect(next().textContent).toBe('犬も好き。')
     // Smaller than the current sentence, in the quieter ink, and no word
     // lit or ruled on it.
     const current = screen.container.querySelector('.anl-m__subs .tok')
-    expect(parseFloat(getComputedStyle(lines()[0]).fontSize)).toBeLessThan(parseFloat(getComputedStyle(current).fontSize))
-    expect(getComputedStyle(lines()[0]).color).toBe(resolver()('var(--text-secondary)'))
-    expect(lines()[0].querySelector('.tok')).toBeNull()
+    expect(parseFloat(getComputedStyle(next()).fontSize)).toBeLessThan(parseFloat(getComputedStyle(current).fontSize))
+    expect(getComputedStyle(next()).color).toBe(resolver()('var(--text-secondary)'))
+    expect(next().querySelector('.tok')).toBeNull()
 
-    // A tap walks to it; the first sentence is now the one below.
-    lines()[0].click()
+    // A tap walks to it; the first sentence is now the one above.
+    next().click()
     await settle()
     expect(screen.container.querySelector('.anl-m__subs .tok__word').textContent).toBe('犬')
-    expect(lines()[0].classList.contains('anl-m__line--none')).toBe(true)
-    expect(lines()[1].textContent).toBe(SENTENCES[0].text)
+    expect(next().classList.contains('anl-m__line--none')).toBe(true)
+    expect(prev().textContent).toBe(SENTENCES[0].text)
   })
 
   it('rules every word with a record, 2px, in its state ink — and never re-inks the word', async () => {
@@ -232,7 +235,12 @@ describe('the result on a phone (plan 134, the owner\'s drawing)', () => {
   it('numbers each grammar point on its card and on its words, each card a door to its lesson', async () => {
     const screen = await renderScreen()
     await analyze(screen)
-    const card = screen.container.querySelector('.anl-m__points .bkd-point')
+    // The cards are the dock's Grammar sheet, its count on the tool.
+    const tool = screen.container.querySelector('.anl-m__tool .anl-num').closest('button')
+    expect(tool.querySelector('.anl-num').textContent).toBe('1')
+    tool.click()
+    await settle(100)
+    const card = document.querySelector('.anl-m__sheet .anl-m__points .bkd-point')
     expect(card.querySelector('.anl-num').textContent).toBe('1')
     expect(card.querySelector('.bkd-point__pattern').textContent).toBe('〜から')
     const frame = screen.container.querySelector('.anl-m__subs .anl-subs__pt')
@@ -276,7 +284,7 @@ describe('the route line (the working rail, and the widths it answers for)', () 
     expect(screen.container.querySelectorAll('.anl-keep').length).toBe(2)
   })
 
-  it('is not built at all below the split — the subtitles walk, the head keeps', async () => {
+  it('is not built at all below the split — the subtitles walk, the dock keeps', async () => {
     // The rail used to stack above the stage here as a ~170px window.
     // A long Passage is the case that made it wrong: eight stops of
     // scroller, a search field and a bulk pin standing between the
@@ -302,10 +310,10 @@ describe('the route line (the working rail, and the widths it answers for)', () 
 
     // What the rail was doing is done by two things that stay: the
     // subtitles' next line walks the eight stops (plan 134)...
-    expect(screen.container.querySelector('.anl-m__subs > .anl-m__line').textContent).toBe('文1です。')
-    // ...and 保存, the one act only the rail could perform, is on the
-    // head, at the size a thumb needs.
-    const keep = screen.container.querySelector('.anl-head__keep')
+    expect(screen.container.querySelector('.anl-m__subs > .anl-m__line--next').textContent).toBe('文1です。')
+    // ...and 保存, the one act only the rail could perform, is in the
+    // dock (plan 219), at the size a thumb needs.
+    const keep = screen.container.querySelector('.anl-m__dock .anl-head__keep')
     expect(keep).not.toBeNull()
     // Its laid-out height, not its box on screen: the result is still
     // sliding in (`arrive`, 0.28s) when this runs, and a box read

@@ -1089,6 +1089,12 @@ const phraseAnalyzer = {
   unkeepSentence:      'Stop keeping this sentence',
   // 歌 (plan 215) — a song's own deck, from the analyser's result.
   songDeckOpen:        'Make a deck of this song',
+  songDeckShort:       'Deck',
+  dockGrammar:         'Grammar',
+  dockWords:           'Words',
+  dockExplain:         'Explain',
+  dockKeep:            'Keep',
+  dockKept:            'Kept',
   songDeckTitle:       'Make it yours',
   songDeckName:        'Deck name',
   songDeckHolds:       'What the deck holds',

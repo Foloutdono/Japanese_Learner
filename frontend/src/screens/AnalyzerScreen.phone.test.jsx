@@ -59,6 +59,13 @@ vi.mock('../components/video/VideoPlayer', () => ({ VideoPlayer: () => <div /> }
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: AnalyzerScreen } = await import('./AnalyzerScreen')
+const { useStaged } = await import('../stores/stage')
+
+// What the Shell reads to leave its two bars out (plan 219): printed
+// beside the screen so a test can see the claim come and go.
+function StageProbe() {
+  return <span data-testid="staged" data-on={String(useStaged())} />
+}
 const { apiJson, apiFetch } = await import('../lib/api')
 
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
@@ -76,6 +83,7 @@ async function renderScreen() {
             <AnalyzerScreen session={{}} />
           </div>
         </div>
+        <StageProbe />
       </MemoryRouter>
     </LangProvider>
   )
@@ -153,16 +161,18 @@ describe('the analyser result on a phone', () => {
       expect(screen.container.querySelector(sel), `${sel} is still built`).toBeNull()
     }
 
-    // What replaces it: the subtitles' next line walks the stops (plan 134).
-    expect(screen.container.querySelector('.anl-m__subs > .anl-m__line').textContent)
+    // What replaces it: the subtitles' next line walks the stops (plan 134),
+    // under the sentence since plan 219.
+    expect(screen.container.querySelector('.anl-m__subs > .anl-m__line--next').textContent)
       .toBe('犬も好き')
   })
 
-  it('puts 保存 on the head as a real toggle at a thumb-sized target', async () => {
+  it('puts 保存 in the dock as a real toggle at a thumb-sized target', async () => {
     const screen = await renderScreen()
     await analyze(screen)
 
-    const keep = screen.container.querySelector('.anl-m__head .anl-head__keep')
+    // Plan 219: keep acts on the line, so it is one of the dock's tools.
+    const keep = screen.container.querySelector('.anl-m__dock .anl-head__keep')
     expect(keep).not.toBeNull()
     expect(keep.tagName).toBe('BUTTON')
     // A toggle, not a link that looks like one: the state is on the
@@ -172,9 +182,10 @@ describe('the analyser result on a phone', () => {
     // sentence is the accessible one -- the rail pin's arrangement.
     expect(keep.getAttribute('aria-label')).toBeTruthy()
     // The mark is drawn, not typed: a text "+" beside the head's
-    // stroked × is a 9px speck next to a 14px icon.
+    // stroked × is a 9px speck next to a 14px icon. The word under it
+    // is the tool's caption, hidden from the accessible name.
     expect(keep.querySelector('svg[aria-hidden="true"]')).not.toBeNull()
-    expect(keep.textContent).toBe('')
+    expect(keep.querySelector('span[aria-hidden="true"]').textContent).toBe('Garder')
     const box = keep.getBoundingClientRect()
     // Measured to within a hair of 44, not to 44 exactly. The keep is
     // the one thumb target here DECLARED at 44px square (index.css,
@@ -197,11 +208,11 @@ describe('the analyser result on a phone', () => {
     await analyze(screen)
 
     const keep = () => screen.container.querySelector('.anl-head__keep')
-    // The subtitles' two quieter lines: the next above, the previous
-    // below (plan 134). Walk to the second stop first: what gets kept is
+    // The subtitles' two quieter lines: the previous above, the next
+    // below (plan 219). Walk to the second stop first: what gets kept is
     // where you are, not where the Passage starts.
-    const next = () => screen.container.querySelectorAll('.anl-m__subs > .anl-m__line')[0]
-    const prev = () => screen.container.querySelectorAll('.anl-m__subs > .anl-m__line')[1]
+    const next = () => screen.container.querySelector('.anl-m__subs > .anl-m__line--next')
+    const prev = () => screen.container.querySelector('.anl-m__subs > .anl-m__line--prev')
     next().click()
     await settle(60)
 
@@ -239,19 +250,53 @@ describe('the analyser result on a phone', () => {
       .toBeLessThanOrEqual(window.innerWidth + 1)
   })
 
-  // ── The drawing on a phone (plan 134) ──
-  // The stage's growing card and its two dials are gone with it: the
-  // subtitles, the numbered grammar and Explain stand at the column's
-  // width, and nothing is wider than the handset.
-  it('gives the subtitles and Explain the page\'s width, and no colour legend', async () => {
+  // ── The drawing on a phone (plan 219, the owner's pick D) ──
+  // The subtitles stand at the column's width, the dock at the screen's
+  // edges, and nothing is wider than the handset.
+  it('gives the subtitles the page\'s width and the dock the screen\'s, and no colour legend', async () => {
     const screen = await renderScreen()
     await analyze(screen)
     const width = screen.container.querySelector('.anl-m').clientWidth
-    for (const sel of ['.anl-m__subs', '.anl-m__explain']) {
-      expect(screen.container.querySelector(sel).getBoundingClientRect().width, sel)
-        .toBeGreaterThan(width * 0.9)
-    }
+    expect(screen.container.querySelector('.anl-m__subs').getBoundingClientRect().width)
+      .toBeGreaterThan(width * 0.9)
+    expect(screen.container.querySelector('.anl-m__dock').getBoundingClientRect().width)
+      .toBeGreaterThanOrEqual(width)
     expect(screen.container.querySelector('.anl-legend, .anl-dials, .anl-stage')).toBeNull()
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth + 1)
+  })
+
+  it('stands the line\'s tools in the dock on the screen\'s foot, each a thumb target', async () => {
+    const screen = await renderScreen()
+    await analyze(screen)
+    const dock = screen.container.querySelector('.anl-m__dock')
+    expect(Math.round(dock.getBoundingClientRect().bottom)).toBeLessThanOrEqual(window.innerHeight)
+    const tools = [...dock.querySelectorAll('.anl-m__tool')]
+    // The fixture's sentences carry no grammar: words, Explain and keep.
+    expect(tools).toHaveLength(3)
+    for (const tool of tools) {
+      expect(tool.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+    }
+    // A typed Passage has no clock: the transport is the stops alone.
+    expect(dock.querySelectorAll('.anl-pbar--stage button')).toHaveLength(2)
+  })
+
+  it('opens the line\'s words in a sheet, and a word from there in the dictionary\'s', async () => {
+    const screen = await renderScreen()
+    await analyze(screen)
+    const words = [...screen.container.querySelectorAll('.anl-m__tool')].find(b => b.textContent.includes('Mots'))
+    words.click()
+    await vi.waitFor(() => expect(document.querySelector('.anl-m__sheet .anl-words__row')).not.toBeNull())
+    document.querySelector('.anl-m__sheet .anl-words__row').click()
+    await vi.waitFor(() => expect(document.querySelector('.anl-m__sheet')).toBeNull())
+  })
+
+  it('takes the stage while the result is up, and gives it back on the way out', async () => {
+    const screen = await renderScreen()
+    const staged = () => document.querySelector('[data-testid="staged"]').dataset.on
+    expect(staged()).toBe('false')
+    await analyze(screen)
+    expect(staged()).toBe('true')
+    screen.container.querySelector('.anl-m__head .stage__leave').click()
+    await vi.waitFor(() => expect(staged()).toBe('false'))
   })
 })

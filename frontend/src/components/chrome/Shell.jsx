@@ -10,6 +10,7 @@ import { Hud } from './Hud'
 import { TabBar } from './TabBar'
 import { DeskRail } from './DeskRail'
 import { useChrome } from './useChrome'
+import { useStaged } from '../../stores/stage'
 
 // ── 車内 — the two frames every screen renders in (plan 068) ──
 // The canvas's backbone: the HUD across the top (level · goal status ·
@@ -59,12 +60,15 @@ function pull(node, step) {
 }
 
 export function Shell() {
-  useChrome('shell')
+  const desk = useDesk()
+  // A screen that takes the stage (stores/stage.js, plan 219) is drawn
+  // without the two bars on a phone, as a run is; the desk keeps its rail.
+  const staged = useStaged() && !desk
+  useChrome(staged ? 'stage' : 'shell')
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const content = useRef(null)
   const departing = useDeparture()
-  const desk = useDesk()
 
   // ── 乗り換え — the flick between gates ──
   // The tab bar is the navigation; this is the same row of five read
@@ -85,12 +89,13 @@ export function Shell() {
 
   // The flick is the phone's: it walks the tab bar's row, and the
   // desk has no row to walk — its gates are a column, in another order.
-  useGateSwipe(content, step, !departing && !desk)
+  // Nor on a stage: a flick there belongs to the screen.
+  useGateSwipe(content, step, !departing && !desk && !staged)
 
   return (
-    <div className={desk ? 'phone phone--desk' : 'phone'}>
+    <div className={desk ? 'phone phone--desk' : staged ? 'phone phone--staged' : 'phone'}>
       <SkipLink />
-      {desk ? <DeskRail /> : <Hud />}
+      {desk ? <DeskRail /> : staged ? null : <Hud />}
       <div
         ref={content}
         className="phone__content"
@@ -102,7 +107,7 @@ export function Shell() {
       >
         <Outlet />
       </div>
-      {desk ? null : <TabBar />}
+      {desk || staged ? null : <TabBar />}
     </div>
   )
 }

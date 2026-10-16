@@ -1656,6 +1656,9 @@
   line-height: 1;
   color: var(--text-secondary);
 }
+/* The phone's stage sets its line at display size (plan 219), and its
+   readings with it. */
+.anl-m__subs .tok__furi { font-size: var(--fs-sm); }
 /* On the focus tint the secondary ink slips under the floor in light
    theme (3.97:1 measured by the contrast guard); the focused word's
    reading takes the primary ink, which the tint already raises. */
@@ -27479,49 +27482,118 @@ button.brd-stn { cursor: pointer; }
   margin-top: auto;
 }
 
-/* ── 手 — the analyser's result on a phone (plan 134) ──
-   The owner's drawing, for every width under the desk: the way back and
-   keep; the video with its trimmed bar; the subtitles -- the next
-   sentence, the current one, the previous one; the numbered grammar;
-   Explain, which opens the explanation in the dictionary's sheet. */
+/* ── 舞台 — the analyser's result on a phone (plan 219) ──
+   The owner's pick D of "Video Analyser Rework", for every width under
+   the desk: drawn as a run is, the shell's two bars away while it holds
+   the stage (stores/stage.js). The head is about the whole Passage --
+   the way back, where it is, the deck it can become; the video edge to
+   edge, its track along its foot; the line in the middle of the screen
+   at display size between the sentences either side; and the thumb's
+   dock at the foot, about the line alone -- grammar, words, Explain,
+   keep -- over the transport. */
+.phone--staged > .phone__content { padding-top: 0; padding-bottom: 0; }
+.phone--staged .analyzer { padding-bottom: 0; }
 .anl-m {
   display: flex;
   flex-direction: column;
   gap: var(--sp-4);
   width: 100%;
   max-width: var(--card-w);
+  min-height: 100vh;
+  min-height: 100dvh;
   margin-inline: auto;
 }
 .anl-m__head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--sp-4);
+  padding-top: calc(var(--sp-3) + var(--safe-top));
 }
+/* Where the Passage is: the stops gone by as a filled track, and the
+   count. The section under it names the stop for a screen reader. */
+.anl-m__where {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+.anl-m__track {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: var(--sp-8);
+  height: 4px;
+  overflow: hidden;
+  background: var(--surface-line);
+  border-radius: var(--r-pill);
+}
+.anl-m__fill {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  background: var(--accent2);
+  border-radius: var(--r-pill);
+}
+.anl-m__count {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tr-term);
+  color: var(--text-secondary);
+}
+/* 歌 (plan 215) at the head: the Passage made a deck is about the
+   whole video, so it stands with the way back rather than in the dock,
+   and it is named, not a bare glyph -- the door a learner has to find. */
+.anl-m__song {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.anl-m__song:hover,
+.anl-m__song:focus-visible { border-color: var(--text-secondary); }
+/* The video edge to edge: out of the column's gutter. */
 .anl-m__player {
   display: flex;
   flex-direction: column;
+  margin-inline: calc(-1 * var(--sp-5));
   background: var(--bg-panel);
-  border-radius: var(--r-panel);
-  overflow: hidden;
 }
 .anl-m__video .video-player__frame {
   margin-bottom: 0;
   border-radius: var(--r-flat);
 }
-.anl-pbar--compact {
-  gap: var(--sp-2);
-  padding: var(--sp-2) var(--sp-3);
+.anl-ptrack {
+  flex: none;
+  border-radius: var(--r-flat);
 }
+/* A 4px track is a thread under a thumb: the target is taller than
+   the line it draws. */
+.anl-ptrack::before {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--sp-4)) 0;
+}
+.anl-ptrack .anl-pbar__knob { width: var(--sp-4); height: var(--sp-4); }
 .anl-m__subs {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   align-items: center;
-  gap: var(--sp-3);
-  padding: var(--sp-4);
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-panel);
+  justify-content: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4) 0;
 }
 /* The sentences either side: smaller, quieter, never lit -- a tap
    walks to them. The empty one keeps its line so the current sentence
@@ -27535,7 +27607,8 @@ button.brd-stn { cursor: pointer; }
   background: transparent;
   border: 0;
   font-family: var(--font-jp);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-body);
+  letter-spacing: var(--tr-term);
   line-height: 1.5;
   color: var(--text-secondary);
   text-overflow: ellipsis;
@@ -27543,9 +27616,19 @@ button.brd-stn { cursor: pointer; }
 }
 .anl-m__subs .anl-subs__line {
   justify-content: center;
+  row-gap: var(--sp-4);
   padding: var(--sp-2) 0;
   background: transparent;
   border: 0;
+}
+.anl-m__subs .anl-subs__line .tok { font-size: var(--fs-display-fluid); }
+.anl-m__tr {
+  margin: 0;
+  font-size: var(--fs-lead);
+  line-height: 1.4;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--text-secondary);
 }
 .anl-m__note {
   display: flex;
@@ -27554,13 +27637,89 @@ button.brd-stn { cursor: pointer; }
   margin: 0;
   text-align: center;
 }
-.anl-m__points {
-  padding: var(--sp-4);
+/* The thumb's dock: the line's four tools over the transport, held on
+   the screen's foot while what is above it scrolls. */
+.anl-m__dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  margin-inline: calc(-1 * var(--sp-5));
+  padding: var(--sp-4) var(--sp-5);
+  padding-bottom: calc(var(--sp-5) + var(--safe-bottom));
   background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-panel);
+  border-top: 1px solid var(--surface-line);
+  border-radius: var(--r-identity) var(--r-identity) 0 0;
 }
-.anl-m__explain { width: 100%; }
+.anl-m__tools {
+  display: flex;
+  gap: var(--sp-3);
+}
+.anl-m__tool,
+.anl-m__tool.anl-head__keep {
+  display: inline-flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  width: auto;
+  min-width: 0;
+  height: auto;
+  min-height: var(--sp-9);
+  padding: var(--sp-2) var(--sp-1);
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-term);
+  color: var(--text-primary);
+}
+.anl-m__tool:hover,
+.anl-m__tool:focus-visible { border-color: var(--text-secondary); }
+/* Explain, the one the station's pigment marks: its rule and its book,
+   the label in the ink every tool reads in. */
+.anl-m__tool--explain { border-color: var(--line-kaiseki); }
+.anl-m__tool--explain svg { color: var(--line-kaiseki); }
+.anl-m__toolnum {
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  line-height: 1;
+}
+/* The transport: on a loop, before, play under the thumb, after, again. */
+.anl-pbar--stage {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--sp-2);
+  background: transparent;
+}
+.anl-pbar--stage .anl-player__btn {
+  width: var(--sp-8);
+  height: var(--sp-8);
+  color: var(--text-primary);
+}
+/* Play in the page's own ink, not the panel's: the dock is the page's
+   surface, cream in the light theme, where a cream button vanished. */
+.anl-pbar--stage .anl-player__btn--main {
+  width: calc(var(--sp-9) + var(--sp-5));
+  height: calc(var(--sp-9) + var(--sp-5));
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+  color: var(--surface);
+}
+.anl-pbar--stage .anl-player__btn--main:hover { background: var(--text-secondary); }
+.anl-pbar--stage .anl-player__btn--on { color: var(--accent2); }
+/* The line's grammar and words, each in a sheet. */
+.anl-m__sheet .anl-m__points,
+.anl-m__sheet .anl-m__words {
+  padding: 0 var(--sp-5) var(--sp-5);
+  overflow-y: auto;
+}
 /* The explanation's sheet: the dictionary's card, the sentence at its
    head beside the round ✕. */
 .anl-explainsheet__head {
