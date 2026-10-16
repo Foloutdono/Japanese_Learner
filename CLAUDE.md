@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **221**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **222**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -115,6 +115,16 @@ runtime purpose.
   that counts or serves the day's reviews cuts too, or a learner on a
   catch-up is shown, served or notified the wall again. The cut never
   writes a schedule: lifted, the gate is what it was.
+- **A lesson waits its turn (plan 221).** A never-met rule opens on its
+  tour, minutes long, so the day's ration opens at most
+  `daily_queue.GRAMMAR_PER_DAY` rules, none before the learner has a
+  day of study behind them, and deals them after the other new cards
+  (`space_rules`: a few quick cards before each). The allowance is read
+  in one place, `_grammar_allowance` in `routes/today.py`: the gate, the
+  run, tomorrow and the ahead all spend it, and anything new that counts
+  or serves the ration does too. A tour can always be skipped for its
+  card; a run the learner boards on purpose (a grammar run, a unit) is
+  not capped.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.

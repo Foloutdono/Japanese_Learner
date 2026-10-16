@@ -58,6 +58,25 @@ def _board(client, level, kana, target, lines):
     assert r.status_code == 200, r.text
 
 
+def _studied_yesterday(user_id: str) -> None:
+    """A day of study behind the learner, which the ration waits for
+    before it opens a rule (plan 221). A review row on no card the queue
+    serves, so nothing it deals or counts as met moves."""
+    from core.srs_instance import srs
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO review_log (card_id, mode, quality, xp_earned, reviewed_at) "
+                "VALUES (%s, 'vocab.flashcard.f2b', 4, 0, NOW() - INTERVAL '1 day')",
+                (f"{user_id}:yesterday",),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+    srs.forget_history(user_id)
+
+
 # ── The pure part ─────────────────────────────────────────────────
 
 def test_ration_spends_kana_first_then_the_lines_in_turn():
@@ -167,13 +186,16 @@ def test_the_ration_deals_each_deck_in_the_order_it_teaches(client):
     # first (plan 186e, below).
     from study import teaching_order
     _board(client, "N4", "both", 9, ["vocab", "kanji", "grammar"])
+    _studied_yesterday(RATION_USER)
     cards = client.get("/api/today/cards?count=10").json()["cards"]
     by_source = {}
     for c in cards:
         by_source.setdefault(c["source"], []).append(c["card_id"])
+    # Two rules a day at most (plan 221); the words and kanji take the rest.
+    assert len(by_source["grammar"]) == daily_queue.GRAMMAR_PER_DAY
     for source, mode in (("vocab", "vocab.flashcard.f2b"), ("kanji", "kanji.flashcard.f2b"),
                          ("grammar", "grammar.flashcard.f2b")):
-        assert by_source[source] == teaching_order.raw_ids(source, "N4", mode)[:3], source
+        assert by_source[source] == teaching_order.raw_ids(source, "N4", mode)[:len(by_source[source])], source
 
 
 def test_the_gate_counts_the_cards_the_run_serves(client):
@@ -217,15 +239,114 @@ def _new_ids(cards):
 def test_an_n5_learner_is_dealt_the_first_unit_in_course_order(client):
     from study import basics
     _board(client, "N5", "both", 6, ["vocab", "kanji", "grammar"])
+    _studied_yesterday(RATION_USER)
     cards = client.get("/api/today/cards?count=10").json()["cards"]
-    first = [raw_id for _, raw_id, _ in basics.sequence()][:6]
-    assert sorted(_new_ids(cards)) == sorted(first)
-    assert first[:3] == ["grammar_N5_です／だ", "grammar_N5_は", "grammar_N5_か"]
+    sequence = [raw_id for _, raw_id, _ in basics.sequence()]
+    assert sequence[:3] == ["grammar_N5_です／だ", "grammar_N5_は", "grammar_N5_か"]
+    # The unit's first two rules (the day's allowance, plan 221), and
+    # its words after them in the course's order; か waits a day.
+    words = [raw_id for raw_id in sequence if not raw_id.startswith("grammar_")][:4]
+    assert sorted(_new_ids(cards)) == sorted(sequence[:2] + words)
     # Each card names its unit, and the gate the unit the course is at.
     assert {c["basics"]["id"] for c in cards} == {"hajimemashite"}
     assert cards[0]["basics"]["unit"] == 1 and cards[0]["basics"]["of"] == len(basics.units())
     status = client.get("/api/today").json()["basics"]
     assert status["done"] is False and status["unit"] == 1 and status["title"]["fr"] == "Enchanté"
+
+
+# ── 文法の日割り — the rules a day opens (plan 221) ────────────────
+
+def test_the_allowance_waits_for_a_day_of_study_then_opens_two_rules():
+    assert daily_queue.grammar_allowance(False, 0) == 0
+    assert daily_queue.grammar_allowance(True, 0) == daily_queue.GRAMMAR_PER_DAY == 2
+    assert daily_queue.grammar_allowance(True, 1) == 1
+    assert daily_queue.grammar_allowance(True, 5) == 0
+
+
+def test_the_ration_caps_the_rules_and_deals_them_after_the_rest():
+    rules = (SECTION, "grammar", "N4", "g")
+    lines = OrderedDict([
+        (rules, ["g1", "g2", "g3"]),
+        ((SECTION, "vocab", "N4", "v"), ["v1", "v2", "v3", "v4"]),
+    ])
+    out = daily_queue.ration(OrderedDict(), lines, 6, grammar=2)
+    # Two rules, the slack to the words, and the rules' lane last.
+    assert list(out.items()) == [((SECTION, "vocab", "N4", "v"), ["v1", "v2", "v3", "v4"]), (rules, ["g1", "g2"])]
+    assert daily_queue.interleave(out, 6)[0][0] != rules
+    # None of them on a day that opens none.
+    assert rules not in daily_queue.ration(OrderedDict(), lines, 6, grammar=0)
+    # No cap asked, the lines as they were -- the rules still after.
+    assert daily_queue.ration(OrderedDict(), lines, 6)[rules] == ["g1", "g2", "g3"]
+
+
+def test_the_course_keeps_its_late_rules_for_another_day():
+    g = (SECTION, "grammar", "N5", "g")
+    v = (SECTION, "vocab", "N5", "v")
+    course = [(g, "desu"), (g, "wa"), (g, "ka"), (v, "watashi"), (v, "anata"), (v, "gakusei")]
+    lines = OrderedDict([(g, ["nonbasic"]), (v, ["eki"])])
+    out = daily_queue.ration(OrderedDict(), lines, 6, course=course, grammar=2)
+    assert list(out.items()) == [(v, ["watashi", "anata", "gakusei", "eki"]), (g, ["desu", "wa"])]
+    # The first day: the unit's words, and the line's words after them.
+    first = daily_queue.ration(OrderedDict(), lines, 4, course=course, grammar=0)
+    assert list(first.items()) == [(v, ["watashi", "anata", "gakusei", "eki"])]
+    # What the course leaves of the allowance goes to the line's own rules.
+    one = daily_queue.ration(OrderedDict(), lines, 9, course=course[:1] + course[3:], grammar=2)
+    assert one[g] == ["desu", "nonbasic"]
+
+
+def test_a_first_day_opens_no_rule(client):
+    # Nothing but the rest of the app on the first day: the words, the
+    # kanji, the kana. The gate counts what the run serves.
+    _board(client, "N5", "both", 6, ["vocab", "kanji", "grammar"])
+    today = client.get("/api/today").json()
+    assert all(lane["source"] != "grammar" for lane in today["lanes"])
+    cards = client.get("/api/today/cards?count=10").json()["cards"]
+    assert len(cards) == today["total"] == 6
+    assert {c["source"] for c in cards} <= {"vocab", "kanji"}
+
+
+def test_a_later_day_opens_two_rules_and_never_first(client):
+    _board(client, "N4", "both", 10, ["grammar", "vocab", "kanji"])
+    _studied_yesterday(RATION_USER)
+    today = client.get("/api/today").json()
+    rules = [lane for lane in today["lanes"] if lane["source"] == "grammar"]
+    assert len(rules) == 1 and rules[0]["new"] == 2
+    # The grammar line is the learner's first, and still not the run's:
+    # three quick cards before each lesson.
+    cards = client.get("/api/today/cards?count=10").json()["cards"]
+    sources = [c["source"] for c in cards]
+    assert [i for i, s in enumerate(sources) if s == "grammar"] == [3, 7]
+
+
+def test_the_new_rules_are_spaced_out_and_a_due_one_keeps_its_place():
+    g, v = (SECTION, "grammar", "N4", "g"), (SECTION, "vocab", "N4", "v")
+    order = [(g, "due"), (g, "r1"), (v, "v1"), (g, "r2"), (v, "v2"), (v, "v3"), (v, "v4")]
+    assert daily_queue.space_rules(order, {"r1", "r2"}) == [
+        (g, "due"), (v, "v1"), (v, "v2"), (g, "r1"), (v, "v3"), (v, "v4"), (g, "r2"),
+    ]
+    # Too few others: the rules close the batch, in their order.
+    assert daily_queue.space_rules([(g, "r1"), (v, "v1"), (g, "r2")], {"r1", "r2"}) == [
+        (v, "v1"), (g, "r1"), (g, "r2"),
+    ]
+    # Nothing new among the rules: the order as it was.
+    assert daily_queue.space_rules(order, set()) == order
+
+
+def test_the_rules_met_today_spend_the_allowance(client):
+    from core.srs_instance import srs
+    from study import teaching_order
+    _board(client, "N4", "both", 10, ["grammar", "vocab"])
+    _studied_yesterday(RATION_USER)
+    # Two rules met today, from the grammar line itself.
+    for raw_id in teaching_order.raw_ids("grammar", "N4", "grammar.ladder")[:2]:
+        r = client.post("/api/today/review", json={"card_id": raw_id, "mode": "grammar.ladder", "quality": 4})
+        assert r.status_code == 200, r.text
+    assert srs.get_new_items_today(RATION_USER, source="grammar") == 2
+    assert srs.get_new_items_today(RATION_USER) == 2
+    cards = client.get("/api/today/cards?count=10").json()["cards"]
+    assert cards and all(c["source"] != "grammar" for c in cards if c["stage"] in (None, "new"))
+    assert all(lane["source"] != "grammar" or lane["new"] == 0
+               for lane in client.get("/api/today").json()["lanes"])
 
 
 def test_the_course_follows_the_learners_lines(client):
@@ -252,9 +373,11 @@ def test_a_learner_above_n5_never_rides_the_course(client):
 
 def test_a_met_unit_gives_way_to_the_next(client):
     # Meet every card of unit 1 in the learner's lines; the gate moves
-    # to unit 2 and the ration starts there.
+    # to unit 2 and the ration starts there -- at its words, since the
+    # three rules met today spent the day's allowance (plan 221).
     from study import basics
     _board(client, "N5", "both", 50, ["grammar", "vocab"])
+    _studied_yesterday(RATION_USER)
     first = basics.units()[0]
     for source in ("grammar", "vocab"):
         for raw_id in first["cards"][source]:
@@ -263,7 +386,8 @@ def test_a_met_unit_gives_way_to_the_next(client):
     status = client.get("/api/today").json()["basics"]
     assert status["unit"] == 2 and status["id"] == "kore-sore"
     cards = client.get("/api/today/cards?count=5").json()["cards"]
-    assert _new_ids(cards)[0] == "grammar_N5_これ／それ／あれ／どれ"
+    assert _new_ids(cards)[0] == basics.units()[1]["cards"]["vocab"][0]
+    assert not any(raw_id.startswith("grammar_") for raw_id in _new_ids(cards))
 
 
 # ── Seen and skippable (plan 186f) ───────────────────────────────

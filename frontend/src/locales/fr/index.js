@@ -1466,6 +1466,7 @@ const dictionary = {
   tourLookQ:         p => `Que fait ${p} ?`,
   tourLookHint:      n => `${n === 2 ? 'Deux' : 'Trois'} phrases. Regarde où il se place, et ce que disent les traductions.`,
   tourIdea:          'J\'ai une idée',
+  tourSkip:          'Passer la leçon',
   tourGuessQ:        p => `Que veut dire ${p} ?`,
   tourCheck:         'Vérifier',
   tourThatIs:        p => `Ça, c'est ${p}.`,

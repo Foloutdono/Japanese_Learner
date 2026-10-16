@@ -649,7 +649,12 @@ function useTourKeys(ref, on) {
 // phone the stop carries the button to the asking's page (AskEntry); on
 // the desk the panel stands under the stops at the left (TourRoute),
 // which reads the thread from `onView`. A replay asks nothing.
-export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt = null, desk = false, onView, ask = null }) {
+// `onSkip` (plan 221): the way past the lesson to its card, at any stop
+// before the terminus -- a quiet link under the gate, the one the glyph
+// tour's "show me" wears. A tour is minutes where a card is seconds, and
+// not every learner wants one; the point's sheet keeps it a tap away
+// (GrammarLesson's replay). A replay has its own way back, and no skip.
+export function GrammarTour({ point, onBoard, onSkip, onLesson, replay = false, startAt = null, desk = false, onView, ask = null }) {
   const { t } = useLang()
   const tour = point.tour
   const stops = stopsOf(tour)
@@ -741,6 +746,15 @@ export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt 
     onBoard?.({ tries: wrong.length, helped, quizRight: quiz.length ? score.right : null, quizTotal: quiz.length || null })
   }
 
+  // Where the learner left the lesson is the funnel's question: the
+  // stop, under grammar_tour_step's outcome `skipped` (plan 221).
+  function skip() {
+    track('grammar_tour_step', { level, stop: kind, outcome: 'skipped' })
+    playClick()
+    onSkip()
+  }
+  const skippable = Boolean(onSkip) && !replay && stop !== 'terminus'
+
   let gate
   if (stop === 'look') gate = <GateButton label={t.tourIdea} onClick={() => go('first')} data-action="continue" />
   else if (stop === 'guess' && helped) gate = <GateButton label={t.onbContinue} onClick={() => go('helped')} data-action="continue" />
@@ -778,6 +792,11 @@ export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt 
       </div>
       <div className="tour__foot">
         {gate}
+        {skippable && (
+          <button type="button" className="brd__link" onClick={skip} data-action="skip">
+            {t.tourSkip}
+          </button>
+        )}
       </div>
     </section>
   )
