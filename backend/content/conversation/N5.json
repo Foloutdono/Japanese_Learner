@@ -11,6 +11,12 @@
       "en": "Buy your lunch: have the bento heated, take chopsticks, say no to a bag and pay by card.",
       "fr": "Achète ton déjeuner : fais réchauffer le bento, prends des baguettes, refuse le sac et paie par carte."
     },
+    "steps": [
+      {"en": "Have the bento heated", "fr": "Fais réchauffer le bento"},
+      {"en": "Take chopsticks", "fr": "Prends des baguettes"},
+      {"en": "Say no to a bag", "fr": "Refuse le sac"},
+      {"en": "Pay by card", "fr": "Paie par carte"}
+    ],
     "them": {"en": "Clerk", "fr": "Vendeur"},
     "register": "polite",
     "turns": [
@@ -254,6 +260,12 @@
       "en": "Get a seat at the counter, order a large ramen and a drink, and thank the shop for the meal as you pay.",
       "fr": "Installe-toi au comptoir, commande un grand ramen et une boisson, et remercie pour le repas en payant."
     },
+    "steps": [
+      {"en": "Take a seat at the counter", "fr": "Installe-toi au comptoir"},
+      {"en": "Order a large ramen", "fr": "Commande un grand ramen"},
+      {"en": "Order a drink", "fr": "Commande une boisson"},
+      {"en": "Thank them for the meal", "fr": "Remercie pour le repas"}
+    ],
     "them": {"en": "Server", "fr": "Serveur"},
     "register": "polite",
     "turns": [
@@ -538,6 +550,11 @@
       "en": "Find out the platform, the time of the next train and how long the ride to Shibuya takes.",
       "fr": "Trouve le quai, l'heure du prochain train et la durée du trajet jusqu'à Shibuya."
     },
+    "steps": [
+      {"en": "Find the platform", "fr": "Trouve le quai"},
+      {"en": "Ask when the next train leaves", "fr": "Demande l'heure du prochain train"},
+      {"en": "Ask how long the ride takes", "fr": "Demande la durée du trajet"}
+    ],
     "them": {"en": "Station attendant", "fr": "Agent de gare"},
     "register": "polite",
     "turns": [
@@ -781,6 +798,12 @@
       "en": "Introduce yourself to a new classmate: your name, your country and what you study.",
       "fr": "Présente-toi à un nouveau camarade : ton nom, ton pays et ce que tu étudies."
     },
+    "steps": [
+      {"en": "Say your name", "fr": "Dis ton nom"},
+      {"en": "Say where you are from", "fr": "Dis d'où tu viens"},
+      {"en": "Say what you study", "fr": "Dis ce que tu étudies"},
+      {"en": "Talk about your free time", "fr": "Parle de tes loisirs"}
+    ],
     "them": {"en": "Classmate", "fr": "Camarade de classe"},
     "register": "polite",
     "turns": [
@@ -1021,6 +1044,12 @@
       "en": "Buy a T-shirt in your size and colour.",
       "fr": "Achète un tee-shirt à ta taille et de la couleur que tu veux."
     },
+    "steps": [
+      {"en": "Ask for it in blue", "fr": "Demande-le en bleu"},
+      {"en": "Try it on", "fr": "Essaie-le"},
+      {"en": "Ask for a bigger size", "fr": "Demande une taille au-dessus"},
+      {"en": "Buy the one that fits", "fr": "Achète celui qui te va"}
+    ],
     "them": {"en": "Shop assistant", "fr": "Vendeur"},
     "register": "polite",
     "turns": [
@@ -1264,6 +1293,11 @@
       "en": "Find out how to walk to the post office.",
       "fr": "Trouve comment aller à pied jusqu'à la poste."
     },
+    "steps": [
+      {"en": "Ask where the post office is", "fr": "Demande où est la poste"},
+      {"en": "Check the way", "fr": "Vérifie le chemin"},
+      {"en": "Ask how far it is on foot", "fr": "Demande combien de temps à pied"}
+    ],
     "them": {"en": "Passer-by", "fr": "Passant"},
     "register": "polite",
     "turns": [
@@ -1504,6 +1538,12 @@
       "en": "Order an iced coffee and a cake to eat in.",
       "fr": "Commande un café glacé et un gâteau, à prendre sur place."
     },
+    "steps": [
+      {"en": "Order an iced coffee", "fr": "Commande un café glacé"},
+      {"en": "Take it with milk", "fr": "Prends-le avec du lait"},
+      {"en": "Add a cake", "fr": "Ajoute un gâteau"},
+      {"en": "Eat in", "fr": "Mange sur place"}
+    ],
     "them": {"en": "Barista", "fr": "Barista"},
     "register": "polite",
     "turns": [
@@ -1791,6 +1831,13 @@
       "en": "Visit your friend: come in, have a drink and a snack, then take your leave.",
       "fr": "Rends visite à ton ami : entre, prends à boire et un goûter, puis prends congé."
     },
+    "steps": [
+      {"en": "Come in", "fr": "Entre"},
+      {"en": "Choose a drink", "fr": "Choisis une boisson"},
+      {"en": "Accept a snack", "fr": "Accepte le goûter"},
+      {"en": "Talk about your Japanese", "fr": "Parle de ton japonais"},
+      {"en": "Take your leave", "fr": "Prends congé"}
+    ],
     "them": {"en": "Friend", "fr": "Ami"},
     "register": "casual",
     "turns": [

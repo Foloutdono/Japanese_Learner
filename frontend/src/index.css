@@ -33231,14 +33231,6 @@ button.brd-stn { cursor: pointer; }
    only what the scene needed to become a conversation: the talk's
    column, the line still owed a reply, the task, the brief, the end. */
 
-/* What the chosen way of riding asks, in the run's brief: one quiet line. */
-.kaiwa-how {
-  margin: 0;
-  font-size: var(--fs-sm);
-  line-height: 1.5;
-  color: var(--text-secondary);
-  text-wrap: pretty;
-}
 /* A scene's record at its card's end: the replies right, over those
    graded -- a figure and its unit (DESIGN.md, Figures). */
 .kaiwa-record { display: inline-flex; align-items: baseline; }
@@ -33290,7 +33282,7 @@ button.brd-stn { cursor: pointer; }
 .stage--talk > :not(.kaiwa-card) { flex: none; }
 /* The card's frame comes off the talk (plan 223): its bubbles stand on
    the stage's own ground, at the stage's gutter, as the canvas drew
-   them; the card is only the scroller now. The brief keeps its card. */
+   them; the card is only the scroller now. */
 .stage--talk > .kaiwa-card {
   flex: 1 1 auto;
   min-height: 0;
@@ -33304,6 +33296,8 @@ button.brd-stn { cursor: pointer; }
 }
 .stage--talk > .kaiwa-card > .prompt-card__body {
   position: relative;
+  display: flex;
+  flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
   padding: var(--sp-3) 0;
@@ -33311,6 +33305,9 @@ button.brd-stn { cursor: pointer; }
   overscroll-behavior: contain;
   scroll-padding-block: var(--sp-3);
 }
+/* The talk at the card's foot (plan 237), against the replies, until
+   it is long enough to fill the card and scroll. */
+.stage--talk > .kaiwa-card > .prompt-card__body > .kaiwa-talk { margin-top: auto; }
 /* A line arrives as a list's row does (Motion), the first with the
    stage; the task, the practice card and the end come in the same way. */
 .kaiwa-talk > .tour-line,
@@ -33434,17 +33431,14 @@ button.brd-stn { cursor: pointer; }
 /* The other person answering a free line: their bubble, the wait's
    three dots where their words will be. */
 .kaiwa-talk > .kaiwa-pending > .tour-line__text { display: flex; align-items: center; min-height: 44px; }
-/* Choose's quick replies under the talk: one surface panel, a row a
-   reply between hairlines -- its number (the desk's key), its Japanese
-   and the arrow that says a tap sends it, sliding in on hover as a
-   card's ▶ does. */
+/* Choose's replies under the talk (plan 237): a tile each, on the one
+   card's surface, its number in a gold ring -- the learner's own, the
+   desk's key -- and its Japanese. A hover lifts it 1px and its edge
+   takes the gold, as a choice card's does. */
 .kaiwa-replies {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-panel);
+  gap: var(--sp-3);
 }
 .kaiwa-reply {
   display: flex;
@@ -33452,25 +33446,39 @@ button.brd-stn { cursor: pointer; }
   gap: var(--sp-4);
   min-height: 52px;
   padding: var(--sp-3) var(--sp-4);
-  background: none;
-  border: 0;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
   color: var(--text-primary);
   font: inherit;
   text-align: start;
   cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
 }
-.kaiwa-reply + .kaiwa-reply { border-top: 1px solid var(--surface-line); }
-.kaiwa-reply:focus-visible { outline: 2px solid var(--accent2); outline-offset: -2px; }
+.kaiwa-reply:hover,
+.kaiwa-reply:focus-visible { transform: translateY(-1px); border-color: var(--accent2); }
+.kaiwa-reply:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .kaiwa-reply { transition: none; }
+  .kaiwa-reply:hover,
+  .kaiwa-reply:focus-visible { transform: none; }
+}
 .kaiwa-reply__n {
   flex: none;
-  min-width: var(--sp-6);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  box-sizing: border-box;
+  border: 2px solid var(--accent2);
+  border-radius: var(--r-pill);
   font-family: var(--font-display);
-  font-size: var(--fs-body);
+  font-size: var(--fs-sm);
   font-weight: 700;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  text-align: center;
-  color: var(--text-secondary);
+  color: var(--sel-ink);
 }
 .kaiwa-reply__jp {
   flex: 1;
@@ -33480,17 +33488,6 @@ button.brd-stn { cursor: pointer; }
   font-weight: 500;
   line-height: 1.4;
   text-wrap: pretty;
-}
-.kaiwa-reply__send {
-  flex: none;
-  color: var(--sel-ink);
-  transform: translateX(calc(-1 * var(--sp-1)));
-  transition: transform 0.15s ease;
-}
-.kaiwa-reply:hover .kaiwa-reply__send,
-.kaiwa-reply:focus-visible .kaiwa-reply__send { transform: none; }
-@media (prefers-reduced-motion: reduce) {
-  .kaiwa-reply__send { transform: none; transition: none; }
 }
 /* Above the phone the talk stops at --card-w and centres, and what
    answers it shares that column: the replies and Next ran the stage's
@@ -33578,28 +33575,215 @@ button.brd-stn { cursor: pointer; }
   text-align: center;
   text-indent: var(--tr-caption);
 }
-/* The brief: the place's plate, what is going on, the errand, the way. */
-.kaiwa-brief {
+/* ── 237 — the ticket and its stub ──
+   The owner's pick D of the canvas "Tsuji — la scène, new directions".
+   The brief is a ticket standing alone over Commencer: the place at its
+   head on the line's edge, what is going on, a tear, the mission as its
+   numbered steps. It is the station plate's paper (.tour-plate), so it
+   reads the same in both themes and hangs as the plate does. */
+.kaiwa-stand {
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
-  gap: var(--sp-4);
+  justify-content: center;
+  width: 100%;
+  max-width: var(--card-w);
+  margin-inline: auto;
 }
-.kaiwa-brief__situation {
+.kaiwa-ticket,
+.kaiwa-route,
+.kaiwa-stub {
+  --plate-ink: #222428;
+  --plate-soft: color-mix(in srgb, var(--plate-ink) 62%, #f3f2ef);
+  --step-ink: color-mix(in srgb, var(--accent2) 60%, var(--plate-ink));
+  background: #f3f2ef;
+  color: var(--plate-ink);
+}
+.kaiwa-ticket {
+  display: flex;
+  flex-direction: column;
+  text-align: start;
+  border-radius: var(--r-panel);
+  box-shadow: var(--elev-hang);
+  /* What the notches are bitten to: the ground the ticket stands on. */
+  --ticket-ground: var(--bg-main);
+}
+.kaiwa-ticket__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-4);
+  padding: var(--sp-5) var(--sp-6) var(--sp-4);
+  border-bottom: 3px solid var(--line-color);
+}
+.kaiwa-ticket__place {
+  font-family: var(--font-jp);
+  font-size: var(--fs-heading);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: var(--tr-term);
+}
+.kaiwa-ticket__place rt { font-size: var(--fs-caption-xs); font-weight: 400; color: var(--plate-soft); }
+.kaiwa-ticket__name { font-size: var(--fs-sm); color: var(--plate-soft); }
+.kaiwa-ticket__situation {
   margin: 0;
+  padding: var(--sp-5) var(--sp-6);
   font-size: var(--fs-body);
   line-height: 1.6;
   text-wrap: pretty;
 }
-.kaiwa-brief__goal {
+/* The tear: a dashed fold, a notch bitten out of each edge. */
+.kaiwa-ticket__tear {
+  position: relative;
+  margin-inline: var(--sp-4);
+  border-top: 2px dashed color-mix(in srgb, var(--plate-ink) 22%, #f3f2ef);
+}
+.kaiwa-ticket__tear::before,
+.kaiwa-ticket__tear::after {
+  content: "";
+  position: absolute;
+  top: -11px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-pill);
+  background: var(--ticket-ground);
+}
+.kaiwa-ticket__tear::before { left: calc(-1 * var(--sp-4) - 10px); }
+.kaiwa-ticket__tear::after { right: calc(-1 * var(--sp-4) - 10px); }
+.kaiwa-ticket__mission {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-1);
+  gap: var(--sp-4);
+  padding: var(--sp-5) var(--sp-6) var(--sp-6);
+}
+.kaiwa-ticket .cap,
+.kaiwa-stub .cap { color: var(--step-ink); }
+/* The mission's steps: a gold ring a number, the learner's own. */
+.kaiwa-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
   margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.kaiwa-step {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
   font-size: var(--fs-body);
-  font-weight: 600;
-  line-height: 1.5;
+  font-weight: 500;
+  line-height: 1.4;
   text-wrap: pretty;
 }
+.kaiwa-step__n {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  box-sizing: border-box;
+  border: 2px solid var(--accent2);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--step-ink);
+}
+/* The talk under way: the route in the meter's place -- the place, a
+   stop a reply on its line, how far along -- and the stub hung under
+   it on the tear's fold, folded to the mission's rings. */
+.kaiwa-head {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--card-w);
+  margin: 0 auto;
+}
+.kaiwa-route {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-plate) var(--r-plate) 0 0;
+  border-bottom: 3px solid var(--line-color);
+}
+.kaiwa-route__place {
+  flex: none;
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: var(--tr-term);
+}
+.kaiwa-route__line {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 20px;
+}
+.kaiwa-route__line::before {
+  content: "";
+  position: absolute;
+  inset-inline: var(--sp-3);
+  top: 9px;
+  height: 2px;
+  background: color-mix(in srgb, var(--plate-ink) 18%, #f3f2ef);
+}
+.kaiwa-route__stop {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  box-sizing: border-box;
+  border: 2px solid color-mix(in srgb, var(--plate-ink) 32%, #f3f2ef);
+  border-radius: var(--r-pill);
+  background: #f3f2ef;
+}
+.kaiwa-route__stop--now { width: 16px; height: 16px; border: 3px solid var(--line-color); }
+.kaiwa-route__stop--ok { border-color: var(--success); background: var(--success); }
+.kaiwa-route__stop--no { border-color: var(--rating-wrong); background: var(--rating-wrong); }
+.kaiwa-route__n {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.kaiwa-route__n small { margin-left: var(--sp-1); font-size: var(--fs-caption); font-weight: 600; color: var(--plate-soft); }
+.kaiwa-stub {
+  display: flex;
+  flex-direction: column;
+  border-radius: 0 0 var(--r-card) var(--r-card);
+  border-top: 2px dashed color-mix(in srgb, var(--plate-ink) 22%, #f3f2ef);
+  margin-top: -1px;
+}
+.kaiwa-stub--open { box-shadow: var(--elev-hang); }
+.kaiwa-stub__toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.kaiwa-stub__toggle:focus-visible { outline: 2px solid var(--accent2); outline-offset: -2px; }
+.kaiwa-stub__rings { flex: 1; display: flex; gap: var(--sp-2); }
+.kaiwa-stub__rings > .kaiwa-step__n { width: 20px; height: 20px; font-size: var(--fs-caption-xs); }
+.kaiwa-stub__chev { flex: none; color: var(--plate-soft); }
+.kaiwa-stub > .kaiwa-steps { padding: 0 var(--sp-4) var(--sp-4); }
 /* The talk over: its figures, two cells of the profile's lattice. */
 .kaiwa-over {
   display: flex;
@@ -44901,6 +45085,8 @@ button.brd-stn { cursor: pointer; }
     flex-direction: column;
     padding: var(--sp-5);
   }
+  /* The ticket stands on the pane's surface there (plan 237). */
+  .desk-pane--kaiwa .kaiwa-ticket { --ticket-ground: var(--surface); }
   /* The talk bounded in the middle column (plan 221, .stage--talk): the
      column is the window's height already, so the card takes what the
      tiles or the floor leave and the talk scrolls in its body, as on

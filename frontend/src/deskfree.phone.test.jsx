@@ -1417,11 +1417,11 @@ describe('the composition run (plan 125)', () => {
 // keeps its single column: the place's plate heads the card, and no
 // column is drawn.
 describe('the conversation run (plan 217)', () => {
-  it('keeps the phone\'s column, the place on the card and no column', async () => {
+  it('keeps the phone\'s column, the place on the route and no column', async () => {
     const { apiJson } = await import('./lib/api')
     const plain = text => [{ text }]
     const SCRIPT = {
-      id: 'konbini-lunch', level: 'N5', title: 'Le déjeuner', situation: 'À la caisse.', goal: 'Payer.', them: 'Vendeur', register: 'polite',
+      id: 'konbini-lunch', level: 'N5', title: 'Le déjeuner', situation: 'À la caisse.', goal: 'Payer.', steps: ['Paie par carte', 'Refuse le sac'], them: 'Vendeur', register: 'polite',
       place: { jp: 'コンビニ', parts: plain('コンビニ'), name: 'Supérette' },
       turns: [{
         them: { jp: 'お弁当は温めますか。', parts: plain('お弁当は温めますか。'), translation: 'Je vous le réchauffe.' },
@@ -1452,10 +1452,12 @@ describe('the conversation run (plan 217)', () => {
     expect(document.querySelector('.screen').className).toBe('screen')
     expect(document.querySelector('[class*="desk-"]')).toBeNull()
     expect(document.querySelector('.desk-run__side')).toBeNull()
-    // The place heads the card, over the talk.
-    const card = document.querySelector('.kaiwa-card')
-    expect(card.querySelector('.tour-plate')).not.toBeNull()
-    expect(card.querySelector('.kaiwa-talk .tour-line')).not.toBeNull()
+    // The place heads the route, in the meter's place over the card, the
+    // mission's stub under it (plan 237); the card holds the talk.
+    const route = document.querySelector('.stage > .kaiwa-head > .kaiwa-route')
+    expect(route.querySelector('.kaiwa-route__place').textContent).toBe('コンビニ')
+    expect(route.nextElementSibling.classList).toContain('kaiwa-stub')
+    expect(document.querySelector('.kaiwa-card .kaiwa-talk .tour-line')).not.toBeNull()
     apiJson.mockReset()
   })
 })

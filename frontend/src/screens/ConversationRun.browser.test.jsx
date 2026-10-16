@@ -55,6 +55,7 @@ const SCRIPT = {
   title: 'Le déjeuner à la supérette',
   situation: 'Tu es à la caisse d’une supérette avec un bento.',
   goal: 'Achète ton déjeuner.',
+  steps: ['Fais réchauffer le bento', 'Prends des baguettes'],
   them: 'Vendeur',
   register: 'polite',
   turns: [
@@ -162,14 +163,16 @@ beforeEach(() => {
 })
 
 describe('a conversation, before it starts', () => {
-  it('opens on the scene: its place, what is going on, the errand and the way', async () => {
+  it('opens on its ticket: the place, what is going on, the mission as its steps', async () => {
     const root = await run('choose')
-    expect(root.querySelector('.tour-plate').getAttribute('aria-label')).toBe('Supérette')
-    expect(root.querySelector('.kaiwa-brief__situation').textContent).toContain('Tu es à la caisse')
-    expect(root.querySelector('.kaiwa-brief__goal').textContent).toContain('Achète ton déjeuner.')
-    expect(root.querySelector('.kaiwa-brief .kaiwa-how').textContent.length).toBeGreaterThan(10)
-    // Nothing is said yet.
+    const ticket = root.querySelector('.kaiwa-ticket')
+    expect(ticket.querySelector('.kaiwa-ticket__head').getAttribute('aria-label')).toBe('Supérette')
+    expect(ticket.querySelector('.kaiwa-ticket__situation').textContent).toContain('Tu es à la caisse')
+    expect([...ticket.querySelectorAll('.kaiwa-step')].map(s => s.textContent))
+      .toEqual(['1Fais réchauffer le bento', '2Prends des baguettes'])
+    // Nothing is said yet, and no route stands before the talk.
     expect(root.querySelector('.kaiwa-talk')).toBeNull()
+    expect(root.querySelector('.kaiwa-route')).toBeNull()
   })
 
   it('sends a way it does not know back to the station', async () => {
@@ -179,6 +182,32 @@ describe('a conversation, before it starts', () => {
 })
 
 describe('Choose', () => {
+  it('stands the route in the meter\'s place, a stop a reply, and hangs the mission under it', async () => {
+    const root = await started('choose')
+    const route = root.querySelector('.kaiwa-route')
+    const stops = SCRIPT.turns.length
+    expect(route.getAttribute('aria-label')).toBe(`Supérette, réplique 1 sur ${stops}`)
+    expect(route.querySelectorAll('.kaiwa-route__stop')).toHaveLength(stops)
+    expect(route.querySelector('.kaiwa-route__stop--now')).toBe(route.querySelector('.kaiwa-route__stop'))
+    expect(root.querySelector('.run-meter')).toBeNull()
+    // The stub: folded to its rings, its steps on a tap.
+    const toggle = root.querySelector('.kaiwa-stub__toggle')
+    expect(toggle.getAttribute('aria-expanded')).toBe('false')
+    expect(root.querySelectorAll('.kaiwa-stub__rings > .kaiwa-step__n')).toHaveLength(2)
+    expect(root.querySelector('.kaiwa-stub .kaiwa-step')).toBeNull()
+    toggle.click()
+    await settle(40)
+    expect(toggle.getAttribute('aria-expanded')).toBe('true')
+    expect([...root.querySelectorAll('.kaiwa-stub .kaiwa-step')].map(s => s.textContent))
+      .toEqual(['1Fais réchauffer le bento', '2Prends des baguettes'])
+    // A wrong pick marks its stop, and the next one is in hand.
+    ;[...root.querySelectorAll('.kaiwa-reply')].find(r => r.textContent.includes('温かい')).click()
+    await settle(120)
+    expect(route.querySelector('.kaiwa-route__stop').classList).toContain('kaiwa-route__stop--no')
+    expect(route.querySelectorAll('.kaiwa-route__stop')[1].classList).toContain('kaiwa-route__stop--now')
+    expect(route.getAttribute('aria-label')).toBe(`Supérette, réplique 2 sur ${stops}`)
+  })
+
   it('holds the line just said untranslated until it is answered, unless asked', async () => {
     const root = await started('choose')
     const lines = root.querySelectorAll('.kaiwa-talk > .tour-line')

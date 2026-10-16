@@ -11,6 +11,12 @@
       "en": "Check in for two nights and find out about breakfast and check-out.",
       "fr": "Enregistre-toi pour deux nuits et renseigne-toi sur le petit-déjeuner et l'heure du départ."
     },
+    "steps": [
+      {"en": "Show your passport", "fr": "Montre ton passeport"},
+      {"en": "Confirm two nights", "fr": "Confirme les deux nuits"},
+      {"en": "Ask about check-out", "fr": "Demande l'heure du départ"},
+      {"en": "Carry your own luggage", "fr": "Porte toi-même tes bagages"}
+    ],
     "them": {"en": "Receptionist", "fr": "Réceptionniste"},
     "register": "polite",
     "turns": [
@@ -255,6 +261,12 @@
       "en": "Tell the reception what is wrong and since when, and register for a consultation.",
       "fr": "Explique à l'accueil ce qui ne va pas et depuis quand, et inscris-toi pour une consultation."
     },
+    "steps": [
+      {"en": "Say what is wrong", "fr": "Dis ce qui ne va pas"},
+      {"en": "Say since when", "fr": "Dis depuis quand"},
+      {"en": "Show your insurance card", "fr": "Montre ta carte d'assurance"},
+      {"en": "Fill in the form", "fr": "Remplis le formulaire"}
+    ],
     "them": {"en": "Receptionist", "fr": "Accueil"},
     "register": "polite",
     "turns": [
@@ -542,6 +554,12 @@
       "en": "Book a table for four this Saturday at seven in the evening.",
       "fr": "Réserve une table pour quatre ce samedi à sept heures du soir."
     },
+    "steps": [
+      {"en": "Say you want to book", "fr": "Dis que tu veux réserver"},
+      {"en": "Choose Saturday at seven", "fr": "Choisis samedi à sept heures"},
+      {"en": "Say you will be four", "fr": "Dis que vous serez quatre"},
+      {"en": "Leave your name and number", "fr": "Laisse ton nom et ton numéro"}
+    ],
     "them": {"en": "Restaurant staff", "fr": "Employé du restaurant"},
     "register": "polite",
     "turns": [
@@ -832,6 +850,12 @@
       "en": "Check in, drop off one suitcase and get a window seat.",
       "fr": "Enregistre-toi, dépose une valise et obtiens une place côté hublot."
     },
+    "steps": [
+      {"en": "Show your passport", "fr": "Montre ton passeport"},
+      {"en": "Drop off one suitcase", "fr": "Dépose une valise"},
+      {"en": "Ask for a window seat", "fr": "Demande une place côté hublot"},
+      {"en": "Ask when boarding starts", "fr": "Demande l'heure d'embarquement"}
+    ],
     "them": {"en": "Check-in agent", "fr": "Agent d'enregistrement"},
     "register": "polite",
     "turns": [
@@ -1076,6 +1100,12 @@
       "en": "Send a parcel of books to France by air.",
       "fr": "Envoie un colis de livres en France par avion."
     },
+    "steps": [
+      {"en": "Say where it is going", "fr": "Dis où il part"},
+      {"en": "Say what is inside", "fr": "Dis ce qu'il contient"},
+      {"en": "Send it by air", "fr": "Envoie-le par avion"},
+      {"en": "Pay for it", "fr": "Paie l'envoi"}
+    ],
     "them": {"en": "Clerk", "fr": "Guichetier"},
     "register": "polite",
     "turns": [
@@ -1364,6 +1394,12 @@
       "en": "Buy medicine for a cold and understand how to take it.",
       "fr": "Achète un médicament contre le rhume et comprends comment le prendre."
     },
+    "steps": [
+      {"en": "Say you have caught a cold", "fr": "Dis que tu as attrapé un rhume"},
+      {"en": "Describe your symptoms", "fr": "Décris tes symptômes"},
+      {"en": "Answer about your fever", "fr": "Réponds sur la fièvre"},
+      {"en": "Ask if it makes you sleepy", "fr": "Demande s'il fait dormir"}
+    ],
     "them": {"en": "Pharmacist", "fr": "Pharmacien"},
     "register": "polite",
     "turns": [
@@ -1609,6 +1645,12 @@
       "en": "Get a trim: a few centimetres off, the fringe a little shorter.",
       "fr": "Fais-toi rafraîchir la coupe : quelques centimètres en moins, la frange un peu plus courte."
     },
+    "steps": [
+      {"en": "Ask for a cut", "fr": "Demande une coupe"},
+      {"en": "Say how much to take off", "fr": "Dis combien couper"},
+      {"en": "Have the fringe shortened", "fr": "Fais raccourcir la frange"},
+      {"en": "Thank the stylist", "fr": "Remercie le coiffeur"}
+    ],
     "them": {"en": "Hairdresser", "fr": "Coiffeur"},
     "register": "polite",
     "turns": [
@@ -1852,6 +1894,12 @@
       "en": "Make plans with a friend: a film on Saturday, a time and a place to meet.",
       "fr": "Organise une sortie avec un ami : un film samedi, une heure et un lieu de rendez-vous."
     },
+    "steps": [
+      {"en": "Say you are free on Saturday", "fr": "Dis que tu es libre samedi"},
+      {"en": "Choose a film", "fr": "Choisis un film"},
+      {"en": "Pick a screening", "fr": "Choisis une séance"},
+      {"en": "Pick a place to meet", "fr": "Choisis un lieu de rendez-vous"}
+    ],
     "them": {"en": "Friend", "fr": "Ami"},
     "register": "casual",
     "turns": [
