@@ -346,7 +346,7 @@ def _parse_ass(content: str) -> list[dict]:
 
 # ── srv3 ────────────────────────────────────────────────────────
 # YouTube's own timed text, the format that keeps the recogniser's time
-# on every word (plan 220): <p t="ms" d="ms">…</p>, and in a recognised
+# on every word (plan 221): <p t="ms" d="ms">…</p>, and in a recognised
 # track each word an <s> whose t is its offset from the paragraph's.
 # The link fetch reads it here; the grab converts the same XML to VTT in
 # the browser (frontend/src/lib/captionGrab.js, srv3Cues), and this
@@ -615,7 +615,7 @@ def fetch_youtube_track(video_id: str) -> list[dict]:
             "no_japanese_subtitles",
         )
 
-    # When each word is said (plan 220). Until then this path read the
+    # When each word is said (plan 221). Until then this path read the
     # track in the library's plain format, which keeps a line's start
     # and end and nothing else, so every session made from a link had
     # its words lit on an estimate: the grab's v2 had brought the

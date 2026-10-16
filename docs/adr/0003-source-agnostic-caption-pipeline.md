@@ -477,7 +477,7 @@ YouTube's srv3 format (`<s t="…">` per word), in words that are often wrong.
 
 ---
 
-## Amendment, 2026-10-16 — the link fetch brings the word times too, and the audio stays YouTube's to read (plan 220)
+## Amendment, 2026-10-16 — the link fetch brings the word times too, and the audio stays YouTube's to read (plan 221)
 
 Asked for subtitles that follow the words more closely ("analyse the audio to
 find the words"), the first thing measured was where the words went without

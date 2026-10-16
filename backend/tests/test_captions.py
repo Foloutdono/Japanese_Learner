@@ -175,7 +175,7 @@ class WordTimeTests(unittest.TestCase):
         self.assertEqual(cue["words"], [[0, 1.3], [1, 1.8]])
 
 
-# srv3, YouTube's own timed text (plan 220): the link fetch reads it
+# srv3, YouTube's own timed text (plan 221): the link fetch reads it
 # here, the grab converts it to VTT in the browser. These are the
 # fixtures of frontend/src/lib/captionGrab.test.js, and the VTT is what
 # its transcriptXmlToVtt writes for them, so the two paths are held to
@@ -377,7 +377,7 @@ class FetchYouTubeTrackTests(unittest.TestCase):
             self._fetch(manual=self._snippets(("   ", 0.0, 1.0)))
         self.assertEqual(caught.exception.code, "subtitles_empty")
 
-    # ── srv3: when each word is said (plan 220) ──
+    # ── srv3: when each word is said (plan 221) ──
     @staticmethod
     def _session(bodies):
         """The library's proxied session: srv3 for the URLs in `bodies`,
