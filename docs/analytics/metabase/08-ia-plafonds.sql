@@ -1,5 +1,5 @@
 -- dashboard: Tsuji — 足跡 · IA & plafonds
--- description: L'usage des fonctions qui appellent un modèle, face aux plafonds quotidiens (core/daily_limit.py) et aux crédits. daily_usage n'est gardé que 30 jours (prune_logs) ; ai_use (plan 215) le prolonge dans event_daily.
+-- description: L'usage des fonctions qui appellent un modèle, face aux plafonds quotidiens (core/daily_limit.py) et aux crédits. daily_usage n'est gardé que 30 jours (prune_logs) ; ai_use (plan 218) le prolonge dans event_daily.
 
 -- ==== question
 -- title: Appels rationnés par jour (ai_use)

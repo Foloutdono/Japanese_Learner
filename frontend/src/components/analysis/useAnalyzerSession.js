@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { countUse } from '../../lib/screenTrail'
 import { apiJson, apiUpload, apiFetch } from '../../lib/api'
 import { useLang } from '../../LangContext'
+import { videoErrorMessage } from './videoErrors'
 
 // ── One Passage, three ways in ────────────────────────────
 // The seam that makes 解析 one screen instead of two (plan 027). A
@@ -34,13 +35,15 @@ export function useAnalyzerSession(session) {
 
   const [passage, setPassage]   = useState(null)
   const [status, setStatus]     = useState('idle')   // idle | working | ready | failed
+  // A sentence from the table, or { video: <what was thrown> } for a
+  // video session's failure, which is worded at the return below.
   const [error, setError]       = useState(null)
   const [focusIndex, setFocus]  = useState(0)
   const [explaining, setExplaining] = useState({})
   // The failure of the one PAID action on this screen used to be an
   // empty catch: the button greyed out, came back, and nothing changed.
-  // A provider outage arrives as a 503 with a usable `detail` (see
-  // routes/phrase.py's LLMUnavailable handler); everything else is a
+  // A provider outage arrives as a 503 (see routes/phrase.py's
+  // LLMUnavailable handler), said as its own line; everything else is a
   // generic failure. Both are now reported per-Sentence, so a failure
   // on stop 12 does not blank the whole Passage's status.
   const [explainError, setExplainError] = useState({})
@@ -157,7 +160,7 @@ export function useAnalyzerSession(session) {
   async function analyzeText(text, { source = 'typed' } = {}) {
     const trimmed = (text ?? '').trim()
     if (!trimmed || status === 'working') return
-    // 足跡 (plan 215): which door the breakdown was asked through, never
+    // 足跡 (plan 218): which door the breakdown was asked through, never
     // the text. A photo's text arrives here too, after the OCR.
     countUse('analyzer', source === 'typed' ? 'text' : 'photo')
 
@@ -252,10 +255,10 @@ export function useAnalyzerSession(session) {
       setVideoSessionId(data.sessionId)
     } catch (e) {
       if (run !== runIdRef.current) return
-      // Surface the parser's own message: it says what was wrong with
-      // the paste, which is the useful thing. A generic failure here
-      // would leave the learner with nothing to act on.
-      setError((e.body && e.body.detail) || e.message)
+      // What was wrong with the paste, which is the useful thing -- in
+      // the learner's language, from the refusal's code
+      // (./videoErrors.js), never the server's English.
+      setError({ video: e })
       setStatus('failed')
     }
   }
@@ -290,11 +293,12 @@ export function useAnalyzerSession(session) {
       setVideoSessionId(data.sessionId)
     } catch (e) {
       if (run !== runIdRef.current) return
-      // The API's own sentence, always. A 400 here means this server
-      // cannot fetch, a 429 means the day's allowance is spent, and
-      // both of those name the file path as the way through -- which a
-      // generic "something went wrong" would throw away.
-      setError((e.body && e.body.detail) || e.message)
+      // Named, always. A 400 here means this server cannot fetch, a
+      // 429 means the day's allowance is spent, and both sentences name
+      // the file path as the way through -- which a generic "something
+      // went wrong" would throw away. Worded from the refusal's code
+      // (./videoErrors.js), in the learner's language.
+      setError({ video: e })
       setStatus('failed')
     }
   }
@@ -320,7 +324,7 @@ export function useAnalyzerSession(session) {
       setVideoSessionId(data.sessionId)
     } catch (e) {
       if (run !== runIdRef.current) return
-      setError((e.body && e.body.detail) || e.message || t.subtitleTooLarge)
+      setError({ video: e })
       setStatus('failed')
     }
   }
@@ -363,7 +367,9 @@ export function useAnalyzerSession(session) {
         setStatus('ready')
       } catch (e) {
         if (cancelled) return
-        setError((e.body && e.body.error) || e.message)
+        // A failed session is a 503 whose body is the stored failure:
+        // its `code` is worded below, its English `error` is the logs'.
+        setError({ video: e })
         setStatus('failed')
       }
     }
@@ -417,8 +423,10 @@ export function useAnalyzerSession(session) {
       setExplainError(prev => ({
         ...prev,
         // 503 is the provider being down, which is temporary and worth
-        // saying so. Anything else is a generic failure.
-        [index]: e?.status === 503 ? (e.message || t.explainUnavailable) : t.explainFailed,
+        // saying so. Anything else is a generic failure. Never the
+        // server's own sentence: ApiError's message is never empty, so
+        // the backend's English used to win every time (plan 215).
+        [index]: e?.status === 503 ? t.explainUnavailable : t.explainFailed,
       }))
     } finally {
       setExplaining(prev => ({ ...prev, [index]: false }))
@@ -535,7 +543,10 @@ export function useAnalyzerSession(session) {
     passage,
     sentences,
     status,
-    error,
+    // A video failure is kept as it was thrown and worded here, at
+    // render, so the sentence follows the learner's language rather
+    // than the one in force when it failed (./videoErrors.js).
+    error: error?.video ? videoErrorMessage(error.video, t) : error,
     history,
     focusIndex: safeIndex,
     setFocusIndex: setFocus,

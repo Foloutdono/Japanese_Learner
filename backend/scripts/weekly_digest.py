@@ -432,7 +432,7 @@ def time_spent(cur, days: int) -> str:
 
     screen_leave's `ms` is ENGAGED time (lib/dwell.js: a hidden tab does
     not count), sent on leaving a screen and on hiding the page (plan
-    215), so a screen's total is real attention, not an open tab.
+    218), so a screen's total is real attention, not an open tab.
     feature_use is one row per (feature, action) per screen left, `n`
     the presses. Raw rows only, so the window is the last 30 days at most.
     """
@@ -450,7 +450,7 @@ def time_spent(cur, days: int) -> str:
     )
     screens = cur.fetchall()
     if not screens:
-        return "_Nothing yet (screen_leave arrived with plan 215)._\n"
+        return "_Nothing yet (screen_leave arrived with plan 218)._\n"
     out = [table(["screen", "minutes", "median stay (s)", "learners"], screens)]
     cur.execute(
         """

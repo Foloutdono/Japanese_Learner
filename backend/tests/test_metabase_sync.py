@@ -1,4 +1,4 @@
-# ── 足跡 — the dashboards as code (plan 215) ──────────────────────────
+# ── 足跡 — the dashboards as code (plan 218) ──────────────────────────
 #
 # docs/analytics/metabase/*.sql is what scripts/metabase_sync.py builds
 # Metabase from. These pin what has to hold for that to stay safe and

@@ -22,7 +22,7 @@ import DayClearView from '../components/dayclear/DayClearView'
 // finishShown, decided once, on arrival). Every way out replaces this
 // entry, so Back from the gate does not replay a ceremony.
 export default function DayClearScreen({ session }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const navigate = useNavigate()
   const state = useLocation().state?.run ?? null
   const [shown] = useState(() => finishShown(state))
@@ -39,6 +39,7 @@ export default function DayClearScreen({ session }) {
     shareTicket({
       ...ticket,
       t,
+      lang,
       figures: { reviews: summary?.totalReviews, words: summary?.wordsLearned, level: summary?.jlptLevel },
     })
   }

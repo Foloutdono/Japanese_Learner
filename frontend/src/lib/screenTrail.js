@@ -1,6 +1,6 @@
 // ── 滞在と利用 — how long a screen held someone, and what they used on it ──
 //
-// Plan 215. screen_view says a screen was ARRIVED at; nothing said how
+// Plan 218. screen_view says a screen was ARRIVED at; nothing said how
 // long it was looked at, so "where do learners spend their time" had no
 // answer. This module keeps the screen that is up, times it with
 // lib/dwell.js (engaged time: a hidden tab stops the clock) and sends

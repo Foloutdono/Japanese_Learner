@@ -62,7 +62,7 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
   const [windowOpen, setWindowOpen] = useState(false)
-  const own = useBookmarkletCopy()
+  const own = useBookmarkletCopy(t)
   const { copied, copy: copyBookmarklet } = grab ?? own
   const [showTutorial, setShowTutorial] = useState(false)
   const fileRef = useRef(null)

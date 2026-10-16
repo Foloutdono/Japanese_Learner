@@ -53,7 +53,7 @@ export function useRatingScale() {
  *  still comes back to the bar the learner just picked. */
 export function setRatingScale(id, session) {
   mirror(id)
-  track('setting_change', { setting: 'rating_scale', value: id })   // plan 215
+  track('setting_change', { setting: 'rating_scale', value: id })   // plan 218
   return apiJson('/api/profile/learning', session, {
     method: 'PATCH',
     body: JSON.stringify({ ratingScale: id }),

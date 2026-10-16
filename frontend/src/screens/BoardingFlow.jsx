@@ -368,14 +368,18 @@ export default function BoardingFlow({
     if (name === savedName || dryRun) { setNameError(null); go('why'); return }
     setBusy(true)
     setNameError(null)
+    // Only a sentence from the table reaches the field: a dropped
+    // connection rejects with the browser's own English ("Failed to
+    // fetch"), which used to be printed as it stood (plan 215).
+    let refused = t.genericError
     apiFetch('/api/profile', session, { method: 'PATCH', body: JSON.stringify({ username: name }) })
       .then(r => {
-        if (r.status === 409) throw new Error(t.usernameTaken)
-        if (!r.ok) throw new Error(t.genericError)
+        if (r.status === 409) refused = t.usernameTaken
+        if (!r.ok) throw new Error(`profile ${r.status}`)
         setSavedName(name)
         go('why')
       })
-      .catch(err => setNameError(err.message || t.genericError))
+      .catch(() => setNameError(refused))
       .finally(() => setBusy(false))
   }
 

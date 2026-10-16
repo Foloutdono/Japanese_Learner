@@ -170,7 +170,7 @@ describe('useCardSession and the trail', () => {
 
   it('records the level of a run whose key names one', async () => {
     await render(<Probe storageKey={sessionKey('vocab', 'N4', 'm')} fetchBatch={vi.fn(pendingBatch)} mode="m" />)
-    // `where` is the door, from the screen the run is on (plan 215);
+    // `where` is the door, from the screen the run is on (plan 218);
     // this harness runs on no route the app declared.
     expect(track).toHaveBeenCalledWith('run_start', { kind: 'vocab', mode: 'm', level: 'N4', where: 'other' })
   })

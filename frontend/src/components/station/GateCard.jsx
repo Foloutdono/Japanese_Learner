@@ -637,7 +637,7 @@ function ClearedGate({ today, desk }) {
       {week && (
         <div className="tdy-rally tpr-at" style={at(frame.cx, frame.cy + frame.fare + BELOW.week)}>
           <WeekStamps week={week} label={t.todayWeekStamps(summary.streak)} />
-          <span className="tdy-rally__n" aria-hidden="true"><b>{summary.streak}</b>{t.todayStreakDays}</span>
+          <span className="tdy-rally__n" aria-hidden="true"><b>{summary.streak}</b>{t.todayStreakDays(summary.streak)}</span>
         </div>
       )}
     </section>

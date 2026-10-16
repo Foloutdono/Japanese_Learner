@@ -1,5 +1,5 @@
 -- dashboard: Tsuji — 足跡 · Temps passé
--- description: Temps engagé (onglet caché exclu, lib/dwell.js) par écran, visite, séance et carte. Plan 215 : les séjours datent de son déploiement.
+-- description: Temps engagé (onglet caché exclu, lib/dwell.js) par écran, visite, séance et carte. Plan 218 : les séjours datent de son déploiement.
 
 -- ==== question
 -- title: Heures engagées sur la période
@@ -84,7 +84,7 @@ FROM per_user GROUP BY 1 ORDER BY 1;
 -- title: Durée des séances par type
 -- display: table
 -- size: 12x7
--- description: run_complete et run_abandon. ms = temps engagé (plan 215) ; avant lui, secs (horloge).
+-- description: run_complete et run_abandon. ms = temps engagé (plan 218) ; avant lui, secs (horloge).
 WITH runs AS (
   SELECT props->>'kind' AS kind, name,
          coalesce((props->>'ms')::numeric, (props->>'secs')::numeric * 1000) AS ms,

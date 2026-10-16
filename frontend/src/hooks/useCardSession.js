@@ -296,7 +296,7 @@ export function useCardSession({
   // and no `done` is an abandonment -- which is the number that
   // matters, since a session nobody finishes is a mode nobody likes.
   //
-  // Since plan 215 each end also carries how the run went, read off the
+  // Since plan 218 each end also carries how the run went, read off the
   // run's tally (stores/runTally.js, which useReviewGates starts with
   // the run): engaged ms, the time per card's median and slow tail, how
   // many were right (lib/runTrail.js runFigures). `where` is the door,

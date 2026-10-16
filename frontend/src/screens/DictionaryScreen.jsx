@@ -410,7 +410,7 @@ export default function DictionaryScreen({ session }) {
 			.then(data => {
 				if (seq !== pageSeq.current) return
 				const newResults = data.results || []
-				// 足跡 (plan 215): a search that answered, counted -- never
+				// 足跡 (plan 218): a search that answered, counted -- never
 				// what was searched for.
 				if (p === 0 && q) countUse('dictionary', 'search')
 				if (p === 0) setResults(newResults)
@@ -630,6 +630,12 @@ export default function DictionaryScreen({ session }) {
 		setLookup({ id: rawId, category: 'grammar' })
 	}
 
+	// An example sentence, broken down, in the same sheet (plan 214).
+	function openSentence(ex) {
+		if (!ex?.jp) return
+		setLookup({ category: 'sentence', term: ex.jp, tr: ex.tr ?? ex.en })
+	}
+
 	// The one card this entry is, in every mode it owes — what the
 	// panel's "review this card" boards when the record says the card
 	// is due (plan 089). The run is the Today run, filtered to one id
@@ -707,6 +713,7 @@ export default function DictionaryScreen({ session }) {
 			entry={selected}
 			onRadicalClick={jumpToRadical} onKanjiClick={char => openEntry(char, 'kanji')}
 			onVocabClick={(k, r) => openEntry(k || r, 'vocab', r)} onGrammarClick={openGrammar}
+			onSentenceClick={openSentence}
 			onKanaClick={(k, type) => openEntry(k, type)} onReview={reviewCard}
 			mining={mining} favorites={shelf}
 		/>
@@ -1023,6 +1030,7 @@ export default function DictionaryScreen({ session }) {
 						onVocabClick={(k, r) => openEntry(k || r, 'vocab', r)}
 						onKanaClick={(k, type) => openEntry(k, type)}
 						onGrammarClick={openGrammar}
+						onSentenceClick={openSentence}
 						onReview={reviewCard}
 						mining={mining}
 						favorites={shelf}
@@ -1043,7 +1051,7 @@ export default function DictionaryScreen({ session }) {
 			{lookup && !desk && (
 				<DictionaryLookupSheet
 					key={lookupKey(lookup)}
-					term={lookup.term} kana={lookup.kana} id={lookup.id} category={lookup.category}
+					term={lookup.term} kana={lookup.kana} id={lookup.id} category={lookup.category} tr={lookup.tr}
 					session={session} mining={mining} favorites={shelf} over
 					onRadicalClick={jumpToRadical}
 					onReview={reviewCard}
@@ -1180,7 +1188,7 @@ const doorsIn = node => [...node.querySelectorAll('button:not([disabled]), a[hre
 // entry opens INTO the dock (DictionaryLookupBody, the lookup sheet's own
 // body) with ✕ stepping back out to this entry — the catalogue, the
 // search and the scroll never move and nothing covers them.
-function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onKanaClick, onReview, mining, favorites }) {
+function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onSentenceClick, onKanaClick, onReview, mining, favorites }) {
 	const deskDock = useContext(DeskDockContext)
 	const dockRef = useRef(null)
 	const lookup = deskDock?.lookup ?? null
@@ -1226,7 +1234,7 @@ function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick
 				{lookup ? (
 					<DictionaryLookupBody
 						key={lookupKey(lookup)}
-						term={lookup.term} kana={lookup.kana} id={lookup.id} category={lookup.category}
+						term={lookup.term} kana={lookup.kana} id={lookup.id} category={lookup.category} tr={lookup.tr}
 						session={deskDock.session} mining={deskDock.mining} favorites={deskDock.favorites}
 						onRadicalClick={deskDock.onRadicalClick}
 						onReview={deskDock.onReview}
@@ -1240,6 +1248,7 @@ function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick
 					onKanjiClick={onKanjiClick}
 					onVocabClick={onVocabClick}
 					onGrammarClick={onGrammarClick}
+					onSentenceClick={onSentenceClick}
 					onKanaClick={onKanaClick}
 					onReview={onReview}
 					mining={mining}
@@ -1259,7 +1268,7 @@ function cardHeadword(entry) {
 
 function ResultsSection({
 	loading, loadingMore, hasMore, results, total, query,
-	selected, setSelected, sentinelRef, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick,
+	selected, setSelected, sentinelRef, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onSentenceClick,
 	onKanaClick, onReview, mining, favorites, shelf = false, t,
 }) {
 	const desk = useDesk()
@@ -1388,7 +1397,7 @@ function ResultsSection({
 						<DetailDock
 							entry={selected} onClose={() => { playUi('click-close-menu'); setSelected(null) }}
 							onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick}
-							onGrammarClick={onGrammarClick} onKanaClick={onKanaClick} onReview={onReview}
+							onGrammarClick={onGrammarClick} onSentenceClick={onSentenceClick} onKanaClick={onKanaClick} onReview={onReview}
 							mining={mining} favorites={favorites}
 						/>
 					)}

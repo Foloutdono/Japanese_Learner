@@ -30,7 +30,7 @@ const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 // deleted. The figures come from GET /api/profile/learning/preview —
 // the same arithmetic the write will run.
 export function LevelPage({ session }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const { summary, failed: summaryFailed } = useProfileSummaryState()
   const { save, saving, failed, setFailed } = useLearningSave(session)
   const [pending, setPending] = useState(null) // { level, preview } while the sheet is open
@@ -155,6 +155,7 @@ export function LevelPage({ session }) {
           to={pending.level}
           preview={pending.preview}
           t={t}
+          lang={lang}
           onConfirm={confirmLevel}
           onClose={() => setPending(null)}
         />
@@ -164,7 +165,7 @@ export function LevelPage({ session }) {
 }
 
 // ── The confirm sheet (canvas SettingsLevelUp / SettingsLevelDown) ──
-function LevelSheet({ from, to, preview, t, onConfirm, onClose }) {
+function LevelSheet({ from, to, preview, t, lang, onConfirm, onClose }) {
   const up = preview.direction !== 'down'
   const title = up ? t.levelUpTitle(to) : t.levelDownTitle(to)
   return (
@@ -175,12 +176,12 @@ function LevelSheet({ from, to, preview, t, onConfirm, onClose }) {
       <div className="lvl-sheet__figs">
         {up ? (
           <>
-            <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">{(preview.markedKnown ?? 0).toLocaleString()}</b><span className="lvl-sheet__fig-l">{t.levelMarkedKnown}</span></div>
+            <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">{(preview.markedKnown ?? 0).toLocaleString(lang)}</b><span className="lvl-sheet__fig-l">{t.levelMarkedKnown}</span></div>
             <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">{t.levelWeeks(preview.spreadWeeks ?? 6)}</b><span className="lvl-sheet__fig-l">{t.levelSpreadOver}</span></div>
           </>
         ) : (
           <>
-            <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">{(preview.setAside ?? 0).toLocaleString()}</b><span className="lvl-sheet__fig-l">{t.levelSetAside}</span></div>
+            <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">{(preview.setAside ?? 0).toLocaleString(lang)}</b><span className="lvl-sheet__fig-l">{t.levelSetAside}</span></div>
             <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">0</b><span className="lvl-sheet__fig-l">{t.levelDeleted}</span></div>
           </>
         )}

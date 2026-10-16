@@ -3,6 +3,8 @@ import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
+import en from '../locales/en/index.js'
+import fr from '../locales/fr/index.js'
 
 // The bug this pins, in one sentence: "still generating" arrives as HTTP
 // 202, which is a SUCCESS status, so apiJson RESOLVES rather than
@@ -351,19 +353,23 @@ describe('AnalyzerScreen polling', () => {
   })
 
   it('surfaces a parse failure with the reason and a way back', async () => {
-    // The ONLY way to fail now: a file or paste we could not parse.
-    // Nothing is fetched, so nothing can be IP-blocked.
+    // A file or paste we could not parse. The poll's 503 carries the
+    // stored failure: its `code` is what the learner is told by, in
+    // their own language, and the server's English `error` is the
+    // logs' (plan 215).
     apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
     apiJson.mockRejectedValue(Object.assign(new Error('bad'), {
       status: 503,
-      body: { error: 'No cue timestamps found in VTT content' },
+      body: { status: 'failed', code: 'no_cues', error: 'No cue timestamps found in VTT content', isYoutube: false },
     }))
 
     const screen = await renderScreen()
     await startFromFile(screen)
     await settle(120)
 
-    expect(screen.container.textContent).toContain('No cue timestamps')
+    const text = screen.container.textContent
+    expect([en.subtitleNoCues, fr.subtitleNoCues].some(s => text.includes(s))).toBe(true)
+    expect(text).not.toContain('No cue timestamps')
     // And the dock is still there to try again with, rather than a dead
     // end. Since plan 029 the intake is always mounted, so the check is
     // that the failure did not replace it: its file is one press away
@@ -516,7 +522,12 @@ describe('AnalyzerScreen polling', () => {
     screen.container.querySelector('.anl-desk__explain').click()
     await settle(500)
 
-    expect(screen.container.textContent).toContain('The AI service is temporarily unavailable.')
+    // The table's own line, never the server's English: ApiError's
+    // message is never empty, so `e.message || …` let it win every
+    // time (plan 215).
+    const text = screen.container.textContent
+    expect([en.explainUnavailable, fr.explainUnavailable].some(s => text.includes(s))).toBe(true)
+    expect(text).not.toContain('The AI service is temporarily unavailable.')
   })
 
   it('offers to explain again once explained', async () => {

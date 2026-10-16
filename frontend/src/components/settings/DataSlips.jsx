@@ -52,7 +52,7 @@ export function DataSlips({ session }) {
     }
   }
 
-  // The learner's own usage statistics (plan 215), the right of access
+  // The learner's own usage statistics (plan 218), the right of access
   // beside the right to object: GET /api/profile/export/trail, both the
   // raw rows and the daily counts, as one CSV.
   const [trailing, setTrailing] = useState(false)
@@ -110,7 +110,7 @@ export function DataSlips({ session }) {
             two the three panels below use. */}
         <Slip label={t.settingsTrail}>
           {/* The trail's own download sits in the hint, as text: the
-              slip's one action stays the switch (plan 215). */}
+              slip's one action stays the switch (plan 218). */}
           <span className="slip__hint">
             {t.settingsTrailHint}{' '}
             <button type="button" className="slip__more" data-action="trail-export" disabled={trailing} onClick={() => { playClick(); exportTrail() }}>

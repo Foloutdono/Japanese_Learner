@@ -34,7 +34,7 @@ export function LangProvider({ children }) {
     }, [lang])
 
     function switchLang(code) {
-        if (code !== lang) track('setting_change', { setting: 'lang', value: code })   // plan 215
+        if (code !== lang) track('setting_change', { setting: 'lang', value: code })   // plan 218
         setLang(code)
         localStorage.setItem('lang', code)
     }

@@ -45,7 +45,7 @@ EVENTS: dict[str, frozenset[str]] = {
 
     # ── Where people go ──────────────────────────────────────────
     "screen_view":    frozenset({"route", "tab"}),
-    # 滞在 — how long the screen was in front of someone (plan 215).
+    # 滞在 — how long the screen was in front of someone (plan 218).
     # Sent when the route changes and when the page is hidden, `ms`
     # ENGAGED time from lib/dwell.js (a hidden tab does not count), so
     # the sum over a visit is the visit's real length. Returning to a
@@ -57,7 +57,7 @@ EVENTS: dict[str, frozenset[str]] = {
     # event_daily's count of this name is "sessions per learner per
     # day" for the life of the account, after the raw rows are gone.
     #
-    # Since plan 215 it carries the visit's context, each a COARSE
+    # Since plan 218 it carries the visit's context, each a COARSE
     # class read once (lib/visitContext.js), never a raw value: no user
     # agent, no resolution, no time zone, nothing that narrows a device
     # down -- the CNIL exemption this design relies on forbids
@@ -106,7 +106,7 @@ EVENTS: dict[str, frozenset[str]] = {
     "guide_done":     frozenset({"gate", "skipped", "stops", "ms"}),
 
     # ── Study runs ───────────────────────────────────────────────
-    # Since plan 215 the sentence runs (reading, translation,
+    # Since plan 218 the sentence runs (reading, translation,
     # comprehension, dictation, composition) report here too, through
     # hooks/useRunTrail.js, and every run carries how it went: `ms` is
     # engaged time (lib/dwell.js; `secs` stays the wall-clock it always
@@ -163,9 +163,10 @@ EVENTS: dict[str, frozenset[str]] = {
     #
     # NOT A DECK NAME, and not a description: both are learner-typed,
     # which is the rule this whole module exists to keep. `structure` is
-    # the deck's type (one of four), `cards` is a count, `where` is
-    # which surface the follow came from (the shelf block or the library
-    # screen), and `sort` is which ordering was showing. A deck id is
+    # the deck's type (one of routes/decks.py's STRUCTURES), `cards` is
+    # a count, `where` is which surface the follow came from (the shelf
+    # block or the library screen), and `sort` is which ordering was
+    # showing. A deck id is
     # not carried either -- it would make the trail say who follows
     # whom, which is more than "is the library used" needs to know.
     "deck_publish":   frozenset({"structure", "cards"}),
@@ -181,6 +182,11 @@ EVENTS: dict[str, frozenset[str]] = {
     # The kind of entry and the direction, never the key: a key names
     # the word a learner looked up, which is theirs.
     "favorite_toggle": frozenset({"kind", "on"}),
+    # ── 歌 — a song's decks, from the video result (plan 215) ────
+    # How many words and lines went in (0 for the half not taken),
+    # never the song's name: the learner typed it, or the video's title
+    # said it, and either is theirs.
+    "song_deck":       frozenset({"words", "lines"}),
     # ── 発車案内 — the app opened from outside it (plan 156) ──────
     # `via` is `notification` (the daily nudge or an agenda block's
     # reminder, plan 181) or `widget` (a home or
@@ -201,6 +207,10 @@ EVENTS: dict[str, frozenset[str]] = {
     # were the point's own (`authored`, plan 187c).
     "grammar_tour_step": frozenset({"level", "stop", "outcome"}),
     "grammar_tour_done": frozenset({"level", "tries", "helped", "authored"}),
+    # ── 初見 — a kana or a kanji's first tour (plan 216) ─────────
+    # `source` is kana or kanji, never the character: whether the trace
+    # is finished, and how often it misses or is drawn for the learner.
+    "glyph_tour_done": frozenset({"source", "misses", "shown"}),
 
     # ── 終着 — the day cleared (plan 191) ────────────────────────
     # Both written server-side: day_clear by POST /api/today/clear on
@@ -214,7 +224,7 @@ EVENTS: dict[str, frozenset[str]] = {
     "rest_day_used":  frozenset({"days"}),
     "ticket_share":   frozenset({"days"}),
 
-    # ── 利用 — the small features, counted per screen (plan 215) ──
+    # ── 利用 — the small features, counted per screen (plan 218) ──
     # Whether anyone plays the audio, scans a photo, asks the tutor,
     # searches the dictionary. Not one row per press: lib/screenTrail.js
     # counts presses while a screen is up and sends one row per
@@ -227,7 +237,7 @@ EVENTS: dict[str, frozenset[str]] = {
     # trail's own switch: an objection is not recorded by the thing it
     # objects to.
     "setting_change": frozenset({"setting", "value"}),
-    # ── AI — a rationed model call claimed (plan 215) ─────────────
+    # ── AI — a rationed model call claimed (plan 218) ─────────────
     # Written server-side by core/daily_limit.claim, so the use of the
     # ceilinged features outlives daily_usage's thirty days (prune_logs)
     # in event_daily. `count` is the day's slots taken, this one
@@ -251,7 +261,7 @@ EVENTS: dict[str, frozenset[str]] = {
 }
 
 # 選択肢 — the values a string property may take, where it is an enum
-# (plan 215). `clean` keeps a key only if the name allows it; for the
+# (plan 218). `clean` keeps a key only if the name allows it; for the
 # keys listed here it also keeps the VALUE only if it is one of these,
 # and drops the key otherwise. That is what makes "nothing a learner
 # typed" structural rather than a call site's good manners: a string
@@ -503,10 +513,10 @@ def write(cur, user_id: str, rows: list[tuple]) -> int:
 
 
 def opted_out(cur, user_id: str) -> bool:
-    """Whether this account asked not to be counted (plan 215).
+    """Whether this account asked not to be counted (plan 218).
 
     The switch in Réglages › Données was a localStorage flag until plan
-    215, which stopped the browser it was flipped in and nothing else:
+    218, which stopped the browser it was flipped in and nothing else:
     the server's own events (a blocked fare, a cleared day, a basics
     unit) kept being written, and so did every other device's. It is
     the account's now, `user_profiles.analytics_off`, and both write

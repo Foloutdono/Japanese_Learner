@@ -27,7 +27,8 @@ import ReadingsInput from '../components/study/ReadingsInput'
 import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
 import {DrawingQuiz, DrawingOverlay} from '../components/study/DrawingCanvas'
-import { speakJapanese, playUi } from '../lib/audio'
+import { GlyphGate, glyphGated } from '../components/study/GlyphGate'
+import { speakJapanese, playUi, isSpeakOnReveal } from '../lib/audio'
 import {
   MODES as STUDY_MODES, RENDER, FAST_REVIEW,
   modeLabel, usesWritingDrill,
@@ -292,6 +293,9 @@ export default function KanjiRun({ session }) {
   // comparison against one key ('write') that used to stand in for it.
   const renderer = STUDY_MODES[mode]?.renderer ?? RENDER.FLASHCARD
   const isRadical = STUDY_MODES[mode]?.base === 'radical'
+  // 初見 (plan 216): a kanji never met is shown before it is drilled --
+  // what it means and reads, its strokes traced, a few simple words.
+  const glyphing = glyphGated(card)
 
   return (
     <StudyStage
@@ -307,7 +311,7 @@ export default function KanjiRun({ session }) {
       onToastDone={gates.toastDone}
       records
       progress={progress}
-      panel={card ? <CardPanel card={card} keys={renderer === RENDER.TYPE ? 'readings' : undefined} /> : null}
+      panel={card && !glyphing ? <CardPanel card={card} keys={renderer === RENDER.TYPE ? 'readings' : undefined} /> : null}
       done={done}
       side={error && !card ? null : <SessionPanel done={done} />}
       sideLabel={t.dictionaryTitle}
@@ -318,7 +322,12 @@ export default function KanjiRun({ session }) {
         {done    && <DoneMessage onBack={leave} pace={paceCtl.pace}
           onExtra={paceCtl.pacedOut ? () => paceCtl.boardExtra(retry) : undefined} />}
 
-        {card && !loading && (
+        {card && !loading && glyphing && (
+          <div className="gt-gate">
+            <GlyphGate card={card} session={session} onBoard={() => updateCurrent({ lesson_seen: true })} />
+          </div>
+        )}
+        {card && !loading && !glyphing && (
           <>
             <HintBar available={availableHints} active={activeHints}
                      onToggle={toggleHint} disabled={gates.locked} />
@@ -504,7 +513,7 @@ export default function KanjiRun({ session }) {
                 onValidate={() => {
                   setAnswered(true)
                   setShowRating(true)
-                  speakJapanese(card.kana)
+                  if (isSpeakOnReveal()) speakJapanese(card.kana)
                 }}
               />
             )}

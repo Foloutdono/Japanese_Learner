@@ -14,7 +14,7 @@ import { countUse } from './screenTrail'
 // back a Passage of two with no rows to draw (routes/phrase.py's
 // PhraseRequest.whole). Every practice fetch of the local tier sends it too.
 export async function explainSentence(session, phrase, lang) {
-  countUse('explain', 'open')   // 足跡 (plan 215): opened, never the sentence
+  countUse('explain', 'open')   // 足跡 (plan 218): opened, never the sentence
   const r = await apiFetch('/api/phrase/analyze', session, {
     method: 'POST',
     body: JSON.stringify({ phrase, save: false, deep: true, whole: true, lang }),

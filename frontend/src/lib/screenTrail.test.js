@@ -1,4 +1,4 @@
-// ── 滞在と利用 — the screen's time and its feature counts (plan 215) ──
+// ── 滞在と利用 — the screen's time and its feature counts (plan 218) ──
 //
 // What has to hold: leaving a screen sends its engaged time and one
 // feature_use per (feature, action) with the count; a hide closes the

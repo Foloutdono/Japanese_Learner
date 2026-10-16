@@ -108,12 +108,12 @@ describe('the lesson gate in the day’s queue', () => {
     expect(stage.querySelector('.gl--gate')).toBeNull()
     expect(stage.querySelector('.prompt-card')).toBeTruthy()
     // The mirror keeps the flag on the queued card, so a reload does not gate again.
-    const cached = JSON.parse(localStorage.getItem(sessionKey('today', 'all')))
+    const cached = JSON.parse(localStorage.getItem(sessionKey('today', 'all', 'en')))
     expect(cached[0].lesson_seen).toBe(true)
   }, 20000)
 
   it('does not gate a point already boarded or already met', async () => {
-    localStorage.setItem(sessionKey('today', 'all'), JSON.stringify([grammar({ lesson_seen: true })]))
+    localStorage.setItem(sessionKey('today', 'all', 'en'), JSON.stringify([grammar({ lesson_seen: true })]))
     const boarded = await mount([])
     await settle()
     expect(boarded.container.querySelector('.gl--gate')).toBeNull()

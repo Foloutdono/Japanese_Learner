@@ -252,7 +252,7 @@ describe('the session', () => {
   })
 })
 
-// ── 足跡 II (plan 215): enums and shapes ──────────────────────────
+// ── 足跡 II (plan 218): enums and shapes ──────────────────────────
 
 describe('the values a property may take', () => {
   it('drops an enum value that is not on its list', () => {

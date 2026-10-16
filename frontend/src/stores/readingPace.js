@@ -65,7 +65,7 @@ export function useReadingPace() {
  *  back to the pace the learner just picked. */
 export function setReadingPace(id, session) {
   mirror(id)
-  track('setting_change', { setting: 'reading_pace', value: id })   // plan 215
+  track('setting_change', { setting: 'reading_pace', value: id })   // plan 218
   setPending(id)
   const saved = saving.then(() => apiJson('/api/profile/learning', session, {
     method: 'PATCH',

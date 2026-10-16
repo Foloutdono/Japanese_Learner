@@ -174,7 +174,7 @@ function sections(t) {
     // Translation mode: given a phrase in the UI's foreign language,
     // type the Japanese translation; the deck's reference translation
     // plus an LLM analysis help you judge your own attempt.
-    { icon: '翻訳', title: t.translationTitle || 'Translation', desc: t.translationDesc || 'Translate into Japanese', path: '/practice/translation', clip: 'translation', color: 'var(--line-honyaku)', tab: 'practice' },
+    { icon: '翻訳', title: t.translationTitle, desc: t.translationDesc, path: '/practice/translation', clip: 'translation', color: 'var(--line-honyaku)', tab: 'practice' },
     // 書取 — dictation: a clip is played (twice, and no more) and the
     // learner writes down what was said. The one section on this tab
     // whose prompt is not text, and so the one the machine grades
@@ -195,7 +195,7 @@ function sections(t) {
     // Generated mock exams (vocab/grammar/reading/listening, built to
     // the official JLPT blueprint but never copied from a real past
     // paper) — see src/exam/.
-    { icon: '模試', title: t.examTitle || 'Mock Exam', desc: t.examDesc || 'Practice exams built to the JLPT format', path: '/practice/exam', clip: 'exam', color: 'var(--line-exam)', tab: 'practice' },
+    { icon: '模試', title: t.examTitle, desc: t.examDesc, path: '/practice/exam', clip: 'exam', color: 'var(--line-exam)', tab: 'practice' },
 
     // ── 辞書 — the dictionary, and the analyzer behind its door ──
     { icon: '辞書', title: t.dictionaryTitle, desc: t.dictionaryDesc, path: '/dictionary',          clip: 'dictionary', color: 'var(--line-jisho)',   tab: 'dictionary' },

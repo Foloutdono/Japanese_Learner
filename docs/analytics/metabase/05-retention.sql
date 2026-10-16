@@ -1,5 +1,5 @@
 -- dashboard: Tsuji — 足跡 · Rétention
--- description: Qui revient, et ce qui distingue ceux qui reviennent. Activité = au moins un événement ce jour-là (event_log ∪ event_daily, donc tout l'historique gardé). Plan 215.
+-- description: Qui revient, et ce qui distingue ceux qui reviennent. Activité = au moins un événement ce jour-là (event_log ∪ event_daily, donc tout l'historique gardé). Plan 218.
 
 -- ==== question
 -- title: Cohortes hebdomadaires (% actifs la semaine N)
@@ -158,7 +158,7 @@ FROM marks GROUP BY 1 ORDER BY 2 DESC;
 -- title: Revenus sous 7 jours, par écran et système de la première visite
 -- display: table
 -- size: 12x7
--- description: Contexte du premier session_start porteur de contexte (plan 215).
+-- description: Contexte du premier session_start porteur de contexte (plan 218).
 WITH active AS (
   SELECT DISTINCT user_id, (at AT TIME ZONE 'Europe/Paris')::date AS day FROM event_log WHERE name <> 'api_error'
   UNION

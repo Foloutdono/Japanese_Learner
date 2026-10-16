@@ -1,5 +1,5 @@
 -- dashboard: Tsuji — 足跡 · Fiabilité
--- description: Ce qui casse ou traîne : requêtes en échec, démarrages ratés, erreurs côté client (jamais leur texte), vitesse des pages. Erreurs client et vitesse depuis le plan 215.
+-- description: Ce qui casse ou traîne : requêtes en échec, démarrages ratés, erreurs côté client (jamais leur texte), vitesse des pages. Erreurs client et vitesse depuis le plan 218.
 
 -- ==== question
 -- title: Requêtes en échec par jour

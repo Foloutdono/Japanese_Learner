@@ -1,5 +1,5 @@
 -- dashboard: Tsuji — 足跡 · Entonnoirs
--- description: Où l'on perd les apprenants : activation, embarquement, premier trajet, guides, cours de base, tours de grammaire, offre. Plan 215.
+-- description: Où l'on perd les apprenants : activation, embarquement, premier trajet, guides, cours de base, tours de grammaire, offre. Plan 218.
 
 -- ==== question
 -- title: Activation des nouveaux apprenants

@@ -82,6 +82,13 @@ describe('on the web', () => {
     auth.signInWithOAuth.mockResolvedValue({ data: {}, error: { message: 'provider is not enabled' } })
     expect(await connectProvider({})).toEqual({ ok: false, message: 'provider is not enabled' })
   })
+
+  it('carries Supabase’s code out with the refusal', async () => {
+    auth.signInWithOAuth.mockResolvedValue({
+      data: {}, error: { code: 'validation_failed', message: 'Unsupported provider: provider is not enabled' },
+    })
+    expect(await connectProvider({})).toMatchObject({ ok: false, code: 'validation_failed' })
+  })
 })
 
 describe('in the shell', () => {
@@ -135,6 +142,25 @@ describe('in the shell', () => {
     expect(r.ok).toBe(false)
     expect(auth.exchangeCodeForSession).not.toHaveBeenCalled()
     expect(auth.setSession).not.toHaveBeenCalled()
+    // Named, so the button words it from the table (lib/authErrors.js)
+    // rather than printing this module's own English.
+    expect(r.code).toBe('no_credentials')
+  })
+
+  // The web reads a refusal's code off the URL it comes back on
+  // (lib/authRedirect.js); the shell's callback carries the same one,
+  // and it reaches the same sentence (plan 215).
+  it('names the refusal the callback carried', async () => {
+    openAuthTab.mockResolvedValue(
+      'app.tsuji://auth-callback#error=server_error&error_code=identity_already_exists&error_description=Identity+is+already+linked',
+    )
+    const r = await connectProvider({ link: true })
+    expect(r).toMatchObject({ ok: false, code: 'identity_already_exists' })
+  })
+
+  it('names a missing authorization url', async () => {
+    auth.signInWithOAuth.mockResolvedValue({ data: {}, error: null })
+    expect(await connectProvider({})).toMatchObject({ ok: false, code: 'no_authorization_url' })
   })
 
   it('passes a failed exchange back rather than reporting success', async () => {

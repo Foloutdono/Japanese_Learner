@@ -1,5 +1,5 @@
 -- dashboard: Tsuji — 足跡 · Fonctionnalités
--- description: Ce qui est utilisé, par combien d'apprenants, et ce qui ne l'est jamais. Plan 215.
+-- description: Ce qui est utilisé, par combien d'apprenants, et ce qui ne l'est jamais. Plan 218.
 
 -- ==== question
 -- title: Écrans : vues, apprenants, temps
@@ -146,7 +146,7 @@ GROUP BY 1 ORDER BY 2 DESC;
 -- title: Fonctions : utilisations et apprenants
 -- display: table
 -- size: 12x7
--- description: feature_use, compté par écran puis envoyé en le quittant (n = nombre d'utilisations). Depuis le plan 215.
+-- description: feature_use, compté par écran puis envoyé en le quittant (n = nombre d'utilisations). Depuis le plan 218.
 SELECT props->>'feature' AS "Fonction", props->>'action' AS "Geste",
        sum((props->>'n')::int) AS "Utilisations", count(DISTINCT user_id) AS "Apprenants"
 FROM event_log

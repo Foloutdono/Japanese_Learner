@@ -1,4 +1,4 @@
-// ── 故障 — the errors nobody reported (plan 215) ──────────────────────
+// ── 故障 — the errors nobody reported (plan 218) ──────────────────────
 //
 // An uncaught exception or a rejected promise nobody handled is, for the
 // learner, a button that did nothing or a screen that went blank, and

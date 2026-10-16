@@ -1,4 +1,4 @@
-// ── 足跡を残さない — the switch is the account's (plan 215) ──────────
+// ── 足跡を残さない — the switch is the account's (plan 218) ──────────
 //
 // The local flag stopped one browser; the account's answer stops them
 // all, and the server too. What must hold: a switch flipped in Settings
@@ -47,7 +47,7 @@ describe('the switch', () => {
   })
 
   it("carries an older device's no up to the account, once", async () => {
-    setOptedOut(true)            // the pre-215 local switch, no session
+    setOptedOut(true)            // the pre-218 local switch, no session
     syncOptOut(false, session)
     expect(isOptedOut()).toBe(true)
     await vi.waitFor(() => expect(apiJson).toHaveBeenCalledTimes(1))

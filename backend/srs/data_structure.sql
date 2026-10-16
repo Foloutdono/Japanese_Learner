@@ -243,7 +243,7 @@ CREATE TABLE user_profiles (
     -- standard figures; see routes/profile.py's READING_PACES and
     -- frontend/src/domain/readingPace.js.
     reading_pace TEXT,
-    -- 足跡を残さない (plan 215): the account asked not to be counted.
+    -- 足跡を残さない (plan 218): the account asked not to be counted.
     -- core/events.opted_out reads it on both of the trail's write paths.
     analytics_off BOOLEAN NOT NULL DEFAULT FALSE
 );
@@ -501,7 +501,10 @@ CREATE TABLE video_sessions (
     -- Retained so existing rows read back; nothing sets it any more.
     window_capped BOOLEAN NOT NULL DEFAULT FALSE,
     status        TEXT NOT NULL DEFAULT 'generating',  -- 'generating' | 'ready' | 'failed'
-    error         TEXT,
+    error         TEXT,                         -- why it failed, in English: for the logs
+    -- ... and as the stable snake_case code the client words in the
+    -- learner's language (plan 215). NULL on a row failed before it.
+    error_code    TEXT,
     sentences     JSONB,
     truncated     INTEGER NOT NULL DEFAULT 0,
     -- Optional YouTube id to embed alongside the transcript. Independent
@@ -951,6 +954,21 @@ CREATE TABLE grammar_tours (
     done_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     quiz_right SMALLINT,   -- the tutorial's closing quiz (plan 194)
     quiz_total SMALLINT,
+    PRIMARY KEY (user_id, card_id)
+);
+
+-- ── 初見 — how a kana or a kanji's first tour went ──────────────────
+-- Owned by study/glyph_tour.py (plan 216). One row per character a learner
+-- was toured through before its first card, the first tour only: the
+-- traces that missed and whether the board drew the strokes for them.
+-- Read by nothing the scheduler runs. No cascade from auth (ADR 0010):
+-- DELETE /api/account and scripts/purge_orphans.py clear it.
+CREATE TABLE glyph_tours (
+    user_id  TEXT NOT NULL,
+    card_id  TEXT NOT NULL,
+    misses   SMALLINT NOT NULL,
+    shown    BOOLEAN NOT NULL,
+    done_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (user_id, card_id)
 );
 

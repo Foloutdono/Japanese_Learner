@@ -22,6 +22,7 @@ from content.grammar_points_data import find, grammar_to_id
 from study import morphology
 from study.grammar_detect import NO_GOOD_VERBS, compound_particles, no_good_points
 from content.vocab_jmdict_data import vocab_jmdict_to_id
+from content import jmdict_fr
 from study.card_lookup import (
     resolve_morpheme, resolve_compound, resolve_phrase, compound_reading,
     resolve_pool_morpheme, resolve_pool_compound, pool_gloss,
@@ -102,6 +103,10 @@ def _grammar_entries(sentence: str, morphemes=None) -> list[dict]:
             # able to edit the catalogue through it.
             "meaning": dict(meaning) if isinstance(meaning, dict) else (meaning or ""),
             "structure": entry.get("structure", ""),
+            # The formation line in French (plan 215), beside the
+            # English, as `meaning` carries both: the analysis is shared
+            # across learners and the screen reads its own.
+            "structure_fr": entry.get("structure_fr", ""),
         })
     return out
 
@@ -130,7 +135,7 @@ def _attach_grammar(tokens: list[dict], grammar: list[dict]) -> None:
             # line above -- the same point twice in a sentence is two
             # lights, not one (frontend grammarSpans.js).
             {k: g[k] for k in ("pattern", "level", "raw_id", "kind", "meaning", "structure",
-                               "start", "end", "segments")}
+                               "structure_fr", "start", "end", "segments")}
             for g in grammar
             if any(s < end and start < e for s, e in g["segments"])
         ]
@@ -144,13 +149,22 @@ def _pool_match(entry: dict) -> dict:
     what draws no badge -- and `pool` saying so outright. The entry is
     cut to the three fields a screen reads: a video session stores the
     analysis of every line it holds (routes/video.py)."""
-    return {
+    out = {
         "level": None,
         "raw_id": vocab_jmdict_to_id(entry),
         "entry": {"kanji": entry.get("kanji", ""), "kana": entry.get("kana", ""),
                   "meaning": pool_gloss(entry)},
         "pool": True,
     }
+    # Its French line beside the English, where the pool's French layer
+    # has one (plan 215) -- the same two fields a deck word carries
+    # (_deck_match), so tokens.js's wordGloss reads it unchanged. An
+    # affix row keeps the one sense it was chosen for, in English: the
+    # French line is the word's, not that sense's.
+    french = None if entry.get("affix") else jmdict_fr.pool_line(entry.get("kanji", ""), entry.get("kana", ""))
+    if french:
+        out["entry"]["meaning_fr"] = french
+    return out
 
 
 def _deck_match(level: str, entry: dict, raw_id: str) -> dict:
@@ -390,7 +404,12 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 致す after お〜, 〜ばかりに after ん, 〜っぽい, 〜ずくめ, 〜手前, 〜どころ;
 # まま no ママ nor 間々; すぐ, ゆっくり, 良い, 赤ちゃん, 何も and 世論 their
 # lower or right cards; 〜不足 after a noun read ぶそく.
-LOCAL_REV = 13
+# 14: no card for a verb in kana another deck verb is spelled as there
+# (plan 213): おきます no 置く, ふりました no 振る, はれる no 腫れる.
+# 15: French beside the English (plan 215) -- a JMdict pool word's
+# `meaning_fr` from the pool's French layer, and a grammar point's
+# `structure_fr`, so a stored breakdown is rebuilt to carry them.
+LOCAL_REV = 15
 
 
 def analyze_local(text: str, level: str | None = None) -> dict:

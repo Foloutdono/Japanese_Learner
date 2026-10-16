@@ -381,7 +381,7 @@ def test_an_older_client_with_no_session_id_is_still_kept(client):
     assert sids() == [("screen_view", None)]
 
 
-# ── 足跡 II (plan 215): enums, shapes, the opt-out, the export ─────
+# ── 足跡 II (plan 218): enums, shapes, the opt-out, the export ─────
 
 def test_a_route_that_is_not_a_pattern_is_dropped(client):
     # `route` is held to a shape on every name: a pattern has no room
@@ -500,7 +500,7 @@ def opted_out():
 
 
 def test_an_opted_out_account_is_not_counted_from_any_browser(client, opted_out):
-    # The switch was a localStorage flag until plan 215: the desk kept
+    # The switch was a localStorage flag until plan 218: the desk kept
     # counting a learner who had opted out on the phone.
     r = client.post("/api/events", json={"events": [{"name": "screen_view", "props": {"route": "/today"}}]})
     assert r.status_code == 202

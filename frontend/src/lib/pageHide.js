@@ -5,7 +5,7 @@
 // counts (lib/screenTrail.js), the page's vitals (lib/vitals.js). track.js
 // runs these, in order, and then flushes -- listeners of their own would
 // fire after the flush had already taken the queue, leaving the last
-// screen of a visit to the next visit (plan 215).
+// screen of a visit to the next visit (plan 218).
 //
 // A module of its own, not an export of track.js, so the many tests that
 // mock track.js with `{ track }` alone can still import what registers.

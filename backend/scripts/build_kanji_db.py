@@ -24,6 +24,9 @@ Inputs (datas/kanji/, the shipped KANJIDIC2 export):
     kanji_dic_refs.json     Nelson, Halpern, Heisig, ... index numbers
     kanji_query_codes.json  SKIP, SH descriptor, four-corner, De Roo
     kanji_deck.json         the app's own JLPT deck, for in_deck
+    kanji_meanings_fr.json  the French KANJIDIC2 lacks for 219 deck
+                            characters (plan 215), tracked: it fills
+                            meaning_fr where the export has none
     ../../kanjivg/*.svg     which characters have a stroke diagram
 
 Those inputs become untracked once this has run (backend/.gitignore),
@@ -33,6 +36,9 @@ the export into datas/kanji/ and re-run this script.
 
 Usage:
     cd backend && python -m scripts.build_kanji_db [--data-dir DIR] [--out PATH]
+    cd backend && python -m scripts.build_kanji_db --french-only
+        # kanji_meanings_fr.json into the shipped database, in place,
+        # without the KANJIDIC2 export (which is not in a fresh clone)
 """
 import argparse
 import glob
@@ -225,6 +231,7 @@ def build(data_dir: str, out_path: str, kanjivg_dir: str) -> None:
         "INSERT INTO kanji VALUES (" + ",".join("?" * 18) + ")", rows
     )
     conn.executemany("INSERT INTO kanji_refs VALUES (?,?,?)", ref_rows)
+    apply_french(conn, data_dir)
     conn.commit()
     conn.execute("VACUUM")
     conn.close()
@@ -237,12 +244,44 @@ def build(data_dir: str, out_path: str, kanjivg_dir: str) -> None:
         print(f"  ! {len(missing)} deck characters are not in KANJIDIC2: {''.join(sorted(missing))}")
 
 
+def apply_french(conn: sqlite3.Connection, data_dir: str) -> int:
+    """kanji_meanings_fr.json over meaning_fr, where KANJIDIC2 has none.
+
+    KANJIDIC2's French stops short of 219 of the deck's characters --
+    name kanji, mostly (蒼, 聡, 鴻, 蓮) -- and a French learner read
+    their cards, their choices and their dictionary plates in English
+    (content/kanji_meanings.py). The file is the app's own French for
+    them (plan 215), written from the character's senses rather than
+    copied from a published list. It never overrides a French meaning
+    the export carries."""
+    path = os.path.join(data_dir, "kanji_meanings_fr.json")
+    if not os.path.exists(path):
+        return 0
+    with open(path, encoding="utf-8") as f:
+        french = json.load(f)
+    cur = conn.executemany(
+        "UPDATE kanji SET meaning_fr = ? WHERE char = ? AND meaning_fr = ''",
+        [(fr, char) for char, fr in french.items() if fr],
+    )
+    print(f"  {cur.rowcount} French meanings filled from kanji_meanings_fr.json")
+    return cur.rowcount
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--data-dir", default=_DATA_DIR)
     p.add_argument("--out", default=_OUT_PATH)
     p.add_argument("--kanjivg-dir", default=_KANJIVG_DIR)
+    p.add_argument("--french-only", action="store_true",
+                   help="apply kanji_meanings_fr.json to the existing database and stop")
     a = p.parse_args()
+    if a.french_only:
+        conn = sqlite3.connect(a.out)
+        apply_french(conn, a.data_dir)
+        conn.commit()
+        conn.execute("VACUUM")
+        conn.close()
+        return
     build(a.data_dir, a.out, a.kanjivg_dir)
 
 

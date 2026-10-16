@@ -59,7 +59,7 @@ export function normalize(text) {
  * @returns {Promise<{ text: string, confidence: number }>}
  */
 export async function recognize(file, { vertical = false, onProgress } = {}) {
-  // 足跡 (plan 215): a photo read, on the device or the server below.
+  // 足跡 (plan 218): a photo read, on the device or the server below.
   countUse('ocr', 'scan')
   const { createWorker } = await import('tesseract.js')
   const lang = vertical ? 'jpn_vert' : 'jpn'

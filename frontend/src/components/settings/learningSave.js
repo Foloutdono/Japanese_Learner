@@ -4,7 +4,7 @@ import { refreshSummary } from '../../stores/profileSummary'
 import { refreshJourney } from '../../stores/journey'
 import { track } from '../../lib/track'
 
-// 足跡 (plan 215): which setting changed, to which of the app's own
+// 足跡 (plan 218): which setting changed, to which of the app's own
 // values -- a level, or `changed` for the lines and the daily pace,
 // whose new value is a set or a number the dashboards do not need.
 function trackLearning(patch) {

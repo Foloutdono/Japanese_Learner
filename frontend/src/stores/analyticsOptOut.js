@@ -12,7 +12,7 @@
 // app_open has already been recorded, which is the one event an
 // opted-out learner would most notice.
 //
-// Since plan 215 the switch is ALSO the account's
+// Since plan 218 the switch is ALSO the account's
 // (user_profiles.analytics_off): the local flag alone stopped one
 // browser, while the server's own events and every other device kept
 // counting. The local flag stays, for the reason above -- it must be
@@ -21,7 +21,7 @@
 import { useSyncExternalStore } from 'react'
 
 const KEY = 'jp-trail-off'
-// Set once a device has carried its pre-215 local switch up to the
+// Set once a device has carried its pre-218 local switch up to the
 // account, so the account is the one truth from then on.
 const SYNCED_KEY = 'jp-trail-synced'
 
@@ -79,7 +79,7 @@ export function setOptedOut(next, session) {
 /**
  * On boot, with the profile's `analyticsOff`. The account's answer wins,
  * except once: a device that said no before the account could hold the
- * answer (before plan 215) carries its no up, rather than being turned
+ * answer (before plan 218) carries its no up, rather than being turned
  * back on by an account that was never asked.
  */
 export function syncOptOut(accountOff, session) {

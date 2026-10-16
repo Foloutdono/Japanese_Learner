@@ -908,7 +908,9 @@ describe('BoardingFlow', () => {
     await settle(60)
 
     const said = live(screen).textContent
-    expect(updateUser).toHaveBeenCalledWith({ email: 'patou@gmail.com', password: 'hunter22' })
+    // The learner's language rides along, for the confirmation mail's
+    // template (lib/guest.js, plan 215).
+    expect(updateUser).toHaveBeenCalledWith({ email: 'patou@gmail.com', password: 'hunter22', data: { lang: 'fr' } })
     expect(said).not.toContain('""')
     expect(said).toContain(fr.claimEmailUnreachable)
     // The older line steps aside rather than stacking under the new one…
@@ -937,7 +939,7 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-action="account-create"]')
     await settle()
 
-    expect(updateUser).toHaveBeenCalledWith({ email: 'patou@gmail.com', password: 'hunter22' })
+    expect(updateUser).toHaveBeenCalledWith({ email: 'patou@gmail.com', password: 'hunter22', data: { lang: 'fr' } })
     expect(stepOf(screen)).toBe('pass')
   })
 })

@@ -7,7 +7,7 @@ Build the 足跡 dashboards in Metabase from docs/analytics/metabase/*.sql.
 
 -- Why this exists ---------------------------------------------
 Metabase keeps its questions in its own application database, which is
-not this repository and is not backed up with it. Plan 215 wrote every
+not this repository and is not backed up with it. Plan 218 wrote every
 question as SQL in docs/analytics/metabase/, one file per dashboard, so
 the dashboards can be read in review, diffed, and rebuilt on a fresh
 Metabase in one command. This script is that command. It talks to
@@ -235,7 +235,7 @@ def main() -> int:
     if not snip:
         snip = mb.call("POST", "/api/native-query-snippet", {
             "name": SNIPPET, "content": snippet_content(ids),
-            "description": "足跡 (plan 215): accounts the dashboards leave out, as a SQL list of user ids.",
+            "description": "足跡 (plan 218): accounts the dashboards leave out, as a SQL list of user ids.",
         })
         print(f"snippet {SNIPPET} created ({len(ids)} ids)")
 
@@ -244,7 +244,7 @@ def main() -> int:
                  if c.get("name") == name and not c.get("archived")), None)
     if not coll:
         coll = mb.call("POST", "/api/collection", {"name": name, "description":
-                       "Plan 215. Built by backend/scripts/metabase_sync.py from docs/analytics/metabase/."})
+                       "Plan 218. Built by backend/scripts/metabase_sync.py from docs/analytics/metabase/."})
     items = mb.call("GET", f"/api/collection/{coll['id']}/items")
     items = items.get("data", items)
     cards = {i["name"]: i["id"] for i in items if i["model"] == "card"}

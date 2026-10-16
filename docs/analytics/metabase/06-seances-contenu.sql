@@ -1,5 +1,5 @@
 -- dashboard: Tsuji — 足跡 · Séances & contenu
--- description: Ce que les séances deviennent, la justesse des réponses, la pratique et les examens. Les séances de pratique (lecture, traduction, compréhension, dictée, rédaction) sont comptées depuis le plan 215 : sans fin propre, une séance quittée après au moins une réponse est « terminée » (mode 'stream').
+-- description: Ce que les séances deviennent, la justesse des réponses, la pratique et les examens. Les séances de pratique (lecture, traduction, compréhension, dictée, rédaction) sont comptées depuis le plan 218 : sans fin propre, une séance quittée après au moins une réponse est « terminée » (mode 'stream').
 
 -- ==== question
 -- title: Séances par type : démarrées, terminées, abandonnées
@@ -47,8 +47,8 @@ GROUP BY 1 ORDER BY 1;
 -- title: Porte d'entrée des séances
 -- display: pie
 -- size: 12x6
--- description: `where` (plan 215) : depuis Aujourd'hui, Apprendre, un paquet, la Pratique, le premier trajet.
-SELECT coalesce(props->>'where', '(avant le plan 215)') AS "Porte", count(*) AS "Séances"
+-- description: `where` (plan 218) : depuis Aujourd'hui, Apprendre, un paquet, la Pratique, le premier trajet.
+SELECT coalesce(props->>'where', '(avant le plan 218)') AS "Porte", count(*) AS "Séances"
 FROM event_log
 WHERE name = 'run_start' AND at >= now() - ({{days}} || ' days')::interval
   AND user_id NOT IN {{snippet: internal_users}}

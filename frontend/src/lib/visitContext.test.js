@@ -1,4 +1,4 @@
-// ── 訪問の文脈 — classes, never values (plan 215) ──────────────────
+// ── 訪問の文脈 — classes, never values (plan 218) ──────────────────
 import { describe, it, expect } from 'vitest'
 import { osFamily, viewportClass } from './visitContext'
 import { VALUES } from './track'

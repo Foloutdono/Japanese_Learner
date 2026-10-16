@@ -1,5 +1,5 @@
 -- dashboard: Tsuji — 足跡 · Appareils
--- description: Sur quoi l'on étudie : classe d'écran, système, web / PWA / natif, tactile, langue, thème. Des classes grossières (lib/visitContext.js), jamais une empreinte. Contexte des visites depuis le plan 215.
+-- description: Sur quoi l'on étudie : classe d'écran, système, web / PWA / natif, tactile, langue, thème. Des classes grossières (lib/visitContext.js), jamais une empreinte. Contexte des visites depuis le plan 218.
 
 -- ==== question
 -- title: Visites par classe d'écran

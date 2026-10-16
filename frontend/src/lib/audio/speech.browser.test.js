@@ -107,6 +107,54 @@ describe('spokenForm', () => {
   })
 })
 
+// ── A sentence (speak on reveal) ─────────────────────────────────
+// A grammar, reading or translation card says its sentence once it is
+// revealed. The device first, as for a word; the server's fallback is
+// the grammar catalogue's reader, since /api/tts declines a sentence.
+// Ahead of speakJapanese's tests: its silent device sets speech.js's
+// sticky flag, which the browser lane carries into the tests after it.
+// The silence watchdog is one path for both (startUtterance), pinned
+// there.
+
+const lineFor = text => `/api/grammar/audio?text=${text}&who=reader&v=${VOICE_REV}`
+
+describe('speakSentence', () => {
+  it('speaks the whole sentence on the device, commas and all', async () => {
+    const spoken = []
+    const synth = stubSynth({ voices: [JA_VOICE], onSpeak: u => { spoken.push(u); u.onstart?.() } })
+    const { speakSentence } = await loadSpeech()
+
+    // spokenForm would cut this at its 、 -- a packed reading's separator,
+    // a sentence's pause.
+    speakSentence('雨なので、家にいます。')
+
+    expect(synth.speak).toHaveBeenCalled()
+    expect(spoken.at(-1).text).toBe('雨なので、家にいます。')
+    expect(mocks.getBuffer).not.toHaveBeenCalled()
+  })
+
+  it("falls back to the catalogue's reader, not /api/tts", async () => {
+    Object.defineProperty(window, 'speechSynthesis', { value: undefined, configurable: true })
+    const { speakSentence } = await loadSpeech()
+
+    speakSentence('水だけ飲みました。')
+
+    expect(clipRequest()).toBe(lineFor('水だけ飲みました。'))
+  })
+
+  it('says nothing when there is no sentence', async () => {
+    stubSynth({ voices: [JA_VOICE] })
+    const { speakSentence } = await loadSpeech()
+
+    speakSentence('')
+    speakSentence(null)
+    speakSentence('  ')
+
+    expect(window.speechSynthesis.speak).not.toHaveBeenCalled()
+    expect(mocks.getBuffer).not.toHaveBeenCalled()
+  })
+})
+
 // ── Which path runs ──────────────────────────────────────────────
 
 describe('speakJapanese', () => {

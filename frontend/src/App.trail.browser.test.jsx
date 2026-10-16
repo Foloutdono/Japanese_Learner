@@ -22,7 +22,7 @@ vi.mock('./lib/track', () => ({ track }))
 const { Trail } = await import('./App')
 const { _resetScreen } = await import('./lib/screenTrail')
 
-// Trail records two names since plan 215: screen_view on arriving and,
+// Trail records two names since plan 218: screen_view on arriving and,
 // through lib/screenTrail.js, screen_leave (and any feature counts) on
 // leaving. The per-render guard below is about arrivals.
 const views = () => track.mock.calls.filter(([name]) => name === 'screen_view')
@@ -102,7 +102,7 @@ describe('Trail', () => {
   })
 
   it('sends the screen left, as its pattern, with the time it was up', async () => {
-    // 滞在 (plan 215): the screen before is closed when the route
+    // 滞在 (plan 218): the screen before is closed when the route
     // changes, its engaged time measured by lib/dwell.js.
     const screen = await render(
       <MemoryRouter initialEntries={['/learn/decks/8f21/study']}>

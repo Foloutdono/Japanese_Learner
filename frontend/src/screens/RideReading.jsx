@@ -16,7 +16,8 @@ import { ReadingTimer, ReadingPrompt, AnswerForm, ReadingRegisters } from '../co
 import { RunLines } from '../components/study/RunLines'
 import { useSentenceKeys, currentLine } from '../components/study/sentenceLines'
 import { BreakdownSide } from '../components/analysis/BreakdownSide'
-import { vocabLookup, grammarLookup } from '../components/analysis/lookup'
+import { vocabLookup, grammarLookup, pointLookup, docksInColumn, lookupKey } from '../components/analysis/lookup'
+import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { PASS_PLATFORMS, SOURCES } from '../domain/paywall'
 import { getAllSections } from '../config/tabs'
 import { useCredits } from '../stores/credits'
@@ -229,6 +230,10 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
   const graded = step === 'graded'
   const panels = desk && Boolean(sentence) && step !== 'pass'
   const measured = step === 'measure' || graded
+  // The card's own doors (plan 213): the point's tag and each word missed
+  // open in the column once it holds the breakdown, else as the sheet.
+  const point = sentence ? pointLookup(sentence.grammar_id, sentence.grammar, analysis) : null
+  const docked = docksInColumn(panels, null, graded, analysis)
 
   return (
     <StudyStage
@@ -296,6 +301,8 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
               answer={answer}
               accuracy={accuracy}
               point={sentence.grammar}
+              onPoint={point ? () => setLookup(point) : null}
+              onOpen={setLookup}
               t={t}
             />
           </PromptCard>
@@ -306,6 +313,9 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
             </div>
           ) : (
             <RatingBar active onRate={rate} guide="ride.rate" />
+          )}
+          {lookup && !docked && (
+            <DictionaryLookupSheet key={lookupKey(lookup)} {...lookup} session={session} onClose={closeLookup} />
           )}
         </>
       )}

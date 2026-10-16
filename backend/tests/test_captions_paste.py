@@ -106,12 +106,15 @@ class LayoutTests(unittest.TestCase):
 
 class FailureTests(unittest.TestCase):
     def test_text_without_timestamps_raises(self) -> None:
-        with self.assertRaises(CaptionParseError):
+        with self.assertRaises(CaptionParseError) as ctx:
             parse_pasted_transcript("just some text\nno times here")
+        # The client's sentence for it is the transcript-panel hint.
+        self.assertEqual(ctx.exception.code, "no_timestamps")
 
     def test_timestamps_without_text_raises(self) -> None:
-        with self.assertRaises(CaptionParseError):
+        with self.assertRaises(CaptionParseError) as ctx:
             parse_pasted_transcript("0:00\n0:04\n")
+        self.assertEqual(ctx.exception.code, "no_cues")
 
     def test_error_message_tells_the_learner_what_to_do(self) -> None:
         with self.assertRaises(CaptionParseError) as ctx:

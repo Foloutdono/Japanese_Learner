@@ -52,7 +52,7 @@ import { beginRun, endOpenRun, _bindTally } from '../lib/runTrail'
 // review through the reader, a card rated twice twice, as the run's
 // count does. The run hands them to its finish (screens/TodayRun.jsx).
 //
-// `laps` (plan 215): the engaged milliseconds each rating took, from the
+// `laps` (plan 218): the engaged milliseconds each rating took, from the
 // run's start or the rating before (lib/dwell.js: a hidden tab does not
 // count), for the trail's time per card (lib/runTrail.js). Numbers only.
 const EMPTY = Object.freeze({ key: null, reviewed: 0, good: 0, xp: 0, cards: Object.freeze([]), faces: Object.freeze([]), verdicts: Object.freeze([]), startedAt: null, streak: 0, best: 0, laps: Object.freeze([]) })
@@ -63,7 +63,7 @@ function emit() { listeners.forEach(fn => fn()) }
 const subscribe = fn => { listeners.add(fn); return () => listeners.delete(fn) }
 
 /** A new run: the session's identity, and every figure back to zero. */
-// The run's engaged clock (plan 215): one at a time, restarted with the
+// The run's engaged clock (plan 218): one at a time, restarted with the
 // tally. `total` reads the whole run, `lap` the time since the last
 // rating.
 let clock = null

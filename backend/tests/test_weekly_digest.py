@@ -108,7 +108,7 @@ def test_sessions_reads_length_and_screens_from_the_session_id():
 
 
 def test_time_spent_reads_engaged_minutes_per_screen_and_the_features():
-    # Plan 215: screen_leave carries engaged ms, feature_use a count per
+    # Plan 218: screen_leave carries engaged ms, feature_use a count per
     # screen left. A route of its own so no other test's rows join it.
     conn = db_conn()
     try:

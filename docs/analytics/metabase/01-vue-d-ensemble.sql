@@ -1,5 +1,5 @@
 -- dashboard: Tsuji — 足跡 · Vue d'ensemble
--- description: Qui est là, combien de temps, combien de visites. Plan 215. Période réglable (jours).
+-- description: Qui est là, combien de temps, combien de visites. Plan 218. Période réglable (jours).
 
 -- ==== question
 -- title: Actifs aujourd'hui
@@ -88,7 +88,7 @@ GROUP BY 1 ORDER BY 1;
 -- title: Durée médiane d'une visite (min)
 -- display: scalar
 -- size: 6x3
--- description: Somme du temps engagé (screen_leave) par visite. Depuis le plan 215.
+-- description: Somme du temps engagé (screen_leave) par visite. Depuis le plan 218.
 WITH visits AS (
   SELECT sid, sum((props->>'ms')::numeric) AS ms
   FROM event_log

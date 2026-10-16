@@ -16,6 +16,7 @@ def _good(**over) -> dict:
     entry = {
         "pattern": "〜てください",
         "structure": "verb て-form + ください",
+        "structure_fr": "verbe forme en て + ください",
         "meaning": {"en": "please do", "fr": "veuillez faire"},
         "register": "polite",
         "steps": [
@@ -38,6 +39,7 @@ def _good(**over) -> dict:
 RIVAL = {
     "pattern": "〜ないでください",
     "structure": "verb ない-form + でください",
+    "structure_fr": "verbe forme en ない + でください",
     "meaning": {"en": "please do not", "fr": "veuillez ne pas"},
     "steps": [], "compare": [],
     "examples": [
@@ -545,3 +547,40 @@ class QuizRuleTests(_TourCase):
         # moved off (plan 196): the gate says so for every point.
         entry = _good(tour=_tour())
         self.assertTrue(any("tour has no quiz" in p for p in check_entry("N5", entry, _catalogue("N5", entry))))
+
+
+# ── structure_fr (plan 215) ──────────────────────────────────
+
+def _fr_problems(**over):
+    entry = _good(**over)
+    return [p for p in check_entry("N5", entry, _catalogue("N5", entry)) if "structure_fr" in p]
+
+
+def test_structure_fr_is_required():
+    entry = _good()
+    del entry["structure_fr"]
+    assert any("structure_fr" in p for p in check_entry("N5", entry, _catalogue("N5", entry)))
+
+
+def test_structure_fr_must_carry_the_japanese_in_order():
+    assert _fr_problems() == []
+    assert _fr_problems(structure_fr="verbe forme en て + くださ")
+    assert _fr_problems(structure_fr="ください + verbe forme en て")
+
+
+def test_structure_fr_may_not_keep_english():
+    assert _fr_problems(structure_fr="verb forme en て + ください")
+    assert _fr_problems(structure_fr="verbe て-form + ください")
+
+
+def test_structure_fr_takes_its_reading_from_the_english_line():
+    """The French ruby is carried over run by run (grammar_examples.
+    structure_furigana), so 〜の中で's 中 is read なか in both lines."""
+    from study.grammar_examples import structure_furigana, structure_text
+    entry = {"structure": "group + の中で", "structure_reading": "group + のなかで",
+             "structure_fr": "groupe + の中で"}
+    assert structure_text(entry, "fr") == "groupe + の中で"
+    assert structure_text(entry, "en") == "group + の中で"
+    parts = structure_furigana(entry, "fr")
+    assert "".join(p["text"] for p in parts) == "groupe + の中で"
+    assert {"text": "中", "reading": "なか"} in parts

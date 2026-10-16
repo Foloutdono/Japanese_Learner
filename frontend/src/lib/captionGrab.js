@@ -219,29 +219,46 @@ export async function decodeGrabHash(hash) {
 // call, one caption fetch. It never sees credentials (the caption
 // fetch omits them) and it leaves the page for the app's analyzer
 // with the result in the hash.
-export function buildBookmarklet(appOrigin) {
+//
+// What it says when it cannot (plan 215) is in the learner's language,
+// baked in when the bookmark is copied: on youtube.com it has no app
+// to ask, and a bookmark copied in French should not answer in English.
+// `t` is the locale table the copy button holds; only the grabAlert*
+// lines are taken from it, as a JSON literal the source reads.
+const GRAB_ALERTS = {
+  notYoutube: 'grabAlertNotYoutube',
+  noVideo: 'grabAlertNoVideo',
+  notReady: 'grabAlertNotReady',
+  noSubtitles: 'grabAlertNoSubtitles',
+  noJapanese: 'grabAlertNoJapanese',
+  empty: 'grabAlertEmpty',
+  failed: 'grabAlertFailed',
+}
+
+export function buildBookmarklet(appOrigin, t) {
+  const said = Object.fromEntries(Object.entries(GRAB_ALERTS).map(([k, key]) => [k, t[key]]))
   const src =
-    `(async()=>{try{` +
-    `if(!/(^|\\.)youtube\\.com$/.test(location.hostname)){alert('Open the YouTube video first / Ouvrez d\\'abord la vid\\u00e9o YouTube');return}` +
+    `(async()=>{var S=${JSON.stringify(said)};try{` +
+    `if(!/(^|\\.)youtube\\.com$/.test(location.hostname)){alert(S.notYoutube);return}` +
     `var vid=new URLSearchParams(location.search).get('v')||(location.pathname.match(/\\/(?:shorts|embed|live)\\/([\\w-]{11})/)||[])[1];` +
-    `if(!vid){alert('No video id in this page');return}` +
+    `if(!vid){alert(S.noVideo);return}` +
     `var key=window.ytcfg&&ytcfg.data_&&ytcfg.data_.INNERTUBE_API_KEY;` +
-    `if(!key){alert('Page not ready - reload and retry');return}` +
+    `if(!key){alert(S.notReady);return}` +
     `var pr=await fetch('/youtubei/v1/player?key='+key,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({context:{client:{clientName:'ANDROID',clientVersion:'20.10.38'}},videoId:vid})}).then(function(r){return r.json()});` +
     `var ts=pr&&pr.captions&&pr.captions.playerCaptionsTracklistRenderer&&pr.captions.playerCaptionsTracklistRenderer.captionTracks||[];` +
-    `if(!ts.length){alert('This video has no subtitles / Pas de sous-titres');return}` +
+    `if(!ts.length){alert(S.noSubtitles);return}` +
     `var man=ts.find(function(t){return t.languageCode==='ja'&&t.kind!=='asr'});` +
     `var asr=ts.find(function(t){return t.languageCode==='ja'&&t.kind==='asr'});` +
-    `if(!man&&!asr){alert('No Japanese subtitles. Available: '+ts.map(function(t){return t.languageCode}).join(', '));return}` +
+    `if(!man&&!asr){alert(S.noJapanese+ts.map(function(t){return t.languageCode}).join(', '));return}` +
     // Both in srv3, the format that keeps a time on every recognised word.
     `var get=async function(t){if(!t)return null;var x=await fetch(t.baseUrl.replace(/&fmt=[^&]*/,'')+'&fmt=srv3',{credentials:'omit'}).then(function(r){return r.text()});return x&&x.indexOf('<p')>=0?x:null};` +
     `var m=await get(man),a=await get(asr);` +
-    `if(!m&&!a){alert('Subtitle fetch came back empty - try again');return}` +
+    `if(!m&&!a){alert(S.empty);return}` +
     `var bytes=new TextEncoder().encode(JSON.stringify({m:m,a:a}));var mode='r';` +
     `if(window.CompressionStream){bytes=new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer());mode='z'}` +
     `var bin='';for(var i=0;i<bytes.length;i+=32768){bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+32768))}` +
     `var b64=btoa(bin).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');` +
     `location.href='${appOrigin}/analyzer#grab=${GRAB_VERSION}.'+mode+'.'+vid+'.'+b64` +
-    `}catch(e){alert('Subtitle grab failed: '+e)}})()`
+    `}catch(e){alert(S.failed+e)}})()`
   return `javascript:${encodeURIComponent(src)}`
 }

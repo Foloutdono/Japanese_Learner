@@ -115,7 +115,7 @@ function DocumentHead() {
 }
 
 watchApiFailures()
-// Plan 215: uncaught errors by screen (never their text) and the page's
+// Plan 218: uncaught errors by screen (never their text) and the page's
 // own speed, once per load.
 watchClientErrors()
 watchVitals()
@@ -144,7 +144,7 @@ export function Trail() {
     if (!route) return
     const tab = tabFor(pathname)
     track('screen_view', { route, tab })
-    // 滞在 (plan 215): the screen before is left -- its engaged time and
+    // 滞在 (plan 218): the screen before is left -- its engaged time and
     // its feature counts sent -- and this one's clock starts.
     enterScreen(route, tab)
   }, [pathname])
@@ -433,7 +433,7 @@ export default function App({ front = NO_FRONT }) {
           standalone: typeof window !== 'undefined'
             && window.matchMedia?.('(display-mode: standalone)').matches === true,
         })
-        // 足跡を残さない (plan 215): the account's switch onto this
+        // 足跡を残さない (plan 218): the account's switch onto this
         // device, or this device's older local switch up to the account.
         syncOptOut(p.analyticsOff, session)
         // A real answer: the device now knows this learner is past

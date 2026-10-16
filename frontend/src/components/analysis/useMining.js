@@ -17,7 +17,13 @@ const DECK_TYPE_FOR_KIND = {
   kanji: 'kanji',
   grammar: 'grammar',
   cloze: 'standard',
+  // The song sheet's own deck (plan 215), which holds both halves.
+  mixed: 'mixed',
 }
+// A mixed deck (plan 215) takes every kind above: an app card of any
+// source, and a written front/back pair -- so it is offered beside the
+// decks of the kind's own type, wherever something can be added.
+const MIXED = 'mixed'
 
 const STORAGE_PREFIX = 'jp-mine-target'
 const BLANK = '＿＿＿'
@@ -81,22 +87,22 @@ export function useMining(session) {
     return () => { cancelled = true }
   }, [session])
 
-  const decksOfType = useCallback(
-    type => decks.filter(d => d.type === type),
+  const decksTaking = useCallback(
+    type => decks.filter(d => d.type === type || d.type === MIXED),
     [decks]
   )
 
   // The remembered deck for `kind`, or null when none is remembered OR
-  // the remembered id no longer matches a deck of the right type (e.g.
-  // it was deleted, or its type changed).
+  // the remembered id no longer matches a deck that takes it (e.g. it
+  // was deleted, or its type changed).
   const targetFor = useCallback(kind => {
     const type = DECK_TYPE_FOR_KIND[kind]
     const storedId = readStoredTarget(kind)
     if (!storedId) return null
-    return decksOfType(type).find(d => String(d.id) === storedId) ?? null
-  }, [decksOfType])
+    return decksTaking(type).find(d => String(d.id) === storedId) ?? null
+  }, [decksTaking])
 
-  const decksFor = useCallback(kind => decksOfType(DECK_TYPE_FOR_KIND[kind]), [decksOfType])
+  const decksFor = useCallback(kind => decksTaking(DECK_TYPE_FOR_KIND[kind]), [decksTaking])
 
   function rememberTarget(kind, deckId) {
     writeStoredTarget(kind, deckId)
@@ -106,13 +112,21 @@ export function useMining(session) {
   // picker used to POST unconditionally and mint a clone every time —
   // eleven identical « Mots du boulot » decks in one real account. A
   // same-type deck whose name matches (trimmed, case-insensitively) IS
-  // the deck the learner meant.
-  async function ensureDeck(kind, name) {
+  // the deck the learner meant -- one of their own: a deck followed from
+  // the library shares the shelf (GET /api/decks) but takes no cards
+  // from anyone but its author.
+  //
+  // `remember: false` makes a deck without making it where the next ＋
+  // goes: the song sheet (plan 215) makes a song's decks in one press,
+  // and a word mined afterwards should still land where the learner
+  // last sent one.
+  async function ensureDeck(kind, name, { remember = true } = {}) {
     const type = DECK_TYPE_FOR_KIND[kind]
     const wanted = name.trim().toLowerCase()
-    const existing = decksOfType(type).find(d => (d.name ?? '').trim().toLowerCase() === wanted)
+    const existing = decksTaking(type).find(d => (d.role ?? 'owner') === 'owner'
+      && (d.name ?? '').trim().toLowerCase() === wanted)
     if (existing) {
-      rememberTarget(kind, existing.id)
+      if (remember) rememberTarget(kind, existing.id)
       return existing
     }
     // A create already on its way under this name is the same deck
@@ -129,7 +143,7 @@ export function useMining(session) {
     }
     const deck = await pending
     setDecks(prev => (prev.some(d => d.id === deck.id) ? prev : [deck, ...prev]))
-    rememberTarget(kind, deck.id)
+    if (remember) rememberTarget(kind, deck.id)
     return deck
   }
 

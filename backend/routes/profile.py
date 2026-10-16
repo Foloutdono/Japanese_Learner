@@ -150,7 +150,7 @@ def _init_db() -> None:
                 # pace's: the client scales them.
                 ("reading_pace", "TEXT"),
                 # 足跡を残さない — the account asked not to be counted
-                # (plan 215). Réglages › Données writes it beside the
+                # (plan 218). Réglages › Données writes it beside the
                 # browser's own flag; core/events.opted_out reads it on
                 # both write paths, so the server's events and every
                 # other device stop too.
@@ -344,7 +344,7 @@ class LearningPayload(BaseModel):
     # The daily nudge on or off, from Settings › Notifications (plan
     # 156). The boarding asked once; this is where the answer changes.
     notifications: bool | None = None
-    # The trail's switch (plan 215), from Réglages › Données: True asks
+    # The trail's switch (plan 218), from Réglages › Données: True asks
     # not to be counted, on every device and by the server too
     # (core/events.opted_out).
     analyticsOff: bool | None = None
@@ -585,7 +585,7 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # round trip.
         "tutorialAt": tutorial_at.isoformat() if tutorial_at else None,
         "guided": dict(guided or {}),
-        # 足跡を残さない (plan 215): the account's answer, which App.jsx
+        # 足跡を残さない (plan 218): the account's answer, which App.jsx
         # copies onto this device's flag on boot so an opt-out made on
         # the phone also stops the desk.
         "analyticsOff": bool(analytics_off),
@@ -669,7 +669,7 @@ def export_progress(user_id: str = Depends(get_user_id)):
 @router.get("/api/profile/export/trail")
 def export_trail(user_id: str = Depends(get_user_id)):
     """
-    The learner's own 足跡 as one CSV (plan 215) -- the right of access
+    The learner's own 足跡 as one CSV (plan 218) -- the right of access
     (GDPR art. 15) for the usage statistics, beside the progress export
     in Réglages › Données. Both halves: the raw rows still inside their
     thirty days (and the once-per-account ones kept a year), then the

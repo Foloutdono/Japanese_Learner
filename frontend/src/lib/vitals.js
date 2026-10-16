@@ -1,4 +1,4 @@
-// ── 速度 — how fast the app felt, measured by the browser (plan 215) ──
+// ── 速度 — how fast the app felt, measured by the browser (plan 218) ──
 //
 // app_open's boot_ms is the API's wait; this is the page's own: the
 // largest paint (LCP), the slowest interaction (an INP approximation:

@@ -22,7 +22,7 @@
 //
 // See docs/adr/0012.
 // The API client and the auth client are loaded when a flush needs them
-// (plan 215), not when this module is: everything that counts something
+// (plan 218), not when this module is: everything that counts something
 // imports track, and importing it must not construct the Supabase client
 // -- a settings store or the language context would otherwise drag auth
 // into every module (and every test) that only wants to say a thing
@@ -39,7 +39,7 @@ export const EVENTS = {
   app_open: ['boot_ms', 'cold', 'platform', 'standalone'],
   boot_timeout: ['waited_ms'],
   screen_view: ['route', 'tab'],
-  // How long the screen was in front of someone (plan 215): engaged
+  // How long the screen was in front of someone (plan 218): engaged
   // time, sent on leaving it and on the page being hidden
   // (lib/screenTrail.js).
   screen_leave: ['route', 'tab', 'ms'],
@@ -57,7 +57,7 @@ export const EVENTS = {
   ride_done: ['skipped', 'at', 'ms'],
   guide_step: ['gate', 'stop', 'index'],
   guide_done: ['gate', 'skipped', 'stops', 'ms'],
-  // Every run, the practice runs too since plan 215 (lib/runTrail.js),
+  // Every run, the practice runs too since plan 218 (lib/runTrail.js),
   // with how it went: engaged ms, the time per item's median and slow
   // tail, how many right, and the door it was entered by.
   run_start: ['kind', 'mode', 'level', 'where'],
@@ -79,6 +79,8 @@ export const EVENTS = {
   // The dictionary's shelf (plan 093): the kind of entry kept or let
   // go, never its key — a key names the word a learner looked up.
   favorite_toggle: ['kind', 'on'],
+  // A song's decks (plan 215): the counts that went in, never its name.
+  song_deck: ['words', 'lines'],
   // The app opened from its notification or its widget (plan 156).
   nudge_opened: ['via'],
   // The basics course (plan 186f): its own unit number, never a card.
@@ -87,6 +89,8 @@ export const EVENTS = {
   // A grammar point's tour (plan 187b): the level, never the pattern.
   grammar_tour_step: ['level', 'stop', 'outcome'],
   grammar_tour_done: ['level', 'tries', 'helped', 'authored'],
+  // A kana or a kanji's first tour (plan 216): its line, never the character.
+  glyph_tour_done: ['source', 'misses', 'shown'],
   // The day cleared (plan 191). day_clear and rest_day_used are written
   // by the server (POST /api/today/clear, the rest-day bridge);
   // ticket_share is a milestone ticket shared, its days and nothing of
@@ -96,7 +100,7 @@ export const EVENTS = {
   ticket_share: ['days'],
   // The small features, counted per screen and sent on leaving it
   // (lib/screenTrail.js countUse), and a setting changed to one of the
-  // app's own values (plan 215). Both closed by VALUES below.
+  // app's own values (plan 218). Both closed by VALUES below.
   feature_use: ['feature', 'action', 'route', 'n'],
   setting_change: ['setting', 'value'],
   // Written by the server (core/daily_limit.claim): a rationed model
@@ -107,12 +111,12 @@ export const EVENTS = {
   install_prompt: ['outcome'],
   // An uncaught error, by screen -- never its message or stack -- and
   // the page's own speed once per load (lib/clientErrors.js,
-  // lib/vitals.js; plan 215).
+  // lib/vitals.js; plan 218).
   client_error: ['route', 'where'],
   vitals: ['route', 'lcp', 'inp', 'cls', 'ttfb'],
 }
 
-// The values a string property may take where it is an enum (plan 215),
+// The values a string property may take where it is an enum (plan 218),
 // mirrored from backend/core/events.py's VALUES, which
 // tests/test_events.py reads this block against -- keep it plain data
 // (one name per key, single-quoted strings) and keep the end marker.
@@ -365,7 +369,7 @@ export async function flush() {
 // happens before the process is reclaimed.
 //
 // Whatever must be queued BEFORE that flush registers in lib/pageHide.js
-// (the screen's dwell and feature counts, the page's vitals; plan 215)
+// (the screen's dwell and feature counts, the page's vitals; plan 218)
 // and runs here, first.
 function onHide(kind) {
   runHideHooks(kind)

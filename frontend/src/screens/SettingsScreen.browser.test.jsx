@@ -372,7 +372,7 @@ describe('SettingsScreen — the level, the bar and the service', () => {
     // stays up at each pace, on the run's own clock, the slowest timed
     // one filling it -- and no clock at all for the last.
     const label = c => c.querySelector('.timer__label').textContent
-    expect(cards.slice(0, 3).map(label)).toEqual(['10.0s', '15.0s', '20.0s'])
+    expect(cards.slice(0, 3).map(label)).toEqual([10, 15, 20].map(T.timerSeconds))
     expect(label(cards[3])).toBe(T.readingUntimed)
     expect(cards.map(c => c.querySelector('.timer__fill').style.width)).toEqual(['50%', '75%', '100%', '100%'])
     // Named in words on the radio, since the clock is hidden from a
