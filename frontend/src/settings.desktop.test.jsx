@@ -412,7 +412,7 @@ describe('the list under the pass (plan 182)', () => {
     const lists = [...document.querySelectorAll('.desk-settings__list .stg-list')]
     expect(lists.map(l => [...l.querySelectorAll('.stg-row')].map(r => r.dataset.page))).toEqual([
       ['display', 'sound'],
-      ['agenda', 'rating', 'reading', 'help'],
+      ['agenda', 'reviews', 'rating', 'reading', 'help'],
       ['account', 'credits'],
       ['pass'],
     ])

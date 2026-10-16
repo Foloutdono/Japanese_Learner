@@ -3068,6 +3068,68 @@ const clrTickets = {
 }
 // ── 191:tickets end ──
 
+
+// ── 216:reviews ──
+// 回復運転 — the review plan (plan 216): the comeback sheet on Today,
+// the catch-up's figure in the day, the run past the share, Settings ›
+// Reviews and the notification that invites back.
+const reviewPlan = {
+  cbJp: '運転再開',
+  cbCap: 'Reprise du service',
+  cbLabel: 'Reprendre à ton rythme',
+  cbAway: n => `Bon retour ! ${n} jour${n > 1 ? 's' : ''} sans réviser.`,
+  cbPiled: 'Tes révisions se sont accumulées.',
+  cbOwed: n => `${n} cartes attendent. Inutile de tout faire aujourd’hui : choisis ton rythme.`,
+  cbChoices: 'Ton rythme',
+  cbSpread: 'Étaler',
+  cbGentle: 'En douceur',
+  cbAll: 'Tout de suite',
+  cbPerDay: n => `${n} par jour`,
+  cbOverDays: n => `en ${n} jours`,
+  cbNoEnd: 'sans échéance',
+  cbCards: n => `${n} carte${n > 1 ? 's' : ''}`,
+  cbMinutes: m => `≈ ${m} min`,
+  cbDays: 'Sur combien de jours',
+  cbDaysN: n => `${n} jours`,
+  cbNewPaused: 'Les nouvelles cartes reprennent dès que tu es à jour.',
+  cbGo: 'C’est parti',
+  cbError: 'Ton choix n’a pas pu être enregistré. Réessaie.',
+  todayCatchupDay: 'jour de rattrapage',
+  todayCatchupGentle: 'par jour, en rattrapage',
+  todayCatchupShort: 'rattrapage',
+  todayExtra: n => `Réviser plus · ${n} carte${n > 1 ? 's' : ''}`,
+  settingsReviews: 'Révisions',
+  rvRowNone: 'Sans plafond',
+  rvRowCap: n => `${n} au plus par jour`,
+  rvRowCatchup: 'Rattrapage en cours',
+  rvRowAway: from => `Absent à partir du ${from}`,
+  rvCapLabel: 'Révisions par jour',
+  rvCapHint: 'Au-delà, les cartes attendent le lendemain, et ta journée se boucle sur ta part.',
+  rvCapNone: 'Aucun',
+  rvCapUnder: load => `Environ ${load} cartes arrivent chaque jour : sous ce plafond, le retard grandira.`,
+  rvCatchupLabel: 'Rattrapage',
+  rvCatchupSpread: (perDay, day, of) => `${perDay} cartes par jour · jour ${day} sur ${of}`,
+  rvCatchupGentle: perDay => `${perDay} cartes par jour, sans échéance`,
+  rvCatchupNew: 'Les nouvelles cartes sont en pause jusqu’à la fin.',
+  rvCatchupStop: 'Arrêter le rattrapage',
+  rvAwayLabel: 'Absence prévue',
+  rvAwayHint: n => `Tes jours d’absence gardent ta série, et les nouvelles cartes s’arrêtent deux jours avant ton départ. ${n} jours au plus.`,
+  rvAwayFrom: 'Du',
+  rvAwayUntil: 'Au',
+  rvAwaySave: 'Enregistrer',
+  rvAwayCancel: 'Annuler l’absence',
+  rvAwaySet: (from, until) => `Du ${from} au ${until}`,
+  rvAwayErr: {
+    past: 'Le premier jour ne peut pas être passé.',
+    order: 'Le dernier jour vient après le premier.',
+    long: n => `${n} jours au plus.`,
+  },
+  rvError: 'Le changement n’a pas pu être enregistré.',
+  nudgeComebackTitle: time => `Ton train de ${time} · on reprend doucement ?`,
+  nudgeComebackBody: 'Quelques minutes suffisent pour repartir.',
+}
+// ── 216:reviews end ──
+
 export default welded({
   ...auth,
   ...landing,
@@ -3101,4 +3163,5 @@ export default welded({
   ...clrMilestones,
   ...clrRestday,
   ...clrTickets,
+  ...reviewPlan,
 })

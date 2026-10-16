@@ -11,6 +11,9 @@ import { playClick } from '../../lib/audio'
 import { Slot } from '../dayclear/kit/WeekStamps'
 import { AGENDA_PATH } from '../agenda/AgendaNext'
 
+// Where a catch-up is changed or stopped (plan 216).
+const REVIEWS_PATH = '/profile/settings/reviews'
+
 // ── 今日 — the day, in four figures (plan 199) ──────────────────
 // What the gate's strip, the basics line and the agenda's card used to
 // say over the gate, said once where the learner goes for more: the
@@ -22,6 +25,8 @@ import { AGENDA_PATH } from '../agenda/AgendaNext'
 //   the new cards  learned today of the day's target
 //   the basics     the unit the next new card comes from (N5 only)
 //   the agenda     the next block, its hour and its subject; a door
+//   the catch-up   which day of the spread, or the share a day for a
+//                  gentle one (plan 216); a door to Settings › Reviews
 //
 // A figure the learner does not have is not drawn, and the lattice
 // never shows a bare cell: an odd last one takes the row.
@@ -65,6 +70,29 @@ export function TodayDay({ today, strip = false }) {
         <span className="tdy-day__fig">{basics.unit}<small>/ {basics.of}</small></span>
         <span className="tdy-day__what">{strip ? t.todayLesson : <>{t.todayLesson} · <b>{title}</b></>}</span>
       </div>,
+    )
+  }
+  const catchup = today?.review?.catchup
+  if (catchup) {
+    cells.push(
+      <Link
+        key="catchup"
+        to={REVIEWS_PATH}
+        className="tdy-day__cell tdy-day__cell--door"
+        onClick={() => playClick()}
+      >
+        {catchup.of ? (
+          <>
+            <span className="tdy-day__fig">{catchup.day}<small>/ {catchup.of}</small></span>
+            <span className="tdy-day__what">{strip ? t.todayCatchupShort : t.todayCatchupDay}</span>
+          </>
+        ) : (
+          <>
+            <span className="tdy-day__fig">{catchup.per_day}</span>
+            <span className="tdy-day__what">{strip ? t.todayCatchupShort : t.todayCatchupGentle}</span>
+          </>
+        )}
+      </Link>,
     )
   }
   const next = blocks?.length ? upcoming(blocks, now, 1)[0] : null

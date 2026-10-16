@@ -17,7 +17,7 @@ from core.db import db_conn
 from core.auth import get_user_id, prefixed
 from core.srs_instance import srs
 from core.user_level import LEVELS, note_stored_level
-from core import credits, events
+from core import credits, events, review_plan
 from core.lines import clean_lines
 from srs.xp import level_progress, next_milestone
 from study import level_rule
@@ -148,6 +148,12 @@ def _init_db() -> None:
                 # (display_seconds, read_seconds) stay the standard
                 # pace's: the client scales them.
                 ("reading_pace", "TEXT"),
+                # 回復運転 — the review plan (plan 216): the learner's
+                # own ceiling on the day's reviews, a catch-up chosen
+                # on the comeback sheet, "all of them now" said on a
+                # day, and an absence declared ahead. All NULL is the
+                # gate as it always was. See core/review_plan.py.
+                *review_plan.COLUMNS,
             ):
                 cur.execute(
                     f"ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS {col} {typ}"
@@ -493,7 +499,12 @@ def bridge_rest_days(user_id: str) -> list:
     """srs.bridge_rest_days, with its event: the missed days a rest
     ticket covers, spent lazily on the learner's next visit: GET
     /api/profile, GET /api/today and POST /api/today/clear. A comfort,
-    never a reason to fail the screen that asked."""
+    never a reason to fail the screen that asked.
+
+    A declared absence is bridged first (plan 216,
+    review_plan.bridge_away): its days are the learner's to keep, and a
+    ticket must not be spent on one of them."""
+    review_plan.bridge_away(user_id)
     try:
         days = srs.bridge_rest_days(user_id)
     except Exception:

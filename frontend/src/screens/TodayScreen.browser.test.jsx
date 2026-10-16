@@ -199,6 +199,38 @@ describe('TodayScreen — the gate', () => {
     // outlasts.
     await vi.waitFor(() => expect(screen.container.querySelector('.run-stub')).toBeTruthy())
   })
+
+  // 回復運転 (plan 216): a catch-up is a figure of the day, and a door to
+  // where it is changed; a share spent with reviews held back leaves a
+  // quiet way on over the shut gate.
+  it('counts the catch-up among the day\'s figures, a door to Settings › Reviews', async () => {
+    todayRef.current = {
+      total: 19, by_source: {}, lanes: LANES, next_due: null,
+      review: { cap: null, held: 40, catchup: { per_day: 23, day: 2, of: 5 }, away: null, comeback: null },
+    }
+    const screen = await mount()
+    await settle()
+    await services(screen)
+    const cell = document.querySelector('.tdy-sheet a.tdy-day__cell[href="/profile/settings/reviews"]')
+    expect(cell).toBeTruthy()
+    expect(cell.querySelector('.tdy-day__fig').textContent).toBe('2/ 5')
+  })
+
+  it('offers the reviews held back past the spent share as a run of their own', async () => {
+    todayRef.current = {
+      total: 0, by_source: {}, lanes: [], next_due: null, reviewed: { total: 20, by_line: { vocab: 20 } },
+      tomorrow: { cards: 20, minutes: 4 },
+      review: { cap: 20, held: 37, catchup: null, away: null, comeback: null },
+    }
+    beginDeparture.mockClear()
+    const screen = await mount()
+    await settle()
+    const extra = screen.container.querySelector('[data-action="review-extra"]')
+    expect(extra).toBeTruthy()
+    expect(extra.textContent).toContain('37')
+    extra.click()
+    expect(beginDeparture.mock.calls[0][0].path).toBe('/today/run?extra=1')
+  })
 })
 
 describe('.btn-primary — the filled action (plans 051, 052, 174)', () => {

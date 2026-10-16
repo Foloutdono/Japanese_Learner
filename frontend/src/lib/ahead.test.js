@@ -109,6 +109,15 @@ describe('planNudges', () => {
     expect(n.body).toBe(t.brdNotifText)
   })
 
+  it('invites back instead of counting a backlog the gate will open the comeback sheet on (plan 216)', () => {
+    const [n] = plan(ahead([{ at: at(1).toISOString(), total: 412, new: 0, comeback: true, lanes: [lane('vocab', 'N5', 412)] }]))
+    expect(n.title).toBe('Your 19:00 train · ease back in?')
+    expect(n.body).toBe(t.nudgeComebackBody)
+    expect(n.title).not.toContain('412')
+    expect(n.lines).toEqual([])
+    expect(n.extra).toEqual({ to: '/today' })
+  })
+
   it('never schedules one that would fire while the app is open', () => {
     const now = new Date(2026, 8, 27, 18, 59, 30)
     expect(plan(ahead([{ at: at(0).toISOString(), total: 8, new: 0, lanes: [] }]), 'android', now)).toEqual([])

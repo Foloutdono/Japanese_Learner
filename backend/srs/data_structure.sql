@@ -242,7 +242,20 @@ CREATE TABLE user_profiles (
     -- The clock runs in the browser, which scales the server's
     -- standard figures; see routes/profile.py's READING_PACES and
     -- frontend/src/domain/readingPace.js.
-    reading_pace TEXT
+    reading_pace TEXT,
+    -- 回復運転 — the review plan (plan 216, core/review_plan.py): a
+    -- ceiling on the day's reviews (NULL none), a catch-up chosen on
+    -- the comeback sheet (its share a day, its days -- NULL for gentle,
+    -- which has no end -- and its first day; all NULL when none runs),
+    -- the day "all of them now" was answered, and an absence declared
+    -- ahead. All NULL is the gate as it always was.
+    review_cap INTEGER,
+    catchup_cap INTEGER,
+    catchup_days SMALLINT,
+    catchup_from DATE,
+    comeback_declined_on DATE,
+    away_from DATE,
+    away_until DATE
 );
 
 -- The Sentence bank: what the learner submitted, plus where it came
