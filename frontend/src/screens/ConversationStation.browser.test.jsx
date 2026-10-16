@@ -84,7 +84,8 @@ describe('the conversation station', () => {
     const on = root.querySelector('.console__band-opt--on')
     expect(on.textContent).toBe('Choisir')
     expect(root.querySelector('.chip--on').textContent).toBe('N4')
-    expect(root.querySelector('.kaiwa-how').textContent).toContain('trois')
+    // Nothing between the console and the scenes (the run's brief says how).
+    expect(root.querySelector('.kaiwa-how')).toBeNull()
   })
 
   it('draws a scene as a platform card: its situation, its first line, its record', async () => {
@@ -107,7 +108,6 @@ describe('the conversation station', () => {
     ;[...root.querySelectorAll('.console__band-opt')].find(b => b.textContent === 'Libre').click()
     await settle(60)
     expect(here.path).toBe('/practice/conversation?level=N5&mode=free')
-    expect(root.querySelector('.kaiwa-how').textContent).toContain('tes mots')
     root.querySelector('.platform-card').click()
     await vi.waitFor(() => expect(here.path).toBe('/practice/conversation/konbini-lunch/free'))
   })

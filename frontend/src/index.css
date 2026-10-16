@@ -33231,7 +33231,7 @@ button.brd-stn { cursor: pointer; }
    only what the scene needed to become a conversation: the talk's
    column, the line still owed a reply, the task, the brief, the end. */
 
-/* What the chosen way of riding asks, under the console: one quiet line. */
+/* What the chosen way of riding asks, in the run's brief: one quiet line. */
 .kaiwa-how {
   margin: 0;
   font-size: var(--fs-sm);
