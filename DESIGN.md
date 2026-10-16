@@ -120,7 +120,7 @@ strength (.09), each keeping its hue, so **the hue alone says which line**.
 朱 keeps a step more strength as the app's accent and 茶 a step less, as a
 tea is; 山吹 is not recut, because it is the metal (below). A new line's
 pigment is minted at that lightness — `src/harmony.css.test.js` measures
-all twelve in both themes — and the native widgets' copies follow.
+all thirteen in both themes — and the native widgets' copies follow.
 
 **The verdicts are one ramp** (状態, same round): the five state inks — 抹茶,
 琥珀, 緑青, 錆 and the rating's 臙脂 — run red to green at one strength
@@ -1062,6 +1062,58 @@ open at the terminus, whose middle is then the point's first sentence and
 the learner's own line rather than the plate again. Enter presses the
 gate and a digit the tile it numbers, on either keyboard row, and **no key
 is printed** on any of the three (the owner's word).
+
+### The conversation (会話, plan 217)
+
+Someone speaks to the learner in a place, and they answer
+(`screens/ConversationStation.jsx`, `screens/ConversationRun.jsx`). It
+adds no idiom of its own: it is the tour's scene made to answer back.
+
+- **The station is a console over platform cards.** How the learner
+  will answer applies to every scene below, so it is the console's band
+  (Choose · Translate · Free talk); the grades are its chips, opening on
+  the learner's own; one quiet line under it says what the way asks. A
+  scene is a platform card: its title, its situation, its first line as
+  the card's specimen (what the train stops at), and the learner's
+  record there at the end of the title's row (ModeSelector's `meta`: a
+  card too narrow to earn the aside's column keeps its long name whole).
+  Both choices ride the address, replaced. On the desk the scenes go two
+  across at every count.
+- **The talk is the tour's scene** (`ScenePlate` and `SceneLine`,
+  exported from `GrammarTour.jsx` and shared, never copied): the place
+  as a station plate at the card's head, then a line a row with who
+  says it, its furigana, its translation and its voice -- the other
+  person in A's voice and the learner in B's (the bank is in
+  `study/grammar_audio`'s catalogue). **The line just said is held
+  untranslated until it is answered**; a quiet link under it gives the
+  translation early. The newest line stays in view.
+- **Three ways, one stage.** Choose: the replies as the tour's tiles
+  under the card; the pick is the answer, with no Check, the right one
+  ringed and a wrong one crossed, the tour's verdict (`Said`) at the
+  card's foot saying both replies' translations and why. Translate: what
+  to say, in the learner's language, at the talk's foot over the docked
+  field; checked, translation's practice card (the reply over the
+  answer's well, rōmaji misses marked, the tutor's verdict at the well's
+  end or the measure where there is none), the bar the grade. Free: the
+  field docked; the other person's answer below the learner's line and
+  the tutor's notes under that line, the line put right where it needed
+  it, the bar the grade; eight lines at most, a refusal said in the card
+  and the line kept.
+- **The talk goes on as written.** The learner is credited with the
+  model reply, or the alternative their answer matched, so the next line
+  answers it; in free talk, with what they wrote.
+- On the desk the brief stands alone, centred, until the talk starts;
+  then the run stands on the three panels: this run's figures at the
+  left, the talk in the middle, the scene's brief (its plate, situation
+  and errand) in the side, the card then holding the talk alone.
+- **The gate: seven on the phone, six on the desk.** The phone hangs
+  会話 as the Practice gate's seventh plate with its grade chips. The
+  desk's lattice is drawn for six specimens, and a seventh plate -- even
+  a strip under them -- cut the exam's and N1 translation's cards in
+  their wells at 1100×800, so the desk keeps the six and 会話 is the
+  rail's seventh station (`PracticeScreen`'s `OFF_DESK`) until a gate of
+  seven is drawn. The pigment is 縹 (`--line-kaiwa`), the dayflower blue
+  between 緑青 and 藍.
 
 ## Space
 

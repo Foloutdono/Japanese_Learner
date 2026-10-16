@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **217**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **218**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -70,6 +70,10 @@ runtime purpose.
   uses it?" (the eye answers that), never a translation printed over the
   question it answers (a twist's and a meaning's `tr` is held back until it
   is answered), and never a sentence or a question twice in a tutorial.
+  Nor may a bank's choices let length answer: written with care, the
+  right reply drifts to the longest (the conversation bank's first draft
+  won 42-75% on "pick the longest"), so across a bank the right one is
+  the longest about as often as a blind pick (plan 217, `LENGTH_TELL`).
   `study/grammar_check.py` holds it; `content/grammar/README.md`, "The
   quiz", is the style guide. Draft with `python -m scripts.check_tour_quiz`.
 - **Every grammar point is asked in Choisir.** The contrast drill needs a
@@ -523,6 +527,19 @@ python -m scripts.reading_bank_report --rows N2     # each row's level words and
 python -m scripts.reading_bank_report --check rows.json  # candidate rows, before they enter the bank
 ```
 
+The conversation bank (plan 217, `content/conversation/N5.json` … `N1.json`,
+its schema and style guide in that directory's README) holds itself to
+`study/conversation.problems`: every line's reading written by hand and
+checked against the line, every reply's romaji against its reading, two
+wrong replies a turn, and a level whose Choose length cannot answer.
+Draft a scenario against it:
+
+```bash
+cd backend
+python -m scripts.check_conversation            # every level; exit 1 on a problem
+python -m scripts.check_conversation --level N4
+```
+
 One more read-only report measures the vocab deck itself (plan 103) —
 its shape, duplicates, readings, glosses, and every content word in the
 taught sentences that resolves to no card, split into the present cards
@@ -559,8 +576,9 @@ python -m scripts.placement_report --write-lists    # placement_lists.json, for 
 The slice is a pure function of the date — grammar, vocab, sentences,
 since plan 109 placement (the three candidate lists, read from
 `datas/vocab/placement_lists.json`, which `placement_report --write-lists`
-writes) and since plan 187g tours (each grammar point's written twist and
-scene) in rotation, each area walking its own list — so there is no
+writes), since plan 187g tours (each grammar point's written twist and
+scene) and since plan 217 conversation (the 会話 bank's scenarios) in
+rotation, each area walking its own list — so there is no
 ledger to keep in sync and no state to corrupt. Read-only, no database, no `.env`, no network:
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does

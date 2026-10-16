@@ -1411,6 +1411,55 @@ describe('the composition run (plan 125)', () => {
   })
 })
 
+// ── plan 217 — 会話, the conversation run a phone keeps ──
+// On the desk the run stands the scene's brief in the side column once
+// the talk is under way, and the card holds the talk alone. A phone
+// keeps its single column: the place's plate heads the card, and no
+// column is drawn.
+describe('the conversation run (plan 217)', () => {
+  it('keeps the phone\'s column, the place on the card and no column', async () => {
+    const { apiJson } = await import('./lib/api')
+    const plain = text => [{ text }]
+    const SCRIPT = {
+      id: 'konbini-lunch', level: 'N5', title: 'Le déjeuner', situation: 'À la caisse.', goal: 'Payer.', them: 'Vendeur', register: 'polite',
+      place: { jp: 'コンビニ', parts: plain('コンビニ'), name: 'Supérette' },
+      turns: [{
+        them: { jp: 'お弁当は温めますか。', parts: plain('お弁当は温めますか。'), translation: 'Je vous le réchauffe.' },
+        me: { jp: 'はい、お願いします。', parts: plain('はい、お願いします。'), romaji: 'hai, onegai shimasu', words: [], translation: 'Oui.', note: 'Poli.' },
+        alt: [],
+        choices: [
+          { jp: 'はい、お願いします。', parts: plain('はい、お願いします。'), translation: 'Oui.', note: 'Poli.', right: true },
+          { jp: 'いただきます。', parts: plain('いただきます。'), translation: 'Bon appétit.', note: 'À table.', right: false },
+          { jp: 'はい、温かいです。', parts: plain('はい、温かいです。'), translation: 'Il est chaud.', note: 'Une autre question.', right: false },
+        ],
+      }],
+      close: null,
+    }
+    apiJson.mockImplementation(async url => (String(url).startsWith('/api/conversation/scenario/') ? SCRIPT : {}))
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: ConversationRun } = await import('./screens/ConversationRun')
+    document.body.innerHTML = ''
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/practice/conversation/konbini-lunch/choose']}>
+          <Routes><Route path="/practice/conversation/:scenario/:mode" element={<ConversationRun session={null} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(300)
+    document.querySelector('.stage__foot .btn-primary').click()
+    await settle(200)
+    expect(document.querySelector('.screen').className).toBe('screen')
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    expect(document.querySelector('.desk-run__side')).toBeNull()
+    // The place heads the card, over the talk.
+    const card = document.querySelector('.kaiwa-card')
+    expect(card.querySelector('.tour-plate')).not.toBeNull()
+    expect(card.querySelector('.kaiwa-talk .tour-line')).not.toBeNull()
+    apiJson.mockReset()
+  })
+})
+
 // ── plan 123, P17 — a phone's radio groups are tapped ──
 // On the desk a radio group is one tab stop walked with the arrows; a
 // phone's keeps a stop per radio, no tabindex written, and leaves the
@@ -1768,10 +1817,13 @@ describe('the gates taking the window (plan 130)', () => {
     apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({}) }))
     const { MemoryRouter } = await import('react-router-dom')
     const { default: PracticeScreen } = await import('./screens/PracticeScreen')
+    // How many platforms, asked of the registry (PracticeScreen.phone.test's
+    // rule): the seventh, 会話, came with plan 217.
+    const { getSections } = await import('./config/tabs')
     await render(<LangProvider><MemoryRouter initialEntries={['/practice']}><PracticeScreen /></MemoryRouter></LangProvider>)
     await settle(250)
     const feet = [...document.querySelectorAll('.plate__foot--dests')]
-    expect(feet).toHaveLength(6)
+    expect(feet).toHaveLength(getSections('practice', {}).length)
     for (const foot of feet) expect(foot.querySelectorAll('.chip')).toHaveLength(5)
     // Nor the desk's specimens (plan 165): no body in the plate's head,
     // and no request for the samples it would draw from.

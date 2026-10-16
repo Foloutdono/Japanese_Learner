@@ -1390,6 +1390,52 @@ const compositionMode = {
   compositionLimitReached: "That's every review for today — your check and your grade still count. The tutor is back tomorrow.",
 }
 
+// ── 会話 — conversation (plan 217) ──────────────────────────────
+// Someone speaks to the learner in a place (a konbini's till, a
+// station's gate, a client's office) and they answer: by choosing among
+// three replies, by writing what they are told to say, or freely, the
+// other person played by the model. ConversationStation lists the
+// scenes, ConversationRun rides one; the tutor's review, the practice
+// card and the rating bar keep their own shared keys.
+const conversationMode = {
+  conversationTitle:   'Conversation',
+  conversationDesc:    'Someone speaks to you: answer them\nChoose, translate or speak freely\nN5 through N1',
+  cvsFetchError:       "Couldn't load the conversation. Try again.",
+  cvsModeLabel:        'How you answer',
+  cvsLevelLabel:       'Grade',
+  cvsModes:            { choose: 'Choose', translate: 'Translate', free: 'Free talk' },
+  cvsHow: {
+    choose:    'Someone speaks to you: pick the right reply among three.',
+    translate: 'You are told what to say: write it in Japanese, in kana, kanji or rōmaji.',
+    free:      'Answer in your own words: the other person reacts to what you say, and the tutor reads every line.',
+  },
+  cvsEmpty:            'No conversation at this grade yet.',
+  cvsRecordAria:       (right, done) => `${right} of ${done} replies right`,
+  cvsLeave:            'Scenes',
+  cvsRepliesRated:     'Replies',
+  cvsStart:            'Start',
+  cvsGoal:             'Your errand',
+  cvsSay:              'Say',
+  cvsTheReply:         'The reply',
+  cvsNext:             'Next',
+  cvsFinish:           'Finish',
+  cvsReplyLabel:       'Your reply',
+  cvsReplyPlaceholder: 'Your reply, in Japanese or rōmaji…',
+  cvsSend:             'Send',
+  cvsAnswering:        who => `${who} is answering…`,
+  cvsReading:          'Reading your reply…',
+  // The day's tutor is spent (routes/conversation.py, 429): the run
+  // goes on, measured and graded.
+  cvsReviewLimit:      "That's every review for today — the measure and your grade still count. The tutor is back tomorrow.",
+  cvsTalkLimit:        "That's every free-talk line for today. Choose and Translate still work — the free talk is back tomorrow.",
+  cvsTalkOff:          'The free talk needs the tutor, and it is not available right now. Choose and Translate still work.',
+  cvsTalkFailed:       'No answer came. Try again.',
+  cvsTalkOver:         'Eight replies: the conversation ends here.',
+  cvsOver:             'The conversation is over',
+  cvsAgain:            'Again',
+  cvsOther:            'Another scene',
+}
+
 // ── Dictionary ────────────────────────────────────────────
 const dictionary = {
   dictionaryPlaceholder: 'Search a kanji, a kana or a meaning…',
@@ -2424,7 +2470,7 @@ const boarding = {
   agdSubjectName: {
     review: 'Reviews', kana: 'Kana', vocab: 'Vocabulary', kanji: 'Kanji', grammar: 'Grammar',
     reading: 'Reading', translation: 'Translation', dictation: 'Dictation', composition: 'Writing',
-    comprehension: 'Comprehension', exam: 'Mock exam',
+    conversation: 'Conversation', comprehension: 'Comprehension', exam: 'Mock exam',
   },
   agdGo: 'Start',
   agdUntil: (end) => `until ${end}`,
@@ -2651,6 +2697,7 @@ const onboarding = {
     comprehension: 'A short text, then its questions — the exam’s reading section, rehearsed.',
     dictation: 'Two listens, no more: write in rōmaji what you hear.',
     composition: 'You are given a grammar point: write a sentence that uses it, and a tutor reads it.',
+    conversation: 'Someone speaks to you in a scene: choose your reply, write it, or answer freely.',
     // On the platform's plate, on the desk (plan 165): the question its
     // well shows.
     exam: 'A question in the JLPT’s format, here 漢字読み: the reading of the underlined word.',
@@ -3146,6 +3193,7 @@ export default {
   ...translationMode,
   ...dictationMode,
   ...compositionMode,
+  ...conversationMode,
   ...dictionary,
   ...comprehension,
   ...progress,

@@ -44,7 +44,7 @@ python -m scripts.audit_slice --dump > /tmp/slice.json
 ```
 
 The slice is a pure function of the date — grammar, vocab, sentences,
-placement and tours in rotation, each area walking its own list — so there is no
+placement, tours and conversation in rotation, each area walking its own list — so there is no
 ledger to update and a run can be reproduced later with `--on`. Read
 `scripts/audit_slice.py`'s docstring for the rotation; `--schedule 12`
 shows what is coming.
@@ -96,6 +96,33 @@ A finding proposes the corrected line with its evidence, as for an
 example sentence; the audit does not rewrite the scene (Rule 0), and a
 proposal must still pass `check_grammar`.
 
+**A conversation slice is whole scenarios of the 会話 bank** (plan 217,
+`backend/content/conversation/`, its README the style guide): a place,
+the person who speaks to the learner there, and four to seven turns,
+each their line, the model reply (`me`) with the alternatives Translate
+also accepts (`alt`), and two `wrong` replies with why. `check_conversation`
+already holds the shape, that every reading spells its line and every
+reply's rōmaji its reading; what no gate can say is whether a native
+speaker would say it. What to try to disprove:
+
+- **a second right answer**: a `wrong` reply the other person would take
+  as a fine answer. Say it to them in the scene. It is the commonest
+  real finding and the most harmful, as in a tour's scene;
+- **an alternative that answers differently**: Translate scores the
+  learner against `me` and every `alt`, so an alt that says something
+  else marks a wrong reply right;
+- **the register**: a `me` out of the scenario's `register`, 敬語 that
+  stacks (二重敬語), a reply no one gives at that counter;
+- **a reading**: the furigana is built from `kana`, counters and dates
+  above all (七時 しちじ, 今日中 きょうじゅう, 一人 ひとり);
+- **the why, the note and the translations**: a rule true of this reply
+  but not of the Japanese, a French that agrees with a gender the
+  learner may not have.
+
+A finding proposes the corrected line with its evidence; the audit does
+not rewrite the scenario (Rule 0), and a proposal must still pass
+`check_conversation`.
+
 **Choisir questions** (plan 201) ride along. A point the contrast drill
 cannot be drawn on is asked from its own `choose` list, which is in its
 grammar slice (whole entries) and beside its tour: a sentence with one
@@ -124,6 +151,7 @@ cd backend
 python -m scripts.check_grammar --level N5          # grammar slices
 python -m pytest tests/test_grammar_points.py tests/test_grammar_sentences.py
 python -m pytest tests/test_reading_sentences.py tests/test_listening_clips.py
+python -m scripts.check_conversation --level N5     # conversation slices
 ```
 
 Two reasons, both load-bearing. It tells you what the gates already

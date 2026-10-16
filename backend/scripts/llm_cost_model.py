@@ -83,6 +83,24 @@ FEATURES = {
         "serves (~60% of the input). COMPOSITION_DAILY_LIMIT caps it at "
         "30/day, which bounds the abuse row.",
     ),
+    "conversation_talk": (
+        48, 1700, 450,
+        "Two free talks a week of six lines each (plan 217): every learner "
+        "line is one call answering twice, the other person's next line and "
+        "the review of the learner's line. In: a stable system block (~1,000 "
+        "tokens, cached) and the scene -- its script of up to fourteen lines, "
+        "the talk so far, the line. Out: two short Japanese lines and the "
+        "review's shape. CONVERSATION_DAILY_LIMIT caps it at 80/day, which "
+        "bounds the abuse row.",
+    ),
+    "conversation_review": (
+        40, 1100, 400,
+        "Two translated replies reviewed a session, 20 sessions (plan 217): "
+        "translation's review with the scene in the user block. One call "
+        "each, the system block a stable prefix. "
+        "CONVERSATION_REVIEW_DAILY_LIMIT caps it at 60/day, which bounds "
+        "the abuse row.",
+    ),
     "practice_ask": (
         40, 1400, 120,
         "Two questions a session, 20 sessions (plan 131): a desk-only panel "

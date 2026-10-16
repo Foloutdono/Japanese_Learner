@@ -174,6 +174,11 @@ describe('the practice gate at phone width', () => {
     // 模試 — not a run: that grade's papers (ExamScreen reads ?level=).
     chipAt(5, 'N2').click()
     await vi.waitFor(() => expect(here.path).toBe('/practice/exam?level=N2'))
+
+    // 会話 — chosen by scene as well as by grade (plan 217): the grade
+    // opens the station on that grade's scenes.
+    chipAt(6, 'N5').click()
+    await vi.waitFor(() => expect(here.path).toBe('/practice/conversation?level=N5'))
   })
 })
 

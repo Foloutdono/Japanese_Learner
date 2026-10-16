@@ -52,11 +52,13 @@ import { AskEntry } from './AskPage'
 const MAX_MISSES = 2
 
 /** A line said aloud, from the server (lib/audio's speakLine): the
-    reader's voice for an example, the scene's two voices for its lines. */
-function Speak({ text, who = 'reader', onSpeak }) {
+    reader's voice for an example, the scene's two voices for its lines.
+    `speak` says a line the catalogue does not hold another way (a free
+    conversation's, on the device: plan 217). */
+export function Speak({ text, who = 'reader', onSpeak, speak = null }) {
   const { t } = useLang()
   return (
-    <button type="button" className="tour-speak" aria-label={t.listen} onClick={() => { onSpeak?.(); speakLine(text, who) }} data-action="speak">
+    <button type="button" className="tour-speak" aria-label={t.listen} onClick={() => { onSpeak?.(); (speak ?? speakLine)(text, who) }} data-action="speak">
       <SpeakerIcon size={20} />
     </button>
   )
@@ -68,8 +70,9 @@ const SHORT = { ja: 6, text: 10 }
 
 /** Choices that are checked once: the pick in gold, then the right one
     ringed and a wrong pick crossed, the why said under them. Where every
-    one is short they stand in a row, four as two by two (plan 206). */
-function Choices({ items, pick, done, onPick, label, ja = false }) {
+    one is short they stand in a row, four as two by two (plan 206).
+    The conversation platform's replies are the same tiles (plan 217). */
+export function Choices({ items, pick, done, onPick, label, ja = false }) {
   const { t } = useLang()
   const trapLabel = t.tourTrap
   const row = items.every(c => [...(ja ? c.jp ?? '' : c.text ?? '')].length <= (ja ? SHORT.ja : SHORT.text))
@@ -332,17 +335,34 @@ function Twist({ twist, n, total, pick, done, onPick }) {
   )
 }
 
-/** One line of a scene: who says it, what, its translation, its voice. */
-function SceneLine({ line, them, onSpeak }) {
+/** One line of a scene: who says it, what, its translation, its voice.
+    The conversation platform draws its talk with the same lines (plan
+    217): `showTr` holds the translation back on a line still to be
+    answered, `children` stand under the line (what the tutor said of
+    the learner's), and `speak` voices a line the catalogue does not
+    hold. */
+export function SceneLine({ line, them, onSpeak, showTr = true, speak = null, children = null }) {
   const { t } = useLang()
   return (
     <li className={`tour-line tour-line--${line.who}`}>
       <span className="tour-line__who">{line.who === 'me' ? t.tourMe : them}</span>
       <div className="tour-line__text">
-        <ExampleSentence ex={{ jp: line.jp, tr: line.tr, segments: line.furigana }} />
+        <ExampleSentence ex={{ jp: line.jp, tr: line.tr, segments: line.furigana }} showTr={showTr} />
+        {children}
       </div>
-      <Speak text={line.jp} who={line.who} onSpeak={onSpeak} />
+      <Speak text={line.jp} who={line.who} onSpeak={onSpeak} speak={speak} />
     </li>
+  )
+}
+
+/** A scene's place, as the station's plate: its name (`children`, with
+    its reading) over its caption, the line's edge under it. */
+export function ScenePlate({ caption, children }) {
+  return (
+    <div className="tour-plate" aria-label={caption}>
+      <span className="tour-plate__name" lang="ja">{children}</span>
+      <span className="tour-plate__cap">{caption}</span>
+    </div>
   )
 }
 
@@ -371,12 +391,9 @@ function Scene({ scene, phase, pick, done, onPick }) {
   if (phase === 'watch') {
     return (
       <>
-        <div className="tour-plate" aria-label={scene.place_caption}>
-          <span className="tour-plate__name" lang="ja">
-            {scene.place_reading ? <ruby>{scene.place}<rt>{scene.place_reading}</rt></ruby> : scene.place}
-          </span>
-          <span className="tour-plate__cap">{scene.place_caption}</span>
-        </div>
+        <ScenePlate caption={scene.place_caption}>
+          {scene.place_reading ? <ruby>{scene.place}<rt>{scene.place_reading}</rt></ruby> : scene.place}
+        </ScenePlate>
         <div className="tour-leaf tour-leaf--scene">
           <ol className="tour-leaf__mid tour-scene">
             {scene.lines.map((line, i) => <SceneLine key={i} line={line} them={scene.them} onSpeak={cut} />)}
