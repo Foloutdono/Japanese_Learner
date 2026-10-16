@@ -9616,6 +9616,28 @@ textarea:focus-visible {
 @keyframes pgate-in {
   from { opacity: 0; }
 }
+/* 雲 — the clouds, over the sky they were lifted from (clouds.py):
+   behind the sky's mask, which stays, they drift a few units either
+   way, slow enough to be seen only by a learner who stays. They start
+   where the painting has them (the loop's middle). */
+.pgate__sky {
+  position: absolute;
+  left: 0;
+  top: calc(var(--pg-sky-top, 0) * 1px);
+  width: 390px;
+  height: calc(var(--pg-sky-h, 0) * 1px);
+  pointer-events: none;
+  mask-image: var(--pg-sky, none);
+  mask-size: 100% 100%;
+}
+.pgate__clouds {
+  animation: pgate-drift 56s ease-in-out -28s infinite alternate;
+}
+.pgate__clouds .pgate__layer { width: 390px; height: calc(var(--pg-sky-h, 0) * 1px); }
+@keyframes pgate-drift {
+  from { transform: translateX(-14px); }
+  to { transform: translateX(14px); }
+}
 .pgate__car { inset: 195.86px auto auto 24.65px; width: 340.71px; height: 360.17px; }
 .pgate__car .pgate__layer { width: 340.71px; height: 360.17px; }
 /* The train: every car, its stripe, its signs, its door and its
@@ -10073,9 +10095,10 @@ textarea:focus-visible {
 }
 /* Reduced motion: the train stands, its door open, its pantograph on
    the wire; the signs turn without rolling; the clock keeps the time
-   it was opened at; no spark. */
+   it was opened at; the clouds keep the painting's place; no spark. */
 @media (prefers-reduced-motion: reduce) {
   .pgate__layer.is-on,
+  .pgate__clouds,
   .pgate-panto__bob--on { animation: none; }
   .pgate__train,
   .pgate-roll__row,
@@ -30404,18 +30427,20 @@ button.brd-stn { cursor: pointer; }
 /* 練習の改札 (plan 225): the painted Practice gate's own, where the
    painting has it, at its drawn size, its word where the painting set it
    (components/practice/gate, the gate's section above). */
+/* A size up from the drawn one (the owner's word), on the drawn centre
+   line, its foot still over KEEP.bottom (gateFit.js). */
 .pgate .pgate__go {
   position: absolute;
-  left: 64.42px;
-  top: 640.84px;
-  width: 263.32px;
-  height: 51.45px;
+  left: 48.08px;
+  top: 636px;
+  width: 296px;
+  height: 58px;
   min-height: 0;
   margin: 0;
   padding: 0 var(--sp-2);
 }
-.pgate .pgate__go .btn-depart__reader { width: 40.64px; height: 40.64px; }
-.pgate .pgate__go .btn-depart__jp { translate: 7.5px 0; }
+.pgate .pgate__go .btn-depart__reader { width: 46px; height: 46px; }
+.pgate .pgate__go .btn-depart__jp { font-size: var(--fs-lead); translate: 8.5px 0; }
 
 /* ── one-shot utilities (each reads --d as its delay) ── */
 .clrk-arrive { animation: clr-arrive 0.5s var(--ease-out) backwards; animation-delay: var(--d, 0ms); }

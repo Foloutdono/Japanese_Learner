@@ -35,6 +35,9 @@ import { ClockFace, Leaves, Pantograph, Rivets, Spark, Spill } from './GateParts
 //   時計    the station clock, keeping the time; a tap shows the next hour
 //   改札    the gate's gold button: the doors close, the train pulls out,
 //           and the run it goes to opens
+//   雲      the clouds, lifted off the sky (scripts/practice-gate/
+//           clouds.py), drifting slowly behind the sky's own mask, so
+//           the canopy, its lamps, the wires and the land stay in front
 //
 // The band along the cars takes the chosen line's pigment through a
 // colour blend over its own mask, so the stripe keeps its paint. The
@@ -288,6 +291,9 @@ export default function PracticeGate({ platforms, here, pathFor, onStation }) {
     '--pg-band-b': asset('band-car2.png'),
     '--pg-fill-top': GATE.fill[hour].top,
     '--pg-fill-side': GATE.fill[hour].side,
+    '--pg-sky': asset('sky.png'),
+    '--pg-sky-top': GATE.sky.top,
+    '--pg-sky-h': GATE.sky.height,
   }
   // Until the frame is measured the scene stands at its own size.
   const placed = fit ?? { u: 1, x: 0, y: 0 }
@@ -303,6 +309,11 @@ export default function PracticeGate({ platforms, here, pathFor, onStation }) {
           <div className="pgate__scene">
             <div className="pgate__layers" aria-hidden="true">
               {hours.map(h => <img key={h} className={`pgate__layer${h === hour ? ' is-on' : ''}`} src={layer('bg', h)} alt="" draggable="false" />)}
+            </div>
+            <div className="pgate__sky" aria-hidden="true">
+              <div className="pgate__layers pgate__clouds">
+                {hours.map(h => <img key={h} className={`pgate__layer${h === hour ? ' is-on' : ''}`} src={layer('clouds', h)} alt="" draggable="false" />)}
+              </div>
             </div>
 
             <div className={`pgate__train pgate__train--${phase}`}>
