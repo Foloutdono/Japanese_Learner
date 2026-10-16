@@ -95,6 +95,50 @@ def test_complete_creates_the_row_when_none_exists(client):
         assert client.get("/api/profile").json()["jlptLevel"] == "N5"
 
 
+def test_a_row_seeded_by_a_concurrent_request_is_returned_not_a_500(monkeypatch):
+    # A new account's boot sends PATCH /api/profile/learning and GET
+    # /api/profile at once: both find no row, and the second INSERT
+    # collides on user_id. It used to read that as five username
+    # collisions and answer 500 -- every new learner's first request.
+    # The other request's row is written here in the gap between the
+    # SELECT and the INSERT, where the race puts it.
+    user_id = "test-profile-race"
+    real_name = profile_module._random_username
+    raced = []
+
+    def other_request_wins():
+        if not raced:
+            raced.append(True)
+            conn = db_conn()
+            try:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "INSERT INTO user_profiles(user_id, username) VALUES (%s, %s)",
+                        (user_id, "RaceWinner42"),
+                    )
+                conn.commit()
+            finally:
+                conn.close()
+        return real_name()
+
+    def drop_row():
+        conn = db_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM user_profiles WHERE user_id = %s", (user_id,))
+            conn.commit()
+        finally:
+            conn.close()
+
+    drop_row()
+    monkeypatch.setattr(profile_module, "_random_username", other_request_wins)
+    try:
+        assert profile_module.ensure_profile_row(user_id) == "RaceWinner42"
+        assert raced
+    finally:
+        drop_row()
+
+
 def test_completing_twice_keeps_the_first_timestamp(client):
     with _clean_onboarding_state(DEV_USER_ID):
         first = client.post("/api/onboarding/complete",
