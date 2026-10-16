@@ -106,6 +106,14 @@ runtime purpose.
   those tables in the server (the stats reset, the account's deletion)
   calls `srs.forget_history(user_id)` after it commits. The cache is in
   process: the API runs one worker.
+- **The gate counts the day's share (plan 217).** A learner's ceiling
+  or catch-up (`core/review_plan.py`) cuts the due reviews to the day's
+  share before the ration joins them (`review_plan.cut`, over
+  `study/review_cap.share`): `_day_queue` (the gate and the clear),
+  `/api/today/cards` and `/api/today/ahead` all cut, and anything new
+  that counts or serves the day's reviews cuts too, or a learner on a
+  catch-up is shown, served or notified the wall again. The cut never
+  writes a schedule: lifted, the gate is what it was.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.

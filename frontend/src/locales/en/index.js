@@ -3179,6 +3179,68 @@ const clrTickets = {
 }
 // ── 191:tickets end ──
 
+
+// ── 217:reviews ──
+// 回復運転 — the review plan (plan 217): the comeback sheet on Today,
+// the catch-up's figure in the day, the run past the share, Settings ›
+// Reviews and the notification that invites back.
+const reviewPlan = {
+  cbJp: '運転再開',
+  cbCap: 'Service resumes',
+  cbLabel: 'Resume at your pace',
+  cbAway: n => `Welcome back — ${n} day${n === 1 ? '' : 's'} away.`,
+  cbPiled: 'Your reviews have piled up.',
+  cbOwed: n => `${n} cards are waiting. No need to do them all today — pick your pace.`,
+  cbChoices: 'Your pace',
+  cbSpread: 'Spread out',
+  cbGentle: 'Gently',
+  cbAll: 'All now',
+  cbPerDay: n => `${n} a day`,
+  cbOverDays: n => `over ${n} days`,
+  cbNoEnd: 'no end date',
+  cbCards: n => `${n} card${n === 1 ? '' : 's'}`,
+  cbMinutes: m => `≈ ${m} min`,
+  cbDays: 'Over how many days',
+  cbDaysN: n => `${n} days`,
+  cbNewPaused: 'New cards come back as soon as you’re caught up.',
+  cbGo: 'Let’s go',
+  cbError: 'Your choice couldn’t be saved. Try again.',
+  todayCatchupDay: 'catch-up day',
+  todayCatchupGentle: 'a day, catching up',
+  todayCatchupShort: 'catch-up',
+  todayExtra: n => `Review more · ${n} card${n === 1 ? '' : 's'}`,
+  settingsReviews: 'Reviews',
+  rvRowNone: 'No ceiling',
+  rvRowCap: n => `${n} at most a day`,
+  rvRowCatchup: 'Catching up',
+  rvRowAway: from => `Away from ${from}`,
+  rvCapLabel: 'Reviews a day',
+  rvCapHint: 'Past it, cards wait for the next day, and your day is cleared on your share.',
+  rvCapNone: 'None',
+  rvCapUnder: load => `About ${load} cards fall due each day: under this ceiling, the backlog will grow.`,
+  rvCatchupLabel: 'Catch-up',
+  rvCatchupSpread: (perDay, day, of) => `${perDay} cards a day · day ${day} of ${of}`,
+  rvCatchupGentle: perDay => `${perDay} cards a day, no end date`,
+  rvCatchupNew: 'New cards are paused until it ends.',
+  rvCatchupStop: 'Stop catching up',
+  rvAwayLabel: 'Time away',
+  rvAwayHint: n => `Your days away keep your streak, and new cards stop two days before you leave. ${n} days at most.`,
+  rvAwayFrom: 'From',
+  rvAwayUntil: 'Until',
+  rvAwaySave: 'Save',
+  rvAwayCancel: 'Cancel time away',
+  rvAwaySet: (from, until) => `${from} to ${until}`,
+  rvAwayErr: {
+    past: 'The first day can’t be in the past.',
+    order: 'The last day comes after the first.',
+    long: n => `${n} days at most.`,
+  },
+  rvError: 'The change couldn’t be saved.',
+  nudgeComebackTitle: time => `Your ${time} train · ease back in?`,
+  nudgeComebackBody: 'A few minutes are enough to get going again.',
+}
+// ── 217:reviews end ──
+
 export default {
   ...auth,
   ...landing,
@@ -3213,4 +3275,5 @@ export default {
   ...clrMilestones,
   ...clrRestday,
   ...clrTickets,
+  ...reviewPlan,
 }

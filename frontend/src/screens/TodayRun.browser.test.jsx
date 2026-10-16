@@ -236,3 +236,23 @@ describe('TodayRun with a quota', () => {
     }
   }, 30000)
 })
+
+// ── 回復運転 — the run past the share (plan 217) ─────────────────
+// Boarded from a cleared gate whose ceiling held reviews back: the
+// queue is asked for them (`extra=1`), as a session of its own.
+describe('TodayRun past the share', () => {
+  it('asks the queue for the reviews held back', async () => {
+    const calls = []
+    apiJson.mockImplementation(async (url) => {
+      if (String(url).startsWith('/api/today/cards')) {
+        calls.push(String(url))
+        return { cards: [CARD], beyond: 0 }
+      }
+      return {}
+    })
+    await mount('/today/run?extra=1')
+    await settle(300)
+    expect(calls.length).toBeGreaterThan(0)
+    expect(calls.every(u => u.includes('&extra=1'))).toBe(true)
+  })
+})

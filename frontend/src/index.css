@@ -8490,6 +8490,14 @@ textarea:focus-visible {
   background: linear-gradient(to bottom, transparent, var(--surface) var(--sp-4));
 }
 .tdy-asks { display: flex; flex-direction: column; gap: var(--sp-3); }
+/* 運転再開 — the comeback sheet (plan 217, components/station/
+   ComebackSheet.jsx): Today's sheet (.tdy-sheet, its docked foot) round
+   a welcome, the cards waiting, the three paces as the service cards
+   Settings draws (.svc) and, for a spread, its days as Today's seg. */
+.cb-lead { display: flex; flex-direction: column; gap: var(--sp-2); }
+.cb-lead__hello { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; text-wrap: pretty; }
+/* The run past the share, a rung over the cleared gate (plan 217). */
+.tdy-extra { align-self: center; }
 .tdy-seg .seg__opt { height: auto; min-height: 44px; gap: var(--sp-2); padding-inline: var(--sp-3); white-space: nowrap; }
 .tdy-seg .seg__opt-latin {
   font-size: var(--fs-body);

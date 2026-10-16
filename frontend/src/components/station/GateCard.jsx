@@ -14,6 +14,7 @@ import { useDesk } from '../../hooks/useDesk'
 import { useMinute } from '../../hooks/useMinute'
 import { Loading } from '../ui/Loading'
 import { CheckIcon, ChevronIcon } from '../ui/Icons'
+import { QuietButton } from '../dayclear/kit'
 import { useCredits } from '../../stores/credits'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { publishLeft } from '../../stores/gateRun'
@@ -614,6 +615,11 @@ function ClearedGate({ today, desk }) {
   const week = summary?.streak > 0 ? restWeek(summary.week, [], day) : null
   const tomorrow = today.tomorrow
   const opens = opensWords(today.next_due, t, lang)
+  const held = today.review?.held ?? 0
+  function rideExtra() {
+    playAnnouncement('today')
+    beginDeparture({ ...sectionFor('/today', t), path: '/today/run?extra=1', stage: true })
+  }
   // On the desk the print centres on the gate's column, as DeskGate's does.
   const heroRef = useRef(null)
   const p = usePrint(desk ? 'desk' : 'phone', desk ? heroRef : null)
@@ -650,6 +656,15 @@ function ClearedGate({ today, desk }) {
           <b className="tdy-next__n">{tomorrow.cards}<small>{t.todayCardsUnit(tomorrow.cards)}</small></b>
           <span className="tdy-next__min">≈ {tomorrow.minutes} {t.gateMinutes}</span>
         </div>
+      )}
+      {/* 回復運転 (plan 217): the share is spent and reviews wait past
+          it -- the way on, for a learner who wants more, stands a rung
+          over the shut gate as a quiet way. The ceiling is a default,
+          never a lock. */}
+      {held > 0 && (
+        <QuietButton className="tdy-extra" data-action="review-extra" onClick={rideExtra}>
+          {t.todayExtra(held)}
+        </QuietButton>
       )}
       <GateButton label={opens ?? t.depart} aria-label={opens ?? t.todayNothingDueShort} disabled />
     </>

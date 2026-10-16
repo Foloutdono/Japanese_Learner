@@ -61,6 +61,7 @@ from routes.video           import router as video_router
 from routes.ocr             import router as ocr_router
 from routes.onboarding      import router as onboarding_router
 from routes.journey         import router as journey_router
+from routes.review_plan     import router as review_plan_router
 from routes.account         import router as account_router
 from routes.credits         import router as credits_router
 from routes.events          import router as events_router
@@ -238,6 +239,7 @@ async def _limit_reached(request, exc: LimitReached):
         "detail": "limit_reached", "what": exc.what, "limit": exc.limit,
     })
 app.include_router(journey_router)
+app.include_router(review_plan_router)
 app.include_router(account_router)
 app.include_router(events_router)
 

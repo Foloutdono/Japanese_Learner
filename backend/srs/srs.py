@@ -1472,6 +1472,13 @@ class SRSEngine:
         figures["today"] = streak_of(studied | {today}, rested, today)["current"]
         return figures
 
+    def last_studied_day(self, user_id: str):
+        """The latest day this learner showed up (a review or a practice
+        answer, _studied_days' meaning), or None for one who never has:
+        what the comeback sheet counts the days away from (plan 217)."""
+        studied = self._studied_days(user_id)
+        return max(studied) if studied else None
+
     def get_streak(self, user_id: str) -> dict[str, int]:
         """Current and longest consecutive-day streak of having at least
         one review, a day a rest ticket bridged keeping it unbroken
@@ -1521,6 +1528,40 @@ class SRSEngine:
                     self._log_sql("rest_use", sql, (day, ticket))
                     cur.execute(sql, (day, ticket))
         return missed
+
+    def bridge_away_days(self, user_id: str, start, until) -> list:
+        """A declared absence (plan 217): the days of [start, until] that
+        have passed (before today) and were neither studied nor already
+        bridged, each written as a rest day of its own -- a rest_tickets
+        row with milestone 0, earned and used on that day and seen at
+        once, so the streak walks through it, the week draws its 運休
+        stub, and no ticket the learner earned is spent on it, nor any
+        notice shown. Earned on the missed day itself, which no
+        day_clears row can name (nothing was studied), so no clear reads
+        it as a ticket kept. Lazy and idempotent like bridge_rest_days,
+        and run before it, so a ticket is never spent on a day the
+        absence covers. Returns the days written, oldest first."""
+        today = datetime.now(timezone.utc).date()
+        last = min(until, today - timedelta(days=1))
+        if last < start:
+            return []
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                # The same lock bridge_rest_days takes, so the two never
+                # bridge one day twice.
+                cur.execute("SELECT id FROM rest_tickets WHERE user_id = %s AND used_on IS NULL FOR UPDATE",
+                            (user_id,))
+                shown = self._studied_days(user_id, cur) | self._rest_days(user_id, cur)
+                days = [start + timedelta(days=n) for n in range((last - start).days + 1)]
+                days = [d for d in days if d not in shown]
+                sql = """
+                    INSERT INTO rest_tickets (user_id, earned_on, milestone, used_on, seen_at)
+                    VALUES (%s, %s, 0, %s, NOW())
+                """
+                for day in days:
+                    self._log_sql("away_day", sql, (user_id, day, day))
+                    cur.execute(sql, (user_id, day, day))
+        return days
 
     def get_rest_days(self, user_id: str, days: int = 30) -> list[str]:
         """The days a rest ticket bridged in the last `days` days, oldest
@@ -2343,6 +2384,53 @@ class SRSEngine:
                 cur.execute(sql, params)
                 (count,) = cur.fetchone()
         return int(count)
+
+    def get_reviewed_today(self, user_id: str) -> tuple[set, set]:
+        """
+        What today has already spent of a review ceiling (plan 217): the
+        (card_id, mode) pairs reviewed today, and the card ids first met
+        today -- the same day, the same servable modes and the same
+        `firsts` as get_new_items_today, whose budget those are. A pair
+        counts once however often it came back today (a lapse is one
+        card, not four), and a card met today is the pace's, never the
+        ceiling's.
+        """
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                mode_sql, mode_params = self._servable_filter()
+                sql = f"""
+                    SELECT DISTINCT card_id, mode FROM review_log
+                    WHERE card_id LIKE %s{mode_sql}
+                      AND reviewed_at >= date_trunc('day', NOW())
+                """
+                params = (pattern,) + mode_params
+                self._log_sql("get_reviewed_today", sql, params)
+                cur.execute(sql, params)
+                pairs = {(row[0], row[1]) for row in cur.fetchall()}
+                if not pairs:
+                    return set(), set()
+                sql = f"""
+                    WITH events AS (
+                        SELECT card_id, reviewed_at AS at
+                        FROM review_log
+                        WHERE card_id LIKE %s{mode_sql}
+                        UNION ALL
+                        SELECT card_id, first_at AS at
+                        FROM card_first_review
+                        WHERE card_id LIKE %s{mode_sql}
+                    ),
+                    firsts AS (
+                        SELECT card_id, MIN(at) AS first_at FROM events GROUP BY card_id
+                    )
+                    SELECT card_id FROM firsts
+                    WHERE first_at >= date_trunc('day', NOW())
+                """
+                params = (pattern,) + mode_params + (pattern,) + mode_params
+                self._log_sql("get_met_today", sql, params)
+                cur.execute(sql, params)
+                met = {row[0] for row in cur.fetchall()}
+        return pairs, met
 
     # ── The level rule (plan 074) ───────────────────────────────
     # A card marked KNOWN gets the state of a card that graduated and

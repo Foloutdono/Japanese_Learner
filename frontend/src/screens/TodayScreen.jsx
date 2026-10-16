@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { useTodaySummary, refreshToday } from '../stores/today'
 import { useProfileSummary } from '../stores/profileSummary'
-import { markRestSeen, restNoticeSeen } from '../stores/dayClear'
+import { comebackShut, markRestSeen, restNoticeSeen } from '../stores/dayClear'
 import GateCard from '../components/station/GateCard'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
 import Empty from '../components/ui/Empty'
 import { useDesk } from '../hooks/useDesk'
 import RestDayNotice from '../components/dayclear/RestDayNotice'
+import { ComebackSheet } from '../components/station/ComebackSheet'
 import { InkFilters } from '../components/dayclear/kit'
 import { restWeek, utcToday } from '../domain/dayClear'
 
@@ -32,6 +33,11 @@ import { restWeek, utcToday } from '../domain/dayClear'
 // the gate gives way once to the notice saying so (RestDayNotice) --
 // while Today's summary names a rest day not yet seen (`rest.unseen`).
 // Any way out tells the server it was seen.
+//
+// 運転再開 (plan 217): a gate whose reviews piled up past a few days of
+// the learner's own load opens on the comeback sheet (ComebackSheet),
+// over the gate and after the rest-day notice, never with it: the
+// paces to take the backlog at, chosen once.
 //
 // Everything this screen reads is shared: /api/today from the store
 // the tab bar's badge already reads. One request, every consumer.
@@ -67,6 +73,10 @@ export default function TodayScreen({ session }) {
       navigate('/today/run')
     })
   }
+  // 運転再開 — the comeback offer, until it is answered or shut.
+  const [comebackLeft, setComebackLeft] = useState(false)
+  const offer = today?.review?.comeback ?? null
+  const showComeback = Boolean(offer) && !showRest && !comebackLeft && !comebackShut()
   const restMinutes = today?.seconds_per_review && today?.total
     ? Math.max(1, Math.ceil((today.total * today.seconds_per_review) / 60))
     : null
@@ -101,7 +111,15 @@ export default function TodayScreen({ session }) {
       ) : (
         <GateCard today={today} failed={failed && !today} />
       )}
-      {guide.open && !showRest && <Guide gate="today" onEnd={guide.onEnd} />}
+      {showComeback && (
+        <ComebackSheet
+          offer={offer}
+          secondsPerReview={today.seconds_per_review}
+          session={session}
+          onClose={() => setComebackLeft(true)}
+        />
+      )}
+      {guide.open && !showRest && !showComeback && <Guide gate="today" onEnd={guide.onEnd} />}
     </main>
   )
 }
