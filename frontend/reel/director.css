@@ -1003,6 +1003,10 @@ body {
 }
 
 /* A page of manga: speed lines, a bubble, a tone. */
+/* The page is the tallest object: it stands below the caption's band
+   (centred on what is left), so its first column is never under it. */
+.scene--manga .scene__obj { padding: 112px 0 0; }
+
 .manga {
   display: grid;
   grid-template-columns: 1fr 1fr;

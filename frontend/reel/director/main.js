@@ -436,7 +436,13 @@ async function playHook(beat, ctx) {
   await marks?.clear()
 }
 
-/** Where the words of `text` start: the breakdown's tokens, if it has one. */
+// A line may break before a word, never before what leans on the word
+// before it (a particle, an auxiliary, a suffix, a mark) nor inside a
+// grammar pattern: 降るかもしれない stays one phrase, as a printed sign
+// or a speech bubble sets it.
+const LEANS = new Set(['particle', 'auxiliary', 'suffix', 'symbol'])
+
+/** Where `text` may break: the breakdown's phrases, if it has one. */
 function breaksOf(bundle, text) {
   const answer = text ? bundle.analyze?.[text.trim()] : null
   if (!answer) return []
@@ -445,7 +451,12 @@ function breaksOf(bundle, text) {
   for (const sentence of answer.sentences) {
     const at = text.indexOf(sentence.text, cursor)
     if (at < 0) continue
-    for (const tok of sentence.tokens) out.push(at + tok.start)
+    const inside = (sentence.grammar ?? []).filter(g => g.kind === 'pattern')
+    for (const tok of sentence.tokens) {
+      if (LEANS.has(tok.pos)) continue
+      if (inside.some(g => g.start < tok.start && tok.start < g.end)) continue
+      out.push(at + tok.start)
+    }
     cursor = at + sentence.text.length
   }
   return out

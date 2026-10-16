@@ -133,7 +133,8 @@ export const analyzer = {
         finger.rest()
         await stage.waitFor('.anl-explainpanel__body', { timeout: 8 })
         await ctx.look(['.anl-explainsheet__jp', '.anl-explainpanel__body'], { duration: 0.6, max: 1.5 })
-        if (beat.translation && beat.say !== false) ctx.say(`“${beat.translation}”`, { hold: null })
+        // Under the explanation, which fills the sheet's top half.
+        if (beat.translation && beat.say !== false) ctx.say(`“${beat.translation}”`, { hold: null, at: 'bottom' })
         await wait(beat.read ?? 2.6)
       }
     }
