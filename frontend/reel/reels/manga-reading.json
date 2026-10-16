@@ -15,7 +15,7 @@
       "text": "明日は雨が降るかもしれない。",
       "translation": "It might rain tomorrow.",
       "answer": "ashita wa ame ga furu kamoshirenai",
-      "reveal": "97% read right, first try",
+      "reveal": "*100%*, read right first try",
       "taps": ["降る"]
     },
     { "end": true }

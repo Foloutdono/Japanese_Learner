@@ -16,12 +16,12 @@
 // ffmpeg; and the sound it recorded is laid under the picture, with the
 // script's music if it names some.
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync, copyFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync, existsSync, copyFileSync, readdirSync, statSync } from 'node:fs'
 import { resolve, dirname, basename, extname, relative, join } from 'node:path'
 import { spawn, spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { pathToFileURL } from 'node:url'
-import { normalize, ScriptError } from './script.mjs'
+import { normalize, requestOf, ScriptError } from './script.mjs'
 import { startReelServer, REEL, REPO } from './server.mjs'
 import { launchShell, steppedPage, dispatchInputs } from './capture.mjs'
 
@@ -44,38 +44,6 @@ function parseArgs(argv) {
 async function loadScript(file) {
   if (/\.(mjs|js)$/.test(file)) return (await import(pathToFileURL(file).href)).default
   return JSON.parse(readFileSync(file, 'utf8'))
-}
-
-/** What the backend is asked for, from the script's beats. */
-export function requestOf(script) {
-  const req = { lang: script.lang, sentences: [], searches: [], words: [], kanji: [], grammar: [] }
-  const seen = new Set()
-  for (const beat of script.beats) {
-    // A hook's text too: its words are where its lines may break.
-    if (beat.kind === 'hook' && typeof beat.text === 'string' && !seen.has(beat.text.trim())) {
-      seen.add(beat.text.trim())
-      req.sentences.push({ text: beat.text.trim(), translation: '', answer: '' })
-    }
-    if (beat.kind !== 'app') continue
-    if (typeof beat.text === 'string' && !seen.has(beat.text.trim())) {
-      seen.add(beat.text.trim())
-      req.sentences.push({ text: beat.text.trim(), translation: beat.translation ?? '', answer: beat.answer ?? '' })
-    }
-    for (const s of beat.sentences ?? []) {
-      if (!seen.has(s.text)) { seen.add(s.text); req.sentences.push({ text: s.text, translation: s.translation ?? '', answer: s.answer ?? '' }) }
-    }
-    if (beat.feature === 'dictionary') {
-      // The page it opens on, and what is searched.
-      req.searches.push({ q: '', category: beat.category ?? 'kanji' })
-      if (beat.search) req.searches.push({ q: beat.search, category: beat.category ?? 'kanji' })
-    }
-    req.words.push(...(beat.words ?? []))
-    req.kanji.push(...(beat.kanji ?? []))
-    if (beat.point) req.grammar.push(beat.point)
-    if (beat.feature === 'comprehension') (req.comprehension ??= []).push(beat.level ?? script.level)
-    if (beat.feature === 'dictation' && beat.text) (req.voice ??= []).push(beat.text.trim())
-  }
-  return req
 }
 
 function fixtures(request, cacheDir) {
@@ -122,6 +90,38 @@ function ffmpeg(args, opts = {}) {
   return { proc, done }
 }
 
+const VIDEO = /\.(mp4|mov|m4v|webm|mkv)$/i
+
+/**
+ * A video hook's footage, as the film plays it: its frames at the
+ * film's rate and size (cover-cropped to 9:16), and its sound, cut once
+ * by ffmpeg into the cache. The hook shows the frame of each film frame
+ * from pictures already loaded, so nothing is decoded on the clock.
+ */
+function footage(src, beat, { cacheDir, width, height, fps }) {
+  const start = Number(beat.start ?? 0)
+  // The world keeps moving under the transition that follows the hook.
+  const span = Math.min(40, (beat.duration ?? 34) + 6)
+  const { size, mtimeMs } = statSync(src)
+  const key = createHash('sha256').update(JSON.stringify([src, size, mtimeMs, start, span, width, height, fps])).digest('hex').slice(0, 12)
+  const dir = `clip-${key}`
+  const out = join(cacheDir, dir)
+  if (!existsSync(join(out, 'clip.json'))) {
+    mkdirSync(out, { recursive: true })
+    const cut = ['-hide_banner', '-loglevel', 'error', '-y', '-ss', String(start), '-i', src, '-t', String(span)]
+    const v = spawnSync('ffmpeg', [...cut, '-vf', `fps=${fps},scale=${width}:${height}:force_original_aspect_ratio=increase,crop=${width}:${height}`,
+      '-q:v', '3', join(out, '%05d.jpg')], { encoding: 'utf8' })
+    if (v.status !== 0) throw new Error(`ffmpeg could not read ${beat.file}:\n${v.stderr || v.error?.message}`)
+    // A clip without sound simply has none (ffmpeg refuses an empty output).
+    const a = spawnSync('ffmpeg', [...cut, '-vn', '-ac', '2', '-ar', '48000', join(out, 'sound.wav')], { encoding: 'utf8' })
+    const count = readdirSync(out).filter(f => f.endsWith('.jpg')).length
+    if (!count) throw new Error(`${beat.file} has no frames from ${start}s`)
+    writeFileSync(join(out, 'clip.json'), JSON.stringify({ count, sound: a.status === 0 && existsSync(join(out, 'sound.wav')) }))
+  }
+  const { count, sound } = JSON.parse(readFileSync(join(out, 'clip.json'), 'utf8'))
+  return { dir, count, fps, seconds: count / fps, sound: sound ? `${dir}/sound.wav` : null }
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2))
   const file = args._[0]
@@ -150,16 +150,24 @@ async function main() {
 
   const bundle = fixtures(requestOf(script), cacheDir)
 
-  // The script's own media, beside it; served from the cache as copies.
+  // The script's own media, beside it; served from the cache as copies,
+  // and a video as its frames and its sound.
   const assets = { base: '', photos: {} }
-  for (const beat of script.beats) {
-    if (beat.kind === 'hook' && beat.file) {
-      const src = resolve(scriptDir, beat.file)
-      if (!existsSync(src)) { console.error(`✗ ${file}: no such file ${beat.file}`); process.exit(2) }
-      const copy = `media-${beat.file.replace(/[^\w.-]/g, '_')}`
-      copyFileSync(src, join(cacheDir, copy))
-      beat.file = copy
+  for (const [i, beat] of script.beats.entries()) {
+    if (beat.kind !== 'hook' || !beat.file) continue
+    const src = resolve(scriptDir, beat.file)
+    if (!existsSync(src)) { console.error(`✗ ${file}: no such file ${beat.file}`); process.exit(2) }
+    if (beat.style === 'video') {
+      if (!VIDEO.test(src)) { console.error(`✗ ${file}: beat ${i + 1}: a video hook's file is a video (mp4, mov, webm…)`); process.exit(2) }
+      process.stdout.write(`· cutting ${beat.file} into frames… `)
+      beat.clip = footage(src, beat, { cacheDir, width: script.width, height: script.height, fps: script.fps })
+      beat.duration ??= Math.min(beat.clip.seconds, 12)
+      console.log(`${beat.clip.count} frames${beat.clip.sound ? ', with its sound' : ''}`)
+      continue
     }
+    const copy = `media-${beat.file.replace(/[^\w.-]/g, '_')}`
+    copyFileSync(src, join(cacheDir, copy))
+    beat.file = copy
   }
   // Which photo each snap hands to the app beat after it.
   const snaps = []
@@ -271,18 +279,33 @@ async function main() {
     await sp.pump(() => page.evaluate(() => Boolean(window.__reel.sound || window.__reel.error)), { label: 'soundtrack', max: 3000 })
     const mixed = await page.evaluate(() => window.__reel.error ? { error: window.__reel.error } : window.__reel.sound)
     if (mixed.error) throw new Error(`the soundtrack failed:\n${mixed.error}`)
-    const { wav, duration } = mixed
+    const { wav, duration, clips = [] } = mixed
     const sound = join(cacheDir, 'sound.wav')
     writeFileSync(sound, Buffer.from(wav, 'base64'))
     await encoder.done
 
+    // The film's own sound, a video hook's sound where its footage
+    // played (faded out as the app takes over), and the music under all.
+    const inputs = ['-i', silent, '-i', sound]
+    const filters = []
+    const mix = ['[1:a]']
+    clips.forEach((c, j) => {
+      inputs.push('-i', join(cacheDir, c.file))
+      const lasts = Math.max(0.1, (c.until ?? duration) - c.at)
+      const at = Math.round(c.at * 1000)
+      filters.push(`[${2 + j}:a]atrim=0:${(lasts + 0.6).toFixed(3)},afade=t=out:st=${lasts.toFixed(3)}:d=0.6,volume=${c.volume ?? 1},adelay=${at}|${at}[c${j}]`)
+      mix.push(`[c${j}]`)
+    })
     const music = script.music ? resolve(scriptDir, script.music.file ?? script.music) : null
-    const mux = music
-      ? ['-y', '-i', silent, '-i', sound, '-i', music, '-filter_complex',
-        `[2:a]volume=${script.music.volume ?? 0.22},afade=t=out:st=${Math.max(0, duration - 1.2)}:d=1.2[m];[1:a][m]amix=inputs=2:duration=first:normalize=0[a]`,
-        '-map', '0:v', '-map', '[a]', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', outFile]
-      : ['-y', '-i', silent, '-i', sound, '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', outFile]
-    await ffmpeg(mux).done
+    if (music) {
+      inputs.push('-i', music)
+      filters.push(`[${2 + clips.length}:a]volume=${script.music.volume ?? 0.22},afade=t=out:st=${Math.max(0, duration - 1.2)}:d=1.2[m]`)
+      mix.push('[m]')
+    }
+    const audio = mix.length > 1
+      ? ['-filter_complex', [...filters, `${mix.join('')}amix=inputs=${mix.length}:duration=first:normalize=0[a]`].join(';'), '-map', '0:v', '-map', '[a]']
+      : ['-map', '0:v', '-map', '1:a']
+    await ffmpeg(['-y', ...inputs, ...audio, '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', outFile]).done
     if (logs.length) console.log(`  (the page logged ${logs.length} error${logs.length > 1 ? 's' : ''}; first: ${logs[0].slice(0, 200)})`)
     console.log(`✓ ${relative(process.cwd(), outFile)} — ${duration.toFixed(1)}s, ${script.width}×${script.height}, ${fps} fps`)
   } finally {

@@ -51,7 +51,7 @@ export function installFeatureFixtures(part) {
 
   route('POST', '/api/phrase/analyze', ({ body }) => {
     const text = String(body?.phrase ?? '').trim()
-    const answer = bundle.analyze?.[text] ?? bestMatch(bundle.analyze, text)
+    const answer = answerFor(bundle.analyze, text)
     if (!answer) return { status: 404, body: { detail: 'reel: no breakdown for this text' } }
     if (!body?.deep) return { body: answer, delay: body?.whole ? 250 : 650 }
     // The deep tier: what a model would have added, written by the script.
@@ -108,11 +108,27 @@ export function installFeatureFixtures(part) {
 }
 
 /** The analysis whose text is closest to `text` (an OCR'd or retyped line). */
+const strip = s => s.replace(/[\s、。！？!?「」]/g, '')
+
 function bestMatch(answers, text) {
   const keys = Object.keys(answers ?? {})
   if (!keys.length) return null
-  const strip = s => s.replace(/[\s、。！？!?「」]/g, '')
   return answers[keys.find(k => strip(k) === strip(text))] ?? null
+}
+
+/**
+ * The breakdown of `text`: its own, or, for one sentence of a passage
+ * (the analyzer explains a passage a sentence at a time), that sentence
+ * as an answer of one.
+ */
+function answerFor(answers, text) {
+  const own = answers?.[text] ?? bestMatch(answers, text)
+  if (own) return own
+  for (const answer of Object.values(answers ?? {})) {
+    const sentence = answer.sentences?.find(x => strip(x.text ?? '') === strip(text))
+    if (sentence) return { ...sentence, sentences: [sentence] }
+  }
+  return null
 }
 
 export function decksOf(part) {

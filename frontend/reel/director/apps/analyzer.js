@@ -73,7 +73,7 @@ export const analyzer = {
       const img = await stage.waitFor('.analysis-cropper__image')
       await wait(0.25)
       // A box drawn over the text: the photo frames the text in its middle.
-      const crop = beat.crop ?? { x: 0.1, y: 0.33, w: 0.8, h: 0.34 }
+      const crop = beat.crop ?? ctx.photoCrop(beat) ?? { x: 0.1, y: 0.33, w: 0.8, h: 0.34 }
       const r = stage.appRect(img)
       const from = phone.toBoard(r.x + r.w * crop.x, r.y + r.h * crop.y)
       const to = phone.toBoard(r.x + r.w * (crop.x + crop.w), r.y + r.h * (crop.y + crop.h))

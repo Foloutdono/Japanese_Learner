@@ -54,7 +54,9 @@ const LINES = {
   review: '--accent2', pass: '--pass-ink',
 }
 
-const state = { ready: false, done: false, error: null, duration: 0, sound: null }
+// `clips`: where a video hook's own sound plays in the film (the renderer
+// mixes the file in at `at`, faded out from `until`).
+const state = { ready: false, done: false, error: null, duration: 0, sound: null, clips: [] }
 const inputs = []
 const rendering = Boolean(window.__REEL_RENDER__)
 
@@ -150,7 +152,7 @@ async function boot() {
     clock: () => clock.now(),
     stage: {
       lang: script.lang, theme: script.theme, learner: script.learner, level: script.level,
-      plan: script.plan, streak: script.streak, due: script.due, ambiance: script.ambiance,
+      plan: script.plan, streak: script.streak, xpLevel: script.xpLevel, xpShort: script.levelUpIn, ambiance: script.ambiance,
       bundle, beats: appBeats.map(b => ({ ...b })), current: 0,
     },
   }
@@ -235,6 +237,22 @@ async function boot() {
       await phone.settled()
       return finger.tap(stage.point(target, opts), opts)
     },
+    /**
+     * Where the text stands in the photo `app` reads, as fractions: the
+     * creator's own picture says (its `subject`); a snap's photo is the
+     * world framed on the text (the photo pass's 432×576 feed).
+     */
+    photoCrop(app) {
+      const hook = ctx.hook?.beat
+      const box = hook?.scene === 'media' && hook.style === 'photo'
+        ? (hook.subject ? { x: hook.subject[0], y: hook.subject[1], w: hook.subject[2], h: hook.subject[3] } : null)
+        : ctx.hook?.photoBox(BOARD_W_, (BOARD_W_ * 4) / 3, 0.72)
+      if (!box || !app) return null
+      const pad = 0.035
+      const x = Math.max(0.02, box.x - pad)
+      const y = Math.max(0.02, box.y - pad)
+      return { x, y, w: Math.min(0.98, box.x + box.w + pad) - x, h: Math.min(0.98, box.y + box.h + pad) - y }
+    },
     /** Show a beat's caption (a string, or { text, at, hold }). */
     say(caption, fallback = {}) {
       if (!caption) return
@@ -294,6 +312,10 @@ async function boot() {
   // The world of the first beat, drawn before the first frame.
   if (beats[0].kind === 'hook') ctx.hook = buildHook(beats[0], layers.world, { seed: script.seed, files, breaks: breaksOf(bundle, beats[0].text) })
   await loadFonts(texts)
+  // Footage is loaded before the first frame: the first hook's, and every
+  // later video hook's, held so its pictures come from memory when it plays.
+  await ctx.hook?.ready
+  ctx.held = await preloadClips(beats.slice(1), files)
 
   // The app, booted at the first scene's place, waiting off screen.
   const first = appBeats[0]
@@ -341,6 +363,7 @@ async function playBeat(beat, ctx) {
   switch (beat.kind) {
     case 'hook': return playHook(beat, ctx)
     case 'app': {
+      endClip(ctx)
       // Straight from another app beat: the next station's plate.
       if (prev?.kind === 'app') await swap(beat, ctx)
       // From the world with no transition named: the phone rises.
@@ -350,25 +373,57 @@ async function playBeat(beat, ctx) {
       }
       return APPS[beat.feature].play(beat, ctx)
     }
-    case 'end': return playEnd(beat, ctx)
+    case 'end': endClip(ctx); return playEnd(beat, ctx)
     default: return TRANSITIONS[beat.kind](beat, ctx)
   }
+}
+
+/** Every picture of the later video hooks, loaded and kept. */
+function preloadClips(beats, files) {
+  const held = []
+  for (const beat of beats) {
+    if (beat.kind !== 'hook' || !beat.clip) continue
+    for (let i = 0; i < beat.clip.count; i++) {
+      const img = new Image()
+      img.src = files(`${beat.clip.dir}/${String(i + 1).padStart(5, '0')}.jpg`)
+      held.push(new Promise(r => { img.onload = img.onerror = r }).then(() => img))
+    }
+  }
+  return Promise.all(held)
+}
+
+/** A video hook's sound stops where the app takes over. */
+function endClip(ctx) {
+  if (ctx.clip) ctx.clip.until = clock.now()
+  ctx.clip = null
 }
 
 async function playHook(beat, ctx) {
   const { layers, phone } = ctx
   if (!ctx.hook || ctx.hook.beat !== beat) {
     ctx.hook?.dispose()
+    // A whip left the last world swept aside.
+    layers.world.style.transform = ''
+    layers.world.style.filter = ''
     ctx.hook = buildHook(beat, layers.world, { seed: ctx.seed, files: ctx.files, breaks: breaksOf(ctx.bundle, beat.text) })
     // Back to the world: the phone goes down, the world comes back.
     recede(ctx, 0, 0.5)
     phone.move(framing('pocket'), 0.6)
   }
+  endClip(ctx)
+  ctx.hook.play()
+  if (beat.clip?.sound) {
+    ctx.clip = { file: beat.clip.sound, at: clock.now(), until: null, volume: beat.volume ?? 1 }
+    state.clips.push(ctx.clip)
+  }
   const hold = beat.duration ?? 2.7
   ctx.say(beat.caption, { hold: Math.max(1.6, hold - 1) })
-  ctx.hook.lean(1.1, hold)
+  ctx.hook.lean(beat.lean ?? 1.1, hold)
   await clock.wait(Math.min(0.9, hold * 0.33))
-  const marks = beat.puzzle === false ? null : await puzzle(ctx.hook, layers.fx, { seed: ctx.seed, sound: i => ctx.sfx.huh(i) })
+  // The marks of not reading it, around what cannot be read; footage
+  // with no subject marked has nothing to stand them around.
+  const asks = beat.puzzle ?? !(beat.scene === 'media' && !beat.subject)
+  const marks = asks ? await puzzle(ctx.hook, layers.fx, { seed: ctx.seed, sound: i => ctx.sfx.huh(i) }) : null
   await clock.wait(Math.max(0.3, hold - 0.9 - 0.75))
   await marks?.clear()
 }
@@ -393,6 +448,9 @@ async function drawPhoto(beat, layers, script, files, texts) {
   document.body.classList.add('photo-mode')
   const hook = buildHook(beat, layers.world, { seed: script.seed, files, breaks: breaksOf(window.__reelBundle ?? {}, beat.text) })
   await loadFonts(texts)
+  // Footage is taken where the snap's shutter falls, a moment past its hook.
+  await hook.ready
+  hook.seek((beat.duration ?? 2.7) + 1.4)
   const holder = document.createElement('div')
   holder.className = 'photo'
   document.body.appendChild(holder)
@@ -458,7 +516,7 @@ async function soundtrack() {
   }
   let binary = ''
   for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000))
-  return { wav: btoa(binary), duration: state.duration, sources: parts.length }
+  return { wav: btoa(binary), duration: state.duration, sources: parts.length, clips: state.clips }
 }
 
 boot().catch(fail)

@@ -1,0 +1,22 @@
+{
+  "lang": "fr",
+  "learner": "Léa",
+  "clock": "20:15",
+  "beats": [
+    {
+      "hook": "menu",
+      "text": "本日のおすすめ 焼き魚定食",
+      "caption": "au resto à Tokyo, la carte est *tout* en kanji 😅"
+    },
+    { "snap": true, "caption": "une photo…" },
+    {
+      "app": "analyzer",
+      "from": "photo",
+      "text": "本日のおすすめ、焼き魚定食",
+      "translation": "La suggestion du jour : le menu poisson grillé.",
+      "caption": "…et *Tsuji* te la décortique",
+      "taps": ["焼き魚"]
+    },
+    { "end": true }
+  ]
+}

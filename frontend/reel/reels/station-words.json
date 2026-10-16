@@ -1,0 +1,25 @@
+{
+  "lang": "en",
+  "learner": "Mika",
+  "clock": "08:05",
+  "beats": [
+    {
+      "hook": "sign",
+      "style": "station",
+      "text": "新宿",
+      "reading": "しんじゅく",
+      "romaji": "Shinjuku",
+      "prev": "よよぎ",
+      "next": "しんおおくぼ",
+      "caption": "you can say *Shinjuku*… but can you read it? 🚉"
+    },
+    { "rise": true },
+    {
+      "app": "vocab",
+      "level": "N5",
+      "words": ["駅:えき", "電車:でんしゃ", "切符:きっぷ"],
+      "caption": "the words of every platform, a card at a time"
+    },
+    { "end": true }
+  ]
+}

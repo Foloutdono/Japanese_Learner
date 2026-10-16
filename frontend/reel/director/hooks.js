@@ -11,7 +11,7 @@
 // and `subject` says where the text stands on the board, which is what
 // the phone's camera frames when it is raised.
 
-import { tween, wait, ease, lerp, every, drift, seeded } from './clock'
+import { tween, wait, ease, lerp, every, drift, seeded, now } from './clock'
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
 
@@ -20,11 +20,18 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 // on the text forbids every other break.
 let breakAt = new Set()
 
+// And as Japanese is set (kinsoku): a line never starts on closing
+// punctuation, a small kana or a long-vowel mark, nor ends on an opening
+// bracket, whatever word starts there.
+const NO_START = /[、。，．！？!?）」』】〉》ー…ゃゅょっぁぃぅぇぉゎャュョッァィゥェォヮ々]/
+const NO_END = /[「『（【〈《]/
+
 /** The text as spans, one per character (kept for the lift). */
 function chars(text, cls = 'obj__ch') {
-  return [...text].map((c, i) => {
+  const all = [...text]
+  return all.map((c, i) => {
     if (c === '\n') return '<br>'
-    const wbr = i > 0 && breakAt.has(i) ? '<wbr>' : ''
+    const wbr = i > 0 && breakAt.has(i) && !NO_START.test(c) && !NO_END.test(all[i - 1]) ? '<wbr>' : ''
     return `${wbr}<span class="${cls}">${esc(c)}</span>`
   }).join('')
 }
@@ -192,12 +199,26 @@ function chatMessage(beat) {
     </div>`
 }
 
+// The creator's own picture or footage. What it shows is theirs, so the
+// text is in it already: `subject` ([x, y, w, h], fractions of the
+// frame) says where, for the camera to frame and the marks to stand
+// around. `overlay: true` prints the text over it instead (a caption the
+// lift can carry into the app).
 function media(beat, files) {
-  const src = files(beat.file)
+  const [x, y, w, h] = beat.subject ?? []
+  const subject = beat.subject
+    ? `<i class="media__subject" data-subject data-object style="left:${x * 100}%;top:${y * 100}%;width:${w * 100}%;height:${h * 100}%"></i>`
+    : ''
+  const overlay = beat.overlay && beat.text
+    ? `<p class="media__text" lang="ja"${subject ? '' : ' data-subject'}>${chars(beat.text)}</p>`
+    : ''
   if (beat.style === 'video') {
-    return `<div class="obj obj--media"><img class="media__frame" alt="" data-frames="${esc(beat.frames ?? '')}" src="${esc(src)}"></div>`
+    const clip = beat.clip ?? { dir: '', count: 0 }
+    const frames = Array.from({ length: clip.count }, (_, i) =>
+      `<img class="media__frame" alt="" src="${esc(files(`${clip.dir}/${String(i + 1).padStart(5, '0')}.jpg`))}"${i ? ' hidden' : ''}>`).join('')
+    return `<div class="obj obj--media" data-clip>${frames}${subject}${overlay}</div>`
   }
-  return `<div class="obj obj--media"><img class="media__img" alt="" src="${esc(src)}">${beat.text ? `<p class="media__text" lang="ja" data-subject>${chars(beat.text)}</p>` : ''}</div>`
+  return `<div class="obj obj--media"><img class="media__img" alt="" src="${esc(files(beat.file))}">${subject}${overlay}</div>`
 }
 
 const OBJECTS = {
@@ -256,6 +277,21 @@ export function buildHook(beat, layer, { seed = 7, files = f => f, breaks = [] }
   }
   fit(text, fits[beat.scene])
 
+  // Footage: one picture per film frame, the one shown now unhidden,
+  // in the world and in any viewfinder fed from it.
+  const frames = [...scene.querySelectorAll('[data-clip] .media__frame')]
+  const feeds = []
+  let shown = 0
+  let stopClip = null
+  const show = i => {
+    if (i === shown) return
+    for (const set of [frames, ...feeds]) {
+      set[shown]?.toggleAttribute('hidden', true)
+      set[i]?.toggleAttribute('hidden', false)
+    }
+    shown = i
+  }
+
   // The head that holds the camera: a slow push and a handheld drift.
   const head = { zoom: 1, x: 0, y: 0, shake: 1 }
   const hx = drift(seed * 5 + 1)
@@ -265,6 +301,18 @@ export function buildHook(beat, layer, { seed = 7, files = f => f, breaks = [] }
     const a = head.shake
     scene.style.transform = `translate(${head.x + hx(t * 0.8) * 2.4 * a}px, ${head.y + hy(t * 0.8) * 2.8 * a}px) rotate(${hr(t * 0.7) * 0.35 * a}deg) scale(${head.zoom})`
   })
+
+  // How a feed `w`×`h` frames the text: measured in the scene's own
+  // frame (the head's drift and lean off), the text centred, filling
+  // `fill` of the width.
+  function framed(w, h, fill) {
+    const held = scene.style.transform
+    scene.style.transform = 'none'
+    const r = hook.subjectRect()
+    const base = scene.getBoundingClientRect()
+    scene.style.transform = held
+    return { r, base, s: Math.min((w * fill) / r.w, (h * 0.62) / r.h, 3.2) }
+  }
 
   const hook = {
     beat,
@@ -283,7 +331,7 @@ export function buildHook(beat, layer, { seed = 7, files = f => f, breaks = [] }
     },
     /** One rect per character, on the board (for the lift). */
     charRects() {
-      return [...scene.querySelectorAll('[data-subject] .obj__ch')].map(el => {
+      return [...scene.querySelectorAll('[data-subject] .obj__ch, .media__text .obj__ch')].map(el => {
         const r = el.getBoundingClientRect()
         return { ch: el.textContent, x: r.left, y: r.top, w: r.width, h: r.height, size: parseFloat(getComputedStyle(el).fontSize) }
       })
@@ -294,12 +342,7 @@ export function buildHook(beat, layer, { seed = 7, files = f => f, breaks = [] }
      * `fill` of the width.
      */
     feed(container, w, h, fill = 0.8) {
-      // Measured in the scene's own frame: the head's drift and lean off.
-      const held = scene.style.transform
-      scene.style.transform = 'none'
-      const r = hook.subjectRect()
-      const base = scene.getBoundingClientRect()
-      scene.style.transform = held
+      const { r, base, s } = framed(w, h, fill)
       const copy = scene.cloneNode(true)
       copy.classList.add('scene--feed')
       // The copy keeps the board's size, so it lays out as the world did.
@@ -308,11 +351,23 @@ export function buildHook(beat, layer, { seed = 7, files = f => f, breaks = [] }
         width: `${base.width}px`, height: `${base.height}px`, transformOrigin: '0 0',
       })
       container.replaceChildren(copy)
-      const s = Math.min((w * fill) / r.w, (h * 0.62) / r.h, 3.2)
+      // Footage stays live in the viewfinder: its frames follow the world's.
+      const copied = [...copy.querySelectorAll('[data-clip] .media__frame')]
+      if (copied.length) feeds.push(copied)
       const cx = r.x - base.left + r.w / 2
       const cy = r.y - base.top + r.h / 2
       copy.style.transform = `translate(${w / 2 - cx * s}px, ${h / 2 - cy * s}px) scale(${s})`
       return copy
+    },
+    /**
+     * Where the text stands in a feed `w`×`h` (the photo a snap takes),
+     * as fractions of it: the box a reader drags over it to read it.
+     */
+    photoBox(w, h, fill = 0.8) {
+      const { r, s } = framed(w, h, fill)
+      const bw = Math.min(1, (r.w * s) / w)
+      const bh = Math.min(1, (r.h * s) / h)
+      return { x: 0.5 - bw / 2, y: 0.5 - bh / 2, w: bw, h: bh }
     },
     /** Push the head in on the text, as a reader leaning closer. */
     lean(zoom = 1.12, seconds = 1.6) {
@@ -327,8 +382,23 @@ export function buildHook(beat, layer, { seed = 7, files = f => f, breaks = [] }
         head.y = lerp(from.y, (330 - cy) * (zoom - 1) * 0.6, k)
       }, ease.inOutSine)
     },
+    /** Every frame of its footage loaded (at once for any other hook). */
+    ready: Promise.all(frames.map(img => (img.complete ? null : new Promise(r => { img.onload = img.onerror = r })))),
+    /** Run the footage from its first frame, on the film's clock. */
+    play() {
+      if (!frames.length || stopClip) return
+      const t0 = now()
+      const fps = beat.clip?.fps ?? 30
+      stopClip = every(t => show(Math.min(frames.length - 1, Math.floor((t - t0) * fps))))
+    },
+    /** The footage stopped at `seconds` (the still a snap takes). */
+    seek(seconds) {
+      if (frames.length) show(Math.min(frames.length - 1, Math.max(0, Math.round(seconds * (beat.clip?.fps ?? 30)))))
+    },
     dispose() {
       stop()
+      stopClip?.()
+      feeds.length = 0
       scene.remove()
     },
   }

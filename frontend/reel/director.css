@@ -1204,6 +1204,12 @@ body {
   object-fit: cover;
 }
 
+/* Where the text stands in the creator's picture: framed, never drawn. */
+.media__subject {
+  position: absolute;
+  display: block;
+}
+
 .media__text {
   position: absolute;
   left: 30px;

@@ -97,17 +97,32 @@ export function cardsOf(beat, bundle, feature = beat.feature) {
 
 const keyOf = c => `${c.card_id}|${c.mode}`
 
-/** A batch: the beat's cards the request's exclude has not yet seen. */
-function batch(cards, query) {
+/**
+ * A batch: the beat's cards neither the request's exclude names nor the
+ * beat has reviewed. A run excludes only what it still holds; a card
+ * answered is the server's to leave out (it is no longer due), or the
+ * run would deal it again after its last card.
+ */
+function batch(cards, query, reviewed = new Set()) {
   // Today names a card by id and mode (`id|mode`), a line's run by id.
   const exclude = new Set((query.get('exclude') ?? '').split(',').filter(Boolean))
-  return cards.filter(c => !exclude.has(keyOf(c)) && !exclude.has(c.card_id))
+  const out = c => exclude.has(keyOf(c)) || exclude.has(c.card_id) || reviewed.has(keyOf(c)) || reviewed.has(c.card_id)
+  return cards.filter(c => !out(c))
 }
 
 const WEEK_KANJI = ['日', '月', '火', '水', '木', '金', '土']
 
 export function installStudyFixtures(part, { beat, beatsOf }) {
   const bundle = part.bundle ?? {}
+  // What this beat has answered (a later beat of the same line starts fresh).
+  const answered = new Map()
+  const reviewed = () => {
+    if (!answered.has(part.current)) answered.set(part.current, new Set())
+    return answered.get(part.current)
+  }
+  const review = body => {
+    if (body?.card_id) reviewed().add(body.mode ? `${body.card_id}|${body.mode}` : body.card_id)
+  }
   const cardsFor = feature => {
     const b = beat()
     return cardsOf(b.feature === feature || (feature === 'today' && b.feature === 'review') ? b : beatsOf(feature)[0] ?? {}, bundle, feature)
@@ -117,10 +132,10 @@ export function installStudyFixtures(part, { beat, beatsOf }) {
   route('GET', '/api/today/cards', ({ query }) => {
     const b = beat()
     const cards = b.feature === 'grammar' ? grammarCards() : cardsOf(b, bundle, 'today')
-    return { cards: batch(cards, query), beyond: 0 }
+    return { cards: batch(cards, query, reviewed()), beyond: 0 }
   })
   const paid = (xp, extra = {}) => { award(part.profile, xp); return { xp_earned: xp, credits: { balance: 41, unlimited: false }, ...extra } }
-  route('POST', '/api/today/review', ({ body }) => paid(4, { card_id: body?.card_id }))
+  route('POST', '/api/today/review', ({ body }) => { review(body); return paid(4, { card_id: body?.card_id }) })
   route('POST', '/api/today/stale', () => ({ stale: [] }))
   route('POST', '/api/today/rest/seen', () => ({ ok: true }))
   route('GET', '/api/today/forecast', () => ({ days: [] }))
@@ -149,15 +164,15 @@ export function installStudyFixtures(part, { beat, beatsOf }) {
 
   // ── かな・単語・漢字 — the lines' own runs ──
   for (const [feature, path] of [['kana', '/api/kana/cards'], ['vocab', '/api/vocab/cards'], ['kanji', '/api/kanji/cards']]) {
-    route('GET', path, ({ query }) => ({ cards: batch(cardsFor(feature), query), pace: { target: 10, newToday: 2, remaining: 8 } }))
+    route('GET', path, ({ query }) => ({ cards: batch(cardsFor(feature), query, reviewed()), pace: { target: 10, newToday: 2, remaining: 8 } }))
     route('GET', path.replace('/cards', '/stats'), () => ({ total: 103, new: 61, learning: 30, mastered: 12, due_now: 5 }))
-    route('POST', path.replace('/cards', '/review'), () => paid(4))
+    route('POST', path.replace('/cards', '/review'), ({ body }) => { review(body); return paid(4) })
   }
 
   // ── 文法 — the ladder ──
-  route('GET', '/api/grammar/cards', ({ query }) => ({ cards: batch(grammarCards(), query), pace: null }))
+  route('GET', '/api/grammar/cards', ({ query }) => ({ cards: batch(grammarCards(), query, reviewed()), pace: null }))
   route('GET', '/api/grammar/level-stats', () => ({ total: 93, new: 61, learning: 22, mastered: 10, due_now: 3 }))
-  route('POST', '/api/grammar/review', () => paid(8))
+  route('POST', '/api/grammar/review', ({ body }) => { review(body); return paid(8) })
   route('POST', '/api/grammar/tour', () => ({ ok: true }))
   route('POST', '/api/grammar/build/check', () => ({ body: LADDER.checks.right, delay: 420 }))
   route('POST', '/api/composition/check', () => ({ found: true, japanese: null }))

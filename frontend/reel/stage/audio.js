@@ -88,6 +88,15 @@ export function installAudio() {
       }
     }
   }
+  // Nothing lets go of the graph. Every disconnect the app makes is a
+  // cleanup: a voice's nodes are released once it has played (synth.js
+  // lets go VOICE_LIFE_MS after it starts, a buffer when it ends). Here
+  // nothing has played yet: the context renders when the film is over,
+  // so a node released on a timer would have taken its voice out of the
+  // film before it was ever heard. Kept, a node whose source has stopped
+  // carries silence.
+  window.AudioNode.prototype.disconnect = function disconnect() {}
+
   const param = window.AudioParam.prototype
   for (const name of ['setValueAtTime', 'linearRampToValueAtTime', 'exponentialRampToValueAtTime', 'setValueCurveAtTime', 'cancelScheduledValues', 'cancelAndHoldAtTime']) {
     const original = param[name]

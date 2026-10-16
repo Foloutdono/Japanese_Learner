@@ -50,7 +50,8 @@ function loop() {
   for (const fn of [...updaters]) fn(t, dt)
   requestAnimationFrame(loop)
 }
-requestAnimationFrame(loop)
+// (Read outside a page too: the reel's tests import the scenes.)
+if (typeof requestAnimationFrame === 'function') requestAnimationFrame(loop)
 
 // ── Easing ─────────────────────────────────────────────────────────
 export const ease = {
