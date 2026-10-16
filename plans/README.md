@@ -7262,6 +7262,24 @@ to six questions where their catalogue holds too few contrast sentences
 and rivals' examples.
 
 
+## Plan 216 — 初見, a kana or a kanji met before it is drilled (2026-10-16)
+
+The owner: tutorials for kana and kanji the first time they are seen,
+like the grammar one -- a slide for how to read them and what they mean,
+one for how to write them (a guided exercise, each stroke dragged from
+point A to point B), one for how they are used (simple words). Built in
+the grammar tour's frame (the owner's "just like the grammar one"), not
+drawn on a canvas first: the trace board is a new piece of it, and the
+first thing to put in front of the owner.
+
+| Phase | What | Status |
+|---|---|---|
+| 216 | **Backend**: `study/glyph_tour.py` (KanjiVG's strokes in writing order, the kana and kanji payloads, the kanji's words one a reading at its level first, `mark_glyph_tours`: due once per character, never for a character reviewed on any kana or kanji track, two queries a batch), `glyph_tours` (first tour only: misses, shown), `POST /api/glyph/tour`, the tour on `/api/kana/cards` (now with `lang`), `/api/kanji/cards`, `/api/frequency/kanji/cards` and Today's queue, the account's erasure, `glyph_tour_done`. **Frontend**: `GlyphTour` (read, write, use), `TraceBoard`, `GlyphGate` in TodayRun, KanaRun and KanjiRun, `domain/strokePath.js` (KanjiVG's M/C/S read without the DOM) and `domain/trace.js` (the verdict: start, end, path), the `gt-*` rules and the desk's one. Tests: `test_glyph_tour.py`, `GlyphTour.browser`, `glyphTour.phone`, `strokePath`, `trace` | DONE (2026-10-16) |
+
+Open: personal decks (StudyRun) do not gate, as they do not for grammar;
+a combination (きゃ, えい) has no tour; the trace's tolerances
+(`domain/trace.TRACE`) were set by hand and want a learner's thumb.
+
 ## Plan 217 — 回復運転, the irregular learner caught up (2026-10-16)
 
 The owner: irregular learners need a way back in, so they are not discouraged and swamped by everything they owe; a popup offering to reschedule, and an option in Settings. Measured in the code first: nothing bounded the day's reviews (the pace bounds the new cards only), a day cleared only on an empty gate (plan 191), so a learner back from ten days away met four hundred cards and a partial finish at every run for a week, and a rest ticket bridged two missed days at most. Proposed: the comeback sheet, a ceiling in Settings, the day cleared on the share, an absence declared ahead, notifications that invite back; the owner's answer: all of it. Built on the defaults proposed (spread over 5 days, 3/5/7 offered; gently 20 a day; offered past 3 days of the learner's load and 60 cards; a ceiling of 50/100/150), without a canvas: the owner asked for everything at once, so the screens reuse the components they stand beside rather than a drawn direction.
