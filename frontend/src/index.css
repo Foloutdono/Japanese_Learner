@@ -32442,6 +32442,87 @@ button.brd-stn { cursor: pointer; }
   padding: 0;
   list-style: none;
 }
+/* ── 221 — the talk stays on the screen ──
+   A scene is five or six exchanges, and its card grew down the page
+   with each one: by the fourth line the replies stood under the fold
+   (877px down an 844px phone, measured) and the learner scrolled to
+   find what to answer with -- then back up to read what was said.
+   So, once the talk is under way, the run is bounded to the screen as
+   the passage's is (.stage--passage): the card takes what the head,
+   the meter, the dock and the floor leave, and the talk scrolls inside
+   its body; what answers it -- the tiles, the field, the bar, Next --
+   stands under the card, on the screen at every length. The dock is
+   the screen's floor here, so the stage ends on it: --dock-bottom is
+   the floor's own height on a stage. The body is the scroller, not the
+   card, as on the passage, and it is positioned so ConversationRun's
+   `follow` can measure a line against it; the scroll-padding is where
+   the newest exchange stops when it is shown from its start. */
+.stage--talk {
+  max-height: calc(100dvh - var(--dock-bottom));
+  min-height: 0;
+  padding-bottom: var(--sp-5);
+}
+.stage--talk > :not(.kaiwa-card) { flex: none; }
+.stage--talk > .kaiwa-card {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.stage--talk > .kaiwa-card > .prompt-card__body {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding-block: var(--sp-3);
+}
+/* A line arrives as a list's row does (Motion), the first with the
+   stage; a verdict, the task and the end come in the same way. */
+.kaiwa-talk > .tour-line,
+.kaiwa-card .tour-said,
+.kaiwa-ask,
+.kaiwa-check,
+.kaiwa-over {
+  animation: arrive 0.32s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kaiwa-talk > .tour-line,
+  .kaiwa-card .tour-said,
+  .kaiwa-ask,
+  .kaiwa-check,
+  .kaiwa-over { animation: arrive-soft 0.2s linear backwards; }
+}
+/* The other person answering a free line: their row, the wait's three
+   dots where their words will be. */
+.kaiwa-pending .tour-line__text { display: flex; align-items: center; min-height: 44px; }
+/* Choose's verdict at the talk's foot: the hairline its door, as the
+   task's, the practice card's and the end's are, not a box in the card
+   (the tour's own card says back the same way, .tour-leaf > .tour-said);
+   the reply taken, struck, now the tiles that showed it have gone. */
+.kaiwa-card .tour-said {
+  padding: var(--sp-4) 0 0;
+  border: 0;
+  border-top: 1px solid var(--surface-line);
+  border-radius: 0;
+  background: none;
+}
+.kaiwa-said__taken { color: var(--text-secondary); text-decoration-color: var(--rating-wrong); }
+/* Above the phone the card stops at --card-w and centres, and what
+   answers it shares that column: the tiles and Next ran the stage's
+   width, 120px past the card on each side of a 900px window. (The
+   phone's dock bleeds edge to edge by its own rule; the desk's panels
+   size the column themselves.) */
+@media (min-width: 769px) {
+  .stage--kaiwa > .tour-guesses,
+  .stage--kaiwa > .stage__foot {
+    width: 100%;
+    max-width: var(--card-w);
+    margin-inline: auto;
+  }
+}
 /* The line still owed a reply holds its translation behind a quiet
    link, the boarding's own (.brd__link), set flush with the line. */
 .kaiwa-tr {
@@ -32503,8 +32584,8 @@ button.brd-stn { cursor: pointer; }
 }
 /* Choose's verdict: each reply's translation leads its note. */
 .kaiwa-said__tr { font-weight: 700; }
-/* The free talk's wait, its refusals and its end. */
-.kaiwa-pending { align-self: flex-start; }
+/* The free talk's refusals and its end (its wait is a row of the talk,
+   .kaiwa-pending above). */
 .kaiwa-alert {
   margin: 0;
   font-size: var(--fs-sm);
@@ -43812,6 +43893,17 @@ button.brd-stn { cursor: pointer; }
     display: flex;
     flex-direction: column;
     padding: var(--sp-5);
+  }
+  /* The talk bounded in the middle column (plan 221, .stage--talk): the
+     column is the window's height already, so the card takes what the
+     tiles or the floor leave and the talk scrolls in its body, as on
+     the phone -- the panels' own growth (flex: 1 0 auto) let the card
+     run the column past the window and the tiles with it. */
+  .desk-run--panels > .stage--talk { max-height: none; }
+  .desk-run--panels > .stage--talk > .kaiwa-card {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
   }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */
