@@ -580,6 +580,17 @@ long word, a long question and a short):
   word after (a question's ask, an example's number), the station's
   number in its corner, a question's five seconds on a ring in the
   other. The meaning, or the answers, stand under the plate.
+
+**The call to action is in the middle** (plan 220), where a carousel
+deals it: after the first half of the items (a quiz's score check
+first), the carousel's own call to action (`funnel.videoCta`) for the
+feature the video comes from (vocabulary: never lose a word; kanji:
+stroke by stroke; grammar; the mock exams), with two more beside it and
+the button to the site. A short shows the carousel's slide itself, in
+its story format on the sumi; a long video lays the same parts out wide
+on the door screen, the words and the button on the left, the picture on
+the right. The video ends on a sign-off: the mark, the name and the
+site (and, after a quiz, the call to comment the score).
 Every Japanese line is said by the app's voices; English or French is on
 the screen.
 
@@ -650,6 +661,8 @@ plays, and it sits as loud as the first bed did. A recorded track takes
 its place (`--music PATH`, plan 219b), only with its licence and credit
 written beside it (`long/music/README.md`), and by default it does:
 “Cool Vibes” by Kevin MacLeod, CC BY 4.0, credited in the description.
+`--music none` makes a video with no music at all (plan 220), for a feed
+where a sound is added when posting; its description names no music.
 The voice's
 credit "VOICEVOX Nemo" ends every description; never publish the clips
 or a video's sound as a dataset.

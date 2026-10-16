@@ -6,7 +6,8 @@ owner's pick); the renderer fetches it from its `source` when a clone
 does not have it, and plays the generated trio if it cannot. Any other
 track here takes its place with `--music`, and `--music trio` or
 `--music lofi` is the bed `backend/scripts/long_video_audio.py` plays
-itself (plan 219):
+itself (plan 219), and `--music none` makes the video without music
+(plan 220):
 
 ```bash
 cd frontend
