@@ -5705,7 +5705,7 @@
             "who": "them",
             "jp": "いらっしゃいませ。ご注文は？",
             "en": "Welcome. What would you like?",
-            "fr": "Bonjour. Qu'est-ce que je vous sers ?"
+            "fr": "Bienvenue. Qu'est-ce que je vous sers ?"
           },
           {
             "who": "me",
@@ -31732,8 +31732,8 @@
           {
             "who": "them",
             "jp": "いらっしゃいませ。旅行の本なら、こちらです。",
-            "en": "Hello. The travel books are over here.",
-            "fr": "Bonjour. Les livres de voyage, c'est par ici."
+            "en": "Welcome. The travel books are over here.",
+            "fr": "Bienvenue. Les livres de voyage, c'est par ici."
           },
           {
             "who": "me",
