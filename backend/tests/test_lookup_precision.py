@@ -133,7 +133,7 @@ class ThePagesSpellingTests(unittest.TestCase):
         # The glosses meet: one word, two spellings.
         for sentence, word, expected in (
             ("眼が痛い。", "眼", "vocab_N5_目_め"),
-            # The N1 お蔭 folded into the N4 おかげ, its word (plan 223).
+            # The N1 お蔭 folded into the N4 おかげ, its word (plan 227).
             ("競り合ったお陰で、彼が勝った。", "お陰", "vocab_N4__おかげ"),
         ):
             with self.subTest(word=word):
@@ -398,7 +398,7 @@ class TheLowerTwinTests(unittest.TestCase):
 
     def test_a_homograph_is_not_a_twin(self) -> None:
         """たとえ, "even if", tokenizes as 仮令. The N3 kana card たとえ
-        carried 例え's gloss, "simile", until plan 223 gave it the list's
+        carried 例え's gloss, "simile", until plan 227 gave it the list's
         word and folded the N1 仮令 into it; 例え, "simile", stays a card
         of its own and never answers for the adverb."""
         self.assertEqual(matches("たとえ雨が降っても、試合は行う。")["たとえ"]["raw_id"], "vocab_N3__たとえ")

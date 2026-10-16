@@ -1,5 +1,5 @@
 """
-Review the course's example sentences (plan 223), in batches.
+Review the course's example sentences (plan 227), in batches.
 
     python -m scripts.vocab_examples stats                 # the sentences, the corrections, the gaps
     python -m scripts.vocab_examples prep DIR --batches 24 # every sentence the deck shows, as review batches
@@ -213,7 +213,7 @@ def cmd_merge(in_dir: str) -> int:
         print(f"{len(found)} problem(s): nothing written")
         return 1
     data = {
-        "_meta": "The course's corrected example sentences (plan 223): content/example_fixes.py.",
+        "_meta": "The course's corrected example sentences (plan 227): content/example_fixes.py.",
         "fixes": dict(sorted(merged.items())),
     }
     with open(example_fixes.PATH, "w", encoding="utf-8") as f:

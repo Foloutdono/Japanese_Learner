@@ -327,7 +327,7 @@ def test_a_term_answers_in_either_language(client):
         crow = _page(client, q="corbeau", lang=lang, limit=200)
         assert "烏" in [r["kanji"] for r in crow["results"]], lang
         # ...and it is in the POOL half, whichever session asked. (璽,
-        # "sceau impérial", stood here until plan 222 put it in the deck.)
+        # "sceau impérial", stood here until plan 226 put it in the deck.)
         assert next(r for r in crow["results"] if r["kanji"] == "烏")["level"] is None
         assert "烏" in [r["kanji"] for r in _page(client, q="raven", lang=lang, limit=200)["results"]], lang
 

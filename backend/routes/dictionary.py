@@ -147,7 +147,7 @@ def get_radical_grid(all: bool = False):
 # ── The kanji collection ─────────────────────────────────────────
 # ONE collection over two pools, for the same reason the vocabulary is
 # (see the block below, and commit 116ad2a). The app's own JLPT deck is
-# 2,383 characters, one entry each since plan 112 (plan 222 added 171); KANJIDIC2, which this repo has
+# 2,383 characters, one entry each since plan 112 (plan 226 added 171); KANJIDIC2, which this repo has
 # shipped all along, has 13,108. The other 10,896 were reachable from
 # nowhere in the app — not by search, not by radical, not on a plate — so
 # looking a character up and not finding it proved only that it was not

@@ -1,5 +1,5 @@
 """
-Author the exam pool's seed papers (plan 221) by replaying the generators.
+Author the exam pool's seed papers (plan 225) by replaying the generators.
 
     python -m scripts.exam_seed status                  # how many seeds each exam id has
     python -m scripts.exam_seed run n4-grammar-01       # build its missing seed papers

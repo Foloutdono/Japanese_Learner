@@ -35,7 +35,7 @@ def build_kanji_frequency(kanji_basic_path, kanji_deck_path):
 def kanji_basic_from_db(db_path):
     """{char: {"freq": rank}} out of the shipped kanji.sqlite3 -- the same
     KANJIDIC2 field kanji_basic.json carries, for a checkout without the
-    export (plan 222, the jōyō characters the deck lacked)."""
+    export (plan 226, the jōyō characters the deck lacked)."""
     import sqlite3
     conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
     try:

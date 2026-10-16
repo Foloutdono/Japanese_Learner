@@ -1,4 +1,4 @@
-# ── The exam pool's seed papers (plan 221) ───────────────────────
+# ── The exam pool's seed papers (plan 225) ───────────────────────
 # exam_papers starts empty, and an empty exam id costs its first
 # learner a generation: ~35 model calls and minutes on a spinner, at
 # each of the twenty exam ids (five levels, four kinds), on every fresh

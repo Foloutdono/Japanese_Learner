@@ -98,7 +98,7 @@ def parsed_themes() -> dict[str, dict[str, list[tuple[str, str, str, str]]]]:
 
 # A theme word and a deck card that share a reading and a word of their
 # glosses but are two words: 羊 the animal and 未 the zodiac's Sheep,
-# both ひつじ (plan 223 glossed 未 "the Sheep").
+# both ひつじ (plan 227 glossed 未 "the Sheep").
 DISTINCT_SPELLINGS: frozenset[tuple[str, str]] = frozenset({
     ("羊", "未"),
 })

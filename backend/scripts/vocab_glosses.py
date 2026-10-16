@@ -1,5 +1,5 @@
 """
-Review the course's glosses (plan 223), in batches.
+Review the course's glosses (plan 227), in batches.
 
     python -m scripts.vocab_glosses prep DIR --batches 14  # every deck card, as review batches
     python -m scripts.vocab_glosses check FILE             # a reviewer's corrections, before they are applied

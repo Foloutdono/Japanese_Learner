@@ -90,7 +90,7 @@ class VocabRankingTests(unittest.TestCase):
         self.entries = audit.vocab_entries()
 
     def test_the_whole_deck_is_ranked(self) -> None:
-        # 7,971 cards since plan 223 retired the N1 list's wrong readings.
+        # 7,971 cards since plan 227 retired the N1 list's wrong readings.
         self.assertGreater(len(self.entries), 7900)
 
     def test_risk_never_rises_down_the_list(self) -> None:

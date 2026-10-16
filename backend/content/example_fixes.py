@@ -1,5 +1,5 @@
 """
-The course's example sentences, corrected (plan 223).
+The course's example sentences, corrected (plan 227).
 
 Every word of the vocab deck shows the Tatoeba sentences JMdict files
 under its senses (content/vocab_extras.get_vocab_extras): on its card and
@@ -7,7 +7,7 @@ dictionary page, in reading practice, and in the 文脈規定 items the exam
 generator mines from them. They came as they are: typos (いらしゃいました),
 translationese, a Bible verse, claims that are not true, sentences far
 above the word's level, French and English that say something else.
-Plan 223 had every one of them read, against each word it illustrates,
+Plan 227 had every one of them read, against each word it illustrates,
 and corrected or replaced the ones that fell short.
 
 The corrections are a layer over JMdict rather than edits inside it, for

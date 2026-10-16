@@ -1,4 +1,4 @@
-# 例文 -- the course's example sentences, corrected (plan 223):
+# 例文 -- the course's example sentences, corrected (plan 227):
 # datas/vocab/example_fixes.json, a layer over the Tatoeba sentences
 # JMdict files under the deck's words (content/example_fixes.py).
 import pytest

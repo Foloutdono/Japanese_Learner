@@ -103,7 +103,7 @@ class LevelVocabularyTests(unittest.TestCase):
     # for a rewrite of the bank; N2's 406 went to 405 when the lookups
     # stopped guessing a kana よる (plan 213): 因る was counted only in
     # によると and により, the points' own letters, and 寄る reads alike.
-    # N3's 397 went to 395 and N1's 491 to 489 with plan 223's glosses
+    # N3's 397 went to 395 and N1's 491 to 489 with plan 227's glosses
     # and cards: a kana うち and ごみ are the N4 cards now that 内 and 塵
     # share their gloss, 仮令 folded into the N3 たとえ and 率直 into the
     # N2 card.

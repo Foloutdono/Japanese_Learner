@@ -41,7 +41,7 @@ Usage:
         # without the KANJIDIC2 export (which is not in a fresh clone)
     cd backend && python -m scripts.build_kanji_db --deck-only
         # ... and kanji_deck.json's membership (in_deck) with it: what
-        # adding a character to the deck needs (plan 222)
+        # adding a character to the deck needs (plan 226)
 """
 import argparse
 import glob
@@ -273,7 +273,7 @@ def apply_french(conn: sqlite3.Connection, data_dir: str) -> int:
 def apply_deck(conn: sqlite3.Connection, data_dir: str) -> int:
     """kanji_deck.json's membership over in_deck, in place: what a deck
     change needs from the database, without the KANJIDIC2 export a full
-    build reads (plan 222 added the 171 jōyō characters the deck lacked).
+    build reads (plan 226 added the 171 jōyō characters the deck lacked).
     Every other column is KANJIDIC2's and does not move with the deck."""
     with open(os.path.join(data_dir, "kanji_deck.json"), encoding="utf-8") as f:
         deck = json.load(f)

@@ -34,7 +34,7 @@ datas/jlpt/
 # Server-generated TTS output, not owned/tracked source data -- same
 # reasoning as datas/jlpt/ above, see study/exam_tts.py.
 datas/exam_audio/
-# scripts/exam_seed.py's working files (plan 221): the prompts the
+# scripts/exam_seed.py's working files (plan 225): the prompts the
 # generators asked and the replies written to them. The papers they
 # built are content/exam_seed/, which ships.
 datas/exam_seed/

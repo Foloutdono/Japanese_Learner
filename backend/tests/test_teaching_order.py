@@ -108,7 +108,7 @@ def test_the_kanji_order_is_the_deck_in_kanjidic_frequency():
     # kanji_frequency.json is what `python -m scripts.build_frequency_index
     # --kanji-db` writes from the deck: a character the deck gained and
     # the file missed is taught after every ranked one (分 was, until
-    # plan 222 rebuilt it with the 171 jōyō characters the deck lacked).
+    # plan 226 rebuilt it with the 171 jōyō characters the deck lacked).
     import json
     import os
 

@@ -107,7 +107,7 @@ def senses(glossaries) -> dict[str, str]:
 
 def example(jp: str) -> str | None:
     """A Tatoeba sentence's French, or None. A sentence the course
-    corrected (content/example_fixes.py, plan 223) answers its own."""
+    corrected (content/example_fixes.py, plan 227) answers its own."""
     return example_fixes.french(jp) or (_one("SELECT fr FROM example WHERE jp = ?", (jp,)) if jp else None)
 
 

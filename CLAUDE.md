@@ -174,14 +174,14 @@ runtime purpose.
 - **The kanji deck is the course's and the gates'.** `datas/kanji/kanji_deck.json`
   is what each level teaches and what every kanji gate admits
   (`llm_shared.kanji_set_for_level`), so it holds the whole jōyō list
-  (plan 222 added the 171 it lacked, 的・無・身・誰 among them). After any
+  (plan 226 added the 171 it lacked, 的・無・身・誰 among them). After any
   change to it run `python -m scripts.build_kanji_db --deck-only` (the
   database's `in_deck` and French) and `python -m scripts.build_frequency_index
   --kanji-db` (the teaching order); a new character carries its French in
   `kanji_meanings_fr.json` where KANJIDIC2 has none. Adding is free;
   moving a character between levels is a migration (`kanji_renames`).
 - **An example sentence is corrected in the layer, not in JMdict (plan
-  223).** The deck's Tatoeba sentences are read through
+  227).** The deck's Tatoeba sentences are read through
   `content/example_fixes.py` (`datas/vocab/example_fixes.json`): a
   correction keeps every course word the sentence showed, carries its
   `en`, `fr` and `why`, and is drafted and checked with
@@ -366,7 +366,7 @@ upserted into `comprehension_pool` when `routes/reading.py` is imported,
 keyed on `seed_key` so a corrected seed updates its row. The prewarm
 scripts grow the pools past that floor; `prewarm_comprehension_pool`
 reports the seeded and the generated rows apart. Exam papers have
-seeds too (plan 221): `content/exam_seed/<exam_id>.json`, ten papers
+seeds too (plan 225): `content/exam_seed/<exam_id>.json`, ten papers
 per exam id (kind × level), stored into `exam_papers` as ordinary
 revisions of the current `generator_version` when `routes/exams.py` is
 imported (`study/exam_seed.py`, keyed on `seed_key`; a changed seed

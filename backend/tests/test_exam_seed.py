@@ -1,4 +1,4 @@
-# 模試の種 -- the exam pool's seed papers (plan 221): content/exam_seed/,
+# 模試の種 -- the exam pool's seed papers (plan 225): content/exam_seed/,
 # built by scripts/exam_seed.py through the generators themselves and
 # stored into exam_papers by study/exam_seed.py when routes/exams.py is
 # imported. The first test is the owner's floor, PER_EXAM sound papers

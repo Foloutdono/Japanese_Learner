@@ -176,7 +176,7 @@ class DeckAlignmentTests(unittest.TestCase):
     def test_a_kanji_the_deck_does_not_teach_reads_from_kanjidic(self) -> None:
         # 蟹 and 鰻 are kanji the deck has no card for, and with no
         # readings to try every word containing one came back undivided.
-        # (身 and 的 stood here until plan 222 put them in the deck.)
+        # (身 and 的 stood here until plan 226 put them in the deck.)
         from content.kanji_data import KANJI_BY_LEVEL
 
         taught = {e["kanji"] for entries in KANJI_BY_LEVEL.values() for e in entries}

@@ -15,7 +15,7 @@ later learner is served for free -- but the first learner at each of
 the twenty exam ids (five levels, four kinds) still pays it, and pays
 it with their time.
 
-Since plan 221 every exam id ships ten seed papers (content/exam_seed/,
+Since plan 225 every exam id ships ten seed papers (content/exam_seed/,
 study/exam_seed.py), so no learner meets an empty exam id on a fresh
 database; this grows the pool past that floor. A seed counts as a live
 revision here like any other paper, so `--target 10` makes nothing

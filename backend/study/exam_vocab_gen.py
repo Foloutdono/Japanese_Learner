@@ -352,7 +352,7 @@ of exactly {n} objects, ONE PER WORD IN THE SAME ORDER, each matching:
 def _dropped(what: str, display: str, why: str) -> None:
     """A model's item not kept, and why: the log line that tells a
     prompt's failures apart (scripts/exam_seed.py prints them to whoever
-    is writing the replies, plan 221)."""
+    is writing the replies, plan 225)."""
     logger.warning("%s item for %s dropped: %s", what, display, why)
 
 
