@@ -171,7 +171,7 @@ export const fromRecipe = r => JSON.parse(new TextDecoder().decode(Uint8Array.fr
 
 /** A carousel short's page: the carousel's own title (plan 210l) for the
  *  feed, its caption, the app, the voice's credit when it speaks, tags. */
-export function shortPage(pl, type, picks, site, voiced) {
+export function shortPage(pl, type, picks, site, voiced, music = null) {
   const fr = pl.lang === 'fr'
   const n = type === 'exam' ? picked(pl, picks, 3).length : 1
   const c = pl.caption
@@ -181,6 +181,7 @@ export function shortPage(pl, type, picks, site, voiced) {
     c.ask,
     `${fr ? 'Continue sur Tsuji' : 'Keep going on Tsuji'}: ${site}`,
     voiced ? (fr ? 'Voix : VOICEVOX Nemo.' : 'Voices: VOICEVOX Nemo.') : null,
+    music ? (fr ? `Musique : ${music}` : `Music: ${music}`) : null,
     tags.map(t => `#${t}`).join(' '),
   ].filter(Boolean)
   return { title: `${titleOf(pl, type, n)} #shorts`, description: lines.join('\n\n'), tags: tags.join(', ') }

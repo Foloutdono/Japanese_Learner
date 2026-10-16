@@ -1,0 +1,7 @@
+# The tracks themselves stay out of git: some free licences forbid
+# passing the file on. Their credit files (*.json) and this folder's
+# README are committed.
+*
+!.gitignore
+!README.md
+!*.json

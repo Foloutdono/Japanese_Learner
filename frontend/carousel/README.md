@@ -646,7 +646,9 @@ bass, brushes and a ride (`--music trio`, the default, at 92), or the
 same piano and tune over a soft boom-bap with a needle's crackle
 (`--music lofi`, at 80). Its notes come from one seed, so a video made
 again sounds the same; its bass carries overtones a phone's speaker
-plays, and it sits as loud as the first bed did. The voice's
+plays, and it sits as loud as the first bed did. A recorded track can
+take its place (`--music PATH`, plan 219b), only with its licence and
+credit written beside it: `long/music/README.md`. The voice's
 credit "VOICEVOX Nemo" ends every description; never publish the clips
 or a video's sound as a dataset.
 

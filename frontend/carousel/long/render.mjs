@@ -13,7 +13,8 @@
 //   --seconds 60      make only the first minute (to look at a draft)
 //   --stills 12,40    draw those seconds as PNGs, and no video
 //   --format short    the short: 9:16, under a minute (YouTube Shorts, Reels, TikTok)
-//   --music lofi      the bed's feel: trio (the default, plan 219) or lofi
+//   --music lofi      the bed: trio (the default, plan 219), lofi, or a recorded
+//                     track's path, its credit file beside it (music/README.md)
 //   --carousel RECIPE a carousel of the studio as a short video, voiced: the
 //                     studio's "Copy the command" writes the recipe (short.js)
 //
@@ -51,6 +52,22 @@ const OUT = resolve(args.out || join(HERE, 'out'))
 const CACHE = join(HERE, 'cache')
 const WORK = join(OUT, '.work')
 for (const d of [OUT, CACHE, WORK, join(WORK, 'sfx')]) mkdirSync(d, { recursive: true })
+// The bed: played by long_video_audio.py (trio, lofi), or a recorded track
+// whose licence allows it (plan 219b), never without its credit file beside
+// it, whose credit the video's description prints (music/README.md).
+const PLAYED = ['trio', 'lofi']
+let music = args.music ? String(args.music) : null
+let musicCredit = null
+if (music && !PLAYED.includes(music)) {
+  const file = resolve(music)
+  const meta = file.replace(/\.[^./]+$/, '') + '.json'
+  if (!existsSync(file)) throw new Error(`--music: no file ${file}`)
+  if (!existsSync(meta)) throw new Error(`--music: ${meta} is missing: a track is used only with its licence and credit written down (carousel/long/music/README.md)`)
+  const m = JSON.parse(readFileSync(meta, 'utf8'))
+  for (const key of ['title', 'artist', 'licence', 'source', 'credit']) if (!m[key]) throw new Error(`--music: ${meta} has no ${key}`)
+  music = file
+  musicCredit = m.credit
+}
 const python = existsSync(join(BACKEND, '.venv/bin/python')) ? join(BACKEND, '.venv/bin/python') : 'python3'
 const log = (...a) => console.log(new Date().toISOString().slice(11, 19), ...a)
 
@@ -128,12 +145,12 @@ if (recipe) {
   tl = shortTimeline(slides, made.counts, made.spoken, dur)
   SIZE = TALL
   slug = ['short', recipe.source, recipe.id, recipe.type, lang].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
-  pageText = await page.evaluate(async ({ st, site, voiced }) => {
+  pageText = await page.evaluate(async ({ st, site, voiced, credit }) => {
     const S = window.__short
     const fetchJson = name => fetch(`/carousel/bank/${name}`).then(r => r.json())
     const { pl } = await S.carouselShort(st, fetchJson)
-    return S.shortPage(pl, st.type, st.picks, site, voiced)
-  }, { st: recipe, site, voiced: tl.cues.length > 0 })
+    return S.shortPage(pl, st.type, st.picks, site, voiced, credit)
+  }, { st: recipe, site, voiced: tl.cues.length > 0, credit: musicCredit })
   await page.evaluate(tl => { window.__draw = t => window.__short.drawShortFrame(window.__ctx, window.__slides, tl, t) }, tl)
   thumbAt = 0.2
   log(`${pageText.title}: ${made.keys.length} slides, ${tl.seconds.toFixed(1)} s${made.spoken ? `, says ${made.spoken}` : ''}`)
@@ -153,7 +170,7 @@ if (recipe) {
     const L = await import('/carousel/long.js')
     window.__draw = t => L.drawLong(window.__ctx, plan, tl, t)
   }, { plan, tl })
-  pageText = describe(plan, tl, site, banks['index.json']?.figures)
+  pageText = describe(plan, tl, site, banks['index.json']?.figures, musicCredit)
   thumbAt = opts.format === 'short' ? 3.4 : 4.5
   log(`${(tl.seconds / 60).toFixed(1)} min, ${tl.cues.length} lines, ${tl.sfx.length} sounds`)
 }
@@ -187,7 +204,7 @@ for (const key of keys) {
   else log(`no app sound named ${key}`)
 }
 writeFileSync(join(WORK, 'timeline.json'), JSON.stringify({ ...tl, seconds }))
-const mixed = spawnSync(python, ['-m', 'scripts.long_video_audio', 'mix', join(WORK, 'timeline.json'), '--cache', CACHE, '--sfx', join(WORK, 'sfx'), '--out', join(WORK, 'mix.wav'), ...(args.music ? ['--music', String(args.music)] : [])], { cwd: BACKEND, stdio: 'inherit' })
+const mixed = spawnSync(python, ['-m', 'scripts.long_video_audio', 'mix', join(WORK, 'timeline.json'), '--cache', CACHE, '--sfx', join(WORK, 'sfx'), '--out', join(WORK, 'mix.wav'), ...(music ? ['--music', music] : [])], { cwd: BACKEND, stdio: 'inherit' })
 if (mixed.status !== 0) throw new Error('the mix failed')
 
 // ── YouTube's loudness, by one gain for the whole: a dynamic leveller would

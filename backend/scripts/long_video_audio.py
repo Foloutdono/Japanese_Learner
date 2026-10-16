@@ -28,7 +28,9 @@ recipes by the page, one WAV a sound) on the timeline, under a bed of
 music this script plays itself (plan 219): a jazz band, an electric
 piano comping over a walking bass and brushes (`--music trio`, the
 default) or the same tune over a lo-fi beat (`--music lofi`), nothing
-recorded, so the video owes no one for it. The music steps back while a
+recorded, so the video owes no one for it; or a recorded track whose
+licence allows it (`--music PATH`, plan 219b), credited in the video's
+description. The music steps back while a
 line is said.
 
 It needs the voice engine (VOICEVOX_URL, CLAUDE.md "Speech") for
@@ -294,9 +296,39 @@ def _drums(rng):
     return kit
 
 
-def bed(seconds: float, style: str = STYLE):
-    """The bed, stereo: (samples, 2) at RATE, as loud as BED_RMS."""
+def recorded(path: Path, seconds: float):
+    """A recorded track as the bed (plan 219b): decoded by ffmpeg, played
+    again from its start (a two-second crossfade over the seam) until the
+    video ends, brought to BED_RMS. Its licence and its credit are the
+    renderer's to check (frontend/carousel/long/music/README.md)."""
+    import subprocess
+
     import numpy as np
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(path), "-f", "f32le", "-ac", "2", "-ar", str(RATE), "-"], capture_output=True, check=True).stdout
+    track = np.frombuffer(raw, dtype="<f4").reshape(-1, 2).copy()
+    if not len(track):
+        raise ValueError(f"{path}: no sound")
+    n = int(seconds * RATE)
+    xf = min(int(2.0 * RATE), len(track) // 4)
+    out = track
+    while len(out) < n:
+        ramp = np.linspace(0, 1, xf, dtype=np.float32)[:, None]
+        seam = out[-xf:] * (1 - ramp) + track[:xf] * ramp
+        out = np.concatenate([out[:-xf], seam, track[xf:]])
+    out = out[:n]
+    fin, fout = min(n, int(1.5 * RATE)), min(n, int(3.0 * RATE))
+    out[:fin] *= np.linspace(0, 1, fin, dtype=np.float32)[:, None]
+    out[n - fout:] *= np.linspace(1, 0, fout, dtype=np.float32)[:, None]
+    rms = float(np.sqrt(np.mean(out ** 2))) or 1.0
+    return (out * (BED_RMS / rms)).astype(np.float32)
+
+
+def bed(seconds: float, style: str = STYLE):
+    """The bed, stereo: (samples, 2) at RATE, as loud as BED_RMS. `style`
+    is one of STYLES, played here, or the path of a recorded track."""
+    import numpy as np
+    if style not in STYLES:
+        return recorded(Path(style), seconds)
     S = STYLES[style]
     rng = np.random.default_rng(SEED)
     n = int(seconds * RATE)
@@ -503,8 +535,10 @@ def main() -> int:
     m.add_argument("--cache", type=Path, required=True)
     m.add_argument("--sfx", type=Path, required=True)
     m.add_argument("--out", type=Path, required=True)
-    m.add_argument("--music", choices=sorted(STYLES), default=STYLE, help="the bed's feel (plan 219)")
+    m.add_argument("--music", default=STYLE, help=f"the bed: {', '.join(sorted(STYLES))} (played here, plan 219) or a recorded track's path (219b)")
     args = ap.parse_args()
+    if args.step == "mix" and args.music not in STYLES and not Path(args.music).is_file():
+        ap.error(f"--music: {args.music} is neither {' nor '.join(sorted(STYLES))} nor a file")
     if args.step == "voice":
         return voice(args.cues, args.cache, args.out)
     return mix(args.timeline, args.cache, args.sfx, args.out, args.music)
