@@ -379,7 +379,7 @@ describe('the analyser on the desk (plan 134)', () => {
     const field = $('.anl-explainpanel .desk-ask__field')
     expect(field).not.toBeNull()
     expect(field.disabled).toBe(false)
-    apiFetch.mockImplementation(async (url, _s, opts) => (String(url) === '/api/ask'
+    apiFetch.mockImplementation(async url => (String(url) === '/api/ask'
       ? ok({ answer: 'Ici, 「は」 marque le thème.', off_topic: false, left: 39 })
       : ok([])))
     field.focus()
