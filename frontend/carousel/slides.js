@@ -410,6 +410,11 @@ function stationPlate(ctx, p, x, y, w, h, st, color) {
   const sf = font(700, FS.title, 'serif')
   const cf = font(500, FS.caption, 'jp')
   const arrow = band * 0.3
+  // A neighbour's reading gives way where the two would meet on a
+  // narrow plate (the 9:16 frame's): its name stays.
+  const sideW = n => (n ? arrow + SP[4] + measure(ctx, n.jp, sf) : 0)
+  const readW = n => (n ? SP[3] + measure(ctx, n.kana, cf) : 0)
+  const readings = sideW(st.prev) + readW(st.prev) + sideW(st.next) + readW(st.next) + SP[6] * 3 <= w
   if (st.prev) {
     ctx.save()
     ctx.translate(x + SP[6] + arrow, by)
@@ -417,15 +422,15 @@ function stationPlate(ctx, p, x, y, w, h, st, color) {
     chevron(ctx, 0, 0, arrow, p.onLine)
     ctx.restore()
     const w1 = text(ctx, st.prev.jp, x + SP[6] + arrow + SP[4], by + FS.title * 0.36, { f: sf, color: p.onLine })
-    text(ctx, st.prev.kana, x + SP[6] + arrow + SP[4] + w1 + SP[3], by + FS.caption * 0.36, { f: cf, color: p.onLine })
+    if (readings) text(ctx, st.prev.kana, x + SP[6] + arrow + SP[4] + w1 + SP[3], by + FS.caption * 0.36, { f: cf, color: p.onLine })
   }
   if (st.next) {
-    const kw = measure(ctx, st.next.kana, cf)
+    const kw = readings ? measure(ctx, st.next.kana, cf) + SP[3] : 0
     const jw = measure(ctx, st.next.jp, sf)
     const ax = x + w - SP[6] - arrow
     chevron(ctx, ax, by, arrow, p.onLine)
-    text(ctx, st.next.kana, ax - SP[4] - kw, by + FS.caption * 0.36, { f: cf, color: p.onLine })
-    text(ctx, st.next.jp, ax - SP[4] - kw - SP[3] - jw, by + FS.title * 0.36, { f: sf, color: p.onLine })
+    if (readings) text(ctx, st.next.kana, ax - SP[4] - kw + SP[3], by + FS.caption * 0.36, { f: cf, color: p.onLine })
+    text(ctx, st.next.jp, ax - SP[4] - kw - jw, by + FS.title * 0.36, { f: sf, color: p.onLine })
   }
 }
 
@@ -524,7 +529,7 @@ const KINDS = {
     if (cmp) {
       while (vsSize > FS.title && measure(ctx, s.pattern + vs + cmp.p, vf()) > f.w) vsSize -= 4
       inline = measure(ctx, s.pattern + vs + cmp.p, vf()) <= f.w
-      if (!inline) while (vsSize > FS.lead && Math.max(measure(ctx, s.pattern, vf()), measure(ctx, `／ ${cmp.p}`, vf())) > f.w) vsSize -= 4
+      if (!inline) while (vsSize > FS.body && Math.max(measure(ctx, s.pattern, vf()), measure(ctx, `／ ${cmp.p}`, vf())) > f.w) vsSize -= 4
     }
     const vsH = !cmp ? 0 : inline ? vsSize * 1.05 + EDGE + SP[6] : vsSize * 2.1 + EDGE + SP[3] + SP[6]
     const room = f.bottom - y - vsH
@@ -617,15 +622,18 @@ const KINDS = {
     iy += FS.display * 1.05
     caption(ctx, c.plan.t.strokes(n), ix, iy + FS.caption, ink2)
     iy += FS.caption + SP[6]
-    const rf = font(500, FS.title, 'jp')
+    // The readings at one size, the largest at which both keep to the column.
+    const said = [...(k.on || []).slice(0, 1), ...(k.kun || []).slice(0, 1).map(([stem, oku]) => stem + (oku || ''))]
+    const rz = [FS.title, FS.lead, FS.body, FS.sm].find(z => said.every(r => measure(ctx, r, font(500, z, 'jp'), TR.term) + TR.term * z <= iw)) || FS.sm
+    const rf = font(500, rz, 'jp')
     for (const on of (k.on || []).slice(0, 1)) {
-      text(ctx, on, ix, iy + FS.title * 0.9, { f: rf, color: ink, tr: TR.term })
-      iy += FS.title * 1.35
+      text(ctx, on, ix, iy + rz * 0.9, { f: rf, color: ink, tr: TR.term })
+      iy += rz * 1.35
     }
     for (const [stem, oku] of (k.kun || []).slice(0, 1)) {
-      const w = text(ctx, stem, ix, iy + FS.title * 0.9, { f: rf, color: ink, tr: TR.term })
-      if (oku) text(ctx, oku, ix + w + TR.term * FS.title, iy + FS.title * 0.9, { f: rf, color: ink2, tr: TR.term })
-      iy += FS.title * 1.35
+      const w = text(ctx, stem, ix, iy + rz * 0.9, { f: rf, color: ink, tr: TR.term })
+      if (oku) text(ctx, oku, ix + w + TR.term * rz, iy + rz * 0.9, { f: rf, color: ink2, tr: TR.term })
+      iy += rz * 1.35
     }
     iy += SP[3]
     const meaning = (((lang === 'fr' && k.fr?.length) ? k.fr : k.en) || []).slice(0, 2).join(', ')
@@ -971,7 +979,11 @@ const KINDS = {
     const ix = f.x + SP[7]
     const iw = f.w - SP[7] * 2
     let y = top + SP[7]
-    caption(ctx, `${t.jlptStyle} · ${t.cover} · ${/^N\d$/.test(plan.level) ? plan.level : plan.source}`, ix, y + FS.caption, p.line.exam)
+    // Its caption inside the frame: "JLPT-style" gives way before it is set smaller.
+    const lvl = /^N\d$/.test(plan.level) ? plan.level : plan.source
+    const capW = (str, z) => measure(ctx, str.toLocaleUpperCase(), font(700, z, 'latin'), TR.caption)
+    const capText = [`${t.jlptStyle} · ${t.cover} · ${lvl}`, `${t.cover} · ${lvl}`].find(str => capW(str, FS.caption) <= iw) || `${t.cover} · ${lvl}`
+    caption(ctx, capText, ix, y + FS.caption, p.line.exam, 'left', capW(capText, FS.caption) <= iw ? FS.caption : FS.xs)
     y += FS.caption + SP[5]
     // The paper's name as large as the sections under it leave room for:
     // each section keeps a row it can be read in.
@@ -1004,12 +1016,25 @@ const KINDS = {
     let rs = rsMax
     const cramped = rs2 => s.quizzes.some((q, i) => { const lb = rowAt(q, i, rs2).lb; return lb.cut || lb.size < FS.sm })
     while (rs > FS.sm && cramped(rs)) rs -= 2
+    // A name still cut on its row (the narrow 9:16 frame) goes under its
+    // section, where the booklet has the room for two lines a row.
+    const under = (q, i) => {
+      const { w } = rowAt(q, i, rs)
+      return fit(ctx, q.cover || q.label || '', { weight: 500, sizes: [FS.body, FS.sm], maxW: iw - w - SP[5], maxLines: 1, balanced: false })
+    }
+    const twoH = rs * 1.3 + FS.body * 1.25
+    const stacked = cramped(rs) && rowsRoom(ts, named) / n >= twoH && s.quizzes.every((q, i) => !under(q, i).cut)
+    const stepH = stacked ? Math.min(twoH * 1.2, rowsRoom(ts, named) / n) : rowH
     s.quizzes.forEach((q, i) => {
-      const ry = y + i * rowH
+      const ry = y + i * stepH
       const { num, jp, w, lb } = rowAt(q, i, rs)
-      text(ctx, num, ix, ry + rowH * 0.62, { f: font(700, rs, 'jp'), color: ink })
-      if (jp) text(ctx, jp, ix + w + SP[5], ry + rowH * 0.62, { f: font(500, rs, 'jp'), color: ink })
-      text(ctx, lb.lines[0] || '', ix + iw, ry + rowH * 0.62, { f: lb.f, color: ink2, align: 'right' })
+      const base = stacked ? ry + rs * 1.05 : ry + rowH * 0.62
+      text(ctx, num, ix, base, { f: font(700, rs, 'jp'), color: ink })
+      if (jp) text(ctx, jp, ix + w + SP[5], base, { f: font(500, rs, 'jp'), color: ink })
+      if (stacked) {
+        const ub = under(q, i)
+        text(ctx, ub.lines[0] || '', ix + w + SP[5], base + rs * 0.25 + ub.size * 1.05, { f: ub.f, color: ink2 })
+      } else text(ctx, lb.lines[0] || '', ix + iw, base, { f: lb.f, color: ink2, align: 'right' })
     })
     // なまえ, and a line to write it on.
     if (named) {
@@ -1809,7 +1834,8 @@ function stopPlate(c, color, maxW) {
       ctx.restore()
       const cy = y + L.h / 2
       let at2 = x + rail + pad
-      roundel(ctx, at2 + L.r, cy, L.r, color, st.code, { ink: color, size: L.r * 0.7 })
+      // Its code never under the scale's smallest caption.
+      roundel(ctx, at2 + L.r, cy, L.r, color, st.code, { ink: color, size: Math.max(FS.xs, L.r * 0.7) })
       at2 += L.r * 2 + SP[5]
       const nameW = Math.max(measure(ctx, st.jp, L.jf), measure(ctx, st.kana, L.kf))
       const kz = Math.max(FS.xs, L.z * 0.42)

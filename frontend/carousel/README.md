@@ -432,6 +432,21 @@ no text over text, nothing set tiny); a slide that no longer fits steps
 its parts down, drops a line it can spare (a cover's name line, a plate's
 English name, the answer slide's quoted sentence read on the question),
 or goes one answer to a row, never over its neighbour or out of the box.
+The 9:16 box is narrower than the 4:5 post's (712 against 792), so a
+text that was set at the first size that fit now looks for the first
+that fits whole (plan 215c): a question, an answer and its why, a key
+point, a word's row, the analyser's meaning step down a rung, or take
+another line, before any is cut with "…"; a key point that still would
+be leaves the slide to the others, an answer's why leaves its card, a
+gloss leaves its last senses off (the deck's words, fewer of them), and
+a named picture tile widens into the room beside it. On the Classic
+decks the exam cover's caption drops "JLPT-style" and a section's name
+goes under its section, a station plate's neighbours drop their readings,
+and a stop plate's code keeps to the caption-xs rung. Measured on a
+sample of every source, type and look in both 9:16 combinations and
+the post, the texts cut outside the call to action's miniatures (whose
+mock app clips as the app does) went from 1,230 before the box changed
+to 301.
 
 Two grounds (washi and sumi, the app's two themes), two languages (the
 slides' Latin text in English or French, French punctuation welded), and

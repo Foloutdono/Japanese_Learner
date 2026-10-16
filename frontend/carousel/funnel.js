@@ -591,7 +591,7 @@ const textBlock = (c, str, { x, w, sizes, weight = 700, fam = 'latin', color = c
   if (!str) return none
   const b = fit(c.ctx, str, { weight, fam, sizes, maxW: w, maxLines, maxH, lh, balanced: align === 'center' })
   const ax = align === 'center' ? x + w / 2 : align === 'right' ? x + w : x
-  return { h: paragraphH(b, lh), b, draw: y => paragraph(c.ctx, b, ax, y, color, align, lh) }
+  return { h: paragraphH(b, lh), b, cut: !!b.cut, draw: y => paragraph(c.ctx, b, ax, y, color, align, lh) }
 }
 
 // ── The item, as large as it can be read ──────────────────────
@@ -642,7 +642,10 @@ function choicesBlock(c, q, { x, w, maxH = Infinity, revealed = false, sizes = [
     const r = z * 0.62
     const tw = w - SP[5] - r * 2 - SP[5] - SP[5]
     const rows = show.map(i => {
-      const b = fit(ctx, all[i].label, { weight: all[i].fam === 'jp' ? 500 : 700, fam: all[i].fam, sizes: [z], maxW: tw, maxLines: 3, balanced: false })
+      const o = { weight: all[i].fam === 'jp' ? 500 : 700, fam: all[i].fam, sizes: [z], maxW: tw, balanced: false }
+      // A long choice (a sentence's translation) takes a fourth line before it is cut.
+      const b3 = fit(ctx, all[i].label, { ...o, maxLines: 3 })
+      const b = b3.cut ? fit(ctx, all[i].label, { ...o, maxLines: 4 }) : b3
       return { i, b, h: Math.max(z * 1.9, paragraphH(b) + z * 1.1) }
     })
     const total = rows.reduce((a, r2) => a + r2.h, 0) + gap * (rows.length - 1)
@@ -652,6 +655,7 @@ function choicesBlock(c, q, { x, w, maxH = Infinity, revealed = false, sizes = [
   const ok = success(p)
   return {
     h: lay.total,
+    cut: lay.rows.some(r2 => r2.b.cut),
     draw: y => {
       let at = y
       for (const row of lay.rows) {
@@ -695,7 +699,7 @@ function stemBlock(c, q, { x, w, maxH, revealed }) {
     return { h: s.h + (t.h ? SP[4] + t.h : 0), draw: y => { s.draw(y); t.draw(y + s.h + SP[4]) } }
   }
   if (st.specimen) return glyphBlock(c, st.specimen, { x, w, maxH, max: FS.word, rule: false })
-  if (st.text) return quoteBlock(c, st.text, { x, w, maxH, sizes: [FS.heading, FS.title, FS.lead] })
+  if (st.text) return quoteBlock(c, st.text, { x, w, maxH, sizes: [FS.heading, FS.title, FS.lead, FS.body, FS.sm] })
   if (st.emoji) return { h: Math.min(FS.glyph, maxH), draw: y => emojiAt(c.ctx, st.emoji, x + w / 2, y + Math.min(FS.glyph, maxH) / 2, Math.min(FS.glyph, maxH) * 0.8) }
   if (st.cue) return bubbleBlock(c, st.cue, { x, w, maxH, who: st.them })
   if (st.task) return textBlock(c, st.task, { x, w, sizes: [FS.lead, FS.body], weight: 500, color: c.p.ink2 })
@@ -708,6 +712,11 @@ function questionBlock(c, q, { x, w, maxH, revealed = false }) {
   // The largest set of sizes at which the question, its stem, its choices
   // and its why all fit; the why gives way before anything is set small.
   let lay = null
+  // A layout that cuts a text is kept only where none down to the small
+  // rung fits whole: a size down is read, a sentence cut short is not.
+  let pick = null
+  let firstFit = null
+  const whole = L => !L.ask.cut && !L.stem.cut && !L.choices.cut && !L.why.cut
   for (const withWhy of revealed && whyText ? [true, false] : [false]) {
     for (const z of [FS.title, FS.lead, FS.body, FS.sm, FS.caption, FS.xs]) {
       const gap = z >= FS.body ? SP[6] : z >= FS.caption ? SP[5] : SP[4]
@@ -718,13 +727,18 @@ function questionBlock(c, q, { x, w, maxH, revealed = false }) {
       const stem = rest > FS.body * 1.6 ? stemBlock(c, q, { x, w, maxH: rest, revealed }) : none
       const total = ask.h + (stem.h ? gap + stem.h : 0) + gap + choices.h + (why.h ? gap + why.h : 0)
       lay = { gap, ask, why, choices, stem, total }
-      if (total <= maxH && (stem.h || !q.stem)) break
+      if (total > maxH || (q.stem && !stem.h)) continue
+      if (z >= FS.sm && whole(lay)) { pick = lay; break }
+      firstFit ||= lay
+      if (z < FS.sm) break
     }
-    if (lay.total <= maxH && (lay.stem.h || !q.stem)) break
+    if (pick) break
   }
+  lay = pick || firstFit || lay
   const { gap, ask, why, choices, stem } = lay
   return {
     h: lay.total,
+    cut: !whole(lay),
     draw: y => {
       let at = y
       ask.draw(at)
@@ -757,10 +771,13 @@ function solutionBlock(c, q, { x, w, maxH }) {
     const maxW = w - pad * 2 - r * 2 - SP[5]
     const sizes = [z, FS.title, FS.lead, FS.body].filter(v => v <= z)
     const one = fit(ctx, said, { fam, weight: 700, sizes, maxW, maxLines: 1 })
-    const b = one.cut ? fit(ctx, said, { fam, weight: 700, sizes, maxW, maxLines: 2, balanced: false }) : one
+    const two = one.cut ? fit(ctx, said, { fam, weight: 700, sizes, maxW, maxLines: 2, balanced: false }) : one
+    // A long answer takes a third line, a rung down, before it is cut.
+    const b = two.cut ? fit(ctx, said, { fam, weight: 700, sizes: [...sizes.slice(-1), FS.sm], maxW, maxLines: 3, balanced: false }) : two
     const h = pad * 2 + Math.max(r * 2, paragraphH(b))
     return {
       h,
+      cut: !!b.cut,
       draw: y => {
         ctx.fillStyle = mix(ok, cardInk(p), p.paper ? 0.14 : 0.2)
         rrect(ctx, x, y, w, h, R.card * 2)
@@ -786,17 +803,21 @@ function solutionBlock(c, q, { x, w, maxH }) {
     return { h: z, draw: y => emojiAt(ctx, st.emoji, x + w / 2, y + z / 2, z * 0.8) }
   }
   // The answer large, then why; the why gives way, then the item's room.
+  // A layout that cuts the answer or its why is kept only where none fits whole.
   let out = none
+  let firstFit = null
   for (const z of [FS.heading, FS.title, FS.lead]) {
     const a = card(z)
     for (const whyZ of [[FS.lead, FS.body], [FS.body, FS.sm], [FS.sm, FS.caption]]) {
-      const why = whyText ? textBlock(c, whyText, { x, w, sizes: whyZ, weight: 500, color: p.ink2, align: 'left', maxLines: 4 }) : none
+      const why = whyText ? textBlock(c, whyText, { x, w, sizes: whyZ, weight: 500, color: p.ink2, align: 'left', maxLines: 5 }) : none
       const room = Math.min(maxH * 0.45, maxH - a.h - why.h - SP[7] - SP[6])
       out = stackOf([itemOf(room), a, why], [SP[7], SP[6]])
-      if (out.h <= maxH) return out
+      if (out.h > maxH) continue
+      if (!a.cut && !why.cut) return out
+      firstFit ||= out
     }
   }
-  return out
+  return firstFit || out
 }
 /** One line of a scene, in its bubble: who says it, the line, its sense. */
 function bubbleBlock(c, line, o) {
@@ -873,11 +894,14 @@ function phone(c, x, y, w, h) {
 function analyserBlock(c, s, o) {
   const tries = [o, { ...o, framed: false }, { ...o, framed: false, small: true }, { ...o, framed: false, small: true, bare: true }]
   let b = none
+  let firstFit = null
   for (const t of tries) {
     b = analyserOnce(c, s, t)
-    if (b.h <= o.maxH) return b
+    if (b.h > o.maxH) continue
+    if (!b.cut) return b
+    firstFit ||= b
   }
-  return b
+  return firstFit || b
 }
 function analyserOnce(c, s, { x, w, maxH, framed, small = false, bare = false }) {
   const { ctx, p } = c
@@ -886,7 +910,7 @@ function analyserOnce(c, s, { x, w, maxH, framed, small = false, bare = false })
   const pad = framed ? 46 : bare ? SP[5] : SP[6]
   const inner = w - pad * 2
   const ghost = u => measured(ctx, m => analyserLine(m, p, 0, 0, inner, u, toks))
-  const mean = textBlock(c, s.translation, { x: x + pad, w: inner, sizes: small ? [FS.body, FS.sm] : [FS.title, FS.lead, FS.body], align: 'left', maxLines: 3 })
+  const mean = textBlock(c, s.translation, { x: x + pad, w: inner, sizes: small ? [FS.body, FS.sm] : [FS.title, FS.lead, FS.body], align: 'left', maxLines: 4 })
   const head = bare ? 0 : FS.caption * 1.3
   // Its furigana keep 22px at the smallest scale (9.92px at a phone's).
   let u = 3.2
@@ -901,6 +925,7 @@ function analyserOnce(c, s, { x, w, maxH, framed, small = false, bare = false })
   const h = body + pad * 2 + (framed ? 86 + 50 - pad : 0)
   return {
     h,
+    cut: mean.cut,
     draw: y => {
       let at
       if (framed) at = phone(c, x, y, w, h).y
@@ -918,7 +943,9 @@ function analyserOnce(c, s, { x, w, maxH, framed, small = false, bare = false })
 /** The sentence answered: with its furigana, its romaji, what it says. */
 function answerBlock(c, s, { x, w, maxH }) {
   let out = none
-  // A rung down at a time; a long sentence's romaji gives way last.
+  let firstFit = null
+  // A rung down at a time; a long sentence's romaji gives way last, and a
+  // layout that cuts a line is kept only where none fits whole.
   for (let k = 0; k < 4; k++) {
     const z = i => RUNGS[Math.min(RUNGS.length - 1, i + k)]
     const ro = k < 3 ? textBlock(c, s.romaji, { x, w, sizes: [z(4), z(5)], weight: 500, color: c.p.ink2, maxLines: 3 }) : none
@@ -926,9 +953,11 @@ function answerBlock(c, s, { x, w, maxH }) {
     const gap = k < 2 ? SP[7] : SP[5]
     const sent = sentenceBlock(c, s.rows, { x, w, maxH: maxH - ro.h - tr.h - gap * 2, max: z(0), min: z(3), script: 'furigana' })
     out = stackOf([sent, ro, tr], [SP[5], gap])
-    if (out.h <= maxH) return out
+    if (out.h > maxH) continue
+    if (!ro.cut && !tr.cut) return out
+    firstFit ||= out
   }
-  return out
+  return firstFit || out
 }
 /** A grammar point: its pattern, what it does, its form, a sentence with it. */
 function pointBlock(c, s, { x, w, maxH }) {
@@ -936,14 +965,16 @@ function pointBlock(c, s, { x, w, maxH }) {
   const pt = s.point
   const head = glyphBlock(c, pt.pattern, { x, w, maxH: maxH * 0.3, max: FS.word * 0.9 })
   const mean = textBlock(c, pt.meaning, { x, w, sizes: [FS.heading, FS.title, FS.lead], maxLines: 3 })
-  const formF = font(700, FS.body, 'latin')
-  const form = pt.form ? { h: FS.body * 2.1, draw: y => {
-    const tw = Math.min(w, measure(ctx, pt.form, formF) + SP[7] * 2)
+  // The form on its pill, on one line where it goes, else on two.
+  const one = pt.form ? fit(ctx, pt.form, { sizes: [FS.body, FS.sm], maxW: w - SP[7] * 2, maxLines: 1 }) : null
+  const fb = one?.cut ? fit(ctx, pt.form, { sizes: [FS.body, FS.sm], maxW: w - SP[7] * 2, maxLines: 2 }) : one
+  const formH = fb ? Math.max(FS.body * 2.1, paragraphH(fb) + FS.body) : 0
+  const form = fb ? { h: formH, draw: y => {
+    const tw = Math.min(w, Math.max(...fb.lines.map(l => measure(ctx, l, fb.f))) + SP[7] * 2)
     ctx.fillStyle = faceInk(p)
-    rrect(ctx, x + (w - tw) / 2, y, tw, FS.body * 2.1, FS.body * 1.05)
+    rrect(ctx, x + (w - tw) / 2, y, tw, formH, FS.body * 1.05)
     ctx.fill()
-    const b = fit(ctx, pt.form, { sizes: [FS.body, FS.sm], maxW: tw - SP[6] * 2, maxLines: 1 })
-    text(ctx, b.lines[0], x + w / 2, y + FS.body * 1.05 + b.size * 0.36, { f: b.f, color: p.line.grammar, align: 'center' })
+    paragraph(ctx, fb, x + w / 2, y + (formH - paragraphH(fb)) / 2, p.line.grammar, 'center')
   } } : none
   const rest = maxH - head.h - mean.h - form.h - SP[7] * 3
   let ex = s.rows?.length ? exampleCard(c, { rows: s.rows, tr: s.translation }, { x, w, maxH: rest, lit: r => (r.g || []).includes(pt.pattern) || r.lit }) : none
@@ -1056,21 +1087,28 @@ function rowsOf(c, list, { x, w, maxH }) {
   const { ctx, p } = c
   const gap = SP[4]
   let lay = null
+  let firstFit = null
   for (const z of [FS.title, FS.lead, FS.body, FS.sm]) {
     const jf = font(700, z, 'jp')
     const pw = Math.min(w * 0.42, Math.max(z * 2.4, ...list.map(it => measure(ctx, it.t, jf) + z * 1.2)))
     const tw = w - pw - SP[6]
     const rows = list.map(it => {
       const sub = [it.reading && it.reading !== it.t ? it.reading : '', it.ro, it.sub].filter(Boolean).join(' · ')
-      const m = fit(ctx, it.main || '', { sizes: [z * 0.9], maxW: tw, maxLines: 2, balanced: false })
-      const sb = sub ? fit(ctx, sub, { weight: 500, sizes: [Math.max(FS.caption * 0.9, z * 0.62)], maxW: tw, maxLines: 1, balanced: false }) : null
+      const m = glossFit(ctx, it.main || '', { sizes: [z * 0.9], maxW: tw, maxLines: 2, balanced: false })
+      const sz = Math.max(FS.caption * 0.9, z * 0.62)
+      const sb1 = sub ? fit(ctx, sub, { weight: 500, sizes: [sz], maxW: tw, maxLines: 1, balanced: false }) : null
+      // A reading too long for its line takes a second before it is cut.
+      const sb = sb1?.cut ? fit(ctx, sub, { weight: 500, sizes: [sz], maxW: tw, maxLines: 2, balanced: false }) : sb1
       const h = Math.max(z * 1.75, paragraphH(m) + (sb ? paragraphH(sb) + SP[1] : 0))
       return { it, m, sb, h }
     })
     const total = rows.reduce((a, r) => a + r.h, 0) + gap * (rows.length - 1)
-    lay = { z, jf, pw, rows, total }
-    if (total <= maxH) break
+    const cut = rows.some(r => r.m.cut || r.sb?.cut)
+    lay = { z, jf, pw, rows, total, cut }
+    if (total <= maxH && !cut) break
+    if (total <= maxH) firstFit ||= lay
   }
+  if (firstFit && (lay.total > maxH || lay.cut)) lay = firstFit
   return {
     h: lay.total,
     draw: y => {
@@ -1183,11 +1221,22 @@ function picturesBlock(c, s, { x, w, maxH }) {
   const gap = SP[4]
   const why = s.reveal && s.why ? textBlock(c, s.why, { x, w, sizes: [FS.body, FS.sm], weight: 500, color: p.ink2, maxLines: 3 }) : none
   const room = maxH - (why.h ? why.h + SP[6] : 0)
-  const label = s.reveal ? FS.lead * 1.25 + FS.sm * 1.3 + SP[3] : 0
   const cellOf = k => Math.min((w - gap * (k - 1)) / k, (room - gap * (Math.ceil(n / k) - 1)) / Math.ceil(n / k))
   const cols = [2, 3, 4].filter(k => k <= Math.max(2, n)).reduce((a, k) => (cellOf(k) > cellOf(a) ? k : a), 2)
   const rowsN = Math.ceil(n / cols)
   const cell = cellOf(cols)
+  // Named, a tile widens into the room the frame leaves beside it (the
+  // 9:16 frame's height sets a tile before its width does): its word and
+  // gloss are read across it.
+  const tw = s.reveal ? Math.min((w - gap * (cols - 1)) / cols, cell * 1.5) : cell
+  // Each gloss on one line where it goes, else on two, a size down; the
+  // tiles' pictures make room for the longest.
+  const glossOf = wd => {
+    const one = glossFit(ctx, wd.main, { weight: 500, sizes: [FS.sm, FS.caption, FS.xs], maxW: tw - SP[4], maxLines: 1 })
+    return one.cut ? glossFit(ctx, wd.main, { weight: 500, sizes: [FS.caption, FS.xs], maxW: tw - SP[4], maxLines: 2, balanced: false }) : one
+  }
+  const glosses = s.reveal ? words.map(glossOf) : []
+  const label = s.reveal ? FS.lead * 1.25 + Math.max(FS.sm * 1.3, ...glosses.map(b => paragraphH(b))) + SP[3] : 0
   const h = rowsN * cell + (rowsN - 1) * gap
   return {
     h: h + (why.h ? SP[6] + why.h : 0),
@@ -1196,28 +1245,27 @@ function picturesBlock(c, s, { x, w, maxH }) {
         const col = i % cols
         const row = Math.floor(i / cols)
         const inRow = Math.min(cols, n - row * cols)
-        const cx0 = x + (w - (inRow * cell + (inRow - 1) * gap)) / 2 + col * (cell + gap)
+        const cx0 = x + (w - (inRow * tw + (inRow - 1) * gap)) / 2 + col * (tw + gap)
         const cy0 = y + row * (cell + gap)
         const odd = s.odd === i
-        card(c, cx0, cy0, cell, cell, R.card * 1.6)
+        card(c, cx0, cy0, tw, cell, R.card * 1.6)
         if (s.reveal && s.odd != null) {
           ctx.strokeStyle = odd ? p.stamp : alpha(success(p), 0.7)
           ctx.lineWidth = odd ? 8 : 3
-          rrect(ctx, cx0 + 4, cy0 + 4, cell - 8, cell - 8, R.card * 1.4)
+          rrect(ctx, cx0 + 4, cy0 + 4, tw - 8, cell - 8, R.card * 1.4)
           ctx.stroke()
         }
         const es = (cell - label) * 0.62
-        if (wd.e) emojiAt(ctx, wd.e, cx0 + cell / 2, cy0 + (cell - label) / 2 + SP[2], es)
+        if (wd.e) emojiAt(ctx, wd.e, cx0 + tw / 2, cy0 + (cell - label) / 2 + SP[2], es)
         else if (!s.reveal) {
           // No picture for it: the word itself, as large as the tile holds.
           const wb = fit(ctx, wd.t, { fam: 'jp', weight: 700, sizes: [FS.display, FS.heading, FS.title, FS.lead, FS.body], maxW: cell - SP[5] * 2, maxLines: 2 })
           paragraph(ctx, wb, cx0 + cell / 2, cy0 + (cell - paragraphH(wb)) / 2, odd && s.reveal ? p.stamp : p.ink, 'center')
         }
         if (s.reveal) {
-          const jb = fit(ctx, wd.t, { fam: 'jp', weight: 700, sizes: [FS.lead, FS.body, FS.sm, FS.caption], maxW: cell - SP[4], maxLines: 1 })
-          text(ctx, jb.lines[0], cx0 + cell / 2, cy0 + cell - label + jb.size, { f: jb.f, color: odd ? p.stamp : p.ink, align: 'center' })
-          const mb = fit(ctx, wd.main, { weight: 500, sizes: [FS.sm, FS.caption, FS.xs], maxW: cell - SP[4], maxLines: 1 })
-          text(ctx, mb.lines[0], cx0 + cell / 2, cy0 + cell - label + FS.lead * 1.25 + mb.size, { f: mb.f, color: p.ink2, align: 'center' })
+          const jb = fit(ctx, wd.t, { fam: 'jp', weight: 700, sizes: [FS.lead, FS.body, FS.sm, FS.caption], maxW: tw - SP[4], maxLines: 1 })
+          text(ctx, jb.lines[0], cx0 + tw / 2, cy0 + cell - label + jb.size, { f: jb.f, color: odd ? p.stamp : p.ink, align: 'center' })
+          paragraph(ctx, glosses[i], cx0 + tw / 2, cy0 + cell - label + FS.lead * 1.25 + glosses[i].size * 0.2, p.ink2, 'center')
         }
       })
       why.draw(y + h + SP[6])
@@ -1425,7 +1473,8 @@ function hookSlide(c, s) {
   const secs = W.seconds[s.ask === 'say' ? 'say' : s.ask === 'read' ? 'read' : 'answer']
   const centred = CENTRED.has(s.kind)
   const layouts = [false, true].map(compact => hookLayout(c, s, { ask, secs, compact: compact || !centred, centred }))
-  const L = layouts.find(l => l.b.h <= l.room) || layouts[1]
+  // The compact head before a text is cut.
+  const L = layouts.find(l => l.b.h <= l.room && !l.b.cut) || layouts.find(l => l.b.h <= l.room) || layouts[1]
   L.draw()
 }
 function hookLayout(c, s, { ask, secs, compact, centred }) {
@@ -1517,14 +1566,17 @@ function detailSlide(c, s) {
   if (ask.h) { ask.draw(y); y += ask.h + SP[6] }
   const bottom = s.yours ? fr.bottom - 92 - SP[7] : fr.bottom
   const b = content(c, s, { x: fr.x, w: fr.w, maxH: bottom - y })
-  // Where the question needs the pill's room, the way on is said in a
-  // line over it instead.
-  if (s.yours && b.h > bottom - y) {
+  // Where the question needs the pill's room (to fit, or to be set
+  // whole), the way on is said in a line over it instead.
+  if (s.yours && (b.h > bottom - y || b.cut)) {
     const hint = textBlock(c, weld(c.lang, W.yoursFoot), { x: fr.x, w: fr.w, sizes: [FS.body, FS.sm], weight: 500, color: p.ink2, align: 'left', maxLines: 1 })
-    hint.draw(y)
-    y += hint.h + SP[5]
-    place(c, content(c, s, { x: fr.x, w: fr.w, maxH: fr.bottom - y }), y, fr.bottom)
-    return
+    const b2 = content(c, s, { x: fr.x, w: fr.w, maxH: fr.bottom - y - hint.h - SP[5] })
+    if (b.h > bottom - y || !b2.cut) {
+      hint.draw(y)
+      y += hint.h + SP[5]
+      place(c, b2, y, fr.bottom)
+      return
+    }
   }
   place(c, b, y, bottom)
   if (s.yours) pill(c, weld(c.lang, W.yoursFoot), fr.cx, fr.bottom - 92)
@@ -1635,19 +1687,22 @@ function keysSlide(c, all, answer = null) {
   const roomFor = ans => fr.bottom - top - keep.h - SP[7] - (ans.h ? ans.h + SP[7] : 0)
   // As many points as fit, the most first; under an answer, its why gives
   // way before them, and they before it.
+  // Fewer points rather than one cut short.
   const pointsIn = room => {
+    let firstFit = null
     for (let k = notes.length; k >= 1; k--) {
       const b = notesBlock(c, notes.slice(0, k), { x, w, maxH: room })
-      if (b) return b
+      if (b && !b.cut) return b
+      firstFit ||= b
     }
-    return null
+    return firstFit
   }
   const answers = answer ? [answerCard(c, answer, w, true), answerCard(c, answer, w, false)] : [none]
   let ans = answers[0]
   let pts = notes.length ? pointsIn(roomFor(ans)) : null
-  if (answer && notes.length && !pts) {
+  if (answer && notes.length && (!pts || pts.cut)) {
     const lean = pointsIn(roomFor(answers[1]))
-    if (lean) { ans = answers[1]; pts = lean }
+    if (lean && (!pts || !lean.cut)) { ans = answers[1]; pts = lean }
   }
   const ph = pts ? pts.h : 0
   const total = ans.h + (ans.h && ph ? SP[7] : 0) + ph + SP[7] + keep.h
@@ -1677,6 +1732,7 @@ function notesBlock(c, notes, { x, w, maxH }) {
   const r = 34
   const tx = x + pad + r * 2 + SP[5]
   const tw = x + w - pad - tx
+  let firstFit = null
   for (const z of [FS.lead, FS.body, FS.sm]) {
     const cards = notes.map(n => {
       const [mark, name] = W.kinds[n.kind] || W.kinds.note
@@ -1687,8 +1743,9 @@ function notesBlock(c, notes, { x, w, maxH }) {
     })
     const h = cards.reduce((a, k) => a + k.h + SP[4], -SP[4])
     if (h > maxH) continue
-    return {
+    const lay = {
       h,
+      cut: cards.some(k => k.b.cut),
       draw: y => {
         for (const k of cards) {
           const ink = kindInk(p, k.n.kind)
@@ -1704,8 +1761,10 @@ function notesBlock(c, notes, { x, w, maxH }) {
         }
       },
     }
+    if (!lay.cut) return lay
+    firstFit ||= lay
   }
-  return null
+  return firstFit
 }
 /** The save button's glyph: a bookmark, as the feed draws it. */
 function bookmark(ctx, cx, cy, h, color, { fill = false, lw = h * 0.1 } = {}) {
@@ -1750,8 +1809,15 @@ function answerCard(c, a, w, withWhy = true) {
   const ok = success(p)
   const pad = SP[5]
   const kh = FS.caption * 1.2
-  const tb = fit(ctx, a.text, { fam: a.fam, weight: 700, sizes: [FS.title, FS.lead, FS.body], maxW: w - pad * 2 - 64, maxLines: 2, balanced: false })
-  const why = withWhy && a.why && a.why !== a.text ? fit(ctx, weld(c.lang, a.why), { weight: 500, sizes: [FS.body, FS.sm], maxW: w - pad * 2, maxLines: 3, balanced: false }) : null
+  // A long answer or why takes more lines, a rung down, before it is cut;
+  // a why that still would be is left off.
+  const tw = w - pad * 2 - 64
+  const t2 = fit(ctx, a.text, { fam: a.fam, weight: 700, sizes: [FS.title, FS.lead, FS.body], maxW: tw, maxLines: 2, balanced: false })
+  const tb = t2.cut ? fit(ctx, a.text, { fam: a.fam, weight: 700, sizes: [FS.body, FS.sm], maxW: tw, maxLines: 3, balanced: false }) : t2
+  const whyStr = withWhy && a.why && a.why !== a.text ? weld(c.lang, a.why) : ''
+  const w3 = whyStr ? fit(ctx, whyStr, { weight: 500, sizes: [FS.body, FS.sm], maxW: w - pad * 2, maxLines: 3, balanced: false }) : null
+  const w5 = w3?.cut ? fit(ctx, whyStr, { weight: 500, sizes: [FS.body, FS.sm], maxW: w - pad * 2, maxLines: 5, balanced: false }) : w3
+  const why = w5?.cut ? null : w5
   const th = Math.max(paragraphH(tb), 44)
   const h = pad * 2 + kh + SP[4] + th + (why ? SP[4] + paragraphH(why) : 0)
   return {
@@ -2049,6 +2115,26 @@ function eyeOff(ctx, cx, cy, size, color) {
   ctx.restore()
 }
 /** Words to the width, the last cut short: a line that always fits. */
+/** A gloss's senses, split where no bracket is open. */
+function sensesOf(str) {
+  const out = ['']
+  let depth = 0
+  for (const ch of String(str || '')) {
+    if (/[([（]/.test(ch)) depth++
+    if (/[)\]）]/.test(ch)) depth = Math.max(0, depth - 1)
+    if (!depth && /[,;、]/.test(ch)) out.push('')
+    else out[out.length - 1] += ch
+  }
+  return out.map(x => x.trim()).filter(Boolean)
+}
+/** A gloss fitted as `fit` does, its last senses left off before it is
+ *  cut: the deck's own words, fewer of them. */
+function glossFit(ctx, str, o) {
+  const senses = sensesOf(str)
+  let b = fit(ctx, str || '', o)
+  for (let k = senses.length - 1; b.cut && k >= 1; k--) b = fit(ctx, senses.slice(0, k).join(', '), o)
+  return b
+}
 function clipped(ctx, str, f, maxW) {
   if (measure(ctx, str, f) <= maxW) return str
   let out = str
