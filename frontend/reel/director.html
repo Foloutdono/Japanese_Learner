@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- The artboard is 432×768 CSS px whatever the film's size: the
+         renderer sets the device scale (1080×1920 is 2.5). -->
+    <meta name="viewport" content="width=432, initial-scale=1" />
+    <title>Tsuji reel</title>
+    <link rel="stylesheet" href="/reel/director.css" />
+  </head>
+  <body>
+    <main id="board" class="board">
+      <div id="world" class="world"></div>
+      <div id="rig" class="rig"></div>
+      <div id="fx" class="fx"></div>
+      <div id="captions" class="captions"></div>
+      <div id="end" class="end"></div>
+      <div id="finger" class="finger-layer"></div>
+    </main>
+    <script type="module" src="/reel/director/main.js"></script>
+  </body>
+</html>

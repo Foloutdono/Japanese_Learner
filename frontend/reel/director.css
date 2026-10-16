@@ -1,0 +1,1248 @@
+/* ── 監督 — the reel's artboard (plan 210) ───────────────────────────
+   A promotional film, not a screen of the app: like the landing page
+   (frontend/landing/), it stands outside src/ and the app's guards, and
+   it speaks the app's language from a copy of its tokens
+   (landing/tokens.mjs, injected on :root by director/main.js).
+
+   The board is 432×768 CSS px, a 9:16 frame the renderer scales to the
+   film's size. Every length below is in that frame. Layers, back to
+   front: the world (the hook's place), the rig (the phone, which holds
+   the app), the effects, the captions, the end card, the finger. */
+
+* { box-sizing: border-box; }
+
+html,
+body {
+  margin: 0;
+  width: 432px;
+  height: 768px;
+  overflow: hidden;
+  background: #0b0a0d;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+}
+
+.board {
+  position: relative;
+  width: 432px;
+  height: 768px;
+  overflow: hidden;
+  background: var(--bg-panel);
+  isolation: isolate;
+}
+
+.world,
+.rig,
+.fx,
+.captions,
+.end,
+.finger-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.world { overflow: hidden; z-index: 1; }
+.rig { z-index: 2; }
+.fx { z-index: 3; }
+.captions { z-index: 4; }
+.end { z-index: 5; }
+.finger-layer { z-index: 6; }
+
+/* ── The phone ──────────────────────────────────────────────────── */
+/* 390×844 is the screen the app is drawn on (the phone lane's width):
+   a status bar, then the app's own viewport, 390×800. */
+.phone {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 412px;
+  height: 866px;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.phone__body {
+  position: absolute;
+  inset: 0;
+  border-radius: 60px;
+  background: linear-gradient(145deg, #3a3640 0%, #17151a 22%, #0c0b0e 60%, #2a2730 100%);
+  box-shadow:
+    0 0 0 1.5px #4a4550,
+    0 30px 60px rgba(0, 0, 0, 0.55),
+    0 8px 18px rgba(0, 0, 0, 0.35);
+}
+
+.phone__body::before {
+  /* the side keys */
+  content: '';
+  position: absolute;
+  right: -3px;
+  top: 190px;
+  width: 4px;
+  height: 92px;
+  border-radius: 2px;
+  background: #2b2830;
+}
+
+.phone__screen {
+  position: absolute;
+  left: 11px;
+  top: 11px;
+  width: 390px;
+  height: 844px;
+  border-radius: 49px;
+  overflow: hidden;
+  background: var(--bg-main);
+  /* a transformed box is the containing block of what it holds, so a
+     fixed sheet inside the app stays inside the glass */
+  transform: translateZ(0);
+}
+
+.phone__status {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 390px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 30px 0 40px;
+  font: 600 15px/1 var(--font-display);
+  letter-spacing: 0.01em;
+  color: var(--text-primary);
+  z-index: 3;
+}
+
+.phone__status svg { display: block; }
+.phone__status-icons { display: flex; gap: 6px; align-items: center; }
+
+.phone__island {
+  position: absolute;
+  left: 50%;
+  top: 11px;
+  width: 118px;
+  height: 34px;
+  margin-left: -59px;
+  border-radius: 20px;
+  background: #000;
+  z-index: 4;
+}
+
+.phone__app {
+  position: absolute;
+  left: 0;
+  top: 44px;
+  width: 390px;
+  height: 800px;
+  border: 0;
+  background: var(--bg-main);
+  z-index: 1;
+  /* the one thing on the board a press reaches: the layers above it
+     let every event through to the app */
+  pointer-events: auto;
+}
+
+.phone__home {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  width: 134px;
+  height: 5px;
+  margin-left: -67px;
+  border-radius: 3px;
+  background: rgba(236, 229, 216, 0.55);
+  z-index: 5;
+}
+
+.phone__glass {
+  /* the sheen across the glass */
+  position: absolute;
+  inset: 0;
+  border-radius: 49px;
+  background: linear-gradient(118deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 38%);
+  z-index: 6;
+  pointer-events: none;
+}
+
+/* ── The camera, on the phone ───────────────────────────────────── */
+.cam {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: #000;
+  opacity: 0;
+}
+
+.cam__view {
+  position: absolute;
+  left: 0;
+  top: 96px;
+  width: 390px;
+  height: 520px;
+  overflow: hidden;
+  background: #111;
+}
+
+.cam__feed {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 432px;
+  height: 768px;
+  transform-origin: 0 0;
+}
+
+.cam__grid {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent calc(33.33% - 0.5px), rgba(255, 255, 255, 0.28) calc(33.33% - 0.5px), rgba(255, 255, 255, 0.28) calc(33.33% + 0.5px), transparent calc(33.33% + 0.5px)),
+    linear-gradient(90deg, transparent calc(66.66% - 0.5px), rgba(255, 255, 255, 0.28) calc(66.66% - 0.5px), rgba(255, 255, 255, 0.28) calc(66.66% + 0.5px), transparent calc(66.66% + 0.5px)),
+    linear-gradient(0deg, transparent calc(33.33% - 0.5px), rgba(255, 255, 255, 0.28) calc(33.33% - 0.5px), rgba(255, 255, 255, 0.28) calc(33.33% + 0.5px), transparent calc(33.33% + 0.5px)),
+    linear-gradient(0deg, transparent calc(66.66% - 0.5px), rgba(255, 255, 255, 0.28) calc(66.66% - 0.5px), rgba(255, 255, 255, 0.28) calc(66.66% + 0.5px), transparent calc(66.66% + 0.5px));
+}
+
+.cam__focus {
+  position: absolute;
+  width: 74px;
+  height: 74px;
+  margin: -37px 0 0 -37px;
+  border: 1.5px solid var(--gate-gold-lit);
+  opacity: 0;
+}
+
+.cam__focus::before,
+.cam__focus::after {
+  content: '';
+  position: absolute;
+  background: var(--gate-gold-lit);
+}
+
+.cam__focus::before { left: 50%; top: -1px; width: 1.5px; height: 7px; }
+.cam__focus::after { top: 50%; left: -1px; height: 1.5px; width: 7px; }
+
+.cam__top {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 52px;
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  font: 600 12px/1 var(--font-display);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.cam__modes {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 636px;
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  font: 600 12px/1 var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.cam__modes b { color: var(--gate-gold-lit); font-weight: 700; }
+
+.cam__zoom {
+  position: absolute;
+  left: 50%;
+  top: 572px;
+  width: 34px;
+  height: 34px;
+  margin-left: -17px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  display: grid;
+  place-items: center;
+  font: 700 11px/1 var(--font-display);
+  color: var(--gate-gold-lit);
+}
+
+.cam__shutter {
+  position: absolute;
+  left: 50%;
+  top: 680px;
+  width: 76px;
+  height: 76px;
+  margin-left: -38px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  display: grid;
+  place-items: center;
+}
+
+.cam__shutter::after {
+  content: '';
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.12s ease;
+}
+
+.cam__shutter.is-pressed::after { transform: scale(0.86); }
+
+.cam__thumb {
+  position: absolute;
+  left: 40px;
+  top: 692px;
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #222;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+}
+
+.cam__thumb img,
+.cam__shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cam__shot {
+  position: absolute;
+  left: 0;
+  top: 96px;
+  width: 390px;
+  height: 520px;
+  overflow: hidden;
+  transform-origin: 0 0;
+  opacity: 0;
+}
+
+.cam__flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  z-index: 5;
+}
+
+/* ── The finger ─────────────────────────────────────────────────── */
+.finger {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.finger__pad {
+  position: absolute;
+  left: -19px;
+  top: -19px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 42% 38%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.28) 62%, rgba(255, 255, 255, 0.18));
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.finger__ring {
+  position: absolute;
+  left: -19px;
+  top: -19px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  opacity: 0;
+}
+
+/* The hand: a pointing hand, tip at the origin, for reels that want one. */
+.finger--hand .finger__pad,
+.finger--hand .finger__ring { display: none; }
+
+.finger__hand {
+  position: absolute;
+  left: -16px;
+  top: -6px;
+  width: 92px;
+  height: 120px;
+  display: none;
+  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.4));
+}
+
+.finger--hand .finger__hand { display: block; }
+
+.finger__tap {
+  position: absolute;
+  width: 46px;
+  height: 46px;
+  margin: -23px 0 0 -23px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  opacity: 0;
+}
+
+/* ── Captions ───────────────────────────────────────────────────── */
+/* The film's words, in the safe band of a short-video app: clear of
+   its header at the top and its caption and buttons at the foot. */
+.cap {
+  position: absolute;
+  left: 26px;
+  right: 46px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+}
+
+.cap--top { top: 74px; }
+.cap--middle { top: 300px; }
+.cap--bottom { bottom: 170px; }
+
+.cap__line {
+  font: 700 25px/1.16 var(--font-display);
+  letter-spacing: -0.01em;
+  color: #fbf7ef;
+  text-wrap: balance;
+}
+
+.cap__line [lang='ja'] { font-family: var(--font-jp); font-weight: 700; }
+
+.cap--board .cap__line {
+  display: inline;
+  padding: 3px 10px 5px;
+  border-radius: 10px;
+  background: rgba(16, 14, 19, 0.88);
+  box-shadow: inset 0 -2px 0 var(--accent2);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.cap--plain .cap__line {
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.55),
+    0 0 14px rgba(0, 0, 0, 0.55),
+    0 0 2px rgba(0, 0, 0, 0.9);
+}
+
+.cap__word {
+  display: inline-block;
+  opacity: 0;
+  transform-origin: 50% 70%;
+}
+
+.cap__word--gold { color: var(--gate-gold-lit); }
+
+.cap__emoji { font-family: 'Noto Color Emoji', sans-serif; font-weight: 400; }
+
+/* ── Effects ────────────────────────────────────────────────────── */
+.fx__flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+}
+
+.fx__dim {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+}
+
+.fx__char {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-family: var(--font-jp);
+  font-weight: 700;
+  line-height: 1;
+  white-space: pre;
+  color: #fbf7ef;
+  transform-origin: 50% 50%;
+  text-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+}
+
+.fx__whip {
+  position: absolute;
+  inset: -40px;
+  opacity: 0;
+  background: linear-gradient(90deg, rgba(16, 14, 19, 0) 0%, rgba(16, 14, 19, 0.92) 35%, rgba(16, 14, 19, 0.92) 65%, rgba(16, 14, 19, 0) 100%);
+}
+
+.fx__q {
+  position: absolute;
+  font: 900 42px/1 var(--font-serif);
+  color: #fbf7ef;
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
+  opacity: 0;
+}
+
+/* ── The end card ───────────────────────────────────────────────── */
+.end__card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background:
+    radial-gradient(120% 70% at 50% 42%, rgba(201, 154, 62, 0.16), rgba(201, 154, 62, 0) 60%),
+    var(--bg-panel);
+  opacity: 0;
+}
+
+.end__mark {
+  width: 132px;
+  height: 132px;
+  color: var(--text-on-panel);
+}
+
+.end__mark .mark__road { fill: var(--accent2); }
+.end__mark .mark__ink { fill: currentColor; }
+
+.end__name {
+  font: 700 44px/1 var(--font-display);
+  letter-spacing: 0.04em;
+  color: var(--text-on-panel);
+}
+
+.end__tag {
+  max-width: 340px;
+  font: 600 19px/1.3 var(--font-display);
+  color: var(--text-on-panel-soft);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.end__road {
+  width: 240px;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--gate-gold-deep), var(--gate-gold-lit), var(--gate-gold-deep));
+  transform-origin: 50% 50%;
+}
+
+.end__cta {
+  margin-top: 8px;
+  padding: 12px 24px 13px;
+  border-radius: 999px;
+  font: 700 17px/1 var(--font-display);
+  letter-spacing: 0.02em;
+  color: var(--text-on-fill);
+  background: linear-gradient(180deg, var(--gate-gold-lit), var(--gate-gold) 55%, var(--gate-gold-deep));
+  box-shadow: 0 2px 0 #7d5d1f, 0 10px 24px rgba(0, 0, 0, 0.4);
+}
+
+.end__url {
+  font: 600 14px/1 var(--font-display);
+  letter-spacing: 0.12em;
+  color: var(--text-on-panel-soft);
+}
+
+/* The director's own debug strip, for a preview in a browser. */
+.preview-bar {
+  position: fixed;
+  left: 8px;
+  bottom: 8px;
+  z-index: 10;
+  font: 600 11px/1 var(--font-display);
+  color: rgba(255, 255, 255, 0.6);
+  pointer-events: auto;
+}
+
+/* ── The world behind the phone ─────────────────────────────────── */
+.world__dim {
+  position: absolute;
+  inset: 0;
+  background: #07060a;
+  opacity: 0;
+  z-index: 5;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 44%;
+  will-change: transform;
+}
+
+.scene--feed { will-change: auto; }
+
+.place {
+  position: absolute;
+  inset: -40px;
+  overflow: hidden;
+}
+
+.bokeh {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--c) 0%, color-mix(in srgb, var(--c) 55%, transparent) 42%, transparent 70%);
+  mix-blend-mode: screen;
+}
+
+.place--street {
+  background:
+    radial-gradient(90% 55% at 50% 100%, rgba(255, 150, 70, 0.18), transparent 70%),
+    radial-gradient(120% 80% at 50% 0%, #2c3060 0%, #1a1b36 46%, #0e0d17 100%);
+}
+
+.place__ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 42%;
+  background: linear-gradient(180deg, rgba(10, 10, 20, 0), rgba(8, 8, 14, 0.9));
+}
+
+.place--platform {
+  background:
+    radial-gradient(70% 40% at 50% 8%, rgba(255, 244, 214, 0.22), transparent 70%),
+    linear-gradient(180deg, #3d434b 0%, #2a2e34 52%, #1b1d21 100%);
+}
+
+.place__edge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 68%;
+  height: 10px;
+  background: linear-gradient(180deg, #c7c2b8, #8e8a83);
+}
+
+.place__tactile {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(68% + 26px);
+  height: 26px;
+  background:
+    radial-gradient(circle, #e9b400 3px, transparent 3.6px) 0 0 / 12px 12px,
+    #d9a400;
+  opacity: 0.85;
+}
+
+.place--izakaya {
+  background:
+    radial-gradient(80% 50% at 50% 30%, rgba(255, 170, 80, 0.22), transparent 70%),
+    linear-gradient(180deg, #3b2416 0%, #24160d 60%, #140c07 100%);
+}
+
+.place--desk {
+  background:
+    radial-gradient(70% 45% at 70% 20%, rgba(255, 220, 160, 0.3), transparent 70%),
+    repeating-linear-gradient(176deg, rgba(0, 0, 0, 0.05) 0 3px, transparent 3px 11px),
+    linear-gradient(165deg, #6a4a31 0%, #4a3220 55%, #2c1d12 100%);
+}
+
+.place--cafe {
+  background:
+    radial-gradient(90% 60% at 30% 20%, rgba(255, 226, 180, 0.35), transparent 70%),
+    linear-gradient(180deg, #6e5642 0%, #4a3a2c 55%, #2a211a 100%);
+}
+
+.scene__obj {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-bottom: 96px;
+}
+
+.obj__ch { display: inline; }
+
+/* The notice: white enamel on a pole, a red head. */
+.sign--notice {
+  position: relative;
+  width: 318px;
+  padding-bottom: 16px;
+  border-radius: 7px;
+  background: linear-gradient(168deg, #ffffff 0%, #f2f0ea 58%, #e2ded4 100%);
+  box-shadow: 0 2px 0 #c7c1b3, 0 22px 46px rgba(0, 0, 0, 0.6);
+  transform: perspective(900px) rotateY(-10deg) rotateX(2deg);
+}
+
+/* A sign stands on its support: the pole or the legs come first in the
+   wrap, so the sign is drawn over them. */
+.sign-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.sign-wrap > .sign { position: relative; }
+
+.sign__pole {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 560px;
+  margin-left: -7px;
+  background: linear-gradient(90deg, #5d5f63, #b9bbbe 42%, #55575b);
+}
+
+.sign__screws i {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f4f4f4, #8d8d8d);
+}
+
+.sign__screws i:nth-child(1) { left: 8px; top: 52px; }
+.sign__screws i:nth-child(2) { right: 8px; top: 52px; }
+.sign__screws i:nth-child(3) { left: 8px; bottom: 8px; }
+.sign__screws i:nth-child(4) { right: 8px; bottom: 8px; }
+
+.sign--notice .sign__title {
+  padding: 12px 0 11px;
+  border-radius: 7px 7px 0 0;
+  background: linear-gradient(180deg, #d63328, #b4241b);
+  color: #fff;
+  font: 900 25px/1 var(--font-jp);
+  letter-spacing: 0.32em;
+  text-indent: 0.32em;
+  text-align: center;
+}
+
+.sign__text {
+  margin: 18px 24px 0;
+  font: 700 34px/1.32 var(--font-jp);
+  color: #121212;
+  text-align: center;
+  text-wrap: balance;
+}
+
+/* Lines break between words, where the breakdown says words begin
+   (<wbr>); a scene whose text has no breakdown breaks anywhere. */
+.scene--words [data-subject] { word-break: keep-all; }
+
+.sign__sub {
+  margin: 10px 24px 0;
+  font: 500 14px/1.5 var(--font-jp);
+  color: #3b3b3b;
+  text-align: center;
+}
+
+.sign__foot {
+  margin: 12px 22px 0;
+  font: 500 11px/1 var(--font-jp);
+  color: #6d6d6d;
+  text-align: right;
+}
+
+/* The works: black and yellow, a lamp that blinks. */
+.sign--construction { position: relative; width: 306px; }
+
+.sign__frame {
+  padding: 13px;
+  border-radius: 5px;
+  background: repeating-linear-gradient(-45deg, #141414 0 15px, #f7c600 15px 30px);
+  box-shadow: 0 22px 46px rgba(0, 0, 0, 0.6);
+}
+
+.sign__panel {
+  padding: 14px 10px 16px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #ffd31a, #f5c400);
+}
+
+.sign--construction .sign__title {
+  font: 900 40px/1 var(--font-jp);
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+  text-align: center;
+  color: #141414;
+}
+
+.sign--construction .sign__text { margin-top: 12px; color: #141414; }
+.sign--construction .sign__sub { color: #2a2200; }
+
+.sign__lamp {
+  position: absolute;
+  left: 50%;
+  top: -24px;
+  width: 32px;
+  height: 24px;
+  margin-left: -16px;
+  border-radius: 16px 16px 4px 4px;
+  background: radial-gradient(circle at 50% 70%, #ffc061, #ff6a00);
+  box-shadow: 0 0 26px 8px rgba(255, 140, 0, 0.6);
+  animation: lamp-blink 0.9s steps(1) infinite;
+}
+
+@keyframes lamp-blink {
+  50% { filter: brightness(0.45); box-shadow: 0 0 6px 1px rgba(255, 140, 0, 0.25); }
+}
+
+.sign__legs {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 70%;
+  height: 300px;
+}
+
+.sign__legs i {
+  position: absolute;
+  top: 0;
+  width: 12px;
+  height: 300px;
+  background: linear-gradient(90deg, #8a8a8a, #d0d0d0 45%, #7a7a7a);
+}
+
+.sign__legs i:first-child { left: 52px; transform: rotate(9deg); }
+.sign__legs i:last-child { right: 52px; transform: rotate(-9deg); }
+
+/* The station's plate, its band in a line's colour. */
+.sign--station {
+  width: 370px;
+  padding-top: 16px;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #ffffff, #eeece6);
+  box-shadow: 0 22px 46px rgba(0, 0, 0, 0.55);
+  text-align: center;
+  overflow: hidden;
+}
+
+.sign__kana {
+  font: 700 15px/1 var(--font-jp);
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
+  color: #222;
+}
+
+.sign__text--station {
+  margin: 8px 12px 0;
+  font: 900 64px/1.05 var(--font-jp);
+  letter-spacing: 0.12em;
+  text-indent: 0.12em;
+}
+
+.sign__latin {
+  margin: 8px 0 12px;
+  font: 700 17px/1 var(--font-display);
+  letter-spacing: 0.1em;
+  color: #222;
+}
+
+.sign__band {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 16px;
+  background: var(--line-vocab);
+  color: #fff;
+  font: 700 14px/1 var(--font-jp);
+}
+
+/* The guide sign: white on blue. */
+.sign--street {
+  position: relative;
+  width: 330px;
+  padding: 14px 18px 18px;
+  border: 3px solid #f4f6fa;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #2160b8, #174a94);
+  box-shadow: 0 0 0 3px #174a94, 0 22px 46px rgba(0, 0, 0, 0.55);
+  transform: perspective(900px) rotateY(8deg);
+}
+
+.sign__arrows {
+  display: flex;
+  justify-content: space-between;
+  font: 700 26px/1 var(--font-display);
+  color: #fff;
+}
+
+.sign--street .sign__text { margin: 10px 0 0; color: #fff; }
+.sign--street .sign__sub { color: #dfe8f7; }
+
+/* The shop's board, written down it. */
+.sign--shop {
+  position: relative;
+  padding: 18px 16px;
+  border-radius: 6px;
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.08) 0 2px, transparent 2px 9px),
+    linear-gradient(90deg, #4a2b15, #6e4425 50%, #48290f);
+  box-shadow: 0 22px 46px rgba(0, 0, 0, 0.6), inset 0 0 0 3px #2b170a;
+}
+
+.sign__text--v {
+  margin: 0;
+  writing-mode: vertical-rl;
+  height: 380px;
+  font: 900 54px/1.15 var(--font-serif);
+  color: #f6e9c8;
+  text-shadow: 0 2px 0 #2b170a;
+}
+
+.sign__noren { display: none; }
+
+/* The departures board: amber light through a grille of dots. */
+.led {
+  position: relative;
+  width: 392px;
+  padding: 10px 12px 12px;
+  border: 7px solid #2b2d31;
+  border-radius: 7px;
+  background: #0a0b0d;
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.65);
+}
+
+.led__head,
+.led__row {
+  display: grid;
+  grid-template-columns: 64px 56px 1fr 34px;
+  align-items: center;
+}
+
+.led__head {
+  padding-bottom: 6px;
+  border-bottom: 1px solid #23252a;
+  font: 700 11px/1 var(--font-jp);
+  color: #8d939a;
+}
+
+.led__row {
+  font: 700 19px/1.65 var(--font-jp);
+  color: #ffb21e;
+  text-shadow: 0 0 6px rgba(255, 150, 0, 0.7);
+}
+
+.led__row .led__kind { color: #4cff7a; text-shadow: 0 0 6px rgba(60, 255, 120, 0.6); }
+.led__row--1 .led__kind { color: #ff5a3c; text-shadow: 0 0 6px rgba(255, 80, 50, 0.6); }
+
+.led__ticker {
+  margin-top: 6px;
+  padding-top: 7px;
+  border-top: 1px solid #23252a;
+  min-height: 58px;
+}
+
+.led__text {
+  margin: 0;
+  font: 700 21px/1.45 var(--font-jp);
+  color: #ff9c1a;
+  text-shadow: 0 0 8px rgba(255, 140, 0, 0.75);
+}
+
+.led__dots {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  background: radial-gradient(circle at 1.5px 1.5px, transparent 0.9px, rgba(0, 0, 0, 0.42) 1.35px) 0 0 / 3px 3px;
+}
+
+/* The menu: wooden slats, and a paper note beside them. */
+.menu {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.menu__slats {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 6px;
+}
+
+.menu__slat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 38px;
+  height: 236px;
+  padding: 12px 0;
+  border-radius: 3px;
+  writing-mode: vertical-rl;
+  background: linear-gradient(90deg, #d4b07c, #eed7ab 50%, #cfa771);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.45);
+  color: #1b120a;
+}
+
+.menu__slat b { font: 700 21px/1 var(--font-serif); letter-spacing: 0.08em; }
+.menu__slat small { font: 600 13px/1 var(--font-serif); }
+
+.menu__paper {
+  width: 132px;
+  padding: 16px 12px;
+  background: #f8f2e2;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.45);
+  transform: rotate(2.5deg);
+}
+
+.menu__text {
+  margin: 0;
+  height: 250px;
+  writing-mode: vertical-rl;
+  font: 700 20px/1.6 var(--font-serif);
+  color: #1b120a;
+}
+
+/* A page of manga: speed lines, a bubble, a tone. */
+.manga {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 58% 42%;
+  gap: 8px;
+  width: 334px;
+  height: 476px;
+  padding: 10px;
+  background: #fbfaf5;
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.55);
+  transform: rotate(-3deg);
+}
+
+.manga__panel {
+  position: relative;
+  overflow: hidden;
+  border: 3px solid #111;
+  background: #fff;
+}
+
+.manga__panel--a { grid-column: 1 / 3; }
+
+.manga__lines {
+  position: absolute;
+  inset: -60%;
+  background: repeating-conic-gradient(from 0deg at 50% 50%, #111 0deg 1.1deg, transparent 1.1deg 6.5deg);
+  opacity: 0.5;
+}
+
+.manga__bubble {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  padding: 26px 22px;
+  border: 3px solid #111;
+  border-radius: 50%;
+  background: #fff;
+  transform: translate(-50%, -50%);
+}
+
+.manga__bubble--small { padding: 12px 16px; font: 900 22px/1 var(--font-jp); color: #111; }
+
+.manga__text {
+  margin: 0;
+  max-height: 196px;
+  writing-mode: vertical-rl;
+  font: 700 22px/1.4 var(--font-serif);
+  color: #111;
+}
+
+.manga__tone {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, #111 1.1px, transparent 1.45px) 0 0 / 6px 6px;
+  opacity: 0.32;
+}
+
+.manga__tone--dark { opacity: 0.6; }
+
+.manga__sfx {
+  position: absolute;
+  left: 18px;
+  top: 34px;
+  font: 900 34px/1 var(--font-jp);
+  color: #111;
+  -webkit-text-stroke: 1.5px #fff;
+  transform: rotate(-12deg);
+}
+
+/* A page of a novel, read down and right to left. */
+.book { transform: rotate(-4deg); }
+
+.book__page {
+  position: relative;
+  width: 304px;
+  height: 430px;
+  padding: 30px 26px 38px;
+  background: linear-gradient(90deg, #ece2cb 0%, #f8f2e3 10%, #f8f2e3 100%);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.55);
+}
+
+.book__cols {
+  height: 100%;
+  writing-mode: vertical-rl;
+  font: 500 19px/2 var(--font-serif);
+  color: #2a241a;
+}
+
+.book__col { margin: 0; }
+.book__col--dim { color: rgba(42, 36, 26, 0.5); }
+.book__text { font-weight: 700; color: #16120c; }
+
+.book__folio {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 12px;
+  font: 500 11px/1 var(--font-serif);
+  color: #6f6450;
+  text-align: center;
+}
+
+/* A letter on washi. */
+.letter {
+  width: 316px;
+  padding: 26px 26px 22px;
+  background: linear-gradient(180deg, #fbf6ea, #f2ead6);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.5);
+  transform: rotate(2deg);
+  color: #2a2116;
+}
+
+.letter__to { margin: 0 0 12px; font: 500 16px/1.4 var(--font-serif); }
+.letter__text { margin: 0; font: 700 25px/1.55 var(--font-serif); }
+.letter__from { margin: 14px 0 0; font: 500 15px/1 var(--font-serif); text-align: right; }
+
+/* A message, in a generic messenger on a phone held close. */
+.chat {
+  width: 352px;
+  border-radius: 26px;
+  overflow: hidden;
+  background: #efe9df;
+  box-shadow: 0 22px 46px rgba(0, 0, 0, 0.55);
+}
+
+.chat__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #fbf8f2;
+  font: 700 16px/1 var(--font-jp);
+  color: #1d1a16;
+}
+
+.chat__avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--line-kana);
+  color: #fff;
+  font: 700 16px/1 var(--font-jp);
+}
+
+.chat__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 14px 18px;
+}
+
+.chat__bubble {
+  max-width: 82%;
+  padding: 10px 14px;
+  border-radius: 18px 18px 18px 6px;
+  background: #fff;
+  font: 500 17px/1.45 var(--font-jp);
+  color: #1d1a16;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
+}
+
+.chat__text { margin: 0; font: 500 19px/1.5 var(--font-jp); }
+
+.chat__typing {
+  display: flex;
+  gap: 4px;
+  width: 54px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.chat__typing i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #b4aa9c;
+  animation: typing 1.2s ease-in-out infinite;
+}
+
+.chat__typing i:nth-child(2) { animation-delay: 0.15s; }
+.chat__typing i:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* The creator's own photo or footage, filling the board. */
+.obj--media {
+  position: absolute;
+  inset: 0;
+}
+
+.media__img,
+.media__frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.media__text {
+  position: absolute;
+  left: 30px;
+  right: 30px;
+  top: 300px;
+  margin: 0;
+  font: 700 26px/1.4 var(--font-jp);
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+}
+
+/* The next station's plate, passing over the screen between features. */
+.fx__plate {
+  position: absolute;
+  left: 46px;
+  right: 46px;
+  top: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 22px 0 20px;
+  border-radius: 6px;
+  background: #fbf8f1;
+  box-shadow: inset 0 -6px 0 var(--plate-line), 0 20px 44px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+}
+
+.fx__plate b { font: 900 52px/1 var(--font-serif); letter-spacing: 0.1em; text-indent: 0.1em; color: #17151a; }
+.fx__plate span { font: 700 15px/1 var(--font-display); letter-spacing: 0.18em; text-indent: 0.18em; text-transform: uppercase; color: #514a40; }
+
+/* The still a snap takes (the renderer's photo pass). */
+.photo-mode .board { visibility: hidden; }
+
+.photo {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #111;
+}
+
+.photo-mode,
+.photo-mode body {
+  width: 100%;
+  height: 100%;
+}

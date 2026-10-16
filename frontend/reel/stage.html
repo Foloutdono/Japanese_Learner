@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>辻 Tsuji</title>
+    <!-- The reel's stage (plan 210): the real app, booted by reel/stage/main.jsx
+         under a session and a backend of its own. Served by the reel's dev
+         server only (reel/server.mjs), at /__reel/stage/<the app's path>, and
+         never built. The theme script is index.html's, read before the
+         first paint for the same reason. -->
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('jp-theme')
+          var theme = saved === 'light' ? 'light' : 'dark'
+          document.documentElement.setAttribute('data-theme', theme)
+        } catch (e) {
+          /* the :root default (dark) stands */
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/reel/stage/main.jsx"></script>
+  </body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "lang": "en",
+  "learner": "Mika",
+  "clock": "19:40",
+  "beats": [
+    {
+      "hook": "sign",
+      "style": "construction",
+      "text": "この先工事中につき通行止め",
+      "sub": "ご迷惑をおかけします",
+      "caption": "POV: day one in Tokyo and you can't read a *single* sign 😭"
+    },
+    { "snap": true, "caption": "so you snap it…" },
+    {
+      "app": "analyzer",
+      "from": "photo",
+      "text": "この先工事中につき通行止め",
+      "translation": "Road closed ahead due to construction.",
+      "explain": "“Road closed ahead due to construction.” 通行止め is 通行 (traffic) + 止め (a stop): the road is shut. 〜につき is the formal “due to” of signs and notices.",
+      "caption": "…and *Tsuji* takes it apart, word by word",
+      "taps": ["工事", "通行"]
+    },
+    { "end": true }
+  ]
+}

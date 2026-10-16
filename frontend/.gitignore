@@ -57,3 +57,9 @@ shots/
 *.p8
 *.p12
 *.mobileprovision
+
+# The reel generator's working files and films (plan 210): the backend's
+# answers, the snaps' stills and the picture before its sound, and the
+# rendered MP4s. `npm run reel` writes them again.
+reel/.cache/
+reel/out/
