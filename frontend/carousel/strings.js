@@ -1,4 +1,4 @@
-// ── カルーセル — the words on the slides (plan 210) ────────────────
+// ── カルーセル — the words on the slides (plan 229) ────────────────
 // Every label a slide prints, in the two languages the app speaks. A
 // label is in the reader's language; Japanese is content, never a
 // caption over the word that does the work (DESIGN.md, "Say less").
@@ -32,7 +32,7 @@ export const STRINGS = {
     another: 'Another use',
     rate: 'How did you do?',
     rateCta: 'Comment your number',
-    // How much help the reader needed, a number to comment (plan 210l).
+    // How much help the reader needed, a number to comment (plan 229l).
     selfCheck: ['On my own', 'With the furigana', 'With the translation', 'Not yet'],
     examAsk: {
       reading: 'How do you read the underlined word?',
@@ -198,7 +198,7 @@ export const STRINGS = {
       copula: 'copula', pronoun: 'pronoun', auxiliary: 'ending', adnominal: 'determiner',
       conjunction: 'conjunction', interjection: 'interjection', prefix: 'prefix', suffix: 'suffix',
     },
-    // The funnel's key points (plan 215), each said from the bank's own fields.
+    // The funnel's key points (plan 234), each said from the bank's own fields.
     keys: {
       reads: (w, r, ro) => `${w} reads ${r}${ro ? ` (${ro})` : ''}.`,
       means: (w, m) => `${w}: ${m}${/[.!?。]$/.test(m) ? '' : '.'}`,
@@ -444,7 +444,7 @@ export function weld(text) {
     .replace(/« /g, '« ')
 }
 /** English quotes as English sets them: the catalogue's « » become “ ”, so
- *  an opening mark never ends a line on its own (plan 210j). */
+ *  an opening mark never ends a line on its own (plan 229j). */
 const curly = text => String(text ?? '').replace(/«\s*/g, '“').replace(/\s*»/g, '”')
 export const weldIf = (lang, text) => (lang === 'fr' ? weld(text) : curly(text))
 

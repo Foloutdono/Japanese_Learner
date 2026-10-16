@@ -1,5 +1,5 @@
 """
-The seed pool's exercises measured, and new ones drafted (plan 211).
+The seed pool's exercises measured, and new ones drafted (plan 230).
 No network; needs the tokenizer. It runs routes/reading's own checks,
 and importing that module opens DATABASE_URL and upserts the seeds into
 its pool (routes/reading._seed_comprehension_pool): point DATABASE_URL

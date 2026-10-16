@@ -1,4 +1,4 @@
-// ── 長編 — the long videos (plan 214) ─────────────────────────────
+// ── 長編 — the long videos (plan 233) ─────────────────────────────
 // Ten-minute 16:9 videos for YouTube, in the platform-board look the
 // owner picked (the sumi ground, the app's card, the line of stations
 // along the foot, one station a word, a kanji, a section or a
@@ -28,7 +28,7 @@ import { particleLabel } from './explain.js'
 import * as A from './app.js'
 
 export const WIDE = { id: 'wide', w: 1920, h: 1080 }
-// A short (plan 214): the same video standing, under a minute, for
+// A short (plan 233): the same video standing, under a minute, for
 // YouTube Shorts, Reels and TikTok; inside a video feed's safe area (the
 // photo view's, draw.js FORMATS.story, reaches further down from the top).
 export const TALL = { id: 'tall', w: 1080, h: 1920, safe: { t: 250, r: 144, b: 430, l: 144 } }
@@ -207,7 +207,7 @@ function planOf(kind, banks, { lang = 'en', level = 'N5', part = 1, theme = null
   throw new Error(`no long video of kind ${kind}`)
 }
 
-// ── The studio's list (plan 214) ─────────────────────────────────
+// ── The studio's list (plan 233) ─────────────────────────────────
 // The carousel studio offers the long videos as one of its sources: at a
 // level, every video it can make, by an id the render command takes.
 const QUIZ_SHARE = { sentence: 0.5, word: 0.3, kanji: 0.25 }
@@ -1359,7 +1359,7 @@ function drawQuestion(ctx, p, line, S, it, m, u, k, fade, sentence, para, card, 
   }
 }
 
-// ── A short, standing (plan 214) ──────────────────────────────────
+// ── A short, standing (plan 233) ──────────────────────────────────
 // The same parts as the wide video, stacked in the 9:16 frame and kept
 // inside the feed's safe area (TALL.safe): the masthead and the line of
 // stations at the top, the card in the middle, nothing under the

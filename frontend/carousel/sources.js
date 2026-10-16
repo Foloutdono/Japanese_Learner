@@ -1,4 +1,4 @@
-// ── カルーセル — what a carousel is drawn from (plans 210b, 210c) ────
+// ── カルーセル — what a carousel is drawn from (plans 229b, 229c) ────
 // A carousel starts from one thing the app teaches: a sentence of the
 // reading bank (read it, or say it: 読書 and 翻訳), a grammar lesson
 // with its tour (文法), a word of the deck (単語), a kanji (漢字), a kana
@@ -33,19 +33,19 @@ export const SOURCES = [
   { id: 'kanji', jp: '漢字', line: 'kanji', name: { en: 'Kanji', fr: 'Kanji' }, file: lv => `kanji-${lv}.json` },
   { id: 'kana', jp: 'かな', line: 'kana', name: { en: 'Kana', fr: 'Kana' }, file: () => 'kana.json', levels: ['hiragana', 'katakana'] },
   { id: 'passage', jp: '理解', line: 'rikai', name: { en: 'Compre\u00adhension', fr: 'Compré\u00adhension' }, file: () => 'comprehension.json', byLevel: true },
-  // Plan 210m: a theme in pictures, kanji that look alike, a conversation
+  // Plan 229m: a theme in pictures, kanji that look alike, a conversation
   // to answer, a trap the grammar lessons warn of. A theme, a set and a
   // conversation are picked from one list, not by level.
   { id: 'theme', jp: '単語帳', line: 'vocab', name: { en: 'Theme words', fr: 'Mots par thème' }, file: () => 'themes.json', noLevels: true },
   { id: 'lookalike', jp: '似た字', line: 'kanji', name: { en: 'Lookalike kanji', fr: 'Kanji jumeaux' }, file: () => 'lookalikes.json', noLevels: true },
   { id: 'dialogue', jp: '返事', line: 'grammar', name: { en: 'Your reply', fr: 'Ta réponse' }, file: () => 'dialogues.json', noLevels: true },
   { id: 'trap', jp: '落とし穴', line: 'grammar', name: { en: 'Traps', fr: 'Pièges' }, file: () => 'traps.json', byLevel: true },
-  // Plan 212: the app itself, in five stories (promo.js); its "levels"
+  // Plan 231: the app itself, in five stories (promo.js); its "levels"
   // are the stories, each reading the file its pick comes from.
   { id: 'promo', jp: '宣伝', line: 'gold', name: { en: 'Promo stories', fr: 'Stories promo' }, file: story => STORY_FILES[story] || 'index.json', levels: STORIES, levelNames: PROMO.en.names },
-  // Plan 213: a pictured word said over and over for ten seconds (echo.js).
+  // Plan 232: a pictured word said over and over for ten seconds (echo.js).
   { id: 'echo', jp: '木霊', line: 'vocab', name: { en: 'Word echo', fr: 'Mot en écho' }, file: () => 'themes.json', noLevels: true },
-  // The long videos (plan 214): a level's videos, drawn by long.js, made by long/render.mjs.
+  // The long videos (plan 233): a level's videos, drawn by long.js, made by long/render.mjs.
   { id: 'long', jp: '長編', line: 'exam', name: { en: 'Long video', fr: 'Vidéo longue' }, file: lv => `words-${lv}.json`, video: true },
 ]
 export const sourceOf = id => SOURCES.find(s => s.id === id) ?? SOURCES[0]
@@ -90,7 +90,7 @@ const LINES = [
   { key: 'learn', jp: '学習', stops: ['tsuji', 'kana', 'word', 'kanji', 'lesson', 'decks'] },
   { key: 'practice', jp: '実践', stops: ['tsuji', 'sentence', 'passage', 'translation', 'dictation', 'composition', 'exam'] },
 ]
-// Plan 210m's modes stop at the station the app teaches them on: a
+// Plan 229m's modes stop at the station the app teaches them on: a
 // theme's words at 単語, lookalike kanji at 漢字, a reply and a trap at 文法.
 const ALIAS = { theme: 'word', lookalike: 'kanji', dialogue: 'lesson', trap: 'lesson' }
 function stationOf(source, lang) {
@@ -129,7 +129,7 @@ function figureOf(source, figures, t, lang) {
 
 // ── The parts every sentence-shaped source shares ────────────
 // The kana words a pattern is built of, which carry no meaning of their
-// own there (plan 215e): a formal noun (もの, こと, ため, わけ), or a verb
+// own there (plan 234e): a formal noun (もの, こと, ため, わけ), or a verb
 // or an adjective of the few a pattern leans on (する, なる, いう, いい).
 // Any other word keeps its own gloss beside the pattern (とめられません
 // of しかとめられません).
@@ -145,7 +145,7 @@ function wordItems(s, points, lang, t) {
   }
   // A pattern a row shares with the row beside it (もの and の of ものの,
   // と and は of とは限らない): the row is a piece of it, whatever else is
-  // written on it (plan 215e).
+  // written on it (plan 234e).
   const sharedOf = i => {
     const near = [s.rows[i - 1], s.rows[i + 1]].filter(r => r && r.k !== 'punct')
     return (s.rows[i].g || []).find(p => points[p] && p !== s.rows[i].t && near.some(r => (r.g || []).includes(p))) ?? null
@@ -160,9 +160,9 @@ function wordItems(s, points, lang, t) {
       const pt = points[p]
       // A particle that is its own point (で, に) says what it does here,
       // in a word: the catalogue's general line is the lesson's, not a
-      // breakdown's (plan 210l). One no point is written on says what the
+      // breakdown's (plan 229l). One no point is written on says what the
       // sentence's shape settles, else nothing: never its part of speech
-      // (plan 215e).
+      // (plan 234e).
       const label = (!p || p === row.t) && particleLabel(s.rows, i, lang)
       main = label || (pt ? tr(pt, lang) : clauseLabel(s.rows, i, lang) || '')
       sub = label ? '' : formOf(pt, lang)
@@ -238,7 +238,7 @@ function grammarSlides(s, bank, lang, on) {
   return out
 }
 
-// ── What a funnel shows (plan 215) ───────────────────────────
+// ── What a funnel shows (plan 234) ───────────────────────────
 // A conversion carousel (funnel.js) shows the analyser's tokens, the
 // words one by one and a few key points besides the plan's questions:
 // each point is a line the catalogue, the deck or the explainers already
@@ -251,7 +251,7 @@ const alike = (a, b) => {
   return shared / Math.max(1, Math.min(x.size, y.size)) > 0.3
 }
 const KEYS = 3
-// A key point and its kind (plan 215c): how a point works, what it means,
+// A key point and its kind (plan 234c): how a point works, what it means,
 // its form, what to watch, what it is not to be confused with, a reading,
 // a word, an example, a sound, a twin, why an answer is right. The slide
 // shows each as what it is; a line of prose that says much what one before
@@ -530,7 +530,7 @@ function lessonPlan(data, L, opts) {
 
 // ── 単語, a word of the deck ───────────────────────────────────
 /** A deck word's id: its written form, and its reading where another
- *  entry is written the same (一日 ついたち, 一日 いちにち: plan 210l). */
+ *  entry is written the same (一日 ついたち, 一日 いちにち: plan 229l). */
 export function wordId(data, w) {
   return wordIds(data).ids.get(w)
 }
@@ -724,11 +724,11 @@ function passagePlan(data, P, opts) {
   }
 }
 
-// ── 単語帳, a theme in pictures (plan 210m) ──────────────────────
+// ── 単語帳, a theme in pictures (plan 229m) ──────────────────────
 // A theme's words, easiest first, the ones the app has a picture for,
 // eight at most to a post.
 const PICTURES = 8
-/** A theme's pictured words cut into posts, evenly (plan 210n): nine
+/** A theme's pictured words cut into posts, evenly (plan 229n): nine
  *  pictures are posts of five and four, never of eight and one. */
 function themeParts(th) {
   const pics = th.words.filter(w => w.t !== th.head.t && w.e)
@@ -763,7 +763,7 @@ function impostorOf(data, key, lang, t, seed = key, pictured = false) {
   const th = data.themes[key]
   const other = data.themes[IMPOSTOR_FROM[key]]
   if (!other) return null
-  // A round drawn as pictures (plan 215) deals pictured words only.
+  // A round drawn as pictures (plan 234) deals pictured words only.
   const plain = w => ['basic', 'medium'].includes(w.band) && !(w.en || []).some(g => EITHER.has(g)) && (!pictured || w.e)
   const mine = th.words.filter(w => w.t !== th.head.t && plain(w))
   const own = new Set(th.words.map(w => w.t))
@@ -820,7 +820,7 @@ function themePlan(data, id, opts) {
   }
 }
 
-// ── 似た字, kanji that look alike (plan 210m) ─────────────────────
+// ── 似た字, kanji that look alike (plan 229m) ─────────────────────
 function lookalikePlan(data, set, opts) {
   const src = sourceOf('lookalike')
   const p = base(src, set, opts, set.lv)
@@ -850,7 +850,7 @@ function lookalikePlan(data, set, opts) {
   }
 }
 
-// ── 返事, a conversation to answer (plan 210m) ────────────────────
+// ── 返事, a conversation to answer (plan 229m) ────────────────────
 // Each turn asks the reader what to answer, then shows the answer. Every
 // line is set with its furigana and its romaji: a beginner reads them all.
 function dialoguePlan(data, d, opts) {
@@ -869,7 +869,7 @@ function dialoguePlan(data, d, opts) {
     }
   })
   // Romaji under every word for a beginner's conversation (N5, N4); a
-  // later level's is read with its furigana alone (plan 210n).
+  // later level's is read with its furigana alone (plan 229n).
   const romaji = ['N5', 'N4'].includes(d.lv)
   const slides = turns.flatMap((turn, i) => [false, true].map(revealed => ({ kind: 'turn', turn, n: i + 1, of: turns.length, revealed, place, them, romaji })))
   closing(slides, o, t, p)
@@ -882,7 +882,7 @@ function dialoguePlan(data, d, opts) {
   }
 }
 
-// ── 落とし穴, a trap the lessons warn of (plan 210m) ──────────────
+// ── 落とし穴, a trap the lessons warn of (plan 229m) ──────────────
 function trapPlan(data, x, opts) {
   const src = sourceOf('trap')
   const p = base(src, x, opts, x.lv)
@@ -994,7 +994,7 @@ export function plan(sourceId, data, id, opts, deps = {}) {
 
 // A carousel asks six questions at most: a mock exam's cover, its twelve
 // question slides, the sheet and the last slide keep under a feed's
-// twenty, and the cover and the sheet keep a readable row each (plan 210l).
+// twenty, and the cover and the sheet keep a readable row each (plan 229l).
 export const MAX_QUESTIONS = 6
 /** The questions a carousel asks: the ones the studio picked for the
  *  item, in the plan's order, else its first `n`; six at most. */
@@ -1003,7 +1003,7 @@ export function picked(pl, picks, n) {
   return (chosen.length ? chosen : pl.quizzes.slice(0, n)).slice(0, MAX_QUESTIONS)
 }
 
-// ── The post's title (plan 210l) ──────────────────────────────
+// ── The post's title (plan 229l) ──────────────────────────────
 // A feed asks for a title over the caption (TikTok's, 90 characters at
 // most): one hook per source and type, in the post's language, naming
 // the item and its level. Only the item's own text is cut, never the hook.
@@ -1087,7 +1087,7 @@ export function titleOf(pl, type, n = 3) {
 }
 
 /** Every Japanese and Latin character a plan may set, for the font loader. */
-// The conversion carousel's own glyphs (funnel.js, plan 215): its
+// The conversion carousel's own glyphs (funnel.js, plan 234): its
 // pictures' emoji, its bands' and its schemas' kanji, the kana table's rows.
 const KANA_ROWS = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ'
 const FUNNEL_GLYPHS = `💡🌱🔖📖🎧⏱️🔁✍️💬🔤📋▶️📷🔔🙂🙋🔊✏️📰🌐🔍🌅🖌️🧩🧑‍🏫問答かな単語漢字文法日本語解詳要点次模試語彙文法読解聴解字写真ō${KANA_ROWS}${[...KANA_ROWS].map(c => String.fromCharCode(c.charCodeAt(0) + 0x60)).join('')}`

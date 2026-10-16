@@ -1,4 +1,4 @@
-// ── 音 — a cover clip's sounds (plan 212) ──────────────────────────
+// ── 音 — a cover clip's sounds (plan 231) ──────────────────────────
 // A clip is scored with the app's own sounds, never new ones: its
 // `sounds` name the app's events (src/lib/audio/recipes.js) and the
 // moments they fall on, and each is rendered from the shipped recipe
@@ -44,7 +44,7 @@ export async function clipAudio(sounds, seconds, voices = globalThis.TsujiVoices
     if (at >= seconds) continue
     let out
     if (src) {
-      // A recorded clip (the word echo's voice, plan 213), decoded once, at its own level.
+      // A recorded clip (the word echo's voice, plan 232), decoded once, at its own level.
       if (!clips.has(src)) clips.set(src, decoded(src))
       out = await clips.get(src)
     } else {
@@ -77,7 +77,7 @@ export async function clipAudio(sounds, seconds, voices = globalThis.TsujiVoices
 }
 
 /** One app sound alone, at the app's own level and unscaled: a long
- *  video's mix (plan 214) lays each where it falls and sets the whole
+ *  video's mix (plan 233) lays each where it falls and sets the whole
  *  itself. [left, right] Float32Arrays at RATE, the voice's tail long. */
 export async function eventAudio(key, voices = globalThis.TsujiVoices) {
   const { VOICE_EVENTS, voiceOut, voiceLevel } = voices

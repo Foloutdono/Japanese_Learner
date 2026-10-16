@@ -1,4 +1,4 @@
-// ── 長編 — a long video, made (plan 214) ───────────────────────────
+// ── 長編 — a long video, made (plan 233) ───────────────────────────
 // node carousel/long/render.mjs --kind vocab|kanji|grammar|quiz [options]
 //
 //   --level N5        the level (N5 … N1)

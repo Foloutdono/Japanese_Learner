@@ -217,7 +217,7 @@ def test_a_voice_as_it_is_takes_no_tone(fake):
 
 @pytest.mark.parametrize("text", ["まいげつ", "は"])
 def test_a_tone_livens_a_word_and_a_lone_kana_alike(fake, text):
-    # The word echo's delivery (plan 213), by text and by notation.
+    # The word echo's delivery (plan 232), by text and by notation.
     tone = {"intonationScale": 1.45, "pitchScale": 0.04, "volumeScale": 1.15}
     engine.say(text, 10005, tone=tone)
     query = fake.calls[-1][2]

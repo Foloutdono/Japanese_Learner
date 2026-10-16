@@ -1,5 +1,5 @@
 """
-The carousel studio's voices (plan 213): the reading of every word the
+The carousel studio's voices (plan 232): the reading of every word the
 theme decks draw in a picture, said by the app's own reader, for the
 word echo (frontend/carousel/echo.js), which says one word over and
 over for ten seconds and needs the sound in the page, not behind the
@@ -7,7 +7,7 @@ app's /api/tts.
 
 Each clip is said by the app's reader (the voice in slot 0, at its
 tempo, encoded as a card's clip is), with more energy than the app's
-own: ENERGY, the owner's pick by ear from three takes (plan 213, "B,
+own: ENERGY, the owner's pick by ear from three takes (plan 232, "B,
 lively"), lifts its intonation, pace, pitch and level. Only a reading
 the app says is made (word_tts.speakable), and a lone kana is said by
 its notation as the app says it. It needs the voice engine
@@ -50,7 +50,7 @@ def pictured_readings() -> list[str]:
     return list(seen)
 
 
-# The echo's delivery: the app's reader, livelier (plan 213's take B).
+# The echo's delivery: the app's reader, livelier (plan 232's take B).
 # Speed multiplies the reader's own tempo; the rest is voice_engine.say's tone.
 ENERGY = {"speed": 1.1, "intonationScale": 1.45, "pitchScale": 0.04, "volumeScale": 1.15}
 

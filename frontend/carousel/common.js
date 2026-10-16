@@ -1,4 +1,4 @@
-// ── カルーセル — the small things every plan uses (plan 210c) ─────
+// ── カルーセル — the small things every plan uses (plan 229c) ─────
 // A seeded order, a question's dealt choices, a lesson's packed rows, a
 // sentence's romaji, a word's gloss and the near-misses of a reading.
 // Pure: the node tests read it directly.
@@ -35,7 +35,7 @@ const KANJI = /[\u3400-\u9fff\uf900-\ufaff々〆ヶ]/
 const KANJI_RUNS = /[\u3400-\u9fff\uf900-\ufaff々〆ヶ]+|[^\u3400-\u9fff\uf900-\ufaff々〆ヶ]+/g
 /** A word's reading cut to its kanji, as the deck's words carry it
  *  ([[text, reading]], '' over kana): 降り出す read ふりだす is 降 ふ, り,
- *  出 だ, す, matched on the kana the word writes itself (plan 210i). A
+ *  出 だ, す, matched on the kana the word writes itself (plan 229i). A
  *  word whose kana do not line up with its reading keeps the reading over
  *  all of it. */
 export function furiganaOf(word, read) {
@@ -55,7 +55,7 @@ export function furiganaOf(word, read) {
 /** A lesson's packed row (carousel_bank.text_rows) as the row a slide
  *  sets. The tokenizer packs some stray kana of a lesson line as
  *  punctuation (the あ of あには, the せい of せいで): a one-element row
- *  that is not punctuation is a word, read from its kana (plan 210l). */
+ *  that is not punctuation is a word, read from its kana (plan 229l). */
 export const unpack = rows => rows.map(r => (r.length === 1
   ? (/^[\p{P}\p{S}＿\s]+$/u.test(r[0]) ? { t: r[0], k: 'punct' } : { t: r[0], k: 'word', ro: kanaRomaji(r[0]) })
   : { t: r[0], k: KINDS[r[1]] || 'word', ro: r[2], ...(r[1] === 'v' ? { pos: 'verb' } : {}), ...(r[3] ? { fu: r[3] } : {}), ...(r[4] ? { lit: true } : {}) }))
@@ -136,7 +136,7 @@ export function readingMisses(row, kanji, known = []) {
   })
   // Another reading of one of its kanji, in place of the one it takes here;
   // never for a word that is one kanji alone, whose other reading is
-  // usually the same word read another way (店 みせ, てん: plan 210l).
+  // usually the same word read another way (店 みせ, てん: plan 229l).
   for (const [text, r] of [...row.t].length > 1 ? row.fu || [] : []) {
     if (!r || [...text].length !== 1 || !kanji?.[text]) continue
     const k = kanji[text]

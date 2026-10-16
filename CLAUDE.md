@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **216**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **235**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -267,7 +267,7 @@ python -m scripts.prewarm_exam_papers --dry-run         # one paper per exam id
 
 None of the three is what makes a fresh deploy usable: the comprehension
 pool is never empty, because `content/comprehension/*.json` (plan 111,
-six hand-written exercises per level since plan 211, in both languages,
+six hand-written exercises per level since plan 230, in both languages,
 held to the same checks as a model answer by
 `tests/test_comprehension_seed.py`, and served before any generated one) is
 upserted into `comprehension_pool` when `routes/reading.py` is imported,
@@ -482,7 +482,7 @@ python -m scripts.reading_bank_report --rows N2     # each row's level words and
 python -m scripts.reading_bank_report --check rows.json  # candidate rows, before they enter the bank
 ```
 
-The comprehension seeds (plan 211) have one as well: every seed run
+The comprehension seeds (plan 230) have one as well: every seed run
 through the checks a model answer must pass, plus a review of what lets
 a reader answer without reading (a right option far longer or more
 specific than the wrong ones, an option echoing its question, a quoted
@@ -585,21 +585,21 @@ public Supabase Storage bucket by file name and needs no rebuild;
 `frontend/landing/README.md` has the slots, the bucket and what changes
 when the page goes live.
 
-The **carousel studio** (plans 210–210n, `frontend/carousel/`,
+The **carousel studio** (plans 229–229n, `frontend/carousel/`,
 its README) draws what the app teaches (a reading-bank sentence, its
 translation, a grammar lesson, a word, a kanji, a kana, a comprehension
-passage; since plan 210m a theme's words in pictures, lookalike kanji, a
+passage; since plan 229m a theme's words in pictures, lookalike kanji, a
 conversation to answer and a tour's trap) as a photo carousel for a
 social feed, as one of its types (the guided walk, a mock exam, this or
 that, build it, a top five, a conversation, kanji spelling, find the
-impostor), and exports the PNGs. Since plan 212 it also draws the app
+impostor), and exports the PNGs. Since plan 231 it also draws the app
 itself as 9:16 promo stories (`promo.js`), with the app's own parts
 measured in the running app (`app.js`) and Today on the real print of
 the hour, each story's cover and its call to action also a seven-second MP4 clip;
-since plan 213 the word echo (`echo.js`), a pictured word said over and
+since plan 232 the word echo (`echo.js`), a pictured word said over and
 over for ten seconds by the app's reader, livelier (`carousel/voices/`, written
 by `python -m scripts.carousel_voices --yes`, which needs the voice
-engine: rerun it after a change of voice or of the themes); since plan 214
+engine: rerun it after a change of voice or of the themes); since plan 233
 ten-minute 16:9 videos for YouTube (`long.js`, made by
 `node carousel/long/render.mjs`: a vocabulary or kanji drill, one grammar
 point whole, a quiz), voiced line by line by the app's voices and mixed
@@ -608,7 +608,7 @@ with the app's sounds and a bed of music it plays itself
 that previews it and gives its page and the command that makes it, and
 each also a 9:16 short under a minute, as any carousel can be too
 (`short.js`: its slides held and swiped, its line voiced). Since plan
-215 a carousel is drawn by default on one path that converts
+234 a carousel is drawn by default on one path that converts
 (`funnel.js`): the hook, the answer as the app shows it, a call to
 action that draws the feature the item comes from as a schema (never a
 figure) with two more beside it, the detail, the key points, three to

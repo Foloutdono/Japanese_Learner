@@ -1,4 +1,4 @@
-// ── 木霊 — the word echo (plan 213) ─────────────────────────────
+// ── 木霊 — the word echo (plan 232) ─────────────────────────────
 // A ten-second 9:16 clip that says one word over and over: its picture,
 // its kanji, its reading and its meaning on the app's review card, and
 // every time the reader says it again, its reading lands somewhere new

@@ -1,5 +1,5 @@
 """
-The long videos' sound (plan 214, frontend/carousel/long.js): every
+The long videos' sound (plan 233, frontend/carousel/long.js): every
 Japanese line a video says, voiced by the app's own voices, and the mix
 of those lines with the app's sounds and a quiet bed of music.
 
@@ -68,7 +68,7 @@ def kana_clip(text: str) -> Path | None:
 
 # The kana deck was recorded to teach a sound: each syllable sung on one
 # held pitch (A3) for half a second. Said in a sentence's place it is
-# tuned to sound spoken (TUNE, plan 214): the vowel let go after
+# tuned to sound spoken (TUNE, plan 233): the vowel let go after
 # SPOKEN_S, the pitch falling FALL semitones across it as a word said
 # alone falls, its level decaying rather than held.
 TUNE = "spoken1"   # in the cache's names: a new tuning remakes the clips

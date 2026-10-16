@@ -1,4 +1,4 @@
-// ── The app's own parts, drawn (plan 212) ─────────────────────────
+// ── The app's own parts, drawn (plan 231) ─────────────────────────
 // The promo stories show the app as a learner meets it: the review
 // card, the rating bar, a question's choices, the pass on the profile,
 // Today's dial and its Depart button, the analyser's sentence and its
@@ -374,7 +374,7 @@ const picture = src => new Promise((resolve, reject) => {
   img.src = src
 })
 
-// The print in motion, for a clip (plan 212): index.css's .tpr- rules and
+// The print in motion, for a clip (plan 231): index.css's .tpr- rules and
 // their keyframes, every animation held paused at the clip's moment `t`.
 // An element's own delay (its phase, written on it) moves on by t; one
 // with none starts at t.

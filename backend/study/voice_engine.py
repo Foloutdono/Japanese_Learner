@@ -437,7 +437,7 @@ def _synthesize(query: dict, style: int, rate: int) -> Pcm:
 # A voice's delivery beyond its pace: how far its pitch moves
 # (intonationScale), its height (pitchScale) and its level (volumeScale),
 # the engine's own names. The app's voices take none of it; the carousel's
-# word echo says its word livelier (scripts/carousel_voices.py, plan 213).
+# word echo says its word livelier (scripts/carousel_voices.py, plan 232).
 TONE_KEYS = ("intonationScale", "pitchScale", "volumeScale")
 
 

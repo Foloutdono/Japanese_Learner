@@ -1,4 +1,4 @@
-// ── カルーセル — drawing (plan 210) ──────────────────────────────
+// ── カルーセル — drawing (plan 229) ──────────────────────────────
 // The primitives every slide is drawn with: the app's scale at a post's
 // density, its palette in both grounds, its three faces, and the
 // sentence laid out word by word with furigana, rules and romaji.
@@ -29,7 +29,7 @@ const RING = 2.5 * K // a roundel's ring
 // The two formats a feed takes. `safe` is the box the feed's own chrome
 // leaves alone: TikTok lays its search bar over the top of a 9:16 post,
 // its buttons down the right and the caption over the foot. Measured on
-// a phone (plan 213): a 4:5 post is shown at full width with its top
+// a phone (plan 232): a 4:5 post is shown at full width with its top
 // ~70px above the screen's, so the search bar covers its first ~150px,
 // and the buttons' column stands from x ~936 down its lower fifth; the
 // sides are kept equal so a centred slide stays centred.
@@ -130,7 +130,7 @@ const FAMILY = {
   serif: '"Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif',
   jp: '"Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif',
   latin: '"Space Grotesk", "Noto Sans JP", "Segoe UI", sans-serif',
-  // A theme's pictures (plan 210m): the one colour face, drawn as it is.
+  // A theme's pictures (plan 229m): the one colour face, drawn as it is.
   emoji: '"Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif',
 }
 export const FONT_FACES = [
@@ -352,7 +352,7 @@ function chevron(ctx, x, cy, w, color) {
 // its punctuation riding it), each word on its rule, furigana over the
 // kanji the script asks for, romaji under the word.
 // Furigana are set as the app sets them (ExampleSentence.jsx and its
-// rules in index.css, plan 210h): one word's readings as one ruby, がく
+// rules in index.css, plan 229h): one word's readings as one ruby, がく
 // and せい joined over 学生 rather than spreading it into 学 生; a reading
 // wider than its kanji leaning on the kana either side by half a reading
 // character, where there IS kana on both sides (a lone kana between two
@@ -581,7 +581,7 @@ function masthead(ctx, p, fr, ink = p.ink, sub = p.ink2) {
 }
 /** A slide's title: a name, set as a station prints its names. */
 function heading(ctx, p, fr, str, y, color = p.ink) {
-  // A long title steps down a rung rather than being cut (plan 210n).
+  // A long title steps down a rung rather than being cut (plan 229n).
   const b = fit(ctx, str, { sizes: [FS.heading, FS.display * 0.6, FS.title], maxW: fr.w, maxLines: 1 })
   text(ctx, b.lines[0], fr.x, y + b.size * 0.8, { f: b.f, color })
   return b.size * 1.1

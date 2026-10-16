@@ -1,4 +1,4 @@
-// ── カルーセル — the questions (plan 210c) ──────────────────────────
+// ── カルーセル — the questions (plan 229c) ──────────────────────────
 // Every question a carousel can ask about its item, in the forms the
 // JLPT asks them (読み, 表記, 文脈, 文の組み立て, 読解) and in the app's
 // own drills (a kana both ways, a kanji's meaning both ways, its
@@ -63,7 +63,7 @@ const senses = (row, lang) => ((lang === 'fr' && row.fr?.length ? row.fr : row.e
 // with no French gloss is neither its answer nor a wrong choice in French.
 const ownGloss = (row, lang) => row?.[lang]?.[0] || ''
 
-// ── No answer given before it is asked (plan 210l) ─────────────
+// ── No answer given before it is asked (plan 229l) ─────────────
 // A mock exam shows each answer on the slide after its question, with the
 // word it is about, its reading and its meaning. Where a later question
 // asks that reading or that meaning, the earlier answer leaves it out: a
@@ -296,7 +296,7 @@ export function wordQuizzes(w, data, lang, t, index, family = []) {
   const near = hasKanji(w.t) ? readingMisses(row, index, knownOf(w)) : []
   const head = `${w.t}\u3000${w.r}`
   // Each question asks one thing about one word, and no answer gives away
-  // another (plan 210l): its reading, its meaning, then words that share
+  // another (plan 229l): its reading, its meaning, then words that share
   // its kanji, each asked once, and read where its kanji reads otherwise.
   const readingQ2 = near.length >= 3 ? {
     kind: 'reading', ask: t.examAsk.kana, stem: { specimen: w.t },
@@ -391,7 +391,7 @@ export function wordQuizzes(w, data, lang, t, index, family = []) {
   return withId([readingQ2, meaning, reverse, inWord1, kinVocab, inWord2], q => t.kinds[q.kind])
 }
 
-/** 表記, a mode of its own (plan 210l): the word and the deck words of its
+/** 表記, a mode of its own (plan 229l): the word and the deck words of its
  *  level that share a kanji with it, each heard in kana and asked how it
  *  is written, among spellings that are no word. Five at most. */
 export function spellingQuizzes(w, data, lang, t) {
@@ -428,7 +428,7 @@ export function kanjiQuizzes(c, data, lang, t) {
     ...dealChoices(meaning, wrongM, `${c}-m`, 'latin'), explain: { head: `${c}\u3000${right || ''}`, sense: meaning },
   } : null
   // Its kun'yomi too, where it has an on'yomi asked above: a kun'yomi
-  // among other kanji's kun'yomi (plan 210l).
+  // among other kanji's kun'yomi (plan 229l).
   const kun = kunOf(k)
   const kuns = [...new Set(shuffle(others.map(([, v]) => kunOf(v)).filter(r => r && !own.has(r) && r !== kun), seeded(`${c}-k`)))].slice(0, 3)
   const kunQ = k.on[0] && kun && kuns.length === 3 ? {
@@ -475,7 +475,7 @@ export function kanjiQuizzes(c, data, lang, t) {
   // (買う "to buy"), which the kanji's meaning would answer. The wrong
   // ones are words written without it, first those that share the right
   // word's other kanji (物 of 買い物); none means what a word written
-  // with it means, so no second answer is right (plan 210l).
+  // with it means, so no second answer is right (plan 229l).
   const sensesOf = x => (lang === 'fr' && x.fr?.length ? x.fr : x.en) || []
   const deck = [...new Map(Object.values(data.kanji).flatMap(v => v.words || []).map(x => [`${x.t}|${x.r}`, x])).values()]
   const withIt = deck.filter(x => x.t.includes(c))
@@ -564,7 +564,7 @@ export function passageQuizzes(P, lang, t) {
   return withId([...seedQs, ...words], q => t.kinds[q.kind])
 }
 
-// ── The modes of plan 210m ────────────────────────────────────
+// ── The modes of plan 229m ────────────────────────────────────
 /** A theme's pictures: which word is this one? The wrong words are the
  *  theme's other pictured words, none of them meaning the same. */
 export function pictureQuizzes(items, key, lang, t) {

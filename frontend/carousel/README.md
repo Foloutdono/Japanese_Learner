@@ -1,4 +1,4 @@
-# The carousel studio (plans 210–210n, 212, 213, 214, 215)
+# The carousel studio (plans 229–229n, 231, 232, 233, 234)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -23,7 +23,7 @@ Each source is one of the app's own lines, and wears its pigment:
 | 返事 | Your reply | one of 36 conversations of three turns, N5 to N1, from a birthday to a business call (`content/dialogues.json`) | what they say, three replies to choose from, then the reply said and why; every line with its furigana, and at N5 and N4 its romaji under every word, for a beginner |
 | 落とし穴 | Traps | a catalogue tour's trap: a sentence that reads one way to the eye and means another | the sentence and what it says (three readings, its translation never printed over it), the answer and why, the two forms side by side, watch out |
 
-The four of plan 210m stop at the station the app teaches them on (a
+The four of plan 229m stop at the station the app teaches them on (a
 theme's words at 単語, lookalike kanji at 漢字, a reply and a trap at
 文法). A theme, a set and a conversation are one list each, picked
 without a level; a trap is picked by its point's level.
@@ -32,7 +32,7 @@ The practice modes a photo cannot hold (dictation needs sound) are left
 out; composition is the "your turn" slide, an invitation to write in the
 comments.
 
-## A carousel that converts (plan 215)
+## A carousel that converts (plan 234)
 
 By default a carousel is drawn on one path, five slides at most, so that a
 reader who stops on it leaves knowing what the app does for what it just
@@ -60,13 +60,13 @@ both hold, the choices wait for the answer, and the text is never the
 one cut short first.
 
 A sentence's carousel (the reading bank's, read or translated, plan
-215d) asks nothing after its call to action: the slide after it is the
+234d) asks nothing after its call to action: the slide after it is the
 sentence cut into its words, as a gloss is printed, each word with its
 furigana, ruled in its line's colour, its romaji and its first sense
 under it (the deck's gloss, its brackets left off), every word of the
 sentence. The pieces of one pattern the tokenizer cut apart are one
 word there, glossed once by the pattern (ので, とは, ものの, ことにした,
-plan 215e): never the pattern's line under each piece, nor の's "of"
+plan 234e): never the pattern's line under each piece, nor の's "of"
 inside ものの; a word in kanji (直す of 直すべきだ) or a verb the pattern
 does not lean on keeps its own gloss beside it. A particle or a form of
 だ no point is written on says what the sentence's shape settles
@@ -84,7 +84,7 @@ question. Its answer sets the sentence on the fewest lines it takes,
 then as large as they hold (これはわたしの本です。 on one line, not three),
 its romaji on a line under it, then what it says.
 
-Each key point carries its kind (`noted` in `sources.js`, plan 215c);
+Each key point carries its kind (`noted` in `sources.js`, plan 234c);
 a line of prose that says much what one before it said gives way to it
 (も: also, too. after its fuller how-it-works).
 
@@ -98,7 +98,7 @@ action, 4 adds the key points, 5 the detail before them, 6 to 8 go on:
 more of the item and more questions in turn, each answered on the next
 slide, as far as the item has them), which feature
 the call to action shows, and the look, the three directions drawn for it.
-Every practice mode has its own call to action (plan 215b), and so do the
+Every practice mode has its own call to action (plan 234b), and so do the
 analyser, the question asked after an exercise and Today:
 
 | Feature | The item's own for | Its picture |
@@ -191,7 +191,7 @@ mock exam asks (three by default; the walk ends on them too where
 | Kana | its sound, which kana a sound is, its twin in the other script |
 | Comprehension | every question the seed writes (understanding, inference, vocabulary, grammar: eight to twelve a passage), then the reading of its words |
 
-No question is answered before it is asked (plan 210l). A mock exam
+No question is answered before it is asked (plan 229l). A mock exam
 shows each answer on the slide after its question, and that answer
 leaves out what a later question asks: the reading's answer prints no
 meaning when the meaning is asked next, and nothing an answer prints is
@@ -214,7 +214,7 @@ order is asked only over a pattern's own pieces after the word it takes
 sentence's phrases, which can be said in more than one order. Nothing is
 asked by blanking a particle out of a sentence.
 
-Plan 210l's review closed the ways a right answer still slipped in as a
+Plan 229l's review closed the ways a right answer still slipped in as a
 wrong one, or the answer showed through the question: a reading
 question never deals another reading of a one-kanji word (店 てん beside
 みせ) nor a reading the deck gives the same written word (行く いく,
@@ -316,8 +316,8 @@ right too.
 to choose from; "One type" keeps one and exports it. Each source lists
 the station plates' slides it may leave out, and each type its own
 options (the exam's cover and answer sheet, the list's recap), as
-toggles. The departure board and the study card of plan 210
-were styles, not types, and plan 210c retired them.
+toggles. The departure board and the study card of plan 229
+were styles, not types, and plan 229c retired them.
 
 ## Nothing leaves the frame
 
@@ -326,11 +326,11 @@ or below the smallest size a feed shows legibly: every block that could
 be long (a sentence, a choice, a bubble, a label, a station's name) is
 fitted, from its largest size down, to the room the others leave, and
 what can give way (a sense, a note, the romaji) gives way first; a
-sentence's translation is never cut. Plan 210d
+sentence's translation is never cut. Plan 229d
 checked this by drawing every slide of a sample of every source, as
 every type and every ending, in both formats, languages and grounds,
 with the real fonts, and measuring every line of text set; every
-issue it found was fixed. Since plan 210l the check also reads the
+issue it found was fixed. Since plan 229l the check also reads the
 pixels: nothing at all, a shape as much as a word, is drawn in the
 margin outside the safe area (the "Your turn" slide's cue, once an
 arrow pointing off the frame, is a speech bubble under the prompt,
@@ -343,7 +343,7 @@ keep clear of its circles, and a carousel asks six questions at most, so
 a mock exam keeps under a feed's twenty slides and its cover and sheet
 a readable row each.
 
-Plan 210m's slides are held the same way, and the check ran over every
+Plan 229m's slides are held the same way, and the check ran over every
 theme post, set and conversation and forty traps. A conversation's line
 carries its furigana (and at N5 and N4 its romaji), which do not shrink
 below their rung: on a long turn the call to comment gives way first,
@@ -353,7 +353,7 @@ line (read on the question) gives way, its translation first, before
 the why is ever cut, and at the least the why takes the 正解 stamp's
 room. A reply is written to keep to one line, a place's name to fit a
 title. A gloss on a picture is never broken inside a word, and a word
-too long beside its picture has the picture step down. Plan 210n added
+too long beside its picture has the picture step down. Plan 229n added
 a check the measure above does not make: no text set ends cut with
 “…” (a translation that ends in one on purpose aside).
 
@@ -440,11 +440,11 @@ rules in `index.css`; `layoutSentence` in `draw.js`):
   exported image).
 
 Both keep clear of what TikTok lays over a photo post, as measured on a
-phone (plan 213): a 4:5 post is shown at full width, its top ~70px above
+phone (plan 232): a 4:5 post is shown at full width, its top ~70px above
 the screen's, so its search bar covers the post's first ~150px (the
 post's safe top is 170) and its buttons stand from x ~936 down the
 lower fifth (the sides are 144 each, so a centred slide stays centred).
-A 9:16 slide, measured on a posted carousel (plan 215c), is shown at
+A 9:16 slide, measured on a posted carousel (plan 234c), is shown at
 full width with its top ~110px under the status bar: the status and
 search bars cover its first ~330px and the page counter stands at the
 top right, the column of buttons stands from x ~920 below y ~1100, the
@@ -460,7 +460,7 @@ English name, the answer slide's quoted sentence read on the question),
 or goes one answer to a row, never over its neighbour or out of the box.
 The 9:16 box is narrower than the 4:5 post's (712 against 792), so a
 text that was set at the first size that fit now looks for the first
-that fits whole (plan 215c): a question, an answer and its why, a key
+that fits whole (plan 234c): a question, an answer and its why, a key
 point, a word's row, the analyser's meaning step down a rung, or take
 another line, before any is cut with "…"; a key point that still would
 be leaves the slide to the others, an answer's why leaves its card, a
@@ -479,7 +479,7 @@ Two grounds (washi and sumi, the app's two themes), two languages (the
 slides' Latin text in English or French, French punctuation welded), and
 the Japanese as written, with furigana, or in kana.
 
-## The promo stories (plan 212)
+## The promo stories (plan 231)
 
 宣伝, the last source, draws the app itself rather than what it teaches:
 five 9:16 stories, picked by the segments over the list (`promo.js`).
@@ -563,7 +563,7 @@ the stages, "due", Depart, a test holds them to `locales/`). It says
 "start free", the kana line free for good, no ads and no trackers; it
 never prices a mode nor says "early access", and a test fails if it does.
 
-## The word echo (plan 213)
+## The word echo (plan 232)
 
 A ten-second 9:16 clip that says one word over and over (`echo.js`,
 the source 木霊 "Word echo"): a theme's pictured word on the app's
@@ -609,14 +609,14 @@ A recording that says a word over and over (a sound from a feed, say)
 can be the echo's sound instead (`echoDeck`'s `track`: the file, its
 length and when each saying starts): the readings land on its sayings
 and it plays whole under them. The sayings are found by ear or from the
-sound's loudness, each voiced rise a saying (plan 213's いたい clip).
+sound's loudness, each voiced rise a saying (plan 232's いたい clip).
 
 "Download the clip" encodes the ten seconds as the promo clips are
 encoded (H.264, the voice as AAC or Opus), the voice mixed by
 `sound.clipAudio`, which takes a recorded clip (`src`) beside the app's
 own sounds (`key`).
 
-## The long videos (plan 214)
+## The long videos (plan 233)
 
 Ten-minute 16:9 videos for YouTube (`long.js`, made by
 `long/render.mjs`), four kinds: a vocabulary drill, a kanji drill, one
@@ -710,7 +710,7 @@ theme's words span the levels, so its page names none. Each still is drawn once
 so ten minutes take about four. It needs the voice engine, the
 backend's Python with numpy, ffmpeg and Playwright's Chromium.
 
-## Short formats (plan 214)
+## Short formats (plan 233)
 
 Two ways to a short video for YouTube Shorts, Reels or TikTok, 9:16 and
 inside a feed's safe area (a carousel's short, the story format's; a
@@ -756,16 +756,16 @@ node carousel/long/render.mjs --carousel <recipe from the studio>
 | `explain.js` | a point explained in its own sentence, stacked particles, lookalike kana |
 | `common.js` | seeded order, dealt choices, romaji, glosses, near-miss readings |
 | `slides.js` | the slide kinds, drawn once, the types and their decks |
-| `funnel.js` | the carousel that converts: each type's hook, answer, detail and key points, the three looks, the feature pictures (plan 215) |
+| `funnel.js` | the carousel that converts: each type's hook, answer, detail and key points, the three looks, the feature pictures (plan 234) |
 | `draw.js` | the canvas primitives, the app's tokens at slide scale, the formats |
 | `strings.js` | every label a slide prints, in English and French |
-| `promo.js` | the promo stories: their plans from the bank, their frames (plan 212) |
-| `app.js` | the app's own parts, drawn at its measures, and Today's print (plan 212) |
-| `echo.js` | the word echo: its plan, its rhythm, its scatter and its clip (plan 213) |
-| `sound.js` | a clip's sound: the app's own events and recorded clips, mixed (plans 212, 213); one event alone for a long video (plan 214) |
-| `long.js` | the long videos: what each says, when, each frame, their page, and the studio's list of them (plan 214) |
-| `short.js` | a carousel as a short video: its timing, its swipes, its line and page (plan 214) |
-| `long/render.mjs` | a long video, its short or a carousel's short made: voiced, mixed, drawn and encoded (plan 214) |
+| `promo.js` | the promo stories: their plans from the bank, their frames (plan 231) |
+| `app.js` | the app's own parts, drawn at its measures, and Today's print (plan 231) |
+| `echo.js` | the word echo: its plan, its rhythm, its scatter and its clip (plan 232) |
+| `sound.js` | a clip's sound: the app's own events and recorded clips, mixed (plans 231, 232); one event alone for a long video (plan 233) |
+| `long.js` | the long videos: what each says, when, each frame, their page, and the studio's list of them (plan 233) |
+| `short.js` | a carousel as a short video: its timing, its swipes, its line and page (plan 233) |
+| `long/render.mjs` | a long video, its short or a carousel's short made: voiced, mixed, drawn and encoded (plan 233) |
 | `studio.js` | the page: the pickers, the previews, the export |
 
 ## Running it
@@ -780,7 +780,7 @@ cd frontend && python3 -m http.server 8123   # then http://localhost:8123/carous
 It draws on canvas, so the preview is the PNG: "Download (.zip)" writes
 every slide of the chosen direction, `title.txt` and `caption.txt` (the
 item, its romaji and translation, hashtags), and a slide opened full size
-can be saved alone. The title (plan 210l, `sources.titleOf`) is the hook a
+can be saved alone. The title (plan 229l, `sources.titleOf`) is the hook a
 feed asks for over the caption, 90 characters at most (TikTok's limit):
 one per source and type, in the post's language, naming the item and its
 level ("JLPT N5 mock exam: 3 questions on で. Your score?"); where it would

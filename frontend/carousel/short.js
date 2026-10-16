@@ -1,4 +1,4 @@
-// ── 短編 — a carousel as a short video (plan 214) ───────────────────
+// ── 短編 — a carousel as a short video (plan 233) ───────────────────
 // Any carousel the studio draws can also be a 9:16 video for YouTube
 // Shorts, Reels or TikTok: its slides in their order, each held as long
 // as it takes to read (a question longer, its seconds ticked), swiped to
@@ -16,7 +16,7 @@ import { depsOf, picked, plan as sourcePlan, sourceOf, titleOf } from './sources
 
 export const SWIPE = 0.35 // a swipe from one slide to the next
 export const FPS = 30
-// A conversion carousel's hook asks too (plan 215).
+// A conversion carousel's hook asks too (plan 234).
 const ASKS = /^(question-|scene-question|round-|ask$)/
 const ease = x => 1 - (1 - Math.min(1, Math.max(0, x))) ** 3
 const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x))
@@ -169,7 +169,7 @@ export function recipeOf(st) {
 }
 export const fromRecipe = r => JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(r.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0))))
 
-/** A carousel short's page: the carousel's own title (plan 210l) for the
+/** A carousel short's page: the carousel's own title (plan 229l) for the
  *  feed, its caption, the app, the voice's credit when it speaks, tags. */
 export function shortPage(pl, type, picks, site, voiced) {
   const fr = pl.lang === 'fr'

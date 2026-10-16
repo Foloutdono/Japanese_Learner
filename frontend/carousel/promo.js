@@ -1,4 +1,4 @@
-// ── 宣伝 — the promo stories (plan 212) ─────────────────────────────
+// ── 宣伝 — the promo stories (plan 231) ─────────────────────────────
 // Five stories that show the app itself, 9:16, each a few frames drawn
 // with the app's own parts (app.js): the pitch on Today's print, one card
 // turned and rated, the analyser at work, one N5 question, and the pass.

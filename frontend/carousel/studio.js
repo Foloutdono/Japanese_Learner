@@ -1,4 +1,4 @@
-// ── カルーセル — the studio (plans 210, 210c) ──────────────────────
+// ── カルーセル — the studio (plans 229, 229c) ──────────────────────
 // Pick what to post (a sentence, a translation, a grammar lesson, a word,
 // a kanji, a kana, a passage), see it drawn as every type of carousel it
 // can be side by side, keep one, pick its questions, export its slides.
@@ -41,7 +41,7 @@ const DEFAULTS = {
   view: 'compare', type: 'plates', format: 'post', ground: 'paper',
   lang: 'en', script: 'kanji', romaji: false, bonus: 'kanji', kanji: '', handle: '', safe: false, slides: {},
   picks: {}, types: {}, ending: 'mark',
-  // Plan 215: the conversion carousel, its look, its length, the feature it shows.
+  // Plan 234: the conversion carousel, its look, its length, the feature it shows.
   design: 'clarte', length: '5', feature: 'auto',
 }
 const state = load()
@@ -51,7 +51,7 @@ const work = document.createElement('canvas')
 function load() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) || '{}')
-    // Plan 210c retired the departure board and the study card.
+    // Plan 229c retired the departure board and the study card.
     const type = TYPES.some(x => x.id === saved.type) ? saved.type : 'plates'
     if (saved.ending && !ENDING_IDS.includes(saved.ending)) delete saved.ending
     if (saved.design && ![...DESIGNS, 'classic'].includes(saved.design)) delete saved.design
@@ -104,7 +104,7 @@ function printFor(hour) {
   if (!prints.has(hour)) prints.set(hour, loadPrint(hour, { base: BASE }).catch(e => { prints.delete(hour); throw e }))
   return prints.get(hour)
 }
-// A word echo's voice (plan 213): voices/index.json names each reading's
+// A word echo's voice (plan 232): voices/index.json names each reading's
 // clip; the clip is decoded once, and where its voice starts and stops
 // measured from the sound.
 const spoken = new Map()
@@ -362,7 +362,7 @@ async function render() {
   if (mine !== token) return
   const opts = { ...state, figures, ending: state.ending }
   const promo = state.source === 'promo'
-  // A promo story's Today stands on the print of the hour (plan 212).
+  // A promo story's Today stands on the print of the hour (plan 231).
   if (promo) {
     opts.print = await printFor(state.hour).catch(e => { status(`Today's print did not load (${e.message}).`); return null })
     if (mine !== token) return
@@ -391,7 +391,7 @@ async function render() {
   if (mine !== token) return
   // A story is 9:16, whatever the post's format.
   const fmt = FORMATS[clipped ? 'story' : state.format]
-  // All looks (plan 215): the type kept, in each look, to pick one from.
+  // All looks (plan 234): the type kept, in each look, to pick one from.
   const looks = state.view === 'looks' && !clipped
   const ids = state.view === 'compare' ? types : [state.type]
   current = {
@@ -495,14 +495,14 @@ async function render() {
   // over the reader's own edits on a redraw.
   const captionKey = `${state.source}|${state.story}|${pl.id}|${state.lang}|${state.type === 'spelling'}|${state.type === 'impostor'}`
   if (captionKey !== captionFor) { $('#caption').value = captionOf(pl); captionFor = captionKey }
-  // The title names the type and the questions asked too (plan 210l).
+  // The title names the type and the questions asked too (plan 229l).
   const asked = state.type === 'exam' ? picked(pl, state.picks[pickKey()], 3).length : 1
   const titleKey = `${captionKey}|${state.type}|${asked}`
   if (titleKey !== titleFor) { $('#title').value = titleOf(pl, state.type, asked); titleFor = titleKey; countTitle() }
   $('#export').disabled = false
 }
 
-// ── The long videos (plan 214) ────────────────────────────────
+// ── The long videos (plan 233) ────────────────────────────────
 // A video is drawn here as it will be made: the same frames, the same
 // timeline, played in place. Its voices are made where it is rendered
 // (long/render.mjs, with the voice engine), so the preview is silent and
@@ -799,7 +799,7 @@ async function exportOne() {
   const result = await offer(`${baseName()}-${i + 1}.png`, await png(full(d.slides[i], current.fmt)))
   status(result === 'saved' ? `Saved slide ${i + 1}.` : MESSAGE[result])
 }
-// ── The clips (plan 212) ──────────────────────────────────────
+// ── The clips (plan 231) ──────────────────────────────────────
 // A promo story's cover, or its call to action, in motion, seven
 // seconds, encoded here as the feeds take a video: H.264 in an MP4
 // (WebCodecs, muxed by mp4-muxer).
@@ -819,7 +819,7 @@ async function exportClip(which = 'cover') {
   })
 }
 
-// ── A carousel as a short video (plan 214) ────────────────────
+// ── A carousel as a short video (plan 233) ────────────────────
 // Its slides standing, each held as long as it reads, swiped to the
 // next, with the app's sounds (short.js). The voice and the music are
 // the render command's: long/render.mjs --carousel.

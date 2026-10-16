@@ -1,4 +1,4 @@
-// ── 導線 — the carousel that converts (plan 215) ─────────────────
+// ── 導線 — the carousel that converts (plan 234) ─────────────────
 // Every carousel type and source drawn on one path, five slides at most:
 //   ask       the hook: the item, and the question it asks the reader
 //   answer    the solution: the item answered, as the app shows it
@@ -26,7 +26,7 @@ import { withoutGiveaways } from './quizzes.js'
 
 export const DESIGNS = ['clarte', 'defi', 'fiche']
 export const LENGTHS = [3, 4, 5, 6, 7, 8]
-// The app's features a call to action can show (plan 215b: every practice
+// The app's features a call to action can show (plan 234b: every practice
 // mode, the analyser, the question after an exercise, Today).
 export const FEATURES = ['reading', 'comprehension', 'translation', 'listen', 'composition', 'exam', 'analyser', 'ask', 'today', 'words', 'kanji', 'grammar', 'kana']
 
@@ -146,7 +146,7 @@ const FEATURE_ICON = {
 }
 const featureInk = (p, f) => p.line[FEATURE_LINE[f]] || p.gold
 // The two features shown beside the one a post promotes: reading,
-// dictation and the mock exams first, as the owner asked (plan 215).
+// dictation and the mock exams first, as the owner asked (plan 234).
 const ALSO = {
   reading: ['listen', 'ask'], comprehension: ['reading', 'exam'], translation: ['composition', 'ask'], listen: ['reading', 'exam'],
   composition: ['translation', 'ask'], exam: ['comprehension', 'listen'], analyser: ['reading', 'ask'], ask: ['reading', 'translation'],
@@ -167,7 +167,7 @@ export function funnelOf(type, pl, opts = {}) {
   const spec = specOf(type, pl, opts)
   if (!spec || !SENTENCED.has(pl.source)) return spec
   // A sentence's carousel breaks the sentence down whole after the call
-  // to action, word by word, and asks nothing more (plan 215d): the
+  // to action, word by word, and asks nothing more (plan 234d): the
   // type's own detail follows it where it is not a question nor the same
   // words again.
   const own = spec.detail && !spec.detail.yours && spec.detail.kind !== 'rows' ? [spec.detail] : []
@@ -617,7 +617,7 @@ function sentenceBlock(c, rows, { x, w, maxH, max = FS.display * 1.15, min = FS.
   if (!rows?.length) return none
   const at = k => layoutSentence(c.ctx, rows, { max, min, maxW: w, maxH, maxLines: k, script, romaji, rules: false, under: 0.34, gap: 0.08, fam, weight: 700 })
   // `fewest`: on as few lines as it sets in, then as large as they hold
-  // (plan 215d): これはわたしの本です。 on one line, not three.
+  // (plan 234d): これはわたしの本です。 on one line, not three.
   let L = null
   if (fewest) for (let k = 1; k <= lines && !L; k++) { const T = at(k); if (T && T.lines.length <= k && T.h <= maxH) L = T }
   L ||= at(lines)
@@ -1099,7 +1099,7 @@ function stackOf(blocks, gaps) {
 }
 
 // ── The detail ────────────────────────────────────────────────
-// ── A sentence word by word (plan 215d) ───────────────────────
+// ── A sentence word by word (plan 234d) ───────────────────────
 /** A gloss's first sense, its brackets left off: what a word says in a
  *  breakdown set under it. */
 function firstSense(str) {
@@ -1187,7 +1187,7 @@ function glossBlock(c, s, { x, w, maxH }) {
   const layAt = z => {
     const gz = Math.max(FS.xs, z * 0.5)
     const cells = s.items.map(it => {
-      // A pattern's pieces read as one word (ので, plan 215e).
+      // A pattern's pieces read as one word (ので, plan 234e).
       const row = (it.j ?? it.i) > it.i ? { t: it.t, k: 'word', ro: it.ro, fu: it.fu } : s.rows[it.i] || { t: it.t, k: 'word' }
       const L = layoutSentence(ctx, [row], { max: z, min: z, maxW: w, maxLines: 1, script: 'furigana', romaji: false, rules: false, under: 0.1, gap: 0, fam: 'jp', weight: 700 })
       const ww = L ? L.lineW(L.lines[0]) : measure(ctx, it.t, font(700, z, 'jp'))
@@ -2211,7 +2211,7 @@ function drawRead(c) {
   sparks(c, 735, 40, 22, p.line.grammar, 1)
   sparks(c, 330, 380, 22, p.line.grammar, -1)
 }
-// ── The practice modes, each a storyboard of its run (plan 215b) ──
+// ── The practice modes, each a storyboard of its run (plan 234b) ──
 /** What the item gives the pictures to show: its Japanese, its rōmaji,
  *  its sense, its point; each where the plan has it, else nothing. */
 function itemOf(c) {

@@ -1,4 +1,4 @@
-"""The long videos' mix (plan 214, scripts/long_video_audio.py): a line
+"""The long videos' mix (plan 233, scripts/long_video_audio.py): a line
 lands where the timeline says, the bed of music stays well under it, and
 the file is as long as the video. No voice engine: the cache is written
 here by hand."""

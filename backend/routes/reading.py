@@ -1784,7 +1784,7 @@ def _init_comprehension_pool() -> None:
                 """
             )
             # The seeds' key (plan 111), here as well as in the seeding:
-            # _pool_take orders on it (plan 211), and a failed seeding
+            # _pool_take orders on it (plan 230), and a failed seeding
             # must not leave every read failing on a missing column.
             cur.execute("ALTER TABLE comprehension_pool ADD COLUMN IF NOT EXISTS seed_key TEXT")
             # Which learner has already read which exercise. A row per
@@ -1896,7 +1896,7 @@ else:
 def _pool_take(user_id: str, level: str, lang: str, avoid: set[str]) -> dict | None:
     """An exercise this learner has not been served, or None.
 
-    The hand-written seeds come first (plan 211): they are reviewed by
+    The hand-written seeds come first (plan 230): they are reviewed by
     hand, and a model's text is checked only by the gates, so a new
     learner reads the best the pool holds before anything generated --
     which, once the pool has grown, a random draw no longer promised.
@@ -2123,7 +2123,7 @@ def _pool_repeat(user_id: str, level: str, lang: str) -> dict | None:
     """An exercise this learner HAS read, or None if they have read none.
 
     What a learner past the day's ceiling is served instead of a
-    refusal, chosen to be worth reading again (plan 211): a text they
+    refusal, chosen to be worth reading again (plan 230): a text they
     have answered every question of right comes last, since there is
     least left in it for them; among the rest, the one read longest ago.
     And never the text they were just served, while there is another:
