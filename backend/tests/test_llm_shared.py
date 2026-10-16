@@ -356,7 +356,7 @@ class CompletionCapKeyTest(unittest.TestCase):
         self.assertEqual(
             llm_shared._PROVIDER_CATALOG["openai"].max_tokens_key, "max_completion_tokens"
         )
-        for name in ("google", "openrouter", "nvidia"):
+        for name in ("claude", "google", "openrouter", "nvidia"):
             with self.subTest(provider=name):
                 self.assertEqual(llm_shared._PROVIDER_CATALOG[name].max_tokens_key,
                                  "max_tokens")
@@ -370,10 +370,26 @@ class PaidProviderTest(unittest.TestCase):
 
     def test_default_order_is_paid_first_and_excludes_nvidia(self):
         order = llm_shared._DEFAULT_PROVIDER_ORDER.split(",")
-        self.assertEqual(order[:2], ["google", "openai"])
+        self.assertEqual(order[:3], ["claude", "google", "openai"])
         self.assertEqual(order[-1], "openrouter",
                          "the free tier is the fallback, never the primary")
         self.assertNotIn("nvidia", order)
+
+    def test_claude_rides_the_openrouter_account_on_its_own_entry(self):
+        # Its own entry so that a Haiku failure falls to the paid Gemini,
+        # not to the `:free` models the openrouter entry walks next.
+        p = llm_shared._PROVIDER_CATALOG["claude"]
+        self.assertEqual(p.url, llm_shared.OPENROUTER_URL)
+        self.assertEqual(p.api_key, llm_shared.OPENROUTER_API_KEY)
+        self.assertEqual(p.models, (llm_shared.CLAUDE_MODEL,))
+        self.assertFalse(any(m.endswith(":free") for m in p.models))
+        self.assertEqual(p.vision_models, (), "photos stay on google until measured")
+
+    def test_claude_sends_openrouters_reasoning_field(self):
+        # Never a thinking budget: Haiku 5.5 answers 400 to one.
+        p = llm_shared._PROVIDER_CATALOG["claude"]
+        self.assertEqual(p.body_for(True), {"reasoning": {"enabled": True}})
+        self.assertEqual(p.body_for(False), {"reasoning": {"enabled": False}})
 
     def test_nvidia_is_still_reachable_by_name(self):
         # Removed from the default, not deleted: one line of

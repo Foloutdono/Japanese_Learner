@@ -5,6 +5,10 @@ committing. The arithmetic is `backend/scripts/llm_cost_model.py`, which
 takes the same numbers as arguments so it can be re-run rather than
 re-argued.
 
+**Superseded in part on 2026-10-16.** The primary in §3 is no longer
+Gemini 3.1 Flash-Lite: §8 is the October re-review and what the owner
+chose from it (Claude Haiku 5.5 for text, Gemini for photos).
+
 ## 1. The premise is right: nothing we call today is sellable
 
 `study/llm_shared.py` is free-tools-only, and says so. Both providers
@@ -429,7 +433,69 @@ tenth of the price; if it stays at zero while `in` is large, step 2 has
 not actually taken effect and the allowed-kanji list is being re-sent at
 full price on every call.
 
+## 8. October 2026: the re-review, and the owner's choice
+
+A month after §3 the cheap end of the market had moved under it. Every
+price below is from the provider's own pricing page on 2026-10-16; the
+general score is BenchLM's, which does not publish what it measures, so
+it ranks and nothing more. The cost is `llm_cost_model.py`'s blended
+learner (70/25/5, cold comprehension pool).
+
+| Model | $/1M in / out | Score | Japanese / translation evidence | $/learner/mo |
+|---|---|---:|---|---:|
+| Claude Haiku 5.5 (2026-10-07) | 0.10 / 0.50 | 70.1 | Claude 2nd behind Gemini on en→fr and en→ja (Alconost, within noise); no Haiku 5.5 figure yet | 0.11 |
+| GPT-6 Luna (2026-09-22) | 0.10 / 0.50 | 66.7 | OpenAI 3rd at Alconost; none yet | 0.11 |
+| DeepSeek Flash | 0.15–0.30 / 0.60–1.20 | 65.6 | Nejumi 0.817 (V4 Flash) | 0.13–0.26 |
+| GPT-5.6 Luna | 0.20 / 1.20 | 64.4 | Nejumi 0.815 | 0.25 |
+| Gemini 3.1 Flash-Lite (§3's primary) | 0.25 / 1.50 | 47.1 | — | 0.31 |
+| GPT-5-mini (§3's fallback) | 0.25 / 2.00 | ~48 | — | 0.40 |
+| Gemini 3.8 Flash | 0.75 / 3.75, 1.50 / 7.50 from 2027 | 69.3 | Gemini 1st on en→fr and en→ja (Alconost); 3.6 Flash leads the cheap proprietary models on Nejumi (0.831) | 0.79 → 1.58 |
+
+Out of the running: DeepSeek, whose API processes in China (a transfer
+question for EU learners); Mistral Small 4 (0.15 / 0.60, scores 34.7);
+Gemini 2.5 Flash-Lite, now closed to new projects; and every free tier
+as a primary, since Google's free tier uses what is sent to improve its
+products.
+
+**The choice.** Text goes to **Claude Haiku 5.5**, photos to **Gemini
+3.8 Flash**. Haiku is the best-scoring model at the lowest price, a
+third of Flash-Lite a learner; Gemini 3.8 Flash has the best
+translation evidence but costs seven times Haiku now and fifteen times
+from January, which only a failed smoke test would justify. Haiku is
+reached on the OpenRouter account as its own catalogue entry, `claude`,
+first in the default order, so a failure falls to the paid Gemini
+before the free tier (`study/llm_shared.py`, the `claude` entry, says
+why not `OPENROUTER_MODEL`, and why not Anthropic's own
+OpenAI-compatible endpoint). Two keys are the whole setup:
+`OPENROUTER_API_KEY` and `GOOGLE_API_KEY`.
+
+**Not measured yet.** Neither model has a Japanese-specific score, and
+both are unverified here until a key exists: run `check_llm_models
+--smoke` (Haiku), `--vision` (Gemini 3.8 Flash on tategaki) and
+`check_ask` before the first learner meets them. Three things to watch
+in the usage log afterwards: Haiku thinks adaptively by default and
+bills the thinking as output (the `reasoning=` column; at +50% output
+it is still $0.15 a learner); its tokenizer counts about 30% more
+tokens than Haiku 4.5's for the same text; and through OpenRouter no
+prompt prefix is cached, which at $0.10 input costs little.
+
+The gap that made §3's recommendation was a model's *Japanese*; the
+number that would reopen this one is `failed` in `llm_usage_report` on
+`task=comprehension`. If Haiku's comprehension retries climb, Gemini
+3.8 Flash is the escalation, as Haiku 4.5 was for Flash-Lite.
+
 ## Sources
+
+October 2026 (§8): [Gemini API pricing](https://ai.google.dev/gemini-api/docs/pricing)
+and [models](https://ai.google.dev/gemini-api/docs/models),
+[OpenAI pricing](https://developers.openai.com/api/docs/pricing),
+[Claude pricing](https://claude.com/pricing) and the
+[Haiku 5.5 overview](https://platform.claude.com/docs/en/models/haiku-5-5/overview),
+[DeepSeek pricing](https://api-docs.deepseek.com/quick_start/pricing),
+[BenchLM](https://benchlm.ai/llm-pricing),
+[Alconost's translation scoreboard](https://alconost.com/en/blog/best-llm-for-translation-2026),
+[Qualiteg's Nejumi report](https://journal.qualiteg.com/llm-ranking-2026/),
+[OpenRouter on reasoning](https://openrouter.ai/docs/use-cases/reasoning-tokens).
 
 Prices and terms, September 2026:
 

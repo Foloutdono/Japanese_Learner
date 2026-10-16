@@ -76,6 +76,12 @@ class LLMUnavailable(RuntimeError):
 # nothing -- and `--smoke` after it, which is the check that actually
 # matters (a model can be in the catalog and still answer an N5 prompt
 # in English). Every id is env-overridable for that reason.
+#
+# 2026-10-16, still without a key: read against the providers' own
+# published model lists instead. gemini-3.1-flash-lite, gpt-5-mini and
+# gpt-5-nano are there. The vision default, gemini-3.1-flash, never was
+# -- its first image would have been a 404, which retires the model for
+# the process and sends every photo to the free tier.
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
 GOOGLE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
 GOOGLE_MODEL = os.environ.get("GOOGLE_MODEL", "gemini-3.1-flash-lite")
@@ -83,7 +89,12 @@ GOOGLE_MODEL = os.environ.get("GOOGLE_MODEL", "gemini-3.1-flash-lite")
 # endpoint. Flash rather than Flash-Lite: OCR reads photographs of
 # manga and novels, which are vertical (tategaki), and that is the one
 # axis every cheap model measured here has failed on.
-GOOGLE_VISION_MODEL = os.environ.get("GOOGLE_VISION_MODEL", "gemini-3.1-flash")
+#
+# gemini-3.8-flash: Google's current stable Flash, $0.75 / $3.75 per 1M
+# until 2026-12-31 and $1.50 / $7.50 after -- about $0.002 an image now,
+# and OCR_DAILY_LIMIT bounds it. Not yet measured on tategaki: run
+# `check_llm_models --vision` before trusting it with manga.
+GOOGLE_VISION_MODEL = os.environ.get("GOOGLE_VISION_MODEL", "gemini-3.8-flash")
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 OPENAI_URL = "https://api.openai.com/v1/chat/completions"
@@ -101,6 +112,21 @@ OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
 # it, same discipline as the earlier stale-model fix below.
 OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "nvidia/nemotron-3.5-lightning:free")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+
+# ── Claude, through the OpenRouter account (2026-10) ─────────────
+# The text primary since the October re-review (docs/llm-commercial-
+# plan.md, §8): Claude Haiku 5.5, $0.10 / $0.50 per 1M, the cheapest of
+# the cheap models that score well -- a third of Gemini 3.1 Flash-Lite
+# a learner. It goes through OpenRouter rather than Anthropic's own
+# OpenAI-compatible endpoint, which Anthropic describes as a testing
+# aid, not a production one, and which caches nothing.
+#
+# Its own entry rather than OPENROUTER_MODEL, because the openrouter
+# entry walks its `:free` models next: pinned there, one Haiku 429 would
+# hand a learner's sentence to a free endpoint, whose upstream may train
+# on it, ahead of the paid Gemini. Here google follows it, and the free
+# tier stays last.
+CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "anthropic/claude-haiku-5.5")
 
 # Both spellings are read on purpose: the key was first added to
 # backend/.env under NVDIA_API_KEY (missing the I), and reading only the
@@ -251,6 +277,22 @@ _PROVIDER_CATALOG = {
         # clean with it off, same prompt and model).
         reasoning_body=lambda _reasoning: {"chat_template_kwargs": {"thinking": False}},
     ),
+    "claude": Provider(
+        name="claude",
+        url=OPENROUTER_URL,
+        api_key=OPENROUTER_API_KEY,
+        models=(CLAUDE_MODEL,),
+        # Haiku reads images, but nobody has measured it on tategaki;
+        # photos stay on google (_VISION_PROVIDER_PREFERENCE).
+        vision_models=(),
+        # OpenRouter's own field, as on the entry below. Haiku 5.5
+        # thinks adaptively and answers 400 to a fixed thinking budget;
+        # OpenRouter turns {"enabled": true} into adaptive thinking, not
+        # a budget, and returns the trace in a field this code never
+        # reads. {"enabled": false} asks for none -- which is what
+        # `check_llm_models --smoke` sends, so it is the check.
+        reasoning_body=lambda reasoning: {"reasoning": {"enabled": reasoning}},
+    ),
     "openrouter": Provider(
         name="openrouter",
         url=OPENROUTER_URL,
@@ -359,7 +401,11 @@ _PROVIDER_CATALOG = {
 # GOOGLE_API_KEY). It remains in the catalog and one line of
 # backend/.env brings it back for local work:
 # LLM_PROVIDER_ORDER=nvidia,openrouter.
-_DEFAULT_PROVIDER_ORDER = "google,openai,openrouter"
+#
+# claude first since 2026-10 (see its entry): with OPENROUTER_API_KEY
+# and GOOGLE_API_KEY set, text is Haiku, then Gemini, then the free
+# tier, and photos are Gemini whatever this says.
+_DEFAULT_PROVIDER_ORDER = "claude,google,openai,openrouter"
 
 # Vision walks providers in a DIFFERENT order than text, because the
 # best free text models and the only free vertical-capable vision model

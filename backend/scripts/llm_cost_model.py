@@ -16,8 +16,10 @@ moving to a paid provider is to log `usage` from each response and
 replace the CALLS/IN/OUT columns here with what actually happened --
 see docs/llm-commercial-plan.md, "Measure, then re-run this".
 
-Prices are $ per 1M tokens, as published in September 2026. They move;
-the table is the one thing here with a short shelf life.
+Prices are $ per 1M tokens, as published in September 2026, and the
+three rows added on 2026-10-16 (Claude Haiku 5.5, GPT-6 Luna, Gemini 3.8
+Flash) as published that day. They move; the table is the one thing
+here with a short shelf life.
 """
 import argparse
 
@@ -26,11 +28,17 @@ PRICES = {
     "Qwen3.7 Flash":         (0.03, 0.13),
     "GPT-5-nano":            (0.05, 0.40),
     "Gemini 2.5 Flash-Lite": (0.10, 0.40),
+    # Haiku's rate holds for prompts up to 100k tokens, which is every
+    # prompt this app sends; past that it is $0.50 / $2.50.
+    "Claude Haiku 5.5":      (0.10, 0.50),
+    "GPT-6 Luna":            (0.10, 0.50),
     "GPT-5.6 Luna":          (0.20, 1.20),
     "Gemini 3.1 Flash-Lite": (0.25, 1.50),
     "GPT-5-mini":            (0.25, 2.00),
     "Gemini 3.5 Flash-Lite": (0.30, 2.50),
     "DeepSeek V4 Flash":     (0.44, 1.32),
+    # Until 2026-12-31; $1.50 / $7.50 from 2027-01-01.
+    "Gemini 3.8 Flash":      (0.75, 3.75),
     "Claude Haiku 4.5":      (1.00, 5.00),
     "Claude Sonnet 5":       (2.00, 10.00),
 }
@@ -41,7 +49,13 @@ PRICES = {
 # unknown id's tokens and declines to guess what they cost, which is the
 # correct answer until someone reads the invoice.
 MODEL_IDS = {
+    # The text primary (study/llm_shared.py's `claude` entry) logs under
+    # OpenRouter's id; the second spelling is Anthropic's own.
+    "anthropic/claude-haiku-5.5": "Claude Haiku 5.5",
+    "claude-haiku-5-5": "Claude Haiku 5.5",
     "gemini-3.1-flash-lite": "Gemini 3.1 Flash-Lite",
+    "gemini-3.8-flash": "Gemini 3.8 Flash",
+    "gpt-6-luna": "GPT-6 Luna",
     "gemini-2.5-flash-lite": "Gemini 2.5 Flash-Lite",
     "gpt-5-mini": "GPT-5-mini",
     "gpt-5-nano": "GPT-5-nano",
@@ -214,7 +228,7 @@ def main():
               f"{cost(tin, tout, pin, pout):13.3f}")
 
     if args.fleet:
-        name = args.model or "Gemini 3.1 Flash-Lite"
+        name = args.model or "Claude Haiku 5.5"
         pin, pout = PRICES[name]
         blended = sum(
             share * cost(tin * mult, tout * mult, pin, pout)
