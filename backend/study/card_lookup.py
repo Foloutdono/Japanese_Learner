@@ -4,6 +4,7 @@ existing vocab/kanji decks and the user's SRS state. Used by both the
 phrase analyzer and the reading-practice mode.
 """
 
+import re
 from functools import lru_cache
 
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
@@ -936,6 +937,10 @@ def resolve_morpheme(morphemes, i: int):
     thing everywhere. The neighbour before it is what resolve_kana's
     auxiliary admission needs: whether this token hangs off a
     conjunctive て/で."""
+    return _kana_verb(morphemes[i], _resolve_morpheme(morphemes, i))
+
+
+def _resolve_morpheme(morphemes, i: int):
     m = morphemes[i]
     previous = morphemes[i - 1] if i > 0 else None
     after_conjunctive = previous is not None and previous.pos == "particle" and previous.conjunctive
@@ -990,6 +995,129 @@ def _common_kana_row(reading: str) -> bool:
         return False
     senses = jmdict_db.get_senses("", reading) or []
     return any("⭐" in (sense.get("term_tags") or []) for sense in senses)
+
+
+# A godan verb's stem before ます (連用形) and before ない (未然形), by
+# the last kana of its dictionary form.
+_GODAN_STEM = {
+    "連用形": dict(zip("うくぐすつぬぶむる", "いきぎしちにびみり")),
+    "未然形": dict(zip("うくぐすつぬぶむる", "わかがさたなばまら")),
+}
+
+
+def _form_of(cform: str) -> str:
+    """The form a kana spelling can be shared in, or "": the dictionary
+    form, and the plain stems. A sound-changed stem (すいて, はいた,
+    おいて: イ音便, 促音便) is a godan verb's alone and spells its own."""
+    form, _, kind = cform.partition("-")
+    if form in ("終止形", "連体形") or (form in _GODAN_STEM and kind == "一般"):
+        return form
+    return ""
+
+
+def _conjugated(kana: str, ctype: str, cform: str) -> str:
+    """The verb read `kana` in its dictionary form, of conjugation class
+    `ctype`, as it is spelled in `cform` -- for the forms a kana stem can
+    be shared in (the dictionary form, the stem before ます and before
+    ない) -- or "" for any other."""
+    form = _form_of(cform)
+    if form in ("終止形", "連体形"):
+        return kana
+    if form not in _GODAN_STEM:
+        return ""
+    if ctype.startswith("五段"):
+        row = _GODAN_STEM[form]
+        return kana[:-1] + row[kana[-1]] if kana[-1:] in row else ""
+    if "一段" in ctype:
+        return kana[:-1] if kana.endswith("る") else ""
+    if ctype.startswith("カ行変格") and kana == "くる":
+        return "き" if form == "連用形" else "こ"
+    return ""
+
+
+def _dictionary_forms(stem: str, cform: str) -> set[str]:
+    """Every dictionary form a verb spelled `stem` in `cform` could have:
+    おき before ます is おきる (an ichidan stem) or おく (a godan one)."""
+    form = _form_of(cform)
+    if form in ("終止形", "連体形"):
+        return {stem}
+    if form not in _GODAN_STEM:
+        return set()
+    out = {stem + "る"}
+    out |= {stem[:-1] + u for u, k in _GODAN_STEM[form].items() if stem.endswith(k)}
+    if stem == ("き" if form == "連用形" else "こ"):
+        out.add("くる")
+    return out
+
+
+@lru_cache(maxsize=4096)
+def _verb_class(written: str) -> str:
+    """UniDic's conjugation class for a deck verb written `written` on
+    its own, or "" when the tokenizer does not read it as one verb."""
+    morphemes = morphology.tokenize(written) or []
+    if len(morphemes) != 1 or morphemes[0].pos != "verb":
+        return ""
+    return morphemes[0].ctype
+
+
+def _deck_verbs_spelled(m) -> list[tuple[str, dict, str]]:
+    """(level, entry, raw_id) for every deck verb a token written in
+    hiragana could be, read off its spelling and its conjugation form
+    alone, or [] for any other token."""
+    if (m.pos != "verb" or not m.cform or not m.surface
+            or any(is_kanji(c) for c in m.surface) or _katakana_written(m.surface)):
+        return []
+    stem = morphology.kata_to_hira(m.surface)
+    out = []
+    for reading in _dictionary_forms(stem, m.cform):
+        for level, entry in _VOCAB_BY_KANA.get(reading, ()):
+            written = re.split(r"[/／;、,・]", entry.get("kanji") or "")[0].strip() or reading
+            ctype = _verb_class(written)
+            if ctype and _conjugated(reading, ctype, m.cform) == stem:
+                raw_id = vocab_to_id(entry, level)
+                if all(raw_id != r for _, _, r in out):
+                    out.append((level, entry, raw_id))
+    return out
+
+
+def _kana_verb(m, hit):
+    """The card for a verb the page writes in hiragana, where its
+    spelling alone could be another deck verb's (plan 213). A kana stem
+    says nothing of the verb it belongs to: 毎日六時におきます is 起きる,
+    "to get up", and UniDic reads おき as 置く, "to put" -- the dictation
+    clip was glossed "poser" under a translation that says "I get up".
+    The kanji tells them apart and the kana cannot, and UniDic's pick
+    between them was wrong as often as not: 明日ははれる was 腫れる "to
+    swell", ねるように 練る "to knead", 雨がふりました 振る "to wave",
+    電車をおります 居る. Nor does the level decide: the lowest of them
+    makes この薬はきかない 聞く "to hear" and 時間がたつ 立つ "to stand".
+
+    So a token another deck verb could be spelled as has no card -- a
+    missing meaning is a gap the learner can see, a false one is learned
+    -- unless:
+
+    - the other shares the hit's gloss: 上る and 登る are one word in two
+      spellings;
+    - the other is a rarer word than the hit, filed at a higher level: a
+      page that writes かえります in kana means the N5 帰る, not the N2 反る
+      "to warp", めがねをかける the N4 掛ける, not the N3 欠ける "to lack".
+      A rival as plain as the hit or plainer is a coin toss UniDic lost
+      as often as it won, and refuses it; the hit is kept or refused,
+      never traded for a rival;
+    - the hit is a kana-only card the page spells as the deck writes it:
+      する, なる, かかる are words the deck writes in kana, and 為る,
+      鳴る and 罹る are not what a page means by them."""
+    spelled = _deck_verbs_spelled(m)
+    if hit is None or not spelled:
+        return hit
+    _, entry, raw_id = hit
+    if not entry.get("kanji") and any(r == raw_id for _, _, r in spelled):
+        return hit
+    words, rank = _gloss_words(entry), _level_rank(hit[0])
+    if any(r != raw_id and not (words & _gloss_words(e)) and _level_rank(lv) <= rank
+           for lv, e, r in spelled):
+        return None
+    return hit
 
 
 _VOICED = str.maketrans("かきくけこさしすせそたちつてとはひふへほ", "がぎぐげござじずぜぞだぢづでどばびぶべぼ")
@@ -1345,6 +1473,12 @@ def resolve_pool_morpheme(morphemes, i: int) -> dict | None:
     previous = morphemes[i - 1] if i > 0 else None
     if m.auxiliary_use and previous is not None and previous.pos == "particle" and previous.conjunctive:
         # ている, てしまう: the grammar point's, as resolve_morpheme says.
+        return None
+    if _deck_verbs_spelled(m):
+        # A kana verb a deck verb could be spelled as, and the deck path
+        # gave no card: two deck verbs share its stem (plan 213), or
+        # UniDic read it as a word the deck does not hold and the deck's
+        # own reads the same. The pool's guess is no better.
         return None
     lemma = m.lemma or m.surface
     if not _has_kanji(lemma) and len(lemma) < 2:

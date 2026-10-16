@@ -31,7 +31,7 @@ from datetime import date, datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, id_for
 from content.kana_data import get_all_kana
 from content.kanji_data import KANJI_BY_LEVEL
 from content import reading_sentences
@@ -518,6 +518,7 @@ def get_ride(lang: str = "fr", user_id: str = Depends(get_user_id)):
             "translation_lang": translation_lang,
             "display_seconds": _display_seconds(jp),
             "grammar": _RIDE_SENTENCE["grammar"],
+            "grammar_id": id_for(_RIDE_SENTENCE["grammar"]),
         },
     }
 

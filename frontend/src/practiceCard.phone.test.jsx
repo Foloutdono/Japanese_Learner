@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { LangProvider, useLang } from './LangContext'
 import PromptCard from './components/study/PromptCard'
-import { SentenceCheck } from './components/study/PracticeCard'
+import { SentenceCheck, MissedWords, PointTag } from './components/study/PracticeCard'
 import './index.css'
 
 // ── 見本 — the practice card on a phone (plan 185) ─────────────────────
@@ -183,5 +183,130 @@ describe('the practice card at 390×844', () => {
     expect(missed[0].querySelector('.pcard-missed__en').textContent).toBe('un peu')
     const well = $(root, '.pcard-well').getBoundingClientRect()
     expect(missed[0].getBoundingClientRect().top).toBeGreaterThan(well.bottom)
+  })
+})
+
+// ── The words missed, as doors (plan 213) ──────────────────────────────
+// わたしは魚が好きです, every word missed: the tiles stood two to a phone's
+// row with the word on the left and its reading and meaning squeezed in a
+// column beside it, so a long meaning ("apprécié, aimer (quelque chose)")
+// fell into a tower of single words and a meaning without a reading sat
+// at the word's shoulder. Each tile now stacks -- the word and its
+// reading, the meaning under them -- and each is a door: a word to its
+// entry, a particle to the point it is.
+const MANY_WORDS = [
+  { text: 'わたし', kana: 'わたし', start: 0, end: 3 },
+  { text: 'は', kana: 'は', start: 3, end: 4 },
+  { text: '魚', kana: 'さかな', start: 4, end: 5 },
+  { text: 'が', kana: 'が', start: 5, end: 6 },
+  { text: '好きです', kana: 'すきです', start: 6, end: 10 },
+  { text: 'おきます', kana: 'おきます', start: 10, end: 14 },
+]
+const MANY_TOKENS = [
+  { surface: 'わたし', start: 0, end: 3, pos: 'pronoun',
+    vocab_match: { entry: { kanji: '私', kana: 'わたし', meaning: 'I, myself', meaning_fr: 'je, moi' } } },
+  { surface: 'は', start: 3, end: 4, pos: 'particle', grammar: [
+    { pattern: '〜は〜が', kind: 'pattern', raw_id: 'grammar_N5_〜は〜が', meaning: { en: 'as for … ', fr: 'quant à …' } },
+    { pattern: 'は', kind: 'marker', raw_id: 'grammar_N5_は', meaning: { en: 'topic marker', fr: 'marque du thème' } },
+  ] },
+  { surface: '魚', start: 4, end: 5, pos: 'noun',
+    vocab_match: { entry: { kanji: '魚', kana: 'さかな', meaning: 'fish', meaning_fr: 'poisson' } } },
+  { surface: 'が', start: 5, end: 6, pos: 'particle' },
+  { surface: '好き', start: 6, end: 8, pos: 'other', vocab_match: { entry: {
+    kanji: '好き', kana: 'すき', meaning: 'liked', meaning_fr: 'apprécié, aimer (quelque chose)' } } },
+  { surface: 'です', start: 8, end: 10, pos: 'auxiliary', grammar: [
+    { pattern: 'です／だ', kind: 'marker', raw_id: 'grammar_N5_です／だ', meaning: { en: 'is', fr: 'être' } },
+  ] },
+  // A verb the lookups would not name (plan 213: おき is 起きる or 置く),
+  // and its ending's point: the tile names nothing rather than the ending.
+  { surface: 'おき', start: 10, end: 12, pos: 'verb', vocab_match: null },
+  { surface: 'ます', start: 12, end: 14, pos: 'auxiliary', grammar: [
+    { pattern: '〜ます／〜ません', kind: 'pattern', raw_id: 'grammar_N5_〜ます／〜ません', meaning: { en: 'polite', fr: 'poli' } },
+  ] },
+]
+
+function Misses({ onOpen, onPoint, width }) {
+  const { t } = useLang()
+  return (
+    <div className="screen">
+      <main className="container stage" style={{ '--line-color': 'var(--line-reading)', width }}>
+        <PromptCard page prose>
+          <PointTag point="〜が好きです" label={t.pcardPoint} onOpen={onPoint} />
+          <MissedWords words={MANY_WORDS} tokens={MANY_TOKENS} label={t.pcardMissed} onOpen={onOpen} />
+        </PromptCard>
+      </main>
+    </div>
+  )
+}
+
+const tiles = root => [...root.querySelectorAll('.pcard-misses .pcard-missed')]
+
+describe('the words missed on a phone (plan 213)', () => {
+  for (const width of [undefined, '320px']) {
+    it(`stacks each tile, its meaning under the word across its width${width ? ` (${width})` : ''}`, async () => {
+      const root = (await render(<LangProvider><Misses onOpen={() => {}} width={width} /></LangProvider>)).container
+      for (const tile of tiles(root)) {
+        const box = tile.getBoundingClientRect()
+        // Nothing spills out of a tile, and no tile out of the page.
+        expect(tile.scrollWidth).toBeLessThanOrEqual(tile.clientWidth)
+        const en = tile.querySelector('.pcard-missed__en')
+        if (!en) continue
+        const word = tile.querySelector('.pcard-missed__word').getBoundingClientRect()
+        const gloss = en.getBoundingClientRect()
+        expect(gloss.top).toBeGreaterThanOrEqual(word.bottom - 1)
+        expect(gloss.left).toBeCloseTo(word.left, 0)
+        expect(gloss.right).toBeLessThanOrEqual(box.right)
+      }
+      // The long meaning holds two lines at most, not a column of words.
+      const like = tiles(root)[4].querySelector('.pcard-missed__en')
+      const lines = like.getBoundingClientRect().height / parseFloat(getComputedStyle(like).lineHeight)
+      expect(lines).toBeLessThanOrEqual(2.05)
+      // A row's tiles stand as tall as one another.
+      const [a, b] = tiles(root).map(tile => tile.getBoundingClientRect())
+      if (Math.abs(a.top - b.top) < 1) expect(a.height).toBeCloseTo(b.height, 0)
+      expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth)
+    })
+  }
+
+  it('opens a word on its entry and a particle on its point, each a 44px door', async () => {
+    const onOpen = vi.fn()
+    const root = (await render(<LangProvider><Misses onOpen={onOpen} /></LangProvider>)).container
+    const [watashi, wa, sakana, ga, suki, oki] = tiles(root)
+    for (const door of [watashi, wa, sakana, suki]) {
+      expect(door.tagName).toBe('BUTTON')
+      expect(door.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+    }
+    watashi.click()
+    expect(onOpen).toHaveBeenLastCalledWith({ category: 'vocab', term: '私', kana: 'わたし' })
+    expect(watashi.querySelector('.pcard-missed__en').textContent).toBe('je, moi')
+    // は means nothing alone: its tile is the topic marker's, gloss and door.
+    expect(wa.querySelector('.pcard-missed__en').textContent).toBe('marque du thème')
+    wa.click()
+    expect(onOpen).toHaveBeenLastCalledWith({ category: 'grammar', id: 'grammar_N5_は' })
+    suki.click()
+    expect(onOpen).toHaveBeenLastCalledWith({ category: 'vocab', term: '好き', kana: 'すき' })
+    // A particle the breakdown names no point for has nothing to open.
+    expect(ga.tagName).toBe('SPAN')
+    // A word with no card is no door, and never borrows its ending's
+    // point for a meaning.
+    expect(oki.tagName).toBe('SPAN')
+    expect(oki.querySelector('.pcard-missed__en')).toBeNull()
+    expect(sakana.getAttribute('aria-label')).toContain('魚')
+  })
+
+  it('opens the point from its tag', async () => {
+    const onPoint = vi.fn()
+    const root = (await render(<LangProvider><Misses onOpen={() => {}} onPoint={onPoint} /></LangProvider>)).container
+    const tag = root.querySelector('.pcard-tag')
+    expect(tag.tagName).toBe('BUTTON')
+    expect(tag.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+    tag.click()
+    expect(onPoint).toHaveBeenCalledTimes(1)
+  })
+
+  it('draws the tag and the tiles as no door without one to open', async () => {
+    const root = (await render(<LangProvider><Misses /></LangProvider>)).container
+    expect(root.querySelector('.pcard-tag').tagName).toBe('SPAN')
+    expect(root.querySelector('button')).toBeNull()
   })
 })
