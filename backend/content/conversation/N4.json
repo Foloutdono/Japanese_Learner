@@ -741,6 +741,7 @@
           },
           "alt": [
             {"jp": "ロペスです。はい、この番号でお願いします。", "kana": "ロペスです。はい、このばんごうでおねがいします。", "romaji": "ropesu desu. hai, kono bangou de onegai shimasu"},
+            {"jp": "ロペスです。はい、この番号でいいです。", "kana": "ロペスです。はい、このばんごうでいいです。", "romaji": "ropesu desu. hai, kono bangou de ii desu"},
             {"jp": "ロペスです。はい、それで大丈夫です。", "kana": "ロペスです。はい、それでだいじょうぶです。", "romaji": "ropesu desu. hai, sore de daijoubu desu"}
           ]
         },
