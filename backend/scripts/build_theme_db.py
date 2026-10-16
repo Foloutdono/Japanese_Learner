@@ -96,6 +96,14 @@ def parsed_themes() -> dict[str, dict[str, list[tuple[str, str, str, str]]]]:
     return out
 
 
+# A theme word and a deck card that share a reading and a word of their
+# glosses but are two words: 羊 the animal and 未 the zodiac's Sheep,
+# both ひつじ (plan 223 glossed 未 "the Sheep").
+DISTINCT_SPELLINGS: frozenset[tuple[str, str]] = frozenset({
+    ("羊", "未"),
+})
+
+
 class Resolver:
     def __init__(self):
         with open(_DECK_JSON, encoding="utf-8") as f:
@@ -141,7 +149,8 @@ class Resolver:
             # shares a word with this one (御飯 "cooked rice" for ご飯), is
             # the same word under another form.
             same = [(lv, k, r) for lv, k, r in twins
-                    if not k or self.same_sense(en, self.deck_meaning[(lv, k, r)])]
+                    if not k or (self.same_sense(en, self.deck_meaning[(lv, k, r)])
+                                 and (kanji, k) not in DISTINCT_SPELLINGS)]
             if same:
                 problems.append("pool form, but the deck teaches this word as: "
                                 + "; ".join(f"{lv} {k or '-'} {r}" for lv, k, r in same))

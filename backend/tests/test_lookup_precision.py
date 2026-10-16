@@ -133,7 +133,8 @@ class ThePagesSpellingTests(unittest.TestCase):
         # The glosses meet: one word, two spellings.
         for sentence, word, expected in (
             ("眼が痛い。", "眼", "vocab_N5_目_め"),
-            ("競り合ったお陰で、彼が勝った。", "お陰", "vocab_N1_お蔭_おかげ"),
+            # The N1 お蔭 folded into the N4 おかげ, its word (plan 223).
+            ("競り合ったお陰で、彼が勝った。", "お陰", "vocab_N4__おかげ"),
         ):
             with self.subTest(word=word):
                 self.assertEqual(matches(sentence)[word]["raw_id"], expected)
@@ -396,9 +397,12 @@ class TheLowerTwinTests(unittest.TestCase):
         self.assertTrue(matches("為る")["為る"]["raw_id"].startswith("vocab_N3_為る_"))
 
     def test_a_homograph_is_not_a_twin(self) -> None:
-        """たとえ, "even if", tokenizes as 仮令, and the N3 kana card たとえ
-        is "simile": no gloss in common, so it never stands beside it."""
-        self.assertEqual(matches("たとえ雨が降っても、試合は行う。")["たとえ"]["raw_id"], "vocab_N1_仮令_たとえ")
+        """たとえ, "even if", tokenizes as 仮令. The N3 kana card たとえ
+        carried 例え's gloss, "simile", until plan 223 gave it the list's
+        word and folded the N1 仮令 into it; 例え, "simile", stays a card
+        of its own and never answers for the adverb."""
+        self.assertEqual(matches("たとえ雨が降っても、試合は行う。")["たとえ"]["raw_id"], "vocab_N3__たとえ")
+        self.assertEqual(matches("上手な例えだ。")["例え"]["raw_id"], "vocab_N1_例え_たとえ")
 
     def test_a_corrected_gloss_makes_a_true_twin(self) -> None:
         """The N3 kana cards なお and そば carried another word's gloss

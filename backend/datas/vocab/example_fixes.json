@@ -577,6 +577,12 @@
    "fr": "La bonde s'est bouchée à cause des cheveux.",
    "why": "too long, slang ノドチンコ"
   },
+  "あからさまに言えば彼は嫌いだ。": {
+   "jp": "頼みごとをしたら、彼はあからさまに嫌な顔をした。",
+   "en": "When I asked him for a favor, he openly pulled a face.",
+   "fr": "Quand je lui ai demandé un service, il a ouvertement fait la grimace.",
+   "why": "dated あからさまに言えば; show typical use"
+  },
   "あごひげをはやした神様は自分が離れたのと同じ方法で戻ってくると約束していた。": {
    "jp": "父は最近ひげを生やし始めた。",
    "en": "My father recently started growing a beard.",
@@ -3787,6 +3793,12 @@
    "fr": "Cette ruelle est très passante.",
    "why": "EN 'cross street'"
   },
+  "この橋は重さ１０トンしか支えられません。": {
+   "jp": "この橋は１０トンまでしか支えられません。",
+   "en": "This bridge can only support up to ten tons.",
+   "fr": "Ce pont ne peut supporter que dix tonnes au maximum.",
+   "why": "awkward 重さ…しか; EN stiff"
+  },
   "この歌を聞くと私はいつも、学生時代を思い出す。": {
    "jp": "この歌を聞くと、いつも学生時代を思い出す。",
    "en": "Whenever I hear this song, I am reminded of my school days.",
@@ -4945,6 +4957,12 @@
    "fr": "Comme ça, vous gagnerez en efficacité.",
    "why": "EN loose"
   },
+  "そうは問屋がおろさないぞ。": {
+   "jp": "この問屋は野菜を町のスーパーに卸している。",
+   "en": "This wholesaler supplies vegetables to the town's supermarkets.",
+   "fr": "Ce grossiste fournit des légumes aux supermarchés de la ville.",
+   "why": "fixed saying, figurative; neither word in its sense"
+  },
   "そう言うことは彼はあつかましい奴だ。": {
    "jp": "そんなことを言うなんて、彼は厚かましい人だ。",
    "en": "How shameless of him to say such a thing.",
@@ -5119,6 +5137,12 @@
    "fr": "Malgré l'opposition de son entourage, il est resté fidèle à ses convictions jusqu'au bout.",
    "why": "religious framing, EN adds 'devout'"
   },
+  "そのキルトは本当によく技巧が凝らされていていいものですね。": {
+   "jp": "そのキルトは本当に技巧が凝らされていて、すばらしいですね。",
+   "en": "So much craftsmanship has gone into that quilt. It's wonderful.",
+   "fr": "On a mis tellement de savoir-faire dans ce quilt, il est magnifique.",
+   "why": "clumsy いいものですね"
+  },
   "そのクモは素早い反撃をする。": {
    "jp": "相手チームは素早い反撃で一点を返した。",
    "en": "The other team pulled a point back with a swift counterattack.",
@@ -5262,6 +5286,12 @@
    "en": "Every morning my grandmother puts her hands together and prays before the family altar.",
    "fr": "Chaque matin, ma grand-mère joint les mains et se recueille devant l'autel familial.",
    "why": "sense mismatch, rude"
+  },
+  "その丘の中腹に家が一軒あった。": {
+   "jp": "その丘の中腹に家が一軒あった。",
+   "en": "There was a house halfway up the hill.",
+   "fr": "Il y avait une maison à flanc de colline.",
+   "why": "EN 'cottage' not in JP"
   },
   "その中古の冷蔵庫はひどい代物だった。": {
    "jp": "お金がないので、中古の自転車を買った。",
@@ -5766,6 +5796,12 @@
    "en": "The storm blew the roof off the house.",
    "fr": "La tempête a emporté le toit de la maison.",
    "why": "stiff 為に, hard"
+  },
+  "その家は高い塀で人目から遮られている。": {
+   "jp": "高い塀に囲まれたその家は、人目につかない。",
+   "en": "Surrounded by a high wall, the house is hidden from view.",
+   "fr": "Entourée d'un haut mur, cette maison est à l'abri des regards.",
+   "why": "translationese passive 人目から遮られる"
   },
   "その小説の筋はわからない。": {
    "jp": "その小説は筋がよくわからなかった。",
@@ -6656,10 +6692,10 @@
    "why": "translationese あなたが使えるよう"
   },
   "その部屋は装飾を凝らしている。": {
-   "jp": "その部屋には凝った装飾が施されている。",
-   "en": "The room is elaborately decorated.",
-   "fr": "Cette pièce est richement décorée.",
-   "why": "unnatural 装飾を凝らしている"
+   "jp": "その部屋には、趣向を凝らした装飾が施されている。",
+   "en": "The room is adorned with ingeniously designed decorations.",
+   "fr": "Cette pièce est ornée de décorations conçues avec beaucoup d'ingéniosité.",
+   "why": "verify: existing correction used 凝った (凝る) and lost 凝らす"
   },
   "その醜い肉屋の旦那はあの想像上の怪物に似ている。": {
    "jp": "酒屋の旦那は、いつもおまけをくれる。",
@@ -8005,6 +8041,12 @@
    "fr": "Maintenant que je suis adulte, je ne vois plus les choses comme ça.",
    "why": "unnatural 私は, EN inaccurate"
   },
+  "もう１日滞在を延ばしたいのですが、泊まれますか。": {
+   "jp": "もう１日滞在を延ばしたいのですが、泊まれますか。",
+   "en": "I'd like to extend my stay by one more night. Is that possible?",
+   "fr": "J'aimerais prolonger mon séjour d'une nuit. Est-ce possible ?",
+   "why": "EN omits 'extend' (延ばす)"
+  },
   "もう３ページ残っている。": {
    "jp": "あと３ページ残っている。",
    "en": "There are three more pages to go.",
@@ -8100,6 +8142,12 @@
    "en": "Eventually, he forgot about the incident.",
    "fr": "Avec le temps, il a oublié cette affaire.",
    "why": "EN dated"
+  },
+  "やつは僕を裏切ったんだ！": {
+   "jp": "やつは僕を裏切ったんだ！",
+   "en": "That guy betrayed me!",
+   "fr": "Ce type m'a trahi !",
+   "why": "EN idiom 'stabbed in the back' hides 裏切る"
   },
   "ゆっくりでも着実にやってゆけば勝負には勝つ。": {
    "jp": "ゆっくりでも着実に進めば、最後には勝負に勝てる。",
@@ -10015,6 +10063,12 @@
    "fr": "Une ambulance et une voiture de police sont passées toutes sirènes hurlantes.",
    "why": "fleeing police"
   },
+  "パリはセーヌ川のほとりにあり、美しい都市です。": {
+   "jp": "パリはセーヌ川のほとりにある美しい都市です。",
+   "en": "Paris is a beautiful city on the banks of the Seine.",
+   "fr": "Paris est une belle ville située au bord de la Seine.",
+   "why": "awkward clause chaining"
+  },
   "パンツとブラジャー以外は全部脱いでください。": {
    "jp": "雨でパンツまでぬれてしまった。",
    "en": "The rain soaked me right through to my underpants.",
@@ -10716,6 +10770,12 @@
    "en": "Insulted in public, he turned bright red.",
    "fr": "Insulté en public, il est devenu tout rouge.",
    "why": "translationese"
+  },
+  "上空を飛行中に私たちはその湖ちらりと一見した。": {
+   "jp": "この寺の庭は一見の価値がある。",
+   "en": "This temple's garden is worth a look.",
+   "fr": "Le jardin de ce temple vaut le coup d'œil.",
+   "why": "missing を, redundant ちらりと一見"
   },
   "上部前方で何かが光っている。": {
    "jp": "空で何かが光っている。",
@@ -11646,6 +11706,12 @@
    "en": "I want to gradually increase my savings for the future.",
    "fr": "Je voudrais augmenter peu à peu mes économies pour l'avenir.",
    "why": "unnatural 体力を増やす"
+  },
+  "体操競技の中では、鉄棒の大車輪が好きです。": {
+   "jp": "体操競技の中では、鉄棒の大車輪が好きです。",
+   "en": "Of all the gymnastics events, I like the giant swing on the high bar.",
+   "fr": "En gymnastique, ce que j'aime, ce sont les grands tours à la barre fixe.",
+   "why": "EN adds 'to see a gymnast do'"
   },
   "体積が大きいからといって常に重量も重いとは限らない。": {
    "jp": "体積が大きいからといって、重量も重いとは限らない。",
@@ -12732,6 +12798,12 @@
    "en": "I wrote a letter addressed to my grandmother.",
    "fr": "J'ai écrit une lettre adressée à ma grand-mère.",
    "why": "overlong postal jargon"
+  },
+  "同書を一部ご寄贈いただければ幸いに存じます。": {
+   "jp": "祖父は集めた古い本を町の図書館に寄贈した。",
+   "en": "My grandfather donated the old books he had collected to the town library.",
+   "fr": "Mon grand-père a fait don à la bibliothèque municipale des vieux livres qu'il avait collectionnés.",
+   "why": "context-dependent 同書, formal letter fragment"
   },
   "同様に、禁煙する最大の理由はたいてい、短期的な利点（例えば、以前より健康で魅力的になった気がするということなど）なのである。": {
    "jp": "禁煙すると、短期的にも体にいい変化がある。",
@@ -14695,6 +14767,12 @@
    "fr": "C'est un spécialiste de ce domaine.",
    "why": "rare 草分け, too hard"
   },
+  "彼はこの墓地に埋葬されている。": {
+   "jp": "彼はこの墓地に埋葬されている。",
+   "en": "He is buried in this cemetery.",
+   "fr": "Il est enterré dans ce cimetière.",
+   "why": "EN tense (stative ている)"
+  },
   "彼はこの銃に弾丸を込めたままにしている。": {
    "jp": "合格の願いを込めて、友達にお守りを贈った。",
    "en": "I gave my friend a good-luck charm, with all my wishes that they pass the exam.",
@@ -15259,6 +15337,12 @@
    "fr": "Hachez finement l'oignon, s'il vous plaît.",
    "why": "not the sense filed (mince)"
   },
+  "彼は天を仰いだ。": {
+   "jp": "彼は天を仰いだ。",
+   "en": "He looked up at the sky.",
+   "fr": "Il a levé la tête vers le ciel.",
+   "why": "FR 'lever les yeux au ciel' reads as eye-rolling"
+  },
   "彼は天気のよい日を利用して壁を塗った。": {
    "jp": "明日の天気はどうかな。",
    "en": "I wonder what the weather will be like tomorrow.",
@@ -15348,6 +15432,12 @@
    "en": "Even young children can play safely in this park.",
    "fr": "Même les tout-petits peuvent jouer en sécurité dans ce parc.",
    "why": "child abuse"
+  },
+  "彼は弁護士になれるという希望に執着していた。": {
+   "jp": "彼は弁護士になるという夢に執着していた。",
+   "en": "He clung to his dream of becoming a lawyer.",
+   "fr": "Il s'accrochait à son rêve de devenir avocat.",
+   "why": "translationese なれるという希望"
   },
   "彼は当惑して落ち着きませんでした。": {
    "jp": "深呼吸をしたら、少し落ち着いた。",
@@ -15912,6 +16002,12 @@
    "en": "As soon as I get home, I wash my hands.",
    "fr": "Dès que je rentre à la maison, je me lave les mains.",
    "why": "fleeing police; neutral context"
+  },
+  "彼は貴族の出である。": {
+   "jp": "彼は貴族の出である。",
+   "en": "He comes from a noble family.",
+   "fr": "Il est issu d'une famille noble.",
+   "why": "EN archaic 'springs from'"
   },
   "彼は貿易で財産を築いた。": {
    "jp": "昔の人はこの丘の上に城を築いた。",
@@ -17317,6 +17413,12 @@
    "fr": "À cette époque, nous jouions souvent au base-ball après l'école.",
    "why": "stiff 我々, redundant その当時"
   },
+  "我々はその湖のほとりのホテルに泊まった。": {
+   "jp": "私たちはその湖のほとりのホテルに泊まった。",
+   "en": "We stayed at a hotel by the lake.",
+   "fr": "Nous avons logé dans un hôtel au bord du lac.",
+   "why": "stiff 我々"
+  },
   "我々はふだんより足を速めて歩いた。": {
    "jp": "作業員を増やして、工事の完成を早めた。",
    "en": "They brought in more workers to finish the construction sooner.",
@@ -17779,6 +17881,12 @@
    "fr": "Il va bientôt falloir faire la vidange de la voiture.",
    "why": "too hard (進水)"
   },
+  "新しいバイクは買えないのでこの古いやつでなんとか間に合わせなくてはならないだろう。": {
+   "jp": "新しいバイクは買えないから、この古いやつで何とか間に合わせるしかない。",
+   "en": "I can't afford a new motorbike, so I'll just have to make do with this old one.",
+   "fr": "Je n'ai pas les moyens d'acheter une moto neuve, alors il va falloir que je me débrouille avec cette vieille-là.",
+   "why": "translationese なくてはならないだろう, overlong"
+  },
   "新しい出生政策は人口増加ゼロをめざしています。": {
    "jp": "この町では出生数が年々減っている。",
    "en": "The number of births in this town is falling year after year.",
@@ -18186,6 +18294,12 @@
    "en": "There were fifty participants in total.",
    "fr": "Il y avait cinquante participants au total.",
    "why": "emperor at Yasukuni (political/religious), hard"
+  },
+  "昼飯でもいっしょにどうですか。": {
+   "jp": "昼飯でも一緒にどう？",
+   "en": "How about grabbing lunch together?",
+   "fr": "Ça te dit qu'on déjeune ensemble ?",
+   "why": "register mismatch casual 昼飯 + どうですか"
   },
   "時がどんどんたってゆく。": {
    "jp": "時間がどんどん経っていく。",
@@ -21163,6 +21277,12 @@
    "fr": "Dans une gare que je ne connaissais pas, je ne trouvais pas la sortie et j'étais tout désorienté.",
    "why": "vague context"
   },
+  "私宛に何か伝言がとどいていませんか。": {
+   "jp": "私宛に何か伝言が届いていませんか。",
+   "en": "Are there any messages for me?",
+   "fr": "Est-ce qu'il y a un message pour moi ?",
+   "why": "orthography とどいて"
+  },
   "私服警官が終始大統領の身辺を固めていた。": {
    "jp": "私服警官が終始大統領の身辺を固めていた。",
    "en": "Plain-clothes police officers stayed close around the President the whole time.",
@@ -21530,10 +21650,10 @@
    "why": "FR tense"
   },
   "縁組は天でなされる。": {
-   "jp": "古事記には天つ神が数多く登場する。",
-   "en": "Many gods of heaven appear in the Kojiki.",
-   "fr": "De nombreuses divinités célestes apparaissent dans le Kojiki.",
-   "why": "天 read てん, not あまつ"
+   "jp": "合格の知らせを聞いて、天にも昇る気持ちになった。",
+   "en": "When I heard I had passed, I felt as if I were walking on air.",
+   "fr": "En apprenant ma réussite, j'étais aux anges.",
+   "why": "verify: existing 天つ神 reads あまつ, not てん; mythology"
   },
   "縦横８フィートの部屋の面積は６４平方フィートである。": {
    "jp": "この部屋の広さは約二十平方メートルだ。",
@@ -23281,6 +23401,12 @@
    "fr": "J'ai obtenu mon permis de conduire l'année dernière.",
    "why": "too hard for N5 (高給, 安楽)"
   },
+  "魂の吐息を感じ始めた。": {
+   "jp": "この絵には画家の魂が込められている。",
+   "en": "The painter's soul has gone into this painting.",
+   "fr": "Le peintre a mis toute son âme dans ce tableau.",
+   "why": "bizarre 魂の吐息"
+  },
   "魔力(Ｍａｇｉｃ)：魔法を使うために必要な能力値。 魔法を使うと減少するが、時間で回復する。": {
    "jp": "xの値を求めなさい。",
    "en": "Find the value of x.",
@@ -23772,6 +23898,12 @@
    "en": "Melt the butter in the frying pan, then add the eggs.",
    "fr": "Faire fondre le beurre dans la poêle, puis ajouter les œufs.",
    "why": "numbered recipe fragment"
+  },
+  "４．煮え立たせる寸前で弱火にして、もう一度灰汁を取り除きます。": {
+   "jp": "この山菜は灰汁が強いので、一度ゆでてから使います。",
+   "en": "These wild vegetables have a strong bitter taste, so they are boiled once before use.",
+   "fr": "Ces légumes sauvages ont un goût très âcre, alors on les fait d'abord bouillir avant de les utiliser.",
+   "why": "numbered recipe fragment; scum, not the filed sense (bitter taste)"
   },
   "４０丁目で車を降りた。": {
    "jp": "私の家は本町二丁目にあります。",

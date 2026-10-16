@@ -815,6 +815,11 @@ MOVES: dict[str, str] = {
     "vocab_N3__あと": "vocab_N3_跡_あと",
     "vocab_N2_適確_てきかく": "vocab_N2_的確_てきかく",
     "vocab_N2_御手洗_おてあらい": "vocab_N5_お手洗い_おてあらい",
+    # Two kana cards that carried another word's gloss: the N3 たとえ
+    # read "simile" (例え) and is the list's "even if", the N1 仮令's word;
+    # the N4 おかげ is the N1 お蔭. Each kanji card folds into the kana one.
+    "vocab_N1_仮令_たとえ": "vocab_N3__たとえ",
+    "vocab_N1_お蔭_おかげ": "vocab_N4__おかげ",
     "vocab_N1_百科辞典_ひゃっかじてん": "vocab_N1_百科事典_ひゃっかじてん",
 }
 

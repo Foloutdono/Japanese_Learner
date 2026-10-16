@@ -103,7 +103,11 @@ class LevelVocabularyTests(unittest.TestCase):
     # for a rewrite of the bank; N2's 406 went to 405 when the lookups
     # stopped guessing a kana よる (plan 213): 因る was counted only in
     # によると and により, the points' own letters, and 寄る reads alike.
-    LEVEL_WORDS_FLOOR = {"N4": 316, "N3": 397, "N2": 405, "N1": 491}
+    # N3's 397 went to 395 and N1's 491 to 489 with plan 223's glosses
+    # and cards: a kana うち and ごみ are the N4 cards now that 内 and 塵
+    # share their gloss, 仮令 folded into the N3 たとえ and 率直 into the
+    # N2 card.
+    LEVEL_WORDS_FLOOR = {"N4": 316, "N3": 395, "N2": 405, "N1": 489}
     LEVEL_KANJI_FLOOR = {"N4": 106, "N3": 236, "N2": 145, "N1": 235}
 
     def test_every_graded_point_has_two_sentences(self) -> None:
