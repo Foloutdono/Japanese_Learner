@@ -439,6 +439,22 @@ rules in `index.css`; `layoutSentence` in `draw.js`):
   9:16 slide draws TikTok's photo view over it, `FEED_HUD`; never on the
   exported image).
 
+Each ratio comes at two margins, picked beside it (plan 234f): **For
+TikTok**, the default, measured below, and **Normal**, for anywhere that
+lays nothing over the image (an Instagram post, a site, a message). The
+normal margins are the post's own before plan 232 fitted it to TikTok,
+104 at the top, 112 at the foot and 92 a side, on either ratio
+(`formatOf` in `draw.js`), and a card reaches as far past the sides as
+on a post. At normal margins the guide reads "Show the margins" and
+tints them alone, never TikTok's photo view, and an exported file's name
+ends in `-normal`. A format keeps its ratio's id at either margin, so
+whatever a slide reads from the ratio (a heading's size, the words to a
+slide) holds. A promo story, a word echo and a short stay at TikTok's
+margins: they are made for a feed's video view. Drawn over a sample of
+every source, type and look in both ratios, what passes the normal box
+is what passes TikTok's (the Fiche band, a glyph's top), and a card's
+shadow at the foot where the wider box lets the card reach it.
+
 Both keep clear of what TikTok lays over a photo post, as measured on a
 phone (plan 232): a 4:5 post is shown at full width, its top ~70px above
 the screen's, so its search bar covers the post's first ~150px (the
