@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { track } from '../../lib/track'
 import { Link } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { apiJson } from '../../lib/api'
@@ -58,6 +59,7 @@ export function NotificationsPage() {
     setBusy(true)
     try {
       await apiJson('/api/profile/learning', await currentSession(), { method: 'PATCH', body: JSON.stringify({ notifications: on }) })
+      track('setting_change', { setting: 'notifications', value: on ? 'on' : 'off' })
       await refreshSummary()
     } catch {
       setFailed(true)

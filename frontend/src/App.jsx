@@ -34,6 +34,10 @@ import { forgetAccount } from './stores/account'
 import { track } from './lib/track'
 import { routePattern } from './lib/routePattern'
 import { watchApiFailures } from './lib/apiTrail'
+import { watchClientErrors } from './lib/clientErrors'
+import { watchVitals } from './lib/vitals'
+import { enterScreen } from './lib/screenTrail'
+import { syncOptOut } from './stores/analyticsOptOut'
 import { useDesk } from './hooks/useDesk'
 import { LangProvider, useLang } from './LangContext'
 
@@ -113,6 +117,10 @@ function DocumentHead() {
 }
 
 watchApiFailures()
+// Plan 218: uncaught errors by screen (never their text) and the page's
+// own speed, once per load.
+watchClientErrors()
+watchVitals()
 
 // 足跡 — renders nothing; records which screen was opened.
 //
@@ -136,7 +144,11 @@ export function Trail() {
   useEffect(() => {
     const route = routePattern(pathname)
     if (!route) return
-    track('screen_view', { route, tab: tabFor(pathname) })
+    const tab = tabFor(pathname)
+    track('screen_view', { route, tab })
+    // 滞在 (plan 218): the screen before is left -- its engaged time and
+    // its feature counts sent -- and this one's clock starts.
+    enterScreen(route, tab)
   }, [pathname])
 
   return null
@@ -423,6 +435,9 @@ export default function App({ front = NO_FRONT }) {
           standalone: typeof window !== 'undefined'
             && window.matchMedia?.('(display-mode: standalone)').matches === true,
         })
+        // 足跡を残さない (plan 218): the account's switch onto this
+        // device, or this device's older local switch up to the account.
+        syncOptOut(p.analyticsOff, session)
         // A real answer: the device now knows this learner is past
         // the gate, and may wave them through on a day the server is
         // not answering (stores/onboarded.js).

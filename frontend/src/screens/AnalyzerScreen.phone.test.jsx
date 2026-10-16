@@ -92,6 +92,11 @@ function typeInto(el, text) {
 async function analyze(screen) {
   typeInto(screen.container.querySelector('textarea'), '猫が好き。犬も好き。')
   screen.container.querySelector('.anl-action').click()
+  // The result's head, not a fixed wait: on a loaded CI runner 150 ms
+  // was sometimes short of the first render of the passage.
+  await vi.waitFor(() => {
+    if (!screen.container.querySelector('.anl-m__head')) throw new Error('no result yet')
+  }, { timeout: 5000 })
   await settle(150)
 }
 

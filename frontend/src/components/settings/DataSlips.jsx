@@ -6,6 +6,7 @@ import { saveBlob } from '../../lib/platform'
 import { playClick } from '../../lib/audio'
 import { refreshSummary } from '../../stores/profileSummary'
 import { useOptedOut, setOptedOut } from '../../stores/analyticsOptOut'
+import { countUse } from '../../lib/screenTrail'
 import { forgetOnboarded } from '../../stores/onboarded'
 import { Seg } from '../chrome/Console'
 import { Slip, SlipRow } from './SettingsPage'
@@ -43,10 +44,30 @@ export function DataSlips({ session }) {
       const blob = await r.blob()
       // A download on the web, the share sheet in the shell (plan 076).
       await saveBlob(blob, 'nihongo-progress.csv')
+      countUse('export', 'progress')
     } catch {
       setExportFailed(true)
     } finally {
       setExporting(false)
+    }
+  }
+
+  // The learner's own usage statistics (plan 218), the right of access
+  // beside the right to object: GET /api/profile/export/trail, both the
+  // raw rows and the daily counts, as one CSV.
+  const [trailing, setTrailing] = useState(false)
+  const [trailFailed, setTrailFailed] = useState(false)
+  async function exportTrail() {
+    setTrailing(true)
+    setTrailFailed(false)
+    try {
+      const r = await apiFetch('/api/profile/export/trail', session)
+      if (!r.ok) throw new Error(String(r.status))
+      await saveBlob(await r.blob(), 'tsuji-usage.csv')
+    } catch {
+      setTrailFailed(true)
+    } finally {
+      setTrailing(false)
     }
   }
 
@@ -88,7 +109,14 @@ export function DataSlips({ session }) {
             here is new CSS -- .slip__hint and .slip__act are the same
             two the three panels below use. */}
         <Slip label={t.settingsTrail}>
-          <span className="slip__hint">{t.settingsTrailHint}</span>
+          {/* The trail's own download sits in the hint, as text: the
+              slip's one action stays the switch (plan 218). */}
+          <span className="slip__hint">
+            {t.settingsTrailHint}{' '}
+            <button type="button" className="slip__more" data-action="trail-export" disabled={trailing} onClick={() => { playClick(); exportTrail() }}>
+              {trailing ? '…' : t.settingsTrailExportBtn}
+            </button>
+          </span>
           {/* One of two, so the rating bar's construction at chip size
               (DESIGN.md, Controls) rather than a button whose label has
               to say which way it will flip. */}
@@ -96,9 +124,10 @@ export function DataSlips({ session }) {
             full
             label={t.settingsTrail}
             value={optedOut ? 'off' : 'on'}
-            onChange={key => { playClick(); setOptedOut(key === 'off') }}
+            onChange={key => { playClick(); setOptedOut(key === 'off', session) }}
             options={[{ key: 'on', label: t.settingsTrailOn }, { key: 'off', label: t.settingsTrailOff }]}
           />
+          {trailFailed && <span className="hint" role="alert">{t.onbPassError}</span>}
         </Slip>
 
         <Slip label={t.settingsExport}>

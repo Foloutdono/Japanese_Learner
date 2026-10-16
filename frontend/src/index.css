@@ -22699,6 +22699,13 @@ a.slip__act { text-decoration: none; }
 .slip__label { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
 .slip__name { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; }
 .slip__hint { font-size: var(--fs-caption); color: var(--text-secondary); line-height: 1.5; }
+/* An action a slip offers in passing, inside its hint (plan 218: the
+   trail's own download beside its switch). Text, not a second
+   .slip__act, so every slip still ends on one action and a desk pair of
+   slips still ends level. */
+.slip__more { padding: 0; border: 0; background: none; font: inherit; color: var(--accent2); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.slip__more:disabled { color: var(--text-secondary); cursor: default; }
+.slip__more:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
 /* Every action on a page is the same box, edge to edge: four
    buttons in four widths, each cut to its own word, read as four
    different controls. */
