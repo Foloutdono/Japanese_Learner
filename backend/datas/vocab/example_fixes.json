@@ -201,9 +201,9 @@
   },
   "「もしおまえが私のなぞなぞ答えられたら、私はおまえを無事に通してやる」とスフィンクスは言った。": {
    "jp": "子どもたちは車の中でなぞなぞをして遊んだ。",
-   "en": "The children played at riddles in the car.",
+   "en": "The children played a riddle game in the car.",
    "fr": "Les enfants ont joué aux devinettes dans la voiture.",
-   "why": "missing particle に, long"
+   "why": "verify: EN 'played at riddles' reads as pretending"
   },
   "「もしや、あなたは小川さんではありませんか？」「そうですが、何か？」": {
    "jp": "「もしや、あなたは小川さんではありませんか？」「そうですが、何か？」",
@@ -243,9 +243,9 @@
   },
   "「ピッキングの道具無しで、どうやって侵入した？」「トイレの窓があいた」": {
    "jp": "工事現場への侵入は禁止されている。",
-   "en": "Entry to the construction site is prohibited.",
-   "fr": "L'accès au chantier est interdit.",
-   "why": "burglary dialogue"
+   "en": "Trespassing on the construction site is prohibited.",
+   "fr": "Il est interdit de pénétrer sur le chantier.",
+   "why": "verify: 侵入 is intrusion/trespass, not neutral 'entry/accès'"
   },
   "「マナカの絵、見して」「えーー、恥ずかしいですよー」": {
    "jp": "「これ、あなたの傘ですか。」「ええ、そうです。ありがとう。」",
@@ -411,9 +411,9 @@
   },
   "「誰か車の中にいるのですか」「トムがいます」": {
    "jp": "「誰か車の中にいるのですか」「トムがいます」",
-   "en": "\"Is there someone in the car?\" \"Tom is.\"",
+   "en": "\"Is anyone in the car?\" \"Tom is.\"",
    "fr": "« Il y a quelqu'un dans la voiture ? » « Oui, Tom. »",
-   "why": "EN mistranslation 誰か"
+   "why": "verify: EN answer 'Tom is.' does not fit 'Is there someone…'"
   },
   "「財布を無くした」ジョンは嘆いた。": {
    "jp": "「財布をなくした」とジョンは嘆いた。",
@@ -496,8 +496,8 @@
   "ああ、彼らはいつ再会するだろうか。": {
    "jp": "二人は十年ぶりに再会した。",
    "en": "The two of them met again for the first time in ten years.",
-   "fr": "Tous les deux se sont retrouvés pour la première fois en dix ans.",
-   "why": "odd ああ"
+   "fr": "Tous deux se sont retrouvés après dix ans de séparation.",
+   "why": "verify: FR 'pour la première fois en dix ans' is an anglicism"
   },
   "ああ悲しい。": {
    "jp": "ああ、悲しい。",
@@ -622,8 +622,8 @@
   "あちらが私の待っていた人です。": {
    "jp": "「あちらが田中さんです。」「え、あっちの背の高い人？」",
    "en": "\"That's Mr Tanaka over there.\" \"What, the tall man over there?\"",
-   "fr": "« Voici M. Tanaka, là-bas. » « Ah bon, le grand, là-bas ? »",
-   "why": "あっち absent; dialogue shows both"
+   "fr": "« C'est M. Tanaka, là-bas. » « Ah bon, le grand, là-bas ? »",
+   "why": "verify: FR 'Voici … là-bas' points near and far at once; C'est"
   },
   "あちらに着いたら手紙をください。": {
    "jp": "「お手洗いはあちらです。」「あっちだって。行こう。」",
@@ -758,10 +758,10 @@
    "why": "translationese あなたに"
   },
   "あなたに庭の手入れを手伝って頂きたいのですが。": {
-   "jp": "庭の手入れを手伝って頂きたいのですが。",
+   "jp": "庭の手入れを手伝っていただきたいのですが。",
    "en": "I would like you to help me look after the garden.",
    "fr": "J'aimerais que vous m'aidiez à entretenir le jardin.",
-   "why": "translationese あなたに"
+   "why": "verify: auxiliary いただく after a te-form is written in kana (頂きたい)"
   },
   "あなたに手紙を書くつもりだったのだが。": {
    "jp": "彼は若い。だが、経験は豊富だ。",
@@ -782,10 +782,10 @@
    "why": "translationese"
   },
   "あなたに面会したいという婦人がいます。": {
-   "jp": "受付に、面会を希望されている婦人がいらっしゃいます。",
+   "jp": "受付に、面会を希望されているご婦人がいらっしゃいます。",
    "en": "There's a lady at reception asking to see you.",
    "fr": "Une dame à l'accueil demande à vous voir.",
-   "why": "translationese あなたに"
+   "why": "verify: keigo: honorific いらっしゃる with bare 婦人; ご婦人"
   },
   "あなたに頼んでもよろしいですか。": {
    "jp": "ちょっと頼んでもいいですか。",
@@ -1024,8 +1024,8 @@
   "あなたの言う事が果たして事実なのか調べてみよう。": {
    "jp": "君の話が果たして本当なのか、調べてみよう。",
    "en": "Let's check whether what you say is really true.",
-   "fr": "Vérifions si ce que tu racontes est vraiment vrai.",
-   "why": "translationese あなた"
+   "fr": "Vérifions si ce que tu racontes est bien vrai.",
+   "why": "verify: FR 'est vraiment vrai' is clumsy French"
   },
   "あなたの計画は実際的だという長所がある。": {
    "jp": "彼女の長所は誰にでも優しいところだ。",
@@ -1047,9 +1047,9 @@
   },
   "あなたの議論は良く相手に伝わった。": {
    "jp": "あなたの言いたいことは、相手によく伝わったと思う。",
-   "en": "I think the other side understood well what you wanted to say.",
-   "fr": "Je pense que votre interlocuteur a bien compris ce que vous vouliez dire.",
-   "why": "unnatural 議論が伝わった"
+   "en": "I think what you wanted to say came across well to the other person.",
+   "fr": "Je pense que ton interlocuteur a bien compris ce que tu voulais dire.",
+   "why": "verify: plain-form JP (思う) takes tu, not vous; EN 'the other side' and loses 伝わった"
   },
   "あなたの迅速な返事が是非とも必要です。": {
    "jp": "是非ともお会いしたいと思っております。",
@@ -1136,10 +1136,10 @@
    "why": "translationese"
   },
   "あなたはあの勤め口に申し込むべきだ。": {
-   "jp": "あの仕事に申し込むべきだよ。",
-   "en": "You should apply for that job.",
-   "fr": "Tu devrais postuler à ce poste.",
-   "why": "dated 勤め口, translationese あなたは"
+   "jp": "あの英会話の講座に申し込んだほうがいいよ。",
+   "en": "You should sign up for that English conversation course.",
+   "fr": "Tu devrais t'inscrire à ce cours de conversation anglaise.",
+   "why": "verify: 仕事に申し込む is unnatural (a job is 応募する); 申し込む's typical object is a course or event"
   },
   "あなたはあの車をどう処理したのですか？": {
    "jp": "このデータはどう処理すればいいですか。",
@@ -1323,9 +1323,9 @@
   },
   "あなたは充分可愛い女の子の範疇に入ると思います。部長のおめがねには余裕でかなってしまうでしょう。": {
    "jp": "兄はサッカー部の部長です。",
-   "en": "My older brother is captain of the soccer club.",
-   "fr": "Mon grand frère est le capitaine du club de foot.",
-   "why": "inappropriate remark on looks; too hard"
+   "en": "My older brother is the president of the soccer club.",
+   "fr": "Mon grand frère est le président du club de foot.",
+   "why": "verify: 部長 of a school club is its head/president, not the team captain (キャプテン/主将)"
   },
   "あなたは先生にしかられましたか。": {
    "jp": "先生に叱られたの？",
@@ -1575,9 +1575,9 @@
   },
   "あのチームはつわものぞろいだ。": {
    "jp": "姉と揃いのセーターを買った。",
-   "en": "My sister and I bought matching sweaters.",
-   "fr": "Ma sœur et moi avons acheté des pulls assortis.",
-   "why": "word absent (ぞろい suffix), other sense"
+   "en": "I bought a sweater to match my older sister's.",
+   "fr": "J'ai acheté un pull assorti à celui de ma grande sœur.",
+   "why": "verify: 姉と揃いのセーターを買った: I bought it (a sweater matching my sister's); EN/FR made both sisters the buyers"
   },
   "あのテーマパークでスリルを味わった。": {
    "jp": "せっかくの料理だから、ゆっくり味わって食べよう。",
@@ -1672,8 +1672,8 @@
   "あの子にはうんざりする。": {
    "jp": "毎日同じ料理ばかりで、もううんざりだ。",
    "en": "It's the same food every day; I'm sick of it.",
-   "fr": "C'est toujours le même plat tous les jours, j'en ai vraiment assez.",
-   "why": "insult to a child"
+   "fr": "Tous les jours le même plat : j'en ai vraiment assez.",
+   "why": "verify: FR redundant 'toujours ... tous les jours'"
   },
   "あの子はなんてうるさい子だろう。": {
    "jp": "蚊がうるさくて、よく眠れなかった。",
@@ -2331,9 +2331,9 @@
   },
   "うっとうしい梅雨期に、すっきりしない話で恐縮ですが、少しの間お付き合いください。": {
    "jp": "話し合いの結果、問題はすっきり解決した。",
-   "en": "After talking it over, the problem was cleanly resolved.",
-   "fr": "Après discussion, le problème a été réglé proprement.",
-   "why": "long, formal, unclear sense"
+   "en": "As a result of the discussion, the problem was cleanly resolved.",
+   "fr": "À l'issue de la discussion, le problème a été entièrement réglé.",
+   "why": "verify: EN dangling modifier (After talking it over, the problem...); FR réglé proprement unidiomatic"
   },
   "うまくあの先生のやまを当てたわね。": {
    "jp": "テストの山が当たって、いい点が取れた。",
@@ -2404,8 +2404,8 @@
   "おつりはいらないよ、運転士さん。": {
    "jp": "おつりはいらないよ、運転手さん。",
    "en": "Keep the change, driver.",
-   "fr": "Gardez la monnaie.",
-   "why": "wrong word 運転士 (train driver)"
+   "fr": "Gardez la monnaie, monsieur.",
+   "why": "verify: FR dropped the address 運転手さん (the card word さん)"
   },
   "おばあちゃんは身をかがめて糸の付いた針を拾った。": {
    "jp": "おばあちゃんに頼まれて、針に糸を通した。",
@@ -2770,8 +2770,8 @@
   "こういうタイプの人はおもしろくない。": {
    "jp": "彼は私のタイプじゃない。",
    "en": "He's not my type.",
-   "fr": "Ce n'est pas mon genre.",
-   "why": "judgmental; better for 'one's type' sense"
+   "fr": "Il n'est pas mon genre.",
+   "why": "verify: FR 'Ce n'est pas mon genre' also reads 'that's not like me'; 彼は names the person"
   },
   "こういう次第だ。": {
    "jp": "以上のような次第で、会議は来週に延期になりました。",
@@ -3046,8 +3046,8 @@
   "このざまはどうしたんだ。": {
    "jp": "田中様、受付までお越しください。",
    "en": "Mr. Tanaka, please come to the reception desk.",
-   "fr": "Monsieur Tanaka est prié de se présenter à l'accueil.",
-   "why": "word absent (ざま, other word)"
+   "fr": "Monsieur Tanaka, veuillez vous présenter à l'accueil.",
+   "why": "verify: FR switched to a third-person announcement; the Japanese addresses Mr Tanaka directly"
   },
   "このところ飛行機事故が続く。": {
    "jp": "このところ、雨の日が続いている。",
@@ -3160,8 +3160,8 @@
   "このスイミングスクールの毎月の月謝はいくらですか。": {
    "jp": "このスイミングスクールの月謝はいくらですか。",
    "en": "How much is the monthly fee at this swimming school?",
-   "fr": "Combien coûte l'inscription mensuelle dans cette école de natation ?",
-   "why": "redundant 毎月の月謝"
+   "fr": "Quel est le tarif mensuel de cette école de natation ?",
+   "why": "verify: FR 'l'inscription mensuelle' is wrong: 月謝 is the monthly fee, not a registration"
   },
   "このストッキングはとても高い。": {
    "jp": "このストッキングはとても高い。",
@@ -3208,8 +3208,8 @@
   "このテーマに関するほとんどの研究では、立法府の介入が悪影響をもたらしたということが示されている。": {
    "jp": "この会議のテーマは、子どもの教育に親がどこまで介入すべきかだ。",
    "en": "The theme of this conference is how far parents should intervene in their children's education.",
-   "fr": "Le thème de cette conférence, c'est jusqu'où les parents doivent intervenir dans l'éducation de leurs enfants.",
-   "why": "political claim, translationese"
+   "fr": "Cette conférence a pour thème la question de savoir jusqu'où les parents doivent intervenir dans l'éducation de leurs enfants.",
+   "why": "verify: FR colloquial 'Le thème..., c'est jusqu'où' in a written sentence"
   },
   "このデータは除外した方がいい。正確というには程とおいものだ。": {
    "jp": "この調査では、未成年の回答は除外した。",
@@ -3368,16 +3368,16 @@
    "why": "bizarre, no context"
   },
   "この代用貨幣では、会社の直営店に行き、その店で食料品や衣料を買うことしかできませんでした。": {
-   "jp": "貨幣が生まれる前、人々は物と物を交換していた。",
-   "en": "Before money came into being, people exchanged goods for other goods.",
-   "fr": "Avant l'apparition de la monnaie, les gens échangeaient des biens contre d'autres biens.",
-   "why": "needs missing context, word only in compound"
+   "jp": "この博物館では、世界各国の貨幣が展示されている。",
+   "en": "This museum displays currency from countries all over the world.",
+   "fr": "Ce musée expose des monnaies du monde entier.",
+   "why": "verify: 'barter came before money' is a contested historical claim (anthropology finds no barter economies preceding money); replaced with a neutral sentence"
   },
   "この件についてのあなたのお求めを了承します。": {
    "jp": "工事中はご不便をおかけしますが、ご了承ください。",
    "en": "We apologize for the inconvenience during the construction and ask for your understanding.",
-   "fr": "Nous vous prions de nous excuser pour la gêne occasionnée pendant les travaux.",
-   "why": "translationese"
+   "fr": "Nous vous prions de nous excuser pour la gêne occasionnée pendant les travaux et vous remercions de votre compréhension.",
+   "why": "verify: FR dropped ご了承ください (the card word 了承); EN has it"
   },
   "この任務はすべての任務に優先する。": {
    "jp": "安全を何よりも優先してください。",
@@ -3842,10 +3842,10 @@
    "why": "EN 'the lake' for この湖"
   },
   "この為替を作るのに銀行の手数料が５０ドルかかった。": {
-   "jp": "外国に住む息子に為替でお金を送った。",
-   "en": "I sent money to my son abroad by money order.",
-   "fr": "J'ai envoyé de l'argent par mandat à mon fils, qui vit à l'étranger.",
-   "why": "stiff, foreign context"
+   "jp": "一人暮らしの息子に為替でお金を送った。",
+   "en": "I sent money by money order to my son, who lives on his own.",
+   "fr": "J'ai envoyé de l'argent par mandat à mon fils, qui vit seul.",
+   "why": "verify: sending a postal money order abroad from Japan is not a current service one can assert; kept the sentence domestic"
   },
   "この無限の空間に漂う永遠の沈黙が私を恐怖に陥れる。": {
    "jp": "海の上に小さなボートが漂っている。",
@@ -3945,9 +3945,9 @@
   },
   "この種は長距離移動の記録を持っています。": {
    "jp": "今年の夏は、最高気温の記録が更新された。",
-   "en": "This summer, the record for the highest temperature was broken.",
-   "fr": "Cet été, le record de la température la plus élevée a été battu.",
-   "why": "fragment out of context (この種)"
+   "en": "This summer, the record high temperature was broken.",
+   "fr": "Cet été, le record de chaleur a été battu.",
+   "why": "verify: FR clumsy (le record de la température la plus élevée)"
   },
   "この紙はどちらが表だか見分けがつかない。": {
    "jp": "この紙はどちらが表かわからない。",
@@ -4232,10 +4232,10 @@
    "why": "EN mistranslation"
   },
   "この驚くほどの増加は、同じ期間の間に起こった急速な経済面での統合によって可能となった。": {
-   "jp": "二つの市が統合して、新しい市が誕生した。",
-   "en": "Two cities merged, and a new city was born.",
-   "fr": "Deux villes ont fusionné pour donner naissance à une nouvelle ville.",
-   "why": "translationese (期間の間), convoluted"
+   "jp": "二つの小学校が統合されて、一つの学校になった。",
+   "en": "Two elementary schools were merged into one.",
+   "fr": "Deux écoles primaires ont été regroupées en une seule.",
+   "why": "verify: cities merging is 合併, not 統合; school consolidation is 統合's typical use"
   },
   "この魚は安くてしかも栄養がある。": {
    "jp": "この魚は安くてしかも栄養がある。",
@@ -4526,10 +4526,10 @@
    "why": "wrong verb (機会を逃す is 逃す)"
   },
   "こんなデカイのがチャリの荷台に乗るわけないだろ。": {
-   "jp": "こんなでかい荷物は自転車に乗らないよ。",
+   "jp": "こんなでかい荷物は自転車に載らないよ。",
    "en": "A package this big won't fit on a bike.",
-   "fr": "Un colis aussi gros, ça ne rentre pas sur un vélo.",
-   "why": "word absent (katakana); slang"
+   "fr": "Un colis aussi gros, ça ne tient pas sur un vélo.",
+   "why": "verify: cargo fitting on a bike is 載る, not 乗る; FR 'rentre pas sur' unnatural"
   },
   "こんな余計な機能なんでつけたんだろう。": {
    "jp": "こんな余計な機能、なんでつけたんだろう。",
@@ -4678,8 +4678,8 @@
   "さあ言ってよ、じっと聞いているから。": {
    "jp": "痛かったが、子どもはじっと我慢した。",
    "en": "It hurt, but the child bore it patiently.",
-   "fr": "Ça faisait mal, mais l'enfant a patiemment supporté.",
-   "why": "sense mismatch"
+   "fr": "Ça faisait mal, mais l'enfant l'a supporté patiemment.",
+   "why": "verify: FR 'supporter' left without an object"
   },
   "さすが、お嬢様。自由奔放な生活をしていたわけじゃないんだ。": {
    "jp": "さすがプロの料理人だ。何を作ってもおいしい。",
@@ -4862,10 +4862,10 @@
    "why": "translationese 持っている"
   },
   "すべての人間が平等に創られているわけではない。": {
-   "jp": "法の前では、すべての人が平等だ。",
+   "jp": "法の下では、すべての人が平等だ。",
    "en": "Everyone is equal before the law.",
    "fr": "Tout le monde est égal devant la loi.",
-   "why": "contentious claim"
+   "why": "verify: 法の前では is a calque of 'before the law'; the Japanese phrase is 法の下（もと）で平等"
   },
   "すべての悲劇は死で終わる。": {
    "jp": "シェークスピアの悲劇を読んだ。",
@@ -4887,15 +4887,15 @@
   },
   "ずっと昔からこの原則は認められてきた。": {
    "jp": "ずっと昔からこの原則は認められてきた。",
-   "en": "This principle has been accepted since long ago.",
+   "en": "This principle has been accepted for a very long time.",
    "fr": "Ce principe est admis depuis très longtemps.",
-   "why": "EN mistranslation"
+   "why": "verify: EN 'since long ago' unidiomatic"
   },
   "ずらりと並んだアルミのポットやなべ。": {
    "jp": "台所にはアルミの鍋がずらりと並んでいた。",
-   "en": "A row of aluminum pans stood lined up in the kitchen.",
+   "en": "Aluminum pans stood lined up in the kitchen.",
    "fr": "Des casseroles en aluminium étaient alignées dans la cuisine.",
-   "why": "fragment"
+   "why": "verify: EN 'A row ... stood lined up' redundant"
   },
   "せっかくの苦労もあだになった。": {
    "jp": "せっかくの苦労が無駄になってしまった。",
@@ -4936,8 +4936,8 @@
   "そうするとよけい傷をとがめるよ。": {
    "jp": "見るなと言われると、よけい見たくなる。",
    "en": "When you're told not to look, you want to look all the more.",
-   "fr": "Quand on vous dit de ne pas regarder, on a encore plus envie de regarder.",
-   "why": "rare とがめる, unclear"
+   "fr": "Quand on nous dit de ne pas regarder, on a encore plus envie de regarder.",
+   "why": "verify: FR mixes generic vous and on in one sentence"
   },
   "そうすれば能率が上がりますよ。": {
    "jp": "そうすれば能率が上がりますよ。",
@@ -5066,10 +5066,10 @@
    "why": "awkward word order"
   },
   "そのようなことが再び起こりうるだろうか。": {
-   "jp": "同じ間違いを再び繰り返さないように気をつけよう。",
+   "jp": "同じ間違いを再びしないように気をつけよう。",
    "en": "Let's be careful not to make the same mistake again.",
    "fr": "Faisons attention à ne pas refaire la même erreur.",
-   "why": "hard 起こりうる, simplified"
+   "why": "verify: 再び繰り返す is redundant (重言)"
   },
   "そのような事はしょっちゅう起こる。": {
    "jp": "うちの父は、しょっちゅう眼鏡をなくす。",
@@ -5535,9 +5535,9 @@
   },
   "その命令に嫌々従う兵もいた。": {
    "jp": "子どもはいやいや宿題を始めた。",
-   "en": "The child reluctantly started on the homework.",
+   "en": "The child reluctantly started on his homework.",
    "fr": "L'enfant s'est mis à contrecœur à ses devoirs.",
-   "why": "soldiers; spelling 嫌々"
+   "why": "verify: EN 'the homework' translationese"
   },
   "その品物を１ダースにつき３ドルで買う。": {
    "jp": "卵を１ダース買ってきてください。",
@@ -5842,8 +5842,8 @@
   "その嵐の天候は恐ろしかった。": {
    "jp": "昨夜の嵐は本当に恐ろしかった。",
    "en": "Last night's storm was really frightening.",
-   "fr": "L'orage d'hier soir était vraiment effrayant.",
-   "why": "translationese 嵐の天候"
+   "fr": "La tempête d'hier soir était vraiment effrayante.",
+   "why": "verify: FR orage is a thunderstorm; 嵐 is a tempête"
   },
   "その川には鉄橋がすでに建設中だ。": {
    "jp": "電車が鉄橋を渡る音が聞こえる。",
@@ -5865,9 +5865,9 @@
   },
   "その市はやがて兵隊によって占領された。": {
    "jp": "弟はおもちゃの兵隊を並べて遊んでいる。",
-   "en": "My little brother is playing at lining up his toy soldiers.",
+   "en": "My little brother is playing with his toy soldiers, lining them up.",
    "fr": "Mon petit frère s'amuse à aligner ses petits soldats.",
-   "why": "military occupation"
+   "why": "verify: EN 'playing at lining up' means pretending, wrong"
   },
   "その年になってもまだ彼女は若々しい少女の面影を保っていた。": {
    "jp": "祖母は七十歳を過ぎても若々しい。",
@@ -5906,10 +5906,10 @@
    "why": "EN/FR disagree, vague"
   },
   "その当時、そこには未開民族が住んでいた。": {
-   "jp": "その島には、まだ未開のジャングルが広がっている。",
+   "jp": "その島には、今も未開のジャングルが広がっている。",
    "en": "Untouched jungle still stretches across that island.",
    "fr": "Une jungle encore vierge s'étend sur cette île.",
-   "why": "pejorative toward a people"
+   "why": "verify: まだ未開 is a redundancy (重言) a teacher would correct"
   },
   "その当時、どこの公立の学校にもネイティブの英語の先生などいませんでした。": {
    "jp": "私は公立の中学校に通っていた。",
@@ -6190,8 +6190,8 @@
   "その歌手はその歌のときが全盛でした。": {
    "jp": "あの歌手の全盛期は八十年代だった。",
    "en": "That singer's heyday was in the eighties.",
-   "fr": "L'apogée de ce chanteur, ce sont les années quatre-vingt.",
-   "why": "awkward"
+   "fr": "Ce chanteur a connu son apogée dans les années quatre-vingt.",
+   "why": "verify: FR present tense for JP past だった"
   },
   "その殺人者の正体は手掛かりがまったくなかった。": {
    "jp": "なくした鍵を探しているが、手掛かりが何もない。",
@@ -6676,8 +6676,8 @@
   "その醜い肉屋の旦那はあの想像上の怪物に似ている。": {
    "jp": "酒屋の旦那は、いつもおまけをくれる。",
    "en": "The owner of the liquor shop always gives me a little extra.",
-   "fr": "Le patron du magasin de saké me donne toujours un petit extra.",
-   "why": "insulting, odd"
+   "fr": "Le patron de la boutique d'alcools me donne toujours un petit quelque chose en plus.",
+   "why": "verify: FR 'magasin de saké' narrower than 酒屋 (and than the EN 'liquor shop'); 'un petit extra' unidiomatic for おまけ"
   },
   "その金は体育館の建設に当てられた。": {
    "jp": "ビルの建設現場で、作業員が壁に板を当てていた。",
@@ -6866,10 +6866,10 @@
    "why": "fragment, odd metaphor"
   },
   "それは、いくぶんナンセンスな趣きの楽しさがあった。": {
-   "jp": "一見ナンセンスな手紙だったが、読み返すうちにその趣が分かってきた。",
-   "en": "At first glance the letter seemed like nonsense, but as I reread it, I began to grasp what it meant.",
-   "fr": "Au premier abord, la lettre semblait absurde, mais en la relisant, j'ai commencé à en saisir le sens.",
-   "why": "unnatural, sense not shown"
+   "jp": "一見ナンセンスな詩だが、読み返すと不思議な趣がある。",
+   "en": "At first glance the poem seems like nonsense, but when you reread it, it has a strange charm.",
+   "fr": "Au premier abord, ce poème semble absurde, mais à la relecture, il a un charme étrange.",
+   "why": "verify: 「その趣が分かってきた」 reads as 'came to appreciate its charm', not 'grasp what it meant' (the 'gist' sense lives in formal 「お手紙の趣」); rewritten so 趣 is unambiguous and the translations match"
   },
   "それは、おまえの声をよく聞くためだよ。": {
    "jp": "雪のため、電車が遅れています。",
@@ -7023,9 +7023,9 @@
   },
   "それらの牛には焼き印がついている。": {
    "jp": "白いシャツにコーヒーのしみがついた。",
-   "en": "A coffee stain got on my white shirt.",
-   "fr": "Ma chemise blanche a une tache de café.",
-   "why": "too hard (焼き印)"
+   "en": "My white shirt got a coffee stain on it.",
+   "fr": "Ma chemise blanche s'est tachée de café.",
+   "why": "verify: EN 'A coffee stain got on my white shirt' unidiomatic; FR present tense for past ついた"
   },
   "それらはあなたを暖かくするのに役立つでしょう。": {
    "jp": "この部屋を子ども部屋にするつもりです。",
@@ -7172,10 +7172,10 @@
    "why": "fragment"
   },
   "たとえば、標本はいくつですか。": {
-   "jp": "私は果物、たとえばリンゴやみかんが好きです。",
-   "en": "I like fruit, for example apples and mandarins.",
-   "fr": "J'aime les fruits, par exemple les pommes et les mandarines.",
-   "why": "odd sentence, no context"
+   "jp": "果物なら、たとえばリンゴやみかんが好きです。",
+   "en": "As for fruit, I like apples and mandarins, for example.",
+   "fr": "Comme fruits, j'aime par exemple les pommes et les mandarines.",
+   "why": "verify: JP calques English apposition (果物、たとえば…が好き)"
   },
   "たとえ私たちが即座に使用をやめても、南極のオゾンホールが元に戻るのにはさらに後６０年かかります。": {
    "jp": "いつか南極に行って、ペンギンを見てみたい。",
@@ -7198,8 +7198,8 @@
   "ためらうことなく、その陰謀にたいする徹底した対抗処置をとった。": {
    "jp": "大型スーパーに対抗して、商店街は安売りを始めた。",
    "en": "To compete with the big supermarket, the local shops started holding sales.",
-   "fr": "Pour faire face au grand supermarché, les commerçants du quartier ont lancé des soldes.",
-   "why": "conspiracy, typo 処置"
+   "fr": "Pour faire face au grand supermarché, les commerçants du quartier ont lancé des promotions.",
+   "why": "verify: FR 'soldes' is the regulated seasonal sale, not 安売り"
   },
   "だいたいあんた、この寒いのにノースリーブで何いってんのよ。": {
    "jp": "だいたい、君が遅れて来たのが悪いんだよ。",
@@ -7677,9 +7677,9 @@
   },
   "なにやら唸りながら、ほとばしるパッションをキャンバスにぶつけている！": {
    "jp": "彼は難しい問題を前にして、うーんと唸った。",
-   "en": "Faced with the difficult problem, he let out a long groan.",
-   "fr": "Face à ce problème difficile, il a poussé un long gémissement.",
-   "why": "bizarre sentence"
+   "en": "Faced with the difficult problem, he groaned, \"Hmm...\"",
+   "fr": "Face à ce problème difficile, il a grogné un long « hum… ».",
+   "why": "verify: うーんと唸る is a thinking groan; FR 'gémissement' implies pain"
   },
   "なによ！出来ないの？この度胸なし！腰抜けッ！": {
    "jp": "「何？聞こえないよ。」",
@@ -8049,9 +8049,9 @@
   },
   "もし嘘なら、彼女はうそつきだ。": {
    "jp": "「嘘つき！約束したじゃない」と娘が泣いた。",
-   "en": "\"Liar! You promised!\" my daughter cried.",
-   "fr": "« Menteur ! Tu avais promis ! » a pleuré ma fille.",
-   "why": "tautological"
+   "en": "\"Liar! You promised!\" my daughter sobbed.",
+   "fr": "« Menteur ! Tu avais promis ! » s'est écriée ma fille en pleurant.",
+   "why": "verify: FR 'a pleuré' as speech verb unnatural; EN 'cried' ambiguous for 泣いた"
   },
   "もし期限切れになったら、大変なことになるよ。": {
    "jp": "締め切りに間に合わなかったら、大変なことになるよ。",
@@ -8073,9 +8073,9 @@
   },
   "もし私の家が大邸宅だったら私の誕生日のパーティーには知人をみんな招待するのだが。": {
    "jp": "知人の紹介で、今の会社に入った。",
-   "en": "I got into my current company through an acquaintance's introduction.",
-   "fr": "Je suis entré dans mon entreprise actuelle grâce à une connaissance qui m'a présenté.",
-   "why": "long translationese"
+   "en": "I joined my current company through an introduction from an acquaintance.",
+   "fr": "Je suis entré dans mon entreprise actuelle par l'intermédiaire d'une connaissance.",
+   "why": "verify: FR 'une connaissance qui m'a présenté' is incomplete (présenté à qui ?)"
   },
   "もちろん万能ではないからといって価値がないわけではないから、ＧＴＤはダメということにはならない。": {
    "jp": "この洗剤は万能で、台所にもお風呂にも使える。",
@@ -8228,10 +8228,10 @@
    "why": "translationese"
   },
   "わたしは、彼女の残業を免除してやった。": {
-   "jp": "彼は体調のため、今月の残業を免除された。",
+   "jp": "彼は体調不良のため、今月の残業を免除された。",
    "en": "He was exempted from overtime this month for health reasons.",
    "fr": "Pour raisons de santé, il a été dispensé d'heures supplémentaires ce mois-ci.",
-   "why": "condescending てやった"
+   "why": "verify: 体調のため alone is unidiomatic for 'for health reasons' (体調不良のため)"
   },
   "わたしはこまかい点までしらべました。": {
    "jp": "細かい点まで調べました。",
@@ -8276,10 +8276,10 @@
    "why": "unnatural 最終的決定を行った"
   },
   "われわれは貧しい人あざ笑ってはいけない。": {
-   "jp": "私たちは貧しい人をあざ笑ってはいけない。",
-   "en": "We must not laugh at the poor.",
-   "fr": "Nous ne devons pas nous moquer des pauvres.",
-   "why": "missing particle を"
+   "jp": "貧しい人をあざ笑ってはいけない。",
+   "en": "You must not mock the poor.",
+   "fr": "Il ne faut pas se moquer des pauvres.",
+   "why": "verify: needless 私たちは (translationese); EN/FR made generic to match"
   },
   "われわれは過ぎし日の事を、必ずしも愛情とは言えないまでも少なくとも一種の憧れを持ってふりかえるのである。": {
    "jp": "幼い日の思い出は、今も大切にしている。",
@@ -8360,10 +8360,10 @@
    "why": "unnatural 早口が出来る"
   },
   "アフリカの難民が救いを求めている。": {
-   "jp": "山で道に迷い、無線で救いを求めた。",
-   "en": "Lost in the mountains, we called for help on the radio.",
-   "fr": "Perdus en montagne, nous avons appelé à l'aide par radio.",
-   "why": "stereotyping generalisation"
+   "jp": "どこからか救いを求める声が聞こえた。",
+   "en": "I heard a cry for help from somewhere.",
+   "fr": "J'ai entendu quelqu'un appeler à l'aide quelque part.",
+   "why": "verify: 無線で救いを求めた is unnatural (a call on the radio is 助け/救助を求める); 救いを求める声 is the natural collocation"
   },
   "アメリカでは杯やコーヒーメーカーを結婚式で花嫁にプレゼントすることがよくあります。": {
    "jp": "ご飯をもう一杯いかがですか。",
@@ -8379,9 +8379,9 @@
   },
   "アメリカの対外債務は５０００億ドルを突破しましたよ。": {
    "jp": "来場者の数がついに百万人を突破した。",
-   "en": "The number of visitors has finally broken through one million.",
+   "en": "The number of visitors has finally passed the one million mark.",
    "fr": "Le nombre de visiteurs a enfin dépassé le million.",
-   "why": "outdated fact; odd ましたよ"
+   "why": "verify: EN 'broken through one million' is a calque; natural English"
   },
   "アメリカはサービス経済の国だ。": {
    "jp": "大学で経済を勉強しています。",
@@ -8524,8 +8524,8 @@
   "イタリアンルネッサンスを開花させるきっかけを作ったのはジョットの功績だ。": {
    "jp": "長年の功績が認められ、彼に賞が贈られた。",
    "en": "In recognition of his many years of achievement, he was given an award.",
-   "fr": "En reconnaissance de ses nombreuses années de réalisations, on lui a décerné un prix.",
-   "why": "debatable historical claim, too hard"
+   "fr": "En reconnaissance de tout ce qu'il a accompli pendant de longues années, on lui a décerné un prix.",
+   "why": "verify: FR 'ses nombreuses années de réalisations' is unidiomatic"
   },
   "イチゴはジャムに作られる。": {
    "jp": "イチゴでジャムを作りました。",
@@ -8728,8 +8728,8 @@
   "オープンソースは技術革新をドライブするエンジンである。": {
    "jp": "週末は海までドライブした。",
    "en": "At the weekend I went for a drive to the sea.",
-   "fr": "Le week-end, je suis allé faire un tour en voiture jusqu'à la mer.",
-   "why": "rare jargon sense, replaced"
+   "fr": "Ce week-end, je suis allé faire un tour en voiture jusqu'à la mer.",
+   "why": "verify: FR 'Le week-end' + passé composé reads as habitual; one past outing is 'Ce week-end'"
   },
   "カエルが鳴いたら帰ろう。": {
    "jp": "夜になると、カエルが鳴き始める。",
@@ -8756,10 +8756,10 @@
    "why": "体 only in 体色 (たいしょく), not からだ"
   },
   "カラーフィルムを一本ください。": {
-   "jp": "このシャツは三つのカラーから選べます。",
-   "en": "This shirt comes in a choice of three colours.",
-   "fr": "Cette chemise existe en trois coloris au choix.",
-   "why": "dated (colour film)"
+   "jp": "このかばんは、カラーが三種類あります。",
+   "en": "This bag comes in three colours.",
+   "fr": "Ce sac existe en trois coloris.",
+   "why": "verify: on a shirt カラー reads as collar; 三つのカラーから選べます unnatural"
   },
   "カルタを配ってください。": {
    "jp": "お正月に、家族でかるたをした。",
@@ -10347,9 +10347,9 @@
   },
   "ミルクを温めてくれませんか。": {
    "jp": "ストーブで部屋を暖めておいた。",
-   "en": "I warmed up the room with the heater.",
-   "fr": "J'ai réchauffé la pièce avec le poêle.",
-   "why": "card spelling absent (温める)"
+   "en": "I warmed up the room with the heater beforehand.",
+   "fr": "J'ai chauffé la pièce à l'avance avec le poêle.",
+   "why": "verify: translations dropped the ておいた (done in advance) of the Japanese"
   },
   "ミーティングに穴をあけてしまったことに対し、再度お詫びします。": {
    "jp": "道路に大きな穴があいていて危ない。",
@@ -10623,9 +10623,9 @@
   },
   "一月は年の一番目の月です。": {
    "jp": "年の初めに、家族で神社へ行きます。",
-   "en": "At the start of the year, my family goes to a shrine.",
+   "en": "At the start of the year, I go to a shrine with my family.",
    "fr": "En début d'année, nous allons au sanctuaire en famille.",
-   "why": "unnatural 年の一番目の月"
+   "why": "verify: EN 'my family goes' leaves the speaker out; 家族で行きます means the speaker goes with them (as the FR says)"
   },
   "一杯のコーヒーを飲んだら頭がすっきりした。": {
    "jp": "コーヒーを一杯飲んだら、頭がすっきりした。",
@@ -10726,8 +10726,8 @@
   "上へ昇れば昇るほど、それだけ墜落の程度は大きくなる。": {
    "jp": "幸い、墜落した小型機の乗員は全員無事だった。",
    "en": "Fortunately, everyone aboard the small plane that crashed was unharmed.",
-   "fr": "Heureusement, tous les occupants du petit avion qui s'est écrasé sont sains et saufs.",
-   "why": "garbled metaphor; listed sense is a crash"
+   "fr": "Heureusement, tous les occupants du petit avion qui s'est écrasé s'en sont sortis indemnes.",
+   "why": "verify: FR tense: 無事だった is past, not 'sont'"
   },
   "上司は会社の電話で私用の電話をかけたといって私をひどく叱った。": {
    "jp": "上司は会社の電話で私用の電話をかけたといって私をひどく叱った。",
@@ -11223,9 +11223,9 @@
   },
   "人間には理性があるが動物には無い。": {
    "jp": "怒りで理性を失ってはいけない。",
-   "en": "You mustn't lose your reason in anger.",
-   "fr": "Il ne faut pas perdre la raison sous l'effet de la colère.",
-   "why": "dubious claim about animals"
+   "en": "You mustn't let anger make you lose your head.",
+   "fr": "Il ne faut pas perdre son sang-froid sous le coup de la colère.",
+   "why": "verify: FR 'perdre la raison' means going mad; 理性を失う here is losing self-control (EN 'lose your reason' had the same slant)"
   },
   "人間は一本のアシに過ぎず、その本性はきわめて弱いが、人間は考える葦である。": {
    "jp": "川岸に葦が生い茂っている。",
@@ -11374,8 +11374,8 @@
   "今度だけは遅刻を大目に見てやろう。": {
    "jp": "今度の旅行はとても楽しかった。",
    "en": "This trip was a lot of fun.",
-   "fr": "Ce voyage-ci a été très amusant.",
-   "why": "too hard for N4 (大目に見る)"
+   "fr": "Ce voyage-ci a été très agréable.",
+   "why": "verify: FR 'très amusant' (funny) is a calque of 'fun' for 楽しい"
   },
   "今度の事務員の方が前の事務員よりタイプを打つのが速い。": {
    "jp": "姉はキーボードを打つのがとても速い。",
@@ -11416,8 +11416,8 @@
   "今日はすがすがしいお天気ですね。": {
    "jp": "今日はすがすがしいお天気ですね。",
    "en": "It's a lovely, refreshing day, isn't it?",
-   "fr": "Quel temps vivifiant aujourd'hui, n'est-ce pas ?",
-   "why": "translations miss refreshing"
+   "fr": "Il fait un temps vivifiant aujourd'hui, vous ne trouvez pas ?",
+   "why": "verify: FR 'Quel temps vivifiant aujourd'hui, n'est-ce pas ?' tacks n'est-ce pas onto an exclamation; unidiomatic"
   },
   "今日はむしろ外出したくない。": {
    "jp": "今日は出かけるより、むしろ家でゆっくりしたい。",
@@ -11534,10 +11534,10 @@
    "why": "fragment, unclear context"
   },
   "代表取締役は取締役の職務の執行を監督するものだ。": {
-   "jp": "試験の間、先生が教室を監督していた。",
-   "en": "During the exam, the teacher supervised the classroom.",
-   "fr": "Pendant l'examen, le professeur surveillait la salle.",
-   "why": "too hard, legal jargon"
+   "jp": "今日の試験は担任の先生が監督する。",
+   "en": "Our homeroom teacher will supervise today's exam.",
+   "fr": "C'est notre professeur principal qui surveillera l'examen d'aujourd'hui.",
+   "why": "verify: 教室を監督する is an odd object; one supervises the exam (試験を監督する)"
   },
   "以上のように、実にシンプルな誰でも出来るノウハウで十分な利益と顧客は確保できるのです！": {
    "jp": "以上の説明で分かりましたか。",
@@ -11602,8 +11602,8 @@
   "会場は立すいの余地もないほどに聴衆で埋まっていた。": {
    "jp": "会場はたくさんの聴衆で埋まっていた。",
    "en": "The hall was filled with a large audience.",
-   "fr": "La salle était remplie d'un nombreux public.",
-   "why": "mixed kana 立すい"
+   "fr": "La salle était remplie d'un public nombreux.",
+   "why": "verify: FR word order ('un nombreux public')"
   },
   "会社が日中合弁で経営しています。": {
    "jp": "この会社は日中合弁で経営されている。",
@@ -11829,9 +11829,9 @@
   },
   "例えば、ペパーバーグは緑色のもくせいの留めくぎと赤色の紙の三角形のような物体を見せる。": {
    "jp": "多くの物体は、温めると膨張する。",
-   "en": "Most objects expand when heated.",
-   "fr": "La plupart des corps se dilatent sous l'effet de la chaleur.",
-   "why": "fragment from a text, unnatural"
+   "en": "Many objects expand when heated.",
+   "fr": "Beaucoup de corps se dilatent sous l'effet de la chaleur.",
+   "why": "verify: 多くの is 'many', not 'most' (EN/FR overstated it)"
   },
   "例えば、温度計や気圧計などの計器は器具です。": {
    "jp": "パイロットは計器を確認してから離陸した。",
@@ -12231,9 +12231,9 @@
   },
   "冷房が効きすぎているのですが。": {
    "jp": "冷房が効きすぎているのですが。",
-   "en": "I'm afraid the air conditioning is turned up too high.",
+   "en": "I'm afraid the air conditioning is too strong.",
    "fr": "La climatisation est un peu trop forte…",
-   "why": "EN mistranslation"
+   "why": "verify: EN 'turned up too high' is ambiguous for cooling (could mean the set temperature)"
   },
   "冷蔵庫の中にたくさんの食べ物が入っていますか。": {
    "jp": "冷蔵庫に何か食べ物ある？",
@@ -12382,8 +12382,8 @@
   "勤労によって日本は今日の日本になった。": {
    "jp": "十一月二十三日は勤労感謝の日だ。",
    "en": "November 23 is Labour Thanksgiving Day.",
-   "fr": "Le 23 novembre est le jour de gratitude envers le travail.",
-   "why": "sweeping national claim"
+   "fr": "Le 23 novembre est le jour de remerciement pour le travail.",
+   "why": "verify: FR holiday name garbled ('jour de gratitude envers le travail')"
   },
   "化学業界はすべてが下火になるまで再投資を控えています。": {
    "jp": "夕方になって、火事はようやく下火になった。",
@@ -12482,10 +12482,10 @@
    "why": "word absent (とどまる), too hard for N5"
   },
   "千円札くずれますか。": {
-   "jp": "長年の雨で、古い石垣が崩れてしまった。",
-   "en": "After years of rain, the old stone wall has crumbled.",
-   "fr": "Après des années de pluie, le vieux mur de pierre s'est effondré.",
-   "why": "wrong verb (崩せますか)"
+   "jp": "千円札、くずれますか。",
+   "en": "Can you break a 1,000-yen note?",
+   "fr": "Vous pouvez me faire la monnaie sur un billet de 1 000 yens ?",
+   "why": "verify: the original was right: くずれる has the filed sense 'to be broken into change' (千円札がくずれる); the replacement's 長年の雨で is also off (長年の風雨). Restored, with a comma"
   },
   "半時間したら彼はここに来るでしょう。": {
    "jp": "毎朝七時半に起きます。",
@@ -12729,9 +12729,9 @@
   },
   "合衆国では２億１６００万丁もの鉄砲類が、民間の手にあるという。": {
    "jp": "日本では、民間人が鉄砲を持つことは法律で厳しく制限されている。",
-   "en": "In Japan, the law strictly limits civilians from owning guns.",
+   "en": "In Japan, civilians' ownership of guns is strictly restricted by law.",
    "fr": "Au Japon, la loi limite strictement la détention d'armes à feu par les civils.",
-   "why": "weapons statistics; unsourced figure"
+   "why": "verify: EN 'limits civilians from owning' is not idiomatic"
   },
   "合衆国には小火器の販売に関する法律上の制約はほとんどない。": {
    "jp": "予算の制約があるので、新しい機械は買えない。",
@@ -13101,9 +13101,9 @@
   },
   "国内は防衛問題で沸騰した。": {
    "jp": "新しいスタジアムの建設をめぐって、市民の議論が沸騰した。",
-   "en": "Debate among residents boiled over about the construction of a new stadium.",
+   "en": "Heated debate broke out among residents over the construction of a new stadium.",
    "fr": "La construction d'un nouveau stade a enflammé le débat parmi les habitants.",
-   "why": "political (defence) topic"
+   "why": "verify: EN 'Debate ... boiled over about the construction' is clumsy and overstates 沸騰 (became heated)"
   },
   "国民は歓呼して彼を国王に迎えた。": {
    "jp": "国王の誕生日を国民みんなで祝った。",
@@ -13214,10 +13214,10 @@
    "why": "proverb with rare kanji 塵"
   },
   "壁に耳あり障子に目あり。": {
-   "jp": "壁に耳あり障子に目あり。",
-   "en": "Walls have ears, and shoji have eyes.",
-   "fr": "Les murs ont des oreilles, et les cloisons de papier ont des yeux.",
-   "why": "EN spelling shouji"
+   "jp": "猫が障子に穴を開けてしまった。",
+   "en": "The cat made a hole in the shoji.",
+   "fr": "Le chat a fait un trou dans le shoji.",
+   "why": "verify: kept a proverb (壁に耳あり障子に目あり); replaced with an original sentence"
   },
   "壊れた湯飲みの補充をした。": {
    "jp": "お客さんに湯飲みでお茶を出した。",
@@ -13264,8 +13264,8 @@
   "多くの天文学者は、宇宙は永遠に膨張してゆくものだと考えている。": {
    "jp": "多くの天文学者は、宇宙は永遠に膨張してゆくものだと考えている。",
    "en": "Many astronomers think the universe will go on expanding forever.",
-   "fr": "Beaucoup d'astronomes pensent que l'univers est en expansion éternelle.",
-   "why": "EN 'infinitely'"
+   "fr": "Beaucoup d'astronomes pensent que l'univers continuera de s'étendre éternellement.",
+   "why": "verify: FR 'est en expansion éternelle' did not match 膨張してゆく (will go on expanding) nor the corrected EN"
   },
   "多くの消費者は消費税反対に立ち上がった。": {
    "jp": "住民たちは町の公園を守るために立ち上がった。",
@@ -13390,8 +13390,8 @@
   "大統領は憲法を停止し、戒厳令をしきました。": {
    "jp": "彼はスピード違反で免許停止になった。",
    "en": "His licence was suspended for speeding.",
-   "fr": "Il a eu une suspension de permis pour excès de vitesse.",
-   "why": "political (martial law)"
+   "fr": "Son permis a été suspendu pour excès de vitesse.",
+   "why": "verify: FR 'Il a eu une suspension de permis' is clumsy; now matches EN"
   },
   "大統領は辞任する前にお金に困らないように根回しした。": {
    "jp": "会議の前に、部長たちに根回しをしておいた。",
@@ -13700,10 +13700,10 @@
    "why": "odd meaning"
   },
   "学生は読書の技能を磨くべきだ。": {
-   "jp": "日本語の力を磨くために、毎日本を読んでいる。",
+   "jp": "日本語の力を磨くために、毎日、本を読んでいる。",
    "en": "I read books every day to improve my Japanese.",
    "fr": "Je lis des livres tous les jours pour améliorer mon japonais.",
-   "why": "translationese 読書の技能"
+   "why": "verify: comma after 毎日 (毎日本を misreads as 毎・日本)"
   },
   "学生間では彼の株が急に上がった。": {
    "jp": "学生の間で彼の株が急に上がった。",
@@ -13826,10 +13826,10 @@
    "why": "容易に hard; EN/FR add subject"
   },
   "富は一生の宝、知は万代の宝。": {
-   "jp": "子どもは国の宝だ。",
-   "en": "Children are a nation's treasure.",
-   "fr": "Les enfants sont le trésor d'une nation.",
-   "why": "archaic proverb; EN mismatch"
+   "jp": "海の底に宝が眠っているといううわさがある。",
+   "en": "There is a rumour that treasure lies at the bottom of the sea.",
+   "fr": "On raconte qu'un trésor dort au fond de la mer.",
+   "why": "verify: replacement 子どもは国の宝 is a set saying"
   },
   "寒波が日本の上空を通過したのです。": {
    "jp": "強い寒気が日本の上空に流れ込んでいる。",
@@ -13844,10 +13844,10 @@
    "why": "translationese"
   },
   "専制君主は人民を弾圧した。": {
-   "jp": "リンカーンの「人民の、人民による、人民のための政治」という言葉は有名だ。",
-   "en": "Lincoln's words \"government of the people, by the people, for the people\" are famous.",
-   "fr": "La formule de Lincoln « le gouvernement du peuple, par le peuple, pour le peuple » est célèbre.",
-   "why": "oppression"
+   "jp": "その王は人民の声によく耳を傾けたと伝えられている。",
+   "en": "That king is said to have listened closely to the voice of the people.",
+   "fr": "On raconte que ce roi était très à l'écoute de son peuple.",
+   "why": "verify: replacement quotes a famous saying (Lincoln's Gettysburg line); use an original sentence"
   },
   "小さな火花はしばしば大きな炎を起こす。": {
    "jp": "電線がショートして火花が散った。",
@@ -13862,10 +13862,10 @@
    "why": "dated cheque, orthography 下さい"
   },
   "小型車のブームは終わろうとしている。": {
-   "jp": "最近、キャンプがブームになっている。",
-   "en": "Camping has become a craze lately.",
-   "fr": "Le camping est devenu très à la mode ces derniers temps.",
-   "why": "vague, possibly outdated claim"
+   "jp": "ブームが去ると、その店の客は急に減った。",
+   "en": "When the craze died down, the shop's customers suddenly dropped off.",
+   "fr": "Une fois la mode passée, la clientèle du magasin a brusquement diminué.",
+   "why": "verify: replacement claims a current camping boom, itself dated by 2026; use a claim-free sentence"
   },
   "少しばかりの学問は危険なもの。": {
    "jp": "学問に終わりはない。",
@@ -13922,16 +13922,16 @@
    "why": "classical proverb, verb not noun"
   },
   "少数民族の雇用促進政策とはいっても、建前にすぎず、現状はマイノリティーが職に就けるチャンスなどほとんどない。": {
-   "jp": "会社は『雇用を守る』と言っているが、それは建前にすぎない。",
+   "jp": "会社は「雇用を守る」と言っているが、それは建前にすぎない。",
    "en": "The company says it will \"protect jobs\", but that is just for show.",
    "fr": "L'entreprise dit vouloir « préserver l'emploi », mais ce n'est qu'une façade.",
-   "why": "social-political polemic"
+   "why": "verify: a direct quotation takes 「」, not 『』 (titles, nested quotes)"
   },
   "屁理屈ばかり並べて、お前の言ってること全然筋が通ってないよ。": {
    "jp": "机の上に写真を並べて、みんなで見ました。",
-   "en": "We laid the photos out on the table and looked at them together.",
-   "fr": "On a étalé les photos sur la table et on les a regardées ensemble.",
-   "why": "insulting; too hard for N5 (屁理屈)"
+   "en": "We laid the photos out on the desk and all looked at them together.",
+   "fr": "On a étalé les photos sur le bureau et on les a regardées tous ensemble.",
+   "why": "verify: 机 is a desk, not a table"
   },
   "屋根から落ちてきたタイルは粉々に砕けた。": {
    "jp": "お風呂場のタイルを掃除した。",
@@ -14121,9 +14121,9 @@
   },
   "弁償代きっちり耳そろえて払わんかい。": {
    "jp": "借りた本を汚してしまったので、弁償した。",
-   "en": "I got the book I had borrowed dirty, so I paid for it.",
+   "en": "I stained a book I had borrowed, so I paid for it.",
    "fr": "J'ai taché le livre qu'on m'avait prêté, alors je l'ai remboursé.",
-   "why": "threatening yakuza speech"
+   "why": "verify: EN 'got the book I had borrowed dirty' clumsy"
   },
   "式に余分の変数を加えたことによって、この実験結果は不明瞭なものになっている。": {
    "jp": "この式を使って、答えを出しなさい。",
@@ -14660,10 +14660,10 @@
    "why": "stray comma"
   },
   "彼は、中国語をしっていたので、私たちは計画を円滑に実行できた。": {
-   "jp": "彼が中国語を知っていたので、私たちは計画を円滑に進めることができた。",
-   "en": "Because he knew Chinese, we were able to carry out our plan smoothly.",
-   "fr": "Comme il connaissait le chinois, nous avons pu mener notre projet sans accroc.",
-   "why": "orthography しっていた"
+   "jp": "彼が中国語を話せたので、私たちは計画を円滑に進めることができた。",
+   "en": "Because he could speak Chinese, we were able to carry out our plan smoothly.",
+   "fr": "Comme il parlait chinois, nous avons pu mener notre projet sans accroc.",
+   "why": "verify: 中国語を知っていた is translationese for knowing a language (話せた)"
   },
   "彼は、寝台の長さを測った。": {
    "jp": "夜行列車の寝台で一晩過ごした。",
@@ -15351,9 +15351,9 @@
   },
   "彼は小さな船を水に浮かべている。": {
    "jp": "子どもたちが池におもちゃの船を浮かべて遊んでいる。",
-   "en": "The children are playing at floating toy boats on the pond.",
+   "en": "The children are floating toy boats on the pond and playing.",
    "fr": "Les enfants s'amusent à faire flotter des bateaux jouets sur l'étang.",
-   "why": "unnatural; EN 'sailing'"
+   "why": "verify: EN 'playing at floating' means pretending to float"
   },
   "彼は就寝前にポケットから小銭を取り出して、テーブルの上にどさっと置く。": {
    "jp": "彼は就寝前にポケットから小銭を取り出して、テーブルの上にどさっと置く。",
@@ -15608,10 +15608,10 @@
    "why": "violent"
   },
   "彼は母親の到着を喜んだ。": {
-   "jp": "母が来て、子どもたちはとても喜んだ。",
+   "jp": "お母さんが来て、子どもたちはとても喜んだ。",
    "en": "The children were overjoyed when their mother came.",
    "fr": "Les enfants ont été ravis de voir arriver leur mère.",
-   "why": "stiff translationese 到着を喜んだ"
+   "why": "verify: JP 母 is the speaker's own mother, so 'their mother' mistranslated it; お母さん matches the translations"
   },
   "彼は氷の上で転んで脚を傷めた。": {
    "jp": "彼は氷の上で転んで足を痛めた。",
@@ -15668,10 +15668,10 @@
    "why": "unnatural 知った"
   },
   "彼は犯行に及んだと信じられていた。": {
-   "jp": "話し合いがまとまらず、ついに裁判に及んだ。",
+   "jp": "話し合いがまとまらず、ついに訴訟に及んだ。",
    "en": "The talks failed, and it finally came to a lawsuit.",
    "fr": "Faute d'accord, on en est finalement venu au procès.",
-   "why": "crime context"
+   "why": "verify: 及ぶ (resort to) collocates with 訴訟, not 裁判"
   },
   "彼は玄人にちかい。": {
    "jp": "彼の料理の腕は玄人に近い。",
@@ -15830,10 +15830,10 @@
    "why": "EN/FR mistranslation"
   },
   "彼は結構しぶといね。転んでもただでは起きぬ、いい根性しているよ。": {
-   "jp": "あのチームはしぶとい。たった一点差で負けていても、最後まで諦めない。",
-   "en": "That team is tenacious. Even when they're just one point behind, they never give up until the very end.",
-   "fr": "Cette équipe est coriace. Même menée d'un seul point, elle ne lâche rien jusqu'au bout.",
-   "why": "word absent (ただ, not たった); too long"
+   "jp": "あのチームはしぶとい。たった一点のリードを最後まで守り切った。",
+   "en": "That team is tenacious: they held on to a one-point lead right to the end.",
+   "fr": "Cette équipe est coriace : elle a conservé jusqu'au bout une avance d'un seul point.",
+   "why": "verify: illogical concession (たった一点差で負けていても…諦めない: a one-point deficit is no reason to give up)"
   },
   "彼は給料の良い会社に変わった。": {
    "jp": "彼は給料の良い会社に変わった。",
@@ -15874,8 +15874,8 @@
   "彼は自分の役割を十二分に生かしていますよ。": {
    "jp": "チームの中で、自分の役割をしっかり果たしたい。",
    "en": "I want to properly fulfil my role in the team.",
-   "fr": "Je veux bien remplir mon rôle dans l'équipe.",
-   "why": "unnatural phrasing"
+   "fr": "Je veux remplir pleinement mon rôle au sein de l'équipe.",
+   "why": "verify: FR 'Je veux bien remplir' reads as 'I'm willing to fulfil'"
   },
   "彼は自分の書く物語の材料はたいてい子供時代の体験に頼っている。": {
    "jp": "彼は子供の頃の体験を小説の材料にしている。",
@@ -16191,9 +16191,9 @@
   },
   "彼らは何一つ不自由なものはなかった。": {
    "jp": "彼らは何一つ不自由なく暮らしていた。",
-   "en": "They lived lacking for nothing.",
+   "en": "They lived without wanting for anything.",
    "fr": "Ils vivaient sans manquer de rien.",
-   "why": "unnatural 不自由なものはなかった"
+   "why": "verify: EN 'lived lacking for nothing' unnatural"
   },
   "彼らは元々あった文明を破壊した。": {
    "jp": "この辺りは元々畑だった。",
@@ -16294,8 +16294,8 @@
   "彼らは皆、根は善良な男たちなのだ。": {
    "jp": "彼は口は悪いが、根は優しい人だ。",
    "en": "He has a sharp tongue, but he's kind at heart.",
-   "fr": "Il parle durement, mais au fond, c'est quelqu'un de gentil.",
-   "why": "unnatural translationese"
+   "fr": "Il n'est pas tendre dans ses paroles, mais au fond, c'est quelqu'un de gentil.",
+   "why": "verify: FR 'Il parle durement' is unidiomatic for 口が悪い"
   },
   "彼らは直ちに我々の救援にやってきた。": {
    "jp": "彼らは直ちに我々の救援にやってきた。",
@@ -16425,9 +16425,9 @@
   },
   "彼女のお見舞いに行こうよ。": {
    "jp": "彼女のお見舞いに行こうよ。",
-   "en": "Let's go and visit her while she's ill.",
-   "fr": "Allons lui rendre visite pendant qu'elle est malade.",
-   "why": "EN/FR add 'hospital'"
+   "en": "Let's go and visit her, since she's ill.",
+   "fr": "Allons lui rendre visite, puisqu'elle est malade.",
+   "why": "verify: EN/FR 'while she's ill' / 'pendant qu'elle est malade' read as seizing an opportunity"
   },
   "彼女のねらいは教師になることである。": {
    "jp": "彼はゴールの右隅に狙いを定めて、ボールを蹴った。",
@@ -16658,10 +16658,10 @@
    "why": "pounds unnatural in Japan"
   },
   "彼女はミルクをボールに注いだ。": {
-   "jp": "牛乳をボールに入れて、よく混ぜてください。",
-   "en": "Put the milk in a bowl and mix well.",
-   "fr": "Versez le lait dans un saladier et mélangez bien.",
-   "why": "translationese 彼女は; kitchen-bowl context"
+   "jp": "卵と牛乳をボールに入れて、よく混ぜてください。",
+   "en": "Put the eggs and milk in a bowl and mix well.",
+   "fr": "Mettez les œufs et le lait dans un saladier et mélangez bien.",
+   "why": "verify: mixing milk alone 'well' is odd; added eggs"
   },
   "彼女はレディーと呼ぶにふさわしい人だ。": {
    "jp": "彼女はレディーと呼ぶにふさわしい人だ。",
@@ -16749,9 +16749,9 @@
   },
   "彼女は家のない人々の代弁をした。": {
    "jp": "彼女はホームレスの人たちの気持ちを代弁した。",
-   "en": "She spoke up for the feelings of homeless people.",
-   "fr": "Elle s'est faite la porte-parole des sans-abri.",
-   "why": "unnatural 家のない人々"
+   "en": "She gave voice to what homeless people were feeling.",
+   "fr": "Elle s'est faite l'interprète des sentiments des sans-abri.",
+   "why": "verify: EN 'spoke up for the feelings' unidiomatic; FR dropped 気持ち"
   },
   "彼女は小切手を同封して私に送ってくれた。": {
    "jp": "彼女は小切手を同封して私に送ってくれた。",
@@ -17043,9 +17043,9 @@
   },
   "彼等は彼に逃げるきっかけを与えた。": {
    "jp": "旅行がきっかけで、日本語の勉強を始めた。",
-   "en": "A trip was what got me started on Japanese.",
-   "fr": "C'est un voyage qui m'a donné envie d'apprendre le japonais.",
-   "why": "translationese, escape"
+   "en": "A trip was what got me started studying Japanese.",
+   "fr": "C'est à la suite d'un voyage que j'ai commencé à étudier le japonais.",
+   "why": "verify: FR said the trip made me want to learn; JP says it got me started studying"
   },
   "彼等は貿易問題について臨時の会合を開いた。": {
    "jp": "彼らは貿易問題について臨時の会合を開いた。",
@@ -17211,9 +17211,9 @@
   },
   "意図していたものとかけ離れた結果となった。": {
    "jp": "意図していたものとかけ離れた結果となった。",
-   "en": "The result turned out far removed from what was intended.",
+   "en": "The result was far from what had been intended.",
    "fr": "Le résultat a été très éloigné de ce qui était prévu.",
-   "why": "awkward EN"
+   "why": "verify: EN 'turned out far removed from' clumsy"
   },
   "意志疎通のはかり方は、文化によって決まるからである。": {
    "jp": "会社は新しい規則を導入する前に、労働組合に諮った。",
@@ -17240,10 +17240,10 @@
    "why": "貴い absent"
   },
   "憲政の危機が始まったのは、このような状況のもとであった。": {
-   "jp": "失敗は成功のもと。",
-   "en": "Failure is the mother of success.",
-   "fr": "L'échec est la mère du succès.",
-   "why": "too hard (憲政の危機)"
+   "jp": "このうわさのもとは、いったい誰だろう。",
+   "en": "Who on earth started this rumour?",
+   "fr": "Mais qui est à l'origine de cette rumeur ?",
+   "why": "verify: replacement 失敗は成功のもと is a proverb"
   },
   "懐かしい１２小節のブルース。": {
    "jp": "この曲を聞くと、学生時代が懐かしくなる。",
@@ -17366,10 +17366,10 @@
    "why": "stiff 我々, redundant その当時"
   },
   "我々はふだんより足を速めて歩いた。": {
-   "jp": "私たちはいつもより足を早めて歩いた。",
-   "en": "We walked faster than usual.",
-   "fr": "Nous avons marché d'un pas plus rapide que d'habitude.",
-   "why": "spelling 速める (card 早める), stiff 我々"
+   "jp": "作業員を増やして、工事の完成を早めた。",
+   "en": "They brought in more workers to finish the construction sooner.",
+   "fr": "On a fait venir plus d'ouvriers pour terminer les travaux plus tôt.",
+   "why": "verify: 足を早める teaches the non-standard spelling (speed is 速める: 足を速める); 早める illustrated in its own sense, hastening a completion"
   },
   "我々は一大危機に直面している。": {
    "jp": "我々は一大危機に直面している。",
@@ -17571,9 +17571,9 @@
   },
   "抗議することもできないうちに、僕は手錠をかけられ、留置場に送られていた。": {
    "jp": "抗議することもできないうちに、僕は手錠をかけられ、留置場に送られていた。",
-   "en": "Before I could even protest, I had been handcuffed and sent to a holding cell.",
-   "fr": "Avant même que j'aie pu protester, on m'avait passé les menottes et envoyé en cellule.",
-   "why": "EN mistranslation (留置場 is not prison)"
+   "en": "Before I could even protest, I had been handcuffed and was being taken to a holding cell.",
+   "fr": "Avant même que j'aie pu protester, on m'avait passé les menottes et on m'emmenait en cellule.",
+   "why": "verify: FR 'on m'avait passé les menottes et envoyé en cellule' shares one pronoun as indirect then direct object (ungrammatical ellipsis); restored the original FR and matched the EN to 送られていた"
   },
   "折り返しの見積書をメールで返信してください。": {
    "jp": "写真をメールで送ります。",
@@ -17854,8 +17854,8 @@
   "新しい製造過程は高い歩留まりを可能にする。": {
    "jp": "彼女は日本語のレベルが高い。",
    "en": "Her level of Japanese is high.",
-   "fr": "Elle a un bon niveau de japonais.",
-   "why": "歩留まり too hard"
+   "fr": "Son niveau de japonais est élevé.",
+   "why": "verify: FR 'bon niveau' loses 高い (high), the word illustrated"
   },
   "新しい規約は全会一致で承認された。": {
    "jp": "新しい規約は全会一致で承認された。",
@@ -17930,10 +17930,10 @@
    "why": "unnatural"
   },
   "旅は道連れ世は情け。": {
-   "jp": "旅は道連れ世は情け。",
-   "en": "On a journey you need a companion, and in life, kindness.",
-   "fr": "En voyage, il faut un compagnon ; dans la vie, de la bienveillance.",
-   "why": "EN loose"
+   "jp": "先生は情けをかけて、遅刻した私を許してくれた。",
+   "en": "The teacher took pity on me and forgave me for being late.",
+   "fr": "Le professeur a eu pitié de moi et m'a pardonné mon retard.",
+   "why": "verify: kept a famous proverb (旅は道連れ世は情け); replaced"
   },
   "既婚女性が家や夫や子供たちの面倒を見ることがどんなことか、彼女は知っていた。": {
    "jp": "書類の「既婚」か「未婚」に丸をつけてください。",
@@ -17980,8 +17980,8 @@
   "日本では米が、ヨーロッパではワインが余っている。": {
    "jp": "パーティーの料理がたくさん余ってしまった。",
    "en": "We had a lot of food left over from the party.",
-   "fr": "Il nous est resté beaucoup de plats de la fête.",
-   "why": "outdated fact (rice surplus)"
+   "fr": "Il nous est resté beaucoup de nourriture après la fête.",
+   "why": "verify: FR 'beaucoup de plats de la fête' is unidiomatic"
   },
   "日本では米が主食です。": {
    "jp": "日本では米が主食です。",
@@ -18027,9 +18027,9 @@
   },
   "日本はいろんな原料に乏しい。": {
    "jp": "日本は資源が乏しく、原料の多くを輸入している。",
-   "en": "Japan is poor in natural resources and imports much of its raw materials.",
+   "en": "Japan has few natural resources and imports a large share of its raw materials.",
    "fr": "Pauvre en ressources naturelles, le Japon importe une grande partie de ses matières premières.",
-   "why": "register mismatch"
+   "why": "verify: EN 'much of its raw materials' is ungrammatical (much + plural)"
   },
   "日本はガット自由貿易体制における最大の受益者の一つだったということができる。": {
    "jp": "その会社は24時間体制で客の質問に対応している。",
@@ -18140,10 +18140,10 @@
    "why": "translationese"
   },
   "昇進が見送られた女には働く励みがない。": {
-   "jp": "台風が近づいているため、明日の試合は見送られた。",
-   "en": "With a typhoon approaching, tomorrow's match has been put off.",
-   "fr": "Un typhon approchant, le match de demain a été reporté.",
-   "why": "sexist generalisation, mistranslated"
+   "jp": "予算が足りないため、新しい体育館の建設は見送られた。",
+   "en": "The construction of the new gym has been shelved for lack of funds.",
+   "fr": "Faute de budget, la construction du nouveau gymnase a été ajournée.",
+   "why": "verify: a match called off for a typhoon is 中止/延期, not 見送られた; shelving a project is the typical context of this sense"
   },
   "明るい色が私たちの目を引いた。": {
    "jp": "明るい色の服が好きです。",
@@ -18496,8 +18496,8 @@
   "本物のノイローゼの奴がノイローゼだなんて自称するのかね？": {
    "jp": "仕事のストレスでノイローゼになりかけた。",
    "en": "Stress at work nearly gave me a nervous breakdown.",
-   "fr": "Le stress au travail a failli me faire faire une dépression nerveuse.",
-   "why": "slang 奴; mocking mental illness"
+   "fr": "À cause du stress au travail, j'ai failli faire une dépression nerveuse.",
+   "why": "verify: FR 'a failli me faire faire' clumsy"
   },
   "杖は彼に何の役にも立たなかった。": {
    "jp": "祖父は杖をついて散歩に出かけた。",
@@ -18512,10 +18512,10 @@
    "why": "particle error 50センチで, uncertain forecast"
   },
   "来年末までで、ここで働き始めてどれくらいの期間になりますか。": {
-   "jp": "来年の春から大阪で働くことになった。",
+   "jp": "来春から大阪で働くことになった。",
    "en": "I'm going to start working in Osaka next spring.",
    "fr": "Je vais travailler à Osaka à partir du printemps prochain.",
-   "why": "unnatural translationese"
+   "why": "verify: 来年 is its own card and hides the prefix; 来春 shows 来 as 'next'"
   },
   "来月タクシー料金があがります。": {
    "jp": "来月、タクシー料金が上がります。",
@@ -18788,10 +18788,10 @@
    "why": "EN mistranslation"
   },
   "武士は食わねど高楊枝。": {
-   "jp": "この城には昔、多くの武士が住んでいた。",
-   "en": "Long ago, many samurai lived in this castle.",
-   "fr": "Autrefois, de nombreux samouraïs vivaient dans ce château.",
-   "why": "obscure proverb, odd EN"
+   "jp": "昔、この町には多くの武士が住んでいた。",
+   "en": "Long ago, many samurai lived in this town.",
+   "fr": "Autrefois, de nombreux samouraïs vivaient dans cette ville.",
+   "why": "verify: samurai mostly lived in the castle town, not inside the castle: the claim was dubious"
   },
   "歩道にお金が落ちていた。": {
    "jp": "歩道にお金が落ちていた。",
@@ -19114,8 +19114,8 @@
   "洪水はかつてはこの地方には宿命であった。": {
    "jp": "かつてこの地方では、洪水は避けられない宿命だった。",
    "en": "In the past, floods were an inescapable fate for this region.",
-   "fr": "Autrefois, les inondations étaient une fatalité inévitable dans cette région.",
-   "why": "awkward JP and EN"
+   "fr": "Autrefois, dans cette région, les inondations étaient un destin inéluctable.",
+   "why": "verify: FR pleonasm 'fatalité inévitable'"
   },
   "流感の予防ワクチンの注射をした。": {
    "jp": "インフルエンザの予防注射をした。",
@@ -19196,10 +19196,10 @@
    "why": "translationese あなたに"
   },
   "測定においては正確さは欠かせないものである。": {
-   "jp": "体温を測定したら、三十八度あった。",
-   "en": "When I took my temperature, it was 38 degrees.",
-   "fr": "Quand j'ai pris ma température, j'avais 38 °C.",
-   "why": "stiff translationese"
+   "jp": "健康診断では、まず身長と体重を測定します。",
+   "en": "At the health check-up, your height and weight are measured first.",
+   "fr": "Lors du bilan de santé, on mesure d'abord la taille et le poids.",
+   "why": "verify: 測定 in a casual first-person たら clause (体温を測定したら) is a register mismatch; a native says 測ったら there; 測定 belongs to a formal procedure"
   },
   "満開をチョイ過ぎた感はありましたが、それでも、美しい桜を満喫してきました。": {
    "jp": "公園の桜がもうすぐ咲きそうだ。",
@@ -19246,14 +19246,14 @@
   "火事の時はベルを鳴らせよ。": {
    "jp": "火事のときは、このベルを鳴らしてください。",
    "en": "In case of fire, please ring this bell.",
-   "fr": "En cas d'incendie, veuillez sonner cette cloche.",
-   "why": "rough imperative"
+   "fr": "En cas d'incendie, veuillez actionner cette sonnerie.",
+   "why": "verify: FR 'sonner cette cloche' is a church-type bell, not a fire-alarm ベル"
   },
   "火星には生物の形跡はない。": {
-   "jp": "火星ではまだ生命の痕跡は見つかっていない。",
-   "en": "No trace of life has been found on Mars yet.",
-   "fr": "Aucune trace de vie n'a encore été découverte sur Mars.",
-   "why": "overstated fact"
+   "jp": "火星に生命が存在するかどうかは、まだ分かっていない。",
+   "en": "It is still not known whether life exists on Mars.",
+   "fr": "On ne sait toujours pas s'il existe une forme de vie sur Mars.",
+   "why": "verify: 'no trace of life has been found' is contestable since the rover's announced potential biosignatures (2024-25); stated as the open question it is"
   },
   "火災で全てのコンピューターディスクが駄目になってしまった時、会社はもうお手上げの状況だった。": {
    "jp": "火災で全てのコンピューターディスクが駄目になってしまった時、会社はもうお手上げの状況だった。",
@@ -19516,8 +19516,8 @@
   "生理が不規則です。": {
    "jp": "不規則な生活は体に悪い。",
    "en": "An irregular lifestyle is bad for your health.",
-   "fr": "Une vie déréglée est mauvaise pour la santé.",
-   "why": "intimate medical topic, more typical context"
+   "fr": "Un rythme de vie irrégulier est mauvais pour la santé.",
+   "why": "verify: FR 'vie déréglée' suggests a dissolute life, not an irregular routine"
   },
   "生産性はオートメーションの徹底によって向上する。": {
    "jp": "この工場はオートメーション化が徹底している。",
@@ -19606,8 +19606,8 @@
   "町は昔のままだった。": {
    "jp": "ママは台所で料理をしている。",
    "en": "Mum is cooking in the kitchen.",
-   "fr": "Maman fait la cuisine.",
-   "why": "word absent (まま, not ママ)"
+   "fr": "Maman prépare à manger dans la cuisine.",
+   "why": "verify: FR dropped 台所で (in the kitchen)"
   },
   "留学生も入れるのかしら。": {
    "jp": "私も仲間に入れてくれる？",
@@ -19678,8 +19678,8 @@
   "目が部屋の明かりを反射したときに彼女の目は輝いた。": {
    "jp": "雪が太陽の光を反射してまぶしい。",
    "en": "The snow is dazzling as it reflects the sunlight.",
-   "fr": "La neige est éblouissante sous le soleil qu'elle réfléchit.",
-   "why": "clumsy repetition of 目"
+   "fr": "La neige, qui réfléchit la lumière du soleil, est éblouissante.",
+   "why": "verify: FR clumsy ('sous le soleil qu'elle réfléchit')"
   },
   "目の前で繰り広げられるやり取りは、俺が入り込む隙なんて一ミリもない。": {
    "jp": "このネジは直径が5ミリだ。",
@@ -19724,10 +19724,10 @@
    "why": "calqued proverb"
   },
   "看護婦が彼の体温を計った。": {
-   "jp": "看護師が彼の体温を計った。",
+   "jp": "看護師が彼の体温を測った。",
    "en": "The nurse took his temperature.",
    "fr": "L'infirmière a pris sa température.",
-   "why": "dated term 看護婦"
+   "why": "verify: 体温は「測る」 (standard 異字同訓 usage), not 計る"
   },
   "看護婦たちは、日夜患者の世話をしている。": {
    "jp": "看護師たちは、日夜患者の世話をしている。",
@@ -19816,8 +19816,8 @@
   "破壊の結果、毎日５０種類もの野生の動植物が消滅していると見積もられている。": {
    "jp": "この店では１０種類のパンを売っている。",
    "en": "This shop sells ten kinds of bread.",
-   "fr": "Cette boulangerie vend dix sortes de pain.",
-   "why": "too hard, unverifiable figure"
+   "fr": "Ce magasin vend dix sortes de pain.",
+   "why": "verify: FR said boulangerie (bakery), JP and EN say shop"
   },
   "硫黄はマッチを作るのに使われる。": {
    "jp": "台所にマッチはありますか。",
@@ -19845,9 +19845,9 @@
   },
   "社長のとっさのひらめきなんだって。": {
    "jp": "ボールが飛んできたので、とっさに頭を下げた。",
-   "en": "A ball came flying at me, so I ducked on the spot.",
+   "en": "A ball came flying at me, so I ducked instinctively.",
    "fr": "Un ballon arrivait sur moi, alors j'ai baissé la tête par réflexe.",
-   "why": "vague fragment, EN mismatch"
+   "why": "verify: EN 'on the spot' wrong for とっさに"
   },
   "社長の挨拶が長くて式の後半が押せ押せになってしまった。": {
    "jp": "式の前に、みんなで写真を撮った。",
@@ -20019,9 +20019,9 @@
   },
   "私たちはそのまま洞窟の口にボートで突っ込んで行きました。": {
    "jp": "私たちはそのまま洞窟の口にボートで突っ込んで行きました。",
-   "en": "We went straight on into the mouth of the cave in our boat.",
+   "en": "We plunged straight on into the mouth of the cave in our boat.",
    "fr": "Nous nous sommes engouffrés en bateau dans l'entrée de la grotte, sans nous arrêter.",
-   "why": "clumsy EN"
+   "why": "verify: EN 'went straight on into' lost 突っ込む (plunge into), the listed word"
   },
   "私たちはその件を詳細に検討した。": {
    "jp": "私たちはその件を詳細に検討した。",
@@ -20103,9 +20103,9 @@
   },
   "私たちは梅の花で有名な水戸公園を見に行った。": {
    "jp": "公園の桜の花がきれいに咲いています。",
-   "en": "The cherry blossoms in the park are in full, beautiful bloom.",
+   "en": "The cherry blossoms in the park are blooming beautifully.",
    "fr": "Les cerisiers du parc sont magnifiquement en fleur.",
-   "why": "false fact (no 水戸公園)"
+   "why": "verify: EN adds 'full' not in the Japanese"
   },
   "私たちは母校を訪れた。": {
    "jp": "私たちは母校を訪れた。",
@@ -20116,8 +20116,8 @@
   "私たちは祖先をうやまうべきだ。": {
    "jp": "日本では、祖先を敬う習慣が今も大切にされている。",
    "en": "In Japan, the custom of honouring one's ancestors is still valued.",
-   "fr": "Au Japon, la coutume d'honorer ses ancêtres reste très présente.",
-   "why": "moralising 'should worship'"
+   "fr": "Au Japon, la coutume d'honorer ses ancêtres est encore aujourd'hui très respectée.",
+   "why": "verify: FR 'reste très présente' (is widespread) does not say 大切にされている (is valued), which the EN says"
   },
   "私たちは１匹の犬と１匹の猫を飼っている。": {
    "jp": "私たちは犬を１匹と猫を１匹飼っている。",
@@ -20260,8 +20260,8 @@
   "私の父は毎日酒におぼれている。": {
    "jp": "彼はゲームにおぼれて、勉強をしなくなった。",
    "en": "He got so hooked on video games that he stopped studying.",
-   "fr": "Il s'est tellement plongé dans les jeux vidéo qu'il a arrêté d'étudier.",
-   "why": "alcoholism, EN mistranslation"
+   "fr": "Il est devenu tellement accro aux jeux vidéo qu'il a arrêté d'étudier.",
+   "why": "verify: FR 'plongé' loses the addiction sense of 溺れる that EN 'hooked' keeps"
   },
   "私の父は私に、ぜひそこを見てくるようにといった。": {
    "jp": "ちょっと飲み物を買ってくるね。",
@@ -20290,8 +20290,8 @@
   "私の連れは疲れすぎていて走るのはおろか、歩くこともできない、と言った。": {
    "jp": "連れが疲れて歩けないと言うので、少し休んだ。",
    "en": "My companion said they were too tired to walk, so we took a short rest.",
-   "fr": "Comme la personne qui m'accompagnait n'arrivait plus à marcher de fatigue, nous avons fait une petite pause.",
-   "why": "long, convoluted for N3"
+   "fr": "Comme la personne qui m'accompagnait disait être trop fatiguée pour marcher, nous avons fait une petite pause.",
+   "why": "verify: FR dropped that the companion said so (言うので)"
   },
   "私の部屋は４階にあります。": {
    "jp": "私の部屋は４階にあります。",
@@ -20558,10 +20558,10 @@
    "why": "political"
   },
   "私はまだその問題が解けない。": {
-   "jp": "その問題は未だに解決されていない。",
+   "jp": "その問題は未だ解決されていない。",
    "en": "That problem has not been solved yet.",
    "fr": "Ce problème n'est toujours pas résolu.",
-   "why": "word absent (まだ)"
+   "why": "verify: 未だに is a separate word; the card is 未だ (いまだ), used as such with the negative"
   },
   "私はもっと敵の抵抗があると踏んでたんだけど、むしろ中枢に進むほど敵が減ってきてる・・・。おかしいと思わないかしら？": {
    "jp": "この仕事は三日で終わると踏んでいる。",
@@ -20638,8 +20638,8 @@
   "私は一つの袋は運んできたが、もう一つのほうは後へ残してきた。": {
    "jp": "荷物の半分はホテルに残して、観光に出かけた。",
    "en": "I left half my luggage at the hotel and went sightseeing.",
-   "fr": "J'ai laissé la moitié de mes bagages à l'hôtel et je suis parti visiter.",
-   "why": "unnatural translationese"
+   "fr": "J'ai laissé la moitié de mes bagages à l'hôtel et je suis allé faire du tourisme.",
+   "why": "verify: FR 'je suis parti visiter' with no object is unidiomatic"
   },
   "私は一人の弟がいます。": {
    "jp": "私には弟が一人います。",
@@ -20704,8 +20704,8 @@
   "私は割のいい仕事の申し入れを受けた。": {
    "jp": "割のいい仕事を紹介してもらった。",
    "en": "Someone put me onto a well-paying job.",
-   "fr": "On m'a présenté un travail bien payé.",
-   "why": "申し入れ unnatural"
+   "fr": "On m'a recommandé un travail bien payé.",
+   "why": "verify: FR 'présenter un travail' unidiomatic"
   },
   "私は勉強と遊びを兼ねている仕事につきたい。": {
    "jp": "この部屋は書斎と客間を兼ねている。",
@@ -21170,10 +21170,10 @@
    "why": "mirror takes 映る, wrong sense"
   },
   "私は長い間臥薪嘗胆の苦しみをなめた。": {
-   "jp": "彼は若いころ、たくさんの苦労をなめた。",
+   "jp": "彼は若いころ、数々の苦労をなめた。",
    "en": "He went through many hardships when he was young.",
    "fr": "Dans sa jeunesse, il a connu bien des épreuves.",
-   "why": "garbled idiom 臥薪嘗胆"
+   "why": "verify: register clash: casual たくさんの with literary 苦労をなめる"
   },
   "私は１時間通勤する。": {
    "jp": "私は通勤に１時間かかります。",
@@ -21434,10 +21434,10 @@
    "why": "horse racing; too hard"
   },
   "笑いで誤魔化すと、亜美さんはさも不機嫌そうに眉を寄せた。": {
-   "jp": "笑いで誤魔化すと、亜美さんはさも不機嫌そうに眉を寄せた。",
+   "jp": "笑ってごまかすと、亜美さんはさも不機嫌そうに眉を寄せた。",
    "en": "When I tried to laugh it off, Ami knit her brows, looking thoroughly displeased.",
    "fr": "Quand j'ai éludé la chose en riant, Ami a froncé les sourcils, visiblement contrariée.",
-   "why": "EN mistranslation of 誤魔化す"
+   "why": "verify: 誤魔化す is ateji (normal orthography ごまかす) and the idiom is 笑ってごまかす, not 笑いで誤魔化す"
   },
   "第二に、いくつかのクリオールはそれ自体独立した「国語」となるかもしれない。": {
    "jp": "その国には国語が二つある。",
@@ -21638,10 +21638,10 @@
    "why": "hard 深い傷を負う"
   },
   "習い性となる。": {
-   "jp": "性に関係なく、誰でも参加できます。",
-   "en": "Anyone can take part, regardless of sex.",
-   "fr": "Tout le monde peut participer, quel que soit son sexe.",
-   "why": "proverb fragment, rare sense"
+   "jp": "フランス語の名詞には、男性と女性の二つの性がある。",
+   "en": "French nouns have two genders, masculine and feminine.",
+   "fr": "Les noms français ont deux genres, le masculin et le féminin.",
+   "why": "verify: 性に関係なく in an everyday notice is unnatural (性別に関係なく) and duplicates another example; grammatical gender instead"
   },
   "習慣は一度身についてしまうと、断ち切るのがとても難しい。": {
    "jp": "一度だけ富士山に登ったことがあります。",
@@ -21722,16 +21722,16 @@
    "why": "quasi-religious maxim"
   },
   "脅迫のもとになされた約束は無効だ。": {
-   "jp": "脅迫されて結んだ契約は無効だ。",
-   "en": "A contract signed under threat is void.",
-   "fr": "Un contrat signé sous la menace est nul.",
-   "why": "stiff のもとになされた"
+   "jp": "脅迫されて結んだ契約は無効だと、彼は主張した。",
+   "en": "He argued that a contract signed under threat was void.",
+   "fr": "Il a soutenu qu'un contrat signé sous la menace était nul.",
+   "why": "verify: false legal claim as a bare fact: a contract made under duress is voidable (取り消し得る, Civil Code art. 96), not void; made a stated argument"
   },
   "脱線がどんどんエスカレートしていく。": {
    "jp": "大雪で電車が脱線したが、けが人はいなかった。",
    "en": "A train derailed in the heavy snow, but no one was hurt.",
-   "fr": "Un train a déraillé à cause de la neige, mais il n'y a pas eu de blessés.",
-   "why": "wrong sense (digression), odd"
+   "fr": "Un train a déraillé à cause de fortes chutes de neige, mais il n'y a pas eu de blessés.",
+   "why": "verify: FR dropped 大雪 (heavy snow); EN and FR now agree"
   },
   "腕のいい工芸師は自分の作品に誇りを持っている。": {
    "jp": "腕のいい工芸家は、自分の作品に誇りを持っている。",
@@ -22046,16 +22046,16 @@
    "why": "blunt 死にました"
   },
   "藪をつついてヘビを出す。": {
-   "jp": "藪をつついてヘビを出す。",
-   "en": "Poke at a bush and you drive out a snake.",
-   "fr": "À fouiller les buissons, on en fait sortir un serpent.",
-   "why": "EN mistranslation"
+   "jp": "隣の人がひじで私をつついた。",
+   "en": "The person next to me nudged me with their elbow.",
+   "fr": "La personne à côté de moi m'a donné un petit coup de coude.",
+   "why": "verify: the sentence is the proverb 藪をつついて蛇を出す; replaced with an original one showing つつく 'to nudge'"
   },
   "血は水よりも濃し。": {
-   "jp": "血は水よりも濃い。",
-   "en": "Blood is thicker than water.",
-   "fr": "Le sang est plus épais que l'eau.",
-   "why": "classical 濃し"
+   "jp": "霧が濃くて、前がよく見えない。",
+   "en": "The fog is so thick that I can hardly see ahead.",
+   "fr": "Le brouillard est si épais que je vois à peine devant moi.",
+   "why": "verify: 血は水よりも濃い is a proverb, which the standard excludes; dense fog shows the same sense"
   },
   "血圧計が大切な検査器械です。": {
    "jp": "血圧計は大切な検査器械です。",
@@ -22130,10 +22130,10 @@
    "why": "overlong economic jargon"
   },
   "覆面をした男達が旅客を襲って金を奪った。": {
-   "jp": "覆面をしたレスラーが同じ飛行機に乗っていて、旅客たちは驚いた。",
-   "en": "A masked wrestler was on the same plane, and the passengers were surprised.",
-   "fr": "Un catcheur masqué voyageait dans le même avion, à la surprise des passagers.",
-   "why": "armed robbery"
+   "jp": "覆面をした人気レスラーが空港に姿を見せ、旅客の注目を集めた。",
+   "en": "A popular masked wrestler appeared at the airport and caught the passengers' attention.",
+   "fr": "Un catcheur masqué très populaire est apparu à l'aéroport et a attiré l'attention des voyageurs.",
+   "why": "verify: 旅客たちは驚いた is unnatural (旅客 is a formal/news word, not a narrative one; 乗客 would be said) and 同じ飛行機 had no referent; rewritten in the news register 旅客 belongs to"
   },
   "見かけ通り彼女は行動力がある。": {
    "jp": "このケーキは見掛けは地味だが、とてもおいしい。",
@@ -22316,10 +22316,10 @@
    "why": "crime, odd wording"
   },
   "警察は空砲を撃った。": {
-   "jp": "スタートのピストルが撃たれて、選手たちが走り出した。",
-   "en": "The starting pistol was fired and the runners set off.",
-   "fr": "Le pistolet du départ a retenti et les coureurs se sont élancés.",
-   "why": "police gunfire"
+   "jp": "先生がスタートのピストルを撃つと、子どもたちは一斉に走り出した。",
+   "en": "When the teacher fired the starting pistol, the children all set off running.",
+   "fr": "Quand le professeur a tiré le coup de pistolet du départ, les enfants se sont tous élancés.",
+   "why": "verify: ピストルが撃たれて (the pistol as passive subject) is unnatural Japanese; the firer made explicit"
   },
   "警察は簡単に銃を使ってはいけない。": {
    "jp": "日本では、銃を持つことが法律で厳しく制限されている。",
@@ -22364,10 +22364,10 @@
    "why": "too hard, sense not shown"
   },
   "貴重な思い出料としては安いものですよ。": {
-   "jp": "旅の思い出に、入場料の半券を取っておいた。",
-   "en": "I kept the stub of my admission ticket as a memento of the trip.",
-   "fr": "En souvenir du voyage, j'ai gardé le talon de mon billet d'entrée.",
-   "why": "nonsense 思い出料, EN mistranslation"
+   "jp": "楽しい思い出になるなら、この入場料は安いものだ。",
+   "en": "If it makes a happy memory, this admission fee is a bargain.",
+   "fr": "Si c'est pour en garder un beau souvenir, ce prix d'entrée n'est pas cher payé.",
+   "why": "verify: 入場料の半券 is wrong: a fee has no stub (半券 belongs to a 入場券)"
   },
   "貿易が国富を増大させた。": {
    "jp": "貿易によって、国の富が増大した。",
@@ -22522,8 +22522,8 @@
   "軍隊は簡単に反乱を鎮圧した。": {
    "jp": "江戸時代には農民の反乱が何度も起きた。",
    "en": "Peasant uprisings broke out many times in the Edo period.",
-   "fr": "À l'époque d'Edo, les révoltes paysannes ont éclaté à maintes reprises.",
-   "why": "troops crushing rebellion"
+   "fr": "À l'époque d'Edo, des révoltes paysannes ont éclaté à maintes reprises.",
+   "why": "verify: FR article: des, not les"
   },
   "転校したそうですね。": {
    "jp": "転校したそうですね。",
@@ -22916,10 +22916,10 @@
    "why": "too hard for N5 (間一髪)"
   },
   "間髪を入れず、迅速かつ的確な応対、畏れ入ります。": {
-   "jp": "お客様への迅速で的確な応対には、いつも恐れ入ります。",
-   "en": "I am always impressed by how quickly and precisely you deal with customers.",
-   "fr": "Votre façon rapide et précise de vous occuper des clients m'impressionne toujours.",
-   "why": "fragment, rare 間髪を入れず / 畏れ入る"
+   "jp": "店員の迅速で的確な応対には恐れ入った。",
+   "en": "The shop assistant's quick and precise service left me amazed.",
+   "fr": "Le service rapide et précis du vendeur m'a laissé admiratif.",
+   "why": "verify: いつも恐れ入ります reads as the stock 'thank you, sorry for the trouble', and is odd said to someone about their handling of customers; 恐れ入った (was amazed) shows the listed sense plainly"
   },
   "関係代名詞は「接続詞+代名詞」のはたらきをしています。": {
    "jp": "関係代名詞は「接続詞+代名詞」のはたらきをしています。",
@@ -23091,9 +23091,9 @@
   },
   "露骨に嫌な顔をして、彼を睨みつけた。": {
    "jp": "彼は露骨に嫌な顔をした。",
-   "en": "He made no effort to hide his annoyance.",
+   "en": "He made a sour face, without even trying to hide it.",
    "fr": "Il a fait la grimace sans s'en cacher.",
-   "why": "hostile 睨みつけた, subject unclear"
+   "why": "verify: EN dropped the face/expression the word 顔 is shown for"
   },
   "静かにするように気をつけなさい。": {
    "jp": "道が凍っているから、転ばないように気を付けてね。",
@@ -23336,10 +23336,10 @@
    "why": "EN obscure proverb"
   },
   "高校卒業後、彼は大学へ進み、父同様牧師になるための勉強をした。": {
-   "jp": "雨の日が続いて、工事の進みが遅れている。",
-   "en": "With all the rainy days, the construction work is falling behind.",
-   "fr": "Avec les jours de pluie qui se succèdent, les travaux prennent du retard.",
-   "why": "verb 進む, not the noun"
+   "jp": "雨の日が続いて、工事の進みが遅い。",
+   "en": "With all the rainy days, the construction work is progressing slowly.",
+   "fr": "Avec les jours de pluie qui se succèdent, les travaux avancent lentement.",
+   "why": "verify: 「進みが遅れている」 is redundant (progress is delayed); 「進みが遅い」 is the natural collocation"
   },
   "高級な品物を買う事は、結局は損にならない。": {
    "jp": "高級なレストランで誕生日を祝った。",
@@ -23679,9 +23679,9 @@
   },
   "２本の道が十文字に交差している。": {
    "jp": "２本の道が十文字に交差している。",
-   "en": "The two roads cross each other.",
-   "fr": "Les deux routes se croisent en forme de croix.",
-   "why": "EN mistranslation"
+   "en": "The two roads cross at right angles.",
+   "fr": "Les deux routes se croisent à angle droit.",
+   "why": "verify: EN dropped 十文字に; FR 'se croisent en forme de croix' redundant; translations now agree"
   },
   "２枚ずつやいてください。": {
    "jp": "魚を焼くと、いいにおいがする。",
@@ -23691,9 +23691,9 @@
   },
   "２桁のＩＱがある人間なら誰でも、この選択が政治的に偏ったものだって分かってるよ。": {
    "jp": "この記事は意見が偏っていて、公平ではない。",
-   "en": "This article's views are biased; it isn't fair.",
-   "fr": "Les opinions de cet article sont partiales ; il n'est pas impartial.",
-   "why": "political, insulting"
+   "en": "The opinions in this article are one-sided; it isn't impartial.",
+   "fr": "Les opinions de cet article sont orientées ; il n'est pas impartial.",
+   "why": "verify: FR 'partiales ; il n'est pas impartial' is a redundant tautology; EN 'fair' vague for 公平"
   },
   "２社は合併を計画している。": {
    "jp": "２社は合併を計画している。",
@@ -23738,10 +23738,10 @@
    "why": "outdated fact (voting age now 18)"
   },
   "２０３０年までには、全人口の２１パーセントが６５歳を越すようになる。": {
-   "jp": "祖父は90歳を越しても、毎日散歩をしている。",
+   "jp": "祖父は90歳を超しても、毎日散歩をしている。",
    "en": "My grandfather is past ninety, but he still goes for a walk every day.",
    "fr": "Mon grand-père a passé les quatre-vingt-dix ans, mais il se promène encore tous les jours.",
-   "why": "unsourced forecast, unclear subject"
+   "why": "verify: a number/threshold exceeded is written 超す (越す is for crossing a place or time)"
   },
   "２１世紀は経済力を基盤とするようになるだろう。": {
    "jp": "安定した生活の基盤を作りたい。",
@@ -23812,8 +23812,8 @@
   "３番目の星はある王様の物でした。": {
    "jp": "前から３番目の列に座ってください。",
    "en": "Please sit in the third row from the front.",
-   "fr": "Asseyez-vous au troisième rang, s'il vous plaît.",
-   "why": "quote without context"
+   "fr": "Asseyez-vous au troisième rang en partant de devant, s'il vous plaît.",
+   "why": "verify: FR dropped 前から (from the front), which the EN keeps"
   },
   "３角形のすべての角の和は１８０度に等しい。": {
    "jp": "三角形のすべての角の和は１８０度に等しい。",
@@ -23830,8 +23830,8 @@
   "４年間は彼は最初の値段で芝を刈ってくれたが、その年の終わりに彼はしょっちゅう手伝いを連れていることに気がついた。": {
    "jp": "店が忙しいので、手伝いを一人雇った。",
    "en": "The shop is busy, so we hired a helper.",
-   "fr": "Le magasin a beaucoup de travail, alors nous avons embauché un assistant.",
-   "why": "far too long"
+   "fr": "Comme il y a beaucoup de monde au magasin, nous avons embauché un assistant.",
+   "why": "verify: FR 'Le magasin a beaucoup de travail' is unidiomatic"
   },
   "４月５日か６日に会っていただけませんか。": {
    "jp": "4月5日か6日に会っていただけませんか。",
@@ -23907,8 +23907,8 @@
   },
   "６人宿泊させて欲しい。": {
    "jp": "６人で宿泊したいのですが、部屋は空いていますか。",
-   "en": "There are six of us and we'd like to stay the night. Do you have a room available?",
-   "fr": "Nous sommes six et nous aimerions passer la nuit ici. Avez-vous une chambre de libre ?",
+   "en": "There are six of us and we'd like to stay here. Do you have a room available?",
+   "fr": "Nous sommes six et nous aimerions séjourner ici. Avez-vous une chambre de libre ?",
    "why": "verify: EN 'We'd like to stay here, six of us' is clumsy; EN/FR reworded"
   },
   "６時にホテルに車で迎えて下さい。": {
@@ -24098,10 +24098,10 @@
    "why": "brand name"
   },
   "ＷＨＯとは世界保健機構を表す。": {
-   "jp": "市は保健サービスの機構を見直すことにした。",
-   "en": "The city has decided to review how its health services are organised.",
-   "fr": "La ville a décidé de revoir l'organisation de ses services de santé.",
-   "why": "false fact (WHO is 世界保健機関)"
+   "jp": "市は保健行政の機構改革を進めている。",
+   "en": "The city is reorganising the structure of its public health administration.",
+   "fr": "La ville réorganise la structure de son administration de la santé publique.",
+   "why": "verify: 保健サービスの機構 is an odd collocation; 保健行政の機構改革 is the natural set phrase"
   },
   "ｘ線写真で異状が認められます。": {
    "jp": "レントゲン写真に異常が認められます。",
