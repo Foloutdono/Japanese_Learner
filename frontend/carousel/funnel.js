@@ -16,7 +16,7 @@
 // carousel studio): its copy is the app's own descriptions, its pictures
 // are schemas of the feature, never a figure.
 import {
-  ASC, FS, SP, R, alpha, fit, font, frame, hasKanji, layoutSentence, drawSentence, mark, measure, metal, METAL_H,
+  ASC, EDGE, FORMATS, FS, SP, R, alpha, fit, font, frame, hasKanji, layoutSentence, drawSentence, mark, measure, metal, METAL_H,
   mix, palette, paragraph, paragraphH, rrect, strokeBox, text,
 } from './draw.js'
 import { analyserLine, departButton, pointCard } from './app.js'
@@ -164,6 +164,18 @@ const FEATURE_OF = {
 /** Why a question's answer is the right one, in a line. */
 const whyOf = q => q.explain?.why || (q.explain?.head && q.explain?.sense ? `${q.explain.head}: ${q.explain.sense}` : '')
 export function funnelOf(type, pl, opts = {}) {
+  const spec = specOf(type, pl, opts)
+  if (!spec || !SENTENCED.has(pl.source)) return spec
+  // A sentence's carousel breaks the sentence down whole after the call
+  // to action, word by word, and asks nothing more (plan 215d): the
+  // type's own detail follows it where it is not a question nor the same
+  // words again.
+  const own = spec.detail && !spec.detail.yours && spec.detail.kind !== 'rows' ? [spec.detail] : []
+  return { ...spec, detail: null, further: [], lead: [...glossPages(pl, opts.fmt || FORMATS.post), ...own] }
+}
+// The sources whose item is a sentence of the reading bank.
+const SENTENCED = new Set(['sentence', 'translation'])
+function specOf(type, pl, opts) {
   const f = pl.funnel || {}
   const base = { keys: f.keys || [], notes: f.notes || (f.keys || []).map(text => ({ kind: 'note', text })), feature: FEATURE_OF[pl.source] || 'reading' }
   const as = (kind, list) => list.filter(Boolean).map(text => ({ kind, text }))
@@ -335,7 +347,7 @@ function platesOf(pl, f, base) {
 
 /** The slides a funnel deals: [{ key, draw(ctx) }]. */
 export function funnelDeck(type, pl, fmt, opts = {}) {
-  const spec = funnelOf(type, pl, opts)
+  const spec = funnelOf(type, pl, { ...opts, fmt })
   if (!spec) return []
   const design = DESIGNS.includes(opts.design) ? opts.design : 'clarte'
   const n = LENGTHS.includes(+opts.length) ? +opts.length : 5
@@ -356,7 +368,8 @@ export function funnelDeck(type, pl, fmt, opts = {}) {
   let q = 1
   let m = 0
   for (const d of suite) {
-    if (room <= 0) break
+    // A sentence's breakdown is dealt whole: its later slides past the length.
+    if (room <= 0 && !(d.kind === 'gloss' && d.page > 1)) break
     if (d.yours) {
       q += 1
       const k = q
@@ -600,9 +613,14 @@ const textBlock = (c, str, { x, w, sizes, weight = 700, fam = 'latin', color = c
 // ── The item, as large as it can be read ──────────────────────
 /** A sentence, each word over its line's rule (a word the vocabulary's, a
  *  particle the grammar's), or the lit words alone ruled in gold. */
-function sentenceBlock(c, rows, { x, w, maxH, max = FS.display * 1.15, min = FS.title, script = c.pl.script, romaji = false, lines = 3, lit = null, align = 'center', ink = c.p.ink, fam = 'serif' }) {
+function sentenceBlock(c, rows, { x, w, maxH, max = FS.display * 1.15, min = FS.title, script = c.pl.script, romaji = false, lines = 3, lit = null, align = 'center', ink = c.p.ink, fam = 'serif', fewest = false }) {
   if (!rows?.length) return none
-  const L = layoutSentence(c.ctx, rows, { max, min, maxW: w, maxH, maxLines: lines, script, romaji, rules: false, under: 0.34, gap: 0.08, fam, weight: 700 })
+  const at = k => layoutSentence(c.ctx, rows, { max, min, maxW: w, maxH, maxLines: k, script, romaji, rules: false, under: 0.34, gap: 0.08, fam, weight: 700 })
+  // `fewest`: on as few lines as it sets in, then as large as they hold
+  // (plan 215d): これはわたしの本です。 on one line, not three.
+  let L = null
+  if (fewest) for (let k = 1; k <= lines && !L; k++) { const T = at(k); if (T && T.lines.length <= k && T.h <= maxH) L = T }
+  L ||= at(lines)
   if (!L) return none
   const ruleOf = (u) => {
     if (u.row.k === 'punct') return null
@@ -952,9 +970,9 @@ function answerBlock(c, s, { x, w, maxH }) {
   for (let k = 0; k < 4; k++) {
     const z = i => RUNGS[Math.min(RUNGS.length - 1, i + k)]
     const ro = k < 3 ? textBlock(c, s.romaji, { x, w, sizes: [z(4), z(5)], weight: 500, color: c.p.ink2, maxLines: 3 }) : none
-    const tr = textBlock(c, `“${s.translation}”`, { x, w, sizes: [z(1), z(2), z(3)], maxLines: 4 })
+    const tr = textBlock(c, `“${s.translation}”`, { x, w, sizes: [z(2), z(3), z(4)], maxLines: 4 })
     const gap = k < 2 ? SP[7] : SP[5]
-    const sent = sentenceBlock(c, s.rows, { x, w, maxH: maxH - ro.h - tr.h - gap * 2, max: z(0), min: z(3), script: 'furigana' })
+    const sent = sentenceBlock(c, s.rows, { x, w, maxH: maxH - ro.h - tr.h - gap * 2, max: z(0), min: z(3), script: 'furigana', fewest: true })
     out = stackOf([sent, ro, tr], [SP[5], gap])
     if (out.h > maxH) continue
     if (!ro.cut && !tr.cut) return out
@@ -1081,6 +1099,174 @@ function stackOf(blocks, gaps) {
 }
 
 // ── The detail ────────────────────────────────────────────────
+// ── A sentence word by word (plan 215d) ───────────────────────
+/** A gloss's first sense, its brackets left off: what a word says in a
+ *  breakdown set under it. */
+function firstSense(str) {
+  const first = (sensesOf(str)[0] || '').replace(/\s*[([（][^)\]）]*[)\]）]/g, '').trim()
+  return first || String(str || '').trim()
+}
+// What a word slide's head takes over the frame's top: the mark or the
+// band, and the kicker under it.
+const HEAD_H = 56 + SP[7] + FS.caption * 1.3 + SP[6]
+const wide = ch => /[\u3000-\u9fff\uff00-\uffef]/.test(ch)
+/** How tall a run of words sets at the body rung, guessed from its
+ *  characters, where there is no canvas to measure it on (the tests). */
+function glossGuess(items, rows, maxW) {
+  const z = FS.body
+  const gz = Math.max(FS.xs, z * 0.5)
+  const rs = Math.max(z * 0.4, FS.caption)
+  const cells = items.map(it => {
+    const row = rows[it.i] || {}
+    const ruby = (row.fu || []).filter(([, r]) => r).reduce((a, [, r]) => a + [...r].length * rs, 0)
+    const ww = Math.max([...it.t].reduce((a, ch) => a + (wide(ch) ? z : z * 0.6), 0), ruby)
+    const rw = (it.ro || '').length * gz * 0.58
+    const gl = (it.gloss || '').length * gz * 0.58
+    const gmax = Math.max(ww, rw, gz * 6)
+    const lines = Math.min(3, Math.max(1, Math.ceil(gl / gmax)))
+    return { w: Math.max(ww, rw, Math.min(gl, gmax)), h: (ruby ? rs * 1.3 : 0) + z * 1.1 + SP[3] * 2 + EDGE + gz * 1.25 + lines * gz * 1.18 }
+  })
+  const lines = [[]]
+  let lw = 0
+  for (const cl of cells) {
+    if (lines.at(-1).length && lw + SP[5] + cl.w > maxW) { lines.push([]); lw = 0 }
+    lw += (lines.at(-1).length ? SP[5] : 0) + cl.w
+    lines.at(-1).push(cl)
+  }
+  return lines.reduce((a, ln) => a + Math.max(...ln.map(cl => cl.h)) + SP[6], -SP[6])
+}
+/** Where `n` words cut into `k` runs as even as the phrases allow: before
+ *  a word, never before a particle or an ending (`starts`). */
+function cutsOf(n, starts, k) {
+  const cuts = []
+  for (let j = 1; j < k; j++) {
+    const left = starts.filter(x => x > (cuts.at(-1) ?? 0))
+    if (!left.length) return null
+    cuts.push(left.reduce((a, x) => (Math.abs(x - (j * n) / k) < Math.abs(a - (j * n) / k) ? x : a), left[0]))
+  }
+  return cuts
+}
+/** The largest rung a run of words sets whole at (0 where none does):
+ *  measured as it is drawn, in a browser, the fonts loaded before a deck
+ *  is dealt; guessed from its characters elsewhere. */
+function glossRung(items, rows, fr, room) {
+  if (typeof document === 'undefined') return glossGuess(items, rows, fr.w) <= room ? FS.body : 0
+  const b = glossBlock({ ctx: SCRATCH ||= document.createElement('canvas').getContext('2d'), p: palette('paper') }, { items, rows }, { x: 0, w: fr.w, maxH: room })
+  return b.h <= room && !b.cut ? b.z : 0
+}
+/** A sentence's breakdown, every word of it, on as many slides as it
+ *  takes: one where it sets at the body rung, else the fewest at the sm
+ *  rung or larger, every slide at the size the most crowded one takes. */
+function glossPages(pl, fmt) {
+  const f = pl.funnel || {}
+  const rows = f.rows || []
+  const items = (f.breakdown || []).map(it => ({ ...it, gloss: firstSense(it.main) }))
+  if (!items.length) return []
+  const fr = frame(fmt)
+  const room = fr.h - HEAD_H
+  const starts = items.map((_, k) => k).filter(k => k && rows[items[k].i]?.k === 'word')
+  let chunks = [items]
+  let z = 0
+  for (let k = 1; k <= 4; k++) {
+    const cuts = cutsOf(items.length, starts, k)
+    if (!cuts) break
+    chunks = [0, ...cuts].map((at, j) => items.slice(at, j < cuts.length ? cuts[j] : items.length))
+    z = Math.min(...chunks.map(ch => glossRung(ch, rows, fr, room)))
+    if (z >= (k === 1 ? FS.body : FS.sm)) break
+  }
+  return chunks.map((ch, j) => ({ kind: 'gloss', items: ch, rows, page: j + 1, pages: chunks.length, label: 'words', z: z || null }))
+}
+/** The sentence cut into its words, as a gloss is printed: each word
+ *  with its furigana, ruled in its line's colour, its romaji and what it
+ *  says under it; the lines as even as the words allow. */
+function glossBlock(c, s, { x, w, maxH }) {
+  const { ctx, p } = c
+  const inkOf = it => (it.line === 'grammar' ? p.line.grammar : p.line.vocab)
+  const gap = SP[5]
+  const layAt = z => {
+    const gz = Math.max(FS.xs, z * 0.5)
+    const cells = s.items.map(it => {
+      const row = s.rows[it.i] || { t: it.t, k: 'word' }
+      const L = layoutSentence(ctx, [row], { max: z, min: z, maxW: w, maxLines: 1, script: 'furigana', romaji: false, rules: false, under: 0.1, gap: 0, fam: 'jp', weight: 700 })
+      const ww = L ? L.lineW(L.lines[0]) : measure(ctx, it.t, font(700, z, 'jp'))
+      const rw = measure(ctx, it.ro || '', font(500, gz, 'latin'))
+      // A long gloss widens its column before it takes a fourth line, or is
+      // cut; never narrower than its longest word, which is never broken.
+      const gf = font(700, gz, 'latin')
+      const longest = Math.max(0, ...String(it.gloss || '').split(/\s+/).map(wd => measure(ctx, wd, gf)))
+      let g = null
+      for (const [span, lines] of [[6, 3], [9, 3], [12, 3], [12, 4]]) {
+        g = fit(ctx, it.gloss || '', { weight: 700, sizes: [gz], maxW: Math.min(w, Math.max(ww, rw, longest, gz * span)), maxLines: lines })
+        if (!g.cut) break
+      }
+      const cw = Math.max(ww, rw, ...g.lines.map(l => measure(ctx, l, g.f)))
+      return { it, L, cw, g }
+    })
+    const pack = limit => {
+      const lines = [[]]
+      let lw = 0
+      for (const cl of cells) {
+        if (lines.at(-1).length && lw + gap + cl.cw > limit) { lines.push([]); lw = 0 }
+        lw += (lines.at(-1).length ? gap : 0) + cl.cw
+        lines.at(-1).push(cl)
+      }
+      return lines
+    }
+    // The narrowest measure that keeps as few lines: no word left alone on the last.
+    let lines = pack(w)
+    let lo = w * 0.4, hi = w
+    for (let k = 0; k < 14; k++) {
+      const mid = (lo + hi) / 2
+      if (pack(mid).length > lines.length) lo = mid
+      else hi = mid
+    }
+    lines = pack(hi)
+    const wordH = ln => Math.max(...ln.map(cl => (cl.L ? cl.L.h : z)))
+    const lineH = ln => wordH(ln) + SP[3] * 2 + EDGE + gz * 1.25 + Math.max(...ln.map(cl => paragraphH(cl.g)))
+    const h = lines.reduce((a, ln) => a + lineH(ln) + SP[6], -SP[6])
+    return { z, gz, lines, wordH, lineH, h, cut: cells.some(cl => cl.g.cut) }
+  }
+  let lay = null
+  let firstFit = null
+  // A breakdown over several slides is set at one size on all of them.
+  for (const z of [FS.heading, FS.title, FS.lead, FS.body, FS.sm].filter(r => !s.z || r <= s.z)) {
+    lay = layAt(z)
+    if (lay.h > maxH) continue
+    if (!lay.cut) break
+    firstFit ||= lay
+  }
+  if (firstFit && (lay.h > maxH || lay.cut)) lay = firstFit
+  return {
+    h: lay.h,
+    z: lay.z,
+    cut: lay.cut,
+    draw: y => {
+      let at = y
+      for (const ln of lay.lines) {
+        const lw = ln.reduce((a, cl, i) => a + cl.cw + (i ? gap : 0), 0)
+        let cx0 = x + (w - lw) / 2
+        const wh = lay.wordH(ln)
+        for (const cl of ln) {
+          const ink = inkOf(cl.it)
+          const mid = cx0 + cl.cw / 2
+          if (cl.L) drawSentence(ctx, cl.L, mid, at + wh - cl.L.h, 'center', () => ({ ink: p.ink, ruby: p.ink2 }))
+          else text(ctx, cl.it.t, mid, at + wh - lay.z * 0.2, { f: font(700, lay.z, 'jp'), color: p.ink, align: 'center' })
+          let yy = at + wh + SP[3]
+          ctx.fillStyle = ink
+          rrect(ctx, cx0, yy, cl.cw, EDGE, EDGE / 2)
+          ctx.fill()
+          yy += EDGE + SP[3]
+          text(ctx, cl.it.ro || '', mid, yy + lay.gz * 0.85, { f: font(500, lay.gz, 'latin'), color: p.ink2, align: 'center' })
+          yy += lay.gz * 1.25
+          paragraph(ctx, cl.g, mid, yy, ink, 'center')
+          cx0 += cl.cw + gap
+        }
+        at += lay.lineH(ln) + SP[6]
+      }
+    },
+  }
+}
+
 /** Words one by one: each in its line's pill, its sense and its reading. */
 function rowsBlock(c, items, { x, w, maxH }) {
   if (!items.length) return none
@@ -1453,6 +1639,7 @@ function content(c, s, box) {
     case 'kanji': return kanjiBlock(c, s, box)
     case 'kana': return kanaBlock(c, s, box)
     case 'rows': return rowsBlock(c, s.items, box)
+    case 'gloss': return glossBlock(c, s, box)
     case 'examples': return examplesBlock(c, s.items, box)
     case 'sentences': return sentencesBlock(c, s.items, box)
     case 'sides': return sidesBlock(c, s.sides, box)
@@ -1560,7 +1747,8 @@ function solutionSlide(c, s) {
 /** The content suite: the item in more detail. */
 function detailSlide(c, s) {
   const { fr, W, p } = c
-  const label = weld(c.lang, s.yours ? W.yours : W.detail[s.label] || W.detail.more)
+  const named = s.yours ? W.yours : W.detail[s.label] || W.detail.more
+  const label = weld(c.lang, s.pages > 1 ? `${named} · ${s.page}/${s.pages}` : named)
   const top = c.design === 'fiche' ? chrome(c, { jp: s.yours ? '問' : '詳', label, band: s.yours ? p.gold : p.line.grammar }) : chrome(c)
   let y = top
   if (c.design !== 'fiche') y += kicker(c, label, fr.x, y, 'left') + SP[6]
@@ -1593,13 +1781,15 @@ function suiteOf(spec, pl) {
   const seen = new Set([spec.hook?.q, spec.solution?.q, spec.detail?.q].filter(Boolean))
   const same = (a, b) => a.kind === b.kind && (a.label || '') === (b.label || '')
   const rowsOf = list => list.map(x => ({ t: x.t, reading: x.kanji ? x.reading : x.reading || '', ro: x.ro, main: x.main, sub: x.pos, line: x.line || 'vocab' }))
+  // A sentence's suite (spec.lead) is its breakdown and more of it, no question.
+  const lead = spec.lead || []
   const parts = [
-    f.breakdown?.length ? { kind: 'rows', items: rowsOf(f.breakdown), label: 'words' } : null,
+    f.breakdown?.length && !spec.lead ? { kind: 'rows', items: rowsOf(f.breakdown), label: 'words' } : null,
     f.examples?.length ? { kind: 'examples', items: f.examples, label: 'sentences' } : null,
     f.words?.length ? { kind: 'rows', items: f.words, label: pl.source === 'kanji' || pl.source === 'word' ? 'kanjiWords' : 'words' } : null,
     f.lookalike?.length > 1 ? { kind: 'kanas', items: f.lookalike, here: f.kana?.k, label: 'lookalike' } : null,
-  ].filter(d => d && !(spec.detail && same(spec.detail, d)))
-  const asks = [
+  ].filter(d => d && !(spec.detail && same(spec.detail, d)) && !lead.some(x => same(x, d)))
+  const asks = spec.lead ? [] : [
     ...(spec.further || []),
     ...withoutGiveaways(pl.quizzes || []).filter(q => !seen.has(q) && !(spec.further || []).some(d => d.q === q)).map(q => ({ kind: 'question', q, yours: true })),
   ]
@@ -1617,7 +1807,8 @@ function suiteOf(spec, pl) {
   }
   const out = []
   // The funnel's own detail leads its kind: first of the parts, or of the questions.
-  if (spec.detail) (spec.detail.yours ? asks : parts).unshift(spec.detail)
+  if (lead.length) parts.unshift(...lead)
+  else if (spec.detail) (spec.detail.yours ? asks : parts).unshift(spec.detail)
   // In turn, a question after a part and a part after a question; of the
   // parts, the one that answers the fewest questions still to ask, so that
   // a question comes before the part that would answer it.

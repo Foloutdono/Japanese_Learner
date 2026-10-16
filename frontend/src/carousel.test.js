@@ -1279,10 +1279,12 @@ describe('the conversion carousels (plan 215)', () => {
       for (const type of types(p)) {
         const where = `${src.id} ${id} ${lang} ${type}`
         let before = 0
+        // A sentence's breakdown is dealt whole, its later slides past the length (plan 215d).
+        const pages = (funnelOf(type, p, { fmt: FORMATS.post }).lead || []).filter(d => d.kind === 'gloss').length
         for (const length of ['5', '6', '7', '8']) {
           const keys = deck(type, p, FORMATS.post, { design: 'clarte', length }).map(x => x.key)
           // Never more than asked, never fewer than a shorter one, the key points last.
-          expect(keys.length, where).toBeLessThanOrEqual(+length)
+          expect(keys.length, where).toBeLessThanOrEqual(+length + Math.max(0, pages - (+length - 4)))
           expect(keys.length, where).toBeGreaterThanOrEqual(before)
           before = keys.length
           expect(new Set(keys).size, where).toBe(keys.length)
@@ -1290,6 +1292,33 @@ describe('the conversion carousels (plan 215)', () => {
             // A question's answer is the next slide; the last question's, the key points.
             if (k.startsWith('question-')) expect([`answer-${k.slice(9)}`, 'keys'], where).toContain(keys[i + 1])
             if (k.startsWith('answer-')) expect(keys[i - 1], where).toBe(`question-${k.slice(7)}`)
+          })
+        }
+      }
+    }
+  }))
+
+  it('breaks a sentence down whole after the call to action, and asks nothing more', { timeout: 120000 }, () => withPath2D(() => {
+    for (const { src, id, lang, p } of some.filter(x => x.src.id === 'sentence' || x.src.id === 'translation')) {
+      const words = p.funnel.breakdown
+      for (const type of types(p)) {
+        const where = `${src.id} ${id} ${lang} ${type}`
+        for (const fmt of [FORMATS.post, FORMATS.story]) {
+          const pages = funnelOf(type, p, { fmt }).lead.filter(d => d.kind === 'gloss')
+          // Every word once, in the sentence's order, over as many slides as it takes.
+          expect(pages.flatMap(d => d.items.map(it => it.t)), where).toEqual(words.map(it => it.t))
+          expect(pages.every((d, i) => d.page === i + 1 && d.pages === pages.length), where).toBe(true)
+          // A slide never starts on a particle or an ending: it rides the word before it.
+          for (const d of pages.slice(1)) expect(p.funnel.rows[d.items[0].i].k, where).toBe('word')
+          const slides = deck(type, p, fmt, { design: 'clarte', length: '8' })
+          const keys = slides.map(x => x.key)
+          expect(keys.some(k => /^(question|answer)-/.test(k)), where).toBe(false)
+          // The breakdown follows the call to action, every word read under it.
+          const at = keys.indexOf('cta')
+          pages.forEach((d, i) => {
+            const { ctx, texts } = stubContext()
+            slides[at + 1 + i].draw(ctx)
+            for (const it of d.items.filter(x => x.ro)) expect(texts, `${where} ${it.t}`).toContain(it.ro)
           })
         }
       }

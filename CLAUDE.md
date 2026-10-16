@@ -622,7 +622,9 @@ the lookalike sets, the conversations) is `frontend/carousel/content/`;
 a conversation's every line carries its furigana and its romaji. A point is explained in its own
 sentence, a particle by the one sense it has there (`explain.js`); its
 questions (`quizzes.js`) deal a wrong answer only where it cannot be
-right too, and none is answered on the slide that asks it. A slide fits its text to the format's safe area rather than
+right too, and none is answered on the slide that asks it; a sentence's
+carousel asks none after its call to action, where every word of the
+sentence is glossed instead. A slide fits its text to the format's safe area rather than
 let it overflow (its README, "Nothing leaves the frame"): a new slide
 kind, ending or label is fitted the same way. Like the landing page it
 is a static page outside `src/` and never ships. Its data is `frontend/carousel/bank/*.json`, written by

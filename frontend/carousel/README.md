@@ -43,7 +43,7 @@ read:
 | The hook | `ask` | the item and the question it asks (can you read it? what does it mean? which one is the odd one out?); a text, with the question asked of it under it |
 | The answer | `answer` | the item answered as the app shows it: the analyser's line and its numbered points, the review card's word, a kanji's readings; a question's solution alone (its sentence completed, or the word asked about, the right answer large, why), never the question again nor its other choices |
 | The call to action | `cta` | "Want more like this?": the feature the item comes from in one card, its picture (a schema of what it does) over its name and what it does; two more features beside it, the button to the site |
-| The detail | `more` | the item further: word by word, in sentences, the words a kanji writes; or "Your turn" (`question-2`): the next question, turn or round, asked and left to the reader, answered on the next slide (`answer-2`) |
+| The detail | `more` | the item further: word by word, in sentences, the words a kanji writes; or "Your turn" (`question-2`): the next question, turn or round, asked and left to the reader, answered on the next slide (`answer-2`); a sentence's: its words glossed, every one of them (`more`, `more-2`…) |
 | The key points | `keys` | the answer to "Your turn" where no slide was left for it, up to three points the catalogue, the deck or the explainers already say, a card each, marked with its kind (how it works, form, watch out, don't mix up, reading, in a word…), and "Save it for your next review" beside the save glyph, a short arrow down from it |
 
 A question is never answered on the slide that asks it: the hook asks,
@@ -58,6 +58,21 @@ before the part that would answer it (`suiteOf`). A text is asked its
 question under it on the hook; where the text and the choices do not
 both hold, the choices wait for the answer, and the text is never the
 one cut short first.
+
+A sentence's carousel (the reading bank's, read or translated, plan
+215d) asks nothing after its call to action: the slide after it is the
+sentence cut into its words, as a gloss is printed, each word with its
+furigana, ruled in its line's colour, its romaji and its first sense
+under it (the deck's gloss, its brackets left off), every word of the
+sentence. A long one goes over as many slides as it takes ("Word by
+word · 1/2"), cut before a word and never before a particle or an
+ending, one where it sets at the body rung, else the fewest at the sm
+rung, all at the size the most crowded one takes; those slides are
+dealt whole, past the length the studio asks for. Longer carousels go
+on with the type's own detail and the item's sentences, never a
+question. Its answer sets the sentence on the fewest lines it takes,
+then as large as they hold (これはわたしの本です。 on one line, not three),
+its romaji on a line under it, then what it says.
 
 Each key point carries its kind (`noted` in `sources.js`, plan 215c);
 a line of prose that says much what one before it said gives way to it
