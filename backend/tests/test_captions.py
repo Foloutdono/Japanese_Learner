@@ -175,6 +175,45 @@ class WordTimeTests(unittest.TestCase):
         self.assertEqual(cue["words"], [[0, 1.3], [1, 1.8]])
 
 
+# srv3, YouTube's own timed text (plan 221): the link fetch reads it
+# here, the grab converts it to VTT in the browser. These are the
+# fixtures of frontend/src/lib/captionGrab.test.js, and the VTT is what
+# its transcriptXmlToVtt writes for them, so the two paths are held to
+# the same cues.
+SRV3_ASR = (
+    '<?xml version="1.0" encoding="utf-8" ?><timedtext format="3"><body>'
+    '<w t="0" id="1"/>'
+    '<p t="1280" d="4799" w="1"><s ac="0">今日</s><s t="400" ac="0">は</s><s t="720" ac="0">いい</s></p>'
+    '<p t="3690" d="2389" w="1" a="1">\n</p>'
+    '<p t="3700" d="3000" w="1"><s ac="0">天気</s><s t="500" ac="0">です</s></p>'
+    '</body></timedtext>'
+)
+SRV3_ASR_AS_THE_GRAB_SENDS_IT = (
+    "WEBVTT\n\n00:00:01.280 --> 00:00:03.700\n今日<00:00:01.680>は<00:00:02.000>いい\n\n"
+    "00:00:03.700 --> 00:00:06.700\n天気<00:00:04.200>です\n"
+)
+SRV3_MANUAL = '<timedtext format="3"><body><p t="1000" d="2000">雨が&amp;#39;<br/>降る</p></body></timedtext>'
+SRV3_MANUAL_AS_THE_GRAB_SENDS_IT = "WEBVTT\n\n00:00:01.000 --> 00:00:03.000\n雨が' 降る\n"
+
+
+class Srv3Tests(unittest.TestCase):
+    def test_a_recognised_track_reads_as_the_grab_s_vtt_does(self) -> None:
+        cues = parse_track(SRV3_ASR, "track.srv3")
+        self.assertEqual(cues, parse_track(SRV3_ASR_AS_THE_GRAB_SENDS_IT, "t.vtt"))
+        self.assertEqual(cues[0], {
+            "start": 1.28, "end": 3.7, "text": "今日はいい",
+            "words": [[0, 1.28], [2, 1.68], [3, 2.0]],
+        })
+
+    def test_a_hand_written_track_reads_as_the_grab_s_vtt_does(self) -> None:
+        cues = parse_track(SRV3_MANUAL, "track.srv3")
+        self.assertEqual(cues, parse_track(SRV3_MANUAL_AS_THE_GRAB_SENDS_IT, "t.vtt"))
+        self.assertEqual(cues, [{"start": 1.0, "end": 3.0, "text": "雨が' 降る"}])
+
+    def test_srv3_is_sniffed_without_its_extension(self) -> None:
+        self.assertEqual(parse_track(SRV3_ASR, "track"), parse_track(SRV3_ASR, "track.srv3"))
+
+
 class ParseVideoIdTests(unittest.TestCase):
     """parse_video_id recognizes every YouTube URL shape we've seen and
     rejects everything else, without ever raising."""
@@ -337,6 +376,94 @@ class FetchYouTubeTrackTests(unittest.TestCase):
         with self.assertRaises(CaptionFetchError) as caught:
             self._fetch(manual=self._snippets(("   ", 0.0, 1.0)))
         self.assertEqual(caught.exception.code, "subtitles_empty")
+
+    # ── srv3: when each word is said (plan 221) ──
+    @staticmethod
+    def _session(bodies):
+        """The library's proxied session: srv3 for the URLs in `bodies`,
+        refused for any other. Records what it was asked."""
+        class _Session:
+            asked = []
+
+            def get(self, url, timeout=None):
+                self.asked.append(url)
+                if url not in bodies:
+                    raise ConnectionError("refused")
+                return SimpleNamespace(text=bodies[url], raise_for_status=lambda: None)
+        return _Session()
+
+    MANUAL_URL = "https://www.youtube.com/api/timedtext?v=vid&lang=ja"
+    ASR_URL = "https://www.youtube.com/api/timedtext?v=vid&lang=ja&kind=asr"
+    MANUAL_SRV3 = '<timedtext format="3"><body><p t="1000" d="3000">今日はいい天気です</p></body></timedtext>'
+    ASR_SRV3 = (
+        '<timedtext format="3"><body><p t="1100" d="3000" w="1">'
+        '<s>今日</s><s t="500">は</s><s t="700">いい</s><s t="1200">天気</s><s t="1800">です</s>'
+        '</p></body></timedtext>'
+    )
+
+    def _fetch_srv3(self, session, manual=None, generated=None):
+        import youtube_transcript_api
+
+        def track(url, snippets):
+            return SimpleNamespace(fetch=lambda: snippets, _url=url, _http_client=session)
+
+        class _TranscriptList:
+            def find_manually_created_transcript(self, codes):
+                if manual is None:
+                    raise youtube_transcript_api.NoTranscriptFound("vid", list(codes), None)
+                return track(FetchYouTubeTrackTests.MANUAL_URL, manual)
+
+            def find_generated_transcript(self, codes):
+                if generated is None:
+                    raise youtube_transcript_api.NoTranscriptFound("vid", list(codes), None)
+                return track(FetchYouTubeTrackTests.ASR_URL, generated)
+
+        class _Api:
+            def __init__(self, **kwargs):
+                pass
+
+            def list(self, video_id):
+                return _TranscriptList()
+
+        with mock.patch.dict("os.environ", self.PROXY_ENV, clear=False), \
+             mock.patch.object(youtube_transcript_api, "YouTubeTranscriptApi", _Api):
+            return fetch_youtube_track("dQw4w9WgXcQ")
+
+    def test_a_hand_written_line_takes_the_recognised_track_s_word_times(self) -> None:
+        """What the grab has done since 2026-09-27, and the link fetch
+        never did: its sessions had every word lit on an estimate."""
+        session = self._session({
+            self.MANUAL_URL + "&fmt=srv3": self.MANUAL_SRV3,
+            self.ASR_URL + "&fmt=srv3": self.ASR_SRV3,
+        })
+        cues = self._fetch_srv3(
+            session,
+            manual=self._snippets(("今日はいい天気です", 1.0, 3.0)),
+            generated=self._snippets(("きょうはいいてんきです", 1.1, 3.0)),
+        )
+        self.assertEqual([c["text"] for c in cues], ["今日はいい天気です"])
+        # 天気 starts at offset 5, when the recogniser heard it.
+        self.assertIn([5, 2.3], cues[0]["words"])
+        # Through the library's own session, so through the proxy.
+        self.assertEqual(session.asked, [self.MANUAL_URL + "&fmt=srv3", self.ASR_URL + "&fmt=srv3"])
+
+    def test_a_recognised_track_alone_keeps_its_own_word_times(self) -> None:
+        session = self._session({self.ASR_URL + "&fmt=srv3": self.ASR_SRV3})
+        cues = self._fetch_srv3(session, generated=self._snippets(("x", 0.0, 1.0)))
+        self.assertEqual(cues, [{
+            "start": 1.1, "end": 4.1, "text": "今日はいい天気です",
+            "words": [[0, 1.1], [2, 1.6], [3, 1.8], [5, 2.3], [7, 2.9]],
+        }])
+
+    def test_a_track_that_will_not_come_as_srv3_is_read_as_before(self) -> None:
+        """Best effort: the srv3 read costs the words their times, never
+        the session."""
+        cues = self._fetch_srv3(
+            self._session({}),
+            manual=self._snippets(("今日はいい天気です", 1.0, 3.0)),
+            generated=self._snippets(("きょう", 1.1, 3.0)),
+        )
+        self.assertEqual(cues, [{"start": 1.0, "end": 4.0, "text": "今日はいい天気です"}])
 
     def test_unconfigured_is_the_shipped_state(self) -> None:
         """No proxy anywhere means the ingest is off, and says so."""
