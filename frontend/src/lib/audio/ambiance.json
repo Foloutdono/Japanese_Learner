@@ -1,0 +1,11 @@
+{
+  "rev": "lake1",
+  "loop": 120.0,
+  "pad": 1.0,
+  "hours": [
+    "dawn",
+    "day",
+    "dusk",
+    "night"
+  ]
+}

@@ -78,7 +78,7 @@ onSettingsChange(applySettings)
  * loop) can, and disconnects itself on end so a long session doesn't
  * accumulate dead nodes hanging off the graph.
  */
-export function playBuffer(buffer, category, soundName, { when = 0, loop = false, fadeIn = 0, offset = 0, gain = 1 } = {}) {
+export function playBuffer(buffer, category, soundName, { when = 0, loop = false, loopStart = 0, loopEnd = 0, fadeIn = 0, offset = 0, gain = 1 } = {}) {
   const ctx = getAudioContext()
   if (!ctx || !buffer) return null
 
@@ -88,6 +88,13 @@ export function playBuffer(buffer, category, soundName, { when = 0, loop = false
   const source = ctx.createBufferSource()
   source.buffer = buffer
   source.loop = loop
+  // A loop region rather than the whole buffer: the ambiance's files
+  // carry a pad of themselves at each end (plan 219), so the seam falls
+  // inside the file wherever its decoder put the first sample.
+  if (loop && loopEnd > loopStart) {
+    source.loopStart = loopStart
+    source.loopEnd = loopEnd
+  }
 
   const trim = ctx.createGain()
   // `gain` is a per-play correction on top of the sound's own trim —
