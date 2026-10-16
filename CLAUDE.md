@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **221**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **222**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -313,9 +313,32 @@ same checks as a model answer by `tests/test_comprehension_seed.py`) is
 upserted into `comprehension_pool` when `routes/reading.py` is imported,
 keyed on `seed_key` so a corrected seed updates its row. The prewarm
 scripts grow the pools past that floor; `prewarm_comprehension_pool`
-reports the seeded and the generated rows apart. Exam papers have no
-seed -- a paper is ~35 model calls -- so `prewarm_exam_papers` is the
-only thing that spares the first learner at each exam id the wait.
+reports the seeded and the generated rows apart. Exam papers have
+seeds too (plan 221): `content/exam_seed/<exam_id>.json`, ten papers
+per exam id (kind × level), stored into `exam_papers` as ordinary
+revisions of the current `generator_version` when `routes/exams.py` is
+imported (`study/exam_seed.py`, keyed on `seed_key`; a changed seed
+rewrites its row while nobody has sat it, and otherwise retires that
+revision and is stored as a new one). They are made by the generators
+themselves, with the model's replies written by Claude rather than
+bought: `scripts/exam_seed.py` replays an exam id's generator with every
+model call answered from a file, so a seed passes every check a
+generated paper does, and `tests/test_exam_seed.py` holds each exam id
+to ten complete papers whose choices' length says nothing. **A bump of
+an exam id's `generator_version` retires its seeds with its papers**:
+the test fails until they are rebuilt.
+
+```bash
+cd backend
+python -m scripts.exam_seed status                # seeds per exam id
+python -m scripts.exam_seed run n4-grammar-01     # replay; prints the next prompt to answer
+python -m scripts.exam_seed check n4-grammar-01   # what the test holds the file to
+```
+
+No seed ships its audio: a listening question's `audioSrc` names the
+clip of its own script, made on first request
+(`study/exam_audio_repair.py`); `python -m scripts.revoice_audio --yes`
+makes them all ahead of the first learner.
 
 Three are one-shots, each run once after a deploy that changed the ids a
 content set serves — `content/grammar/renames.py` for grammar points,
