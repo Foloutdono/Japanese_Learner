@@ -59,6 +59,18 @@ export function redirectTarget() {
   return `${window.location.origin}/`
 }
 
+/**
+ * Where a confirmation e-mail's link should land: the origin the
+ * learner signed up on, as Google's return is. Without it Supabase
+ * writes the project's Site URL into the link, and a learner who
+ * signed up on tsuji.app confirmed onto the Vercel address, signed in
+ * there and not where they started. Undefined in the shell, which
+ * keeps the Site URL: no WebView is waiting on a mail's link.
+ */
+export function emailRedirectTarget() {
+  return isNative() ? undefined : `${window.location.origin}/`
+}
+
 // What the callback carries depends on the client's flowType, and the
 // shell has to read it by hand either way — the deep link never
 // touches the page, so detectSessionInUrl (which does this for us on

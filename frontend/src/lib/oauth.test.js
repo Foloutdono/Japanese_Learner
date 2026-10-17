@@ -32,7 +32,7 @@ vi.mock('./native', () => ({ openAuthTab: (...a) => openAuthTab(...a) }))
 // stubbed before the import because lib/origin.js reads it as it loads.
 vi.stubEnv('VITE_API_ORIGIN', 'https://web.test')
 
-const { connectProvider, hasProvider, redirectTarget, NATIVE_REDIRECT } = await import('./oauth')
+const { connectProvider, hasProvider, redirectTarget, emailRedirectTarget, NATIVE_REDIRECT } = await import('./oauth')
 
 beforeEach(() => {
   for (const m of [auth.signInWithOAuth, auth.linkIdentity, auth.exchangeCodeForSession, auth.setSession, openAuthTab]) m.mockReset()
@@ -62,6 +62,14 @@ describe('where Supabase sends the learner back', () => {
     expect(redirectTarget()).toBe('https://web.test/auth/native')
     // The manifests are written against this exact string.
     expect(NATIVE_REDIRECT).toBe('app.tsuji://auth-callback')
+  })
+
+  // A confirmation mail's link too: left to Supabase it is the Site URL,
+  // which sent a learner who signed up on tsuji.app to the Vercel address.
+  it('is the app\'s own origin for a confirmation e-mail, and the Site URL in the shell', () => {
+    expect(emailRedirectTarget()).toBe('https://app.test/')
+    isNative.mockReturnValue(true)
+    expect(emailRedirectTarget()).toBeUndefined()
   })
 })
 

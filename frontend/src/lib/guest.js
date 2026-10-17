@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { emailRedirectTarget } from './oauth'
 
 // ── 仮乗車券 — riding without an account ──────────────────────────
 // A guest is a REAL Supabase user that simply has no credentials on
@@ -100,9 +101,11 @@ export async function claimAccount({ email, password, lang }) {
     // sent: `lang` is what the dashboard's e-mail templates branch on
     // ({{ .Data.lang }}), so the learner who claimed the pass in French
     // is mailed in French (plan 215). Omitted when unknown.
+    // `emailRedirectTo`: the confirmation lands on the origin the pass
+    // was claimed on, not on the project's Site URL (lib/oauth.js).
     const { data, error } = await supabase.auth.updateUser({
       email, password, ...(lang ? { data: { lang } } : {}),
-    })
+    }, { emailRedirectTo: emailRedirectTarget() })
     // `code` is the part worth having: the message is English-only and
     // sometimes describes the wrong field (see above).
     if (error) return { ok: false, code: error.code, message: error.message }

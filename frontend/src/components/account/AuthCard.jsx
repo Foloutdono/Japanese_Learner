@@ -5,6 +5,7 @@ import { Seg } from '../chrome/Console'
 import { ProviderButton } from './ProviderButton'
 import { authRedirectError, authRedirectMessage } from '../../lib/authRedirect'
 import { authErrorMessage } from '../../lib/authErrors'
+import { emailRedirectTarget } from '../../lib/oauth'
 import { playUi } from '../../lib/audio'
 
 // ── The sign-in card (plan 075; lifted out of AuthScreen, plan 122) ──
@@ -67,8 +68,11 @@ export function AuthCard({ initialMode = 'login', autoFocus = false, seg = true,
     if (mode === 'signup') {
       // `lang` on the new user's metadata is what the dashboard's
       // confirmation template branches on ({{ .Data.lang }}), so the
-      // mail is written in the language the learner signed up in.
-      const { error } = await supabase.auth.signUp({ email, password, options: { data: { lang } } })
+      // mail is written in the language the learner signed up in, and
+      // its link returns to this origin rather than the Site URL.
+      const { error } = await supabase.auth.signUp({
+        email, password, options: { data: { lang }, emailRedirectTo: emailRedirectTarget() },
+      })
       if (error) setError(authErrorMessage(error, t, { form: true }))
       else setSuccess(t.signupSuccess)
     } else {
