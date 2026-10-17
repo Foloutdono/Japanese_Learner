@@ -227,8 +227,8 @@ describe('the painted platform on the desk (plan 243)', () => {
     expect(document.getElementById(go.getAttribute('aria-describedby')).textContent).toBe(fr.practiceHow.conversation)
     expect(go.getAttribute('data-guide')).toBe('practice.board')
     go.click()
-    await settle(100)
-    expect(here.path).toBe('/practice/conversation?level=N3')
+    // The router moves in a transition: waited for, not timed.
+    await vi.waitFor(() => expect(here.path).toBe('/practice/conversation?level=N3'))
   })
 
   it('departs on Enter from a train, and opens a train\'s station from its card', async () => {
@@ -236,8 +236,7 @@ describe('the painted platform on the desk (plan 243)', () => {
     await choose(2, 'N5')
     trains()[2].focus()
     press('Enter')
-    await settle(100)
-    expect(here.path).toBe('/practice/translation/level/N5')
+    await vi.waitFor(() => expect(here.path).toBe('/practice/translation/level/N5'))
     await screen.unmount()
     await gate()
     await choose(4, 'N4')
@@ -290,8 +289,7 @@ describe('the painted platform on the desk (plan 243)', () => {
     expect(veil.classList.contains('is-on')).toBe(true)
     expect(veil.querySelector('.pgate-veil__name').textContent).toBe(SECTIONS[0].title)
     expect(veil.querySelector('.pgate-veil__grade').textContent).toBe('N4')
-    await settle(600)
-    expect(here.path).toBe('/practice/reading/level/N4')
+    await vi.waitFor(() => expect(here.path).toBe('/practice/reading/level/N4'))
     motion.reduced = true
   })
 })
