@@ -57,9 +57,17 @@ Set up once, in the dashboards (the repository cannot do these):
    workflow); it creates `production` at `main`'s head.
 2. **Render**: the backend service → Settings → Build & Deploy → Branch →
    `production`. Optionally Auto-Deploy → *After CI checks pass*.
-3. **Vercel**: the project → Settings → Git → Production Branch →
-   `production`. `main` and every pull request then get preview
-   deployments, which is the place to try a frontend change.
+3. **Vercel**: the project → Settings → Environments → Production →
+   Branch Tracking → `production`, then Save. (Not Settings → Git: the
+   setting is not there any more.) Vercel refuses a branch it has never
+   deployed ("No deployments found for production"), and the branch the
+   workflow creates at `main`'s head carries a commit Vercel already
+   built for `main`, so it may deploy nothing. If it refuses, let the
+   next release put a new commit on `production` (merge anything to
+   `main`, then run the workflow: it ships the newest green commit), wait
+   for that deployment to appear, and Save again. `main` and every pull
+   request then get preview deployments, which is the place to try a
+   frontend change.
 
 A preview's `/api` is rewritten to the **production** backend and database
 (`vercel.json`), running the code last promoted, so a frontend change that
