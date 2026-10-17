@@ -427,7 +427,7 @@ describe('the list under the pass (plan 182)', () => {
     expect(lists.map(l => [...l.querySelectorAll('.stg-row')].map(r => r.dataset.page))).toEqual([
       ['display', 'sound'],
       ['agenda', 'reviews', 'rating', 'reading', 'help', 'write'],
-      ['account', 'credits'],
+      ['account', 'transfer', 'credits'],
       ['pass'],
     ])
     // Set apart by a gap, not by a caption.

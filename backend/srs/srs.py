@@ -2497,14 +2497,26 @@ class SRSEngine:
         "total_reviews": 1, "correct_reviews": 1, "last_quality": 4,
     }
 
+    # An imported assumption (plan 243): a card the learner's old app
+    # (Anki, WaniKani, Renshuu) says they know, written by seed_imported
+    # with that app's own interval and ease. It carries the same signature, so its first
+    # answer is the same check (is_assumed reads no further), and one
+    # mark the level rule's never has: `learning_step`, which nothing
+    # reads on a graduated row of a scheduler track, holds IMPORTED_STEP,
+    # a step no answer writes. The level rule's give-back passes it by
+    # (forget_assumed): a move down says the level was misjudged, not
+    # the learner's own deck. The first answer breaks the signature, so
+    # the mark it leaves on the row means nothing after it.
+    IMPORTED_STEP = -1
+
     @classmethod
     def is_assumed(cls, state: CardState) -> bool:
-        """Whether a row is still the level rule's assumption: written by
-        seed_known and never answered since (plan 224). Read off the row
-        itself, which nothing else can write: a card met from new has
-        no graduated repetition after its first review, and KNOWN_STATE
-        has three after one. The first answer, pass or miss, changes
-        both."""
+        """Whether a row is still an assumption: written by seed_known
+        (or seed_imported) and never answered since (plan 224). Read off
+        the row itself, which nothing else can write: a card met from
+        new has no graduated repetition after its first review, and
+        KNOWN_STATE has three after one. The first answer, pass or miss,
+        changes both."""
         k = cls.KNOWN_STATE
         return (
             state.total_reviews == k["total_reviews"]
@@ -2513,13 +2525,18 @@ class SRSEngine:
             and not state.is_learning
         )
 
-    # The same signature as a SQL condition over card_modes, for the
-    # move down that gives the assumed cards back (forget_assumed).
-    _ASSUMED_SQL = (
-        f"total_reviews = {KNOWN_STATE['total_reviews']} "
-        f"AND repetitions = {KNOWN_STATE['repetitions']} "
-        "AND lapses = 0 AND NOT is_learning"
+    # The same signature as a SQL condition over card_modes, `{t}` the
+    # table's name where a statement needs it: any untouched assumption,
+    # the level rule's alone (what a move down gives back,
+    # forget_assumed), and an import's alone (what its undo takes back,
+    # forget_imported).
+    _UNTOUCHED = (
+        "{t}total_reviews = %d AND {t}repetitions = %d AND {t}lapses = 0 AND NOT {t}is_learning"
+        % (KNOWN_STATE["total_reviews"], KNOWN_STATE["repetitions"])
     )
+    _UNTOUCHED_SQL = _UNTOUCHED.format(t="")
+    _ASSUMED_SQL = f"{_UNTOUCHED_SQL} AND learning_step <> {IMPORTED_STEP}"
+    _IMPORTED_SQL = f"{_UNTOUCHED_SQL} AND learning_step = {IMPORTED_STEP}"
 
     def seed_known(self, card_ids: list[str], mode: str, spread_days: int = 42,
                    now: datetime | None = None) -> int:
@@ -2588,6 +2605,91 @@ class SRSEngine:
             cur.execute(sql, (mode, list(card_ids)))
             return cur.rowcount
 
+    # ── 乗換 — another app's progress (plan 243) ────────────────
+    def seed_imported(self, rows: list[tuple[str, str, float, int, datetime]]) -> int:
+        """Write the cards another app says the learner knows:
+        (card id, mode, difficulty, interval in days, next review) each,
+        as study/transfer.rows builds them. A card is written as an
+        imported assumption -- KNOWN_STATE's signature, the app's interval
+        and ease, IMPORTED_STEP -- where it has no row, or only an
+        untouched assumption: the old app knows the card better than a
+        level's guess, and a newer export better than an older one. A row with
+        an answer behind it is history and is never touched. Returns
+        how many rows were written."""
+        if not rows:
+            return 0
+        k = self.KNOWN_STATE
+        values = [
+            (
+                cid, mode, difficulty, k["stability"], interval,
+                k["repetitions"], k["lapses"], self.IMPORTED_STEP, k["is_learning"],
+                when, k["total_reviews"], k["correct_reviews"], k["last_quality"],
+            )
+            for cid, mode, difficulty, interval, when in rows
+        ]
+        with self.storage.cursor() as cur:
+            execute_values(
+                cur, "INSERT INTO cards(id) VALUES %s ON CONFLICT(id) DO NOTHING",
+                [(cid,) for cid in dict.fromkeys(r[0] for r in rows)], page_size=1000,
+            )
+            sql = f"""
+                INSERT INTO card_modes(
+                    card_id, mode, difficulty, stability, interval_days,
+                    repetitions, lapses, learning_step, is_learning,
+                    next_review, total_reviews, correct_reviews, last_quality
+                )
+                VALUES %s
+                ON CONFLICT (card_id, mode) DO UPDATE SET
+                    difficulty = EXCLUDED.difficulty,
+                    stability = EXCLUDED.stability,
+                    interval_days = EXCLUDED.interval_days,
+                    learning_step = EXCLUDED.learning_step,
+                    next_review = EXCLUDED.next_review,
+                    last_quality = EXCLUDED.last_quality
+                WHERE {self._UNTOUCHED.format(t="card_modes.")}
+                RETURNING card_id
+            """
+            self._log_sql("seed_imported", sql, (len(values),))
+            written = execute_values(cur, sql, values, page_size=1000, fetch=True)
+        return len(written)
+
+    def with_history(self, card_ids: list[str], mode: str) -> set[str]:
+        """Those of these cards whose row in `mode` has an answer behind
+        it -- what seed_imported leaves alone."""
+        if not card_ids:
+            return set()
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = f"SELECT card_id FROM card_modes WHERE mode = %s AND card_id = ANY(%s) AND NOT ({self._UNTOUCHED_SQL})"
+                self._log_sql("with_history", sql, (mode, len(card_ids)))
+                cur.execute(sql, (mode, list(card_ids)))
+                return {row[0] for row in cur.fetchall()}
+
+    def count_imported(self, user_id: str) -> int:
+        """How many of the learner's imported cards still wait for their
+        first answer here."""
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = f"SELECT COUNT(*) FROM card_modes WHERE card_id LIKE %s AND {self._IMPORTED_SQL}"
+                pattern = self._user_prefix_pattern(user_id)
+                self._log_sql("count_imported", sql, (pattern,))
+                cur.execute(sql, (pattern,))
+                row = cur.fetchone()
+        return int(row[0]) if row else 0
+
+    def forget_imported(self, user_id: str) -> int:
+        """Take back an import: delete the learner's imported rows no
+        answer has touched, so each card is what it was before the app's
+        word -- new, unless the route seeds the level's assumptions back
+        over it. A card answered here since is history and stays.
+        Returns how many rows went."""
+        sql = f"DELETE FROM card_modes WHERE card_id LIKE %s AND {self._IMPORTED_SQL}"
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.cursor() as cur:
+            self._log_sql("forget_imported", sql, (pattern,))
+            cur.execute(sql, (pattern,))
+            return cur.rowcount
+
     def get_level_checks(self, user_id: str, days: int) -> list[tuple[str, int]]:
         """The level rule's checks the learner answered in the last
         `days` days (plan 224): (raw card id, quality), one per card --
@@ -2638,8 +2740,10 @@ class SRSEngine:
 
     def count_cards_with_history(self, card_ids: list[str]) -> int:
         """How many of these cards have a row under any mode that is more
-        than an untouched assumption -- the cards a move down sets aside
-        once forget_assumed has given the rest back (plan 224)."""
+        than the level rule's untouched assumption -- the cards a move
+        down sets aside once forget_assumed has given the rest back (plan
+        224). An imported card is not given back (plan 243), so it is set
+        aside with them."""
         if not card_ids:
             return 0
         with self.storage.connection() as conn:

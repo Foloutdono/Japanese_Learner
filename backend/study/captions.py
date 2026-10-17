@@ -546,13 +546,18 @@ def _proxy_config():
     return None
 
 
-def fetch_youtube_track(video_id: str) -> list[dict]:
+def fetch_youtube_track(video_id: str, translations: dict | None = None) -> list[dict]:
     """A video's Japanese caption track, as a Track in exactly the
     shape parse_track returns.
 
     Everything downstream of Cue is therefore untouched by this
     ingest's existence, which is the promise docs/adr/0003 made about
     any new source and the reason deleting the last one cost nothing.
+
+    `translations`, when given, is filled with the video's own
+    hand-written tracks in the languages the app is read in, {lang:
+    Track} (plan 242, study/line_translate.from_track): the lines'
+    translation where its makers wrote one. Never the lines studied.
 
     Every failure is a CaptionFetchError carrying a sentence meant for
     the learner, including the unconfigured case -- which is what this
@@ -639,7 +644,35 @@ def fetch_youtube_track(video_id: str) -> list[dict]:
                 cues = align_cues(cues, heard)
             except Exception:
                 logger.warning("Word timing skipped for %s", video_id, exc_info=True)
+    if translations is not None:
+        translations.update(_translation_tracks(available, video_id))
     return cues
+
+
+def _translation_tracks(available, video_id: str) -> dict:
+    """The video's hand-written tracks in the languages the app is read
+    in (study/line_translate.TRACK_LANGS), {lang: Track}, the first of
+    each. Best effort, each: a track that will not come costs its lines
+    nothing but the model's translation in its place (plan 242). Never
+    a recognised track -- one in French under a Japanese video is the
+    recogniser hearing French in Japanese -- and never YouTube's machine
+    translation."""
+    from study.line_translate import track_lang
+
+    out = {}
+    try:
+        listed = list(available)
+    except TypeError:
+        return out
+    for transcript in listed:
+        lang = track_lang(getattr(transcript, "language_code", ""))
+        if lang is None or lang in out or getattr(transcript, "is_generated", True):
+            continue
+        try:
+            out[lang] = _plain_cues(transcript, video_id)
+        except Exception as e:
+            logger.warning("The %s track of %s did not come: %s", lang, video_id, e)
+    return out
 
 
 # The library's own fetch, in its plain format: a line's start and

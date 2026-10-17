@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **242**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **244**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -216,6 +216,25 @@ runtime purpose.
   the new level up back as new cards (`forget_assumed`) and deletes no
   answered row; a new seeding path writes `KNOWN_STATE` or it is not
   read as an assumption.
+- **An import is an assumption the level does not give back (plans
+  243, 243b).** `SRSEngine.seed_imported` writes `KNOWN_STATE`'s
+  signature with the source's interval and ease and `IMPORTED_STEP` in
+  `learning_step`, only over no row or an untouched assumption: its
+  first answer is the same check, but `forget_assumed` (a move down)
+  passes it by, and its undo (`forget_imported`) seeds the level's
+  assumptions back over the holes. A source (`routes/transfer.SOURCES`:
+  Anki, WaniKani, Renshuu) is read on the device and never through our
+  server: Anki's file by `frontend/src/lib/anki/`, never uploaded; a
+  keyed app by `frontend/src/lib/transfer/`, straight from its own API
+  with the learner's key, which goes nowhere else and is never stored.
+  Only the chosen notes, cut to their short Japanese fields, and their
+  strongest card's schedule reach `/api/transfer`, and
+  `tests/test_transfer.py` holds the two sides' bounds and sources
+  equal. A new source is a reader in `lib/transfer/` that returns
+  `kindCollection`'s shape, a `SOURCES` entry on both sides and a value
+  of `transfer_import.source` in `events.VALUES` and `track.js`. A new
+  learner is offered it once on Today (`TransferSheet`), after the
+  gate's guide, while `transferOffer` says so (`transfer_offered_at`).
 - **The placement test is replayed from its seed (plan 224).** The climb
   (`study/placement.walk`) keeps nothing between two answers: it is
   rebuilt from the seed at each one, in whatever process answers it. So
@@ -895,7 +914,7 @@ Set `DEV_USER_ID` in `backend/.env` and every request is treated as that user wi
 
 ### Backend layout
 - `main.py` — FastAPI app setup: loads `backend/.env`, mounts routers, CORS (deployed frontend origin + `CORS_ORIGINS` env list), static mounts for `kanjivg` (stroke-order diagrams) and `datas/exam_audio` (generated TTS).
-- `routes/` — one file per feature area (kana, vocab, kanji, grammar, phrase, reading, translation, dictation, composition, practice, dictionary, decks, exams, today, stats, profile, frequency, theme_vocab, translations, onboarding, journey, tts, station). Thin FastAPI routers; business logic lives in `srs/` and `study/`.
+- `routes/` — one file per feature area (kana, vocab, kanji, grammar, phrase, reading, translation, dictation, composition, practice, dictionary, decks, exams, today, stats, profile, frequency, theme_vocab, translations, onboarding, journey, tts, station, transfer). Thin FastAPI routers; business logic lives in `srs/` and `study/`.
 - `core/` — cross-cutting singletons: `auth.py` (identity), `db.py` (raw psycopg2 connections), `srs_instance.py` / `frequency_store_instance.py` (module-level singletons constructed once at import time from `DATABASE_URL`, imported by routes needing SRS/frequency state).
 - `srs/` — the spaced-repetition engine (`srs.py` is the large one — scheduling, review submission, card state), `scheduler.py` (interval/difficulty math), `storage.py` (DB access), `models.py` (`CardState`/`ReviewResult` dataclasses), `xp.py` (XP curve), `batch_cache.py`, `frequency_store.py`.
 - `study/` — content-generation and evaluation logic that sits above the SRS layer: exam generation (`exam_blueprint.py`, `exam_*_gen.py` per section — vocab/kanji/grammar/reading/listening — `exam_validation.py`, `exam_scoring.py`, `exam_tts.py`), card selection/lookup (`card_index.py`, `card_lookup.py`, `daily_queue.py` for the "Today" queue), difficulty modeling (`difficulty.py`), grammar detection (`grammar_detect.py` — which catalogue points a sentence actually uses, over the tokenizer and the catalogue's own example sentences; `difficulty.points_in` is its name to the rest of the app), a point's own Choisir questions (`grammar_choose.py`, plan 201), Japanese text processing (`furigana.py`, `morphology.py`, `grammar_match.py`, `sound.py`, `romaji.py` — Hepburn conversion and the fold two romanizations are compared under), dictation (`dictation.py` — clip identity and the transcription measure), speech (`voice_engine.py` — the only client of the VOICEVOX Nemo engine; `exam_tts.py` — the clip store, content keys, the voice epoch and dialogue assembly; `word_tts.py` — the `/api/tts` card-reading clips), and study `modes.py`/`structures.py` defining the review-mode taxonomy per content type.

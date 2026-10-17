@@ -537,3 +537,33 @@ two) to where the next piece's is, and the pieces tile the cue.
 Every other cue is still exactly one Sentence, and a cue with no Japanese is never
 cut. A session stored before this is cut the same way the next time it is opened
 (`routes/video._current`), its indices with it.
+
+---
+
+## Amendment, 2026-10-17 — a video's own translation is taken where it has one (plan 242)
+
+The owner: *"If the subtitles translated are available take them, if not make
+them."* Since plan 235 every line's translation was the model's, even under a
+video whose makers had written French or English subtitles beside the Japanese.
+
+**The translated track is a source of translations, never of lines.** The rule
+the pasted-transcript ingest died of (2026-09-01: English handed to learners as
+the lines of a Japanese video) is untouched: the lines studied are still only
+ever a Japanese track. Beside it, the link fetch (`study/captions.py`) and the
+grab (`lib/captionGrab.js`, v3) now bring the video's hand-written tracks in the
+languages the app is read in (`line_translate.TRACK_LANGS`: French, English),
+and the worker reads each Japanese cue's translation off them by time
+(`study/line_translate.from_track`): the translated lines said within the cue,
+none where a translated line straddles two cues, none on a cue `line_cut` cuts
+in pieces. What it finds is kept on the session as the model's translations are
+(`video_sessions.translations`, by the line's text), so the block a learner
+reaches asks the model only for what the track left -- nothing, under a video
+translated end to end.
+
+Never a recognised track (one in French under a Japanese video is the recogniser
+hearing French in Japanese), and never YouTube's machine translation (`tlang`),
+which translates each cue alone, half a sentence as a whole one. Best effort,
+each: a translated track that will not come or will not read leaves its lines to
+the model, never the session. A v2 bookmark keeps working and brings none. An
+uploaded subtitle file carries none either: the upload accepts the translated
+tracks only as the grab sends them (`translation_fr`, `translation_en`).

@@ -1010,8 +1010,12 @@ const phraseAnalyzer = {
   // Le bureau du texte : la liste des mots repliée en une ligne (plan 235).
   wordsFoldCap:        'Mots de la phrase',
   explanationTitle:    'Explication de la phrase',
-  showExplanation:     'Voir l’explication',
-  showEntry:           'Revenir à la fiche',
+  // Le volet du bureau, ses trois faces (plan 242).
+  panelFaces:          'Ce que le volet montre',
+  faceWord:            'Mot',
+  facePoint:           'Point',
+  faceGrammar:         'Grammaire',
+  faceExplain:         'Construction',
   explainThisSentence: 'Expliquer la phrase',
   explanationOpen:     'Explication ouverte',
   writtenHere:         s => `ici : ${s}`,
@@ -3297,6 +3301,78 @@ const reviewPlan = {
 }
 // ── 217:reviews end ──
 
+// ── 243b:transfer ──
+// 乗換 (plans 243, 243b): Settings › Correspondance, another app's
+// progress brought across on a transfer ticket -- the source, the file
+// or the key, what the course finds, the stamp, and the way back while
+// the imported cards wait for their first answer; and the sheet over
+// Today that asks a new learner, once.
+const trCount = n => n.toLocaleString('fr-FR')
+const transfer = {
+  settingsTransfer: 'Correspondance',
+  trRowValue: 'Anki, WaniKani, Renshuu',
+  trCap: 'Correspondance',
+  trTicketLabel: 'Billet de correspondance',
+  trFrom: 'De',
+  trTo: 'Vers',
+  trSource: { anki: 'Anki', wanikani: 'WaniKani', renshuu: 'Renshuu' },
+  trFileHint: 'Ton fichier **.apkg** ou **.colpkg**',
+  trChooseFile: 'Choisir mon fichier Anki',
+  trKeyLabel: { wanikani: 'Ton jeton d’API WaniKani', renshuu: 'Ta clé d’API Renshuu' },
+  trKeyPlaceholder: { wanikani: 'Colle-le ici', renshuu: 'Colle-la ici' },
+  trReadKey: { wanikani: 'Lire mes cartes WaniKani', renshuu: 'Lire mes cartes Renshuu' },
+  trPages: n => `${trCount(n)} page${n > 1 ? 's' : ''} lue${n > 1 ? 's' : ''}`,
+  trHowQ: { anki: 'Comment l’exporter depuis Anki ?', wanikani: 'Où trouver mon jeton ?', renshuu: 'Où trouver ma clé ?' },
+  trHow: {
+    anki: ['**Fichier › Exporter…**', 'Coche **Inclure les informations de planification**', 'Décoche **Inclure les médias** : le fichier reste léger'],
+    wanikani: ['Sur WaniKani, **Settings › API Tokens**', 'Crée un jeton **sans aucune permission** : il ne pourra que lire', 'Colle-le ici'],
+    renshuu: ['Dans les réglages de Renshuu, trouve ta **clé d’API**', 'Copie-la', 'Colle-la ici'],
+  },
+  trPrivacyFile: 'Lu sur ton appareil. Seuls les mots partent.',
+  trPrivacyKey: name => `Ton appareil lit ${name} lui-même : ta clé ne nous est jamais envoyée, et n’est pas gardée.`,
+  trFound: n => `carte${n > 1 ? 's' : ''} reprise${n > 1 ? 's' : ''}`,
+  trLine: { vocab: 'Vocabulaire', kanji: 'Kanji', kana: 'Kana' },
+  trDecks: 'Paquets',
+  trDue: (n, weeks) => `${trCount(n)} ${n > 1 ? 'étaient en retard : elles reviennent' : 'était en retard : elle revient'} sur ${weeks} semaines.`,
+  trKept: n => `${trCount(n)} déjà étudiée${n > 1 ? 's' : ''} ici ${n > 1 ? 'restent comme elles sont' : 'reste comme elle est'}.`,
+  trAbove: n => `${trCount(n)} ${n > 1 ? 'sont' : 'est'} au-delà de ton niveau et de ta destination : ${n > 1 ? 'elles reviendront' : 'elle reviendra'} dans ta journée quand ton niveau y arrivera.`,
+  trCheck: 'Chaque carte est vérifiée à son premier passage.',
+  trPunch: 'Composter le billet',
+  trAllKept: 'Tu as déjà étudié ici toutes ces cartes : rien à reprendre.',
+  trNone: 'Aucune de ces notes n’a de carte dans le cours.',
+  trMissing: n => `${trCount(n)} note${n > 1 ? 's' : ''} sans carte dans le cours`,
+  trMissingSample: sample => `Par exemple : ${sample}.`,
+  trReadFrom: list => `Mots lus dans ${list}.`,
+  trRestart: 'Recommencer',
+  trImported: n => `carte${n > 1 ? 's' : ''} importée${n > 1 ? 's' : ''}`,
+  trImportedHint: 'Elles rejoignent ta journée à leur date. La première fois, chacune est vérifiée.',
+  trPunched: 'Composté',
+  trGoToday: 'Aller à Aujourd’hui',
+  trWaiting: n => `${trCount(n)} carte${n > 1 ? 's' : ''} importée${n > 1 ? 's attendent' : ' attend'} encore ta première réponse.`,
+  trUndo: 'Annuler l’import',
+  trUndoConfirmQ: 'Retirer les cartes importées que tu n’as pas encore revues ? Celles que tu as revues ici restent.',
+  trUndoYes: 'Retirer',
+  trUndone: n => `${trCount(n)} carte${n > 1 ? 's' : ''} retirée${n > 1 ? 's' : ''}.`,
+  trErr: {
+    notAnki: 'Ce fichier n’est pas un paquet Anki (.apkg ou .colpkg).',
+    unreadable: 'Ce fichier n’a pas pu être lu.',
+    noSchedule: 'Ce paquet a été exporté sans sa planification : exporte-le de nouveau avec « Inclure les informations de planification ».',
+    nothing: 'Rien à reprendre : aucune carte que l’appli t’a déjà apprise.',
+    tooMany: 'Trop de notes en une fois : choisis moins de paquets.',
+    badKey: 'Cette clé n’est pas acceptée. Vérifie-la et colle-la de nouveau.',
+    network: 'Impossible de joindre l’appli. Vérifie ta connexion.',
+    rate: 'L’appli demande d’attendre un peu. Réessaie dans une minute.',
+    unreachable: 'L’appli n’a pas répondu comme prévu. Réessaie plus tard.',
+    server: 'L’import n’a pas pu aboutir. Réessaie.',
+  },
+  trSheetQ: 'Tu as déjà appris ailleurs ?',
+  trSheetLead: 'Les mots que tu connais ne repartent pas de zéro : ils gardent leur rythme.',
+  trSheetGo: 'Reprendre ma progression',
+  trSheetLater: 'Je commence ici',
+  trSheetFoot: 'Toujours possible plus tard, dans Réglages.',
+}
+// ── 243b:transfer end ──
+
 export default welded({
   ...auth,
   ...landing,
@@ -3332,4 +3408,5 @@ export default welded({
   ...clrRestday,
   ...clrTickets,
   ...reviewPlan,
+  ...transfer,
 })

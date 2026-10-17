@@ -202,6 +202,17 @@ EVENTS: dict[str, frozenset[str]] = {
     # novices get through the course, and where they stop or skip it.
     "basics_unit_done": frozenset({"unit"}),
     "basics_skipped":   frozenset({"unit"}),
+    # ── 乗換 — another app's progress brought across (plans 243, 243b)
+    # All three written server-side (routes/transfer.py). An import:
+    # where from (`source`, VALUES below), the notes sent, the course
+    # cards they matched, the rows written and the cards left alone
+    # because they were already studied here; an undo, the rows it took
+    # back; the sheet over Today answered (`choice` go | later). Never a
+    # word, a field, a deck's name or a key: those are the learner's,
+    # and the name and the key never leave the device.
+    "transfer_import":  frozenset({"source", "notes", "cards", "written", "kept"}),
+    "transfer_undo":    frozenset({"removed"}),
+    "transfer_offer":   frozenset({"choice"}),
 
     # ── 発見 — a grammar point's tour (plan 187b) ────────────────
     # `level` is N5…N1, never the pattern: the funnel is read by level.
@@ -327,6 +338,8 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         "action":  frozenset({"play", "text", "photo", "video", "scan", "send",
                               "open", "search", "progress", "move", "stay"}),
     },
+    "transfer_import": {"source": frozenset({"anki", "wanikani", "renshuu"})},
+    "transfer_offer":  {"choice": frozenset({"go", "later"})},
     "setting_change": {
         "setting": frozenset({"theme", "lang", "rating_scale", "reading_pace", "sound",
                               "notifications", "level", "lines", "daily_target"}),
@@ -370,6 +383,9 @@ KEEP_LONG = frozenset({
     # Fourteen units at most, once each: "did the learners who finished
     # the basics stay" is a question about a whole account.
     "basics_unit_done", "basics_skipped",
+    # Once or twice an account: "did the learners who came from another
+    # app stay" is one too, and the sheet over Today is asked once.
+    "transfer_import", "transfer_undo", "transfer_offer",
 })
 
 # A session id is the client's random token for one visit
