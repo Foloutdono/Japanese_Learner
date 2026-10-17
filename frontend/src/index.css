@@ -40421,25 +40421,26 @@ button.brd-stn { cursor: pointer; }
     color: var(--text-secondary);
     opacity: 0.55;
   }
-  /* The entry in its band (DictionaryLookupBody's `band`): the article
-     dissolves into the column and its two halves are the column's
-     panels -- the top the card and your numbers, the bottom the
-     dictionary alone. */
+  /* The entry in its band (DictionaryLookupBody's `band`): one panel,
+     the card and your numbers at its top, the dictionary under them
+     past the record's hairline. It was two panels, the top and the
+     dictionary, and where the column kept no gap between them they
+     stood edge to edge as one card drawn twice (owner's cut). */
   .desk-run--panels > .desk-run__side > .desk-entry {
     flex: 1 1 auto;
     min-height: 0;
     gap: var(--sp-6);
   }
-  .dict-entry--band { display: contents; }
-  .dict-entry--band > .dict-entry__top,
-  .dict-entry--band > .dict-entry__body {
+  .dict-entry--band {
+    flex: 0 1 auto;
+    min-height: 0;
     background: var(--surface);
     border: 1px solid var(--surface-line);
     border-radius: var(--r-panel);
     overflow: hidden;
   }
   .dict-entry--band > .dict-entry__top { flex: none; }
-  /* The dictionary scrolls in its panel when what it holds is taller
+  /* The dictionary scrolls in the panel when what it holds is taller
      than the column leaves it -- the stroke sheet stands at its floor
      rather than shrinking out of legibility (owner's second round). */
   .dict-entry--band > .dict-entry__body {
@@ -40497,9 +40498,9 @@ button.brd-stn { cursor: pointer; }
     grid-area: stripe;
     margin: var(--sp-3) calc(-1 * var(--sp-6)) 0;
   }
-  /* Your two numbers under the stripe, the panel's own foot their edge,
-     the outer figures on the band's gutter: its plate pads --sp-6. */
-  .dict-entry--band .records--entry { border-bottom-width: 0; }
+  /* Your two numbers under the stripe, their hairline the edge between
+     them and the dictionary, the outer figures on the band's gutter: its
+     plate pads --sp-6. */
   .dict-entry--band .records--entry > :first-child { padding-inline-start: var(--sp-6); }
   .dict-entry--band .records--entry > :last-child { padding-inline-end: var(--sp-6); }
   /* The dictionary: the senses and the words at their height, the
@@ -40509,7 +40510,7 @@ button.brd-stn { cursor: pointer; }
      (a word, a grammar point) the panel ends where its blocks do (plan
      235): stretched to the column's foot, 緊張's was a slab of empty
      paper under three senses. */
-  .dict-entry--band > .dict-entry__body:not(:has(.dict-form)) { flex-grow: 0; }
+  .dict-entry--band:has(.dict-form) { flex-grow: 1; }
   .dict-entry--band > .dict-entry__body > .dict-block { flex: none; }
   .dict-entry--band > .dict-entry__body > .dict-block:has(> .dict-form) {
     order: 1;
@@ -40527,6 +40528,26 @@ button.brd-stn { cursor: pointer; }
     width: 100%;
     height: 100%;
     max-height: calc(3 * var(--fs-specimen-glyph));
+  }
+  /* An example opened from a docked entry (plan 214, SentenceFrame) is a
+     panel as the entry is: its ‹ and the breakdown on one ground, which
+     scrolls in it, rather than a strip of panel over rows loose on the
+     page. It ends where the breakdown does, as the entry does. */
+  .desk-entry > .dict-sent {
+    flex: 0 1 auto;
+    min-height: 0;
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+    overflow: hidden;
+  }
+  .desk-entry > .dict-sent > .dict-sent__head { position: static; flex: none; }
+  .desk-entry > .dict-sent > .dict-sent__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: var(--sp-5);
   }
 
   /* ── 机 — grammar: the catalogue a list, the entry the page (plan 128) ──
@@ -41575,6 +41596,8 @@ button.brd-stn { cursor: pointer; }
     border-radius: var(--r-panel);
   }
   .anl-desk__entry--explain .dict-entry--band > .dict-entry__body { display: none; }
+  /* The card alone, its record's hairline would lie on the panel's foot. */
+  .anl-desk__entry--explain .dict-entry--band .records--entry { border-bottom-width: 0; }
   /* The asking under the explanation (plan 220): the panel scrolls, so
      the thread takes the height it holds rather than sharing it. */
   .anl-explainpanel > .desk-ask { flex: none; }
