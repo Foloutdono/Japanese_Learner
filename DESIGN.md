@@ -2190,7 +2190,12 @@ line here says otherwise.
   (←/→) and the word pressed -- the line's numbered grammar, a point
   opening its lesson in that face with its ✕ giving the list back, and
   the line's construction, which Explain buys the first time the face is
-  turned to, the line at its head with its points framed and numbered.
+  turned to: the line laid out as its blocks at `--fs-heading`, each
+  named under it (a word by its gloss, a point's run framed in the
+  grammar's ink under its number) and each a door to its card or its
+  lesson, then the prose, the Japanese it names in the line's face and
+  weight, "Explain again" a quiet word under it and the asking right
+  after (the owner's pick B of the canvas's "The Construction face").
   The segment is the way between them: there is no way back to look for,
   and Esc walks one step back. The bar and the segment are measured, not
   queried (`useLabelsFit`): too narrow for their column, the bar puts its

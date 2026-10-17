@@ -523,10 +523,20 @@ describe('the panel\'s three faces (plan 238)', () => {
     faceNamed('Construction').click()
     await expect.poll(() => $('.anl-explainpanel__body')?.textContent).toBe(EXPLANATION)
     expect(apiJson.mock.calls.filter(([u]) => String(u).includes('/explain')).length).toBe(1)
-    // The line, each point framed under its number as on the subtitle.
-    expect($('.anl-built').textContent).toContain('雨')
-    expect($$('.anl-built__n').map(n => n.textContent)).toEqual(['1', '2'])
-    expect($$('.anl-built__pt').map(p => p.textContent)).toEqual(['1を', '2ている'])
+    // The line as its blocks (the owner's pick B): each word one, a
+    // point's run one under its number, framed, as on the subtitle.
+    const tiles = $$('.anl-blocks__tile')
+    expect(tiles.map(b => b.querySelector('.anl-blocks__jp').textContent)).toEqual(['雨', 'を', '見', 'ている'])
+    expect($$('.anl-blocks__tile--pt .anl-blocks__n').map(n => n.textContent)).toEqual(['1', '2'])
+    // Each named under it: a word by its gloss, a point by its own.
+    expect(tiles[0].querySelector('.anl-blocks__gloss').textContent).toBe('rain')
+    expect(tiles[1].querySelector('.anl-blocks__gloss').textContent).toBe('object')
+    // At a heading's size, where the line stood at a lead's.
+    expect(parseFloat(getComputedStyle($('.anl-blocks__jp')).fontSize)).toBeGreaterThan(26)
+    // The Japanese the prose names, in the line's weight.
+    expect($$('.anl-explainpanel__body .anl-explainpanel__jp').map(j => j.textContent)).toEqual(['見ている', 'を', '雨', '見る'])
+    // The asking right under the prose, not at the panel's foot.
+    expect(box('.anl-explainpanel .desk-ask').top - box('.anl-explainpanel__again').bottom).toBeLessThan(60)
     // The word's face and back: no second call.
     faceNamed('Mot').click()
     await settle()
@@ -538,6 +548,25 @@ describe('the panel\'s three faces (plan 238)', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
     await settle()
     expect(faceNamed('Mot').getAttribute('aria-checked')).toBe('true')
+  })
+
+  it('opens a block\'s word on its card and a point\'s on its lesson', async () => {
+    answering()
+    await openVideo()
+    faceNamed('Construction').click()
+    await expect.poll(() => $$('.anl-blocks__tile').length).toBe(4)
+    // Every block here is a door: two words with a card, two points.
+    expect($$('button.anl-blocks__tile').map(b => b.getAttribute('aria-label')))
+      .toEqual(['雨 — rain', 'を — object', '見 — to see', 'ている'])
+    $$('button.anl-blocks__tile')[2].click()
+    await settle()
+    expect(faceNamed('Mot').getAttribute('aria-checked')).toBe('true')
+    expect($('.anl-subs .tok--on').textContent).toContain('見')
+    faceNamed('Construction').click()
+    await settle()
+    $('button.anl-blocks__tile--pt').click()
+    await settle()
+    expect(faceNamed('Grammaire').getAttribute('aria-checked')).toBe('true')
   })
 
   it('turns to the word when a word is pressed, on the strip or on the line', async () => {

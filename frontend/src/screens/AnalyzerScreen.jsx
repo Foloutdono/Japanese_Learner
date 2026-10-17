@@ -1594,6 +1594,8 @@ export default function AnalyzerScreen({ session }) {
             askKey={focused.text}
             askContext={sentenceAsk}
             analysis={focused}
+            onWord={walkTo}
+            onPoint={openPoint}
             t={t}
           />
         ) : face === 'grammar' ? (
