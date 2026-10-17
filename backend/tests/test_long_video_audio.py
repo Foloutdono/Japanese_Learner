@@ -5,9 +5,15 @@ here by hand."""
 import json
 import wave
 
-import numpy as np
+import pytest
 
-from scripts import long_video_audio as lva
+# numpy is the mix's, an operator script's (scripts/long_video_audio.py
+# imports it where it mixes), and no dependency of the backend: CI does
+# not install it, and an import here at the top failed the suite's
+# collection whole. Without it, these tests are skipped.
+np = pytest.importorskip("numpy")
+
+from scripts import long_video_audio as lva  # noqa: E402
 from study import voice_engine
 
 

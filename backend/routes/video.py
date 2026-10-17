@@ -24,7 +24,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from core.credits import require_pass
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from core.db import db_conn
 from core.auth import get_user_id
@@ -37,13 +37,14 @@ from study.captions import (
     proxy_configured, CaptionParseError, CaptionFetchError,
 )
 from study.cue_sentences import sentences_from_cues
+from study.line_cut import MAX_LINE_WIDTH, cut_line, line_width
 from study.word_timing import align_cues
 from study.sentences import MAX_SENTENCES
 # _analyze_sentence already bundles local + optional-deep + per-user
 # SRS state, and buying its deep tier shares phrase_analysis_cache --
 # reused wholesale rather than reimplemented, the same pattern
 # routes/translation.py uses for routes/reading.py's _chat.
-from routes.phrase import _analyze_sentence
+from routes.phrase import TranslationsPayload, _analyze_sentence, deep_context, translated_block
 
 # A pass feature (plan 069): every route here refuses a free learner
 # with 402 pass_required once CREDITS_ENFORCE=1; a no-op until then.
@@ -165,6 +166,12 @@ def _ensure_video_schema() -> None:
             # written before this column; NULL is such a row, and the
             # client falls back to its own line for it. Additive.
             cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS error_code TEXT")
+            # Each line's translation (plan 235), as {lang: {line text:
+            # translation}}: by the text, so a chorus is translated once
+            # and a line cut again keeps what it had. Additive.
+            cur.execute(
+                "ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS translations JSONB NOT NULL DEFAULT '{}'::jsonb"
+            )
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_video_sessions_user
                 ON video_sessions(user_id, created_at DESC)
@@ -587,7 +594,7 @@ def _load_session(session_id: int, user_id: str) -> dict | None:
                 """
                 SELECT source, source_ref, window_start, window_end, window_capped,
                        status, error, sentences, truncated, created_at, video_id,
-                       error_code
+                       error_code, translations
                   FROM video_sessions
                  WHERE id = %s AND user_id = %s AND deleted_at IS NULL
                 """,
@@ -599,13 +606,14 @@ def _load_session(session_id: int, user_id: str) -> dict | None:
     if row is None:
         return None
     (source, source_ref, window_start, window_end, window_capped,
-     status, error, sentences, truncated, created_at, video_id, error_code) = row
+     status, error, sentences, truncated, created_at, video_id, error_code, translations) = row
     return {
         "source": source, "source_ref": source_ref,
         "window_start": window_start, "window_end": window_end, "window_capped": window_capped,
         "status": status, "error": error, "error_code": error_code,
         "sentences": sentences, "truncated": truncated,
         "created_at": created_at, "video_id": video_id,
+        "translations": translations or {},
     }
 
 
@@ -622,15 +630,43 @@ def _current(session_id: int, sentences: list[dict]) -> list[dict]:
     analysis is remade: the cue times are the session's own and ride
     across, and a line kept as not Japanese stays as it is. Without a
     tokenizer nothing is remade -- "analysis unavailable" is no
-    improvement on an older analysis."""
-    if not morphology.MORPHOLOGY_AVAILABLE or all(s.get("local_rev") == LOCAL_REV for s in sentences):
+    improvement on an older analysis.
+
+    A line wider than study/line_cut.MAX_LINE_WIDTH, stored before the
+    lines were held to it (plan 235), is cut as a new session's would
+    be, each piece analysed and timed on its own. The session's indices
+    move with it, which is why every route that reads a line by its
+    index reads it through here."""
+    if not morphology.MORPHOLOGY_AVAILABLE:
+        return sentences
+
+    def wide(s):
+        return not s.get("foreign") and line_width(s.get("text") or "") > MAX_LINE_WIDTH
+
+    if all(s.get("local_rev") == LOCAL_REV and not wide(s) for s in sentences):
         return sentences
     fresh = []
+    changed = False
     for s in sentences:
-        if s.get("local_rev") != LOCAL_REV and not s.get("foreign"):
-            s = {**analyze_local(s["text"]), "cue_start": s.get("cue_start"), "cue_end": s.get("cue_end"),
-                 **({"word_times": s["word_times"]} if s.get("word_times") else {})}
-        fresh.append({**s, "local_rev": LOCAL_REV})
+        if s.get("foreign"):
+            changed |= s.get("local_rev") != LOCAL_REV
+            fresh.append({**s, "local_rev": LOCAL_REV})
+            continue
+        pieces = cut_line(s["text"], s.get("cue_start"), s.get("cue_end"), s.get("word_times")) if wide(s) else None
+        if s.get("local_rev") == LOCAL_REV and (pieces is None or len(pieces) == 1):
+            # Current, and nowhere to cut it.
+            fresh.append(s)
+            continue
+        changed = True
+        for piece in pieces or [{"text": s["text"], "start": s.get("cue_start"), "end": s.get("cue_end"),
+                                  **({"words": s["word_times"]} if s.get("word_times") else {})}]:
+            fresh.append({
+                **analyze_local(piece["text"]), "cue_start": piece["start"], "cue_end": piece["end"],
+                **({"word_times": piece["words"]} if piece.get("words") else {}),
+                "local_rev": LOCAL_REV,
+            })
+    if not changed:
+        return sentences
     # Best effort: a failed save costs the next opening the same few
     # milliseconds a line, never the answer.
     try:
@@ -840,6 +876,47 @@ def restore_video_session(session_id: int, user_id: str = Depends(get_user_id)):
 
 class ExplainPayload(BaseModel):
     lang: str = "en"
+    # What the player says the video is (plan 235), where it knows:
+    # YouTube's own title and channel, read off the embed. The server
+    # never fetches them -- the watch page goes through a metered proxy.
+    title: str = Field("", max_length=200)
+    channel: str = Field("", max_length=120)
+
+
+# How many lines either side of a line its explanation is shown.
+_CONTEXT_LINES = 2
+_SOURCE_NAMES = {
+    "youtube": "the Japanese subtitles of a YouTube video",
+    "upload": "a video's Japanese subtitle file",
+    "paste": "a video's Japanese transcript",
+}
+
+
+def _clock_time(seconds) -> str:
+    seconds = max(0, int(seconds or 0))
+    return f"{seconds // 3600}:{seconds % 3600 // 60:02d}:{seconds % 60:02d}" if seconds >= 3600 \
+        else f"{seconds // 60}:{seconds % 60:02d}"
+
+
+def _line_context(session: dict, sentences: list[dict], index: int, title: str, channel: str) -> str:
+    """Where line `index` stands (routes/phrase.deep_context): what the
+    video is, where in it the line is said, and the lines around it --
+    the lines the track has, never anything the learner typed."""
+    line = sentences[index]
+    source = _SOURCE_NAMES.get(session.get("source"), "a video's Japanese subtitles")
+    about = [f"From {source}" + (f": \"{title.strip()}\"" if title.strip() else "")
+             + (f", by {channel.strip()}" if channel.strip() else "") + "."]
+    where = f"Line {index + 1} of {len(sentences)}"
+    if line.get("cue_start") is not None:
+        where += f", said at {_clock_time(line['cue_start'])}"
+    about.append(where + ".")
+
+    def text(s):
+        return s.get("text") or ""
+
+    before = [text(s) for s in sentences[max(0, index - _CONTEXT_LINES):index] if text(s)]
+    after = [text(s) for s in sentences[index + 1:index + 1 + _CONTEXT_LINES] if text(s)]
+    return deep_context(about, before, after)
 
 
 @router.post("/api/video/session/{session_id}/sentence/{index}/explain")
@@ -848,6 +925,11 @@ def explain_video_sentence(session_id: int, index: int, payload: ExplainPayload,
     """Buys the deep tier for ONE Sentence -- never the whole session
     (see study/analysis and docs/adr/0001). Shares phrase_analysis_cache
     with /api/phrase/analyze via _analyze_sentence.
+
+    Asked where the line stands (plan 235): the video's title and
+    channel the client read off the player, the line's place and time,
+    and the two lines either side -- cached with that context, so the
+    same words in another video are explained again.
 
     It used to write the Sentence to phrase_history as well (source
     'video'), and the analyser's shelf, which lists that table, drew
@@ -861,13 +943,16 @@ def explain_video_sentence(session_id: int, index: int, payload: ExplainPayload,
     if session["status"] != "ready":
         raise HTTPException(status_code=409, detail="Session is not ready yet")
 
-    sentences = session["sentences"] or []
+    # Through _current, as GET read them: the indices the client holds.
+    sentences = _current(session_id, session["sentences"] or [])
     if index < 0 or index >= len(sentences):
         raise HTTPException(status_code=404, detail="No such sentence in this session")
 
     text = sentences[index]["text"]
     states = srs.get_user_states(user_id)
-    explained = _analyze_sentence(text, deep=True, lang=payload.lang, states=states, user_id=user_id)
+    context = _line_context(session, sentences, index, payload.title, payload.channel)
+    explained = _analyze_sentence(text, deep=True, lang=payload.lang, states=states, user_id=user_id,
+                                  context=context)
 
     # A Cue is a Sentence, and a Sentence's cue times are part of it.
     # _analyze_sentence builds from TEXT alone -- analyze_local is pure
@@ -883,3 +968,29 @@ def explain_video_sentence(session_id: int, index: int, payload: ExplainPayload,
             merged[key] = sentences[index][key]
 
     return merged
+
+
+# ── 訳 — a translation under every line (plan 235) ──────────────
+# Asked a block at a time as the learner reaches it (study/line_translate
+# .py has why not one line, and why not the deep tier), kept on the
+# session by the line's text, and rationed there: a block the session
+# already holds costs nothing, a block it lacks claims one of the
+# learner's LINE_TRANSLATION_DAILY_LIMIT calls a day first. The answer
+# is routes/phrase.py's translated_block, which a typed Passage's lines
+# go through too.
+@router.post("/api/video/session/{session_id}/translations")
+def translate_video_lines(session_id: int, payload: TranslationsPayload,
+                          user_id: str = Depends(get_user_id)):
+    """The translations of the block of lines `index` falls in, in the
+    learner's language: {"start", "lines"}, `lines` one entry per line
+    of the block from `start`, None for a line not Japanese or one the
+    model left out. Lines the session already holds are not asked for
+    again; a line repeated in the block is asked once."""
+    session = _load_session(session_id, user_id)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if session["status"] != "ready":
+        raise HTTPException(status_code=409, detail="Session is not ready yet")
+    sentences = _current(session_id, session["sentences"] or [])
+    return translated_block(user_id, "video_sessions", session_id, sentences,
+                            session["translations"], payload, "video")
