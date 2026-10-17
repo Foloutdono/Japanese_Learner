@@ -384,7 +384,7 @@ async function render() {
   if (!types.includes(state.type)) { state.type = types.includes('plates') ? 'plates' : types[0]; renderToggles() }
   for (const el of document.querySelectorAll('[data-promo]')) el.hidden = el.dataset.promo === 'only' ? !promo : clipped
   $('#export-clip').hidden = !clipped
-  $('#export-clip').textContent = echo ? 'Download the clip (.mp4, 10 s, with the voice)' : 'Download the cover clip (.mp4, 7 s, with sound)'
+  $('#export-clip').textContent = echo ? 'Download the clip (.mp4, with the voice)' : 'Download the cover clip (.mp4, 7 s, with sound)'
   renderKanjiPicker(pl)
   renderTypes(pl)
   renderQuestions(pl)

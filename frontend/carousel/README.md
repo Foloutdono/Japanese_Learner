@@ -653,8 +653,24 @@ length and when each saying starts): the readings land on its sayings
 and it plays whole under them. The sayings are found by ear or from the
 sound's loudness, each voiced rise a saying (plan 232's いたい clip).
 
-"Download the clip" encodes the ten seconds as the promo clips are
-encoded (H.264, the voice as AAC or Opus), the voice mixed by
+**Then the word is kept (plan 244).** The owner picked this ending from
+four drawn (the promo stories' board, the theme's words listed, the
+review's rating bar): `ECHO.after` (0.35s) after the last saying has
+been said (or the recording has played whole), the readings fall back
+under the ground, the card rises to the head of the frame at five
+sixths of its size, and under it come "Want to keep it?", then its line
+("Tsuji asks you again just before you'd forget it, with the 46 other
+words of the theme": the count is the theme deck's, from
+`themes.json`), then the site's address in its bar (`draw.address`, the
+call to action's since plan 243), each a little after the one before
+(`KEEP`). The ask lands on the board's flap and the address with the
+platform's chime, the app's own sounds. It holds `ECHO.keep` (3.5s), so
+a clip runs about thirteen and a half seconds; the studio shows the
+ending as the echo's second frame (`keep`), which is also the clip's
+last.
+
+"Download the clip" encodes the sayings and the ending as the promo
+clips are encoded (H.264, the sound as AAC or Opus), the voice mixed by
 `sound.clipAudio`, which takes a recorded clip (`src`) beside the app's
 own sounds (`key`).
 
@@ -803,7 +819,7 @@ node carousel/long/render.mjs --carousel <recipe from the studio>
 | `strings.js` | every label a slide prints, in English and French |
 | `promo.js` | the promo stories: their plans from the bank, their frames (plan 231) |
 | `app.js` | the app's own parts, drawn at its measures, and Today's print (plan 231) |
-| `echo.js` | the word echo: its plan, its rhythm, its scatter and its clip (plan 232) |
+| `echo.js` | the word echo: its plan, its rhythm, its scatter, its clip and the word kept at its end (plans 232, 244) |
 | `sound.js` | a clip's sound: the app's own events and recorded clips, mixed (plans 231, 232); one event alone for a long video (plan 233) |
 | `long.js` | the long videos: what each says, when, each frame, their page, and the studio's list of them (plan 233) |
 | `short.js` | a carousel as a short video: its timing, its swipes, its line and page (plan 233) |

@@ -3,6 +3,9 @@
 // its kanji, its reading and its meaning on the app's review card, and
 // every time the reader says it again, its reading lands somewhere new
 // on the screen, any size, any tilt, until the screen is full of it.
+// Then the word is kept (plan 244, the owner's pick A): the readings
+// fall back to a whisper, the card rises, and under it the ask and the
+// way to the app.
 // The word is a theme's pictured word (themes.json, written by
 // scripts.carousel_bank) and the voice is the app's reader saying it
 // (voices/, scripts.carousel_voices: the clip a card's speaker button
@@ -13,13 +16,18 @@
 // than a short one and never runs into itself. Where the voice starts
 // and stops in its clip is measured from the sound (`voiceSpan`); the
 // plan only needs the two numbers.
-import { SP, font, fit, frame, ground, hasKanji, masthead, palette, paragraphH, text } from './draw.js'
+import { FS, METAL_H, SP, address, alpha, font, fit, frame, ground, hasKanji, masthead, palette, paragraphH, text } from './draw.js'
 import * as A from './app.js'
-import { STRINGS, weldIf } from './strings.js'
+import { SITE, STRINGS, weldIf } from './strings.js'
 
-/** The clip: ten seconds at thirty frames; the card comes in by FIRST,
- *  when the word is first said, and GAP of silence follows each saying. */
-export const ECHO = { seconds: 10, fps: 30, first: 0.6, gap: 0.3, rise: 0.5, pop: 0.18 }
+/** The clip: ten seconds of sayings at thirty frames; the card comes in
+ *  by FIRST, when the word is first said, and GAP of silence follows each
+ *  saying. AFTER the last one has been said, the word is kept for KEEP
+ *  seconds (plan 244). */
+export const ECHO = { seconds: 10, fps: 30, first: 0.6, gap: 0.3, rise: 0.5, pop: 0.18, after: 0.35, keep: 3.5 }
+// The keeping, in seconds from its start: the readings fade and the card
+// rises, the ask lands, its line, then the way to the app.
+const KEEP = { fade: [0, 0.5], card: [0, 0.6], ask: [0.45, 0.5], line: [0.75, 0.5], bar: [1.1, 0.5] }
 
 const SAY = {
   en: {
@@ -27,12 +35,16 @@ const SAY = {
     ask: 'Say it with me until it sticks.',
     voice: 'Voice · VOICEVOX Nemo',
     credit: 'Voice: VOICEVOX Nemo',
+    keep: 'Want to keep it?',
+    keepLine: n => `Tsuji asks you again just before you’d forget it, with the ${n} other words of the theme.`,
   },
   fr: {
     title: w => `Comment dit-on « ${w.gloss} » en japonais ? ${w.r} ${w.e}`,
     ask: 'Répète avec moi jusqu’à ce que ça rentre.',
     voice: 'Voix · VOICEVOX Nemo',
     credit: 'Voix : VOICEVOX Nemo',
+    keep: 'Tu veux le garder ?',
+    keepLine: n => `Tsuji te le redemande juste avant que tu l’oublies, avec les ${n} autres mots du thème.`,
   },
 }
 
@@ -62,10 +74,12 @@ export function echoPlan(data, id, opts) {
   const S = SAY[lang]
   const gloss = weldIf(lang, glossOf(w, lang))
   const word = { t: w.t, r: w.r, ro: w.ro, e: w.e, gloss, lv: w.lv || '', theme: w.themeName[lang] || w.themeName.en }
+  // The theme's other words, as its deck counts them: what the ending promises.
+  const others = data.themes[w.theme].words.length - 1
   return {
     source: 'echo', id: keyOf(w), lang, t: STRINGS[lang], level: w.lv || '', script: 'kanji', handle: opts.handle || '',
     quizzes: [], slides: [], hook: null,
-    echo: { word, voice: S.voice },
+    echo: { word, voice: S.voice, keep: S.keep, keepLine: S.keepLine(others) },
     title: S.title(word),
     caption: { jp: hasKanji(w.t) ? `${w.t}（${w.r}）` : w.r, romaji: w.ro, tr: gloss, ask: `${S.ask}\n${S.credit}`, tags: ['vocabulary', w.theme], name: w.t },
   }
@@ -199,6 +213,9 @@ export function echoDeck(plan, fmt, opts = {}) {
   const span = voice ? { on: voice.on, off: voice.off } : guessed(word.r)
   const track = opts.track || null
   const at = track ? track.beats : beats(span)
+  // The word is kept once its last saying has been said (a recording of
+  // its own, once it has played whole).
+  const keepAt = track ? track.seconds : Math.round(((at.at(-1) ?? ECHO.first) + span.off - span.on + ECHO.after) * 1000) / 1000
   // The card, as the app's review card: the picture, the word, its
   // reading in gold, its meaning; on the foot the theme and the voice.
   const cardH = 300 * U
@@ -284,22 +301,78 @@ export function echoDeck(plan, fmt, opts = {}) {
       ctx.restore()
     })
   }
+  // The word kept (plan 244), `s` seconds in (null: kept): every saying
+  // falls back under the ground, the card rises to the head of the frame
+  // at five sixths of its size, and under it the ask, its line and the
+  // site's address, each coming in after the one before.
+  const top = fr.y + 64 + SP[6]
+  const small = 0.84
+  const barY = fr.bottom - METAL_H
+  const askY = top + card.h * small + SP[7]
+  // Set once, on the first context that draws it (the fonts are in by then).
+  let set = null
+  const setOn = ctx => {
+    if (set) return set
+    const ask = fit(ctx, plan.echo.keep, { weight: 900, fam: 'serif', sizes: [FS.display * 0.62, FS.heading], maxW: fr.w, maxLines: 2, lh: 1.12 })
+    const lineY = askY + ask.size * 1.12 * ask.lines.length + SP[4]
+    const line = fit(ctx, plan.echo.keepLine, { weight: 500, sizes: [FS.lead, FS.body, FS.sm], maxW: fr.w, maxLines: 4, lh: 1.3, maxH: barY - SP[5] - lineY })
+    return (set = { ask, line, lineY })
+  }
+  const drawKeep = (ctx, s) => {
+    const { ask, line, lineY } = setOn(ctx)
+    const into = ([from, len]) => (s == null ? 1 : ease(Math.min(1, Math.max(0, (s - from) / len))))
+    ground(ctx, p, fr)
+    drawWords(ctx, null)
+    ctx.fillStyle = alpha(p.bg, 0.86 * into(KEEP.fade))
+    ctx.fillRect(0, 0, fr.W, fr.H)
+    masthead(ctx, p, fr)
+    const k = into(KEEP.card)
+    const sc = 1 - (1 - small) * k
+    ctx.save()
+    ctx.translate(fr.cx, card.y + (top - card.y) * k)
+    ctx.scale(sc, sc)
+    ctx.translate(-fr.cx, -card.y)
+    drawCard(ctx, 1)
+    ctx.restore()
+    // Each line rises a little as it comes in, as the card did.
+    const lines = (b, lh, y, color, k2) => {
+      ctx.save()
+      ctx.globalAlpha *= k2
+      b.lines.forEach((l, i) => text(ctx, l, fr.cx, y + (1 - k2) * 16 * U + b.size * (0.82 + i * lh), { f: b.f, color, align: 'center' }))
+      ctx.restore()
+    }
+    lines(ask, 1.12, askY, p.ink, into(KEEP.ask))
+    lines(line, 1.3, lineY, p.ink2, into(KEEP.line))
+    const kb = into(KEEP.bar)
+    ctx.save()
+    ctx.globalAlpha *= kb
+    address(ctx, p, fr.x, barY + (1 - kb) * 24 * U, fr.w, SITE)
+    ctx.restore()
+  }
   // The readings over everything: over the card's edges, never its word.
   const drawAt = (ctx, t) => {
+    if (t != null && t >= keepAt) return drawKeep(ctx, t - keepAt)
     ground(ctx, p, fr)
     masthead(ctx, p, fr)
     drawCard(ctx, t == null ? 1 : ease(Math.min(1, t / ECHO.rise)))
     drawWords(ctx, t)
   }
   const still = { key: 'echo', draw: ctx => { ctx.save(); drawAt(ctx, null); ctx.restore() } }
+  const kept = { key: 'keep', draw: ctx => { ctx.save(); drawKeep(ctx, null); ctx.restore() } }
   const clip = {
-    seconds: track ? track.seconds : ECHO.seconds,
+    seconds: Math.round((keepAt + ECHO.keep) * 1000) / 1000,
     fps: ECHO.fps,
     print: false,
     beats: at,
-    // Each saying's clip starts where its voice will start, less its lead-in.
-    get sounds() { return track ? [{ at: 0, src: track.src }] : voice ? at.map(a => ({ at: Math.max(0, a - span.on), src: voice.src })) : [] },
+    // Each saying's clip starts where its voice will start, less its lead-in;
+    // the ask lands on the board's flap and the way on with the platform's chime.
+    get sounds() {
+      const said = track ? [{ at: 0, src: track.src }] : voice ? at.map(a => ({ at: Math.max(0, a - span.on), src: voice.src })) : []
+      const ms = x => Math.round(x * 1000) / 1000
+      return [...said, { at: ms(keepAt + KEEP.ask[0]), key: 'board-flap', gain: 0.7 }, { at: ms(keepAt + KEEP.bar[0]), key: 'platform-chime' }]
+    },
+    keepAt,
     draw: (ctx, t) => { ctx.save(); drawAt(ctx, t); ctx.restore() },
   }
-  return Object.assign([still], { clip, clips: { cover: clip }, spots, keep })
+  return Object.assign([still, kept], { clip, clips: { cover: clip }, spots, keep })
 }

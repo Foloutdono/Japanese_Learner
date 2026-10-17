@@ -41,7 +41,7 @@ const glossEn = r => (r.en || [])[0] || ''
 // its own gate, a word echo is one frame and its clip, a long video is a
 // player of its own (plan 233).
 const STATIONED = SOURCES.filter(s => s.id !== 'promo' && s.id !== 'echo' && s.id !== 'long')
-const LAST = { promo: id => (id === 'pass' ? 'free' : 'board'), echo: () => 'echo' }
+const LAST = { promo: id => (id === 'pass' ? 'free' : 'board'), echo: () => 'keep' }
 
 /** Every file a source reads: one per level, one per kana set, or one. */
 function filesOf(src) {
@@ -901,14 +901,16 @@ describe('the word echo (plan 232)', () => {
     }
   })
 
-  it('lands its readings on a recording of its own, which plays whole under it', () => {
+  it('lands its readings on a recording of its own, which plays whole under it, then keeps the word', () => {
     const pl = echoPlan(themes, '人参::にんじん', { lang: 'en' })
     const beatsAt = [0.46, 1.04, 1.54, 2.11, 2.78]
     const { clip, spots } = echoDeck(pl, FORMATS.story, { ground: 'sumi', track: { src: 'sound.mp3', seconds: 15.384, beats: beatsAt } })
-    expect(clip.seconds).toBe(15.384)
+    expect(clip.keepAt).toBe(15.384)
+    expect(clip.seconds).toBeCloseTo(15.384 + ECHO.keep, 3)
     expect(clip.beats).toEqual(beatsAt)
     expect(spots.length).toBe(beatsAt.length)
-    expect(clip.sounds).toEqual([{ at: 0, src: 'sound.mp3' }])
+    expect(clip.sounds.filter(x => x.src)).toEqual([{ at: 0, src: 'sound.mp3' }])
+    expect(clip.sounds.filter(x => x.key).every(x => x.at > 15.384)).toBe(true)
   })
 
   it('finds where the voice starts and stops in its clip', () => {
@@ -933,16 +935,23 @@ describe('the word echo (plan 232)', () => {
         const voice = { src: 'x.mp3', on: 0.14, off: 0.14 + 0.11 * [...pl.echo.word.r].length }
         const frames = echoDeck(pl, FORMATS.story, { ground: 'sumi', voice })
         const { clip } = frames
-        expect(clip.seconds).toBe(10)
-        expect(clip.sounds.map(x => x.at), id).toEqual(clip.beats.map(a => Math.max(0, a - voice.on)))
-        expect(clip.sounds.every(x => x.src === 'x.mp3'), id).toBe(true)
+        // Ten seconds of sayings, then the word kept once the last has been said.
+        const voiced = voice.off - voice.on
+        expect(clip.keepAt, id).toBeCloseTo(clip.beats.at(-1) + voiced + ECHO.after, 3)
+        expect(clip.keepAt, id).toBeLessThanOrEqual(ECHO.seconds + ECHO.after)
+        expect(clip.seconds, id).toBeCloseTo(clip.keepAt + ECHO.keep, 3)
+        const said = clip.sounds.filter(x => x.src)
+        expect(said.map(x => x.at), id).toEqual(clip.beats.map(a => Math.max(0, a - voice.on)))
+        expect(said.every(x => x.src === 'x.mp3'), id).toBe(true)
+        // The ending's own sounds are the app's, after the last saying.
+        expect(clip.sounds.filter(x => x.key).map(x => x.key), id).toEqual(['board-flap', 'platform-chime'])
         // Before the first saying, the card alone; at the end, every saying on the screen.
         const first = stubContext()
         clip.draw(first.ctx, 0.3)
         expect(first.texts.filter(x => x === pl.echo.word.r).length, id).toBe(1)
-        for (const t of [1, 4.5, 9.99]) expect(() => clip.draw(stubContext().ctx, t)).not.toThrow()
+        for (const t of [1, 4.5, clip.keepAt - 0.01, clip.keepAt + 0.3, clip.seconds - 0.01]) expect(() => clip.draw(stubContext().ctx, t)).not.toThrow()
         const end = stubContext()
-        clip.draw(end.ctx, 9.99)
+        clip.draw(end.ctx, clip.keepAt - 0.01)
         expect(end.texts.filter(x => x === pl.echo.word.r).length, id).toBe(clip.beats.length + 1)
         expect(end.texts.some(x => /VOICEVOX Nemo/.test(x)), id).toBe(true)
         const still = stubContext()
@@ -950,6 +959,34 @@ describe('the word echo (plan 232)', () => {
         expect(still.texts.sort(), id).toEqual(end.texts.sort())
       }
     }
+    } finally {
+      globalThis.Path2D = had
+    }
+  })
+
+  it('ends on the word kept: the ask, the review that brings it back, the theme and the way to the app (plan 244)', () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class {}
+    try {
+      for (const lang of ['en', 'fr']) {
+        for (const { id } of echoItems(themes, lang).filter((_, i) => i % 23 === 0)) {
+          const pl = echoPlan(themes, id, { lang })
+          const theme = Object.values(themes.themes).find(th => th.words.some(w => `${w.t}::${w.r}` === id))
+          expect(pl.echo.keepLine, id).toContain(` ${theme.words.length - 1} `)
+          const frames = echoDeck(pl, FORMATS.story, { ground: 'paper', voice: { src: 'x.mp3', on: 0.14, off: 0.6 } })
+          expect(frames.map(f => f.key), id).toEqual(['echo', 'keep'])
+          const kept = stubContext()
+          frames[1].draw(kept.ctx)
+          // The ask and its line whole, the site's address in its bar.
+          expect(kept.texts.join(' '), id).toContain(pl.echo.keep)
+          expect(kept.texts.join(' ').replace(/\s+/g, ' '), id).toContain(pl.echo.keepLine)
+          expect(kept.texts, id).toContain('tsuji.app')
+          // The clip's last frame is the ending, as it stands still.
+          const last = stubContext()
+          frames.clip.draw(last.ctx, frames.clip.seconds - 0.01)
+          expect(last.texts.sort(), id).toEqual(kept.texts.sort())
+        }
+      }
     } finally {
       globalThis.Path2D = had
     }
