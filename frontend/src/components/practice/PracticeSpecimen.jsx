@@ -1,4 +1,5 @@
 import { useLang } from '../../LangContext'
+import { ScenePlate } from '../study/GrammarTour'
 
 // ── 見本 — the exercise as the run will ask it, drawn in the page (plan 159) ──
 // The Learn stations print, in a small well on each platform, the card
@@ -19,7 +20,10 @@ import { useLang } from '../../LangContext'
 //
 // ── On the Practice gate too (plan 165) ──
 // The canvas's last board, "Every platform's specimen", hangs the six
-// platforms of the gate each with its exercise in a well: `plate` draws
+// platforms of the gate each with its exercise in a well (since plan
+// 244 the desk's gate shows the chosen train's, 会話's among them: its
+// first scene's place as the scene's own plate, its title and the line
+// it opens on): `plate` draws
 // the same faces at a plate's size -- the Japanese a rung down, the
 // field the well's width, comprehension's text over its question
 // rather than beside it, each choice on one line -- and the mock
@@ -74,7 +78,7 @@ export function Audio({ listens = null }) {
 
 /**
  * platform — reading | translation | comprehension | dictation | composition,
- *            and on the gate exam
+ *            and on the gate exam and conversation
  * card     — the stop's card from the samples, or null while it is on its way
  *            (the exam's: its grade's 漢字読み item, samples' card.vocab)
  * tag      — the caption in the well's corner ("Une phrase du grade")
@@ -167,6 +171,18 @@ function face(platform, card, words, note, t, compact) {
               </span>
             </span>
           )}
+        </>
+      )
+    case 'conversation':
+      // A scene, as its station's card names it: its place on the
+      // scene's own plate (the tour's, ScenePlate), its title -- left
+      // out of a compact well, where the plate says where it is -- and
+      // the line the other person opens on.
+      return (
+        <>
+          <ScenePlate caption={card.place.name}>{card.place.jp}</ScenePlate>
+          {!compact && <span className="prc-spec__scene">{card.title}</span>}
+          <span className="prc-spec__jp" lang="ja">{card.opener}</span>
         </>
       )
     case 'exam':

@@ -9576,10 +9576,8 @@ textarea:focus-visible {
    they get, instead of the air pooling under the last plate. Every
    plate is a plate, so every plate gets one share — the shelf too. */
 @media (max-width: 768px) {
-  .learn > .plates,
-  .practice > .plates { flex: 1; }
-  .learn > .plates > .plate,
-  .practice > .plates > .plate { flex: 1 1 auto; }
+  .learn > .plates { flex: 1; }
+  .learn > .plates > .plate { flex: 1 1 auto; }
 }
 
 /* ── 練習の改札 — the painted platform (plan 225) ──────────────────────
@@ -34935,72 +34933,342 @@ button.brd-stn { cursor: pointer; }
   }
 
   /* ── the gates, laid out for the width ──
-     Learn and Practice hang their plates two by two: a column of them
-     at the desk's width was a stack of slabs a thousand pixels long.
-     Learn's fifth, the deck shelf under the four lines, takes the full
-     row, so the lattice has no short last row (DESIGN.md, "A lattice's
-     column count must divide its content").
+     Learn hangs its plates two by two: a column of them at the desk's
+     width was a stack of slabs a thousand pixels long. Its fifth, the
+     deck shelf under the four lines, takes the full row, so the lattice
+     has no short last row (DESIGN.md, "A lattice's column count must
+     divide its content").
 
      And they take the window (plan 130). The plates stood a third of
      the way down a 950px window with the rest of it empty; now the
      plates fill the room the page has, their rows sharing it the way
      the phone's column shares its own, and the room goes to each
-     plate's body — the line drawn upright on Learn, on Practice the
-     platform's specimen (plan 165) — never to air in the box
+     plate's body — the line drawn upright — never to air in the box
      (DESIGN.md, the density contract). A row's share never goes below
      its content: a window too short for the plates scrolls. The shelf
-     keeps its own height, having no body to give the room to. Practice
-     goes three across once three hold a French name whole (about
-     1344px), and its six then stand in two rows. */
-  .learn > .plates,
-  .practice > .plates {
+     keeps its own height, having no body to give the room to. */
+  .learn > .plates {
     flex: 1;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, 1fr) auto;
     width: 100%;
-  }
-  .learn > .plates { grid-template-rows: repeat(2, 1fr) auto; }
-  .practice > .plates {
-    grid-template-columns: repeat(auto-fit, minmax(calc(var(--desk-side-w) - var(--sp-5)), 1fr));
-    grid-auto-rows: 1fr;
   }
   .learn > .plates > .plate:last-child:nth-child(odd) { grid-column: 1 / -1; }
   /* A plate with a body keeps its head at the head's own height; the
      body takes the rest. */
   .learn > .plates > .plate--line > .plate__head { flex: none; }
 
-  /* ── 見本 — every platform's specimen (plan 165) ──
-     A Practice plate holds its body inside its head (screens/
-     PracticeScreen's PlatformSpecimen, Plate's `body`): the plate is one
-     door, the name its first row and the body the second, spanning the
-     roundel's column too and taking what the name leaves. In the body,
-     a line saying what the run asks over the run's card in a well
-     (components/practice/PracticeSpecimen's `plate`), the well taking
-     what the line leaves -- the canvas's "Every platform's specimen". */
-  .practice > .plates > .plate > .plate__head {
-    grid-template-rows: auto minmax(0, 1fr);
-    row-gap: var(--sp-4);
-    min-height: 0;
-    padding-bottom: var(--sp-5);
+  /* ── 練習の改札、机 — the platform painted wide (plan 244) ──
+     components/practice/gate/DeskGate.jsx: the owner's painting of the
+     desk's Practice gate (scripts/practice-gate/desk.py), the window's
+     height and the width the rail leaves, lit at Today's hour, with one
+     board over its right side -- the owner's pick B of the canvas
+     "Tsuji — Practice on the desk". The scene is --pd-w × --pd-h units,
+     one px each inside a zoomed root (--pd-u, its corner at --pd-x,
+     --pd-y: deskFit.js), and every place in it (the car, the door) comes
+     in as a unitless property from desk.json, so nothing here repeats
+     the painting's measures. Its layers and the hours' crossfade are the
+     phone's (.pgate__layer); the board is the app's, in the app's inks. */
+  .phone--desk .phone__content:has(> main.practice) { max-width: none; padding-block: 0; }
+  .practice:has(> .pdesk) { height: 100dvh; padding: 0; gap: 0; }
+  .pdesk {
+    flex: 1;
+    overflow: hidden;
+    background: var(--pd-fill);
   }
-  .plate__body {
-    grid-column: 1 / -1;
-    align-self: stretch;
+  .pdesk__frame {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    user-select: none;
+  }
+  .pdesk__stage {
+    position: absolute;
+    left: calc(var(--pd-x, 0) * 1px);
+    top: calc(var(--pd-y, 0) * 1px);
+    width: calc(var(--pd-w) * var(--pd-u, 1) * 1px);
+    height: calc(var(--pd-h) * var(--pd-u, 1) * 1px);
+  }
+  .pdesk__scene {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: calc(var(--pd-w) * 1px);
+    height: calc(var(--pd-h) * 1px);
+    overflow: hidden;
+    zoom: var(--pd-u, 1);
+  }
+  /* The painting's layers at their own size: they are the scene's units. */
+  .pdesk .pgate__layer { width: auto; height: auto; }
+  .pdesk__car {
+    inset: calc(var(--pd-car-top) * 1px) auto auto 0;
+    width: calc(var(--pd-w) * 1px);
+    height: calc(var(--pd-car-h) * 1px);
+  }
+  /* The train: the car, the cars before and after it (car2, its door
+     shut), the stripes and the door, gliding in and pulling out
+     together, as the phone's does. The cars either side cover the
+     window for the whole of either way. */
+  .pdesk__train {
+    position: absolute;
+    inset: 0;
+    transform: translateX(0);
+    filter: blur(0);
+    transition: transform 2600ms cubic-bezier(0.1, 0.55, 0.22, 1);
+  }
+  .pdesk__train--away {
+    transform: translateX(calc(var(--pd-w) * -1px));
+    filter: blur(3px);
+    transition: none;
+  }
+  .pdesk__train--arriving { transition: transform 2600ms cubic-bezier(0.1, 0.55, 0.22, 1), filter 2200ms ease-out; }
+  .pdesk__train--closing { transition: none; }
+  .pdesk__train--leaving {
+    transform: translateX(calc(var(--pd-w) * 1px));
+    filter: blur(3.5px);
+    transition: transform 2400ms cubic-bezier(0.62, 0, 0.92, 0.55), filter 2000ms ease-in;
+  }
+  .pdesk__train--gone {
+    transform: translateX(calc(var(--pd-w) * 1px));
+    filter: blur(3.5px);
+    transition: none;
+  }
+  .pdesk-car2 {
+    position: absolute;
+    top: calc(var(--pd-car-top) * 1px);
+    width: calc(var(--pd-w) * 1px);
+    height: calc(var(--pd-car-h) * 1px);
+    background: var(--pd-car2) 0 0 / 100% 100% no-repeat;
+  }
+  /* The stripe takes the train's pigment over its own mask, by colour
+     alone, so it keeps its paint and the hour's light (the phone's
+     .pgate-band, on the desk's cars and the door's two leaves). */
+  .pdesk-band,
+  .pdesk-leaf__band {
+    position: absolute;
+    pointer-events: none;
+    background-color: var(--pg-line, var(--pg-ink-translation));
+    mix-blend-mode: color;
+    mask-size: 100% 100%;
+    mask-repeat: no-repeat;
+    transition: background-color 500ms ease;
+  }
+  .pdesk-band {
+    top: calc(var(--pd-car-top) * 1px);
+    left: 0;
+    width: calc(var(--pd-w) * 1px);
+    height: calc(var(--pd-car-h) * 1px);
+  }
+  .pdesk-band--a { mask-image: var(--pd-band-a); }
+  .pdesk-band--b { mask-image: var(--pd-band-b); }
+  .pdesk-leaf__band { inset: 0; }
+  .pdesk-leaf__band--l { mask-image: var(--pd-band-l); }
+  .pdesk-leaf__band--r { mask-image: var(--pd-band-r); }
+  .pdesk-spill-at {
+    position: absolute;
+    pointer-events: none;
+    transition: opacity 900ms ease;
+  }
+  .pdesk-spill { display: block; }
+  /* 扉 — the door's two leaves, cut from the shut door the painting has,
+     over the open doorway; open, each runs into the car's side. */
+  .pdesk-door {
+    position: absolute;
+    left: calc(var(--pd-door-x) * 1px);
+    top: calc(var(--pd-door-y) * 1px);
+    width: calc(var(--pd-door-w) * 1px);
+    height: calc(var(--pd-door-h) * 1px);
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .pdesk-leaf {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    transition: transform 620ms cubic-bezier(0.45, 0, 0.25, 1);
+  }
+  .pdesk-leaf > img { display: block; width: 100%; height: 100%; }
+  .pdesk-leaf--l { left: 0; }
+  .pdesk-leaf--r { left: 50%; }
+  .pdesk-door--open .pdesk-leaf { transition-duration: 900ms; }
+  .pdesk-door--open .pdesk-leaf--l { transform: translateX(-100%); }
+  .pdesk-door--open .pdesk-leaf--r { transform: translateX(100%); }
+  /* 時計 — the phone's station clock, at the painted one's place and size. */
+  .pdesk-clock { position: absolute; }
+  .pdesk-clock .pgate-clock { position: relative; left: auto; top: auto; display: block; }
+  /* 改札 — the gate button on the platform, under the stage's middle:
+     at most the desk's 440px, never under the board. */
+  .pdesk__go {
+    position: absolute;
+    left: 0;
+    bottom: var(--sp-8);
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    width: calc(var(--pd-stage) * 1px);
+    padding-inline: var(--sp-6);
+    pointer-events: none;
+  }
+  .pdesk__go > .btn-depart { width: min(440px, 100%); pointer-events: auto; }
+  /* ── the board ──
+     Over the painting's right side, as Today's column stands beside its
+     dial: the levels as a band over the trains, a train a row, then the
+     chosen train's card, taking what the trains leave. */
+  .pdesk__board {
+    position: absolute;
+    top: var(--sp-6);
+    right: var(--sp-7);
+    bottom: var(--sp-6);
+    z-index: 1;
+    width: clamp(var(--desk-side-w), 36%, var(--desk-entry-w));
     display: flex;
     flex-direction: column;
-    min-height: 0;
+    gap: var(--sp-5);
   }
-  .plate__fill {
+  .pdesk-panel {
+    min-height: 0;
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+  }
+  .pdesk-deps {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  /* The levels apply to every train under them: the console's band
+     (DESIGN.md, "A control that applies to the whole answer"), the
+     panel's width, divided from the trains by a hairline. */
+  .pdesk-levels.seg {
+    border: 0;
+    border-bottom: 1px solid var(--surface-line);
+    border-radius: 0;
+  }
+  .pdesk-levels .seg__opt { align-items: center; }
+  .pdesk-here {
+    width: 5px;
+    height: 5px;
+    border-radius: var(--r-pill);
+    background: currentcolor;
+  }
+  .pdesk-deps__list { display: flex; flex-direction: column; }
+  .pdesk-dep {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: var(--sp-4);
+    min-height: 44px;
+    padding: var(--sp-2) var(--sp-5);
+    border: 0;
+    border-top: 1px solid var(--surface-line);
+    border-radius: 0;
+    background: none;
+    color: var(--text-primary);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .pdesk-dep:first-child { border-top: 0; }
+  /* The chosen train: the selection's wash, its line's rail down the left. */
+  .pdesk-dep[aria-checked='true'] {
+    background: var(--sel-wash);
+    box-shadow: inset 3px 0 0 var(--line-color);
+  }
+  .pdesk-dep:hover,
+  .pdesk-dep:focus-visible { filter: none; }
+  .pdesk-dep:hover .pf-line__roundel,
+  .pdesk-dep:focus-visible .pf-line__roundel { background: color-mix(in srgb, var(--line-color) 18%, transparent); }
+  .pdesk-dep__names {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    min-width: 0;
+  }
+  .pdesk-dep__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-lead);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .pdesk-dep[aria-checked='true'] .pdesk-dep__title { color: var(--sel-ink); }
+  .pdesk-dep__rec {
+    font-size: var(--fs-sm);
+    line-height: 1.3;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+  .pdesk-card {
     flex: 1 1 0;
     display: flex;
     flex-direction: column;
     gap: var(--sp-4);
+    padding: var(--sp-5) var(--sp-6);
+    overflow: hidden;
+  }
+  .pdesk-card__head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--sp-4);
+  }
+  .pdesk-card__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-lead);
+    font-weight: 700;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+  .pdesk-card__level {
+    padding: var(--sp-1) var(--sp-3);
+    border: 1px solid color-mix(in srgb, var(--line-color) 55%, transparent);
+    border-radius: var(--r-pill);
+    color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    line-height: 1;
+  }
+  .pdesk-card__how {
+    margin: 0;
+    font-size: var(--fs-sm);
+    line-height: 1.45;
+    color: var(--text-secondary);
+    text-wrap: pretty;
+  }
+  /* The run's card in its well, plan 165's plate face (.prc-spec--plate,
+     with the specimen's rules), taking what the card leaves: DeskGate
+     measures it to choose the face. */
+  .pdesk-card__well {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
     min-height: 0;
   }
-  .plate__how {
-    font-size: var(--fs-sm);
-    line-height: 1.4;
+  .pdesk-card__open {
+    align-self: flex-start;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
     color: var(--text-secondary);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: var(--sp-1);
+    cursor: pointer;
+  }
+  .pdesk-card__open:hover,
+  .pdesk-card__open:focus-visible { color: var(--text-primary); filter: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .pdesk__train,
+    .pdesk-leaf,
+    .pdesk-band,
+    .pdesk-leaf__band { transition: none; }
   }
 
   /* ── the second column (plan 114) ──
@@ -42399,14 +42667,19 @@ button.brd-stn { cursor: pointer; }
      one line: comprehension's text over its question, the text giving
      way first (it fades out at its foot, .prc-spec__text's mask), and
      the mock exam's 漢字読み over its four readings. A short plate's
-     comprehension is its text alone (PracticeScreen's TEXT_MIN), which
-     takes the well rather than the text's own cap. */
+     comprehension is its text alone (PracticeSpecimen's `compact`),
+     which takes the well rather than the text's own cap. Since plan 244
+     the plate is the desk's board, its card the chosen train's
+     (components/practice/gate/DeskGate). */
   .prc-spec--plate {
     flex: 1 1 0;
     min-height: 0;
     gap: var(--sp-4);
     padding: var(--sp-5);
   }
+  /* Its caption, where the well has the room for one (plan 244), stands
+     over the face rather than on it. */
+  .prc-spec--plate:has(> .prc-spec__tag) { padding-top: var(--sp-7); }
   .prc-spec--plate .prc-spec__jp {
     font-size: var(--fs-title);
     line-height: 1.6;
@@ -42449,6 +42722,17 @@ button.brd-stn { cursor: pointer; }
   .prc-spec--plate .prc-spec__text:only-child {
     flex: 1 1 auto;
     max-height: none;
+  }
+  /* 会話's face (plan 244): the scene's place on its plate, the scene's
+     name under it, then the line the other person opens on. */
+  .prc-spec__scene {
+    max-width: 100%;
+    font-family: var(--font-display);
+    font-size: var(--fs-lead);
+    font-weight: 700;
+    line-height: 1.3;
+    text-align: center;
+    text-wrap: balance;
   }
   .prc-spec--compact {
     gap: var(--sp-3);
@@ -42790,26 +43074,20 @@ button.brd-stn { cursor: pointer; }
     .learn-desk > .plates.plates--across > .plate.plate--line { min-height: min-content; }
     .learn-desk > .plates.plates--across > .plate.plate--line > .plate__head { padding-block: var(--sp-1); }
     .learn-desk > .plates.plates--across > .plate.plate--line > .plate__foot { padding-block: var(--sp-1) var(--sp-2); }
-    /* ── Practice ──
-       Six plates two by two left each row 180px on a 600px window, and
-       the specimens in the plates were cut at both edges of their wells
-       (composition's point lost its top, the exam's readings their
-       second row). Three across as soon as three hold a desk column's
-       least width, so two rows share the window; a name that no longer
-       holds on one line takes two. Where three do not fit (under
-       ~1250px) a row keeps two thirds of a side column, the room a
-       specimen needs once its line is not drawn (PracticeScreen's
-       HOW_MIN), and the page scrolls. The floor is a height, never the
-       specimen's own: the specimen measures its room to choose what it
-       draws, and a room sized by what it drew never gave way. */
-    .practice > .plates {
-      grid-template-columns: repeat(auto-fit, minmax(var(--desk-run-col-min), 1fr));
-      grid-auto-rows: minmax(calc(var(--desk-side-w) * 2 / 3), 1fr);
-    }
-    .practice > .plates > .plate .plate__title {
-      white-space: normal;
-      text-wrap: balance;
-    }
+    /* ── Practice (plan 244) ──
+       The board a rung tighter: at 600px the band, the seven trains and
+       the chosen one's card share 568px, and the card keeps its well,
+       the room its compact face needs. The trains' rows close up, and
+       the card loses its head and its link, which the chosen row and
+       the rail's own stations say already. */
+    .pdesk__board { top: var(--sp-5); bottom: var(--sp-5); gap: var(--sp-4); }
+    .pdesk-dep { min-height: 40px; padding-block: var(--sp-1); }
+    .pdesk-dep__names { gap: 0; }
+    .pdesk-dep__title { font-size: var(--fs-body); }
+    .pdesk-dep__rec { font-size: var(--fs-caption); }
+    .pdesk-card { gap: var(--sp-3); padding: var(--sp-4) var(--sp-5); }
+    .pdesk-card__head,
+    .pdesk-card__open { display: none; }
     /* A practice station's page stands at its own height, as the narrow
        page does (PracticePage's NARROW), rather than the window's: held
        to 568px its well cut the run's card at both edges -- reading's
@@ -42824,6 +43102,11 @@ button.brd-stn { cursor: pointer; }
       flex: none;
       padding: var(--sp-7) var(--sp-6) var(--sp-5);
     }
+    /* Not the gate's: the board's card (plan 244) still gives its well
+       what the card leaves. */
+    .prc-spec--plate { flex: 1 1 0; padding: var(--sp-5); }
+    .prc-spec--plate:has(> .prc-spec__tag) { padding-top: var(--sp-7); }
+    .prc-spec--compact { padding: var(--sp-4); }
     .prc-lower { flex: none; }
     .prc-panel { max-height: calc(6 * var(--sp-8)); }
     /* ── the analyser's typed Passage ──
@@ -45431,8 +45714,8 @@ button.brd-stn { cursor: pointer; }
      The station's scenes go two across at every count: a scene's card
      carries its name, its situation and its first line, and a third of
      the page held a word a line of them when a grade has three. The
-     odd one out still takes the row. (The Practice gate keeps its six
-     plates on the desk, screens/PracticeScreen's OFF_DESK.) */
+     odd one out still takes the row. (Since plan 244 the Practice gate
+     hangs it on the desk too, its seventh train.) */
   .learn:has(> .kaiwa-console) > .platform-grid,
   .learn:has(> .kaiwa-console) > .platform-grid:has(> .platform-slot:nth-child(3):last-child) {
     grid-template-columns: repeat(2, minmax(0, 1fr));

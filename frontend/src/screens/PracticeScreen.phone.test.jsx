@@ -11,7 +11,8 @@ import '../index.css'
 // where it goes -- where the plates' chips and heads were. The lit
 // destination opens its station, as a plate's head did; the gold
 // button boards the train to the run at the sign's grade, as a chip
-// did. The desk keeps its plates (gates.desktop.test.jsx).
+// did. The desk's painted platform (plan 244) is
+// PracticeScreen.desktop.test.jsx.
 
 vi.mock('../lib/api', () => ({
   apiFetch: vi.fn(async () => ({ ok: true, status: 200, json: async () => ({}) })),
@@ -231,13 +232,12 @@ describe('the painted platform at phone width (plan 225)', () => {
 
 // ── 案内 — the anchors the guide points at (plan 100) ────────────
 describe('the practice gate\'s guide anchors', () => {
-  it('marks the two signs and the gate, once each, and none of the plates\'', async () => {
+  it('marks the two signs and the gate, once each', async () => {
     const screen = await gate()
     const root = screen.container
     for (const anchor of ['practice.sign', 'practice.grade', 'practice.board']) {
       expect(root.querySelectorAll(`[data-guide="${anchor}"]`), anchor).toHaveLength(1)
     }
-    expect(root.querySelector('[data-guide="practice.plate"], [data-guide="practice.dests"]')).toBeNull()
     // No pass tag is drawn while nothing is for sale: the guide skips
     // that stop rather than pointing at nothing.
     expect(root.querySelector('[data-guide="practice.pass"]')).toBeNull()
