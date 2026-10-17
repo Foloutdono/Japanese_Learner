@@ -17,7 +17,7 @@
 //                     studio's "Copy the command" writes the recipe (short.js)
 //   --challenge ID    a reading challenge (plan 247, challenge.js): a
 //                     comprehension text, 9:16, over Today's print
-//   --style crawl     ... crawling up the screen (crawl), or read along by the voice (along)
+//   --style scroll    ... going up the screen as credits do (scroll), or read along by the voice (along)
 //   --hour night      ... the print's hour: dawn, day, dusk or night
 //   --music FILE      ... a track of your own under it (any audio ffmpeg reads), looped if short
 //

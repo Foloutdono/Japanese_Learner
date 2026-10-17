@@ -811,17 +811,22 @@ A comprehension text (the 30 of `comprehension.json`, six a level) read
 as a 9:16 video (`challenge.js`, the source 速読 "Reading challenge"),
 over Today's print of the hour, in one of two ways:
 
-- **Credits crawl** (`crawl`, 流れ; the owner's own picture, in place of
-  the falling lines first drawn): the title, then the whole text, comes
-  up from the foot of the screen and climbs into the sky as a film's
-  opening crawl does, on a plane tipped away from the viewer (`CRAWL`):
-  largest at the foot, where it is read, smaller, flatter and fainter as
-  it climbs, and slower, the plane moving at one speed. Every sentence
-  is set at the heading's size, on as many lines as it takes. The whole
-  text passes the reading line at the pace a learner of its level reads
-  (`CPM`: 180 characters a minute at N5 up to 320 at N1), after the
-  first line's way up to it (`CH.into`) and before the last one's read
-  (`CH.out`); the counter at the head says which sentence is there.
+- **Credits scroll** (`scroll`, 流れ; built to the owner's reference, a
+  reading challenge seen on TikTok, in place of the falling lines first
+  drawn and a perspective crawl after them): the whole text goes slowly
+  up the screen as a film's credits do, flat and at one size, in the
+  app's ink on the print of the hour washed with its paper (`WASH`,
+  heavier at dusk and night so the page stays paper), on short airy
+  lines broken between phrases, each sentence on a line of its own
+  (`SCROLL`). It comes in with its first line at the reading line and
+  moves at one speed, worked out from its own laid-out length, so the
+  whole text passes that line at the pace a learner of its level reads
+  (`CPM`: 180 characters a minute at N5 up to 320 at N1), after a moment
+  to come in (`CH.into`) and before the last line's read (`CH.out`); the
+  counter at the head says which sentence is there. The reference also
+  leaves a space between phrases; the bank's words are not cut surely
+  enough for that (としょかん written in kana comes out as はと・しょ・か・ん),
+  so the scroll leaves none.
 - **Read along** (`along`, 声): the text stands on one panel while the
   app's reader says it (slowed at N5 and N4, as a card's slow line), each
   word gold once said and underlined while it is said; the panel turns
@@ -840,11 +845,11 @@ to N1, each with its questions", "Free · in your browser" and the site's
 address in its bar (plan 245).
 
 **Easy to read** is its first rule: everything a viewer reads is light
-on a dark panel or on the sky darkened under it, so it reads at every
-hour of the print; a sentence is set at the heading's size (the crawl,
-never under the title's on screen between the reading line and the
-foot) or a little over the title's (read along), with its readings at
-N5 to N3. The tests hold every text whole inside the frame, at every
+in ink on the washed print (the scroll, its hook, question and way to
+the app with it) or light on a dark panel or the sky darkened under it
+(read along), so it reads at every hour of the print; a sentence is set
+at the title's size (the scroll) or a little over it (read along), with
+its readings at N5 to N3. The tests hold every text whole inside the frame, at every
 level, in both languages.
 
 **The sound** makes up no music. The owner adds a track of their own
@@ -854,7 +859,7 @@ video's length, faded in and out over 2.5 s and, under the voice, held
 some 12 dB below it (`long_video_audio mix --bed`). Without one the
 video has only the board's flap on the hook, the clicks of the
 countdown, the answer's chime and the platform's on the way out
-(`--no-bed`), kept calm (-20 LUFS) when nobody speaks either. The crawl,
+(`--no-bed`), kept calm (-20 LUFS) when nobody speaks either. The scroll,
 which nobody says, can be downloaded from the studio as it is, the
 track mixed in the browser; the one read along is made by the command,
 which voices each sentence. The track is not kept anywhere: the studio
@@ -862,7 +867,7 @@ reads it from the file chosen, the command from its path.
 
 ```bash
 cd frontend
-node carousel/long/render.mjs --challenge n5-01 --style crawl --hour dusk --lang en --music ~/music/late-train.mp3
+node carousel/long/render.mjs --challenge n5-01 --style scroll --hour day --lang en --music ~/music/late-train.mp3
 VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --challenge n5-01 --style along --hour night --lang fr
 ```
 
@@ -884,7 +889,7 @@ VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --challenge n5
 | `sound.js` | a clip's sound: the app's own events and recorded clips, mixed (plans 231, 232); one event alone for a long video (plan 233) |
 | `long.js` | the long videos: what each says, when, each frame, their page, and the studio's list of them (plan 233) |
 | `short.js` | a carousel as a short video: its timing, its swipes, its line and page (plan 233) |
-| `challenge.js` | the reading challenges: a comprehension text in a credits crawl or read along, its timing on the voice, each frame, its page (plan 247) |
+| `challenge.js` | the reading challenges: a comprehension text in a credits scroll or read along, its timing on the voice, each frame, its page (plan 247) |
 | `long/render.mjs` | a long video, its short, a carousel's short or a reading challenge made: voiced, mixed, drawn and encoded (plans 233, 247) |
 | `studio.js` | the page: the pickers, the previews, the export |
 

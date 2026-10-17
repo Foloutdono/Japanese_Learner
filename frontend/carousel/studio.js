@@ -45,7 +45,7 @@ const DEFAULTS = {
   // Plan 234: the conversion carousel, its look, its length, the feature it shows.
   design: 'clarte', length: '5', feature: 'auto',
   // Plan 247: how a reading challenge's text moves.
-  challengeStyle: 'crawl',
+  challengeStyle: 'scroll',
 }
 const state = load()
 const files = new Map()
@@ -637,9 +637,9 @@ async function renderLong(mine) {
   $('#command').textContent = longCommand(id, state.level, state.lang, short ? 'short' : 'long', state.fit)
 }
 // ── The reading challenges (plan 247) ─────────────────────────
-// A comprehension text as a 9:16 video over Today's print: crawling up
-// the screen as a film's opening crawl does, or read along by the app's
-// reader. Drawn here as it is made; the crawl is encoded here too, with
+// A comprehension text as a 9:16 video over Today's print: going slowly
+// up the screen as a film's credits do, or read along by the app's
+// reader. Drawn here as it is made; the scroll is encoded here too, with
 // the app's sounds and a track of the owner's music if one is added, and
 // the voice of the one read along is made where it is rendered (the
 // command below), every word timed on it.
@@ -677,7 +677,7 @@ async function renderChallenge(mine) {
   name.append(jp, ` ${pl.title}`)
   const n = document.createElement('span')
   n.className = 'deck__count'
-  n.textContent = `${clock(tl.seconds)} · ${pl.sents.length} sentences · ${pl.style === 'crawl' ? 'crawl' : 'read along'} · 9:16`
+  n.textContent = `${clock(tl.seconds)} · ${pl.sents.length} sentences · ${pl.style === 'scroll' ? 'scroll' : 'read along'} · 9:16`
   head.append(name, n)
   const screen = document.createElement('div')
   screen.className = 'player'
@@ -705,7 +705,7 @@ async function renderChallenge(mine) {
   bar.append(play, scrub, time)
   const note = document.createElement('p')
   note.className = 'player__note'
-  note.textContent = pl.style === 'crawl'
+  note.textContent = pl.style === 'scroll'
     ? `A silent preview: the app’s sounds${music ? ' and your track' : ''} are laid under it when it is downloaded or rendered.`
     : 'A silent preview, timed on a guess: the voice is made, and every word lit on it, when the video is rendered (the command below).'
   const chapters = document.createElement('ol')
@@ -757,13 +757,13 @@ async function renderChallenge(mine) {
     countTitle()
   }
   $('#command').textContent = challengeCommand(pl)
-  // The crawl is made here, whole; the one read along needs the voice engine.
-  $('#export-video').disabled = pl.style !== 'crawl'
-  $('#export-video').textContent = pl.style === 'crawl' ? `Download the video (.mp4, ${clock(tl.seconds)}${music ? ', with your track' : ''})` : 'Read along is made by the command (the voice)'
+  // The scroll is made here, whole; the one read along needs the voice engine.
+  $('#export-video').disabled = pl.style !== 'scroll'
+  $('#export-video').textContent = pl.style === 'scroll' ? `Download the video (.mp4, ${clock(tl.seconds)}${music ? ', with your track' : ''})` : 'Read along is made by the command (the voice)'
 }
 async function exportChallenge() {
   const ch = current.challenge
-  if (!ch || current.plan.style !== 'crawl') return
+  if (!ch || current.plan.style !== 'scroll') return
   const { tl, P } = ch
   await encodeClip({
     btn: '#export-video', name: `tsuji-challenge-${safeName(ch.id)}-${current.plan.hour}-${state.lang}`, said: 'reading challenge',
