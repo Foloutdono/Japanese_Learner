@@ -1371,15 +1371,18 @@ describe('first contact, finished (P13, plan 155)', () => {
     await pastName()
     await pick('[data-motive="trip"]')
     inCar('[data-action="continue"]').click()
-    await settle(500)
     // Gone from sight, not from the page: the arriving answers are still
-    // coming in, and dropping it took their entrance with it.
-    const out = $('.brd__car--out')
-    expect(out).not.toBeNull()
-    expect(opacityOf(out)).toBe(0)
+    // coming in, and dropping it took their entrance with it. Read when
+    // the fade has drawn, not after a sleep: with the lanes' pages
+    // running side by side a frame can be late by more than the 500ms
+    // this once waited, and the car was read at its opacity of 1.
+    await vi.waitFor(() => {
+      const out = $('.brd__car--out')
+      expect(out).not.toBeNull()
+      expect(opacityOf(out)).toBe(0)
+    }, { timeout: 5000, interval: 20 })
     expect(getComputedStyle(live()).animationName).toBe('desk-brd-pull-in')
-    await settle(500)
-    expect($('.brd__car--out')).toBeNull()
+    await vi.waitFor(() => expect($('.brd__car--out')).toBeNull(), { timeout: 5000, interval: 20 })
     inCar('[data-action="back"]').click()
     await settle(40)
     expect(live().dataset.dir).toBe('back')
