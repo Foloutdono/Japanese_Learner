@@ -15,6 +15,7 @@ import { PROMO, STORIES } from './promo.js'
 import { PRINT_HOURS, loadPrint } from './app.js'
 import { RATE, clipAudio, decoded, loadVoices } from './sound.js'
 import { voiceSpan } from './echo.js'
+import { STYLES as CHALLENGE_STYLES, challengeCommand, challengePage, challengePlan, challengeTimeline, drawChallenge } from './challenge.js'
 import { FPS as SHORT_FPS, chars, depsFor as depsOfWord, drawShortFrame, recipeOf, shortTimeline } from './short.js'
 import { LONG_SITE, TALL, describe as describeLong, drawLong, fitShort, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, timeline, WIDE } from './long.js'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
@@ -34,7 +35,7 @@ const TOGGLE_LABELS = {
   apart: 'What tells them apart', pair: 'The two side by side', careful: 'Watch out',
 }
 const T = STRINGS.en
-const LIST_NAME = { long: 'Video', promo: 'Story', echo: 'Word', sentence: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
+const LIST_NAME = { long: 'Video', challenge: 'Text', promo: 'Story', echo: 'Word', sentence: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
 
 const DEFAULTS = {
   source: 'sentence', level: 'N5', longFormat: 'long', kanaSet: 'hiragana', story: 'pitch', hour: 'day', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20' },
@@ -43,6 +44,8 @@ const DEFAULTS = {
   picks: {}, types: {}, ending: 'mark',
   // Plan 234: the conversion carousel, its look, its length, the feature it shows.
   design: 'clarte', length: '5', feature: 'auto',
+  // Plan 247: how a reading challenge's text moves.
+  challengeStyle: 'fall',
 }
 const state = load()
 const files = new Map()
@@ -58,6 +61,7 @@ function load() {
     if (saved.hour && !PRINT_HOURS.includes(saved.hour)) delete saved.hour
     if (saved.story && !STORIES.includes(saved.story)) delete saved.story
     if (saved.fit && !FITS.includes(saved.fit)) delete saved.fit
+    if (saved.challengeStyle && !CHALLENGE_STYLES.includes(saved.challengeStyle)) delete saved.challengeStyle
     return {
       ...DEFAULTS, ...saved, type, ids: { ...DEFAULTS.ids, ...(saved.ids || {}) }, slides: { ...(saved.slides || {}) },
       picks: { ...(saved.picks || {}) }, types: { ...(saved.types || {}) },
@@ -345,7 +349,10 @@ let titleFor = ''
 async function render() {
   const mine = ++token
   stopPlayer()
-  document.body.dataset.mode = state.source === 'long' ? 'long' : ''
+  // A video (a long one, a reading challenge) has a page and a command, not slides.
+  document.body.dataset.mode = videoSource() ? 'long' : ''
+  document.body.dataset.video = state.source === 'challenge' ? 'challenge' : ''
+  $('#hour-field').hidden = !['promo', 'challenge'].includes(state.source)
   const funnel = DESIGNS.includes(state.design)
   document.body.dataset.design = funnel ? 'funnel' : 'classic'
   if (state.view === 'looks' && !funnel) state.view = 'compare'
@@ -356,6 +363,7 @@ async function render() {
   if (!listCache.length) await renderList()
   if (mine !== token) return
   if (state.source === 'long') return renderLong(mine)
+  if (state.source === 'challenge') return renderChallenge(mine)
   const id = currentId()
   const deps = await depsFor(data, id)
   if (mine !== token) return
@@ -628,7 +636,145 @@ async function renderLong(mine) {
   }
   $('#command').textContent = longCommand(id, state.level, state.lang, short ? 'short' : 'long', state.fit)
 }
+// ── The reading challenges (plan 247) ─────────────────────────
+// A comprehension text as a 9:16 video over Today's print: its sentences
+// falling into the lake, or read along by the app's reader. Drawn here
+// as it is made; the falling one is encoded here too, with the lake and
+// the app's sounds, and the voice of the one read along is made where it
+// is rendered (the command below), every word timed on it.
+const CHAPTER = { hook: 'Hook', words: 'Three words', reading: 'Reading', question: 'Question', answer: 'Answer', cta: 'The app' }
+async function renderChallenge(mine) {
+  const data = await fetchJson('comprehension.json')
+  if (mine !== token) return
+  const id = currentId()
+  const pl = challengePlan(data, id, { lang: state.lang, style: state.challengeStyle, hour: state.hour })
+  const tl = challengeTimeline(pl)
+  const P = await printFor(state.hour).catch(e => { status(`Today's print did not load (${e.message}).`); return null })
+  await fonts(JSON.stringify(pl))
+  if (mine !== token) return
+  const page = challengePage(pl, tl, state.lang === 'en' ? `${LONG_SITE}/en` : LONG_SITE)
+  current = { plan: pl, fmt: FORMATS.story, decks: [], challenge: { id, tl, P, page } }
+  const stage = $('#stage')
+  stage.replaceChildren()
+  stage.dataset.view = 'long'
+  const row = document.createElement('section')
+  row.className = 'deck'
+  row.setAttribute('aria-label', 'Reading challenge')
+  const head = document.createElement('div')
+  head.className = 'deck__head'
+  const name = document.createElement('h2')
+  name.className = 'deck__name'
+  const jp = document.createElement('span')
+  jp.lang = 'ja'
+  jp.className = 'deck__jp'
+  jp.textContent = '速読'
+  name.append(jp, ` ${pl.title}`)
+  const n = document.createElement('span')
+  n.className = 'deck__count'
+  n.textContent = `${clock(tl.seconds)} · ${pl.sents.length} sentences · ${pl.style === 'fall' ? 'falling' : 'read along'} · 9:16`
+  head.append(name, n)
+  const screen = document.createElement('div')
+  screen.className = 'player'
+  const c = document.createElement('canvas')
+  c.width = FORMATS.story.w
+  c.height = FORMATS.story.h
+  c.style.aspectRatio = `${c.width} / ${c.height}`
+  c.style.maxWidth = '420px'
+  c.setAttribute('aria-label', 'The video, drawn frame by frame')
+  screen.append(c)
+  const bar = document.createElement('div')
+  bar.className = 'player__bar'
+  const play = document.createElement('button')
+  play.type = 'button'
+  play.className = 'btn btn--quiet'
+  play.textContent = 'Play'
+  const scrub = document.createElement('input')
+  scrub.type = 'range'
+  scrub.min = '0'
+  scrub.max = String(tl.seconds)
+  scrub.step = '0.05'
+  scrub.setAttribute('aria-label', 'Where in the video')
+  const time = document.createElement('span')
+  time.className = 'player__time'
+  bar.append(play, scrub, time)
+  const note = document.createElement('p')
+  note.className = 'player__note'
+  note.textContent = pl.style === 'fall'
+    ? 'A silent preview: the lake and the app’s sounds are laid under it when it is downloaded or rendered.'
+    : 'A silent preview, timed on a guess: the voice is made, and every word lit on it, when the video is rendered (the command below).'
+  const chapters = document.createElement('ol')
+  chapters.className = 'chapters'
+  row.append(head, screen, bar, note, chapters)
+  stage.append(row)
+  const key = `challenge|${id}|${state.lang}|${state.challengeStyle}|${state.hour}`
+  player = { c, pl, tl, t: Math.min(player?.key === key ? player.t : tl.lines[1]?.at + 1.5 || 1.6, tl.seconds), raf: 0, id, key, play, scrub, time }
+  const draw = () => {
+    drawChallenge(c.getContext('2d'), pl, tl, player.t, P)
+    scrub.value = String(player.t)
+    time.textContent = `${clock(player.t)} / ${clock(tl.seconds)}`
+  }
+  player.draw = draw
+  const seek = t => { player.t = Math.max(0, Math.min(tl.seconds, t)); draw() }
+  for (const sg of tl.segs) {
+    const li = document.createElement('li')
+    const b = document.createElement('button')
+    b.type = 'button'
+    b.className = 'chip'
+    b.textContent = `${clock(sg.start)} ${CHAPTER[sg.key]}`
+    b.addEventListener('click', () => seek(sg.start + (sg.key === 'reading' ? 1.2 : 1.6)))
+    li.append(b)
+    chapters.append(li)
+  }
+  scrub.addEventListener('input', () => seek(Number(scrub.value)))
+  play.addEventListener('click', () => {
+    if (player.raf) { stopPlayer(); play.textContent = 'Play'; return }
+    if (player.t >= tl.seconds - 0.05) player.t = 0
+    play.textContent = 'Pause'
+    let last = performance.now()
+    const tick = now => {
+      player.t = Math.min(tl.seconds, player.t + (now - last) / 1000)
+      last = now
+      draw()
+      if (player.t >= tl.seconds) { player.raf = 0; play.textContent = 'Play'; return }
+      player.raf = requestAnimationFrame(tick)
+    }
+    player.raf = requestAnimationFrame(tick)
+  })
+  draw()
+  if (key !== captionFor) {
+    $('#caption').value = page.description
+    $('#title').value = page.title
+    $('#tags').value = page.tags
+    captionFor = key
+    titleFor = key
+    countTitle()
+  }
+  $('#command').textContent = challengeCommand(pl)
+  // The falling one is made here, whole; the one read along needs the voice engine.
+  $('#export-video').disabled = pl.style !== 'fall'
+  $('#export-video').textContent = pl.style === 'fall' ? `Download the video (.mp4, ${clock(tl.seconds)}, with the lake)` : 'Read along is made by the command (the voice)'
+}
+async function exportChallenge() {
+  const ch = current.challenge
+  if (!ch || current.plan.style !== 'fall') return
+  const { tl, P } = ch
+  await encodeClip({
+    btn: '#export-video', name: `tsuji-challenge-${safeName(ch.id)}-${current.plan.hour}-${state.lang}`, said: 'reading challenge',
+    fmt: FORMATS.story, fps: 30, seconds: tl.seconds,
+    sounds: [{ at: 0, src: `${BASE}${tl.bed.src}` }, ...tl.sfx],
+    frame: (ctx, t) => { drawChallenge(ctx, current.plan, tl, t, P) },
+  })
+}
 async function exportThumb() {
+  if (current.challenge) {
+    const c = document.createElement('canvas')
+    c.width = FORMATS.story.w
+    c.height = FORMATS.story.h
+    drawChallenge(c.getContext('2d'), current.plan, current.challenge.tl, 1.6, current.challenge.P)
+    const result = await offer(`tsuji-challenge-${safeName(current.challenge.id)}-${state.lang}.png`, await png(c))
+    status(result === 'saved' ? 'Saved the thumbnail.' : MESSAGE[result])
+    return
+  }
   if (!current.long) return
   const c = document.createElement('canvas')
   c.width = current.fmt.w
@@ -852,7 +998,8 @@ async function exportShort() {
     frame: (ctx, t) => { drawShortFrame(ctx, slides, tl, t, fmt) },
   })
 }
-const clippedSource = () => ['promo', 'echo', 'long'].includes(state.source)
+const clippedSource = () => ['promo', 'echo', 'long', 'challenge'].includes(state.source)
+const videoSource = () => ['long', 'challenge'].includes(state.source)
 
 /** A clip encoded as the feeds take a video, H.264 in an MP4 with its sounds. */
 async function encodeClip({ btn: sel, name, said, fmt, fps, seconds, sounds, frame }) {
@@ -960,7 +1107,7 @@ async function copyField(id, name) {
 /** The title's length against the feed's limit. */
 function countTitle() {
   // A video's title is YouTube's, a hundred characters at most.
-  const max = state.source === 'long' ? 100 : TITLE_MAX
+  const max = videoSource() ? 100 : TITLE_MAX
   $('#title').maxLength = max
   $('#title-count').textContent = `${[...$('#title').value].length}/${max}`
 }
@@ -1044,12 +1191,13 @@ function wire() {
   $('#export').addEventListener('click', exportZip)
   $('#export-clip').addEventListener('click', () => exportClip('cover'))
   $('#export-end-clip').addEventListener('click', () => exportClip('end'))
-  $('#copy').addEventListener('click', () => copyField('#caption', state.source === 'long' ? 'Description' : 'Caption'))
+  $('#copy').addEventListener('click', () => copyField('#caption', videoSource() ? 'Description' : 'Caption'))
   $('#copy-tags').addEventListener('click', () => copyField('#tags', 'Tags'))
   $('#copy-command').addEventListener('click', async () => {
     try { await navigator.clipboard.writeText($('#command').textContent); status('Command copied: run it from frontend/.') } catch { status('Select the command and copy it.') }
   })
   $('#export-thumb').addEventListener('click', exportThumb)
+  $('#export-video').addEventListener('click', exportChallenge)
   $('#export-short').addEventListener('click', exportShort)
   $('#copy-short').addEventListener('click', async () => {
     const cmd = `VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --carousel ${recipeOf(shortRecipe())}`

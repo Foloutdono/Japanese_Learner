@@ -40,9 +40,9 @@ read:
 
 | Slide | Key | Shows |
 | --- | --- | --- |
-| The hook | `ask` | the item and the question it asks (can you read it? what does it mean? which one is the odd one out?); a text, with the question asked of it under it; in Fiche, "The answer is on the next slide" at its foot (plan 243: it said "Save it for later", which sent the reader away before the answer) |
+| The hook | `ask` | the item and the question it asks (can you read it? what does it mean? which one is the odd one out?); a text, with the question asked of it under it; in Fiche, "The answer is on the next slide" at its foot (plan 245: it said "Save it for later", which sent the reader away before the answer) |
 | The answer | `answer` | the item answered as the app shows it: the analyser's line and its numbered points, the review card's word, a kanji's readings; a question's solution alone (its sentence completed, or the word asked about, the right answer large, why), never the question again nor its other choices |
-| The call to action | `cta` | "Want more like this?": the feature the item comes from in one card, its picture (a schema of what it does) over its name and what it does; two more features beside it, and the way to the site: its address in a browser's bar, a padlock before it and Go, the gate's gold, at its end, inside the safe area where the card above reaches past it, so Go is never under the feed's buttons (plan 243, `draw.address`, as high as the metal it replaced) |
+| The call to action | `cta` | "Want more like this?": the feature the item comes from in one card, its picture (a schema of what it does) over its name and what it does; two more features beside it, and the way to the site: its address in a browser's bar, a padlock before it and Go, the gate's gold, at its end, inside the safe area where the card above reaches past it, so Go is never under the feed's buttons (plan 245, `draw.address`, as high as the metal it replaced) |
 | The detail | `more` | the item further: word by word, in sentences, the words a kanji writes; or "Your turn" (`question-2`): the next question, turn or round, asked and left to the reader, answered on the next slide (`answer-2`); a sentence's: its words glossed, every one of them (`more`, `more-2`…) |
 | The key points | `keys` | the answer to "Your turn" where no slide was left for it, up to three points the catalogue, the deck or the explainers already say, a card each, marked with its kind (how it works, form, watch out, don't mix up, reading, in a word…), and "Save it for your next review" beside the save glyph, a short arrow down from it |
 
@@ -653,7 +653,7 @@ length and when each saying starts): the readings land on its sayings
 and it plays whole under them. The sayings are found by ear or from the
 sound's loudness, each voiced rise a saying (plan 232's いたい clip).
 
-**Then the word is kept (plan 244).** The owner picked this ending from
+**Then the word is kept (plan 246).** The owner picked this ending from
 four drawn (the promo stories' board, the theme's words listed, the
 review's rating bar): `ECHO.after` (0.35s) after the last saying has
 been said (or the recording has played whole), the readings fall back
@@ -662,7 +662,7 @@ sixths of its size, and under it come "Want to keep it?", then its line
 ("Tsuji asks you again just before you'd forget it, with the 46 other
 words of the theme": the count is the theme deck's, from
 `themes.json`), then the site's address in its bar (`draw.address`, the
-call to action's since plan 243), each a little after the one before
+call to action's since plan 245), each a little after the one before
 (`KEEP`). The ask lands on the board's flap and the address with the
 platform's chime, the app's own sounds. It holds `ECHO.keep` (3.5s), so
 a clip runs about thirteen and a half seconds; the studio shows the
@@ -805,6 +805,58 @@ VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --format short
 node carousel/long/render.mjs --carousel <recipe from the studio>
 ```
 
+## The reading challenges (plan 247)
+
+A comprehension text (the 30 of `comprehension.json`, six a level) read
+as a 9:16 video (`challenge.js`, the source 速読 "Reading challenge"),
+over Today's print of the hour, in one of the two ways the owner picked
+from four drawn:
+
+- **Falling lines** (`fall`, 流れ): each sentence drops in at the head of
+  the sky onto a dark panel and is held there for as long as a learner
+  of its level reads it (`CPM`: 180 characters a minute at N5 up to 320
+  at N1, never under `CH.least`), a gold bar under it running out as
+  the app's reading clock does; the sentences read slide down under it,
+  dimmer at each step, and are gone into the lake.
+- **Read along** (`along`, 声): the text stands on one panel while the
+  app's reader says it (slowed at N5 and N4, as a card's slow line), each
+  word gold once said and underlined while it is said; the panel turns
+  to the next sentence when it would run past its foot. The words are
+  lit on the engine's own syllables (`long_video_audio.mora_marks`, from
+  its audio query, within a frame of the clip it makes) wherever their
+  count is the text's, else in proportion to each word's.
+
+Either way it opens on the hook ("Can you read this?", the title, the
+level, its sentences and its reading time) and three of its words, the
+level's own first, with their readings and meanings; it ends on one of
+its questions (the one about what the text says, never its grammar),
+five seconds counted by the app's clicks and "Answer in the comments",
+its answer, then the way to the app: the title, "Texts like this one, N5
+to N1, each with its questions", "Free · in your browser" and the site's
+address in its bar (plan 245).
+
+**Easy to read** is its first rule: everything a viewer reads is light
+on a dark panel or on the sky darkened under it, so it reads at every
+hour of the print; a sentence is set at the heading's size (falling) or
+a little over the title's (read along), with its readings at N5 to N3,
+and never moves while it is read; what moves, moves between two. The
+tests hold every text whole inside the frame, at every level, in both
+languages.
+
+**The sound** is the hour's lake, the ambiance Today plays (`AMBIANCE`,
+held equal to `src/lib/audio/ambiance.json`'s revision), with the board's
+flap on the hook, the clicks of the countdown, the answer's chime and
+the platform's on the way out. The falling one, which nobody says, is
+kept calm (-20 LUFS) and can be downloaded from the studio as it is; the
+one read along is made by the command, which voices each sentence and
+mixes the lake under it (`long_video_audio mix --bed`).
+
+```bash
+cd frontend
+node carousel/long/render.mjs --challenge n5-01 --style fall --hour dusk --lang en
+VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --challenge n5-01 --style along --hour night --lang fr
+```
+
 ## The code
 
 | File | Does |
@@ -819,11 +871,12 @@ node carousel/long/render.mjs --carousel <recipe from the studio>
 | `strings.js` | every label a slide prints, in English and French |
 | `promo.js` | the promo stories: their plans from the bank, their frames (plan 231) |
 | `app.js` | the app's own parts, drawn at its measures, and Today's print (plan 231) |
-| `echo.js` | the word echo: its plan, its rhythm, its scatter, its clip and the word kept at its end (plans 232, 244) |
+| `echo.js` | the word echo: its plan, its rhythm, its scatter, its clip and the word kept at its end (plans 232, 246) |
 | `sound.js` | a clip's sound: the app's own events and recorded clips, mixed (plans 231, 232); one event alone for a long video (plan 233) |
 | `long.js` | the long videos: what each says, when, each frame, their page, and the studio's list of them (plan 233) |
 | `short.js` | a carousel as a short video: its timing, its swipes, its line and page (plan 233) |
-| `long/render.mjs` | a long video, its short or a carousel's short made: voiced, mixed, drawn and encoded (plan 233) |
+| `challenge.js` | the reading challenges: a comprehension text falling or read along, its timing on the voice, each frame, its page (plan 247) |
+| `long/render.mjs` | a long video, its short, a carousel's short or a reading challenge made: voiced, mixed, drawn and encoded (plans 233, 247) |
 | `studio.js` | the page: the pickers, the previews, the export |
 
 ## Running it

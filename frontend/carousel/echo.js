@@ -3,7 +3,7 @@
 // its kanji, its reading and its meaning on the app's review card, and
 // every time the reader says it again, its reading lands somewhere new
 // on the screen, any size, any tilt, until the screen is full of it.
-// Then the word is kept (plan 244, the owner's pick A): the readings
+// Then the word is kept (plan 246, the owner's pick A): the readings
 // fall back to a whisper, the card rises, and under it the ask and the
 // way to the app.
 // The word is a theme's pictured word (themes.json, written by
@@ -23,7 +23,7 @@ import { SITE, STRINGS, weldIf } from './strings.js'
 /** The clip: ten seconds of sayings at thirty frames; the card comes in
  *  by FIRST, when the word is first said, and GAP of silence follows each
  *  saying. AFTER the last one has been said, the word is kept for KEEP
- *  seconds (plan 244). */
+ *  seconds (plan 246). */
 export const ECHO = { seconds: 10, fps: 30, first: 0.6, gap: 0.3, rise: 0.5, pop: 0.18, after: 0.35, keep: 3.5 }
 // The keeping, in seconds from its start: the readings fade and the card
 // rises, the ask lands, its line, then the way to the app.
@@ -301,7 +301,7 @@ export function echoDeck(plan, fmt, opts = {}) {
       ctx.restore()
     })
   }
-  // The word kept (plan 244), `s` seconds in (null: kept): every saying
+  // The word kept (plan 246), `s` seconds in (null: kept): every saying
   // falls back under the ground, the card rises to the head of the frame
   // at five sixths of its size, and under it the ask, its line and the
   // site's address, each coming in after the one before.

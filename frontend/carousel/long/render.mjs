@@ -15,6 +15,10 @@
 //   --format short    the short: 9:16, under a minute (YouTube Shorts, Reels, TikTok)
 //   --carousel RECIPE a carousel of the studio as a short video, voiced: the
 //                     studio's "Copy the command" writes the recipe (short.js)
+//   --challenge ID    a reading challenge (plan 247, challenge.js): a
+//                     comprehension text, 9:16, over Today's print and its lake
+//   --style fall      ... its sentences falling (fall), or read along by the voice (along)
+//   --hour dusk       ... the print's hour: dawn, day, dusk or night
 //
 // Writes <name>.mp4, <name>.txt (the title, then the description with
 // its chapters and the voice's credit) and <name>.jpg (a thumbnail).
@@ -31,6 +35,7 @@ import { chromium } from 'playwright'
 import { SITE_ORIGIN } from '../../landing/config.mjs'
 import { FPS, TALL, WIDE, cueKey, describe, fitShort, longPlan, timeline } from '../long.js'
 import { fromRecipe, shortTimeline } from '../short.js'
+import { challengeCues, challengePage, challengePlan, challengeTimeline } from '../challenge.js'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const FRONT = resolve(HERE, '../..')
@@ -83,8 +88,11 @@ function voiceAll(cues) {
   writeFileSync(join(WORK, 'cues.json'), JSON.stringify(cues))
   const voiced = spawnSync(python, ['-m', 'scripts.long_video_audio', 'voice', join(WORK, 'cues.json'), '--cache', CACHE, '--out', join(WORK, 'durs.json')], { cwd: BACKEND, stdio: 'inherit' })
   if (voiced.status !== 0) log('some lines could not be voiced: they are timed by a guess and left unsaid')
-  const { durs } = JSON.parse(readFileSync(join(WORK, 'durs.json'), 'utf8'))
-  return c => durs[cueKey(c)]
+  const { durs, marks = {} } = JSON.parse(readFileSync(join(WORK, 'durs.json'), 'utf8'))
+  const dur = c => durs[cueKey(c)]
+  // A line read along is also known syllable by syllable (plan 247).
+  dur.marks = c => marks[cueKey(c)] || null
+  return dur
 }
 const site = lang === 'en' ? `${SITE_ORIGIN}/en` : SITE_ORIGIN
 const banks = {}
@@ -103,7 +111,27 @@ const canvasOf = size => page.evaluate(size => {
 }, size)
 
 let tl, slug, SIZE, pageText, thumbAt
-if (recipe) {
+if (args.challenge) {
+  // ── A reading challenge: the text over the hour's print, read along voiced ──
+  const plan = challengePlan(banks['comprehension.json'], String(args.challenge), { lang, style: args.style, hour: args.hour })
+  const cues = challengeCues(plan)
+  const dur = cues.length ? voiceAll(cues) : null
+  tl = challengeTimeline(plan, dur ? c => (dur(c) ? { dur: dur(c), marks: dur.marks(c) } : null) : null)
+  SIZE = TALL
+  slug = ['challenge', plan.id, plan.style, plan.hour, lang].join('-')
+  await fontsFor(JSON.stringify(plan))
+  await canvasOf(SIZE)
+  await page.evaluate(async ({ plan, tl }) => {
+    const C = await import('/carousel/challenge.js')
+    const A = await import('/carousel/app.js')
+    const P = await A.loadPrint(plan.hour, { base: '/' })
+    // Every frame drawn: something moves in each (a sentence's clock, a word lit).
+    window.__draw = t => { C.drawChallenge(window.__ctx, plan, tl, t, P); return t }
+  }, { plan, tl })
+  pageText = challengePage(plan, tl, site)
+  thumbAt = 1.6
+  log(`${pageText.title}: ${plan.sents.length} sentences, ${tl.seconds.toFixed(1)} s, ${tl.cues.length} lines voiced`)
+} else if (recipe) {
   // ── A carousel of the studio, standing, its line voiced ──
   const made = await page.evaluate(async st => {
     const S = await import('/carousel/short.js')
@@ -188,14 +216,23 @@ for (const key of keys) {
   else log(`no app sound named ${key}`)
 }
 writeFileSync(join(WORK, 'timeline.json'), JSON.stringify({ ...tl, seconds }))
-const mixed = spawnSync(python, ['-m', 'scripts.long_video_audio', 'mix', join(WORK, 'timeline.json'), '--cache', CACHE, '--sfx', join(WORK, 'sfx'), '--out', join(WORK, 'mix.wav')], { cwd: BACKEND, stdio: 'inherit' })
+// A recorded bed (a challenge's lake), as a WAV at the mix's rate.
+const bedArgs = []
+if (tl.bed?.src) {
+  const bedWav = join(WORK, 'bed.wav')
+  const conv = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', join(FRONT, tl.bed.src), '-ar', '48000', '-ac', '2', bedWav])
+  if (conv.status === 0) bedArgs.push('--bed', bedWav)
+  else log(`the bed ${tl.bed.src} could not be read: the music plays instead`)
+}
+const mixed = spawnSync(python, ['-m', 'scripts.long_video_audio', 'mix', join(WORK, 'timeline.json'), '--cache', CACHE, '--sfx', join(WORK, 'sfx'), '--out', join(WORK, 'mix.wav'), ...bedArgs], { cwd: BACKEND, stdio: 'inherit' })
 if (mixed.status !== 0) throw new Error('the mix failed')
 
 // ── YouTube's loudness, by one gain for the whole: a dynamic leveller would
 // lift the bed of music back up to the voice between two lines ──
 const probe = spawnSync('ffmpeg', ['-hide_banner', '-i', join(WORK, 'mix.wav'), '-af', 'loudnorm=I=-16:TP=-1.5:print_format=json', '-f', 'null', '-'], { encoding: 'utf8' })
 const loud = JSON.parse(probe.stderr.slice(probe.stderr.lastIndexOf('{')))
-const gain = Math.min(-16 - Number(loud.input_i), -1.5 - Number(loud.input_tp))
+// A challenge read in silence is kept calmer (its timeline says how loud).
+const gain = Math.min((tl.loudness ?? -16) - Number(loud.input_i), -1.5 - Number(loud.input_tp))
 log(`loudness ${loud.input_i} LUFS, peak ${loud.input_tp} dBTP: ${gain.toFixed(1)} dB`)
 
 // ── The frames, each still drawn once, into ffmpeg ──

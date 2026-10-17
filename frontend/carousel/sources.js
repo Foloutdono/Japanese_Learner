@@ -19,6 +19,7 @@ import {
 } from './quizzes.js'
 import { PROMO, STORIES, STORY_FILES, analysed, promoItems, promoPlan } from './promo.js'
 import { echoItems, echoPlan } from './echo.js'
+import { challengeItems } from './challenge.js'
 
 export { gloss, lineRomaji, readingMisses, seeded, shuffle, unpack }
 
@@ -47,6 +48,8 @@ export const SOURCES = [
   { id: 'echo', jp: '木霊', line: 'vocab', name: { en: 'Word echo', fr: 'Mot en écho' }, file: () => 'themes.json', noLevels: true },
   // The long videos (plan 233): a level's videos, drawn by long.js, made by long/render.mjs.
   { id: 'long', jp: '長編', line: 'exam', name: { en: 'Long video', fr: 'Vidéo longue' }, file: lv => `words-${lv}.json`, video: true },
+  // Plan 247: a comprehension text read as a 9:16 video, falling or read along (challenge.js).
+  { id: 'challenge', jp: '速読', line: 'rikai', name: { en: 'Reading challenge', fr: 'Défi lecture' }, file: () => 'comprehension.json', byLevel: true, video: true },
 ]
 export const sourceOf = id => SOURCES.find(s => s.id === id) ?? SOURCES[0]
 
@@ -925,6 +928,8 @@ export function itemsOf(sourceId, data, lang, filter) {
       return data.kana.filter(k => !filter || k.set === filter).map(k => ({ id: k.k, jp: k.k, sub: k.ro, tag: k.twin || '' }))
     case 'passage':
       return data.passages.map(P => ({ id: P.id, jp: P.title, sub: P.grammar.join('　'), tag: P.lv }))
+    case 'challenge':
+      return challengeItems(data, lang)
     case 'theme':
       // A post of a theme is drawn with four pictures at least.
       return Object.entries(data.themes).flatMap(([key, th]) => {

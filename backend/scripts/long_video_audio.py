@@ -27,7 +27,13 @@ recorded for.
 recipes by the page, one WAV a sound) on the timeline, under a bed of
 music this script plays itself: soft chords and a slow pluck, nothing
 recorded, so the video owes no one for it. The music steps back while a
-line is said.
+line is said. A reading challenge (plan 247, frontend/carousel/challenge.js)
+lies on the app's own lake instead, the ambiance Today plays (`--bed`).
+
+A line marked `marks` (a challenge read along) is also written down
+syllable by syllable: when each of the engine's morae starts in its
+clip, from the engine's own audio query, so the video lights each word
+as the voice reaches it.
 
 It needs the voice engine (VOICEVOX_URL, CLAUDE.md "Speech") for
 `voice`, numpy for `mix`, and no database. The licence's one condition
@@ -146,12 +152,30 @@ def read_wav(path: Path):
     return data.reshape(-1, ch), rate
 
 
+def mora_marks(query: dict, speed: float) -> list[dict]:
+    """When each mora of an audio query starts in its clip, in seconds:
+    the engine lays the lead-in silence, each mora's consonant and vowel
+    and each pause at its length, all divided by the speed (a pause is
+    marked `p`). Within a frame (about 11ms) of the clip it makes."""
+    t = float(query.get("prePhonemeLength", 0.1))
+    out = []
+    for phrase in query.get("accent_phrases", []):
+        for mora in phrase.get("moras", []):
+            out.append({"t": round(t / speed, 3), "k": mora.get("text", "")})
+            t += float(mora.get("consonant_length") or 0) + float(mora.get("vowel_length") or 0)
+        pause = phrase.get("pause_mora")
+        if pause:
+            out.append({"t": round(t / speed, 3), "k": "、", "p": 1})
+            t += float(pause.get("vowel_length") or 0)
+    return out
+
+
 def voice(cues_path: Path, cache: Path, out: Path) -> int:
     from study import voice_engine as engine
     cues = json.loads(cues_path.read_text(encoding="utf-8"))
     cache.mkdir(parents=True, exist_ok=True)
     rev = engine.VOICE_REV
-    durs, failed = {}, []
+    durs, marks, failed = {}, {}, []
     unique = {cue_key(c): c for c in cues}
     todo = [c for c in unique.values() if not (cache / clip_name(c, rev)).exists()]
     print(f"{len(unique)} line(s), {len(todo)} to voice (voice {rev}).")
@@ -172,9 +196,17 @@ def voice(cues_path: Path, cache: Path, out: Path) -> int:
             write_wav(path, pcm.frames, pcm.rate)
         with wave.open(str(path)) as w:
             durs[cue_key(cue)] = round(w.getnframes() / w.getframerate(), 3)
+        if cue.get("marks") and not kana:
+            slot = SLOTS.get(cue["who"], 0)
+            speed = engine.tempo_for_slot(slot) * (SLOW if cue.get("slow") else 1.0)
+            try:
+                query = engine._json(engine._request("POST", "/audio_query", params={"text": cue["text"], "speaker": engine.style_for_slot(slot)}), "/audio_query")
+                marks[cue_key(cue)] = mora_marks(query, speed)
+            except Exception as e:  # noqa: BLE001 -- the words are then lit in proportion
+                print(f"  {cue['text']}: no syllables ({type(e).__name__}: {e})", file=sys.stderr)
         if i % 50 == 0:
             print(f"  {i}/{len(unique)}")
-    out.write_text(json.dumps({"rev": rev, "durs": durs}, ensure_ascii=False, indent=0), encoding="utf-8")
+    out.write_text(json.dumps({"rev": rev, "durs": durs, "marks": marks}, ensure_ascii=False, indent=0), encoding="utf-8")
     print(f"wrote {out}: {len(durs)} line(s); {len(failed)} failed.")
     return 1 if failed else 0
 
@@ -253,7 +285,33 @@ def limited(x, block: int = 120, release: float = 0.08):
     return np.clip(out[:n], -CEILING, CEILING)
 
 
-def mix(tl_path: Path, cache: Path, sfx: Path, out: Path) -> int:
+# A recorded bed (the lake, plan 247) at this level, some 12dB under the
+# voice where it speaks; where nothing is said it carries the video.
+BED_RMS = 0.05
+
+
+def recorded_bed(path: Path, n: int):
+    """A WAV at RATE looped to `n` frames, stereo, levelled to BED_RMS,
+    opening and closing on a fade as the music does."""
+    import numpy as np
+    data, rate = read_wav(path)
+    if rate != RATE:
+        idx = np.arange(int(len(data) * RATE / rate)) * rate / RATE
+        data = np.stack([np.interp(idx, np.arange(len(data)), data[:, c]) for c in range(data.shape[1])], axis=1).astype(np.float32)
+    if data.shape[1] == 1:
+        data = np.repeat(data, 2, axis=1)
+    reps = -(-n // max(1, len(data)))
+    loop = np.tile(data, (reps, 1))[:n].astype(np.float32)
+    rms = float(np.sqrt(np.mean(loop ** 2))) or 1.0
+    loop *= BED_RMS / rms
+    fade = min(int(2.5 * RATE), n // 2)
+    ramp = np.linspace(0, 1, fade, dtype=np.float32)[:, None]
+    loop[:fade] *= ramp
+    loop[n - fade:] *= ramp[::-1]
+    return loop
+
+
+def mix(tl_path: Path, cache: Path, sfx: Path, out: Path, bed_path: Path | None = None) -> int:
     import numpy as np
 
     from study import voice_engine as engine
@@ -298,7 +356,10 @@ def mix(tl_path: Path, cache: Path, sfx: Path, out: Path) -> int:
     # carries the video: it rises, up to twice its level, still stepping
     # back under the voice.
     spoken = float(np.mean(np.abs(voice_track) > 0.02)) if n else 0.0
-    music = bed(n / RATE) * MUSIC * float(np.clip(0.12 / max(spoken, 0.06), 1.0, 2.0))
+    if bed_path:
+        music = recorded_bed(bed_path, n)
+    else:
+        music = bed(n / RATE) * MUSIC * float(np.clip(0.12 / max(spoken, 0.06), 1.0, 2.0))
     level = np.abs(voice_track)
     win = int(0.25 * RATE)
     run = np.concatenate([[0], np.cumsum(level, dtype=np.float64)])
@@ -306,9 +367,14 @@ def mix(tl_path: Path, cache: Path, sfx: Path, out: Path) -> int:
     lo, hi = np.clip(idx - win // 2, 0, n), np.clip(idx + win // 2, 0, n)
     follow = ((run[hi] - run[lo]) / win).astype(np.float32)
     duck = 1 - 0.55 * np.clip(follow / 0.05, 0, 1)
-    music *= duck
-    left = voice_track + music + fx[:, 0] * 0.5
-    right = voice_track + music + fx[:, 1] * 0.5
+    if music.ndim == 2:
+        music = music * duck[:, None]
+        left = voice_track + music[:, 0] + fx[:, 0] * 0.5
+        right = voice_track + music[:, 1] + fx[:, 1] * 0.5
+    else:
+        music *= duck
+        left = voice_track + music + fx[:, 0] * 0.5
+        right = voice_track + music + fx[:, 1] * 0.5
     stereo = np.stack([left, right], axis=1)
     # As loud as a video on YouTube: the voice where it speaks at LOUD, its
     # few peaks above the ceiling held down by a limiter rather than the
@@ -336,10 +402,11 @@ def main() -> int:
     m.add_argument("--cache", type=Path, required=True)
     m.add_argument("--sfx", type=Path, required=True)
     m.add_argument("--out", type=Path, required=True)
+    m.add_argument("--bed", type=Path, help="a recorded bed (WAV) in place of the music: the lake of a reading challenge")
     args = ap.parse_args()
     if args.step == "voice":
         return voice(args.cues, args.cache, args.out)
-    return mix(args.timeline, args.cache, args.sfx, args.out)
+    return mix(args.timeline, args.cache, args.sfx, args.out, args.bed)
 
 
 if __name__ == "__main__":

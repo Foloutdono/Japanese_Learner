@@ -159,6 +159,9 @@ body:not([data-mode="long"]) [data-long="only"] { display: none !important; }
 body[data-design="funnel"] [data-funnel="hide"] { display: none !important; }
 body:not([data-design="funnel"]) [data-funnel="only"] { display: none !important; }
 body[data-mode="long"] [data-long="hide"] { display: none !important; }
+/* The reading challenges (plan 247): a video, with its own controls. */
+body:not([data-video="challenge"]) [data-challenge="only"] { display: none !important; }
+body[data-video="challenge"] [data-challenge="hide"] { display: none !important; }
 .player canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
 .player__bar { display: flex; align-items: center; gap: 12px; }
 .player__bar input { flex: 1; min-width: 0; accent-color: var(--gold); }
@@ -194,7 +197,15 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
       <ul id="items" class="sentences"></ul>
     </div>
 
-    <div class="field" data-promo="only">
+    <div class="field" data-challenge="only">
+      <div class="label">How the text moves <span>a reading challenge</span></div>
+      <div class="seg" role="group" aria-label="How the text moves">
+        <button type="button" data-set="challengeStyle:fall">Falling lines 流れ</button>
+        <button type="button" data-set="challengeStyle:along">Read along 声</button>
+      </div>
+    </div>
+
+    <div class="field" id="hour-field" hidden>
       <div class="label">Today’s print <span>the hour it is drawn at</span></div>
       <div class="seg" role="group" aria-label="Hour">
         <button type="button" data-set="hour:dawn">Dawn 曙</button>
@@ -262,7 +273,7 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
       <div id="questions" class="chips" role="group" aria-label="Questions"></div>
     </div>
 
-    <div class="field" data-long="only">
+    <div class="field" data-long="only" data-challenge="hide">
       <div class="label">Format <span>YouTube, or a short for any feed</span></div>
       <div class="seg" role="group" aria-label="Video format">
         <button type="button" data-set="longFormat:long">16:9 video</button>
@@ -359,6 +370,7 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
       </div>
       <div class="export__actions">
         <button id="export-thumb" type="button" class="btn btn--metal" data-long="only">Download the thumbnail (.png)</button>
+        <button id="export-video" type="button" class="btn btn--metal" data-challenge="only">Download the video (.mp4, with the lake)</button>
         <button id="copy-command" type="button" class="btn" data-long="only">Copy the command</button>
         <button id="export" type="button" class="btn btn--metal" data-long="hide" disabled>Download <span id="export-name"></span> (.zip)</button>
         <button id="export-short" type="button" class="btn btn--metal" data-long="hide" hidden>Download as a short video (.mp4, 9:16)</button>
