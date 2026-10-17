@@ -1794,4 +1794,50 @@ describe('the reading challenges (plan 247)', () => {
     }
     expect(challengePage(challengePlan(data, 'n4-01', { lang: 'fr' }), challengeTimeline(challengePlan(data, 'n4-01', { lang: 'fr' })), 'x').title).toMatch(/^Tu arrives/)
   }))
+
+  // Last of the block: the strip it leaves behind is the stub's.
+  it('draws the scroll’s text once and lays it between pixels, at sixty frames, so it glides', () => withPath2D(() => {
+    const had = globalThis.OffscreenCanvas
+    const made = []
+    globalThis.OffscreenCanvas = class {
+      constructor(w, h) {
+        Object.assign(this, { width: w, height: h, d: drawn(), laid: [] })
+        this.d.ctx.drawImage = (img, x, y) => this.laid.push({ img, y })
+        made.push(this)
+      }
+      getContext() { return this.d.ctx }
+    }
+    try {
+      const pl = challengePlan(data, 'n3-02', { lang: 'fr' })
+      const tl = challengeTimeline(pl)
+      expect(tl.fps).toBe(60)
+      expect(challengeTimeline(challengePlan(data, 'n3-02', { style: 'along' })).fps).toBe(30)
+      const seg = tl.segs.find(s => s.key === 'reading')
+      const frameAt = t => {
+        const { ctx, at } = drawn()
+        const laid = []
+        ctx.drawImage = img => laid.push(img)
+        drawChallenge(ctx, pl, tl, t, null)
+        return { at, laid }
+      }
+      const t1 = seg.start + CHALLENGE.into + 10.004
+      const one = frameAt(t1)
+      const strip = made.find(c => c.height !== FORMATS.story.h)
+      const layer = made.find(c => c.height === FORMATS.story.h)
+      const written = strip.d.at.length
+      expect(written).toBeGreaterThan(0)
+      // The frame shows the layer; no line of the text is written on the frame itself.
+      expect(one.laid).toContain(layer)
+      expect(one.at.some(x => jp(x.t) && x.t !== pl.title)).toBe(false)
+      frameAt(t1 + 1 / 60)
+      // Written once, laid twice: a sixtieth of a second apart, less than a pixel, between pixels.
+      expect(strip.d.at.length).toBe(written)
+      const [a, b] = layer.laid.filter(x => x.img === strip).map(x => x.y)
+      expect(a - b).toBeGreaterThan(0.2)
+      expect(a - b).toBeLessThan(1.2)
+      expect(Number.isInteger(a) && Number.isInteger(b)).toBe(false)
+    } finally {
+      globalThis.OffscreenCanvas = had
+    }
+  }))
 })

@@ -821,12 +821,20 @@ over Today's print of the hour, in one of two ways:
   (`SCROLL`). It comes in with its first line at the reading line and
   moves at one speed, worked out from its own laid-out length, so the
   whole text passes that line at the pace a learner of its level reads
-  (`CPM`: 180 characters a minute at N5 up to 320 at N1), after a moment
+  (`CPM`: 150 characters a minute at N5 up to 265 at N1, a notch under
+  the first pace, which the owner found a little quick), after a moment
   to come in (`CH.into`) and before the last line's read (`CH.out`); the
   counter at the head says which sentence is there. The reference also
   leaves a space between phrases; the bank's words are not cut surely
   enough for that (としょかん written in kana comes out as はと・しょ・か・ん),
   so the scroll leaves none.
+
+  It glides: text written straight on a frame is set on whole pixels, so
+  a line climbing under a pixel a frame stood still, then jumped, and
+  shook. The scroll writes its text once on a strip of its own and lays
+  the strip between pixels each frame, at 60 frames a second
+  (`tl.fps`; read along keeps 30), and the render passes its frames to
+  the encoder near-lossless, so their edges do not shimmer as they climb.
 - **Read along** (`along`, 声): the text stands on one panel while the
   app's reader says it (slowed at N5 and N4, as a card's slow line), each
   word gold once said and underlined while it is said; the panel turns

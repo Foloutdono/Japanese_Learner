@@ -767,7 +767,7 @@ async function exportChallenge() {
   const { tl, P } = ch
   await encodeClip({
     btn: '#export-video', name: `tsuji-challenge-${safeName(ch.id)}-${current.plan.hour}-${state.lang}`, said: 'reading challenge',
-    fmt: FORMATS.story, fps: 30, seconds: tl.seconds,
+    fmt: FORMATS.story, fps: tl.fps, seconds: tl.seconds,
     // The track under it all, looped if it is shorter, coming in and going out.
     sounds: [...(music ? [{ at: 0, src: music.url, gain: 0.7, loop: true, fade: 2.5 }] : []), ...tl.sfx],
     frame: (ctx, t) => { drawChallenge(ctx, current.plan, tl, t, P) },

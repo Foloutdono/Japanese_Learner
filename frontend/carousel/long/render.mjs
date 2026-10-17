@@ -243,26 +243,31 @@ const gain = Math.min((tl.loudness ?? -16) - Number(loud.input_i), -1.5 - Number
 log(`loudness ${loud.input_i} LUFS, peak ${loud.input_tp} dBTP: ${gain.toFixed(1)} dB`)
 
 // ── The frames, each still drawn once, into ffmpeg ──
+// A timeline may set its own rate (a challenge's scroll glides at sixty)
+// and a moving text is passed near-lossless, or each frame's JPEG blocks
+// fall on its letters differently and their edges shimmer as they climb.
+const fps = tl.fps || FPS
+const quality = args.challenge ? 0.98 : 0.93
 const mp4 = join(OUT, `${slug}.mp4`)
-const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-', '-i', join(WORK, 'mix.wav'),
-  '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-r', String(FPS), '-af', `volume=${gain.toFixed(2)}dB`, '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', '-shortest', mp4], { stdio: ['pipe', 'inherit', 'inherit'] })
+const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(fps), '-c:v', 'mjpeg', '-i', '-', '-i', join(WORK, 'mix.wav'),
+  '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-r', String(fps), '-af', `volume=${gain.toFixed(2)}dB`, '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', '-shortest', mp4], { stdio: ['pipe', 'inherit', 'inherit'] })
 const write = buf => new Promise(r => (ff.stdin.write(buf) ? r() : ff.stdin.once('drain', r)))
-const frames = Math.round(seconds * FPS)
+const frames = Math.round(seconds * fps)
 let last = null
 let drawn = 0
 const BATCH = 60
 for (let f = 0; f < frames; f += BATCH) {
-  const out = await page.evaluate(({ from, to, fps, prev }) => {
+  const out = await page.evaluate(({ from, to, fps, prev, quality }) => {
     const res = []
     let key = prev
     for (let i = from; i < to; i++) {
       const k = window.__draw(i / fps)
       if (k === key) { res.push(null); continue }
       key = k
-      res.push(window.__canvas.toDataURL('image/jpeg', 0.93))
+      res.push(window.__canvas.toDataURL('image/jpeg', quality))
     }
     return { res, key }
-  }, { from: f, to: Math.min(frames, f + BATCH), fps: FPS, prev: last?.key ?? null })
+  }, { from: f, to: Math.min(frames, f + BATCH), fps, prev: last?.key ?? null, quality })
   for (const url of out.res) {
     if (url) { last = { buf: Buffer.from(url.split(',')[1], 'base64'), key: out.key }; drawn++ }
     await write(last.buf)

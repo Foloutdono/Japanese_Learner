@@ -23,15 +23,16 @@ import { SITE } from './strings.js'
 export const STYLES = ['scroll', 'along']
 export const HOURS = ['dawn', 'day', 'dusk', 'night']
 // A learner's pace at each level, in characters a minute: the scroll
-// carries the text past the reading line at this pace.
-export const CPM = { N5: 180, N4: 200, N3: 240, N2: 280, N1: 320 }
+// carries the text past the reading line at this pace (a notch under
+// the first one, 180 to 320, which the owner found a little quick).
+export const CPM = { N5: 150, N4: 165, N3: 200, N2: 230, N1: 265 }
 // Readings over the kanji where a learner of the level still needs them.
 const RUBY = new Set(['N5', 'N4', 'N3'])
 // The read-along voice slows for the first two levels, as a card's slow line does.
 const SLOW = new Set(['N5', 'N4'])
 // The video's beats, in seconds.
 export const CH = {
-  fps: 30, hook: 3.2, words: 5.5,
+  hook: 3.2, words: 5.5,
   // scroll: the text comes in for INTO seconds before it moves, and the
   // last line is still read for OUT seconds after it passes the reading line.
   into: 1, out: 4,
@@ -198,6 +199,8 @@ export function challengeTimeline(plan, voiced = null) {
   const reading = +(segs.find(s => s.key === 'reading').dur).toFixed(1)
   return {
     seconds: +t.toFixed(3), segs, lines, cues, sfx, reading,
+    // The scroll at sixty frames a second, so its slow climb glides; the one read along at thirty.
+    fps: plan.style === 'scroll' ? 60 : 30,
     // The owner's music under it, if any: a video read in silence is kept calm.
     bed: plan.music ? { src: plan.music } : null, loudness: plan.music || plan.style === 'along' ? -16 : -20,
     chapters: segs.map(s => ({ at: s.start, title: s.key })),
@@ -375,6 +378,41 @@ function scrollRows(ctx, plan) {
   rowsOf.set(key, out)
   return out
 }
+// The text is drawn once, on a strip of its own, and each frame lays the
+// strip where the text has come to: text drawn straight on the frame is
+// set on whole pixels, so a line climbing 1.5 px a frame steps by one
+// pixel, then two, and shakes; an image is laid between pixels, and
+// glides. Where there is no canvas to draw it on (the tests), it is drawn
+// line by line, in the same places.
+const canvasOf = (w, h) => (typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(w, h)
+  : typeof document !== 'undefined' ? Object.assign(document.createElement('canvas'), { width: w, height: h }) : null)
+const BLEED = SP[6]
+let strip = null
+let layer = null
+function stripOf(ctx, plan, rows, length, T) {
+  const key = `${plan.id}|${plan.lang}`
+  if (strip?.key === key) return strip.c
+  const c = canvasOf(Math.ceil(fr.w + BLEED * 2), Math.ceil(length + BLEED * 2))
+  if (!c) return null
+  const x = c.getContext('2d')
+  let y = BLEED
+  for (const row of rows) {
+    drawSentence(x, row.L, c.width / 2, y, 'center', () => ({ ink: T.ink, rule: null, ruby: T.ruby }))
+    y += row.h
+  }
+  strip = { key, c }
+  return c
+}
+// Faint where the text comes up from the foot and where it goes under the masthead.
+function fades(x) {
+  const g = x.createLinearGradient(0, SCROLL.head, 0, SCROLL.foot + SCROLL.fade)
+  const at = y => (y - SCROLL.head) / (SCROLL.foot + SCROLL.fade - SCROLL.head)
+  g.addColorStop(0, 'rgba(0,0,0,0)')
+  g.addColorStop(at(SCROLL.head + SCROLL.fade), 'rgba(0,0,0,1)')
+  g.addColorStop(at(SCROLL.foot), 'rgba(0,0,0,1)')
+  g.addColorStop(1, 'rgba(0,0,0,0)')
+  return g
+}
 function scroll(ctx, plan, tl, t, P) {
   const T = LOOK.paper
   backdrop(ctx, P, T, 0.5, plan.hour)
@@ -385,20 +423,42 @@ function scroll(ctx, plan, tl, t, P) {
   const speed = length / (plan.chars / (plan.cpm / 60))
   const off = speed * Math.max(0, t - seg.start - CH.into)
   const k = ease((t - seg.start) / 0.6)
-  let y = SCROLL.read - off
+  const top = SCROLL.read - off
+  // The sentence at the reading line: the last one to have reached it.
   let reading = 0
+  let y = top
   for (const row of rows) {
-    const top = y
+    if (y <= SCROLL.read + 1) reading = row.i
     y += row.h
-    // The sentence at the reading line: the last one to have reached it.
-    if (top <= SCROLL.read + 1) reading = row.i
-    const mid = top + row.L.lineH / 2
-    const a = Math.min(1, (mid - SCROLL.head) / SCROLL.fade, (SCROLL.foot + SCROLL.fade - mid) / SCROLL.fade)
-    if (a <= 0.01) continue
+  }
+  const c = stripOf(ctx, plan, rows, length, T)
+  if (!layer && c) layer = canvasOf(FMT.w, FMT.h)
+  if (c && layer) {
+    // The strip on a layer the frame's size, faded at its head and foot, then laid on the frame.
+    const x = layer.getContext('2d')
+    x.globalCompositeOperation = 'source-over'
+    x.clearRect(0, 0, FMT.w, FMT.h)
+    x.drawImage(c, fr.cx - c.width / 2, top - BLEED)
+    x.globalCompositeOperation = 'destination-in'
+    x.fillStyle = fades(x)
+    x.fillRect(0, 0, FMT.w, FMT.h)
     ctx.save()
-    ctx.globalAlpha *= a * k
-    drawSentence(ctx, row.L, fr.cx, top, 'center', () => ({ ink: T.ink, rule: null, ruby: T.ruby }))
+    ctx.globalAlpha *= k
+    ctx.drawImage(layer, 0, 0)
     ctx.restore()
+  } else {
+    y = top
+    for (const row of rows) {
+      const mid = y + row.L.lineH / 2
+      const a = Math.min(1, (mid - SCROLL.head) / SCROLL.fade, (SCROLL.foot + SCROLL.fade - mid) / SCROLL.fade)
+      if (a > 0.01) {
+        ctx.save()
+        ctx.globalAlpha *= a * k
+        drawSentence(ctx, row.L, fr.cx, y, 'center', () => ({ ink: T.ink, rule: null, ruby: T.ruby }))
+        ctx.restore()
+      }
+      y += row.h
+    }
   }
   chip(ctx, T, `JLPT ${plan.lv} · ${reading + 1} / ${plan.sents.length}`, fr.right, fr.y + 6, { align: 'right' })
 }
