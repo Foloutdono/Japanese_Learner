@@ -434,6 +434,14 @@ export default function AnalyzerScreen({ session }) {
       if (grab.manual && grab.asr) {
         try { timing = transcriptXmlToVtt(grab.asr) } catch { /* the words go estimated */ }
       }
+      // The video's own translation, where its makers wrote one (plan
+      // 238): what is printed under the lines, never the lines.
+      const translations = {}
+      for (const [lang, xml] of Object.entries(grab.translations ?? {})) {
+        try {
+          translations[lang] = new File([transcriptXmlToVtt(xml)], `${grab.videoId}.${lang}.vtt`, { type: 'text/vtt' })
+        } catch { /* the model translates its lines instead */ }
+      }
       const url = `https://youtu.be/${grab.videoId}`
       rememberGrabUsed()
       setGrabFlag(true)
@@ -442,7 +450,7 @@ export default function AnalyzerScreen({ session }) {
       clearFocus()
       analyzer.startVideoFromFile(
         new File([vtt], `${grab.videoId}.ja.vtt`, { type: 'text/vtt' }),
-        { url, timing: timing && new File([timing], `${grab.videoId}.ja-asr.vtt`, { type: 'text/vtt' }) },
+        { url, timing: timing && new File([timing], `${grab.videoId}.ja-asr.vtt`, { type: 'text/vtt' }), translations },
       )
     })
     return () => { cancelled = true }

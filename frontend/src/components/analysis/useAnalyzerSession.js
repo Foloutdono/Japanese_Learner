@@ -309,7 +309,7 @@ export function useAnalyzerSession(session) {
     }
   }
 
-  async function startVideoFromFile(file, { url, start, end, timing }) {
+  async function startVideoFromFile(file, { url, start, end, timing, translations }) {
     if (!file) return
     countUse('analyzer', 'video')
     const run = beginRun()
@@ -319,6 +319,11 @@ export function useAnalyzerSession(session) {
       // The grab's recognised track, the clock the lines' words are
       // read out on (backend/study/word_timing.py). Never the lines.
       if (timing) formData.append('timing', timing)
+      // The video's own translation, {lang: file} (plan 238): what the
+      // server prints under the lines it lines up with. Never the lines.
+      for (const [lang, track] of Object.entries(translations ?? {})) {
+        formData.append(`translation_${lang}`, track)
+      }
       // Same rule as the JSON ingest: an absent bound is absent, not 0.
       if (start != null) formData.append('start', String(start))
       if (end != null) formData.append('end', String(end))

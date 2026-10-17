@@ -133,7 +133,9 @@ FEATURES = {
         "blocks; a typed Passage is a block or two. In: a ~350-token system block (stable, "
         "cached) and 20 lines with their context. Out: 20 short subtitles "
         "and their keys. Kept on the session by the line's text, so a "
-        "chorus and a second viewing cost nothing. "
+        "chorus and a second viewing cost nothing, and a video whose makers "
+        "wrote a French or English track asks only for the lines it left "
+        "(plan 238): the 30 is an upper bound. "
         "LINE_TRANSLATION_DAILY_LIMIT caps it at 60 blocks/day (1,200 "
         "lines), which bounds the abuse row.",
     ),

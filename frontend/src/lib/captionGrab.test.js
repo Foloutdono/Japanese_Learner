@@ -88,12 +88,32 @@ describe('transcriptXmlToVtt', () => {
 describe('the grab hash codec', () => {
   it('round-trips videoId and both tracks through encode/decode', async () => {
     const payload = await encodeGrabPayload('UQecj-5Tiqw', { manual: SAMPLE_XML, asr: '<p t="0">x</p>' })
-    expect(payload.startsWith('v2.')).toBe(true)
+    expect(payload.startsWith('v3.')).toBe(true)
     const grab = await decodeGrabHash(`#grab=${payload}`)
     expect(grab).not.toBeNull()
     expect(grab.videoId).toBe('UQecj-5Tiqw')
     expect(grab.manual).toBe(SAMPLE_XML)
     expect(grab.asr).toBe('<p t="0">x</p>')
+    expect(grab.translations).toEqual({})
+  })
+
+  // Plan 238: the video's own translation rides beside the Japanese,
+  // in the languages the app is read in and no other.
+  it('carries the video’s own translations, and only the app’s languages', async () => {
+    const payload = await encodeGrabPayload('UQecj-5Tiqw', {
+      manual: SAMPLE_XML, translations: { fr: '<p t="0">Bonjour</p>', de: '<p t="0">Hallo</p>', en: '' },
+    })
+    const grab = await decodeGrabHash(`#grab=${payload}`)
+    expect(grab.translations).toEqual({ fr: '<p t="0">Bonjour</p>' })
+  })
+
+  it('still reads a v2 hash, a bookmark made before the translations came', async () => {
+    let bin = ''
+    new TextEncoder().encode(JSON.stringify({ m: SAMPLE_XML, a: null })).forEach(b => { bin += String.fromCharCode(b) })
+    const b64 = btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+    const grab = await decodeGrabHash(`#grab=v2.r.UQecj-5Tiqw.${b64}`)
+    expect(grab.manual).toBe(SAMPLE_XML)
+    expect(grab.translations).toEqual({})
   })
 
   it('carries a track missing on either side as null, and refuses none at all', async () => {
@@ -149,7 +169,12 @@ describe('buildBookmarklet', () => {
     expect(src).toContain("languageCode==='ja'&&t.kind!=='asr'")
     expect(src).toContain("languageCode==='ja'&&t.kind==='asr'")
     expect(src).toContain("'&fmt=srv3'")
-    expect(src).toContain('#grab=v2.')
+    // And the video's own translation, hand-written, in the app's two
+    // languages (plan 238).
+    expect(src).toContain('["fr","en"]')
+    expect(src).toContain("t.kind!=='asr'&&(t.languageCode===L")
+    expect(src).toContain('t:tr')
+    expect(src).toContain('#grab=v3.')
   })
 
   // On youtube.com the bookmark has no app to ask, so it says what it

@@ -263,7 +263,8 @@ def test_oversized_upload_is_refused_before_the_form_is_parsed(client, monkeypat
         raise AssertionError("an oversized body reached the multipart parser")
 
     monkeypatch.setattr(Request, "form", _parsed)
-    huge = b"1\n00:00:01,000 --> 00:00:02,000\nx\n" * 100_000
+    # Past the four files an upload may carry (plan 238), not just one.
+    huge = b"1\n00:00:01,000 --> 00:00:02,000\nx\n" * (video_module._MAX_UPLOAD_FILES * 40_000)
     response = client.post(
         "/api/video/session",
         files={"file": ("huge.srt", huge, "text/plain")},
@@ -342,7 +343,7 @@ def test_a_bare_url_becomes_a_session_when_a_proxy_is_configured(client, monkeyp
     session, indistinguishable downstream from an uploaded file."""
     _a_proxy(monkeypatch)
 
-    def _fake_fetch(video_id):
+    def _fake_fetch(video_id, translations=None):
         assert video_id == "dQw4w9WgXcQ"
         return [
             {"start": 1.0, "end": 4.0, "text": "私は学生です。"},
@@ -375,7 +376,7 @@ def test_a_failed_fetch_does_not_call_the_learner_s_subtitles_broken(client, mon
 
     import study.captions as captions_module
 
-    def _blocked(video_id):
+    def _blocked(video_id, translations=None):
         raise captions_module.CaptionFetchError(
             "This video has no Japanese subtitles. Try another video, "
             "or add a subtitle file yourself.",
@@ -405,7 +406,7 @@ def test_the_daily_cap_refuses_instead_of_spending(client, monkeypatch):
     _a_proxy(monkeypatch)
     monkeypatch.setattr(video_module, "_FETCH_DAILY_CAP_PER_USER", 0)
 
-    def _must_not_run(video_id):  # pragma: no cover - asserts it isn't reached
+    def _must_not_run(video_id, translations=None):  # pragma: no cover - asserts it isn't reached
         raise AssertionError("a capped request still spent a fetch")
 
     monkeypatch.setattr(video_module, "fetch_youtube_track", _must_not_run)
@@ -428,7 +429,7 @@ def test_the_app_wide_cap_is_its_own_refusal(client, monkeypatch):
     # Out of the way, so a test database many runs old (the count is
     # by day, from the rows) cannot answer with the learner's own cap.
     monkeypatch.setattr(video_module, "_FETCH_DAILY_CAP_PER_USER", 10**6)
-    monkeypatch.setattr(video_module, "fetch_youtube_track", lambda video_id: [])
+    monkeypatch.setattr(video_module, "fetch_youtube_track", lambda video_id, translations=None: [])
 
     response = client.post(
         "/api/video/session", json={"url": "https://youtu.be/dQw4w9WgXcQ"},
