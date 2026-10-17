@@ -168,6 +168,10 @@ describe('a whole scene on a phone (plan 221)', () => {
     tiles.forEach(onScreen)
     // And the line they answer is the one in view.
     inTalk(document.querySelector('.kaiwa-talk > .tour-line:last-child'))
+    // Clear of the floor, by the stage's gutter: flush on it, the last
+    // tile read as cut off under the floor.
+    const last = [...document.querySelectorAll('.kaiwa-reply')].at(-1).getBoundingClientRect()
+    expect(document.querySelector('.run-floor').getBoundingClientRect().top - last.bottom).toBeGreaterThanOrEqual(16)
     screen.unmount()
   })
 

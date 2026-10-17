@@ -33440,6 +33440,11 @@ button.brd-stn { cursor: pointer; }
   flex-direction: column;
   gap: var(--sp-3);
 }
+/* On the stage frame the stage ends on the floor with no padding of its
+   own (a docked foot carries its gutter, :root[data-chrome="stage"]
+   .stage), so the tiles keep the gutter themselves: flush on the floor,
+   the last one read as cut off under it. */
+.stage--talk > .kaiwa-replies { margin-bottom: var(--sp-5); }
 .kaiwa-reply {
   display: flex;
   align-items: center;
