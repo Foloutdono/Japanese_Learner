@@ -24,7 +24,8 @@ import { MODES, runPath } from '../domain/conversation'
 //                below is ridden, so a control about the whole answer,
 //                edge to edge at the console's head (DESIGN.md, "A
 //                control that applies to the whole answer is a BAND");
-//                under it, one line saying what that way asks
+//                no line under the console says what it asks: the
+//                band's word does, and the run's brief says it whole
 //   the chips    the five grades, the one the scenarios are drawn from;
 //                the learner's own grade first, the way every station
 //                opens on it (ADR 0005: a landmark, never a lock)
@@ -88,7 +89,6 @@ export default function ConversationStation({ session }) {
           </Chips>
         </ConsoleTop>
       </Console>
-      <p className="kaiwa-how">{t.cvsHow[mode]}</p>
 
       {failed && (
         <Empty tone="error" message={t.cvsFetchError} action={{ label: t.retry, onClick: () => { setFailed(false); setAttempt(n => n + 1) } }} />

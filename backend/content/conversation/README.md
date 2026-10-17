@@ -39,6 +39,7 @@ A scenario is ridden three ways, all from the same turns:
   "title": {"en": "Lunch at the konbini", "fr": "Le déjeuner à la supérette"},
   "situation": {"en": "…", "fr": "…"},  // where you are, who speaks to you, why: two short sentences at most
   "goal": {"en": "…", "fr": "…"},       // the errand, one sentence: what the free talk is for
+  "steps": [{"en": "…", "fr": "…"}],   // the errand cut into steps: two to five, the learner's mission (plan 237)
   "them": {"en": "Clerk", "fr": "Vendeur"},  // who speaks to you, as a role
   "register": "polite",                 // how the LEARNER speaks here: casual | polite | formal
   "turns": [                            // four to seven
@@ -65,7 +66,8 @@ A scenario is ridden three ways, all from the same turns:
 | `kana` | the same line with every kanji spelled in its reading **in this sentence**: hiragana for what is written in kanji, katakana left as katakana, every other character of `jp` (kana, 、 。 ？ ！ ー) carried over unchanged and in order. It is what the furigana is built from, so it is the reading the app teaches: 一人 is ひとり, 今日 is きょう, 何 is なん before で／です and なに elsewhere. |
 | `romaji` | on `me` and each `alt`, and nowhere else: the line as it is SAID, word-spaced, the particles by sound (は wa, へ e, を o), long vowels as the kana writes them (おねがい onegai, どう dou, ラーメン raamen). Checked against `kana`. The romanizer the check runs (`study/romaji`) does not know every loan sound — ティ comes out `tei` and ジェ `jie` — so keep those out of the learner's lines (the clerk may say 「ティーシャツ」; the learner answers 「はい、そうです」). |
 | `en`, `fr` | every line's translation, both languages, natural rather than word for word. The French addresses the learner as « tu » and the people in the scene as they would address each other (« vous » to a clerk). |
-| `situation`, `goal`, `title` | in the learner's language only: no Japanese in them. |
+| `situation`, `goal`, `steps`, `title` | in the learner's language only: no Japanese in them. |
+| `steps` | the `goal` cut into what the learner does, two to five, in the order the turns do it: a short imperative each (« Prends des baguettes », "Take chopsticks"), 44 characters at most in either language. Printed on the brief's ticket and in the run's stub (plan 237), so a step names something one of the learner's replies does, never something only the other person says. The `goal` stays the sentence the free talk's model reads. |
 | `them` | a role, not a name: Clerk, Station attendant, Classmate. |
 | `register` | how the learner should speak to `them`: `polite` (です／ます) almost everywhere, `casual` with a friend, `formal` (敬語) at an interview, with a client, with a boss. Every `me` is in that register. |
 | `turns` | four to seven. Each `them` line is something said TO the learner that wants an answer — a question, an offer, a request, news that needs a reaction — and the turns make one plausible exchange, start to end. |

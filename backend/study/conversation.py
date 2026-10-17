@@ -45,6 +45,11 @@ REGISTERS = ("casual", "polite", "formal")
 BANK_DIR = Path(__file__).resolve().parent.parent / "content" / "conversation"
 
 MIN_TURNS, MAX_TURNS = 4, 7
+# The mission as the learner ticks it off (plan 237): the goal's errand
+# cut into short steps, printed on the brief's ticket and in the run's
+# stub. A step is a line on a phone, never a sentence.
+MIN_STEPS, MAX_STEPS = 2, 5
+MAX_STEP = 44
 WRONG = 2
 MAX_ID = 40
 _ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -75,7 +80,7 @@ _LATIN_OR_DIGIT = re.compile(r"[A-Za-z0-9０-９Ａ-Ｚａ-ｚ]")
 
 # The keys each object may carry, so a typo (`wrongs`, `romanji`) is a
 # problem rather than a field silently never read.
-_SCENARIO_KEYS = {"id", "place", "title", "situation", "goal", "them", "register", "turns", "close"}
+_SCENARIO_KEYS = {"id", "place", "title", "situation", "goal", "steps", "them", "register", "turns", "close"}
 _TURN_KEYS = {"them", "me", "wrong"}
 _LINE_KEYS = {"jp", "kana", "en", "fr"}
 _ME_KEYS = _LINE_KEYS | {"romaji", "note", "alt"}
@@ -138,6 +143,21 @@ def _pair_problems(pair, where: str, *, japanese: bool = True) -> list[str]:
             out.append(f"{where}: no {lang}")
         elif not japanese and _JAPANESE.search(value):
             out.append(f"{where}: Japanese in the {lang} (the learner's language only)")
+    return out
+
+
+def _steps_problems(steps, where: str) -> list[str]:
+    if not isinstance(steps, list) or not MIN_STEPS <= len(steps) <= MAX_STEPS:
+        return [f"{where}: wants {MIN_STEPS} to {MAX_STEPS} steps"]
+    out = []
+    for n, step in enumerate(steps, 1):
+        found = _pair_problems(step, f"{where} step {n}", japanese=False)
+        if isinstance(step, dict):
+            found += [f"{where} step {n}: unknown key {k!r}" for k in sorted(set(step) - set(LANGS))]
+        if not found:
+            found = [f"{where} step {n}: the {lang} runs past {MAX_STEP} characters"
+                     for lang in LANGS if len(step[lang]) > MAX_STEP]
+        out += found
     return out
 
 
@@ -276,6 +296,7 @@ def problems() -> list[str]:
             found += _line_problems(row.get("place"), f"{where} place", level, keys=_LINE_KEYS, ends=False)
             for key in ("title", "situation", "goal", "them"):
                 found += _pair_problems(row.get(key), f"{where} {key}", japanese=False)
+            found += _steps_problems(row.get("steps"), where)
             if row.get("register") not in REGISTERS:
                 found.append(f"{where}: register must be one of {', '.join(REGISTERS)}")
             turns = row.get("turns")
@@ -340,6 +361,7 @@ def _head(level: str, row: dict, lang: str) -> dict:
         "title": text(row["title"], lang),
         "situation": text(row["situation"], lang),
         "goal": text(row["goal"], lang),
+        "steps": [text(step, lang) for step in row["steps"]],
         "them": text(row["them"], lang),
         "register": row["register"],
     }

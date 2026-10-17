@@ -157,7 +157,7 @@ export async function carouselShort(st, fetchJson) {
   const figures = (await fetchJson('index.json').catch(() => null))?.figures
   const opts = { ...st, figures }
   const pl = sourcePlan(st.source, data, st.id, opts, deps)
-  // At the margins the studio chose: TikTok's, Instagram's or none (plan 237).
+  // At the margins the studio chose: TikTok's, Instagram's or none (plan 239).
   const slides = deck(st.type, pl, formatOf('story', st.fit), opts)
   return { pl, slides }
 }

@@ -139,7 +139,7 @@ const silent = row => row.k === 'punct' || /^[＿_]+$/.test(row.t)
  *  grammar video takes a `point`. */
 export function longPlan(kind, banks, opts0 = {}) {
   const pl = planOf(kind, banks, opts0)
-  // A short stands in a feed: TikTok's, Instagram's or none (plan 237).
+  // A short stands in a feed: TikTok's, Instagram's or none (plan 239).
   return opts0.format === 'short' ? { ...shorten(pl), fit: opts0.fit || 'tiktok' } : pl
 }
 
@@ -1371,7 +1371,7 @@ const TH = TALL.h
 const TX = TALL.safe.l
 const TWIDE = TW - TALL.safe.l - TALL.safe.r
 
-/** Where a short's parts stand (plan 237): inside TikTok's video feed
+/** Where a short's parts stand (plan 239): inside TikTok's video feed
  *  (TALL.safe), or Instagram's box or the normal margins (draw.js
  *  formatOf), into which the TikTok short is moved whole, scaled to fit
  *  and centred: the same picture, Instagram's a little smaller. */

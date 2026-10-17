@@ -48,7 +48,7 @@ export const FORMATS = {
 // it (an Instagram post, a site, a message), on either ratio. The margins
 // are the post's own before plan 232 fitted it to TikTok.
 const NORMAL = { t: 104, r: 92, b: 112, l: 92 }
-// Instagram's margins (plan 237), measured on a reel in its feed: the
+// Instagram's margins (plan 239), measured on a reel in its feed: the
 // feed shows a 9:16 post's middle 4:5 (1080 × 1350, 285 cut at the top
 // and the foot) with, on the web, the author's header laid over that
 // crop's top 110 and its sound switch at the crop's corner; full
@@ -75,7 +75,7 @@ export const FEED_HUD = {
   pills: [{ x: 160, y: 213, w: 862, h: 104 }, { x: 921, y: 397, w: 113, h: 60 }],
   dots: [{ x: 995, y: 1180, r: 58 }, { x: 995, y: 1335, r: 46 }, { x: 995, y: 1500, r: 44 }, { x: 995, y: 1665, r: 40 }, { x: 100, y: 1612, r: 64 }],
 }
-/** Instagram's over a 9:16 post in its feed (plan 237): what the 4:5
+/** Instagram's over a 9:16 post in its feed (plan 239): what the 4:5
  *  crop cuts, the author's header over the crop (their picture, name,
  *  the reel's progress, its sound) and the sound switch at its corner. */
 export const INSTAGRAM_HUD = {

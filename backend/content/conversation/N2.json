@@ -11,6 +11,13 @@
       "en": "Get through the interview: introduce yourself, say why you chose this café, when you can work and what experience you have, and ask a question of your own.",
       "fr": "Passe l'entretien : présente-toi, dis pourquoi tu as choisi ce café, quand tu peux travailler et quelle expérience tu as, et pose une question à ton tour."
     },
+    "steps": [
+      {"en": "Introduce yourself", "fr": "Présente-toi"},
+      {"en": "Say why this café", "fr": "Dis pourquoi ce café"},
+      {"en": "Say when you can work", "fr": "Dis quand tu peux travailler"},
+      {"en": "Describe your experience", "fr": "Décris ton expérience"},
+      {"en": "Ask a question of your own", "fr": "Pose une question à ton tour"}
+    ],
     "them": {"en": "Café manager", "fr": "Gérant du café"},
     "register": "formal",
     "turns": [
@@ -292,6 +299,12 @@
       "en": "Ask your manager for two days of paid leave, give the reason and arrange the handover of your work.",
       "fr": "Demande deux jours de congés payés à ton responsable, donne la raison et organise la passation de ton travail."
     },
+    "steps": [
+      {"en": "Ask for two days of leave", "fr": "Demande deux jours de congé"},
+      {"en": "Give the dates", "fr": "Donne les dates"},
+      {"en": "Give the reason", "fr": "Donne la raison"},
+      {"en": "Arrange the handover", "fr": "Organise la passation"}
+    ],
     "them": {"en": "Manager", "fr": "Responsable"},
     "register": "formal",
     "turns": [
@@ -535,6 +548,12 @@
       "en": "Explain the fault, answer the clerk's questions and get the headphones exchanged for a new pair.",
       "fr": "Explique la panne, réponds aux questions de l'employé et fais échanger le casque contre un neuf."
     },
+    "steps": [
+      {"en": "Explain the fault", "fr": "Explique la panne"},
+      {"en": "Show the receipt", "fr": "Montre le ticket de caisse"},
+      {"en": "Say when it broke", "fr": "Dis quand c'est arrivé"},
+      {"en": "Ask for an exchange", "fr": "Demande un échange"}
+    ],
     "them": {"en": "Customer service", "fr": "Service client"},
     "register": "polite",
     "turns": [
@@ -819,6 +838,12 @@
       "en": "Introduce yourself and ask your neighbour, politely, to keep the noise down after eleven at night.",
       "fr": "Présente-toi et demande poliment à ton voisin de faire moins de bruit après vingt-trois heures."
     },
+    "steps": [
+      {"en": "Introduce yourself", "fr": "Présente-toi"},
+      {"en": "Say what you hear", "fr": "Dis ce que tu entends"},
+      {"en": "Say until what time", "fr": "Dis jusqu'à quelle heure"},
+      {"en": "Ask for quiet after eleven", "fr": "Demande le calme après vingt-trois heures"}
+    ],
     "them": {"en": "Neighbour", "fr": "Voisin"},
     "register": "polite",
     "turns": [
@@ -1062,6 +1087,12 @@
       "en": "Give your name and company, ask for Mr Tanaka of Sales, and leave a message asking him to call you back.",
       "fr": "Donne ton nom et ton entreprise, demande M. Tanaka du service commercial et laisse-lui un message pour qu'il te rappelle."
     },
+    "steps": [
+      {"en": "Give your name and company", "fr": "Donne ton nom et ton entreprise"},
+      {"en": "Ask for Mr Tanaka", "fr": "Demande M. Tanaka"},
+      {"en": "Ask when he will be back", "fr": "Demande quand il revient"},
+      {"en": "Ask him to call you back", "fr": "Demande qu'il te rappelle"}
+    ],
     "them": {"en": "Receptionist", "fr": "Standardiste"},
     "register": "formal",
     "turns": [

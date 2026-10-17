@@ -71,6 +71,7 @@ export const LONG_SCENE = {
   title: "À la recherche d'un appartement",
   situation: "Tu entres dans une agence immobilière pour trouver un appartement à louer. Un agent t'accueille au comptoir.",
   goal: "Décris l'appartement que tu cherches (ton budget, la distance à la gare) et prends rendez-vous pour une visite.",
+  steps: ["Dis quelle taille il te faut", "Donne ton budget", "Dis à quelle distance de la gare", "Prends rendez-vous pour une visite"],
   them: "Agent immobilier",
   register: "polite",
   // The right reply first: a test picks by the reply, not by its place.

@@ -15,7 +15,6 @@ import { useMinute } from '../../hooks/useMinute'
 import { Loading } from '../ui/Loading'
 import { CheckIcon, ChevronIcon } from '../ui/Icons'
 import LevelFitLine from './LevelFitLine'
-import { QuietButton } from '../dayclear/kit'
 import { useCredits } from '../../stores/credits'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { publishLeft } from '../../stores/gateRun'
@@ -653,23 +652,30 @@ function ClearedGate({ today, desk }) {
       )}
     </section>
   )
+  // 回復運転 (plan 217): the share is spent and reviews wait past it --
+  // the way on, for a learner who wants more, is the board's first row
+  // over tomorrow's, on its glass, so it reads on every print (plan 238,
+  // the owner's pick A of the canvas "Tsuji — Réviser plus"). The
+  // ceiling is a default, never a lock.
   const foot = (
     <>
-      {tomorrow?.cards > 0 && (
-        <div className="tdy-next" role="group" aria-label={t.nudgeWhen.tomorrow}>
-          <span className="tdy-next__day">{t.nudgeWhen.tomorrow}</span>
-          <b className="tdy-next__n">{tomorrow.cards}<small>{t.todayCardsUnit(tomorrow.cards)}</small></b>
-          <span className="tdy-next__min">≈ {tomorrow.minutes} {t.gateMinutes}</span>
+      {(held > 0 || tomorrow?.cards > 0) && (
+        <div className="tdy-board">
+          {held > 0 && (
+            <button type="button" className="tdy-next tdy-board__go" data-action="review-extra" onClick={rideExtra}>
+              <span className="tdy-next__day">{t.todayHeld}</span>
+              <b className="tdy-next__n">{held}<small>{t.todayCardsUnit(held)}</small></b>
+              <span className="tdy-board__way">{t.todayHeldGo}<ChevronIcon direction="right" size={16} /></span>
+            </button>
+          )}
+          {tomorrow?.cards > 0 && (
+            <div className="tdy-next" role="group" aria-label={t.nudgeWhen.tomorrow}>
+              <span className="tdy-next__day">{t.nudgeWhen.tomorrow}</span>
+              <b className="tdy-next__n">{tomorrow.cards}<small>{t.todayCardsUnit(tomorrow.cards)}</small></b>
+              <span className="tdy-next__min">≈ {tomorrow.minutes} {t.gateMinutes}</span>
+            </div>
+          )}
         </div>
-      )}
-      {/* 回復運転 (plan 217): the share is spent and reviews wait past
-          it -- the way on, for a learner who wants more, stands a rung
-          over the shut gate as a quiet way. The ceiling is a default,
-          never a lock. */}
-      {held > 0 && (
-        <QuietButton className="tdy-extra" data-action="review-extra" onClick={rideExtra}>
-          {t.todayExtra(held)}
-        </QuietButton>
       )}
       <GateButton label={opens ?? t.depart} aria-label={opens ?? t.todayNothingDueShort} disabled />
     </>

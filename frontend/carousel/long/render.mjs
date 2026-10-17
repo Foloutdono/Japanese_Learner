@@ -45,7 +45,7 @@ const opts = {
   lang, level: args.level || 'N5', part: Number(args.part || 1), theme: args.theme || null, point: args.point || null,
   ids: args.ids ? String(args.ids).split(',') : null, count: args.count ? Number(args.count) : null,
   format: args.format === 'short' ? 'short' : 'long',
-  // The feed a short stands in (plan 237): TikTok's, Instagram's or none.
+  // The feed a short stands in (plan 239): TikTok's, Instagram's or none.
   fit: ['instagram', 'normal'].includes(args.fit) ? args.fit : 'tiktok',
 }
 const OUT = resolve(args.out || join(HERE, 'out'))

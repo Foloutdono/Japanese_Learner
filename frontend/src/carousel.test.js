@@ -1180,7 +1180,7 @@ describe('the short formats (plan 233)', () => {
     expect(timeline(g).cues.filter(c => c.slow)).toEqual([])
   }), 120000)
 
-  it('keeps a 9:16 slide and a short inside Instagram’s feed crop, clear of its header, caption and buttons (plan 237)', () => withPath2D(() => {
+  it('keeps a 9:16 slide and a short inside Instagram’s feed crop, clear of its header, caption and buttons (plan 239)', () => withPath2D(() => {
     const ig = formatOf('story', 'instagram')
     expect([ig.id, ig.w, ig.h, ig.fit]).toEqual(['story', 1080, 1920, 'instagram'])
     // The feed shows the middle 4:5, 285 cut at the top and the foot, its header over the crop's top 110.

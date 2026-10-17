@@ -13,8 +13,8 @@ import { RunStreak } from '../components/study/RunStreak'
 import SpeakToggle from '../components/study/SpeakToggle'
 import { TutorReview, TutorVerdict } from '../components/study/TutorReview'
 import { SentenceLead, AnswerWell, CorrectedInPlace, MarkedAnswer } from '../components/study/PracticeCard'
-import { SceneLine, ScenePlate, Mark } from '../components/study/GrammarTour'
-import { ArrowIcon } from '../components/ui/Icons'
+import { SceneLine, Mark } from '../components/study/GrammarTour'
+import { ChevronIcon } from '../components/ui/Icons'
 import { DeskPane } from '../components/analysis/BreakdownSide'
 import { FuriganaParts } from '../components/study/Readings'
 import { EnterKey, KeyCap } from '../components/chrome/DeskKeys'
@@ -37,10 +37,10 @@ const KAIWA_COLOR = 'var(--line-kaiwa)'
 //
 // ── What this mode is ──
 // Someone speaks to the learner in a place, and they answer. The talk
-// is drawn as the grammar tour draws its scene (GrammarTour's ScenePlate
-// and SceneLine: the place as a station plate, each line with who says
-// it, its furigana, its translation and its voice -- the other person in
-// one voice, the learner in another), and grows a line at a time:
+// is drawn as the grammar tour draws its scene (GrammarTour's SceneLine:
+// each line with who says it, its furigana, its translation and its
+// voice -- the other person in one voice, the learner in another), and
+// grows a line at a time:
 //
 //   choose      the other person's line, and the three replies under
 //               the talk as quick replies. A pick is the answer, and is
@@ -89,6 +89,19 @@ const KAIWA_COLOR = 'var(--line-kaiwa)'
 // under it. What a reply says of itself (its note) is shown while its
 // exchange is in hand and leaves with Next, so the talk keeps the
 // bubbles and their marks, not every note.
+//
+// ── The ticket and its stub (plan 237) ──
+// The owner's pick D of the canvas "Tsuji — la scène, new directions":
+// the brief is a ticket -- the place at its head on the line's edge,
+// what is going on, a tear, and the mission as the scene's numbered
+// steps (the bank's `steps`) -- standing alone over Commencer. Once the
+// talk is under way the place moves into the route that stands in the
+// run meter's place (a stop a reply, the one in hand ringed, the ones
+// behind marked right or wrong), and the mission hangs under it as the
+// ticket's stub: its rings folded, its steps unfolded on a tap, so the
+// errand is never more than a tap away on a phone (the desk keeps the
+// ticket in its side column). The talk stands at the card's foot,
+// against what answers it, and the replies are tiles of their own.
 export default function ConversationRun({ session }) {
   const { scenario, mode } = useParams()
   const { lang } = useLang()
@@ -115,7 +128,11 @@ function Run({ session, id, mode }) {
   const [lines, setLines] = useState([])
   // Lines whose translation the learner asked for before answering.
   const [early, setEarly] = useState(() => new Set())
-  const [score, setScore] = useState({ right: 0, total: 0 })
+  // A mark a graded reply, right or not: the route's stops and the score.
+  const [marks, setMarks] = useState([])
+  const score = { right: marks.filter(Boolean).length, total: marks.length }
+  // Whether the mission's stub is unfolded.
+  const [mission, setMission] = useState(false)
 
   // Choose: the tile picked, which is the answer.
   const [pick, setPick] = useState(null)
@@ -228,7 +245,8 @@ function Run({ session, id, mode }) {
     startTally(`conversation:${id}:${mode}`)
     resetTurn()
     setTurn(0)
-    setScore({ right: 0, total: 0 })
+    setMarks([])
+    setMission(false)
     setEarly(new Set())
     setLimited(limitedRef.current)
     setWaiting(false)
@@ -263,7 +281,7 @@ function Run({ session, id, mode }) {
   // the pick's `correct`, or the rating's `quality` with the opinions the
   // learner saw beside it.
   function grade(quality, body) {
-    setScore(s => ({ right: s.right + (quality > 2 ? 1 : 0), total: s.total + 1 }))
+    setMarks(m => [...m, quality > 2])
     countReview({ quality })
     postResult('/api/conversation/result', session, { scenario: id, mode, ...body })
       .then(({ data }) => fare.pay(data, quality))
@@ -501,7 +519,7 @@ function Run({ session, id, mode }) {
     </ol>
   )
 
-  const brief = script && <Brief script={script} mode={mode} t={t} />
+  const brief = script && <Ticket script={script} t={t} />
 
   // ── The foot: the one control the moment wants ──
   let foot = null
@@ -586,8 +604,16 @@ function Run({ session, id, mode }) {
       leaveLabel={t.cvsLeave}
       where={where}
       sub={sub}
-      // On the desk the score is the run panel's figures.
-      remaining={desk ? undefined : `${score.right} / ${score.total}`}
+      // Below the desk the route stands in the meter's place, the stub
+      // under it; on the desk the score is the run panel's figures.
+      meter={(stage === 'talk' || stage === 'over') && script
+        ? (
+          <div className="kaiwa-head">
+            <Route script={script} marks={marks} t={t} />
+            <Stub steps={script.steps} open={mission} onToggle={() => setMission(o => !o)} t={t} />
+          </div>
+        )
+        : null}
       pass={false}
       aside={<><RunStreak /><SpeakToggle variant="head" /></>}
       toast={fare.toast}
@@ -603,17 +629,10 @@ function Run({ session, id, mode }) {
         <Empty tone="error" message={t.cvsFetchError} action={{ label: t.retry, onClick: () => { setStage('loading'); setFetches(n => n + 1) } }} />
       )}
 
-      {stage === 'brief' && script && (
-        <PromptCard page prose className="kaiwa-card">{brief}</PromptCard>
-      )}
+      {stage === 'brief' && script && <div className="kaiwa-stand">{brief}</div>}
 
       {(stage === 'talk' || stage === 'over') && script && (
         <PromptCard page prose className="kaiwa-card">
-          {!desk && (
-            <ScenePlate caption={script.place.name}>
-              <FuriganaParts parts={script.place.parts} />
-            </ScenePlate>
-          )}
           {talk}
 
           {stage === 'talk' && mode === 'free' && talkError && (
@@ -698,21 +717,76 @@ function follow(box, anchor) {
 }
 
 /** The scene before it starts, and beside it on the desk once it has:
- *  where, what is going on, what the learner is there to do, and what
- *  this way of riding asks. */
-function Brief({ script, mode, t }) {
+ *  a ticket -- the place at its head, what is going on, the tear, and
+ *  the mission as its numbered steps. */
+function Ticket({ script, t }) {
   return (
-    <div className="kaiwa-brief">
-      <ScenePlate caption={script.place.name}>
-        <FuriganaParts parts={script.place.parts} />
-      </ScenePlate>
-      <p className="kaiwa-brief__situation">{script.situation}</p>
-      <p className="kaiwa-brief__goal">
-        <span className="cap">{t.cvsGoal}</span>
-        <span>{script.goal}</span>
-      </p>
-      <p className="kaiwa-how">{t.cvsHow[mode]}</p>
+    <article className="kaiwa-ticket">
+      <div className="kaiwa-ticket__head" aria-label={script.place.name}>
+        <span className="kaiwa-ticket__place" lang="ja"><FuriganaParts parts={script.place.parts} /></span>
+        <span className="kaiwa-ticket__name" aria-hidden="true">{script.place.name}</span>
+      </div>
+      <p className="kaiwa-ticket__situation">{script.situation}</p>
+      <div className="kaiwa-ticket__tear" aria-hidden="true" />
+      <section className="kaiwa-ticket__mission" aria-label={t.cvsGoal}>
+        <span className="cap" aria-hidden="true">{t.cvsGoal}</span>
+        <Steps steps={script.steps} />
+      </section>
+    </article>
+  )
+}
+
+/** The mission's steps, a gold ring a number. */
+function Steps({ steps }) {
+  return (
+    <ol className="kaiwa-steps">
+      {steps.map((step, i) => (
+        <li key={step} className="kaiwa-step">
+          <span className="kaiwa-step__n" aria-hidden="true">{i + 1}</span>
+          {step}
+        </li>
+      ))}
+    </ol>
+  )
+}
+
+/** The run's meter on a phone: the place, then a stop a reply on its
+ *  line -- the ones behind marked right or wrong, the one in hand
+ *  ringed -- and how far along the talk is. A free talk runs past the
+ *  script's length as it goes. */
+function Route({ script, marks, t }) {
+  const stops = Math.max(script.turns.length, marks.length + 1)
+  const at = Math.min(marks.length + 1, stops)
+  return (
+    <div className="kaiwa-route" role="img" aria-label={t.cvsRouteAria(script.place.name, at, stops)}>
+      <span className="kaiwa-route__place" lang="ja" aria-hidden="true">{script.place.jp}</span>
+      <span className="kaiwa-route__line" aria-hidden="true">
+        {Array.from({ length: stops }, (_, i) => (
+          <i
+            key={i}
+            className={`kaiwa-route__stop${i < marks.length ? (marks[i] ? ' kaiwa-route__stop--ok' : ' kaiwa-route__stop--no') : i === marks.length ? ' kaiwa-route__stop--now' : ''}`}
+          />
+        ))}
+      </span>
+      <b className="kaiwa-route__n" aria-hidden="true">{at}<small>/ {stops}</small></b>
     </div>
+  )
+}
+
+/** The ticket's stub, hung under the route: the mission folded to its
+ *  rings, its steps on a tap. */
+function Stub({ steps, open, onToggle, t }) {
+  return (
+    <section className={`kaiwa-stub${open ? ' kaiwa-stub--open' : ''}`}>
+      <button type="button" className="kaiwa-stub__toggle" aria-expanded={open} onClick={() => { playClick(); onToggle() }}>
+        <span className="cap">{t.cvsGoal}</span>
+        <span className="kaiwa-stub__rings" aria-hidden="true">
+          {!open && steps.map((step, i) => <span key={step} className="kaiwa-step__n">{i + 1}</span>)}
+        </span>
+        <ChevronIcon direction={open ? 'up' : 'down'} size={16} className="kaiwa-stub__chev" />
+      </button>
+      {open && <Steps steps={steps} />}
+    </section>
   )
 }
 
@@ -742,9 +816,9 @@ function Field({ value, onChange, onSubmit, label, action, t }) {
   )
 }
 
-/** Choose's quick replies, under the talk: each a row of the tray, its
- *  number (the desk's key) and its Japanese, and the arrow that says a
- *  tap sends it -- there is no Check: the pick is the answer. */
+/** Choose's replies, under the talk: a tile each, its number in a gold
+ *  ring (the desk's key) and its Japanese -- there is no Check: the
+ *  pick is the answer. */
 function Replies({ choices, onPick, label }) {
   return (
     <div className="kaiwa-replies" role="group" aria-label={label}>
@@ -752,7 +826,6 @@ function Replies({ choices, onPick, label }) {
         <button key={c.jp} type="button" className="kaiwa-reply" onClick={() => { playClick(); onPick(i) }} data-choice={i}>
           <span className="kaiwa-reply__n" aria-hidden="true">{i + 1}</span>
           <span className="kaiwa-reply__jp" lang="ja">{c.jp}</span>
-          <ArrowIcon direction="right" size={18} className="kaiwa-reply__send" />
         </button>
       ))}
     </div>

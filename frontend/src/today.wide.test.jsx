@@ -392,6 +392,27 @@ describe('the week ahead, in the column', () => {
   })
 })
 
+// 回復運転 on the desk (plan 238): the board over the shut gate, at
+// its width, its first row the way on to the reviews past the share.
+describe('the reviews waiting past the share, on the desk', () => {
+  it('stands them on the board over tomorrow, the gate\'s width, and boards them as a run of their own', async () => {
+    todayRef.current = {
+      total: 0, lanes: [], by_source: {}, next_due: null, pace: { target: 10, newToday: 10 },
+      reviewed: { total: 31, by_line: { vocab: 20, kanji: 11 } }, tomorrow: { cards: 41, minutes: 9 },
+      review: { cap: 31, held: 37, catchup: null, away: null, comeback: null },
+    }
+    await mount()
+    const board = $('.tdy-desk__go .tdy-board')
+    const gate = $('.tdy-desk__go .btn-depart--gate')
+    expect([...board.children].map(words)).toEqual(['En attente 37 cartes Réviser', 'Demain 41 cartes ≈ 9 min'])
+    const [b, g] = [board, gate].map(el => el.getBoundingClientRect())
+    expect(Math.round(b.width)).toBe(Math.round(g.width))
+    expect(b.bottom).toBeLessThanOrEqual(g.top)
+    await userEvent.click(board.querySelector('[data-action="review-extra"]'))
+    expect(departure.begin.mock.calls[0][0].path).toBe('/today/run?extra=1')
+  })
+})
+
 // ── 主 — the main flashcards alone, and Depart as the gate ──────────
 // The owner's ask: a way to board each line's main flashcard (the
 // recognition card, `<source>.flashcard.f2b`) and nothing else, and

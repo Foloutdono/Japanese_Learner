@@ -456,7 +456,7 @@ every source, type and look in both ratios, what passes the normal box
 is what passes TikTok's (the Fiche band, a glyph's top), and a card's
 shadow at the foot where the wider box lets the card reach it.
 
-A third, **For Instagram** (plan 237), because Instagram's feed crops a
+A third, **For Instagram** (plan 239), because Instagram's feed crops a
 9:16 post: it shows a reel's (and a 9:16 carousel's) middle 4:5, 1080 ×
 1350 with 285 cut at the top and the foot, and on the web lays the
 author's header (their picture, name, the reel's progress and sound)

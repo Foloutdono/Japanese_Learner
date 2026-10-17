@@ -524,7 +524,7 @@ async function renderLong(mine) {
   const short = state.longFormat === 'short'
   const size = short ? TALL : WIDE
   const { kind, opts } = longPick(id, state.level, state.lang, short ? 'short' : 'long')
-  // A short at the margins chosen (plan 237): TikTok's, Instagram's or none.
+  // A short at the margins chosen (plan 239): TikTok's, Instagram's or none.
   for (const el of document.querySelectorAll('[data-short]')) el.hidden = !short
   const pl = short ? fitShort(longPlan(kind, banks, { ...opts, fit: state.fit })) : longPlan(kind, banks, opts)
   const tl = timeline(pl)

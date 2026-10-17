@@ -11,6 +11,12 @@
       "en": "Describe the flat you want (your budget, how near the station) and arrange a viewing.",
       "fr": "Décris l'appartement que tu cherches (ton budget, la distance à la gare) et prends rendez-vous pour une visite."
     },
+    "steps": [
+      {"en": "Say what size you need", "fr": "Dis quelle taille il te faut"},
+      {"en": "Give your budget", "fr": "Donne ton budget"},
+      {"en": "Say how near the station", "fr": "Dis à quelle distance de la gare"},
+      {"en": "Arrange a viewing", "fr": "Prends rendez-vous pour une visite"}
+    ],
     "them": {"en": "Estate agent", "fr": "Agent immobilier"},
     "register": "polite",
     "turns": [
@@ -298,6 +304,13 @@
       "en": "Open a bank account your salary can be paid into.",
       "fr": "Ouvre un compte bancaire sur lequel recevoir ton salaire."
     },
+    "steps": [
+      {"en": "Say you want an account", "fr": "Dis que tu veux ouvrir un compte"},
+      {"en": "Show your residence card", "fr": "Montre ta carte de résident"},
+      {"en": "Sign instead of a seal", "fr": "Signe à la place du sceau"},
+      {"en": "Say what it is for", "fr": "Dis à quoi il servira"},
+      {"en": "Ask about online banking", "fr": "Renseigne-toi sur la banque en ligne"}
+    ],
     "them": {"en": "Bank clerk", "fr": "Employé de banque"},
     "register": "polite",
     "turns": [
@@ -585,6 +598,12 @@
       "en": "Settle in: choose your dinner time and find out about the baths and breakfast.",
       "fr": "Installe-toi : choisis l'heure du dîner et renseigne-toi sur les bains et le petit-déjeuner."
     },
+    "steps": [
+      {"en": "Choose your dinner time", "fr": "Choisis l'heure du dîner"},
+      {"en": "Ask about the outdoor bath", "fr": "Renseigne-toi sur le bain en plein air"},
+      {"en": "Get a bigger yukata", "fr": "Demande un yukata plus grand"},
+      {"en": "Ask what to wear to breakfast", "fr": "Demande quoi porter au petit-déjeuner"}
+    ],
     "them": {"en": "Inn staff", "fr": "Personnel de l'auberge"},
     "register": "polite",
     "turns": [
@@ -872,6 +891,12 @@
       "en": "Ask for the parcel to be delivered again tomorrow evening.",
       "fr": "Demande que le colis soit relivré demain soir."
     },
+    "steps": [
+      {"en": "Ask for a redelivery", "fr": "Demande une nouvelle livraison"},
+      {"en": "Give the slip number", "fr": "Donne le numéro de l'avis"},
+      {"en": "Choose tomorrow evening", "fr": "Choisis demain soir"},
+      {"en": "Confirm your address", "fr": "Confirme ton adresse"}
+    ],
     "them": {"en": "Delivery company operator", "fr": "Opérateur du transporteur"},
     "register": "polite",
     "turns": [
@@ -1113,6 +1138,11 @@
       "en": "Turn down tonight's invitation politely and agree on another day.",
       "fr": "Décline poliment l'invitation de ce soir et trouve un autre jour avec ton collègue."
     },
+    "steps": [
+      {"en": "Turn down tonight", "fr": "Décline pour ce soir"},
+      {"en": "Give your reason", "fr": "Donne ta raison"},
+      {"en": "Agree on another day", "fr": "Mets-toi d'accord sur un autre jour"}
+    ],
     "them": {"en": "Colleague", "fr": "Collègue"},
     "register": "polite",
     "turns": [
@@ -1356,6 +1386,13 @@
       "en": "Register your new address after your move.",
       "fr": "Déclare ta nouvelle adresse après ton déménagement."
     },
+    "steps": [
+      {"en": "Say you have moved", "fr": "Dis que tu as déménagé"},
+      {"en": "Show your residence card", "fr": "Montre ta carte de résident"},
+      {"en": "Say where you lived before", "fr": "Dis où tu habitais avant"},
+      {"en": "Fill in the form", "fr": "Remplis le formulaire"},
+      {"en": "Sign up for health insurance", "fr": "Inscris-toi à l'assurance maladie"}
+    ],
     "them": {"en": "City hall clerk", "fr": "Agent de la mairie"},
     "register": "polite",
     "turns": [
