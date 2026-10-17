@@ -16,8 +16,8 @@
 // carousel studio): its copy is the app's own descriptions, its pictures
 // are schemas of the feature, never a figure.
 import {
-  ASC, EDGE, FORMATS, FS, SP, R, alpha, fit, font, frame, hasKanji, layoutSentence, drawSentence, mark, measure, metal, METAL_H,
-  mix, palette, paragraph, paragraphH, rrect, strokeBox, text,
+  ASC, EDGE, FORMATS, FS, SP, R, alpha, fit, font, frame, hasKanji, layoutSentence, drawSentence, mark, measure, METAL_H,
+  address, mix, palette, paragraph, paragraphH, rrect, strokeBox, text,
 } from './draw.js'
 import { analyserLine, departButton, pointCard } from './app.js'
 import { SITE } from './strings.js'
@@ -43,7 +43,6 @@ export const WORDS = {
     seconds: { read: 'seconds to read it', say: 'seconds to say it', answer: 'seconds to answer' },
     count: n => `Count to ${NUM.en[n] || n}, then swipe.`,
     swipe: 'Swipe for the answer',
-    save: 'Save it for later',
     answer: 'The answer',
     analyser: 'As Tsuji’s analyser cuts it',
     meaning: 'Meaning',
@@ -64,7 +63,7 @@ export const WORDS = {
     saveFor: 'Save it for your next review',
     or: 'or',
     them: 'Them', you: 'You',
-    cta: { head: 'Want more like this?', also: 'Also', go: `Go to ${SITE}`, band: 'More on Tsuji' },
+    cta: { head: 'Want more like this?', also: 'Also', band: 'More on Tsuji' },
     features: {
       reading: { name: 'Read against the clock', line: 'Read the sentence before the clock covers it, write its reading in rōmaji, then see it cut word by word.', short: 'Reading', steps: ['Read', 'Write', 'Check'], romaji: 'rōmaji' },
       comprehension: { name: 'Read a whole text', line: 'A short text, then its questions: the exam’s reading section, rehearsed.', short: 'Comprehension', steps: ['Read', 'Answer', 'Check'] },
@@ -93,7 +92,6 @@ export const WORDS = {
     seconds: { read: 'secondes pour lire', say: 'secondes pour le dire', answer: 'secondes pour répondre' },
     count: n => `Compte jusqu’à ${NUM.fr[n] || n}, puis glisse.`,
     swipe: 'Glisse pour la réponse',
-    save: 'Enregistre-le pour plus tard',
     answer: 'La réponse',
     analyser: 'Découpée par l’analyseur de Tsuji',
     meaning: 'Sens',
@@ -113,7 +111,7 @@ export const WORDS = {
     saveFor: 'Enregistre-le pour ta prochaine révision',
     or: 'ou',
     them: 'En face', you: 'Toi',
-    cta: { head: 'Envie d’en voir plus ?', also: 'Et aussi', go: `Va sur ${SITE}`, band: 'Plus sur Tsuji' },
+    cta: { head: 'Envie d’en voir plus ?', also: 'Et aussi', band: 'Plus sur Tsuji' },
     features: {
       reading: { name: 'Lis contre la montre', line: 'Lis la phrase avant que le chrono ne la couvre, écris sa lecture en rōmaji, puis découvre-la mot à mot.', short: 'Lecture', steps: ['Lis', 'Écris', 'Vérifie'], romaji: 'rōmaji' },
       comprehension: { name: 'Lis un texte entier', line: 'Un texte court, puis ses questions : l’épreuve de lecture de l’examen, en répétition.', short: 'Compréhension', steps: ['Lis', 'Réponds', 'Vérifie'] },
@@ -520,7 +518,6 @@ function pill(c, label, cx, y, { icon = '→', fill = faceInk(c.p), ink = c.p.in
   ctx.arc(x + h / 2, y + h / 2, h / 2 - 10, 0, Math.PI * 2)
   ctx.fill()
   if (emoji) text(ctx, icon, x + h / 2, y + h / 2 + 15, { f: font(400, 40, 'emoji'), color: p.onLine, align: 'center' })
-  else if (icon === 'save') bookmark(ctx, x + h / 2, y + h / 2, 36, p.onLine, { fill: true })
   else chevronIcon(ctx, x + h / 2, y + h / 2, 18, p.onLine)
   text(ctx, b.lines[0], x + h + SP[3], y + h / 2 + b.size * 0.36, { f: b.f, color: ink })
   return h
@@ -1738,7 +1735,8 @@ function hookLayout(c, s, { ask, secs, compact, centred }) {
         if (compact) kicker(c, ask, fr.cx, top, 'center')
         else head.draw(top)
         place(c, b, y, bottom)
-        pill(c, weld(c.lang, W.save), fr.cx, fr.bottom - 92, { icon: 'save', dot: p.gold })
+        // The way on to the answer, as the next question says it (plan 241).
+        pill(c, weld(c.lang, W.yoursFoot), fr.cx, fr.bottom - 92)
       },
     }
   }
@@ -2095,7 +2093,9 @@ function ctaSlide(c, feature) {
   line.draw(y + edge + room + SP[4] + name.h + SP[2])
   y += ch + gap
   if (showAlso) also(c, ALSO[feature], y)
-  metal(ctx, p, fr.cx, fr.bottom - btn, weld(c.lang, W.cta.go), fr.w)
+  // The way on: the site's address (plan 241), inside the safe area, so Go
+  // is never under the feed's buttons where the card above reaches past it.
+  address(ctx, p, fr.x, fr.bottom - btn, fr.w, SITE)
 }
 /** The two other features, a picture and a name each. */
 function also(c, list, y) {

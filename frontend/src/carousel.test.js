@@ -1379,7 +1379,7 @@ describe('the conversion carousels (plan 234)', () => {
     const dialogue = some.find(x => x.src.id === 'dialogue' && x.lang === 'en')
     const { p } = dialogue
     // The size each text is set at, read off the font as it is drawn.
-    const sizes = (ctx0, texts) => {
+    const sizes = ctx0 => {
       const at = []
       const ctx = new Proxy(ctx0, { get: (o, k) => (k === 'fillText' ? (t, ...a) => { at.push([String(t), parseFloat(/([\d.]+)px/.exec(o.font)?.[1] || '0')]); return o.fillText(t, ...a) } : o[k]), set: (o, k, v) => { o[k] = v; return true } })
       return { ctx, at }
@@ -1388,8 +1388,7 @@ describe('the conversion carousels (plan 234)', () => {
       const slides = deck('plates', p, FORMATS.story, { design })
       for (const key of ['ask', 'answer']) {
         const sl = slides.find(x => x.key === key)
-        const { ctx: base, texts } = stubContext()
-        const { ctx, at } = sizes(base, texts)
+        const { ctx, at } = sizes(stubContext().ctx)
         sl.draw(ctx)
         const turn = p.funnel.turns.find(tu => tu.them.rows.every(r => r.k === 'punct' || at.some(([t]) => t === r.t)))
         expect(turn, `${design} ${key}`).toBeTruthy()
@@ -1397,6 +1396,24 @@ describe('the conversion carousels (plan 234)', () => {
         const line = turn.them.rows.filter(r => r.k !== 'punct').map(r => Math.max(...at.filter(([t]) => t === r.t).map(([, z]) => z)))
         expect(Math.min(...line), `${design} ${key}`).toBeGreaterThanOrEqual(FS.title - 0.5)
       }
+    }
+  }))
+
+  it('sends the Fiche hook on to the answer and the call to action on to the site’s address (plan 241)', () => withPath2D(() => {
+    for (const { src, id, lang, p } of some) {
+      const where = `${src.id} ${id} ${lang}`
+      const slides = deck('plates', p, FORMATS.story, { design: 'fiche' })
+      const hook = stubContext()
+      slides[0].draw(hook.ctx)
+      // Its foot says where the answer is (the stub measures wider than the font: it may be cut).
+      const foot = hook.texts.at(-1)
+      expect(foot.length, where).toBeGreaterThan(8)
+      expect(FUNNEL[lang].yoursFoot.startsWith(foot.replace(/…$/, '')), `${where}: ${foot}`).toBe(true)
+      // The address, set alone in its bar: no "Go to" before it.
+      const cta = stubContext()
+      slides.find(x => x.key === 'cta').draw(cta.ctx)
+      expect(cta.texts, where).toContain('tsuji.app')
+      expect(cta.texts.join(' '), where).not.toMatch(/Go to|Va sur/)
     }
   }))
 

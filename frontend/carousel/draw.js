@@ -368,6 +368,52 @@ function metal(ctx, p, cx, y, label, maxW = Infinity) {
   chevron(ctx, x + SP[7] + tw + SP[4], y + h / 2, arrow, p.onFill)
   return h
 }
+/** The way to the site (plan 241): its address as a browser's bar shows
+ *  it, a padlock before it and Go, the gate's gold, at its end; as high as
+ *  the metal, so a layout that keeps room for one keeps it for the other. */
+function address(ctx, p, x, y, w, site) {
+  const h = METAL_H
+  const cy = y + h / 2
+  ctx.save()
+  shadow(ctx, `0 6px 18px ${alpha(p.paper ? p.ink : '#000000', 0.18)}`)
+  // The field is lit above its ground, as a browser's is.
+  ctx.fillStyle = p.paper ? mix('#ffffff', p.bg, 0.7) : mix(p.ink, p.bg, 0.08)
+  rrect(ctx, x, y, w, h, h / 2)
+  ctx.fill()
+  ctx.restore()
+  ctx.strokeStyle = alpha(p.ink, 0.18)
+  ctx.lineWidth = 3
+  rrect(ctx, x + 1.5, y + 1.5, w - 3, h - 3, h / 2 - 1.5)
+  ctx.stroke()
+  // The padlock: its shackle, then its body.
+  const lx = x + SP[6]
+  ctx.strokeStyle = p.ink2
+  ctx.lineWidth = 6
+  ctx.beginPath()
+  ctx.arc(lx, cy - 6, 13, Math.PI, 0)
+  ctx.stroke()
+  ctx.fillStyle = p.ink2
+  rrect(ctx, lx - 19, cy - 6, 38, 30, 6)
+  ctx.fill()
+  // Go: a gold disc inside the bar's end.
+  const r = h / 2 - SP[1]
+  const gx = x + w - SP[1] - r
+  const room = gx - r - SP[4] - (lx + SP[5])
+  const size = [FS.title, FS.lead, FS.body].find(z => measure(ctx, site, font(700, z, 'latin')) <= room) || FS.body
+  text(ctx, site, lx + SP[5], cy + size * 0.36, { f: font(700, size, 'latin'), color: p.ink })
+  const g = ctx.createLinearGradient(0, cy - r, 0, cy + r)
+  g.addColorStop(0, p.goldLit)
+  g.addColorStop(1, p.goldMid)
+  ctx.save()
+  shadow(ctx, `0 4px 16px ${alpha(p.goldMid, 0.3)}`)
+  ctx.fillStyle = g
+  ctx.beginPath()
+  ctx.arc(gx, cy, r, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.restore()
+  chevron(ctx, gx - r * 0.42, cy, r * 0.84, p.onFill)
+  return h
+}
 function chevron(ctx, x, cy, w, color) {
   ctx.save()
   ctx.strokeStyle = color
@@ -698,6 +744,6 @@ export const hasKanji = text => /[\u3400-\u9fff々]/.test(text)
 
 export {
   FS, SP, R, TR, EDGE, RING, ASC, FAMILY, alpha, shadow, noShadow, rrect, measure, text, caption, wrap, balance, fit,
-  paragraph, paragraphH, roundel, mark, metal, METAL_H, chevron, units, layoutSentence, drawSentence, lineOf, frame, ground,
+  paragraph, paragraphH, roundel, mark, metal, METAL_H, address, chevron, units, layoutSentence, drawSentence, lineOf, frame, ground,
   masthead, heading, pageMark, pages, strokeBox, marked, stamp,
 }

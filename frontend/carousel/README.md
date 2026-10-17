@@ -40,9 +40,9 @@ read:
 
 | Slide | Key | Shows |
 | --- | --- | --- |
-| The hook | `ask` | the item and the question it asks (can you read it? what does it mean? which one is the odd one out?); a text, with the question asked of it under it |
+| The hook | `ask` | the item and the question it asks (can you read it? what does it mean? which one is the odd one out?); a text, with the question asked of it under it; in Fiche, "The answer is on the next slide" at its foot (plan 241: it said "Save it for later", which sent the reader away before the answer) |
 | The answer | `answer` | the item answered as the app shows it: the analyser's line and its numbered points, the review card's word, a kanji's readings; a question's solution alone (its sentence completed, or the word asked about, the right answer large, why), never the question again nor its other choices |
-| The call to action | `cta` | "Want more like this?": the feature the item comes from in one card, its picture (a schema of what it does) over its name and what it does; two more features beside it, the button to the site |
+| The call to action | `cta` | "Want more like this?": the feature the item comes from in one card, its picture (a schema of what it does) over its name and what it does; two more features beside it, and the way to the site: its address in a browser's bar, a padlock before it and Go, the gate's gold, at its end, inside the safe area where the card above reaches past it, so Go is never under the feed's buttons (plan 241, `draw.address`, as high as the metal it replaced) |
 | The detail | `more` | the item further: word by word, in sentences, the words a kanji writes; or "Your turn" (`question-2`): the next question, turn or round, asked and left to the reader, answered on the next slide (`answer-2`); a sentence's: its words glossed, every one of them (`more`, `more-2`…) |
 | The key points | `keys` | the answer to "Your turn" where no slide was left for it, up to three points the catalogue, the deck or the explainers already say, a card each, marked with its kind (how it works, form, watch out, don't mix up, reading, in a word…), and "Save it for your next review" beside the save glyph, a short arrow down from it |
 
