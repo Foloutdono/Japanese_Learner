@@ -116,19 +116,20 @@ def test_a_lines_syllables_start_where_the_engine_lays_them():
 
 
 def test_a_recorded_bed_loops_under_the_voice(tmp_path):
+    # A reading challenge's own track of music (plan 247).
     cache, sfx = tmp_path / "cache", tmp_path / "sfx"
     cache.mkdir()
     sfx.mkdir()
     cue = {"at": 4.0, "text": "テスト", "who": "reader"}
     _tone(cache / lva.clip_name(cue, voice_engine.VOICE_REV), 1.0, lva.VOICE_RATE)
-    # The lake: three seconds of a low tone, at the engine's rate, looped
-    # to the video's length and brought to its level.
-    lake = tmp_path / "lake.wav"
-    _tone(lake, 3.0, lva.VOICE_RATE, hz=110.0, amp=0.9)
+    # Three seconds of a low tone, at the engine's rate, looped to the
+    # video's length and brought to its level.
+    track = tmp_path / "track.wav"
+    _tone(track, 3.0, lva.VOICE_RATE, hz=110.0, amp=0.9)
     timeline = {"seconds": 12.0, "cues": [cue], "sfx": []}
     (tmp_path / "tl.json").write_text(json.dumps(timeline), encoding="utf-8")
     out = tmp_path / "mix.wav"
-    assert lva.mix(tmp_path / "tl.json", cache, sfx, out, lake) == 0
+    assert lva.mix(tmp_path / "tl.json", cache, sfx, out, track) == 0
     with wave.open(str(out)) as w:
         assert abs(w.getnframes() / w.getframerate() - 12.0) < 0.01
         data = np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").astype(np.float64) / 32768
@@ -139,3 +140,20 @@ def test_a_recorded_bed_loops_under_the_voice(tmp_path):
     # Past its three seconds it plays on, looped, at the same level.
     assert _rms_db(late) > -60
     assert abs(_rms_db(early) - _rms_db(late)) < 2
+
+
+def test_no_bed_is_silence_under_the_voice(tmp_path):
+    # A reading challenge with no track (plan 247): its voice and sounds alone.
+    cache, sfx = tmp_path / "cache", tmp_path / "sfx"
+    cache.mkdir()
+    sfx.mkdir()
+    cue = {"at": 4.0, "text": "テスト", "who": "reader"}
+    _tone(cache / lva.clip_name(cue, voice_engine.VOICE_REV), 1.0, lva.VOICE_RATE)
+    (tmp_path / "tl.json").write_text(json.dumps({"seconds": 12.0, "cues": [cue], "sfx": []}), encoding="utf-8")
+    out = tmp_path / "mix.wav"
+    assert lva.mix(tmp_path / "tl.json", cache, sfx, out, None, True) == 0
+    with wave.open(str(out)) as w:
+        data = np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").astype(np.float64) / 32768
+    left, rate = data[0::2], lva.RATE
+    assert np.abs(left[int(6.5 * rate):int(9.5 * rate)]).max() == 0
+    assert _rms_db(left[int(4.2 * rate):int(4.8 * rate)]) > -40

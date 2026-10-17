@@ -162,6 +162,9 @@ body[data-mode="long"] [data-long="hide"] { display: none !important; }
 /* The reading challenges (plan 247): a video, with its own controls. */
 body:not([data-video="challenge"]) [data-challenge="only"] { display: none !important; }
 body[data-video="challenge"] [data-challenge="hide"] { display: none !important; }
+.music { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.music__add { cursor: pointer; }
+.music__name { color: var(--ink2); font-size: 13px; overflow-wrap: anywhere; }
 .player canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
 .player__bar { display: flex; align-items: center; gap: 12px; }
 .player__bar input { flex: 1; min-width: 0; accent-color: var(--gold); }
@@ -200,8 +203,17 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
     <div class="field" data-challenge="only">
       <div class="label">How the text moves <span>a reading challenge</span></div>
       <div class="seg" role="group" aria-label="How the text moves">
-        <button type="button" data-set="challengeStyle:fall">Falling lines 流れ</button>
+        <button type="button" data-set="challengeStyle:crawl">Credits crawl 流れ</button>
         <button type="button" data-set="challengeStyle:along">Read along 声</button>
+      </div>
+    </div>
+
+    <div class="field" data-challenge="only">
+      <div class="label">Music <span>a track of yours under it, or none</span></div>
+      <div class="music">
+        <label class="btn btn--quiet music__add"><input id="music-file" type="file" accept="audio/*" hidden>Add a track</label>
+        <span id="music-name" class="music__name">No music</span>
+        <button id="music-clear" type="button" class="btn btn--quiet" hidden>Remove</button>
       </div>
     </div>
 
@@ -370,7 +382,7 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
       </div>
       <div class="export__actions">
         <button id="export-thumb" type="button" class="btn btn--metal" data-long="only">Download the thumbnail (.png)</button>
-        <button id="export-video" type="button" class="btn btn--metal" data-challenge="only">Download the video (.mp4, with the lake)</button>
+        <button id="export-video" type="button" class="btn btn--metal" data-challenge="only">Download the video (.mp4)</button>
         <button id="copy-command" type="button" class="btn" data-long="only">Copy the command</button>
         <button id="export" type="button" class="btn btn--metal" data-long="hide" disabled>Download <span id="export-name"></span> (.zip)</button>
         <button id="export-short" type="button" class="btn btn--metal" data-long="hide" hidden>Download as a short video (.mp4, 9:16)</button>

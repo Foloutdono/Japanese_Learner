@@ -809,15 +809,19 @@ node carousel/long/render.mjs --carousel <recipe from the studio>
 
 A comprehension text (the 30 of `comprehension.json`, six a level) read
 as a 9:16 video (`challenge.js`, the source 速読 "Reading challenge"),
-over Today's print of the hour, in one of the two ways the owner picked
-from four drawn:
+over Today's print of the hour, in one of two ways:
 
-- **Falling lines** (`fall`, 流れ): each sentence drops in at the head of
-  the sky onto a dark panel and is held there for as long as a learner
-  of its level reads it (`CPM`: 180 characters a minute at N5 up to 320
-  at N1, never under `CH.least`), a gold bar under it running out as
-  the app's reading clock does; the sentences read slide down under it,
-  dimmer at each step, and are gone into the lake.
+- **Credits crawl** (`crawl`, 流れ; the owner's own picture, in place of
+  the falling lines first drawn): the title, then the whole text, comes
+  up from the foot of the screen and climbs into the sky as a film's
+  opening crawl does, on a plane tipped away from the viewer (`CRAWL`):
+  largest at the foot, where it is read, smaller, flatter and fainter as
+  it climbs, and slower, the plane moving at one speed. Every sentence
+  is set at the heading's size, on as many lines as it takes. The whole
+  text passes the reading line at the pace a learner of its level reads
+  (`CPM`: 180 characters a minute at N5 up to 320 at N1), after the
+  first line's way up to it (`CH.into`) and before the last one's read
+  (`CH.out`); the counter at the head says which sentence is there.
 - **Read along** (`along`, 声): the text stands on one panel while the
   app's reader says it (slowed at N5 and N4, as a card's slow line), each
   word gold once said and underlined while it is said; the panel turns
@@ -837,23 +841,28 @@ address in its bar (plan 245).
 
 **Easy to read** is its first rule: everything a viewer reads is light
 on a dark panel or on the sky darkened under it, so it reads at every
-hour of the print; a sentence is set at the heading's size (falling) or
-a little over the title's (read along), with its readings at N5 to N3,
-and never moves while it is read; what moves, moves between two. The
-tests hold every text whole inside the frame, at every level, in both
-languages.
+hour of the print; a sentence is set at the heading's size (the crawl,
+never under the title's on screen between the reading line and the
+foot) or a little over the title's (read along), with its readings at
+N5 to N3. The tests hold every text whole inside the frame, at every
+level, in both languages.
 
-**The sound** is the hour's lake, the ambiance Today plays (`AMBIANCE`,
-held equal to `src/lib/audio/ambiance.json`'s revision), with the board's
-flap on the hook, the clicks of the countdown, the answer's chime and
-the platform's on the way out. The falling one, which nobody says, is
-kept calm (-20 LUFS) and can be downloaded from the studio as it is; the
-one read along is made by the command, which voices each sentence and
-mixes the lake under it (`long_video_audio mix --bed`).
+**The sound** makes up no music. The owner adds a track of their own
+(the app's jazz) in the studio, under "Music", or gives it to the
+command (`--music FILE`, any format ffmpeg reads); it is looped to the
+video's length, faded in and out over 2.5 s and, under the voice, held
+some 12 dB below it (`long_video_audio mix --bed`). Without one the
+video has only the board's flap on the hook, the clicks of the
+countdown, the answer's chime and the platform's on the way out
+(`--no-bed`), kept calm (-20 LUFS) when nobody speaks either. The crawl,
+which nobody says, can be downloaded from the studio as it is, the
+track mixed in the browser; the one read along is made by the command,
+which voices each sentence. The track is not kept anywhere: the studio
+reads it from the file chosen, the command from its path.
 
 ```bash
 cd frontend
-node carousel/long/render.mjs --challenge n5-01 --style fall --hour dusk --lang en
+node carousel/long/render.mjs --challenge n5-01 --style crawl --hour dusk --lang en --music ~/music/late-train.mp3
 VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --challenge n5-01 --style along --hour night --lang fr
 ```
 
@@ -875,7 +884,7 @@ VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --challenge n5
 | `sound.js` | a clip's sound: the app's own events and recorded clips, mixed (plans 231, 232); one event alone for a long video (plan 233) |
 | `long.js` | the long videos: what each says, when, each frame, their page, and the studio's list of them (plan 233) |
 | `short.js` | a carousel as a short video: its timing, its swipes, its line and page (plan 233) |
-| `challenge.js` | the reading challenges: a comprehension text falling or read along, its timing on the voice, each frame, its page (plan 247) |
+| `challenge.js` | the reading challenges: a comprehension text in a credits crawl or read along, its timing on the voice, each frame, its page (plan 247) |
 | `long/render.mjs` | a long video, its short, a carousel's short or a reading challenge made: voiced, mixed, drawn and encoded (plans 233, 247) |
 | `studio.js` | the page: the pickers, the previews, the export |
 

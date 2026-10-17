@@ -858,9 +858,9 @@ that previews it and gives its page and the command that makes it, and
 each also a 9:16 short under a minute, as any carousel can be too
 (`short.js`: its slides held and swiped, its line voiced); since plan
 247 reading challenges (`challenge.js`): a comprehension text read as a
-9:16 video over Today's print and its lake, its sentences falling or
-read along by the app's reader, each word lit on the voice's own
-syllables. Since plan
+9:16 video over Today's print, rising from the foot of the screen as a
+film's opening crawl or read along by the app's reader, each word lit
+on the voice's own syllables, over the owner's own music or none. Since plan
 234 a carousel is drawn by default on one path that converts
 (`funnel.js`): the hook, the answer as the app shows it, a call to
 action that draws the feature the item comes from as a schema (never a

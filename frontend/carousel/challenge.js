@@ -1,16 +1,16 @@
 // ── 速読 — the reading challenge (plan 247) ───────────────────────
-// A comprehension text read as a 9:16 video, in one of the two ways the
-// owner picked from four drawn: `fall`, each sentence dropping in at the
-// head of Today's print and held there for as long as a learner of its
-// level takes to read it, the sentences read sinking below it toward the
-// lake; `along`, the text standing on the print while the app's reader
-// says it, each word lit as it is said. Before it the hook and three of
-// its words; after it one of its questions, asked and answered, and the
-// way to the app.
+// A comprehension text read as a 9:16 video over Today's print, in one
+// of two ways: `crawl`, the whole text coming slowly up from the foot of
+// the screen on a plane tipped away from the viewer, as a film's opening
+// crawl does, read at its largest in the lower half and growing smaller
+// as it goes up into the sky (the owner's own picture of it); `along`,
+// the text standing while the app's reader says it, each word lit as it
+// is said (the owner's pick D of four drawn). Before it the hook and three
+// of its words; after it one of its questions, asked and answered, and the
+// way to the app. Under it, a track of the owner's own music, or nothing.
 //
-// Everything a viewer must read is set large, light on a dark panel, so
-// it reads on every hour of the print: a sentence is held, never moved,
-// while it is read; what moves, moves between two sentences.
+// Everything a viewer must read is set large and light on the darkened
+// sky or on a dark panel, so it reads at every hour of the print.
 //
 // Pure but for the canvas it draws on: `challengeTimeline` times the
 // video (on the voice's own lengths and syllables where it is voiced,
@@ -20,14 +20,11 @@ import { drawPrint } from './app.js'
 import { unpack } from './common.js'
 import { SITE } from './strings.js'
 
-export const STYLES = ['fall', 'along']
+export const STYLES = ['crawl', 'along']
 export const HOURS = ['dawn', 'day', 'dusk', 'night']
-// A learner's pace at each level, in characters a minute: a sentence is
-// held as long as its characters take at this pace, and never under LEAST.
+// A learner's pace at each level, in characters a minute: the crawl
+// carries the text past the reading line at this pace.
 export const CPM = { N5: 180, N4: 200, N3: 240, N2: 280, N1: 320 }
-// The lake under the print, as the app plays it behind Today
-// (src/lib/audio/ambiance.json's revision; a test holds them equal).
-export const AMBIANCE = 'lake1'
 // Readings over the kanji where a learner of the level still needs them.
 const RUBY = new Set(['N5', 'N4', 'N3'])
 // The read-along voice slows for the first two levels, as a card's slow line does.
@@ -35,8 +32,9 @@ const SLOW = new Set(['N5', 'N4'])
 // The video's beats, in seconds.
 export const CH = {
   fps: 30, hook: 3.2, words: 5.5,
-  // fall: a sentence drops in, then is held; never under LEAST.
-  drop: 0.7, least: 2.6,
+  // crawl: the first line comes up into the frame for INTO seconds before
+  // the reading line, and the last is still read for OUT seconds after it.
+  into: 2.5, out: 4,
   // along: the voice starts LEAD after its sentence is due, a GAP between two.
   lead: 0.35, gap: 0.3, turn: 0.35,
   ask: 2.2, count: 5, answer: 3.6, cta: 5.2,
@@ -50,7 +48,7 @@ const CORRECT = RATING_INKS['--rating-correct']
 
 const W = {
   en: {
-    hook: { fall: 'Can you read this?', along: 'Read along. Can you keep up?' },
+    hook: { crawl: 'Can you read this?', along: 'Read along. Can you keep up?' },
     sentences: n => `${n} sentences`,
     chars: n => `${n} characters`,
     words: 'Three words first',
@@ -60,13 +58,13 @@ const W = {
     free: 'Free · in your browser',
     voice: 'Voice · VOICEVOX Nemo',
     title: (lv, t) => `Can you read this Japanese text? JLPT ${lv} reading challenge: ${t}`,
-    body: { fall: 'Read each sentence before it sinks into the lake, then answer the question.', along: 'Read along with the voice, word by word, then answer the question.' },
+    body: { crawl: 'Read the text as it scrolls up, then answer the question.', along: 'Read along with the voice, word by word, then answer the question.' },
     site: site => `More texts like this one, each with its questions, on Tsuji: ${site}`,
     credit: 'Voice: VOICEVOX Nemo.',
     tags: ['japanese', 'learnjapanese', 'japanesereading', 'jlpt'],
   },
   fr: {
-    hook: { fall: 'Tu arrives à lire ça ?', along: 'Lis avec la voix. Tu suis ?' },
+    hook: { crawl: 'Tu arrives à lire ça ?', along: 'Lis avec la voix. Tu suis ?' },
     sentences: n => `${n} phrases`,
     chars: n => `${n} caractères`,
     words: 'D’abord, trois mots',
@@ -76,7 +74,7 @@ const W = {
     free: 'Gratuit · dans ton navigateur',
     voice: 'Voix · VOICEVOX Nemo',
     title: (lv, t) => `Tu arrives à lire ce texte japonais ? Défi lecture JLPT ${lv} : ${t}`,
-    body: { fall: 'Lis chaque phrase avant qu’elle ne coule dans le lac, puis réponds à la question.', along: 'Lis avec la voix, mot à mot, puis réponds à la question.' },
+    body: { crawl: 'Lis le texte pendant qu’il défile, puis réponds à la question.', along: 'Lis avec la voix, mot à mot, puis réponds à la question.' },
     site: site => `D’autres textes comme celui-ci, avec leurs questions, sur Tsuji : ${site}`,
     credit: 'Voix : VOICEVOX Nemo.',
     tags: ['japonais', 'apprendrelejaponais', 'lecturejaponaise', 'jlpt'],
@@ -97,16 +95,17 @@ export function challengeItems(data, lang = 'en') {
   return data.passages.map(P => ({ id: P.id, jp: P.title, sub: W[lang === 'fr' ? 'fr' : 'en'].chars(P.sents.map(unpack).reduce((n, rows) => n + charsOf(rows), 0)), tag: P.lv }))
 }
 
-/** A text's challenge: its sentences, three of its words, one question. */
+/** A text's challenge: its sentences, three of its words, one question.
+ *  `opts.music`: the track laid under it (a file's path or name), or none. */
 export function challengePlan(data, id, opts = {}) {
   const lang = opts.lang === 'fr' ? 'fr' : 'en'
   const P = data.passages.find(x => x.id === id) ?? data.passages[0]
-  const style = STYLES.includes(opts.style) ? opts.style : 'fall'
+  const style = STYLES.includes(opts.style) ? opts.style : 'crawl'
   const hour = HOURS.includes(opts.hour) ? opts.hour : 'dusk'
   const sents = P.sents.map(unpack)
   // Three words of its level the text writes in kanji, in the order it meets them.
   const text = P.sents.map(s => s.map(t => t[0]).join('')).join('')
-  const kanji = w => /[㐀-鿿]/.test(w.t)
+  const kanji = w => /[\u3400-\u9fff]/.test(w.t)
   const ranked = [...P.words.filter(w => kanji(w) && w.lv === P.lv), ...P.words.filter(w => kanji(w) && w.lv !== P.lv), ...P.words.filter(w => !kanji(w))]
   const words = [...new Map(ranked.map(w => [w.t, w])).values()].slice(0, 3)
     .sort((a, b) => text.indexOf(a.t) - text.indexOf(b.t))
@@ -115,7 +114,7 @@ export function challengePlan(data, id, opts = {}) {
   const Q = P.questions.find(q => q.type === 'comprehension') ?? P.questions[0]
   const q = { ask: Q.question[lang] || Q.question.en, choices: Q.options[lang] || Q.options.en, right: Q.correct }
   return {
-    source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, title: P.title, sents, words, q,
+    source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, title: P.title, sents, words, q, music: opts.music || null,
     chars: sents.reduce((n, rows) => n + charsOf(rows), 0), cpm: CPM[P.lv] || CPM.N3, ruby: RUBY.has(P.lv), slow: SLOW.has(P.lv),
   }
 }
@@ -156,12 +155,10 @@ export function challengeTimeline(plan, voiced = null) {
   seg('hook', CH.hook)
   seg('words', CH.words)
   const from = t
-  if (plan.style === 'fall') {
-    plan.sents.forEach((rows, i) => {
-      const hold = Math.max(CH.least, charsOf(rows) / (plan.cpm / 60))
-      lines.push({ i, at: +t.toFixed(3), drop: CH.drop, hold: +hold.toFixed(3) })
-      t += CH.drop + hold
-    })
+  if (plan.style === 'crawl') {
+    // The whole text past the reading line at the level's pace, the first
+    // line's way up to it before and the last line's read after.
+    t += CH.into + plan.chars / (plan.cpm / 60) + CH.out
   } else {
     plan.sents.forEach((rows, i) => {
       const cue = { text: sentenceText(rows), who: 'reader', slow: plan.slow, marks: true }
@@ -187,8 +184,8 @@ export function challengeTimeline(plan, voiced = null) {
   const reading = +(segs.find(s => s.key === 'reading').dur).toFixed(1)
   return {
     seconds: +t.toFixed(3), segs, lines, cues, sfx, reading,
-    // The hour's lake under it all; a video read in silence is kept calm.
-    bed: { src: `public/sounds/ambiant/${AMBIANCE}/${plan.hour}.mp3` }, loudness: plan.style === 'fall' ? -20 : -16,
+    // The owner's music under it, if any: a video read in silence is kept calm.
+    bed: plan.music ? { src: plan.music } : null, loudness: plan.music || plan.style === 'along' ? -16 : -20,
     chapters: segs.map(s => ({ at: s.start, title: s.key })),
   }
 }
@@ -196,7 +193,8 @@ export function challengeTimeline(plan, voiced = null) {
 /** The command that makes it, from frontend/ (the voice engine running for `along`). */
 export function challengeCommand(plan) {
   const voice = plan.style === 'along' ? 'VOICEVOX_URL=http://localhost:50121 ' : ''
-  return `${voice}node carousel/long/render.mjs --challenge ${plan.id} --style ${plan.style} --hour ${plan.hour} --lang ${plan.lang}`
+  const music = plan.music ? ` --music "${plan.music}"` : ''
+  return `${voice}node carousel/long/render.mjs --challenge ${plan.id} --style ${plan.style} --hour ${plan.hour} --lang ${plan.lang}${music}`
 }
 
 /** The video's page: its title, its description, its tags. */
@@ -219,9 +217,9 @@ const fr = frame(FMT)
 const TOP = fr.y + 64 + SP[7]
 // Laid out once a plan and a size, on the context that draws them.
 const layouts = new Map()
-function layOf(ctx, plan, i, z, w) {
-  const key = `${plan.id}|${plan.lang}|${i}|${z}|${w}`
-  if (!layouts.has(key)) layouts.set(key, layoutSentence(ctx, plan.sents[i], { max: z, min: FS.title, maxW: w, maxLines: 6, script: plan.ruby ? 'furigana' : 'kanji', rules: false, gap: 0.02 }))
+function layOf(ctx, plan, i, z, w, { maxLines = 6, min = FS.title } = {}) {
+  const key = `${plan.id}|${plan.lang}|${i}|${z}|${w}|${maxLines}|${min}`
+  if (!layouts.has(key)) layouts.set(key, layoutSentence(ctx, plan.sents[i], { max: z, min, maxW: w, maxLines, script: plan.ruby ? 'furigana' : 'kanji', rules: false, gap: 0.02 }))
   return layouts.get(key)
 }
 
@@ -271,7 +269,7 @@ export function drawChallenge(ctx, plan, tl, t, P = null) {
   ctx.save()
   if (s.key === 'hook') hook(ctx, plan, tl, into, P)
   else if (s.key === 'words') words(ctx, plan, into, P)
-  else if (s.key === 'reading') (plan.style === 'fall' ? fall : along)(ctx, plan, tl, t, P)
+  else if (s.key === 'reading') (plan.style === 'crawl' ? crawl : along)(ctx, plan, tl, t, P)
   else if (s.key === 'question') question(ctx, plan, into, false, P)
   else if (s.key === 'answer') question(ctx, plan, into, true, P)
   else cta(ctx, plan, into, P)
@@ -315,63 +313,80 @@ function words(ctx, plan, into, P) {
   })
 }
 
-// fall: the sentence being read on its panel at the head of the sky, its
-// time running out under it; those read below it, dimmer as they sink.
-const FALL_Z = FS.heading
 const PAD = SP[5]
-// How dim a sentence is, by how many were read after it: the one read
-// now at full ink, those before it fading as they go down.
-const DIM = [1, 0.62, 0.4, 0.24, 0.12, 0]
-function fall(ctx, plan, tl, t, P) {
-  sky(ctx, P, 0.42)
+
+// crawl: the text on a plane tipped away from the viewer. A line comes up
+// from the foot of the screen at its largest, is read in the lower half
+// (the reading line, READ), and grows smaller and fainter as it climbs
+// into the sky. Its size at a height is in proportion to that height's
+// distance from the vanishing line, its letters a little flattened
+// (ASPECT), and the plane moves at one speed, so a line slows as it
+// recedes, as a film's opening crawl does.
+export const CRAWL = {
+  z: FS.heading, title: FS.display * 0.8, aspect: 0.88,
+  enter: FMT.h, ref: fr.bottom, vanish: fr.y - 420, fade: fr.y + 90,
+  read: fr.bottom - 200, clear: fr.y + 520,
+}
+const SPAN = CRAWL.ref - CRAWL.vanish
+const yAt = u => CRAWL.vanish + (CRAWL.enter - CRAWL.vanish) * Math.exp(-CRAWL.aspect * u / SPAN)
+const uAt = y => (SPAN / CRAWL.aspect) * Math.log((CRAWL.enter - CRAWL.vanish) / (y - CRAWL.vanish))
+const scaleAt = y => (y - CRAWL.vanish) / SPAN
+const TEXT_INK = RUBY_INK
+// The crawl's rows, laid out once: the title, then each sentence's lines.
+const rowsOf = new Map()
+function crawlRows(ctx, plan) {
+  const key = `${plan.id}|${plan.lang}`
+  if (rowsOf.has(key)) return rowsOf.get(key)
+  const tb = fit(ctx, plan.title, { weight: 900, fam: 'serif', sizes: [CRAWL.title, FS.display * 0.6], maxW: fr.w, maxLines: 2, lh: 1.1 })
+  const rows = tb.lines.map(l => ({ title: l, f: tb.f, size: tb.size, h: tb.size * 1.1 }))
+  rows[rows.length - 1].h += SP[8]
+  plan.sents.forEach((rows0, i) => {
+    // Every sentence at the one size, on as many lines as it takes.
+    const L = layOf(ctx, plan, i, CRAWL.z, fr.w, { maxLines: 12, min: CRAWL.z })
+    L.lines.forEach((line, li) => rows.push({ i, L: { ...L, lines: [line] }, h: L.lineH + L.lineGap + (li === L.lines.length - 1 ? SP[6] : 0) }))
+  })
+  const out = { rows, length: rows.reduce((n, r) => n + r.h, 0) }
+  rowsOf.set(key, out)
+  return out
+}
+function crawl(ctx, plan, tl, t, P) {
+  sky(ctx, P, 0.62)
+  // The whole sky darkened, the text's ground from its foot to its top.
+  ctx.fillStyle = 'rgba(10,8,18,0.5)'
+  ctx.fillRect(0, 0, FMT.w, FMT.h)
   masthead(ctx)
-  const now = tl.lines.reduce((n, l, i) => (t >= l.at ? i : n), 0)
-  const L0 = tl.lines[now]
-  chip(ctx, `JLPT ${plan.lv} · ${now + 1} / ${tl.lines.length}`, fr.right, fr.y + 6, { align: 'right' })
-  const lay = i => layOf(ctx, plan, i, FALL_Z, fr.w - PAD * 2)
-  // Where each sentence's text stands when `cur` is the one being read.
-  const standing = cur => {
-    const at = { [cur]: TOP + PAD }
-    let y = TOP + lay(cur).h + PAD * 2 + SP[6]
-    for (let i = cur - 1; i >= 0 && i >= cur - DIM.length; i--) { at[i] = y; y += lay(i).h + SP[6] }
-    return at
-  }
-  const k = ease((t - L0.at) / L0.drop)
-  const before = now ? standing(now - 1) : {}
-  const after = standing(now)
-  const SINK = FMT.h * 0.7
-  // Those read: each glides from where it stood to its place under the
-  // one dropping in, and dims a step; past SINK they are gone into the lake.
-  for (let i = Math.max(0, now - DIM.length); i < now; i++) {
-    const y = (before[i] ?? after[i]) + ((after[i] ?? before[i]) - (before[i] ?? after[i])) * k
-    const d0 = now - 1 - i
-    const a = (DIM[d0] + (DIM[d0 + 1] - DIM[d0]) * k) * Math.max(0, Math.min(1, (SINK - y) / 260))
+  const seg = tl.segs.find(x => x.key === 'reading')
+  const { rows, length } = crawlRows(ctx, plan)
+  // From the title just under the frame's foot to the last line past the
+  // clear line, at one speed over the reading's length.
+  const u0 = uAt(CRAWL.ref + 40)
+  const u1 = uAt(CRAWL.clear) + length
+  const U = u0 + (u1 - u0) * Math.min(1, Math.max(0, (t - seg.start) / seg.dur))
+  let p = 0
+  let reading = null
+  for (const row of rows) {
+    const u = U - p
+    p += row.h
+    if (u < 0) break
+    const y = yAt(u)
+    // The sentence at the reading line: the lowest one that has reached it.
+    if (row.L && y <= CRAWL.read) reading = row.i
+    if (y < CRAWL.fade - 40) continue
+    const k = scaleAt(y)
+    // Faint where it comes up from the foot and where it leaves into the sky.
+    const a = Math.min(1, (CRAWL.enter - y) / (CRAWL.enter - CRAWL.ref)) * Math.min(1, (y - CRAWL.fade) / 260)
     if (a <= 0.01) continue
     ctx.save()
-    // The one read before keeps its panel as it leaves it, fading.
-    if (d0 === 0) { ctx.globalAlpha = 1 - k; panel(ctx, fr.x, y - PAD, fr.w, lay(i).h + PAD * 2) }
-    ctx.globalAlpha = a
-    shade(ctx, d0 > 0 || k > 0.5)
-    drawSentence(ctx, lay(i), fr.x + PAD, y, 'left', () => ({ ink: LIGHT, rule: null, ruby: RUBY_INK }))
+    ctx.globalAlpha *= a
+    ctx.translate(fr.cx, y)
+    ctx.scale(k, k * CRAWL.aspect)
+    shade(ctx, true)
+    if (row.title) text(ctx, row.title, 0, row.size * 0.85, { f: row.f, color: GOLD, align: 'center' })
+    else drawSentence(ctx, row.L, 0, 0, 'center', () => ({ ink: TEXT_INK, rule: null, ruby: alpha(LIGHT, 0.9) }))
     ctx.restore()
   }
-  // The one read now, dropping in from above, then held on its panel.
-  const L = lay(now)
-  const top = TOP - 90 * (1 - k)
-  ctx.save()
-  ctx.globalAlpha *= k
-  panel(ctx, fr.x, top, fr.w, L.h + PAD * 2)
-  drawSentence(ctx, L, fr.x + PAD, top + PAD, 'left', () => ({ ink: LIGHT, rule: null, ruby: RUBY_INK }))
-  // Its time, running out under it, as the app's reading clock does.
-  const left = 1 - Math.min(1, Math.max(0, (t - L0.at - L0.drop) / L0.hold))
-  const by = top + L.h + PAD * 2 - SP[4]
-  ctx.fillStyle = alpha(LIGHT, 0.18)
-  rrect(ctx, fr.x + PAD, by, fr.w - PAD * 2, 6, 3)
-  ctx.fill()
-  ctx.fillStyle = GOLD
-  rrect(ctx, fr.x + PAD, by, (fr.w - PAD * 2) * left, 6, 3)
-  ctx.fill()
-  ctx.restore()
+  const at = reading ?? 0
+  chip(ctx, `JLPT ${plan.lv} · ${Math.min(plan.sents.length, at + 1)} / ${plan.sents.length}`, fr.right, fr.y + 6, { align: 'right' })
 }
 
 // along: the text on one panel, each word gold once said, the word being

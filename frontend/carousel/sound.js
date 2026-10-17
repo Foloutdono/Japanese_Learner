@@ -34,13 +34,16 @@ const TAIL = 4
 const PEAK = 0.5
 
 /** The score rendered: [left, right] Float32Arrays, `seconds` long at RATE.
- *  A sound is an app event (`key`) or a recorded clip (`src`). */
+ *  A sound is an app event (`key`) or a recorded clip (`src`); a clip
+ *  marked `loop` plays again until the score ends (a track of music under
+ *  a reading challenge, plan 247), and one given a `fade` comes in and
+ *  goes out over that many seconds rather than stopping mid-note. */
 export async function clipAudio(sounds, seconds, voices = globalThis.TsujiVoices) {
   const { VOICE_EVENTS, voiceOut, voiceLevel } = voices
   const n = Math.round(seconds * RATE)
   const mix = [new Float32Array(n), new Float32Array(n)]
   const clips = new Map()
-  for (const { at, key, src, gain = 1 } of sounds) {
+  for (const { at, key, src, gain = 1, loop = false, fade = 0 } of sounds) {
     if (at >= seconds) continue
     let out
     if (src) {
@@ -58,10 +61,15 @@ export async function clipAudio(sounds, seconds, voices = globalThis.TsujiVoices
       out = await ctx.startRendering()
     }
     const from = Math.round(at * RATE)
+    const ramp = Math.max(1, Math.round(fade * RATE))
     for (let ch = 0; ch < 2; ch++) {
       const data = out.getChannelData(Math.min(ch, out.numberOfChannels - 1))
       const dst = mix[ch]
-      for (let i = 0; i < data.length && from + i < n; i++) dst[from + i] += data[i] * (src ? gain : 1)
+      const len = loop ? n - from : data.length
+      for (let i = 0; i < len && from + i < n; i++) {
+        const env = fade ? Math.min(1, i / ramp, (n - from - i) / ramp) : 1
+        dst[from + i] += data[i % data.length] * (src ? gain : 1) * env
+      }
     }
   }
   let peak = 0

@@ -45,7 +45,7 @@ const DEFAULTS = {
   // Plan 234: the conversion carousel, its look, its length, the feature it shows.
   design: 'clarte', length: '5', feature: 'auto',
   // Plan 247: how a reading challenge's text moves.
-  challengeStyle: 'fall',
+  challengeStyle: 'crawl',
 }
 const state = load()
 const files = new Map()
@@ -637,17 +637,23 @@ async function renderLong(mine) {
   $('#command').textContent = longCommand(id, state.level, state.lang, short ? 'short' : 'long', state.fit)
 }
 // ── The reading challenges (plan 247) ─────────────────────────
-// A comprehension text as a 9:16 video over Today's print: its sentences
-// falling into the lake, or read along by the app's reader. Drawn here
-// as it is made; the falling one is encoded here too, with the lake and
-// the app's sounds, and the voice of the one read along is made where it
-// is rendered (the command below), every word timed on it.
+// A comprehension text as a 9:16 video over Today's print: crawling up
+// the screen as a film's opening crawl does, or read along by the app's
+// reader. Drawn here as it is made; the crawl is encoded here too, with
+// the app's sounds and a track of the owner's music if one is added, and
+// the voice of the one read along is made where it is rendered (the
+// command below), every word timed on it.
 const CHAPTER = { hook: 'Hook', words: 'Three words', reading: 'Reading', question: 'Question', answer: 'Answer', cta: 'The app' }
+// The track laid under it, picked from this computer: kept for the visit
+// only, never stored ({ name, url }).
+let music = null
 async function renderChallenge(mine) {
   const data = await fetchJson('comprehension.json')
   if (mine !== token) return
   const id = currentId()
-  const pl = challengePlan(data, id, { lang: state.lang, style: state.challengeStyle, hour: state.hour })
+  const pl = challengePlan(data, id, { lang: state.lang, style: state.challengeStyle, hour: state.hour, music: music?.name })
+  $('#music-name').textContent = music ? music.name : 'No music'
+  $('#music-clear').hidden = !music
   const tl = challengeTimeline(pl)
   const P = await printFor(state.hour).catch(e => { status(`Today's print did not load (${e.message}).`); return null })
   await fonts(JSON.stringify(pl))
@@ -671,7 +677,7 @@ async function renderChallenge(mine) {
   name.append(jp, ` ${pl.title}`)
   const n = document.createElement('span')
   n.className = 'deck__count'
-  n.textContent = `${clock(tl.seconds)} · ${pl.sents.length} sentences · ${pl.style === 'fall' ? 'falling' : 'read along'} · 9:16`
+  n.textContent = `${clock(tl.seconds)} · ${pl.sents.length} sentences · ${pl.style === 'crawl' ? 'crawl' : 'read along'} · 9:16`
   head.append(name, n)
   const screen = document.createElement('div')
   screen.className = 'player'
@@ -699,15 +705,16 @@ async function renderChallenge(mine) {
   bar.append(play, scrub, time)
   const note = document.createElement('p')
   note.className = 'player__note'
-  note.textContent = pl.style === 'fall'
-    ? 'A silent preview: the lake and the app’s sounds are laid under it when it is downloaded or rendered.'
+  note.textContent = pl.style === 'crawl'
+    ? `A silent preview: the app’s sounds${music ? ' and your track' : ''} are laid under it when it is downloaded or rendered.`
     : 'A silent preview, timed on a guess: the voice is made, and every word lit on it, when the video is rendered (the command below).'
   const chapters = document.createElement('ol')
   chapters.className = 'chapters'
   row.append(head, screen, bar, note, chapters)
   stage.append(row)
-  const key = `challenge|${id}|${state.lang}|${state.challengeStyle}|${state.hour}`
-  player = { c, pl, tl, t: Math.min(player?.key === key ? player.t : tl.lines[1]?.at + 1.5 || 1.6, tl.seconds), raf: 0, id, key, play, scrub, time }
+  const key = `challenge|${id}|${state.lang}|${state.challengeStyle}|${state.hour}|${music?.name || ''}`
+  const reading = tl.segs.find(sg => sg.key === 'reading')
+  player = { c, pl, tl, t: Math.min(player?.key === key ? player.t : reading.start + 12, tl.seconds), raf: 0, id, key, play, scrub, time }
   const draw = () => {
     drawChallenge(c.getContext('2d'), pl, tl, player.t, P)
     scrub.value = String(player.t)
@@ -750,18 +757,19 @@ async function renderChallenge(mine) {
     countTitle()
   }
   $('#command').textContent = challengeCommand(pl)
-  // The falling one is made here, whole; the one read along needs the voice engine.
-  $('#export-video').disabled = pl.style !== 'fall'
-  $('#export-video').textContent = pl.style === 'fall' ? `Download the video (.mp4, ${clock(tl.seconds)}, with the lake)` : 'Read along is made by the command (the voice)'
+  // The crawl is made here, whole; the one read along needs the voice engine.
+  $('#export-video').disabled = pl.style !== 'crawl'
+  $('#export-video').textContent = pl.style === 'crawl' ? `Download the video (.mp4, ${clock(tl.seconds)}${music ? ', with your track' : ''})` : 'Read along is made by the command (the voice)'
 }
 async function exportChallenge() {
   const ch = current.challenge
-  if (!ch || current.plan.style !== 'fall') return
+  if (!ch || current.plan.style !== 'crawl') return
   const { tl, P } = ch
   await encodeClip({
     btn: '#export-video', name: `tsuji-challenge-${safeName(ch.id)}-${current.plan.hour}-${state.lang}`, said: 'reading challenge',
     fmt: FORMATS.story, fps: 30, seconds: tl.seconds,
-    sounds: [{ at: 0, src: `${BASE}${tl.bed.src}` }, ...tl.sfx],
+    // The track under it all, looped if it is shorter, coming in and going out.
+    sounds: [...(music ? [{ at: 0, src: music.url, gain: 0.7, loop: true, fade: 2.5 }] : []), ...tl.sfx],
     frame: (ctx, t) => { drawChallenge(ctx, current.plan, tl, t, P) },
   })
 }
@@ -1198,6 +1206,19 @@ function wire() {
   })
   $('#export-thumb').addEventListener('click', exportThumb)
   $('#export-video').addEventListener('click', exportChallenge)
+  $('#music-file').addEventListener('change', e => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (music) URL.revokeObjectURL(music.url)
+    music = { name: file.name, url: URL.createObjectURL(file) }
+    e.target.value = ''
+    render()
+  })
+  $('#music-clear').addEventListener('click', () => {
+    if (music) URL.revokeObjectURL(music.url)
+    music = null
+    render()
+  })
   $('#export-short').addEventListener('click', exportShort)
   $('#copy-short').addEventListener('click', async () => {
     const cmd = `VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --carousel ${recipeOf(shortRecipe())}`

@@ -16,9 +16,10 @@
 //   --carousel RECIPE a carousel of the studio as a short video, voiced: the
 //                     studio's "Copy the command" writes the recipe (short.js)
 //   --challenge ID    a reading challenge (plan 247, challenge.js): a
-//                     comprehension text, 9:16, over Today's print and its lake
-//   --style fall      ... its sentences falling (fall), or read along by the voice (along)
-//   --hour dusk       ... the print's hour: dawn, day, dusk or night
+//                     comprehension text, 9:16, over Today's print
+//   --style crawl     ... crawling up the screen (crawl), or read along by the voice (along)
+//   --hour night      ... the print's hour: dawn, day, dusk or night
+//   --music FILE      ... a track of your own under it (any audio ffmpeg reads), looped if short
 //
 // Writes <name>.mp4, <name>.txt (the title, then the description with
 // its chapters and the voice's credit) and <name>.jpg (a thumbnail).
@@ -29,7 +30,7 @@
 import { spawn, spawnSync } from 'node:child_process'
 import { createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { createServer } from 'node:http'
-import { dirname, extname, join, resolve } from 'node:path'
+import { dirname, extname, isAbsolute, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 import { SITE_ORIGIN } from '../../landing/config.mjs'
@@ -113,7 +114,9 @@ const canvasOf = size => page.evaluate(size => {
 let tl, slug, SIZE, pageText, thumbAt
 if (args.challenge) {
   // ── A reading challenge: the text over the hour's print, read along voiced ──
-  const plan = challengePlan(banks['comprehension.json'], String(args.challenge), { lang, style: args.style, hour: args.hour })
+  const music = typeof args.music === 'string' ? resolve(args.music) : null
+  if (music && !existsSync(music)) throw new Error(`no track at ${music}`)
+  const plan = challengePlan(banks['comprehension.json'], String(args.challenge), { lang, style: args.style, hour: args.hour, music })
   const cues = challengeCues(plan)
   const dur = cues.length ? voiceAll(cues) : null
   tl = challengeTimeline(plan, dur ? c => (dur(c) ? { dur: dur(c), marks: dur.marks(c) } : null) : null)
@@ -216,13 +219,17 @@ for (const key of keys) {
   else log(`no app sound named ${key}`)
 }
 writeFileSync(join(WORK, 'timeline.json'), JSON.stringify({ ...tl, seconds }))
-// A recorded bed (a challenge's lake), as a WAV at the mix's rate.
+// A recorded bed (a challenge's track of music), as a WAV at the mix's rate.
 const bedArgs = []
 if (tl.bed?.src) {
   const bedWav = join(WORK, 'bed.wav')
-  const conv = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', join(FRONT, tl.bed.src), '-ar', '48000', '-ac', '2', bedWav])
+  const src = isAbsolute(tl.bed.src) ? tl.bed.src : join(FRONT, tl.bed.src)
+  const conv = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', src, '-ar', '48000', '-ac', '2', bedWav])
   if (conv.status === 0) bedArgs.push('--bed', bedWav)
-  else log(`the bed ${tl.bed.src} could not be read: the music plays instead`)
+  else throw new Error(`the track ${src} could not be read`)
+} else if (tl.bed === null) {
+  // A challenge with no track: its sounds and its voice alone, no music made up.
+  bedArgs.push('--no-bed')
 }
 const mixed = spawnSync(python, ['-m', 'scripts.long_video_audio', 'mix', join(WORK, 'timeline.json'), '--cache', CACHE, '--sfx', join(WORK, 'sfx'), '--out', join(WORK, 'mix.wav'), ...bedArgs], { cwd: BACKEND, stdio: 'inherit' })
 if (mixed.status !== 0) throw new Error('the mix failed')

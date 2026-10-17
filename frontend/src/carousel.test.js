@@ -14,7 +14,7 @@ import { SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTim
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf } from '../carousel/funnel.js'
 import { KINDS, LONG_SITE, PART, SHORT, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
-import { AMBIANCE, CH as CHALLENGE, CPM, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
+import { CH as CHALLENGE, CPM, CRAWL, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
@@ -1604,19 +1604,23 @@ describe('the reading challenges (plan 247)', () => {
     globalThis.Path2D = class {}
     try { return fn() } finally { globalThis.Path2D = had }
   }
-  // Every text drawn, where and how large (the stub's measure, a little wide).
+  // Every text drawn, where and how large (the stub's measure, a little wide),
+  // through the crawl's moves and scales: its size is its height on screen.
   const drawn = () => {
     const at = []
-    const state = { font: '10px sans-serif', textAlign: 'left', globalAlpha: 1 }
+    const state = { font: '10px sans-serif', textAlign: 'left', globalAlpha: 1, tx: 0, ty: 0, sx: 1, sy: 1 }
     const size = () => parseFloat(/([\d.]+)px/.exec(state.font)?.[1] || '10')
     const width = t => [...String(t)].reduce((w, c) => w + (/[\u3000-\u9fff\uff00-\uffef]/.test(c) ? 1 : 0.56), 0) * size()
     const methods = {
       measureText: t => ({ width: width(t), actualBoundingBoxAscent: size() * 0.72, actualBoundingBoxDescent: size() * 0.12, actualBoundingBoxLeft: 0, actualBoundingBoxRight: width(t) }),
-      fillText: (t, x) => {
+      fillText: (t, x, y) => {
         const w = width(t)
         const left = state.textAlign === 'center' ? x - w / 2 : state.textAlign === 'right' ? x - w : x
-        at.push({ t: String(t), size: size(), left, right: left + w, alpha: state.globalAlpha })
+        const L = state.tx + state.sx * left
+        at.push({ t: String(t), size: size() * state.sy, left: L, right: L + w * state.sx, y: state.ty + state.sy * y, alpha: state.globalAlpha })
       },
+      translate: (x, y) => { state.tx += x * state.sx; state.ty += y * state.sy },
+      scale: (a, b) => { state.sx *= a; state.sy *= b },
       createLinearGradient: () => ({ addColorStop() {} }),
       getTransform: () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }),
       // What a save keeps: how faint, in what face, from where.
@@ -1630,14 +1634,17 @@ describe('the reading challenges (plan 247)', () => {
   const jp = t => /[\u3040-\u30ff\u3400-\u9fff]/.test(t)
   const each = data.passages
 
-  it('lays the hour’s lake under it, the one the app plays behind Today', () => {
-    expect(AMBIANCE).toBe(JSON.parse(read('src/lib/audio/ambiance.json')).rev)
+  it('makes up no music: the owner’s track under it, or nothing but its sounds', () => {
     for (const style of CHALLENGE_STYLES) {
-      for (const hour of ['dawn', 'day', 'dusk', 'night']) {
-        const tl = challengeTimeline(challengePlan(data, 'n5-01', { style, hour }))
-        expect(() => read(tl.bed.src), tl.bed.src).not.toThrow()
-      }
+      const pl = challengePlan(data, 'n5-01', { style })
+      expect(challengeTimeline(pl).bed, style).toBeNull()
+      expect(challengeCommand(pl), style).not.toMatch(/--music/)
+      const jazz = challengePlan(data, 'n5-01', { style, music: 'music/late train.mp3' })
+      expect(challengeTimeline(jazz).bed, style).toEqual({ src: 'music/late train.mp3' })
+      expect(challengeTimeline(jazz).loudness, style).toBe(-16)
+      expect(challengeCommand(jazz), style).toMatch(/ --music "music\/late train\.mp3"$/)
     }
+    expect(challengePlan(data, 'n5-01').style).toBe('crawl')
     expect(Object.keys(CPM).sort()).toEqual([...LEVELS].sort())
     expect(SOURCES.find(s => s.id === 'challenge')).toMatchObject({ video: true, byLevel: true })
     expect(challengeItems(data).length).toBe(data.passages.length)
@@ -1658,16 +1665,15 @@ describe('the reading challenges (plan 247)', () => {
     }
   })
 
-  it('holds each falling sentence as long as its level reads it, one after another', () => {
+  it('crawls the whole text up past the reading line at the pace its level reads', () => {
     for (const P of data.passages) {
-      const pl = challengePlan(data, P.id, { style: 'fall' })
+      const pl = challengePlan(data, P.id, { style: 'crawl' })
       const tl = challengeTimeline(pl)
-      expect(tl.lines.length, P.id).toBe(pl.sents.length)
-      tl.lines.forEach((l, i) => {
-        const chars = pl.sents[i].filter(r => r.k !== 'punct').reduce((n, r) => n + [...r.t].length, 0)
-        expect(l.hold, `${P.id} ${i}`).toBeGreaterThanOrEqual(Math.max(CHALLENGE.least, chars / (CPM[P.lv] / 60)) - 0.001)
-        if (i) expect(l.at, `${P.id} ${i}`).toBeCloseTo(tl.lines[i - 1].at + tl.lines[i - 1].drop + tl.lines[i - 1].hold, 2)
-      })
+      const chars = pl.sents.flat().filter(r => r.k !== 'punct').reduce((n, r) => n + [...r.t].length, 0)
+      expect(pl.chars, P.id).toBe(chars)
+      const seg = tl.segs.find(s => s.key === 'reading')
+      expect(seg.dur, P.id).toBeCloseTo(CHALLENGE.into + chars / (CPM[P.lv] / 60) + CHALLENGE.out, 2)
+      expect(tl.lines, P.id).toEqual([])
       // Hook, words, the reading, the question, its answer, the app: end to end.
       expect(tl.segs.map(s => s.key)).toEqual(['hook', 'words', 'reading', 'question', 'answer', 'cta'])
       tl.segs.forEach((s, i) => { if (i) expect(s.start, P.id).toBeCloseTo(tl.segs[i - 1].start + tl.segs[i - 1].dur, 2) })
@@ -1676,6 +1682,37 @@ describe('the reading challenges (plan 247)', () => {
       expect(tl.sfx.map(x => x.key), P.id).toEqual(['board-flap', ...Array(CHALLENGE.count).fill('click'), 'correct', 'platform-chime'])
     }
   })
+
+  it('brings the text up from the foot and lets it shrink away into the sky', () => withPath2D(() => {
+    const pl = challengePlan(data, 'n4-01')
+    const tl = challengeTimeline(pl)
+    const seg = tl.segs.find(s => s.key === 'reading')
+    const first = pl.sents[0][0].t
+    const where = t => {
+      const { ctx, at } = drawn()
+      drawChallenge(ctx, pl, tl, t, null)
+      return at
+    }
+    // The first sentence's first word, drawn top down after the title.
+    const word = t => where(t).find(x => x.t === first)
+    // The text opens under the frame's foot and climbs, shrinking.
+    const opens = word(seg.start)
+    expect(!opens || opens.y > CRAWL.ref).toBe(true)
+    const rises = [0.06, 0.12, 0.18].map(f => word(seg.start + seg.dur * f))
+    for (let i = 1; i < rises.length; i++) {
+      expect(rises[i].y).toBeLessThan(rises[i - 1].y)
+      expect(rises[i].size).toBeLessThan(rises[i - 1].size)
+    }
+    // Every sentence read on the way: the counter climbs to the last.
+    const n = pl.sents.length
+    const count = t => where(t).find(x => / \/ \d+$/.test(x.t))?.t
+    expect(count(seg.start + 0.1)).toMatch(new RegExp(` 1 / ${n}$`))
+    expect(count(seg.start + seg.dur - 0.05)).toMatch(new RegExp(` ${n} / ${n}$`))
+    // The last line still in the sky as the question comes, not cut off at the foot.
+    const end = where(seg.start + seg.dur - 0.05).filter(x => jp(x.t) && x.alpha > 0.5)
+    expect(end.length).toBeGreaterThan(0)
+    expect(Math.max(...end.map(x => x.y))).toBeLessThan(CRAWL.read)
+  }))
 
   it('lights each word read along as the voice reaches it, on the engine’s own syllables', () => {
     const pl = challengePlan(data, 'n5-01', { style: 'along' })
@@ -1714,7 +1751,9 @@ describe('the reading challenges (plan 247)', () => {
           const pl = challengePlan(data, P.id, { style, lang })
           const tl = challengeTimeline(pl)
           const where = `${P.id} ${style} ${lang}`
-          const moments = [1.6, ...tl.lines.slice(0, 3).map(l => (l.drop ? l.at + l.drop + 0.5 : l.voice + 0.5)), ...tl.segs.slice(3).map(s => s.start + s.dur - 0.05)]
+          const seg = tl.segs.find(s => s.key === 'reading')
+          const reading = style === 'crawl' ? [0.25, 0.5, 0.75].map(f => seg.start + seg.dur * f) : tl.lines.slice(0, 3).map(l => l.voice + 0.5)
+          const moments = [1.6, ...reading, ...tl.segs.slice(3).map(s => s.start + s.dur - 0.05)]
           for (const t of moments) {
             const { ctx, at } = drawn()
             drawChallenge(ctx, pl, tl, t, null)
@@ -1724,14 +1763,14 @@ describe('the reading challenges (plan 247)', () => {
               expect(x.t.endsWith('…'), `${where} ${t} ${x.t}`).toBe(false)
             }
           }
-          // The sentence being read, at the title's size at least, its readings over it.
+          // The sentence being read, at the title's size at least, its readings
+          // over it: on the crawl, what is between the reading line and the foot.
           const { ctx, at } = drawn()
-          const l = tl.lines[1]
-          drawChallenge(ctx, pl, tl, l.drop ? l.at + l.drop + 0.5 : l.voice + 0.2, null)
+          drawChallenge(ctx, pl, tl, style === 'crawl' ? seg.start + seg.dur * 0.5 : tl.lines[1].voice + 0.2, null)
           const words = at.filter(x => jp(x.t) && x.alpha > 0.99)
-          const body = Math.max(...words.map(x => x.size))
+          const body = Math.max(...words.filter(x => style !== 'crawl' || (x.y >= CRAWL.read && x.y <= CRAWL.ref)).map(x => x.size))
           expect(body, where).toBeGreaterThanOrEqual(FS.title)
-          if (pl.ruby) expect(words.some(x => x.size < body), where).toBe(true)
+          if (pl.ruby) expect(words.some(x => x.size < body * 0.6), where).toBe(true)
         }
       }
     }
@@ -1749,8 +1788,8 @@ describe('the reading challenges (plan 247)', () => {
       expect(page.description).toContain('https://tsuji.app')
       expect(page.description).toMatch(/VOICEVOX Nemo/)
       expect(challengeCommand(pl)).toMatch(/^VOICEVOX_URL=.* --challenge n4-01 --style along/)
-      expect(challengeCommand({ ...pl, style: 'fall' })).not.toMatch(/VOICEVOX/)
-      expect(challengePage({ ...pl, style: 'fall' }, tl, 'x').description).not.toMatch(/VOICEVOX/)
+      expect(challengeCommand({ ...pl, style: 'crawl' })).not.toMatch(/VOICEVOX/)
+      expect(challengePage({ ...pl, style: 'crawl' }, tl, 'x').description).not.toMatch(/VOICEVOX/)
     }
     expect(challengePage(challengePlan(data, 'n4-01', { lang: 'fr' }), challengeTimeline(challengePlan(data, 'n4-01', { lang: 'fr' })), 'x').title).toMatch(/^Tu arrives/)
   }))

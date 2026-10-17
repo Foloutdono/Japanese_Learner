@@ -28,7 +28,8 @@ recipes by the page, one WAV a sound) on the timeline, under a bed of
 music this script plays itself: soft chords and a slow pluck, nothing
 recorded, so the video owes no one for it. The music steps back while a
 line is said. A reading challenge (plan 247, frontend/carousel/challenge.js)
-lies on the app's own lake instead, the ambiance Today plays (`--bed`).
+lies on a track of the owner's own music instead (`--bed`), or on nothing
+but its sounds and its voice (`--no-bed`).
 
 A line marked `marks` (a challenge read along) is also written down
 syllable by syllable: when each of the engine's morae starts in its
@@ -285,8 +286,8 @@ def limited(x, block: int = 120, release: float = 0.08):
     return np.clip(out[:n], -CEILING, CEILING)
 
 
-# A recorded bed (the lake, plan 247) at this level, some 12dB under the
-# voice where it speaks; where nothing is said it carries the video.
+# A recorded bed (a track of music, plan 247) at this level, some 12dB
+# under the voice where it speaks; where nothing is said it carries the video.
 BED_RMS = 0.05
 
 
@@ -311,7 +312,7 @@ def recorded_bed(path: Path, n: int):
     return loop
 
 
-def mix(tl_path: Path, cache: Path, sfx: Path, out: Path, bed_path: Path | None = None) -> int:
+def mix(tl_path: Path, cache: Path, sfx: Path, out: Path, bed_path: Path | None = None, no_bed: bool = False) -> int:
     import numpy as np
 
     from study import voice_engine as engine
@@ -358,6 +359,8 @@ def mix(tl_path: Path, cache: Path, sfx: Path, out: Path, bed_path: Path | None 
     spoken = float(np.mean(np.abs(voice_track) > 0.02)) if n else 0.0
     if bed_path:
         music = recorded_bed(bed_path, n)
+    elif no_bed:
+        music = np.zeros(n, dtype=np.float32)
     else:
         music = bed(n / RATE) * MUSIC * float(np.clip(0.12 / max(spoken, 0.06), 1.0, 2.0))
     level = np.abs(voice_track)
@@ -402,11 +405,12 @@ def main() -> int:
     m.add_argument("--cache", type=Path, required=True)
     m.add_argument("--sfx", type=Path, required=True)
     m.add_argument("--out", type=Path, required=True)
-    m.add_argument("--bed", type=Path, help="a recorded bed (WAV) in place of the music: the lake of a reading challenge")
+    m.add_argument("--bed", type=Path, help="a recorded bed (WAV) in place of the music: a reading challenge's own track")
+    m.add_argument("--no-bed", action="store_true", help="no bed at all: a reading challenge with no track")
     args = ap.parse_args()
     if args.step == "voice":
         return voice(args.cues, args.cache, args.out)
-    return mix(args.timeline, args.cache, args.sfx, args.out, args.bed)
+    return mix(args.timeline, args.cache, args.sfx, args.out, args.bed, args.no_bed)
 
 
 if __name__ == "__main__":
