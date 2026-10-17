@@ -3,7 +3,7 @@
 // is here, and only here: `npm run landing` regenerates the pages from
 // it (frontend/landing/README.md).
 import { readFileSync } from 'node:fs'
-import { BOARD_PARAM } from '../src/lib/frontEntry.js'
+import { BOARD_PARAM, SIGNIN_PARAM } from '../src/lib/frontEntry.js'
 
 // The web origin the canonical, hreflang, sitemap and share-card URLs
 // are written against: the custom domain, tsuji.app.
@@ -31,8 +31,13 @@ export const APP_ENTRY = '/app'
 // mints the guest pass at once and opens the boarding on its first
 // question, the name, rather than on its own Welcome, which would ask
 // the visitor to board a second time (src/lib/frontEntry.js). Se
-// connecter keeps APP_ENTRY: the sign-in stands on the Welcome.
+// connecter leads to SIGNIN_ENTRY, below.
 export const BOARD_ENTRY = `${APP_ENTRY}?${BOARD_PARAM}`
+
+// Where Se connecter leads: the app with its sign-in form already open,
+// not its Welcome, which would ask the visitor to press Se connecter a
+// second time (src/lib/frontEntry.js).
+export const SIGNIN_ENTRY = `${APP_ENTRY}?${SIGNIN_PARAM}`
 
 // The two store listings. Null draws the badge as "coming soon" and
 // links nowhere: a badge that 404s is worse than one that waits.
