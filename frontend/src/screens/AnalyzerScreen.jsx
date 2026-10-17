@@ -277,7 +277,7 @@ export default function AnalyzerScreen({ session }) {
   const [lookup, setLookup] = useState(null)
   const closeLookup = useCallback(() => setLookup(null), [])
   // 机 (plan 134): on the desk the result is three columns and the
-  // right one is a panel with three faces since plan 238 (the owner's
+  // right one is a panel with three faces since plan 242 (the owner's
   // pick C of the canvas "Tsuji analyser — the desk and Explain"), its
   // segment the way between them: the card in focus -- its entry in the
   // runs' band (plan 126), following the token the learner walks to, or
@@ -287,7 +287,7 @@ export default function AnalyzerScreen({ session }) {
   // grammar in its left column (plan 161), so its panel has two.
   const [side, setSide] = useState('card')
   // The desk's player bar and the panel's segment, each told when the
-  // column it stands in is too narrow for it on one row (plan 238): the
+  // column it stands in is too narrow for it on one row (plan 242): the
   // desk's stylesheet answers one width only, so the boxes are measured.
   const [slabRef, barTight] = useLabelsFit('.anl-pbar')
   const [panelRef, facesTight] = useLabelsFit('.anl-faces')
@@ -487,7 +487,7 @@ export default function AnalyzerScreen({ session }) {
     setTokenIndex(0)
     // An explanation belongs to its sentence: another sentence opens on
     // its card (plan 134). The grammar face stays, the new line's points
-    // in it (plan 238).
+    // in it (plan 242).
     setSide(v => (v === 'grammar' ? v : 'card'))
   }, [focusIndex, passageKey])
 
@@ -581,7 +581,7 @@ export default function AnalyzerScreen({ session }) {
       if (tag === 'INPUT' || tag === 'TEXTAREA' || el?.isContentEditable) return
       // The route map owns its own arrows (roving tabindex) -- inside
       // it the arrow keys mean "move along the line", not this map; the
-      // panel's segment walks its faces with them (plan 238).
+      // panel's segment walks its faces with them (plan 242).
       if (el?.closest?.('.anl-line, .anl-faces')) return
       // Space on a focused button is the button's own activation.
       if (e.key === ' ' && tag === 'BUTTON') return
@@ -975,7 +975,7 @@ export default function AnalyzerScreen({ session }) {
     if (stopFilter === 'kept' && !analyzer.kept.has(s.text)) return false
     if (stopFilter === 'i1' && (s.foreign || s.unknown_count !== 1)) return false
     if (stopFilter === 'new' && !(s.unknown_count > 0)) return false
-    // In the Japanese or in its translation (plan 238): the line read as
+    // In the Japanese or in its translation (plan 242): the line read as
     // a bilingual transcript is searched as one.
     if (stopQuery && !s.text.includes(stopQuery)
       && !stopTranslation(s, i).toLowerCase().includes(stopQuery.toLowerCase())) return false
@@ -1007,7 +1007,7 @@ export default function AnalyzerScreen({ session }) {
     if (!target) return
     playerRef.current?.pause()
     setLookup(target)
-    // The video desk's panel opens it on its grammar face (plan 238); a
+    // The video desk's panel opens it on its grammar face (plan 242); a
     // typed Passage's, whose grammar is in its left column, on its card.
     setSide(playerVideoId ? 'grammar' : 'card')
   }
@@ -1051,7 +1051,7 @@ export default function AnalyzerScreen({ session }) {
   function walkTo(i) {
     if (wide) {
       setLookup(null)
-      // A word pressed is the word's card (plan 238): the panel turns to it.
+      // A word pressed is the word's card (plan 242): the panel turns to it.
       setSide('card')
     }
     setTokenIndex(i)
@@ -1234,7 +1234,7 @@ export default function AnalyzerScreen({ session }) {
 
   // ── 机 — the result on three columns (plans 134, 238) ────────
   // The owner's pick C of the canvas "Tsuji analyser — the desk and
-  // Explain" (plan 238), with the desk's rail taken away to give it the
+  // Explain" (plan 242), with the desk's rail taken away to give it the
   // window: the Passage's lines on the left, each over its translation;
   // the head, then the video edge to edge with no arrows beside it, the
   // line as its subtitle over its translation and the player's bar as
@@ -1280,7 +1280,7 @@ export default function AnalyzerScreen({ session }) {
   )
   const several = sentences.length > 1
   // The typed sentence's own arrows; a video's line is walked from the
-  // player's bar, the arrows beside the picture gone (plan 238).
+  // player's bar, the arrows beside the picture gone (plan 242).
   const prevArrow = several && arrow('left', focusIndex === 0, () => goToStop(focusIndex - 1), t.prevSentence)
   const nextArrow = several && arrow('right', focusIndex >= sentences.length - 1, () => goToStop(focusIndex + 1), t.nextSentence)
   const railPanel = several && (

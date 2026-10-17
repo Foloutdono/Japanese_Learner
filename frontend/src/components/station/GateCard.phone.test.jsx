@@ -80,6 +80,22 @@ const words = el => {
   while (walk.nextNode()) out.push(walk.currentNode.textContent.trim())
   return out.filter(Boolean).join(' ').replace(/\s+/g, ' ')
 }
+// A computed colour's channels, and the WCAG 2.x contrast of two.
+const rgbOf = str => {
+  const nums = str.match(/[\d.]+/g).slice(0, 3).map(Number)
+  return str.startsWith('color(') ? nums.map(n => n * 255) : nums
+}
+function contrast(a, b) {
+  const lum = c => {
+    const [r, g, bl] = c.map(v => {
+      const s = v / 255
+      return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4
+    })
+    return 0.2126 * r + 0.7152 * g + 0.0722 * bl
+  }
+  const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x)
+  return (hi + 0.05) / (lo + 0.05)
+}
 const MAIN = LANES.filter(l => l.mode.endsWith('.flashcard.f2b')).reduce((n, l) => n + l.due, 0)
 const RIDING = LANES.filter(l => l.mode.endsWith('.flashcard.f2b')).length
 const ALL = TODAY.total
@@ -270,6 +286,42 @@ describe('the gate with nothing due', () => {
     const go = document.querySelector('.btn-depart--gate')
     expect(go.disabled).toBe(true)
     expect(text(go)).toMatch(/^Ouvre à \d\d:\d\d$/)
+  })
+
+  // 回復運転 (plan 238, the owner's pick A of the canvas "Tsuji —
+  // Réviser plus"): the reviews waiting past the spent share are the
+  // board's first row, the way on to them, over tomorrow's. The quiet
+  // word it replaces took the page's ink and stood on the print, where
+  // the light theme's night lost it.
+  it('stands the reviews waiting past the share on the board, over tomorrow, in the panel\'s ink', async () => {
+    document.documentElement.setAttribute('data-theme', 'light')
+    try {
+      await gate({
+        total: 0, lanes: [], next_due: at,
+        reviewed: { total: 72, by_line: { vocab: 72 } },
+        tomorrow: { cards: 72, minutes: 14 },
+        review: { cap: 72, held: 144, catchup: null, away: null, comeback: null },
+      })
+      const board = document.querySelector('.tdy__foot .tdy-board')
+      const rows = [...board.children]
+      expect(rows.map(words)).toEqual(['En attente 144 cartes Réviser', 'Demain 72 cartes ≈ 14 min'])
+      expect(rows[0].tagName).toBe('BUTTON')
+      expect(rows[0].dataset.action).toBe('review-extra')
+      expect(document.querySelector('.tdy__foot .clrk-quiet')).toBeNull()
+      // One board's columns: the two counts stand one over the other.
+      const [a, b] = rows.map(r => r.querySelector('.tdy-next__n').getBoundingClientRect().left)
+      expect(Math.abs(a - b)).toBeLessThan(1)
+      // On the glass, in the panel's ink, whatever the page's theme.
+      expect(getComputedStyle(board).backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
+      const probe = document.createElement('i')
+      probe.style.color = 'var(--bg-panel)'
+      document.body.append(probe)
+      const ratio = contrast(rgbOf(getComputedStyle(rows[0].querySelector('.tdy-board__way')).color), rgbOf(getComputedStyle(probe).color))
+      probe.remove()
+      expect(ratio).toBeGreaterThan(4.5)
+    } finally {
+      document.documentElement.removeAttribute('data-theme')
+    }
   })
 
   it('stamps nothing on a day nothing was reviewed', async () => {

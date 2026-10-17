@@ -1046,7 +1046,7 @@ const phraseAnalyzer = {
   // The text desk: the words list folded to one line (plan 235).
   wordsFoldCap:        'Words in the sentence',
   explanationTitle:    'The sentence explained',
-  // The desk's panel, its three faces (plan 238).
+  // The desk's panel, its three faces (plan 242).
   panelFaces:          'What the panel shows',
   faceWord:            'Word',
   facePoint:           'Point',
@@ -1580,6 +1580,7 @@ const dictionary = {
   bldRight: 'Right.',
   bldClose: 'Almost.',
   bldWrong: 'Not quite.',
+  bldOther: (said, register) => `The sentence says ${said}: the same, in ${register === 'plain' ? 'plain' : 'polite'} speech.`,
   mapAria: "The point's line",
   mapTutorial: 'Tutorial',
   mapNow: 'now',
@@ -3310,7 +3311,8 @@ const reviewPlan = {
   todayCatchupDay: 'catch-up day',
   todayCatchupGentle: 'a day, catching up',
   todayCatchupShort: 'catch-up',
-  todayExtra: n => `Review more · ${n} card${n === 1 ? '' : 's'}`,
+  todayHeld: 'Waiting',
+  todayHeldGo: 'Review',
   settingsReviews: 'Reviews',
   rvRowNone: 'No ceiling',
   rvRowCap: n => `${n} at most a day`,

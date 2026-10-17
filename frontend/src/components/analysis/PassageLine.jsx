@@ -28,7 +28,7 @@ import { PlusIcon, CheckIcon } from '../ui/Icons'
 // --anl-strip-h machinery that existed only to keep two sticky
 // siblings from overlapping.
 
-// `translations` (plan 238, the desk): each stop's translation, in the
+// `translations` (plan 242, the desk): each stop's translation, in the
 // order of `sentences`, printed under its Japanese in the learner's
 // language (`trLang`) -- the line read as a bilingual transcript. A rail
 // given none draws its stops on one line, as it always did.
@@ -252,7 +252,7 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, scrollOnChang
                   </span>
                   {/* The time over the marks, one narrow column at the
                       row's end, so the line and its translation keep
-                      the rail's width (plan 238). */}
+                      the rail's width (plan 242). */}
                   <span className="anl-stop__meta">
                     {time}
                     <span className="anl-stop__marks">{marks}</span>

@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 at the desk's tightest (plan 238) ────────────────────────
+// ── 机 at the desk's tightest (plan 242) ────────────────────────
 // The owner's pick C at 1100×800, the narrowest window the desk is
 // drawn for: the player's bar, too wide for its column on one row, puts
 // its track and its clock on a row of their own over the buttons, and

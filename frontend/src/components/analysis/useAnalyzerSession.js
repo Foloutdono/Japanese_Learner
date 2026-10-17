@@ -319,7 +319,7 @@ export function useAnalyzerSession(session) {
       // The grab's recognised track, the clock the lines' words are
       // read out on (backend/study/word_timing.py). Never the lines.
       if (timing) formData.append('timing', timing)
-      // The video's own translation, {lang: file} (plan 238): what the
+      // The video's own translation, {lang: file} (plan 242): what the
       // server prints under the lines it lines up with. Never the lines.
       for (const [lang, track] of Object.entries(translations ?? {})) {
         formData.append(`translation_${lang}`, track)

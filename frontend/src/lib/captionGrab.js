@@ -37,7 +37,7 @@
 // track goes up beside them only as the clock their words are read
 // out on (backend/study/word_timing.py).
 //
-// v3 (plan 238, "if the subtitles translated are available take
+// v3 (plan 242, "if the subtitles translated are available take
 // them"): beside the two, the video's own hand-written French and
 // English tracks, where its makers wrote them. They are never the lines
 // studied: they go up as the lines' translation, which the server reads

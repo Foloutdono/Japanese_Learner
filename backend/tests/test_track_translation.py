@@ -1,4 +1,4 @@
-"""A video's own translation under its lines (plan 238).
+"""A video's own translation under its lines (plan 242).
 
 The owner: "If the subtitles translated are available take them, if not
 make them." A video whose makers wrote French or English subtitles has

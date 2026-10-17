@@ -556,7 +556,7 @@ def fetch_youtube_track(video_id: str, translations: dict | None = None) -> list
 
     `translations`, when given, is filled with the video's own
     hand-written tracks in the languages the app is read in, {lang:
-    Track} (plan 238, study/line_translate.from_track): the lines'
+    Track} (plan 242, study/line_translate.from_track): the lines'
     translation where its makers wrote one. Never the lines studied.
 
     Every failure is a CaptionFetchError carrying a sentence meant for
@@ -653,7 +653,7 @@ def _translation_tracks(available, video_id: str) -> dict:
     """The video's hand-written tracks in the languages the app is read
     in (study/line_translate.TRACK_LANGS), {lang: Track}, the first of
     each. Best effort, each: a track that will not come costs its lines
-    nothing but the model's translation in its place (plan 238). Never
+    nothing but the model's translation in its place (plan 242). Never
     a recognised track -- one in French under a Japanese video is the
     recogniser hearing French in Japanese -- and never YouTube's machine
     translation."""

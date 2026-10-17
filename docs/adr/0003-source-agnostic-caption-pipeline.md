@@ -540,7 +540,7 @@ cut. A session stored before this is cut the same way the next time it is opened
 
 ---
 
-## Amendment, 2026-10-17 — a video's own translation is taken where it has one (plan 238)
+## Amendment, 2026-10-17 — a video's own translation is taken where it has one (plan 242)
 
 The owner: *"If the subtitles translated are available take them, if not make
 them."* Since plan 235 every line's translation was the model's, even under a

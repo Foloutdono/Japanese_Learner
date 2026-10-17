@@ -417,7 +417,7 @@ describe('the analyser on the desk (plan 134)', () => {
     expect(document.scrollingElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight + 1)
   })
 
-  // Plan 238: the explanation is the panel's Construction face, its
+  // Plan 242: the explanation is the panel's Construction face, its
   // segment the way between it and the word -- the swap on the column's
   // edge went. A typed sentence keeps its grammar in its own column, so
   // its panel has the two faces.

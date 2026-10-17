@@ -1010,7 +1010,7 @@ const phraseAnalyzer = {
   // Le bureau du texte : la liste des mots repliée en une ligne (plan 235).
   wordsFoldCap:        'Mots de la phrase',
   explanationTitle:    'Explication de la phrase',
-  // Le volet du bureau, ses trois faces (plan 238).
+  // Le volet du bureau, ses trois faces (plan 242).
   panelFaces:          'Ce que le volet montre',
   faceWord:            'Mot',
   facePoint:           'Point',
@@ -1545,6 +1545,7 @@ const dictionary = {
   bldRight: 'Juste.',
   bldClose: 'Presque.',
   bldWrong: 'Pas tout à fait.',
+  bldOther: (said, register) => `La phrase dit ${said} : la même chose, en style ${register === 'plain' ? 'neutre' : 'poli'}.`,
   mapAria: 'La ligne du point',
   mapTutorial: 'Tutoriel',
   mapNow: 'maintenant',
@@ -3261,7 +3262,8 @@ const reviewPlan = {
   todayCatchupDay: 'jour de rattrapage',
   todayCatchupGentle: 'par jour, en rattrapage',
   todayCatchupShort: 'rattrapage',
-  todayExtra: n => `Réviser plus · ${n} carte${n > 1 ? 's' : ''}`,
+  todayHeld: 'En attente',
+  todayHeldGo: 'Réviser',
   settingsReviews: 'Révisions',
   rvRowNone: 'Sans plafond',
   rvRowCap: n => `${n} au plus par jour`,

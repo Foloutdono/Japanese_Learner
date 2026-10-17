@@ -7,7 +7,7 @@ import { grammarGloss } from './grammarGloss'
 import { coversToken, numberedPointsOf } from './grammarSpans'
 import { wordGloss } from './tokens'
 
-// ── 構造 — the construction, a face of the desk's panel (plan 238) ──
+// ── 構造 — the construction, a face of the desk's panel (plan 242) ──
 // On the desk the sentence's explanation does not print under the
 // stage: it is the Construction face of the panel on the right (the
 // owner's pick C of the canvas "Tsuji analyser — the desk and Explain"),

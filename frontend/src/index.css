@@ -915,7 +915,7 @@
   font-family: var(--font-jp);
   font-size: 0.9rem;
 }
-/* The line under its translation (plan 238, the desk's rail): the
+/* The line under its translation (plan 242, the desk's rail): the
    Japanese and, a rung down in the quiet ink, the learner's language. */
 .anl-stop__body {
   display: flex;
@@ -8631,8 +8631,6 @@ textarea:focus-visible {
    Settings draws (.svc) and, for a spread, its days as Today's seg. */
 .cb-lead { display: flex; flex-direction: column; gap: var(--sp-2); }
 .cb-lead__hello { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; text-wrap: pretty; }
-/* The run past the share, a rung over the cleared gate (plan 217). */
-.tdy-extra { align-self: center; }
 .tdy-seg .seg__opt { height: auto; min-height: 44px; gap: var(--sp-2); padding-inline: var(--sp-3); white-space: nowrap; }
 .tdy-seg .seg__opt-latin {
   font-size: var(--fs-body);
@@ -8789,21 +8787,52 @@ textarea:focus-visible {
 .tdy-rally { display: flex; align-items: center; gap: var(--sp-4); }
 .tdy-rally__n { display: flex; flex-direction: column; font-size: var(--fs-caption); line-height: 1.2; color: var(--text-secondary); }
 .tdy-rally__n b { font-family: var(--font-display); font-size: var(--fs-title); font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; }
-.tdy-next {
+/* The board over the shut gate (plan 238, the owner's pick A of the
+   canvas "Tsuji — Réviser plus"): a departure board, a row a line,
+   the reviews waiting past the day's share over tomorrow's. The first
+   row is the way on to them, the whole row, as the door is on a gate
+   that opens; the rows share the board's columns, so the figures stand
+   one over the other. */
+.tdy-board {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: baseline;
   column-gap: var(--sp-5);
-  min-height: 46px;
-  padding: var(--sp-3) var(--sp-5);
+  overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-panel);
 }
+.tdy-next {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  align-items: baseline;
+  min-height: 46px;
+  padding: var(--sp-3) var(--sp-5);
+}
+.tdy-next + .tdy-next { border-top: 1px solid var(--surface-line); }
 .tdy-next__day { font-weight: 600; }
 .tdy-next__n { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; font-variant-numeric: tabular-nums; }
 .tdy-next__n small { margin-left: var(--sp-1); font-size: var(--fs-caption); font-weight: 600; color: var(--text-secondary); }
-.tdy-next__min { font-size: var(--fs-sm); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.tdy-next__min { justify-self: end; font-size: var(--fs-sm); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.tdy-board__go {
+  border-radius: 0;
+  font: inherit;
+  text-align: left;
+  transition: background-color 0.15s ease;
+}
+.tdy-board__go:hover,
+.tdy-board__go:focus-visible { background: color-mix(in srgb, currentcolor 6%, transparent); filter: none; }
+.tdy-board__go:focus-visible { outline: 2px solid currentcolor; outline-offset: -2px; }
+.tdy-board__way {
+  display: inline-flex;
+  align-items: center;
+  place-self: center end;
+  gap: var(--sp-1);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
 
 /* ── 浮世絵 — the print of the hour (plan 205) ────────────────────
    The owner's pick of the canvas "Tsuji — Today, the visit card"
@@ -9047,8 +9076,9 @@ textarea:focus-visible {
 .tdy--print .tdy-door__go { color: var(--text-on-panel); }
 /* A cleared day (plan 206): its week of stamps set on the sky, the
    kit's slots (WeekStamps) in the seal's red, their weekdays in the
-   hour's ink; tomorrow's row on the door's glass. The shut gate's own
-   glass is written with the gate's rules (.btn-depart--gate:disabled). */
+   hour's ink; the board (the reviews waiting, tomorrow) on the door's
+   glass. The shut gate's own glass is written with the gate's rules
+   (.btn-depart--gate:disabled). */
 .tdy--print .tdy-rally {
   width: max-content;
   --stamp-ink: var(--tpr-seal);
@@ -9057,13 +9087,14 @@ textarea:focus-visible {
 }
 .tdy--print .tdy-rally__n { color: var(--tpr-soft); }
 :where(.tdy--print) .tdy-rally__n b { color: var(--tpr-ink); }
-.tdy--print .tdy-next {
+.tdy--print .tdy-board {
   border-color: var(--surface-line);
   background: color-mix(in srgb, var(--bg-panel) 82%, transparent);
   color: var(--text-on-panel);
 }
 :where(.tdy--print) .tdy-next__n small,
 .tdy--print .tdy-next__min { color: var(--text-on-panel-soft); }
+.tdy--print .tdy-board__way { color: var(--text-on-panel); }
 
 /* The print's moving parts (the classes the print's build writes,
    scripts/today-print/build.py): slowly and by little, transform and
@@ -22784,7 +22815,16 @@ form.stage__foot > .btn-primary {
 }
 @container (max-width: 429px) {
   .records--entry { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .records--entry .record { padding-inline: var(--sp-5); }
 }
+/* Flush is the lattice's hairlines, not its figures. A cell that meets
+   the panel's edge pads to the gutter the plate, its stripe and the
+   blocks keep (--sp-5), so a figure starts where the stripe and the
+   gloss start: padded --sp-3, "100 %" sat 8px from a phone's edge under
+   all three at 16px. Two by two (above) every cell takes the gutter, so
+   both columns sit the same distance inside their hairlines. */
+.records--entry > :first-child { padding-inline-start: var(--sp-5); }
+.records--entry > :last-child { padding-inline-end: var(--sp-5); }
 /* ── 期限 — a card that is due, and the one thing to do about it ──
    The schedule's cell, as the door (plan 235): "Maintenant" in the due
    ink, and under it what pressing it does, the chevron beside the word.
@@ -40479,8 +40519,11 @@ button.brd-stn { cursor: pointer; }
     grid-area: stripe;
     margin: var(--sp-3) calc(-1 * var(--sp-6)) 0;
   }
-  /* Your two numbers under the stripe, the panel's own foot their edge. */
+  /* Your two numbers under the stripe, the panel's own foot their edge,
+     the outer figures on the band's gutter: its plate pads --sp-6. */
   .dict-entry--band .records--entry { border-bottom-width: 0; }
+  .dict-entry--band .records--entry > :first-child { padding-inline-start: var(--sp-6); }
+  .dict-entry--band .records--entry > :last-child { padding-inline-end: var(--sp-6); }
   /* The dictionary: the senses and the words at their height, the
      stroke sheet growing into what they leave, its kanji large -- and
      never below twice the specimen, where the stroke numbers still
@@ -41180,7 +41223,7 @@ button.brd-stn { cursor: pointer; }
   .desk-ask__offer:disabled { opacity: 0.45; cursor: not-allowed; }
   /* ── 解析 — the analyser's result on three columns (plans 134, 238) ──
      The owner's pick C of the canvas "Tsuji analyser — the desk and
-     Explain" (plan 238, drawn at 1440 × 900 as 270 | 676 | 400): the
+     Explain" (plan 242, drawn at 1440 × 900 as 270 | 676 | 400): the
      desk's rail steps aside for this one screen and the result takes the
      window -- the lines on the left, the video edge to edge in the
      middle with the line's words on one strip under it, and one panel
@@ -41277,7 +41320,7 @@ button.brd-stn { cursor: pointer; }
     border-radius: var(--r-panel);
     overflow: hidden;
   }
-  /* The picture edge to edge on the sumi's top (plan 238): no arrows
+  /* The picture edge to edge on the sumi's top (plan 242): no arrows
      beside it -- the bar walks the lines -- and as wide as the column,
      or as wide as leaves the window's height for the head, the line and
      its translation, the bar and one strip of words (25rem of it), 16:9
@@ -41487,7 +41530,7 @@ button.brd-stn { cursor: pointer; }
     line-height: 1.3;
     color: var(--text-primary);
   }
-  /* ── 帯 — the line's words on one strip under the sumi (plan 238) ──
+  /* ── 帯 — the line's words on one strip under the sumi (plan 242) ──
      Wrapped, and scrolling in the row the window leaves it. */
   .anl-desk__strip {
     grid-area: strip;
@@ -41528,7 +41571,7 @@ button.brd-stn { cursor: pointer; }
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  /* ── 面 — the panel, its three faces (plan 238) ──
+  /* ── 面 — the panel, its three faces (plan 242) ──
      The segment over the face it shows: the word's band, the line's
      grammar or its construction, each a panel of its own. */
   .anl-desk__entry {
@@ -41556,7 +41599,7 @@ button.brd-stn { cursor: pointer; }
     border: 1px solid var(--surface-line);
     border-radius: var(--r-panel);
   }
-  /* ── 構造 — the construction face (plan 238, the owner's pick B of
+  /* ── 構造 — the construction face (plan 242, the owner's pick B of
      the canvas's "The Construction face"): the line laid out as its
      blocks at a heading's size, each named under it, a point's run
      framed in the grammar's ink under its number; the prose under them,

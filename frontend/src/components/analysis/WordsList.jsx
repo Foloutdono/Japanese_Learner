@@ -104,7 +104,7 @@ export function WordsFold({ analysis, current, onOpen, open = false, t }) {
   )
 }
 
-// ── 帯 — a video line's words under the sumi (plan 238) ──────────
+// ── 帯 — a video line's words under the sumi (plan 242) ──────────
 // The owner's pick C of the canvas "Tsuji analyser — the desk and
 // Explain": the list that stood under the video beside a card in focus
 // gave its height to the picture, and the words ride one strip under

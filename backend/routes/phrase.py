@@ -228,7 +228,7 @@ def passage_context(texts: list[str], index: int, source: str = "typed") -> str:
 # desk analyser prints under a typed or photographed sentence; an entry
 # bought under v4 has none and would never gain one.
 #
-# v6 (plan 238): the explanation says how the phrase is built and
+# v6 (plan 242): the explanation says how the phrase is built and
 # nothing else (the owner: "the explain button is only for the
 # explanation of how the sentence is built"). Under v5 it opened on a
 # paraphrase of the meaning and closed on its tone -- the translation's

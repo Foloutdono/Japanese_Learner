@@ -111,7 +111,7 @@ sentence alone, so the reading bank's cached explanations are untouched.
 
 ---
 
-## Amendment, 2026-10-17 — the explanation is the construction (plan 238)
+## Amendment, 2026-10-17 — the explanation is the construction (plan 242)
 
 With a translation under every line (plan 235), and the video's own where it has
 one (ADR 0003, same day), the owner: *"the explain button is only for the

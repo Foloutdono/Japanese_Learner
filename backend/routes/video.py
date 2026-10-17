@@ -66,7 +66,7 @@ _MAX_UPLOAD_BYTES = 1 * 1024 * 1024
 _MULTIPART_OVERHEAD_BYTES = 64 * 1024
 # Files an upload may carry: the track, the recognised one it is timed
 # by, and the video's own translation in each of
-# study/line_translate.TRACK_LANGS (plan 238).
+# study/line_translate.TRACK_LANGS (plan 242).
 _MAX_UPLOAD_FILES = 4
 
 # Same reasoning and same values as routes/exams.py's own constants --
@@ -275,7 +275,7 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
     Sentences, analyzes each with the LOCAL tier only (never a model --
     see docs/adr/0001), and materializes the result. Owns the job row
     from 'running' through to either deleted (success) or 'failed'."""
-    # The video's own translation, {lang: Track} (plan 238): the link
+    # The video's own translation, {lang: Track} (plan 242): the link
     # fetch fills it beside the Japanese, the grab sends it as files.
     translated = {}
     try:
@@ -526,7 +526,7 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
                 raise _refusal(413, "file_too_large", "Subtitle file is too large")
             timing = raw_timing.decode("utf-8", errors="replace")
         # Optional: the video's own translation, the grab's hand-written
-        # French or English track as VTT (plan 238). Never the lines
+        # French or English track as VTT (plan 242). Never the lines
         # studied -- only what is printed under them.
         tracks = {}
         for lang in line_translate.TRACK_LANGS:

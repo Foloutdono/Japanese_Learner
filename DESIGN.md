@@ -879,8 +879,13 @@ it and tomorrow as a row of a departure board over the shut gate.
 cards wait and three paces as Settings' service cards (`.svc`), a
 spread's days as the services sheet's seg. It never stands over the
 rest-day notice. A day whose share is spent with reviews held back
-keeps its shut gate, and the way on to them is a quiet way a rung over
-it, never a second button.
+keeps its shut gate, and the way on to them is the board's first row
+over tomorrow's (« En attente · 144 cartes · Réviser › », plan 238,
+the owner's pick A of the canvas "Tsuji — Réviser plus"): the whole row
+is the way on, as the door is on a gate that opens, on the board's
+glass, so it reads on every print, and never a second button. A quiet
+word set on the print takes the page's ink, which the light theme's
+night loses.
 
 ### The tour (発見, plan 187)
 
@@ -2178,7 +2183,7 @@ line here says otherwise.
   pressed in a docked breakdown opens its entry in that column
   (`SideLookup`), the sentence's line kept above it so the next word is one
   click, Esc or ✕ bringing the breakdown back where it was scrolled. The
-  analyser's result is three columns (plan 134; since plan 238 the
+  analyser's result is three columns (plan 134; since plan 242 the
   owner's pick C of the canvas "Tsuji analyser — the desk and Explain"):
   the Passage's lines on the left, each over its translation, the time
   over the marks at the row's end; the video edge to edge on the sumi's
@@ -2218,7 +2223,7 @@ line here says otherwise.
   the word's row; one sentence's words over its grammar on the left,
   several sentences' words under the sentence; every panel as tall as it
   holds. Its panel has two faces, the word's card and the construction
-  (plan 238), its grammar keeping its own column.
+  (plan 242), its grammar keeping its own column.
   Before a Passage, the analyser is the learner's passages (plan 136, the
   owner's pick C of three drawn directions): the one console over a card
   each, and the intake the column beside them at a phone's width -- the

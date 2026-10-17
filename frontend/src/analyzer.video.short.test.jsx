@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 on the short desk (plan 238) ─────────────────────────────
+// ── 机 on the short desk (plan 242) ─────────────────────────────
 // The owner's pick C at 1280×600, a laptop's window under its browser's
 // bars: the picture gives up its height before anything else does --
 // still 16:9, still on the sumi's top -- so the line, its translation,

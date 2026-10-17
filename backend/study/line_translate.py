@@ -19,7 +19,7 @@
 # DAILY_LIMIT blocks a day, for both kinds of Passage) and scripts/
 # llm_cost_model.py costs them. The routes keep what it found.
 #
-# Since plan 238 a video's lines are first read off the video's own
+# Since plan 242 a video's lines are first read off the video's own
 # translation, where its makers wrote one (from_track, below), and only
 # what that leaves is asked of the model.
 import bisect
@@ -164,7 +164,7 @@ def translate_block(user_id: str, lines: list[dict], index: int, lang_name: str,
     return start, [None if s.get("foreign") else merged.get(s.get("text")) for s in block], found
 
 
-# ── The video's own translation (plan 238) ──────────────────────────
+# ── The video's own translation (plan 242) ──────────────────────────
 # The owner (2026-10-17): "If the subtitles translated are available
 # take them, if not make them." A video whose makers wrote French or
 # English subtitles beside the Japanese has its lines translated by the

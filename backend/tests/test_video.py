@@ -263,7 +263,7 @@ def test_oversized_upload_is_refused_before_the_form_is_parsed(client, monkeypat
         raise AssertionError("an oversized body reached the multipart parser")
 
     monkeypatch.setattr(Request, "form", _parsed)
-    # Past the four files an upload may carry (plan 238), not just one.
+    # Past the four files an upload may carry (plan 242), not just one.
     huge = b"1\n00:00:01,000 --> 00:00:02,000\nx\n" * (video_module._MAX_UPLOAD_FILES * 40_000)
     response = client.post(
         "/api/video/session",

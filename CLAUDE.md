@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **239**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **243**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -90,6 +90,16 @@ runtime purpose.
   the translation printed under it carry what the grammar does not, keep the
   stem outside the hole (悲し＿＿＿ + み), and let an independent reviewer
   attack the batch before it ships.
+- **Construire takes what the translation cannot tell apart (plan 241).**
+  A translation never says polite or plain, so where Construire's hole
+  closes its sentence the ending in the other register is right too
+  (`study/plain_polite.other_register`: です for だ, ている for ています,
+  たい for たいです), and a kanji the keyboard put in is read before it is
+  judged. Never inside the sentence (学生だと思います), never before か
+  polite to plain, never where the point is the polite ending or a form.
+  A new rule or refusal there is pinned in `tests/test_plain_polite.py`
+  with the sentence it reads both ways and the one it must not, and
+  diffed over every sentence Construire asks.
 - **One progress number.** A card's progress is `srs._progress`, 0 (new) to
   1 (mastered); every `learned / total`, bar and figure sums it. Never add a
   second curve beside it.

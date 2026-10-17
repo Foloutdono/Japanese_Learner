@@ -97,7 +97,7 @@ describe('the grab hash codec', () => {
     expect(grab.translations).toEqual({})
   })
 
-  // Plan 238: the video's own translation rides beside the Japanese,
+  // Plan 242: the video's own translation rides beside the Japanese,
   // in the languages the app is read in and no other.
   it('carries the video’s own translations, and only the app’s languages', async () => {
     const payload = await encodeGrabPayload('UQecj-5Tiqw', {
@@ -170,7 +170,7 @@ describe('buildBookmarklet', () => {
     expect(src).toContain("languageCode==='ja'&&t.kind==='asr'")
     expect(src).toContain("'&fmt=srv3'")
     // And the video's own translation, hand-written, in the app's two
-    // languages (plan 238).
+    // languages (plan 242).
     expect(src).toContain('["fr","en"]')
     expect(src).toContain("t.kind!=='asr'&&(t.languageCode===L")
     expect(src).toContain('t:tr')

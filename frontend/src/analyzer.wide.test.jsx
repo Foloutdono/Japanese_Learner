@@ -451,7 +451,7 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
   })
 })
 
-// ── 面 — the panel's three faces (plan 238) ──────────────────────
+// ── 面 — the panel's three faces (plan 242) ──────────────────────
 // The way between the word, the line's grammar and its construction is
 // the panel's own segment: no swap on the column's edge, no way back to
 // look for. A point opens its lesson in the grammar face, its ✕ giving
@@ -469,7 +469,7 @@ function answering({ translations = null } = {}) {
   })
 }
 
-describe('the panel\'s three faces (plan 238)', () => {
+describe('the panel\'s three faces (plan 242)', () => {
   it('turns to the line\'s grammar, opens a point in it, and its ✕ gives the list back', async () => {
     apiFetch.mockImplementation(async url => {
       const u = String(url)
@@ -588,7 +588,7 @@ describe('the panel\'s three faces (plan 238)', () => {
   })
 })
 
-// ── 訳 — the lines read as a bilingual transcript (plan 238) ─────────
+// ── 訳 — the lines read as a bilingual transcript (plan 242) ─────────
 describe('the lines on the left, each over its translation', () => {
   it('prints each line\'s translation under it, and finds a line by its French', async () => {
     answering({ translations: { start: 0, lines: ['Je regarde la pluie', 'J’attends à la gare'] } })
