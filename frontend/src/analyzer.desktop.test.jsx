@@ -417,10 +417,16 @@ describe('the analyser on the desk (plan 134)', () => {
     expect(document.scrollingElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight + 1)
   })
 
-  it('stands the explanation in the description\'s place, and swaps back', async () => {
+  // Plan 238: the explanation is the panel's Construction face, its
+  // segment the way between it and the word -- the swap on the column's
+  // edge went. A typed sentence keeps its grammar in its own column, so
+  // its panel has the two faces.
+  it('turns the panel to the construction, and its segment turns it back', async () => {
     await mount()
     await analyze()
     expect($('.anl-swap')).toBeNull()
+    const faces = () => $$('.anl-faces .seg__opt')
+    expect(faces().map(o => o.textContent)).toEqual(['Mot駅', 'Construction'])
     // On a typed sentence, Explain stands under it on the sumi (plan 161).
     expect($('.anl-slab .anl-desk__explain').textContent).toContain('Expliquer la phrase')
     expect($('.anl-subs__tr')).toBeNull()
@@ -433,25 +439,26 @@ describe('the analyser on the desk (plan 134)', () => {
     expect(box('.anl-subs__tr').top).toBeGreaterThan(box('.anl-subs__line').bottom - 1)
     expect(box('.anl-desk__explain').top).toBeGreaterThan(box('.anl-subs__tr').bottom - 1)
     expect($('.anl-desk__explain').getAttribute('aria-pressed')).toBe('true')
-    // The card's head stays over it; its description gives way.
-    expect(shown()).toBe('駅')
-    expect(getComputedStyle($('.anl-desk__entry .dict-entry__body')).display).toBe('none')
+    // The panel's face is the construction, the segment lit on it.
+    expect(faces()[1].getAttribute('aria-checked')).toBe('true')
+    expect($('.anl-desk__entry .dict-entry__body')).toBeNull()
 
-    $('.anl-swap').click()
+    faces()[0].click()
     await settle()
     expect($('.anl-explainpanel')).toBeNull()
-    expect(getComputedStyle($('.anl-desk__entry .dict-entry__body')).display).not.toBe('none')
+    expect(shown()).toBe('駅')
     // Bought, the translation stays with the sentence.
     expect($('.anl-subs__tr').textContent).toBe(TRANSLATION)
-    // Bought once: the button goes back to it without a second call.
+    // Bought once: the segment goes back to it without a second call.
     const calls = apiJson.mock.calls.length
-    $('.anl-desk__explain').click()
+    faces()[1].click()
     await settle()
     expect($('.anl-explainpanel')).not.toBeNull()
     expect(apiJson.mock.calls.length).toBe(calls)
     press('Escape')
     await settle()
     expect($('.anl-explainpanel')).toBeNull()
+    expect(faces()[0].getAttribute('aria-checked')).toBe('true')
   })
 
   // Plan 220: under the explanation, a short question about the sentence,

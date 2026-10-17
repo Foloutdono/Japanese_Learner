@@ -915,6 +915,35 @@
   font-family: var(--font-jp);
   font-size: 0.9rem;
 }
+/* The line under its translation (plan 238, the desk's rail): the
+   Japanese and, a rung down in the quiet ink, the learner's language. */
+.anl-stop__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.anl-stop__body > .anl-stop__text { flex: none; }
+.anl-stop__tr {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+/* Its time over its marks, one narrow column at the row's end. */
+.anl-stop__meta {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--sp-1);
+}
+.anl-stop__marks {
+  display: flex;
+  gap: var(--sp-1);
+}
+.anl-stop__marks:empty { display: none; }
 
 /* 鶯色 — the video source's own colour, spent on the one piece of
    data only a video Sentence has. See the --line-douga note in the
@@ -41149,15 +41178,18 @@ button.brd-stn { cursor: pointer; }
   .desk-ask__offer:hover,
   .desk-ask__offer:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); }
   .desk-ask__offer:disabled { opacity: 0.45; cursor: not-allowed; }
-  /* ── 解析 — the analyser's result on three columns (plan 134) ──
-     The owner's drawing (the "Choix" boards of the analyser canvas, drawn
-     at 1877 × 930 as 410 | 830 | 541): the desk's rail steps aside for
-     this one screen and the result takes the window. One grid, so the
-     grammar's box and the words' row share their top and their foot:
+  /* ── 解析 — the analyser's result on three columns (plans 134, 238) ──
+     The owner's pick C of the canvas "Tsuji analyser — the desk and
+     Explain" (plan 238, drawn at 1440 × 900 as 270 | 676 | 400): the
+     desk's rail steps aside for this one screen and the result takes the
+     window -- the lines on the left, the video edge to edge in the
+     middle with the line's words on one strip under it, and one panel
+     on the right, its segment turning it between the word, the line's
+     grammar and its construction:
 
-       rail    head  entry
-       rail    slab  entry
-       points  work  entry
+       rail  head   entry
+       rail  slab   entry
+       rail  strip  entry
 
      Every panel scrolls inside itself; nothing passes the window's foot. */
   .phone--desk:has(.anl-desk) { padding-inline-start: 0; }
@@ -41167,12 +41199,20 @@ button.brd-stn { cursor: pointer; }
     display: grid;
     grid-template:
       "rail head entry" auto
-      "rail slab entry" auto
-      "points work entry" minmax(0, 1fr)
-      / minmax(0, 410fr) minmax(0, 830fr) minmax(0, 541fr);
+      "rail slab entry" minmax(0, 1fr)
+      "rail strip entry" auto
+      / minmax(0, 270fr) minmax(0, 676fr) minmax(20rem, 400fr);
     gap: var(--sp-4) var(--sp-6);
     height: calc(100dvh - 2 * var(--sp-6));
     min-height: 0;
+  }
+  /* A video of one line has no list: the picture takes its width. */
+  .anl-desk--video.anl-desk--one {
+    grid-template:
+      "head entry" auto
+      "slab entry" minmax(0, 1fr)
+      "strip entry" auto
+      / minmax(0, 946fr) minmax(20rem, 400fr);
   }
   /* ── The left column ── */
   /* Sized by its rows, never the other way: the rail spans the two auto
@@ -41199,7 +41239,6 @@ button.brd-stn { cursor: pointer; }
     overscroll-behavior: contain;
   }
   .anl-desk__points {
-    grid-area: points;
     min-height: 0;
     padding: var(--sp-4);
     overflow-y: auto;
@@ -41208,12 +41247,6 @@ button.brd-stn { cursor: pointer; }
     border: 1px solid var(--surface-line);
     border-radius: var(--r-panel);
   }
-  /* The one sentence of a typed Passage has no list: the grammar stands
-     at the column's top. A sentence with no construction has no box:
-     the list takes the column's height. Standing at the top, the box is
-     as tall as its points up to the column's foot, then scrolls. */
-  .anl-desk--one .anl-desk__points { grid-row: 1 / -1; align-self: start; max-height: 100%; }
-  .anl-desk--bare .anl-desk__rail { grid-row: 1 / -1; }
   /* ── The head ── */
   .anl-desk__head {
     display: flex;
@@ -41244,20 +41277,31 @@ button.brd-stn { cursor: pointer; }
     border-radius: var(--r-panel);
     overflow: hidden;
   }
+  /* The picture edge to edge on the sumi's top (plan 238): no arrows
+     beside it -- the bar walks the lines -- and as wide as the column,
+     or as wide as leaves the window's height for the head, the line and
+     its translation, the bar and one strip of words (25rem of it), 16:9
+     either way. */
+  .anl-desk--video .anl-slab { padding-top: 0; }
   .anl-slab__screen {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--sp-4);
-    padding: 0 var(--sp-6);
+    flex: none;
+    justify-content: center;
   }
-  /* The picture at the drawing's share of the window: 360 of 930 tall,
-     so 69dvh wide at 16:9; narrower when the column is. */
+  .anl-desk--video .anl-pbar { flex: none; }
+  /* Where the column is too narrow for the bar on one row (the desk at
+     its tightest; measured, not queried -- useLabelsFit in
+     AnalyzerScreen), the track and the clock take a row of their own
+     over the buttons. */
+  .anl-slab--tight .anl-pbar { flex-wrap: wrap; }
+  .anl-slab--tight .anl-pbar__track { order: -3; flex-basis: 0; }
+  .anl-slab--tight .anl-pbar .anl-player__time { order: -2; }
+  .anl-slab--tight .anl-pbar::after { content: ''; order: -1; flex-basis: 100%; }
+  .anl-slab--tight .anl-pbar__sep:has(+ .anl-pbar__track) { display: none; }
   .anl-slab__video {
     flex: 0 1 auto;
-    width: 69dvh;
+    width: min(100%, calc((100dvh - 25rem) * 16 / 9));
     min-width: 0;
-    margin-inline: auto;
   }
   .anl-slab__video .video-player__frame {
     margin-bottom: 0;
@@ -41299,6 +41343,17 @@ button.brd-stn { cursor: pointer; }
     justify-content: space-between;
     gap: var(--sp-4);
   }
+  /* The sumi to the column's foot, as drawn: the line and its
+     translation centred in what the picture and the bar leave, and
+     scrolling there, never pushing the bar out, when a long line and a
+     tall strip of words leave little. */
+  .anl-desk--video .anl-subs {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .anl-desk--video .anl-subs > .anl-subs__head { margin-bottom: auto; }
+  .anl-desk--video .anl-subs > :last-child { margin-bottom: auto; }
   .anl-subs__count {
     font-family: var(--font-display);
     font-size: var(--fs-caption);
@@ -41357,13 +41412,6 @@ button.brd-stn { cursor: pointer; }
   .anl-slab .anl-subs__n {
     background: color-mix(in srgb, var(--line-grammar) 70%, var(--text-on-panel));
     color: var(--bg-panel);
-  }
-  .anl-desk__work {
-    display: grid;
-    grid-area: work;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--sp-5);
-    min-height: 0;
   }
   .anl-desk__words {
     display: flex;
@@ -41439,71 +41487,110 @@ button.brd-stn { cursor: pointer; }
     line-height: 1.3;
     color: var(--text-primary);
   }
-  .anl-desk__focus {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-3);
-    min-height: 0;
-  }
-  .anl-focus {
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    gap: var(--sp-3);
-    min-height: 0;
-    padding: var(--sp-5) var(--sp-6);
+  /* ── 帯 — the line's words on one strip under the sumi (plan 238) ──
+     Wrapped, and scrolling in the row the window leaves it. */
+  .anl-desk__strip {
+    grid-area: strip;
+    max-height: 7rem;
     overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .anl-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+  }
+  .anl-strip__chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    max-width: 100%;
+    padding: var(--sp-2) var(--sp-4);
     background: var(--surface);
     border: 1px solid var(--surface-line);
     border-radius: var(--r-card);
+    color: var(--text-primary);
+    text-align: left;
   }
-  .anl-focus__head {
-    display: flex;
-    align-items: baseline;
-    gap: var(--sp-4);
+  .anl-strip__chip:hover,
+  .anl-strip__chip:focus-visible { border-color: var(--text-secondary); }
+  .anl-strip__chip--on,
+  .anl-strip__chip--on:hover {
+    background: var(--bg-main);
+    border-color: var(--text-primary);
   }
-  .anl-focus--point .anl-focus__head { align-items: center; }
-  .anl-focus__word {
-    border-bottom: 2px dotted var(--accent2);
-    font-family: var(--font-serif);
-    font-size: var(--fs-title);
-    font-weight: 700;
-    line-height: 1.2;
-  }
-  .anl-focus__word--point { border-bottom-color: var(--line-grammar); }
-  .anl-focus__reading {
-    font-family: var(--font-jp);
-    font-size: var(--fs-sm);
-    letter-spacing: var(--tr-reading);
-    color: var(--text-secondary);
-  }
-  .anl-focus__lvl { margin-left: auto; }
-  .anl-focus__gloss { font-size: var(--fs-body); line-height: 1.45; }
-  .anl-focus__parts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-2);
-  }
-  .anl-focus__foot {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-3);
-    margin-top: auto;
-  }
-  .anl-focus__here {
-    font-family: var(--font-jp);
+  .anl-strip__gloss {
+    min-width: 0;
+    max-width: 14em;
+    overflow: hidden;
     font-size: var(--fs-sm);
     color: var(--text-secondary);
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
-  .anl-focus__foot > .anl-focus__add { margin-left: auto; }
-  /* ── The card in focus: the band, or the explanation in its place ── */
+  /* ── 面 — the panel, its three faces (plan 238) ──
+     The segment over the face it shows: the word's band, the line's
+     grammar or its construction, each a panel of its own. */
   .anl-desk__entry {
-    position: relative;
     grid-area: entry;
     flex-direction: column;
     gap: var(--sp-4);
     min-height: 0;
-    padding-right: var(--sp-5);
+  }
+  .anl-faces { flex: none; }
+  .anl-faces.seg--full .seg__opt { flex: 1 1 auto; }
+  .anl-faces .seg__opt-fig > [lang="ja"] { font-family: var(--font-jp); }
+  /* A panel too narrow for the three names (measured, as the bar is)
+     keeps them on one row: the word they open is printed under them
+     anyway. */
+  .anl-desk__entry--tight .anl-faces .seg__opt { padding-inline: var(--sp-2); }
+  .anl-desk__entry--tight .anl-faces .seg__opt-latin { letter-spacing: var(--tr-term); text-indent: var(--tr-term); }
+  .anl-desk__entry--tight .anl-faces .seg__opt-fig:has(> [lang="ja"]) { display: none; }
+  .anl-face__points {
+    flex: 0 1 auto;
+    min-height: 0;
+    padding: var(--sp-4);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+  }
+  /* The construction's sentence, each point framed under its number as
+     on the subtitle (ExplainPanel's BuiltLine). */
+  .anl-built {
+    margin: 0;
+    padding-top: var(--sp-2);
+    font-family: var(--font-jp);
+    font-size: var(--fs-title);
+    line-height: 2.2;
+    letter-spacing: var(--tr-term);
+  }
+  .anl-built__pt {
+    position: relative;
+    margin-inline: var(--sp-2) var(--sp-4);
+    padding: 0 var(--sp-2);
+    border-radius: var(--r-card);
+    box-shadow: inset 0 0 0 2px var(--line-grammar);
+  }
+  .anl-built__n {
+    position: absolute;
+    top: calc(-1 * var(--sp-3));
+    right: calc(-1 * var(--sp-3));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--sp-5);
+    height: var(--sp-5);
+    padding: 0 var(--sp-1);
+    background: var(--line-grammar);
+    border-radius: var(--r-pill);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0;
+    color: var(--bg-main);
   }
   .anl-desk__none {
     flex: none;
@@ -41524,32 +41611,9 @@ button.brd-stn { cursor: pointer; }
     border: 1px solid var(--surface-line);
     border-radius: var(--r-panel);
   }
-  .anl-desk__entry--explain .dict-entry--band > .dict-entry__body { display: none; }
   /* The asking under the explanation (plan 220): the panel scrolls, so
      the thread takes the height it holds rather than sharing it. */
   .anl-explainpanel > .desk-ask { flex: none; }
-  /* The swap on the column's edge, as drawn: the card's description and
-     the explanation, one press apart. */
-  .anl-swap {
-    position: absolute;
-    top: 60%;
-    right: 0;
-    z-index: 2;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    padding: 0;
-    background: var(--bg-main);
-    border: 1px solid var(--surface-line);
-    border-radius: var(--r-pill);
-    color: var(--line-kaiseki);
-    box-shadow: var(--elev-action);
-  }
-  .anl-swap:hover,
-  .anl-swap:focus-visible { border-color: var(--line-kaiseki); }
-
   /* ── 字幕 — a typed or photographed Passage: the sentence in the
      video's place (plan 161) ──
      The owner's picks B and B′ of the canvas "Tsuji analyser — text &

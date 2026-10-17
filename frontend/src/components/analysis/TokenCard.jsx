@@ -26,7 +26,8 @@ const CONTENT_POS = new Set(['noun', 'verb', 'adjective', 'adverb'])
 // the single unknown Token of an i+1 Sentence (see SentenceBreakdown's
 // isUnknownToken) -- that one word is the entire reason the Sentence
 // is worth studying, so its mine control stands out. The analyser's
-// own card is FocusCard.jsx (plan 134); this one is the list layout's.
+// card in focus is the dictionary's entry (plan 238); this one is the
+// list layout's.
 export function TokenCard({
   word, t, onWordClick, onKanjiClick, mining, sentenceText, emphasize = false,
 }) {

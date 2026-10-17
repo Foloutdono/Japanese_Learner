@@ -1046,8 +1046,12 @@ const phraseAnalyzer = {
   // The text desk: the words list folded to one line (plan 235).
   wordsFoldCap:        'Words in the sentence',
   explanationTitle:    'The sentence explained',
-  showExplanation:     'Show the explanation',
-  showEntry:           'Back to the entry',
+  // The desk's panel, its three faces (plan 238).
+  panelFaces:          'What the panel shows',
+  faceWord:            'Word',
+  facePoint:           'Point',
+  faceGrammar:         'Grammar',
+  faceExplain:         'Construction',
   explainThisSentence: 'Explain the sentence',
   explanationOpen:     'Explanation open',
   writtenHere:         s => `here: ${s}`,

@@ -2,13 +2,17 @@ import { Sheet } from '../chrome/Sheet'
 import { AskPanel } from '../study/AskPanel'
 import { Dots } from '../ui/Loading'
 import { CloseIcon, OpenBookIcon } from '../ui/Icons'
+import { coversToken, numberedPointsOf } from './grammarSpans'
 
-// ── 解説 — the explanation, in the entry's place (plan 134) ──────────
+// ── 構造 — the construction, a face of the desk's panel (plan 238) ──
 // On the desk the sentence's explanation does not print under the
-// stage: Explain puts it in the right column, where the focused card's
-// description stood, and the swap on the column's edge moves between
-// the two (the owner's drawing). The card's head stays above it, so the
-// word in focus is still named while the sentence is explained.
+// stage: it is the Construction face of the panel on the right (the
+// owner's pick C of the canvas "Tsuji analyser — the desk and Explain"),
+// beside the word's entry and the line's grammar, the panel's own
+// segment the way between them -- where plan 134 stood it in the entry's
+// description's place with a swap on the column's edge. At its head the
+// sentence, each point framed under its number as on the subtitle, so
+// what the prose names is found on the line.
 //
 // The deep tier is bought once per sentence and cached per language
 // (routes/phrase.py), so "Explain again" is here too: a learner who
@@ -17,9 +21,10 @@ import { CloseIcon, OpenBookIcon } from '../ui/Icons'
 // Under an explanation, the asking (plan 220): the runs' own panel
 // (components/study/AskPanel.jsx, mode "analyser"), as on the phone's
 // sheet, a short question about the sentence answered from it.
-export function ExplainPanel({ explanation, explaining, error, onExplain, t, ask = null, askKey = '', askContext = null }) {
+export function ExplainPanel({ explanation, explaining, error, onExplain, t, ask = null, askKey = '', askContext = null, analysis = null }) {
   return (
     <section className="anl-explainpanel" aria-label={t.explanationTitle} aria-busy={explaining || undefined}>
+      {analysis && <BuiltLine analysis={analysis} />}
       {explanation ? (
         <p className="anl-explainpanel__body">{explanation}</p>
       ) : explaining ? (
@@ -36,6 +41,36 @@ export function ExplainPanel({ explanation, explaining, error, onExplain, t, ask
       )}
     </section>
   )
+}
+
+// The sentence as the construction reads it: its words in a row, each
+// point's run framed under its number (SubtitleLine's frames, without
+// its doors or its clock -- the line on the stage is the one to press).
+function BuiltLine({ analysis }) {
+  const tokens = analysis?.tokens ?? analysis?.words ?? []
+  if (!tokens.length) return null
+  const points = numberedPointsOf(analysis)
+  const owner = tokens.map(w => points.findIndex(p => coversToken(p, w)))
+  const firstOf = points.map(p => tokens.findIndex(w => coversToken(p, w)))
+  const out = []
+  for (let i = 0; i < tokens.length;) {
+    let j = i
+    while (owner[i] !== -1 && j + 1 < tokens.length && owner[j + 1] === owner[i]) j += 1
+    const text = tokens.slice(i, j + 1).map(w => w.surface).join('')
+    if (owner[i] === -1) {
+      out.push(<span key={i}>{text}</span>)
+    } else {
+      const numbers = firstOf.map((first, q) => (first >= i && first <= j ? q + 1 : null)).filter(Boolean)
+      out.push(
+        <span key={i} className="anl-built__pt">
+          {numbers.length > 0 && <span className="anl-built__n" aria-hidden="true">{numbers.join('·')}</span>}
+          {text}
+        </span>,
+      )
+    }
+    i = j + 1
+  }
+  return <p className="anl-built" lang="ja">{out}</p>
 }
 
 // On a phone (plan 220, the owner's drawing on "Video Analyser Rework")

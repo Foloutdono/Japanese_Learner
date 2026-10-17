@@ -28,7 +28,11 @@ import { PlusIcon, CheckIcon } from '../ui/Icons'
 // --anl-strip-h machinery that existed only to keep two sticky
 // siblings from overlapping.
 
-export function PassageLine({ sentences, activeIndex, onSelect, t, scrollOnChange = true, kept, onKeep }) {
+// `translations` (plan 238, the desk): each stop's translation, in the
+// order of `sentences`, printed under its Japanese in the learner's
+// language (`trLang`) -- the line read as a bilingual transcript. A rail
+// given none draws its stops on one line, as it always did.
+export function PassageLine({ sentences, activeIndex, onSelect, t, scrollOnChange = true, kept, onKeep, translations = null, trLang }) {
   const lineRef = useRef(null)
   const stopRefs = useRef({})
 
@@ -133,6 +137,60 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, scrollOnChang
       {sentences.map((s, i) => {
         const active = i === activeIndex
         const isKept = !!kept?.has(s.text)
+        // What the stop says after its line: not Japanese, or its grade and
+        // i+1; already explained -- and, apart, when it is said.
+        const marks = (
+          <>
+            {s.foreign ? (
+              /* Flagged, not hidden: the learner can see this line is in
+                 the track and that the app has nothing to say about it. */
+              <span className="anl-stop__foreign" title={t.notJapaneseLine} aria-hidden="true">
+                {t.notJapaneseShort}
+              </span>
+            ) : (
+              <>
+                {/* The Sentence's own JLPT grade -- the quietest badge
+                    on the stop, because it is context, not a call to
+                    action the way i+1 is. */}
+                {s.level && (
+                  <span className="anl-stop__lvl" aria-hidden="true">{s.level}</span>
+                )}
+                {s.unknown_count === 1 && (
+                  <span className="anl-stop__iplus" title={t.iPlusOne} aria-hidden="true">i+1</span>
+                )}
+              </>
+            )}
+
+            {/* Already explained. The deep tier is the one thing on
+                this screen that costs a model call (docs/adr/0001), and
+                nothing recorded what had been bought: on a 47-stop
+                subtitle track the only way to know was to open each stop.
+                No new pigment -- the wave's colour rule spends
+                --line-douga on the timestamp chip and nothing else, and
+                --success is already i+1's. This is shape and weight.
+
+                A ✓ from the icon set, not the 済 it printed until
+                2026-09-21 — the same call the keep control below made
+                on 2026-09-11 ("the marks need no language at all"),
+                and the stop's aria-label still says it in words.
+
+                Session-local for a video Passage: the explain endpoint
+                does not write back into video_sessions.sentences, so a
+                reloaded session loses the marks even though the
+                explanations themselves are still cached server-side. A
+                typed or photographed Passage keeps them, because the
+                history re-derive merges the cache back in. */}
+            {s.explanation && (
+              <span className="anl-stop__done" aria-hidden="true"><CheckIcon size={11} /></span>
+            )}
+          </>
+        )
+        // The one place 鶯色 is spent: the only data a video Sentence
+        // has that no other source does.
+        const time = s.cue_start != null && (
+          <span className="anl-stop__time" aria-hidden="true">{formatTimecode(s.cue_start)}</span>
+        )
+
         return (
           // Sibling, not child: the stop is a <button>, and a <button>
           // inside a <button> is invalid HTML with undefined focus
@@ -161,6 +219,7 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, scrollOnChang
               aria-label={[
                 t.stopNumber(i + 1, sentences.length),
                 s.text,
+                translations?.[i] || null,
                 s.foreign ? t.notJapaneseShort : null,
                 !s.foreign && s.level ? s.level : null,
                 !s.foreign && s.unknown_count === 1 ? t.iPlusOne : null,
@@ -185,55 +244,26 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, scrollOnChang
 
               {/* Truncated by CSS, never by slicing the string: a hard
                   character count cuts mid-grapheme and mangles Japanese. */}
-              <span className="anl-stop__text" lang="ja">{s.text}</span>
-
-              {s.foreign ? (
-                /* Flagged, not hidden: the learner can see this line is in
-                   the track and that the app has nothing to say about it. */
-                <span className="anl-stop__foreign" title={t.notJapaneseLine} aria-hidden="true">
-                  {t.notJapaneseShort}
-                </span>
+              {translations ? (
+                <>
+                  <span className="anl-stop__body">
+                    <span className="anl-stop__text" lang="ja">{s.text}</span>
+                    {translations[i] && <span className="anl-stop__tr" lang={trLang}>{translations[i]}</span>}
+                  </span>
+                  {/* The time over the marks, one narrow column at the
+                      row's end, so the line and its translation keep
+                      the rail's width (plan 238). */}
+                  <span className="anl-stop__meta">
+                    {time}
+                    <span className="anl-stop__marks">{marks}</span>
+                  </span>
+                </>
               ) : (
                 <>
-                  {/* The Sentence's own JLPT grade -- the quietest badge
-                      on the stop, because it is context, not a call to
-                      action the way i+1 is. */}
-                  {s.level && (
-                    <span className="anl-stop__lvl" aria-hidden="true">{s.level}</span>
-                  )}
-                  {s.unknown_count === 1 && (
-                    <span className="anl-stop__iplus" title={t.iPlusOne} aria-hidden="true">i+1</span>
-                  )}
+                  <span className="anl-stop__text" lang="ja">{s.text}</span>
+                  {marks}
+                  {time}
                 </>
-              )}
-
-              {/* Already explained. The deep tier is the one thing on
-                  this screen that costs a model call (docs/adr/0001), and
-                  nothing recorded what had been bought: on a 47-stop
-                  subtitle track the only way to know was to open each stop.
-                  No new pigment -- the wave's colour rule spends
-                  --line-douga on the timestamp chip and nothing else, and
-                  --success is already i+1's. This is shape and weight.
-
-                  A ✓ from the icon set, not the 済 it printed until
-                  2026-09-21 — the same call the keep control below made
-                  on 2026-09-11 ("the marks need no language at all"),
-                  and the stop's aria-label still says it in words.
-
-                  Session-local for a video Passage: the explain endpoint
-                  does not write back into video_sessions.sentences, so a
-                  reloaded session loses the marks even though the
-                  explanations themselves are still cached server-side. A
-                  typed or photographed Passage keeps them, because the
-                  history re-derive merges the cache back in. */}
-              {s.explanation && (
-                <span className="anl-stop__done" aria-hidden="true"><CheckIcon size={11} /></span>
-              )}
-
-              {/* The one place 鶯色 is spent: the only data a video
-                  Sentence has that no other source does. */}
-              {s.cue_start != null && (
-                <span className="anl-stop__time" aria-hidden="true">{formatTimecode(s.cue_start)}</span>
               )}
             </button>
             {onKeep && (
