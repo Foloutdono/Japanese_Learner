@@ -6,8 +6,8 @@
 # boot gate (the `boot_timeout` events), so deploys happen once a day, at
 # the quietest hour, rather than once per merge.
 #
-# What it does: if `main` is ahead of `production` and CI is green on
-# main's head, it fast-forwards `production` to it. Never a merge commit,
+# What it does: it fast-forwards `production` to the newest commit of
+# `main` whose CI passed, if that is ahead of it. Never a merge commit,
 # never a force-push: `production` only ever holds commits `main` held
 # first, so there is nothing to reconcile and a hotfix has one path (merge
 # to `main`, press Run workflow). It creates `production` on its first run.
@@ -52,49 +52,68 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Is there anything to ship?
-        id: ahead
+      - name: Pick the newest commit of main whose CI passed
+        id: pick
         run: |
-          main_sha=$(git rev-parse HEAD)
-          echo "main_sha=$main_sha" >> "$GITHUB_OUTPUT"
-          if ! git ls-remote --exit-code --heads origin production >/dev/null; then
-            echo "production does not exist yet: the first run creates it."
-            echo "ship=true" >> "$GITHUB_OUTPUT"
-            exit 0
+          # The newest, not necessarily the head: a push to main whose CI
+          # is still running, or flaked, waits for tomorrow (or a manual
+          # run), and the commits before it that passed ship meanwhile.
+          # Only merge commits carry the two CI jobs (ci.yml runs on a
+          # push to main), so walking the first parent is walking the
+          # candidates, newest first.
+          have_production=false
+          if git ls-remote --exit-code --heads origin production >/dev/null; then
+            git fetch origin production
+            have_production=true
           fi
-          git fetch origin production
-          if [ "$(git rev-parse origin/production)" = "$main_sha" ]; then
-            echo "production is already at main ($main_sha): nothing to ship."
+          pick=""
+          if [ "${{ inputs.ignore_ci }}" = "true" ]; then
+            pick=$(git rev-parse HEAD)
+            echo "CI ignored on request: main's head, $pick."
+          else
+            for sha in $(git rev-list --first-parent -n 30 HEAD); do
+              if [ "$have_production" = true ] && [ "$sha" = "$(git rev-parse origin/production)" ]; then
+                echo "Reached production ($sha) before a newer green commit: nothing to ship."
+                break
+              fi
+              ok=true
+              for job in backend frontend; do
+                result=$(gh api "repos/$GITHUB_REPOSITORY/commits/$sha/check-runs?per_page=100" \
+                  --jq "[.check_runs[] | select(.name == \"$job\") | .conclusion] | first // \"missing\"")
+                echo "$sha $job: $result"
+                [ "$result" = "success" ] || ok=false
+              done
+              if [ "$ok" = true ]; then pick=$sha; break; fi
+            done
+            if [ -z "$pick" ] && [ "$have_production" = false ]; then
+              echo "::error::No commit among main's last 30 has both CI jobs green."
+              exit 1
+            fi
+          fi
+          if [ -z "$pick" ]; then
             echo "ship=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          if ! git merge-base --is-ancestor origin/production "$main_sha"; then
-            echo "::error::production holds commits main does not. Something was pushed to it by hand; merge it into main, then run this again."
-            exit 1
-          fi
-          echo "ship=true" >> "$GITHUB_OUTPUT"
-          git log --oneline origin/production.."$main_sha" | head -50
-
-      - name: CI must be green on main's head
-        if: steps.ahead.outputs.ship == 'true' && inputs.ignore_ci != true
-        run: |
-          sha='${{ steps.ahead.outputs.main_sha }}'
-          # The two CI jobs (ci.yml). A missing or still-running one is
-          # not green: a push to main whose CI has not finished waits for
-          # tomorrow, or for a manual run.
-          for job in backend frontend; do
-            result=$(gh api "repos/$GITHUB_REPOSITORY/commits/$sha/check-runs?per_page=100" \
-              --jq "[.check_runs[] | select(.name == \"$job\") | .conclusion] | first // \"missing\"")
-            echo "$job: $result"
-            if [ "$result" != "success" ]; then
-              echo "::error::CI '$job' is '$result' on $sha: not promoting."
+          if [ "$have_production" = true ]; then
+            if [ "$(git rev-parse origin/production)" = "$pick" ]; then
+              echo "production is already at $pick: nothing to ship."
+              echo "ship=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if ! git merge-base --is-ancestor origin/production "$pick"; then
+              echo "::error::production holds commits that $pick lacks. Something was pushed to it by hand; merge it into main, then run this again."
               exit 1
             fi
-          done
+            git log --oneline origin/production.."$pick" | head -50
+          else
+            echo "production does not exist yet: the first run creates it at $pick."
+          fi
+          echo "ship=true" >> "$GITHUB_OUTPUT"
+          echo "sha=$pick" >> "$GITHUB_OUTPUT"
 
-      - name: Fast-forward production to main
-        if: steps.ahead.outputs.ship == 'true'
+      - name: Fast-forward production
+        if: steps.pick.outputs.ship == 'true'
         run: |
-          git push origin "${{ steps.ahead.outputs.main_sha }}:refs/heads/production"
+          git push origin "${{ steps.pick.outputs.sha }}:refs/heads/production"
           echo "### Shipped" >> "$GITHUB_STEP_SUMMARY"
-          echo "production is now at \`${{ steps.ahead.outputs.main_sha }}\`." >> "$GITHUB_STEP_SUMMARY"
+          echo "production is now at \`${{ steps.pick.outputs.sha }}\`." >> "$GITHUB_STEP_SUMMARY"
