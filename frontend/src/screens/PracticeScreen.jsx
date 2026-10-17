@@ -30,7 +30,7 @@ import DeskGate from '../components/practice/gate/DeskGate'
 // its station; the gold button boards the train to the run, by the
 // platform's own departure rather than the boarding's door.
 //
-// ── On the desk, the platform painted wide (plan 243) ──
+// ── On the desk, the platform painted wide (plan 244) ──
 // The owner's pick B of the canvas "Tsuji — Practice on the desk", from
 // a painting of their own again: the station as wide as the window, a
 // car standing at it, and one board over its right side holding the

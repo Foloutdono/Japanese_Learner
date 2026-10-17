@@ -1,4 +1,4 @@
-// ── The desk's painted platform in its frame (plan 243) ────────────────
+// ── The desk's painted platform in its frame (plan 244) ────────────────
 // The scene is the owner's painting of the desk gate, one unit a px of
 // it (scripts/practice-gate/desk.py, desk.json): 2127 × 940 units, the
 // station as wide as a wide window. The frame is the screen beside the

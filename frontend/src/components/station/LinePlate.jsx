@@ -30,7 +30,7 @@ import { useListWalk, WALK_KEYS } from '../../hooks/useListWalk'
 // raw: the leg being ridden, 0..1, and 1 for a plate with no track
 // behind it.
 //
-// (The Practice gate hung plates too, on the desk until plan 243 drew
+// (The Practice gate hung plates too, on the desk until plan 244 drew
 // it a painted platform of its own as the phone's, plan 225, had: each
 // with its exercise in the plate's body, plan 165.)
 

@@ -19,7 +19,7 @@ import { ClockFace, Spill } from './GateParts'
 import DESK from './desk.json'
 import { fitDesk, SCENE } from './deskFit'
 
-// ── 練習の改札、机 — the painted platform on the desk (plan 243) ──────
+// ── 練習の改札、机 — the painted platform on the desk (plan 244) ──────
 // The owner's pick B of the canvas "Tsuji — Practice on the desk" (the
 // platform painted wide, one board hung beside the car), and the
 // painting of it the owner made (scripts/practice-gate/source/desk.webp),

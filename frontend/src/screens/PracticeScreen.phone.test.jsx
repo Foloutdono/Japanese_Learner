@@ -11,7 +11,7 @@ import '../index.css'
 // where it goes -- where the plates' chips and heads were. The lit
 // destination opens its station, as a plate's head did; the gold
 // button boards the train to the run at the sign's grade, as a chip
-// did. The desk's painted platform (plan 243) is
+// did. The desk's painted platform (plan 244) is
 // PracticeScreen.desktop.test.jsx.
 
 vi.mock('../lib/api', () => ({

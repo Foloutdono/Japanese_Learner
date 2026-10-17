@@ -7,7 +7,7 @@ import './index.css'
 // ── 低 — the gates on a laptop's short window (plan 169) ────────────
 // At 1280×600 each of Learn's four line plates was 19px shorter than
 // its line, the figures under its stops cut at every foot: they come in
-// a rung and hold whole. Practice's painted platform (plan 243) keeps
+// a rung and hold whole. Practice's painted platform (plan 244) keeps
 // its board in the window: the levels, the seven trains a rung tighter
 // and the chosen one's card, which leaves its head and its link to the
 // row and the rail and keeps its well, every train's compact face whole

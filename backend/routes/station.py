@@ -50,7 +50,7 @@ router = APIRouter()
 SOURCES = (
     "kana", "kanji", "vocab", "grammar",
     # The practice platforms (plan 159), below the Learn lines; 会話's
-    # since the desk's gate hangs it as its seventh train (plan 243).
+    # since the desk's gate hangs it as its seventh train (plan 244).
     "reading", "translation", "comprehension", "dictation", "composition", "exam", "conversation",
 )
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
@@ -390,7 +390,7 @@ def _conversation_line(lang: str) -> dict:
     """会話 (plan 217): the level's scenes, in the bank's order -- the
     station lists them so, and a learner's first scene at a grade is its
     first. The card is that scene as the station's card names it: its
-    place, its title and the line it opens on (plan 243: the desk's gate
+    place, its title and the line it opens on (plan 244: the desk's gate
     shows the train's card at its grade, and this is 会話's). The bank
     holds every text in English and French; `lang` picks one."""
     bank_lang = conversation.bank_lang(lang)

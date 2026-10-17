@@ -175,7 +175,7 @@ export function ConsoleIndex({ value, onChange, onClear, placeholder, count, inp
 // minutes under a run's length) -- Today's choices, plan 199 -- and a
 // `mark` after its word with its `current` (aria-current): the
 // learner's own grade among the levels on the desk's Practice gate
-// (plan 243). On the desk (plan 123) it is one tab stop and its
+// (plan 244). On the desk (plan 123) it is one tab stop and its
 // arrows move and check, as a radio group's do (hooks/useRadioWalk).
 export function Seg({ options, value, onChange, full = false, className = '', label }) {
   const desk = useDesk()

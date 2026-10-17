@@ -1,4 +1,4 @@
-"""The Practice gate's painted platform on the desk (plan 243), from the
+"""The Practice gate's painted platform on the desk (plan 244), from the
 owner's painting of it: source/desk.webp.
 
   python3 scripts/practice-gate/desk.py

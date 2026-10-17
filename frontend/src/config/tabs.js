@@ -203,7 +203,7 @@ function sections(t) {
     // grade, so its station is its own (screens/ConversationStation.jsx)
     // rather than the sentence platforms'. No `clip`, for dictation's
     // reason. After 模試, the seventh train on both gates: the phone's
-    // painted platform (plan 225) and the desk's (plan 243), which drew
+    // painted platform (plan 225) and the desk's (plan 244), which drew
     // six plates and kept this one to the rail until then.
     { icon: '会話', title: t.conversationTitle, desc: t.conversationDesc, path: '/practice/conversation', color: 'var(--line-kaiwa)', tab: 'practice' },
 

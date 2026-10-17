@@ -62,7 +62,7 @@ units at (24.65, 195.86); the train passing is the tile repeated, the
 standing car the painting's own. The roll signs, the leaves and the
 pantograph are placed in the same units (`PracticeGate.jsx`).
 
-## On the desk (plan 243)
+## On the desk (plan 244)
 
 The desk's gate stands on a second painting of the owner's,
 `source/desk.webp`: the owner's picture of option B of the canvas

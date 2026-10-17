@@ -2574,7 +2574,7 @@ const guide = {
   guideLearnShelf: 'Tes propres decks, et la bibliothèque des decks partagés par les autres.',
   guidePracticePass: 'Ces exercices font partie de l’abonnement.',
   // Le quai peint (plan 225) : ses deux panneaux et son portique ; au
-  // bureau (plan 243), le tableau des départs et le portique.
+  // bureau (plan 244), le tableau des départs et le portique.
   guidePracticeSign: 'La destination du train. Touche la ligne du dessus ou du dessous pour la faire tourner, celle qui est allumée pour ouvrir sa station.',
   guidePracticeGrade: 'Le niveau du train. Le tien porte un point : fais-le tourner pour en essayer un autre.',
   guidePracticeBoard: 'Embarque : les portes se ferment et le train t’emmène à l’exercice.',
@@ -2598,7 +2598,7 @@ const guide = {
   guideLearnStopsDesk: 'Toute la ligne. Clique sur un arrêt pour l’étudier.',
   // Pour un pointeur (plan 123) : les notes qui disaient « touchez ».
   guideLearnPlateDesk: 'Une ligne. Clique dessus pour l’ouvrir. La pastille montre ce qui t’attend aujourd’hui.',
-  // Le quai peint au bureau (plan 243) : le tableau des départs, ses
+  // Le quai peint au bureau (plan 244) : le tableau des départs, ses
   // niveaux en tête, et le portique, qu'Entrée presse aussi.
   guidePracticeGradeDesk: 'Le niveau des trains. Le tien porte un point : clique sur un autre pour l’essayer quand même.',
   guidePracticeSignDesk: 'Les trains au départ, un par exercice, avec ce que tu y as fait à ce niveau. Clique sur l’un pour voir ce qu’il te demandera.',
@@ -2654,7 +2654,7 @@ const onboarding = {
   settingsLineOff: 'Hors de ton trajet',
   plateOffRoute: 'Hors de ton trajet',
   // Le relevé d'un niveau sur un quai de Pratique, au bureau (plan 130 ;
-  // sur le tableau des départs depuis le plan 243) : ce qui a été fait à
+  // sur le tableau des départs depuis le plan 244) : ce qui a été fait à
   // ce niveau, puis la part juste. L'espace avant le % est insécable,
   // comme partout en français.
   practiceDone: {
@@ -2678,7 +2678,7 @@ const onboarding = {
     dictation: 'Deux écoutes, pas une de plus : écris en rōmaji ce que tu entends.',
     composition: 'Un point de grammaire est donné : écris une phrase qui l’emploie, un tuteur la relit.',
     conversation: 'On te parle dans une scène : choisis ta réponse, écris-la ou réponds librement.',
-    // Sur la carte du train choisi, au bureau (plan 243, la plaque du
+    // Sur la carte du train choisi, au bureau (plan 244, la plaque du
     // plan 165 avant lui) : la question que son puits montre.
     exam: 'Une question au format JLPT, ici 漢字読み : la lecture du mot souligné.',
   },
@@ -2702,7 +2702,7 @@ const onboarding = {
   practiceGateHour: { dawn: 'l’aube', day: 'le jour', dusk: 'le soir', night: 'la nuit' },
   practiceGatePantoRaise: 'Lever le pantographe',
   practiceGatePantoLower: 'Baisser le pantographe',
-  // ── Le quai peint, au bureau (plan 243) ─────────────────────
+  // ── Le quai peint, au bureau (plan 244) ─────────────────────
   // L'horloge pour un pointeur, et la porte de la station sur la carte
   // du train choisi.
   practiceGateClockDesk: hour => `Horloge du quai, ${hour}. Clique pour l’heure suivante.`,

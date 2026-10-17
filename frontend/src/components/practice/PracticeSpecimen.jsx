@@ -21,7 +21,7 @@ import { ScenePlate } from '../study/GrammarTour'
 // ── On the Practice gate too (plan 165) ──
 // The canvas's last board, "Every platform's specimen", hangs the six
 // platforms of the gate each with its exercise in a well (since plan
-// 243 the desk's gate shows the chosen train's, 会話's among them: its
+// 244 the desk's gate shows the chosen train's, 会話's among them: its
 // first scene's place as the scene's own plate, its title and the line
 // it opens on): `plate` draws
 // the same faces at a plate's size -- the Japanese a rung down, the

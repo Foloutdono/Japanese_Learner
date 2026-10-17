@@ -9,7 +9,7 @@ import { LangProvider } from './LangContext'
 import '@fontsource/space-grotesk/latin-700.css'
 import './index.css'
 
-// ── 机 — the Practice gate on a laptop (plan 243) ──────────────────
+// ── 机 — the Practice gate on a laptop (plan 244) ──────────────────
 // The `wide` lane: a laptop's 1440×900. The board stands at Today's
 // column's width (36% of the frame), and the chosen train's card has
 // the room the owner's picture gives it: the line saying what the run
@@ -75,7 +75,7 @@ async function choose(train, level) {
   await settle(150)
 }
 
-describe('the Practice gate on a laptop (plan 243)', () => {
+describe('the Practice gate on a laptop (plan 244)', () => {
   it('draws the line over the card\'s well and the full face in it, on every train at every grade', async () => {
     await gate()
     await settle()

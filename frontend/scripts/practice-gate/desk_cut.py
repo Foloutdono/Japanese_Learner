@@ -1,4 +1,4 @@
-"""The desk's painted platform (plan 243), cut from the owner's painting.
+"""The desk's painted platform (plan 244), cut from the owner's painting.
 
 source/desk.webp is the owner's picture of the desk gate as they want it:
 the station painted wide at Today's day hour, with the board of option B

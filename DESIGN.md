@@ -793,7 +793,7 @@ question and at the end of a first ride (`Continue` in
 Board's place (plan 168, phone and desk alike) — and Today's **Depart** on the fare
 gate (`components/station/GateCard.jsx`, owner-directed after plan 164) — and,
 on the desk, a deck's **Study** (`screens/DeckDetailScreen.jsx`'s gate, plan
-179) — and the painted Practice gates' **Embarquer** (plans 225 and 243,
+179) — and the painted Practice gates' **Embarquer** (plans 225 and 244,
 below) are
 drawn by one component, `components/ui/GateButton.jsx` (`.btn-depart--gate`),
 as a ticket gate you tap your pass on (改札, plan 164: the owner's pick D of four
@@ -1230,7 +1230,7 @@ adds no idiom of its own: it is the tour's scene made to answer back.
   left, the thread in the middle, the scene's brief (its plate,
   situation and errand) in the side.
 - **The gate: seven trains on both.** The phone's painted platform
-  rolls 会話 as its seventh destination (plan 225), and since plan 243
+  rolls 会話 as its seventh destination (plan 225), and since plan 244
   the desk's board lists it as its seventh train, its card the grade's
   first scene: the place on the scene's plate, its name, the line the
   other person opens on. (The desk's six plates, plan 165, had no room
@@ -1277,7 +1277,7 @@ It keeps its own rules:
 - **Reduced motion**: the train stands, door open, pantograph up; the
   signs turn without rolling; Embarquer opens the run at once.
 
-**On the desk, the platform painted wide (plan 243).** The owner's pick
+**On the desk, the platform painted wide (plan 244).** The owner's pick
 B of the canvas "Tsuji — Practice on the desk", from a second painting
 of the owner's (`scripts/practice-gate/source/desk.webp`, cut and lit
 by `scripts/practice-gate/desk.py` with the phone's recipes for the
@@ -1870,7 +1870,7 @@ line here says otherwise.
   two rows. The shelf keeps its own height, having no body. Both feet are
   lists, one tab stop each, walked with ↑/↓. A window too short for the
   plates scrolls rather than squeezing a row below its content. (The
-  record is the desk's board's now, a row a train: plan 243, "The
+  record is the desk's board's now, a row a train: plan 244, "The
   painted platform" above.)
 - **Learn is the lines beside the shelf** (plan 132, the owner's pick of
   three drawn layouts). The four lines stand in one column, each drawn
@@ -2029,7 +2029,7 @@ line here says otherwise.
   canvas printed beside each title (読書, 翻訳 …) stays off: the owner
   cut it from these plates as a second name for a thing already named,
   and the roundel still carries the station's code. The phone keeps its
-  chips. Since plan 243 the plates are gone: the desk's painted
+  chips. Since plan 244 the plates are gone: the desk's painted
   platform shows the chosen train's card alone, the same face in the
   same well ("The painted platform" above).
 - **The statistics are the four lines** (plan 138, the owner's pick B of
@@ -2567,7 +2567,7 @@ line here says otherwise.
   share, the shelf too. On the desk the lattice takes the window the same
   way, and the plate's body grows into the room: the whole line upright on
   Learn (plan 130, "The desk" above). Practice hung plates too until its
-  gate was painted, on the phone in plan 225 and on the desk in plan 243
+  gate was painted, on the phone in plan 225 and on the desk in plan 244
   (with the platform's own exercise in a well under a line saying what
   it asks since plan 165).
 - **A line with stops is how this app draws distance**, and it is one drawing

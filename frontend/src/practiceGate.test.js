@@ -15,7 +15,7 @@ import { workbox } from '../pwa.workbox.js'
 // ask for is on disk at the revision it asks for, the inks its drawn
 // parts take at each hour are there, the scene stands in any frame as
 // the gate's rules say, and the pantograph stands on the painting's
-// measurements. The desk's own painting (plan 243, scripts/practice-gate/
+// measurements. The desk's own painting (plan 244, scripts/practice-gate/
 // desk.py into public/practice/gate/desk/<rev>/) is held the same way.
 
 const HOURS = ['dawn', 'day', 'dusk', 'night']
@@ -99,7 +99,7 @@ describe('the scene in its frame', () => {
   })
 })
 
-// ── 机 — the desk's painted platform (plan 243) ──
+// ── 机 — the desk's painted platform (plan 244) ──
 const DESK_ROOT = new URL(`../public/practice/gate/desk/${DESK.rev}/`, import.meta.url)
 
 describe('the desk\'s painted platform on disk', () => {

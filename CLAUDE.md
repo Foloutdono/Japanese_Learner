@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **244**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **245**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -61,7 +61,7 @@ runtime purpose.
   `REV` in `frontend/scripts/ambiance/build.py` (the ambiance, plan 219),
   `REV` in `frontend/scripts/practice-gate/build.py` (the painted platform,
   plan 225), `REV` in `frontend/scripts/practice-gate/desk.py` (the desk's
-  painted platform, plan 243).
+  painted platform, plan 244).
   A change to what any of them produces bumps it, or learners keep the old.
 - **The grammar detector and the lookups change by counter-case.** Every new
   rule or refusal is pinned in `tests/test_grammar_precision.py` /
@@ -787,7 +787,7 @@ npm run landing:og  # its two share cards, rendered in Chromium
 python3 scripts/today-print/build.py  # Today's print of the hour (plan 205; numpy, Pillow)
 python3 scripts/ambiance/build.py     # the ambiance of the hour (plan 219; numpy, ffmpeg)
 python3 scripts/practice-gate/build.py  # Practice's painted platform (plan 225; numpy, Pillow, opencv-contrib)
-python3 scripts/practice-gate/desk.py   # ... and the desk's, from its own painting (plan 243)
+python3 scripts/practice-gate/desk.py   # ... and the desk's, from its own painting (plan 244)
 ```
 
 Today's gate stands on a print drawn ahead of time (plan 205):
@@ -808,7 +808,7 @@ and `src/components/practice/gate/gate.json`. Same rules again, and
 `scripts/practice-gate/README.md` has them; the roll signs, the door,
 the pantograph and the clock are drawn by the app over the painting
 (`components/practice/gate/`). The desk's gate stands on a second
-painting of the owner's (plan 243): `desk.py` in the same folder lights
+painting of the owner's (plan 244): `desk.py` in the same folder lights
 it with the phone's recipes into `public/practice/gate/desk/<REV>/` and
 `src/components/practice/gate/desk.json`, and `DeskGate` hangs the
 board of levels and trains over its right side.

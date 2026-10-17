@@ -7,7 +7,7 @@ import { LangProvider } from '../LangContext'
 import '@fontsource/space-grotesk/latin-700.css'
 import '../index.css'
 
-// ── 練習の改札、机 — the painted platform on the desk (plan 243) ──────
+// ── 練習の改札、机 — the painted platform on the desk (plan 244) ──────
 // The owner's pick B of the canvas "Tsuji — Practice on the desk", from
 // the owner's own painting of it: the station the window's height and
 // the width the rail leaves, a car standing at it with its door open,
@@ -109,7 +109,7 @@ async function choose(train, level) {
   await settle(150)
 }
 
-describe('the painted platform on the desk (plan 243)', () => {
+describe('the painted platform on the desk (plan 244)', () => {
   it('stands the painting in the window, the board over its right side', async () => {
     await gate()
     expect($('.practice > .pdesk')).not.toBeNull()

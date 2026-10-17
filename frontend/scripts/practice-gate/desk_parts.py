@@ -1,4 +1,4 @@
-"""The desk's painted platform as parts (plan 243), so each hour can light
+"""The desk's painted platform as parts (plan 244), so each hour can light
 them on their own, as parts.py does for the phone's: the sky and its
 clouds, the land under it (Fuji's snow, the far hills, the forest), the
 canopy and its lamps, the wires, the platform and its tactile strip; on

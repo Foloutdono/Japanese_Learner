@@ -1810,7 +1810,7 @@ describe('the run\'s lines (plan 129)', () => {
 // ── plan 130 — the gates a phone keeps ──
 // On the desk the plates take the window, Learn's line stands upright
 // and Practice's board holds the record and the chosen train's card
-// (plan 243; the plates' specimens, plan 165, before it). A phone keeps
+// (plan 244; the plates' specimens, plan 165, before it). A phone keeps
 // its own: since plan 225 Practice's is the painted platform, its signs
 // where the chips were, and no request for a record or a sample it has
 // nowhere to print.
@@ -1831,7 +1831,7 @@ describe('the gates taking the window (plan 130)', () => {
     const sign = document.querySelector('.pgate-sign--main')
     expect(sign.querySelectorAll('.pgate-roll--dest .pgate-roll__row')).toHaveLength(getSections('practice', {}).length)
     expect(sign.querySelectorAll('.pgate-roll--grade .pgate-roll__row')).toHaveLength(5)
-    // Nor the desk's board (plan 243), and no request for the samples
+    // Nor the desk's board (plan 244), and no request for the samples
     // its card would draw from.
     expect(document.querySelector('.pdesk, .prc-spec')).toBeNull()
     expect(apiFetch.mock.calls.some(([path]) => path === '/api/practice/record')).toBe(false)

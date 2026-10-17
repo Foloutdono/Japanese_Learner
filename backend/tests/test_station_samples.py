@@ -332,7 +332,7 @@ def test_the_exam_vocab_carries_the_paper_s_four_readings(client):
 
 
 def test_a_conversation_card_is_the_grade_s_first_scene(client):
-    # Plan 243: 会話 is the desk gate's seventh train, and its card is
+    # Plan 244: 会話 is the desk gate's seventh train, and its card is
     # the scene a learner meets first at the grade -- its place, its
     # title and the line it opens on -- in the learner's language.
     fr = _stops(client, "conversation", "fr")

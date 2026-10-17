@@ -52,7 +52,7 @@ import { ClockFace, Leaves, Pantograph, Rivets, Spark, Spill } from './GateParts
 // The scene is 390 × 724 units, one CSS px each inside a zoomed root
 // (Today's print's lifted layers are placed the same way): every number
 // in this file and in the section of index.css it uses is the canvas's.
-// The desk has a painted platform of its own (DeskGate, plan 243).
+// The desk has a painted platform of its own (DeskGate, plan 244).
 
 // The standing car and the next cars' tiles, left to right (the scene's
 // units; a car is 340.71 wide). Each next car's signs sit 100.5 in.

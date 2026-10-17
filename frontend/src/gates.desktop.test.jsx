@@ -8,7 +8,7 @@ import './index.css'
 // At the desk's tightest (1100, the rail taking 256 of it) Learn stands
 // its four lines in one column beside the shelf (plan 132), and Today
 // sets the strip beside the fare gate. Practice stands its painted
-// platform since plan 243 (screens/PracticeScreen.desktop.test.jsx).
+// platform since plan 244 (screens/PracticeScreen.desktop.test.jsx).
 // The phone's own column (layout.phone.test, PracticeScreen.phone.test)
 // does not move.
 
@@ -111,7 +111,7 @@ describe('the plated gates on the desk', () => {
 // it empty. They fill it now, their rows sharing the room, and the room
 // goes to each plate's body: the line upright on Learn. (Practice's
 // plates did the same with the grades' rows and then, plan 165, each
-// platform's specimen, until plan 243 painted the gate.)
+// platform's specimen, until plan 244 painted the gate.)
 //
 // The page does not scroll, and the last plate stands a gutter from
 // the window's floor: the plates took the room rather than leaving it.

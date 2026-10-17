@@ -34959,7 +34959,7 @@ button.brd-stn { cursor: pointer; }
      body takes the rest. */
   .learn > .plates > .plate--line > .plate__head { flex: none; }
 
-  /* ── 練習の改札、机 — the platform painted wide (plan 243) ──
+  /* ── 練習の改札、机 — the platform painted wide (plan 244) ──
      components/practice/gate/DeskGate.jsx: the owner's painting of the
      desk's Practice gate (scripts/practice-gate/desk.py), the window's
      height and the width the rail leaves, lit at Today's hour, with one
@@ -42668,7 +42668,7 @@ button.brd-stn { cursor: pointer; }
      way first (it fades out at its foot, .prc-spec__text's mask), and
      the mock exam's 漢字読み over its four readings. A short plate's
      comprehension is its text alone (PracticeSpecimen's `compact`),
-     which takes the well rather than the text's own cap. Since plan 243
+     which takes the well rather than the text's own cap. Since plan 244
      the plate is the desk's board, its card the chosen train's
      (components/practice/gate/DeskGate). */
   .prc-spec--plate {
@@ -42677,7 +42677,7 @@ button.brd-stn { cursor: pointer; }
     gap: var(--sp-4);
     padding: var(--sp-5);
   }
-  /* Its caption, where the well has the room for one (plan 243), stands
+  /* Its caption, where the well has the room for one (plan 244), stands
      over the face rather than on it. */
   .prc-spec--plate:has(> .prc-spec__tag) { padding-top: var(--sp-7); }
   .prc-spec--plate .prc-spec__jp {
@@ -42723,7 +42723,7 @@ button.brd-stn { cursor: pointer; }
     flex: 1 1 auto;
     max-height: none;
   }
-  /* 会話's face (plan 243): the scene's place on its plate, the scene's
+  /* 会話's face (plan 244): the scene's place on its plate, the scene's
      name under it, then the line the other person opens on. */
   .prc-spec__scene {
     max-width: 100%;
@@ -43074,7 +43074,7 @@ button.brd-stn { cursor: pointer; }
     .learn-desk > .plates.plates--across > .plate.plate--line { min-height: min-content; }
     .learn-desk > .plates.plates--across > .plate.plate--line > .plate__head { padding-block: var(--sp-1); }
     .learn-desk > .plates.plates--across > .plate.plate--line > .plate__foot { padding-block: var(--sp-1) var(--sp-2); }
-    /* ── Practice (plan 243) ──
+    /* ── Practice (plan 244) ──
        The board a rung tighter: at 600px the band, the seven trains and
        the chosen one's card share 568px, and the card keeps its well,
        the room its compact face needs. The trains' rows close up, and
@@ -43102,7 +43102,7 @@ button.brd-stn { cursor: pointer; }
       flex: none;
       padding: var(--sp-7) var(--sp-6) var(--sp-5);
     }
-    /* Not the gate's: the board's card (plan 243) still gives its well
+    /* Not the gate's: the board's card (plan 244) still gives its well
        what the card leaves. */
     .prc-spec--plate { flex: 1 1 0; padding: var(--sp-5); }
     .prc-spec--plate:has(> .prc-spec__tag) { padding-top: var(--sp-7); }
@@ -45714,7 +45714,7 @@ button.brd-stn { cursor: pointer; }
      The station's scenes go two across at every count: a scene's card
      carries its name, its situation and its first line, and a third of
      the page held a word a line of them when a grade has three. The
-     odd one out still takes the row. (Since plan 243 the Practice gate
+     odd one out still takes the row. (Since plan 244 the Practice gate
      hangs it on the desk too, its seventh train.) */
   .learn:has(> .kaiwa-console) > .platform-grid,
   .learn:has(> .kaiwa-console) > .platform-grid:has(> .platform-slot:nth-child(3):last-child) {
