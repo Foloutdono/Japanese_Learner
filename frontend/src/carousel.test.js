@@ -1650,12 +1650,10 @@ describe('the reading challenges (plan 247)', () => {
     expect(challengeItems(data).length).toBe(data.passages.length)
   })
 
-  it('reads every text, three of its words first and one of its questions after', () => {
+  it('reads every text, and one of its questions after', () => {
     for (const P of data.passages) {
       for (const lang of ['en', 'fr']) {
         const pl = challengePlan(data, P.id, { lang })
-        expect(pl.words.length, P.id).toBe(3)
-        for (const w of pl.words) expect(w.r && w.gloss, `${P.id} ${w.t}`).toBeTruthy()
         // A question about what the text says, its answer among its four choices.
         const Q = P.questions.find(q => q.type === 'comprehension')
         if (Q) expect(pl.q.ask, P.id).toBe(Q.question[lang])
@@ -1674,8 +1672,8 @@ describe('the reading challenges (plan 247)', () => {
       const seg = tl.segs.find(s => s.key === 'reading')
       expect(seg.dur, P.id).toBeCloseTo(CHALLENGE.into + chars / (CPM[P.lv] / 60) + CHALLENGE.out, 2)
       expect(tl.lines, P.id).toEqual([])
-      // Hook, words, the reading, the question, its answer, the app: end to end.
-      expect(tl.segs.map(s => s.key)).toEqual(['hook', 'words', 'reading', 'question', 'answer', 'cta'])
+      // The hook, the reading, the question, its answer, the app: end to end.
+      expect(tl.segs.map(s => s.key)).toEqual(['hook', 'reading', 'question', 'answer', 'cta'])
       tl.segs.forEach((s, i) => { if (i) expect(s.start, P.id).toBeCloseTo(tl.segs[i - 1].start + tl.segs[i - 1].dur, 2) })
       expect(tl.seconds, P.id).toBeCloseTo(tl.segs.at(-1).start + tl.segs.at(-1).dur, 2)
       expect(tl.cues, P.id).toEqual([])

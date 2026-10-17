@@ -4,8 +4,8 @@
 // film's credits do, at one size, in ink on the print washed pale (the
 // owner's own reference); `along`, the text standing while the app's
 // reader says it, each word lit as it is said (the owner's pick D of four
-// drawn). Before it the hook and three of its words; after it one of its
-// questions, asked and answered, and the way to the app. Under it, a
+// drawn). Before it the hook; after it one of its questions, asked and
+// answered, and the way to the app. Under it, a
 // track of the owner's own music, or nothing.
 //
 // Everything a viewer must read is set large, in ink on the washed print
@@ -32,7 +32,7 @@ const RUBY = new Set(['N5', 'N4', 'N3'])
 const SLOW = new Set(['N5', 'N4'])
 // The video's beats, in seconds.
 export const CH = {
-  hook: 3.2, words: 5.5,
+  hook: 3.2,
   // scroll: the text comes in for INTO seconds before it moves, and the
   // last line is still read for OUT seconds after it passes the reading line.
   into: 1, out: 4,
@@ -66,7 +66,6 @@ const W = {
     hook: { scroll: 'Can you read this?', along: 'Read along. Can you keep up?' },
     sentences: n => `${n} sentences`,
     chars: n => `${n} characters`,
-    words: 'Three words first',
     comments: 'Answer in the comments',
     gotIt: 'Did you get it?',
     more: 'Texts like this one, N5 to N1, each with its questions',
@@ -82,7 +81,6 @@ const W = {
     hook: { scroll: 'Tu arrives à lire ça ?', along: 'Lis avec la voix. Tu suis ?' },
     sentences: n => `${n} phrases`,
     chars: n => `${n} caractères`,
-    words: 'D’abord, trois mots',
     comments: 'Réponds en commentaire',
     gotIt: 'Tu avais trouvé ?',
     more: 'Des textes comme celui-ci, du N5 au N1, avec leurs questions',
@@ -110,7 +108,7 @@ export function challengeItems(data, lang = 'en') {
   return data.passages.map(P => ({ id: P.id, jp: P.title, sub: W[lang === 'fr' ? 'fr' : 'en'].chars(P.sents.map(unpack).reduce((n, rows) => n + charsOf(rows), 0)), tag: P.lv }))
 }
 
-/** A text's challenge: its sentences, three of its words, one question.
+/** A text's challenge: its sentences and one of its questions.
  *  `opts.music`: the track laid under it (a file's path or name), or none. */
 export function challengePlan(data, id, opts = {}) {
   const lang = opts.lang === 'fr' ? 'fr' : 'en'
@@ -118,18 +116,11 @@ export function challengePlan(data, id, opts = {}) {
   const style = STYLES.includes(opts.style) ? opts.style : 'scroll'
   const hour = HOURS.includes(opts.hour) ? opts.hour : 'dusk'
   const sents = P.sents.map(unpack)
-  // Three words of its level the text writes in kanji, in the order it meets them.
-  const text = P.sents.map(s => s.map(t => t[0]).join('')).join('')
-  const kanji = w => /[\u3400-\u9fff]/.test(w.t)
-  const ranked = [...P.words.filter(w => kanji(w) && w.lv === P.lv), ...P.words.filter(w => kanji(w) && w.lv !== P.lv), ...P.words.filter(w => !kanji(w))]
-  const words = [...new Map(ranked.map(w => [w.t, w])).values()].slice(0, 3)
-    .sort((a, b) => text.indexOf(a.t) - text.indexOf(b.t))
-    .map(w => ({ t: w.t, r: w.r, gloss: (w[lang] || w.en || [])[0] || '' }))
   // The question about what the text says, never about its grammar.
   const Q = P.questions.find(q => q.type === 'comprehension') ?? P.questions[0]
   const q = { ask: Q.question[lang] || Q.question.en, choices: Q.options[lang] || Q.options.en, right: Q.correct }
   return {
-    source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, title: P.title, sents, words, q, music: opts.music || null,
+    source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, title: P.title, sents, q, music: opts.music || null,
     chars: sents.reduce((n, rows) => n + charsOf(rows), 0), cpm: CPM[P.lv] || CPM.N3, ruby: RUBY.has(P.lv), slow: SLOW.has(P.lv),
   }
 }
@@ -168,7 +159,6 @@ export function challengeTimeline(plan, voiced = null) {
   let t = 0
   const seg = (key, dur) => { segs.push({ key, start: +t.toFixed(3), dur: +dur.toFixed(3) }); t += dur }
   seg('hook', CH.hook)
-  seg('words', CH.words)
   const from = t
   if (plan.style === 'scroll') {
     // The whole text past the reading line at the level's pace, a moment
@@ -306,7 +296,6 @@ export function drawChallenge(ctx, plan, tl, t, P = null) {
   const T = lookOf(plan)
   ctx.save()
   if (s.key === 'hook') hook(ctx, plan, tl, into, P, T)
-  else if (s.key === 'words') words(ctx, plan, into, P, T)
   else if (s.key === 'reading') (plan.style === 'scroll' ? scroll : along)(ctx, plan, tl, t, P)
   else if (s.key === 'question') question(ctx, plan, into, false, P, T)
   else if (s.key === 'answer') question(ctx, plan, into, true, P, T)
@@ -328,27 +317,6 @@ function hook(ctx, plan, tl, into, P, T) {
   ctx.globalAlpha *= ease((into - 0.6) / 0.6)
   chip(ctx, T, `JLPT ${plan.lv} · ${S.sentences(plan.sents.length)} · ${clock(tl.reading)}`, fr.cx, y, { align: 'center', z: FS.body })
   ctx.restore()
-}
-
-function words(ctx, plan, into, P, T) {
-  const S = W[plan.lang]
-  backdrop(ctx, P, T, 0.5, plan.hour)
-  masthead(ctx, T)
-  let y = lines(ctx, T, S.words, TOP + 40, [FS.heading, FS.title]) + SP[6]
-  const h = 168
-  plan.words.forEach((w, i) => {
-    const k = ease((into - 0.3 - i * 0.35) / 0.5)
-    ctx.save()
-    ctx.globalAlpha *= k
-    panel(ctx, T, fr.x, y + (1 - k) * 20, fr.w, h)
-    text(ctx, w.r, fr.x + SP[5], y + 52, { f: font(500, FS.body, 'jp'), color: T.title })
-    const tb = fit(ctx, w.t, { weight: 700, fam: 'serif', sizes: [FS.display * 0.68, FS.heading], maxW: fr.w * 0.5, maxLines: 1 })
-    text(ctx, tb.lines[0], fr.x + SP[5], y + 136, { f: tb.f, color: T.ink })
-    const gb = fit(ctx, w.gloss, { weight: 600, sizes: [FS.lead, FS.body, FS.sm], maxW: fr.w * 0.44, maxLines: 2, lh: 1.15 })
-    gb.lines.forEach((l, j) => text(ctx, l, fr.right - SP[5], y + h / 2 + gb.size * (0.36 + (j - (gb.lines.length - 1) / 2) * 1.15), { f: gb.f, color: T.ink, align: 'right' }))
-    ctx.restore()
-    y += h + SP[5]
-  })
 }
 
 const PAD = SP[5]

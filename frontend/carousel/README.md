@@ -844,8 +844,9 @@ over Today's print of the hour, in one of two ways:
   count is the text's, else in proportion to each word's.
 
 Either way it opens on the hook ("Can you read this?", the title, the
-level, its sentences and its reading time) and three of its words, the
-level's own first, with their readings and meanings; it ends on one of
+level, its sentences and its reading time) and goes straight into the
+text (the three of its words first shown before it are gone, at the
+owner's word); it ends on one of
 its questions (the one about what the text says, never its grammar),
 five seconds counted by the app's clicks and "Answer in the comments",
 its answer, then the way to the app: the title, "Texts like this one, N5

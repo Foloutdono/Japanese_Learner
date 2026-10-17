@@ -643,7 +643,7 @@ async function renderLong(mine) {
 // the app's sounds and a track of the owner's music if one is added, and
 // the voice of the one read along is made where it is rendered (the
 // command below), every word timed on it.
-const CHAPTER = { hook: 'Hook', words: 'Three words', reading: 'Reading', question: 'Question', answer: 'Answer', cta: 'The app' }
+const CHAPTER = { hook: 'Hook', reading: 'Reading', question: 'Question', answer: 'Answer', cta: 'The app' }
 // The track laid under it, picked from this computer: kept for the visit
 // only, never stored ({ name, url }).
 let music = null
