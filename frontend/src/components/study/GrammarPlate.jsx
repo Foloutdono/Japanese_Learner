@@ -422,11 +422,15 @@ export function GrammarConstruire({ card, answered, entry: held, onDone, session
       <p className="gl-tr gl-tr--lead">{build.tr}</p>
     </div>
   )
+  // An answer in the other register is right too (plan 241): the hole
+  // holds it, and a line says what the sentence itself has there.
+  const other = verdict?.gaps?.find(g => g.said)
   const back = verdict && (
     <Back
       card={card}
       kind={whole === 'right' ? 'ok' : 'no'}
       head={whole === 'right' ? t.bldRight : whole === 'close' ? t.bldClose : whole === 'wrong' ? t.bldWrong : null}
+      note={other ? t.bldOther(other.said, other.register) : null}
       sentence={front}
     />
   )

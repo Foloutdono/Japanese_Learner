@@ -45,6 +45,7 @@ from study.grammar_detect import can_find
 from study.grammar_match import verifiable
 from study.grammar_tour import _dictionary_form, lit_spans
 from study.morphology import kata_to_hira, tokenize
+from study.plain_polite import other_register
 from study.romaji import kana_of
 
 # The exercise each step kind asks, by the mode's base, and what stands
@@ -73,6 +74,7 @@ def chain_for(kind: str) -> tuple[str, ...]:
 # ── 作る Construire ───────────────────────────────────────────
 
 _MARKS = re.compile(r"[\s。、．，,.！？!?「」『』（）()・…〜～]+")
+_KANJI = re.compile(r"[\u4e00-\u9fff\u3005]")
 
 
 def _slice(parts: list[dict], a: int, b: int) -> list[dict]:
@@ -216,20 +218,45 @@ def _marks(given: str, expected: str) -> list[dict]:
     return out
 
 
-def _gap_verdict(given: str, written: str, reading: str) -> str:
-    if given in (_norm(written), reading):
-        return "right"
+def _heard(given: str) -> str:
+    """What was typed, read: a kanji the keyboard put in (下さい for
+    ください, 思う for おもう) is read as the tokenizer reads it."""
+    return _reading(align_sentence(given)) if _KANJI.search(given) else given
+
+
+def _one_off(given: str, reading: str) -> bool:
     ops = difflib.SequenceMatcher(a=given, b=reading, autojunk=False).get_opcodes()
     changed = sum(max(i2 - i1, j2 - j1) for op, i1, i2, j1, j2 in ops if op != "equal")
-    return "close" if given and changed == 1 and len(reading) > 1 else "wrong"
+    return bool(given) and changed == 1 and len(reading) > 1
+
+
+def _gap_verdict(typed: str, forms: list[tuple[str, str]]) -> tuple[str, int, str]:
+    """(verdict, form, heard): what was typed against each of the gap's
+    forms (written, read), the sentence's own first -- `right` as one is
+    written or read, `close` one kana off one, else `wrong`; the form it
+    was judged against (the sentence's own for a wrong answer), and what
+    was typed, read."""
+    given = _norm(typed)
+    heard = _heard(given)
+    for n, (written, reading) in enumerate(forms):
+        if given == _norm(written) or heard == reading:
+            return "right", n, heard
+    for n, (_, reading) in enumerate(forms):
+        if _one_off(heard, reading):
+            return "close", n, heard
+    return "wrong", 0, heard
 
 
 def check_build(level: str, pattern: str, key: str, answers: list[str], lang: str) -> dict | None:
     """The verdict on a Construire, gap by gap: `right` when what was typed
     is the point as written or as read, `close` when one kana is off (書い
     で for 書いて), else `wrong`; the whole is right when every gap is,
-    close when none is wrong. Each gap carries its answer, its reading and
-    the runs that draw the correction; the whole sentence comes back lit.
+    close when none is wrong. A gap that closes its sentence is right in
+    either register too (plan 241): the translation does not say which,
+    so です answers あしたはテストだ (study/plain_polite.py). Each gap
+    carries its answer, its reading and the runs that draw the correction,
+    and, where it was judged in the other register, what the sentence
+    `said` and in which `register`; the whole sentence comes back lit.
     None for a key the point has no sentence under. Nothing typed is kept."""
     item = next((i for i in _build_items(level, pattern) if i[0] == key), None)
     if item is None:
@@ -240,12 +267,16 @@ def check_build(level: str, pattern: str, key: str, answers: list[str], lang: st
     for n, (a, b) in enumerate(spans):
         written = jp[a:b]
         reading = _reading(_slice(parts, a, b))
-        given = _norm(answers[n] if n < len(answers) else "")
-        verdict = _gap_verdict(given, written, reading)
-        gaps.append({
-            "verdict": verdict, "answer": written, "reading": reading,
-            "marks": [] if verdict == "right" else _marks(given, reading),
-        })
+        other = other_register(jp, a, b, reading, pattern)
+        forms = [(written, reading), *(other[1] if other else ())]
+        verdict, form, heard = _gap_verdict(answers[n] if n < len(answers) else "", forms)
+        gap = {
+            "verdict": verdict, "answer": forms[form][0], "reading": reading,
+            "marks": [] if verdict == "right" else _marks(heard, forms[form][1]),
+        }
+        if form:
+            gap.update(said=written, register=other[0])
+        gaps.append(gap)
     verdicts = {g["verdict"] for g in gaps}
     whole = "right" if verdicts == {"right"} else "wrong" if "wrong" in verdicts else "close"
     return {
