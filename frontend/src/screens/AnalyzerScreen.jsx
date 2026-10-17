@@ -8,8 +8,8 @@ import { dialogOpen } from '../lib/dialogOpen'
 import { Seg } from '../components/chrome/Console'
 import { Sheet } from '../components/chrome/Sheet'
 import { stationFor } from '../config/stations'
-import { WordsList, WordTiles } from '../components/analysis/WordsList'
-import { wordTileRows, isFreshWord } from '../components/analysis/rows'
+import { WordsFold, WordsList, WordTiles } from '../components/analysis/WordsList'
+import { wordRowsOf, wordTileRows, isFreshWord } from '../components/analysis/rows'
 import { useAsk } from '../hooks/useAsk'
 import { askContext } from '../domain/ask'
 import { FocusCard } from '../components/analysis/FocusCard'
@@ -31,6 +31,7 @@ import { prefetchLookup } from '../lib/dictionaryLookup'
 import { useMining } from '../components/analysis/useMining'
 import { useFavorites } from '../hooks/useFavorites'
 import { useAnalyzerSession } from '../components/analysis/useAnalyzerSession'
+import { useLineTranslations } from '../components/analysis/useLineTranslations'
 import { IntakeText } from '../components/analysis/IntakeText'
 import { IntakePhoto } from '../components/analysis/IntakePhoto'
 import { IntakeVideo } from '../components/analysis/IntakeVideo'
@@ -296,9 +297,13 @@ export default function AnalyzerScreen({ session }) {
   // (plan 219).
   const [dock, setDock] = useState(null)
   const closeDock = useCallback(() => setDock(null), [])
+  // The text desk's words, folded to one line under the sumi, open as a
+  // list in a sheet (plan 235, the owner's pick C).
+  const [wordsOpen, setWordsOpen] = useState(false)
+  const closeWords = useCallback(() => setWordsOpen(false), [])
   // Every route into a new Passage starts the focus over: the first
   // word, its own entry, the card rather than an explanation.
-  const clearFocus = useCallback(() => { setLookup(null); setSide('card'); setTokenIndex(0); setExplainOpen(false) }, [])
+  const clearFocus = useCallback(() => { setLookup(null); setSide('card'); setTokenIndex(0); setExplainOpen(false); setWordsOpen(false) }, [])
   // The desk's transport (plan 134, components/analysis/PlayerBar): the
   // focused sentence on a loop, a stop at each sentence's end, the
   // speed, and the video folded away to give the sentence the column.
@@ -355,6 +360,25 @@ export default function AnalyzerScreen({ session }) {
   // Where a grammar point sits, lit across the desk's three columns (the
   // subtitle line, the numbered points, the words list and the card).
   const light = useLight(analyzer.focused)
+  // 訳 (plan 235): what the player says the video is, where it knows --
+  // told to a line's translation and to its explanation -- and the
+  // Passage's translations, asked a block of lines at a time where the
+  // Passage is kept: a video's session, a typed Passage's history row.
+  const aboutVideo = useCallback(() => ({
+    title: (playerRef.current?.title?.() ?? '').slice(0, 200),
+    channel: (playerRef.current?.channel?.() ?? '').slice(0, 120),
+  }), [])
+  const translationsPath = passage?.sessionId != null
+    ? `/api/video/session/${passage.sessionId}/translations`
+    : passage?.historyId != null ? `/api/phrase/history/${passage.historyId}/translations` : null
+  const lineTranslations = useLineTranslations({
+    session,
+    path: translationsPath,
+    count: sentences.length,
+    focusIndex,
+    lang,
+    about: aboutVideo,
+  })
   const busy = status === 'working'
   const ready = status === 'ready' && Boolean(analyzer.focused)
   // The page is the intake until a Passage is ready, and the result
@@ -982,6 +1006,20 @@ export default function AnalyzerScreen({ session }) {
   }
 
   const focused = analyzer.focused
+  // The line's translation: the Passage's own (plan 235), or, before it
+  // comes and on a Passage saved nowhere, the one Explain bought (plan
+  // 161). A line holds its translation's place while it comes, so the
+  // line over it does not move when it lands.
+  const translation = lineTranslations[focusIndex] ?? focused?.translation ?? ''
+  const translationDue = translationsPath != null && Boolean(focused) && !focused.foreign
+  const explainHere = () => analyzer.explain(focusIndex, aboutVideo())
+  // The slot holds a space while its translation comes: a line of the
+  // same type, so the one that lands is no taller and nothing moves.
+  const trLine = className => (
+    <p className={className} lang={lang} aria-hidden={translation ? undefined : true}>
+      {translation || ' '}
+    </p>
+  )
   // A token picked on the stage; on the desk the dock follows it, so a
   // door pressed before stops being what the dock shows.
   function walkTo(i) {
@@ -1180,7 +1218,7 @@ export default function AnalyzerScreen({ session }) {
   // What a question about the sentence carries (plan 220): the sentence,
   // its translation and the explanation the learner has just read.
   const sentenceAsk = focused && askContext({
-    sentence: focused.text, level: focused.level, translation: focused.translation,
+    sentence: focused.text, level: focused.level, translation,
     review: focused.explanation, analysis: focused,
   })
   const explainingHere = Boolean(explaining[focusIndex])
@@ -1192,7 +1230,7 @@ export default function AnalyzerScreen({ session }) {
   function pressExplain() {
     if (explainShown) { setSide('card'); return }
     setSide('explain')
-    if (!hasExplanation && !explainingHere) analyzer.explain(focusIndex)
+    if (!hasExplanation && !explainingHere) explainHere()
   }
   const arrow = (dir, disabled, onClick, label) => (
     <button type="button" className="anl-slab__arrow" disabled={disabled} onClick={onClick} aria-label={label}>
@@ -1297,7 +1335,10 @@ export default function AnalyzerScreen({ session }) {
   // the entry on the right is that card, and its deck action rides the
   // word's row. One sentence (B′): the words over the grammar on the
   // left. Several (B): the Passage's line over the grammar on the left,
-  // the words under the sentence.
+  // the words under the sentence -- folded to one line since plan 235
+  // (the owner's pick C of the canvas "Tsuji analyser — text desk
+  // stage"), so the sentence, its translation and Explain have the
+  // stage, and opened as the list in a sheet.
   const textDesk = !playerVideoId
   const focusWord = pointAt === -1 && stageToken?.vocab_match ? stageToken : null
   const wordAction = textDesk && focusWord && (
@@ -1313,6 +1354,7 @@ export default function AnalyzerScreen({ session }) {
       t={t}
     />
   )
+  const foldRows = readable ? wordRowsOf(focused) : []
   const wordsPanel = readable && (
     <section className="anl-desk__words" aria-label={t.wordsInSentence}>
       <WordsList analysis={focused} current={pointAt === -1 ? stageToken : null} onSelect={selectRow} t={t} action={wordAction} />
@@ -1437,10 +1479,15 @@ export default function AnalyzerScreen({ session }) {
           {textDesk ? (
             <div className="anl-subs__stage">
               {subsBody}
-              {focused.translation && <p className="anl-subs__tr" lang={lang}>{focused.translation}</p>}
+              {(translation || translationDue) && trLine('anl-subs__tr')}
               {readable && explainButton}
             </div>
-          ) : subsBody}
+          ) : (
+            <>
+              {subsBody}
+              {(translation || translationDue) && trLine('anl-subs__tr')}
+            </>
+          )}
         </div>
         {playerVideoId && (
           <PlayerBar
@@ -1488,7 +1535,10 @@ export default function AnalyzerScreen({ session }) {
           </div>
         </div>
       )}
-      {textDesk && several && wordsPanel}
+      {textDesk && several && readable && (
+        <WordsFold analysis={focused} current={pointAt === -1 ? stageToken : null}
+          open={wordsOpen} onOpen={() => setWordsOpen(true)} t={t} />
+      )}
 
       <section className={`desk-entry anl-desk__entry${explainShown ? ' anl-desk__entry--explain' : ''}`} aria-label={t.openDictionary}>
         {deskEntry ? (
@@ -1511,7 +1561,7 @@ export default function AnalyzerScreen({ session }) {
             explanation={focused.explanation}
             explaining={explainingHere}
             error={explainError[focusIndex]}
-            onExplain={() => analyzer.explain(focusIndex)}
+            onExplain={explainHere}
             ask={asking}
             askKey={focused.text}
             askContext={sentenceAsk}
@@ -1565,7 +1615,7 @@ export default function AnalyzerScreen({ session }) {
   function openExplain() {
     playerRef.current?.pause()
     setExplainOpen(true)
-    if (!hasExplanation && !explainingHere) analyzer.explain(focusIndex)
+    if (!hasExplanation && !explainingHere) explainHere()
   }
   const sideLine = (text, dir, go, where) => (text
     ? (
@@ -1646,7 +1696,7 @@ export default function AnalyzerScreen({ session }) {
             timing={timing}
           />
         )}
-        {focused.translation && <p className="anl-m__tr" lang={lang}>{focused.translation}</p>}
+        {(translation || translationDue) && trLine('anl-m__tr')}
         {sideLine(nextText, t.nextSentence, () => goToStop(focusIndex + 1), 'next')}
       </section>
 
@@ -1836,6 +1886,33 @@ export default function AnalyzerScreen({ session }) {
           moves the same position the stepper reads from. */}
       {showResult && focused && wide && deskResult}
 
+      {/* The text desk's words, opened from their folded line (plan 235):
+          the list that stood under the sumi, a row putting its word in
+          focus -- the entry on the right follows -- and closing it. A
+          sheet is portalled to the body, so the station's pigment is
+          set again on what it holds. */}
+      {showResult && focused && wide && textDesk && (
+        <Sheet
+          open={wordsOpen}
+          onClose={closeWords}
+          jp={t.wordsSheetTitle}
+          cap={t.wordsSheetCount(foldRows.length, foldRows.filter(isFreshWord).length)}
+          label={t.wordsInSentence}
+          className="anl-wordsheet"
+          dismiss
+        >
+          <div style={{ '--line-color': KAISEKI }}>
+            <WordsList
+              analysis={focused}
+              current={pointAt === -1 ? stageToken : null}
+              onSelect={row => { closeWords(); selectRow(row) }}
+              t={t}
+              action={wordAction}
+            />
+          </div>
+        </Sheet>
+      )}
+
       {showResult && focused && !wide && mobileResult}
 
       {lookup && !wide && (
@@ -1852,11 +1929,11 @@ export default function AnalyzerScreen({ session }) {
       {explainOpen && !wide && focused && (
         <ExplainSheet
           sentence={focused.text}
-          translation={focused.translation}
+          translation={translation}
           explanation={focused.explanation}
           explaining={explainingHere}
           error={explainError[focusIndex]}
-          onExplain={() => analyzer.explain(focusIndex)}
+          onExplain={explainHere}
           onClose={closeExplain}
           ask={asking}
           askKey={focused.text}

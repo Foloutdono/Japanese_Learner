@@ -300,7 +300,9 @@ describe('ComprehensionRun', () => {
     const sheet = document.querySelector('.dict-sheet[role="dialog"]')
     expect(sheet).toBeTruthy()
     expect(sheet.querySelector('.dict-plate__word').textContent).toBe(GRAMMAR_ENTRY.pattern)
-    expect(sheet.querySelector('.dict-plate__structure').textContent).toBe(GRAMMAR_ENTRY.structure)
+    // Its formation opens the lesson under the plate, as a formula (plan 235).
+    expect(sheet.querySelector('.gl-formula').textContent.replace(/\s/g, ''))
+      .toBe(GRAMMAR_ENTRY.structure.replace(/\s/g, ''))
     sheet.querySelector('.dict-plate__btn[aria-label]').click()
     await settle()
     expect(document.querySelector('.dict-sheet[role="dialog"]')).toBeNull()

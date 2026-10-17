@@ -198,6 +198,10 @@ class Morpheme:
     # 漢 (Sino-Japanese), 外 (a loanword), 混 (mixed). センス is 外 and
     # 扇子 is 漢: a reading alone joins them, the origin does not (plan
     # 149). ダメ and キレイ, native words written in katakana, stay 混／漢.
+    proper: bool = False  # UniDic's 固有名詞: a name, of a person or a
+    # place. JMdict, the pool, files almost none, so the commonest row of
+    # a name's spelling is another word (plan 236: 博 read ひろし is no 博
+    # read はく, "doctor").
 
 
 def _conjugation(raw) -> str:
@@ -290,6 +294,85 @@ def _in_context(morphemes: list[Morpheme], tags: list[tuple]) -> list[Morpheme]:
     ]
 
 
+def _tag(text: str, offset: int = 0) -> tuple[list[Morpheme], list[tuple]]:
+    """MeCab's morphemes for `text`, their offsets counted from `offset`
+    (where `text` stands in the sentence), with UniDic's pos1-3 for each
+    -- what _in_context's rules read and Morpheme does not carry."""
+    morphemes = []
+    tags = []
+    cursor = offset
+    for w in _tagger(text):
+        surface = w.surface
+        # MeCab drops ASCII whitespace between words and hands it
+        # back as the next word's `white_space`. Uncounted, every
+        # offset after a space was short by it -- and a subtitle
+        # line is usually several phrases with spaces between them:
+        # the grammar detector, which matches the raw text and
+        # anchors on these offsets, lost every particle after the
+        # first space, and a cloze blanked the wrong letters.
+        start = cursor + len(getattr(w, "white_space", "") or "")
+        end = start + len(surface)
+        cursor = end
+        feat = w.feature
+        pron = getattr(feat, "pron", None) or getattr(feat, "kana", None) or ""
+        kana = getattr(feat, "kana", None) or ""
+        lform = getattr(feat, "lForm", None) or pron
+        lemma = _clean_lemma(getattr(feat, "lemma", None), surface)
+        pos1 = getattr(feat, "pos1", None)
+        pos2 = getattr(feat, "pos2", None)
+        tags.append((pos1 or "", pos2 or "", getattr(feat, "pos3", None) or ""))
+        morphemes.append(Morpheme(
+            surface=surface,
+            start=start,
+            end=end,
+            lemma=lemma,
+            reading=_reading_of(surface, kana, pron),
+            lemma_reading=kata_to_hira(lform) or lemma,
+            kana=getattr(feat, "kana", None) or surface,
+            pos=_POS_MAP.get(pos1, "other"),
+            auxiliary_use=(pos2 == "非自立可能"),
+            conjunctive=(pos2 == "接続助詞"),
+            ctype=_conjugation(getattr(feat, "cType", None)),
+            cform=_conjugation(getattr(feat, "cForm", None)),
+            goshu=_conjugation(getattr(feat, "goshu", None)),
+            proper=(pos2 == "固有名詞"),
+        ))
+    return morphemes, tags
+
+
+# What a quotation closes on, so what stands before its と (「…」と言った).
+_CLOSING_QUOTES = frozenset("」』")
+
+
+def _quotative_to(text: str, morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """The quotative と handed back to the particle it is (plan 236).
+
+    UniDic carries the mixed-script spellings a word is printed in when
+    one of its kanji is left in kana -- と博 for 賭博 "gambling", と殺 for
+    屠殺 -- and after a quotation MeCab can take the quotative と for the
+    first kana of one: 「…緊張するよ」と博がいいます came back と博, 賭博,
+    where it says と and the name 博 (Hiroshi), so 緊張's example put ばく
+    over the name and its breakdown looked up gambling. After a closing
+    quote, a token that opens on と and goes on in kanji is that particle
+    and the start of the next word: the と is cut off and the rest of the
+    sentence tagged again from there, where MeCab reads 博 as the name it
+    is. A mixed-script word anywhere else (とり肉, 違法なと博) stays whole.
+    """
+    for i, m in enumerate(morphemes):
+        if (len(m.surface) > 1 and m.surface[0] == "と"
+                and any(_is_kanji(c) for c in m.surface[1:])
+                and m.start > 0 and text[m.start - 1] in _CLOSING_QUOTES):
+            to = Morpheme(
+                surface="と", start=m.start, end=m.start + 1, lemma="と",
+                reading="と", lemma_reading="と", kana="ト", pos="particle",
+                auxiliary_use=False, conjunctive=False, goshu="和",
+            )
+            rest, rest_tags = _tag(text[m.start + 1:], m.start + 1)
+            rest, rest_tags = _quotative_to(text, rest, rest_tags)
+            return morphemes[:i] + [to] + rest, tags[:i] + [("助詞", "格助詞", "*")] + rest_tags
+    return morphemes, tags
+
+
 def tokenize(text: str) -> list[Morpheme] | None:
     """Full-sentence tokenization, or None if the analyzer isn't
     available (see MORPHOLOGY_AVAILABLE) or this specific call failed.
@@ -299,44 +382,7 @@ def tokenize(text: str) -> list[Morpheme] | None:
     if not MORPHOLOGY_AVAILABLE or not text:
         return None
     try:
-        morphemes = []
-        tags = []
-        cursor = 0
-        for w in _tagger(text):
-            surface = w.surface
-            # MeCab drops ASCII whitespace between words and hands it
-            # back as the next word's `white_space`. Uncounted, every
-            # offset after a space was short by it -- and a subtitle
-            # line is usually several phrases with spaces between them:
-            # the grammar detector, which matches the raw text and
-            # anchors on these offsets, lost every particle after the
-            # first space, and a cloze blanked the wrong letters.
-            start = cursor + len(getattr(w, "white_space", "") or "")
-            end = start + len(surface)
-            cursor = end
-            feat = w.feature
-            pron = getattr(feat, "pron", None) or getattr(feat, "kana", None) or ""
-            kana = getattr(feat, "kana", None) or ""
-            lform = getattr(feat, "lForm", None) or pron
-            lemma = _clean_lemma(getattr(feat, "lemma", None), surface)
-            pos1 = getattr(feat, "pos1", None)
-            pos2 = getattr(feat, "pos2", None)
-            tags.append((pos1 or "", pos2 or "", getattr(feat, "pos3", None) or ""))
-            morphemes.append(Morpheme(
-                surface=surface,
-                start=start,
-                end=end,
-                lemma=lemma,
-                reading=_reading_of(surface, kana, pron),
-                lemma_reading=kata_to_hira(lform) or lemma,
-                kana=getattr(feat, "kana", None) or surface,
-                pos=_POS_MAP.get(pos1, "other"),
-                auxiliary_use=(pos2 == "非自立可能"),
-                conjunctive=(pos2 == "接続助詞"),
-                ctype=_conjugation(getattr(feat, "cType", None)),
-                cform=_conjugation(getattr(feat, "cForm", None)),
-                goshu=_conjugation(getattr(feat, "goshu", None)),
-            ))
+        morphemes, tags = _quotative_to(text, *_tag(text))
         _demonstratives(morphemes)
         return _in_context(morphemes, tags)
     except Exception:  # pragma: no cover - defensive only

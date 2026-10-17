@@ -9616,6 +9616,28 @@ textarea:focus-visible {
 @keyframes pgate-in {
   from { opacity: 0; }
 }
+/* 雲 — the clouds, over the sky they were lifted from (clouds.py):
+   behind the sky's mask, which stays, they drift a few units either
+   way, slow enough to be seen only by a learner who stays. They start
+   where the painting has them (the loop's middle). */
+.pgate__sky {
+  position: absolute;
+  left: 0;
+  top: calc(var(--pg-sky-top, 0) * 1px);
+  width: 390px;
+  height: calc(var(--pg-sky-h, 0) * 1px);
+  pointer-events: none;
+  mask-image: var(--pg-sky, none);
+  mask-size: 100% 100%;
+}
+.pgate__clouds {
+  animation: pgate-drift 56s ease-in-out -28s infinite alternate;
+}
+.pgate__clouds .pgate__layer { width: 390px; height: calc(var(--pg-sky-h, 0) * 1px); }
+@keyframes pgate-drift {
+  from { transform: translateX(-14px); }
+  to { transform: translateX(14px); }
+}
 .pgate__car { inset: 195.86px auto auto 24.65px; width: 340.71px; height: 360.17px; }
 .pgate__car .pgate__layer { width: 340.71px; height: 360.17px; }
 /* The train: every car, its stripe, its signs, its door and its
@@ -10073,9 +10095,10 @@ textarea:focus-visible {
 }
 /* Reduced motion: the train stands, its door open, its pantograph on
    the wire; the signs turn without rolling; the clock keeps the time
-   it was opened at; no spark. */
+   it was opened at; the clouds keep the painting's place; no spark. */
 @media (prefers-reduced-motion: reduce) {
   .pgate__layer.is-on,
+  .pgate__clouds,
   .pgate-panto__bob--on { animation: none; }
   .pgate__train,
   .pgate-roll__row,
@@ -16287,14 +16310,17 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   gap: var(--sp-2) var(--sp-4);
   max-width: 100%;
 }
+/* In the primary ink at the lead rung (plan 235): a kanji's readings are
+   half of what its entry is for, and in the secondary ink at the body
+   rung, beside a 72px glyph, they were the quietest line on the plate. */
 .dict-plate__yomi {
   display: inline-flex;
   align-items: center;
   gap: var(--sp-2);
   font-family: var(--font-jp);
-  font-size: var(--fs-body);
+  font-size: var(--fs-lead);
   letter-spacing: var(--tr-term);
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 /* 音 / 訓, as a carved square — the mark the plate and the readings
    panel share, so the two registers tell apart without the long
@@ -16360,15 +16386,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-indent: var(--tr-reading);
   color: var(--text-secondary);
 }
-/* A grammar point's formation ("verb て-form + から") in the reading's
-   place over the pattern: the same register, untracked — it is mixed
-   script and words, not kana to be spaced. */
-.dict-plate__structure {
-  max-width: 100%;
-  font-family: var(--font-jp);
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-}
 
 /* The headword. --font-jp, like the catalogue plate and the study
    card: it is a specimen, the shape the reader is here to look at,
@@ -16418,32 +16435,35 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   user-select: none;
 }
 
-/* The plain-language line: the first gloss, or a kana's romaji — set
-   exactly as the station plate sets its romaji, one rung up for
-   legibility under a specimen.
-
-   It used to clamp to two lines, on the reasoning that the whole list
-   lives in the body. Since plan 089 that is the other way round: the
-   caption stands down entirely where the body would repeat it (see
-   bodyPrintsGloss in DictionaryDetail.jsx), so wherever it prints it
-   is the ONLY copy — and a clamp over the only copy cuts the end off
-   a grammar point's gloss with nowhere left to read it. */
+/* The plain-language line: the meaning, in the learner's words (plan
+   235). It was set as a station plate sets its romaji -- 700, tracked,
+   uppercase, in the secondary ink -- which is a register for a name in
+   Latin letters, not for a meaning to be read: "SOL · TERRE · TERRAIN"
+   read as signage. A line of prose at the lead rung now, the first
+   gloss sentence-cased (GlossList), and the only copy of the meaning on
+   the entry (DictionaryDetail.jsx: the plate holds a kanji's glosses, a
+   word's senses are the body's), so it is never clamped. */
 .dict-plate__caption {
-  max-width: 100%;
+  max-width: 34ch;
   font-family: var(--font-display);
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-indent: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
+  font-size: var(--fs-lead);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text-primary);
+  text-wrap: balance;
+}
+/* A kana's caption is its romaji, a sound rather than a meaning: the
+   title rung, the way the reading is said aloud. */
+.dict-plate__caption--romaji {
+  font-size: var(--fs-title);
+  letter-spacing: var(--tr-term);
 }
 /* "No meaning recorded" — the caption standing in for a gloss KANJIDIC2
-   does not carry (meaningAbsent in DictionaryDetail.jsx). Same register,
-   at book weight: the plate should not set an absence in the same ink and
-   weight as 土's SOIL, and the app has no third text token to dim it to. */
+   does not carry (meaningAbsent in DictionaryDetail.jsx): at book weight
+   and in the secondary ink, so an absence never reads as a meaning. */
 .dict-plate__caption--absent {
   font-weight: 400;
+  color: var(--text-secondary);
 }
 /* The line stripe: the one place the plate carries colour — the same
    3px edge the catalogue plate wears, in 辞書's pigment here. */
@@ -16464,58 +16484,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .dict-block { padding: var(--sp-5) var(--sp-5); }
 .dict-block + .dict-block { border-top: 1px solid var(--surface-line); }
-/* ── 期限 — a card that is due, and the one thing to do about it ──
-   This was a right-flush "DUE NOW" caption hanging over a lattice it
-   was not part of, beside a cell that said the next review was two
-   days ago: one state said twice, with the arithmetic left to the
-   reader. The cell that owns the schedule says it now
-   (.record__value--due), and the block ends on the action instead
-   (plan 089).
-
-   A ghost, not a fill: the panel has no primary action, and 辞書's
-   gold could not carry an ink at this size anyway (DESIGN.md, "the
-   primary button"). The due pigment is mixed toward the ambient ink
-   the way the study card's stage word is (.stage-mark) — the raw
-   state colour is under the floor as text on paper. */
-.dict-due {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-2);
-  width: 100%;
-  min-height: 44px; /* a hit target, not a spacing rung */
-  margin-top: var(--sp-4);
-  padding-inline: var(--sp-6);
-  background: transparent;
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  font-family: var(--font-display);
-  font-size: var(--fs-body);
-  font-weight: 600;
-  color: color-mix(in srgb, var(--state-due) 65%, var(--text-primary));
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-@media (prefers-reduced-motion: reduce) {
-  .dict-due { transition: none; }
-}
-.dict-due:hover,
-.dict-due:focus-visible {
-  filter: none;
-  border-color: var(--line-color, var(--accent2));
-  background: var(--overlay-hover);
-}
-/* The ledger's own chevron, sliding in on approach (DESIGN.md, Motion). */
-.dict-due__chev {
-  opacity: 0.7;
-  transform: translateX(-4px);
-  transition: transform 0.15s ease, opacity 0.15s ease;
-}
-@media (prefers-reduced-motion: reduce) {
-  .dict-due__chev { transform: none; transition: none; }
-}
-.dict-due:hover .dict-due__chev,
-.dict-due:focus-visible .dict-due__chev { opacity: 1; transform: translateX(0); }
-
 /* ── What it means ─────────────────────────────────────────
    JMdict senses: a tabular numeral in the entry's ink, then the tags,
    the glosses and the sentences that illustrate that sense. */
@@ -16525,7 +16493,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--sp-4);
+  gap: var(--sp-5);
 }
 .dict-sense {
   display: grid;
@@ -16533,6 +16501,8 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   gap: var(--sp-3);
   align-items: baseline;
 }
+/* One sense is not numbered (plan 235): a list of one is not a list. */
+.dict-senses--one .dict-sense { grid-template-columns: minmax(0, 1fr); }
 .dict-sense__n {
   font-family: var(--font-display);
   font-size: var(--fs-caption);
@@ -16546,15 +16516,30 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   gap: var(--sp-2);
   min-width: 0;
 }
+/* The grammatical tags under the gloss, as words between middots
+   (plan 235), not a row of codes over it. */
 .dict-sense__tags {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sp-1) var(--sp-3);
+  align-items: baseline;
+  gap: 0 var(--sp-2);
+}
+.dict-tag__sep {
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
 }
 .dict-sense__gloss {
   font-size: var(--fs-body);
   line-height: 1.55;
   color: var(--text-primary);
+}
+/* The first sense is the word's meaning (plan 235): the plate leaves it
+   to the body, so it is set where the plate would have set it, at the
+   lead rung, and the senses after it at reading size. */
+.dict-sense:first-child .dict-sense__gloss {
+  font-size: var(--fs-lead);
+  font-weight: 600;
+  line-height: 1.4;
 }
 .dict-sense__examples {
   display: flex;
@@ -16562,20 +16547,11 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   gap: var(--sp-3);
   margin-top: var(--sp-1);
 }
-/* The app's own gloss line, for a kanji or a word with no senses:
-   one line of prose, its glosses joined by the shared middot. */
-.dict-gloss {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-lead);
-  line-height: 1.5;
-  color: var(--text-primary);
-}
 
-/* A grammatical tag ("n", "v1", "uk"): a word in the caption register
-   with a dotted rule under it, which is the whole hint that it opens
-   a note. Not a pill — a run of pills over every sense was the
-   loudest thing in the body and said the least. */
+/* A grammatical tag ("nom", "v. suru", "courant"): a plain word in the
+   caption register (plan 235). It still opens its JMdict note on hover
+   or focus; the dotted rule that hinted at it went, with the star, from
+   a line that was the loudest in the body and said the least. */
 .dict-tag {
   padding: 0;
   border: 0;
@@ -16587,8 +16563,8 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   letter-spacing: var(--tr-term);
   line-height: 1.4;
   color: var(--text-secondary);
-  text-decoration: underline dotted;
-  text-decoration-color: var(--surface-line);
+  text-decoration: underline;
+  text-decoration-color: transparent;
   text-underline-offset: 3px;
   transition: color 0.15s ease, text-decoration-color 0.15s ease;
 }
@@ -16847,6 +16823,14 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .dict-word:hover::before,
 .dict-word:focus-visible::before { opacity: 1; }
+/* The word and its 熟 square, one cell (plan 235). */
+.dict-word__head {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+}
 .dict-word__jp {
   flex-shrink: 0;
   font-family: var(--font-jp);
@@ -16896,15 +16880,35 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   color: var(--dict-ink);
   font-weight: 700;
 }
+/* The gloss beside its word, not flush against the far edge (plan
+   235): right-aligned, 毎月's "chaque mois" sat a column away from it,
+   nearer the chevron than the word it glosses. */
 .dict-word__gloss {
   flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-align: right;
   font-size: var(--fs-sm);
   color: var(--text-secondary);
+}
+/* Where subgrid holds, the ledger's rows share their columns, so every
+   gloss starts where the others do -- after the longest word, capped
+   at half the row -- and the list reads down as two columns rather
+   than as rows that each found their own place. Without it a row is
+   the flex line above, its gloss after its own word. */
+@supports (grid-template-columns: subgrid) {
+  .dict-words {
+    display: grid;
+    grid-template-columns: fit-content(50%) minmax(0, 1fr) auto;
+  }
+  .dict-word {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    column-gap: var(--sp-4);
+  }
+  .dict-word--static .dict-word__gloss { grid-column: 2 / -1; }
 }
 .dict-word__chev {
   flex-shrink: 0;
@@ -18091,8 +18095,8 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 
 /* The rest of what a grammar card reads the same way: the formation
-   line under the rule (and on the lesson's and the dictionary's
-   plates), a pattern as an option, a rival in the lesson. The reading
+   line under the rule (and the lesson's formula, plan 235), a pattern
+   as an option, a rival in the lesson. The reading
    at --fs-caption, the size every reading in running text is set at
    (the dictionary's sentences and words, the fill_in sentence): it was
    --fs-caption-xs on the formation, about 10px, which is under the size
@@ -18102,7 +18106,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    ruby, not the block, so a line with no kanji keeps the height it
    always had. */
 .grammar-structure ruby,
-.dict-plate__structure ruby,
+.gl-formula__pat ruby,
 .review-grammar-explanation ruby,
 .gl-door__pattern ruby {
   line-height: calc(1.2em + 2 * var(--fs-caption));
@@ -18119,7 +18123,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   max-height: calc(96px + 2 * var(--fs-caption));
 }
 .grammar-structure ruby,
-.dict-plate__structure ruby,
+.gl-formula__pat ruby,
 .review-grammar-explanation ruby,
 .grammar-choice ruby,
 .gl-door__pattern ruby {
@@ -18128,7 +18132,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   white-space: nowrap;
 }
 .grammar-structure rt,
-.dict-plate__structure rt,
+.gl-formula__pat rt,
 .review-grammar-explanation rt,
 .grammar-choice rt,
 .gl-door__pattern rt {
@@ -22720,6 +22724,70 @@ form.stage__foot > .btn-primary {
 .record__chev { transition: none; }
 }
 
+/* ── 記録 — your record, under the stripe (plan 235) ──
+   The profile's records lattice, slim: one row right under the plate,
+   flush with the panel's edges, in every layout (DictionaryDetail.jsx,
+   recordBlock). Its figures are a rung down from the profile's -- the
+   lead rung, not the heading's -- because on an entry they are about the
+   reader, not the word, and at the heading rung they were the largest
+   type after the headword. Four across, the schedule's cell a share
+   wider: it carries a word ("Maintenant", a date), not a numeral.
+   Declared after the lattice's own rules (記録), which it refines. */
+.records--entry {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.25fr);
+  border-width: 0 0 1px;
+  border-radius: 0;
+}
+.records--entry-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.records--entry .record { padding: var(--sp-3) var(--sp-4); }
+.records--entry .record__value { font-size: var(--fs-lead); }
+.records--entry .record__value--word { font-size: var(--fs-body); }
+/* The record measures itself, not the screen: a dock, a phone, a side
+   column. Four across from a desk dock's width (--desk-entry-w), the
+   cells a rung tighter until there is room to spare; two by two under
+   it, on every phone and in the kana charts' column. A label is one
+   caption word that cannot break -- INTERVALLE is the longest -- and
+   four across a phone left it a few pixels in the app's face and none
+   in a fallback one, where it was cut. */
+.dict-record { container-type: inline-size; }
+@container (max-width: 479px) {
+  .records--entry .record { padding-inline: var(--sp-3); }
+}
+@container (max-width: 429px) {
+  .records--entry { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* ── 期限 — a card that is due, and the one thing to do about it ──
+   The schedule's cell, as the door (plan 235): "Maintenant" in the due
+   ink, and under it what pressing it does, the chevron beside the word.
+   It replaces the ghost that used to cross the record's foot -- a fifth
+   block repeating the fourth cell. A foot of the due ink is its edge
+   (DESIGN.md, Colour: an edge, never a fill); the hover is the ledger's,
+   a tint on the cell. The due pigment is mixed toward the ambient ink
+   the way the stage word mixes its own: raw, it is under the floor as
+   text on paper. */
+.record--due {
+  align-items: flex-start;
+  border: 0;
+  border-radius: 0;
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--state-due) 65%, var(--text-primary));
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .record--due { transition: none; }
+}
+.record--due:hover,
+.record--due:focus-visible { background: var(--bg-card-hover); filter: none; }
+.record__label--go {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  color: color-mix(in srgb, var(--state-due) 65%, var(--text-primary));
+}
+
 
 /* ══ 定期券 — the profile, the statistics and the settings (plan 074) ══
    The canvas's Profile, ProfileInserts, StatusSheet, Statistics,
@@ -26331,15 +26399,14 @@ button.brd-stn { cursor: pointer; }
 /* ══ 文法 — the lesson (plan 087) ══════════════════════════════
    A grammar point taught, in three dresses: the gate before a new
    card in a run, the sheet behind the door on every card and in the
-   station's index, and the body of the dictionary's plate. The
-   blocks are the dictionary's (.dict-block, hairline-divided, no
-   heading — DESIGN.md, "a body that names itself"); what is new here
-   is the step's pair mark, the door onto a neighbour, the gap in a
+   station's index, and the body of the dictionary's plate. Unlike the
+   dictionary's other bodies it is set in headed sections (plan 235,
+   "The lesson in sections" below): a lesson is read, not consulted.
+   What is new here besides is the door onto a neighbour, the gap in a
    contrast sentence, and the station's index rows. The pigment is
    文法's, injected once by the shell: the sheet names it below, the
    stage frame and the dictionary hand it down as --line-color. */
 .gl-sheet { --line-color: var(--line-grammar); }
-.gl-block { display: flex; flex-direction: column; gap: var(--sp-4); }
 /* The gate is the card's own column: the lesson stands where the
    prompt card will, at the width the stage gives it, on the one
    surface (DESIGN.md, "one card, everywhere"). */
@@ -27239,42 +27306,76 @@ button.brd-stn { cursor: pointer; }
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-/* ── The steps ── (plan 146, the owner's pick B of three)
-   RULE, USE, CAREFUL: each opens on its mark at the caption rung, and
-   one hairline divides a step from the next -- the rule under every
-   mark drew three lines where two divide. An ordered list, because the
-   order IS the lesson; the numerals are the marks, so the list's own
-   are off. The rule is the lead, a rung up: it is the one sentence
-   every other block explains. */
-.gl-steps {
+/* ── The lesson in sections (plan 235) ──
+   The owner found the lesson hard to read: three caption-sized marks
+   over one wall of hairline-divided prose, the Japanese in the gold
+   wherever it stood. So it is set in sections, each opening on a head
+   -- a glyph in the lesson's ink, the name in the primary ink at the
+   body rung, a hairline running on to the column's edge -- the label
+   and the divider in one line, and a section's room (--sp-7) between
+   one and the next, so the eye finds Construction, Règle, Emploi,
+   Attention, Exemples by their heads before it reads a word. The
+   sections fall in two columns (.gl-col): one after the other on a
+   phone, side by side on the desk's grammar page. */
+.gl-cols {
   display: flex;
   flex-direction: column;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  gap: var(--sp-7);
+  padding: var(--sp-5) var(--sp-5) var(--sp-7);
 }
-.gl-step { display: flex; flex-direction: column; gap: var(--sp-3); padding-block: var(--sp-4); }
-.gl-step:first-child { padding-top: 0; }
-.gl-step:last-child { padding-bottom: 0; }
-.gl-step + .gl-step { border-top: 1px solid var(--surface-line); }
-.gl-step__mark { padding: 0; border-bottom: 0; }
-.gl-step__mark .dict-mark__name { font-size: var(--fs-caption); }
-.gl-step__body {
+.gl-col {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-2);
+  gap: var(--sp-7);
+  min-width: 0;
+}
+.gl-col:empty { display: none; }
+.gl-sec {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+.gl-sec__head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.gl-sec__icon { flex: none; color: var(--dict-ink); }
+.gl-sec__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+.gl-sec__rule {
+  flex: 1;
+  min-width: var(--sp-5);
+  height: 1px;
+  background: var(--surface-line);
+}
+.gl-sec__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
   font-size: var(--fs-body);
   line-height: 1.6;
   color: var(--text-primary);
   text-wrap: pretty;
 }
-.gl-step--rule .gl-step__body { font-size: var(--fs-lead); }
+/* The rule is the lead: the one sentence every other section explains. */
+.gl-sec--rule .gl-sec__body { font-size: var(--fs-lead); }
 .gl-step__p { margin: 0; }
+/* The forms a rule sets in bold are the pattern's: the gold is theirs,
+   the formula's and the rivals', and no other Japanese in the prose
+   wears it -- a lesson where every form was gold had nothing gold. */
+.gl-sec strong { font-weight: 700; color: var(--dict-ink); }
 /* The Japanese in the prose, set as Japanese (lessonText.inline): its
-   own face, whole on its line -- ではありませんで | した no longer --
-   and in the lesson's ink, so the forms stand out of the sentence that
-   explains them. The last-resort break is for a run wider than the
-   column, which the catalogue does not have. */
+   own face, whole on its line -- ではありませんで | した no longer -- in
+   the prose's own ink. The last-resort break is for a run wider than
+   the column, which the catalogue does not have. */
 .gl-ja {
   font-family: var(--font-jp);
   word-break: keep-all;
@@ -27283,24 +27384,128 @@ button.brd-stn { cursor: pointer; }
 /* A word or a short form (lessonText.SHORT_RUN) whole on its line:
    keep-all still let あります／います break after its slash. */
 .gl-ja--word { white-space: nowrap; }
-:is(.gl-step__body, .gl-door__note, .gl-door__gloss) .gl-ja { color: var(--dict-ink); }
-/* ── A use ──
-   A row each, divided by a dotted hairline (the step's own is solid).
-   Nine in ten say what the form is for and then give it: the saying
-   over the forms, each form whole at the sentences' rung in the ink,
-   its gloss beside it in the secondary register. A paradigm is its
-   labels beside its forms. */
+
+/* ── Construction: the formation as a formula ──
+   "verbe forme en て + から" is what the learner brings, a plus, and the
+   pattern: the slot a dashed blank in plain words (the field's own
+   dash, an empty place to fill), the pattern at the title rung in the
+   lesson's ink, its furigana over it where it has a reading. It was a
+   grey line over the pattern on the plate, read as a caption. */
+.gl-formula {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
+  margin: 0;
+}
+.gl-formula__slot {
+  display: inline-block;
+  padding: var(--sp-2) var(--sp-4);
+  border: 1px dashed var(--text-secondary);
+  border-radius: var(--r-card);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-secondary);
+}
+.gl-formula__plus {
+  font-family: var(--font-display);
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.gl-formula__pat {
+  font-family: var(--font-jp);
+  font-size: var(--fs-title);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--dict-ink);
+}
+/* The gloss a pattern closes on, after it in the prose's quiet ink. */
+.gl-formula__note {
+  margin-inline-start: calc(-1 * var(--sp-2));
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+
+/* ── Formes: a paradigm as a table ──
+   Négatif : …. Passé : …. was a paragraph of labels and forms; it is a
+   table now, the labels down one column and the forms beside them, a
+   hairline under each row, so "le passé négatif" is found by running
+   an eye down the left. */
+.gl-table {
+  display: grid;
+  grid-template-columns: fit-content(40%) minmax(0, 1fr);
+  column-gap: var(--sp-5);
+  margin: 0;
+  border-top: 1px solid var(--surface-line);
+}
+.gl-table__row { display: contents; }
+.gl-table__label,
+.gl-table__forms {
+  margin: 0;
+  padding-block: var(--sp-3);
+  border-bottom: 1px solid var(--surface-line);
+}
+/* Where subgrid holds, a row is one box across both columns, its rule
+   under the pair and the label on the form's baseline. */
+@supports (grid-template-columns: subgrid) {
+  .gl-table__row {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    align-items: baseline;
+    padding-block: var(--sp-3);
+    border-bottom: 1px solid var(--surface-line);
+  }
+  .gl-table__label,
+  .gl-table__forms {
+    padding-block: 0;
+    border-bottom: 0;
+  }
+}
+.gl-table__label {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* ── Emploi: what the form is for, over its forms ──
+   A use a row, a dot of the lesson's ink at its start: the saying in
+   the primary ink, its forms under it whole at the sentences' rung,
+   each with its gloss beside it in the secondary register. */
 .gl-step__list {
   display: flex;
   flex-direction: column;
+  gap: var(--sp-3);
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.gl-use { display: flex; flex-direction: column; gap: var(--sp-1); padding-block: var(--sp-3); }
-.gl-use:first-child { padding-top: 0; }
-.gl-use:last-child { padding-bottom: 0; }
-.gl-use + .gl-use { border-top: 1px dashed var(--surface-line); }
+.gl-use {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding-inline-start: var(--sp-5);
+  font-size: var(--fs-body);
+  line-height: 1.55;
+  color: var(--text-primary);
+}
+.gl-use::before {
+  content: '';
+  position: absolute;
+  left: var(--sp-1);
+  top: 0.65em;
+  width: var(--sp-2);
+  height: var(--sp-2);
+  border-radius: var(--r-pill);
+  background: var(--dict-ink);
+}
+/* A paradigm inside a use list is its table, unbulleted. */
+.gl-use:has(> .gl-table) { padding-inline-start: 0; }
+.gl-use:has(> .gl-table)::before { display: none; }
 .gl-forms {
   display: flex;
   flex-wrap: wrap;
@@ -27311,31 +27516,33 @@ button.brd-stn { cursor: pointer; }
 .gl-form__ja {
   font-family: var(--font-jp);
   font-size: var(--fs-lead);
-  color: var(--dict-ink);
+  color: var(--text-primary);
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
 .gl-form__gloss { font-size: var(--fs-sm); color: var(--text-secondary); }
-.gl-paradigm {
-  display: grid;
-  grid-template-columns: max-content minmax(0, 1fr);
-  align-items: baseline;
-  gap: var(--sp-1) var(--sp-5);
-  margin: 0;
+
+/* ── Attention: the trap ──
+   A box, its ring a hairline and its leading edge the due ink, the
+   head in that ink too: the one section that is a warning reads as one
+   before it is read. An edge, never a fill (DESIGN.md, Colour). */
+.gl-sec--careful {
+  --careful-ink: color-mix(in srgb, var(--state-due) 72%, var(--text-primary));
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
+  border: 1px solid var(--surface-line);
+  border-inline-start: 3px solid var(--state-due);
+  border-radius: var(--r-card);
 }
-.gl-paradigm__row { display: contents; }
-.gl-paradigm__label { color: var(--text-secondary); }
-.gl-paradigm__forms { margin: 0; }
-/* A trap is a state of the step, not a louder step: the mark takes
-   the due ink, and its text stands on a rail of it -- an edge, the way
-   the study card's stage word does. */
-.gl-step--careful .gl-step__body { padding-left: var(--sp-4); border-left: 2px solid var(--state-due); }
-.gl-step--careful .dict-mark__name { color: color-mix(in srgb, var(--state-due) 72%, var(--text-primary)); }
-/* ── The neighbours ──
-   One row per rival, the radical family's door: the pattern, its
-   gloss, the one line that says which to use when, and the ▶ sliding
-   in on approach where a shell can open it. Inert where it cannot —
-   the same row, a fact rather than a dead control. */
+.gl-sec--careful .gl-sec__icon,
+.gl-sec--careful .gl-sec__name { color: var(--careful-ink); }
+.gl-sec--careful .gl-sec__rule { display: none; }
+
+/* ── À ne pas confondre: the neighbours ──
+   One row per rival, the radical family's door: the pattern, its level
+   and its gloss, the one line that says which to use when, and the ▶
+   sliding in on approach where a shell can open it. Inert where it
+   cannot -- the same row, a fact rather than a dead control. */
 .gl-compare { display: flex; flex-direction: column; gap: var(--sp-3); }
 .gl-door {
   display: flex;
@@ -27367,7 +27574,7 @@ button.brd-stn { cursor: pointer; }
   font-family: var(--font-jp);
   font-size: var(--fs-lead);
   font-weight: 700;
-  color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
+  color: var(--dict-ink);
 }
 .gl-door__level {
   font-family: var(--font-display);
@@ -27377,7 +27584,12 @@ button.brd-stn { cursor: pointer; }
   color: var(--text-secondary);
 }
 .gl-door__gloss { font-size: var(--fs-sm); color: var(--text-secondary); }
-.gl-door__note { font-size: var(--fs-body); line-height: 1.5; color: var(--text-primary); text-wrap: pretty; }
+.gl-door__note {
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  color: var(--text-primary);
+  text-wrap: pretty;
+}
 .gl-door__chev {
   flex: none;
   color: var(--text-secondary);
@@ -27390,14 +27602,14 @@ button.brd-stn { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   .gl-door, .gl-door__chev { transition: none; }
 }
-/* The translations' one switch, under the examples: a ghost, the
-   secondary ink, the chevron saying which way it goes. */
+/* The translations' one switch, at the end of the sentences' head: a
+   ghost, the secondary ink, the chevron saying which way it goes. */
 .gl-tr-toggle {
-  align-self: center;
+  flex: none;
   display: inline-flex;
   align-items: center;
   gap: var(--sp-1);
-  padding: var(--sp-2) var(--sp-4);
+  padding: var(--sp-1) var(--sp-3);
   background: transparent;
   border: 1px solid var(--surface-line);
   border-radius: var(--r-pill);
@@ -27495,9 +27707,9 @@ button.brd-stn { cursor: pointer; }
    the translation under the sentence. A sentence in another register
    than its point says so at the right (GrammarLesson's registerTag):
    a ring in the ink, as a chip is drawn, never a fill. */
-.gl-block--examples .dict-examples { gap: 0; }
-.gl-block--examples .dict-ex,
-.gl-block--examples .dict-ex--door .dict-ex__body {
+.gl-sec--examples .dict-examples { gap: 0; }
+.gl-sec--examples .dict-ex,
+.gl-sec--examples .dict-ex--door .dict-ex__body {
   display: grid;
   grid-template-columns: var(--sp-5) minmax(0, 1fr) auto;
   grid-template-areas:
@@ -27506,10 +27718,10 @@ button.brd-stn { cursor: pointer; }
   align-items: baseline;
   column-gap: var(--sp-3);
 }
-.gl-block--examples .dict-ex { padding-block: var(--sp-3); }
+.gl-sec--examples .dict-ex { padding-block: var(--sp-3); }
 /* A sentence that opens its breakdown (plan 214): the row is the door,
    its lines the grid above, the chevron at its end. */
-.gl-block--examples .dict-ex--door {
+.gl-sec--examples .dict-ex--door {
   display: flex;
   align-items: center;
   width: 100%;
@@ -27517,11 +27729,11 @@ button.brd-stn { cursor: pointer; }
   padding-inline: 0;
   border-radius: 0;
 }
-.gl-block--examples .dict-ex:first-child { padding-top: 0; }
-.gl-block--examples .dict-ex + .dict-ex { border-top: 1px solid var(--surface-line); }
-.gl-block--examples .dict-ex__n { grid-area: n; justify-self: end; }
-.gl-block--examples .dict-ex__jp { grid-area: jp; }
-.gl-block--examples .dict-ex__tr { grid-area: tr; }
+.gl-sec--examples .dict-ex:first-child { padding-top: 0; }
+.gl-sec--examples .dict-ex + .dict-ex { border-top: 1px solid var(--surface-line); }
+.gl-sec--examples .dict-ex__n { grid-area: n; justify-self: end; }
+.gl-sec--examples .dict-ex__jp { grid-area: jp; }
+.gl-sec--examples .dict-ex__tr { grid-area: tr; }
 .dict-ex__tag {
   grid-area: tag;
   padding: var(--sp-1) var(--sp-3);
@@ -30404,18 +30616,20 @@ button.brd-stn { cursor: pointer; }
 /* 練習の改札 (plan 225): the painted Practice gate's own, where the
    painting has it, at its drawn size, its word where the painting set it
    (components/practice/gate, the gate's section above). */
+/* A size up from the drawn one (the owner's word), on the drawn centre
+   line, its foot still over KEEP.bottom (gateFit.js). */
 .pgate .pgate__go {
   position: absolute;
-  left: 64.42px;
-  top: 640.84px;
-  width: 263.32px;
-  height: 51.45px;
+  left: 48.08px;
+  top: 636px;
+  width: 296px;
+  height: 58px;
   min-height: 0;
   margin: 0;
   padding: 0 var(--sp-2);
 }
-.pgate .pgate__go .btn-depart__reader { width: 40.64px; height: 40.64px; }
-.pgate .pgate__go .btn-depart__jp { translate: 7.5px 0; }
+.pgate .pgate__go .btn-depart__reader { width: 46px; height: 46px; }
+.pgate .pgate__go .btn-depart__jp { font-size: var(--fs-lead); translate: 8.5px 0; }
 
 /* ── one-shot utilities (each reads --d as its delay) ── */
 .clrk-arrive { animation: clr-arrive 0.5s var(--ease-out) backwards; animation-delay: var(--d, 0ms); }
@@ -40023,8 +40237,7 @@ button.brd-stn { cursor: pointer; }
   .dict-entry--band .dict-plate__word { grid-area: word; align-self: center; }
   .dict-entry--band .dict-plate__word--glyph { font-size: var(--fs-specimen-word); line-height: 1; }
   .dict-entry--band .dict-plate__readings,
-  .dict-entry--band .dict-plate__reading,
-  .dict-entry--band .dict-plate__structure {
+  .dict-entry--band .dict-plate__reading {
     grid-area: readings;
     justify-content: flex-start;
     align-self: end;
@@ -40035,11 +40248,6 @@ button.brd-stn { cursor: pointer; }
     grid-area: caption;
     align-self: start;
     text-align: left;
-    text-transform: none;
-    text-indent: 0;
-    letter-spacing: 0;
-    font-size: var(--fs-heading);
-    color: var(--text-primary);
   }
   .dict-entry--band .dict-plate__row {
     grid-area: row;
@@ -40053,18 +40261,16 @@ button.brd-stn { cursor: pointer; }
     grid-area: stripe;
     margin: var(--sp-3) calc(-1 * var(--sp-6)) 0;
   }
-  /* Your numbers under the stripe, four across, flush with the panel. */
-  .dict-entry--band > .dict-entry__top > .dict-block { padding: 0; border: 0; }
-  .dict-entry--band > .dict-entry__top .records {
-    border: 0;
-    border-radius: 0;
-  }
-  .dict-entry--band > .dict-entry__top .record { padding: var(--sp-4) var(--sp-5); }
-  .dict-entry--band > .dict-entry__top .dict-due { margin: var(--sp-3) var(--sp-5) var(--sp-4); }
+  /* Your two numbers under the stripe, the panel's own foot their edge. */
+  .dict-entry--band .records--entry { border-bottom-width: 0; }
   /* The dictionary: the senses and the words at their height, the
      stroke sheet growing into what they leave, its kanji large -- and
      never below twice the specimen, where the stroke numbers still
-     read; under that the panel scrolls (above). */
+     read; under that the panel scrolls (above). With no stroke sheet
+     (a word, a grammar point) the panel ends where its blocks do (plan
+     235): stretched to the column's foot, 緊張's was a slab of empty
+     paper under three senses. */
+  .dict-entry--band > .dict-entry__body:not(:has(.dict-form)) { flex-grow: 0; }
   .dict-entry--band > .dict-entry__body > .dict-block { flex: none; }
   .dict-entry--band > .dict-entry__body > .dict-block:has(> .dict-form) {
     order: 1;
@@ -40184,7 +40390,6 @@ button.brd-stn { cursor: pointer; }
     font-size: var(--fs-specimen-word);
     line-height: 1;
   }
-  .desk-dict--page .dict-plate__structure { order: 2; }
   .desk-dict--page .dict-plate__caption {
     flex-basis: 100%;
     order: 3;
@@ -40226,7 +40431,7 @@ button.brd-stn { cursor: pointer; }
      and pushed the speaker off the panel (こんにちは), while the gloss ran
      out under the marks. A single sign keeps the drawing: at the
      specimen's size it leaves its gloss the room. */
-  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long), :has(.dict-plate__word--word)) {
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__word--long), :has(.dict-plate__word--word)) {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "row"
@@ -40236,64 +40441,37 @@ button.brd-stn { cursor: pointer; }
       "stripe";
     gap: var(--sp-2);
   }
-  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long), :has(.dict-plate__word--word)) .dict-plate__row {
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__word--long), :has(.dict-plate__word--word)) .dict-plate__row {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     margin-bottom: var(--sp-2);
   }
-  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long), :has(.dict-plate__word--word)) .dict-plate__word {
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__word--long), :has(.dict-plate__word--word)) .dict-plate__word {
     justify-self: start;
     text-indent: 0;
   }
-  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long), :has(.dict-plate__word--word)) :is(.dict-plate__readings, .dict-plate__reading, .dict-plate__structure) {
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__word--long), :has(.dict-plate__word--word)) :is(.dict-plate__readings, .dict-plate__reading) {
     align-self: start;
   }
-  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long), :has(.dict-plate__word--word)) .dict-plate__caption {
-    font-size: var(--fs-title);
-  }
-  /* The learner's record under the stripe, four across (below), then
-     the lesson in two columns where each holds a desk column's least
-     width, --desk-run-col-min, and one where the page is narrower. */
-  .desk-dict--page .dict-entry__body > .dict-block:has(> .records) {
-    order: -1;
-    padding: 0;
-    border-bottom: 1px solid var(--surface-line);
-  }
-  /* Flush under the stripe, as the run's band sets it (plan 126). */
-  .desk-dict--page .dict-block > .records {
-    border: 0;
-    border-radius: 0;
-  }
-  .desk-dict--page .dict-block > .dict-due { margin: var(--sp-3) var(--sp-5) var(--sp-4); }
-  /* Each column its own (plan 146): the rule, its uses and its trap
-     down the left, the sentences over the rivals down the right. The
-     two used to be one flow poured into CSS columns, which balanced it
-     wherever the heights fell -- the sentences' block opened at the
-     left column's foot with its hairline and its pad and went on at the
-     right, and a longer rule would have carried a step across. A grid
-     of at most two tracks, each at least --desk-run-col-min and never
-     under half the body, so two stand where two fit and one where they
-     do not; the right-hand blocks name the last track, which in one
-     column is the only one, and fall in under the steps. Two hairlines
-     are the columns' and not the stack's, so each is drawn a pixel past
-     its box and clipped there where the body is one column: the rule
-     between the columns, at the steps' end edge, and the sentences'
-     top rule, which in two columns would stand under the stripe. */
-  .desk-dict--page .gl-body:has(> .gl-block--steps) {
+  /* The lesson's two columns side by side (plan 146, set in sections
+     by plan 235): the formula, the rule, its uses and its trap down the
+     left, the sentences over the rivals down the right, each column its
+     own so no section is carried across. A grid of at most two tracks,
+     each at least --desk-run-col-min and never under half the body, so
+     two stand where two fit and one where they do not. */
+  .desk-dict--page .gl-cols {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(max(var(--desk-run-col-min), calc(50% - 1px)), 1fr));
-    grid-template-rows: auto 1fr;
-    overflow: clip;
+    grid-template-columns: repeat(auto-fit, minmax(max(var(--desk-run-col-min), calc(50% - var(--sp-5))), 1fr));
+    align-items: start;
+    gap: var(--sp-6) var(--sp-7);
+    padding-block: var(--sp-5);
   }
-  .desk-dict--page .gl-block--steps {
-    grid-column: 1;
-    grid-row: span 2;
-    margin-inline-end: -1px;
-    border-inline-end: 1px solid var(--surface-line);
-  }
-  .desk-dict--page .gl-block--steps ~ .gl-block { grid-column: -2; }
-  .desk-dict--page .gl-block--steps + .gl-block { margin-top: -1px; }
+  /* A rung closer down the page, so a typical point reads whole on a
+     laptop without a scroll (plan 128): the sections a step apart
+     rather than a section's, the trap's box a rung shallower. */
+  .desk-dict--page .gl-col { gap: var(--sp-6); }
+  .desk-dict--page .gl-sec--careful { padding-block: var(--sp-3); }
 
   /* ── 机 — the dictionary's entry in its column (plan 128) ──
      After the run's band (plan 126), whose plate rules these share
@@ -40330,7 +40508,7 @@ button.brd-stn { cursor: pointer; }
     font-size: var(--fs-specimen-word);
     line-height: 1;
   }
-  .desk-dict:not(.desk-dict--page) .dict-plate:has(.dict-plate__word--glyph) :is(.dict-plate__readings, .dict-plate__reading, .dict-plate__structure) {
+  .desk-dict:not(.desk-dict--page) .dict-plate:has(.dict-plate__word--glyph) :is(.dict-plate__readings, .dict-plate__reading) {
     grid-area: readings;
     justify-content: flex-start;
     text-align: left;
@@ -40351,16 +40529,14 @@ button.brd-stn { cursor: pointer; }
     margin-top: var(--sp-4);
   }
   /* The stroke sheet and its figures in one row rather than the sheet
-     beside a stack of them, and the record four across: the two blocks
-     the column's width can take side by side. */
+     beside a stack of them: the column's width can take them side by
+     side. */
   .desk-dict .dict-form {
     grid-template: none;
     grid-auto-columns: minmax(0, 1fr);
     grid-auto-flow: column;
   }
   .desk-dict .dict-form__sheet { grid-row: auto; }
-  .desk-dict > .dict-dock .records { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .desk-dict > .dict-dock .records > .record { padding: var(--sp-4); }
 
   /* ── 机 — the kana charts: the whole syllabary, and where the learner
      stands (plan 128) ──
@@ -40431,7 +40607,6 @@ button.brd-stn { cursor: pointer; }
     color: var(--text-secondary);
   }
   /* The record two by two at the side column's width. */
-  .desk-dict--chart > .dict-dock .records { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
   /* ── 三面 — the practice runs on three panels (plan 129) ──
      Reading, translation, dictation, composition and comprehension stand
@@ -41231,9 +41406,61 @@ button.brd-stn { cursor: pointer; }
   .anl-desk__side > .anl-desk__points { flex: 0 1 auto; min-height: 0; }
   .anl-desk--text .anl-desk__rail { contain: none; }
   .anl-desk--text .anl-desk__points { align-self: stretch; max-height: none; }
-  /* Several sentences' words under the sentence, never more than a
-     share of the window: the sentence keeps the rest. */
-  .anl-desk--text > .anl-desk__words { grid-area: work; max-height: 40dvh; }
+  /* 畳 (plan 235, the owner's pick C): several sentences' words folded
+     to one line under the sentence, which keeps the rest of the column,
+     and opened as the list in a sheet (WordsList.jsx's WordsFold). */
+  .anl-fold {
+    display: flex;
+    grid-area: work;
+    align-items: center;
+    gap: var(--sp-4);
+    min-width: 0;
+    padding: var(--sp-4) var(--sp-3) var(--sp-4) var(--sp-4);
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+    color: var(--text-primary);
+    text-align: left;
+  }
+  .anl-fold:hover,
+  .anl-fold:focus-visible { border-color: var(--line-color); }
+  .anl-fold__cap {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: var(--sp-3);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .anl-fold__n {
+    padding: 0 var(--sp-2);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    font-size: var(--fs-caption);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+  }
+  .anl-fold__words {
+    display: flex;
+    flex: 1 1 auto;
+    gap: var(--sp-2);
+    min-width: 0;
+    overflow: hidden;
+  }
+  .anl-fold__chip {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    padding: var(--sp-1) var(--sp-3);
+    background: var(--bg-main);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+  }
+  .anl-fold__chip--on { border-color: var(--text-primary); }
+  .anl-fold__chip .anl-words__word { font-size: var(--fs-body); }
+  .anl-fold > svg { flex: none; color: var(--text-secondary); }
   /* One typed sentence is printed at display size under the head, so
      its title is for a screen reader alone and Keep holds the corner. */
   .anl-desk--text .anl-desk__head > .anl-head__keep { margin-left: auto; }
@@ -41242,12 +41469,15 @@ button.brd-stn { cursor: pointer; }
     min-height: 0;
     padding-bottom: var(--sp-7);
   }
+  /* Centred while it fits; once a sentence, its translation (plan 235)
+     and Explain outgrow the stage, they start at its top and scroll,
+     rather than overflowing above it where no scroll reaches. */
   .anl-subs__stage {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: safe center;
     gap: var(--sp-6);
     min-height: 0;
     overflow-y: auto;
@@ -41266,6 +41496,12 @@ button.brd-stn { cursor: pointer; }
     color: var(--text-on-panel-soft);
     text-align: center;
     text-wrap: balance;
+  }
+  /* Under a video's subtitle (plan 235): a rung under the line, which
+     is a heading on the slab rather than display size. */
+  .anl-desk:not(.anl-desk--text) .anl-subs__tr {
+    font-size: var(--fs-lead);
+    font-weight: 400;
   }
   /* Explain on the sumi, in the panel's inks, as the arrows beside it. */
   .anl-slab .anl-explainbtn {

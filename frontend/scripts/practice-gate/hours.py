@@ -80,7 +80,7 @@ def recipes(print_hours):
             floor=(C('#2b2f3a'), C('#1b1e26')), floor_tex=0.55, tactile=C('#5a4519'),
             pillar=C('#17191f'), pillar_rim=(C('#ffcf8e'), 0.10),
             body=C('#3a4250'), body_ref=0.70, body_gamma=1.15, glass=C('#ffd9a2'), glass_k=0.95, inside=(1.06, 0.96, 0.80), inside_k=1.0,
-            far_win=C('#1a2944'), key=(C('#9fb3d8'), 0.35), roof=C('#1b1e25'), roof_ref=0.6, under=C('#06070a'),
+            key=(C('#9fb3d8'), 0.35), roof=C('#1b1e25'), roof_ref=0.6, under=C('#06070a'),
             mist=None),
         'dusk': dict(
             sky=print_hours['dusk']['sky'],
@@ -92,7 +92,7 @@ def recipes(print_hours):
             floor=(C('#6a5f63'), C('#4a4552')), floor_tex=0.8, tactile=C('#9a6e2a'), sun_patch=(C('#f4a25c'), 0.55),
             pillar=C('#26232a'), pillar_rim=(C('#ffb36a'), 0.14),
             body=C('#857d8a'), body_ref=0.70, body_gamma=1.1, glass=C('#f7b77e'), glass_k=0.6, inside=(1.04, 0.95, 0.84), inside_k=0.92,
-            far_win=C('#e2a07a'), key=(C('#ffb478'), 0.75), roof=C('#45404c'), roof_ref=0.6, under=C('#121015'),
+            key=(C('#ffb478'), 0.75), roof=C('#45404c'), roof_ref=0.6, under=C('#121015'),
             mist=None),
         'dawn': dict(
             sky=print_hours['dawn']['sky'],
@@ -104,7 +104,7 @@ def recipes(print_hours):
             floor=(C('#8d8a9c'), C('#6e6c80')), floor_tex=0.85, tactile=C('#b18a49'), sun_patch=(C('#f7b6a0'), 0.35),
             pillar=C('#2a2834'), pillar_rim=(C('#f6b29a'), 0.10),
             body=C('#8f8ba3'), body_ref=0.70, body_gamma=1.1, glass=C('#d9b8b4'), glass_k=0.35, inside=(1.02, 0.97, 0.92), inside_k=0.95,
-            far_win=C('#f2b7a6'), key=(C('#ffc4b4'), 0.6), roof=C('#5b5868'), roof_ref=0.6, under=C('#16151c'),
+            key=(C('#ffc4b4'), 0.6), roof=C('#5b5868'), roof_ref=0.6, under=C('#16151c'),
             mist=dict(color=C('#f3d6d8'), v=(288, 330), k=0.3)),
     }
 
@@ -182,7 +182,9 @@ class Lighter:
         return out
 
     # ── the three layers ──
-    def scene(self, hour, a, M):
+    def scene(self, hour, a, M, clouds=True):
+        """The scene lit at the hour; without its clouds (clouds=False), the
+        same sky they drift over (clouds.py), its stars where they were."""
         T = self.H[hour]
         rgb = a[..., :3]
         L, S = lum(rgb), sat(rgb)
@@ -209,7 +211,7 @@ class Lighter:
         under = np.clip(1 - shade, 0, 1) ** 1.4 * cl['under']
         cbody = mix(np.broadcast_to(cl['body'], base.shape), np.broadcast_to(cl['lit'], base.shape),
                     np.clip(shade * (1 - cl['under']) + under, 0, 1))
-        skyc = mix(base, cbody, cloud * cl['amount'])
+        skyc = mix(base, cbody, cloud * cl['amount']) if clouds else base
         out = rgb.copy()
         out[sky] = skyc[sky]
 
@@ -310,7 +312,8 @@ class Lighter:
         inside = np.clip(rgb * np.array(T['inside'], np.float32)[None, None, :] * T['inside_k'], 0, 1)
         out[ins] = inside[ins]
         far = M['far']
-        out[far] = tone(T['far_win'], L, 0.8, 1.0)[far]
+        # the far window shows the forest: lit as the hour lights the forest outside
+        out[far] = tone(T['forest'], L, T['forest_ref'], 1.15)[far]
         return np.clip(out, 0, 1), al
 
     # ── the app's own drawing (the door's two leaves), lit like the painted car ──

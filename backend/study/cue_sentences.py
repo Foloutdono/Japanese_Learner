@@ -20,14 +20,18 @@
 # is still a usable study unit, and their rolling-window duplication is
 # already handled upstream (captions._merge_duplicate_consecutive).
 #
-# So: one Cue in, exactly one Sentence out. Not split either -- a
-# subtitle line is what is on screen, and splitting it on an internal ？
-# produced stops that no longer matched the file and shared a timestamp
-# with their other half.
+# So: one Cue in, one Sentence out. Not split on its punctuation either
+# -- a subtitle line is what is on screen, and splitting it on an
+# internal ？ produced stops that no longer matched the file and shared
+# a timestamp with their other half. Except for width (plan 235): a cue
+# wider than study/line_cut.MAX_LINE_WIDTH is cut into the fewest lines
+# that fit, between two phrases, and its time with it, so no two stops
+# share a timestamp and every one reads at a glance.
 #
 # Nothing is ever DROPPED. A line with no Japanese is flagged, not
 # removed: filtering it out silently deletes part of the track the
 # learner is reading along with.
+from study.line_cut import cut_line
 from study.text_normalize import japanese_ratio
 
 
@@ -45,12 +49,13 @@ def sentences_from_cues(cues: list[dict], start: float | None,
     """Every Cue overlapping the Window [start, end) as a Sentence, each
     {"text", "cue_start", "cue_end", "japanese"}.
 
-    EVERY Cue, in file order, one Sentence each. This is a subtitle
+    EVERY Cue, in file order, one Sentence each -- or, a Japanese cue
+    too wide to read at a glance, one per piece study/line_cut cuts it
+    into, in order and tiling its time (plan 235). This is a subtitle
     track: the learner is reading along with it, so a line that is
     missing from the list is a line they cannot find, and a line that
-    has been split or merged no longer matches what is on screen. The
-    output is meant to be an enhanced copy of the file, not a filtered
-    one.
+    has been merged no longer matches what is on screen. The output is
+    meant to be an enhanced copy of the file, not a filtered one.
 
     `japanese` is False for a line with no Japanese in it -- a Korean
     verse, an English ad-lib. Those are KEPT and flagged, not dropped:
@@ -63,16 +68,24 @@ def sentences_from_cues(cues: list[dict], start: float | None,
     by the caller via MAX_SENTENCES, which is what actually bounds the
     analysis work -- see docs/adr/0003's amendment.
     """
-    return [
-        {
-            "text": cue["text"],
-            "cue_start": cue["start"],
-            "cue_end": cue["end"],
-            "japanese": is_japanese(cue["text"]),
-            # When each word is said, where the file or the aligner knew
-            # (study/captions.py, study/word_timing.py); absent otherwise.
-            **({"word_times": cue["words"]} if cue.get("words") else {}),
-        }
-        for cue in cues
-        if (start is None or cue["end"] > start) and (end is None or cue["start"] < end)
-    ]
+    out = []
+    for cue in cues:
+        if not ((start is None or cue["end"] > start) and (end is None or cue["start"] < end)):
+            continue
+        japanese = is_japanese(cue["text"])
+        # A line with no Japanese is shown as it is, never cut.
+        lines = (cut_line(cue["text"], cue["start"], cue["end"], cue.get("words"))
+                 if japanese else [{"text": cue["text"], "start": cue["start"], "end": cue["end"],
+                                    **({"words": cue["words"]} if cue.get("words") else {})}])
+        for line in lines:
+            out.append({
+                "text": line["text"],
+                "cue_start": line["start"],
+                "cue_end": line["end"],
+                "japanese": japanese,
+                # When each word is said, where the file or the aligner
+                # knew (study/captions.py, study/word_timing.py); absent
+                # otherwise.
+                **({"word_times": line["words"]} if line.get("words") else {}),
+            })
+    return out

@@ -507,8 +507,9 @@ describe('the dictionary screen', () => {
     await settle(60)
     const entry = screen.container.querySelector('.dict-entry')
     const plate = entry.querySelector('.dict-plate')
-    // Structure over pattern over gloss; the level and the seal.
-    expect(plate.querySelector('.dict-plate__structure').textContent).toBe(GRAMMAR.structure)
+    // The pattern over its gloss; the level and the seal. The formation
+    // opens the lesson below, as a formula (plan 235).
+    expect(plate.querySelector('.dict-plate__structure')).toBeNull()
     expect(plate.querySelector('.dict-plate__word').textContent).toBe(GRAMMAR.pattern)
     expect(plate.querySelector('.dict-plate__word').classList.contains('dict-plate__word--long')).toBe(true)
     expect(plate.querySelector('.dict-plate__caption').textContent).toBe(GRAMMAR.meaning)
@@ -520,11 +521,14 @@ describe('the dictionary screen', () => {
     expect(plate.querySelector(`[aria-label="${T.listen}"]`)).toBeNull()
     const actions = [...plate.querySelectorAll('.dict-plate__actions .dict-plate__btn')]
     expect(actions.map(b => b.getAttribute('aria-label'))).toEqual([T.dictAdd, T.close])
-    // The body: the two sentences with their ruby, then the record —
-    // and nothing drawn. The formation and the gloss are on the plate
-    // above and were printed a second time here until plan 089.
-    const blocks = [...entry.querySelectorAll('.dict-block')].map(b => b.getAttribute('aria-label'))
-    expect(blocks).toEqual([T.examples, T.cardStats])
+    // The record under the plate, then the lesson's sections, each under
+    // its head: the formula and the two sentences with their ruby -- and
+    // nothing drawn. The gloss is the plate's, said once (plan 089).
+    expect(entry.querySelector('.dict-record').getAttribute('aria-label')).toBe(T.cardStats)
+    const secs = [...entry.querySelectorAll('.gl-sec')].map(b => b.getAttribute('aria-label'))
+    expect(secs).toEqual([T.glStructure, T.examples])
+    expect(entry.querySelector('.gl-formula__slot').textContent).toBe('verb ます-stem')
+    expect(entry.querySelector('.gl-formula__pat').textContent).toBe('ました／ませんでした')
     expect(entry.querySelector('.dict-formation')).toBeNull()
     expect(entry.querySelectorAll('.dict-ex').length).toBe(2)
     expect(entry.querySelector('.dict-ex rt').textContent).toBe('きのう')

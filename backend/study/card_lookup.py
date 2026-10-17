@@ -1140,7 +1140,12 @@ def _read_otherwise(m, entry: dict) -> bool:
 
     A card may be read voiced where the token is not, as a compound
     voices its second half (沿い read そい, the card ぞい), never the
-    other way round: がち is not the かち card."""
+    other way round: がち is not the かち card.
+
+    A token UniDic calls a name is held to the same rule (plan 236): the
+    pool's commonest row for a spelling is a guess, a card of the course
+    is not, and where UniDic takes a course word for a name it is UniDic
+    that misreads -- 大きな蓮の葉 is はす, the card, not Ren."""
     if _numeral(m.surface):
         return False
     card = {_zuru(morphology.kata_to_hira(r)) for r in _reading_variants(entry.get("kana") or "")}
@@ -1484,6 +1489,14 @@ def resolve_pool_morpheme(morphemes, i: int) -> dict | None:
     if not _has_kanji(lemma) and len(lemma) < 2:
         # One kana on its own is a particle mis-tagged or a letter.
         return None
+    if m.proper and _has_kanji(m.surface):
+        # A name: only a row read as the page reads it is its word (香港,
+        # whose row is read ホンコン; 太郎). The spelling's commonest row
+        # is another word read otherwise -- JMdict files almost no names,
+        # so 博 read ひろし, Hiroshi, took 博 read はく, "doctor"; 山下 read
+        # やました took さんか, "foot of a mountain" (plan 236).
+        return _pool_by_form(m.surface, (m.reading, m.lemma_reading, _to_katakana(m.reading)),
+                             seen_kanji=False)
     inflects = m.pos in ("verb", "adjective")
     written = {c for c in m.surface if is_kanji(c)}
     if written and not written <= set(lemma):

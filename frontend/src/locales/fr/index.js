@@ -890,6 +890,11 @@ const stats = {
   // schedule: a figure, so one word rather than a phrase (plan 089).
   dueValue:          'Main­tenant', // soft hyphen: a record cell is ~76px wide on the desk
   reviewThisCard:    'Réviser cette carte',
+  // Le relevé de la fiche (plan 235) : la case du calendrier, quand la
+  // carte est due, est la porte vers sa révision ; et le mot qui remplace
+  // l'étoile de JMdict sur un mot courant.
+  dictReview:        'Réviser',
+  dictCommon:        'courant',
   total:              'Total',
   overview:           'Aperçu',
   streak:             'Série',
@@ -1002,6 +1007,8 @@ const phraseAnalyzer = {
   hideVideo:           'Masquer la vidéo',
   furiganaNow:         label => `Furigana : ${label}`,
   wordsInSentence:     'Les mots de la phrase',
+  // Le bureau du texte : la liste des mots repliée en une ligne (plan 235).
+  wordsFoldCap:        'Mots de la phrase',
   explanationTitle:    'Explication de la phrase',
   showExplanation:     'Voir l’explication',
   showEntry:           'Revenir à la fiche',
@@ -1578,6 +1585,10 @@ const dictionary = {
   glUse:             'Emploi',
   glCareful:         'Attention',
   glCompare:         'Comparer',
+  // Les titres de la leçon (plan 235) : chaque partie se repère à l'œil.
+  glStructure:       'Construction',
+  glForms:           'Formes',
+  glConfuse:         'À ne pas confondre',
   glBoard:           'Compris — embarquer',
   glBlank:           'trou',
   glRegister: { neutral: 'Neutre', casual: 'Familier', polite: 'Poli', formal: 'Soutenu', written: 'Écrit' },

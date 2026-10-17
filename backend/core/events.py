@@ -336,7 +336,7 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
                               "on", "off", "N5", "N4", "N3", "N2", "N1", "changed"}),
     },
     "ai_use":       {"feature": frozenset({"ask", "composition", "translation_review",
-                                         "deep_analysis", "exam_paper"})},
+                                         "deep_analysis", "exam_paper", "line_translation"})},
     "client_error": {"where": frozenset({"error", "rejection"})},
 }
 

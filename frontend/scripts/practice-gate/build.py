@@ -4,8 +4,9 @@ source/closed.png (the same platform, the door shut: the next cars).
 
   python3 scripts/practice-gate/build.py
 
-writes public/practice/gate/<REV>/ -- the four layers (bg, car, car2, near)
-at each of Today's four hours, and the stripe's two masks -- and
+writes public/practice/gate/<REV>/ -- the five layers (bg, clouds, car,
+car2, near) at each of Today's four hours, the stripe's two masks and the
+sky's (the clouds drift behind it, clouds.py) -- and
 src/components/practice/gate/gate.json, the revision the app asks for and
 the door leaves' inks at each hour (the leaves are drawn, so they take the
 hour's light from here). The day is the painting itself; dawn, dusk and
@@ -27,10 +28,11 @@ sys.path.insert(0, str(HERE))
 
 from cut import cut          # noqa: E402
 from band import mask         # noqa: E402
+import clouds                 # noqa: E402
 import parts                  # noqa: E402
 from hours import Lighter, HOUR_ORDER, LEAF   # noqa: E402
 
-REV = 1
+REV = 5
 FRONT = HERE.parent.parent
 PRINT = FRONT / 'src/components/station/print/print.json'
 OUT = FRONT / 'public/practice/gate'
@@ -72,7 +74,19 @@ def main():
         bg, scene_masks = parts.scene(work)
         near = parts.load(work, 'near')
         cars = {name: parts.car(work, name) for name in ('car', 'car2')}
-        webp(bg[..., :3], None, out / 'bg-day.webp')
+        sky = clouds.mask(scene_masks)
+        r0, r1 = clouds.rows(scene_masks)
+        sky_png = np.zeros((r1 - r0, sky.shape[1], 4), np.uint8)
+        sky_png[..., :3] = 255
+        sky_png[..., 3] = np.clip(sky[r0:r1] * 255 + 0.5, 0, 255).astype(np.uint8)
+        Image.fromarray(sky_png).save(out / 'sky.png', optimize=True)
+
+        def scene_and_clouds(hour, lit, clear):
+            clear, col, al = clouds.split(lit, clear, sky, scene_masks)
+            webp(clear, None, out / f'bg-{hour}.webp')
+            webp(col[r0:r1], al[r0:r1], out / f'clouds-{hour}.webp')
+
+        scene_and_clouds('day', bg[..., :3], clouds.day_clear(bg[..., :3], scene_masks))
         webp(near[..., :3], near[..., 3], out / 'near-day.webp')
         fill = {'day': fills(bg[..., :3], near[..., :3])}
         for name, (a, _) in cars.items():
@@ -80,8 +94,12 @@ def main():
 
         light = Lighter(json.loads(PRINT.read_text())['hours'])
         for hour in HOUR_ORDER:
+            # the same stars with the clouds and without them
+            state = light.rng.bit_generator.state
             lit, _ = light.scene(hour, bg, scene_masks)
-            webp(lit, None, out / f'bg-{hour}.webp')
+            light.rng.bit_generator.state = state
+            clear, _ = light.scene(hour, bg, scene_masks, clouds=False)
+            scene_and_clouds(hour, lit, clear)
             rgb, al = light.pillars(hour, near)
             webp(rgb, al, out / f'near-{hour}.webp')
             fill[hour] = fills(lit, rgb)
@@ -94,7 +112,8 @@ def main():
             for hour in ('dawn', 'day', 'dusk', 'night')}
     DATA.parent.mkdir(parents=True, exist_ok=True)
     fill = {hour: fill[hour] for hour in ('dawn', 'day', 'dusk', 'night')}
-    DATA.write_text(json.dumps({'rev': REV, 'leaf': leaf, 'fill': fill}, ensure_ascii=False, indent=2) + '\n')
+    sky_at = {'top': r0 / 2, 'height': (r1 - r0) / 2}
+    DATA.write_text(json.dumps({'rev': REV, 'leaf': leaf, 'fill': fill, 'sky': sky_at}, ensure_ascii=False, indent=2) + '\n')
     for f in sorted(out.iterdir()):
         print(f'{f.relative_to(FRONT)}  {f.stat().st_size // 1024} KB')
 

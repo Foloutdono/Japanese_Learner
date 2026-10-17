@@ -169,12 +169,17 @@ export function useAnalyzerSession(session) {
     try {
       const data = await apiJson('/api/phrase/analyze', session, {
         method: 'POST',
-        body: JSON.stringify({ phrase: trimmed, lang, source }),
+        // `lines` (plan 235): each sentence held to the width a video's
+        // lines are, which only the analyser asks for.
+        body: JSON.stringify({ phrase: trimmed, lang, source, lines: true }),
       })
       if (run !== runIdRef.current) return
       setPassage({
         ...emptyPassage(),
         source,
+        // The history row it was saved as: what its translations and its
+        // explanations are asked by (plan 235).
+        historyId: data.id ?? null,
         sentences: data.sentences ?? [],
         truncated: data.truncated ?? 0,
       })
@@ -201,6 +206,7 @@ export function useAnalyzerSession(session) {
       setPassage({
         ...emptyPassage(),
         source: data.source ?? 'typed',
+        historyId: id,
         text: data.passage ?? '',
         sentences: data.sentences ?? [],
         truncated: data.truncated ?? 0,
@@ -356,6 +362,9 @@ export function useAnalyzerSession(session) {
         }
         setPassage({
           ...emptyPassage(),
+          // What the line's translations are asked by (plan 235,
+          // ./useLineTranslations.js).
+          sessionId: videoSessionId,
           source: data.source ?? 'video',
           sourceRef: data.sourceRef,
           videoId: data.videoId ?? null,
@@ -387,7 +396,13 @@ export function useAnalyzerSession(session) {
   // Never the whole Passage: it can be up to study/sentences
   // .MAX_SENTENCES long, and `deep` on every one of them would
   // multiply the cost by that many. See docs/adr/0001.
-  async function explain(index) {
+  //
+  // A line is explained where it stands (plan 235): the server has its
+  // place and its neighbours -- a video's on its session, a typed
+  // Passage's on its history row -- and `about` the video's title and
+  // channel, which only the player knows. A Passage saved nowhere is
+  // explained as the sentence alone.
+  async function explain(index, about = {}) {
     const sentence = passage?.sentences?.[index]
     if (!sentence || explaining[index]) return
     countUse('explain', 'open')
@@ -400,12 +415,21 @@ export function useAnalyzerSession(session) {
         ? await apiJson(
             `/api/video/session/${videoSessionId}/sentence/${index}/explain`,
             session,
-            { method: 'POST', body: JSON.stringify({ lang }) },
+            {
+              method: 'POST',
+              body: JSON.stringify({ lang, title: about.title ?? '', channel: about.channel ?? '' }),
+            },
           )
-        : await apiJson('/api/phrase/analyze', session, {
-            method: 'POST',
-            body: JSON.stringify({ phrase: sentence.text, deep: true, lang, save: false }),
-          }).then(data => data.sentences?.[0] ?? data)
+        : passage?.historyId != null
+          ? await apiJson(
+              `/api/phrase/history/${passage.historyId}/sentence/${index}/explain`,
+              session,
+              { method: 'POST', body: JSON.stringify({ lang }) },
+            )
+          : await apiJson('/api/phrase/analyze', session, {
+              method: 'POST',
+              body: JSON.stringify({ phrase: sentence.text, deep: true, lang, save: false }),
+            }).then(data => data.sentences?.[0] ?? data)
 
       if (run !== runIdRef.current) return
       setPassage(prev => (prev
@@ -520,7 +544,7 @@ export function useAnalyzerSession(session) {
       } else {
         await apiJson('/api/phrase/analyze', session, {
           method: 'POST',
-          body: JSON.stringify({ phrase: entry.label, lang, source: entry.source ?? 'typed' }),
+          body: JSON.stringify({ phrase: entry.label, lang, source: entry.source ?? 'typed', lines: true }),
         })
       }
     } finally {

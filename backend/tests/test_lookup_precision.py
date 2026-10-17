@@ -22,7 +22,7 @@ held over every sentence the app teaches from.
 import unittest
 
 from study import analysis, card_lookup, morphology
-from content import vocab_jmdict_data as jmdict
+from content import vocab_extras, vocab_jmdict_data as jmdict
 
 
 def matches(sentence: str) -> dict[str, dict]:
@@ -664,6 +664,77 @@ class WhatTheBankMetTests(unittest.TestCase):
             ("赤ちゃんが泣いている。", "赤ちゃん", "vocab_N4_赤ちゃん_あかちゃん"),
             ("あかちゃんが泣いている。", "あかちゃん", "vocab_N4_赤ちゃん_あかちゃん"),
             ("世論は大きく変わった。", "世論", "vocab_N1_世論_よろん/せろん"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(matches(sentence)[word]["raw_id"], raw_id)
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class QuotationTests(unittest.TestCase):
+    """Plan 236. UniDic spells some words half in kana (と博 for 賭博,
+    "gambling"), and after a quotation MeCab took the quotative と for
+    the first kana of one: 「…緊張するよ」と博がいいます came back と博, so
+    緊張's example put ばく over the name 博 (Hiroshi) and its breakdown
+    glossed it as gambling. Read again as と and the name, the name still
+    took the pool's 博 read はく, "doctor": JMdict files almost no names,
+    so the commonest row of a name's spelling is another word, and a name
+    takes a row read as it is read or none. A course card is no guess and
+    stays where UniDic takes its word for a name."""
+
+    SENTENCE = "「僕、飛行機に乗るのはこれが初めてなんだ。緊張するよ」と博がいいます。"
+
+    def test_the_quotations_to_is_the_particle_and_the_name_its_own(self) -> None:
+        tokens = morphology.tokenize(self.SENTENCE)
+        at = next(i for i, m in enumerate(tokens) if m.surface == "博")
+        self.assertEqual((tokens[at - 1].surface, tokens[at - 1].pos), ("と", "particle"))
+        self.assertEqual(tokens[at].reading, "ひろし")
+        self.assertNotIn("賭博", [m.lemma for m in tokens])
+        # Cut and tagged again, the tokens are still the text, offsets and all.
+        self.assertEqual([self.SENTENCE[m.start:m.end] for m in tokens], [m.surface for m in tokens])
+        self.assertEqual("".join(m.surface for m in tokens), self.SENTENCE)
+
+    def test_the_example_reads_the_name(self) -> None:
+        examples = vocab_extras.get_vocab_extras("緊張", "きんちょう")["examples"]
+        segments = next(ex["segments"] for ex in examples if ex["jp"] == self.SENTENCE)
+        self.assertIn({"text": "博", "reading": "ひろし"},
+                      [{"text": p["text"], "reading": p.get("reading")} for p in segments])
+
+    def test_a_mixed_spelling_anywhere_else_stays_one_word(self) -> None:
+        for sentence, surface, lemma in (
+            ("違法なと博に手を出した。", "と博", "賭博"),
+            ("スーパーでとり肉を買いました。", "とり肉", "鳥肉"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertIn((surface, lemma), [(m.surface, m.lemma) for m in morphology.tokenize(sentence)])
+
+    def test_a_quotations_to_before_a_word_is_left_as_it_was(self) -> None:
+        self.assertEqual(matches("「おはよう」と先生が言った。")["先生"]["raw_id"], "vocab_N5_先生_せんせい")
+
+    def test_a_name_takes_no_row_read_otherwise(self) -> None:
+        for sentence, name in (
+            (self.SENTENCE, "博"),
+            ("「博、君の気持ちは分かるよ」とマイクが言います。", "博"),  # はく, "doctor"
+            ("博が来た。", "博"),
+            ("こんにちは、山下さん。お出かけですか。", "山下"),  # さんか, "foot of a mountain"
+            ("週末、上野の国立博物館に行った。", "上野"),  # こうずけ, a former province
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(name, matches(sentence))
+
+    def test_a_name_read_as_its_row_keeps_it(self) -> None:
+        for sentence, word, meaning in (
+            ("彼は九州へ旅立った。", "九州", "Ky"),
+            ("東京に住んでいます。", "東京", "Tokyo"),
+            ("「行こう」と太郎が言った。", "太郎", "son"),
+            ("その汽船は香港に立ち寄った。", "香港", "Hong Kong"),  # the row is read ホンコン
+        ):
+            with self.subTest(word=word):
+                self.assertIn(meaning, matches(sentence)[word]["entry"]["meaning"])
+
+    def test_a_course_word_taken_for_a_name_keeps_its_card(self) -> None:
+        for sentence, word, raw_id in (
+            ("池に大きな蓮の葉が浮かんでいる。", "蓮", "vocab_N1_蓮_はす"),  # read れん, Ren
+            ("師匠は少年の利根を見込んで、弟子に取った。", "利根", "vocab_N1_利根_りこん"),  # とね, the river
         ):
             with self.subTest(sentence=sentence):
                 self.assertEqual(matches(sentence)[word]["raw_id"], raw_id)

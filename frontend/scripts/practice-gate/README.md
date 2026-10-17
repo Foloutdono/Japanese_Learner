@@ -17,13 +17,15 @@ cd frontend && python3 scripts/practice-gate/build.py
 
 It writes:
 
-- `public/practice/gate/<REV>/`: four layers at each hour, as WebP --
-  `bg` (the scene), `car` (the standing car), `car2` (the next cars, from
+- `public/practice/gate/<REV>/`: five layers at each hour, as WebP --
+  `bg` (the scene, its sky without clouds), `clouds` (the clouds alone,
+  the sky's rows), `car` (the standing car), `car2` (the next cars, from
   the door-shut painting, for the train passing) and `near` (the two
   pillars, in front) -- and `band-car.png`, `band-car2.png`, the
-  stripe's masks, over which the app lays the line's pigment;
-- `src/components/practice/gate/gate.json`: the revision the app asks for
-  and the door leaves' inks at each hour.
+  stripe's masks, over which the app lays the line's pigment, and
+  `sky.png`, the sky's mask, behind which the clouds drift;
+- `src/components/practice/gate/gate.json`: the revision the app asks for,
+  the door leaves' inks at each hour and where the clouds' rows lie.
 
 The output is deterministic: two builds write the same bytes (the stars
 and the moon's seas draw from one seeded stream, the hours in a fixed
@@ -48,6 +50,7 @@ order).
 | `band.py` | the blue stripe's own mask on each car, nothing else blue (not the seats through the door, not the lake) |
 | `parts.py` | the scene's parts as masks (sky, clouds, land, Fuji's snow, the canopy and its lamps, the wires, the platform and its tactile strip; on the cars their body, glass, inside, roof, underframe) |
 | `hours.py` | each hour's light, part by part: Today's sky, the sun or moon, stars, the far town's windows, the lamps and their glow, the windows lit from inside |
+| `clouds.py` | each hour's scene split into the sky without its clouds and the clouds alone, which give the scene back at rest; past the sky (behind the wires, the land, the pillars) the clouds are carried as far as they drift |
 | `build.py` | the app's files |
 
 ## How the app lays it out
