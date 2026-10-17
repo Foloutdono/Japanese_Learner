@@ -409,7 +409,11 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 15: French beside the English (plan 215) -- a JMdict pool word's
 # `meaning_fr` from the pool's French layer, and a grammar point's
 # `structure_fr`, so a stored breakdown is rebuilt to carry them.
-LOCAL_REV = 15
+# 16: a quotation's と is the particle, never the first kana of a word
+# (plan 236): 「…」と博 is と and the name 博, no と博 (賭博, "gambling");
+# and a name takes no pool row read otherwise (博 read ひろし is no 博
+# read はく, "doctor").
+LOCAL_REV = 16
 
 
 def analyze_local(text: str, level: str | None = None) -> dict:
