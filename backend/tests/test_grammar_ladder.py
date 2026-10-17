@@ -267,6 +267,41 @@ def test_construire_reads_romaji_and_names_the_one_kana_off():
     assert grammar_ladder.check_build(level, entry["pattern"], built["key"], ["ます"], "fr")["verdict"] == "wrong"
 
 
+def test_construire_takes_the_other_register_where_the_translation_cannot_say():
+    # Plan 241: « Demain, c'est l'examen » under あしたはテスト＿。 -- です
+    # was marked wrong for the sentence's だ, though nothing asked for it.
+    level, entry, _ = _point("です／だ")
+    key = next(i[0] for i in grammar_ladder._build_items(level, entry["pattern"]) if i[1] == "あしたはテストだ。")
+    for typed in ("です", "desu", "デス"):
+        verdict = grammar_ladder.check_build(level, entry["pattern"], key, [typed], "fr")
+        assert verdict["verdict"] == "right", typed
+        assert verdict["gaps"][0] == {"verdict": "right", "answer": "です", "reading": "だ", "marks": [],
+                                      "said": "だ", "register": "plain"}
+        assert verdict["jp"] == "あしたはテストだ。"
+    # The sentence's own answer says nothing more.
+    assert "said" not in grammar_ladder.check_build(level, entry["pattern"], key, ["だ"], "fr")["gaps"][0]
+    # One kana off the other form is close to it, and corrected towards it.
+    close = grammar_ladder.check_build(level, entry["pattern"], key, ["でず"], "fr")["gaps"][0]
+    assert close["verdict"] == "close" and close["answer"] == "です" and close["said"] == "だ"
+    assert close["marks"] == [{"ok": "で"}, {"wrong": "ず", "fix": "す"}]
+    # A wrong answer is corrected towards the sentence, as before.
+    wrong = grammar_ladder.check_build(level, entry["pattern"], key, ["でした"], "fr")["gaps"][0]
+    assert wrong["verdict"] == "wrong" and wrong["answer"] == "だ" and "said" not in wrong
+    # A question keeps its register: 学生だか is not one.
+    asked = next(i[0] for i in grammar_ladder._build_items(level, entry["pattern"]) if i[1] == "学生ですか。")
+    assert grammar_ladder.check_build(level, entry["pattern"], asked, ["だ"], "fr")["verdict"] == "wrong"
+
+
+def test_construire_reads_a_kanji_the_keyboard_put_in():
+    level, entry, _ = _point("〜と思います")
+    key = next(i[0] for i in grammar_ladder._build_items(level, entry["pattern"]) if i[1] == "この店は安いと思います。")
+    for typed in ("と思います", "とおもいます", "to omoimasu", "と思う", "とおもう"):
+        assert grammar_ladder.check_build(level, entry["pattern"], key, [typed], "en")["verdict"] == "right", typed
+    # Read, a wrong one is still wrong, and its correction is drawn in kana.
+    wrong = grammar_ladder.check_build(level, entry["pattern"], key, ["と言います"], "en")["gaps"][0]
+    assert wrong["verdict"] == "wrong" and "言" not in "".join(m.get("wrong", "") for m in wrong["marks"])
+
+
 def test_construire_asks_another_sentence_each_turn():
     level, entry, _ = _point("〜てください")
     keys = [grammar_ladder.build_payload(level, entry, "en", turn)["key"] for turn in range(4)]

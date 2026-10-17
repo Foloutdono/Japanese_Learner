@@ -1576,6 +1576,7 @@ const dictionary = {
   bldRight: 'Right.',
   bldClose: 'Almost.',
   bldWrong: 'Not quite.',
+  bldOther: (said, register) => `The sentence says ${said}: the same, in ${register === 'plain' ? 'plain' : 'polite'} speech.`,
   mapAria: "The point's line",
   mapTutorial: 'Tutorial',
   mapNow: 'now',
