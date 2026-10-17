@@ -1319,8 +1319,12 @@ describe('the places (plan 123, P16)', () => {
     expect(document.querySelector('main a')).toBeNull()
     expect(getComputedStyle(rows[0].querySelector('.stg-row__chev')).display).not.toBe('none')
     rows.find(r => r.dataset.page === 'display').click()
-    await settle()
-    expect([seen.path, seen.type]).toEqual(['/profile/settings/display', 'PUSH'])
+    // Waited for, not slept on: the push comes through the router's
+    // transition, which a fixed 120ms lost on a loaded CI runner.
+    await vi.waitFor(
+      () => expect([seen.path, seen.type]).toEqual(['/profile/settings/display', 'PUSH']),
+      { timeout: 5000, interval: 20 },
+    )
   })
 
   it('keeps the shelf\'s decks and its library door buttons', async () => {
