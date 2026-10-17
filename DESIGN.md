@@ -1140,7 +1140,8 @@ adds no idiom of its own: it is the tour's scene made to answer back.
 - **The station is a console over platform cards.** How the learner
   will answer applies to every scene below, so it is the console's band
   (Choose · Translate · Free talk); the grades are its chips, opening on
-  the learner's own; one quiet line under it says what the way asks. A
+  the learner's own; nothing between them and the scenes (the band's
+  word says how the learner answers). A
   scene is a platform card: its title, its situation, its first line as
   the card's specimen (what the train stops at), and the learner's
   record there at the end of the title's row (ModeSelector's `meta`: a
@@ -1163,6 +1164,22 @@ adds no idiom of its own: it is the tour's scene made to answer back.
   printed. **The line just said is held untranslated until it is
   answered**; a quiet link inside it gives the translation early, and
   its voice's ring wears the line's ink.
+- **The scene is a ticket, and its stub rides the talk** (plan 237, the
+  owner's pick D of the canvas "Tsuji — la scène, new directions"). The
+  brief is a ticket standing alone over Commencer, on the station
+  plate's paper so it reads the same in both themes: the place at its
+  head on the line's edge, what is going on, a tear (a dashed fold, a
+  notch bitten from each edge), and the mission as the scene's numbered
+  steps (the bank's `steps`), a gold ring a number -- the learner's own.
+  Once the talk is under way the place moves into the **route**, which
+  stands in the run meter's place below the desk (StudyStage's `meter`
+  as a node): a stop a reply on its line, the one in hand ringed in the
+  line's colour, the ones behind filled right or wrong, and "n / total".
+  Under it hangs the ticket's **stub**, folded to the mission's rings,
+  its steps on a tap, so the errand is a tap away on a phone; the desk
+  keeps the whole ticket in its side column. The talk stands at the
+  card's foot, against what answers it, and Choose's replies are tiles
+  of their own, a gold ring for the number.
 - **The talk stays on the screen** (plan 221). Once it is under way the
   run is bounded to the screen, as the passage is: the card takes what
   the head, the meter, the dock and the floor leave, the talk scrolls
@@ -1179,10 +1196,9 @@ adds no idiom of its own: it is the tour's scene made to answer back.
   line, under the sentence runs' speaker switch in the head
   (`SpeakToggle`). A free reply is the device's voice, the catalogue
   having no such line.
-- **Three ways, one stage.** Choose: the replies as **quick replies**
-  under the talk, one surface panel, a row a reply between hairlines --
-  its number (the desk's key), its Japanese, and a gold arrow that
-  slides in on hover, saying a tap sends it; the pick is the answer,
+- **Three ways, one stage.** Choose: the replies under the talk, a
+  surface tile each (plan 237) -- its number in a gold ring (the desk's
+  key) and its Japanese, lifting 1px to the gold on hover; the pick is the answer,
   with no Check, and **is sent**: the replies go and the pick joins the
   talk as the learner's bubble, its mark at the corner (the tour's ring
   in success, or the miss's cross). A wrong pick stays struck, on the

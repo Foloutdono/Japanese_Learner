@@ -11,6 +11,12 @@
       "en": "Explain the supplier's delay, ask the client for a two-week extension and propose a partial delivery on the original date.",
       "fr": "Explique le retard du fournisseur, demande au client un délai de deux semaines et propose une livraison partielle à la date prévue."
     },
+    "steps": [
+      {"en": "Raise the delivery date", "fr": "Aborde la date de livraison"},
+      {"en": "Explain the supplier's delay", "fr": "Explique le retard du fournisseur"},
+      {"en": "Ask for two more weeks", "fr": "Demande deux semaines de plus"},
+      {"en": "Offer a partial delivery", "fr": "Propose une livraison partielle"}
+    ],
     "them": {"en": "Client project manager", "fr": "Chef de projet du client"},
     "register": "formal",
     "turns": [
@@ -298,6 +304,12 @@
       "en": "Apologise for the wrong delivery, explain its cause and the measures you are taking, and offer compensation.",
       "fr": "Excuse-toi pour la livraison erronée, explique sa cause et les mesures prises par ton entreprise, et propose un dédommagement."
     },
+    "steps": [
+      {"en": "Apologise", "fr": "Présente tes excuses"},
+      {"en": "Explain the cause", "fr": "Explique la cause"},
+      {"en": "Set out the measures", "fr": "Expose les mesures prises"},
+      {"en": "Offer compensation", "fr": "Propose un dédommagement"}
+    ],
     "them": {"en": "Client purchasing manager", "fr": "Responsable des achats"},
     "register": "formal",
     "turns": [
@@ -585,6 +597,13 @@
       "en": "Present your research plan, explain why you chose this lab and how your work differs from earlier studies, and convince the professor you belong there.",
       "fr": "Présente ton projet de recherche, explique pourquoi tu as choisi ce laboratoire et en quoi ton travail se distingue des études antérieures, et convaincs le professeur que tu y as ta place."
     },
+    "steps": [
+      {"en": "Present your research", "fr": "Présente ton projet de recherche"},
+      {"en": "Say why this lab", "fr": "Dis pourquoi ce laboratoire"},
+      {"en": "Set your work apart", "fr": "Montre ce qui distingue ton travail"},
+      {"en": "Explain your method", "fr": "Explique ta méthode"},
+      {"en": "Ask a question of your own", "fr": "Pose une question à ton tour"}
+    ],
     "them": {"en": "Professor", "fr": "Professeur"},
     "register": "formal",
     "turns": [
@@ -872,6 +891,13 @@
       "en": "Understand your results and the two treatment options, ask about side effects and the hospital stay, and take the time to decide.",
       "fr": "Comprends tes résultats et les deux traitements possibles, pose tes questions sur les effets secondaires et l'hospitalisation, et prends le temps de décider."
     },
+    "steps": [
+      {"en": "Ask if treatment is urgent", "fr": "Demande si le traitement presse"},
+      {"en": "Compare the two treatments", "fr": "Compare les deux traitements"},
+      {"en": "Ask about side effects", "fr": "Interroge sur les effets secondaires"},
+      {"en": "Ask about the hospital stay", "fr": "Demande la durée d'hospitalisation"},
+      {"en": "Take time to decide", "fr": "Prends le temps de décider"}
+    ],
     "them": {"en": "Doctor", "fr": "Médecin"},
     "register": "polite",
     "turns": [

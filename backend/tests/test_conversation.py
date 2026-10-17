@@ -134,12 +134,28 @@ def test_a_rule_broken_is_named(monkeypatch):
     row["turns"][1]["wrong"] = row["turns"][1]["wrong"][:1]
     row["turns"][2]["me"]["romaji"] = "iie, daijobu deshita"
     row["title"]["fr"] = ""
+    row["steps"] = row["steps"][:1]
     monkeypatch.setattr(conversation, "bank", lambda: {**{lv: [] for lv in conversation.LEVELS}, "N5": [row]})
     found = "\n".join(conversation.problems())
     assert "turn 1 me: kana does not carry" in found
     assert "turn 2: wants exactly 2 wrong replies" in found
     assert "turn 3 me: romaji" in found
     assert "title: no fr" in found
+    assert "wants 2 to 5 steps" in found
+
+
+def test_a_step_is_one_short_line_in_both_languages(monkeypatch):
+    # The mission's steps (plan 237) print on the brief's ticket and in
+    # the run's stub, a line each on a phone.
+    row = json.loads(json.dumps(conversation.find(KONBINI)[1]))
+    row["steps"][0]["fr"] = "Fais réchauffer le bento au micro-ondes de la supérette"
+    row["steps"][1] = {"en": "Take chopsticks", "fr": "お箸をもらう"}
+    row["steps"][2]["note"] = "a stray key"
+    monkeypatch.setattr(conversation, "bank", lambda: {**{lv: [] for lv in conversation.LEVELS}, "N5": [row]})
+    found = "\n".join(conversation.problems())
+    assert f"step 1: the fr runs past {conversation.MAX_STEP} characters" in found
+    assert "step 2: Japanese in the fr" in found
+    assert "step 3: unknown key 'note'" in found
 
 
 def test_every_script_spells_its_lines_back_and_deals_one_right_reply():
@@ -198,6 +214,7 @@ def test_a_script_carries_every_turn_with_its_furigana(client):
     assert r.status_code == 200
     body = r.json()
     assert body["place"]["jp"] == "コンビニ" and body["them"] == "Clerk"
+    assert body["steps"] == ["Have the bento heated", "Take chopsticks", "Say no to a bag", "Pay by card"]
     first = body["turns"][0]
     assert first["them"]["translation"] == "Welcome. Shall I heat up your bento?"
     assert {"text": "温", "reading": "あたた"} in first["them"]["parts"]
