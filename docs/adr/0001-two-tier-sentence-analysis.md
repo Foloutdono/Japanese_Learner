@@ -108,3 +108,23 @@ two sentences either side of it (`passage_context`), and found again under that
 key when the Passage is reopened -- or, bought before, under the plain one. The
 phrase alone keeps its old key, and a Passage of one sentence is asked as the
 sentence alone, so the reading bank's cached explanations are untouched.
+
+---
+
+## Amendment, 2026-10-17 — the explanation is the construction (plan 242)
+
+With a translation under every line (plan 235), and the video's own where it has
+one (ADR 0003, same day), the owner: *"the explain button is only for the
+explanation of how the sentence is built."* The deep tier's explanation had been
+asked for "the grammar and nuance of the whole phrase", and came back opening on
+a paraphrase of the meaning and closing on its tone.
+
+It is now asked for how the phrase is built and nothing else: what its predicate
+is and what it is said of, what modifies or completes what, how each conjugated
+or combined form is put together and what each part adds, the Japanese pieces
+quoted; never a restatement of what the phrase says, and a nuance named only
+where a form carries it. Asked where the line stands, it says so when the
+construction runs across lines (a clause left open, a subject carried over). The
+schema is unchanged -- `translation` still comes with the deep tier, for the
+callers that have no other -- and `CACHE_VERSION` is 6, so no explanation bought
+under the old prompt is served again.

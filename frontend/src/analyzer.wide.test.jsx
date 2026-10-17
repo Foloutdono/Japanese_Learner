@@ -4,12 +4,15 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — the analyser's video Passage on three columns (plan 134) ──
-// The owner's drawing at a laptop's full width: the sentences over the
-// grammar on the left, the video with the sentence as its subtitle and
-// the player's bar as one sumi object in the middle, the card in focus
-// on the right -- the desk's rail stepped aside, all three inside the
-// window, each scrolling itself.
+// ── 机 — the analyser's video Passage on three columns (plans 134, 238) ──
+// The owner's pick C of the canvas "Tsuji analyser — the desk and
+// Explain" at a laptop's full width: the lines on the left, each over
+// its translation; the video edge to edge with no arrows beside it, the
+// line as its subtitle and the player's bar as one sumi object, the
+// line's words on a strip under it, in the middle; one panel on the
+// right whose segment turns it between the word, the line's grammar and
+// its construction -- the desk's rail stepped aside, all three inside
+// the window, each scrolling itself.
 // And the bar's pieces: the sentence again, on a loop, a stop at each
 // sentence's end, the speed, the video folded away; one plain track,
 // no step per sentence. The phone's stage is deskfree.phone.
@@ -134,7 +137,7 @@ async function openVideo() {
 }
 
 describe('the analyser\'s video Passage on three columns (plan 134)', () => {
-  it('stands the sentences, the sumi object and the card side by side, inside the window', async () => {
+  it('stands the lines, the sumi object and the panel side by side, inside the window', async () => {
     await openVideo()
     expect($('.anl-desk')).not.toBeNull()
     // The rail steps aside: the result has the window.
@@ -144,27 +147,48 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
     const right = box('.anl-desk__entry')
     expect(rail.right).toBeLessThanOrEqual(slab.left)
     expect(slab.right).toBeLessThanOrEqual(right.left)
-    // The drawing's shares: 410 | 830 | 541.
-    expect(slab.width / rail.width).toBeGreaterThan(1.8)
-    // The list of sentences over the grammar, the grammar's box level
-    // with the words' row, top and foot.
+    // The drawing's shares: 270 | 676 | 400.
+    expect(slab.width / rail.width).toBeGreaterThan(2.2)
+    expect(slab.width / right.width).toBeGreaterThan(1.5)
+    // The lines alone on the left: the grammar is a face of the panel.
     expect($('.anl-desk__rail .anl-stop')).not.toBeNull()
-    expect(box('.anl-desk__points').top).toBeGreaterThan(rail.bottom - 1)
-    expect(Math.abs(box('.anl-desk__points').top - box('.anl-desk__work').top)).toBeLessThan(2)
-    expect(Math.abs(box('.anl-desk__points').bottom - box('.anl-desk__work').bottom)).toBeLessThan(2)
-    // The video, the subtitle and the bar are one object, in that order.
+    expect($('.anl-desk__points')).toBeNull()
+    // The video edge to edge on the sumi's top, no arrows beside it; the
+    // subtitle, then the bar, in one object.
     expect($('.anl-slab [data-testid="player"]')).not.toBeNull()
+    expect($('.anl-slab__arrow')).toBeNull()
+    const video = box('.anl-slab__video')
+    expect(Math.abs(video.left - slab.left)).toBeLessThan(1)
+    expect(Math.abs(video.right - slab.right)).toBeLessThan(1)
+    expect(Math.abs(video.top - slab.top)).toBeLessThan(1)
     expect(box('.anl-subs').top).toBeGreaterThan(box('.anl-slab__screen').bottom - 1)
     expect(box('.anl-pbar').top).toBeGreaterThan(box('.anl-subs').bottom - 1)
-    // The words beside the card in focus, Explain under it.
-    expect(box('.anl-desk__focus').left).toBeGreaterThan(box('.anl-desk__words').right - 1)
-    expect(box('.anl-desk__explain').top).toBeGreaterThan(box('.anl-focus').bottom - 1)
+    // The line's words on one strip under it, at the desk's foot; no card
+    // beside them -- the panel is that card.
+    const strip = box('.anl-desk__strip')
+    expect(strip.top).toBeGreaterThan(slab.bottom - 1)
+    expect(Math.abs(strip.left - slab.left)).toBeLessThan(1)
+    expect(Math.abs(strip.bottom - box('.anl-desk').bottom)).toBeLessThan(2)
+    expect($$('.anl-strip__chip .anl-words__word').map(w => w.textContent)).toEqual(['雨', '見る'])
+    expect($('.anl-focus, .anl-desk__work, .anl-swap')).toBeNull()
+    // The panel: its segment over the word's band.
+    expect($$('.anl-faces .seg__opt').map(o => o.textContent)).toEqual(['Mot雨', 'Grammaire2', 'Construction'])
+    expect($('.anl-faces .seg__opt--on').textContent).toBe('Mot雨')
+    expect(box('.anl-faces').bottom).toBeLessThanOrEqual(box('.anl-desk__entry .dict-entry__top').top)
     // Nothing past the window: each column scrolls in itself.
     expect(document.scrollingElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight + 1)
     expect(document.scrollingElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
   })
 
-  it('keeps the rows to the head and the sumi object when the list of sentences is long', async () => {
+  it('gives the picture more of the window than the drawing before it', async () => {
+    await openVideo()
+    // Plan 134's picture was 69dvh wide, 621px at 900; edge to edge in
+    // the wider column it is the column's whole width.
+    expect(box('.anl-slab__video').width).toBeGreaterThan(0.69 * window.innerHeight + 40)
+    expect(box('.anl-slab__video').height).toBeGreaterThan(0)
+  })
+
+  it('keeps the head and the bar whole when the list of lines is long', async () => {
     session = LONG
     await openVideo()
     const rail = box('.anl-desk__rail')
@@ -173,13 +197,9 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
     expect(box('.anl-desk__head').height).toBeLessThan(80)
     const gap = parseFloat(getComputedStyle($('.anl-desk')).rowGap)
     expect(Math.abs(slab.top - (box('.anl-desk__head').bottom + gap))).toBeLessThan(2)
-    expect(Math.abs(rail.bottom - slab.bottom)).toBeLessThan(2)
+    expect(Math.abs(rail.bottom - box('.anl-desk').bottom)).toBeLessThan(2)
     // The sumi object whole: its subtitle and its bar inside it.
     expect(box('.anl-pbar').bottom).toBeLessThanOrEqual(slab.bottom + 1)
-    // The grammar and the words have the rest of the window.
-    expect(box('.anl-desk__points').height).toBeGreaterThan(150)
-    expect(box('.anl-desk__work').height).toBeGreaterThan(150)
-    expect(Math.abs(box('.anl-desk__points').top - box('.anl-desk__work').top)).toBeLessThan(2)
     const line = $('.anl-desk__rail .anl-line')
     expect(line.scrollHeight).toBeGreaterThan(line.clientHeight)
     expect(document.scrollingElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight + 1)
@@ -416,12 +436,177 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
   it('walks the sentences from the bar and follows the grammar from its number', async () => {
     await openVideo()
     expect($('.anl-subs__pt .anl-subs__n').textContent).toBe('1')
-    expect($('.anl-desk__points .anl-num').textContent).toBe('1')
+    faceNamed('Grammaire').click()
+    await settle()
+    expect($('.anl-face__points .anl-num').textContent).toBe('1')
     $('button[aria-label="Phrase suivante"]').click()
     await settle()
     expect($('.anl-subs__count').textContent).toContain('2 / 2')
     expect(spies.seekTo).toHaveBeenLastCalledWith(40)
-    // A sentence with no construction has no grammar panel.
-    expect($('.anl-desk__points')).toBeNull()
+    // A sentence with no construction has no grammar face: the panel
+    // gives the word back.
+    expect($$('.anl-faces .seg__opt').map(o => o.textContent)).toEqual(['Mot駅', 'Construction'])
+    expect($('.anl-face__points')).toBeNull()
+    expect($('.anl-desk__entry .dict-plate__word').textContent).toBe('駅')
+  })
+})
+
+// ── 面 — the panel's three faces (plan 242) ──────────────────────
+// The way between the word, the line's grammar and its construction is
+// the panel's own segment: no swap on the column's edge, no way back to
+// look for. A point opens its lesson in the grammar face, its ✕ giving
+// the list back; Esc walks back one step at a time; the construction is
+// bought the first time its face is turned to, the line at its head
+// with its points numbered as on the subtitle.
+const faceNamed = name => $$('.anl-faces .seg__opt').find(o => o.textContent.startsWith(name))
+const EXPLANATION = 'Le cœur est 見ている : を fait de 雨 l’objet de 見る.'
+function answering({ translations = null } = {}) {
+  apiJson.mockImplementation(async url => {
+    const u = String(url)
+    if (u.includes('/translations')) return translations ?? { start: 0, lines: [] }
+    if (u.includes('/explain')) return { ...session.sentences[0], explanation: EXPLANATION }
+    return session
+  })
+}
+
+describe('the panel\'s three faces (plan 242)', () => {
+  it('turns to the line\'s grammar, opens a point in it, and its ✕ gives the list back', async () => {
+    apiFetch.mockImplementation(async url => {
+      const u = String(url)
+      if (u.startsWith('/api/dictionary?')) {
+        const params = new URLSearchParams(u.split('?')[1])
+        if (params.get('id') === 'grammar_N5_teiru') {
+          return ok({ results: [{ type: 'grammar', raw_id: 'grammar_N5_teiru', pattern: '〜ている', level: 'N5', meaning: 'ongoing', status: { status: 'new' } }], total: 1, has_more: false })
+        }
+        const q = params.get('q')
+        return ok({ results: ENTRIES[q] ? [ENTRIES[q]] : [], total: ENTRIES[q] ? 1 : 0, has_more: false })
+      }
+      return ok([])
+    })
+    await openVideo()
+    faceNamed('Grammaire').click()
+    await settle()
+    expect(faceNamed('Grammaire').getAttribute('aria-checked')).toBe('true')
+    expect($$('.anl-face__points .bkd-point__pattern').map(p => p.textContent)).toEqual(['を', '〜ている'])
+    $$('.anl-face__points .bkd-point')[1].click()
+    await expect.poll(() => $('.anl-desk__entry .dict-plate__word')?.textContent).toBe('〜ている')
+    // Still the grammar face, the point's lesson in it.
+    expect(faceNamed('Grammaire').getAttribute('aria-checked')).toBe('true')
+    expect($('.anl-face__points')).toBeNull()
+    $('.anl-desk__entry button[aria-label="Fermer"]').click()
+    await settle()
+    expect($$('.anl-face__points .bkd-point').length).toBe(2)
+
+    // The word's face holds the word all along.
+    faceNamed('Mot').click()
+    await settle()
+    expect($('.anl-desk__entry .dict-plate__word').textContent).toBe('雨')
+  })
+
+  it('walks back one step per Esc: the point, the list, the word', async () => {
+    await openVideo()
+    faceNamed('Grammaire').click()
+    await settle()
+    $$('.anl-face__points .bkd-point')[0].click()
+    await settle()
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle()
+    expect($$('.anl-face__points .bkd-point').length).toBe(2)
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle()
+    expect(faceNamed('Mot').getAttribute('aria-checked')).toBe('true')
+  })
+
+  it('buys the construction the first time its face is turned to, the line at its head', async () => {
+    answering()
+    await openVideo()
+    faceNamed('Construction').click()
+    await expect.poll(() => $('.anl-explainpanel__body')?.textContent).toBe(EXPLANATION)
+    expect(apiJson.mock.calls.filter(([u]) => String(u).includes('/explain')).length).toBe(1)
+    // The line as its blocks (the owner's pick B): each word one, a
+    // point's run one under its number, framed, as on the subtitle.
+    const tiles = $$('.anl-blocks__tile')
+    expect(tiles.map(b => b.querySelector('.anl-blocks__jp').textContent)).toEqual(['雨', 'を', '見', 'ている'])
+    expect($$('.anl-blocks__tile--pt .anl-blocks__n').map(n => n.textContent)).toEqual(['1', '2'])
+    // Each named under it: a word by its gloss, a point by its own.
+    expect(tiles[0].querySelector('.anl-blocks__gloss').textContent).toBe('rain')
+    expect(tiles[1].querySelector('.anl-blocks__gloss').textContent).toBe('object')
+    // At a heading's size, where the line stood at a lead's.
+    expect(parseFloat(getComputedStyle($('.anl-blocks__jp')).fontSize)).toBeGreaterThan(26)
+    // The Japanese the prose names, in the line's weight.
+    expect($$('.anl-explainpanel__body .anl-explainpanel__jp').map(j => j.textContent)).toEqual(['見ている', 'を', '雨', '見る'])
+    // The asking right under the prose, not at the panel's foot.
+    expect(box('.anl-explainpanel .desk-ask').top - box('.anl-explainpanel__again').bottom).toBeLessThan(60)
+    // The word's face and back: no second call.
+    faceNamed('Mot').click()
+    await settle()
+    expect($('.anl-explainpanel')).toBeNull()
+    faceNamed('Construction').click()
+    await settle()
+    expect($('.anl-explainpanel__body').textContent).toBe(EXPLANATION)
+    expect(apiJson.mock.calls.filter(([u]) => String(u).includes('/explain')).length).toBe(1)
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle()
+    expect(faceNamed('Mot').getAttribute('aria-checked')).toBe('true')
+  })
+
+  it('opens a block\'s word on its card and a point\'s on its lesson', async () => {
+    answering()
+    await openVideo()
+    faceNamed('Construction').click()
+    await expect.poll(() => $$('.anl-blocks__tile').length).toBe(4)
+    // Every block here is a door: two words with a card, two points.
+    expect($$('button.anl-blocks__tile').map(b => b.getAttribute('aria-label')))
+      .toEqual(['雨 — rain', 'を — object', '見 — to see', 'ている'])
+    $$('button.anl-blocks__tile')[2].click()
+    await settle()
+    expect(faceNamed('Mot').getAttribute('aria-checked')).toBe('true')
+    expect($('.anl-subs .tok--on').textContent).toContain('見')
+    faceNamed('Construction').click()
+    await settle()
+    $('button.anl-blocks__tile--pt').click()
+    await settle()
+    expect(faceNamed('Grammaire').getAttribute('aria-checked')).toBe('true')
+  })
+
+  it('turns to the word when a word is pressed, on the strip or on the line', async () => {
+    answering()
+    // Asked for, and found missing, by an earlier test: the lookups are
+    // cached for the session.
+    const { clearLookupCache } = await import('./lib/dictionaryLookup')
+    clearLookupCache()
+    ENTRIES.見る = entry('見る', 'みる', 'to see')
+    await openVideo()
+    faceNamed('Grammaire').click()
+    await settle()
+    $$('.anl-strip__chip').at(-1).click()
+    await expect.poll(() => $('.anl-desk__entry .dict-plate__word')?.textContent).toBe('見る')
+    expect(faceNamed('Mot').getAttribute('aria-checked')).toBe('true')
+    expect($('.anl-strip__chip--on').textContent).toContain('見る')
+    expect($('.anl-subs .tok--on').textContent).toContain('見')
+    delete ENTRIES.見る
+  })
+})
+
+// ── 訳 — the lines read as a bilingual transcript (plan 242) ─────────
+describe('the lines on the left, each over its translation', () => {
+  it('prints each line\'s translation under it, and finds a line by its French', async () => {
+    answering({ translations: { start: 0, lines: ['Je regarde la pluie', 'J’attends à la gare'] } })
+    await openVideo()
+    await expect.poll(() => $$('.anl-desk__rail .anl-stop__tr').map(t => t.textContent))
+      .toEqual(['Je regarde la pluie', 'J’attends à la gare'])
+    expect($('.anl-desk__rail .anl-stop__tr').getAttribute('lang')).toBe('fr')
+    // Under the Japanese, inside the stop, the time beside both.
+    const stop = $$('.anl-desk__rail .anl-stop')[1]
+    expect(stop.querySelector('.anl-stop__tr').getBoundingClientRect().top)
+      .toBeGreaterThan(stop.querySelector('.anl-stop__text').getBoundingClientRect().bottom - 1)
+    expect(stop.getAttribute('aria-label')).toContain('J’attends à la gare')
+    expect(stop.querySelector('.anl-stop__meta .anl-stop__time').textContent).toBe('0:40')
+    // The search reads the translation too.
+    const search = $('.anl-railhead__search')
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(search, 'gare')
+    search.dispatchEvent(new Event('input', { bubbles: true }))
+    await settle()
+    expect($$('.anl-desk__rail .anl-stop__text').map(t => t.textContent)).toEqual(['駅で待つ'])
   })
 })

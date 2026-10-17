@@ -64,7 +64,7 @@ SYSTEM_PROMPT_TEMPLATE = """You are a Japanese language tutor. Given a Japanese 
 - "pos" is a short part-of-speech label (noun, verb, particle, adjective, etc), in {lang_name}.
 - "grammar" has one entry per grammar point listed under the phrase, in the order listed, with "pattern" copied EXACTLY as listed. "note" is ONE sentence, in {lang_name}, saying what that pattern does in THIS phrase -- what it attaches to here and what it adds to the meaning -- not a general definition. An empty list when no points are listed.
 - "translation" is the whole phrase translated into {lang_name}: one natural sentence, as a subtitle would give it, with no notes or alternatives.
-- "explanation" is 2-4 sentences, in {lang_name}, explaining the grammar and nuance of the whole phrase.
+- "explanation" is 2-4 sentences, in {lang_name}, saying how the phrase is BUILT: what its predicate is and what it is said of, what modifies or completes what, and how each conjugated or combined form is put together and what each of its parts adds. Quote the Japanese pieces you name. Never restate, summarise or translate what the phrase says, and make no general remark on its mood or tone: "translation" carries the meaning, the explanation is the construction, and a nuance is named only where a form carries it.
 
 The JSON key names ("words", "surface", "base", "reading", "meaning", "pos",
 "grammar", "pattern", "note", "translation", "explanation") must stay exactly
@@ -121,8 +121,9 @@ def _user_message(phrase: str, points: list[dict], context: str = "") -> str:
 # unchanged. The phrase alone is still what is broken down.
 CONTEXT_INSTRUCTION = (
     "This phrase is one line of a longer text. Break down and translate the phrase alone, "
-    "but use what follows to get its meaning right, and let the explanation say in a sentence "
-    "how it fits there (what it continues, answers or refers to)."
+    "but use what follows to get its meaning right. Where its construction runs across lines "
+    "(a clause the line before leaves open, a subject or object carried over, a sentence the "
+    "next line completes), let the explanation say so in a sentence."
 )
 
 
@@ -226,7 +227,14 @@ def passage_context(texts: list[str], index: int, source: str = "typed") -> str:
 # v5 (plan 161): the prompt asks for the phrase's translation, which the
 # desk analyser prints under a typed or photographed sentence; an entry
 # bought under v4 has none and would never gain one.
-CACHE_VERSION = 5
+#
+# v6 (plan 242): the explanation says how the phrase is built and
+# nothing else (the owner: "the explain button is only for the
+# explanation of how the sentence is built"). Under v5 it opened on a
+# paraphrase of the meaning and closed on its tone -- the translation's
+# job, which every line of a video now has under it -- and an entry
+# bought then would go on saying so.
+CACHE_VERSION = 6
 
 
 def _phrase_key(phrase: str, lang: str, context: str = "") -> str:

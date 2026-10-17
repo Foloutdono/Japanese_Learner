@@ -209,8 +209,8 @@ export function WordRows({ analysis, t, onTokenClick }) {
 //               up top, the explanation, a status legend, then one
 //               TokenCard per Token. No screen draws it today; the
 //               analyzer moved to a stage of its own (plan 073, drawn
-//               since plan 134 by SubtitleLine, WordsList and
-//               FocusCard) and the practice modes to 'rows' (plan
+//               since plan 134 by SubtitleLine and WordsList) and
+//               the practice modes to 'rows' (plan
 //               084), which retired the one-card-at-a-time 'stepper'
 //               the practice modes used to share.
 //   'rows'    — the practice modes' shape (plan 084, numbered as the

@@ -1,7 +1,6 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { WordsList } from './WordsList'
-import { FocusCard } from './FocusCard'
 
 // ── Every word the app holds a card for (plan 148) ───────────────
 // さらば桃源郷真っさらになったんだ: three words the JLPT deck does not
@@ -45,21 +44,5 @@ describe('a word past the course in the analyser', () => {
     expect(byWord['真っさら'].querySelector('.anl-words__word--offdeck')).toBeTruthy()
     // なった is named as the dictionary names it (plan 160).
     expect(byWord['なる'].querySelector('.anl-words__lvl').textContent).toBe('N5')
-  })
-
-  it('goes into a vocab deck from the card in focus', async () => {
-    const mineApp = vi.fn(async () => 1)
-    const mining = {
-      targetFor: () => ({ id: 7, type: 'vocab' }), decksFor: () => [{ id: 7, type: 'vocab', name: 'Anime' }],
-      ensureDeck: vi.fn(), mineApp,
-    }
-    const screen = await render(<FocusCard analysis={ANALYSIS} token={TOKENS[1]} mining={mining} t={T} />)
-    const card = screen.container.querySelector('.anl-focus')
-    expect(card.querySelector('.anl-focus__word').textContent).toBe('桃源郷')
-    expect(card.querySelector('.anl-focus__gloss').textContent).toBe('earthly paradise')
-    expect(card.querySelector('.anl-focus__lvl')).toBeNull()
-    card.querySelector('.anl-focus__add').click()
-    await vi.waitFor(() => expect(mineApp).toHaveBeenCalled())
-    expect(mineApp).toHaveBeenCalledWith({ deckId: 7, source: 'vocab', level: null, rawId: 'vocab_jmdict_2', kind: 'vocab' })
   })
 })
