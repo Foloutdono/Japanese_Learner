@@ -1438,7 +1438,7 @@ const conversationMode = {
   cvsLevelLabel:       'Grade',
   cvsModes:            { choose: 'Choose', translate: 'Translate', free: 'Free talk' },
   cvsEmpty:            'No conversation at this grade yet.',
-  // The station's search (plan 245): the well, its count, and what it
+  // The station's search (plan 246): the well, its count, and what it
   // says when the grade holds nothing of the query.
   cvsSearchPlaceholder: 'Find a scene…',
   cvsCount:            n => (n === 1 ? '1 scene' : `${n} scenes`),

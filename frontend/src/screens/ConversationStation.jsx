@@ -30,7 +30,7 @@ import { MODES, runPath, searchWords, sceneMatches, nearestLevel } from '../doma
 //   the chips    the five grades, the one the scenarios are drawn from;
 //                the learner's own grade first, the way every station
 //                opens on it (ADR 0005: a landmark, never a lock)
-//   the field    the console's second row (plan 245): the search well,
+//   the field    the console's second row (plan 246): the search well,
 //                looking through the grade's scenes (domain/conversation
 //                .sceneMatches) with their count at its end. A grade
 //                that holds none of what was asked is not the end of

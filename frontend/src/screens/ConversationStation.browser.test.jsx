@@ -11,7 +11,7 @@ import { LangProvider } from '../LangContext'
 // platform card with its opening line as its specimen and the
 // learner's record at its end; a card boards the scene ridden the way
 // the band says; the console's field searches the grade, and a grade
-// with none of what was asked points to one that has it (plan 245).
+// with none of what was asked points to one that has it (plan 246).
 // French copy: the lane's.
 
 const apiJson = vi.fn()

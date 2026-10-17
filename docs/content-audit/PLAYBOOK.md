@@ -118,7 +118,7 @@ speaker would say it. What to try to disprove:
 - **the why, the note and the translations**: a rule true of this reply
   but not of the Japanese, a French that agrees with a gender the
   learner may not have;
-- **a variant** (plan 245, the README's "Variants"): a scene placed
+- **a variant** (plan 246, the README's "Variants"): a scene placed
   after another that takes the same errand another way must part from
   it by its second turn, and its title must say how; one that replays
   its base is a duplicate.

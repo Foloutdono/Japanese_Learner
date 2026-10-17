@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { fold, searchWords, sceneMatches, nearestLevel } from './conversation'
 
-// ── The station's search (plan 245) ──────────────────────────────
+// ── The station's search (plan 246) ──────────────────────────────
 // A query is folded as the scenes are: case, accents, full width and
 // the two kana scripts set aside, every word wanted somewhere in the
 // scene's own fields.

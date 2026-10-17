@@ -1147,7 +1147,7 @@ adds no idiom of its own: it is the tour's scene made to answer back.
 - **The station is a console over platform cards.** How the learner
   will answer applies to every scene below, so it is the console's band
   (Choose · Translate · Free talk); the grades are its chips, opening on
-  the learner's own; the search well is its second row (plan 245),
+  the learner's own; the search well is its second row (plan 246),
   asking the grade's scenes for every word typed (their titles,
   situations, errands, roles, places and opening lines, folded for case,
   accents and the two kana scripts), the count at the well's end, and a

@@ -51,7 +51,7 @@ export function linesSaid(lines) {
   return lines.filter(line => line.who === 'me').length
 }
 
-// ── The station's search (plan 245) ──
+// ── The station's search (plan 246) ──
 // A query is read the way a learner types it, so the two sides are
 // folded alike: case and accents set aside (« hôtel » finds Hotel),
 // full width read as half, and katakana as hiragana (こんびに finds

@@ -1404,7 +1404,7 @@ const conversationMode = {
   cvsLevelLabel:       'Niveau',
   cvsModes:            { choose: 'Choisir', translate: 'Traduire', free: 'Libre' },
   cvsEmpty:            'Pas encore de conversation à ce niveau.',
-  // La recherche de la station (plan 245) : le champ, son compte, et ce
+  // La recherche de la station (plan 246) : le champ, son compte, et ce
   // qu'il dit quand le niveau n'a rien de la requête.
   cvsSearchPlaceholder: 'Chercher une scène…',
   cvsCount:            n => (n === 1 ? '1 scène' : `${n} scènes`),
