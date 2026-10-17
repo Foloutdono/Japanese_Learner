@@ -821,8 +821,8 @@ over Today's print of the hour, in one of two ways:
   (`SCROLL`). It comes in with its first line at the reading line and
   moves at one speed, worked out from its own laid-out length, so the
   whole text passes that line at the pace a learner of its level reads
-  (`CPM`: 150 characters a minute at N5 up to 265 at N1, a notch under
-  the first pace, which the owner found a little quick), after a moment
+  (`CPM`: 130 characters a minute at N5 up to 230 at N1, two notches
+  under the first pace, which the owner found quick), after a moment
   to come in (`CH.into`) and before the last line's read (`CH.out`); the
   counter at the head says which sentence is there. The reference also
   leaves a space between phrases; the bank's words are not cut surely

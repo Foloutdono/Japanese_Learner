@@ -23,9 +23,10 @@ import { SITE } from './strings.js'
 export const STYLES = ['scroll', 'along']
 export const HOURS = ['dawn', 'day', 'dusk', 'night']
 // A learner's pace at each level, in characters a minute: the scroll
-// carries the text past the reading line at this pace (a notch under
-// the first one, 180 to 320, which the owner found a little quick).
-export const CPM = { N5: 150, N4: 165, N3: 200, N2: 230, N1: 265 }
+// carries the text past the reading line at this pace (two notches under
+// the first one, 180 to 320, which the owner found quick, and then 150 to
+// 265, still a bit quick).
+export const CPM = { N5: 130, N4: 145, N3: 175, N2: 200, N1: 230 }
 // Readings over the kanji where a learner of the level still needs them.
 const RUBY = new Set(['N5', 'N4', 'N3'])
 // The read-along voice slows for the first two levels, as a card's slow line does.
