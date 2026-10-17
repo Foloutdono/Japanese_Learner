@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 import { DARK, LIGHT, SCALE, FONTS, block } from './tokens.mjs'
 import {
-  SITE_ORIGIN, PAGES, DEFAULT_LANG, APP_ENTRY, BOARD_ENTRY, STORES, CONTACT,
+  SITE_ORIGIN, PAGES, DEFAULT_LANG, APP_ENTRY, BOARD_ENTRY, SIGNIN_ENTRY, STORES, CONTACT,
   PRESENTATION, CLIPS, RHYTHMS, DEFAULT_RHYTHM, sessionKey,
 } from './config.mjs'
 import { LEVELS, EXAM_N5, arrivals, spanOf, kanjiStrokes } from './content.mjs'
@@ -161,7 +161,7 @@ function header(t, other) {
     + `<div class="top__end"><button type="button" class="top__sound" data-sound aria-pressed="true" aria-label="${esc(t.sound)}" title="${esc(t.sound)}" hidden>${SPEAKER}</button>`
     + `<nav class="seg langs" aria-label="${esc(t.langLabel)}">${langs}</nav>`
     + `<a class="top__other" href="${PAGES[other].path}" hreflang="${other}" lang="${other}">${other.toUpperCase()}</a>`
-    + `<a class="ghost top__signin" href="${APP_ENTRY}" data-board>${esc(t.signIn)}</a>`
+    + `<a class="ghost top__signin" href="${SIGNIN_ENTRY}" data-board>${esc(t.signIn)}</a>`
     // The way in, kept in reach once the hero's gate has scrolled away.
     + `<a class="top__board" href="${BOARD_ENTRY}" data-board data-top-board tabindex="-1" aria-hidden="true">${esc(t.board)}</a></div>`
     + '</div></header>'

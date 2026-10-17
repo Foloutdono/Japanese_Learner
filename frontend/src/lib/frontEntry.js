@@ -14,24 +14,35 @@
 // is not read as a second press.
 export const BOARD_PARAM = 'board'
 
+// Se connecter pressed on the landing page: `/app?signin`. Without it the
+// link opened `/app` bare, and the visitor who had asked to sign in was
+// met by the Welcome, a second poster with its own Se connecter, rather
+// than by the sign-in form. App opens the sign-in at once instead, and
+// its ‹ goes back to the page it came from.
+export const SIGNIN_PARAM = 'signin'
+
 const NONE = Object.freeze({ entry: null, back: '/' })
 
 /**
  * What the landing page asked for on this load: `{ entry, back }`, where
- * `entry` is 'board' or null and `back` is the page to return to when
- * the learner backs out of the boarding's first question -- the landing
- * page they came from (its language included), else `/`.
+ * `entry` is 'board', 'signin' or null and `back` is the page to return
+ * to when the learner backs out of the first screen it opened -- the
+ * landing page they came from (its language included), else `/`.
  */
 export function takeEntry(win = typeof window === 'undefined' ? null : window) {
   if (!win) return NONE
   let url
   try { url = new URL(win.location.href) } catch { return NONE }
-  if (!url.searchParams.has(BOARD_PARAM)) return NONE
+  const entry = url.searchParams.has(BOARD_PARAM) ? 'board'
+    : url.searchParams.has(SIGNIN_PARAM) ? 'signin'
+      : null
+  if (!entry) return NONE
   url.searchParams.delete(BOARD_PARAM)
+  url.searchParams.delete(SIGNIN_PARAM)
   try {
     win.history.replaceState(win.history.state, '', url.pathname + url.search + url.hash)
   } catch { /* a browser refusing replaceState: the marker stays, harmlessly */ }
-  return { entry: 'board', back: pageBehind(win.document?.referrer, url.origin) }
+  return { entry, back: pageBehind(win.document?.referrer, url.origin) }
 }
 
 // The landing page's addresses are `/` and one per other language

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { takeEntry, BOARD_PARAM } from './frontEntry'
+import { takeEntry, BOARD_PARAM, SIGNIN_PARAM } from './frontEntry'
 
 // A window with only what takeEntry reads.
 function fakeWindow(href, referrer = '') {
@@ -14,6 +14,12 @@ describe('takeEntry', () => {
   it('reads Board pressed on the landing page, and takes it off the address', () => {
     const win = fakeWindow(`https://tsuji.app/app?${BOARD_PARAM}`, 'https://tsuji.app/')
     expect(takeEntry(win)).toEqual({ entry: 'board', back: '/' })
+    expect(win.history.replaceState).toHaveBeenCalledWith({ kept: true }, '', '/app')
+  })
+
+  it('reads Se connecter pressed on the landing page, and takes it off the address', () => {
+    const win = fakeWindow(`https://tsuji.app/app?${SIGNIN_PARAM}`, 'https://tsuji.app/en')
+    expect(takeEntry(win)).toEqual({ entry: 'signin', back: '/en' })
     expect(win.history.replaceState).toHaveBeenCalledWith({ kept: true }, '', '/app')
   })
 

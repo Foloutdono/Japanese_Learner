@@ -102,5 +102,16 @@ describe('App signed out', () => {
     expect(screen.container.querySelector('.brd-front__promise')).not.toBeNull()
     expect(window.history.state).toBeNull()
   })
+
+  // Se connecter on the landing page (lib/frontEntry.js): the sign-in is
+  // open on arrival, on Login, with no Welcome to press it on again.
+  it('opens the sign-in at once when the landing page asked for it', async () => {
+    window.history.replaceState(null, '', '/app')
+    const screen = await render(<App front={{ entry: 'signin', back: '/' }} />)
+    await settle()
+    expect(screen.container.querySelector('.brd-signin')).not.toBeNull()
+    expect(screen.container.querySelector('.brd-front__promise')).toBeNull()
+    expect(checkedSide(screen)).toBe(-1)
+  })
 })
 
