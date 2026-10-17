@@ -85,6 +85,24 @@ WHERE name = 'boarding_done' AND at >= now() - ({{days}} || ' days')::interval
 GROUP BY 1, 2, 3 ORDER BY 4 DESC;
 
 -- ==== question
+-- title: La carte : champs changés, nom, compte
+-- display: table
+-- size: 12x7
+-- description: boarding_done depuis le plan 246 (la carte est le formulaire) : pour chaque façon dont la carte a été laissée (google = gardée avec Google, link = un lien envoyé à une adresse, already = un compte déjà là, none = un invité), combien d'embarquements ont changé l'objectif, le rythme, l'heure ou les lignes dans leur feuille, et combien de cartes portent un nom. Les valeurs par défaut sont ce que la plupart gardent, ou non.
+SELECT coalesce(props->>'kept', '—') AS "Carte",
+       count(DISTINCT user_id) AS "Apprenants",
+       count(*) FILTER (WHERE (props->>'edited_goal')::boolean) AS "Objectif changé",
+       count(*) FILTER (WHERE (props->>'edited_rhythm')::boolean) AS "Rythme changé",
+       count(*) FILTER (WHERE (props->>'edited_hour')::boolean) AS "Heure changée",
+       count(*) FILTER (WHERE (props->>'edited_lines')::boolean) AS "Lignes changées",
+       count(*) FILTER (WHERE (props->>'named')::boolean) AS "Avec un nom"
+FROM event_log
+WHERE name = 'boarding_done' AND props ? 'kept'
+  AND at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}}
+GROUP BY 1 ORDER BY 2 DESC;
+
+-- ==== question
 -- title: Premier trajet (試乗)
 -- display: table
 -- size: 12x7

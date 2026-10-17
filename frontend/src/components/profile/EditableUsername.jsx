@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { apiFetch } from '../../lib/api'
+import { CARD_NAME_MAX, cardNameLength, cleanCardName } from '../../domain/passCard'
 import { PencilIcon, CrossIcon } from '../ui/Icons'
 
 // Must match backend/routes/profile.py's USERNAME_RE — the backend is
@@ -13,7 +14,13 @@ export const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/
 // Lifted verbatim from ProfileScreen (which imports it back) when the
 // onboarding welcome step needed the same control — the name on your
 // pass is the first thing 窓口 offers to fix.
-export function EditableUsername({ username, session, onChange, t, ground = 'panel' }) {
+//
+// `field` is which name the card's signature is (plan 246): the
+// username, for an account boarded before the card asked for a first
+// name, or `cardName` -- any script, up to CARD_NAME_MAX, and nothing at
+// all an answer (the card then prints its placeholder in the quiet ink).
+export function EditableUsername({ username, session, onChange, t, ground = 'panel', field = 'username' }) {
+  const card = field === 'cardName'
   const [editing, setEditing] = useState(false)
   const [value, setValue]     = useState(username)
   const [error, setError]     = useState(null)
@@ -31,11 +38,12 @@ export function EditableUsername({ username, session, onChange, t, ground = 'pan
   }
 
   function save() {
-    if (!USERNAME_RE.test(value)) {
-      setError(t.usernameInvalid)
+    const next = card ? cleanCardName(value) : value
+    if (card ? cardNameLength(value) > CARD_NAME_MAX : !USERNAME_RE.test(value)) {
+      setError(card ? t.cardNameTooLong(CARD_NAME_MAX) : t.usernameInvalid)
       return
     }
-    if (value === username) { setEditing(false); return }
+    if (next === username) { setEditing(false); return }
 
     setSaving(true)
     setError(null)
@@ -45,14 +53,14 @@ export function EditableUsername({ username, session, onChange, t, ground = 'pan
     // (plan 215): the refusal is decided here, and anything else is
     // the generic line.
     let refused = t.genericError
-    apiFetch('/api/profile', session, { method: 'PATCH', body: JSON.stringify({ username: value }) })
+    apiFetch('/api/profile', session, { method: 'PATCH', body: JSON.stringify({ [field]: next }) })
       .then(r => {
         if (r.status === 409) refused = t.usernameTaken
         if (!r.ok) throw new Error(`profile ${r.status}`)
         return r.json()
       })
       .then(data => {
-        onChange(data.username)
+        onChange(card ? (data.cardName ?? next) : data.username)
         setEditing(false)
       })
       .catch(() => setError(refused))
@@ -66,7 +74,7 @@ export function EditableUsername({ username, session, onChange, t, ground = 'pan
             shortens: a pass prints its holder on one line, and a
             20-character name on a 360px card would otherwise wrap
             under the pencil and grow the card. */}
-        <span className="profile-card__name-text">{username}</span>
+        <span className={`profile-card__name-text${username ? '' : ' profile-card__name-text--empty'}`}>{username || t.brdNamePlaceholder}</span>
         <PencilIcon size={13} className="profile-card__edit-glyph" />
       </button>
     )
@@ -77,7 +85,8 @@ export function EditableUsername({ username, session, onChange, t, ground = 'pan
       <input
         autoFocus
         value={value}
-        maxLength={20}
+        maxLength={card ? CARD_NAME_MAX * 2 : 20}
+        placeholder={card ? t.brdNamePlaceholder : undefined}
         onChange={e => setValue(e.target.value)}
         onKeyDown={e => {
           if (e.key === 'Enter') save()

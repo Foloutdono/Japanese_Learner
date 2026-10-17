@@ -3,16 +3,17 @@ import { render } from 'vitest-browser-react'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── The boarding's contract at phone width (plans 075, 168) ──────
+// ── The boarding's contract at phone width (plans 075, 168, 246) ──
 // The canvas's frame, pinned against the real cascade at 390×844: the
 // foot is docked at the bottom edge with the one filled action full
 // width at 66 px (plan 164's gate), in the same place on every screen;
 // the head is 44 px with a 44 px back button and a 2 px track; the
 // question stands centred over its drawing, the pair on the room's
 // middle (plan 168); every choice is a 44 px target or taller; nothing
-// scrolls sideways; the sign-in stands in the Welcome's place, its
-// segmented control filling its card and its action the same gate. The
-// stores behind the pass are stubbed: this is about the frame.
+// scrolls sideways; the card's sheets keep their targets too (plan
+// 246); the sign-in stands in the Welcome's place, its segmented
+// control filling its card and its action the same gate. The stores
+// behind the card are stubbed: this is about the frame.
 
 vi.mock('./lib/api', () => ({
   api: p => p,
@@ -41,10 +42,10 @@ async function click(root, sel) {
   await settle(20)
 }
 
-async function mountFlow(username = 'Tester') {
+async function mountFlow({ guest = false } = {}) {
   const screen = await render(
     <LangProvider>
-      <BoardingFlow session={{ access_token: 'tok' }} initialProfile={{ username }} onComplete={() => {}} dryRun />
+      <BoardingFlow session={{ access_token: 'tok' }} onComplete={() => {}} guest={guest} dryRun />
     </LangProvider>
   )
   await settle(60)
@@ -53,8 +54,7 @@ async function mountFlow(username = 'Tester') {
 
 // The lane's 844 IS the canvas's artboard, and the frame is 100dvh, so
 // a shorter phone is drawn by shortening the frame: 764 px is a 6.1"
-// Android with its status and navigation bars taking the rest -- the
-// screen the sixth motive was falling off.
+// Android with its status and navigation bars taking the rest.
 async function atHeight(px, fn) {
   const shorter = document.createElement('style')
   shorter.textContent = `.brd { height: ${px}px; }`
@@ -64,12 +64,29 @@ async function atHeight(px, fn) {
 }
 
 const live = root => root.querySelector('.brd__car:not(.brd__car--out)')
+const sheet = () => document.querySelector('.brd-sheet')
+
+// A reader's line to the level, where the gate waits for a pick.
+async function toLevel(screen) {
+  await click(screen.container, '[data-kana="both"]')
+  await settle()
+  expect(screen.container.querySelector('.brd').dataset.step).toBe('level')
+}
+
+async function toCard(screen) {
+  await click(screen.container, '[data-kana="none"]')
+  await settle()
+  await click(screen.container, '[data-action="continue"]')
+  await settle()
+  expect(screen.container.querySelector('.brd').dataset.step).toBe('card')
+}
 
 describe('the boarding at 390×844', () => {
   it('docks the foot with a full-width 52 px action and never scrolls sideways', async () => {
     const screen = await mountFlow()
+    await toLevel(screen)
     const frame = screen.container.querySelector('.brd')
-    const foot = frame.querySelector('.brd__foot')
+    const foot = live(screen.container).querySelector('.brd__foot')
     const action = foot.querySelector('.btn-depart')
     // The frame fills its column (the test container, never wider than the phone).
     expect(Math.round(rect(frame).width)).toBe(Math.round(rect(screen.container).width))
@@ -79,37 +96,24 @@ describe('the boarding at 390×844', () => {
     expect(Math.round(rect(action).width)).toBe(Math.round(rect(foot).width))
     expect(rect(action).height).toBeGreaterThanOrEqual(52)
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
-    // The field is the screen's own control, already focused, 44 px or taller.
-    expect(rect(frame.querySelector('.brd-plate__field')).height).toBeGreaterThanOrEqual(44)
     // Not yet is the gate's outline (plan 164), not the family's 0.45:
     // the button stays at full strength, its fill layer gone and its
-    // edge drawn, the same shape. The field arrives filled with the
-    // account's name, so empty it first.
-    const height = rect(action).height
-    const setValue = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
-    const field = frame.querySelector('.brd-plate__field')
-    setValue.call(field, '')
-    field.dispatchEvent(new Event('input', { bubbles: true }))
+    // edge drawn, the same shape -- no level picked yet.
     await settle(600)
     expect(action.disabled).toBe(true)
     expect(getComputedStyle(action).opacity).toBe('1')
     expect(getComputedStyle(action, '::before').opacity).toBe('0')
     expect(getComputedStyle(action).boxShadow).toContain('inset')
     expect(getComputedStyle(action).animationName).toBe('none')
-    expect(rect(action).height).toBe(height)
   })
 
   // ── 改札, the gate button (plan 164, redrawn in plan 225) ──
-  // The owner's pick D: a 66 px gold pill with a sumi reader at its left
-  // and the word on the pill's centre line; since plan 225 the painted
-  // Practice gate's own, the reader holding a card scanner's mark and a
-  // hairline between it and the word, the pill still. A pick wakes it
-  // with one overshoot, and only a pick -- a Continue that arrives ready
-  // does not pop.
+  // A 66 px gold pill with a sumi reader at its left and the word on the
+  // pill's centre line. A pick wakes it with one overshoot, and only a
+  // pick -- a Continue that arrives ready does not pop.
   it('draws Continue as the gate, and a pick wakes it once', async () => {
     const screen = await mountFlow()
-    await click(screen.container, '[data-action="continue"]')
-    await settle()
+    await toLevel(screen)
     const go = () => live(screen.container).querySelector('[data-action="continue"]')
     expect(go().disabled).toBe(true)
     expect(go().classList.contains('btn-depart--waking')).toBe(false)
@@ -124,7 +128,7 @@ describe('the boarding at 390×844', () => {
     const pill = rect(go())
     expect(Math.abs((word.left + word.right) / 2 - (pill.left + pill.right) / 2)).toBeLessThanOrEqual(1)
 
-    await click(screen.container, '[data-motive="trip"]')
+    await click(screen.container, '[data-level="N4"]')
     expect(go().disabled).toBe(false)
     expect(go().classList.contains('btn-depart--waking')).toBe(true)
     expect(getComputedStyle(go()).animationName).toContain('btn-gate-wake')
@@ -151,8 +155,7 @@ describe('the boarding at 390×844', () => {
 
   it('keeps a 44 px head: the back button, the line with its stops', async () => {
     const screen = await mountFlow()
-    await click(screen.container, '[data-action="continue"]')
-    await settle()
+    await toLevel(screen)
     const head = screen.container.querySelector('.brd__head')
     const back = head.querySelector('button.brd__back')
     const track = head.querySelector('.brd__track')
@@ -160,112 +163,58 @@ describe('the boarding at 390×844', () => {
     expect(Math.round(rect(back).width)).toBe(44)
     expect(Math.round(rect(back).height)).toBe(44)
     expect(rect(head.querySelector('.brd__rail')).height).toBe(2)
-    // One stop per question, the one you stand at a larger ring --
-    // your train -- the ones behind filled, the ones ahead empty.
+    // One stop per question, the one you stand at a larger ring -- your
+    // train -- the ones behind filled, the ones ahead empty: the kana,
+    // the level, the card.
     const stops = [...track.querySelectorAll('.brd__stop')]
+    expect(stops).toHaveLength(3)
     expect(stops).toHaveLength(Number(track.getAttribute('aria-valuemax')))
     const here = track.querySelector('.brd__stop--here')
     expect(Math.round(rect(here).width)).toBe(19)
     expect(track.querySelectorAll('.brd__stop--passed')).toHaveLength(Number(track.getAttribute('aria-valuenow')) - 1)
   })
 
-  // ── The junction (plan 168, the owner's A02) ──
-  // Six reasons at the ends of three rungs off one trunk, each its
-  // pictogram in a ring over its name: one choice each, a thumb's
-  // target, inside the screen and clear of each other.
-  it('hangs the six reasons off the junction, each a target of its own', async () => {
-    const screen = await mountFlow()
-    await click(screen.container, '[data-action="continue"]')
-    await settle()
-    const ways = [...live(screen.container).querySelectorAll('.brd-way')]
-    expect(ways).toHaveLength(6)
-    for (const way of ways) {
-      expect(rect(way).height).toBeGreaterThanOrEqual(44)
-      expect(rect(way).width).toBeGreaterThanOrEqual(44)
-      expect(rect(way).left).toBeGreaterThanOrEqual(0)
-      expect(rect(way).right).toBeLessThanOrEqual(390)
-      expect(way.getAttribute('aria-pressed')).toBe('false')
-    }
-    for (const [i, a] of ways.entries()) {
-      for (const b of ways.slice(i + 1)) {
-        const [p, q] = [rect(a), rect(b)]
-        const apart = p.right <= q.left || q.right <= p.left || p.bottom <= q.top || q.bottom <= p.top
-        expect(apart, `${a.dataset.motive} / ${b.dataset.motive}`).toBe(true)
-      }
-    }
-    // A pick lights its road from the hub, and its ring.
-    await click(screen.container, '[data-motive="live"]')
-    expect(live(screen.container).querySelector('[data-motive="live"]').getAttribute('aria-pressed')).toBe('true')
-    expect(live(screen.container).querySelectorAll('.brd-road--on')).toHaveLength(1)
-    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
-  })
-
-  // The owner's word on the built junction: a name that wraps under its
-  // ring -- "Pour un voyage au Japon" -- stood all but on the ring under
-  // it. A rung between them, on the lane's phone and on a notched one
-  // whose frame is drawn short (the 723 px an iPhone leaves the page).
-  it('keeps a rung between a reason\'s name and the ring under it', async () => {
-    localStorage.setItem('lang', 'fr')
-    try {
-      const screen = await mountFlow()
-      await click(screen.container, '[data-action="continue"]')
-      await settle(900)
-      const clear = () => {
-        const ways = [...live(screen.container).querySelectorAll('.brd-way')]
-        return Math.min(...ways.slice(0, 4).map((way, i) => (
-          rect(ways[i + 2].querySelector('.brd-way__ring')).top - rect(way.querySelector('.brd-way__name')).bottom
-        )))
-      }
-      expect(clear()).toBeGreaterThanOrEqual(12)
-      for (const height of [764, 723]) {
-        await atHeight(height, () => {
-          expect(clear(), `${height} px`).toBeGreaterThanOrEqual(12)
-          // And still nothing scrolls: the sixth reason over the gate.
-          const body = live(screen.container).querySelector('.brd__body')
-          expect(body.scrollHeight, `${height} px`).toBe(body.clientHeight)
-        })
-      }
-    } finally {
-      localStorage.removeItem('lang')
-    }
-  })
-
   // ── The question over its drawing, the pair on the room's middle ──
-  // Plan 168, the owner's word on the built screens: the titles
-  // centred, and not always at the top of the screen. The question is
-  // set centred, a rung (--sp-8) over its drawing, and the two stand as
-  // one block in the middle of the room between the head and the foot --
-  // the room over the question the room under the drawing. A shorter
-  // phone spends that room first, then the rung, down to the body's own
-  // gap, before anything scrolls.
-  it('centres the question over its drawing, and the pair in the room', async () => {
-    const screen = await mountFlow('SilentSamurai6323')
+  // Plan 168, the owner's word on the built screens: the titles centred,
+  // and not always at the top of the screen. The question (and its hint)
+  // is set centred, a rung (--sp-8) over its drawing, and the two stand
+  // as one block in the middle of the room between the frame's top and
+  // the foot. A shorter phone spends that room first, then the rung,
+  // down to the body's own gap, before anything scrolls. The card is
+  // drawn here: it is C's one screen of its own.
+  it('centres the card under its question, and the pair in the room', async () => {
+    const screen = await mountFlow({ guest: true })
+    await toCard(screen)
     const q = () => live(screen.container).querySelector('.brd__q')
+    const hint = () => live(screen.container).querySelector('.brd__hint')
     const body = () => live(screen.container).querySelector('.brd__body')
     const stage = () => live(screen.container).querySelector('.brd__body > .brd__stage')
     const gap = () => parseFloat(getComputedStyle(body()).rowGap)
-    const rung = () => rect(stage()).top - rect(q()).bottom
-    const over = () => rect(q()).top - rect(body()).top
+    const rung = () => rect(stage()).top - rect(hint()).bottom
+    // The card is an arrival: no head, and the room starts a rung under
+    // the frame's top (the body's padding), so the middle is the room's.
+    const over = () => rect(q()).top - rect(body()).top - parseFloat(getComputedStyle(body()).paddingTop)
     const under = () => rect(body()).bottom - rect(stage()).bottom
-    await click(screen.container, '[data-action="continue"]')
     // Past the drawing's arrival: a stage still translated 6 px down is
     // 6 px of overflow that says nothing about the rest state.
     await settle(900)
     expect(getComputedStyle(q()).textAlign).toBe('center')
     expect(Math.round(rung())).toBe(44)
     expect(Math.abs(over() - under())).toBeLessThanOrEqual(1)
-    // Not pinned under the head: the room is spent round the pair.
     expect(over()).toBeGreaterThan(gap())
     expect(body().scrollHeight).toBe(body().clientHeight)
+    // The card at the column's width, inside the phone.
+    const card = rect(live(screen.container).querySelector('.brd-card .pcard'))
+    expect(card.left).toBeGreaterThanOrEqual(0)
+    expect(card.right).toBeLessThanOrEqual(390)
 
-    for (const height of [800, 764, 700]) {
+    for (const height of [764, 700]) {
       await atHeight(height, () => {
-        const ways = [...live(screen.container).querySelectorAll('.brd-way')]
-        expect(ways).toHaveLength(6)
-        // Nothing scrolls, the sixth reason clears the docked action,
-        // and the rung gives way no further than the body's own gap.
+        // Nothing scrolls, the line under the card clears the docked
+        // action, and the rung gives way no further than the body's gap.
         expect(body().scrollHeight, `${height} px`).toBe(body().clientHeight)
-        expect(rect(ways[5]).bottom).toBeLessThanOrEqual(rect(live(screen.container).querySelector('.brd__foot')).top)
+        expect(rect(live(screen.container).querySelector('.brd-keep-line')).bottom)
+          .toBeLessThanOrEqual(rect(live(screen.container).querySelector('.brd__foot')).top)
         expect(rung(), `${height} px`).toBeGreaterThanOrEqual(gap() - 0.5)
         expect(Math.abs(over() - under()), `${height} px`).toBeLessThanOrEqual(1)
       })
@@ -273,44 +222,47 @@ describe('the boarding at 390×844', () => {
   })
 
   // ── The question takes focus, and wears no ring for it ──
-  // The flow moves focus onto the new question at every step so a
-  // screen reader reads it. Chrome matches :focus-visible on a
-  // scripted .focus() whenever the last interaction was a key press,
-  // so answering with Enter drew a gold box around the next question
-  // (`.brd :focus-visible`, two classes, beating the heading's own
-  // `outline: none`) and answering with a thumb drew nothing.
+  // The flow moves focus onto the new question at every step so a screen
+  // reader reads it. Chrome matches :focus-visible on a scripted .focus()
+  // whenever the last interaction was a key press, so answering with
+  // Enter drew a gold box around the next question and answering with a
+  // thumb drew nothing.
   it('rings the choices but never the question it moves focus to', async () => {
     const screen = await mountFlow()
     // A key press first: it is what puts Chrome in the mode that draws
     // the ring at all, and so the premise of everything below.
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }))
-    await click(screen.container, '[data-action="continue"]')
-    await settle()
+    await toLevel(screen)
     const q = live(screen.container).querySelector('.brd__q')
     expect(document.activeElement).toBe(q)
     expect(q.matches(':focus-visible')).toBe(true)
     expect(getComputedStyle(q).outlineStyle).toBe('none')
     // The ring is intact for anything a hand can actually reach.
-    const way = live(screen.container).querySelector('.brd-way')
-    way.focus()
+    const stop = live(screen.container).querySelector('[data-level="N4"]')
+    stop.focus()
     await settle(20)
-    expect(getComputedStyle(way).outlineStyle).toBe('solid')
-    expect(getComputedStyle(way).outlineWidth).toBe('2px')
+    expect(getComputedStyle(stop).outlineStyle).toBe('solid')
+    expect(getComputedStyle(stop).outlineWidth).toBe('2px')
   })
 
-  // ── The name's plate rings gold, inside the clip ──
-  // The cars slide sideways, so `.brd__cars` clips them. The name is
-  // the station's plate now (plan 168): the field draws no ring of its
-  // own, the plate's edge turns gold while the field holds the focus,
-  // and that edge -- 2 px outside the plate -- stands inside the clip.
-  it('rings the name\'s plate in gold while it holds the focus, inside the frame that clips the cars', async () => {
+  // ── The name's plate rings gold, inside the sheet ──
+  // The name is the station's plate (plan 168), now in its sheet (plan
+  // 246): the field draws no ring of its own, the plate's edge turns gold
+  // while the field holds the focus, and that edge -- 2 px outside the
+  // plate -- stands inside the sheet, which scrolls and so clips.
+  it('rings the name\'s plate in gold while it holds the focus, inside the sheet', async () => {
     const screen = await mountFlow()
-    const cars = screen.container.querySelector('.brd__cars')
-    const field = screen.container.querySelector('.brd-plate__field')
+    await toCard(screen)
+    await click(screen.container, '[data-door="name"]')
+    await settle(120)
+    const field = sheet().querySelector('.brd-plate__field')
     const plate = field.closest('.brd-plate')
-    expect(getComputedStyle(cars).overflow).toBe('hidden')
+    field.focus()
+    await settle(20)
     expect(document.activeElement).toBe(field)
     expect(getComputedStyle(field).outlineStyle).toBe('none')
+    // The plate's name at the heading's size: past the 16 px iOS zooms under.
+    expect(parseFloat(getComputedStyle(field).fontSize)).toBeGreaterThan(16)
     const gold = getComputedStyle(plate).boxShadow
     field.blur()
     await settle(20)
@@ -318,23 +270,20 @@ describe('the boarding at 390×844', () => {
     field.focus()
     await settle(20)
     expect(getComputedStyle(plate).boxShadow).toBe(gold)
-    const clip = rect(cars)
+    const clip = rect(sheet())
     const box = rect(plate)
     expect(box.left - clip.left).toBeGreaterThanOrEqual(2)
     expect(clip.right - box.right).toBeGreaterThanOrEqual(2)
+    // The plate stands full in the sheet's width, the gate under it.
+    expect(rect(sheet().querySelector('[data-action="name-save"]')).height).toBeGreaterThanOrEqual(52)
   })
 
   // The kana's answers go on by themselves, so the screen has no foot;
-  // the four stand at the crossing's ends. The pace is four trains on
-  // the departure board, and the hour is the board turned by hand, the
-  // three services under it.
-  it('the kana at the crossing\'s four ends, the pace as four trains, the hour turned on the board', async () => {
+  // the four stand at the crossing's ends. On the card the pace is four
+  // trains on the departure board, and the hour is the board turned by
+  // hand, the three services under it, each in its sheet.
+  it('the kana at the crossing\'s four ends; the pace as four trains and the hour on the board, in their sheets', async () => {
     const screen = await mountFlow()
-    await click(screen.container, '[data-action="continue"]')
-    await settle()
-    await click(screen.container, '[data-motive="trip"]')
-    await click(screen.container, '[data-action="continue"]')
-    await settle()
     expect(live(screen.container).querySelector('.brd__foot')).toBeNull()
     expect(live(screen.container).querySelector('.brd-cross__words')).not.toBeNull()
     const answers = [...live(screen.container).querySelectorAll('.brd-cross__ans')]
@@ -344,47 +293,65 @@ describe('the boarding at 390×844', () => {
       expect(rect(a).left).toBeGreaterThanOrEqual(0)
       expect(rect(a).right).toBeLessThanOrEqual(390)
     }
+    await toCard(screen)
 
-    await click(screen.container, '[data-kana="both"]')
-    await settle()
-    await click(screen.container, '[data-how="pick"]')
-    await click(screen.container, '[data-action="continue"]')
-    await settle()
-    await click(screen.container, '[data-level="N5"]')
-    await click(screen.container, '[data-action="continue"]')
-    await settle()
-    await click(screen.container, '[data-action="continue"]')   // the goal
-    await settle()
-    await click(screen.container, '[data-action="continue"]')   // the lines
-    await settle()
-    const trains = [...live(screen.container).querySelectorAll('.brd-train')]
+    // Every door of the card is a thumb's target: a stop's code is
+    // narrower than a thumb, and its door reaches past it (its ::after),
+    // so the reach is what is measured.
+    for (const door of live(screen.container).querySelectorAll('[data-door]')) {
+      const box = rect(door)
+      const after = getComputedStyle(door, '::after')
+      const out = side => after.content !== 'none' && after.position === 'absolute' ? Math.max(0, -parseFloat(after[side]) || 0) : 0
+      expect(box.width + out('left') + out('right'), door.dataset.door).toBeGreaterThanOrEqual(44)
+      expect(box.height + out('top') + out('bottom'), door.dataset.door).toBeGreaterThanOrEqual(44)
+      expect(box.left, door.dataset.door).toBeGreaterThanOrEqual(0)
+      expect(box.right, door.dataset.door).toBeLessThanOrEqual(390)
+    }
+
+    await click(screen.container, '[data-door="service"]')
+    await settle(120)
+    const trains = [...sheet().querySelectorAll('.brd-train')]
     expect(trains).toHaveLength(4)
     for (const tr of trains) expect(Math.round(rect(tr).height)).toBeGreaterThanOrEqual(56)
-    await click(screen.container, '[data-action="continue"]')
-    await settle()
-    const hours = [...live(screen.container).querySelectorAll('.brd-hour')]
+    expect(rect(sheet()).top).toBeGreaterThanOrEqual(0)
+    sheet().querySelector('[data-rhythm="10"]').click()
+    await settle(120)
+
+    await click(screen.container, '[data-door="hour"]')
+    await settle(120)
+    const hours = [...sheet().querySelectorAll('.brd-hour')]
     expect(hours).toHaveLength(3)
     for (const h of hours) expect(rect(h).height).toBeGreaterThanOrEqual(76)
-    const steps = [...live(screen.container).querySelectorAll('.brd-clock__step')]
+    const steps = [...sheet().querySelectorAll('.brd-clock__step')]
     expect(steps).toHaveLength(4)
     for (const s of steps) {
       expect(Math.round(rect(s).height)).toBe(44)
       expect(rect(s).width).toBeGreaterThanOrEqual(44)
     }
+    expect(rect(sheet()).top).toBeGreaterThanOrEqual(0)
+
+    // The goal's stops and the lines are thumbs' targets too.
+    sheet().querySelector('[data-hour="am"]').click()
+    await settle(120)
+    await click(screen.container, '[data-door="destination"]')
+    await settle(120)
+    for (const g of sheet().querySelectorAll('[data-goal]')) expect(rect(g).height).toBeGreaterThanOrEqual(44)
+    sheet().querySelector('[data-goal="N5"]').click()
+    await settle(120)
+    await click(screen.container, '[data-door="lines"]')
+    await settle(120)
+    for (const l of sheet().querySelectorAll('[data-line]')) expect(rect(l).height).toBeGreaterThanOrEqual(56)
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
   })
 
   // ── The gate, in one place (plan 168) ──
-  // The owner's word on the built screens: the buttons differed from
-  // screen to screen, and they are the feature that matters most. Every
-  // way on is the one gate, the foot's last row -- a quiet way (the
-  // sign-in, Not now, the account already held, the offer) stands over
-  // it, never under -- so the pill stands in the same place at the same
-  // size from Board to the pass, and its word, at the gate's own size,
-  // holds one line beside the reader.
+  // The owner's word on the built screens: every way on is the one gate,
+  // the foot's last row -- a quiet way (the test on the line, the climb's
+  // two ways out) stands over it, never under -- so the pill stands in
+  // the same place at the same size from Board to the card, and its
+  // word, at the gate's own size, holds one line beside the reader.
   it('stands the one gate in the same place on every screen', async () => {
     localStorage.setItem('lang', 'fr')
-    shell.nudge = true
     try {
       const welcome = await render(
         <LangProvider><Welcome onBoard={() => {}} onSignIn={() => {}} /></LangProvider>
@@ -395,12 +362,7 @@ describe('the boarding at 390×844', () => {
       const size = getComputedStyle(board.querySelector('.btn-depart__jp')).fontSize
       await welcome.unmount()
 
-      const screen = await render(
-        <LangProvider>
-          <BoardingFlow session={{ access_token: 'tok' }} initialProfile={{ username: 'Tester' }} onComplete={() => {}} onSignIn={() => {}} guest dryRun />
-        </LangProvider>
-      )
-      await settle(60)
+      const screen = await mountFlow({ guest: true })
       const step = () => screen.container.querySelector('.brd').dataset.step
       const seen = []
       const measure = () => {
@@ -422,40 +384,14 @@ describe('the boarding at 390×844', () => {
       // pill's one overshoot, 540 ms) has let go.
       const on = async sel => { await click(screen.container, sel); await settle(700) }
 
-      measure()                                   // the name, the sign-in over it
-      expect(live(screen.container).querySelector('.brd__foot > [data-action="sign-in"] + .btn-depart--gate')).not.toBeNull()
-      await on('[data-action="continue"]')
-      await on('[data-motive="trip"]')
-      measure()                                   // the reasons
-      await on('[data-action="continue"]')
       await on('[data-kana="both"]')
-      await on('[data-how="pick"]')
-      measure()                                   // choose it or find it
+      await on('[data-level="N4"]')
+      measure()                                   // the level, the test over it
+      expect(live(screen.container).querySelector('.brd__foot > [data-action="level-test"] + .btn-depart--gate')).not.toBeNull()
       await on('[data-action="continue"]')
-      await on('[data-level="N5"]')
-      measure()                                   // the level
-      await on('[data-action="continue"]')
-      measure()                                   // the goal
-      await on('[data-action="continue"]')
-      measure()                                   // the lines
-      await on('[data-action="continue"]')
-      measure()                                   // the rhythm
-      await on('[data-action="continue"]')
-      measure()                                   // the hour
-      await on('[data-action="continue"]')
-      measure()                                   // the nudge, Not now over it
-      expect(live(screen.container).querySelector('.brd__foot > [data-action="not-now"] + .btn-depart--gate')).not.toBeNull()
-      await on('[data-action="not-now"]')
-      measure()                                   // the plan
-      await on('[data-action="continue"]')
-      measure()                                   // the account, the one already held over it
-      expect(live(screen.container).querySelector('.brd__foot > [data-action="account-sign-in"] + .btn-depart--gate')).not.toBeNull()
-      await on('[data-action="account-skip"]')
-      measure()                                   // the pass, the offer over it
-      expect(live(screen.container).querySelector('.brd__foot > [data-action="paywall-open"].brd__link')).not.toBeNull()
-      expect(seen).toEqual(['name', 'why', 'levelHow', 'level', 'goal', 'lines', 'rhythm', 'time', 'nudge', 'plan', 'account', 'pass'])
+      measure()                                   // the card
+      expect(seen).toEqual(['level', 'card'])
     } finally {
-      shell.nudge = false
       localStorage.removeItem('lang')
     }
   })
@@ -470,11 +406,6 @@ describe('the boarding at 390×844', () => {
     const place = rect(welcome.container.querySelector('[data-action="board"]'))
     await welcome.unmount()
     const screen = await mountFlow()
-    await click(screen.container, '[data-action="continue"]')
-    await settle()
-    await click(screen.container, '[data-motive="trip"]')
-    await click(screen.container, '[data-action="continue"]')
-    await settle()
     await click(screen.container, '[data-kana="none"]')
     await settle()
     expect(screen.container.querySelector('.brd').dataset.step).toBe('reveal')
@@ -547,6 +478,8 @@ describe('the boarding at 390×844', () => {
     expect(document.activeElement.type).toBe('email')
     expect(screen.container.querySelector('.brd-front__promise')).toBeNull()
     expect(screen.container.querySelector('[data-action="board-corner"]')).not.toBeNull()
+    // The sign-in mails a link too (plan 246): a thumb's target.
+    expect(rect(screen.container.querySelector('[data-action="sign-in-link"]')).height).toBeGreaterThanOrEqual(44)
   })
 })
 
@@ -555,20 +488,20 @@ describe('the boarding at 390×844', () => {
 // phone's back gesture, Alt+←) left Tsuji from any question and the
 // answers were gone on the way back in. One guard entry now stands in
 // the browser's history while a question is behind the learner: Back
-// steps back one question, answers kept, and from the first question
-// it leaves as it always has.
+// steps back one question, answers kept -- from the card too, which has
+// no ‹ of its own -- and from the first question it leaves as it
+// always has.
 describe('the browser\'s Back in the boarding', () => {
   const popped = () => new Promise(r => window.addEventListener('popstate', () => setTimeout(r, 60), { once: true }))
 
   it('steps back one question at a time, keeping every answer', async () => {
     const start = window.history.length
     const screen = await mountFlow()
-    await click(screen.container, '[data-action="continue"]')        // name → why
+    await toLevel(screen)
+    await click(screen.container, '[data-level="N3"]')
+    await click(screen.container, '[data-action="continue"]')        // level → card
     await settle()
-    await click(screen.container, '[data-motive="trip"]')
-    await click(screen.container, '[data-action="continue"]')        // why → kana
-    await settle()
-    expect(live(screen.container).querySelector('.brd-cross')).not.toBeNull()
+    expect(screen.container.querySelector('.brd').dataset.step).toBe('card')
     // One entry for the whole flow, however deep.
     expect(window.history.length).toBe(start + 1)
 
@@ -576,29 +509,28 @@ describe('the browser\'s Back in the boarding', () => {
     window.history.back()
     await back
     await settle()
-    // Back on the motives, the one chosen still chosen.
-    expect(live(screen.container).querySelector('[data-motive="trip"]').getAttribute('aria-pressed')).toBe('true')
+    // Back on the line, the level chosen still chosen.
+    expect(live(screen.container).querySelector('[data-level="N3"]').getAttribute('aria-pressed')).toBe('true')
 
     back = popped()
     window.history.back()
     await back
     await settle()
-    // Back on the name, with nothing left behind: the guard is gone.
-    expect(live(screen.container).querySelector('.brd-plate__field')).not.toBeNull()
-    expect(live(screen.container).querySelector('.brd-plate__field').value).toBe('Tester')
+    // Back on the kana, with nothing left behind: the guard is gone.
+    expect(live(screen.container).querySelector('[data-kana="both"]').getAttribute('aria-pressed')).toBe('true')
   })
 
   it('takes the guard out when ‹ brings the learner back to the first question', async () => {
     const screen = await mountFlow()
     const before = window.history.state
-    await click(screen.container, '[data-action="continue"]')        // name → why
+    await click(screen.container, '[data-kana="none"]')              // kana → reveal
     await settle()
     expect(window.history.state).toEqual({ brd: true })
     const back = popped()
-    await click(screen.container, '.brd__back')                      // ‹ to the name
+    await click(screen.container, '.brd__back')                      // ‹ to the kana
     await back
     await settle()
     expect(window.history.state).toEqual(before)
-    expect(live(screen.container).querySelector('.brd-plate__field')).not.toBeNull()
+    expect(live(screen.container).querySelector('.brd-cross')).not.toBeNull()
   })
 })

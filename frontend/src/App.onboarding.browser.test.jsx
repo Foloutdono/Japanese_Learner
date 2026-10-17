@@ -60,7 +60,7 @@ describe('App onboarding gate', () => {
     await settle()
 
     expect(screen.container.querySelector('.brd')).not.toBeNull()
-    expect(screen.container.querySelector('.brd').dataset.step).toBe('name')
+    expect(screen.container.querySelector('.brd').dataset.step).toBe('kana')
     // No router mounted: the flow replaces the app, it doesn't cover it.
     // (.gatehall is the home screen's room — the wall-map redesign's
     // successor to the departure board this assertion used to probe.)
@@ -104,7 +104,7 @@ describe('App onboarding gate', () => {
     await vi.waitFor(() => {
       expect(screen.container.querySelector('.brd')).not.toBeNull()
     }, { timeout: 6000 })
-    expect(screen.container.querySelector('.brd').dataset.step).toBe('name')
+    expect(screen.container.querySelector('.brd').dataset.step).toBe('kana')
   })
 
   // ── 試乗 — the first ride (plan 098) ──

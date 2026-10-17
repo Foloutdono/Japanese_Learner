@@ -18,7 +18,9 @@ import '../index.css'
 // ── 短い車内 — the boarding on a short phone, under a thumb ──────
 // Reported from an Android install (2026-09-09): a pale rail down the
 // right of the welcome, of "why" and of "level", the choices ending
-// 10px short of the button under them. Three things had to be true at
+// 10px short of the button under them (the boarding asked more then:
+// since plan 246 the questions it no longer asks are the card's
+// sheets, held here too). Three things had to be true at
 // once for that, and this file holds two of them down:
 //
 //   1. the app styled `::-webkit-scrollbar` and `scrollbar-width` for
@@ -66,7 +68,8 @@ vi.mock('../lib/supabase', () => ({
     },
   },
 }))
-// The nudge is native-only, and this is the web: seven stops, no eighth.
+// The nudge is native-only, and this is the web: the hour's sheet adds
+// to a calendar instead.
 vi.mock('../lib/platform', () => ({
   isNative: () => false,
   canNudge: () => false,
@@ -112,12 +115,7 @@ describe('the boarding on a 390x667 handset', () => {
   it('asks every question, and answers, without scrolling', async () => {
     const screen = await render(
       <LangProvider>
-        <BoardingFlow
-          session={{ access_token: 'tok' }}
-          initialProfile={{ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 }}
-          onComplete={vi.fn()}
-          dryRun
-        />
+        <BoardingFlow session={{ access_token: 'tok' }} onComplete={vi.fn()} guest dryRun />
       </LangProvider>
     )
     const over = {}
@@ -125,46 +123,39 @@ describe('the boarding on a 390x667 handset', () => {
       await settle()
       over[stepOf(screen)] = overflowOf(screen)
     }
+    // A sheet is its own scroll (index.css, `.sheet`): one that ran past
+    // the handset would be read a row at a time over the card.
+    async function recordSheet(open, kind) {
+      await click(screen, open)
+      await settle(500)
+      const sheet = document.querySelector(`.brd-sheet--${kind}`)
+      expect(sheet, kind).toBeTruthy()
+      over[`sheet:${kind}`] = sheet.scrollHeight - sheet.clientHeight
+      document.querySelector('.scrim').click()
+      await settle(200)
+      expect(document.querySelector('.brd-sheet'), `${kind} shut`).toBeNull()
+    }
 
-    await record()                                    // name
-    await click(screen, '[data-action="continue"]')
-    await record()                                    // why
-    await click(screen, '[data-motive="trip"]')
-    await click(screen, '[data-action="continue"]')
     await record()                                    // kana
     // Both scripts -> the level list rather than the reveal. The level
     // is the longest list in the boarding: the novice and all five
     // stops, six rows each carrying a code, a name and a line of
-    // prose. It is the case that failed, and the goal behind it is the
+    // prose. It is the case that failed, and the goal's sheet is the
     // same rows, one fewer.
     await click(screen, '[data-kana="both"]')
-    await record()                                    // choose it or find it
-    await click(screen, '[data-how="pick"]')
-    await click(screen, '[data-action="continue"]')
     await record()                                    // level
     await click(screen, '[data-level="novice"]')
     await click(screen, '[data-action="continue"]')
-    await record()                                    // goal
-    await click(screen, '[data-goal="N5"]')
-    await click(screen, '[data-action="continue"]')
-    await record()                                    // lines
-    await click(screen, '[data-action="continue"]')
-    await record()                                    // rhythm
-    await click(screen, '[data-action="continue"]')
-    await record()                                    // time
-    await click(screen, '[data-action="continue"]')
-
-    // No Building since plan 168: the plan arrives under the arrival
-    // signboard, which any tap sends on its way.
-    expect(stepOf(screen)).toBe('plan')
-    await settle(200)
-    window.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
-    await record()                                    // plan
-    await click(screen, '[data-action="continue"]')
-    await record()                                    // pass
+    await record()                                    // card
+    await recordSheet('[data-door="destination"]', 'goal')
+    await recordSheet('[data-door="service"]', 'rhythm')
+    await recordSheet('[data-door="hour"]', 'hour')
+    await recordSheet('[data-door="lines"]', 'lines')
+    await recordSheet('[data-door="name"]', 'name')
+    await recordSheet('[data-action="keep"]', 'account')
 
     expect(Object.keys(over)).toEqual(
-      ['name', 'why', 'kana', 'levelHow', 'level', 'goal', 'lines', 'rhythm', 'time', 'plan', 'pass'])
+      ['kana', 'level', 'card', 'sheet:goal', 'sheet:rhythm', 'sheet:hour', 'sheet:lines', 'sheet:name', 'sheet:account'])
     expect(Object.entries(over).filter(([, px]) => px > 0)).toEqual([])
   }, 90000)
 
@@ -182,21 +173,12 @@ describe('the boarding on a 390x667 handset', () => {
     }))
     const screen = await render(
       <LangProvider>
-        <BoardingFlow
-          session={{ access_token: 'tok' }}
-          initialProfile={{ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 }}
-          onComplete={vi.fn()}
-          dryRun
-        />
+        <BoardingFlow session={{ access_token: 'tok' }} onComplete={vi.fn()} dryRun />
       </LangProvider>
     )
     await settle()
-    await click(screen, '[data-action="continue"]')
-    await click(screen, '[data-motive="trip"]')
-    await click(screen, '[data-action="continue"]')
     await click(screen, '[data-kana="both"]')
-    await click(screen, '[data-how="test"]')
-    await click(screen, '[data-action="continue"]')
+    await click(screen, '[data-action="level-test"]')
     await settle()
     expect(stepOf(screen)).toBe('test')
     expect(screen.container.querySelectorAll('.brd__car:not(.brd__car--out) .mcq-row')).toHaveLength(4)
@@ -208,19 +190,9 @@ describe('the boarding on a 390x667 handset', () => {
   it('reads the reveal without scrolling', async () => {
     const screen = await render(
       <LangProvider>
-        <BoardingFlow
-          session={{ access_token: 'tok' }}
-          initialProfile={{ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 }}
-          onComplete={vi.fn()}
-          dryRun
-        />
+        <BoardingFlow session={{ access_token: 'tok' }} onComplete={vi.fn()} dryRun />
       </LangProvider>
     )
-    await settle()
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    await click(screen, '[data-motive="trip"]')
-    await click(screen, '[data-action="continue"]')
     await settle()
     await click(screen, '[data-kana="hiragana"]')
     await settle()

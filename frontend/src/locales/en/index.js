@@ -23,6 +23,12 @@ const auth = {
   authCheckFields:       'Check your email address and your password.',
   authSignupDisabled:    'Sign-ups are closed for now.',
   authLinkExpired:       'This link has expired or was already used. Try signing in; if that fails, start again to get a new one.',
+  // A sign-in link (plan 246): a card kept by a link has no password, and
+  // a forgotten password finds its door here.
+  authLinkSend:          'Email me a sign-in link',
+  authLinkSent:          (email) => `Link sent to ${email}. Open it on this device.`,
+  authLinkNoAccount:     'No card is kept at that address.',
+  authLinkNeedsEmail:    'Type your address, then ask for the link.',
 }
 
 // ── Landing screen ────────────────────────────────────────
@@ -2384,7 +2390,7 @@ const boarding = {
   brdGoalHintStart: 'Every stop is ahead of you.',
   brdNextStop: 'Next stop',
   // The lines: what to learn. The kana are not a row -- every ticket
-  // rides them -- so the hint says so (components/boarding/LinesStep.jsx).
+  // rides them -- so the lines' sheet says so (components/boarding/CardSheets.jsx).
   brdLinesQ: 'What do you want to learn?',
   brdLinesHint: 'The kana ride on every ticket. Pick any of the rest.',
   brdLinesNone: 'Pick at least one line.',
@@ -2533,7 +2539,7 @@ const boarding = {
   brdBuildingAria: 'Building your journey',
   // 机 (plan 140): the stops on the desk's column, one per question --
   // the part of the boarding each answers, as the line prints it.
-  brdStop: { name: 'Name', why: 'Why', kana: 'Kana', level: 'Level', goal: 'Goal', lines: 'Lines', rhythm: 'Rhythm', time: 'Departure', nudge: 'Reminder' },
+  brdStop: { name: 'Name', why: 'Why', kana: 'Kana', level: 'Level', goal: 'Goal', lines: 'Lines', rhythm: 'Rhythm', time: 'Departure', nudge: 'Reminder', card: 'Card' },
   brdArrivalTitle: 'Your plan',
   brdPlanQ: (name) => `Your plan is ready, **${name}**.`,
   brdFor: { studies: 'for your studies', fun: 'for the fun of it', trip: 'for your trip', live: 'for your life in Japan', friends: 'for your friends', other: 'for yourself' },
@@ -2584,6 +2590,38 @@ const boarding = {
   brdTrainAt: (today, time) => `Your train · ${today ? 'today' : 'tomorrow'}, **${time}**, then every day`,
   brdArriveIn: (days, every, time) => `${days === 1 ? '**tomorrow**' : `in **${days} days**`}, ${every} at ${time}`,
   brdForLine: (purpose, promise) => `${purpose.charAt(0).toUpperCase()}${purpose.slice(1)}: **${promise.charAt(0).toLowerCase()}${promise.slice(1)}**.`,
+  // The card is the form (plan 246): the card filled in, its fields
+  // doors, a sheet a field.
+  brdCardQ: 'Your card, filled in for you.',
+  brdCardHint: 'Tap a field to change it.',
+  brdIssue: 'Issue my card',
+  brdLevelTest: 'Not sure? The test places you',
+  brdKeepDevice: 'On this device only',
+  brdKeepGo: 'Keep my card',
+  brdKeepSent: (email) => `Link sent to ${email}`,
+  brdKeptGoogle: 'Kept on your Google account',
+  brdKeptEmail: (email) => `Kept · ${email}`,
+  brdKeptAccount: 'Kept on your account',
+  brdSheetGoal: 'Destination',
+  brdSheetRhythm: 'Pace',
+  brdSheetHour: 'Departure',
+  brdSheetLines: 'Lines',
+  brdSheetName: 'Name',
+  brdSheetAccount: 'Account',
+  brdGoalCap: (min) => `at ${min} min a day`,
+  brdNameOptional: 'optional',
+  brdNamePlaceholder: 'Your first name',
+  brdNameNote: 'It is printed on your card.',
+  brdNameSave: 'Save',
+  cardNameTooLong: (n) => `${n} characters at most.`,
+  brdAccountLede: 'Without an account, your card lives on this device alone.',
+  brdLinkNote: 'We send you a link. No password to remember.',
+  brdLinkSend: 'Send my link',
+  brdLater: 'Later',
+  brdRemindAt: (time) => `Remind me at **${time}**`,
+  brdAgendaAdd: 'Add to my calendar',
+  brdAgendaTitle: 'Tsuji · your Japanese train',
+  brdAgendaBody: (min) => `${min} min of Japanese, every day.`,
 }
 
 const ride = {

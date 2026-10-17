@@ -98,10 +98,6 @@ export function bucketFor(min) {
   return 'pm'
 }
 
-/** How a reader of both scripts finds their level (plan 224): they
- *  choose it on the line, or the test finds it. */
-export const LEVEL_HOW = ['pick', 'test']
-
 /** The kana branch sets the level: a reader of both scripts earns the
  *  level list; anyone else is a NOVICE — one script or none is short of
  *  N5, which asks for both kana and ~100 kanji.
@@ -182,6 +178,19 @@ export function approx(n, to) {
 export function kanjiThrough(volumes, level) {
   const upTo = LEVELS.slice(0, LEVELS.indexOf(level) + 1)
   return upTo.reduce((sum, lvl) => sum + (volumes?.kanji?.[lvl] ?? 0), 0)
+}
+
+// The canvas's figures, for the beat before the volumes answer.
+const KANJI_SIGN = { N5: 100, N4: 300, N3: 650, N2: 1000, N1: 2000 }
+
+/** A stop as the lines name it -- the level list, and the card's goal
+ *  sheet (plan 246): its code (the kana's own sign for the novice's),
+ *  its name and what it holds, the kanji counted from the app's own
+ *  volumes once they have answered. */
+export function levelStop(t, lang, volumes, level) {
+  if (level === 'novice') return { key: level, code: 'あ', name: t.brdNovice, desc: t.brdLevelDesc.novice }
+  const kanji = volumes ? approx(kanjiThrough(volumes, level), 50) : KANJI_SIGN[level]
+  return { key: level, code: level, name: t.levelName[level], desc: t.brdLevelDesc[level](kanji.toLocaleString(lang)) }
 }
 
 /** The kana signs an answer already covers, out of the journey's total. */

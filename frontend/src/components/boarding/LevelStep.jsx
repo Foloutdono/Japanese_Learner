@@ -1,6 +1,6 @@
 import { useLang } from '../../LangContext'
-import { LEVELS, approx, goalStops, kanjiThrough } from '../../domain/boarding'
-import { BoardQuestion, Continue } from './BoardFrame'
+import { LEVELS, levelStop } from '../../domain/boarding'
+import { BoardLink, BoardQuestion, Continue } from './BoardFrame'
 import { PickMark } from './BoardOption'
 import { useDesk } from '../../hooks/useDesk'
 import { useBoxSize } from '../../hooks/useBoxWidth'
@@ -13,14 +13,6 @@ import { useBoxSize } from '../../hooks/useBoxWidth'
 // the next one marked; for a learner still short of the kana that is
 // the novice's own stop, which heads their list (domain/boarding.js
 // goalStops).
-
-// The canvas's figures, for the beat before the volumes answer.
-const KANJI_SIGN = { N5: 100, N4: 300, N3: 650, N2: 1000, N1: 2000 }
-
-function kanjiFigure(volumes, level, lang) {
-  const n = volumes ? approx(kanjiThrough(volumes, level), 50) : KANJI_SIGN[level]
-  return n.toLocaleString(lang)
-}
 
 // A level's pick on the desk is its own number (plan 122, owner's
 // call): N5 on 5 ... N1 on 1, the novice -- before N5 -- on 0.
@@ -175,7 +167,6 @@ function ClimbLine({ stops, answers, at = null, value, onChange, label, attr, ca
 // Each stop steps 8px right of the one under it, the line leaning as
 // it climbs.
 const LEVEL_CLIMB = { h: 458, top: 46, rung: 66, foot: 62 }
-const GOAL_CLIMB = { h: 484, top: 46, rung: 70, foot: 68 }
 
 function climbPoints(shape) {
   const stations = LINE.map((_, k) => [20 + 8 * k, shape.top + (LINE.length - 1 - k) * shape.rung])
@@ -240,16 +231,10 @@ function Climb({ shape, stops, answers, at = null, value, onChange, label, attr,
   )
 }
 
-// A stop as the lines name it; the novice's is the kana's own sign in
-// its ring.
+// A stop as the lines name it (domain/boarding levelStop); the novice's
+// is the kana's own sign in its ring.
 function stopOf(t, lang, volumes, level) {
-  return {
-    key: level,
-    code: level === 'novice' ? 'あ' : level,
-    name: level === 'novice' ? t.brdNovice : t.levelName[level],
-    desc: level === 'novice' ? t.brdLevelDesc.novice : t.brdLevelDesc[level](kanjiFigure(volumes, level, lang)),
-    digit: levelDigit(level),
-  }
+  return { ...levelStop(t, lang, volumes, level), digit: levelDigit(level) }
 }
 
 // A level's score on the test (plan 224), as its stop's tag: right out
@@ -264,8 +249,10 @@ function scored(stop, result) {
 // `placed` is the test's verdict when the learner took it (plan 224):
 // the line then says where the answers stopped, each level asked
 // carries its score, and the stop they reach is the pick -- still the
-// learner's to change.
-export function LevelStep({ volumes, value, onChange, onContinue, no = null, placed = null }) {
+// learner's to change. `onTest` is the test as the line's quiet way over
+// the gate (plan 246): « Pas sûr ? Le test te place », where a question
+// of its own used to ask how the level should be found.
+export function LevelStep({ volumes, value, onChange, onContinue, onTest = null, no = null, placed = null }) {
   const { t, lang } = useLang()
   const desk = useDesk()
   const stops = LINE.map(level => scored(stopOf(t, lang, volumes, level), placed))
@@ -304,69 +291,7 @@ export function LevelStep({ volumes, value, onChange, onContinue, no = null, pla
         </div>
       </div>
       <div className="brd__foot">
-        <Continue keys label={t.onbContinue} onClick={onContinue} disabled={!value} data-action="continue" />
-      </div>
-    </>
-  )
-}
-
-// `level` is the learner's own choice, not the level the office
-// stores: the novice is stored at N5 and has not passed it, so N5 is
-// the first stop AHEAD of them. goalStops knows that, and knows the
-// one case where the novice's OWN stop is still ahead -- a learner who
-// cannot read both scripts yet, whose destination may simply be the
-// kana. There is nothing behind such a learner to name, so the hint
-// says the line is whole rather than printing a stop they have not
-// reached.
-//
-// On the desk the goal is drawn on the whole line (ClimbLine): `arrival`
-// is the month the pick is reached in at the ride's pace, hung over it,
-// or null until the volumes that price it have answered.
-export function GoalStep({ volumes, level, kana, value, onChange, onContinue, arrival = null, no = null }) {
-  const { t, lang } = useLang()
-  const desk = useDesk()
-  const ahead = goalStops(level, kana)
-  const fromStart = ahead[0] === 'novice'
-  const from = level === 'novice' ? t.brdNovice : level
-  const tagged = stop => ({ ...stopOf(t, lang, volumes, stop), tag: stop === ahead[0] ? t.brdNextStop : null })
-  return (
-    <>
-      <div className="brd__body">
-        <BoardQuestion hint={desk ? (fromStart ? t.brdGoalHintStart : t.brdGoalHint(from)) : null}>{t.brdGoalQ}</BoardQuestion>
-        <div className="brd__stage">
-          {desk
-            ? (
-              <ClimbLine
-                stops={LINE.map(tagged)}
-                answers={ahead}
-                // Where the learner stands: the stop before the first
-                // one ahead -- the hub, for one short of the kana.
-                at={LINE.indexOf(ahead[0]) - 1}
-                value={value}
-                onChange={onChange}
-                label={t.brdGoalQ}
-                attr="data-goal"
-                call={{ cap: t.statusArrival, fig: arrival ?? (value === 'novice' ? t.brdNovice : value) }}
-                no={no}
-              />
-            )
-            : (
-              <Climb
-                shape={GOAL_CLIMB}
-                stops={LINE.map(tagged)}
-                answers={ahead}
-                at={LINE.indexOf(ahead[0]) - 1}
-                value={value}
-                onChange={onChange}
-                label={t.brdGoalQ}
-                attr="data-goal"
-                note={arrival ? `${t.statusArrival} · ${arrival}` : null}
-                no={no}
-              />
-            )}
-        </div>
-      </div>
-      <div className="brd__foot">
+        {onTest && <BoardLink onClick={onTest} data-action="level-test">{t.brdLevelTest}</BoardLink>}
         <Continue keys label={t.onbContinue} onClick={onContinue} disabled={!value} data-action="continue" />
       </div>
     </>

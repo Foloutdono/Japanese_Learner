@@ -25068,7 +25068,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 }
 .brd-flap--turn { animation: brd-flip 900ms ease-in-out 380ms 1 backwards; }
 /* A drum still spinning: the board lights with all four turning and
-   they stop left to right (components/boarding/TimeStep.jsx). The face
+   they stop left to right (the hour's sheet, CardSheets.jsx). The face
    is changing on its own tick, so the tile only has to say it is not a
    number to read yet — dimmer, and one drum's worth of blur. */
 .brd-flap--spin {
@@ -25231,7 +25231,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 /* The plate's name at the heading rung, past the phone's 1rem floor on
    fields (".field, input:not(…)", 0-3-1): a name that size is already
    past the 16px under which iOS zooms, which is all that floor is for. */
-.brd .brd-plate > input.brd-plate__field {
+.brd .brd-plate > input.brd-plate__field,
+.brd-sheet .brd-plate > input.brd-plate__field {
   flex: 1;
   min-width: 0;
   width: 100%;
@@ -25496,6 +25497,10 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 }
 .brd-climb__rail--ink { stroke: var(--accent2); stroke-width: 9; }
 .brd-climb__hub { position: absolute; left: 12px; top: calc(var(--y, 0) * var(--ys, 1) * 1px); translate: -50% -50%; }
+/* The hub keeps its size as the line closes, its centre the drawing's
+   height less its radius: that radius stays whole under it, or the hub
+   hangs past the drawing and the body scrolls by what is left out. */
+.brd-map.brd-climb { height: calc((var(--h, 0) * var(--ys, 1) + 20 * (1 - var(--ys, 1))) * 1px); }
 .brd-stn {
   position: absolute;
   left: 0;
@@ -26179,6 +26184,11 @@ button.brd-stn { cursor: pointer; }
   .brd-map.brd-cross,
   .brd-map.brd-fan,
   .brd-map.brd-junction { --ys: 1; }
+  /* The line climbing has carried the test over its gate since plan
+     246, a quiet way the foot did not hold before, so it closes
+     further: its rung at 80% is 53px, still clear of a 40px ring and
+     its halo. */
+  .brd-map.brd-climb { --ys: 0.8; }
   .brd-ride { margin-top: var(--sp-6); }
   .brd-held,
   .brd-for { margin-top: var(--sp-5); }
@@ -28193,7 +28203,7 @@ button.brd-stn { cursor: pointer; }
   width: 100%;
   max-width: var(--card-w);
   /* The quiet offer over the one filled action (plan 099's plate),
-     PassStep's own order; the card ride's foot holds the action alone. */
+     the boarding's own order; the card ride's foot holds the action alone. */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -28212,7 +28222,7 @@ button.brd-stn { cursor: pointer; }
    the platforms as a lattice of roundel-and-name in each line's own
    pigment (a line colour is a section's name, never decoration), the
    open-for-now note, and the foot with the quiet offer over the one
-   filled action -- PassStep's own order. */
+   filled action -- the boarding's own order. */
 /* The plate's heading: it captioned 定期券 above it until 2026-09-21
    and stands alone now, so it takes the rung and the ink the term had
    (and loses the negative margin that tucked it under it). */
@@ -31060,6 +31070,270 @@ button.brd-stn { cursor: pointer; }
 
 
 /* ── 191:day ── */
+/* ══ 246 — 乗車, the card is the form ══════════════════════════════
+   The owner's pick C of the boarding's canvas: the card's back, filled
+   in with what most keep, every printed field a door to its sheet
+   (components/boarding/CardStep.jsx, CardSheets.jsx). The card is the
+   app's own (PassBack): what is new here is its stage, its doors' extra
+   marks, the line under it and the sheets' bodies. */
+
+/* The card at the column's width, no wider than its back is drawn at,
+   and under it the one line it cannot print: where it lives. */
+.brd-card__card { align-self: center; width: 100%; max-width: var(--pcard-back-w); }
+.brd-keep-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  column-gap: var(--sp-3);
+  min-height: 44px;
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.4;
+  text-align: center;
+  color: var(--text-secondary);
+}
+.brd-keep-line .svg { flex: none; width: 16px; height: 16px; }
+.brd-keep-line__txt { min-width: 0; overflow-wrap: anywhere; }
+.brd-keep-line__go {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--sp-2);
+  background: none;
+  border: 0;
+  font: inherit;
+  font-weight: 700;
+  color: var(--brd-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.brd-keep-line--kept { color: var(--text-primary); }
+.brd-keep-line--kept .svg { color: var(--accent2); }
+
+/* 初 and あ as a stop's code: the Japanese face, set as the Latin
+   codes are. */
+.pcb__code--jp { font-family: var(--font-jp); letter-spacing: 0; }
+/* The boarding's signature: the panel itself the door to the name's
+   sheet; an empty one prints the placeholder in the quiet ink, as the
+   profile's does. */
+.pcb__sign-door {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 0 var(--sp-4);
+  background: none;
+  border: 0;
+  border-radius: inherit;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+/* The panel is under a thumb's height, and less once the card is
+   fitted to a phone's column: the door reaches past it, as the stops'
+   do, into the strip's own margins. */
+.pcb__sign-door::after { content: ''; position: absolute; inset: calc(-1 * var(--sp-3)) 0; }
+.pcb__sign-name--empty { opacity: 0.45; }
+.profile-card__name-text--empty { font-style: italic; color: var(--text-secondary); }
+
+/* The sign-in's link (plan 246), a quiet way under its fields: a card
+   kept by a link has no password, and a forgotten one had no door. */
+.auth-link {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--sp-3);
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* The sheets portal out of the boarding's frame, so they name its inks
+   again (.brd's own): the boards they borrow are drawn in them. */
+.brd-sheet {
+  --brd-ink: color-mix(in srgb, var(--accent2) 65%, var(--text-primary));
+  --brd-wash: color-mix(in srgb, var(--accent2) 12%, var(--surface));
+  --brd-wash-ink: color-mix(in srgb, var(--accent2) 50%, var(--text-primary));
+  --brd-kana-ink: color-mix(in srgb, var(--line-kana) 70%, var(--text-primary));
+}
+.brd-sheet__lede { margin: 0; font-size: var(--fs-body); line-height: 1.45; }
+.brd-sheet__note { margin: 0; font-size: var(--fs-sm); line-height: 1.4; text-align: center; color: var(--text-secondary); }
+.brd-sheet__field,
+.brd-sheet__ways { display: flex; flex-direction: column; gap: var(--sp-3); }
+/* On the sheet's surface the hours' cells stand on the paper, as they
+   did on the page. */
+.brd-sheet .brd-hour { background: var(--bg-main); }
+
+/* Objectif: the line climbing, a row a stop. The rail runs a row's
+   height between the stops' centres, the ride in the pass's gold from
+   the pick down to where the learner stands (the counts are plain
+   numbers, set by the sheet). */
+.brd-goals { --row: var(--sp-9); position: relative; }
+.brd-goals__list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.brd-goals__rail,
+.brd-goals__ride { position: absolute; left: 16px; translate: -50% 0; }
+.brd-goals__rail { top: calc(var(--row) / 2); width: 2px; height: calc(var(--rows, 0) * var(--row)); background: var(--surface-line); }
+.brd-goals__ride { top: calc(var(--row) / 2 + var(--from, 0) * var(--row)); width: 3px; height: calc(var(--ride, 0) * var(--row)); background: var(--accent2); }
+.brd-goal {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  height: var(--row);
+  padding: 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.brd-goal--here { cursor: default; }
+.brd-goal__dot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--surface);
+  border: 2px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  line-height: 1;
+}
+.brd-goal__dot--jp { font-family: var(--font-jp); font-size: var(--fs-sm); }
+.brd-goal--ride .brd-goal__dot { border-color: var(--accent2); }
+.brd-goal--on .brd-goal__dot { background: var(--gate-gold); border-color: var(--gate-gold); color: var(--text-on-fill); box-shadow: 0 0 0 5px var(--sel-wash); }
+.brd-goal--here .brd-goal__dot { border: 3px solid var(--accent2); color: var(--brd-ink); }
+.brd-goal__txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.brd-goal__top { display: flex; align-items: baseline; gap: var(--sp-3); }
+.brd-goal__name { flex: 1; min-width: 0; font-size: var(--fs-body); font-weight: 700; line-height: 1.25; }
+.brd-goal__date { flex: none; font-size: var(--fs-sm); font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.brd-goal--on .brd-goal__date { color: var(--brd-ink); }
+.brd-goal__desc { overflow: hidden; font-size: var(--fs-sm); line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); }
+.brd-goal--here .brd-goal__desc { font-weight: 700; color: var(--brd-ink); }
+
+/* Lignes: the kana on every ticket, then a check per line in its
+   pigment's ring. */
+.brd-lines__kana { display: flex; align-items: center; gap: var(--sp-4); margin: 0; }
+.brd-lines__disc {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: var(--bg-main);
+  border: 4px solid var(--line-kana);
+  border-radius: var(--r-pill);
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--brd-kana-ink);
+}
+.brd-lines__kana-txt { display: flex; flex-direction: column; font-size: var(--fs-body); }
+.brd-lines__lock { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-sm); color: var(--text-secondary); }
+.brd-lines__lock .svg { width: 13px; height: 13px; }
+.brd-lines {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+  background: var(--bg-main);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+}
+.brd-lines li + li { border-top: 1px solid var(--surface-line); }
+.brd-line {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 64px;
+  padding: var(--sp-3) var(--sp-4);
+  background: none;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.brd-line[data-line="vocab"] { --pig: var(--line-vocab); }
+.brd-line[data-line="kanji"] { --pig: var(--line-kanji); }
+.brd-line[data-line="grammar"] { --pig: var(--line-grammar); }
+.brd-line__ring {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--bg-main);
+  border: 2.5px solid var(--pig);
+  border-radius: var(--r-pill);
+  font-family: var(--font-jp);
+  font-size: var(--fs-title);
+  font-weight: 700;
+  line-height: 1;
+  color: color-mix(in srgb, var(--pig) 70%, var(--text-primary));
+}
+.brd-line__txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.brd-line__name { font-size: var(--fs-body); font-weight: 700; line-height: 1.25; }
+.brd-line__vol { font-size: var(--fs-sm); line-height: 1.3; color: var(--text-secondary); }
+.brd-line[aria-pressed="false"] :is(.brd-line__ring, .brd-line__txt) { opacity: 0.55; }
+/* A check, the lines' and the reminder's alike. */
+.brd-line__chk,
+.brd-remind__chk {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  color: transparent;
+}
+.brd-line__chk .svg,
+.brd-remind__chk .svg { width: 12px; height: 12px; stroke-width: 2.5; }
+:is(.brd-line, .brd-remind)[aria-pressed="true"] :is(.brd-line__chk, .brd-remind__chk) { border-color: var(--accent2); color: var(--accent2); }
+
+/* Départ, on a native shell: the nudge's own switch under the board. */
+.brd-remind {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 52px;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--bg-main);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.brd-remind__txt { font-size: var(--fs-body); }
+.brd-remind__txt strong { font-weight: 700; color: var(--brd-ink); }
+
 /* ══ 終着 — the everyday clear on a phone (plan 191) ════════════════
    ClearPhone (components/dayclear/ClearPhone.jsx), the canvas's Main
    board drawn as it is: its geometry in the board's px, the
@@ -40373,6 +40647,18 @@ button.brd-stn { cursor: pointer; }
     .desk-front__door-btn:hover,
     .desk-front__door-btn:focus-visible { border-color: var(--text-secondary); }
   }
+
+  /* A quiet way over a floor (plan 246, the line's test) stands on the
+     floor's own row, before the way back: the phone's rung over its
+     gate is a row of the paper's height, which a laptop's short window
+     has not got to spare. Set here, after every rule of the floor, the
+     gate and the quiet ways that these refine. */
+  .desk-brd .brd__foot:has(> .brd__link + .desk-brd__floor) { flex-direction: row; align-items: center; gap: var(--sp-5); }
+  .desk-brd .brd__foot > .brd__link:has(+ .desk-brd__floor) { margin-left: auto; }
+  .desk-brd .brd__foot > .brd__link + .desk-brd__floor { flex: 0 1 auto; width: auto; min-width: 0; }
+  /* Sized by its content now, the floor would hold Continue at its
+     words' width: the ticket's is set, and still gives way. */
+  .desk-brd .brd__foot > .brd__link + .desk-brd__floor > .btn-depart:last-child { width: var(--desk-side-w); }
 
   /* ── copied, focused (plan 123) ──
      A reading copied from a desk's page is the word, not the word and

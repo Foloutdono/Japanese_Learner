@@ -35,7 +35,7 @@ def _clean_onboarding_state(user_id: str):
                         daily_departure = NULL, rating_scale = NULL,
                         motive = NULL, kana_known = NULL, reminder_time = NULL,
                         notifications = FALSE, lines = NULL,
-                        reading_pace = NULL
+                        reading_pace = NULL, card_name = NULL
                     WHERE user_id = %s
                     """,
                     (user_id,),
@@ -438,6 +438,78 @@ def test_complete_rejects_bad_boarding_answers(client):
         {"tzOffsetMin": 900},
     ):
         assert client.post("/api/onboarding/complete", json={**base, **bad}).status_code == 422, bad
+
+
+# ── 署名 — the name on the card (plan 246) ───────────────────────
+# The boarding asks for a first name, not a handle: any script, nothing
+# at all an answer, printed on the learner's own card. Never asked reads
+# back as null (the card prints the username, as it did); asked and left
+# empty is '' and prints no name; a caller that does not send it leaves
+# it alone.
+def test_complete_stores_the_card_name_and_the_profile_serves_it(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        assert client.get("/api/profile").json()["cardName"] is None
+        done = client.post("/api/onboarding/complete", json={
+            "jlptLevel": "N5", "dailyNewTarget": 10, "cardName": "  Camille  ",
+        })
+        assert done.status_code == 200, done.text
+        assert done.json()["cardName"] == "Camille"
+        assert client.get("/api/profile").json()["cardName"] == "Camille"
+        # Settings' retake sends no name: the card keeps the one it has.
+        client.post("/api/onboarding/complete", json={"jlptLevel": "N5", "dailyNewTarget": 10})
+        assert client.get("/api/profile").json()["cardName"] == "Camille"
+        # Asked and left empty is an answer of its own.
+        client.post("/api/onboarding/complete", json={"jlptLevel": "N5", "dailyNewTarget": 10, "cardName": ""})
+        assert client.get("/api/profile").json()["cardName"] == ""
+
+
+def test_the_card_name_is_any_script_and_needs_no_uniqueness(client):
+    # Two Camilles are two Camilles: the column is not the username, and
+    # the username is left as it was.
+    with _clean_onboarding_state(DEV_USER_ID):
+        username = client.get("/api/profile").json()["username"]
+        for name in ("さくら", "Jean-Luc", "Zoë Ñúñez", "مریم"):
+            r = client.post("/api/onboarding/complete", json={
+                "jlptLevel": "N5", "dailyNewTarget": 10, "cardName": name,
+            })
+            assert r.status_code == 200, (name, r.text)
+            after = client.get("/api/profile").json()
+            assert after["cardName"] == name
+            assert after["username"] == username
+
+
+def test_the_card_name_is_cleaned_and_held_to_its_length():
+    clean = profile_module.clean_card_name
+    assert clean("  Anne   Marie ") == "Anne Marie"
+    # A tab, a bidi override, a zero-width space: none reaches a card.
+    assert clean("Ka\tito\u202e\u200b") == "Ka ito"
+    # The joiners a script spells names with are kept.
+    assert clean("\u0645\u0647\u200c\u0633\u0627") == "\u0645\u0647\u200c\u0633\u0627"
+    # Composed, so the length counted is the one printed.
+    assert clean("Zoe\u0308") == "Zoë"
+    assert clean("x" * profile_module.CARD_NAME_MAX) == "x" * profile_module.CARD_NAME_MAX
+    with pytest.raises(ValueError):
+        clean("x" * (profile_module.CARD_NAME_MAX + 1))
+
+
+def test_complete_and_patch_refuse_a_name_too_long(client):
+    long = "x" * (profile_module.CARD_NAME_MAX + 1)
+    base = {"jlptLevel": "N5", "dailyNewTarget": 10}
+    assert client.post("/api/onboarding/complete", json={**base, "cardName": long}).status_code == 422
+    assert client.patch("/api/profile", json={"cardName": long}).status_code == 422
+
+
+def test_patch_renames_the_card_alone_and_the_handle_alone(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        username = client.get("/api/profile").json()["username"]
+        r = client.patch("/api/profile", json={"cardName": "Hélène"})
+        assert r.status_code == 200, r.text
+        assert r.json() == {"username": username, "cardName": "Hélène"}
+        after = client.get("/api/profile").json()
+        assert after["cardName"] == "Hélène"
+        assert after["username"] == username
+        # Nothing to change is still a caller's bug.
+        assert client.patch("/api/profile", json={}).status_code == 422
 
 
 # ── The lines: what the learner chose to ride (core/lines.py) ─────

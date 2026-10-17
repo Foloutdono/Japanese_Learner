@@ -9,8 +9,9 @@
 #   POST /api/onboarding/complete         stamp level + pace + onboarded_at
 #                                         (+ the boarding's own answers,
 #                                         plan 075: motive, kana, rhythm,
-#                                         the hour and the nudge; and the
-#                                         lines, core/lines.py)
+#                                         the hour and the nudge; the
+#                                         lines, core/lines.py; and the
+#                                         card's name, plan 246)
 #   GET  /api/onboarding/volumes          per-level item counts (projection)
 #
 # And the first ride (plan 097), the lesson after the boarding:
@@ -44,7 +45,7 @@ from core.auth import get_user_id
 from core.db import db_conn
 from core.lines import clean_lines
 from core.user_level import GOAL_LEVELS, LEVELS, NOVICE_GOAL, note_stored_level, resolve_level
-from routes.profile import _profile_row, apply_kana_rule, apply_level_rule, ensure_profile_row
+from routes.profile import _profile_row, apply_kana_rule, apply_level_rule, clean_card_name, ensure_profile_row
 from routes.reading import _display_seconds, phrase_to_romaji
 from study.furigana import align_sentence
 from routes.vocab import _build_vocab_card
@@ -146,11 +147,20 @@ class CompletePayload(BaseModel):
     # (core/lines.py). Optional like the rest: a client that does not
     # ask leaves NULL, which reads as all three; a replay overwrites.
     lines: list[str] | None = None
+    # 署名 (plan 246): the first name the card prints, '' for none. Absent
+    # (Settings' retake, a client before the card was the form) leaves
+    # the column as it stands; sent, it is written, empty included.
+    cardName: str | None = None
 
     @field_validator("lines")
     @classmethod
     def valid_lines(cls, v: list[str] | None) -> list[str] | None:
         return clean_lines(v)
+
+    @field_validator("cardName")
+    @classmethod
+    def valid_card_name(cls, v: str | None) -> str | None:
+        return None if v is None else clean_card_name(v)
 
     @field_validator("motive")
     @classmethod
@@ -335,7 +345,8 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
                     reminder_time = %s,
                     notifications = %s,
                     lines = %s,
-                    tz_offset_min = COALESCE(%s, tz_offset_min)
+                    tz_offset_min = COALESCE(%s, tz_offset_min),
+                    card_name = CASE WHEN %s THEN %s ELSE card_name END
                 WHERE user_id = %s
                 RETURNING onboarded_at, goal_set_at
                 """,
@@ -353,6 +364,8 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
                     payload.notifications,
                     payload.lines,
                     payload.tzOffsetMin,
+                    payload.cardName is not None,
+                    payload.cardName,
                     user_id,
                 ),
             )
@@ -387,6 +400,7 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
         "reminderTime": payload.reminderTime,
         "notifications": payload.notifications,
         "lines": payload.lines,
+        "cardName": payload.cardName,
     }
 
 

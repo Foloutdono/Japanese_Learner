@@ -7,10 +7,11 @@ import './index.css'
 // ── 音 — first contact speaks the app's sound vocabulary ──────────
 // The boarding was silent but for the 案内 sign's chime. Now each press
 // makes the sound the rest of the app makes for its kind (lib/audio's
-// chimes.js): the gate's departure on every Continue and on Board, the
-// wood pick on an answer, the switch's two step on a line, the hour
-// board's flaps on the hour, the click on ‹ and on the quiet links --
-// once a press, never twice, since a flam reads as one sound hit harder.
+// chimes.js): the gate's departure on every Continue, on Board and on
+// « Émettre ma carte », the wood pick on an answer, the switch's two
+// step on a line, the hour board's flaps on the hour, the click on ‹, on
+// a door of the card (plan 246) and on the quiet links -- once a press,
+// never twice, since a flam reads as one sound hit harder.
 
 const apiJson = vi.hoisted(() => vi.fn())
 const apiJsonWithTimeout = vi.hoisted(() => vi.fn())
@@ -76,7 +77,7 @@ beforeEach(() => {
 async function board() {
   await render(
     <LangProvider>
-      <BoardingFlow session={{ access_token: 'tok' }} initialProfile={{ username: 'Tester' }} onComplete={vi.fn()} onExit={vi.fn()} dryRun />
+      <BoardingFlow session={{ access_token: 'tok' }} onComplete={vi.fn()} onExit={vi.fn()} dryRun />
     </LangProvider>
   )
   await settle(150)
@@ -89,19 +90,12 @@ async function press(sel) {
   await settle()
 }
 
-/** Name → why → kana (both) → level N1 → lines → rhythm → time. */
-async function toTime() {
-  await press('[data-action="continue"]')
-  await press('[data-motive="trip"]')
-  await press('[data-action="continue"]')
+/** Kana (both) → level N1 → the card. */
+async function toCard() {
   await press('[data-kana="both"]')
-  await press('[data-how="pick"]')
-  await press('[data-action="continue"]')
   await press('[data-level="N1"]')
-  await press('[data-action="continue"]')   // → lines (N1: no goal)
-  await press('[data-action="continue"]')   // → rhythm
-  await press('[data-action="continue"]')   // → time
-  expect(stepOf()).toBe('time')
+  await press('[data-action="continue"]')
+  expect(stepOf()).toBe('card')
 }
 
 describe('the Welcome', () => {
@@ -120,29 +114,11 @@ describe('the Welcome', () => {
 })
 
 describe('the questions', () => {
-  it('sounds the gate on Continue and a pick on an answer, one sound a press', async () => {
-    await board()
-    await press('[data-action="continue"]')
-    expect(stepOf()).toBe('why')
-    expect(ui('click-screen-selection')).toBe(1)
-    expect(ui('click-mode-selection')).toBe(0)
-
-    quiet()
-    await press('[data-motive="trip"]')
-    expect(ui('click-mode-selection')).toBe(1)
-    expect(ui('click-screen-selection')).toBe(0)
-  })
-
   it('sounds the departure when the kana answer goes on by itself, and the click on ‹', async () => {
     await board()
-    await press('[data-action="continue"]')
-    await press('[data-motive="trip"]')
-    await press('[data-action="continue"]')
     expect(stepOf()).toBe('kana')
-
-    quiet()
     await press('[data-kana="both"]')
-    expect(stepOf()).toBe('levelHow')
+    expect(stepOf()).toBe('level')
     expect(ui('click-screen-selection')).toBe(1)
     expect(ui('click-mode-selection')).toBe(0)
 
@@ -153,17 +129,32 @@ describe('the questions', () => {
     expect(sound.playUi).not.toHaveBeenCalled()
   })
 
-  it('throws a line with the switch’s two step', async () => {
+  it('sounds a pick on an answer and the gate on Continue, one sound a press', async () => {
     await board()
-    await press('[data-action="continue"]')
-    await press('[data-motive="trip"]')
-    await press('[data-action="continue"]')
     await press('[data-kana="both"]')
-    await press('[data-how="pick"]')
-    await press('[data-action="continue"]')
+
+    quiet()
     await press('[data-level="N1"]')
+    expect(ui('click-mode-selection')).toBe(1)
+    expect(ui('click-screen-selection')).toBe(0)
+
+    quiet()
     await press('[data-action="continue"]')
-    expect(stepOf()).toBe('lines')
+    expect(stepOf()).toBe('card')
+    expect(ui('click-screen-selection')).toBe(1)
+    expect(ui('click-mode-selection')).toBe(0)
+  })
+})
+
+describe('the card', () => {
+  it('clicks on a door, and throws a line with the switch’s two step', async () => {
+    await board()
+    await toCard()
+
+    quiet()
+    await press('[data-door="lines"]')
+    expect(sound.playClick).toHaveBeenCalledTimes(1)
+    expect(sound.playUi).not.toHaveBeenCalled()
 
     quiet()
     await press('[data-line="grammar"]')
@@ -171,49 +162,56 @@ describe('the questions', () => {
     expect(sound.playUi).not.toHaveBeenCalled()
   })
 
+  it('sounds the wood pick on a train, and nothing else', async () => {
+    await board()
+    await toCard()
+    await press('[data-door="service"]')
+
+    quiet()
+    await press('[data-rhythm="20"]')
+    expect(ui('click-mode-selection')).toBe(1)
+    expect(sound.playBoardFlap).not.toHaveBeenCalled()
+    expect(sound.playToggle).not.toHaveBeenCalled()
+  })
+
   it('turns the hour board’s flaps each time the hour moves, and only then', async () => {
     await board()
-    await toTime()
+    await toCard()
+    await press('[data-door="hour"]')
 
     quiet()
     await press('.brd-clock__step')              // the first ▲: an hour later
     expect(sound.playBoardFlap).toHaveBeenCalledTimes(1)
-    await press('[data-hour="pm"]')              // a service: the board turns to it
+    await press('[data-hour="pm"]')              // a service: the board turns to it, and shuts
     expect(sound.playBoardFlap).toHaveBeenCalledTimes(2)
+    await press('[data-door="hour"]')
     await press('[data-hour="pm"]')              // the hour it already shows
     expect(sound.playBoardFlap).toHaveBeenCalledTimes(2)
     expect(sound.playUi).not.toHaveBeenCalled()
   })
-})
 
-describe('the name', () => {
-  it('sounds the gate once when Enter in the field goes on', async () => {
+  it('sounds the gate once when Enter in the name goes on', async () => {
     await board()
-    expect(document.activeElement).toBe(inCar('.brd-plate__field'))
-    await userEvent.keyboard('{Enter}')
+    await toCard()
+    await press('[data-door="name"]')
+    const field = $('.brd-sheet .brd-plate__field')
+    field.focus()
+
+    quiet()
+    await userEvent.keyboard('Aiko{Enter}')
     await settle()
-    expect(stepOf()).toBe('why')
     expect(ui('click-screen-selection')).toBe(1)
+    expect(inCar('.pcb__sign-name').textContent).toBe('Aiko')
   })
-})
 
-describe('the arrival', () => {
-  it('lands the welcome’s coin once on the card, as its count starts', async () => {
+  it('issues the card through the gate, once, with no coin of its own', async () => {
     await board()
-    await toTime()
-    await press('[data-action="continue"]')   // → the plan, under its sign
-    await settle(1200)                        // the sign steps aside
-    expect(stepOf()).toBe('plan')
-    await press('[data-action="continue"]')   // → the pass
-    expect(stepOf()).toBe('pass')
-    expect(sound.playFareTick).not.toHaveBeenCalled()
-    // The card is issued face up and turns over by itself (plan 173):
-    // the count starts on its back, and the coin with it.
-    await settle(500)
-    expect(sound.playFareTick).not.toHaveBeenCalled()
-    await settle(1700)
-    expect(sound.playFareTick).toHaveBeenCalledTimes(1)
+    await toCard()
+
+    quiet()
+    await press('[data-action="issue"]')
     await settle(600)
-    expect(sound.playFareTick).toHaveBeenCalledTimes(1)
+    expect(ui('click-screen-selection')).toBe(1)
+    expect(sound.playFareTick).not.toHaveBeenCalled()
   })
 })

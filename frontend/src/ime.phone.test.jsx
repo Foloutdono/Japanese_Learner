@@ -18,7 +18,7 @@ vi.mock('./lib/audio', async o => ({ ...(await o()), playClick: vi.fn(), playUi:
 
 const { TypeInput } = await import('./components/study/QuizComponents')
 const { default: ReadingsInput } = await import('./components/study/ReadingsInput')
-const { default: NameStep } = await import('./components/boarding/NameStep')
+const { NameSheet } = await import('./components/boarding/CardSheets')
 const { composing } = await import('./lib/keyGuards')
 
 const settle = (ms = 40) => new Promise(r => setTimeout(r, ms))
@@ -45,9 +45,10 @@ const FIELDS = {
     await wrap(<ReadingsInput readings={{ on: [{ reading: 'コウ' }], kun: [{ reading: 'くち' }] }} submitted={false} onSubmit={onSubmit} />)
     return document.querySelector('.readings-input__field')
   },
+  // The card's name (plan 246): its sheet's plate saves on Enter.
   'the boarding name': async onSubmit => {
-    await wrap(<NameStep value="あいこ" onChange={() => {}} onContinue={onSubmit} />)
-    return document.querySelector('.brd-field input, input[autocomplete="nickname"]')
+    await wrap(<NameSheet open onClose={() => {}} value="あいこ" onSave={onSubmit} />)
+    return document.querySelector('.brd-sheet .brd-plate__field')
   },
 }
 

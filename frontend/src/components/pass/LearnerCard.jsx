@@ -33,7 +33,10 @@ export function ProfileCard({ profile, session, onUsernameChange }) {
   const { t } = useLang()
   const { tier, face, back } = usePassData(profile)
   const [side, turn] = useTurn('face')
-  const rename = username => { onUsernameChange(username); refreshSummary() }
+  // The signature is the card's own name where the boarding asked for
+  // one (plan 246), the username where it never did.
+  const field = profile?.cardName != null ? 'cardName' : 'username'
+  const rename = value => { onUsernameChange(value, field); refreshSummary() }
   return (
     <section className="pcard-slot pcard-slot--profile" aria-label={t.passLabel} data-guide="profile.pass">
       <PassCard
@@ -46,7 +49,7 @@ export function ProfileCard({ profile, session, onUsernameChange }) {
             tier={tier}
             data={back}
             onTurn={turn}
-            doors={{ settings: null, onBalance: openBalance, onStatus: showStatus, sign: { session, onChange: rename } }}
+            doors={{ settings: null, onBalance: openBalance, onStatus: showStatus, sign: { session, onChange: rename, field } }}
           />
         )}
       />

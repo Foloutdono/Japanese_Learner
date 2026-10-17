@@ -16,6 +16,26 @@ export function CheckMark({ className = 'svg' }) {
   )
 }
 
+// 乗車 (plan 246): where the card lives, on the line under it -- this
+// device alone, or a link on its way to an address.
+export function DeviceMark() {
+  return (
+    <svg className="svg" viewBox="0 0 24 24" aria-hidden="true" {...stroke}>
+      <rect x="7" y="2.5" width="10" height="19" rx="2" />
+      <path d="M11 18.5h2" />
+    </svg>
+  )
+}
+
+export function MailMark() {
+  return (
+    <svg className="svg" viewBox="0 0 24 24" aria-hidden="true" {...stroke}>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <polyline points="3 7 12 13 21 7" />
+    </svg>
+  )
+}
+
 // 辻 (plan 163): the kana's strip on the lines, a line no answer holds.
 export function LockMark() {
   return (

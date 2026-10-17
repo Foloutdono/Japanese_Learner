@@ -25,6 +25,12 @@ const auth = {
   authCheckFields:       'Vérifie ton adresse e-mail et ton mot de passe.',
   authSignupDisabled:    'Les inscriptions sont fermées pour le moment.',
   authLinkExpired:       'Ce lien a expiré ou a déjà servi. Essaie de te connecter ; sinon, recommence pour en recevoir un nouveau.',
+  // Un lien de connexion (plan 246) : une carte gardée par un lien n’a pas
+  // de mot de passe, et un mot de passe oublié trouve ici sa porte.
+  authLinkSend:          'Recevoir un lien de connexion',
+  authLinkSent:          (email) => `Lien envoyé à ${email}. Ouvre-le sur cet appareil.`,
+  authLinkNoAccount:     'Aucune carte n’est gardée à cette adresse.',
+  authLinkNeedsEmail:    'Écris ton adresse, puis demande le lien.',
 }
 
 // ── Landing screen ────────────────────────────────────────
@@ -2319,8 +2325,8 @@ const boarding = {
   brdGoalHintStart: 'Tous les arrêts sont devant toi.',
   brdNextStop: 'Prochain arrêt',
   // Les lignes : quoi apprendre. Les kana ne sont pas une ligne à
-  // choisir -- chaque billet les emprunte -- l’indication le dit
-  // (components/boarding/LinesStep.jsx).
+  // choisir -- chaque billet les emprunte -- la feuille des lignes le
+  // dit (components/boarding/CardSheets.jsx).
   brdLinesQ: 'Que veux-tu apprendre ?',
   brdLinesHint: 'Les kana sont sur chaque billet. Choisis le reste.',
   brdLinesNone: 'Choisis au moins une ligne.',
@@ -2468,7 +2474,7 @@ const boarding = {
   // L’arrivée : le plan, la carte.
   brdBuildingAria: 'Préparation de ton trajet',
   // 机 (plan 140) : les arrêts de la colonne du bureau, un par question.
-  brdStop: { name: 'Nom', why: 'Pourquoi', kana: 'Kana', level: 'Niveau', goal: 'Objectif', lines: 'Lignes', rhythm: 'Rythme', time: 'Départ', nudge: 'Rappel' },
+  brdStop: { name: 'Nom', why: 'Pourquoi', kana: 'Kana', level: 'Niveau', goal: 'Objectif', lines: 'Lignes', rhythm: 'Rythme', time: 'Départ', nudge: 'Rappel', card: 'Carte' },
   brdArrivalTitle: 'Ton plan',
   brdPlanQ: (name) => `Ton plan est prêt, **${name}**.`,
   brdFor: { studies: 'pour tes études', fun: 'pour le plaisir', trip: 'pour ton voyage', live: 'pour ta vie au Japon', friends: 'pour tes amis', other: 'pour toi' },
@@ -2519,6 +2525,38 @@ const boarding = {
   brdTrainAt: (today, time) => `Ton train · ${today ? 'aujourd’hui' : 'demain'}, **${time}**, puis chaque jour`,
   brdArriveIn: (days, every, time) => `${days === 1 ? '**demain**' : `dans **${days} jours**`}, ${every} à ${time}`,
   brdForLine: (purpose, promise) => `${purpose.charAt(0).toUpperCase()}${purpose.slice(1)} : **${promise.charAt(0).toLowerCase()}${promise.slice(1)}**.`,
+  // La carte est le formulaire (plan 246) : la carte remplie, ses champs
+  // des portes, une feuille par champ.
+  brdCardQ: 'Ta carte, remplie pour toi.',
+  brdCardHint: 'Touche un champ pour le changer.',
+  brdIssue: 'Émettre ma carte',
+  brdLevelTest: 'Pas sûr ? Le test te place',
+  brdKeepDevice: 'Sur cet appareil seulement',
+  brdKeepGo: 'Garder ma carte',
+  brdKeepSent: (email) => `Lien envoyé à ${email}`,
+  brdKeptGoogle: 'Gardée sur ton compte Google',
+  brdKeptEmail: (email) => `Gardée · ${email}`,
+  brdKeptAccount: 'Gardée sur ton compte',
+  brdSheetGoal: 'Objectif',
+  brdSheetRhythm: 'Rythme',
+  brdSheetHour: 'Départ',
+  brdSheetLines: 'Lignes',
+  brdSheetName: 'Nom',
+  brdSheetAccount: 'Compte',
+  brdGoalCap: (min) => `à ${min} min par jour`,
+  brdNameOptional: 'facultatif',
+  brdNamePlaceholder: 'Ton prénom',
+  brdNameNote: 'Il s’imprime sur ta carte.',
+  brdNameSave: 'Valider',
+  cardNameTooLong: (n) => `${n} caractères au plus.`,
+  brdAccountLede: 'Sans compte, ta carte ne vit que sur cet appareil.',
+  brdLinkNote: 'On t’envoie un lien. Pas de mot de passe à retenir.',
+  brdLinkSend: 'Recevoir mon lien',
+  brdLater: 'Plus tard',
+  brdRemindAt: (time) => `Me rappeler à **${time}**`,
+  brdAgendaAdd: 'Ajouter à mon agenda',
+  brdAgendaTitle: 'Tsuji · ton train de japonais',
+  brdAgendaBody: (min) => `${min} min de japonais, chaque jour.`,
 }
 
 const ride = {
