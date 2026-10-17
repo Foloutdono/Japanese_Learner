@@ -31,28 +31,54 @@ def mask(M):
     return np.clip(cv2.GaussianBlur(sky, (0, 0), 0.7), 0, 1)
 
 
-def zone(M):
+class Sky:
+    """Where a painting's clouds are read and how far they drift, in its
+    px: the phone's by default (the desk's is desk.py's)."""
+    drift = DRIFT
+    top = TOP * 2
+    low = LOW * 2
+
+    def carry(self, pre, al, hole, m):
+        """The clouds (premultiplied, and their alpha) carried into the
+        hole, as far as they drift: inpainted. (`m`, the sky's mask, is
+        for a painting that carries them only where the sky is hidden.)"""
+        pre = np.clip(pre * 255 + 0.5, 0, 255).astype(np.uint8)
+        al = np.clip(al * 255 + 0.5, 0, 255).astype(np.uint8)
+        hole = hole.astype(np.uint8) * 255
+        pre = cv2.inpaint(pre, hole, 6, cv2.INPAINT_TELEA).astype(np.float32) / 255
+        al = cv2.inpaint(al, hole, 6, cv2.INPAINT_TELEA).astype(np.float32) / 255
+        return pre, al
+
+    def clear_of(self, z):
+        """The zone less what is not sky to read: the phone's pillars' edges."""
+        z[:, :int(EDGE[0] * 2)] = False
+        z[:, int(EDGE[1] * 2):] = False
+        return z
+
+
+PHONE = Sky()
+
+
+def zone(M, g=PHONE):
     """Where a cloud is read, softened by a pixel: the sky clear of the
     pillars' edges, the lamps' halo and the land's line, whose light
     parts (Fuji's snow) would otherwise be taken for clouds and carried
     off."""
     sky = M['sky']
     H, W = sky.shape
-    z = sky.copy()
-    z[:, :int(EDGE[0] * 2)] = False
-    z[:, int(EDGE[1] * 2):] = False
-    z[:int(TOP * 2)] = False
-    z &= np.arange(H)[:, None] < (M['horizon'][None, :] - LOW * 2)
+    z = g.clear_of(sky.copy())
+    z[:int(g.top)] = False
+    z &= np.arange(H)[:, None] < (M['horizon'][None, :] - g.low)
     return z, np.clip(cv2.GaussianBlur(z.astype(np.float32), (0, 0), 1.0), 0, 1) * sky
 
 
-def rows(M):
+def rows(M, g=PHONE):
     ys = np.nonzero(M['sky'].any(axis=1))[0]
     H = M['sky'].shape[0]
-    return max(0, ys.min() - DRIFT), min(H, ys.max() + 1 + DRIFT)
+    return max(0, ys.min() - g.drift), min(H, ys.max() + 1 + g.drift)
 
 
-def day_clear(rgb, M):
+def day_clear(rgb, M, g=PHONE):
     """The painting's sky without its clouds: each cloud's place filled
     from the clear sky round it, smoothly (the sky is a gradient)."""
     sky = M['sky']
@@ -67,8 +93,8 @@ def day_clear(rgb, M):
     Lb = cv2.GaussianBlur(Lb.reshape(-1, 1).astype(np.float32), (0, 0), 6).ravel()
     cloud = np.clip((L - Lb[:, None] - 0.012) / 0.2, 0, 1) * sky * np.clip((S < 0.3) + 0.3, 0, 1)
     hole = cv2.dilate((cloud > 0.02).astype(np.uint8), np.ones((9, 9), np.uint8)) > 0
-    hole &= zone(M)[0]
-    r0, r1 = rows(M)
+    hole &= zone(M, g)[0]
+    r0, r1 = rows(M, g)
     h = rgb[r0:r1].astype(np.float32).copy()
     hl, w = hole[r0:r1], sky[r0:r1].astype(np.float32)
     # a first guess, each row's clear sky; then the membrane, over sky neighbours only
@@ -88,11 +114,11 @@ def day_clear(rgb, M):
     return out
 
 
-def split(lit, clear, m, M):
+def split(lit, clear, m, M, g=PHONE):
     """The sky they drift over, and the clouds that, over it behind the
     mask `m`, give back `lit`: their colour and alpha, at the scene's full
     size. Outside the zone the sky keeps what `lit` has."""
-    z = zone(M)[1][..., None]
+    z = zone(M, g)[1][..., None]
     clear = clear * z + lit * (1 - z)
     d = lit - clear
     mag = np.abs(d).max(axis=-1)
@@ -102,12 +128,9 @@ def split(lit, clear, m, M):
     shown = np.maximum(s * m, 1e-3)[..., None]
     col = np.where((s > 0)[..., None], np.clip(clear + d / shown, 0, 1), clear).astype(np.float32)
     # carried on past the sky, as far as they drift: premultiplied, inpainted
-    reach = cv2.dilate(M['sky'].astype(np.uint8), np.ones((2 * DRIFT + 1, 2 * DRIFT + 1), np.uint8)) > 0
+    reach = cv2.dilate(M['sky'].astype(np.uint8), np.ones((2 * g.drift + 1, 2 * g.drift + 1), np.uint8)) > 0
     hole = (reach & ~inside).astype(np.uint8) * 255
-    pre = np.clip(col * s[..., None] * 255 + 0.5, 0, 255).astype(np.uint8)
-    al = np.clip(s * 255 + 0.5, 0, 255).astype(np.uint8)
-    pre = cv2.inpaint(pre, hole, 6, cv2.INPAINT_TELEA).astype(np.float32) / 255
-    s2 = cv2.inpaint(al, hole, 6, cv2.INPAINT_TELEA).astype(np.float32) / 255
+    pre, s2 = g.carry(col * s[..., None], s, hole > 0, m)
     s2 = np.where(inside, s, s2 * reach)
     col2 = np.where((s2 > 1e-3)[..., None], np.clip(pre / np.maximum(s2, 1e-3)[..., None], 0, 1), col)
     col2[inside] = col[inside]

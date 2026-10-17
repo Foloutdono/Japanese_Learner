@@ -35001,6 +35001,64 @@ button.brd-stn { cursor: pointer; }
   }
   /* The painting's layers at their own size: they are the scene's units. */
   .pdesk .pgate__layer { width: auto; height: auto; }
+  /* 空 — the sky alive (plan 244b, DeskSky): behind the sky's own mask
+     (desk.py's sky.png), the clouds lifted off it drift --pd-drift units
+     either way from where the painting has them, slow enough to be seen
+     only by a learner who stays; under them the sun's or the moon's glow
+     breathes and the brightest stars catch the light; over them birds
+     cross. The canopy, the wires, the pillars and the land stay in front.
+     The clouds' layer runs --pd-sky-pad units past the scene each side,
+     so a drift never shows its edge. */
+  .pdesk__sky {
+    position: absolute;
+    left: 0;
+    top: calc(var(--pd-sky-top) * 1px);
+    width: calc(var(--pd-w) * 1px);
+    height: calc(var(--pd-sky-h) * 1px);
+    pointer-events: none;
+    mask-image: var(--pd-sky);
+    mask-size: 100% 100%;
+    mask-repeat: no-repeat;
+  }
+  .pdesk__clouds {
+    inset: 0 auto auto calc(var(--pd-sky-pad) * -1px);
+    width: calc((var(--pd-w) + 2 * var(--pd-sky-pad)) * 1px);
+    height: calc(var(--pd-sky-h) * 1px);
+    animation: desk-drift 80s ease-in-out -40s infinite alternate;
+  }
+  .pdesk__clouds.is-still { animation: none; }
+  @keyframes desk-drift {
+    from { transform: translateX(calc(var(--pd-drift) * -1px)); }
+    to { transform: translateX(calc(var(--pd-drift) * 1px)); }
+  }
+  .pdesk-disc {
+    position: absolute;
+    background: radial-gradient(closest-side, var(--pd-glow), transparent);
+    mix-blend-mode: screen;
+    opacity: 0.1;
+  }
+  .pdesk-glint {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    margin: -3.5px 0 0 -3.5px;
+    background: radial-gradient(closest-side, #fff, rgba(255, 255, 255, 0.35) 45%, transparent);
+    opacity: 0;
+  }
+  .pdesk-flock {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+  }
+  .pdesk-bird { position: absolute; overflow: visible; }
+  /* A canopy tube stuttering (DeskFlicker): the canopy's own ink over it. */
+  .pdesk-flicker {
+    position: absolute;
+    background: var(--pd-fill);
+    opacity: 0;
+    pointer-events: none;
+  }
   .pdesk__car {
     inset: calc(var(--pd-car-top) * 1px) auto auto 0;
     width: calc(var(--pd-w) * 1px);
@@ -35269,6 +35327,7 @@ button.brd-stn { cursor: pointer; }
     .pdesk-leaf,
     .pdesk-band,
     .pdesk-leaf__band { transition: none; }
+    .pdesk__clouds { animation: none; }
   }
 
   /* ── the second column (plan 114) ──

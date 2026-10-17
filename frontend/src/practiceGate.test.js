@@ -111,9 +111,41 @@ describe('the desk\'s painted platform on disk', () => {
       expect(DESK.fill[hour].top, hour).toMatch(HEX)
       expect(DESK.fill[hour].side, hour).toMatch(HEX)
     }
-    for (const mask of ['band-car', 'band-car2', 'band-leaf-l', 'band-leaf-r']) {
+    for (const mask of ['band-car', 'band-car2', 'band-leaf-l', 'band-leaf-r', 'sky']) {
       expect(existsSync(new URL(`${mask}.png`, DESK_ROOT)), mask).toBe(true)
     }
+  })
+
+  // plan 244b: the sky alive (DeskSky)
+  it('lifts the clouds off the sky at every hour, carried past the scene as far as they drift', () => {
+    for (const hour of HOURS) {
+      expect(existsSync(new URL(`clouds-${hour}.webp`, DESK_ROOT)), `clouds-${hour}`).toBe(true)
+    }
+    const { top, h, pad, drift } = DESK.sky
+    expect(top).toBeGreaterThanOrEqual(0)
+    expect(top + h).toBeLessThanOrEqual(DESK.car.top + DESK.car.h)
+    expect(drift).toBeGreaterThan(0)
+    expect(drift).toBeLessThanOrEqual(pad)
+  })
+
+  it('names stars and a glow in the sky, never under it', () => {
+    const { top, h } = DESK.sky
+    for (const hour of ['dawn', 'dusk', 'night']) {
+      expect(DESK.stars[hour].length, hour).toBeGreaterThan(0)
+      for (const [x, y, b] of DESK.stars[hour]) {
+        expect(x).toBeGreaterThanOrEqual(0)
+        expect(x).toBeLessThanOrEqual(DESK.scene.w)
+        expect(y).toBeGreaterThanOrEqual(top)
+        expect(y).toBeLessThanOrEqual(top + h)
+        expect(b).toBeGreaterThan(0)
+      }
+      const d = DESK.disc[hour]
+      expect(d.glow, hour).toMatch(HEX)
+      expect(d.y).toBeGreaterThan(top)
+      expect(d.y).toBeLessThan(top + h)
+    }
+    // the night's are the most
+    expect(DESK.stars.night.length).toBeGreaterThan(DESK.stars.dusk.length)
   })
 
   it('keeps what it draws over the painting inside it', () => {
@@ -256,6 +288,8 @@ describe('its styles', () => {
     for (const part of ['.pdesk__train', '.pdesk-leaf', '.pdesk-band']) {
       expect(still.slice(0, still.indexOf('}')), part).toContain(part)
     }
+    // and its clouds where the painting has them
+    expect(still.slice(0, still.indexOf('}\n  }') + 1), '.pdesk__clouds').toMatch(/\.pdesk__clouds \{ animation: none; \}/)
   })
 
   it('keeps the train still under reduced motion', () => {

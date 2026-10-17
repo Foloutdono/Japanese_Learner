@@ -27,11 +27,12 @@ from PIL import Image
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
+import clouds                   # noqa: E402
 import desk_cut as cut          # noqa: E402
 import desk_parts as parts      # noqa: E402
 from hours import Geometry, Lighter, HOUR_ORDER   # noqa: E402
 
-REV = 2
+REV = 3
 FRONT = HERE.parent.parent
 PRINT = FRONT / 'src/components/station/print/print.json'
 OUT = FRONT / 'public/practice/gate/desk'
@@ -52,11 +53,77 @@ class Desk(Geometry):
     towns = ((560, 840, 330, 346, 0.4), (870, 1330, 334, 350, 0.35), (20, 290, 334, 350, 0.25))
     rims = tuple(x for x0, x1 in cut.PILLARS for x in (x0 + 1.5, x1 - 2.5))
     bloom = (5, 15, 36)
+    pillar_knee = 0.3           # the painting's sun lights the pillars' right edge white
     recipe = {
         'night': dict(disc=dict(at=(556, 146), r=11, glow_r=62), stars=900, town=110),
         'dusk': dict(disc=dict(at=(520, 138), r=9, glow_r=40), stars=70, town=46),
         'dawn': dict(disc=dict(at=(232, 326), r=13, glow_r=82), stars=110, town=26),
     }
+
+
+class DeskSky(clouds.Sky):
+    """Where the desk's clouds are read, and how far they drift (px)."""
+    drift = 64                  # the app drifts them DRIFT either way; this is past it
+    top = parts.SKY_TOP + 30    # under the lamps' halo
+    low = 5
+
+    def carry(self, pre, al, hole, m):
+        """The clouds carried along their rows behind what hides the sky
+        (the sign, the pillars, past the scene's sides), each hidden pixel
+        between the nearest it was read at either side: a drift is a
+        slide along the row, and inpainted the sign's rods drew cones down
+        it that a drift brought out. Where the sky shows but no cloud was
+        read (the lamps' halo, the land's line) none is carried, so at
+        rest the sky is the hour's to the pixel."""
+        hole = hole & (m < 0.02)
+        out_p, out_a = pre.copy(), al.copy()
+        cols = np.arange(al.shape[1])
+        for y in np.nonzero(hole.any(axis=1))[0]:
+            known = ~hole[y]
+            if not known.any():
+                continue
+            h = hole[y]
+            out_a[y, h] = np.interp(cols[h], cols[known], al[y, known])
+            for c in range(3):
+                out_p[y, h, c] = np.interp(cols[h], cols[known], pre[y, known, c])
+        return out_p, out_a
+
+    def clear_of(self, z):
+        """Clear of the pillars' painted edges (in a sky padded each side,
+        theirs), and a few px clear of what stands upright in the sky: a
+        sign's pale steel edge, read as a cloud, slid out beside it."""
+        pad = (z.shape[1] - cut.W) // 2
+        p = np.pad(parts.pillars((z.shape[0], cut.W)), ((0, 0), (pad, pad)))
+        z = z & ~(cv2.dilate(p.astype(np.uint8), np.ones((1, 9), np.uint8)) > 0)
+        return cv2.erode(z.astype(np.uint8), np.ones((1, 13), np.uint8)) > 0
+
+
+SKY = DeskSky()
+DRIFT = 48                    # px the app's clouds drift either way (index.css's desk-drift)
+# The stars that twinkle (the app's glints over the brightest the hour drew)
+# and the disc whose glow breathes, at each hour.
+TWINKLE = {'night': 16, 'dusk': 5, 'dawn': 5}
+
+
+def drifting(lit, clear, sky, M):
+    """The sky they drift over and the clouds (clouds.split), the clouds
+    carried SKY.drift px past the scene's two sides, so a drift never
+    shows the scene's edge: the clouds' layer is that much wider each
+    side, and the sky the scene's own width."""
+    d = SKY.drift
+
+    def wide(x):
+        return np.pad(x, ((0, 0), (d, d)) + ((0, 0),) * (x.ndim - 2), mode='edge')
+
+    Mw = {'sky': np.pad(M['sky'], ((0, 0), (d, d))), 'horizon': wide(M['horizon'][None, :])[0]}
+    clear, col, al = clouds.split(wide(lit), wide(clear), np.pad(sky, ((0, 0), (d, d))), Mw, SKY)
+    return clear[:, d:-d], col, al
+
+
+def sky_mask(M):
+    """Where the clouds show: the sky, less the land's soft edge in front of it."""
+    sky = np.clip(cv2.GaussianBlur(M['sky'].astype(np.float32), (0, 0), 0.7), 0, 1)
+    return sky * (1 - M['matte']['alpha'])
 
 
 # What the hour does to a thing it has no part for: the bench, the
@@ -79,6 +146,7 @@ SEEN_THROUGH = 0.94           # what the near glass keeps of the light inside
 MIRROR = {'dawn': 0.34, 'dusk': 0.45, 'night': 0.8}
 GLASS_DIM = 0.66              # the glass gives back less than the wall it mirrors
 STREAK = (7, 3.0)             # px under the far window's top, and half its height
+EDGE = 2                      # px: the near layer's soft edge past a pillar's band
 
 
 def to_f(a):
@@ -180,6 +248,26 @@ def lit_windows(cars, Mc, hour):
     return out
 
 
+def pillars_edged(lit, near_rgb):
+    """The pillars' soft edges at the hour. The near layer's edge is a
+    pixel of the pillar over a pixel of what is behind it: out of the
+    pillar's band, that pixel takes the pillar's lit edge (it kept the
+    day's sky, and stood as a pale line by the pillar at night); and
+    under the band the scene is the pillar too (it kept the day's pillar
+    and floor, which the edge let through)."""
+    band = parts.pillars(lit.shape[:2], (0, cut.PILLAR_FOOT))
+    have = band.copy()
+    for _ in range(EDGE):
+        for step in (1, -1):
+            grow = np.roll(have, step, axis=1) & ~have
+            grow[:, 0 if step == 1 else -1] = False
+            near_rgb[grow] = np.roll(near_rgb, step, axis=1)[grow]
+            have |= grow
+    lit = lit.copy()
+    lit[band] = near_rgb[band]
+    return lit
+
+
 def leaves(car2, al):
     """The shut door's two leaves, cut from car2 where they stand."""
     x0, y0, x1, y1 = cut.DOORWAY
@@ -210,31 +298,56 @@ def main():
     png_mask(bl, out / 'band-leaf-l.png')
     png_mask(br, out / 'band-leaf-r.png')
 
-    def write(hour, bg_rgb, cars, near_rgb):
-        webp(bg_rgb, None, out / f'bg-{hour}.webp')
+    # the clouds, lifted off the sky so they drift behind its mask (clouds.py)
+    sky = sky_mask(M)
+    r0, r1 = (int(r) for r in clouds.rows(M, SKY))
+    png_mask(sky[r0:r1], out / 'sky.png')
+
+    def write(hour, lit, clear, cars, near_rgb):
+        clear, col, al = drifting(lit, clear, sky, M)
+        webp(clear, None, out / f'bg-{hour}.webp')
+        webp(col[r0:r1], al[r0:r1], out / f'clouds-{hour}.webp')
         for name, (rgb, al) in cars.items():
             webp(rgb, al, out / f'{name}-{hour}.webp')
         lf, rt = leaves(cars['car2'][0], None)
         webp(lf, None, out / f'leaf-l-{hour}.webp')
         webp(rt, None, out / f'leaf-r-{hour}.webp')
         webp(near_rgb, near[..., 3], out / f'near-{hour}.webp')
-        return {'top': ink(bg_rgb[:4, 300:1600]), 'side': ink(near_rgb[:600, cut.PILLARS[0][0] + 20:cut.PILLARS[0][0] + 30])}
+        return {'top': ink(lit[:4, 300:1600]), 'side': ink(near_rgb[:600, cut.PILLARS[0][0] + 20:cut.PILLARS[0][0] + 30])}
 
-    fill = {'day': write('day', bg[..., :3], {n: (a[..., :3], a[..., 3]) for n, a in car.items()}, near[..., :3])}
+    day = bg[..., :3]
+    fill = {'day': write('day', day, clouds.day_clear(day, M, SKY),
+                         {n: (a[..., :3], a[..., 3]) for n, a in car.items()}, near[..., :3])}
 
     light = Lighter(json.loads(PRINT.read_text())['hours'], Desk())
     bg_a = np.dstack([bg, np.ones(bg.shape[:2], np.float32)])
+    stars, discs = {}, {}
     for hour in HOUR_ORDER:
-        lit, _ = light.scene(hour, bg_a, M)
-        lit = ambient(lit, M['bench'], hour)
-        lit = sign_lit(lit, bg, M['sign'], hour)
-        cars = lit_windows({name: light.car(hour, a, Mc[name]) for name, a in car.items()}, Mc, hour)
         rgb, _ = light.pillars(hour, near)
         near_rgb = near[..., :3].copy()
         near_rgb[Mn['pillars']] = rgb[Mn['pillars']]
         near_rgb = ambient(near_rgb, Mn['bench'], hour)
         near_rgb = sign_lit(near_rgb, near[..., :3], Mn['sign'], hour)
-        fill[hour] = write(hour, lit, cars, near_rgb)
+
+        def finish(lit):
+            lit = ambient(lit, M['bench'], hour)
+            lit = sign_lit(lit, bg, M['sign'], hour)
+            return pillars_edged(lit, near_rgb)
+
+        # the same stars with the clouds and without them
+        state = light.rng.bit_generator.state
+        light.placed = []
+        lit = finish(light.scene(hour, bg_a, M)[0])
+        light.rng.bit_generator.state = state
+        drawn, light.placed = light.placed, []
+        clear = finish(light.scene(hour, bg_a, M, clouds=False)[0])
+        cars = lit_windows({name: light.car(hour, a, Mc[name]) for name, a in car.items()}, Mc, hour)
+        fill[hour] = write(hour, lit, clear, cars, near_rgb)
+        stars[hour] = [[round(float(x), 1), round(float(y), 1), round(float(b), 2)]
+                       for x, y, b in sorted(drawn, key=lambda st: -st[2])[:TWINKLE[hour]]]
+        d = light.H[hour]['disc']
+        discs[hour] = {'kind': d['kind'], 'x': float(d['at'][0]), 'y': float(d['at'][1]), 'r': float(d['r']),
+                       'glow': ink(d['glow']), 'reach': float(d['glow_r'])}
         print('lit', hour)
 
     x0, y0, x1, y1 = cut.DOORWAY
@@ -248,6 +361,10 @@ def main():
         'pillars': [list(p) for p in cut.PILLARS],
         'floor': cut.FLOOR[0],
         'fill': {hour: fill[hour] for hour in ('dawn', 'day', 'dusk', 'night')},
+        'sky': {'top': r0, 'h': r1 - r0, 'pad': SKY.drift, 'drift': DRIFT},
+        'stars': {hour: stars[hour] for hour in ('dawn', 'dusk', 'night')},
+        'disc': {hour: discs[hour] for hour in ('dawn', 'dusk', 'night')},
+        'lamps': {'rows': list(parts.TUBE_ROWS), 'tubes': [[x0, min(x1, cut.W)] for x0, x1 in cut.LAMPS]},
     }
     DATA.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n')
     for f in sorted(out.iterdir()):

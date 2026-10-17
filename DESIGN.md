@@ -1314,6 +1314,15 @@ Today's column's width (`components/practice/gate/DeskGate`):
   the scene moves on until the clock stands whole, with the sign there it
   is drawn a little larger, the roof giving way, until the clock stands
   wholly under the board.
+- **Its sky lives** (plan 244b, `DeskSky`): a painting is still, a
+  platform is not. Behind the sky's own mask -- the canopy, the wires,
+  the pillars and the land stay in front -- the clouds drift slowly
+  either way from where the painting has them, the brightest stars catch
+  the light, the sun's or the moon's glow breathes, and now and then a
+  few birds cross by day (the geese of 落雁 at dusk; none at night). Each
+  is slow enough to be noticed only by a learner who stays, and every
+  loop but the clouds' is a Web Animation. Under reduced motion the sky
+  is the painting's.
 
 ## Space
 
