@@ -19,13 +19,52 @@ a Mac: iOS is archived on a GitHub macOS runner by fastlane.
    Promote closed → production from the console once the 14 days are met.
 4. **App Store**: the TestFlight build appears under the external group
    after processing; submit it for review from App Store Connect.
-5. **Web** ships on its own: Vercel deploys `main`. The native shells call
-   the web origin, so a backend or API change is live for the apps the
-   moment the web is.
+5. **Web** ships on its own, once a day (below): Vercel deploys
+   `production`. The native shells call the web origin, so a backend or
+   API change is live for the apps the moment the web is.
 
 A pull request or a push to `main` builds a **debug APK** only (the
 `app-debug-apk` artifact) — cheap, and it catches a broken shell before it
 reaches a tag.
+
+## Web: the daily release
+
+Two branches. **`main` is where work lands and is tested; `production` is
+what learners run.** Render (the backend) and Vercel (the frontend) deploy
+`production` only, and `.github/workflows/promote.yml` fast-forwards it to
+`main` once a day at 03:17 UTC (05:17 in Paris), when CI is green on
+`main`'s head and `main` is ahead. So:
+
+- A merge to `main` ships to nobody. Merge as often as you like.
+- Every deploy restarts the one-worker backend, and a learner opening the
+  app meanwhile waits on the boot gate (the `boot_timeout` events in the
+  trail). One restart a day, in the small hours, keeps that off the day.
+- `production` never holds a commit `main` did not hold first, so there is
+  nothing to merge back. Never push to it by hand: the workflow refuses to
+  promote while it holds a commit `main` lacks.
+- **A hotfix** is the same path, quicker: merge it to `main`, then Actions
+  → *Promote to production* → Run workflow (tick *ignore CI* only when the
+  fix cannot wait for it).
+- To hold a day's release back, merge nothing to `main` that you do not
+  want shipped, or disable the workflow; to see what the next release
+  carries: `git log --oneline origin/production..origin/main`.
+- Cut mobile tags (`v*`) from `production`, so a build carries what is live.
+
+Set up once, in the dashboards (the repository cannot do these):
+
+1. Run the workflow once (Actions → *Promote to production* → Run
+   workflow); it creates `production` at `main`'s head.
+2. **Render**: the backend service → Settings → Build & Deploy → Branch →
+   `production`. Optionally Auto-Deploy → *After CI checks pass*.
+3. **Vercel**: the project → Settings → Git → Production Branch →
+   `production`. `main` and every pull request then get preview
+   deployments, which is the place to try a frontend change.
+
+A preview's `/api` is rewritten to the **production** backend and database
+(`vercel.json`), running the code last promoted, so a frontend change that
+needs a new endpoint fails on a preview until the backend ships, and a
+preview's test learner writes real rows. Test backend changes locally (see
+Commands in `CLAUDE.md`) until there is a staging backend.
 
 ## Secrets (repository → Settings → Secrets → Actions)
 
