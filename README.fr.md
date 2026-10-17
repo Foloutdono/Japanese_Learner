@@ -12,7 +12,7 @@
 
 <p align="center">
   <!-- TODO : remplacer par le domaine définitif dès qu’il est en ligne -->
-  <a href="https://japanese-learner-seven.vercel.app"><strong>Essayer Tsuji →</strong></a>
+  <a href="https://tsuji.app"><strong>Essayer Tsuji →</strong></a>
   &nbsp;·&nbsp;
   <a href="README.md">English</a> · <strong>Français</strong>
 </p>
@@ -192,7 +192,7 @@ Tout le contenu est classé par niveau du JLPT :
 ## Essayer Tsuji
 
 <!-- TODO : remplacer par le domaine définitif dès qu’il est en ligne -->
-- **Sur le web** : ouvrez **[japanese-learner-seven.vercel.app](https://japanese-learner-seven.vercel.app)**
+- **Sur le web** : ouvrez **[tsuji.app](https://tsuji.app)**
   dans n’importe quel navigateur récent et créez un compte avec une adresse
   e-mail et un mot de passe, ou avec Google.
 - **L’installer** : Tsuji est une Progressive Web App, qui s’installe comme

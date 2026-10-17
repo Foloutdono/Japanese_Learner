@@ -6,8 +6,8 @@ import { readFileSync } from 'node:fs'
 import { BOARD_PARAM } from '../src/lib/frontEntry.js'
 
 // The web origin the canonical, hreflang, sitemap and share-card URLs
-// are written against. The Vercel origin until a custom domain exists.
-export const SITE_ORIGIN = 'https://japanese-learner-seven.vercel.app'
+// are written against: the custom domain, tsuji.app.
+export const SITE_ORIGIN = 'https://tsuji.app'
 
 // Where each language's page is served: the French page is the site's
 // `/`, the English one `/en`. The files stay under public/landing/ and
