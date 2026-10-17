@@ -1735,7 +1735,7 @@ function hookLayout(c, s, { ask, secs, compact, centred }) {
         if (compact) kicker(c, ask, fr.cx, top, 'center')
         else head.draw(top)
         place(c, b, y, bottom)
-        // The way on to the answer, as the next question says it (plan 241).
+        // The way on to the answer, as the next question says it (plan 243).
         pill(c, weld(c.lang, W.yoursFoot), fr.cx, fr.bottom - 92)
       },
     }
@@ -2093,7 +2093,7 @@ function ctaSlide(c, feature) {
   line.draw(y + edge + room + SP[4] + name.h + SP[2])
   y += ch + gap
   if (showAlso) also(c, ALSO[feature], y)
-  // The way on: the site's address (plan 241), inside the safe area, so Go
+  // The way on: the site's address (plan 243), inside the safe area, so Go
   // is never under the feed's buttons where the card above reaches past it.
   address(ctx, p, fr.x, fr.bottom - btn, fr.w, SITE)
 }

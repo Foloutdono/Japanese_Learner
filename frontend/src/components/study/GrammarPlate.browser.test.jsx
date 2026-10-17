@@ -335,4 +335,46 @@ describe('Construire', () => {
     expect(fix.querySelector('s').textContent).toBe('で')
     expect(fix.querySelector('ins').textContent).toBe('て')
   })
+
+  // Plan 241: です in あしたはテストだ is right -- the translation does
+  // not say which register -- and the card says what the sentence has.
+  it('takes an answer in the other register as right, and says what the sentence itself has', async () => {
+    const copula = {
+      ...card,
+      card_id: 'grammar_N5_です／だ',
+      raw_id: 'grammar_N5_です／だ',
+      grammar: 'です／だ',
+      build: {
+        key: 'tw:2',
+        tr: "Tomorrow's the test.",
+        pieces: [{ furigana: [{ text: 'あしたはテスト' }] }, { gap: 0, size: 1 }, { furigana: [{ text: '。' }] }],
+      },
+    }
+    // What the backend answers (study/grammar_ladder.check_build).
+    apiJson.mockResolvedValue({
+      verdict: 'right',
+      gaps: [{ verdict: 'right', answer: 'です', reading: 'だ', marks: [], said: 'だ', register: 'plain' }],
+      jp: 'あしたはテストだ。',
+      tr: "Tomorrow's the test.",
+      furigana: [{ text: 'あしたはテスト' }, { text: 'だ', highlight: true }, { text: '。' }],
+    })
+    const screen = await mount(<Run card={copula} onDone={() => {}} />)
+    const root = screen.container
+    await screen.getByLabelText('Your answer').fill('desu')
+    root.querySelector('form.gl-entry .btn-primary').click()
+    await settle()
+    expect(root.querySelector('.gl-back__head--ok').textContent).toBe('Right.')
+    expect(root.querySelector('.gl-echo .gl-gap--filled').textContent).toBe('です')
+    expect(root.querySelector('.gl-back__why').textContent).toBe('The sentence says だ: the same, in plain speech.')
+    expect(root.querySelector('.gl-ring__arc--miss')).toBeNull()
+  })
+
+  it('says nothing more when the answer is the sentence’s own', async () => {
+    apiJson.mockResolvedValue(cards.checks.right)
+    const screen = await mount(<Run card={card} onDone={() => {}} />)
+    await screen.getByLabelText('Your answer').fill('tekudasai')
+    screen.container.querySelector('form.gl-entry .btn-primary').click()
+    await settle()
+    expect(screen.container.querySelector('.gl-back__why')).toBeNull()
+  })
 })

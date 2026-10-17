@@ -87,5 +87,9 @@ def sentences_from_cues(cues: list[dict], start: float | None,
                 # knew (study/captions.py, study/word_timing.py); absent
                 # otherwise.
                 **({"word_times": line["words"]} if line.get("words") else {}),
+                # The video's own translation of the cue, {lang: text}
+                # (plan 242, study/line_translate.from_track), on a cue
+                # that stays one line: a piece of one takes none.
+                **({"tr": cue["tr"]} if cue.get("tr") and japanese and len(lines) == 1 else {}),
             })
     return out

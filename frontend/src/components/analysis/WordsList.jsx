@@ -104,6 +104,42 @@ export function WordsFold({ analysis, current, onOpen, open = false, t }) {
   )
 }
 
+// ── 帯 — a video line's words under the sumi (plan 242) ──────────
+// The owner's pick C of the canvas "Tsuji analyser — the desk and
+// Explain": the list that stood under the video beside a card in focus
+// gave its height to the picture, and the words ride one strip under
+// the sumi -- each a chip, the word over its state's rule and its gloss
+// beside it, the one in focus edged in ink -- that puts its word in
+// focus. The panel on the right is the card that follows it.
+export function WordsStrip({ analysis, current, onSelect, t }) {
+  const lang = useLang()?.lang
+  const rows = wordRowsOf(analysis)
+  if (!rows.length) return null
+  return (
+    <div className="anl-strip" role="group" aria-label={t.wordsInSentence}>
+      {rows.map((row, i) => {
+        const head = row.head
+        const { name, reading } = rowName(row)
+        const meaning = wordGloss(head, lang)
+        const on = Boolean(current) && row.tokens.includes(current)
+        return (
+          <button
+            key={i}
+            type="button"
+            className={`anl-strip__chip${on ? ' anl-strip__chip--on' : ''}`}
+            onClick={() => onSelect(row)}
+            aria-current={on || undefined}
+            aria-label={[t.jumpToTokenNamed(row.surface), reading, meaning].filter(Boolean).join(' — ')}
+          >
+            <span className={`anl-words__word anl-words__word--${tokState(head)}`} lang="ja">{name}</span>
+            {meaning && <span className="anl-strip__gloss">{meaning}</span>}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 // ── 札 — the sentence's words on a phone (plan 220, the owner's W2) ──
 // The dock's Words sheet: a card per word, two to a row -- its level in
 // the corner, its reading over it, the word large, its gloss under it,

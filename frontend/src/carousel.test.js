@@ -1399,7 +1399,7 @@ describe('the conversion carousels (plan 234)', () => {
     }
   }))
 
-  it('sends the Fiche hook on to the answer and the call to action on to the site’s address (plan 241)', () => withPath2D(() => {
+  it('sends the Fiche hook on to the answer and the call to action on to the site’s address (plan 243)', () => withPath2D(() => {
     for (const { src, id, lang, p } of some) {
       const where = `${src.id} ${id} ${lang}`
       const slides = deck('plates', p, FORMATS.story, { design: 'fiche' })

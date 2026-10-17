@@ -1034,8 +1034,12 @@ describe('BoardingFlow', () => {
 
     const said = live(screen).textContent
     // The learner's language rides along, for the confirmation mail's
-    // template (lib/guest.js, plan 215).
-    expect(updateUser).toHaveBeenCalledWith({ email: 'patou@gmail.com', password: 'hunter22', data: { lang: 'fr' } })
+    // template (lib/guest.js, plan 215), and the mail's link returns to
+    // the origin the pass was claimed on (lib/oauth.js).
+    expect(updateUser).toHaveBeenCalledWith(
+      { email: 'patou@gmail.com', password: 'hunter22', data: { lang: 'fr' } },
+      { emailRedirectTo: `${window.location.origin}/` },
+    )
     expect(said).not.toContain('""')
     expect(said).toContain(fr.claimEmailUnreachable)
     // The older line steps aside rather than stacking under the new one…
@@ -1064,7 +1068,10 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-action="account-create"]')
     await settle()
 
-    expect(updateUser).toHaveBeenCalledWith({ email: 'patou@gmail.com', password: 'hunter22', data: { lang: 'fr' } })
+    expect(updateUser).toHaveBeenCalledWith(
+      { email: 'patou@gmail.com', password: 'hunter22', data: { lang: 'fr' } },
+      { emailRedirectTo: `${window.location.origin}/` },
+    )
     expect(stepOf(screen)).toBe('pass')
   })
 })

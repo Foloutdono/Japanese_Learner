@@ -368,7 +368,7 @@ function metal(ctx, p, cx, y, label, maxW = Infinity) {
   chevron(ctx, x + SP[7] + tw + SP[4], y + h / 2, arrow, p.onFill)
   return h
 }
-/** The way to the site (plan 241): its address as a browser's bar shows
+/** The way to the site (plan 243): its address as a browser's bar shows
  *  it, a padlock before it and Go, the gate's gold, at its end; as high as
  *  the metal, so a layout that keeps room for one keeps it for the other. */
 function address(ctx, p, x, y, w, site) {
