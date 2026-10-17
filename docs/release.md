@@ -32,8 +32,9 @@ reaches a tag.
 Two branches. **`main` is where work lands and is tested; `production` is
 what learners run.** Render (the backend) and Vercel (the frontend) deploy
 `production` only, and `.github/workflows/promote.yml` fast-forwards it to
-`main` once a day at 03:17 UTC (05:17 in Paris), when CI is green on
-`main`'s head and `main` is ahead. So:
+`main` once a day at 03:17 UTC (05:17 in Paris), to the newest commit of
+`main` whose CI passed (the head, or the last one before a red or still
+running head) when that is ahead of it. So:
 
 - A merge to `main` ships to nobody. Merge as often as you like.
 - Every deploy restarts the one-worker backend, and a learner opening the

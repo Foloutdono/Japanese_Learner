@@ -945,8 +945,8 @@ Frontend calls same-origin `/api/*` FastAPI routes in both dev and prod (Vite pr
 
 - **Two branches, one release a day.** `main` is where work lands and is
   tested; `production` is what Render and Vercel deploy, moved by
-  `.github/workflows/promote.yml` once a day (03:17 UTC) when CI is green on
-  `main`. A merge to `main` ships to no learner, because each backend
+  `.github/workflows/promote.yml` once a day (03:17 UTC) to the newest `main`
+  commit whose CI passed. A merge to `main` ships to no learner, because each backend
   restart shows learners the boot gate. Never push to `production` by hand;
   a hotfix is a merge to `main` and a manual run of the workflow
   (`docs/release.md`, "Web: the daily release").

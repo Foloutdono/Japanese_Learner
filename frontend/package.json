@@ -24,7 +24,9 @@
     "lint:ink": "node scripts/check-ink-ground.mjs",
     "lint:artboards": "node scripts/check-artboards.mjs",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:node": "vitest run --project node",
+    "test:browsers": "vitest run --project browser --project phone --project tablet --project touch --project desktop --project wide --project short"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.1",
