@@ -79,6 +79,7 @@ class Geometry:
     floor = (556, 724)          # the platform's rows, near to far
     stars_y = 268               # no star lower than this
     stars_margin = 52           # px clear of the layer's two sides
+    star = 1.0                  # a star's size, as a share of the phone's
     towns = ((300, 366, 284, 297, 0.55), (180, 300, 289, 298, 0.3), (40, 175, 292, 300, 0.15))
     rims = (23.5, 366.4)        # the pillars' inner edges, lit by the lamps
     bloom = (6, 18, 44)         # the lamps' glow, px
@@ -182,7 +183,7 @@ class Lighter:
             if rng.random() > fade:
                 continue
             b = (rng.random() ** 2.6) * 0.9 + 0.12
-            s = 0.55 + rng.random() ** 3 * 1.1
+            s = (0.55 + rng.random() ** 3 * 1.1) * G.star
             tint = np.array([1.0, 0.97, 0.92]) if rng.random() < 0.5 else np.array([0.88, 0.93, 1.0])
             x0, x1, y0, y1 = max(0, xi - 4), min(Ww, xi + 5), max(0, yi - 4), min(Hh, yi + 5)
             gy, gx = np.mgrid[y0:y1, x0:x1].astype(np.float32)

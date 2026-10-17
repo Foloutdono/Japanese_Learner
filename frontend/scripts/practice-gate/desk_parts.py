@@ -27,6 +27,7 @@ TUBE_ROWS = (86, 99)
 WIRES = (150, 196)
 TACTILE = (730, 753)          # the tactile strip's rows, the whole platform's length
 PILLAR_SIGN = (299, 236, 346, 444)   # 富士見台, on the first pillar
+HUNG_BOX = (354, 84, 379, 122)       # the box hung beside the first pillar, under the canopy
 # the car layer's rows (the scene's less CAR[0])
 ROOF_BAND = 420 - CAR[0]      # the roof's curve, over the windows
 UNDER = 706 - CAR[0]          # the skirt and the underframe, under the doors
@@ -92,7 +93,13 @@ def scene(bg):
     yy = np.arange(H)[:, None]
     h = horizon(rgb)
     front = pillars(shape, (0, PILLAR_FOOT))
+    # the sign: its box less the sky round its frame, in the box's outer
+    # ring, which the hour lights as sky (lit as the sign, it stood round it
+    # as a pale rim); the letters are a cool white, and stay the sign's
+    blue = (rgb[..., 2] - rgb[..., 0] > 0.15) & (L > 0.5)
     sign = box(shape, *SIGN)
+    ring = sign & ~(cv2.erode(sign.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0)
+    sign &= ~(blue & ring)
     rods = np.zeros(shape, bool)
     for b in SIGN_RODS + (CLOCK_ROD,):
         rods |= box(shape, *b)
@@ -104,7 +111,20 @@ def scene(bg):
         lamp_box |= box(shape, x0 - 12, LAMP_ROWS[0], x1 + 12, LAMP_ROWS[1])
         tube |= box(shape, x0, TUBE_ROWS[0], x1, TUBE_ROWS[1])
     tube &= (L > 0.8) & (S < 0.25) & ~front
-    canopy = (yy < SKY_TOP) | (lamp_box & ~tube & (L < 0.62)) | rods
+    # what hangs from the canopy into the sky's first rows, lit as the
+    # canopy (lit as sky, the box's sunlit edge was a pale crescent at
+    # night): the lamps' end caps, grey and joined to the canopy, and the
+    # box beside P1, what of its box is not the sky
+    grey = (yy < SKY_TOP + 40) & (S < 0.14) & ~front & ~sign & ~tube
+    n, lab = cv2.connectedComponents(grey.astype(np.uint8), connectivity=8)
+    roots = np.unique(lab[SKY_TOP - 1][grey[SKY_TOP - 1]])
+    hung = np.isin(lab, roots[roots > 0]) & (yy >= SKY_TOP)
+    hung = cv2.dilate(hung.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+    sky_blue = (rgb[..., 2] - rgb[..., 0] > 0.17) & (L > 0.62)
+    clear = cv2.erode(sky_blue.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+    hung |= box(shape, *HUNG_BOX) & ~clear
+    hung &= (yy >= SKY_TOP) & ~front
+    canopy = (yy < SKY_TOP) | (lamp_box & ~tube & (L < 0.62)) | rods | hung
     canopy &= ~front & ~sign & ~tube
 
     sky_like = ((rgb[..., 2] - rgb[..., 0] > 0.17) & (L > 0.62)) | ((L > 0.86) & (S < 0.12))
@@ -150,20 +170,41 @@ def car(a, open_door):
     roof = on & (rows < ROOF_BAND)
     under = on & (rows >= UNDER)
     side = on & ~roof & ~under
-    # the windows: the trees seen through them (green), whole, with the
-    # glass's own edge; never the stripe
+    # the windows: each opening, found by the trees seen through it
+    # (green), out to the glass's own edge and up over its transom; never
+    # the stripe
     g = rgb
     tree = side & (g[..., 1] > g[..., 0] + 0.04) & (g[..., 1] > g[..., 2] - 0.02) & (sat(g) > 0.2)
     tree &= ~((rows >= STRIPE[0] - CAR[0] - 2) & (rows < STRIPE[1] - CAR[0] + 2))
     n, lab, stats, _ = cv2.connectedComponentsWithStats(tree.astype(np.uint8), 8)
-    glass = np.zeros(shape, bool)
+    windows = np.zeros(shape, bool)
     for k in range(1, n):
         x, y, w, h, area = stats[k]
         if area < 400 or h < 30:
             continue
-        glass[min(y, GLASS_TOP):y + h, x:x + w] = True
-    glass = cv2.dilate(glass.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
-    glass &= side
+        # a window of the car's side rises over its transom; the doorway's
+        # far window keeps its own top, the wall over it the inside's
+        through = DOORWAY[0] <= x + w / 2 < DOORWAY[2]
+        windows[y if through else min(y, GLASS_TOP):y + h, x:x + w] = True
+    windows = cv2.dilate(windows.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+    windows &= side
+    # the glass: an opening less its mullions and transom (whole columns and
+    # rows of grey steel, kept whole, so they stand against the light inside)
+    # and, near its edge, less what is not coloured (the gasket, the steel at
+    # its rounded corners)
+    grey = sat(g) < 0.12
+    glass = np.zeros(shape, bool)
+    n, lab, stats, _ = cv2.connectedComponentsWithStats(windows.astype(np.uint8), 8)
+    for k in range(1, n):
+        x, y, w, h, _ = stats[k]
+        own = lab[y:y + h, x:x + w] == k
+        low = grey[y:y + h, x:x + w] & own
+        bars = np.zeros((h, w), bool)
+        bars[:, low.sum(axis=0) > 0.35 * own.sum(axis=0)] = True
+        bars[low.sum(axis=1) > 0.35 * own.sum(axis=1), :] = True
+        bars = cv2.dilate(bars.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+        core = cv2.erode(own.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0
+        glass[y:y + h, x:x + w] |= own & ~bars & (core | ~low)
     inside = np.zeros(shape, bool)
     far = np.zeros(shape, bool)
     if open_door:
@@ -171,8 +212,9 @@ def car(a, open_door):
         inside = box(shape, x0, y0 - CAR[0], x1, y1 - CAR[0]) & on
         far = inside & glass
         glass &= ~inside
+        windows &= ~inside
     body = side & ~glass & ~inside
-    return dict(roof=roof, under=under, glass=glass, inside=inside & ~far, far=far, body=body)
+    return dict(roof=roof, under=under, glass=glass, inside=inside & ~far, far=far, body=body, windows=windows)
 
 
 def near(a):

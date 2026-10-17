@@ -10,19 +10,24 @@ unit, and everything below is measured in the scene's units.
   clean    the name strip cut off; the gate button, the clock's face (the
            app draws both) painted out; the platform under the board drawn
            again from the painting's own bays (its canopy at the rafters'
-           repeat, its sky and floor mirrored at the seam, the car carried
-           along its doors and windows, the middle pillar carried one bay
-           on, where the painting shows its top); and one bay more past the
+           repeat; its sky quilted from the sky past Fuji, in strips joined
+           on their least-error cut, never mirrored; its floor carried at
+           the pillars' own pitch, so each shadow falls from its pillar; the
+           car carried along its doors and windows from the car with its
+           pillar drawn out; the middle pillar carried one bay on, where
+           the painting shows its top); and one bay more past the
            painting's right edge, so a wide window is filled by the scene
            rather than by a crop of its height
   layers   bg (the scene, the roof's gear painted out: the car carries it),
            car (the standing car, its door open), car2 (the same car, its
-           door shut: the cars before and after it), near (the pillars,
-           the pillar's sign and the bench, in front), the shut door's two
-           leaves (the app slides them), and the stripe's masks, over which
-           the app lays the line's pigment
+           door shut: the cars before and after it), each ending in a body
+           panel and half a gangway, so the cars of a passing train meet as
+           cars do; near (the pillars, the pillar's sign and the bench, in
+           front), the shut door's two leaves (the app slides them), and the
+           stripe's masks, over which the app lays the line's pigment
 
-Every pixel is the painting's own, copied or drawn on from it."""
+Every pixel is the painting's own, copied or drawn on from it; the
+gangway's folds take the inks of the car's own underframe."""
 import numpy as np
 import cv2
 from PIL import Image
@@ -33,6 +38,10 @@ W = 2127                      # the scene's: one bay more
 H = 940
 SEAM = 1140                   # past it, the painting is the board's
 BAY = 548                     # a bay, pillar to pillar (P2 to P3)
+CLEAR_SKY = 882               # the sky from here to the seam: past Fuji's foot, clear of P2
+QUILT = 244                   # the sky's strips are laid from this seed
+GANGWAY = 52                  # between two cars of a passing train: the gangway's width
+PLAIN = (942, 980)            # plain body between the window and the shut door: a car's end panel
 # a pillar's band (x0, x1), its face and its rim; P3 is the painting's own
 # (its top shows over the board), P4 is P3 a bay on
 PILLARS = ((296, 355), (798, 854), (1346, 1402), (1894, 1950))
@@ -93,6 +102,46 @@ def carried(S, rows, x0, x1, shift):
         S[r0:r1, x] = S[r0:r1, x - shift]
 
 
+def least_cut(err):
+    """The top-to-bottom path of least error through err (rows x cols): per
+    row, the column where what is left of it ends and what is right begins."""
+    h, w = err.shape
+    cost = err.astype(np.float64)
+    back = np.zeros((h, w), np.int64)
+    for y in range(1, h):
+        prev = cost[y - 1]
+        step = np.stack([np.r_[np.inf, prev[:-1]], prev, np.r_[prev[1:], np.inf]])
+        k = step.argmin(axis=0)
+        back[y] = k - 1
+        cost[y] += step[k, np.arange(w)]
+    path = np.zeros(h, np.int64)
+    path[-1] = int(cost[-1].argmin())
+    for y in range(h - 1, 0, -1):
+        path[y - 1] = np.clip(path[y] + back[y, path[y]], 0, w - 1)
+    return path
+
+
+def quilted(S, rows, x0, x1, src, seed, overlap=40, strip=(120, 200)):
+    """S[rows, x0:x1] laid from `src` in strips of `strip` px taken at
+    seeded offsets, each joined to what stands left of it along the least-
+    error cut through `overlap` columns: the sky runs on with no mirror and
+    no repeat at a fixed pitch, its rows (the wires, the treeline) kept."""
+    r0, r1 = rows
+    rng = np.random.default_rng(seed)
+    sw = src.shape[1]
+    x = x0
+    while x < x1:
+        n = min(int(rng.integers(strip[0], strip[1] + 1)), x1 - x, sw - overlap)
+        o = int(rng.integers(0, sw - overlap - n + 1))
+        piece = src[:, o:o + overlap + n]
+        here = S[r0:r1, x - overlap:x]
+        err = ((here.astype(np.float32) - piece[:, :overlap].astype(np.float32)) ** 2).sum(axis=2)
+        take = np.arange(overlap)[None, :] >= least_cut(err)[:, None]
+        here[take] = piece[:, :overlap][take]
+        S[r0:r1, x:x + n] = piece[:, overlap:overlap + n]
+        x += n
+
+
 def clean(path):
     """The painting as the scene: H x W, RGB uint8."""
     im = np.asarray(Image.open(path).convert('RGB'))[TOP:TOP + H, :PAINTED]
@@ -133,16 +182,27 @@ def clean(path):
         n = min(LAMP[1] - LAMP[0], W - x0)
         S[62:100, x0:x0 + n] = S[62:100, LAMP[0]:LAMP[0] + n]
 
-    # ── the sky down to the car's roof, and the floor: the bay beside,
-    #    mirrored at the seam so it runs on; past P3, the bay beside
-    #    carried along ──
-    n = P3[0] - SEAM
-    for r0, r1 in ((SKY[0], ROOF), FLOOR):
-        S[r0:r1, SEAM:P3[0]] = S[r0:r1, SEAM - n:SEAM][:, ::-1]
-        carried(S, (r0, r1), P3[1], W, P3[1] - (P2[1] + 2))
+    # ── the sky down to the car's roof: quilted from the sky past Fuji, so
+    #    it runs on with neither a mirror at the seam (a house, a cloud
+    #    twice, face to face) nor a repeat at the bay's pitch ──
+    quilted(S, (SKY[0], ROOF), SEAM, W, S[SKY[0]:ROOF, CLEAR_SKY:SEAM].copy(), QUILT)
 
-    # ── the car past the seam: its doors and windows carried along ──
-    carried(S, (ROOF, CAR[1]), SEAM, W, 545)
+    # ── the floor: carried along at the pillars' own pitch, so each
+    #    pillar's shadow (the sun is behind them, on the right) and its
+    #    reflection fall from the pillar carried there; mirrored, the
+    #    shadows met in a V under every bay ──
+    carried(S, FLOOR, SEAM, W, BAY)
+
+    # ── the car past the seam: its doors and windows carried along, from
+    #    the car with P2 drawn out of it (the pillar carried with it stood
+    #    beside P3 and P4 as a sliver) ──
+    car = S[ROOF:CAR[1]].copy()
+    c0, c1 = P2[0] - 140, P2[1] + 140
+    hole = np.zeros((CAR[1] - ROOF, c1 - c0), bool)
+    hole[:, P2[0] - 2 - c0:P2[1] + 2 - c0] = True
+    car[:, c0:c1] = shiftmap(car[:, c0:c1].copy(), hole)
+    carried(car, (0, CAR[1] - ROOF), SEAM, W, 545)
+    S[ROOF:CAR[1], SEAM:] = car[:, SEAM:]
 
     # ── P3 and P4: the middle pillar's band, carried a bay along with its
     #    base and its reflection on the floor ──
@@ -174,6 +234,29 @@ def gear_mask(S):
     m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
     m[ROOF:] = 0
     return m > 0
+
+
+def ended(car):
+    """The car's two ends, where the cars of a passing train meet: its last
+    body panel (the plain steel between the window and the shut door) and
+    its end frame, then its part of the gangway -- its folds in the
+    underframe's two inks -- out to the car's edge, from the roof to the
+    skirt. The left end's part is the frame pillar's width, so the
+    standing car hides it; the right end's is the rest."""
+    r0, r1 = ROOF - 2, CAR[1]
+    left, right = P0[1], GANGWAY - P0[1]
+    steel = car[r0:r1, PLAIN[0]:PLAIN[1]]
+    car[r0:r1, W - right - steel.shape[1]:W - right] = steel
+    dark = np.median(car[CAR[1] - 14:CAR[1] - 4, 600:960].reshape(-1, 3), axis=0)
+    deep = (dark * 0.55).astype(np.uint8)
+    fold = np.where((np.arange(GANGWAY) // 3) % 2 == 0, 1.0, 0.72)[None, :, None]
+    bellows = np.clip(dark[None, None, :] * fold, 0, 255).astype(np.uint8)
+    top, foot = ROOF + 8, CAR[1] - 18
+    for x0, x1, k0 in ((0, left, right), (W - right, W, 0)):
+        car[r0:r1, x0:x1] = deep
+        car[top:foot, x0:x1] = np.repeat(bellows[:, k0:k0 + x1 - x0], foot - top, axis=0)
+    for x in (left, W - right - 2):
+        car[r0:r1, x:x + 2] = (car[r0:r1, x:x + 2].astype(np.int16) * 0.62).astype(np.uint8)
 
 
 def widened(leaf, at, n):
@@ -218,6 +301,8 @@ def layers(S):
     leaf_r = widened(shut[:, half:], half - 10, gap)
     car2 = car.copy()
     car2[DOORWAY[1]:DOORWAY[3], DOORWAY[0]:DOORWAY[2]] = np.concatenate([leaf_l, leaf_r], axis=1)
+    ended(car)
+    ended(car2)
 
     # in front of the car: the frame, the pillars to their feet (the
     # pillar's sign with them), the bench where it stands before the car
