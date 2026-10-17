@@ -22786,7 +22786,16 @@ form.stage__foot > .btn-primary {
 }
 @container (max-width: 429px) {
   .records--entry { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .records--entry .record { padding-inline: var(--sp-5); }
 }
+/* Flush is the lattice's hairlines, not its figures. A cell that meets
+   the panel's edge pads to the gutter the plate, its stripe and the
+   blocks keep (--sp-5), so a figure starts where the stripe and the
+   gloss start: padded --sp-3, "100 %" sat 8px from a phone's edge under
+   all three at 16px. Two by two (above) every cell takes the gutter, so
+   both columns sit the same distance inside their hairlines. */
+.records--entry > :first-child { padding-inline-start: var(--sp-5); }
+.records--entry > :last-child { padding-inline-end: var(--sp-5); }
 /* ── 期限 — a card that is due, and the one thing to do about it ──
    The schedule's cell, as the door (plan 235): "Maintenant" in the due
    ink, and under it what pressing it does, the chevron beside the word.
@@ -40481,8 +40490,11 @@ button.brd-stn { cursor: pointer; }
     grid-area: stripe;
     margin: var(--sp-3) calc(-1 * var(--sp-6)) 0;
   }
-  /* Your two numbers under the stripe, the panel's own foot their edge. */
+  /* Your two numbers under the stripe, the panel's own foot their edge,
+     the outer figures on the band's gutter: its plate pads --sp-6. */
   .dict-entry--band .records--entry { border-bottom-width: 0; }
+  .dict-entry--band .records--entry > :first-child { padding-inline-start: var(--sp-6); }
+  .dict-entry--band .records--entry > :last-child { padding-inline-end: var(--sp-6); }
   /* The dictionary: the senses and the words at their height, the
      stroke sheet growing into what they leave, its kanji large -- and
      never below twice the specimen, where the stroke numbers still
