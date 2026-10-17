@@ -232,7 +232,7 @@ describe('the carousel studio', () => {
       const seen = {}
       for (const [n, { src, id, p }] of every.entries()) {
         if ((seen[src.id] = (seen[src.id] || 0) + 1) % 90 !== 2) continue
-        const fmt = formatOf(n % 2 ? 'post' : 'story', 'normal')
+        const fmt = formatOf(n % 2 ? 'post' : 'story', Math.floor(n / 2) % 2 ? 'instagram' : 'normal')
         for (const type of TYPES.map(x => x.id).filter(x => available(x, p))) {
           for (const design of [...DESIGNS, 'classic']) {
             for (const sl of deck(type, p, fmt, { ground: n % 3 ? 'paper' : 'sumi', design }).filter(x => !x.key.startsWith('passage-'))) {
@@ -1179,6 +1179,46 @@ describe('the short formats (plan 233)', () => {
     expect(g.items.map(x => x.type)).toEqual(['gtitle', 'gex', 'gex', 'q'])
     expect(timeline(g).cues.filter(c => c.slow)).toEqual([])
   }), 120000)
+
+  it('keeps a 9:16 slide and a short inside Instagram’s feed crop, clear of its header, caption and buttons (plan 237)', () => withPath2D(() => {
+    const ig = formatOf('story', 'instagram')
+    expect([ig.id, ig.w, ig.h, ig.fit]).toEqual(['story', 1080, 1920, 'instagram'])
+    // The feed shows the middle 4:5, 285 cut at the top and the foot, its header over the crop's top 110.
+    const crop = (1920 - 1350) / 2
+    expect(ig.safe.t).toBeGreaterThanOrEqual(crop + 110)
+    // Full screen, a reel's caption stands from ~1450 and its buttons down the right.
+    expect(ig.h - ig.safe.b).toBeLessThanOrEqual(1450)
+    expect(ig.safe.r).toBeGreaterThanOrEqual(140)
+    expect(ig.safe.l).toBe(ig.safe.r)
+    // A 4:5 post is shown whole: Instagram's are the normal margins.
+    expect(formatOf('post', 'instagram').safe).toEqual(formatOf('post', 'normal').safe)
+    // The guide draws Instagram's feed over a 9:16 slide, never over a post.
+    const drawn = fmt => {
+      const calls = []
+      const ctx = new Proxy({}, { get: (o, k) => (k in o ? o[k] : () => calls.push(k)), set: (o, k, v) => { o[k] = v; return true } })
+      drawFeedHud(ctx, fmt)
+      return calls.filter(k => k === 'fillRect' || k === 'fill').length
+    }
+    expect(drawn(ig)).toBeGreaterThan(0)
+    expect(drawn(formatOf('post', 'instagram'))).toBe(0)
+    // A long video's short: TikTok's moved whole into Instagram's box, and said so on its command.
+    const { kind, opts } = longPick('vocab:1', 'N5', 'en', 'short')
+    const pl = fitShort(longPlan(kind, files, { ...opts, fit: 'instagram' }))
+    expect(pl.fit).toBe('instagram')
+    expect(fitShort(longPlan(kind, files, opts)).fit).toBe('tiktok')
+    const tl = timeline(pl)
+    const scales = []
+    const { ctx: base } = stubContext()
+    const ctx = new Proxy(base, { get: (o, k) => (k === 'scale' ? (x, y) => scales.push([x, y]) : o[k]), set: (o, k, v) => { o[k] = v; return true } })
+    drawLong(ctx, pl, tl, tl.segs[1].start + 1)
+    const box = s => [1080 - s.l - s.r, 1920 - s.t - s.b]
+    const [tw, th] = box({ t: 250, r: 144, b: 430, l: 144 })
+    const [iw, ih] = box(ig.safe)
+    expect(scales[0][0]).toBeCloseTo(Math.min(iw / tw, ih / th), 5)
+    expect(longCommand('vocab:1', 'N5', 'en', 'short', 'instagram')).toContain('--format short --fit instagram')
+    expect(longCommand('vocab:1', 'N5', 'en', 'short')).not.toContain('--fit')
+    expect(longCommand('vocab:1', 'N5', 'en', 'long', 'instagram')).not.toContain('--fit')
+  }))
 
   it('times a carousel as a short: each slide read, a question answered, its line said at the reveal', () => {
     expect(slideSeconds(0, 'cover').hold).toBe(2.4)

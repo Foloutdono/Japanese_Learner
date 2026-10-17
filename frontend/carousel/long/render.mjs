@@ -45,6 +45,8 @@ const opts = {
   lang, level: args.level || 'N5', part: Number(args.part || 1), theme: args.theme || null, point: args.point || null,
   ids: args.ids ? String(args.ids).split(',') : null, count: args.count ? Number(args.count) : null,
   format: args.format === 'short' ? 'short' : 'long',
+  // The feed a short stands in (plan 237): TikTok's, Instagram's or none.
+  fit: ['instagram', 'normal'].includes(args.fit) ? args.fit : 'tiktok',
 }
 const OUT = resolve(args.out || join(HERE, 'out'))
 const CACHE = join(HERE, 'cache')
@@ -126,7 +128,7 @@ if (recipe) {
   const dur = voiceAll(draft.cues)
   tl = shortTimeline(slides, made.counts, made.spoken, dur)
   SIZE = TALL
-  slug = ['short', recipe.source, recipe.id, recipe.type, lang].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
+  slug = ['short', recipe.source, recipe.id, recipe.type, lang, ...(recipe.fit && recipe.fit !== 'tiktok' ? [recipe.fit] : [])].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
   pageText = await page.evaluate(async ({ st, site, voiced }) => {
     const S = window.__short
     const fetchJson = name => fetch(`/carousel/bank/${name}`).then(r => r.json())
@@ -139,7 +141,7 @@ if (recipe) {
 } else {
   // ── A long video, or its short: the plan, its lines voiced, the timeline ──
   let plan = longPlan(kind, banks, opts)
-  slug = [...(opts.format === 'short' ? ['short'] : []), kind, opts.theme || opts.level, kind === 'grammar' ? plan.point : opts.ids ? 'pick' : `part${opts.part}`, lang].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
+  slug = [...(opts.format === 'short' ? ['short'] : []), kind, opts.theme || opts.level, kind === 'grammar' ? plan.point : opts.ids ? 'pick' : `part${opts.part}`, lang, ...(opts.format === 'short' && opts.fit !== 'tiktok' ? [opts.fit] : [])].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
   log(`${plan.title}: ${plan.items.length} items`)
   const dur = voiceAll(timeline(plan).cues)
   // A short holds under its minute on the lines as they are said.

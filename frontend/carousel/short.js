@@ -11,6 +11,7 @@
 // writes, `shortTimeline` times the slides, `drawShortFrame` draws any
 // second of it and returns a key that is the same for two frames that
 // look the same.
+import { formatOf } from './draw.js'
 import { FORMATS, deck } from './slides.js'
 import { depsOf, picked, plan as sourcePlan, sourceOf, titleOf } from './sources.js'
 
@@ -156,7 +157,8 @@ export async function carouselShort(st, fetchJson) {
   const figures = (await fetchJson('index.json').catch(() => null))?.figures
   const opts = { ...st, figures }
   const pl = sourcePlan(st.source, data, st.id, opts, deps)
-  const slides = deck(st.type, pl, FORMATS.story, opts)
+  // At the margins the studio chose: TikTok's, Instagram's or none (plan 237).
+  const slides = deck(st.type, pl, formatOf('story', st.fit), opts)
   return { pl, slides }
 }
 

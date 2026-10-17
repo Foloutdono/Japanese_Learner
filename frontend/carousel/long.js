@@ -20,7 +20,7 @@
 // reveal lands on its voice), and `drawLong` draws the frame at any
 // second and returns a key that is the same for two frames that look
 // the same, so the renderer (long/render.mjs) draws each still once.
-import { alpha, drawSentence, fit, font, hasKanji, layoutSentence, mark, measure, palette, paragraphH, rrect, text } from './draw.js'
+import { alpha, drawSentence, fit, font, formatOf, hasKanji, layoutSentence, mark, measure, palette, paragraphH, rrect, text } from './draw.js'
 import { weldIf } from './strings.js'
 import { gloss, unpack } from './common.js'
 import { plan as sourcePlan, itemsOf } from './sources.js'
@@ -139,7 +139,8 @@ const silent = row => row.k === 'punct' || /^[＿_]+$/.test(row.t)
  *  grammar video takes a `point`. */
 export function longPlan(kind, banks, opts0 = {}) {
   const pl = planOf(kind, banks, opts0)
-  return opts0.format === 'short' ? shorten(pl) : pl
+  // A short stands in a feed: TikTok's, Instagram's or none (plan 237).
+  return opts0.format === 'short' ? { ...shorten(pl), fit: opts0.fit || 'tiktok' } : pl
 }
 
 /** A short: a few items, each said in fewer lines; a grammar point by its
@@ -270,7 +271,7 @@ export function longFiles(id, level) {
 }
 
 /** The command that makes the video, from frontend/. */
-export function longCommand(id, level, lang = 'en', format = 'long') {
+export function longCommand(id, level, lang = 'en', format = 'long', fit = 'tiktok') {
   const { kind, opts } = longPick(id, level, lang, format)
   const q = v => (/^[\w.-]+$/.test(v) ? v : `'${String(v).replace(/'/g, "'\\''")}'`)
   const args = [`--kind ${kind}`]
@@ -280,6 +281,7 @@ export function longCommand(id, level, lang = 'en', format = 'long') {
   if (opts.part) args.push(`--part ${opts.part}`)
   args.push(`--lang ${lang}`)
   if (format === 'short') args.push('--format short')
+  if (format === 'short' && fit !== 'tiktok') args.push(`--fit ${fit}`)
   return `VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs ${args.join(' ')}`
 }
 
@@ -1369,8 +1371,31 @@ const TH = TALL.h
 const TX = TALL.safe.l
 const TWIDE = TW - TALL.safe.l - TALL.safe.r
 
+/** Where a short's parts stand (plan 237): inside TikTok's video feed
+ *  (TALL.safe), or Instagram's box or the normal margins (draw.js
+ *  formatOf), into which the TikTok short is moved whole, scaled to fit
+ *  and centred: the same picture, Instagram's a little smaller. */
+function tallBox(fit) {
+  const s = fit === 'tiktok' ? TALL.safe : formatOf('story', fit).safe
+  return { x: s.l, y: s.t, w: TW - s.l - s.r, h: TH - s.t - s.b }
+}
 /** The frame of a short at second `t`, and its key. */
 function drawTall(ctx, plan, tl, t) {
+  if (!plan.fit || plan.fit === 'tiktok') return drawTallFrame(ctx, plan, tl, t)
+  const from = tallBox('tiktok')
+  const to = tallBox(plan.fit)
+  const s = Math.min(to.w / from.w, to.h / from.h)
+  ctx.fillStyle = palette('sumi').bg
+  ctx.fillRect(0, 0, TW, TH)
+  ctx.save()
+  ctx.translate(to.x + (to.w - from.w * s) / 2, to.y + (to.h - from.h * s) / 2)
+  ctx.scale(s, s)
+  ctx.translate(-from.x, -from.y)
+  const key = drawTallFrame(ctx, plan, tl, t)
+  ctx.restore()
+  return key
+}
+function drawTallFrame(ctx, plan, tl, t) {
   const { p, S, line, sg, u, state, k, fade, d, m } = begin(ctx, plan, tl, t, TW, TH)
   const { card, sentence, para, pill } = tools(ctx, p, line)
   const cx = TW / 2

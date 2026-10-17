@@ -393,7 +393,7 @@ async function render() {
   // A story is 9:16 at TikTok's margins, whatever the post's format.
   const fmt = clipped ? FORMATS.story : formatOf(state.format, state.fit)
   // Nothing is laid over a slide at normal margins: the guide shows them alone.
-  $('#safe-label').textContent = fmt.fit === 'normal' ? 'Show the margins' : 'Show the feed’s overlays'
+  $('#safe-label').textContent = fmt.fit === 'normal' ? 'Show the margins' : fmt.fit === 'instagram' ? 'Show Instagram’s crop' : 'Show the feed’s overlays'
   // All looks (plan 234): the type kept, in each look, to pick one from.
   const looks = state.view === 'looks' && !clipped
   const ids = state.view === 'compare' ? types : [state.type]
@@ -524,7 +524,9 @@ async function renderLong(mine) {
   const short = state.longFormat === 'short'
   const size = short ? TALL : WIDE
   const { kind, opts } = longPick(id, state.level, state.lang, short ? 'short' : 'long')
-  const pl = short ? fitShort(longPlan(kind, banks, opts)) : longPlan(kind, banks, opts)
+  // A short at the margins chosen (plan 237): TikTok's, Instagram's or none.
+  for (const el of document.querySelectorAll('[data-short]')) el.hidden = !short
+  const pl = short ? fitShort(longPlan(kind, banks, { ...opts, fit: state.fit })) : longPlan(kind, banks, opts)
   const tl = timeline(pl)
   const page = describeLong(pl, tl, state.lang === 'en' ? `${LONG_SITE}/en` : LONG_SITE, banks['index.json']?.figures)
   await fonts(JSON.stringify(pl.items).slice(0, 40000) + pl.title + page.title)
@@ -615,7 +617,7 @@ async function renderLong(mine) {
   })
   draw()
   // The video's page: written when the video or its language changes.
-  const key = `long|${id}|${state.level}|${state.lang}|${state.longFormat}`
+  const key = `long|${id}|${state.level}|${state.lang}|${state.longFormat}|${state.fit}`
   if (key !== captionFor) {
     $('#caption').value = page.description
     $('#title').value = page.title
@@ -624,7 +626,7 @@ async function renderLong(mine) {
     titleFor = key
     countTitle()
   }
-  $('#command').textContent = longCommand(id, state.level, state.lang, short ? 'short' : 'long')
+  $('#command').textContent = longCommand(id, state.level, state.lang, short ? 'short' : 'long', state.fit)
 }
 async function exportThumb() {
   if (!current.long) return
@@ -669,8 +671,9 @@ function safeZone(fmt) {
   z.style.setProperty('--b', `${safe.b / h * 100}%`)
   z.style.setProperty('--l', `${safe.l / w * 100}%`)
   z.style.setProperty('--r', `${safe.r / w * 100}%`)
-  // On a 9:16 slide for TikTok, its photo view itself: its bars, its buttons.
-  if (h === 1920 && fmt.fit === 'tiktok') {
+  // On a 9:16 slide, the feed itself: TikTok's photo view, its bars and
+  // its buttons; Instagram's feed, what its 4:5 crop cuts and its header.
+  if (h === 1920 && fmt.fit !== 'normal') {
     const hud = document.createElement('canvas')
     hud.width = w
     hud.height = h
@@ -766,7 +769,7 @@ async function offer(filename, blob) {
 const png = canvas => new Promise(r => canvas.toBlob(r, 'image/png'))
 const safeName = s => String(s).replace(/[\\/:*?"<>|.\s]+/g, '-').replace(/^-+|-+$/g, '')
 // A slide at normal margins says so in its file's name.
-const fmtName = fmt => (fmt.fit === 'normal' ? `${fmt.id}-normal` : fmt.id)
+const fmtName = fmt => (fmt.fit && fmt.fit !== 'tiktok' ? `${fmt.id}-${fmt.fit}` : fmt.id)
 const baseName = () => `tsuji-${state.source}-${safeName(current.plan.id)}-${state.type}-${fmtName(current.fmt)}`
 
 async function exportZip() {
@@ -837,7 +840,7 @@ function shortRecipe() {
 }
 async function exportShort() {
   if (!current.plan || clippedSource()) return
-  const fmt = FORMATS.story
+  const fmt = formatOf('story', state.fit)
   const slides = deck(state.type, current.plan, fmt, { ...state, figures: current.figures, picks: state.picks[pickKey()] })
   work.width = fmt.w
   work.height = fmt.h

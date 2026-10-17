@@ -450,11 +450,32 @@ on a post. At normal margins the guide reads "Show the margins" and
 tints them alone, never TikTok's photo view, and an exported file's name
 ends in `-normal`. A format keeps its ratio's id at either margin, so
 whatever a slide reads from the ratio (a heading's size, the words to a
-slide) holds. A promo story, a word echo and a short stay at TikTok's
-margins: they are made for a feed's video view. Drawn over a sample of
+slide) holds. A promo story and a word echo stay at TikTok's margins:
+they are made for a feed's video view. Drawn over a sample of
 every source, type and look in both ratios, what passes the normal box
 is what passes TikTok's (the Fiche band, a glyph's top), and a card's
 shadow at the foot where the wider box lets the card reach it.
+
+A third, **For Instagram** (plan 237), because Instagram's feed crops a
+9:16 post: it shows a reel's (and a 9:16 carousel's) middle 4:5, 1080 ×
+1350 with 285 cut at the top and the foot, and on the web lays the
+author's header (their picture, name, the reel's progress and sound)
+over that crop's top ~110px and its sound switch at the crop's corner.
+A short laid out for TikTok put its masthead and its page counter under
+that header. Full screen, a reel's caption stands over the foot from
+y ~1450 and its buttons down the right. So a 9:16 slide for Instagram
+keeps to 400 … 1450, 144 a side: inside the crop, under its header,
+above the caption, clear of the buttons and of the profile grid's 3:4.
+A 4:5 post is shown whole, nothing over it but a counter that fades, so
+its Instagram margins are the normal ones. The guide reads "Show
+Instagram's crop" and darkens what the crop cuts, with the header and
+the sound switch (`INSTAGRAM_HUD`); an exported file ends in
+`-instagram`. A short follows the choice too: a carousel's short is
+laid out at its margins (`carouselShort`), and a long video's short,
+whose parts stand at fixed places, is drawn for TikTok's box and moved
+whole into the one chosen, scaled to fit and centred (`drawTall`; the
+studio's video panel has the same choice and its command carries
+`--fit`).
 
 Both keep clear of what TikTok lays over a photo post, as measured on a
 phone (plan 232): a 4:5 post is shown at full width, its top ~70px above
