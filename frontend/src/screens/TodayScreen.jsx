@@ -7,10 +7,12 @@ import { comebackShut, markRestSeen, restNoticeSeen } from '../stores/dayClear'
 import GateCard from '../components/station/GateCard'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
+import { useGuideHeld, wasShown } from '../stores/guide'
 import Empty from '../components/ui/Empty'
 import { useDesk } from '../hooks/useDesk'
 import RestDayNotice from '../components/dayclear/RestDayNotice'
 import { ComebackSheet } from '../components/station/ComebackSheet'
+import { TransferSheet } from '../components/station/TransferSheet'
 import { InkFilters } from '../components/dayclear/kit'
 import { restWeek, utcToday } from '../domain/dayClear'
 import { startAmbiance, stopAmbiance } from '../lib/audio'
@@ -39,6 +41,11 @@ import { startAmbiance, stopAmbiance } from '../lib/audio'
 // the learner's own load opens on the comeback sheet (ComebackSheet),
 // over the gate and after the rest-day notice, never with it: the
 // paces to take the backlog at, chosen once.
+//
+// 乗換 (plan 243b): a learner new to the app is asked once, after the
+// first ride and the gate's guide and never over either sheet above,
+// whether they studied in another app (TransferSheet), while the
+// profile says the offer is open (`transferOffer`).
 //
 // Everything this screen reads is shared: /api/today from the store
 // the tab bar's badge already reads. One request, every consumer.
@@ -87,6 +94,13 @@ export default function TodayScreen({ session }) {
   const [comebackLeft, setComebackLeft] = useState(false)
   const offer = today?.review?.comeback ?? null
   const showComeback = Boolean(offer) && !showRest && !comebackLeft && !comebackShut()
+  // 乗換 — the offer to bring another app's progress, once: after the
+  // gate's guide has had its turn (stamped, or shown on this visit) and
+  // while nothing holds the guides, so the two never meet.
+  const [transferLeft, setTransferLeft] = useState(false)
+  const held = useGuideHeld()
+  const showTransfer = Boolean(summary?.transferOffer) && !transferLeft && Boolean(today)
+    && (summary.guided?.today || wasShown('today')) && !guide.open && !held && !showRest && !showComeback
   const restMinutes = today?.seconds_per_review && today?.total
     ? Math.max(1, Math.ceil((today.total * today.seconds_per_review) / 60))
     : null
@@ -130,6 +144,9 @@ export default function TodayScreen({ session }) {
         />
       )}
       {guide.open && !showRest && !showComeback && <Guide gate="today" onEnd={guide.onEnd} />}
+      {showTransfer && (
+        <TransferSheet session={session} onClose={() => setTransferLeft(true)} />
+      )}
     </main>
   )
 }

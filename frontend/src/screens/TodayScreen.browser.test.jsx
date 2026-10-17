@@ -44,6 +44,7 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 
 const { default: TodayScreen } = await import('./TodayScreen')
 const { beginDeparture } = await import('../stores/departure')
+const { forgetShown } = await import('../stores/guide')
 
 const settle = (ms = 80) => new Promise(r => setTimeout(r, ms))
 
@@ -302,11 +303,95 @@ describe('TodayScreen — the guide', () => {
     let screen = await mount()
     await settleLong()
     expect(document.querySelector('.guide')).toBeNull()
-    screen.unmount()
+    await screen.unmount()
     summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }
     screen = await mount()
     await settleLong()
     expect(document.querySelector('.guide')).toBeNull()
-    screen.unmount()
+    await screen.unmount()
+  })
+})
+
+// 乗換 (plan 243b): the sheet that asks a new learner, once, whether
+// they studied in another app -- after the gate's guide, never with it,
+// and gone the moment it is answered, whichever way.
+describe('TodayScreen — the transfer sheet', () => {
+  const GUIDED = { today: '2026-10-17T00:00:00Z' }
+  const offered = extra => ({ username: 'Aiko', week: [], streak: 0, level: 1, guided: GUIDED, transferOffer: true, ...extra })
+  const sheet = () => document.querySelector('.tr-sheet')
+  const settleLong = (ms = 200) => new Promise(r => setTimeout(r, ms))
+
+  function mountWithSettings() {
+    return render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/today']}>
+          <Routes>
+            <Route path="/today" element={<TodayScreen />} />
+            <Route path="/profile/settings/:page" element={<p data-page="settings">settings</p>} />
+          </Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+  }
+
+  beforeEach(() => {
+    apiJson.mockClear()
+    forgetShown()
+  })
+
+  it('asks, with the apps it reads, and "I’m starting here" answers it', async () => {
+    summaryRef.current = offered()
+    const screen = await mountWithSettings()
+    await settleLong()
+    expect(document.querySelector('.guide')).toBeNull()
+    expect(sheet()).toBeTruthy()
+    expect(sheet().querySelector('h2').textContent.replace(/\u00a0/g, ' ')).toBe('Tu as déjà appris ailleurs ?')
+    expect([...sheet().querySelectorAll('.tr-chip')].map(c => c.textContent)).toEqual(['Anki', 'WaniKani', 'Renshuu'])
+    sheet().querySelector('[data-action="transfer-offer-later"]').click()
+    await settle()
+    expect(sheet()).toBeNull()
+    const posted = apiJson.mock.calls.filter(([u]) => u === '/api/transfer/offer')
+    expect(posted).toHaveLength(1)
+    expect(JSON.parse(posted[0][2].body)).toEqual({ choice: 'later' })
+    await screen.unmount()
+  })
+
+  it('goes to Settings › Correspondance', async () => {
+    summaryRef.current = offered()
+    const screen = await mountWithSettings()
+    await settleLong()
+    sheet().querySelector('[data-action="transfer-offer-go"]').click()
+    await settle()
+    expect(document.querySelector('[data-page="settings"]')).toBeTruthy()
+    const posted = apiJson.mock.calls.filter(([u]) => u === '/api/transfer/offer')
+    expect(posted.map(([, , o]) => JSON.parse(o.body))).toEqual([{ choice: 'go' }])
+    await screen.unmount()
+  })
+
+  it('shut with Escape counts as an answer', async () => {
+    summaryRef.current = offered()
+    const screen = await mountWithSettings()
+    await settleLong()
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle()
+    expect(sheet()).toBeNull()
+    expect(apiJson.mock.calls.filter(([u]) => u === '/api/transfer/offer')).toHaveLength(1)
+    await screen.unmount()
+  })
+
+  it('waits for the gate’s guide, and is not drawn when the profile does not offer', async () => {
+    summaryRef.current = offered({ guided: {} })
+    let screen = await mountWithSettings()
+    await settleLong()
+    expect(document.querySelector('.guide')).toBeTruthy()
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    localStorage.removeItem('jp-guided')
+    summaryRef.current = offered({ transferOffer: false })
+    screen = await mountWithSettings()
+    await settleLong()
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }
   })
 })
