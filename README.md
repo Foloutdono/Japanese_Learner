@@ -11,8 +11,7 @@
 </p>
 
 <p align="center">
-  <!-- TODO: replace with the custom domain once it is live -->
-  <a href="https://japanese-learner-seven.vercel.app"><strong>Try Tsuji →</strong></a>
+  <a href="https://tsuji.app"><strong>Try Tsuji →</strong></a>
   &nbsp;·&nbsp;
   <strong>English</strong> · <a href="README.fr.md">Français</a>
 </p>
@@ -183,8 +182,7 @@ available in English.
 
 ## Try it
 
-<!-- TODO: replace with the custom domain once it is live -->
-- **On the web:** open **[japanese-learner-seven.vercel.app](https://japanese-learner-seven.vercel.app)**
+- **On the web:** open **[tsuji.app](https://tsuji.app)**
   in any modern browser and create an account with an email address and
   password, or with Google.
 - **Install it:** Tsuji is a Progressive Web App, so it installs like a

@@ -35,7 +35,7 @@ export const TALL = { id: 'tall', w: 1080, h: 1920, safe: { t: 250, r: 144, b: 4
 export const SHORT = { vocab: 6, kanji: 4, quiz: 3, seconds: 59 }
 // The site a description links to: landing/config.mjs's SITE_ORIGIN, which
 // reads the disk and cannot load in the studio (a test holds the two equal).
-export const LONG_SITE = 'https://japanese-learner-seven.vercel.app'
+export const LONG_SITE = 'https://tsuji.app'
 export const FPS = 30
 export const KINDS = ['vocab', 'kanji', 'grammar', 'quiz']
 // A part of a drill or a quiz: about ten minutes each (timeline's pace).
