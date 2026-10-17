@@ -66,6 +66,11 @@ const BROWSER_OPTIMIZE = {
     'react/jsx-dev-runtime',
     'vitest-browser-react',
     'tesseract.js',
+    // Settings › Correspondance's Anki reader (plan 243), behind `await import()` in
+    // components/settings/TransferPage.jsx: the same cold-cache race.
+    'sql.js',
+    'fzstd',
+    'fflate',
   ],
 };
 

@@ -260,7 +260,12 @@ export default function App({ front = NO_FRONT }) {
   // line to say why, so the learner would be returned to the poster as
   // if they had never tapped anything. The sign-in screen has that
   // line, and it prints the reason on its own mount.
-  const [authMode, setAuthMode] = useState(() => (authRedirectError() ? 'login' : null)) // null | 'login' | 'signup'
+  // Se connecter pressed on the landing page (lib/frontEntry.js) opens
+  // the sign-in at once, rather than the Welcome and its own Se connecter.
+  const [authMode, setAuthMode] = useState(() => (authRedirectError() || front.entry === 'signin' ? 'login' : null)) // null | 'login' | 'signup'
+  // ... and backing out of it goes back to that page, not to the Welcome
+  // it skipped. Spent on the first way out, or by signing in.
+  const signinBehind = useRef(front.entry === 'signin' ? front.back : null)
   // 机 (plans 122, 163) and a phone (plan 168): the sign-in stands in the
   // promise's place on the Welcome itself, so there is no second screen
   // to swap to -- authMode says whether it stands, and on which side it
@@ -281,7 +286,7 @@ export default function App({ front = NO_FRONT }) {
       if (authIgnore.current) { authIgnore.current = false; return }
       if (!authGuard.current) return
       authGuard.current = false
-      setAuthMode(null)
+      closeSignIn()
     }
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
@@ -336,6 +341,19 @@ export default function App({ front = NO_FRONT }) {
   // the Welcome it skipped. The page to go to while it loads, or null.
   const pageBehind = useRef(front.entry === 'board' ? front.back : null)
   const [leavingForPage, setLeavingForPage] = useState(false)
+
+  // The sign-in's ‹ (and the browser's Back on it): the Welcome, or the
+  // landing page when that is where the sign-in was opened from.
+  function closeSignIn() {
+    const page = signinBehind.current
+    signinBehind.current = null
+    if (page) {
+      setLeavingForPage(true)
+      window.location.replace(page)
+      return
+    }
+    setAuthMode(null)
+  }
 
   // Anonymous sign-ins are a project setting, so this can legitimately
   // be unavailable. It is not something the learner can act on, so the
@@ -591,7 +609,7 @@ export default function App({ front = NO_FRONT }) {
     }
     return (
       <LangProvider>
-        <Welcome onBoard={board} boarding={boarding} onSignIn={() => setAuthMode('login')} onBack={() => setAuthMode(null)} authMode={authMode} />
+        <Welcome onBoard={board} boarding={boarding} onSignIn={() => setAuthMode('login')} onBack={closeSignIn} authMode={authMode} />
       </LangProvider>
     )
   }

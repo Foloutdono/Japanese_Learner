@@ -14,6 +14,7 @@ from content.kanji_meanings import KANJI_FR
 from content.kanji_readings import display_reading, split_readings
 from content.radical_data import radical_for
 from content.vocab_data import VOCAB_BY_LEVEL
+from study import conversation
 from study.exam_gen_utils import make_choices
 from study.exam_kanji_gen import build_kanji_reading_distractors
 from study.grammar_lesson import contrast_payload
@@ -48,8 +49,9 @@ router = APIRouter()
 
 SOURCES = (
     "kana", "kanji", "vocab", "grammar",
-    # The practice platforms (plan 159), below the Learn lines.
-    "reading", "translation", "comprehension", "dictation", "composition", "exam",
+    # The practice platforms (plan 159), below the Learn lines; 会話's
+    # since the desk's gate hangs it as its seventh train (plan 244).
+    "reading", "translation", "comprehension", "dictation", "composition", "exam", "conversation",
 )
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
 LANGS = ("fr", "en")
@@ -384,6 +386,33 @@ def _exam_line(lang: str) -> dict:
     return stops
 
 
+def _conversation_line(lang: str) -> dict:
+    """会話 (plan 217): the level's scenes, in the bank's order -- the
+    station lists them so, and a learner's first scene at a grade is its
+    first. The card is that scene as the station's card names it: its
+    place, its title and the line it opens on (plan 244: the desk's gate
+    shows the train's card at its grade, and this is 会話's). The bank
+    holds every text in English and French; `lang` picks one."""
+    bank_lang = conversation.bank_lang(lang)
+    stops = {}
+    for level, scenes in conversation.bank().items():
+        if level not in LEVELS or not scenes:
+            continue
+        first = scenes[0]
+        stops[level] = {
+            "sample": [conversation.text(scene["title"], bank_lang) for scene in scenes],
+            "card": {
+                "place": {"jp": first["place"]["jp"], "name": conversation.text(first["place"], bank_lang)},
+                "title": conversation.text(first["title"], bank_lang),
+                "opener": first["turns"][0]["them"]["jp"],
+                "them": conversation.text(first["them"], bank_lang),
+            },
+            "points": [],
+            "size": len(scenes),
+        }
+    return stops
+
+
 LINES = {
     "kana": _kana_line,
     "kanji": _kanji_line,
@@ -395,6 +424,7 @@ LINES = {
     "dictation": _dictation_line,
     "composition": _composition_line,
     "exam": _exam_line,
+    "conversation": _conversation_line,
 }
 
 

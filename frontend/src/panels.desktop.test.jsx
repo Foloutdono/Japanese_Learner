@@ -529,7 +529,42 @@ describe('the card\'s details', () => {
     const body = rect('.dict-entry--band > .dict-entry__body')
     expect(top.bottom).toBeLessThanOrEqual(body.top)
     expect($('.dict-entry__top > .dict-plate')).not.toBeNull()
-    expect(getComputedStyle($('.dict-entry__top')).borderTopWidth).toBe('1px')
+    // One panel, the card over the dictionary: the band is drawn, its
+    // halves are not (owner's cut, 2026-10-17).
+    expect(getComputedStyle(entry).borderTopWidth).toBe('1px')
+    expect(getComputedStyle($('.dict-entry__top')).borderTopWidth).toBe('0px')
+    expect(getComputedStyle($('.dict-entry--band > .dict-entry__body')).borderTopWidth).toBe('0px')
+    const band = entry.getBoundingClientRect()
+    expect(top.top).toBeGreaterThanOrEqual(band.top)
+    expect(body.bottom).toBeLessThanOrEqual(band.bottom)
+  })
+
+  // An example opened from the docked entry stood its ‹ on a strip of
+  // panel and its breakdown loose on the page under it.
+  it('open an example as a panel of its own, the ‹ and the breakdown on it', async () => {
+    apiFetch.mockImplementation(async () => ({
+      ok: true, status: 200,
+      json: async () => ({ results: [{
+        type: 'vocab', kanji: '週間', kana: 'しゅうかん', meaning: 'week', level: 'N5',
+        senses: [{ number: 1, glossary: 'week' }],
+        examples: [{ jp: '二週間休みます。', en: 'I am off for two weeks.', sense_number: 1 }],
+      }] }),
+    }))
+    await render(<Stage><Revealing term="週間" category="vocab" /><RatingBar active={false} onRate={() => {}} /></Stage>)
+    await settle()
+    press(' ')
+    await settle(400)
+    $('.dict-ex--door').click()
+    await settle(200)
+    const sent = $('.desk-run__side .desk-entry > .dict-sent')
+    expect(sent).not.toBeNull()
+    expect(getComputedStyle(sent).borderTopWidth).toBe('1px')
+    expect(getComputedStyle(sent).backgroundColor).toBe(probe('backgroundColor', 'var(--surface)'))
+    const panel = sent.getBoundingClientRect()
+    const head = rect('.dict-sent__head')
+    const body = rect('.dict-sent__body')
+    expect(head.top).toBeGreaterThanOrEqual(panel.top)
+    expect(body.bottom).toBeLessThanOrEqual(panel.bottom)
   })
 
   // A kanji the learner has met, with its stroke sheet and more words

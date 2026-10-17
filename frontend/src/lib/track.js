@@ -86,6 +86,12 @@ export const EVENTS = {
   // The basics course (plan 186f): its own unit number, never a card.
   basics_unit_done: ['unit'],
   basics_skipped: ['unit'],
+  // Another app's progress brought across (plans 243, 243b), written by
+  // the server: where from and counts only, never a word, a field, a
+  // deck's name or a key; and the sheet over Today answered.
+  transfer_import: ['source', 'notes', 'cards', 'written', 'kept'],
+  transfer_undo: ['removed'],
+  transfer_offer: ['choice'],
   // A grammar point's tour (plan 187b): the level, never the pattern.
   grammar_tour_step: ['level', 'stop', 'outcome'],
   grammar_tour_done: ['level', 'tries', 'helped', 'authored'],
@@ -147,6 +153,8 @@ export const VALUES = {
     feature: ['speech', 'analyzer', 'ocr', 'ask', 'explain', 'dictionary', 'export', 'level_fit'],
     action: ['play', 'text', 'photo', 'video', 'scan', 'send', 'open', 'search', 'progress', 'move', 'stay'],
   },
+  transfer_import: { source: ['anki', 'wanikani', 'renshuu'] },
+  transfer_offer: { choice: ['go', 'later'] },
   setting_change: {
     setting: ['theme', 'lang', 'rating_scale', 'reading_pace', 'sound', 'notifications', 'level', 'lines', 'daily_target'],
     value: ['light', 'dark', 'auto', 'fr', 'en', 'binary', 'simple', 'full', 'standard', 'relaxed', 'slow', 'untimed', 'on', 'off', 'N5', 'N4', 'N3', 'N2', 'N1', 'changed'],

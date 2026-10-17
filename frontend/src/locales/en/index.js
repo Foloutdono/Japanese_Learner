@@ -2637,10 +2637,9 @@ const guide = {
   guideLearnPlate: 'A line. Tap it to open it. The badge shows what’s due today.',
   guideLearnStops: 'Where you are on the line, and the stops around you.',
   guideLearnShelf: 'Your own decks, plus a library of decks shared by other learners.',
-  guidePracticePlate: 'A practice mode: read, understand, translate, listen to or write real sentences.',
-  guidePracticeDests: 'The levels. Yours is marked. Tap another to try it anyway.',
   guidePracticePass: 'These modes come with the pass.',
-  // The painted platform (plan 225): its two signs and its gate.
+  // The painted platform (plan 225): its two signs and its gate; on the
+  // desk (plan 244), the departures board and the gate.
   guidePracticeSign: 'Where the train goes. Tap the row above or below to turn the sign, the lit one to open its station.',
   guidePracticeGrade: 'The train’s level. Yours carries a dot: turn the sign to try another.',
   guidePracticeBoard: 'Depart: the doors close and the train takes you to the exercise.',
@@ -2655,7 +2654,6 @@ const guide = {
   guideProfileLedger: 'Each line, and how far you’ve come.',
   guideProfileSettings: 'Settings: your level, your pace, how you grade, and this guide anytime.',
   guideLearnLibrary: 'The library: decks shared by other learners. Open one to preview it; follow it to study it.',
-  guidePracticeExam: 'The mock exam: a JLPT-style test at the level you pick, graded when you hand it in.',
   guideDictActions: 'Listen to it, or use ＋ to save it or add it to one of your decks.',
   guideProfileStats: 'Statistics: what sticks and what slips, line by line.',
   guideProfileBoard: 'The leaderboard, in XP: this week and all time.',
@@ -2665,13 +2663,11 @@ const guide = {
   guideLearnStopsDesk: 'The whole line. Click any stop to study it.',
   // Worded for a pointer (plan 123): the notes that said "tap".
   guideLearnPlateDesk: 'A line. Click it to open it. The badge shows what’s due today.',
-  // The desk's platforms carry no grades since plan 165: the stop is
-  // skipped there, but its note is still worded for a pointer.
-  guidePracticeDestsDesk: 'The levels. Yours is marked. Click another to try it anyway.',
-  guidePracticePlateDesk: 'A practice mode, and what it asks of you at your level. Click it to open it.',
-  // The painted platform stands only on the phone (plan 225): its note is
-  // still worded for a pointer, as the levels' is.
-  guidePracticeSignDesk: 'Where the train goes. Click the row above or below to turn the sign, the lit one to open its station.',
+  // The painted platform on the desk (plan 244): the departures board,
+  // its levels at its head, and the gate, which Enter presses too.
+  guidePracticeGradeDesk: 'The trains’ level. Yours carries a dot: click another to try it anyway.',
+  guidePracticeSignDesk: 'The trains leaving, one per exercise, with what you have done on each at this level. Click one to see what it will ask of you.',
+  guidePracticeBoardDesk: 'Depart: the doors close and the train takes you to the exercise. Enter works from anywhere here.',
   guideDictEntryDesk: 'An entry, open beside the list. ← and → move through the list.',
   // Settings, the two ways back.
   settingsFirstRide: 'First ride',
@@ -2726,12 +2722,14 @@ const onboarding = {
   settingsLineOn: 'On your route',
   settingsLineOff: 'Off your route',
   plateOffRoute: 'Off your route',
-  // A grade's record on a Practice platform, on the desk (plan 130):
-  // what was done at that grade, then the share of it that went right.
+  // A grade's record on a Practice platform, on the desk (plan 130; on
+  // the departures board since plan 244): what was done at that grade,
+  // then the share of it that went right.
   practiceDone: {
     sentences: n => `${n} sentence${n === 1 ? '' : 's'}`,
     texts: n => `${n} text${n === 1 ? '' : 's'}`,
     papers: n => `${n} paper${n === 1 ? '' : 's'}`,
+    replies: n => `${n} repl${n === 1 ? 'y' : 'ies'}`,
   },
   practiceRight: pct => `${pct}% right`,
   practiceNotYet: 'Not yet',
@@ -2748,8 +2746,8 @@ const onboarding = {
     dictation: 'Two listens, no more: write in rōmaji what you hear.',
     composition: 'You are given a grammar point: write a sentence that uses it, and a tutor reads it.',
     conversation: 'Someone speaks to you in a scene: choose your reply, write it, or answer freely.',
-    // On the platform's plate, on the desk (plan 165): the question its
-    // well shows.
+    // On the chosen train's card, on the desk (plan 244, plan 165's
+    // plate before it): the question its well shows.
     exam: 'A question in the JLPT’s format, here 漢字読み: the reading of the underlined word.',
   },
   // ── The painted platform, on the phone (plan 225) ─────────
@@ -2772,6 +2770,11 @@ const onboarding = {
   practiceGateHour: { dawn: 'dawn', day: 'day', dusk: 'dusk', night: 'night' },
   practiceGatePantoRaise: 'Raise the pantograph',
   practiceGatePantoLower: 'Lower the pantograph',
+  // ── The painted platform, on the desk (plan 244) ──────────────
+  // The clock for a pointer, and the station's door on the chosen
+  // train's card.
+  practiceGateClockDesk: hour => `Platform clock, ${hour}. Click for the next hour.`,
+  practiceDeskOpen: 'Open the station',
   practiceBank: {
     sentences: n => `${n} sentences written for the grade.`,
     texts: n => `${n} questions a text.`,
@@ -2783,6 +2786,8 @@ const onboarding = {
     text: 'A text of the grade',
     clip: 'A sentence of the grade, by ear',
     point: 'A point of the grade',
+    paper: 'A question of the grade',
+    scene: 'A scene of the grade',
     tier: 'Words of the tier',
     mine: 'Your words',
   },
@@ -3345,6 +3350,78 @@ const reviewPlan = {
 }
 // ── 217:reviews end ──
 
+// ── 243b:transfer ──
+// 乗換 (plans 243, 243b): Settings › Transfer, another app's progress
+// brought across on a transfer ticket -- the source, the file or the
+// key, what the course finds, the stamp, and the way back while the
+// imported cards wait for their first answer; and the sheet over Today
+// that asks a new learner, once.
+const trCount = n => n.toLocaleString('en-US')
+const transfer = {
+  settingsTransfer: 'Transfer',
+  trRowValue: 'Anki, WaniKani, Renshuu',
+  trCap: 'Transfer',
+  trTicketLabel: 'Transfer ticket',
+  trFrom: 'From',
+  trTo: 'To',
+  trSource: { anki: 'Anki', wanikani: 'WaniKani', renshuu: 'Renshuu' },
+  trFileHint: 'Your **.apkg** or **.colpkg** file',
+  trChooseFile: 'Choose my Anki file',
+  trKeyLabel: { wanikani: 'Your WaniKani API token', renshuu: 'Your Renshuu API key' },
+  trKeyPlaceholder: { wanikani: 'Paste it here', renshuu: 'Paste it here' },
+  trReadKey: { wanikani: 'Read my WaniKani cards', renshuu: 'Read my Renshuu cards' },
+  trPages: n => `${trCount(n)} page${n === 1 ? '' : 's'} read`,
+  trHowQ: { anki: 'How do I export it from Anki?', wanikani: 'Where do I find my token?', renshuu: 'Where do I find my key?' },
+  trHow: {
+    anki: ['**File › Export…**', 'Tick **Include scheduling information**', 'Untick **Include media**: the file stays light'],
+    wanikani: ['On WaniKani, **Settings › API Tokens**', 'Create a token **with no permissions**: it can only read', 'Paste it here'],
+    renshuu: ['In Renshuu’s settings, find your **API key**', 'Copy it', 'Paste it here'],
+  },
+  trPrivacyFile: 'Read on your device. Only the words leave it.',
+  trPrivacyKey: name => `Your device reads ${name} itself: your key is never sent to us, and is not kept.`,
+  trFound: n => `card${n === 1 ? '' : 's'} carried over`,
+  trLine: { vocab: 'Vocabulary', kanji: 'Kanji', kana: 'Kana' },
+  trDecks: 'Decks',
+  trDue: (n, weeks) => `${trCount(n)} ${n === 1 ? 'was overdue: it comes' : 'were overdue: they come'} back over ${weeks} weeks.`,
+  trKept: n => `${trCount(n)} already studied here ${n === 1 ? 'stays as it is' : 'stay as they are'}.`,
+  trAbove: n => `${trCount(n)} ${n === 1 ? 'is' : 'are'} past your level and destination: ${n === 1 ? 'it comes' : 'they come'} back into your day when your level gets there.`,
+  trCheck: 'Each card is checked the first time it comes back.',
+  trPunch: 'Stamp the ticket',
+  trAllKept: 'You have studied every one of these cards here already: nothing to carry over.',
+  trNone: 'None of these notes has a card in the course.',
+  trMissing: n => `${trCount(n)} note${n === 1 ? '' : 's'} with no card in the course`,
+  trMissingSample: sample => `For example: ${sample}.`,
+  trReadFrom: list => `Words read from ${list}.`,
+  trRestart: 'Start over',
+  trImported: n => `card${n === 1 ? '' : 's'} imported`,
+  trImportedHint: 'They join your day on their date. The first time, each one is checked.',
+  trPunched: 'Stamped',
+  trGoToday: 'Go to Today',
+  trWaiting: n => `${trCount(n)} imported card${n === 1 ? ' is' : 's are'} still waiting for your first answer.`,
+  trUndo: 'Undo the import',
+  trUndoConfirmQ: 'Remove the imported cards you have not reviewed yet? Those you have reviewed here stay.',
+  trUndoYes: 'Remove',
+  trUndone: n => `${trCount(n)} card${n === 1 ? '' : 's'} removed.`,
+  trErr: {
+    notAnki: 'This file is not an Anki deck (.apkg or .colpkg).',
+    unreadable: 'This file could not be read.',
+    noSchedule: 'This deck was exported without its scheduling: export it again with “Include scheduling information”.',
+    nothing: 'Nothing to carry over: no card the app has taught you yet.',
+    tooMany: 'Too many notes at once: choose fewer decks.',
+    badKey: 'This key was not accepted. Check it and paste it again.',
+    network: 'Could not reach the app. Check your connection.',
+    rate: 'The app asks us to wait a little. Try again in a minute.',
+    unreachable: 'The app did not answer as expected. Try again later.',
+    server: 'The import could not go through. Try again.',
+  },
+  trSheetQ: 'Have you studied somewhere else?',
+  trSheetLead: 'The words you know don’t start from zero: they keep their rhythm.',
+  trSheetGo: 'Bring my progress across',
+  trSheetLater: 'I’m starting here',
+  trSheetFoot: 'Always possible later, in Settings.',
+}
+// ── 243b:transfer end ──
+
 export default {
   ...auth,
   ...landing,
@@ -3380,4 +3457,5 @@ export default {
   ...clrRestday,
   ...clrTickets,
   ...reviewPlan,
+  ...transfer,
 }

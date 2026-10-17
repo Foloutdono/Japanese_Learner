@@ -1,0 +1,100 @@
+# The daily release: `main` is promoted to `production`, once.
+#
+# Render and Vercel deploy the `production` branch and nothing else, so a
+# merge to `main` ships to no learner. Each deploy restarts the one-worker
+# backend, and a learner opening the app during the restart sits on the
+# boot gate (the `boot_timeout` events), so deploys happen once a day, at
+# the quietest hour, rather than once per merge.
+#
+# What it does: if `main` is ahead of `production` and CI is green on
+# main's head, it fast-forwards `production` to it. Never a merge commit,
+# never a force-push: `production` only ever holds commits `main` held
+# first, so there is nothing to reconcile and a hotfix has one path (merge
+# to `main`, press Run workflow). It creates `production` on its first run.
+#
+# Setup, once, in the dashboards (docs/release.md, "Web: the daily release"):
+#   Render  -> the backend service -> Settings -> Build & Deploy -> Branch: production
+#   Vercel  -> the project -> Settings -> Git -> Production Branch: production
+#
+# The schedule only starts working once this file is on the default
+# branch; GitHub ignores cron in workflows that live only on a branch.
+name: Promote to production
+
+on:
+  schedule:
+    # 03:17 UTC, 05:17 in Paris: the learners are French and asleep. Off
+    # the hour, since GitHub's cron queue is busiest at :00.
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+    inputs:
+      ignore_ci:
+        description: 'Promote even if CI is not green on main (a hotfix you accept the risk of)'
+        type: boolean
+        default: false
+        required: false
+
+concurrency:
+  group: promote
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  checks: read
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Is there anything to ship?
+        id: ahead
+        run: |
+          main_sha=$(git rev-parse HEAD)
+          echo "main_sha=$main_sha" >> "$GITHUB_OUTPUT"
+          if ! git ls-remote --exit-code --heads origin production >/dev/null; then
+            echo "production does not exist yet: the first run creates it."
+            echo "ship=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git fetch origin production
+          if [ "$(git rev-parse origin/production)" = "$main_sha" ]; then
+            echo "production is already at main ($main_sha): nothing to ship."
+            echo "ship=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if ! git merge-base --is-ancestor origin/production "$main_sha"; then
+            echo "::error::production holds commits main does not. Something was pushed to it by hand; merge it into main, then run this again."
+            exit 1
+          fi
+          echo "ship=true" >> "$GITHUB_OUTPUT"
+          git log --oneline origin/production.."$main_sha" | head -50
+
+      - name: CI must be green on main's head
+        if: steps.ahead.outputs.ship == 'true' && inputs.ignore_ci != true
+        run: |
+          sha='${{ steps.ahead.outputs.main_sha }}'
+          # The two CI jobs (ci.yml). A missing or still-running one is
+          # not green: a push to main whose CI has not finished waits for
+          # tomorrow, or for a manual run.
+          for job in backend frontend; do
+            result=$(gh api "repos/$GITHUB_REPOSITORY/commits/$sha/check-runs?per_page=100" \
+              --jq "[.check_runs[] | select(.name == \"$job\") | .conclusion] | first // \"missing\"")
+            echo "$job: $result"
+            if [ "$result" != "success" ]; then
+              echo "::error::CI '$job' is '$result' on $sha: not promoting."
+              exit 1
+            fi
+          done
+
+      - name: Fast-forward production to main
+        if: steps.ahead.outputs.ship == 'true'
+        run: |
+          git push origin "${{ steps.ahead.outputs.main_sha }}:refs/heads/production"
+          echo "### Shipped" >> "$GITHUB_STEP_SUMMARY"
+          echo "production is now at \`${{ steps.ahead.outputs.main_sha }}\`." >> "$GITHUB_STEP_SUMMARY"

@@ -172,8 +172,10 @@ export function ConsoleIndex({ value, onChange, onClear, placeholder, count, inp
 // both, and `icon` a glyph before the word (the analyser's three
 // sources, plan 136). An option may also carry a `figure` (bold after
 // its word: Principales 266) and a `sub` (a second, smaller line: the
-// minutes under a run's length) -- Today's choices, plan 199. On the
-// desk (plan 123) it is one tab stop and its
+// minutes under a run's length) -- Today's choices, plan 199 -- and a
+// `mark` after its word with its `current` (aria-current): the
+// learner's own grade among the levels on the desk's Practice gate
+// (plan 244). On the desk (plan 123) it is one tab stop and its
 // arrows move and check, as a radio group's do (hooks/useRadioWalk).
 export function Seg({ options, value, onChange, full = false, className = '', label }) {
   const desk = useDesk()
@@ -191,10 +193,12 @@ export function Seg({ options, value, onChange, full = false, className = '', la
             aria-checked={on}
             tabIndex={radioTab(desk, i, checked)}
             className={`seg__opt${on ? ' seg__opt--on' : ''}${opt.sub ? ' seg__opt--sub' : ''}`}
+            aria-current={opt.current}
             onClick={() => { if (!on) onChange(opt.key) }}
           >
             {opt.icon}
             {opt.label && <span className="seg__opt-latin">{opt.label}</span>}
+            {opt.mark}
             {opt.figure != null && <b className="seg__opt-fig">{opt.figure}</b>}
             {opt.sub && <small className="seg__opt-sub">{opt.sub}</small>}
           </button>

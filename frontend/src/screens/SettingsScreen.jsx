@@ -19,6 +19,7 @@ import { ReadingPacePage } from '../components/settings/ReadingPacePage'
 import { HelpPage } from '../components/settings/HelpPage'
 import { AccountPage } from '../components/settings/AccountPage'
 import { CreditsPage } from '../components/settings/CreditsPage'
+import { TransferPage } from '../components/settings/TransferPage'
 import { NotificationsPage } from '../components/settings/NotificationsPage'
 import { WritePage } from '../components/settings/WritePage'
 import { FeedbackSheet } from '../components/feedback/FeedbackSheet'
@@ -54,6 +55,7 @@ const PAGES = {
   help: HelpPage,
   write: WritePage,
   account: AccountPage,
+  transfer: TransferPage,
   credits: CreditsPage,
 }
 

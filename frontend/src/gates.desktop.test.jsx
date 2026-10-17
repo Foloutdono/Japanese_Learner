@@ -1,27 +1,20 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { MemoryRouter, useLocation } from 'react-router-dom'
+import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
 // ── 机 — the gates laid out for the width (plan 113) ────────────
-// At the desk's tightest (1100, the rail taking 256 of it) Practice
-// hangs its six plates in three rows of two since 作文 (plan 125),
-// Learn its four lines in one column beside the shelf (plan 132) —
-// and Today sets the strip beside the fare gate. The phone's own
-// column (layout.phone.test, PracticeScreen.phone.test) does not move.
+// At the desk's tightest (1100, the rail taking 256 of it) Learn stands
+// its four lines in one column beside the shelf (plan 132), and Today
+// sets the strip beside the fare gate. Practice stands its painted
+// platform since plan 244 (screens/PracticeScreen.desktop.test.jsx).
+// The phone's own column (layout.phone.test, PracticeScreen.phone.test)
+// does not move.
 
-// Every practice platform's card at every grade, as
-// /api/station/{platform}/samples serves it (plan 165: the Practice
-// gate's specimens; testing/practiceCards.json is its `stops`, cards
-// only).
-const { default: CARDS } = await import('./testing/practiceCards.json')
 vi.mock('./lib/api', () => ({
   api: p => p,
-  apiFetch: vi.fn(async path => {
-    const line = path.match(/^\/api\/station\/(\w+)\/samples/)?.[1]
-    return { ok: true, status: 200, json: async () => (line ? { stops: CARDS[line] } : {}) }
-  }),
+  apiFetch: vi.fn(async () => ({ ok: true, status: 200, json: async () => ({}) })),
   apiJson: vi.fn(async () => ({})),
   apiJsonWithTimeout: vi.fn(async () => ({})),
   apiUpload: vi.fn(),
@@ -39,12 +32,10 @@ vi.mock('./lib/audio', async o => ({
   ...(await o()), playUi: vi.fn(), playAnnouncement: vi.fn(), playClick: vi.fn(),
 }))
 vi.mock('./stores/boarding', () => ({ board: commit => commit() }))
-// The learner's grade: N4, unless a test walks them all.
-const learner = vi.hoisted(() => ({ grade: 'N4' }))
 vi.mock('./stores/profileSummary', async (o) => ({
   ...(await o()),
   useProfileSummary: () => ({ jlptLevel: 'N4' }),
-  useProfileSummaryState: () => ({ summary: { jlptLevel: learner.grade }, failed: false }),
+  useProfileSummaryState: () => ({ summary: { jlptLevel: 'N4' }, failed: false }),
 }))
 vi.mock('./stores/departure', async (o) => ({ ...(await o()), beginDeparture: vi.fn() }))
 // The distance on each line (plan 130's upright foot): kana finished,
@@ -58,11 +49,7 @@ const STATS = {
 vi.mock('./stores/stats', async (o) => ({ ...(await o()), useStats: () => ({ data: STATS, failed: false }) }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
-const { default: PracticeScreen } = await import('./screens/PracticeScreen')
 const { default: LearnScreen } = await import('./screens/LearnScreen')
-const { apiFetch } = await import('./lib/api')
-const { beginDeparture } = await import('./stores/departure')
-const { default: fr } = await import('./locales/fr/index.js')
 
 // The plates arrive staggered (index.css's `arrive`); a slow runner can
 // still be finishing the last of them when the timer fires, and a plate
@@ -77,12 +64,6 @@ const settle = async (ms = 620) => {
 
 // The shell's frame without the shell: the content column beside a
 // rail's width of nothing, which is what the desk leaves a screen.
-const seen = { path: null }
-function Probe() {
-  const { pathname, search } = useLocation()
-  seen.path = pathname + search
-  return null
-}
 function framed(path, screen) {
   return render(
     <LangProvider>
@@ -90,7 +71,6 @@ function framed(path, screen) {
         <div className="phone phone--desk">
           <div className="phone__content">{screen}</div>
         </div>
-        <Probe />
       </MemoryRouter>
     </LangProvider>
   )
@@ -99,50 +79,7 @@ const $$ = (sel, root = document) => [...root.querySelectorAll(sel)]
 const box = el => el.getBoundingClientRect()
 const press = (key, el = document.activeElement) => el.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }))
 
-// Two across: every pair shares a top and a height, and each half is
-// half. An odd last plate takes the row (`spans`); an even count ends
-// on a full pair.
-function lattice(plates, { count, spans }) {
-  const boxes = [...plates.children].map(p => p.getBoundingClientRect())
-  const whole = plates.getBoundingClientRect()
-  expect(boxes).toHaveLength(count)
-  for (let i = 0; i + 1 < count; i += 2) {
-    // Within a pixel rather than rounded apiece: since plan 130 the rows
-    // share the window, so a row can start on a half pixel, and two
-    // rounds of 369.5 measured a hair apart land either side of it.
-    expect(Math.abs(boxes[i].top - boxes[i + 1].top)).toBeLessThanOrEqual(1)
-    expect(boxes[i + 1].left).toBeGreaterThan(boxes[i].right)
-    expect(Math.abs(boxes[i].width - boxes[i + 1].width)).toBeLessThanOrEqual(1)
-    expect(boxes[i].width).toBeLessThan(whole.width / 2)
-    expect(Math.abs(boxes[i].height - boxes[i + 1].height)).toBeLessThanOrEqual(1)
-    if (i > 0) expect(boxes[i].top).toBeGreaterThan(boxes[i - 2].bottom)
-  }
-  const last = boxes[count - 1]
-  if (spans) {
-    expect(last.top).toBeGreaterThan(boxes[count - 2].bottom)
-    expect(Math.abs(last.width - whole.width)).toBeLessThanOrEqual(1)
-  } else {
-    expect(last.width).toBeLessThan(whole.width / 2)
-  }
-}
-
 describe('the plated gates on the desk', () => {
-  it('hangs Practice\'s six platforms in three rows of two, the exam last beside 作文', async () => {
-    await framed('/practice', <PracticeScreen />)
-    await settle()
-    const plates = document.querySelector('.practice > .plates')
-    expect(getComputedStyle(plates).display).toBe('grid')
-    // Six divide by two, so the odd-last rule has nothing to span: the
-    // exam keeps its place at the end of the gate and shares the third
-    // row with the platform added before it (plan 125).
-    lattice(plates, { count: 6, spans: false })
-    expect(plates.lastElementChild.querySelector('.plate__head').textContent).toMatch(/examen|exam/i)
-    expect(plates.children[4].querySelector('.plate__head').textContent).toMatch(/rédaction|composition/i)
-    for (const title of document.querySelectorAll('.plate__title')) {
-      expect(title.scrollWidth).toBeLessThanOrEqual(title.clientWidth)
-    }
-  })
-
   it("stands Learn's four lines in one column beside the shelf over the library (plan 132)", async () => {
     await framed('/learn', <LearnScreen />)
     await settle()
@@ -172,19 +109,12 @@ describe('the plated gates on the desk', () => {
 // ── plan 130 — the gates take the window ────────────────────────
 // The plates stood a third of the way down the window with the rest of
 // it empty. They fill it now, their rows sharing the room, and the room
-// goes to each plate's body: the line upright on Learn, and on Practice
-// the grades as rows with the learner's record -- since plan 165, each
-// platform's specimen (below).
+// goes to each plate's body: the line upright on Learn. (Practice's
+// plates did the same with the grades' rows and then, plan 165, each
+// platform's specimen, until plan 244 painted the gate.)
 //
 // The page does not scroll, and the last plate stands a gutter from
 // the window's floor: the plates took the room rather than leaving it.
-function fills(gate) {
-  const plates = document.querySelector(`.${gate} > .plates`)
-  const gutter = parseFloat(getComputedStyle(document.querySelector(`.${gate}`)).paddingBottom)
-  expect(document.scrollingElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight + 1)
-  expect(Math.abs(box(plates).bottom - (window.innerHeight - gutter))).toBeLessThanOrEqual(2)
-}
-
 describe('the gates take the window (plan 130)', () => {
   it('draws each Learn line across its plate, the four filling the window (plan 132)', async () => {
     await framed('/learn', <LearnScreen />)
@@ -226,92 +156,5 @@ describe('the gates take the window (plan 130)', () => {
     n5.focus()
     press('ArrowDown')
     expect(document.activeElement).toBe(n4)
-  })
-})
-
-// ── plan 165 — every platform's specimen ───────────────────────
-// The canvas's last board: each Practice plate holds, under its name,
-// the run's own card in a well, at the learner's grade -- the one door
-// to the station. At the desk's tightest the plates stand three rows
-// deep, so the line over the well gives its room to the well and
-// comprehension holds its text without its question; every well shows
-// its card whole, and the gate still takes the window without a scroll.
-describe('every platform\'s specimen on the Practice gate (plan 165)', () => {
-  const plates = () => $$('.practice > .plates > .plate')
-  const well = plate => plate.querySelector('.plate__head .plate__body .prc-spec--plate')
-  const platformOf = plate => ['reading', 'comprehension', 'translation', 'dictation', 'composition', 'exam'][plates().indexOf(plate)]
-
-  it('draws each platform\'s card at the learner\'s grade, whole, in a gate that fills the window', async () => {
-    await framed('/practice', <PracticeScreen />)
-    await settle()
-    fills('practice')
-    // No grades on the desk's plates: the station a plate opens has them.
-    expect(document.querySelector('.plate__foot')).toBeNull()
-    expect(apiFetch.mock.calls.some(([path]) => path === '/api/practice/record')).toBe(false)
-    expect(plates()).toHaveLength(6)
-    for (const plate of plates()) {
-      const w = well(plate)
-      expect(w, platformOf(plate)).not.toBeNull()
-      // Whole: nothing in the well cut at its foot or its edge.
-      expect(w.scrollHeight, platformOf(plate)).toBeLessThanOrEqual(w.clientHeight + 1)
-      expect(w.scrollWidth, platformOf(plate)).toBeLessThanOrEqual(w.clientWidth + 1)
-      expect(w.getAttribute('aria-hidden')).toBe('true')
-    }
-    const [reading, comprehension, translation, dictation, composition, exam] = plates().map(well)
-    expect(reading.querySelector('.prc-spec__jp').textContent).toBe(CARDS.reading.N4.card.jp)
-    expect(reading.querySelector('.prc-spec__clock')).not.toBeNull()
-    expect(translation.querySelector('.prc-spec__prompt').textContent).toBe(CARDS.translation.N4.card.en)
-    expect(dictation.querySelector('.prc-spec__audio')).not.toBeNull()
-    expect(composition.querySelector('.prc-spec__jp').textContent).toBe(CARDS.composition.N4.card.jp)
-    expect(composition.querySelector('.prc-spec__gloss').textContent).toBe(CARDS.composition.N4.card.meaning)
-    // The exam's 漢字読み: its word underlined, the paper's four readings.
-    const vocab = CARDS.exam.N4.card.vocab
-    expect(exam.querySelector('.prc-spec__mark').textContent).toBe(vocab.word)
-    expect($$('.prc-spec__opt', exam).map(o => o.textContent.slice(1))).toEqual(vocab.options)
-    // Three rows deep, the plates are short: comprehension holds its
-    // text alone, and no line is drawn over any well.
-    expect(comprehension.querySelector('.prc-spec__title').textContent).toBe(CARDS.comprehension.N4.card.title)
-    expect(comprehension.querySelector('.prc-spec__q')).toBeNull()
-    for (const how of $$('.plate__how')) expect(how.hidden).toBe(true)
-  })
-
-  it('holds every grade\'s card whole, N1\'s longest sentences too', async () => {
-    for (const grade of ['N5', 'N4', 'N3', 'N2', 'N1']) {
-      learner.grade = grade
-      const screen = await framed('/practice', <PracticeScreen />)
-      await settle(300)
-      expect(document.scrollingElement.scrollHeight, grade).toBeLessThanOrEqual(window.innerHeight + 1)
-      for (const plate of plates()) {
-        const w = well(plate)
-        expect(w.textContent, `${grade} ${platformOf(plate)}`).not.toBe('')
-        expect(w.scrollHeight, `${grade} ${platformOf(plate)}`).toBeLessThanOrEqual(w.clientHeight + 1)
-        expect(w.scrollWidth, `${grade} ${platformOf(plate)}`).toBeLessThanOrEqual(w.clientWidth + 1)
-      }
-      expect(plates()[0].querySelector('.prc-spec__jp').textContent).toBe(CARDS.reading[grade].card.jp)
-      await screen.unmount()
-    }
-    learner.grade = 'N4'
-  })
-
-  it('makes the plate one door, named for its platform and described by what it asks', async () => {
-    await framed('/practice', <PracticeScreen />)
-    await settle()
-    const heads = plates().map(p => p.querySelector(':scope > .plate__head'))
-    expect(heads.every(h => h.tagName === 'BUTTON')).toBe(true)
-    // The head is the plate: it runs from the plate's top to its stripe.
-    for (const [i, head] of heads.entries()) {
-      expect(Math.abs(box(head).height - (box(plates()[i]).height - box(plates()[i].querySelector('.plate__stripe')).height - 2))).toBeLessThanOrEqual(1)
-    }
-    // The name is the name; what the platform asks is the description,
-    // there to a screen reader even where the plate is too short to draw it.
-    const how = document.getElementById(heads[0].getAttribute('aria-describedby'))
-    expect(how.textContent).toBe(fr.practiceHow.reading)
-    expect(how.getAttribute('aria-hidden')).toBe('true')
-    expect(heads[5].querySelector('.plate__title').textContent).toBe(fr.examTitle)
-    // A click anywhere on the plate -- the well too -- departs for its station.
-    beginDeparture.mockClear()
-    heads[1].querySelector('.prc-spec').click()
-    expect(beginDeparture).toHaveBeenCalledTimes(1)
-    expect(beginDeparture.mock.calls[0][0].path).toBe('/practice/comprehension')
   })
 })

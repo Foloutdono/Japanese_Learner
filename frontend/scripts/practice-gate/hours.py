@@ -67,6 +67,29 @@ SKY_TOP_V = 46.0
 HOUR_ORDER = ('night', 'dusk', 'dawn')
 
 
+class Geometry:
+    """Where a painting keeps what the hours light, in its own units: the
+    phone's platform (390 x 724 units, 2 px to a unit) by default. The
+    desk's painting (desk.py) is measured the same way and lit by the
+    same recipes."""
+    px = 2                      # layer px to a unit
+    sky_top = SKY_TOP_V         # the sky's top, under the canopy
+    horizon = HORIZON_V         # where the sky meets the land
+    fascia = 37.5               # the canopy's fascia, from this row down
+    floor = (556, 724)          # the platform's rows, near to far
+    stars_y = 268               # no star lower than this
+    stars_margin = 52           # px clear of the layer's two sides
+    star = 1.0                  # a star's size, as a share of the phone's
+    towns = ((300, 366, 284, 297, 0.55), (180, 300, 289, 298, 0.3), (40, 175, 292, 300, 0.15))
+    rims = (23.5, 366.4)        # the pillars' inner edges, lit by the lamps
+    bloom = (6, 18, 44)         # the lamps' glow, px
+    recipe = {}                 # an hour's recipe, as this painting needs it: its sun
+                                # or moon where it has its sky, its stars, its town
+
+
+PHONE = Geometry()
+
+
 def recipes(print_hours):
     """What each hour lights, and how. The skies are Today's own."""
     return {
@@ -110,19 +133,26 @@ def recipes(print_hours):
 
 
 class Lighter:
-    def __init__(self, print_hours):
+    def __init__(self, print_hours, geo=PHONE):
+        self.G = geo
         self.H = recipes(print_hours)
+        for hour, changes in geo.recipe.items():
+            T = dict(self.H[hour])
+            for key, value in changes.items():
+                T[key] = dict(T[key], **value) if isinstance(value, dict) and isinstance(T.get(key), dict) else value
+            self.H[hour] = T
         self.rng = np.random.default_rng(205)
 
     # ── the sky's disc, its stars, the far town ──
     def disc(self, img_lin, d):
         """Today's sun or moon: a soft disc, its glow, the moon's quiet seas."""
         Hh, Ww = img_lin.shape[:2]
+        px = self.G.px
         cu, cv = d['at']
-        cx, cy, r = cu * 2, cv * 2, d['r'] * 2
+        cx, cy, r = cu * px, cv * px, d['r'] * px
         yy, xx = np.mgrid[0:Hh, 0:Ww].astype(np.float32)
         dist = np.sqrt((xx - cx) ** 2 + (yy - cy) ** 2)
-        glow = np.exp(-(np.maximum(dist - r, 0) / (d['glow_r'] * 2 / 2.2)) ** 1.4) * d['glow_k']
+        glow = np.exp(-(np.maximum(dist - r, 0) / (d['glow_r'] * px / 2.2)) ** 1.4) * d['glow_k']
         out = img_lin + lin(d['glow'])[None, None, :] * glow[..., None] * (1 - img_lin)
         inner, edge = C(d['fill'][0]), C(d['fill'][1])
         t = np.clip(dist / r, 0, 1)
@@ -136,13 +166,14 @@ class Lighter:
 
     def stars(self, img_lin, n, sky, clouds, horizon_px, keep_out):
         rng = self.rng
+        G = self.G
         Hh, Ww = img_lin.shape[:2]
         out = img_lin.copy()
         placed = tries = 0
         while placed < n and tries < n * 30:
             tries += 1
-            x = rng.uniform(52, Ww - 52)
-            y = rng.uniform(SKY_TOP_V * 2 + 14, 268 * 2)
+            x = rng.uniform(G.stars_margin, Ww - G.stars_margin)
+            y = rng.uniform(G.sky_top * G.px + 14, G.stars_y * G.px)
             xi, yi = int(x), int(y)
             if not sky[yi, xi] or clouds[yi, xi] > 0.08:
                 continue
@@ -152,7 +183,7 @@ class Lighter:
             if rng.random() > fade:
                 continue
             b = (rng.random() ** 2.6) * 0.9 + 0.12
-            s = 0.55 + rng.random() ** 3 * 1.1
+            s = (0.55 + rng.random() ** 3 * 1.1) * G.star
             tint = np.array([1.0, 0.97, 0.92]) if rng.random() < 0.5 else np.array([0.88, 0.93, 1.0])
             x0, x1, y0, y1 = max(0, xi - 4), min(Ww, xi + 5), max(0, yi - 4), min(Hh, yi + 5)
             gy, gx = np.mgrid[y0:y1, x0:x1].astype(np.float32)
@@ -164,12 +195,12 @@ class Lighter:
     def town(self, img_lin, n, land_mask):
         """Windows lit in the far town at Fuji's foot and along the hills."""
         rng = self.rng
+        px = self.G.px
         Hh, Ww = img_lin.shape[:2]
         out = img_lin.copy()
-        zones = [(300, 366, 284, 297, 0.55), (180, 300, 289, 298, 0.3), (40, 175, 292, 300, 0.15)]
-        for u0, u1, v0, v1, share in zones:
+        for u0, u1, v0, v1, share in self.G.towns:
             for _ in range(int(n * share)):
-                x, y = rng.uniform(u0 * 2, u1 * 2), rng.uniform(v0 * 2, v1 * 2)
+                x, y = rng.uniform(u0 * px, u1 * px), rng.uniform(v0 * px, v1 * px)
                 xi, yi = int(x), int(y)
                 if not land_mask[yi, xi]:
                     continue
@@ -186,14 +217,15 @@ class Lighter:
         """The scene lit at the hour; without its clouds (clouds=False), the
         same sky they drift over (clouds.py), its stars where they were."""
         T = self.H[hour]
+        G = self.G
         rgb = a[..., :3]
         L, S = lum(rgb), sat(rgb)
         Hh, Ww = L.shape
-        v = (np.arange(Hh, dtype=np.float32) / 2)[:, None] * np.ones((1, Ww), np.float32)
+        v = (np.arange(Hh, dtype=np.float32) / G.px)[:, None] * np.ones((1, Ww), np.float32)
         sky, land, horizon = M['sky'], M['land'], M['horizon']
 
         # the sky and its clouds
-        t = np.clip((v - SKY_TOP_V) / (HORIZON_V - SKY_TOP_V), 0, 1)
+        t = np.clip((v - G.sky_top) / (G.horizon - G.sky_top), 0, 1)
         base = grad(T['sky'], t)
         Lsky = np.where(sky, L, np.nan)
         with np.errstate(all='ignore'):
@@ -238,7 +270,7 @@ class Lighter:
 
         # the canopy, its fascia, the wires
         can = M['canopy']
-        fascia = can & (v >= 37.5)
+        fascia = can & (v >= G.fascia)
         out[can] = tone(T['canopy'], L, 0.26, 1.0)[can]
         out[fascia] = tone(T['fascia'], L, 0.5, 1.0)[fascia]
         wires = M['wires']
@@ -252,7 +284,7 @@ class Lighter:
         lowf = blur(np.nan_to_num(Lp, nan=float(np.nanmean(Lp))), 22)
         tex = np.clip(L / np.maximum(lowf, 0.05), 0.4, 1.6) ** T['floor_tex']
         near_c, far_c = T['floor']
-        fv = np.clip((v - 556) / (724 - 556), 0, 1)
+        fv = np.clip((v - G.floor[0]) / (G.floor[1] - G.floor[0]), 0, 1)
         floor = mix(np.broadcast_to(near_c, rgb.shape), np.broadcast_to(far_c, rgb.shape), fv) * tex[..., None]
         if 'sun_patch' in T:
             pc, pk = T['sun_patch']
@@ -267,7 +299,7 @@ class Lighter:
         d = T['disc']
         lo = mix(lo, self.disc(lo, d), smooth(sky, 0.7 if d['kind'] == 'sun' else 0.8))
         if T['stars']:
-            keep = (d['at'][0] * 2, d['at'][1] * 2, d['r'] * 2 * 3.2)
+            keep = (d['at'][0] * G.px, d['at'][1] * G.px, d['r'] * G.px * 3.2)
             lo = self.stars(lo, T['stars'], sky, cloud, horizon, keep)
         if T['town']:
             lo = self.town(lo, T['town'] * (1 if hour == 'night' else 0.5), M['forest'] | M['mount'])
@@ -275,7 +307,8 @@ class Lighter:
         lo[tube] = lin(T['tube'])
         bc, bk = T['bloom']
         tm = tube.astype(np.float32)
-        bloom = blur(tm, 6) * 1.6 + blur(tm, 18) * 1.1 + blur(tm, 44) * 0.5
+        b0, b1, b2 = G.bloom
+        bloom = blur(tm, b0) * 1.6 + blur(tm, b1) * 1.1 + blur(tm, b2) * 0.5
         lo = lo + lin(bc)[None, None, :] * (bloom * bk)[..., None] * 0.55
         return np.clip(srgb(lo), 0, 1), a[..., 3]
 
@@ -286,9 +319,9 @@ class Lighter:
         out = tone(T['pillar'], L, 0.3, 1.0)
         # a warm rim on the pillars' inner edges, from the platform's lamps
         Hh, Ww = L.shape
-        u = (np.arange(Ww, dtype=np.float32) / 2)[None, :] * np.ones((Hh, 1), np.float32)
+        u = (np.arange(Ww, dtype=np.float32) / self.G.px)[None, :] * np.ones((Hh, 1), np.float32)
         rc, rk = T['pillar_rim']
-        rim = np.clip(1 - np.abs(u - 23.5) / 2.2, 0, 1) + np.clip(1 - np.abs(u - 366.4) / 2.2, 0, 1)
+        rim = sum(np.clip(1 - np.abs(u - at) / 2.2, 0, 1) for at in self.G.rims)
         out = out + rc[None, None, :] * (rim * rk)[..., None]
         return np.clip(out, 0, 1), al
 

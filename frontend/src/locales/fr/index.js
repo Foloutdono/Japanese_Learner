@@ -2572,10 +2572,9 @@ const guide = {
   guideLearnPlate: 'Une ligne. Touche-la pour l’ouvrir. La pastille montre ce qui t’attend aujourd’hui.',
   guideLearnStops: 'Où tu en es sur la ligne, et les arrêts autour.',
   guideLearnShelf: 'Tes propres decks, et la bibliothèque des decks partagés par les autres.',
-  guidePracticePlate: 'Un exercice : lire, comprendre, traduire, écouter ou écrire de vraies phrases.',
-  guidePracticeDests: 'Les niveaux. Le tien est marqué : touche-en un autre pour l’essayer quand même.',
   guidePracticePass: 'Ces exercices font partie de l’abonnement.',
-  // Le quai peint (plan 225) : ses deux panneaux et son portique.
+  // Le quai peint (plan 225) : ses deux panneaux et son portique ; au
+  // bureau (plan 244), le tableau des départs et le portique.
   guidePracticeSign: 'La destination du train. Touche la ligne du dessus ou du dessous pour la faire tourner, celle qui est allumée pour ouvrir sa station.',
   guidePracticeGrade: 'Le niveau du train. Le tien porte un point : fais-le tourner pour en essayer un autre.',
   guidePracticeBoard: 'Embarque : les portes se ferment et le train t’emmène à l’exercice.',
@@ -2590,7 +2589,6 @@ const guide = {
   guideProfileLedger: 'Chaque ligne, et le chemin parcouru.',
   guideProfileSettings: 'Réglages : ton niveau, ton rythme, ta façon de noter, et ce guide quand tu veux.',
   guideLearnLibrary: 'La bibliothèque : des decks partagés par d’autres. Ouvre-en un pour le découvrir ; suis-le pour l’étudier.',
-  guidePracticeExam: 'L’examen blanc : une épreuve type JLPT au niveau de ton choix, corrigée dès que tu la rends.',
   guideDictActions: 'Écoute-la, ou utilise ＋ pour la garder en favori ou l’ajouter à l’un de tes decks.',
   guideProfileStats: 'Statistiques : ce qui reste et ce qui t’échappe, ligne par ligne.',
   guideProfileBoard: 'Le classement en XP : cette semaine et depuis toujours.',
@@ -2600,13 +2598,11 @@ const guide = {
   guideLearnStopsDesk: 'Toute la ligne. Clique sur un arrêt pour l’étudier.',
   // Pour un pointeur (plan 123) : les notes qui disaient « touchez ».
   guideLearnPlateDesk: 'Une ligne. Clique dessus pour l’ouvrir. La pastille montre ce qui t’attend aujourd’hui.',
-  // Au bureau, les quais ne portent plus leurs niveaux (plan 165) : l'arrêt
-  // y est sauté, mais sa note reste dite pour un pointeur.
-  guidePracticeDestsDesk: 'Les niveaux. Le tien est marqué : clique sur un autre pour l’essayer quand même.',
-  guidePracticePlateDesk: 'Un exercice, et ce qu’il te demandera à ton niveau. Clique dessus pour l’ouvrir.',
-  // Le quai peint ne se tient qu'au téléphone (plan 225) : sa note reste
-  // dite pour un pointeur, comme celle des niveaux.
-  guidePracticeSignDesk: 'La destination du train. Clique sur la ligne du dessus ou du dessous pour la faire tourner, sur celle qui est allumée pour ouvrir sa station.',
+  // Le quai peint au bureau (plan 244) : le tableau des départs, ses
+  // niveaux en tête, et le portique, qu'Entrée presse aussi.
+  guidePracticeGradeDesk: 'Le niveau des trains. Le tien porte un point : clique sur un autre pour l’essayer quand même.',
+  guidePracticeSignDesk: 'Les trains au départ, un par exercice, avec ce que tu y as fait à ce niveau. Clique sur l’un pour voir ce qu’il te demandera.',
+  guidePracticeBoardDesk: 'Embarque : les portes se ferment et le train t’emmène à l’exercice. Entrée le fait de n’importe où ici.',
   guideDictEntryDesk: 'Une entrée, ouverte à côté de la liste. ← et → pour parcourir la liste.',
   // Réglages, les deux retours.
   settingsFirstRide: 'Premier essai',
@@ -2657,13 +2653,15 @@ const onboarding = {
   settingsLineOn: 'Sur ton trajet',
   settingsLineOff: 'Hors de ton trajet',
   plateOffRoute: 'Hors de ton trajet',
-  // Le relevé d'un niveau sur un quai de Pratique, au bureau (plan 130) :
-  // ce qui a été fait à ce niveau, puis la part juste. L'espace avant le
-  // % est insécable, comme partout en français.
+  // Le relevé d'un niveau sur un quai de Pratique, au bureau (plan 130 ;
+  // sur le tableau des départs depuis le plan 244) : ce qui a été fait à
+  // ce niveau, puis la part juste. L'espace avant le % est insécable,
+  // comme partout en français.
   practiceDone: {
     sentences: n => `${n} phrase${n > 1 ? 's' : ''}`,
     texts: n => `${n} texte${n > 1 ? 's' : ''}`,
     papers: n => `${n} épreuve${n > 1 ? 's' : ''}`,
+    replies: n => `${n} réponse${n > 1 ? 's' : ''}`,
   },
   practiceRight: pct => `${pct}\u00a0% justes`,
   practiceNotYet: 'Pas encore',
@@ -2680,8 +2678,8 @@ const onboarding = {
     dictation: 'Deux écoutes, pas une de plus : écris en rōmaji ce que tu entends.',
     composition: 'Un point de grammaire est donné : écris une phrase qui l’emploie, un tuteur la relit.',
     conversation: 'On te parle dans une scène : choisis ta réponse, écris-la ou réponds librement.',
-    // Sur la plaque du quai, au bureau (plan 165) : la question que son
-    // puits montre.
+    // Sur la carte du train choisi, au bureau (plan 244, la plaque du
+    // plan 165 avant lui) : la question que son puits montre.
     exam: 'Une question au format JLPT, ici 漢字読み : la lecture du mot souligné.',
   },
   // ── Le quai peint, au téléphone (plan 225) ─────────────────
@@ -2704,6 +2702,11 @@ const onboarding = {
   practiceGateHour: { dawn: 'l’aube', day: 'le jour', dusk: 'le soir', night: 'la nuit' },
   practiceGatePantoRaise: 'Lever le pantographe',
   practiceGatePantoLower: 'Baisser le pantographe',
+  // ── Le quai peint, au bureau (plan 244) ─────────────────────
+  // L'horloge pour un pointeur, et la porte de la station sur la carte
+  // du train choisi.
+  practiceGateClockDesk: hour => `Horloge du quai, ${hour}. Clique pour l’heure suivante.`,
+  practiceDeskOpen: 'Ouvrir la station',
   practiceBank: {
     sentences: n => `${n} phrases écrites pour le grade.`,
     texts: n => `${n} questions par texte.`,
@@ -2715,6 +2718,8 @@ const onboarding = {
     text: 'Un texte du grade',
     clip: 'Une phrase du grade, à l’oreille',
     point: 'Un point du grade',
+    paper: 'Une question du grade',
+    scene: 'Une scène du grade',
     tier: 'Des mots du palier',
     mine: 'Tes mots',
   },
@@ -3296,6 +3301,78 @@ const reviewPlan = {
 }
 // ── 217:reviews end ──
 
+// ── 243b:transfer ──
+// 乗換 (plans 243, 243b): Settings › Correspondance, another app's
+// progress brought across on a transfer ticket -- the source, the file
+// or the key, what the course finds, the stamp, and the way back while
+// the imported cards wait for their first answer; and the sheet over
+// Today that asks a new learner, once.
+const trCount = n => n.toLocaleString('fr-FR')
+const transfer = {
+  settingsTransfer: 'Correspondance',
+  trRowValue: 'Anki, WaniKani, Renshuu',
+  trCap: 'Correspondance',
+  trTicketLabel: 'Billet de correspondance',
+  trFrom: 'De',
+  trTo: 'Vers',
+  trSource: { anki: 'Anki', wanikani: 'WaniKani', renshuu: 'Renshuu' },
+  trFileHint: 'Ton fichier **.apkg** ou **.colpkg**',
+  trChooseFile: 'Choisir mon fichier Anki',
+  trKeyLabel: { wanikani: 'Ton jeton d’API WaniKani', renshuu: 'Ta clé d’API Renshuu' },
+  trKeyPlaceholder: { wanikani: 'Colle-le ici', renshuu: 'Colle-la ici' },
+  trReadKey: { wanikani: 'Lire mes cartes WaniKani', renshuu: 'Lire mes cartes Renshuu' },
+  trPages: n => `${trCount(n)} page${n > 1 ? 's' : ''} lue${n > 1 ? 's' : ''}`,
+  trHowQ: { anki: 'Comment l’exporter depuis Anki ?', wanikani: 'Où trouver mon jeton ?', renshuu: 'Où trouver ma clé ?' },
+  trHow: {
+    anki: ['**Fichier › Exporter…**', 'Coche **Inclure les informations de planification**', 'Décoche **Inclure les médias** : le fichier reste léger'],
+    wanikani: ['Sur WaniKani, **Settings › API Tokens**', 'Crée un jeton **sans aucune permission** : il ne pourra que lire', 'Colle-le ici'],
+    renshuu: ['Dans les réglages de Renshuu, trouve ta **clé d’API**', 'Copie-la', 'Colle-la ici'],
+  },
+  trPrivacyFile: 'Lu sur ton appareil. Seuls les mots partent.',
+  trPrivacyKey: name => `Ton appareil lit ${name} lui-même : ta clé ne nous est jamais envoyée, et n’est pas gardée.`,
+  trFound: n => `carte${n > 1 ? 's' : ''} reprise${n > 1 ? 's' : ''}`,
+  trLine: { vocab: 'Vocabulaire', kanji: 'Kanji', kana: 'Kana' },
+  trDecks: 'Paquets',
+  trDue: (n, weeks) => `${trCount(n)} ${n > 1 ? 'étaient en retard : elles reviennent' : 'était en retard : elle revient'} sur ${weeks} semaines.`,
+  trKept: n => `${trCount(n)} déjà étudiée${n > 1 ? 's' : ''} ici ${n > 1 ? 'restent comme elles sont' : 'reste comme elle est'}.`,
+  trAbove: n => `${trCount(n)} ${n > 1 ? 'sont' : 'est'} au-delà de ton niveau et de ta destination : ${n > 1 ? 'elles reviendront' : 'elle reviendra'} dans ta journée quand ton niveau y arrivera.`,
+  trCheck: 'Chaque carte est vérifiée à son premier passage.',
+  trPunch: 'Composter le billet',
+  trAllKept: 'Tu as déjà étudié ici toutes ces cartes : rien à reprendre.',
+  trNone: 'Aucune de ces notes n’a de carte dans le cours.',
+  trMissing: n => `${trCount(n)} note${n > 1 ? 's' : ''} sans carte dans le cours`,
+  trMissingSample: sample => `Par exemple : ${sample}.`,
+  trReadFrom: list => `Mots lus dans ${list}.`,
+  trRestart: 'Recommencer',
+  trImported: n => `carte${n > 1 ? 's' : ''} importée${n > 1 ? 's' : ''}`,
+  trImportedHint: 'Elles rejoignent ta journée à leur date. La première fois, chacune est vérifiée.',
+  trPunched: 'Composté',
+  trGoToday: 'Aller à Aujourd’hui',
+  trWaiting: n => `${trCount(n)} carte${n > 1 ? 's' : ''} importée${n > 1 ? 's attendent' : ' attend'} encore ta première réponse.`,
+  trUndo: 'Annuler l’import',
+  trUndoConfirmQ: 'Retirer les cartes importées que tu n’as pas encore revues ? Celles que tu as revues ici restent.',
+  trUndoYes: 'Retirer',
+  trUndone: n => `${trCount(n)} carte${n > 1 ? 's' : ''} retirée${n > 1 ? 's' : ''}.`,
+  trErr: {
+    notAnki: 'Ce fichier n’est pas un paquet Anki (.apkg ou .colpkg).',
+    unreadable: 'Ce fichier n’a pas pu être lu.',
+    noSchedule: 'Ce paquet a été exporté sans sa planification : exporte-le de nouveau avec « Inclure les informations de planification ».',
+    nothing: 'Rien à reprendre : aucune carte que l’appli t’a déjà apprise.',
+    tooMany: 'Trop de notes en une fois : choisis moins de paquets.',
+    badKey: 'Cette clé n’est pas acceptée. Vérifie-la et colle-la de nouveau.',
+    network: 'Impossible de joindre l’appli. Vérifie ta connexion.',
+    rate: 'L’appli demande d’attendre un peu. Réessaie dans une minute.',
+    unreachable: 'L’appli n’a pas répondu comme prévu. Réessaie plus tard.',
+    server: 'L’import n’a pas pu aboutir. Réessaie.',
+  },
+  trSheetQ: 'Tu as déjà appris ailleurs ?',
+  trSheetLead: 'Les mots que tu connais ne repartent pas de zéro : ils gardent leur rythme.',
+  trSheetGo: 'Reprendre ma progression',
+  trSheetLater: 'Je commence ici',
+  trSheetFoot: 'Toujours possible plus tard, dans Réglages.',
+}
+// ── 243b:transfer end ──
+
 export default welded({
   ...auth,
   ...landing,
@@ -3331,4 +3408,5 @@ export default welded({
   ...clrRestday,
   ...clrTickets,
   ...reviewPlan,
+  ...transfer,
 })
