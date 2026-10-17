@@ -76,6 +76,24 @@ def blank_span(jp: str, pattern: str, level: str) -> tuple[int, int] | None:
     return start, end
 
 
+def span_parts(jp: str, span: tuple[int, int] | None) -> list[dict]:
+    """The parts `span` covers, as the sentence writes them: what stands
+    in the hole once the contrast drill is answered (plan 245).
+
+    Never the pattern itself. A point is quoted in its citation form and a
+    sentence holds what it holds there: から〜まで is blanked on its から
+    alone (十時＿＿＿七時まで), 〜てしまう on the てしま of てしまいました,
+    so the pattern poured back into the hole read 十時から〜まで七時まで
+    and 食べてしまういました. Empty when there is no span."""
+    parts = align_sentence(jp) if jp and span else []
+    if not parts:
+        return []
+    return [
+        {k: v for k, v in part.items() if k != "highlight"}
+        for part in mark_spans(parts, [span]) if part.get("highlight")
+    ]
+
+
 def parts_with_span(jp: str, span: tuple[int, int] | None, mark: str) -> list[dict]:
     """
     align_sentence's parts with the span marked.
@@ -113,6 +131,8 @@ def _payload(jp: str, en: str, fr: str, register: str | None, contrast: bool,
         "tr": translation({"en": en, "fr": fr}, lang),
         "furigana": parts_with_span(jp, span, "blank" if blank else "highlight"),
     }
+    if blank and span:
+        payload["fill"] = span_parts(jp, span)
     if register:
         payload["register"] = register
     if contrast:
@@ -123,7 +143,10 @@ def _payload(jp: str, en: str, fr: str, register: str | None, contrast: bool,
 def _frozen(payload: dict) -> dict:
     # lru_cache hands back the same object every time; a caller that
     # mutates the parts list would corrupt every later reader.
-    return {**payload, "furigana": [dict(p) for p in payload["furigana"]]}
+    out = {**payload, "furigana": [dict(p) for p in payload["furigana"]]}
+    if "fill" in payload:
+        out["fill"] = [dict(p) for p in payload["fill"]]
+    return out
 
 
 def example_payload(example: dict, pattern: str, lang: str) -> dict:
@@ -135,7 +158,8 @@ def example_payload(example: dict, pattern: str, lang: str) -> dict:
 
 
 def blanked_payload(example: dict, pattern: str, lang: str, level: str | None = None) -> dict:
-    """{jp, tr, furigana (with the pattern as one blank part), ...}. With
+    """{jp, tr, furigana (with the pattern as one blank part), fill (what
+    the sentence has in the hole, span_parts), ...}. With
     the point's `level`, a pattern the stems cannot point at is blanked
     where the detector finds it (blank_span)."""
     return _frozen(_payload(
