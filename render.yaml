@@ -8,6 +8,10 @@ services:
     name: japanese-app-backend
     runtime: python
     region: frankfurt
+    # `production`, not `main`: `.github/workflows/promote.yml` moves it
+    # once a day, so the one-worker backend restarts once a day rather
+    # than at every merge (docs/release.md, "Web: the daily release").
+    branch: production
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT

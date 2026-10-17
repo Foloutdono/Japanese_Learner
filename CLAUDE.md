@@ -943,6 +943,13 @@ Frontend calls same-origin `/api/*` FastAPI routes in both dev and prod (Vite pr
 
 ## Deployment
 
+- **Two branches, one release a day.** `main` is where work lands and is
+  tested; `production` is what Render and Vercel deploy, moved by
+  `.github/workflows/promote.yml` once a day (03:17 UTC) when CI is green on
+  `main`. A merge to `main` ships to no learner, because each backend
+  restart shows learners the boot gate. Never push to `production` by hand;
+  a hotfix is a merge to `main` and a manual run of the workflow
+  (`docs/release.md`, "Web: the daily release").
 - Backend: Render (`render.yaml`), root `backend/`, persistent disk mounted at `/data` for SRS storage. The running service is the dashboard's `Japanese_Learner`, in Frankfurt, which `render.yaml` did not create (the names differ): a Blueprint made from the file would add a second backend beside it, so the live services are changed in the dashboard and the file is kept saying the same.
 - Voice engine: a second service in `render.yaml`, `voicevox-nemo`, a
   **private** service running the stock `voicevox/voicevox_nemo_engine` image
