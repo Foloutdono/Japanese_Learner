@@ -61,3 +61,52 @@ print, so a taller screen shows more sky. A car tile is 340.71 × 360.17
 units at (24.65, 195.86); the train passing is the tile repeated, the
 standing car the painting's own. The roll signs, the leaves and the
 pantograph are placed in the same units (`PracticeGate.jsx`).
+
+## On the desk (plan 243)
+
+The desk's gate stands on a second painting of the owner's,
+`source/desk.webp`: the owner's picture of option B of the canvas
+"Tsuji — Practice on the desk" (the station painted wide, the 辻駅 sign,
+the 富士見台 pillar, the clock, the bench, a car with its door open, and
+the board drawn over its right side). `desk.py` cuts it and lights it
+with this folder's own recipes (`hours.py`, given the painting's
+`Geometry`: where its sky, floor, stars, town and lamps' rims lie, and
+where each hour puts its sun or moon in this sky).
+
+```bash
+cd frontend && python3 scripts/practice-gate/desk.py
+# same needs as build.py; about a minute, deterministic
+```
+
+It writes:
+
+- `public/practice/gate/desk/<REV>/`: at each hour, `bg` (the scene, the
+  roof's gear and what the app draws painted out), `car` (the standing
+  car, its door open), `car2` (the same car, door shut: the cars before
+  and after it), `near` (the pillars, the pillar's sign, the bench) and
+  the shut door's two leaves, `leaf-l` and `leaf-r`, as WebP; and
+  `band-car.png`, `band-car2.png`, `band-leaf-l.png`, `band-leaf-r.png`,
+  the stripe's masks;
+- `src/components/practice/gate/desk.json`: the revision, the scene's
+  size (2127 × 940 units, one px each) and where the car, the door, the
+  clock, the sign and the pillars stand in it, and the frame's fill at
+  each hour.
+
+The rules are the phone's: bump `REV` in `desk.py` whenever its output
+changes (the service worker keeps `/practice/gate/` cache-first, the
+desk's folder with it) and delete the old revision's folder, never edit
+the layers or the JSON by hand, and draw from nothing but the owner's
+painting. `src/practiceGate.test.js` holds the layers at the revision
+the app asks for, and the fit.
+
+| module | what it does |
+| --- | --- |
+| `desk_cut.py` | cuts the picture's name strip off; paints out the gate button and the clock's face (the app draws both); draws the platform under the board again from the painting's own bays (the canopy at the rafters' repeat, the sky and floor mirrored at the seam, the car carried along its doors and windows, a pillar carried one bay on) and one bay more past the right edge, for a wide window; cuts the layers and the stripe's masks |
+| `desk_parts.py` | the scene's parts as masks, as `parts.py` does for the phone's (the sky and its clouds, Fuji's snow, the far hills, the forest, the canopy and its lamps, the wires, the platform and its tactile strip, the sign; on the cars their roof, side, glass, the lit inside and its far window, the underframe; in front the pillars, the pillar's sign and the bench) |
+| `desk.py` | lights the parts at each hour and writes the app's files |
+
+The app fits the scene to its frame in `deskFit.js` (the open door kept
+left of the board, the sign whole or gone, the clock never cut by the
+board's edge where the painting can help it) and draws the board, the
+leaves, the clock, the stripe's pigment and the gate button over it
+(`DeskGate.jsx`).

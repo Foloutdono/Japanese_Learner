@@ -5,13 +5,13 @@ import { LangProvider } from './LangContext'
 import './index.css'
 
 // ── 低 — the gates on a laptop's short window (plan 169) ────────────
-// Both gates share the window's height among their plates. At 1280×600
-// each of Learn's four line plates was 19px shorter than its line, the
-// figures under its stops cut at every foot, and Practice's six plates
-// two by two left each specimen a 180px row that cut its card at both
-// edges. Learn's plates come in a rung and hold whole; Practice goes
-// three across as soon as three hold a desk column's least width, and a
-// specimen keeps its content wherever the page must scroll instead.
+// At 1280×600 each of Learn's four line plates was 19px shorter than
+// its line, the figures under its stops cut at every foot: they come in
+// a rung and hold whole. Practice's painted platform (plan 243) keeps
+// its board in the window: the levels, the seven trains a rung tighter
+// and the chosen one's card, which leaves its head and its link to the
+// row and the rail and keeps its well, every train's compact face whole
+// at every grade.
 
 const { default: CARDS } = await import('./testing/practiceCards.json')
 vi.mock('./lib/api', () => ({
@@ -89,16 +89,30 @@ describe('the gates on a short window', () => {
     expect(box(plates.at(-1)).bottom).toBeLessThanOrEqual(window.innerHeight)
   })
 
-  it('stands Practice\'s six plates three across, every specimen whole', async () => {
+  it('keeps Practice\'s board in the window, every train\'s card whole at every grade', async () => {
     await framed('/practice', <PracticeScreen />)
     await settle(900)
-    const plates = $$('.practice > .plates > .plate')
-    expect(plates).toHaveLength(6)
-    expect(new Set(plates.map(p => Math.round(box(p).top))).size).toBe(2)
-    for (const spec of $$('.practice .prc-spec--plate')) {
-      expect(spec.scrollHeight).toBeLessThanOrEqual(spec.clientHeight + 1)
-      expect(spec.scrollWidth).toBeLessThanOrEqual(spec.clientWidth + 1)
+    expect(document.scrollingElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight + 1)
+    const trains = $$('.pdesk-dep')
+    expect(trains).toHaveLength(7)
+    expect(box(document.querySelector('.pdesk-card')).bottom).toBeLessThanOrEqual(window.innerHeight)
+    for (const part of ['.pdesk-card__head', '.pdesk-card__open', '.pdesk-card__how']) {
+      expect(getComputedStyle(document.querySelector(part)).display, part).toBe('none')
     }
-    expect(box(plates.at(-1)).bottom).toBeLessThanOrEqual(window.innerHeight)
+    const levels = $$('.pdesk-levels [role="radio"]')
+    for (const level of levels) {
+      for (const train of trains) {
+        train.click()
+        level.click()
+        // A plain wait: settle() would sit out the reading face's clock.
+        await new Promise(r => setTimeout(r, 150))
+        const well = document.querySelector('.pdesk-card .prc-spec')
+        const what = `${level.textContent} ${train.querySelector('.pdesk-dep__title').textContent}`
+        expect(well.classList.contains('prc-spec--compact'), what).toBe(true)
+        expect(well.textContent, what).not.toBe('')
+        expect(well.scrollHeight, what).toBeLessThanOrEqual(well.clientHeight + 1)
+        expect(well.scrollWidth, what).toBeLessThanOrEqual(well.clientWidth + 1)
+      }
+    }
   })
 })

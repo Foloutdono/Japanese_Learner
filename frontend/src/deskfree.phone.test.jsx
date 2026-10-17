@@ -1809,10 +1809,11 @@ describe('the run\'s lines (plan 129)', () => {
 
 // ── plan 130 — the gates a phone keeps ──
 // On the desk the plates take the window, Learn's line stands upright
-// and Practice's plates hold their specimens (plan 165; the grades'
-// rows before it). A phone keeps its own: since plan 225 Practice's is
-// the painted platform, its signs where the chips were, and no request
-// for a record or a sample it has nowhere to print.
+// and Practice's board holds the record and the chosen train's card
+// (plan 243; the plates' specimens, plan 165, before it). A phone keeps
+// its own: since plan 225 Practice's is the painted platform, its signs
+// where the chips were, and no request for a record or a sample it has
+// nowhere to print.
 describe('the gates taking the window (plan 130)', () => {
   it('keeps Practice\'s painted platform and never asks for the record', async () => {
     apiFetch.mockReset()
@@ -1830,9 +1831,9 @@ describe('the gates taking the window (plan 130)', () => {
     const sign = document.querySelector('.pgate-sign--main')
     expect(sign.querySelectorAll('.pgate-roll--dest .pgate-roll__row')).toHaveLength(getSections('practice', {}).length)
     expect(sign.querySelectorAll('.pgate-roll--grade .pgate-roll__row')).toHaveLength(5)
-    // Nor the desk's specimens (plan 165), and no request for the
-    // samples they would draw from.
-    expect(document.querySelector('.plate__body, .prc-spec')).toBeNull()
+    // Nor the desk's board (plan 243), and no request for the samples
+    // its card would draw from.
+    expect(document.querySelector('.pdesk, .prc-spec')).toBeNull()
     expect(apiFetch.mock.calls.some(([path]) => path === '/api/practice/record')).toBe(false)
     expect(apiFetch.mock.calls.some(([path]) => path.startsWith('/api/station/'))).toBe(false)
   })

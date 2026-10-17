@@ -60,7 +60,8 @@ runtime purpose.
   `REV` in `frontend/scripts/today-print/build.py` (Today's print, plan 205),
   `REV` in `frontend/scripts/ambiance/build.py` (the ambiance, plan 219),
   `REV` in `frontend/scripts/practice-gate/build.py` (the painted platform,
-  plan 225).
+  plan 225), `REV` in `frontend/scripts/practice-gate/desk.py` (the desk's
+  painted platform, plan 243).
   A change to what any of them produces bumps it, or learners keep the old.
 - **The grammar detector and the lookups change by counter-case.** Every new
   rule or refusal is pinned in `tests/test_grammar_precision.py` /
@@ -767,6 +768,7 @@ npm run landing:og  # its two share cards, rendered in Chromium
 python3 scripts/today-print/build.py  # Today's print of the hour (plan 205; numpy, Pillow)
 python3 scripts/ambiance/build.py     # the ambiance of the hour (plan 219; numpy, ffmpeg)
 python3 scripts/practice-gate/build.py  # Practice's painted platform (plan 225; numpy, Pillow, opencv-contrib)
+python3 scripts/practice-gate/desk.py   # ... and the desk's, from its own painting (plan 243)
 ```
 
 Today's gate stands on a print drawn ahead of time (plan 205):
@@ -786,7 +788,11 @@ lights them at Today's four hours, into `public/practice/gate/<REV>/`
 and `src/components/practice/gate/gate.json`. Same rules again, and
 `scripts/practice-gate/README.md` has them; the roll signs, the door,
 the pantograph and the clock are drawn by the app over the painting
-(`components/practice/gate/`). The desk keeps the plates.
+(`components/practice/gate/`). The desk's gate stands on a second
+painting of the owner's (plan 243): `desk.py` in the same folder lights
+it with the phone's recipes into `public/practice/gate/desk/<REV>/` and
+`src/components/practice/gate/desk.json`, and `DeskGate` hangs the
+board of levels and trains over its right side.
 
 The landing page is the site's **`/`** (and `/en`), and the app's front
 door is **`/app`**: on the web the app's document is built as `app.html`

@@ -2633,10 +2633,9 @@ const guide = {
   guideLearnPlate: 'A line. Tap it to open it. The badge shows what’s due today.',
   guideLearnStops: 'Where you are on the line, and the stops around you.',
   guideLearnShelf: 'Your own decks, plus a library of decks shared by other learners.',
-  guidePracticePlate: 'A practice mode: read, understand, translate, listen to or write real sentences.',
-  guidePracticeDests: 'The levels. Yours is marked. Tap another to try it anyway.',
   guidePracticePass: 'These modes come with the pass.',
-  // The painted platform (plan 225): its two signs and its gate.
+  // The painted platform (plan 225): its two signs and its gate; on the
+  // desk (plan 243), the departures board and the gate.
   guidePracticeSign: 'Where the train goes. Tap the row above or below to turn the sign, the lit one to open its station.',
   guidePracticeGrade: 'The train’s level. Yours carries a dot: turn the sign to try another.',
   guidePracticeBoard: 'Depart: the doors close and the train takes you to the exercise.',
@@ -2651,7 +2650,6 @@ const guide = {
   guideProfileLedger: 'Each line, and how far you’ve come.',
   guideProfileSettings: 'Settings: your level, your pace, how you grade, and this guide anytime.',
   guideLearnLibrary: 'The library: decks shared by other learners. Open one to preview it; follow it to study it.',
-  guidePracticeExam: 'The mock exam: a JLPT-style test at the level you pick, graded when you hand it in.',
   guideDictActions: 'Listen to it, or use ＋ to save it or add it to one of your decks.',
   guideProfileStats: 'Statistics: what sticks and what slips, line by line.',
   guideProfileBoard: 'The leaderboard, in XP: this week and all time.',
@@ -2661,13 +2659,11 @@ const guide = {
   guideLearnStopsDesk: 'The whole line. Click any stop to study it.',
   // Worded for a pointer (plan 123): the notes that said "tap".
   guideLearnPlateDesk: 'A line. Click it to open it. The badge shows what’s due today.',
-  // The desk's platforms carry no grades since plan 165: the stop is
-  // skipped there, but its note is still worded for a pointer.
-  guidePracticeDestsDesk: 'The levels. Yours is marked. Click another to try it anyway.',
-  guidePracticePlateDesk: 'A practice mode, and what it asks of you at your level. Click it to open it.',
-  // The painted platform stands only on the phone (plan 225): its note is
-  // still worded for a pointer, as the levels' is.
-  guidePracticeSignDesk: 'Where the train goes. Click the row above or below to turn the sign, the lit one to open its station.',
+  // The painted platform on the desk (plan 243): the departures board,
+  // its levels at its head, and the gate, which Enter presses too.
+  guidePracticeGradeDesk: 'The trains’ level. Yours carries a dot: click another to try it anyway.',
+  guidePracticeSignDesk: 'The trains leaving, one per exercise, with what you have done on each at this level. Click one to see what it will ask of you.',
+  guidePracticeBoardDesk: 'Depart: the doors close and the train takes you to the exercise. Enter works from anywhere here.',
   guideDictEntryDesk: 'An entry, open beside the list. ← and → move through the list.',
   // Settings, the two ways back.
   settingsFirstRide: 'First ride',
@@ -2722,12 +2718,14 @@ const onboarding = {
   settingsLineOn: 'On your route',
   settingsLineOff: 'Off your route',
   plateOffRoute: 'Off your route',
-  // A grade's record on a Practice platform, on the desk (plan 130):
-  // what was done at that grade, then the share of it that went right.
+  // A grade's record on a Practice platform, on the desk (plan 130; on
+  // the departures board since plan 243): what was done at that grade,
+  // then the share of it that went right.
   practiceDone: {
     sentences: n => `${n} sentence${n === 1 ? '' : 's'}`,
     texts: n => `${n} text${n === 1 ? '' : 's'}`,
     papers: n => `${n} paper${n === 1 ? '' : 's'}`,
+    replies: n => `${n} repl${n === 1 ? 'y' : 'ies'}`,
   },
   practiceRight: pct => `${pct}% right`,
   practiceNotYet: 'Not yet',
@@ -2744,8 +2742,8 @@ const onboarding = {
     dictation: 'Two listens, no more: write in rōmaji what you hear.',
     composition: 'You are given a grammar point: write a sentence that uses it, and a tutor reads it.',
     conversation: 'Someone speaks to you in a scene: choose your reply, write it, or answer freely.',
-    // On the platform's plate, on the desk (plan 165): the question its
-    // well shows.
+    // On the chosen train's card, on the desk (plan 243, plan 165's
+    // plate before it): the question its well shows.
     exam: 'A question in the JLPT’s format, here 漢字読み: the reading of the underlined word.',
   },
   // ── The painted platform, on the phone (plan 225) ─────────
@@ -2768,6 +2766,11 @@ const onboarding = {
   practiceGateHour: { dawn: 'dawn', day: 'day', dusk: 'dusk', night: 'night' },
   practiceGatePantoRaise: 'Raise the pantograph',
   practiceGatePantoLower: 'Lower the pantograph',
+  // ── The painted platform, on the desk (plan 243) ──────────────
+  // The clock for a pointer, and the station's door on the chosen
+  // train's card.
+  practiceGateClockDesk: hour => `Platform clock, ${hour}. Click for the next hour.`,
+  practiceDeskOpen: 'Open the station',
   practiceBank: {
     sentences: n => `${n} sentences written for the grade.`,
     texts: n => `${n} questions a text.`,
@@ -2779,6 +2782,8 @@ const onboarding = {
     text: 'A text of the grade',
     clip: 'A sentence of the grade, by ear',
     point: 'A point of the grade',
+    paper: 'A question of the grade',
+    scene: 'A scene of the grade',
     tier: 'Words of the tier',
     mine: 'Your words',
   },

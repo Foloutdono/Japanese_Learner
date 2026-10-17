@@ -2568,10 +2568,9 @@ const guide = {
   guideLearnPlate: 'Une ligne. Touche-la pour l’ouvrir. La pastille montre ce qui t’attend aujourd’hui.',
   guideLearnStops: 'Où tu en es sur la ligne, et les arrêts autour.',
   guideLearnShelf: 'Tes propres decks, et la bibliothèque des decks partagés par les autres.',
-  guidePracticePlate: 'Un exercice : lire, comprendre, traduire, écouter ou écrire de vraies phrases.',
-  guidePracticeDests: 'Les niveaux. Le tien est marqué : touche-en un autre pour l’essayer quand même.',
   guidePracticePass: 'Ces exercices font partie de l’abonnement.',
-  // Le quai peint (plan 225) : ses deux panneaux et son portique.
+  // Le quai peint (plan 225) : ses deux panneaux et son portique ; au
+  // bureau (plan 243), le tableau des départs et le portique.
   guidePracticeSign: 'La destination du train. Touche la ligne du dessus ou du dessous pour la faire tourner, celle qui est allumée pour ouvrir sa station.',
   guidePracticeGrade: 'Le niveau du train. Le tien porte un point : fais-le tourner pour en essayer un autre.',
   guidePracticeBoard: 'Embarque : les portes se ferment et le train t’emmène à l’exercice.',
@@ -2586,7 +2585,6 @@ const guide = {
   guideProfileLedger: 'Chaque ligne, et le chemin parcouru.',
   guideProfileSettings: 'Réglages : ton niveau, ton rythme, ta façon de noter, et ce guide quand tu veux.',
   guideLearnLibrary: 'La bibliothèque : des decks partagés par d’autres. Ouvre-en un pour le découvrir ; suis-le pour l’étudier.',
-  guidePracticeExam: 'L’examen blanc : une épreuve type JLPT au niveau de ton choix, corrigée dès que tu la rends.',
   guideDictActions: 'Écoute-la, ou utilise ＋ pour la garder en favori ou l’ajouter à l’un de tes decks.',
   guideProfileStats: 'Statistiques : ce qui reste et ce qui t’échappe, ligne par ligne.',
   guideProfileBoard: 'Le classement en XP : cette semaine et depuis toujours.',
@@ -2596,13 +2594,11 @@ const guide = {
   guideLearnStopsDesk: 'Toute la ligne. Clique sur un arrêt pour l’étudier.',
   // Pour un pointeur (plan 123) : les notes qui disaient « touchez ».
   guideLearnPlateDesk: 'Une ligne. Clique dessus pour l’ouvrir. La pastille montre ce qui t’attend aujourd’hui.',
-  // Au bureau, les quais ne portent plus leurs niveaux (plan 165) : l'arrêt
-  // y est sauté, mais sa note reste dite pour un pointeur.
-  guidePracticeDestsDesk: 'Les niveaux. Le tien est marqué : clique sur un autre pour l’essayer quand même.',
-  guidePracticePlateDesk: 'Un exercice, et ce qu’il te demandera à ton niveau. Clique dessus pour l’ouvrir.',
-  // Le quai peint ne se tient qu'au téléphone (plan 225) : sa note reste
-  // dite pour un pointeur, comme celle des niveaux.
-  guidePracticeSignDesk: 'La destination du train. Clique sur la ligne du dessus ou du dessous pour la faire tourner, sur celle qui est allumée pour ouvrir sa station.',
+  // Le quai peint au bureau (plan 243) : le tableau des départs, ses
+  // niveaux en tête, et le portique, qu'Entrée presse aussi.
+  guidePracticeGradeDesk: 'Le niveau des trains. Le tien porte un point : clique sur un autre pour l’essayer quand même.',
+  guidePracticeSignDesk: 'Les trains au départ, un par exercice, avec ce que tu y as fait à ce niveau. Clique sur l’un pour voir ce qu’il te demandera.',
+  guidePracticeBoardDesk: 'Embarque : les portes se ferment et le train t’emmène à l’exercice. Entrée le fait de n’importe où ici.',
   guideDictEntryDesk: 'Une entrée, ouverte à côté de la liste. ← et → pour parcourir la liste.',
   // Réglages, les deux retours.
   settingsFirstRide: 'Premier essai',
@@ -2653,13 +2649,15 @@ const onboarding = {
   settingsLineOn: 'Sur ton trajet',
   settingsLineOff: 'Hors de ton trajet',
   plateOffRoute: 'Hors de ton trajet',
-  // Le relevé d'un niveau sur un quai de Pratique, au bureau (plan 130) :
-  // ce qui a été fait à ce niveau, puis la part juste. L'espace avant le
-  // % est insécable, comme partout en français.
+  // Le relevé d'un niveau sur un quai de Pratique, au bureau (plan 130 ;
+  // sur le tableau des départs depuis le plan 243) : ce qui a été fait à
+  // ce niveau, puis la part juste. L'espace avant le % est insécable,
+  // comme partout en français.
   practiceDone: {
     sentences: n => `${n} phrase${n > 1 ? 's' : ''}`,
     texts: n => `${n} texte${n > 1 ? 's' : ''}`,
     papers: n => `${n} épreuve${n > 1 ? 's' : ''}`,
+    replies: n => `${n} réponse${n > 1 ? 's' : ''}`,
   },
   practiceRight: pct => `${pct}\u00a0% justes`,
   practiceNotYet: 'Pas encore',
@@ -2676,8 +2674,8 @@ const onboarding = {
     dictation: 'Deux écoutes, pas une de plus : écris en rōmaji ce que tu entends.',
     composition: 'Un point de grammaire est donné : écris une phrase qui l’emploie, un tuteur la relit.',
     conversation: 'On te parle dans une scène : choisis ta réponse, écris-la ou réponds librement.',
-    // Sur la plaque du quai, au bureau (plan 165) : la question que son
-    // puits montre.
+    // Sur la carte du train choisi, au bureau (plan 243, la plaque du
+    // plan 165 avant lui) : la question que son puits montre.
     exam: 'Une question au format JLPT, ici 漢字読み : la lecture du mot souligné.',
   },
   // ── Le quai peint, au téléphone (plan 225) ─────────────────
@@ -2700,6 +2698,11 @@ const onboarding = {
   practiceGateHour: { dawn: 'l’aube', day: 'le jour', dusk: 'le soir', night: 'la nuit' },
   practiceGatePantoRaise: 'Lever le pantographe',
   practiceGatePantoLower: 'Baisser le pantographe',
+  // ── Le quai peint, au bureau (plan 243) ─────────────────────
+  // L'horloge pour un pointeur, et la porte de la station sur la carte
+  // du train choisi.
+  practiceGateClockDesk: hour => `Horloge du quai, ${hour}. Clique pour l’heure suivante.`,
+  practiceDeskOpen: 'Ouvrir la station',
   practiceBank: {
     sentences: n => `${n} phrases écrites pour le grade.`,
     texts: n => `${n} questions par texte.`,
@@ -2711,6 +2714,8 @@ const onboarding = {
     text: 'Un texte du grade',
     clip: 'Une phrase du grade, à l’oreille',
     point: 'Un point du grade',
+    paper: 'Une question du grade',
+    scene: 'Une scène du grade',
     tier: 'Des mots du palier',
     mine: 'Tes mots',
   },
