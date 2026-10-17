@@ -24208,6 +24208,160 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   color: var(--text-secondary);
 }
 .svc-row--on :is(.svc-row__pace, .svc-row__tag) { color: var(--text-primary); }
+/* ── 乗換 — Settings › Correspondance, the transfer ticket (plan 243b,
+   the owner's pick B of the canvas "Tsuji — the transfer from Anki, new
+   directions"; components/settings/TransferPage.jsx) ──
+   One ticket, the pass's own sumi (as .sheet--sumi), so it reads the
+   panel inks in both themes: its head, where from and where to, a
+   perforation, then the slot -- the file or the key, the cards found,
+   the stamp -- and, printed, a stub for the one action. Under it the
+   how-to folded, and the privacy line. */
+.tr-ticket {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--r-panel);
+  border: 1px solid color-mix(in srgb, var(--pass-ink) 45%, transparent);
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+}
+.tr-ticket__head { display: flex; justify-content: space-between; align-items: baseline; padding: var(--sp-5) var(--sp-5) var(--sp-4); }
+.tr-cap {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+.tr-ticket__jp { font-family: var(--font-jp); font-size: var(--fs-caption); color: var(--text-on-panel-soft); }
+.tr-ticket__from { display: flex; flex-direction: column; gap: var(--sp-3); padding: 0 var(--sp-5) var(--sp-5); }
+.tr-ticket__route {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--sp-4);
+  padding: 0 var(--sp-5) var(--sp-5);
+}
+.tr-stop { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.tr-stop--to { align-items: flex-end; text-align: end; }
+.tr-stop__name { font-family: var(--font-display); font-size: var(--fs-title); font-weight: 700; line-height: 1.1; }
+.tr-stop__name--jp { font-family: var(--font-serif); }
+.tr-stop__sub { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-caption); color: var(--text-on-panel-soft); }
+.tr-arrow { color: var(--accent2); }
+/* The perforation, dashed in the ticket's own edge. */
+.tr-perf { margin: 0 var(--sp-4); border-top: 2px dashed color-mix(in srgb, var(--pass-ink) 45%, transparent); }
+.tr-slot { display: flex; flex-direction: column; gap: var(--sp-4); padding: var(--sp-6) var(--sp-5); }
+.tr-slot--center { text-align: center; }
+.tr-slot__icon { align-self: center; color: var(--text-on-panel-soft); }
+.tr-slot__hint { font-size: var(--fs-sm); line-height: 1.5; color: var(--text-on-panel-soft); text-wrap: pretty; }
+.tr-slot__hint strong { color: var(--text-on-panel); }
+.tr-key { display: flex; flex-direction: column; gap: var(--sp-3); text-align: start; }
+.tr-figure { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-3); }
+.tr-figure__n { font-family: var(--font-display); font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.tr-figure__unit { font-size: var(--fs-body); }
+/* A row per line, its rail the line's pigment (the boarding's held
+   lines' pattern: the pigment named once, on the data-line). */
+.tr-lines { display: flex; flex-direction: column; gap: var(--sp-2); font-size: var(--fs-sm); }
+.tr-line { display: flex; justify-content: space-between; padding: var(--sp-1) 0 var(--sp-1) var(--sp-4); border-left: 3px solid var(--pig); }
+.tr-line b { font-variant-numeric: tabular-nums; }
+.tr-line[data-line="vocab"] { --pig: var(--line-vocab); }
+.tr-line[data-line="kanji"] { --pig: var(--line-kanji); }
+.tr-line[data-line="kana"] { --pig: var(--line-kana); }
+/* The decks, stamped on the ticket: a pill each, the chosen ringed in
+   the pass's gold. */
+.tr-decks { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.tr-deck {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 36px;
+  padding: 0 var(--sp-4);
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--pass-ink) 45%, transparent);
+  background: transparent;
+  color: var(--text-on-panel-soft);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+.tr-deck:hover,
+.tr-deck:focus-visible { filter: none; border-color: var(--accent2); color: var(--text-on-panel); }
+.tr-deck--on { border-color: var(--accent2); background: color-mix(in srgb, var(--accent2) 12%, var(--bg-panel)); color: var(--text-on-panel); }
+.tr-stub { display: flex; flex-direction: column; gap: var(--sp-4); padding: var(--sp-5); }
+.tr-stub__note { font-size: var(--fs-sm); line-height: 1.5; color: var(--text-on-panel-soft); text-wrap: pretty; }
+/* 済, pressed on the ticket once it is stamped, beside the figure. */
+.tr-punched { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); }
+.tr-stamp {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  border: 3px solid var(--stamp-ink);
+  color: var(--stamp-ink);
+  font-family: var(--font-serif);
+  font-size: var(--fs-heading);
+  font-weight: 700;
+  transform: rotate(-12deg);
+}
+.tr-go { text-decoration: none; }
+/* The source, the app's segmented pill, in the panel's inks. */
+.tr-ticket .seg { border-color: color-mix(in srgb, var(--pass-ink) 45%, transparent); }
+.tr-ticket .seg__opt { border-left-color: color-mix(in srgb, var(--pass-ink) 45%, transparent); color: var(--text-on-panel-soft); }
+.tr-ticket .seg__opt:hover,
+.tr-ticket .seg__opt:focus-visible,
+.tr-ticket .seg__opt--on,
+.tr-ticket .seg__opt--on .seg__opt-latin { color: var(--text-on-panel); }
+.tr-how { padding: var(--sp-4) var(--sp-5); border: 1px solid var(--surface-line); border-radius: var(--r-card); }
+.tr-how > summary { font-size: var(--fs-sm); font-weight: 700; cursor: pointer; }
+.tr-how ol { margin: var(--sp-4) 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--sp-4); font-size: var(--fs-sm); line-height: 1.45; }
+.tr-how li { display: grid; grid-template-columns: var(--sp-6) minmax(0, 1fr); gap: var(--sp-3); }
+.tr-how__no {
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--pass-ink);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.tr-note { margin: 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--text-secondary); text-wrap: pretty; }
+.tr-confirm { display: flex; flex-direction: column; gap: var(--sp-3); }
+/* A quiet way (Recommencer, the notes left out, the undo): the slip's
+   own link, centred under the ticket. */
+.tr-quiet { align-self: center; font-size: var(--fs-sm); }
+.tr-foot { display: flex; align-items: center; gap: var(--sp-3); font-size: var(--fs-caption); line-height: 1.5; color: var(--text-secondary); }
+.tr-foot > svg { flex: none; width: 16px; height: 16px; }
+.tr-file { display: none; }
+/* The sheet over Today, once (plan 243b, pick P1; components/station/
+   TransferSheet.jsx): Today's sheet round a cap, the question, a line,
+   the apps it reads as plain pills, and the two ways out. */
+.tr-sheet__q { margin: 0; text-wrap: balance; }
+.tr-sheet__lead { margin: 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: pretty; }
+.tr-chips { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
+.tr-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 var(--sp-4);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--surface-line);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+.tr-sheet__acts { display: flex; flex-direction: column; gap: var(--sp-4); }
+.tr-sheet__note { align-self: center; font-size: var(--fs-caption); color: var(--text-secondary); }
 /* The date sits over the rail, the rail low in the track. */
 .svc-row__track { position: relative; height: var(--sp-9); min-width: 0; }
 .svc-row__track::before {

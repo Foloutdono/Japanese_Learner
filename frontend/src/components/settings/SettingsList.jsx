@@ -17,7 +17,7 @@ import { ATTRIBUTIONS } from '../../domain/attributions'
 import { SOURCES } from '../../domain/paywall'
 import {
   ChevronIcon, MonitorIcon, SpeakerIcon, BellIcon, StarIcon, HourglassIcon,
-  InfoIcon, UserIcon, BooksIcon, CalendarIcon, CardIcon, MessageIcon,
+  InfoIcon, UserIcon, BooksIcon, CalendarIcon, CardIcon, MessageIcon, ImportIcon,
 } from '../ui/Icons'
 import { SettingsDoor } from './SettingsDoor'
 import { ThemeSwatch, SoundMeter, RatingDots, PaceLine } from './RowSpecimens'
@@ -38,7 +38,8 @@ import { ThemeSwatch, SoundMeter, RatingDots, PaceLine } from './RowSpecimens'
 //   the app     display, sound, reminders (a shell's only)
 //   the study   the agenda, the reviews, the rating bar, the reading
 //               pace, help
-//   the learner the account, the credits
+//   the learner the account, what Anki taught them (plan 243), the
+//               credits
 //
 // and the pass, which opens an offer rather than a page, on its own.
 // Adding a setting is one entry in `useGroups`: its page is registered in
@@ -86,6 +87,7 @@ function useGroups(session) {
     ],
     [
       { id: 'account', Icon: UserIcon, label: t.account, value: accountValue },
+      { id: 'transfer', Icon: ImportIcon, label: t.settingsTransfer, value: t.trRowValue },
       { id: 'credits', Icon: BooksIcon, label: t.settingsCredits, value: t.settingsCreditsCount(ATTRIBUTIONS.length) },
     ],
   ]

@@ -237,3 +237,20 @@ FROM event_log
 WHERE name = 'song_deck' AND at >= now() - ({{days}} || ' days')::interval
   AND user_id NOT IN {{snippet: internal_users}}
 GROUP BY 1 ORDER BY 2 DESC;
+
+-- ==== question
+-- title: Correspondances (乗換)
+-- display: table
+-- size: 12x6
+-- description: transfer_import, transfer_undo et transfer_offer (plans 243, 243b), écrits par le serveur : la source et des comptes seulement. Notes envoyées, cartes du cours reconnues, lignes écrites ; une annulation, les lignes reprises ; la feuille d'Aujourd'hui, acceptée (go) ou non (later). Ni mot, ni nom de paquet, ni clé n'est jamais enregistré.
+SELECT CASE name WHEN 'transfer_import' THEN 'Import · ' || coalesce(props->>'source', '?')
+                 WHEN 'transfer_undo' THEN 'Annulation'
+                 ELSE 'Feuille · ' || coalesce(props->>'choice', '?') END AS "Geste",
+       count(*) AS "Fois", count(DISTINCT user_id) AS "Apprenants",
+       round((percentile_cont(0.5) WITHIN GROUP (ORDER BY (props->>'notes')::numeric))::numeric, 0) AS "Notes (médiane)",
+       round((percentile_cont(0.5) WITHIN GROUP (ORDER BY (props->>'cards')::numeric))::numeric, 0) AS "Cartes reconnues (médiane)",
+       round((percentile_cont(0.5) WITHIN GROUP (ORDER BY coalesce(props->>'written', props->>'removed')::numeric))::numeric, 0) AS "Lignes (médiane)"
+FROM event_log
+WHERE name IN ('transfer_import', 'transfer_undo', 'transfer_offer') AND at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}}
+GROUP BY 1 ORDER BY 1;

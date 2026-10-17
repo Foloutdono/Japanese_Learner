@@ -263,7 +263,10 @@ CREATE TABLE user_profiles (
     away_until DATE,
     -- 足跡を残さない (plan 218): the account asked not to be counted.
     -- core/events.opted_out reads it on both of the trail's write paths.
-    analytics_off BOOLEAN NOT NULL DEFAULT FALSE
+    analytics_off BOOLEAN NOT NULL DEFAULT FALSE,
+    -- 乗換 (plan 243b): when Today asked whether the learner studied
+    -- elsewhere, or an import made it moot. routes/transfer.py.
+    transfer_offered_at TIMESTAMPTZ
 );
 
 -- The Sentence bank: what the learner submitted, plus where it came

@@ -22,6 +22,7 @@ from core import credits, events, review_plan
 from core.lines import clean_lines
 from srs.xp import level_progress, next_milestone
 from study import level_fit, level_rule
+from routes import transfer as transfer_routes
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -161,6 +162,11 @@ def _init_db() -> None:
                 # both write paths, so the server's events and every
                 # other device stop too.
                 ("analytics_off", "BOOLEAN NOT NULL DEFAULT FALSE"),
+                # 乗換 — when Today's sheet asked whether the learner
+                # studied elsewhere (plan 243b), answered either way, or
+                # an import made the question moot. NULL is not asked
+                # yet; routes/transfer.py writes and reads it.
+                ("transfer_offered_at", "TIMESTAMPTZ"),
             ):
                 cur.execute(
                     f"ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS {col} {typ}"
@@ -630,6 +636,9 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # round trip.
         "tutorialAt": tutorial_at.isoformat() if tutorial_at else None,
         "guided": dict(guided or {}),
+        # 乗換 (plan 243b): whether Today asks, once, if the learner
+        # studied elsewhere (routes/transfer.offer_open).
+        "transferOffer": transfer_routes.offer_open(user_id, tutorial_at),
         # 足跡を残さない (plan 218): the account's answer, which App.jsx
         # copies onto this device's flag on boot so an opt-out made on
         # the phone also stops the desk.
