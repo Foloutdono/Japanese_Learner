@@ -8602,8 +8602,6 @@ textarea:focus-visible {
    Settings draws (.svc) and, for a spread, its days as Today's seg. */
 .cb-lead { display: flex; flex-direction: column; gap: var(--sp-2); }
 .cb-lead__hello { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; text-wrap: pretty; }
-/* The run past the share, a rung over the cleared gate (plan 217). */
-.tdy-extra { align-self: center; }
 .tdy-seg .seg__opt { height: auto; min-height: 44px; gap: var(--sp-2); padding-inline: var(--sp-3); white-space: nowrap; }
 .tdy-seg .seg__opt-latin {
   font-size: var(--fs-body);
@@ -8760,21 +8758,52 @@ textarea:focus-visible {
 .tdy-rally { display: flex; align-items: center; gap: var(--sp-4); }
 .tdy-rally__n { display: flex; flex-direction: column; font-size: var(--fs-caption); line-height: 1.2; color: var(--text-secondary); }
 .tdy-rally__n b { font-family: var(--font-display); font-size: var(--fs-title); font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; }
-.tdy-next {
+/* The board over the shut gate (plan 238, the owner's pick A of the
+   canvas "Tsuji — Réviser plus"): a departure board, a row a line,
+   the reviews waiting past the day's share over tomorrow's. The first
+   row is the way on to them, the whole row, as the door is on a gate
+   that opens; the rows share the board's columns, so the figures stand
+   one over the other. */
+.tdy-board {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: baseline;
   column-gap: var(--sp-5);
-  min-height: 46px;
-  padding: var(--sp-3) var(--sp-5);
+  overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-panel);
 }
+.tdy-next {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  align-items: baseline;
+  min-height: 46px;
+  padding: var(--sp-3) var(--sp-5);
+}
+.tdy-next + .tdy-next { border-top: 1px solid var(--surface-line); }
 .tdy-next__day { font-weight: 600; }
 .tdy-next__n { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; font-variant-numeric: tabular-nums; }
 .tdy-next__n small { margin-left: var(--sp-1); font-size: var(--fs-caption); font-weight: 600; color: var(--text-secondary); }
-.tdy-next__min { font-size: var(--fs-sm); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.tdy-next__min { justify-self: end; font-size: var(--fs-sm); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.tdy-board__go {
+  border-radius: 0;
+  font: inherit;
+  text-align: left;
+  transition: background-color 0.15s ease;
+}
+.tdy-board__go:hover,
+.tdy-board__go:focus-visible { background: color-mix(in srgb, currentcolor 6%, transparent); filter: none; }
+.tdy-board__go:focus-visible { outline: 2px solid currentcolor; outline-offset: -2px; }
+.tdy-board__way {
+  display: inline-flex;
+  align-items: center;
+  place-self: center end;
+  gap: var(--sp-1);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
 
 /* ── 浮世絵 — the print of the hour (plan 205) ────────────────────
    The owner's pick of the canvas "Tsuji — Today, the visit card"
@@ -9018,8 +9047,9 @@ textarea:focus-visible {
 .tdy--print .tdy-door__go { color: var(--text-on-panel); }
 /* A cleared day (plan 206): its week of stamps set on the sky, the
    kit's slots (WeekStamps) in the seal's red, their weekdays in the
-   hour's ink; tomorrow's row on the door's glass. The shut gate's own
-   glass is written with the gate's rules (.btn-depart--gate:disabled). */
+   hour's ink; the board (the reviews waiting, tomorrow) on the door's
+   glass. The shut gate's own glass is written with the gate's rules
+   (.btn-depart--gate:disabled). */
 .tdy--print .tdy-rally {
   width: max-content;
   --stamp-ink: var(--tpr-seal);
@@ -9028,13 +9058,14 @@ textarea:focus-visible {
 }
 .tdy--print .tdy-rally__n { color: var(--tpr-soft); }
 :where(.tdy--print) .tdy-rally__n b { color: var(--tpr-ink); }
-.tdy--print .tdy-next {
+.tdy--print .tdy-board {
   border-color: var(--surface-line);
   background: color-mix(in srgb, var(--bg-panel) 82%, transparent);
   color: var(--text-on-panel);
 }
 :where(.tdy--print) .tdy-next__n small,
 .tdy--print .tdy-next__min { color: var(--text-on-panel-soft); }
+.tdy--print .tdy-board__way { color: var(--text-on-panel); }
 
 /* The print's moving parts (the classes the print's build writes,
    scripts/today-print/build.py): slowly and by little, transform and

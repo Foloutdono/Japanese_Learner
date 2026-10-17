@@ -879,8 +879,13 @@ it and tomorrow as a row of a departure board over the shut gate.
 cards wait and three paces as Settings' service cards (`.svc`), a
 spread's days as the services sheet's seg. It never stands over the
 rest-day notice. A day whose share is spent with reviews held back
-keeps its shut gate, and the way on to them is a quiet way a rung over
-it, never a second button.
+keeps its shut gate, and the way on to them is the board's first row
+over tomorrow's (« En attente · 144 cartes · Réviser › », plan 238,
+the owner's pick A of the canvas "Tsuji — Réviser plus"): the whole row
+is the way on, as the door is on a gate that opens, on the board's
+glass, so it reads on every print, and never a second button. A quiet
+word set on the print takes the page's ink, which the light theme's
+night loses.
 
 ### The tour (発見, plan 187)
 
