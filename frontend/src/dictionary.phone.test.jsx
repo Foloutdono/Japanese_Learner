@@ -242,6 +242,64 @@ describe('the dictionary at phone width', () => {
     expect(getComputedStyle(records).gridTemplateColumns.split(' ').length).toBe(2)
     expect(getComputedStyle(records).columnGap).toBe('1px')
   })
+
+  it('the record under the stripe: its hairlines run to the edges, its figures stand on the gutter the plate and the blocks keep', async () => {
+    // The sheet as a whole screen, the record as recordBlock prints it
+    // (plan 235). Its cells padded 8px across, so "100 %" sat 8px from
+    // the screen's edge under a plate, a stripe and a gloss at 16px.
+    const cell = (value, label) => (
+      <div className="record">
+        <span className="record__body">
+          <span className="record__value">{value}</span>
+          <span className="record__label">{label}</span>
+        </span>
+      </div>
+    )
+    const screen = await render(
+      <aside className="dict-sheet">
+        <article className="dict-entry">
+          <header className="dict-plate">
+            <div className="dict-plate__row">
+              <div className="dict-plate__marks"><span className="dict-plate__level">N5</span></div>
+              <div className="dict-plate__actions"><button type="button" className="dict-plate__btn">♪</button></div>
+            </div>
+            <div className="dict-plate__stack"><h1 className="dict-plate__word">どの</h1></div>
+            <div className="dict-plate__stripe" />
+          </header>
+          <section className="dict-record">
+            <div className="records records--entry">
+              {cell('100%', 'Précision')}
+              {cell('4/4', 'Révisions')}
+              {cell('1 jours', 'Intervalle')}
+              {cell('Maintenant', 'Prochaine révision')}
+            </div>
+          </section>
+          <div className="dict-entry__body">
+            <section className="dict-block"><span>Quel</span></section>
+          </div>
+        </article>
+      </aside>
+    )
+    const box = el => el.getBoundingClientRect()
+    const panel = box(screen.container.querySelector('.dict-entry'))
+    const stripe = box(screen.container.querySelector('.dict-plate__stripe'))
+    const block = screen.container.querySelector('.dict-block')
+    const blockText = box(block).left + parseFloat(getComputedStyle(block).paddingLeft)
+    const cells = [...screen.container.querySelectorAll('.dict-record .record')]
+    const bodies = cells.map(c => box(c.querySelector('.record__body')))
+    // Two by two, the lattice flush with the panel.
+    expect(box(cells[0]).left).toBeCloseTo(panel.left, 0)
+    expect(box(cells[1]).right).toBeCloseTo(panel.right, 0)
+    expect(box(cells[2]).top).toBeGreaterThan(box(cells[0]).bottom - 1)
+    // The figures on the gutter: the left column starts where the stripe
+    // and the gloss start, the right column ends where the stripe ends.
+    expect(stripe.left).toBeCloseTo(blockText, 0)
+    for (const i of [0, 2]) expect(bodies[i].left, `cell ${i}`).toBeCloseTo(stripe.left, 0)
+    for (const i of [1, 3]) expect(bodies[i].right, `cell ${i}`).toBeCloseTo(stripe.right, 0)
+    // And each figure clears the hairline between the columns by as much.
+    const gutter = stripe.left - panel.left
+    for (const i of [1, 3]) expect(bodies[i].left - box(cells[i]).left, `cell ${i}`).toBeCloseTo(gutter, 0)
+  })
 })
 
 describe('the catalogue tile\'s edge (plan 147)', () => {

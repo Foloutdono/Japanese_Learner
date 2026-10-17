@@ -146,8 +146,8 @@ describe('the statistics on the desk', () => {
     const tile = plate('Kanji').querySelector('.rep-tile')
     expect(tile.textContent).toContain('仕')
     tile.click()
-    await settle(60)
-    expect($('[data-where]').textContent).toBe('/learn/kanji/N4/kanji.flashcard.f2b')
+    // A navigation, so waited for, as the cell's above is.
+    await vi.waitFor(() => expect($('[data-where]').textContent).toBe('/learn/kanji/N4/kanji.flashcard.f2b'))
   })
 
   it('cuts no caption and squeezes no name', async () => {
