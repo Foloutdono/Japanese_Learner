@@ -95,12 +95,39 @@ jobs:
       - name: Install Playwright chromium
         working-directory: frontend
         run: npx playwright install chromium
-      - name: Test
+      # The six browser lanes only. The node lane is the `frontend-node`
+      # job below, on its own runner: its carousel.test.js alone is ~330 s
+      # of CPU, and run beside six chromiums on this runner's 4 cores it
+      # starved them -- every run lost one or two browser tests to a 15 s
+      # timeout or an animation read before a frame was drawn, a different
+      # test each time, 7 of 20 runs red on 2026-10-17. Without it the
+      # lanes pass here as they do alone.
+      - name: Test (browser lanes)
         working-directory: frontend
-        run: npm test
+        run: npm run test:browsers
       # The production build was never exercised by CI: Vercel built it,
       # and a build-only break (a plugin config, an import that only the
       # bundler resolves) surfaced as a failed deploy after the merge.
       - name: Build
         working-directory: frontend
         run: npm run build
+
+  # vitest's node lane (everything that is not *.{browser,phone,tablet,
+  # touch,desktop,wide,short}.test.*), apart from the browser lanes so the
+  # two never share cores; see the Test step of `frontend`. promote.yml
+  # reads this job's result too, by this name.
+  frontend-node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          # 22 for the same reason as `frontend`: the supabase client the
+          # tests import needs a global WebSocket.
+          node-version: '22'
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Test (node lane)
+        working-directory: frontend
+        run: npm run test:node

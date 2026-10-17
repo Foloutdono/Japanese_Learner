@@ -58,7 +58,7 @@ jobs:
           # The newest, not necessarily the head: a push to main whose CI
           # is still running, or flaked, waits for tomorrow (or a manual
           # run), and the commits before it that passed ship meanwhile.
-          # Only merge commits carry the two CI jobs (ci.yml runs on a
+          # Only merge commits carry the CI jobs (ci.yml runs on a
           # push to main), so walking the first parent is walking the
           # candidates, newest first.
           have_production=false
@@ -77,7 +77,7 @@ jobs:
                 break
               fi
               ok=true
-              for job in backend frontend; do
+              for job in backend frontend frontend-node; do
                 result=$(gh api "repos/$GITHUB_REPOSITORY/commits/$sha/check-runs?per_page=100" \
                   --jq "[.check_runs[] | select(.name == \"$job\") | .conclusion] | first // \"missing\"")
                 echo "$sha $job: $result"
@@ -86,7 +86,7 @@ jobs:
               if [ "$ok" = true ]; then pick=$sha; break; fi
             done
             if [ -z "$pick" ] && [ "$have_production" = false ]; then
-              echo "::error::No commit among main's last 30 has both CI jobs green."
+              echo "::error::No commit among main's last 30 has all three CI jobs green."
               exit 1
             fi
           fi
