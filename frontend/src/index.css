@@ -20776,7 +20776,10 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   border: none;
   border-radius: 0;
   justify-content: start;
-  overflow-x: auto;
+  /* Not a scroll box: a cell lifts on hover, and a scroll box clipped
+     the top row's lift. Nothing overflows it at any width -- a phone's
+     cells shrink to fit, the desk's share the column. */
+  overflow: visible;
 }
 .syllabary-cell {
   background: var(--surface);
@@ -27471,14 +27474,14 @@ button.brd-stn { cursor: pointer; }
 /* ── Formes: a paradigm as a table ──
    Négatif : …. Passé : …. was a paragraph of labels and forms; it is a
    table now, the labels down one column and the forms beside them, a
-   hairline under each row, so "le passé négatif" is found by running
-   an eye down the left. */
+   hairline between two rows, so "le passé négatif" is found by running
+   an eye down the left. None above the first or under the last: the
+   section's head already rules it off. */
 .gl-table {
   display: grid;
   grid-template-columns: fit-content(40%) minmax(0, 1fr);
   column-gap: var(--sp-5);
   margin: 0;
-  border-top: 1px solid var(--surface-line);
 }
 .gl-table__row { display: contents; }
 .gl-table__label,
@@ -27487,6 +27490,8 @@ button.brd-stn { cursor: pointer; }
   padding-block: var(--sp-3);
   border-bottom: 1px solid var(--surface-line);
 }
+.gl-table__row:first-child > * { padding-block-start: 0; }
+.gl-table__row:last-child > * { padding-block-end: 0; border-bottom: 0; }
 /* Where subgrid holds, a row is one box across both columns, its rule
    under the pair and the label on the form's baseline. */
 @supports (grid-template-columns: subgrid) {
@@ -27498,6 +27503,8 @@ button.brd-stn { cursor: pointer; }
     padding-block: var(--sp-3);
     border-bottom: 1px solid var(--surface-line);
   }
+  .gl-table__row:first-child { padding-block-start: 0; }
+  .gl-table__row:last-child { padding-block-end: 0; border-bottom: 0; }
   .gl-table__label,
   .gl-table__forms {
     padding-block: 0;
