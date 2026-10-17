@@ -20,7 +20,7 @@ Each source is one of the app's own lines, and wears its pigment:
 | 理解 | Comprehension | a comprehension passage | the passage page by page, then its questions and their answers |
 | 単語帳 | Theme words | a post of a theme of the app's theme decks (fruits, the body, jobs …): its pictured words, easiest first, cut evenly into posts of four to eight (Fruits (1), (2), (3)) | each word with a picture (an emoji, `content/emoji.json`), its reading over it, its romaji, its meaning, then all of them on one slide |
 | 似た字 | Lookalike kanji | one of 63 sets of kanji that look alike (大 太 犬 天 夫, 晴 清 情 精 請, `content/lookalikes.json`) | each kanji with its readings, its meaning, what sets it apart and a word it writes, then the set side by side, then "which kanji means this?" |
-| 返事 | Your reply | one of 36 conversations of three turns, N5 to N1, from a birthday to a business call (`content/dialogues.json`) | what they say, three replies to choose from, then the reply said and why; every line with its furigana, and at N5 and N4 its romaji under every word, for a beginner |
+| 返事 | Your reply | one of 36 conversations of three turns, N5 to N1, from a birthday to a business call (`content/dialogues.json`) | what they say, three replies to choose from, then the reply said and why; every line with its furigana, and at N5 and N4 its romaji under every word, for a beginner. A turn's line is set as large as the frame lets it (plan 240, `turnBlock`): every rung from the display's down is tried, the replies to choose from (never above the line) and the why sized into what is left, the smaller of the line and the replies (a third up) made as large as it goes, and a bubble keeps its romaji and its sense only while they cost under 3% and 10% of the size; the reply said is set at the line's size, and both bubbles stand wider and leaner (`snug`) |
 | 落とし穴 | Traps | a catalogue tour's trap: a sentence that reads one way to the eye and means another | the sentence and what it says (three readings, its translation never printed over it), the answer and why, the two forms side by side, watch out |
 
 The four of plan 229m stop at the station the app teaches them on (a
@@ -487,7 +487,11 @@ full width with its top ~110px under the status bar: the status and
 search bars cover its first ~330px and the page counter stands at the
 top right, the column of buttons stands from x ~920 below y ~1100, the
 author's picture at the bottom left and the caption from y ~1710. Its
-safe box is 350 at the top, 430 at the foot and 184 a side, and a card
+safe box is 350 at the top, 330 at the foot and 184 a side. The foot was
+430 until plan 240 measured it again on a posted conversation: the
+caption's panel stands from y ~1660 and the page dots at y ~1600-1625,
+centred, so a slide reaches down to 1590 rather than leave 170px bare
+over the dots. A card
 reaches past its sides by half what it does on a post (16 against 32),
 so it stops clear of the buttons.
 A change to the safe box is checked by drawing every slide of every

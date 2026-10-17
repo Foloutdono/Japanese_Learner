@@ -38,11 +38,14 @@ const RING = 2.5 * K // a roundel's ring
 // image's top runs under the status bar), the page counter at the top
 // right, the column of buttons from x 920 down from y 1100, the
 // author's picture at the bottom left and the caption from y 1710.
+// Its foot was measured again on a posted conversation (plan 240): the
+// caption's panel stands from y ~1660 and the page dots at y ~1600-1625,
+// centred, so a slide reaches down to 1590 rather than leave 170px bare.
 // Instagram crops a 9:16 post in its feed, so it has margins of its own
 // (INSTAGRAM, below).
 export const FORMATS = {
   post: { id: 'post', fit: 'tiktok', w: 1080, h: 1350, safe: { t: 170, r: 144, b: 112, l: 144 } },
-  story: { id: 'story', fit: 'tiktok', w: 1080, h: 1920, safe: { t: 350, r: 184, b: 430, l: 184 } },
+  story: { id: 'story', fit: 'tiktok', w: 1080, h: 1920, safe: { t: 350, r: 184, b: 330, l: 184 } },
 }
 // Normal margins (plan 234f): a slide for anywhere that lays nothing over
 // it (an Instagram post, a site, a message), on either ratio. The margins
@@ -72,7 +75,7 @@ export function formatOf(id, fit = 'tiktok') {
  *  an export. */
 export const FEED_HUD = {
   bars: [{ x: 0, y: 0, w: 1080, h: 330 }, { x: 0, y: 1710, w: 1080, h: 210 }],
-  pills: [{ x: 160, y: 213, w: 862, h: 104 }, { x: 921, y: 397, w: 113, h: 60 }],
+  pills: [{ x: 160, y: 213, w: 862, h: 104 }, { x: 921, y: 397, w: 113, h: 60 }, { x: 446, y: 1601, w: 178, h: 24 }],
   dots: [{ x: 995, y: 1180, r: 58 }, { x: 995, y: 1335, r: 46 }, { x: 995, y: 1500, r: 44 }, { x: 995, y: 1665, r: 40 }, { x: 100, y: 1612, r: 64 }],
 }
 /** Instagram's over a 9:16 post in its feed (plan 239): what the 4:5

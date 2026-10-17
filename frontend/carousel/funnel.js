@@ -853,18 +853,20 @@ function bubbleBlock(c, line, o) {
   }
   return b
 }
-function bubbleOnce(c, line, { x, w, maxH = Infinity, who, me = false, romaji = false, tr = true }) {
+function bubbleOnce(c, line, { x, w, maxH = Infinity, who, me = false, romaji = false, tr = true, max = FS.heading, snug = false }) {
   const { ctx, p } = c
-  const pad = SP[6]
-  const bw = w * 0.9
+  // Snug (a turn's, plan 240): a wider bubble, a leaner pad, the line larger.
+  const pad = snug ? SP[5] : SP[6]
+  const bw = w * (snug ? 0.95 : 0.9)
   const bx = me ? x + w - bw : x
   const name = who ? textBlock(c, who.toLocaleUpperCase(), { x: bx + pad, w: bw - pad * 2, sizes: [FS.caption], align: me ? 'right' : 'left', color: me ? c.line : p.ink2, maxLines: 1 }) : none
   const t = tr && line.tr ? textBlock(c, line.tr, { x: bx + pad, w: bw - pad * 2, sizes: [FS.body, FS.sm], weight: 500, color: p.ink2, align: me ? 'right' : 'left', maxLines: 3 }) : none
-  const s = sentenceBlock(c, line.rows, { x: bx + pad, w: bw - pad * 2, maxH: maxH - name.h - t.h - pad * 2 - SP[4] * 2, max: FS.heading, min: FS.sm, script: 'furigana', romaji, align: me ? 'right' : 'left', fam: 'jp', lines: 3 })
+  const s = sentenceBlock(c, line.rows, { x: bx + pad, w: bw - pad * 2, maxH: maxH - name.h - t.h - pad * 2 - SP[4] * 2, max, min: FS.sm, script: 'furigana', romaji, align: me ? 'right' : 'left', fam: 'jp', lines: 3 })
   const h = pad * 2 + name.h + (name.h ? SP[3] : 0) + s.h + (t.h ? SP[4] + t.h : 0)
   // Its height counts the tail under it.
   return {
     h: h + 26,
+    size: s.L?.size || 0,
     draw: y => {
       ctx.fillStyle = me ? mix(c.line, cardInk(p), 0.12) : faceInk(p)
       rrect(ctx, bx, y, bw, h, R.card * 2)
@@ -1384,27 +1386,47 @@ function chatBlock(c, lines, { x, w, maxH, them }) {
   })
 }
 /** A turn of a conversation: their line, then the three replies, or the right one. */
+// A turn's lines as large as the frame lets them (plan 240): the line said
+// and the reply are tried at every rung from the display's down, the
+// replies to choose from and the why sized into what is left (the replies
+// are the question: the smaller of the line and them, a third up, is what
+// is made as large as it goes), and each
+// bubble keeps its rōmaji and its sense where they still fit. A rung is
+// given up to keep them only when it costs little: a sense is worth 10%
+// of the size, rōmaji 3%.
+const TURN_RUNGS = [FS.display, FS.display * 0.85, FS.heading, FS.title * 1.2, FS.title, FS.lead, FS.body, FS.sm]
+const TURN_SHOWS = [{ romaji: true, tr: true, worth: 1 }, { romaji: false, tr: true, worth: 0.97 }, { romaji: false, tr: false, worth: 0.9 }]
 function turnBlock(c, s, { x, w, maxH }) {
   const turn = s.turn
-  const gap = SP[7]
-  if (!s.revealed) {
-    const q = { choices: turn.choices.map(rows => ({ rows })), right: turn.right }
-    // The replies at the largest rung that leaves their line its bubble.
-    let out = none
-    for (const z of [FS.title, FS.lead, FS.body, FS.sm, FS.caption]) {
-      const ch = choicesBlock(c, q, { x, w, sizes: [z] })
-      const them = bubbleBlock(c, turn.them, { x, w, maxH: maxH - ch.h - gap, who: s.them, romaji: s.romaji })
-      out = stackOf([them, ch], [gap])
-      if (out.h <= maxH) break
-    }
-    return out
+  const gap = SP[6]
+  const shows = TURN_SHOWS.filter(v => s.romaji || !v.romaji)
+  const q = { choices: turn.choices.map(rows => ({ rows })), right: turn.right }
+  let best = null
+  let last = null
+  const keep = (out, score) => {
+    last = out
+    if (out.h <= maxH && (!best || score > best.score)) best = { out, score }
   }
-  const why = textBlock(c, turn.why, { x, w, sizes: [FS.body, FS.sm, FS.caption], weight: 500, color: c.p.ink2, align: 'left', maxLines: 4 })
-  const room = maxH - why.h - gap * 2
-  const mine = bubbleBlock(c, { rows: turn.choices[turn.right], tr: turn.reply }, { x, w, maxH: room * 0.45, who: c.W.you, me: true, romaji: s.romaji })
-  const them = bubbleBlock(c, turn.them, { x, w, maxH: room - mine.h, who: s.them, romaji: s.romaji })
-  const all = stackOf([them, mine, why], [gap, gap])
-  return all.h <= maxH ? all : stackOf([them, mine], [gap])
+  for (const z of TURN_RUNGS) {
+    for (const v of shows) {
+      const them = bubbleOnce(c, turn.them, { x, w, max: z, who: s.them, romaji: v.romaji, tr: v.tr, snug: true })
+      if (!s.revealed) {
+        // The replies never above the line, as large as what is left holds.
+        const room = maxH - them.h - gap
+        const zc = [FS.title, FS.lead, FS.body, FS.sm, FS.caption].filter(r => r <= them.size + 0.5).find(r => choicesBlock(c, q, { x, w, sizes: [r] }).h <= room) ?? FS.caption
+        keep(stackOf([them, choicesBlock(c, q, { x, w, sizes: [zc] })], [gap]), Math.min(them.size, zc * 1.3) * v.worth)
+        continue
+      }
+      // The reply at the line's size: the two bubbles read alike.
+      const mine = bubbleOnce(c, { rows: turn.choices[turn.right], tr: turn.reply }, { x, w, max: Math.min(z, them.size), who: c.W.you, me: true, romaji: v.romaji, tr: v.tr, snug: true })
+      const room = maxH - them.h - mine.h - gap * 2
+      const why = [FS.lead, FS.body, FS.sm].map(z2 => textBlock(c, turn.why, { x, w, sizes: [z2], weight: 500, color: c.p.ink2, align: 'left', maxLines: 5 })).find(b => !b.cut && b.h <= room)
+      const size = Math.min(them.size, mine.size) * v.worth
+      if (why) keep(stackOf([them, mine, why], [gap, gap]), size)
+      else keep(stackOf([them, mine], [gap]), size * 0.8)
+    }
+  }
+  return best ? best.out : last
 }
 /** Pictures in a grid; answered, each with its word, the odd one ringed. */
 function picturesBlock(c, s, { x, w, maxH }) {

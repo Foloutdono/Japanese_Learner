@@ -1373,6 +1373,33 @@ describe('the conversion carousels (plan 234)', () => {
     }
   }))
 
+  it('sets a turn’s line as large as the 9:16 frame lets it, down to the page dots (plan 240)', () => withPath2D(() => {
+    // TikTok's photo view: its caption's panel from y ~1660, the page dots at ~1600.
+    expect(FORMATS.story.h - FORMATS.story.safe.b).toBe(1590)
+    const dialogue = some.find(x => x.src.id === 'dialogue' && x.lang === 'en')
+    const { p } = dialogue
+    // The size each text is set at, read off the font as it is drawn.
+    const sizes = (ctx0, texts) => {
+      const at = []
+      const ctx = new Proxy(ctx0, { get: (o, k) => (k === 'fillText' ? (t, ...a) => { at.push([String(t), parseFloat(/([\d.]+)px/.exec(o.font)?.[1] || '0')]); return o.fillText(t, ...a) } : o[k]), set: (o, k, v) => { o[k] = v; return true } })
+      return { ctx, at }
+    }
+    for (const design of DESIGNS) {
+      const slides = deck('plates', p, FORMATS.story, { design })
+      for (const key of ['ask', 'answer']) {
+        const sl = slides.find(x => x.key === key)
+        const { ctx: base, texts } = stubContext()
+        const { ctx, at } = sizes(base, texts)
+        sl.draw(ctx)
+        const turn = p.funnel.turns.find(tu => tu.them.rows.every(r => r.k === 'punct' || at.some(([t]) => t === r.t)))
+        expect(turn, `${design} ${key}`).toBeTruthy()
+        // Their line, at the title's size at least: it was set at the body's before.
+        const line = turn.them.rows.filter(r => r.k !== 'punct').map(r => Math.max(...at.filter(([t]) => t === r.t).map(([, z]) => z)))
+        expect(Math.min(...line), `${design} ${key}`).toBeGreaterThanOrEqual(FS.title - 0.5)
+      }
+    }
+  }))
+
   it('draws a conversation’s call to action as its run: one of its exchanges, every reply whole (plan 235)', () => withPath2D(() => {
     const joined = rows => rows.map(r => r.t).join('')
     const dialogues = some.filter(x => x.src.id === 'dialogue')
