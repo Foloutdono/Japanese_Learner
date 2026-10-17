@@ -102,10 +102,19 @@ export function askTarget(opened, now) {
 const plain = s => (typeof s === 'string' ? s.replace(/\*\*/g, '') : '')
 const lines = xs => xs.filter(Boolean).join('\n')
 
+/** What stands in a gap question's hole once it is answered: the
+ *  sentence's own text (`fill`), never the pattern poured back in --
+ *  から〜まで is blanked on its から, 〜てしまう on the てしま of
+ *  てしまいました. The bare pattern only for a payload without it. */
+export function holeText(q, right) {
+  if (q?.fill?.length) return q.fill.map(p => p.text).join('')
+  return String(right?.pattern ?? '').replace(/^[〜～]/, '')
+}
+
 /** A quiz sentence as it reads answered: the blank filled with the right form. */
 function filled(q, right) {
   if (!q.furigana?.length) return q.jp ?? ''
-  const answer = q.kind === 'gap' ? String(right?.pattern ?? '').replace(/^[〜～]/, '') : right?.jp ?? ''
+  const answer = q.kind === 'gap' ? holeText(q, right) : right?.jp ?? ''
   return q.furigana.map(seg => (seg.blank ? answer : seg.text)).join('')
 }
 

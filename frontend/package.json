@@ -26,7 +26,9 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:node": "vitest run --project node",
-    "test:browsers": "vitest run --project browser --project phone --project tablet --project touch --project desktop --project wide --project short"
+    "test:browsers": "vitest run --project browser --project phone --project tablet --project touch --project desktop --project wide --project short",
+    "test:browsers:mobile": "vitest run --project browser --project phone --project tablet --project touch",
+    "test:browsers:desk": "vitest run --project desktop --project wide --project short"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.1",

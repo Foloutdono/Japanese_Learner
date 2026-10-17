@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { askWords, askContext, askHistory, askResetsAt, askTarget, tourAsk, askSuggestions, MAX_HISTORY, SUGGESTIONS } from './ask'
+import { holeText, askWords, askContext, askHistory, askResetsAt, askTarget, tourAsk, askSuggestions, MAX_HISTORY, SUGGESTIONS } from './ask'
 import fr from '../locales/fr/index.js'
 import en from '../locales/en/index.js'
 import tours from '../testing/grammarTour.json'
@@ -154,5 +154,16 @@ describe('the questions offered', () => {
 
   it('has its register questions to offer without a breakdown', () => {
     expect(askSuggestions(ctx, en)).toEqual(['How would I say it more politely?', 'And casually, between friends?'])
+  })
+})
+
+describe('what stands in a gap once it is answered', () => {
+  it('is the sentence\'s own text, not the pattern', () => {
+    const right = { pattern: 'から〜まで', correct: true }
+    expect(holeText({ fill: [{ text: 'から' }] }, right)).toBe('から')
+    expect(holeText({ fill: [{ text: 'てしま' }] }, { pattern: '〜てしまう' })).toBe('てしま')
+  })
+  it('falls back to the bare pattern for a payload without one', () => {
+    expect(holeText({}, { pattern: '〜ために' })).toBe('ために')
   })
 })

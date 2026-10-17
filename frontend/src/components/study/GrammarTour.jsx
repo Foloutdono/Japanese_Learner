@@ -12,7 +12,7 @@ import { bare } from '../../domain/ladderLine'
 import { PICK_KEY_DIGIT } from '../../domain/choiceKeys'
 import { dialogOpen } from '../../lib/dialogOpen'
 import { composing, pressedByPointer, trackPresses } from '../../lib/keyGuards'
-import { tourAsk } from '../../domain/ask'
+import { holeText, tourAsk } from '../../domain/ask'
 import { AskEntry } from './AskPage'
 
 // ── 発見 — a grammar point found before it is drilled (plan 187b) ──
@@ -451,7 +451,7 @@ function QuizQuestion({ q, n, total, pick, done, onPick }) {
   let items = q.choices
   let ja = false
   if (q.kind === 'gap' || q.kind === 'form') {
-    const answer = q.kind === 'gap' ? bare(right.pattern) : right.jp
+    const answer = q.kind === 'gap' ? holeText(q, right) : right.jp
     const segments = q.furigana.map(seg => (seg.blank ? { ...seg, answer } : seg))
     ask = q.kind === 'gap' ? t.tourQuizGap : q.ask
     body = (
@@ -542,7 +542,7 @@ function Recap({ q, pick }) {
     said = <FuriganaParts parts={right.furigana?.length ? right.furigana : [{ text: right.jp }]} />
     if (!ok && taken) fix = taken.jp
   } else if (q.kind === 'gap' || q.kind === 'form') {
-    const form = q.kind === 'gap' ? bare(right.pattern) : right.jp
+    const form = q.kind === 'gap' ? holeText(q, right) : right.jp
     said = q.furigana.map((seg, i) => (seg.blank
       ? <b key={i} className="tour-recap__form">{form}</b>
       : <FuriganaParts key={i} parts={[seg]} />))

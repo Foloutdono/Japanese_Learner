@@ -179,6 +179,26 @@ describe('Choisir', () => {
     expect(root.querySelector('.gl-ring__arc--miss')).toBeTruthy()
   })
 
+  it('fills the hole with what the sentence has there, never the pattern poured back in', async () => {
+    // から〜まで is blanked on its から: 十時＿＿＿七時まで. The pattern in
+    // the hole read 十時から〜まで七時まで.
+    const split = {
+      ...card,
+      grammar: 'から〜まで',
+      contrast: {
+        ...card.contrast,
+        jp: '店は十時から七時までです。',
+        furigana: [{ text: '店は十時' }, { text: '＿＿＿', blank: true }, { text: '七時までです。' }],
+        fill: [{ text: 'から' }],
+        choices: ['から〜まで', 'まで〜から'],
+        answer: 'から〜まで',
+      },
+    }
+    const root = (await mount(<GrammarChoose card={split} revealed selected="から〜まで" />)).container
+    expect(root.querySelector('.gl-echo .gl-gap--filled').textContent).toBe('から')
+    expect(root.querySelector('.gl-echo .gl-sent').textContent).toBe('店は十時から七時までです。')
+  })
+
   it('turns once: nothing is left on the other side, so a tap or Space leaves the answer up', async () => {
     const screen = await mount(<Toggle card={card} />)
     const root = screen.container
