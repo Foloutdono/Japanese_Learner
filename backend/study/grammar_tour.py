@@ -55,7 +55,7 @@ from study.grammar_match import contains_pattern, verifiable
 from study.morphology import tokenize
 
 # Bumped when the payload's shape or its seeding changes.
-TOUR_REV = 6  # 6: the formation line in the learner's language (plan 215)
+TOUR_REV = 7  # 7: a gap question carries what fills its hole (plan 245)
 LOOK_COUNT = 3
 MIN_LIT = 2
 GUESS_COUNT = 4
@@ -408,7 +408,7 @@ def _gap_questions(level: str, entry: dict, lang: str, met: set[str], rng: rando
             furigana = furigana_by_pattern(c["choices"])
             out.append({
                 "kind": "gap",
-                "jp": c["jp"], "tr": c["tr"], "furigana": c["furigana"],
+                "jp": c["jp"], "tr": c["tr"], "furigana": c["furigana"], "fill": c.get("fill", []),
                 "choices": [{"pattern": p, "furigana": furigana.get(p), "correct": p == r_pattern,
                              "trap": p == pattern} for p in c["choices"]],
                 "why": why,
