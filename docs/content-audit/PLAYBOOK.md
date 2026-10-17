@@ -117,7 +117,11 @@ speaker would say it. What to try to disprove:
   above all (七時 しちじ, 今日中 きょうじゅう, 一人 ひとり);
 - **the why, the note and the translations**: a rule true of this reply
   but not of the Japanese, a French that agrees with a gender the
-  learner may not have.
+  learner may not have;
+- **a variant** (plan 245, the README's "Variants"): a scene placed
+  after another that takes the same errand another way must part from
+  it by its second turn, and its title must say how; one that replays
+  its base is a duplicate.
 
 A finding proposes the corrected line with its evidence; the audit does
 not rewrite the scenario (Rule 0), and a proposal must still pass

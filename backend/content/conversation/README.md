@@ -115,6 +115,20 @@ object, the time, the reason, a second clause — never with politeness.
 shortest, must win a level's Choose between 25% and 42% of the time
 (a blind pick wins a third; `LENGTH_TELL`).
 
+## Variants
+
+A real errand never goes the same way twice: the clerk asks for a point
+card, the cake has sold out, seven o'clock is fully booked, the answer is
+no, the neighbour at the door is the one complaining about you. A
+**variant** (plan 245) takes a scene the bank already has and sends it
+another way, so that a learner who has ridden one is ready for the
+others. It is a scenario of its own, with its own `id`, steps and record,
+placed right after the scene it varies, and its title says what differs
+("The konbini, paying cash" after "Lunch at the konbini"). It parts from
+its base by the second turn at the latest: a variant that replays its
+base line for line is a duplicate. The station lists the two side by
+side, and its search finds the family by its place.
+
 ## The level
 
 The words and the grammar of every `me` and every `them` are the level's
@@ -132,3 +146,7 @@ The model is handed the place, the two roles, the situation, the goal,
 the register, the level and the turns as a script to stay near. So the
 turns are also its picture of what this exchange sounds like: keep them
 the exchange a real visit would have, in the order it would have it.
+Near is not word for word (plan 245): the model says its lines in its
+own words and now and then takes a turn the script does not, as the
+person in its place would, so the free talk varies the way the variants
+do, the learner's goal still within reach.

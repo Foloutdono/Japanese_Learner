@@ -1,18 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { apiJson } from '../lib/api'
+import { countUse } from '../lib/screenTrail'
 import { board } from '../stores/boarding'
 import { useProfileSummary } from '../stores/profileSummary'
 import { Leave } from '../components/chrome/Bar'
-import { Console, ConsoleBand, ConsoleTop, Chips, Chip } from '../components/chrome/Console'
+import { Console, ConsoleBand, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import ModeSelector from '../components/selection/ModeSelector'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import { welded } from '../locales/frenchSpacing'
 import { LEVELS } from '../domain/sentenceSource'
-import { MODES, runPath } from '../domain/conversation'
+import { MODES, runPath, searchWords, sceneMatches, nearestLevel } from '../domain/conversation'
 
 // ── 会話 — the conversation station (plan 217) ────────────────────
 // A scenario is a place and someone who speaks to the learner there,
@@ -29,6 +30,12 @@ import { MODES, runPath } from '../domain/conversation'
 //   the chips    the five grades, the one the scenarios are drawn from;
 //                the learner's own grade first, the way every station
 //                opens on it (ADR 0005: a landmark, never a lock)
+//   the field    the console's second row (plan 245): the search well,
+//                looking through the grade's scenes (domain/conversation
+//                .sceneMatches) with their count at its end. A grade
+//                that holds none of what was asked is not the end of
+//                it: the empty state names the grades that do and
+//                moves to the nearest, the query kept
 //   the scenes   the grade's scenarios as the platform cards every
 //                station's choices are: the title, the situation, and
 //                as the card's specimen the line the scene opens on --
@@ -40,7 +47,8 @@ import { MODES, runPath } from '../domain/conversation'
 // Both choices ride the address (?level=N4&mode=free), replaced rather
 // than pushed, so Back leaves the station in one step: the Practice
 // gate's grade chips land here with the grade already chosen, and a run
-// leaves back to the same view.
+// leaves back to the same view. The query is the screen's own: a run
+// comes back to the grade, not to a search.
 export default function ConversationStation({ session }) {
   const { t, lang } = useLang()
   const navigate = useNavigate()
@@ -64,12 +72,29 @@ export default function ConversationStation({ session }) {
 
   function choose(next) {
     const merged = { level, mode, ...next }
-    const query = { level: merged.level }
-    if (merged.mode !== MODES[0]) query.mode = merged.mode
-    setParams(query, { replace: true })
+    const address = { level: merged.level }
+    if (merged.mode !== MODES[0]) address.mode = merged.mode
+    setParams(address, { replace: true })
   }
 
-  const scenes = (data?.scenarios ?? []).filter(s => s.level === level)
+  const [query, setQuery] = useState('')
+  const searchRef = useRef(null)
+  function search(value) {
+    // A search is counted once, as it starts, not once a keystroke.
+    if (!query.trim() && value.trim()) countUse('conversation', 'search')
+    setQuery(value)
+  }
+  function clearSearch() {
+    setQuery('')
+    searchRef.current?.focus()
+  }
+
+  const words = searchWords(query)
+  const found = (data?.scenarios ?? []).filter(s => sceneMatches(s, words))
+  const scenes = found.filter(s => s.level === level)
+  // Where else the query is answered, when this grade has none of it.
+  const elsewhere = words.length && !scenes.length ? LEVELS.filter(key => found.some(s => s.level === key)) : []
+  const nearest = nearestLevel(level, elsewhere, LEVELS)
   const record = data?.record ?? {}
 
   return (
@@ -88,13 +113,34 @@ export default function ConversationStation({ session }) {
             ))}
           </Chips>
         </ConsoleTop>
+        <ConsoleIndex
+          inputRef={searchRef}
+          enterKeyHint="search"
+          value={query}
+          onChange={e => search(e.target.value)}
+          onClear={clearSearch}
+          placeholder={t.cvsSearchPlaceholder}
+          aria-label={t.cvsSearchPlaceholder}
+          clearLabel={t.cancel}
+          count={data && words.length ? t.cvsCount(scenes.length) : undefined}
+        />
       </Console>
 
       {failed && (
         <Empty tone="error" message={t.cvsFetchError} action={{ label: t.retry, onClick: () => { setFailed(false); setAttempt(n => n + 1) } }} />
       )}
       {!failed && !data && <Loading />}
-      {!failed && data && scenes.length === 0 && <Empty message={t.cvsEmpty} />}
+      {!failed && data && scenes.length === 0 && !words.length && <Empty message={t.cvsEmpty} />}
+      {!failed && data && scenes.length === 0 && words.length > 0 && (nearest ? (
+        <Empty
+          icon={null}
+          message={t.cvsNoMatchHere(level)}
+          hint={t.cvsFoundAt(elsewhere)}
+          action={{ label: t.cvsGoTo(nearest), onClick: () => choose({ level: nearest }) }}
+        />
+      ) : (
+        <Empty icon={null} message={t.cvsNoMatch} hint={t.cvsNoMatchHint} action={{ label: t.cvsClearSearch, onClick: clearSearch }} />
+      ))}
       {!failed && scenes.length > 0 && (
         <ModeSelector
           modes={scenes.map(scene => ({

@@ -532,10 +532,10 @@
       }
     ],
     "close": {
-      "jp": "ありがとうございました。また来てください。",
-      "kana": "ありがとうございました。またきてください。",
-      "en": "Thank you very much. Please come again.",
-      "fr": "Merci beaucoup. Revenez nous voir."
+      "jp": "ありがとうございました。またどうぞ。",
+      "kana": "ありがとうございました。またどうぞ。",
+      "en": "Thank you very much. Do come again.",
+      "fr": "Merci beaucoup. Revenez quand vous voulez !"
     }
   },
   {
@@ -985,10 +985,10 @@
       },
       {
         "them": {
-          "jp": "そうですか。これからよろしくお願いします。",
-          "kana": "そうですか。これからよろしくおねがいします。",
-          "en": "I see. Well, I look forward to getting to know you.",
-          "fr": "Ah, d'accord. Eh bien, au plaisir de mieux te connaître !"
+          "jp": "へえ、私も映画が好きです。これからよろしくお願いします。",
+          "kana": "へえ、わたしもえいががすきです。これからよろしくおねがいします。",
+          "en": "Oh, I like films too. Well, I look forward to getting to know you.",
+          "fr": "Ah, moi aussi, j'aime le cinéma. Eh bien, au plaisir de mieux te connaître !"
         },
         "me": {
           "jp": "こちらこそ、よろしくお願いします。",
@@ -1193,38 +1193,38 @@
           "fr": "Alors, il vous va ?"
         },
         "me": {
-          "jp": "ちょっと小さいです。",
-          "kana": "ちょっとちいさいです。",
-          "romaji": "chotto chiisai desu",
-          "en": "It's a bit small.",
-          "fr": "Il est un peu petit.",
+          "jp": "ちょっと小さいです。大きいのはありますか。",
+          "kana": "ちょっとちいさいです。おおきいのはありますか。",
+          "romaji": "chotto chiisai desu. ookii no wa arimasu ka",
+          "en": "It's a bit small. Do you have a bigger one?",
+          "fr": "Il est un peu petit. Vous en avez un plus grand ?",
           "note": {
-            "en": "「ちょっと」 softens the complaint: the shirt is a little small.",
-            "fr": "「ちょっと」 adoucit la remarque : le tee-shirt est un peu petit."
+            "en": "「ちょっと」 softens the complaint, and 「大きいのはありますか」 asks for the next size up: the 「の」 stands for the shirt.",
+            "fr": "「ちょっと」 adoucit la remarque, et 「大きいのはありますか」 demande la taille au-dessus : 「の」 remplace le tee-shirt."
           },
           "alt": [
-            {"jp": "少し小さいです。", "kana": "すこしちいさいです。", "romaji": "sukoshi chiisai desu"}
+            {"jp": "少し小さいです。大きいのはありますか。", "kana": "すこしちいさいです。おおきいのはありますか。", "romaji": "sukoshi chiisai desu. ookii no wa arimasu ka"}
           ]
         },
         "wrong": [
           {
-            "jp": "これはちょっと少ないです。",
-            "kana": "これはちょっとすくないです。",
-            "en": "There isn't much of this one.",
-            "fr": "Celui-ci, il n'y en a pas beaucoup.",
+            "jp": "ちょっと少ないです。大きいのはありますか。",
+            "kana": "ちょっとすくないです。おおきいのはありますか。",
+            "en": "There's a bit too little of it. Do you have a bigger one?",
+            "fr": "Il y en a un peu trop peu. Vous en avez un plus grand ?",
             "why": {
-              "en": "「少ない」 is for amounts, few or little; for size, small is 「小さい」.",
-              "fr": "「少ない」 sert pour les quantités, peu nombreux ; pour la taille, petit se dit 「小さい」."
+              "en": "「少ない」 is for amounts, few or little; for a size, small is 「小さい」.",
+              "fr": "「少ない」 sert pour les quantités, peu nombreux ; pour une taille, petit se dit 「小さい」."
             }
           },
           {
-            "jp": "ちょっと小さくなりました。",
-            "kana": "ちょっとちいさくなりました。",
-            "en": "It got a bit smaller.",
-            "fr": "Il a un peu rétréci.",
+            "jp": "ちょっと大きいです。大きいのはありますか。",
+            "kana": "ちょっとおおきいです。おおきいのはありますか。",
+            "en": "It's a bit big. Do you have a bigger one?",
+            "fr": "Il est un peu grand. Vous en avez un plus grand ?",
             "why": {
-              "en": "「小さくなりました」 says the shirt has shrunk; you mean it is small on you, 「小さいです」.",
-              "fr": "「小さくなりました」 dit que le tee-shirt a rétréci ; tu veux dire qu'il est petit pour toi : 「小さいです」."
+              "en": "「大きいです」 says the shirt is already too big, so asking for 「大きいの」, a bigger one, contradicts it.",
+              "fr": "「大きいです」 dit que le tee-shirt est déjà trop grand : demander 「大きいの」, un plus grand, le contredit."
             }
           }
         ]
@@ -1303,8 +1303,8 @@
     "turns": [
       {
         "them": {
-          "jp": "はい、何ですか。",
-          "kana": "はい、なんですか。",
+          "jp": "はい、何でしょうか。",
+          "kana": "はい、なんでしょうか。",
           "en": "Yes? What is it?",
           "fr": "Oui ? Qu'y a-t-il ?"
         },
@@ -1681,9 +1681,9 @@
       },
       {
         "them": {
-          "jp": "ケーキもどうですか。",
-          "kana": "ケーキもどうですか。",
-          "en": "How about a cake as well?",
+          "jp": "ケーキもいかがですか。",
+          "kana": "ケーキもいかがですか。",
+          "en": "Would you like a cake as well?",
           "fr": "Et un gâteau avec ça ?"
         },
         "me": {

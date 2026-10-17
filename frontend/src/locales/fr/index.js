@@ -1404,6 +1404,19 @@ const conversationMode = {
   cvsLevelLabel:       'Niveau',
   cvsModes:            { choose: 'Choisir', translate: 'Traduire', free: 'Libre' },
   cvsEmpty:            'Pas encore de conversation à ce niveau.',
+  // La recherche de la station (plan 245) : le champ, son compte, et ce
+  // qu'il dit quand le niveau n'a rien de la requête.
+  cvsSearchPlaceholder: 'Chercher une scène…',
+  cvsCount:            n => (n === 1 ? '1 scène' : `${n} scènes`),
+  cvsNoMatchHere:      level => `Aucune scène ${level} ne correspond.`,
+  cvsFoundAt:          levels => {
+    const at = levels.map(level => `en ${level}`)
+    return `Il y en a ${at.length < 2 ? at.join('') : `${at.slice(0, -1).join(', ')} et ${at.at(-1)}`}.`
+  },
+  cvsGoTo:             level => `Passer en ${level}`,
+  cvsNoMatch:          'Aucune scène ne correspond.',
+  cvsNoMatchHint:      'Essaie un lieu, une personne ou un mot de la scène.',
+  cvsClearSearch:      'Effacer la recherche',
   cvsRecordAria:       (right, done) => `${right} répliques justes sur ${done}`,
   cvsLeave:            'Scènes',
   cvsRepliesRated:     'Répliques',
