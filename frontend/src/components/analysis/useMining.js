@@ -68,7 +68,7 @@ function writeStoredTarget(kind, deckId) {
 }
 
 // Owns "which deck does this go in" for every mining control on an
-// analysis surface (TokenCard, FocusCard, GrammarChips). One instance
+// analysis surface (TokenCard, the words' rows, GrammarChips). One instance
 // per screen; every mine control reads from it.
 export function useMining(session) {
   const [decks, setDecks] = useState([])

@@ -18,6 +18,11 @@
 # translate_block rations the calls (core/daily_limit.py, LINE_TRANSLATION_
 # DAILY_LIMIT blocks a day, for both kinds of Passage) and scripts/
 # llm_cost_model.py costs them. The routes keep what it found.
+#
+# Since plan 242 a video's lines are first read off the video's own
+# translation, where its makers wrote one (from_track, below), and only
+# what that leaves is asked of the model.
+import bisect
 import json
 import logging
 import os
@@ -25,6 +30,7 @@ import re
 
 from core import daily_limit
 from study.llm_shared import chat
+from study.text_normalize import japanese_ratio
 
 logger = logging.getLogger(__name__)
 
@@ -156,6 +162,84 @@ def translate_block(user_id: str, lines: list[dict], index: int, lang_name: str,
         found = {text: tr for text, tr in zip(wanted, got) if tr}
     merged = {**known, **found}
     return start, [None if s.get("foreign") else merged.get(s.get("text")) for s in block], found
+
+
+# ── The video's own translation (plan 242) ──────────────────────────
+# The owner (2026-10-17): "If the subtitles translated are available
+# take them, if not make them." A video whose makers wrote French or
+# English subtitles beside the Japanese has its lines translated by the
+# people who made it, and for nothing: the link fetch and the grab bring
+# that track too (study/captions.py, lib/captionGrab.js), each Japanese
+# cue takes the translated lines said in its time, and the session
+# keeps them as if they had been asked (routes/video.py). translate_block
+# then asks only for the lines the track left.
+#
+# Only where the two tracks line up. A translated line that straddles
+# two cues is neither's, and its cues are left to the model rather than
+# given half a sentence. A cue study/line_cut cuts in pieces takes none
+# of it either (study/cue_sentences.py): its translation says the whole
+# cue, and stood under one piece it would say more than the piece, which
+# the model's are held never to do.
+#
+# Hand-written tracks only. YouTube's machine translation (its tlang)
+# translates each cue alone, half a sentence as a whole one, which is
+# what translate_block's context is there to avoid.
+
+# The languages a learner reads the app in: a video's track is looked
+# for in each, so a learner who switches finds theirs too.
+TRACK_LANGS = ("fr", "en")
+
+# The share of a translated line's time that must fall inside one cue
+# for it to be that cue's.
+_INSIDE = 0.6
+# Cues looked back over from a translated line's end: subtitles overlap
+# their neighbours at most, never a dozen lines back.
+_LOOK_BACK = 8
+
+
+def track_lang(code: str) -> str | None:
+    """The TRACK_LANGS language a track's language code is, a region
+    tag dropped ("fr-CA" is French); None for any other."""
+    base = str(code or "").strip().lower().replace("_", "-").split("-")[0]
+    return base if base in TRACK_LANGS else None
+
+
+def from_track(cues: list[dict], track: list[dict]) -> list[str | None]:
+    """One translation or None per cue of `cues`, read off `track`, a
+    translated Track in parse_track's shape: the translated lines said
+    within each cue, in order, joined. None for a cue a translated line
+    straddles, and a line of the track in Japanese translates nothing."""
+    order = sorted(range(len(cues)), key=lambda i: cues[i]["start"])
+    starts = [cues[i]["start"] for i in order]
+    taken: list[list[str]] = [[] for _ in cues]
+    straddled: set[int] = set()
+    for line in track:
+        text = " ".join((line.get("text") or "").split())
+        if not text or japanese_ratio(text) > 0.5:
+            continue
+        start, end = line["start"], line["end"]
+        hi = bisect.bisect_left(starts, end) if end > start else bisect.bisect_right(starts, start)
+        best, best_overlap, touched = None, 0.0, []
+        for k in range(hi - 1, max(-1, hi - 1 - _LOOK_BACK), -1):
+            cue = cues[order[k]]
+            if end > start:
+                overlap = min(end, cue["end"]) - max(start, cue["start"])
+            else:
+                # A line with no length is the cue's it is said in.
+                overlap = 1.0 if cue["start"] <= start < cue["end"] else 0.0
+            if overlap <= 0:
+                continue
+            touched.append(order[k])
+            if overlap > best_overlap:
+                best, best_overlap = order[k], overlap
+        if best is None:
+            continue
+        if end > start and best_overlap < _INSIDE * (end - start):
+            straddled.update(touched)
+            continue
+        taken[best].append(text)
+    return [None if i in straddled or not parts else " ".join(parts)
+            for i, parts in enumerate(taken)]
 
 
 # The rows a Passage's translations are kept on: a video's session, a

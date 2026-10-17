@@ -1010,8 +1010,12 @@ const phraseAnalyzer = {
   // Le bureau du texte : la liste des mots repliée en une ligne (plan 235).
   wordsFoldCap:        'Mots de la phrase',
   explanationTitle:    'Explication de la phrase',
-  showExplanation:     'Voir l’explication',
-  showEntry:           'Revenir à la fiche',
+  // Le volet du bureau, ses trois faces (plan 242).
+  panelFaces:          'Ce que le volet montre',
+  faceWord:            'Mot',
+  facePoint:           'Point',
+  faceGrammar:         'Grammaire',
+  faceExplain:         'Construction',
   explainThisSentence: 'Expliquer la phrase',
   explanationOpen:     'Explication ouverte',
   writtenHere:         s => `ici : ${s}`,

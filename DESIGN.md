@@ -2183,15 +2183,31 @@ line here says otherwise.
   pressed in a docked breakdown opens its entry in that column
   (`SideLookup`), the sentence's line kept above it so the next word is one
   click, Esc or ✕ bringing the breakdown back where it was scrolled. The
-  analyser's result is three columns (plan 134, the owner's drawing): the
-  Passage's sentences over the focused one's grammar, numbered; the video,
-  the sentence as its subtitle and the player's bar as one sumi object,
-  with the sentence's words beside the word in focus under it and Explain
-  at their foot; and the card in focus in the runs' band on the right,
-  following the token walked to (←/→) and the doors pressed, Explain
-  standing the explanation in its description's place with a swap on the
-  column's edge. The desk's rail steps aside for this one screen, so the
-  three columns have the window at the drawing's shares (410 | 830 | 541);
+  analyser's result is three columns (plan 134; since plan 242 the
+  owner's pick C of the canvas "Tsuji analyser — the desk and Explain"):
+  the Passage's lines on the left, each over its translation, the time
+  over the marks at the row's end; the video edge to edge on the sumi's
+  top with no arrows beside it (the bar walks the lines), the line as its
+  subtitle over its translation and the player's bar as one sumi object
+  to the column's foot, the line's words on one strip under it; and one
+  panel on the right whose segment (the console's `Seg`) turns it between
+  the word's card in the runs' band -- following the token walked to
+  (←/→) and the word pressed -- the line's numbered grammar, a point
+  opening its lesson in that face with its ✕ giving the list back, and
+  the line's construction, which Explain buys the first time the face is
+  turned to: the line laid out as its blocks at `--fs-heading`, each
+  named under it (a word by its gloss, a point's run framed in the
+  grammar's ink under its number) and each a door to its card or its
+  lesson, then the prose, the Japanese it names in the line's face and
+  weight, "Explain again" a quiet word under it and the asking right
+  after (the owner's pick B of the canvas's "The Construction face").
+  The segment is the way between them: there is no way back to look for,
+  and Esc walks one step back. The bar and the segment are measured, not
+  queried (`useLabelsFit`): too narrow for their column, the bar puts its
+  track and clock on a row of their own and the segment drops the word it
+  names. The desk's rail steps aside for this one screen, so the
+  three columns have the window at the drawing's shares (270 | 676 | 400,
+  the panel never under 20rem);
   under the desk the same result is a stage (plan 219, the owner's pick D
   of four drawn): no HUD and no tab bar while it is up, the head about
   the whole Passage (the way back, where it is, the song's deck), the
@@ -2206,7 +2222,8 @@ line here says otherwise.
   card beside the words, the entry being that card and its deck action on
   the word's row; one sentence's words over its grammar on the left,
   several sentences' words under the sentence; every panel as tall as it
-  holds.
+  holds. Its panel has two faces, the word's card and the construction
+  (plan 242), its grammar keeping its own column.
   Before a Passage, the analyser is the learner's passages (plan 136, the
   owner's pick C of three drawn directions): the one console over a card
   each, and the intake the column beside them at a phone's width -- the

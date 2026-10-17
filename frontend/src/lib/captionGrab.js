@@ -36,8 +36,16 @@
 // still the hand-written ones where they exist, and the recognised
 // track goes up beside them only as the clock their words are read
 // out on (backend/study/word_timing.py).
+//
+// v3 (plan 242, "if the subtitles translated are available take
+// them"): beside the two, the video's own hand-written French and
+// English tracks, where its makers wrote them. They are never the lines
+// studied: they go up as the lines' translation, which the server reads
+// off them by time (backend/study/line_translate.from_track) and asks
+// the model only for what they leave. A v2 bookmark still works; its
+// lines are translated by the model alone.
 
-const GRAB_VERSION = 'v2'
+const GRAB_VERSION = 'v3'
 // YouTube video ids: 11 URL-safe base64 chars today; bounded loosely
 // so a format drift fails soft, but injection through the hash fails
 // hard.
@@ -150,7 +158,7 @@ export function transcriptXmlToVtt(xml) {
 }
 
 // ── The hash codec ────────────────────────────────────────
-// Payload shape: grab=v1.<z|r>.<videoId>.<base64url>  — z is gzip,
+// Payload shape: grab=v3.<z|r>.<videoId>.<base64url>  — z is gzip,
 // r is raw UTF-8; the bookmarklet compresses when the browser has
 // CompressionStream (every current one does) and falls back rather
 // than failing.
@@ -175,10 +183,15 @@ async function pipeBytes(bytes, TransformCtor, kind) {
   return new Uint8Array(await new Response(stream).arrayBuffer())
 }
 
-// The payload is the two tracks as JSON: {m: the hand-written track's
-// XML or null, a: the recognised one's or null}.
-export async function encodeGrabPayload(videoId, { manual = null, asr = null }) {
-  let bytes = new TextEncoder().encode(JSON.stringify({ m: manual, a: asr }))
+// The languages a video's own translation is taken in: those the app
+// is read in (backend/study/line_translate.TRACK_LANGS).
+export const TRANSLATION_LANGS = ['fr', 'en']
+
+// The payload is the tracks as JSON: {m: the hand-written track's XML
+// or null, a: the recognised one's or null, t: {lang: the video's own
+// translation's XML}, only the languages it has}.
+export async function encodeGrabPayload(videoId, { manual = null, asr = null, translations = {} }) {
+  let bytes = new TextEncoder().encode(JSON.stringify({ m: manual, a: asr, t: translations }))
   let mode = 'r'
   if (typeof CompressionStream !== 'undefined') {
     bytes = await pipeBytes(bytes, CompressionStream, 'gzip')
@@ -187,27 +200,32 @@ export async function encodeGrabPayload(videoId, { manual = null, asr = null }) 
   return `${GRAB_VERSION}.${mode}.${videoId}.${toBase64Url(bytes)}`
 }
 
-// {videoId, manual, asr} -- either track may be null, never both -- or
-// null for "not a grab hash / not one we can read": the screen treats
-// null as none of its business. Never throws. A v1 hash (a bookmark
-// made before v2) carried the one track, as XML.
+// {videoId, manual, asr, translations} -- either Japanese track may be
+// null, never both; translations {lang: XML}, empty where the video has
+// none or the bookmark is older than v3 -- or null for "not a grab hash
+// / not one we can read": the screen treats null as none of its
+// business. Never throws. A v1 hash (a bookmark made before v2)
+// carried the one track, as XML.
 export async function decodeGrabHash(hash) {
   try {
     const match = /[#&]grab=([^&]+)/.exec(hash ?? '')
     if (!match) return null
     const [version, mode, videoId, data] = match[1].split('.')
-    if ((version !== GRAB_VERSION && version !== 'v1') || !data || !VIDEO_ID.test(videoId ?? '')) return null
+    if (!['v1', 'v2', GRAB_VERSION].includes(version) || !data || !VIDEO_ID.test(videoId ?? '')) return null
     if (mode !== 'z' && mode !== 'r') return null
     let bytes = fromBase64Url(data)
     if (mode === 'z') {
       bytes = await pipeBytes(bytes, DecompressionStream, 'gzip')
     }
     const body = new TextDecoder().decode(bytes)
-    if (version === 'v1') return { videoId, manual: body, asr: null }
-    const { m, a } = JSON.parse(body)
+    if (version === 'v1') return { videoId, manual: body, asr: null, translations: {} }
+    const { m, a, t } = JSON.parse(body)
     const manual = typeof m === 'string' && m ? m : null
     const asr = typeof a === 'string' && a ? a : null
-    return manual || asr ? { videoId, manual, asr } : null
+    const translations = Object.fromEntries(TRANSLATION_LANGS
+      .filter(lang => typeof t?.[lang] === 'string' && t[lang])
+      .map(lang => [lang, t[lang]]))
+    return manual || asr ? { videoId, manual, asr, translations } : null
   } catch {
     return null
   }
@@ -254,7 +272,10 @@ export function buildBookmarklet(appOrigin, t) {
     `var get=async function(t){if(!t)return null;var x=await fetch(t.baseUrl.replace(/&fmt=[^&]*/,'')+'&fmt=srv3',{credentials:'omit'}).then(function(r){return r.text()});return x&&x.indexOf('<p')>=0?x:null};` +
     `var m=await get(man),a=await get(asr);` +
     `if(!m&&!a){alert(S.empty);return}` +
-    `var bytes=new TextEncoder().encode(JSON.stringify({m:m,a:a}));var mode='r';` +
+    // The video's own translation, hand-written, in each language the
+    // app is read in; best effort, a track that will not come is left out.
+    `var tr={};for(var L of ${JSON.stringify(TRANSLATION_LANGS)}){try{var x=await get(ts.find(function(t){return t.kind!=='asr'&&(t.languageCode===L||t.languageCode.indexOf(L+'-')===0)}));if(x)tr[L]=x}catch(e){}}` +
+    `var bytes=new TextEncoder().encode(JSON.stringify({m:m,a:a,t:tr}));var mode='r';` +
     `if(window.CompressionStream){bytes=new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer());mode='z'}` +
     `var bin='';for(var i=0;i<bytes.length;i+=32768){bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+32768))}` +
     `var b64=btoa(bin).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');` +

@@ -30,7 +30,7 @@ from core.db import db_conn
 from core.auth import get_user_id
 from core.history import HISTORY_LIMIT, trim_history
 from core.srs_instance import srs
-from study import morphology
+from study import line_translate, morphology
 from study.analysis import LOCAL_REV, analyze_local, attach_user_state
 from study.captions import (
     parse_track, parse_pasted_transcript, parse_video_id, fetch_youtube_track,
@@ -64,6 +64,10 @@ _MAX_UPLOAD_BYTES = 1 * 1024 * 1024
 # Room in a multipart body for its boundaries and the small form fields
 # (start, end, url) beside the file.
 _MULTIPART_OVERHEAD_BYTES = 64 * 1024
+# Files an upload may carry: the track, the recognised one it is timed
+# by, and the video's own translation in each of
+# study/line_translate.TRACK_LANGS (plan 242).
+_MAX_UPLOAD_FILES = 4
 
 # Same reasoning and same values as routes/exams.py's own constants --
 # see that module's comment. Not shared as an import: a generic
@@ -266,11 +270,14 @@ def _fail_session(session_id: int, message: str, code: str) -> None:
 
 def _video_worker(session_id: int, source: str, source_ref: str, content: str | None,
                    filename: str | None, window_start: float | None, window_end: float | None,
-                   timing: str | None = None) -> None:
+                   timing: str | None = None, tracks: dict | None = None) -> None:
     """Runs off-request. Parses/fetches the Track, reconstructs
     Sentences, analyzes each with the LOCAL tier only (never a model --
     see docs/adr/0001), and materializes the result. Owns the job row
     from 'running' through to either deleted (success) or 'failed'."""
+    # The video's own translation, {lang: Track} (plan 242): the link
+    # fetch fills it beside the Japanese, the grab sends it as files.
+    translated = {}
     try:
         # Two of these are purely local -- no request leaves this
         # server while building a Track, so they behave identically on
@@ -279,7 +286,7 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
         # goes out through a paid residential proxy and refuses
         # outright when none is configured. See study/captions.py.
         if source == "youtube":
-            cues = fetch_youtube_track(source_ref)
+            cues = fetch_youtube_track(source_ref, translated)
         elif source == "paste":
             cues = parse_pasted_transcript(content or "")
         else:
@@ -321,9 +328,28 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
         except Exception:
             logger.warning("Word timing skipped for session %s", session_id, exc_info=True)
 
+    # The grab's translated tracks, each read as the lines are. Best
+    # effort, like the timing: a track that will not read or line up
+    # leaves its lines to the model, never the session without them.
+    for lang, track in (tracks or {}).items():
+        try:
+            translated[lang] = parse_track(track, f"{lang}.vtt")
+        except Exception:
+            logger.warning("The %s track of session %s did not read", lang, session_id, exc_info=True)
+    try:
+        cues = _with_translations(cues, translated)
+    except Exception:
+        logger.warning("The translations of session %s were skipped", session_id, exc_info=True)
+
     all_sentences = sentences_from_cues(cues, window_start, window_end)
     truncated = max(0, len(all_sentences) - MAX_SENTENCES)
     kept = all_sentences[:MAX_SENTENCES]
+    # Kept as the model's are, by the line's text (study/line_translate),
+    # so the block a learner reaches asks only for what the track left.
+    translations = {}
+    for s in kept:
+        for lang, text in (s.get("tr") or {}).items():
+            translations.setdefault(lang, {}).setdefault(s["text"], text)
 
     analyzed = []
     for s in kept:
@@ -353,11 +379,12 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
             cur.execute(
                 """
                 UPDATE video_sessions
-                   SET status = 'ready', sentences = %s, truncated = %s
+                   SET status = 'ready', sentences = %s, truncated = %s, translations = %s
                  WHERE id = %s
              RETURNING user_id
                 """,
-                (json.dumps(analyzed, ensure_ascii=False), truncated, session_id),
+                (json.dumps(analyzed, ensure_ascii=False), truncated,
+                 json.dumps(translations, ensure_ascii=False), session_id),
             )
             row = cur.fetchone()
             cur.execute("DELETE FROM video_session_jobs WHERE session_id = %s", (session_id,))
@@ -371,12 +398,26 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
         conn.close()
 
 
+def _with_translations(cues: list[dict], translated: dict) -> list[dict]:
+    """`cues`, each the video's own translation of it carries as its
+    `tr`, {lang: text} (study/line_translate.from_track); a cue the
+    tracks do not line up with carries none."""
+    if not translated:
+        return cues
+    read = {lang: line_translate.from_track(cues, track) for lang, track in translated.items()}
+    out = []
+    for i, cue in enumerate(cues):
+        tr = {lang: lines[i] for lang, lines in read.items() if lines[i]}
+        out.append({**cue, "tr": tr} if tr else cue)
+    return out
+
+
 def _start_worker(session_id: int, source: str, source_ref: str, content: str | None,
                    filename: str | None, window_start: float | None, window_end: float | None,
-                   timing: str | None = None) -> None:
+                   timing: str | None = None, tracks: dict | None = None) -> None:
     threading.Thread(
         target=_video_worker,
-        args=(session_id, source, source_ref, content, filename, window_start, window_end, timing),
+        args=(session_id, source, source_ref, content, filename, window_start, window_end, timing, tracks),
         name=f"video-session:{session_id}", daemon=True,
     ).start()
 
@@ -457,8 +498,9 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
             declared = int(request.headers.get("content-length", ""))
         except ValueError:
             declared = None
-        # Two files at most: the track and its timing.
-        if declared is not None and declared > 2 * _MAX_UPLOAD_BYTES + _MULTIPART_OVERHEAD_BYTES:
+        # Four files at most: the track, its timing and the video's own
+        # translation in the two languages the app is read in.
+        if declared is not None and declared > _MAX_UPLOAD_FILES * _MAX_UPLOAD_BYTES + _MULTIPART_OVERHEAD_BYTES:
             raise _refusal(413, "file_too_large", "Subtitle file is too large")
         form = await request.form()
         upload = form.get("file")
@@ -483,6 +525,18 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
             if len(raw_timing) > _MAX_UPLOAD_BYTES:
                 raise _refusal(413, "file_too_large", "Subtitle file is too large")
             timing = raw_timing.decode("utf-8", errors="replace")
+        # Optional: the video's own translation, the grab's hand-written
+        # French or English track as VTT (plan 242). Never the lines
+        # studied -- only what is printed under them.
+        tracks = {}
+        for lang in line_translate.TRACK_LANGS:
+            track_upload = form.get(f"translation_{lang}")
+            if track_upload is None or not hasattr(track_upload, "read"):
+                continue
+            raw_track = await track_upload.read(_MAX_UPLOAD_BYTES + 1)
+            if len(raw_track) > _MAX_UPLOAD_BYTES:
+                raise _refusal(413, "file_too_large", "Subtitle file is too large")
+            tracks[lang] = raw_track.decode("utf-8", errors="replace")
         source = "upload"
         source_ref = upload.filename or "upload"
         # Optional, and NEVER fetched from -- it only names a video to
@@ -556,6 +610,7 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
             )
         filename = None
         timing = None
+        tracks = None
         try:
             window_start = _optional_seconds(body.get("start"), "start")
             window_end = _optional_seconds(body.get("end"), "end")
@@ -579,7 +634,7 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
         _open_session, user_id, source, source_ref, window_start, window_end, window_capped, video_id,
     )
 
-    _start_worker(session_id, source, source_ref, content, filename, window_start, window_end, timing)
+    _start_worker(session_id, source, source_ref, content, filename, window_start, window_end, timing, tracks)
     return JSONResponse(
         status_code=202,
         content={"sessionId": session_id, "status": "generating", "windowCapped": window_capped},

@@ -495,7 +495,9 @@ describe('AnalyzerScreen polling', () => {
     // The failure speaks in the panel the explanation would have filled,
     // and its button is there to try again.
     expect(screen.container.querySelector('.anl-explainpanel__error')).not.toBeNull()
-    expect(screen.container.querySelector('.anl-explainpanel__foot button').disabled).toBe(false)
+    const retry = screen.container.querySelector('.anl-explainpanel__read .anl-ghost')
+    expect(retry.textContent).toBe('Expliquer')
+    expect(retry.disabled).toBe(false)
   })
 
   it('says so when the provider is down', async () => {
@@ -555,11 +557,11 @@ describe('AnalyzerScreen polling', () => {
     await settle(1500)
 
     // The explanation stands in the right column, with the way to buy
-    // it again under it (it is cached per language, so a learner who
-    // switched the interface's gets it in the new one) and nothing
-    // beside that but an error, when there is one.
+    // it again under it, a quiet word (it is cached per language, so a
+    // learner who switched the interface's gets it in the new one) and
+    // nothing beside that but an error, when there is one.
     expect(screen.container.querySelector('.anl-explainpanel__body').textContent).toBe('An introduction.')
-    expect(screen.container.querySelector('.anl-explainpanel__foot button').textContent).toBe('Expliquer à nouveau')
+    expect(screen.container.querySelector('.anl-explainpanel__again').textContent).toBe('Expliquer à nouveau')
     expect(screen.container.querySelector('.anl-explainpanel__error')).toBeNull()
   })
 })
