@@ -8,6 +8,7 @@ import { playClick } from '../lib/audio'
 import { useDesk } from '../hooks/useDesk'
 import { useBoardKeys } from '../hooks/useBoardKeys'
 import { useBoxWidth } from '../hooks/useBoxWidth'
+import { useBackGuard } from '../hooks/useBackGuard'
 import { useProfileSummary } from '../stores/profileSummary'
 import { BoardHead, BoardLink } from '../components/boarding/BoardFrame'
 import { BoardBack } from '../components/boarding/boardBack'
@@ -41,6 +42,14 @@ import RouteStep from '../components/intro/RouteStep'
 // records every screen as a ride_step (`intro-<step>`), a skip as a
 // ride_step to 'cards' with dir 'skip'.
 //
+// On the first ride (`first`, App's rideDue) the browser's Back is the
+// frame's ‹, as the boarding's is (plan 123): one screen back while
+// there is one, through a guard entry (hooks/useBackGuard.js). Without
+// it Back left for the entry behind the ride, the front door, which
+// opened the introduction again on its first screen (reported
+// 2026-10-17). From the first screen Back is the browser's, as from
+// the boarding's first question: beginning there again loses nothing.
+//
 // `covered` is App's "the 改札 cutscene is still playing": the stopwatch
 // waits for it. `dryRun` is the workbench's (/dev/ride): `onNext` instead
 // of the route, and no request.
@@ -58,7 +67,7 @@ const STEP_COMPONENTS = {
   route: RouteStep,
 }
 
-export default function RideIntro({ session, covered = false, dryRun = false, onNext = null, volumes: given = null }) {
+export default function RideIntro({ session, covered = false, first = false, dryRun = false, onNext = null, volumes: given = null }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
   const desk = useDesk()
@@ -115,12 +124,18 @@ export default function RideIntro({ session, covered = false, dryRun = false, on
     track('ride_step', { step: `intro-${from}`, to, dir, ms: watches.current?.step.lap() ?? 0 })
   }, [])
 
+  // Back on the first ride: one screen back, as the ‹ (above), the
+  // guard stood again on each screen that still has one behind it. Read
+  // once, like the cards' own.
+  const [held] = useState(first)
+  const release = useBackGuard(held && index > 0, () => goTo(index - 1, 'back'), index)
+
   function leave(dir) {
     if (done.current) return
     done.current = true
     mark(step, 'cards', dir)
     if (onNext) onNext()
-    else if (!dryRun) navigate(INTRO_NEXT, { replace: true })
+    else if (!dryRun) release().then(() => navigate(INTRO_NEXT, { replace: true }))
   }
 
   function goTo(next, dir) {

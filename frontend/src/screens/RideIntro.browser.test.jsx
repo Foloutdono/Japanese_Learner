@@ -47,12 +47,12 @@ const VOLUMES = {
 const settle = (ms = 120) => new Promise(r => setTimeout(r, ms))
 const live = root => root.querySelector('.brd__car:not(.brd__car--out)')
 
-async function mount() {
+async function mount(props = {}) {
   const screen = await render(
     <LangProvider>
       <MemoryRouter initialEntries={['/ride/intro']}>
         <Routes>
-          <Route path="/ride/intro" element={<RideIntro session={{ access_token: 'tok' }} volumes={VOLUMES} />} />
+          <Route path="/ride/intro" element={<RideIntro session={{ access_token: 'tok' }} volumes={VOLUMES} {...props} />} />
           <Route path="/ride/cards" element={<p data-testid="cards">cards</p>} />
         </Routes>
       </MemoryRouter>
@@ -163,5 +163,39 @@ describe('入門, the six screens', () => {
     expect(root.querySelector('[data-testid="cards"]')).not.toBeNull()
     const [, last] = track.mock.calls.filter(([name]) => name === 'ride_step').at(-1)
     expect(last).toMatchObject({ step: 'intro-scripts', to: 'cards', dir: 'skip' })
+  })
+
+  // The first ride (App's rideDue): Back left for the entry behind the
+  // ride, the front door, which opened the introduction again on its
+  // first screen (reported 2026-10-17). It is the frame's ‹ now, as the
+  // boarding's is: one screen back while there is one, and the way on
+  // takes the guard out before it boards the cards.
+  it('on the first ride, Back goes back a screen as ‹ does, and the cards leave nothing behind', async () => {
+    const root = await mount({ first: true })
+    // Nothing behind the first screen: no guard, Back is the browser's.
+    expect(window.history.state?.guard).toBeFalsy()
+    await next(root)
+    await next(root)
+    expect(root.querySelector('main.brd.nyu').dataset.step).toBe('table')
+    expect(window.history.state?.guard).toBe(true)
+
+    window.history.back()
+    await settle(350)
+    expect(root.querySelector('main.brd.nyu').dataset.step).toBe('sounds')
+    // Still a screen behind it: the guard stands again.
+    expect(window.history.state?.guard).toBe(true)
+    window.history.back()
+    await settle(350)
+    expect(root.querySelector('main.brd.nyu').dataset.step).toBe('scripts')
+    expect(window.history.state?.guard).toBeFalsy()
+    const backs = track.mock.calls.filter(([name, p]) => name === 'ride_step' && p.dir === 'back').map(([, p]) => `${p.step}>${p.to}`)
+    expect(backs).toEqual(['intro-table>intro-sounds', 'intro-sounds>intro-scripts'])
+
+    await next(root)
+    expect(window.history.state?.guard).toBe(true)
+    live(root).querySelector('[data-action="skip"]').click()
+    await settle(200)
+    expect(root.querySelector('[data-testid="cards"]')).not.toBeNull()
+    expect(window.history.state?.guard).toBeFalsy()
   })
 })
