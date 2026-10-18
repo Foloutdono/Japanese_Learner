@@ -1,17 +1,16 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { useCredits } from '../../stores/credits'
 import { cardTier, holderName, xpClimb } from '../../domain/passCard'
 import { CardFace } from '../pass/PassCard'
-import { PassWave } from '../profile/PassWave'
 import { playGateChime } from '../../lib/audio'
 import { spendKey } from '../../lib/keyGuards'
 
 // ── 改札 — the ticket gate ─────────────────────────────────
 // The moment between choosing a destination and arriving at it. You
-// tap your 定期券 on the reader, the lamp turns, the flaps retract,
-// and you walk through onto the platform.
+// tap your 定期券 on the reader, the reader lights, the flaps snap
+// into the cabinets, and the cabinets part onto the platform.
 //
 // It exists because the audio for it was already here and had nothing
 // to look at: HomeScreen has always played a jingle and the spoken
@@ -21,65 +20,61 @@ import { spendKey } from '../../lib/keyGuards'
 //
 // Drawn rather than filmed, and that is the whole point. A recorded
 // clip could not show *your* card — the name and the level — nor take
-// the destination's own line colour, of which there are eleven. Every frame here is a transform on an element that
-// already knows both.
+// the destination's own line colour, of which there are eleven. Every
+// frame here is a transform on an element that already knows both.
 //
 // The budget is severe because this fires on every departure, dozens
 // of times a session: 980ms end to end, skippable by any input, and
-// skipped outright under prefers-reduced-motion. The last of it is the
-// arrival the owner asked for: the open gate grows into view with the
-// line's light until its lane is the screen, the destination's name
-// growing with it to fill the screen, and the two hold there a beat
-// before they fade off the destination. Navigation happens in that
-// hold, so the destination is mounted and running its own arrive
-// animation by the time the gate fades off it.
+// skipped outright under prefers-reduced-motion.
+//
+// Drawn as a game asset since plan 253 (the owner's pick B of three
+// drawn on the canvas "Tsuji — the ticket gate, redrawn", and "improve
+// it one more time"): flat fills, one ink outline, no blurred shadow.
+// The gate stands up close, its two cabinets the screen's two halves
+// like the door's leaves, the line's light beyond them, a flat fill. The pass
+// taps the reader, the flaps snap into the cabinets, and the cabinets
+// part on the door's own keyframes onto the line's light, the name
+// growing out of the hall to hold on it before the scene fades off the
+// destination. The gate it replaces grew a box of blurred shadows to
+// four times its size on the main thread, repainting it every frame:
+// that was the lag. Nothing here scales but the name (laid out at the
+// size it lands at) and the light (a flat fill): everything else is a
+// translation of a layer drawn once, as the door is.
+//
 // One dial for the whole cutscene. The CSS reads it as --gate-x and
 // multiplies every duration and delay by it, so the timers here and
 // the animations there cannot drift apart — raise this and the card,
-// the flaps, the push and the navigation all stretch together.
+// the flaps, the cabinets and the navigation all stretch together.
 const SPEED = 1.4
 
-const CONTACT_MS  = 300 * SPEED   // card meets the reader; chime, lamp turns
-const COVERED_MS  = 660 * SPEED   // the lane's light has the screen; the hold
+const CONTACT_MS  = 300 * SPEED   // card meets the reader; chime, the reader lights
+const COVERED_MS  = 660 * SPEED   // the cabinets are off the screen; the hold
 const NAVIGATE_MS = 700 * SPEED   // in the hold — swap the screen behind it
 const LEAVE_MS    = 840 * SPEED   // the light starts off the destination
 const DONE_MS     = 980 * SPEED   // gate leaves
 
-// How far the view travels: the scale at which the lane, grown about
-// its centre (the rig's, between two equal cabinets), covers the whole
-// scene. Measured rather than written down, because it is a ratio of
-// two boxes — the lane is 260px of a 390px phone, 470px of a 1180px
-// desk canvas — and CSS cannot divide one length by another. A hair
-// over, so no edge of the scene is left on a rounding.
-function pushThrough(scene, lane) {
-  if (!lane.clientWidth || !lane.clientHeight) return null
-  return 1.03 * Math.max(scene.clientWidth / lane.clientWidth, scene.clientHeight / lane.clientHeight)
-}
-
-// The name's way out of the lane: where it stands in the scene, and
-// the size at which it takes the screen — most of its width, or two
-// thirds of its height where the screen is wide and a two-character
-// name would otherwise run off its top and foot. Layout offsets, not the painted box: the rig is still
-// rising on its arrive transform when this runs.
-function titleFit(scene, name) {
-  let x = 0
-  let y = 0
-  for (let el = name; el && el !== scene; el = el.offsetParent) {
-    x += el.offsetLeft
-    y += el.offsetTop
-  }
-  const { offsetWidth: w, offsetHeight: h } = name
+// The name's way out of the hall: where it stands before the cabinets
+// part (midway between the sign and the cabinets' tops), the size it
+// stands at there, and the size at which it takes the screen — most of
+// its width, or two thirds of its height where the screen is wide and a
+// two-character name would otherwise run off its top and foot. Read off
+// the name laid out at its own size (zoom 1, the CSS's default), before
+// anything is written.
+function titleFit(scene, sign, cab, body) {
+  const { offsetWidth: w, offsetHeight: h } = body
   if (!w || !h) return null
-  return {
-    k: Math.min(0.84 * scene.clientWidth / w, 0.66 * scene.clientHeight / h),
-    dx: x + w / 2 - scene.clientWidth / 2,
-    dy: y + h / 2 - scene.clientHeight / 2,
-  }
+  const { clientWidth: W, clientHeight: H } = scene
+  const top = sign.offsetTop + sign.offsetHeight
+  const band = cab.offsetTop - top
+  const k = Math.min(0.84 * W / w, 0.66 * H / h)
+  // In the hall: half again its own size, as long as the hall holds it.
+  const s = Math.max(0.5, Math.min(1.5, 0.7 * band / h, 0.8 * W / w))
+  return { k, s: s / k, dy: top + band / 2 - H / 2 }
 }
 
 // The name's ink on the line's light, chosen by the light's lightness
 // (DESIGN.md: "the ink is chosen by the fill's lightness"): the panel's
-// kinari, as it stood in the lane, unless the pigment is too light to
+// kinari, as it stood in the hall, unless the pigment is too light to
 // carry it at display size, where the floor is 3:1 — and then the
 // fill's dark ink. Measured, that is 山吹 gold alone, Today's line and
 // the dictionary's, at 2.19:1 in the dark theme; the next lightest,
@@ -103,19 +98,20 @@ function prefersReducedMotion() {
 /**
  * `section` is the board row being departed for — it carries the line
  * colour and the name, and `stage` when the destination is a run, drawn
- * without the chrome (the desk's rail then leaves with the scene). `station` is its config/stations entry, for the
- * code on the roundel beyond the flaps. `onNavigate` is called once,
- * while the line's light has the screen; `onDone` when the gate should
- * unmount.
+ * without the chrome (the desk's rail then leaves with the scene).
+ * `station` is its config/stations entry, for the code on the sign over
+ * the gate. `onNavigate` is called once, while the line's light has the
+ * screen; `onDone` when the gate should unmount.
  */
 export function TicketGate({ section, station, onNavigate, onDone }) {
   const summary = useProfileSummary()
   const credits = useCredits()
-  const [phase, setPhase] = useState('closed')
   const timers = useRef([])
   const scene = useRef(null)
-  const lane = useRef(null)
-  const name = useRef(null)
+  const sign = useRef(null)
+  const cab = useRef(null)
+  const beyond = useRef(null)
+  const body = useRef(null)
   // The light's colour, for the one strip of the window the scene
   // cannot paint (below): the line's as the gate mounted, which is all
   // it will ever be — DepartureGate keys a new gate per departure. The
@@ -129,23 +125,21 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
   const cbs = useRef({ onNavigate, onDone })
   useEffect(() => { cbs.current = { onNavigate, onDone } }, [onNavigate, onDone])
 
-  // Before the first paint, so neither the push nor the name's growth
-  // ever starts from a guess. Every reading is taken before anything is
-  // written: a write between two readings dirtied the page's style, and
-  // the next reading recalculated it again, twice in the tap's frame.
+  // Before the first paint, so the name's growth never starts from a
+  // guess. Every reading is taken before anything is written: a write
+  // between two readings dirtied the page's style, and the next reading
+  // recalculated it again, twice in the tap's frame.
   useLayoutEffect(() => {
     const el = scene.current
-    if (!el || !lane.current || !name.current) return
-    const push = pushThrough(el, lane.current)
-    const fit = titleFit(el, name.current)
-    // Against the kinari the name wears in the lane, which is what it
-    // would keep.
-    const light = getComputedStyle(lane.current.querySelector('.gate__wipe')).backgroundColor
-    const ink = inkFor(light, getComputedStyle(name.current.firstChild).color)
-    if (push) el.style.setProperty('--gate-push', push.toFixed(3))
+    if (!el || !sign.current || !cab.current || !body.current) return
+    const fit = titleFit(el, sign.current, cab.current, body.current)
+    // Against the kinari the name wears in the dim hall, which is what
+    // it would keep.
+    const light = getComputedStyle(beyond.current).backgroundColor
+    const ink = inkFor(light, getComputedStyle(body.current.querySelector('.gate__dest')).color)
     if (fit) {
       el.style.setProperty('--gate-title-k', fit.k.toFixed(3))
-      el.style.setProperty('--gate-title-dx', `${fit.dx.toFixed(1)}px`)
+      el.style.setProperty('--gate-title-s', fit.s.toFixed(3))
       el.style.setProperty('--gate-title-dy', `${fit.dy.toFixed(1)}px`)
     }
     el.dataset.ink = ink
@@ -162,6 +156,12 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
       return
     }
 
+    // The card, the reader, the flaps, the cabinets and the name run on
+    // their own CSS delays (the 改札 block of index.css, every one
+    // scaled by --gate-x), as the door's do: a class flipped at the
+    // contact re-rendered the scene, card and all, in the middle of its
+    // motion. The timers here only carry what CSS cannot: the chime,
+    // the light on the window's gutter, the navigation and the unmount.
     const at = (ms, fn) => timers.current.push(setTimeout(fn, ms))
 
     // The window's scrollbar gutter (index.css reserves one) is outside
@@ -169,17 +169,17 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
     // classic scrollbars saw the line's colour stop a strip short of
     // the window's edge through the whole hold. The gutter is painted in
     // the page's own ground, so the ground takes the light the moment
-    // the lane has the screen — at once, not on html's own transition,
-    // which would colour the strip before the light got there — and
-    // gives it back as the scene fades, on that transition, in step
-    // with the fade. Everywhere else that ground is under body.
+    // the cabinets have left the screen — at once, not on html's own
+    // transition, which would colour the strip before the light got
+    // there — and gives it back as the scene fades, on that transition,
+    // in step with the fade. Everywhere else that ground is under body.
     const ground = document.documentElement.style
     const unwash = () => {
       ground.removeProperty('transition')
       ground.removeProperty('--gate-ground')
     }
 
-    at(CONTACT_MS, () => { playGateChime(); setPhase('open') })
+    at(CONTACT_MS, playGateChime)
     at(COVERED_MS, () => {
       ground.setProperty('transition', 'none')
       ground.setProperty('--gate-ground', wash.current)
@@ -227,64 +227,90 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
   const { share } = xpClimb(summary)
   const tier = cardTier(credits)
 
+  // The name twice over, stacked: in the hall's kinari while the hall
+  // is dim, and in the light's ink once it is lit. The two cross by
+  // opacity, so the name, laid out at the size it lands at, is drawn
+  // once each and never repainted as its colour turns.
+  const face = mode => (
+    <span className={`gate__face gate__face--${mode}`}>
+      <span className="gate__dest" lang="ja">{section.icon}</span>
+      <span className="gate__dest-latin">{section.title}</span>
+    </span>
+  )
+
   return createPortal(
     <div
       ref={scene}
-      className={`gate gate--${phase}${section.stage ? ' gate--stage' : ''}`}
+      className={`gate${section.stage ? ' gate--stage' : ''}`}
       style={{ '--line-color': section.color, '--gate-x': SPEED }}
       aria-hidden="true"
     >
       <div className="gate__scrim" />
 
-      <div className="gate__rig">
-        <div className="gate__pillar gate__pillar--left">
-          <span className="gate__lamp" />
+      <div className="gate__set">
+        {/* What is through the gate: the line's light, one flat fill,
+            dim until the flaps open. */}
+        <div className="gate__beyond" ref={beyond}>
+          <span className="gate__dim" />
         </div>
 
-        {/* The lane: what is beyond the gate, the flaps over it, and
-            the light it floods with as the gate grows into view. */}
-        <div className="gate__lane" ref={lane}>
-          <span className="gate__beyond">
-            {station?.code && <span className="gate__roundel">{station.code}</span>}
-            <span className="gate__name" ref={name}>
-              <span className="gate__dest" lang="ja">{section.icon}</span>
-              <span className="gate__dest-latin">{section.title}</span>
-            </span>
+        {/* The sign the gate stands under, which rides up and off as
+            the cabinets part, as the door's header does. */}
+        <div className="gate__sign" ref={sign}>
+          {station?.code && <span className="gate__roundel">{station.code}</span>}
+          <svg className="gate__arrow" viewBox="0 0 26 18" aria-hidden="true">
+            <path d="M2 9h20M15 3l7 6-7 6" />
+          </svg>
+        </div>
+
+        {/* The ground the gate stands on, the cabinets mirrored in it. */}
+        <span className="gate__floor" />
+
+        {/* The two cabinets, the screen's two halves. Each carries its
+            flap, tucked behind its face. */}
+        <div className="gate__cab gate__cab--l" ref={cab}>
+          <span className="gate__flap" />
+          <span className="gate__face-plate" />
+          {/* The gate's own sign: shut, then the way through. */}
+          <span className="gate__led">
+            <svg className="gate__led-x" viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8" /></svg>
+            <svg className="gate__led-go" viewBox="0 0 14 14"><path d="M2 7h9M7 3l4 4-4 4" /></svg>
           </span>
-          <span className="gate__flap gate__flap--l" />
-          <span className="gate__flap gate__flap--r" />
-          <span className="gate__wipe" />
         </div>
-
-        <div className="gate__pillar gate__pillar--right">
-          {/* The reader. The contactless mark is the same component
-              the pass and the top bar draw, so the thing tapping and
-              the thing being tapped are visibly the same object. */}
+        <div className="gate__cab gate__cab--r">
+          <span className="gate__flap" />
+          <span className="gate__face-plate" />
+          {/* The reader, with the contactless mark every reader in a
+              station carries: three arcs, drawn whole. (The pass's own
+              mark, half-circles fading out, read at this size as a
+              stray dot and two brackets.) */}
           <span className="gate__reader">
-            <PassWave className="pass__wave gate__wave" />
+            <span className="gate__reader-lit" />
+            <svg className="gate__nfc" viewBox="0 0 12 24">
+              <path d="M1.28 9.03A4 4 0 0 1 1.28 14.97M3.95 6.05A8 8 0 0 1 3.95 17.95M6.63 3.08A12 12 0 0 1 6.63 20.92" />
+            </svg>
           </span>
-          <span className="gate__lamp" />
         </div>
       </div>
 
-      {/* The card, flying in to meet the reader: the learner's own.
-          Beside the rig rather than in it, where it stands at the same
-          place: it is in the learner's hand, not part of the gate, so
-          it does not grow with the gate as the gate grows into view. */}
-      <div className="gate__card">
-        <CardFace tier={tier} name={holder} level={level ?? ''} share={share} />
-      </div>
-
-      {/* The destination's name, handed out of the lane as the gate
-          grows: laid out at the size it takes the screen at, and shrunk
-          to the lane's until then, so it is sharp when it holds. */}
+      {/* The destination's name: in the hall over the gate, then grown
+          to take the screen as the cabinets part. Laid out at the size
+          it lands at and shrunk until then, so it is sharp when it
+          holds. Over the cabinets, which it outgrows as they leave. */}
       <div className="gate__title">
         <span className="gate__title-move">
-          <span className="gate__title-body">
-            <span className="gate__dest" lang="ja">{section.icon}</span>
-            <span className="gate__dest-latin">{section.title}</span>
+          <span className="gate__title-body" ref={body}>
+            {face('dim')}
+            {face('lit')}
           </span>
         </span>
+      </div>
+
+      {/* The card, flying in to meet the reader: the learner's own. Not
+          part of the gate, so it does not leave with the cabinets: it
+          is in the learner's hand. */}
+      <div className="gate__card">
+        <CardFace tier={tier} name={holder} level={level ?? ''} share={share} />
       </div>
     </div>,
     document.body,

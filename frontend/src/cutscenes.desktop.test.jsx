@@ -11,7 +11,7 @@ import './index.css'
 // stopped there while the light filled the canvas, and jumped over the
 // rail when the navigation turned the chrome — the owner's "weird stop
 // before continuing". Into a run (`stage`), it spans the window from
-// its first frame, so the growth is one movement.
+// its first frame, so the parting is one movement.
 
 vi.mock('./lib/audio', async o => ({ ...(await o()), playGateChime: vi.fn() }))
 vi.mock('./stores/profileSummary', () => ({ useProfileSummary: () => ({ username: 'aiko', level: 3 }) }))
@@ -44,10 +44,9 @@ describe('the ticket gate under the desk\'s rail', () => {
     // To the window's right edge, less the scrollbar gutter no fixed
     // box reaches (TicketGate paints it in the light through the hold).
     expect(box.right).toBeGreaterThan(window.innerWidth - rail())
-    // Measured against the window it grows over: the lane, grown by
-    // --gate-push, covers the whole of it, the rail's strip included.
-    const lane = document.querySelector('.gate__lane')
-    const push = parseFloat(el.style.getPropertyValue('--gate-push'))
-    expect(push * lane.clientWidth).toBeGreaterThanOrEqual(box.width)
+    // Its two cabinets stand on the window's own edges, the rail's
+    // strip included (plan 253).
+    expect(document.querySelector('.gate__cab--l').getBoundingClientRect().left).toBeLessThanOrEqual(0)
+    expect(document.querySelector('.gate__cab--r').getBoundingClientRect().right).toBeGreaterThanOrEqual(box.right)
   })
 })
