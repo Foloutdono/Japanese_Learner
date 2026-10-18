@@ -7,6 +7,7 @@ import SelectionScreen from '../components/selection/SelectionScreen'
 import LevelSelector from '../components/selection/LevelSelector'
 import { useDesk } from '../hooks/useDesk'
 import { StationSplit, LevelRedirect } from '../components/selection/StationSplit'
+import { LineStation } from '../components/selection/LineStation'
 import { ScopeFigures } from '../components/selection/ModeFigures'
 import { LinePlatforms } from '../components/selection/LinePlatforms'
 import { useStationSamples } from '../stores/stationSamples'
@@ -287,17 +288,16 @@ export default function KanjiScreen({ session }) {
   const modes = byLevel ? MODES : MODES.filter(m => m.key !== FAST_REVIEW)
   const run = m => navigate(`${pathname}/${m}${search}`)
 
-  // ── 机 — the line beside its platforms (plans 114, 137) ──
-  // See VocabScreen: on the desk a level's platforms stand beside the
-  // JLPT line, both columns taking the window (LinePlatforms); the bar
-  // prints no sub, and the way out is the sources.
+  // ── 机 — the line over its cars (plans 114, 251) ──
+  // See VocabScreen: on the desk a level's exercises stand under the
+  // JLPT line as cars (LineStation, LinePlatforms); the bar prints no
+  // sub, and the way out is the sources.
   if (desk && byLevel) {
     return (
       <SelectionScreen title={t.kanjiTitle} aside={leaveSources}>
-        <StationSplit
-          className="desk-split--line"
+        <LineStation
           label={t.stationJlpt}
-          list={<LevelSelector source="kanji" selected={level} linkTo={lvl => `${BASE}/${lvl}`} figured />}
+          line={<LevelSelector source="kanji" selected={level} linkTo={lvl => `${BASE}/${lvl}`} across />}
         >
           <LinePlatforms
             source="kanji"
@@ -306,7 +306,7 @@ export default function KanjiScreen({ session }) {
             modes={modes}
             onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))}
           />
-        </StationSplit>
+        </LineStation>
       </SelectionScreen>
     )
   }

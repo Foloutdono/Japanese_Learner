@@ -633,6 +633,9 @@ const quiz = {
   // ── 読み入力 (kanji.readings) ──
   readingsOn:          'On (Chinese-derived)',
   readingsKun:         'Kun (native Japanese)',
+  // The two fields' labels on a car's face (plan 251, LinePlatforms).
+  readingsOnTag:       'On',
+  readingsKunTag:      'Kun',
   readingsAdd:         'add a reading',
   readingsRemove:      (r) => `Remove ${r}`,
   readingsFound:       'found',
