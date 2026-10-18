@@ -174,3 +174,12 @@ export function applyXpGain({ amount }) {
   setCache({ ...cache, xp, level, xpPrevLevel, xpForNext })
   return { leveledUp, newLevel: level }
 }
+
+// The streak the server has just counted (a cleared day, plan 250),
+// moved in place until the next real fetch says it: the finish plays on
+// Today, whose desk panel prints the summary's streak beside the rally
+// that rolls to the answer's.
+export function applyStreak(streak) {
+  if (!cache || !(streak > 0) || cache.streak === streak) return
+  setCache({ ...cache, streak, streakLongest: Math.max(cache.streakLongest ?? 0, streak) })
+}

@@ -18,7 +18,22 @@ export { printHour } from '../../../domain/printHour'
 // A print fetched once a visit: the hour's file is a few hundred
 // kilobytes, and an hour's turn is the only reason to fetch another.
 const scenes = new Map()
+const loading = new Map()
 const sceneUrl = key => `/today/print/${PRINT.rev}/${key}.json`
+
+function loadScene(key) {
+  if (!loading.has(key)) {
+    loading.set(key, fetch(sceneUrl(key))
+      .then(r => (r.ok ? r.json() : null))
+      .then(doc => {
+        if (doc?.layers?.sky) scenes.set(key, doc)
+        return doc?.layers?.sky ? doc : null
+      })
+      .catch(() => null)
+      .finally(() => loading.delete(key)))
+  }
+  return loading.get(key)
+}
 
 /** The hour's print for the frame, or null until it has come (or when
  *  it cannot: the gate stands on the sky's colours without it). Nothing
@@ -29,17 +44,17 @@ export function usePrintScene(hour, device) {
   useEffect(() => {
     if (!key || scenes.has(key)) return undefined
     let live = true
-    fetch(sceneUrl(key))
-      .then(r => (r.ok ? r.json() : null))
-      .then(doc => {
-        if (!doc?.layers?.sky) return
-        scenes.set(key, doc)
-        if (live) setGot(key)
-      })
-      .catch(() => {})
+    loadScene(key).then(doc => { if (doc && live) setGot(key) })
     return () => { live = false }
   }, [key])
   return got === key || scenes.has(key) ? scenes.get(key) : null
+}
+
+/** Fetch an hour's print ahead of the moment it is shown: a month's
+ *  finish turns the print to night under a veil (plan 250). */
+export function preloadPrint(hour, device) {
+  const key = device ? `${hour}-${device}` : null
+  if (key && !scenes.has(key)) loadScene(key)
 }
 
 // How much of the print's sky a short screen may lose before its foot
@@ -55,8 +70,10 @@ const WIDE = 0.7
 
 // Where the lines stand under the dial's rings, in the print's units:
 // the minutes and the hour they end (or, on a cleared day, what the day
-// reviewed), then the legend on a phone, or the week's stamps (plan 206).
-export const BELOW = { time: 28, keys: 54, week: 64 }
+// reviewed), then the legend on a phone, or the week's stamps (plan 206);
+// on the finish of a day, the day's fare in the legend's place and the
+// week under it (`under`, plan 250).
+export const BELOW = { time: 28, keys: 54, week: 64, under: 86 }
 
 /**
  * Which print the frame takes and where it stands: `u` pixels to the
@@ -116,6 +133,8 @@ export function printVars(hour, print, box) {
     '--tpr-room': frame.cy + frame.fare + BELOW.week + 14 - LIFT[print],
     '--tpr-sky-h': (frame.horizon + 12) / frame.h,
     '--tpr-top': look.band,
+    // Its ground, for what stands under the print's foot (plan 250).
+    '--tpr-ground': look.ground,
     // The print's own sky and ground, for the moment before it has come.
     '--tpr-sky': `linear-gradient(${look.sky.map(([o, c]) => `${c} ${((o * frame.horizon) / frame.h * 100).toFixed(2)}%`).join(', ')}, ${look.ground} ${(frame.horizon / frame.h * 100).toFixed(2)}%)`,
     '--tpr-ink': look.ink.text,

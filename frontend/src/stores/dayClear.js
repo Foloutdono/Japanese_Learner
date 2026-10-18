@@ -1,15 +1,19 @@
 import { useEffect, useSyncExternalStore } from 'react'
 import { apiJson } from '../lib/api'
 import { reviewsSettled } from '../lib/reviews'
-import { applyXpGain } from './profileSummary'
-import { refreshToday } from './today'
+import { applyStreak, applyXpGain } from './profileSummary'
+import { refetchToday, refreshToday } from './today'
 import { clearPaid } from '../domain/dayClear'
 
 // ── 終着 — asking whether the day is cleared (plan 191) ──────────────
 // A run hands its finish to /today/clear with its tally in the router's
 // state (screens/TodayRun.jsx); the finish asks the server, once per
 // run, whether that run cleared the day (POST /api/today/clear) and
-// plays the ceremony or the partial finish on the answer.
+// plays the ceremony or the partial finish on the answer -- on Today
+// itself since plan 250 (screens/TodayScreen.jsx), so the answer is
+// held back until Today's own summary has been fetched again after it:
+// the gate the finish plays on says what the day reviewed, tomorrow,
+// and when it opens.
 //
 // Module state keyed by the run, not screen state: StrictMode mounts the
 // screen twice in development and a desk window dragged across 1100px
@@ -93,9 +97,12 @@ export function requestClear(run, session) {
     .then(result => {
       const cleared = Boolean(result?.cleared)
       const levelUp = cleared ? payInto(result) : null
-      // The gate's figures (the badge, day_clear.done) are stale now.
-      refreshToday()
-      set(key, { status: cleared ? 'cleared' : 'partial', result, levelUp, error: null })
+      if (cleared) applyStreak(result.streak)
+      // The gate's figures (the badge, the dial, day_clear.done) are
+      // stale now: the finish waits for them.
+      return refetchToday().catch(() => {}).then(() => {
+        set(key, { status: cleared ? 'cleared' : 'partial', result, levelUp, error: null })
+      })
     })
     .catch(error => set(key, { status: 'error', result: null, levelUp: null, error }))
 }

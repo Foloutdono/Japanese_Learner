@@ -1,7 +1,7 @@
 // ── The boards' dice (plan 191) ──────────────────────────────────
 // mulberry32, as the canvas's boards seed it (kit.md §14): the same
-// numbers on every replay, so a stamp's tilt, a pile's jitter or a
-// firework's burst never differs between two plays of one ceremony.
+// numbers on every replay, so a lantern's place on the lake never
+// differs between two plays of one finish.
 export function rng(seed) {
   let a = seed >>> 0
   return () => {
@@ -12,6 +12,3 @@ export function rng(seed) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296
   }
 }
-
-/** The boards' seed: the day of the data story, 2026-10-06. */
-export const BOARD_SEED = 20261006

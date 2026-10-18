@@ -27,7 +27,7 @@ const EMPTY = { total: 0, by_source: {}, lanes: [], next_due: null, pace: { targ
 const todayRef = vi.hoisted(() => ({ current: null }))
 vi.mock('./stores/today', () => ({
   useTodaySummary: () => ({ data: todayRef.current, failed: false }),
-  refreshToday: vi.fn(), seedTodaySummary: vi.fn(),
+  refreshToday: vi.fn(), refetchToday: vi.fn(() => Promise.resolve()), seedTodaySummary: vi.fn(),
 }))
 vi.mock('./stores/journey', () => ({
   useJourneyStatus: () => ({ data: { goalLevel: 'N4', goalTargetDate: '2027-03-14', goalSetAt: '2026-09-01T00:00:00Z', plannedPerDay: 10, itemsTotal: 100, itemsDone: 10, actual14: 70, days14: 14 }, failed: false }),

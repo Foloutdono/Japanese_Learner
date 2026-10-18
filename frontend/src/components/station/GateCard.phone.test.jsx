@@ -18,7 +18,7 @@ vi.mock('../../lib/audio', async o => ({
   ...(await o()), playUi: vi.fn(), playClick: vi.fn(), playAnnouncement: vi.fn(),
 }))
 const creditsRef = vi.hoisted(() => ({ current: null }))
-vi.mock('../../stores/credits', () => ({ useCredits: () => creditsRef.current }))
+vi.mock('../../stores/credits', () => ({ useCredits: () => creditsRef.current, openBalance: vi.fn() }))
 vi.mock('../../stores/departure', () => ({ beginDeparture: vi.fn(), useDeparture: () => null }))
 vi.mock('../../stores/profileSummary', async o => ({
   ...(await o()),
