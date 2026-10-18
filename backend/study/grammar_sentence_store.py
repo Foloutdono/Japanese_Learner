@@ -14,6 +14,7 @@ regenerate selectively instead of wiping the table.
 import json
 
 from core.db import db_conn
+from core.rls import enable_rls
 
 
 def ensure_grammar_sentence_schema() -> None:
@@ -30,6 +31,7 @@ def ensure_grammar_sentence_schema() -> None:
                     PRIMARY KEY (level, pattern)
                 )
             """)
+            enable_rls(cur, "grammar_sentences")
         conn.commit()
     finally:
         conn.close()

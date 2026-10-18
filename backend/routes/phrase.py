@@ -11,6 +11,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from core.db import db_conn
+from core.rls import enable_rls
 from core.auth import get_user_id
 from core.srs_instance import srs
 from core.history import trim_history
@@ -263,6 +264,7 @@ def _init_cache() -> None:
                 )
                 """
             )
+            enable_rls(cur, "phrase_analysis_cache")
         conn.commit()
     finally:
         conn.close()
@@ -326,6 +328,9 @@ def _migrate_history_schema() -> None:
             cur.execute(
                 "ALTER TABLE phrase_history ADD COLUMN IF NOT EXISTS translations JSONB NOT NULL DEFAULT '{}'::jsonb"
             )
+            # Closed to the Data API like every table (core/rls.py). The
+            # table predates the self-migrations, so nothing creates it.
+            enable_rls(cur, "phrase_history")
         conn.commit()
     finally:
         conn.close()

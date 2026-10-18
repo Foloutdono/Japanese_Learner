@@ -49,6 +49,7 @@ from typing import Annotated
 from core import auth, events
 from core.auth import get_user_id
 from core.db import db_conn
+from core.rls import enable_rls
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -93,6 +94,7 @@ def _ensure_schema() -> None:
                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
+            enable_rls(cur, "feedback")
             cur.execute(
                 "CREATE INDEX IF NOT EXISTS feedback_user_at ON feedback (user_id, created_at)"
             )

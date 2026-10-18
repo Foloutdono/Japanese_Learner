@@ -18,6 +18,7 @@ from core.credits import require_pass
 from core.auth import get_user_id
 from core.credits import local_today, resets_at
 from core.db import db_conn
+from core.rls import enable_rls
 from study.llm_shared import chat, LLMUnavailable
 from study.ocr_prompt import OCR_PROMPT, VERTICAL_HINT
 from study.text_normalize import normalize_recognized_text
@@ -83,6 +84,7 @@ def _ensure_ocr_schema() -> None:
                     PRIMARY KEY (user_id, day)
                 )
             """)
+            enable_rls(cur, "ocr_usage")
         conn.commit()
     finally:
         conn.close()
