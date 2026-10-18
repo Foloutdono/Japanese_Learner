@@ -64,9 +64,12 @@ const settle = (ms = 140) => new Promise(r => setTimeout(r, ms))
 // Always the arriving car: the leaving one stays mounted for the 260 ms
 // of the pull, and it carries the same selectors.
 async function click(screen, sel) {
-  const el = screen.container.querySelector(`.brd__car:not(.brd__car--out) ${sel}`)
+  // The next screen comes a frame after the tap (a transition,
+  // BoardingFlow's go()), so its control is waited for.
+  const find = () => screen.container.querySelector(`.brd__car:not(.brd__car--out) ${sel}`)
     ?? screen.container.querySelector(sel)
-  expect(el, sel).toBeTruthy()
+  await vi.waitFor(() => expect(find(), sel).toBeTruthy(), { timeout: 2000 })
+  const el = find()
   el.click()
   await settle(40)
 }

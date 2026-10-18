@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { startTransition, useEffect, useRef, useState } from 'react'
 import { useLang } from '../LangContext'
 import { ApiError, apiFetch, apiJson, apiJsonWithTimeout } from '../lib/api'
 import { canNudge, requestNudgePermission } from '../lib/platform'
@@ -297,11 +297,18 @@ export default function BoardingFlow({
     })
   }
 
+  // 速度: a move between screens is a transition. Rendered inside the
+  // tap, the next screen held the tap's paint for 250-370 ms of a cheap
+  // phone's CPU (608 ms on a learner's, 2026-10-18, the trail's INP);
+  // as a transition the tap paints its press at once and the screen
+  // follows a frame later, in a render that can yield.
   function go(next) {
     mark(step, next, 'fwd')
-    setHistory(h => [...h, step])
-    if (!REDUCED) setLeaving({ step, dir: 'fwd' })
-    setStep(next)
+    startTransition(() => {
+      setHistory(h => [...h, step])
+      if (!REDUCED) setLeaving({ step, dir: 'fwd' })
+      setStep(next)
+    })
   }
 
   // On past a screen that is not kept behind the next one: the test,
@@ -310,17 +317,21 @@ export default function BoardingFlow({
   // fresh test (plan 224).
   function goPast(next) {
     mark(step, next, 'fwd')
-    if (!REDUCED) setLeaving({ step, dir: 'fwd' })
-    setStep(next)
+    startTransition(() => {
+      if (!REDUCED) setLeaving({ step, dir: 'fwd' })
+      setStep(next)
+    })
   }
 
   function back() {
     if (history.length === 0) return
     const prev = history[history.length - 1]
     mark(step, prev, 'back')
-    setHistory(h => h.slice(0, -1))
-    if (!REDUCED) setLeaving({ step, dir: 'back' })
-    setStep(prev)
+    startTransition(() => {
+      setHistory(h => h.slice(0, -1))
+      if (!REDUCED) setLeaving({ step, dir: 'back' })
+      setStep(prev)
+    })
   }
 
   // 机 (plan 140): a stop already passed on the line is a door straight
@@ -331,9 +342,11 @@ export default function BoardingFlow({
     const at = history.lastIndexOf(target)
     if (at < 0) return
     mark(step, target, 'back')
-    setHistory(h => h.slice(0, at))
-    if (!REDUCED) setLeaving({ step, dir: 'back' })
-    setStep(target)
+    startTransition(() => {
+      setHistory(h => h.slice(0, at))
+      if (!REDUCED) setLeaving({ step, dir: 'back' })
+      setStep(target)
+    })
   }
 
   // ── The browser's Back (plan 123) ────────────────────────────
@@ -482,10 +495,13 @@ export default function BoardingFlow({
       // still rung, on the beat it lands on: a sound is not motion, and
       // the gate's departure has just been played.
       if (REDUCED) playVoice('platform-chime', { after: ARRIVAL_CHIME_MS / 1000 })
-      else setArrival(true)
+      else startTransition(() => setArrival(true))
     }
-    setHistory([])
-    setStep('plan')
+    // A transition, as go() is.
+    startTransition(() => {
+      setHistory([])
+      setStep('plan')
+    })
   }
 
   // ── The contract ─────────────────────────────────────────────

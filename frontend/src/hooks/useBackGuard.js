@@ -39,7 +39,32 @@ import { dialogOpen } from '../lib/dialogOpen'
 //
 // A browser that refuses the history API keeps the screen as it was:
 // Back leaves it.
+//
+// Two things the first version (2026-10-18) missed, both on a phone:
+//
+// - Chrome's back button passes over an entry a page added without a
+//   tap since it was reached (its history intervention), and the guard
+//   is stood on mount. So Back can land PAST it, on the entry under the
+//   screen -- the front door -- in one pop. history.back() is exempt
+//   from that rule, which is why a test of it passed.
+// - A pop that changes the address is rendered by React 19 inside the
+//   popstate event, in React Router's own listener: the screen unmounts
+//   and its listener is gone before the event reaches it, so `onBack`
+//   never ran and the door boarded the ride from its first card again.
+//
+// So the guards hear the pop through ONE window listener, added when
+// this module loads -- before App's and React Router's, which are added
+// at render, and listeners on the window run in the order they were
+// added (a capture flag does not put one first there) -- and a pop that
+// left the address the guard stood on is the screen left, `onBack`,
+// whatever sheet was open over it.
 const RELEASE_MS = 1500
+
+// Every guard mounted now, told of each pop before the router hears it.
+const guards = new Set()
+if (typeof window !== 'undefined') {
+  window.addEventListener('popstate', () => { [...guards].forEach(onPop => onPop()) })
+}
 
 export function useBackGuard(on, onBack, step = null) {
   const guard = useRef(false)
@@ -49,6 +74,8 @@ export function useBackGuard(on, onBack, step = null) {
   const landing = useRef(null)
   const timer = useRef(null)
   const out = useRef(null)
+  // The address the guard stood on: a pop elsewhere went past it.
+  const standingAt = useRef(null)
   const onBackRef = useRef(onBack)
   useEffect(() => { onBackRef.current = onBack })
 
@@ -59,6 +86,7 @@ export function useBackGuard(on, onBack, step = null) {
       // entry it stands over.
       window.history.pushState({ ...window.history.state, guard: true }, '')
       guard.current = true
+      standingAt.current = window.location.pathname
     } catch { /* a browser refusing the history API: Back leaves, as before */ }
   }, [])
 
@@ -82,7 +110,8 @@ export function useBackGuard(on, onBack, step = null) {
       if (landing.current) { landing.current(); return }
       if (!guard.current) return
       guard.current = false
-      if (dialogOpen()) {
+      const past = window.location.pathname !== standingAt.current
+      if (!past && dialogOpen()) {
         // hooks/useDialog closes every sheet on Escape, whoever mounted it.
         window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
         stand()
@@ -90,9 +119,9 @@ export function useBackGuard(on, onBack, step = null) {
       }
       onBackRef.current()
     }
-    window.addEventListener('popstate', onPop)
+    guards.add(onPop)
     return () => {
-      window.removeEventListener('popstate', onPop)
+      guards.delete(onPop)
       // Gone before the pop it waited on: nothing navigates for it.
       clearTimeout(timer.current)
     }

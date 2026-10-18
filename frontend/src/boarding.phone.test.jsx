@@ -35,8 +35,9 @@ const { default: Welcome } = await import('./components/boarding/Welcome')
 const settle = (ms = 340) => new Promise(r => setTimeout(r, ms))
 const rect = el => el.getBoundingClientRect()
 async function click(root, sel) {
+  // The next screen comes a frame after the tap (a transition, go()).
+  await vi.waitFor(() => expect(root.querySelector(sel), sel).toBeTruthy(), { timeout: 2000 })
   const el = root.querySelector(sel)
-  expect(el, sel).toBeTruthy()
   el.click()
   await settle(20)
 }

@@ -32,6 +32,7 @@ import { rememberOnboarded, wasOnboardedHere } from './stores/onboarded'
 import { holdGuide } from './stores/guide'
 import { forgetAccount } from './stores/account'
 import { track } from './lib/track'
+import { cardsRidden } from './lib/rideProgress'
 import { routePattern } from './lib/routePattern'
 import { watchApiFailures } from './lib/apiTrail'
 import { watchClientErrors } from './lib/clientErrors'
@@ -509,7 +510,10 @@ export default function App({ front = NO_FRONT }) {
   // 入門 (plan 170): a learner who answered « Pas encore » to the kana
   // question meets the introduction before the cards; everyone else
   // boards the cards as before.
-  const rideStart = onboardingProfile?.kanaKnown === 'none' ? '/ride/intro' : '/ride/cards'
+  // A ride left after its cards (a reload, the tab closed) is boarded
+  // again at the reading, never the first card (lib/rideProgress.js).
+  const rideStart = cardsRidden(session?.user?.id) ? '/ride/reading'
+    : onboardingProfile?.kanaKnown === 'none' ? '/ride/intro' : '/ride/cards'
   // 案内 — no gate's guide may open under the 改札 cutscene (plan 100).
   useEffect(() => { holdGuide(onboarding === 'finishing') }, [onboarding])
   const rideDone = () => setGate(g => (

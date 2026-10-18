@@ -45,8 +45,9 @@ const { ARRIVAL_CHIME_MS } = await import('../components/onboarding/TrainArrival
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 const stepOf = screen => screen.container.querySelector('.brd')?.dataset.step
 async function click(screen, sel) {
+  // The next screen comes a frame after the tap (a transition, go()).
+  await vi.waitFor(() => expect(screen.container.querySelector(sel), sel).toBeTruthy(), { timeout: 2000 })
   const el = screen.container.querySelector(sel)
-  expect(el, sel).toBeTruthy()
   el.click()
   await settle(20)
 }

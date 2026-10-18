@@ -111,8 +111,9 @@ const q = (screen, sel) => live(screen).querySelector(sel) ?? screen.container.q
 // A native click's state lands on the next tick, so every click waits
 // one before the next lands on the state it moved.
 async function click(screen, sel) {
+  // The next screen comes a frame after the tap (a transition, go()).
+  await vi.waitFor(() => expect(q(screen, sel), sel).toBeTruthy(), { timeout: 2000 })
   const el = q(screen, sel)
-  expect(el, sel).toBeTruthy()
   el.click()
   await settle(20)
 }
