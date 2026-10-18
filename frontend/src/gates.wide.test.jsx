@@ -7,17 +7,19 @@ import { LangProvider } from './LangContext'
 // and the runner's fallback for it (DejaVu Sans) sets « Entraînement à
 // la lecture » 45px wider than Space Grotesk does.
 import '@fontsource/space-grotesk/latin-700.css'
+// ... and the wells' Japanese in the app's own face, so a sentence
+// breaks where a learner sees it break.
+import '@fontsource/noto-sans-jp/400.css'
+import '@fontsource/noto-sans-jp/700.css'
 import './index.css'
 
-// ── 机 — the Practice gate on a laptop (plan 244) ──────────────────
-// The `wide` lane: a laptop's 1440×900. The board stands at Today's
-// column's width (36% of the frame), and the chosen train's card has
-// the room the owner's picture gives it: the line saying what the run
-// asks over the well, and in the well the full face -- comprehension's
-// text over its question and four choices, each on one line -- on every
-// train at every grade, with nothing cut and no scroll. At the desk's
-// tightest (screens/PracticeScreen.desktop.test.jsx) the line goes and
-// the well draws its compact face.
+// ── 机 — the Practice gate on a laptop (plans 165, 254) ──────────────
+// The `wide` lane: a laptop's 1440×900. The seven plates stand three to
+// a row, the exam's paper the whole last row, and the gate holds the
+// window whole: every name on its plate (a long one in two lines) and
+// every platform's card whole in its well at every grade. At the desk's
+// tightest (screens/PracticeScreen.desktop.test.jsx) the rows go two
+// across and the window scrolls a row.
 
 const { default: CARDS } = await import('./testing/practiceCards.json')
 vi.mock('./lib/api', () => ({
@@ -69,50 +71,41 @@ const gate = () => render(
     </MemoryRouter>
   </LangProvider>
 )
-async function choose(train, level) {
-  $$('.pdesk-dep')[train].click()
-  $$('.pdesk-levels [role="radio"]')[LEVELS.indexOf(level)].click()
-  await settle(150)
-}
+const plates = () => $$('.practice > .plates > .plate')
+const nameOf = plate => plate.querySelector('.plate__title').textContent
 
-describe('the Practice gate on a laptop (plan 244)', () => {
-  it('draws the line over the card\'s well and the full face in it, on every train at every grade', async () => {
-    await gate()
-    await settle()
-    expect(document.scrollingElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight + 1)
-    const frame = box($('.pdesk'))
-    expect(Math.abs(box($('.pdesk__board')).width - 0.36 * frame.width)).toBeLessThanOrEqual(1)
-    for (const level of LEVELS) {
-      for (let i = 0; i < 7; i++) {
-        await choose(i, level)
-        const what = `${level} ${$('.pdesk-card').getAttribute('aria-label')}`
-        const how = $('.pdesk-card__how')
-        expect(how.hidden, what).toBe(false)
-        expect(box(how).height, what).toBeGreaterThan(0)
-        const well = $('.pdesk-card .prc-spec')
-        expect(well.classList.contains('prc-spec--compact'), what).toBe(false)
-        expect(box(well).top, what).toBeGreaterThan(box(how).bottom)
-        expect(well.scrollHeight, what).toBeLessThanOrEqual(well.clientHeight + 1)
-        expect(well.scrollWidth, what).toBeLessThanOrEqual(well.clientWidth + 1)
-        // Every French name whole, the card's and the trains'.
-        for (const title of $$('.pdesk-dep__title, .pdesk-card__title')) {
-          expect(title.scrollWidth, title.textContent).toBeLessThanOrEqual(title.clientWidth)
+describe('the Practice gate on a laptop (plans 165, 254)', () => {
+  it('stands the seven three to a row in the window, every card whole at every grade', async () => {
+    try {
+      for (const level of LEVELS) {
+        learner.grade = level
+        const screen = await gate()
+        await settle()
+        expect(document.scrollingElement.scrollHeight, level).toBeLessThanOrEqual(window.innerHeight + 1)
+        const boxes = plates().map(box)
+        expect(boxes).toHaveLength(7)
+        // Three rows: the first two of three plates, the paper the third
+        // (a row's plates within a pixel: the rows share the window).
+        const rows = boxes.reduce((acc, b) => (acc.some(r => Math.abs(r - b.top) <= 1) ? acc : [...acc, b.top]), [])
+        expect(rows).toHaveLength(3)
+        expect(boxes.filter(b => Math.abs(b.top - rows[0]) <= 1)).toHaveLength(3)
+        expect(boxes.filter(b => Math.abs(b.top - rows[1]) <= 1)).toHaveLength(3)
+        const whole = box($('.practice > .plates'))
+        expect(Math.abs(boxes[6].width - whole.width), level).toBeLessThanOrEqual(1)
+        for (const plate of plates()) {
+          const what = `${level} ${nameOf(plate)}`
+          const well = plate.querySelector('.prc-spec--plate')
+          expect(well.textContent, what).not.toBe('')
+          expect(well.scrollHeight, what).toBeLessThanOrEqual(well.clientHeight + 1)
+          expect(well.scrollWidth, what).toBeLessThanOrEqual(well.clientWidth + 1)
+          const title = plate.querySelector('.plate__title')
+          expect(title.scrollWidth, what).toBeLessThanOrEqual(title.clientWidth)
         }
+        expect(plates()[0].querySelector('.prc-spec__jp').textContent).toBe(CARDS.reading[level].card.jp)
+        await screen.unmount()
       }
-      await choose(1, level)
-      const comprehension = $('.pdesk-card .prc-spec')
-      const card = CARDS.comprehension[level].card
-      expect(comprehension.querySelector('.prc-spec__title').textContent).toBe(card.title)
-      // The text keeps a line under its title, above the question.
-      const text = comprehension.querySelector('.prc-spec__text')
-      expect(box(text).height, level).toBeGreaterThan(box(comprehension.querySelector('.prc-spec__title')).height)
-      expect(box(comprehension.querySelector('.prc-spec__q')).top).toBeGreaterThanOrEqual(box(text).bottom)
-      expect(comprehension.querySelector('.prc-spec__q').textContent).toBe(card.question)
-      const choices = $$('.prc-spec__opt', comprehension)
-      expect(choices.map(c => c.querySelector('.prc-spec__label').textContent)).toEqual(card.options)
-      // Each on one line, however long the sentence.
-      const heights = choices.map(c => Math.round(box(c).height))
-      expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(1)
+    } finally {
+      learner.grade = 'N5'
     }
   })
 })

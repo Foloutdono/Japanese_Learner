@@ -7266,17 +7266,6 @@ textarea:focus-visible {
    natural widths first, then stretches what landed on each — so the
    set keeps the shape it wraps into. A lone chip is not a set and
    keeps its own width. */
-.plate__foot--dests .chip {
-  flex: 1 1 0;
-  justify-content: center;
-  padding: 0;
-  /* .chip trims the same trailing space off its END padding; this one
-     zeroes its padding, so there is nothing to trim and it takes a
-     LEADING pad instead. A start pad moves centred content by half its
-     own width, so a whole tracking here buys the half-tracking shift
-     the trim buys in .chip. Measured 0.91px left of centre before. */
-  padding-inline-start: var(--tr-caption);
-}
 /* .select-console__acts joins them: two chips are the whole of what
    you can do with a selection, which is a set and takes the row. */
 .console__chips .chip,
@@ -9481,14 +9470,6 @@ textarea:focus-visible {
   letter-spacing: var(--tr-term);
   color: var(--text-primary);
 }
-/* On a practice platform the foot is where the trains go: the five
-   grades, a thumb's worth of chip each, sharing the row — the console's
-   two-row grammar, a hairline and then the choices. */
-.plate__foot--dests {
-  display: flex;
-  gap: var(--sp-2);
-  padding: var(--sp-3) var(--sp-4);
-}
 /* The stripe: the pigment at rest along the whole edge, raw over the
    stretch ridden. A plate with no track behind it — the shelf, a
    platform — is painted raw end to end. 3px since plan 174 (線): every
@@ -9519,594 +9500,13 @@ textarea:focus-visible {
    they get, instead of the air pooling under the last plate. Every
    plate is a plate, so every plate gets one share — the shelf too. */
 @media (max-width: 768px) {
-  .learn > .plates { flex: 1; }
-  .learn > .plates > .plate { flex: 1 1 auto; }
-}
-
-/* ── 練習の改札 — the painted platform (plan 225) ──────────────────────
-   The Practice gate on the phone: the owner's painting of the platform,
-   cut into layers by scripts/practice-gate and made live by
-   components/practice/gate/PracticeGate.jsx. The scene is 390 × 724
-   units, one px each inside .pgate__scene, which is zoomed to its frame
-   (--pg-u px to the unit, its corner at --pg-x, --pg-y: gateFit.js), as
-   Today's print's lifted layers are. Every left, top, width and height
-   below is the painting's, measured on the canvas "Practice gate — five
-   wheels", board 4; the type is the scale's, zoomed with the scene. Its
-   inks are the painting's and its signs' own, the same in both themes:
-   it is a picture of a platform in the hour's light, not a surface of
-   the app. */
-.practice:has(> .pgate) { flex: 1 0 auto; padding-bottom: 0; }
-.pgate {
-  position: relative;
-  flex: 1 0 auto;
-  isolation: isolate;
-  /* The lines' pigments on the platform: the washi theme's in either
-     theme (the signs are boards in the platform's light), 翻訳 at the
-     painted stripe's own blue, as the board drew it. */
-  --pg-ink-reading: #186b6a;
-  --pg-ink-comprehension: #854e27;
-  --pg-ink-translation: #2f5aa0;
-  --pg-ink-dictation: #226d4c;
-  --pg-ink-composition: #744c7e;
-  --pg-ink-exam: #72583b;
-  --pg-ink-conversation: #05697d;
-}
-/* The hour's light on the signs' housings, as the painted car takes it. */
-.pgate--dawn { --pg-rim: rgba(206, 196, 214, 0.45); --pg-shade: 0.28; }
-.pgate--dusk { --pg-rim: rgba(206, 184, 176, 0.42); --pg-shade: 0.28; --pg-sheen: 0.09; }
-.pgate--night { --pg-rim: rgba(116, 126, 146, 0.4); --pg-shade: 0.28; --pg-sheen: 0.09; }
-/* The frame: the whole screen between the bars. What a frame of another
-   shape shows past the scene is the canopy's colour over it, or the
-   pillars' beside it (gate.json's fill). */
-.pgate__frame {
-  position: absolute;
-  inset: calc(-1 * var(--sp-6)) calc(-1 * var(--sp-5)) 0;
-  overflow: hidden;
-  background: var(--pg-fill-top, #474440);
-  user-select: none;
-}
-.pgate__wing {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: calc(var(--pg-x, 0) * 1px + 1px);
-  background: var(--pg-fill-side, #37393d);
-}
-.pgate__wing--l { left: 0; }
-.pgate__wing--r { right: 0; }
-.pgate__stage {
-  position: absolute;
-  left: calc(var(--pg-x, 0) * 1px);
-  top: calc(var(--pg-y, 0) * 1px);
-  width: calc(390px * var(--pg-u, 1));
-  height: calc(724px * var(--pg-u, 1));
-}
-.pgate__scene {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 390px;
-  height: 724px;
-  overflow: hidden;
-  zoom: var(--pg-u, 1);
-  font-family: var(--font-display);
-}
-/* Each layer's hours, stacked: the hour shown comes in over the last
-   one, which goes once it has. */
-.pgate__layers {
-  position: absolute;
-  inset: 0;
-  isolation: isolate;
-  pointer-events: none;
-}
-.pgate__layer {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 390px;
-  height: 724px;
-  opacity: 0;
-  transition: opacity 0s linear 700ms;
-}
-.pgate__layer.is-on {
-  z-index: 1;
-  opacity: 1;
-  transition: none;
-  animation: pgate-in 700ms ease;
-}
-@keyframes pgate-in {
-  from { opacity: 0; }
-}
-/* 雲 — the clouds, over the sky they were lifted from (clouds.py):
-   behind the sky's mask, which stays, they drift a few units either
-   way, slow enough to be seen only by a learner who stays. They start
-   where the painting has them (the loop's middle). */
-.pgate__sky {
-  position: absolute;
-  left: 0;
-  top: calc(var(--pg-sky-top, 0) * 1px);
-  width: 390px;
-  height: calc(var(--pg-sky-h, 0) * 1px);
-  pointer-events: none;
-  mask-image: var(--pg-sky, none);
-  mask-size: 100% 100%;
-}
-.pgate__clouds {
-  animation: pgate-drift 56s ease-in-out -28s infinite alternate;
-}
-.pgate__clouds .pgate__layer { width: 390px; height: calc(var(--pg-sky-h, 0) * 1px); }
-@keyframes pgate-drift {
-  from { transform: translateX(-14px); }
-  to { transform: translateX(14px); }
-}
-.pgate__car { inset: 195.86px auto auto 24.65px; width: 340.71px; height: 360.17px; }
-.pgate__car .pgate__layer { width: 340.71px; height: 360.17px; }
-/* The train: every car, its stripe, its signs, its door and its
-   pantograph, gliding in and pulling out together. */
-.pgate__train {
-  position: absolute;
-  inset: 0;
-  transform: translateX(0);
-  filter: blur(0);
-  transition: transform 2600ms cubic-bezier(0.1, 0.55, 0.22, 1);
-}
-.pgate__train--away {
-  transform: translateX(-780px);
-  filter: blur(3px);
-  transition: none;
-}
-.pgate__train--arriving { transition: transform 2600ms cubic-bezier(0.1, 0.55, 0.22, 1), filter 2200ms ease-out; }
-.pgate__train--closing { transition: none; }
-.pgate__train--leaving {
-  transform: translateX(780px);
-  filter: blur(3.5px);
-  transition: transform 2400ms cubic-bezier(0.62, 0, 0.92, 0.55), filter 2000ms ease-in;
-}
-.pgate__train--gone {
-  transform: translateX(780px);
-  filter: blur(3.5px);
-  transition: none;
-}
-/* The next cars, from the door-shut painting. */
-.pgate-c2 {
-  position: absolute;
-  top: 195.86px;
-  width: 340.71px;
-  height: 360.17px;
-  background: var(--pg-car2, none) 0 0 / 100% 100% no-repeat;
-}
-/* The stripe takes the line's pigment over its own mask, by colour
-   alone, so it keeps its paint and the hour's light. */
-.pgate-band {
-  position: absolute;
-  top: 195.86px;
-  width: 340.71px;
-  height: 360.17px;
-  pointer-events: none;
-  background-color: var(--pg-line, var(--pg-ink-translation));
-  mix-blend-mode: color;
-  mask-size: 100% 100%;
-  mask-repeat: no-repeat;
-  transition: background-color 500ms ease;
-}
-.pgate-band--a { mask-image: var(--pg-band-a, none); }
-.pgate-band--b { mask-image: var(--pg-band-b, none); }
-.pgate-spill-at {
-  position: absolute;
-  left: 15px;
-  top: 549px;
-  width: 160px;
-  height: 110px;
-  pointer-events: none;
-  transition: opacity 900ms ease;
-}
-.pgate-spill { display: block; overflow: visible; }
-/* 方向幕 — the roll signs, in their housing on the car's side. */
-.pgate-sign {
-  position: absolute;
-  top: 355px;
-  height: 183px;
-  border-radius: var(--r-plate);
-  background: linear-gradient(180deg, #2e3034 0%, #2a2c30 20%, #27292d 62%, #232428 100%);
-  box-shadow:
-    0 0 0 0.5px #15161a,
-    0 0 0 1.3px var(--pg-rim, rgba(224, 225, 228, 0.5)),
-    0 1.6px 2.4px 1px rgba(0, 0, 0, var(--pg-shade, 0.16)),
-    inset 0 0.8px 0 rgba(255, 255, 255, var(--pg-sheen, 0.15)),
-    inset 0 -0.7px 0 rgba(0, 0, 0, 0.35);
-}
-.pgate-sign--main { left: 146px; width: 215px; }
-.pgate-sign--coach { width: 218px; }
-.pgate-sign__rivets { position: absolute; left: 0; top: 0; pointer-events: none; }
-.pgate-roll {
-  position: absolute;
-  top: 6px;
-  height: 129px;
-  overflow: hidden;
-  background: #eae4dd;
-  box-shadow: 0 0 0 0.9px #0c0e11, 0 1px 0 0.9px rgba(255, 255, 255, 0.06);
-}
-.pgate-roll--grade { left: 6px; width: 52px; }
-.pgate-roll--dest { left: 63px; width: 146px; }
-.pgate-sign--coach .pgate-roll--dest { width: 149px; }
-.pgate-roll__drum {
-  position: absolute;
-  inset: 0;
-  transition: filter 160ms ease;
-}
-.pgate-roll__drum--rolling { filter: blur(1.2px); }
-/* A row: three show, the lit one in the middle; the drum turns a row's
-   height (43) a step. */
-.pgate-roll__row {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 43px;
-  height: 43px;
-  display: flex;
-  align-items: center;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  line-height: 1;
-  cursor: pointer;
-  transform: translateY(calc(var(--k, 0) * 43px));
-  transition: transform 460ms cubic-bezier(0.3, 0.9, 0.35, 1.06), opacity 300ms ease;
-}
-.pgate-roll__row:focus-visible { outline: 2px solid var(--gate-gold); outline-offset: -2px; }
-.pgate-roll__row--jump { transition: none; }
-.pgate-roll__row--off { opacity: 0; }
-.pgate-roll__row--grade {
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--sp-1);
-  padding-right: var(--sp-2);
-  color: #141519;
-  font-family: var(--font-display);
-  font-size: var(--fs-lead);
-  font-weight: 700;
-}
-.pgate-roll__here {
-  width: 6px;
-  height: 6px;
-  border-radius: var(--r-pill);
-  background: #2f5aa8;
-}
-.pgate-roll__row--dest { padding-left: var(--sp-3); text-align: left; }
-.pgate-roll__code {
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28.6px;
-  height: 28.6px;
-  box-sizing: border-box;
-  border: 1.6px solid var(--pg-row, #141519);
-  border-radius: var(--r-pill);
-  color: var(--pg-row, #141519);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  transition: border-color 300ms ease, color 300ms ease;
-}
-.pgate-roll__names {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-1);
-  min-width: 0;
-  margin-left: var(--sp-3);
-}
-.pgate-roll__jp {
-  font-family: var(--font-jp);
-  font-size: var(--fs-title);
-  font-weight: 700;
-  letter-spacing: var(--tr-term);
-  color: #070403;
-}
-.pgate-roll__name {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 600;
-  letter-spacing: var(--tr-term);
-  text-transform: uppercase;
-  white-space: nowrap;
-  color: #3d3936;
-}
-/* The rows above and below the lit one, under the housing's shade; the
-   arrows that say the drum turns; the glass over it all. */
-.pgate-roll__dim {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 43px;
-  pointer-events: none;
-}
-.pgate-roll__dim--up {
-  top: 0;
-  background: linear-gradient(180deg, rgba(40, 46, 58, 0.66) 0%, rgba(40, 46, 58, 0.43) 100%);
-  box-shadow: inset 0 -1px 0 rgba(20, 22, 28, 0.3);
-}
-.pgate-roll__dim--down {
-  top: 86px;
-  background: linear-gradient(180deg, rgba(40, 46, 58, 0.44) 0%, rgba(40, 46, 58, 0.66) 100%);
-  box-shadow: inset 0 1px 0 rgba(20, 22, 28, 0.3);
-}
-.pgate-roll__arrow {
-  position: absolute;
-  right: 3.03px;
-  width: 0;
-  height: 0;
-  border-right: 4.54px solid transparent;
-  border-left: 4.54px solid transparent;
-  pointer-events: none;
-}
-.pgate-roll__arrow--up { top: 17.65px; border-bottom: 7.69px solid #d8d7d5; }
-.pgate-roll__arrow--down { top: 103.65px; border-top: 7.69px solid #d8d7d5; }
-.pgate-roll--dest .pgate-roll__arrow { right: 5.83px; border-right-width: 4.66px; border-left-width: 4.66px; }
-.pgate-roll--dest .pgate-roll__arrow--up { top: 17.48px; border-bottom-width: 8.04px; }
-.pgate-roll--dest .pgate-roll__arrow--down { top: 103.48px; border-top-width: 8.04px; }
-.pgate-roll__glass {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
-}
-/* The LED under the signs: where the train goes, then what the run asks. */
-.pgate-led {
-  position: absolute;
-  left: 6px;
-  top: 140px;
-  width: 203px;
-  height: 37px;
-  overflow: hidden;
-  background: #171719;
-  box-shadow: 0 0 0 0.9px #0c0e11, 0 1px 0 0.9px rgba(255, 255, 255, 0.06), inset 0 1px 3px rgba(0, 0, 0, 0.6);
-}
-.pgate-sign--coach .pgate-led { width: 206px; }
-.pgate-led__page {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--sp-1);
-  margin: 0;
-  padding: 0 var(--sp-2) 0 var(--sp-3);
-  color: #eab757;
-  text-shadow: 0 0 3px rgba(234, 170, 70, 0.35);
-  opacity: 0;
-  transition: opacity 500ms ease;
-}
-.pgate-led__page.is-on { opacity: 1; }
-/* Three lines at most, held inside the LED: the scale's smallest type,
-   a shade under the canvas's, set a shade closer. */
-.pgate-led__page--how {
-  flex-direction: row;
-  align-items: center;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 600;
-  line-height: 1.15;
-}
-.pgate-led__jp {
-  font-family: var(--font-jp);
-  font-size: var(--fs-body);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: var(--tr-term);
-}
-.pgate-led__jp small { margin-left: 0.3em; font-size: var(--fs-caption); }
-.pgate-led__grade {
-  margin-left: 0.8em;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-}
-.pgate-led__full {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 600;
-  line-height: 1;
-}
-/* 扉 — the door's two leaves, drawn (GateParts' Leaves) over the
-   painted doorway; open, each runs into the car's side. */
-.pgate-door {
-  position: absolute;
-  left: 54.05px;
-  top: 365.4px;
-  width: 81.28px;
-  height: 182.5px;
-  overflow: hidden;
-  pointer-events: none;
-}
-.pgate-leaf {
-  position: absolute;
-  top: 0;
-  width: 40.64px;
-  height: 182.5px;
-  transition: transform 620ms cubic-bezier(0.45, 0, 0.25, 1);
-}
-.pgate-leaf svg { display: block; }
-.pgate-leaf--l { left: 0; }
-.pgate-leaf--r { left: 40.64px; }
-.pgate-door--open .pgate-leaf { transition-duration: 900ms; }
-.pgate-door--open .pgate-leaf--l { transform: translateX(-100%); }
-.pgate-door--open .pgate-leaf--r { transform: translateX(100%); }
-.pgate-leaf__band {
-  fill: var(--pg-line, var(--pg-ink-translation));
-  mix-blend-mode: color;
-  transition: fill 500ms ease;
-}
-/* 菱 — the pantograph, a shade of the hour's light over its steel. */
-.pgate-panto {
-  position: absolute;
-  left: 0;
-  top: 0;
-  overflow: visible;
-  pointer-events: none;
-  transition: filter 700ms ease;
-}
-.pgate--dawn .pgate-panto { filter: brightness(0.9) sepia(0.14) hue-rotate(-18deg); }
-.pgate--dusk .pgate-panto { filter: brightness(0.78) sepia(0.2); }
-.pgate--night .pgate-panto { filter: brightness(0.62) saturate(0.8); }
-.pgate-panto__bob { transform-origin: 137.06px 312.18px; }
-.pgate-panto__bob--on { animation: pgate-bob 230ms ease-in-out infinite alternate; }
-@keyframes pgate-bob {
-  from { transform: scaleY(1); }
-  to { transform: scaleY(0.994); }
-}
-.pgate-panto__tap {
-  position: absolute;
-  left: 48px;
-  top: 186px;
-  width: 114px;
-  height: 132px;
-  padding: 0;
-  border: 0;
-  border-radius: var(--r-card);
-  background: none;
-  cursor: pointer;
-}
-.pgate-panto__tap:focus-visible { outline: 2px solid var(--gate-gold); outline-offset: 2px; }
-.pgate-spark {
-  position: absolute;
-  top: 194.3px;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-}
-.pgate-spark__glow {
-  position: absolute;
-  left: -12px;
-  top: -12px;
-  width: 24px;
-  height: 24px;
-  border-radius: var(--r-pill);
-  background: radial-gradient(circle, #fff 0%, rgba(214, 236, 255, 0.95) 16%, rgba(126, 178, 255, 0.6) 38%, rgba(90, 140, 255, 0) 70%);
-  opacity: 0;
-  animation: pgate-flash 460ms ease-out forwards;
-}
-.pgate-spark__streak {
-  position: absolute;
-  left: -12px;
-  top: -12px;
-  overflow: visible;
-  opacity: 0;
-  animation: pgate-streak 420ms ease-out forwards;
-}
-@keyframes pgate-flash {
-  0% { opacity: 0; transform: scale(0.3); }
-  10% { opacity: 1; transform: scale(1); }
-  28% { opacity: 0.7; transform: scale(0.75); }
-  42% { opacity: 1; transform: scale(1.12); }
-  100% { opacity: 0; transform: scale(0.45); }
-}
-@keyframes pgate-streak {
-  0% { opacity: 0; transform: scale(0.25); }
-  12% { opacity: 1; }
-  100% { opacity: 0; transform: scale(1.7); }
-}
-/* 時計 — the station clock under the canopy, lit at night. */
-.pgate-clock {
-  position: absolute;
-  left: 317.37px;
-  top: 62.7px;
-  width: 44.96px;
-  height: 44.96px;
-  padding: 0;
-  border: 0;
-  border-radius: var(--r-pill);
-  background: radial-gradient(circle at 40% 30%, #6c6d73 0%, #3b3c41 70%, #2a2b2f 100%);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  cursor: pointer;
-  transition: box-shadow 700ms ease;
-}
-.pgate--dawn .pgate-clock { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.32), 0 0 8px 1px rgba(255, 220, 200, 0.16); }
-.pgate--dusk .pgate-clock { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35), 0 0 10px 2px rgba(255, 226, 180, 0.22); }
-.pgate--night .pgate-clock { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4), 0 0 16px 4px rgba(255, 236, 200, 0.3); }
-.pgate-clock:focus-visible { outline: 2px solid var(--gate-gold); outline-offset: 2px; }
-.pgate-clock__dial {
-  position: absolute;
-  left: 1.7px;
-  top: 1.7px;
-  width: 41.56px;
-  height: 41.56px;
-  border-radius: var(--r-pill);
-  background: radial-gradient(circle at 45% 40%, #fff 0%, #f4f3f0 60%, #e2e1de 100%);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
-}
-.pgate-clock__face { position: absolute; left: 0; top: 0; }
-.pgate-clock__numerals { font-family: Arial, "Helvetica Neue", system-ui, sans-serif; }
-.pgate-clock__hand {
-  fill: #141416;
-  transform-box: view-box;
-  transform-origin: 22.48px 22.48px;
-  animation: pgate-turn 3600s linear infinite;
-}
-.pgate-clock__hand--h { animation-duration: 43200s; }
-.pgate-clock__hand--s {
-  fill: #d33a2c;
-  animation-duration: 60s;
-  animation-timing-function: steps(60);
-}
-@keyframes pgate-turn {
-  to { transform: rotate(360deg); }
-}
-/* 改札 — the gate button, where the painting has it: written after every
-   other gate's rules (with the kit's, below), since it narrows them. */
-/* The veil the train leaves behind it: where it went. */
-.pgate-veil {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-4);
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 700ms ease;
-}
-.pgate-veil.is-on {
-  opacity: 1;
-  pointer-events: auto;
-  transition-duration: 450ms;
-}
-.pgate-veil__jp {
-  padding-left: var(--tr-name);
-  font-family: var(--font-serif);
-  font-size: var(--fs-display);
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: var(--tr-name);
-}
-.pgate-veil__name { font-size: var(--fs-body); font-weight: 700; }
-.pgate-veil__grade {
-  padding: var(--sp-2) var(--sp-4);
-  border: 1px solid color-mix(in srgb, var(--gate-gold) 60%, transparent);
-  border-radius: var(--r-pill);
-  color: var(--gate-gold-lit);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-}
-/* Reduced motion: the train stands, its door open, its pantograph on
-   the wire; the signs turn without rolling; the clock keeps the time
-   it was opened at; the clouds keep the painting's place; no spark. */
-@media (prefers-reduced-motion: reduce) {
-  .pgate__layer.is-on,
-  .pgate__clouds,
-  .pgate-panto__bob--on { animation: none; }
-  .pgate__train,
-  .pgate-roll__row,
-  .pgate-leaf { transition: none; }
-  .pgate-roll__drum--rolling { filter: none; }
-  .pgate-clock__hand { animation-play-state: paused; }
-  .pgate-spark { display: none; }
+  .learn > .plates,
+  .practice > .plates { flex: 1; }
+  .learn > .plates > .plate,
+  .practice > .plates > .plate { flex: 1 1 auto; }
+  /* Practice hangs seven where Learn hangs five or six (plan 254): its
+     heads stand a rung tighter, so the seven hold a phone's height. */
+  .practice > .plates > .plate > .plate__head { padding-block: var(--sp-3); }
 }
 
 /* 駅ナンバリング — the roundel on the panel's ink, kept for the doors
@@ -29796,24 +29196,6 @@ button.brd-stn { cursor: pointer; }
   animation: clr-gate-in 0.6s var(--ease-out) backwards;
   animation-delay: var(--gate-d, 0ms);
 }
-/* 練習の改札 (plan 225): the painted Practice gate's own, where the
-   painting has it, at its drawn size, its word where the painting set it
-   (components/practice/gate, the gate's section above). */
-/* A size up from the drawn one (the owner's word), on the drawn centre
-   line, its foot still over KEEP.bottom (gateFit.js). */
-.pgate .pgate__go {
-  position: absolute;
-  left: 48.08px;
-  top: 636px;
-  width: 296px;
-  height: 58px;
-  min-height: 0;
-  margin: 0;
-  padding: 0 var(--sp-2);
-}
-.pgate .pgate__go .btn-depart__reader { width: 46px; height: 46px; }
-.pgate .pgate__go .btn-depart__jp { font-size: var(--fs-lead); translate: 8.5px 0; }
-
 /* ── one-shot utilities (each reads --d as its delay) ── */
 .clrk-arrive { animation: clr-arrive 0.5s var(--ease-out) backwards; animation-delay: var(--d, 0ms); }
 .clrk-fade { animation: clr-fade 0.4s ease backwards; animation-delay: var(--d, 0ms); }
@@ -32790,6 +32172,79 @@ button.brd-stn { cursor: pointer; }
     flex-wrap: wrap;
   }
 
+  /* ── 見本 — Practice's plates, each its exercise (plans 165, 254) ──
+     The Practice gate hangs a plate per platform, as on the phone, and
+     each holds its body inside its head (screens/PracticeScreen's
+     PlatformSpecimen, Plate's `body`): the plate is one door, the name
+     its first row and the body the second, spanning the roundel's
+     column too and taking what the name leaves. In the body, a line
+     saying what the run asks over the run's card in a well
+     (components/practice/PracticeSpecimen's `plate`), the well taking
+     what the line leaves -- the canvas "Practice screens — layout
+     options", "Every platform's specimen", seven since the owner's pick
+     A of "Tsuji — Practice, new directions" (plan 254). The gate takes
+     the window's width, as that board drew it: the gate alone
+     (`.practice--gate`), the exam's result being a main.practice too,
+     which keeps the canvas.
+
+     Seven plates make no lattice of their own, so they wrap: four to a
+     row where four fit at a desk column's least width each, three where
+     they do not, two on the narrowest desk, every row stretched to the
+     gate's width. The exam's paper is the last plate (PracticeScreen
+     puts it there) and two plates wide, so with four to a row it takes
+     the two cells the second row leaves, and with three or two the whole
+     last row: no row is ever short (DESIGN.md, "A lattice's column count
+     must divide its content"). A plate's basis leaves a gutter of the
+     row for flex to share out, so four that fit are never pushed to
+     three by a rounding, and the paper grows twice as fast as a plate,
+     so its edges stay on the columns above it. The rows share the
+     window, never below two thirds of a side column, the room a
+     specimen needs once its line is not drawn: a window too short for
+     them scrolls, as the narrowest desk does by a row. */
+  .phone--desk .phone__content:has(> .practice--gate) { max-width: none; }
+  .practice > .plates {
+    flex: 1;
+    flex-flow: row wrap;
+    width: 100%;
+  }
+  .practice > .plates > .plate {
+    flex: 1 1 max(var(--desk-run-col-min), (100% - 4 * var(--sp-4)) / 4);
+    min-height: calc(var(--desk-side-w) * 2 / 3);
+  }
+  .practice > .plates > .plate--paper {
+    flex: 2 1 calc(2 * max(var(--desk-run-col-min), (100% - 4 * var(--sp-4)) / 4) + var(--sp-4));
+  }
+  .practice > .plates > .plate > .plate__head {
+    grid-template-rows: auto minmax(0, 1fr);
+    row-gap: var(--sp-4);
+    min-height: 0;
+  }
+  /* A name that no longer holds on one line at a third of a laptop
+     takes two, balanced. */
+  .practice > .plates > .plate .plate__title {
+    white-space: normal;
+    text-wrap: balance;
+  }
+  .plate__body {
+    grid-column: 1 / -1;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .plate__fill {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    min-height: 0;
+  }
+  .plate__how {
+    font-size: var(--fs-sm);
+    line-height: 1.4;
+    color: var(--text-secondary);
+  }
+
   /* ── the gates, laid out for the width ──
      Learn hangs its plates two by two: a column of them at the desk's
      width was a stack of slabs a thousand pixels long. Its fifth, the
@@ -32816,396 +32271,6 @@ button.brd-stn { cursor: pointer; }
   /* A plate with a body keeps its head at the head's own height; the
      body takes the rest. */
   .learn > .plates > .plate--line > .plate__head { flex: none; }
-
-  /* ── 練習の改札、机 — the platform painted wide (plan 244) ──
-     components/practice/gate/DeskGate.jsx: the owner's painting of the
-     desk's Practice gate (scripts/practice-gate/desk.py), the window's
-     height and the width the rail leaves, lit at Today's hour, with one
-     board over its right side -- the owner's pick B of the canvas
-     "Tsuji — Practice on the desk". The scene is --pd-w × --pd-h units,
-     one px each inside a zoomed root (--pd-u, its corner at --pd-x,
-     --pd-y: deskFit.js), and every place in it (the car, the door) comes
-     in as a unitless property from desk.json, so nothing here repeats
-     the painting's measures. Its layers and the hours' crossfade are the
-     phone's (.pgate__layer); the board is the app's, in the app's inks. */
-  .phone--desk .phone__content:has(> main.practice) { max-width: none; padding-block: 0; }
-  .practice:has(> .pdesk) { height: 100dvh; padding: 0; gap: 0; }
-  .pdesk {
-    flex: 1;
-    overflow: hidden;
-    background: var(--pd-fill);
-  }
-  .pdesk__frame {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    user-select: none;
-  }
-  .pdesk__stage {
-    position: absolute;
-    left: calc(var(--pd-x, 0) * 1px);
-    top: calc(var(--pd-y, 0) * 1px);
-    width: calc(var(--pd-w) * var(--pd-u, 1) * 1px);
-    height: calc(var(--pd-h) * var(--pd-u, 1) * 1px);
-  }
-  .pdesk__scene {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: calc(var(--pd-w) * 1px);
-    height: calc(var(--pd-h) * 1px);
-    overflow: hidden;
-    zoom: var(--pd-u, 1);
-  }
-  /* The painting's layers at their own size: they are the scene's units. */
-  .pdesk .pgate__layer { width: auto; height: auto; }
-  /* 空 — the sky alive (plan 244b, DeskSky): behind the sky's own mask
-     (desk.py's sky.png), the clouds lifted off it drift --pd-drift units
-     either way from where the painting has them, slow enough to be seen
-     only by a learner who stays; under them the sun's or the moon's glow
-     breathes and the brightest stars catch the light; over them birds
-     cross. The canopy, the wires, the pillars and the land stay in front.
-     The clouds' layer runs --pd-sky-pad units past the scene each side,
-     so a drift never shows its edge. */
-  .pdesk__sky {
-    position: absolute;
-    left: 0;
-    top: calc(var(--pd-sky-top) * 1px);
-    width: calc(var(--pd-w) * 1px);
-    height: calc(var(--pd-sky-h) * 1px);
-    pointer-events: none;
-    mask-image: var(--pd-sky);
-    mask-size: 100% 100%;
-    mask-repeat: no-repeat;
-  }
-  .pdesk__clouds {
-    inset: 0 auto auto calc(var(--pd-sky-pad) * -1px);
-    width: calc((var(--pd-w) + 2 * var(--pd-sky-pad)) * 1px);
-    height: calc(var(--pd-sky-h) * 1px);
-    animation: desk-drift 80s ease-in-out -40s infinite alternate;
-  }
-  .pdesk__clouds.is-still { animation: none; }
-  @keyframes desk-drift {
-    from { transform: translateX(calc(var(--pd-drift) * -1px)); }
-    to { transform: translateX(calc(var(--pd-drift) * 1px)); }
-  }
-  .pdesk-disc {
-    position: absolute;
-    background: radial-gradient(closest-side, var(--pd-glow), transparent);
-    mix-blend-mode: screen;
-    opacity: 0.1;
-  }
-  .pdesk-glint {
-    position: absolute;
-    width: 5px;
-    height: 5px;
-    margin: -2.5px 0 0 -2.5px;
-    background: radial-gradient(closest-side, #fff, rgba(255, 255, 255, 0.3) 50%, transparent);
-    opacity: 0;
-  }
-  .pdesk-flock {
-    position: absolute;
-    left: 0;
-    top: 0;
-    opacity: 0;
-  }
-  /* Swallows fly alone (DeskBirds): the flock stands, each bird's way moves. */
-  .pdesk-flock--solo { opacity: 1; }
-  /* A bird (DeskBirds), jointed: every box is a hinge, its size nought,
-     turning about its own corner; its part drawn from it. */
-  .pdesk-way,
-  .pdesk-bird,
-  .pdesk-joint {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 0;
-    height: 0;
-    transform-origin: 0 0;
-  }
-  .pdesk-bone {
-    position: absolute;
-    left: 0;
-    top: 0;
-    overflow: visible;
-  }
-  /* A canopy tube stuttering (DeskFlicker): the canopy's own ink over it. */
-  .pdesk-flicker {
-    position: absolute;
-    background: var(--pd-fill);
-    opacity: 0;
-    pointer-events: none;
-  }
-  .pdesk__car {
-    inset: calc(var(--pd-car-top) * 1px) auto auto 0;
-    width: calc(var(--pd-w) * 1px);
-    height: calc(var(--pd-car-h) * 1px);
-  }
-  /* The train: the car, the cars before and after it (car2, its door
-     shut), the stripes and the door, gliding in and pulling out
-     together, as the phone's does. The cars either side cover the
-     window for the whole of either way. */
-  .pdesk__train {
-    position: absolute;
-    inset: 0;
-    transform: translateX(0);
-    filter: blur(0);
-    transition: transform 2600ms cubic-bezier(0.1, 0.55, 0.22, 1);
-  }
-  .pdesk__train--away {
-    transform: translateX(calc(var(--pd-w) * -1px));
-    filter: blur(3px);
-    transition: none;
-  }
-  .pdesk__train--arriving { transition: transform 2600ms cubic-bezier(0.1, 0.55, 0.22, 1), filter 2200ms ease-out; }
-  .pdesk__train--closing { transition: none; }
-  .pdesk__train--leaving {
-    transform: translateX(calc(var(--pd-w) * 1px));
-    filter: blur(3.5px);
-    transition: transform 2400ms cubic-bezier(0.62, 0, 0.92, 0.55), filter 2000ms ease-in;
-  }
-  .pdesk__train--gone {
-    transform: translateX(calc(var(--pd-w) * 1px));
-    filter: blur(3.5px);
-    transition: none;
-  }
-  .pdesk-car2 {
-    position: absolute;
-    top: calc(var(--pd-car-top) * 1px);
-    width: calc(var(--pd-w) * 1px);
-    height: calc(var(--pd-car-h) * 1px);
-    background: var(--pd-car2) 0 0 / 100% 100% no-repeat;
-  }
-  /* The stripe takes the train's pigment over its own mask, by colour
-     alone, so it keeps its paint and the hour's light (the phone's
-     .pgate-band, on the desk's cars and the door's two leaves). */
-  .pdesk-band,
-  .pdesk-leaf__band {
-    position: absolute;
-    pointer-events: none;
-    background-color: var(--pg-line, var(--pg-ink-translation));
-    mix-blend-mode: color;
-    mask-size: 100% 100%;
-    mask-repeat: no-repeat;
-    transition: background-color 500ms ease;
-  }
-  .pdesk-band {
-    top: calc(var(--pd-car-top) * 1px);
-    left: 0;
-    width: calc(var(--pd-w) * 1px);
-    height: calc(var(--pd-car-h) * 1px);
-  }
-  .pdesk-band--a { mask-image: var(--pd-band-a); }
-  .pdesk-band--b { mask-image: var(--pd-band-b); }
-  .pdesk-leaf__band { inset: 0; }
-  .pdesk-leaf__band--l { mask-image: var(--pd-band-l); }
-  .pdesk-leaf__band--r { mask-image: var(--pd-band-r); }
-  .pdesk-spill-at {
-    position: absolute;
-    pointer-events: none;
-    transition: opacity 900ms ease;
-  }
-  .pdesk-spill { display: block; }
-  /* 扉 — the door's two leaves, cut from the shut door the painting has,
-     over the open doorway; open, each runs into the car's side. */
-  .pdesk-door {
-    position: absolute;
-    left: calc(var(--pd-door-x) * 1px);
-    top: calc(var(--pd-door-y) * 1px);
-    width: calc(var(--pd-door-w) * 1px);
-    height: calc(var(--pd-door-h) * 1px);
-    overflow: hidden;
-    pointer-events: none;
-  }
-  .pdesk-leaf {
-    position: absolute;
-    top: 0;
-    width: 50%;
-    height: 100%;
-    transition: transform 620ms cubic-bezier(0.45, 0, 0.25, 1);
-  }
-  .pdesk-leaf > img { display: block; width: 100%; height: 100%; }
-  .pdesk-leaf--l { left: 0; }
-  .pdesk-leaf--r { left: 50%; }
-  .pdesk-door--open .pdesk-leaf { transition-duration: 900ms; }
-  .pdesk-door--open .pdesk-leaf--l { transform: translateX(-100%); }
-  .pdesk-door--open .pdesk-leaf--r { transform: translateX(100%); }
-  /* 時計 — the phone's station clock, at the painted one's place and size. */
-  .pdesk-clock { position: absolute; }
-  .pdesk-clock .pgate-clock { position: relative; left: auto; top: auto; display: block; }
-  /* 改札 — the gate button on the platform, under the stage's middle:
-     at most the desk's 440px, never under the board. */
-  .pdesk__go {
-    position: absolute;
-    left: 0;
-    bottom: var(--sp-8);
-    z-index: 1;
-    display: flex;
-    justify-content: center;
-    width: calc(var(--pd-stage) * 1px);
-    padding-inline: var(--sp-6);
-    pointer-events: none;
-  }
-  .pdesk__go > .btn-depart { width: min(440px, 100%); pointer-events: auto; }
-  /* ── the board ──
-     Over the painting's right side, as Today's column stands beside its
-     dial: the levels as a band over the trains, a train a row, then the
-     chosen train's card, taking what the trains leave. */
-  .pdesk__board {
-    position: absolute;
-    top: var(--sp-6);
-    right: var(--sp-7);
-    bottom: var(--sp-6);
-    z-index: 1;
-    width: clamp(var(--desk-side-w), 36%, var(--desk-entry-w));
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-5);
-  }
-  .pdesk-panel {
-    min-height: 0;
-    background: var(--surface);
-    border: 1px solid var(--surface-line);
-    border-radius: var(--r-panel);
-  }
-  .pdesk-deps {
-    flex: none;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  /* The levels apply to every train under them: the console's band
-     (DESIGN.md, "A control that applies to the whole answer"), the
-     panel's width, divided from the trains by a hairline. */
-  .pdesk-levels.seg {
-    border: 0;
-    border-bottom: 1px solid var(--surface-line);
-    border-radius: 0;
-  }
-  .pdesk-levels .seg__opt { align-items: center; }
-  .pdesk-here {
-    width: 5px;
-    height: 5px;
-    border-radius: var(--r-pill);
-    background: currentcolor;
-  }
-  .pdesk-deps__list { display: flex; flex-direction: column; }
-  .pdesk-dep {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    column-gap: var(--sp-4);
-    min-height: 44px;
-    padding: var(--sp-2) var(--sp-5);
-    border: 0;
-    border-top: 1px solid var(--surface-line);
-    border-radius: 0;
-    background: none;
-    color: var(--text-primary);
-    font: inherit;
-    text-align: left;
-    cursor: pointer;
-    transition: background 0.15s ease;
-  }
-  .pdesk-dep:first-child { border-top: 0; }
-  /* The chosen train: the selection's wash, its line's rail down the left. */
-  .pdesk-dep[aria-checked='true'] {
-    background: var(--sel-wash);
-    box-shadow: inset 3px 0 0 var(--line-color);
-  }
-  .pdesk-dep:hover,
-  .pdesk-dep:focus-visible { filter: none; }
-  .pdesk-dep:hover .pf-line__roundel,
-  .pdesk-dep:focus-visible .pf-line__roundel { background: color-mix(in srgb, var(--line-color) 18%, transparent); }
-  .pdesk-dep__names {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-1);
-    min-width: 0;
-  }
-  .pdesk-dep__title {
-    font-family: var(--font-display);
-    font-size: var(--fs-lead);
-    font-weight: 700;
-    line-height: 1.2;
-  }
-  .pdesk-dep[aria-checked='true'] .pdesk-dep__title { color: var(--sel-ink); }
-  .pdesk-dep__rec {
-    font-size: var(--fs-sm);
-    line-height: 1.3;
-    color: var(--text-secondary);
-    font-variant-numeric: tabular-nums;
-  }
-  .pdesk-card {
-    flex: 1 1 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-4);
-    padding: var(--sp-5) var(--sp-6);
-    overflow: hidden;
-  }
-  .pdesk-card__head {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items: center;
-    column-gap: var(--sp-4);
-  }
-  .pdesk-card__title {
-    font-family: var(--font-display);
-    font-size: var(--fs-lead);
-    font-weight: 700;
-    line-height: 1.2;
-    text-wrap: balance;
-  }
-  .pdesk-card__level {
-    padding: var(--sp-1) var(--sp-3);
-    border: 1px solid color-mix(in srgb, var(--line-color) 55%, transparent);
-    border-radius: var(--r-pill);
-    color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
-    font-family: var(--font-display);
-    font-size: var(--fs-caption);
-    font-weight: 700;
-    line-height: 1;
-  }
-  .pdesk-card__how {
-    margin: 0;
-    font-size: var(--fs-sm);
-    line-height: 1.45;
-    color: var(--text-secondary);
-    text-wrap: pretty;
-  }
-  /* The run's card in its well, plan 165's plate face (.prc-spec--plate,
-     with the specimen's rules), taking what the card leaves: DeskGate
-     measures it to choose the face. */
-  .pdesk-card__well {
-    flex: 1 1 0;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
-  .pdesk-card__open {
-    align-self: flex-start;
-    padding: 0;
-    border: 0;
-    border-radius: 0;
-    background: none;
-    color: var(--text-secondary);
-    font: inherit;
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    text-decoration: underline;
-    text-underline-offset: var(--sp-1);
-    cursor: pointer;
-  }
-  .pdesk-card__open:hover,
-  .pdesk-card__open:focus-visible { color: var(--text-primary); filter: none; }
-  @media (prefers-reduced-motion: reduce) {
-    .pdesk__train,
-    .pdesk-leaf,
-    .pdesk-band,
-    .pdesk-leaf__band { transition: none; }
-    .pdesk__clouds { animation: none; }
-  }
 
   /* ── the second column (plan 114) ──
      components/chrome/DeskSide.jsx: whatever stands beside a screen's
@@ -39858,9 +38923,9 @@ button.brd-stn { cursor: pointer; }
      way first (it fades out at its foot, .prc-spec__text's mask), and
      the mock exam's 漢字読み over its four readings. A short plate's
      comprehension is its text alone (PracticeSpecimen's `compact`),
-     which takes the well rather than the text's own cap. Since plan 244
-     the plate is the desk's board, its card the chosen train's
-     (components/practice/gate/DeskGate). */
+     which takes the well rather than the text's own cap. (Plan 244's
+     painted gate drew it on its board's card; plan 254 hung the plates
+     again.) */
   .prc-spec--plate {
     flex: 1 1 0;
     min-height: 0;
@@ -39928,6 +38993,12 @@ button.brd-stn { cursor: pointer; }
     gap: var(--sp-3);
     padding: var(--sp-4);
   }
+  /* 会話's compact face (plan 254): the scene's plate and the line it
+     opens on set closer, so the two hold a plate at its row's floor --
+     two lines of the opener, the most a grade's first scene takes there. */
+  .prc-spec--compact .tour-plate { padding-block: var(--sp-2); }
+  .prc-spec--compact .tour-plate__name { line-height: 1.3; }
+  .prc-spec--compact:where(:has(> .tour-plate)) > .prc-spec__jp { line-height: 1.4; }
   .prc-spec__mark {
     text-decoration: underline;
     text-decoration-thickness: 2px;
@@ -40264,20 +39335,6 @@ button.brd-stn { cursor: pointer; }
     .learn-desk > .plates.plates--across > .plate.plate--line { min-height: min-content; }
     .learn-desk > .plates.plates--across > .plate.plate--line > .plate__head { padding-block: var(--sp-1); }
     .learn-desk > .plates.plates--across > .plate.plate--line > .plate__foot { padding-block: var(--sp-1) var(--sp-2); }
-    /* ── Practice (plan 244) ──
-       The board a rung tighter: at 600px the band, the seven trains and
-       the chosen one's card share 568px, and the card keeps its well,
-       the room its compact face needs. The trains' rows close up, and
-       the card loses its head and its link, which the chosen row and
-       the rail's own stations say already. */
-    .pdesk__board { top: var(--sp-5); bottom: var(--sp-5); gap: var(--sp-4); }
-    .pdesk-dep { min-height: 40px; padding-block: var(--sp-1); }
-    .pdesk-dep__names { gap: 0; }
-    .pdesk-dep__title { font-size: var(--fs-body); }
-    .pdesk-dep__rec { font-size: var(--fs-caption); }
-    .pdesk-card { gap: var(--sp-3); padding: var(--sp-4) var(--sp-5); }
-    .pdesk-card__head,
-    .pdesk-card__open { display: none; }
     /* A practice station's page stands at its own height, as the narrow
        page does (PracticePage's NARROW), rather than the window's: held
        to 568px its well cut the run's card at both edges -- reading's
@@ -40292,8 +39349,8 @@ button.brd-stn { cursor: pointer; }
       flex: none;
       padding: var(--sp-7) var(--sp-6) var(--sp-5);
     }
-    /* Not the gate's: the board's card (plan 244) still gives its well
-       what the card leaves. */
+    /* Not the gate's: a plate's well (plans 165, 254) still takes what
+       its plate leaves. */
     .prc-spec--plate { flex: 1 1 0; padding: var(--sp-5); }
     .prc-spec--plate:has(> .prc-spec__tag) { padding-top: var(--sp-7); }
     .prc-spec--compact { padding: var(--sp-4); }
@@ -42167,8 +41224,8 @@ button.brd-stn { cursor: pointer; }
      The station's scenes go two across at every count: a scene's card
      carries its name, its situation and its first line, and a third of
      the page held a word a line of them when a grade has three. The
-     odd one out still takes the row. (Since plan 244 the Practice gate
-     hangs it on the desk too, its seventh train.) */
+     odd one out still takes the row. (The Practice gate hangs it on the
+     desk too since plan 244, its seventh plate since plan 254.) */
   .learn:has(> .kaiwa-console) > .platform-grid,
   .learn:has(> .kaiwa-console) > .platform-grid:has(> .platform-slot:nth-child(3):last-child) {
     grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -4,13 +4,14 @@ import { deckItems, lineMarks, stopsAround, stopsTravelled } from '../../domain/
 import { useListWalk, WALK_KEYS } from '../../hooks/useListWalk'
 
 // ── 駅名標 — a line as its own station plate (plan 094) ──────────
-// The Learn gate hangs one plate per section: the roundel
+// The Learn and Practice gates hang one plate per section: the roundel
 // with the line's code, the name in the learner's language, whatever
 // the section has to say at its trailing edge (a due count), and the
 // line's pigment as the 4px stripe along the bottom — the stroke every
 // station plate in the app carries. Between the head and the stripe,
 // a FOOT: what a real 駅名標 prints under the name, the stop behind
-// you and the stop ahead.
+// you and the stop ahead -- on a practice platform, the learner's
+// grade between what they did there and how much of it was right.
 //
 // It replaced the wall map (plan 071): four tracks of five labels
 // each, at the same weight, on a phone whose width gave a label 60px.
@@ -30,21 +31,27 @@ import { useListWalk, WALK_KEYS } from '../../hooks/useListWalk'
 // raw: the leg being ridden, 0..1, and 1 for a plate with no track
 // behind it.
 //
-// (The Practice gate hung plates too, on the desk until plan 244 drew
-// it a painted platform of its own as the phone's, plan 225, had: each
-// with its exercise in the plate's body, plan 165.)
+// A `body` (plan 165, the Practice gate on the desk) is drawn INSIDE
+// the head, under the name, where a plate has nothing in it to press
+// but the plate itself: the platform's exercise, which is a picture of
+// the door rather than a door of its own. The head then grows to the
+// whole plate, and `describedBy` names the element in the body that
+// says what the platform does, so the button's name stays the name.
+// (The painted platforms of plans 225 and 244 stood in the plates'
+// place for a while; plan 254 hung the plates again.)
 
-export function Plate({ section, aside = null, meta = null, foot = null, fill = 1, onClick, className = '', guide }) {
+export function Plate({ section, aside = null, meta = null, foot = null, body = null, describedBy, fill = 1, onClick, className = '', guide }) {
   const code = stationFor(section.path).code
   return (
     <div className={`plate ${className}`.trim()} style={{ '--line-color': section.color }} data-guide={guide}>
-      <button type="button" className="plate__head" onClick={onClick}>
+      <button type="button" className="plate__head" onClick={onClick} aria-describedby={describedBy}>
         <span className="pf-line__roundel plate__roundel" aria-hidden="true">{code}</span>
         <span className="plate__names">
           <span className="plate__title">{section.title}</span>
           {meta && <span className="plate__meta">{meta}</span>}
         </span>
         {aside && <span className="plate__aside">{aside}</span>}
+        {body && <span className="plate__body">{body}</span>}
       </button>
       {foot}
       <span className="plate__stripe" aria-hidden="true">
