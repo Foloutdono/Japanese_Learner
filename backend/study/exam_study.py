@@ -16,6 +16,7 @@ import json
 import re
 
 from core.db import db_conn
+from study.exam_blueprint import LEVEL_BLUEPRINT
 from study.exam_gen_utils import GenerationFailed, call_llm_json
 
 _GAP_RUN = re.compile(r"＿{2,}")
@@ -60,10 +61,24 @@ def _cloze_sentence(passage: dict, number: int) -> str:
     return ""
 
 
-def study_sentence(mondai: dict, q: dict, passage: dict | None) -> str:
+def mondai_type(paper: dict, mondai: dict) -> str | None:
+    """A mondai's type as the blueprint names it. The vocabulary paper
+    stores all its mondai as mcq-text, so its 用法 is a usage item only
+    by its id at the paper's level, as name_mondai names it (plan 247)."""
+    kind = mondai.get("type")
+    if kind != "mcq-text":
+        return kind
+    for section in LEVEL_BLUEPRINT.get(paper.get("level"), {}).get("sections", []):
+        for m in section["mondai"]:
+            if m["id"] == mondai.get("id"):
+                return m["type"]
+    return kind
+
+
+def study_sentence(mondai: dict, q: dict, passage: dict | None, kind: str | None = None) -> str:
     """The sentence a learner studies this question by: the answer in its
     gap, the pieces in their order, the right sentence of a usage item."""
-    kind = mondai.get("type")
+    kind = kind or mondai.get("type")
     if "pieces" in q:
         by_id = {p["id"]: p.get("textJp") or "" for p in q["pieces"]}
         return (q.get("contextJp") or "") + "".join(by_id.get(i, "") for i in q.get("order") or [])
@@ -186,7 +201,7 @@ def study_question(paper: dict, question_id: str, lang: str, lang_name: str) -> 
     if found is None:
         return None
     mondai, q, passage = found
-    sentence = study_sentence(mondai, q, passage)
+    sentence = study_sentence(mondai, q, passage, mondai_type(paper, mondai))
     options = q.get("choices") or q.get("pieces") or []
     # Sentence order's pieces are fragments of the sentence itself, whose
     # translation alone means little; the sentence carries them.

@@ -133,6 +133,19 @@ def test_a_usage_item_is_read_in_its_right_sentence():
     assert _sentence("usage") == "窓をひらく。"
 
 
+def test_a_stored_usage_item_is_read_in_its_right_sentence():
+    # The generator stores 用法 as mcq-text: the item is told by its id at
+    # the paper's level, or the screen studied the bare word (plan 247).
+    from study import exam_seed
+    paper = exam_seed.load("n4-vocab-01")["papers"][0]["paper"]
+    mondai, q, passage = find_question(paper, "moji_5_q1")
+    assert mondai["type"] == "mcq-text"
+    right = next(c["textJp"] for c in q["choices"] if c["id"] == q["answer"])
+    assert study_sentence(mondai, q, passage, exam_study.mondai_type(paper, mondai)) == right
+    fill = find_question(paper, "moji_3_q1")
+    assert exam_study.mondai_type(paper, fill[0]) == "vocab-context"
+
+
 def test_a_reading_question_carries_its_passage():
     mondai, q, passage = find_question(PAPER, "read")
     assert study_sentence(mondai, q, passage) == "天気はどうですか。"

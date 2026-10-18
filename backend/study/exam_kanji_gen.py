@@ -23,8 +23,10 @@
 # neither. Carrier sentences are a natural upgrade for a later pass
 # once the reading generator (Phase 4) exists to reuse.
 import random
+import re
 
 import content.kanji_pool_data as _kanji_db
+import content.vocab_jmdict_data as _jmdict
 from content.vocab_data import VOCAB_BY_LEVEL
 from study.exam_gen_utils import GenerationFailed, make_choices
 
@@ -97,6 +99,32 @@ def _build_reading_to_spellings() -> dict[str, set[str]]:
 
 READING_TO_SPELLINGS = _build_reading_to_spellings()
 
+
+def _build_spelling_to_readings() -> dict[str, set[str]]:
+    # The other way round: spelling -> every reading the deck gives it.
+    # A bare-word prompt has no sentence to choose between them, so none
+    # of them may be a wrong choice (上 is うえ at N5 and うわ, かみ,
+    # じょう at N3; plan 247).
+    index: dict[str, set[str]] = {}
+    for reading, spellings in READING_TO_SPELLINGS.items():
+        for kanji in spellings:
+            index.setdefault(kanji, set()).add(reading)
+    return index
+
+
+SPELLING_TO_READINGS = _build_spelling_to_readings()
+
+
+def _readings_of(written: str) -> set[str]:
+    """Every reading of the word written `written`: the deck's, and the
+    JMdict pool's rows written exactly that way (二 is ふた there, 角
+    すみ and すま) -- a reading the course does not teach is still a
+    right answer to "read this word"."""
+    readings = set(SPELLING_TO_READINGS.get(written, set()))
+    readings.update(_kata_to_hira(e["kana"]) for e in _jmdict.by_kanji(written, limit=40))
+    return readings
+
+
 _KATAKANA_RANGE = ("ァ", "ヶ")
 _KATA_TO_HIRA_SHIFT = 0x60
 
@@ -155,19 +183,29 @@ def _voicing_flip_candidates(reading: str) -> list[str]:
     out = []
     for i, m in enumerate(moras):
         for variant in _voicing_variants(m):
+            # After っ only a k/s/t/p consonant can stand: しっけ voiced
+            # to しっげ, or しゅっちょう to しゅっぢょう, is a string no
+            # Japanese word spells. Nor is ぢ or づ voiced out of ち, つ:
+            # いぢだんと, らいげづ look like no reading (plan 247).
+            if i > 0 and moras[i - 1] == "っ" and variant[0] not in _GEMINATABLE_STARTS:
+                continue
+            if variant[0] in "ぢづ":
+                continue
             perturbed = moras.copy()
             perturbed[i] = variant
             out.append("".join(perturbed))
     return out
 
 
-# Crude but workable: mora endings whose vowel is u/o, the two columns
-# a trailing "long ー" is spelled with in real hiragana orthography
-# (しゅう, とう). Good enough to reproduce the pattern this generator
-# is built around; not a full model of Japanese vowel length.
-# A contracted mora (しゅ, きょ) ends in its small kana, so ゅ/ょ are
-# here too: せんしゅ -> せんしゅう is the pair this generator is named for.
-_U_O_VOWEL_ENDINGS = set("うくすつぬふむゆるぐずぶぷおこそとのほもよろごぞどぼぽゅょ")
+# Crude but workable: mora endings a trailing う turns into the long
+# vowel of an on-reading (こ/こう, と/とう). Good enough to reproduce
+# the pattern this generator is built around; not a full model of
+# Japanese vowel length. A contracted mora (しゅ, きょ) ends in its
+# small kana, so ゅ/ょ are here too: せんしゅ -> せんしゅう is the pair
+# this generator is named for. A plain u-column mora is not: no reading
+# lengthens げつ or す, and らいげつう, だすう reached papers as choices
+# nobody could take for a reading (plan 247).
+_LENGTHENED_BY_U = set("おこそとのほもよろごぞどぼぽゅょ")
 
 
 def _toggle_long_vowel(reading: str) -> list[str]:
@@ -179,7 +217,7 @@ def _toggle_long_vowel(reading: str) -> list[str]:
         # A short word ending in う is not lengthened either: あう -> あうう
         # is no more a near-miss than the fragment would be.
         return [reading[:-1]] if len(moras) >= 3 else []
-    if moras and moras[-1][-1] in _U_O_VOWEL_ENDINGS:
+    if moras and moras[-1][-1] in _LENGTHENED_BY_U:
         return [reading + "う"]
     return []
 
@@ -187,6 +225,7 @@ def _toggle_long_vowel(reading: str) -> list[str]:
 # k/s/t/p rows are the consonants that plausibly geminate (っ) in real
 # words (がっこう, きって) — the other rows essentially don't.
 _GEMINATABLE_STARTS = set("かきくけこさしすせそたちつてとぱぴぷぺぽ")
+_BARE_VOWELS = set("あいうえお")
 
 
 def _toggle_geminate(reading: str) -> list[str]:
@@ -197,10 +236,46 @@ def _toggle_geminate(reading: str) -> list[str]:
             out.append("".join(moras[:i] + moras[i + 1:]))
     # i > 0 only — っ never opens a real Japanese word, so inserting
     # one before the first mora would produce an unpronounceable
-    # "distractor" rather than a plausible near-miss.
+    # "distractor" rather than a plausible near-miss. Nor does it
+    # follow ん, or a bare vowel past the first mora (the う of とう,
+    # the い of かい): だんっかい, かいっしゃ spell no word (plan 247).
     for i, m in enumerate(moras):
-        if i > 0 and m and m[0] in _GEMINATABLE_STARTS and moras[i - 1] != "っ":
-            out.append("".join(moras[:i] + ["っ"] + moras[i:]))
+        if i == 0 or not m or m[0] not in _GEMINATABLE_STARTS:
+            continue
+        before = moras[i - 1]
+        if before in ("っ", "ん") or (i > 1 and before in _BARE_VOWELS):
+            continue
+        out.append("".join(moras[:i] + ["っ"] + moras[i:]))
+    return out
+
+
+def _fits_written(candidate: str, written: str) -> bool:
+    """Whether `candidate` keeps the kana `written` shows. The okurigana
+    of 食べる or 出す, the お of お茶, are printed in the prompt, so a
+    choice that changes them (たべるう, だず) is struck by eye (plan
+    247)."""
+    parts = _collapse_kanji(written)
+    # A kanji's reading never ends in an unwritten っ before its
+    # okurigana (だっす for 出す): the っ would be printed, as in 真っ白.
+    pattern = "".join(
+        ("(?:.*[^っ])" if i + 1 < len(parts) else "(?:.+)") if ch == "*" else re.escape(_kata_to_hira(ch))
+        for i, ch in enumerate(parts)
+    )
+    return re.fullmatch(pattern, _kata_to_hira(candidate)) is not None
+
+
+def _is_kana(ch: str) -> bool:
+    # ヵ and ヶ are counters read か/が/こ, so they belong to the kanji run.
+    return ("ぁ" <= ch <= "ゖ" or "ァ" <= ch <= "ヴ" or ch == "ー") and ch not in "ヵヶ"
+
+
+def _collapse_kanji(written: str) -> list[str]:
+    # A run of kanji (and 々) reads as one span of any length.
+    out: list[str] = []
+    for ch in written:
+        if not _is_kana(ch) and out and out[-1] == "*":
+            continue
+        out.append(ch if _is_kana(ch) else "*")
     return out
 
 
@@ -221,11 +296,28 @@ def build_kanji_reading_distractors(word: dict, rng: random.Random) -> list[str]
     if len(kanji) == 1:
         info = KANJI_READINGS.get(kanji, {})
         for alt in info.get("ja_on", []) + info.get("ja_kun", []):
+            # The stem of a reading that takes okurigana (あ.げる) is no
+            # reading of the bare character: 上 offered あ, のぼ. An affix
+            # reading (-べ of 海辺, うわ- of 上着) is the character's own
+            # in a word the learner may know, so a right answer to a bare
+            # prompt (plan 247).
+            if "." in alt or "-" in alt:
+                continue
+            # Nor is a loanword KANJIDIC spells with the character (米
+            # メエトル): an on-reading runs to three kana at most.
+            if alt in info.get("ja_on", []) and len(alt) > 3:
+                continue
             stripped = _strip_okurigana(alt)
             if stripped:
                 candidates.add(stripped)
 
     candidates -= own_readings
+    if kanji:
+        # A reading the word itself has is a right answer to a bare
+        # prompt, whichever the deck keys (plan 247).
+        candidates -= _readings_of(kanji)
+        if _fits_written(correct, kanji):
+            candidates = {c for c in candidates if _fits_written(c, kanji)}
     return sorted(candidates)
 
 
@@ -254,11 +346,20 @@ _READING_INSTRUCTIONS_JP = "つぎの　ことばの　読み方として　最�
 _ORTHOGRAPHY_INSTRUCTIONS_JP = "つぎの　ことばを　漢字で　書く　とき、最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。"
 
 
+def _one_spelling(word: dict) -> bool:
+    kanji = word.get("kanji") or ""
+    return bool(kanji) and "/" not in kanji
+
+
 def build_reading_mondai(spec: dict, pool: list[dict], used_words: set, used_prompts: set, rng: random.Random) -> dict:
     questions = []
     for word in pool:
         if len(questions) >= spec["count"]:
             break
+        # A word with no written form, or with two (丸い/円い), has no
+        # prompt to print: the placement's pool is the whole level.
+        if not _one_spelling(word):
+            continue
         key = (word["kanji"], word["kana"])
         if key in used_words or word["kanji"] in used_prompts:
             continue
@@ -295,6 +396,8 @@ def build_orthography_mondai(spec: dict, pool: list[dict], used_words: set, used
     for word in pool:
         if len(questions) >= spec["count"]:
             break
+        if not _one_spelling(word):
+            continue
         key = (word["kanji"], word["kana"])
         reading = word["kana"].split("/")[0].strip()
         if key in used_words or reading in used_prompts:
