@@ -805,23 +805,23 @@
          {
           "id": "bunpou_1_q7",
           "number": 7,
-          "promptJp": "説明書に書いてある＿＿＿＿組み立てたら、すぐにできた。",
+          "promptJp": "この部屋にある本は、だれでも自由に読ん＿＿＿＿。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "うちに"
+            "textJp": "ではいけない"
            },
            {
             "id": "c2",
-            "textJp": "通りに"
+            "textJp": "でもかまわない"
            },
            {
             "id": "c3",
-            "textJp": "ために"
+            "textJp": "でばかりいる"
            },
            {
             "id": "c4",
-            "textJp": "たびに"
+            "textJp": "でたまらない"
            }
           ],
           "answer": "c2"
@@ -1440,23 +1440,23 @@
          {
           "id": "bunpou_1_q7",
           "number": 7,
-          "promptJp": "すみません、急いでいた＿＿＿＿、メールの返事を書くのを忘れていました。",
+          "promptJp": "わたしが好きなのは、肉＿＿＿＿魚です。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ものか"
+            "textJp": "ばかりでなく"
            },
            {
             "id": "c2",
-            "textJp": "もので"
+            "textJp": "ではなく"
            },
            {
             "id": "c3",
-            "textJp": "ものなら"
+            "textJp": "だけでなく"
            },
            {
             "id": "c4",
-            "textJp": "ものも"
+            "textJp": "にとって"
            }
           ],
           "answer": "c2"
@@ -1931,23 +1931,23 @@
          {
           "id": "bunpou_1_q1",
           "number": 1,
-          "promptJp": "この部屋、なんだかへんなにおいがする。ガス＿＿＿＿がもれているんじゃない？",
+          "promptJp": "電車をお降りの＿＿＿＿は、お忘れ物のないようご注意ください。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "か何が"
+            "textJp": "ところ"
            },
            {
             "id": "c2",
-            "textJp": "かどうか"
+            "textJp": "うち"
            },
            {
             "id": "c3",
-            "textJp": "か何か"
+            "textJp": "際"
            },
            {
             "id": "c4",
-            "textJp": "か何で"
+            "textJp": "たび"
            }
           ],
           "answer": "c3"
@@ -2416,7 +2416,7 @@
          {
           "id": "bunpou_3_p1",
           "titleJp": "最近読んだ本",
-          "textTemplateJp": "先月、友だち【1】すすめられて、ある小説を読みました。犬と少年の話です。最初は、あまりおもしろくない【2】思いました。【3】、読んでいくうちに、どんどん話に引きこまれて、最後にはないてしまいました。本を読んでないた【4】、子どものとき以来です。みなさんも、時間がある【5】、ぜひ読んでみてください。",
+          "textTemplateJp": "先月、友だち【1】すすめられて、ある小説を読みました。犬と少年の話です。最初は、あまりおもしろくない【2】思いました。ところが、読んでいくうちに、どんどん話に引きこま【3】、最後にはないてしまいました。本を読んでないた【4】、子どものとき以来です。みなさんも、時間がある【5】、ぜひ読んでみてください。",
           "blanks": [
            {
             "id": "bunpou_3_b1",
@@ -2470,19 +2470,19 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "だから"
+              "textJp": "せて"
              },
              {
               "id": "c2",
-              "textJp": "そのうえ"
+              "textJp": "させられて"
              },
              {
               "id": "c3",
-              "textJp": "つまり"
+              "textJp": "ずに"
              },
              {
               "id": "c4",
-              "textJp": "ところが"
+              "textJp": "れて"
              }
             ],
             "answer": "c4"
@@ -2566,23 +2566,23 @@
          {
           "id": "bunpou_1_q1",
           "number": 1,
-          "promptJp": "あれ、今日の会議は何時からだった＿＿＿＿。",
+          "promptJp": "説明書をよく読んだ＿＿＿＿、使ってください。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "っぽい"
+            "textJp": "うちに"
            },
            {
             "id": "c2",
-            "textJp": "ばかり"
+            "textJp": "とたんに"
            },
            {
             "id": "c3",
-            "textJp": "だけ"
+            "textJp": "ばかりに"
            },
            {
             "id": "c4",
-            "textJp": "っけ"
+            "textJp": "上で"
            }
           ],
           "answer": "c4"
@@ -3015,19 +3015,19 @@
           "pieces": [
            {
             "id": "p4",
-            "textJp": "にできないはずがない。"
-           },
-           {
-            "id": "p2",
-            "textJp": "は小学生でもできるのだから、"
-           },
-           {
-            "id": "p3",
-            "textJp": "大学生のきみ"
+            "textJp": "駅前の店も少なくなってきた。"
            },
            {
             "id": "p1",
-            "textJp": "この問題"
+            "textJp": "町の人口が"
+           },
+           {
+            "id": "p3",
+            "textJp": "とともに、"
+           },
+           {
+            "id": "p2",
+            "textJp": "へる"
            }
           ],
           "order": [
@@ -3273,23 +3273,23 @@
          {
           "id": "bunpou_1_q4",
           "number": 4,
-          "promptJp": "この店は、月曜日と木曜日が休みだ。＿＿＿＿、週に五日しか開いていないということだ。",
+          "promptJp": "この図書館は、月曜日＿＿＿＿は毎日開いている。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ただし"
+            "textJp": "だけ"
            },
            {
             "id": "c2",
-            "textJp": "それでも"
+            "textJp": "しか"
            },
            {
             "id": "c3",
-            "textJp": "つまり"
+            "textJp": "以外"
            },
            {
             "id": "c4",
-            "textJp": "なぜなら"
+            "textJp": "ほど"
            }
           ],
           "answer": "c3"
@@ -3297,23 +3297,23 @@
          {
           "id": "bunpou_1_q5",
           "number": 5,
-          "promptJp": "駅から走ってきた＿＿＿＿、まだ息が苦しいんです。",
+          "promptJp": "子どものころ、きらいなやさいを母にむりやり食べ＿＿＿＿。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ものなのに"
+            "textJp": "させた"
            },
            {
             "id": "c2",
-            "textJp": "くせに"
+            "textJp": "させてもらった"
            },
            {
             "id": "c3",
-            "textJp": "ものだから"
+            "textJp": "させられた"
            },
            {
             "id": "c4",
-            "textJp": "ほどに"
+            "textJp": "られた"
            }
           ],
           "answer": "c3"
@@ -3649,20 +3649,20 @@
           "contextJp": "",
           "pieces": [
            {
-            "id": "p1",
-            "textJp": "最近、"
+            "id": "p2",
+            "textJp": "家族みんなで"
            },
            {
             "id": "p4",
-            "textJp": "気がする。"
+            "textJp": "ことが大切だ。"
            },
            {
-            "id": "p2",
-            "textJp": "テレビの音"
+            "id": "p1",
+            "textJp": "困ったときは、"
            },
            {
             "id": "p3",
-            "textJp": "が小さくなった"
+            "textJp": "助けあう"
            }
           ],
           "order": [
@@ -3932,23 +3932,23 @@
          {
           "id": "bunpou_1_q5",
           "number": 5,
-          "promptJp": "引き受けると約束した＿＿＿＿、最後まで責任をもってやるべきだ。",
+          "promptJp": "わたしは子どものころ体がよわくて、学校を休み＿＿＿＿だった。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "以外"
+            "textJp": "っぽい"
            },
            {
             "id": "c2",
-            "textJp": "ばかり"
+            "textJp": "やすい"
            },
            {
             "id": "c3",
-            "textJp": "最中"
+            "textJp": "ながら"
            },
            {
             "id": "c4",
-            "textJp": "以上"
+            "textJp": "がち"
            }
           ],
           "answer": "c4"
@@ -4004,23 +4004,23 @@
          {
           "id": "bunpou_1_q8",
           "number": 8,
-          "promptJp": "年をとった＿＿＿＿、最近、小さい字が読みにくくなった。",
+          "promptJp": "頭では分かっている＿＿＿＿、なかなか実行できない。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "おかげか"
+            "textJp": "とたんに"
            },
            {
             "id": "c2",
-            "textJp": "うちに"
+            "textJp": "うえに"
            },
            {
             "id": "c3",
-            "textJp": "せいか"
+            "textJp": "ものの"
            },
            {
             "id": "c4",
-            "textJp": "とたんに"
+            "textJp": "ために"
            }
           ],
           "answer": "c3"
@@ -4028,23 +4028,23 @@
          {
           "id": "bunpou_1_q9",
           "number": 9,
-          "promptJp": "このまま雨がやまない＿＿＿＿、明日のハイキングは中止にしましょう。",
+          "promptJp": "この大学では国際＿＿＿＿が進んで、留学生がとても増えた。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ように"
+            "textJp": "的"
            },
            {
             "id": "c2",
-            "textJp": "ようなら"
+            "textJp": "化"
            },
            {
             "id": "c3",
-            "textJp": "ようで"
+            "textJp": "中"
            },
            {
             "id": "c4",
-            "textJp": "ような"
+            "textJp": "風"
            }
           ],
           "answer": "c2"
@@ -4076,23 +4076,23 @@
          {
           "id": "bunpou_1_q11",
           "number": 11,
-          "promptJp": "店に着いたら、すぐに買えると思っていた。＿＿＿＿、もう全部売り切れていた。",
+          "promptJp": "＿＿＿＿京都まで来たのだから、おてらをたくさん見て帰りたい。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "それで"
+            "textJp": "まるで"
            },
            {
             "id": "c2",
-            "textJp": "そのうえ"
+            "textJp": "たとえ"
            },
            {
             "id": "c3",
-            "textJp": "ところが"
+            "textJp": "せっかく"
            },
            {
             "id": "c4",
-            "textJp": "だから"
+            "textJp": "なかなか"
            }
           ],
           "answer": "c3"
@@ -4471,23 +4471,23 @@
          {
           "id": "bunpou_1_q1",
           "number": 1,
-          "promptJp": "なんだか、明日は雨がふる＿＿＿＿。かさを持って行こう。",
+          "promptJp": "もし外国に住む＿＿＿＿、どの国に住みたいですか。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "気にする"
+            "textJp": "ために"
            },
            {
             "id": "c2",
-            "textJp": "気がする"
+            "textJp": "としたら"
            },
            {
             "id": "c3",
-            "textJp": "気になる"
+            "textJp": "とたんに"
            },
            {
             "id": "c4",
-            "textJp": "気がきく"
+            "textJp": "ところで"
            }
           ],
           "answer": "c2"
@@ -4519,23 +4519,23 @@
          {
           "id": "bunpou_1_q3",
           "number": 3,
-          "promptJp": "コーヒーを飲みすぎた＿＿＿＿、ゆうべはよく眠れなかった。",
+          "promptJp": "失敗した＿＿＿＿、学べることもある。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "せいか"
+            "textJp": "からこそ"
            },
            {
             "id": "c2",
-            "textJp": "おかげか"
+            "textJp": "からといって"
            },
            {
             "id": "c3",
-            "textJp": "くせに"
+            "textJp": "ばかりに"
            },
            {
             "id": "c4",
-            "textJp": "ものの"
+            "textJp": "くせに"
            }
           ],
           "answer": "c1"
@@ -4543,23 +4543,23 @@
          {
           "id": "bunpou_1_q4",
           "number": 4,
-          "promptJp": "この電車に乗れなかった＿＿＿＿、会議にはまにあわないだろう。",
+          "promptJp": "この曲は、聞け＿＿＿＿聞くほど好きになる。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "とすれば"
+            "textJp": "ば"
            },
            {
             "id": "c2",
-            "textJp": "とたんに"
+            "textJp": "ても"
            },
            {
             "id": "c3",
-            "textJp": "とおりに"
+            "textJp": "たら"
            },
            {
             "id": "c4",
-            "textJp": "とか"
+            "textJp": "と"
            }
           ],
           "answer": "c1"
@@ -4687,23 +4687,23 @@
          {
           "id": "bunpou_1_q10",
           "number": 10,
-          "promptJp": "チームは最後まで戦い＿＿＿＿、ついに優勝した。",
+          "promptJp": "テーブルの上に、だれかの飲み＿＿＿＿のコーヒーが置いてある。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "かけて"
+            "textJp": "ぬき"
            },
            {
             "id": "c2",
-            "textJp": "あって"
+            "textJp": "こみ"
            },
            {
             "id": "c3",
-            "textJp": "ぬいて"
+            "textJp": "かけ"
            },
            {
             "id": "c4",
-            "textJp": "こんで"
+            "textJp": "あい"
            }
           ],
           "answer": "c3"
@@ -4735,23 +4735,23 @@
          {
           "id": "bunpou_1_q12",
           "number": 12,
-          "promptJp": "この地図＿＿＿＿あれば、道に迷うことはないでしょう。",
+          "promptJp": "（先生をさがしている友だちに）先生なら、教室でほかの学生と話して＿＿＿＿よ。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "こそ"
+            "textJp": "まいります"
            },
            {
             "id": "c2",
-            "textJp": "さえ"
+            "textJp": "いらっしゃいます"
            },
            {
             "id": "c3",
-            "textJp": "ほど"
+            "textJp": "おります"
            },
            {
             "id": "c4",
-            "textJp": "しか"
+            "textJp": "いたします"
            }
           ],
           "answer": "c2"
@@ -4759,23 +4759,23 @@
          {
           "id": "bunpou_1_q13",
           "number": 13,
-          "promptJp": "明日のめんせつのことが心配で＿＿＿＿。",
+          "promptJp": "毎日自分で料理をして、経済＿＿＿＿な生活を送っている。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "しかない"
+            "textJp": "性"
            },
            {
             "id": "c2",
-            "textJp": "しかたがない"
+            "textJp": "的"
            },
            {
             "id": "c3",
-            "textJp": "ほかない"
+            "textJp": "式"
            },
            {
             "id": "c4",
-            "textJp": "わけがない"
+            "textJp": "家"
            }
           ],
           "answer": "c2"
@@ -4857,20 +4857,20 @@
           "contextJp": "",
           "pieces": [
            {
-            "id": "p1",
-            "textJp": "祖母"
+            "id": "p4",
+            "textJp": "帰ったら部屋がとても寒かった。"
            },
            {
             "id": "p3",
-            "textJp": "フランス料理"
+            "textJp": "出かけたので、"
            },
            {
             "id": "p2",
-            "textJp": "は日本料理はもちろん、"
+            "textJp": "開けっぱなしで"
            },
            {
-            "id": "p4",
-            "textJp": "も上手に作れる。"
+            "id": "p1",
+            "textJp": "窓を"
            }
           ],
           "order": [
@@ -5298,23 +5298,23 @@
          {
           "id": "bunpou_1_q9",
           "number": 9,
-          "promptJp": "祖父は、戦争の苦しい時代を生き＿＿＿＿。",
+          "promptJp": "考え方は、人＿＿＿＿ちがう。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "かけた"
+            "textJp": "ほど"
            },
            {
             "id": "c2",
-            "textJp": "こんだ"
+            "textJp": "ばかり"
            },
            {
             "id": "c3",
-            "textJp": "ぬいた"
+            "textJp": "によって"
            },
            {
             "id": "c4",
-            "textJp": "あった"
+            "textJp": "まで"
            }
           ],
           "answer": "c3"
@@ -5322,23 +5322,23 @@
          {
           "id": "bunpou_1_q10",
           "number": 10,
-          "promptJp": "妹は最近、何を聞いても笑って＿＿＿＿、ちゃんと答えてくれない。",
+          "promptJp": "大事な試験の＿＿＿＿に、急におなかが痛くなった。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "しかいなくて"
+            "textJp": "うち"
            },
            {
             "id": "c2",
-            "textJp": "だけあって"
+            "textJp": "とたん"
            },
            {
             "id": "c3",
-            "textJp": "ばかりいて"
+            "textJp": "最中"
            },
            {
             "id": "c4",
-            "textJp": "ほどいて"
+            "textJp": "かわり"
            }
           ],
           "answer": "c3"
@@ -5346,23 +5346,23 @@
          {
           "id": "bunpou_1_q11",
           "number": 11,
-          "promptJp": "冬は、運動不足になり＿＿＿＿なので、気をつけよう。",
+          "promptJp": "（父が子どもに）この問題はむずかしくないから、自分でやって＿＿＿＿。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "っぽい"
+            "textJp": "あげる"
            },
            {
             "id": "c2",
-            "textJp": "らしい"
+            "textJp": "しまう"
            },
            {
             "id": "c3",
-            "textJp": "だらけ"
+            "textJp": "もらう"
            },
            {
             "id": "c4",
-            "textJp": "がち"
+            "textJp": "ごらん"
            }
           ],
           "answer": "c4"
@@ -5430,20 +5430,20 @@
           "contextJp": "",
           "pieces": [
            {
-            "id": "p2",
-            "textJp": "どこかで見た"
+            "id": "p4",
+            "textJp": "引っ越しが早く終わった。"
            },
            {
             "id": "p3",
-            "textJp": "ことがあるような"
-           },
-           {
-            "id": "p4",
-            "textJp": "気がする。"
+            "textJp": "おかげで、"
            },
            {
             "id": "p1",
-            "textJp": "あの人の顔、"
+            "textJp": "友だちが"
+           },
+           {
+            "id": "p2",
+            "textJp": "手伝ってくれた"
            }
           ],
           "order": [
@@ -5765,23 +5765,23 @@
          {
           "id": "bunpou_1_q2",
           "number": 2,
-          "promptJp": "三百ページもある本を、一日で読み＿＿＿＿。",
+          "promptJp": "映画がつまらなかったので、＿＿＿＿で見るのをやめた。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "かけた"
+            "textJp": "とたん"
            },
            {
             "id": "c2",
-            "textJp": "だした"
+            "textJp": "まま"
            },
            {
             "id": "c3",
-            "textJp": "あった"
+            "textJp": "あいだ"
            },
            {
             "id": "c4",
-            "textJp": "きった"
+            "textJp": "途中"
            }
           ],
           "answer": "c4"
@@ -5813,23 +5813,23 @@
          {
           "id": "bunpou_1_q4",
           "number": 4,
-          "promptJp": "何か問題でもあるのかと聞かれたが、＿＿＿＿問題はないと答えた。",
+          "promptJp": "A「田中さん、きのうから休みを取って旅行に行っているそうですよ。」B「それで、きのうから会社にいない＿＿＿＿。」",
           "choices": [
            {
             "id": "c1",
-            "textJp": "必ず"
+            "textJp": "ばかりだ"
            },
            {
             "id": "c2",
-            "textJp": "ぜひ"
+            "textJp": "ことにする"
            },
            {
             "id": "c3",
-            "textJp": "別に"
+            "textJp": "わけだ"
            },
            {
             "id": "c4",
-            "textJp": "やっと"
+            "textJp": "ようがない"
            }
           ],
           "answer": "c3"
@@ -5837,23 +5837,23 @@
          {
           "id": "bunpou_1_q5",
           "number": 5,
-          "promptJp": "ノートがないなら、この紙＿＿＿＿に書いておいてください。",
+          "promptJp": "知らない＿＿＿＿、知っているような顔をするな。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "か何か"
+            "textJp": "くせに"
            },
            {
             "id": "c2",
-            "textJp": "とか何"
+            "textJp": "ために"
            },
            {
             "id": "c3",
-            "textJp": "かどうか"
+            "textJp": "うちに"
            },
            {
             "id": "c4",
-            "textJp": "も何か"
+            "textJp": "とたんに"
            }
           ],
           "answer": "c1"
@@ -5885,23 +5885,23 @@
          {
           "id": "bunpou_1_q7",
           "number": 7,
-          "promptJp": "家族が待っているから、こんなところで休んで＿＿＿＿。",
+          "promptJp": "地図＿＿＿＿歩いていったら、ちゃんと駅に着いた。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ばかりいる"
+            "textJp": "ばかりに"
            },
            {
             "id": "c2",
-            "textJp": "もかまわない"
+            "textJp": "たびに"
            },
            {
             "id": "c3",
-            "textJp": "はいられない"
+            "textJp": "にしたがって"
            },
            {
             "id": "c4",
-            "textJp": "しかたがない"
+            "textJp": "ほどに"
            }
           ],
           "answer": "c3"
@@ -5909,23 +5909,23 @@
          {
           "id": "bunpou_1_q8",
           "number": 8,
-          "promptJp": "家を出＿＿＿＿とき、電話がかかってきた。",
+          "promptJp": "あしたの会議は、十時から始まる＿＿＿＿。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ようにした"
+            "textJp": "ことにしている"
            },
            {
             "id": "c2",
-            "textJp": "ようとした"
+            "textJp": "ことになっている"
            },
            {
             "id": "c3",
-            "textJp": "ことにした"
+            "textJp": "ことがある"
            },
            {
             "id": "c4",
-            "textJp": "そうにした"
+            "textJp": "ことか"
            }
           ],
           "answer": "c2"
@@ -5933,23 +5933,23 @@
          {
           "id": "bunpou_1_q9",
           "number": 9,
-          "promptJp": "急いで書いたので、この作文はまちがい＿＿＿＿だ。",
+          "promptJp": "天気予報で晴れと言っていても、雨が降らない＿＿＿＿。かさを持って行こう。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "だらけ"
+            "textJp": "とは限らない"
            },
            {
             "id": "c2",
-            "textJp": "気味"
+            "textJp": "にちがいない"
            },
            {
             "id": "c3",
-            "textJp": "っぽい"
+            "textJp": "はずだ"
            },
            {
             "id": "c4",
-            "textJp": "ほど"
+            "textJp": "ことにする"
            }
           ],
           "answer": "c1"
@@ -5981,23 +5981,23 @@
          {
           "id": "bunpou_1_q11",
           "number": 11,
-          "promptJp": "あの映画をいっしょに見に行ったのは、いつだった＿＿＿＿。",
+          "promptJp": "東京＿＿＿＿、わたしの町は人が少なくて静かだ。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "くらい"
+            "textJp": "について"
            },
            {
             "id": "c2",
-            "textJp": "っけ"
+            "textJp": "にくらべて"
            },
            {
             "id": "c3",
-            "textJp": "ばかり"
+            "textJp": "によって"
            },
            {
             "id": "c4",
-            "textJp": "だけ"
+            "textJp": "にとって"
            }
           ],
           "answer": "c2"
@@ -6158,20 +6158,20 @@
           "contextJp": "",
           "pieces": [
            {
+            "id": "p3",
+            "textJp": "駅前のパン屋が"
+           },
+           {
             "id": "p1",
-            "textJp": "この話"
+            "textJp": "友だちの話"
            },
            {
             "id": "p4",
-            "textJp": "ことになる。"
-           },
-           {
-            "id": "p3",
-            "textJp": "大変な"
+            "textJp": "来月閉店するそうだ。"
            },
            {
             "id": "p2",
-            "textJp": "が本当だとすれば、"
+            "textJp": "によると、"
            }
           ],
           "order": [
@@ -6225,8 +6225,8 @@
         "passages": [
          {
           "id": "bunpou_3_p1",
-          "titleJp": "かべの時計",
-          "textTemplateJp": "わたしの部屋のかべには、古い時計がかかっている。この時計は、わたしが生まれた年【1】父が買ってきたものだそうだ。去年の冬、とつぜん時計が止まってしまった。新しいのを買おう【2】思ったが、なんだかさびしくて、町の時計屋に持って行った。店の人は「古いです【3】、まだまだ使えますよ」と言って、一週間で直して【4】。今、時計はまた毎日同じ音を立てて動いている。この音を聞く【5】、なぜか安心する。",
+          "titleJp": "毎週聞いているラジオ",
+          "textTemplateJp": "わたしは毎週日曜日の夜、ラジオの音楽番組を聞いている。この番組を聞き始めた【1】、高校生のときだ。番組では、聞いている人からとどいたメール【2】、しかいの人がいろいろ話してくれる。わたしも一度、メールを送ってみた。【3】、番組の中で自分の名前が読まれたので、本当にうれしかった。今は仕事が忙しくて、夜に聞けないこと【4】多い。でも、ろくおんして【5】、毎週必ず聞いている。",
           "blanks": [
            {
             "id": "bunpou_3_b1",
@@ -6234,19 +6234,19 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "に"
+              "textJp": "のは"
              },
              {
               "id": "c2",
-              "textJp": "を"
+              "textJp": "のに"
              },
              {
               "id": "c3",
-              "textJp": "が"
+              "textJp": "ので"
              },
              {
               "id": "c4",
-              "textJp": "と"
+              "textJp": "のを"
              }
             ],
             "answer": "c1"
@@ -6257,19 +6257,19 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "と"
+              "textJp": "について"
              },
              {
               "id": "c2",
-              "textJp": "に"
+              "textJp": "にとって"
              },
              {
               "id": "c3",
-              "textJp": "を"
+              "textJp": "として"
              },
              {
               "id": "c4",
-              "textJp": "で"
+              "textJp": "につれて"
              }
             ],
             "answer": "c1"
@@ -6280,19 +6280,19 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "けど"
+              "textJp": "すると"
              },
              {
               "id": "c2",
-              "textJp": "から"
+              "textJp": "しかし"
              },
              {
               "id": "c3",
-              "textJp": "ので"
+              "textJp": "それとも"
              },
              {
               "id": "c4",
-              "textJp": "ほど"
+              "textJp": "なぜなら"
              }
             ],
             "answer": "c1"
@@ -6303,19 +6303,19 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "あげた"
+              "textJp": "を"
              },
              {
               "id": "c2",
-              "textJp": "もらった"
+              "textJp": "で"
              },
              {
               "id": "c3",
-              "textJp": "やった"
+              "textJp": "に"
              },
              {
               "id": "c4",
-              "textJp": "くれた"
+              "textJp": "が"
              }
             ],
             "answer": "c4"
@@ -6326,19 +6326,19 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "たら"
+              "textJp": "ばかり"
              },
              {
               "id": "c2",
-              "textJp": "なら"
+              "textJp": "しか"
              },
              {
               "id": "c3",
-              "textJp": "ば"
+              "textJp": "こそ"
              },
              {
               "id": "c4",
-              "textJp": "と"
+              "textJp": "でも"
              }
             ],
             "answer": "c4"
