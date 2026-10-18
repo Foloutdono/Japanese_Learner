@@ -24391,7 +24391,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 }
 .brd-hub--sm { width: 40px; height: 40px; font-size: var(--fs-sm); }
 
-/* ── the name: your station's plate, on its sheet ── */
+/* ── the name: your station's plate, on its own screen (plan 255)
+   and on the card's sheet ── */
 .brd-plate {
   position: relative;
   display: flex;
@@ -24409,7 +24410,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 /* The plate's name at the heading rung, past the phone's 1rem floor on
    fields (".field, input:not(…)", 0-3-1): a name that size is already
    past the 16px under which iOS zooms, which is all that floor is for. */
-.brd-sheet .brd-plate > input.brd-plate__field {
+:is(.brd-sheet, .brd-name) .brd-plate > input.brd-plate__field {
   flex: 1;
   min-width: 0;
   width: 100%;
@@ -24434,6 +24435,46 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   color: var(--text-secondary);
 }
 .brd-plate__stripe { flex: none; height: 4px; background: color-mix(in srgb, var(--accent2) 30%, transparent); }
+/* The name's screen (NameStep, the canvas's 2B): the plate, and under it
+   a pole down to the question's hub and the road on to the card's stop. */
+.brd-name { display: flex; flex-direction: column; gap: var(--sp-3); }
+.brd-name__line { position: relative; flex: none; height: 172px; }
+.brd-name__pole {
+  position: absolute;
+  left: 30px;
+  top: calc(-1 * var(--sp-3));
+  width: 4px;
+  height: calc(88px + var(--sp-3));
+  background: var(--text-primary);
+}
+.brd-name__hub { position: absolute; left: 8px; top: calc(110px - 24px); }
+.brd-name__road {
+  position: absolute;
+  left: 54px;
+  right: 43px;
+  top: calc(110px - 2.5px);
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: var(--surface-line);
+}
+.brd-name__next { position: absolute; right: 19.5px; top: calc(110px - 12.5px); width: 25px; height: 25px; }
+.brd-name__ring {
+  position: absolute;
+  inset: 0;
+  border: 3px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: var(--bg-main);
+}
+.brd-name__lab {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + var(--sp-3));
+  translate: -50% 0;
+  white-space: nowrap;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
 
 /* ── 04 the level's test (plan 224; the line's quiet way, plan 247) ──
    The test stands in the car's stage, the climb's levels over the
@@ -35734,6 +35775,9 @@ button.brd-stn { cursor: pointer; }
   /* The card (plan 247): its fields in words beside it rather than under
      it, the card at its back's width and the rows at the side column's,
      and the line of where it lives under both. */
+  /* The name (plan 255): its plate at the card's width, the size of
+     what it signs, not the paper's. */
+  .desk-brd .brd__car[data-car="name"] { --desk-brd-w: var(--pcard-back-w); }
   .desk-brd .brd__car[data-car="card"] { --desk-brd-w: calc(var(--pcard-back-w) + var(--desk-side-w) + var(--sp-7)); }
   .desk-brd .brd-card {
     display: grid;

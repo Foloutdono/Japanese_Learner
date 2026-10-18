@@ -2500,7 +2500,11 @@ const boarding = {
   // its stops, one per question -- the part of the boarding each
   // answers, as the line prints it.
   brdBuildingAria: 'Building your journey',
-  brdStop: { kana: 'Kana', level: 'Level', card: 'Card' },
+  brdStop: { kana: 'Kana', level: 'Level', name: 'Name', card: 'Card' },
+  // 名前 (plan 255): the name has a screen of its own, before the card.
+  brdNameQ: 'What’s your name?',
+  brdNameHint: 'Your first name is printed on your card. Any script.',
+  brdNameSkip: 'Later',
   // The first ride's end (screens/RideReading.jsx).
   brdEnter: 'Enter the station',
   // 辻 on a phone (plan 168): the kana over the lines' hub, the board's
@@ -2515,8 +2519,8 @@ const boarding = {
   brdTrainAt: (today, time) => `Your train · ${today ? 'today' : 'tomorrow'}, **${time}**, then every day`,
   // The card is the form (plan 247): the card filled in, its fields
   // doors, a sheet a field.
-  brdCardQ: 'Your card, filled in for you.',
-  brdCardHint: 'Tap a field to change it.',
+  brdCardQ: 'Check your card.',
+  brdCardHint: 'All correct? Tap a line to change it.',
   brdIssue: 'Issue my card',
   brdLevelTest: 'Not sure? The test places you',
   brdKeepDevice: 'On this device only',

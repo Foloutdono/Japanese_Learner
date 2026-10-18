@@ -2439,7 +2439,11 @@ const boarding = {
   // 机 (plan 140) : la colonne du bureau, son nom pour un lecteur
   // d’écran et ses arrêts, un par question.
   brdBuildingAria: 'Préparation de ton trajet',
-  brdStop: { kana: 'Kana', level: 'Niveau', card: 'Carte' },
+  brdStop: { kana: 'Kana', level: 'Niveau', name: 'Nom', card: 'Carte' },
+  // 名前 (plan 255) : le nom a son écran, avant la carte.
+  brdNameQ: 'Comment tu t’appelles ?',
+  brdNameHint: 'Ton prénom s’imprime sur ta carte. N’importe quelle écriture.',
+  brdNameSkip: 'Plus tard',
   // La fin de la première course (screens/RideReading.jsx).
   brdEnter: 'Entrer en gare',
   // 辻 on a phone (plan 168): the kana over the lines' hub, the board's
@@ -2454,8 +2458,8 @@ const boarding = {
   brdTrainAt: (today, time) => `Ton train · ${today ? 'aujourd’hui' : 'demain'}, **${time}**, puis chaque jour`,
   // La carte est le formulaire (plan 247) : la carte remplie, ses champs
   // des portes, une feuille par champ.
-  brdCardQ: 'Ta carte, remplie pour toi.',
-  brdCardHint: 'Touche un champ pour le changer.',
+  brdCardQ: 'Vérifie ta carte.',
+  brdCardHint: 'Tout est juste ? Touche une ligne pour la changer.',
   brdIssue: 'Émettre ma carte',
   brdLevelTest: 'Pas sûr ? Le test te place',
   brdKeepDevice: 'Sur cet appareil seulement',

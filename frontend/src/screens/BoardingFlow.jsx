@@ -23,6 +23,7 @@ import { KanaStep, KanaReveal } from '../components/boarding/KanaStep'
 import { LevelStep } from '../components/boarding/LevelStep'
 import { TestStep } from '../components/boarding/TestStep'
 import CardStep from '../components/boarding/CardStep'
+import NameStep from '../components/boarding/NameStep'
 import { AccountSheet, GoalSheet, HourSheet, LinesSheet, NameSheet, RhythmSheet } from '../components/boarding/CardSheets'
 import { DeskStrip } from '../components/boarding/DeskStrip'
 import { FeedbackSheet } from '../components/feedback/FeedbackSheet'
@@ -137,14 +138,15 @@ const PULL_MS = 260
 const DESK_PULL_MS = 820
 const REDUCED = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 const DEFAULT_TIME = DEPART_TIMES.am
-const STEPS = ['kana', 'reveal', 'level', 'test', 'card']
+const STEPS = ['kana', 'reveal', 'level', 'test', 'name', 'card']
 
-// The track's stops: the kana, a reader's level, the card -- the reveal
+// The track's stops: the kana, a reader's level, the name (plan 255),
+// the card -- the reveal
 // is the kana's stop's second half and the test the level's own, never
 // stops of their own. Whether the level is asked depends on the kana's
 // answer, so the count reads the answers so far.
 function trackStops(answers) {
-  return ['kana', ...(answers.kana === 'both' ? ['level'] : []), 'card']
+  return ['kana', ...(answers.kana === 'both' ? ['level'] : []), 'name', 'card']
 }
 
 const STOP_OF = { reveal: 'kana', test: 'level' }
@@ -244,10 +246,13 @@ export default function BoardingFlow({
     return () => clearTimeout(id)
   }, [leaving, desk])
 
-  // Focus lands on the new screen's question.
+  // Focus lands on the new screen's question -- or on the one field a
+  // screen asks to be written in first (`data-first-focus`, the name's
+  // plate, plan 255), so the keyboard comes up with it.
   useEffect(() => {
-    const q = frameRef.current?.querySelector('.brd__car:not(.brd__car--out) .brd__q')
-    q?.focus({ preventScroll: true })
+    const car = frameRef.current?.querySelector('.brd__car:not(.brd__car--out)')
+    const target = car?.querySelector('[data-first-focus]') ?? car?.querySelector('.brd__q')
+    target?.focus({ preventScroll: true })
   }, [step])
 
   // 足跡 — every transition in the boarding runs through these, so
@@ -409,6 +414,18 @@ export default function BoardingFlow({
 
   function continueLevel() {
     set(keepingGoal(levelAnswers(answers.levelChoice, answers.kana), answers.kana))
+    go('name')
+  }
+
+  // The name on its own screen (plan 255), kept as typed while it is
+  // typed and cleaned as the card prints it on the way to the card;
+  // the quiet way goes on with none, the card's placeholder in its place.
+  function continueName() {
+    set({ cardName: cleanCardName(answers.cardName) })
+    go('card')
+  }
+  function skipName() {
+    set({ cardName: '' })
     go('card')
   }
 
@@ -695,7 +712,7 @@ export default function BoardingFlow({
       case 'kana':
         return <KanaStep value={answers.kana} onAnswer={answerKana} />
       case 'reveal':
-        return <KanaReveal onContinue={() => go('card')} first={kanaStop} />
+        return <KanaReveal onContinue={() => go('name')} first={kanaStop} />
       case 'test':
         return <TestStep session={session} onResult={placedBy} onPick={skipTest} still={leaving} />
       case 'level':
@@ -709,6 +726,17 @@ export default function BoardingFlow({
             onTest={() => go('test')}
             no={hubNo('level')}
             placed={answers.placed}
+          />
+        )
+      case 'name':
+        return (
+          <NameStep
+            value={answers.cardName}
+            onChange={cardName => set({ cardName })}
+            onContinue={continueName}
+            onSkip={skipName}
+            no={hubNo('name')}
+            next={t.brdStop.card}
           />
         )
       case 'card':
@@ -748,6 +776,7 @@ export default function BoardingFlow({
   const stopValue = {
     kana: answers.kana ? t.brdKana[answers.kana] : null,
     level: choice == null ? null : choice === 'novice' ? t.brdNovice : choice,
+    name: answers.cardName || null,
     card: null,
   }
   const atStop = stops.indexOf(stopOf(step))
