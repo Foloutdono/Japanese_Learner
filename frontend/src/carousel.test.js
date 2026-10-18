@@ -12,7 +12,7 @@ import { CLIP, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoD
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
 import { LIMIT, SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
 import { TUNABLES, tuned } from '../carousel/tune.js'
-import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf, readable } from '../carousel/funnel.js'
+import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf, readable, unstopped } from '../carousel/funnel.js'
 import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, TALL, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, stillAt, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
 import { CH as CHALLENGE, CPM, SCROLL, TRACK, TRACKS, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
@@ -2355,7 +2355,7 @@ describe('Read it (plan 253)', () => {
           // point, never the breakdown's own.
           const bonus = funnelOf('read', p).solution.bonus
           const s = banks[lv].sentences.find(x => x.id === id)
-          if (s.v) expect(bonus, id).toEqual({ kind: 'version', ...s.v })
+          if (s.v) expect(bonus, id).toEqual({ kind: 'version', ...s.v, rows: unstopped(s.v.rows) })
           else if (bonus) expect(['careful', 'mean'], id).toContain(bonus.kind)
           for (const design of [...DESIGNS, 'classic']) {
             for (const fmt of [FORMATS.post, FORMATS.story]) {
@@ -2445,6 +2445,8 @@ describe('Read it’s own short sentences (plan 254)', () => {
                 sl.draw(ctx)
                 const all = texts.map(x => x.t).join(' ')
                 if (sl.key === 'ask') for (const w of words) expect(all, `${where} ${w.t}`).toContain(reading(w))
+                // A line to read at a glance, never closed by a full stop (plan 255).
+                expect(all, `${where} ${sl.key}`).not.toContain('。')
                 if (sl.key === 'words') {
                   for (const w of p.funnel.breakdown) expect(all, `${where} ${w.t}`).toContain(w.main.split(' ')[0])
                   // French sets a narrow space before its colon.

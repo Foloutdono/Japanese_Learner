@@ -1157,15 +1157,19 @@ function readSpec(pl, base) {
   const f = pl.funnel
   // The mistake to avoid where it says it in a few lines, else what the point means.
   const notes = f.notes || []
-  const bonus = f.version ? { kind: 'version', ...f.version }
+  const bonus = f.version ? { kind: 'version', ...f.version, rows: unstopped(f.version.rows) }
     : notes.find(n => n.kind === 'careful' && n.text.length <= 180) || notes.find(n => n.kind === 'mean') || notes.find(n => n.kind === 'careful') || null
+  const rows = unstopped(f.rows)
   return {
     ...base,
-    hook: { kind: 'readit', rows: f.rows, ask: 'read', seconds: 5, swipe: true },
+    hook: { kind: 'readit', rows, ask: 'read', seconds: 5, swipe: true },
     words: { kind: 'cards', items: f.breakdown, label: 'words', lit: f.lit || '' },
-    solution: { kind: 'reading', rows: f.rows, translation: f.translation, bonus },
+    solution: { kind: 'reading', rows, translation: f.translation, bonus },
   }
 }
+/** A sentence without its closing full stop, as Read it sets it (plan
+ *  255): a line to read at a glance, not prose. A question keeps its ？. */
+export const unstopped = rows => (rows?.at(-1)?.k === 'punct' && rows.at(-1).t === '。' ? rows.slice(0, -1) : rows)
 /** The script Read it sets a sentence in: kana where the studio asks for
  *  it, else the kanji with their furigana. */
 const readScript = c => (c.pl.script === 'kana' ? 'kana' : 'furigana')
