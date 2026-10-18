@@ -29275,13 +29275,84 @@ button.brd-stn { cursor: pointer; }
 }
 .exam-res__fig { font-size: var(--fs-display); }
 .exam-res__of { font-size: var(--fs-title); color: var(--text-secondary); }
-.exam-res__pct { margin-left: auto; font-size: var(--fs-heading); color: color-mix(in srgb, var(--success) 60%, var(--text-primary)); }
+.exam-res__pct {
+  margin-left: auto;
+  font-size: var(--fs-heading);
+  color: color-mix(in srgb, var(--success) 60%, var(--text-primary));
+  transition: color 0.3s var(--ease-out);
+}
+.exam-res__pct--run { color: var(--text-primary); }
 .exam-res__pct--low,
 .exam-res__s--low { color: color-mix(in srgb, var(--danger) 50%, var(--text-primary)); }
 .exam-res__bar { position: relative; height: 6px; border-radius: var(--r-pill); background: var(--surface-line); }
-.exam-res__fill { position: absolute; inset: 0 auto 0 0; border-radius: var(--r-pill); background: var(--success); }
-.exam-res__fill--low { background: var(--danger); }
-.exam-res__tick { position: absolute; top: -4px; width: 2px; height: 14px; margin-left: -1px; background: var(--text-primary); }
+.exam-res__tick {
+  position: absolute;
+  top: -4px;
+  width: 2px;
+  height: 14px;
+  margin-left: -1px;
+  background: var(--text-primary);
+  transition: background-color 0.2s var(--ease-out);
+}
+.exam-res__tick--lit { background: var(--success); }
+
+/* ── 目盛 — the score read off its bar (plan 254) ──
+   The owner's pick A of the canvas "Tsuji — the exam result, animated",
+   drawn by exam/ScoreReveal.jsx on the phone (exam-res) and the desk
+   (desk-score), whose own rules size the bar and its tick. The fill runs
+   in the neutral ink and takes the verdict's when it passes the target
+   or lands short of it; it is drawn whole and slid in under the bar's
+   clip, so the run moves a box and never resizes one. */
+.exam-score__run { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; }
+.exam-score__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: var(--r-pill);
+  background: var(--success);
+  transition: background-color 0.25s var(--ease-out);
+}
+.exam-score__fill--run { background: var(--text-secondary); }
+.exam-score__fill--low { background: var(--danger); }
+/* The ring going out from the target's tick once, as the fill passes it. */
+.exam-score__ping {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid var(--success);
+  border-radius: var(--r-pill);
+  pointer-events: none;
+  animation: score-ping 0.6s var(--ease-out) both;
+}
+@keyframes score-ping {
+  from { opacity: 0.9; transform: scale(0.4); }
+  to { opacity: 0; transform: scale(2.4); }
+}
+/* Short of the target, the part still owed, hatched in the miss's ink. */
+.exam-score__owed {
+  position: absolute;
+  inset-block: 0;
+  background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--danger) 85%, transparent) 0 2px, transparent 2px 5px);
+  animation: arrive-soft 0.4s var(--ease-out) backwards;
+}
+/* The verdict's line: set from the first frame and hidden, so its room
+   is held and nothing under it moves when it lands. */
+.exam-score__verdict {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: color-mix(in srgb, var(--success) 60%, var(--text-primary));
+  visibility: hidden;
+}
+.exam-score__verdict--low { color: color-mix(in srgb, var(--danger) 50%, var(--text-primary)); }
+.exam-score__verdict--in { visibility: visible; animation: arrive 0.32s var(--ease-out) backwards; }
+@media (prefers-reduced-motion: reduce) {
+  .exam-score__ping { display: none; }
+  .exam-score__verdict--in { animation-name: arrive-soft; }
+}
 /* The time the paper took against the time it allows, on a hairline of
    its own under the score's caption. */
 .exam-res__time {
@@ -41945,29 +42016,27 @@ button.brd-stn { cursor: pointer; }
     font-size: var(--fs-heading);
     font-weight: 700;
     color: color-mix(in srgb, var(--success) 60%, var(--text-primary));
+    transition: color 0.3s var(--ease-out);
   }
+  .desk-score__pct--run { color: var(--text-primary); }
   .desk-score__pct--low { color: color-mix(in srgb, var(--danger) 45%, var(--text-primary)); }
+  /* Read off as the phone's is (plan 254, exam/ScoreReveal.jsx): the
+     fill, the ring and the verdict's line are exam-score's. */
   .desk-score__bar {
     position: relative;
     height: 8px;
     border-radius: var(--r-pill);
     background: var(--surface-line);
   }
-  .desk-score__bar > i {
-    position: absolute;
-    inset-block: 0;
-    inset-inline-start: 0;
-    border-radius: inherit;
-    background: var(--success);
-  }
-  .desk-score__bar > i.desk-score__low { background: var(--danger); }
   .desk-score__tick {
     position: absolute;
     top: -5px;
     bottom: -5px;
     width: 2px;
     background: var(--text-primary);
+    transition: background-color 0.2s var(--ease-out);
   }
+  .desk-score__tick--lit { background: var(--success); }
   .desk-score__cap {
     display: flex;
     justify-content: space-between;

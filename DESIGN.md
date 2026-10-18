@@ -1654,6 +1654,23 @@ The beats are `components/dayclear/useFinish.js`'s, the parts
 `index.css`, over the kit's `191:primitives`, and `/dev/dayclear` plays
 every finish with no backend.
 
+**A paper's score is read off its bar, not celebrated (目盛, plan 254).**
+The owner's pick A of the canvas "Tsuji — the exam result, animated"
+(2026-10-18), over the gate, the seal, the board and the red pen: on the
+result's arrival the bar fills from empty in the neutral ink, the score
+and its percentage counting with it, after half a second's wait and over
+a second and a half. The target's tick lights as the fill passes it, a
+ring going out from it once, and the correct chime sounds then. Landed,
+the bar and the percentage take the verdict's ink, the part still owed to
+the target is hatched, and one line under the bar says it (Target
+reached, or how many answers short), its room held from the first frame
+so nothing under it moves. The target is a practice target, never a pass
+mark, so nothing there says 合格. A tap, a click or a key ends it without
+being swallowed; it plays once on arrival, not on a link to one question,
+and under reduced motion it is drawn ended. It holds nothing: the review
+under it is there from the first frame. One component draws it on both
+widths (`exam/ScoreReveal.jsx`, the `exam-score__*` rules).
+
 ## Structure
 
 ### The chrome (the mobile canvas, plan 068)
