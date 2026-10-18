@@ -66,11 +66,12 @@ describe('welded', () => {
   })
 
   it('is already applied to the French table', () => {
-    // The screen that started this: the plan's lead, which ended on
-    // "pour toi :" -- since plan 168 the line that opens on it.
-    expect(fr.brdForLine(fr.brdFor.other, 'Lire ce que tu croises chaque jour')).toBe(
-      `Pour toi${NBSP}: **lire ce que tu croises chaque jour**.`
+    // A sentence built at call time, as the plan's lead that started
+    // this was (the card says the plan since plan 247): the kana's
+    // first stop, its colon after the words that open it.
+    expect(fr.brdRevealFirst('12 mars', 10)).toBe(
+      `Ton premier arrêt${NBSP}: **les kana**, lus d’ici le **12 mars** à 10 min par jour.`
     )
-    expect(fr.brdNameQ).toBe(`Comment tu t’appelles${NBSP}?`)
+    expect(fr.brdKanaQ).toBe(`Tu sais lire ça${NBSP}?`)
   })
 })

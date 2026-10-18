@@ -32,6 +32,7 @@ import { rememberOnboarded, wasOnboardedHere } from './stores/onboarded'
 import { holdGuide } from './stores/guide'
 import { forgetAccount } from './stores/account'
 import { track } from './lib/track'
+import { cardsRidden } from './lib/rideProgress'
 import { routePattern } from './lib/routePattern'
 import { watchApiFailures } from './lib/apiTrail'
 import { watchClientErrors } from './lib/clientErrors'
@@ -322,7 +323,8 @@ export default function App({ front = NO_FRONT }) {
   const [boardedHere, setBoardedHere] = useState(() => (front.entry === 'board' ? performance.now() : null))
   // 正面口 (lib/frontEntry.js): Board pressed on the landing page is
   // honoured before any screen is drawn -- the pass is minted at once and
-  // the boarding opens on its name, with no Welcome asking a second time.
+  // the boarding opens on its first question, with no Welcome asking a
+  // second time.
   // On until a session arrives, or until the pass could not be minted (the
   // Welcome then opens on the sign-up, as its own Board does).
   const [pageBoard, setPageBoard] = useState(front.entry === 'board')
@@ -508,7 +510,10 @@ export default function App({ front = NO_FRONT }) {
   // 入門 (plan 170): a learner who answered « Pas encore » to the kana
   // question meets the introduction before the cards; everyone else
   // boards the cards as before.
-  const rideStart = onboardingProfile?.kanaKnown === 'none' ? '/ride/intro' : '/ride/cards'
+  // A ride left after its cards (a reload, the tab closed) is boarded
+  // again at the reading, never the first card (lib/rideProgress.js).
+  const rideStart = cardsRidden(session?.user?.id) ? '/ride/reading'
+    : onboardingProfile?.kanaKnown === 'none' ? '/ride/intro' : '/ride/cards'
   // 案内 — no gate's guide may open under the 改札 cutscene (plan 100).
   useEffect(() => { holdGuide(onboarding === 'finishing') }, [onboarding])
   const rideDone = () => setGate(g => (
@@ -636,7 +641,6 @@ export default function App({ front = NO_FRONT }) {
       <LangProvider>
         <BoardingFlow
           session={session}
-          initialProfile={onboardingProfile}
           guest={isGuest(session)}
           onComplete={signed => {
             // The contract is signed server-side by now: this device
@@ -663,14 +667,6 @@ export default function App({ front = NO_FRONT }) {
           onExit={() => leaveBoarding()}
           onSignIn={() => leaveBoarding('login')}
         />
-        {/* 定期券 — the offer, for the last boarding screen's door to
-            open. This branch returns BEFORE the router, so the copy
-            mounted beside <Routes/> is not in the tree here: without
-            this one, the pass line on PassStep would be exactly the
-            dead control domain/paywall.js argues against. Portals to
-            document.body and uses no router hook, so it is at home
-            outside the BrowserRouter. */}
-        <OfferScreen />
       </LangProvider>
     )
   }

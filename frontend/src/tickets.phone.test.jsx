@@ -3,6 +3,7 @@ import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
+import { parkPointer } from './testing/parkPointer'
 
 // ── 記念切符 — Profile › Billets on a phone (plan 191) ────────────────
 // The canvas's Collection board at 390×844: the record held up large
@@ -134,6 +135,11 @@ describe('the tickets at 390×844', () => {
 
   it('lays the screen out whole: the gate at the foot, nothing past the edges', async () => {
     await mount({ reduced: true })
+    // At rest, under no pointer: the lane's pointer is shared, a file
+    // before this one may have left it at a phone's foot, and a hovered
+    // gate stands 2px up (.btn-depart--gate:hover; the reduced prop stills
+    // the screen's motion, not the stylesheet's).
+    await parkPointer()
     await settle(400)
     expect(Math.round($('.tkb-head').getBoundingClientRect().top)).toBe(44)
     const gate = $('.tkb-foot .btn-depart--gate').getBoundingClientRect()

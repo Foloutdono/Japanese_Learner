@@ -85,8 +85,15 @@ EVENTS: dict[str, frozenset[str]] = {
     # `level_how` and `placed` (plan 224): whether the learner chose
     # their level or took the test, and where the test placed them --
     # beside `level`, what they boarded at, so an override shows.
+    # The card (plan 247): which of its fields a sheet changed (the
+    # defaults are what most keep, or they are not), whether it carries
+    # a name -- never the name -- and where it was left: kept with
+    # Google or by a link, boarded on an account already, or a guest's.
+    # `motive` stays for a client from before the card, which asked why.
     "boarding_done":  frozenset({"motive", "kana_known", "level", "pace", "notifications", "lines", "ms",
-                                 "level_how", "placed"}),
+                                 "level_how", "placed",
+                                 "edited_goal", "edited_rhythm", "edited_hour", "edited_lines",
+                                 "named", "kept"}),
     # "Embarquer" mints an anonymous Supabase guest (lib/guest.js), so an
     # abandoned boarding leaves an auth user with no profile row. `from`
     # tells the two apart.
@@ -322,6 +329,7 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
     "boarding_done": {
         "level_how": frozenset({"pick", "test"}),
         "placed":    frozenset({"N5", "N4", "N3", "N2", "N1"}),
+        "kept":      frozenset({"google", "link", "already", "none"}),
     },
     "run_start":    {"where": _RUN_DOORS},
     "run_complete": {"where": _RUN_DOORS},

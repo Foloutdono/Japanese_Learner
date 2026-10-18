@@ -6,11 +6,12 @@ import fr from '../../locales/fr/index.js'
 import '../../index.css'
 
 // ── Settings › Account, and the two doors off it ─────────────────
-// The boarding can now be refused (lib/guest.js, components/boarding/
-// AccountStep.jsx), which is only an honest offer if the refusal is
-// reversible: a guest pass lives in one browser's storage and nothing
-// else, so an offer made once at the end and never again would be a
-// trap rather than a choice. This page is where it is made again.
+// The boarding can now be refused (lib/guest.js, the card's account
+// sheet in components/boarding/CardSheets.jsx), which is only an honest
+// offer if the refusal is reversible: a guest pass lives in one
+// browser's storage and nothing else, so an offer made once at the end
+// and never again would be a trap rather than a choice. This page is
+// where it is made again.
 //
 // The sign-out row matters as much as the offer. For a learner with
 // credentials it means "sign out of this device"; for a guest the very

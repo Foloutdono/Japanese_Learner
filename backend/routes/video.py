@@ -81,6 +81,8 @@ _STALE_RUNNING_SECONDS = 900
 # daily budget, but a paste or an upload had none, so a learner could
 # start as many threads as they could post.
 _MAX_PREPARING_PER_USER = 2
+# Namespace half of the advisory lock _open_session takes (cf. agenda).
+VIDEO_SESSION_LOCK = 931_211
 
 # ── The fetch budget ───────────────────────────────────────────
 # The link ingest is the one path here that spends METERED money: a
@@ -320,6 +322,27 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
         )
         return
 
+    # Everything after the track is read runs under one guard: an
+    # exception past this point used to leave the session 'generating'
+    # and its job 'running' until the stale cutoff, holding one of the
+    # learner's _MAX_PREPARING_PER_USER slots the whole time.
+    try:
+        _materialize(session_id, cues, translated, timing, tracks, window_start, window_end)
+    except Exception:
+        logger.exception("Unexpected error preparing session %s", session_id)
+        try:
+            _fail_session(
+                session_id, "Something went wrong reading this transcript. Please try again.",
+                "transcript_failed",
+            )
+        except Exception:
+            logger.exception("Could not mark session %s failed", session_id)
+
+
+def _materialize(session_id: int, cues: list[dict], translated: dict, timing: str | None,
+                 tracks: dict | None, window_start: float | None, window_end: float | None) -> None:
+    """The session's lines, from its read track: timed, translated where
+    a track carries them, analysed by the local tier and stored."""
     # The recognised track beside a hand-written one (the grab sends
     # both; the link fetch reads both itself and returns its lines
     # timed, plan 221): its word times lent to the lines it agrees with.
@@ -448,6 +471,11 @@ def _open_session(user_id, source, source_ref, window_start, window_end, window_
     conn = db_conn()
     try:
         with conn.cursor() as cur:
+            # Count and insert under one lock per learner, or two posts at
+            # once both pass the count (cf. routes/agenda.py).
+            cur.execute(
+                "SELECT pg_advisory_xact_lock(%s, hashtext(%s))", (VIDEO_SESSION_LOCK, user_id)
+            )
             cur.execute(
                 """
                 SELECT COUNT(*)
@@ -460,9 +488,9 @@ def _open_session(user_id, source, source_ref, window_start, window_end, window_
                 (user_id, _STALE_RUNNING_SECONDS),
             )
             if cur.fetchone()[0] >= _MAX_PREPARING_PER_USER:
-                raise HTTPException(
-                    status_code=429,
-                    detail="A session is still being prepared. Wait for it, then add the next one.",
+                raise _refusal(
+                    429, "session_preparing",
+                    "A session is still being prepared. Wait for it, then add the next one.",
                 )
             cur.execute(
                 """
@@ -507,7 +535,8 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
             raise _refusal(413, "file_too_large", "Subtitle file is too large")
         form = await request.form()
         upload = form.get("file")
-        if upload is None:
+        # A plain text field named `file` is not a file: refused, not a 500.
+        if upload is None or not hasattr(upload, "read"):
             raise _refusal(400, "file_required", "file is required for an upload")
         raw = await upload.read(_MAX_UPLOAD_BYTES + 1)
         if len(raw) > _MAX_UPLOAD_BYTES:
@@ -545,11 +574,8 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
         # Optional, and NEVER fetched from -- it only names a video to
         # embed alongside the transcript. See the JSON branch below.
         video_id = parse_video_id(form.get("url") or "")
-        try:
-            window_start = _optional_seconds(form.get("start"), "start")
-            window_end = _optional_seconds(form.get("end"), "end")
-        except (TypeError, ValueError):
-            raise _refusal(400, "bad_window", "start/end must be numbers")
+        window_start = _optional_seconds(form.get("start"), "start")
+        window_end = _optional_seconds(form.get("end"), "end")
         filename = upload.filename
     else:
         # A pasted transcript is held to _MAX_UPLOAD_BYTES characters
@@ -561,7 +587,7 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
         except ValueError:
             declared = None
         if declared is not None and declared > 3 * _MAX_UPLOAD_BYTES + _MULTIPART_OVERHEAD_BYTES:
-            raise HTTPException(status_code=413, detail="Transcript is too long")
+            raise _refusal(413, "transcript_too_long", "Transcript is too long")
         try:
             body = await request.json()
         except Exception:
@@ -585,7 +611,7 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
             raise _refusal(400, "not_youtube_url", "Not a recognized YouTube URL")
 
         if len(pasted) > _MAX_UPLOAD_BYTES:
-            raise HTTPException(status_code=413, detail="Transcript is too long")
+            raise _refusal(413, "transcript_too_long", "Transcript is too long")
         if pasted:
             source = "paste"
             content = pasted
@@ -614,11 +640,8 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
         filename = None
         timing = None
         tracks = None
-        try:
-            window_start = _optional_seconds(body.get("start"), "start")
-            window_end = _optional_seconds(body.get("end"), "end")
-        except (TypeError, ValueError):
-            raise _refusal(400, "bad_window", "start/end must be numbers")
+        window_start = _optional_seconds(body.get("start"), "start")
+        window_end = _optional_seconds(body.get("end"), "end")
 
     # Only a Window with BOTH bounds can be back-to-front. One bound on
     # its own ("from 2:30 on", "up to 4:00") is a perfectly good Window,

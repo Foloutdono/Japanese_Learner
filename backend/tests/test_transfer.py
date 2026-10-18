@@ -382,10 +382,29 @@ def _offer(client) -> bool:
     return client.get("/api/profile").json()["transferOffer"]
 
 
+def _answer(days_ago: int = 0):
+    """One card answered, `days_ago` days back."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO review_log (card_id, mode, quality, reviewed_at) "
+                "VALUES (%s, %s, 4, NOW() - make_interval(days => %s))",
+                (f"{AUID}:vocab_N5_食べる_たべる", VOCAB_MODE, days_ago),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+    srs.forget_history(AUID)
+
+
 def test_a_new_learner_is_asked_once_after_the_ride(aclient):
     _board(aclient, "N5")
     assert _offer(aclient) is False          # the ride is still ahead
     _ride(aclient)
+    # Not before the first answer: the day's first card comes first.
+    assert _offer(aclient) is False
+    _answer()
     assert _offer(aclient) is True
     r = aclient.post("/api/transfer/offer", json={"choice": "later"})
     assert r.status_code == 200 and r.json() == {"transferOffer": False}
@@ -397,6 +416,8 @@ def test_a_new_learner_is_asked_once_after_the_ride(aclient):
 def test_an_import_answers_the_offer(aclient):
     _board(aclient, "N5")
     _ride(aclient)
+    _answer()
+    assert _offer(aclient) is True
     aclient.post("/api/transfer/import", json=_body("食べる"))
     assert _offer(aclient) is False
 
@@ -404,15 +425,5 @@ def test_an_import_answers_the_offer(aclient):
 def test_a_learner_who_studied_weeks_ago_is_not_asked(aclient):
     _board(aclient, "N5")
     _ride(aclient)
-    conn = db_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "INSERT INTO review_log (card_id, mode, quality, reviewed_at) VALUES (%s, %s, 4, NOW() - INTERVAL '30 days')",
-                (f"{AUID}:vocab_N5_食べる_たべる", VOCAB_MODE),
-            )
-        conn.commit()
-    finally:
-        conn.close()
-    srs.forget_history(AUID)
+    _answer(days_ago=30)
     assert _offer(aclient) is False

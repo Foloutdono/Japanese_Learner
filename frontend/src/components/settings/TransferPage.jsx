@@ -89,10 +89,13 @@ export function TransferPage({ session }) {
 
   // The preview of the decks chosen, the latest asked for winning: a
   // deck toggled twice quickly never prints the first answer second.
+  // The decks' old payload goes the moment they change, so the ticket
+  // cannot be punched with the decks the chips no longer show.
   async function check(opened, decks) {
     const built = buildPayload(opened, decks)
-    if (built.over) { setError('tooMany'); setPhase(p => (p === 'checking' ? 'choose' : p)); return }
     const turn = ++asked.current
+    setPayload(null)
+    if (built.over) { setError('tooMany'); setPhase(p => (p === 'checking' ? 'choose' : p)); return }
     setError(null)
     try {
       const body = await apiJson('/api/transfer/preview', session, {
@@ -351,7 +354,7 @@ export function TransferPage({ session }) {
                       t.trCheck,
                     ].filter(Boolean).join(' ')}
                   </span>
-                  <button type="button" className="btn-primary" data-action="transfer-punch" disabled={phase === 'importing'} onClick={punch}>
+                  <button type="button" className="btn-primary" data-action="transfer-punch" disabled={phase === 'importing' || !payload} onClick={punch}>
                     {phase === 'importing' ? '…' : t.trPunch}
                   </button>
                 </>

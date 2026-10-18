@@ -10,10 +10,6 @@ import { levelItems } from './journeyProjection'
 
 export const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
-// Why the learner is here -- the second question, and the source of the
-// plan's two promise lines. Stored as is (routes/onboarding.py MOTIVES).
-export const MOTIVES = ['studies', 'fun', 'trip', 'live', 'friends', 'other']
-
 // The kana check's four answers (routes/onboarding.py KANA_KNOWN).
 export const KANA_ANSWERS = ['hiragana', 'katakana', 'both', 'none']
 
@@ -67,17 +63,6 @@ export function clampDeparture(min) {
   return Math.min(LAST_DEPARTURE_MIN, Math.max(DAY_START_MIN, snapped))
 }
 
-/** Where a minute sits on the track, 0..1. */
-export function dayFraction(min) {
-  return (min - DAY_START_MIN) / (DAY_END_MIN - DAY_START_MIN)
-}
-
-/** The minute a track position (0..1) names, snapped. */
-export function minuteAtFraction(fraction) {
-  const raw = DAY_START_MIN + Math.min(1, Math.max(0, fraction)) * (DAY_END_MIN - DAY_START_MIN)
-  return clampDeparture(raw)
-}
-
 /** The first departure at a minute of the day (plan 168): today if it
  *  is still to come, else tomorrow -- `later` says which. The hour's
  *  board and the nudge's week both count from it. */
@@ -97,10 +82,6 @@ export function bucketFor(min) {
   if (min < 17 * 60) return 'noon'
   return 'pm'
 }
-
-/** How a reader of both scripts finds their level (plan 224): they
- *  choose it on the line, or the test finds it. */
-export const LEVEL_HOW = ['pick', 'test']
 
 /** The kana branch sets the level: a reader of both scripts earns the
  *  level list; anyone else is a NOVICE — one script or none is short of
@@ -162,16 +143,6 @@ export function levelAnswers(choice, kanaAnswer) {
   }
 }
 
-/** The answers as they would stand if the question in hand were
- *  answered now (plan 122). Only the level list has one to draft: a
- *  level picked but not yet continued has not set the level the office
- *  stores, nor the goal it opens on. Every other answer is set by the
- *  pick itself. */
-export function boardingDraft(answers, step) {
-  if (step !== 'level' || !answers.levelChoice) return answers
-  return { ...answers, ...levelAnswers(answers.levelChoice, answers.kana) }
-}
-
 /** ~n: the figure a promise wears, rounded to the nearest `to`. */
 export function approx(n, to) {
   return Math.max(to, Math.round(n / to) * to)
@@ -184,46 +155,25 @@ export function kanjiThrough(volumes, level) {
   return upTo.reduce((sum, lvl) => sum + (volumes?.kanji?.[lvl] ?? 0), 0)
 }
 
+// The canvas's figures, for the beat before the volumes answer.
+const KANJI_SIGN = { N5: 100, N4: 300, N3: 650, N2: 1000, N1: 2000 }
+
+/** A stop as the lines name it -- the level list, and the card's goal
+ *  sheet (plan 247): its code (the kana's own sign for the novice's),
+ *  its name and what it holds, the kanji counted from the app's own
+ *  volumes once they have answered. */
+export function levelStop(t, lang, volumes, level) {
+  if (level === 'novice') return { key: level, code: 'あ', name: t.brdNovice, desc: t.brdLevelDesc.novice }
+  const kanji = volumes ? approx(kanjiThrough(volumes, level), 50) : KANJI_SIGN[level]
+  return { key: level, code: level, name: t.levelName[level], desc: t.brdLevelDesc[level](kanji.toLocaleString(lang)) }
+}
+
 /** The kana signs an answer already covers, out of the journey's total. */
 export function kanaKnownCount(volumes, kanaAnswer) {
   const all = volumes?.kana ?? 0
   if (kanaAnswer === 'both') return all
   if (kanaAnswer === 'hiragana' || kanaAnswer === 'katakana') return Math.round(all / 2)
   return 0
-}
-
-const DAY_MS = 86400000
-
-/** The rhythm's time axis on the desk (plan 163, the four roads): today
- *  at 0, the latest arrival at 1, and a mark at the start of each month
- *  between -- every quarter past a year and a half, every January past
- *  four years. `at` is where a mark falls (0..1) and `mid` where its
- *  name sits: halfway across the stretch it opens, or on the mark for a
- *  year; a January also names its year, where months name the stretch. */
-export function rideAxis(now, last, lang) {
-  const start = now.getTime()
-  const span = Math.max(last.getTime() - start, DAY_MS)
-  const at = d => (d.getTime() - start) / span
-  const days = span / DAY_MS
-  const step = days > 4 * 365 ? 12 : days > 540 ? 3 : 1
-  const month = new Intl.DateTimeFormat(lang, { month: 'short' })
-  const marks = []
-  // The first month to start after today -- on a quarter or a year, the
-  // first of those.
-  const m = new Date(now.getFullYear(), now.getMonth() + 1, 1)
-  while (m.getMonth() % step !== 0) m.setMonth(m.getMonth() + 1)
-  for (; m.getTime() <= start + span; m.setMonth(m.getMonth() + step)) {
-    const next = new Date(m.getFullYear(), m.getMonth() + step, 1)
-    const jan = m.getMonth() === 0
-    marks.push({
-      at: at(m),
-      mid: step === 12 ? at(m) : (at(m) + Math.min(1, at(next))) / 2,
-      label: step === 12 ? String(m.getFullYear()) : month.format(m),
-      jan,
-      year: jan && step !== 12 ? String(m.getFullYear()) : null,
-    })
-  }
-  return { at, marks }
 }
 
 /** The kana's own stop on the ride (plan 163, the desk's reveal): the

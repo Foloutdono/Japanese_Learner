@@ -109,7 +109,7 @@ describe('locale parity (fr <-> en)', () => {
 
 // Every leaf of a table, as the learner receives it: a plain string, a
 // copy function's result, or the same again inside a nested group
-// (brdFor, brdPromise, onbTestKind…), which the key-parity tests above
+// (brdKana, destHour, onbTestKind…), which the key-parity tests above
 // do not descend into.
 function walk(value, path, out) {
   if (typeof value === 'function') {

@@ -112,7 +112,22 @@ async function backFromTheGate() {
   expect(window.location.pathname).toBe('/today')
 }
 
+/** The sentence written and graded: the lesson over, the plate up. */
+async function rideTheReading(root) {
+  await found(root, '.sentence')
+  const input = root.querySelector('input')
+  Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, 'eki de tomodachi ni aimasu')
+  input.dispatchEvent(new Event('input', { bubbles: true }))
+  await settle(50)
+  root.querySelector('.stage__foot button').click()
+  await graded(root)
+  root.querySelector('.rating-bar__btn--q4').click()
+  await found(root, '.ride__plate')
+}
+
 beforeEach(() => {
+  // The cards' note on the device (lib/rideProgress.js), one learner's.
+  window.localStorage.removeItem('tsuji.ride.cards:user-1')
   track.mockReset()
   apiJson.mockReset()
   apiJson.mockImplementation(async url => {
@@ -205,5 +220,66 @@ describe('Back on the first ride, at 390×844', () => {
     window.history.back()
     await at('/today')
     expect(rideDone()).toEqual([expect.objectContaining({ skipped: true, at: 'cards' })])
+  })
+
+  // Chrome's back button passes over an entry a page added without a
+  // tap since it was reached (the history intervention), and the ride's
+  // guard is stood on mount: a phone's Back can land past it, on the
+  // front door, in one pop -- where React renders the door, unmounting
+  // the ride, before a listener the ride added could hear it.
+  // history.back() is exempt from the rule, so the skip is played as the
+  // go(-2) the button makes of it.
+  it('sends to the gate when Back passes over the guard to the front door', async () => {
+    const root = await boot()
+    await at('/ride/cards')
+    await rideTheCards(root)
+    await at('/ride/reading')
+    await found(root, '.sentence')
+
+    window.history.go(-2)
+    await at('/today')
+    expect(rideDone()).toEqual([expect.objectContaining({ skipped: true, at: 'reading' })])
+    await settle(300)
+    expect(views().filter(v => v === '/ride/cards')).toHaveLength(1)
+    expect(window.location.pathname).toBe('/today')
+  })
+})
+
+// ── The lesson is over at its grade, not at « Entrer en gare » ──────
+// Reported 2026-10-18 from the trail: a learner reached the reading's
+// plate, left it some other way than its button, and the front door
+// boarded them onto the first card again. The stamp is the grade's
+// now, and the cards done leave a note the door reads.
+describe('A ride left before its last button, at 390×844', () => {
+  it('is stamped the moment the sentence is graded, and Back from the plate is no skip', async () => {
+    const root = await boot()
+    await at('/ride/cards')
+    await rideTheCards(root)
+    await at('/ride/reading')
+    await rideTheReading(root)
+
+    const done = posts().find(([u]) => u === '/api/onboarding/ride/done')
+    expect(JSON.parse(done[2].body)).toEqual({ skipped: false })
+    expect(rideDone()).toEqual([expect.objectContaining({ skipped: false, at: 'reading' })])
+
+    window.history.back()
+    await at('/today')
+    expect(rideDone()).toHaveLength(1)
+    expect(posts().filter(([u]) => u === '/api/onboarding/ride/done')).toHaveLength(1)
+    await backFromTheGate()
+  })
+
+  it('boards the reading, not the first card, after a reload between the halves', async () => {
+    const first = await boot()
+    await at('/ride/cards')
+    await rideTheCards(first)
+    await at('/ride/reading')
+    await found(first, '.sentence')
+
+    // The page loaded again, the ride unstamped.
+    const again = await boot()
+    await at('/ride/reading')
+    await found(again, '.sentence')
+    expect(views().at(-1)).toBe('/ride/reading')
   })
 })

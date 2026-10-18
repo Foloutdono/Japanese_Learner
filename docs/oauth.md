@@ -131,11 +131,14 @@ Two more parts of the same knot:
   the browser already holds whenever there is exactly one, and a learner whose
   journey is on their other address is never asked — they simply arrive
   somewhere else.
-- **Say whose pass it is.** The boarding's first question prints the session's
-  address when there is one (`brdNameNewPass`). The boarding only ever runs on
-  an account with nothing on it, so an address there always means *a new pass
-  for this address* — which is the one thing worth knowing before answering
-  seven questions, and the sign-in link is in the same foot.
+- **Say whose pass it is.** The card's line prints the session's address when
+  there is one (`brdKeptEmail`), with the way to another account beside it
+  (`brdKeptSwitch`, which signs out and opens the sign-in). The boarding only
+  ever runs on an account with nothing on it, so an address there always means
+  *a new pass for this address* — which is the one thing worth knowing before
+  the card is issued. Since plan 247 the card is the form: the first question
+  is the kana's, whose four answers fill a 667px phone, so the line on the
+  card is where the address is said.
 
 When it has already happened, the evidence is in **Authentication → Users**:
 two rows, one address, the newer one empty. Deleting the newer row from the

@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **248**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **250**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -247,8 +247,23 @@ runtime purpose.
   equal. A new source is a reader in `lib/transfer/` that returns
   `kindCollection`'s shape, a `SOURCES` entry on both sides and a value
   of `transfer_import.source` in `events.VALUES` and `track.js`. A new
-  learner is offered it once on Today (`TransferSheet`), after the
-  gate's guide, while `transferOffer` says so (`transfer_offered_at`).
+  learner is offered it once on Today (`TransferSheet`), after their
+  first answer, never before it (`routes/transfer.offer_open`), while
+  `transferOffer` says so (`transfer_offered_at`).
+- **The boot asks for the screen first (2026-10-18).** The API runs a
+  learner's requests six at a time (`core/concurrency.py`), so whatever
+  is mounted for the whole session -- a sheet, a store, the chrome --
+  reads nothing while it draws nothing: a closed `RunOutSheet` asking for
+  `/api/today` put the day's queue ahead of the first ride's card. A
+  store's fetch shares the one in flight (`stores/remote.js`,
+  `profileSummary`'s `fetchIfStale`).
+- **Nothing moves by top or left (2026-10-18).** A highlight or a note
+  that glides between anchors is placed by a transform (`guide/Spot.jsx`),
+  and one that moves to a new anchor is a new element (`guide/Callout.jsx`'s
+  key): a glide of top/left is a layout shift on every frame, and a first
+  ride read CLS 1.3 from the ride's own notes. A tap that changes the
+  screen renders it as a transition (`BoardingFlow`'s `go()`), so the tap
+  paints before the screen does.
 - **The placement test is replayed from its seed (plan 224).** The climb
   (`study/placement.walk`) keeps nothing between two answers: it is
   rebuilt from the seed at each one, in whatever process answers it. So
@@ -256,6 +271,14 @@ runtime purpose.
   processes -- a set, or anything built by iterating one, is sorted
   before a seeded random touches it (`tests/test_placement.py` builds
   the climb under two hash seeds).
+- **The card's name is not the handle (plan 247).** `user_profiles.card_name`
+  is the first name a learner's own card prints: any script, up to 24
+  characters (`routes/profile.clean_card_name`), `''` for none and NULL
+  for never asked, which prints the username as before. The username
+  stays the public handle (番付, the library), unique and in Latin
+  letters. Whatever prints the holder of a learner's own card or gate
+  reads `holderName` (`domain/passCard.js`); whatever another learner
+  can see prints the username, never the card's name.
 
 ## Commands
 
@@ -406,7 +429,15 @@ One more is read-only and needs no flag, so it is safe to run at any time:
 ```bash
 python -m scripts.weekly_digest        # the four numbers, as markdown
 python -m scripts.read_feedback        # what learners wrote to us (plan 222), newest first
+python -m scripts.learner_trail <user_id>  # one learner's visits, where they left, and why it may have been (plan 249)
 ```
+
+`learner_trail` merges the 足跡 trail with the study tables onto one
+clock, visit by visit, and names the patterns that have cost learners
+before (a boarding left, the first ride begun again, a dead-end sheet,
+a failed request, a slow page, no first answer). It never reads a text
+column a learner wrote into and reads nobody who objected
+(`analytics_off`); run it by hand, never from a workflow.
 
 Two others fill a shared cache ahead of demand rather than maintaining
 one. Neither is required — both caches fill themselves from real traffic

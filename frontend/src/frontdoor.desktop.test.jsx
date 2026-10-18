@@ -9,13 +9,17 @@ import './index.css'
 // column in an empty window, Continue on the window's floor, and no key
 // answered -- some fifty presses and clicks on the novice's road. This
 // file is the desk's side of it, one block per phase; the phone's is a
-// block of deskfree.phone.test.jsx.
+// block of deskfree.phone.test.jsx. Since plan 247 the boarding asks
+// the kana and a reader's level, then hands the card filled in, every
+// printed field a door to a sheet -- on the desk a dialog in the
+// paper's middle.
 //
 // The keys (P8): Enter goes on from anywhere in the live car, pressing
 // the screen's own Continue, which prints the key. A field, an answer
 // not yet picked, ‹ and a link keep their own Enter; an answer already
 // picked, or one the pointer just pressed, does not -- Enter goes on
-// with the pick as it stands. Nothing under a dialog, and no Esc.
+// with the pick as it stands. Nothing under a dialog -- a sheet's keys
+// are the sheet's -- and no Esc.
 
 const apiJson = vi.hoisted(() => vi.fn())
 const apiJsonWithTimeout = vi.hoisted(() => vi.fn())
@@ -69,6 +73,10 @@ const live = () => $('.brd__car:not(.brd__car--out)')
 const inCar = s => live()?.querySelector(s)
 const stepOf = () => $('.brd')?.dataset.step
 const enter = () => userEvent.keyboard('{Enter}')
+const sheet = () => $('.brd-sheet')
+const inSheet = s => sheet()?.querySelector(s) ?? null
+const completes = () => apiJsonWithTimeout.mock.calls.filter(c => c[0] === '/api/onboarding/complete')
+const posted = () => JSON.parse(completes()[0][2].body)
 
 beforeEach(() => {
   apiJson.mockReset()
@@ -85,113 +93,124 @@ afterEach(() => {
 async function board({ onComplete = vi.fn(), onExit = vi.fn(), guest = false } = {}) {
   await render(
     <LangProvider>
-      <BoardingFlow session={{ access_token: 'tok' }} initialProfile={{ username: 'Tester' }} onComplete={onComplete} onExit={onExit} guest={guest} />
+      <BoardingFlow session={{ access_token: 'tok' }} onComplete={onComplete} onExit={onExit} guest={guest} />
     </LangProvider>
   )
   await settle(150)
 }
 
-/** Name → why, the name kept (no write), by Enter in the field. */
-async function pastName() {
-  expect(stepOf()).toBe('name')
-  expect(document.activeElement).toBe(inCar('.brd-field'))
-  await enter()
+const box = el => el.getBoundingClientRect()
+const mid = r => (r.left + r.right) / 2
+const cy = r => (r.top + r.bottom) / 2
+const bodyW = () => document.body.getBoundingClientRect().width
+const side = () => $('.desk-brd__side')
+const strip = () => $('.desk-brd__strip')
+const stop = key => strip()?.querySelector(`[data-stop="${key}"]`)
+const stops = () => [...strip().querySelectorAll('.desk-brd__sp')].map(r => r.dataset.stop)
+const stateOf = key => stop(key)?.className.match(/desk-brd__sp--(\w+)/)?.[1]
+// The answer said on a stop: read out beside its name, not printed.
+const valueOf = key => stop(key)?.querySelector('.sr-only')?.textContent.replace(/^ · /, '') ?? null
+const doorOf = key => stop(key)?.querySelector('button.desk-brd__sp-door') ?? null
+async function pick(sel) { inCar(sel).click(); await settle(40) }
+async function next() { inCar('[data-action="continue"]').click(); await settle() }
+// A door of the card opens its sheet, a dialog in the paper's middle.
+async function door(page) { inCar(`[data-door="${page}"]`).click(); await settle(300); expect(sheet(), page).not.toBeNull() }
+async function shut() { await userEvent.keyboard('{Escape}'); await settle(200); expect(sheet()).toBeNull() }
+// Tops as the eye reads them, once the answers' entrance has landed.
+const rowsOf = els => new Set(els.map(el => Math.round(box(el).top / 4)))
+
+/** The kana, both scripts read, to the level list. */
+async function toLevel() {
+  expect(stepOf()).toBe('kana')
+  await pick('[data-kana="both"]')
   await settle()
-  expect(stepOf()).toBe('why')
+  expect(stepOf()).toBe('level')
 }
+/** From the level list, at `level`, to the card. */
+async function toCard(level = 'N3') {
+  await pick(`[data-level="${level}"]`)
+  await next()
+  expect(stepOf()).toBe('card')
+}
+const fits = el => el.scrollHeight <= el.clientHeight + 1
 
 describe('Enter at first contact (P8)', () => {
   it('prints the key on every Continue it presses, and goes on from the question', async () => {
     await board()
+    // The kana's answers go on by themselves: no Continue to print it on.
+    expect(inCar('.btn-depart')).toBeNull()
+    await toLevel()
     const cap = () => inCar('.btn-depart')
     expect(cap().getAttribute('aria-keyshortcuts')).toBe('Enter')
     expect(cap().querySelector('.desk-kbd')).not.toBeNull()
-    await pastName()
     // The question has the focus on a new screen: Enter goes on only
     // once there is an answer to go on with.
     expect(document.activeElement).toBe(inCar('.brd__q'))
     await enter()
     await settle()
-    expect(stepOf()).toBe('why')
-    await userEvent.click(inCar('[data-motive="trip"]'))
+    expect(stepOf()).toBe('level')
+    await userEvent.click(inCar('[data-level="N3"]'))
     await enter()
     await settle()
-    expect(stepOf()).toBe('kana')
+    expect(stepOf()).toBe('card')
+    // The card's gate names it too, and Enter issues the card.
+    expect(inCar('[data-action="issue"]').getAttribute('aria-keyshortcuts')).toBe('Enter')
+    expect(inCar('[data-action="issue"] .desk-kbd')).not.toBeNull()
+    await enter()
+    await settle()
+    expect(completes()).toHaveLength(1)
   })
 
   it('leaves an answer not yet picked its own Enter, and goes on from a picked one', async () => {
     await board()
-    await pastName()
-    inCar('[data-motive="fun"]').focus()
-    await enter()
-    await settle()
-    expect(stepOf()).toBe('why')
-    expect(inCar('[data-motive="fun"]').getAttribute('aria-pressed')).toBe('true')
-    await enter()
-    await settle()
-    expect(stepOf()).toBe('kana')
-  })
-
-  // The longest walk in the file: it boards and passes eight screens,
-  // each waiting on the car. It takes ~7s alone and went past vitest's
-  // default 15s on a loaded CI runner (main at 45160ad5, and #264), so
-  // it has a budget of its own.
-  it('goes on from a line the pointer clicked off, and leaves it off', async () => {
-    await board()
-    await pastName()
-    await userEvent.click(inCar('[data-motive="trip"]'))
-    await enter()
-    await settle()
-    await userEvent.click(inCar('[data-kana="both"]'))
-    await settle()
-    await userEvent.click(inCar('[data-how="pick"]'))
+    await toLevel()
+    inCar('[data-level="N2"]').focus()
     await enter()
     await settle()
     expect(stepOf()).toBe('level')
-    await userEvent.click(inCar('[data-level="N1"]'))
+    expect(inCar('[data-level="N2"]').getAttribute('aria-pressed')).toBe('true')
     await enter()
     await settle()
-    expect(stepOf()).toBe('lines')
-    await userEvent.click(inCar('[data-line="kanji"]'))
-    expect(inCar('[data-line="kanji"]').getAttribute('aria-pressed')).toBe('false')
+    expect(stepOf()).toBe('card')
+  })
+
+  it('keeps a sheet\'s keys its own, and goes on from the card with what it set', async () => {
+    await board()
+    await toLevel()
+    await toCard('N1')
+    await door('lines')
+    await userEvent.click(inSheet('[data-line="kanji"]'))
+    expect(inSheet('[data-line="kanji"]').getAttribute('aria-pressed')).toBe('false')
+    // Under the sheet the card's gate is not Enter's: nothing is issued.
+    document.activeElement?.blur?.()
     await enter()
     await settle()
-    expect(stepOf()).toBe('rhythm')
-    // Back, to see what was carried: the line stayed off.
-    await userEvent.click(inCar('[data-action="back"]'))
-    await settle()
-    expect(inCar('[data-line="kanji"]').getAttribute('aria-pressed')).toBe('false')
-    // A picked line reached by Tab: Space toggles it, Enter goes on.
-    const vocab = inCar('[data-line="vocab"]')
-    vocab.focus()
-    await userEvent.keyboard(' ')
-    expect(vocab.getAttribute('aria-pressed')).toBe('false')
-    await userEvent.keyboard(' ')
-    expect(vocab.getAttribute('aria-pressed')).toBe('true')
+    expect(completes()).toHaveLength(0)
+    expect(sheet()).not.toBeNull()
+    // Shut, the card prints what the sheet set, and Enter issues it.
+    await shut()
+    expect(inCar('[data-door="lines"]').querySelectorAll('.pcb__line')).toHaveLength(2)
+    document.activeElement?.blur?.()
     await enter()
     await settle()
-    expect(stepOf()).toBe('rhythm')
-    // One Enter is one screen: the rhythm's lands on the hour, no further.
-    await enter()
-    await settle()
-    expect(stepOf()).toBe('time')
-  }, 30000)
+    expect(posted().lines).toEqual(['vocab', 'grammar'])
+  })
 
   it('does nothing under a dialog, and nothing on Esc', async () => {
     await board()
-    await pastName()
-    await userEvent.click(inCar('[data-motive="trip"]'))
+    await toLevel()
+    await userEvent.click(inCar('[data-level="N3"]'))
     const modal = document.createElement('div')
     modal.setAttribute('aria-modal', 'true')
     modal.dataset.probeModal = ''
     document.body.appendChild(modal)
     await enter()
     await settle()
-    expect(stepOf()).toBe('why')
+    expect(stepOf()).toBe('level')
     modal.remove()
     await userEvent.keyboard('{Escape}')
     await settle()
-    expect(stepOf()).toBe('why')
+    expect(stepOf()).toBe('level')
   })
 })
 
@@ -211,59 +230,18 @@ describe('the Welcome\'s Enter (P8)', () => {
   })
 })
 
-// ── P9 — the boarding frame (plans 122, 140, 163) ──
+// ── P9 — the boarding frame (plans 122, 140, 163, 247) ──
 // Plan 163, the owner's pick D of the canvas "Tsuji — onboarding, new
 // directions": the sumi column goes, and three places never move. The
 // question at the paper's top-left corner; the journey as a strip at the
 // floor's left end, a named stop per question, the answer given said on
 // its stop and a stop behind a door back to its question (plan 140's
 // rules); the floor in the bottom-right corner, Back beside Continue.
-// The answers laid for the width, no Building, and the plan the last
-// screen -- it enters the station.
-const box = el => el.getBoundingClientRect()
-const mid = r => (r.left + r.right) / 2
-const cy = r => (r.top + r.bottom) / 2
-const bodyW = () => document.body.getBoundingClientRect().width
-const side = () => $('.desk-brd__side')
-const strip = () => $('.desk-brd__strip')
-const stop = key => strip()?.querySelector(`[data-stop="${key}"]`)
-const stops = () => [...strip().querySelectorAll('.desk-brd__sp')].map(r => r.dataset.stop)
-const stateOf = key => stop(key)?.className.match(/desk-brd__sp--(\w+)/)?.[1]
-// The answer said on a stop: read out beside its name, not printed.
-const valueOf = key => stop(key)?.querySelector('.sr-only')?.textContent.replace(/^ · /, '') ?? null
-const doorOf = key => stop(key)?.querySelector('button.desk-brd__sp-door') ?? null
-async function pick(sel) { inCar(sel).click(); await settle(40) }
-async function next() { inCar('[data-action="continue"]').click(); await settle() }
-// The plan's arrival plays out on its own; waited out rather than
-// skipped, so no Enter can land on the plan's own action instead.
-async function arrived() { for (let i = 0; i < 60 && $('.onb-arrival'); i++) await settle(100) }
-// Tops as the eye reads them, once the answers' entrance has landed.
-const rowsOf = els => new Set(els.map(el => Math.round(box(el).top / 4)))
+// Since plan 247 the stops are the kana, a reader's level and the card,
+// and the card is the last screen: its gate issues it.
 
-/** From the name to the level list, kana both. */
-async function toLevel() {
-  await pastName()
-  await pick('[data-motive="trip"]')
-  await next()
-  await pick('[data-kana="both"]')
-  await settle()
-  await pick('[data-how="pick"]')
-  await next()
-  expect(stepOf()).toBe('level')
-}
-/** From the level list, N3, to the hour. */
-async function toTime() {
-  await pick('[data-level="N3"]')
-  await next()          // → goal
-  await next()          // → lines
-  await next()          // → rhythm
-  await next()          // → time
-  expect(stepOf()).toBe('time')
-}
-const fits = el => el.scrollHeight <= el.clientHeight + 1
-
-describe('the boarding frame on the desk (P9, plans 140, 163)', () => {
-  it('draws the journey as a strip at the floor\'s left end, a stop per question, and keeps it to the plan', async () => {
+describe('the boarding frame on the desk (P9, plans 140, 163, 247)', () => {
+  it('draws the journey as a strip at the floor\'s left end, a stop per question, and keeps it to the card', async () => {
     const onComplete = vi.fn()
     await board({ onComplete })
     expect($('main.brd').className).toBe('brd desk-brd')
@@ -271,116 +249,93 @@ describe('the boarding frame on the desk (P9, plans 140, 163)', () => {
     expect($('.brd__head')).toBeNull()
     expect($('.brd__track')).toBeNull()
     expect(side()).toBeNull()
+    // The reveal is the kana's own stop; the level joins once both are read.
+    expect(stops()).toEqual(['kana', 'card'])
+    await toLevel()
+    expect(stops()).toEqual(['kana', 'level', 'card'])
     await settle(600)
     // On the floor's line, at its left end, clear of the way back.
     const at = box(strip())
     expect(Math.abs(cy(at) - cy(box(inCar('[data-action="continue"]'))))).toBeLessThan(1.5)
     expect(Math.round(at.left)).toBe(Math.round(box(inCar('.brd__q')).left))
-    expect(at.right).toBeLessThan(box(inCar('[data-action="back"]')).left)
-    // The reveal is the kana's own stop; the level joins once both are read.
-    expect(stops()).toEqual(['name', 'why', 'kana', 'goal', 'lines', 'rhythm', 'time'])
-    await toLevel()
-    expect(stops()).toEqual(['name', 'why', 'kana', 'level', 'goal', 'lines', 'rhythm', 'time'])
-    await toTime()
-    await next()
-    // No Building: the hour goes straight to the plan, under the arrival.
-    expect(stepOf()).toBe('plan')
-    expect($('.brd-build__track')).toBeNull()
-    // The strip stays, every stop ridden and none a door any more.
-    expect(stops().map(stateOf).every(s => s === 'done')).toBe(true)
-    expect(strip().querySelector('button.desk-brd__sp-door')).toBeNull()
-    expect(strip().querySelector('[aria-current]')).toBeNull()
-    expect($('.onb-arrival')).not.toBeNull()
-    // The key that skips the arrival is the arrival's alone.
-    await enter()
-    await settle()
-    expect(stepOf()).toBe('plan')
-    expect($('.onb-arrival')).toBeNull()
-    // The plan is the last screen: Enter the station posts the contract.
-    const go = inCar('[data-action="enter"]')
-    expect([en.brdEnter, fr.brdEnter]).toContain(go.querySelector('.btn-depart__jp').textContent)
-    expect(go.getAttribute('aria-keyshortcuts')).toBe('Enter')
+    expect(at.right).toBeLessThan(box(inCar('[data-action="level-test"]')).left)
+    await toCard()
+    // The strip stays, the questions behind the card doors back to them.
+    expect(stops().map(stateOf)).toEqual(['done', 'done', 'now'])
+    expect(doorOf('kana')).not.toBeNull()
+    expect(doorOf('level')).not.toBeNull()
+    expect(doorOf('card')).toBeNull()
+    // The card is the last screen: its gate posts the contract.
+    const go = inCar('[data-action="issue"]')
+    expect([en.brdIssue, fr.brdIssue]).toContain(go.querySelector('.btn-depart__jp').textContent)
     await enter()
     await settle()
     expect(apiJsonWithTimeout).toHaveBeenCalledWith('/api/onboarding/complete', expect.anything(), expect.anything())
     expect(onComplete).toHaveBeenCalledTimes(1)
     // The kana answer goes with it: App decides the first ride on it.
     expect(onComplete).toHaveBeenCalledWith({ kanaKnown: 'both' })
-    expect(stepOf()).toBe('plan')
+    expect(stepOf()).toBe('card')
   })
 
   it('says each answer on its stop, the pick as it stands, and lights the one asked', async () => {
     await board()
-    expect(stops().map(stateOf)).toEqual(['now', 'next', 'next', 'next', 'next', 'next', 'next'])
-    expect(stop('name').getAttribute('aria-current')).toBe('step')
-    expect(valueOf('name')).toBe('Tester')
-    // Said, not printed: a pointer's title and the stop's read-out name.
-    expect(stop('name').querySelector('.desk-brd__sp-door').title).toMatch(/· Tester$/)
-    await pastName()
-    expect(stateOf('name')).toBe('done')
-    expect(stateOf('why')).toBe('now')
-    expect(valueOf('why')).toBeNull()
-    await pick('[data-motive="trip"]')
-    // Said before Continue: the answer's stop reads it at once.
-    expect([en.brdMotive.trip, fr.brdMotive.trip]).toContain(valueOf('why'))
-    await next()
-    await pick('[data-kana="both"]')
-    await settle()
-    await pick('[data-how="pick"]')
-    await next()
+    expect(stops().map(stateOf)).toEqual(['now', 'next'])
+    expect(stop('kana').getAttribute('aria-current')).toBe('step')
+    expect(valueOf('kana')).toBeNull()
+    await toLevel()
     expect(stateOf('kana')).toBe('done')
+    expect([en.brdKana.both, fr.brdKana.both]).toContain(valueOf('kana'))
+    // Said, not printed: a pointer's title and the stop's read-out name.
+    expect(stop('kana').querySelector('.desk-brd__sp-door').title).toMatch(/ · /)
     expect(stateOf('level')).toBe('now')
+    expect(valueOf('level')).toBeNull()
     await pick('[data-level="N3"]')
+    // Said before Continue: the answer's stop reads it at once.
     expect(valueOf('level')).toBe('N3')
-    // A stop ahead says nothing, even one the draft already prices.
-    expect(stateOf('goal')).toBe('next')
-    expect(valueOf('goal')).toBeNull()
+    // A stop ahead says nothing.
+    expect(stateOf('card')).toBe('next')
+    expect(valueOf('card')).toBeNull()
     await next()
-    expect(stepOf()).toBe('goal')
-    // Continue committed what the draft priced.
-    expect(inCar('[data-goal="N2"]').getAttribute('aria-pressed')).toBe('true')
-    expect(valueOf('goal')).toBe('N3 → N2')
-    await pick('[data-goal="N1"]')
-    expect(valueOf('goal')).toBe('N3 → N1')
-    await next()
-    expect(stateOf('goal')).toBe('done')
-    expect(stateOf('lines')).toBe('now')
-    expect(valueOf('lines')).toMatch(/·/)
-    await next()
-    expect(stateOf('rhythm')).toBe('now')
-    await pick('[data-rhythm="20"]')
-    expect(valueOf('rhythm')).toMatch(/^20 /)
-    await next()
-    expect(valueOf('time')).toMatch(/^\d\d:\d\d$/)
+    expect(stateOf('level')).toBe('done')
+    expect(stateOf('card')).toBe('now')
   })
 
   it('opens a passed stop\'s question in one pull, every answer kept', async () => {
     await board()
     await toLevel()
-    await pick('[data-level="N3"]')
-    await next()
-    expect(stepOf()).toBe('goal')
-    // Doors on the stops behind, none on the one asked or ahead.
-    for (const key of ['name', 'why', 'kana', 'level']) expect(doorOf(key), key).not.toBeNull()
-    for (const key of ['goal', 'lines', 'rhythm', 'time']) expect(doorOf(key), key).toBeNull()
-    doorOf('why').click()
+    await toCard('N3')
+    doorOf('kana').click()
     await settle()
-    expect(stepOf()).toBe('why')
-    expect(inCar('[data-motive="trip"]').getAttribute('aria-pressed')).toBe('true')
-    expect(stateOf('why')).toBe('now')
-    // The way on is the way it was, the answers after it kept.
-    await next()
     expect(stepOf()).toBe('kana')
     expect(inCar('[data-kana="both"]').getAttribute('aria-pressed')).toBe('true')
+    expect(stateOf('kana')).toBe('now')
+    // The way on is the way it was, the answers after it kept.
+    await pick('[data-kana="both"]')
+    await settle()
+    expect(stepOf()).toBe('level')
+    expect(inCar('[data-level="N3"]').getAttribute('aria-pressed')).toBe('true')
+    await next()
+    expect(stepOf()).toBe('card')
+    // The card's origin is a door back to the question that set it.
+    inCar('[data-door="level"]').click()
+    await settle()
+    expect(stepOf()).toBe('level')
+    expect(inCar('[data-level="N3"]').getAttribute('aria-pressed')).toBe('true')
     // ‹ on the floor goes back one question, as it always did.
     inCar('[data-action="back"]').click()
     await settle()
-    expect(stepOf()).toBe('why')
+    expect(stepOf()).toBe('kana')
   })
 
   it('stands Back beside Continue in the bottom-right corner, and leaves from the first question', async () => {
     const onExit = vi.fn()
     await board({ onExit })
+    await settle(600)
+    // The kana: the way back on a floor of its own, out of the boarding.
+    const out = inCar('.desk-brd__floor [data-action="back"]')
+    expect(out).not.toBeNull()
+    expect(inCar('.btn-depart')).toBeNull()
+    await toLevel()
     await settle(600)
     const floor = inCar('.desk-brd__floor')
     const back = floor.querySelector('[data-action="back"]')
@@ -392,19 +347,23 @@ describe('the boarding frame on the desk (P9, plans 140, 163)', () => {
     expect(Math.round(window.innerHeight - box(go).bottom)).toBe(28)
     expect([en.back, fr.back]).toContain(back.textContent)
     back.click()
+    await settle()
+    expect(stepOf()).toBe('kana')
+    inCar('[data-action="back"]').click()
     expect(onExit).toHaveBeenCalledTimes(1)
   })
 
   it('sets the question in the top-left corner and its answers in the paper under it', async () => {
     await board()
-    // The name at the card's width, for a name at the display size.
-    expect(Math.round(box(inCar('.brd-field')).width)).toBe(640)
-    await pastName()
-    await pick('[data-motive="trip"]')
     // Measured once the answers' entrance has landed (brd-in, 6px).
     await settle(900)
+    // The kana's four answers on one row, under the words, and the way
+    // back on a floor of its own: no Continue there to stand beside.
+    expect(rowsOf([...inCar('.brd-grid').children]).size).toBe(1)
+    await toLevel()
+    await settle(900)
     const q = box(inCar('.brd__q'))
-    const roads = box(inCar('.desk-brd__roads'))
+    const climb = box(inCar('.desk-brd__climb'))
     const foot = box(inCar('.brd__foot'))
     // The question at the corner, --sp-7 and --sp-6 under the window's
     // top, set left -- and at the display rung: 1100x800 is no short step.
@@ -412,99 +371,14 @@ describe('the boarding frame on the desk (P9, plans 140, 163)', () => {
     expect(Math.round(q.top)).toBe(50)
     expect(getComputedStyle(inCar('.brd__q')).fontSize).toBe('40px')
     expect(getComputedStyle(inCar('.brd__q')).textAlign).toBe('start')
-    // The answers centred across the paper, between the question and the
-    // floor, a rung (--sp-6) at least under the question.
-    expect(Math.abs(mid(roads) - bodyW() / 2)).toBeLessThan(1.5)
-    expect(roads.top - q.bottom).toBeGreaterThanOrEqual(21.5)
-    expect(roads.bottom).toBeLessThan(foot.top)
-    await next()
-    await settle(900)
-    // The kana's four answers on one row, under the card, and the way
-    // back on a floor of its own: no Continue there to stand beside.
-    expect(rowsOf([...inCar('.brd-grid').children]).size).toBe(1)
-    expect(inCar('.desk-brd__floor [data-action="back"]')).not.toBeNull()
-    expect(inCar('.btn-depart')).toBeNull()
-  })
-
-  it('sets the name on its plate over the question\'s hub, the line leaving it for the next stop', async () => {
-    await board()
-    await settle(600)
-    const field = box(inCar('.brd-field'))
-    // The letters the name has left, at the plate's end.
-    expect(inCar('.desk-brd__plate-count').textContent).toBe('6 / 20')
-    await userEvent.keyboard('X')
-    expect(inCar('.desk-brd__plate-count').textContent).toBe('7 / 20')
-    // Set in from the question, the hub under the plate's left end.
-    expect(field.left).toBeGreaterThan(box(inCar('.brd__q')).left)
-    const hub = inCar('.desk-brd__hub--pole')
-    expect(hub.textContent).toBe('01')
-    expect(Math.abs(mid(box(hub)) - (field.left + 40))).toBeLessThan(1)
-    expect(box(hub).top).toBeGreaterThan(field.bottom)
-    // The next stop down the line, named.
-    const nextStop = inCar('.desk-brd__name-next')
-    expect([en.brdStop.why, fr.brdStop.why]).toContain(nextStop.textContent)
-    expect(box(nextStop).left).toBeGreaterThan(field.right)
-  })
-
-  it('draws the six reasons as roads out of the question\'s hub, the pick\'s road lit', async () => {
-    await board()
-    await pastName()
-    await settle(900)
-    const roads = inCar('.desk-brd__roads')
-    const hub = roads.querySelector('.desk-brd__hub')
-    // The hub prints the question's place on the strip, in the paper's middle.
-    expect(hub.textContent).toBe('02')
-    expect(Math.abs(mid(box(hub)) - bodyW() / 2)).toBeLessThan(1.5)
-    const ways = [...roads.querySelectorAll('.desk-brd__way')]
-    expect(ways.map(w => w.dataset.motive)).toEqual(['studies', 'fun', 'trip', 'live', 'friends', 'other'])
-    // A road from the hub's centre to each reason's ring, drawn on the
-    // map's own figures -- out of 100 across it and down it.
-    const map = box(roads.querySelector('.desk-brd__map'))
-    const at = (x, y) => [map.left + (Number(x) / 100) * map.width, map.top + (Number(y) / 100) * map.height]
-    const ends = [...roads.querySelectorAll('.desk-brd__road')].map(l => ({
-      start: at(l.getAttribute('x1'), l.getAttribute('y1')),
-      end: at(l.getAttribute('x2'), l.getAttribute('y2')),
-      on: l.classList.contains('desk-brd__road--on'),
-    }))
-    expect(ends).toHaveLength(6)
-    const near = ([x, y], r) => Math.abs(x - mid(r)) < 1 && Math.abs(y - cy(r)) < 1
-    for (const e of ends) expect(near(e.start, box(hub))).toBe(true)
-    const rings = ways.map(w => box(w.querySelector('.desk-brd__ring')))
-    rings.forEach((r, i) => expect(ends.some(e => near(e.end, r)), ways[i].dataset.motive).toBe(true))
-    // Clockwise from the top left, in the order the digits pick them.
-    const angles = rings.map(r => Math.atan2(cy(r) - cy(box(hub)), mid(r) - mid(box(hub))))
-    expect([...angles].sort((a, b) => a - b)).toEqual(angles)
-    expect(angles[0]).toBeLessThan(-Math.PI / 2)
-    // Each whole on the paper, under the question and over the floor, and
-    // none on another or on the hub.
-    const q = box(inCar('.brd__q'))
-    const floor = box(inCar('.brd__foot'))
-    const boxes = ways.map(box)
-    const apart = (a, b) => a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top
-    boxes.forEach((b, i) => {
-      const name = ways[i].dataset.motive
-      expect(b.left, name).toBeGreaterThanOrEqual(q.left - 0.5)
-      expect(b.right, name).toBeLessThanOrEqual(bodyW() - q.left + 0.5)
-      expect(b.top, name).toBeGreaterThan(q.bottom)
-      expect(b.bottom, name).toBeLessThan(floor.top)
-      expect(apart(b, box(hub)), name).toBe(true)
-      boxes.forEach((o, j) => { if (j > i) expect(apart(b, o), `${name}/${ways[j].dataset.motive}`).toBe(true) })
-    })
-    // A pick lights its own road, and only its own.
-    expect(ends.some(e => e.on)).toBe(false)
-    await pick('[data-motive="live"]')
-    const lit = [...roads.querySelectorAll('.desk-brd__road--on')]
-    expect(lit).toHaveLength(1)
-    expect(near(at(lit[0].getAttribute('x2'), lit[0].getAttribute('y2')), rings[3])).toBe(true)
-    expect(inCar('[data-motive="live"]').getAttribute('aria-pressed')).toBe('true')
-    expect(kbdOf(inCar('[data-motive="live"]'))).toBe('4')
+    // The answers across the paper, between the question and the floor.
+    expect(Math.abs(mid(climb) - bodyW() / 2)).toBeLessThan(1.5)
+    expect(climb.top).toBeGreaterThan(box(inCar('.brd__hint')).bottom)
+    expect(climb.bottom).toBeLessThan(foot.top)
   })
 
   it('hangs the kana\'s four answers from the two words, each drawn as what it reads', async () => {
     await board()
-    await pastName()
-    await pick('[data-motive="trip"]')
-    await next()
     await settle(900)
     expect(stepOf()).toBe('kana')
     expect([en.brdKanaHint, fr.brdKanaHint]).toContain(inCar('.brd__hint').textContent)
@@ -546,9 +420,6 @@ describe('the boarding frame on the desk (P9, plans 140, 163)', () => {
 
   it('reads the two words out sign by sign, and names the first stop and its day', async () => {
     await board()
-    await pastName()
-    await pick('[data-motive="trip"]')
-    await next()
     await pick('[data-kana="hiragana"]')
     await settle(900)
     expect(stepOf()).toBe('reveal')
@@ -572,21 +443,21 @@ describe('the boarding frame on the desk (P9, plans 140, 163)', () => {
     expect(fits(inCar('.brd__body'))).toBe(true)
   })
 
-  it('draws the level and the goal as the line climbing from the hub, the pick hung with its callout', async () => {
+  it('draws the level as the line climbing from the hub, the pick hung with its callout, and the goal\'s sheet riding on from it', async () => {
     await board()
     await toLevel()
     await settle(900)
     const climb = () => inCar('.desk-brd__climb')
-    const stops = () => [...climb().querySelectorAll('.desk-brd__stop')]
+    const stations = () => [...climb().querySelectorAll('.desk-brd__stop')]
     const ring = el => box(el.querySelector('.desk-brd__stop-ring'))
-    const stateOf = el => el.className.match(/desk-brd__stop--(\w+)/)?.[1] ?? null
+    const stationOf = el => el.className.match(/desk-brd__stop--(\w+)/)?.[1] ?? null
     expect([en.brdLevelHint, fr.brdLevelHint]).toContain(inCar('.brd__hint').textContent)
-    expect(stops().map(s => s.dataset.level)).toEqual(['novice', 'N5', 'N4', 'N3', 'N2', 'N1'])
+    expect(stations().map(s => s.dataset.level)).toEqual(['novice', 'N5', 'N4', 'N3', 'N2', 'N1'])
     // A step up and to the right a level, from the hub at the line's foot,
     // which prints the question's place on the strip.
     const hub = climb().querySelector('.desk-brd__hub')
-    expect(hub.textContent).toBe('04')
-    const rings = stops().map(ring)
+    expect(hub.textContent).toBe('02')
+    const rings = stations().map(ring)
     ;[box(hub), ...rings].reduce((before, r) => {
       expect(mid(r)).toBeGreaterThan(mid(before))
       expect(cy(r)).toBeLessThan(cy(before))
@@ -595,10 +466,10 @@ describe('the boarding frame on the desk (P9, plans 140, 163)', () => {
     // Each stop's name and holdings under its ring, clear of the next
     // stop's, and the whole line on the paper, over the floor.
     const q = box(inCar('.brd__q'))
-    const labels = stops().map(s => box(s.querySelector('.desk-brd__stop-lab')))
+    const labels = stations().map(s => box(s.querySelector('.desk-brd__stop-lab')))
     labels.forEach((l, i) => {
-      expect(l.top, stops()[i].dataset.level).toBeGreaterThan(rings[i].bottom)
-      if (i < labels.length - 1) expect(l.right, stops()[i].dataset.level).toBeLessThanOrEqual(labels[i + 1].left)
+      expect(l.top, stations()[i].dataset.level).toBeGreaterThan(rings[i].bottom)
+      if (i < labels.length - 1) expect(l.right, stations()[i].dataset.level).toBeLessThanOrEqual(labels[i + 1].left)
       expect(l.right).toBeLessThanOrEqual(bodyW() - q.left + 0.5)
       expect(l.bottom).toBeLessThan(box(inCar('.brd__foot')).top)
     })
@@ -608,7 +479,7 @@ describe('the boarding frame on the desk (P9, plans 140, 163)', () => {
     // The pick: the stops behind it filled, the line inked up to it, and
     // "You are here" hung over its ring.
     await pick('[data-level="N4"]')
-    expect(stops().map(stateOf)).toEqual(['known', 'known', 'on', null, null, null])
+    expect(stations().map(stationOf)).toEqual(['known', 'known', 'on', null, null, null])
     expect(inCar('[data-level="N4"]').getAttribute('aria-pressed')).toBe('true')
     expect(climb().querySelectorAll('.desk-brd__rail--known')).toHaveLength(1)
     const call = inCar('.desk-brd__call')
@@ -616,184 +487,154 @@ describe('the boarding frame on the desk (P9, plans 140, 163)', () => {
     expect(call.querySelector('.desk-brd__call-fig').textContent).toBe('N4')
     expect(Math.abs(mid(box(call)) - mid(ring(inCar('[data-level="N4"]'))))).toBeLessThan(1)
     expect(box(call).bottom).toBeLessThan(ring(inCar('[data-level="N4"]')).top)
-    // The goal: the same line, the stops behind the learner inked and no
-    // longer answers, the next one tagged; the ride to the pick in gold,
-    // and the arrival's month over it.
+    // The goal, the card's destination: the stops ahead, the hardest on
+    // top, where the learner stands under them and no answer; the next
+    // one is the card's to begin with, each priced with its day.
     await next()
-    await settle(900)
-    expect(stepOf()).toBe('goal')
-    expect(climb().querySelector('.desk-brd__hub').textContent).toBe('05')
-    expect(stops().map(s => s.dataset.goal ?? null)).toEqual([null, null, null, 'N3', 'N2', 'N1'])
-    expect(stops().slice(0, 3).every(s => s.tagName === 'SPAN' && stateOf(s) === 'known')).toBe(true)
-    expect([en.brdNextStop, fr.brdNextStop]).toContain(inCar('[data-goal="N3"] .brd-tag').textContent)
-    await pick('[data-goal="N2"]')
-    expect(stops().map(stateOf)).toEqual(['known', 'known', 'known', 'ride', 'on', null])
-    expect(climb().querySelectorAll('.desk-brd__rail--ride')).toHaveLength(1)
-    const arrive = inCar('.desk-brd__call')
-    expect([en.statusArrival, fr.statusArrival]).toContain(arrive.querySelector('.desk-brd__call-cap').textContent)
-    expect(arrive.querySelector('.desk-brd__call-fig').textContent).toMatch(/20\d\d/)
+    expect(inCar('[data-door="destination"] .pcb__code').textContent).toBe('N3')
+    await door('destination')
+    const goals = () => [...sheet().querySelectorAll('.brd-goal')]
+    expect([...sheet().querySelectorAll('[data-goal]')].map(g => g.dataset.goal)).toEqual(['N1', 'N2', 'N3'])
+    expect(goals().at(-1).classList.contains('brd-goal--here')).toBe(true)
+    expect(goals().at(-1).tagName).toBe('SPAN')
+    expect(inSheet('[data-goal="N3"]').getAttribute('aria-pressed')).toBe('true')
+    for (const g of sheet().querySelectorAll('[data-goal] .brd-goal__date')) expect(g.textContent).toMatch(/20\d\d/)
+    // A pick shuts the sheet and reprints the card; open again, the ride
+    // runs in gold from where the learner stands to it.
+    inSheet('[data-goal="N2"]').click()
+    await settle(300)
+    expect(sheet()).toBeNull()
+    expect(inCar('[data-door="destination"] .pcb__code').textContent).toBe('N2')
+    await door('destination')
+    expect(goals().map(g => g.className.match(/brd-goal--(\w+)/)?.[1] ?? null)).toEqual([null, 'on', 'ride', 'here'])
+    expect(inSheet('.brd-goals__ride')).not.toBeNull()
   })
 
-  it('draws a learner short of the kana riding from the hub, the novice\'s stop the next', async () => {
+  it('rides a learner short of the kana from 初, the novice\'s own stop among the goals', async () => {
     await board()
-    await pastName()
-    await pick('[data-motive="trip"]')
-    await next()
     await pick('[data-kana="none"]')
     await settle()
+    expect(stepOf()).toBe('reveal')
     await next()
-    await settle(900)
-    expect(stepOf()).toBe('goal')
-    const stops = [...inCar('.desk-brd__climb').querySelectorAll('.desk-brd__stop')]
-    // Every stop ahead, the novice's own first: all six are answers.
-    expect(stops.map(s => s.dataset.goal)).toEqual(['novice', 'N5', 'N4', 'N3', 'N2', 'N1'])
-    expect(inCar('.desk-brd__rail--known')).toBeNull()
-    await pick('[data-goal="N5"]')
-    expect(stops.map(s => s.className.match(/desk-brd__stop--(\w+)/)?.[1] ?? null)).toEqual(['ride', 'on', null, null, null, null])
-    expect(inCar('.desk-brd__climb').querySelectorAll('.desk-brd__rail--ride')).toHaveLength(1)
+    await settle(600)
+    expect(stepOf()).toBe('card')
+    // From 初 -- the novice has passed no stop -- to the first stop ahead.
+    const from = inCar('[data-door="level"] .pcb__code')
+    expect(from.textContent).toBe('初')
+    expect(from.getAttribute('lang')).toBe('ja')
+    expect(inCar('[data-door="destination"] .pcb__code').textContent).toBe('N5')
+    await door('destination')
+    // Every stop ahead, the novice's own last: all six are answers, and
+    // none is where the learner stands.
+    expect([...sheet().querySelectorAll('[data-goal]')].map(g => g.dataset.goal)).toEqual(['N1', 'N2', 'N3', 'N4', 'N5', 'novice'])
+    expect(inSheet('.brd-goal--here')).toBeNull()
+    inSheet('[data-goal="novice"]').click()
+    await settle(300)
+    // The kana's own stop, printed in its sign.
+    expect(inCar('[data-door="destination"] .pcb__code').textContent).toBe('あ')
+    // The kana are on every ticket: the lines' sheet says so, locked.
+    await door('lines')
+    expect(inSheet('.brd-lines__kana')).not.toBeNull()
   })
 
-  it('fits every question in a laptop\'s window, in French, with no scroll', async () => {
-    await board()
-    await pastName()
-    await pick('[data-motive="trip"]')
-    const check = async () => {
-      await settle(900)
-      expect(fits(inCar('.brd__body')), stepOf()).toBe(true)
-      expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
-      expect(box(inCar('.brd__foot')).bottom).toBeLessThanOrEqual(window.innerHeight)
-      // The strip and the floor share their line and never meet.
-      expect(box(strip()).right, `${stepOf()}: the strip`).toBeLessThan(box(inCar('.brd__foot button')).left)
-      const go = inCar('.brd__foot .btn-depart')
-      if (go) expect(go.scrollWidth, `${stepOf()}: Continue`).toBeLessThanOrEqual(go.clientWidth)
+  it('fits every question, the card and its sheets in a laptop\'s window, in French, with no scroll', async () => {
+    localStorage.setItem('lang', 'fr')
+    try {
+      await board({ guest: true })
+      const check = async () => {
+        await settle(900)
+        expect(fits(inCar('.brd__body')), stepOf()).toBe(true)
+        expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
+        expect(box(inCar('.brd__foot')).bottom).toBeLessThanOrEqual(window.innerHeight)
+        // The strip and the floor share their line and never meet.
+        expect(box(strip()).right, `${stepOf()}: the strip`).toBeLessThan(box(inCar('.brd__foot button')).left)
+        const go = inCar('.brd__foot .btn-depart')
+        if (go) expect(go.scrollWidth, `${stepOf()}: Continue`).toBeLessThanOrEqual(go.clientWidth)
+      }
+      const checkSheet = async (open, kind) => {
+        inCar(open).click()
+        await settle(500)
+        const at = $(`.brd-sheet--${kind}`)
+        expect(at, kind).not.toBeNull()
+        expect(fits(at), kind).toBe(true)
+        expect(box(at).bottom, kind).toBeLessThanOrEqual(window.innerHeight)
+        await shut()
+      }
+      await check()       // kana
+      await toLevel()
+      await check()       // level
+      await toCard('N5')
+      await check()       // card
+      await checkSheet('[data-door="destination"]', 'goal')
+      await checkSheet('[data-door="service"]', 'rhythm')
+      await checkSheet('[data-door="hour"]', 'hour')
+      await checkSheet('[data-door="lines"]', 'lines')
+      await checkSheet('[data-door="name"]', 'name')
+      await checkSheet('[data-action="keep"]', 'account')
+    } finally {
+      localStorage.removeItem('lang')
     }
-    await check()
-    await next()
-    await pick('[data-kana="both"]')
-    await settle()
-    await pick('[data-how="pick"]')
-    await next()
-    await check()       // level
-    await pick('[data-level="N5"]')
-    await next()
-    await check()       // goal
-    await next()
-    await check()       // lines, all three on their stop
-    await next()
-    await check()       // rhythm
-    await next()
-    await check()       // time
   })
 
-  it('draws the plan as the ride to scale, what the terminus holds beside what it is for', async () => {
-    await board()
+  it('stands the card in the paper\'s middle under its question, its gate in the floor\'s corner', async () => {
+    await board({ guest: true })
     await toLevel()
-    await toTime()
-    await next()
+    await toCard('N3')
     await settle(900)
-    expect(stepOf()).toBe('plan')
-    const halts = [...inCar('.desk-brd__route').children]
-    const ring = h => box(h.querySelector('.desk-brd__halt-ring'))
-    // From the crossroads to the terminus, left to right, on one line.
-    expect(halts[0].classList.contains('desk-brd__halt--start')).toBe(true)
-    expect(halts[0].querySelector('.mark')).not.toBeNull()
-    expect(halts.at(-1).classList.contains('desk-brd__halt--end')).toBe(true)
-    halts.map(ring).reduce((a, b) => { expect(mid(b)).toBeGreaterThan(mid(a)); return b })
-    expect(new Set(halts.map(h => Math.round(cy(ring(h))))).size).toBe(1)
-    // A reader of both scripts has no kana stop; the terminus is the goal
-    // (N3's next, N2) and its date.
-    expect(inCar('.desk-brd__halt--kana')).toBeNull()
-    expect(halts.at(-1).querySelector('.desk-brd__halt-ring').textContent).toBe('N2')
-    expect(halts.at(-1).querySelector('.desk-brd__halt-date').textContent).toMatch(/20\d\d/)
-    // Every stop's name clear of the next one's.
-    const names = halts.map(h => box(h.querySelector('.desk-brd__halt-name')))
-    names.reduce((a, b) => { expect(b.left).toBeGreaterThan(a.right); return b })
-    // Under the rule: each line's figure at the terminus, the trip's two
-    // promises beside them.
-    expect([...inCar('.desk-brd__held-list').children].map(i => i.dataset.line)).toEqual(['vocab', 'kanji', 'grammar'])
-    expect(inCar('.desk-brd__for-list').children).toHaveLength(2)
-    expect(box(inCar('.desk-brd__held')).right).toBeLessThan(box(inCar('.desk-brd__for')).left)
-    expect(fits(inCar('.brd__body'))).toBe(true)
-    expect(box(inCar('.brd__foot')).bottom).toBeLessThanOrEqual(window.innerHeight)
-    // Its one action at a ticket's width, in the floor's corner.
-    const go = box(inCar('[data-action="enter"]'))
+    const q = box(inCar('.brd__q'))
+    expect(Math.round(q.left)).toBe(Math.round(box(strip()).left))
+    const card = box(inCar('.brd-card .pcard'))
+    expect(Math.abs(mid(card) - bodyW() / 2)).toBeLessThan(1.5)
+    expect(card.top).toBeGreaterThan(box(inCar('.brd__hint')).bottom)
+    // Every field of the print a door, named for a screen reader.
+    expect([...inCar('.brd-card').querySelectorAll('[data-door]')].map(d => d.dataset.door))
+      .toEqual(['level', 'destination', 'service', 'hour', 'lines', 'name'])
+    for (const d of inCar('.brd-card').querySelectorAll('[data-door]')) expect(d.getAttribute('aria-label'), d.dataset.door).toBeTruthy()
+    // Under it, where it lives -- this device -- and the way to keep it.
+    expect(inCar('.brd-keep-line').dataset.kept).toBe('device')
+    expect(box(inCar('.brd-keep-line')).top).toBeGreaterThan(card.bottom)
+    // Its one action at a ticket's width, in the floor's corner, and no
+    // way back beside it: the card is an arrival.
+    const go = box(inCar('[data-action="issue"]'))
     expect(Math.round(go.width)).toBe(360)
     expect(Math.round(bodyW() - go.right)).toBe(Math.round(box(strip()).left))
+    expect(inCar('[data-action="back"]')).toBeNull()
+    expect(fits(inCar('.brd__body'))).toBe(true)
   })
 
-  it('stops the plan at the kana for a learner who reads neither script yet', async () => {
-    await board()
-    await pastName()
-    await pick('[data-motive="trip"]')
-    await next()
-    await pick('[data-kana="none"]')
-    await settle()
-    await next()          // → goal, N5 picked
-    await next()          // → lines
-    await next()          // → rhythm
-    await next()          // → time
-    await next()          // → plan
-    await settle(900)
-    expect(stepOf()).toBe('plan')
-    const halts = [...inCar('.desk-brd__route').children]
-    expect(halts.map(h => h.className.match(/desk-brd__halt--(\w+)/)[1])).toEqual(['start', 'kana', 'by', 'by', 'end'])
-    expect(halts[1].querySelector('.desk-brd__halt-ring').textContent).toBe('あ')
-    const names = halts.map(h => box(h.querySelector('.desk-brd__halt-name')))
-    names.reduce((a, b) => { expect(b.left).toBeGreaterThan(a.right); return b })
-  })
-
-  it('says on the plan why the office refused the contract, and stays', async () => {
+  it('says on the card why the office refused the contract, and stays', async () => {
     const onComplete = vi.fn()
     apiJsonWithTimeout.mockImplementation(async () => { throw new ApiError('refused') })
     await board({ onComplete })
     await toLevel()
-    await toTime()
-    await next()
-    await arrived()
-    inCar('[data-action="enter"]').click()
+    await toCard()
+    inCar('[data-action="issue"]').click()
     await settle()
     expect(onComplete).not.toHaveBeenCalled()
     expect(inCar('.brd__error').dataset.error).toBe('refused')
-    expect(stepOf()).toBe('plan')
+    expect(stepOf()).toBe('card')
   })
 
-  it('offers the account to a guest after the plan, and enters from there', async () => {
+  it('offers to keep a guest\'s card under it, and issues it from there', async () => {
     const onComplete = vi.fn()
     await board({ onComplete, guest: true })
     await toLevel()
-    await toTime()
-    await next()
-    await arrived()
-    // Not the last screen for a guest: the account is offered first.
-    expect(inCar('[data-action="enter"]')).toBeNull()
-    await next()
-    expect(stepOf()).toBe('account')
-    expect(stops().map(stateOf).every(s => s === 'done')).toBe(true)
-    await settle(900)
-    // The form on the left, the ticket it keeps on the right: the holder,
-    // the ride's terminus and its day, the welcome on the stub.
-    const form = box(inCar('.desk-brd__form'))
-    const ticket = inCar('.desk-brd__tkt')
-    expect(form.right).toBeLessThan(box(ticket).left)
-    expect(ticket.querySelector('.desk-brd__tkt-name').textContent).toBe('Tester')
-    expect(ticket.querySelector('.desk-brd__tkt-stop--end .desk-brd__tkt-dot').textContent).toBe('N2')
-    expect(ticket.querySelector('.desk-brd__tkt-bal').textContent).toBe('200')
-    expect([en.brdCreditsOffered, fr.brdCreditsOffered]).toContain(ticket.querySelector('.desk-brd__tkt-sub').textContent)
-    // Every term whole on the ticket.
-    for (const dd of ticket.querySelectorAll('.desk-brd__tkt-term > dd')) {
-      expect(dd.scrollWidth).toBeLessThanOrEqual(dd.clientWidth + 1)
-    }
-    // Riding on without an account is offered under it, and the floor
-    // keeps its one filled action; signing in under the form.
-    expect(inCar('.desk-brd__tkt-note [data-action="account-skip"]')).not.toBeNull()
-    expect(inCar('.brd__foot [data-action="account-skip"]')).toBeNull()
-    expect(inCar('.desk-brd__form [data-action="account-sign-in"]')).not.toBeNull()
-    expect(fits(inCar('.brd__body'))).toBe(true)
-    inCar('[data-action="account-skip"]').click()
+    await toCard()
+    // The line under the card says it lives here, and opens the account.
+    inCar('[data-action="keep"]').click()
+    await settle(400)
+    expect($('.brd-sheet--account')).not.toBeNull()
+    expect(inSheet('.auth-provider')).not.toBeNull()
+    expect(inSheet('input[type="email"]')).not.toBeNull()
+    // Later rides on as a guest: the sheet shuts, and the card is issued.
+    inSheet('[data-action="account-later"]').click()
+    await settle(300)
+    expect(sheet()).toBeNull()
+    expect(inCar('.brd-keep-line').dataset.kept).toBe('device')
+    inCar('[data-action="issue"]').click()
     await settle()
     expect(apiJsonWithTimeout).toHaveBeenCalledWith('/api/onboarding/complete', expect.anything(), expect.anything())
     expect(onComplete).toHaveBeenCalledTimes(1)
-    expect(stepOf()).toBe('account')
   })
 })
 
@@ -982,9 +823,9 @@ describe('the front door on the desk (P10, plans 140, 163)', () => {
 })
 
 // ── P12 — the digits ──
-// A digit picks the answer that names it, printed on it: a motive by
-// its row, a level by its own number (the novice on 0), a kana answer
-// by its tile -- and a kana answer advances, as a tap does.
+// A digit picks the answer that names it, printed on it: a level by its
+// own number (the novice on 0), a kana answer by its tile -- and a kana
+// answer advances, as a tap does.
 const kbdOf = el => el?.querySelector('.desk-kbd')?.textContent ?? null
 // An AZERTY key a US layout has no key for (é, à): Playwright would
 // insert it as text with no keydown, so the keydown is dispatched from
@@ -992,42 +833,11 @@ const kbdOf = el => el?.querySelector('.desk-kbd')?.textContent ?? null
 const azerty = key => (document.activeElement ?? document.body)
   .dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }))
 describe('the digits at first contact (P12)', () => {
-  it('picks a motive by its row, on either keyboard row', async () => {
+  it('answers the kana by its tile and goes on, and picks a level by its own number, on either keyboard row', async () => {
     await board()
-    // Typed in the name field, a digit is the name's.
-    await userEvent.keyboard('2')
-    expect(inCar('.brd-field').value).toBe('Tester2')
-    await userEvent.keyboard('{Backspace}')
-    await pastName()
-    expect(kbdOf(inCar('[data-motive="fun"]'))).toBe('2')
-    await userEvent.keyboard('2')
-    expect(inCar('[data-motive="fun"]').getAttribute('aria-pressed')).toBe('true')
-    await userEvent.keyboard('&')
-    expect(inCar('[data-motive="studies"]').getAttribute('aria-pressed')).toBe('true')
-    azerty('é')
-    await settle(40)
-    expect(inCar('[data-motive="fun"]').getAttribute('aria-pressed')).toBe('true')
-  })
-
-  it('answers the kana by its tile and goes on, and picks a level by its own number', async () => {
-    await board()
-    await pastName()
-    await userEvent.keyboard('3')
-    await userEvent.keyboard('{Enter}')
-    await settle()
     expect(stepOf()).toBe('kana')
     expect(kbdOf(inCar('[data-kana="both"]'))).toBe('3')
     await userEvent.keyboard('3')
-    await settle()
-    // Choose it or find it (plan 224): a road each, picked by its number.
-    expect(stepOf()).toBe('levelHow')
-    expect(kbdOf(inCar('[data-how="pick"]'))).toBe('1')
-    expect(kbdOf(inCar('[data-how="test"]'))).toBe('2')
-    await userEvent.keyboard('2')
-    expect(inCar('[data-how="test"]').getAttribute('aria-pressed')).toBe('true')
-    await userEvent.keyboard('1')
-    expect(inCar('[data-how="pick"]').getAttribute('aria-pressed')).toBe('true')
-    await userEvent.keyboard('{Enter}')
     await settle()
     expect(stepOf()).toBe('level')
     expect(kbdOf(inCar('[data-level="N5"]'))).toBe('5')
@@ -1036,26 +846,31 @@ describe('the digits at first contact (P12)', () => {
     expect(inCar('[data-level="N5"]').getAttribute('aria-pressed')).toBe('true')
     await userEvent.keyboard('1')
     expect(inCar('[data-level="N1"]').getAttribute('aria-pressed')).toBe('true')
+    await userEvent.keyboard('&')
+    expect(inCar('[data-level="N1"]').getAttribute('aria-pressed')).toBe('true')
+    azerty('é')
+    await settle(40)
+    expect(inCar('[data-level="N2"]').getAttribute('aria-pressed')).toBe('true')
     azerty('à')
     await settle(40)
     expect(inCar('[data-level="novice"]').getAttribute('aria-pressed')).toBe('true')
     await userEvent.keyboard('{Enter}')
     await settle()
-    // The goal list names its stops the same way: N4 on 4.
-    expect(stepOf()).toBe('goal')
-    await userEvent.keyboard('4')
-    expect(inCar('[data-goal="N4"]').getAttribute('aria-pressed')).toBe('true')
+    // The card: no digit picks a field; its sheets are the pointer's and
+    // Enter's.
+    expect(stepOf()).toBe('card')
+    expect(inCar('[aria-keyshortcuts~="1"]')).toBeNull()
   })
 
   it('picks nothing under a dialog', async () => {
     await board()
-    await pastName()
+    await toLevel()
     const modal = document.createElement('div')
     modal.setAttribute('aria-modal', 'true')
     modal.dataset.probeModal = ''
     document.body.appendChild(modal)
     await userEvent.keyboard('1')
-    expect(inCar('[data-motive="studies"]').getAttribute('aria-pressed')).toBe('false')
+    expect(inCar('[data-level="N1"]').getAttribute('aria-pressed')).toBe('false')
   })
 })
 
@@ -1065,8 +880,8 @@ describe('the digits at first contact (P12)', () => {
 // bottom-right corner; the stop being asked is lit on the strip and the
 // light moves with the question; each answer's key turns over to its
 // check in one slot; the Welcome hands its paper to the wait with the
-// dots on one spot; the plan's arrival boards the paper; and a car is
-// not dropped before the one after it has landed.
+// dots on one spot; and a car is not dropped before the one after it
+// has landed. Since plan 247 the card's sheets keep the drawing too.
 const { default: AppLoading } = await import('./screens/AppLoading')
 const landed = () => settle(900)
 const centreY = r => (r.top + r.bottom) / 2
@@ -1081,45 +896,36 @@ const opacityIs = (of, value) => vi.waitFor(
 )
 
 describe('first contact, finished (P13, plan 155)', () => {
-  it('stands the way on where it stood, on every question', async () => {
+  it('stands the way on where it stood, on every question and on the card', async () => {
     await board()
     const floors = []
-    const read = async () => {
+    const read = async gate => {
       await landed()
-      const go = box(inCar('[data-action="continue"]'))
-      const back = box(inCar('[data-action="back"]'))
-      floors.push({ step: stepOf(), go: [Math.round(go.right), Math.round(go.top)], width: Math.round(go.width), gap: Math.round(go.left - back.right) })
+      const go = box(inCar(gate))
+      const back = inCar('[data-action="back"]')
+      floors.push({ step: stepOf(), go: [Math.round(go.right), Math.round(go.top)], width: Math.round(go.width), gap: back ? Math.round(go.left - box(back).right) : null })
     }
-    await read()                          // name
-    await pastName()
-    await pick('[data-motive="trip"]')
-    await read()                          // why, the six roads
-    await next()
-    await pick('[data-kana="both"]')
+    await pick('[data-kana="hiragana"]')
     await settle()
-    await pick('[data-how="pick"]')
-    await next()
+    await read('[data-action="continue"]')       // reveal
+    inCar('[data-action="back"]').click()
+    await settle()
+    await toLevel()
     await pick('[data-level="N3"]')
-    await read()                          // level, the canvas
+    await read('[data-action="continue"]')       // level, the test on its floor
     await next()
-    await read()                          // goal
-    await next()
-    await read()                          // lines
-    await next()
-    await read()                          // rhythm
-    await next()
-    await read()                          // time
-    expect(floors.map(f => f.step)).toEqual(['name', 'why', 'level', 'goal', 'lines', 'rhythm', 'time'])
-    // Continue's end and its top in the corner on every question, Back a
-    // rung before it. At 1100 the ticket gives some of its width to the
-    // strip, and a little more once both scripts are read and the level
-    // joins it -- never so much that its label wraps.
+    await read('[data-action="issue"]')          // card, the gate alone
+    expect(floors.map(f => f.step)).toEqual(['reveal', 'level', 'card'])
+    // Continue's end and its top in the corner on every screen, Back a
+    // rung before it where there is one. At 1100 the ticket gives some of
+    // its width to the strip -- never so much that its label wraps.
     for (const f of floors) {
       expect(f.go, f.step).toEqual(floors[0].go)
-      expect(f.gap, f.step).toBe(12)
+      if (f.gap != null) expect(f.gap, f.step).toBe(12)
       expect(f.width, f.step).toBeGreaterThanOrEqual(240)
       expect(f.width, f.step).toBeLessThanOrEqual(360)
     }
+    expect(floors[2].gap).toBeNull()
   })
 
   it('lights the stop being asked, and moves the light with the question', async () => {
@@ -1127,47 +933,31 @@ describe('first contact, finished (P13, plan 155)', () => {
     const lit = () => strip().querySelector('[aria-current="step"]')?.dataset.stop
     const ring = key => box(stop(key).querySelector('.desk-brd__sp-dot'))
     await landed()
-    expect(lit()).toBe('name')
+    expect(lit()).toBe('kana')
     // The lit stop's ring is the phone track's "here", larger than a dot.
-    expect(Math.round(ring('name').width)).toBe(16)
-    expect(Math.round(ring('why').width)).toBe(10)
-    await pastName()
+    expect(Math.round(ring('kana').width)).toBe(16)
+    expect(Math.round(ring('card').width)).toBe(10)
+    await toLevel()
     await landed()
-    expect(lit()).toBe('why')
-    expect(Math.round(ring('name').width)).toBe(10)
-    await pick('[data-motive="trip"]')
+    expect(lit()).toBe('level')
+    expect(Math.round(ring('kana').width)).toBe(10)
+    await pick('[data-level="N4"]')
     await next()
+    await landed()
+    expect(lit()).toBe('card')
+    doorOf('kana').click()
     await landed()
     expect(lit()).toBe('kana')
-    doorOf('name').click()
+    await pick('[data-kana="both"]')
     await landed()
-    expect(lit()).toBe('name')
-    await next()
-    await landed()
-    expect(lit()).toBe('why')
+    expect(lit()).toBe('level')
   })
 
   it('turns an answer\'s key over to its check, in one slot', async () => {
     await board()
-    await pastName()
     await landed()
-    const row = inCar('[data-motive="fun"]')
-    const key = () => row.querySelector('.desk-brd__key')
-    const tick = () => row.querySelector('.desk-brd__tick')
-    // One slot, beside a reason's name (the six roads, plan 163).
-    expect(row.querySelectorAll('.desk-kbd')).toHaveLength(1)
-    expect(row.querySelector('.brd-opt__check')).toBeNull()
-    expect(key().textContent).toBe('2')
-    expect(opacityOf(key())).toBeGreaterThan(0.5)
-    await opacityIs(() => tick(), 0)
-    await pick('[data-motive="fun"]')
-    await settle(300)
-    await opacityIs(() => key(), 0)
-    await opacityIs(() => tick(), 1)
-    // A kana answer's in its tile's top right corner.
-    await next()
-    await landed()
-    // Inside the tile's border, --sp-2 (6px) from its edges.
+    // A kana answer's in its tile's top right corner, inside the tile's
+    // border, --sp-2 (6px) from its edges.
     const corner = el => {
       const m = box(el.querySelector('.desk-brd__mark'))
       const t = box(el)
@@ -1176,132 +966,106 @@ describe('first contact, finished (P13, plan 155)', () => {
     expect(corner(inCar('[data-kana="hiragana"]'))).toEqual([6, 6])
     // A station's on its ring's shoulder, clear of its code and the rail
     // through its middle (the climbing line, plan 163).
-    await pick('[data-kana="both"]')
-    await settle()
-    await pick('[data-how="pick"]')
-    await next()
+    await toLevel()
     await landed()
-    const ring = box(inCar('[data-level="N5"] .desk-brd__stop-ring'))
-    const mark = box(inCar('[data-level="N5"] .desk-brd__mark'))
+    const station = inCar('[data-level="N5"]')
+    const ring = box(station.querySelector('.desk-brd__stop-ring'))
+    const mark = box(station.querySelector('.desk-brd__mark'))
     expect(mid(mark)).toBeGreaterThan(ring.right - ring.width / 4)
     expect(cy(mark)).toBeLessThan(ring.top + ring.height / 4)
-    expect(kbdOf(inCar('[data-level="N5"]'))).toBe('5')
-    expect(inCar('.desk-brd__chk')).toBeNull()
+    // One slot: the key, until the pick turns it over to its check.
+    const key = () => station.querySelector('.desk-brd__key')
+    const tick = () => station.querySelector('.desk-brd__tick')
+    expect(station.querySelectorAll('.desk-kbd')).toHaveLength(1)
+    expect(key().textContent).toBe('5')
+    expect(opacityOf(key())).toBeGreaterThan(0.5)
+    await opacityIs(() => tick(), 0)
+    await pick('[data-level="N5"]')
+    await opacityIs(() => key(), 0)
+    await opacityIs(() => tick(), 1)
   })
 
-  it('draws the rhythms as four roads from today, the shorter ride the sooner stop', async () => {
+  it('prices the four trains on the rhythm\'s sheet, the more minutes the sooner, and reprints the card', async () => {
     await board()
     await toLevel()
-    await pick('[data-level="N3"]')
-    await next()
-    await next()
-    await next()
-    expect(stepOf()).toBe('rhythm')
-    await landed()
-    const rides = [...inCar('.desk-brd__rides').querySelectorAll('.desk-brd__ride')]
-    expect(rides.map(r => r.dataset.rhythm)).toEqual(['5', '10', '15', '20'])
-    expect([en.nudgeWhen.today, fr.nudgeWhen.today]).toContain(inCar('.desk-brd__ride-cap--today').textContent)
-    // Each road as long as its ride: the more minutes, the sooner.
-    const ends = rides.map(r => Number(getComputedStyle(r).getPropertyValue('--end')))
-    const days = rides.map(r => Number(r.querySelector('.desk-brd__ride-days').textContent.match(/\d+/)[0]))
-    for (let i = 1; i < 4; i++) {
-      expect(ends[i]).toBeLessThan(ends[i - 1])
-      expect(days[i]).toBeLessThan(days[i - 1])
-    }
-    for (const r of rides) expect(r.querySelector('.desk-brd__ride-when').textContent).toMatch(/20\d\d/)
-    // The recommended rhythm is picked from the start, on the band, its
-    // tag beside its name.
-    const band = () => box(inCar('.desk-brd__ride-band'))
-    expect(inCar('[data-rhythm="10"]').getAttribute('aria-pressed')).toBe('true')
-    expect(Math.abs(band().top - box(rides[1]).top)).toBeLessThan(1.5)
-    expect([en.onbPaceRecommended, fr.onbPaceRecommended]).toContain(inCar('[data-rhythm="10"] .brd-tag').textContent)
-    // Its digit moves the pick, the band with it.
-    await userEvent.keyboard('4')
-    expect(inCar('[data-rhythm="20"]').getAttribute('aria-pressed')).toBe('true')
-    expect(Math.abs(band().top - box(rides[3]).top)).toBeLessThan(1.5)
-    // The rows one under another, each whole on the paper.
-    rides.reduce((a, b) => { expect(box(b).top).toBeGreaterThanOrEqual(box(a).bottom - 0.5); return b })
-    for (const r of rides) {
-      expect(box(r.querySelector('.desk-brd__ride-arr')).right).toBeLessThanOrEqual(bodyW())
-      expect(box(r).bottom).toBeLessThan(box(inCar('.brd__foot')).top)
-    }
+    await toCard('N3')
+    const service = () => inCar('[data-door="service"] .pcb__value')?.textContent ?? inCar('[data-door="service"]').textContent
+    const before = service()
+    await door('service')
+    const trains = [...sheet().querySelectorAll('.brd-train')]
+    expect(trains.map(r => r.dataset.rhythm)).toEqual(['5', '10', '15', '20'])
+    // The recommended rhythm is the card's to begin with, its tag beside its name.
+    expect(inSheet('[data-rhythm="10"]').getAttribute('aria-pressed')).toBe('true')
+    expect([en.onbPaceRecommended, fr.onbPaceRecommended]).toContain(inSheet('[data-rhythm="10"] .brd-train__tag').textContent)
+    // Each priced with its day: the more minutes, the fewer days.
+    const days = trains.map(r => Number(r.querySelector('.brd-train__days').textContent.match(/\d+/)[0]))
+    for (let i = 1; i < 4; i++) expect(days[i]).toBeLessThan(days[i - 1])
+    for (const r of trains) expect(r.querySelector('.brd-train__date').textContent).toMatch(/20\d\d/)
+    // The rows one under another, each whole in the sheet.
+    trains.reduce((a, b) => { expect(box(b).top).toBeGreaterThanOrEqual(box(a).bottom - 0.5); return b })
+    for (const r of trains) expect(box(r).right).toBeLessThanOrEqual(box(sheet()).right)
+    // A pick shuts the sheet and the card reprints its service.
+    inSheet('[data-rhythm="20"]').click()
+    await settle(300)
+    expect(sheet()).toBeNull()
+    expect(service()).not.toBe(before)
   })
 
-  it('draws the hour as the day\'s arc, the train riding it by the half hour', async () => {
+  it('turns the hour\'s board by its steppers, and a service takes it to its hour', async () => {
     await board()
     await toLevel()
-    await toTime()
-    await landed()
-    expect([en.brdTimeHint, fr.brdTimeHint]).toContain(inCar('.brd__hint').textContent)
-    const ring = id => box(inCar(`[data-hour="${id}"] .desk-brd__hour-ring`))
-    // Morning low at the left, noon at the crown, night low at the right.
-    expect(mid(ring('am'))).toBeLessThan(mid(ring('noon')))
-    expect(mid(ring('noon'))).toBeLessThan(mid(ring('pm')))
-    expect(ring('noon').top).toBeLessThan(ring('am').top)
-    expect(ring('noon').top).toBeLessThan(ring('pm').top)
-    // The morning's ride is the day's to begin with: the train stands on
-    // its station, and the station is the train.
-    const train = () => inCar('[role="slider"]')
-    expect(inCar('[data-hour="am"]').getAttribute('aria-pressed')).toBe('true')
-    expect(train().getAttribute('aria-valuetext')).toBe('07:30')
-    expect(train().classList.contains('desk-brd__train--docked')).toBe(true)
-    // A half hour on: off the station, on the arc, the stretch behind it
-    // gold to its centre -- and still the morning.
-    train().focus()
-    await userEvent.keyboard('{ArrowRight}')
-    expect(train().getAttribute('aria-valuetext')).toBe('08:00')
-    expect(train().classList.contains('desk-brd__train--docked')).toBe(false)
-    expect(inCar('[data-hour="am"]').getAttribute('aria-pressed')).toBe('true')
-    const map = box(inCar('.desk-brd__sky-map'))
-    const [ex, ey] = inCar('.desk-brd__arc--done').getAttribute('d').match(/(-?[\d.]+) (-?[\d.]+)$/).slice(1).map(Number)
-    expect(Math.abs(map.left + ex - mid(box(train())))).toBeLessThan(1)
-    expect(Math.abs(map.top + ey - cy(box(train())))).toBeLessThan(1)
-    // A ride's digit takes the train to its hour; the board says it.
-    await userEvent.keyboard('3')
-    expect(inCar('[data-hour="pm"]').getAttribute('aria-pressed')).toBe('true')
-    expect(train().getAttribute('aria-valuetext')).toBe('21:00')
-    await settle(1400)
-    expect(inCar('.brd-board__flaps').getAttribute('aria-label')).toBe('21:00')
-    // Taken by the arc under the pointer, by the half hour.
-    const at15 = [...inCar('.desk-brd__sky-map').querySelectorAll('.desk-brd__hour')].find(h => h.textContent === '15')
-    const at = box(at15)
-    inCar('.desk-brd__sky').dispatchEvent(new PointerEvent('pointerdown', { clientX: mid(at), clientY: cy(at), pointerId: 7, buttons: 1, bubbles: true }))
-    await settle(40)
-    expect(['14:30', '15:00', '15:30']).toContain(train().getAttribute('aria-valuetext'))
-    // ...and not by the board in the bowl.
-    const was = train().getAttribute('aria-valuetext')
-    const sheet = box(inCar('.desk-brd__sky-board'))
-    inCar('.desk-brd__sky-board').dispatchEvent(new PointerEvent('pointerdown', { clientX: mid(sheet), clientY: cy(sheet), pointerId: 8, buttons: 1, bubbles: true }))
-    await settle(40)
-    expect(train().getAttribute('aria-valuetext')).toBe(was)
-    expect(fits(inCar('.brd__body'))).toBe(true)
+    await toCard('N3')
+    const printed = () => inCar('[data-door="hour"]').getAttribute('aria-label')
+    expect(printed()).toMatch(/07:30$/)
+    await door('hour')
+    const flaps = () => inSheet('.brd-board__flaps').getAttribute('aria-label')
+    expect(flaps()).toBe('07:30')
+    expect(inSheet('[data-hour="am"]').getAttribute('aria-pressed')).toBe('true')
+    // An hour later: the board turns, the sheet stays, the card reprints.
+    inSheet(`.brd-clock__step[aria-label="${inSheet('.brd-clock__step').getAttribute('aria-label')}"]`).click()
+    await settle(60)
+    expect(flaps()).toBe('08:30')
+    expect(sheet()).not.toBeNull()
+    expect(printed()).toMatch(/08:30$/)
+    // A ride's own hour: picked, it shuts the sheet.
+    inSheet('[data-hour="pm"]').click()
+    await settle(300)
+    expect(sheet()).toBeNull()
+    expect(printed()).toMatch(/21:00$/)
+    // On the web the reminder is the learner's own calendar.
+    await door('hour')
+    expect(inSheet('[data-action="agenda"]')).not.toBeNull()
+    expect(inSheet('[data-action="remind"]')).toBeNull()
+    expect(fits(sheet())).toBe(true)
   })
 
-  it('draws the lines as three cards under the kana\'s ticket, each with what it carries', async () => {
+  it('switches the lines in their sheet, each with what it carries, the last one refusing to go', async () => {
     await board()
     await toLevel()
-    await pick('[data-level="N3"]')
-    await next()
-    await next()
-    expect(stepOf()).toBe('lines')
-    await landed()
-    expect([en.brdOnEveryTicket, fr.brdOnEveryTicket]).toContain(inCar('.desk-brd__ticket-lock').textContent)
-    const cards = [...inCar('.desk-brd__lines').children]
-    expect(cards.map(c => c.dataset.line)).toEqual(['vocab', 'kanji', 'grammar'])
-    expect(new Set(cards.map(c => Math.round(box(c).top))).size).toBe(1)
-    for (const c of cards) expect(c.querySelector('.desk-brd__line-fig').textContent).toMatch(/^~\d/)
-    // The arrival moves as a line comes off, and goes with the last one.
-    const arrival = () => inCar('.desk-brd__first')?.textContent ?? null
+    await toCard('N3')
+    await door('lines')
+    const rows = [...sheet().querySelectorAll('[data-line]')]
+    expect(rows.map(c => c.dataset.line)).toEqual(['vocab', 'kanji', 'grammar'])
+    for (const c of rows) expect(c.querySelector('.brd-line__vol').textContent).toMatch(/^~\d/)
+    // A reader of both scripts has no kana strip to lock.
+    expect(inSheet('.brd-lines__kana')).toBeNull()
+    // The arrival moves as a line comes off; the last one stays on, and says so.
+    const arrival = () => inSheet('.brd-arrive')?.textContent ?? null
     const before = arrival()
     expect(before).toMatch(/N2/)
-    await pick('[data-line="vocab"]')
-    expect(inCar('[data-line="vocab"]').getAttribute('aria-pressed')).toBe('false')
+    inSheet('[data-line="vocab"]').click()
+    await settle(40)
+    expect(inSheet('[data-line="vocab"]').getAttribute('aria-pressed')).toBe('false')
     expect(arrival()).not.toBe(before)
-    await pick('[data-line="kanji"]')
-    await pick('[data-line="grammar"]')
-    expect(arrival()).toBeNull()
-    expect(inCar('.brd__error')).not.toBeNull()
-    expect(inCar('[data-action="continue"]').disabled).toBe(true)
+    inSheet('[data-line="kanji"]').click()
+    await settle(40)
+    inSheet('[data-line="grammar"]').click()
+    await settle(40)
+    expect(inSheet('[data-line="grammar"]').getAttribute('aria-pressed')).toBe('true')
+    expect(inSheet('.brd-arrive--none')).not.toBeNull()
+    // A switch, not a pick: the sheet stays open until it is shut.
+    await shut()
+    expect(inCar('[data-door="lines"]').querySelectorAll('.pcb__line')).toHaveLength(1)
   })
 
   it('hands the Welcome\'s paper to the wait', async () => {
@@ -1362,28 +1126,14 @@ describe('first contact, finished (P13, plan 155)', () => {
     expect([en.signup, fr.signup]).toContain($('h1').textContent)
   })
 
-  it('boards the plan\'s arrival on the whole paper, no column beside it', async () => {
-    await board()
-    await toLevel()
-    await toTime()
-    await next()
-    await settle(200)
-    const sign = $('.onb-arrival__board')
-    expect(sign).not.toBeNull()
-    expect(Math.abs(mid(box(sign)) - bodyW() / 2)).toBeLessThan(2)
-    expect(Math.round(box($('.onb-arrival__scrim')).left)).toBe(0)
-  })
-
   it('keeps the leaving car until the arriving one has landed, and runs Back the other way', async () => {
     await board()
-    await pastName()
-    await pick('[data-motive="trip"]')
-    inCar('[data-action="continue"]').click()
+    await pick('[data-kana="both"]')
     // Gone from sight, not from the page: the arriving answers are still
     // coming in, and dropping it took their entrance with it. Read when
     // the fade has drawn, not after a sleep: with the lanes' pages
-    // running side by side a frame can be late by more than the 500ms
-    // this once waited, and the car was read at its opacity of 1.
+    // running side by side a frame can be late by more than a fixed
+    // wait, and the car was read at its opacity of 1.
     await vi.waitFor(() => {
       const out = $('.brd__car--out')
       expect(out).not.toBeNull()
@@ -1399,20 +1149,18 @@ describe('first contact, finished (P13, plan 155)', () => {
 })
 
 describe('the hover, simpler (P14, plan 155)', () => {
-  it('draws the name field\'s gold edge on an answer, and nothing else', async () => {
+  it('draws the gold edge on an answer, and nothing else', async () => {
     await board()
-    await settle(300)
-    const gold = getComputedStyle(inCar('.brd-field')).borderTopColor
-    await pastName()
+    await toLevel()
     await landed()
-    // A reason: its ring takes the edge (the six roads, plan 163).
-    const way = inCar('[data-motive="fun"]')
-    const ring = way.querySelector('.desk-brd__ring')
+    // A station: its ring takes the edge (the climbing line, plan 163).
+    const station = inCar('[data-level="N3"]')
+    const ring = station.querySelector('.desk-brd__stop-ring')
     const ground = getComputedStyle(ring).backgroundColor
-    await userEvent.hover(way)
+    await userEvent.hover(station)
     await settle(250)
-    expect(getComputedStyle(way).filter).toBe('none')
-    expect(getComputedStyle(ring).borderTopColor).toBe(gold)
+    expect(getComputedStyle(station).filter).toBe('none')
+    expect(getComputedStyle(ring).borderTopColor).toBe(paintOf('--accent2'))
     // No wash: the ground it had at rest.
     expect(getComputedStyle(ring).backgroundColor).toBe(ground)
     await userEvent.hover(inCar('[data-action="back"]'))
@@ -1420,18 +1168,23 @@ describe('the hover, simpler (P14, plan 155)', () => {
     expect(getComputedStyle(inCar('[data-action="back"]')).filter).toBe('none')
   })
 
-  it('focuses the name with one gold edge, no second ring', async () => {
+  it('focuses the name on its plate with one gold edge, no second ring', async () => {
     await board()
-    const field = inCar('.brd-field')
-    expect(document.activeElement).toBe(field)
+    await toLevel()
+    await toCard()
+    await door('name')
+    const field = inSheet('.brd-plate__field')
+    field.focus()
     await settle(300)
     const focused = getComputedStyle(field)
     expect(focused.outlineStyle).toBe('none')
-    const gold = focused.borderTopColor
+    const plate = field.closest('.brd-plate')
+    const gold = getComputedStyle(plate).boxShadow
     field.blur()
     await settle(200)
-    // At rest, filled, the answers' hairline: the gold is the focus alone.
-    expect(field.value).toBe('Tester')
-    expect(getComputedStyle(field).borderTopColor).not.toBe(gold)
+    // At rest, the plate's own edge: the gold is the focus alone.
+    expect(getComputedStyle(plate).boxShadow).not.toBe(gold)
+    // The count is the card's: a first name, up to 24 characters.
+    expect(inSheet('.brd-plate__count').textContent).toBe('0 / 24')
   })
 })

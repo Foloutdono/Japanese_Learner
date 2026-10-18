@@ -64,9 +64,12 @@ const settle = (ms = 140) => new Promise(r => setTimeout(r, ms))
 // Always the arriving car: the leaving one stays mounted for the 260 ms
 // of the pull, and it carries the same selectors.
 async function click(screen, sel) {
-  const el = screen.container.querySelector(`.brd__car:not(.brd__car--out) ${sel}`)
+  // The next screen comes a frame after the tap (a transition,
+  // BoardingFlow's go()), so its control is waited for.
+  const find = () => screen.container.querySelector(`.brd__car:not(.brd__car--out) ${sel}`)
     ?? screen.container.querySelector(sel)
-  expect(el, sel).toBeTruthy()
+  await vi.waitFor(() => expect(find(), sel).toBeTruthy(), { timeout: 2000 })
+  const el = find()
   el.click()
   await settle(40)
 }
@@ -151,23 +154,12 @@ describe('the boarding reached on a stale address', () => {
     await settle(300)
     expect(screen.container.querySelector('.brd')).not.toBeNull()
 
-    // The eight questions, then the three arrival screens.
-    await click(screen, '[data-action="continue"]')              // the name, already the profile's
-    await click(screen, '[data-motive="trip"]')
-    await click(screen, '[data-action="continue"]')              // why
-    await click(screen, '[data-kana="both"]')                    // → choose or test
-    await click(screen, '[data-how="pick"]')
-    await click(screen, '[data-action="continue"]')              // → the level list
+    // The two questions, then the card (plan 247), issued as it stands.
+    await click(screen, '[data-kana="both"]')                    // → the level list
     await click(screen, '[data-level="N5"]')
-    await click(screen, '[data-action="continue"]')              // the level
-    await click(screen, 'button[data-goal]')                     // the first stop ahead
-    await click(screen, '[data-action="continue"]')              // the goal
-    await click(screen, '[data-action="continue"]')              // the lines, all on by default
-    await click(screen, '[data-action="continue"]')              // the rhythm
-    await click(screen, '[data-action="continue"]')              // the hour, on to the plan
+    await click(screen, '[data-action="continue"]')              // → the card, filled in
     await settle(120)
-    await click(screen, '[data-action="continue"]')              // the plan
-    await click(screen, '[data-action="enter"]')                 // the pass
+    await click(screen, '[data-action="issue"]')                 // the card, issued
     await settle(400)
 
     expect(screen.container.querySelector('.brd')).toBeNull()
