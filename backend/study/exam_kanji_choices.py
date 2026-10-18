@@ -14,10 +14,10 @@
 #     燵 offered in N5 -- a paper shows only the kanji of its level
 #     (study/exam_levels.py).
 #
-# The placement test (study/placement.py) and the Practice gate
-# (routes/station.py) still build theirs with exam_kanji_gen: replayed
-# from a seed at every answer, the one must not change under a running
-# test, and the other draws a specimen. Only the exam papers come here.
+# The placement test (study/placement.py) still builds its own with
+# exam_kanji_gen: it is replayed from a seed at every answer and must not
+# change under a running test. The exam papers and the Practice gate's
+# specimen (routes/station.py) come here.
 #
 # What a wrong 読み is, here: the reading as a learner of THIS course
 # could say it, built from the readings the course's own words give each
@@ -28,6 +28,12 @@
 # exist (せんしゅう / ぜんしゅう / せんしゅ / ぜんしゅ), where every choice
 # has two neighbours and one opposite and none is the centre
 # (study/exam_tells.py).
+#
+# A wrong 読み also fits the kana the prompt prints (fits_prompt): 閉じる
+# printed, しめる offered, is wrong at a glance, and the answer is the one
+# reading that ends in じる (103 of the 300 N3-N1 items the first builder
+# made were answered so). The wrong readings are the kanji's other
+# readings in the word's own okurigana, and real words that sound like it.
 import itertools
 import re
 from functools import lru_cache
@@ -152,6 +158,29 @@ _UNVOICED = {"が": "か", "ぎ": "き", "ぐ": "く", "げ": "け", "ご": "こ
 _LENGTHEN_O = frozenset("おこそとのほもよろごぞどぼょ")
 _LENGTHEN_U = frozenset("ゅゆふす")
 _LENGTHEN_E = frozenset("えけせてねへめれげぜでべ")
+
+
+_TO_HIRAGANA = {chr(c): chr(c - 0x60) for c in range(0x30A1, 0x30F7)}
+
+
+@lru_cache(maxsize=None)
+def _skeleton(kanji: str) -> "re.Pattern[str]":
+    """What the prompt's own kana pin down in any reading of it: 閉じる ends
+    in じる, 引き出し has き between two readings. A kanji run is any run of
+    kana."""
+    pieces = []
+    for m in re.finditer(r"[々〆]|[\u4e00-\u9fff\u3400-\u4dbf]+|[^\u4e00-\u9fff\u3400-\u4dbf々〆]+", kanji):
+        run = m.group()
+        pieces.append(".+" if _is_kanji(run[0]) or run[0] in "々〆" else re.escape("".join(_TO_HIRAGANA.get(c, c) for c in run)))
+    return re.compile("".join(pieces))
+
+
+def fits_prompt(kanji: str, reading: str) -> bool:
+    """Whether `reading` can be a reading of `kanji` as printed. A wrong
+    reading that ends in another okurigana than the prompt shows (向く
+    printed, むける offered) is wrong at a glance, and the answer is the
+    only choice that fits."""
+    return _skeleton(kanji).fullmatch(reading) is not None
 
 
 class Edit:
@@ -288,31 +317,6 @@ def sound_alikes(reading: str, level: str) -> list[str]:
     return out
 
 
-def other_endings(parts: list[dict], kanji: str, reading: str, level: str = "N1") -> list[str]:
-    """The same kanji with another of its okurigana, where that is a word
-    (返す -> かえる, 受ける -> うかる, 分かる -> わかれる, わける): the wrong
-    reading a learner who knows the kanji, but not this word, would give."""
-    if len(parts) < 2 or parts[-1]["kanji"] or not parts[-2]["kanji"] or any(p["kanji"] for p in parts[:-2]):
-        return []
-    order = ("N5", "N4", "N3", "N2", "N1")
-    last = parts[-2]
-    _on, kun = _packed(last["text"])
-    head = "".join(p["reading"] for p in parts[:-2])
-    deck = _deck_by_reading()
-    out = []
-    for token in kun:
-        if "." not in token or token[:1] in "-~":
-            continue
-        stem, okurigana = token.replace("~", "").split(".", 1)
-        if okurigana == parts[-1]["text"] or not okurigana or not stem:
-            continue
-        text = head + stem + okurigana
-        # a word the course teaches by this level: a learner has met it
-        if text != reading and text in deck and order.index(deck[text][0]) <= order.index(level):
-            out.append(text)
-    return out
-
-
 def _apply(parts: list[dict], *edits: Edit) -> str:
     texts = {e.slot: e.text for e in edits}
     return "".join(texts.get(i, p["reading"]) for i, p in enumerate(parts))
@@ -334,7 +338,8 @@ def reading_sets(kanji: str, reading: str, level: str = "N1") -> list[tuple[floa
     edits = reading_edits(parts)
 
     def ok(text: str) -> bool:
-        return text != reading and text not in valid and not kana_problems(text, reading)
+        return (text != reading and text not in valid and not kana_problems(text, reading)
+                and fits_prompt(kanji, text))
 
     singles: dict[str, Edit] = {}
     for e in edits:
@@ -353,11 +358,9 @@ def reading_sets(kanji: str, reading: str, level: str = "N1") -> list[tuple[floa
             choices = [reading, ta, tb, both]
             if _symmetric(choices):
                 sets.append((ea.weight + eb.weight + 0.3, [ta, tb, both]))
-    # three single slips, the kanji's other endings, and the words that sound like it
+    # three single slips, and the words that sound like it. Not the kanji's
+    # other okurigana (返す for かえる): the prompt prints the okurigana it has
     pool = dict(singles)
-    for text in other_endings(parts, kanji, reading, level):
-        if ok(text):
-            pool[text] = Edit(-1, text, "ending", 1.1)
     for text in sound_alikes(reading, level):
         if ok(text) and text not in pool:
             pool[text] = Edit(-1, text, "near", 0.9)
@@ -477,6 +480,11 @@ def spellings_read(reading: str) -> frozenset[str]:
     return frozenset(found)
 
 
+def _written_twice(text: str) -> bool:
+    """Two neighbouring kanji alike (今今, 目目): no one writes a word so."""
+    return any(a == b and _is_kanji(a) for a, b in zip(text, text[1:]))
+
+
 def orthography_sets(kanji: str, reading: str, level: str) -> list[tuple[float, list[str]]]:
     """(weight, three wrong spellings), best first: a 2x2 grid over two of
     the word's kanji where it has two, otherwise three lookalikes of one."""
@@ -485,6 +493,9 @@ def orthography_sets(kanji: str, reading: str, level: str) -> list[tuple[float, 
         return []
     near = {i: lookalike_ranking(kanji[i], level, 5) for i in slots}
     taken = spellings_read(reading) | {kanji}
+
+    def sound(wrong: list[str]) -> bool:
+        return len(set(wrong)) == 3 and not taken & set(wrong) and (_written_twice(kanji) or not any(map(_written_twice, wrong)))
 
     def spell(**changes) -> str:
         chars = list(kanji)
@@ -497,12 +508,12 @@ def orthography_sets(kanji: str, reading: str, level: str) -> list[tuple[float, 
         for (sa, a), (sb, b) in itertools.product(near[i][:3], near[j][:3]):
             one, two, both = spell(**{f"s{i}": a}), spell(**{f"s{j}": b}), spell(**{f"s{i}": a, f"s{j}": b})
             wrong = [one, two, both]
-            if len(set(wrong)) == 3 and not taken & set(wrong) and _symmetric([kanji] + wrong):
+            if sound(wrong) and _symmetric([kanji] + wrong):
                 sets.append((GRID_BONUS + sa + sb, wrong))
     for i in slots:
         for trio in itertools.combinations(near[i], 3):
             wrong = [spell(**{f"s{i}": c}) for _, c in trio]
-            if len(set(wrong)) == 3 and not taken & set(wrong) and _symmetric([kanji] + wrong):
+            if sound(wrong) and _symmetric([kanji] + wrong):
                 sets.append((sum(sc for sc, _ in trio), wrong))
     sets.sort(key=lambda t: (-t[0], t[1]))
     return sets
@@ -521,13 +532,18 @@ def reading_item_problems(kanji: str, choices: list[str], answer: int) -> list[s
             out.append(f"{text!r} is no reading: {why}")
         if text in valid:
             out.append(f"{text!r} is also a reading of {kanji}")
+        if not fits_prompt(kanji, text):
+            out.append(f"{text!r} does not fit the kana {kanji} prints")
     return out
 
 
 def orthography_item_problems(reading: str, choices: list[str], answer: int) -> list[str]:
     """Why a 表記 item is not fit to ask -- [] when it is."""
     taken = spellings_read(reading)
-    return [f"{text!r} is also a spelling read {reading}" for i, text in enumerate(choices) if i != answer and text in taken]
+    out = [f"{text!r} is also a spelling read {reading}" for i, text in enumerate(choices) if i != answer and text in taken]
+    out += [f"{text!r} writes a kanji twice" for i, text in enumerate(choices)
+            if i != answer and _written_twice(text) and not _written_twice(choices[answer])]
+    return out
 
 
 # ── The mondai ─────────────────────────────────────────────────────────
@@ -549,17 +565,21 @@ def _deck_readings_by_spelling(level: str) -> dict[str, frozenset[str]]:
     return {k: frozenset(v) for k, v in out.items()}
 
 
+# words a deck teaches that an exam should not print as a question
+_NOT_ASKED = frozenset({"小便", "大便", "自殺", "死体"})
+
+
 def askable(word: dict, level: str) -> bool:
     """A word a paper at `level` may ask about: written only with the kanji
-    the level has been taught, one reading, and a spelling the course
-    reads one way."""
+    the level has been taught, one reading, a spelling the course reads one
+    way, and not one an exam leaves out."""
     from study.llm_shared import kanji_set_for_level
 
     allowed = kanji_set_for_level(level)
     kanji = word.get("kanji") or ""
     return bool(kanji) and "/" not in kanji and "/" not in (word.get("kana") or "") and all(
         not _is_kanji(c) or c in allowed for c in kanji) and "々" not in kanji \
-        and len(_deck_readings_by_spelling(level).get(kanji, ())) <= 1
+        and kanji not in _NOT_ASKED and len(_deck_readings_by_spelling(level).get(kanji, ())) <= 1
 
 
 def _choices(rng, right: str, wrong: list[str]) -> tuple[list[dict], str]:
@@ -583,7 +603,10 @@ def _build(spec, pool, used_words, used_prompts, rng, level, sets_for, prompt_of
             break
         key = (word["kanji"], word["kana"])
         prompt = prompt_of(word)
-        if key in used_words or prompt in used_prompts or not askable(word, level):
+        # a kanji is asked once in a paper: 向く, 向かう and 向き would be three
+        # questions on one character, and the second teaches the first's answer
+        chars = {c for c in word["kanji"] if _is_kanji(c)}
+        if key in used_words or prompt in used_prompts or chars & used_words or not askable(word, level):
             continue
         sets = sets_for(word, level)
         if not sets:
@@ -593,6 +616,7 @@ def _build(spec, pool, used_words, used_prompts, rng, level, sets_for, prompt_of
         wrong = top[rng.randrange(len(top))][1]
         choices, answer = _choices(rng, right_of(word), wrong)
         used_words.add(key)
+        used_words.update(chars)
         used_prompts.add(prompt)
         questions.append({"id": f"{spec['id']}_q{len(questions) + 1}", "number": len(questions) + 1,
                           "promptJp": prompt, "choices": choices, "answer": answer})

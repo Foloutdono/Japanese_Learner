@@ -4,9 +4,12 @@
 # made: ぱじめ, まぢ, a star around the answer, 燵 in an N5 paper.
 import random
 
+import pytest
+
 from content.vocab_data import VOCAB_BY_LEVEL
 from study import exam_kanji_choices as K
 from study import exam_tells
+from study.exam_gen_utils import GenerationFailed
 from study.llm_shared import kanji_set_for_level
 
 
@@ -104,3 +107,48 @@ def test_the_builder_builds_a_mondai_of_the_levels_words():
         texts = [c["textJp"] for c in q["choices"]]
         assert len(set(texts)) == 4 and exam_tells.tell(texts) is None
         assert q["answer"] in {c["id"] for c in q["choices"]}
+
+
+def test_a_wrong_reading_fits_the_kana_the_prompt_prints():
+    # 閉じる prints じる: しめる / しまる / とける end otherwise, so the one
+    # reading that fits (とじる) was the answer without a word being read
+    assert K.fits_prompt("閉じる", "とじる") and not K.fits_prompt("閉じる", "しめる")
+    assert K.fits_prompt("引き出し", "ひきだし") and not K.fits_prompt("引き出し", "ひいだし")
+    assert K.fits_prompt("ガス代", "がすだい") and K.fits_prompt("お茶", "おちゃ") and K.fits_prompt("人々", "ひとびと")
+    assert K.reading_item_problems("閉じる", ["とじる", "しめる", "しまる", "とける"], 0) == [
+        "'しめる' does not fit the kana 閉じる prints",
+        "'しまる' does not fit the kana 閉じる prints",
+        "'とける' does not fit the kana 閉じる prints"]
+    assert K.reading_item_problems("閉じる", ["とじる", "へいじる", "ひじる", "しじる"], 0) == []
+
+
+def test_every_set_the_builder_offers_fits_the_prompt():
+    rng = random.Random(7)
+    for level in ("N4", "N3", "N2"):
+        words = [w for w in VOCAB_BY_LEVEL[level] if K.askable(w, level) and not all(
+            "\u4e00" <= c <= "\u9fff" for c in w["kanji"])]          # the words that print okurigana
+        for w in rng.sample(words, 30):
+            for _, wrong in K.reading_sets(w["kanji"], K._first_reading(w), level)[:6]:
+                assert all(K.fits_prompt(w["kanji"], t) for t in wrong), (w["kanji"], wrong)
+
+
+def test_a_wrong_spelling_does_not_write_a_kanji_twice():
+    assert K.orthography_item_problems("ことし", ["今年", "今今", "去年", "今午"], 0) == ["'今今' writes a kanji twice"]
+    for _, wrong in K.orthography_sets("今年", "ことし", "N4")[:6]:
+        assert not any(a == b for text in wrong for a, b in zip(text, text[1:])), wrong
+
+
+def test_a_kanji_is_asked_once_in_a_paper():
+    pool = [w for w in VOCAB_BY_LEVEL["N5"] if w.get("kanji") in ("学校", "大学")]
+    assert len(pool) == 2 and all(K.askable(w, "N5") for w in pool)
+    used_words, used_prompts = set(), set()
+    spec = {"id": "moji_1", "official_number": 1, "count": 1}
+    K.build_reading_mondai(spec, pool, used_words, used_prompts, random.Random(1), "N5")
+    # 学校 and 大学 share 学: the second would be a second question on one character
+    with pytest.raises(GenerationFailed):
+        K.build_orthography_mondai({"id": "moji_2", "official_number": 2, "count": 1}, pool, used_words, used_prompts,
+                                   random.Random(1), "N5")
+
+
+def test_a_word_an_exam_leaves_out_is_not_asked():
+    assert not K.askable({"kanji": "自殺", "kana": "じさつ"}, "N1")

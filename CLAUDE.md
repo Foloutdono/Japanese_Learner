@@ -97,9 +97,10 @@ runtime purpose.
   A wrong choice is a real form or expression the learner could choose,
   never a corruption of the right one (ないければなりません). The
   漢字読み / 表記 choices are made by `study/exam_kanji_choices.py`: the
-  readings the course's own words give a kanji and the sound changes of
-  a compound, set as a grid; wrong spellings from lookalike kanji of the
-  paper's own level. `exam_kanji_gen` still builds the placement test's
+  readings the course's own words give a kanji, in the word's own okurigana
+  (しめる offered for a printed 閉じる is wrong at a glance: `fits_prompt`),
+  and the sound changes of a compound, set as a grid; wrong spellings from
+  lookalike kanji of the paper's own level. `exam_kanji_gen` still builds the placement test's
   items, replayed from a seed (`study/placement.py`): leave it.
 - **A paper shows only its level's kanji and grammar (plan 254).**
   `study/exam_levels.py` holds every text a paper prints to
