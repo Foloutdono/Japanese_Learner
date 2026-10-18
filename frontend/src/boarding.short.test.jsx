@@ -132,6 +132,28 @@ describe('first contact on a short window', { timeout: 40000 }, () => {
     await sheetHoldsWhole('[data-action="keep"]', 'account')
   })
 
+  // A session with an address (docs/oauth.md): the card's line says
+  // the address and holds the way to another account, whole too.
+  it('holds the card whole for a pass that names its address', async () => {
+    await render(
+      <LangProvider>
+        <BoardingFlow
+          session={{ access_token: 'tok', user: { email: 'marie-claire.dupont-moreau@gmail.com' } }}
+          onComplete={vi.fn()}
+          onExit={vi.fn()}
+          onSignIn={vi.fn()}
+        />
+      </LangProvider>
+    )
+    await settle(300)
+    await pick('[data-kana="both"]')
+    await settle()
+    await pick('[data-level="N3"]')
+    await next()
+    holdsWhole('card')
+    expect(inCar('[data-action="switch-account"]')).toBeTruthy()
+  })
+
   it('reads the two words out whole for a learner who reads one script', async () => {
     await board()
     await pick('[data-kana="hiragana"]')

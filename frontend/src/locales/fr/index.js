@@ -2551,6 +2551,7 @@ const boarding = {
   brdKeptGoogle: 'Gardée sur ton compte Google',
   brdKeptEmail: (email) => `Gardée · ${email}`,
   brdKeptAccount: 'Gardée sur ton compte',
+  brdKeptSwitch: 'Changer de compte',
   brdSheetGoal: 'Objectif',
   brdSheetRhythm: 'Rythme',
   brdSheetHour: 'Départ',

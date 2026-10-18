@@ -161,13 +161,14 @@ function type(el, value) {
   el.dispatchEvent(new Event('input', { bubbles: true }))
 }
 
-async function renderFlow({ onComplete = vi.fn(), dryRun = false, onExit = undefined, guest = false, user = null } = {}) {
+async function renderFlow({ onComplete = vi.fn(), dryRun = false, onExit = undefined, onSignIn = undefined, guest = false, user = null } = {}) {
   const screen = await render(
     <LangProvider>
       <BoardingFlow
         session={{ access_token: 'tok', ...(user ? { user } : {}) }}
         onComplete={onComplete}
         onExit={onExit}
+        onSignIn={onSignIn}
         guest={guest}
         dryRun={dryRun}
       />
@@ -673,6 +674,32 @@ describe('BoardingFlow', () => {
     expect(q(screen, '[data-action="keep"]')).toBeNull()
   })
 
+  // ── 名札 — whose pass it is (docs/oauth.md) ──────────────────────
+  // Google's chooser can land a learner on an account no pass carried:
+  // a NEW pass, with their journey on the other one. The card's line
+  // says the address and holds the way to another account; a guest's
+  // has nothing to switch from.
+  it('tells a session with an address whose pass it is, and opens the way to another', async () => {
+    const onSignIn = vi.fn()
+    const { screen } = await renderFlow({ user: { email: 'aiko@example.com' }, onSignIn })
+    await toCardBeginner(screen)
+    const line = q(screen, '.brd-keep-line')
+    expect(line.querySelector('.brd-keep-line__txt').textContent).toBe(fr.brdKeptEmail('aiko@example.com'))
+    const door = q(screen, '[data-action="switch-account"]')
+    expect(door.textContent).toBe(fr.brdKeptSwitch)
+    await click(screen, '[data-action="switch-account"]')
+    expect(onSignIn).toHaveBeenCalledTimes(1)
+    // Nothing was issued on the way out.
+    expect(completes()).toHaveLength(0)
+  })
+
+  it('offers a guest no account to switch from', async () => {
+    const { screen } = await renderFlow({ guest: true, user: { email: null, is_anonymous: true }, onSignIn: vi.fn() })
+    await toCardBeginner(screen)
+    expect(q(screen, '.brd-keep-line').dataset.kept).toBe('device')
+    expect(q(screen, '[data-action="switch-account"]')).toBeNull()
+  })
+
   // ── 改札 — coming back from Google, on the web ──────────────────
   // The web leaves the page for Google and returns as a FRESH load: the
   // stash puts the learner back on the card, which says it is kept when
@@ -683,10 +710,21 @@ describe('BoardingFlow', () => {
     expect(stepOf(screen)).toBe('card')
     expect(sheet()).toBeNull()
     expect(q(screen, '.brd-keep-line').dataset.kept).toBe('google')
+    expect(q(screen, '.brd-keep-line').textContent).toBe(fr.brdKeptGoogle)
     expect(code(screen, 'destination').textContent).toBe('N3')
     await click(screen, '[data-action="issue"]')
     await settle(80)
     expect(done()[0]).toMatchObject({ kept: 'google' })
+  })
+
+  it('says which Google account the card came back kept on', async () => {
+    stashed()
+    const { screen } = await renderFlow({ guest: false, user: { email: 'aiko@gmail.com', app_metadata: { provider: 'google' } }, onSignIn: vi.fn() })
+    expect(stepOf(screen)).toBe('card')
+    const line = q(screen, '.brd-keep-line')
+    expect(line.dataset.kept).toBe('google')
+    expect(line.querySelector('.brd-keep-line__txt').textContent).toBe(fr.brdKeptEmail('aiko@gmail.com'))
+    expect(q(screen, '[data-action="switch-account"]')).toBeTruthy()
   })
 
   it('comes back from a refused round trip to the account sheet, with the reason on it', async () => {

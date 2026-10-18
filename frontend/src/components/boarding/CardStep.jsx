@@ -79,7 +79,12 @@ function IssueError({ error, onReport }) {
   )
 }
 
-function KeepLine({ kept, onKeep }) {
+// An account boarded with prints its address: the boarding only runs on
+// an account with no journey on it, so an address here is a NEW pass
+// for it -- and for the learner Google's chooser put on an account no
+// pass carried, not the one they meant (docs/oauth.md, "Say whose pass
+// it is"). `onSwitch` is the way to their own, beside the address.
+function KeepLine({ kept, onKeep, onSwitch = null }) {
   const { t } = useLang()
   if (kept.state === 'device') {
     return (
@@ -106,13 +111,16 @@ function KeepLine({ kept, onKeep }) {
     <p className="brd-keep-line brd-keep-line--kept" data-kept={kept.state}>
       <CheckMark />
       <span className="brd-keep-line__txt">
-        {kept.state === 'google' ? t.brdKeptGoogle : kept.email ? t.brdKeptEmail(kept.email) : t.brdKeptAccount}
+        {kept.email ? t.brdKeptEmail(kept.email) : kept.state === 'google' ? t.brdKeptGoogle : t.brdKeptAccount}
       </span>
+      {kept.email && onSwitch && (
+        <button type="button" className="brd-keep-line__go" onClick={() => { playClick(); onSwitch() }} data-action="switch-account">{t.brdKeptSwitch}</button>
+      )}
     </p>
   )
 }
 
-export default function CardStep({ contract, kept, onOpen, onSign, onKeep, onEnter, onReport = null, busy = false, error = null, children = null }) {
+export default function CardStep({ contract, kept, onOpen, onSign, onKeep, onEnter, onSwitch = null, onReport = null, busy = false, error = null, children = null }) {
   const { t, lang } = useLang()
   const credits = useCredits()
   const tier = cardTier(credits)
@@ -133,7 +141,7 @@ export default function CardStep({ contract, kept, onOpen, onSign, onKeep, onEnt
               back={<PassBack tier={tier} data={back} doors={{ open: onOpen, onSign }} />}
             />
           </div>
-          <KeepLine kept={kept} onKeep={onKeep} />
+          <KeepLine kept={kept} onKeep={onKeep} onSwitch={onSwitch} />
         </div>
       </div>
       <div className="brd__foot">

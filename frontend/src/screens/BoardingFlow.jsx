@@ -58,7 +58,9 @@ import { BoardBack } from '../components/boarding/boardBack'
 //
 // `onExit` is the way back OUT of the first question: back on the kana
 // has nowhere to go inside the flow, so it leaves for Welcome, where the
-// sign-in is. `onSignIn` is the same door, named (the Welcome's).
+// sign-in is. `onSignIn` is the same door, named (the Welcome's), and
+// the card's line offers it to a session that holds an address: a new
+// pass for it, which may not be the one the learner meant.
 //
 // The track at the head is the progress bar -- a stop per question, the
 // card the last; the card is an arrival screen and stands with no head:
@@ -153,7 +155,7 @@ const stopOf = step => STOP_OF[step] ?? step
 const UNEDITED = { goal: false, rhythm: false, hour: false, lines: false }
 
 export default function BoardingFlow({
-  session, onComplete, onExit = null, guest = false, dryRun = false,
+  session, onComplete, onExit = null, onSignIn = null, guest = false, dryRun = false,
 }) {
   const { t, lang } = useLang()
   const desk = useDesk()
@@ -702,6 +704,7 @@ export default function BoardingFlow({
             onSign={() => setSheet('name')}
             onKeep={() => setSheet('account')}
             onEnter={complete}
+            onSwitch={guest ? null : onSignIn}
             onReport={() => setReporting(true)}
             busy={busy}
             error={saveError}

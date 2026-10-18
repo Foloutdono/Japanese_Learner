@@ -661,6 +661,7 @@ export default function App({ front = NO_FRONT }) {
             } : g))
           }}
           onExit={() => leaveBoarding()}
+          onSignIn={() => leaveBoarding('login')}
         />
       </LangProvider>
     )

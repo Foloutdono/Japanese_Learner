@@ -2613,6 +2613,7 @@ const boarding = {
   brdKeptGoogle: 'Kept on your Google account',
   brdKeptEmail: (email) => `Kept · ${email}`,
   brdKeptAccount: 'Kept on your account',
+  brdKeptSwitch: 'Switch account',
   brdSheetGoal: 'Destination',
   brdSheetRhythm: 'Pace',
   brdSheetHour: 'Departure',

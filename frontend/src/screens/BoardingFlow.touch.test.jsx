@@ -201,6 +201,37 @@ describe('the boarding on a 390x667 handset', () => {
     expect(overflowOf(screen)).toBe(0)
   }, 30000)
 
+  // A session with an address boards a NEW pass for it (docs/oauth.md):
+  // the card's line says the address and holds the way to another
+  // account. The reader's card, in both tables, with an address as long
+  // as a real one runs.
+  it.each(['fr', 'en'])('names a pass its address, and the switch, without scrolling (%s)', async lang => {
+    localStorage.setItem('lang', lang)
+    try {
+      const screen = await render(
+        <LangProvider>
+          <BoardingFlow
+            session={{ access_token: 'tok', user: { email: 'marie-claire.dupont-moreau@gmail.com' } }}
+            onComplete={vi.fn()}
+            onSignIn={vi.fn()}
+            dryRun
+          />
+        </LangProvider>
+      )
+      await settle()
+      await click(screen, '[data-kana="both"]')
+      await settle()
+      await click(screen, '[data-level="N4"]')
+      await click(screen, '[data-action="continue"]')
+      await settle()
+      expect(stepOf(screen)).toBe('card')
+      expect(q(screen, '[data-action="switch-account"]')).toBeTruthy()
+      expect(overflowOf(screen)).toBe(0)
+    } finally {
+      localStorage.removeItem('lang')
+    }
+  }, 30000)
+
   it('opens on a welcome that fits', async () => {
     // Step zero, mounted by App rather than by the flow.
     const screen = await render(<LangProvider><Welcome onBoard={vi.fn()} onSignIn={vi.fn()} /></LangProvider>)

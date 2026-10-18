@@ -17,6 +17,10 @@ const apiJsonWithTimeout = vi.fn()
 // /api/today, shaped fully so NextService renders quietly.
 const apiJson = vi.fn(async () => ({ total: 0, by_source: {}, lanes: [], next_due: null }))
 const apiFetch = vi.fn(async () => ({ ok: true, status: 200, json: async () => ({}) }))
+// The session's user, and the sign-out the boarding's switch asks for.
+const USER = { id: 'user-1' }
+const sessionUser = { current: USER }
+const signOut = vi.fn(async () => ({ error: null }))
 
 vi.mock('./lib/api', () => ({
   api: p => p,
@@ -30,9 +34,9 @@ vi.mock('./lib/api', () => ({
 vi.mock('./lib/supabase', () => ({
   supabase: {
     auth: {
-      getSession: async () => ({ data: { session: { access_token: 'tok', user: { id: 'user-1' } } } }),
+      getSession: async () => ({ data: { session: { access_token: 'tok', user: sessionUser.current } } }),
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),
-      signOut: async () => {},
+      signOut: (...a) => signOut(...a),
     },
   },
 }))
@@ -48,6 +52,8 @@ const settle = (ms = 120) => new Promise(r => setTimeout(r, ms))
 
 beforeEach(() => {
   apiJsonWithTimeout.mockReset()
+  sessionUser.current = USER
+  signOut.mockClear()
   window.history.replaceState(null, '', '/')
   try { window.localStorage.removeItem('jp-onboarded') } catch { /* private mode */ }
 })
@@ -65,6 +71,28 @@ describe('App onboarding gate', () => {
     // (.gatehall is the home screen's room — the wall-map redesign's
     // successor to the departure board this assertion used to probe.)
     expect(screen.container.querySelector('.gatehall')).toBeNull()
+  })
+
+  // Google's chooser can land a learner on an account no pass carried
+  // (docs/oauth.md): the card says the address, and its switch leaves
+  // the boarding for the sign-in, this device only, as back out of the
+  // first question does.
+  it('switches a pass that names its address back to the sign-in', async () => {
+    sessionUser.current = { id: 'user-2', email: 'aiko@gmail.com', app_metadata: { provider: 'google' } }
+    apiJsonWithTimeout.mockResolvedValue({ username: 'Tester', onboardedAt: null, jlptLevel: null })
+
+    const screen = await render(<App />)
+    await settle()
+    const live = sel => screen.container.querySelector(`.brd__car:not(.brd__car--out) ${sel}`)
+    live('[data-kana="none"]').click()
+    await settle(700)
+    live('[data-action="continue"]').click()
+    await settle(700)
+    expect(screen.container.querySelector('.brd').dataset.step).toBe('card')
+    expect(live('.brd-keep-line').textContent).toContain('aiko@gmail.com')
+    live('[data-action="switch-account"]').click()
+    await settle()
+    expect(signOut).toHaveBeenCalledWith({ scope: 'local' })
   })
 
   it('shows the app when the profile is already onboarded', async () => {
