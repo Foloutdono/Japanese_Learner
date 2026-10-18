@@ -2211,6 +2211,10 @@ const exam = {
   // honest thing to show is raw proportion correct plus a practice
   // target — and to say plainly that that is what it is.
   examPracticeTarget:  'Target',
+  // The line the score's bar lands on (plan 254): the target met, or how
+  // many more right answers it wanted.
+  examTargetReached:   'Target reached',
+  examTargetShort: n => `${n} ${n > 1 ? 'answers' : 'answer'} short of the target`,
   // Wrong answers are what a review is for, so that's what opens by
   // default — a 21-question paper otherwise lists 21 identical rows to
   // click through before finding the two that went wrong.

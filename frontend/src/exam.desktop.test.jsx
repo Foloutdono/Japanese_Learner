@@ -329,6 +329,10 @@ describe('the exam result on the desk', () => {
     expect(rows[1].querySelector('.desk-oval--x').textContent).toBe('1')
     expect(rows[1].querySelector('.desk-oval--right').textContent).toBe('2')
     expect(openQ()).toBe('2')
+    // The score counts up as its bar fills (plan 254); a key ends the
+    // count on the whole of it.
+    press('Shift')
+    await settle()
     expect($('.desk-score__fig').textContent).toBe('1')
     expect($('.desk-book__walk').textContent).toContain('erreur 1 sur 2')
     const open = $('.desk-book--res')

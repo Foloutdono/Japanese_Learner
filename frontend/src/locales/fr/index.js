@@ -2145,6 +2145,10 @@ const exam = {
   // brute de bonnes réponses et un objectif d'entraînement, en le
   // disant clairement.
   examPracticeTarget:  'Objectif',
+  // La ligne où se pose la barre du score (plan 254) : l’objectif
+  // atteint, ou combien de bonnes réponses il manquait.
+  examTargetReached:   'Objectif atteint',
+  examTargetShort: n => `À ${n} ${n > 1 ? 'bonnes réponses' : 'bonne réponse'} de l’objectif`,
   // Une correction sert d'abord aux erreurs : c'est donc ce qui est
   // ouvert par défaut — sinon une épreuve de 21 questions affiche 21
   // lignes identiques à dérouler avant de trouver les deux ratées.
