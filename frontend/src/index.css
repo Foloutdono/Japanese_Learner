@@ -30647,7 +30647,7 @@ button.brd-stn { cursor: pointer; }
 /* The head on the board's 52px, so the rally's 1.5px line sits on a
    whole pixel. */
 .rst-head { flex: none; min-height: var(--sp-9); }
-.rst-air { flex: 1 1 0; min-height: var(--sp-7); }
+.rst-air { flex: 1 1 0; min-height: var(--sp-5); }
 .rst-air--top { max-height: 124px; min-height: var(--sp-5); }
 /* The hero's rhythm, the board's 28px over the streak and 44px over the
    reserve, spent as spacers in the screen's column: at most the board's,
@@ -40289,12 +40289,6 @@ button.brd-stn { cursor: pointer; }
   .tkb-book { grid-column: 2; grid-row: 2 / span 2; align-self: start; }
   .tkb-foot { grid-column: 1; grid-row: 3; }
   .tkb-air { display: none; }
-
-  /* The short desk (plan 169): the air's floor a rung lower; the hero's
-     rhythm gives way with it (plan 250b). */
-  @media (max-height: 799px) {
-    .today > .rst .rst-air { min-height: var(--sp-5); }
-  }
   /* ── 191:desk-tickets end ── */
 
   /* ── 机 — Choisir and Construire on the desk (plan 194) ──

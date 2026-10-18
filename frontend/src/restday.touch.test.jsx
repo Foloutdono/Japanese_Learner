@@ -4,6 +4,7 @@ import { page } from 'vitest/browser'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
+import { appFonts } from './testing/appFonts'
 
 // ── 運休 and 記念切符 on a short phone (plans 191, 250b) ───────────────
 // 390×667, a thumb, under the Shell's bars as Today shows the notice:
@@ -37,8 +38,9 @@ afterEach(async () => {
 const top = sel => $(sel).getBoundingClientRect().top
 const bottom = sel => $(sel).getBoundingClientRect().bottom
 
-function mount(query) {
-  return render(
+// Its places are measured in the app's own faces, not the machine's.
+async function mount(query) {
+  const screen = await render(
     <LangProvider>
       <MemoryRouter initialEntries={[`/dev/dayclear${query}`]}>
         <Routes>
@@ -49,6 +51,8 @@ function mount(query) {
       </MemoryRouter>
     </LangProvider>
   )
+  await appFonts()
+  return screen
 }
 
 describe('at 390×667', () => {
