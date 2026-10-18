@@ -2543,11 +2543,11 @@ const guide = {
   guideLearnStops: 'Où tu en es sur la ligne, et les arrêts autour.',
   guideLearnShelf: 'Tes propres decks, et la bibliothèque des decks partagés par les autres.',
   guidePracticePass: 'Ces exercices font partie de l’abonnement.',
-  // Le quai peint (plan 225) : ses deux panneaux et son portique ; au
-  // bureau (plan 244), le tableau des départs et le portique.
-  guidePracticeSign: 'La destination du train. Touche la ligne du dessus ou du dessous pour la faire tourner, celle qui est allumée pour ouvrir sa station.',
-  guidePracticeGrade: 'Le niveau du train. Le tien porte un point : fais-le tourner pour en essayer un autre.',
-  guidePracticeBoard: 'Embarque : les portes se ferment et le train t’emmène à l’exercice.',
+  // Les plaques de Pratique (plan 254) : un quai, son pied (ton niveau,
+  // ce que tu y as fait) et l'examen blanc.
+  guidePracticePlate: 'Un exercice : lire, comprendre, traduire, écouter, écrire ou converser. Touche-le pour l’ouvrir à ton niveau.',
+  guidePracticeStops: 'Ton niveau, avec ce que tu y as fait et ta part de bonnes réponses.',
+  guidePracticeExam: 'L’examen blanc : une épreuve type JLPT au niveau de ton choix, corrigée dès que tu la rends.',
   guideDictConsole: 'Cherche par mot, lecture ou sens.',
   guideDictOptions: 'Affine ta recherche : mot exact, début ou n’importe où. Dans le japonais, le sens ou les deux.',
   guideDictChips: 'Parcours par collection. Tes favoris sont au bout.',
@@ -2568,11 +2568,8 @@ const guide = {
   guideLearnStopsDesk: 'Toute la ligne. Clique sur un arrêt pour l’étudier.',
   // Pour un pointeur (plan 123) : les notes qui disaient « touchez ».
   guideLearnPlateDesk: 'Une ligne. Clique dessus pour l’ouvrir. La pastille montre ce qui t’attend aujourd’hui.',
-  // Le quai peint au bureau (plan 244) : le tableau des départs, ses
-  // niveaux en tête, et le portique, qu'Entrée presse aussi.
-  guidePracticeGradeDesk: 'Le niveau des trains. Le tien porte un point : clique sur un autre pour l’essayer quand même.',
-  guidePracticeSignDesk: 'Les trains au départ, un par exercice, avec ce que tu y as fait à ce niveau. Clique sur l’un pour voir ce qu’il te demandera.',
-  guidePracticeBoardDesk: 'Embarque : les portes se ferment et le train t’emmène à l’exercice. Entrée le fait de n’importe où ici.',
+  // Les plaques de Pratique au bureau (plans 165, 254) : chacune porte son exercice.
+  guidePracticePlateDesk: 'Un exercice, et ce qu’il te demandera à ton niveau. Clique dessus pour l’ouvrir.',
   guideDictEntryDesk: 'Une entrée, ouverte à côté de la liste. ← et → pour parcourir la liste.',
   // 机 (plan 248) : sur le bureau, les chiffres du carnet de tampons ouvrent ceux du profil.
   guideProfileRecordsDesk: 'Tes chiffres : ta série et ton record, les jours tamponnés, tes révisions, ce que tu retiens, ta meilleure série sans faute.',
@@ -2626,9 +2623,9 @@ const onboarding = {
   settingsLineOn: 'Sur ton trajet',
   settingsLineOff: 'Hors de ton trajet',
   plateOffRoute: 'Hors de ton trajet',
-  // Le relevé d'un niveau sur un quai de Pratique, au bureau (plan 130 ;
-  // sur le tableau des départs depuis le plan 244) : ce qui a été fait à
-  // ce niveau, puis la part juste. L'espace avant le % est insécable,
+  // Le relevé d'un niveau sur un quai de Pratique (plan 130 ; au pied
+  // de ses plaques au téléphone depuis le plan 254) : ce qui a été fait
+  // à ce niveau, puis la part juste. L'espace avant le % est insécable,
   // comme partout en français.
   practiceDone: {
     sentences: n => `${n} phrase${n > 1 ? 's' : ''}`,
@@ -2651,35 +2648,10 @@ const onboarding = {
     dictation: 'Deux écoutes, pas une de plus : écris en rōmaji ce que tu entends.',
     composition: 'Un point de grammaire est donné : écris une phrase qui l’emploie, un tuteur la relit.',
     conversation: 'On te parle dans une scène : choisis ta réponse, écris-la ou réponds librement.',
-    // Sur la carte du train choisi, au bureau (plan 244, la plaque du
-    // plan 165 avant lui) : la question que son puits montre.
+    // Sur sa plaque, au bureau (plans 165, 254) : la question que son
+    // puits montre.
     exam: 'Une question au format JLPT, ici 漢字読み : la lecture du mot souligné.',
   },
-  // ── Le quai peint, au téléphone (plan 225) ─────────────────
-  // Le nom court de chaque quai, sous son japonais sur le panneau du
-  // train ; les noms que lit un lecteur d'écran.
-  practiceGateShort: {
-    reading: 'Lecture',
-    comprehension: 'Compréhension',
-    translation: 'Traduction',
-    dictation: 'Dictée',
-    composition: 'Rédaction',
-    exam: 'Examen',
-    conversation: 'Conversation',
-  },
-  practiceGateGrade: 'Niveau du train',
-  practiceGateDest: 'Destination du train',
-  practiceGateStation: title => `${title} : ouvrir la station`,
-  practiceGateBoard: (title, level) => `Embarquer · ${title} · ${level}`,
-  practiceGateClock: hour => `Horloge du quai, ${hour}. Touche pour l’heure suivante.`,
-  practiceGateHour: { dawn: 'l’aube', day: 'le jour', dusk: 'le soir', night: 'la nuit' },
-  practiceGatePantoRaise: 'Lever le pantographe',
-  practiceGatePantoLower: 'Baisser le pantographe',
-  // ── Le quai peint, au bureau (plan 244) ─────────────────────
-  // L'horloge pour un pointeur, et la porte de la station sur la carte
-  // du train choisi.
-  practiceGateClockDesk: hour => `Horloge du quai, ${hour}. Clique pour l’heure suivante.`,
-  practiceDeskOpen: 'Ouvrir la station',
   practiceBank: {
     sentences: n => `${n} phrases écrites pour le grade.`,
     texts: n => `${n} questions par texte.`,

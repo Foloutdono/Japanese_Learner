@@ -26,12 +26,6 @@ export function playDoorChime() { playVoice('door-chime') }
 /** The leaves running open. Starts when they do, not with the chime. */
 export function playDoorSlide() { playVoice('door-slide') }
 
-/** 菱 — the Practice gate's pantograph rising to the wire or folding (plan 225). */
-export function playPantograph() { playVoice('pantograph-air') }
-
-/** A spark where the pantograph's head meets the wire. */
-export function playSpark() { playVoice('pantograph-spark') }
-
 /**
  * The app's generic click and toggle.
  *

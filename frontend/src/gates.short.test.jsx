@@ -2,16 +2,20 @@ import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
+// The faces the app draws in (main.jsx), so Practice's wells are
+// measured as a learner sees them.
+import '@fontsource/space-grotesk/latin-700.css'
+import '@fontsource/noto-sans-jp/400.css'
+import '@fontsource/noto-sans-jp/700.css'
 import './index.css'
 
 // ── 低 — the gates on a laptop's short window (plan 169) ────────────
 // At 1280×600 each of Learn's four line plates was 19px shorter than
 // its line, the figures under its stops cut at every foot: they come in
-// a rung and hold whole. Practice's painted platform (plan 244) keeps
-// its board in the window: the levels, the seven trains a rung tighter
-// and the chosen one's card, which leaves its head and its link to the
-// row and the rail and keeps its well, every train's compact face whole
-// at every grade.
+// a rung and hold whole. Practice's plates (plans 165, 254) stand three
+// to a row, each at its row's floor -- the room a well needs for its
+// compact face -- and the window scrolls to the exam's paper: every
+// platform's card whole at every grade.
 
 const { default: CARDS } = await import('./testing/practiceCards.json')
 vi.mock('./lib/api', () => ({
@@ -89,30 +93,33 @@ describe('the gates on a short window', () => {
     expect(box(plates.at(-1)).bottom).toBeLessThanOrEqual(window.innerHeight)
   })
 
-  it('keeps Practice\'s board in the window, every train\'s card whole at every grade', async () => {
-    await framed('/practice', <PracticeScreen />)
-    await settle(900)
-    expect(document.scrollingElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight + 1)
-    const trains = $$('.pdesk-dep')
-    expect(trains).toHaveLength(7)
-    expect(box(document.querySelector('.pdesk-card')).bottom).toBeLessThanOrEqual(window.innerHeight)
-    for (const part of ['.pdesk-card__head', '.pdesk-card__open', '.pdesk-card__how']) {
-      expect(getComputedStyle(document.querySelector(part)).display, part).toBe('none')
-    }
-    const levels = $$('.pdesk-levels [role="radio"]')
-    for (const level of levels) {
-      for (const train of trains) {
-        train.click()
-        level.click()
-        // A plain wait: settle() would sit out the reading face's clock.
-        await new Promise(r => setTimeout(r, 150))
-        const well = document.querySelector('.pdesk-card .prc-spec')
-        const what = `${level.textContent} ${train.querySelector('.pdesk-dep__title').textContent}`
-        expect(well.classList.contains('prc-spec--compact'), what).toBe(true)
-        expect(well.textContent, what).not.toBe('')
-        expect(well.scrollHeight, what).toBeLessThanOrEqual(well.clientHeight + 1)
-        expect(well.scrollWidth, what).toBeLessThanOrEqual(well.clientWidth + 1)
+  it('stands Practice\'s plates three to a row at their floor, every card whole at every grade', async () => {
+    try {
+      for (const grade of ['N5', 'N4', 'N3', 'N2', 'N1']) {
+        learner.grade = grade
+        const screen = await framed('/practice', <PracticeScreen />)
+        await new Promise(r => setTimeout(r, 400))
+        await document.fonts.ready
+        const plates = $$('.practice > .plates > .plate')
+        expect(plates).toHaveLength(7)
+        const tops = plates.map(p => box(p).top).reduce((acc, t) => (acc.some(r => Math.abs(r - t) <= 1) ? acc : [...acc, t]), [])
+        expect(tops, grade).toHaveLength(3)
+        // A row never gives a well less than its compact face: the
+        // window scrolls the paper instead.
+        for (const plate of plates) expect(box(plate).height, grade).toBeGreaterThanOrEqual(240 - 1)
+        expect(document.scrollingElement.scrollHeight).toBeGreaterThan(window.innerHeight)
+        for (const plate of plates) {
+          const well = plate.querySelector('.prc-spec--plate')
+          const what = `${grade} ${plate.querySelector('.plate__title').textContent}`
+          expect(well.classList.contains('prc-spec--compact'), what).toBe(true)
+          expect(well.textContent, what).not.toBe('')
+          expect(well.scrollHeight, what).toBeLessThanOrEqual(well.clientHeight + 1)
+          expect(well.scrollWidth, what).toBeLessThanOrEqual(well.clientWidth + 1)
+        }
+        await screen.unmount()
       }
+    } finally {
+      learner.grade = 'N4'
     }
   })
 })

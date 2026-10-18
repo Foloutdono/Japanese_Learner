@@ -41,10 +41,10 @@ The app is a Japanese railway station. Learning is a journey: sections are
 your profile is a **commuter pass** (定期券) in its **holder** (定期入れ), and
 the home screen is the
 **gate hall**: the day's reviews at the **fare gate** (改札), your pass under
-them, behind the Learn gate a column of **station plates** (駅名標), one per
-line, each printing the stop you have reached and the one ahead, and behind
-the Practice gate a painted **platform**, a train standing at it for each
-exercise.
+them, and behind the Learn and Practice gates a column of **station
+plates** (駅名標): on Learn one per line, each printing the stop you have
+reached and the one ahead, and on Practice one per exercise, printing your
+grade and what you did there.
 
 The pass is a physical object, so it behaves like one. It has a front and a
 back — the contract it was issued under, 乗車駅 · 行先 · 種別 · 発車時刻 ·
@@ -793,9 +793,7 @@ question and at the end of a first ride (`Continue` in
 Board's place (plan 168, phone and desk alike) — and Today's **Depart** on the fare
 gate (`components/station/GateCard.jsx`, owner-directed after plan 164) — and,
 on the desk, a deck's **Study** (`screens/DeckDetailScreen.jsx`'s gate, plan
-179) — and the painted Practice gates' **Embarquer** (plans 225 and 244,
-below) are
-drawn by one component, `components/ui/GateButton.jsx` (`.btn-depart--gate`),
+179) — are drawn by one component, `components/ui/GateButton.jsx` (`.btn-depart--gate`),
 as a ticket gate you tap your pass on (改札, plan 164: the owner's pick D of four
 directions drawn for "more vibrant, the user must notice it and want to
 press it"; redrawn in plan 225 as the painted Practice gate drew its own,
@@ -815,7 +813,7 @@ scanner — the pass's contactless arcs it carried read as a speaker's):
   between it and the word. Pressing lights the reader (`--text-on-panel`),
   the gate's ピッ. The word stands on the pill's centre line; on the desk
   the printed Enter takes the right end.
-- **It stands still**, as the painted one does: plan 164's breathing halo
+- **It stands still**, as the painted Practice gate's did: plan 164's breathing halo
   and the ripples off the reader went with the redraw.
 - **Not yet is its outline**, not a faded fill: `--surface`, a
   `--surface-line` ring, the word, the reader's mark and its hairline in
@@ -1236,111 +1234,58 @@ adds no idiom of its own: it is the tour's scene made to answer back.
   then the run stands on the three panels: this run's figures at the
   left, the thread in the middle, the scene's brief (its plate,
   situation and errand) in the side.
-- **The gate: seven trains on both.** The phone's painted platform
-  rolls 会話 as its seventh destination (plan 225), and since plan 244
-  the desk's board lists it as its seventh train, its card the grade's
-  first scene: the place on the scene's plate, its name, the line the
-  other person opens on. (The desk's six plates, plan 165, had no room
-  for a seventh, and kept 会話 to the rail until then.) The pigment is
-  縹 (`--line-kaiwa`), the dayflower blue between 緑青 and 藍.
+- **The gate: the seventh plate on both** (plan 254). On a phone 会話's
+  foot prints the learner's grade and their replies there; on the desk
+  its well holds the grade's first scene: the place on the scene's
+  plate, its name, the line the other person opens on (a compact well
+  keeps the plate and the line, set closer). (The desk's six plates,
+  plan 165, had no room for a seventh and kept 会話 to the rail; plan
+  244's painted board listed it as a train; plan 254's plates wrap to
+  hold seven.) The pigment is 縹 (`--line-kaiwa`), the dayflower blue
+  between 緑青 and 藍.
 
-### The painted platform (練習の改札, plan 225)
+### The practice gate (練習の改札, plans 165, 254)
 
-**Practice's gate on the phone is a painting, made live.** The owner
-painted the platform — the canopy, Fuji past it, a car standing with its
-door open — and picked it, its four hours too, on the canvas "Practice
-gate — five wheels" (board 4). `scripts/practice-gate/` cuts the painting
-into layers and lights them at Today's hours (曙 dawn, the day, 落雁 dusk,
-秋月 night, `domain/printHour`), and `components/practice/gate/` draws over
-it, where the painting has them, the things that move or say something:
+**Practice hangs plates, as Learn does.** The painted platforms of plans
+225 (the phone) and 244 (the desk) asked for a grade rolled on a sign, a
+train chosen on another and a departure watched before every run; the
+owner found them a pain to use and took the plates back from the canvas
+"Tsuji — Practice, new directions": B on the phone, A on the desk
+(`screens/PracticeScreen.jsx`, plan 254).
 
-- **Two roll signs on the car's side**, the train's grade (種別) and where
-  it goes (行先): three rows each, the lit one in the middle, rolled by a
-  tap on the row above or below (or the arrow keys) with the flaps'
-  clatter. The learner's own grade carries a dot. The lit destination
-  opens its station, as a plate's head did. Under them an **LED** pages
-  between what the run asks and where the train goes.
-- **The band along the cars** takes the chosen line's pigment, through a
-  colour blend over the stripe's own mask, so it keeps its paint.
-- **The door's leaves, the pantograph, the clock**: the train wakes and
-  raises its pantograph to the wire, a spark where it touches, then
-  opens; a tap folds or raises it. The clock keeps the time; a tap on it
-  shows the next hour.
-- **The gate button** (above) at the painting's foot: the doors close,
-  the train pulls out on the wire, a veil says where it went, and the run
-  opens. A tap skips to it. When the learner comes back, the train comes
-  in again.
-
-It keeps its own rules:
-
-- **It is a picture, not a surface.** Its inks are the painting's and its
-  signs', the same in both themes; the lines' pigments on it are the washi
-  theme's (`--pg-ink-*`), the signs being boards in the platform's light.
-- **Its numbers are the painting's.** The scene is 390 × 724 units, one
-  px each inside a zoomed root (`gateFit.js` places it: it fills the
-  frame's width, gives up sky before anything else, and keeps the wire
-  to the button whole); its type is the scale's, zoomed with it.
-- **Regenerated, never edited**: change the generator and bump its `REV`.
-- **Reduced motion**: the train stands, door open, pantograph up; the
-  signs turn without rolling; Embarquer opens the run at once.
-
-**On the desk, the platform painted wide (plan 244).** The owner's pick
-B of the canvas "Tsuji — Practice on the desk", from a second painting
-of the owner's (`scripts/practice-gate/source/desk.webp`, cut and lit
-by `scripts/practice-gate/desk.py` with the phone's recipes for the
-hours): the station the window's height and the width the rail leaves,
-the 辻駅 sign, the 富士見台 pillar, the clock, the bench and a car with
-its door open, and **one board over the painting's right side**, at
-Today's column's width (`components/practice/gate/DeskGate`):
-
-- **The levels as the board's band**, the console's band over the
-  trains it applies to, the learner's own carrying a dot (and
-  `aria-current`), a landmark and never a lock.
-- **The seven trains**, one row each: the roundel, the name and the
-  learner's record at the chosen level (what was done, in the station's
-  unit, and the share right; "not yet"). One tab stop, the arrows walk
-  and choose; Enter on a train boards it.
-- **The chosen train's card**: its name and level, the line saying what
-  the run asks, the run's first card in a well (plan 165's plate face)
-  and the way into its station. As the window shortens the well's
-  caption goes first, then the line (still the gate button's
-  description), then the face takes its compact form; the short desk
-  also leaves out the head and the link, which the chosen row and the
-  rail say already.
-- **What the phone's car said, the board says.** No roll signs, no
-  LED, no pantograph: a sign is a word to read on a phone, and on a
-  computer the list beside it reads better. The stripe, the door's two
-  leaves, the clock (its next hour on a click), the gate button under
-  the stage's middle (Enter anywhere), the departure and the veil are
-  the phone's.
-- **The painting keeps its landmarks whole** (`deskFit.js`): it fills
-  the frame and starts at its left edge, unless the open door would
-  then stand under the board; the sign then leaves whole, never cut in
-  two, and the door stands at the stage's edge. The clock is never cut
-  by the board's edge where the painting can help it: with the sign gone
-  the scene moves on until the clock stands whole, with the sign there it
-  is drawn a little larger, the roof giving way, until the clock stands
-  wholly under the board.
-- **Its sky lives** (plan 244b, `DeskSky`): a painting is still, a
-  platform is not. Behind the sky's own mask -- the canopy, the wires,
-  the pillars and the land stay in front -- the clouds drift slowly
-  either way from where the painting has them, the brightest stars catch
-  the light, the sun's or the moon's glow breathes, and now and then the
-  hour's birds cross, jointed as Today's print draws them (cranes at
-  dawn, swallows by day, each on its own swooping way, the geese of 落雁 at dusk; none at night). Each
-  is slow enough to be noticed only by a learner who stays, and every
-  loop but the clouds' is a Web Animation. Under reduced motion the sky
-  is the painting's.
-- **The open door shows the car's inside as the owner painted it**
-  (plan 244c, `source/interior.webp`), its far window full of the car's own painted trees: shown narrower than painted,
-  never squeezed (plain columns let out between its rings, posters and
-  stanchions), and lit at each hour as the car is lit.
-- **Every window is the painting's** (owner-directed): the trees it
-  shows through the car, in each window and the doorway's far one, at
-  every hour, their colours kept and only the light changed, with what
-  the hour puts on the glass -- its sky fading down the pane, a soft
-  sheen, after dark the lit car's warmth and its tubes along each pane's
-  top. Never a view built for the window.
+- **On a phone, Learn's plate** (B). The seven stand in a column sharing
+  the gate, their heads a rung tighter than Learn's, so the seven hold a
+  phone's height. A plate is one door, to where the learner is: the
+  platform's list of grades, their own marked, where a tap boards the run
+  (reading's and translation's JLPT list, past the choice of a source,
+  which is one tap back; the exam's papers and 会話's scenes open on the
+  learner's grade by themselves). The foot is Learn's: the learner's grade
+  in its middle, between what they did there and the share of it that was
+  right (`/api/practice/record`), or "not yet". While the record cannot be
+  read the grade stands alone. The stripe is painted raw end to end: a
+  platform has no track behind it.
+- **On the desk, every platform's specimen** (A, plan 165). Under its name
+  a plate holds a line saying what the run asks and the run's own card in
+  a well, at the learner's grade (the station's sample); the whole plate is
+  one door to the station, which opens on that grade with Embarquer a key
+  away. The line is the head's description, drawn only where the body has
+  240px for it; under 300px tall or 340px wide the well takes its compact
+  face and loses its caption (comprehension its question, 会話 its scene's
+  name, its plate and line set closer).
+- **Seven make no lattice, so they wrap**: four to a row where four fit at
+  a desk column's least width (`--desk-run-col-min`), three where they do
+  not, two on the narrowest desk. The exam's paper is the last plate and
+  two plates wide, so with four to a row it takes the two cells the second
+  row leaves and with three or two the whole last row: no row is ever
+  short. A plate's basis leaves a gutter for flex to share out, and the
+  paper grows twice as fast, so its edges stay on the columns above it.
+  The rows share the window, never below two thirds of a side column, the
+  room a compact card needs: the short desk and the narrowest scroll by a
+  row. The gate takes the window's width.
+- **Every card whole**, at every width and every grade: nothing in a well
+  is cut, measured in the app's own faces
+  (`PracticeScreen.desktop.test.jsx`, `gates.wide.test.jsx`,
+  `gates.short.test.jsx`).
 
 ## Space
 
@@ -1911,8 +1856,9 @@ line here says otherwise.
   two rows. The shelf keeps its own height, having no body. Both feet are
   lists, one tab stop each, walked with ↑/↓. A window too short for the
   plates scrolls rather than squeezing a row below its content. (The
-  record is the desk's board's now, a row a train: plan 244, "The
-  painted platform" above.)
+  desk's plates carry their exercise since plan 165, and the record
+  stands at the foot of the phone's plates since plan 254: "The practice
+  gate" above.)
 - **Learn is the lines beside the shelf** (plan 132, the owner's pick of
   three drawn layouts). The four lines stand in one column, each drawn
   **across** its plate: the novice's stop, then a column per level — its
@@ -2083,15 +2029,13 @@ line here says otherwise.
   (the reading and three of the generator's near-misses). The plate is
   one door: the well stands inside its head, so a click on the picture
   departs as the name does, and the line is the button's description.
-  Measured: three rows deep (the desk's tightest) a plate draws no line
-  and comprehension's text stands alone, so every card is whole and the
-  gate still takes the window without a scroll. The Japanese name the
-  canvas printed beside each title (読書, 翻訳 …) stays off: the owner
-  cut it from these plates as a second name for a thing already named,
-  and the roundel still carries the station's code. The phone keeps its
-  chips. Since plan 244 the plates are gone: the desk's painted
-  platform shows the chosen train's card alone, the same face in the
-  same well ("The painted platform" above).
+  Measured: a short plate draws no line and comprehension's text stands
+  alone, so every card is whole. The Japanese name the canvas printed
+  beside each title (読書, 翻訳 …) stays off: the owner cut it from these
+  plates as a second name for a thing already named, and the roundel
+  still carries the station's code. Plan 244 painted the gate in the
+  plates' place; plan 254 hung them again, seven, 会話 among them, and
+  the phone hangs Learn's plates ("The practice gate" above).
 - **The statistics are the four lines** (plan 138, the owner's pick B of
   four drawn directions, the canvas "Statistics rework — options"). A
   strip of four figures across the top — retention with its line beside
@@ -2617,8 +2561,9 @@ line here says otherwise.
   pushes one plate's title off the line the others share. The foot is what
   a real 駅名標 prints under the name: on a Learn line the stop reached in
   the middle with the stop behind and the stop ahead at the edges, the
-  stripe filling with the leg being ridden (on a Practice platform, before
-  its gate was painted, the five grades its trains left for). Chosen from
+  stripe filling with the leg being ridden (on a Practice platform the
+  learner's grade between what they did there and the share right, plan
+  254; the five grades its trains left for, before plan 225). Chosen from
   five directions drawn side by
   side (plates, the platform card, the map upright, the ledger, the next
   train), and drawn without the reading and the caption the mockup gave
@@ -2626,10 +2571,10 @@ line here says otherwise.
   times. On a phone the column takes the gate and every plate gets one
   share, the shelf too. On the desk the lattice takes the window the same
   way, and the plate's body grows into the room: the whole line upright on
-  Learn (plan 130, "The desk" above). Practice hung plates too until its
-  gate was painted, on the phone in plan 225 and on the desk in plan 244
-  (with the platform's own exercise in a well under a line saying what
-  it asks since plan 165).
+  Learn (plan 130, "The desk" above), and on Practice the platform's own
+  exercise in a well under a line saying what it asks (plan 165). (Its
+  gate was painted for a while, plans 225 and 244, until plan 254 hung
+  the plates again.)
 - **A line with stops is how this app draws distance**, and it is one drawing
   shared by two places: the level picker's route diagram and the pass's ghost
   track. Same parts
