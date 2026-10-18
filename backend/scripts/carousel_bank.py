@@ -80,6 +80,17 @@ def _senses(meaning: str, limit: int = 3) -> list[str]:
     return parts[:limit]
 
 
+# KANJIDIC's notes among a kanji's meanings, which are no meaning to
+# learn: 働 "work; (kokuji)", 八 "eight; eight radical (no. 12)".
+_NOT_A_SENSE = re.compile(r"^\(.*\)$|\bradical\b.*\(no\.\s*\d+\)", re.I)
+
+
+def _kanji_senses(meaning: str, limit: int = 3) -> list[str]:
+    """A kanji's meanings as _senses cuts them, its dictionary's notes
+    left out before the first `limit` are taken."""
+    return [s for s in _senses(meaning, 99) if not _NOT_A_SENSE.search(s)][:limit]
+
+
 def _plain(text: str) -> str:
     """Catalogue prose without its markdown emphasis."""
     return re.sub(r"\*\*(.+?)\*\*", r"\1", text or "").strip()
@@ -662,8 +673,8 @@ def kanji_entry(char: str, deck: dict) -> dict:
         "lv": level,
         "on": on,
         "kun": kun,
-        "en": _senses(entry.get("meaning", "")),
-        "fr": _senses(get_kanji_meaning(char, "fr")),
+        "en": _kanji_senses(entry.get("meaning", "")),
+        "fr": _kanji_senses(get_kanji_meaning(char, "fr")),
     }
     s = strokes(char)
     if s:
@@ -1110,25 +1121,59 @@ def themes() -> dict:
 
 def lookalikes(deck: dict) -> dict:
     """The lookalike sets (content/lookalikes.json), each kanji with what
-    tells it apart, its meanings, its readings and its first deck word."""
+    tells it apart, its meanings, its readings and a deck word that
+    writes it: the easiest one a learner at the set's level can read."""
     from content.vocab_data import VOCAB_BY_LEVEL
     from translations import fr_gloss
     from translations.fr.vocab_fr import VOCAB_FR
 
-    first_word: dict = {}
+    # Every deck word of up to four characters that writes a kanji (お父さん
+    # is four), the deck's easiest first.
+    words_of: dict = {}
     for lv in LEVELS:
         for e in VOCAB_BY_LEVEL.get(lv, []):
             written = e["kanji"]
-            if len(written) > 3:
+            if len(written) > 4:
                 continue
-            for c in written:
-                if c in DECK_BY_CHAR and c not in first_word and written != c:
-                    kana = (e.get("kana") or "").split("/")[0]
-                    w = {"t": written, "r": kana, "en": _senses(e.get("meaning", ""), 1)}
-                    fr = _senses(fr_gloss(e, VOCAB_FR) or "", 1)
-                    if fr:
-                        w["fr"] = fr
-                    first_word[c] = w
+            for c in dict.fromkeys(written):
+                if c in DECK_BY_CHAR and written != c:
+                    words_of.setdefault(c, []).append((lv, e))
+
+    def readable(written: str, rank: int) -> bool:
+        """Every kanji of the word is a deck kanji at or below the level."""
+        return all(ch == "々" or not _KANJI_CHAR.match(ch)
+                   or (ch in DECK_BY_CHAR and LEVELS.index(DECK_BY_CHAR[ch][0]) <= rank)
+                   for ch in written)
+
+    def example(c: str, rank: int, used: set, pin) -> dict | None:
+        """A word at or below the set's level written with kanji at or
+        below it; else any word written with kanji at or below it; else
+        none, never 目標 in an N4 set. Within a tier, a word no other kanji
+        of the set shows yet comes first. `pin` is the set's own choice (a
+        word, or None for no word)."""
+        found = words_of.get(c, [])
+        if pin is not False:
+            if pin is None:
+                return None
+            found = [x for x in found if x[1]["kanji"] == pin]
+            if not found:
+                raise SystemExit(f"lookalikes.json: {pin} is no deck word that writes {c}")
+        else:
+            ok = [x for x in found if readable(x[1]["kanji"], rank)]
+            for tier in ([x for x in ok if LEVELS.index(x[0]) <= rank], ok):
+                if tier:
+                    found = [next((x for x in tier if x[1]["kanji"] not in used), tier[0])]
+                    break
+            else:
+                return None
+        e = found[0][1]
+        kana = (e.get("kana") or "").split("/")[0]
+        w = {"t": e["kanji"], "r": kana, "en": _senses(e.get("meaning", ""), 1)}
+        fr = _senses(fr_gloss(e, VOCAB_FR) or "", 1)
+        if fr:
+            w["fr"] = fr
+        return w
+
     sets = []
     for spec in json.loads((CONTENT / "lookalikes.json").read_text(encoding="utf-8")):
         chars = []
@@ -1143,10 +1188,17 @@ def lookalikes(deck: dict) -> dict:
             # another (校 is “exam” before it is “school”).
             if "m" in ch:
                 card["en"], card["fr"] = ch["m"]["en"], ch["m"]["fr"]
-            if c in first_word:
-                card["word"] = first_word[c]
             chars.append(card)
-        level = min((ch["lv"] for ch in chars), key=lambda lv: LEVELS.index(lv) * -1)
+        level = max((card["lv"] for card in chars), key=LEVELS.index)
+        rank = LEVELS.index(level)
+        used: set = set()
+        for card, ch in zip(chars, spec["chars"]):
+            # "w" pins the word (a deck word that writes the kanji), or
+            # null for none, where the rule's choice reads badly (流石).
+            w = example(card["c"], rank, used, ch.get("w", False))
+            if w:
+                card["word"] = w
+                used.add(w["t"])
         sets.append({"id": spec["id"], "lv": level, "chars": chars})
     return {"rev": REV, "sets": sets}
 
@@ -1174,6 +1226,9 @@ _DIALOGUE_READINGS = [
     (["船便"], [["船便", "w", "funabin", [["船", "ふな"], ["便", "びん"]]]]),
     (["御", "社"], [["御社", "w", "onsha", [["御", "おん"], ["社", "しゃ"]]]]),
     (["担当", "の", "方"], [None, None, ["方", "w", "kata", [["方", "かた"]]]]),
+    # 何とか, "somehow", is one word; before なった the analyser reads かなった as 叶った.
+    (["何", "と", "かなった"], [["何とか", "w", "nantoka", [["何", "なん"], ["とか", ""]]], ["なった", "v", "natta"]]),
+    (["何", "と", "か"], [["何とか", "w", "nantoka", [["何", "なん"], ["とか", ""]]]]),
 ]
 
 

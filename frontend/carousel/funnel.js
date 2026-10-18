@@ -47,7 +47,7 @@ export const WORDS = {
     analyser: 'As Tsuji’s analyser cuts it',
     meaning: 'Meaning',
     detail: {
-      words: 'Word by word', sentences: 'In sentences', kanjiWords: 'Words written with it', more: 'More', scene: 'The whole scene',
+      words: 'Word by word', sentences: 'In sentences', kanjiWords: 'Words written with it', lookWords: 'A word for each', more: 'More', scene: 'The whole scene',
       pair: 'Side by side', lookalike: 'Its lookalikes', list: 'The list', next: 'Next turn', round: 'Next round', question: 'One more',
     },
     // A question the carousel leaves to its reader: answered on the slide after.
@@ -96,7 +96,7 @@ export const WORDS = {
     analyser: 'Découpée par l’analyseur de Tsuji',
     meaning: 'Sens',
     detail: {
-      words: 'Mot à mot', sentences: 'En phrases', kanjiWords: 'Des mots qui l’écrivent', more: 'Encore', scene: 'Toute la scène',
+      words: 'Mot à mot', sentences: 'En phrases', kanjiWords: 'Des mots qui l’écrivent', lookWords: 'Un mot pour chacun', more: 'Encore', scene: 'Toute la scène',
       pair: 'Côte à côte', lookalike: 'Ses sosies', list: 'La liste', next: 'Le tour suivant', round: 'La manche suivante', question: 'Encore une',
     },
     yours: 'À toi',
@@ -242,8 +242,10 @@ function specOf(type, pl, opts) {
       }
     }
     case 'impostor': {
-      // Drawn as pictures: the rounds of pictured words, where the theme has them.
-      const I = f.impostor || pl.impostor
+      // Drawn as pictures: the rounds of pictured words, where the theme has
+      // enough of them; else the classic rounds of words (plan 248: a theme
+      // of four pictures drew empty tiles).
+      const I = f.impostor
       if (!I) return null
       const [r0, r1] = I.rounds
       return {
@@ -317,7 +319,7 @@ function platesOf(pl, f, base) {
       ...base,
       hook: { kind: 'pictures', words: f.pictures, ask: 'pictures', seconds: 10 },
       solution: { kind: 'pictures', words: f.pictures, reveal: true },
-      detail: (f.impostor || pl.impostor) ? (r => ({ kind: 'pictures', words: r.words, odd: r.at, why: r.why, ask: 'odd', yours: true }))((f.impostor || pl.impostor).rounds[0]) : null,
+      detail: f.impostor ? (r => ({ kind: 'pictures', words: r.words, odd: r.at, why: r.why, ask: 'odd', yours: true }))(f.impostor.rounds[0]) : null,
     }
     case 'lookalike': return {
       ...base,
@@ -1821,7 +1823,7 @@ function suiteOf(spec, pl) {
   const parts = [
     f.breakdown?.length && !spec.lead ? { kind: 'rows', items: rowsOf(f.breakdown), label: 'words' } : null,
     f.examples?.length ? { kind: 'examples', items: f.examples, label: 'sentences' } : null,
-    f.words?.length ? { kind: 'rows', items: f.words, label: ['kanji', 'word', 'kana'].includes(pl.source) ? 'kanjiWords' : 'words' } : null,
+    f.words?.length ? { kind: 'rows', items: f.words, label: ['kanji', 'word', 'kana'].includes(pl.source) ? 'kanjiWords' : pl.source === 'lookalike' ? 'lookWords' : 'words' } : null,
     f.lookalike?.length > 1 ? { kind: 'kanas', items: f.lookalike, here: f.kana?.k, label: 'lookalike' } : null,
   ].filter(d => d && !(spec.detail && same(spec.detail, d)) && !lead.some(x => same(x, d)))
   const asks = spec.lead ? [] : [

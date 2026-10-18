@@ -1,4 +1,4 @@
-# The carousel studio (plans 229–229n, 231, 232, 233, 234)
+# The carousel studio (plans 229–229n, 231–235, 237, 247, 248)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -887,6 +887,35 @@ node carousel/long/render.mjs --challenge n5-01 --style scroll --hour day --lang
 VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --challenge n5-01 --style along --hour night --lang fr
 ```
 
+## Tuning (plan 248)
+
+Every number a maker may want to set per post is declared once, in
+`tune.js`: its default (what the studio did before it could be tuned),
+its range, its step, its label and the sources it acts on. The studio's
+**Tune** panel, under the settings, shows the ones of the source in view
+as sliders, grouped:
+
+| Group | Sources | What |
+| --- | --- | --- |
+| Reading challenge | challenge | the reading pace (× each level's characters a minute), the hook, the text's coming in, the last line held, the pause between sentences, the question alone, the countdown, the answer, the app last, the picture's wash |
+| Music | challenge | the track's level and its fades |
+| Word echo | echo | how long the word is said, the silence between two sayings, the word kept |
+| Short video | every carousel | each slide's hold (×), the time to answer a question, the longest a short may run |
+| Long video | long | the pauses (×) and the quiz's countdown |
+| Export | every clip | the video's and the sound's bitrates, a keyframe every so many seconds |
+
+A module reads a value with `tuned(tune, key)`, which falls back to the
+default and holds a stale or hand-edited value to its range, so a tune
+never breaks a drawing. The studio keeps only the values changed, per
+viewer, and writes them into every render command as `--tune k=v,…`
+(`tuneFlag`), which `long/render.mjs` reads back (`parseTune`): the
+video rendered is the one previewed. A carousel's short carries its tune
+in its recipe. Sizes are not tunable: they stay on the type scale ("Easy
+to read"). A new tunable is a line in `tune.js` and a `tuned()` where the
+number was; `src/carouselTune.test.js` holds every default inside its
+range and on its step, and `src/carousel.test.js` holds each default to
+what its video did before.
+
 ## The code
 
 | File | Does |
@@ -907,6 +936,7 @@ VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --challenge n5
 | `short.js` | a carousel as a short video: its timing, its swipes, its line and page (plan 233) |
 | `challenge.js` | the reading challenges: a comprehension text in a credits scroll or read along, its timing on the voice, each frame, its page (plan 247) |
 | `long/render.mjs` | a long video, its short, a carousel's short or a reading challenge made: voiced, mixed, drawn and encoded (plans 233, 247) |
+| `tune.js` | what the Tune panel can set: each value's default, range, step and label, read by every module through `tuned()` (plan 248) |
 | `studio.js` | the page: the pickers, the previews, the export |
 
 ## Running it
@@ -944,3 +974,36 @@ needs: every sentence spelled back by its words, every item of every
 source drawn as every type it can be, a question that never deals its
 answer twice nor a wrong answer that could be right, ★ only where the
 order is fixed, the figures the bank's own.
+
+### Hand-written content (plan 248)
+
+`content/dialogues.json`, `content/lookalikes.json` and `content/emoji.json`
+are written by hand and held by `src/carousel.test.js`:
+
+- **A conversation** is in both languages (its place, its speaker, each
+  line, the right reply's translation and the why), deals three distinct
+  replies a turn, and lets no length answer: across a level, the right
+  reply is the longest, or the shortest, between 25% and 42% of the
+  time, ties shared, the bound the app's own conversations keep
+  (`study/conversation.LENGTH_TELL`). Its why accounts for every wrong
+  reply and never overstates a rule, and a wrong reply is one a native
+  speaker would not say there.
+- **A lookalike set** tells each kanji apart in both languages, every
+  kanji one the deck teaches. A set's `m` leads its slide with the sense
+  its note is about. Each kanji's example word is the easiest one a
+  learner at the set's level reads (`carousel_bank.lookalikes`): a deck
+  word at or below the level, every kanji in it at or below too, else
+  none; `"w"` pins one (or `null`, none). The dictionary's notes
+  ("(kokuji)", "radical (no. 12)") are no meaning and never shown.
+- **A theme's picture** names its word and nothing beside it: an emoji
+  whose Japanese name is another word of the theme (📚 本 for 図書館,
+  🍫 for ココア) is left out, and no two words of a theme share one. A
+  theme added here needs its impostor theme in `sources.IMPOSTOR_FROM`,
+  and its new pictured words their voices
+  (`python -m scripts.carousel_voices --yes`, with the voice engine).
+
+The bank cuts every line through the analyser and mends what it gets
+wrong (plan 248): a word the page writes in kana (としょかん) is read as
+the word it spells (`_RESPELL`, reviewed by hand), a number (二十五歳),
+でも opening a clause and お or ご with their word stay whole, and a word
+in katakana is romanised as it is written (コーヒー koohii).

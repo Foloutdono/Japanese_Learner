@@ -758,6 +758,7 @@ const IMPOSTOR_FROM = {
   music: 'sports', office_supplies: 'drinks', shopping_money: 'weather', insects_bugs: 'birds', birds: 'insects_bugs',
   seafood: 'birds', drinks: 'dishes', tools: 'clothing', medical: 'holidays_events', plants_trees: 'animals',
   household_items: 'animals', holidays_events: 'weather',
+  kitchen_items: 'animals', furniture: 'insects_bugs', rooms: 'seafood', shapes: 'animals', materials: 'emotions', family: 'tools',
 }
 // Words more than one theme can claim (a tomato is a fruit to a
 // botanist, a heart is a body part and a feeling): never in a round.
@@ -848,6 +849,8 @@ function lookalikePlan(data, set, opts) {
   const heads = chars.map(k => k.c).join(' ')
   const funnel = {
     chars,
+    // A word each kanji writes, within the set's level (plan 248): the suite's detail.
+    words: chars.filter(k => k.word).length > 1 ? wordRowsOf(chars.filter(k => k.word).map(k => ({ t: k.word.t, r: k.word.r, main: k.word.main }))) : [],
     ...noted(chars.map(k => ['mean', k.note && t.keys.means(k.c, k.note)]), lang),
   }
   return {

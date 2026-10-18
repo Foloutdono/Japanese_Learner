@@ -861,7 +861,11 @@ each also a 9:16 short under a minute, as any carousel can be too
 9:16 video over Today's print, going slowly up the screen as a film's
 credits do, in ink on the print washed pale, or read along by the app's
 reader, each word lit on the voice's own syllables, over the owner's
-own music or none. Since plan
+own music or none. Since plan 248 every number a maker may set per
+post (a video's timing and pace, the music's level, the export's
+quality) is one line of `tune.js`, set in the studio's Tune panel and
+written into the render command, so the video rendered is the one
+previewed. Since plan
 234 a carousel is drawn by default on one path that converts
 (`funnel.js`): the hook, the answer as the app shows it, a call to
 action that draws the feature the item comes from as a schema (never a

@@ -182,7 +182,7 @@ export const STRINGS = {
     },
     cta: {
       plates: 'Save it for your next review.',
-      exam: n => `How many out of ${n}? Comment your score.`,
+      exam: n => (n > 1 ? `How many out of ${n}? Comment your score.` : 'Did you get it? Tell us in the comments.'),
       compare: 'Which one do you mix up? Tell us in the comments.',
       build: 'Build one of your own in the comments.',
       list: 'Save the list for later.',
@@ -388,7 +388,7 @@ export const STRINGS = {
     },
     cta: {
       plates: 'Garde-le pour ta prochaine révision.',
-      exam: n => `Combien sur ${n} ? Donne ton score en commentaire.`,
+      exam: n => (n > 1 ? `Combien sur ${n} ? Donne ton score en commentaire.` : 'Tu as trouvé ? Dis-le en commentaire.'),
       compare: 'Lequel tu confonds ? Dis-le en commentaire.',
       build: 'Construis la tienne en commentaire.',
       list: 'Garde la liste pour plus tard.',

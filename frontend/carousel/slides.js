@@ -2915,7 +2915,8 @@ export function deck(type, plan, fmt, opts) {
       if (o.cover) add('cover', ctx => KINDS.cover(ctxOf(ctx, fr), { quizzes: qs }))
       if (plan.source === 'passage') plan.slides.filter(s => s.kind === 'passage').forEach(passage)
       qs.forEach(q => ask(q))
-      if (o.sheet && qs.length) add('sheet', ctx => KINDS.sheet(ctxOf(ctx), { quizzes: qs }))
+      // One question's answer is its own slide: no sheet to repeat it (plan 248).
+      if (o.sheet && qs.length > 1) add('sheet', ctx => KINDS.sheet(ctxOf(ctx), { quizzes: qs }))
       outro(t.cta.exam(qs.length))
       break
     }

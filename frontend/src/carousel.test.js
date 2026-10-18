@@ -498,6 +498,9 @@ describe('the carousel studio', () => {
     const rows = ps.flatMap(p => p.slides.filter(s => s.kind === 'turn').flatMap(s => [s.turn.them.rows, ...s.turn.choices]).flat())
     const read = t => rows.filter(r => r.t === t).map(r => r.fu.map(([, x]) => x).join(''))
     expect(new Set(read('船便'))).toEqual(new Set(['ふなびん']))
+    // 何とか is one word, never 何 と 叶った (plan 248).
+    expect(new Set(read('何とか'))).toEqual(new Set(['なん']))
+    expect(rows.some(r => r.t === 'かなった')).toBe(false)
     expect(new Set(read('御社'))).toEqual(new Set(['おんしゃ']))
     expect(rows.some(r => r.t === '御')).toBe(false)
   })
@@ -1855,6 +1858,73 @@ describe('the reading challenges (plan 247)', () => {
       globalThis.OffscreenCanvas = had
     }
   }))
+})
+
+describe('the hand-written content, held to its rules (plan 248)', () => {
+  const LANGS = ['en', 'fr']
+  const both = (o, where) => LANGS.forEach(l => expect(String(o?.[l] || '').trim(), `${where} ${l}`).not.toBe(''))
+
+  it('writes every conversation in both languages, three replies a turn, and lets no length answer', () => {
+    const dialogues = JSON.parse(read('carousel/content/dialogues.json'))
+    expect(new Set(dialogues.map(d => d.id)).size).toBe(dialogues.length)
+    const tells = {}
+    for (const d of dialogues) {
+      expect(LEVELS, d.id).toContain(d.lv)
+      both(d.place, `${d.id} place`)
+      both(d.them, `${d.id} them`)
+      expect(d.turns.length, d.id).toBeGreaterThanOrEqual(3)
+      d.turns.forEach((t, i) => {
+        const at = `${d.id} ${i + 1}`
+        both(t.them, `${at} line`)
+        both(t.reply, `${at} reply`)
+        both(t.why, `${at} why`)
+        expect(t.choices, at).toHaveLength(3)
+        expect(new Set(t.choices).size, at).toBe(3)
+        expect([0, 1, 2], at).toContain(t.right)
+        // How often the longest reply, or the shortest, is the right one, ties shared.
+        const sizes = t.choices.map(c => [...c].length)
+        const n = (tells[d.lv] ||= { turns: 0, longest: 0, shortest: 0 })
+        n.turns++
+        const max = Math.max(...sizes)
+        const min = Math.min(...sizes)
+        if (sizes[t.right] === max) n.longest += 1 / sizes.filter(x => x === max).length
+        if (sizes[t.right] === min) n.shortest += 1 / sizes.filter(x => x === min).length
+      })
+    }
+    // The bound the app's own conversations keep (study/conversation.py, LENGTH_TELL).
+    for (const [lv, n] of Object.entries(tells)) {
+      for (const k of ['longest', 'shortest']) {
+        expect(n[k] / n.turns, `${lv} ${k}`).toBeGreaterThanOrEqual(0.25)
+        expect(n[k] / n.turns, `${lv} ${k}`).toBeLessThanOrEqual(0.42)
+      }
+    }
+  })
+
+  it('tells each lookalike apart in both languages, every kanji one the deck teaches', () => {
+    const sets = JSON.parse(read('carousel/content/lookalikes.json'))
+    const index = bank('kanji-index.json')
+    const known = new Set(Object.keys(index.kanji || index))
+    expect(new Set(sets.map(s => s.id)).size).toBe(sets.length)
+    for (const s of sets) {
+      expect(s.chars.length, s.id).toBeGreaterThanOrEqual(2)
+      expect(new Set(s.chars.map(c => c.c)).size, s.id).toBe(s.chars.length)
+      for (const c of s.chars) {
+        both(c, `${s.id} ${c.c}`)
+        expect(known.has(c.c), `${s.id} ${c.c}`).toBe(true)
+        if (c.m) for (const l of LANGS) expect(c.m[l]?.length, `${s.id} ${c.c} m.${l}`).toBeGreaterThan(0)
+      }
+    }
+    // An example word is no harder than its set: every kanji it writes is at or below the set's level.
+    const rank = lv => LEVELS.indexOf(lv)
+    const levelOf = ch => index.kanji?.[ch]?.lv ?? index[ch]?.lv
+    for (const s of bank('lookalikes.json').sets) {
+      for (const c of s.chars.filter(x => x.word)) {
+        for (const ch of [...c.word.t].filter(x => /[㐀-鿿]/.test(x) && x !== '々')) {
+          expect(rank(levelOf(ch)), `${s.id} ${c.word.t}`).toBeLessThanOrEqual(rank(s.lv))
+        }
+      }
+    }
+  })
 })
 
 describe('tuned from the studio (plan 248)', () => {
