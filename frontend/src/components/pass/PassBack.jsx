@@ -32,7 +32,7 @@ import { InfinitySign } from './InfinitySign'
 //             open page marked
 //   onBalance, onStatus   the two meters' doors, or none
 //   sign      { session, onChange, field } to rename in place, or none
-//   open      the boarding's card (plan 246): each line of the print a
+//   open      the boarding's card (plan 247): each line of the print a
 //             button that hands its page to `open` -- 'level' (the
 //             origin), 'destination', 'service', 'hour', 'lines' -- for
 //             the sheet that changes it, Settings being no part of a
@@ -141,7 +141,7 @@ export function PassBack({ tier, data, doors = {}, onTurn }) {
         <span className="pcb__sign">
           {onSign
             ? (
-              // The boarding's signature (plan 246): a door to the name
+              // The boarding's signature (plan 247): a door to the name
               // sheet, the placeholder in the quiet ink while it is empty.
               <button type="button" className="pcb__sign-door" aria-haspopup="dialog" aria-label={data.name ? `${t.brdSheetName}, ${data.name}` : t.brdSheetName} onClick={() => { playClick(); onSign() }} data-door="name">
                 <span className={`pcb__sign-name${data.name ? '' : ' pcb__sign-name--empty'}`}>{data.name || t.brdNamePlaceholder}</span>

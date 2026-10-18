@@ -9,7 +9,7 @@ import './index.css'
 // The 改札 and the train door each cut to their end on any key, and
 // each plays over a screen that is already mounted: the ride's first
 // card under the gate, a run under the door (the arrival over the plan
-// went with the plan, plan 246). The skip never took the key, so the same Space
+// went with the plan, plan 247). The skip never took the key, so the same Space
 // also turned the card underneath (and on the desk the same Esc left
 // the ride the gate was opening). Now the key is caught in the capture
 // phase and stopped, and a browser chord still skips without being

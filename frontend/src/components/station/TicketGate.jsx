@@ -221,7 +221,7 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
   // The learner's own card (plan 173), face up: their material, the
   // name, the level under it and the road of its struck 辻 filled to the
   // climb -- the face every other screen draws.
-  // The card's own name (plan 246): none prints none.
+  // The card's own name (plan 247): none prints none.
   const holder = holderName(summary)
   const level = summary?.level ?? null
   const { share } = xpClimb(summary)

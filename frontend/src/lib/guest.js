@@ -120,7 +120,7 @@ export async function claimAccount({ email, password, lang }) {
 }
 
 /**
- * 本乗車券 by a link (plan 246) — the card's account sheet: an address
+ * 本乗車券 by a link (plan 247) — the card's account sheet: an address
  * and nothing else. Supabase mails it a link; followed, the address is
  * the account's, on the same id as everything else, so nothing moves.
  * No password is set, which is the point (the sign-in card mails a link

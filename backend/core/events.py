@@ -84,7 +84,7 @@ EVENTS: dict[str, frozenset[str]] = {
     # `level_how` and `placed` (plan 224): whether the learner chose
     # their level or took the test, and where the test placed them --
     # beside `level`, what they boarded at, so an override shows.
-    # The card (plan 246): which of its fields a sheet changed (the
+    # The card (plan 247): which of its fields a sheet changed (the
     # defaults are what most keep, or they are not), whether it carries
     # a name -- never the name -- and where it was left: kept with
     # Google or by a link, boarded on an account already, or a guest's.

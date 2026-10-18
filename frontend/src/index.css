@@ -26185,7 +26185,7 @@ button.brd-stn { cursor: pointer; }
   .brd-map.brd-fan,
   .brd-map.brd-junction { --ys: 1; }
   /* The line climbing has carried the test over its gate since plan
-     246, a quiet way the foot did not hold before, so it closes
+     247, a quiet way the foot did not hold before, so it closes
      further: its rung at 80% is 53px, still clear of a 40px ring and
      its halo. */
   .brd-map.brd-climb { --ys: 0.8; }
@@ -31070,7 +31070,7 @@ button.brd-stn { cursor: pointer; }
 
 
 /* ── 191:day ── */
-/* ══ 246 — 乗車, the card is the form ══════════════════════════════
+/* ══ 247 — 乗車, the card is the form ══════════════════════════════
    The owner's pick C of the boarding's canvas: the card's back, filled
    in with what most keep, every printed field a door to its sheet
    (components/boarding/CardStep.jsx, CardSheets.jsx). The card is the
@@ -31140,7 +31140,7 @@ button.brd-stn { cursor: pointer; }
 .pcb__sign-name--empty { opacity: 0.45; }
 .profile-card__name-text--empty { font-style: italic; color: var(--text-secondary); }
 
-/* The sign-in's link (plan 246), a quiet way under its fields: a card
+/* The sign-in's link (plan 247), a quiet way under its fields: a card
    kept by a link has no password, and a forgotten one had no door. */
 .auth-link {
   align-self: center;
@@ -40648,7 +40648,7 @@ button.brd-stn { cursor: pointer; }
     .desk-front__door-btn:focus-visible { border-color: var(--text-secondary); }
   }
 
-  /* A quiet way over a floor (plan 246, the line's test) stands on the
+  /* A quiet way over a floor (plan 247, the line's test) stands on the
      floor's own row, before the way back: the phone's rung over its
      gate is a row of the paper's height, which a laptop's short window
      has not got to spare. Set here, after every rule of the floor, the

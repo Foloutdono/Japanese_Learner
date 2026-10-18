@@ -34,7 +34,7 @@ export function ProfileCard({ profile, session, onUsernameChange }) {
   const { tier, face, back } = usePassData(profile)
   const [side, turn] = useTurn('face')
   // The signature is the card's own name where the boarding asked for
-  // one (plan 246), the username where it never did.
+  // one (plan 247), the username where it never did.
   const field = profile?.cardName != null ? 'cardName' : 'username'
   const rename = value => { onUsernameChange(value, field); refreshSummary() }
   return (

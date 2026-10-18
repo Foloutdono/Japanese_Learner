@@ -19,7 +19,7 @@ import '../index.css'
 // Reported from an Android install (2026-09-09): a pale rail down the
 // right of the welcome, of "why" and of "level", the choices ending
 // 10px short of the button under them (the boarding asked more then:
-// since plan 246 the questions it no longer asks are the card's
+// since plan 247 the questions it no longer asks are the card's
 // sheets, held here too). Three things had to be true at
 // once for that, and this file holds two of them down:
 //

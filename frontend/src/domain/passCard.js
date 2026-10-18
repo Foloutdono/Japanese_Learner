@@ -52,7 +52,7 @@ export function sinceMonth(iso, lang) {
   return new Intl.DateTimeFormat(lang, { month: 'long', year: 'numeric' }).format(d)
 }
 
-// 署名 (plan 246): the card prints a first name the boarding asked for,
+// 署名 (plan 247): the card prints a first name the boarding asked for,
 // any script, or none -- not the username, which stays the public handle
 // (番付, the library). /api/profile's cardName is null for an account
 // boarded before the card was the form, whose username was the name it

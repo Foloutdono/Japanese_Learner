@@ -11,7 +11,7 @@
 #                                         plan 075: motive, kana, rhythm,
 #                                         the hour and the nudge; the
 #                                         lines, core/lines.py; and the
-#                                         card's name, plan 246)
+#                                         card's name, plan 247)
 #   GET  /api/onboarding/volumes          per-level item counts (projection)
 #
 # And the first ride (plan 097), the lesson after the boarding:
@@ -147,7 +147,7 @@ class CompletePayload(BaseModel):
     # (core/lines.py). Optional like the rest: a client that does not
     # ask leaves NULL, which reads as all three; a replay overwrites.
     lines: list[str] | None = None
-    # 署名 (plan 246): the first name the card prints, '' for none. Absent
+    # 署名 (plan 247): the first name the card prints, '' for none. Absent
     # (Settings' retake, a client before the card was the form) leaves
     # the column as it stands; sent, it is written, empty included.
     cardName: str | None = None

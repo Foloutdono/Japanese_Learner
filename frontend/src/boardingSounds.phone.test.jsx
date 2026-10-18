@@ -10,7 +10,7 @@ import './index.css'
 // chimes.js): the gate's departure on every Continue, on Board and on
 // « Émettre ma carte », the wood pick on an answer, the switch's two
 // step on a line, the hour board's flaps on the hour, the click on ‹, on
-// a door of the card (plan 246) and on the quiet links -- once a press,
+// a door of the card (plan 247) and on the quiet links -- once a press,
 // never twice, since a flam reads as one sound hit harder.
 
 const apiJson = vi.hoisted(() => vi.fn())

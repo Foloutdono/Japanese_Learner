@@ -168,7 +168,7 @@ def _init_db() -> None:
                 # an import made the question moot. NULL is not asked
                 # yet; routes/transfer.py writes and reads it.
                 ("transfer_offered_at", "TIMESTAMPTZ"),
-                # 署名 — the first name the card prints (plan 246), in
+                # 署名 — the first name the card prints (plan 247), in
                 # any script: not the username, which stays the public
                 # handle. NULL = never asked (an account boarded before
                 # the card was the form, whose card prints its
@@ -229,7 +229,7 @@ def _random_username() -> str:
     return f"{random.choice(_ADJECTIVES)}{random.choice(_NOUNS)}{random.randint(100, 9999)}"
 
 
-# ── 署名 — the name on the card (plan 246) ────────────────────
+# ── 署名 — the name on the card (plan 247) ────────────────────
 # The boarding's card asks for a first name rather than a handle: any
 # script, spaces and hyphens and all, up to CARD_NAME_MAX characters,
 # and nothing at all is an answer. It is printed on the learner's own
@@ -367,7 +367,7 @@ def usernames_for(user_ids: list[str]) -> dict[str, str]:
 class ProfilePayload(BaseModel):
     """The two names, each optional, at least one sent: the username is
     the public handle (番付, the library), unique and in Latin letters;
-    cardName the first name the card prints (plan 246), any script, ''
+    cardName the first name the card prints (plan 247), any script, ''
     for none."""
     username: str | None = None
     cardName: str | None = None
@@ -651,7 +651,7 @@ def get_profile(user_id: str = Depends(get_user_id)):
 
     return {
         "username": username,
-        # 署名 (plan 246): the name the card prints. null is an account
+        # 署名 (plan 247): the name the card prints. null is an account
         # that was never asked, whose card prints `username` as it always
         # has; '' was asked and printed as no name (domain/passCard.js
         # holderName is the one reading of the two).

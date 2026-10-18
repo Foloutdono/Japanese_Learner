@@ -23,7 +23,7 @@ const auth = {
   authCheckFields:       'Check your email address and your password.',
   authSignupDisabled:    'Sign-ups are closed for now.',
   authLinkExpired:       'This link has expired or was already used. Try signing in; if that fails, start again to get a new one.',
-  // A sign-in link (plan 246): a card kept by a link has no password, and
+  // A sign-in link (plan 247): a card kept by a link has no password, and
   // a forgotten password finds its door here.
   authLinkSend:          'Email me a sign-in link',
   authLinkSent:          (email) => `Link sent to ${email}. Open it on this device.`,
@@ -2600,7 +2600,7 @@ const boarding = {
   brdTrainAt: (today, time) => `Your train · ${today ? 'today' : 'tomorrow'}, **${time}**, then every day`,
   brdArriveIn: (days, every, time) => `${days === 1 ? '**tomorrow**' : `in **${days} days**`}, ${every} at ${time}`,
   brdForLine: (purpose, promise) => `${purpose.charAt(0).toUpperCase()}${purpose.slice(1)}: **${promise.charAt(0).toLowerCase()}${promise.slice(1)}**.`,
-  // The card is the form (plan 246): the card filled in, its fields
+  // The card is the form (plan 247): the card filled in, its fields
   // doors, a sheet a field.
   brdCardQ: 'Your card, filled in for you.',
   brdCardHint: 'Tap a field to change it.',

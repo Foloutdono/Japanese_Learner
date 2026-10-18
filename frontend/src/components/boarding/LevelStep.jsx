@@ -250,7 +250,7 @@ function scored(stop, result) {
 // the line then says where the answers stopped, each level asked
 // carries its score, and the stop they reach is the pick -- still the
 // learner's to change. `onTest` is the test as the line's quiet way over
-// the gate (plan 246): « Pas sûr ? Le test te place », where a question
+// the gate (plan 247): « Pas sûr ? Le test te place », where a question
 // of its own used to ask how the level should be found.
 export function LevelStep({ volumes, value, onChange, onContinue, onTest = null, no = null, placed = null }) {
   const { t, lang } = useLang()

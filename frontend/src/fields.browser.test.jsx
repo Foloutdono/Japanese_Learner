@@ -105,7 +105,7 @@ const CASES = [
       <textarea className="textarea anl-slip__field" placeholder="paste Japanese" />
     </div></div>],
 
-  ['The card\'s account sheet (plan 246) — the page\'s field on the sheet\'s surface',
+  ['The card\'s account sheet (plan 247) — the page\'s field on the sheet\'s surface',
     <div className="sheet brd-sheet"><div className="brd-sheet__field">
       <input type="email" className="field field--page brd-fld" placeholder="e-mail" />
     </div></div>],

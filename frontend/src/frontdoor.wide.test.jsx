@@ -9,7 +9,7 @@ import './index.css'
 // Since plan 163 there is no column: the Welcome is the crossroads on
 // the canvas (--desk-board-w) centred in the window, its lines at the
 // drawing's length, and the boarding's questions stand in the canvas's
-// corners and draw their answers across it -- and since plan 246 the
+// corners and draw their answers across it -- and since plan 247 the
 // card, filled in, stands in the canvas's middle under its question.
 
 const apiJson = vi.hoisted(() => vi.fn())
@@ -138,7 +138,7 @@ describe('first contact at 1440 (P10)', () => {
     expect(Math.round(box($('.desk-brd__strip')).left)).toBe(Math.round(gutter))
     expect(Math.round(bodyW() - box(inCar('[data-action="continue"]')).right)).toBe(Math.round(gutter))
     // A ticket's width here: the floor has the room the strip leaves,
-    // and the test (plan 246) stands on it, before the way back.
+    // and the test (plan 247) stands on it, before the way back.
     expect(Math.round(box(inCar('[data-action="continue"]')).width)).toBe(360)
     const test = box(inCar('[data-action="level-test"]'))
     const back = box(inCar('[data-action="back"]'))

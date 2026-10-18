@@ -122,7 +122,7 @@ describe('the boarding frame on a phone (P9)', () => {
     await settle(40)
     inCar('[data-action="continue"]').click()
     await settle()
-    // The card is an arrival (plan 246): no head, the phone's own frame.
+    // The card is an arrival (plan 247): no head, the phone's own frame.
     expect(stepOf()).toBe('card')
     expect($('main.brd').className).toBe('brd brd--arrival')
     expect($('.brd__head')).toBeNull()

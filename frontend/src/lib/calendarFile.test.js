@@ -1,4 +1,4 @@
-// ── 時刻表 — the daily train as a calendar file (plan 246) ──
+// ── 時刻表 — the daily train as a calendar file (plan 247) ──
 // The one thing the web's hour sheet hands a learner to keep: if a
 // calendar refuses the file, the reminder is gone without a word. So
 // the file is held to what RFC 5545 asks of it -- CRLF lines of 75

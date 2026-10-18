@@ -440,7 +440,7 @@ def test_complete_rejects_bad_boarding_answers(client):
         assert client.post("/api/onboarding/complete", json={**base, **bad}).status_code == 422, bad
 
 
-# ── 署名 — the name on the card (plan 246) ───────────────────────
+# ── 署名 — the name on the card (plan 247) ───────────────────────
 # The boarding asks for a first name, not a handle: any script, nothing
 # at all an answer, printed on the learner's own card. Never asked reads
 # back as null (the card prints the username, as it did); asked and left

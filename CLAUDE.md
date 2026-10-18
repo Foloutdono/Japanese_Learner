@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **247**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **248**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -247,7 +247,7 @@ runtime purpose.
   processes -- a set, or anything built by iterating one, is sorted
   before a seeded random touches it (`tests/test_placement.py` builds
   the climb under two hash seeds).
-- **The card's name is not the handle (plan 246).** `user_profiles.card_name`
+- **The card's name is not the handle (plan 247).** `user_profiles.card_name`
   is the first name a learner's own card prints: any script, up to 24
   characters (`routes/profile.clean_card_name`), `''` for none and NULL
   for never asked, which prints the username as before. The username

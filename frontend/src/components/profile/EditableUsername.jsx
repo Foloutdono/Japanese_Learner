@@ -15,7 +15,7 @@ export const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/
 // onboarding welcome step needed the same control — the name on your
 // pass is the first thing 窓口 offers to fix.
 //
-// `field` is which name the card's signature is (plan 246): the
+// `field` is which name the card's signature is (plan 247): the
 // username, for an account boarded before the card asked for a first
 // name, or `cardName` -- any script, up to CARD_NAME_MAX, and nothing at
 // all an answer (the card then prints its placeholder in the quiet ink).

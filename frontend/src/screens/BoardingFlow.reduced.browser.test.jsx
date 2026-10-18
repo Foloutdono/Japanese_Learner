@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { LangProvider } from '../LangContext'
 
-// ── The boarding under reduced motion (plan 075; the card, plan 246) ──
+// ── The boarding under reduced motion (plan 075; the card, plan 247) ──
 // The motion sheet's rule: with reduced motion on, only the rest state
 // is drawn. No car moves between screens, and the card arrives at rest.
 // The preference is read once at import, so it is stubbed before the

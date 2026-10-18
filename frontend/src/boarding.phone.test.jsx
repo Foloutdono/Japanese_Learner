@@ -3,7 +3,7 @@ import { render } from 'vitest-browser-react'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── The boarding's contract at phone width (plans 075, 168, 246) ──
+// ── The boarding's contract at phone width (plans 075, 168, 247) ──
 // The canvas's frame, pinned against the real cascade at 390×844: the
 // foot is docked at the bottom edge with the one filled action full
 // width at 66 px (plan 164's gate), in the same place on every screen;
@@ -11,7 +11,7 @@ import './index.css'
 // question stands centred over its drawing, the pair on the room's
 // middle (plan 168); every choice is a 44 px target or taller; nothing
 // scrolls sideways; the card's sheets keep their targets too (plan
-// 246); the sign-in stands in the Welcome's place, its segmented
+// 247); the sign-in stands in the Welcome's place, its segmented
 // control filling its card and its action the same gate. The stores
 // behind the card are stubbed: this is about the frame.
 
@@ -247,7 +247,7 @@ describe('the boarding at 390×844', () => {
 
   // ── The name's plate rings gold, inside the sheet ──
   // The name is the station's plate (plan 168), now in its sheet (plan
-  // 246): the field draws no ring of its own, the plate's edge turns gold
+  // 247): the field draws no ring of its own, the plate's edge turns gold
   // while the field holds the focus, and that edge -- 2 px outside the
   // plate -- stands inside the sheet, which scrolls and so clips.
   it('rings the name\'s plate in gold while it holds the focus, inside the sheet', async () => {
@@ -478,7 +478,7 @@ describe('the boarding at 390×844', () => {
     expect(document.activeElement.type).toBe('email')
     expect(screen.container.querySelector('.brd-front__promise')).toBeNull()
     expect(screen.container.querySelector('[data-action="board-corner"]')).not.toBeNull()
-    // The sign-in mails a link too (plan 246): a thumb's target.
+    // The sign-in mails a link too (plan 247): a thumb's target.
     expect(rect(screen.container.querySelector('[data-action="sign-in-link"]')).height).toBeGreaterThanOrEqual(44)
   })
 })

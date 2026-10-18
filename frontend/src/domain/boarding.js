@@ -184,7 +184,7 @@ export function kanjiThrough(volumes, level) {
 const KANJI_SIGN = { N5: 100, N4: 300, N3: 650, N2: 1000, N1: 2000 }
 
 /** A stop as the lines name it -- the level list, and the card's goal
- *  sheet (plan 246): its code (the kana's own sign for the novice's),
+ *  sheet (plan 247): its code (the kana's own sign for the novice's),
  *  its name and what it holds, the kanji counted from the app's own
  *  volumes once they have answered. */
 export function levelStop(t, lang, volumes, level) {

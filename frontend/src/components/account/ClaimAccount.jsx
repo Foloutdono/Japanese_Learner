@@ -4,7 +4,7 @@ import { useLang } from '../../LangContext'
 // Deliberately only the fields and their messages: the host docks its
 // own action where its own chrome puts actions -- Settings' slip, its
 // `.btn-secondary` on the row. The state is hooks/useClaim.js. The
-// boarding keeps the card by a link instead (plan 246:
+// boarding keeps the card by a link instead (plan 247:
 // components/boarding/CardSheets.jsx), with no password to set.
 //
 // `.field--page` is the field with its well stepped up to the surface:

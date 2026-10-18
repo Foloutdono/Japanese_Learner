@@ -1,4 +1,4 @@
-// ── 時刻表 — the daily train in the learner's own calendar (plan 246) ──
+// ── 時刻表 — the daily train in the learner's own calendar (plan 247) ──
 // On the web the boarding asks for no reminder: a tab cannot promise to
 // be open at seven, and a browser's notification is a permission prompt
 // on the first minute of a stranger's visit. The hour's sheet offers one

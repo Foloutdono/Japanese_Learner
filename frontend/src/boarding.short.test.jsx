@@ -13,7 +13,7 @@ import './index.css'
 // straight out to the right named itself under its ring, on the ring
 // below, and noon's name stood on the departure board. Every question
 // holds whole in its body now, down to this window -- and since plan
-// 246, the card that took the place of the questions it no longer asks,
+// 247, the card that took the place of the questions it no longer asks,
 // and each of the sheets its doors open.
 
 const apiJson = vi.hoisted(() => vi.fn())

@@ -16,7 +16,7 @@ export function CheckMark({ className = 'svg' }) {
   )
 }
 
-// 乗車 (plan 246): where the card lives, on the line under it -- this
+// 乗車 (plan 247): where the card lives, on the line under it -- this
 // device alone, or a link on its way to an address.
 export function DeviceMark() {
   return (

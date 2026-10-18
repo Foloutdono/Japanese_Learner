@@ -8,7 +8,7 @@ import { BoardQuestion, Continue } from './BoardFrame'
 import { CheckMark, DeviceMark, MailMark } from './icons'
 import { playClick } from '../../lib/audio'
 
-// ── 定期券 — the card, filled in (plan 246) ──────────────────────
+// ── 定期券 — the card, filled in (plan 247) ──────────────────────
 // The owner's pick C of the boarding's canvas: the boarding asks only
 // what it cannot guess -- the kana, and a reader's level -- then hands
 // the learner their card already filled in with what most keep (the

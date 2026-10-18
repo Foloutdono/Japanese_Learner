@@ -53,7 +53,7 @@ const NAMED = {
   // A confirmation link followed too late, or twice (a mail scanner
   // that opens links counts): it arrives on the URL (lib/authRedirect.js).
   otp_expired: t => t.authLinkExpired,
-  // A sign-in link asked for an address no account holds (plan 246): the
+  // A sign-in link asked for an address no account holds (plan 247): the
   // sign-in mails only an account that exists (shouldCreateUser false).
   otp_disabled: t => t.authLinkNoAccount,
   user_not_found: t => t.authLinkNoAccount,

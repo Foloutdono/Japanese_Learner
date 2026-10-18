@@ -10,7 +10,7 @@ import { useClimb } from '../onboarding/useClimb'
 // ── 4 · the test, in the boarding's car (plan 224) ───────────────
 // The climb (study/placement.walk): N5 first, a level up each time one
 // is cleared, the first not cleared where the learner boards. Reached
-// from the level's line, its quiet way (plan 246), and back to it. The
+// from the level's line, its quiet way (plan 247), and back to it. The
 // question in the car's stage, the levels over it (ClimbRungs), the
 // two ways out under it: "I know my level" to the line with nothing
 // chosen, "Too hard? Stop here" to the line with the level being asked

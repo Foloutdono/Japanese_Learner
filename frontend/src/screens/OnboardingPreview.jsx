@@ -17,7 +17,7 @@ import { playClick } from '../lib/audio'
 // DEV_USER_ID and never verifies it; the volumes call is therefore
 // live, which is the point — a preview of fake data would not
 // exercise the thing being polished. `?guest` boards on a guest pass,
-// so the card's line offers to keep it (plan 246).
+// so the card's line offers to keep it (plan 247).
 export default function OnboardingPreview() {
   const [run, setRun] = useState(1)
   const [phase, setPhase] = useState('flow') // flow | gate | done

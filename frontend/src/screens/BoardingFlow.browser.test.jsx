@@ -9,7 +9,7 @@ import fr from '../locales/fr/index.js'
 import { ApiError } from '../lib/api'
 import '../index.css'
 
-// ── The boarding, walked end to end (plan 075; the card, plan 246) ──
+// ── The boarding, walked end to end (plan 075; the card, plan 247) ──
 // The owner's pick C: the boarding asks the kana and a reader's level,
 // then hands the card already filled in, every printed field a door to
 // a sheet. Everything stays in memory and POSTs exactly once on
@@ -433,7 +433,7 @@ describe('BoardingFlow', () => {
     expect('goalTargetDate' in body).toBe(false)
   })
 
-  // ── 実力診断 from the line (plan 224; its quiet way, plan 246) ──
+  // ── 実力診断 from the line (plan 224; its quiet way, plan 247) ──
   // The climb, mocked as the server answers it: one question at a time,
   // then the verdict. The line comes back with the stop reached chosen
   // and each level asked carrying its score.

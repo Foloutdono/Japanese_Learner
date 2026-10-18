@@ -53,7 +53,7 @@ export function AuthCard({ initialMode = 'login', autoFocus = false, seg = true,
     setSuccess(null)
   }
 
-  // 乗車 (plan 246): a card kept by a link has no password, so signing
+  // 乗車 (plan 247): a card kept by a link has no password, so signing
   // in mails a link too -- which is also the door a forgotten password
   // had none of. Only an account that exists is mailed (shouldCreateUser
   // false): a new learner boards from the Welcome, on a guest pass.

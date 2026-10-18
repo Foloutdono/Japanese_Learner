@@ -27,7 +27,7 @@ import { AccountSheet, GoalSheet, HourSheet, LinesSheet, NameSheet, RhythmSheet 
 import { DeskStrip } from '../components/boarding/DeskStrip'
 import { BoardBack } from '../components/boarding/boardBack'
 
-// ── 乗車 — the boarding (plan 075; the card is the form, plan 246) ──
+// ── 乗車 — the boarding (plan 075; the card is the form, plan 247) ──
 // The owner's pick C of the boarding's canvas ("Tsuji — the boarding,
 // audit and new directions"): the boarding asks only what it cannot
 // guess, then hands the learner their card already filled in, every
@@ -40,7 +40,7 @@ import { BoardBack } from '../components/boarding/boardBack'
 //   → the card (CardStep: the goal, the rhythm, the hour, the lines, the
 //     name and the account, each a sheet) → the 改札.
 //
-// What left the questions in plan 246: the name (a field on the card,
+// What left the questions in plan 247: the name (a field on the card,
 // optional, a first name rather than the public username), why (no
 // longer asked), how the level is found (the test is the line's quiet
 // way), the goal, the lines, the rhythm and the hour (fields, filled
@@ -522,7 +522,7 @@ export default function BoardingFlow({
           // the learner when they took it.
           ...(answers.kana === 'both' ? { level_how: answers.placed ? 'test' : 'pick' } : {}),
           ...(answers.placed ? { placed: answers.placed.recommendedLevel } : {}),
-          // The card (plan 246): which of its fields a sheet changed --
+          // The card (plan 247): which of its fields a sheet changed --
           // the defaults are what most keep, or they are not -- whether
           // it carries a name, and where it was left.
           edited_goal: edited.goal,

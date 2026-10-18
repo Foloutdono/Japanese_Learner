@@ -18,7 +18,7 @@ import { CARD_NAME_MAX, cardNameLength } from '../../domain/passCard'
 import { BoardLink, Continue } from './BoardFrame'
 import { CheckMark, LockMark } from './icons'
 
-// ── 乗車 — the card's sheets (plan 246) ──────────────────────────
+// ── 乗車 — the card's sheets (plan 247) ──────────────────────────
 // The owner's pick C of the boarding's canvas, "the card is the form":
 // every printed field of the card is a door, and each opens its sheet
 // over the card, as Today's services sheet does -- the handle, the

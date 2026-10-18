@@ -45,7 +45,7 @@ const FIELDS = {
     await wrap(<ReadingsInput readings={{ on: [{ reading: 'コウ' }], kun: [{ reading: 'くち' }] }} submitted={false} onSubmit={onSubmit} />)
     return document.querySelector('.readings-input__field')
   },
-  // The card's name (plan 246): its sheet's plate saves on Enter.
+  // The card's name (plan 247): its sheet's plate saves on Enter.
   'the boarding name': async onSubmit => {
     await wrap(<NameSheet open onClose={() => {}} value="あいこ" onSave={onSubmit} />)
     return document.querySelector('.brd-sheet .brd-plate__field')

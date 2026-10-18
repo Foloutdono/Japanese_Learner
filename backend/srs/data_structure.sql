@@ -267,7 +267,7 @@ CREATE TABLE user_profiles (
     -- 乗換 (plan 243b): when Today asked whether the learner studied
     -- elsewhere, or an import made it moot. routes/transfer.py.
     transfer_offered_at TIMESTAMPTZ,
-    -- 署名 (plan 246): the first name the card prints, in any script, up
+    -- 署名 (plan 247): the first name the card prints, in any script, up
     -- to 24 characters -- not the username, which stays the public
     -- handle (番付, the library). NULL = never asked (an account boarded
     -- before the card was the form: the card prints its username), ''

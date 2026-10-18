@@ -88,7 +88,7 @@ GROUP BY 1, 2, 3 ORDER BY 4 DESC;
 -- title: La carte : champs changés, nom, compte
 -- display: table
 -- size: 12x7
--- description: boarding_done depuis le plan 246 (la carte est le formulaire) : pour chaque façon dont la carte a été laissée (google = gardée avec Google, link = un lien envoyé à une adresse, already = un compte déjà là, none = un invité), combien d'embarquements ont changé l'objectif, le rythme, l'heure ou les lignes dans leur feuille, et combien de cartes portent un nom. Les valeurs par défaut sont ce que la plupart gardent, ou non.
+-- description: boarding_done depuis le plan 247 (la carte est le formulaire) : pour chaque façon dont la carte a été laissée (google = gardée avec Google, link = un lien envoyé à une adresse, already = un compte déjà là, none = un invité), combien d'embarquements ont changé l'objectif, le rythme, l'heure ou les lignes dans leur feuille, et combien de cartes portent un nom. Les valeurs par défaut sont ce que la plupart gardent, ou non.
 SELECT coalesce(props->>'kept', '—') AS "Carte",
        count(DISTINCT user_id) AS "Apprenants",
        count(*) FILTER (WHERE (props->>'edited_goal')::boolean) AS "Objectif changé",

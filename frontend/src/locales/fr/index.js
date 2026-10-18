@@ -25,7 +25,7 @@ const auth = {
   authCheckFields:       'Vérifie ton adresse e-mail et ton mot de passe.',
   authSignupDisabled:    'Les inscriptions sont fermées pour le moment.',
   authLinkExpired:       'Ce lien a expiré ou a déjà servi. Essaie de te connecter ; sinon, recommence pour en recevoir un nouveau.',
-  // Un lien de connexion (plan 246) : une carte gardée par un lien n’a pas
+  // Un lien de connexion (plan 247) : une carte gardée par un lien n’a pas
   // de mot de passe, et un mot de passe oublié trouve ici sa porte.
   authLinkSend:          'Recevoir un lien de connexion',
   authLinkSent:          (email) => `Lien envoyé à ${email}. Ouvre-le sur cet appareil.`,
@@ -2538,7 +2538,7 @@ const boarding = {
   brdTrainAt: (today, time) => `Ton train · ${today ? 'aujourd’hui' : 'demain'}, **${time}**, puis chaque jour`,
   brdArriveIn: (days, every, time) => `${days === 1 ? '**demain**' : `dans **${days} jours**`}, ${every} à ${time}`,
   brdForLine: (purpose, promise) => `${purpose.charAt(0).toUpperCase()}${purpose.slice(1)} : **${promise.charAt(0).toLowerCase()}${promise.slice(1)}**.`,
-  // La carte est le formulaire (plan 246) : la carte remplie, ses champs
+  // La carte est le formulaire (plan 247) : la carte remplie, ses champs
   // des portes, une feuille par champ.
   brdCardQ: 'Ta carte, remplie pour toi.',
   brdCardHint: 'Touche un champ pour le changer.',

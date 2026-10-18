@@ -9,7 +9,7 @@ import './index.css'
 // column in an empty window, Continue on the window's floor, and no key
 // answered -- some fifty presses and clicks on the novice's road. This
 // file is the desk's side of it, one block per phase; the phone's is a
-// block of deskfree.phone.test.jsx. Since plan 246 the boarding asks
+// block of deskfree.phone.test.jsx. Since plan 247 the boarding asks
 // the kana and a reader's level, then hands the card filled in, every
 // printed field a door to a sheet -- on the desk a dialog in the
 // paper's middle.
@@ -230,17 +230,17 @@ describe('the Welcome\'s Enter (P8)', () => {
   })
 })
 
-// ── P9 — the boarding frame (plans 122, 140, 163, 246) ──
+// ── P9 — the boarding frame (plans 122, 140, 163, 247) ──
 // Plan 163, the owner's pick D of the canvas "Tsuji — onboarding, new
 // directions": the sumi column goes, and three places never move. The
 // question at the paper's top-left corner; the journey as a strip at the
 // floor's left end, a named stop per question, the answer given said on
 // its stop and a stop behind a door back to its question (plan 140's
 // rules); the floor in the bottom-right corner, Back beside Continue.
-// Since plan 246 the stops are the kana, a reader's level and the card,
+// Since plan 247 the stops are the kana, a reader's level and the card,
 // and the card is the last screen: its gate issues it.
 
-describe('the boarding frame on the desk (P9, plans 140, 163, 246)', () => {
+describe('the boarding frame on the desk (P9, plans 140, 163, 247)', () => {
   it('draws the journey as a strip at the floor\'s left end, a stop per question, and keeps it to the card', async () => {
     const onComplete = vi.fn()
     await board({ onComplete })
@@ -881,7 +881,7 @@ describe('the digits at first contact (P12)', () => {
 // light moves with the question; each answer's key turns over to its
 // check in one slot; the Welcome hands its paper to the wait with the
 // dots on one spot; and a car is not dropped before the one after it
-// has landed. Since plan 246 the card's sheets keep the drawing too.
+// has landed. Since plan 247 the card's sheets keep the drawing too.
 const { default: AppLoading } = await import('./screens/AppLoading')
 const landed = () => settle(900)
 const centreY = r => (r.top + r.bottom) / 2
