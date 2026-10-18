@@ -263,6 +263,9 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
           </svg>
         </div>
 
+        {/* The ground the gate stands on, the cabinets mirrored in it. */}
+        <span className="gate__floor" />
+
         {/* The two cabinets, the screen's two halves. Each carries its
             flap, tucked behind its face. */}
         <div className="gate__cab gate__cab--l" ref={cab}>

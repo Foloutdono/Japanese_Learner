@@ -194,6 +194,24 @@ describe('the gate stands up close and parts like the door (plan 249)', () => {
     expect(box('.gate__cab--r').left).toBeGreaterThanOrEqual(scene.right)
   })
 
+  it('stands the gate on a floor it is mirrored in, and takes the floor away before the hold', async () => {
+    await gate()
+    const scene = box('.gate')
+    const floor = box('.gate__floor')
+    // Across the whole screen, the cabinets standing on its edge.
+    expect(floor.left).toBeLessThanOrEqual(scene.left)
+    expect(floor.right).toBeGreaterThanOrEqual(scene.right)
+    expect(Math.abs(box('.gate__cab--l').bottom - floor.top)).toBeLessThan(1)
+    // Each cabinet's reflection fills the floor under it.
+    const mirror = getComputedStyle(document.querySelector('.gate__cab--l'), '::after')
+    expect(parseFloat(mirror.height)).toBeGreaterThan(floor.height - 6)
+    // Gone off the screen's foot before the hold.
+    const sill = named('door-sill-out')
+    expect(end(sill)).toBeLessThanOrEqual(700 * X + 1)
+    at(700 * X + 1)
+    expect(box('.gate__floor').top).toBeGreaterThanOrEqual(scene.bottom)
+  })
+
   // The fade is declared on its beat, by the scene's own timer, not with
   // a delay from the mount: a waiting opacity animation on the scene had
   // the browser draw the whole scene twice a frame (plan 210).

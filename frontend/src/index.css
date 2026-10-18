@@ -20784,8 +20784,13 @@ button.syllabary-cell:focus-visible {
   --gate-lane: clamp(96px, 28vw, 300px);
   --gate-depth: var(--sp-5);
   --gate-over: var(--sp-7);
-  /* Where the cabinets' tops stand, down the screen. */
-  --gate-top: 45%;
+  /* Where the cabinets' tops stand, down the screen, and where they
+     stand on the ground, in hundredths of it (unitless, so the
+     reflection can be measured against the cabinet's own height). */
+  --gate-top-n: 45;
+  --gate-base-n: 80;
+  --gate-top: calc(var(--gate-top-n) * 1%);
+  --gate-base: calc(var(--gate-base-n) * 1%);
   --gate-light: var(--line-color, var(--accent));
   /* The asset's palette, from the theme's own: the ink is sumi in both
      themes, the body the card's ground, lit and shaded by mixing. */
@@ -20793,7 +20798,10 @@ button.syllabary-cell:focus-visible {
   --gate-body: var(--bg-card);
   --gate-hi: color-mix(in srgb, var(--bg-card) 86%, #fff);
   --gate-shade: color-mix(in srgb, var(--bg-card) 78%, #000);
-  --gate-kick: color-mix(in srgb, var(--bg-card) 90%, #000);
+  /* The ground: a polished floor a step darker than the page, its
+     tile seams a step darker again. */
+  --gate-floor: color-mix(in srgb, var(--bg-panel) 32%, var(--bg-main));
+  --gate-seam: color-mix(in srgb, var(--gate-floor) 76%, var(--gate-ink));
   /* The name's ink on the light: the hall's kinari, or the fill's dark
      ink where the pigment is too light for it (TicketGate's inkFor). */
   --gate-title-ink: var(--text-on-panel);
@@ -20904,6 +20912,38 @@ button.syllabary-cell:focus-visible {
   stroke-linejoin: round;
 }
 
+/* ── The ground ── */
+/* The polished floor the gate stands on, across the whole screen: an
+   ink edge where the cabinets meet it, three tile seams spaced wider as
+   they come nearer, the line's light mirrored across it, coming up with
+   the light, and the cabinets mirrored over that (.gate__cab::after). It
+   holds still while the cabinets slide off it, their reflections with
+   them, then drops off the screen's foot from 560ms, as the door's sill
+   does, and is gone by 700ms, so the hold is the light alone. */
+.gate__floor {
+  position: absolute;
+  inset: var(--gate-base) 0 0;
+  box-sizing: border-box;
+  border-top: 4px solid var(--gate-ink);
+  background:
+    linear-gradient(var(--gate-seam), var(--gate-seam)) 0 16% / 100% 3px no-repeat,
+    linear-gradient(var(--gate-seam), var(--gate-seam)) 0 42% / 100% 3px no-repeat,
+    linear-gradient(var(--gate-seam), var(--gate-seam)) 0 78% / 100% 3px no-repeat,
+    var(--gate-floor);
+  animation: door-sill-out calc(140ms * var(--gate-x)) cubic-bezier(0.5, 0, 0.8, 0.4) calc(560ms * var(--gate-x)) forwards;
+}
+.gate__floor::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--gate-light) 55%, transparent) 0 22%,
+    color-mix(in srgb, var(--gate-light) 32%, transparent) 22% 50%,
+    color-mix(in srgb, var(--gate-light) 14%, transparent) 50%);
+  opacity: 0.35;
+  animation: gate-hand-on calc(150ms * var(--gate-x)) ease-out calc(310ms * var(--gate-x)) forwards;
+}
+
 /* ── The cabinets ── */
 /* Each the screen's half less half the lane, running past its edge.
    They part on the door's keyframes (unlock a finger apart, then run)
@@ -20912,19 +20952,53 @@ button.syllabary-cell:focus-visible {
 .gate__cab {
   position: absolute;
   top: var(--gate-top);
-  bottom: 0;
+  bottom: calc(100% - var(--gate-base));
   width: calc(50% - var(--gate-lane) / 2 + var(--gate-over));
   isolation: isolate;
   animation: calc(210ms * var(--gate-x)) linear calc(455ms * var(--gate-x)) both;
 }
-.gate__cab--l { left: calc(-1 * var(--gate-over)); animation-name: door-part-l; }
-.gate__cab--r { right: calc(-1 * var(--gate-over)); animation-name: door-part-r; }
+.gate__cab--l {
+  left: calc(-1 * var(--gate-over));
+  animation-name: door-part-l;
+  --gate-side-band: linear-gradient(270deg,
+    rgb(0 0 0 / 0.2) 0 var(--gate-depth),
+    var(--gate-ink) var(--gate-depth) calc(var(--gate-depth) + 3px),
+    transparent calc(var(--gate-depth) + 3px));
+  --gate-side-mirror: linear-gradient(270deg, rgb(0 0 0 / 0.1) 0 var(--gate-depth), transparent var(--gate-depth));
+}
+.gate__cab--r {
+  right: calc(-1 * var(--gate-over));
+  animation-name: door-part-r;
+  --gate-side-band: linear-gradient(90deg,
+    rgb(0 0 0 / 0.2) 0 var(--gate-depth),
+    var(--gate-ink) var(--gate-depth) calc(var(--gate-depth) + 3px),
+    transparent calc(var(--gate-depth) + 3px));
+  --gate-side-mirror: linear-gradient(90deg, rgb(0 0 0 / 0.1) 0 var(--gate-depth), transparent var(--gate-depth));
+}
+/* The cabinet mirrored in the floor, the ground's height under it: its
+   plinth, then its body fading in three flat steps, no outline. It
+   leaves with the cabinet. */
+.gate__cab::after {
+  content: '';
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  height: calc(100% * (100 - var(--gate-base-n)) / (var(--gate-base-n) - var(--gate-top-n)));
+  background:
+    var(--gate-side-mirror),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--bg-panel) 45%, transparent) 0 10px,
+      color-mix(in srgb, var(--gate-body) 44%, transparent) 10px 30%,
+      color-mix(in srgb, var(--gate-body) 26%, transparent) 30% 58%,
+      color-mix(in srgb, var(--gate-body) 12%, transparent) 58%);
+}
 
-/* The face: a sumi cap on top, its lit lip, the body and the kick
-   plate at the foot (the line's belt across it went at the owner's
+/* The face: a sumi cap on top, its lit lip, the body and the sumi
+   plinth it stands on (the line's belt across it went at the owner's
    word: the line's colour is the light beyond, the reader's ring and
-   the sign's rule, never a band across the gate). Bands of one gradient, hard-stopped, so the face is one
-   box drawn once. The inner side, the face toward the lane, is a shade
+   the sign's rule, never a band across the gate). Bands of one
+   gradient, hard-stopped, so the face is one box drawn once. The inner side, the face toward the lane, is a shade
    laid over the same bands at the lane's edge behind one ink rule, so
    the cabinet is one shape under one outline, its single round corner
    at the top of the lane, and reads as a box rather than a panel. */
@@ -20935,26 +21009,14 @@ button.syllabary-cell:focus-visible {
   border: 4px solid var(--gate-ink);
   background:
     var(--gate-side-band),
-    linear-gradient(180deg, var(--gate-ink) 0 4px, var(--gate-kick) 4px) bottom / 100% 22% no-repeat,
+    linear-gradient(180deg, var(--gate-ink) 0 4px, var(--bg-panel) 4px) bottom / 100% 14px no-repeat,
     linear-gradient(180deg,
       var(--bg-panel) 0 42px,
       var(--gate-hi) 42px 50px,
       var(--gate-body) 50px);
 }
-.gate__cab--l .gate__face-plate {
-  --gate-side-band: linear-gradient(270deg,
-    rgb(0 0 0 / 0.2) 0 var(--gate-depth),
-    var(--gate-ink) var(--gate-depth) calc(var(--gate-depth) + 3px),
-    transparent calc(var(--gate-depth) + 3px));
-  border-radius: 0 var(--r-panel) 0 0;
-}
-.gate__cab--r .gate__face-plate {
-  --gate-side-band: linear-gradient(90deg,
-    rgb(0 0 0 / 0.2) 0 var(--gate-depth),
-    var(--gate-ink) var(--gate-depth) calc(var(--gate-depth) + 3px),
-    transparent calc(var(--gate-depth) + 3px));
-  border-radius: var(--r-panel) 0 0 0;
-}
+.gate__cab--l .gate__face-plate { border-radius: 0 var(--r-panel) 0 0; }
+.gate__cab--r .gate__face-plate { border-radius: var(--r-panel) 0 0 0; }
 /* The service panel on the body: an inset outline and its two
    screws, the one detail that says a cabinet rather than a wall. Clear
    of the side, so it stands on the face alone. */
@@ -20962,7 +21024,7 @@ button.syllabary-cell:focus-visible {
   content: '';
   position: absolute;
   top: 120px;
-  bottom: calc(22% + var(--sp-4));
+  bottom: calc(14px + var(--sp-5));
   border: 3px solid color-mix(in srgb, var(--gate-ink) 22%, var(--gate-body));
   border-radius: var(--r-card);
   background:
