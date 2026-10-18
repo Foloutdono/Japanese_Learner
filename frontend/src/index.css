@@ -27630,11 +27630,15 @@ button.brd-stn { cursor: pointer; }
    stops with the boarding's ease; none under reduced motion. */
 .guide__spot {
   position: fixed;
+  /* Placed by its transform (guide/Spot.jsx): a glide of top/left is a
+     layout shift on every frame. */
+  top: 0;
+  left: 0;
   z-index: 219;
   box-shadow: 0 0 0 100vmax var(--scrim-bg, rgba(0, 0, 0, 0.55));
   border-radius: var(--r-card);
   pointer-events: none;
-  transition: top var(--guide-move, 260ms) ease-out, left var(--guide-move, 260ms) ease-out,
+  transition: transform var(--guide-move, 260ms) ease-out,
     width var(--guide-move, 260ms) ease-out, height var(--guide-move, 260ms) ease-out;
 }
 .guide__spot--pill { border-radius: var(--r-pill); }

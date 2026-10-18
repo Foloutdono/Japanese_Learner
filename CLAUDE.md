@@ -247,8 +247,23 @@ runtime purpose.
   equal. A new source is a reader in `lib/transfer/` that returns
   `kindCollection`'s shape, a `SOURCES` entry on both sides and a value
   of `transfer_import.source` in `events.VALUES` and `track.js`. A new
-  learner is offered it once on Today (`TransferSheet`), after the
-  gate's guide, while `transferOffer` says so (`transfer_offered_at`).
+  learner is offered it once on Today (`TransferSheet`), after their
+  first answer, never before it (`routes/transfer.offer_open`), while
+  `transferOffer` says so (`transfer_offered_at`).
+- **The boot asks for the screen first (2026-10-18).** The API runs a
+  learner's requests six at a time (`core/concurrency.py`), so whatever
+  is mounted for the whole session -- a sheet, a store, the chrome --
+  reads nothing while it draws nothing: a closed `RunOutSheet` asking for
+  `/api/today` put the day's queue ahead of the first ride's card. A
+  store's fetch shares the one in flight (`stores/remote.js`,
+  `profileSummary`'s `fetchIfStale`).
+- **Nothing moves by top or left (2026-10-18).** A highlight or a note
+  that glides between anchors is placed by a transform (`guide/Spot.jsx`),
+  and one that moves to a new anchor is a new element (`guide/Callout.jsx`'s
+  key): a glide of top/left is a layout shift on every frame, and a first
+  ride read CLS 1.3 from the ride's own notes. A tap that changes the
+  screen renders it as a transition (`BoardingFlow`'s `go()`), so the tap
+  paints before the screen does.
 - **The placement test is replayed from its seed (plan 224).** The climb
   (`study/placement.walk`) keeps nothing between two answers: it is
   rebuilt from the seed at each one, in whatever process answers it. So
@@ -414,7 +429,15 @@ One more is read-only and needs no flag, so it is safe to run at any time:
 ```bash
 python -m scripts.weekly_digest        # the four numbers, as markdown
 python -m scripts.read_feedback        # what learners wrote to us (plan 222), newest first
+python -m scripts.learner_trail <user_id>  # one learner's visits, where they left, and why it may have been (plan 249)
 ```
+
+`learner_trail` merges the 足跡 trail with the study tables onto one
+clock, visit by visit, and names the patterns that have cost learners
+before (a boarding left, the first ride begun again, a dead-end sheet,
+a failed request, a slow page, no first answer). It never reads a text
+column a learner wrote into and reads nobody who objected
+(`analytics_off`); run it by hand, never from a workflow.
 
 Two others fill a shared cache ahead of demand rather than maintaining
 one. Neither is required — both caches fill themselves from real traffic
