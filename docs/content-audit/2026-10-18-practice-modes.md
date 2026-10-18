@@ -108,7 +108,7 @@ context and pinned in `tests/test_furigana_context.py`:
   Each is rewritten so the engine says what the kana says, the Japanese
   natural and the choices still parallel.
 
-**模試 (exam seeds, 19 of 20 exam ids):**
+**模試 (exam seeds, all 20 exam ids):**
 
 - Second right answers:
   - N5 grammar: 新しく くつを買いました is right too.
@@ -143,6 +143,31 @@ context and pinned in `tests/test_furigana_context.py`:
   other 116 had nothing left to offer (most are verbs whose okurigana
   rules out every near-miss), so they were re-dealt on an unused word of
   the level, as the generator deals them now.
+- N1 listening's misread lines, the key line among them: ちゅうりん禁止
+  for 駐輪禁止, お米 おこめ, 生の なまの, 十分 as 10分 or じゅうぶん,
+  持ち手 もちて, 港町 みなと町, 先生がた, あいてない, and 看護師長 for 師長.
+- Stories told twice. The seeds were written on forty subjects, drawn
+  part by part with no memory of the paper, so one story came back
+  within and across papers: cinema seats in five N5 papers, four
+  neighbours' parcels at N3, pet-sitting six times at N1. 171 texts
+  that retold another (their content words overlap by 0.25 or more,
+  `retold_stories`) are new scenes or passages, on subjects no other
+  text of the exam id tells, with new questions at the same answer ids.
+  Five more, just under the line, read as one story and were rewritten
+  too.
+- Keys that copied the passage. Picking the choice that copies the most
+  of its passage won 53%, 60%, 55%, 57% and 42% of the reading questions,
+  N5 to N1, against 25% for a blind pick. 178 keys are now said in other
+  words, and where it helps a wrong choice reuses the text's words in
+  something untrue: 23%, 26%, 20%, 23% and 21% (`echo_tells`, 15-35%).
+- Words tested twice: 78 vocabulary items tested a word an earlier paper
+  of the exam id had tested, 21 of them in another spelling or form
+  (水曜日 and すいようび, 言う and 言いました). Each later one is now on a
+  word the exam id does not test.
+- Grammar points asked again and again while others never were
+  (をください six times at N5, か何か four at N3, かたわら five at N1):
+  135 items, blanks and passages are on points the exam id had not
+  keyed, near-synonyms kept apart within a paper.
 
 **Code:**
 
@@ -163,16 +188,28 @@ context and pinned in `tests/test_furigana_context.py`:
 - The mock exam's card said "Full-length practice exams". A paper
   carries a share of a section's items, so it now says practice papers
   (en, fr).
+- `study/llm_shared.soften_kanji` softens a number with its counter, in
+  the reading the pair takes (一階 いっかい, 何階 なんがい, 一冊 いっさつ).
+  Word by word it wrote 一かい, which the engine reads いちかい. In a
+  listening script it also writes in katakana what the engine misreads in
+  hiragana: a noun softened to a lone は or へ (ハブラシ), and さつ after a
+  number.
+- `study/exam_topics.py`: an exam walks each list it draws from (the
+  subjects, the grammar points, the deck words) in one order, and a paper
+  takes its share by its place, the revision or a seed's number
+  (`TopicDeck`, `dealt_order`). The pools hold 90 reading and 160
+  listening subjects, ten papers of the level that asks the most of each.
+- The reading prompt asks for the key in other words than the text's,
+  and a key that still copies it (`exam_validation.copied_key`) is told to
+  the model once (`llm_cost_model` counts the call).
+- `study/exam_seed.py` holds the seeds to all of it: `retold_stories`,
+  `echo_tells`, and `retested_words`, which tells a word by its deck
+  entry, in any form.
 
 ## Open findings (the owner's call)
 
 **Voice.**
 
-- `soften_kanji` (`study/llm_shared.py`) softens word by word. So 一階
-  becomes 一かい, 何階 何かい, 一冊 一さつ and 歯 は, and the engine reads
-  them いちかい, なにかい, いちさっ and わ. Future N5–N4 papers will
-  repeat what this audit fixed by hand unless a number and its counter
-  are softened together.
 - Valid but unlike the kana, left as they are:
   - 日本 said にっぽん.
   - 船便 said せんびん.
@@ -181,27 +218,15 @@ context and pinned in `tests/test_furigana_context.py`:
   - その間 said そのかん.
   - 明日 said あした where the kana says あす.
   - 確認不足 said ふそく.
-- **n1-listening-01 is not in this change.** Its fixes are written:
-  ちゅうりん禁止 for 駐輪禁止 in the key line, お米, 生の, 時間近く, 師長,
-  十分, 持ち手 and more. But the write to the seed file was refused by
-  the session's permission check.
 
 **Exams.**
 
-- Topics are drawn per mondai or per batch with no memory of the paper
-  (`exam_reading_gen.build_reading_passage_mondai`,
-  `exam_listening_gen._build_listening_mcq_mondai`). Results:
-  - Six of the ten N2 listening papers carry a subject twice. N3 and N1
-    reading do the same.
-  - Across papers, the same story recurs: rubbish day, the lost
-    umbrella, the breaking bicycle (five N1 papers), pet-sitting (six N1
-    listening items).
-
-  157 findings list such repeats. The fix is one draw per paper,
-  without replacement, then reseeding.
-- Keys copy the passage. The option sharing most wording with the text
-  is the key in 52–65% of reading questions (25% is chance). A seed
-  check like `LENGTH_TELL` would bound it.
+- The kanji deck places 結 and 基 at N1, where most lists have N3 and
+  N2, so N2 papers write けっか and にもとづいて in kana. Moving a
+  character is a migration (`kanji_renames`).
+- In listening, the choice repeating the most of its script is the key
+  in 37-39% of items. No check bounds it, since a script is heard rather
+  than read beside the choices.
 - Never-right distractors: にかたくない is a wrong choice 14 times on N1
   grammar papers and never the key, を皮切りに 8 times.
 - Mondai below their level:
