@@ -184,6 +184,12 @@ def inside_at(x, y=None):
     return sx, INSIDE[1] + (y - r0) * (INSIDE[3] - INSIDE[1]) / (r1 - r0)
 
 
+# Where the trees the inside's far window shows are taken from: the
+# corner of a stretch of the car's own first pane (x 45..129, rows 487..589),
+# clear of every pillar.
+FAR_TREES = (50, 512)
+
+
 # What the hours need of it, measured on the picture: the far window's
 # glass (inside its frame and rounded corners), its two stanchions, and
 # its floor (the sun lies on it by day).
@@ -284,6 +290,17 @@ def clean(path):
     edge[[0, -1], :] = edge[:, [0, -1]] = 0.5
     S[y0:y1, x0:x1] = (inside(path.parent / 'interior.webp') * edge[..., None]
                        + S[y0:y1, x0:x1] * (1 - edge[..., None])).astype(np.uint8)
+
+    # ── its far window full of the trees the car's own windows show (the
+    #    picture's had sky and a mountain over them): a stretch of a pane of
+    #    the painting's, at its own scale, inside the far window's frame ──
+    fx0, fy0, fx1, fy1 = FAR
+    glass = np.zeros((fy1 - fy0, fx1 - fx0), np.uint8)
+    cv2.rectangle(glass, (0, 0), (fx1 - fx0 - 1, fy1 - fy0 - 1), 1, -1)
+    w = cv2.GaussianBlur(cv2.erode(glass, np.ones((3, 3), np.uint8)).astype(np.float32), (3, 3), 0)[..., None]
+    sx, sy = FAR_TREES
+    trees = S[sy:sy + fy1 - fy0, sx:sx + fx1 - fx0].astype(np.float32)
+    S[fy0:fy1, fx0:fx1] = (trees * w + S[fy0:fy1, fx0:fx1] * (1 - w)).astype(np.uint8)
     return S
 
 

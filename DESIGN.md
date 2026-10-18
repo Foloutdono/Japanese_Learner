@@ -1325,7 +1325,7 @@ Today's column's width (`components/practice/gate/DeskGate`):
   loop but the clouds' is a Web Animation. Under reduced motion the sky
   is the painting's.
 - **The open door shows the car's inside as the owner painted it**
-  (plan 244c, `source/interior.webp`): shown narrower than painted,
+  (plan 244c, `source/interior.webp`), its far window full of the car's own painted trees: shown narrower than painted,
   never squeezed (plain columns let out between its rings, posters and
   stanchions), and lit at each hour as the car is lit.
 - **Every window is the painting's** (owner-directed): the trees it

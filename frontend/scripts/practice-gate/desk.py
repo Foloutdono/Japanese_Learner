@@ -34,7 +34,7 @@ import desk_cut as cut          # noqa: E402
 import desk_parts as parts      # noqa: E402
 from hours import Geometry, Lighter, HOUR_ORDER, lin, srgb   # noqa: E402
 
-REV = 4
+REV = 5
 FRONT = HERE.parent.parent
 PRINT = FRONT / 'src/components/station/print/print.json'
 OUT = FRONT / 'public/practice/gate/desk'
