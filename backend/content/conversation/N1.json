@@ -879,6 +879,256 @@
     }
   },
   {
+    "id": "business-apology-credit",
+    "place": {"jp": "取引先", "kana": "とりひきさき", "en": "A client's office", "fr": "Chez un client"},
+    "title": {"en": "More than an apology", "fr": "Plus que des excuses"},
+    "situation": {
+      "en": "You are at a client's office to apologise for the wrong goods your company sent them. The purchasing manager has heard your apology, and wants more than words.",
+      "fr": "Tu es chez un client pour t'excuser de la mauvaise marchandise que ton entreprise lui a envoyée. Le responsable des achats a entendu tes excuses, mais il attend davantage que des mots."
+    },
+    "goal": {
+      "en": "Take the client's anger seriously, keep to what is in your authority when he asks for a discount and hints at reviewing your business, offer concrete measures, and commit to an answer by a set date.",
+      "fr": "Prends au sérieux la colère du client, tiens-t'en à ce qui relève de toi quand il réclame une remise et laisse planer une remise en cause de vos relations, propose des mesures concrètes et engage-toi à répondre à une date précise."
+    },
+    "steps": [
+      {"en": "Apologise once more", "fr": "Excuse-toi une nouvelle fois"},
+      {"en": "Say a discount is not yours to grant", "fr": "Dis que la remise ne dépend pas de toi"},
+      {"en": "Offer concrete measures", "fr": "Propose des mesures concrètes"},
+      {"en": "Promise an answer by a set date", "fr": "Promets une réponse à date fixe"},
+      {"en": "Agree to come back with your manager", "fr": "Accepte de revenir avec ton supérieur"}
+    ],
+    "them": {"en": "Client purchasing manager", "fr": "Responsable des achats"},
+    "register": "formal",
+    "turns": [
+      {
+        "them": {
+          "jp": "お詫びはわかりました。ただ、謝ってもらえば済むという話ではないんですよ。",
+          "kana": "おわびはわかりました。ただ、あやまってもらえばすむというはなしではないんですよ。",
+          "en": "I've heard your apology. But this isn't something an apology alone can settle.",
+          "fr": "J'ai bien entendu vos excuses. Mais ce n'est pas une affaire que des excuses suffisent à régler."
+        },
+        "me": {
+          "jp": "おっしゃるとおりでございます。重ねてお詫び申し上げます。",
+          "kana": "おっしゃるとおりでございます。かさねておわびもうしあげます。",
+          "romaji": "ossharu toori de gozaimasu. kasanete owabi moushiagemasu",
+          "en": "You are quite right. Once again, please accept my apologies.",
+          "fr": "Vous avez tout à fait raison. Je vous renouvelle toutes mes excuses.",
+          "note": {
+            "en": "「おっしゃるとおりでございます」 grants the client's point without a word of defence, and 「重ねて」 renews the apology you have already made.",
+            "fr": "「おっしゃるとおりでございます」 donne raison au client sans un mot de défense, et 「重ねて」 renouvelle les excuses déjà présentées."
+          },
+          "alt": [
+            {"jp": "ごもっともでございます。このたびは多大なご迷惑をおかけし、重ねてお詫び申し上げます。", "kana": "ごもっともでございます。このたびはただいなごめいわくをおかけし、かさねておわびもうしあげます。", "romaji": "gomottomo de gozaimasu. kono tabi wa tadai na go meiwaku o okake shi, kasanete owabi moushiagemasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "ですが、正しい商品はすでにお届けしましたので、この件は解決済みかと存じます。",
+            "kana": "ですが、ただしいしょうひんはすでにおとどけしましたので、このけんはかいけつずみかとぞんじます。",
+            "en": "But we have already delivered the correct goods, so I believe the matter is settled.",
+            "fr": "Mais nous vous avons déjà livré les bons articles : je considère donc l'affaire comme réglée.",
+            "why": {
+              "en": "「解決済み」 declares the matter closed, when the client has just told you it is not.",
+              "fr": "「解決済み」 déclare l'affaire close, alors que le client vient de te dire qu'elle ne l'est pas."
+            }
+          },
+          {
+            "jp": "おっしゃるとおりでございます。それでは、本日はこれで失礼いたします。",
+            "kana": "おっしゃるとおりでございます。それでは、ほんじつはこれでしつれいいたします。",
+            "en": "You are quite right. Well then, I shall take my leave for today.",
+            "fr": "Vous avez tout à fait raison. Sur ce, je vais prendre congé pour aujourd'hui.",
+            "why": {
+              "en": "「これで失礼いたします」 takes your leave just as the client says the matter is far from settled.",
+              "fr": "「これで失礼いたします」 prend congé au moment même où le client dit que l'affaire est loin d'être réglée."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "おかげで、うちは生産ラインを半日止めざるを得なかったんです。次回の発注分は、一割値引きしてもらえませんか。",
+          "kana": "おかげで、うちはせいさんラインをはんにちとめざるをえなかったんです。じかいのはっちゅうぶんは、いちわりねびきしてもらえませんか。",
+          "en": "Thanks to you, we had no choice but to stop our production line for half a day. Could you take ten percent off our next order?",
+          "fr": "Grâce à vous, nous avons dû arrêter notre chaîne de production pendant une demi-journée. Pourriez-vous nous faire dix pour cent de remise sur la prochaine commande ?"
+        },
+        "me": {
+          "jp": "大変恐縮ですが、お値引きにつきましては、私の一存ではお答えいたしかねます。",
+          "kana": "たいへんきょうしゅくですが、おねびきにつきましては、わたしのいちぞんではおこたえいたしかねます。",
+          "romaji": "taihen kyoushuku desu ga, onebiki ni tsukimashite wa, watashi no ichizon de wa okotae itashikanemasu",
+          "en": "I am terribly sorry, but a discount is not something I can answer on my own authority.",
+          "fr": "Je regrette vivement, mais je ne peux pas vous répondre sur une remise de ma seule autorité.",
+          "note": {
+            "en": "「私の一存では」 says the decision is not yours alone to make, and 「お答えいたしかねます」 declines humbly without saying no.",
+            "fr": "「私の一存では」 dit que la décision ne t'appartient pas en propre, et 「お答えいたしかねます」 décline humblement sans dire non."
+          },
+          "alt": [
+            {"jp": "申し訳ございませんが、値引きのお話は、私一人では判断いたしかねます。", "kana": "もうしわけございませんが、ねびきのおはなしは、わたしひとりでははんだんいたしかねます。", "romaji": "moushiwake gozaimasen ga, nebiki no ohanashi wa, watashi hitori de wa handan itashikanemasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "ですが、ラインを止められたのは、あくまで御社のご判断によるものかと存じます。",
+            "kana": "ですが、ラインをとめられたのは、あくまでおんしゃのごはんだんによるものかとぞんじます。",
+            "en": "But stopping the line was, I believe, entirely your company's own decision.",
+            "fr": "Mais l'arrêt de la chaîne relevait, je crois, d'une décision de votre seule société.",
+            "why": {
+              "en": "「御社のご判断」 puts the stopped line down to the client's own choice, when your company's mistake forced it.",
+              "fr": "「御社のご判断」 met l'arrêt de la chaîne sur le compte d'un choix du client, alors que c'est l'erreur de ton entreprise qui l'a imposé."
+            }
+          },
+          {
+            "jp": "大変恐縮ですが、お値引きは、私の一存ではお答えになりかねます。",
+            "kana": "たいへんきょうしゅくですが、おねびきは、わたしのいちぞんではおこたえになりかねます。",
+            "en": "I am terribly sorry, but a discount is not something I could graciously answer on my own authority.",
+            "fr": "Je regrette vivement, mais je ne saurais daigner vous répondre sur une remise de ma seule autorité.",
+            "why": {
+              "en": "「お答えになりかねます」 puts your own answer in the honorific 「お〜になる」, which raises yourself; yours is 「お答えいたしかねます」.",
+              "fr": "「お答えになりかねます」 met ta propre réponse à l'honorifique 「お〜になる」, qui t'élève toi-même ; pour toi, c'est 「お答えいたしかねます」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "そうですか。実は社内でも、御社との取引を見直すべきだという声が出ているんですよ。",
+          "kana": "そうですか。じつはしゃないでも、おんしゃとのとりひきをみなおすべきだというこえがでているんですよ。",
+          "en": "I see. To be honest, people in our company are saying we should review our business with you.",
+          "fr": "Je vois. À vrai dire, chez nous, certains estiment qu'il faudrait revoir nos relations avec votre société."
+        },
+        "me": {
+          "jp": "重く受け止めております。今後、御社向けの出荷にはすべて私が立ち会い、検品結果を毎回ご報告いたします。",
+          "kana": "おもくうけとめております。こんご、おんしゃむけのしゅっかにはすべてわたしがたちあい、けんぴんけっかをまいかいごほうこくいたします。",
+          "romaji": "omoku uketomete orimasu. kongo, onsha muke no shukka ni wa subete watashi ga tachiai, kenpin kekka o maikai go houkoku itashimasu",
+          "en": "I take that very seriously. From now on, I will personally attend every shipment to your company and report the inspection results to you each time.",
+          "fr": "Je prends cela très au sérieux. Désormais, j'assisterai moi-même à chaque expédition vers votre société et je vous communiquerai à chaque fois le résultat du contrôle.",
+          "note": {
+            "en": "「重く受け止めております」 takes the warning without protest, and 「私が立ち会い」 answers it with a measure you can carry out yourself.",
+            "fr": "「重く受け止めております」 accueille l'avertissement sans protester, et 「私が立ち会い」 y répond par une mesure que tu peux appliquer toi-même."
+          },
+          "alt": [
+            {"jp": "大変重く受け止めております。今後は御社向けの出荷に私が必ず立ち会い、検品の結果をその都度ご報告いたします。", "kana": "たいへんおもくうけとめております。こんごはおんしゃむけのしゅっかにわたしがかならずたちあい、けんぴんのけっかをそのつどごほうこくいたします。", "romaji": "taihen omoku uketomete orimasu. kongo wa onsha muke no shukka ni watashi ga kanarazu tachiai, kenpin no kekka o sono tsudo go houkoku itashimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "ありがとうございます。弊社を見直していただけるとは、光栄でございます。",
+            "kana": "ありがとうございます。へいしゃをみなおしていただけるとは、こうえいでございます。",
+            "en": "Thank you. It is an honour that you should think better of us.",
+            "fr": "Merci beaucoup. C'est un honneur que vous nous voyiez d'un meilleur œil.",
+            "why": {
+              "en": "「見直す」 here is reviewing the business, perhaps to end it, not thinking better of your company: 「光栄でございます」 thanks the client for a threat.",
+              "fr": "「見直す」 veut dire ici revoir les relations, peut-être pour y mettre fin, et non vous voir d'un meilleur œil : 「光栄でございます」 remercie le client d'une menace."
+            }
+          },
+          {
+            "jp": "でしたら、弊社としても、御社とのお取引を考え直させていただきます。",
+            "kana": "でしたら、へいしゃとしても、おんしゃとのおとりひきをかんがえなおさせていただきます。",
+            "en": "In that case, we too will reconsider our business with your company.",
+            "fr": "Dans ce cas, nous aussi, nous allons reconsidérer nos relations avec votre société.",
+            "why": {
+              "en": "「弊社としても」 answers the client's warning with a threat of your own, when it is your company that is in the wrong.",
+              "fr": "「弊社としても」 répond à l'avertissement du client par une menace de ton cru, alors que c'est ton entreprise qui est en tort."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "対策はわかりました。それで、値引きの件はいつお返事をいただけるんですか。",
+          "kana": "たいさくはわかりました。それで、ねびきのけんはいつおへんじをいただけるんですか。",
+          "en": "I understand the measures. So when will you give me an answer on the discount?",
+          "fr": "J'ai bien compris les mesures. Mais pour la remise, quand aurai-je votre réponse ?"
+        },
+        "me": {
+          "jp": "社に持ち帰って上司と協議し、今週金曜日までに必ずお返事いたします。",
+          "kana": "しゃにもちかえってじょうしときょうぎし、こんしゅうきんようびまでにかならずおへんじいたします。",
+          "romaji": "sha ni mochikaette joushi to kyougi shi, konshuu kin'youbi made ni kanarazu ohenji itashimasu",
+          "en": "I will take it back to my company, discuss it with my manager, and give you an answer by this Friday without fail.",
+          "fr": "Je rapporte la demande à ma société, j'en discute avec mon supérieur, et je vous réponds sans faute d'ici ce vendredi.",
+          "note": {
+            "en": "「上司と協議し」 says who will decide, and 「今週金曜日までに必ず」 gives the client a day to hold you to.",
+            "fr": "「上司と協議し」 dit qui décidera, et 「今週金曜日までに必ず」 donne au client un jour auquel te tenir."
+          },
+          "alt": [
+            {"jp": "本日、社に戻って上司と相談し、金曜日までに必ずご回答いたします。", "kana": "ほんじつ、しゃにもどってじょうしとそうだんし、きんようびまでにかならずごかいとういたします。", "romaji": "honjitsu, sha ni modotte joushi to soudan shi, kin'youbi made ni kanarazu go kaitou itashimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "値引きの件でしたら、私の判断で、今この場でお受けいたします。",
+            "kana": "ねびきのけんでしたら、わたしのはんだんで、いまこのばでおうけいたします。",
+            "en": "As for the discount, I will accept it here and now, on my own judgement.",
+            "fr": "Pour la remise, je l'accepte ici même, de ma propre autorité.",
+            "why": {
+              "en": "「私の判断で、今この場で」 grants on the spot the very discount you have just said is not yours to decide.",
+              "fr": "「私の判断で、今この場で」 accorde sur-le-champ la remise même dont tu viens de dire qu'elle ne dépend pas de toi."
+            }
+          },
+          {
+            "jp": "立ち会いによる検品は、来週月曜日の出荷分から始めさせていただく予定です。",
+            "kana": "たちあいによるけんぴんは、らいしゅうげつようびのしゅっかぶんからはじめさせていただくよていです。",
+            "en": "The inspections with me in attendance will start with next Monday's shipment.",
+            "fr": "Le contrôle en ma présence commencera avec l'expédition de lundi prochain.",
+            "why": {
+              "en": "It says when the inspections will start, when the client, setting the measures aside, asked when you will answer on the discount: 「いつお返事を」.",
+              "fr": "Tu dis quand commencera le contrôle, alors que le client, laissant les mesures de côté, demandait quand tu répondrais sur la remise : 「いつお返事を」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "金曜日ですね。では、お返事の際は、上の方にもお越しいただけますか。",
+          "kana": "きんようびですね。では、おへんじのさいは、うえのかたにもおこしいただけますか。",
+          "en": "Friday, then. And when you give us your answer, could someone senior come as well?",
+          "fr": "Vendredi, donc. Et ce jour-là, un de vos supérieurs pourrait-il venir aussi ?"
+        },
+        "me": {
+          "jp": "承知いたしました。金曜日には、上司とともに改めて伺います。",
+          "kana": "しょうちいたしました。きんようびには、じょうしとともにあらためてうかがいます。",
+          "romaji": "shouchi itashimashita. kin'youbi ni wa, joushi to tomo ni aratamete ukagaimasu",
+          "en": "Certainly. On Friday I will come again, with my manager.",
+          "fr": "Bien entendu. Vendredi, je reviendrai avec mon supérieur.",
+          "note": {
+            "en": "「上司とともに」 grants the client's request at once, and 「伺います」 is the humble 「行く」 for your visit.",
+            "fr": "「上司とともに」 accède aussitôt à la demande du client, et 「伺います」 est l'humble 「行く」 pour ta visite."
+          },
+          "alt": [
+            {"jp": "かしこまりました。金曜日は、上司の佐藤と二人で伺います。", "kana": "かしこまりました。きんようびは、じょうしのさとうとふたりでうかがいます。", "romaji": "kashikomarimashita. kin'youbi wa, joushi no satou to futari de ukagaimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "承知いたしました。金曜日には、部長がいらっしゃいます。",
+            "kana": "しょうちいたしました。きんようびには、ぶちょうがいらっしゃいます。",
+            "en": "Certainly. On Friday our department head will graciously come.",
+            "fr": "Bien entendu. Vendredi, notre directeur daignera venir.",
+            "why": {
+              "en": "「いらっしゃいます」 is honorific, and before a client your own department head takes none: he 「伺います」, as you do.",
+              "fr": "「いらっしゃいます」 est honorifique, et devant un client, ton propre directeur n'y a pas droit : il 「伺います」, comme toi."
+            }
+          },
+          {
+            "jp": "いえ、上司は多忙のため、金曜日も私一人で伺います。",
+            "kana": "いえ、じょうしはたぼうのため、きんようびもわたしひとりでうかがいます。",
+            "en": "No, my manager is very busy, so on Friday too I will come alone.",
+            "fr": "Non, mon supérieur est très pris : vendredi aussi, je viendrai sans lui.",
+            "why": {
+              "en": "「上司は多忙のため」 tells a wronged client your manager has better things to do, and turns down a fair request.",
+              "fr": "「上司は多忙のため」 fait savoir à un client lésé que ton supérieur a mieux à faire, et refuse une demande légitime."
+            }
+          }
+        ]
+      }
+    ],
+    "close": {
+      "jp": "わかりました。では、金曜日にお待ちしています。",
+      "kana": "わかりました。では、きんようびにおまちしています。",
+      "en": "Very well. We'll expect you on Friday, then.",
+      "fr": "Entendu. Nous vous attendons donc vendredi."
+    }
+  },
+  {
     "id": "research-interview",
     "place": {"jp": "大学院", "kana": "だいがくいん", "en": "Graduate school interview", "fr": "Entretien d'admission en master"},
     "title": {"en": "Into the lab", "fr": "Entrer au laboratoire"},
@@ -1761,6 +2011,256 @@
     }
   },
   {
+    "id": "doctor-second-opinion",
+    "place": {"jp": "病院", "kana": "びょういん", "en": "Hospital", "fr": "Hôpital"},
+    "title": {"en": "Asking for a second opinion", "fr": "Demander un second avis"},
+    "situation": {
+      "en": "You have returned to the hospital to hear what last week's tests showed. The doctor goes through them with you in the consulting room.",
+      "fr": "Te voici de retour à l'hôpital pour savoir ce qu'ont montré les examens de la semaine dernière. Le médecin les passe en revue avec toi dans son cabinet."
+    },
+    "goal": {
+      "en": "Hear why the doctor advises surgery soon, ask about its risks and what waiting would cost, and ask tactfully for a referral letter so that you can get a second opinion.",
+      "fr": "Écoute pourquoi le médecin conseille d'opérer bientôt, interroge-le sur les risques et sur ce que coûterait l'attente, puis demande-lui avec tact une lettre d'orientation pour obtenir un second avis."
+    },
+    "steps": [
+      {"en": "Ask about the risks of surgery", "fr": "Interroge sur les risques de l'opération"},
+      {"en": "Ask what waiting would cost", "fr": "Demande ce que coûterait l'attente"},
+      {"en": "Ask for a second opinion, tactfully", "fr": "Demande un second avis avec tact"},
+      {"en": "Ask for a referral letter", "fr": "Demande une lettre d'orientation"},
+      {"en": "Thank the doctor", "fr": "Remercie le médecin"}
+    ],
+    "them": {"en": "Doctor", "fr": "Médecin"},
+    "register": "polite",
+    "turns": [
+      {
+        "them": {
+          "jp": "検査の結果が出ました。胆のうに一センチを超えるポリープがあるので、早めに手術で胆のうごと取ることをお勧めします。",
+          "kana": "けんさのけっかがでました。たんのうにいっセンチをこえるポリープがあるので、はやめにしゅじゅつでたんのうごととることをおすすめします。",
+          "en": "Your results are back. There is a polyp of over a centimetre in your gallbladder, so I recommend surgery fairly soon, to remove it along with the gallbladder.",
+          "fr": "Les résultats de vos examens sont arrivés. Vous avez dans la vésicule biliaire un polype de plus d'un centimètre : je vous conseille de vous faire opérer assez vite, pour l'enlever avec la vésicule."
+        },
+        "me": {
+          "jp": "手術ですか。手術には、どんなリスクがあるんでしょうか。",
+          "kana": "しゅじゅつですか。しゅじゅつには、どんなリスクがあるんでしょうか。",
+          "romaji": "shujutsu desu ka. shujutsu ni wa, donna risuku ga aru n deshou ka",
+          "en": "Surgery? What risks does the operation carry?",
+          "fr": "Une opération ? Quels en sont les risques ?",
+          "note": {
+            "en": "「手術ですか」 takes in the news, and 「どんなリスクがあるんでしょうか」 asks, gently, what the operation would mean for you.",
+            "fr": "「手術ですか」 accuse le coup, et 「どんなリスクがあるんでしょうか」 demande doucement ce que l'opération représenterait pour toi."
+          },
+          "alt": [
+            {"jp": "手術ですか。どのような危険があるんでしょうか。", "kana": "しゅじゅつですか。どのようなきけんがあるんでしょうか。", "romaji": "shujutsu desu ka. dono you na kiken ga aru n deshou ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "一センチぐらいでしたら、たいしたことはありませんね。安心しました。",
+            "kana": "いっセンチぐらいでしたら、たいしたことはありませんね。あんしんしました。",
+            "en": "Only a centimetre or so? Then it's nothing serious. What a relief.",
+            "fr": "Un centimètre à peu près ? Alors ce n'est rien de grave. Quel soulagement.",
+            "why": {
+              "en": "「たいしたことはありません」 makes light of a finding the doctor has just said should be removed soon.",
+              "fr": "「たいしたことはありません」 minimise une découverte dont le médecin vient de dire qu'il faut l'enlever bientôt."
+            }
+          },
+          {
+            "jp": "手術？それって、どうしても受けなきゃだめなの？",
+            "kana": "しゅじゅつ？それって、どうしてもうけなきゃだめなの？",
+            "en": "Surgery? Do I seriously have to go through with that?",
+            "fr": "Une opération ? Faut vraiment que je passe par là ?",
+            "why": {
+              "en": "「受けなきゃだめなの？」 is how you talk to a friend; a patient speaks to the doctor in polite form.",
+              "fr": "「受けなきゃだめなの？」, c'est ainsi qu'on parle à un ami ; un patient s'adresse au médecin en forme polie."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "一般的な手術なので、リスクは低いです。ただ、ごくまれに、出血や胆管の損傷といった合併症が起こることがあります。",
+          "kana": "いっぱんてきなしゅじゅつなので、リスクはひくいです。ただ、ごくまれに、しゅっけつやたんかんのそんしょうといったがっぺいしょうがおこることがあります。",
+          "en": "It is a common operation, so the risk is low. But very rarely there can be complications, such as bleeding or damage to the bile duct.",
+          "fr": "C'est une opération courante, donc le risque est faible. Mais, très rarement, des complications peuvent survenir, comme un saignement ou une lésion des voies biliaires."
+        },
+        "me": {
+          "jp": "では、手術をしないで様子を見た場合は、どうなりますか。",
+          "kana": "では、しゅじゅつをしないでようすをみたばあいは、どうなりますか。",
+          "romaji": "dewa, shujutsu o shinaide yousu o mita baai wa, dou narimasu ka",
+          "en": "Then what would happen if I didn't have the operation and we just kept an eye on it?",
+          "fr": "Et si je ne me faisais pas opérer et qu'on se contentait de surveiller, que se passerait-il ?",
+          "note": {
+            "en": "「様子を見た場合は」 asks what waiting would mean, the other side of the choice, before you decide.",
+            "fr": "「様子を見た場合は」 demande ce que signifierait l'attente, l'autre versant du choix, avant de décider."
+          },
+          "alt": [
+            {"jp": "もし、すぐに手術を受けなかったら、どうなるんでしょうか。", "kana": "もし、すぐにしゅじゅつをうけなかったら、どうなるんでしょうか。", "romaji": "moshi, sugu ni shujutsu o ukenakattara, dou naru n deshou ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "出血がよく起こるんですか。それなら、手術はやめておきます。",
+            "kana": "しゅっけつがよくおこるんですか。それなら、しゅじゅつはやめておきます。",
+            "en": "Bleeding often happens? Then I'll give the operation a miss.",
+            "fr": "Les saignements sont fréquents ? Alors je renonce à l'opération.",
+            "why": {
+              "en": "「よく起こる」 hears the complications as common, when the doctor said 「ごくまれに」, very rarely.",
+              "fr": "「よく起こる」 comprend que les complications sont fréquentes, alors que le médecin a dit 「ごくまれに」, très rarement."
+            }
+          },
+          {
+            "jp": "では、私が手術をしないで様子を見ていた場合は、どうなりましたか。",
+            "kana": "では、わたしがしゅじゅつをしないでようすをみていたばあいは、どうなりましたか。",
+            "en": "Then what happened when I didn't have the operation and we kept an eye on it?",
+            "fr": "Et quand je ne me suis pas fait opérer et qu'on a surveillé, que s'est-il passé ?",
+            "why": {
+              "en": "「どうなりましたか」 asks what happened, as if you had already waited, when the choice is still ahead of you.",
+              "fr": "「どうなりましたか」 demande ce qui s'est passé, comme si tu avais déjà attendu, alors que le choix est encore devant toi."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "もし悪性だった場合は、その間に進行してしまうおそれがあります。ですから、なるべく早いほうがいいと思いますよ。",
+          "kana": "もしあくせいだったばあいは、そのあいだにしんこうしてしまうおそれがあります。ですから、なるべくはやいほうがいいとおもいますよ。",
+          "en": "If it turned out to be malignant, it could progress in the meantime. That's why I think the sooner, the better.",
+          "fr": "S'il s'avérait malin, il risquerait d'évoluer entre-temps. C'est pourquoi je pense qu'il vaut mieux ne pas tarder."
+        },
+        "me": {
+          "jp": "よくわかりました。ただ、大事なことなので、ほかの先生のご意見も伺ってみたいのですが。",
+          "kana": "よくわかりました。ただ、だいじなことなので、ほかのせんせいのごいけんもうかがってみたいのですが。",
+          "romaji": "yoku wakarimashita. tada, daiji na koto na node, hoka no sensei no go iken mo ukagatte mitai no desu ga",
+          "en": "I understand. But it's an important decision, so I'd like to hear another doctor's opinion as well, if I may.",
+          "fr": "J'ai bien compris. Mais c'est une décision importante, alors j'aimerais aussi entendre l'avis d'un autre médecin, si vous le permettez.",
+          "note": {
+            "en": "「大事なことなので」 grounds the request in the weight of the decision, not in any doubt of the doctor, and 「伺ってみたいのですが」 leaves it open for him to agree.",
+            "fr": "「大事なことなので」 fonde la demande sur le poids de la décision et non sur un doute envers le médecin, et 「伺ってみたいのですが」 la laisse en suspens pour qu'il y consente."
+          },
+          "alt": [
+            {"jp": "わかりました。念のため、セカンドオピニオンを受けてみてもよろしいでしょうか。", "kana": "わかりました。ねんのため、セカンドオピニオンをうけてみてもよろしいでしょうか。", "romaji": "wakarimashita. nen no tame, sekando opinion o ukete mite mo yoroshii deshou ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "先生の診断が信用できないので、ほかの病院で診てもらうことにします。",
+            "kana": "せんせいのしんだんがしんようできないので、ほかのびょういんでみてもらうことにします。",
+            "en": "I can't trust your diagnosis, so I'll get myself seen at another hospital.",
+            "fr": "Je ne peux pas me fier à votre diagnostic, alors je vais me faire examiner dans un autre hôpital.",
+            "why": {
+              "en": "「信用できない」 tells the doctor you distrust him, when a second opinion is asked for without casting doubt on the first.",
+              "fr": "「信用できない」 dit au médecin que tu te méfies de lui, alors qu'un second avis se demande sans mettre le premier en doute."
+            }
+          },
+          {
+            "jp": "よくわかりました。ただ、大事なことなので、ほかの先生のご意見も申し上げてみたいのですが。",
+            "kana": "よくわかりました。ただ、だいじなことなので、ほかのせんせいのごいけんももうしあげてみたいのですが。",
+            "en": "I understand. But it's an important decision, so I'd like to humbly tell you another doctor's opinion as well, if I may.",
+            "fr": "J'ai bien compris. Mais c'est une décision importante, alors j'aimerais aussi vous exposer humblement l'avis d'un autre médecin, si vous le permettez.",
+            "why": {
+              "en": "「申し上げる」 is the humble 「言う」: you offer to tell him another doctor's opinion, when you mean to hear one, 「伺う」.",
+              "fr": "「申し上げる」 est l'humble 「言う」 : tu proposes de lui exposer l'avis d'un autre médecin, alors que tu veux en entendre un, 「伺う」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "もちろん構いませんよ。どちらの病院をお考えですか。",
+          "kana": "もちろんかまいませんよ。どちらのびょういんをおかんがえですか。",
+          "en": "Of course, that's no problem at all. Which hospital do you have in mind?",
+          "fr": "Bien sûr, aucun problème. À quel hôpital pensez-vous ?"
+        },
+        "me": {
+          "jp": "大学病院の外科を考えています。紹介状を書いていただけますか。",
+          "kana": "だいがくびょういんのげかをかんがえています。しょうかいじょうをかいていただけますか。",
+          "romaji": "daigaku byouin no geka o kangaete imasu. shoukaijou o kaite itadakemasu ka",
+          "en": "I'm thinking of the surgical department at the university hospital. Could you write me a referral letter?",
+          "fr": "Je pense au service de chirurgie de l'hôpital universitaire. Pourriez-vous me faire une lettre d'orientation ?",
+          "note": {
+            "en": "「紹介状」 is the letter the other doctor needs to take up your case, and 「書いていただけますか」 asks for it as a favour.",
+            "fr": "「紹介状」 est la lettre dont l'autre médecin a besoin pour reprendre ton dossier, et 「書いていただけますか」 la demande comme une faveur."
+          },
+          "alt": [
+            {"jp": "大学病院に行ってみたいので、紹介状をお願いできますか。", "kana": "だいがくびょういんにいってみたいので、しょうかいじょうをおねがいできますか。", "romaji": "daigaku byouin ni itte mitai node, shoukaijou o onegai dekimasu ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "大学病院を考えています。招待状を書いていただけますか。",
+            "kana": "だいがくびょういんをかんがえています。しょうたいじょうをかいていただけますか。",
+            "en": "I'm thinking of the university hospital. Could you write me an invitation?",
+            "fr": "Je pense à l'hôpital universitaire. Pourriez-vous me faire un carton d'invitation ?",
+            "why": {
+              "en": "「招待状」 is an invitation, to a wedding or a party; the letter that hands your case to another doctor is a 「紹介状」.",
+              "fr": "「招待状」 est une invitation, à un mariage ou à une fête ; la lettre qui confie ton dossier à un autre médecin, c'est un 「紹介状」."
+            }
+          },
+          {
+            "jp": "こちらの病院で、来週手術を受けたいと考えています。",
+            "kana": "こちらのびょういんで、らいしゅうしゅじゅつをうけたいとかんがえています。",
+            "en": "I'm thinking of having the operation here next week.",
+            "fr": "Je pense me faire opérer ici, la semaine prochaine.",
+            "why": {
+              "en": "「こちらの病院で」 books the operation here, when the doctor asked where you will go for the other opinion you have just asked to hear.",
+              "fr": "「こちらの病院で」 prévoit l'opération ici, alors que le médecin te demandait où tu iras chercher l'autre avis que tu viens de demander."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "わかりました。紹介状と検査の画像をご用意しますので、一週間ほどお待ちください。",
+          "kana": "わかりました。しょうかいじょうとけんさのがぞうをごよういしますので、いっしゅうかんほどおまちください。",
+          "en": "Very well. I'll prepare the referral letter and your scan images, so please allow about a week.",
+          "fr": "Entendu. Je vous prépare la lettre d'orientation et les images de vos examens : comptez environ une semaine."
+        },
+        "me": {
+          "jp": "ありがとうございます。向こうでお話を伺ったら、改めてご相談させてください。",
+          "kana": "ありがとうございます。むこうでおはなしをうかがったら、あらためてごそうだんさせてください。",
+          "romaji": "arigatou gozaimasu. mukou de ohanashi o ukagattara, aratamete go soudan sasete kudasai",
+          "en": "Thank you. Once I've heard what they say there, may I come back and talk it over with you again?",
+          "fr": "Merci beaucoup. Une fois que j'aurai entendu leur avis là-bas, permettez-moi de revenir en parler avec vous.",
+          "note": {
+            "en": "「改めてご相談させてください」 tells the doctor the decision will come back to him, so the second opinion takes nothing from the first.",
+            "fr": "「改めてご相談させてください」 dit au médecin que la décision lui reviendra, si bien que le second avis n'enlève rien au premier."
+          },
+          "alt": [
+            {"jp": "ありがとうございます。向こうの先生のお話を聞いてから、またご相談します。", "kana": "ありがとうございます。むこうのせんせいのおはなしをきいてから、またごそうだんします。", "romaji": "arigatou gozaimasu. mukou no sensei no ohanashi o kiite kara, mata go soudan shimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "ありがとうございます。では、半年ほどしたら向こうに行ってみます。",
+            "kana": "ありがとうございます。では、はんとしほどしたらむこうにいってみます。",
+            "en": "Thank you. Then I'll go and see them there in six months or so.",
+            "fr": "Merci beaucoup. Alors j'irai les voir là-bas d'ici six mois environ.",
+            "why": {
+              "en": "「半年ほどしたら」 puts the second opinion off for months, the very waiting the doctor has just warned against.",
+              "fr": "「半年ほどしたら」 repousse le second avis de plusieurs mois, l'attente même contre laquelle le médecin vient de te mettre en garde."
+            }
+          },
+          {
+            "jp": "はい、では一週間ほどお待ちください。",
+            "kana": "はい、ではいっしゅうかんほどおまちください。",
+            "en": "Yes, then please wait about a week.",
+            "fr": "Oui, alors veuillez patienter environ une semaine.",
+            "why": {
+              "en": "「お待ちください」 asks the doctor to wait, when it is you he has asked to wait for the letter.",
+              "fr": "「お待ちください」 demande au médecin de patienter, alors que c'est toi qu'il prie d'attendre la lettre."
+            }
+          }
+        ]
+      }
+    ],
+    "close": {
+      "jp": "ええ、ぜひそうしてください。ただ、あまり時間を空けないようにしましょうね。",
+      "kana": "ええ、ぜひそうしてください。ただ、あまりじかんをあけないようにしましょうね。",
+      "en": "Yes, please do. But let's not leave it too long.",
+      "fr": "Oui, faites donc. Mais tâchons de ne pas laisser passer trop de temps."
+    }
+  },
+  {
     "id": "price-negotiation",
     "place": {"jp": "商談室", "kana": "しょうだんしつ", "en": "Negotiation room", "fr": "Salle de négociation"},
     "title": {"en": "Negotiating a unit price", "fr": "Négocier un prix unitaire"},
@@ -2052,6 +2552,256 @@
       "kana": "かしこまりました。よいおへんじをおまちしております。",
       "en": "Certainly. I look forward to a favourable answer.",
       "fr": "Très bien. Dans l'attente d'une réponse favorable."
+    }
+  },
+  {
+    "id": "price-increase",
+    "place": {"jp": "商談室", "kana": "しょうだんしつ", "en": "Negotiation room", "fr": "Salle de négociation"},
+    "title": {"en": "Facing a price rise", "fr": "Face à une hausse de prix"},
+    "situation": {
+      "en": "The account manager of one of your suppliers has come to your company about next year's terms. Here it is the supplier who wants the price to move, and upwards.",
+      "fr": "Le commercial d'un de tes fournisseurs est venu dans ton entreprise pour parler des conditions de l'an prochain. Ici, c'est le fournisseur qui veut faire bouger le prix, et à la hausse."
+    },
+    "goal": {
+      "en": "Ask the supplier what lies behind a twelve percent rise from April, press for a rise in stages, offer a volume commitment in return, and take the proposal back to your company.",
+      "fr": "Demande au fournisseur ce qui justifie une hausse de douze pour cent en avril, pousse pour une hausse étalée, propose un engagement de volume en échange et rapporte la proposition à ta société."
+    },
+    "steps": [
+      {"en": "Ask what the rise is based on", "fr": "Demande ce qui justifie la hausse"},
+      {"en": "Refuse twelve percent in one go", "fr": "Refuse douze pour cent d'un coup"},
+      {"en": "Propose a rise in two stages", "fr": "Propose une hausse en deux temps"},
+      {"en": "Offer a volume commitment", "fr": "Propose un engagement de volume"},
+      {"en": "Take it back to your company", "fr": "Rapporte la proposition à ta société"}
+    ],
+    "them": {"en": "Supplier's account manager", "fr": "Commercial du fournisseur"},
+    "register": "formal",
+    "turns": [
+      {
+        "them": {
+          "jp": "大変申し上げにくいのですが、四月から、全製品の価格を十二パーセント改定させていただきたく、お願いに参りました。",
+          "kana": "たいへんもうしあげにくいのですが、しがつから、ぜんせいひんのかかくをじゅうにパーセントかいていさせていただきたく、おねがいにまいりました。",
+          "en": "This is very difficult to say, but I have come to ask you to accept a twelve percent revision of the prices of all our products from April.",
+          "fr": "C'est très délicat à dire, mais je suis venu vous demander d'accepter une révision de douze pour cent du prix de tous nos produits à partir d'avril."
+        },
+        "me": {
+          "jp": "十二パーセントとは、かなりの幅ですね。その根拠をお聞かせいただけますか。",
+          "kana": "じゅうにパーセントとは、かなりのはばですね。そのこんきょをおきかせいただけますか。",
+          "romaji": "juuni paasento to wa, kanari no haba desu ne. sono konkyo o okikase itadakemasu ka",
+          "en": "Twelve percent is quite a large step. Could you tell me what it is based on?",
+          "fr": "Douze pour cent, c'est une hausse considérable. Pourriez-vous m'en exposer les raisons ?",
+          "note": {
+            "en": "「かなりの幅ですね」 marks the size of the rise without refusing it yet, and 「根拠をお聞かせいただけますか」 asks the supplier to justify it.",
+            "fr": "「かなりの幅ですね」 souligne l'ampleur de la hausse sans encore la refuser, et 「根拠をお聞かせいただけますか」 demande au fournisseur de la justifier."
+          },
+          "alt": [
+            {"jp": "十二パーセントですか。差し支えなければ、改定の理由を伺えますか。", "kana": "じゅうにパーセントですか。さしつかえなければ、かいていのりゆうをうかがえますか。", "romaji": "juuni paasento desu ka. sashitsukaenakereba, kaitei no riyuu o ukagaemasu ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "十二パーセントもお安くしていただけるのですか。大変ありがたいです。",
+            "kana": "じゅうにパーセントもおやすくしていただけるのですか。たいへんありがたいです。",
+            "en": "You're going to make it twelve percent cheaper? That's very good of you.",
+            "fr": "Vous allez baisser vos prix de douze pour cent ? C'est très aimable à vous.",
+            "why": {
+              "en": "「お安く」 takes the 「改定」 for a cut, when news that is 「申し上げにくい」 is a rise.",
+              "fr": "「お安く」 prend le 「改定」 pour une baisse, alors qu'une nouvelle 「申し上げにくい」, délicate à annoncer, est une hausse."
+            }
+          },
+          {
+            "jp": "十二パーセントとは、かなりの幅ですね。その根拠をお聞かせいたしましょうか。",
+            "kana": "じゅうにパーセントとは、かなりのはばですね。そのこんきょをおきかせいたしましょうか。",
+            "en": "Twelve percent is quite a large step. Shall I tell you what it is based on?",
+            "fr": "Douze pour cent, c'est une hausse considérable. Voulez-vous que je vous en expose les raisons ?",
+            "why": {
+              "en": "「お聞かせいたしましょうか」 offers to tell the supplier the reasons for his own rise, when you mean to hear them: 「お聞かせいただけますか」.",
+              "fr": "「お聞かせいたしましょうか」 propose d'exposer au fournisseur les raisons de sa propre hausse, alors que tu veux les entendre : 「お聞かせいただけますか」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "原材料費と物流費の高騰が続き、弊社の努力だけでは吸収しきれず、改定を余儀なくされた次第です。",
+          "kana": "げんざいりょうひとぶつりゅうひのこうとうがつづき、へいしゃのどりょくだけではきゅうしゅうしきれず、かいていをよぎなくされたしだいです。",
+          "en": "Raw material and logistics costs keep soaring. Our own efforts can no longer absorb it all, and we have been forced to revise our prices.",
+          "fr": "Le coût des matières premières et de la logistique ne cesse de flamber : nos seuls efforts ne suffisent plus à l'absorber, et nous voilà contraints de réviser nos prix."
+        },
+        "me": {
+          "jp": "ご事情はお察しいたしますが、一度に十二パーセントとなりますと、弊社としてもお受けいたしかねます。",
+          "kana": "ごじじょうはおさっしいたしますが、いちどにじゅうにパーセントとなりますと、へいしゃとしてもおうけいたしかねます。",
+          "romaji": "go jijou wa osasshi itashimasu ga, ichido ni juuni paasento to narimasu to, heisha to shite mo ouke itashikanemasu",
+          "en": "I appreciate your situation, but twelve percent in one go is not something our company can accept.",
+          "fr": "Je comprends votre situation, mais douze pour cent d'un seul coup, notre société ne peut pas l'accepter.",
+          "note": {
+            "en": "「お察しいたしますが」 grants the supplier's reasons before the refusal, and 「一度に」 aims the refusal at the size of the step, not at the rise itself.",
+            "fr": "「お察しいたしますが」 reconnaît les raisons du fournisseur avant le refus, et 「一度に」 vise l'ampleur du saut, non la hausse elle-même."
+          },
+          "alt": [
+            {"jp": "事情はよくわかりますが、十二パーセントを一度にというのは、弊社としては受け入れられません。", "kana": "じじょうはよくわかりますが、じゅうにパーセントをいちどにというのは、へいしゃとしてはうけいれられません。", "romaji": "jijou wa yoku wakarimasu ga, juuni paasento o ichido ni to iu no wa, heisha to shite wa ukeireraremasen"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "ですが、それは御社の努力が足りないということではございませんか。",
+            "kana": "ですが、それはおんしゃのどりょくがたりないということではございませんか。",
+            "en": "But doesn't that simply mean your company isn't trying hard enough?",
+            "fr": "Mais cela ne veut-il pas simplement dire que votre société ne fait pas assez d'efforts ?",
+            "why": {
+              "en": "「努力が足りない」 accuses the supplier of not trying, when he has just explained the costs his efforts cannot absorb.",
+              "fr": "「努力が足りない」 accuse le fournisseur de ne pas faire d'efforts, alors qu'il vient d'expliquer les coûts que ses efforts ne peuvent plus absorber."
+            }
+          },
+          {
+            "jp": "ご事情はお察しになりますが、十二パーセントは弊社としてもお受けいたしかねます。",
+            "kana": "ごじじょうはおさっしになりますが、じゅうにパーセントはへいしゃとしてもおうけいたしかねます。",
+            "en": "I graciously appreciate your situation, but twelve percent is not something our company can accept.",
+            "fr": "Je daigne comprendre votre situation, mais douze pour cent, notre société ne peut pas l'accepter.",
+            "why": {
+              "en": "「お察しになります」 is honorific and raises whoever understands, here yourself; your own understanding is 「お察しいたします」.",
+              "fr": "「お察しになります」 est honorifique et élève celui qui comprend, ici toi-même ; ta propre compréhension, c'est 「お察しいたします」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "お立場はよくわかります。では、どのような形でしたらご検討いただけますでしょうか。",
+          "kana": "おたちばはよくわかります。では、どのようなかたちでしたらごけんとういただけますでしょうか。",
+          "en": "I quite understand your position. Then in what form could you consider it?",
+          "fr": "Je comprends tout à fait votre position. Sous quelle forme pourriez-vous l'envisager, alors ?"
+        },
+        "me": {
+          "jp": "例えば、四月と十月に六パーセントずつ、二段階に分けていただくことはできませんか。",
+          "kana": "たとえば、しがつとじゅうがつにろくパーセントずつ、にだんかいにわけていただくことはできませんか。",
+          "romaji": "tatoeba, shigatsu to juugatsu ni roku paasento zutsu, nidankai ni wakete itadaku koto wa dekimasen ka",
+          "en": "For example, could you split it into two stages, six percent in April and six in October?",
+          "fr": "Par exemple, ne pourriez-vous pas l'étaler en deux temps, six pour cent en avril et six en octobre ?",
+          "note": {
+            "en": "「二段階に分けて」 accepts the rise in the end but spreads its weight, a counter-proposal the supplier can take back to his company.",
+            "fr": "「二段階に分けて」 accepte la hausse au bout du compte mais en étale le poids, une contre-proposition que le fournisseur peut soumettre à sa société."
+          },
+          "alt": [
+            {"jp": "四月と十月の二回に分けて、六パーセントずつ改定していただくことは可能でしょうか。", "kana": "しがつとじゅうがつのにかいにわけて、ろくパーセントずつかいていしていただくことはかのうでしょうか。", "romaji": "shigatsu to juugatsu no nikai ni wakete, roku paasento zutsu kaitei shite itadaku koto wa kanou deshou ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "例えば、四月に十パーセント、十月にさらに十パーセントと、二段階に分けていただけませんか。",
+            "kana": "たとえば、しがつにじゅっパーセント、じゅうがつにさらにじゅっパーセントと、にだんかいにわけていただけませんか。",
+            "en": "For example, could you split it into two stages: ten percent in April and another ten in October?",
+            "fr": "Par exemple, pourriez-vous l'étaler en deux temps : dix pour cent en avril, puis dix de plus en octobre ?",
+            "why": {
+              "en": "「十パーセント」 twice comes to twenty percent, more than the twelve you have just refused.",
+              "fr": "Deux fois 「十パーセント」, cela fait vingt pour cent, plus que les douze que tu viens de refuser."
+            }
+          },
+          {
+            "jp": "形は問いませんので、すべて御社のよろしいようにお決めください。",
+            "kana": "かたちはといませんので、すべておんしゃのよろしいようにおきめください。",
+            "en": "Any form will do, so please decide it all as suits your company.",
+            "fr": "La forme importe peu : décidez de tout comme il conviendra à votre société.",
+            "why": {
+              "en": "「御社のよろしいように」 hands every term to the supplier, a moment after you refused his twelve percent.",
+              "fr": "「御社のよろしいように」 abandonne toutes les conditions au fournisseur, un instant après avoir refusé ses douze pour cent."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "二段階ですか。正直なところ、弊社には厳しいのですが、何かお約束いただけることはございますか。",
+          "kana": "にだんかいですか。しょうじきなところ、へいしゃにはきびしいのですが、なにかおやくそくいただけることはございますか。",
+          "en": "Two stages? Frankly, that's hard for us. Is there anything you could commit to in return?",
+          "fr": "En deux temps ? Franchement, c'est dur pour nous. Pourriez-vous vous engager sur quelque chose en échange ?"
+        },
+        "me": {
+          "jp": "でしたら、来年度の発注量を今年度並みに確約する、という条件ではいかがでしょうか。",
+          "kana": "でしたら、らいねんどのはっちゅうりょうをこんねんどなみにかくやくする、というじょうけんではいかがでしょうか。",
+          "romaji": "deshitara, rainendo no hatchuuryou o konnendo nami ni kakuyaku suru, to iu jouken de wa ikaga deshou ka",
+          "en": "In that case, how about this condition: we guarantee next year's order volume at this year's level?",
+          "fr": "Dans ce cas, que diriez-vous de cette condition : nous garantissons pour l'an prochain le même volume de commandes que cette année ?",
+          "note": {
+            "en": "「確約する」 offers the supplier a firm volume, a real return for the phasing, and 「という条件では」 makes it a condition of the deal.",
+            "fr": "「確約する」 offre au fournisseur un volume ferme, une vraie contrepartie à l'étalement, et 「という条件では」 en fait une condition de l'accord."
+          },
+          "alt": [
+            {"jp": "では、来年度も今年度と同じ量を発注するとお約束する形で、いかがでしょうか。", "kana": "では、らいねんどもこんねんどとおなじりょうをはっちゅうするとおやくそくするかたちで、いかがでしょうか。", "romaji": "dewa, rainendo mo konnendo to onaji ryou o hatchuu suru to oyakusoku suru katachi de, ikaga deshou ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "はい、来週の水曜日でしたら、もう一度お会いするお約束ができます。",
+            "kana": "はい、らいしゅうのすいようびでしたら、もういちどおあいするおやくそくができます。",
+            "en": "Yes. I could make an appointment to meet you again next Wednesday.",
+            "fr": "Oui, je peux vous accorder un rendez-vous mercredi prochain pour nous revoir.",
+            "why": {
+              "en": "「お約束」 here is a commitment in return for the phasing, not an appointment to meet again.",
+              "fr": "「お約束」 désigne ici un engagement en échange de l'étalement, et non un rendez-vous pour se revoir."
+            }
+          },
+          {
+            "jp": "でしたら、来年度からは発注先をすべて他社に切り替える、という条件ではいかがでしょうか。",
+            "kana": "でしたら、らいねんどからははっちゅうさきをすべてたしゃにきりかえる、というじょうけんではいかがでしょうか。",
+            "en": "In that case, how about this condition: from next year we move all our orders to another supplier?",
+            "fr": "Dans ce cas, que diriez-vous de cette condition : à partir de l'an prochain, nous passons toutes nos commandes chez un autre fournisseur ?",
+            "why": {
+              "en": "「他社に切り替える」 offers to take your orders elsewhere: nothing a supplier would want in return for the phasing.",
+              "fr": "「他社に切り替える」 propose de passer commande ailleurs : rien qu'un fournisseur voudrait en échange de l'étalement."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "なるほど。数量のお約束をいただけるのでしたら、二段階の改定で、社内を説得してみます。御社でもご検討いただけますか。",
+          "kana": "なるほど。すうりょうのおやくそくをいただけるのでしたら、にだんかいのかいていで、しゃないをせっとくしてみます。おんしゃでもごけんとういただけますか。",
+          "en": "I see. If you can commit to the volume, I'll try to win my company round to a rise in two stages. Could you consider it on your side too?",
+          "fr": "Je vois. Si vous vous engagez sur les volumes, je vais essayer de convaincre ma direction d'une hausse en deux temps. Pourriez-vous l'étudier de votre côté aussi ?"
+        },
+        "me": {
+          "jp": "承知いたしました。上の者と協議のうえ、今月中にお返事いたします。",
+          "kana": "しょうちいたしました。うえのものときょうぎのうえ、こんげつちゅうにおへんじいたします。",
+          "romaji": "shouchi itashimashita. ue no mono to kyougi no ue, kongetsuchuu ni ohenji itashimasu",
+          "en": "Certainly. I will discuss it with my superiors and give you an answer within the month.",
+          "fr": "Entendu. J'en discute avec ma hiérarchie et je vous donne une réponse dans le courant du mois.",
+          "note": {
+            "en": "「上の者」 speaks of your own superiors humbly before an outsider, and 「今月中に」 tells the supplier when the answer will come.",
+            "fr": "「上の者」 désigne humblement ta propre hiérarchie devant un tiers, et 「今月中に」 dit au fournisseur quand viendra la réponse."
+          },
+          "alt": [
+            {"jp": "かしこまりました。本日のお話を社内で検討いたしまして、今月中にご回答いたします。", "kana": "かしこまりました。ほんじつのおはなしをしゃないでけんとういたしまして、こんげつちゅうにごかいとういたします。", "romaji": "kashikomarimashita. honjitsu no ohanashi o shanai de kentou itashimashite, kongetsuchuu ni go kaitou itashimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "承知いたしました。上の方々とよく協議して、今月中にお返事いたします。",
+            "kana": "しょうちいたしました。うえのかたがたとよくきょうぎして、こんげつちゅうにおへんじいたします。",
+            "en": "Certainly. I will discuss it carefully with my honourable superiors and give you an answer within the month.",
+            "fr": "Entendu. J'en discute sérieusement avec mes honorables supérieurs et je vous donne une réponse dans le courant du mois.",
+            "why": {
+              "en": "「上の方々」 honours your own superiors before an outsider; before a supplier they are 「上の者」.",
+              "fr": "「上の方々」 honore ta propre hiérarchie devant un tiers ; devant un fournisseur, ce sont 「上の者」."
+            }
+          },
+          {
+            "jp": "承知いたしました。では、十二パーセントの改定で、この場で合意いたします。",
+            "kana": "しょうちいたしました。では、じゅうにパーセントのかいていで、このばでごういいたします。",
+            "en": "Certainly. Then we agree, here and now, to the twelve percent revision.",
+            "fr": "Entendu. Nous acceptons donc, ici même, la révision de douze pour cent.",
+            "why": {
+              "en": "「十二パーセントの改定で…合意いたします」 gives in on the spot to the very rise you have spent the meeting cutting down.",
+              "fr": "「十二パーセントの改定で…合意いたします」 cède sur-le-champ à la hausse même que tu as passé l'entretien à réduire."
+            }
+          }
+        ]
+      }
+    ],
+    "close": {
+      "jp": "ありがとうございます。弊社でも、二段階の案で社内を調整してまいります。",
+      "kana": "ありがとうございます。へいしゃでも、にだんかいのあんでしゃないをちょうせいしてまいります。",
+      "en": "Thank you. We'll work on the two-stage plan internally on our side as well.",
+      "fr": "Merci beaucoup. De notre côté aussi, nous allons préparer la formule en deux temps en interne."
     }
   },
   {
@@ -2595,6 +3345,1050 @@
       "kana": "ありがとうございます。おきをつけておかえりください。",
       "en": "Thank you. Take care on your way home.",
       "fr": "Merci. Rentrez bien."
+    }
+  },
+  {
+    "id": "performance-review",
+    "place": {"jp": "面談室", "kana": "めんだんしつ", "en": "Interview room", "fr": "Salle d'entretien"},
+    "title": {"en": "The annual review", "fr": "L'entretien annuel"},
+    "situation": {
+      "en": "It is your annual review, and your section manager has called you into the interview room. He has praise for your year, and one criticism.",
+      "fr": "C'est ton entretien annuel, et ton chef de service t'a fait venir dans la salle d'entretien. Il a des compliments sur ton année, et une critique."
+    },
+    "goal": {
+      "en": "Take the praise and the criticism of your late reports well, propose a remedy, ask what you need for the next grade and agree on your goals for next year.",
+      "fr": "Accueille bien les compliments comme la critique sur tes rapports en retard, propose une solution, demande ce qu'il te faut pour l'échelon suivant et fixe avec lui tes objectifs de l'an prochain."
+    },
+    "steps": [
+      {"en": "Thank him for the praise", "fr": "Remercie-le des compliments"},
+      {"en": "Accept the criticism", "fr": "Accepte la critique"},
+      {"en": "Propose a remedy", "fr": "Propose une solution"},
+      {"en": "Ask about the next grade", "fr": "Demande ce qu'il faut pour monter"},
+      {"en": "Agree on your goals", "fr": "Fixe tes objectifs avec lui"}
+    ],
+    "them": {"en": "Section manager", "fr": "Chef de service"},
+    "register": "formal",
+    "turns": [
+      {
+        "them": {
+          "jp": "じゃあ、始めようか。まず、今年の新システムの導入は、本当によくやってくれたね。お客様の評判もいいよ。",
+          "kana": "じゃあ、はじめようか。まず、ことしのしんシステムのどうにゅうは、ほんとうによくやってくれたね。おきゃくさまのひょうばんもいいよ。",
+          "en": "Right, let's begin. First, you did a really good job bringing in the new system this year. The customers think highly of it, too.",
+          "fr": "Bon, commençons. D'abord, la mise en place du nouveau système cette année, tu as vraiment fait du bon travail. Les clients en sont très contents."
+        },
+        "me": {
+          "jp": "ありがとうございます。課長をはじめ、チームの皆さんに支えていただいたおかげです。",
+          "kana": "ありがとうございます。かちょうをはじめ、チームのみなさんにささえていただいたおかげです。",
+          "romaji": "arigatou gozaimasu. kachou o hajime, chiimu no minasan ni sasaete itadaita okage desu",
+          "en": "Thank you. It is thanks to the support of the whole team, starting with you.",
+          "fr": "Merci beaucoup. C'est grâce au soutien de toute l'équipe, à commencer par vous.",
+          "note": {
+            "en": "「おかげです」 passes the credit on to others, and 「課長をはじめ」 names your manager first among them, as modesty before praise asks.",
+            "fr": "「おかげです」 reporte le mérite sur les autres, et 「課長をはじめ」 nomme ton chef en premier, comme le veut la modestie face aux compliments."
+          },
+          "alt": [
+            {"jp": "ありがとうございます。チームの皆さんのご協力があったからこそです。", "kana": "ありがとうございます。チームのみなさんのごきょうりょくがあったからこそです。", "romaji": "arigatou gozaimasu. chiimu no minasan no go kyouryoku ga atta kara koso desu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "申し訳ございません。今後は二度とこのようなことのないよう、注意いたします。",
+            "kana": "もうしわけございません。こんごはにどとこのようなことのないよう、ちゅういいたします。",
+            "en": "I am very sorry. I will take care that nothing like this ever happens again.",
+            "fr": "Toutes mes excuses. Je veillerai à ce que cela ne se reproduise plus jamais.",
+            "why": {
+              "en": "「申し訳ございません」 and 「二度とこのようなことのないよう」 answer a reproach, and your manager has just praised you.",
+              "fr": "「申し訳ございません」 et 「二度とこのようなことのないよう」 répondent à un reproche, alors que ton chef vient de te féliciter."
+            }
+          },
+          {
+            "jp": "はい、私一人の力で成し遂げましたので、当然の結果だと思います。",
+            "kana": "はい、わたしひとりのちからでなしとげましたので、とうぜんのけっかだとおもいます。",
+            "en": "Yes, I achieved it single-handedly, so I think it is only to be expected.",
+            "fr": "Oui, je l'ai accompli par mes seuls moyens, c'est donc un résultat tout naturel.",
+            "why": {
+              "en": "「私一人の力で」 and 「当然の結果」 claim all the credit for a team's work, the opposite of the modesty praise calls for.",
+              "fr": "「私一人の力で」 et 「当然の結果」 s'attribuent tout le mérite du travail d'une équipe, à l'inverse de la modestie qu'appellent les compliments."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "ただね、一つ気になっているのが報告書なんだ。今年だけで、締め切りに遅れたのが五回もあったよね。",
+          "kana": "ただね、ひとつきになっているのがほうこくしょなんだ。ことしだけで、しめきりにおくれたのがごかいもあったよね。",
+          "en": "The thing is, one thing does bother me: your reports. This year alone, they were late five times, weren't they?",
+          "fr": "Seulement, il y a une chose qui me préoccupe : tes rapports. Rien que cette année, tu as dépassé l'échéance cinq fois, non ?"
+        },
+        "me": {
+          "jp": "おっしゃるとおりです。弁解の余地もございません。",
+          "kana": "おっしゃるとおりです。べんかいのよちもございません。",
+          "romaji": "ossharu toori desu. benkai no yochi mo gozaimasen",
+          "en": "You are quite right. I have no excuse.",
+          "fr": "Vous avez tout à fait raison. Je n'ai aucune excuse.",
+          "note": {
+            "en": "「おっしゃるとおりです」 accepts the criticism at once, and 「弁解の余地もございません」 offers no excuse for it.",
+            "fr": "「おっしゃるとおりです」 accepte aussitôt la critique, et 「弁解の余地もございません」 n'y oppose aucune excuse."
+          },
+          "alt": [
+            {"jp": "ご指摘のとおりです。言い訳のしようもございません。", "kana": "ごしてきのとおりです。いいわけのしようもございません。", "romaji": "go shiteki no toori desu. iiwake no shiyou mo gozaimasen"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "それは、ほかの仕事を次々に頼まれたせいでして、私のせいではございません。",
+            "kana": "それは、ほかのしごとをつぎつぎにたのまれたせいでして、わたしのせいではございません。",
+            "en": "That was because I kept being given other work, one job after another; it was not my fault.",
+            "fr": "C'est parce qu'on me confiait sans cesse d'autres travaux : ce n'était pas ma faute.",
+            "why": {
+              "en": "「私のせいではございません」 pushes the blame onto others, when the reports were yours to hand in.",
+              "fr": "「私のせいではございません」 rejette la faute sur les autres, alors que c'était à toi de rendre ces rapports."
+            }
+          },
+          {
+            "jp": "五回だけですか。思ったより少なくて、安心いたしました。",
+            "kana": "ごかいだけですか。おもったよりすくなくて、あんしんいたしました。",
+            "en": "Only five times? That's fewer than I thought, what a relief.",
+            "fr": "Seulement cinq fois ? C'est moins que je ne pensais, quel soulagement.",
+            "why": {
+              "en": "「五回も」 told you five was a lot, and 「だけ」 treats it as few: you are relieved by a criticism.",
+              "fr": "「五回も」 te disait que cinq fois, c'est beaucoup, et 「だけ」 en fait peu : tu te réjouis d'une critique."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "うん。で、どうしたら改善できると思う？",
+          "kana": "うん。で、どうしたらかいぜんできるとおもう？",
+          "en": "Mm. So how do you think you could improve?",
+          "fr": "Hmm. Et comment penses-tu pouvoir t'améliorer ?"
+        },
+        "me": {
+          "jp": "今後は、締め切りの二日前に下書きをお送りし、遅れそうなときは早めにご相談いたします。",
+          "kana": "こんごは、しめきりのふつかまえにしたがきをおおくりし、おくれそうなときははやめにごそうだんいたします。",
+          "romaji": "kongo wa, shimekiri no futsukamae ni shitagaki o ookuri shi, okuresou na toki wa hayame ni go soudan itashimasu",
+          "en": "From now on, I will send you a draft two days before each deadline, and if one looks like slipping, I will come to you early.",
+          "fr": "Désormais, je vous enverrai un brouillon deux jours avant chaque échéance, et si un retard se profile, je viendrai vous en parler à temps.",
+          "note": {
+            "en": "「二日前に下書きを」 sets a check before the deadline, and 「早めにご相談いたします」 promises a warning instead of another late report.",
+            "fr": "「二日前に下書きを」 fixe un contrôle avant l'échéance, et 「早めにご相談いたします」 promet de prévenir plutôt que de rendre un nouveau rapport en retard."
+          },
+          "alt": [
+            {"jp": "これからは、締め切りの前日までに一度見ていただき、遅れそうな場合はすぐにご報告いたします。", "kana": "これからは、しめきりのぜんじつまでにいちどみていただき、おくれそうなばあいはすぐにごほうこくいたします。", "romaji": "kore kara wa, shimekiri no zenjitsu made ni ichido mite itadaki, okuresou na baai wa sugu ni go houkoku itashimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "今後は、締め切りの前日に、課長から私にご連絡いただけますか。",
+            "kana": "こんごは、しめきりのぜんじつに、かちょうからわたしにごれんらくいただけますか。",
+            "en": "From now on, could you contact me the day before each deadline?",
+            "fr": "Désormais, pourriez-vous me prévenir la veille de chaque échéance ?",
+            "why": {
+              "en": "「課長から私にご連絡いただけますか」 hands your deadlines to your manager, when the remedy he asked for is yours to find.",
+              "fr": "「課長から私にご連絡いただけますか」 confie tes échéances à ton chef, alors que la solution qu'il demande dépend de toi."
+            }
+          },
+          {
+            "jp": "今後は、報告書の締め切りを、毎回一週間ずつ延ばしていただけないでしょうか。",
+            "kana": "こんごは、ほうこくしょのしめきりを、まいかいいっしゅうかんずつのばしていただけないでしょうか。",
+            "en": "From now on, could you push each report's deadline back by a week?",
+            "fr": "Désormais, pourriez-vous repousser d'une semaine l'échéance de chaque rapport ?",
+            "why": {
+              "en": "「締め切りを…延ばして」 moves the deadlines instead of meeting them, which is the very problem your manager raised.",
+              "fr": "「締め切りを…延ばして」 déplace les échéances au lieu de les respecter, ce qui est justement le problème soulevé par ton chef."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "それなら安心だ。ほかに、何か聞いておきたいことはある？",
+          "kana": "それならあんしんだ。ほかに、なにかきいておきたいことはある？",
+          "en": "Good, that reassures me. Is there anything else you'd like to ask?",
+          "fr": "Voilà qui me rassure. Il y a autre chose que tu voudrais me demander ?"
+        },
+        "me": {
+          "jp": "はい。次の等級に上がるには、私に何が足りないでしょうか。",
+          "kana": "はい。つぎのとうきゅうにあがるには、わたしになにがたりないでしょうか。",
+          "romaji": "hai. tsugi no toukyuu ni agaru ni wa, watashi ni nani ga tarinai deshou ka",
+          "en": "Yes. What do I still lack to move up to the next grade?",
+          "fr": "Oui. Que me manque-t-il pour passer à l'échelon supérieur ?",
+          "note": {
+            "en": "「何が足りないでしょうか」 asks what you lack rather than what you are owed, the modest way to raise promotion with your manager.",
+            "fr": "「何が足りないでしょうか」 demande ce qui te manque plutôt que ce qu'on te doit, la façon modeste d'aborder une promotion avec ton chef."
+          },
+          "alt": [
+            {"jp": "はい。次の等級に上がるためには、どのような点が求められるのでしょうか。", "kana": "はい。つぎのとうきゅうにあがるためには、どのようなてんがもとめられるのでしょうか。", "romaji": "hai. tsugi no toukyuu ni agaru tame ni wa, dono you na ten ga motomerareru no deshou ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "はい。次の等級に上がるには、課長に何が足りないでしょうか。",
+            "kana": "はい。つぎのとうきゅうにあがるには、かちょうになにがたりないでしょうか。",
+            "en": "Yes. What do you still lack to move up to the next grade?",
+            "fr": "Oui. Que vous manque-t-il pour passer à l'échelon supérieur ?",
+            "why": {
+              "en": "「課長に何が足りない」 asks what your manager lacks, an insult, when the grade in question is yours.",
+              "fr": "「課長に何が足りない」 demande ce qui manque à ton chef, une insulte, alors que l'échelon en question est le tien."
+            }
+          },
+          {
+            "jp": "はい。同期の田中さんのお給料は、いくらでしょうか。",
+            "kana": "はい。どうきのたなかさんのおきゅうりょうは、いくらでしょうか。",
+            "en": "Yes. How much does Tanaka, who joined the same year as me, earn?",
+            "fr": "Oui. Combien gagne Tanaka, entré dans l'entreprise la même année que moi ?",
+            "why": {
+              "en": "「田中さんのお給料」 asks for a colleague's pay, which is confidential, when your review invites a question about your own grade.",
+              "fr": "「田中さんのお給料」 demande le salaire d'un collègue, une information confidentielle, alors que l'entretien t'invite à parler de ton propre échelon."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "そうだな。次の等級では、後輩の育成が求められる。来期は新人を一人任せようと思うんだけど、どうかな。",
+          "kana": "そうだな。つぎのとうきゅうでは、こうはいのいくせいがもとめられる。らいきはしんじんをひとりまかせようとおもうんだけど、どうかな。",
+          "en": "Let me see. At the next grade, you're expected to train the juniors. Next term I'm thinking of putting a new hire in your care. How does that sound?",
+          "fr": "Voyons. À l'échelon suivant, on attend de toi que tu formes les plus jeunes. L'an prochain, je pense te confier un nouvel arrivant. Qu'en dis-tu ?"
+        },
+        "me": {
+          "jp": "ありがとうございます。ぜひやらせていただきます。",
+          "kana": "ありがとうございます。ぜひやらせていただきます。",
+          "romaji": "arigatou gozaimasu. zehi yarasete itadakimasu",
+          "en": "Thank you. I would be glad to take it on.",
+          "fr": "Merci beaucoup. Avec plaisir, je m'en charge.",
+          "note": {
+            "en": "「ぜひやらせていただきます」 takes on the new hire gladly, as a chance you are given rather than a burden.",
+            "fr": "「ぜひやらせていただきます」 accepte volontiers le nouvel arrivant, comme une chance qu'on t'accorde plutôt qu'une charge."
+          },
+          "alt": [
+            {"jp": "ありがとうございます。喜んでお引き受けいたします。", "kana": "ありがとうございます。よろこんでおひきうけいたします。", "romaji": "arigatou gozaimasu. yorokonde ohikiuke itashimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "では、来期は私の仕事を新人の方にお任せしてよろしいのですね。",
+            "kana": "では、らいきはわたしのしごとをしんじんのかたにおまかせしてよろしいのですね。",
+            "en": "So next term I can leave my work to the new hire, then?",
+            "fr": "L'an prochain, je pourrai donc confier mon travail au nouvel arrivant, c'est bien cela ?",
+            "why": {
+              "en": "「新人を一人任せよう」 puts a new hire in your care, not your work in the new hire's hands.",
+              "fr": "「新人を一人任せよう」 te confie un nouvel arrivant, et non ton travail à ce nouvel arrivant."
+            }
+          },
+          {
+            "jp": "ありがとうございます。喜んでお引き受けになります。",
+            "kana": "ありがとうございます。よろこんでおひきうけになります。",
+            "en": "Thank you. I shall graciously take it on, with pleasure.",
+            "fr": "Merci beaucoup. Je daignerai m'en charger, avec plaisir.",
+            "why": {
+              "en": "「お引き受けになります」 is honorific and raises whoever takes the task on, here yourself; yours is 「お引き受けいたします」.",
+              "fr": "「お引き受けになります」 est honorifique et élève celui qui accepte la tâche, ici toi-même ; pour toi, c'est 「お引き受けいたします」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "よし。じゃあ来期の目標は、新人の育成と、報告書を期限内に出すこと。この二つでいいかな。",
+          "kana": "よし。じゃあらいきのもくひょうは、しんじんのいくせいと、ほうこくしょをきげんないにだすこと。このふたつでいいかな。",
+          "en": "Good. So next term's goals are training the new hire and handing your reports in on time. Are you happy with those two?",
+          "fr": "Bien. Alors tes objectifs de l'an prochain : former le nouvel arrivant, et rendre tes rapports dans les délais. Ces deux-là, ça te va ?"
+        },
+        "me": {
+          "jp": "はい、異存はございません。来週の月曜日までに、目標シートにまとめて提出いたします。",
+          "kana": "はい、いぞんはございません。らいしゅうのげつようびまでに、もくひょうシートにまとめてていしゅついたします。",
+          "romaji": "hai, izon wa gozaimasen. raishuu no getsuyoubi made ni, mokuhyou shiito ni matomete teishutsu itashimasu",
+          "en": "Yes, I have no objection. I will set them out in my goal sheet and hand it in by next Monday.",
+          "fr": "Oui, je n'y vois aucune objection. Je les reporterai sur ma fiche d'objectifs et je vous la remettrai d'ici lundi prochain.",
+          "note": {
+            "en": "「異存はございません」 agrees formally, and 「来週の月曜日までに」 puts a date on the goal sheet, the first deadline to keep.",
+            "fr": "「異存はございません」 donne ton accord dans les formes, et 「来週の月曜日までに」 fixe une date à la fiche d'objectifs, la première échéance à tenir."
+          },
+          "alt": [
+            {"jp": "はい、それでお願いいたします。目標シートは、来週の月曜日までに提出いたします。", "kana": "はい、それでおねがいいたします。もくひょうシートは、らいしゅうのげつようびまでにていしゅついたします。", "romaji": "hai, sore de onegai itashimasu. mokuhyou shiito wa, raishuu no getsuyoubi made ni teishutsu itashimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "はい、異存はございません。ただ、報告書の期限だけは、これからも守れないかもしれません。",
+            "kana": "はい、いぞんはございません。ただ、ほうこくしょのきげんだけは、これからもまもれないかもしれません。",
+            "en": "Yes, I have no objection. Though the report deadlines are the one thing I may go on missing.",
+            "fr": "Oui, je n'y vois aucune objection. Cela dit, les délais des rapports, il se peut que je continue à ne pas les tenir.",
+            "why": {
+              "en": "「異存はございません」 agrees to the goal, then 「守れないかもしれません」 gives it up in the same breath.",
+              "fr": "「異存はございません」 accepte l'objectif, puis 「守れないかもしれません」 y renonce dans le même souffle."
+            }
+          },
+          {
+            "jp": "うん、いいよ。じゃあ、来週までにシートにまとめて出しとくね。",
+            "kana": "うん、いいよ。じゃあ、らいしゅうまでにシートにまとめてだしとくね。",
+            "en": "Yeah, fine. I'll put it in the sheet and get it to you by next week, then.",
+            "fr": "Ouais, ça marche. Je mets ça sur la fiche et je te la rends d'ici la semaine prochaine.",
+            "why": {
+              "en": "「いいよ」 and 「出しとくね」 are how you talk to a friend; in your review, to your manager, they break the formal register.",
+              "fr": "「いいよ」 et 「出しとくね」, c'est le ton entre amis ; en entretien, face à ton chef, cela rompt le registre soutenu."
+            }
+          }
+        ]
+      }
+    ],
+    "close": {
+      "jp": "うん。今度は、期限どおりに頼むよ。",
+      "kana": "うん。こんどは、きげんどおりにたのむよ。",
+      "en": "Good. And this time, on time, please.",
+      "fr": "Bien. Et cette fois, dans les délais, d'accord ?"
+    }
+  },
+  {
+    "id": "resignation-talk",
+    "place": {"jp": "会議室", "kana": "かいぎしつ", "en": "Meeting room", "fr": "Salle de réunion"},
+    "title": {"en": "Handing in your notice", "fr": "Annoncer sa démission"},
+    "situation": {
+      "en": "You have decided to leave your company at the end of next month, and you have asked your department head for a word in a meeting room. He has just sat down.",
+      "fr": "Tu as décidé de quitter ton entreprise à la fin du mois prochain, et tu as demandé à ton directeur de te recevoir en salle de réunion. Il vient de s'asseoir."
+    },
+    "goal": {
+      "en": "Tell your department head you are leaving at the end of next month, give a reason that blames no one, turn down his offer of a transfer or a raise gracefully, and offer a full handover.",
+      "fr": "Annonce à ton directeur que tu pars à la fin du mois prochain, donne une raison qui ne met personne en cause, décline avec tact son offre de mutation ou d'augmentation, et propose une passation complète."
+    },
+    "steps": [
+      {"en": "Say you are leaving next month", "fr": "Annonce ton départ le mois prochain"},
+      {"en": "Give a reason that blames no one", "fr": "Donne une raison qui n'accuse personne"},
+      {"en": "Decline his offer gracefully", "fr": "Décline son offre avec tact"},
+      {"en": "Offer a full handover", "fr": "Propose une passation complète"},
+      {"en": "Promise a handover plan", "fr": "Promets un plan de passation"}
+    ],
+    "them": {"en": "Department head", "fr": "Directeur de département"},
+    "register": "formal",
+    "turns": [
+      {
+        "them": {
+          "jp": "話があるということだったけど、どうしたのかな。",
+          "kana": "はなしがあるということだったけど、どうしたのかな。",
+          "en": "You said you wanted a word. What's on your mind?",
+          "fr": "Tu voulais me parler, c'est ça ? Qu'est-ce qui se passe ?"
+        },
+        "me": {
+          "jp": "お忙しいところ申し訳ございません。来月末をもちまして、退職させていただきたいと考えております。",
+          "kana": "おいそがしいところもうしわけございません。らいげつまつをもちまして、たいしょくさせていただきたいとかんがえております。",
+          "romaji": "oisogashii tokoro moushiwake gozaimasen. raigetsumatsu o mochimashite, taishoku sasete itadakitai to kangaete orimasu",
+          "en": "I am sorry to take up your time. I would like to leave the company at the end of next month.",
+          "fr": "Pardon de vous déranger alors que vous êtes occupé. Je souhaiterais quitter l'entreprise à la fin du mois prochain.",
+          "note": {
+            "en": "「をもちまして」 marks the end of next month as the formal close of your time here, and 「退職させていただきたい」 asks leave to go rather than simply announcing it.",
+            "fr": "「をもちまして」 fait de la fin du mois prochain le terme officiel de ton passage ici, et 「退職させていただきたい」 demande la permission de partir plutôt que de l'annoncer tout net."
+          },
+          "alt": [
+            {"jp": "突然で申し訳ございません。来月末で退職させていただきたく、お時間をいただきました。", "kana": "とつぜんでもうしわけございません。らいげつまつでたいしょくさせていただきたく、おじかんをいただきました。", "romaji": "totsuzen de moushiwake gozaimasen. raigetsumatsu de taishoku sasete itadakitaku, ojikan o itadakimashita"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "お忙しいところ申し訳ございません。先月末をもちまして、退職させていただきました。",
+            "kana": "おいそがしいところもうしわけございません。せんげつまつをもちまして、たいしょくさせていただきました。",
+            "en": "I am sorry to take up your time. I left the company at the end of last month.",
+            "fr": "Pardon de vous déranger alors que vous êtes occupé. J'ai quitté l'entreprise à la fin du mois dernier.",
+            "why": {
+              "en": "「先月末」 and 「させていただきました」 put your leaving last month, when you are still here and go only at the end of next month.",
+              "fr": "「先月末」 et 「させていただきました」 placent ton départ le mois dernier, alors que tu es toujours là et ne pars qu'à la fin du mois prochain."
+            }
+          },
+          {
+            "jp": "お忙しいところ申し訳ございません。来月末をもちまして、退職していただきたいと考えております。",
+            "kana": "おいそがしいところもうしわけございません。らいげつまつをもちまして、たいしょくしていただきたいとかんがえております。",
+            "en": "I am sorry to take up your time. I would like you to leave the company at the end of next month.",
+            "fr": "Pardon de vous déranger alors que vous êtes occupé. Je souhaiterais que vous quittiez l'entreprise à la fin du mois prochain.",
+            "why": {
+              "en": "「退職していただきたい」 asks your department head to leave, when it is you who are going: 「退職させていただきたい」.",
+              "fr": "「退職していただきたい」 demande à ton directeur de partir, alors que c'est toi qui t'en vas : 「退職させていただきたい」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "えっ、それはまた急だな。理由を聞かせてもらえるか。うちの何かに不満があるのか。",
+          "kana": "えっ、それはまたきゅうだな。りゆうをきかせてもらえるか。うちのなにかにふまんがあるのか。",
+          "en": "What? That's rather sudden. Can you tell me why? Is something here making you unhappy?",
+          "fr": "Quoi ? C'est bien soudain. Tu peux me dire pourquoi ? Il y a quelque chose qui ne te plaît pas, chez nous ?"
+        },
+        "me": {
+          "jp": "いえ、不満はございません。前から関心のあった分野に、挑戦したいと考えまして。",
+          "kana": "いえ、ふまんはございません。まえからかんしんのあったぶんやに、ちょうせんしたいとかんがえまして。",
+          "romaji": "ie, fuman wa gozaimasen. mae kara kanshin no atta bun'ya ni, chousen shitai to kangaemashite",
+          "en": "No, I have no complaints. I want to try my hand at a field that has long interested me.",
+          "fr": "Non, je n'ai aucun reproche à faire. Je voudrais me lancer dans un domaine qui m'intéresse depuis longtemps.",
+          "note": {
+            "en": "「不満はございません」 takes the blame off the company, and 「挑戦したいと考えまして」 gives a reason that looks ahead, not back.",
+            "fr": "「不満はございません」 met l'entreprise hors de cause, et 「挑戦したいと考えまして」 donne une raison tournée vers l'avenir, non vers le passé."
+          },
+          "alt": [
+            {"jp": "いいえ、職場に不満があるわけではございません。以前から興味のあった分野に挑戦したくなりまして。", "kana": "いいえ、しょくばにふまんがあるわけではございません。いぜんからきょうみのあったぶんやにちょうせんしたくなりまして。", "romaji": "iie, shokuba ni fuman ga aru wake de wa gozaimasen. izen kara kyoumi no atta bun'ya ni chousen shitaku narimashite"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "はい、正直に申し上げますと、この部署の雰囲気や上司のやり方には、もう耐えられません。",
+            "kana": "はい、しょうじきにもうしあげますと、このぶしょのふんいきやじょうしのやりかたには、もうたえられません。",
+            "en": "Yes. To be frank with you, I can no longer stand the atmosphere in this department, or the way my superiors work.",
+            "fr": "Oui. À parler franchement, je ne supporte plus l'ambiance de ce service, ni les méthodes de mes supérieurs.",
+            "why": {
+              "en": "「もう耐えられません」 blames the department you are leaving, and the man in front of you, when a parting reason should blame no one.",
+              "fr": "「もう耐えられません」 met en cause le service que tu quittes, et l'homme en face de toi, alors qu'une raison de départ ne doit accuser personne."
+            }
+          },
+          {
+            "jp": "いえ、不満はございません。来月から、別の部署に異動になりますので。",
+            "kana": "いえ、ふまんはございません。らいげつから、べつのぶしょにいどうになりますので。",
+            "en": "No, I have no complaints. I'm being transferred to another department from next month.",
+            "fr": "Non, je n'ai aucun reproche à faire. C'est que je change de service le mois prochain.",
+            "why": {
+              "en": "「異動」 is a move within the company, when you have just told him you are leaving it.",
+              "fr": "「異動」, c'est changer de poste au sein de l'entreprise, alors que tu viens de lui annoncer que tu la quittes."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "そうか。君には期待していたんだがな。今の仕事が合わないなら異動も考えるし、給与も人事に掛け合ってみるが、どうだ。",
+          "kana": "そうか。きみにはきたいしていたんだがな。いまのしごとがあわないならいどうもかんがえるし、きゅうよもじんじにかけあってみるが、どうだ。",
+          "en": "I see. I had high hopes for you, you know. If your work doesn't suit you, I could look at a transfer, and I'd take your pay up with HR as well. What do you say?",
+          "fr": "Je vois. Je comptais beaucoup sur toi, tu sais. Si ton poste ne te convient pas, on peut envisager une mutation, et je peux aussi plaider pour ton salaire auprès des RH. Qu'en dis-tu ?"
+        },
+        "me": {
+          "jp": "大変ありがたいお言葉ですが、熟慮のうえで決めたことですので、お気持ちだけ頂戴いたします。",
+          "kana": "たいへんありがたいおことばですが、じゅくりょのうえできめたことですので、おきもちだけちょうだいいたします。",
+          "romaji": "taihen arigatai okotoba desu ga, jukuryo no ue de kimeta koto desu node, okimochi dake choudai itashimasu",
+          "en": "Those are very kind words, but I made this decision after long thought, so I will accept only the kindness behind them.",
+          "fr": "Ce sont des paroles très généreuses, mais c'est une décision mûrement réfléchie : je n'en retiendrai que l'intention, avec gratitude.",
+          "note": {
+            "en": "「お気持ちだけ頂戴いたします」 declines the offer while thanking him for the thought, the graceful way to say no to a superior.",
+            "fr": "「お気持ちだけ頂戴いたします」 décline l'offre tout en le remerciant de l'intention, la façon élégante de dire non à un supérieur."
+          },
+          "alt": [
+            {"jp": "身に余るお話ですが、よく考えて決めたことですので、お気持ちだけありがたく頂戴します。", "kana": "みにあまるおはなしですが、よくかんがえてきめたことですので、おきもちだけありがたくちょうだいします。", "romaji": "mi ni amaru ohanashi desu ga, yoku kangaete kimeta koto desu node, okimochi dake arigataku choudai shimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "ありがとうございます。では、異動のほうでお願いいたします。退職の意思は変わりませんが。",
+            "kana": "ありがとうございます。では、いどうのほうでおねがいいたします。たいしょくのいしはかわりませんが。",
+            "en": "Thank you. Then I'll take the transfer, please. Though I am still leaving.",
+            "fr": "Merci beaucoup. Alors je prends la mutation, s'il vous plaît. Même si je pars quand même.",
+            "why": {
+              "en": "「異動のほうでお願いいたします」 accepts the transfer, then 「退職の意思は変わりません」 says you are leaving anyway: the reply cancels itself out.",
+              "fr": "「異動のほうでお願いいたします」 accepte la mutation, puis 「退職の意思は変わりません」 dit que tu pars malgré tout : la réponse s'annule."
+            }
+          },
+          {
+            "jp": "今さらそうおっしゃっても、もう遅いと思います。",
+            "kana": "いまさらそうおっしゃっても、もうおそいとおもいます。",
+            "en": "It's a bit late for you to say that now.",
+            "fr": "Me dire ça maintenant, c'est un peu tard, je crois.",
+            "why": {
+              "en": "「今さら…もう遅い」 reproaches your department head for his offer, when a graceful refusal thanks him for it.",
+              "fr": "「今さら…もう遅い」 reproche son offre à ton directeur, alors qu'un refus élégant l'en remercie."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "そうか、決意は固いようだな。わかった。じゃあ、今抱えている案件はどうするつもりだ。",
+          "kana": "そうか、けついはかたいようだな。わかった。じゃあ、いまかかえているあんけんはどうするつもりだ。",
+          "en": "I see, your mind is made up. All right. So what do you intend to do about the projects you have on your hands?",
+          "fr": "Je vois, ta décision est prise. Bon. Et les dossiers dont tu t'occupes, qu'est-ce que tu comptes en faire ?"
+        },
+        "me": {
+          "jp": "退職日までに資料をすべて整理し、後任の方に責任を持って引き継ぎます。",
+          "kana": "たいしょくびまでにしりょうをすべてせいりし、こうにんのかたにせきにんをもってひきつぎます。",
+          "romaji": "taishokubi made ni shiryou o subete seiri shi, kounin no kata ni sekinin o motte hikitsugimasu",
+          "en": "By my last day I will put all the files in order and hand everything over properly to my successor.",
+          "fr": "D'ici mon dernier jour, je mettrai tous les documents en ordre et je passerai la main à mon successeur en bonne et due forme.",
+          "note": {
+            "en": "「退職日までに」 keeps the handover inside your time here, and 「責任を持って」 promises it will be complete.",
+            "fr": "「退職日までに」 garde la passation dans le temps qu'il te reste, et 「責任を持って」 promet qu'elle sera complète."
+          },
+          "alt": [
+            {"jp": "最終日までに資料をまとめ、後任の方にきちんと引き継ぎをいたします。", "kana": "さいしゅうびまでにしりょうをまとめ、こうにんのかたにきちんとひきつぎをいたします。", "romaji": "saishuubi made ni shiryou o matome, kounin no kata ni kichinto hikitsugi o itashimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "担当している案件の資料は、コピーも含めてすべて次の会社に持ってまいります。",
+            "kana": "たんとうしているあんけんのしりょうは、コピーもふくめてすべてつぎのかいしゃにもってまいります。",
+            "en": "I will take all the files for my projects to my next company, copies included.",
+            "fr": "J'emporterai tous les documents de mes dossiers dans ma prochaine entreprise, copies comprises.",
+            "why": {
+              "en": "「次の会社に持ってまいります」 walks off with your company's files, which belong to it and stay with your successor.",
+              "fr": "「次の会社に持ってまいります」 emporte les documents de l'entreprise, qui lui appartiennent et restent à ton successeur."
+            }
+          },
+          {
+            "jp": "案件のことは、私が辞めたあとで、どなたかが引き継いでくださると思います。",
+            "kana": "あんけんのことは、わたしがやめたあとで、どなたかがひきついでくださるとおもいます。",
+            "en": "As for the projects, I'm sure someone will take them over after I've gone.",
+            "fr": "Pour les dossiers, je pense que quelqu'un les reprendra après mon départ.",
+            "why": {
+              "en": "「辞めたあとで、どなたかが」 leaves your projects to whoever picks them up after you go, when the handover is yours to make.",
+              "fr": "「辞めたあとで、どなたかが」 abandonne tes dossiers à qui voudra bien les reprendre après ton départ, alors que la passation te revient."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "頼むよ。後任は来週中に決めるから、引き継ぎの予定を表にして出してくれるか。",
+          "kana": "たのむよ。こうにんはらいしゅうちゅうにきめるから、ひきつぎのよていをひょうにしてだしてくれるか。",
+          "en": "I'm counting on you. I'll choose your successor next week, so could you draw up a schedule for the handover and give it to me?",
+          "fr": "Je compte sur toi. Je désignerai ton successeur la semaine prochaine : tu peux me préparer un planning de passation ?"
+        },
+        "me": {
+          "jp": "承知いたしました。今週中に引き継ぎの計画表を作成し、お持ちいたします。",
+          "kana": "しょうちいたしました。こんしゅうちゅうにひきつぎのけいかくひょうをさくせいし、おもちいたします。",
+          "romaji": "shouchi itashimashita. konshuuchuu ni hikitsugi no keikakuhyou o sakusei shi, omochi itashimasu",
+          "en": "Certainly. I will draw up a handover schedule this week and bring it to you.",
+          "fr": "Bien entendu. Je prépare un planning de passation cette semaine et je vous l'apporte.",
+          "note": {
+            "en": "「今週中に」 has the plan ready before the successor is chosen, and 「お持ちいたします」 humbly promises to bring it.",
+            "fr": "「今週中に」 fait que le planning sera prêt avant le choix du successeur, et 「お持ちいたします」 promet humblement de l'apporter."
+          },
+          "alt": [
+            {"jp": "かしこまりました。今週中に引き継ぎの予定表をまとめて、お持ちします。", "kana": "かしこまりました。こんしゅうちゅうにひきつぎのよていひょうをまとめて、おもちします。", "romaji": "kashikomarimashita. konshuuchuu ni hikitsugi no yoteihyou o matomete, omochi shimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "承知いたしました。今週中に引き継ぎの計画表を作成して、お持ちになります。",
+            "kana": "しょうちいたしました。こんしゅうちゅうにひきつぎのけいかくひょうをさくせいして、おもちになります。",
+            "en": "Certainly. I will draw up a handover schedule this week and graciously bring it to you.",
+            "fr": "Bien entendu. Je prépare un planning de passation cette semaine et je daignerai vous l'apporter.",
+            "why": {
+              "en": "「お持ちになります」 is honorific and raises whoever brings the plan, here yourself; yours is 「お持ちいたします」.",
+              "fr": "「お持ちになります」 est honorifique et élève celui qui apporte le planning, ici toi-même ; pour toi, c'est 「お持ちいたします」."
+            }
+          },
+          {
+            "jp": "承知いたしました。引き継ぎの計画表は、退職したあとで、ご自宅にお送りいたします。",
+            "kana": "しょうちいたしました。ひきつぎのけいかくひょうは、たいしょくしたあとで、ごじたくにおおくりいたします。",
+            "en": "Certainly. I will send the handover schedule to your home once I have left.",
+            "fr": "Bien entendu. Je vous enverrai le planning de passation chez vous, une fois que j'aurai quitté l'entreprise.",
+            "why": {
+              "en": "「退職したあとで」 sends the plan once you have gone, when the handover has to happen while you are still here.",
+              "fr": "「退職したあとで」 envoie le planning après ton départ, alors que la passation doit se faire pendant que tu es encore là."
+            }
+          }
+        ]
+      }
+    ],
+    "close": {
+      "jp": "わかった。正直、寂しくなるよ。",
+      "kana": "わかった。しょうじき、さびしくなるよ。",
+      "en": "All right. Honestly, we'll miss you.",
+      "fr": "D'accord. Franchement, tu vas nous manquer."
+    }
+  },
+  {
+    "id": "offer-decline",
+    "place": {"jp": "電話", "kana": "でんわ", "en": "On the phone", "fr": "Au téléphone"},
+    "title": {"en": "Declining a job offer", "fr": "Décliner une offre d'embauche"},
+    "situation": {
+      "en": "A company has offered you a job, but you have accepted another one. You call its HR department to decline, and the HR manager who handled your application picks up.",
+      "fr": "Une entreprise t'a fait une offre d'embauche, mais tu en as accepté une autre. Tu appelles ses ressources humaines pour la décliner, et le responsable qui a suivi ta candidature décroche."
+    },
+    "goal": {
+      "en": "Decline the offer with a sincere apology, give a reason that disparages no one, hold firm when you are asked whether anything could change your mind, and thank them for their time.",
+      "fr": "Décline l'offre en t'excusant sincèrement, donne une raison qui ne dénigre personne, maintiens ta décision quand on te demande si quelque chose pourrait te faire changer d'avis, et remercie pour le temps qu'on t'a consacré."
+    },
+    "steps": [
+      {"en": "Say who you are", "fr": "Présente-toi"},
+      {"en": "Decline, with an apology", "fr": "Décline l'offre en t'excusant"},
+      {"en": "Give a reason that slights no one", "fr": "Donne une raison qui ne vexe personne"},
+      {"en": "Hold firm", "fr": "Maintiens ta décision"},
+      {"en": "Thank them for their time", "fr": "Remercie pour le temps accordé"}
+    ],
+    "them": {"en": "HR manager", "fr": "Responsable RH"},
+    "register": "formal",
+    "turns": [
+      {
+        "them": {
+          "jp": "はい、人事部採用担当の佐藤でございます。",
+          "kana": "はい、じんじぶさいようたんとうのさとうでございます。",
+          "en": "Hello, Sato speaking, recruitment, Human Resources.",
+          "fr": "Ressources humaines, service recrutement, Sato à l'appareil."
+        },
+        "me": {
+          "jp": "お世話になっております。先日内定のご連絡をいただきました、マルタンと申します。",
+          "kana": "おせわになっております。せんじつないていのごれんらくをいただきました、マルタンともうします。",
+          "romaji": "osewa ni natte orimasu. senjitsu naitei no go renraku o itadakimashita, marutan to moushimasu",
+          "en": "Hello, thank you for everything. This is Martin; you were kind enough to call me with a job offer the other day.",
+          "fr": "Bonjour, je vous remercie de votre attention. Martin à l'appareil : vous m'avez fait une offre d'embauche l'autre jour.",
+          "note": {
+            "en": "「内定のご連絡をいただきました」 tells HR at once which candidate is calling, and 「と申します」 gives your name humbly.",
+            "fr": "「内定のご連絡をいただきました」 dit aussitôt au recruteur quel candidat appelle, et 「と申します」 donne ton nom humblement."
+          },
+          "alt": [
+            {"jp": "お世話になっております。先日内定をいただいた、マルタンと申します。", "kana": "おせわになっております。せんじつないていをいただいた、マルタンともうします。", "romaji": "osewa ni natte orimasu. senjitsu naitei o itadaita, marutan to moushimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "お世話になっております。内定のご連絡をさしあげました、マルタンと申します。",
+            "kana": "おせわになっております。ないていのごれんらくをさしあげました、マルタンともうします。",
+            "en": "Hello, thank you for everything. This is Martin, who humbly called you with a job offer.",
+            "fr": "Bonjour, je vous remercie de votre attention. Martin à l'appareil : c'est moi qui vous ai humblement annoncé une offre d'embauche.",
+            "why": {
+              "en": "「さしあげました」 says you gave HR the news of an offer, when it is they who gave it to you: 「いただきました」.",
+              "fr": "「さしあげました」 dit que c'est toi qui as annoncé une offre au recruteur, alors que c'est lui qui te l'a faite : 「いただきました」."
+            }
+          },
+          {
+            "jp": "お電話ありがとうございます。マルタンと申します。",
+            "kana": "おでんわありがとうございます。マルタンともうします。",
+            "en": "Thank you for calling. This is Martin.",
+            "fr": "Merci de votre appel. Martin à l'appareil.",
+            "why": {
+              "en": "「お電話ありがとうございます」 is what the one who answers says to the caller, and the caller here is you.",
+              "fr": "「お電話ありがとうございます」, c'est ce que dit celui qui décroche à qui l'appelle, et ici, c'est toi qui appelles."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "マルタンさんですね。お世話になっております。どうされましたか。",
+          "kana": "マルタンさんですね。おせわになっております。どうされましたか。",
+          "en": "Ah, Martin. Hello. What can I do for you?",
+          "fr": "Ah, Martin. Bonjour. Que puis-je pour vous ?"
+        },
+        "me": {
+          "jp": "誠に勝手ながら、内定を辞退させていただきたく存じます。ご迷惑をおかけし、申し訳ございません。",
+          "kana": "まことにかってながら、ないていをじたいさせていただきたくぞんじます。ごめいわくをおかけし、もうしわけございません。",
+          "romaji": "makoto ni katte nagara, naitei o jitai sasete itadakitaku zonjimasu. go meiwaku o okake shi, moushiwake gozaimasen",
+          "en": "I am afraid it is entirely my own doing, but I must decline your offer. I am truly sorry for the trouble it causes you.",
+          "fr": "C'est entièrement de mon fait, mais je souhaiterais décliner votre offre. Je vous prie de m'excuser pour le désagrément.",
+          "note": {
+            "en": "「誠に勝手ながら」 owns the decision as yours alone before you even state it, and 「申し訳ございません」 apologises for the trouble it causes.",
+            "fr": "「誠に勝手ながら」 assume la décision comme relevant de ta seule responsabilité avant même de l'énoncer, et 「申し訳ございません」 s'excuse du désagrément qu'elle cause."
+          },
+          "alt": [
+            {"jp": "大変申し訳ございませんが、このたびの内定を辞退させていただきたく、お電話いたしました。", "kana": "たいへんもうしわけございませんが、このたびのないていをじたいさせていただきたく、おでんわいたしました。", "romaji": "taihen moushiwake gozaimasen ga, kono tabi no naitei o jitai sasete itadakitaku, odenwa itashimashita"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "誠に勝手ながら、内定を承諾させていただきたく存じます。入社までの手続きを改めて教えていただけますか。",
+            "kana": "まことにかってながら、ないていをしょうだくさせていただきたくぞんじます。にゅうしゃまでのてつづきをあらためておしえていただけますか。",
+            "en": "It is entirely my own doing, but I would like to accept your offer. Could you go over what I need to do before I start?",
+            "fr": "C'est entièrement de mon fait, mais je souhaiterais accepter votre offre. Pourriez-vous me rappeler les démarches avant mon arrivée ?",
+            "why": {
+              "en": "「承諾」 accepts the offer, the opposite of what you are calling to do; turning it down is 「辞退」.",
+              "fr": "「承諾」 accepte l'offre, l'inverse de ce pour quoi tu appelles ; la décliner, c'est 「辞退」."
+            }
+          },
+          {
+            "jp": "おかげさまで、内定は辞退させていただくことになりました。",
+            "kana": "おかげさまで、ないていはじたいさせていただくことになりました。",
+            "en": "Thanks to you, I shall be declining your offer.",
+            "fr": "Grâce à vous, je vais décliner votre offre.",
+            "why": {
+              "en": "「おかげさまで」 thanks HR for good news of yours, and makes them the cause of the very refusal you bring them.",
+              "fr": "「おかげさまで」 remercie le recruteur d'une bonne nouvelle te concernant, et fait de lui la cause du refus même que tu lui apportes."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "そうですか。それは残念です。差し支えなければ、理由を伺ってもよろしいですか。",
+          "kana": "そうですか。それはざんねんです。さしつかえなければ、りゆうをうかがってもよろしいですか。",
+          "en": "I see. That's a pity. If you don't mind my asking, may I ask why?",
+          "fr": "Je vois. C'est bien dommage. Si ce n'est pas indiscret, puis-je vous demander pourquoi ?"
+        },
+        "me": {
+          "jp": "自分の適性をよく考えた結果、別の会社に入社することを決めました。",
+          "kana": "じぶんのてきせいをよくかんがえたけっか、べつのかいしゃににゅうしゃすることをきめました。",
+          "romaji": "jibun no tekisei o yoku kangaeta kekka, betsu no kaisha ni nyuusha suru koto o kimemashita",
+          "en": "After thinking carefully about where my strengths lie, I have decided to join another company.",
+          "fr": "Après avoir bien réfléchi à mes aptitudes, j'ai décidé d'entrer dans une autre entreprise.",
+          "note": {
+            "en": "「自分の適性」 grounds the choice in yourself, so the reason says nothing against the company you are turning down.",
+            "fr": "「自分の適性」 fonde le choix sur toi-même, si bien que la raison ne dit rien contre l'entreprise que tu refuses."
+          },
+          "alt": [
+            {"jp": "自分に合った仕事をよく考えた結果、ほかの会社にお世話になることにいたしました。", "kana": "じぶんにあったしごとをよくかんがえたけっか、ほかのかいしゃにおせわになることにいたしました。", "romaji": "jibun ni atta shigoto o yoku kangaeta kekka, hoka no kaisha ni osewa ni naru koto ni itashimashita"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "御社は残業が多いと伺いましたので、他社に決めました。",
+            "kana": "おんしゃはざんぎょうがおおいとうかがいましたので、たしゃにきめました。",
+            "en": "I heard your company works a lot of overtime, so I chose another one.",
+            "fr": "On m'a dit qu'on fait beaucoup d'heures supplémentaires chez vous, alors j'ai choisi une autre entreprise.",
+            "why": {
+              "en": "「残業が多いと伺いました」 repeats a rumour against the company you are turning down, when the reason should disparage no one.",
+              "fr": "「残業が多いと伺いました」 colporte une rumeur contre l'entreprise que tu refuses, alors que la raison ne doit dénigrer personne."
+            }
+          },
+          {
+            "jp": "御社がずっと第一志望でしたので、別の会社に入社することを決めました。",
+            "kana": "おんしゃがずっとだいいちしぼうでしたので、べつのかいしゃににゅうしゃすることをきめました。",
+            "en": "Your company was always my first choice, so I have decided to join another one.",
+            "fr": "Votre entreprise a toujours été mon premier choix, alors j'ai décidé d'entrer dans une autre.",
+            "why": {
+              "en": "「第一志望でしたので」 gives your first choice as the reason for choosing another: the reason argues against what it explains.",
+              "fr": "「第一志望でしたので」 donne ton premier choix pour raison d'en choisir un autre : la raison contredit ce qu'elle explique."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "そうでしたか。例えば配属先などの条件を見直せば、考え直していただける余地はありませんか。",
+          "kana": "そうでしたか。たとえばはいぞくさきなどのじょうけんをみなおせば、かんがえなおしていただけるよちはありませんか。",
+          "en": "I see. If we were to look again at the terms, your posting for instance, is there no room for you to reconsider?",
+          "fr": "Je vois. Si nous revoyions les conditions, votre affectation par exemple, n'y aurait-il pas moyen de vous faire changer d'avis ?"
+        },
+        "me": {
+          "jp": "もったいないお話ですが、決心は固まっておりますので、どうかご容赦ください。",
+          "kana": "もったいないおはなしですが、けっしんはかたまっておりますので、どうかごようしゃください。",
+          "romaji": "mottainai ohanashi desu ga, kesshin wa katamatte orimasu node, douka go yousha kudasai",
+          "en": "That is more than I deserve, but my mind is made up, so I hope you will forgive me.",
+          "fr": "C'est plus que je ne mérite, mais ma décision est prise : je vous prie de m'en excuser.",
+          "note": {
+            "en": "「もったいないお話ですが」 honours the offer as more than you deserve, and 「決心は固まっております」 closes the door without a word against it.",
+            "fr": "「もったいないお話ですが」 honore l'offre comme plus que tu ne mérites, et 「決心は固まっております」 ferme la porte sans un mot contre elle."
+          },
+          "alt": [
+            {"jp": "ありがたいお話ですが、気持ちは変わりませんので、どうかご理解いただけますと幸いです。", "kana": "ありがたいおはなしですが、きもちはかわりませんので、どうかごりかいいただけますとさいわいです。", "romaji": "arigatai ohanashi desu ga, kimochi wa kawarimasen node, douka go rikai itadakemasu to saiwai desu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "でしたら、配属先とお給料の条件次第では、考え直してもよろしいですが。",
+            "kana": "でしたら、はいぞくさきとおきゅうりょうのじょうけんしだいでは、かんがえなおしてもよろしいですが。",
+            "en": "In that case, depending on the posting and the salary, I might be willing to reconsider.",
+            "fr": "Dans ce cas, selon l'affectation et le salaire proposés, je veux bien y repenser.",
+            "why": {
+              "en": "「条件次第では、考え直しても」 reopens a choice already made, when you have accepted another company's offer.",
+              "fr": "「条件次第では、考え直しても」 rouvre un choix déjà fait, alors que tu as accepté l'offre d'une autre entreprise."
+            }
+          },
+          {
+            "jp": "もう決めたことですので、何度聞かれても答えは同じだと申し上げております。",
+            "kana": "もうきめたことですので、なんどきかれてもこたえはおなじだともうしあげております。",
+            "en": "I've already made up my mind, so however many times you ask, I'm telling you the answer is the same.",
+            "fr": "C'est décidé : vous pouvez me le demander autant de fois que vous voudrez, je vous dis que la réponse est la même.",
+            "why": {
+              "en": "「何度聞かれても」 treats one courteous question as badgering, when holding firm still owes the offer thanks.",
+              "fr": "「何度聞かれても」 traite une question courtoise comme du harcèlement, alors que maintenir sa décision n'empêche pas de remercier de l'offre."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "わかりました。残念ですが、マルタンさんのご判断を尊重いたします。",
+          "kana": "わかりました。ざんねんですが、マルタンさんのごはんだんをそんちょういたします。",
+          "en": "I understand. It's a shame, but I respect your decision.",
+          "fr": "Je comprends. C'est dommage, mais je respecte votre décision."
+        },
+        "me": {
+          "jp": "ご理解いただき、ありがとうございます。選考では、大変お世話になりました。",
+          "kana": "ごりかいいただき、ありがとうございます。せんこうでは、たいへんおせわになりました。",
+          "romaji": "go rikai itadaki, arigatou gozaimasu. senkou de wa, taihen osewa ni narimashita",
+          "en": "Thank you for understanding. And thank you for all your help during the selection process.",
+          "fr": "Merci de votre compréhension. Et merci pour tout ce que vous avez fait pendant le recrutement.",
+          "note": {
+            "en": "「お世話になりました」 thanks HR for help that is now over, the right farewell to a selection that ends here.",
+            "fr": "「お世話になりました」 remercie le recruteur d'une aide désormais terminée, l'adieu qui convient à un recrutement qui s'arrête là."
+          },
+          "alt": [
+            {"jp": "ありがとうございます。選考の際は、本当にお世話になりました。", "kana": "ありがとうございます。せんこうのさいは、ほんとうにおせわになりました。", "romaji": "arigatou gozaimasu. senkou no sai wa, hontou ni osewa ni narimashita"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "ありがとうございます。それでは、四月から、どうぞよろしくお願いいたします。",
+            "kana": "ありがとうございます。それでは、しがつから、どうぞよろしくおねがいいたします。",
+            "en": "Thank you. Then I look forward to working with you from April.",
+            "fr": "Merci beaucoup. Alors, au plaisir de travailler avec vous à partir d'avril.",
+            "why": {
+              "en": "「四月から、どうぞよろしく」 greets the company you are about to join, and you have just turned this one down.",
+              "fr": "「四月から、どうぞよろしく」 salue l'entreprise où l'on va entrer, et tu viens de refuser celle-ci."
+            }
+          },
+          {
+            "jp": "ご理解いただき、ありがとうございます。選考では、大変お世話になっております。",
+            "kana": "ごりかいいただき、ありがとうございます。せんこうでは、たいへんおせわになっております。",
+            "en": "Thank you for understanding. And thank you for the help you keep giving me in the selection process.",
+            "fr": "Merci de votre compréhension. Et merci pour l'aide que vous continuez à m'apporter dans le recrutement.",
+            "why": {
+              "en": "「お世話になっております」 thanks HR for help still going on, when the selection has just ended: it is 「お世話になりました」.",
+              "fr": "「お世話になっております」 remercie le recruteur d'une aide toujours en cours, alors que le recrutement vient de prendre fin : c'est 「お世話になりました」."
+            }
+          }
+        ]
+      }
+    ],
+    "close": {
+      "jp": "こちらこそ、ありがとうございました。新しい職場でのご活躍をお祈りしております。",
+      "kana": "こちらこそ、ありがとうございました。あたらしいしょくばでのごかつやくをおいのりしております。",
+      "en": "Thank you too. I wish you every success in your new job.",
+      "fr": "Merci à vous. Je vous souhaite beaucoup de réussite dans votre nouveau poste."
+    }
+  },
+  {
+    "id": "press-call",
+    "place": {"jp": "電話", "kana": "でんわ", "en": "Business call", "fr": "Appel professionnel"},
+    "title": {"en": "A reporter on the line", "fr": "Un journaliste au bout du fil"},
+    "situation": {
+      "en": "You work in your company's press office, and a newspaper reporter calls about a merger reported this morning. Talks are in fact under way, but nothing has been announced: you may neither confirm nor deny.",
+      "fr": "Tu travailles au service de presse de ton entreprise, et un journaliste appelle au sujet d'une fusion évoquée ce matin dans la presse. Des discussions sont bel et bien en cours, mais rien n'a été annoncé : tu ne peux ni confirmer ni démentir."
+    },
+    "goal": {
+      "en": "Keep a courteous tone while the reporter presses: neither confirm nor deny the merger, point to the official announcement, decline to speculate and offer to pass questions on.",
+      "fr": "Garde un ton courtois quand le journaliste insiste : ne confirme ni ne dément la fusion, renvoie à l'annonce officielle, refuse de spéculer et propose de transmettre ses questions."
+    },
+    "steps": [
+      {"en": "Neither confirm nor deny", "fr": "Ne confirme ni ne dément"},
+      {"en": "Point to the official announcement", "fr": "Renvoie à l'annonce officielle"},
+      {"en": "Decline to speculate", "fr": "Refuse de spéculer"},
+      {"en": "Offer to pass questions on", "fr": "Propose de transmettre ses questions"},
+      {"en": "Treat every paper alike", "fr": "Traite tous les journaux à égalité"}
+    ],
+    "them": {"en": "Reporter", "fr": "Journaliste"},
+    "register": "formal",
+    "turns": [
+      {
+        "them": {
+          "jp": "毎朝新聞の山本と申します。今朝、御社と山田商事の合併が一部で報じられましたが、事実でしょうか。",
+          "kana": "まいあさしんぶんのやまもとともうします。けさ、おんしゃとやまだしょうじのがっぺいがいちぶでほうじられましたが、じじつでしょうか。",
+          "en": "This is Yamamoto from the Maiasa Shimbun. This morning some outlets reported a merger between your company and Yamada Trading. Is it true?",
+          "fr": "Yamamoto, du Maiasa Shimbun. Ce matin, certains médias ont annoncé une fusion entre votre société et Yamada Trading. Est-ce exact ?"
+        },
+        "me": {
+          "jp": "お問い合わせありがとうございます。その件につきましては、弊社から発表したものではございません。",
+          "kana": "おといあわせありがとうございます。そのけんにつきましては、へいしゃからはっぴょうしたものではございません。",
+          "romaji": "otoiawase arigatou gozaimasu. sono ken ni tsukimashite wa, heisha kara happyou shita mono de wa gozaimasen",
+          "en": "Thank you for your enquiry. That report is not something our company has announced.",
+          "fr": "Merci de votre appel. Cette information ne vient pas de nous : notre société n'a rien annoncé de tel.",
+          "note": {
+            "en": "「弊社から発表したものではございません」 is the set reply to a report a company has not announced: it neither confirms the merger nor denies it.",
+            "fr": "「弊社から発表したものではございません」 est la réponse consacrée à une information qu'une société n'a pas annoncée : elle ne confirme ni ne dément la fusion."
+          },
+          "alt": [
+            {"jp": "お問い合わせの件は、弊社が公表したものではございません。", "kana": "おといあわせのけんは、へいしゃがこうひょうしたものではございません。", "romaji": "otoiawase no ken wa, heisha ga kouhyou shita mono de wa gozaimasen"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "はい、来月、正式に発表する予定でございます。",
+            "kana": "はい、らいげつ、せいしきにはっぴょうするよていでございます。",
+            "en": "Yes, we plan to announce it officially next month.",
+            "fr": "Oui, nous prévoyons de l'annoncer officiellement le mois prochain.",
+            "why": {
+              "en": "「発表する予定でございます」 confirms the merger and gives its date, which you may not do before the official announcement.",
+              "fr": "「発表する予定でございます」 confirme la fusion et en donne la date, ce que tu ne peux pas faire avant l'annonce officielle."
+            }
+          },
+          {
+            "jp": "いいえ、そのような事実は一切ございません。まったくの誤報でございます。",
+            "kana": "いいえ、そのようなじじつはいっさいございません。まったくのごほうでございます。",
+            "en": "No, there is no truth in it whatsoever. The report is completely false.",
+            "fr": "Non, cela n'a aucun fondement. L'information est entièrement fausse.",
+            "why": {
+              "en": "「事実は一切ございません」 denies talks that are in fact under way: a denial you would have to take back later.",
+              "fr": "「事実は一切ございません」 dément des discussions qui sont bel et bien en cours : un démenti qu'il faudrait reprendre plus tard."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "ということは、協議していること自体は否定されないんですね。",
+          "kana": "ということは、きょうぎしていることじたいはひていされないんですね。",
+          "en": "So you're not denying that talks are taking place?",
+          "fr": "Vous ne démentez donc pas que des discussions aient lieu ?"
+        },
+        "me": {
+          "jp": "肯定も否定もいたしかねます。公表すべき事実が決まりましたら、速やかにお知らせいたします。",
+          "kana": "こうていもひていもいたしかねます。こうひょうすべきじじつがきまりましたら、すみやかにおしらせいたします。",
+          "romaji": "koutei mo hitei mo itashikanemasu. kouhyou subeki jijitsu ga kimarimashitara, sumiyaka ni oshirase itashimasu",
+          "en": "I can neither confirm nor deny it. Should there be a decision to make public, we will announce it promptly.",
+          "fr": "Je ne peux ni confirmer ni démentir. S'il y a une décision à rendre publique, nous l'annoncerons sans tarder.",
+          "note": {
+            "en": "「肯定も否定もいたしかねます」 refuses the reporter's inference without a word on the talks, and 「公表すべき事実が決まりましたら」 points to the official announcement.",
+            "fr": "「肯定も否定もいたしかねます」 refuse la déduction du journaliste sans un mot sur les discussions, et 「公表すべき事実が決まりましたら」 renvoie à l'annonce officielle."
+          },
+          "alt": [
+            {"jp": "肯定も否定もできかねます。発表できることが決まりましたら、すぐに公表いたします。", "kana": "こうていもひていもできかねます。はっぴょうできることがきまりましたら、すぐにこうひょういたします。", "romaji": "koutei mo hitei mo dekikanemasu. happyou dekiru koto ga kimarimashitara, sugu ni kouhyou itashimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "はい、協議していることは事実ですが、合併の時期や条件などは、まだ何も決まってはおりません。",
+            "kana": "はい、きょうぎしていることはじじつですが、がっぺいのじきやじょうけんなどは、まだなにもきまってはおりません。",
+            "en": "Yes, it is true that we are in talks, but nothing about the timing or the terms of the merger has been decided yet.",
+            "fr": "Oui, il est exact que nous sommes en discussion, mais ni la date ni les conditions de la fusion ne sont encore décidées.",
+            "why": {
+              "en": "「協議していることは事実です」 confirms the talks, the very thing the reporter was fishing for.",
+              "fr": "「協議していることは事実です」 confirme les discussions, cela même que le journaliste cherchait à te faire dire."
+            }
+          },
+          {
+            "jp": "さあ、どうでしょうか。その辺りは、ご想像にお任せいたします。",
+            "kana": "さあ、どうでしょうか。そのあたりは、ごそうぞうにおまかせいたします。",
+            "en": "Well, who can say? I'll leave that to your imagination.",
+            "fr": "Eh bien, qui sait ? Je laisse ce point à votre imagination.",
+            "why": {
+              "en": "「ご想像にお任せいたします」 is the coy non-answer that hints at a yes and lets the reporter print his guess; a press officer declines neutrally.",
+              "fr": "「ご想像にお任せいたします」 est la non-réponse malicieuse qui laisse entendre un oui et permet au journaliste de publier sa supposition ; un chargé de presse refuse de façon neutre."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "関係者の話では、来月にも正式発表されるとも聞いていますが。",
+          "kana": "かんけいしゃのはなしでは、らいげつにもせいしきはっぴょうされるともきいていますが。",
+          "en": "People close to the matter tell me it could be officially announced as early as next month.",
+          "fr": "D'après des sources proches du dossier, une annonce officielle pourrait même intervenir dès le mois prochain."
+        },
+        "me": {
+          "jp": "憶測に基づくご質問には、お答えを差し控えさせていただきます。",
+          "kana": "おくそくにもとづくごしつもんには、おこたえをさしひかえさせていただきます。",
+          "romaji": "okusoku ni motozuku go shitsumon ni wa, okotae o sashihikae sasete itadakimasu",
+          "en": "I must refrain from answering questions based on speculation.",
+          "fr": "Je me dois de ne pas répondre à des questions fondées sur des spéculations.",
+          "note": {
+            "en": "「憶測に基づく」 names the question for what it is without blaming the reporter, and 「差し控えさせていただきます」 declines it humbly.",
+            "fr": "「憶測に基づく」 qualifie la question sans en blâmer le journaliste, et 「差し控えさせていただきます」 la décline humblement."
+          },
+          "alt": [
+            {"jp": "憶測に関するご質問には、お答えいたしかねます。", "kana": "おくそくにかんするごしつもんには、おこたえいたしかねます。", "romaji": "okusoku ni kansuru go shitsumon ni wa, okotae itashikanemasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "憶測に基づくご質問には、山本様にお答えを差し控えていただきます。",
+            "kana": "おくそくにもとづくごしつもんには、やまもとさまにおこたえをさしひかえていただきます。",
+            "en": "As for questions based on speculation, I will have you refrain from answering them, Mr Yamamoto.",
+            "fr": "Pour les questions fondées sur des spéculations, je vais vous prier, monsieur Yamamoto, de vous abstenir d'y répondre.",
+            "why": {
+              "en": "「山本様に…差し控えていただきます」 has the reporter do the refraining, when it is you who withhold the answer: 「差し控えさせていただきます」.",
+              "fr": "「山本様に…差し控えていただきます」 fait s'abstenir le journaliste, alors que c'est toi qui gardes ta réponse : 「差し控えさせていただきます」."
+            }
+          },
+          {
+            "jp": "そんなでたらめ、いったい誰が言ってるんですか。",
+            "kana": "そんなでたらめ、いったいだれがいってるんですか。",
+            "en": "Who on earth is spreading rubbish like that?",
+            "fr": "Mais qui donc raconte des âneries pareilles ?",
+            "why": {
+              "en": "「でたらめ」 and 「いったい誰が」 snap at the reporter; however hard he presses, a press officer stays courteous.",
+              "fr": "「でたらめ」 et 「いったい誰が」 rabrouent le journaliste ; si fort qu'il insiste, un chargé de presse garde un ton courtois."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "では、せめて社長のコメントだけでもいただけませんか。",
+          "kana": "では、せめてしゃちょうのコメントだけでもいただけませんか。",
+          "en": "Then could I at least have a comment from your president?",
+          "fr": "Alors, pourrais-je au moins avoir un commentaire de votre président ?"
+        },
+        "me": {
+          "jp": "申し訳ございません。ご質問でしたら、私が承って担当の者に申し伝えます。",
+          "kana": "もうしわけございません。ごしつもんでしたら、わたしがうけたまわってたんとうのものにもうしつたえます。",
+          "romaji": "moushiwake gozaimasen. go shitsumon deshitara, watashi ga uketamawatte tantou no mono ni moushitsutaemasu",
+          "en": "I am sorry. If you have questions, I will take them myself and pass them on to the people concerned.",
+          "fr": "Je regrette. Si vous avez des questions, je les prends moi-même et je les transmets aux personnes concernées.",
+          "note": {
+            "en": "「申し訳ございません」 turns down the comment without a blunt no, and 「承って…申し伝えます」 humbly offers to pass the questions on.",
+            "fr": "「申し訳ございません」 refuse le commentaire sans un non abrupt, et 「承って…申し伝えます」 propose humblement de transmettre les questions."
+          },
+          "alt": [
+            {"jp": "申し訳ございませんが、社長のコメントはお出しできかねます。ご質問は私がお預かりし、担当者に伝えます。", "kana": "もうしわけございませんが、しゃちょうのコメントはおだしできかねます。ごしつもんはわたしがおあずかりし、たんとうしゃにつたえます。", "romaji": "moushiwake gozaimasen ga, shachou no komento wa odashi dekikanemasu. go shitsumon wa watashi ga oazukari shi, tantousha ni tsutaemasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "申し訳ございませんが、社長はこの件について、何もおっしゃらないかと存じます。",
+            "kana": "もうしわけございませんが、しゃちょうはこのけんについて、なにもおっしゃらないかとぞんじます。",
+            "en": "I am sorry, but I believe the president will graciously say nothing on the matter.",
+            "fr": "Je regrette, mais je pense que le président ne daignera rien dire à ce sujet.",
+            "why": {
+              "en": "「おっしゃらない」 raises your own president before an outsider, when people of your own company take no honorific before a reporter.",
+              "fr": "「おっしゃらない」 élève ton propre président devant un tiers, alors que devant un journaliste, les gens de ta maison ne reçoivent aucun honorifique."
+            }
+          },
+          {
+            "jp": "社長のコメントは難しいですが、オフレコでしたら、私から少しお話しできます。",
+            "kana": "しゃちょうのコメントはむずかしいですが、オフレコでしたら、わたしからすこしおはなしできます。",
+            "en": "A comment from the president would be difficult, but off the record, I could tell you a little myself.",
+            "fr": "Un commentaire du président, ce serait difficile, mais en off, je pourrais vous en dire un peu moi-même.",
+            "why": {
+              "en": "「オフレコでしたら」 offers to leak off the record what you may neither confirm nor deny on it.",
+              "fr": "「オフレコでしたら」 propose de dévoiler en off ce que tu ne peux ni confirmer ni démentir officiellement."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "わかりました。では、発表があったら、真っ先に知らせてもらえますか。",
+          "kana": "わかりました。では、はっぴょうがあったら、まっさきにしらせてもらえますか。",
+          "en": "All right. Then when there's an announcement, could you let me know first?",
+          "fr": "D'accord. Alors, quand il y aura une annonce, vous pourriez me prévenir en premier ?"
+        },
+        "me": {
+          "jp": "発表の際は、報道各社に同時にお知らせいたしますので、ご了承ください。",
+          "kana": "はっぴょうのさいは、ほうどうかくしゃにどうじにおしらせいたしますので、ごりょうしょうください。",
+          "romaji": "happyou no sai wa, houdou kakusha ni douji ni oshirase itashimasu node, go ryoushou kudasai",
+          "en": "When there is an announcement, we inform every news organisation at the same time, so I hope you will understand.",
+          "fr": "Lors d'une annonce, nous informons tous les médias en même temps : merci de votre compréhension.",
+          "note": {
+            "en": "「報道各社に同時に」 turns down the favour without a no, by stating the rule that treats every paper alike.",
+            "fr": "「報道各社に同時に」 refuse la faveur sans dire non, en énonçant la règle qui traite tous les journaux à égalité."
+          },
+          "alt": [
+            {"jp": "発表の際は、報道機関の皆様に一斉にご案内いたしますので、ご理解ください。", "kana": "はっぴょうのさいは、ほうどうきかんのみなさまにいっせいにごあんないいたしますので、ごりかいください。", "romaji": "happyou no sai wa, houdou kikan no minasama ni issei ni go annai itashimasu node, go rikai kudasai"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "かしこまりました。発表の前日に、山本様にだけ内々にお知らせいたします。",
+            "kana": "かしこまりました。はっぴょうのぜんじつに、やまもとさまにだけないないにおしらせいたします。",
+            "en": "Certainly. I'll let you know privately, and you alone, the day before the announcement.",
+            "fr": "Entendu. Je vous préviendrai discrètement, vous seul, la veille de l'annonce.",
+            "why": {
+              "en": "「山本様にだけ内々に」 promises one paper the news ahead of the rest, a leak before the official announcement.",
+              "fr": "「山本様にだけ内々に」 promet l'information à un seul journal avant les autres, une fuite avant l'annonce officielle."
+            }
+          },
+          {
+            "jp": "かしこまりました。では、発表がございましたら、山本様からお知らせいただけますか。",
+            "kana": "かしこまりました。では、はっぴょうがございましたら、やまもとさまからおしらせいただけますか。",
+            "en": "Certainly. Then when there is an announcement, could you let me know?",
+            "fr": "Entendu. Alors, quand il y aura une annonce, pourriez-vous me prévenir ?",
+            "why": {
+              "en": "「山本様からお知らせいただけますか」 asks the reporter to tell you of your own company's announcement: the request is turned round.",
+              "fr": "「山本様からお知らせいただけますか」 demande au journaliste de te prévenir de l'annonce de ta propre société : la demande est retournée."
+            }
+          }
+        ]
+      }
+    ],
+    "close": {
+      "jp": "わかりました。では、また改めてご連絡します。失礼します。",
+      "kana": "わかりました。では、またあらためてごれんらくします。しつれいします。",
+      "en": "All right. I'll be in touch again, then. Goodbye.",
+      "fr": "D'accord. Je vous recontacterai. Au revoir."
     }
   }
 ]

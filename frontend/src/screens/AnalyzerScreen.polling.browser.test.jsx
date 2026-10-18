@@ -144,6 +144,7 @@ beforeEach(async () => {
   playerSpies.play.mockReset()
   playerSpies.pause.mockReset()
   playerSpies.seekTo.mockReset()
+  apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => [] }))
   playerProps.last = null
   // The sound is persisted (lib/videoVolume), and the browser lane
   // shares one origin across the whole file: without this, a case that
@@ -350,6 +351,94 @@ describe('AnalyzerScreen polling', () => {
     } finally {
       window.history.replaceState(null, '', window.location.pathname + window.location.search)
     }
+  })
+
+  // ── A poor connection ──
+  // Supabase hands the app a new session object on every token refresh
+  // and every return to the tab -- the same sign-in. A Passage already
+  // on screen is not asked for again on it: asking moved the line back to
+  // the first stop under a playing video, and a request the link dropped
+  // took the Passage, and the player with it, off the screen.
+  it('neither asks for a ready session again nor moves the line on a refreshed sign-in', async () => {
+    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
+    apiJson.mockResolvedValue(videoSession())
+    const tree = session => (
+      <LangProvider>
+        <MemoryRouter>
+          <AnalyzerScreen session={session} />
+        </MemoryRouter>
+      </LangProvider>
+    )
+    const screen = await render(tree({ access_token: 't' }))
+    await settle(30)
+    await startFromFile(screen)
+    await settle(2000)
+    screen.container.querySelectorAll('.anl-stop')[1].click()
+    await settle(60)
+    expect(screen.container.querySelector('.anl-subs__count').textContent).toContain('2 / 2')
+    const asked = () => apiJson.mock.calls.filter(([url]) => url === '/api/video/session/1').length
+    const before = asked()
+
+    apiJson.mockRejectedValue(new TypeError('Failed to fetch'))
+    await screen.rerender(tree({ access_token: 't' }))
+    await settle(300)
+
+    expect(asked()).toBe(before)
+    expect(screen.container.querySelector('.anl-desk [data-testid="player"]')).not.toBeNull()
+    expect(screen.container.querySelector('.anl-subs__count').textContent).toContain('2 / 2')
+  })
+
+  // A request that got no answer says nothing about the session: it is
+  // asked again, rather than ending a session the server is still making.
+  it('asks again when the link drops while the session is being made', async () => {
+    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
+    let drops = 2
+    apiJson.mockImplementation(async url => {
+      if (url !== '/api/video/session/1') return {}
+      if (drops > 0) {
+        drops -= 1
+        throw new TypeError('Failed to fetch')
+      }
+      return videoSession()
+    })
+
+    const screen = await renderScreen()
+    await startFromFile(screen)
+    await vi.waitFor(() => expect(screen.container.querySelector('.anl-desk')).not.toBeNull(), { timeout: 8000 })
+    const text = screen.container.textContent
+    expect([en.analysisFailed, fr.analysisFailed].some(s => text.includes(s))).toBe(false)
+  })
+
+  // The history asked again on a refreshed sign-in, with the link down:
+  // what is kept stays marked kept.
+  it('keeps the kept marks when the history cannot be asked again', async () => {
+    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
+    apiJson.mockResolvedValue(videoSession())
+    apiFetch.mockImplementation(async url => ({
+      ok: true, status: 200,
+      json: async () => (url === '/api/phrase/history'
+        ? [{ id: 3, phrase: '猫が好き', kept: true, source: 'upload', created_at: '2026-10-01T00:00:00Z' }]
+        : []),
+    }))
+    const tree = session => (
+      <LangProvider>
+        <MemoryRouter>
+          <AnalyzerScreen session={session} />
+        </MemoryRouter>
+      </LangProvider>
+    )
+    const screen = await render(tree({ access_token: 't' }))
+    await settle(30)
+    await startFromFile(screen)
+    await settle(2000)
+    const keep = () => screen.container.querySelector('.anl-head__keep')
+    expect(keep().getAttribute('aria-pressed')).toBe('true')
+
+    apiFetch.mockImplementation(async () => { throw new TypeError('Failed to fetch') })
+    await screen.rerender(tree({ access_token: 't' }))
+    await settle(300)
+
+    expect(keep().getAttribute('aria-pressed')).toBe('true')
   })
 
   it('surfaces a parse failure with the reason and a way back', async () => {

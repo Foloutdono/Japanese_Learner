@@ -1789,6 +1789,7 @@ const profile = {
   ranking:           'Classement',
   periodWeek:        'Cette semaine',
   periodAll:         'Depuis le début',
+  rankColumn:        'Rang',
   east:              'Est',
   west:              'Ouest',
   passLabel:         "Carte d'abonnement",
@@ -2563,6 +2564,8 @@ const guide = {
   guidePracticeSignDesk: 'Les trains au départ, un par exercice, avec ce que tu y as fait à ce niveau. Clique sur l’un pour voir ce qu’il te demandera.',
   guidePracticeBoardDesk: 'Embarque : les portes se ferment et le train t’emmène à l’exercice. Entrée le fait de n’importe où ici.',
   guideDictEntryDesk: 'Une entrée, ouverte à côté de la liste. ← et → pour parcourir la liste.',
+  // 机 (plan 248) : sur le bureau, les chiffres du carnet de tampons ouvrent ceux du profil.
+  guideProfileRecordsDesk: 'Tes chiffres : ta série et ton record, les jours tamponnés, tes révisions, ce que tu retiens, ta meilleure série sans faute.',
   // Réglages, les deux retours.
   settingsFirstRide: 'Premier essai',
   settingsRideAgain: 'Refaire l\'essai',

@@ -35733,15 +35733,20 @@ button.brd-stn { cursor: pointer; }
 
   /* The profile: the holder opened flat — the pass and its stamp book
      on the left, the record (the figures, the ledger, the 番付) on the
-     right (screens/ProfileScreen.jsx). The ledger in a half-width
-     column goes two across, never three. */
-  /* The pass and its stamps are drawn for a phone's width and read as
-     objects at it; the record — the figures, the lines, the boards —
-     is what grows into the rest (plan 115). */
+     right (screens/ProfileScreen.jsx). The pass and its stamps are drawn
+     for a phone's width and read as objects at it; the record is what
+     grows into the rest (plan 115). Since plan 248 (the owner's pick A
+     一望 of the canvas "Tsuji — the profile on the desk") the holder is
+     whole in the window from the narrowest desk: the tickets' and the
+     agenda's doors one lattice of slim rows under the card, the stamp
+     book's three figures opening the records' lattice (three by two),
+     both rankings on one board. The two columns end together: the
+     board's rows share what the record's column has to spare, the stamp
+     book takes what the card's has. */
   .desk-profile {
     display: grid;
     grid-template-columns: var(--desk-side-w) minmax(0, 1fr);
-    align-items: start;
+    align-items: stretch;
     gap: var(--sp-5);
   }
   .desk-profile__col {
@@ -35750,6 +35755,12 @@ button.brd-stn { cursor: pointer; }
     gap: var(--sp-5);
     min-width: 0;
   }
+  .desk-profile__col > .sbook { flex: 1 0 auto; }
+  /* The two doors: places, not figures, so a rung less room round them
+     than a record's cell has, and their counts at the row's rung. */
+  .desk-doors > .record--door { padding: var(--sp-3) var(--sp-5); }
+  .desk-doors .record__value--door { font-size: var(--fs-lead); }
+  .desk-profile .records--three > .record { padding-block: var(--sp-4); }
   /* The lines drawn with their stops (plan 143): a row a line, the
      mark whole again at the head of the row, then a rail per stop (a
      kana set, a JLPT level) filled with that stop's own learned / total
@@ -35790,18 +35801,38 @@ button.brd-stn { cursor: pointer; }
     text-transform: none;
   }
   .pf-line__stop--here .pf-line__stop-name { color: var(--text-primary); }
-  /* The two rankings at once (Banzuke's `both`): side by side once the
-     column holds two at the side column's width, stacked below that. */
-  .desk-banzuke {
+  /* 東西 — the two rankings on one board (Banzuke's `both`, plan 248):
+     the ranks down its middle column, this week's names to their left
+     and all time's to their right, each name beside its rank and its XP
+     at the board's edge. Every row is a subgrid of the board's three
+     columns, so the ranks stand in one column and both heads over their
+     sides; the rows share the board's height either side of the
+     elision (--bz-top, --bz-out, Banzuke's counts), the head and the ⋯
+     keep their own. The learner's own place is washed on its side, the
+     pass ink's rail at the board's edge. */
+  .desk-bz {
+    flex: 1 0 auto;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(var(--desk-side-w), 1fr));
-    align-items: start;
-    gap: var(--sp-5);
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-rows: auto repeat(var(--bz-top, 5), minmax(min-content, 1fr));
   }
-  /* One tab, as the phone's are: on the desk each board is one period,
-     so its head is that period's tab, underlined and inked. */
+  .desk-bz--out {
+    grid-template-rows:
+      auto repeat(var(--bz-top, 5), minmax(min-content, 1fr))
+      auto repeat(var(--bz-out, 1), minmax(min-content, 1fr));
+  }
+  .desk-bz__head,
+  .desk-bz__row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    border-bottom: 1px solid var(--surface-line);
+  }
+  .desk-bz__row:last-child { border-bottom: 0; }
+  /* Each period's head is its tab, as the phone's are, underlined and
+     inked; the rank column's head is a word for a screen reader alone,
+     under the same gold. */
   .desk-bz__period {
-    flex: 1;
     padding: var(--sp-4) var(--sp-5);
     text-align: center;
     font-family: var(--font-display);
@@ -35813,6 +35844,30 @@ button.brd-stn { cursor: pointer; }
     color: var(--sel-ink);
     box-shadow: inset 0 -2px 0 var(--accent2);
   }
+  .desk-bz__gap {
+    grid-column: 1 / -1;
+    padding: var(--sp-2) 0;
+    text-align: center;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--surface-line);
+  }
+  .desk-bz__rank {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-inline: var(--sp-3);
+  }
+  .desk-bz__cell {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    min-width: 0;
+    padding: var(--sp-2) var(--sp-5);
+  }
+  .desk-bz__cell--west { flex-direction: row-reverse; }
+  .desk-bz__cell--west .leaderboard-row__name { text-align: right; }
+  .desk-bz__cell--me { background: var(--overlay-hover); box-shadow: inset -3px 0 0 var(--pass-ink); }
+  .desk-bz__cell--west.desk-bz__cell--me { box-shadow: inset 3px 0 0 var(--pass-ink); }
 
   /* ── 教材 on the desk: the shelf beside the open deck (plan 154) ──
      The owner's pick B of four layouts drawn on the canvas "Tsuji — the
@@ -41632,6 +41687,20 @@ button.brd-stn { cursor: pointer; }
     .prc-spec--compact { padding: var(--sp-4); }
     .prc-lower { flex: none; }
     .prc-panel { max-height: calc(6 * var(--sp-8)); }
+    /* ── the profile (plan 248) ──
+       The holder is whole in the window down to 800px; under that the
+       room round its inserts gives way a rung -- the gaps, the stamp
+       book's margins, and the doors', the figures', the lines' and the
+       board's rows -- and the page scrolls the rest. The card and the
+       stamps keep their size: they are the objects the holder holds. */
+    .desk-profile,
+    .desk-profile__col { gap: var(--sp-4); }
+    .desk-profile .sbook { gap: var(--sp-3); padding: var(--sp-4); }
+    .desk-doors > .record--door { padding-block: var(--sp-2); }
+    .desk-profile .records--three > .record { padding-block: var(--sp-3); }
+    .desk-profile .pf-line { padding-block: var(--sp-3); }
+    .desk-bz__period { padding-block: var(--sp-3); }
+    .desk-bz__cell { padding-block: var(--sp-1); }
     /* ── the analyser's typed Passage ──
        The sentence a rung under display size and its subtitle a rung
        under its own: at display size three lines of a sentence and its
