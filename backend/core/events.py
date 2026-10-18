@@ -250,13 +250,14 @@ EVENTS: dict[str, frozenset[str]] = {
     "ticket_share":   frozenset({"days"}),
 
     # ── 回復運転 — the review plan (plan 217) ─────────────────────
-    # catchup_offer is the client's, once a sheet: the gate opened on
-    # the comeback sheet (`owed` the reviews it would have printed,
-    # `away` the days since the learner last studied). The rest are
-    # written server-side: catchup_choice
-    # the answer (`choice` spread | gentle | all, `days` a spread's,
-    # `per_day` its share); catchup_done the day its share stopped
-    # holding anything back (`days` it took). review_cap_set is the
+    # catchup_offer is the client's, once a visit: the comeback offer
+    # put before the learner -- the sheet the gate opened on, the notice
+    # on the gate since plan 254 (`owed` the reviews it would have
+    # printed, `away` the days since the learner last studied). The
+    # rest are written server-side: catchup_choice the answer (`choice`
+    # spread | gentle | all, `days` a spread's, `per_day` its share);
+    # catchup_done the day its share stopped holding anything back
+    # (`days` it took). review_cap_set is the
     # ceiling chosen in Settings (`cap`, null for none); away_set an
     # absence declared or withdrawn (`days` long, 0 withdrawn), and
     # away_day_used the lazy bridge writing its days (`days`). Every
@@ -342,11 +343,14 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         # export: the progress downloaded. level_fit: Today's line that
         # says the level does not fit (plan 224) -- opened, the move
         # taken, or the level kept. conversation: the 会話 station's
-        # search started (plan 246).
+        # search started (plan 246). comeback: Today's notice that the
+        # reviews piled up (plan 254) -- its paces opened, or the notice
+        # hidden for the day.
         "feature": frozenset({"speech", "analyzer", "ocr", "ask", "explain",
-                              "dictionary", "export", "level_fit", "conversation"}),
+                              "dictionary", "export", "level_fit", "conversation",
+                              "comeback"}),
         "action":  frozenset({"play", "text", "photo", "video", "scan", "send",
-                              "open", "search", "progress", "move", "stay"}),
+                              "open", "search", "progress", "move", "stay", "hide"}),
     },
     "transfer_import": {"source": frozenset({"anki", "wanikani", "renshuu"})},
     "transfer_offer":  {"choice": frozenset({"go", "later"})},

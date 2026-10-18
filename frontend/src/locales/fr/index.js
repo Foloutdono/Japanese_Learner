@@ -3156,9 +3156,10 @@ const clrTickets = {
 
 
 // ── 217:reviews ──
-// 回復運転 — the review plan (plan 217): the comeback sheet on Today,
-// the catch-up's figure in the day, the run past the share, Settings ›
-// Reviews and the notification that invites back.
+// 回復運転 — the review plan (plan 217): the comeback notice on Today
+// and its sheet (plan 254), the catch-up's figure in the day, the run
+// past the share, Settings › Reviews and the notification that invites
+// back.
 const reviewPlan = {
   cbJp: '運転再開',
   cbCap: 'Reprise du service',
@@ -3180,6 +3181,9 @@ const reviewPlan = {
   cbNewPaused: 'Les nouvelles cartes reprennent dès que tu es à jour.',
   cbGo: 'C’est parti',
   cbError: 'Ton choix n’a pas pu être enregistré. Réessaie.',
+  cbLinePiled: n => (n === 1 ? 'carte accumulée' : 'cartes accumulées'),
+  cbLineGo: 'Étaler',
+  cbHide: 'Masquer pour aujourd’hui',
   todayCatchupDay: 'jour de rattrapage',
   todayCatchupGentle: 'par jour, en rattrapage',
   todayCatchupShort: 'rattrapage',

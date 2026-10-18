@@ -676,7 +676,7 @@ def get_today(user_id: str = Depends(get_user_id)):
         # clearing it pays, and the rest days.
         **_day_status(user_id),
         # 回復運転 (plan 217): the review plan and what it did today,
-        # and the comeback sheet's offer when the gate opens on one.
+        # and the comeback offer when the gate has one (its notice).
         "review": _review_status(user_id, queue),
     }
 
@@ -1047,8 +1047,8 @@ def get_today_ahead(at: str = Query(..., description="comma-separated ISO instan
     # 回復運転 (plan 217): what the gate will hold is the day's share
     # under the learner's ceiling or catch-up -- today's what is left of
     # it, a later day's a whole one -- and no new card on a day the plan
-    # pauses them. Without a ceiling, a point whose reviews would open
-    # the gate on the comeback sheet says so (`comeback`), and the
+    # pauses them. Without a ceiling, a point whose reviews would put
+    # the comeback offer on the gate says so (`comeback`), and the
     # notification invites back rather than counting the backlog.
     plan = review_plan.read_plan(user_id)
     prefix = len(user_id) + 1

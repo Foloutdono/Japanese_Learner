@@ -96,7 +96,7 @@ export function planNudges({ ahead, time, t, kanaSetLabel, now, platform }) {
       // 回復運転 (plan 217): a backlog past a few days of the learner's
       // load, with no ceiling to share it out. Counting it would be the
       // last reason not to open the app: the notification invites back,
-      // and the gate opens on the comeback sheet.
+      // and the gate offers the paces (its comeback notice, plan 254).
       out.push({
         id: NUDGE_IDS[out.length],
         at,

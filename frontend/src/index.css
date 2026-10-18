@@ -8492,7 +8492,8 @@ textarea:focus-visible {
    in the state's ink before its figures -- a stop behind the level the
    checks say is not known, or a level already behind the learner. */
 .tdy-fit { flex: none; }
-.tdy-fit__ring {
+.tdy-fit__ring,
+.tdy-cb__ring {
   flex: none;
   width: 10px;
   height: 10px;
@@ -8500,6 +8501,49 @@ textarea:focus-visible {
   border-radius: var(--r-pill);
 }
 .tdy-fit--up .tdy-fit__ring { border-color: var(--success); }
+/* 運転再開 — the reviews piled up (plan 254, station/ComebackLine): the
+   run's row's shape and words, the ring in the due ink before the cards
+   that wait, and past a hairline at its end the ✕ that hides it for the
+   day. Two buttons in one row, so the row is a box of its own rather
+   than a door. It only ever stands on the print, so it is the door's
+   sumi glass there (below) and its panel inks, in both themes. */
+.tdy-cb {
+  flex: none;
+  display: flex;
+  min-height: 44px;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: color-mix(in srgb, var(--bg-panel) 82%, transparent);
+  font-size: var(--fs-sm);
+  color: var(--text-on-panel-soft);
+}
+.tdy-cb__open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 0 var(--sp-3) 0 var(--sp-4);
+  border-radius: inherit;
+  font: inherit;
+  text-align: left;
+}
+.tdy-cb__hide {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  padding: 0;
+  border-left: 1px solid var(--surface-line);
+  border-radius: inherit;
+  color: var(--text-on-panel-soft);
+}
+/* A thumb's 44px: the hit runs out over the row's own edge. */
+.tdy-cb__hide::before { content: ''; position: absolute; inset: -1px -1px -1px 0; }
+.tdy-cb__hide:hover,
+.tdy-cb__hide:focus-visible { filter: none; color: var(--text-on-panel); }
 
 /* ── The services: the sheet on a phone, the column on the desk ──
    No title over either choice (the owner's word): an option says what
@@ -33808,8 +33852,10 @@ button.brd-stn { cursor: pointer; }
     overflow-y: auto;
   }
   .tdy-desk__col > * { flex-shrink: 0; }
-  /* The level-fit row (plan 224) heads the column, the board under it. */
-  .tdy-desk__col > .tdy-fit { min-height: var(--sp-8); }
+  /* The comeback's row (plan 254) and the level-fit row (plan 224) head
+     the column, the board under them. */
+  .tdy-desk__col > .tdy-fit,
+  .tdy-desk__col > .tdy-cb { min-height: var(--sp-8); }
   .tdy-desk__panel {
     display: flex;
     flex-direction: column;

@@ -283,7 +283,7 @@ def settle(user_id: str, plan: Plan, owed: int) -> Plan:
 
 
 def comeback(user_id: str, plan: Plan, owed: int, load: float, days_away: int) -> dict | None:
-    """GET /api/today's `comeback`: the offer the gate opens on, or None.
+    """GET /api/today's `comeback`: the offer the gate's notice opens, or None.
     Offered when no catch-up runs, the reviews the gate would print are
     more than COMEBACK_LOADS days of the learner's load (and more than
     COMEBACK_FLOOR), and "all of them now" was not chosen in the last
