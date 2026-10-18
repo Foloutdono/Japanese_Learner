@@ -45,7 +45,7 @@ export function chars(slide, ctx) {
  *  where it has none to say (a kanji's readings, a set of lookalikes). */
 export function spokenLine(pl) {
   const jp = pl.caption?.jp || ''
-  if (pl.source === 'sentence' || pl.source === 'kana') return jp || null
+  if (pl.source === 'sentence' || pl.source === 'short' || pl.source === 'kana') return jp || null
   const reading = /（(.+?)）/.exec(jp)?.[1]
   if (reading) return reading
   const rows = pl.slides.find(s => s.rows?.length)?.rows || pl.slides.find(s => s.items?.[0]?.rows)?.items[0].rows

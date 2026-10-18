@@ -1341,7 +1341,7 @@ describe('the short formats (plan 233)', () => {
       // Counted as each draws in the studio and the renderer (a browser's measure); here a fixed count.
       const counts = slides.map(() => 40)
       const line = spokenLine(pl)
-      if (['sentence', 'word', 'kana', 'translation', 'lesson', 'theme'].includes(src.id)) expect(line, src.id).toMatch(/[ぁ-んァ-ン一-龯]/)
+      if (['sentence', 'short', 'word', 'kana', 'translation', 'lesson', 'theme'].includes(src.id)) expect(line, src.id).toMatch(/[ぁ-んァ-ン一-龯]/)
       if (line) expect(line, src.id).not.toMatch(/[（）a-z]/i)
       const tl = shortTimeline(slides, counts, line)
       expect(tl.segs).toHaveLength(slides.length)
