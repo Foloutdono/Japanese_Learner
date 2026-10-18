@@ -46,6 +46,7 @@ import content.kanji_pool_data as kanji_db
 from content.kanji_meanings import KANJI_FR
 from core.auth import get_user_id
 from core.db import db_conn
+from core.rls import enable_rls
 from core.srs_instance import srs
 from routes.dictionary import (
     _deck_kanji_result, _exact_vocab, _grammar_result, _kana_result,
@@ -85,6 +86,7 @@ def _ensure_schema() -> None:
                     PRIMARY KEY (user_id, kind, key)
                 )
             """)
+            enable_rls(cur, "dictionary_favorites")
         conn.commit()
     finally:
         conn.close()

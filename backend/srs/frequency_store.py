@@ -14,6 +14,8 @@ for cards/card_modes/review_log.
 import logging
 from typing import Any
 
+from core.rls import enable_rls
+
 from .storage import Storage
 
 logger = logging.getLogger(__name__)
@@ -43,6 +45,7 @@ class FrequencyOverrideStore:
             """
             self._log_sql("create_frequency_overrides_table", sql_table)
             cur.execute(sql_table)
+            enable_rls(cur, "frequency_overrides")
 
             sql_index = """
                 CREATE INDEX IF NOT EXISTS idx_frequency_overrides_user_domain

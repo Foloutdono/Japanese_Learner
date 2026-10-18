@@ -53,6 +53,7 @@ from core import daily_limit
 from core.auth import get_user_id
 from core.credits import require_pass, resets_at
 from core.db import db_conn
+from core.rls import enable_rls
 from core.srs_instance import srs
 from study import grammar_detect, tutor_review
 from study.grammar_examples import structure_text
@@ -107,6 +108,7 @@ def _init_db() -> None:
                 )
                 """
             )
+            enable_rls(cur, "composition_log")
             cur.execute(
                 """
                 CREATE INDEX IF NOT EXISTS idx_composition_log_user

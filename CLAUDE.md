@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **246**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **247**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -174,6 +174,15 @@ runtime purpose.
   `DELETE /api/account` (`routes/account.py`) in the same change.
 - **One table's self-migration per transaction.** A failing `ALTER` must not
   roll back another table's.
+- **A table is born closed to the Data API.** Supabase serves `public` to
+  the anon key, which ships in the bundle, and grants it every new table
+  there, so the transaction that creates a table closes it:
+  `core/rls.enable_rls(cur, table)` right after the CREATE, and an
+  `ALTER TABLE … ENABLE ROW LEVEL SECURITY` after its CREATE TABLE in
+  `srs/data_structure.sql` (`tests/test_rls.py`). No policy, never FORCE:
+  the backend reads as the tables' owner, which RLS leaves alone, and
+  nothing reads them through the Data API. A table made by hand in
+  `public` is closed by hand (`scripts/sql/close_data_api.sql`).
 - **The reading bank is held at its level from both sides.** A row of
   `content/reading_sentences.py` (which reading and translation share) has
   nothing above its level and, at N4–N1, two deck words of its own level

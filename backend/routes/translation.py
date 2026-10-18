@@ -7,6 +7,7 @@ from core.credits import require_pass, resets_at
 from pydantic import BaseModel, Field
 
 from core.db import db_conn
+from core.rls import enable_rls
 from core.auth import get_user_id
 import routes.reading as reading  # reused wholesale below — see get_translation_batch's docstring
 from study import tutor_review
@@ -55,6 +56,7 @@ def _init_db() -> None:
                 )
                 """
             )
+            enable_rls(cur, "translation_log")
             # The screen grades with the app's six-segment rating bar, so
             # the learner's answer carries more than pass/fail. `correct`
             # stays -- it is what every existing reader and every row

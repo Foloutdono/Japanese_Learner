@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { userEvent } from 'vitest/browser'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 
@@ -9,7 +10,9 @@ import { LangProvider } from '../LangContext'
 // Choose; both choices ride the address, replaced; a scene is a
 // platform card with its opening line as its specimen and the
 // learner's record at its end; a card boards the scene ridden the way
-// the band says. French copy: the lane's.
+// the band says; the console's field searches the grade, and a grade
+// with none of what was asked points to one that has it (plan 246).
+// French copy: the lane's.
 
 const apiJson = vi.fn()
 vi.mock('../lib/api', () => ({
@@ -116,6 +119,52 @@ describe('the conversation station', () => {
     const root = await station('/practice/conversation?level=N5&mode=translate')
     expect(titles(root)).toEqual(['Le déjeuner'])
     expect(root.querySelector('.console__band-opt--on').textContent).toBe('Traduire')
+  })
+
+  it('searches the grade, counts what it found, and clears', async () => {
+    const root = await station()
+    const field = root.querySelector('.console__field')
+    expect(field.getAttribute('aria-label')).toBe('Chercher une scène…')
+    // Nothing asked: no count to print.
+    expect(root.querySelector('.console__count')).toBeNull()
+    await userEvent.fill(field, 'CLINIQUE')
+    await settle(60)
+    expect(titles(root)).toEqual(['À la clinique'])
+    expect(root.querySelector('.console__count').textContent).toBe('1 scène')
+    root.querySelector('.console__clear').click()
+    await settle(60)
+    expect(titles(root)).toEqual(['À l’hôtel', 'À la clinique'])
+    expect(root.querySelector('.console__count')).toBeNull()
+    expect(document.activeElement).toBe(field)
+  })
+
+  it('points a search the grade cannot answer to the grade that can', async () => {
+    const root = await station()
+    await userEvent.fill(root.querySelector('.console__field'), 'déjeuner')
+    await settle(60)
+    expect(titles(root)).toEqual([])
+    expect(root.querySelector('.empty__msg').textContent).toBe('Aucune scène N4 ne correspond.')
+    expect(root.querySelector('.empty__hint').textContent).toBe('Il y en a en N5.')
+    const go = root.querySelector('.empty__action')
+    expect(go.textContent).toBe('Passer en N5')
+    go.click()
+    await settle(60)
+    expect(here.path).toBe('/practice/conversation?level=N5')
+    expect(titles(root)).toEqual(['Le déjeuner'])
+    // The query is kept: the learner is still asking it.
+    expect(root.querySelector('.console__field').value).toBe('déjeuner')
+  })
+
+  it('owns up to a search nothing answers, and takes it back', async () => {
+    const root = await station()
+    await userEvent.fill(root.querySelector('.console__field'), 'piscine')
+    await settle(60)
+    expect(root.querySelector('.empty__msg').textContent).toBe('Aucune scène ne correspond.')
+    expect(root.querySelector('.console__count').textContent).toBe('0 scènes')
+    root.querySelector('.empty__action').click()
+    await settle(60)
+    expect(root.querySelector('.console__field').value).toBe('')
+    expect(titles(root)).toEqual(['À l’hôtel', 'À la clinique'])
   })
 
   it('owns up to a list that did not come, and tries again', async () => {
