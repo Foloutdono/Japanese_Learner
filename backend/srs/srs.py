@@ -1009,6 +1009,10 @@ class SRSEngine:
         return self.award_xp(user_id, source, ref, xp)
 
     def get_due_cards(self, mode: str, limit: int | None = None, card_ids: list[str] | None = None) -> list[str]:
+        # An empty pool is no cards, never every learner's: only None
+        # means unscoped.
+        if card_ids is not None and not card_ids:
+            return []
         now = datetime.now(timezone.utc)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
@@ -1070,6 +1074,9 @@ class SRSEngine:
         today. (get_due_count was the other, and was deleted: it counted
         every user's due cards with no scoping at all.)
         """
+        # As in get_due_cards: an empty pool is no cards, not the table.
+        if card_ids is not None and not card_ids:
+            return []
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 if card_ids:
