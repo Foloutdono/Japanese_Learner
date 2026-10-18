@@ -22,10 +22,20 @@ import { OfferButton } from './OfferButton'
 // server refuses the run's first unpaid fare and never sees the rest,
 // so this sheet -- the one place that knows what the run left -- posts
 // it once per stop, for the week the offer draws (WeekOffer).
+// Mounted for the whole session (App.jsx) and drawn only at a run-out,
+// so what it reads is read only then: closed, a sheet asking for
+// /api/today and /api/credits at every boot put them in the learner's
+// six-at-a-time queue (core/concurrency.py) ahead of the screen's own
+// requests -- the first ride's cards among them (2026-10-18).
 export function RunOutSheet() {
+  const runOut = useRunOut()
+  if (!runOut) return null
+  return <RunOut runOut={runOut} />
+}
+
+function RunOut({ runOut }) {
   const { t } = useLang()
   const navigate = useNavigate()
-  const runOut = useRunOut()
   const credits = useCredits()
   const today = useTodaySummary().data
   const cleared = runOut?.cleared ?? 0
@@ -36,7 +46,6 @@ export function RunOutSheet() {
     recorded.current = runOut
     recordStop(waiting)
   }, [runOut, waiting])
-  if (!runOut) return null
 
   function leave() {
     clearRunOut()

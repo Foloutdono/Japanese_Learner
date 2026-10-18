@@ -28,10 +28,18 @@ name, which never leaves the device.
 ── The offer (plan 243b) ─────────────────────────────────────
 Once, on Today, a new learner is asked whether they studied elsewhere
 (the sheet frontend/src/components/station/TransferSheet.jsx draws).
-`offer_open` decides who is asked: the first ride behind them, nothing
-studied before the last NEW_DAYS days, and never asked before
+`offer_open` decides who is asked: the first ride behind them, a first
+answer given (a card or an exercise), nothing studied before the last
+NEW_DAYS days, and never asked before
 (user_profiles.transfer_offered_at, which an import stamps too, so a
 learner who came through Settings is not asked after the fact).
+
+Not before the first answer: asked straight after the ride, a learner
+who had studied nowhere else read its first button, « Reprendre ma
+progression », as the way on, landed on Settings › Correspondance with
+nothing to bring and left without having answered one card (the trail
+of 2026-10-18). Their first card is the day's gate; the question waits
+until they come back from it.
 """
 import logging
 from datetime import datetime, timedelta, timezone
@@ -184,7 +192,7 @@ def offer_open(user_id: str, tutorial_at) -> bool:
     if row is None or row[0] is not None:
         return False
     first = srs.first_studied_day(user_id)
-    return first is None or first >= datetime.now(timezone.utc).date() - timedelta(days=NEW_DAYS)
+    return first is not None and first >= datetime.now(timezone.utc).date() - timedelta(days=NEW_DAYS)
 
 
 @router.post("/api/transfer/preview")

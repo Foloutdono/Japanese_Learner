@@ -36,8 +36,9 @@ const { default: Welcome } = await import('./components/boarding/Welcome')
 const settle = (ms = 340) => new Promise(r => setTimeout(r, ms))
 const rect = el => el.getBoundingClientRect()
 async function click(root, sel) {
+  // The next screen comes a frame after the tap (a transition, go()).
+  await vi.waitFor(() => expect(root.querySelector(sel), sel).toBeTruthy(), { timeout: 2000 })
   const el = root.querySelector(sel)
-  expect(el, sel).toBeTruthy()
   el.click()
   await settle(20)
 }
@@ -67,18 +68,26 @@ const live = root => root.querySelector('.brd__car:not(.brd__car--out)')
 const sheet = () => document.querySelector('.brd-sheet')
 
 // A reader's line to the level, where the gate waits for a pick.
+// On `step`, the pull over: the leaving car is dropped once it has left
+// (BoardingFlow's PULL_MS), and the next screen starts a frame after the
+// tap (a transition), so a fixed wait can measure the car mid-pull.
+async function arrived(screen, step) {
+  await vi.waitFor(() => {
+    expect(screen.container.querySelector('.brd').dataset.step).toBe(step)
+    expect(screen.container.querySelector('.brd__car--out')).toBeNull()
+  }, { timeout: 3000 })
+}
+
 async function toLevel(screen) {
   await click(screen.container, '[data-kana="both"]')
-  await settle()
-  expect(screen.container.querySelector('.brd').dataset.step).toBe('level')
+  await arrived(screen, 'level')
 }
 
 async function toCard(screen) {
   await click(screen.container, '[data-kana="none"]')
   await settle()
   await click(screen.container, '[data-action="continue"]')
-  await settle()
-  expect(screen.container.querySelector('.brd').dataset.step).toBe('card')
+  await arrived(screen, 'card')
 }
 
 describe('the boarding at 390×844', () => {
