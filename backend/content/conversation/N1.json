@@ -1109,10 +1109,10 @@
             }
           },
           {
-            "jp": "申し訳ございませんが、上司は多忙のため、金曜日も私一人で伺います。",
-            "kana": "もうしわけございませんが、じょうしはたぼうのため、きんようびもわたしひとりでうかがいます。",
-            "en": "I am sorry, but my manager is very busy, so on Friday too I will come alone.",
-            "fr": "Je vous prie de m'excuser, mais mon supérieur est très pris : vendredi aussi, je viendrai sans lui.",
+            "jp": "いえ、上司は多忙のため、金曜日も私一人で伺います。",
+            "kana": "いえ、じょうしはたぼうのため、きんようびもわたしひとりでうかがいます。",
+            "en": "No, my manager is very busy, so on Friday too I will come alone.",
+            "fr": "Non, mon supérieur est très pris : vendredi aussi, je viendrai sans lui.",
             "why": {
               "en": "「上司は多忙のため」 tells a wronged client your manager has better things to do, and turns down a fair request.",
               "fr": "「上司は多忙のため」 fait savoir à un client lésé que ton supérieur a mieux à faire, et refuse une demande légitime."
@@ -2109,8 +2109,8 @@
             }
           },
           {
-            "jp": "では、手術をしないで様子を見ていた場合は、どうなりましたか。",
-            "kana": "では、しゅじゅつをしないでようすをみていたばあいは、どうなりましたか。",
+            "jp": "では、私が手術をしないで様子を見ていた場合は、どうなりましたか。",
+            "kana": "では、わたしがしゅじゅつをしないでようすをみていたばあいは、どうなりましたか。",
             "en": "Then what happened when I didn't have the operation and we kept an eye on it?",
             "fr": "Et quand je ne me suis pas fait opérer et qu'on a surveillé, que s'est-il passé ?",
             "why": {
@@ -2559,8 +2559,8 @@
     "place": {"jp": "商談室", "kana": "しょうだんしつ", "en": "Negotiation room", "fr": "Salle de négociation"},
     "title": {"en": "Facing a price rise", "fr": "Face à une hausse de prix"},
     "situation": {
-      "en": "The account manager of one of your suppliers has come to your company about next year's terms. This time it is the supplier who wants the price to move, and upwards.",
-      "fr": "Le commercial d'un de tes fournisseurs est venu dans ton entreprise pour parler des conditions de l'an prochain. Cette fois, c'est le fournisseur qui veut faire bouger le prix, et à la hausse."
+      "en": "The account manager of one of your suppliers has come to your company about next year's terms. Here it is the supplier who wants the price to move, and upwards.",
+      "fr": "Le commercial d'un de tes fournisseurs est venu dans ton entreprise pour parler des conditions de l'an prochain. Ici, c'est le fournisseur qui veut faire bouger le prix, et à la hausse."
     },
     "goal": {
       "en": "Ask the supplier what lies behind a twelve percent rise from April, press for a rise in stages, offer a volume commitment in return, and take the proposal back to your company.",
@@ -2754,8 +2754,8 @@
       },
       {
         "them": {
-          "jp": "なるほど。数量のお約束をいただけるのでしたら、二段階の改定で、社内を説得してみます。そちらでもご検討いただけますか。",
-          "kana": "なるほど。すうりょうのおやくそくをいただけるのでしたら、にだんかいのかいていで、しゃないをせっとくしてみます。そちらでもごけんとういただけますか。",
+          "jp": "なるほど。数量のお約束をいただけるのでしたら、二段階の改定で、社内を説得してみます。御社でもご検討いただけますか。",
+          "kana": "なるほど。すうりょうのおやくそくをいただけるのでしたら、にだんかいのかいていで、しゃないをせっとくしてみます。おんしゃでもごけんとういただけますか。",
           "en": "I see. If you can commit to the volume, I'll try to win my company round to a rise in two stages. Could you consider it on your side too?",
           "fr": "Je vois. Si vous vous engagez sur les volumes, je vais essayer de convaincre ma direction d'une hausse en deux temps. Pourriez-vous l'étudier de votre côté aussi ?"
         },
@@ -2775,13 +2775,13 @@
         },
         "wrong": [
           {
-            "jp": "承知いたしました。上の方とよく協議して、今月中にお返事いたします。",
-            "kana": "しょうちいたしました。うえのかたとよくきょうぎして、こんげつちゅうにおへんじいたします。",
+            "jp": "承知いたしました。上の方々とよく協議して、今月中にお返事いたします。",
+            "kana": "しょうちいたしました。うえのかたがたとよくきょうぎして、こんげつちゅうにおへんじいたします。",
             "en": "Certainly. I will discuss it carefully with my honourable superiors and give you an answer within the month.",
             "fr": "Entendu. J'en discute sérieusement avec mes honorables supérieurs et je vous donne une réponse dans le courant du mois.",
             "why": {
-              "en": "「上の方」 honours your own superiors before an outsider; before a supplier they are 「上の者」.",
-              "fr": "「上の方」 honore ta propre hiérarchie devant un tiers ; devant un fournisseur, ce sont 「上の者」."
+              "en": "「上の方々」 honours your own superiors before an outsider; before a supplier they are 「上の者」.",
+              "fr": "「上の方々」 honore ta propre hiérarchie devant un tiers ; devant un fournisseur, ce sont 「上の者」."
             }
           },
           {
@@ -3622,10 +3622,10 @@
             }
           },
           {
-            "jp": "はい、いいよ。じゃあ、来週までに出しとくね。",
-            "kana": "はい、いいよ。じゃあ、らいしゅうまでにだしとくね。",
-            "en": "Yeah, fine. I'll get it to you by next week, then.",
-            "fr": "Ouais, ça marche. Je te rends ça d'ici la semaine prochaine.",
+            "jp": "うん、いいよ。じゃあ、来週までにシートにまとめて出しとくね。",
+            "kana": "うん、いいよ。じゃあ、らいしゅうまでにシートにまとめてだしとくね。",
+            "en": "Yeah, fine. I'll put it in the sheet and get it to you by next week, then.",
+            "fr": "Ouais, ça marche. Je mets ça sur la fiche et je te la rends d'ici la semaine prochaine.",
             "why": {
               "en": "「いいよ」 and 「出しとくね」 are how you talk to a friend; in your review, to your manager, they break the formal register.",
               "fr": "「いいよ」 et 「出しとくね」, c'est le ton entre amis ; en entretien, face à ton chef, cela rompt le registre soutenu."
@@ -4240,13 +4240,13 @@
             }
           },
           {
-            "jp": "そのような誘導尋問には、広報としてお答えいたしかねます。",
-            "kana": "そのようなゆうどうじんもんには、こうほうとしておこたえいたしかねます。",
-            "en": "As the press office, I will not answer leading questions like that.",
-            "fr": "Au nom du service de presse, je ne répondrai pas à ce genre de question orientée.",
+            "jp": "さあ、どうでしょうか。その辺りは、ご想像にお任せいたします。",
+            "kana": "さあ、どうでしょうか。そのあたりは、ごそうぞうにおまかせいたします。",
+            "en": "Well, who can say? I'll leave that to your imagination.",
+            "fr": "Eh bien, qui sait ? Je laisse ce point à votre imagination.",
             "why": {
-              "en": "「誘導尋問」 accuses the reporter of trying to trap you, when the refusal is meant to stay courteous.",
-              "fr": "「誘導尋問」 accuse le journaliste de te tendre un piège, alors que le refus doit rester courtois."
+              "en": "「ご想像にお任せいたします」 is the coy non-answer that hints at a yes and lets the reporter print his guess; a press officer declines neutrally.",
+              "fr": "「ご想像にお任せいたします」 est la non-réponse malicieuse qui laisse entendre un oui et permet au journaliste de publier sa supposition ; un chargé de presse refuse de façon neutre."
             }
           }
         ]
