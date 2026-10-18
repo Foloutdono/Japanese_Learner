@@ -624,10 +624,12 @@ export function timeline(plan, dur = null) {
   // A reply video's stations are its questions, not its scenes (plan 249).
   const of = plan.kind === 'reply' ? replies(plan) : plan.items.length
   const short = plan.format === 'short'
-  chapters.push({ at: 0, title: S.chapters.intro })
   fx(0.3, 'board-flap')
   // A reply short opens on its scene, which asks the question (plan 249b).
-  if (!(short && plan.kind === 'reply')) seg('intro', short ? 2.5 : 5.5, {})
+  if (!(short && plan.kind === 'reply')) {
+    chapters.push({ at: 0, title: S.chapters.intro })
+    seg('intro', short ? 2.5 : 5.5, {})
+  }
   plan.items.forEach((it, i) => {
     const start = at
     // A scene stands at the question it opens.
