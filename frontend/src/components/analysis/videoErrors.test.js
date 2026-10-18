@@ -16,6 +16,8 @@ const DOOR = {
   link_allowance_mine: 'videoLinkAllowanceMine',
   link_allowance_app: 'videoLinkAllowanceApp',
   file_too_large: 'subtitleTooLarge',
+  transcript_too_long: 'transcriptTooLong',
+  session_preparing: 'videoStillPreparing',
   not_utf8: 'subtitleNotUtf8',
   end_before_start: 'windowBackwards',
 }

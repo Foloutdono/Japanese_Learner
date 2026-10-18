@@ -21,6 +21,8 @@ const NAMED = {
   link_allowance_mine: t => t.videoLinkAllowanceMine,
   link_allowance_app: t => t.videoLinkAllowanceApp,
   file_too_large: t => t.subtitleTooLarge,
+  transcript_too_long: t => t.transcriptTooLong,
+  session_preparing: t => t.videoStillPreparing,
   not_utf8: t => t.subtitleNotUtf8,
   end_before_start: t => t.windowBackwards,
   // In the worker: the link's road.

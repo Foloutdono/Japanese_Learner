@@ -940,3 +940,45 @@ def test_a_session_built_by_an_older_analysis_is_read_again(client):
         conn.close()
     assert stored[0]["local_rev"] == video_module.LOCAL_REV
     assert stored[0]["grammar"]
+
+
+# ── Refusals the client words, and a worker that cannot strand a session ──
+
+def test_a_text_field_named_file_is_refused_not_a_500(client):
+    response = client.post("/api/video/session", data={"file": "not a file"}, files={"x": ("x.txt", b"")})
+    assert response.status_code == 400
+    assert response.json()["detail"]["code"] == "file_required"
+
+
+def test_a_transcript_too_long_is_named(client, monkeypatch):
+    monkeypatch.setattr(video_module, "_MAX_UPLOAD_BYTES", 10)
+    response = client.post("/api/video/session", json={"transcript": "0:01 私は学生です。" * 5})
+    assert response.status_code == 413
+    assert response.json()["detail"]["code"] == "transcript_too_long"
+
+
+def test_the_preparing_cap_is_named(client, monkeypatch):
+    monkeypatch.setattr(video_module, "_MAX_PREPARING_PER_USER", 0)
+    response = client.post(
+        "/api/video/session", files={"file": ("a.srt", _SRT, "application/x-subrip")},
+    )
+    assert response.status_code == 429
+    assert response.json()["detail"]["code"] == "session_preparing"
+
+
+def test_a_failure_after_the_track_is_read_fails_the_session(client, monkeypatch):
+    """Past the parse, an exception used to leave the session generating
+    and its job running until the stale cutoff."""
+    def _boom(*args, **kwargs):
+        raise RuntimeError("driver repr that must not reach the learner")
+
+    monkeypatch.setattr(video_module, "sentences_from_cues", _boom)
+    response = client.post(
+        "/api/video/session", files={"file": ("a.srt", _SRT, "application/x-subrip")},
+    )
+    assert response.status_code == 202
+    settled = _poll_until_settled(client, response.json()["sessionId"])
+    assert settled.status_code == 503
+    body = settled.json()
+    assert body["code"] == "transcript_failed"
+    assert "driver repr" not in body["error"]
