@@ -2,6 +2,10 @@ import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
+// The shipped face (main.jsx), so a platform's name is measured in the
+// font it is drawn in: CI's fallback (DejaVu Sans) sets « Entraînement
+// à la lecture » wider than Space Grotesk does.
+import '@fontsource/space-grotesk/latin-700.css'
 import '../index.css'
 
 // ── 実践 — the gate's platforms, at 390px (plan 254) ──────────────
@@ -65,7 +69,10 @@ const PLATFORMS = SECTIONS.length
 
 // Long enough for the shared `arrive` to land: it starts the plate
 // 10px low, and everything below measures against the page's foot.
-const settle = (ms = 620) => new Promise(r => setTimeout(r, ms))
+const settle = async (ms = 620) => {
+  await new Promise(r => setTimeout(r, ms))
+  await document.fonts.ready
+}
 
 async function gate() {
   forgetPracticeRecord()
