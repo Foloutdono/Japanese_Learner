@@ -140,7 +140,7 @@ if (args.challenge) {
   if (dur && !dur.ok && !args.unvoiced) throw new Error('the voice engine did not voice every line (VOICEVOX_URL): start it, or pass --unvoiced')
   tl = challengeTimeline(plan, dur ? c => (dur(c) ? { dur: dur(c), marks: dur.marks(c) } : null) : null)
   SIZE = TALL
-  slug = ['challenge', plan.id, plan.style, plan.hour, lang].join('-')
+  slug = ['challenge', plan.id, plan.style, plan.hour, lang, ...(plan.music ? [] : ['nomusic'])].join('-')
   await fontsFor(glyphs(plan))
   await canvasOf(SIZE)
   await page.evaluate(async ({ plan, tl }) => {

@@ -917,7 +917,7 @@ credit is written into the description of every video it plays under
 (`challengePage`; keep it there when posting). The owner can put a
 track of their own in its place in the studio, under "Music", or give
 it to the command (`--music FILE`, any format ffmpeg reads), or take
-the music away (`Remove`, `--music none`). The track is looped to the
+the music away (`Remove`, `--music none`, the file named `…-nomusic`). The track is looped to the
 video's length if it is shorter, faded in and out over 2.5 s and, under
 the voice, held some 12 dB below it (`long_video_audio mix --bed`).
 Without one the video has only the board's flap on the hook, the clicks
