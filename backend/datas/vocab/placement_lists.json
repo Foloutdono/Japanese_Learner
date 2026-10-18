@@ -3440,12 +3440,6 @@
  ],
  "listed_not_here": [
   {
-   "expression": "そして",
-   "reading": "そして",
-   "level": "N3",
-   "rank": 88
-  },
-  {
    "expression": "パパ",
    "reading": "パパ",
    "level": "N4",
@@ -3468,12 +3462,6 @@
    "reading": "もしもし",
    "level": "N5",
    "rank": 538
-  },
-  {
-   "expression": "取引",
-   "reading": "とりひき",
-   "level": "N1",
-   "rank": 547
   },
   {
    "expression": "我",
@@ -3566,12 +3554,6 @@
    "rank": 1459
   },
   {
-   "expression": "追いかける",
-   "reading": "おいかける",
-   "level": "N2",
-   "rank": 1531
-  },
-  {
    "expression": "自ら",
    "reading": "みずから",
    "level": "N2",
@@ -3618,12 +3600,6 @@
    "reading": "ただいま",
    "level": "N2",
    "rank": 2712
-  },
-  {
-   "expression": "とりあえず",
-   "reading": "とりあえず",
-   "level": "N1",
-   "rank": 2729
   },
   {
    "expression": "並",

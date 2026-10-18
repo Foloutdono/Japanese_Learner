@@ -413,7 +413,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # (plan 236): 「…」と博 is と and the name 博, no と博 (賭博, "gambling");
 # and a name takes no pool row read otherwise (博 read ひろし is no 博
 # read はく, "doctor").
-LOCAL_REV = 16
+# 17: the content audit's second placement run (#360) -- そして, 取引,
+# 追いかける and とりあえず reach their cards, which wrote them 然して (at
+# N1), 取り引き, 追い掛ける and 取りあえず before.
+LOCAL_REV = 17
 
 
 def analyze_local(text: str, level: str | None = None) -> dict:
