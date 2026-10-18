@@ -682,7 +682,8 @@ async function renderLong(mine) {
   name.append(jp, ` ${pl.title}`)
   const n = document.createElement('span')
   n.className = 'deck__count'
-  n.textContent = `about ${clock(tl.seconds)} · ${pl.items.length} stations · ${short ? '9:16 short' : '16:9'}`
+  // A reply video's stations are its questions (plan 249).
+  n.textContent = `about ${clock(tl.seconds)} · ${pl.kind === 'reply' ? `${tl.of} questions` : `${tl.of} stations`} · ${short ? '9:16 short' : '16:9'}`
   head.append(name, n)
   const screen = document.createElement('div')
   screen.className = 'player'

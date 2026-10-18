@@ -65,6 +65,9 @@ group('Long video', ['long'], [
   { key: 'long.pause', label: 'Pauses', unit: '×', def: 1, min: 0.5, max: 2, step: 0.05, hint: 'thinking time and the silences between lines' },
   { key: 'long.count', label: 'Quiz countdown', unit: 's', def: 5, min: 3, max: 10, step: 1 },
 ])
+group('Reply video', ['long'], [
+  { key: 'reply.count', label: 'Time to reply', unit: 's', def: 7, min: 3, max: 15, step: 1, hint: 'the timer on each question, once the three replies are up (plan 249)' },
+])
 group('Export', [SLIDES, 'promo', 'echo', 'challenge'], [
   { key: 'export.mbps', label: 'Video quality', unit: 'Mb/s', def: 8, min: 4, max: 20, step: 1, hint: 'at thirty frames a second; doubled at sixty' },
   { key: 'export.audio', label: 'Sound quality', unit: 'kb/s', def: 160, min: 96, max: 256, step: 32 },

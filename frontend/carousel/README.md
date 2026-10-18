@@ -1,4 +1,4 @@
-# The carousel studio (plans 229–229n, 231–235, 237, 247, 248)
+# The carousel studio (plans 229–229n, 231–235, 237, 247–249)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -681,8 +681,9 @@ own sounds (`key`).
 ## The long videos (plan 233)
 
 Ten-minute 16:9 videos for YouTube (`long.js`, made by
-`long/render.mjs`), four kinds: a vocabulary drill, a kanji drill, one
-grammar point explained whole, and a quiz. The owner picked the look
+`long/render.mjs`), five kinds: a vocabulary drill, a kanji drill, one
+grammar point explained whole, a quiz, and (plan 249) conversations to
+answer. The owner picked the look
 from two drawn directions, "platform board": the sumi ground, the app's
 card in the middle, the line of stations along the foot, one station a
 word, a kanji, a section or a question, the line's pigment the kind's
@@ -706,6 +707,24 @@ the screen.
   ring, then the answer, why, and its sentence said; a kanji asked in a
   word only in a word of the level or easier. A score check every ten,
   40 a part.
+
+- **Reply** (返事, plan 249): the studio's conversations
+  (`content/dialogues.json`), two to a video, so six questions at
+  least (a level's odd one rides with the part before it: N4's last
+  has nine). A scene's card (its place, said, and who speaks to you),
+  then each turn: their line in a bubble, said by speaker A, with its
+  readings, its romaji at N5 and N4, and what it means; the three
+  replies, numbered, in the carousel's own order; a timer of seven
+  seconds on a ring, a tick a second (`reply.count` in the Tune
+  panel); the right one lit and said by speaker B; then yours in a
+  bubble of its own, what it means, and why the others are wrong. It
+  ends asking the viewer's score (? / 6). Standing, one column; wide,
+  their line and the timer on the left, the replies on the right. Its
+  short keeps its six questions past the minute, as Shorts, Reels and
+  TikTok allow, under three minutes (Shorts' limit) where it can: a
+  last whole conversation is let go before a question is (`fitShort`).
+  Speaker A is the app's woman's voice and B its man's, as the 会話
+  station and the tours set them.
 
 **Pick per video.** A level's `--part` walks the deck in its order (a
 quiz's part is a seeded deal), and two parts never share an item;

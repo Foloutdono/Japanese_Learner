@@ -22,7 +22,7 @@
 // the same, so the renderer (long/render.mjs) draws each still once.
 import { alpha, drawSentence, fit, font, formatOf, hasKanji, layoutSentence, mark, measure, palette, paragraphH, rrect, text } from './draw.js'
 import { weldIf } from './strings.js'
-import { gloss, unpack } from './common.js'
+import { deal, gloss, unpack } from './common.js'
 import { plan as sourcePlan, itemsOf } from './sources.js'
 import { particleLabel } from './explain.js'
 import * as A from './app.js'
@@ -38,9 +38,10 @@ export const SHORT = { vocab: 6, kanji: 4, quiz: 3, seconds: 59 }
 // reads the disk and cannot load in the studio (a test holds the two equal).
 export const LONG_SITE = 'https://tsuji.app'
 export const FPS = 30
-export const KINDS = ['vocab', 'kanji', 'grammar', 'quiz']
-// A part of a drill or a quiz: about ten minutes each (timeline's pace).
-export const PART = { vocab: 48, kanji: 36, quiz: 40 }
+export const KINDS = ['vocab', 'kanji', 'grammar', 'quiz', 'reply']
+// A part of a drill or a quiz: about ten minutes each (timeline's pace);
+// a reply video's, two conversations: six questions (plan 249).
+export const PART = { vocab: 48, kanji: 36, quiz: 40, reply: 2 }
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
 const SAY = {
@@ -51,19 +52,22 @@ const SAY = {
       kanji: (lv, part) => `JLPT ${lv} kanji${part ? ` · part ${part}` : ''}`,
       grammar: (lv, p) => `JLPT ${lv} grammar · ${p}`,
       quiz: (lv, part) => `JLPT ${lv} quiz${part ? ` · part ${part}` : ''}`,
+      reply: (lv, part) => `JLPT ${lv} conversations${part ? ` · part ${part}` : ''}`,
     },
-    count: { vocab: n => `${n} words`, kanji: n => `${n} kanji`, quiz: n => `${n} questions` },
+    count: { vocab: n => `${n} words`, kanji: n => `${n} kanji`, quiz: n => `${n} questions`, reply: n => `${n} questions` },
     hook: {
       vocab: 'Read each word before it is revealed.',
       kanji: 'Watch the strokes, then read it.',
       grammar: 'One grammar point, from the start.',
       quiz: 'Five seconds a question. Keep score!',
+      reply: 'Someone speaks to you. Pick your reply before the timer ends.',
     },
     how: {
       vocab: 'Say it out loud, then listen.',
       kanji: 'Every reading is said aloud.',
       grammar: 'Every sentence is said aloud.',
       quiz: 'Every answer is explained.',
+      reply: 'Every line is said aloud.',
     },
     readIt: 'Read it…', on: 'ON', kun: 'KUN', strokes: n => `${n} stroke${n > 1 ? 's' : ''}`,
     rule: 'What it does', use: 'How it is used', example: 'Example', careful: 'Watch out', compare: 'Don’t mix it up', twist: 'A twist', scene: 'In a conversation', quizHead: 'Your turn', recap: 'Recap',
@@ -73,6 +77,8 @@ const SAY = {
     chapters: { intro: 'Intro', outro: 'Keep going', score: 'Score check', final: 'Your score' },
     voices: 'Voices: VOICEVOX Nemo.',
     study: 'Study with Tsuji:',
+    // A reply video (plan 249).
+    replyAsk: 'Your reply?', you: 'You', sceneHead: 'A new scene', speaks: who => `Speaking to you: ${who}`,
   },
   fr: {
     title: {
@@ -81,19 +87,22 @@ const SAY = {
       kanji: (lv, part) => `Kanji JLPT ${lv}${part ? ` · partie ${part}` : ''}`,
       grammar: (lv, p) => `Grammaire JLPT ${lv} · ${p}`,
       quiz: (lv, part) => `Quiz JLPT ${lv}${part ? ` · partie ${part}` : ''}`,
+      reply: (lv, part) => `Conversations JLPT ${lv}${part ? ` · partie ${part}` : ''}`,
     },
-    count: { vocab: n => `${n} mots`, kanji: n => `${n} kanji`, quiz: n => `${n} questions` },
+    count: { vocab: n => `${n} mots`, kanji: n => `${n} kanji`, quiz: n => `${n} questions`, reply: n => `${n} questions` },
     hook: {
       vocab: 'Lis chaque mot avant qu’il soit révélé.',
       kanji: 'Regarde les traits, puis lis-le.',
       grammar: 'Un point de grammaire, depuis le début.',
       quiz: 'Cinq secondes par question. Compte tes points !',
+      reply: 'On te parle. Choisis ta réponse avant la fin du chrono.',
     },
     how: {
       vocab: 'Dis-le à voix haute, puis écoute.',
       kanji: 'Chaque lecture est dite à voix haute.',
       grammar: 'Chaque phrase est dite à voix haute.',
       quiz: 'Chaque réponse est expliquée.',
+      reply: 'Chaque réplique est dite à voix haute.',
     },
     readIt: 'Lis-le…', on: 'ON', kun: 'KUN', strokes: n => `${n} trait${n > 1 ? 's' : ''}`,
     rule: 'Ce qu’il fait', use: 'Comment l’employer', example: 'Exemple', careful: 'Attention', compare: 'À ne pas confondre', twist: 'Une variante', scene: 'En conversation', quizHead: 'À toi', recap: 'Récap',
@@ -103,11 +112,12 @@ const SAY = {
     chapters: { intro: 'Intro', outro: 'La suite', score: 'Point d’étape', final: 'Ton score' },
     voices: 'Voix : VOICEVOX Nemo.',
     study: 'Apprendre avec Tsuji :',
+    replyAsk: 'Ta réponse ?', you: 'Toi', sceneHead: 'Nouvelle scène', speaks: who => `Te parle : ${who}`,
   },
 }
 export const LONG_SAY = SAY
 
-const LINE = { vocab: 'vocab', kanji: 'kanji', grammar: 'grammar', quiz: 'exam' }
+const LINE = { vocab: 'vocab', kanji: 'kanji', grammar: 'grammar', quiz: 'exam', reply: 'kaiwa' }
 
 // A seeded shuffle, so a video is the same each time it is made.
 function seeded(str) {
@@ -161,8 +171,21 @@ function shorten(pl) {
   return out
 }
 
-/** A short under its minute: its last items let go until it fits. */
+/** A short under its minute: its last items let go until it fits. A
+ *  reply video keeps six questions at least, past the minute, as Shorts,
+ *  Reels and TikTok now allow; under three minutes (Shorts' limit) it
+ *  lets a last whole conversation go, never a question of one (plan 249). */
+export const REPLY_SHORT = 179
 export function fitShort(plan, dur = null, seconds = SHORT.seconds) {
+  if (plan.kind === 'reply') {
+    let pl = plan
+    while (timeline(pl, dur).seconds > REPLY_SHORT) {
+      const cut = pl.items.findLastIndex(x => x.type === 'scene')
+      if (pl.items.slice(0, cut).filter(x => x.type === 'reply').length < 6) break
+      pl = { ...pl, items: pl.items.slice(0, cut) }
+    }
+    return pl
+  }
   let pl = plan
   while (pl.items.length > 1 && timeline(pl, dur).seconds > seconds) pl = { ...pl, items: pl.items.slice(0, -1) }
   return pl
@@ -207,17 +230,60 @@ function planOf(kind, banks, { lang = 'en', level = 'N5', part = 1, theme = null
     const qs = quizDeal(banks, level, lang, opts, ids ? null : part, n, ids)
     return { ...base, title: S.title.quiz(level, ids ? 0 : part), items: qs.map(q => ({ type: 'q', q })) }
   }
+  if (kind === 'reply') {
+    const all = (banks['dialogues.json']?.dialogues || []).filter(d => d.lv === level)
+    const ds = ids ? ids.map(id => all.find(d => d.id === id)).filter(Boolean) : replyParts(all)[part - 1] || []
+    return { ...base, title: S.title.reply(level, ids ? 0 : part), items: ds.flatMap(d => replyItems(d, lang)) }
+  }
   throw new Error(`no long video of kind ${kind}`)
 }
+
+// ── 返事 — what would you answer? (plan 249) ─────────────────────
+// A reply video deals the studio's conversations (content/dialogues.json):
+// the other person's line said, three replies, a timer, then yours said
+// and why the others are wrong. Two conversations a video, six questions.
+
+/** A level's conversations in parts of two; a last part under six
+ *  questions rides with the one before it, so no video asks fewer. */
+export function replyParts(all) {
+  const out = []
+  for (let i = 0; i < all.length; i += PART.reply) out.push(all.slice(i, i + PART.reply))
+  const asks = ds => ds.reduce((n, d) => n + d.turns.length, 0)
+  if (out.length > 1 && asks(out.at(-1)) < 6) out.at(-2).push(...out.pop())
+  return out
+}
+
+/** A conversation as a video's items: its scene, then a question a turn,
+ *  the replies dealt in the carousel's own order (sources.dialoguePlan). */
+function replyItems(d, lang) {
+  const tr = o => weldIf(lang, o?.[lang] || o?.en || '')
+  const place = { jp: d.place.jp, tr: tr(d.place) }
+  const who = tr(d.them)
+  // Romaji under a beginner's replies (N5, N4), as the carousel sets them.
+  const romaji = ['N5', 'N4'].includes(d.lv)
+  return [
+    { type: 'scene', id: d.id, place, who, asks: d.turns.length },
+    ...d.turns.map((tu, i) => {
+      const dealt = deal(tu.right, tu.choices.map((_, k) => k).filter(k => k !== tu.right), `${d.id}-${i}`)
+      return {
+        type: 'reply', id: d.id, k: i + 1, place, who, romaji,
+        them: { rows: unpack(tu.them.rows), tr: tr(tu.them) },
+        choices: dealt.choices.map(k => unpack(tu.choices[k])), right: dealt.right,
+        reply: tr(tu.reply), why: tr(tu.why),
+      }
+    }),
+  ]
+}
+const replies = plan => plan.items.filter(x => x.type === 'reply').length
 
 // ── The studio's list (plan 233) ─────────────────────────────────
 // The carousel studio offers the long videos as one of its sources: at a
 // level, every video it can make, by an id the render command takes.
 const QUIZ_SHARE = { sentence: 0.5, word: 0.3, kanji: 0.25 }
-const LIST_KIND = { vocab: '語彙', kanji: '漢字', quiz: '試験', grammar: '文法', theme: '主題' }
+const LIST_KIND = { vocab: '語彙', kanji: '漢字', quiz: '試験', grammar: '文法', theme: '主題', reply: '返事' }
 
 /** The bank files a level's list reads. */
-export const longListFiles = level => [`words-${level}.json`, `kanji-${level}.json`, `${level}.json`, `grammar-${level}.json`, 'themes.json']
+export const longListFiles = level => [`words-${level}.json`, `kanji-${level}.json`, `${level}.json`, `grammar-${level}.json`, 'themes.json', 'dialogues.json']
 
 /** The videos a level can make: its vocabulary and kanji parts, its
  *  quiz's parts, each grammar point, each theme. */
@@ -243,6 +309,10 @@ export function longItems(banks, level, lang = 'en') {
   )
   for (let p = 1; p <= quizParts; p++) out.push({ id: `quiz:${p}`, kind: 'quiz', jp: `${LIST_KIND.quiz} ${p}`, sub: S.title.quiz(level, p), tag: S.count.quiz(PART.quiz) })
   for (const L of banks[`grammar-${level}.json`]?.lessons || []) out.push({ id: `grammar:${L.p}`, kind: 'grammar', jp: L.p, sub: weldIf(lang, L[lang] || L.en), tag: LIST_KIND.grammar })
+  // The level's conversations, two a video (plan 249).
+  replyParts((banks['dialogues.json']?.dialogues || []).filter(d => d.lv === level)).forEach((ds, i) => {
+    out.push({ id: `reply:${i + 1}`, kind: 'reply', jp: `${LIST_KIND.reply} ${i + 1}`, sub: ds.map(d => d.place.jp).join('、'), tag: S.count.reply(ds.reduce((n, d) => n + d.turns.length, 0)) })
+  })
   for (const [key, th] of Object.entries(banks['themes.json']?.themes || {})) {
     out.push({ id: `theme:${key}`, kind: 'theme', jp: th.head?.t || key, sub: th.name?.[lang] || th.name?.en || key, tag: S.count.vocab(th.words.length) })
   }
@@ -256,7 +326,7 @@ export function longPick(id, level, lang = 'en', format = 'long') {
   if (kind === 'theme') return { kind: 'vocab', opts: { lang, level, theme: rest, format } }
   const part = Number(rest) || 1
   // A drill's short starts where its long part starts: 語彙 3's short is that part's first six words.
-  const short = format === 'short' && kind !== 'quiz' ? ((part - 1) * PART[kind]) / SHORT[kind] + 1 : part
+  const short = format === 'short' && kind !== 'quiz' && kind !== 'reply' ? ((part - 1) * PART[kind]) / SHORT[kind] + 1 : part
   return { kind, opts: { lang, level, part: short, format } }
 }
 
@@ -269,6 +339,7 @@ export function longFiles(id, level) {
   if (kind === 'vocab') return [`words-${level}.json`, ...easier.map(lv => `${lv}.json`)]
   if (kind === 'kanji') return [`kanji-${level}.json`]
   if (kind === 'grammar') return [`grammar-${level}.json`, ...LEVELS.map(lv => `words-${lv}.json`)]
+  if (kind === 'reply') return ['dialogues.json']
   return [`${level}.json`, `words-${level}.json`, `kanji-${level}.json`]
 }
 
@@ -543,20 +614,23 @@ export function timeline(plan, dur = null) {
     return dur?.(c) ?? guess(text) * (slow ? 1.2 : 1)
   }
   const fx = (t, key, gain) => sfx.push({ at: +t.toFixed(3), key, ...(gain != null ? { gain } : {}) })
-  const of = plan.items.length
+  // A reply video's stations are its questions, not its scenes (plan 249).
+  const of = plan.kind === 'reply' ? replies(plan) : plan.items.length
   const short = plan.format === 'short'
   chapters.push({ at: 0, title: S.chapters.intro })
   fx(0.3, 'board-flap')
   seg('intro', short ? 2.5 : 5.5, {})
   plan.items.forEach((it, i) => {
     const start = at
-    const n = i + 1
+    // A scene stands at the question it opens.
+    const n = plan.kind === 'reply' ? plan.items.slice(0, i + 1).filter(x => x.type === 'reply').length + (it.type === 'scene' ? 1 : 0) : i + 1
     const drill = plan.kind === 'vocab' || plan.kind === 'kanji'
     if (drill && i % 5 === 0) {
       const names = plan.items.slice(i, i + 5).map(x => x.t || x.c).join(', ')
       chapters.push({ at: start, title: `${n}–${Math.min(of, i + 5)} · ${names}` })
     }
     if (plan.kind === 'quiz' && i % 5 === 0) chapters.push({ at: start, title: `${S.quizHead} ${n}${n < of ? `–${Math.min(of, i + 5)}` : ''}` })
+    if (it.type === 'scene') chapters.push({ at: start, title: it.place.tr })
     if (plan.kind === 'grammar') {
       const asked = it.type === 'q' && !it.twist ? plan.items.slice(0, i + 1).filter(x => x.type === 'q' && !x.twist).length : 0
       chapters.push({ at: start, title: asked ? `${S.quizHead} ${asked}` : grammarChapter(it, S) })
@@ -594,6 +668,29 @@ export function timeline(plan, dur = null) {
       marks.words = []
       for (const w of it.words) { marks.words.push(u); u += 0.3 + say(start + u + 0.3, w.r) + 1.4 }
       seg('kanji', u + (short ? 0.3 : 0.8), it, marks, n)
+    } else if (it.type === 'scene') {
+      // Where it happens, its name said, and who speaks to you.
+      let u = 0.5
+      u += say(start + u, it.place.jp)
+      seg('scene', Math.max(2.4, u + 1.6 * P), it, {}, n)
+    } else if (it.type === 'reply') {
+      // Their line said; the three replies; the timer, a tick a second;
+      // then yours said, and why (plan 249).
+      const lineAt = 0.3
+      const choicesAt = lineAt + say(start + lineAt, joined(it.them.rows), 'them') + 0.3
+      const show = choicesAt + 0.6
+      const count = tuned(plan.tune, 'reply.count')
+      for (let c = 0; c < count; c++) fx(start + show + c, 'click', 0.35)
+      const reveal = show + count
+      fx(start + reveal, 'correct')
+      const replyAt = reveal + 0.5
+      const why = replyAt + say(start + replyAt, joined(it.choices[it.right]), 'me') + 0.5
+      seg('reply', why + (READ(it.reply) * 0.4 + READ(it.why) * 0.6) * P + 0.6, it, { lineAt, choicesAt, show, count, reveal, replyAt, why }, n)
+      if (n === of) {
+        chapters.push({ at, title: S.chapters.final })
+        fx(at + 0.2, 'board-flap')
+        seg('score', short ? 4 : 5, { n, of }, {}, n)
+      }
     } else if (it.type === 'q') {
       const q = it.q
       const show = 1.2 + Math.min(3, READ(q.ask) * 0.3)
@@ -698,24 +795,27 @@ const PAGE = {
       kanji: (lv, n, part) => `${n} JLPT ${lv} kanji · Stroke order, readings and words${part ? ` (part ${part})` : ''}`,
       quiz: (lv, n, part) => `JLPT ${lv} Japanese quiz · ${n} questions, 5 seconds each${part ? ` (part ${part})` : ''}`,
       grammar: (lv, p, meaning) => `${p} (“${meaning}”) explained · JLPT ${lv} Japanese grammar`,
+      reply: (lv, n, part) => `What would you answer in Japanese? ${n} JLPT ${lv} conversation questions${part ? ` (part ${part})` : ''}`,
     },
     lead: {
       vocab: (lv, n, theme) => `${n} ${theme ? `words about ${theme.toLowerCase()}` : `words from the JLPT ${lv} list`}, one at a time. Read each one before it is revealed, then hear it said aloud.`,
       kanji: (lv, n) => `${n} kanji from the JLPT ${lv} list, each drawn stroke by stroke, then its meaning, its readings and two words that use it, all said aloud.`,
       quiz: (lv, n) => `${n} questions from the JLPT ${lv} level: readings, meanings, kanji and grammar in real sentences. Five seconds each, then the answer and why.`,
       grammar: (lv, p, meaning) => `Everything about ${p}, one of the JLPT ${lv} grammar points: what it means (“${meaning}”), how to build it, and how it sounds in real sentences.`,
+      reply: (lv, n) => `${n} everyday situations at the JLPT ${lv} level. Someone speaks to you: pick your reply before the timer runs out. Every line is said aloud, and the right reply is explained.`,
     },
     howHead: 'How it works', useHead: 'Get the most out of it', chapHead: 'Chapters', appHead: 'Keep going with Tsuji', creditHead: 'Credits',
     how: {
       vocab: ex => ['The word appears alone: read it before the three lamps go out.', 'Its reading is said twice: say it with the voice.', ex.all ? 'Then its meaning, and a sentence it is used in, said aloud.' : ex.some ? `Then its meaning, and for ${ex.some} of them a sentence it is used in, said aloud.` : 'Then its meaning.'],
       kanji: ['Watch the strokes in their order: try to guess the kanji before its meaning appears.', 'Its ON and KUN readings are said one by one.', 'Two everyday words show it at work.'],
       quiz: ['Read the question and pick your answer before the ring empties.', 'The right answer is shown with the reason, and the sentence is said.', 'Keep count: there is a score check every ten questions.'],
+      reply: ['Listen to the line, then read the three replies.', 'Pick yours before the ring empties: a tick a second.', 'The right reply is said aloud, with why the others don’t fit.'],
     },
     grammarParts: n => [`What it does and how to build it`, `How it is used`, `${n.ex} example sentences, each said twice and cut word by word`, n.careful && 'The mistake to avoid', n.compare && `Not to be confused with ${n.compare}`, n.twists && `${n.twists} twist${n.twists > 1 ? 's' : ''}: test your understanding`, n.scene && 'A short conversation', n.quiz && `${n.quiz} question${n.quiz > 1 ? 's' : ''} to check yourself`, 'A recap'].filter(Boolean),
-    use: { vocab: 'Say every word out loud before you hear it. Come back in two or three days: what you still know then is what you have learned.', kanji: 'Trace each kanji with your finger as it is drawn. Come back in two or three days and pause on each one before it is revealed.', quiz: 'Pause if you need more time. Tell us your score in the comments!', grammar: 'Pause on each example and say it aloud before the voice does. Then try the questions without looking back.' },
+    use: { vocab: 'Say every word out loud before you hear it. Come back in two or three days: what you still know then is what you have learned.', kanji: 'Trace each kanji with your finger as it is drawn. Come back in two or three days and pause on each one before it is revealed.', quiz: 'Pause if you need more time. Tell us your score in the comments!', grammar: 'Pause on each example and say it aloud before the voice does. Then try the questions without looking back.', reply: 'Say your reply out loud before the voice does. Pause if you need more time, and tell us your score in the comments!' },
     app: (f, site) => `Tsuji is a Japanese app built on spaced repetition: ${f.words} words, ${f.kanji} kanji and ${f.points} grammar points, from N5 to N1, each brought back just before you would forget it. The kana line is free for good, with no ads and no trackers.\n${site}`,
     credits: kana => [`Voices: VOICEVOX Nemo.`, kana && 'Kana voice: 波音リツ (Canon).', 'Music: made for Tsuji.'].filter(Boolean).join(' '),
-    tags: (lv, kind) => ['learn Japanese', 'Japanese', `JLPT ${lv}`, 'JLPT', `${lv} ${({ vocab: 'vocabulary', kanji: 'kanji', quiz: 'quiz', grammar: 'grammar' })[kind]}`, ({ vocab: 'Japanese vocabulary', kanji: 'kanji stroke order', quiz: 'Japanese quiz', grammar: 'Japanese grammar' })[kind], 'Japanese for beginners', 'nihongo', '日本語'],
+    tags: (lv, kind) => ['learn Japanese', 'Japanese', `JLPT ${lv}`, 'JLPT', `${lv} ${({ vocab: 'vocabulary', kanji: 'kanji', quiz: 'quiz', grammar: 'grammar', reply: 'conversation' })[kind]}`, ({ vocab: 'Japanese vocabulary', kanji: 'kanji stroke order', quiz: 'Japanese quiz', grammar: 'Japanese grammar', reply: 'Japanese conversation' })[kind], 'Japanese for beginners', 'nihongo', '日本語'],
     hashtags: lv => lv ? `#LearnJapanese #Japanese #JLPT #JLPT${lv} #日本語` : '#LearnJapanese #Japanese #JapaneseVocabulary #日本語',
   },
   fr: {
@@ -724,24 +824,27 @@ const PAGE = {
       kanji: (lv, n, part) => `${n} kanji du JLPT ${lv} · Ordre des traits, lectures et mots${part ? ` (partie ${part})` : ''}`,
       quiz: (lv, n, part) => `Quiz de japonais JLPT ${lv} · ${n} questions, 5 secondes chacune${part ? ` (partie ${part})` : ''}`,
       grammar: (lv, p, meaning) => `${p} (« ${meaning} ») expliqué · Grammaire japonaise JLPT ${lv}`,
+      reply: (lv, n, part) => `Que répondrais-tu en japonais ? ${n} questions de conversation JLPT ${lv}${part ? ` (partie ${part})` : ''}`,
     },
     lead: {
       vocab: (lv, n, theme) => `${n} ${theme ? `mots sur le thème ${theme.toLowerCase()}` : `mots de la liste du JLPT ${lv}`}, un par un. Lis chacun avant qu’il soit révélé, puis écoute-le prononcé.`,
       kanji: (lv, n) => `${n} kanji de la liste du JLPT ${lv}, chacun tracé trait par trait, puis son sens, ses lectures et deux mots qui l’emploient, le tout dit à voix haute.`,
       quiz: (lv, n) => `${n} questions du niveau JLPT ${lv} : lectures, sens, kanji et grammaire dans de vraies phrases. Cinq secondes chacune, puis la réponse et pourquoi.`,
       grammar: (lv, p, meaning) => `Tout sur ${p}, un point de grammaire du JLPT ${lv} : ce qu’il veut dire (« ${meaning} »), comment le former, et comment il sonne dans de vraies phrases.`,
+      reply: (lv, n) => `${n} situations du quotidien au niveau JLPT ${lv}. On te parle : choisis ta réponse avant la fin du chrono. Chaque réplique est dite à voix haute, et la bonne réponse est expliquée.`,
     },
     howHead: 'Comment ça marche', useHead: 'Pour en tirer le meilleur', chapHead: 'Chapitres', appHead: 'Continue avec Tsuji', creditHead: 'Crédits',
     how: {
       vocab: ex => ['Le mot apparaît seul : lis-le avant que les trois lampes s’éteignent.', 'Sa lecture est dite deux fois : répète-la avec la voix.', ex.all ? 'Puis son sens, et une phrase qui l’emploie, dite à voix haute.' : ex.some ? `Puis son sens et, pour ${ex.some} d’entre eux, une phrase qui l’emploie, dite à voix haute.` : 'Puis son sens.'],
       kanji: ['Regarde les traits dans leur ordre : devine le kanji avant que son sens apparaisse.', 'Ses lectures ON et KUN sont dites une à une.', 'Deux mots du quotidien le montrent à l’œuvre.'],
       quiz: ['Lis la question et choisis ta réponse avant que l’anneau se vide.', 'La bonne réponse s’affiche avec la raison, et la phrase est dite.', 'Compte tes points : un point d’étape toutes les dix questions.'],
+      reply: ['Écoute la réplique, puis lis les trois réponses.', 'Choisis la tienne avant que l’anneau se vide : un tic par seconde.', 'La bonne réponse est dite à voix haute, avec pourquoi les autres ne vont pas.'],
     },
     grammarParts: n => [`Ce qu’il fait et comment le former`, `Comment l’employer`, `${n.ex} phrases d’exemple, dites deux fois et découpées mot à mot`, n.careful && 'L’erreur à éviter', n.compare && `À ne pas confondre avec ${n.compare}`, n.twists && `${n.twists} variante${n.twists > 1 ? 's' : ''} pour tester ta compréhension`, n.scene && 'Une courte conversation', n.quiz && `${n.quiz} question${n.quiz > 1 ? 's' : ''} pour vérifier`, 'Un récap'].filter(Boolean),
-    use: { vocab: 'Dis chaque mot à voix haute avant de l’entendre. Reviens dans deux ou trois jours : ce que tu sais encore, tu l’as appris.', kanji: 'Trace chaque kanji du doigt pendant qu’il se dessine. Reviens dans deux ou trois jours et mets pause avant chaque révélation.', quiz: 'Mets pause s’il te faut plus de temps. Donne ton score en commentaire !', grammar: 'Mets pause sur chaque exemple et dis-le avant la voix. Puis réponds aux questions sans revenir en arrière.' },
+    use: { vocab: 'Dis chaque mot à voix haute avant de l’entendre. Reviens dans deux ou trois jours : ce que tu sais encore, tu l’as appris.', kanji: 'Trace chaque kanji du doigt pendant qu’il se dessine. Reviens dans deux ou trois jours et mets pause avant chaque révélation.', quiz: 'Mets pause s’il te faut plus de temps. Donne ton score en commentaire !', grammar: 'Mets pause sur chaque exemple et dis-le avant la voix. Puis réponds aux questions sans revenir en arrière.', reply: 'Dis ta réponse à voix haute avant la voix. Mets pause s’il te faut plus de temps, et donne ton score en commentaire !' },
     app: (f, site) => `Tsuji est une appli de japonais fondée sur la répétition espacée : ${f.words} mots, ${f.kanji} kanji et ${f.points} points de grammaire, du N5 au N1, chacun ramené juste avant que tu l’oublies. La ligne des kana est gratuite pour de bon, sans pub et sans traqueur.\n${site}`,
     credits: kana => [`Voix : VOICEVOX Nemo.`, kana && 'Voix des kana : 波音リツ (Canon).', 'Musique : faite pour Tsuji.'].filter(Boolean).join(' '),
-    tags: (lv, kind) => ['apprendre le japonais', 'japonais', `JLPT ${lv}`, 'JLPT', `${({ vocab: 'vocabulaire', kanji: 'kanji', quiz: 'quiz', grammar: 'grammaire' })[kind]} ${lv}`, ({ vocab: 'vocabulaire japonais', kanji: 'ordre des traits kanji', quiz: 'quiz japonais', grammar: 'grammaire japonaise' })[kind], 'japonais débutant', 'nihongo', '日本語'],
+    tags: (lv, kind) => ['apprendre le japonais', 'japonais', `JLPT ${lv}`, 'JLPT', `${({ vocab: 'vocabulaire', kanji: 'kanji', quiz: 'quiz', grammar: 'grammaire', reply: 'conversation' })[kind]} ${lv}`, ({ vocab: 'vocabulaire japonais', kanji: 'ordre des traits kanji', quiz: 'quiz japonais', grammar: 'grammaire japonaise', reply: 'conversation japonaise' })[kind], 'japonais débutant', 'nihongo', '日本語'],
     hashtags: lv => lv ? `#ApprendreLeJaponais #Japonais #JLPT #JLPT${lv} #日本語` : '#ApprendreLeJaponais #Japonais #VocabulaireJaponais #日本語',
   },
 }
@@ -755,8 +858,9 @@ const SHORT_PAGE = {
       kanji: (lv, n) => `${n} JLPT ${lv} kanji in under a minute #shorts`,
       quiz: (lv, n) => `JLPT ${lv} quiz: ${n} questions, 5 seconds each #shorts`,
       grammar: (lv, p, meaning) => `${p} (“${meaning}”) in under a minute · JLPT ${lv} #shorts`,
+      reply: (lv, n) => `What would you answer? ${n} JLPT ${lv} Japanese conversation questions #shorts`,
     },
-    lead: { vocab: 'Read each word before it is revealed, then say it with the voice.', kanji: 'Watch the strokes, then read it.', quiz: 'Five seconds a question. How many did you get?', grammar: 'One grammar point: its form, two examples, one question.' },
+    lead: { vocab: 'Read each word before it is revealed, then say it with the voice.', kanji: 'Watch the strokes, then read it.', quiz: 'Five seconds a question. How many did you get?', grammar: 'One grammar point: its form, two examples, one question.', reply: 'Someone speaks to you: pick your reply before the timer ends. How many did you get?' },
     app: (f, site) => `Keep going on Tsuji: ${f.words} words, ${f.kanji} kanji and ${f.points} grammar points with spaced repetition. No ads, no trackers.\n${site}`,
     hashtags: lv => `#Shorts #LearnJapanese #Japanese${lv ? ` #JLPT${lv}` : ''} #日本語`,
   },
@@ -766,8 +870,9 @@ const SHORT_PAGE = {
       kanji: (lv, n) => `${n} kanji du JLPT ${lv} en moins d’une minute #shorts`,
       quiz: (lv, n) => `Quiz JLPT ${lv} : ${n} questions, 5 secondes chacune #shorts`,
       grammar: (lv, p, meaning) => `${p} (« ${meaning} ») en moins d’une minute · JLPT ${lv} #shorts`,
+      reply: (lv, n) => `Que répondrais-tu ? ${n} questions de conversation en japonais JLPT ${lv} #shorts`,
     },
-    lead: { vocab: 'Lis chaque mot avant qu’il soit révélé, puis répète-le avec la voix.', kanji: 'Regarde les traits, puis lis-le.', quiz: 'Cinq secondes par question. Combien en as-tu ?', grammar: 'Un point de grammaire : sa forme, deux exemples, une question.' },
+    lead: { vocab: 'Lis chaque mot avant qu’il soit révélé, puis répète-le avec la voix.', kanji: 'Regarde les traits, puis lis-le.', quiz: 'Cinq secondes par question. Combien en as-tu ?', grammar: 'Un point de grammaire : sa forme, deux exemples, une question.', reply: 'On te parle : choisis ta réponse avant la fin du chrono. Combien en as-tu ?' },
     app: (f, site) => `Continue sur Tsuji : ${f.words} mots, ${f.kanji} kanji et ${f.points} points de grammaire en répétition espacée. Sans pub, sans traqueur.\n${site}`,
     hashtags: lv => `#Shorts #ApprendreLeJaponais #Japonais${lv ? ` #JLPT${lv}` : ''} #日本語`,
   },
@@ -778,7 +883,7 @@ const SHORT_PAGE = {
 export function describe(plan, tl, site, figures = null) {
   if (plan.format === 'short') return describeShort(plan, tl, site, figures)
   const P = PAGE[plan.lang] || PAGE.en
-  const n = plan.items.length
+  const n = plan.kind === 'reply' ? replies(plan) : plan.items.length
   const part = plan.part && !plan.ids && !plan.theme ? plan.part : 0
   const lv = plan.level
   const first = plan.items[0] || {}
@@ -816,7 +921,7 @@ export function describe(plan, tl, site, figures = null) {
 function describeShort(plan, tl, site, figures) {
   const P = SHORT_PAGE[plan.lang] || SHORT_PAGE.en
   const lv = plan.level
-  const n = plan.items.length
+  const n = plan.kind === 'reply' ? replies(plan) : plan.items.length
   const meaning = plan.items[0]?.meaning
   const title = plan.kind === 'grammar' ? P.title.grammar(lv, plan.point, meaning) : P.title[plan.kind](lv, n, plan.theme)
   const fmt = x => Number(x).toLocaleString(plan.lang === 'fr' ? 'fr-FR' : 'en-US')
@@ -946,7 +1051,7 @@ export function drawLong(ctx, plan, tl, t) {
       fade(k(0.2, 0.6), () => mark(ctx, W / 2 - 100, 200, 200, p.ink, p.gold))
       fade(k(0.6, 0.6), () => para(plan.title, W / 2, 500, 1600, [96, 84, 72], p.ink, 'center', 700, 2))
       const count = S.count[plan.kind]
-      if (count) fade(k(0.9, 0.6), () => para(count(plan.items.length), W / 2, 640, 1400, [48], p.ink2, 'center', 500, 1))
+      if (count) fade(k(0.9, 0.6), () => para(count(tl.of), W / 2, 640, 1400, [48], p.ink2, 'center', 500, 1))
       fade(k(1.6, 0.6), () => para(S.hook[plan.kind], W / 2, 780, 1500, [52, 44], p.gold, 'center', 700, 1))
       fade(k(2.2, 0.6), () => para(S.how[plan.kind], W / 2, 860, 1500, [40, 36], p.ink2, 'center', 500, 1))
       break
@@ -955,7 +1060,7 @@ export function drawLong(ctx, plan, tl, t) {
       fade(k(0.2, 0.6), () => mark(ctx, W / 2 - 90, 170, 180, p.ink, p.gold))
       fade(k(0.6, 0.6), () => para(S.outro, W / 2, 440, 1500, [88, 76], p.ink, 'center', 700, 1))
       fade(k(1.0, 0.6), () => para(S.outroSub, W / 2, 570, 1500, [44, 38], p.ink2, 'center', 500, 1))
-      if (plan.kind === 'quiz') fade(k(1.3, 0.6), () => para(S.comment, W / 2, 650, 1500, [44, 38], p.gold, 'center', 700, 1))
+      if (plan.kind === 'quiz' || plan.kind === 'reply') fade(k(1.3, 0.6), () => para(S.comment, W / 2, 650, 1500, [44, 38], p.gold, 'center', 700, 1))
       fade(k(1.8, 0.6), () => {
         const bw = 760
         A.departButton(ctx, p, W / 2 - bw / 2, 760, bw, 2, S.depart)
@@ -1053,9 +1158,12 @@ export function drawLong(ctx, plan, tl, t) {
       break
     }
     case 'q': drawQuestion(ctx, p, line, S, sg.data, m, u, k, fade, sentence, para, card, state); break
+    case 'scene': drawScene(ctx, p, line, S, d, k, fade, para, REPLY_WIDE); break
+    case 'reply': drawReply(ctx, p, line, S, d, m, u, k, fade, card, state, REPLY_WIDE); break
     case 'score': {
       fade(k(0.1, 0.5), () => para(S.score(d.n, d.of), W / 2, 380, 1600, [84, 72, 60], p.ink, 'center', 700, 2))
-      fade(k(0.6, 0.5), () => para(`${d.n} / ${d.of}`, W / 2, 620, 800, [96], p.gold, 'center', 700, 1))
+      // The last asks the viewer's own score (plan 249): ? / 6, never 6 / 6.
+      fade(k(0.6, 0.5), () => para(`${d.n === d.of ? '?' : d.n} / ${d.of}`, W / 2, 620, 800, [96], p.gold, 'center', 700, 1))
       if (d.n === d.of) fade(k(1.2, 0.5), () => para(S.comment, W / 2, 790, 1400, [48, 40], p.ink2, 'center', 500, 1))
       break
     }
@@ -1433,13 +1541,14 @@ function drawTallFrame(ctx, plan, tl, t) {
       fade(k(0.1, 0.4), () => mark(ctx, cx - 90, 420, 180, p.ink, p.gold))
       fade(k(0.3, 0.4), () => para(plan.title, cx, 700, TWIDE, [84, 72, 62, 54], p.ink, 'center', 700, 3))
       fade(k(0.8, 0.4), () => para(S.hook[plan.kind], cx, 1080, TWIDE, [52, 46, 40], p.gold, 'center', 700, 2))
+      if (plan.kind === 'reply') fade(k(1.2, 0.4), () => para(`${S.count.reply(tl.of)} · ${S.how.reply}`, cx, 1290, TWIDE, [38, 32], p.ink2, 'center', 500, 2))
       break
     }
     case 'outro': {
       fade(k(0.1, 0.4), () => mark(ctx, cx - 80, 440, 160, p.ink, p.gold))
       fade(k(0.3, 0.4), () => para(S.outro, cx, 700, TWIDE, [76, 64], p.ink, 'center', 700, 2))
       fade(k(0.6, 0.4), () => para(S.outroSub, cx, 900, TWIDE, [40, 34], p.ink2, 'center', 500, 3))
-      if (plan.kind === 'quiz') fade(k(0.8, 0.4), () => para(S.comment, cx, 1060, TWIDE, [44, 38], p.gold, 'center', 700, 2))
+      if (plan.kind === 'quiz' || plan.kind === 'reply') fade(k(0.8, 0.4), () => para(S.comment, cx, 1060, TWIDE, [44, 38], p.gold, 'center', 700, 2))
       fade(k(1.0, 0.4), () => A.departButton(ctx, p, cx - 330, 1200, 660, 2, S.depart))
       break
     }
@@ -1533,6 +1642,14 @@ function drawTallFrame(ctx, plan, tl, t) {
       break
     }
     case 'q': drawTallQuestion(ctx, p, line, S, d, m, u, k, fade, sentence, para, card, state); break
+    case 'scene': drawScene(ctx, p, line, S, d, k, fade, para, REPLY_TALL); break
+    case 'reply': drawReply(ctx, p, line, S, d, m, u, k, fade, card, state, REPLY_TALL); break
+    case 'score': {
+      fade(k(0.1, 0.5), () => para(S.score(d.n, d.of), cx, 620, TWIDE, [66, 58, 50], p.ink, 'center', 700, 3))
+      fade(k(0.6, 0.5), () => para(`${d.n === d.of ? '?' : d.n} / ${d.of}`, cx, 940, TWIDE, [150], p.gold, 'center', 700, 1))
+      if (d.n === d.of) fade(k(1.2, 0.5), () => para(S.comment, cx, 1180, TWIDE, [46, 40], p.ink2, 'center', 500, 2))
+      break
+    }
     default:
   }
   return state.join(',')
@@ -1638,5 +1755,151 @@ function drawTallQuestion(ctx, p, line, S, it, m, u, k, fade, sentence, para, ca
       if (first) ey += para(first, TX, ey, TWIDE, [42, 38, 34], p.gold, 'left', 700, 3) + 14
       if (e.why) para(e.why, TX, ey, TWIDE, [36, 32, 28], p.ink2, 'left', 500, Math.max(1, Math.floor((1480 - ey) / 38)))
     })
+  }
+}
+
+// ── A reply video's frames (plan 249) ─────────────────────────────
+// The same parts in both formats, each at its own measures: a scene's
+// card, then each question: their line in a bubble (who says it, its
+// readings, its romaji for a beginner, what it means), the three
+// replies numbered, the timer's ring, the right one lit, then yours in
+// a bubble of its own and why. Standing (9:16), one column; wide
+// (16:9), their line and the timer on the left, the replies and then
+// yours on the right. Every size steps down together until the
+// question stands in the frame; the answer steps on its own.
+const REPLY_TALL = { id: 'tall', stack: true, top: 400, bottom: 1490, them: { x: TX, w: TWIDE }, mine: { x: TX, w: TWIDE }, big: 60, mid: 52, small: 32, label: 28, num: 60, pad: 28 }
+const REPLY_WIDE = { id: 'wide', stack: false, top: 160, bottom: 930, them: { x: 120, w: 760 }, mine: { x: 940, w: 860 }, big: 60, mid: 50, small: 32, label: 28, num: 64, pad: 30 }
+const STEPS = [1, 0.92, 0.84, 0.76, 0.68, 0.6, 0.54]
+const RING = 190 // the timer's room under what it stands below
+const GAP = 12 // between two replies
+
+const replyLayouts = new WeakMap()
+/** A question's parts laid out once per format: the question at the
+ *  largest step that stands in the frame, the answer at its own. */
+function replyLayout(ctx, it, g) {
+  let byFormat = replyLayouts.get(it)
+  if (!byFormat) replyLayouts.set(it, (byFormat = {}))
+  if (byFormat[g.id]) return byFormat[g.id]
+  const room = g.bottom - g.top
+  // A beginner's romaji stands under each word: the words a little further apart for it.
+  const lay = (rows, z, maxW, maxLines) => layoutSentence(ctx, rows, { max: z, min: Math.round(z * 0.75), maxW, maxLines, script: 'furigana', romaji: it.romaji, rules: false, gap: it.romaji ? 0.22 : 0.06, fam: 'jp', weight: 700 })
+  const part = (s, rows, tr, w, z) => {
+    const pad = g.pad * Math.max(0.75, s)
+    const label = g.label * Math.max(0.85, s)
+    const L = lay(rows, z * s, w - 2 * pad, 3)
+    // What it means: two lines, else three a little smaller; never cut.
+    const T = fit(ctx, tr, { weight: 500, sizes: [g.small * s, g.small * s * 0.88], maxW: w - 2 * pad, maxLines: 3, lh: 1.22, fam: 'latin', balanced: false })
+    return { s, pad, label, L, T, h: pad + label + 12 + L.h + 14 + paragraphH(T, 1.22) + pad }
+  }
+  let q = null
+  for (const s of STEPS) {
+    const them = part(s, it.them.rows, it.them.tr, g.them.w, g.big)
+    const cw = g.mine.w
+    const choices = it.choices.map(rows => lay(rows, g.mid * s, cw - g.num * s - 2 * them.pad, 2))
+    const choiceH = choices.map(L => Math.max(g.num * s + 20, L.h + them.pad))
+    const askH = them.label * 1.9
+    const list = askH + choiceH.reduce((a, b) => a + b, 0) + GAP * (choiceH.length - 1)
+    const total = g.stack ? them.h + 28 + list + RING : Math.max(them.h + 28 + RING, list)
+    q = { s, them, choices, choiceH, askH, total }
+    if (total <= room) break
+  }
+  // The answer: yours in its bubble, what it means, and room for why (three lines at least).
+  const above = g.stack ? q.them.h + 28 : 0
+  let a = null
+  for (const s of STEPS.filter(x => x <= q.s)) {
+    a = part(s, it.choices[it.right], it.reply, g.mine.w, g.mid)
+    if (above + a.h + 24 + 3 * g.small * Math.max(0.8, s) * 1.22 <= room) break
+  }
+  byFormat[g.id] = { ...q, mine: a }
+  return byFormat[g.id]
+}
+
+/** A bubble: a card with who speaks over its line, its readings and what it means. */
+function bubble(ctx, p, card, x, y, w, b, who, whoColor, edge, width) {
+  card(x, y, w, b.h, edge, width)
+  text(ctx, who.toUpperCase(), x + b.pad, y + b.pad + b.label * 0.8, { f: font(700, b.label, 'latin'), color: whoColor, tr: 0.14 })
+  const top = y + b.pad + b.label + 12
+  drawSentence(ctx, b.L, x + b.pad, top, 'left', () => ({ ink: p.ink, ruby: p.ink2, romaji: p.ink2 }))
+  b.T.lines.forEach((l, j) => text(ctx, l, x + b.pad, top + b.L.h + 14 + b.T.size * (0.8 + j * 1.22), { f: b.T.f, color: p.ink2 }))
+}
+
+/** A scene's card: where it happens, said, and who speaks to you. */
+function drawScene(ctx, p, line, S, d, k, fade, para, g) {
+  const x = g.them.x
+  const w = g.stack ? g.them.w : g.mine.x + g.mine.w - g.them.x
+  const cx = x + w / 2
+  const mid = (g.top + g.bottom) / 2
+  fade(k(0.1, 0.4), () => text(ctx, S.sceneHead.toUpperCase(), cx, mid - 230, { f: font(700, g.label, 'latin'), color: line, align: 'center', tr: 0.16 }))
+  fade(k(0.25, 0.45), () => {
+    const fam = hasKanji(d.place.jp) ? 'serif' : 'jp'
+    const z = Math.min(150, (150 * w) / Math.max(1, measure(ctx, d.place.jp, font(900, 150, fam))))
+    text(ctx, d.place.jp, cx, mid - 50, { f: font(900, z, fam), color: p.ink, align: 'center' })
+  })
+  fade(k(0.6, 0.4), () => para(d.place.tr, cx, mid + 20, w, [g.big, g.mid], p.ink, 'center', 700, 2))
+  fade(k(0.9, 0.4), () => para(`${S.speaks(d.who)} · ${S.count.reply(d.asks)}`, cx, mid + 120, w, [g.small, g.small * 0.85], p.ink2, 'center', 500, 2))
+}
+
+/** A question: their line, the replies and the timer; the right one lit; yours, and why. */
+function drawReply(ctx, p, line, S, it, m, u, k, fade, card, state, g) {
+  const revealed = u >= m.reveal
+  const done = u >= m.why
+  state.push(done ? 'A' : revealed ? 'R' : '')
+  const Ly = replyLayout(ctx, it, g)
+  const s = Ly.s
+  fade(k(0, 0.3), () => bubble(ctx, p, card, g.them.x, g.top, g.them.w, Ly.them, it.who, line, p.surfaceLine, 2))
+  // Under their line standing, beside it wide.
+  const y0 = g.stack ? g.top + Ly.them.h + 28 : g.top
+  if (done) {
+    // Yours, said: the reply in its own bubble, in gold, what it means; why.
+    const a = Ly.mine
+    fade(k(m.why, 0.35), () => bubble(ctx, p, card, g.mine.x, y0, g.mine.w, a, S.you, p.gold, p.gold, 6))
+    const ey = y0 + a.h + 24
+    fade(k(m.why + 0.35, 0.4), () => {
+      const room = g.bottom - ey
+      const sizes = [1.25, 1.12, 1, 0.9, 0.8].map(x => g.small * x * Math.max(0.8, a.s))
+      const b = fit(ctx, it.why, { weight: 500, sizes, maxW: g.mine.w, maxLines: Math.max(2, Math.floor(room / (sizes.at(-1) * 1.22))), maxH: room, lh: 1.22, fam: 'latin', balanced: false })
+      b.lines.forEach((l, j) => text(ctx, l, g.mine.x, ey + b.size * (0.8 + j * 1.22), { f: b.f, color: p.ink }))
+    })
+    return
+  }
+  const label = Ly.them.label
+  if (u >= m.choicesAt) fade(k(m.choicesAt, 0.3), () => text(ctx, S.replyAsk.toUpperCase(), g.mine.x, y0 + label * 1.1, { f: font(700, label, 'latin'), color: p.gold, tr: 0.14 }))
+  let cy = y0 + Ly.askH
+  const pad = Ly.them.pad
+  it.choices.forEach((rows, j) => {
+    const h = Ly.choiceH[j]
+    const at = cy
+    if (u >= m.choicesAt) fade(k(m.choicesAt + 0.1 + j * 0.12, 0.3), () => {
+      const right = j === it.right
+      ctx.save()
+      if (revealed && !right) ctx.globalAlpha *= 0.35
+      card(g.mine.x, at, g.mine.w, h, revealed && right ? p.gold : p.surfaceLine, revealed && right ? 6 : 2)
+      const nz = g.mid * 0.95 * s
+      text(ctx, String(j + 1), g.mine.x + pad + (g.num * s) / 2 - 6, at + h / 2 + nz * 0.36, { f: font(700, nz, 'latin'), color: revealed && right ? p.gold : line, align: 'center' })
+      const L = Ly.choices[j]
+      drawSentence(ctx, L, g.mine.x + pad + g.num * s, at + (h - L.h) / 2, 'left', () => ({ ink: p.ink, ruby: p.ink2, romaji: p.ink2 }))
+      ctx.restore()
+    })
+    cy += h + GAP
+  })
+  if (!revealed && u >= m.show) {
+    // The timer: a ring that empties, a second a tick, its digit in the frame's key.
+    const left = m.reveal - u
+    const share = Math.max(0, left / m.count)
+    state.push(`${Math.round(share * 90)}|${Math.ceil(left)}`)
+    const [rx, ry] = g.stack ? [g.them.x + g.them.w / 2, cy - GAP + RING / 2] : [g.them.x + g.them.w / 2, g.top + Ly.them.h + 28 + RING / 2]
+    const r = 60
+    ctx.lineWidth = 12
+    ctx.strokeStyle = p.surfaceLine
+    ctx.beginPath()
+    ctx.arc(rx, ry, r, 0, 7)
+    ctx.stroke()
+    ctx.strokeStyle = p.gold
+    ctx.lineCap = 'round'
+    ctx.beginPath()
+    ctx.arc(rx, ry, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * share)
+    ctx.stroke()
+    ctx.lineCap = 'butt'
+    text(ctx, String(Math.ceil(left)), rx, ry + 20, { f: font(700, 56, 'latin'), color: p.ink, align: 'center' })
   }
 }

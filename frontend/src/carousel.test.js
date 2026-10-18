@@ -13,7 +13,7 @@ import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '
 import { LIMIT, SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
 import { TUNABLES, tuned } from '../carousel/tune.js'
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf } from '../carousel/funnel.js'
-import { KINDS, LONG_SITE, PART, SHORT, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, timeline } from '../carousel/long.js'
+import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
 import { CH as CHALLENGE, CPM, SCROLL, TRACK, TRACKS, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
@@ -1003,6 +1003,7 @@ describe('the long videos (plan 233)', () => {
   const files = {}
   for (const lv of LEVELS) for (const f of [`${lv}.json`, `words-${lv}.json`, `kanji-${lv}.json`, `grammar-${lv}.json`]) files[f] = bank(f)
   files['themes.json'] = bank('themes.json')
+  files['dialogues.json'] = bank('dialogues.json')
   const withPath2D = fn => {
     const had = globalThis.Path2D
     globalThis.Path2D = class { constructor(d) { this.d = d } }
@@ -1023,7 +1024,8 @@ describe('the long videos (plan 233)', () => {
       for (const kind of KINDS) {
         const pl = longPlan(kind, files, { lang, level: 'N5', point: '〜てください' })
         const tl = timeline(pl)
-        expect(pl.items.length, kind).toBeGreaterThan(kind === 'grammar' ? 10 : 20)
+        // A reply video: two scenes and six questions (plan 249).
+        expect(pl.items.length, kind).toBeGreaterThan(kind === 'grammar' ? 10 : kind === 'reply' ? 7 : 20)
         expect(tl.segs[0].type).toBe('intro')
         expect(tl.segs.at(-1).type).toBe('outro')
         drawsWhole(pl, tl)
@@ -1153,11 +1155,11 @@ describe('the long videos (plan 233)', () => {
       const listed = Object.fromEntries(longListFiles(level).map(f => [f, files[f]]))
       const items = longItems(listed, level, 'en')
       const kinds = new Set(items.map(x => x.kind))
-      expect([...kinds].sort(), level).toEqual(['grammar', 'kanji', 'quiz', 'theme', 'vocab'])
+      expect([...kinds].sort(), level).toEqual(['grammar', 'kanji', 'quiz', 'reply', 'theme', 'vocab'])
       expect(new Set(items.map(x => x.id)).size, level).toBe(items.length)
       expect(items.filter(x => x.kind === 'grammar').length, level).toBe(bank(`grammar-${level}.json`).lessons.length)
       // Every listed video is drawn from the files it says it reads, the last part of each kind too.
-      const sample = ['vocab', 'kanji', 'quiz', 'grammar', 'theme'].flatMap(k => { const of = items.filter(x => x.kind === k); return [of[0], of.at(-1)] })
+      const sample = ['vocab', 'kanji', 'quiz', 'grammar', 'theme', 'reply'].flatMap(k => { const of = items.filter(x => x.kind === k); return [of[0], of.at(-1)] })
       for (const it of sample) {
         const own = Object.fromEntries([...longListFiles(level), ...longFiles(it.id, level)].map(f => [f, files[f]]))
         const { kind, opts } = longPick(it.id, level, 'en')
@@ -1188,6 +1190,7 @@ describe('the short formats (plan 233)', () => {
   const files = {}
   for (const lv of LEVELS) for (const f of [`${lv}.json`, `words-${lv}.json`, `kanji-${lv}.json`, `grammar-${lv}.json`]) files[f] = bank(f)
   files['themes.json'] = bank('themes.json')
+  files['dialogues.json'] = bank('dialogues.json')
   const withPath2D = fn => {
     const had = globalThis.Path2D
     globalThis.Path2D = class { constructor(d) { this.d = d } }
@@ -1201,9 +1204,10 @@ describe('the short formats (plan 233)', () => {
           const pl = fitShort(longPlan(kind, files, { lang, level, format: 'short', point: bank(`grammar-${level}.json`).lessons[1].p }))
           const tl = timeline(pl)
           expect(pl.format, kind).toBe('short')
-          expect(tl.seconds, `${kind} ${level}`).toBeLessThanOrEqual(SHORT.seconds)
+          // A reply short keeps its six questions past the minute, under Shorts' three (plan 249).
+          expect(tl.seconds, `${kind} ${level}`).toBeLessThanOrEqual(kind === 'reply' ? REPLY_SHORT : SHORT.seconds)
           expect(tl.seconds, `${kind} ${level}`).toBeGreaterThan(20)
-          if (kind !== 'grammar') expect(pl.items.length, kind).toBeLessThanOrEqual(SHORT[kind])
+          if (kind !== 'grammar' && kind !== 'reply') expect(pl.items.length, kind).toBeLessThanOrEqual(SHORT[kind])
           for (const sg of tl.segs) {
             for (const u of [0, sg.dur / 2, ...Object.values(sg.marks).flat().filter(x => typeof x === 'number'), sg.dur - 0.01]) {
               expect(() => drawLong(stubContext().ctx, pl, tl, sg.start + Math.min(u, sg.dur - 0.01)), `${kind} ${sg.type} ${u}`).not.toThrow()
@@ -1988,5 +1992,111 @@ describe('tuned from the studio (plan 248)', () => {
     const quiz = timeline(longPlan('quiz', files, { level: 'N5', tune: { 'long.count': 8 } }))
     const quiz5 = timeline(longPlan('quiz', files, { level: 'N5' }))
     expect(quiz.seconds).toBeGreaterThan(quiz5.seconds)
+  })
+})
+
+describe('the reply videos (plan 249)', () => {
+  const dialogues = bank('dialogues.json')
+  const files = { 'dialogues.json': dialogues }
+  const parts = lv => longItems(files, lv, 'en').filter(x => x.kind === 'reply')
+  const planFor = (lv, id, format = 'long', lang = 'en') => { const { kind, opts } = longPick(id, lv, lang, format); return longPlan(kind, files, opts) }
+  // Every text drawn, where: its baseline and its size.
+  const placed = () => {
+    const at = []
+    const state = { font: '10px sans-serif' }
+    const size = () => parseFloat(/([\d.]+)px/.exec(state.font)?.[1] || '10')
+    const widthOf = t => [...String(t)].reduce((w, c) => w + (/[\u3000-\u9fff\uff00-\uffef]/.test(c) ? 1 : 0.56), 0) * size()
+    let dy = 0
+    const stack = []
+    const methods = {
+      measureText: t => ({ width: widthOf(t), actualBoundingBoxAscent: size() * 0.72, actualBoundingBoxDescent: size() * 0.12, actualBoundingBoxLeft: 0, actualBoundingBoxRight: widthOf(t) }),
+      fillText: (t, x, y) => at.push({ t: String(t), y: y + dy, z: size() }),
+      save: () => stack.push(dy), restore: () => { dy = stack.pop() ?? 0 }, translate: (x, y) => { dy += y },
+      createLinearGradient: () => ({ addColorStop() {} }), createRadialGradient: () => ({ addColorStop() {} }),
+      getTransform: () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }),
+    }
+    const ctx = new Proxy(state, { get: (o, k) => (k in methods ? methods[k] : k in o ? o[k] : () => {}), set: (o, k, v) => { o[k] = v; return true } })
+    return { ctx, at }
+  }
+
+  it('deals every conversation of a level once, six questions a video at least', () => {
+    for (const lv of LEVELS) {
+      const seen = []
+      for (const it of parts(lv)) {
+        const pl = planFor(lv, it.id)
+        expect(pl.items.filter(x => x.type === 'reply').length, it.id).toBeGreaterThanOrEqual(6)
+        seen.push(...pl.items.filter(x => x.type === 'scene').map(x => x.id))
+      }
+      expect(seen.sort(), lv).toEqual(dialogues.dialogues.filter(d => d.lv === lv).map(d => d.id).sort())
+    }
+    expect(longFiles('reply:1', 'N5')).toEqual(['dialogues.json'])
+    expect(longListFiles('N5')).toContain('dialogues.json')
+    expect(longCommand('reply:2', 'N3', 'fr', 'short')).toContain('--kind reply --level N3 --part 2 --lang fr --format short')
+  })
+
+  it('says their line, then yours once the timer is out, a tick a second', () => {
+    const pl = longPlan('reply', files, { level: 'N5', part: 1, tune: { 'reply.count': 6 } })
+    const tl = timeline(pl)
+    expect(tl.of).toBe(6)
+    for (const sg of tl.segs.filter(x => x.type === 'reply')) {
+      const it = sg.data
+      const inSeg = x => x.at >= sg.start && x.at < sg.start + sg.dur
+      const said = tl.cues.filter(inSeg)
+      expect(said.map(c => c.who)).toEqual(['them', 'me'])
+      expect(said[0].text).toBe(it.them.rows.map(r => r.t).join(''))
+      expect(said[1].text).toBe(it.choices[it.right].map(r => r.t).join(''))
+      expect(tl.sfx.filter(x => x.key === 'click' && inSeg(x))).toHaveLength(6)
+      expect(sg.marks.reveal - sg.marks.show).toBeCloseTo(6, 6)
+      expect(tl.sfx.some(x => x.key === 'correct' && Math.abs(x.at - (sg.start + sg.marks.reveal)) < 0.01)).toBe(true)
+      expect(said[1].at).toBeGreaterThan(sg.start + sg.marks.reveal)
+    }
+    // The right reply is dealt in the carousel's order, never always in one place.
+    expect(new Set(pl.items.filter(x => x.type === 'reply').map(x => x.right)).size).toBeGreaterThan(1)
+    // It ends asking the viewer's own score.
+    expect(tl.segs.at(-2).type).toBe('score')
+    expect(tl.chapters.map(c => c.title)).toContain(pl.items[0].place.tr)
+  })
+
+  it('stands every question inside the frame, in both formats, nothing cut', () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class { constructor(d) { this.d = d } }
+    try {
+      const box = { long: { top: 160, bottom: 930, head: 150, foot: 950 }, short: { top: 400, bottom: 1490, head: 380, foot: 1600 } }
+      for (const lv of LEVELS) {
+        for (const it of parts(lv)) {
+          for (const format of ['long', 'short']) {
+            for (const lang of ['en', 'fr']) {
+              const pl = planFor(lv, it.id, format, lang)
+              const tl = timeline(pl)
+              const b = box[format]
+              for (const sg of tl.segs.filter(x => x.type === 'reply')) {
+                for (const u of [sg.marks.show + 1, sg.marks.reveal + 0.8, sg.dur - 0.05]) {
+                  const { ctx, at } = placed()
+                  drawLong(ctx, pl, tl, sg.start + u)
+                  for (const x of at.filter(x => x.y > b.head && x.y < b.foot)) {
+                    const where = `${lv} ${it.id} ${format} ${lang} ${sg.data.id}#${sg.data.k} ${u.toFixed(1)} ${x.t}`
+                    expect(x.y - x.z * 0.85, where).toBeGreaterThanOrEqual(b.top - 1)
+                    expect(x.y + x.z * 0.25, where).toBeLessThanOrEqual(b.bottom + 1)
+                    // Cut, unless the text itself trails off ("At night, it's a bit loud…").
+                    expect(x.t.endsWith('…') && ![sg.data.them.tr, sg.data.reply, sg.data.why].some(o => o.endsWith(x.t)), where).toBe(false)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    } finally { globalThis.Path2D = had }
+  }, 120000)
+
+  it('holds a short under three minutes, never under six questions', () => {
+    for (const lv of LEVELS) {
+      for (const it of parts(lv)) {
+        const pl = fitShort(planFor(lv, it.id, 'short'))
+        const tl = timeline(pl)
+        expect(tl.of, it.id).toBeGreaterThanOrEqual(6)
+        if (tl.of > 6) expect(tl.seconds, it.id).toBeLessThanOrEqual(REPLY_SHORT)
+      }
+    }
   })
 })
