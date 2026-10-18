@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **253**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **254**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -872,7 +872,9 @@ opens on the hook, links "in bio", keeps every credit, five hashtags at
 most). Since plan 252 vocabulary shorts have their own source
 (`words.js`: nine words, as a card on washi or a quiz on sumi, every
 wrong meaning one that shares no word with the word's), and every long
-video and short a "Music" switch. Since plan 248 every number a maker may set per
+video and short a "Music" switch; since plan 253 a sentence can be
+posted as "Read it" (`funnel.js`: the sentence, its words a card each,
+the answer with a bonus line from the catalogue, the app). Since plan 248 every number a maker may set per
 post (a video's timing and pace, the music's level, the export's
 quality) is one line of `tune.js`, set in the studio's Tune panel and
 written into the render command, so the video rendered is the one

@@ -99,6 +99,7 @@ export const STRINGS = {
     like: 'Like this one:',
     types: {
       plates: { name: 'Station plates', desc: 'The guided walk: word by word, then the point' },
+      read: { name: 'Read it', desc: 'Can you read it? Its words a card each, then the answer and a bonus' },
       exam: { name: 'Mock exam', desc: 'Questions in the JLPT’s forms, then the answers' },
       compare: { name: 'This or that', desc: 'Two things learners mix up, side by side' },
       build: { name: 'Build it', desc: 'The sentence put together, piece by piece' },
@@ -192,6 +193,7 @@ export const STRINGS = {
       dialogue: 'How many did you get right? Comment your score.',
       trap: 'Did you fall for it? Tell us in the comments.',
       impostor: 'Found them all? Comment your score.',
+      read: 'Could you read it? Tell us in the comments.',
     },
     pos: {
       noun: 'noun', verb: 'verb', adjective: 'adjective', adverb: 'adverb', particle: 'particle',
@@ -305,6 +307,7 @@ export const STRINGS = {
     like: 'Comme celle-ci :',
     types: {
       plates: { name: 'Plaques de gare', desc: 'La visite guidée : mot à mot, puis le point' },
+      read: { name: 'Lis-la', desc: 'Tu sais la lire ? Ses mots une carte chacun, puis la réponse et un bonus' },
       exam: { name: 'Examen blanc', desc: 'Des questions façon JLPT, puis les réponses' },
       compare: { name: 'Ceci ou cela', desc: 'Deux choses qu’on confond, côte à côte' },
       build: { name: 'Construis-la', desc: 'La phrase montée morceau par morceau' },
@@ -398,6 +401,7 @@ export const STRINGS = {
       dialogue: 'Combien de bonnes réponses ? Donne ton score en commentaire.',
       trap: 'Tu es tombé dans le piège ? Dis-le en commentaire.',
       impostor: 'Tu les as tous trouvés ? Donne ton score en commentaire.',
+      read: 'Tu as su la lire ? Dis-le-nous en commentaire.',
     },
     pos: {
       noun: 'nom', verb: 'verbe', adjective: 'adjectif', adverb: 'adverbe', particle: 'particule',

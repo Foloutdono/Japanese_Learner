@@ -28,7 +28,7 @@ import { withoutGiveaways } from './quizzes.js'
 import { furiganaOf } from './common.js'
 import { promoDeck } from './promo.js'
 import { echoDeck } from './echo.js'
-import { DESIGNS, funnelDeck } from './funnel.js'
+import { DESIGNS, funnelDeck, readable } from './funnel.js'
 
 export { FORMATS }
 
@@ -2793,6 +2793,8 @@ export function endingSlide(id, type, plan, fmt, opts) {
 // ── The carousel types and their decks ────────────────────────
 export const TYPES = [
   { id: 'plates', jp: '駅名標' },
+  // Plan 253: a sentence to read, its words a card each, the answer and a bonus.
+  { id: 'read', jp: '一読' },
   { id: 'exam', jp: '模試' },
   { id: 'compare', jp: '乗換' },
   { id: 'build', jp: '組立' },
@@ -2817,6 +2819,7 @@ export function available(type, pl) {
   // And a word echo as the clip it is (plan 232).
   if (pl.source === 'echo' || type === 'echo') return pl.source === 'echo' && type === 'echo'
   switch (type) {
+    case 'read': return readable(pl)
     case 'exam': return pl.quizzes.length > 0
     case 'compare': return !!pl.compare
     case 'build': return !!pl.build
@@ -2869,6 +2872,8 @@ export function deck(type, plan, fmt, opts) {
     const frames = echoDeck(plan, FORMATS.story, opts)
     return Object.assign(frames.map(sl => ({ key: sl.key, draw: ctx => { noShadow(ctx); sl.draw(ctx) } })), { clip: frames.clip, clips: frames.clips })
   }
+  // Read it is drawn in a look whatever the studio's: Clarté where it says Classic (plan 253).
+  if (type === 'read') return funnelDeck(type, plan, fmt, { ...opts, design: DESIGNS.includes(opts.design) ? opts.design : 'clarte' })
   // Plan 234: hook, answer, the feature, the detail, the key points.
   if (DESIGNS.includes(opts.design)) {
     const slides = funnelDeck(type, plan, fmt, opts)

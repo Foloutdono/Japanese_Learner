@@ -12,7 +12,7 @@ import { CLIP, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoD
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
 import { LIMIT, SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
 import { TUNABLES, tuned } from '../carousel/tune.js'
-import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf } from '../carousel/funnel.js'
+import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf, readable } from '../carousel/funnel.js'
 import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, TALL, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, stillAt, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
 import { CH as CHALLENGE, CPM, SCROLL, TRACK, TRACKS, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
@@ -164,8 +164,9 @@ describe('the carousel studio', () => {
       for (const type of TYPES.map(x => x.id).filter(x => available(x, p))) {
         const slides = deck(type, p, FORMATS.post, { ground: 'paper' })
         expect(slides.length, `${src.id} ${id} ${type}`).toBeGreaterThan({ promo: 1, echo: 0 }[src.id] ?? 2)
-        // A promo story ends on its own gate, not on a station (plan 231).
-        expect(slides.at(-1).key, `${src.id} ${id} ${type}`).toBe(LAST[src.id]?.(id) ?? 'outro')
+        // A promo story ends on its own gate, not on a station (plan 231);
+        // Read it on the app's call to action, in any look (plan 253).
+        expect(slides.at(-1).key, `${src.id} ${id} ${type}`).toBe(type === 'read' ? 'cta' : LAST[src.id]?.(id) ?? 'outro')
         expect(new Set(slides.map(x => x.key)).size, `${src.id} ${id} ${type}`).toBe(slides.length)
       }
     }
@@ -177,7 +178,8 @@ describe('the carousel studio', () => {
     try {
       for (const src of STATIONED) {
         const { p } = every.find(x => x.src === src)
-        const type = TYPES.map(x => x.id).find(x => x !== 'plates' && available(x, p)) || 'plates'
+        // Read it ends on the app's call to action, never an ending (plan 253).
+        const type = TYPES.map(x => x.id).find(x => x !== 'plates' && x !== 'read' && available(x, p)) || 'plates'
         for (const fmt of Object.values(FORMATS)) {
           for (const ground of ['paper', 'sumi']) {
             for (const id of ENDING_IDS) {
@@ -1373,7 +1375,8 @@ describe('the conversion carousels (plan 234)', () => {
       for (const lang of n ? ['en'] : ['en', 'fr']) some.push({ src, id, lang, p: plan(src.id, data, id, { ...OPTS, lang }, depsFor(src, data, id)) })
     })
   }
-  const types = p => TYPES.map(x => x.id).filter(x => available(x, p))
+  // Read it deals its own four slides in its own order (plan 253): its test is its own.
+  const types = p => TYPES.map(x => x.id).filter(x => x !== 'read' && available(x, p))
 
   it('walks every type of every source: the hook, the answer, the app, then the detail and the key points', { timeout: 120000 }, () => withPath2D(() => {
     for (const { src, id, lang, p } of some) {
@@ -2325,6 +2328,65 @@ describe('the vocabulary shorts (plan 252)', () => {
     expect(wordsCommand(quiet)).toBe('VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --words theme:animals:1 --style card --lang fr --fit instagram --music none')
     // A long video's own short no longer lists words or themes: they are the word shorts'.
     expect(longItems({ ...B.N5, 'kanji-N5.json': bank('kanji-N5.json'), 'grammar-N5.json': bank('grammar-N5.json') }, 'N5', 'en', 'short').some(x => x.kind === 'vocab' || x.kind === 'theme')).toBe(false)
+  })
+})
+
+describe('Read it (plan 253)', () => {
+  const firstSense = str => (String(str || '').split(/[;,]\s*/)[0] || '').replace(/\s*[([（][^)\]）]*[)\]）]/g, '').trim()
+  // Every N5 sentence, and every fifth of the others.
+  const sentences = LEVELS.flatMap(lv => banks[lv].sentences.filter((_, i) => lv === 'N5' || i % 5 === 0).map(s => [lv, s.id]))
+
+  it('asks a short sentence of the reading bank alone, its words, the answer and a bonus, then the app', { timeout: 240000 }, () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class { constructor(d) { this.d = d } }
+    let drawn = 0
+    try {
+      for (const [lv, id] of sentences) {
+        for (const lang of ['en', 'fr']) {
+          const p = plan('sentence', banks[lv], id, { ...OPTS, lang })
+          const words = p.funnel.breakdown
+          expect(available('read', p), `${id}`).toBe(readable(p))
+          expect(readable(p), `${id}`).toBe(words.length > 0 && words.length <= 7 && !!p.funnel.translation)
+          if (!readable(p)) continue
+          // The bonus is the catalogue's line on the point, never the breakdown's own.
+          const bonus = funnelOf('read', p).solution.bonus
+          if (bonus) expect(['careful', 'mean'], id).toContain(bonus.kind)
+          for (const design of [...DESIGNS, 'classic']) {
+            for (const fmt of [FORMATS.post, FORMATS.story]) {
+              const slides = deck('read', p, fmt, { design, length: '8', ending: 'pass' })
+              const where = `${id} ${lang} ${design} ${fmt.id}`
+              expect(slides.map(x => x.key), where).toEqual(['ask', 'words', 'answer', 'cta'])
+              const own = [p.funnel.translation, bonus?.text, ...words.flatMap(w => [w.main, w.sub, w.pos])].filter(Boolean)
+              slides.forEach((sl, k) => {
+                const { ctx, texts } = placedTexts()
+                sl.draw(ctx)
+                const all = texts.map(x => x.t)
+                if (sl.key === 'words') {
+                  for (const w of words) {
+                    if (w.ro) expect(all, `${where} ${w.t}`).toContain(w.ro)
+                    if (firstSense(w.main)) expect(all.join(' '), `${where} ${w.t}`).toContain(firstSense(w.main).split(' ')[0])
+                  }
+                }
+                if (sl.key === 'answer') expect(all.join(' '), where).toContain(p.funnel.translation.split(' ')[0])
+                if (k === 3) return
+                for (const x of texts) {
+                  const at = `${where} ${sl.key} ${x.t}`
+                  expect(x.y - x.z * 0.85, at).toBeGreaterThanOrEqual(fmt.safe.t - 1)
+                  expect(x.y + x.z * 0.25, at).toBeLessThanOrEqual(fmt.h - fmt.safe.b + 1)
+                  expect(x.t.endsWith('…') && !own.some(o => o.includes(x.t)), at).toBe(false)
+                }
+              })
+              drawn += 1
+            }
+          }
+        }
+      }
+    } finally { globalThis.Path2D = had }
+    expect(drawn).toBeGreaterThan(500)
+    // Only a sentence of the reading bank is read so.
+    const data = bank('words-N5.json')
+    const wp = plan('word', data, itemsOf('word', data, 'en')[0].id, OPTS, depsFor(SOURCES.find(x => x.id === 'word'), data, itemsOf('word', data, 'en')[0].id))
+    expect(available('read', wp)).toBe(false)
   })
 })
 

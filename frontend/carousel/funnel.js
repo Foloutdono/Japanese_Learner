@@ -44,6 +44,7 @@ export const WORDS = {
     count: n => `Count to ${NUM.en[n] || n}, then swipe.`,
     swipe: 'Swipe for the answer',
     answer: 'The answer',
+    bonus: 'Bonus',
     analyser: 'As Tsuji’s analyser cuts it',
     meaning: 'Meaning',
     detail: {
@@ -93,6 +94,7 @@ export const WORDS = {
     count: n => `Compte jusqu’à ${NUM.fr[n] || n}, puis glisse.`,
     swipe: 'Glisse pour la réponse',
     answer: 'La réponse',
+    bonus: 'Bonus',
     analyser: 'Découpée par l’analyseur de Tsuji',
     meaning: 'Sens',
     detail: {
@@ -165,7 +167,8 @@ const FEATURE_OF = {
 const whyOf = q => q.explain?.why || (q.explain?.head && q.explain?.sense ? `${q.explain.head}: ${q.explain.sense}` : '')
 export function funnelOf(type, pl, opts = {}) {
   const spec = specOf(type, pl, opts)
-  if (!spec || !SENTENCED.has(pl.source)) return spec
+  // Read it (plan 253) deals its words before its answer, its own way.
+  if (!spec || !SENTENCED.has(pl.source) || type === 'read') return spec
   // A sentence's carousel breaks the sentence down whole after the call
   // to action, word by word, and asks nothing more (plan 234d): the
   // type's own detail follows it where it is not a question nor the same
@@ -190,6 +193,7 @@ function specOf(type, pl, opts) {
     notes: (whys(qs).length ? as('why', whys(qs)) : base.notes).slice(0, 3),
   } : null
   switch (type) {
+    case 'read': return readable(pl) ? readSpec(pl, base) : null
     case 'exam': return asked(withoutGiveaways(picked(pl, opts.picks, 3)))
     case 'spelling': return pl.spelling?.length ? asked(pl.spelling.slice(0, 3)) : null
     case 'compare': {
@@ -355,6 +359,15 @@ export function funnelDeck(type, pl, fmt, opts = {}) {
   const n = LENGTHS.includes(+opts.length) ? +opts.length : 5
   const feature = FEATURES.includes(opts.feature) ? opts.feature : spec.feature
   const look = lookOf(design, fmt, pl)
+  // Read it (plan 253): the sentence, its words, the answer, the app; whatever the length.
+  if (type === 'read') {
+    return [
+      { key: 'ask', fn: c => hookSlide(c, spec.hook) },
+      { key: 'words', fn: c => detailSlide(c, spec.words) },
+      { key: 'answer', fn: c => solutionSlide(c, spec.solution) },
+      { key: 'cta', fn: c => ctaSlide(c, feature) },
+    ].map(sl => ({ key: sl.key, draw: ctx => sl.fn(context(ctx, look)) }))
+  }
   const out = [
     { key: 'ask', fn: c => hookSlide(c, spec.hook) },
     { key: 'answer', fn: c => solutionSlide(c, spec.solution) },
@@ -1116,6 +1129,132 @@ function stackOf(blocks, gaps) {
   return { h, cut: list.some(x => x.b.cut), draw: y => { let at = y; list.forEach((x, i) => { if (i) at += x.gap; x.b.draw(at); at += x.b.h }) } }
 }
 
+// ── Read it (plan 253) ────────────────────────────────────────
+// A reading challenge seen in a feed, drawn in the app's looks: the
+// sentence to read; its words, a card each; the answer, its romaji under
+// each word, what it says, and a bonus; then the app. The bonus is the
+// catalogue's own line on the sentence's point (the mistake to avoid, else
+// what it means), never one written here, nor the line the breakdown
+// writes of its own.
+const READ_MAX = 7
+/** Whether a sentence can be read word by word on one slide. */
+export const readable = pl => pl.source === 'sentence' && !!pl.funnel?.translation && (pl.funnel.breakdown || []).length > 0 && pl.funnel.breakdown.length <= READ_MAX
+function readSpec(pl, base) {
+  const f = pl.funnel
+  // The mistake to avoid where it says it in a few lines, else what the point means.
+  const notes = f.notes || []
+  const bonus = notes.find(n => n.kind === 'careful' && n.text.length <= 180) || notes.find(n => n.kind === 'mean') || notes.find(n => n.kind === 'careful') || null
+  return {
+    ...base,
+    hook: { kind: 'sentence', rows: f.rows, ask: 'read', seconds: 5, swipe: true },
+    words: { kind: 'cards', items: f.breakdown, label: 'words' },
+    solution: { kind: 'reading', rows: f.rows, translation: f.translation, bonus },
+  }
+}
+/** A sentence's words, a card each: a bar in its line's colour, the word
+ *  with its furigana and its romaji, what it says on the right, glossed
+ *  from the deck or left bare. */
+function cardsBlock(c, items, { x, w, maxH }) {
+  const { ctx, p } = c
+  if (!items?.length) return none
+  // Tighter as the words grow many: five stay at a size read from afar.
+  const gap = items.length > 4 ? SP[3] : SP[4]
+  const pad = items.length > 4 ? SP[4] : SP[5]
+  const bar = EDGE * 2
+  let lay = null
+  let firstFit = null
+  for (const z of [FS.heading, FS.title, FS.lead, FS.body, FS.sm]) {
+    const rz = Math.max(FS.caption, z * 0.5)
+    const mz = Math.max(FS.sm, z * 0.74)
+    const sz = Math.max(FS.caption, z * 0.5)
+    const cards = items.map(it => {
+      const row = { t: it.t, k: 'word', fu: it.kanji ? it.fu : null }
+      const L = layoutSentence(ctx, [row], { max: z, min: z * 0.7, maxW: w * 0.5, maxLines: 1, script: it.kanji ? 'furigana' : 'kanji', rules: false, gap: 0, fam: 'jp', weight: 700 })
+      const lw = Math.max(L.lineW(L.lines[0]), measure(ctx, it.ro || '', font(500, rz, 'latin')))
+      const rightW = Math.max(w * 0.3, w - pad * 2 - bar - SP[5] - lw - SP[6])
+      const main = firstSense(it.main)
+      const sub = it.sub || it.pos || ''
+      // A size down, then a line more, before anything is cut.
+      const say = (str, weight, tries) => tries.map(([lines, zs]) => fit(ctx, str, { weight, sizes: zs, maxW: rightW, maxLines: lines, balanced: false })).find(b => !b.cut)
+        || fit(ctx, str, { weight, sizes: tries.at(-1)[1], maxW: rightW, maxLines: tries.at(-1)[0], balanced: false })
+      const m = main ? say(main, 700, [[2, [mz, mz * 0.85]], [3, [mz * 0.85, FS.sm]]]) : null
+      const sb = sub ? say(sub, 500, [[2, [sz, FS.caption]], [3, [FS.caption, FS.xs]]]) : null
+      const left = L.h + SP[1] + rz * 1.1
+      const right = (m ? paragraphH(m) : 0) + (sb ? SP[1] + paragraphH(sb) : 0)
+      return { it, L, rz, m, sb, h: pad * 2 + Math.max(left, right), right }
+    })
+    const total = cards.reduce((a, cd) => a + cd.h, 0) + gap * (cards.length - 1)
+    const cut = cards.some(cd => cd.m?.cut || cd.sb?.cut)
+    lay = { cards, total, cut }
+    if (total <= maxH && !cut) break
+    if (total <= maxH) firstFit ||= lay
+  }
+  if (firstFit && (lay.total > maxH || lay.cut)) lay = firstFit
+  return {
+    h: lay.total,
+    cut: lay.cut,
+    draw: y => {
+      let at = y
+      for (const cd of lay.cards) {
+        card(c, x, at, w, cd.h)
+        ctx.fillStyle = cd.it.line === 'grammar' ? p.line.grammar : p.line.vocab
+        rrect(ctx, x + pad, at + pad, bar, cd.h - pad * 2, bar / 2)
+        ctx.fill()
+        const lx = x + pad + bar + SP[5]
+        const ly = at + (cd.h - (cd.L.h + SP[1] + cd.rz * 1.1)) / 2
+        drawSentence(ctx, cd.L, lx, ly, 'left', () => ({ ink: p.ink, ruby: p.ink2, rule: null }))
+        text(ctx, cd.it.ro || '', lx, ly + cd.L.h + SP[1] + cd.rz * 0.85, { f: font(500, cd.rz, 'latin'), color: p.ink2 })
+        let ry = at + (cd.h - cd.right) / 2
+        if (cd.m) ry += paragraph(ctx, cd.m, x + w - pad, ry, p.ink, 'right')
+        if (cd.sb) paragraph(ctx, cd.sb, x + w - pad, ry + SP[1], p.ink2, 'right')
+        at += cd.h + gap
+      }
+    },
+  }
+}
+/** The answer, read: the sentence with each word's romaji under it, what
+ *  it says in the line's colour, and the bonus on a card of its own. */
+function readingBlock(c, s, { x, w, maxH }) {
+  let out = none
+  let firstFit = null
+  for (let k = 0; k < 4; k++) {
+    const z = i => RUNGS[Math.min(RUNGS.length - 1, i + k)]
+    const bonus = s.bonus ? bonusBlock(c, s.bonus, { x, w, sizes: [z(4), z(5), FS.sm] }) : none
+    const tr = textBlock(c, quoted(c.lang, s.translation), { x, w, sizes: [z(1), z(2), z(3)], color: c.line, maxLines: 3 })
+    const gap = k < 2 ? SP[7] : SP[5]
+    const sent = sentenceBlock(c, s.rows, { x, w, maxH: maxH - tr.h - bonus.h - gap * 2, max: z(1), min: z(3), script: 'furigana', romaji: true, fewest: true })
+    out = stackOf([sent, tr, bonus], [gap, gap])
+    if (out.h > maxH) continue
+    if (!tr.cut && !bonus.cut) return out
+    firstFit ||= out
+  }
+  return firstFit || out
+}
+/** The bonus: the point's own line on a card, dark on either ground. */
+function bonusBlock(c, note, { x, w, sizes }) {
+  const { ctx, p } = c
+  const S = palette('sumi')
+  const fill = p.paper ? S.panel : cardInk(p)
+  const ink = p.paper ? S.ink : p.ink
+  const gold = p.paper ? S.gold : p.gold
+  const pad = SP[6]
+  const hz = FS.caption
+  const head = weld(c.lang, `${c.W.bonus} · ${c.W.kinds[note.kind]?.[1] || ''}`).toLocaleUpperCase()
+  const say = (lines, zs) => fit(ctx, weld(c.lang, note.text), { weight: 500, sizes: zs, maxW: w - pad * 2, maxLines: lines, lh: 1.25, balanced: false })
+  const five = say(5, sizes)
+  const tb = five.cut ? say(8, [FS.sm, FS.caption]) : five
+  const h = pad * 2 + hz * 1.2 + SP[4] + paragraphH(tb, 1.25)
+  return {
+    h,
+    cut: !!tb.cut,
+    draw: y => {
+      card(c, x, y, w, h, R.card * 2, fill)
+      text(ctx, head, x + pad, y + pad + hz * 0.85, { f: font(700, hz, 'latin'), color: gold, tr: 0.18 })
+      paragraph(ctx, tb, x + pad, y + pad + hz * 1.2 + SP[4], ink, 'left', 1.25)
+    },
+  }
+}
+
 // ── The detail ────────────────────────────────────────────────
 // ── A sentence word by word (plan 234d) ───────────────────────
 /** A gloss's first sense, its brackets left off: what a word says in a
@@ -1686,6 +1825,8 @@ function content(c, s, box) {
     case 'chat': return chatBlock(c, s.lines, { ...box, them: s.them })
     case 'apart': return apartBlock(c, s.chars, box)
     case 'kanas': return kanasBlock(c, s, box)
+    case 'cards': return cardsBlock(c, s.items, box)
+    case 'reading': return readingBlock(c, s, box)
     default: return none
   }
 }
@@ -1752,8 +1893,8 @@ function hookLayout(c, s, { ask, secs, compact, centred }) {
         if (compact) kicker(c, ask, fr.cx, top, 'center')
         else head.draw(top)
         place(c, b, y, bottom)
-        // The way on to the answer, as the next question says it (plan 245).
-        pill(c, weld(c.lang, W.yoursFoot), fr.cx, fr.bottom - 92)
+        // The way on to the answer, as the next question says it (plan 245); Read it's, as the feed says it (plan 253).
+        pill(c, weld(c.lang, s.swipe ? W.swipe : W.yoursFoot), fr.cx, fr.bottom - 92)
       },
     }
   }

@@ -1,4 +1,4 @@
-# The carousel studio (plans 229–229n, 231–235, 237, 247–252)
+# The carousel studio (plans 229–229n, 231–235, 237, 247–253)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -157,6 +157,7 @@ the content for (the studio greys out the others).
 | 会話 | Conversation | the tour's scene line by line, then "what do you say?" | a lesson with a scene |
 | 表記 | Kanji spelling | the word and up to four words of its level that share a kanji with it, each heard in kana and asked how it is written (among spellings that are no word), then the sheet | a word with a kanji spelling to ask |
 | 仲間外れ | Find the impostor | three rounds of six words: five of the theme and one from another theme no word of it could be mistaken for (fruits and vegetables, birds and insects), each asked, then answered with every word's meaning and the impostor circled | a theme |
+| 一読 | Read it | four slides, always (plan 253, after a reading challenge the owner saw in a feed): the sentence alone, "Can you read it?" and the way to swipe; its words, a card each (the line's bar, the word with its furigana and romaji, what it says from the deck or bare); the answer, its romaji under each word, what it says in the line's colour, and a bonus card, the catalogue's own line on its point (the mistake to avoid where it is short, else what it means, never the breakdown's own line); then the app's call to action. Drawn in the look picked (Clarté where the studio says Classic), never on an ending | a reading-bank sentence of seven words at most |
 
 ## The last slide
 
