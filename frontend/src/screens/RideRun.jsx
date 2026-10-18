@@ -19,6 +19,7 @@ import { normalizeCard, wordForm } from '../domain/cardShape'
 import { useProfileSummary } from '../stores/profileSummary'
 import { startTally, countReview } from '../stores/runTally'
 import { useDesk } from '../hooks/useDesk'
+import { useBackGuard } from '../hooks/useBackGuard'
 import { EnterKey } from '../components/chrome/DeskKeys'
 import { SessionPanel } from '../components/study/SessionPanel'
 import { CardPanel } from '../components/study/CardPanel'
@@ -62,6 +63,14 @@ import { LookupWatchContext } from '../components/study/lookupWatch'
 // not need ninety seconds of this, and whether people skip is the one
 // question the feature has to answer (ride_done's `skipped`).
 //
+// On the first ride (`first`, App's rideDue) the browser's Back is that
+// ‹ too. The entry behind the ride is the front door, which boarded it
+// again from the start (reported 2026-10-17), so Back is held
+// (hooks/useBackGuard.js) and skips as the head does, ride_done and
+// all -- unless the card's entry is open, which that Back closes, as
+// its scrim does. A ride taken again from Settings › Help has the page
+// it came from behind it, and Back goes there.
+//
 // `covered` is App's word for "the 改札 cutscene is still playing over
 // the router": the ride's first paint is under that scrim, so the
 // stopwatch and the known card's sound wait for it. `dryRun` is the
@@ -102,7 +111,7 @@ function rideCard(card, latin) {
   }
 }
 
-export default function RideRun({ session, onDone, onNext = null, covered = false, dryRun = false, cards: given = null }) {
+export default function RideRun({ session, onDone, onNext = null, covered = false, first = false, dryRun = false, cards: given = null }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
   const desk = useDesk()
@@ -125,6 +134,10 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
   const watches = useRef(null)
   const holdTimer = useRef(null)
   const finished = useRef(false)
+  // Back on the first ride: the head's Skip (above). Read once, since
+  // the ride's own stamp turns App's answer on the way out.
+  const [held] = useState(first)
+  const release = useBackGuard(held, () => finish(true))
 
   useEffect(() => {
     document.title = `${t.rideDocumentTitle} — ${t.appTitle}`
@@ -171,7 +184,7 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
       // On to the reading ride; the lesson's stamp is its plate's.
       mark(step, 'reading')
       if (onNext) onNext()
-      else navigate(RIDE_NEXT, { replace: true })
+      else release().then(() => navigate(RIDE_NEXT, { replace: true }))
       return
     }
     track('ride_done', { skipped: true, at: 'cards', ms: watches.current?.total.read() ?? 0 })
@@ -185,7 +198,7 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
     // Skip and nothing else.
     stamped.then(() => {
       onDone?.()
-      if (!dryRun) navigate('/today', { replace: true })
+      if (!dryRun) release().then(() => navigate('/today', { replace: true }))
     })
   }
 
@@ -196,8 +209,8 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
     if (!failed || finished.current) return
     finished.current = true
     onDone?.()
-    if (!dryRun) navigate('/today', { replace: true })
-  }, [failed, navigate, onDone, dryRun])
+    if (!dryRun) release().then(() => navigate('/today', { replace: true }))
+  }, [failed, navigate, onDone, dryRun, release])
 
   const card = cards?.[index] ?? null
   const nc = rideCard(card, latin)

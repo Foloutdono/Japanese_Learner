@@ -399,6 +399,71 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
     expect($('.anl-subs__count').textContent).toContain('2 / 2')
   })
 
+  // On a poor connection the video stops to load more: the learner has
+  // not paused it, so the bar still offers Pause and Pause pauses it; but
+  // its clock stands, and the line and its words stand with it.
+  it('takes a stall to load more for playing, its clock stopped', async () => {
+    await openVideo()
+    player.last.onPlayingChange(true, true)
+    player.last.onTimeUpdate(39.8)
+    player.last.onPlayingChange(true, false)
+    await settle(30)
+    const main = $('.anl-player__btn--main')
+    expect(main.getAttribute('aria-label')).toBe('Pause')
+    await settle(600)
+    expect($('.anl-subs__count').textContent).toContain('1 / 2')
+    main.click()
+    expect(spies.pause).toHaveBeenCalledTimes(1)
+    expect(spies.play).not.toHaveBeenCalled()
+  })
+
+  it('stops at a sentence\'s end once the video has got there, not while it loads', async () => {
+    await openVideo()
+    $('button[aria-label="Pause à la fin de chaque phrase"]').click()
+    await settle(30)
+    player.last.onPlayingChange(true, true)
+    player.last.onTimeUpdate(39.5)
+    player.last.onTimeUpdate(39.75)
+    player.last.onPlayingChange(true, false)
+    await settle(400)
+    expect(spies.pause).not.toHaveBeenCalled()
+    player.last.onPlayingChange(true, true)
+    player.last.onTimeUpdate(39.8)
+    await expect.poll(() => spies.pause.mock.calls.length, { timeout: 1000 }).toBe(1)
+  })
+
+  // A seek into what the player has not loaded is answered only once it
+  // has, seconds later on a poor connection, and until then the player
+  // reads where the video was. The line, its words and the bar's clock
+  // stand on the stop picked meanwhile -- the clock does not send the
+  // line back there when 追従 is given back.
+  it('stands on a stop picked far down the line while the player gets there', async () => {
+    session = LONG
+    await openVideo()
+    const time = () => $('.anl-pbar .anl-player__time').textContent
+    player.last.onPlayingChange(true, true)
+    player.last.onTimeUpdate(37)
+    await expect.poll(time).toBe('0:37 / 3:04')
+    // Line 20 is at 1:56.
+    $$('.anl-desk__rail .anl-stop')[19].click()
+    await settle(30)
+    expect(spies.seekTo).toHaveBeenLastCalledWith(116)
+    await expect.poll(time).toBe('1:56 / 3:04')
+    $('button[aria-label="Suivre la vidéo"]').click()
+    player.last.onTimeUpdate(37.25)
+    player.last.onPlayingChange(true, false)
+    player.last.onTimeUpdate(37.25)
+    await settle(300)
+    expect($('.anl-subs__count').textContent).toContain('20 / 36')
+    expect(time()).toBe('1:56 / 3:04')
+    // There: the clock goes on from it.
+    player.last.onTimeUpdate(116.1)
+    player.last.onPlayingChange(true, true)
+    player.last.onTimeUpdate(116.3)
+    await settle(60)
+    expect($('.anl-subs__count').textContent).toContain('20 / 36')
+  })
+
   it('reads the words out on the times the line carries', async () => {
     session = {
       ...SESSION,
