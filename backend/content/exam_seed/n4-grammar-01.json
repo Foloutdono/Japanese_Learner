@@ -511,22 +511,22 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "ても"
-             },
-             {
-              "id": "c2",
               "textJp": "けれど"
              },
              {
+              "id": "c2",
+              "textJp": "ても"
+             },
+             {
               "id": "c3",
-              "textJp": "まま"
+              "textJp": "ので"
              },
              {
               "id": "c4",
-              "textJp": "ので"
+              "textJp": "まま"
              }
             ],
-            "answer": "c4"
+            "answer": "c3"
            },
            {
             "id": "bunpou_3_b3",
@@ -534,7 +534,7 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "より"
+              "textJp": "だけ"
              },
              {
               "id": "c2",
@@ -542,14 +542,14 @@
              },
              {
               "id": "c3",
-              "textJp": "しか"
+              "textJp": "より"
              },
              {
               "id": "c4",
-              "textJp": "だけ"
+              "textJp": "しか"
              }
             ],
-            "answer": "c3"
+            "answer": "c4"
            },
            {
             "id": "bunpou_3_b4",
@@ -561,11 +561,11 @@
              },
              {
               "id": "c2",
-              "textJp": "ことに"
+              "textJp": "ために"
              },
              {
               "id": "c3",
-              "textJp": "ために"
+              "textJp": "ことに"
              },
              {
               "id": "c4",
@@ -1650,22 +1650,22 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "まで"
-             },
-             {
-              "id": "c2",
-              "textJp": "ずつ"
-             },
-             {
-              "id": "c3",
               "textJp": "から"
              },
              {
-              "id": "c4",
+              "id": "c2",
+              "textJp": "まで"
+             },
+             {
+              "id": "c3",
               "textJp": "ほど"
+             },
+             {
+              "id": "c4",
+              "textJp": "ずつ"
              }
             ],
-            "answer": "c1"
+            "answer": "c2"
            },
            {
             "id": "bunpou_3_b2",
@@ -1696,22 +1696,22 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "ために"
+              "textJp": "のは"
              },
              {
               "id": "c2",
-              "textJp": "まえに"
+              "textJp": "ために"
              },
              {
               "id": "c3",
-              "textJp": "ように"
+              "textJp": "まえに"
              },
              {
               "id": "c4",
-              "textJp": "のは"
+              "textJp": "ように"
              }
             ],
-            "answer": "c4"
+            "answer": "c1"
            },
            {
             "id": "bunpou_3_b4",
@@ -1719,11 +1719,11 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "のように"
+              "textJp": "みたいな"
              },
              {
               "id": "c2",
-              "textJp": "みたいな"
+              "textJp": "のための"
              },
              {
               "id": "c3",
@@ -1731,10 +1731,10 @@
              },
              {
               "id": "c4",
-              "textJp": "のための"
+              "textJp": "のように"
              }
             ],
-            "answer": "c1"
+            "answer": "c4"
            }
           ]
          }
@@ -2254,22 +2254,22 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "たら"
-             },
-             {
-              "id": "c2",
-              "textJp": "ずに"
-             },
-             {
-              "id": "c3",
               "textJp": "ても"
              },
              {
-              "id": "c4",
+              "id": "c2",
               "textJp": "ないで"
+             },
+             {
+              "id": "c3",
+              "textJp": "たら"
+             },
+             {
+              "id": "c4",
+              "textJp": "ずに"
              }
             ],
-            "answer": "c1"
+            "answer": "c3"
            },
            {
             "id": "bunpou_3_b3",
@@ -2277,22 +2277,22 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "作るまえに"
+              "textJp": "作りながら"
              },
              {
               "id": "c2",
-              "textJp": "作ったので"
-             },
-             {
-              "id": "c3",
               "textJp": "作りすぎて"
              },
              {
+              "id": "c3",
+              "textJp": "作るまえに"
+             },
+             {
               "id": "c4",
-              "textJp": "作りながら"
+              "textJp": "作ったので"
              }
             ],
-            "answer": "c4"
+            "answer": "c1"
            },
            {
             "id": "bunpou_3_b4",
@@ -2839,18 +2839,18 @@
              },
              {
               "id": "c2",
-              "textJp": "まえに"
+              "textJp": "なら"
              },
              {
               "id": "c3",
-              "textJp": "ので"
+              "textJp": "まえに"
              },
              {
               "id": "c4",
-              "textJp": "なら"
+              "textJp": "ので"
              }
             ],
-            "answer": "c3"
+            "answer": "c4"
            },
            {
             "id": "bunpou_3_b3",
@@ -2881,22 +2881,22 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "ことにした"
-             },
-             {
-              "id": "c2",
-              "textJp": "ことがある"
-             },
-             {
-              "id": "c3",
               "textJp": "ところだ"
              },
              {
-              "id": "c4",
+              "id": "c2",
               "textJp": "ままだ"
+             },
+             {
+              "id": "c3",
+              "textJp": "ことにした"
+             },
+             {
+              "id": "c4",
+              "textJp": "ことがある"
              }
             ],
-            "answer": "c1"
+            "answer": "c3"
            }
           ]
          }
@@ -3348,16 +3348,16 @@
           "contextJp": "A「このレストランのカレー、おいしいですね。」",
           "pieces": [
            {
+            "id": "p3",
+            "textJp": "カレーの"
+           },
+           {
             "id": "p1",
             "textJp": "でも、母が"
            },
            {
             "id": "p2",
             "textJp": "作った"
-           },
-           {
-            "id": "p3",
-            "textJp": "カレーの"
            },
            {
             "id": "p4",
@@ -3393,22 +3393,22 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "前に"
+              "textJp": "まで"
              },
              {
               "id": "c2",
-              "textJp": "と"
+              "textJp": "前に"
              },
              {
               "id": "c3",
-              "textJp": "ほど"
+              "textJp": "と"
              },
              {
               "id": "c4",
-              "textJp": "まで"
+              "textJp": "ほど"
              }
             ],
-            "answer": "c1"
+            "answer": "c2"
            },
            {
             "id": "bunpou_3_b2",
@@ -3420,18 +3420,18 @@
              },
              {
               "id": "c2",
-              "textJp": "して"
+              "textJp": "しないで"
              },
              {
               "id": "c3",
-              "textJp": "しないで"
+              "textJp": "して"
              },
              {
               "id": "c4",
               "textJp": "したり"
              }
             ],
-            "answer": "c2"
+            "answer": "c3"
            },
            {
             "id": "bunpou_3_b3",
@@ -3997,22 +3997,22 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "ときに"
+              "textJp": "ために"
              },
              {
               "id": "c2",
-              "textJp": "ように"
-             },
-             {
-              "id": "c3",
               "textJp": "までに"
              },
              {
+              "id": "c3",
+              "textJp": "ときに"
+             },
+             {
               "id": "c4",
-              "textJp": "ために"
+              "textJp": "ように"
              }
             ],
-            "answer": "c2"
+            "answer": "c4"
            },
            {
             "id": "bunpou_3_b3",
@@ -4043,22 +4043,22 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "多くても"
-             },
-             {
-              "id": "c2",
-              "textJp": "少ないので"
-             },
-             {
-              "id": "c3",
               "textJp": "多いから"
              },
              {
-              "id": "c4",
+              "id": "c2",
               "textJp": "多いのに"
+             },
+             {
+              "id": "c3",
+              "textJp": "多くても"
+             },
+             {
+              "id": "c4",
+              "textJp": "少ないので"
              }
             ],
-            "answer": "c3"
+            "answer": "c1"
            }
           ]
          }
@@ -4555,22 +4555,22 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "からの"
+              "textJp": "のような"
              },
              {
               "id": "c2",
-              "textJp": "のための"
+              "textJp": "からの"
              },
              {
               "id": "c3",
-              "textJp": "のような"
+              "textJp": "のための"
              },
              {
               "id": "c4",
               "textJp": "のあとの"
              }
             ],
-            "answer": "c2"
+            "answer": "c3"
            },
            {
             "id": "bunpou_3_b2",
@@ -5136,22 +5136,22 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "か"
-             },
-             {
-              "id": "c2",
               "textJp": "ので"
              },
              {
-              "id": "c3",
+              "id": "c2",
               "textJp": "と"
              },
              {
-              "id": "c4",
+              "id": "c3",
               "textJp": "が"
+             },
+             {
+              "id": "c4",
+              "textJp": "か"
              }
             ],
-            "answer": "c4"
+            "answer": "c3"
            },
            {
             "id": "bunpou_3_b2",
@@ -5159,22 +5159,22 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "おきます"
-             },
-             {
-              "id": "c2",
-              "textJp": "あります"
-             },
-             {
-              "id": "c3",
               "textJp": "しまいます"
              },
              {
-              "id": "c4",
+              "id": "c2",
               "textJp": "みます"
+             },
+             {
+              "id": "c3",
+              "textJp": "おきます"
+             },
+             {
+              "id": "c4",
+              "textJp": "あります"
              }
             ],
-            "answer": "c2"
+            "answer": "c4"
            },
            {
             "id": "bunpou_3_b3",
@@ -5186,7 +5186,7 @@
              },
              {
               "id": "c2",
-              "textJp": "前に"
+              "textJp": "あいだ"
              },
              {
               "id": "c3",
@@ -5194,10 +5194,10 @@
              },
              {
               "id": "c4",
-              "textJp": "あいだ"
+              "textJp": "前に"
              }
             ],
-            "answer": "c2"
+            "answer": "c4"
            },
            {
             "id": "bunpou_3_b4",
@@ -5717,11 +5717,11 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "から"
+              "textJp": "まで"
              },
              {
               "id": "c2",
-              "textJp": "まで"
+              "textJp": "に"
              },
              {
               "id": "c3",
@@ -5729,10 +5729,10 @@
              },
              {
               "id": "c4",
-              "textJp": "に"
+              "textJp": "から"
              }
             ],
-            "answer": "c1"
+            "answer": "c4"
            },
            {
             "id": "bunpou_3_b2",

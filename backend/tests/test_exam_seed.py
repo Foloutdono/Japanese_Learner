@@ -112,6 +112,17 @@ def test_keys_that_step_through_the_slots_are_not_a_seed():
     assert exam_seed.rotation_tells([_paper_of(_cycling(12))]) == []      # too few steps to say
 
 
+def test_a_sentence_order_item_shown_in_its_right_order_is_not_a_seed_and_is_re_placed():
+    paper = _first("n4-grammar-01")
+    q = next(q for m in paper["sections"][0]["mondai"] for q in m["questions"] if "pieces" in q)
+    q["pieces"] = sorted(q["pieces"], key=lambda p: q["order"].index(p["id"]))
+    assert _about(exam_seed.problems("n4-grammar-01", paper), q["id"], "right order")
+    data = {"examId": "n4-grammar-01", "papers": [{"n": 1, "paper": paper}]}
+    assert exam_seed.reslot(data) >= 1
+    assert not _about(exam_seed.problems("n4-grammar-01", paper), q["id"], "right order")
+    assert q["order"] and sorted(p["id"] for p in q["pieces"]) == sorted(q["order"])      # same pieces, same answer
+
+
 def test_reslot_moves_the_keys_and_nothing_else():
     paper = _paper_of(_cycling(50))
     before = _words(paper)

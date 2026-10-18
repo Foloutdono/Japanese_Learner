@@ -136,6 +136,8 @@ def problems(exam_id: str, paper: dict) -> list[str]:
     for q in flat:
         if "pieces" in q and q.get("starIndex") not in (1, 2):
             out.append(f"{q.get('id')}: the ★ is on the first or last piece, answered by punctuation")
+        if "pieces" in q and [p.get("id") for p in q["pieces"]] == q.get("order"):
+            out.append(f"{q.get('id')}: the pieces are shown in their right order, so the sentence reads top to bottom")
     out += choice_tells(paper, level)
     out += kanji_item_problems(paper, level)
     out += item_shape_problems(paper, level)
@@ -345,13 +347,24 @@ def rotation_tells(papers: list[dict]) -> list[str]:
 
 def reslot(data: dict) -> int:
     """Move the keys of every mondai `rotation_tells` names to a balanced,
-    unpatterned set of slots, in place, and return how many questions were
-    moved. Position only: no choice's text changes and the same one is still
+    unpatterned set of slots, and the pieces of a sentence-order item shown
+    in their right order out of it, in place, and return how many questions
+    were moved. Position only: no choice's text changes and the same one is still
     the key, so nothing that reads the content can tell this ran. The
     result is seeded by the exam id and the mondai, so it is repeatable."""
     papers = [entry["paper"] for entry in data["papers"]]
     flagged = {m.split(":", 1)[0] for m in rotation_tells(papers)}
     moved = 0
+    # a sentence-order item shown in its right order reads top to bottom
+    for paper in papers:
+        for section in paper.get("sections") or []:
+            for m in section.get("mondai") or []:
+                for q in m.get("questions") or []:
+                    if "pieces" in q and [p.get("id") for p in q["pieces"]] == q.get("order"):
+                        rng = random.Random(f"{data.get('examId')}:{q.get('id')}:{paper.get('title')}")
+                        while [p.get("id") for p in q["pieces"]] == q["order"]:
+                            rng.shuffle(q["pieces"])
+                        moved += 1
     for mondai, runs in _key_runs(papers).items():
         if mondai not in flagged:
             continue

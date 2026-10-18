@@ -126,22 +126,22 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "にあって"
-           },
-           {
-            "id": "c2",
             "textJp": "にして"
            },
            {
+            "id": "c2",
+            "textJp": "にあって"
+           },
+           {
             "id": "c3",
-            "textJp": "とあれば"
+            "textJp": "ともなると"
            },
            {
             "id": "c4",
-            "textJp": "ともなると"
+            "textJp": "とあれば"
            }
           ],
-          "answer": "c2"
+          "answer": "c1"
          },
          {
           "id": "bunpou_5_q6",
@@ -524,14 +524,14 @@
              },
              {
               "id": "c3",
-              "textJp": "それでも"
+              "textJp": "すると"
              },
              {
               "id": "c4",
-              "textJp": "すると"
+              "textJp": "それでも"
              }
             ],
-            "answer": "c3"
+            "answer": "c4"
            },
            {
             "id": "bunpou_7_b5",
@@ -593,22 +593,22 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "ばこそ"
-           },
-           {
-            "id": "c2",
-            "textJp": "ばそれまで"
-           },
-           {
-            "id": "c3",
             "textJp": "ばきりがない"
            },
            {
-            "id": "c4",
+            "id": "c2",
             "textJp": "ばいい"
+           },
+           {
+            "id": "c3",
+            "textJp": "ばこそ"
+           },
+           {
+            "id": "c4",
+            "textJp": "ばそれまで"
            }
           ],
-          "answer": "c1"
+          "answer": "c3"
          },
          {
           "id": "bunpou_5_q2",
@@ -1033,7 +1033,7 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "ほど"
+              "textJp": "では"
              },
              {
               "id": "c2",
@@ -1041,14 +1041,14 @@
              },
              {
               "id": "c3",
-              "textJp": "では"
+              "textJp": "さえ"
              },
              {
               "id": "c4",
-              "textJp": "さえ"
+              "textJp": "ほど"
              }
             ],
-            "answer": "c3"
+            "answer": "c1"
            },
            {
             "id": "bunpou_7_b3",
@@ -1208,18 +1208,18 @@
            },
            {
             "id": "c2",
-            "textJp": "降ろうが降るまいが"
-           },
-           {
-            "id": "c3",
             "textJp": "降ったが最後"
            },
            {
-            "id": "c4",
+            "id": "c3",
             "textJp": "降るか降らないかで"
+           },
+           {
+            "id": "c4",
+            "textJp": "降ろうが降るまいが"
            }
           ],
-          "answer": "c2"
+          "answer": "c4"
          },
          {
           "id": "bunpou_5_q4",
@@ -1228,11 +1228,11 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "がてら"
+            "textJp": "ようにも"
            },
            {
             "id": "c2",
-            "textJp": "ようにも"
+            "textJp": "がてら"
            },
            {
             "id": "c3",
@@ -1276,11 +1276,11 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "ばいい"
+            "textJp": "ども"
            },
            {
             "id": "c2",
-            "textJp": "ばそれまでだ"
+            "textJp": "ばいい"
            },
            {
             "id": "c3",
@@ -1288,7 +1288,7 @@
            },
            {
             "id": "c4",
-            "textJp": "ども"
+            "textJp": "ばそれまでだ"
            }
           ],
           "answer": "c3"
@@ -1324,22 +1324,22 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "抜くといい抜かれるといい"
+            "textJp": "抜くなり抜かれるなり"
            },
            {
             "id": "c2",
-            "textJp": "抜こうが抜かれようが"
-           },
-           {
-            "id": "c3",
             "textJp": "抜きつ抜かれつ"
            },
            {
+            "id": "c3",
+            "textJp": "抜こうが抜かれようが"
+           },
+           {
             "id": "c4",
-            "textJp": "抜くなり抜かれるなり"
+            "textJp": "抜くといい抜かれるといい"
            }
           ],
-          "answer": "c3"
+          "answer": "c2"
          },
          {
           "id": "bunpou_5_q9",
@@ -1839,22 +1839,22 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "ないかぎり"
-           },
-           {
-            "id": "c2",
             "textJp": "ないばかりに"
            },
            {
-            "id": "c3",
+            "id": "c2",
             "textJp": "んばかりに"
            },
            {
-            "id": "c4",
+            "id": "c3",
             "textJp": "まいとして"
+           },
+           {
+            "id": "c4",
+            "textJp": "ないかぎり"
            }
           ],
-          "answer": "c3"
+          "answer": "c2"
          },
          {
           "id": "bunpou_5_q7",
@@ -2378,22 +2378,22 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "くせに"
+            "textJp": "ものを"
            },
            {
             "id": "c2",
-            "textJp": "ものなら"
+            "textJp": "くせに"
            },
            {
             "id": "c3",
-            "textJp": "ものだから"
+            "textJp": "ものなら"
            },
            {
             "id": "c4",
-            "textJp": "ものを"
+            "textJp": "ものだから"
            }
           ],
-          "answer": "c4"
+          "answer": "c1"
          },
          {
           "id": "bunpou_5_q6",
@@ -2699,22 +2699,22 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "といわれる"
-             },
-             {
-              "id": "c2",
               "textJp": "とばかりの"
              },
              {
-              "id": "c3",
+              "id": "c2",
               "textJp": "べき"
+             },
+             {
+              "id": "c3",
+              "textJp": "といわれる"
              },
              {
               "id": "c4",
               "textJp": "ゆえの"
              }
             ],
-            "answer": "c1"
+            "answer": "c3"
            },
            {
             "id": "bunpou_7_b2",
@@ -2845,11 +2845,11 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "なりの"
+            "textJp": "にかたくない"
            },
            {
             "id": "c2",
-            "textJp": "にかたくない"
+            "textJp": "に足る"
            },
            {
             "id": "c3",
@@ -2857,10 +2857,10 @@
            },
            {
             "id": "c4",
-            "textJp": "に足る"
+            "textJp": "なりの"
            }
           ],
-          "answer": "c4"
+          "answer": "c2"
          },
          {
           "id": "bunpou_5_q2",
@@ -3061,22 +3061,22 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "ずくめの"
-           },
-           {
-            "id": "c2",
             "textJp": "ならではの"
            },
            {
+            "id": "c2",
+            "textJp": "ずくめの"
+           },
+           {
             "id": "c3",
-            "textJp": "あっての"
+            "textJp": "をおいての"
            },
            {
             "id": "c4",
-            "textJp": "をおいての"
+            "textJp": "あっての"
            }
           ],
-          "answer": "c3"
+          "answer": "c4"
          }
         ]
        },
@@ -3749,20 +3749,20 @@
           "contextJp": "",
           "pieces": [
            {
-            "id": "p1",
-            "textJp": "町きっての"
-           },
-           {
             "id": "p2",
             "textJp": "名医と言われた"
+           },
+           {
+            "id": "p4",
+            "textJp": "毎日大勢の患者が訪れた。"
            },
            {
             "id": "p3",
             "textJp": "祖父の診療所には、"
            },
            {
-            "id": "p4",
-            "textJp": "毎日大勢の患者が訪れた。"
+            "id": "p1",
+            "textJp": "町きっての"
            }
           ],
           "order": [
@@ -4434,22 +4434,22 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "のに"
-             },
-             {
-              "id": "c2",
-              "textJp": "うえに"
-             },
-             {
-              "id": "c3",
               "textJp": "からには"
              },
              {
-              "id": "c4",
+              "id": "c2",
               "textJp": "ばかりに"
+             },
+             {
+              "id": "c3",
+              "textJp": "うえに"
+             },
+             {
+              "id": "c4",
+              "textJp": "のに"
              }
             ],
-            "answer": "c1"
+            "answer": "c4"
            },
            {
             "id": "bunpou_7_b4",
@@ -4997,22 +4997,22 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "なら"
-             },
-             {
-              "id": "c2",
-              "textJp": "ものの"
-             },
-             {
-              "id": "c3",
               "textJp": "ので"
              },
              {
-              "id": "c4",
+              "id": "c2",
               "textJp": "わりに"
+             },
+             {
+              "id": "c3",
+              "textJp": "なら"
+             },
+             {
+              "id": "c4",
+              "textJp": "ものの"
              }
             ],
-            "answer": "c3"
+            "answer": "c1"
            },
            {
             "id": "bunpou_7_b4",
@@ -5121,22 +5121,22 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "きっての"
-           },
-           {
-            "id": "c2",
             "textJp": "ならではの"
            },
            {
-            "id": "c3",
+            "id": "c2",
             "textJp": "ずくめの"
+           },
+           {
+            "id": "c3",
+            "textJp": "きっての"
            },
            {
             "id": "c4",
             "textJp": "なりの"
            }
           ],
-          "answer": "c1"
+          "answer": "c3"
          },
          {
           "id": "bunpou_5_q3",
@@ -5145,22 +5145,22 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "とあって"
-           },
-           {
-            "id": "c2",
             "textJp": "と思いきや"
            },
            {
+            "id": "c2",
+            "textJp": "ともなく"
+           },
+           {
             "id": "c3",
-            "textJp": "とばかりに"
+            "textJp": "とあって"
            },
            {
             "id": "c4",
-            "textJp": "ともなく"
+            "textJp": "とばかりに"
            }
           ],
-          "answer": "c2"
+          "answer": "c1"
          },
          {
           "id": "bunpou_5_q4",
@@ -5217,7 +5217,7 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "をよそに"
+            "textJp": "をおいて"
            },
            {
             "id": "c2",
@@ -5229,10 +5229,10 @@
            },
            {
             "id": "c4",
-            "textJp": "をおいて"
+            "textJp": "をよそに"
            }
           ],
-          "answer": "c1"
+          "answer": "c4"
          },
          {
           "id": "bunpou_5_q7",
@@ -5241,11 +5241,11 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "だに"
+            "textJp": "なり"
            },
            {
             "id": "c2",
-            "textJp": "なり"
+            "textJp": "たりとも"
            },
            {
             "id": "c3",
@@ -5253,10 +5253,10 @@
            },
            {
             "id": "c4",
-            "textJp": "たりとも"
+            "textJp": "だに"
            }
           ],
-          "answer": "c1"
+          "answer": "c4"
          },
          {
           "id": "bunpou_5_q8",
@@ -5289,22 +5289,22 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "ずくめ"
-           },
-           {
-            "id": "c2",
             "textJp": "まみれ"
            },
            {
+            "id": "c2",
+            "textJp": "ならでは"
+           },
+           {
             "id": "c3",
-            "textJp": "ぐるみ"
+            "textJp": "ずくめ"
            },
            {
             "id": "c4",
-            "textJp": "ならでは"
+            "textJp": "ぐるみ"
            }
           ],
-          "answer": "c1"
+          "answer": "c3"
          },
          {
           "id": "bunpou_5_q10",
@@ -5541,18 +5541,18 @@
              },
              {
               "id": "c2",
-              "textJp": "まで"
-             },
-             {
-              "id": "c3",
               "textJp": "ばかり"
              },
              {
-              "id": "c4",
+              "id": "c3",
               "textJp": "など"
+             },
+             {
+              "id": "c4",
+              "textJp": "まで"
              }
             ],
-            "answer": "c4"
+            "answer": "c3"
            },
            {
             "id": "bunpou_7_b3",
@@ -5560,11 +5560,11 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "ところが"
+              "textJp": "なお"
              },
              {
               "id": "c2",
-              "textJp": "なお"
+              "textJp": "ところが"
              },
              {
               "id": "c3",
@@ -5575,7 +5575,7 @@
               "textJp": "それとも"
              }
             ],
-            "answer": "c2"
+            "answer": "c1"
            },
            {
             "id": "bunpou_7_b4",
@@ -5606,7 +5606,7 @@
             "choices": [
              {
               "id": "c1",
-              "textJp": "ばかりか"
+              "textJp": "うえに"
              },
              {
               "id": "c2",
@@ -5614,14 +5614,14 @@
              },
              {
               "id": "c3",
-              "textJp": "ので"
+              "textJp": "ばかりか"
              },
              {
               "id": "c4",
-              "textJp": "うえに"
+              "textJp": "ので"
              }
             ],
-            "answer": "c3"
+            "answer": "c4"
            }
           ]
          }
