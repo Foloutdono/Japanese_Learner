@@ -1,6 +1,6 @@
 import { useEffect, useSyncExternalStore } from 'react'
 
-// ── 運賃 — the day's fare, said at its beat (plan 247) ──────────────
+// ── 運賃 — the day's fare, said at its beat (plan 250) ──────────────
 // A review's XP reports to the pass the moment the summary moves
 // (components/chrome/useXpGain.js). The cleared day is the exception:
 // its bonus is paid into the summary as the server answers

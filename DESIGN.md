@@ -1621,11 +1621,11 @@ moments, three objects, none waiting to be dismissed:
 So nothing holds the queue. Every reward plays over the next card, because
 a learner who has just rated one card is already looking for the next.
 
-**The one ceremony: the cleared day (終着, plans 191, 247).** The owner's
+**The one ceremony: the cleared day (終着, plans 191, 250).** The owner's
 ruling on the canvas "Tsuji — the day cleared" (2026-10-07): clearing the
 day's queue is the app's biggest win — the learner showed up and finished —
 and it is the one moment that is a ceremony, played after the last card,
-when nothing is waiting. Since plan 247 (the owner's picks of "Tsuji — the
+when nothing is waiting. Since plan 250 (the owner's picks of "Tsuji — the
 day cleared, new directions", 2026-10-18) it plays **on Today's print
 itself and ends as Today**: the run comes back to the gate (`/today/clear`
 is the same screen), the phone's bars step away in their places while it
@@ -1650,7 +1650,7 @@ gate's, the gold ticket's foil is the pass's metal, and the cranes and the
 lanterns are drawn things with their own colours, as the print's are.
 The beats are `components/dayclear/useFinish.js`'s, the parts
 `FinishSky.jsx` and `FinishBoard.jsx` beside it, placed by
-`components/station/GateCard.jsx`; the CSS is the `247:finish` region of
+`components/station/GateCard.jsx`; the CSS is the `250:finish` region of
 `index.css`, over the kit's `191:primitives`, and `/dev/dayclear` plays
 every finish with no backend.
 

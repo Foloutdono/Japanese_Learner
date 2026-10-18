@@ -21,7 +21,7 @@ import { laneCount, laneTypeOf } from '../../domain/lanes'
 // Under the Shell (Today's bars) a short phone has less room than the
 // board: its rhythm gives way after the screen's air (two spacers in the
 // hero), and the foot -- today's card and the gate -- docks on the tab
-// bar as Today's does, so the gate never leaves the screen (plan 247b).
+// bar as Today's does, so the gate never leaves the screen (plan 250b).
 //
 // The entrance tells it once, on the board's own clock: the stations
 // arrive, the line runs to the day before the miss and stops there, the

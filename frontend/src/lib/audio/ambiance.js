@@ -47,7 +47,7 @@ import AMBIANCE from './ambiance.json'
 //     would be twice that), so only the hour playing is kept, never
 //     in the shared buffer cache.
 //
-//  6. **A print turned to another hour is heard at it** (plan 247b).
+//  6. **A print turned to another hour is heard at it** (plan 250b).
 //     The month's finish brings the night down on Today's print
 //     whatever the clock says (B3·b); while it stands the lake is the
 //     night's (holdAmbianceHour), crossfaded in and, when the hold is
@@ -190,7 +190,7 @@ export function startAmbiance() {
 }
 
 /** Hold the lake at `hour` over the clock's while a screen's print is
- *  turned to it (the month's night, plan 247b); the returned release
+ *  turned to it (the month's night, plan 250b); the returned release
  *  gives the clock its hour back. Both cross over. */
 export function holdAmbianceHour(hour) {
   const hold = { hour }

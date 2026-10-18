@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// ── 終着 — the day cleared, asked once a run (plans 191, 247) ─────────
+// ── 終着 — the day cleared, asked once a run (plans 191, 250) ─────────
 const api = vi.hoisted(() => ({ apiJson: vi.fn() }))
 const xp = vi.hoisted(() => ({ applyXpGain: vi.fn(), applyStreak: vi.fn() }))
 const today = vi.hoisted(() => ({ refreshToday: vi.fn(), refetchToday: vi.fn(() => Promise.resolve()) }))
@@ -61,7 +61,7 @@ describe('asking whether the day is cleared', () => {
     expect(today.refetchToday).toHaveBeenCalled()
   })
 
-  it('holds the answer until Today\'s summary has come again (plan 247)', async () => {
+  it('holds the answer until Today\'s summary has come again (plan 250)', async () => {
     // The finish plays on the gate, which must already say the day.
     let fetched
     today.refetchToday.mockReturnValueOnce(new Promise(r => { fetched = r }))

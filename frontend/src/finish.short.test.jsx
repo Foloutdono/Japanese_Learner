@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 終着 on a 1280×600 window (plan 247) ─────────────────────────────
+// ── 終着 on a 1280×600 window (plan 250) ─────────────────────────────
 // The finishes at rest on the short desk: what stands under the dial
 // (the week's stamps, the thread's key, the month's ticket and its rest
 // day) clear of the board over the gate, the gate in the window and

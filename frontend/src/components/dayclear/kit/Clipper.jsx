@@ -3,7 +3,7 @@ import { CLIPPER_ART, CLIPPER_VIEWBOX } from './clipperArt'
 
 // ── 改札鋏 — the ticket clipper (plan 191) ──────────────────────────
 // The gate clerk's punch, as the canvas drew it (clipper/clipper.py; the
-// month's gold ticket is clipped with it, plan 247): two crossed steel
+// month's gold ticket is clipped with it, plan 250): two crossed steel
 // arms on a rivet, in
 // along its own axis from the lower right, the jaws opening, biting the
 // ticket's edge at 34% of its one-second clock and parting at 55%, then

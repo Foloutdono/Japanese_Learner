@@ -10,7 +10,7 @@ import { useFare } from '../../stores/fare'
 // same frame the summary moves.
 //
 // The day cleared says its fare at its own beat (stores/fare.js, plan
-// 247): while a finish holds the fare, a rise is taken in silently,
+// 250): while a finish holds the fare, a rise is taken in silently,
 // and the fare it shows is reported whole -- the day's XP as one
 // figure, the bar lit from where it began.
 //

@@ -5,7 +5,7 @@ import '../../../index.css'
 import { InkFilters, WeekStamps, Slot, Odometer, Ticket, Clipper, ClipperChip, GateButton, ClearHeader } from './index'
 import { CLEAR_DAY } from '../fixtures'
 
-// ── 終着 — the ceremony's kit, drawn (plans 191, 247b) ──────────────
+// ── 終着 — the ceremony's kit, drawn (plans 191, 250b) ──────────────
 // The shared pieces of the canvas's kit.css that the finish, the
 // rest-day notice and the tickets draw: each its board's geometry from
 // the app's tokens.

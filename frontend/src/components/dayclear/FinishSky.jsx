@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { handOver } from '../station/print/liftPrint'
 import { rng } from './kit'
 
-// ── 終着 — what crosses the print on a milestone day (plan 247) ───────
+// ── 終着 — what crosses the print on a milestone day (plan 250) ───────
 // Drawn on Today's print in its units (components/station/print/
 // usePrint.js: --tpr-u pixels to the unit, the print's corner at
 // --tpr-x/--tpr-y), each in a box that clips to the print's room, so

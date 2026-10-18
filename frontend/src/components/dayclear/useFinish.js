@@ -5,7 +5,7 @@ import { showFare, useFareHold } from '../../stores/fare'
 import { useChromeAway } from '../../stores/stage'
 import { playArrival, playDayClear, playMilestone, playPassClip, playStamp } from '../../lib/audio'
 
-// ── 終着 — the day's run, finished on Today (plan 247) ─────────────────
+// ── 終着 — the day's run, finished on Today (plan 250) ─────────────────
 // The owner's picks of the canvas "Tsuji — the day cleared, new
 // directions" (2026-10-18): the finish plays on Today's print and ends
 // as Today, a kind of finish a timeline:

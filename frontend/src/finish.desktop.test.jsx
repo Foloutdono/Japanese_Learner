@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 終着 — the day's run, finished on Today, on the desk (plan 247) ───
+// ── 終着 — the day's run, finished on Today, on the desk (plan 250) ───
 // The desk keeps its rail while a finish plays (the phone's bars step
 // away, the rail never does); the gate's column draws the finish on the
 // print and the services' board comes back beside it at the chrome

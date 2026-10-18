@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { Sheet } from '../chrome/Sheet'
 import { DictionaryLookupSheet } from '../dictionary/DictionaryDetail'
 
-// ── 終着 — a pile's cards (plans 191, 247) ───────────────────────────
+// ── 終着 — a pile's cards (plans 191, 250) ───────────────────────────
 // At the finish's rest the board's À revoir row (components/dayclear/
 // FinishBoard.jsx) opens this sheet, the pile's cards as rows -- the term
 // over its reading, the pile's ink on the edge -- and a row opens the

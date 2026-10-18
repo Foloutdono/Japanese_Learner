@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-// ── 夜 — a print turned to another hour is heard at it (plan 247b) ────
+// ── 夜 — a print turned to another hour is heard at it (plan 250b) ────
 // The month's finish brings the night down on Today's print whatever
 // the clock says; the lake under it is the night's while the print
 // holds it, crossed over to and back from, and the clock's half-minute

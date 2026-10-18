@@ -14,7 +14,7 @@ import { XpToast } from '../components/rewards/XpToast'
 import { renderTicketPng } from '../lib/shareTicket'
 import { SCENES, SUMMARY, REST_MINUTES, TODAY_PARTIAL, todayCleared } from '../components/dayclear/fixtures'
 
-// ── 試写 — the day cleared, every scene (plans 191, 247) ────────────────
+// ── 試写 — the day cleared, every scene (plans 191, 250) ────────────────
 // /dev/dayclear: each finish of the canvas "Tsuji — the day cleared,
 // new directions" played on Today with its own data story
 // (components/dayclear/fixtures.js) and no backend, for review and for
@@ -23,7 +23,7 @@ import { SCENES, SUMMARY, REST_MINUTES, TODAY_PARTIAL, todayCleared } from '../c
 // so a production build does not carry it. It stands under the shell,
 // so the layout is the window's: a phone's bars leave and come back,
 // the desk's rail stays. The rest-day notice and the tickets stand under
-// the bars as Today and the profile show them (plan 247b).
+// the bars as Today and the profile show them (plan 250b).
 //
 //   ?scene=day | again | ticket3 | ticket7 | ticket14 | month30 |
 //          month100 | month365 | partial | restday | tickets | share

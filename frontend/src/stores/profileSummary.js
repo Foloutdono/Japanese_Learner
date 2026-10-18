@@ -175,7 +175,7 @@ export function applyXpGain({ amount }) {
   return { leveledUp, newLevel: level }
 }
 
-// The streak the server has just counted (a cleared day, plan 247),
+// The streak the server has just counted (a cleared day, plan 250),
 // moved in place until the next real fetch says it: the finish plays on
 // Today, whose desk panel prints the summary's streak beside the rally
 // that rolls to the answer's.

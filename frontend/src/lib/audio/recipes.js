@@ -739,7 +739,7 @@ const EVENTS = [
     // Plan 200: the level-up no longer plays it (its voice is
     // `level-burst`, below, since plan 173 made the level the card's
     // engraving and not a punch). The streak tickets' punch on Today's
-    // board and the month ticket's clipper (plan 247, components/
+    // board and the month ticket's clipper (plan 250, components/
     // dayclear/FinishBoard.jsx) are the punch still, and this is its
     // voice.
     key: 'pass-clip', category: 'ui', family: 'rewards', meter: 'peak',

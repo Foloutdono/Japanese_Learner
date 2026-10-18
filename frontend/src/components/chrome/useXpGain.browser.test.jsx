@@ -3,7 +3,7 @@ import { render } from 'vitest-browser-react'
 import { useXpGain } from './useXpGain'
 import { showFare, useFareHold } from '../../stores/fare'
 
-// ── 運賃 — the fare on the pass (plan 247) ───────────────────────────
+// ── 運賃 — the fare on the pass (plan 250) ───────────────────────────
 // A rise reports to the pass as it is paid; while the day's finish holds
 // the fare (stores/fare.js) a rise is taken in silently, and the fare is
 // said whole at its beat, the bar lit from where the run began.

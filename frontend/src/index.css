@@ -8758,7 +8758,7 @@ textarea:focus-visible {
      and the light it sheds on the sky. */
   --tpr-seal: #ce6153;
   --tpr-seal-glow: #e98066;
-  /* The day's fare on the sky (plan 247): the pass's metal mixed toward
+  /* The day's fare on the sky (plan 250): the pass's metal mixed toward
      the hour's ink, so it reads on every print. */
   --tpr-gold: color-mix(in srgb, var(--gate-gold) 50%, var(--tpr-ink));
 }
@@ -29460,7 +29460,7 @@ button.brd-stn { cursor: pointer; }
 /* ══ 終着 — the day cleared: the kit (plan 191) ══════════════════════
    The shared pieces of the canvas "Tsuji — the day cleared" (its
    kit.css, round 2) that the day cleared's screens still draw (plan
-   247b): the ink filters, the week's stamps, the header, the odometer,
+   250b): the ink filters, the week's stamps, the header, the odometer,
    the two tickets with their punched notch, the clipper, the card and
    the dashed panel, and the gate's two props. Components in
    components/dayclear/kit/; a screen composes them and owns its own
@@ -29577,7 +29577,7 @@ button.brd-stn { cursor: pointer; }
 }
 
 /* What stands on the print shakes 3px at the seal's hit (the everyday
-   finish, plan 247). */
+   finish, plan 250). */
 .clrk-shake { animation: clr-shake 0.32s linear; }
 
 /* ── tickets: 硬券 (paper) and foil (gold) ──
@@ -30215,8 +30215,8 @@ button.brd-stn { cursor: pointer; }
 .brd-remind__txt { font-size: var(--fs-body); }
 .brd-remind__txt strong { font-weight: 700; color: var(--brd-ink); }
 
-/* ── 247:finish ── */
-/* ══ 終着 — the day's run, finished on Today (plan 247) ══════════════════
+/* ── 250:finish ── */
+/* ══ 終着 — the day's run, finished on Today (plan 250) ══════════════════
    The owner's picks of the canvas "Tsuji — the day cleared, new
    directions" (2026-10-18): the finish plays on Today's print and ends
    as Today (components/dayclear/useFinish.js; GateCard's `finish`).
@@ -30620,7 +30620,7 @@ button.brd-stn { cursor: pointer; }
   .tdy-crane__dn { opacity: 0; }
   .clr-pile-sheet__row { transition: none; }
 }
-/* ── 247:finish end ── */
+/* ── 250:finish end ── */
 
 /* ── 191:restday ── */
 /* ══ 運休 — the rest-day notice (plan 191) ══════════════════════════
@@ -30632,7 +30632,7 @@ button.brd-stn { cursor: pointer; }
    rest is each element's own style. The air gives way first: the space
    over the rally stops growing at the board's 124px, the space under
    the reserve takes the rest, and both shrink on a short phone; then the
-   hero's own rhythm (plan 247b), and on a phone shorter still the column
+   hero's own rhythm (plan 250b), and on a phone shorter still the column
    scrolls under its foot, docked on the tab bar as Today's is. */
 .today:has(> .rst) { flex: 1 0 auto; padding: 0; }
 .rst { flex: 1 0 auto; display: flex; flex-direction: column; }
@@ -40291,7 +40291,7 @@ button.brd-stn { cursor: pointer; }
   .tkb-air { display: none; }
 
   /* The short desk (plan 169): the air's floor a rung lower; the hero's
-     rhythm gives way with it (plan 247b). */
+     rhythm gives way with it (plan 250b). */
   @media (max-height: 799px) {
     .today > .rst .rst-air { min-height: var(--sp-5); }
   }

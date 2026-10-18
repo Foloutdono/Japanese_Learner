@@ -36,7 +36,7 @@ export function useStaged() {
   return useSyncExternalStore(subscribe, read, read)
 }
 
-// ── 退場 — the bars stepped away, in their places (plan 247) ──────────
+// ── 退場 — the bars stepped away, in their places (plan 250) ──────────
 // The day cleared plays on Today with the phone's two bars gone, as a
 // run's stage, and hands the screen back with them drawn in. Taken out
 // of the page (a stage) the bars would take their room with them, and

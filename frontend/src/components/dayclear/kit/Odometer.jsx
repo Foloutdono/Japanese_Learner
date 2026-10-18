@@ -1,7 +1,7 @@
 // ── 走行計 — the odometer (plan 191) ───────────────────────────────
 // The canvas kit's §11: a figure that rolls to its value, a column a
 // digit. The finish rolls the dial's count and the streak with it
-// (components/station/GateCard.jsx, plan 247).
+// (components/station/GateCard.jsx, plan 250).
 
 // One tabular digit's advance in Space Grotesk 700, and the thin space
 // between thousands -- the odometer's columns are drawn at these.

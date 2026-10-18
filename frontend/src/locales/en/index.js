@@ -3117,7 +3117,7 @@ const clrDay = {
 
 
 
-// ── 247:finish ──
+// ── 250:finish ──
 // See the French table.
 const clrFinish = {
   finFareOf: 'including',
@@ -3136,7 +3136,7 @@ const clrFinish = {
   finThreadLeft: () => 'left',
   finContinue: 'Continue',
 }
-// ── 247:finish end ──
+// ── 250:finish end ──
 
 
 

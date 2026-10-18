@@ -10,7 +10,7 @@ import { clearPaid } from '../domain/dayClear'
 // state (screens/TodayRun.jsx); the finish asks the server, once per
 // run, whether that run cleared the day (POST /api/today/clear) and
 // plays the ceremony or the partial finish on the answer -- on Today
-// itself since plan 247 (screens/TodayScreen.jsx), so the answer is
+// itself since plan 250 (screens/TodayScreen.jsx), so the answer is
 // held back until Today's own summary has been fetched again after it:
 // the gate the finish plays on says what the day reviewed, tomorrow,
 // and when it opens.

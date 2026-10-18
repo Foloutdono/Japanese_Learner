@@ -82,7 +82,7 @@ const LINE_TITLE = {
 }
 const titlesOf = t => Object.fromEntries(Object.entries(LINE_TITLE).map(([k, f]) => [k, f(t)]))
 
-// 終着 (plan 247): the day's run finishes here. `finish` is the finish's
+// 終着 (plan 250): the day's run finishes here. `finish` is the finish's
 // state (components/dayclear/useFinish.js): while its answer is awaited
 // the print stands with the dial waiting; a clear plays on the cleared
 // gate, a partial run on the open one, and both end as Today.
@@ -281,7 +281,7 @@ function DialCount({ run, t, roll = null }) {
   return (
     <>
       {roll ? (
-        // 途中下車 (plan 247, B4·a): the count rolls down from what the gate
+        // 途中下車 (plan 250, B4·a): the count rolls down from what the gate
         // held before the run to what it holds now.
         <span className="tdy-dial__count tdy-dial__count--roll">
           <Odometer value={roll.rolled ? run.taken : roll.from} />
@@ -321,7 +321,7 @@ function DialTime({ run, t, lang, style }) {
 // phone's layout takes the desk's.
 function usePrint(layout, anchorRef, hourOverride = null) {
   const now = useMinute()
-  // A month's finish is a night's, whatever the hour (plan 247, B3·b).
+  // A month's finish is a night's, whatever the hour (plan 250, B3·b).
   const hour = hourOverride ?? printHour(now)
   const [frameRef, box] = usePrintFrame(layout, anchorRef)
   const print = box?.print ?? layout
@@ -625,7 +625,7 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
   )
 }
 
-// ── 終着 — the finish's marks on an open gate (plan 247, B4·a) ─────
+// ── 終着 — the finish's marks on an open gate (plan 250, B4·a) ─────
 // A run that left cards comes back to the gate for them; the dial's
 // thin ring says the day (what it has ridden solid, what waits dotted,
 // a stop where the learner got off), the count rolls down from what the
@@ -708,7 +708,7 @@ function DeskDay({ today, part = false }) {
 // nothing reviewed and nothing due stamps nothing: the hour's own disc,
 // saying the learner is up to date.
 //
-// 終着 (plan 247): the day's run finishes here (`finish`, useFinish's
+// 終着 (plan 250): the day's run finishes here (`finish`, useFinish's
 // state, timed by its beats). Every day the seal is slammed onto the
 // disc, the ring closing round it; the day's fare and its prime under
 // what the day was, the week's stamp pressed; the board takes the run's
@@ -765,7 +765,7 @@ function ClearedGate({ today, desk, finish = null }) {
     if (kind === 'month' && p.print) preloadPrint('night', p.print)
   }, [kind, p.print])
   // ... and heard: the night's lake from the dusk on, for as long as the
-  // print holds the night (plan 247b).
+  // print holds the night (plan 250b).
   useEffect(() => (kind === 'month' ? holdAmbianceHour('night') : undefined), [kind])
   const sealBeat = kind === 'day' ? 'SLAM' : 'PRESS_SEAL'
   const seal = stamped && came(sealBeat)

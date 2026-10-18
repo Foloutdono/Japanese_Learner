@@ -5,7 +5,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 運休 and 記念切符 on a short phone (plans 191, 247b) ───────────────
+// ── 運休 and 記念切符 on a short phone (plans 191, 250b) ───────────────
 // 390×667, a thumb, under the Shell's bars as Today shows the notice:
 // its air gives way first, then the hero's own rhythm, so the whole
 // notice and its gate stand between the bars; on a phone shorter still

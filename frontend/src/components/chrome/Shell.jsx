@@ -64,7 +64,7 @@ export function Shell() {
   // A screen that takes the stage (stores/stage.js, plan 219) is drawn
   // without the two bars on a phone, as a run is; the desk keeps its rail.
   const staged = useStaged() && !desk
-  // The day cleared (plan 247) sends the bars away in their places and
+  // The day cleared (plan 250) sends the bars away in their places and
   // draws them back in: their room stays, so the print under the screen
   // never moves (stores/stage.js).
   const away = useChromeAwayState() && !desk && !staged

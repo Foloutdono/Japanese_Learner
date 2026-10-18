@@ -174,7 +174,7 @@ export function liftLayer(layer) {
  *
  * `loops` hands over the looping parts alone and `keep` leaves the
  * boxes' own custom properties where they are: the day cleared's flock
- * and lanterns (plan 247), placed by theirs, whose ways in are single
+ * and lanterns (plan 250), placed by theirs, whose ways in are single
  * turns that end on their own.
  */
 export function handOver(root, { loops = false, keep = false } = {}) {

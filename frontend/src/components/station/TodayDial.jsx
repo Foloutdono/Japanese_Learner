@@ -16,7 +16,7 @@ import { DIAL, dialArcs, fareArc } from '../../domain/dial'
 //   parts  [{ key, n, lit }]: a line's cards and the run's share of them
 //   fare   { rides, total } while some of the run waits, else null
 //
-// On the print, the day cleared plays on the dial (plan 247): `stamp`
+// On the print, the day cleared plays on the dial (plan 250): `stamp`
 // ('slam' | 'press') brings the day's seal down onto the disc, `ringIn`
 // turns the lines' ring in, `thread` ({ rides, total, ride, stop }) is
 // the day's thread on the thin ring, and `fx` the transients over it
@@ -128,7 +128,7 @@ function CutSeal({ id, mid, r, day, foot, fill }) {
 function PrintDial({ parts, fare, className, print, seal, stamp, ringIn, thread, fx, style, children }) {
   const id = useId().replace(/[^\w-]/g, '')
   const { frame, disc } = print
-  // While the day's seal comes down (the finish, plan 247) the disc is
+  // While the day's seal comes down (the finish, plan 250) the disc is
   // the hour's own and the seal a layer of its own over it: an <svg>
   // the compositor moves. Once it has landed it is the disc again.
   const falling = Boolean(seal && stamp)
@@ -258,7 +258,7 @@ function PrintDial({ parts, fare, className, print, seal, stamp, ringIn, thread,
           </g>
         )}
       </svg>
-      {/* 運賃 — the day's thread (plan 247, B4·a): the thin ring solid as
+      {/* 運賃 — the day's thread (plan 250, B4·a): the thin ring solid as
           far as the day has ridden, dotted for what waits, a stop where
           the learner got off. Boxes of their own, so its way in is the
           compositor's. */}
@@ -289,7 +289,7 @@ function PrintDial({ parts, fare, className, print, seal, stamp, ringIn, thread,
   )
 }
 
-/** The day's thread said under the dial (plan 247, B4·a): the thin
+/** The day's thread said under the dial (plan 250, B4·a): the thin
  *  ring's two marks beside what the day has ridden and what waits. */
 export function ThreadKey({ done, left, t, className = '' }) {
   return (

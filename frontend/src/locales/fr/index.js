@@ -3053,7 +3053,7 @@ const clrPrimitives = {
 
 // ── 191:piles ──
 // The piles' names and a pile's sheet (PileSheet): the À revoir row of
-// the finish opens the run's wrong pile there (plan 247).
+// the finish opens the run's wrong pile there (plan 250).
 const clrDay = {
   clrPiles: ['À revoir', 'Justes', 'Parfaites'],
   clrPileCount: n => `${n}\u00a0carte${n === 1 ? '' : 's'}`,
@@ -3065,7 +3065,7 @@ const clrDay = {
 
 
 
-// ── 247:finish ──
+// ── 250:finish ──
 // The finish played on Today (components/dayclear/useFinish.js and its
 // parts): the day's fare under the dial, the board's rows, the month's
 // ticket and the rest day it brought, the partial run's line and its
@@ -3089,7 +3089,7 @@ const clrFinish = {
   finThreadLeft: n => (n === 1 ? 'reste' : 'restent'),
   finContinue: 'Continuer',
 }
-// ── 247:finish end ──
+// ── 250:finish end ──
 
 
 

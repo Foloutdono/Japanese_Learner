@@ -3,7 +3,7 @@ import { ChevronIcon } from '../ui/Icons'
 import { kanjiNumber } from '../../domain/dayClear'
 import { Ticket, Clipper, ClipperChip, Slot, CLIP_BITE_MS, CLIP_PART_MS } from './kit'
 
-// ── 終着 — what the finish adds to Today's cleared gate (plan 247) ────
+// ── 終着 — what the finish adds to Today's cleared gate (plan 250) ────
 // The rows the board over the shut gate takes on a finish (the board's
 // own grid: a row's name, its figure, its way or its note), and the
 // month's gold ticket under the moon. Placed by the gate

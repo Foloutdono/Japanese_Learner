@@ -134,7 +134,7 @@ export const CLEAR_MONTH365 = Object.freeze({
 })
 
 // A second run the same day, after the clear: nothing paid, the day
-// stamped again (plan 247: the everyday finish, its fare the run's).
+// stamped again (plan 250: the everyday finish, its fare the run's).
 export const CLEAR_AGAIN = Object.freeze({ ...CLEAR_DAY, already: true, bonus: 0, xp: { xp_earned: 0, leveled_up: false, new_level: 14 } })
 
 // A run that ended with cards left: 20 done, 14 left, ~5 min (21.4 s a card).
@@ -215,7 +215,7 @@ export const SUMMARY = Object.freeze({
   week: [], guided: { today: true },
 })
 
-// ── Today, as the finish finds it (plan 247) ─────────────────────────
+// ── Today, as the finish finds it (plan 250) ─────────────────────────
 // GET /api/today after the run: cleared (nothing left, the day's
 // reviews by line, tomorrow, the gate opening in 22 hours), or the 14
 // a partial run left (kanji 5, vocab 6, grammar 3; 20 reviewed).

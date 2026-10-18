@@ -31,7 +31,7 @@ import { startAmbiance, stopAmbiance } from '../lib/audio'
 // too, and the sheet and the column the rest. The run itself
 // is /today/run on the stage (screens/TodayRun.jsx).
 //
-// 終着 (plan 247): the run finishes here, on /today/clear, its tally in
+// 終着 (plan 250): the run finishes here, on /today/clear, its tally in
 // the router's state. The screen asks the server once whether it
 // cleared the day (stores/dayClear) and plays the answer on the gate
 // itself (components/dayclear/useFinish, GateCard's `finish`): on a

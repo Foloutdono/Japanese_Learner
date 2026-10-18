@@ -51,7 +51,7 @@ export function usePrintScene(hour, device) {
 }
 
 /** Fetch an hour's print ahead of the moment it is shown: a month's
- *  finish turns the print to night under a veil (plan 247). */
+ *  finish turns the print to night under a veil (plan 250). */
 export function preloadPrint(hour, device) {
   const key = device ? `${hour}-${device}` : null
   if (key && !scenes.has(key)) loadScene(key)
@@ -72,7 +72,7 @@ const WIDE = 0.7
 // the minutes and the hour they end (or, on a cleared day, what the day
 // reviewed), then the legend on a phone, or the week's stamps (plan 206);
 // on the finish of a day, the day's fare in the legend's place and the
-// week under it (`under`, plan 247).
+// week under it (`under`, plan 250).
 export const BELOW = { time: 28, keys: 54, week: 64, under: 86 }
 
 /**
@@ -133,7 +133,7 @@ export function printVars(hour, print, box) {
     '--tpr-room': frame.cy + frame.fare + BELOW.week + 14 - LIFT[print],
     '--tpr-sky-h': (frame.horizon + 12) / frame.h,
     '--tpr-top': look.band,
-    // Its ground, for what stands under the print's foot (plan 247).
+    // Its ground, for what stands under the print's foot (plan 250).
     '--tpr-ground': look.ground,
     // The print's own sky and ground, for the moment before it has come.
     '--tpr-sky': `linear-gradient(${look.sky.map(([o, c]) => `${c} ${((o * frame.horizon) / frame.h * 100).toFixed(2)}%`).join(', ')}, ${look.ground} ${(frame.horizon / frame.h * 100).toFixed(2)}%)`,

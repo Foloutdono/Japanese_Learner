@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 試写 — /dev/dayclear plays every scene with no backend (plans 191, 247) ──
+// ── 試写 — /dev/dayclear plays every scene with no backend (plans 191, 250) ──
 // The workbench the finishes are reviewed and filmed on: each scene of
 // the canvas "Tsuji — the day cleared, new directions" from its own
 // fixtures, at a phone's width, under the Shell as Today has it, with

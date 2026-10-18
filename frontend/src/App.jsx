@@ -573,7 +573,7 @@ export default function App({ front = NO_FRONT }) {
             <Route path="/dev/ride" element={<RidePreview />} />
             <Route path="/dev/sounds" element={<SoundPalette />} />
             <Route path="/dev/offers" element={<OffersPreview />} />
-            {/* 終着 (plans 191, 247): every finish of the day's run, from
+            {/* 終着 (plans 191, 250): every finish of the day's run, from
                 the canvas's fixtures (?scene=…&reduced=1), on Today under
                 the shell: the bars leave and come back on a phone, the
                 real rail beside it on the desk. */}
@@ -680,7 +680,7 @@ export default function App({ front = NO_FRONT }) {
           <Route element={<Shell />}>
             {/* 本日の運行 — everything due, in one queue. See TodayScreen. */}
             <Route path="/today"                element={<TodayScreen session={session} />} />
-            {/* 終着 — the day's run finished, on Today itself (plan 247):
+            {/* 終着 — the day's run finished, on Today itself (plan 250):
                 the same screen, so the URL leaves when the finish rests
                 and nothing is remounted. */}
             <Route path="/today/clear"          element={<TodayScreen session={session} />} />

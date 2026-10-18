@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 終着 — the day's run, finished on Today, on a phone (plan 247) ────
+// ── 終着 — the day's run, finished on Today, on a phone (plan 250) ────
 // /today/clear is Today with the run's tally in the router's state. The
 // print of the hour waits under the empty dial while the server answers,
 // the bars away in their places; the answer plays on the gate itself --

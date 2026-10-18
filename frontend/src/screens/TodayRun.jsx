@@ -267,7 +267,7 @@ export default function TodayRun({ session }) {
   // The finish (plan 191, 終着): once the queue is genuinely empty —
   // never on a failed fetch, which the error branch below owns — a run
   // that reviewed anything hands its tally to /today/clear, Today
-  // itself since plan 247 (screens/TodayScreen.jsx), which asks the
+  // itself since plan 250 (screens/TodayScreen.jsx), which asks the
   // server whether the day is cleared and plays the answer on the gate;
   // a run that reviewed nothing goes back to the gate. The shared summary the tab
   // badge reads is refetched on the way (a minute behind otherwise).
@@ -409,7 +409,7 @@ export default function TodayRun({ session }) {
     // stamp keyed on the id alone was once handed to a transition that
     // could never match it, which hung every stamped review.
     // The card's face goes on the run's tally for the finish (plans 191,
-    // 247): what it was, its line, its verdict and its climb -- the
+    // 250): what it was, its line, its verdict and its climb -- the
     // board's À revoir opens the ones missed.
     const preview = card.review_preview?.[quality]
     if (!gates.review(preview, {
