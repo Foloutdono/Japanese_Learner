@@ -17,6 +17,7 @@ from study.grammar_choose import choose_items, choose_payload
 from study.grammar_examples import (
     blank_span, blanked_payload, example_payload, pattern_furigana, structure_furigana,
 )
+from study.grammar_forms import choice_forms, form_text
 from study.grammar_match import contains_pattern, verifiable
 from study.mcq import pick_distractors
 
@@ -76,7 +77,13 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
                      example: dict | None = None, offer: str | None = None,
                      authored: bool = True) -> dict | None:
     """
-    {jp, tr, furigana (one blank part), choices: [pattern...], answer}
+    {jp, tr, furigana (one blank part), fill, choices, answer, why,
+    readings, rules?}: the choices are what each option prints, the form
+    its rule would take in the hole (plan 254, study/grammar_forms), the
+    answer one of them, `why` the lesson's line on a rival keyed by its
+    form, `readings` the forms' ruby and `rules` the pattern behind each
+    form (an authored question's choices are its own fillings, and it
+    has no `rules`).
     `turn` picks the sentence deterministically where given (the
     ladder's review count). `example` is the sentence itself, one of the
     point's contrast examples, where the caller has chosen it (the tour's
@@ -127,6 +134,9 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
         if "choices" in example:
             return choose_payload(level, entry, example, lang, rng)
     sentence = example["jp"]
+    blanked = blanked_payload(example, pattern, lang, level)
+    fill = "".join(p["text"] for p in blanked.get("fill", []))
+    lines = {r["pattern"]: r["en"] for r in entry.get("compare", [])}
 
     rivals = [
         r["pattern"] for r in entry.get("compare", [])
@@ -142,16 +152,37 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
             if g["pattern"] != pattern and g["pattern"] not in choices
             and verifiable(g["pattern"]) and not contains_pattern(sentence, g["pattern"])
         ]
-        choices += pick_distractors(fillers, lambda p: p, pattern, CONTRAST_CHOICES - 1 - len(choices))
+        # Drawn in a random order, each kept only where it prints as no
+        # option before it does (plan 254): もう〜ました is ました, which
+        # 〜ました／〜ませんでした already says beside 〜ています.
+        taken = {f.text for f in choice_forms(pattern, fill, [pattern] + choices, lines).values()}
+        for filler in pick_distractors(fillers, lambda p: p, pattern, len(fillers)):
+            if len(choices) == CONTRAST_CHOICES - 1:
+                break
+            form = form_text(pattern, fill, filler)
+            if form not in taken:
+                taken.add(form)
+                choices.append(filler)
     if not choices:
         return None
+    # Each option prints the one form its rule would take in the hole
+    # (plan 254): あの and あれ for あの人, not この／その／あの／どの against
+    # これ／それ／あれ／どれ. The rivals choose theirs first, the fillers after.
+    forms = choice_forms(pattern, fill, [pattern] + choices, lines)
     choices.append(pattern)
     rng.shuffle(choices)
 
     # What each named rival is not (plan 194): the lesson's own line on it,
     # said when that rival is the choice taken -- the trap explained.
     why = {
-        r["pattern"]: localise({"en": r["en"], "fr": r["fr"]}, lang)
-        for r in entry.get("compare", []) if r["pattern"] in choices
+        forms[r["pattern"]].text: localise({"en": r["en"], "fr": r["fr"]}, lang)
+        for r in entry.get("compare", []) if r["pattern"] != pattern and r["pattern"] in forms
     }
-    return {**blanked_payload(example, pattern, lang, level), "choices": choices, "answer": pattern, "why": why}
+    return {
+        **blanked,
+        "choices": [forms[c].text for c in choices],
+        "answer": forms[pattern].text,
+        "why": why,
+        "readings": {f.text: f.parts for f in forms.values() if f.parts},
+        "rules": {forms[c].text: c for c in choices},
+    }

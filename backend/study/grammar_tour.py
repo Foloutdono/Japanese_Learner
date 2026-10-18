@@ -49,13 +49,13 @@ from content.grammar_sentences_data import translation
 from study.furigana import align_sentence, mark_spans
 from study.grammar_detect import hits
 from study.grammar_examples import (
-    BLANK, furigana_by_pattern, highlight_span, pattern_furigana, structure_furigana, structure_text,
+    BLANK, highlight_span, pattern_furigana, structure_furigana, structure_text,
 )
 from study.grammar_match import contains_pattern, verifiable
 from study.morphology import tokenize
 
 # Bumped when the payload's shape or its seeding changes.
-TOUR_REV = 7  # 7: a gap question carries what fills its hole (plan 245)
+TOUR_REV = 8  # 8: a gap question's options print the form each rule takes there (plan 254)
 LOOK_COUNT = 3
 MIN_LIT = 2
 GUESS_COUNT = 4
@@ -403,14 +403,16 @@ def _gap_questions(level: str, entry: dict, lang: str, met: set[str], rng: rando
                 continue
             c = contrast_payload(r_level, r_entry, get_grammar_points(r_level), lang, rng=rng,
                                  example=example, offer=pattern)
-            if c is None or pattern not in c["choices"] or c["answer"] != r_pattern:
+            rules = (c or {}).get("rules", {})
+            if c is None or pattern not in rules.values() or rules.get(c["answer"]) != r_pattern:
                 continue
-            furigana = furigana_by_pattern(c["choices"])
+            # Each option prints the form its rule would take in the hole
+            # (plan 254); `pattern` stays the rule it is.
             out.append({
                 "kind": "gap",
                 "jp": c["jp"], "tr": c["tr"], "furigana": c["furigana"], "fill": c.get("fill", []),
-                "choices": [{"pattern": p, "furigana": furigana.get(p), "correct": p == r_pattern,
-                             "trap": p == pattern} for p in c["choices"]],
+                "choices": [{"pattern": rules[f], "form": f, "furigana": c["readings"].get(f),
+                             "correct": rules[f] == r_pattern, "trap": rules[f] == pattern} for f in c["choices"]],
                 "why": why,
             })
             met.add(jp)
