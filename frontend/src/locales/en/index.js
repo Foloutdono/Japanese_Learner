@@ -2530,6 +2530,11 @@ const boarding = {
   brdSheetName: 'Name',
   brdSheetAccount: 'Account',
   brdSheetDone: 'Done',
+  // The list under the card (plan 247): each field in words, a door to
+  // the same sheet as the card's own.
+  brdRowsAria: 'Change your card',
+  brdRowGoal: (stop, date) => (date ? `${stop} · arriving ${date}` : stop),
+  brdRowRhythm: (name, min) => `${name} · ${min} min a day`,
   brdGoalCap: (min) => `at ${min} min a day`,
   brdNameOptional: 'optional',
   brdNamePlaceholder: 'Your first name',

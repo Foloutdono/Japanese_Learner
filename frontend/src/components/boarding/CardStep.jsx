@@ -6,6 +6,7 @@ import { PassCard } from '../pass/PassCard'
 import { PassBack } from '../pass/PassBack'
 import { BoardQuestion, Continue } from './BoardFrame'
 import { CheckMark, DeviceMark, MailMark } from './icons'
+import { LINES } from '../../domain/boarding'
 import { playClick } from '../../lib/audio'
 
 // ── 定期券 — the card, filled in (plan 247) ──────────────────────
@@ -79,6 +80,41 @@ function IssueError({ error, onReport }) {
   )
 }
 
+// The card's fields again, in words, under it (plan 247, as the canvas
+// "C, start to finish" drew it): the destination with its date, the
+// rhythm in minutes, the hour, the lines by name and the name. A row is
+// a door to the same sheet as its field on the card -- a wider one,
+// for a thumb, and a reading of the card for whoever skims its codes.
+function CardRows({ contract, onOpen, onSign }) {
+  const { t, lang } = useLang()
+  const stop = contract.to.jp ? contract.to.name : contract.to.code
+  const lines = LINES.filter(id => contract.lines.includes(id))
+    .map((id, i) => (i === 0 ? t.brdLine[id] : t.brdLine[id].toLocaleLowerCase(lang)))
+    .join(', ')
+  const rows = [
+    { id: 'goal', name: t.brdSheetGoal, value: t.brdRowGoal(stop, contract.valid), open: () => onOpen('destination') },
+    { id: 'rhythm', name: t.brdSheetRhythm, value: t.brdRowRhythm(t.brdRhythmName[contract.minutes] ?? '', contract.minutes), open: () => onOpen('service') },
+    { id: 'hour', name: t.brdSheetHour, value: contract.hour, open: () => onOpen('hour') },
+    { id: 'lines', name: t.brdSheetLines, value: lines, open: () => onOpen('lines') },
+    { id: 'name', name: t.brdSheetName, value: contract.name || t.brdNamePlaceholder, empty: !contract.name, open: onSign },
+  ]
+  return (
+    <ul className="brd-rows" aria-label={t.brdRowsAria}>
+      {rows.map(row => (
+        <li key={row.id}>
+          <button type="button" className="brd-row" data-row={row.id} aria-haspopup="dialog" onClick={() => { playClick(); row.open() }}>
+            <span className="brd-row__txt">
+              <span className="brd-row__name">{row.name}</span>
+              <span className={`brd-row__val${row.empty ? ' brd-row__val--empty' : ''}`}>{row.value}</span>
+            </span>
+            <svg className="brd-row__chev" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polyline points="9 6 15 12 9 18" /></svg>
+          </button>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 // An account boarded with prints its address: the boarding only runs on
 // an account with no journey on it, so an address here is a NEW pass
 // for it -- and for the learner Google's chooser put on an account no
@@ -141,6 +177,7 @@ export default function CardStep({ contract, kept, onOpen, onSign, onKeep, onEnt
               back={<PassBack tier={tier} data={back} doors={{ open: onOpen, onSign }} />}
             />
           </div>
+          <CardRows contract={contract} onOpen={onOpen} onSign={onSign} />
           <KeepLine kept={kept} onKeep={onKeep} onSwitch={onSwitch} />
         </div>
       </div>

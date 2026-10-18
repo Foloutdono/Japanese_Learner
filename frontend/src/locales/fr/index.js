@@ -2469,6 +2469,11 @@ const boarding = {
   brdSheetName: 'Nom',
   brdSheetAccount: 'Compte',
   brdSheetDone: 'C’est bon',
+  // La liste sous la carte (plan 247) : chaque champ en clair, une porte
+  // vers la même feuille que le champ de la carte.
+  brdRowsAria: 'Modifier ta carte',
+  brdRowGoal: (stop, date) => (date ? `${stop} · arrivée le ${date}` : stop),
+  brdRowRhythm: (name, min) => `${name} · ${min} min par jour`,
   brdGoalCap: (min) => `à ${min} min par jour`,
   brdNameOptional: 'facultatif',
   brdNamePlaceholder: 'Ton prénom',

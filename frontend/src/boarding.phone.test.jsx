@@ -237,16 +237,57 @@ describe('the boarding at 390×844', () => {
     expect(card.left).toBeGreaterThanOrEqual(0)
     expect(card.right).toBeLessThanOrEqual(390)
 
-    for (const height of [764, 700]) {
-      await atHeight(height, () => {
-        // Nothing scrolls, the line under the card clears the docked
-        // action, and the rung gives way no further than the body's gap.
-        expect(body().scrollHeight, `${height} px`).toBe(body().clientHeight)
-        expect(rect(live(screen.container).querySelector('.brd-keep-line')).bottom)
-          .toBeLessThanOrEqual(rect(live(screen.container).querySelector('.brd__foot')).top)
-        expect(rung(), `${height} px`).toBeGreaterThanOrEqual(gap() - 0.5)
-        expect(Math.abs(over() - under()), `${height} px`).toBeLessThanOrEqual(1)
-      })
+    // A 6.1" Android's 764 px: nothing scrolls, the line under the card
+    // clears the docked action, and the rung gives way no further than
+    // the body's gap.
+    await atHeight(764, () => {
+      expect(body().scrollHeight, '764 px').toBe(body().clientHeight)
+      expect(rect(live(screen.container).querySelector('.brd-keep-line')).bottom)
+        .toBeLessThanOrEqual(rect(live(screen.container).querySelector('.brd__foot')).top)
+      expect(rung(), '764 px').toBeGreaterThanOrEqual(gap() - 0.5)
+      expect(Math.abs(over() - under()), '764 px').toBeLessThanOrEqual(1)
+    })
+    // Under it the card's fields in words (plan 247) take what is left:
+    // the body scrolls by less than their list, the question and the
+    // card keep the top, and the end of it clears the docked action.
+    await atHeight(700, async () => {
+      const rows = live(screen.container).querySelector('.brd-rows')
+      expect(body().scrollHeight - body().clientHeight, '700 px').toBeLessThan(rect(rows).height)
+      expect(rect(q()).top).toBeGreaterThanOrEqual(rect(body()).top)
+      body().scrollTop = body().scrollHeight
+      await settle(100)
+      expect(rect(live(screen.container).querySelector('.brd-keep-line')).bottom)
+        .toBeLessThanOrEqual(rect(live(screen.container).querySelector('.brd__foot')).top + 0.5)
+      body().scrollTop = 0
+    })
+  })
+
+  // ── The card's fields in words (plan 247) ──
+  // Under the card, as the canvas drew it: the destination, the rhythm
+  // in minutes, the hour, the lines by name and the name, each a door to
+  // the same sheet as its field on the card.
+  it('lists the card\'s fields under it, each a door to its sheet', async () => {
+    const screen = await mountFlow({ guest: true })
+    await toCard(screen)
+    await settle(400)
+    const rows = [...live(screen.container).querySelectorAll('.brd-rows .brd-row')]
+    expect(rows.map(r => r.dataset.row)).toEqual(['goal', 'rhythm', 'hour', 'lines', 'name'])
+    const words = id => live(screen.container).querySelector(`[data-row="${id}"] .brd-row__val`).textContent
+    expect(words('rhythm')).toBe('Rapide · 10 min par jour')
+    expect(words('hour')).toMatch(/^Matin · \d\d:\d\d$/)
+    expect(words('lines')).toBe('Vocabulaire, kanji, grammaire')
+    expect(words('name')).toBe('Ton prénom')
+    // The list at the card's width.
+    const card = rect(live(screen.container).querySelector('.brd-card .pcard'))
+    const list = rect(live(screen.container).querySelector('.brd-rows'))
+    expect(Math.round(list.width)).toBe(Math.round(card.width))
+    for (const [row, sheet] of [['goal', 'goal'], ['rhythm', 'rhythm'], ['hour', 'hour'], ['lines', 'lines'], ['name', 'name']]) {
+      await click(screen.container, `[data-row="${row}"]`)
+      await settle(400)
+      expect(document.querySelector(`.brd-sheet--${sheet}`), row).toBeTruthy()
+      document.querySelector('.scrim').click()
+      await settle(300)
+      expect(document.querySelector('.brd-sheet'), `${row} shut`).toBeNull()
     }
   })
 

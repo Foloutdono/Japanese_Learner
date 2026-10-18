@@ -113,8 +113,27 @@ function overflowOf(screen) {
   return body.scrollHeight - body.clientHeight
 }
 
+// The card's step is the one that may scroll here (plan 247): its fields
+// in words stand under it, and a 667 px handset has not the room for
+// both. It scrolls by less than that list, so the card and its question
+// never leave the top, and scrolled to its end the last row and the line
+// of where the card lives stand clear of the docked gate.
+async function cardInReach(screen) {
+  const car = live(screen)
+  const body = car.querySelector('.brd__body')
+  const rows = car.querySelector('.brd-rows')
+  expect(overflowOf(screen)).toBeLessThan(rows.getBoundingClientRect().height)
+  body.scrollTop = body.scrollHeight
+  await settle(100)
+  const foot = car.querySelector('.brd__foot').getBoundingClientRect().top + 0.5
+  expect(rows.getBoundingClientRect().bottom).toBeLessThanOrEqual(foot)
+  expect(car.querySelector('.brd-keep-line').getBoundingClientRect().bottom).toBeLessThanOrEqual(foot)
+  body.scrollTop = 0
+  await settle(100)
+}
+
 describe('the boarding on a 390x667 handset', () => {
-  it('asks every question, and answers, without scrolling', async () => {
+  it('asks every question, and answers, without scrolling but the card\'s list', async () => {
     const screen = await render(
       <LangProvider>
         <BoardingFlow session={{ access_token: 'tok' }} onComplete={vi.fn()} guest dryRun />
@@ -149,6 +168,8 @@ describe('the boarding on a 390x667 handset', () => {
     await click(screen, '[data-level="novice"]')
     await click(screen, '[data-action="continue"]')
     await record()                                    // card
+    await cardInReach(screen)
+    delete over.card
     await recordSheet('[data-door="destination"]', 'goal')
     await recordSheet('[data-door="service"]', 'rhythm')
     await recordSheet('[data-door="hour"]', 'hour')
@@ -157,7 +178,7 @@ describe('the boarding on a 390x667 handset', () => {
     await recordSheet('[data-action="keep"]', 'account')
 
     expect(Object.keys(over)).toEqual(
-      ['kana', 'level', 'card', 'sheet:goal', 'sheet:rhythm', 'sheet:hour', 'sheet:lines', 'sheet:name', 'sheet:account'])
+      ['kana', 'level', 'sheet:goal', 'sheet:rhythm', 'sheet:hour', 'sheet:lines', 'sheet:name', 'sheet:account'])
     expect(Object.entries(over).filter(([, px]) => px > 0)).toEqual([])
   }, 90000)
 
@@ -206,7 +227,7 @@ describe('the boarding on a 390x667 handset', () => {
   // the card's line says the address and holds the way to another
   // account. The reader's card, in both tables, with an address as long
   // as a real one runs.
-  it.each(['fr', 'en'])('names a pass its address, and the switch, without scrolling (%s)', async lang => {
+  it.each(['fr', 'en'])('names a pass its address, and the switch, in reach (%s)', async lang => {
     localStorage.setItem('lang', lang)
     try {
       const screen = await render(
@@ -227,7 +248,7 @@ describe('the boarding on a 390x667 handset', () => {
       await settle()
       expect(stepOf(screen)).toBe('card')
       expect(q(screen, '[data-action="switch-account"]')).toBeTruthy()
-      expect(overflowOf(screen)).toBe(0)
+      await cardInReach(screen)
     } finally {
       localStorage.removeItem('lang')
     }

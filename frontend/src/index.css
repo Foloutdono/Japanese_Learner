@@ -29959,6 +29959,64 @@ button.brd-stn { cursor: pointer; }
 .brd-keep-line--kept { color: var(--text-primary); }
 .brd-keep-line--kept .svg { color: var(--accent2); }
 
+/* The card's fields again under it, in words (CardStep's CardRows): one
+   panel of rows at the card's width, each a door to its sheet. */
+.brd-rows {
+  align-self: center;
+  width: 100%;
+  max-width: var(--pcard-back-w);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
+  overflow: hidden;
+}
+.brd-rows li + li { border-top: 1px solid var(--surface-line); }
+.brd-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 50px;
+  padding: var(--sp-2) var(--sp-4) var(--sp-2) var(--sp-5);
+  background: none;
+  border: 0;
+  font: inherit;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+.brd-row:hover { background: var(--overlay-hover); }
+.brd-row:focus-visible { outline: 2px solid var(--accent2); outline-offset: -2px; }
+.brd-row__txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; line-height: 1.25; }
+.brd-row__name {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.brd-row__val {
+  font-size: var(--fs-body);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.brd-row__val--empty { font-weight: 400; color: var(--text-secondary); }
+.brd-row__chev {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--text-secondary);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 /* 初 and あ as a stop's code: the Japanese face, set as the Latin
    codes are. */
 .pcb__code--jp { font-family: var(--font-jp); letter-spacing: 0; }
@@ -36491,6 +36549,18 @@ button.brd-stn { cursor: pointer; }
   /* The test (plan 224): the stage as wide as its choices, so the word
      asked stands over them rather than at the paper's edge. */
   .desk-brd .brd__car[data-car="test"] { --desk-brd-w: var(--card-w); }
+  /* The card (plan 247): its fields in words beside it rather than under
+     it, the card at its back's width and the rows at the side column's,
+     and the line of where it lives under both. */
+  .desk-brd .brd__car[data-car="card"] { --desk-brd-w: calc(var(--pcard-back-w) + var(--desk-side-w) + var(--sp-7)); }
+  .desk-brd .brd-card {
+    display: grid;
+    grid-template-columns: var(--pcard-back-w) minmax(0, 1fr);
+    align-items: center;
+    column-gap: var(--sp-7);
+  }
+  .desk-brd .brd-card > .brd-rows { max-width: none; }
+  .desk-brd .brd-card > .brd-keep-line { grid-column: 1 / -1; }
   .desk-brd .brd__stage {
     --desk-at: var(--desk-brd-w);
     width: 100%;
