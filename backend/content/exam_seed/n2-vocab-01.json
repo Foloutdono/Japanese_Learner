@@ -896,23 +896,23 @@
          {
           "id": "moji_2_q2",
           "number": 2,
-          "promptJp": "りょうがわ",
+          "promptJp": "けいび",
           "choices": [
            {
             "id": "c1",
-            "textJp": "両仙"
+            "textJp": "警倍"
            },
            {
             "id": "c2",
-            "textJp": "両傘"
+            "textJp": "訴備"
            },
            {
             "id": "c3",
-            "textJp": "両側"
+            "textJp": "警備"
            },
            {
             "id": "c4",
-            "textJp": "下側"
+            "textJp": "警候"
            }
           ],
           "answer": "c3"
@@ -2378,23 +2378,23 @@
          {
           "id": "moji_2_q4",
           "number": 4,
-          "promptJp": "きょうかい",
+          "promptJp": "しゅうりょう",
           "choices": [
            {
             "id": "c1",
-            "textJp": "境界"
+            "textJp": "終了"
            },
            {
             "id": "c2",
-            "textJp": "境略"
+            "textJp": "終予"
            },
            {
             "id": "c3",
-            "textJp": "垂界"
+            "textJp": "絶了"
            },
            {
             "id": "c4",
-            "textJp": "境田"
+            "textJp": "終事"
            }
           ],
           "answer": "c1"
@@ -2918,23 +2918,23 @@
          {
           "id": "moji_1_q2",
           "number": 2,
-          "promptJp": "落第",
+          "promptJp": "接続",
           "choices": [
            {
             "id": "c1",
-            "textJp": "らくたい"
+            "textJp": "せつぞっく"
            },
            {
             "id": "c2",
-            "textJp": "らっくだい"
+            "textJp": "せっつぞく"
            },
            {
             "id": "c3",
-            "textJp": "らぐだい"
+            "textJp": "ぜつぞく"
            },
            {
             "id": "c4",
-            "textJp": "らくだい"
+            "textJp": "せつぞく"
            }
           ],
           "answer": "c4"
@@ -4046,24 +4046,24 @@
          {
           "id": "moji_5_q1",
           "number": 1,
-          "promptJp": "会議の日時が決まったら、すぐに全員に知らせてください。",
-          "underlineJp": "日時",
+          "promptJp": "試合が終わった直後に、強い雨が降り出した。",
+          "underlineJp": "直後",
           "choices": [
            {
             "id": "c1",
-            "textJp": "日にちと時間"
+            "textJp": "すぐあと"
            },
            {
             "id": "c2",
-            "textJp": "場所と人数"
+            "textJp": "少し前"
            },
            {
             "id": "c3",
-            "textJp": "議題と順番"
+            "textJp": "途中"
            },
            {
             "id": "c4",
-            "textJp": "参加者の名前"
+            "textJp": "ずっとあと"
            }
           ],
           "answer": "c1"
@@ -4180,23 +4180,23 @@
          {
           "id": "moji_6_q1",
           "number": 1,
-          "promptJp": "園芸",
+          "promptJp": "配る",
           "choices": [
            {
             "id": "c1",
-            "textJp": "子どもたちは、公園の園芸で元気に遊んでいる。"
+            "textJp": "毎朝、庭の花に水を配っている。"
            },
            {
             "id": "c2",
-            "textJp": "父は会社をやめてから、庭で花や野菜を育てる園芸を楽しんでいる。"
+            "textJp": "駅前で、新しい店のチラシを配っている人がいた。"
            },
            {
             "id": "c3",
-            "textJp": "娘は四月から、近くの園芸に通い始めた。"
+            "textJp": "銀行にお金を配って、新しい口座を作った。"
            },
            {
             "id": "c4",
-            "textJp": "この町では、毎年夏に大きな園芸が開かれて、遠くからもたくさんの人が来る。"
+            "textJp": "郵便局で、友だちに手紙を配った。"
            }
           ],
           "answer": "c2"
@@ -4529,23 +4529,23 @@
          {
           "id": "moji_2_q4",
           "number": 4,
-          "promptJp": "せんざい",
+          "promptJp": "しりょう",
           "choices": [
            {
             "id": "c1",
-            "textJp": "洗別"
+            "textJp": "資斜"
            },
            {
             "id": "c2",
-            "textJp": "洗剤"
+            "textJp": "資料"
            },
            {
             "id": "c3",
-            "textJp": "湖剤"
+            "textJp": "賜料"
            },
            {
             "id": "c4",
-            "textJp": "準剤"
+            "textJp": "賑料"
            }
           ],
           "answer": "c2"
@@ -4658,23 +4658,23 @@
          {
           "id": "moji_4_q4",
           "number": 4,
-          "promptJp": "数学は彼女の＿＿＿＿です。",
+          "promptJp": "医師は白い＿＿＿＿をしていた。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "弱点"
+            "textJp": "マスク"
            },
            {
             "id": "c2",
-            "textJp": "ブラシ"
+            "textJp": "ブラウス"
            },
            {
             "id": "c3",
-            "textJp": "幼児"
+            "textJp": "サンプル"
            },
            {
             "id": "c4",
-            "textJp": "長短"
+            "textJp": "チップ"
            }
           ],
           "answer": "c1"
@@ -4897,23 +4897,23 @@
          {
           "id": "moji_6_q1",
           "number": 1,
-          "promptJp": "敬う",
+          "promptJp": "引き受ける",
           "choices": [
            {
             "id": "c1",
-            "textJp": "大切な花びんを落とさないように、敬って運んだ。"
+            "textJp": "駅の窓口で、予約していた切符を引き受けた。"
            },
            {
             "id": "c2",
-            "textJp": "祖父は、村の人たちからとても敬われていた。"
+            "textJp": "部長に頼まれて、新しい仕事を引き受けることにした。"
            },
            {
             "id": "c3",
-            "textJp": "自分の体を敬って、毎晩早く寝るようにしている。"
+            "textJp": "たんじょうびに、友だちからすてきなプレゼントを引き受けた。"
            },
            {
             "id": "c4",
-            "textJp": "兄の合格を敬って、家族でレストランへ出かけた。"
+            "textJp": "先生の説明を引き受けて、大事なところをノートに書いた。"
            }
           ],
           "answer": "c2"
@@ -4969,23 +4969,23 @@
          {
           "id": "moji_6_q4",
           "number": 4,
-          "promptJp": "吊るす",
+          "promptJp": "鳴らす",
           "choices": [
            {
             "id": "c1",
-            "textJp": "重い荷物を、両手で胸の前につるして運んだ。"
+            "textJp": "子どもたちが、公園で楽しそうに歌を鳴らしている。"
            },
            {
             "id": "c2",
-            "textJp": "床に落ちたごみを拾って、ごみ箱につるした。"
+            "textJp": "朝六時に目覚まし時計が鳴らして、目が覚めた。"
            },
            {
             "id": "c3",
-            "textJp": "ぬれたかさを、ベランダにつるしてかわかした。"
+            "textJp": "火事のときは、すぐにこのベルを鳴らしてください。"
            },
            {
             "id": "c4",
-            "textJp": "テーブルに白い布をつるして、その上にお皿をならべた。"
+            "textJp": "となりの犬が、知らない人を見て大きな声で鳴らしている。"
            }
           ],
           "answer": "c3"
@@ -5270,23 +5270,23 @@
          {
           "id": "moji_2_q5",
           "number": 5,
-          "promptJp": "あう",
+          "promptJp": "ついか",
           "choices": [
            {
             "id": "c1",
-            "textJp": "遭う"
+            "textJp": "追加"
            },
            {
             "id": "c2",
-            "textJp": "迅う"
+            "textJp": "追務"
            },
            {
             "id": "c3",
-            "textJp": "追う"
+            "textJp": "追勧"
            },
            {
             "id": "c4",
-            "textJp": "遠う"
+            "textJp": "逆加"
            }
           ],
           "answer": "c1"
@@ -5834,23 +5834,23 @@
          {
           "id": "moji_1_q4",
           "number": 4,
-          "promptJp": "俳句",
+          "promptJp": "輸送",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ばいく"
+            "textJp": "ゆぞう"
            },
            {
             "id": "c2",
-            "textJp": "はいぐ"
+            "textJp": "ゆそ"
            },
            {
             "id": "c3",
-            "textJp": "はいく"
+            "textJp": "ゆそう"
            },
            {
             "id": "c4",
-            "textJp": "ぱいく"
+            "textJp": "ゆっそう"
            }
           ],
           "answer": "c3"
@@ -6116,23 +6116,23 @@
          {
           "id": "moji_4_q5",
           "number": 5,
-          "promptJp": "船は今夜＿＿＿＿を越すだろう。",
+          "promptJp": "財布の＿＿＿＿をこの袋に空けなさい。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "赤道"
+            "textJp": "中身"
            },
            {
             "id": "c2",
-            "textJp": "点数"
+            "textJp": "中指"
            },
            {
             "id": "c3",
-            "textJp": "先々月"
+            "textJp": "中世"
            },
            {
             "id": "c4",
-            "textJp": "スピーカー"
+            "textJp": "中途"
            }
           ],
           "answer": "c1"
@@ -6197,24 +6197,24 @@
          {
           "id": "moji_5_q1",
           "number": 1,
-          "promptJp": "長い話し合いの末、ようやく両社の取り引きが成立した。",
-          "underlineJp": "成立した",
+          "promptJp": "弟は、れいぞうこのケーキをこっそり食べてしまった。",
+          "underlineJp": "こっそり",
           "choices": [
            {
             "id": "c1",
-            "textJp": "取り消された"
+            "textJp": "すばやく"
            },
            {
             "id": "c2",
-            "textJp": "延期された"
+            "textJp": "のこさず"
            },
            {
             "id": "c3",
-            "textJp": "まとまった"
+            "textJp": "ひそかに"
            },
            {
             "id": "c4",
-            "textJp": "見直された"
+            "textJp": "ゆっくり"
            }
           ],
           "answer": "c3"
@@ -6575,23 +6575,23 @@
          {
           "id": "moji_1_q5",
           "number": 5,
-          "promptJp": "出張",
+          "promptJp": "周辺",
           "choices": [
            {
             "id": "c1",
-            "textJp": "しゅちょう"
+            "textJp": "しゅうぺん"
            },
            {
             "id": "c2",
-            "textJp": "しゅつちょう"
+            "textJp": "しゅうべん"
            },
            {
             "id": "c3",
-            "textJp": "しゅっちょう"
+            "textJp": "しゅうへん"
            },
            {
             "id": "c4",
-            "textJp": "しゅっちょ"
+            "textJp": "じゅうへん"
            }
           ],
           "answer": "c3"
@@ -6608,23 +6608,23 @@
          {
           "id": "moji_2_q1",
           "number": 1,
-          "promptJp": "りょうがわ",
+          "promptJp": "ろくおん",
           "choices": [
            {
             "id": "c1",
-            "textJp": "両修"
+            "textJp": "鉱音"
            },
            {
             "id": "c2",
-            "textJp": "丈側"
+            "textJp": "鋼音"
            },
            {
             "id": "c3",
-            "textJp": "両令"
+            "textJp": "銘音"
            },
            {
             "id": "c4",
-            "textJp": "両側"
+            "textJp": "録音"
            }
           ],
           "answer": "c4"
@@ -6914,24 +6914,24 @@
          {
           "id": "moji_5_q1",
           "number": 1,
-          "promptJp": "報告書には、売り上げの変化を示す図表がいくつものっている。",
-          "underlineJp": "図表",
+          "promptJp": "大型の台風が、九州に接近している。",
+          "underlineJp": "接近して",
           "choices": [
            {
             "id": "c1",
-            "textJp": "写真"
+            "textJp": "上陸して"
            },
            {
             "id": "c2",
-            "textJp": "グラフ"
+            "textJp": "近づいて"
            },
            {
             "id": "c3",
-            "textJp": "コメント"
+            "textJp": "遠ざかって"
            },
            {
             "id": "c4",
-            "textJp": "文章"
+            "textJp": "発生して"
            }
           ],
           "answer": "c2"

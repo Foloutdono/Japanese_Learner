@@ -1792,23 +1792,23 @@
          {
           "id": "moji_5_q5",
           "number": 5,
-          "promptJp": "現金",
+          "promptJp": "守る",
           "choices": [
            {
             "id": "c1",
-            "textJp": "この店はカードが使えないので、現金で払ってください。"
+            "textJp": "彼はどんなときでも、約束をきちんと守る人だ。"
            },
            {
             "id": "c2",
-            "textJp": "試験の現金は、来週の月曜日に発表される。"
+            "textJp": "雨が降りそうなので、かさを守って出かけた。"
            },
            {
             "id": "c3",
-            "textJp": "現金の天気予報によると、明日は雨がふるそうだ。"
+            "textJp": "毎日れんしゅうしたので、やっと試合に守ることができた。"
            },
            {
             "id": "c4",
-            "textJp": "姉は毎朝六時に起きて、現金で近くの公園をジョギングしている。"
+            "textJp": "道がわからなかったので、近くの人に駅への行き方を守った。"
            }
           ],
           "answer": "c1"
@@ -3227,23 +3227,23 @@
          {
           "id": "moji_3_q6",
           "number": 6,
-          "promptJp": "彼は自分の本を５つの分野に＿＿＿＿。",
+          "promptJp": "その列車は予定どおりに＿＿＿＿した。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "分けた"
+            "textJp": "到着"
            },
            {
             "id": "c2",
-            "textJp": "届けた"
+            "textJp": "帰宅"
            },
            {
             "id": "c3",
-            "textJp": "洗った"
+            "textJp": "合格"
            },
            {
             "id": "c4",
-            "textJp": "焼いた"
+            "textJp": "外出"
            }
           ],
           "answer": "c1"
@@ -5165,23 +5165,23 @@
          {
           "id": "moji_3_q11",
           "number": 11,
-          "promptJp": "私たちは公園の＿＿＿＿に座った。",
+          "promptJp": "ガイドさんは、みんなに聞こえるように＿＿＿＿を使っている。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ベンチ"
+            "textJp": "マイク"
            },
            {
             "id": "c2",
-            "textJp": "農家"
+            "textJp": "カード"
            },
            {
             "id": "c3",
-            "textJp": "仲間"
+            "textJp": "メッセージ"
            },
            {
             "id": "c4",
-            "textJp": "虫歯"
+            "textJp": "ルール"
            }
           ],
           "answer": "c1"
@@ -5624,23 +5624,23 @@
          {
           "id": "moji_1_q7",
           "number": 7,
-          "promptJp": "莫大",
+          "promptJp": "情報",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ばくだい"
+            "textJp": "じょうほう"
            },
            {
             "id": "c2",
-            "textJp": "ばぐだい"
+            "textJp": "じょうぽう"
            },
            {
             "id": "c3",
-            "textJp": "ばっくだい"
+            "textJp": "しょうほう"
            },
            {
             "id": "c4",
-            "textJp": "はくだい"
+            "textJp": "じょうほ"
            }
           ],
           "answer": "c1"
@@ -6265,23 +6265,23 @@
          {
           "id": "moji_5_q2",
           "number": 2,
-          "promptJp": "愛情",
+          "promptJp": "偶然",
           "choices": [
            {
             "id": "c1",
-            "textJp": "二人は大学で出会って愛情し、来年けっこんする予定だ。"
+            "textJp": "明日は、偶然雨が降るでしょう。"
            },
            {
             "id": "c2",
-            "textJp": "犬が、しっぽをふって愛情に走ってきた。"
+            "textJp": "毎朝、偶然六時に起きて、公園を散歩している。"
            },
            {
             "id": "c3",
-            "textJp": "母は、愛情をこめて毎朝おべんとうを作ってくれる。"
+            "textJp": "旅行先のホテルで、偶然高校の友だちに会った。"
            },
            {
             "id": "c4",
-            "textJp": "私はからい料理が愛情で、毎日食べている。"
+            "textJp": "試験に合格するために、毎日偶然勉強している。"
            }
           ],
           "answer": "c3"
@@ -6557,23 +6557,23 @@
          {
           "id": "moji_1_q8",
           "number": 8,
-          "promptJp": "突然",
+          "promptJp": "方法",
           "choices": [
            {
             "id": "c1",
-            "textJp": "とつぜん"
+            "textJp": "ほうほう"
            },
            {
             "id": "c2",
-            "textJp": "とっつぜん"
+            "textJp": "ぼうほう"
            },
            {
             "id": "c3",
-            "textJp": "とつせん"
+            "textJp": "ほうほ"
            },
            {
             "id": "c4",
-            "textJp": "どつぜん"
+            "textJp": "ぽうほう"
            }
           ],
           "answer": "c1"
@@ -7418,23 +7418,23 @@
          {
           "id": "moji_1_q6",
           "number": 6,
-          "promptJp": "評判",
+          "promptJp": "責任",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ぴょうばん"
+            "textJp": "せっきにん"
            },
            {
             "id": "c2",
-            "textJp": "ひょうはん"
+            "textJp": "せぎにん"
            },
            {
             "id": "c3",
-            "textJp": "ひょうばん"
+            "textJp": "せきにん"
            },
            {
             "id": "c4",
-            "textJp": "びょうばん"
+            "textJp": "ぜきにん"
            }
           ],
           "answer": "c3"
@@ -7676,23 +7676,23 @@
          {
           "id": "moji_3_q2",
           "number": 2,
-          "promptJp": "あの＿＿＿＿は彼女によく似合う。",
+          "promptJp": "＿＿＿＿は一度しかないから、楽しもう。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "弾"
+            "textJp": "人物"
            },
            {
             "id": "c2",
-            "textJp": "ドレス"
+            "textJp": "人生"
            },
            {
             "id": "c3",
-            "textJp": "身"
+            "textJp": "人類"
            },
            {
             "id": "c4",
-            "textJp": "回り"
+            "textJp": "人込み"
            }
           ],
           "answer": "c2"
@@ -7820,23 +7820,23 @@
          {
           "id": "moji_3_q8",
           "number": 8,
-          "promptJp": "最終電車に乗り遅れてしまいました。＿＿＿＿、家までずっと歩いて帰ることにしました。",
+          "promptJp": "この人は母の兄、＿＿＿＿私のおじです。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "別に"
+            "textJp": "それとも"
            },
            {
             "id": "c2",
-            "textJp": "どうしても"
+            "textJp": "ところが"
            },
            {
             "id": "c3",
-            "textJp": "いずれ"
+            "textJp": "なぜなら"
            },
            {
             "id": "c4",
-            "textJp": "そこで"
+            "textJp": "つまり"
            }
           ],
           "answer": "c4"

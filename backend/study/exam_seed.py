@@ -35,6 +35,7 @@ import hashlib
 import itertools
 import json
 import logging
+import re
 from pathlib import Path
 
 from study.exam_audio_repair import questions_with_audio, turns_from_script
@@ -263,7 +264,8 @@ def retold_stories(entries: list[dict]) -> list[str]:
 # The generator now deals them from one walk through the level's deck
 # (study/exam_topics.dealt_order), ten papers apart at the least; no two
 # seeds of a vocabulary exam id test one word. The word an item tests
-# is where its kind puts it.
+# is where its kind puts it, and is told by the deck entry it names, so
+# that 水曜日 and すいようび, or 言う and 言いました, are one word.
 _TESTED = {
     "kanji-reading": lambda q, right: q.get("promptJp"),
     "kanji-orthography": lambda q, right: right,
@@ -271,10 +273,70 @@ _TESTED = {
     "vocab-paraphrase": lambda q, right: q.get("underlineJp"),
     "vocab-usage": lambda q, right: q.get("promptJp"),
 }
+# The sentence the word is read in, where it has one: きました is 着る
+# in セーターをきました and 来る on its own.
+_SENTENCE = {
+    "vocab-context": lambda q, right: (q.get("promptJp") or "").replace("＿＿＿＿", right or "", 1),
+    "vocab-paraphrase": lambda q, right: q.get("promptJp"),
+}
+
+
+_SURU = re.compile(r"(?:する|します|しました|した|して|される|された|させる)$")
+_KANJI = re.compile(r"[一-鿿々]")
+_NOT_THE_WORD = {"particle", "auxiliary", "symbol", "punctuation"}
+
+
+def _deck_entries(level: str):
+    """The level's deck by written form and by kana: a kana that names
+    two entries (こしょう, 故障 and 胡椒) names neither."""
+    from content.vocab_data import VOCAB_BY_LEVEL
+
+    by_kanji: dict[str, str] = {}
+    by_kana: dict[str, set[str]] = {}
+    for w in VOCAB_BY_LEVEL.get(level, []):
+        entry = f"{w.get('kanji') or ''}::{w.get('kana') or ''}"
+        if w.get("kanji"):
+            by_kanji.setdefault(w["kanji"], entry)
+        for kana in (w.get("kana") or "").split("/"):
+            if kana.strip():
+                by_kana.setdefault(kana.strip(), set()).add(entry)
+    return by_kanji, {k: next(iter(v)) for k, v in by_kana.items() if len(v) == 1}
+
+
+def _tested_entry(word: str, by_kanji: dict, by_kana: dict, sentence: str | None = None) -> str:
+    """The deck entry `word` names, as written, in kana, or once the
+    tokenizer has put it back in its dictionary form (言いました 言う,
+    成立した 成立), read in `sentence` when it has one; the string itself
+    when none is found. A word in kana alone is put back only onto an
+    entry whose kana starts as it does: the tokenizer reads き as 来る
+    even in シャツをきます, but ふとって is 太る."""
+    from study.morphology import tokenize
+
+    for form in (word, _SURU.sub("", word)):
+        if form in by_kanji:
+            return by_kanji[form]
+        if form in by_kana:
+            return by_kana[form]
+    start = sentence.find(word) if sentence else -1
+    if start < 0:
+        sentence, start = word, 0
+    lemmas, at = [], 0
+    for m in tokenize(sentence) or []:
+        at = sentence.find(m.surface, at)
+        if at < 0:
+            break
+        if start <= at < start + len(word) and m.pos not in _NOT_THE_WORD and m.lemma != "為る":
+            lemmas.append(m.lemma)
+        at += len(m.surface)
+    entry = by_kanji.get("".join(lemmas)) or by_kana.get("".join(lemmas))
+    if entry and (_KANJI.search(word) or any(k[:1] == word[:1] for k in entry.split("::")[1].split("/"))):
+        return entry
+    return word
 
 
 def retested_words(level: str, entries: list[dict]) -> list[str]:
     kinds = {m["id"]: m["type"] for s in LEVEL_BLUEPRINT[level]["sections"] for m in s["mondai"]}
+    by_kanji, by_kana = _deck_entries(level)
     first: dict[str, str] = {}
     out = []
     for e in entries:
@@ -289,10 +351,12 @@ def retested_words(level: str, entries: list[dict]) -> list[str]:
                     where = f"#{e.get('n')} {q.get('id')}"
                     if not word:
                         continue
-                    if word in first:
-                        out.append(f"{where} tests {word} again ({first[word]})")
+                    sentence = _SENTENCE.get(kinds.get(m.get("id")), lambda q, right: None)(q, right)
+                    entry = _tested_entry(word, by_kanji, by_kana, sentence)
+                    if entry in first:
+                        out.append(f"{where} tests {word} again ({first[entry]})")
                     else:
-                        first[word] = where
+                        first[entry] = where
     return out
 
 

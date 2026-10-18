@@ -1017,24 +1017,24 @@
          {
           "id": "moji_3_q1",
           "number": 1,
-          "promptJp": "このホテルは、客の要望に柔軟に対応してくれる。",
-          "underlineJp": "対応して",
+          "promptJp": "その件については、一切何も聞いていない。",
+          "underlineJp": "一切",
           "choices": [
            {
             "id": "c1",
-            "textJp": "逆らって"
+            "textJp": "少しは"
            },
            {
             "id": "c2",
-            "textJp": "応じて"
+            "textJp": "まったく"
            },
            {
             "id": "c3",
-            "textJp": "気づいて"
+            "textJp": "前から"
            },
            {
             "id": "c4",
-            "textJp": "甘えて"
+            "textJp": "具体的には"
            }
           ],
           "answer": "c2"
@@ -3025,24 +3025,24 @@
          {
           "id": "moji_3_q2",
           "number": 2,
-          "promptJp": "その小説には、未来の社会を予言するような場面がいくつもある。",
-          "underlineJp": "予言する",
+          "promptJp": "会議の日程変更の件、了解しました。",
+          "underlineJp": "了解しました",
           "choices": [
            {
             "id": "c1",
-            "textJp": "笑い飛ばす"
+            "textJp": "反対しました"
            },
            {
             "id": "c2",
-            "textJp": "言い当てる"
+            "textJp": "承知しました"
            },
            {
             "id": "c3",
-            "textJp": "書き残す"
+            "textJp": "忘れていました"
            },
            {
             "id": "c4",
-            "textJp": "批判する"
+            "textJp": "提案しました"
            }
           ],
           "answer": "c2"
@@ -3100,24 +3100,24 @@
          {
           "id": "moji_3_q5",
           "number": 5,
-          "promptJp": "子どもを守ることは、大人の責務だ。",
-          "underlineJp": "責務",
+          "promptJp": "この病気が再び悪化する可能性は、極めて低い。",
+          "underlineJp": "極めて",
           "choices": [
            {
             "id": "c1",
-            "textJp": "権利"
+            "textJp": "意外に"
            },
            {
             "id": "c2",
-            "textJp": "特技"
+            "textJp": "次第に"
            },
            {
             "id": "c3",
-            "textJp": "義務"
+            "textJp": "非常に"
            },
            {
             "id": "c4",
-            "textJp": "楽しみ"
+            "textJp": "比較的"
            }
           ],
           "answer": "c3"
@@ -3532,23 +3532,23 @@
          {
           "id": "moji_2_q3",
           "number": 3,
-          "promptJp": "その日本語に＿＿＿＿する英語はない。",
+          "promptJp": "何時間もかけて父を＿＿＿＿し、ようやく留学を認めてもらった。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "対応"
+            "textJp": "説得"
            },
            {
             "id": "c2",
-            "textJp": "類推"
+            "textJp": "監視"
            },
            {
             "id": "c3",
-            "textJp": "家出"
+            "textJp": "追跡"
            },
            {
             "id": "c4",
-            "textJp": "混血"
+            "textJp": "弁護"
            }
           ],
           "answer": "c1"
@@ -4193,23 +4193,23 @@
          {
           "id": "moji_2_q3",
           "number": 3,
-          "promptJp": "会社は、新しい工場を立ち上げるため、三人の技術者をタイに＿＿＿＿した。",
+          "promptJp": "大雨のため、住民は近くの小学校に＿＿＿＿した。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "派遣"
+            "textJp": "避難"
            },
            {
             "id": "c2",
-            "textJp": "指摘"
+            "textJp": "捜査"
            },
            {
             "id": "c3",
-            "textJp": "却下"
+            "textJp": "感染"
            },
            {
             "id": "c4",
-            "textJp": "断言"
+            "textJp": "確信"
            }
           ],
           "answer": "c1"
@@ -4553,23 +4553,23 @@
          {
           "id": "moji_4_q4",
           "number": 4,
-          "promptJp": "通常",
+          "promptJp": "規模",
           "choices": [
            {
             "id": "c1",
-            "textJp": "この道は、毎朝通常で混んでいる。"
+            "textJp": "このシャツは規模が合わないので、一つ大きいものに替えてもらった。"
            },
            {
             "id": "c2",
-            "textJp": "この店は通常、夜十時まで営業している。"
+            "textJp": "今回の地震は、過去百年で最大規模のものだった。"
            },
            {
             "id": "c3",
-            "textJp": "会議の資料を、出席者全員に通常してください。"
+            "textJp": "彼は毎日、規模正しい生活を送っている。"
            },
            {
             "id": "c4",
-            "textJp": "彼は通常がうまく、どの国の人とも話せる。"
+            "textJp": "テストの規模が悪くて、母にしかられた。"
            }
           ],
           "answer": "c2"
@@ -5719,24 +5719,24 @@
          {
           "id": "moji_3_q4",
           "number": 4,
-          "promptJp": "富士山を背景に、家族で記念写真を撮った。",
-          "underlineJp": "背景",
+          "promptJp": "計画の詳細は、来週の会議で説明します。",
+          "underlineJp": "詳細",
           "choices": [
            {
             "id": "c1",
-            "textJp": "目印"
+            "textJp": "大まかな流れ"
            },
            {
             "id": "c2",
-            "textJp": "正面"
+            "textJp": "決まった理由"
            },
            {
             "id": "c3",
-            "textJp": "中心"
+            "textJp": "必要な費用"
            },
            {
             "id": "c4",
-            "textJp": "バック"
+            "textJp": "細かい内容"
            }
           ],
           "answer": "c4"
@@ -6380,24 +6380,24 @@
          {
           "id": "moji_3_q4",
           "number": 4,
-          "promptJp": "川の土手に沿って、桜の木が並んでいる。",
-          "underlineJp": "土手",
+          "promptJp": "今から準備を始めても、もう手遅れだ。",
+          "underlineJp": "手遅れだ",
           "choices": [
            {
             "id": "c1",
-            "textJp": "流れ"
+            "textJp": "時間が余っている"
            },
            {
             "id": "c2",
-            "textJp": "堤防"
+            "textJp": "間に合わない"
            },
            {
             "id": "c3",
-            "textJp": "上流"
+            "textJp": "簡単だ"
            },
            {
             "id": "c4",
-            "textJp": "河口"
+            "textJp": "早すぎる"
            }
           ],
           "answer": "c2"

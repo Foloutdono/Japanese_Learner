@@ -2475,23 +2475,23 @@
          {
           "id": "moji_2_q2",
           "number": 2,
-          "promptJp": "いう",
+          "promptJp": "くるま",
           "choices": [
            {
             "id": "c1",
-            "textJp": "誕う"
+            "textJp": "軌"
            },
            {
             "id": "c2",
-            "textJp": "言う"
+            "textJp": "車"
            },
            {
             "id": "c3",
-            "textJp": "諮う"
+            "textJp": "転"
            },
            {
             "id": "c4",
-            "textJp": "請う"
+            "textJp": "輝"
            }
           ],
           "answer": "c2"
@@ -2956,23 +2956,23 @@
          {
           "id": "moji_1_q6",
           "number": 6,
-          "promptJp": "忙しい",
+          "promptJp": "時間",
           "choices": [
            {
             "id": "c1",
-            "textJp": "いそかしい"
+            "textJp": "じがん"
            },
            {
             "id": "c2",
-            "textJp": "いぞがしい"
+            "textJp": "しかん"
            },
            {
             "id": "c3",
-            "textJp": "いっそがしい"
+            "textJp": "じっかん"
            },
            {
             "id": "c4",
-            "textJp": "いそがしい"
+            "textJp": "じかん"
            }
           ],
           "answer": "c4"
@@ -3494,23 +3494,23 @@
          {
           "id": "moji_1_q5",
           "number": 5,
-          "promptJp": "映画館",
+          "promptJp": "学校",
           "choices": [
            {
             "id": "c1",
-            "textJp": "えいがかん"
+            "textJp": "がっこう"
            },
            {
             "id": "c2",
-            "textJp": "えいかかん"
+            "textJp": "がこう"
            },
            {
             "id": "c3",
-            "textJp": "えいががん"
+            "textJp": "かっこう"
            },
            {
             "id": "c4",
-            "textJp": "えいがっかん"
+            "textJp": "がっこ"
            }
           ],
           "answer": "c1"
@@ -4314,23 +4314,23 @@
          {
           "id": "moji_3_q3",
           "number": 3,
-          "promptJp": "りんごやバナナなどの＿＿＿＿がすきです。",
+          "promptJp": "その＿＿＿＿を聞いて、みんなびっくりしました。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "のみもの"
+            "textJp": "新聞"
            },
            {
             "id": "c2",
-            "textJp": "おかし"
+            "textJp": "本"
            },
            {
             "id": "c3",
-            "textJp": "にく"
+            "textJp": "カレンダー"
            },
            {
             "id": "c4",
-            "textJp": "くだもの"
+            "textJp": "ニュース"
            }
           ],
           "answer": "c4"
@@ -4642,23 +4642,23 @@
          {
           "id": "moji_1_q6",
           "number": 6,
-          "promptJp": "二十歳",
+          "promptJp": "半分",
           "choices": [
            {
             "id": "c1",
-            "textJp": "はたっち"
+            "textJp": "ばんぶん"
            },
            {
             "id": "c2",
-            "textJp": "はだち"
+            "textJp": "はんふん"
            },
            {
             "id": "c3",
-            "textJp": "はたち"
+            "textJp": "はんぶん"
            },
            {
             "id": "c4",
-            "textJp": "ばたち"
+            "textJp": "ぱんぶん"
            }
           ],
           "answer": "c3"
@@ -4852,23 +4852,23 @@
          {
           "id": "moji_3_q2",
           "number": 2,
-          "promptJp": "本の１０ページを＿＿＿＿ください。",
+          "promptJp": "この道をまっすぐ＿＿＿＿と、駅があります。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "わたって"
+            "textJp": "休む"
            },
            {
             "id": "c2",
-            "textJp": "きえて"
+            "textJp": "会う"
            },
            {
             "id": "c3",
-            "textJp": "しって"
+            "textJp": "立つ"
            },
            {
             "id": "c4",
-            "textJp": "見て"
+            "textJp": "行く"
            }
           ],
           "answer": "c4"
@@ -5132,23 +5132,23 @@
          {
           "id": "moji_1_q3",
           "number": 3,
-          "promptJp": "音楽",
+          "promptJp": "一人",
           "choices": [
            {
             "id": "c1",
-            "textJp": "おんがぐ"
+            "textJp": "ぴとり"
            },
            {
             "id": "c2",
-            "textJp": "おんがく"
+            "textJp": "ひとり"
            },
            {
             "id": "c3",
-            "textJp": "おんがっく"
+            "textJp": "ひっとり"
            },
            {
             "id": "c4",
-            "textJp": "おんかく"
+            "textJp": "ひどり"
            }
           ],
           "answer": "c2"
@@ -5309,23 +5309,23 @@
          {
           "id": "moji_2_q3",
           "number": 3,
-          "promptJp": "ねん",
+          "promptJp": "たべる",
           "choices": [
            {
             "id": "c1",
-            "textJp": "年"
+            "textJp": "食べる"
            },
            {
             "id": "c2",
-            "textJp": "幸"
+            "textJp": "飯べる"
            },
            {
             "id": "c3",
-            "textJp": "幹"
+            "textJp": "飽べる"
            },
            {
             "id": "c4",
-            "textJp": "干"
+            "textJp": "餌べる"
            }
           ],
           "answer": "c1"
@@ -5568,24 +5568,24 @@
          {
           "id": "moji_4_q2",
           "number": 2,
-          "promptJp": "すいようびに、としょかんへ行きます。",
-          "underlineJp": "すいようび",
+          "promptJp": "あさって、友だちがうちに来ます。",
+          "underlineJp": "あさって",
           "choices": [
            {
             "id": "c1",
-            "textJp": "かようびのつぎの日"
+            "textJp": "あしたのつぎの日"
            },
            {
             "id": "c2",
-            "textJp": "かようびのまえの日"
+            "textJp": "きょうのつぎの日"
            },
            {
             "id": "c3",
-            "textJp": "もくようびのつぎの日"
+            "textJp": "きのうのまえの日"
            },
            {
             "id": "c4",
-            "textJp": "げつようびのつぎの日"
+            "textJp": "きょうのまえの日"
            }
           ],
           "answer": "c1"
@@ -5593,24 +5593,24 @@
          {
           "id": "moji_4_q3",
           "number": 3,
-          "promptJp": "きょうしつには、まだだれもいません。",
-          "underlineJp": "きょうしつ",
+          "promptJp": "きのう見たえいがは、つまらなかったです。",
+          "underlineJp": "つまらなかった",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ごはんをたべるへや"
+            "textJp": "たのしかった"
            },
            {
             "id": "c2",
-            "textJp": "じゅぎょうをするへや"
+            "textJp": "おもしろくなかった"
            },
            {
             "id": "c3",
-            "textJp": "先生がやすむへや"
+            "textJp": "みじかかった"
            },
            {
             "id": "c4",
-            "textJp": "おきゃくさんがまつへや"
+            "textJp": "ながかった"
            }
           ],
           "answer": "c2"

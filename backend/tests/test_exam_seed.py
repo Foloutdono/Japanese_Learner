@@ -119,6 +119,29 @@ def test_a_word_tested_twice_is_found():
     assert found == ["#3 moji_1_q1 tests 両側 again (#1 moji_1_q1)"]
 
 
+def test_a_word_is_one_word_in_kana_and_in_any_form():
+    # By the deck entry it names, read in its sentence: 水曜日 and すいようび
+    # are one word, 言う and 言いました one, but セーターをきました is 着る,
+    # which the tokenizer alone reads 来る.
+    def item(n, mondai, prompt, right, underline=None):
+        q = {"id": f"{mondai}_q1", "promptJp": prompt, "answer": "c1",
+             "choices": [{"id": "c1", "textJp": right}, {"id": "c2", "textJp": "x"}]}
+        if underline:
+            q["underlineJp"] = underline
+        return {"n": n, "paper": {"sections": [{"id": "vocabulary", "mondai": [{"id": mondai, "questions": [q]}]}]}}
+
+    found = exam_seed.retested_words("N5", [
+        item(1, "moji_1", "水曜日", "すいようび"),
+        item(2, "moji_4", "すいようびに行きます。", "もくようび", underline="すいようび"),
+        item(3, "moji_2", "くる", "来る"),
+        item(4, "moji_3", "さむいので、セーターを＿＿＿＿。", "きました"),
+        item(5, "moji_1", "言う", "いう"),
+        item(6, "moji_3", "先生に「ありがとう」と＿＿＿＿。", "言いました"),
+    ])
+    assert found == ["#2 moji_4_q1 tests すいようび again (#1 moji_1_q1)",
+                     "#6 moji_3_q1 tests 言いました again (#5 moji_1_q1)"]
+
+
 # ── The loader ────────────────────────────────────────────────
 
 EXAM = "n3-reading-01"
