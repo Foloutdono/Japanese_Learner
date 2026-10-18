@@ -102,13 +102,20 @@ export function askTarget(opened, now) {
 const plain = s => (typeof s === 'string' ? s.replace(/\*\*/g, '') : '')
 const lines = xs => xs.filter(Boolean).join('\n')
 
+/** What a gap question's option prints: the one form its rule would
+ *  take in the hole (`form`, plan 254) -- あの, not この／その／あの／どの --
+ *  or, for a payload without it, the bare pattern. */
+export function gapForm(c) {
+  return c?.form ?? String(c?.pattern ?? '').replace(/^[〜～]/, '')
+}
+
 /** What stands in a gap question's hole once it is answered: the
  *  sentence's own text (`fill`), never the pattern poured back in --
  *  から〜まで is blanked on its から, 〜てしまう on the てしま of
- *  てしまいました. The bare pattern only for a payload without it. */
+ *  てしまいました. The option's form only for a payload without it. */
 export function holeText(q, right) {
   if (q?.fill?.length) return q.fill.map(p => p.text).join('')
-  return String(right?.pattern ?? '').replace(/^[〜～]/, '')
+  return gapForm(right)
 }
 
 /** A quiz sentence as it reads answered: the blank filled with the right form. */
@@ -119,7 +126,7 @@ function filled(q, right) {
 }
 
 /** What a choice says, whichever kind of question offered it. */
-const said = c => (c ? c.text ?? c.jp ?? c.pattern ?? '' : '')
+const said = c => (c ? c.text ?? c.jp ?? c.form ?? c.pattern ?? '' : '')
 
 /**
  * The thread, its context and whether it takes a question, for the stop

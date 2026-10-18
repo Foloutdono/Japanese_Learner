@@ -17,6 +17,7 @@
 #
 # And /api/frequency/{domain}/tiers/started counts a tier's met cards
 # the way /api/stats counts a level's: reviewed in any mode, once.
+import random
 import re
 
 import pytest
@@ -28,6 +29,8 @@ from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
 from content.kana_data import KANA_SETS
 from content.vocab_data import VOCAB_BY_LEVEL
 from core.db import db_conn
+from study.grammar_forms import choice_forms
+from study.grammar_lesson import contrast_payload
 from routes.station import station_samples
 from study.grammar_ladder import build_payload
 from tests.conftest import acting_as
@@ -91,15 +94,19 @@ def test_a_grammar_specimen_carries_its_sentence_and_its_blank(client):
         assert card["jp"] in patterns
         if "blank" in card:
             assert card["sentence"]
-            assert card["blank"]["choices"][-1] == card["jp"]
             assert len(card["blank"]["choices"]) >= 2
             assert card["blank"]["before"] or card["blank"]["after"]
             # The lesson's own rivals, so the specimen is the same on
-            # every process rather than drawn with random fillers.
+            # every process rather than drawn with random fillers, and the
+            # point last; each tile the form its rule takes in the hole, as
+            # the run's are (plan 254).
             entry = next(p for p in GRAMMAR_POINTS_BY_LEVEL[level] if p["pattern"] == card["jp"])
-            named = {r["pattern"] for r in entry.get("compare", [])}
-            if named - {card["jp"]}:
-                assert set(card["blank"]["choices"][:-1]) <= named
+            named = list(dict.fromkeys(r["pattern"] for r in entry.get("compare", []) if r["pattern"] != card["jp"]))
+            drill = contrast_payload(level, entry, GRAMMAR_POINTS_BY_LEVEL[level], "en", random.Random(0), authored=False)
+            rules = named[:3] or [drill["rules"][c] for c in drill["choices"] if drill["rules"][c] != card["jp"]][:3]
+            forms = choice_forms(card["jp"], "".join(p["text"] for p in drill["fill"]), [card["jp"]] + rules,
+                                 {r["pattern"]: r["en"] for r in entry.get("compare", [])})
+            assert card["blank"]["choices"] == [forms[r].text for r in rules + [card["jp"]]]
 
 
 def test_a_grammar_specimen_shows_construire_and_ecrire_as_their_runs_ask_them(client):

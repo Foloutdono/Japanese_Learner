@@ -135,8 +135,11 @@ def test_contrast_payload_blanks_the_pattern_and_offers_its_rivals():
     }
     grammar_list = GRAMMAR_POINTS_BY_LEVEL[level]
     payload = contrast_payload(level, entry, grammar_list, "en")
-    assert payload["answer"] == "〜べきだ"
-    assert "〜べきだ" in payload["choices"] and "〜はずだ" in payload["choices"]
+    # Each option is the form its rule takes in the hole (plan 254), the
+    # rule behind it in `rules`.
+    assert payload["answer"] == "べきだ" and payload["rules"]["べきだ"] == "〜べきだ"
+    assert "はずだ" in payload["choices"] and payload["rules"]["はずだ"] == "〜はずだ"
+    assert payload["why"] == {"はずだ": "expectation, not duty"}
     assert len(payload["choices"]) == 4 and len(set(payload["choices"])) == 4
     blanks = [p for p in payload["furigana"] if p.get("blank")]
     assert len(blanks) == 1 and blanks[0]["text"] == BLANK

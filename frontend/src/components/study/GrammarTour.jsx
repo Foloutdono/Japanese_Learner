@@ -8,11 +8,10 @@ import { ExampleSentence } from '../dictionary/ExampleSentence'
 import { LessonInline } from './GrammarLesson'
 import { FuriganaParts } from './Readings'
 import { quizScore, stopKind, stopsOf, twistIndex, twistsOf } from '../../domain/tourStops'
-import { bare } from '../../domain/ladderLine'
 import { PICK_KEY_DIGIT } from '../../domain/choiceKeys'
 import { dialogOpen } from '../../lib/dialogOpen'
 import { composing, pressedByPointer, trackPresses } from '../../lib/keyGuards'
-import { holeText, tourAsk } from '../../domain/ask'
+import { gapForm, holeText, tourAsk } from '../../domain/ask'
 import { AskEntry } from './AskPage'
 
 // ── 発見 — a grammar point found before it is drilled (plan 187b) ──
@@ -459,7 +458,7 @@ function QuizQuestion({ q, n, total, pick, done, onPick }) {
         <ExampleSentence ex={{ jp: q.jp, tr: q.tr, segments }} showTr revealed={done} blankLabel={t.glBlank} />
       </div>
     )
-    if (q.kind === 'gap') items = q.choices.map(c => ({ ...c, jp: bare(c.pattern) }))
+    if (q.kind === 'gap') items = q.choices.map(c => ({ ...c, jp: gapForm(c) }))
     ja = true
   } else if (q.kind === 'use') {
     ja = true
@@ -546,7 +545,7 @@ function Recap({ q, pick }) {
     said = q.furigana.map((seg, i) => (seg.blank
       ? <b key={i} className="tour-recap__form">{form}</b>
       : <FuriganaParts key={i} parts={[seg]} />))
-    if (!ok && taken) fix = q.kind === 'gap' ? bare(taken.pattern) : taken.jp
+    if (!ok && taken) fix = q.kind === 'gap' ? gapForm(taken) : taken.jp
   } else {
     said = <FuriganaParts parts={q.furigana?.length ? q.furigana : [{ text: q.jp }]} />
     if (!ok && taken) fix = taken.text

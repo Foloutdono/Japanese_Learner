@@ -92,7 +92,13 @@ runtime purpose.
   `fill`, `grammar_examples.span_parts`), never the pattern poured back
   in: a point is blanked on one piece of it (から of から〜まで, ます of
   〜ます／〜ません), so the pattern doubled the sentence (plan 245,
-  `tests/test_contrast_fill.py`).
+  `tests/test_contrast_fill.py`). Asked, each option prints the one
+  form its rule would take in the hole (`study/grammar_forms.py`, plan
+  254): あの beside あれ, never この／その／あの／どの against
+  これ／それ／あれ／どれ, the payload's `rules` naming the rule behind each.
+  A rule no lone piece can stand for (〜か〜か, whose か fits
+  電話＿＿メール; お〜になる, whose になる is "become") stays whole, and
+  no two options print alike (`tests/test_choice_forms.py`).
 - **Construire takes what the translation cannot tell apart (plan 241).**
   A translation never says polite or plain, so where Construire's hole
   closes its sentence the ending in the other register is right too

@@ -17,6 +17,7 @@ from content.vocab_data import VOCAB_BY_LEVEL
 from study import conversation
 from study.exam_gen_utils import make_choices
 from study.exam_kanji_gen import build_kanji_reading_distractors
+from study.grammar_forms import choice_forms
 from study.grammar_ladder import build_specimen, write_payload
 from study.grammar_lesson import contrast_payload
 from translations import get_meaning
@@ -155,7 +156,14 @@ def _grammar_card(level: str, entry: dict, points: list[dict], lang: str) -> dic
     # lesson names no rival at all.
     pattern = entry["pattern"]
     rivals = list(dict.fromkeys(r["pattern"] for r in entry.get("compare", []) if r["pattern"] != pattern))
-    choices = (rivals or [c for c in contrast["choices"] if c != pattern])[:3] + [pattern]
+    rules = contrast["rules"]
+    choices = (rivals or [rules[c] for c in contrast["choices"] if rules[c] != pattern])[:3]
+    # Each tile prints the form its rule takes in the hole, as the run's do
+    # (plan 254): あの and あれ, not the two series whole.
+    fill = "".join(p["text"] for p in contrast.get("fill", []))
+    forms = choice_forms(pattern, fill, [pattern] + choices,
+                         {r["pattern"]: r["en"] for r in entry.get("compare", [])})
+    choices = [forms[c].text for c in choices + [pattern]]
     card = {
         "jp": pattern,
         "meaning": gloss(entry, lang),
