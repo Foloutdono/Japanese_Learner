@@ -647,7 +647,7 @@ const textBlock = (c, str, { x, w, sizes, weight = 700, fam = 'latin', color = c
 // ── The item, as large as it can be read ──────────────────────
 /** A sentence, each word over its line's rule (a word the vocabulary's, a
  *  particle the grammar's), or the lit words alone ruled in gold. */
-function sentenceBlock(c, rows, { x, w, maxH, max = FS.display * 1.15, min = FS.title, script = c.pl.script, romaji = false, lines = 3, lit = null, align = 'center', ink = c.p.ink, fam = 'serif', fewest = false, gap = 0.08, romajiK }) {
+function sentenceBlock(c, rows, { x, w, maxH, max = FS.display * 1.15, min = FS.title, script = c.pl.script, romaji = false, lines = 3, lit = null, align = 'center', ink = c.p.ink, fam = 'serif', fewest = false, gap = 0.08, romajiK, inks = null }) {
   if (!rows?.length) return none
   const at = k => layoutSentence(c.ctx, rows, { max, min, maxW: w, maxH, maxLines: k, script, romaji, romajiK, rules: false, under: 0.34, gap, fam, weight: 700 })
   // `fewest`: on as few lines as it sets in, then as large as they hold
@@ -659,10 +659,12 @@ function sentenceBlock(c, rows, { x, w, maxH, max = FS.display * 1.15, min = FS.
   const ruleOf = (u) => {
     if (u.row.k === 'punct') return null
     if (lit) return lit(u.row) ? c.p.gold : null
+    // `inks`: a word's own ink, row by row (Read it, plan 256).
+    if (inks) return inks.get(u.i) || null
     return u.row.k === 'word' ? c.p.line.vocab : c.p.line.grammar
   }
   const ax = align === 'center' ? x + w / 2 : x
-  return { h: L.h, L, draw: y => drawSentence(c.ctx, L, ax, y, align, u => ({ ink, ruby: c.p.ink2, romaji: c.p.ink2, rule: ruleOf(u), ruleW: Math.max(6, L.size * 0.075) })) }
+  return { h: L.h, L, draw: y => drawSentence(c.ctx, L, ax, y, align, u => ({ ink, ruby: c.p.ink2, romaji: inks?.get(u.i) || c.p.ink2, rule: ruleOf(u), ruleW: Math.max(6, L.size * (inks ? 0.09 : 0.075)) })) }
 }
 /** A word, a kanji or a kana alone, as large as the room lets it be. */
 function glyphBlock(c, str, { x, w, maxH, max, fam = 'serif', color = c.p.ink, rule = true }) {
@@ -1162,21 +1164,40 @@ function readSpec(pl, base) {
   const rows = unstopped(f.rows)
   return {
     ...base,
-    hook: { kind: 'readit', rows, ask: 'read', seconds: 5, swipe: true },
+    hook: { kind: 'readit', rows, items: f.breakdown, ask: 'read', seconds: 5, swipe: true },
     words: { kind: 'cards', items: f.breakdown, label: 'words', lit: f.lit || '' },
-    solution: { kind: 'reading', rows, translation: f.translation, bonus },
+    solution: { kind: 'reading', rows, items: f.breakdown, translation: f.translation, bonus },
   }
 }
 /** A sentence without its closing full stop, as Read it sets it (plan
  *  255): a line to read at a glance, not prose. A question keeps its ？. */
 export const unstopped = rows => (rows?.at(-1)?.k === 'punct' && rows.at(-1).t === '。' ? rows.slice(0, -1) : rows)
+// Read it's words, an ink each (plan 256, the owner's pick of five
+// drawn, after the post that started Read it): a word keeps its ink on
+// every slide, its rule under the sentence, its card's bar and its
+// romaji under the answer, so the eye follows it from the question to
+// what it means. The inks are the app's own, the stamp's vermilion first,
+// on either ground; here, and only here, a line's pigment names a word
+// rather than its line (the README, "One line, one colour").
+const READ_INKS = p => [p.stamp, p.line.vocab, p.paper ? p.goldMid : p.goldLit, p.line.grammar, p.line.kanji, p.line.reading, p.line.rikai]
+/** Each row of a sentence to its word's ink: the breakdown's nth word
+ *  wears the nth ink, on every row it spans (ので is one word). */
+export function readInks(p, items) {
+  const inks = READ_INKS(p)
+  const out = new Map()
+  ;(items || []).forEach((it, n) => {
+    for (let i = it.i; i <= (it.j ?? it.i); i++) out.set(i, inks[n % inks.length])
+  })
+  return out
+}
 /** The script Read it sets a sentence in: kana where the studio asks for
  *  it, else the kanji with their furigana. */
 const readScript = c => (c.pl.script === 'kana' ? 'kana' : 'furigana')
 /** The sentence to read, alone: on as few lines as it sets in, as large
  *  as they hold, each word over its line's rule, a space between words. */
-function readitBlock(c, rows, box) {
-  const at = (lines, fewest) => sentenceBlock(c, rows, { ...box, max: FS.word, min: FS.title, lines, fewest, script: readScript(c), fam: 'jp', gap: 0.2, romaji: c.pl.showRomaji })
+function readitBlock(c, rows, box, items) {
+  const inks = readInks(c.p, items)
+  const at = (lines, fewest) => sentenceBlock(c, rows, { ...box, max: FS.word, min: FS.title, lines, fewest, script: readScript(c), fam: 'jp', gap: 0.2, romaji: c.pl.showRomaji, inks })
   // One line, unless two set it a third larger (あたまが / いたい。).
   const one = at(1, true)
   const two = at(2, false)
@@ -1245,9 +1266,10 @@ function cardsBlock(c, items, { x, w, maxH }, lit = '') {
     cut: lay.cut || !!litB.cut,
     draw: y => {
       let at = y
-      for (const cd of lay.cards) {
+      const inks = READ_INKS(p)
+      lay.cards.forEach((cd, n) => {
         card(c, x, at, w, cd.h)
-        ctx.fillStyle = cd.it.line === 'grammar' ? p.line.grammar : p.line.vocab
+        ctx.fillStyle = inks[n % inks.length]
         rrect(ctx, x + pad, at + pad, bar, cd.h - pad * 2, bar / 2)
         ctx.fill()
         const lx = x + pad + bar + SP[5]
@@ -1258,7 +1280,7 @@ function cardsBlock(c, items, { x, w, maxH }, lit = '') {
         if (cd.m) ry += paragraph(ctx, cd.m, x + w - pad, ry, p.ink, 'right')
         if (cd.sb) paragraph(ctx, cd.sb, x + w - pad, ry + SP[2], p.ink2, 'right')
         at += cd.h + gap
-      }
+      })
       if (litB.h) litB.draw(at - gap + litGap)
     },
   }
@@ -1274,9 +1296,9 @@ function readingBlock(c, s, { x, w, maxH }) {
     const bonus = !s.bonus ? none
       : s.bonus.kind === 'version' ? versionBlock(c, s.bonus, { x, w, step: k })
         : bonusBlock(c, s.bonus, { x, w, sizes: [z(3), z(4), FS.sm] })
-    const tr = textBlock(c, quoted(c.lang, s.translation), { x, w, sizes: [z(1), z(2), z(3)], weight: 800, color: c.line, maxLines: 3, lh: 1.15 })
+    const tr = textBlock(c, quoted(c.lang, s.translation), { x, w, sizes: [z(1), z(2), z(3)], weight: 800, color: c.p.stamp, maxLines: 3, lh: 1.15 })
     const gap = k < 2 ? SP[7] : SP[5]
-    const sent = sentenceBlock(c, s.rows, { x, w, maxH: maxH - tr.h - bonus.h - gap * 2, max: tops[k], min: z(3), script: readScript(c), fam: 'jp', romaji: true, romajiK: 0.36, gap: 0.2, fewest: true })
+    const sent = sentenceBlock(c, s.rows, { x, w, maxH: maxH - tr.h - bonus.h - gap * 2, max: tops[k], min: z(3), script: readScript(c), fam: 'jp', romaji: true, romajiK: 0.36, gap: 0.2, fewest: true, inks: readInks(c.p, s.items) })
     out = stackOf([sent, tr, bonus], [gap, gap])
     if (out.h > maxH) continue
     if (!tr.cut && !bonus.cut) return out
@@ -1888,7 +1910,7 @@ function pairHeadsBlock(c, s, { x, w, maxH }) {
 function content(c, s, box) {
   switch (s.kind) {
     case 'sentence': return sentenceBlock(c, s.rows, { ...box, romaji: c.pl.showRomaji, min: FS.lead, lines: 4 })
-    case 'readit': return readitBlock(c, s.rows, box)
+    case 'readit': return readitBlock(c, s.rows, box, s.items)
     case 'glyph': return glyphBlock(c, s.text, box)
     case 'quote': return quoteBlock(c, s.text, box)
     case 'pattern': {
@@ -1990,7 +2012,7 @@ function hookLayout(c, s, { ask, secs, compact, centred }) {
         else head.draw(top)
         place(c, b, y, bottom)
         // The way on to the answer, as the next question says it (plan 245); Read it's, as the feed says it (plan 253).
-        pill(c, weld(c.lang, s.swipe ? W.swipe : W.yoursFoot), fr.cx, fr.bottom - 92)
+        pill(c, weld(c.lang, s.swipe ? W.swipe : W.yoursFoot), fr.cx, fr.bottom - 92, s.swipe ? { dot: p.stamp } : {})
       },
     }
   }
@@ -2012,7 +2034,7 @@ function hookLayout(c, s, { ask, secs, compact, centred }) {
       else kicker(c, ask, fr.cx, top, 'center')
       if (b.h > room) place(c, b, top + kh + gap, bottom)
       else stack([b, lv], top + kh + gap, bottom, SP[7])
-      pill(c, weld(c.lang, W.swipe), fr.cx, fr.bottom - 92)
+      pill(c, weld(c.lang, W.swipe), fr.cx, fr.bottom - 92, s.swipe ? { dot: p.stamp } : {})
     },
   }
 }

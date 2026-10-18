@@ -1,4 +1,4 @@
-# The carousel studio (plans 229–229n, 231–235, 237, 247–255)
+# The carousel studio (plans 229–229n, 231–235, 237, 247–256)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -322,7 +322,15 @@ committing it.
 A word wears the vocabulary line's pigment, a particle or an ending the
 grammar line's, a kanji the kanji line's: DESIGN.md's "one line, one
 colour", so a colour on a post means what it means in the app. The gold is
-the action (the metal), and nothing else.
+the action (the metal), and nothing else. Read it is the one exception,
+the owner's pick of five schemes drawn (plan 256): there each word wears
+an ink of its own, the stamp's vermilion first, then the vocabulary's
+indigo, the gate's gold, the grammar's green, the kanji's violet, the
+reading's teal and the comprehension's brown (`readInks`), and keeps it on
+every slide (its rule under the sentence, its card's bar, its romaji under
+the answer), so the eye follows a word from the question to what it
+means; the translation is set in the stamp's vermilion. The inks are the
+app's tokens on either ground, never a colour of its own.
 
 A question is one only understanding answers: its right answer is the
 catalogue's (a scene's, a quiz's, a comprehension question's), never a

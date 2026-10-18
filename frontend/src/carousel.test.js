@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { FORMATS, FS, RATING_INKS, drawFeedHud, formatOf, layoutSentence, reading } from '../carousel/draw.js'
+import { FORMATS, FS, RATING_INKS, drawFeedHud, formatOf, layoutSentence, palette, reading } from '../carousel/draw.js'
 import { LEVELS, SOURCES, TITLE_MAX, chunksOf, depsOf, itemsOf, lineRomaji, picked, plan, readingMisses, themePartOf, titleOf, unpack } from '../carousel/sources.js'
 import { ENDING_IDS, TYPES, available, deck, endingSlide } from '../carousel/slides.js'
 import { assemblyQ, kanjiQuizzes, overlaps, withoutGiveaways } from '../carousel/quizzes.js'
@@ -12,7 +12,7 @@ import { CLIP, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoD
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
 import { LIMIT, SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
 import { TUNABLES, tuned } from '../carousel/tune.js'
-import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf, readable, unstopped } from '../carousel/funnel.js'
+import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf, readInks, readable, unstopped } from '../carousel/funnel.js'
 import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, TALL, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, stillAt, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
 import { CH as CHALLENGE, CPM, SCROLL, TRACK, TRACKS, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
@@ -2474,6 +2474,29 @@ describe('Read it’s own short sentences (plan 254)', () => {
       }
     } finally { globalThis.Path2D = had }
     expect(drawn).toBe(data.sentences.length * 2 * DESIGNS.length * 2)
+  })
+
+  it('gives each word an ink of its own, the app’s, on every row it spans (plan 256)', () => {
+    const sentences = [
+      ...data.sentences.map(s => plan('short', data, s.id, OPTS)),
+      ...LEVELS.flatMap(lv => banks[lv].sentences.map(s => plan('sentence', banks[lv], s.id, OPTS))).filter(readable),
+    ]
+    expect(sentences.length).toBeGreaterThan(100)
+    for (const ground of ['paper', 'sumi']) {
+      const p = palette(ground)
+      const tokens = new Set([p.stamp, p.goldMid, p.goldLit, ...Object.values(p.line)])
+      for (const pl of sentences) {
+        const items = pl.funnel.breakdown
+        const inks = readInks(p, items)
+        const at = `${pl.source} ${pl.id} ${ground}`
+        // Every word of the sentence wears one, no two words the same.
+        pl.funnel.rows.forEach((r, i) => expect(inks.has(i), `${at} ${r.t}`).toBe(r.k !== 'punct'))
+        const worn = items.map(it => inks.get(it.i))
+        expect(new Set(worn).size, at).toBe(items.length)
+        for (const it of items) for (let i = it.i; i <= it.j; i++) expect(inks.get(i), at).toBe(inks.get(it.i))
+        for (const ink of worn) expect(tokens.has(ink), `${at} ${ink}`).toBe(true)
+      }
+    }
   })
 
   it('says what changed in the line the reader reads, in kana where the post is', () => {
