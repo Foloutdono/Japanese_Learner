@@ -396,7 +396,6 @@
 {"t":"病院","r":"びょういん","ro":"byouin","en":["hospital"],"fr":["hôpital"],"fu":[["病","びょう"],["院","いん"]],"hy":["平院","病飲","猫院"],"ex":["N4.148","N4.151"]},
 {"t":"トイレ","r":"トイレ","ro":"toire","en":["toilet"],"fr":["toilettes"],"ex":["N5.133"]},
 {"t":"果物","r":"くだもの","ro":"kudamono","en":["fruit"],"fr":["fruit"],"fu":[["果物","くだもの"]],"ex":["N3.206"]},
-{"t":"私","r":"わたくし","ro":"watakushi","en":["I, myself (humble, very formal)"],"fr":["je, moi (humble, très poli)"],"fu":[["私","わたくし"]]},
 {"t":"一昨日","r":"おととい","ro":"ototoi","en":["day before yesterday"],"fr":["avant-hier"],"fu":[["一昨日","おととい"]]},
 {"t":"いす","r":"いす","ro":"isu","en":["chair"],"fr":["chaise"]},
 {"t":"初め","r":"はじめ","ro":"hajime","en":["beginning (of a period)"],"fr":["début (d'une période)"],"fu":[["初","はじ"],["め",""]]},
