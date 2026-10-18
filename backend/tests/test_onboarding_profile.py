@@ -283,8 +283,9 @@ def test_volumes_counts_items_not_cards(client):
     from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
     assert body["grammar"] == {lvl: len(GRAMMAR_POINTS_BY_LEVEL[lvl]) for lvl in ("N5", "N4", "N3", "N2", "N1")}
     # plan 153: 時 じ, 年 ねん, 月 がつ, 杯 はい; plan 186c: the basics moved
-    # down (円, 分, 日本, 週, 週間, five greetings) and the months added.
-    assert body["vocab"]["N5"] == 704
+    # down (円, 分, 日本, 週, 週間, five greetings) and the months added;
+    # #360: そして down from the N1 然して.
+    assert body["vocab"]["N5"] == 705
     # plan 226: the 93 jōyō characters the deck lacked at N1.
     assert body["kanji"]["N1"] == 1325
     # 238: the gojūon and the yōon of both scripts, and the fourteen
