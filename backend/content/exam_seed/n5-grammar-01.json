@@ -2062,7 +2062,7 @@
          {
           "id": "bunpou_1_q5",
           "number": 5,
-          "promptJp": "きのう、新し＿＿＿＿　くつを　買いました。",
+          "promptJp": "これは　きのう　買った　新し＿＿＿＿　くつです。",
           "choices": [
            {
             "id": "c1",
@@ -4162,7 +4162,7 @@
          {
           "id": "bunpou_2_q2",
           "number": 2,
-          "contextJp": "A「じしょは　どこですか。」",
+          "contextJp": "A「ほんだなに　何が　ありますか。」",
           "pieces": [
            {
             "id": "p3",

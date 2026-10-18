@@ -116,25 +116,25 @@
           "fr": "Vous voulez être à combien de minutes à pied de la gare ?"
         },
         "me": {
-          "jp": "十分以内だと助かります。",
-          "kana": "じゅっぷんいないだとたすかります。",
-          "romaji": "juppun inai da to tasukarimasu",
-          "en": "Ten minutes or less would really help.",
-          "fr": "Dix minutes maximum, ça m'arrangerait.",
+          "jp": "駅から十分以内だと助かります。",
+          "kana": "えきからじゅっぷんいないだとたすかります。",
+          "romaji": "eki kara juppun inai da to tasukarimasu",
+          "en": "Ten minutes or less from the station would really help.",
+          "fr": "Dix minutes maximum depuis la gare, ça m'arrangerait.",
           "note": {
             "en": "「以内」 means within, and 「〜だと助かります」 says politely that it would make things easier for you.",
             "fr": "「以内」 veut dire « pas plus de », et 「〜だと助かります」 dit poliment que ça te faciliterait la vie."
           },
           "alt": [
-            {"jp": "十分以内がいいです。", "kana": "じゅっぷんいないがいいです。", "romaji": "juppun inai ga ii desu"}
+            {"jp": "駅から十分以内がいいです。", "kana": "えきからじゅっぷんいないがいいです。", "romaji": "eki kara juppun inai ga ii desu"}
           ]
         },
         "wrong": [
           {
-            "jp": "十分以内だと助けます。",
-            "kana": "じゅっぷんいないだとたすけます。",
-            "en": "If it's within ten minutes, I'll help.",
-            "fr": "Si c'est à moins de dix minutes, j'aiderai.",
+            "jp": "駅から十分以内だと助けます。",
+            "kana": "えきからじゅっぷんいないだとたすけます。",
+            "en": "If it's within ten minutes of the station, I'll help.",
+            "fr": "Si c'est à moins de dix minutes de la gare, j'aiderai.",
             "why": {
               "en": "「助けます」 means you will help someone; for something that would help you, the verb is 「助かります」.",
               "fr": "「助けます」 veut dire que tu vas aider quelqu'un ; pour dire que ça t'aiderait, le verbe est 「助かります」."
@@ -536,8 +536,8 @@
       },
       {
         "them": {
-          "jp": "でしたら、来月の一日から入れますよ。今日、お申し込みになりますか。",
-          "kana": "でしたら、らいげつのついたちからはいれますよ。きょう、おもうしこみになりますか。",
+          "jp": "でしたら、来月一日から住めますよ。今日、お申し込みになりますか。",
+          "kana": "でしたら、らいげつついたちからすめますよ。きょう、おもうしこみになりますか。",
           "en": "In that case, you could move in from the first of next month. Would you like to apply today?",
           "fr": "Dans ce cas, vous pourriez emménager dès le premier du mois prochain. Vous voulez faire la demande aujourd'hui ?"
         },
@@ -1247,9 +1247,9 @@
           "fr": "Très bien. Pouvez-vous me donner le numéro indiqué sur l'avis ?"
         },
         "me": {
-          "jp": "はい、三四五の六七八九です。",
-          "kana": "はい、さんよんごのろくななはちきゅうです。",
-          "romaji": "hai, san yon go no roku nana hachi kyuu desu",
+          "jp": "はい、三、四、五の、六、七、八、九です。",
+          "kana": "はい、さん、よん、ごの、ろく、なな、はち、きゅうです。",
+          "romaji": "hai, san, yon, go no, roku, nana, hachi, kyuu desu",
           "en": "Yes, it's 345-6789.",
           "fr": "Oui, c'est le 345-6789.",
           "note": {
@@ -1288,9 +1288,9 @@
           "fr": "Merci. Quand voulez-vous qu'on vous le livre ?"
         },
         "me": {
-          "jp": "明日の夜、七時から九時の間にお願いします。",
-          "kana": "あしたのよる、しちじからくじのあいだにおねがいします。",
-          "romaji": "ashita no yoru, shichiji kara kuji no aida ni onegai shimasu",
+          "jp": "明日の夜、七時から九時までの間にお願いします。",
+          "kana": "あしたのよる、しちじからくじまでのあいだにおねがいします。",
+          "romaji": "ashita no yoru, shichiji kara kuji made no aida ni onegai shimasu",
           "en": "Tomorrow evening, between seven and nine, please.",
           "fr": "Demain soir, entre dix-neuf heures et vingt et une heures, s'il vous plaît.",
           "note": {
@@ -1298,7 +1298,7 @@
             "fr": "「〜から〜の間に」 donne le créneau dans lequel le colis doit arriver."
           },
           "alt": [
-            {"jp": "明日の夜七時から九時の間でお願いします。", "kana": "あしたのよるしちじからくじのあいだでおねがいします。", "romaji": "ashita no yoru shichiji kara kuji no aida de onegai shimasu"}
+            {"jp": "明日の夜七時から九時までの間でお願いします。", "kana": "あしたのよるしちじからくじまでのあいだでおねがいします。", "romaji": "ashita no yoru shichiji kara kuji made no aida de onegai shimasu"}
           ]
         },
         "wrong": [
@@ -1313,8 +1313,8 @@
             }
           },
           {
-            "jp": "明日の夜、七時から九時の間に荷物をお届けします。",
-            "kana": "あしたのよる、しちじからくじのあいだににもつをおとどけします。",
+            "jp": "明日の夜、七時から九時までの間に荷物をお届けします。",
+            "kana": "あしたのよる、しちじからくじまでのあいだににもつをおとどけします。",
             "en": "I'll deliver the parcel tomorrow evening, between seven and nine.",
             "fr": "Je vous livrerai le colis demain soir, entre dix-neuf heures et vingt et une heures.",
             "why": {
@@ -1538,14 +1538,14 @@
           "fr": "Oui, bien sûr. Vous pourrez le récupérer à notre dépôt près de la gare dès demain matin."
         },
         "me": {
-          "jp": "何時まで開いていますか。",
+          "jp": "何時まであいていますか。",
           "kana": "なんじまであいていますか。",
           "romaji": "nanji made aite imasu ka",
           "en": "Until what time is it open?",
           "fr": "C'est ouvert jusqu'à quelle heure ?",
           "note": {
-            "en": "「まで」 asks for the closing time, and 「開いています」 is the state of being open.",
-            "fr": "「まで」 demande l'heure de fermeture, et 「開いています」 décrit l'état d'être ouvert."
+            "en": "「まで」 asks for the closing time, and 「あいています」 (開いている) is the state of being open.",
+            "fr": "「まで」 demande l'heure de fermeture, et 「あいています」 (開いている) décrit l'état d'être ouvert."
           },
           "alt": [
             {"jp": "何時までやっていますか。", "kana": "なんじまでやっていますか。", "romaji": "nanji made yatte imasu ka"}
@@ -1553,13 +1553,13 @@
         },
         "wrong": [
           {
-            "jp": "何時まで開いていましたか。",
+            "jp": "何時まであいていましたか。",
             "kana": "なんじまであいていましたか。",
             "en": "Until what time was it open?",
             "fr": "C'était ouvert jusqu'à quelle heure ?",
             "why": {
-              "en": "「開いていましたか」 is past: it asks about a day gone by, when you are going tomorrow.",
-              "fr": "「開いていましたか」 est au passé : il porte sur un jour passé, alors que tu y vas demain."
+              "en": "「あいていましたか」 is past: it asks about a day gone by, when you are going tomorrow.",
+              "fr": "「あいていましたか」 est au passé : il porte sur un jour passé, alors que tu y vas demain."
             }
           },
           {
@@ -3268,13 +3268,13 @@
             }
           },
           {
-            "jp": "ううん、ちょっと頼みたいことがあって。",
-            "kana": "ううん、ちょっとたのみたいことがあって。",
-            "en": "No, there's something I wanted to ask you.",
-            "fr": "Non, j'ai un petit service à te demander.",
+            "jp": "うん、ちょっと頼みたいことがあるのに。",
+            "kana": "うん、ちょっとたのみたいことがあるのに。",
+            "en": "Yeah, even though there's something I want to ask you.",
+            "fr": "Oui, alors que j'ai un service à te demander.",
             "why": {
-              "en": "「ううん」 says no, you need nothing, and the rest says you do: the two cannot both stand.",
-              "fr": "「ううん」 dit non, tu n'as besoin de rien, et la suite dit le contraire : les deux ne vont pas ensemble."
+              "en": "Ending on 「のに」 turns your opener into a complaint (and yet...), as if your coworker were brushing you off; a favour is led into by stopping on 「〜て」 or 「〜けど」.",
+              "fr": "Finir sur 「のに」 fait de ton entrée en matière un reproche (« et pourtant… »), comme si ton collègue t'ignorait ; on amène un service en s'arrêtant sur 「〜て」 ou 「〜けど」."
             }
           }
         ]
@@ -3385,7 +3385,7 @@
             "fr": "「なら」 reprend le jour que ton collègue propose, et 「助かる」 est le merci familier pour un vrai coup de main."
           },
           "alt": [
-            {"jp": "うん、日曜日なら入れる。ありがとう、助かる！", "kana": "うん、にちようびならはいれる。ありがとう、たすかる！", "romaji": "un, nichiyoubi nara haireru. arigatou, tasukaru!"}
+            {"jp": "うん、日曜日なら行ける。ありがとう、助かる！", "kana": "うん、にちようびならいける。ありがとう、たすかる！", "romaji": "un, nichiyoubi nara ikeru. arigatou, tasukaru!"}
           ]
         },
         "wrong": [

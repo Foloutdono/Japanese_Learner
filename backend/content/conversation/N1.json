@@ -154,7 +154,7 @@
       },
       {
         "them": {
-          "jp": "二週間ですか。それは困りますね。何とか前倒しにはできませんか。",
+          "jp": "二週間ですか。それは困りますね。なんとか前倒しにはできませんか。",
           "kana": "にしゅうかんですか。それはこまりますね。なんとかまえだおしにはできませんか。",
           "en": "Two weeks? That's a problem for us. Is there no way to bring it forward?",
           "fr": "Deux semaines ? Ça nous pose problème. Vous ne pouvez vraiment pas avancer ?"
@@ -491,7 +491,7 @@
       },
       {
         "them": {
-          "jp": "発売日に必要なのは、標準モデルの三百台です。そこだけは何としても間に合わせてください。",
+          "jp": "発売日に必要なのは、標準モデルの三百台です。そこだけはなんとしても間に合わせてください。",
           "kana": "はつばいびにひつようなのは、ひょうじゅんモデルのさんびゃくだいです。そこだけはなんとしてもまにあわせてください。",
           "en": "What we need on launch day is the three hundred units of the standard model. Those, at least, you must get to us in time, whatever it takes.",
           "fr": "Ce qu'il nous faut le jour du lancement, ce sont les trois cents unités du modèle standard. Celles-là, il faut les livrer à temps, coûte que coûte."
@@ -652,7 +652,7 @@
       },
       {
         "them": {
-          "jp": "原因は何だったんですか。",
+          "jp": "原因はなんだったんですか。",
           "kana": "げんいんはなんだったんですか。",
           "en": "What was the cause?",
           "fr": "Quelle en était la cause ?"
@@ -1088,7 +1088,7 @@
           "kana": "しゅうりょうごはにほんごきょうしとして、けんきゅうでえたちけんをきょういくのげんばにいかしたいとかんがえております。",
           "romaji": "shuuryougo wa nihongo kyoushi to shite, kenkyuu de eta chiken o kyouiku no genba ni ikashitai to kangaete orimasu",
           "en": "Afterwards I would like to work as a Japanese teacher and put what my research teaches me to use in the classroom.",
-          "fr": "Ensuite, j'aimerais devenir professeur de japonais et mettre ce que ma recherche m'aura appris au service de l'enseignement.",
+          "fr": "Ensuite, j'aimerais enseigner le japonais et mettre en pratique, en classe, ce que ma recherche m'aura appris.",
           "note": {
             "en": "「生かしたい」 says what you will make of the research, which turns a plan into a reason to admit you.",
             "fr": "「生かしたい」 dit ce que tu feras de ta recherche, ce qui fait d'un projet une raison de t'admettre."
@@ -1102,7 +1102,7 @@
             "jp": "修了後は日本語教師として、研究で得た知見を教育の現場に生かしておりました。",
             "kana": "しゅうりょうごはにほんごきょうしとして、けんきゅうでえたちけんをきょういくのげんばにいかしておりました。",
             "en": "After finishing, I was putting what my research taught me to use in the classroom, as a Japanese teacher.",
-            "fr": "Après mon master, je mettais ce que ma recherche m'avait appris au service de l'enseignement, comme professeur de japonais.",
+            "fr": "Après mon master, j'enseignais le japonais et mettais en pratique, en classe, ce que ma recherche m'avait appris.",
             "why": {
               "en": "「生かしておりました」 is past and tells what you were doing, when 「修了後」 asks about a future still ahead.",
               "fr": "「生かしておりました」 est au passé et dit ce que tu faisais, alors que 「修了後」 porte sur l'avenir."
@@ -1334,17 +1334,17 @@
           "fr": "Mais au travail, vous enregistrerez aussi la voix de gens qui n'ont rien accepté, des clients, des partenaires, non ?"
         },
         "me": {
-          "jp": "その場合は、同意のない方の発話を文字起こしの段階で削除し、分析には使いません。",
-          "kana": "そのばあいは、どういのないかたのはつわをもじおこしのだんかいでさくじょし、ぶんせきにはつかいません。",
-          "romaji": "sono baai wa, doui no nai kata no hatsuwa o mojiokoshi no dankai de sakujo shi, bunseki ni wa tsukaimasen",
+          "jp": "その場合は、同意のない方々の発話を文字起こしの段階で削除し、分析には使いません。",
+          "kana": "そのばあいは、どういのないかたがたのはつわをもじおこしのだんかいでさくじょし、ぶんせきにはつかいません。",
+          "romaji": "sono baai wa, doui no nai katagata no hatsuwa o mojiokoshi no dankai de sakujo shi, bunseki ni wa tsukaimasen",
           "en": "In that case, I will delete what anyone who hasn't consented says at the transcription stage, and not use it in the analysis.",
           "fr": "Dans ce cas, je supprimerai dès la transcription les propos des personnes qui n'ont pas donné leur accord, et ne les utiliserai pas dans l'analyse.",
           "note": {
-            "en": "「同意のない方」 speaks of those people with respect, and 「削除し、分析には使いません」 says exactly what becomes of their words.",
-            "fr": "「同意のない方」 parle de ces personnes avec égard, et 「削除し、分析には使いません」 dit exactement ce que deviennent leurs paroles."
+            "en": "「同意のない方々」 speaks of those people with respect, and 「削除し、分析には使いません」 says exactly what becomes of their words.",
+            "fr": "「同意のない方々」 parle de ces personnes avec égard, et 「削除し、分析には使いません」 dit exactement ce que deviennent leurs paroles."
           },
           "alt": [
-            {"jp": "その場合は、同意をいただいていない方の声を記録から消し、分析の対象から外します。", "kana": "そのばあいは、どういをいただいていないかたのこえをきろくからけし、ぶんせきのたいしょうからはずします。", "romaji": "sono baai wa, doui o itadaite inai kata no koe o kiroku kara keshi, bunseki no taishou kara hazushimasu"}
+            {"jp": "その場合は、同意をいただいていない方々の声を記録から消し、分析の対象から外します。", "kana": "そのばあいは、どういをいただいていないかたがたのこえをきろくからけし、ぶんせきのたいしょうからはずします。", "romaji": "sono baai wa, doui o itadaite inai katagata no koe o kiroku kara keshi, bunseki no taishou kara hazushimasu"}
           ]
         },
         "wrong": [
@@ -1359,8 +1359,8 @@
             }
           },
           {
-            "jp": "その場合は、同意のない方の発話を、すでにすべて削除いたしました。",
-            "kana": "そのばあいは、どういのないかたのはつわを、すでにすべてさくじょいたしました。",
+            "jp": "その場合は、同意のない方々の発話を、すでにすべて削除いたしました。",
+            "kana": "そのばあいは、どういのないかたがたのはつわを、すでにすべてさくじょいたしました。",
             "en": "In that case, I have already deleted everything said by those who haven't consented.",
             "fr": "Dans ce cas, j'ai déjà supprimé tous les propos des personnes qui n'ont pas donné leur accord.",
             "why": {
@@ -1581,7 +1581,7 @@
           "jp": "手術は確実ですが、体への負担が大きくなります。薬は体には楽ですが、効果が出るまで時間がかかります。",
           "kana": "しゅじゅつはかくじつですが、からだへのふたんがおおきくなります。くすりはからだにはらくですが、こうかがでるまでじかんがかかります。",
           "en": "Surgery is certain, but it is harder on the body. Medication is easier on the body, but it takes time to work.",
-          "fr": "L'opération est sûre, mais plus lourde pour l'organisme. Les médicaments sont plus doux, mais ils mettent du temps à agir."
+          "fr": "L'opération donne un résultat certain, mais elle est plus lourde pour l'organisme. Les médicaments sont plus doux, mais ils mettent du temps à agir."
         },
         "me": {
           "jp": "薬の場合、副作用の心配はありませんか。",
@@ -1872,8 +1872,8 @@
       },
       {
         "them": {
-          "jp": "そうですね。五パーセントでしたら、何とかお応えできるかと存じます。",
-          "kana": "そうですね。ごパーセントでしたら、なんとかおこたえできるかとぞんじます。",
+          "jp": "そうですね。五パーセントでしたら、どうにかお応えできるかと存じます。",
+          "kana": "そうですね。ごパーセントでしたら、どうにかおこたえできるかとぞんじます。",
           "en": "Let me see. At five percent, I think we could just about manage it.",
           "fr": "Voyons. À cinq pour cent, nous pourrions faire un effort, je pense."
         },
@@ -1888,7 +1888,7 @@
             "fr": "「難しいかと存じます」 dit non sans fermer la porte, et 「別の形」 invite le fournisseur à chercher une autre voie."
           },
           "alt": [
-            {"jp": "五パーセントでは、社内を通すのが難しいと存じます。ほかの条件で、何とかなりませんか。", "kana": "ごパーセントでは、しゃないをとおすのがむずかしいとぞんじます。ほかのじょうけんで、なんとかなりませんか。", "romaji": "go paasento de wa, shanai o toosu no ga muzukashii to zonjimasu. hoka no jouken de, nantoka narimasen ka"}
+            {"jp": "五パーセントでは、社内を通すのが難しいと存じます。ほかの条件で、どうにかなりませんか。", "kana": "ごパーセントでは、しゃないをとおすのがむずかしいとぞんじます。ほかのじょうけんで、どうにかなりませんか。", "romaji": "go paasento de wa, shanai o toosu no ga muzukashii to zonjimasu. hoka no jouken de, dounika narimasen ka"}
           ]
         },
         "wrong": [
@@ -2127,9 +2127,9 @@
           "fr": "Des réserves ? C'est-à-dire ?"
         },
         "me": {
-          "jp": "前回のリリースでは、テストの二週目に重大な不具合が三件見つかっております。",
-          "kana": "ぜんかいのリリースでは、テストのにしゅうめにじゅうだいなふぐあいがさんけんみつかっております。",
-          "romaji": "zenkai no ririisu de wa, tesuto no nishuume ni juudai na fuguai ga sanken mitsukatte orimasu",
+          "jp": "前回のリリースでは、テストの二週目に重大な不具合が三つ見つかっております。",
+          "kana": "ぜんかいのリリースでは、テストのにしゅうめにじゅうだいなふぐあいがみっつみつかっております。",
+          "romaji": "zenkai no ririisu de wa, tesuto no nishuume ni juudai na fuguai ga mittsu mitsukatte orimasu",
           "en": "In the last release, three serious bugs were found in the second week of testing.",
           "fr": "Lors de la dernière version, trois anomalies graves ont été découvertes pendant la deuxième semaine de tests.",
           "note": {
@@ -2137,7 +2137,7 @@
             "fr": "「二週目に」 désigne justement la semaine que le plan supprimerait : ta réserve repose sur un fait, pas sur une impression."
           },
           "alt": [
-            {"jp": "前回のリリースの際は、テスト後半の一週間で重大な不具合が三件見つかりました。", "kana": "ぜんかいのリリースのさいは、テストこうはんのいっしゅうかんでじゅうだいなふぐあいがさんけんみつかりました。", "romaji": "zenkai no ririisu no sai wa, tesuto kouhan no isshuukan de juudai na fuguai ga sanken mitsukarimashita"}
+            {"jp": "前回のリリースの際は、テスト後半の一週間で重大な不具合が三つ見つかりました。", "kana": "ぜんかいのリリースのさいは、テストこうはんのいっしゅうかんでじゅうだいなふぐあいがみっつみつかりました。", "romaji": "zenkai no ririisu no sai wa, tesuto kouhan no isshuukan de juudai na fuguai ga mittsu mitsukarimashita"}
           ]
         },
         "wrong": [
@@ -2240,13 +2240,13 @@
             }
           },
           {
-            "jp": "はい。残りの機能は、二週間後のリリースまでにテストいたします。",
-            "kana": "はい。のこりのきのうは、にしゅうかんごのリリースまでにテストいたします。",
-            "en": "Yes. We will test the remaining features before their release two weeks later.",
-            "fr": "Oui. Nous testerons les fonctions restantes avant leur sortie, deux semaines plus tard.",
+            "jp": "はい。主要な機能は、テストを省いて予定どおりリリースいたします。",
+            "kana": "はい。しゅようなきのうは、テストをはぶいてよていどおりリリースいたします。",
+            "en": "Yes. We will release the main features on schedule, skipping their testing.",
+            "fr": "Oui. Nous sortirons les fonctions principales à la date prévue, sans les tester.",
             "why": {
-              "en": "「残りの機能は」 answers for the remaining features, when the head of department asked whether the main ones, 「主要な機能」, can be tested in a week.",
-              "fr": "「残りの機能は」 répond pour les fonctions restantes, alors que le directeur demandait si les principales, 「主要な機能」, peuvent être testées en une semaine."
+              "en": "「テストを省いて」 ships the main features with no testing at all, the very risk your objection was about.",
+              "fr": "「テストを省いて」 sort les fonctions principales sans aucun test, le risque même qui fondait ton objection."
             }
           }
         ]
@@ -2327,8 +2327,8 @@
     "turns": [
       {
         "them": {
-          "jp": "お忙しい中、来ていただいてありがとうございます。",
-          "kana": "おいそがしいなか、きていただいてありがとうございます。",
+          "jp": "お忙しいところ、来ていただいてありがとうございます。",
+          "kana": "おいそがしいところ、きていただいてありがとうございます。",
           "en": "Thank you for coming, busy as you are.",
           "fr": "Merci de votre présence, malgré votre emploi du temps chargé."
         },

@@ -362,7 +362,7 @@
     "jp": "若い人の多くが仕事を求めて都市へ出ていき、残った住民の平均年齢は上がりつつある。",
     "translation": {
      "en": "Many young people leave for the cities in search of work, and the average age of those who remain is rising.",
-     "fr": "Beaucoup de jeunes partent vers les grandes villes chercher du travail, et l'âge moyen des habitants restants ne cesse de monter."
+     "fr": "Beaucoup de jeunes partent vers les grandes villes chercher du travail, et l'âge moyen des habitants restants est en train de monter."
     },
     "note": {
      "en": "The pattern 「〜つつある」 on the stem 「上がり」 describes a change that is under way.",
@@ -2175,7 +2175,7 @@
      {
       "surface": "探さざるを得ない",
       "meaning": {
-       "en": "cannot help but seek",
+       "en": "have no choice but to seek",
        "fr": "n'a d'autre choix que de chercher"
       }
      },
@@ -2199,7 +2199,7 @@
    "〜をはじめ",
    "〜に伴って"
   ],
-  "text": "近年、都市部でカラスの数が増えているという報告が相次いでいる。ある研究によると、その原因は、家庭から出るごみの量が増えたことにあるらしい。カラスは非常に賢い鳥で、ごみ袋の色や、ごみを集める車が来る時刻まで覚えるという。しかし、ごみを散らかす行動は、彼らの暮らしのごく一部にすぎない。実際には、木の実をはじめ、虫や小さな動物など、さまざまなものを食べて生きている。人口の増加に伴って、カラスの食べ物も人間のごみへと変わっていったのである。カラスを追い払うのではなく、彼らがごみに近づく理由をなくすことが、もっとも確実な方法なのだ。",
+  "text": "近年、都市部でカラスの数が増えているという報告が相次いでいる。ある研究によると、その原因は、家庭から出るごみの量が増えたことにあるらしい。カラスは非常に賢い鳥で、ごみ袋の色や、ごみを集める車が来る時刻まで覚えるという。しかし、ごみを散らかす行動は、彼らの暮らしのごく一部にすぎない。実際には、木の実をはじめ、虫や小さな動物など、さまざまなものを食べて生きている。人口の増加に伴って、カラスの食べ物に人間のごみも加わっていったのである。カラスを追い払うのではなく、彼らがごみに近づく理由をなくすことが、もっとも確実な方法なのだ。",
   "questions": [
    {
     "type": "comprehension",
@@ -2358,21 +2358,21 @@
    {
     "type": "comprehension",
     "question": {
-     "en": "What did crows' food change into?",
-     "fr": "En quoi la nourriture des corbeaux s'est-elle transformée ?"
+     "en": "What was added to crows' food as the population grew?",
+     "fr": "Qu'est-ce qui s'est ajouté à la nourriture des corbeaux avec la croissance de la population ?"
     },
     "options": {
      "en": [
       "Human rubbish",
-      "Nuts from city trees",
-      "Small animals in parks",
-      "Farm crops"
+      "Crops from farm fields",
+      "Fish from rivers",
+      "Eggs of other birds"
      ],
      "fr": [
       "Les déchets humains",
-      "Les fruits des arbres en ville",
-      "Les petits animaux des parcs",
-      "Les récoltes agricoles"
+      "Les récoltes des champs",
+      "Les poissons des rivières",
+      "Les œufs d'autres oiseaux"
      ]
     },
     "correct": 0
@@ -3043,13 +3043,13 @@
     ]
    },
    {
-    "jp": "人口の増加に伴って、カラスの食べ物も人間のごみへと変わっていったのである。",
+    "jp": "人口の増加に伴って、カラスの食べ物に人間のごみも加わっていったのである。",
     "translation": {
-     "en": "As the human population grew, crows' food too shifted towards human rubbish.",
-     "fr": "Avec la croissance de la population, la nourriture des corbeaux s'est elle aussi tournée vers les déchets humains."
+     "en": "As the human population grew, human rubbish too was added to crows' food.",
+     "fr": "Avec la croissance de la population, les déchets humains sont venus s'ajouter à la nourriture des corbeaux."
     },
     "note": {
-     "en": "The pattern 「〜に伴って」 links one change to another that came with it; 「〜ていった」 shows gradual change away from the past.",
+     "en": "The pattern 「〜に伴って」 links one change to another that came with it; 「〜ていった」 shows a change that went on over time.",
      "fr": "La structure 「〜に伴って」 lie un changement à celui qui l'a accompagné ; 「〜ていった」 montre une évolution progressive."
     },
     "words": [
@@ -3103,10 +3103,10 @@
       }
      },
      {
-      "surface": "も",
+      "surface": "に",
       "meaning": {
-       "en": "too",
-       "fr": "aussi"
+       "en": "to",
+       "fr": "à"
       }
      },
      {
@@ -3131,17 +3131,17 @@
       }
      },
      {
-      "surface": "へと",
+      "surface": "も",
       "meaning": {
-       "en": "towards",
-       "fr": "vers"
+       "en": "too",
+       "fr": "aussi"
       }
      },
      {
-      "surface": "変わっていった",
+      "surface": "加わっていった",
       "meaning": {
-       "en": "gradually changed",
-       "fr": "s'est progressivement transformée"
+       "en": "came to be added",
+       "fr": "sont venus s'ajouter"
       }
      },
      {

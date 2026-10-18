@@ -2151,7 +2151,7 @@ const decks = {
 // paper. Keep that distinction in mind if you touch this copy again.
 const exam = {
   examTitle:           'Mock Exam',
-  examDesc:            'Full-length practice exams, timed and scored\nVocabulary, grammar, reading, listening\nBuilt to the official JLPT format — unofficial scoring',
+  examDesc:            'Practice papers, timed and scored\nVocabulary, grammar, reading, listening\nBuilt to the official JLPT format — unofficial scoring',
   examQuestions:       'questions',
   examNoneAvailable:   'No exams available yet.',
 

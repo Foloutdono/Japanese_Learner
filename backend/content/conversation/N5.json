@@ -420,10 +420,7 @@
           "note": {
             "en": "「で」 names what you pay with, and 「すみません」 apologises for handing over such a big note.",
             "fr": "「で」 indique avec quoi tu paies, et 「すみません」 s'excuse de tendre un si gros billet."
-          },
-          "alt": [
-            {"jp": "一万円でお願いします。", "kana": "いちまんえんでおねがいします。", "romaji": "ichiman'en de onegai shimasu"}
-          ]
+          }
         },
         "wrong": [
           {
@@ -1557,8 +1554,8 @@
       },
       {
         "them": {
-          "jp": "何色がいいですか。",
-          "kana": "なにいろがいいですか。",
+          "jp": "どんな色がいいですか。",
+          "kana": "どんないろがいいですか。",
           "en": "What colour would you like?",
           "fr": "Vous le voulez de quelle couleur ?"
         },
@@ -1761,7 +1758,7 @@
     "turns": [
       {
         "them": {
-          "jp": "はい、何でしょうか。",
+          "jp": "はい、なんでしょうか。",
           "kana": "はい、なんでしょうか。",
           "en": "Yes? What is it?",
           "fr": "Oui ? Qu'y a-t-il ?"
@@ -1805,13 +1802,13 @@
       },
       {
         "them": {
-          "jp": "この道をまっすぐ行って、二つ目の角を右に曲がってください。",
+          "jp": "この道をまっすぐ行って、二つ目のかどを右に曲がってください。",
           "kana": "このみちをまっすぐいって、ふたつめのかどをみぎにまがってください。",
           "en": "Go straight down this street and turn right at the second corner.",
           "fr": "Continuez tout droit dans cette rue et prenez la deuxième à droite."
         },
         "me": {
-          "jp": "二つ目の角を右ですね。",
+          "jp": "二つ目のかどを右ですね。",
           "kana": "ふたつめのかどをみぎですね。",
           "romaji": "futatsume no kado o migi desu ne",
           "en": "Right at the second corner, yes?",
@@ -1823,7 +1820,7 @@
         },
         "wrong": [
           {
-            "jp": "二つ目の角を左ですね。",
+            "jp": "二つ目のかどを左ですね。",
             "kana": "ふたつめのかどをひだりですね。",
             "en": "Left at the second corner, yes?",
             "fr": "La deuxième à gauche, c'est bien ça ?",
@@ -2024,7 +2021,7 @@
             "fr": "「はい」 dit que oui, tu cherches bien, et 「図書館はどこですか」 demande directement le chemin."
           },
           "alt": [
-            {"jp": "はい、図書館を探しています。", "kana": "はい、としょかんをさがしています。", "romaji": "hai, toshokan o sagashite imasu"}
+            {"jp": "はい、図書館はどこにありますか。", "kana": "はい、としょかんはどこにありますか。", "romaji": "hai, toshokan wa doko ni arimasu ka"}
           ]
         },
         "wrong": [
@@ -3045,8 +3042,8 @@
             "en": "Yeah, I'm off!",
             "fr": "Oui, j'y vais !",
             "why": {
-              "en": "「いってきます」 is said to your own family as you leave home, meaning you will be back.",
-              "fr": "「いってきます」 se dit à sa famille en quittant la maison, pour dire qu'on va revenir."
+              "en": "「いってきます」 is said as you set off from a place you will come back to, like your own home; you are leaving your friend's to go home.",
+              "fr": "「いってきます」 se dit en partant d'un endroit où l'on va revenir, comme chez soi ; toi, tu quittes la maison de ton ami pour rentrer."
             }
           }
         ]
@@ -3643,7 +3640,7 @@
             "fr": "「おはようございます」 rend le salut du matin, et 「ね」 partage sa remarque sur le temps."
           },
           "alt": [
-            {"jp": "おはようございます。そうですね。", "kana": "おはようございます。そうですね。", "romaji": "ohayou gozaimasu. sou desu ne"}
+            {"jp": "おはようございます。今日は暖かいですね。", "kana": "おはようございます。きょうはあたたかいですね。", "romaji": "ohayou gozaimasu. kyou wa atatakai desu ne"}
           ]
         },
         "wrong": [
@@ -3934,7 +3931,7 @@
             "fr": "「あと」 compte ce qui reste, et 「十分」, lu じゅっぷん, fait dix minutes."
           },
           "alt": [
-            {"jp": "十分ぐらいで着くよ。", "kana": "じゅっぷんぐらいでつくよ。", "romaji": "juppun gurai de tsuku yo"}
+            {"jp": "あと十分ぐらいで着くよ。", "kana": "あとじゅっぷんぐらいでつくよ。", "romaji": "ato juppun gurai de tsuku yo"}
           ]
         },
         "wrong": [

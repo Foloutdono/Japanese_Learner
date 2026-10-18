@@ -1751,8 +1751,8 @@
      "fr": "J'ai dit : « Bonne idée. »"
     },
     "note": {
-     "en": "The particle 「ね」 at the end of 「いいですね」 seeks agreement.",
-     "fr": "La particule 「ね」 à la fin de 「いいですね」 cherche l'accord de l'autre."
+     "en": "The particle 「ね」 at the end of 「いいですね」 shows agreement: the writer shares the friend's idea.",
+     "fr": "La particule 「ね」 à la fin de 「いいですね」 marque l'accord : l'auteur partage l'idée de son ami."
     },
     "words": [
      {
@@ -2889,7 +2889,7 @@
    "〜で〜がいちばん",
    "〜ましょう"
   ],
-  "text": "ゆきさん、こんにちは。わたしは先月、この新しいまちに来ました。今、駅のちかくのアパートにすんでいます。このまちで、駅の前のこうえんがいちばんきれいです。日よう日には、たくさんの人がこうえんをさんぽしています。こうえんの中に、小さいきっさてんがあります。そこのコーヒーはとてもおいしいです。わたしは毎週土よう日に、そこで本を読んでいます。来月、ゆきさんは休みがありますね。わたしのまちへあそびに来てください。いっしょにこうえんをさんぽしましょう。そして、あのきっさてんでコーヒーを飲みましょう。メールをまっています。アンナより",
+  "text": "ゆきさん、こんにちは。わたしは先月、この新しいまちに来ました。今、駅のちかくのアパートにすんでいます。このまちで、駅の前のこうえんがいちばんきれいです。日よう日には、たくさんの人がこうえんをさんぽしています。こうえんの中に、小さいきっさてんがあります。そこのコーヒーはとてもおいしいです。わたしは毎週土よう日に、そこで本を読んでいます。来月、ゆきさんは休みがありますね。わたしのまちへあそびに来てください。いっしょにこうえんをさんぽしましょう。そして、そのきっさてんでコーヒーを飲みましょう。メールをまっています。アンナより",
   "questions": [
    {
     "type": "comprehension",
@@ -2944,13 +2944,13 @@
     "options": {
      "en": [
       "The park is the prettiest place in the town",
-      "The park is prettier than the station",
+      "The station is the prettiest place in the town",
       "The park by the station is quite pretty",
       "The town is as pretty as the park"
      ],
      "fr": [
       "Le parc est le plus joli endroit de la ville",
-      "Le parc est plus joli que la gare",
+      "La gare est le plus joli endroit de la ville",
       "Le parc près de la gare est assez joli",
       "La ville est aussi jolie que le parc"
      ]
@@ -3794,14 +3794,14 @@
     ]
    },
    {
-    "jp": "そして、あのきっさてんでコーヒーを飲みましょう。",
+    "jp": "そして、そのきっさてんでコーヒーを飲みましょう。",
     "translation": {
      "en": "And then let's have a coffee at that café.",
      "fr": "Et puis, prenons un café dans ce café-là."
     },
     "note": {
-     "en": "The word 「あの」 points to the café both people now know about.",
-     "fr": "Le mot 「あの」 désigne le café que les deux connaissent maintenant."
+     "en": "The word 「その」 points back to the café described above; 「あの」 is kept for a place both people already know.",
+     "fr": "Le mot 「その」 renvoie au café décrit plus haut ; 「あの」 est réservé à un lieu que les deux connaissent déjà."
     },
     "words": [
      {
@@ -3812,7 +3812,7 @@
       }
      },
      {
-      "surface": "あの",
+      "surface": "その",
       "meaning": {
        "en": "that",
        "fr": "ce…-là"

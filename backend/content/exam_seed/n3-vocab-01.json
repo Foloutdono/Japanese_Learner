@@ -74,23 +74,23 @@
          {
           "id": "moji_1_q3",
           "number": 3,
-          "promptJp": "携帯",
+          "promptJp": "従う",
           "choices": [
            {
             "id": "c1",
-            "textJp": "けいったい"
+            "textJp": "したかう"
            },
            {
             "id": "c2",
-            "textJp": "けいだい"
+            "textJp": "じたがう"
            },
            {
             "id": "c3",
-            "textJp": "けいたい"
+            "textJp": "したがう"
            },
            {
             "id": "c4",
-            "textJp": "げいたい"
+            "textJp": "しったがう"
            }
           ],
           "answer": "c3"
@@ -154,7 +154,7 @@
            },
            {
             "id": "c2",
-            "textJp": "しゅうしょくう"
+            "textJp": "しゅうしょっく"
            },
            {
             "id": "c3",
@@ -174,7 +174,7 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "ぜつめつう"
+            "textJp": "ぜっつめつ"
            },
            {
             "id": "c2",
@@ -186,7 +186,7 @@
            },
            {
             "id": "c4",
-            "textJp": "ぜづめつ"
+            "textJp": "せつめつ"
            }
           ],
           "answer": "c2"
@@ -210,7 +210,7 @@
            },
            {
             "id": "c4",
-            "textJp": "しゅぢょう"
+            "textJp": "しゅっちょう"
            }
           ],
           "answer": "c1"
@@ -959,23 +959,23 @@
          {
           "id": "moji_1_q2",
           "number": 2,
-          "promptJp": "明らか",
+          "promptJp": "解釈",
           "choices": [
            {
             "id": "c1",
-            "textJp": "あぎらか"
+            "textJp": "かいじゃく"
            },
            {
             "id": "c2",
-            "textJp": "あっきらか"
+            "textJp": "かいしゃっく"
            },
            {
             "id": "c3",
-            "textJp": "あきらっか"
+            "textJp": "かいしゃぐ"
            },
            {
             "id": "c4",
-            "textJp": "あきらか"
+            "textJp": "かいしゃく"
            }
           ],
           "answer": "c4"
@@ -999,7 +999,7 @@
            },
            {
             "id": "c4",
-            "textJp": "はっでん"
+            "textJp": "ばってん"
            }
           ],
           "answer": "c2"
@@ -1007,23 +1007,23 @@
          {
           "id": "moji_1_q4",
           "number": 4,
-          "promptJp": "経つ",
+          "promptJp": "物質",
           "choices": [
            {
             "id": "c1",
-            "textJp": "たつう"
+            "textJp": "ふっしつ"
            },
            {
             "id": "c2",
-            "textJp": "だつ"
+            "textJp": "ぶっしっつ"
            },
            {
             "id": "c3",
-            "textJp": "たつ"
+            "textJp": "ぶっしつ"
            },
            {
             "id": "c4",
-            "textJp": "たづ"
+            "textJp": "ぶしつ"
            }
           ],
           "answer": "c3"
@@ -1055,23 +1055,23 @@
          {
           "id": "moji_1_q6",
           "number": 6,
-          "promptJp": "向く",
+          "promptJp": "墓",
           "choices": [
            {
             "id": "c1",
-            "textJp": "むぐ"
+            "textJp": "ぱか"
            },
            {
             "id": "c2",
-            "textJp": "むくう"
+            "textJp": "ばか"
            },
            {
             "id": "c3",
-            "textJp": "むく"
+            "textJp": "はか"
            },
            {
             "id": "c4",
-            "textJp": "むっく"
+            "textJp": "はが"
            }
           ],
           "answer": "c3"
@@ -1087,7 +1087,7 @@
            },
            {
             "id": "c2",
-            "textJp": "たたか"
+            "textJp": "たたがう"
            },
            {
             "id": "c3",
@@ -1103,23 +1103,23 @@
          {
           "id": "moji_1_q8",
           "number": 8,
-          "promptJp": "年月",
+          "promptJp": "食料",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ねんげつう"
+            "textJp": "しょくりょ"
            },
            {
             "id": "c2",
-            "textJp": "ねんげっつ"
+            "textJp": "しょぐりょう"
            },
            {
             "id": "c3",
-            "textJp": "ねんげつ"
+            "textJp": "しょくりょう"
            },
            {
             "id": "c4",
-            "textJp": "ねんげづ"
+            "textJp": "しょっくりょう"
            }
           ],
           "answer": "c3"
@@ -1872,7 +1872,7 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "こっぎょう"
+            "textJp": "ごっきょう"
            },
            {
             "id": "c2",
@@ -1928,11 +1928,11 @@
            },
            {
             "id": "c3",
-            "textJp": "きずう"
+            "textJp": "しょう"
            },
            {
             "id": "c4",
-            "textJp": "いた"
+            "textJp": "きす"
            }
           ],
           "answer": "c1"
@@ -1944,7 +1944,7 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "ぢしき"
+            "textJp": "ちしぎ"
            },
            {
             "id": "c2",
@@ -2012,23 +2012,23 @@
          {
           "id": "moji_1_q8",
           "number": 8,
-          "promptJp": "満ちる",
+          "promptJp": "刺激",
           "choices": [
            {
             "id": "c1",
-            "textJp": "みぢる"
+            "textJp": "しげっき"
            },
            {
             "id": "c2",
-            "textJp": "みちるう"
+            "textJp": "しけき"
            },
            {
             "id": "c3",
-            "textJp": "みっちる"
+            "textJp": "しげぎ"
            },
            {
             "id": "c4",
-            "textJp": "みちる"
+            "textJp": "しげき"
            }
           ],
           "answer": "c4"
@@ -2294,11 +2294,11 @@
          {
           "id": "moji_3_q5",
           "number": 5,
-          "promptJp": "あなたに手紙を書くつもりだったの＿＿＿＿。",
+          "promptJp": "この店は安い。＿＿＿＿、味はあまりよくない。",
           "choices": [
            {
             "id": "c1",
-            "textJp": "しかも"
+            "textJp": "それとも"
            },
            {
             "id": "c2",
@@ -2306,11 +2306,11 @@
            },
            {
             "id": "c3",
-            "textJp": "思わず"
+            "textJp": "あるいは"
            },
            {
             "id": "c4",
-            "textJp": "うなる"
+            "textJp": "例えば"
            }
           ],
           "answer": "c2"
@@ -2769,7 +2769,7 @@
            },
            {
             "id": "c4",
-            "textJp": "はっごう"
+            "textJp": "ぱっこう"
            }
           ],
           "answer": "c2"
@@ -2777,23 +2777,23 @@
          {
           "id": "moji_1_q2",
           "number": 2,
-          "promptJp": "乗せる",
+          "promptJp": "肌",
           "choices": [
            {
             "id": "c1",
-            "textJp": "のぜる"
+            "textJp": "はた"
            },
            {
             "id": "c2",
-            "textJp": "のせるう"
+            "textJp": "ばだ"
            },
            {
             "id": "c3",
-            "textJp": "のせる"
+            "textJp": "はだ"
            },
            {
             "id": "c4",
-            "textJp": "のっせる"
+            "textJp": "き"
            }
           ],
           "answer": "c3"
@@ -2805,7 +2805,7 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "すみ"
+            "textJp": "かど"
            },
            {
             "id": "c2",
@@ -2813,11 +2813,11 @@
            },
            {
             "id": "c3",
-            "textJp": "ずみ"
+            "textJp": "がど"
            },
            {
             "id": "c4",
-            "textJp": "すま"
+            "textJp": "かと"
            }
           ],
           "answer": "c1"
@@ -2825,23 +2825,23 @@
          {
           "id": "moji_1_q4",
           "number": 4,
-          "promptJp": "精神",
+          "promptJp": "意識",
           "choices": [
            {
             "id": "c1",
-            "textJp": "せいしん"
+            "textJp": "いしき"
            },
            {
             "id": "c2",
-            "textJp": "せいっしん"
+            "textJp": "いしっき"
            },
            {
             "id": "c3",
-            "textJp": "ぜいしん"
+            "textJp": "いっしき"
            },
            {
             "id": "c4",
-            "textJp": "せいじん"
+            "textJp": "いじき"
            }
           ],
           "answer": "c1"
@@ -2933,7 +2933,7 @@
            },
            {
             "id": "c3",
-            "textJp": "しはら"
+            "textJp": "しぱらう"
            },
            {
             "id": "c4",
@@ -3670,7 +3670,7 @@
            },
            {
             "id": "c2",
-            "textJp": "こんざつう"
+            "textJp": "こんさつ"
            },
            {
             "id": "c3",
@@ -3694,7 +3694,7 @@
            },
            {
             "id": "c2",
-            "textJp": "しばふう"
+            "textJp": "しはふ"
            },
            {
             "id": "c3",
@@ -3734,23 +3734,23 @@
          {
           "id": "moji_1_q4",
           "number": 4,
-          "promptJp": "損",
+          "promptJp": "不足",
           "choices": [
            {
             "id": "c1",
-            "textJp": "そこな"
+            "textJp": "ふそぐ"
            },
            {
             "id": "c2",
-            "textJp": "そこ"
+            "textJp": "ふっそく"
            },
            {
             "id": "c3",
-            "textJp": "そん"
+            "textJp": "ふそく"
            },
            {
             "id": "c4",
-            "textJp": "ぞん"
+            "textJp": "ぶそく"
            }
           ],
           "answer": "c3"
@@ -3790,7 +3790,7 @@
            },
            {
             "id": "c2",
-            "textJp": "すこしもう"
+            "textJp": "すっこしも"
            },
            {
             "id": "c3",
@@ -3798,7 +3798,7 @@
            },
            {
             "id": "c4",
-            "textJp": "すこっしも"
+            "textJp": "すごしも"
            }
           ],
           "answer": "c3"
@@ -3818,7 +3818,7 @@
            },
            {
             "id": "c3",
-            "textJp": "きょうりょくう"
+            "textJp": "きょうりょっく"
            },
            {
             "id": "c4",
@@ -3830,23 +3830,23 @@
          {
           "id": "moji_1_q8",
           "number": 8,
-          "promptJp": "孫",
+          "promptJp": "伝統",
           "choices": [
            {
             "id": "c1",
-            "textJp": "まこ"
+            "textJp": "でんと"
            },
            {
             "id": "c2",
-            "textJp": "まご"
+            "textJp": "でんとう"
            },
            {
             "id": "c3",
-            "textJp": "まごう"
+            "textJp": "てんとう"
            },
            {
             "id": "c4",
-            "textJp": "そん"
+            "textJp": "でんどう"
            }
           ],
           "answer": "c2"
@@ -4571,23 +4571,23 @@
          {
           "id": "moji_1_q1",
           "number": 1,
-          "promptJp": "話し合う",
+          "promptJp": "言い方",
           "choices": [
            {
             "id": "c1",
-            "textJp": "はなしあう"
+            "textJp": "いいかた"
            },
            {
             "id": "c2",
-            "textJp": "はなじあう"
+            "textJp": "いいかった"
            },
            {
             "id": "c3",
-            "textJp": "はなしあ"
+            "textJp": "いいかだ"
            },
            {
             "id": "c4",
-            "textJp": "ばなしあう"
+            "textJp": "いいがた"
            }
           ],
           "answer": "c1"
@@ -4595,23 +4595,23 @@
          {
           "id": "moji_1_q2",
           "number": 2,
-          "promptJp": "関心",
+          "promptJp": "書斎",
           "choices": [
            {
             "id": "c1",
-            "textJp": "かんしん"
+            "textJp": "しょさい"
            },
            {
             "id": "c2",
-            "textJp": "がんしん"
+            "textJp": "しょっさい"
            },
            {
             "id": "c3",
-            "textJp": "かんじん"
+            "textJp": "じょさい"
            },
            {
             "id": "c4",
-            "textJp": "かんっしん"
+            "textJp": "しょざい"
            }
           ],
           "answer": "c1"
@@ -4619,23 +4619,23 @@
          {
           "id": "moji_1_q3",
           "number": 3,
-          "promptJp": "谷",
+          "promptJp": "食卓",
           "choices": [
            {
             "id": "c1",
-            "textJp": "たに"
+            "textJp": "しょくたく"
            },
            {
             "id": "c2",
-            "textJp": "こく"
+            "textJp": "しょくたぐ"
            },
            {
             "id": "c3",
-            "textJp": "きわ"
+            "textJp": "しょっくたく"
            },
            {
             "id": "c4",
-            "textJp": "だに"
+            "textJp": "じょくたく"
            }
           ],
           "answer": "c1"
@@ -4643,23 +4643,23 @@
          {
           "id": "moji_1_q4",
           "number": 4,
-          "promptJp": "間違い",
+          "promptJp": "少女",
           "choices": [
            {
             "id": "c1",
-            "textJp": "まっちがい"
+            "textJp": "しょうじょう"
            },
            {
             "id": "c2",
-            "textJp": "まちがい"
+            "textJp": "しょうじょ"
            },
            {
             "id": "c3",
-            "textJp": "まぢがい"
+            "textJp": "じょうじょ"
            },
            {
             "id": "c4",
-            "textJp": "まちかい"
+            "textJp": "しょうしょ"
            }
           ],
           "answer": "c2"
@@ -4667,23 +4667,23 @@
          {
           "id": "moji_1_q5",
           "number": 5,
-          "promptJp": "吠える",
+          "promptJp": "底",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ぽえる"
+            "textJp": "そご"
            },
            {
             "id": "c2",
-            "textJp": "ぼえる"
+            "textJp": "そっこ"
            },
            {
             "id": "c3",
-            "textJp": "ほえる"
+            "textJp": "そこ"
            },
            {
             "id": "c4",
-            "textJp": "ほえるう"
+            "textJp": "ぞこ"
            }
           ],
           "answer": "c3"
@@ -4715,23 +4715,23 @@
          {
           "id": "moji_1_q7",
           "number": 7,
-          "promptJp": "神",
+          "promptJp": "少々",
           "choices": [
            {
             "id": "c1",
-            "textJp": "じん"
+            "textJp": "じょうしょう"
            },
            {
             "id": "c2",
-            "textJp": "かみ"
+            "textJp": "しょうしょう"
            },
            {
             "id": "c3",
-            "textJp": "こう"
+            "textJp": "しょうしょ"
            },
            {
             "id": "c4",
-            "textJp": "かん"
+            "textJp": "しょうじょう"
            }
           ],
           "answer": "c2"
@@ -4739,23 +4739,23 @@
          {
           "id": "moji_1_q8",
           "number": 8,
-          "promptJp": "訴える",
+          "promptJp": "石炭",
           "choices": [
            {
             "id": "c1",
-            "textJp": "うたえる"
+            "textJp": "せきだん"
            },
            {
             "id": "c2",
-            "textJp": "うったえるう"
+            "textJp": "ぜきたん"
            },
            {
             "id": "c3",
-            "textJp": "うったえる"
+            "textJp": "せきたん"
            },
            {
             "id": "c4",
-            "textJp": "うっだえる"
+            "textJp": "せきったん"
            }
           ],
           "answer": "c3"
@@ -5504,23 +5504,23 @@
          {
           "id": "moji_1_q2",
           "number": 2,
-          "promptJp": "何とか",
+          "promptJp": "夫人",
           "choices": [
            {
             "id": "c1",
-            "textJp": "なんとか"
+            "textJp": "ふじん"
            },
            {
             "id": "c2",
-            "textJp": "なんどか"
+            "textJp": "ふしん"
            },
            {
             "id": "c3",
-            "textJp": "なんとが"
+            "textJp": "ぶじん"
            },
            {
             "id": "c4",
-            "textJp": "なんとっか"
+            "textJp": "ぷじん"
            }
           ],
           "answer": "c1"
@@ -5536,7 +5536,7 @@
            },
            {
             "id": "c2",
-            "textJp": "かくっす"
+            "textJp": "かっくす"
            },
            {
             "id": "c3",
@@ -5544,7 +5544,7 @@
            },
            {
             "id": "c4",
-            "textJp": "かくすう"
+            "textJp": "かぐす"
            }
           ],
           "answer": "c1"
@@ -5600,23 +5600,23 @@
          {
           "id": "moji_1_q6",
           "number": 6,
-          "promptJp": "効く",
+          "promptJp": "従兄弟",
           "choices": [
            {
             "id": "c1",
-            "textJp": "きぐ"
+            "textJp": "いどこ"
            },
            {
             "id": "c2",
-            "textJp": "きっく"
+            "textJp": "いとご"
            },
            {
             "id": "c3",
-            "textJp": "きく"
+            "textJp": "いとこ"
            },
            {
             "id": "c4",
-            "textJp": "きくう"
+            "textJp": "いとこう"
            }
           ],
           "answer": "c3"
@@ -6413,23 +6413,23 @@
          {
           "id": "moji_1_q2",
           "number": 2,
-          "promptJp": "頂上",
+          "promptJp": "舌",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ちょうしょう"
+            "textJp": "ぜつ"
            },
            {
             "id": "c2",
-            "textJp": "ちょうじょう"
+            "textJp": "した"
            },
            {
             "id": "c3",
-            "textJp": "ぢょうじょう"
+            "textJp": "じた"
            },
            {
             "id": "c4",
-            "textJp": "ちょうじょ"
+            "textJp": "しだ"
            }
           ],
           "answer": "c2"
@@ -6437,23 +6437,23 @@
          {
           "id": "moji_1_q3",
           "number": 3,
-          "promptJp": "覚ます",
+          "promptJp": "満足",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ざます"
+            "textJp": "まんそく"
            },
            {
             "id": "c2",
-            "textJp": "さまず"
+            "textJp": "まんぞっく"
            },
            {
             "id": "c3",
-            "textJp": "さまっす"
+            "textJp": "まんぞぐ"
            },
            {
             "id": "c4",
-            "textJp": "さます"
+            "textJp": "まんぞく"
            }
           ],
           "answer": "c4"
@@ -6509,23 +6509,23 @@
          {
           "id": "moji_1_q6",
           "number": 6,
-          "promptJp": "要素",
+          "promptJp": "基本",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ようぞ"
+            "textJp": "ぎほん"
            },
            {
             "id": "c2",
-            "textJp": "ようっそ"
+            "textJp": "きぽん"
            },
            {
             "id": "c3",
-            "textJp": "ようそう"
+            "textJp": "きぼん"
            },
            {
             "id": "c4",
-            "textJp": "ようそ"
+            "textJp": "きほん"
            }
           ],
           "answer": "c4"
@@ -6533,23 +6533,23 @@
          {
           "id": "moji_1_q7",
           "number": 7,
-          "promptJp": "欠陥",
+          "promptJp": "事実",
           "choices": [
            {
             "id": "c1",
-            "textJp": "げっかん"
+            "textJp": "じじっつ"
            },
            {
             "id": "c2",
-            "textJp": "けっがん"
+            "textJp": "じしつ"
            },
            {
             "id": "c3",
-            "textJp": "けっかん"
+            "textJp": "じじつ"
            },
            {
             "id": "c4",
-            "textJp": "けかん"
+            "textJp": "しじつ"
            }
           ],
           "answer": "c3"
@@ -6565,7 +6565,7 @@
            },
            {
             "id": "c2",
-            "textJp": "とづぜん"
+            "textJp": "とっつぜん"
            },
            {
             "id": "c3",
@@ -7302,7 +7302,7 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "そうっとう"
+            "textJp": "そうどう"
            },
            {
             "id": "c2",
@@ -7322,23 +7322,23 @@
          {
           "id": "moji_1_q2",
           "number": 2,
-          "promptJp": "文句",
+          "promptJp": "跡",
           "choices": [
            {
             "id": "c1",
-            "textJp": "もんぐ"
+            "textJp": "あっと"
            },
            {
             "id": "c2",
-            "textJp": "もんくう"
+            "textJp": "あとう"
            },
            {
             "id": "c3",
-            "textJp": "もんっく"
+            "textJp": "あど"
            },
            {
             "id": "c4",
-            "textJp": "もんく"
+            "textJp": "あと"
            }
           ],
           "answer": "c4"
@@ -7346,23 +7346,23 @@
          {
           "id": "moji_1_q3",
           "number": 3,
-          "promptJp": "恋",
+          "promptJp": "昼食",
           "choices": [
            {
             "id": "c1",
-            "textJp": "こ"
+            "textJp": "ちゅうじょく"
            },
            {
             "id": "c2",
-            "textJp": "れん"
+            "textJp": "ちゅうしょっく"
            },
            {
             "id": "c3",
-            "textJp": "ごい"
+            "textJp": "ちゅうしょぐ"
            },
            {
             "id": "c4",
-            "textJp": "こい"
+            "textJp": "ちゅうしょく"
            }
           ],
           "answer": "c4"
@@ -7402,7 +7402,7 @@
            },
            {
             "id": "c2",
-            "textJp": "きんっこ"
+            "textJp": "きんこう"
            },
            {
             "id": "c3",
@@ -7466,23 +7466,23 @@
          {
           "id": "moji_1_q8",
           "number": 8,
-          "promptJp": "震える",
+          "promptJp": "価格",
           "choices": [
            {
             "id": "c1",
-            "textJp": "ふるえるう"
+            "textJp": "かかっく"
            },
            {
             "id": "c2",
-            "textJp": "ぶるえる"
+            "textJp": "かっかく"
            },
            {
             "id": "c3",
-            "textJp": "ふるえる"
+            "textJp": "かかく"
            },
            {
             "id": "c4",
-            "textJp": "ぷるえる"
+            "textJp": "かかぐ"
            }
           ],
           "answer": "c3"
@@ -7503,7 +7503,7 @@
           "choices": [
            {
             "id": "c1",
-            "textJp": "実検"
+            "textJp": "実駅"
            },
            {
             "id": "c2",
@@ -8231,23 +8231,23 @@
          {
           "id": "moji_1_q2",
           "number": 2,
-          "promptJp": "密",
+          "promptJp": "武器",
           "choices": [
            {
             "id": "c1",
-            "textJp": "みつう"
+            "textJp": "ぶっき"
            },
            {
             "id": "c2",
-            "textJp": "みっつ"
+            "textJp": "ふき"
            },
            {
             "id": "c3",
-            "textJp": "みづ"
+            "textJp": "ぶぎ"
            },
            {
             "id": "c4",
-            "textJp": "みつ"
+            "textJp": "ぶき"
            }
           ],
           "answer": "c4"
@@ -8279,23 +8279,23 @@
          {
           "id": "moji_1_q4",
           "number": 4,
-          "promptJp": "会",
+          "promptJp": "嵐",
           "choices": [
            {
             "id": "c1",
-            "textJp": "あ"
+            "textJp": "あらっし"
            },
            {
             "id": "c2",
-            "textJp": "かい"
+            "textJp": "あらし"
            },
            {
             "id": "c3",
-            "textJp": "え"
+            "textJp": "あらじ"
            },
            {
             "id": "c4",
-            "textJp": "がい"
+            "textJp": "らん"
            }
           ],
           "answer": "c2"
@@ -8327,23 +8327,23 @@
          {
           "id": "moji_1_q6",
           "number": 6,
-          "promptJp": "弾",
+          "promptJp": "横切る",
           "choices": [
            {
             "id": "c1",
-            "textJp": "たま"
+            "textJp": "よこぎる"
            },
            {
             "id": "c2",
-            "textJp": "だま"
+            "textJp": "よこきる"
            },
            {
             "id": "c3",
-            "textJp": "はず"
+            "textJp": "よごぎる"
            },
            {
             "id": "c4",
-            "textJp": "ただ"
+            "textJp": "よっこぎる"
            }
           ],
           "answer": "c1"
@@ -8351,23 +8351,23 @@
          {
           "id": "moji_1_q7",
           "number": 7,
-          "promptJp": "実際",
+          "promptJp": "翼",
           "choices": [
            {
             "id": "c1",
-            "textJp": "じっさい"
+            "textJp": "つばさ"
            },
            {
             "id": "c2",
-            "textJp": "しっさい"
+            "textJp": "つばっさ"
            },
            {
             "id": "c3",
-            "textJp": "じさい"
+            "textJp": "つはさ"
            },
            {
             "id": "c4",
-            "textJp": "じっざい"
+            "textJp": "つばざ"
            }
           ],
           "answer": "c1"
@@ -8375,23 +8375,23 @@
          {
           "id": "moji_1_q8",
           "number": 8,
-          "promptJp": "今日",
+          "promptJp": "宗教",
           "choices": [
            {
             "id": "c1",
-            "textJp": "こんにぢ"
+            "textJp": "しゅうきょ"
            },
            {
             "id": "c2",
-            "textJp": "こんにっち"
+            "textJp": "じゅうきょう"
            },
            {
             "id": "c3",
-            "textJp": "ごんにち"
+            "textJp": "しゅうぎょう"
            },
            {
             "id": "c4",
-            "textJp": "こんにち"
+            "textJp": "しゅうきょう"
            }
           ],
           "answer": "c4"

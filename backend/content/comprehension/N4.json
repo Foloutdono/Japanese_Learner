@@ -43,7 +43,7 @@
     "id": "n4-02",
     "level": "N4",
     "title": "田中さんの家族が来る",
-    "grammar": ["〜たら", "〜ておく", "〜そうです"],
+    "grammar": ["〜たら", "〜ておく", "〜そうだ（伝聞）"],
     "text": "明日、田中さんの家族が私のアパートにあそびに来ます。田中さんの子どもは魚がすきだそうです。それで、今日はスーパーで新しい魚とやさいを買っておきました。へやもきれいにそうじしておきました。料理はあまり上手ではありませんが、母に電話して作り方を聞きました。母は「魚をやく前に、しおを少しつけたら、おいしくなるよ」と教えてくれました。明日の朝、もう一度スーパーへ行って、くだものも買うつもりです。もし雨がふったら、駅まで車でむかえに行きます。田中さんたちが楽しんでくれたら、うれしいです。",
     "questions": [
       {"type": "grammar", "question": {"en": "What does 「〜そうです」 express in 「魚がすきだそうです」?", "fr": "Qu'exprime 「〜そうです」 dans 「魚がすきだそうです」 ?"}, "options": {"en": ["Something the writer was told by someone", "Something the writer guesses from looking", "Something the writer hopes will be true", "Something the writer decided alone"], "fr": ["Une information qu'on a donnée à l'auteur", "Une supposition de l'auteur d'après ce qu'il voit", "Une chose que l'auteur espère vraie", "Une décision que l'auteur a prise seul"]}, "correct": 0},

@@ -2085,7 +2085,7 @@ const decks = {
 // Garder cette distinction en tête si ce texte est retouché.
 const exam = {
   examTitle:           'Examen blanc',
-  examDesc:            "Examens complets, chronométrés et notés\nVocabulaire, grammaire, lecture, écoute\nAu format JLPT officiel — notation non officielle",
+  examDesc:            "Épreuves d’entraînement, chronométrées et notées\nVocabulaire, grammaire, lecture, écoute\nAu format JLPT officiel — notation non officielle",
   examQuestions:       'questions',
   examNoneAvailable:   'Aucun examen disponible pour le moment.',
 

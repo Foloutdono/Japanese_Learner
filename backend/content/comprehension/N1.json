@@ -1002,7 +1002,7 @@
     "jp": "同じ事情で閉店を余儀なくされる店は、全国で後を絶たない。",
     "translation": {
      "en": "Shops forced to close for the same reasons keep appearing across the country.",
-     "fr": "Les boutiques contraintes de fermer pour les mêmes raisons ne cessent de se multiplier dans tout le pays."
+     "fr": "Les boutiques contraintes de fermer pour les mêmes raisons se succèdent sans fin dans tout le pays."
     },
     "note": {
      "en": "The pattern 「〜を余儀なくされる」 means being compelled to do something unwelcome; 「後を絶たない」 means it never stops.",
@@ -1773,8 +1773,8 @@
    {
     "jp": "しかし、翻訳の正確さもさることながら、言葉を学ぶことの価値は、相手の文化の内側に立ってものを見る経験そのものにある。",
     "translation": {
-     "en": "But accuracy of translation aside, the value of learning a language lies in the very experience of standing inside the other person's culture and seeing things from there.",
-     "fr": "Mais, précision de la traduction mise à part, la valeur de l'apprentissage d'une langue réside dans l'expérience même de se placer à l'intérieur de la culture de l'autre pour voir les choses."
+     "en": "But important as the accuracy of translation is, the value of learning a language lies above all in the very experience of standing inside the other person's culture and seeing things from there.",
+     "fr": "Mais si la précision de la traduction compte, bien sûr, la valeur de l'apprentissage d'une langue réside avant tout dans l'expérience même de se placer à l'intérieur de la culture de l'autre pour voir les choses."
     },
     "note": {
      "en": "The pattern 「〜もさることながら」 grants one point as true and then moves to a weightier one.",
@@ -2379,7 +2379,7 @@
    "〜に至る",
    "〜ゆえに"
   ],
-  "text": "明治の初め、一人の女性が医師を志した。当時、女性が医学を学ぶ道は制度上閉ざされていたが、彼女は周囲の冷笑をものともせず、役所に通って受験の許可を求めたという。三年に及ぶ交渉の末、試験を受けることが認められ、彼女は日本で初めての女性医師となるに至った。注目すべきは、彼女がその後、自らの成功に満足しなかったことである。女性ゆえに学ぶ機会を奪われる者を一人でも減らそうと、私塾を開き、後進の教育に生涯を捧げた。今日、医学部の学生の半数近くを女性が占める。それを当然と感じられること自体が、彼女のような先人が切り開いた道の上に私たちが立っている証しなのだ。",
+  "text": "明治の初め、一人の女性が医師を志した。当時、女性が医学を学ぶ道は制度上閉ざされていたが、彼女は周囲の冷笑をものともせず、役所に通って受験の許可を求めたという。三年に及ぶ交渉の末、試験を受けることが認められ、彼女はついに医師となるに至った。注目すべきは、彼女がその後、自らの成功に満足しなかったことである。女性ゆえに学ぶ機会を奪われる者を一人でも減らそうと、私塾を開き、後進の教育に生涯を捧げた。今日、医学部の学生の約四割を女性が占める。それを当然と感じられること自体が、彼女のような先人が切り開いた道の上に私たちが立っている証しなのだ。",
   "questions": [
    {
     "type": "comprehension",
@@ -2565,13 +2565,13 @@
     },
     "options": {
      "en": [
-      "Nearly half",
+      "About four in ten",
       "About ten percent",
       "A small minority",
       "Well over half"
      ],
      "fr": [
-      "Près de la moitié",
+      "Environ quatre sur dix",
       "Environ dix pour cent",
       "Une petite minorité",
       "Bien plus de la moitié"
@@ -2926,10 +2926,10 @@
     ]
    },
    {
-    "jp": "三年に及ぶ交渉の末、試験を受けることが認められ、彼女は日本で初めての女性医師となるに至った。",
+    "jp": "三年に及ぶ交渉の末、試験を受けることが認められ、彼女はついに医師となるに至った。",
     "translation": {
-     "en": "After negotiations lasting three years, she was allowed to sit the exam, and went on to become Japan's first female doctor.",
-     "fr": "Au terme de trois années de démarches, elle fut autorisée à passer l'examen et finit par devenir la première femme médecin du Japon."
+     "en": "After negotiations lasting three years, she was allowed to sit the exam, and at last went on to become a doctor.",
+     "fr": "Au terme de trois années de démarches, elle fut autorisée à passer l'examen et finit par devenir médecin."
     },
     "note": {
      "en": "The pattern 「〜に至った」 marks the end point of a long process; 「〜の末」 means after all that.",
@@ -3035,38 +3035,17 @@
       }
      },
      {
-      "surface": "日本",
+      "surface": "ついに",
       "meaning": {
-       "en": "Japan",
-       "fr": "Japon"
+       "en": "at last",
+       "fr": "enfin"
       }
      },
      {
-      "surface": "で",
+      "surface": "医師",
       "meaning": {
-       "en": "in",
-       "fr": "au"
-      }
-     },
-     {
-      "surface": "初めて",
-      "meaning": {
-       "en": "first",
-       "fr": "première"
-      }
-     },
-     {
-      "surface": "の",
-      "meaning": {
-       "en": "of",
-       "fr": "de"
-      }
-     },
-     {
-      "surface": "女性医師",
-      "meaning": {
-       "en": "female doctor",
-       "fr": "femme médecin"
+       "en": "doctor",
+       "fr": "médecin"
       }
      },
      {
@@ -3259,7 +3238,7 @@
      {
       "surface": "減らそう",
       "meaning": {
-       "en": "let us reduce",
+       "en": "to reduce (intention)",
        "fr": "réduire (intention)"
       }
      },
@@ -3343,14 +3322,14 @@
     ]
    },
    {
-    "jp": "今日、医学部の学生の半数近くを女性が占める。",
+    "jp": "今日、医学部の学生の約四割を女性が占める。",
     "translation": {
-     "en": "Today women make up nearly half of medical students.",
-     "fr": "Aujourd'hui, les femmes représentent près de la moitié des étudiants en médecine."
+     "en": "Today women make up about four in ten medical students.",
+     "fr": "Aujourd'hui, les femmes représentent environ quatre étudiants en médecine sur dix."
     },
     "note": {
-     "en": "The verb 「占める」 with 「を」 means to account for a share; 「半数近く」 means nearly half.",
-     "fr": "Le verbe 「占める」 avec 「を」 signifie représenter une part ; 「半数近く」 signifie près de la moitié."
+     "en": "The verb 「占める」 with 「を」 means to account for a share; 「約四割」 means about forty percent, a 割 being a tenth.",
+     "fr": "Le verbe 「占める」 avec 「を」 signifie représenter une part ; 「約四割」 signifie environ quarante pour cent, un 割 valant un dixième."
     },
     "words": [
      {
@@ -3389,10 +3368,10 @@
       }
      },
      {
-      "surface": "半数近く",
+      "surface": "約四割",
       "meaning": {
-       "en": "nearly half",
-       "fr": "près de la moitié"
+       "en": "about four in ten",
+       "fr": "environ quatre sur dix"
       }
      },
      {
@@ -3603,7 +3582,7 @@
    "〜てからというもの",
    "〜を禁じ得ない"
   ],
-  "text": "先生、ご無沙汰しております。工房を離れて十年、先日ようやく自分の窯を持つことができましたので、ご報告かたがた筆を取りました。弟子入りした当初、私は形の美しさばかりを追い、土の声を聞けと何度叱られたかわかりません。独立してからというもの、売れる器を作らねばという焦りから、あの言葉を忘れかけていた時期もありました。それでも先日、窯から出した茶碗を手に取った瞬間、そこに先生の指の跡が見えた気がして、込み上げる涙を禁じ得ませんでした。今では毎朝、仕事の前にまず土に触れることにしています。季節の変わり目です。どうかお体を大切になさってください。",
+  "text": "先生、ご無沙汰しております。工房を離れて十年、先日ようやく自分の窯を持つことができましたので、ご報告かたがた筆を取りました。弟子入りした当初、私は形の美しさばかりを追い、土の声を聞けと何度叱られたかわかりません。独立してからというもの、売れる器を作らねばという焦りから、あの言葉を忘れかけていました。それでも先日、窯から出した茶碗を手に取った瞬間、そこに先生の指の跡が見えた気がして、込み上げる涙を禁じ得ませんでした。今では毎朝、仕事の前にまず土に触れることにしています。季節の変わり目です。どうかお体を大切になさってください。",
   "questions": [
    {
     "type": "comprehension",
@@ -4219,10 +4198,10 @@
     ]
    },
    {
-    "jp": "独立してからというもの、売れる器を作らねばという焦りから、あの言葉を忘れかけていた時期もありました。",
+    "jp": "独立してからというもの、売れる器を作らねばという焦りから、あの言葉を忘れかけていました。",
     "translation": {
-     "en": "Ever since I set up on my own, there have been times when, anxious to make pots that would sell, I half forgot those words.",
-     "fr": "Depuis que je travaille à mon compte, il y a eu des périodes où, pressé par le besoin de faire des pièces qui se vendent, j'avais presque oublié ces paroles."
+     "en": "Ever since I set up on my own, my anxiety to make pots that would sell had me half forgetting those words.",
+     "fr": "Depuis que je travaille à mon compte, le besoin pressant de faire des pièces qui se vendent m'avait presque fait oublier ces paroles."
     },
     "note": {
      "en": "The pattern 「〜てからというもの」 marks a change that began at that moment and has lasted since; 「作らねば」 is a written form of 作らなければ.",
@@ -4314,31 +4293,10 @@
       }
      },
      {
-      "surface": "忘れかけていた",
+      "surface": "忘れかけていました",
       "meaning": {
        "en": "had half forgotten",
        "fr": "avais presque oublié"
-      }
-     },
-     {
-      "surface": "時期",
-      "meaning": {
-       "en": "periods, times",
-       "fr": "périodes"
-      }
-     },
-     {
-      "surface": "も",
-      "meaning": {
-       "en": "also",
-       "fr": "aussi"
-      }
-     },
-     {
-      "surface": "ありました",
-      "meaning": {
-       "en": "there were",
-       "fr": "il y a eu"
       }
      }
     ]
@@ -6192,8 +6150,8 @@
      "fr": "Dans le monde scientifique, une expérience réussie devient un article, mais la plupart des expériences ratées ne laissent même pas de trace écrite."
     },
     "note": {
-     "en": "The particle 「すら」 means not even, stressing how little is left of a failure.",
-     "fr": "La particule 「すら」 signifie même pas, et souligne combien il reste peu d'un échec."
+     "en": "The particle 「すら」 means even; with the negative 「残らない」 it gives not even, stressing how little is left of a failure.",
+     "fr": "La particule 「すら」 signifie même ; avec la négation 「残らない」, elle donne même pas, et souligne combien il reste peu d'un échec."
     },
     "words": [
      {
@@ -6325,8 +6283,8 @@
      {
       "surface": "すら",
       "meaning": {
-       "en": "not even",
-       "fr": "même pas"
+       "en": "even",
+       "fr": "même"
       }
      },
      {

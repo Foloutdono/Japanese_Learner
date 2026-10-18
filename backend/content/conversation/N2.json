@@ -111,39 +111,39 @@
       },
       {
         "them": {
-          "jp": "週に何日ぐらい入れそうですか。",
-          "kana": "しゅうになんにちぐらいはいれそうですか。",
+          "jp": "週に何日ぐらい働けそうですか。",
+          "kana": "しゅうになんにちぐらいはたらけそうですか。",
           "en": "About how many days a week do you think you could work?",
           "fr": "Combien de jours par semaine pourriez-vous travailler, à peu près ?"
         },
         "me": {
-          "jp": "学校がありますので、週に三日、夕方からでしたら入れます。",
-          "kana": "がっこうがありますので、しゅうにみっか、ゆうがたからでしたらはいれます。",
-          "romaji": "gakkou ga arimasu node, shuu ni mikka, yuugata kara deshitara hairemasu",
+          "jp": "学校がありますので、週に三日、夕方からでしたら働けます。",
+          "kana": "がっこうがありますので、しゅうにみっか、ゆうがたからでしたらはたらけます。",
+          "romaji": "gakkou ga arimasu node, shuu ni mikka, yuugata kara deshitara hatarakemasu",
           "en": "I have classes, so I can work three days a week, from the late afternoon.",
           "fr": "J'ai des cours, donc je peux travailler trois jours par semaine, à partir de la fin d'après-midi.",
           "note": {
-            "en": "「でしたら」 sets a polite condition, and 「入れます」 is the potential of 「入る」, to take a shift.",
-            "fr": "「でしたら」 pose poliment une condition, et 「入れます」 est le potentiel de 「入る」, prendre un service."
+            "en": "「でしたら」 sets a polite condition, and 「働けます」 is the potential of 「働く」, to work.",
+            "fr": "「でしたら」 pose poliment une condition, et 「働けます」 est le potentiel de 「働く」, travailler."
           },
           "alt": [
-            {"jp": "学校がありますので、週に三日、夕方からでしたら働けます。", "kana": "がっこうがありますので、しゅうにみっか、ゆうがたからでしたらはたらけます。", "romaji": "gakkou ga arimasu node, shuu ni mikka, yuugata kara deshitara hatarakemasu"}
+            {"jp": "学校がありますので、週に三日、夕方からでしたら大丈夫です。", "kana": "がっこうがありますので、しゅうにみっか、ゆうがたからでしたらだいじょうぶです。", "romaji": "gakkou ga arimasu node, shuu ni mikka, yuugata kara deshitara daijoubu desu"}
           ]
         },
         "wrong": [
           {
-            "jp": "学校がありますので、週に三日、夕方からでしたら入られます。",
-            "kana": "がっこうがありますので、しゅうにみっか、ゆうがたからでしたらはいられます。",
-            "en": "I have classes, so three days a week, from the late afternoon, I shall graciously come in.",
-            "fr": "J'ai des cours, alors trois jours par semaine, à partir de la fin d'après-midi, je daignerai venir.",
+            "jp": "学校がありますので、週に三日、夕方からでしたら働かれます。",
+            "kana": "がっこうがありますので、しゅうにみっか、ゆうがたからでしたらはたらかれます。",
+            "en": "I have classes, so three days a week, from the late afternoon, I shall graciously work.",
+            "fr": "J'ai des cours, alors trois jours par semaine, à partir de la fin d'après-midi, je daignerai travailler.",
             "why": {
-              "en": "「入られます」 is the honorific or passive of 「入る」, not its potential: you can work is 「入れます」.",
-              "fr": "「入られます」 est l'honorifique ou le passif de 「入る」, pas son potentiel : « je peux travailler » se dit 「入れます」."
+              "en": "「働かれます」 is the honorific or passive of 「働く」, not its potential: you can work is 「働けます」.",
+              "fr": "「働かれます」 est l'honorifique ou le passif de 「働く」, pas son potentiel : « je peux travailler » se dit 「働けます」."
             }
           },
           {
-            "jp": "学校がありますので、平日も週末も、毎日朝から晩まで入れます。",
-            "kana": "がっこうがありますので、へいじつもしゅうまつも、まいにちあさからばんまではいれます。",
+            "jp": "学校がありますので、平日も週末も、毎日朝から晩まで働けます。",
+            "kana": "がっこうがありますので、へいじつもしゅうまつも、まいにちあさからばんまではたらけます。",
             "en": "I have classes, so I can work every day, weekdays and weekends, from morning to night.",
             "fr": "J'ai des cours, donc je peux travailler tous les jours, en semaine comme le week-end, du matin au soir.",
             "why": {
@@ -1341,7 +1341,7 @@
     "steps": [
       {"en": "Introduce yourself", "fr": "Présente-toi"},
       {"en": "Say what you hear", "fr": "Dis ce que tu entends"},
-      {"en": "Say until what time", "fr": "Dis jusqu'à quelle heure"},
+      {"en": "Say at what time", "fr": "Dis à quelle heure"},
       {"en": "Ask for quiet after eleven", "fr": "Demande le calme après vingt-trois heures"}
     ],
     "them": {"en": "Neighbour", "fr": "Voisin"},
@@ -1349,7 +1349,7 @@
     "turns": [
       {
         "them": {
-          "jp": "はい、何でしょうか。",
+          "jp": "はい、なんでしょうか。",
           "kana": "はい、なんでしょうか。",
           "en": "Yes? Can I help you?",
           "fr": "Oui ? C'est pour quoi ?"
@@ -2275,7 +2275,7 @@
       },
       {
         "them": {
-          "jp": "はい、何でしょう。",
+          "jp": "はい、なんでしょう。",
           "kana": "はい、なんでしょう。",
           "en": "Yes, what is it?",
           "fr": "Oui, de quoi s'agit-il ?"
@@ -2869,23 +2869,23 @@
           "fr": "Quoi, il faut encore attendre ? J'ai déjà attendu trente minutes."
         },
         "me": {
-          "jp": "大変お待たせしてしまい、申し訳ございません。五分ほどでお持ちいたします。",
-          "kana": "たいへんおまたせしてしまい、もうしわけございません。ごふんほどでおもちいたします。",
-          "romaji": "taihen omatase shite shimai, moushiwake gozaimasen. gofun hodo de omochi itashimasu",
+          "jp": "大変お待たせしてしまい、申し訳ございません。あと五分ほどでお持ちいたします。",
+          "kana": "たいへんおまたせしてしまい、もうしわけございません。あとごふんほどでおもちいたします。",
+          "romaji": "taihen omatase shite shimai, moushiwake gozaimasen. ato gofun hodo de omochi itashimasu",
           "en": "I'm very sorry to have kept you waiting so long. I'll bring it in about five minutes.",
           "fr": "Pardon de vous avoir fait attendre si longtemps. Je vous l'apporte d'ici cinq minutes environ.",
           "note": {
-            "en": "「お待たせしてしまい」 owns the wait as your doing, and 「五分ほどで」 gives him a time he can count on.",
-            "fr": "「お待たせしてしまい」 reconnaît que l'attente est de ton fait, et 「五分ほどで」 lui donne un délai sur lequel compter."
+            "en": "「お待たせしてしまい」 owns the wait as your doing, and 「あと五分ほどで」 gives him a time he can count on.",
+            "fr": "「お待たせしてしまい」 reconnaît que l'attente est de ton fait, et 「あと五分ほどで」 lui donne un délai sur lequel compter."
           },
           "alt": [
-            {"jp": "お待たせして、大変申し訳ございません。五分ほどでお持ちします。", "kana": "おまたせして、たいへんもうしわけございません。ごふんほどでおもちします。", "romaji": "omatase shite, taihen moushiwake gozaimasen. gofun hodo de omochi shimasu"}
+            {"jp": "お待たせして、大変申し訳ございません。あと五分ほどでお持ちします。", "kana": "おまたせして、たいへんもうしわけございません。あとごふんほどでおもちします。", "romaji": "omatase shite, taihen moushiwake gozaimasen. ato gofun hodo de omochi shimasu"}
           ]
         },
         "wrong": [
           {
-            "jp": "大変お待ちしてしまい、申し訳ございません。五分ほどでお持ちいたします。",
-            "kana": "たいへんおまちしてしまい、もうしわけございません。ごふんほどでおもちいたします。",
+            "jp": "大変お待ちしてしまい、申し訳ございません。あと五分ほどでお持ちいたします。",
+            "kana": "たいへんおまちしてしまい、もうしわけございません。あとごふんほどでおもちいたします。",
             "en": "I'm very sorry to have waited for you so long. I'll bring it in about five minutes.",
             "fr": "Pardon de vous avoir attendu si longtemps. Je vous l'apporte d'ici cinq minutes environ.",
             "why": {
@@ -2894,8 +2894,8 @@
             }
           },
           {
-            "jp": "大変お待たせしてしまい、申し訳ございません。五分ほどでお持ちいたしました。",
-            "kana": "たいへんおまたせしてしまい、もうしわけございません。ごふんほどでおもちいたしました。",
+            "jp": "大変お待たせしてしまい、申し訳ございません。あと五分ほどでお持ちいたしました。",
+            "kana": "たいへんおまたせしてしまい、もうしわけございません。あとごふんほどでおもちいたしました。",
             "en": "I'm very sorry to have kept you waiting so long. I brought it in about five minutes.",
             "fr": "Pardon de vous avoir fait attendre si longtemps. Je vous l'ai apporté en cinq minutes environ.",
             "why": {

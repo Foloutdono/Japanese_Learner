@@ -452,8 +452,8 @@
       },
       {
         "them": {
-          "jp": "十分ほどでまいります。ほかに何かございますか。",
-          "kana": "じゅっぷんほどでまいります。ほかになにかございますか。",
+          "jp": "あと十分ほどでまいります。ほかに何かございますか。",
+          "kana": "あとじゅっぷんほどでまいります。ほかになにかございますか。",
           "en": "Someone will be up in about ten minutes. Is there anything else?",
           "fr": "Quelqu'un sera là dans dix minutes environ. Désirez-vous autre chose ?"
         },
@@ -1440,8 +1440,8 @@
             "en": "Yes, I'm off now.",
             "fr": "Oui, j'y vais maintenant.",
             "why": {
-              "en": "「いってきます」 is said to the people you leave behind at home, not to someone asking for your passport.",
-              "fr": "「いってきます」 se dit à ceux qu'on laisse à la maison en partant, pas à quelqu'un qui demande ton passeport."
+              "en": "「いってきます」 answers someone who sees you off as you set out, not someone asking for your passport.",
+              "fr": "「いってきます」 répond à quelqu'un qui te voit partir, pas à quelqu'un qui demande ton passeport."
             }
           },
           {
@@ -1913,7 +1913,7 @@
       },
       {
         "them": {
-          "jp": "中身は何ですか。",
+          "jp": "中身はなんですか。",
           "kana": "なかみはなんですか。",
           "en": "What's inside?",
           "fr": "Qu'est-ce qu'il contient ?"
@@ -2258,35 +2258,35 @@
           "fr": "Vous avez de la fièvre ?"
         },
         "me": {
-          "jp": "はい、三十七度ぐらいあります。",
-          "kana": "はい、さんじゅうななどぐらいあります。",
-          "romaji": "hai, sanjuunana do gurai arimasu",
-          "en": "Yes, about thirty-seven degrees.",
-          "fr": "Oui, environ trente-sept degrés.",
+          "jp": "はい、三十八度ぐらいあります。",
+          "kana": "はい、さんじゅうはちどぐらいあります。",
+          "romaji": "hai, sanjuuhachi do gurai arimasu",
+          "en": "Yes, about thirty-eight degrees.",
+          "fr": "Oui, environ trente-huit degrés.",
           "note": {
-            "en": "「ぐらい」 makes the figure approximate: about thirty-seven degrees.",
-            "fr": "「ぐらい」 rend le chiffre approximatif : environ trente-sept degrés."
+            "en": "「ぐらい」 makes the figure approximate: about thirty-eight degrees.",
+            "fr": "「ぐらい」 rend le chiffre approximatif : environ trente-huit degrés."
           },
           "alt": [
-            {"jp": "はい、三十七度ぐらいです。", "kana": "はい、さんじゅうななどぐらいです。", "romaji": "hai, sanjuunana do gurai desu"}
+            {"jp": "はい、三十八度ぐらいです。", "kana": "はい、さんじゅうはちどぐらいです。", "romaji": "hai, sanjuuhachi do gurai desu"}
           ]
         },
         "wrong": [
           {
-            "jp": "いいえ、三十七度あります。",
-            "kana": "いいえ、さんじゅうななどあります。",
-            "en": "No, it's thirty-seven degrees.",
-            "fr": "Non, j'ai trente-sept degrés.",
+            "jp": "いいえ、三十八度あります。",
+            "kana": "いいえ、さんじゅうはちどあります。",
+            "en": "No, it's thirty-eight degrees.",
+            "fr": "Non, j'ai trente-huit degrés.",
             "why": {
               "en": "「いいえ」 says you have no fever, and then you give its temperature.",
               "fr": "「いいえ」 dit que tu n'as pas de fièvre, puis tu en donnes la température."
             }
           },
           {
-            "jp": "はい、三十七歳です。",
-            "kana": "はい、さんじゅうななさいです。",
-            "en": "Yes, I'm thirty-seven.",
-            "fr": "Oui, j'ai trente-sept ans.",
+            "jp": "はい、三十八歳です。",
+            "kana": "はい、さんじゅうはっさいです。",
+            "en": "Yes, I'm thirty-eight.",
+            "fr": "Oui, j'ai trente-huit ans.",
             "why": {
               "en": "「歳」 gives an age; a temperature is counted in 「度」.",
               "fr": "「歳」 donne un âge ; une température se compte en 「度」."
@@ -2663,7 +2663,7 @@
     "turns": [
       {
         "them": {
-          "jp": "ねえ、今週末、暇？",
+          "jp": "ねえ、今週末、ひま？",
           "kana": "ねえ、こんしゅうまつ、ひま？",
           "en": "Hey, are you free this weekend?",
           "fr": "Dis, t'es libre ce week-end ?"
@@ -2679,7 +2679,7 @@
             "fr": "「なら」 isole le jour où tu peux, et le 「暇だよ」 familier, c'est ainsi qu'on parle à un ami."
           },
           "alt": [
-            {"jp": "うん、土曜日なら暇。", "kana": "うん、どようびならひま。", "romaji": "un, doyoubi nara hima"}
+            {"jp": "うん、土曜日ならひま。", "kana": "うん、どようびならひま。", "romaji": "un, doyoubi nara hima"}
           ]
         },
         "wrong": [
@@ -3876,22 +3876,22 @@
           "fr": "Bonjour. Vous avez choisi ?"
         },
         "me": {
-          "jp": "まだです。おすすめは何ですか。",
+          "jp": "まだです。おすすめはなんですか。",
           "kana": "まだです。おすすめはなんですか。",
           "romaji": "mada desu. osusume wa nan desu ka",
           "en": "Not yet. What do you recommend?",
           "fr": "Pas encore. Qu'est-ce que vous recommandez ?",
           "note": {
-            "en": "「まだです」 says you have not chosen yet, and 「おすすめは何ですか」 asks what the restaurant suggests.",
-            "fr": "「まだです」 dit que tu n'as pas encore choisi, et 「おすすめは何ですか」 demande ce que le restaurant conseille."
+            "en": "「まだです」 says you have not chosen yet, and 「おすすめはなんですか」 asks what the restaurant suggests.",
+            "fr": "「まだです」 dit que tu n'as pas encore choisi, et 「おすすめはなんですか」 demande ce que le restaurant conseille."
           },
           "alt": [
-            {"jp": "まだ決まっていません。おすすめは何ですか。", "kana": "まだきまっていません。おすすめはなんですか。", "romaji": "mada kimatte imasen. osusume wa nan desu ka"}
+            {"jp": "まだ決まっていません。おすすめはなんですか。", "kana": "まだきまっていません。おすすめはなんですか。", "romaji": "mada kimatte imasen. osusume wa nan desu ka"}
           ]
         },
         "wrong": [
           {
-            "jp": "もう決まりました。おすすめは何ですか。",
+            "jp": "もう決まりました。おすすめはなんですか。",
             "kana": "もうきまりました。おすすめはなんですか。",
             "en": "I've already decided. What do you recommend?",
             "fr": "C'est déjà choisi. Qu'est-ce que vous recommandez ?",
