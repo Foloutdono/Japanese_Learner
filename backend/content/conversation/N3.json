@@ -1350,13 +1350,13 @@
         },
         "wrong": [
           {
-            "jp": "もし電車がもっと遅れたら、何時までにお着きになればいいですか。",
-            "kana": "もしでんしゃがもっとおくれたら、なんじまでにおつきになればいいですか。",
-            "en": "If the train is held up even more, by what time should I graciously arrive?",
-            "fr": "Si le train prend encore plus de retard, avant quelle heure dois-je daigner arriver ?",
+            "jp": "もし電車がもっと遅れたら、何時までに着いてもらえますか。",
+            "kana": "もしでんしゃがもっとおくれたら、なんじまでについてもらえますか。",
+            "en": "If the train is held up even more, by what time could you get there?",
+            "fr": "Si le train prend encore plus de retard, avant quelle heure pourriez-vous arriver ?",
             "why": {
-              "en": "「お着きになる」 is the honorific that raises someone else's arriving, as the staff did yours; your own is plain 「着く」.",
-              "fr": "「お着きになる」 est l'honorifique qui élève l'arrivée de l'autre, comme le personnel l'a fait pour la tienne ; la tienne, c'est 「着く」 tout simplement."
+              "en": "「着いてもらえますか」 asks the inn to get somewhere by a certain time, when it is you who are travelling.",
+              "fr": "「着いてもらえますか」 demande à l'auberge d'arriver quelque part avant une certaine heure, alors que c'est toi qui voyages."
             }
           },
           {
@@ -2713,13 +2713,13 @@
         },
         "wrong": [
           {
-            "jp": "はい、持っていません。前の市役所でもらいませんでした。",
-            "kana": "はい、もっていません。まえのしやくしょでもらいませんでした。",
-            "en": "Yes, I don't have it. I didn't get one from my previous city hall.",
-            "fr": "Oui, je ne l'ai pas. Mon ancienne mairie ne me l'a pas donné.",
+            "jp": "はい、前の市役所で住所を変えてもらいました。",
+            "kana": "はい、まえのしやくしょでじゅうしょをかえてもらいました。",
+            "en": "Yes, my old city hall changed my address for me.",
+            "fr": "Oui, mon ancienne mairie a changé mon adresse.",
             "why": {
-              "en": "「はい」 says you have it, and 「持っていません」 that you do not: the two cannot both stand.",
-              "fr": "「はい」 dit que tu l'as, et 「持っていません」 que tu ne l'as pas : les deux ne vont pas ensemble."
+              "en": "A move is registered at the new town's city hall, not changed by the old one, and 「住所を変えてもらいました」 says nothing of the certificate she asked about.",
+              "fr": "Un déménagement se déclare à la mairie de la nouvelle ville, pas à l'ancienne, et 「住所を変えてもらいました」 ne dit rien du certificat demandé."
             }
           },
           {
@@ -2767,13 +2767,13 @@
             }
           },
           {
-            "jp": "いいえ、まだ出されていないんです。",
-            "kana": "いいえ、まだだされていないんです。",
-            "en": "No, I have not yet graciously submitted it.",
-            "fr": "Non, je n'ai pas encore daigné la faire.",
+            "jp": "いいえ、前の町には三年ぐらい住んでいました。",
+            "kana": "いいえ、まえのまちにはさんねんぐらいすんでいました。",
+            "en": "No, I lived in my old town for about three years.",
+            "fr": "Non, j'ai habité environ trois ans dans mon ancienne ville.",
             "why": {
-              "en": "「出されて」 is the clerk's respectful form for what you did; of yourself it is plain 「出していない」.",
-              "fr": "「出されて」 est la forme respectueuse de l'agent pour ce que tu as fait ; pour toi-même, c'est 「出していない」 tout simplement."
+              "en": "「三年ぐらい住んでいました」 says how long you lived there; the clerk asked whether you reported the move-out.",
+              "fr": "「三年ぐらい住んでいました」 dit combien de temps tu y as vécu ; l'agent demandait si tu as fait la déclaration de départ."
             }
           }
         ]
@@ -2786,9 +2786,9 @@
           "fr": "Je vois. Alors il faut faire la déclaration de départ à votre ancienne mairie. C'est possible aussi par courrier."
         },
         "me": {
-          "jp": "前の町は遠いので、郵便で出すことにします。届くまで、何日ぐらいかかりますか。",
-          "kana": "まえのまちはとおいので、ゆうびんでだすことにします。とどくまで、なんにちぐらいかかりますか。",
-          "romaji": "mae no machi wa tooi node, yuubin de dasu koto ni shimasu. todoku made, nannichi gurai kakarimasu ka.",
+          "jp": "前の町は遠いので、郵便で出すことにします。証明書が届くまで、何日ぐらいかかりますか。",
+          "kana": "まえのまちはとおいので、ゆうびんでだすことにします。しょうめいしょがとどくまで、なんにちぐらいかかりますか。",
+          "romaji": "mae no machi wa tooi node, yuubin de dasu koto ni shimasu. shoumeisho ga todoku made, nannichi gurai kakarimasu ka.",
           "en": "My old town is a long way off, so I'll do it by post. How many days until the certificate reaches me?",
           "fr": "Mon ancienne ville est loin, alors je vais le faire par courrier. Combien de jours faut-il pour recevoir le certificat ?",
           "note": {
@@ -2796,15 +2796,15 @@
             "fr": "「ことにします」 fait du courrier ta décision, et 「届くまで」 demande combien de temps avant que le certificat t'arrive."
           },
           "alt": [
-            {"jp": "前の町は遠いので、郵便にします。何日ぐらいで届きますか。", "kana": "まえのまちはとおいので、ゆうびんにします。なんにちぐらいでとどきますか。", "romaji": "mae no machi wa tooi node, yuubin ni shimasu. nannichi gurai de todokimasu ka."}
+            {"jp": "前の町は遠いので、郵便にします。証明書は何日ぐらいで届きますか。", "kana": "まえのまちはとおいので、ゆうびんにします。しょうめいしょはなんにちぐらいでとどきますか。", "romaji": "mae no machi wa tooi node, yuubin ni shimasu. shoumeisho wa nannichi gurai de todokimasu ka."}
           ]
         },
         "wrong": [
           {
-            "jp": "前の町は遠いので、郵便で出すことにします。届けるまで、何日ぐらいかかりますか。",
-            "kana": "まえのまちはとおいので、ゆうびんでだすことにします。とどけるまで、なんにちぐらいかかりますか。",
-            "en": "My old town is a long way off, so I'll do it by post. How many days until I deliver it?",
-            "fr": "Mon ancienne ville est loin, alors je vais le faire par courrier. Combien de jours avant que je le livre ?",
+            "jp": "前の町は遠いので、郵便で出すことにします。証明書を届けるまで、何日ぐらいかかりますか。",
+            "kana": "まえのまちはとおいので、ゆうびんでだすことにします。しょうめいしょをとどけるまで、なんにちぐらいかかりますか。",
+            "en": "My old town is a long way off, so I'll do it by post. How many days until I deliver the certificate?",
+            "fr": "Mon ancienne ville est loin, alors je vais le faire par courrier. Combien de jours avant que je livre le certificat ?",
             "why": {
               "en": "「届ける」 is to deliver something yourself; the certificate reaching you is 「届く」.",
               "fr": "「届ける」, c'est livrer soi-même quelque chose ; le certificat qui t'arrive, c'est 「届く」."
@@ -2860,7 +2860,7 @@
             "en": "All right. As soon as it arrives, please bring it.",
             "fr": "D'accord. Dès qu'il arrive, apportez-le, s'il vous plaît.",
             "why": {
-              "en": "「お持ちください」 hands the clerk's own request back to her, asking her to bring it.",
+              "en": "「お持ちください」 hands the clerk's own request back to them, asking them to bring it.",
               "fr": "「お持ちください」 renvoie à l'agent sa propre demande, comme si c'était à lui de l'apporter."
             }
           }
@@ -3342,13 +3342,13 @@
         },
         "wrong": [
           {
-            "jp": "じゃあ、あげておきます。",
-            "kana": "じゃあ、あげておきます。",
-            "en": "Then I'll give them away.",
-            "fr": "Alors je les donne.",
+            "jp": "じゃあ、財布の中は見ていません。",
+            "kana": "じゃあ、さいふのなかはみていません。",
+            "en": "Then, I haven't looked inside the wallet.",
+            "fr": "Alors, je n'ai pas regardé dans le portefeuille.",
             "why": {
-              "en": "「あげておきます」 hands the rights to someone else; keeping them for yourself is 「もらっておきます」.",
-              "fr": "「あげておきます」 donne ces droits à quelqu'un d'autre ; les garder pour toi, c'est 「もらっておきます」."
+              "en": "「財布の中は見ていません」 says you have not opened the wallet, as if you had been asked that; the officer asked what you want to do about your rights.",
+              "fr": "「財布の中は見ていません」 dit que tu n'as pas ouvert le portefeuille, comme si c'était la question ; le policier demandait ce que tu fais de tes droits."
             }
           },
           {
@@ -3822,10 +3822,10 @@
       },
       {
         "them": {
-          "jp": "大変申し訳ございません。ご注文が通っていなかったようです。",
-          "kana": "たいへんもうしわけございません。ごちゅうもんがとおっていなかったようです。",
-          "en": "I'm terribly sorry. It seems your order never went through to the kitchen.",
-          "fr": "Toutes mes excuses. Il semble que votre commande ne soit jamais arrivée en cuisine."
+          "jp": "大変申し訳ございません。確認しましたら、ご注文がキッチンに通っていなかったようです。",
+          "kana": "たいへんもうしわけございません。かくにんしましたら、ごちゅうもんがキッチンにとおっていなかったようです。",
+          "en": "I'm terribly sorry. I've checked, and it seems your order never went through to the kitchen.",
+          "fr": "Toutes mes excuses. J'ai vérifié : il semble que votre commande ne soit jamais arrivée en cuisine."
         },
         "me": {
           "jp": "そうですか。今からだと、どのくらいかかりますか。",
@@ -3849,7 +3849,7 @@
             "fr": "Ah bon. En la lançant maintenant, ça coûterait combien ?",
             "why": {
               "en": "「いくら」 asks the price, which has not changed; short of time, what you need to know is how long: 「どのくらい」.",
-              "fr": "「いくら」 demande le prix, qui n'a pas changé ; pressé comme tu l'es, il te faut savoir combien de temps : 「どのくらい」."
+              "fr": "「いくら」 demande le prix, qui n'a pas changé ; avec le peu de temps qui te reste, il te faut savoir combien de temps : 「どのくらい」."
             }
           },
           {
@@ -4801,8 +4801,8 @@
             "en": "My stomach hurt until last night.",
             "fr": "J'ai eu mal au ventre jusqu'à hier soir.",
             "why": {
-              "en": "「まで」 with the past says the pain stopped last night, so there is nothing to see the doctor about; since then is 「から」.",
-              "fr": "「まで」 avec le passé dit que la douleur s'est arrêtée hier soir : il n'y aurait plus de raison de consulter ; « depuis », c'est 「から」."
+              "en": "「まで」 with the past says the pain stopped last night, when that is when it began and it still hurts; since then is 「から」.",
+              "fr": "「まで」 avec le passé dit que la douleur s'est arrêtée hier soir, alors qu'elle a commencé là et dure encore ; « depuis », c'est 「から」."
             }
           },
           {
@@ -4907,10 +4907,10 @@
       },
       {
         "them": {
-          "jp": "おなかの風邪ですね。三日分のお薬を出しますので、しばらくは消化のいいものを食べてください。",
-          "kana": "おなかのかぜですね。みっかぶんのおくすりをだしますので、しばらくはしょうかのいいものをたべてください。",
-          "en": "It's a stomach bug. I'll give you three days' worth of medicine, and for a while, eat things that are easy to digest.",
-          "fr": "C'est une gastro. Je vous prescris des médicaments pour trois jours, et en attendant, mangez des choses faciles à digérer."
+          "jp": "食べ物が原因かもしれませんね。三日分のお薬を出しますので、しばらくは消化のいいものを食べてください。",
+          "kana": "たべものがげんいんかもしれませんね。みっかぶんのおくすりをだしますので、しばらくはしょうかのいいものをたべてください。",
+          "en": "It may well be something you ate. I'll give you three days' worth of medicine, and for a while, eat things that are easy to digest.",
+          "fr": "C'est peut-être ce que vous avez mangé. Je vous prescris des médicaments pour trois jours, et en attendant, mangez des choses faciles à digérer."
         },
         "me": {
           "jp": "例えば、どんなものを食べればいいですか。",
@@ -5004,7 +5004,7 @@
           "jp": "はい、気をつけます。ありがとうございました。",
           "kana": "はい、きをつけます。ありがとうございました。",
           "romaji": "hai, ki o tsukemasu. arigatou gozaimashita.",
-          "en": "I will, thank you. Thank you very much.",
+          "en": "I'll be careful. Thank you very much.",
           "fr": "Oui, je ferai attention. Merci beaucoup.",
           "note": {
             "en": "「気をつけます」 takes the advice to heart, and 「ありがとうございました」, in the past, thanks the doctor as the consultation ends.",
@@ -5134,13 +5134,13 @@
         },
         "wrong": [
           {
-            "jp": "毎月二十ギガぐらいお使いになると思います。",
-            "kana": "まいつきにじゅうギガぐらいおつかいになるとおもいます。",
-            "en": "I think I graciously use about twenty gigs a month.",
-            "fr": "Je pense que je daigne utiliser une vingtaine de gigas par mois.",
+            "jp": "毎月二十回ぐらい使います。",
+            "kana": "まいつきにじゅっかいぐらいつかいます。",
+            "en": "I use it about twenty times a month.",
+            "fr": "Je m'en sers une vingtaine de fois par mois.",
             "why": {
-              "en": "「お使いになる」 is the clerk's honorific for what you use; said of yourself it praises you: 「使う」.",
-              "fr": "「お使いになる」 est l'honorifique de la vendeuse pour ce que tu utilises ; dit de toi-même, il te flatte : 「使う」."
+              "en": "「二十回」 counts how often you use the phone; she asked how much data, which is measured in 「ギガ」.",
+              "fr": "「二十回」 compte combien de fois tu te sers du téléphone ; elle demandait la quantité de données, qui se mesure en 「ギガ」."
             }
           },
           {
@@ -5157,10 +5157,10 @@
       },
       {
         "them": {
-          "jp": "でしたら、こちらの二十ギガのプランが、月三千円です。契約の期間は決まっていません。",
-          "kana": "でしたら、こちらのにじゅうギガのプランが、つきさんぜんえんです。けいやくのきかんはきまっていません。",
-          "en": "In that case, this twenty-gig plan is three thousand yen a month. There's no fixed contract period.",
-          "fr": "Dans ce cas, ce forfait de vingt gigas est à trois mille yens par mois. Il n'y a pas de durée d'engagement."
+          "jp": "でしたら、こちらの二十ギガのプランが、月三千円です。二年契約のような決まった期間はありません。",
+          "kana": "でしたら、こちらのにじゅうギガのプランが、つきさんぜんえんです。にねんけいやくのようなきまったきかんはありません。",
+          "en": "In that case, this twenty-gig plan is three thousand yen a month. There's no fixed period, like a two-year contract.",
+          "fr": "Dans ce cas, ce forfait de vingt gigas est à trois mille yens par mois. Il n'y a pas de durée imposée, comme un engagement de deux ans."
         },
         "me": {
           "jp": "じゃあ、途中でやめても、お金はかからないんですか。",
@@ -5217,7 +5217,7 @@
             "fr": "「書いてあります」 dit que l'adresse y est déjà écrite : 「〜てある」 décrit un état que quelqu'un a mis en place."
           },
           "alt": [
-            {"jp": "はい、どうぞ。住所も新しいのに変えてあります。", "kana": "はい、どうぞ。じゅうしょもあたらしいのにかえてあります。", "romaji": "hai, douzo. juusho mo atarashii no ni kaete arimasu."}
+            {"jp": "はい、どうぞ。住所は裏に書いてあります。", "kana": "はい、どうぞ。じゅうしょはうらにかいてあります。", "romaji": "hai, douzo. juusho wa ura ni kaite arimasu."}
           ]
         },
         "wrong": [
@@ -5472,13 +5472,13 @@
         },
         "wrong": [
           {
-            "jp": "実は、よくおわかりにならないんです。何曜日に何を出せばいいですか。",
-            "kana": "じつは、よくおわかりにならないんです。なんようびになにをだせばいいですか。",
-            "en": "To be honest, I don't graciously understand. What goes out on which day?",
-            "fr": "À vrai dire, je ne daigne pas bien comprendre. Qu'est-ce que je sors, et quel jour ?",
+            "jp": "はい、分け方はもう教えました。",
+            "kana": "はい、わけかたはもうおしえました。",
+            "en": "Yes, I've already shown you how to sort it.",
+            "fr": "Oui, je vous ai déjà expliqué le tri.",
             "why": {
-              "en": "「おわかりになる」 is the honorific for someone else's understanding; of your own, plain 「わからない」.",
-              "fr": "「おわかりになる」 est l'honorifique pour ce que comprend autrui ; pour toi-même, c'est 「わからない」 tout simplement."
+              "en": "「もう教えました」 says you have already taught her how to sort, when she is the one offering to help you.",
+              "fr": "「もう教えました」 dit que tu lui as déjà expliqué le tri, alors que c'est elle qui te propose son aide."
             }
           },
           {
@@ -5555,7 +5555,7 @@
             "fr": "「寄ってみます」 dit que tu feras un saut à la mairie, 「〜てみる」 en faisant une chose que tu vas tenter."
           },
           "alt": [
-            {"jp": "ありがとうございます。じゃあ、ネットで見てみます。", "kana": "ありがとうございます。じゃあ、ネットでみてみます。", "romaji": "arigatou gozaimasu. jaa, netto de mite mimasu."}
+            {"jp": "ありがとうございます。じゃあ、今日、市役所に行ってみます。", "kana": "ありがとうございます。じゃあ、きょう、しやくしょにいってみます。", "romaji": "arigatou gozaimasu. jaa, kyou, shiyakusho ni itte mimasu."}
           ]
         },
         "wrong": [
@@ -5722,13 +5722,13 @@
         },
         "wrong": [
           {
-            "jp": "足が悪いなら、バスに乗らないほうがいいですよ。",
-            "kana": "あしがわるいなら、バスにのらないほうがいいですよ。",
-            "en": "If your legs are bad, you'd better not take the bus.",
-            "fr": "Si vous avez de mauvaises jambes, mieux vaut ne pas prendre le bus.",
+            "jp": "それなら、美術館は月曜日がお休みですよ。",
+            "kana": "それなら、びじゅつかんはげつようびがおやすみですよ。",
+            "en": "In that case, the museum is closed on Mondays.",
+            "fr": "Dans ce cas, le musée est fermé le lundi.",
             "why": {
-              "en": "「足が悪いなら」 gives his bad legs as the reason not to take the bus, when they are the very reason to take it.",
-              "fr": "「足が悪いなら」 fait de ses mauvaises jambes une raison de ne pas prendre le bus, alors que c'est justement la raison de le prendre."
+              "en": "「月曜日がお休み」 says when the museum is closed, when he has just said the walk is too far for his legs: what helps is the bus.",
+              "fr": "「月曜日がお休み」 dit quand le musée est fermé, alors qu'il vient de dire que la marche est trop longue pour ses jambes : ce qui l'aide, c'est le bus."
             }
           },
           {
@@ -5810,13 +5810,13 @@
         },
         "wrong": [
           {
-            "jp": "いいえ、通り道ではないので、気にしないでください。",
-            "kana": "いいえ、とおりみちではないので、きにしないでください。",
-            "en": "Not at all, it's not on my way, so please don't worry.",
-            "fr": "Pas du tout, ce n'est pas sur mon chemin, ne vous en faites pas.",
+            "jp": "いいえ、美術館には行ったことがありません。",
+            "kana": "いいえ、びじゅつかんにはいったことがありません。",
+            "en": "No, I've never been to the museum.",
+            "fr": "Non, le musée, je ne connais pas.",
             "why": {
-              "en": "「通り道ではないので」 gives a detour as your reason he need not worry, and you have just said you are going his way.",
-              "fr": "「通り道ではないので」 donne un détour comme raison de ne pas s'en faire, alors que tu viens de dire que tu vas dans sa direction."
+              "en": "「行ったことがありません」 answers whether you have been to the museum; he asked whether walking with him is a bother.",
+              "fr": "「行ったことがありません」 répond à la question de savoir si tu connais le musée ; il te demandait si l'accompagner te dérange."
             }
           },
           {
@@ -5900,7 +5900,7 @@
             "fr": "Ouais, première année. Le tennis, ça pourrait me plaire.",
             "why": {
               "en": "「うん」 and 「だよ」 are how you talk to a friend; a first-year speaks politely to an older student of the club.",
-              "fr": "「うん」 et 「だよ」, c'est le ton entre amis ; un nouveau parle poliment à un aîné du club."
+              "fr": "「うん」 et 「だよ」, c'est le ton entre amis ; en première année, on parle poliment à un aîné du club."
             }
           }
         ]
