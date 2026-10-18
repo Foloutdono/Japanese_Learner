@@ -137,20 +137,26 @@ describe('the boarding at 390×844', () => {
     const pill = rect(go())
     expect(Math.abs((word.left + word.right) / 2 - (pill.left + pill.right) / 2)).toBeLessThanOrEqual(1)
 
-    // The wake is witnessed, not caught in flight: the class lives for
-    // the pop's 540 ms of real time, and a starved runner whose settle
-    // overruns that (CI, 2026-10-18) found it already let go. The class
-    // set and the pop started are recorded as they happen instead.
+    // The pick opens the gate and wakes it in the one render: the first
+    // time the gate is seen pressable, it is woken already. The wake used
+    // to be an effect's, a render and a task later, and on a starved
+    // runner the settle(20) came back in between and read the class not
+    // yet set (CI, 2026-10-18). The class set and the pop started are
+    // recorded as they happen, so no read races the 540 ms the class
+    // lives either.
     const gate = go()
     const woke = []
+    let wokenOnOpen = null
     const seen = new MutationObserver(() => {
+      if (wokenOnOpen === null && !gate.disabled) wokenOnOpen = gate.classList.contains('btn-depart--waking')
       if (gate.classList.contains('btn-depart--waking')) woke.push('class')
     })
-    seen.observe(gate, { attributes: true, attributeFilter: ['class'] })
+    seen.observe(gate, { attributes: true, attributeFilter: ['class', 'disabled'] })
     gate.addEventListener('animationstart', e => woke.push(e.animationName))
     await click(screen.container, '[data-level="N4"]')
     expect(go()).toBe(gate)
     expect(go().disabled).toBe(false)
+    expect(wokenOnOpen).toBe(true)
     await expect.poll(() => woke).toContain('class')
     await expect.poll(() => woke).toContain('btn-gate-wake')
     // The pop lets go once it has landed, and the gate stands still.

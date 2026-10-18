@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { useLang } from '../../LangContext'
 
 /** 改札 — the gate you tap your pass on (plan 164, redrawn in plan 225;
@@ -31,12 +31,17 @@ import { useLang } from '../../LangContext'
     region of index.css). */
 export function GateButton({ label, onClick, disabled = false, keys = false, compact = false, arrive = false, arriveDelay = 0, className = '', style, ...rest }) {
   const { t } = useLang()
+  // Woken in the render that first sees the gate pressable, not in an
+  // effect on [disabled]: the effect's setWaking was a render of its own,
+  // a task after the one that opened the gate, so a frame could draw it
+  // open and not yet woken, and a loaded runner read it there (the
+  // boarding's phone test).
   const [waking, setWaking] = useState(false)
-  const was = useRef(disabled)
-  useEffect(() => {
-    if (was.current && !disabled) setWaking(true)
-    was.current = disabled
-  }, [disabled])
+  const [was, setWas] = useState(disabled)
+  if (disabled !== was) {
+    setWas(disabled)
+    if (was && !disabled) setWaking(true)
+  }
   const woke = e => { if (e.animationName === 'btn-gate-wake') setWaking(false) }
   const classes = [
     'btn-depart', 'btn-depart--gate', waking && 'btn-depart--waking',
