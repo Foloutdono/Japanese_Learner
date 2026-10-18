@@ -56,20 +56,6 @@ def save(level: str, pattern: str, sentences: list[dict], version: str) -> None:
         conn.close()
 
 
-def load_level(level: str) -> dict[str, list[dict]]:
-    """{pattern: [{"jp","en"}, ...]} for one level. Absent = not generated."""
-    conn = db_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT pattern, sentences FROM grammar_sentences WHERE level = %s",
-                (level,),
-            )
-            return {row[0]: row[1] for row in cur.fetchall()}
-    finally:
-        conn.close()
-
-
 def existing_patterns(level: str, version: str) -> set[str]:
     """
     Patterns already generated AT THIS VERSION. The generator script skips

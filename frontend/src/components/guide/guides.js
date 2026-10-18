@@ -97,9 +97,3 @@ export function deskStops(gate) {
 // gate's guide plays the first time THAT gate is opened, when the thing
 // it explains is under the learner's thumb.
 export const GUIDE_CHAIN = false
-
-/** The stops of `gate` whose anchors are on the screen right now. */
-export function presentStops(gate) {
-  if (typeof document === 'undefined') return []
-  return (GUIDES[gate] ?? []).filter(stop => document.querySelector(`[data-guide="${stop.anchor}"]`))
-}

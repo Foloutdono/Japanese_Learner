@@ -9,7 +9,6 @@
 // `pass`, the paid one, unlimited, with Max's deck and card figures
 // (domain/paywall.js). So `pass` is drawn as Max; `pro` and `max` are
 // read as themselves the day the store splits the paid plan in two.
-export const CARD_TIERS = Object.freeze(['free', 'pro', 'max'])
 
 /** The card a learner carries, from the credits summary's plan. */
 export function cardTier(credits) {
