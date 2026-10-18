@@ -413,7 +413,14 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # (plan 236): 「…」と博 is と and the name 博, no と博 (賭博, "gambling");
 # and a name takes no pool row read otherwise (博 read ひろし is no 博
 # read はく, "doctor").
-LOCAL_REV = 16
+# 17: readings the practice audit found (plan 247) -- 〜日 cut off a
+# common noun read び (誕生日, 休館日, たんじょう日), 〜会社 がいしゃ (旅行会社,
+# 株式会社), 今日 きょう wherever UniDic gave こんにち before 中, a comma
+# or a noun, 一昨日 おととい, 生年月日 がっぴ; 四月一日 ついたち, 午後四時
+# よじ, 何時ごろ なんじごろ, この前 まえ; 箱, 鉢, 版 and 数 standing alone
+# はこ, はち, はん, かず; 腕時計, 通行止め, ビニール傘, 普段着, 洗濯物 and
+# 洗面所 as their compounds say them (study/reading_context.py).
+LOCAL_REV = 17
 
 
 def analyze_local(text: str, level: str | None = None) -> dict:

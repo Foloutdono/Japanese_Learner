@@ -111,8 +111,89 @@ class ContextRuleTests(unittest.TestCase):
     def test_youbi(self) -> None:
         self.assertEqual(_read(_tok("日曜", "にちよう"), _tok("日", "ひ"))[1], "び")
         self.assertEqual(_read(_tok("何よう", "なによう"), _tok("日", "ひ"))[1], "び")
-        # 日 after anything else keeps UniDic's reading.
-        self.assertEqual(_read(_tok("毎", "まい"), _tok("日", "ひ"))[1], "ひ")
+        # 日 after a prefix keeps UniDic's reading (a common noun's is the
+        # next test's).
+        self.assertEqual(_read(_tok("毎", "まい", "接頭辞", "*", "*", "prefix"), _tok("日", "ひ"))[1], "ひ")
+
+    def test_bi_the_day_of(self) -> None:
+        """〜日 cut off a common noun is び: 誕生日, 発売日, 記念日, and
+        the N5 banks' たんじょう日."""
+        day = lambda reading="ひ": _tok("日", reading, "名詞", "普通名詞", "副詞可能")
+        for head, kind in (("誕生", "サ変可能"), ("たんじょう", "サ変可能"), ("定休", "一般"),
+                           ("リリース", "サ変可能")):
+            for reading in ("ひ", "にち", "じつ"):
+                with self.subTest(head=head, reading=reading):
+                    got = _read(_tok(head, "x", "名詞", "普通名詞", kind), day(reading))
+                    self.assertEqual(got[1], "び")
+        # A date, an adverbial noun's 日 (あさ日, the morning sun) and
+        # the day after の stay as UniDic reads them.
+        self.assertEqual(_read(_tok("あさ", "あさ", "名詞", "普通名詞", "副詞可能"), day())[1], "ひ")
+        self.assertEqual(_read(_tok("母", "はは"), _particle("の"), day())[2], "ひ")
+        self.assertEqual(_read(_tok("十", "じゅう", "名詞", "数詞", "*"), day("にち"))[1], "か")
+        # しゅく日 is 祝日, しゅくじつ; 一昨日 is おととい; 生年月日 がっぴ.
+        self.assertEqual(_read(_tok("しゅく", "しゅく"), day())[1], "じつ")
+        self.assertEqual(_read(_tok("一昨", "いっさく"), day()), ["おとと", "い"])
+        month = _tok("月", "がつ", "名詞", "普通名詞", "助数詞可能")
+        year = _tok("年", "ねん", "名詞", "普通名詞", "助数詞可能")
+        self.assertEqual(_read(_tok("生", "せい"), year, month, day())[2:], ["がっ", "ぴ"])
+
+    def test_gaisha_a_company_of(self) -> None:
+        """〜会社 cut off a common noun is がいしゃ: 旅行会社, 株式会社."""
+        company = lambda: _tok("会社", "かいしゃ")
+        for head in ("旅行", "管理", "株式", "バス"):
+            with self.subTest(head):
+                self.assertEqual(_read(_tok(head, "x"), company())[1], "がいしゃ")
+        # 今日会社を休む: two words, 今日 adverbial. その会社, 会社 alone.
+        self.assertEqual(_read(_tok("今日", "きょう", "名詞", "普通名詞", "副詞可能"), company())[1], "かいしゃ")
+        self.assertEqual(_read(_tok("その", "その", "連体詞", "*", "*", "adnominal"), company())[1], "かいしゃ")
+        self.assertEqual(_read(_tok("大", "だい", "接頭辞", "*", "*", "prefix"), company())[1], "かいしゃ")
+        self.assertEqual(_read(company(), _particle("に"))[0], "かいしゃ")
+
+    def test_a_voiced_half_standing_alone(self) -> None:
+        """箱, 鉢, 版 read as the voiced half of 本箱, 植木鉢, 初版 are はこ,
+        はち, はん where they stand alone; 数 alone is かず."""
+        for word, voiced, plain in (("箱", "ばこ", "はこ"), ("鉢", "ばち", "はち"),
+                                    ("版", "ばん", "はん"), ("数", "すう", "かず")):
+            with self.subTest(word):
+                self.assertEqual(_read(_tok("、", "、", "補助記号"), _tok(word, voiced), _particle("に"))[1], plain)
+                # The tail of a compound keeps it: 本|箱, 参加者|数.
+                self.assertEqual(_read(_tok("本", "ほん"), _tok(word, voiced), _particle("に"))[1], voiced)
+
+    def test_the_voiced_tail_of_a_compound(self) -> None:
+        """腕時計, 通行止め, ビニール傘: UniDic cut them and read the tail
+        as a word alone."""
+        for head, tail, alone, voiced in (("腕", "時計", "とけい", "どけい"),
+                                          ("通行", "止め", "とめ", "どめ"),
+                                          ("ビニール", "傘", "さん", "がさ")):
+            with self.subTest(tail):
+                self.assertEqual(_read(_tok(head, "x"), _tok(tail, alone))[1], voiced)
+                # この時計, the clock: a word of its own.
+                self.assertEqual(_read(_tok("この", "この", "連体詞", "*", "*", "adnominal"),
+                                       _tok(tail, alone))[1], alone)
+        self.assertEqual(_read(_tok("普段", "ふだん", "名詞", "普通名詞", "副詞可能"),
+                               _tok("着", "ちゃく", "接尾辞"))[1], "ぎ")
+        self.assertEqual(_read(_tok("洗濯", "せんたく"), _tok("物", "ぶつ", "接尾辞"))[1], "もの")
+        # 印刷物 is ぶつ, and 一着 the counter.
+        self.assertEqual(_read(_tok("印刷", "いんさつ"), _tok("物", "ぶつ", "接尾辞"))[1], "ぶつ")
+        self.assertEqual(_read(_tok("一", "いち", "名詞", "数詞"), _tok("着", "ちゃく", "接尾辞"))[1], "ちゃく")
+
+    def test_kono_mae_the_other_day(self) -> None:
+        adnominal = lambda s: _tok(s, s, "連体詞", "*", "*", "adnominal")
+        self.assertEqual(_read(adnominal("この"), _tok("前", "ぜん"), _tok("、", "、", "補助記号"))[1], "まえ")
+        # 前首相: the prefix.
+        self.assertEqual(_read(_tok("前", "ぜん", "接頭辞"), _tok("首相", "しゅしょう"))[0], "ぜん")
+
+    def test_kyou_today(self) -> None:
+        """今日 is きょう wherever UniDic gives こんにち before anything but
+        what the present age is said with (今日の, 今日では, 今日に)."""
+        konnichi = lambda: _tok("今日", "こんにち", "名詞", "普通名詞", "副詞可能")
+        for after in (_tok("中", "じゅう", "接尾辞"), _tok("、", "、", "補助記号"),
+                      _tok("三", "さん", "名詞", "数詞"), _tok("ご覧", "ごらん")):
+            with self.subTest(after["surface"]):
+                self.assertEqual(_read(konnichi(), after)[0], "きょう")
+        for after in ("の", "では", "に", "まで"):
+            with self.subTest(after):
+                self.assertEqual(_read(konnichi(), _particle(after))[0], "こんにち")
 
     def test_juu_all_through(self) -> None:
         for before in ("世界", "日本", "一日", "今日", "家", "年"):
@@ -138,6 +219,7 @@ class ContextRuleTests(unittest.TestCase):
         self.assertEqual(_read(_tok("明日", "あす"))[0], "あした")
         self.assertEqual(_read(_tok("私", "わたくし", "代名詞"))[0], "わたし")
         self.assertEqual(_read(_tok("何時", "なんどき"))[0], "なんじ")
+        self.assertEqual(_read(_tok("何時ごろ", "いつごろ"))[0], "なんじごろ")
         self.assertEqual(_read(_tok("上手", "かみて"))[0], "じょうず")
         self.assertEqual(_read(_tok("下手", "しもて"))[0], "へた")
         # A reading that is already right is left: 私 わたし, 日本 にほん.
@@ -618,6 +700,30 @@ class SentenceReadingTests(unittest.TestCase):
         "一月も勉強しました。": "一[ひと] 月[つき] 勉[べん]強[きょう]",
         "一月も終わりました。": "一[いち] 月[がつ] 終[お]",
         "一月に日本へ行きます。": "一[いち] 月[がつ] 日本[にほん] 行[い]",
+        # 〜日, 〜会社 and 今日, cut or read alone by the tokenizer.
+        "誕生日は何月ですか。": "誕[たん]生[じょう] 日[び] 何[なん] 月[がつ]",
+        "結婚記念日に食事をした。": "結[けっ]婚[こん] 記[き]念[ねん] 日[び] 食[しょく]事[じ]",
+        "月曜日がしゅく日のときは開いています。": "月[げつ]曜[よう] 日[び] 日[じつ] 開[ひら]",
+        "一昨日、駅で会った。": "一昨[おとと] 日[い] 駅[えき] 会[あ]",
+        "書類に生年月日を書いてください。": "書[しょ]類[るい] 生[せい] 年[ねん] 月[がっ] 日[ぴ] 書[か]",
+        "母の日に花を買った。": "母[はは] 日[ひ] 花[はな] 買[か]",
+        "旅行会社で働いています。": "旅[りょ]行[こう] 会社[がいしゃ] 働[はたら]",
+        "このしょるいは今日中に出してください。": "今日[きょう] 中[じゅう] 出[だ]",
+        # And what the exam papers and the comprehension texts showed.
+        "四月一日から変わります。": "四[し] 月[がつ] 一日[ついたち] 変[か]",
+        "午後四時に来てください。": "午[ご]後[ご] 四[よ] 時[じ] 来[き]",
+        "箱に詰めておくから。": "箱[はこ] 詰[つ]",
+        "本箱を買った。": "本[ほん]箱[ばこ] 買[か]",
+        "腕時計が出てきた。": "腕[うで] 時計[どけい] 出[で]",
+        "この時計は高い。": "時計[とけい] 高[たか]",
+        "普段着でお越しください。": "普[ふ]段[だん] 着[ぎ] 越[こ]",
+        "洗濯物を干した。": "洗[せん]濯[たく] 物[もの] 干[ほ]",
+        "この前、会った。": "前[まえ] 会[あ]",
+        "道路が通行止めになる。": "道[どう]路[ろ] 通[つう]行[こう] 止[ど]",
+        "ビニール傘を借りる。": "傘[がさ] 借[か]",
+        "数が少なかった。": "数[かず] 少[すく]",
+        "一つ前の版で参加する。": "一[ひと] 前[まえ] 版[はん] 参[さん]加[か]",
+        "土曜日の美術展、何時ごろ待ち合わせる？": "土[ど]曜[よう] 日[び] 美[び]術[じゅつ] 展[てん] 何[なん]時[じ] 待[ま] 合[あ]",
     }
 
     def test_sentences(self) -> None:

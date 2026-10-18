@@ -351,7 +351,8 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
 
     if ctr_surface in ("時", "時間"):
         if cls == 4:
-            return _swap_tail(n_read, "よん", "よ"), c_read
+            # UniDic gives the 4 as よん, or as し after 午前/午後.
+            return _swap_tail(_swap_tail(n_read, "よん", "よ"), "し", "よ"), c_read
         if cls == 9:
             return _swap_tail(n_read, "きゅう", "く"), c_read
         if cls == 7 and ctr_surface == "時":
@@ -368,7 +369,7 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
         return None
 
     if ctr_surface in ("人", "年", "円") and cls == 4:
-        return _swap_tail(n_read, "よん", "よ"), c_read
+        return _swap_tail(_swap_tail(n_read, "よん", "よ"), "し", "よ"), c_read
 
     return None
 
@@ -461,10 +462,17 @@ _WHOLE = {
     "何日": (None, "なんにち"),
     "何年": (None, "なんねん"),
     "何曜日": (None, "なんようび"),
+    # One token with ごろ, read いつ: the hour asked, as 何時 is.
+    "何時ごろ": (None, "なんじごろ"),
+    "何時頃": (None, "なんじごろ"),
     # かみて / しもて are the stage's sides; the words taught are じょうず, へた.
     "上手": ("かみて", "じょうず"),
     "下手": ("しもて", "へた"),
 }
+
+# What 今日 may stand before when it is こんにち, the present age:
+# 今日の日本, 今日では, 今日に至るまで. Before anything else it is きょう.
+_KONNICHI_BEFORE = {"の", "で", "では", "に", "まで", "を", "は", "も", "が"}
 
 # A spelling UniDic's lighter dictionary gets wrong at the head of an
 # inflecting word: 丸い マリイ. (head of the surface, wrong, right)
@@ -540,6 +548,15 @@ def _stands_alone(tokens: list[dict], i: int, after_adjectival: bool = False) ->
     return True
 
 
+def _compound_head(token: dict) -> bool:
+    """Can `token` be the first half of a compound noun with the next
+    one: a common noun (誕生, 旅行, リリース), not adverbial (今日, あさ)
+    and not a number or a counter."""
+    tags = token.get("tags") or ("", "", "")
+    return (token.get("pos") == "noun" and tags[:2] == ("名詞", "普通名詞")
+            and tags[2] in ("一般", "サ変可能") and not _is_numeral(token["surface"]))
+
+
 # One-kanji nouns UniDic reads by a reading the word alone never has in
 # the app's sentences: (UniDic's, the word's).
 _NOUN_ALONE = {
@@ -547,6 +564,31 @@ _NOUN_ALONE = {
     "露": ("ろ", "つゆ"),
     "米": ("べい", "こめ"),
     "間": ("かん", "あいだ"),
+    # Read as the second half of a compound (本箱, 植木鉢, 初版), voiced,
+    # where the word stands alone: 箱に詰める, 鉢を移す, 後に出た版.
+    "箱": ("ばこ", "はこ"),
+    "鉢": ("ばち", "はち"),
+    "版": ("ばん", "はん"),
+    # 数が少ない: the number, かず. すう is the prefix (数日), a token
+    # of its own that never stands alone.
+    "数": ("すう", "かず"),
+}
+
+# The second half of a compound that UniDic cut off and read as a word
+# alone, unvoiced, where the compound voices it: 腕時計 うでどけい,
+# 通行止め つうこうどめ, ビニール傘 ビニールがさ. Only after a common
+# noun (_compound_head), so a word of its own (この時計) is untouched.
+_RENDAKU_TAIL = {"時計": ("とけい", "どけい"), "止め": ("とめ", "どめ"),
+                 "傘": ("かさ", "がさ")}
+
+# The few compounds whose second half UniDic cut off and gave another
+# word's reading: 普段着 is ふだんぎ (着 ちゃく is the counter, 一着),
+# 洗濯物 せんたくもの (ぶつ is 印刷物's), 洗面所 せんめんじょ.
+_COMPOUND_TAIL = {
+    ("普段", "着"): "ぎ", ("作業", "着"): "ぎ", ("仕事", "着"): "ぎ",
+    ("運動", "着"): "ぎ", ("練習", "着"): "ぎ", ("防寒", "着"): "ぎ",
+    ("洗濯", "物"): "もの",
+    ("洗面", "所"): "じょ",
 }
 
 
@@ -605,6 +647,14 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
                 out[i] = right
             continue
 
+        # 今日 is こんにち, "these days", only where a sentence speaks of
+        # the present age: 今日の社会, 今日では, 今日に至る. UniDic gives
+        # it before 中 (今日中, きょうじゅう), a comma, a number or a noun
+        # too, where it is always today, きょう.
+        if s == "今日" and r == "こんにち" and nxt(i) not in _KONNICHI_BEFORE:
+            out[i] = "きょう"
+            continue
+
         # 言う read ゆう: every form of 言 is い-. 込む is never ごむ on
         # its own (and 〜込む compounds are one token, こむ).
         head = next(((w, ok) for c, w, ok in _HEADS if s.startswith(c) and r.startswith(w)), None)
@@ -630,6 +680,51 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
         # 日曜日: 日 after 曜 is び.
         if s == "日" and r == "ひ" and (prev(i).endswith("曜") or prev(i).endswith("よう")):
             out[i] = "び"
+            continue
+
+        # 〜日, "the day of": 誕生日, 発売日, 記念日, 休館日 are び. UniDic
+        # cuts a compound it does not list in two and reads the 日 it cut
+        # off as the word alone, ひ or にち; the compounds it lists (平日,
+        # 祝日, 夕日, 前日) are one token and never reach here. Only after
+        # a common noun: a numeral's 日 is a date (三日), an adverbial
+        # noun's is a word of its own (あさ日, the morning sun). The kana
+        # spellings the N5 banks use are the same words: たんじょう日,
+        # and しゅく日, which is 祝日, しゅくじつ. 一昨日 is おととい, and
+        # 生年月日 and 年月日 end がっぴ.
+        if s == "日" and r in ("ひ", "にち", "じつ") and i > 0:
+            if prev(i) == "一昨":
+                out[i - 1], out[i] = "おとと", "い"
+                continue
+            if prev(i) == "月" and i > 1 and surf[i - 2] == "年":
+                out[i - 1], out[i] = "がっ", "ぴ"
+                continue
+            if _compound_head(tokens[i - 1]):
+                out[i] = "じつ" if prev(i) == "しゅく" else "び"
+                continue
+
+        # 〜会社: 旅行会社, 管理会社, 株式会社 are がいしゃ, voiced in the
+        # compound; UniDic reads every 会社 it cut off as the word alone.
+        # Only straight after a common noun: in 今日会社を休む the two
+        # are words of their own, and 今日 is adverbial.
+        if s == "会社" and r == "かいしゃ" and i > 0 and _compound_head(tokens[i - 1]):
+            out[i] = "がいしゃ"
+            continue
+
+        # 腕時計, 通行止め, ビニール傘: the voiced half of a compound
+        # UniDic did not list (傘 it also reads さん there).
+        if s in _RENDAKU_TAIL and i > 0 and _compound_head(tokens[i - 1]):
+            alone, voiced = _RENDAKU_TAIL[s]
+            if r in (alone, "さん"):
+                out[i] = voiced
+                continue
+        if (prev(i), s) in _COMPOUND_TAIL:
+            out[i] = _COMPOUND_TAIL[(prev(i), s)]
+            continue
+
+        # この前, "the other day": まえ. UniDic gives the prefix ぜん
+        # (前首相) when a comma follows.
+        if s == "前" and r == "ぜん" and prev(i) in ("この", "その", "あの", "どの"):
+            out[i] = "まえ"
             continue
 
         # 〜中 "all through".
@@ -764,6 +859,14 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             continue
         if _measures_a_span(tokens, i + 1):
             out[i - 1], out[i] = "ひと", "つき"
+
+    # The first of a month: 四月一日 is しがつついたち. UniDic reads a 一日
+    # after a month in kanji as one token, いちにち, the span; last, as
+    # the pass above that reads a numeral and its counter in one token
+    # would read it いちにち again.
+    for i in range(2, n):
+        if surf[i] == "一日" and out[i] == "いちにち" and surf[i - 1] == "月" and _is_numeral(surf[i - 2]):
+            out[i] = "ついたち"
     return out
 
 
