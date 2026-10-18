@@ -38,10 +38,11 @@
 import logging
 import random
 import re
+from functools import partial
 
 from content.grammar_points_data import get_grammar_points, gloss
 from study.exam_blueprint import LEVEL_BLUEPRINT
-from study.exam_topics import READING_TOPICS, pick_topics
+from study.exam_topics import TopicDeck, dealt_order
 from study.exam_validation import validate_passage_length, validate_kanji_gate
 from study.exam_gen_utils import GenerationFailed, kanji_instruction, call_llm_json, call_llm_json_batch
 from study.exam_pipeline import generate_paper
@@ -145,8 +146,8 @@ def _validate_fill_item(item, level: str, q_id: str, number: int) -> dict:
 
 
 def _build_grammar_fill_mondai(spec: dict, level: str, points: list[dict], used_patterns: set, rng: random.Random) -> dict:
+    # In the order the paper deals them (_generate_grammar_paper_once).
     candidates = [p for p in points if p["pattern"] not in used_patterns]
-    rng.shuffle(candidates)
 
     questions = []
     pos = 0
@@ -298,7 +299,6 @@ def _validate_star_item(point: dict, item, level: str, q_id: str, number: int, r
 
 def _build_sentence_order_mondai(spec: dict, level: str, points: list[dict], used_patterns: set, rng: random.Random) -> dict:
     candidates = [p for p in points if p["pattern"] not in used_patterns]
-    rng.shuffle(candidates)
 
     questions = []
     pos = 0
@@ -363,14 +363,15 @@ exactly this schema:
 """
 
 
-def _build_cloze_mondai(spec: dict, level: str, rng: random.Random) -> dict:
+def _build_cloze_mondai(spec: dict, level: str, rng: random.Random,
+                        deck: TopicDeck | None = None) -> dict:
     blank_count = spec["count"]
     chars = spec.get("passage_chars", 150)
     # "on any everyday topic" is what the other two prompts in this file
     # DON'T say -- they name real grammar points from the catalog, and
     # they vary because of it. This one had nothing item-specific in it
     # at all; see study/exam_topics.py's header for what that produced.
-    topic = pick_topics(READING_TOPICS, 1, rng)[0]
+    topic = (deck or TopicDeck(f"grammar:{level}", None, rng, {})).deal("reading", 1)[0]
     prompt = _CLOZE_PROMPT.format(level=level, chars=chars, blank_count=blank_count,
                                   allowed_kanji=kanji_instruction(level), topic=topic)
     data = call_llm_json(prompt, task="exam-grammar-cloze")
@@ -467,15 +468,21 @@ def _flatten_grammar_questions(mondai_list: list[dict]) -> list[dict]:
     return out
 
 
-def _generate_grammar_paper_once(level: str, seed: int) -> dict:
-    # Seeded now that the rng also picks the cloze passage's topic
-    # (study/exam_topics.py): two revisions of the same paper must be
-    # asked for different subjects, not left to differ by chance. It
-    # still drives candidate ORDER for the other two mondai, where no
-    # reproducibility is claimed either way.
+def _generate_grammar_paper_once(level: str, seed: int, paper: int | None = None) -> dict:
+    # Seeded so that two revisions of the same paper are asked for
+    # different things, not left to differ by chance. What they are
+    # asked about is dealt by the paper's place (below); the rng draws
+    # it only for a paper without one.
     rng = random.Random(seed)
     specs = _grammar_specs_for_level(level)
-    points = get_grammar_points(level)
+    # The points a paper asks and its cloze's subject are dealt from
+    # the exam's walk (study/exam_topics.py, plan 247): every point is
+    # asked once before any is asked twice, and no two papers in a row
+    # ask one, nor one subject.
+    asked = sum(spec["count"] for spec in specs if spec["type"] in ("grammar-fill", "sentence-order"))
+    points = dealt_order(get_grammar_points(level), f"grammar:{level}", "points", paper, asked, rng)
+    cloze = sum(1 for spec in specs if spec["type"] == "cloze-passage")
+    deck = TopicDeck(f"grammar:{level}", paper, rng, {"reading": cloze})
 
     used_patterns: set = set()
     mondai = []
@@ -491,7 +498,7 @@ def _generate_grammar_paper_once(level: str, seed: int) -> dict:
             elif spec["type"] == "sentence-order":
                 built = _build_sentence_order_mondai(spec, level, points, used_patterns, rng)
             elif spec["type"] == "cloze-passage":
-                built = _build_cloze_mondai(spec, level, rng)
+                built = _build_cloze_mondai(spec, level, rng, deck)
             else:
                 continue
         except (RuntimeError, GenerationFailed) as e:
@@ -526,9 +533,9 @@ def _generate_grammar_paper_once(level: str, seed: int) -> dict:
     }
 
 
-def generate_grammar_paper(level: str, seed: int) -> dict:
+def generate_grammar_paper(level: str, seed: int, paper: int | None = None) -> dict:
     return generate_paper(
-        generate_once=_generate_grammar_paper_once,
+        generate_once=partial(_generate_grammar_paper_once, paper=paper),
         flatten=_flatten_grammar_questions,
         level=level, seed=seed,
         max_attempts=_MAX_GENERATION_ATTEMPTS,

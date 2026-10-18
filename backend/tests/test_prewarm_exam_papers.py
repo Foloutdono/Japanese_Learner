@@ -37,7 +37,7 @@ def stub_generator(monkeypatch):
     well-formed paper and counts its calls."""
     calls = []
 
-    def generate(seed):
+    def generate(seed, paper=None):
         calls.append(seed)
         return {"level": "N5", "sections": []}
 

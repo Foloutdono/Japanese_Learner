@@ -185,7 +185,7 @@ def build(exam_id: str, n: int) -> tuple[str, object, list[str]]:
     _PAPER["id"] = f"{exam_id}#{n}"
     with replaying() as collect:
         try:
-            paper = generate(seed_for(exam_id, n))
+            paper = generate(seed_for(exam_id, n), paper=n)
         except Pending as p:
             return "pending", p, collect.lines
         except exam_gen_utils.GenerationFailed as e:

@@ -246,9 +246,9 @@ def _seed_for(exam_id: str, revision: int) -> int:
     # Deterministic from the id and revision, so those two are the whole
     # reproducibility key — no seed needs to be passed around or stored
     # anywhere else to regenerate/verify a paper later. The revision is
-    # in the hash and not just the row: it is what makes two revisions
-    # of one exam draw different topics from study/exam_topics.py
-    # instead of asking the model for the same thing twice.
+    # in the hash and not just the row, so two revisions are written
+    # from different draws; which subjects each is written on is the
+    # topic deck's, dealt by the revision itself (study/exam_topics.py).
     return int(hashlib.sha256(f"{exam_id}:{revision}".encode()).hexdigest(), 16) % (2**63)
 
 
@@ -316,7 +316,7 @@ def _generation_worker(exam_id: str, revision: int) -> None:
         # part, and an idle-in-transaction connection for its whole
         # duration was the other half of the old synchronous design's
         # cost.
-        paper = generate(seed)
+        paper = generate(seed, paper=revision)
     except LLMUnavailable as e:
         logger.error("Exam generation for %s hit a provider failure: %s", exam_id, e)
         _mark_job_failed(exam_id, str(e), _UNAVAILABLE_COOLDOWN_SECONDS)

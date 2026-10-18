@@ -38,7 +38,10 @@ KIND_META = {
     "listening": ("Listening Practice", "聴解", {"listening-mcq"}),
 }
 
-# id -> (generator_version, kind, level, callable(seed) -> paper).
+# id -> (generator_version, kind, level, callable(seed, paper=k) -> paper),
+# k the paper's place among the exam id's papers (its revision, a
+# seed's number), which the topic deck deals by (study/exam_topics.py's
+# TopicDeck, plan 247).
 # generator_version is stored per row in exam_papers AND filtered on
 # when a paper is served (see routes/exams._select_paper): bumping the string here
 # retires every paper an older generator produced, in one edit, without

@@ -16,6 +16,7 @@
 # repair_answer_balance below, which every generate_*_paper() retry
 # loop now calls before paying for a full LLM regeneration.
 import random
+import re
 
 from study.llm_shared import offending_kanji
 
@@ -193,6 +194,42 @@ def validate_kanji_gate(text: str, level: str) -> list[str]:
     if bad:
         return [f"text contains kanji outside {level}'s allowed set ({bad}): {text[:60]!r}..."]
     return []
+
+
+# ── A key that copies the text ────────────────────────────────
+# Asked what a passage says, a reader can pick the choice that repeats
+# its words and be right without having understood it: the seed papers'
+# keys were the choice copying the most of the passage 42-60% of the
+# time, against 25% for a blind pick (plan 247). The exam words its key
+# in other words and lets the wrong choices reuse the text's. A copy is
+# the longest stretch of a choice the text holds word for word,
+# punctuation and spacing aside; a key gives itself away when it copies
+# COPY_RUN characters or more and COPY_LEAD more than any wrong choice.
+# On the seed papers those keys were what put the share past
+# study/exam_seed.ECHO_TELL: without them every exam id's was inside.
+_NOT_COMPARED = re.compile(r"[\s、。，．・「」『』（）()？！?!…：:〜~＿【】―—\-]")
+COPY_RUN = 6
+COPY_LEAD = 3
+
+
+def copied_run(choice: str, text: str) -> str:
+    """The longest stretch of `choice` that `text` holds word for word."""
+    c, t = _NOT_COMPARED.sub("", choice or ""), _NOT_COMPARED.sub("", text or "")
+    best = ""
+    for i in range(len(c)):
+        j = i + len(best) + 1
+        while j <= len(c) and c[i:j] in t:
+            best = c[i:j]
+            j += 1
+    return best
+
+
+def copied_key(choices: list[str], right: int, text: str) -> str:
+    """What the right choice copies of `text` when that gives it away,
+    else ""."""
+    key = copied_run(choices[right], text)
+    others = max((len(copied_run(c, text)) for i, c in enumerate(choices) if i != right), default=0)
+    return key if len(key) >= COPY_RUN and len(key) >= others + COPY_LEAD else ""
 
 
 def validate_content(questions: list[dict], check_duplicates: bool = True) -> list[str]:

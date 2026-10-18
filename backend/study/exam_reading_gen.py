@@ -25,11 +25,12 @@
 # when no key is configured.
 import logging
 import random
+from functools import partial
 
 from study.exam_blueprint import LEVEL_BLUEPRINT
-from study.exam_topics import OPINION_TOPICS, READING_TOPICS, pick_topics
+from study.exam_topics import TopicDeck
 from study.exam_validation import (
-    passage_length_bounds, validate_passage_length, validate_kanji_gate,
+    copied_key, passage_length_bounds, validate_passage_length, validate_kanji_gate,
 )
 from study.exam_gen_utils import GenerationFailed, kanji_instruction, call_llm_json
 from study.exam_pipeline import generate_paper
@@ -82,7 +83,11 @@ naming anyone at all: わたし (I), 友だち (a friend), 先生 (the teacher),
 男の子/女の子 (a boy/girl) are always safe and need no name at all.
 
 Then write exactly {question_count} multiple-choice questions about the \
-text, each with exactly 4 Japanese answer choices.
+text, each with exactly 4 Japanese answer choices. Say the right choice in \
+other words than the text's, never as a phrase copied out of it: a reader \
+must find it by understanding the text, not by matching its wording. The \
+wrong choices may reuse the text's own words, put together into something \
+the text does not say.
 
 {style_guidance}
 
@@ -219,10 +224,30 @@ def _build_questions(questions_raw: list, level: str, passage_id: str, start_num
     return questions
 
 
+def _copied_keys(questions_raw: list, text: str) -> list[str]:
+    """One error per question whose right choice copies the text
+    (exam_validation.copied_key), worded as what to do about it."""
+    out = []
+    for i, q in enumerate(questions_raw):
+        choices = q.get("choices") if isinstance(q, dict) else None
+        right = q.get("correctIndex") if isinstance(q, dict) else None
+        if not (isinstance(choices, list) and len(choices) == 4 and all(isinstance(c, str) for c in choices)
+                and isinstance(right, int) and 0 <= right < 4):
+            continue
+        run = copied_key(choices, right, text)
+        if run:
+            out.append(f"Question {i + 1}: its right choice copies 「{run}」 word for word from the "
+                       f"text and no wrong choice comes as close, so it can be found by matching "
+                       f"words. Say the right choice in other words that mean the same, and let "
+                       f"the wrong choices reuse words from the text.")
+    return out
+
+
 def _build_one_passage(level: str, mondai_name: str, chars: int, question_count: int,
                         style_guidance: str, topic: str, passage_id: str, start_number: int) -> dict:
     feedback = ""
     last_errors: list[str] = []
+    told_of_copies = False
 
     for attempt in range(_PASSAGE_ATTEMPTS):
         last_attempt = attempt == _PASSAGE_ATTEMPTS - 1
@@ -246,9 +271,12 @@ def _build_one_passage(level: str, mondai_name: str, chars: int, question_count:
         # paper that does not exist costs more than one that leans on a
         # few hard words. Reading practice, which can afford to refuse,
         # treats the same measurement as a gate (routes/reading.py).
+        # A key that copies the text (plan 247) is a fourth kind: told
+        # once, then accepted, so it costs a passage one call at most.
         hard_errors: list[str] = []
         kanji_errors: list[str] = []
         soft_errors: list[str] = []
+        copy_errors: list[str] = []
         if not isinstance(text, str) or not text.strip():
             hard_errors.append("missing textJp")
         else:
@@ -258,6 +286,9 @@ def _build_one_passage(level: str, mondai_name: str, chars: int, question_count:
         if not isinstance(questions_raw, list) or len(questions_raw) != question_count:
             got = len(questions_raw) if isinstance(questions_raw, list) else "n/a"
             hard_errors.append(f"expected {question_count} questions, got {got}")
+        elif isinstance(text, str) and not told_of_copies and not last_attempt:
+            copy_errors.extend(_copied_keys(questions_raw, text))
+            told_of_copies = bool(copy_errors)
 
         if not hard_errors and kanji_errors and last_attempt:
             softened = soften_kanji(text, level)
@@ -269,7 +300,7 @@ def _build_one_passage(level: str, mondai_name: str, chars: int, question_count:
             logger.info("Passage %s: accepted over its vocabulary mix (%s)", passage_id, "; ".join(soft_errors))
             soft_errors = []
 
-        if not hard_errors and not kanji_errors and not soft_errors:
+        if not hard_errors and not kanji_errors and not soft_errors and not copy_errors:
             try:
                 questions = _build_questions(questions_raw, level, passage_id, start_number)
             except GenerationFailed as e:
@@ -278,7 +309,7 @@ def _build_one_passage(level: str, mondai_name: str, chars: int, question_count:
                 continue
             return {"id": passage_id, "textJp": text, "questions": questions}
 
-        last_errors = hard_errors + kanji_errors + soft_errors
+        last_errors = hard_errors + kanji_errors + soft_errors + copy_errors
         feedback = _FEEDBACK_HEADER + "".join(
             f"- {_as_feedback(e, text, chars)}\n" for e in last_errors
         )
@@ -312,15 +343,21 @@ def _passage_question_counts(total: int, questions_per_passage: int) -> list[int
     return [base + (1 if i < remainder else 0) for i in range(passage_count) if base + (1 if i < remainder else 0) > 0]
 
 
-def build_reading_passage_mondai(spec: dict, level: str, rng: random.Random) -> dict:
+def _is_opinion(spec: dict) -> bool:
+    return "主張" in spec["name_jp"]
+
+
+def build_reading_passage_mondai(spec: dict, level: str, rng: random.Random,
+                                 deck: TopicDeck | None = None) -> dict:
     qpp = spec.get("questions_per_passage", 1)
     counts = _passage_question_counts(spec["count"], qpp)
     # The same 主張 test that picks the style guidance picks the topic
     # pool: an opinion passage needs something to hold an opinion ABOUT,
     # and "a note left on the fridge" gives it nothing to argue.
-    is_opinion = "主張" in spec["name_jp"]
+    is_opinion = _is_opinion(spec)
     style_guidance = _STYLE_OPINION if is_opinion else _STYLE_COMPREHENSION
-    topics = pick_topics(OPINION_TOPICS if is_opinion else READING_TOPICS, len(counts), rng)
+    deck = deck or TopicDeck(f"reading:{level}", None, rng, {})
+    topics = deck.deal("opinion" if is_opinion else "reading", len(counts))
 
     passages = []
     next_number = 1
@@ -380,7 +417,16 @@ def _reading_specs_for_level(level: str) -> list[dict]:
     return specs
 
 
-def _generate_reading_paper_once(level: str, seed: int) -> dict:
+def _topic_draws(specs: list[dict]) -> dict[str, int]:
+    """How many subjects one paper deals from each pool: a passage each."""
+    draws = {"reading": 0, "opinion": 0}
+    for spec in specs:
+        passages = len(_passage_question_counts(spec["count"], spec.get("questions_per_passage", 1)))
+        draws["opinion" if _is_opinion(spec) else "reading"] += passages
+    return draws
+
+
+def _generate_reading_paper_once(level: str, seed: int, paper: int | None = None) -> dict:
     # `seed` drives TOPIC selection (study/exam_topics.py). It used to be
     # ignored entirely, on the reasoning that an LLM call is
     # non-deterministic anyway -- true, but it meant the prompt itself
@@ -389,9 +435,14 @@ def _generate_reading_paper_once(level: str, seed: int) -> dict:
     # every time. What the seed buys is not reproducibility (the DB
     # caching in routes/exams.py still provides that); it is that two
     # papers, or two revisions of one paper, are asked for DIFFERENT
-    # things rather than being left to differ by chance.
+    # things rather than being left to differ by chance. Since plan 247
+    # the subjects are dealt by the paper's place, `paper` (TopicDeck):
+    # left to their seeds, papers in a row drew one subject.
     rng = random.Random(seed)
     specs = _reading_specs_for_level(level)
+    # One deck for the paper (plan 247): no passage shares a subject
+    # with another, nor with the papers dealt either side of this one.
+    deck = TopicDeck(f"reading:{level}", paper, rng, _topic_draws(specs))
 
     mondai = []
     included_items = 0
@@ -401,7 +452,7 @@ def _generate_reading_paper_once(level: str, seed: int) -> dict:
             logger.warning("Skipping %s (reading-passage): no LLM provider is configured", spec["id"])
             continue
         try:
-            built = build_reading_passage_mondai(spec, level, rng)
+            built = build_reading_passage_mondai(spec, level, rng, deck)
         except GenerationFailed as e:
             logger.warning("Skipping %s: %s", spec["id"], e)
             continue
@@ -429,13 +480,13 @@ def _flatten_reading_questions(mondai_list: list[dict]) -> list[dict]:
     return [q for m in mondai_list for p in m["passages"] for q in p["questions"]]
 
 
-def generate_reading_paper(level: str, seed: int) -> dict:
+def generate_reading_paper(level: str, seed: int, paper: int | None = None) -> dict:
     # check_duplicates=False: promptJp here is a question's own text
     # ("what does the author mean by X?"), not a test-item identity
     # like a vocab/kanji target word -- the real exam itself reuses
     # boilerplate question phrasing across different passages.
     return generate_paper(
-        generate_once=_generate_reading_paper_once,
+        generate_once=partial(_generate_reading_paper_once, paper=paper),
         flatten=_flatten_reading_questions,
         level=level, seed=seed,
         max_attempts=_MAX_GENERATION_ATTEMPTS,

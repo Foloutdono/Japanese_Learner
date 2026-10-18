@@ -140,6 +140,51 @@ class VocabularyMixTests(unittest.TestCase):
         self.assertEqual(passage["textJp"], self._HARD_WORD)
 
 
+class CopiedKeyTests(unittest.TestCase):
+    """A right choice that copies the passage's words, where no wrong
+    choice does, is found by matching rather than reading (plan 247):
+    told to the model once, then accepted."""
+
+    _TEXT = "あ" * 30 + "えきまえのパンやでパンをかいます。" + "あ" * 30
+
+    def _copying(self) -> dict:
+        data = _response(self._TEXT)
+        data["questions"][0]["choices"] = ["えきまえのパンやでパンをかう", "うちでつくる", "なにもたべない", "ともだちにもらう"]
+        return data
+
+    def _build(self, responses):
+        calls = []
+
+        def fake_call(prompt, _user_message="x", **_kwargs):
+            calls.append(prompt)
+            return responses[min(len(calls) - 1, len(responses) - 1)]
+
+        with mock.patch.object(reading, "call_llm_json", side_effect=fake_call):
+            passage = reading._build_one_passage("N5", "内容理解", 80, 1, "STYLE", "a bakery", "p1", 1)
+        return passage, calls
+
+    def test_the_measure(self):
+        from study.exam_validation import copied_key, copied_run
+        self.assertEqual(copied_run("「えきまえ」の、パンや", "えきまえのパンや。"), "えきまえのパンや")
+        choices = ["えきまえのパンやでパンをかう", "うちでつくる", "なにもたべない", "ともだちにもらう"]
+        self.assertEqual(copied_key(choices, 0, self._TEXT), "えきまえのパンやでパンをか")
+        # A wrong choice that reuses the text's words as closely gives nothing away.
+        choices[1] = "えきまえのパンやでパンをうる"
+        self.assertEqual(copied_key(choices, 0, self._TEXT), "")
+
+    def test_a_copied_key_is_told_once(self):
+        passage, calls = self._build([self._copying(), self._copying()])
+        self.assertEqual(len(calls), 2)
+        self.assertIn("copies 「えきまえのパンやでパンをか」", calls[1])
+        self.assertIn("other words", calls[1])
+        # Told once, then accepted: it costs a passage one call at most.
+        self.assertEqual(passage["questions"][0]["choices"][0]["textJp"], "えきまえのパンやでパンをかう")
+
+    def test_the_prompt_asks_for_the_key_in_other_words(self):
+        _passage, calls = self._build([_response(_GOOD)])
+        self.assertIn("other words than the text's", calls[0])
+
+
 class TopicAssignmentTests(unittest.TestCase):
     def test_each_passage_in_a_mondai_gets_its_own_topic(self):
         import random

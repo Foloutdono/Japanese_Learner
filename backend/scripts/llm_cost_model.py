@@ -147,11 +147,13 @@ FEATURES = {
         "what it was.",
     ),
     "exam_generation": (
-        52, 1300, 2000,
-        "~35 calls build one N3 exam set (vocab 6, grammar+reading ~19, "
-        "listening ~10, batched 4-8 items a call). Papers are SHARED -- "
+        55, 1300, 2000,
+        "~37 calls build one N3 exam set (vocab 6, grammar+reading ~21, "
+        "listening ~10, batched 4-8 items a call; a reading passage whose "
+        "key copies the text is asked once more, plan 247: ~2 of 7). "
+        "Papers are SHARED -- "
         "exam_papers rows are picked per revision, not per user -- so the "
-        "cost amortizes. 52 = 1.5 papers a month per user before sharing. "
+        "cost amortizes. 55 = 1.5 papers a month per user before sharing. "
         "A learner asking past every revision starts a new one; "
         "EXAM_PAPERS_DAILY_LIMIT caps those at 5/day (plan 211).",
     ),

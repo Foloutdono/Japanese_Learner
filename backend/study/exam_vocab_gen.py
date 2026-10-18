@@ -34,12 +34,14 @@ import json
 import logging
 import random
 import re
+from functools import partial
 
 from content.vocab_data import VOCAB_BY_LEVEL
 from content.vocab_extras import get_vocab_extras, word_category
 from study.exam_blueprint import LEVEL_BLUEPRINT
 from study.exam_gen_utils import GenerationFailed, make_choices, kanji_instruction, call_llm_json_batch
 from study.exam_pipeline import generate_paper
+from study.exam_topics import dealt_order
 from study.llm_shared import chat, sentence_kanji_ok, llm_configured, offending_kanji
 import study.exam_kanji_gen as exam_kanji_gen
 
@@ -376,8 +378,7 @@ def _pick_batch(candidates: list[dict], pos: int, batch_size: int,
 def _build_vocab_paraphrase_mondai(spec: dict, pool: list[dict], used_words: set, used_prompts: set,
                                     rng: random.Random, level: str) -> dict:
     questions = []
-    candidates = list(pool)
-    rng.shuffle(candidates)
+    candidates = list(pool)  # in the order the paper deals them
     allowed_kanji = kanji_instruction(level)
 
     pos = 0
@@ -474,8 +475,7 @@ def _build_vocab_paraphrase_mondai(spec: dict, pool: list[dict], used_words: set
 def _build_vocab_usage_mondai(spec: dict, pool: list[dict], used_words: set, used_prompts: set,
                                rng: random.Random, level: str) -> dict:
     questions = []
-    candidates = list(pool)
-    rng.shuffle(candidates)
+    candidates = list(pool)  # in the order the paper deals them
     allowed_kanji = kanji_instruction(level)
 
     pos = 0
@@ -576,7 +576,10 @@ def time_limit_min(level: str, items: int) -> int:
     return max(5, round(section["timeLimitMin"] * items / max(1, total_section_items)))
 
 
-def _generate_vocabulary_paper_once(level: str, seed: int) -> dict:
+_WORD_ITEMS = ("kanji-reading", "kanji-orthography", "vocab-context", "vocab-paraphrase", "vocab-usage")
+
+
+def _generate_vocabulary_paper_once(level: str, seed: int, paper: int | None = None) -> dict:
     rng = random.Random(seed)
     vocab_section = _vocab_section(level)
 
@@ -584,10 +587,16 @@ def _generate_vocabulary_paper_once(level: str, seed: int) -> dict:
     # record more than one accepted kanji spelling in the same "kanji"
     # field — see exam_kanji_gen.py's identical note. Excluded from
     # both pools.
-    kanji_pool = [w for w in VOCAB_BY_LEVEL.get(level, []) if w.get("kanji") and "/" not in w["kanji"]]
-    vocab_pool = [w for w in VOCAB_BY_LEVEL.get(level, []) if "/" not in (w.get("kanji") or "")]
-    rng.shuffle(kanji_pool)
-    rng.shuffle(vocab_pool)
+    # The words are dealt from the exam's walk through the level's deck
+    # (study/exam_topics.py, plan 247), the kanji items' and the others'
+    # from one walk, so no two papers in a row ask one word. A paper's
+    # share is twice what it asks: a part passes words over (no example
+    # sentence, a spelling already shown), and those are its own to
+    # pass, not the next paper's.
+    asked = sum(m["count"] for m in vocab_section["mondai"] if m["type"] in _WORD_ITEMS)
+    vocab_pool = dealt_order([w for w in VOCAB_BY_LEVEL.get(level, []) if "/" not in (w.get("kanji") or "")],
+                             f"vocab:{level}", "words", paper, 2 * asked, rng)
+    kanji_pool = [w for w in vocab_pool if w.get("kanji")]
 
     used_words: set = set()
     used_prompts: set = set()
@@ -662,9 +671,9 @@ def _flatten_vocab_questions(mondai_list: list[dict]) -> list[dict]:
     return [q for m in mondai_list for q in m["questions"]]
 
 
-def generate_vocabulary_paper(level: str, seed: int) -> dict:
+def generate_vocabulary_paper(level: str, seed: int, paper: int | None = None) -> dict:
     return generate_paper(
-        generate_once=_generate_vocabulary_paper_once,
+        generate_once=partial(_generate_vocabulary_paper_once, paper=paper),
         flatten=_flatten_vocab_questions,
         level=level, seed=seed,
         max_attempts=_MAX_GENERATION_ATTEMPTS,

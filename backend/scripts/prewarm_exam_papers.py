@@ -113,7 +113,7 @@ def generate_one(exam_id: str) -> tuple[int, int]:
     _version, _kind, _level, generate = EXAM_GENERATORS[exam_id]
     revision = _next_revision(exam_id)
     seed = _seed_for(exam_id, revision)
-    paper = generate(seed)
+    paper = generate(seed, paper=revision)
     if not _store(exam_id, revision, seed, paper):
         raise RuntimeError(f"revision {revision} of {exam_id} was stored by someone else meanwhile")
     return revision, len(flatten_questions(paper))

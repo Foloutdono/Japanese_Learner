@@ -20,9 +20,10 @@
 # exam_vocab_gen.py already skips 語形成 ("no generator yet").
 import logging
 import random
+from functools import partial
 
 from study.exam_blueprint import LEVEL_BLUEPRINT
-from study.exam_topics import LISTENING_TOPICS, pick_topics
+from study.exam_topics import TopicDeck
 from study.exam_gen_utils import GenerationFailed, kanji_instruction, call_llm_json_batch
 from study.exam_pipeline import generate_paper
 from study import voice_engine
@@ -191,7 +192,9 @@ def _build_one_listening_mcq_question(item, level: str, q_id: str, number: int) 
 _SPARE_BATCH_CALLS = 1
 
 
-def _build_listening_mcq_mondai(spec: dict, level: str, rng: random.Random) -> dict:
+def _build_listening_mcq_mondai(spec: dict, level: str, rng: random.Random,
+                                deck: TopicDeck | None = None) -> dict:
+    deck = deck or TopicDeck(f"listening:{level}", None, rng, {})
     questions = []
     calls = 0
     max_calls = -(-spec["count"] // _LISTENING_MCQ_BATCH_SIZE) + _SPARE_BATCH_CALLS
@@ -201,10 +204,10 @@ def _build_listening_mcq_mondai(spec: dict, level: str, rng: random.Random) -> d
         # Fresh topics per CALL, not per mondai: a retry batch re-asks
         # for the items the previous one dropped, and re-sending the
         # subjects that just failed to produce a usable item is the one
-        # thing least likely to work. Drawing from the shared paper-level
-        # rng also keeps the two listening mondai from covering the same
-        # ground as each other.
-        topics = pick_topics(LISTENING_TOPICS, batch_n, rng)
+        # thing least likely to work. Dealing from the paper's deck also
+        # keeps the two listening mondai from covering the same ground
+        # as each other, or as the papers either side (plan 247).
+        topics = deck.deal("listening", batch_n)
         topic_block = "\n".join(f"{i + 1}. {t}" for i, t in enumerate(topics))
         prompt = _LISTENING_MCQ_PROMPT_BATCH.format(
             n=batch_n, level=level, name_jp=spec["name_jp"], allowed_kanji=kanji_instruction(level),
@@ -278,7 +281,7 @@ def _listening_specs_for_level(level: str) -> list[dict]:
     return specs
 
 
-def _generate_listening_paper_once(level: str, seed: int) -> dict:
+def _generate_listening_paper_once(level: str, seed: int, paper: int | None = None) -> dict:
     # `seed` drives topic selection (study/exam_topics.py) -- see
     # exam_reading_gen._generate_reading_paper_once for the full
     # reasoning. It matters more here than anywhere else in the project:
@@ -286,9 +289,12 @@ def _generate_listening_paper_once(level: str, seed: int) -> dict:
     # the model to "vary the topic", which varies topics within one
     # batch of four and not at all between batches or between papers,
     # and the observed result was a paper where nearly every item was
-    # either arranging a meeting time or a scene at a station.
+    # either arranging a meeting time or a scene at a station. Since
+    # plan 247 the subjects are dealt by the paper's place (TopicDeck).
     rng = random.Random(seed)
     specs = _listening_specs_for_level(level)
+    draws = sum(spec["count"] for spec in specs if spec["type"] == "listening-mcq")
+    deck = TopicDeck(f"listening:{level}", paper, rng, {"listening": draws})
 
     mondai = []
     included_items = 0
@@ -312,7 +318,7 @@ def _generate_listening_paper_once(level: str, seed: int) -> dict:
             logger.warning("Skipping %s (listening-mcq): the voice engine is not configured or not answering", spec["id"])
             continue
         try:
-            built = _build_listening_mcq_mondai(spec, level, rng)
+            built = _build_listening_mcq_mondai(spec, level, rng, deck)
         except GenerationFailed as e:
             logger.warning("Skipping %s: %s", spec["id"], e)
             continue
@@ -340,7 +346,7 @@ def _flatten_listening_questions(mondai_list: list[dict]) -> list[dict]:
     return [q for m in mondai_list for q in m["questions"]]
 
 
-def generate_listening_paper(level: str, seed: int) -> dict:
+def generate_listening_paper(level: str, seed: int, paper: int | None = None) -> dict:
     # check_duplicates=False: questionPromptJp here is the spoken
     # comprehension question's own text, not a test-item identity the
     # way a vocab/kanji target word is -- and this generator doesn't
@@ -349,7 +355,7 @@ def generate_listening_paper(level: str, seed: int) -> dict:
     # the first if left on. Same reasoning as exam_reading_gen.py/
     # exam_grammar_gen.py's own check_duplicates=False.
     return generate_paper(
-        generate_once=_generate_listening_paper_once,
+        generate_once=partial(_generate_listening_paper_once, paper=paper),
         flatten=_flatten_listening_questions,
         level=level, seed=seed,
         max_attempts=_MAX_GENERATION_ATTEMPTS,
