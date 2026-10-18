@@ -66,9 +66,10 @@ import { playUi } from '../../lib/audio'
  *       long name keeps the card's width (the conversation station's
  *       record, plan 217).
  *     specimen — optional node drawn between the body and the aside:
- *       the card the platform will ask, small (the desk's line split,
- *       plan 137; components/selection/LinePlatforms.jsx). Only the
- *       desk passes it.
+ *       the card the platform will ask, which a car of the desk's line
+ *       station draws as its face, over its name (plan 251;
+ *       components/selection/LinePlatforms.jsx). Only the desk passes
+ *       it.
  */
 export default function ModeSelector({ modes, onSelect }) {
   const { t } = useLang()
