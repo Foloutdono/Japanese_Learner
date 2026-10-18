@@ -1,4 +1,4 @@
-# The carousel studio (plans 229–229n, 231–235, 237, 247–249b)
+# The carousel studio (plans 229–229n, 231–235, 237, 247–250)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -708,37 +708,45 @@ the screen.
   word only in a word of the level or easier. A score check every ten,
   40 a part.
 
-- **Reply** (返事, plans 249, 249b): the studio's conversations
-  (`content/dialogues.json`), two to a 16:9 video, so six questions at
-  least (a level's odd one rides with the part before it: N4's last
-  has nine), and one to a short: a short is a scene whole, its three
-  questions, and the studio's list holds a short a scene when the
-  9:16 format is picked. Drawn as the thread the owner picked from
-  three (plan 249b): the carousel's Fiche look on washi, the 会話
-  line's band carrying the place and the question's number. A scene's
-  card is the chat's head (a disc, the place, said, what it is, who
+- **Reply** (返事, plans 249, 249b, 250): the 会話 station's own
+  scenes (`backend/content/conversation`, exported as
+  `bank/conversation.json` by `scripts/carousel_bank.py`), six turns
+  each since plan 250, the right reply first in the file and dealt in
+  the carousel's own order. Each line is cut into words as the studio's
+  conversations are, its furigana taken from the bank's hand-written
+  kana (the reading the app teaches: 何時 なんじ, 十分 じゅっぷん, never
+  the cut's guess), and the export fails on a line that would read
+  otherwise. Two scenes to a 16:9 video, twelve questions; one to a
+  short, six, and the studio's list holds a short a scene when the 9:16
+  format is picked. Drawn as the thread the owner picked from three
+  (plan 249b): the carousel's Fiche look on washi, the 会話 line's band
+  carrying the scene's title and the question's number. A scene's card
+  is the chat's head (a disc, the place, said, the scene's title, who
   speaks to you), under "What would you answer?" where it opens a
   short, which has no title card before it (its thumbnail is taken
   there, `stillAt`). Then each turn: their line in a bubble on the
   left, said by speaker A, its words ruled in their line's colour, its
   readings, its romaji at N5 and N4, and what it means; your three
-  replies down the right as dashed drafts, numbered, in the carousel's
-  own order; a timer of seven seconds on a ring in the band, a tick a
-  second (`reply.count` in the Tune panel); the right one sent (green,
-  ticked) and said by speaker B, the others fading; then their line as
-  a reminder, yours in a bubble of its own with what it means, and a
-  note of why the others are wrong (under the thread standing, beside
-  it wide). The next question scrolls the thread up, the foot of your
-  last reply left showing under the band. Short of room, the foot goes
-  first, then the replies widen, then every size steps down together,
-  then a long line is set lean (a tighter bubble, no name over it),
-  and a beginner's replies, last of all, lose their romaji; a test
-  holds every question of every level, in both formats and both
-  languages, inside the safe area and whole. It ends asking the
-  viewer's score (? / 3), then on the carousel's own call to action
-  for the conversation station (`funnel.drawCta`). Speaker A is the
-  app's woman's voice and B its man's, as the 会話 station and the
-  tours set them.
+  replies down the right as dashed drafts, numbered; a timer of seven
+  seconds on a ring in the band, a tick a second (`reply.count` in the
+  Tune panel); the right one sent (green, ticked) and said by speaker
+  B, the others fading; then their line as a reminder, yours in a
+  bubble of its own with what it means, and the bank's note of why it
+  is right (under the thread standing, beside it wide). The next
+  question scrolls the thread up, the foot of your last reply left
+  showing under the band. Japanese is never set under 34 px
+  (`READABLE`): the furigana keep their least size, and a word under
+  them would read smaller than its reading. So short of room the foot
+  goes first, then the replies widen, then every size steps down to
+  that floor, then a long line is set lean (a tighter bubble, no name
+  over it), a beginner's replies lose their romaji, and at N2 and N1
+  the replies, then their line, lose their furigana before anything
+  shrinks further; a test holds every question of every level, in
+  both formats and both languages, inside the safe area and whole. It
+  ends asking the viewer's score (? / 6), then on the carousel's own
+  call to action for the conversation station (`funnel.drawCta`).
+  Speaker A is the app's woman's voice and B its man's, as the 会話
+  station and the tours set them.
 
 **Pick per video.** A level's `--part` walks the deck in its order (a
 quiz's part is a seeded deal), and two parts never share an item;

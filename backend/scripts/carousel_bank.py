@@ -1054,6 +1054,7 @@ def files(deck: dict):
     yield "lookalikes.json", lookalike_file
     dialogue_file = dialogues()
     yield "dialogues.json", dialogue_file
+    yield "conversation.json", conversation()
     trap_file = traps()
     yield "traps.json", trap_file
     yield "index.json", figures(sentences, kana, comprehension, {
@@ -1263,6 +1264,114 @@ def dialogues() -> dict:
             })
         out.append({"id": d["id"], "lv": d["lv"], "place": d["place"], "them": d["them"], "turns": turns})
     return {"rev": REV, "dialogues": out}
+
+
+# ── The station's own conversations (plan 250) ────────────────────
+# The reply videos ask the 会話 station's scenes (content/conversation),
+# six turns each: each line cut into words as the studio's conversations
+# are, its readings held to the hand-written kana the app teaches.
+CONVERSATION = BACKEND / "content" / "conversation"
+_MARKS = set("、。？！…・「」『』（）")
+
+
+def _said(rows: list[list]) -> str:
+    """What a line's rows read: each word's furigana, or its text."""
+    out = []
+    for row in rows:
+        if len(row) > 3 and row[3]:
+            out.append("".join(r or t for t, r in row[3]))
+        else:
+            out.append(row[0])
+    return "".join(c for c in "".join(out) if c not in _MARKS)
+
+
+def _by_kana(rows: list[list], line: dict) -> list[list]:
+    """The rows read as the bank reads the line: each word's furigana
+    taken from the line's own kana (align_deck, the app's furigana), never
+    the cut's guess (何時 is なんじ, 十分 じゅっぷん, 入れます はいれます here).
+    Words a reading runs across are joined into one; a word's romaji is
+    made again from its reading only where that reading changed."""
+    from study.furigana import align_deck
+    from study.romaji import to_romaji
+
+    jp = line["jp"]
+    parts = align_deck(jp, line["kana"])
+    if "".join(p["text"] for p in parts) != jp or "".join(r[0] for r in rows) != jp:
+        return rows
+    spans, at = [], 0
+    for p in parts:
+        spans.append((at, at + len(p["text"]), p["text"], p.get("reading")))
+        at += len(p["text"])
+    bounds, at = [], 0
+    for r in rows:
+        bounds.append((at, at + len(r[0])))
+        at += len(r[0])
+    groups: list[list[int]] = []
+    for i, (start, _) in enumerate(bounds):
+        crossed = any(a < start < b and reading for a, b, _, reading in spans)
+        if groups and crossed:
+            groups[-1].append(i)
+        else:
+            groups.append([i])
+    out = []
+    for g in groups:
+        first = rows[g[0]]
+        if len(g) == 1 and len(first) == 1:
+            out.append(first)
+            continue
+        start, end = bounds[g[0]][0], bounds[g[-1]][1]
+        fu = []
+        for a, b, text, reading in spans:
+            lo, hi = max(a, start), min(b, end)
+            if lo < hi:
+                fu.append([text, reading] if reading else [jp[lo:hi], ""])
+        said = "".join(r or t for t, r in fu)
+        was = "".join(_said([rows[i]]) for i in g)
+        ro = first[2] if len(g) == 1 and said == was else to_romaji(said)
+        row = [jp[start:end], first[1], ro, fu if any(r for _, r in fu) else 0]
+        while row[-1] == 0:
+            row.pop()
+        out.append(row)
+    return out
+
+
+def conversation_rows(line: dict, level: str, where: str, misread: list[str]) -> list[list]:
+    """A line's rows; where they still read it otherwise than its kana, the
+    line is reported, never shipped with a reading the app does not teach."""
+    rows = _by_kana(_reread(_honorific(text_rows(line["jp"], level))), line)
+    kana = "".join(c for c in line["kana"] if c not in _MARKS)
+    if _said(rows) != kana:
+        misread.append(f"{where}: {line['jp']} reads {_said(rows)}, the bank says {kana}")
+    return rows
+
+
+def conversation() -> dict:
+    """The station's scenes as a reply video asks them: the place (its
+    title as the name it goes by), who speaks, and each turn's line, the
+    three replies (the right one first, the video deals them), what the
+    right one means and why it is right."""
+    out = []
+    misread: list[str] = []
+    for level in LEVELS:
+        for sc in json.loads((CONVERSATION / f"{level}.json").read_text(encoding="utf-8")):
+            turns = []
+            for n, t in enumerate(sc["turns"], 1):
+                where = f"{sc['id']} turn {n}"
+                turns.append({
+                    "them": {"rows": conversation_rows(t["them"], level, f"{where} them", misread), "en": t["them"]["en"], "fr": t["them"]["fr"]},
+                    "choices": [conversation_rows(r, level, f"{where} reply {k}", misread) for k, r in enumerate([t["me"], *t["wrong"]])],
+                    "right": 0,
+                    "reply": {"en": t["me"]["en"], "fr": t["me"]["fr"]},
+                    "why": {"en": t["me"]["note"]["en"], "fr": t["me"]["note"]["fr"]},
+                })
+            out.append({
+                "id": sc["id"], "lv": level,
+                "place": {"jp": sc["place"]["jp"], "en": sc["title"]["en"], "fr": sc["title"]["fr"]},
+                "them": sc["them"], "turns": turns,
+            })
+    if misread:
+        raise SystemExit("the cut reads these lines otherwise than the bank:\n  " + "\n  ".join(misread))
+    return {"rev": REV, "scenes": out}
 
 
 def traps() -> dict:

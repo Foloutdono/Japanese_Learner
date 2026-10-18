@@ -229,7 +229,7 @@ function planOf(kind, banks, { lang = 'en', level = 'N5', part = 1, theme = null
     return { ...base, title: S.title.quiz(level, ids ? 0 : part), items: qs.map(q => ({ type: 'q', q })) }
   }
   if (kind === 'reply') {
-    const all = (banks['dialogues.json']?.dialogues || []).filter(d => d.lv === level)
+    const all = scenesOf(banks).filter(d => d.lv === level)
     // A short is one scene (plan 249b): its part is the scene's number.
     if (format === 'short' && !ids) {
       const d = all[part - 1]
@@ -242,13 +242,14 @@ function planOf(kind, banks, { lang = 'en', level = 'N5', part = 1, theme = null
 }
 
 // ── 返事 — what would you answer? (plan 249) ─────────────────────
-// A reply video deals the studio's conversations (content/dialogues.json):
-// the other person's line said, three replies, a timer, then yours said
-// and why the others are wrong. Two conversations a video, six questions;
-// its short, one conversation (plan 249b).
+// A reply video asks the 会話 station's own scenes (plan 250: the app's
+// content/conversation, six turns each, bank/conversation.json): the
+// other person's line said, three replies, a timer, then yours said and
+// why it is right. Two scenes a 16:9 video, twelve questions; a short,
+// one scene, six (plan 249b).
 
-/** A level's conversations in parts of two; a last part under six
- *  questions rides with the one before it, so no video asks fewer. */
+/** A level's scenes in parts of two; a last part under six questions
+ *  rides with the one before it, so no video asks fewer. */
 export function replyParts(all) {
   const out = []
   for (let i = 0; i < all.length; i += PART.reply) out.push(all.slice(i, i + PART.reply))
@@ -257,7 +258,10 @@ export function replyParts(all) {
   return out
 }
 
-/** A conversation as a video's items: its scene, then a question a turn,
+/** The station's scenes (plan 250). */
+const scenesOf = banks => banks['conversation.json']?.scenes || []
+
+/** A scene as a video's items: its card, then a question a turn,
  *  the replies dealt in the carousel's own order (sources.dialoguePlan). */
 function replyItems(d, lang) {
   const tr = o => weldIf(lang, o?.[lang] || o?.en || '')
@@ -287,7 +291,7 @@ const QUIZ_SHARE = { sentence: 0.5, word: 0.3, kanji: 0.25 }
 const LIST_KIND = { vocab: '語彙', kanji: '漢字', quiz: '試験', grammar: '文法', theme: '主題', reply: '返事' }
 
 /** The bank files a level's list reads. */
-export const longListFiles = level => [`words-${level}.json`, `kanji-${level}.json`, `${level}.json`, `grammar-${level}.json`, 'themes.json', 'dialogues.json']
+export const longListFiles = level => [`words-${level}.json`, `kanji-${level}.json`, `${level}.json`, `grammar-${level}.json`, 'themes.json', 'conversation.json']
 
 /** The videos a level can make: its vocabulary and kanji parts, its
  *  quiz's parts, each grammar point, each theme. */
@@ -314,7 +318,7 @@ export function longItems(banks, level, lang = 'en', format = 'long') {
   for (let p = 1; p <= quizParts; p++) out.push({ id: `quiz:${p}`, kind: 'quiz', jp: `${LIST_KIND.quiz} ${p}`, sub: S.title.quiz(level, p), tag: S.count.quiz(PART.quiz) })
   for (const L of banks[`grammar-${level}.json`]?.lessons || []) out.push({ id: `grammar:${L.p}`, kind: 'grammar', jp: L.p, sub: weldIf(lang, L[lang] || L.en), tag: LIST_KIND.grammar })
   // The level's conversations, two a video (plan 249); a short, one (plan 249b).
-  const talks = (banks['dialogues.json']?.dialogues || []).filter(d => d.lv === level)
+  const talks = scenesOf(banks).filter(d => d.lv === level)
   const groups = format === 'short' ? talks.map(d => [d]) : replyParts(talks)
   groups.forEach((ds, i) => {
     const sub = format === 'short' ? `${ds[0].place.jp} · ${weldIf(lang, ds[0].place[lang] || ds[0].place.en)}` : ds.map(d => d.place.jp).join('、')
@@ -346,7 +350,7 @@ export function longFiles(id, level) {
   if (kind === 'vocab') return [`words-${level}.json`, ...easier.map(lv => `${lv}.json`)]
   if (kind === 'kanji') return [`kanji-${level}.json`]
   if (kind === 'grammar') return [`grammar-${level}.json`, ...LEVELS.map(lv => `words-${lv}.json`)]
-  if (kind === 'reply') return ['dialogues.json']
+  if (kind === 'reply') return ['conversation.json']
   return [`${level}.json`, `words-${level}.json`, `kanji-${level}.json`]
 }
 
@@ -1797,6 +1801,7 @@ const CTA_FMT = {
   wide: { id: 'wide', fit: 'normal', w: W, h: H, safe: { t: 70, r: 160, b: 70, l: 160 } },
 }
 const PEEK = 110 // how much of your last reply shows under the band
+const READABLE = 34 // the least a Japanese line is set at, its furigana's own least beside it
 const STEPS = [1, 0.92, 0.84, 0.76, 0.68, 0.6]
 const RIM = 28 // a bubble's tail, under it
 
@@ -1878,11 +1883,11 @@ function capsAt(ctx, str, x, y, color, align = 'left') {
 /** A speech bubble laid out: who speaks, the line (its words ruled in
  *  their line's colour), what it means; drawn at (x, y), its tail on the
  *  speaker's side. Yours (`me`) stands right, in the green of a reply sent. */
-function bubbleOf(ctx, p, rows, { tr = null, who = null, w, z, romaji = false, script = 'furigana', pad = SP[5], lines = 3, me = false, tail = true, trSizes = [FS.body, FS.sm], foot = false }) {
+function bubbleOf(ctx, p, rows, { tr = null, who = null, w, z, min = Math.round(z * 0.7), romaji = false, script = 'furigana', pad = SP[5], lines = 3, me = false, tail = true, trSizes = [FS.body, FS.sm], trLines = 3, foot = false }) {
   const inner = w - pad * 2
-  const L = layoutSentence(ctx, rows, { max: z, min: Math.round(z * 0.7), maxW: inner, maxLines: lines, script, romaji, rules: true, gap: romaji ? 0.22 : 0.06, fam: 'jp', weight: 700 })
+  const L = layoutSentence(ctx, rows, { max: z, min: Math.min(z, min), maxW: inner, maxLines: lines, script, romaji, rules: true, gap: romaji ? 0.22 : 0.06, fam: 'jp', weight: 700 })
   const nameH = who ? FS.caption * 1.25 + SP[3] : 0
-  const T = tr ? fit(ctx, tr, { weight: 500, sizes: trSizes, maxW: inner, maxLines: 3, lh: 1.22, balanced: false }) : null
+  const T = tr ? fit(ctx, tr, { weight: 500, sizes: trSizes, maxW: inner, maxLines: trLines, lh: 1.22, balanced: false }) : null
   const box = pad * 2 + nameH + L.h + (T ? SP[4] + paragraphH(T, 1.22) : 0)
   const lw = Math.max(...L.lines.map(l => L.lineW(l)))
   return {
@@ -1922,14 +1927,14 @@ function bubbleOf(ctx, p, rows, { tr = null, who = null, w, z, romaji = false, s
 }
 /** Your three replies, as drafts down the right: dashed and numbered
  *  while you choose; then the right one sent, the others fading. */
-function draftsOf(ctx, p, choices, { w, z, romaji, tight = false }) {
+function draftsOf(ctx, p, choices, { w, z, min = Math.round(z * 0.7), romaji, tight = false, script = 'furigana', lines = 2 }) {
   const r = 28
   const gap = SP[3]
   const vp = tight ? SP[3] : SP[4]
   const rows = choices.map(rs => {
-    const L = layoutSentence(ctx, rs, { max: z, min: Math.round(z * 0.7), maxW: w - SP[5] * 2 - r * 2 - SP[4], maxLines: 2, script: 'furigana', romaji, rules: false, gap: romaji ? 0.22 : 0.06, fam: 'jp', weight: 700 })
+    const L = layoutSentence(ctx, rs, { max: z, min: Math.min(z, min), maxW: w - SP[5] * 2 - r * 2 - SP[4], maxLines: lines, script, romaji, rules: false, gap: romaji ? 0.22 : 0.06, fam: 'jp', weight: 700 })
     const lw = Math.max(...L.lines.map(l => L.lineW(l)))
-    return { L, h: L.h + vp, bw: Math.min(w, lw + SP[5] * 2 + r * 2 + SP[4]), cut: L.lines.length > 2 }
+    return { L, h: L.h + vp, bw: Math.min(w, lw + SP[5] * 2 + r * 2 + SP[4]), cut: L.lines.length > lines }
   })
   return {
     h: rows.reduce((a, x) => a + x.h, 0) + gap * (rows.length - 1),
@@ -2025,45 +2030,55 @@ function threadLayout(ctx, p, S, it, g, peek) {
   if (byKey[key]) return byKey[key]
   const room = g.bottom - g.band
   const askH = g.stack ? 0 : FS.caption * 1.3 + SP[4]
-  // The furigana keep their least size, so a long line at the last
-  // steps is set lean (a tighter bubble, no name over it: the scene's
-  // card said who), and a beginner's replies, last of all, lose their
-  // romaji (their line keeps it).
-  const tries = STEPS.flatMap(s => (peek ? [true, false] : [false]).flatMap(foot => [false, true].map(wider => ({ s, foot, wider }))))
-  for (const s of [0.68, 0.6, 0.54]) tries.push({ s, foot: false, wider: true, lean: true })
-  if (it.romaji) for (const s of [0.68, 0.6, 0.54]) tries.push({ s, foot: false, wider: true, lean: true, bare: true })
+  // Japanese is never set under READABLE: the furigana keep their least
+  // size, and a word under them would read smaller than its reading. So
+  // past the steps, a long line is set lean (a tighter bubble, no name
+  // over it: the scene's card said who), then a beginner's replies lose
+  // their romaji, then the replies their furigana and last their line's
+  // (a reader of long lines, N2 and N1, reads the kanji), never the size.
+  const zThem = g.stack ? FS.title : FS.heading
+  const zMine = g.stack ? FS.lead : FS.title
+  const above = s => zMine * s >= READABLE - 0.5 && zThem * s >= READABLE - 0.5
+  const tries = STEPS.filter(above).flatMap(s => (peek ? [true, false] : [false]).flatMap(foot => [false, true].map(wider => ({ s, foot, wider }))))
+  const last = STEPS.filter(above).slice(-3)
+  for (const s of last) tries.push({ s, wider: true, lean: true })
+  if (it.romaji) for (const s of last) tries.push({ s, wider: true, lean: true, bare: true })
+  for (const s of STEPS.filter(above)) tries.push({ s, wider: true, lean: true, bare: true, plain: 1 })
+  for (const s of STEPS.filter(above)) tries.push({ s, wider: true, lean: true, bare: true, plain: 2 })
   let q = null
-  for (const { s, foot, wider, lean = false, bare = false } of tries) {
+  for (const { s, foot = false, wider, lean = false, bare = false, plain = 0 } of tries) {
     const { w, tw, rx, dw } = columns(g, wider)
     const top = foot ? PEEK : 0
     const pad = lean ? SP[3] : s >= 0.84 ? SP[5] : SP[4]
     const gap = lean ? SP[4] : SP[5]
-    const trSizes = [FS.body, FS.sm].map(z => z * Math.max(0.85, s))
-    const them = bubbleOf(ctx, p, it.them.rows, { tr: it.them.tr, who: lean ? null : it.who, w: tw, z: (g.stack ? FS.title : FS.heading) * s, romaji: it.romaji, pad, trSizes })
-    const drafts = draftsOf(ctx, p, it.choices, { w: dw, z: (g.stack ? FS.lead : FS.title) * s, romaji: it.romaji && !bare, tight: lean })
+    // Lean, what it means takes a fourth line, a size down, before anything is cut.
+    const trSizes = (lean ? [FS.body, FS.sm, FS.caption] : [FS.body, FS.sm]).map(z => z * Math.max(0.85, s))
+    const them = bubbleOf(ctx, p, it.them.rows, { tr: it.them.tr, who: lean ? null : it.who, w: tw, z: zThem * s, min: READABLE, romaji: it.romaji && plain < 2, script: plain >= 2 ? 'kanji' : 'furigana', pad, trSizes, trLines: lean ? 4 : 3, lines: plain ? 4 : 3 })
+    const drafts = draftsOf(ctx, p, it.choices, { w: dw, z: zMine * s, min: READABLE, romaji: it.romaji && !bare, tight: lean, script: plain ? 'kanji' : 'furigana', lines: plain ? 3 : 2 })
     const total = g.stack ? top + gap + them.h + gap + drafts.h : Math.max(SP[6] + them.h, top + gap + askH + drafts.h)
-    q = { s, foot, them, drafts, total, w, tw, rx, dw, top, gap }
+    q = { s, foot, them, drafts, total, w, tw, rx, dw, top, gap, plain }
     if (total <= room && !them.cut && !drafts.cut) break
   }
   // The answer: their line shrunk to a reminder (the first to go short
   // of room), yours in its bubble, what it means, and why: under it
-  // standing, beside the thread wide.
+  // standing, beside the thread wide. Yours keeps its furigana while it
+  // can, at a size that reads, as the question's did.
   let a = null
-  const answers = STEPS.flatMap(s => [false, true].map(lean => ({ s, lean })))
+  const answers = [false, true].flatMap(plain => STEPS.filter(s => zThem * s >= READABLE - 0.5).flatMap(s => [false, true].map(lean => ({ s, lean, plain }))))
   const lw = g.stack ? q.w : q.tw
-  for (const { s, lean } of answers) {
+  for (const { s, lean, plain } of answers) {
     const ns = [FS.body, FS.sm, FS.caption].map(z => z * Math.max(0.85, s))
     const pad = lean ? SP[3] : s >= 0.84 ? SP[5] : SP[4]
-    const trSizes = [FS.body, FS.sm].map(z => z * Math.max(0.85, s))
-    const you = bubbleOf(ctx, p, it.choices[it.right], { tr: it.reply, who: S.you, w: lw * 0.9, z: (g.stack ? FS.title : FS.heading) * s, romaji: it.romaji, me: true, pad, trSizes })
+    const trSizes = (lean ? [FS.body, FS.sm, FS.caption] : [FS.body, FS.sm]).map(z => z * Math.max(0.85, s))
+    const you = bubbleOf(ctx, p, it.choices[it.right], { tr: it.reply, who: S.you, w: lw * 0.9, z: zThem * s, min: READABLE, romaji: it.romaji && !plain, script: plain ? 'kanji' : 'furigana', me: true, pad, trSizes, trLines: lean ? 4 : 3, lines: plain ? 4 : 3 })
     const note = noteOf(ctx, p, S.whyOne, it.why, { w: g.stack ? q.w : q.dw, sizes: ns })
     let fits = false
     for (const back of [true, false]) {
-      const b = back ? bubbleOf(ctx, p, it.them.rows, { w: lw * 0.8, z: FS.body * Math.max(0.85, s), pad: SP[4], lines: 2 }) : null
+      const b = back ? bubbleOf(ctx, p, it.them.rows, { w: lw * 0.8, z: FS.body * Math.max(0.85, s), min: READABLE, script: plain ? 'kanji' : 'furigana', pad: SP[4], lines: 2 }) : null
       const thread = SP[5] + (b ? b.h + SP[4] : 0) + you.h
       const total = g.stack ? thread + SP[5] + note.h : Math.max(thread, SP[6] + note.h)
       a = { back: b, you, note, total }
-      fits = total <= room && !you.cut && !note.cut
+      fits = total <= room && !you.cut && !note.cut && !b?.cut
       if (fits) break
     }
     if (fits) break
@@ -2190,15 +2205,15 @@ function drawThreadScene(ctx, p, S, plan, d, k, fade, g) {
   const opens = plan.format === 'short' && plan.items.indexOf(d) === 0
   const hook = opens ? fit(ctx, S.replyHook, { weight: 900, fam: 'serif', sizes: [FS.display * 0.8, FS.heading], maxW: w, maxLines: 2, lh: 1.06 }) : null
   const headH = hook ? paragraphH(hook, 1.06) + SP[7] : FS.caption * 1.3 + SP[5]
-  // The chat's head: who it is with (a disc), the place, what it is, who speaks; two lines each at most.
+  // The chat's head: who it is with (a disc), the place, what it is, who speaks; never cut, a size down first.
   const r = 80
   const pad = SP[6]
   const tx = x + pad + r * 2 + SP[6]
   const tw = x + cw - pad - tx
   const fam = hasKanji(d.place.jp) ? 'serif' : 'jp'
   const jz = Math.min(FS.display, (FS.display * tw) / Math.max(1, measure(ctx, d.place.jp, font(900, FS.display, fam))))
-  const place = fit(ctx, d.place.tr, { weight: 700, sizes: [FS.lead, FS.body, FS.sm], maxW: tw, maxLines: 2, lh: 1.18, balanced: false })
-  const who = fit(ctx, `${d.who} · ${S.online}`, { weight: 500, sizes: [FS.body, FS.sm], maxW: tw - 36, maxLines: 2, lh: 1.18, balanced: false })
+  const place = fit(ctx, d.place.tr, { weight: 700, sizes: [FS.lead, FS.body, FS.sm, FS.caption], maxW: tw, maxLines: 3, lh: 1.18, balanced: false })
+  const who = fit(ctx, `${d.who} · ${S.online}`, { weight: 500, sizes: [FS.body, FS.sm, FS.caption], maxW: tw - 36, maxLines: 3, lh: 1.18, balanced: false })
   const textH = jz * 1.05 + SP[3] + paragraphH(place) + SP[4] + paragraphH(who)
   const ch = Math.max(r * 2 + pad * 2, textH + pad * 2)
   const pillH = 64

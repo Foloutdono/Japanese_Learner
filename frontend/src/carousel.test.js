@@ -1003,7 +1003,7 @@ describe('the long videos (plan 233)', () => {
   const files = {}
   for (const lv of LEVELS) for (const f of [`${lv}.json`, `words-${lv}.json`, `kanji-${lv}.json`, `grammar-${lv}.json`]) files[f] = bank(f)
   files['themes.json'] = bank('themes.json')
-  files['dialogues.json'] = bank('dialogues.json')
+  files['conversation.json'] = bank('conversation.json')
   const withPath2D = fn => {
     const had = globalThis.Path2D
     globalThis.Path2D = class { constructor(d) { this.d = d } }
@@ -1190,7 +1190,7 @@ describe('the short formats (plan 233)', () => {
   const files = {}
   for (const lv of LEVELS) for (const f of [`${lv}.json`, `words-${lv}.json`, `kanji-${lv}.json`, `grammar-${lv}.json`]) files[f] = bank(f)
   files['themes.json'] = bank('themes.json')
-  files['dialogues.json'] = bank('dialogues.json')
+  files['conversation.json'] = bank('conversation.json')
   const withPath2D = fn => {
     const had = globalThis.Path2D
     globalThis.Path2D = class { constructor(d) { this.d = d } }
@@ -1996,8 +1996,9 @@ describe('tuned from the studio (plan 248)', () => {
 })
 
 describe('the reply videos (plan 249)', () => {
-  const dialogues = bank('dialogues.json')
-  const files = { 'dialogues.json': dialogues }
+  // The 会話 station's own scenes, six turns each (plan 250).
+  const scenes = bank('conversation.json').scenes
+  const files = { 'conversation.json': bank('conversation.json') }
   const parts = (lv, format = 'long') => longItems(files, lv, 'en', format).filter(x => x.kind === 'reply')
   const planFor = (lv, id, format = 'long', lang = 'en') => { const { kind, opts } = longPick(id, lv, lang, format); return longPlan(kind, files, opts) }
   // Every text drawn, where: its baseline and its size.
@@ -2027,22 +2028,23 @@ describe('the reply videos (plan 249)', () => {
         expect(pl.items.filter(x => x.type === 'reply').length, it.id).toBeGreaterThanOrEqual(6)
         seen.push(...pl.items.filter(x => x.type === 'scene').map(x => x.id))
       }
-      expect(seen.sort(), lv).toEqual(dialogues.dialogues.filter(d => d.lv === lv).map(d => d.id).sort())
+      expect(seen.sort(), lv).toEqual(scenes.filter(d => d.lv === lv).map(d => d.id).sort())
     }
-    expect(longFiles('reply:1', 'N5')).toEqual(['dialogues.json'])
-    expect(longListFiles('N5')).toContain('dialogues.json')
+    expect(longFiles('reply:1', 'N5')).toEqual(['conversation.json'])
+    expect(longListFiles('N5')).toContain('conversation.json')
     expect(longCommand('reply:2', 'N3', 'fr', 'short')).toContain('--kind reply --level N3 --part 2 --lang fr --format short')
   })
 
-  it('makes a short of each conversation, one scene a short (plan 249b)', () => {
+  it('makes a short of each scene, six questions a short (plans 249b, 250)', () => {
     for (const lv of LEVELS) {
-      const talks = dialogues.dialogues.filter(d => d.lv === lv)
+      const talks = scenes.filter(d => d.lv === lv)
       const shorts = parts(lv, 'short')
       expect(shorts.map(x => x.sub), lv).toEqual(talks.map(d => `${d.place.jp} · ${d.place.en}`))
       shorts.forEach((it, i) => {
         const pl = planFor(lv, it.id, 'short')
         expect(pl.items.filter(x => x.type === 'scene').map(x => x.id), it.id).toEqual([talks[i].id])
-        expect(pl.items.filter(x => x.type === 'reply'), it.id).toHaveLength(talks[i].turns.length)
+        // Six questions a short: every scene of the station has six turns (plan 250).
+        expect(pl.items.filter(x => x.type === 'reply'), it.id).toHaveLength(6)
         expect(pl.title, it.id).toBe(`${talks[i].place.en} · JLPT ${lv}`)
       })
     }
@@ -2057,7 +2059,7 @@ describe('the reply videos (plan 249)', () => {
   it('says their line, then yours once the timer is out, a tick a second', () => {
     const pl = longPlan('reply', files, { level: 'N5', part: 1, tune: { 'reply.count': 6 } })
     const tl = timeline(pl)
-    expect(tl.of).toBe(6)
+    expect(tl.of).toBe(12)
     for (const sg of tl.segs.filter(x => x.type === 'reply')) {
       const it = sg.data
       const inSeg = x => x.at >= sg.start && x.at < sg.start + sg.dur
