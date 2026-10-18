@@ -2609,6 +2609,7 @@ const boarding = {
   brdKeepDevice: 'On this device only',
   brdKeepGo: 'Keep my card',
   brdKeepSent: (email) => `Link sent to ${email}`,
+  brdKeepChange: 'Change',
   brdKeptGoogle: 'Kept on your Google account',
   brdKeptEmail: (email) => `Kept · ${email}`,
   brdKeptAccount: 'Kept on your account',
@@ -2618,6 +2619,7 @@ const boarding = {
   brdSheetLines: 'Lines',
   brdSheetName: 'Name',
   brdSheetAccount: 'Account',
+  brdSheetDone: 'Done',
   brdGoalCap: (min) => `at ${min} min a day`,
   brdNameOptional: 'optional',
   brdNamePlaceholder: 'Your first name',
@@ -2626,6 +2628,7 @@ const boarding = {
   cardNameTooLong: (n) => `${n} characters at most.`,
   brdAccountLede: 'Without an account, your card lives on this device alone.',
   brdLinkNote: 'We send you a link. No password to remember.',
+  brdLinkSentNote: (email) => `A link went to ${email}. Send it again, or fix the address.`,
   brdLinkSend: 'Send my link',
   brdLater: 'Later',
   brdRemindAt: (time) => `Remind me at **${time}**`,
@@ -2749,6 +2752,7 @@ const onboarding = {
   // working is a wrong turn they cannot take -- and "try again" is a
   // false promise, since the same contract earns the same refusal.
   brdPassRefused: 'The office could not issue this pass — that is on our side, not your connection. Nothing was saved.',
+  brdPassBusy: 'The office is not answering just now. Nothing was saved: try again in a moment.',
   // The daily pace, lived: the concourse 新規 gauge and the study
   // screens' session terminus (see components/study/usePace.js).
   paceDoneTitle: 'Today’s target reached',

@@ -74,6 +74,7 @@ vi.mock('../lib/platform', () => ({
   isNative: () => false,
   canNudge: () => false,
   requestNudgePermission: async () => false,
+  nudgePermission: async () => 'denied',
 }))
 vi.mock('../lib/audio', async (importOriginal) => ({
   ...(await importOriginal()),

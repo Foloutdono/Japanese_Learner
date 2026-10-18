@@ -2547,6 +2547,7 @@ const boarding = {
   brdKeepDevice: 'Sur cet appareil seulement',
   brdKeepGo: 'Garder ma carte',
   brdKeepSent: (email) => `Lien envoyé à ${email}`,
+  brdKeepChange: 'Changer',
   brdKeptGoogle: 'Gardée sur ton compte Google',
   brdKeptEmail: (email) => `Gardée · ${email}`,
   brdKeptAccount: 'Gardée sur ton compte',
@@ -2556,6 +2557,7 @@ const boarding = {
   brdSheetLines: 'Lignes',
   brdSheetName: 'Nom',
   brdSheetAccount: 'Compte',
+  brdSheetDone: 'C’est bon',
   brdGoalCap: (min) => `à ${min} min par jour`,
   brdNameOptional: 'facultatif',
   brdNamePlaceholder: 'Ton prénom',
@@ -2564,6 +2566,7 @@ const boarding = {
   cardNameTooLong: (n) => `${n} caractères au plus.`,
   brdAccountLede: 'Sans compte, ta carte ne vit que sur cet appareil.',
   brdLinkNote: 'On t’envoie un lien. Pas de mot de passe à retenir.',
+  brdLinkSentNote: (email) => `Un lien est parti vers ${email}. Renvoie-le, ou corrige l’adresse.`,
   brdLinkSend: 'Recevoir mon lien',
   brdLater: 'Plus tard',
   brdRemindAt: (time) => `Me rappeler à **${time}**`,
@@ -2683,6 +2686,7 @@ const onboarding = {
   onbPaceRecommended: 'Recommandé',
   onbPassError: 'L’enregistrement a échoué — vérifie ta connexion et réessaie.',
   brdPassRefused: 'Le guichet n’a pas pu émettre ce titre — cela vient de nous, pas de ta connexion. Rien n’a été enregistré.',
+  brdPassBusy: 'Le guichet ne répond pas pour l’instant. Rien n’a été enregistré : réessaie dans un instant.',
   // Le rythme quotidien, vécu : la jauge 新規 du hall et le terminus
   // de session des écrans d'étude (voir components/study/usePace.js).
   paceDoneTitle: 'Objectif du jour atteint',

@@ -55,13 +55,26 @@ function issuedBack(t, lang, contract, credits) {
 // Why the gate did not go through, over it. 'refused' is the office
 // answering and turning the contract down -- a wrong thing to blame on
 // the connection, and the one case where trying again unchanged earns
-// the same answer. 'network' is the line the app never got down.
-function IssueError({ error }) {
+// the same answer, so it carries the way to tell us (plan 247): the
+// feedback sheet, the failure joined. 'busy' is the office unable to
+// answer just now, and 'network' the line the app never got down: both
+// are worth the gate a second time, and say so.
+const ISSUE_ERROR = { refused: 'brdPassRefused', busy: 'brdPassBusy', network: 'onbPassError' }
+
+function IssueError({ error, onReport }) {
   const { t } = useLang()
   if (!error) return null
   return (
     <p className="brd__error" role="alert" data-error={error}>
-      {error === 'refused' ? t.brdPassRefused : t.onbPassError}
+      {t[ISSUE_ERROR[error] ?? 'onbPassError']}
+      {error === 'refused' && onReport && (
+        <>
+          {' '}
+          <button type="button" className="fb-link" onClick={() => { playClick(); onReport() }} aria-haspopup="dialog" data-action="report">
+            {t.reportProblem}
+          </button>
+        </>
+      )}
     </p>
   )
 }
@@ -77,11 +90,15 @@ function KeepLine({ kept, onKeep }) {
       </p>
     )
   }
+  // A link on its way: the address it went to, and the way back to the
+  // sheet -- a mistyped address, or a mail that never came, is mended
+  // there rather than nowhere (plan 247).
   if (kept.state === 'sent') {
     return (
       <p className="brd-keep-line" data-kept="sent" role="status">
         <MailMark />
         <span className="brd-keep-line__txt">{t.brdKeepSent(kept.email)}</span>
+        <button type="button" className="brd-keep-line__go" onClick={() => { playClick(); onKeep() }} data-action="keep">{t.brdKeepChange}</button>
       </p>
     )
   }
@@ -95,7 +112,7 @@ function KeepLine({ kept, onKeep }) {
   )
 }
 
-export default function CardStep({ contract, kept, onOpen, onSign, onKeep, onEnter, busy = false, error = null, children = null }) {
+export default function CardStep({ contract, kept, onOpen, onSign, onKeep, onEnter, onReport = null, busy = false, error = null, children = null }) {
   const { t, lang } = useLang()
   const credits = useCredits()
   const tier = cardTier(credits)
@@ -120,7 +137,7 @@ export default function CardStep({ contract, kept, onOpen, onSign, onKeep, onEnt
         </div>
       </div>
       <div className="brd__foot">
-        <IssueError error={error} />
+        <IssueError error={error} onReport={onReport} />
         <Continue keys label={t.brdIssue} onClick={onEnter} disabled={busy} data-action="issue" />
       </div>
       {children}

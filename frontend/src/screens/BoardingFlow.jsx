@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLang } from '../LangContext'
 import { ApiError, apiJson, apiJsonWithTimeout } from '../lib/api'
-import { canNudge, requestNudgePermission } from '../lib/platform'
+import { canNudge, nudgePermission, requestNudgePermission } from '../lib/platform'
 import { track } from '../lib/track'
 import { stopwatch } from '../lib/dwell'
 import { refreshSummary } from '../stores/profileSummary'
@@ -25,6 +25,8 @@ import { TestStep } from '../components/boarding/TestStep'
 import CardStep from '../components/boarding/CardStep'
 import { AccountSheet, GoalSheet, HourSheet, LinesSheet, NameSheet, RhythmSheet } from '../components/boarding/CardSheets'
 import { DeskStrip } from '../components/boarding/DeskStrip'
+import { FeedbackSheet } from '../components/feedback/FeedbackSheet'
+import { failureOf } from '../lib/feedback'
 import { BoardBack } from '../components/boarding/boardBack'
 
 // ── 乗車 — the boarding (plan 075; the card is the form, plan 247) ──
@@ -98,17 +100,24 @@ import { BoardBack } from '../components/boarding/boardBack'
 // is signed, so a later boarding can never resume someone else's.
 // Deliberately NOT a general autosave -- a mid-flow refresh is still a
 // clean restart.
+//
+// And an hour at most (plan 247): a round trip that never came back to
+// the boarding -- Google's other account signed in instead, the tab
+// left -- must not seat a later boarding in this tab on a card it did
+// not fill in. A stash written before the stamp is read as fresh.
 const STASH_KEY = 'jp-boarding-stash'
+const STASH_TTL_MS = 60 * 60 * 1000
 
 function stash(state) {
-  try { sessionStorage.setItem(STASH_KEY, JSON.stringify(state)) } catch { /* private mode */ }
+  try { sessionStorage.setItem(STASH_KEY, JSON.stringify({ ...state, at: Date.now() })) } catch { /* private mode */ }
 }
 
 function takeStash() {
   try {
     const raw = sessionStorage.getItem(STASH_KEY)
     sessionStorage.removeItem(STASH_KEY)
-    return raw ? JSON.parse(raw) : null
+    const kept = raw ? JSON.parse(raw) : null
+    return kept && (kept.at == null || Date.now() - kept.at < STASH_TTL_MS) ? kept : null
   } catch {
     return null
   }
@@ -180,8 +189,16 @@ export default function BoardingFlow({
   const [leaving, setLeaving] = useState(null)   // { step, dir } during a pull
   const [volumes, setVolumes] = useState(null)
   const [busy, setBusy] = useState(false)
-  // null | 'network' | 'refused' -- which of the two the card says.
+  // null | 'network' | 'busy' | 'refused' -- which of the three the card
+  // says, and the status a refusal came with, for the report under it.
   const [saveError, setSaveError] = useState(null)
+  const [refusedWith, setRefusedWith] = useState(0)
+  // « Signaler ce problème » under a refusal: the feedback sheet, here
+  // rather than App's FeedbackHost, which the boarding stands in for.
+  const [reporting, setReporting] = useState(false)
+  // On a native shell, the OS's own answer when it will not ask again:
+  // the reminder's switch says why it stays off (plan 247).
+  const [nudgeDenied, setNudgeDenied] = useState(false)
   const [now] = useState(() => new Date())
   const frameRef = useRef(null)
   // 辻 (plan 163): the strip at the floor's left end, measured so the
@@ -296,14 +313,25 @@ export default function BoardingFlow({
   // ignored) the moment none do, so by the time the router mounts no
   // dead entry is left. From the first question Back leaves, as it
   // always has.
+  //
+  // A sheet open over the card is shut by Back first, as a phone's Back
+  // shuts any sheet, and the card stays (plan 247): the pop took the
+  // guard, so it goes straight back in.
   const guard = useRef(false)
   const ignorePop = useRef(false)
   const backRef = useRef(back)
-  useEffect(() => { backRef.current = back })
+  const overRef = useRef(false)
+  useEffect(() => { backRef.current = back; overRef.current = sheet != null || reporting })
   useEffect(() => {
     function onPop() {
       if (ignorePop.current) { ignorePop.current = false; return }
       if (!guard.current) return
+      if (overRef.current) {
+        setSheet(null)
+        setReporting(false)
+        try { window.history.pushState({ brd: true }, '') } catch { guard.current = false }
+        return
+      }
       guard.current = false
       backRef.current()
     }
@@ -329,12 +357,21 @@ export default function BoardingFlow({
   // the line; anyone else is a novice, whose card takes the nearest stop
   // ahead (levelAnswers) -- the kana's own stop, still ahead of them, is
   // on the goal's sheet as a destination they can name.
+  // A goal the learner picked on the card rides on through a return to
+  // the question that set the level, while it is still a stop ahead of
+  // the answer given there (plan 247); a goal never picked is the new
+  // level's next stop, as the card was first filled in.
+  function keepingGoal(next, kana) {
+    const ahead = goalStops(next.levelChoice, kana)
+    return edited.goal && ahead.includes(answers.goal) ? { ...next, goal: answers.goal } : next
+  }
+
   function answerKana(kana) {
     // A pick that goes on by itself: it sounds the gate it stands for.
     playUi('click-screen-selection')
     const choice = levelForKana(kana)
     if (choice) {
-      set({ kana, ...levelAnswers(choice, kana) })
+      set({ kana, ...keepingGoal(levelAnswers(choice, kana), kana) })
       go('reveal')
     } else {
       set({ kana })
@@ -355,7 +392,7 @@ export default function BoardingFlow({
   }
 
   function continueLevel() {
-    set(levelAnswers(answers.levelChoice, answers.kana))
+    set(keepingGoal(levelAnswers(answers.levelChoice, answers.kana), answers.kana))
     go('card')
   }
 
@@ -394,10 +431,18 @@ export default function BoardingFlow({
     edit('lines')
   }
   // Allow asks the OS -- its own prompt, its own words -- and the answer
-  // is the answer: a refusal boards without the nudge.
+  // is the answer: a refusal boards without the nudge. One the OS keeps
+  // (it will not ask a second time) is said under the switch, which
+  // would otherwise do nothing at every press (plan 247).
   function remind() {
     if (answers.notifications) { set({ notifications: false }); return }
-    requestNudgePermission().then(granted => set({ notifications: granted }))
+    requestNudgePermission()
+      .then(granted => {
+        set({ notifications: granted })
+        if (granted) { setNudgeDenied(false); return null }
+        return nudgePermission().then(state => setNudgeDenied(state === 'denied'))
+      })
+      .catch(() => set({ notifications: false }))
   }
   function addToCalendar() {
     const { first } = firstDeparture(new Date(), answers.minute)
@@ -546,10 +591,15 @@ export default function BoardingFlow({
       })
       .catch(err => {
         setBusy(false)
-        // An ApiError means the office ANSWERED and refused the
-        // contract; anything else -- a dead fetch, the timeout's own
-        // abort -- never reached it.
-        setSaveError(err instanceof ApiError ? 'refused' : 'network')
+        // An ApiError means the office ANSWERED. A 4xx is a refusal,
+        // which the same press earns again; a 5xx, a 408 or a 429 is the
+        // office unable to answer just now, which a second press a moment
+        // later is not (plan 247). Anything else -- a dead fetch, the
+        // timeout's own abort -- never reached it.
+        const answered = err instanceof ApiError
+        const status = answered ? Number(err.status) || 0 : 0
+        setRefusedWith(status)
+        setSaveError(!answered ? 'network' : status >= 500 || status === 408 || status === 429 ? 'busy' : 'refused')
       })
   }
 
@@ -591,6 +641,7 @@ export default function BoardingFlow({
         now={now}
         native={canNudge()}
         notifications={answers.notifications}
+        denied={nudgeDenied}
         onRemind={remind}
         onAgenda={addToCalendar}
       />
@@ -608,6 +659,7 @@ export default function BoardingFlow({
       <AccountSheet
         open={sheet === 'account'}
         onClose={close}
+        sent={linkSent}
         // The last moment before the web navigates away for Google, when
         // the answers still only exist in memory.
         onLeaveForAuth={() => stash({ answers, step: 'card', sheet: 'account', keeping: 'google', edited, history })}
@@ -650,10 +702,19 @@ export default function BoardingFlow({
             onSign={() => setSheet('name')}
             onKeep={() => setSheet('account')}
             onEnter={complete}
+            onReport={() => setReporting(true)}
             busy={busy}
             error={saveError}
           >
             {!leaving && sheets}
+            {!leaving && (
+              <FeedbackSheet
+                open={reporting}
+                onClose={() => setReporting(false)}
+                session={session}
+                failure={failureOf('/api/onboarding/complete', refusedWith)}
+              />
+            )}
           </CardStep>
         )
       default:

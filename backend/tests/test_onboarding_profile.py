@@ -5,6 +5,7 @@
 # leaked N2 here would silently change what reading-comprehension tests
 # elsewhere in the suite are served.
 import contextlib
+from datetime import date, timedelta
 
 import pytest
 
@@ -497,6 +498,53 @@ def test_complete_and_patch_refuse_a_name_too_long(client):
     base = {"jlptLevel": "N5", "dailyNewTarget": 10}
     assert client.post("/api/onboarding/complete", json={**base, "cardName": long}).status_code == 422
     assert client.patch("/api/profile", json={"cardName": long}).status_code == 422
+
+
+# ── Every contract the card can send is one the office signs ──────
+# The card (plan 247) is the last screen before the app, and the only
+# way past it is this POST: a 422 it cannot fix leaves a learner with
+# nowhere to go (it happened once, to every beginner, 2026-09-09; see
+# goal_is_coherent). So each extreme the card can build is posted here
+# as BoardingFlow builds it -- the kana's own stop, a goal equal to the
+# level, none at all, the day's first and last half hour, the planet's
+# two ends, one line, a full-length name in any script.
+_SOON = (date.today() + timedelta(days=12)).isoformat()
+_LATER = (date.today() + timedelta(days=900)).isoformat()
+
+
+@pytest.mark.parametrize("body, name", [
+    # « Pas encore »: a novice riding to the kana, at dawn, at 5 a day,
+    # on the far side of the date line, on one line, with no name.
+    ({"jlptLevel": "N5", "goalLevel": "novice", "goalTargetDate": _SOON, "dailyDeparture": "am",
+      "kanaKnown": "none", "lines": ["grammar"], "rhythmMin": 5, "dailyNewTarget": 5,
+      "reminderTime": "06:00", "notifications": False, "tzOffsetMin": 840, "cardName": ""}, ""),
+    # One script read: a novice riding to N5 -- the goal equal to the
+    # level -- at the last half hour, from the other side of the planet.
+    ({"jlptLevel": "N5", "goalLevel": "N5", "goalTargetDate": _SOON, "dailyDeparture": "pm",
+      "kanaKnown": "hiragana", "lines": ["vocab", "kanji"], "rhythmMin": 20, "dailyNewTarget": 20,
+      "reminderTime": "23:30", "notifications": True, "tzOffsetMin": -720,
+      "cardName": "José-María Ñúñez"}, "José-María Ñúñez"),
+    # A reader at N1: no stop ahead, so no goal and no date; a name of
+    # twenty-four kanji, the most a card holds.
+    ({"jlptLevel": "N1", "dailyDeparture": "noon", "kanaKnown": "both",
+      "lines": ["vocab", "kanji", "grammar"], "rhythmMin": 15, "dailyNewTarget": 15,
+      "reminderTime": "12:30", "notifications": False, "tzOffsetMin": 0,
+      "cardName": "山田" * 12}, "山田" * 12),
+    # A reader at N3 riding to N1, years away, named in a right-to-left
+    # script with a family emoji (joiners and all) and a decomposed accent.
+    ({"jlptLevel": "N3", "goalLevel": "N1", "goalTargetDate": _LATER, "dailyDeparture": "am",
+      "kanaKnown": "both", "lines": ["kanji"], "rhythmMin": 10, "dailyNewTarget": 10,
+      "reminderTime": "07:30", "notifications": False, "tzOffsetMin": 330,
+      "cardName": " مريم 👩‍👩‍👧 René "}, "مريم 👩‍👩‍👧 René"),
+])
+def test_every_contract_the_card_can_send_is_signed(client, body, name):
+    with _clean_onboarding_state(DEV_USER_ID):
+        done = client.post("/api/onboarding/complete", json=body)
+        assert done.status_code == 200, done.text
+        served = client.get("/api/profile").json()
+        assert served["onboardedAt"] is not None
+        assert served["cardName"] == name
+        assert served["jlptLevel"] == body["jlptLevel"]
 
 
 def test_patch_renames_the_card_alone_and_the_handle_alone(client):

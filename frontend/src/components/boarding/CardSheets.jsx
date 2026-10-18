@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
+import { useDesk } from '../../hooks/useDesk'
 import { Sheet } from '../chrome/Sheet'
 import { Emphasized } from '../ui/Emphasized'
 import { ProviderButton } from '../account/ProviderButton'
@@ -28,7 +29,12 @@ import { CheckMark, LockMark } from './icons'
 // Each sheet prints what its choice does to the arrival before it is
 // picked. A pick is a save and shuts the sheet (Settings' rule for a
 // choice that is a save), and the card under it reprints at once; the
-// name and the address are typed, so theirs carry their own gate.
+// name and the address are typed, so theirs carry their own gate. The
+// lines are switches and the hour's drums turn without shutting, so on
+// a phone those two end on a gate of their own too, « C'est bon », as
+// Today's services sheet ends on its own (plan 247): a sheet a thumb
+// opened is never one only a scrim or a drag can close. The desk's
+// dialog has its ✕.
 //
 // The sheets portal out of the boarding's frame (components/chrome/Sheet),
 // so they wear `.brd-sheet`, which names the boarding's own inks again
@@ -44,6 +50,16 @@ function CardSheet({ open, onClose, jp, cap = null, kind, children }) {
 
 // A pick in a list: the wood pick every list in the app makes.
 const pickSound = () => playUi('click-mode-selection')
+
+// The switches' sheets' way out on a phone: a gate of their own. The
+// desk's dialog has its ✕ and Escape (components/chrome/Sheet's
+// `dismiss`), and none of the room a short window would need for it.
+function SheetDone({ onClose }) {
+  const { t } = useLang()
+  const desk = useDesk()
+  if (desk) return null
+  return <Continue label={t.brdSheetDone} onClick={onClose} data-action="sheet-done" />
+}
 
 // ── Objectif — the line climbing (the goal) ──────────────────────
 // The stops ahead, the hardest on top, each printing the day it is
@@ -181,7 +197,7 @@ function DepartureBoard({ value, onChange, rides, stop, first }) {
 // seven, one event a day at the hour for the learner's own calendar.
 export function HourSheet({
   open, onClose, minute, onChange, onPick, now,
-  native = false, notifications = false, onRemind = null, onAgenda = null,
+  native = false, notifications = false, denied = false, onRemind = null, onAgenda = null,
 }) {
   const { t } = useLang()
   const time = minutesToTime(minute)
@@ -190,12 +206,17 @@ export function HourSheet({
       <HourBoard minute={minute} onChange={onChange} onPick={onPick} now={now ?? new Date()} />
       {native
         ? (
-          <button type="button" className="brd-remind" aria-pressed={notifications} onClick={onRemind} data-action="remind">
-            <span className="brd-remind__chk" aria-hidden="true"><CheckMark /></span>
-            <span className="brd-remind__txt"><Emphasized text={t.brdRemindAt(time)} /></span>
-          </button>
+          <>
+            <button type="button" className="brd-remind" aria-pressed={notifications} onClick={onRemind} data-action="remind">
+              <span className="brd-remind__chk" aria-hidden="true"><CheckMark /></span>
+              <span className="brd-remind__txt"><Emphasized text={t.brdRemindAt(time)} /></span>
+            </button>
+            {/* The OS will not ask again: the switch says why it stays off. */}
+            {denied && !notifications && <p className="brd-sheet__note" role="status" data-note="denied">{t.notifDenied}</p>}
+          </>
         )
         : <BoardLink onClick={onAgenda} data-action="agenda">{t.brdAgendaAdd}</BoardLink>}
+      <SheetDone onClose={onClose} />
     </CardSheet>
   )
 }
@@ -346,6 +367,7 @@ export function LinesSheet({ open, onClose, value, onChange, carries = null, sto
   return (
     <CardSheet open={open} onClose={onClose} jp={t.brdSheetLines} kind="lines">
       <LineChecks value={value} onChange={onChange} carries={carries} stop={stop} arrival={arrival} novice={novice} />
+      <SheetDone onClose={onClose} />
     </CardSheet>
   )
 }
@@ -455,20 +477,22 @@ function NamePlate({ value, onSave }) {
 // the card keeps saying where the card lives. On the web Google leaves
 // the page, so `onLeaveForAuth` writes the answers down first; a refusal
 // comes back on the URL (lib/authRedirect.js) and is said here.
-export function AccountSheet({ open, onClose, onLeaveForAuth = null, onKept, onSent }) {
+// `sent`: the address a link already went to, if one did -- the field
+// opens on it, to send again or to mend (plan 247).
+export function AccountSheet({ open, onClose, onLeaveForAuth = null, onKept, onSent, sent = null }) {
   const { t } = useLang()
   return (
     <CardSheet open={open} onClose={onClose} jp={t.brdSheetAccount} kind="account">
-      <KeepForm onClose={onClose} onLeaveForAuth={onLeaveForAuth} onKept={onKept} onSent={onSent} />
+      <KeepForm onClose={onClose} onLeaveForAuth={onLeaveForAuth} onKept={onKept} onSent={onSent} sent={sent} />
     </CardSheet>
   )
 }
 
 const ADDRESS = /.+@.+\..+/
 
-function KeepForm({ onClose, onLeaveForAuth, onKept, onSent }) {
+function KeepForm({ onClose, onLeaveForAuth, onKept, onSent, sent }) {
   const { t, lang } = useLang()
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(sent ?? '')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
   // A plain read: a refusal on the URL is a fact about this page load.
@@ -510,7 +534,7 @@ function KeepForm({ onClose, onLeaveForAuth, onKept, onSent }) {
           onChange={e => setEmail(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !composing(e)) send() }}
         />
-        <p className="brd-sheet__note">{t.brdLinkNote}</p>
+        <p className="brd-sheet__note" data-note={sent ? 'sent' : undefined}>{sent ? t.brdLinkSentNote(sent) : t.brdLinkNote}</p>
       </div>
       {error && <p className="auth-message auth-message--error" role="alert">{error}</p>}
       <div className="brd-sheet__ways">

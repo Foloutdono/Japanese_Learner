@@ -35,7 +35,15 @@ vi.mock('../lib/api', () => ({
   apiJson: (...a) => apiJson(...a),
   apiJsonWithTimeout: (...a) => apiJsonWithTimeout(...a),
   apiUpload: vi.fn(),
-  ApiError: class ApiError extends Error {},
+  // The real one's shape: a refusal has its status (lib/api.js).
+  ApiError: class ApiError extends Error {
+    constructor(status, body = null, path = '') {
+      super(`Request failed (${status}) for ${path}`)
+      this.status = status
+      this.body = body
+      this.path = path
+    }
+  },
 }))
 // The card kept by a link: one updateUser call with the address alone
 // (lib/guest.js claimByLink), and what it REFUSES with is the point of
@@ -53,10 +61,14 @@ vi.mock('../lib/supabase', () => ({
 // The reminder is native-only; one test flips it on.
 const nudgeRef = { current: false }
 const requestNudge = vi.fn(async () => nudgeRef.current)
+// What the OS says it will do when it is not asking (plan 247): one test
+// has it refuse for good.
+const nudgeState = { current: 'prompt' }
 vi.mock('../lib/platform', () => ({
   isNative: () => nudgeRef.current,
   canNudge: () => nudgeRef.current,
   requestNudgePermission: () => requestNudge(),
+  nudgePermission: async () => nudgeState.current,
 }))
 // 改札 — what the Google round trip came back with. Only the pending
 // refusal is faked: the message and the classification stay real.
@@ -544,14 +556,16 @@ describe('BoardingFlow', () => {
   // A refusal is not a connection: the office answering 422 wore the same
   // "check your connection" line as a dead network once (2026-09-09).
   it('says the office refused when the office answered, not that the line is down', async () => {
-    apiJsonWithTimeout.mockRejectedValue(new ApiError('refused'))
+    apiJsonWithTimeout.mockRejectedValue(new ApiError(422, { detail: 'refused' }, '/api/onboarding/complete'))
     const { screen, onComplete } = await renderFlow()
     await toCardReader(screen)
     await click(screen, '[data-action="issue"]')
     await settle(80)
     const line = q(screen, '.brd__error')
     expect(line?.dataset.error).toBe('refused')
-    expect(line.textContent).toBe(fr.brdPassRefused)
+    // The refusal, and the way to tell us under it (plan 247).
+    expect(line.textContent.startsWith(fr.brdPassRefused)).toBe(true)
+    expect(line.querySelector('[data-action="report"]').textContent).toBe(fr.reportProblem)
     expect(stepOf(screen)).toBe('card')
     expect(q(screen, '[data-action="issue"]').disabled).toBe(false)
     expect(onComplete).not.toHaveBeenCalled()
