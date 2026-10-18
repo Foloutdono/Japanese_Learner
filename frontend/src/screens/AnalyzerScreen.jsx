@@ -333,10 +333,20 @@ export default function AnalyzerScreen({ session }) {
   useEffect(() => clearHoldTimer, [clearHoldTimer])
   // The clock's two inputs besides the poll. Play and pause reach the
   // playhead before the render that tells the subtitle, which reads it
-  // in its layout effect.
-  const changePlaying = useCallback(value => {
-    playhead.setPlaying(value)
+  // in its layout effect. A stall to load more (VideoPlayer) is playing
+  // to the bar -- Pause still pauses it -- but its clock stands: the
+  // playhead does not carry it, and no stop at a sentence's end is owed
+  // until it moves again (the poll sets that timer again then).
+  const changePlaying = useCallback((value, moving = value) => {
+    playhead.setPlaying(moving)
+    if (!moving) clearHoldTimer()
     setPlaying(value)
+  }, [playhead, clearHoldTimer])
+  // Every seek the screen asks for goes through here: the clock stands
+  // on it at once (components/analysis/playhead), rather than on where
+  // the video was until a player still loading says it has moved.
+  const seek = useCallback(seconds => {
+    if (playerRef.current?.seekTo(seconds) !== false) playhead.seek(seconds)
   }, [playhead])
   useEffect(() => { playhead.setRate(rate) }, [playhead, rate])
   // Paused by hand, or the stop turned off: no stop is owed.
@@ -770,10 +780,13 @@ export default function AnalyzerScreen({ session }) {
   }
 
   // ── Playback sync ─────────────────────────────────────────
-  const handleTimeUpdate = useCallback(seconds => {
+  const handleTimeUpdate = useCallback(reported => {
+    playhead.poll(reported)
+    // Where the clock stands: the poll, unless it is a player still
+    // reading where it was before a seek the screen asked for.
+    const seconds = playhead.polled()
     const last = lastPollRef.current
     lastPollRef.current = seconds
-    playhead.poll(seconds)
     const played = seconds >= last && seconds - last < PLAYBACK_STEP
     // 反復 (plan 134): on a loop, the focused sentence's end sends the
     // clock back to its start -- the line does not move on, whatever
@@ -781,7 +794,7 @@ export default function AnalyzerScreen({ session }) {
     const here = sentences[focusIndex]
     if (loop && played && here?.cue_end != null && here.cue_start != null
         && last < here.cue_end && seconds >= here.cue_end) {
-      playerRef.current?.seekTo(here.cue_start)
+      seek(here.cue_start)
       return
     }
     // 一時停止 (plan 134): stop where the sentence that was playing ends,
@@ -800,7 +813,7 @@ export default function AnalyzerScreen({ session }) {
         const player = playerRef.current
         player?.pause()
         const at = player?.currentTime?.() ?? playhead.polled()
-        if (at >= s.cue_end - HOLD_INSET) player?.seekTo(Math.max(s.cue_start ?? 0, s.cue_end - HOLD_INSET))
+        if (at >= s.cue_end - HOLD_INSET) seek(Math.max(s.cue_start ?? 0, s.cue_end - HOLD_INSET))
         if (followPlayback) analyzer.setFocusIndex(i)
       }
       // The end crossed between two polls with no timer set (a clock
@@ -836,7 +849,7 @@ export default function AnalyzerScreen({ session }) {
       // rather than snapping back to the first one.
       return idx === -1 ? prev : idx
     })
-  }, [sentences, analyzer, followPlayback, loop, pauseEach, focusIndex, rate, clearHoldTimer, playhead, playing])
+  }, [sentences, analyzer, followPlayback, loop, pauseEach, focusIndex, rate, clearHoldTimer, playhead, playing, seek])
 
   // 追従 on time (2026-09-27): while the video plays, the line in focus
   // moves on at the moment the clock reaches the next line's cue, on a
@@ -892,9 +905,7 @@ export default function AnalyzerScreen({ session }) {
       playerRef.current?.pause()
       return
     }
-    if (hasWindow && playhead.polled() < windowStart) {
-      playerRef.current?.seekTo(windowStart)
-    }
+    if (hasWindow && playhead.polled() < windowStart) seek(windowStart)
     playerRef.current?.play()
   }
 
@@ -904,7 +915,7 @@ export default function AnalyzerScreen({ session }) {
     if (here?.cue_start == null) return
     // Heard again, stopped again at its end.
     heldRef.current = null
-    playerRef.current?.seekTo(here.cue_start)
+    seek(here.cue_start)
     playerRef.current?.play()
   }
 
@@ -940,7 +951,7 @@ export default function AnalyzerScreen({ session }) {
     if (!(span > 0)) return
     const r = e.currentTarget.getBoundingClientRect()
     const frac = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width))
-    playerRef.current?.seekTo(frac * span)
+    seek(frac * span)
   }
 
   // The line, the stage, and the player are three views of ONE
@@ -960,9 +971,7 @@ export default function AnalyzerScreen({ session }) {
     heldRef.current = null
     clearHoldTimer()
     const target = sentences[index]
-    if (target?.cue_start != null && playerRef.current) {
-      playerRef.current.seekTo(target.cue_start)
-    }
+    if (target?.cue_start != null && playerRef.current) seek(target.cue_start)
   }
 
   // ── The filtered line ─────────────────────────────────────

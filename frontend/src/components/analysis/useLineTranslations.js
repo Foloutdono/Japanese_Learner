@@ -7,10 +7,11 @@ import { apiJson } from '../../lib/api'
 // kept where the Passage is kept), so this asks for the block the line
 // in focus falls in, and the next one a few lines before the learner
 // reaches it, so the translation is there when the line is. A block is
-// asked once per Passage and language: a failure (the day's ceiling,
+// asked once per Passage and language: a refusal (the day's ceiling,
 // the model down) leaves its lines without a translation rather than
 // asking again on every step -- a translation helps the line, and the
-// line reads without it.
+// line reads without it. A request the link dropped got no answer at
+// all, and is asked again when the line next moves.
 //
 // `path` is where the Passage's translations are asked: a video
 // session's (`/api/video/session/<id>/translations`) or a typed or
@@ -68,7 +69,11 @@ export function useLineTranslations({ session, path, count, focusIndex, lang, ab
             return { key, lines }
           })
         })
-        .catch(() => {})
+        // A request that got no answer at all (the link dropped) is not
+        // a refusal: its block is asked again at the next step.
+        .catch(e => {
+          if (e?.status == null && asked.current.key === key) asked.current.starts.delete(from)
+        })
     }
   }, [key, count, focusIndex, session, path, lang])
 
