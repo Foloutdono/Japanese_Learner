@@ -86,6 +86,26 @@ describe('the ladder’s Choisir on the desk', () => {
     expect(document.querySelector('.gl-map__group')).toBeNull()
   })
 
+  // Plan 198: the card panel says what each rating does to the point, on
+  // the stop in hand, where it drew four tiles; the walk and its outcomes
+  // stand whole in the panel at the window's height.
+  it('says what each rating does on the stop in hand, whole in its panel', async () => {
+    await mount()
+    const panel = document.querySelector('.desk-run__left > .desk-card')
+    expect(panel.querySelector('.desk-verdict')).toBeNull()
+    const stop = panel.querySelector('.gl-map__stop[aria-current="step"]')
+    // Choose 2: a miss asks it again, a pass climbs to Choose 3.
+    const rows = [...stop.querySelectorAll('.gl-out')]
+    expect(rows.map(r => [...r.querySelectorAll('.desk-kbd')].map(k => k.textContent))).toEqual([['4', '3'], ['2', '1']])
+    const box = panel.getBoundingClientRect()
+    rows.forEach(r => expect(r.getBoundingClientRect().bottom).toBeLessThanOrEqual(stop.getBoundingClientRect().bottom + 1))
+    ;[...panel.querySelectorAll('.gl-map__stop')].forEach(s => {
+      expect(s.getBoundingClientRect().top).toBeGreaterThanOrEqual(box.top)
+      expect(s.getBoundingClientRect().bottom).toBeLessThanOrEqual(panel.querySelector('.desk-rhythm').getBoundingClientRect().top + 1)
+    })
+    expect(panel.scrollHeight).toBeLessThanOrEqual(panel.clientHeight + 1)
+  })
+
   it('stands on no scroll bar before the answer', async () => {
     await mount()
     expect(scrollers()).toEqual([])

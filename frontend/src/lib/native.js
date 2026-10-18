@@ -14,7 +14,7 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 import { Share } from '@capacitor/share'
 import { SplashScreen } from '@capacitor/splash-screen'
 import { StatusBar, Style } from '@capacitor/status-bar'
-import { openPath } from './platform'
+import { nativePlatform, openPath } from './platform'
 import { LEGACY_NUDGE_ID, NUDGE_IDS } from './ahead'
 import { AGENDA_IDS } from './agenda'
 import { OPENABLE_PATHS } from '../domain/agenda'
@@ -139,21 +139,49 @@ async function cancelNudges() {
   } catch { /* nothing scheduled */ }
 }
 
+// ── The reminders' channel (Android 8 and up, plan 215) ──────────
+// Android files every notification under a channel, and the app's
+// notification settings list the channels by name: the plugin's own is
+// called "Default", in English whatever the learner speaks. Both kinds
+// of reminder -- the day's train and the agenda -- go on one channel of
+// the app's own instead, named in the interface's language
+// (t.nudgeChannel, handed down by NativeBridge). Creating a channel that
+// already exists only renames it, and keeps whatever the learner set on
+// it. (The plugin still creates its "Default" on every launch; nothing
+// is posted to it any more.) iOS has no channels: there none is asked
+// for and none is named.
+const CHANNEL_ID = 'reminders'
+
+/** The channel field the reminders carry: { channelId } once the
+ *  channel exists, else nothing (the plugin's default channel). */
+async function remindersChannel(name) {
+  if (!name || nativePlatform() !== 'android') return {}
+  try {
+    // 3 is IMPORTANCE_DEFAULT, the importance of the channel it replaces.
+    await LocalNotifications.createChannel({ id: CHANNEL_ID, name, importance: 3 })
+    return { channelId: CHANNEL_ID }
+  } catch {
+    return {}
+  }
+}
+
 /** The day's notifications (lib/ahead.js), replacing whatever was
  *  scheduled; nothing when the OS has not allowed them. Android lists
  *  the lanes in the expanded notification (its inbox style); iOS has
- *  them in the body already. */
-export async function scheduleNudges(nudges) {
+ *  them in the body already. `channel` is the reminders' channel's name. */
+export async function scheduleNudges(nudges, channel) {
   await cancelNudges()
   if (!nudges.length) return []
   const { display } = await LocalNotifications.checkPermissions()
   if (display !== 'granted') return []
+  const onChannel = await remindersChannel(channel)
   await LocalNotifications.schedule({
     notifications: nudges.map(n => ({
       id: n.id,
       title: n.title,
       body: n.body,
       ...(n.lines.length ? { inboxList: n.lines } : {}),
+      ...onChannel,
       schedule: { at: n.at, allowWhileIdle: true },
       extra: n.extra,
     })),
@@ -163,19 +191,21 @@ export async function scheduleNudges(nudges) {
 
 /** 時間割 (plan 181): the agenda's notifications (lib/agenda.js),
  *  replacing the agenda's own and leaving the day's train alone; nothing
- *  when the OS has not allowed them. */
-export async function scheduleAgenda(items) {
+ *  when the OS has not allowed them. `channel` as scheduleNudges's. */
+export async function scheduleAgenda(items, channel) {
   try {
     await LocalNotifications.cancel({ notifications: AGENDA_IDS.map(id => ({ id })) })
   } catch { /* nothing scheduled */ }
   if (!items.length) return []
   const { display } = await LocalNotifications.checkPermissions()
   if (display !== 'granted') return []
+  const onChannel = await remindersChannel(channel)
   await LocalNotifications.schedule({
     notifications: items.map(n => ({
       id: n.id,
       title: n.title,
       body: n.body,
+      ...onChannel,
       schedule: { at: n.at, allowWhileIdle: true },
       extra: n.extra,
     })),

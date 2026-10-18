@@ -47,12 +47,15 @@ const FLOOR = 0.0001   // exponentialRamp cannot reach zero
  *   type   waveform — 'sine' (default), 'triangle', 'square', 'sawtooth'
  *   to     glide the pitch to this frequency across the note
  *   attack override the 4ms onset — longer reads as a swell, not a hit
+ *   floor  the share of `peak` it sounds at once it has started (default
+ *          0: it grows from silence, which for a long swell means nothing
+ *          is heard for most of it, the climb being exponential)
  */
 export function tones(ctx, bus, notes) {
   const now = ctx.currentTime + lead
 
   for (const n of notes) {
-    const { freq, at = 0, dur, peak, type = 'sine', to, attack = ATTACK } = n
+    const { freq, at = 0, dur, peak, type = 'sine', to, attack = ATTACK, floor = 0 } = n
     const start = now + at
     const osc = ctx.createOscillator()
     const env = ctx.createGain()
@@ -62,6 +65,7 @@ export function tones(ctx, bus, notes) {
     if (to && to !== freq) osc.frequency.exponentialRampToValueAtTime(to, start + dur)
 
     env.gain.setValueAtTime(FLOOR, start)
+    if (floor > 0) env.gain.exponentialRampToValueAtTime(peak * floor, start + ATTACK * 4)
     env.gain.exponentialRampToValueAtTime(peak, start + attack)
     env.gain.exponentialRampToValueAtTime(FLOOR, start + dur)
 
@@ -171,8 +175,11 @@ export function noiseTicks(ctx, bus, ticks) {
  * { at, dur, peak } plus the filter's journey: `from` → `mid` at
  * `mid_at` (a fraction of dur) → `to`. `q` sets how hollow it is;
  * `hold` is the fraction of dur spent at full level before the fall.
+ * `swell` (plan 200) makes it a riser: the level climbs for that
+ * fraction of dur (0.97 is nearly all of it) and the sweep is then
+ * cut, `attack` and `hold` unused -- the build before a hit.
  */
-export function noiseSweep(ctx, bus, { at = 0, dur, peak, from, mid, to, midAt = 0.45, q = 0.8, hold = 0.55, attack = 0.1 }) {
+export function noiseSweep(ctx, bus, { at = 0, dur, peak, from, mid, to, midAt = 0.45, q = 0.8, hold = 0.55, attack = 0.1, swell = 0 }) {
   const now = ctx.currentTime + lead
   const start = now + at
 
@@ -201,8 +208,8 @@ export function noiseSweep(ctx, bus, { at = 0, dur, peak, from, mid, to, midAt =
 
   const env = ctx.createGain()
   env.gain.setValueAtTime(FLOOR, start)
-  env.gain.exponentialRampToValueAtTime(peak, start + Math.min(attack, dur * 0.4))
-  env.gain.setValueAtTime(peak, start + dur * hold)
+  env.gain.exponentialRampToValueAtTime(peak, start + (swell ? dur * swell : Math.min(attack, dur * 0.4)))
+  env.gain.setValueAtTime(peak, start + dur * (swell || hold))
   env.gain.exponentialRampToValueAtTime(FLOOR, start + dur)
 
   src.connect(band); band.connect(env); env.connect(bus)
@@ -287,23 +294,45 @@ export function bar(ctx, bus, notes) {
 const HALL_RT60 = 1.3      // seconds to fall 60dB
 const HALL_PREDELAY = 0.014
 const HALL_SECONDS = 1.5
-const hallCache = new WeakMap()
+const hallBuilds = new WeakMap()
 
-function hallImpulse(ctx) {
-  const cached = hallCache.get(ctx)
-  if (cached) return cached
+// The impulse is made a slice at a time, so the warm-up ahead of time
+// (warmHall, below) can stop between slices whenever the page has a
+// frame to draw; a voice that needs the hall before then finishes it on
+// the spot. The samples are the same either way: the noise, the filter
+// and the energy carry on from one slice to the next.
+function hallBuild(ctx) {
+  let b = hallBuilds.get(ctx)
+  if (!b) {
+    const rate = ctx.sampleRate
+    const frames = Math.floor(rate * HALL_SECONDS)
+    b = {
+      rate, frames,
+      pre: Math.floor(rate * HALL_PREDELAY),
+      ir: ctx.createBuffer(2, frames, rate),
+      ch: 0, i: -1, done: false,
+    }
+    hallBuilds.set(ctx, b)
+  }
+  return b
+}
 
-  const rate = ctx.sampleRate
-  const frames = Math.floor(rate * HALL_SECONDS)
-  const ir = ctx.createBuffer(2, frames, rate)
-  const pre = Math.floor(rate * HALL_PREDELAY)
-  for (let ch = 0; ch < 2; ch++) {
-    const data = ir.getChannelData(ch)
-    // A different seed per ear is what makes the tail wide.
-    const rand = mulberry32(NOISE_SEED + 0x4A11 + ch)
-    let lp = 0
-    let energy = 0
-    for (let i = pre; i < frames; i++) {
+/** Up to `n` more samples of the impulse; true once it is whole. */
+function hallStep(b, n) {
+  const { rate, frames, pre } = b
+  while (!b.done && n > 0) {
+    if (b.i < 0) {
+      b.data = b.ir.getChannelData(b.ch)
+      // A different seed per ear is what makes the tail wide.
+      b.rand = mulberry32(NOISE_SEED + 0x4A11 + b.ch)
+      b.lp = 0
+      b.energy = 0
+      b.i = pre
+    }
+    const { data, rand } = b
+    let { lp, energy } = b
+    const end = Math.min(frames, b.i + n)
+    for (let i = b.i; i < end; i++) {
       const t = (i - pre) / rate
       // The highs die first: a one-pole lowpass that closes as the
       // tail falls, so the late tail is the warm hum of a big room.
@@ -314,12 +343,25 @@ function hallImpulse(ctx) {
       data[i] = lp * onset * 10 ** (-3 * t / HALL_RT60)
       energy += data[i] * data[i]
     }
+    n -= end - b.i
+    b.i = end
+    b.lp = lp
+    b.energy = energy
+    if (end < frames) continue
     // Unit energy per ear: the send level alone says how much room.
     const scale = energy > 0 ? 1 / Math.sqrt(energy) : 0
     for (let i = 0; i < frames; i++) data[i] *= scale
+    b.ch += 1
+    b.i = -1
+    b.done = b.ch === 2
   }
-  hallCache.set(ctx, ir)
-  return ir
+  return b.done
+}
+
+function hallImpulse(ctx) {
+  const b = hallBuild(ctx)
+  hallStep(b, Infinity)
+  return b.ir
 }
 
 // One convolver per destination, kept: setting a convolver's buffer
@@ -336,6 +378,38 @@ function hallInto(ctx, dest) {
     convolvers.set(dest, conv)
   }
   return conv
+}
+
+// A slice of the impulse: about a millisecond of a phone's main thread,
+// and only begun with three left in the idle period, so a slow phone's
+// slice never runs into the next frame.
+const HALL_SLICE = 4096
+const SLICE_ROOM_MS = 3
+// A convolver is made in one piece, 5ms on a laptop and ~35ms on a
+// phone, so it waits for an idle period that long: the browser grants
+// one only when it has no frame coming, never in the gap between two
+// frames of a scene (plan 210).
+const CONVOLVER_IDLE_MS = 40
+
+/**
+ * The hall made ahead for each of `dests` (voices.js, when idle: plan
+ * 207), as much of it as the idle callback's `deadline` has room for.
+ * True once all of it is made; false to be called again. `late` (the
+ * caller has waited long enough) makes one piece regardless, so a page
+ * that is never idle for long still gets its hall a piece at a time.
+ */
+export function warmHall(ctx, dests, deadline, late = false) {
+  const b = hallBuild(ctx)
+  const forced = late || deadline.didTimeout
+  while (!b.done) {
+    if (!forced && deadline.timeRemaining() < SLICE_ROOM_MS) return false
+    hallStep(b, forced ? Infinity : HALL_SLICE)
+  }
+  const left = dests.filter(d => !convolvers.has(d))
+  if (left.length === 0) return true
+  if (!forced && deadline.timeRemaining() < CONVOLVER_IDLE_MS) return false
+  hallInto(ctx, left[0])
+  return left.length === 1
 }
 
 // Longer than any voice plus the hall's tail, several times over.

@@ -1,4 +1,4 @@
-import { Navigate, useParams } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { Bar, Leave } from '../components/chrome/Bar'
 import { useListWalk, WALK_KEYS } from '../hooks/useListWalk'
@@ -9,6 +9,7 @@ import { AgendaPage } from '../components/settings/AgendaPage'
 import { LevelPage } from '../components/settings/LevelPage'
 import { DestinationPage } from '../components/settings/DestinationPage'
 import { ServicePage } from '../components/settings/ServicePage'
+import { ReviewsPage } from '../components/settings/ReviewsPage'
 import { HourPage } from '../components/settings/HourPage'
 import { LinesPage } from '../components/settings/LinesPage'
 import { DisplayPage } from '../components/settings/DisplayPage'
@@ -18,7 +19,10 @@ import { ReadingPacePage } from '../components/settings/ReadingPacePage'
 import { HelpPage } from '../components/settings/HelpPage'
 import { AccountPage } from '../components/settings/AccountPage'
 import { CreditsPage } from '../components/settings/CreditsPage'
+import { TransferPage } from '../components/settings/TransferPage'
 import { NotificationsPage } from '../components/settings/NotificationsPage'
+import { WritePage } from '../components/settings/WritePage'
+import { FeedbackSheet } from '../components/feedback/FeedbackSheet'
 import { canNudge } from '../lib/platform'
 import { SettingsPaneContext } from '../components/settings/pane'
 import { useDesk } from '../hooks/useDesk'
@@ -39,6 +43,7 @@ const PAGES = {
   level: LevelPage,
   destination: DestinationPage,
   service: ServicePage,
+  reviews: ReviewsPage,
   hour: HourPage,
   lines: LinesPage,
   display: DisplayPage,
@@ -48,7 +53,9 @@ const PAGES = {
   rating: RatingPage,
   reading: ReadingPacePage,
   help: HelpPage,
+  write: WritePage,
   account: AccountPage,
+  transfer: TransferPage,
   credits: CreditsPage,
 }
 
@@ -70,6 +77,8 @@ const DOORS = '.stg-door:not([inert] *)'
 export default function SettingsScreen({ session }) {
   const { page } = useParams()
   const desk = useDesk()
+  const navigate = useNavigate()
+  const location = useLocation()
   if (page && MOVED[page]) return <Navigate to={`/profile/settings/${MOVED[page]}`} replace />
   if (page && !PAGES[page]) return <Navigate to="/profile/settings" replace />
   if (page === 'notifications' && !canNudge()) return <Navigate to="/profile/settings" replace />
@@ -92,6 +101,20 @@ export default function SettingsScreen({ session }) {
         <SettingsPaneContext.Provider value>
           <Page session={session} />
         </SettingsPaneContext.Provider>
+      </main>
+    )
+  }
+
+  // Nous écrire (plan 222): on a phone the form is a sheet over the
+  // list, as the canvas drew it, not a page pushed over it. Its address
+  // is the page's, so the way back closes it; a sheet opened from a
+  // link has no list behind it in the history, and goes to it instead.
+  if (page === 'write') {
+    const close = () => (location.key !== 'default' ? navigate(-1) : navigate('/profile/settings', { replace: true }))
+    return (
+      <main id="main-content" className="settings">
+        <SettingsHome session={session} />
+        <FeedbackSheet open onClose={close} session={session} />
       </main>
     )
   }

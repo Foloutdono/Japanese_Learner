@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { track } from '../lib/track'
+import { runFigures, runWhere } from '../lib/runTrail'
 
 // Once the queue drops to this many unreviewed cards, kick off a
 // background refill — small enough that a refill is rarely idle for
@@ -48,7 +49,11 @@ const CHECK_WAIT_MS = 2500
 // over options that are patterns (which b2f's now are, where a v8 card
 // holds meanings no option could be graded right against). A v8 grammar
 // queue would print 中 with no なか until it had been answered past.
-const CACHE_VERSION = 'v9'
+// v10: every rating in a ladder card's review_preview gained `step` and
+// `passed` (plan 198), where the rating leaves the point on its line, which
+// the desk's card panel draws on the walk. A v9 ladder queue would draw
+// the four tiles it drew before until it had been answered past.
+const CACHE_VERSION = 'v10'
 
 const KEY_PREFIX = 'jp-session'
 
@@ -77,6 +82,16 @@ const RUN_KINDS = new Set(['kana', 'vocab', 'kanji', 'grammar', 'today', 'deck']
 function runKind(key) {
   const kind = String(key).split(':')[2]
   return RUN_KINDS.has(kind) ? kind : 'other'
+}
+
+// The JLPT level, when the key's `<what>` segment is one. For a theme,
+// a deck or a tier that segment is a slug the learner may have named,
+// so it is read against the five levels and is otherwise absent.
+const RUN_LEVELS = new Set(['N5', 'N4', 'N3', 'N2', 'N1'])
+
+function runLevel(key) {
+  const level = String(key).split(':')[3]
+  return RUN_LEVELS.has(level) ? level : undefined
 }
 
 // A cached entry has to be an array of card-shaped objects, and every
@@ -280,20 +295,27 @@ export function useCardSession({
   // screen makes per card. A run that unmounts with answers behind it
   // and no `done` is an abandonment -- which is the number that
   // matters, since a session nobody finishes is a mode nobody likes.
-  const runRef = useRef({ at: 0, answered: 0, done: false })
+  //
+  // Since plan 218 each end also carries how the run went, read off the
+  // run's tally (stores/runTally.js, which useReviewGates starts with
+  // the run): engaged ms, the time per card's median and slow tail, how
+  // many were right (lib/runTrail.js runFigures). `where` is the door,
+  // from the screen the run is on, read once at its start.
+  const runRef = useRef({ at: 0, answered: 0, done: false, where: 'other' })
 
   useEffect(() => {
     if (storageKey === IDLE_KEY) return undefined
-    const run = { at: Date.now(), answered: 0, done: false }
+    const run = { at: Date.now(), answered: 0, done: false, where: runWhere() }
     runRef.current = run
     const kind = runKind(storageKey)
-    track('run_start', { kind, mode })
+    const level = runLevel(storageKey)
+    track('run_start', { kind, mode, level, where: run.where })
     return () => {
       // Finished runs report themselves below; a run nobody answered a
       // single card in is a screen someone glanced at, and screen_view
       // already said so.
       if (run.done || run.answered === 0) return
-      track('run_abandon', { kind, mode, done: run.answered })
+      track('run_abandon', { kind, mode, level, done: run.answered, where: run.where, ...runFigures() })
     }
   }, [storageKey, mode])
 
@@ -305,8 +327,11 @@ export function useCardSession({
     track('run_complete', {
       kind: runKind(storageKey),
       mode,
+      level: runLevel(storageKey),
       items: run.answered,
       secs: Math.round((Date.now() - run.at) / 1000),
+      where: run.where,
+      ...runFigures(),
     })
   }, [done, storageKey, mode])
 

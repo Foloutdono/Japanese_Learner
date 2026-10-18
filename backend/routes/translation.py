@@ -1,11 +1,13 @@
 import logging
-import re
+import os
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from core.credits import require_pass
+from core import daily_limit
+from core.credits import require_pass, resets_at
 from pydantic import BaseModel, Field
 
 from core.db import db_conn
+from core.rls import enable_rls
 from core.auth import get_user_id
 import routes.reading as reading  # reused wholesale below — see get_translation_batch's docstring
 from study import tutor_review
@@ -14,6 +16,11 @@ from study.llm_shared import llm_configured
 # A pass feature (plan 069): every route here refuses a free learner
 # with 402 pass_required once CREDITS_ENFORCE=1; a no-op until then.
 router = APIRouter(dependencies=[Depends(require_pass)])
+
+# The tutor's reviews a learner may ask for in a day (plan 211). See
+# composition.py's COMPOSITION_DAILY_LIMIT, the same review's ceiling.
+FEATURE = "translation_review"
+TRANSLATION_DAILY_LIMIT = int(os.environ.get("TRANSLATION_DAILY_LIMIT", "60"))
 logger = logging.getLogger(__name__)
 
 
@@ -49,6 +56,7 @@ def _init_db() -> None:
                 )
                 """
             )
+            enable_rls(cur, "translation_log")
             # The screen grades with the app's six-segment rating bar, so
             # the learner's answer carries more than pass/fail. `correct`
             # stays -- it is what every existing reader and every row
@@ -192,7 +200,7 @@ A reference Japanese translation is:
 The learner's own attempt was:
 <<<{user_answer}>>>
 {grammar_note}
-Respond with ONLY a JSON object (no markdown fences, no commentary) matching exactly this schema:
+Respond with ONLY a JSON object (no markdown fences, no commentary, no reasoning written out) matching exactly this schema. Your reply starts with the character {{ and ends with }}:
 {{
   "verdict": "correct",
   "summary": "...",
@@ -233,9 +241,23 @@ def post_translation_analyze(payload: AnalyzePayload, user_id: str = Depends(get
     if not payload.user_answer.strip():
         raise HTTPException(status_code=400, detail="user_answer is required")
 
-    lang_name = reading.LANG_NAMES.get(payload.lang, payload.lang)
-    prompt_lang = payload.prompt_lang or payload.lang
-    prompt_lang_name = reading.LANG_NAMES.get(prompt_lang, prompt_lang)
+    # A model call a review, and none was ever counted (plan 211): the
+    # same ceiling composition's review has, its own allowance.
+    used = daily_limit.claim(user_id, FEATURE, TRANSLATION_DAILY_LIMIT)
+    if used > TRANSLATION_DAILY_LIMIT:
+        raise HTTPException(
+            status_code=429,
+            detail=(
+                f"Daily limit of {TRANSLATION_DAILY_LIMIT} translation reviews reached; "
+                f"resets {resets_at(user_id):%Y-%m-%dT%H:%MZ}"
+            ),
+        )
+
+    # Known languages only: these names land in the prompt.
+    lang = reading.known_lang(payload.lang)
+    lang_name = reading.LANG_NAMES[lang]
+    prompt_lang = reading.known_lang(payload.prompt_lang or lang)
+    prompt_lang_name = reading.LANG_NAMES[prompt_lang]
     # The one thing this endpoint knows that the learner does not, and
     # that the reference sentence alone does not say: WHY this sentence
     # was chosen. A curated sentence exists to demonstrate one grammar
@@ -285,14 +307,22 @@ def post_translation_analyze(payload: AnalyzePayload, user_id: str = Depends(get
         # reasoning model is paid in latency, not in quality.
         max_tokens=1000,
         task="translation-review",
+        # A model that thinks out loud and runs out of tokens before its
+        # JSON answers 200 with a monologue; the next model is asked.
+        accept=tutor_review.acceptable_reply,
     )
     review = _parse_review(content)
     if review is None:
-        # Not the shape. The prose is still a review, so it is served as
-        # one rather than costing the learner a second call; the screen
-        # prints `analysis` when `review` is missing.
+        # Not the shape. Prose that reads as a review is still one, so
+        # it is served as one rather than costing the learner a second
+        # call; the screen prints `analysis` when `review` is missing.
+        # Anything else (reasoning, a cut-off object) is no review at
+        # all, and the screen already has a place for "none came".
+        cleaned = tutor_review.usable_prose(content)
+        if cleaned is None:
+            logger.error("translation review was neither the shape nor prose: %s", content[:300])
+            raise HTTPException(status_code=503, detail="The tutor's reply could not be read")
         logger.warning("translation review was not the shape; served as prose")
-        cleaned = re.sub(r"^```(?:\w+)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
         return {"review": None, "analysis": cleaned}
     review.pop("japanese", None)  # composition's key; the prompt here never asks for it
     if review["better"]:

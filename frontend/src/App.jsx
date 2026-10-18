@@ -32,7 +32,13 @@ import { rememberOnboarded, wasOnboardedHere } from './stores/onboarded'
 import { holdGuide } from './stores/guide'
 import { forgetAccount } from './stores/account'
 import { track } from './lib/track'
+import { cardsRidden } from './lib/rideProgress'
 import { routePattern } from './lib/routePattern'
+import { watchApiFailures } from './lib/apiTrail'
+import { watchClientErrors } from './lib/clientErrors'
+import { watchVitals } from './lib/vitals'
+import { enterScreen } from './lib/screenTrail'
+import { syncOptOut } from './stores/analyticsOptOut'
 import { useDesk } from './hooks/useDesk'
 import { LangProvider, useLang } from './LangContext'
 
@@ -68,6 +74,8 @@ import ReadingRun from './screens/ReadingRun'
 import ComprehensionRun from './screens/ComprehensionRun'
 import DictationRun from './screens/DictationRun'
 import CompositionRun from './screens/CompositionRun'
+import ConversationStation from './screens/ConversationStation'
+import ConversationRun from './screens/ConversationRun'
 import ProfileScreen from './screens/ProfileScreen'
 import SettingsScreen from './screens/SettingsScreen'
 import ExamScreen from './screens/ExamScreen'
@@ -75,6 +83,7 @@ import ExamRunner from './screens/ExamRunner'
 import ExamResult from './screens/ExamResult'
 import TranslationRun from './screens/TranslationRun'
 import AppLoading from './screens/AppLoading'
+import { FeedbackHost } from './components/feedback/FeedbackSheet'
 
 // Renders nothing — keeps <html lang> and document.title in step with
 // the current route and language. Beside <Routes/> rather than inside
@@ -109,6 +118,12 @@ function DocumentHead() {
   return null
 }
 
+watchApiFailures()
+// Plan 218: uncaught errors by screen (never their text) and the page's
+// own speed, once per load.
+watchClientErrors()
+watchVitals()
+
 // 足跡 — renders nothing; records which screen was opened.
 //
 // Beside <Routes/> for exactly the reason DocumentHead is: the
@@ -131,7 +146,11 @@ export function Trail() {
   useEffect(() => {
     const route = routePattern(pathname)
     if (!route) return
-    track('screen_view', { route, tab: tabFor(pathname) })
+    const tab = tabFor(pathname)
+    track('screen_view', { route, tab })
+    // 滞在 (plan 218): the screen before is left -- its engaged time and
+    // its feature counts sent -- and this one's clock starts.
+    enterScreen(route, tab)
   }, [pathname])
 
   return null
@@ -242,7 +261,12 @@ export default function App({ front = NO_FRONT }) {
   // line to say why, so the learner would be returned to the poster as
   // if they had never tapped anything. The sign-in screen has that
   // line, and it prints the reason on its own mount.
-  const [authMode, setAuthMode] = useState(() => (authRedirectError() ? 'login' : null)) // null | 'login' | 'signup'
+  // Se connecter pressed on the landing page (lib/frontEntry.js) opens
+  // the sign-in at once, rather than the Welcome and its own Se connecter.
+  const [authMode, setAuthMode] = useState(() => (authRedirectError() || front.entry === 'signin' ? 'login' : null)) // null | 'login' | 'signup'
+  // ... and backing out of it goes back to that page, not to the Welcome
+  // it skipped. Spent on the first way out, or by signing in.
+  const signinBehind = useRef(front.entry === 'signin' ? front.back : null)
   // 机 (plans 122, 163) and a phone (plan 168): the sign-in stands in the
   // promise's place on the Welcome itself, so there is no second screen
   // to swap to -- authMode says whether it stands, and on which side it
@@ -263,7 +287,7 @@ export default function App({ front = NO_FRONT }) {
       if (authIgnore.current) { authIgnore.current = false; return }
       if (!authGuard.current) return
       authGuard.current = false
-      setAuthMode(null)
+      closeSignIn()
     }
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
@@ -300,7 +324,8 @@ export default function App({ front = NO_FRONT }) {
   const [boardedHere, setBoardedHere] = useState(() => (front.entry === 'board' ? performance.now() : null))
   // 正面口 (lib/frontEntry.js): Board pressed on the landing page is
   // honoured before any screen is drawn -- the pass is minted at once and
-  // the boarding opens on its name, with no Welcome asking a second time.
+  // the boarding opens on its first question, with no Welcome asking a
+  // second time.
   // On until a session arrives, or until the pass could not be minted (the
   // Welcome then opens on the sign-up, as its own Board does).
   const [pageBoard, setPageBoard] = useState(front.entry === 'board')
@@ -318,6 +343,19 @@ export default function App({ front = NO_FRONT }) {
   // the Welcome it skipped. The page to go to while it loads, or null.
   const pageBehind = useRef(front.entry === 'board' ? front.back : null)
   const [leavingForPage, setLeavingForPage] = useState(false)
+
+  // The sign-in's ‹ (and the browser's Back on it): the Welcome, or the
+  // landing page when that is where the sign-in was opened from.
+  function closeSignIn() {
+    const page = signinBehind.current
+    signinBehind.current = null
+    if (page) {
+      setLeavingForPage(true)
+      window.location.replace(page)
+      return
+    }
+    setAuthMode(null)
+  }
 
   // Anonymous sign-ins are a project setting, so this can legitimately
   // be unavailable. It is not something the learner can act on, so the
@@ -418,6 +456,9 @@ export default function App({ front = NO_FRONT }) {
           standalone: typeof window !== 'undefined'
             && window.matchMedia?.('(display-mode: standalone)').matches === true,
         })
+        // 足跡を残さない (plan 218): the account's switch onto this
+        // device, or this device's older local switch up to the account.
+        syncOptOut(p.analyticsOff, session)
         // A real answer: the device now knows this learner is past
         // the gate, and may wave them through on a day the server is
         // not answering (stores/onboarded.js).
@@ -470,7 +511,10 @@ export default function App({ front = NO_FRONT }) {
   // 入門 (plan 170): a learner who answered « Pas encore » to the kana
   // question meets the introduction before the cards; everyone else
   // boards the cards as before.
-  const rideStart = onboardingProfile?.kanaKnown === 'none' ? '/ride/intro' : '/ride/cards'
+  // A ride left after its cards (a reload, the tab closed) is boarded
+  // again at the reading, never the first card (lib/rideProgress.js).
+  const rideStart = cardsRidden(session?.user?.id) ? '/ride/reading'
+    : onboardingProfile?.kanaKnown === 'none' ? '/ride/intro' : '/ride/cards'
   // 案内 — no gate's guide may open under the 改札 cutscene (plan 100).
   useEffect(() => { holdGuide(onboarding === 'finishing') }, [onboarding])
   const rideDone = () => setGate(g => (
@@ -570,7 +614,7 @@ export default function App({ front = NO_FRONT }) {
     }
     return (
       <LangProvider>
-        <Welcome onBoard={board} boarding={boarding} onSignIn={() => setAuthMode('login')} onBack={() => setAuthMode(null)} authMode={authMode} />
+        <Welcome onBoard={board} boarding={boarding} onSignIn={() => setAuthMode('login')} onBack={closeSignIn} authMode={authMode} />
       </LangProvider>
     )
   }
@@ -597,7 +641,6 @@ export default function App({ front = NO_FRONT }) {
       <LangProvider>
         <BoardingFlow
           session={session}
-          initialProfile={onboardingProfile}
           guest={isGuest(session)}
           onComplete={signed => {
             // The contract is signed server-side by now: this device
@@ -624,14 +667,6 @@ export default function App({ front = NO_FRONT }) {
           onExit={() => leaveBoarding()}
           onSignIn={() => leaveBoarding('login')}
         />
-        {/* 定期券 — the offer, for the last boarding screen's door to
-            open. This branch returns BEFORE the router, so the copy
-            mounted beside <Routes/> is not in the tree here: without
-            this one, the pass line on PassStep would be exactly the
-            dead control domain/paywall.js argues against. Portals to
-            document.body and uses no router hook, so it is at home
-            outside the BrowserRouter. */}
-        <OfferScreen />
       </LangProvider>
     )
   }
@@ -712,6 +747,9 @@ export default function App({ front = NO_FRONT }) {
                 />
               ))
             )}
+            {/* 会話 (plan 217): chosen by scene and by grade, so its
+                station is its own rather than SentenceStation's. */}
+            <Route path="/practice/conversation" element={<ConversationStation session={session} />} />
             <Route path="/dictionary"           element={<DictionaryScreen session={session} />} />
             <Route path="/dictionary/analyzer"  element={<AnalyzerScreen session={session} />} />
             <Route path="/profile"              element={<ProfileScreen session={session} />} />
@@ -757,6 +795,7 @@ export default function App({ front = NO_FRONT }) {
             <Route path="/practice/comprehension/:level"     element={<ComprehensionRun session={session} />} />
             <Route path="/practice/dictation/:level"          element={<DictationRun session={session} />} />
             <Route path="/practice/composition/:level"        element={<CompositionRun session={session} />} />
+            <Route path="/practice/conversation/:scenario/:mode" element={<ConversationRun session={session} />} />
             <Route path="/practice/translation/level/:level" element={<TranslationRun session={session} />} />
             <Route path="/practice/translation/tier/:tier"   element={<TranslationRun session={session} />} />
             <Route path="/practice/translation/mastery"      element={<TranslationRun session={session} />} />
@@ -765,20 +804,24 @@ export default function App({ front = NO_FRONT }) {
                 boarding, on the stage like any run. Reachable at any
                 time (Settings replays it); the index route below is
                 what sends a new learner here first. `covered` is the
-                改札 cutscene still playing over the router. */}
+                改札 cutscene still playing over the router. `first` is
+                the ride that index route sends to, never a replay: the
+                entry behind it is that route, which would board the
+                ride again, so each screen holds Back
+                (hooks/useBackGuard.js). */}
             <Route path="/ride" element={<Navigate to="/ride/cards" replace />} />
             {/* 入門 (plan 170): six screens before the cards, for the
                 learner with no kana; its way on and its way out both
                 board the cards. */}
             <Route
               path="/ride/intro"
-              element={<RideIntro session={session} covered={onboarding === 'finishing'} />}
+              element={<RideIntro session={session} covered={onboarding === 'finishing'} first={rideDue} />}
             />
             <Route
               path="/ride/cards"
-              element={<RideRun session={session} onDone={rideDone} covered={onboarding === 'finishing'} />}
+              element={<RideRun session={session} onDone={rideDone} covered={onboarding === 'finishing'} first={rideDue} />}
             />
-            <Route path="/ride/reading" element={<RideReading session={session} onDone={rideDone} />} />
+            <Route path="/ride/reading" element={<RideReading session={session} onDone={rideDone} first={rideDue} />} />
           </Route>
 
           {/* The gate hall retired with the chrome; the front door is
@@ -820,6 +863,10 @@ export default function App({ front = NO_FRONT }) {
             second is raised by a review the screen fired and forgot. */}
         <BalanceSheet />
         <RunOutSheet />
+        {/* Nous écrire, raised from inside a run (plan 222): a failure's
+            link and a card's flag. Here for RunOutSheet's reason -- the
+            run's own retry unmounts the failure that raised it. */}
+        <FeedbackHost session={session} />
         <OfferScreen />
         {/* 補充 — what the refill landed while the app was closed, on
             arrival (plan 141). Held through the 改札 cutscene and the

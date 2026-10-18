@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { apiJson } from '../../lib/api'
+import { cachedJson, invalidateCachedJson, MINE_TTL_MS } from '../../lib/cachedJson'
 import { playClick, playUi } from '../../lib/audio'
 import { useProfileSummaryState } from '../../stores/profileSummary'
 import { useTodaySummary, refreshToday } from '../../stores/today'
@@ -29,7 +30,7 @@ const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 // deleted. The figures come from GET /api/profile/learning/preview —
 // the same arithmetic the write will run.
 export function LevelPage({ session }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const { summary, failed: summaryFailed } = useProfileSummaryState()
   const { save, saving, failed, setFailed } = useLearningSave(session)
   const [pending, setPending] = useState(null) // { level, preview } while the sheet is open
@@ -42,21 +43,28 @@ export function LevelPage({ session }) {
   const desk = useDesk()
   const onWalk = useRadioWalk(desk, { check: false })
 
+  // A level's preview is asked once however often it is pressed
+  // (lib/cachedJson, plan 211), and only the last level pressed opens
+  // its sheet: an earlier one answering late must not take its place.
+  const asked = useRef(0)
   async function askLevel(level) {
     if (level === current || saving) return
     playClick()
     setFailed(false)
+    const ask = ++asked.current
     try {
-      const preview = await apiJson(`/api/profile/learning/preview?jlptLevel=${level}`, session)
-      setPending({ level, preview })
+      const preview = await cachedJson(`/api/profile/learning/preview?jlptLevel=${level}`, session, { ttlMs: MINE_TTL_MS })
+      if (ask === asked.current) setPending({ level, preview })
     } catch {
-      setFailed(true)
+      if (ask === asked.current) setFailed(true)
     }
   }
 
   function confirmLevel() {
     const { level } = pending
     setPending(null)
+    // What moving would do is measured from the level left behind.
+    invalidateCachedJson('/api/profile/learning/preview')
     playUi('click')
     save({ jlptLevel: level })
   }
@@ -147,6 +155,7 @@ export function LevelPage({ session }) {
           to={pending.level}
           preview={pending.preview}
           t={t}
+          lang={lang}
           onConfirm={confirmLevel}
           onClose={() => setPending(null)}
         />
@@ -156,24 +165,32 @@ export function LevelPage({ session }) {
 }
 
 // ── The confirm sheet (canvas SettingsLevelUp / SettingsLevelDown) ──
-function LevelSheet({ from, to, preview, t, onConfirm, onClose }) {
+// A move down gives back the cards the level assumed known and never
+// asked about (plan 224): they are new again. The sheet prints how many
+// where it printed the zero deleted -- the body still says nothing is.
+// Shared with Today's level-fit line (station/LevelFitLine), whose Stay
+// is an answer of its own (`onStay`) where here it only closes.
+export function LevelSheet({ from, to, preview, t, lang, onConfirm, onClose, onStay = onClose }) {
   const up = preview.direction !== 'down'
+  const returned = preview.returned ?? 0
   const title = up ? t.levelUpTitle(to) : t.levelDownTitle(to)
   return (
     <Sheet open onClose={onClose} jp={title} label={title} className="lvl-sheet" initialFocus=".btn-secondary">
       <p className="lvl-sheet__body">
-        <Emphasized text={up ? t.levelUpBody(to, preview.spreadWeeks ?? 6) : t.levelDownBody(to)} strongClassName="lvl-sheet__strong" />
+        <Emphasized text={up ? t.levelUpBody(to, preview.spreadWeeks ?? 6) : t.levelDownBody(to, returned)} strongClassName="lvl-sheet__strong" />
       </p>
       <div className="lvl-sheet__figs">
         {up ? (
           <>
-            <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">{(preview.markedKnown ?? 0).toLocaleString()}</b><span className="lvl-sheet__fig-l">{t.levelMarkedKnown}</span></div>
+            <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">{(preview.markedKnown ?? 0).toLocaleString(lang)}</b><span className="lvl-sheet__fig-l">{t.levelMarkedKnown}</span></div>
             <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">{t.levelWeeks(preview.spreadWeeks ?? 6)}</b><span className="lvl-sheet__fig-l">{t.levelSpreadOver}</span></div>
           </>
         ) : (
           <>
-            <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">{(preview.setAside ?? 0).toLocaleString()}</b><span className="lvl-sheet__fig-l">{t.levelSetAside}</span></div>
-            <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">0</b><span className="lvl-sheet__fig-l">{t.levelDeleted}</span></div>
+            <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">{(preview.setAside ?? 0).toLocaleString(lang)}</b><span className="lvl-sheet__fig-l">{t.levelSetAside}</span></div>
+            {returned > 0
+              ? <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">{returned.toLocaleString(lang)}</b><span className="lvl-sheet__fig-l">{t.levelBackToNew}</span></div>
+              : <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">0</b><span className="lvl-sheet__fig-l">{t.levelDeleted}</span></div>}
           </>
         )}
       </div>
@@ -181,7 +198,7 @@ function LevelSheet({ from, to, preview, t, onConfirm, onClose }) {
         <span className="btn-depart__jp">{up ? t.levelUpGo(to) : t.levelDownGo(to)}</span>
         <span className="btn-depart__go" aria-hidden="true">▶</span>
       </button>
-      <button type="button" className="btn-secondary" onClick={onClose}>
+      <button type="button" className="btn-secondary" onClick={onStay}>
         {t.levelStay(from ?? to)}
       </button>
     </Sheet>

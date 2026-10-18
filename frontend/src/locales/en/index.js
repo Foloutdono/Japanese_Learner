@@ -13,6 +13,22 @@ const auth = {
   signOut:           'Sign out',
   usernameInvalid:   'Username must be 3-20 characters (letters, numbers, underscore).',
   usernameTaken:     'This username is already taken.',
+  // 改札 — sign-in refusals, named by their code (lib/authErrors.js)
+  // rather than by Supabase's English sentence (plan 215). The ones the
+  // guest claim shares (address taken, weak password, too many tries)
+  // say the claim* lines.
+  authBadCredentials:    'Wrong email address or password.',
+  authEmailNotConfirmed: 'Confirm your address first: the link is in your inbox.',
+  authEmailInvalid:      'That email address is not valid. Check it, or try another one.',
+  authCheckFields:       'Check your email address and your password.',
+  authSignupDisabled:    'Sign-ups are closed for now.',
+  authLinkExpired:       'This link has expired or was already used. Try signing in; if that fails, start again to get a new one.',
+  // A sign-in link (plan 247): a card kept by a link has no password, and
+  // a forgotten password finds its door here.
+  authLinkSend:          'Email me a sign-in link',
+  authLinkSent:          (email) => `Link sent to ${email}. Open it on this device.`,
+  authLinkNoAccount:     'No card is kept at that address.',
+  authLinkNeedsEmail:    'Type your address, then ask for the link.',
 }
 
 // ── Landing screen ────────────────────────────────────────
@@ -40,6 +56,12 @@ const nav = {
   waitingServer:     'Waking the server…',
   errorTitle:        'That didn’t work',
   errorHint:         'Check your connection — your progress is safe.',
+  // The two refusals a session has a line of its own for
+  // (components/study/SessionError.jsx): a pass the server no longer
+  // recognises, a deck that is no longer there. Everything else says
+  // errorHint.
+  sessionExpired:    'Your session has expired. Sign in again to carry on — your progress is safe.',
+  deckGone:          'This deck is no longer on your shelf.',
   // ── The chrome (plan 068): the five gates and the HUD ──
   tabLearn:          'Learn',
   tabPractice:       'Practice',
@@ -73,12 +95,12 @@ const nav = {
   gateNoCredits:     (at) => (at ? `No credits left — +1 at ${at}` : 'No credits left'),
   runOutTitle:       'Out of credits',
   runOutCleared:     (n) => `${n} cleared`,
-  runOutWaiting:     (n) => `${n} wait for the refill`,
+  runOutWaiting:     (n) => `${n} wait${n === 1 ? 's' : ''} for the refill`,
   runOutWaits:       'waiting',
   // 補充 — what the refill landed while the app was closed (plan 141)
   claimTitle:        'While you were away',
   claimButton:       'Claim',
-  claimBookLabel:    (n, cap) => `${n} credits of ${cap}`,
+  claimBookLabel:    (n, cap) => `${n} credit${n === 1 ? '' : 's'} of ${cap}`,
   // 無料 — a lane that costs nothing (domain/credits.js).
   freeFare:          'free',
   laneNew:           n => `${n} new`,
@@ -95,7 +117,7 @@ const nav = {
   gateServicesOf:    (on, all) => `${on} of ${all}`,
   gateServicesTitle: "Today's services",
   gateMinutes:       'min',
-  gateMinutesLabel:  n => `about ${n} minutes`,
+  gateMinutesLabel:  n => `about ${n} minute${n === 1 ? '' : 's'}`,
   gateRides:         'board',
   gateWaits:         (at) => (at ? `wait · +1 at ${at}` : 'wait'),
   gateBalance:       'credits',
@@ -103,6 +125,33 @@ const nav = {
   weekAhead:         'The next seven days',
   weekLeft:          'Left for tomorrow',
   gateRidesFree:     'board · free',
+  // 一目 — Today at a glance (plan 199)
+  gateModesMainName: 'Main cards',
+  gateModesAllName:  'Every mode',
+  gateTakeWord:      'All',
+  gateTakeAllWord:   'all',
+  gateEndsAt:        at => `done by ${at}`,
+  gateAdjust:        'Adjust',
+  // 浮世絵 (plan 205): the print's title slip, said whole -- the day and
+  // the hour's view, as the print's series would name it.
+  printTitle:        (day, view) => `${day} — ${view}`,
+  printViews:        { dawn: 'dawn', day: 'sails coming home', dusk: 'geese coming down', night: 'the autumn moon' },
+  gateServicesN:     n => (n === 1 ? '1 service' : `${n} services`),
+  gateLineModes:     name => `Modes: ${name}`,
+  gateLineNone:      'No service today',
+  gateOpensAt:       at => `Opens at ${at}`,
+  gateOpensIn:       when => `Opens ${when}`,
+  todayDayLabel:     'Your day',
+  todayStreakDays:   n => (n === 1 ? 'day in a row' : 'days in a row'),
+  todayStreakShort:  'in a row',
+  todayNewToday:     'new today',
+  todayNewShort:     'new',
+  todayLesson:       'unit',
+  todayReviewed:     n => (n === 1 ? '1 card today' : `${n} cards today`),
+  // The same, its figure set apart on the print (plan 206).
+  todayReviewedUnit: n => (n === 1 ? 'card today' : 'cards today'),
+  todayCardsUnit:    n => (n === 1 ? 'card' : 'cards'),
+  todayWeekStamps:   n => `${n} day${n === 1 ? '' : 's'} in a row, the last seven stamped`,
   // 基礎 — the basics course on the gate and in Settings › Level (plan 186f)
   basicsUnit:        (n, of) => `Unit ${n} of ${of}`,
   basicsMet:         (n, of) => `${n} of ${of} units met`,
@@ -110,7 +159,7 @@ const nav = {
   basicsSkip:        'Skip the basics',
   basicsSkipLabel:   'Basics',
   basicsSkipAct:     'I know them',
-  basicsSkipped:     n => `${n} basic cards marked known.`,
+  basicsSkipped:     n => `${n} basic card${n === 1 ? '' : 's'} marked known.`,
   // 基礎 — the course's station on the Learn gate (plan 186g)
   basicsTitle:       'Basics',
   basicsDesc:        'N5 from its first lesson\nOne unit at a time\nIts rules, its words, its kanji',
@@ -179,7 +228,7 @@ const nav = {
   ofrWeekDone:        'reviewed',
   ofrWeekWaiting:     'waiting',
   ofrWeekCeiling:     (n) => `limit: ${n} credits / day`,
-  ofrWeekGain:        (n) => `+${n} cards reviewed with Pro`,
+  ofrWeekGain:        (n) => `+${n} card${n === 1 ? '' : 's'} reviewed with Pro`,
   ofrWeekChart:       (stops, waited) => `Your last 7 days: ${stops} day${stops > 1 ? 's' : ''} when cards waited, ${waited} card${waited > 1 ? 's' : ''} in all.`,
   ofrWeekEyebrow:     'Your week',
   ofrWeekTitle:       (n) => (n === 1 ? 'Your credits stopped you once this week.' : `Your credits stopped you ${n} times this week.`),
@@ -293,9 +342,7 @@ const home = {
   kanaTitle:         'Kana',
   kanaDesc:          'Hiragana and katakana, sound by sound\nRecognition first, then written by hand\nThe ground everything else stands on',
   vocabTitle:        'Vocabulary JLPT',
-  vocabDesc:         'N5 → N1\nKanji + Kana → Meaning\nPhase progression',
   kanjiTitle:        'Kanji',
-  kanjiDesc:         'Kanji learning\nN5 → N1\nWriting exercises',
   dictionaryTitle:   'Dictionary',
   dictionaryDesc:    'Kanji, kana, or any word\nReadings, radicals, stroke order, examples\nAnd whether you have met it before',
   grammarTitle:      'Grammar',
@@ -464,6 +511,9 @@ const quiz = {
   deskSealed:          'The entry opens on the reveal.',
   keyEnter:            'Enter',
   keyEscape:           'Esc',
+  // A percentage (the HUD's status, an exam's score, the report): French
+  // sets a no-break space before the sign, English none.
+  percent:             n => `${n}%`,
   deskWayUp:           'Way up',
   deskBreakdownWait:   'The sentence’s breakdown appears here once you have graded your answer.',
   // An exercise on three panels (plan 129): the run's sentences, each with
@@ -481,12 +531,15 @@ const quiz = {
   deskKeyPick:         'picks an answer',
   deskKeyNext:         'next question',
   deskKeyWalk:         'walks the questions',
-  // 問 — a question about the exercise, on the desk (plan 131): open once
-  // the answer is graded, short, precise, about this exercise only.
+  // 問 — a question about the exercise, on the desk (plan 131) and, on a
+  // phone, on a page of its own (plan 197): open once the answer is graded,
+  // short, precise, about this exercise only.
   askTitle:            'A question',
+  askOpen:             'Ask a question',
   askPlaceholder:      'Your question…',
   askSealed:           'Questions open once your answer is graded.',
   askSealedText:       'Questions open with the results.',
+  askSealedTour:       'Questions open once this stop is answered.',
   askHint:             'A short, precise answer, about this exercise.',
   askSend:             'Ask',
   askThinking:         'Answering',
@@ -496,6 +549,15 @@ const quiz = {
   askSpent:            at => (at ? `No more questions today: they come back at ${at}.` : 'No more questions today.'),
   askLeft:             n => `${n} question${n > 1 ? 's' : ''} left today`,
   askFull:             'That’s all for this sentence.',
+  askSuggestLabel:     'Suggested questions',
+  askSugContrast:      (a, b) => `Why ${a} and not ${b}?`,
+  askSugMarks:         p => `What does ${p} mark here?`,
+  askSugPoint:         p => `How is ${p} used?`,
+  askSugExample:       w => `Another example with ${w}?`,
+  askSugPolite:        'How would I say it more politely?',
+  askSugCasual:        'And casually, between friends?',
+  askSugWhyRight:      'Why is this the right answer?',
+  askSugWhere:         'Where does the text say it?',
 
   // Feedback — the ❌/✅/← glyphs these used to carry inline are now
   // real <Icon/>s rendered by whatever shows the text (see
@@ -549,6 +611,8 @@ const quiz = {
   field_radical:    'Radical',
   field_word:       'Word',
   field_reading:    'Reading',
+  field_kana:       'Kana',
+  field_romaji:     'Rōmaji',
   field_rule:       'Grammar rule',
   field_sentences:  'Example sentence',
   field_sentences_group: 'Example sentences',
@@ -651,7 +715,6 @@ const quiz = {
 
   // XpToast
   levelUp:          'Level up!',
-  level:            'Level',
   levelShort:       'Lv',
   // 上下 (plan 174): the run's meter under the head, for a screen reader.
   runMeter:          (n, total) => (total == null ? `${n} rated` : `${n} of ${total}`),
@@ -686,8 +749,8 @@ const stats = {
   newUnit:            'new',
   learningUnit:       'in progress',
   learnedLabel:       'Learned',   // a platform's figure, read out (plan 184)
-  sourceTiers:        n => `${n} tiers`,
-  sourceThemes:       n => `${n} themes`,
+  sourceTiers:        n => `${n} tier${n === 1 ? '' : 's'}`,
+  sourceThemes:       n => `${n} theme${n === 1 ? '' : 's'}`,
   // The vocabulary's sources on the desk (plan 183): the strip of what
   // the learner has started, over the three sources.
   sourcesInProgress:  'In progress',
@@ -746,7 +809,6 @@ const stats = {
   practiceResult:     'Result',
   reference:          'Reference',
   // ── Dictionary and the analyzer (plan 073) ──
-  allReadings:        'All readings',
   dictCollections:    'Collections',
   analyzerDoorSub:    'Text, a photo, a video',
   passagesCount: (n) => `${n} ${n === 1 ? 'passage' : 'passages'}`,
@@ -763,7 +825,7 @@ const stats = {
   reportDelta:        (n, w) => `${n > 0 ? '+' : n < 0 ? '−' : '±'}${Math.abs(n)} · ${w} wk`,
   reportWeekOf:       (date, n) => `week of ${date} · ${n} ${n === 1 ? 'review' : 'reviews'}`,
   reportRungs:        ['<1 d', '1 w', '1 m', '3 m', '3 m+'],
-  reportStrengthSummary: n => `${n} cards by how far ahead they sit`,
+  reportStrengthSummary: n => (n === 1 ? `${n} card by how far ahead it sits` : `${n} cards by how far ahead they sit`),
   reportMisses:       (n, d) => `${n === 1 ? 'miss' : 'misses'} · ${d} d`,
   // ── 路線別, the record's lines (plan 138) ──
   reportWeekStart:    d => `week of ${d}`,
@@ -780,7 +842,7 @@ const stats = {
   reportEmptyHint:    'The first week of reviews draws the line.',
   startedNote:     n => `${n} started`,
   reportError:        'The record could not be read',
-  daysUnit:           'days',
+  daysUnit:           n => (n === 1 ? 'day' : 'days'),
   balanceRefillLine:  (at) => `+1 at ${at}`,
   balanceRefillRate:  (min) => `+1 every ${min} min`,
   perDayUnit:         '/ day',
@@ -817,15 +879,22 @@ const stats = {
   levelUpTitle:       l => `Move up to ${l}?`,
   levelUpBody:        (to, weeks) => `The stops behind ${to} are marked **known**: their cards start mastered, with a first check spread over the next ${weeks} weeks. Cards you are already learning keep their place. **Nothing is deleted.**`,
   levelDownTitle:     l => `Move down to ${l}?`,
-  levelDownBody:      to => `The cards beyond ${to} are set aside, not deleted: they keep their history and rejoin the run when you move up again. Today's run shrinks to the ${to} stops.`,
+  levelDownBody:      (to, returned) => (returned > 0
+    ? `What you studied beyond ${to} is set aside, not deleted. The cards marked known from ${to} up that you were never asked about become **new** again.`
+    : `The cards beyond ${to} are set aside, not deleted: they keep their history and rejoin the run when you move up again. Today's run shrinks to the ${to} stops.`),
   levelMarkedKnown:   'Marked known',
   levelSpreadOver:    'Spread over',
-  levelWeeks:         n => `${n} weeks`,
+  levelWeeks:         n => `${n} week${n === 1 ? '' : 's'}`,
   levelSetAside:      'Set aside',
   levelDeleted:       'Deleted',
+  levelBackToNew:     'Back to new',
   levelUpGo:          l => `Move up to ${l}`,
   levelDownGo:        l => `Move down to ${l}`,
   levelStay:          l => `Stay at ${l}`,
+  fitDown: (to, passed, answered) => `${to} · ${passed} of ${answered} checks known`,
+  fitUp: (level, known, met) => `${level} · ${known} of ${met} new words already known`,
+  fitDownGo: to => `Board at ${to}`,
+  fitUpGo: to => `Try ${to}`,
   destOnPass:         'On the pass',
   destService:        'Service',
   destDailyRide:      'Daily ride',
@@ -864,10 +933,14 @@ const stats = {
   // schedule: a figure, so one word rather than a phrase (plan 089).
   dueValue:          'Now',
   reviewThisCard:    'Review this card',
+  // The entry's record (plan 235): the schedule's cell, when the card is
+  // due, is the door to its review; and the word that replaces JMdict's
+  // star on a common word.
+  dictReview:        'Review',
+  dictCommon:        'common',
   total:             'Total',
   overview:        'Overview',
   streak:          'Streak',
-  longestStreak:   'Best streak',
   resultNotSaved:  "This answer could not be saved to your record and will not appear in it.",
   runStreak:       (n, best) => `${n} in a row · best ${best}`,
   accuracy:        'Accuracy',
@@ -913,7 +986,7 @@ const phraseAnalyzer = {
   intakeVideoLead:     'Paste the link, let the 字幕取り bookmark fetch the subtitles — or drop a file.',
   shootPhoto:          'Shoot',
   pickPhoto:           'Choose',
-  charCount:           n => `${n} characters`,
+  charCount:           n => `${n} character${n === 1 ? '' : 's'}`,
   // Must agree with routes/video.py:50 (_MAX_UPLOAD_BYTES = 1 MB).
   subtitleAccepted:    'SRT, VTT and ASS · up to 1 MB',
   windowLabel:         'Section',
@@ -976,9 +1049,15 @@ const phraseAnalyzer = {
   hideVideo:           'Hide the video',
   furiganaNow:         label => `Furigana: ${label}`,
   wordsInSentence:     'The words in the sentence',
+  // The text desk: the words list folded to one line (plan 235).
+  wordsFoldCap:        'Words in the sentence',
   explanationTitle:    'The sentence explained',
-  showExplanation:     'Show the explanation',
-  showEntry:           'Back to the entry',
+  // The desk's panel, its three faces (plan 242).
+  panelFaces:          'What the panel shows',
+  faceWord:            'Word',
+  facePoint:           'Point',
+  faceGrammar:         'Grammar',
+  faceExplain:         'Construction',
   explainThisSentence: 'Explain the sentence',
   explanationOpen:     'Explanation open',
   writtenHere:         s => `here: ${s}`,
@@ -1024,7 +1103,7 @@ const phraseAnalyzer = {
   status_new:          'New',
   status_not_started:  'Not in deck',
   status_due:          'Due now',
-  sentenceLevel:       'Estimated level',
+  sentenceLevel:       level => `Estimated level: ${level}`,
   unknownWords:        'unknown words',
   offDeckWords:        'not taught by the app',
   iPlusOne:            'One step beyond you',
@@ -1032,6 +1111,31 @@ const phraseAnalyzer = {
   // 保存 (plan 039) — pinning a Sentence into the bank.
   keepSentence:        'Keep this sentence',
   unkeepSentence:      'Stop keeping this sentence',
+  // 歌 (plan 215) — a song's own deck, from the analyser's result.
+  songDeckOpen:        'Make a deck of this song',
+  songDeckShort:       'Deck',
+  dockGrammar:         'Grammar',
+  dockWords:           'Words',
+  dockExplain:         'Explain',
+  dockKeep:            'Keep',
+  dockKept:            'Kept',
+  songDeckTitle:       'Make it yours',
+  songDeckName:        'Deck name',
+  songDeckHolds:       'What the deck holds',
+  songDeckWords:       'Words',
+  songDeckLines:       'Lyrics',
+  wordsSheetTitle:     'The words',
+  wordsSheetCount:     (n, fresh) => `${n} word${n > 1 ? 's' : ''}${fresh ? ` · ${fresh} new` : ''}`,
+  songDeckWordsDesc:   'To understand the song, word by word',
+  songDeckLinesDesc:   'Every line and its reading, to sing it',
+  songDeckCreate:      n => `Create the deck · ${n} card${n > 1 ? 's' : ''}`,
+  explainCap:          'Explanation',
+  explainFailedTitle:  'No explanation for now',
+  askHintSentence:     'A question about this line? A short, precise answer.',
+  askOffTopicSentence: 'I only answer questions about this sentence.',
+  songDeckMaking:      'Making it',
+  songDeckFailed:      "Couldn't make the deck. Try again.",
+  songDeckLimit:       "Your plan's deck or card limit is reached: part of the song is left out.",
   grammarSpotted:      'Grammar spotted',
   explainSentence:     'Explain',
   explainAgain:        'Explain again',
@@ -1098,6 +1202,17 @@ const video = {
   bookmarkletCopied:   'Copied! Now do step 2',
   downsubHint:         'Downloads a .vtt file to choose here — useful when the bookmark will not work.',
   grabEmpty:           'The grabbed subtitles were empty — try again from the video page.',
+  // The bookmark's own alerts, on youtube.com: baked in the learner's
+  // language at the moment of copying (lib/captionGrab.js). tutTrouble1
+  // quotes the first sentences of grabAlertNoJapanese and
+  // grabAlertNotReady -- a test holds them in step.
+  grabAlertNotYoutube:  'Open the YouTube video first.',
+  grabAlertNoVideo:     'No video on this page.',
+  grabAlertNotReady:    'Page not ready: reload it and try again.',
+  grabAlertNoSubtitles: 'This video has no subtitles.',
+  grabAlertNoJapanese:  'No Japanese subtitles. Available: ',
+  grabAlertEmpty:       'The subtitles came back empty: try again.',
+  grabAlertFailed:      'Subtitle grab failed: ',
   // ── The bookmark tutorial ──
   tutTitle:            'Set up the 字幕取り bookmark',
   tutWhat:             'The idea: we save a small "magic address" as a bookmark in your browser. Opening that bookmark while you are on a YouTube video grabs its Japanese subtitles and brings you back here with the analysis started. Nothing to install, no extension, no account.',
@@ -1136,6 +1251,28 @@ const video = {
   analyzingVideo:      'Analyzing the subtitles…',
   captionsUnavailable: "Couldn't get this video's captions.",
   subtitleTooLarge:    'This subtitle file is too large.',
+  transcriptTooLong:   'This transcript is too long. Paste a shorter part of it.',
+  videoStillPreparing: 'A video is still being prepared. Wait for it, then add the next one.',
+  // 動画 — why a video did not open (plan 215). The server names each
+  // refusal with a code; these say it in the learner's language
+  // (components/analysis/videoErrors.js), never the server's English.
+  subtitleNotUtf8:     'This file is not UTF-8. Japanese .srt files are often Shift-JIS: save it again as UTF-8 (any text editor can), then try again.',
+  subtitleParseFailed: 'This subtitle file is malformed and could not be read.',
+  subtitleUnknownFormat: 'Unrecognised subtitle format. Choose an SRT, VTT or ASS file.',
+  subtitleNoCues:      'There are no lines to read in these subtitles.',
+  transcriptNoTimestamps: 'No timestamps found. Copy the whole transcript panel from YouTube (each line should start with a time, like 0:18).',
+  videoNotYoutube:     'That link is not a YouTube video.',
+  videoLinkFetchOff:   'This server cannot fetch subtitles from a link. Use the 字幕取り bookmark, or add a subtitle file.',
+  videoLinkAllowanceMine: 'You have used today’s link allowance. Add a subtitle file, or come back tomorrow.',
+  videoLinkAllowanceApp: 'Today’s link allowance for the whole app is used up. Add a subtitle file, or come back tomorrow.',
+  videoNoJapanese:     'This video has no Japanese subtitles. Try another video, or add a subtitle file yourself.',
+  videoSubtitlesOff:   'This video has its subtitles turned off.',
+  videoSubtitlesEmpty: 'This video’s Japanese subtitle track is empty.',
+  videoUnavailable:    'This video is unavailable.',
+  videoYoutubeRefused: 'YouTube refused to hand over this video’s subtitles. The 字幕取り bookmark or a subtitle file will get through.',
+  videoYoutubeUnreachable: 'Could not reach YouTube. Try again in a moment.',
+  videoTranscriptFailed: 'Reading these subtitles went wrong. Try again.',
+  videoStalled:        'Preparing the subtitles stalled on the way. Try again.',
   breakThisDown:       'Break this down',
   seekToSentence:      'Jump to this sentence',
   // 案内表示 — the notices under the intake. An `info` notice is a fact
@@ -1176,10 +1313,11 @@ const reading = {
   romajiPlaceholder:    'e.g. konnichiwa',
   // The play button a phrase arrives behind (ReadingPieces' PlayButton).
   readingPlay:          'Show the sentence and start the timer',
+  // The reading's clock (ReadingTimer): "4.5s".
+  timerSeconds:         s => `${s.toFixed(1)}s`,
   correct:              'Correct!',
   incorrect:            'Not quite',
   correctRomaji:        'Correct romaji',
-  yourAnswer:           'Your answer',
   // The practice card (plan 185): the grammar point's tag at the card's
   // top, on the answer and (translation) on the prompt; and, for a screen
   // reader, what the figure in the answer's well counts and the name of
@@ -1190,8 +1328,6 @@ const reading = {
   pcardMissed:          'Words missed',
   nextPhrase:           'Next phrase',
   translation:          'Translation',
-  gradeCorrect:         'I got it right',
-  gradeIncorrect:       'I got it wrong',
 
   // Word-by-word breakdown toggle + its per-word navigation
   // (ReadingRun.jsx, DictationRun.jsx) — shown once a phrase has been
@@ -1295,6 +1431,60 @@ const compositionMode = {
   compositionLimitReached: "That's every review for today — your check and your grade still count. The tutor is back tomorrow.",
 }
 
+// ── 会話 — conversation (plan 217) ──────────────────────────────
+// Someone speaks to the learner in a place (a konbini's till, a
+// station's gate, a client's office) and they answer: by choosing among
+// three replies, by writing what they are told to say, or freely, the
+// other person played by the model. ConversationStation lists the
+// scenes, ConversationRun rides one; the tutor's review, the practice
+// card and the rating bar keep their own shared keys.
+const conversationMode = {
+  conversationTitle:   'Conversation',
+  conversationDesc:    'Someone speaks to you: answer them\nChoose, translate or speak freely\nN5 through N1',
+  cvsFetchError:       "Couldn't load the conversation. Try again.",
+  cvsModeLabel:        'How you answer',
+  cvsLevelLabel:       'Grade',
+  cvsModes:            { choose: 'Choose', translate: 'Translate', free: 'Free talk' },
+  cvsEmpty:            'No conversation at this grade yet.',
+  // The station's search (plan 246): the well, its count, and what it
+  // says when the grade holds nothing of the query.
+  cvsSearchPlaceholder: 'Find a scene…',
+  cvsCount:            n => (n === 1 ? '1 scene' : `${n} scenes`),
+  cvsNoMatchHere:      level => `No ${level} scene matches that.`,
+  cvsFoundAt:          levels => `Found at ${levels.length < 2 ? levels.join('') : `${levels.slice(0, -1).join(', ')} and ${levels.at(-1)}`}.`,
+  cvsGoTo:             level => `Go to ${level}`,
+  cvsNoMatch:          'No scene matches that.',
+  cvsNoMatchHint:      'Try a place, a person or a word from the scene.',
+  cvsClearSearch:      'Clear the search',
+  cvsRecordAria:       (right, done) => `${right} of ${done} replies right`,
+  cvsLeave:            'Scenes',
+  cvsRepliesRated:     'Replies',
+  cvsStart:            'Start',
+  cvsGoal:             'Your errand',
+  cvsRouteAria:        (place, n, total) => `${place}, reply ${n} of ${total}`,
+  cvsSay:              'Say',
+  cvsTheReply:         'The reply',
+  cvsRightMark:        'Right',
+  cvsWrongMark:        'Wrong',
+  cvsNext:             'Next',
+  cvsFinish:           'Finish',
+  cvsReplyLabel:       'Your reply',
+  cvsReplyPlaceholder: 'Your reply, in Japanese or rōmaji…',
+  cvsSend:             'Send',
+  cvsAnswering:        who => `${who} is answering…`,
+  cvsReading:          'Reading your reply…',
+  // The day's tutor is spent (routes/conversation.py, 429): the run
+  // goes on, measured and graded.
+  cvsReviewLimit:      "That's every review for today — the measure and your grade still count. The tutor is back tomorrow.",
+  cvsTalkLimit:        "That's every free-talk line for today. Choose and Translate still work — the free talk is back tomorrow.",
+  cvsTalkOff:          'The free talk needs the tutor, and it is not available right now. Choose and Translate still work.',
+  cvsTalkFailed:       'No answer came. Try again.',
+  cvsTalkOver:         'Eight replies: the conversation ends here.',
+  cvsOver:             'The conversation is over',
+  cvsAgain:            'Again',
+  cvsOther:            'Another scene',
+}
+
 // ── Dictionary ────────────────────────────────────────────
 const dictionary = {
   dictionaryPlaceholder: 'Search a kanji, a kana or a meaning…',
@@ -1306,7 +1496,7 @@ const dictionary = {
   level:             'Level',
   listen:            'Listen',
   displayedKanji:    'kanji displayed',
-    radical:           'Radical',
+  radical:           'Radical',
   // Additional dictionary keys used by screens
   dictAll:           'All',
   dictKanji:         'Kanji',
@@ -1345,6 +1535,7 @@ const dictionary = {
   tourLookQ:         p => `What does ${p} do?`,
   tourLookHint:      n => `${n === 2 ? 'Two' : 'Three'} sentences. Look where it sits, and what the translations say.`,
   tourIdea:          'I have an idea',
+  tourSkip:          'Skip the lesson',
   tourGuessQ:        p => `What does ${p} mean?`,
   tourCheck:         'Check',
   tourThatIs:        p => `That one is ${p}.`,
@@ -1407,22 +1598,40 @@ const dictionary = {
   bldRight: 'Right.',
   bldClose: 'Almost.',
   bldWrong: 'Not quite.',
+  bldOther: (said, register) => `The sentence says ${said}: the same, in ${register === 'plain' ? 'plain' : 'polite'} speech.`,
   mapAria: "The point's line",
   mapTutorial: 'Tutorial',
   mapNow: 'now',
   mapDone: 'done',
   mapAfter: days => `+${days} d`,
+  // 198 — what each rating does to the point, on the walk (CardPanel)
+  mapOutsAria: 'What each rating does',
+  mapOutMove: move => ({ stay: 'try again', next: 'next step', back: 'relapse', hold: 'stays mastered' })[move],
+  mapOutRow: (verdicts, move, when) => `${verdicts}: ${move}, ${when}`,
   mapSealed: 'its name opens with the answer',
   tourUsageHead: "That's not all!",
   tourQuizCount: (n, total) => `Question ${n} of ${total}`,
   tourQuizGap: 'Which one fits?',
-  tourQuizWhich: p => `Which one uses ${p}?`,
-  tourQuizKinds: { gap: 'The gap', which: 'The false friend', usage: 'The meaning' },
+  tourQuizKinds: { gap: 'The gap', meaning: 'The meaning', form: 'The form', use: 'The reply' },
   tourTrap: 'Trap',
   tourResults: 'Results',
   tourScore: (r, n) => `${r} of ${n}`,
   tourSheet: "The point's sheet",
   tourStart: 'Start: Choose 1',
+  // 初見 — a kana or a kanji met for the first time (plan 216)
+  glyphAria:         g => `Meet ${g}`,
+  glyphNew:          { kana: 'New kana', kanji: 'New kanji' },
+  glyphTwin:         { hiragana: 'in hiragana', katakana: 'in katakana' },
+  glyphStops:        { read: 'Read', write: 'Write', use: 'In words' },
+  glyphStrokeCount:  (n, total) => `Stroke ${n} of ${total}`,
+  glyphTraceQ:       'Trace each stroke from the dot to the ring.',
+  glyphMiss:         { start: 'Start on the full dot.', end: 'Go all the way to the ring.', path: 'Follow the stroke.' },
+  glyphGiven:        'This stroke is drawn for you.',
+  glyphTraced:       misses => (misses ? 'Traced.' : 'Traced first time.'),
+  glyphShowMe:       'Show me',
+  glyphShown:        'That is how it is written.',
+  glyphBoardAria:    (g, n, total) => `Trace ${g}, stroke ${n} of ${total}`,
+  glyphStart:        'Start',
   // 文法 — the lesson (plan 087): the pair marks over the steps, the
   // door on every card and the station's index, the gate's one button.
   glLesson:          'Lesson',
@@ -1431,6 +1640,10 @@ const dictionary = {
   glUse:             'Use',
   glCareful:         'Careful',
   glCompare:         'Compare',
+  // The lesson's section heads (plan 235): each part found at a glance.
+  glStructure:       'Structure',
+  glForms:           'Forms',
+  glConfuse:         'Not to be confused with',
   glBoard:           'Understood — board',
   glBlank:           'gap',
   glRegister: { neutral: 'Neutral', casual: 'Casual', polite: 'Polite', formal: 'Formal', written: 'Written' },
@@ -1438,11 +1651,13 @@ const dictionary = {
   dictModeSearch:    'Search',
   dictModeRadical:   'Radical',
   dictionaryPlaceholderRadical: 'Filter these results by radical…',
-  dictionaryResults: n => `${n} results`,
+  dictionaryResults: n => `${n} result${n === 1 ? '' : 's'}`,
   dictRadicalNumber: (n) => `radical #${n}`,
   dictStrokesPlural: 'strokes',
   dictStrokeSingular: 'stroke',
   dictStrokeIndex:   'Stroke count index',
+  // The entry while it opens (DictionaryDetail.jsx).
+  loadingDictionary: 'Opening the entry…',
   dictStrokePrev:    'Fewer strokes',
   dictStrokeNext:    'More strokes',
   syllabaryMain:     'Main syllabary',
@@ -1532,6 +1747,11 @@ const misc = {
   hintSentencesHide:  'Hide the sentence',
   hintFuriganaShow:   'Show furigana',
   hintFuriganaHide:   'Hide furigana',
+  // The speak-on-reveal switch beside them (components/study/SpeakToggle.jsx):
+  // the name stays, the title says what a tap does.
+  speakOnReveal:      'Speak on reveal',
+  speakOnRevealOn:    'Speak the answer when it is revealed',
+  speakOnRevealOff:   'Stop speaking the answer when it is revealed',
 
   // ── Study modes (domain/studyModes.js) ──
   // One label + description per mode key. Namespacing means these need no
@@ -1608,6 +1828,7 @@ const profile = {
   ranking:           'Ranking',
   periodWeek:        'This week',
   periodAll:         'All time',
+  rankColumn:        'Rank',
   east:              'East',
   west:              'West',
   passLabel:         'Commuter pass',
@@ -1615,7 +1836,6 @@ const profile = {
   noActivityWeek:    'Nothing studied this week yet',
   profileTitle:      'Profile',
   profileStale:      "Couldn't reach the server — showing your last known data.",
-  level:             'Level',
   leaderboard:       'Leaderboard',
   done:              'Done',
   genericError:      'Something went wrong. Try again.',
@@ -1640,9 +1860,9 @@ const profile = {
   jourFootOnTime:    (a, p, dest, date) =>
     `**${a} a day**, right on the promised **${p}**. ${dest} arrival holds at **${date}**.`,
   jourFootAhead:     (a, p, dest, days, date) =>
-    `**${a} a day** against the promised **${p}** — ${dest} comes **${days} days early**, around **${date}**.`,
+    `**${a} a day** against the promised **${p}** — ${dest} comes **${days} day${days === 1 ? '' : 's'} early**, around **${date}**.`,
   jourFootBehind:    (a, p, dest, date, days) =>
-    `Last 14 days: **${a} a day** against the promised **${p}**. At today's rhythm ${dest} arrives **${date}** — **${days} days** behind the date on your pass.`,
+    `Last 14 days: **${a} a day** against the promised **${p}**. At today's rhythm ${dest} arrives **${date}** — **${days} day${days === 1 ? '' : 's'}** behind the date on your pass.`,
   jourFootSuspended: (date) =>
     `No study in 14 days. The **${date}** on your pass no longer means anything — resume, or reprint it with a date that does.`,
   jourFootPaceKept:  (a, p) =>
@@ -1712,7 +1932,6 @@ const settings = {
   // Only ever surfaces as title/aria-label text (NavControls.jsx) —
   // the visible toggle is already a real IconSun/IconMoon SVG.
 
-  volumeMaster:       'Master volume',
   volumeKana:         'Kana volume',
   volumeVoice:        'Voice volume',
   volumeEffects:      'Effects volume',
@@ -1752,7 +1971,7 @@ const decks = {
   deckEdit:          'Edit',
   deckAddCards:      'Add cards',
   deckWriteCard:     'Write a card',
-  deckAllCards:      n => `All ${n} cards`,
+  deckAllCards:      n => (n === 1 ? 'The card' : `All ${n} cards`),
   deckFigs:          { due: 'Due', new: 'New', learning: 'Learning', mastered: 'Mastered' },
   deckCardState:     { due: 'Due', new: 'New', learning: 'Learning', mastered: 'Mastered' },
   deckToday:         'Today',
@@ -1794,7 +2013,7 @@ const decks = {
   grammarType:       'Grammar',
   deckGrammarDesc:   'Grammar points only — from JLPT levels',
   mixedType:         'Mixed',
-  mixedDesc:         'Your own cards plus kanji, vocab and grammar, all mixed',
+  mixedDesc:         'Words, kanji, grammar and your own cards, in one deck',
 
   // Browse existing cards (BrowseCardsMenu.jsx)
   browseBtn:              'Browse',
@@ -1808,9 +2027,8 @@ const decks = {
   // {n} follows the same placeholder convention as andMore above.
   browseSelectedCount:    '{n} selected',
   searching:              'Searching…',
-  noResults:              'No results.',
+  browseNoResults:        'No results.',
   alreadyAdded:           'already added',
-  close:                  'Close',
   adding:                 'Adding…',
   addSelected:            'Add ({n})',
   browseAddFailed:        "These cards weren't added. Try again.",
@@ -1881,7 +2099,7 @@ const decks = {
   gateShelfEmpty:        'No decks on your shelf.',
   gateShelfEmptyHint:    'Make your own, or follow one from the library: it is reviewed with the rest.',
   gateDeckPublished:     'published',
-  librarySeeCards:       n => `See the ${n} card${n === 1 ? '' : 's'}`,
+  librarySeeCards:       n => (n === 1 ? 'See the card' : `See the ${n} cards`),
   libraryFeatured:       'Featured',
   libraryFeaturedWhen:   'this week',
   libraryFollowing:      'Following',
@@ -1969,7 +2187,6 @@ const exam = {
   examRetry:           'Try again',
 
   examSectionEmpty:    'This section has no questions yet.',
-  examAnswered:        'answered',
   examFinishSection:   'Finish',
   examQuestionAbbrev:  'Q',
   examResultMissing:   "This result isn't available — start the exam again.",
@@ -1990,15 +2207,10 @@ const exam = {
   // computed from official item parameters no third party has, so the
   // honest thing to show is raw proportion correct plus a practice
   // target — and to say plainly that that is what it is.
-  examScoreCorrect:    'correct',
   examPracticeTarget:  'Target',
-  examUnofficialNote:  'Unofficial practice score — raw proportion correct, not a JLPT scaled score.',
-  examReviewTitle:     'Review your answers',
-  examReviewHint:      'Tap a question to see it again with the correct answer.',
   // Wrong answers are what a review is for, so that's what opens by
   // default — a 21-question paper otherwise lists 21 identical rows to
   // click through before finding the two that went wrong.
-  examShowWrongOnly:   'Missed only',
   examShowAll:         'All questions',
   examAllCorrect:      'Nothing missed — every question correct.',
   // Colour alone can't carry which row was picked and which was right
@@ -2007,7 +2219,6 @@ const exam = {
   examYourAnswer:      'Your answer',
   examCorrectAnswer:   'Correct answer',
   examNotAnswered:     'Left blank',
-  examTimeTaken:       'Time taken',
   // The listening script ships inside every paper already (see
   // exam_listening_gen.py) and is exactly what makes a missed
   // listening question learnable — withheld during the exam, offered
@@ -2029,8 +2240,6 @@ const exam = {
   // stands in for: on a paper JLPT the answer sheet is what tells you
   // at a glance what you still owe.
   examSheetTitle:      'Answer sheet',
-  examSheetBlank:      'blank',
-  examSheetFlagged:    'flagged',
   // aria-label for one chip — the visual states (fill, outline, corner
   // mark) are meaningless to a screen reader, so each chip spells out
   // its own.
@@ -2100,7 +2309,6 @@ const boarding = {
   brdHaveAccountQ: 'Have an account?',
   brdNoAccountYet: 'No account yet?',
   brdBackHome: 'Back to the start',
-  brdHaveAccount: 'Already have an account? Sign in',
   // Google: "continue", never "sign up" or "sign in" — a provider does
   // not tell the two apart. You simply arrive.
   continueWithGoogle: 'Continue with Google',
@@ -2124,35 +2332,16 @@ const boarding = {
   claimEmailUnreachable: 'The confirmation could not be sent to that address. Try another one, or keep your progress with Google.',
   claimWeakPassword: 'That password is too easy to guess. Try a longer one.',
   claimTooSoon: 'Too many attempts just now. Wait a minute and try again.',
-  // Last stop: the account, asked once everything has been seen — and
-  // refusable. "Keep" rather than "create": the progress already
-  // exists, this only puts a key on it (lib/guest.js).
-  brdAccountQ: 'Keep your progress.',
+  // A guest's account, kept from Settings › Account: the progress
+  // already exists, this only puts a key on it (lib/guest.js).
   brdAccountCreate: 'Create my account',
-  brdAccountSkip: 'Continue without an account',
-  // 辻 (plan 163): the desk's account, beside the ticket it keeps.
-  brdTicketKind: 'Ticket · Tsuji',
-  brdIssued: (date) => `Issued ${date}`,
+  // The card (plan 247): the credits it is issued with, on its back,
+  // and the service named on the rhythm's sheet.
   brdCreditsOffered: 'credits, on us',
-  brdPunched: 'Punched',
   brdTermService: 'Service',
-  brdTermRoute: 'Ride',
-  brdTermValid: 'Valid until',
-  brdServiceValue: (name, n) => `${name} · ${n} a day`,
-  brdTicketNote: 'Without an account, your ticket stays on this device.',
+  // The Welcome: each demo's tag.
   brdDemoTag: { kanji: 'Kanji', vocab: 'Vocabulary', grammar: 'Grammar', dictation: 'Dictation', reading: 'Reading', kana: 'Kana', translation: 'Translation', analyzer: 'Analyzer', exam: 'Mock exam' },
   // The questions.
-  brdNameQ: 'What’s your name?',
-  brdNameAria: 'Your name',
-  // The address the pass is being issued to, said on question one.
-  // The boarding only runs on an account with nothing on it, so an
-  // address here always means a NEW pass for that address — which is
-  // the one thing a learner who meant to reach an OLD one needs to be
-  // told before answering seven questions. A guest has no address and
-  // never sees this line. "Below" is the sign-in link in the foot.
-  brdNameNewPass: email => `A new pass, for ${email}. If your journey is on another account, sign in below instead.`,
-  brdWhyQ: (name) => `Why are you learning Japanese, **${name}**?`,
-  brdMotive: { studies: 'For my studies', fun: 'For fun', trip: 'For a trip to Japan', live: 'To live in Japan', friends: 'To make friends', other: 'Something else' },
   brdKanaQ: 'Can you read this?',
   brdKana: { hiragana: 'Hiragana', katakana: 'Katakana', both: 'Both', none: 'Not yet' },
   brdKanaWord: { sushi: 'sushi', hotel: 'hotel', station: 'station' },
@@ -2170,6 +2359,9 @@ const boarding = {
   brdRevealFirst: (date, min) => `Your first stop: **the kana**, read by **${date}** at ${min} min a day.`,
   brdLevelQ: 'Nice! What’s your level?',
   brdLevelHint: 'The stops behind you will be marked known.',
+  brdTestQ: 'Let’s find your stop',
+  brdTestPick: 'I’ll choose it',
+  brdPlacedQ: level => `Your answers stop at ${level}`,
   brdNovice: 'Novice',
   // The kanji figure is the app's own count through that stop (~, rounded).
   brdLevelDesc: {
@@ -2180,34 +2372,15 @@ const boarding = {
     N2: (k) => `News and work · ~${k} kanji`,
     N1: (k) => `Almost anything · ~${k} kanji`,
   },
-  brdGoalQ: 'What’s your goal?',
-  brdGoalHint: (level) => `The stops ahead of ${level}.`,
-  // Nobody has a stop behind them before the kana: the list opens with
-  // the novice's own, so it names no level (domain/boarding.js goalStops).
-  brdGoalHintStart: 'Every stop is ahead of you.',
-  brdNextStop: 'Next stop',
   // The lines: what to learn. The kana are not a row -- every ticket
-  // rides them -- so the hint says so (components/boarding/LinesStep.jsx).
-  brdLinesQ: 'What do you want to learn?',
-  brdLinesHint: 'The kana ride on every ticket. Pick any of the rest.',
+  // rides them -- so the lines' sheet says so (components/boarding/CardSheets.jsx).
   brdLinesNone: 'Pick at least one line.',
   brdLine: { vocab: 'Vocabulary', kanji: 'Kanji', grammar: 'Grammar' },
-  // 入門 (plan 170): the lines in a beginner's words, for a learner
-  // short of both scripts, and when they start.
-  brdLineDescNovice: {
-    vocab: 'Words',
-    kanji: 'One meaning per character',
-    grammar: 'How a sentence is built',
-  },
+  // 入門 (plan 170): when the lines start, for a learner short of
+  // both scripts.
   brdLinesHintNovice: 'They start after the kana.',
-  brdLineDesc: {
-    vocab: 'Words, N5 to N1',
-    kanji: 'Readings, meanings, writing',
-    grammar: 'Patterns, with examples',
-  },
-  // 辻 (plan 163): the desk's lines -- the kana's strip and what each
-  // line carries on the ride to its goal.
-  brdKanaFirst: 'hiragana and katakana, first',
+  // The lines' sheet: the kana's strip and what each line carries on
+  // the ride to its goal.
   brdOnEveryTicket: 'On every ticket',
   brdLineCarries: {
     vocab: (stop) => `words to ${stop}`,
@@ -2215,41 +2388,27 @@ const boarding = {
     grammar: (stop) => `points to ${stop}`,
   },
   brdLinesArrive: (n, stop, date) => `${n === 1 ? 'With this line' : n === 2 ? 'With these two lines' : 'With these three lines'}, you reach ${stop} by **${date}**.`,
-  brdRhythmQ: 'What’s your rhythm?',
-  // 辻 (plan 163): the desk's four roads -- a rhythm's minutes and its
-  // service, and the days its ride takes.
-  brdRhythmHint: 'The more you ride each day, the sooner you arrive. You can change it later.',
+  // The rhythm's departure board: a train's minutes and its service,
+  // and the days its ride takes; the hour's board.
   brdADay: 'a day',
   brdRhythmName: { 5: 'Local', 10: 'Rapid', 15: 'Special rapid', 20: 'Express' },
   brdRideDays: (n) => (n === 1 ? '1 day' : `${n} days`),
-  brdMinADay: 'min a day',
   brdNewItems: (n) => `~${n} new items`,
-  brdChangeLater: 'You can change it later.',
-  brdTimeQ: 'When do you study?',
   brdDeparture: 'Departure',
   brdDayAria: 'Departure time',
-  // 辻 (plan 163): the desk's hour, the day as the sun's arc.
-  brdTimeHint: 'Your train leaves at this hour every day.',
-  brdYourTrain: 'Your train',
-  brdThenDaily: 'then every day',
-  brdTimeFine: 'or slide the train along the day, by the half hour',
-  // The nudge (native only), and the notification as the app sends it.
-  // brdAppName is the store name, the one the notification header
-  // shows; keep it in step with capacitor.config.json's appName.
-  brdNudgeQ: (time) => `A nudge at **${time}**?`,
+  // The notification as the app sends it. brdAppName is the store
+  // name, the one the notification header shows; keep it in step with
+  // capacitor.config.json's appName.
   brdAppName: 'Tsuji',
-  brdNotifNow: 'now',
-  brdNotifTitle: (time) => `Your train leaves at ${time}`,
   brdNotifText: 'Your cards are waiting at the gate.',
-  brdNudgeHint: 'One a day, at your time. Never more.',
-  brdAllow: 'Remind me',
-  brdNotNow: 'Not now',
   // ── 発車案内 — the daily nudge from the day's queue, the widget and
   // Settings › Notifications (plan 156). The nudge's title and body are
   // written from what the gate will hold at the learner's hour.
   nudgeTitle: (time, n) => `Your ${time} train · ${n} ${n === 1 ? 'card' : 'cards'}`,
   nudgeMinutes: (m) => (m <= 1 ? 'About a minute' : `About ${m} min`),
   nudgeNew: (n) => `${n} new`,
+  // The reminders' channel, as Android's settings name it (lib/native.js).
+  nudgeChannel: 'Reminders',
   nudgeLine: { kana: 'Kana', vocab: 'Vocabulary', kanji: 'Kanji', grammar: 'Grammar' },
   nudgeWhen: { today: 'Today', tomorrow: 'Tomorrow' },
   widgetTitle: 'Today’s train',
@@ -2315,7 +2474,7 @@ const boarding = {
   agdSubjectName: {
     review: 'Reviews', kana: 'Kana', vocab: 'Vocabulary', kanji: 'Kanji', grammar: 'Grammar',
     reading: 'Reading', translation: 'Translation', dictation: 'Dictation', composition: 'Writing',
-    comprehension: 'Comprehension', exam: 'Mock exam',
+    conversation: 'Conversation', comprehension: 'Comprehension', exam: 'Mock exam',
   },
   agdGo: 'Start',
   agdUntil: (end) => `until ${end}`,
@@ -2330,51 +2489,15 @@ const boarding = {
   agdThen: 'Then',
   agdStartWith: 'To start with',
   agdWeekTotalLabel: 'Each week',
-  // The arrival: the plan, the pass.
+  // 机 (plan 140): the desk's column, its name for a screen reader and
+  // its stops, one per question -- the part of the boarding each
+  // answers, as the line prints it.
   brdBuildingAria: 'Building your journey',
-  // 机 (plan 140): the stops on the desk's column, one per question --
-  // the part of the boarding each answers, as the line prints it.
-  brdStop: { name: 'Name', why: 'Why', kana: 'Kana', level: 'Level', goal: 'Goal', lines: 'Lines', rhythm: 'Rhythm', time: 'Departure', nudge: 'Reminder' },
-  brdArrivalTitle: 'Your plan',
-  brdPlanQ: (name) => `Your plan is ready, **${name}**.`,
-  brdFor: { studies: 'for your studies', fun: 'for the fun of it', trip: 'for your trip', live: 'for your life in Japan', friends: 'for your friends', other: 'for yourself' },
-  // One figure per line on the ticket.
-  brdFigWords: (n) => `~${n} words`,
-  brdFigKanji: (n) => `~${n} kanji`,
-  brdFigGrammar: (n) => `~${n} grammar points`,
-  // The novice's stop, taken as a goal: the kana, and the line that
-  // waits beyond them. No word count, and no motive line — three weeks
-  // of signs cannot promise a drama without pausing.
-  brdBulletKana: 'Both kana scripts, read on sight',
-  brdBulletThenLine: 'Then the whole line, stop by stop',
-  // Two promise lines per motive (the canvas's boarding note).
-  brdPromise: {
-    studies: ['Your course material', 'A lecture’s key terms'],
-    fun: ['Manga panels, lyrics', 'A drama without pausing'],
-    trip: ['Read signs, menus and tickets', 'Ask your way, order, book a room'],
-    live: ['The town hall, the bank, the doctor', 'Your mail and contracts'],
-    friends: ['Chat by message', 'A dinner conversation'],
-    other: ['Read what you meet every day', 'Say what you mean'],
-  },
-  brdOnTrackKana: 'On track for the kana',
-  brdPassQ: (name) => `Your pass is ready, **${name}**.`,
-  brdEnjoy: 'Enjoy the ride.',
-  brdCreditsGift: (n) => `+${n} credits, on the house`,
+  brdStop: { kana: 'Kana', level: 'Level', card: 'Card' },
+  // The first ride's end (screens/RideReading.jsx).
   brdEnter: 'Enter the station',
-  // 辻 (plan 163): the desk's plan, the ride drawn to scale -- its stops'
-  // days and names, what the terminus holds, what the ride is for.
-  brdInDays: (n) => (n === 1 ? 'tomorrow' : `in ${n} days`),
-  brdEvery: { am: 'every morning', noon: 'every noon', pm: 'every evening' },
-  brdAtTime: (every, time) => `${every} at ${time}`,
-  brdKanaDone: 'Kana read',
-  brdBothScripts: 'hiragana and katakana',
-  brdTerminus: (stop) => `Terminus · ${stop}`,
-  brdAtTerminus: 'At the terminus, you’ll know',
-  brdUnit: { vocab: 'words', kanji: 'kanji', grammar: 'grammar points' },
-  brdUnitKana: 'signs',
   // 辻 on a phone (plan 168): the kana over the lines' hub, the board's
-  // arrival column and first stop, the hour's arrows and first train, the
-  // plan's arrival and what the ride is for.
+  // arrival column and first stop, the hour's arrows and first train.
   brdKanaFirstShort: 'Kana first',
   brdArriveAt: (stop) => `Arrival at ${stop}`,
   brdFirstStop: (date) => `First stop: the kana, read by **${date}**`,
@@ -2383,8 +2506,42 @@ const boarding = {
   brdHalfLater: 'Half an hour later',
   brdHalfEarlier: 'Half an hour earlier',
   brdTrainAt: (today, time) => `Your train · ${today ? 'today' : 'tomorrow'}, **${time}**, then every day`,
-  brdArriveIn: (days, every, time) => `${days === 1 ? '**tomorrow**' : `in **${days} days**`}, ${every} at ${time}`,
-  brdForLine: (purpose, promise) => `${purpose.charAt(0).toUpperCase()}${purpose.slice(1)}: **${promise.charAt(0).toLowerCase()}${promise.slice(1)}**.`,
+  // The card is the form (plan 247): the card filled in, its fields
+  // doors, a sheet a field.
+  brdCardQ: 'Your card, filled in for you.',
+  brdCardHint: 'Tap a field to change it.',
+  brdIssue: 'Issue my card',
+  brdLevelTest: 'Not sure? The test places you',
+  brdKeepDevice: 'On this device only',
+  brdKeepGo: 'Keep my card',
+  brdKeepSent: (email) => `Link sent to ${email}`,
+  brdKeepChange: 'Change',
+  brdKeptGoogle: 'Kept on your Google account',
+  brdKeptEmail: (email) => `Kept · ${email}`,
+  brdKeptAccount: 'Kept on your account',
+  brdKeptSwitch: 'Switch account',
+  brdSheetGoal: 'Destination',
+  brdSheetRhythm: 'Pace',
+  brdSheetHour: 'Departure',
+  brdSheetLines: 'Lines',
+  brdSheetName: 'Name',
+  brdSheetAccount: 'Account',
+  brdSheetDone: 'Done',
+  brdGoalCap: (min) => `at ${min} min a day`,
+  brdNameOptional: 'optional',
+  brdNamePlaceholder: 'Your first name',
+  brdNameNote: 'It is printed on your card.',
+  brdNameSave: 'Save',
+  cardNameTooLong: (n) => `${n} characters at most.`,
+  brdAccountLede: 'Without an account, your card lives on this device alone.',
+  brdLinkNote: 'We send you a link. No password to remember.',
+  brdLinkSentNote: (email) => `A link went to ${email}. Send it again, or fix the address.`,
+  brdLinkSend: 'Send my link',
+  brdLater: 'Later',
+  brdRemindAt: (time) => `Remind me at **${time}**`,
+  brdAgendaAdd: 'Add to my calendar',
+  brdAgendaTitle: 'Tsuji · your Japanese train',
+  brdAgendaBody: (min) => `${min} min of Japanese, every day.`,
 }
 
 const ride = {
@@ -2433,14 +2590,17 @@ const guide = {
   // The desk rail's Help: the lit gate's guide, played again on demand.
   guideHelp: 'Help',
   guideHelpTour: gate => `Guided tour: ${gate}`,
-  guideTodayGate: 'Today’s reviews, line by line. Switch one off to save it for later, then hit Depart.',
+  guideTodayGate: 'Today’s reviews and the time they take. Adjust picks the cards and the lines, then hit Depart.',
   guideTabBar: 'Your five tabs: Learn, Practice, Today, Dictionary and your profile.',
   guideLearnPlate: 'A line. Tap it to open it. The badge shows what’s due today.',
   guideLearnStops: 'Where you are on the line, and the stops around you.',
   guideLearnShelf: 'Your own decks, plus a library of decks shared by other learners.',
-  guidePracticePlate: 'A practice mode: read, understand, translate, listen to or write real sentences.',
-  guidePracticeDests: 'The levels. Yours is marked. Tap another to try it anyway.',
   guidePracticePass: 'These modes come with the pass.',
+  // The painted platform (plan 225): its two signs and its gate; on the
+  // desk (plan 244), the departures board and the gate.
+  guidePracticeSign: 'Where the train goes. Tap the row above or below to turn the sign, the lit one to open its station.',
+  guidePracticeGrade: 'The train’s level. Yours carries a dot: turn the sign to try another.',
+  guidePracticeBoard: 'Depart: the doors close and the train takes you to the exercise.',
   guideDictConsole: 'Search by word, reading or meaning.',
   guideDictOptions: 'Fine-tune your search: exact word, starts with or contains. Search the Japanese, the meaning or both.',
   guideDictChips: 'Browse by collection. Your saved entries are at the end.',
@@ -2452,21 +2612,23 @@ const guide = {
   guideProfileLedger: 'Each line, and how far you’ve come.',
   guideProfileSettings: 'Settings: your level, your pace, how you grade, and this guide anytime.',
   guideLearnLibrary: 'The library: decks shared by other learners. Open one to preview it; follow it to study it.',
-  guidePracticeExam: 'The mock exam: a JLPT-style test at the level you pick, graded when you hand it in.',
   guideDictActions: 'Listen to it, or use ＋ to save it or add it to one of your decks.',
   guideProfileStats: 'Statistics: what sticks and what slips, line by line.',
   guideProfileBoard: 'The leaderboard, in XP: this week and all time.',
   // 机 (plan 115): the notes that teach the desk's keys and doors.
   guideTabBarDesk: 'Your five sections, down the left. Press / anywhere to search the dictionary.',
-  guideTodayGateDesk: 'Today’s reviews, line by line. Switch one off to save it for later, then depart. Enter works from anywhere here.',
+  guideTodayGateDesk: 'Today’s reviews and the time they take. Pick the cards and the lines on the right, then depart. Enter works from anywhere here.',
   guideLearnStopsDesk: 'The whole line. Click any stop to study it.',
   // Worded for a pointer (plan 123): the notes that said "tap".
   guideLearnPlateDesk: 'A line. Click it to open it. The badge shows what’s due today.',
-  // The desk's platforms carry no grades since plan 165: the stop is
-  // skipped there, but its note is still worded for a pointer.
-  guidePracticeDestsDesk: 'The levels. Yours is marked. Click another to try it anyway.',
-  guidePracticePlateDesk: 'A practice mode, and what it asks of you at your level. Click it to open it.',
+  // The painted platform on the desk (plan 244): the departures board,
+  // its levels at its head, and the gate, which Enter presses too.
+  guidePracticeGradeDesk: 'The trains’ level. Yours carries a dot: click another to try it anyway.',
+  guidePracticeSignDesk: 'The trains leaving, one per exercise, with what you have done on each at this level. Click one to see what it will ask of you.',
+  guidePracticeBoardDesk: 'Depart: the doors close and the train takes you to the exercise. Enter works from anywhere here.',
   guideDictEntryDesk: 'An entry, open beside the list. ← and → move through the list.',
+  // 机 (plan 248): on the desk the stamp book's figures open the profile's record.
+  guideProfileRecordsDesk: 'Your numbers: your streak and your longest, the days stamped, total reviews, what you remember, your best perfect run.',
   // Settings, the two ways back.
   settingsFirstRide: 'First ride',
   settingsRideAgain: 'Take the test ride again',
@@ -2481,17 +2643,16 @@ const onboarding = {
   durYears: (n) => `${n} yr`,
   onbContinue: 'Continue',
   onbStepsAria: (n, total) => `Step ${n} of ${total}`,
-  onbTestProgress: (n, total) => `${n} / ${total}`,
   onbTestKind: {
     reading: 'How is this word read?',
     orthography: 'Which is the correct kanji spelling?',
     context: 'Which word completes the sentence?',
     grammar: 'Which grammar rule is at work?',
   },
-  onbTestStop: 'Stop here — place me from my answers so far',
-  onbTestFinish: 'See my result',
+  onbTestStop: 'Too hard? Stop here',
+  onbClimbLabel: 'Levels: cleared, being asked, ahead',
   onbTestError: 'The test could not be loaded. Try again in a moment.',
-  onbTestRetake: 'Retake the test',
+  onbTestRetake: 'Take the test',
   onbTestResult: (level, correct, total) => `${correct} of ${total} correct — we recommend boarding at ${level}.`,
   onbPaceRecommended: 'Recommended',
   onbPassError: 'Saving failed — check your connection and try again.',
@@ -2500,6 +2661,7 @@ const onboarding = {
   // working is a wrong turn they cannot take -- and "try again" is a
   // false promise, since the same contract earns the same refusal.
   brdPassRefused: 'The office could not issue this pass — that is on our side, not your connection. Nothing was saved.',
+  brdPassBusy: 'The office is not answering just now. Nothing was saved: try again in a moment.',
   // The daily pace, lived: the concourse 新規 gauge and the study
   // screens' session terminus (see components/study/usePace.js).
   paceDoneTitle: 'Today’s target reached',
@@ -2521,12 +2683,14 @@ const onboarding = {
   settingsLineOn: 'On your route',
   settingsLineOff: 'Off your route',
   plateOffRoute: 'Off your route',
-  // A grade's record on a Practice platform, on the desk (plan 130):
-  // what was done at that grade, then the share of it that went right.
+  // A grade's record on a Practice platform, on the desk (plan 130; on
+  // the departures board since plan 244): what was done at that grade,
+  // then the share of it that went right.
   practiceDone: {
     sentences: n => `${n} sentence${n === 1 ? '' : 's'}`,
     texts: n => `${n} text${n === 1 ? '' : 's'}`,
     papers: n => `${n} paper${n === 1 ? '' : 's'}`,
+    replies: n => `${n} repl${n === 1 ? 'y' : 'ies'}`,
   },
   practiceRight: pct => `${pct}% right`,
   practiceNotYet: 'Not yet',
@@ -2542,10 +2706,36 @@ const onboarding = {
     comprehension: 'A short text, then its questions — the exam’s reading section, rehearsed.',
     dictation: 'Two listens, no more: write in rōmaji what you hear.',
     composition: 'You are given a grammar point: write a sentence that uses it, and a tutor reads it.',
-    // On the platform's plate, on the desk (plan 165): the question its
-    // well shows.
+    conversation: 'Someone speaks to you in a scene: choose your reply, write it, or answer freely.',
+    // On the chosen train's card, on the desk (plan 244, plan 165's
+    // plate before it): the question its well shows.
     exam: 'A question in the JLPT’s format, here 漢字読み: the reading of the underlined word.',
   },
+  // ── The painted platform, on the phone (plan 225) ─────────
+  // Each platform's short name, under its Japanese on the train's sign;
+  // the names a screen reader reads.
+  practiceGateShort: {
+    reading: 'Reading',
+    comprehension: 'Comprehension',
+    translation: 'Translation',
+    dictation: 'Dictation',
+    composition: 'Composition',
+    exam: 'Exam',
+    conversation: 'Conversation',
+  },
+  practiceGateGrade: 'The train’s level',
+  practiceGateDest: 'The train’s destination',
+  practiceGateStation: title => `${title}: open the station`,
+  practiceGateBoard: (title, level) => `Depart · ${title} · ${level}`,
+  practiceGateClock: hour => `Platform clock, ${hour}. Tap for the next hour.`,
+  practiceGateHour: { dawn: 'dawn', day: 'day', dusk: 'dusk', night: 'night' },
+  practiceGatePantoRaise: 'Raise the pantograph',
+  practiceGatePantoLower: 'Lower the pantograph',
+  // ── The painted platform, on the desk (plan 244) ──────────────
+  // The clock for a pointer, and the station's door on the chosen
+  // train's card.
+  practiceGateClockDesk: hour => `Platform clock, ${hour}. Click for the next hour.`,
+  practiceDeskOpen: 'Open the station',
   practiceBank: {
     sentences: n => `${n} sentences written for the grade.`,
     texts: n => `${n} questions a text.`,
@@ -2557,6 +2747,8 @@ const onboarding = {
     text: 'A text of the grade',
     clip: 'A sentence of the grade, by ear',
     point: 'A point of the grade',
+    paper: 'A question of the grade',
+    scene: 'A scene of the grade',
     tier: 'Words of the tier',
     mine: 'Your words',
   },
@@ -2662,6 +2854,29 @@ const onboarding = {
     '即時応答': 'Listen to the line and choose the best reply.',
   },
   examMinutes: n => `≈\u00a0${n}\u00a0min`,
+  // ── The mock exam at a desk (plan 200) ───────────────────────
+  // The booklet on the left, the answer sheet on the right; the page
+  // turns in its foot.
+  examQuit:            'Leave',
+  examMark:            'Flag',
+  examToAnswer:        'to answer',
+  examLastQuestion:    'Last question',
+  examThisText:        'This text',
+  examLikeThePaper:    'As on the paper',
+  examYourSheet:       'Your sheet',
+  examBlanksLeft: n => `${n} question${n > 1 ? 's' : ''} left blank`,
+  examBlankCounts:     'A blank question counts as wrong.',
+  examGoTo: n => `Go to ${n}`,
+  examHandIn:          'Hand it in anyway',
+  examMissOf: (i, n) => `mistake ${i} of ${n}`,
+  examPapersSat:       'papers',
+  examRightCap:        'right',
+  examLastSitting:     'the last',
+  examSheetRow: (n, answered) => `Question ${n}${answered ? '' : ', blank'}`,
+  examOval: (n, choice) => `Question ${n}, answer ${choice}`,
+  examAnsweredCap:     'answered',
+  examSheetResult: (n, state) => `Question ${n}, ${state === 'ok' ? 'right' : state === 'x' ? 'wrong' : 'left blank'}`,
+  examPlayPause:       'play, pause',
   settingsRedoDesc: 'Take it again once you’ve progressed — your level moves with you.',
   // ── Which rating bar to grade with ──────────────────────────
   // Two buttons, four or six. All three send the same rating to the
@@ -2706,12 +2921,46 @@ const onboarding = {
   },
   settingsHelp: 'Help',
   settingsHelpValue: 'Ride · Guide',
+  // Write to us (plan 222): a problem, an idea, a mistake in what is
+  // taught, and a card reported from its flag. Nothing leaves the
+  // device without being written out here first.
+  settingsWrite: 'Write to us',
+  settingsWriteValue: 'A problem, an idea',
+  fbKindLabel: 'What it is',
+  fbKind: { problem: 'Problem', idea: 'Idea', fault: 'Mistake' },
+  fbPlaceholder: {
+    problem: 'What happened, and where.',
+    idea: 'What you would like to find here.',
+    fault: 'The word or sentence, and what is wrong.',
+  },
+  fbTextLabel: 'Your message',
+  fbJoin: 'Attach the screen and the device',
+  fbJoinFailure: 'Attach the error, the screen and the device',
+  fbScreen: 'this screen',
+  fbFailure: (status, area) => `error ${status} (${area})`,
+  fbDevice: { phone: 'phone', tablet: 'tablet', desk: 'computer', wide: 'computer' },
+  fbPlatform: { web: 'web', native: 'app' },
+  fbReply: 'Reply to me at',
+  fbSend: 'Send',
+  fbSent: 'Received, thank you.',
+  fbSentNote: 'Every message is read by a person.',
+  fbSentReply: 'Every message is read by a person. The answer will come by e-mail.',
+  fbErrLimit: 'Five messages a day: more tomorrow.',
+  fbErrSend: 'The message did not go. Try again.',
+  cardReport: 'Report this card',
+  cardReportReasons: 'What is wrong',
+  cardReason: { reading: 'Reading', meaning: 'Meaning', audio: 'Audio', example: 'Example', other: 'Other' },
+  cardReportNote: 'A word more, if you like.',
+  cardReportNoteLabel: 'A word more',
+  reportProblem: 'Report this problem',
   settingsCreditsCount: n => `${n} sources`,
   settingsPaceMinutes: m => `≈ ${m} min`,
   settingsYourPace: 'Your pace',
   settingsYourPaceSub: n => `${n} / day · last 14 days`,
   settingsInsteadOf: d => `instead of ${d}`,
   creditsWhat: { dictionary: 'Dictionary', kanji: 'Kanji', strokes: 'Stroke order', sentences: 'Example sentences', voice: 'Station voice', speech: 'Japanese speech', kana: 'Kana voice', type: 'Typefaces' },
+  // The licence of a source with terms of its own (domain/attributions.js).
+  creditsTerms: name => `${name} terms`,
   themeDark: 'Dark',
   themeLight: 'Light',
   themeAuto: 'System',
@@ -2723,7 +2972,8 @@ const onboarding = {
   volumeMaster: 'Master volume',
   settingsPerDay: '/ day',
   settingsTrail: 'Usage statistics',
-  settingsTrailHint: 'Which screens are opened, never what you write. Kept on our own server, never shared.',
+  settingsTrailHint: 'Which screens and features you use and for how long, never what you write. On our own server, never shared, gone within 25 months.',
+  settingsTrailExportBtn: 'Download mine',
   settingsTrailOn: 'Counted',
   settingsTrailOff: 'Not counted',
   settingsExport: 'Export your progress',
@@ -2876,9 +3126,9 @@ const clrDay = {
   clrSumUp: () => 'moved up',
   clrSumMastered: () => 'mastered',
   clrSumMin: 'min',
-  clrTomorrow: (cards, min) => `Tomorrow · ~${cards} cards · ${min} min`,
+  clrTomorrow: (cards, min) => `Tomorrow · ~${cards} card${cards === 1 ? '' : 's'} · ${min} min`,
   clrTomorrowDay: day => `Tomorrow · ${day}`,
-  clrTomorrowSub: (cards, min) => `~${cards} cards · ${min} min`,
+  clrTomorrowSub: (cards, min) => `~${cards} card${cards === 1 ? '' : 's'} · ${min} min`,
   clrOrdinalSuffix: n => {
     const t = n % 100
     if (t >= 11 && t <= 13) return 'th'
@@ -2896,7 +3146,7 @@ const clrDay = {
   clrRestFirst: n => `the first on day ${n}`,
   clrRestNext: n => `the next on day ${n}`,
   // The desk's board (ClearDesk): see the French table.
-  clrDeskGridAria: n => `The trip’s ${n} card${n === 1 ? '' : 's'}`,
+  clrDeskGridAria: n => (n === 1 ? 'The trip’s card' : `The trip’s ${n} cards`),
   clrDeskStreakWord: n => (n === 1 ? 'day in a row' : 'days in a row'),
   clrDeskNextIn: n => `in ${n} days`,
   clrDeskNextAria: (days, inDays) => `${days}-day ticket, to earn ${inDays === 1 ? 'tomorrow' : `in ${inDays} days`}`,
@@ -2920,7 +3170,7 @@ const clrPartial = {
   ptlReviews: 'reviews',
   ptlRight: 'correct',
   ptlDayAria: 'The day',
-  ptlLoopAria: (done, total, left) => `${done} of ${total} cards today; today’s stamp waits at the end of the other ${left}`,
+  ptlLoopAria: (done, total, left) => `${done} of ${total} cards today; today’s stamp waits at the end of ${left === 1 ? 'the last one' : `the other ${left}`}`,
   ptlLeft: n => (n === 1 ? 'card left today' : 'cards left today'),
   ptlTease: min => `~${min} min to today’s stamp and the streak bonus`,
   ptlContinue: n => `Continue · ${n} card${n === 1 ? '' : 's'}`,
@@ -2960,7 +3210,7 @@ const clrRestday = {
   rstHeld: 'in reserve',
   rstNextPre: 'the next on day',
   rstNextPost: '',
-  rstTodayAria: (n, min) => `Today: ${n} card${n === 1 ? '' : 's'}${min ? `, about ${min} minutes` : ''}`,
+  rstTodayAria: (n, min) => `Today: ${n} card${n === 1 ? '' : 's'}${min ? `, about ${min} minute${min === 1 ? '' : 's'}` : ''}`,
   rstCards: n => (n === 1 ? 'card' : 'cards'),
   rstMin: 'min',
   rstDepart: 'Depart',
@@ -2983,7 +3233,7 @@ const clrTickets = {
   tkbRange: (from, to) => `${from} to ${to}`,
   tkbTicketAria: (days, no, range, record) => `${days}-day ticket, number ${no}, ${range}${record ? ', record' : ''}`,
   tkbCellAria: (days, record) => `${days}-day ticket${record ? ', record' : ''}`,
-  tkbLockedAria: (days, inDays) => `${days}-day ticket, not earned yet${inDays ? `, in ${inDays} days` : ''}`,
+  tkbLockedAria: (days, inDays) => `${days}-day ticket, not earned yet${inDays ? `, in ${inDays} day${inDays === 1 ? '' : 's'}` : ''}`,
   tkbShareTicket: 'Share this ticket',
   tkbShareFigures: { reviews: 'cards reviewed', words: 'words learned', level: 'on the way' },
   tkbShareAria: (days, no, range, stamped) => `${days}-day ticket, number ${no}, ${range}, stamped ${stamped}`,
@@ -2997,6 +3247,141 @@ const clrTickets = {
   tkbEmptyGo: 'Depart',
 }
 // ── 191:tickets end ──
+
+
+// ── 217:reviews ──
+// 回復運転 — the review plan (plan 217): the comeback sheet on Today,
+// the catch-up's figure in the day, the run past the share, Settings ›
+// Reviews and the notification that invites back.
+const reviewPlan = {
+  cbJp: '運転再開',
+  cbCap: 'Service resumes',
+  cbLabel: 'Resume at your pace',
+  cbAway: n => `Welcome back — ${n} day${n === 1 ? '' : 's'} away.`,
+  cbPiled: 'Your reviews have piled up.',
+  cbOwed: n => `${n} cards are waiting. No need to do them all today — pick your pace.`,
+  cbChoices: 'Your pace',
+  cbSpread: 'Spread out',
+  cbGentle: 'Gently',
+  cbAll: 'All now',
+  cbPerDay: n => `${n} a day`,
+  cbOverDays: n => `over ${n} days`,
+  cbNoEnd: 'no end date',
+  cbCards: n => `${n} card${n === 1 ? '' : 's'}`,
+  cbMinutes: m => `≈ ${m} min`,
+  cbDays: 'Over how many days',
+  cbDaysN: n => `${n} days`,
+  cbNewPaused: 'New cards come back as soon as you’re caught up.',
+  cbGo: 'Let’s go',
+  cbError: 'Your choice couldn’t be saved. Try again.',
+  todayCatchupDay: 'catch-up day',
+  todayCatchupGentle: 'a day, catching up',
+  todayCatchupShort: 'catch-up',
+  todayHeld: 'Waiting',
+  todayHeldGo: 'Review',
+  settingsReviews: 'Reviews',
+  rvRowNone: 'No ceiling',
+  rvRowCap: n => `${n} at most a day`,
+  rvRowCatchup: 'Catching up',
+  rvRowAway: from => `Away from ${from}`,
+  rvCapLabel: 'Reviews a day',
+  rvCapHint: 'Past it, cards wait for the next day, and your day is cleared on your share.',
+  rvCapNone: 'None',
+  rvCapUnder: load => `About ${load} cards fall due each day: under this ceiling, the backlog will grow.`,
+  rvCatchupLabel: 'Catch-up',
+  rvCatchupSpread: (perDay, day, of) => `${perDay} cards a day · day ${day} of ${of}`,
+  rvCatchupGentle: perDay => `${perDay} cards a day, no end date`,
+  rvCatchupNew: 'New cards are paused until it ends.',
+  rvCatchupStop: 'Stop catching up',
+  rvAwayLabel: 'Time away',
+  rvAwayHint: n => `Your days away keep your streak, and new cards stop two days before you leave. ${n} days at most.`,
+  rvAwayFrom: 'From',
+  rvAwayUntil: 'Until',
+  rvAwaySave: 'Save',
+  rvAwayCancel: 'Cancel time away',
+  rvAwaySet: (from, until) => `${from} to ${until}`,
+  rvAwayErr: {
+    past: 'The first day can’t be in the past.',
+    order: 'The last day comes after the first.',
+    long: n => `${n} days at most.`,
+  },
+  rvError: 'The change couldn’t be saved.',
+  nudgeComebackTitle: time => `Your ${time} train · ease back in?`,
+  nudgeComebackBody: 'A few minutes are enough to get going again.',
+}
+// ── 217:reviews end ──
+
+// ── 243b:transfer ──
+// 乗換 (plans 243, 243b): Settings › Transfer, another app's progress
+// brought across on a transfer ticket -- the source, the file or the
+// key, what the course finds, the stamp, and the way back while the
+// imported cards wait for their first answer; and the sheet over Today
+// that asks a new learner, once.
+const trCount = n => n.toLocaleString('en-US')
+const transfer = {
+  settingsTransfer: 'Transfer',
+  trRowValue: 'Anki, WaniKani, Renshuu',
+  trCap: 'Transfer',
+  trTicketLabel: 'Transfer ticket',
+  trFrom: 'From',
+  trTo: 'To',
+  trSource: { anki: 'Anki', wanikani: 'WaniKani', renshuu: 'Renshuu' },
+  trFileHint: 'Your **.apkg** or **.colpkg** file',
+  trChooseFile: 'Choose my Anki file',
+  trKeyLabel: { wanikani: 'Your WaniKani API token', renshuu: 'Your Renshuu API key' },
+  trKeyPlaceholder: { wanikani: 'Paste it here', renshuu: 'Paste it here' },
+  trReadKey: { wanikani: 'Read my WaniKani cards', renshuu: 'Read my Renshuu cards' },
+  trPages: n => `${trCount(n)} page${n === 1 ? '' : 's'} read`,
+  trHowQ: { anki: 'How do I export it from Anki?', wanikani: 'Where do I find my token?', renshuu: 'Where do I find my key?' },
+  trHow: {
+    anki: ['**File › Export…**', 'Tick **Include scheduling information**', 'Untick **Include media**: the file stays light'],
+    wanikani: ['On WaniKani, **Settings › API Tokens**', 'Create a token **with no permissions**: it can only read', 'Paste it here'],
+    renshuu: ['In Renshuu’s settings, find your **API key**', 'Copy it', 'Paste it here'],
+  },
+  trPrivacyFile: 'Read on your device. Only the words leave it.',
+  trPrivacyKey: name => `Your device reads ${name} itself: your key is never sent to us, and is not kept.`,
+  trFound: n => `card${n === 1 ? '' : 's'} carried over`,
+  trLine: { vocab: 'Vocabulary', kanji: 'Kanji', kana: 'Kana' },
+  trDecks: 'Decks',
+  trDue: (n, weeks) => `${trCount(n)} ${n === 1 ? 'was overdue: it comes' : 'were overdue: they come'} back over ${weeks} weeks.`,
+  trKept: n => `${trCount(n)} already studied here ${n === 1 ? 'stays as it is' : 'stay as they are'}.`,
+  trAbove: n => `${trCount(n)} ${n === 1 ? 'is' : 'are'} past your level and destination: ${n === 1 ? 'it comes' : 'they come'} back into your day when your level gets there.`,
+  trCheck: 'Each card is checked the first time it comes back.',
+  trPunch: 'Stamp the ticket',
+  trAllKept: 'You have studied every one of these cards here already: nothing to carry over.',
+  trNone: 'None of these notes has a card in the course.',
+  trMissing: n => `${trCount(n)} note${n === 1 ? '' : 's'} with no card in the course`,
+  trMissingSample: sample => `For example: ${sample}.`,
+  trReadFrom: list => `Words read from ${list}.`,
+  trRestart: 'Start over',
+  trImported: n => `card${n === 1 ? '' : 's'} imported`,
+  trImportedHint: 'They join your day on their date. The first time, each one is checked.',
+  trPunched: 'Stamped',
+  trGoToday: 'Go to Today',
+  trWaiting: n => `${trCount(n)} imported card${n === 1 ? ' is' : 's are'} still waiting for your first answer.`,
+  trUndo: 'Undo the import',
+  trUndoConfirmQ: 'Remove the imported cards you have not reviewed yet? Those you have reviewed here stay.',
+  trUndoYes: 'Remove',
+  trUndone: n => `${trCount(n)} card${n === 1 ? '' : 's'} removed.`,
+  trErr: {
+    notAnki: 'This file is not an Anki deck (.apkg or .colpkg).',
+    unreadable: 'This file could not be read.',
+    noSchedule: 'This deck was exported without its scheduling: export it again with “Include scheduling information”.',
+    nothing: 'Nothing to carry over: no card the app has taught you yet.',
+    tooMany: 'Too many notes at once: choose fewer decks.',
+    badKey: 'This key was not accepted. Check it and paste it again.',
+    network: 'Could not reach the app. Check your connection.',
+    rate: 'The app asks us to wait a little. Try again in a minute.',
+    unreachable: 'The app did not answer as expected. Try again later.',
+    server: 'The import could not go through. Try again.',
+  },
+  trSheetQ: 'Have you studied somewhere else?',
+  trSheetLead: 'The words you know don’t start from zero: they keep their rhythm.',
+  trSheetGo: 'Bring my progress across',
+  trSheetLater: 'I’m starting here',
+  trSheetFoot: 'Always possible later, in Settings.',
+}
+// ── 243b:transfer end ──
 
 export default {
   ...auth,
@@ -3012,6 +3397,7 @@ export default {
   ...translationMode,
   ...dictationMode,
   ...compositionMode,
+  ...conversationMode,
   ...dictionary,
   ...comprehension,
   ...progress,
@@ -3031,4 +3417,6 @@ export default {
   ...clrMilestones,
   ...clrRestday,
   ...clrTickets,
+  ...reviewPlan,
+  ...transfer,
 }

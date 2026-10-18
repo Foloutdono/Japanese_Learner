@@ -22,6 +22,7 @@ python -m pytest tests/test_grammar_points.py tests/test_grammar_sentences.py
   // "reading": "〜のなかで",                  // only where the pattern has a kanji (this is 〜の中で's; 〜てください has none)
   "structure": "verb て-form + ください",     // what it attaches to, one line
   // "structure_reading": "group + のなかで",  // only where the structure has a kanji (〜の中で's "group + の中で")
+  "structure_fr": "verbe forme en て + ください", // the same line in French (plan 215)
   "meaning":   {"en": "please do", "fr": "faites…, s'il vous plaît"},
   "register":  "polite",                       // optional: neutral | casual | polite | formal | written
   "steps": [                                   // the lesson, read top to bottom
@@ -43,54 +44,32 @@ python -m pytest tests/test_grammar_points.py tests/test_grammar_sentences.py
 | `pattern` | unique across all five levels; no `:`. The structure names it (`tests/test_grammar_points.py`). |
 | `reading` | on every pattern with a kanji and on no other: the pattern spelled with each kanji run in kana, everything else (〜, kana, brackets, spaces) exactly as written — 〜が（逆接） is 〜が（ぎゃくせつ）. It is the furigana every card, lesson and dictionary plate prints over the pattern (`study/grammar_examples.pattern_furigana`), so it is the reading the lesson teaches: 〜気味 is 〜ぎみ, 〜方 is 〜かた, 〜得る is 〜うる. Two readings of one kanji are joined by ・ (〜中 is 〜ちゅう・じゅう). Written by hand, never taken from the tokenizer, which guesses on a fragment. |
 | `structure_reading` | the same rule for the formation line: on every `structure` with a kanji and on no other, spelled exactly as the structure is (its English too) with each kanji run in kana — "group + の中で" is "group + のなかで". The card, the lesson and the dictionary print it over the formation. |
+| `structure_fr` | the formation line in French, on every point: the same formula with its English words in French, its Japanese runs (kana, kanji, 〜, ・, ／, brackets) and its `+` joints exactly as `structure` has them and in the same order. The French furigana is carried over from `structure_reading` by matching those runs, so there is no French reading field. Keep the lessons' own terms: "verbe forme en て", "forme du dictionnaire", "forme neutre", "radical verbal", "adj. en い／な", "nom", "proposition", "classificateur". `structure` itself stays English and is never translated in place — the detector reads what a point attaches to from it. |
 | `meaning` | one line, both languages, no Japanese in it. |
 | `steps` | kinds `rule`, `use`, `careful`, each at most once, `rule` first. `**bold**` allowed; a bullet is a line starting `- `. |
 | `compare` | every `pattern` is a real point (any level), never the entry itself. |
 | `examples` | each passes `study/grammar_sentence_gen.check_sentence`: 8–60 characters, ends in 。！？, kanji within the level (the pattern's own kanji excepted), and visibly contains the pattern. Distinct sentences. |
 | `contrast` | marks a sentence in which the rivals in `compare` are **wrong**; the contrast drill blanks the pattern in it and offers the rivals as choices. So the sentence must not also contain a rival, and the point must compare something. A bare particle may mark one too (plan 190): see "What the matcher can and cannot see". |
-
-## The quiz's sentences (plan 195)
-
-The tour's closing quiz asks only sentences the learner has not met in the
-tour, and none twice (`study/grammar_tour._quiz`). They come from the rest
-of what the app teaches -- every example and tour sentence of the
-catalogue and every row of the reading bank, kept for each point they
-write (`study/grammar_quiz_pool.py`) -- and, where a point has too few,
-from `content/grammar/quiz_sentences.json`: level -> pattern -> Japanese
-sentences written for the quiz alone (no translation: a sentence the quiz
-offers as a choice is never translated). Each is held to
-`study/grammar_quiz_pool.sentence_problems`: a whole sentence at the
-level's kanji, grammar and words, the point visibly written in it, and no
-sentence the app already teaches. Check a draft before it enters the file:
-
-```bash
-python -m scripts.check_quiz_sentences FILE.json   # a draft
-python -m scripts.check_quiz_sentences             # the committed bank
-```
-
-**After any change to the catalogue or the reading bank, run
-`python -m scripts.build_quiz_pool`** (it writes `quiz_pool.json`, the
-sentences each point's quiz may draw on); `tests/test_grammar_quiz_pool.py`
-fails while the file disagrees with the catalogue.
+| `choose` | optional, at least three questions: a point's own Choisir questions, for a point the contrast drill cannot be drawn on (plan 201). See "Choisir's own questions". |
 
 ## The tour block (plan 187)
 
 A point a learner has never met is toured before it is drilled
 (`study/grammar_tour.py`): its examples, a guess at what it does, the
 rule. That much is derived from the entry above. The rest is written
-by hand, in an optional `tour` key, and where it is written both halves
-are -- a twist per notion the point has beyond the meaning the guess
-asks (plan 189), then the scene:
+by hand, in an optional `tour` key, and where it is written all three
+parts are -- a twist per notion the point has beyond the meaning the guess
+asks (plan 189), the scene, and the closing quiz (plan 196):
 
 ```jsonc
 "tour": {
   "twists": [{                                // 1–6, one per notion, in teaching order
     "notion": {"en": "Or, between nouns", "fr": "Ou, entre deux noms"},  // the stop's name, ≤ 40 chars
     "jp": "おちゃかコーヒーを飲みますか。",
-    "tr": {"en": "…", "fr": "…"},             // the sentence translated, shown under it (plan 194)
+    "tr": {"en": "…", "fr": "…"},            // the sentence translated, shown once the question is answered (plan 196)
     "ask": {"en": "…", "fr": "…"},            // the question over it
     "choices": [{"en": "…", "fr": "…"}, …],   // three readings of it, the RIGHT ONE FIRST, then the confusion
-                                              // the two-choice usages stop asks against (plan 194); the quiz asks all three
+                                              // the stop asks against: only the first two are shown (plan 194)
     "why": {"en": "…", "fr": "…"},            // one line said once it is answered
     "pair": ["すってください", "すわないでください"],  // optional: two forms drawn side by side
     "kind": "usage"                           // "usage": another use of the point; "trap": a rival set against it
@@ -106,7 +85,25 @@ asks (plan 189), then the scene:
       "choices": ["…", "…", "…"],             // three Japanese lines, the RIGHT ONE FIRST
       "why": {"en": "…", "fr": "…"}
     }
-  }
+  },
+  "quiz": [                                   // 4–6 questions (plan 196), each of one kind, none the tour has asked
+    {"kind": "meaning",                       // read a sentence the tour has not shown
+     "ask": {"en": "…", "fr": "…"},           // the question over it
+     "jp": "…。",                             // shown with NO translation
+     "tr": {"en": "…", "fr": "…"},            // its translation, shown once the question is answered
+     "choices": [{"en": "…", "fr": "…"}, …],  // three readings, the RIGHT ONE FIRST
+     "why": {"en": "…", "fr": "…"}},
+    {"kind": "form",                          // build the form
+     "ask": {"en": "…", "fr": "…"},           // what is asked: "Which form completes it?", or more exactly
+     "jp": "きのうは学校に＿＿＿。",             // ONE blank, ＿＿＿ (study/grammar_examples.BLANK), over the form
+     "tr": {"en": "…", "fr": "…"},            // what the whole sentence says: it is what is to be said, so it is shown
+     "choices": ["行かなかった", "行かない", "行きなかった"],  // three fillings, the RIGHT ONE FIRST
+     "why": {"en": "…", "fr": "…"}},
+    {"kind": "use",                           // say the right thing in a situation
+     "ask": {"en": "…", "fr": "…"},           // the situation, in the learner's language
+     "choices": ["…。", "…。", "…。"],         // three Japanese lines, the RIGHT ONE FIRST
+     "why": {"en": "…", "fr": "…"}}
+  ]
 }
 ```
 
@@ -118,6 +115,52 @@ of its lines or the cue, in the right answer, and in no wrong answer
 (read by the detector where `grammar_detect.can_find` trusts it, else by
 the stems). A point that names its own alternatives (`〜つ／〜人／〜枚`,
 `〜があります／います`) may be answered wrong with another of them.
+
+### The quiz (plan 196)
+
+The quiz is the first time the learner is asked for the point without
+being told what it is. The first one, built from sentences the app already
+taught (plans 194, 195), asked "which of these uses it?" up to eight times:
+a question the eye answers by finding the point's own characters, and the
+twists printed the translation of the sentence over the question "what
+does it say?". Neither tests anything, and a learner said so. So:
+
+- **A question is one only someone who has understood the point can
+  answer.** Never "find the sentence that contains it". A `use` is held to
+  that in code: where the detector reads the point, a wrong line writes it
+  too (the same verb in the wrong tense, the wrong register, beside the
+  rival that carries it), so finding the point answers nothing.
+- **Never a translation shown over the question it answers.** A twist's and
+  a meaning's `tr` is held back until the question is answered. A form
+  shows its `tr` because it is what is to be said, and its three fillings
+  are forms, not translations of it.
+- **Every sentence is new, and no question is asked twice.** No sentence of
+  the quiz is one of the point's examples (the fourth of them too), a twist's, a line or answer of the
+  scene, or another question's; no question is worded twice across the
+  twists and the quiz (`study/grammar_check._repeat_problems`, which also
+  fails a sentence standing twice among the examples, twists and scene).
+- **A wrong answer is one a learner could really give.** A `form`'s wrong
+  fillings are real forms the cue rules out (the wrong tense, the wrong
+  register, the rival) and, once at most in a question, the slip learners
+  make (買あない); a `meaning`'s wrong readings are the misreadings the
+  point invites; a `use`'s wrong lines are sentences someone could say, wrong for the
+  reason the `why` gives. The right answer is the only right one: a
+  rival the lesson calls a same-meaning form is never a wrong choice.
+- **Which kind asks what.** `form` for what is built (a conjugation, an
+  attachment, a particle's slot); `meaning` for a sense or a second use
+  read in a sentence the learner has not seen; `use` for choosing between
+  the point and its neighbours or registers in a situation. At least two
+  kinds in a quiz, at most three of one, and the questions of one kind
+  are not side by side.
+- The `ask` of a `meaning` is a real question about the sentence, not
+  "what does it say?" alone where the choices are only its translations
+  (see the point's twists for the notions it already asks); an `ask` is
+  never the question the twists or another question put.
+
+Where a rival's lesson has contrast sentences, up to two more questions
+are derived for the point (the rival's own contrast sentence with the
+rival blanked and the point offered as the wrong answer, `study/
+grammar_tour._gap_questions`), so a served quiz is at most eight.
 
 Writing one: a twist is a surprise the guess did not prepare for -- a
 second use (か between two nouns), a sense, a form the lesson teaches as
@@ -157,6 +200,78 @@ found most often:
   bought at the gates or the window, not on the train), and the figures
   add up.
 
+## Choisir's own questions (plan 201)
+
+**Every point is asked in Choisir** (the ladder's first three steps and its
+relapse). The contrast drill draws its question from the point's marked
+`contrast` sentences, which needs the matcher (or the detector, once, on one
+piece) to find the point and a sentence in which every rival is wrong. A
+particle its rivals share every sentence with (は, も, と), a form whose
+letters are every verb's (ない形, 〜ば), a class label (い形容詞／な形容詞) or a
+cause the detector cannot tell from a sequence (〜て（理由）) has neither, and
+its Choisir steps used to fall back to the flashcard. Such a point carries a
+`choose` list instead, written like the tour's quiz it is modelled on:
+
+```jsonc
+"choose": [                                   // at least 3: one for each step of Choisir
+  {
+    "jp": "あれは学校＿＿＿。",                 // ONE hole, ＿＿＿ (study/grammar_examples.BLANK); no space in the sentence
+    "tr": {"en": "That is a school.", "fr": "C'est une école."},  // printed UNDER the sentence: it fixes the meaning
+    "choices": ["です", "あります", "ます"],     // three or four fillings, the RIGHT ONE FIRST (the run shuffles them)
+    "why": {"en": "…", "fr": "…"},             // said to whoever takes a wrong one: why the right one is right
+    "slips": ["ます"]                          // optional: see below
+  }
+]
+```
+
+The choices are the forms that stand in the hole, not catalogue points, so a
+question is not limited to the rivals the lesson names. Writing one:
+
+- **The right filling is the only right one.** Write every wrong filling out
+  in the sentence before keeping it: a wrong filling is wrong only because the
+  sentence is ungrammatical with it, or because it says what `tr` rules out.
+  Where は and が (or も, と, や) both fit the grammar, `tr` must carry the
+  difference ("too", "isn't it?", "but"), and a rival that is as good an
+  answer is left out of the choices. What a reviewer finds most often is a
+  second right answer: で marking a group (友だちで食べる) beside と, な before a
+  する-noun (かんたんな説明) beside に, や as a free choice (ペンやえんぴつ)
+  beside か.
+- **The wrong fillings are slips a learner could make**: the rival, the wrong
+  tense or polarity, the form that mixes two stems (まちた for まった).
+- **The hole turns on the point, not on a word.** いつも is “always”
+  whatever the lesson says of も after a question word; a question that is
+  answered only by knowing the word is not a question about the point.
+- **The hole holds the point, and the stem stays outside it.** The sentence
+  as filled must be spelled right: 悲し＿＿＿ + み (悲しみ), never 悲＿＿＿ + み. A
+  hole that starts or ends inside a word's reading (今日 held to 今) is refused.
+- **`slips` names the wrong fillings the detector may read as the point
+  although the sentence rules them out**: a form nobody says (the detector
+  reads a た after any stem as た形), or the point in the wrong tense (だったし
+  where the sentence says あした). It is the author's word and the reviewer's to
+  check: a clipped or colloquial form that is just as good an answer (走ろ for
+  走ろう, 食べれる) is a second answer, never a slip. A wrong filling the
+  detector reads as the point and that is not declared is refused. A point that
+  names its own alternatives (〜つ／〜人／〜枚, です／だ) is exempt, as in the
+  scene.
+- **Where the detector can read the point** (`grammar_detect.can_find`), it is
+  asked of the right filling *at the hole*: the point must be written there. A
+  sentence it cannot read is reworded, as a scene's line is.
+- Both languages, no Japanese in a translation, the level's kanji (the point's
+  own excepted), and a French that does not agree with the learner (no *je suis
+  allé*, no *m'a forcé*): the learner has no gender.
+- Never a sentence the lesson or the tutorial already shows (the examples, the
+  twists, the scene, the quiz), and no sentence twice.
+
+`study/grammar_choose.py` serves them through the contrast drill's own
+payload (`contrast_payload`), adding the parts of the right filling as it
+stands in the sentence (`fill`, what the card turns to), the ruby of a filling
+with kanji, and `answer`, which the run compares a tile to. The gate is
+`study/grammar_check._choose_problems`, run by `python -m scripts.check_grammar`,
+and `tests/test_grammar_choose.py` holds that every point of the catalogue is
+asked a real contrast on every turn. What the gate cannot see is the audit's
+(`docs/content-audit/PLAYBOOK.md`): the questions are in the grammar and the
+tours slices.
+
 ## The ladder's snapshot (plan 187e)
 
 `ladder.json`, beside the five levels, is not an entry file: it writes
@@ -171,14 +286,15 @@ the detector over every example, some twelve seconds, which is the only
 reason it is written down. After any change here run
 `python -m scripts.build_ladder_flags` (`--check` reports first);
 `tests/test_grammar_ladder.py` fails while the file disagrees. A point it
-leaves out is still asked: its card falls back a rung.
+leaves out is still asked: its card falls back a rung. (`choose` is not in the
+snapshot: a point's questions are read from the entry, which is cheap.)
 
 ## Rich levels
 
 `RICH_LEVELS` in `content/grammar_points_data.py` names the levels whose
 points carry the full lesson. There the gate requires: a `rule` step, at
-least one `compare` rival, at least one `contrast` example (when the pattern
-can be blanked at all: a bare particle is exempt), three or more
+least one `compare` rival, at least one `contrast` example (a point the
+matcher cannot read carries three `choose` questions instead), three or more
 examples (write four or five), and French that is not a copy of the English.
 Every level is rich today. A level taken out of the set (or a new one)
 is held to the lower bar — a bilingual gloss and two examples — until its
@@ -246,23 +362,27 @@ contrast rule reads those stems. Two consequences while writing `compare`:
   does not match 〜が見える. The gate names the sentence; reword it.
 
 A pattern the matcher cannot check at all (a bare particle, a class label
-such as い形容詞／な形容詞) is exempt from the contrast requirement: its lesson
-names the neighbours either way. It **may** still mark a contrast sentence
-(plan 190), and then the drill and the ladder's build blank it where the
-grammar detector finds it — exactly once, on one piece; the gate names a
-marked sentence where it does not. Two rules for marking one, because the
-drill hides the translation until the answer:
+such as い形容詞／な形容詞) is not held to a contrast example: its lesson
+names the neighbours either way, and the point is asked from questions of its
+own instead (`choose`, above); since plan 201 a point with neither a marked
+sentence the detector can blank nor `choose` fails the gate. It **may** still
+mark a contrast sentence (plan 190), and then the drill and the ladder's build
+blank it where the grammar detector finds it — exactly once, on one piece; the
+gate names a marked sentence where it does not. Two rules for marking one (a
+marked sentence is asked as it stands, with its rivals as the only wrong
+choices):
 
 - Mark only a sentence in which every rival is **ungrammatical** in the gap,
   not merely a different meaning. を in 毎あさパン＿食べます (が and に cannot
   stand there), が after a question word (だれ＿来ますか: は cannot), に with
   a clock time (七時＿おきます: で and へ cannot). は against が and も, と
-  against や, ね against よ and へ against に share too many sentences: leave
-  them unmarked.
+  against や, ね against よ and へ against に share too many sentences to
+  mark one: write them `choose` questions, where the translation printed under
+  the sentence says which is meant.
 - Such a point is offered its named rivals alone, never fillers from the
   level: a particle's gap takes だけ, まで, から and more, so no filler is
   certainly wrong there.
 
 `card_index.contrast_ok` reads which of these points can be drawn from the
 ladder's snapshot (its `blank` list), so run `build_ladder_flags` after
-marking one.
+marking one. A point with `choose` needs no snapshot.

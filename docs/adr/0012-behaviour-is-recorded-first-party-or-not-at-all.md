@@ -2,6 +2,7 @@
 
 - **Status**: accepted
 - **Date**: 2026-09-10
+- **Extended by**: [0022](0022-the-trail-measures-time-and-use-and-stays-exempt.md) — time on screen, every run, visit context, feature counts, closed values, the account-wide objection and the 25-month bound (plan 218)
 
 ## Context
 
@@ -93,3 +94,17 @@ raises `KeyError`. It was unreachable only because the counts sat behind
 it on the first deck anyone created, returning 500 where a 402 was meant. Both
 now go through `credits._count()`, and both count in shadow mode so the
 crossing can be recorded.
+
+**Added later: the visit.** A row says what happened; only a shared id says
+that three rows were one sitting. `lib/track.js` mints a random id per visit
+(sessionStorage, so it dies with the tab; a new one after thirty minutes
+without an event) and sends it beside each event, stored in
+`event_log.sid`. It is not a property (the allowlist does not apply to it)
+and so is held to a shape instead, `events.clean_sid`: letters, digits and
+dashes, 8 to 64, or nothing. It is not a device id and links nothing the
+`user_id` on the row did not already link. Each visit opens with a
+`session_start` event, so `event_daily` keeps "sessions a day" after the raw
+rows, and their ids, are gone at thirty days; length and screens per session
+are raw-row questions and are answered for the window only. A failed request
+(`api_error`) joins the running visit but never begins or extends one.
+

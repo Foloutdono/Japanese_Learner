@@ -81,7 +81,7 @@ export default function DayClearPreview() {
     if (name !== 'share') return undefined
     let url = null
     let live = true
-    renderTicketPng({ ...scene.share, t }).then(blob => {
+    renderTicketPng({ ...scene.share, t, lang }).then(blob => {
       if (!live) return
       url = URL.createObjectURL(blob)
       setPng(url)
@@ -109,7 +109,7 @@ export default function DayClearPreview() {
         reduced={reduced}
         onLeave={leave}
         onContinue={leave}
-        onShare={ticket => shareTicket({ ...SCENES.share.share, ...ticket, t })}
+        onShare={ticket => shareTicket({ ...SCENES.share.share, ...ticket, t, lang })}
         onRetry={leave}
       />
     )

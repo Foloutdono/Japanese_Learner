@@ -196,7 +196,7 @@ def _lookup(client, term, **extra):
 def test_a_homograph_opens_the_reading_that_was_asked_for(client):
     """Two words share a surface and differ only by reading. Without the
     reading the commoner one wins whichever was wanted."""
-    for kanji, kana in [("国境", "くにざかい"), ("国境", "こっきょう"),
+    for kanji, kana in [("大事", "おおごと"), ("大事", "だいじ"),
                         ("工場", "こうば"), ("工場", "こうじょう"),
                         ("入室", "にっしつ"), ("一寸", "いっすん")]:
         got = _lookup(client, kanji, kana=kana)
@@ -218,9 +218,9 @@ def test_the_reading_disambiguates_but_never_filters(client):
     """It reorders page 0 and nothing else: same collection, same totals,
     same paging."""
     plain = client.get("/api/dictionary", params={
-        "q": "国境", "limit": 10, "category": "vocab"}).json()
+        "q": "大事", "limit": 10, "category": "vocab"}).json()
     exact = client.get("/api/dictionary", params={
-        "q": "国境", "limit": 10, "category": "vocab", "kana": "くにざかい"}).json()
+        "q": "大事", "limit": 10, "category": "vocab", "kana": "おおごと"}).json()
     assert exact["total"] == plain["total"]
     assert exact["has_more"] == plain["has_more"]
     assert len(exact["results"]) == len(plain["results"])
@@ -263,7 +263,7 @@ def test_one_answers_with_the_exact_entry_alone(client):
     """The analyser docks one word's entry on every focus, and the page
     around it was the whole of the wait. `one` answers with that entry,
     the same row the page puts first, and nothing else."""
-    for kanji, kana in [("国境", "くにざかい"), ("工場", "こうば"), ("ラブ", "ラブ"),
+    for kanji, kana in [("大事", "おおごと"), ("工場", "こうば"), ("ラブ", "ラブ"),
                         ("毎月", "まいげつ")]:
         page = client.get("/api/dictionary", params={
             "q": kanji, "limit": 10, "category": "vocab", "kana": kana}).json()

@@ -82,16 +82,15 @@ describe('the tickets on the desk', () => {
 })
 
 describe('the rest-day notice on the desk', () => {
-  it('draws the phone\'s composition, centred in the gate\'s column, its gate at the foot', async () => {
+  it('draws the phone\'s composition, centred on the page, its gate at the foot', async () => {
     await mount('?scene=restday&bare=1&reduced=1')
     await settle(500)
     const rest = box('main.today > .rst')
     expect(Math.round(rest.width)).toBe(390)
-    const column = $('main.today').getBoundingClientRect()
-    // The gate's column: the today grid's first track.
-    const first = parseFloat(getComputedStyle($('main.today')).gridTemplateColumns.split(' ')[0])
-    const padding = parseFloat(getComputedStyle($('main.today')).paddingLeft)
-    expect(Math.abs((rest.left + rest.right) / 2 - (column.left + padding + first / 2))).toBeLessThan(2)
+    // In place of the whole gate, the dial's panel and its column alike
+    // (plan 199): on the page's axis.
+    const page = $('main.today').getBoundingClientRect()
+    expect(Math.abs((rest.left + rest.right) / 2 - (page.left + page.right) / 2)).toBeLessThan(2)
     const gate = box('.rst-gatewrap .btn-depart--gate')
     expect(gate.bottom).toBeLessThanOrEqual(window.innerHeight)
     expect(window.innerHeight - gate.bottom).toBeLessThan(80)

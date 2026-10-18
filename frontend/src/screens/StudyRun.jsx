@@ -24,11 +24,11 @@ import { useReviewGates } from '../hooks/useReviewGates'
 // apart. See CardPrompt's own note.
 import CardPrompt from '../components/study/CardPrompt'
 import { GrammarChoice } from '../components/study/GrammarPieces'
-import { wordForm, structureKeyOf, normalizeCard, cardShape } from '../domain/cardShape'
+import { wordForm, structureKeyOf, normalizeCard, cardShape, choiceAnswer } from '../domain/cardShape'
 import SessionError from '../components/study/SessionError'
 import ReadingsInput from '../components/study/ReadingsInput'
 import { DrawingQuiz, DrawingOverlay } from '../components/study/DrawingCanvas'
-import { speakJapanese } from '../lib/audio'
+import { speakJapanese, isSpeakOnReveal } from '../lib/audio'
 import {
   MODES as STUDY_MODES, RENDER, HINTS,
   modeLabel, usesWritingDrill,
@@ -288,6 +288,7 @@ export default function StudyRun({ session }) {
     <StudyStage
       color="var(--line-decks)"
       onLeave={leave}
+      report={showRating && card ? { card } : null}
       leaveLabel={t.decksTitle}
       where={deck?.name ?? ''}
       sub={title}
@@ -305,7 +306,7 @@ export default function StudyRun({ session }) {
     >
         <DeckProgress stats={progress} />
         {loading && <Loading />}
-        {error && !card && <SessionError error={error} onRetry={retry} />}
+        {error && !card && <SessionError error={error} onRetry={retry} session={session} />}
         {done    && <DoneMessage onBack={leave} pace={paceCtl.pace}
           onExtra={paceCtl.pacedOut ? () => paceCtl.boardExtra(retry) : undefined} />}
 
@@ -382,7 +383,7 @@ export default function StudyRun({ session }) {
               (desk || !answered) && (
                 <GrammarTiles
                   choices={nc.contrast?.choices ?? []}
-                  correct={nc.grammar}
+                  correct={choiceAnswer(nc)}
                   readings={nc.choices_furigana}
                   selected={selected} answered={answered} onAnswer={onMCQAnswer}
                 />
@@ -440,7 +441,7 @@ export default function StudyRun({ session }) {
                 onValidate={() => {
                   setAnswered(true)
                   setShowRating(true)
-                  speakJapanese(nc.kana)
+                  if (isSpeakOnReveal()) speakJapanese(nc.kana)
                 }}
               />
             )}

@@ -1,23 +1,30 @@
 import hashlib
 import json
 import logging
+import os
 import re
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from core.credits import require_pass
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from core.db import db_conn
+from core.rls import enable_rls
 from core.auth import get_user_id
 from core.srs_instance import srs
 from core.history import trim_history
 from study.llm_shared import chat, LLMUnavailable
 from content.grammar_points_data import localise
+from study import line_translate
 from study.analysis import analyze_local, attach_user_state, merge_deep
+from study.cue_sentences import is_japanese
+from study.line_cut import cut_line
 from study.sentences import split_sentences, MAX_SENTENCES
-from routes.reading import LANG_NAMES
+from routes.reading import LANG_NAMES, known_lang
+from core import daily_limit
+from core.credits import resets_at
 
 # A pass feature (plan 069): every route here refuses a free learner
 # with 402 pass_required once CREDITS_ENFORCE=1; a no-op until then.
@@ -58,7 +65,7 @@ SYSTEM_PROMPT_TEMPLATE = """You are a Japanese language tutor. Given a Japanese 
 - "pos" is a short part-of-speech label (noun, verb, particle, adjective, etc), in {lang_name}.
 - "grammar" has one entry per grammar point listed under the phrase, in the order listed, with "pattern" copied EXACTLY as listed. "note" is ONE sentence, in {lang_name}, saying what that pattern does in THIS phrase -- what it attaches to here and what it adds to the meaning -- not a general definition. An empty list when no points are listed.
 - "translation" is the whole phrase translated into {lang_name}: one natural sentence, as a subtitle would give it, with no notes or alternatives.
-- "explanation" is 2-4 sentences, in {lang_name}, explaining the grammar and nuance of the whole phrase.
+- "explanation" is 2-4 sentences, in {lang_name}, saying how the phrase is BUILT: what its predicate is and what it is said of, what modifies or completes what, and how each conjugated or combined form is put together and what each of its parts adds. Quote the Japanese pieces you name. Never restate, summarise or translate what the phrase says, and make no general remark on its mood or tone: "translation" carries the meaning, the explanation is the construction, and a nuance is named only where a form carries it.
 
 The JSON key names ("words", "surface", "base", "reading", "meaning", "pos",
 "grammar", "pattern", "note", "translation", "explanation") must stay exactly
@@ -92,14 +99,94 @@ def _deep_points(analysis: dict, lang: str) -> list[dict]:
     return out
 
 
-def _user_message(phrase: str, points: list[dict]) -> str:
-    if not points:
-        return phrase
-    lines = [phrase, "", "Grammar points found in this phrase:"]
-    for point in points:
-        detail = " -- ".join(part for part in (point.get("structure"), point.get("meaning")) if part)
-        lines.append(f"- {point['pattern']}" + (f" ({detail})" if detail else ""))
+def _user_message(phrase: str, points: list[dict], context: str = "") -> str:
+    lines = [phrase]
+    if points:
+        lines += ["", "Grammar points found in this phrase:"]
+        for point in points:
+            detail = " -- ".join(part for part in (point.get("structure"), point.get("meaning")) if part)
+            lines.append(f"- {point['pattern']}" + (f" ({detail})" if detail else ""))
+    if context:
+        lines += ["", context]
     return "\n".join(lines)
+
+
+# ── Where the phrase stands (plan 235) ─────────────────────────
+# A video's line explained alone was explained as a sentence of its own:
+# みなさんがいてくれるので、 with nobody to be there and nothing it
+# was the reason for (the owner: "give a bit of context to it, not just
+# the sentence ... a snippet of the text and some metadata"). A caller
+# that knows where the phrase stands passes it here -- what the video
+# is, where in it the line comes, the lines around it -- and it rides
+# in the user block under the phrase, the schema and the system block
+# unchanged. The phrase alone is still what is broken down.
+CONTEXT_INSTRUCTION = (
+    "This phrase is one line of a longer text. Break down and translate the phrase alone, "
+    "but use what follows to get its meaning right. Where its construction runs across lines "
+    "(a clause the line before leaves open, a subject or object carried over, a sentence the "
+    "next line completes), let the explanation say so in a sentence."
+)
+
+
+def deep_context(about: list[str], before: list[str], after: list[str]) -> str:
+    """The block a phrase's context is written as: `about` the lines
+    saying what the text is, `before` and `after` its neighbours."""
+    lines = [CONTEXT_INSTRUCTION]
+    lines += [f"- {line}" for line in about if line]
+    if before:
+        lines.append("- Before it: " + " / ".join(before))
+    if after:
+        lines.append("- After it: " + " / ".join(after))
+    return "\n".join(lines)
+
+
+# ── A typed Passage's sentences (plan 235) ─────────────────────
+# The analyser holds a typed or photographed Passage's sentences to a
+# video's line width too (study/line_cut.py): a sentence from a novel
+# drew nine rows of a phone at display size. Only the analyser's: the
+# practice runs, reading practice and the dictionary ask for one
+# sentence's breakdown and take it whole, and nothing of theirs is cut.
+# A grammar point that would span a cut is lost to both halves, which
+# is why the cut goes at a mark or a clause's end first.
+_TEXT_SOURCES = {
+    "typed": "a Japanese text the learner is reading",
+    "image": "a photographed page of Japanese",
+    "video": "a line kept from a video's subtitles",
+}
+
+
+def passage_sentences(passage: str, whole: bool = False, lines: bool = False) -> list[dict]:
+    """The Sentences a Passage is analysed as, each {"text", ...}: one
+    when `whole`, split on its punctuation otherwise, and with `lines`
+    every Japanese one wider than the line cut into the lines it reads
+    in."""
+    if whole:
+        return [{"text": passage}]
+    sentences = split_sentences(passage)
+    if not lines:
+        return sentences
+    out = []
+    for s in sentences:
+        if not is_japanese(s["text"]):
+            out.append(s)
+            continue
+        out += [{"text": piece["text"]} for piece in cut_line(s["text"], None, None)]
+    return out
+
+
+def passage_context(texts: list[str], index: int, source: str = "typed") -> str:
+    """Where sentence `index` of a typed Passage stands (deep_context):
+    what the text is, the sentence's place, two sentences either side.
+    Empty for a Passage of one sentence, which is explained as it always
+    was -- and under the key the reading bank and every other caller
+    share."""
+    if len(texts) < 2:
+        return ""
+    about = [f"From {_TEXT_SOURCES.get(source, _TEXT_SOURCES['typed'])}.",
+             f"Sentence {index + 1} of {len(texts)}."]
+    before = [t for t in texts[max(0, index - 2):index] if t]
+    after = [t for t in texts[index + 1:index + 3] if t]
+    return deep_context(about, before, after)
 
 
 # ── The breakdown cache ───────────────────────────────────────
@@ -141,11 +228,25 @@ def _user_message(phrase: str, points: list[dict]) -> str:
 # v5 (plan 161): the prompt asks for the phrase's translation, which the
 # desk analyser prints under a typed or photographed sentence; an entry
 # bought under v4 has none and would never gain one.
-CACHE_VERSION = 5
+#
+# v6 (plan 242): the explanation says how the phrase is built and
+# nothing else (the owner: "the explain button is only for the
+# explanation of how the sentence is built"). Under v5 it opened on a
+# paraphrase of the meaning and closed on its tone -- the translation's
+# job, which every line of a video now has under it -- and an entry
+# bought then would go on saying so.
+CACHE_VERSION = 6
 
 
-def _phrase_key(phrase: str, lang: str) -> str:
+def _phrase_key(phrase: str, lang: str, context: str = "") -> str:
+    # A phrase explained where it stands (plan 235) is its own entry:
+    # the same line in another video, or with other lines around it, is
+    # another explanation. The phrase alone keeps the key it always had,
+    # so nothing cached under it moves.
     material = f"v{CACHE_VERSION}:{lang}:{phrase}"
+    if context:
+        digest = hashlib.sha256(context.encode("utf-8")).hexdigest()
+        material = f"v{CACHE_VERSION}:{lang}:ctx:{digest}:{phrase}"
     return hashlib.sha256(material.encode("utf-8")).hexdigest()
 
 
@@ -163,6 +264,7 @@ def _init_cache() -> None:
                 )
                 """
             )
+            enable_rls(cur, "phrase_analysis_cache")
         conn.commit()
     finally:
         conn.close()
@@ -219,6 +321,16 @@ def _migrate_history_schema() -> None:
                 CREATE UNIQUE INDEX IF NOT EXISTS idx_phrase_history_kept_unique
                 ON phrase_history(user_id, phrase) WHERE kept
             """)
+            # Each sentence's translation (plan 235), as a video session
+            # keeps its lines': {lang: {sentence: translation}}. A
+            # translation is a translation of text, not an analysis, so
+            # ADR-0002 still holds: nothing here goes stale with the SRS.
+            cur.execute(
+                "ALTER TABLE phrase_history ADD COLUMN IF NOT EXISTS translations JSONB NOT NULL DEFAULT '{}'::jsonb"
+            )
+            # Closed to the Data API like every table (core/rls.py). The
+            # table predates the self-migrations, so nothing creates it.
+            enable_rls(cur, "phrase_history")
         conn.commit()
     finally:
         conn.close()
@@ -230,7 +342,7 @@ except Exception:  # pragma: no cover - a missing DB must not stop import
     logger.exception("phrase_history schema migration failed")
 
 
-def _cached_analysis(phrase: str, lang: str) -> dict | None:
+def _cached_analysis(phrase: str, lang: str, context: str = "") -> dict | None:
     """The stored LLM result for `phrase` in `lang`, or None.
 
     A cache miss must never be an error: a failed lookup falls through to
@@ -245,7 +357,7 @@ def _cached_analysis(phrase: str, lang: str) -> dict | None:
         with conn.cursor() as cur:
             cur.execute(
                 "SELECT result FROM phrase_analysis_cache WHERE phrase_key = %s",
-                (_phrase_key(phrase, lang),),
+                (_phrase_key(phrase, lang, context),),
             )
             row = cur.fetchone()
     except Exception:
@@ -260,7 +372,33 @@ def _cached_analysis(phrase: str, lang: str) -> dict | None:
     return json.loads(result) if isinstance(result, str) else result
 
 
-def _store_analysis(phrase: str, lang: str, result: dict) -> None:
+def _cached_analyses(keys: list[str]) -> dict[str, dict]:
+    """The stored results under `keys`, in one query: a Passage's
+    sentences (up to MAX_SENTENCES, twice that reopened) read on one
+    connection rather than one each. A failed read is an empty dict,
+    every sentence a miss, as _cached_analysis's None is."""
+    if not keys:
+        return {}
+    try:
+        conn = db_conn()
+    except Exception:
+        return {}
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT phrase_key, result FROM phrase_analysis_cache WHERE phrase_key = ANY(%s)",
+                (list(set(keys)),),
+            )
+            rows = cur.fetchall()
+    except Exception:
+        logger.exception("phrase cache read failed")
+        return {}
+    finally:
+        conn.close()
+    return {key: json.loads(result) if isinstance(result, str) else result for key, result in rows}
+
+
+def _store_analysis(phrase: str, lang: str, result: dict, context: str = "") -> None:
     """Best-effort write. ON CONFLICT DO NOTHING rather than an upsert:
     two readers reaching the same uncached phrase at once both call the
     model and both try to store it; either answer is equally good and
@@ -277,7 +415,7 @@ def _store_analysis(phrase: str, lang: str, result: dict) -> None:
                 VALUES (%s, %s, %s)
                 ON CONFLICT (phrase_key) DO NOTHING
                 """,
-                (_phrase_key(phrase, lang), phrase, json.dumps(result, ensure_ascii=False)),
+                (_phrase_key(phrase, lang, context), phrase, json.dumps(result, ensure_ascii=False)),
             )
         conn.commit()
     except Exception:
@@ -287,7 +425,9 @@ def _store_analysis(phrase: str, lang: str, result: dict) -> None:
 
 
 class PhraseRequest(BaseModel):
-    phrase: str
+    # Bounded (plan 211): split into at most MAX_SENTENCES, but read and
+    # tokenized whole first. A long chapter pasted is ~20k characters.
+    phrase: str = Field(max_length=20_000)
     # False for callers that just want the AI breakdown without adding
     # an entry to the user's phrase-analyzer history — added for reading
     # practice (see reading.py / ReadingScreen.jsx, 2026-08), which
@@ -317,11 +457,16 @@ class PhraseRequest(BaseModel):
     # Passage of two with no top-level tokens, and the run drew the bare
     # sentence where its breakdown should have been.
     whole: bool = False
+    # True for the analyser's own Passage (plan 235): each sentence
+    # held to the line width a video's lines are (passage_sentences).
+    # Every other caller takes its sentences as they are.
+    lines: bool = False
 
 
-def _call_llm(phrase: str, lang: str, points: list[dict] | None = None) -> dict:
+def _call_llm(phrase: str, lang: str, points: list[dict] | None = None, context: str = "") -> dict:
     """One word-by-word breakdown, via the shared multi-provider client,
-    with a note on each of `points` (_deep_points) in context.
+    with a note on each of `points` (_deep_points) and, where the caller
+    knows it, where the phrase stands (`context`, deep_context).
 
     max_tokens=1500: a segmentation of one sentence, a line per grammar
     point, its translation and a 2-4 sentence note. Generous for the longest phrase the
@@ -337,7 +482,7 @@ def _call_llm(phrase: str, lang: str, points: list[dict] | None = None) -> dict:
         content = chat(
             [
                 {"role": "system", "content": SYSTEM_PROMPT_TEMPLATE.format(lang_name=lang_name)},
-                {"role": "user", "content": _user_message(phrase, points or [])},
+                {"role": "user", "content": _user_message(phrase, points or [], context)},
             ],
             timeout=30, max_tokens=1500, reasoning=False, task="phrase",
         )
@@ -405,8 +550,18 @@ def _normalize_explanation_key(parsed: dict) -> dict:
     return parsed
 
 
+# The deep tier's model calls a learner may make in a day (plan 211):
+# a cache miss, never a hit -- the curated sentences are paid for once
+# for everyone. Every caller of the deep tier (the analyzer, the runs'
+# explain, a video line) counts here; before, none counted at all, and
+# a request could buy fifty.
+DEEP_FEATURE = "deep_analysis"
+DEEP_DAILY_LIMIT = int(os.environ.get("DEEP_DAILY_LIMIT", "150"))
+
+
 def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: str,
-                       allow_llm_call: bool = True) -> dict:
+                       allow_llm_call: bool = True, context: str = "",
+                       cached: dict[str, dict] | None = None) -> dict:
     """One Sentence through the full local (+ optional deep) pipeline,
     with per-user SRS state attached. Shared by the live analyze path
     and the history re-derive path (Step 3) so the two can never drift.
@@ -417,8 +572,22 @@ def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: s
     is permanent and keyed by (phrase, lang), so a cache HIT still merges
     in -- only a cache MISS is treated differently: skipped instead of
     escalated to _call_llm.
+
+    `context` (deep_context) is where the phrase stands, for a caller
+    that knows it (a video's line, plan 235): asked with the phrase and
+    cached under a key of its own.
+
+    `cached`, when a caller already read the cache for a whole Passage
+    (_analyze_passage, _cached_analyses), is that read: looked up here
+    instead of a query per sentence.
     """
     analysis = analyze_local(text)
+    lang = known_lang(lang)
+
+    def lookup(ctx: str) -> dict | None:
+        if cached is None:
+            return _cached_analysis(text, lang, ctx)
+        return cached.get(_phrase_key(text, lang, ctx))
 
     if deep:
         # The deep tier is bought explicitly, per call, per Sentence --
@@ -426,10 +595,26 @@ def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: s
         # docs/adr/0001). The cached half (llm_result) is the expensive,
         # user-independent half; everything from attach_user_state
         # onward is per-user and recomputed every time.
-        llm_result = _cached_analysis(text, lang)
+        llm_result = lookup(context)
+        if llm_result is None and context and not allow_llm_call:
+            # Reopened, a sentence explained before it was explained
+            # where it stands still finds what was bought for it.
+            llm_result = lookup("")
         if llm_result is None and allow_llm_call:
-            llm_result = _call_llm(text, lang, _deep_points(analysis, lang))
-            _store_analysis(text, lang, llm_result)
+            if daily_limit.claim(user_id, DEEP_FEATURE, DEEP_DAILY_LIMIT) > DEEP_DAILY_LIMIT:
+                raise HTTPException(
+                    status_code=429,
+                    detail=(
+                        f"Daily limit of {DEEP_DAILY_LIMIT} explanations reached; "
+                        f"resets {resets_at(user_id):%Y-%m-%dT%H:%MZ}"
+                    ),
+                )
+            llm_result = _call_llm(text, lang, _deep_points(analysis, lang), context)
+            _store_analysis(text, lang, llm_result, context)
+            if cached is not None:
+                # The same sentence again further down the Passage
+                # finds it, as it would have found the stored row.
+                cached[_phrase_key(text, lang, context)] = llm_result
         if llm_result is not None:
             llm_result = _normalize_explanation_key(llm_result)
             analysis = merge_deep(
@@ -450,19 +635,34 @@ MAX_DEEP_SENTENCES = 50
 
 
 def _analyze_passage(passage: str, deep: bool, lang: str, user_id: str,
-                      allow_llm_call: bool = True, whole: bool = False) -> dict:
+                      allow_llm_call: bool = True, whole: bool = False,
+                      lines: bool = False, source: str = "typed") -> dict:
     """A Passage split into Sentences and each analyzed independently --
-    or, `whole`, taken as one Sentence (see PhraseRequest.whole). No LLM
-    call happens here unless `deep` is set -- see _analyze_sentence."""
-    all_sentences = [{"text": passage}] if whole else split_sentences(passage)
+    or, `whole`, taken as one Sentence (see PhraseRequest.whole), or,
+    `lines`, held to the line width (passage_sentences), its deep tier
+    read where each sentence stands (passage_context). No LLM call
+    happens here unless `deep` is set -- see _analyze_sentence."""
+    all_sentences = passage_sentences(passage, whole=whole, lines=lines)
     truncated = max(0, len(all_sentences) - MAX_SENTENCES)
     kept = all_sentences[:MAX_SENTENCES]
+    texts = [s["text"] for s in kept]
 
     states = srs.get_user_states(user_id)
+    contexts = [passage_context(texts, i, source) if deep and lines else "" for i in range(len(texts))]
+    # Every sentence's cache rows in one read, not one connection each:
+    # a reopened chapter is up to MAX_SENTENCES of them, each with a
+    # second key when it stands in a context (_analyze_sentence).
+    cached = None
+    if deep:
+        key_lang = known_lang(lang)
+        keys = [_phrase_key(text, key_lang, ctx) for text, ctx in zip(texts, contexts)]
+        keys += [_phrase_key(text, key_lang) for text, ctx in zip(texts, contexts) if ctx]
+        cached = _cached_analyses(keys)
     sentences = [
-        _analyze_sentence(s["text"], deep, lang, states, user_id,
-                          allow_llm_call and i < MAX_DEEP_SENTENCES)
-        for i, s in enumerate(kept)
+        _analyze_sentence(text, deep, lang, states, user_id,
+                          allow_llm_call and i < MAX_DEEP_SENTENCES,
+                          context=contexts[i], cached=cached)
+        for i, text in enumerate(texts)
     ]
 
     result = {"passage": passage, "sentences": sentences, "truncated": truncated}
@@ -505,7 +705,8 @@ def analyze_phrase(payload: PhraseRequest, user_id: str = Depends(get_user_id)):
     # configured at all -- this is the whole point of the two-tier split,
     # see docs/adr/0001-two-tier-sentence-analysis.md. llm_configured()
     # is deliberately never checked here.
-    result = _analyze_passage(phrase, payload.deep, payload.lang, user_id, whole=payload.whole)
+    result = _analyze_passage(phrase, payload.deep, payload.lang, user_id, whole=payload.whole,
+                              lines=payload.lines, source=payload.source)
 
     if not payload.save:
         return {**result, "id": None, "created_at": None}
@@ -569,23 +770,129 @@ def get_phrase_history_entry(entry_id: int, lang: str = "en", user_id: str = Dep
     # deep tier was never bought (or was bought in a different `lang`)
     # simply comes back local-only, rather than triggering a fresh model
     # call just because the learner reopened an old entry.
+    #
+    # The shelf is the analyser's, so the Passage comes back in the lines
+    # the analyser reads it in (plan 235), each sentence's explanation
+    # looked up where it stands -- the indices its translations and its
+    # Explain are asked by.
+    entry = _load_entry(entry_id, user_id)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    result = _analyze_passage(entry["phrase"], deep=True, lang=lang, user_id=user_id, allow_llm_call=False,
+                              lines=True, source=entry["source"])
+    return {**result, "id": entry_id, "source": entry["source"], "created_at": entry["created_at"].isoformat()}
+
+
+def _load_entry(entry_id: int, user_id: str) -> dict | None:
     conn = db_conn()
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT phrase, created_at FROM phrase_history WHERE id = %s AND user_id = %s",
+                "SELECT phrase, source, translations, created_at FROM phrase_history "
+                "WHERE id = %s AND user_id = %s",
                 (entry_id, user_id),
             )
             row = cur.fetchone()
     finally:
         conn.close()
-
     if row is None:
-        raise HTTPException(status_code=404, detail="Not found")
+        return None
+    phrase, source, translations, created_at = row
+    return {"phrase": phrase, "source": source, "translations": translations or {}, "created_at": created_at}
 
-    phrase, created_at = row
-    result = _analyze_passage(phrase, deep=True, lang=lang, user_id=user_id, allow_llm_call=False)
-    return {**result, "id": entry_id, "created_at": created_at.isoformat()}
+
+def _entry_sentences(entry: dict) -> list[str]:
+    """A history Passage's sentences as the analyser holds them, the
+    first MAX_SENTENCES as _analyze_passage keeps them."""
+    return [s["text"] for s in passage_sentences(entry["phrase"], lines=True)[:MAX_SENTENCES]]
+
+
+class HistoryExplainPayload(BaseModel):
+    lang: str = "en"
+
+
+@router.post("/api/phrase/history/{entry_id}/sentence/{index}/explain")
+def explain_history_sentence(entry_id: int, index: int, payload: HistoryExplainPayload,
+                             user_id: str = Depends(get_user_id)):
+    """The deep tier of ONE sentence of a typed or photographed Passage,
+    asked where it stands (plan 235): the two sentences either side of
+    it, its place, what kind of text it is. A Passage of one sentence is
+    asked as the sentence alone. The answer is the sentence's analysis,
+    as /api/phrase/analyze gives one; reopening the Passage
+    (get_phrase_history_entry) finds it under the same context."""
+    entry = _load_entry(entry_id, user_id)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="Not found")
+    texts = _entry_sentences(entry)
+    if index < 0 or index >= len(texts):
+        raise HTTPException(status_code=404, detail="No such sentence in this Passage")
+    states = srs.get_user_states(user_id)
+    return _analyze_sentence(texts[index], deep=True, lang=payload.lang, states=states, user_id=user_id,
+                             context=passage_context(texts, index, entry["source"]))
+
+
+# ── 訳 — a translation under every sentence (plan 235) ──────────
+# A video session's lines and a typed Passage's sentences are translated
+# alike (study/line_translate.py): a block of lines at a time, kept on
+# the row the Passage is kept on, rationed by the same daily ceiling.
+class TranslationsPayload(BaseModel):
+    lang: str = "en"
+    # A line of the block wanted: the block is the BLOCK lines it falls in.
+    index: int = Field(0, ge=0)
+    title: str = Field("", max_length=200)
+    channel: str = Field("", max_length=120)
+
+
+def _translation_refusal(status: int, code: str, message: str) -> HTTPException:
+    """Shaped as routes/video.py's refusals (plan 210): a code the client
+    words, the English for the logs."""
+    return HTTPException(status_code=status, detail={"code": code, "message": message})
+
+
+def translated_block(user_id: str, table: str, row_id: int, lines: list[dict], stored: dict,
+                     payload: TranslationsPayload, kind: str) -> dict:
+    """The /translations answer for a Passage's `lines` (each {"text",
+    "foreign"?}), `stored` being what its row already holds --
+    {"start", "lines"}, one translation or None per line of the block --
+    and what had to be asked kept on that row."""
+    lang = known_lang(payload.lang)
+    try:
+        start, out, found = line_translate.translate_block(
+            user_id, lines, payload.index, LANG_NAMES.get(lang, lang),
+            dict((stored or {}).get(lang) or {}), payload.title, payload.channel, kind,
+        )
+    except line_translate.OverLimit:
+        raise _translation_refusal(
+            429, "translation_limit",
+            f"Daily limit of {line_translate.LINE_TRANSLATION_DAILY_LIMIT} translated blocks reached; "
+            f"resets {resets_at(user_id):%Y-%m-%dT%H:%MZ}",
+        )
+    except LLMUnavailable as e:
+        logger.error("Line translation has no usable LLM provider: %s", e)
+        raise _translation_refusal(503, "ai_unavailable", "The AI service is temporarily unavailable.")
+    if found:
+        # Best effort: a failed save costs the next opening a call,
+        # never this answer.
+        try:
+            line_translate.keep(table, row_id, lang, found)
+        except Exception:
+            logger.exception("Could not store the translations of %s %s", table, row_id)
+    return {"start": start, "lines": out}
+
+
+@router.post("/api/phrase/history/{entry_id}/translations")
+def translate_history_sentences(entry_id: int, payload: TranslationsPayload,
+                                user_id: str = Depends(get_user_id)):
+    """The translations of the block of a typed or photographed
+    Passage's sentences that `index` falls in -- as a video session's
+    lines are translated (routes/video.py) -- None for a sentence with
+    no Japanese in it."""
+    entry = _load_entry(entry_id, user_id)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="Not found")
+    lines = [{"text": text, "foreign": not is_japanese(text)} for text in _entry_sentences(entry)]
+    return translated_block(user_id, "phrase_history", entry_id, lines, entry["translations"], payload, "text")
 
 
 @router.delete("/api/phrase/history/{entry_id}")
@@ -604,9 +911,13 @@ def delete_phrase_history_entry(entry_id: int, user_id: str = Depends(get_user_i
 
 
 class KeepRequest(BaseModel):
-    sentence: str
-    source: str = "typed"
-    source_ref: str = ""
+    # Bounded (plan 211), as PhraseRequest is. A video Sentence is kept
+    # under its session's own source (routes/video.py: youtube, paste,
+    # upload) and a ref of "<ref>@<cue_start>", the ref an upload's
+    # file name at most.
+    sentence: str = Field(max_length=20_000)
+    source: Literal["typed", "image", "video", "youtube", "paste", "upload"] = "typed"
+    source_ref: str = Field("", max_length=1_000)
 
 
 @router.post("/api/phrase/keep")

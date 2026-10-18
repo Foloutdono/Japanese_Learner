@@ -198,5 +198,5 @@ def test_a_learner_who_never_boarded_is_told_nothing_is_due(client):
     # No level, no pace, no cards: every train empty, no word, no error.
     at = _iso(datetime.now(timezone.utc) + timedelta(days=1))
     body = client.get("/api/today/ahead", params={"at": at}).json()
-    assert body["points"] == [{"at": body["points"][0]["at"], "total": 0, "new": 0, "lanes": []}]
+    assert body["points"] == [{"at": body["points"][0]["at"], "total": 0, "new": 0, "lanes": [], "comeback": False}]
     assert body["words"] == []

@@ -1,3 +1,5 @@
+import { ChevronIcon } from '../ui/Icons'
+
 // ── One example sentence, everywhere one is printed ────────────
 // Furigana'd Japanese with the headword or the pattern picked out in
 // the entry's ink, over its translation. It was private to the
@@ -40,8 +42,11 @@
 // A part that is only closing punctuation rides on the part before it
 // (`tail`): 。 alone on a line is a line opening on a full stop, which
 // Japanese never sets, and the backend cuts it off where the pattern's
-// highlight ends.
+// highlight ends. A plain part that only OPENS on it gives its marks to
+// the part before and keeps the rest (plan 235): かぞくの中で | 、だれが…
+// broke after the highlight and opened its second line on the comma.
 const CLOSING = /^[、。，．！？」』）〕】]+$/
+const LEADING_CLOSING = /^([、。，．！？」』）〕】]+)(.+)$/su
 // Kana, the long-vowel mark and full-width punctuation: what a reading
 // may overhang. Not a kanji, and not Latin, whose letters are narrower.
 const OVERHANGABLE = /^[\u3000-\u303f\u3041-\u30ff\uff01-\uff0f\uff1a-\uff20\uff5b-\uff65]$/u
@@ -50,8 +55,13 @@ function wordRuby(segments) {
   const out = []
   for (const seg of segments ?? []) {
     const prev = out[out.length - 1]
+    const lead = prev && !prev.blank && !seg.blank && !seg.reading && !seg.highlight
+      ? LEADING_CLOSING.exec(seg.text) : null
     if (prev && !prev.blank && !seg.blank && !seg.reading && !seg.highlight && CLOSING.test(seg.text)) {
       out[out.length - 1] = { ...prev, tail: (prev.tail ?? '') + seg.text }
+    } else if (lead) {
+      out[out.length - 1] = { ...prev, tail: (prev.tail ?? '') + lead[1] }
+      out.push({ ...seg, text: lead[2] })
     } else if (
       prev && prev.reading && seg.reading && !prev.tail && !prev.blank && !seg.blank
       && prev.word != null && prev.word === seg.word
@@ -98,13 +108,18 @@ export function SenseNumeral({ number, className = '' }) {
   )
 }
 
-export function ExampleSentence({ ex, senseNumber, showTr = true, revealed = false, blankLabel, tag }) {
+// `onOpen` makes the sentence a door to its breakdown (plan 214): the
+// whole example is the button, a chevron at its end saying it leads
+// somewhere, and inside it the same lines as a printed example, as
+// spans -- a button holds phrasing content only.
+export function ExampleSentence({ ex, senseNumber, showTr = true, revealed = false, blankLabel, tag, onOpen, openLabel }) {
   const translation = ex.tr ?? ex.en
   const segments = wordRuby(ex.segments)
-  return (
-    <div className="dict-ex">
+  const Line = onOpen ? 'span' : 'div'
+  const lines = (
+    <>
       {senseNumber != null && <SenseNumeral number={senseNumber} className="dict-ex__n" />}
-      <div className="dict-ex__jp" lang="ja">
+      <Line className="dict-ex__jp" lang="ja">
         {segments.length > 0
           ? segments.map((seg, j) => {
               // Each segment (a word, a kanji compound, a kana run) is
@@ -133,9 +148,24 @@ export function ExampleSentence({ ex, senseNumber, showTr = true, revealed = fal
                 : <span key={j} className="dict-ex__seg">{content}</span>
             })
           : ex.jp}
-      </div>
+      </Line>
       {tag && <span className="dict-ex__tag">{tag}</span>}
-      {showTr && translation && <div className="dict-ex__tr">{translation}</div>}
-    </div>
+      {/* `tr` is in the learner's language; a sentence that has only
+          the corpus's English `en` (no French line yet, plan 215) is
+          marked as English. */}
+      {showTr && translation && <Line className="dict-ex__tr" lang={ex.tr ? undefined : 'en'}>{translation}</Line>}
+    </>
+  )
+  if (!onOpen) return <div className="dict-ex">{lines}</div>
+  return (
+    <button
+      type="button"
+      className="dict-ex dict-ex--door"
+      onClick={onOpen}
+      aria-label={[openLabel, ex.jp].filter(Boolean).join(' — ')}
+    >
+      <span className="dict-ex__body">{lines}</span>
+      <ChevronIcon direction="right" size={16} className="dict-ex__go" />
+    </button>
   )
 }

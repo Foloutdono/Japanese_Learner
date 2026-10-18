@@ -34,6 +34,7 @@ from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, find, grammar_t
 from content.grammar_sentences_data import contrast_examples, get_sentences
 from content.radical_data import radical_for
 
+from study.grammar_choose import choose_items
 from study.grammar_match import verifiable
 from study import grammar_ladder
 from study.modes import (
@@ -72,13 +73,19 @@ def contrast_ok(level: str, pattern: str) -> bool:
     neighbour to compare, and its author must have marked a sentence in
     which those neighbours are wrong that the drill can blank -- by the
     pattern's stems (verifiable, as fill_ok), or for a bare particle
-    where the detector finds it once (grammar_ladder.can_blank, plan 190). Same reason this lives here as
-    fill_ok: the pool and the denominator have to agree.
+    where the detector finds it once (grammar_ladder.can_blank, plan 190)
+    -- or the point must carry questions of its own (`choose`, plan 201).
+    Same reason this lives here as fill_ok: the pool and the denominator
+    have to agree.
     """
     found = find(pattern)
     if found is None or found[0] != level:
         return False
     entry = found[1]
+    if choose_items(entry):
+        # A point asked from questions of its own (plan 201): the gate
+        # holds them, so there is nothing to look up.
+        return True
     if not verifiable(pattern):
         # A bare particle is blanked where the grammar detector finds it
         # (plan 190), which is slow to ask: the ladder's snapshot says.

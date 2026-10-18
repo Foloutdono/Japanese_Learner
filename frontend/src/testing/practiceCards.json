@@ -315,5 +315,62 @@
     }
    }
   }
+ },
+ "conversation": {
+  "N5": {
+   "card": {
+    "place": {
+     "jp": "コンビニ",
+     "name": "Supérette"
+    },
+    "title": "Le déjeuner à la supérette",
+    "opener": "いらっしゃいませ。お弁当は温めますか。",
+    "them": "Vendeur"
+   }
+  },
+  "N4": {
+   "card": {
+    "place": {
+     "jp": "ホテル",
+     "name": "Hôtel"
+    },
+    "title": "L'arrivée à l'hôtel",
+    "opener": "いらっしゃいませ。チェックインでしょうか。",
+    "them": "Réceptionniste"
+   }
+  },
+  "N3": {
+   "card": {
+    "place": {
+     "jp": "不動産屋",
+     "name": "Agence immobilière"
+    },
+    "title": "À la recherche d'un appartement",
+    "opener": "いらっしゃいませ。どのようなお部屋をお探しですか。",
+    "them": "Agent immobilier"
+   }
+  },
+  "N2": {
+   "card": {
+    "place": {
+     "jp": "面接",
+     "name": "Entretien d'embauche"
+    },
+    "title": "Entretien dans un café",
+    "opener": "では、まず簡単に自己紹介をお願いします。",
+    "them": "Gérant du café"
+   }
+  },
+  "N1": {
+   "card": {
+    "place": {
+     "jp": "会議室",
+     "name": "Salle de réunion"
+    },
+    "title": "Demander un délai",
+    "opener": "本日はどういったご用件でしょうか。",
+    "them": "Chef de projet du client"
+   }
+  }
  }
 }

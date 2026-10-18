@@ -136,6 +136,17 @@ export function HourglassIcon({ size = 18, className }) {
   )
 }
 
+// A note: the song (plan 215), the analyser's door to a song's decks.
+export function SongIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <path d="M9 18V5l11-2v13" />
+      <circle cx="6" cy="18" r="3" />
+      <circle cx="17" cy="16" r="3" />
+    </svg>
+  )
+}
+
 export function CardIcon({ size = 18, className }) {
   return (
     <svg {...base} width={size} height={size} className={className}>
@@ -483,6 +494,31 @@ export function ReplayIcon({ size = 16, className }) {
   )
 }
 
+// What a rating does to a ladder point (plan 198, CardPanel's walk): ask
+// it again -- a turn, clockwise, the way a clock goes back to its start --
+// or go down the line to the next stop, or back up it to the relapse.
+export function RetryIcon({ size = 16, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className} strokeWidth={2.4}>
+      <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+      <path d="M21 3v5h-5" />
+    </svg>
+  )
+}
+
+export function ArrowIcon({ direction = 'down', size = 16, className }) {
+  const paths = {
+    down:  ['M12 5v14', 'm19 12-7 7-7-7'],
+    up:    ['m5 12 7-7 7 7', 'M12 19V5'],
+    right: ['M5 12h14', 'm12 5 7 7-7 7'],
+  }[direction]
+  return (
+    <svg {...base} width={size} height={size} className={className} strokeWidth={2.4}>
+      {paths.map(d => <path key={d} d={d} />)}
+    </svg>
+  )
+}
+
 export function LoopIcon({ size = 16, className }) {
   return (
     <svg {...base} width={size} height={size} className={className}>
@@ -538,6 +574,18 @@ export function InfoIcon({ size = 16, className }) {
   )
 }
 
+// A message: a speech balloon with two lines in it, Settings' 「Nous
+// écrire」 row (plan 222).
+export function MessageIcon({ size = 16, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <path d="M4 5h16v11H9.5L4 20z" />
+      <line x1="8" y1="9" x2="16" y2="9" />
+      <line x1="8" y1="12.5" x2="13" y2="12.5" />
+    </svg>
+  )
+}
+
 // The answer sheet: a page of bubbles and their lines (plan 171).
 export function SheetIcon({ size = 18, className }) {
   return (
@@ -549,6 +597,31 @@ export function SheetIcon({ size = 18, className }) {
       <line x1="12.5" y1="8.5" x2="16" y2="8.5" />
       <line x1="12.5" y1="12.5" x2="16" y2="12.5" />
       <line x1="12.5" y1="16.5" x2="16" y2="16.5" />
+    </svg>
+  )
+}
+
+// A grammar point's construction (plan 235): a slot, joined to the
+// pattern by a plus -- the lesson's formula drawn as its head's glyph.
+export function SlotsIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <rect x="2" y="7.5" width="6" height="9" rx="1.5" strokeDasharray="2 1.6" />
+      <rect x="16" y="7.5" width="6" height="9" rx="1.5" />
+      <line x1="12" y1="9.6" x2="12" y2="14.4" />
+      <line x1="9.6" y1="12" x2="14.4" y2="12" />
+    </svg>
+  )
+}
+
+// A table of forms (plan 235): a header column beside three rows.
+export function TableIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <rect x="3.5" y="4.5" width="17" height="15" rx="1.5" />
+      <line x1="3.5" y1="9.5" x2="20.5" y2="9.5" />
+      <line x1="3.5" y1="14.5" x2="20.5" y2="14.5" />
+      <line x1="9.5" y1="4.5" x2="9.5" y2="19.5" />
     </svg>
   )
 }

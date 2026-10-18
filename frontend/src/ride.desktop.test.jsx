@@ -283,6 +283,10 @@ describe('the reading ride on the desk\'s panels (P12)', () => {
     expect($('.desk-sentence__text').textContent).toBe(SENTENCE.phrase)
     expect($('.desk-sentence__dot--q4')).not.toBeNull()  // '1' is the best tile: q4 on the default scale
     expect(figure()).toBe('1')
-    expect(posts().some(([u]) => u === '/api/onboarding/ride/done')).toBe(false)
+    // The lesson is over at its grade (2026-10-18): stamped now, not on
+    // the plate's Enter, so a ride left at the plate is not begun again.
+    const done = posts().filter(([u]) => u === '/api/onboarding/ride/done')
+    expect(done).toHaveLength(1)
+    expect(JSON.parse(done[0][2].body)).toEqual({ skipped: false })
   })
 })

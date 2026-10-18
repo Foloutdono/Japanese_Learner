@@ -56,7 +56,7 @@ describe('調和 — the harmony rules (plan 174)', () => {
   it('一面: a panel\'s corner is the panel\'s, a control\'s the control\'s', () => {
     const panels = ['.plate', '.platform-card', '.route-stop', '.dict-entry-card', '.records', '.exam-st__row',
       '.anl-door', '.anl-entry', '.rep-plate', '.rep-strip', '.dict-form', '.deck-identity', '.card-list',
-      '.balance__rows', '.jour-cmps', '.stg-list', '.sbook', '.gate-card__short', '.console', '.gate-card', '.exam-st__hero']
+      '.balance__rows', '.jour-cmps', '.stg-list', '.sbook', '.tdy-board', '.console', '.exam-st__hero']
     for (const p of panels) expect(decl(rule(p), 'border-radius'), p).toBe('var(--r-panel)')
     for (const c of ['.seg', '.field']) expect(decl(rule(c), 'border-radius'), c).toBe('var(--r-card)')
   })
@@ -103,7 +103,7 @@ describe('調和 — the harmony rules (plan 174)', () => {
   it('一族: the line pigments are one lightness in each theme', () => {
     // 山吹 is the metal and stays it; 鶯 is no longer a line.
     const lines = Object.keys(DARK).filter(k => k.startsWith('line-') && !['line-jisho', 'line-douga'].includes(k))
-    expect(lines.length).toBe(12)
+    expect(lines.length).toBe(13)
     for (const k of lines) {
       const d = oklch(DARK[k])
       const l = oklch(LIGHT[k])

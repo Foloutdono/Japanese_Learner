@@ -362,3 +362,25 @@ def test_history_reads_back_newest_first_and_is_bounded(client):
     assert set(entry) == {"level", "raw_id", "pattern", "sentence", "found", "verdict", "grammar_used",
                           "correct", "quality", "created_at"}
     assert client.get("/api/composition/history", params={"limit": 101}).status_code == 422
+
+
+# ── A model that thinks out loud (2026-10-12) ────────────────────────
+def test_reasoning_is_never_served_as_the_review(client, tutor):
+    tutor("We need to produce JSON with fields: verdict, summary, good, fix. First, analyze the learner's attempt.")
+    r = client.post("/api/composition/review", json={"raw_id": _id(NAGARA), "sentence": SENTENCE})
+    assert r.status_code == 503
+    assert "produce JSON" not in r.text
+
+
+def test_the_review_asks_chat_to_walk_on_from_an_unusable_reply(client, monkeypatch):
+    seen = {}
+
+    def chat(messages, *a, **kw):
+        seen.update(kw)
+        return _reply()
+    monkeypatch.setattr(composition, "llm_configured", lambda: True)
+    monkeypatch.setattr(reading, "_chat", chat)
+    assert client.post("/api/composition/review", json={"raw_id": _id(NAGARA), "sentence": SENTENCE}).status_code == 200
+    accept = seen["accept"]
+    assert accept(_reply()) and accept("Ta phrase est naturelle.")
+    assert not accept("We need to produce JSON with fields: verdict, summary.")

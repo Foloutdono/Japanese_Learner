@@ -220,7 +220,8 @@ describe('a practice run on three panels', () => {
 
   // The rating bar unframed with them (plan 185): its misses carry their
   // own sumi, the ground their panel inks read on -- in the light theme
-  // too, where the frame's surface was paper under them.
+  // too, where the frame's surface was paper under them. Since plan 203
+  // (券売機) the sumi is each key's own face, not a panel's.
   it('stands the rating bar unframed, its misses on their own sumi in either theme', async () => {
     for (const theme of [null, 'light']) {
       if (theme) document.documentElement.setAttribute('data-theme', theme)
@@ -236,13 +237,19 @@ describe('a practice run on three panels', () => {
       const bar = $('.stage > .rating-bar')
       expect(getComputedStyle(bar).borderTopStyle).toBe('none')
       expect(getComputedStyle(bar).backgroundColor).toBe('rgba(0, 0, 0, 0)')
-      const misses = $('.rating-bar__misses')
-      const panel = getComputedStyle(document.documentElement).getPropertyValue('--bg-panel').trim()
-      const probe = document.createElement('i')
-      probe.style.color = panel
-      document.body.append(probe)
-      expect(getComputedStyle(misses).backgroundColor).toBe(getComputedStyle(probe).color)
-      probe.remove()
+      const misses = [...document.querySelectorAll('.rating-bar__misses .rating-bar__btn')]
+      expect(misses.length).toBeGreaterThan(0)
+      for (const miss of misses) {
+        // The face's stops, as rgb() or color(srgb …): each one sumi.
+        const image = getComputedStyle(miss).backgroundImage
+        const stops = [
+          ...[...image.matchAll(/rgba?\((\d+), (\d+), (\d+)/g)].map(m => m.slice(1).map(Number)),
+          ...[...image.matchAll(/color\(srgb ([\d.]+) ([\d.]+) ([\d.]+)/g)].map(m => m.slice(1).map(v => Number(v) * 255)),
+        ]
+        expect(stops.length, theme ?? 'dark').toBeGreaterThan(1)
+        for (const stop of stops) expect(Math.max(...stop), theme ?? 'dark').toBeLessThan(56)
+        expect(getComputedStyle(miss).color).toBe('rgb(243, 236, 223)')
+      }
     }
     document.documentElement.removeAttribute('data-theme')
   })

@@ -12,6 +12,7 @@ from core.credits import local_today, require_pass, resets_at
 from pydantic import BaseModel, Field
 
 from core.db import db_conn
+from core.rls import enable_rls
 from core.auth import get_user_id, unprefixed
 from core.srs_instance import srs
 from core.user_level import resolve_level
@@ -19,10 +20,12 @@ from study.card_lookup import (
     find_segments_in_text, attach_stats_to_segments, VOCAB_STATUS_MODES,
     vocab_card_id_for_word,
 )
-from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, gloss as grammar_gloss, grammar_to_id
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, gloss as grammar_gloss, grammar_to_id, id_for
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content import vocab_extras
 from content import reading_sentences
+from content import jmdict_fr
+from study.grammar_examples import structure_text
 from study import difficulty
 from study.analysis import analyze_with_glosses, attach_user_state
 from study.answer_balance import balance_answers, position_skew
@@ -115,6 +118,12 @@ def _migrate_reading_log_schema() -> None:
         "ALTER TABLE IF EXISTS reading_log ADD COLUMN IF NOT EXISTS quality SMALLINT",
         "ALTER TABLE IF EXISTS reading_log ADD COLUMN IF NOT EXISTS accuracy SMALLINT",
         "ALTER TABLE IF EXISTS comprehension_log ADD COLUMN IF NOT EXISTS grammar JSONB",
+        # Closed to the Data API like every table (core/rls.py). These
+        # two predate the self-migrations, so nothing creates them; plain
+        # statements, as the ADD COLUMNs above already take the same
+        # lock at every boot.
+        "ALTER TABLE IF EXISTS reading_log ENABLE ROW LEVEL SECURITY",
+        "ALTER TABLE IF EXISTS comprehension_log ENABLE ROW LEVEL SECURITY",
     )
     for sql in statements:
         conn = db_conn()
@@ -166,6 +175,15 @@ LANG_NAMES = {
     "pt": "Portuguese",
 }
 
+
+def known_lang(value: object) -> str:
+    """A language the app answers in, a region tag dropped ("fr-FR" is
+    French); anything else is English (ask.py's rule). For a `lang` that
+    keys a cache of model answers (plan 211): taken as sent, `en1`,
+    `en2`, ... were each a fresh model call and a junk cache row."""
+    code = str(value or "").strip().lower().replace("_", "-").split("-")[0]
+    return code if code in LANG_NAMES else "en"
+
 MIN_BATCH = 1
 MAX_BATCH = 10
 DEFAULT_BATCH = 5
@@ -196,7 +214,7 @@ class ResultPayload(BaseModel):
     source_word: dict | None = None
 
 
-def _chat(messages, timeout=60, max_tokens=3000, task=""):
+def _chat(messages, timeout=60, max_tokens=3000, task="", accept=None):
     """Thin adapter over study/llm_shared.chat -- kept as a local name so
     this module's many call sites are unchanged, and so the shared
     function's LLMUnavailable becomes the HTTPException(503) they already
@@ -206,9 +224,12 @@ def _chat(messages, timeout=60, max_tokens=3000, task=""):
     reasoning stays on: this endpoint asks for ONE passage plus a handful
     of questions in a single constrained blob, which is the shape
     llm_shared documents reasoning as helping with -- unlike the batched
-    generators, which pass reasoning=False."""
+    generators, which pass reasoning=False.
+
+    `accept` is llm_shared.chat's own: a reply it refuses is not
+    returned, the next model is asked."""
     try:
-        return chat(messages, timeout=timeout, max_tokens=max_tokens, task=task)
+        return chat(messages, timeout=timeout, max_tokens=max_tokens, task=task, accept=accept)
     except LLMUnavailable as e:
         raise HTTPException(503, detail=str(e))
 
@@ -550,6 +571,16 @@ def _pick_words_mastery(user_id: str, count: int) -> list[tuple[str, str, str | 
     return picked
 
 
+def _corpus_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None,
+                   lang: str) -> dict:
+    """A Tatoeba sentence as a phrase, translated into the learner's
+    language where the French layer has it (content/jmdict_fr.py, plan
+    210) and in the corpus's English otherwise -- `translation_lang`
+    says which, as it always has."""
+    text, text_lang = jmdict_fr.translation(jp, en, lang)
+    return _finish_phrase(jp, text, kanji, kana, level, translation_lang=text_lang)
+
+
 def _finish_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None,
                    grammar: str | None = None, translation_lang: str = "en") -> dict:
     """
@@ -600,6 +631,8 @@ def _finish_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None,
     # guessed one.
     if grammar:
         phrase["grammar"] = grammar
+        # Its card id, so the tag opens the point's lesson (plan 213).
+        phrase["grammar_id"] = id_for(grammar)
     return phrase
 
 
@@ -647,11 +680,12 @@ def get_reading_batch(
     NOTE on `lang`: the curated bank carries every sentence in English
     and French (plan 192), and a curated phrase comes back in `lang`
     when the bank holds it. Real example sentences (JMdict/Tatoeba-
-    sourced) only carry an English translation in this app's data —
-    there's no French/Spanish/etc. translation layer for them — so those
-    come back with "translation_lang": "en" regardless of `lang`, and
-    the frontend labels the translation by `translation_lang` rather
-    than silently implying it's in the UI language.
+    sourced) carry the corpus's English, and since plan 215 a French
+    line from content/jmdict_fr.py for the ones the French layer holds
+    (every sentence a deck word or a JMdict word shows); one without
+    comes back with "translation_lang": "en", which the frontend marks
+    on the element's `lang` rather than implying it is in the UI
+    language.
 
     NOTE on reading_log.phase: it now stores a compact label from
     _source_label() ("level:N3" / "freq:vocab:1" / "freq:vocab:1:500"
@@ -674,6 +708,10 @@ def get_reading_batch(
     count = max(MIN_BATCH, min(MAX_BATCH, count))
     exclude_seen = {p for p in exclude.split("|") if p}
 
+    # The page's sizes alone (plan 211): a free size over the JMdict
+    # pool was a random pick over as much of its 212k rows as asked.
+    if tier_size not in freq.TIER_SIZES:
+        raise HTTPException(status_code=422, detail=f"tier_size must be one of {list(freq.TIER_SIZES)}")
     if source == "level":
         if not level:
             raise HTTPException(status_code=400, detail="level is required for source=level")
@@ -697,7 +735,7 @@ def get_reading_batch(
             word_pool = _pick_words_level(level, _LEVEL_CANDIDATE_SCAN_CAP)
             picked = _pick_level_appropriate_phrases(word_pool, level, count - len(phrases))
             phrases.extend(
-                _finish_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl)
+                _corpus_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl, lang)
                 for kanji, kana, lvl, example in picked
             )
     elif source == "frequency":
@@ -720,7 +758,7 @@ def get_reading_batch(
                     break
                 picked = _pick_level_appropriate_phrases(words, lvl, remaining, scan_cap=len(words))
                 phrases.extend(
-                    _finish_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl2)
+                    _corpus_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl2, lang)
                     for kanji, kana, lvl2, example in picked
                 )
                 remaining = count - len(phrases)
@@ -731,11 +769,11 @@ def get_reading_batch(
                 example = vocab_extras.pick_random_example(kanji, kana, "", "en")
                 if example is None:
                     continue
-                phrases.append(_finish_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl))
+                phrases.append(_corpus_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl, lang))
     elif source == "mastery":
         picked = _pick_words_mastery(user_id, count)
         phrases = [
-            _finish_phrase(jp, en, kanji, kana, lvl)
+            _corpus_phrase(jp, en, kanji, kana, lvl, lang)
             # `segments` here is only the internal gating result used to
             # verify the sentence is fully learning/mastered vocabulary
             # (see _pick_words_mastery) — not sent to the client anymore.
@@ -1628,7 +1666,7 @@ def _call_llm_comprehension(level: str, lang: str, *, grammar_seeds: list[dict] 
         data["grammar_points"] = [
             {
                 "pattern": p["pattern"],
-                "structure": p.get("structure", ""),
+                "structure": structure_text(p, lang),
                 "meaning": grammar_gloss(p, lang),
                 "level": level,
                 "raw_id": grammar_to_id(p, level),
@@ -1774,12 +1812,17 @@ def _init_comprehension_pool() -> None:
                 )
                 """
             )
+            enable_rls(cur, "comprehension_pool")
             cur.execute(
                 """
                 CREATE INDEX IF NOT EXISTS comprehension_pool_bucket
                     ON comprehension_pool (level, lang, generator_version)
                 """
             )
+            # The seeds' key (plan 111), here as well as in the seeding:
+            # _pool_take orders on it (plan 230), and a failed seeding
+            # must not leave every read failing on a missing column.
+            cur.execute("ALTER TABLE comprehension_pool ADD COLUMN IF NOT EXISTS seed_key TEXT")
             # Which learner has already read which exercise. A row per
             # SERVE, not per completion: an exercise that was opened and
             # abandoned has still been read, and serving it again is the
@@ -1803,6 +1846,7 @@ def _init_comprehension_pool() -> None:
                 )
                 """
             )
+            enable_rls(cur, "comprehension_served")
         conn.commit()
     finally:
         conn.close()
@@ -1889,11 +1933,17 @@ else:
 def _pool_take(user_id: str, level: str, lang: str, avoid: set[str]) -> dict | None:
     """An exercise this learner has not been served, or None.
 
+    The hand-written seeds come first (plan 230): they are reviewed by
+    hand, and a model's text is checked only by the gates, so a new
+    learner reads the best the pool holds before anything generated --
+    which, once the pool has grown, a random draw no longer promised.
+
     `avoid` is the grammar they have just read (_recent_grammar_
     patterns): a candidate that uses none of it is preferred, and one
     that does is taken rather than paying for a generation -- the same
     trade _pick_grammar_seeds makes when the level has run out of fresh
-    points.
+    points. So a seed clear of it comes first, then a generated text
+    clear of it, then a seed that is not.
 
     A miss must never be an error. Every failure here returns None,
     which is the generate path, which is what this whole layer is an
@@ -1920,7 +1970,7 @@ def _pool_take(user_id: str, level: str, lang: str, avoid: set[str]) -> dict | N
                    AND NOT EXISTS (
                         SELECT 1 FROM comprehension_served s
                          WHERE s.pool_id = p.id AND s.user_id = %s)
-                 ORDER BY random()
+                 ORDER BY (p.seed_key IS NULL), random()
                  LIMIT %s
                 """,
                 (level, lang, _POOL_VERSION, user_id, _POOL_CANDIDATES),
@@ -2057,6 +2107,7 @@ def _init_comprehension_usage() -> None:
                 )
                 """
             )
+            enable_rls(cur, "comprehension_usage")
         conn.commit()
     finally:
         conn.close()
@@ -2107,13 +2158,16 @@ def _claim_generation_slot(user_id: str) -> int:
 
 
 def _pool_repeat(user_id: str, level: str, lang: str) -> dict | None:
-    """An exercise this learner HAS read, the one they read longest ago,
-    or None if they have read none.
+    """An exercise this learner HAS read, or None if they have read none.
 
     What a learner past the day's ceiling is served instead of a
-    refusal. served_at is bumped, so a second repeat in the same
-    session moves on to the next-oldest rather than handing back the
-    same text twice."""
+    refusal, chosen to be worth reading again (plan 230): a text they
+    have answered every question of right comes last, since there is
+    least left in it for them; among the rest, the one read longest ago.
+    And never the text they were just served, while there is another:
+    served_at is bumped, so the same text twice in a row would read as
+    a bug. Answers are matched by the text, which is what
+    comprehension_log keeps."""
     try:
         conn = db_conn()
     except Exception:
@@ -2127,7 +2181,13 @@ def _pool_repeat(user_id: str, level: str, lang: str) -> dict | None:
                   JOIN comprehension_served s ON s.pool_id = p.id
                  WHERE s.user_id = %s AND p.level = %s AND p.lang = %s
                    AND p.generator_version = %s
-                 ORDER BY s.served_at
+                 ORDER BY s.served_at = (SELECT MAX(served_at) FROM comprehension_served
+                                          WHERE user_id = s.user_id),
+                          EXISTS (SELECT 1 FROM comprehension_log l
+                                   WHERE l.user_id = s.user_id AND l.level = p.level
+                                     AND l.text = p.exercise->>'text'
+                                     AND l.total > 0 AND l.score = l.total),
+                          s.served_at
                  LIMIT 1
                 """,
                 (user_id, level, lang, _POOL_VERSION),

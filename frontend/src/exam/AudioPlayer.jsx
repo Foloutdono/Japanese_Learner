@@ -183,6 +183,7 @@ export default function AudioPlayer({ src, keyHint = false, ring = false }) {
             className="exam-ring__play"
             onClick={toggle}
             aria-label={playing ? t.examAudioPause : t.examAudioPlay}
+            aria-keyshortcuts={keyHint ? 'Space' : undefined}
           >
             {playing ? <PauseIcon size={28} /> : <PlayIcon size={28} />}
           </button>
@@ -194,6 +195,13 @@ export default function AudioPlayer({ src, keyHint = false, ring = false }) {
           <UndoIcon size={14} />
           {plays > 0 ? `${t.examAudioReplayShort} · ${t.examAudioPlayed(plays)}` : t.examAudioReplayShort}
         </button>
+        {/* The desk's booklet (plan 200): Space plays it, and says so. */}
+        {keyHint && (
+          <span className="exam-ring__key" aria-hidden="true">
+            <kbd className="desk-kbd">{t.keySpace}</kbd>
+            {t.examPlayPause}
+          </span>
+        )}
       </div>
     )
   }

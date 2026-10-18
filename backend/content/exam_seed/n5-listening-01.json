@@ -1,0 +1,3886 @@
+{
+ "examId": "n5-listening-01",
+ "generatorVersion": "listening-gen-2",
+ "papers": [
+  {
+   "n": 1,
+   "seed": 2339456046319727057,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Listening Practice",
+    "titleJp": "N5 聴解",
+    "sections": [
+     {
+      "id": "listening",
+      "label": "Listening",
+      "labelJp": "聴解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "choukai_1",
+        "number": 1,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_1_q1",
+          "number": 1,
+          "questionPromptJp": "男の人は何をとなりのへやにもっていきますか。",
+          "audioSrc": "/exam-audio/3c31cdd27a31633fb10308f0.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人は何をとなりのへやにもっていきますか。\nA: 中川さん、すみません。ちょっと手つだってくれませんか。\nB: いいですよ。何をしますか。\nA: このへやのものを、となりのへやにもっていきたいんです。本だなは、きのうもっていきました。\nB: じゃ、このつくえをもっていきましょうか。\nA: あ、つくえはとてもおもいですから、よる、父と二人でもっていきます。\nB: そうですか。じゃ、いすとテレビは？\nA: いすはかるいですから、わたしがもっていきます。テレビをおねがいできますか。\nB: はい、わかりました。\nnarrator: 男の人は何をとなりのへやにもっていきますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "本だな"
+           },
+           {
+            "id": "c2",
+            "textJp": "つくえ"
+           },
+           {
+            "id": "c3",
+            "textJp": "いす"
+           },
+           {
+            "id": "c4",
+            "textJp": "テレビ"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_1_q2",
+          "number": 2,
+          "questionPromptJp": "二人は何を買いますか。",
+          "audioSrc": "/exam-audio/02baf2df49d377721a6f7753.mp3",
+          "scriptJp": "narrator: 会社で女の人と男の人が話しています。二人は何を買いますか。\nA: 来週、きむらさんのたんじょう日ですね。みんなで何かあげませんか。\nB: いいですね。花はどうですか。\nA: 花もいいですが、きむらさんはおかしがだいすきですよ。\nB: でも、きむらさんは今、あまいものを食べないと言っていましたよ。\nA: あ、そうでしたね。じゃ、ネクタイはどうですか。\nB: ネクタイは、すきないろがわかりませんから……。あ、きのう、コップをわってしまったと言っていましたよ。\nA: じゃ、それにしましょう。\nnarrator: 二人は何を買いますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "花"
+           },
+           {
+            "id": "c2",
+            "textJp": "おかし"
+           },
+           {
+            "id": "c3",
+            "textJp": "コップ"
+           },
+           {
+            "id": "c4",
+            "textJp": "ネクタイ"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_1_q3",
+          "number": 3,
+          "questionPromptJp": "二人はどこにすわりますか。",
+          "audioSrc": "/exam-audio/71a7e71c4ae1a007b9710f00.mp3",
+          "scriptJp": "narrator: えいがかんで女の人と男の人が話しています。二人はどこにすわりますか。\nA: どこにすわりましょうか。いちばんまえはどうですか。\nB: いちばんまえは目がつかれますよ。うしろのほうがいいです。\nA: でも、いちばんうしろは、もうせきがありませんね。\nB: じゃ、まん中はどうですか。右と左があいていますね。\nA: 右はドアのちかくですね。人がよく出たり入ったりしますよ。\nB: そうですね。じゃ、左にしましょう。\nnarrator: 二人はどこにすわりますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "いちばんまえ"
+           },
+           {
+            "id": "c2",
+            "textJp": "いちばんうしろ"
+           },
+           {
+            "id": "c3",
+            "textJp": "まん中の右"
+           },
+           {
+            "id": "c4",
+            "textJp": "まん中の左"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_1_q4",
+          "number": 4,
+          "questionPromptJp": "男の人のかさはどれですか。",
+          "audioSrc": "/exam-audio/baf7c3f39eecb62ad5077555.mp3",
+          "scriptJp": "narrator: ホテルのフロントで女の人と男の人が話しています。男の人のかさはどれですか。\nB: すみません。きのう、ここにかさをわすれてしまいました。\nA: どんなかさですか。\nB: くろいかさです。\nA: くろいかさは二本ありますね。こちらの小さいかさですか。\nB: いいえ、わたしのは大きいです。それから、白い花のえがあります。\nA: じゃ、こちらですね。\nB: あ、それです。ありがとうございます。\nnarrator: 男の人のかさはどれですか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "くろくて小さいかさ"
+           },
+           {
+            "id": "c2",
+            "textJp": "くろくて大きいかさ"
+           },
+           {
+            "id": "c3",
+            "textJp": "白くて小さいかさ"
+           },
+           {
+            "id": "c4",
+            "textJp": "白くて大きいかさ"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_1_q5",
+          "number": 5,
+          "questionPromptJp": "二人はどのせきを買いますか。",
+          "audioSrc": "/exam-audio/b4b1daaa69d12c5544efc5c4.mp3",
+          "scriptJp": "narrator: えいがかんで女の人と男の人が話しています。二人はどのせきを買いますか。\nA: 4時のえいがと、6時のえいががありますね。\nB: 4時のは、まえのほうのせきしかあいていませんね。6時のは、うしろのほうもあいていますよ。\nA: まえのほうは、ちょっと目がつかれますね。でも、6時のを見ると、かえるのがおそくなります。あしたはあさがはやいんです。\nB: じゃ、4時のにしましょう。まえのほうでも、いちばんまえじゃありませんから。\nA: そうですね。そうしましょう。\nnarrator: 二人はどのせきを買いますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "4時のまえのせき"
+           },
+           {
+            "id": "c2",
+            "textJp": "4時のうしろのせき"
+           },
+           {
+            "id": "c3",
+            "textJp": "6時のまえのせき"
+           },
+           {
+            "id": "c4",
+            "textJp": "6時のうしろのせき"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_1_q6",
+          "number": 6,
+          "questionPromptJp": "だれがねこにごはんをあげますか。",
+          "audioSrc": "/exam-audio/dc25aaba6adb8ef9971ce91a.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。だれがねこにごはんをあげますか。\nA: 山中さん、来週の金よう日から日よう日まで、母とりょこうに行くんです。そのあいだ、うちのねこにごはんをあげてくれませんか。\nB: すみません。ぼくも土よう日から出かけるんです。となりのおばあさんはどうですか。\nA: おばあさんは、ねこがあまりすきじゃないんです。\nB: そうですか。じゃ、ぼくのいもうとにたのみましょう。いもうとはねこが大すきですから、よろこびますよ。\nA: ほんとうですか。ありがとうございます。じゃ、おねがいします。\nnarrator: だれがねこにごはんをあげますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "男の人"
+           },
+           {
+            "id": "c2",
+            "textJp": "男の人のいもうと"
+           },
+           {
+            "id": "c3",
+            "textJp": "となりのおばあさん"
+           },
+           {
+            "id": "c4",
+            "textJp": "女の人のお母さん"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_1_q7",
+          "number": 7,
+          "questionPromptJp": "二人は何をつくりますか。",
+          "audioSrc": "/exam-audio/f681c2f36dfb2fd952890c8f.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。二人は何をつくりますか。\nA: 土よう日にアンナさんが来ますね。ばんごはん、何をつくりましょうか。\nB: アンナさんは魚がすきだと言っていましたね。おすしはどうですか。\nA: 魚はすきですが、なまの魚は食べないんですよ。おすしやさしみはだめです。\nB: そうですか。じゃ、魚をやきましょう。\nA: いいですね。そうしましょう。\nnarrator: 二人は何をつくりますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "おすし"
+           },
+           {
+            "id": "c2",
+            "textJp": "やき魚"
+           },
+           {
+            "id": "c3",
+            "textJp": "さしみ"
+           },
+           {
+            "id": "c4",
+            "textJp": "てんぷら"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "choukai_2",
+        "number": 2,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_2_q1",
+          "number": 1,
+          "questionPromptJp": "男の人はどうしてピザをもってかえりませんか。",
+          "audioSrc": "/exam-audio/c19b571d260b0ceb39282425.mp3",
+          "scriptJp": "narrator: パーティーのあとで女の人と男の人が話しています。男の人はどうしてピザをもってかえりませんか。\nA: ピザがたくさんのこりましたね。山口さん、もってかえりませんか。\nB: ありがとうございます。でも、いいです。\nA: おなかがいっぱいですか。\nB: いいえ、そうじゃないんです。じつは、うちのれいぞうこが、きのうからこわれているんです。\nA: あ、そうですか。じゃ、わたしがもってかえりますね。\nnarrator: 男の人はどうしてピザをもってかえりませんか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ピザがきらいだから"
+           },
+           {
+            "id": "c2",
+            "textJp": "おなかがいっぱいだから"
+           },
+           {
+            "id": "c3",
+            "textJp": "れいぞうこがこわれているから"
+           },
+           {
+            "id": "c4",
+            "textJp": "あしたからりょこうだから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_2_q2",
+          "number": 2,
+          "questionPromptJp": "プールのそばで、何をしてはいけませんか。",
+          "audioSrc": "/exam-audio/45d8bdb6d42592699b8ca2e7.mp3",
+          "scriptJp": "narrator: プールで男の人と女の人が話しています。プールのそばで、何をしてはいけませんか。\nB: すみません。プールのそばで、ジュースを飲んでもいいですか。\nA: はい、飲みものはいいですよ。でも、おかしやパンなどの食べものはだめです。\nB: わかりました。それから、子どものしゃしんをとってもいいですか。\nA: しゃしんはいいですよ。でも、ほかの人のしゃしんは、とらないでくださいね。\nnarrator: プールのそばで、何をしてはいけませんか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "おかしを食べる"
+           },
+           {
+            "id": "c2",
+            "textJp": "ジュースを飲む"
+           },
+           {
+            "id": "c3",
+            "textJp": "しゃしんをとる"
+           },
+           {
+            "id": "c4",
+            "textJp": "子どもとあそぶ"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_2_q3",
+          "number": 3,
+          "questionPromptJp": "ケンさんは何がきらいですか。",
+          "audioSrc": "/exam-audio/ec2d48bb8e079302f3a44999.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。ケンさんは何がきらいですか。\nA: あしたケンさんが来ますから、ばんごはんはなべにしませんか。\nB: いいですね。でも、ケンさんは、とうふがきらいでしたよね。\nA: いいえ、とうふは大すきですよ。きらいなのは、きのこです。\nB: そうでしたか。じゃ、きのこは入れないで、さかなとやさいを入れましょう。\nnarrator: ケンさんは何がきらいですか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "とうふ"
+           },
+           {
+            "id": "c2",
+            "textJp": "さかな"
+           },
+           {
+            "id": "c3",
+            "textJp": "やさい"
+           },
+           {
+            "id": "c4",
+            "textJp": "きのこ"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_2_q4",
+          "number": 4,
+          "questionPromptJp": "女の人はどうしてせきをかわりたいですか。",
+          "audioSrc": "/exam-audio/62be0e9a33103655af2df0e1.mp3",
+          "scriptJp": "narrator: 小さいコンサートで女の人と男の人が話しています。女の人はどうしてせきをかわりたいですか。\nA: すみません、せきをかわってもらえませんか。\nB: いいですよ。そこはまどのそばですから、さむいですか。\nA: いいえ、さむくはないんです。ここからだと、ステージがよく見えないんです。\nB: ああ、まえの人が大きいですからね。どうぞ、こちらにすわってください。\nnarrator: 女の人はどうしてせきをかわりたいですか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "まどのそばでさむいから"
+           },
+           {
+            "id": "c2",
+            "textJp": "ステージがよく見えないから"
+           },
+           {
+            "id": "c3",
+            "textJp": "となりの人がうるさいから"
+           },
+           {
+            "id": "c4",
+            "textJp": "入り口からとおいから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_2_q5",
+          "number": 5,
+          "questionPromptJp": "男の学生はどうして今日そうじをしませんか。",
+          "audioSrc": "/exam-audio/9e36e4f6c6f50892fae15818.mp3",
+          "scriptJp": "narrator: 学校で女の学生と男の学生が話しています。男の学生はどうして今日そうじをしませんか。\nA: やまだくん、今日のそうじは、こくばんですよ。\nB: すみません。今日は4時に、はいしゃのよやくがあるんです。\nA: そうですか。じゃ、こくばんはわたしがします。そのかわり、あしたは、ゆかのそうじをおねがいしますね。\nB: わかりました。ありがとう。\nnarrator: 男の学生はどうして今日そうじをしませんか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "テストがあるから"
+           },
+           {
+            "id": "c2",
+            "textJp": "クラブがあるから"
+           },
+           {
+            "id": "c3",
+            "textJp": "バスにおくれるから"
+           },
+           {
+            "id": "c4",
+            "textJp": "はいしゃのよやくがあるから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_2_q6",
+          "number": 6,
+          "questionPromptJp": "としょかんは日よう日、何時から何時までですか。",
+          "audioSrc": "/exam-audio/b7c03d24912280bd00c77221.mp3",
+          "scriptJp": "narrator: 女の人がとしょかんに電話しています。としょかんは日よう日、何時から何時までですか。\nA: もしもし、としょかんは、日よう日もあいていますか。\nB: はい、あいています。月よう日から土よう日までは9時から6時までですが、日よう日は10時から5時までです。\nA: 日よう日は10時からですね。わかりました。ありがとうございます。\nnarrator: としょかんは日よう日、何時から何時までですか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "10時から5時まで"
+           },
+           {
+            "id": "c2",
+            "textJp": "9時から5時まで"
+           },
+           {
+            "id": "c3",
+            "textJp": "9時から6時まで"
+           },
+           {
+            "id": "c4",
+            "textJp": "10時から6時まで"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 2,
+   "seed": 7039050584516290204,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Listening Practice",
+    "titleJp": "N5 聴解",
+    "sections": [
+     {
+      "id": "listening",
+      "label": "Listening",
+      "labelJp": "聴解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "choukai_1",
+        "number": 1,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_1_q1",
+          "number": 1,
+          "questionPromptJp": "男の人はこれから何をしますか。",
+          "audioSrc": "/exam-audio/45d211fda536cb6494913104.mp3",
+          "scriptJp": "narrator: 女の人と男の人が電話で話しています。男の人はこれから何をしますか。\nA: もしもし、山本さん、ごめんなさい。まだバスが来ないんです。15分ぐらいおくれます。\nB: そうですか。じゃ、ぼくは先にレストランに入って、まっていますね。\nA: あ、あのレストランは12時からですよ。まだあいていません。\nB: そうですか。じゃ、レストランのとなりの本やで、本を見ています。\nA: すみません。ついたら、わたしが電話しますね。\nnarrator: 男の人はこれから何をしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "バスにのる"
+           },
+           {
+            "id": "c2",
+            "textJp": "レストランでまつ"
+           },
+           {
+            "id": "c3",
+            "textJp": "本やで本を見る"
+           },
+           {
+            "id": "c4",
+            "textJp": "女の人に電話する"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_1_q2",
+          "number": 2,
+          "questionPromptJp": "店の人は男の人にいくらかえしますか。",
+          "audioSrc": "/exam-audio/51ef66db5a32e1f20c40fb01.mp3",
+          "scriptJp": "narrator: 店で男の人と店の人が話しています。店の人は男の人にいくらかえしますか。\nB: すみません。このレシート、ちょっと見てください。\nA: はい、何でしょうか。\nB: ケーキを二つ買いましたが、ここは三つになっています。\nA: あ、もうしわけありません。ケーキ二つとジュース一本ですね。\nB: はい、そうです。\nA: では、ぜんぶで750円です。さっき1050円いただきましたから、300円おかえしします。\nnarrator: 店の人は男の人にいくらかえしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "150円"
+           },
+           {
+            "id": "c2",
+            "textJp": "300円"
+           },
+           {
+            "id": "c3",
+            "textJp": "750円"
+           },
+           {
+            "id": "c4",
+            "textJp": "1050円"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_1_q3",
+          "number": 3,
+          "questionPromptJp": "本はいつとどきますか。",
+          "audioSrc": "/exam-audio/abb66dba9f6716ded83895f1.mp3",
+          "scriptJp": "narrator: 女の人と店の人が電話で話しています。本はいつとどきますか。\nA: もしもし、先週そちらで本を買いましたが、まだとどかないんです。\nB: もうしわけありません。お名前をおねがいします。\nA: 西川です。\nB: 西川さまですね。……本は今日のあさ、店を出ました。今日のよるとどきます。\nA: 今日のよるは、うちにいないんです。あしたの午前はどうですか。\nB: はい、だいじょうぶです。では、あしたの午前にもっていきます。\nnarrator: 本はいつとどきますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "今日のよる"
+           },
+           {
+            "id": "c2",
+            "textJp": "あしたの午前"
+           },
+           {
+            "id": "c3",
+            "textJp": "あしたの午後"
+           },
+           {
+            "id": "c4",
+            "textJp": "あさっての午前"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_1_q4",
+          "number": 4,
+          "questionPromptJp": "二人はどのせきにすわりますか。",
+          "audioSrc": "/exam-audio/405f42c278c3e0288699b45d.mp3",
+          "scriptJp": "narrator: えいがかんで女の人と男の人が話しています。二人はどのせきにすわりますか。\nA: どのせきがいいですか。\nB: Cの10と11があいていますね。\nA: Cはスクリーンにちかいですね。もう少しうしろがいいです。\nB: じゃ、Hの3と4はどうですか。\nA: Hはいちばんうしろですね。ちょっととおいです。Fはどうですか。\nB: Fは2と3があいています。でも、Fの2ははしですよ。\nA: はしでもいいですよ。Fにしましょう。\nnarrator: 二人はどのせきにすわりますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "Cの10と11"
+           },
+           {
+            "id": "c2",
+            "textJp": "Hの3と4"
+           },
+           {
+            "id": "c3",
+            "textJp": "Fの2と3"
+           },
+           {
+            "id": "c4",
+            "textJp": "Fの3と4"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_1_q5",
+          "number": 5,
+          "questionPromptJp": "女の人はどの出口から出て、どちらへ行きますか。",
+          "audioSrc": "/exam-audio/55cf3e6c4362f77f5dc61ce8.mp3",
+          "scriptJp": "narrator: 駅で女の人と男の人が話しています。女の人はどの出口から出て、どちらへ行きますか。\nA: すみません。さくらホテルへ行きたいんですが、どう行きますか。\nB: さくらホテルですか。東口を出て、右へ行ってください。\nA: 東口を出て右ですね。\nB: あ、すみません、ちがいました。それはさくらぎんこうです。さくらホテルは、西口を出て、左です。\nA: 西口を出て左ですね。ありがとうございます。\nnarrator: 女の人はどの出口から出て、どちらへ行きますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "東口を出て右"
+           },
+           {
+            "id": "c2",
+            "textJp": "東口を出て左"
+           },
+           {
+            "id": "c3",
+            "textJp": "西口を出て右"
+           },
+           {
+            "id": "c4",
+            "textJp": "西口を出て左"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_1_q6",
+          "number": 6,
+          "questionPromptJp": "二人はどこでひるごはんを食べますか。",
+          "audioSrc": "/exam-audio/3982183334ccd791fdc7a423.mp3",
+          "scriptJp": "narrator: 会社で女の人と男の人が話しています。二人はどこでひるごはんを食べますか。\nA: ひるごはん、駅のまえのラーメンやと、となりのビルのカレーや、どちらがいいですか。\nB: ラーメンやは、いつも人がたくさんならんでいますよ。1時からかいぎがありますから……。\nA: じゃ、カレーやにしましょうか。\nB: でも、ぼく、からいものはちょっと……。\nA: あそこには、からくないカレーもありますよ。\nB: そうですか。じゃ、そこにしましょう。\nnarrator: 二人はどこでひるごはんを食べますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ラーメンや"
+           },
+           {
+            "id": "c2",
+            "textJp": "カレーや"
+           },
+           {
+            "id": "c3",
+            "textJp": "すしや"
+           },
+           {
+            "id": "c4",
+            "textJp": "そばや"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_1_q7",
+          "number": 7,
+          "questionPromptJp": "男の人はどのしゃしんをおくりますか。",
+          "audioSrc": "/exam-audio/f5c78c1b53d4b36dca1c59c2.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人はどのしゃしんをおくりますか。\nA: おばあさんに、しゃしんをおくるんですか。\nB: ええ。このうみのしゃしんはどうでしょう。\nA: いいですね。でも、みんな小さくて、かおがよく見えませんね。\nB: じゃ、このこうえんのは？花がきれいですよ。\nA: あ、これは、おとうとさんが目をとじていますね。\nB: ほんとうだ。じゃ、山のしゃしんにします。みんなよくわらっていますから。\nnarrator: 男の人はどのしゃしんをおくりますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "うみのしゃしん"
+           },
+           {
+            "id": "c2",
+            "textJp": "山のしゃしん"
+           },
+           {
+            "id": "c3",
+            "textJp": "こうえんのしゃしん"
+           },
+           {
+            "id": "c4",
+            "textJp": "にわのしゃしん"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "choukai_2",
+        "number": 2,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_2_q1",
+          "number": 1,
+          "questionPromptJp": "女の人はあした何時にびょういんに行きますか。",
+          "audioSrc": "/exam-audio/eb14dc183d1f758fb3765573.mp3",
+          "scriptJp": "narrator: 女の人がびょういんに電話しています。女の人はあした何時にびょういんに行きますか。\nA: もしもし、あしたの10時によやくをしている西山です。\nB: はい、西山さま。あしたの10時ですね。\nA: はい。そちらははじめてなんですが、何か気をつけることはありますか。\nB: はじめてのかたは、かみに名前やじゅうしょを書いてもらいますから、15分まえに来てください。\nA: わかりました。じゃ、そのじかんに行きます。\nnarrator: 女の人はあした何時にびょういんに行きますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "9時"
+           },
+           {
+            "id": "c2",
+            "textJp": "9時45分"
+           },
+           {
+            "id": "c3",
+            "textJp": "10時"
+           },
+           {
+            "id": "c4",
+            "textJp": "10時15分"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_2_q2",
+          "number": 2,
+          "questionPromptJp": "どうして今日パソコンがなおりませんか。",
+          "audioSrc": "/exam-audio/57354fe60a2d3cdbc27fae0c.mp3",
+          "scriptJp": "narrator: パソコンの店で男の人と店の人が話しています。どうして今日パソコンがなおりませんか。\nB: すみません。このパソコン、今日なおりますか。\nA: すみません。なおす人が、今日は休みなんです。あしたの午後ならできます。\nB: そうですか。いくらぐらいかかりますか。\nA: 3000円ぐらいです。\nB: わかりました。じゃ、おねがいします。\nnarrator: どうして今日パソコンがなおりませんか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "なおす人が今日は休みだから"
+           },
+           {
+            "id": "c2",
+            "textJp": "店がもうすぐしまるから"
+           },
+           {
+            "id": "c3",
+            "textJp": "パソコンが古いから"
+           },
+           {
+            "id": "c4",
+            "textJp": "お金がたりないから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_2_q3",
+          "number": 3,
+          "questionPromptJp": "男の人のお母さんはどうしてケーキを食べませんか。",
+          "audioSrc": "/exam-audio/392e33e7d4dce22fbaa531b3.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人のお母さんはどうしてケーキを食べませんか。\nA: 日よう日に、お母さんが来ますね。わたし、ケーキをつくりましょうか。\nB: ありがとう。でも、母は、ケーキはちょっと……。\nA: あまいものがきらいなんですか。\nB: いいえ、大すきなんですが、今びょうきで、あまいものを食べてはいけないんです。\nA: そうですか。じゃ、くだものを出しましょう。\nnarrator: 男の人のお母さんはどうしてケーキを食べませんか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "あまいものがきらいだから"
+           },
+           {
+            "id": "c2",
+            "textJp": "おなかがいっぱいだから"
+           },
+           {
+            "id": "c3",
+            "textJp": "びょうきだから"
+           },
+           {
+            "id": "c4",
+            "textJp": "くだものがすきだから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_2_q4",
+          "number": 4,
+          "questionPromptJp": "女の人はどうしていぬのせわができませんか。",
+          "audioSrc": "/exam-audio/f1eba756a19a99a37670b206.mp3",
+          "scriptJp": "narrator: 男の人と女の人が話しています。女の人はどうしていぬのせわができませんか。\nB: 来週、三日りょこうに行くんです。そのあいだ、うちのいぬのせわをしてもらえませんか。\nA: いぬですか。わたし、いぬは大すきですよ。でも、わたしのアパートは、どうぶつがだめなんです。\nB: そうですか……。\nA: あ、いもうとのうちは大きいにわがありますから、いもうとにきいてみますね。\nnarrator: 女の人はどうしていぬのせわができませんか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "いぬがきらいだから"
+           },
+           {
+            "id": "c2",
+            "textJp": "しごとがいそがしいから"
+           },
+           {
+            "id": "c3",
+            "textJp": "りょこうに行くから"
+           },
+           {
+            "id": "c4",
+            "textJp": "アパートでどうぶつがだめだから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_2_q5",
+          "number": 5,
+          "questionPromptJp": "二人はいつ山へ行きますか。",
+          "audioSrc": "/exam-audio/a25107006dc8bbf7f111b82c.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。二人はいつ山へ行きますか。\nA: 土よう日、いっしょに山へ行きませんか。\nB: いいですね。でも、天気よほうでは、土よう日は雨だそうですよ。\nA: そうですか。日よう日はどうですか。\nB: 日よう日は、いい天気になるそうです。\nA: じゃ、日よう日に行きましょう。土よう日は、うちでゆっくりします。\nnarrator: 二人はいつ山へ行きますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "日よう日"
+           },
+           {
+            "id": "c2",
+            "textJp": "土よう日"
+           },
+           {
+            "id": "c3",
+            "textJp": "来週の土よう日"
+           },
+           {
+            "id": "c4",
+            "textJp": "行きません"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_2_q6",
+          "number": 6,
+          "questionPromptJp": "男の人はどうしてこのしゃしんをつかいませんか。",
+          "audioSrc": "/exam-audio/e893cbd02dc084e0cb21e61f.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人はどうしてこのしゃしんをつかいませんか。\nA: このしゃしん、パスポートにつかうんですか。\nB: はい。かおもよく見えますし、いいとおもいます。でも、三年まえのしゃしんなんです。\nA: パスポートのしゃしんは、とってから6か月までのものですよ。\nB: そうですか。じゃ、このしゃしんはつかいません。駅のまえで、新しいのをとります。\nnarrator: 男の人はどうしてこのしゃしんをつかいませんか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "かおが小さいから"
+           },
+           {
+            "id": "c2",
+            "textJp": "めがねをかけているから"
+           },
+           {
+            "id": "c3",
+            "textJp": "しゃしんがくらいから"
+           },
+           {
+            "id": "c4",
+            "textJp": "しゃしんが古いから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 3,
+   "seed": 8477366019693298278,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Listening Practice",
+    "titleJp": "N5 聴解",
+    "sections": [
+     {
+      "id": "listening",
+      "label": "Listening",
+      "labelJp": "聴解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "choukai_1",
+        "number": 1,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_1_q1",
+          "number": 1,
+          "questionPromptJp": "二人はあした何時にどこで会いますか。",
+          "audioSrc": "/exam-audio/9cedb3b304a79a50f384fa4d.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。二人はあした何時にどこで会いますか。\nA: あした、いっしょにどうぶつえんに行きませんか。\nB: いいですね。何時に会いましょうか。\nA: どうぶつえんは9時からですから、9時に駅のまえはどうですか。\nB: 9時はちょっとはやいです。10時はどうですか。\nA: いいですよ。じゃ、10時に駅のまえで。\nB: あ、駅のまえは人が多いですから、どうぶつえんの入り口で会いましょう。\nA: わかりました。\nnarrator: 二人はあした何時にどこで会いますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "9時に駅のまえ"
+           },
+           {
+            "id": "c2",
+            "textJp": "10時に駅のまえ"
+           },
+           {
+            "id": "c3",
+            "textJp": "9時に入り口"
+           },
+           {
+            "id": "c4",
+            "textJp": "10時に入り口"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_1_q2",
+          "number": 2,
+          "questionPromptJp": "かいぎはどのへやでしますか。",
+          "audioSrc": "/exam-audio/decbb356eb5a736c556d4805.mp3",
+          "scriptJp": "narrator: 会社で女の人と男の人が話しています。かいぎはどのへやでしますか。\nA: あしたのかいぎは、何人来ますか。\nB: 12人です。\nA: じゃ、3がいの小さいへやは、ちょっとせまいですね。\nB: そうですね。5かいの大きいへやはどうですか。\nA: 5かいの大きいへやは、あしたの午前、ほかの人がつかいますよ。\nB: かいぎは午後ですから、だいじょうぶですよ。\nA: あ、そうでしたね。じゃ、そこにしましょう。\nnarrator: かいぎはどのへやでしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "3がいの小さいへや"
+           },
+           {
+            "id": "c2",
+            "textJp": "3がいの大きいへや"
+           },
+           {
+            "id": "c3",
+            "textJp": "5かいの小さいへや"
+           },
+           {
+            "id": "c4",
+            "textJp": "5かいの大きいへや"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_1_q3",
+          "number": 3,
+          "questionPromptJp": "男の人はあした何をきていきますか。",
+          "audioSrc": "/exam-audio/2740c772affea0ad0a7bd060.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人はあした何をきていきますか。\nA: あしたの会社のパーティー、何をきていきますか。\nB: いつものセーターとズボンで行きます。\nA: えっ、あしたは社長も来ますよ。スーツのほうがいいですよ。\nB: そうですか。じゃ、スーツにします。ネクタイもしたほうがいいですか。\nA: ええ、ネクタイもしてください。\nB: わかりました。\nnarrator: 男の人はあした何をきていきますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "セーターとズボン"
+           },
+           {
+            "id": "c2",
+            "textJp": "スーツとネクタイ"
+           },
+           {
+            "id": "c3",
+            "textJp": "セーターだけ"
+           },
+           {
+            "id": "c4",
+            "textJp": "スーツだけ"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_1_q4",
+          "number": 4,
+          "questionPromptJp": "男の人はどのクラブに入りますか。",
+          "audioSrc": "/exam-audio/e6f5026f34ace253056ef27a.mp3",
+          "scriptJp": "narrator: 大学で女の人と男の人が話しています。男の人はどのクラブに入りますか。\nA: 古川さん、クラブはもうきめましたか。\nB: まだです。テニスと、サッカーと、えいがのクラブを見に行きました。\nA: テニスはどうでしたか。\nB: たのしかったです。でも、テニスは毎日れんしゅうがあります。ぼくは火よう日と木よう日にアルバイトがありますから……。\nA: サッカーは？\nB: サッカーは月よう日と水よう日だけです。えいがのクラブは火よう日です。\nA: じゃ、サッカーがいいですね。\nB: そうですね。そうします。\nnarrator: 男の人はどのクラブに入りますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "テニス"
+           },
+           {
+            "id": "c2",
+            "textJp": "サッカー"
+           },
+           {
+            "id": "c3",
+            "textJp": "えいが"
+           },
+           {
+            "id": "c4",
+            "textJp": "バスケットボール"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_1_q5",
+          "number": 5,
+          "questionPromptJp": "二人はあしたどこで会いますか。",
+          "audioSrc": "/exam-audio/8ebe489c56f2ddda9893db0f.mp3",
+          "scriptJp": "narrator: 大学で女の人と男の人が話しています。二人はあしたどこで会いますか。\nA: あした、いっしょにテストのべんきょうをしませんか。\nB: いいですね。大学のとしょかんはどうですか。\nA: としょかんは、あしたは休みですよ。\nB: そうですか。じゃ、駅のまえのきっさてんは？\nA: あそこはちょっとうるさいですね。大学のしょくどうはどうですか。午後は人が少ないですよ。\nB: いいですね。じゃ、1時にしょくどうで会いましょう。\nnarrator: 二人はあしたどこで会いますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "大学のとしょかん"
+           },
+           {
+            "id": "c2",
+            "textJp": "駅のまえのきっさてん"
+           },
+           {
+            "id": "c3",
+            "textJp": "大学のしょくどう"
+           },
+           {
+            "id": "c4",
+            "textJp": "大学の入り口"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_1_q6",
+          "number": 6,
+          "questionPromptJp": "二人はのこったごはんをどうしますか。",
+          "audioSrc": "/exam-audio/890acd09a357a7e248680824.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。二人はのこったごはんをどうしますか。\nA: ごはんがたくさんのこりましたね。\nB: すてるのはもったいないですね。あしたのあさ、食べましょうか。\nA: あしたのあさのパンは、もう買いましたよ。\nB: じゃ、おにぎりをつくって、あしたのおひるにもっていきましょう。\nA: いいですね。そうしましょう。\nnarrator: 二人はのこったごはんをどうしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "すてる"
+           },
+           {
+            "id": "c2",
+            "textJp": "あしたのあさ食べる"
+           },
+           {
+            "id": "c3",
+            "textJp": "おにぎりをつくる"
+           },
+           {
+            "id": "c4",
+            "textJp": "となりの人にあげる"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_1_q7",
+          "number": 7,
+          "questionPromptJp": "女の人は何人でよやくしますか。",
+          "audioSrc": "/exam-audio/e3a4acc04d8f345d42073e5f.mp3",
+          "scriptJp": "narrator: 女の人がレストランに電話しています。女の人は何人でよやくしますか。\nA: もしもし、土よう日のよる7時に、4人でよやくしたいんですが。\nB: 土よう日の7時ですね。はい、だいじょうぶです。\nA: あ、ちょっとまってください。……すみません、ともだちがもう二人来ます。\nB: では、6人ですね。\nA: はい。一人は小さい子どもですが、子どものいすはありますか。\nB: はい、ありますよ。では、土よう日の7時に、6人でおまちしています。\nnarrator: 女の人は何人でよやくしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "4人"
+           },
+           {
+            "id": "c2",
+            "textJp": "5人"
+           },
+           {
+            "id": "c3",
+            "textJp": "6人"
+           },
+           {
+            "id": "c4",
+            "textJp": "7人"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         }
+        ]
+       },
+       {
+        "id": "choukai_2",
+        "number": 2,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_2_q1",
+          "number": 1,
+          "questionPromptJp": "男の人はどうしておくれましたか。",
+          "audioSrc": "/exam-audio/313d0c85d8745620e835eebb.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人はどうしておくれましたか。\nB: すみません、おそくなって。\nA: どうしたんですか。電車がおくれたんですか。\nB: いいえ、電車はおくれていません。駅で、さいふがないのがわかって、うちまでとりにかえったんです。\nA: そうですか。たいへんでしたね。\nnarrator: 男の人はどうしておくれましたか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "電車がおくれたから"
+           },
+           {
+            "id": "c2",
+            "textJp": "ねるのがおそかったから"
+           },
+           {
+            "id": "c3",
+            "textJp": "さいふをとりにかえったから"
+           },
+           {
+            "id": "c4",
+            "textJp": "みちをまちがえたから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_2_q2",
+          "number": 2,
+          "questionPromptJp": "男の学生はいつしゅくだいを出しますか。",
+          "audioSrc": "/exam-audio/14a4a39c485e172bc559b4ec.mp3",
+          "scriptJp": "narrator: 学校で女の先生と男の学生が話しています。男の学生はいつしゅくだいを出しますか。\nA: リンさん、きのうのしゅくだいは？\nB: すみません、先生。書きましたが、うちにわすれてしまいました。\nA: そうですか。じゃ、あしたもってきてください。\nB: あのう、あしたは、学校が休みです。\nA: あ、そうでしたね。じゃ、あさってでいいですよ。\nB: はい、わかりました。\nnarrator: 男の学生はいつしゅくだいを出しますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "今日"
+           },
+           {
+            "id": "c2",
+            "textJp": "あした"
+           },
+           {
+            "id": "c3",
+            "textJp": "あさって"
+           },
+           {
+            "id": "c4",
+            "textJp": "来週"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_2_q3",
+          "number": 3,
+          "questionPromptJp": "男の人はこれから何を買いに行きますか。",
+          "audioSrc": "/exam-audio/fbaf9a0ef5231defc08bc971.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人はこれから何を買いに行きますか。\nA: 土よう日のレストランは、とてもすてきなところですから、ジャケットをきてきてくださいね。\nB: ジャケットはありますよ。白いシャツもあります。\nA: それから、くつも。スニーカーはだめですよ。くろいくつがいいですね。\nB: えっ、ぼく、スニーカーしかもっていません。じゃ、これから買いに行きます。\nnarrator: 男の人はこれから何を買いに行きますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ジャケット"
+           },
+           {
+            "id": "c2",
+            "textJp": "白いシャツ"
+           },
+           {
+            "id": "c3",
+            "textJp": "くろいくつ"
+           },
+           {
+            "id": "c4",
+            "textJp": "ネクタイ"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_2_q4",
+          "number": 4,
+          "questionPromptJp": "このびょういんは、木よう日は何時までですか。",
+          "audioSrc": "/exam-audio/6fefdaeb49df271f5e129793.mp3",
+          "scriptJp": "narrator: 男の人がびょういんに電話しています。このびょういんは、木よう日は何時までですか。\nB: もしもし、あした、そちらに行きたいんですが、何時までですか。\nA: あしたは木よう日ですから、午前だけです。12時までです。\nB: そうですか。いつもは何時までですか。\nA: ほかの日は、午後7時までです。土よう日は午後5時までです。\nB: わかりました。じゃ、土よう日に行きます。\nnarrator: このびょういんは、木よう日は何時までですか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "9時"
+           },
+           {
+            "id": "c2",
+            "textJp": "12時"
+           },
+           {
+            "id": "c3",
+            "textJp": "午後5時"
+           },
+           {
+            "id": "c4",
+            "textJp": "午後7時"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_2_q5",
+          "number": 5,
+          "questionPromptJp": "女の人は何時までにびじゅつかんに入りますか。",
+          "audioSrc": "/exam-audio/6ce77a0f5bc350338b65f937.mp3",
+          "scriptJp": "narrator: 女の人がびじゅつかんに電話しています。女の人は何時までにびじゅつかんに入りますか。\nA: もしもし、そちらは何時まであいていますか。\nB: 午後5時までです。でも、入り口は4時半にしまります。\nA: じゃ、4時半までに入らなければなりませんね。\nB: はい、そうです。\nnarrator: 女の人は何時までにびじゅつかんに入りますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "4時"
+           },
+           {
+            "id": "c2",
+            "textJp": "4時半"
+           },
+           {
+            "id": "c3",
+            "textJp": "5時"
+           },
+           {
+            "id": "c4",
+            "textJp": "5時半"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_2_q6",
+          "number": 6,
+          "questionPromptJp": "女の人はどうして今日びょういんに行きませんか。",
+          "audioSrc": "/exam-audio/d786c46055dff19943c8e7a3.mp3",
+          "scriptJp": "narrator: 男の人と女の人が話しています。女の人はどうして今日びょういんに行きませんか。\nB: 今日、北山さんに会いに、びょういんへ行きませんか。\nA: 今日は、行かないほうがいいとおもいます。\nB: どうしてですか。\nA: 北山さんは、きのうからねつが高いそうです。おくさんが言っていました。\nB: そうですか。じゃ、来週行きましょう。\nnarrator: 女の人はどうして今日びょういんに行きませんか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "北山さんのねつが高いから"
+           },
+           {
+            "id": "c2",
+            "textJp": "女の人がいそがしいから"
+           },
+           {
+            "id": "c3",
+            "textJp": "びょういんが休みだから"
+           },
+           {
+            "id": "c4",
+            "textJp": "北山さんがもううちにかえったから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 4,
+   "seed": 2781273801552649098,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Listening Practice",
+    "titleJp": "N5 聴解",
+    "sections": [
+     {
+      "id": "listening",
+      "label": "Listening",
+      "labelJp": "聴解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "choukai_1",
+        "number": 1,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_1_q1",
+          "number": 1,
+          "questionPromptJp": "男の人は何を買いますか。",
+          "audioSrc": "/exam-audio/b5718571b8e055fa862906c5.mp3",
+          "scriptJp": "narrator: プールで女の人と男の人が話しています。男の人は何を買いますか。\nB: すみません。このプールははじめてです。何かきまりがありますか。\nA: はい。プールに入るまえに、シャワーをあびてください。それから、ぼうしをかぶってください。\nB: ぼうしですか。もってきませんでした。\nA: 入り口の店でうっていますよ。500円です。\nB: そうですか。タオルもそこでうっていますか。\nA: タオルは、こちらでかしていますよ。お金はいりません。\nB: よかった。じゃ、ぼうしだけ買います。\nnarrator: 男の人は何を買いますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ぼうし"
+           },
+           {
+            "id": "c2",
+            "textJp": "タオル"
+           },
+           {
+            "id": "c3",
+            "textJp": "ぼうしとタオル"
+           },
+           {
+            "id": "c4",
+            "textJp": "水ぎ"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_1_q2",
+          "number": 2,
+          "questionPromptJp": "女の人はどのせきを買いますか。",
+          "audioSrc": "/exam-audio/8de45df112788aa6342f6de7.mp3",
+          "scriptJp": "narrator: えいがかんで女の人と店の人が話しています。女の人はどのせきを買いますか。\nB: いらっしゃいませ。何まいですか。\nA: 大人一人と子ども一人です。\nB: 今、まえのほうと、うしろのほうがあいています。\nA: 子どもが小さいですから、まえのほうがいいです。\nB: まえのほうは、いちばんまえのせきしかありませんが……。\nA: いちばんまえは、ちょっと……。じゃ、うしろのほうで、ドアにちかいせきはありますか。\nB: はい、ドアのとなりのせきが二つあいています。\nA: じゃ、そこをおねがいします。\nnarrator: 女の人はどのせきを買いますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "いちばんまえ"
+           },
+           {
+            "id": "c2",
+            "textJp": "まえのほうのまん中"
+           },
+           {
+            "id": "c3",
+            "textJp": "うしろのドアのとなり"
+           },
+           {
+            "id": "c4",
+            "textJp": "うしろのまん中"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_1_q3",
+          "number": 3,
+          "questionPromptJp": "女の人はこのあと何をしますか。",
+          "audioSrc": "/exam-audio/481c1b1c950597c2655bfc5d.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。女の人はこのあと何をしますか。\nA: どうしよう。じてんしゃのタイヤに空気がありません。\nB: ああ、ほんとうですね。駅のまえのじてんしゃやで、空気を入れてもらえますよ。\nA: でも、今日は日よう日ですから、休みですよね。\nB: あ、そうですね。ぼくのうちに空気入れがありますよ。とってきましょうか。\nA: いいですか。ありがとうございます。じゃ、わたしはここでまっています。\nnarrator: 女の人はこのあと何をしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "じてんしゃやへ行く"
+           },
+           {
+            "id": "c2",
+            "textJp": "男の人のうちへ行く"
+           },
+           {
+            "id": "c3",
+            "textJp": "ここで男の人をまつ"
+           },
+           {
+            "id": "c4",
+            "textJp": "空気入れを買う"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_1_q4",
+          "number": 4,
+          "questionPromptJp": "男の人はいくらはらいますか。",
+          "audioSrc": "/exam-audio/cc6ec1ed5345d3fad39ee25b.mp3",
+          "scriptJp": "narrator: レストランで女の人と男の人が話しています。男の人はいくらはらいますか。\nB: ぜんぶで4000円ですね。二人で2000円ずつにしましょう。\nA: でも、わたしはワインを飲みませんでしたよ。ワインは1000円です。\nB: あ、そうですね。じゃ、ワインはぼくがはらいます。\nA: ワインのほかは3000円ですから、一人1500円ですね。\nB: はい。じゃ、ぼくは1500円とワインの1000円ですね。\nnarrator: 男の人はいくらはらいますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "1000円"
+           },
+           {
+            "id": "c2",
+            "textJp": "1500円"
+           },
+           {
+            "id": "c3",
+            "textJp": "2000円"
+           },
+           {
+            "id": "c4",
+            "textJp": "2500円"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_1_q5",
+          "number": 5,
+          "questionPromptJp": "男の人は何を食べましたか。",
+          "audioSrc": "/exam-audio/db94f7676bf6855b1522ec30.mp3",
+          "scriptJp": "narrator: レストランで男の人と店の人が話しています。男の人は何を食べましたか。\nB: すみません。このレシート、まちがっているとおもいます。\nA: はい、何でしょうか。\nB: ここにラーメンとありますが、ぼくはラーメンを食べていません。\nA: もうしわけありません。サンドイッチでしたか。\nB: いいえ、カレーです。カレーとコーヒーです。\nA: すみません。すぐになおします。\nnarrator: 男の人は何を食べましたか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "カレー"
+           },
+           {
+            "id": "c2",
+            "textJp": "ラーメン"
+           },
+           {
+            "id": "c3",
+            "textJp": "サンドイッチ"
+           },
+           {
+            "id": "c4",
+            "textJp": "スパゲッティ"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_1_q6",
+          "number": 6,
+          "questionPromptJp": "男の人はどうしますか。",
+          "audioSrc": "/exam-audio/5f7bafaac2c6dd327429e7c8.mp3",
+          "scriptJp": "narrator: じてんしゃやで男の人と店の人が話しています。男の人はどうしますか。\nB: すみません。じてんしゃのブレーキがわるいんです。なおしてもらえますか。\nA: ちょっと見ますね。……ブレーキを新しいのにかえますから、三日かかります。3000円です。\nB: 三日ですか。今日はできませんか。\nA: 今日なら、2000円高くなりますよ。\nB: うーん。じゃ、いそぎませんから、三日まちます。\nnarrator: 男の人はどうしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "今日なおしてもらう"
+           },
+           {
+            "id": "c2",
+            "textJp": "三日まつ"
+           },
+           {
+            "id": "c3",
+            "textJp": "新しいじてんしゃを買う"
+           },
+           {
+            "id": "c4",
+            "textJp": "ほかの店に行く"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_1_q7",
+          "number": 7,
+          "questionPromptJp": "男の人は何時からおよぎますか。",
+          "audioSrc": "/exam-audio/72ba2a5674618ed1b477b143.mp3",
+          "scriptJp": "narrator: プールの入り口で男の人と女の人が話しています。男の人は何時からおよぎますか。\nB: すみません。今からおよいでもいいですか。\nA: 今は子どものじかんです。大人は6時からです。\nB: 今5時半ですね。じゃ、6時までまちます。\nA: あ、すみません。今日は6時から6時半まで、プールのそうじをするんです。\nB: そうですか。じゃ、6時半からですね。\nnarrator: 男の人は何時からおよぎますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "5時"
+           },
+           {
+            "id": "c2",
+            "textJp": "5時半"
+           },
+           {
+            "id": "c3",
+            "textJp": "6時"
+           },
+           {
+            "id": "c4",
+            "textJp": "6時半"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "choukai_2",
+        "number": 2,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_2_q1",
+          "number": 1,
+          "questionPromptJp": "二人はどうしてマフラーをあげますか。",
+          "audioSrc": "/exam-audio/39fc22cffc07815a7c640ef9.mp3",
+          "scriptJp": "narrator: 会社で女の人と男の人が話しています。二人はどうしてマフラーをあげますか。\nA: 大山さん、来月から、ほっかいどうの会社ではたらきますね。みんなで何かあげませんか。\nB: いいですね。おさけはどうですか。\nA: 大山さんは、おさけを飲みませんよ。\nB: そうですか。じゃ、マフラーはどうですか。ほっかいどうは、ふゆ、とてもさむいですから。\nA: それはいいですね。そうしましょう。\nnarrator: 二人はどうしてマフラーをあげますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "たんじょう日だから"
+           },
+           {
+            "id": "c2",
+            "textJp": "ほっかいどうはさむいから"
+           },
+           {
+            "id": "c3",
+            "textJp": "マフラーがやすいから"
+           },
+           {
+            "id": "c4",
+            "textJp": "いろがきれいだから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_2_q2",
+          "number": 2,
+          "questionPromptJp": "男の学生はどこをそうじしますか。",
+          "audioSrc": "/exam-audio/a84cddc452c9aff4d4f35fe1.mp3",
+          "scriptJp": "narrator: 学校で女の先生と男の学生が話しています。男の学生はどこをそうじしますか。\nA: 今日のそうじですが、小山くんは、まどをおねがいします。\nB: 先生、ぼく、きのうもまどでした。\nA: そうですか。じゃ、こくばんをおねがいします。\nB: こくばんは、もうたなかさんがしています。\nA: じゃ、小山くんは、ろうかをおねがいします。\nB: はい、わかりました。\nnarrator: 男の学生はどこをそうじしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "まど"
+           },
+           {
+            "id": "c2",
+            "textJp": "こくばん"
+           },
+           {
+            "id": "c3",
+            "textJp": "ろうか"
+           },
+           {
+            "id": "c4",
+            "textJp": "つくえ"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_2_q3",
+          "number": 3,
+          "questionPromptJp": "おきゃくさんは何時に来ますか。",
+          "audioSrc": "/exam-audio/0ab91caa135b25d56552fef8.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。おきゃくさんは何時に来ますか。\nA: おきゃくさんは7時に来ますから、6時からりょうりをつくりましょう。\nB: あ、さっき、さとうさんから電話がありました。30分はやく来るそうです。\nA: えっ、じゃ、6時半ですね。りょうりは5時半からにしましょう。そのまえに、へやのそうじをしてくれませんか。\nB: わかりました。\nnarrator: おきゃくさんは何時に来ますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "5時半"
+           },
+           {
+            "id": "c2",
+            "textJp": "6時"
+           },
+           {
+            "id": "c3",
+            "textJp": "6時半"
+           },
+           {
+            "id": "c4",
+            "textJp": "7時"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_2_q4",
+          "number": 4,
+          "questionPromptJp": "女の人はどうしてやさいを小さくきりますか。",
+          "audioSrc": "/exam-audio/3e6a27a69adb2e5554f98dff.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。女の人はどうしてやさいを小さくきりますか。\nA: あした、あねの子どもがうちに来るんです。ばんごはんは何がいいでしょう。\nB: 子どもはハンバーグがすきですよ。\nA: そうですね。でも、その子は、やさいがきらいなんです。\nB: じゃ、やさいを小さくきって、ハンバーグの中に入れたらどうですか。見えませんよ。\nA: いいですね。そうします。\nnarrator: 女の人はどうしてやさいを小さくきりますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "子どもが小さいから"
+           },
+           {
+            "id": "c2",
+            "textJp": "子どもがやさいがきらいだから"
+           },
+           {
+            "id": "c3",
+            "textJp": "はやくやけるから"
+           },
+           {
+            "id": "c4",
+            "textJp": "ハンバーグが小さいから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_2_q5",
+          "number": 5,
+          "questionPromptJp": "女の人はどうして新しいテントを買いますか。",
+          "audioSrc": "/exam-audio/9ddcca8212a3db98229914b7.mp3",
+          "scriptJp": "narrator: 男の人と女の人が話しています。女の人はどうして新しいテントを買いますか。\nB: 来週のキャンプ、テントはどうしますか。\nA: 新しいのを買います。\nB: きょねんのテントは、つかわないんですか。\nA: きょねんのは、つよいかぜで、こわれてしまったんです。\nB: そうでしたか。\nnarrator: 女の人はどうして新しいテントを買いますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "きょねんのテントが小さいから"
+           },
+           {
+            "id": "c2",
+            "textJp": "大きいテントがほしいから"
+           },
+           {
+            "id": "c3",
+            "textJp": "やすかったから"
+           },
+           {
+            "id": "c4",
+            "textJp": "きょねんのテントがこわれたから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_2_q6",
+          "number": 6,
+          "questionPromptJp": "男の人はどうしてシフトをかわってほしいですか。",
+          "audioSrc": "/exam-audio/fedc0a6ac51448255a354703.mp3",
+          "scriptJp": "narrator: 店で男の人と女の人が話しています。男の人はどうしてシフトをかわってほしいですか。\nB: 来週の水よう日、シフトをかわってもらえませんか。\nA: いいですよ。りょこうですか。\nB: いいえ。木よう日に大学でテストがあるんです。水よう日は、べんきょうしなければなりません。\nA: そうですか。がんばってください。\nnarrator: 男の人はどうしてシフトをかわってほしいですか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "りょこうに行くから"
+           },
+           {
+            "id": "c2",
+            "textJp": "テストがあるから"
+           },
+           {
+            "id": "c3",
+            "textJp": "かぜをひいたから"
+           },
+           {
+            "id": "c4",
+            "textJp": "国から母が来るから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 5,
+   "seed": 1036508314230097382,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Listening Practice",
+    "titleJp": "N5 聴解",
+    "sections": [
+     {
+      "id": "listening",
+      "label": "Listening",
+      "labelJp": "聴解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "choukai_1",
+        "number": 1,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_1_q1",
+          "number": 1,
+          "questionPromptJp": "女の人は何を買いましたか。",
+          "audioSrc": "/exam-audio/f6646418a3c0863010b3959d.mp3",
+          "scriptJp": "narrator: スーパーで女の人と店の人が話しています。女の人は何を買いましたか。\nA: すみません。このレシートなんですが、パンが二つになっています。わたしは一つだけ買いました。\nB: もうしわけありません。ちょっと見せてください。……あ、ジュースも二本になっていますね。\nA: ジュースは二本買いました。それはだいじょうぶです。\nB: わかりました。では、パン一つの150円をおかえしします。\nnarrator: 女の人は何を買いましたか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "パン一つとジュース一本"
+           },
+           {
+            "id": "c2",
+            "textJp": "パン一つとジュース二本"
+           },
+           {
+            "id": "c3",
+            "textJp": "パン二つとジュース一本"
+           },
+           {
+            "id": "c4",
+            "textJp": "パン二つとジュース二本"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_1_q2",
+          "number": 2,
+          "questionPromptJp": "二人はいつびょういんへ行きますか。",
+          "audioSrc": "/exam-audio/0bc33b4b9923269df1a9322f.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。二人はいつびょういんへ行きますか。\nA: もりさんがにゅういんしましたね。いっしょにびょういんへ行きませんか。\nB: いいですね。今日の午後はどうですか。\nA: もりさんのおくさんの話では、今日はまだ会えないそうです。あしたからはだいじょうぶだと言っていました。\nB: じゃ、あしたの午後はどうですか。\nA: あしたは、しごとがおそくまであるんです。あさっての土よう日はどうですか。\nB: 土よう日ですね。いいですよ。じゃ、午後2時ごろ行きましょう。\nnarrator: 二人はいつびょういんへ行きますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "今日の午後"
+           },
+           {
+            "id": "c2",
+            "textJp": "あしたの午前"
+           },
+           {
+            "id": "c3",
+            "textJp": "あしたの午後"
+           },
+           {
+            "id": "c4",
+            "textJp": "土よう日の午後"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_1_q3",
+          "number": 3,
+          "questionPromptJp": "二人は何時に会いますか。",
+          "audioSrc": "/exam-audio/4a96fae10cc37f9dac12a36a.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。二人は何時に会いますか。\nA: 土よう日の花火、何時に会いましょうか。\nB: 花火は7時からですね。6時半に会いましょう。\nA: 6時半だと人が多くて、いいところで見ることができませんよ。5時はどうですか。\nB: 5時は、まだしごとです。6時ならだいじょうぶですよ。\nA: じゃ、6時にしましょう。川のちかくのコンビニのまえで会いましょう。\nB: はい、わかりました。\nnarrator: 二人は何時に会いますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "5時"
+           },
+           {
+            "id": "c2",
+            "textJp": "6時"
+           },
+           {
+            "id": "c3",
+            "textJp": "6時半"
+           },
+           {
+            "id": "c4",
+            "textJp": "7時"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_1_q4",
+          "number": 4,
+          "questionPromptJp": "女の人はいくらはらいますか。",
+          "audioSrc": "/exam-audio/adc9222a4bff3403a4ab3dd9.mp3",
+          "scriptJp": "narrator: とけいやで女の人と店の人が話しています。女の人はいくらはらいますか。\nA: すみません。このとけい、うごかなくなってしまいました。なおりますか。\nB: ちょっと見せてください。……ああ、中をなおさなければなりませんね。5000円で、一週間かかります。\nA: 一週間ですか。来週の水よう日にりょこうに行きますから、そのまえにほしいんですが……。\nB: では、いそいで三日でなおします。でも、1000円高くなりますよ。\nA: はい、それでおねがいします。\nnarrator: 女の人はいくらはらいますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "1000円"
+           },
+           {
+            "id": "c2",
+            "textJp": "4000円"
+           },
+           {
+            "id": "c3",
+            "textJp": "5000円"
+           },
+           {
+            "id": "c4",
+            "textJp": "6000円"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_1_q5",
+          "number": 5,
+          "questionPromptJp": "男の人は何をしますか。",
+          "audioSrc": "/exam-audio/4ec8451b337f605273d70d57.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人は何をしますか。\nA: 山下さん、来週から国へかえるんです。そのあいだ、うちのいぬのことをおねがいできませんか。\nB: いいですよ。いぬを、ぼくのうちにつれていきましょうか。\nA: ありがとう。でも、いぬは、じぶんのうちのほうがいいとおもいます。毎日あさ、うちに来て、ごはんをあげてくれませんか。\nB: いいですよ。さんぽはどうしますか。\nA: さんぽは、となりの子どもがしてくれます。\nB: わかりました。\nnarrator: 男の人は何をしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ごはんをあげる"
+           },
+           {
+            "id": "c2",
+            "textJp": "いぬとさんぽする"
+           },
+           {
+            "id": "c3",
+            "textJp": "うちにいぬをつれていく"
+           },
+           {
+            "id": "c4",
+            "textJp": "となりの子どもに会う"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_1_q6",
+          "number": 6,
+          "questionPromptJp": "男の人はこのあと何をしますか。",
+          "audioSrc": "/exam-audio/45754f401b7938fe3cea0113.mp3",
+          "scriptJp": "narrator: 会社で女の人と男の人が話しています。男の人はこのあと何をしますか。\nA: かいぎのおべんとう、三つのこりましたね。\nB: そうですね。れいぞうこに入れておきましょうか。\nA: おべんとうは、あしたはもうだめですよ。今日食べたほうがいいです。\nB: でも、すてるのはもったいないですね。\nA: そうですね。ほしい人にあげましょう。\nB: じゃ、ほしい人がいるか、ぼくがみんなに聞いてきます。\nnarrator: 男の人はこのあと何をしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "みんなに聞く"
+           },
+           {
+            "id": "c2",
+            "textJp": "おべんとうをすてる"
+           },
+           {
+            "id": "c3",
+            "textJp": "おべんとうを食べる"
+           },
+           {
+            "id": "c4",
+            "textJp": "れいぞうこに入れる"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_1_q7",
+          "number": 7,
+          "questionPromptJp": "女の人はこれからかばんに何を入れますか。",
+          "audioSrc": "/exam-audio/380b054620f57b6170c6c5c5.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。女の人はこれからかばんに何を入れますか。\nA: あしたからのうみのりょこう、水ぎはもうかばんに入れました。ほかに何がいりますか。\nB: ぼうしはどうですか。日がつよいですよ。\nA: ぼうしは、むこうで買います。かわいいのがほしいんです。\nB: そうですか。電車に長くのりますから、本はどうですか。\nA: そうですね。じゃ、本を一さつ入れます。\nnarrator: 女の人はこれからかばんに何を入れますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "本"
+           },
+           {
+            "id": "c2",
+            "textJp": "水ぎ"
+           },
+           {
+            "id": "c3",
+            "textJp": "ぼうし"
+           },
+           {
+            "id": "c4",
+            "textJp": "サングラス"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         }
+        ]
+       },
+       {
+        "id": "choukai_2",
+        "number": 2,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_2_q1",
+          "number": 1,
+          "questionPromptJp": "二人はどうしてイタリアりょうりの店に行きますか。",
+          "audioSrc": "/exam-audio/7e3a72a7700581c8e65509c7.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。二人はどうしてイタリアりょうりの店に行きますか。\nA: 今日のばんごはん、ちゅうかりょうりの店と、イタリアりょうりの店、どちらにしますか。\nB: ちゅうかの店のほうがやすいですね。\nA: そうですね。でも、さっき電話したら、ちゅうかの店は、今日はよやくでいっぱいだと言っていました。\nB: そうですか。じゃ、イタリアのほうにしましょう。\nnarrator: 二人はどうしてイタリアりょうりの店に行きますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ちゅうかの店がいっぱいだから"
+           },
+           {
+            "id": "c2",
+            "textJp": "やすいから"
+           },
+           {
+            "id": "c3",
+            "textJp": "おいしいから"
+           },
+           {
+            "id": "c4",
+            "textJp": "駅からちかいから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_2_q2",
+          "number": 2,
+          "questionPromptJp": "二人は何時に会いますか。",
+          "audioSrc": "/exam-audio/7d12da7bc88c2ca3c6721963.mp3",
+          "scriptJp": "narrator: 女の人と男の人が電話で話しています。二人は何時に会いますか。\nA: もしもし、ごめんなさい。電車をまちがえて、今、となりの駅にいるんです。\nB: そうですか。こちらにはいつごろつきますか。\nA: つぎの電車は10分あとですから、3時20分ごろになるとおもいます。\nB: わかりました。じゃ、3時20分に駅の出口で。\nA: あ、駅から店までは、あるいて10分ですね。じゃ、店のまえで3時半に会いましょう。\nB: はい、そうしましょう。\nnarrator: 二人は何時に会いますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "3時"
+           },
+           {
+            "id": "c2",
+            "textJp": "3時10分"
+           },
+           {
+            "id": "c3",
+            "textJp": "3時20分"
+           },
+           {
+            "id": "c4",
+            "textJp": "3時半"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_2_q3",
+          "number": 3,
+          "questionPromptJp": "女の人はそつぎょうしきに何をきていきますか。",
+          "audioSrc": "/exam-audio/513932b2e9b15d4ecd9cbb27.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。女の人はそつぎょうしきに何をきていきますか。\nA: 来週、むすこの学校のそつぎょうしきがあるんです。くろいスーツをきていこうとおもっています。\nB: くろもいいですが、はるですから、あかるいいろはどうですか。\nA: そうですね。グレーのスーツもありますが、ちょっとくらいですね。じゃ、ピンクのスーツにします。\nB: いいですね。\nnarrator: 女の人はそつぎょうしきに何をきていきますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ピンクのスーツ"
+           },
+           {
+            "id": "c2",
+            "textJp": "くろいスーツ"
+           },
+           {
+            "id": "c3",
+            "textJp": "しろいスーツ"
+           },
+           {
+            "id": "c4",
+            "textJp": "グレーのスーツ"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_2_q4",
+          "number": 4,
+          "questionPromptJp": "しゅくだいはいつまでに出しますか。",
+          "audioSrc": "/exam-audio/fb7346879cdf5dfec30cd6c5.mp3",
+          "scriptJp": "narrator: 学校で女の先生と男の学生が話しています。しゅくだいはいつまでに出しますか。\nB: 先生、このしゅくだいは、いつまでに出しますか。\nA: 金よう日までです。あ、ちがいました。金よう日は学校が休みですね。じゃ、木よう日までにしてください。\nB: 来週の月よう日じゃ、だめですか。\nA: だめです。木よう日までに出してくださいね。\nnarrator: しゅくだいはいつまでに出しますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "木よう日"
+           },
+           {
+            "id": "c2",
+            "textJp": "水よう日"
+           },
+           {
+            "id": "c3",
+            "textJp": "金よう日"
+           },
+           {
+            "id": "c4",
+            "textJp": "来週の月よう日"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_2_q5",
+          "number": 5,
+          "questionPromptJp": "どうして大きいへやでかいぎをしますか。",
+          "audioSrc": "/exam-audio/f06913227db831d0ebfdcabc.mp3",
+          "scriptJp": "narrator: 会社で女の人と男の人が話しています。どうして大きいへやでかいぎをしますか。\nA: あしたのかいぎ、小さいへやでしましょうか。\nB: あしたは、ほかの会社の人も来ますから、20人ぐらいになりますよ。\nA: そうですか。じゃ、大きいへやにしましょう。\nnarrator: どうして大きいへやでかいぎをしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "人が多いから"
+           },
+           {
+            "id": "c2",
+            "textJp": "テレビがあるから"
+           },
+           {
+            "id": "c3",
+            "textJp": "小さいへやがうるさいから"
+           },
+           {
+            "id": "c4",
+            "textJp": "大きいへやはあかるいから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_2_q6",
+          "number": 6,
+          "questionPromptJp": "男の学生はしゅくだいをどうやって出しますか。",
+          "audioSrc": "/exam-audio/f7f71bc13af0d1c58c2e36e4.mp3",
+          "scriptJp": "narrator: 学校で男の学生と女の先生が話しています。男の学生はしゅくだいをどうやって出しますか。\nB: 先生、来週の月よう日は、びょういんに行きますから、学校を休みます。しゅくだいはどうしましょうか。\nA: ともだちにわたしてもらってもいいですし、メールで出してもいいですよ。\nB: じゃ、日よう日のよるまでに、メールで出します。\nA: はい、わかりました。\nnarrator: 男の学生はしゅくだいをどうやって出しますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ともだちにわたす"
+           },
+           {
+            "id": "c2",
+            "textJp": "先生のへやにもっていく"
+           },
+           {
+            "id": "c3",
+            "textJp": "火よう日にもっていく"
+           },
+           {
+            "id": "c4",
+            "textJp": "メールで出す"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 6,
+   "seed": 2263466637340694886,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Listening Practice",
+    "titleJp": "N5 聴解",
+    "sections": [
+     {
+      "id": "listening",
+      "label": "Listening",
+      "labelJp": "聴解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "choukai_1",
+        "number": 1,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_1_q1",
+          "number": 1,
+          "questionPromptJp": "男の人はどのクラスに入りますか。",
+          "audioSrc": "/exam-audio/1d58ed9101e6ff59fc82dc09.mp3",
+          "scriptJp": "narrator: りょうりの学校で女の人と男の人が話しています。男の人はどのクラスに入りますか。\nA: りょうりのクラスは、月よう日と水よう日と土よう日にあります。\nB: 月よう日は、しごとがおそくまであります。水よう日は何時からですか。\nA: 水よう日はよるの7時からです。土よう日は午前10時からです。\nB: 7時はちょっと……。土よう日の午前は、いつもテニスをしているんです。\nA: 土よう日は、午後2時からのクラスもありますよ。\nB: じゃ、それにします。\nnarrator: 男の人はどのクラスに入りますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "月よう日"
+           },
+           {
+            "id": "c2",
+            "textJp": "水よう日の7時"
+           },
+           {
+            "id": "c3",
+            "textJp": "土よう日の10時"
+           },
+           {
+            "id": "c4",
+            "textJp": "土よう日の2時"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_1_q2",
+          "number": 2,
+          "questionPromptJp": "男の人はどの出口から出ますか。",
+          "audioSrc": "/exam-audio/bcaa0bbc4ff756e971cfe1a1.mp3",
+          "scriptJp": "narrator: 駅で女の人と男の人が話しています。男の人はどの出口から出ますか。\nB: すみません。みどりとしょかんへ行きたいんですが、どの出口から出ますか。\nA: 北口から出ると、いちばんちかいですよ。でも、北口はかいだんしかありません。\nB: そうですか。大きいにもつがありますから、エレベーターがいいんですが……。\nA: じゃ、西口から出てください。西口にはエレベーターがあります。そこから左へ5分ぐらいです。\nB: わかりました。ありがとうございます。\nnarrator: 男の人はどの出口から出ますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "北口"
+           },
+           {
+            "id": "c2",
+            "textJp": "南口"
+           },
+           {
+            "id": "c3",
+            "textJp": "東口"
+           },
+           {
+            "id": "c4",
+            "textJp": "西口"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_1_q3",
+          "number": 3,
+          "questionPromptJp": "女の人はどうしますか。",
+          "audioSrc": "/exam-audio/7cd76c53ed0b7cf7f79fd066.mp3",
+          "scriptJp": "narrator: くつの店で女の人と店の人が話しています。女の人はどうしますか。\nA: すみません。この白いくつの23センチはありますか。\nB: もうしわけありません。白は今、24センチしかありません。くろならありますが……。\nA: 白がほしいんです。24センチは、ちょっと大きいですね。\nB: 来週の火よう日に、23センチの白が店に来ますよ。\nA: そうですか。じゃ、火よう日にまた来ます。\nnarrator: 女の人はどうしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "くろいくつを買う"
+           },
+           {
+            "id": "c2",
+            "textJp": "24センチの白を買う"
+           },
+           {
+            "id": "c3",
+            "textJp": "火よう日にまた来る"
+           },
+           {
+            "id": "c4",
+            "textJp": "ほかの店へ行く"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_1_q4",
+          "number": 4,
+          "questionPromptJp": "男の人は何をもっていきますか。",
+          "audioSrc": "/exam-audio/2d28e158d79e2e88fe538e5a.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人は何をもっていきますか。\nA: あしたから二日、山へ行きますね。にもつはもうできましたか。\nB: まだです。セーターはいりますか。\nA: 山の上はよるさむいですから、セーターはもっていってください。\nB: かさはどうですか。\nA: 天気よほうでは、二日ともいい天気だと言っていましたから、かさはいりませんよ。\nB: カメラはどうしましょう。\nA: カメラは、わたしがもっていきますよ。\nB: じゃ、ぼくはセーターだけですね。\nnarrator: 男の人は何をもっていきますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "セーター"
+           },
+           {
+            "id": "c2",
+            "textJp": "かさ"
+           },
+           {
+            "id": "c3",
+            "textJp": "カメラ"
+           },
+           {
+            "id": "c4",
+            "textJp": "セーターとカメラ"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_1_q5",
+          "number": 5,
+          "questionPromptJp": "男の人は何を買いに行きますか。",
+          "audioSrc": "/exam-audio/ad17e69d0917c750c587943c.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人は何を買いに行きますか。\nA: 今日のばんごはんは、ジョンさんが来ますから、サラダとスパゲッティをつくりましょう。\nB: いいですね。トマトのスパゲッティですか。\nA: あ、ジョンさんは、トマトがきらいなんですよ。\nB: じゃ、たまごとベーコンのスパゲッティはどうですか。たまごはありますが、ベーコンがありません。\nA: じゃ、ベーコンを買ってきてください。サラダのやさいは、ありますから。\nB: わかりました。\nnarrator: 男の人は何を買いに行きますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ベーコン"
+           },
+           {
+            "id": "c2",
+            "textJp": "トマト"
+           },
+           {
+            "id": "c3",
+            "textJp": "たまご"
+           },
+           {
+            "id": "c4",
+            "textJp": "やさい"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_1_q6",
+          "number": 6,
+          "questionPromptJp": "女の人はノートを何さつ買いましたか。",
+          "audioSrc": "/exam-audio/a9159a8914173e2ef8423d3a.mp3",
+          "scriptJp": "narrator: 本やで女の人と店の人が話しています。女の人はノートを何さつ買いましたか。\nA: すみません。このレシート、ノートが三さつになっていますが、わたしは二さつだけ買いました。\nB: そうですか。すみませんが、ふくろの中を見てもいいですか。\nA: はい。……あ、あおいノートが一さつ、ペンの下にありました。ごめんなさい、三さつでした。\nB: いいえ、だいじょうぶですよ。\nnarrator: 女の人はノートを何さつ買いましたか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "一さつ"
+           },
+           {
+            "id": "c2",
+            "textJp": "二さつ"
+           },
+           {
+            "id": "c3",
+            "textJp": "三さつ"
+           },
+           {
+            "id": "c4",
+            "textJp": "四さつ"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_1_q7",
+          "number": 7,
+          "questionPromptJp": "女の人は何時にめがねをとりに来ますか。",
+          "audioSrc": "/exam-audio/9ed618971313eac65794aeba.mp3",
+          "scriptJp": "narrator: めがねの店で女の人と店の人が話しています。女の人は何時にめがねをとりに来ますか。\nA: すみません。めがねがこわれてしまいました。なおりますか。\nB: はい。1時間ぐらいでできます。今2時半ですから、3時半ですね。\nA: 3時半は、ちょっと……。4時に来てもいいですか。\nB: はい、どうぞ。お金は1000円です。\nnarrator: 女の人は何時にめがねをとりに来ますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "2時半"
+           },
+           {
+            "id": "c2",
+            "textJp": "3時"
+           },
+           {
+            "id": "c3",
+            "textJp": "3時半"
+           },
+           {
+            "id": "c4",
+            "textJp": "4時"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "choukai_2",
+        "number": 2,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_2_q1",
+          "number": 1,
+          "questionPromptJp": "男の人はどこにかさをわすれましたか。",
+          "audioSrc": "/exam-audio/4f7be3c3b2e48f2e4d2c8688.mp3",
+          "scriptJp": "narrator: デパートのうけつけで女の人と男の人が話しています。男の人はどこにかさをわすれましたか。\nB: すみません。かさをわすれてしまったんですが……。\nA: どこでわすれましたか。\nB: 3がいのレストランだとおもいます。\nA: 3がいのレストランからは、さっきかさが一本とどきましたが、あかいかさです。\nB: いいえ、ぼくのはあおいかさです。……あ、そうだ。5かいの本やで本を見ていたとき、かさをおきました。\nA: 5かいですね。今、電話してみます。\nnarrator: 男の人はどこにかさをわすれましたか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "3がいのレストラン"
+           },
+           {
+            "id": "c2",
+            "textJp": "5かいの本や"
+           },
+           {
+            "id": "c3",
+            "textJp": "デパートの入り口"
+           },
+           {
+            "id": "c4",
+            "textJp": "5かいのレストラン"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_2_q2",
+          "number": 2,
+          "questionPromptJp": "女の人はどうして月よう日のクラスに入りませんか。",
+          "audioSrc": "/exam-audio/f3ff9f609e6a8b2fac6144c0.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。女の人はどうして月よう日のクラスに入りませんか。\nB: えいごのクラスは、月よう日のよると、土よう日の午前があります。\nA: 月よう日のよるは、子どもとうちにいなければならないんです。\nB: そうですか。じゃ、土よう日の午前のクラスはどうですか。\nA: 土よう日は、おっとが子どもとあそんでくれますから、だいじょうぶです。土よう日にします。\nnarrator: 女の人はどうして月よう日のクラスに入りませんか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "しごとがあるから"
+           },
+           {
+            "id": "c2",
+            "textJp": "クラスの人が多いから"
+           },
+           {
+            "id": "c3",
+            "textJp": "子どもといなければならないから"
+           },
+           {
+            "id": "c4",
+            "textJp": "よるはねむいから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_2_q3",
+          "number": 3,
+          "questionPromptJp": "二人はのこったカレーをどうしますか。",
+          "audioSrc": "/exam-audio/dec2ee15779a072ae811b26a.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。二人はのこったカレーをどうしますか。\nA: カレーがたくさんのこりましたね。\nB: あした、また食べましょうか。\nA: あしたのよるは、二人とも出かけますよ。\nB: そうでしたね。じゃ、となりのスミスさんにあげましょうか。スミスさんはカレーが大すきですよ。\nA: いいですね。今からもっていきましょう。\nnarrator: 二人はのこったカレーをどうしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "あした食べる"
+           },
+           {
+            "id": "c2",
+            "textJp": "すてる"
+           },
+           {
+            "id": "c3",
+            "textJp": "となりの人にあげる"
+           },
+           {
+            "id": "c4",
+            "textJp": "男の人がもってかえる"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_2_q4",
+          "number": 4,
+          "questionPromptJp": "今日、店は何時までですか。",
+          "audioSrc": "/exam-audio/b257556f2931c161611a30d0.mp3",
+          "scriptJp": "narrator: 女の人が店に電話しています。今日、店は何時までですか。\nA: もしもし、そちらは何時まであいていますか。\nB: 毎日、よる8時までです。日よう日は6時までです。\nA: 今日は土よう日ですから、8時までですね。\nB: あ、すみません。今日は、店の中のそうじがありますから、7時までなんです。\nA: わかりました。じゃ、それまでに行きます。\nnarrator: 今日、店は何時までですか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "6時"
+           },
+           {
+            "id": "c2",
+            "textJp": "7時"
+           },
+           {
+            "id": "c3",
+            "textJp": "8時"
+           },
+           {
+            "id": "c4",
+            "textJp": "9時"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_2_q5",
+          "number": 5,
+          "questionPromptJp": "レストランは今月、何よう日が休みですか。",
+          "audioSrc": "/exam-audio/a47d2c8accd46ff32ee57356.mp3",
+          "scriptJp": "narrator: 女の人がレストランに電話しています。レストランは今月、何よう日が休みですか。\nA: もしもし、そちらのレストランは、何よう日が休みですか。\nB: いつもは水よう日です。でも、今月は水よう日もあいています。そのかわり、木よう日が休みです。\nA: 今月は木よう日だけが休みですね。わかりました。\nnarrator: レストランは今月、何よう日が休みですか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "水よう日"
+           },
+           {
+            "id": "c2",
+            "textJp": "木よう日"
+           },
+           {
+            "id": "c3",
+            "textJp": "水よう日と木よう日"
+           },
+           {
+            "id": "c4",
+            "textJp": "休みはありません"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_2_q6",
+          "number": 6,
+          "questionPromptJp": "女の人はどうしてうしろのせきがいいですか。",
+          "audioSrc": "/exam-audio/3df3d2cbfcb7549854b9db51.mp3",
+          "scriptJp": "narrator: えいがかんで女の人と男の人が話しています。女の人はどうしてうしろのせきがいいですか。\nB: まえのほうのせきがいいですよ。よく見えますから。\nA: このえいがかんは、スクリーンがとても大きいんです。まえだと、くびがいたくなりますよ。\nB: そうですか。じゃ、うしろのほうにしましょう。\nnarrator: 女の人はどうしてうしろのせきがいいですか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "スクリーンが大きいから"
+           },
+           {
+            "id": "c2",
+            "textJp": "まえのせきが高いから"
+           },
+           {
+            "id": "c3",
+            "textJp": "出口にちかいから"
+           },
+           {
+            "id": "c4",
+            "textJp": "まえはうるさいから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 7,
+   "seed": 8062257722413699099,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Listening Practice",
+    "titleJp": "N5 聴解",
+    "sections": [
+     {
+      "id": "listening",
+      "label": "Listening",
+      "labelJp": "聴解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "choukai_1",
+        "number": 1,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_1_q1",
+          "number": 1,
+          "questionPromptJp": "男の人は日よう日に何をもっていきますか。",
+          "audioSrc": "/exam-audio/942a468f8c34b73fee52547c.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人は日よう日に何をもっていきますか。\nA: 大川さん、日よう日に、ソファを新しいアパートにもっていきたいんです。手つだってくれませんか。\nB: いいですよ。ぼくの車でもっていきましょうか。\nA: ありがとう。でも、ソファは大きいですから、車に入らないとおもいます。トラックをかりました。\nB: そうですか。じゃ、何かもっていくものはありますか。ひもはいりますか。\nA: ひもは、トラックといっしょにかりましたから、いりません。日よう日はあついですから、タオルをもってきてください。\nB: わかりました。\nnarrator: 男の人は日よう日に何をもっていきますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "車"
+           },
+           {
+            "id": "c2",
+            "textJp": "トラック"
+           },
+           {
+            "id": "c3",
+            "textJp": "タオル"
+           },
+           {
+            "id": "c4",
+            "textJp": "ひも"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_1_q2",
+          "number": 2,
+          "questionPromptJp": "二人はどのしゃしんをつかいますか。",
+          "audioSrc": "/exam-audio/77575638011fbf4bb8dee752.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。二人はどのしゃしんをつかいますか。\nA: 先生にあげるカードに、クラスのしゃしんを一まい入れましょう。\nB: このしゃしんはどうですか。みんなでうみに行った時のです。\nA: いいですね。でも、先生がいませんね。\nB: じゃ、これは？先生とみんなで、学校の入り口でとりました。\nA: あ、目をとじている人がいますよ。こっちの、きょうしつでとったのはどうですか。\nB: これは、先生もみんなもよくわらっていますね。これにしましょう。\nnarrator: 二人はどのしゃしんをつかいますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "うみのしゃしん"
+           },
+           {
+            "id": "c2",
+            "textJp": "学校の入り口のしゃしん"
+           },
+           {
+            "id": "c3",
+            "textJp": "きょうしつのしゃしん"
+           },
+           {
+            "id": "c4",
+            "textJp": "先生だけのしゃしん"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_1_q3",
+          "number": 3,
+          "questionPromptJp": "男の学生はどのクラスに入りますか。",
+          "audioSrc": "/exam-audio/141449d50bd4180d7361c316.mp3",
+          "scriptJp": "narrator: 日本語の学校で女の先生と男の学生が話しています。男の学生はどのクラスに入りますか。\nA: リーさん、来月のクラスはどれにしますか。かんじと、会話と、さくぶんのクラスがあります。\nB: 会話は、アルバイトで毎日たくさん話していますから、だいじょうぶです。\nA: じゃ、かんじのクラスですか。\nB: かんじは、毎日うちで一人でべんきょうしています。さくぶんがいちばんへたですから、さくぶんのクラスにします。\nA: わかりました。\nnarrator: 男の学生はどのクラスに入りますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "かんじのクラス"
+           },
+           {
+            "id": "c2",
+            "textJp": "会話のクラス"
+           },
+           {
+            "id": "c3",
+            "textJp": "さくぶんのクラス"
+           },
+           {
+            "id": "c4",
+            "textJp": "かんじと会話のクラス"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_1_q4",
+          "number": 4,
+          "questionPromptJp": "男の人はクラブで何をしますか。",
+          "audioSrc": "/exam-audio/756a7e2a7fb8bc22a612dee9.mp3",
+          "scriptJp": "narrator: 大学で女の人と男の人が話しています。男の人はクラブで何をしますか。\nA: 山川さん、おんがくのクラブに入ったんですね。\nB: はい。ギターをしたかったんですが、ギターはもう人がたくさんいるんです。\nA: じゃ、何をしますか。ピアノですか。\nB: ピアノは小さい時からしていますから、何か新しいものがいいです。ドラムにします。\nA: いいですね。\nnarrator: 男の人はクラブで何をしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ギター"
+           },
+           {
+            "id": "c2",
+            "textJp": "ピアノ"
+           },
+           {
+            "id": "c3",
+            "textJp": "ドラム"
+           },
+           {
+            "id": "c4",
+            "textJp": "うた"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_1_q5",
+          "number": 5,
+          "questionPromptJp": "男の人はいつびょういんへ行きますか。",
+          "audioSrc": "/exam-audio/d236f5e44a40233078adb6f7.mp3",
+          "scriptJp": "narrator: 男の人がびょういんに電話しています。男の人はいつびょういんへ行きますか。\nB: もしもし、あしたの午前に、みてもらいたいんですが。\nA: すみません。あしたの午前は、もういっぱいです。午後3時はどうですか。\nB: 午後は、しごとが……。あさってはどうですか。\nA: あさってなら、午前10時と11時があいています。\nB: うーん……。あ、あしたは午後から休みでした。じゃ、あしたの3時でおねがいします。\nA: はい、わかりました。\nnarrator: 男の人はいつびょういんへ行きますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "あしたの3時"
+           },
+           {
+            "id": "c2",
+            "textJp": "あしたの午前"
+           },
+           {
+            "id": "c3",
+            "textJp": "あさっての10時"
+           },
+           {
+            "id": "c4",
+            "textJp": "あさっての11時"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_1_q6",
+          "number": 6,
+          "questionPromptJp": "男の人はどのクラスに入りますか。",
+          "audioSrc": "/exam-audio/e2fd64ac87a1362b9eecc33c.mp3",
+          "scriptJp": "narrator: ギターの学校で女の人と男の人が話しています。男の人はどのクラスに入りますか。\nA: ギターのクラスは、グループのクラスと一人のクラスがあります。グループは一か月4000円、一人のクラスは8000円です。\nB: グループのクラスはいつですか。\nA: 毎週、火よう日のよる7時からです。\nB: 火よう日は、しごとでおそくなる日が多いんです。一人のクラスは？\nA: 一人のクラスは、すきな日にできますよ。\nB: ちょっと高いですが、一人のクラスにします。\nnarrator: 男の人はどのクラスに入りますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "グループのクラス"
+           },
+           {
+            "id": "c2",
+            "textJp": "一人のクラス"
+           },
+           {
+            "id": "c3",
+            "textJp": "子どものクラス"
+           },
+           {
+            "id": "c4",
+            "textJp": "火よう日のクラス"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_1_q7",
+          "number": 7,
+          "questionPromptJp": "男の人はこれからかばんに何を入れますか。",
+          "audioSrc": "/exam-audio/e8f4ac220a1eb1c6fab763fc.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人はこれからかばんに何を入れますか。\nA: あしたから二日、おおさかの会社へ行きますね。にもつは、もうできましたか。\nB: はい。スーツとシャツは入れました。\nA: パソコンは？\nB: パソコンは、むこうの会社のをつかいますから、いりません。\nA: あしたは、おおさかは雨だそうですよ。\nB: そうですか。じゃ、かさを入れます。\nnarrator: 男の人はこれからかばんに何を入れますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "スーツ"
+           },
+           {
+            "id": "c2",
+            "textJp": "シャツ"
+           },
+           {
+            "id": "c3",
+            "textJp": "パソコン"
+           },
+           {
+            "id": "c4",
+            "textJp": "かさ"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         }
+        ]
+       },
+       {
+        "id": "choukai_2",
+        "number": 2,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_2_q1",
+          "number": 1,
+          "questionPromptJp": "女の人はどうしてこの店で本を買いませんか。",
+          "audioSrc": "/exam-audio/fff56107a08a0e23fa5b7731.mp3",
+          "scriptJp": "narrator: 本やで女の人と店の人が話しています。女の人はどうしてこの店で本を買いませんか。\nA: すみません。「やさしい日本のうた」という本はありますか。\nB: すみません、今、ありません。たのむと、一週間ぐらいでとどきますが……。\nA: 一週間ですか。あさってのじゅぎょうでつかうんです。\nB: そうですか。駅のまえの大きい本やには、あるとおもいますよ。\nA: わかりました。じゃ、そこへ行ってみます。\nnarrator: 女の人はどうしてこの店で本を買いませんか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "本が高いから"
+           },
+           {
+            "id": "c2",
+            "textJp": "店がもうしまるから"
+           },
+           {
+            "id": "c3",
+            "textJp": "本がきらいだから"
+           },
+           {
+            "id": "c4",
+            "textJp": "とどくのがおそいから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_2_q2",
+          "number": 2,
+          "questionPromptJp": "女の人はいつかさをとりに来ますか。",
+          "audioSrc": "/exam-audio/f127b7758b314459a0af7578.mp3",
+          "scriptJp": "narrator: 駅で女の人と駅の人が話しています。女の人はいつかさをとりに来ますか。\nA: すみません。きのう、電車の中にかさをわすれてしまいました。\nB: 何時ごろの電車ですか。\nA: よるの8時ごろです。みどりのかさです。\nB: ……みどりのかさは二本とどいていますね。名前があるのと、ないのと。\nA: 名前は書いていません。\nB: じゃ、名前がないほうですね。でも、そのかさは、今、となりの駅にあるんです。あした、ここにとどきます。\nA: そうですか。じゃ、あしたまた来ます。\nnarrator: 女の人はいつかさをとりに来ますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "あした"
+           },
+           {
+            "id": "c2",
+            "textJp": "今日"
+           },
+           {
+            "id": "c3",
+            "textJp": "あさって"
+           },
+           {
+            "id": "c4",
+            "textJp": "来週"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_2_q3",
+          "number": 3,
+          "questionPromptJp": "男の人はあした何いろのネクタイをしますか。",
+          "audioSrc": "/exam-audio/3e769cda84e5af61c4113cab.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人はあした何いろのネクタイをしますか。\nB: あしたの会社のしきに、このあかいネクタイをしていこうとおもいます。\nA: あかいネクタイは、しきには、あまりよくないですよ。\nB: じゃ、くろはどうですか。\nA: くろもちょっと……。あおいネクタイがいいとおもいますよ。\nB: わかりました。じゃ、あおにします。\nnarrator: 男の人はあした何いろのネクタイをしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "あお"
+           },
+           {
+            "id": "c2",
+            "textJp": "あか"
+           },
+           {
+            "id": "c3",
+            "textJp": "くろ"
+           },
+           {
+            "id": "c4",
+            "textJp": "きいろ"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_2_q4",
+          "number": 4,
+          "questionPromptJp": "女の人はどうしてドライヤーをもっていきませんか。",
+          "audioSrc": "/exam-audio/7ea2ff942491bc457de4c6d4.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。女の人はどうしてドライヤーをもっていきませんか。\nA: あしたから二日のりょこう、ドライヤーもかばんに入れたほうがいいですか。\nB: ホテルのへやにありますよ。きのう、電話で聞きました。\nA: そうですか。じゃ、もっていきません。かばんがかるくなって、よかったです。\nnarrator: 女の人はどうしてドライヤーをもっていきませんか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ホテルのへやにあるから"
+           },
+           {
+            "id": "c2",
+            "textJp": "おもいから"
+           },
+           {
+            "id": "c3",
+            "textJp": "こわれているから"
+           },
+           {
+            "id": "c4",
+            "textJp": "つかわないから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_2_q5",
+          "number": 5,
+          "questionPromptJp": "男の人はどのせきにすわりますか。",
+          "audioSrc": "/exam-audio/3d424a48f5ba845b33d4d783.mp3",
+          "scriptJp": "narrator: えいがかんで女の人と男の人が話しています。男の人はどのせきにすわりますか。\nA: わたしたちのせきは、Dの7と8ですね。\nB: はい。どちらにすわりますか。\nA: わたしは7ばんにします。はしのほうがすきなんです。\nB: じゃ、ぼくは8ばんですね。\nA: あ、ちょっとまってください。このきっぷ、Dじゃありません。Eですよ。\nB: ほんとうだ。じゃ、Eのほうですね。\nnarrator: 男の人はどのせきにすわりますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "Dの7"
+           },
+           {
+            "id": "c2",
+            "textJp": "Dの8"
+           },
+           {
+            "id": "c3",
+            "textJp": "Eの7"
+           },
+           {
+            "id": "c4",
+            "textJp": "Eの8"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_2_q6",
+          "number": 6,
+          "questionPromptJp": "二人はどうして駅のまえのレストランに行きますか。",
+          "audioSrc": "/exam-audio/0853471f603a199fdc80f719.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。二人はどうして駅のまえのレストランに行きますか。\nA: 駅のまえのレストランと、ホテルの中のレストラン、どちらにしますか。\nB: ホテルのほうがおいしいですが、高いですね。\nA: そうですね。今月はあまりお金がありませんから、駅のまえにしましょう。\nB: そうしましょう。\nnarrator: 二人はどうして駅のまえのレストランに行きますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "やすいから"
+           },
+           {
+            "id": "c2",
+            "textJp": "おいしいから"
+           },
+           {
+            "id": "c3",
+            "textJp": "ちかいから"
+           },
+           {
+            "id": "c4",
+            "textJp": "すいているから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 8,
+   "seed": 4239867207818437330,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Listening Practice",
+    "titleJp": "N5 聴解",
+    "sections": [
+     {
+      "id": "listening",
+      "label": "Listening",
+      "labelJp": "聴解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "choukai_1",
+        "number": 1,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_1_q1",
+          "number": 1,
+          "questionPromptJp": "女の人はこのあと何をしますか。",
+          "audioSrc": "/exam-audio/93819be7461b72da31b4a9f6.mp3",
+          "scriptJp": "narrator: アパートで女の人と男の人が話しています。女の人はこのあと何をしますか。\nA: すみません。あした、わたしのにもつがとどきますが、わたしはるすなんです。もらっておいてくれませんか。\nB: いいですよ。何時ごろとどきますか。\nA: 午後2時から4時のあいだです。\nB: うーん、3時まではうちにいますが、そのあとは、かいものに行きます。\nA: そうですか。じゃ、ゆうびんきょくに電話して、午前にもってきてもらいます。\nB: 午前なら、ずっとうちにいますから、だいじょうぶですよ。\nnarrator: 女の人はこのあと何をしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "かいものに行く"
+           },
+           {
+            "id": "c2",
+            "textJp": "ゆうびんきょくに電話する"
+           },
+           {
+            "id": "c3",
+            "textJp": "男の人のうちに行く"
+           },
+           {
+            "id": "c4",
+            "textJp": "にもつをとりに行く"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_1_q2",
+          "number": 2,
+          "questionPromptJp": "女の人はこれから何を買いに行きますか。",
+          "audioSrc": "/exam-audio/3787b6cdc9057d74d38e3297.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。女の人はこれから何を買いに行きますか。\nA: あしたから二日、おんせんに行きます。タオルはもっていったほうがいいですか。\nB: ホテルにタオルがありますから、いりませんよ。\nA: そうですか。はブラシは？\nB: はブラシも、ホテルにあるとおもいます。でも、パジャマはないですよ。\nA: パジャマですか。わたしのは古いですから、新しいのを買いに行きます。\nnarrator: 女の人はこれから何を買いに行きますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "タオル"
+           },
+           {
+            "id": "c2",
+            "textJp": "はブラシ"
+           },
+           {
+            "id": "c3",
+            "textJp": "パジャマ"
+           },
+           {
+            "id": "c4",
+            "textJp": "シャンプー"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_1_q3",
+          "number": 3,
+          "questionPromptJp": "子どもはどのクラスに入りますか。",
+          "audioSrc": "/exam-audio/065e2ec0b785c99cd7acd8de.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。子どもはどのクラスに入りますか。\nA: すみません。子どものダンスのクラスに入りたいんですが。\nB: お子さんは何さいですか。\nA: 七さいです。ダンスははじめてなんです。\nB: そうですか。七さいの子は、火よう日のクラスですが、はじめての子は、土よう日のクラスがいいですよ。土よう日は先生が二人いますから。\nA: じゃ、土よう日のクラスにします。\nnarrator: 子どもはどのクラスに入りますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "月よう日のクラス"
+           },
+           {
+            "id": "c2",
+            "textJp": "火よう日のクラス"
+           },
+           {
+            "id": "c3",
+            "textJp": "木よう日のクラス"
+           },
+           {
+            "id": "c4",
+            "textJp": "土よう日のクラス"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_1_q4",
+          "number": 4,
+          "questionPromptJp": "女の人はいつかばんをとりに来ますか。",
+          "audioSrc": "/exam-audio/2bec944ba6cf297d339c7415.mp3",
+          "scriptJp": "narrator: かばんの店で女の人と店の人が話しています。女の人はいつかばんをとりに来ますか。\nA: すみません。このかばん、なおしてもらえますか。\nB: はい。……ああ、ここですね。1500円で、三日かかります。今日は月よう日ですから、木よう日にできますよ。\nA: 木よう日は、ちょっと来ることができません。金よう日はどうですか。\nB: すみません。金よう日は店が休みなんです。土よう日はあいていますよ。\nA: じゃ、土よう日に来ます。\nnarrator: 女の人はいつかばんをとりに来ますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "水よう日"
+           },
+           {
+            "id": "c2",
+            "textJp": "木よう日"
+           },
+           {
+            "id": "c3",
+            "textJp": "金よう日"
+           },
+           {
+            "id": "c4",
+            "textJp": "土よう日"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_1_q5",
+          "number": 5,
+          "questionPromptJp": "女の人はけっこんしきに何をきていきますか。",
+          "audioSrc": "/exam-audio/4d9ba2ffee927fc0abea0ecc.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。女の人はけっこんしきに何をきていきますか。\nA: 来月、ともだちのけっこんしきがあるんです。何をきていくか、まだきめていません。\nB: 白いドレスはどうですか。\nA: けっこんしきで白はだめですよ。けっこんする人のいろですから。\nB: そうですか。じゃ、このまえ買ったあおいドレスは？\nA: それもいいですね。でも、母は、おばあさんのきものがいいと言っているんです。\nB: きものはいいですね。きっときれいですよ。\nA: そうですね。じゃ、そうします。\nnarrator: 女の人はけっこんしきに何をきていきますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "きもの"
+           },
+           {
+            "id": "c2",
+            "textJp": "白いドレス"
+           },
+           {
+            "id": "c3",
+            "textJp": "あおいドレス"
+           },
+           {
+            "id": "c4",
+            "textJp": "くろいスーツ"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_1_q6",
+          "number": 6,
+          "questionPromptJp": "男の学生はいつまでにしゅくだいを出しますか。",
+          "audioSrc": "/exam-audio/c97aba7c91cdf1b120d70481.mp3",
+          "scriptJp": "narrator: 大学で女の先生と男の学生が話しています。男の学生はいつまでにしゅくだいを出しますか。\nB: 先生、すみません。しゅくだいは金よう日までですか。\nA: はい、金よう日の午後5時までです。\nB: あのう、木よう日から日よう日まで、国から父と母が来るんです。月よう日に出してもいいですか。\nA: そうですか。じゃ、月よう日のあさ9時までに出してください。\nB: ありがとうございます。\nnarrator: 男の学生はいつまでにしゅくだいを出しますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "金よう日の午後5時"
+           },
+           {
+            "id": "c2",
+            "textJp": "月よう日のあさ9時"
+           },
+           {
+            "id": "c3",
+            "textJp": "月よう日の午後5時"
+           },
+           {
+            "id": "c4",
+            "textJp": "木よう日のあさ9時"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_1_q7",
+          "number": 7,
+          "questionPromptJp": "男の人はピクニックに何をもっていきますか。",
+          "audioSrc": "/exam-audio/ab15f6413ba445fbc3834f89.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人はピクニックに何をもっていきますか。\nA: 日よう日のピクニック、何をもっていきましょうか。わたしはおにぎりをつくります。\nB: じゃ、ぼくは飲みものをもっていきます。\nA: 飲みものは、すずきさんがもってくると言っていましたよ。\nB: そうですか。じゃ、くだものはどうですか。\nA: いいですね。あ、すわるシートもいりますね。\nB: シートは、うちにないんです。\nA: じゃ、シートはわたしがもっていきます。\nB: じゃ、ぼくはくだものだけですね。\nnarrator: 男の人はピクニックに何をもっていきますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "くだもの"
+           },
+           {
+            "id": "c2",
+            "textJp": "おにぎり"
+           },
+           {
+            "id": "c3",
+            "textJp": "飲みもの"
+           },
+           {
+            "id": "c4",
+            "textJp": "シート"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         }
+        ]
+       },
+       {
+        "id": "choukai_2",
+        "number": 2,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_2_q1",
+          "number": 1,
+          "questionPromptJp": "女の学生はどこをそうじしますか。",
+          "audioSrc": "/exam-audio/dcbfbc1d6e5887bb5c4547e0.mp3",
+          "scriptJp": "narrator: 学校で女の学生と男の学生が話しています。女の学生はどこをそうじしますか。\nA: そうじ、どうしましょうか。わたしがゆかをしますから、山本くんは、まどをおねがいします。\nB: まどは、きのうぼくがしました。今日は、つくえをふきます。\nA: じゃ、まどはわたしがします。ゆかは木下さんにおねがいしましょう。\nB: そうですね。\nnarrator: 女の学生はどこをそうじしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "まど"
+           },
+           {
+            "id": "c2",
+            "textJp": "ゆか"
+           },
+           {
+            "id": "c3",
+            "textJp": "つくえ"
+           },
+           {
+            "id": "c4",
+            "textJp": "こくばん"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_2_q2",
+          "number": 2,
+          "questionPromptJp": "女の人はどうしてしゃしんのクラブに入りますか。",
+          "audioSrc": "/exam-audio/442db53869edb4628f2163ed.mp3",
+          "scriptJp": "narrator: 大学で男の人と女の人が話しています。女の人はどうしてしゃしんのクラブに入りますか。\nB: どのクラブに入りますか。\nA: しゃしんのクラブに入ります。\nB: しゃしんが大すきなんですか。\nA: いいえ、まだよくわかりません。でも、父が新しいカメラをくれたんです。それで、しゃしんをならいたいとおもいました。\nnarrator: 女の人はどうしてしゃしんのクラブに入りますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "しゃしんが大すきだから"
+           },
+           {
+            "id": "c2",
+            "textJp": "ともだちがいるから"
+           },
+           {
+            "id": "c3",
+            "textJp": "父が入ってと言ったから"
+           },
+           {
+            "id": "c4",
+            "textJp": "父にカメラをもらったから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_2_q3",
+          "number": 3,
+          "questionPromptJp": "プールは今月、何よう日が休みですか。",
+          "audioSrc": "/exam-audio/c711f08aa12ec1614c27d3db.mp3",
+          "scriptJp": "narrator: プールで男の人と女の人が話しています。プールは今月、何よう日が休みですか。\nB: すみません。このプールは、毎日あいていますか。\nA: いいえ、月よう日が休みです。それから、今月は、そうじがありますから、木よう日も休みです。\nB: 水よう日はあいていますか。\nA: はい、水よう日はあいていますよ。\nnarrator: プールは今月、何よう日が休みですか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "月よう日だけ"
+           },
+           {
+            "id": "c2",
+            "textJp": "木よう日だけ"
+           },
+           {
+            "id": "c3",
+            "textJp": "月よう日と水よう日"
+           },
+           {
+            "id": "c4",
+            "textJp": "月よう日と木よう日"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_2_q4",
+          "number": 4,
+          "questionPromptJp": "男の人は何を買いに行きますか。",
+          "audioSrc": "/exam-audio/997772f38cbb2e63f138eca9.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人は何を買いに行きますか。\nA: 来週のキャンプ、テントはありますか。\nB: テントは、ともだちにかりました。\nA: よるはくらいですから、ライトもいりますね。\nB: ライトはうちにあります。でも、でんちがないんです。\nA: じゃ、でんちを買ってきてください。\nB: わかりました。\nnarrator: 男の人は何を買いに行きますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "でんち"
+           },
+           {
+            "id": "c2",
+            "textJp": "テント"
+           },
+           {
+            "id": "c3",
+            "textJp": "ライト"
+           },
+           {
+            "id": "c4",
+            "textJp": "ふく"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_2_q5",
+          "number": 5,
+          "questionPromptJp": "二人はいくらぐらいのプレゼントを買いますか。",
+          "audioSrc": "/exam-audio/10e82dd270e7af66f7d6c432.mp3",
+          "scriptJp": "narrator: 会社で女の人と男の人が話しています。二人はいくらぐらいのプレゼントを買いますか。\nA: 中山さんへのプレゼント、一人いくら出しましょうか。\nB: 一人1000円はどうですか。8人ですから、8000円ですね。\nA: ちょっと高いですね。一人500円にしませんか。\nB: そうですね。じゃ、4000円ぐらいのものを買いましょう。\nnarrator: 二人はいくらぐらいのプレゼントを買いますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "500円"
+           },
+           {
+            "id": "c2",
+            "textJp": "4000円"
+           },
+           {
+            "id": "c3",
+            "textJp": "5000円"
+           },
+           {
+            "id": "c4",
+            "textJp": "8000円"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_2_q6",
+          "number": 6,
+          "questionPromptJp": "男の人はどのセーターを買いますか。",
+          "audioSrc": "/exam-audio/0107bd2fe090b187a429c708.mp3",
+          "scriptJp": "narrator: 店で男の人と店の人が話しています。男の人はどのセーターを買いますか。\nB: すみません。このくろいセーターのLはありますか。\nA: はい、こちらです。\nB: ……ちょっと大きいですね。くろのMはありますか。\nA: すみません。Mは、きいろとグレーしかありません。\nB: そうですか。きいろはちょっと……。じゃ、グレーにします。\nnarrator: 男の人はどのセーターを買いますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "くろのL"
+           },
+           {
+            "id": "c2",
+            "textJp": "くろのM"
+           },
+           {
+            "id": "c3",
+            "textJp": "きいろのM"
+           },
+           {
+            "id": "c4",
+            "textJp": "グレーのM"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 9,
+   "seed": 4537322619367299605,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Listening Practice",
+    "titleJp": "N5 聴解",
+    "sections": [
+     {
+      "id": "listening",
+      "label": "Listening",
+      "labelJp": "聴解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "choukai_1",
+        "number": 1,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_1_q1",
+          "number": 1,
+          "questionPromptJp": "男の人はいくらはらいますか。",
+          "audioSrc": "/exam-audio/d8cec641dee2cd92b57313ad.mp3",
+          "scriptJp": "narrator: カメラの店で男の人と店の人が話しています。男の人はいくらはらいますか。\nB: すみません。このカメラ、なおりますか。\nA: ちょっと見せてください。……そとだけなら五千円ですが、これは中がわるいですから、一万円かかります。\nB: 一万円ですか。高いですね。\nA: 新しいカメラは、二万円からありますよ。\nB: うーん、このカメラは父にもらったたいせつなものですから……。なおしてください。\nA: わかりました。二週間ぐらいでできます。\nnarrator: 男の人はいくらはらいますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "五千円"
+           },
+           {
+            "id": "c2",
+            "textJp": "一万円"
+           },
+           {
+            "id": "c3",
+            "textJp": "二万円"
+           },
+           {
+            "id": "c4",
+            "textJp": "三万円"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_1_q2",
+          "number": 2,
+          "questionPromptJp": "女の人は何ばんのバスにのりますか。",
+          "audioSrc": "/exam-audio/6cfaa310072366072d5fdf2e.mp3",
+          "scriptJp": "narrator: 駅のまえで女の人と男の人が話しています。女の人は何ばんのバスにのりますか。\nA: すみません。大学びょういんへ行きたいんですが、どのバスにのりますか。\nB: 大学びょういんなら、3ばんと5ばんのバスが行きますよ。\nA: どちらがはやいですか。\nB: 3ばんのほうがはやいですが、今日は日よう日ですから、3ばんのバスは来ませんよ。\nA: じゃ、5ばんですね。ありがとうございます。\nnarrator: 女の人は何ばんのバスにのりますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "1ばん"
+           },
+           {
+            "id": "c2",
+            "textJp": "3ばん"
+           },
+           {
+            "id": "c3",
+            "textJp": "5ばん"
+           },
+           {
+            "id": "c4",
+            "textJp": "7ばん"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_1_q3",
+          "number": 3,
+          "questionPromptJp": "男の人は何時に女の人のうちへ行きますか。",
+          "audioSrc": "/exam-audio/467630417b06ecd0cf9322d6.mp3",
+          "scriptJp": "narrator: 女の人と男の人が電話で話しています。男の人は何時に女の人のうちへ行きますか。\nA: もしもし、北川です。あしたの土よう日、本だなを2かいにもっていきたいんですが、手つだってくれませんか。\nB: いいですよ。何時がいいですか。\nA: 午前10時はどうですか。\nB: 午前中は、ちょっとようじがあるんです。午後1時からならだいじょうぶです。\nA: 1時は、わたしがまだ出かけています。3時はどうですか。\nB: 3時ですね。いいですよ。\nA: ありがとう。じゃ、まっています。\nnarrator: 男の人は何時に女の人のうちへ行きますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "午前10時"
+           },
+           {
+            "id": "c2",
+            "textJp": "午後1時"
+           },
+           {
+            "id": "c3",
+            "textJp": "午後2時"
+           },
+           {
+            "id": "c4",
+            "textJp": "午後3時"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_1_q4",
+          "number": 4,
+          "questionPromptJp": "男の人はこのあとまず何をしますか。",
+          "audioSrc": "/exam-audio/823b97bb4facf24217df3113.mp3",
+          "scriptJp": "narrator: プールで女の人と男の人が話しています。男の人はこのあとまず何をしますか。\nB: すみません。子どもといっしょに来ました。子どもは一人でプールに入ってもいいですか。\nA: お子さんは何さいですか。\nB: 8さいです。\nA: 10さいまでの子どもは、大人といっしょに入ってください。\nB: そうですか。こまったな。今日はぼくの水ぎをもってきませんでした。\nA: 水ぎは、あちらの店でかりることができますよ。\nB: そうですか。じゃ、かりて、子どもといっしょに入ります。\nnarrator: 男の人はこのあとまず何をしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "水ぎを買う"
+           },
+           {
+            "id": "c2",
+            "textJp": "水ぎをかりる"
+           },
+           {
+            "id": "c3",
+            "textJp": "子どもをまつ"
+           },
+           {
+            "id": "c4",
+            "textJp": "うちへかえる"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_1_q5",
+          "number": 5,
+          "questionPromptJp": "男の人はこれからどうしますか。",
+          "audioSrc": "/exam-audio/c0f3c054adf361409834bd47.mp3",
+          "scriptJp": "narrator: 男の人と女の人が電話で話しています。男の人はこれからどうしますか。\nB: もしもし、今どこですか。もう10時ですよ。コンサートは10時半からですよ。\nA: ごめんなさい。今、おきたんです。これから行くと、11時ごろになります。\nB: えっ、そうですか。じゃ、入り口でまっていましょうか。\nA: いいえ、先に入っていてください。わたしはあとから一人で入ります。\nB: わかりました。じゃ、先に入っています。\nnarrator: 男の人はこれからどうしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "入り口でまつ"
+           },
+           {
+            "id": "c2",
+            "textJp": "先に入る"
+           },
+           {
+            "id": "c3",
+            "textJp": "女の人のうちへ行く"
+           },
+           {
+            "id": "c4",
+            "textJp": "うちへかえる"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_1_q6",
+          "number": 6,
+          "questionPromptJp": "男の人はパーティーでどこにすわりますか。",
+          "audioSrc": "/exam-audio/bbfe7751d0be980a4a0bc74a.mp3",
+          "scriptJp": "narrator: 会社で女の人と男の人が話しています。男の人はパーティーでどこにすわりますか。\nA: パーティーのせき、どうしましょうか。社長はまん中ですね。\nB: はい。ぼくは、入り口のちかくにすわります。飲みものを出しますから。\nA: 入り口のちかくは、わたしがすわります。りょうりを出しますから。\nB: じゃ、ぼくは、まどのそばですか。\nA: まどのそばは、いとうさんです。高山さんは、社長のとなりにすわってください。社長が、高山さんの話を聞きたいと言っていましたよ。\nB: わかりました。\nnarrator: 男の人はパーティーでどこにすわりますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "社長のとなり"
+           },
+           {
+            "id": "c2",
+            "textJp": "まん中"
+           },
+           {
+            "id": "c3",
+            "textJp": "入り口のちかく"
+           },
+           {
+            "id": "c4",
+            "textJp": "まどのそば"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_1_q7",
+          "number": 7,
+          "questionPromptJp": "二人は何をつくりますか。",
+          "audioSrc": "/exam-audio/6ad72dcd328e61d461597d52.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。二人は何をつくりますか。\nA: あしたマリアさんが来ますね。ばんごはん、何をつくりましょうか。\nB: てんぷらはどうですか。\nA: マリアさんは、あぶらが多いものがだめなんですよ。\nB: そうですか。じゃ、やきとりは？\nA: マリアさんは、にくを食べないんです。\nB: じゃ、カレーにしましょう。やさいのカレーなら、にくはいりません。\nA: いいですね。からくないのにしましょう。\nnarrator: 二人は何をつくりますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "てんぷら"
+           },
+           {
+            "id": "c2",
+            "textJp": "やきとり"
+           },
+           {
+            "id": "c3",
+            "textJp": "カレー"
+           },
+           {
+            "id": "c4",
+            "textJp": "すきやき"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         }
+        ]
+       },
+       {
+        "id": "choukai_2",
+        "number": 2,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_2_q1",
+          "number": 1,
+          "questionPromptJp": "二人は、にくやさかなをどこで買いますか。",
+          "audioSrc": "/exam-audio/76b3ed99baed4a8bbfdfcca2.mp3",
+          "scriptJp": "narrator: 女の人と男の人がキャンプについて話しています。二人は、にくやさかなをどこで買いますか。\nA: キャンプの食べもの、どこで買いましょうか。うちのちかくのスーパーはやすいですよ。\nB: でも、キャンプじょうまで車で3時間かかりますから、にくやさかなは、わるくなりますよ。\nA: そうですね。じゃ、にくやさかなは、キャンプじょうの店で買いましょう。\nB: ええ。飲みものは、うちのちかくのスーパーで買っていきましょう。\nnarrator: 二人は、にくやさかなをどこで買いますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "うちのちかくのスーパー"
+           },
+           {
+            "id": "c2",
+            "textJp": "駅のまえのコンビニ"
+           },
+           {
+            "id": "c3",
+            "textJp": "キャンプじょうの店"
+           },
+           {
+            "id": "c4",
+            "textJp": "山の上のレストラン"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_2_q2",
+          "number": 2,
+          "questionPromptJp": "男の人はどうしてすしやに行きたくないですか。",
+          "audioSrc": "/exam-audio/37c8dc04f57810a1b836ff0f.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人はどうしてすしやに行きたくないですか。\nA: ばんごはん、すしやとそばや、どちらにしますか。\nB: すしもいいですね。でも、きのうのよるも、さかなを食べましたから……。\nA: そうですか。じゃ、そばやにしましょう。\nB: そうしましょう。\nnarrator: 男の人はどうしてすしやに行きたくないですか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "高いから"
+           },
+           {
+            "id": "c2",
+            "textJp": "とおいから"
+           },
+           {
+            "id": "c3",
+            "textJp": "人が多いから"
+           },
+           {
+            "id": "c4",
+            "textJp": "きのうもさかなを食べたから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_2_q3",
+          "number": 3,
+          "questionPromptJp": "おじいさんはどこにすわりますか。",
+          "audioSrc": "/exam-audio/70f8d0e54b84f2dc1ae1374b.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。おじいさんはどこにすわりますか。\nA: 今日のしょくじ会、おじいさんには、どこにすわってもらいましょうか。\nB: まどのそばはどうですか。そとがよく見えますよ。\nA: まどのそばは、ちょっとさむいですよ。おじいさんは、さむいのがだめなんです。\nB: じゃ、ストーブのまえはどうですか。\nA: いいですね。そうしましょう。\nnarrator: おじいさんはどこにすわりますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "ストーブのまえ"
+           },
+           {
+            "id": "c2",
+            "textJp": "まどのそば"
+           },
+           {
+            "id": "c3",
+            "textJp": "ドアのそば"
+           },
+           {
+            "id": "c4",
+            "textJp": "テレビのまえ"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_2_q4",
+          "number": 4,
+          "questionPromptJp": "二人はあした何をしますか。",
+          "audioSrc": "/exam-audio/857c6f55eb86750d93891c8f.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。二人はあした何をしますか。\nA: あしたのピクニック、天気はどうですか。\nB: 天気よほうでは、午前は雨ですが、午後ははれるそうです。\nA: じゃ、午後から行きましょうか。\nB: でも、午後はかぜがとてもつよいそうですよ。\nA: そうですか。じゃ、ピクニックはやめて、うちでえいがを見ましょう。\nB: そうですね。\nnarrator: 二人はあした何をしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "午前にピクニックに行く"
+           },
+           {
+            "id": "c2",
+            "textJp": "午後にピクニックに行く"
+           },
+           {
+            "id": "c3",
+            "textJp": "うちでえいがを見る"
+           },
+           {
+            "id": "c4",
+            "textJp": "えいがかんへ行く"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_2_q5",
+          "number": 5,
+          "questionPromptJp": "二人はかみのおさらを何まい買いますか。",
+          "audioSrc": "/exam-audio/2ee9fd4ee1a10190248e4755.mp3",
+          "scriptJp": "narrator: 女の人と男の人がキャンプのじゅんびをしています。二人はかみのおさらを何まい買いますか。\nA: キャンプでつかうかみのおさら、何まい買いましょうか。\nB: 5人ですから、一人2まいで、10まいですね。\nA: うちに4まいありますから、6まいでいいですね。\nB: でも、少し多いほうがいいですよ。10まい買いましょう。\nA: そうですね。そうしましょう。\nnarrator: 二人はかみのおさらを何まい買いますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "4まい"
+           },
+           {
+            "id": "c2",
+            "textJp": "6まい"
+           },
+           {
+            "id": "c3",
+            "textJp": "10まい"
+           },
+           {
+            "id": "c4",
+            "textJp": "14まい"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_2_q6",
+          "number": 6,
+          "questionPromptJp": "女の人はどうしてこまっていますか。",
+          "audioSrc": "/exam-audio/cd3083816b01036eecbeb2fa.mp3",
+          "scriptJp": "narrator: 男の人と女の人が話しています。女の人はどうしてこまっていますか。\nB: どうしたんですか。じてんしゃのまえで。\nA: じてんしゃのかぎがないんです。かばんの中にも、ポケットにもないんです。\nB: それはこまりましたね。いっしょにさがしましょうか。\nA: ありがとうございます。\nnarrator: 女の人はどうしてこまっていますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "かぎがないから"
+           },
+           {
+            "id": "c2",
+            "textJp": "タイヤに空気がないから"
+           },
+           {
+            "id": "c3",
+            "textJp": "ブレーキがわるいから"
+           },
+           {
+            "id": "c4",
+            "textJp": "じてんしゃがないから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "n": 10,
+   "seed": 2961820100474694018,
+   "paper": {
+    "level": "N5",
+    "title": "N5 Listening Practice",
+    "titleJp": "N5 聴解",
+    "sections": [
+     {
+      "id": "listening",
+      "label": "Listening",
+      "labelJp": "聴解",
+      "timeLimitMin": 10,
+      "mondai": [
+       {
+        "id": "choukai_1",
+        "number": 1,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_1_q1",
+          "number": 1,
+          "questionPromptJp": "男の人はつくえをどこにおきますか。",
+          "audioSrc": "/exam-audio/8174a39b6084339e9f242276.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人はつくえをどこにおきますか。\nA: 小川さん、このつくえをほかのところにおきたいんです。手つだってくれませんか。\nB: いいですよ。どこにおきますか。\nA: まどのまえはどうでしょう。\nB: まどのまえは、あさ日がたくさん入りますから、あついですよ。\nA: そうですね。じゃ、ドアの右がわは？\nB: ドアの右がわには、もうテレビがありますね。左がわはどうですか。\nA: 左がわは本だなのとなりですね。いいですね。そこにしましょう。\nnarrator: 男の人はつくえをどこにおきますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "まどのまえ"
+           },
+           {
+            "id": "c2",
+            "textJp": "ドアの右がわ"
+           },
+           {
+            "id": "c3",
+            "textJp": "ドアの左がわ"
+           },
+           {
+            "id": "c4",
+            "textJp": "テレビのとなり"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_1_q2",
+          "number": 2,
+          "questionPromptJp": "男の人は来週いつ店に出ますか。",
+          "audioSrc": "/exam-audio/5982be1dc0ffeb3a057b9d62.mp3",
+          "scriptJp": "narrator: 店で女の人と男の人が話しています。男の人は来週いつ店に出ますか。\nA: 高木さん、ちょっとおねがいがあるんですが。来週の土よう日、わたしのかわりに店に出てくれませんか。\nB: 土よう日ですか。午前はちょっと……。午後からならいいですよ。\nA: わたしは午後1時からですから、だいじょうぶです。高木さんの日よう日は、わたしが出ますね。\nB: ありがとう。じゃ、ぼくは土よう日の午後に来ます。\nnarrator: 男の人は来週いつ店に出ますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "土よう日の午前"
+           },
+           {
+            "id": "c2",
+            "textJp": "土よう日の午後"
+           },
+           {
+            "id": "c3",
+            "textJp": "日よう日の午前"
+           },
+           {
+            "id": "c4",
+            "textJp": "日よう日の午後"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_1_q3",
+          "number": 3,
+          "questionPromptJp": "女の人はどのシャツを買いますか。",
+          "audioSrc": "/exam-audio/ac6cfe0a18e22740e410e909.mp3",
+          "scriptJp": "narrator: 店で女の人と店の人が話しています。女の人はどのシャツを買いますか。\nA: すみません。このシャツのMはありますか。\nB: はい。しろとあおがあります。\nA: しろいシャツはたくさんもっていますから、あおにします。\nB: こちらです。どうぞ、きてみてください。\nA: ……ちょっと小さいですね。Lはありますか。\nB: すみません。Lは、あおはありません。しろだけです。\nA: そうですか。じゃ、しろのLにします。\nnarrator: 女の人はどのシャツを買いますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "しろのM"
+           },
+           {
+            "id": "c2",
+            "textJp": "あおのM"
+           },
+           {
+            "id": "c3",
+            "textJp": "しろのL"
+           },
+           {
+            "id": "c4",
+            "textJp": "あおのL"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_1_q4",
+          "number": 4,
+          "questionPromptJp": "男の人はまず何をしますか。",
+          "audioSrc": "/exam-audio/14d39ecf2f5c42b61aa7e047.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人はまず何をしますか。\nA: 6時におきゃくさんが来ますね。じゅんびをしましょう。\nB: はい。何からしましょうか。へやのそうじですか。\nA: そうじは、もうわたしがしました。飲みものを買いに行ってくれませんか。\nB: いいですよ。りょうりは？\nA: りょうりは、飲みものを買ってきてから、いっしょにつくりましょう。\nB: わかりました。テーブルにおさらを出しましょうか。\nA: それは、おきゃくさんが来るまえに、わたしがします。じゃ、おねがいします。\nnarrator: 男の人はまず何をしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "へやをそうじする"
+           },
+           {
+            "id": "c2",
+            "textJp": "飲みものを買いに行く"
+           },
+           {
+            "id": "c3",
+            "textJp": "りょうりをつくる"
+           },
+           {
+            "id": "c4",
+            "textJp": "おさらをテーブルに出す"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_1_q5",
+          "number": 5,
+          "questionPromptJp": "かいぎはどのへやでしますか。",
+          "audioSrc": "/exam-audio/442a07699115395ac807c3dd.mp3",
+          "scriptJp": "narrator: 会社で女の人と男の人が話しています。かいぎはどのへやでしますか。\nA: あしたのかいぎ、201のへやでいいですか。\nB: あしたのかいぎではビデオを見ますから、テレビがあるへやがいいです。\nA: テレビがあるのは、102と202ですね。\nB: 202は、あしたは、ほかの人がつかいますよ。\nA: じゃ、もう一つのほうにしましょう。\nnarrator: かいぎはどのへやでしますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "101"
+           },
+           {
+            "id": "c2",
+            "textJp": "102"
+           },
+           {
+            "id": "c3",
+            "textJp": "201"
+           },
+           {
+            "id": "c4",
+            "textJp": "202"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_1_q6",
+          "number": 6,
+          "questionPromptJp": "男の人は何でこうえんへ行きますか。",
+          "audioSrc": "/exam-audio/98ed0c64988be649b70a059a.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人は何でこうえんへ行きますか。\nB: すみません。みどりこうえんへ行きたいんですが、電車とバスと、どちらがいいですか。\nA: 電車がはやいですよ。でも、駅からこうえんまで、20分ぐらいあるきます。\nB: そうですか。ぼく、今、足がいたいんです。\nA: じゃ、バスがいいですね。バスは、こうえんのまえにとまりますよ。\nB: タクシーはどうですか。\nA: タクシーは高いですよ。3000円ぐらいかかります。\nB: じゃ、バスにします。ありがとうございます。\nnarrator: 男の人は何でこうえんへ行きますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "バス"
+           },
+           {
+            "id": "c2",
+            "textJp": "電車"
+           },
+           {
+            "id": "c3",
+            "textJp": "タクシー"
+           },
+           {
+            "id": "c4",
+            "textJp": "じてんしゃ"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_1_q7",
+          "number": 7,
+          "questionPromptJp": "二人はどこにすわりますか。",
+          "audioSrc": "/exam-audio/e347d665e8c231e252ba55e2.mp3",
+          "scriptJp": "narrator: えいがかんで女の人と男の人が話しています。二人はどこにすわりますか。\nA: どこにすわりましょうか。\nB: まえから3ばん目があいていますね。\nA: 3ばん目は、ちょっとスクリーンにちかいですね。\nB: じゃ、うしろから2ばん目はどうですか。\nA: うしろから2ばん目は、はしのせきしかありませんね。まえから5ばん目は？\nB: まえから5ばん目は、まん中があいていますよ。\nA: じゃ、そこにしましょう。\nnarrator: 二人はどこにすわりますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "まえから3ばん目"
+           },
+           {
+            "id": "c2",
+            "textJp": "まえから5ばん目"
+           },
+           {
+            "id": "c3",
+            "textJp": "うしろから2ばん目"
+           },
+           {
+            "id": "c4",
+            "textJp": "うしろから3ばん目"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         }
+        ]
+       },
+       {
+        "id": "choukai_2",
+        "number": 2,
+        "type": "listening-mcq",
+        "instructionsJp": "もんだいようしに　なにも　いんさつされて　いません。まず　ぶんを　きいて　ください。それから、しつもんと　せんたくしを　きいて、1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。",
+        "instructions": "Listen to the conversation, then choose the best answer from 1-4.",
+        "questions": [
+         {
+          "id": "choukai_2_q1",
+          "number": 1,
+          "questionPromptJp": "女の人はびょういんに何をもっていきますか。",
+          "audioSrc": "/exam-audio/3192f402eece6f1b3c1d5ea8.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。女の人はびょういんに何をもっていきますか。\nA: あした、大木さんに会いに、びょういんへ行きます。花をもっていこうとおもいます。\nB: あのびょういんは、花をもっていってはいけないそうですよ。\nA: そうですか。じゃ、くだものはどうでしょう。\nB: 大木さんは今、食べものはだめだと言っていましたよ。\nA: じゃ、ざっしをもっていきます。大木さんは、ざっしをよく読んでいますから。\nnarrator: 女の人はびょういんに何をもっていきますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "花"
+           },
+           {
+            "id": "c2",
+            "textJp": "くだもの"
+           },
+           {
+            "id": "c3",
+            "textJp": "ざっし"
+           },
+           {
+            "id": "c4",
+            "textJp": "おかし"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c3"
+         },
+         {
+          "id": "choukai_2_q2",
+          "number": 2,
+          "questionPromptJp": "男の学生はしゅくだいをどこに出しますか。",
+          "audioSrc": "/exam-audio/2d39be9edf4a3dfec80bb548.mp3",
+          "scriptJp": "narrator: 大学で女の先生と男の学生が話しています。男の学生はしゅくだいをどこに出しますか。\nB: 先生、しゅくだいは、金よう日までに、どこに出しますか。\nA: いつもは、きょうしつのつくえの上ですが、今週は、わたしのへやにもってきてください。\nB: 先生のへやは、何がいですか。\nA: 3がいです。1かいのじむしつのとなりじゃありませんよ。\nB: はい、わかりました。\nnarrator: 男の学生はしゅくだいをどこに出しますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "きょうしつのつくえの上"
+           },
+           {
+            "id": "c2",
+            "textJp": "3がいの先生のへや"
+           },
+           {
+            "id": "c3",
+            "textJp": "1かいのじむしつ"
+           },
+           {
+            "id": "c4",
+            "textJp": "きょうしつの先生のつくえ"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c2"
+         },
+         {
+          "id": "choukai_2_q3",
+          "number": 3,
+          "questionPromptJp": "男の人はどうして土よう日に手つだうことができませんか。",
+          "audioSrc": "/exam-audio/e62004fad5b7b3ab4c1f6a84.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。男の人はどうして土よう日に手つだうことができませんか。\nA: 土よう日に、へやのベッドをうごかしたいんですが、手つだってくれませんか。\nB: すみません。土よう日は、いもうとのけっこんしきがあるんです。日よう日はどうですか。\nA: 日よう日でもいいですよ。ありがとう。\nnarrator: 男の人はどうして土よう日に手つだうことができませんか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "いもうとのけっこんしきだから"
+           },
+           {
+            "id": "c2",
+            "textJp": "しごとがあるから"
+           },
+           {
+            "id": "c3",
+            "textJp": "りょこうに行くから"
+           },
+           {
+            "id": "c4",
+            "textJp": "ベッドがおもいから"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c1"
+         },
+         {
+          "id": "choukai_2_q4",
+          "number": 4,
+          "questionPromptJp": "メロンパンは何時にできますか。",
+          "audioSrc": "/exam-audio/cc3379a31db619e65ddb2dac.mp3",
+          "scriptJp": "narrator: パンやで女の人と店の人が話しています。メロンパンは何時にできますか。\nA: すみません。メロンパンはありますか。\nB: すみません、さっき、ぜんぶなくなりました。つぎは4時にやけます。\nA: 今3時半ですね。じゃ、4時にまた来ます。\nB: あ、すみません。今日は4時半でした。\nA: わかりました。じゃ、4時半に来ます。\nnarrator: メロンパンは何時にできますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "3時"
+           },
+           {
+            "id": "c2",
+            "textJp": "3時半"
+           },
+           {
+            "id": "c3",
+            "textJp": "4時"
+           },
+           {
+            "id": "c4",
+            "textJp": "4時半"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_2_q5",
+          "number": 5,
+          "questionPromptJp": "二人はあしたどこで会いますか。",
+          "audioSrc": "/exam-audio/3520520f1054b6ca36e03a43.mp3",
+          "scriptJp": "narrator: 女の人と男の人が話しています。二人はあしたどこで会いますか。\nA: あした、何時にどこで会いましょうか。\nB: 1時に、駅のまえの本やのまえはどうですか。\nA: あしたは雨だそうですよ。本やの中で会いませんか。\nB: そうですね。じゃ、1時に本やの中で。\nnarrator: 二人はあしたどこで会いますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "本やのまえ"
+           },
+           {
+            "id": "c2",
+            "textJp": "駅の入り口"
+           },
+           {
+            "id": "c3",
+            "textJp": "きっさてん"
+           },
+           {
+            "id": "c4",
+            "textJp": "本やの中"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         },
+         {
+          "id": "choukai_2_q6",
+          "number": 6,
+          "questionPromptJp": "女の人は何時に何人でレストランに行きますか。",
+          "audioSrc": "/exam-audio/77b7688a861a02d4bb9b0b17.mp3",
+          "scriptJp": "narrator: 女の人がレストランに電話しています。女の人は何時に何人でレストランに行きますか。\nA: もしもし、あしたのよる7時に、3人でよやくした南です。\nB: はい、南さま。\nA: すみません、じかんを30分はやくしたいんですが。\nB: 6時半ですね。はい、だいじょうぶです。\nA: それから、一人ふえて、4人になりました。\nB: わかりました。では、6時半に4人でおまちしています。\nnarrator: 女の人は何時に何人でレストランに行きますか。",
+          "choices": [
+           {
+            "id": "c1",
+            "textJp": "7時に3人"
+           },
+           {
+            "id": "c2",
+            "textJp": "6時半に3人"
+           },
+           {
+            "id": "c3",
+            "textJp": "7時に4人"
+           },
+           {
+            "id": "c4",
+            "textJp": "6時半に4人"
+           }
+          ],
+          "choiceType": "text",
+          "answer": "c4"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

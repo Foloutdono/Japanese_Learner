@@ -205,27 +205,41 @@ describe('the HUD', () => {
     expect(hud.querySelector('.hud__status')).toBeNull()
   })
 
-  // 到着 (plan 174, the owner's pick H4): the panel is the arrival plate
-  // -- the destination's grade on a white plate edged in the state's ink,
-  // the month the pace kept arrives in, and the drift under it.
-  it('prints the arrival plate: the destination, the month and the drift', async () => {
+  // 環 (plan 199, the owner's pick A of the canvas "Tsuji — Today at a
+  // glance"): the panel is the goal's ring -- the destination's grade in
+  // a roundel whose arc is the share of its items done, in the state's
+  // ink, the share and the signed drift beside it.
+  it('prints the goal as a ring: the destination, the share done and the drift', async () => {
     journeyRef.current = {
       goalLevel: 'N4', goalTargetDate: '2027-03-14', goalSetAt: '2026-09-01T00:00:00Z',
-      plannedPerDay: 10, itemsTotal: 1000, itemsDone: 100, actual14: 14, days14: 14,
+      plannedPerDay: 10, itemsTotal: 1000, itemsDone: 160, actual14: 14, days14: 14,
     }
     await mountShell()
     await settle()
     const panel = document.querySelector('.hud__status')
     expect(panel).toBeTruthy()
     // 1 a day against 10 promised: the projected arrival is far past
-    // the printed one — late, by a delta the plate prints in days.
+    // the printed one -- late, by a delta the ring prints in days.
     expect(panel.classList.contains('hud__status--delayed')).toBe(true)
-    expect(panel.classList.contains('hud__status--arrival')).toBe(true)
-    expect(panel.querySelector('.hud__dest').textContent).toBe('N4')
-    expect(panel.querySelector('.hud__month').textContent).toMatch(/20\d\d/)
-    expect(panel.querySelector('.hud__status-word').textContent).toMatch(/\d/)
-    // The plate's edge is the state's ink.
-    expect(getComputedStyle(panel.querySelector('.hud__dest')).boxShadow).toMatch(/inset/)
+    expect(panel.classList.contains('hud__status--ring')).toBe(true)
+    expect(panel.querySelector('.hud__ring-dest').textContent).toBe('N4')
+    // French sets the sign after a no-break space (t.percent).
+    expect(panel.querySelector('.hud__ring-figs b').textContent).toBe('16\u00a0%')
+    expect(panel.querySelector('.hud__status-word').textContent).toMatch(/^−\d+j$/)
+    // The arc is the share done, in the state's ink; no white plate.
+    const arc = panel.querySelector('.hud__ring-arc')
+    const c = 2 * Math.PI * 14.5
+    expect(Number.parseFloat(arc.getAttribute('stroke-dasharray'))).toBeCloseTo(0.16 * c, 3)
+    expect(getComputedStyle(arc).stroke).toBe(getComputedStyle(panel.querySelector('.hud__status-word')).color)
+    expect(panel.querySelector('.hud__dest')).toBeNull()
+    // Said whole for a screen reader.
+    expect(panel.getAttribute('aria-label')).toMatch(/N4 · 16\u00a0%/)
+    // Inside the HUD, beside the card's strip.
+    const hb = document.querySelector('.hud__inner').getBoundingClientRect()
+    const pb = panel.getBoundingClientRect()
+    expect(pb.top).toBeGreaterThanOrEqual(hb.top)
+    expect(pb.bottom).toBeLessThanOrEqual(hb.bottom)
+    expect(pb.right).toBeLessThanOrEqual(document.querySelector('.hstrip').getBoundingClientRect().left)
   })
 
   it('keeps the word-and-days panel for a pass judged on pace alone', async () => {
@@ -237,7 +251,7 @@ describe('the HUD', () => {
     await settle()
     const panel = document.querySelector('.hud__status')
     expect(panel).toBeTruthy()
-    expect(panel.classList.contains('hud__status--arrival')).toBe(false)
+    expect(panel.classList.contains('hud__status--ring')).toBe(false)
     expect(panel.querySelector('.hud__status-word').textContent.length).toBeGreaterThan(0)
   })
 })

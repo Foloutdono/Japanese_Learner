@@ -2,6 +2,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
 import { LangProvider } from './LangContext'
+// The real cascade, fonts and all, as the handset's lane has it: a
+// question holds whole in the metrics a learner's window draws.
+import '@fontsource/space-grotesk/latin-400.css'
+import '@fontsource/space-grotesk/latin-500.css'
+import '@fontsource/space-grotesk/latin-700.css'
+import '@fontsource/noto-serif-jp/600.css'
+import '@fontsource/noto-serif-jp/700.css'
+import '@fontsource/noto-sans-jp/400.css'
+import '@fontsource/noto-sans-jp/500.css'
+import '@fontsource/noto-sans-jp/700.css'
 import './index.css'
 
 // ── 低 — first contact on a laptop's short window (plan 169) ───────
@@ -12,7 +22,9 @@ import './index.css'
 // the lines' cards their figures. On a 1366×768 laptop the reason
 // straight out to the right named itself under its ring, on the ring
 // below, and noon's name stood on the departure board. Every question
-// holds whole in its body now, down to this window.
+// holds whole in its body now, down to this window -- and since plan
+// 247, the card that took the place of the questions it no longer asks,
+// and each of the sheets its doors open.
 
 const apiJson = vi.hoisted(() => vi.fn())
 const apiJsonWithTimeout = vi.hoisted(() => vi.fn())
@@ -64,10 +76,8 @@ const settle = async (ms = 700) => {
 const $ = s => document.querySelector(s)
 const live = () => $('.brd__car:not(.brd__car--out)')
 const inCar = s => live()?.querySelector(s)
-const inCarAll = s => [...(live()?.querySelectorAll(s) ?? [])]
 const stepOf = () => $('.brd')?.dataset.step
 const box = el => el.getBoundingClientRect()
-const meets = (a, b) => a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1
 
 beforeEach(() => {
   apiJson.mockReset()
@@ -80,7 +90,7 @@ beforeEach(() => {
 async function board() {
   await render(
     <LangProvider>
-      <BoardingFlow session={{ access_token: 'tok' }} initialProfile={{ username: 'Tester' }} onComplete={vi.fn()} onExit={vi.fn()} />
+      <BoardingFlow session={{ access_token: 'tok' }} onComplete={vi.fn()} onExit={vi.fn()} guest />
     </LangProvider>
   )
   await settle(300)
@@ -98,74 +108,89 @@ function holdsWhole(step) {
 
 // Each question pulls in and draws its answers; the long walks need
 // longer than Vitest's default to ride.
+/** A sheet over the card stands whole on the window, nothing to scroll. */
+async function sheetHoldsWhole(open, kind) {
+  inCar(open).click()
+  await settle(400)
+  const sheet = $(`.brd-sheet--${kind}`)
+  expect(sheet, kind).toBeTruthy()
+  expect(sheet.scrollHeight, kind).toBeLessThanOrEqual(sheet.clientHeight + 2)
+  expect(box(sheet).top, kind).toBeGreaterThanOrEqual(0)
+  expect(box(sheet).bottom, kind).toBeLessThanOrEqual(window.innerHeight)
+  await userEvent.keyboard('{Escape}')
+  await settle(200)
+  expect($('.brd-sheet'), `${kind} shut`).toBeNull()
+}
+
+// Each question pulls in and draws its answers; the long walks need
+// longer than Vitest's default to ride.
 describe('first contact on a short window', { timeout: 40000 }, () => {
-  it('holds every question whole, from the name to the hour', async () => {
+  it('holds every question whole, from the kana to the card and its sheets', async () => {
     await board()
-    holdsWhole('name')
-    await userEvent.keyboard('{Enter}')
-    await settle()
-    holdsWhole('why')
-    await pick('[data-motive="trip"]')
-    await next()
     holdsWhole('kana')
     await pick('[data-kana="both"]')
     await settle()
     holdsWhole('level')
     await pick('[data-level="N3"]')
     await next()
-    holdsWhole('goal')
-    await next()
-    holdsWhole('lines')
-    await next()
-    holdsWhole('rhythm')
-    await next()
-    holdsWhole('time')
+    holdsWhole('card')
+    await sheetHoldsWhole('[data-door="destination"]', 'goal')
+    await sheetHoldsWhole('[data-door="service"]', 'rhythm')
+    await sheetHoldsWhole('[data-door="hour"]', 'hour')
+    await sheetHoldsWhole('[data-door="lines"]', 'lines')
+    await sheetHoldsWhole('[data-door="name"]', 'name')
+    await sheetHoldsWhole('[data-action="keep"]', 'account')
   })
 
-  it('names every reason beside its ring, none on another\'s', async () => {
-    await board()
-    await userEvent.keyboard('{Enter}')
-    await settle()
-    expect(stepOf()).toBe('why')
-    const ways = inCarAll('.desk-brd__way')
-    expect(ways).toHaveLength(6)
-    const rings = ways.map(w => box(w.querySelector('.desk-brd__ring')))
-    const names = ways.map(w => box(w.querySelector('.desk-brd__way-name')))
-    for (let i = 0; i < ways.length; i++) {
-      for (let j = 0; j < ways.length; j++) {
-        if (i === j) continue
-        expect(meets(names[i], rings[j]), `${ways[i].dataset.motive} on ${ways[j].dataset.motive}'s ring`).toBe(false)
-        expect(meets(names[i], names[j]), `${ways[i].dataset.motive} on ${ways[j].dataset.motive}'s name`).toBe(false)
-      }
-    }
-    // The reason straight out to the right is named beside its ring.
-    const trip = inCar('[data-motive="trip"]')
-    expect(box(trip.querySelector('.desk-brd__way-name')).left).toBeGreaterThan(box(trip.querySelector('.desk-brd__ring')).right)
-  })
-
-  it('stands noon\'s name clear of the departure board', async () => {
-    await board()
-    await userEvent.keyboard('{Enter}')
-    await settle()
-    await pick('[data-motive="trip"]')
-    await next()
+  // A session with an address (docs/oauth.md): the card's line says
+  // the address and holds the way to another account, whole too.
+  it('holds the card whole for a pass that names its address', async () => {
+    await render(
+      <LangProvider>
+        <BoardingFlow
+          session={{ access_token: 'tok', user: { email: 'marie-claire.dupont-moreau@gmail.com' } }}
+          onComplete={vi.fn()}
+          onExit={vi.fn()}
+          onSignIn={vi.fn()}
+        />
+      </LangProvider>
+    )
+    await settle(300)
     await pick('[data-kana="both"]')
     await settle()
     await pick('[data-level="N3"]')
-    for (let i = 0; i < 4; i++) await next()
-    expect(stepOf()).toBe('time')
-    const board_ = box(inCar('.desk-brd__sky-board'))
-    for (const stn of inCarAll('.desk-brd__hour-stn')) {
-      expect(meets(box(stn), board_), stn.dataset.hour).toBe(false)
-    }
+    await next()
+    holdsWhole('card')
+    expect(inCar('[data-action="switch-account"]')).toBeTruthy()
+  })
+
+  // The level's test (plan 224): its longest question, a sentence with
+  // its gap on two lines over four words, holds whole too, its two ways
+  // on the floor's row beside the way back (plan 247).
+  it('holds the test\'s longest question whole, its ways on the floor\'s row', async () => {
+    apiJsonWithTimeout.mockImplementation(async () => ({
+      seed: 1, done: false, level: 'N3', perLevel: { N5: { correct: 3, total: 3, cleared: true }, N4: { correct: 4, total: 5, cleared: true } },
+      question: {
+        id: 'q', sectionId: 'N3', kind: 'context', type: 'mcq-text',
+        promptJp: 'この地域では、毎年夏になると大勢の観光客が（　　）ので、道路がとても混雑する。',
+        choices: ['押し寄せる', '打ち明ける', '立ち去る', '見落とす'].map((textJp, i) => ({ id: `c${i + 1}`, textJp })),
+      },
+    }))
+    await board()
+    await pick('[data-kana="both"]')
+    await settle()
+    await pick('[data-action="level-test"]')
+    await settle()
+    expect(live().querySelectorAll('.mcq-row')).toHaveLength(4)
+    holdsWhole('test')
+    const ways = box(inCar('.brd-test__ways'))
+    const floor = box(inCar('.desk-brd__floor'))
+    expect(ways.bottom).toBeGreaterThan(floor.top)
+    expect(ways.right).toBeLessThanOrEqual(floor.left)
   })
 
   it('reads the two words out whole for a learner who reads one script', async () => {
     await board()
-    await userEvent.keyboard('{Enter}')
-    await settle()
-    await pick('[data-motive="trip"]')
-    await next()
     await pick('[data-kana="hiragana"]')
     await settle()
     holdsWhole('reveal')

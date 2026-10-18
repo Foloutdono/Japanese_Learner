@@ -103,12 +103,22 @@ export function useSheetDrag(panelRef, onClose) {
     const panel = panelRef.current
     if (!panel) return undefined
     let g = null
+    // The window listeners of a mouse drag on the grip, while one is
+    // down, so an unmount mid-drag can take them away.
+    let endGrip = null
 
     const offset = px => { panel.style.transform = px ? `translateY(${px}px)` : '' }
 
     function onStart(e) {
-      // A second finger is a pinch or a stray palm, not a push.
-      if (e.touches.length !== 1) { g = null; return }
+      // A second finger is a pinch or a stray palm, not a push. A drag
+      // already claimed is let go where it is: no touch it sees from
+      // here on can release it, and the sheet would stay where the
+      // first finger left it.
+      if (e.touches.length !== 1) {
+        if (g?.on) { setDragging(false); offset(0) }
+        g = null
+        return
+      }
       if (e.target.closest?.(OWN_GESTURE)) return
       if (canScrollUp(e.target, panel)) return
       const t = e.touches[0]
@@ -189,12 +199,17 @@ export function useSheetDrag(panelRef, onClose) {
         m.lastT = ev.timeStamp
         offset(Math.max(0, moved - START_SLOP))
       }
-      const up = ev => {
+      const unlisten = () => {
         window.removeEventListener('pointermove', move)
         window.removeEventListener('pointerup', up)
         window.removeEventListener('pointercancel', up)
+        endGrip = null
+      }
+      const up = ev => {
+        unlisten()
         if (m.on) finish(m, ev.clientY, ev.timeStamp)
       }
+      endGrip = unlisten
       window.addEventListener('pointermove', move)
       window.addEventListener('pointerup', up)
       window.addEventListener('pointercancel', up)
@@ -211,6 +226,10 @@ export function useSheetDrag(panelRef, onClose) {
       panel.removeEventListener('touchend', onEnd)
       panel.removeEventListener('touchcancel', onEnd)
       panel.removeEventListener('pointerdown', onGrip)
+      // A sheet shut mid-drag (Escape, the scrim) must not hear the
+      // release: it would close it a second time and swallow the next
+      // click on whatever is under the mouse.
+      endGrip?.()
     }
   }, [panelRef])
 

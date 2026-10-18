@@ -1,22 +1,23 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { LangProvider } from '../../LangContext'
+// The section rules asserted below only exist once the real sheet is loaded.
+import '../../index.css'
 
 // ── The lesson (plan 087) ─────────────────────────────────────
 // One component in three dresses: the dictionary plate's body, the
 // sheet behind every door, the gate before a new card. What is pinned
-// is the shape a reader meets: blocks that name themselves and no
-// headings, the steps under their pair marks with the table's one
-// markup honoured, a compare row that is a door where a shell can open
-// one and a fact where it cannot, the pattern picked out of each
-// sentence, the translations' one switch, the gate's one button — and
-// that a point whose lesson is not written yet prints exactly what it
-// has.
+// is the shape a reader meets: sections under their heads (plan 235),
+// the formation as a formula, a paradigm as a table, the table's one
+// markup honoured, the trap a box, a compare row that is a door where
+// a shell can open one and a fact where it cannot, the pattern picked
+// out of each sentence, the translations' one switch, the gate's one
+// button -- and that a point whose lesson is not written yet prints
+// exactly what it has.
 //
 // Plan 089 moved two things: the plate variant no longer reprints the
-// formation and the gloss the plate above it has already drawn, and
-// the neighbours sit UNDER the sentences rather than between them and
-// the lesson.
+// gloss the plate above it has already drawn, and the neighbours sit
+// UNDER the sentences rather than between them and the lesson.
 
 vi.mock('../../lib/audio', async (o) => ({ ...(await o()), playUi: vi.fn(), playClick: vi.fn() }))
 
@@ -43,6 +44,17 @@ const PLAIN = { ...RICH, steps: [], compare: [], register: undefined }
 
 const settle = (ms = 40) => new Promise(r => setTimeout(r, ms))
 
+// A token's computed value, so an assertion compares two computed values.
+function probe(prop, expr) {
+  const el = document.createElement('div')
+  el.style[prop] = expr
+  document.body.appendChild(el)
+  const v = getComputedStyle(el)[prop]
+  el.remove()
+  return v
+}
+const labels = root => [...root.querySelectorAll('.gl-sec')].map(sec => sec.getAttribute('aria-label'))
+
 // The lane's files share one origin; this file reads the English table
 // and hands the origin back as it found it (DictionaryDetail's own test
 // does the same).
@@ -51,23 +63,30 @@ afterEach(() => { localStorage.removeItem('lang') })
 const mount = (ui) => render(<LangProvider>{ui}</LangProvider>)
 
 describe('the grammar lesson', () => {
-  it('prints the plate body as blocks that name themselves, in order, with no headings', async () => {
+  it('prints the plate body as sections under their heads, in order, the formula first', async () => {
     const screen = await mount(<GrammarLesson point={RICH} variant="plate" onCompare={() => {}} />)
-    const blocks = [...screen.container.querySelectorAll('.dict-block')]
-    // The lesson, the sentences, then the neighbours. No formation and
-    // no meaning: the plate above this body has already printed both,
-    // and this is the one variant where there IS a plate above it.
-    expect(blocks.map(b => b.getAttribute('aria-label'))).toEqual(['Lesson', 'Examples', 'Compare'])
-    expect(screen.container.querySelector('h3, h4, .section-header')).toBeNull()
+    // How it is built, the rule, its uses, the trap; then the sentences
+    // and the neighbours. No meaning: the plate above this body has
+    // already printed it, and this is the one variant with a plate above.
+    expect(labels(screen.container)).toEqual(['Structure', 'Rule', 'Use', 'Careful', 'Examples', 'Compare'])
+    // A head each, an h3 under the entry's h2, a glyph beside it that a
+    // screen reader skips.
+    expect([...screen.container.querySelectorAll('h3')].map(h => h.textContent))
+      .toEqual(['Structure', 'Rule', 'Use', 'Careful', 'Examples', 'Not to be confused with'])
+    for (const icon of screen.container.querySelectorAll('.gl-sec__icon')) expect(icon.getAttribute('aria-hidden')).toBe('true')
+    // The lesson in one column, the sentences and the rivals in the
+    // other: side by side where a page has the room, one after the other
+    // on a phone.
+    const cols = [...screen.container.querySelectorAll('.gl-col')]
+    expect(cols.map(col => labels(col))).toEqual([['Structure', 'Rule', 'Use', 'Careful'], ['Examples', 'Compare']])
     // the plate variant draws no plate of its own: the shell already has one
     expect(screen.container.querySelector('.dict-plate')).toBeNull()
     expect(screen.container.querySelector('.dict-formation')).toBeNull()
   })
 
-  it('degrades to the sentences alone for a point whose lesson is not written', async () => {
+  it('degrades to the formula and the sentences for a point whose lesson is not written', async () => {
     const screen = await mount(<GrammarLesson point={PLAIN} variant="plate" />)
-    const blocks = [...screen.container.querySelectorAll('.dict-block')]
-    expect(blocks.map(b => b.getAttribute('aria-label'))).toEqual(['Examples'])
+    expect(labels(screen.container)).toEqual(['Structure', 'Examples'])
   })
 
   it('puts the neighbours under the sentences in every dress', async () => {
@@ -77,25 +96,51 @@ describe('the grammar lesson', () => {
     // the thing this one is confused with.
     for (const variant of ['plate', 'sheet', 'gate']) {
       const screen = await mount(<GrammarLesson point={RICH} variant={variant} onCompare={() => {}} />)
-      const labels = [...screen.container.querySelectorAll('.dict-block')]
-        .map(b => b.getAttribute('aria-label'))
-      expect(labels.indexOf('Compare')).toBeGreaterThan(labels.indexOf('Examples'))
+      const order = labels(screen.container)
+      expect(order.indexOf('Compare')).toBeGreaterThan(order.indexOf('Examples'))
     }
   })
 
-  // The mark was a pair -- 規則 RULE -- until 2026-09-21: the Japanese
-  // half captioned a part of a lesson rather than naming a place, so
-  // it went, app-wide, and the name took the rung and the ink it wore
-  // (index.css, .dict-mark__name). A leftover Japanese half here is a
-  // regression, so this asserts there is none.
-  it('sets each step under its mark, honours **…** and "- " lines, and marks the trap', async () => {
+  // The marks were captions over one wall of prose (plan 146) until
+  // the owner found the lesson hard to read: they are heads now, each
+  // opening its own section (plan 235). The pair's Japanese half went
+  // app-wide on 2026-09-21 and must not come back with them.
+  it('sets each step under its head, honours **…** and "- " lines, and boxes the trap', async () => {
     const screen = await mount(<GrammarLesson point={RICH} variant="sheet" />)
-    const steps = [...screen.container.querySelectorAll('.gl-step')]
-    expect(steps.map(s => s.querySelector('.dict-mark__jp'))).toEqual([null, null, null])
-    expect(steps.map(s => s.querySelector('.dict-mark__name').textContent)).toEqual(['Rule', 'Use', 'Careful'])
-    expect(steps[0].querySelector('strong').textContent).toBe('polite request')
-    expect([...steps[1].querySelectorAll('li')].map(li => li.textContent)).toEqual(['asking a favour', 'giving an instruction'])
-    expect(steps[2].classList.contains('gl-step--careful')).toBe(true)
+    expect(screen.container.querySelector('.dict-mark__jp')).toBeNull()
+    const rule = screen.container.querySelector('.gl-sec--rule')
+    const use = screen.container.querySelector('.gl-sec--use')
+    const careful = screen.container.querySelector('.gl-sec--careful')
+    expect(rule.querySelector('strong').textContent).toBe('polite request')
+    // The rule is the lead, a rung over the rest of the prose.
+    expect(getComputedStyle(rule.querySelector('.gl-sec__body')).fontSize).toBe(probe('fontSize', 'var(--fs-lead)'))
+    // A use step's own line stays prose over its list.
+    expect(use.querySelector('.gl-step__p').textContent).toBe('Reach for it when:')
+    expect([...use.querySelectorAll('li')].map(li => li.textContent)).toEqual(['asking a favour', 'giving an instruction'])
+    // The trap reads as a warning before it is read: a box whose leading
+    // edge and head are the due ink, never a fill.
+    const box = getComputedStyle(careful)
+    expect(box.borderLeftWidth).toBe('3px')
+    expect(box.borderLeftColor).toBe(probe('color', 'var(--state-due)'))
+    expect(box.backgroundColor).toBe('rgba(0, 0, 0, 0)')
+    expect(getComputedStyle(careful.querySelector('.gl-sec__name')).color)
+      .toBe(probe('color', 'color-mix(in srgb, var(--state-due) 72%, var(--text-primary))'))
+  })
+
+  it('sets the formation as a formula: the slot in plain words, the pattern in the ink, a gloss in brackets after it', async () => {
+    const screen = await mount(<GrammarLesson point={{ ...RICH, structure: 'period + に + number + 回 (how often)' }} variant="sheet" />)
+    const formula = screen.container.querySelector('.gl-sec--structure .gl-formula')
+    expect([...formula.children].map(el => [el.className, el.textContent])).toEqual([
+      ['gl-formula__slot', 'period'], ['gl-formula__plus', '+'], ['gl-formula__pat', 'に'], ['gl-formula__plus', '+'],
+      ['gl-formula__slot', 'number'], ['gl-formula__plus', '+'], ['gl-formula__pat', '回'], ['gl-formula__note', '(how often)'],
+    ])
+    expect(formula.querySelector('.gl-formula__pat').lang).toBe('ja')
+    // The slot is a dashed blank, the pattern the gold's.
+    expect(getComputedStyle(formula.querySelector('.gl-formula__slot')).borderTopStyle).toBe('dashed')
+    // A slot in plain words keeps the Japanese in it, and its spaces.
+    const mixed = await mount(<GrammarLesson point={{ ...RICH, structure: 'Noun/な-adj + です・だ' }} variant="sheet" />)
+    expect(mixed.container.querySelector('.gl-formula__slot').textContent).toBe('Noun/な-adj')
+    expect(mixed.container.querySelector('.gl-formula__pat').textContent).toBe('です・だ')
   })
 
   it('makes a compare row a door where a shell can open one, and a fact where it cannot', async () => {
@@ -124,10 +169,12 @@ describe('the grammar lesson', () => {
     expect(screen.container.querySelector('.dict-ex__tr')).toBeNull()
   })
 
-  it('draws the plate with the three registers and the register word in the sheet and the gate', async () => {
+  it('draws the plate with the pattern over its gloss and the register word in the sheet and the gate', async () => {
     const screen = await mount(<GrammarLesson point={RICH} variant="sheet" onClose={() => {}} />)
     const plate = screen.container.querySelector('.dict-plate')
-    expect(plate.querySelector('.dict-plate__structure').textContent).toBe('verb て-form + ください')
+    // The pattern over its gloss: the formation opens the lesson instead.
+    expect(plate.querySelector('.dict-plate__structure')).toBeNull()
+    expect(screen.container.querySelector('.gl-formula').textContent).toBe('verb て-form+ください')
     expect(plate.querySelector('.dict-plate__word').textContent).toBe('〜てください')
     expect(plate.querySelector('.dict-plate__caption').textContent).toBe('please do')
     expect(plate.querySelector('.dict-plate__level').textContent).toBe('N5')
@@ -149,7 +196,7 @@ describe('the grammar lesson', () => {
     const plate = screen.container.querySelector('.dict-plate')
     const read = el => [...el.querySelectorAll('rt')].map(rt => rt.textContent)
     expect(read(plate.querySelector('.dict-plate__word'))).toEqual(['なか'])
-    expect(read(plate.querySelector('.dict-plate__structure'))).toEqual(['なか'])
+    expect(read(screen.container.querySelector('.gl-formula__pat'))).toEqual(['なか'])
     expect(read(screen.container.querySelector('.gl-door__pattern'))).toEqual(['いち', 'ばん'])
     // A point with no reading prints as it always did.
     const bare = await mount(<GrammarLesson point={RICH} variant="sheet" onClose={() => {}} />)
@@ -158,9 +205,9 @@ describe('the grammar lesson', () => {
 
   // Plan 146, the owner's pick B: the lesson read for its shape
   // (lessonText). A use that names its forms prints them under it, in
-  // Japanese and whole; a paradigm is its labels beside its forms; the
-  // sentences are numbered, and one in another register than a
-  // register-bound point says so.
+  // Japanese and whole; a paradigm is the point's forms, a table of its
+  // own (plan 235); the sentences are numbered, and one in another
+  // register than a register-bound point says so.
   const SHAPED = {
     ...RICH, pattern: 'です／だ', register: 'polite',
     steps: [
@@ -176,22 +223,29 @@ describe('the grammar lesson', () => {
     ],
   }
 
-  it('prints a use as its saying over its forms, a paradigm as labels beside forms, the rest as prose', async () => {
+  it('sets a paradigm apart as the point\'s forms, a use as its saying over its forms, the rest as prose', async () => {
     const screen = await mount(<GrammarLesson point={SHAPED} variant="sheet" />)
-    const uses = [...screen.container.querySelectorAll('.gl-use')]
-    expect(uses).toHaveLength(3)
+    // The forms before the uses: a paradigm is looked up, a use is read.
+    expect(labels(screen.container)).toEqual(['Structure', 'Rule', 'Forms', 'Use', 'Careful', 'Examples', 'Compare'])
+    const rows = [...screen.container.querySelectorAll('.gl-sec--forms .gl-table__row')]
+    expect(rows.map(r => r.querySelector('dt').textContent)).toEqual(['Negative', 'Past'])
+    expect(rows.map(r => r.querySelector('dd .gl-form__ja').textContent)).toEqual(['ではありません', 'でした'])
+    expect(rows[0].querySelector('dd .gl-form__gloss').textContent).toBe('spoken: じゃありません')
+    // A row is one line across the two columns, its label on the forms' line.
+    const [label, forms] = [rows[0].querySelector('dt'), rows[0].querySelector('dd')].map(el => el.getBoundingClientRect())
+    expect(label.right).toBeLessThanOrEqual(forms.left)
+    expect(Math.abs(label.top - forms.top)).toBeLessThan(forms.height)
+    const uses = [...screen.container.querySelectorAll('.gl-sec--use .gl-use')]
+    expect(uses).toHaveLength(2)
     expect(uses[0].querySelector('.gl-use__say').textContent).toBe('To say what something is')
     expect([...uses[0].querySelectorAll('.gl-form__ja')].map(f => [f.textContent, f.lang])).toEqual([['学生です', 'ja'], ['しずかです', 'ja']])
-    const labels = [...uses[1].querySelectorAll('dt')].map(d => d.textContent)
-    expect(labels).toEqual(['Negative', 'Past'])
-    expect(uses[1].querySelector('dd .gl-form__gloss').textContent).toBe('spoken: じゃありません')
-    expect(uses[2].textContent).toBe('Speeches.')
-    expect(uses[2].querySelector('.gl-forms, dl')).toBeNull()
+    expect(uses[1].textContent).toBe('Speeches.')
+    expect(uses[1].querySelector('.gl-forms, dl')).toBeNull()
   })
 
   it('sets the Japanese in the prose as Japanese, a formula whole', async () => {
     const screen = await mount(<GrammarLesson point={SHAPED} variant="sheet" />)
-    const rule = screen.container.querySelector('.gl-step--rule')
+    const rule = screen.container.querySelector('.gl-sec--rule')
     const runs = [...rule.querySelectorAll('.gl-ja')]
     expect(runs.map(r => r.textContent)).toEqual(['です', 'A\u00A0は\u00A0B\u00A0です', 'だ'])
     expect(runs.every(r => r.lang === 'ja' && r.classList.contains('gl-ja--word'))).toBe(true)
@@ -200,7 +254,7 @@ describe('the grammar lesson', () => {
 
   it('numbers the sentences and tags the one in another register', async () => {
     const screen = await mount(<GrammarLesson point={SHAPED} variant="sheet" />)
-    const exs = [...screen.container.querySelectorAll('.gl-block--examples .dict-ex')]
+    const exs = [...screen.container.querySelectorAll('.gl-sec--examples .dict-ex')]
     expect(exs.map(ex => ex.querySelector('.dict-ex__n').textContent)).toEqual(['1', '2'])
     expect(exs.map(ex => ex.querySelector('.dict-ex__tag')?.textContent ?? null)).toEqual([null, 'Casual'])
     // Under a neutral point every sentence is polite or casual by
@@ -211,7 +265,7 @@ describe('the grammar lesson', () => {
 
   it('sets a word\'s kanji under one reading, never across a highlight', async () => {
     const screen = await mount(<GrammarLesson point={SHAPED} variant="sheet" />)
-    const first = screen.container.querySelector('.gl-block--examples .dict-ex')
+    const first = screen.container.querySelector('.gl-sec--examples .dict-ex')
     expect([...first.querySelectorAll('rt')].map(rt => rt.textContent)).toEqual(['がくせい'])
     expect(first.querySelector('ruby').firstChild.nodeValue).toBe('学生')
     expect(first.querySelector('.dict-ex__hl').textContent).toBe('です')

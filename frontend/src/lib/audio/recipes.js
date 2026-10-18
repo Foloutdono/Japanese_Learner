@@ -56,6 +56,57 @@ function clatter(ctx, bus, count = FLAP_TIMES.length, scale = 1) {
   })))
 }
 
+// ── The level-up's clock (plan 200) ───────────────────────
+// The level-up is a scene on a clock (index.css, `.levelup`), and its
+// sound is scored against that clock, in seconds from the card's arrival:
+// the road fills from 0.55s to 2.15s along cubic-bezier(0.45, 0, 0.85,
+// 0.65) -- slow, then faster as it goes -- the card trembles from 1.30s in
+// thirteen steps of 83ms, and the ring and the sparks burst at 2.28s.
+// `level-charge` is played on the fill's own animationstart and
+// `level-burst` on the ring's, so the two stay on the card's clock.
+const FILL_FROM = 0.55
+const FILL_SPAN = 1.6
+const FILL_CURVE = [0.45, 0, 0.85, 0.65]
+const TREMBLE_FROM = 1.30
+const TREMBLE_STEP = 0.0832
+const TREMBLE_STEPS = 13
+const BURST_AT = 2.28
+
+/** The CSS's clock the level-up is scored against, held to it by XpToast.browser.test. */
+export const LEVEL_CLOCK = { FILL_FROM, FILL_SPAN, FILL_CURVE, TREMBLE_FROM, TREMBLE_STEP, TREMBLE_STEPS, BURST_AT }
+
+/** When, from the card's arrival, the road has filled `share` of its height. */
+function fillAt(share) {
+  const [x1, y1, x2, y2] = FILL_CURVE
+  const at = (a, b, s) => 3 * (1 - s) ** 2 * s * a + 3 * (1 - s) * s ** 2 * b + s ** 3
+  let lo = 0
+  let hi = 1
+  for (let i = 0; i < 32; i++) {
+    const mid = (lo + hi) / 2
+    if (at(y1, y2, mid) < share) lo = mid
+    else hi = mid
+  }
+  return FILL_FROM + FILL_SPAN * at(x1, x2, (lo + hi) / 2)
+}
+
+// C major's pentatonic from C5 up two octaves: no note in it can clash
+// with the open fifths the swell builds under it, or with the C major
+// the road bursts into.
+const CLIMB = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5, 1174.66, 1318.51, 1567.98, 1760.0, 2093.0]
+
+/** A note that only grows: it climbs to its last instant and is cut there. */
+function swelling(note, overtones = [0.6, 0.38, 0.2]) {
+  const attack = note.dur - 0.05
+  return [1, 2, 3, 4].slice(0, overtones.length + 1).map((n, i) => ({
+    ...note,
+    freq: note.freq * n,
+    to: note.to ? note.to * n : undefined,
+    peak: note.peak * (i ? overtones[i - 1] : 1),
+    attack,
+    type: i ? 'sine' : note.type,
+  }))
+}
+
 // ── The recipes ───────────────────────────────────────────
 // An event is the moment; its variants are the voices that can answer
 // it, the first being the one that ships. A variant is
@@ -488,6 +539,39 @@ const EVENTS = [
         } },
     ],
   },
+  // 菱 — the Practice gate's pantograph (plan 225): the air that lifts
+  // it to the wire or lets it fold, and the spark where its head meets
+  // the wire. Written on the canvas that drew the gate, at its levels;
+  // shipped with their first voices until the listening panel's round.
+  {
+    key: 'pantograph-air', category: 'sfx', family: 'station',
+    label: 'Pantograph', jp: '菱', where: 'The Practice gate: the pantograph rising to the wire or folding onto the roof',
+    variants: [
+      { key: 'air', label: 'Air', note: 'The air that lifts it: a soft band of noise swelling as the arms unfold and settling as the head meets the wire.',
+        play: (c, b) => noiseSweep(c, b, { dur: 0.9, peak: 0.05, from: 650, mid: 1500, to: 600, q: 0.5, hold: 0.5, attack: 0.15 }) },
+      { key: 'breath', label: 'Short breath', note: 'Half the travel and a narrower band: the same air, further down the platform.',
+        level: 1.16,
+        play: (c, b) => noiseSweep(c, b, { dur: 0.55, peak: 0.05, from: 700, mid: 1400, to: 650, q: 0.7, hold: 0.45, attack: 0.1 }) },
+    ],
+  },
+  {
+    key: 'pantograph-spark', category: 'sfx', family: 'station', meter: 'peak',
+    label: 'Spark at the wire', jp: '火花', where: 'The Practice gate: the head touching the wire, and a train arcing as it brakes or pulls out',
+    variants: [
+      { key: 'crackle', label: 'Crackle', note: 'Four bright ticks in a tenth of a second, high and dry: the arc as the strip meets the wire.',
+        play: (c, b) => noiseTicks(c, b, [
+          { at: 0, freq: 5200, peak: 0.5, q: 3, dur: 0.02 },
+          { at: 0.03, freq: 6900, peak: 0.35, q: 3, dur: 0.015 },
+          { at: 0.07, freq: 4600, peak: 0.3, q: 3, dur: 0.02 },
+          { at: 0.11, freq: 7400, peak: 0.2, q: 3, dur: 0.012 },
+        ]) },
+      { key: 'snap', label: 'Snap', note: 'One tick and its echo: a spark you see more than hear.',
+        play: (c, b) => noiseTicks(c, b, [
+          { at: 0, freq: 6000, peak: 0.5, q: 3, dur: 0.02 },
+          { at: 0.035, freq: 5200, peak: 0.2, q: 3, dur: 0.015 },
+        ]) },
+    ],
+  },
   {
     key: 'platform-chime', category: 'ui', family: 'station',
     label: 'Platform sign lands', jp: '到着ホーム', where: 'The onboarding arrival cutscene',
@@ -602,16 +686,66 @@ const EVENTS = [
     ],
   },
   {
-    // Plan 142: the level is clipped on the pass rather than turned
-    // over on a board, so its voice is the gate's punch (改札鋏), not
-    // the board's drums. Played on the cut itself -- XpToast starts it
-    // from the bite's own animationstart -- so it lands on the frame
-    // the notch opens, never on a timer guessing at the CSS.
+    // Plan 200: the level is a build and a hit now (since plan 173 it has
+    // been the card's engraving filling and bursting, not a punch), and
+    // is scored as one: this is the build, on the fill's own
+    // animationstart, a swell and a run of bars that quicken with the
+    // road, a roll that grows with the tremble, a riser, all falling
+    // away in the last 50ms, so the burst, which is `level-burst` below,
+    // lands on a breath.
+    key: 'level-charge', category: 'ui', family: 'rewards',
+    label: 'Level up, the build', jp: '充填', where: 'The road and the crossing of the card\'s 辻 filling, 2.3s, into the burst',
+    variants: [
+      { key: 'build', label: 'Build', note: 'Open fifths rising under a run of bars that bunches up as the road quickens, a roll growing with the tremble and a riser: all of it falling away in the last 50ms, so the burst lands on a breath.',
+        play: (c, b) => {
+          // The swell: C and G, a fifth up in each, ending on the dominant's
+          // open fifth so the burst resolves into C.
+          tones(c, b, [
+            ...swelling({ freq: 130.81, to: 196.0, at: 0.5, dur: BURST_AT - 0.5, peak: 0.16, type: 'triangle', floor: 0.3 }),
+            ...swelling({ freq: 261.63, to: 392.0, at: 0.5, dur: BURST_AT - 0.5, peak: 0.09, type: 'triangle', floor: 0.3 }, [0.5, 0.3]),
+            ...swelling({ freq: 392.0, to: 587.33, at: 0.5, dur: BURST_AT - 0.5, peak: 0.06, type: 'triangle', floor: 0.3 }, [0.5]),
+          ])
+          // The run: the first bar as the road sets off, each of the others as
+          // it passes the next eleventh of its height.
+          bar(c, b, CLIMB.map((freq, i) => ({
+            freq, at: fillAt(i / CLIMB.length), dur: 0.32,
+            peak: 0.12 + 0.1 * (i / (CLIMB.length - 1)), material: 'metal',
+          })))
+          // The roll, one knock to each step of the tremble, each harder.
+          for (let k = 0; k < TREMBLE_STEPS; k++) {
+            const grow = k / (TREMBLE_STEPS - 1)
+            const at = TREMBLE_FROM + k * TREMBLE_STEP
+            noiseTicks(c, b, [{ at, freq: 700, peak: 0.25 + 0.7 * grow, q: 2.5, dur: 0.05 }])
+            thump(c, b, { at, from: 150, to: 95, dur: 0.07, peak: 0.04 + 0.12 * grow })
+          }
+          // The riser, as the crossing fills.
+          noiseSweep(c, b, { at: 0.9, dur: 1.38, peak: 0.3, from: 1200, to: 9000, q: 0.9, swell: 0.97 })
+        } },
+      { key: 'run', label: 'Run', note: 'The run of bars alone, quickening with the road. Nothing under it, nothing after.',
+        level: 1.75,
+        play: (c, b) => bar(c, b, CLIMB.map((freq, i) => ({
+          freq, at: fillAt(i / CLIMB.length), dur: 0.32,
+          peak: 0.1 + 0.14 * (i / (CLIMB.length - 1)), material: 'metal',
+        }))) },
+    ],
+  },
+  {
+    // Plan 142: the level was clipped on the pass rather than turned
+    // over on a board, so its voice was the gate's punch (改札鋏), not
+    // the board's drums. Played on the cut itself -- XpToast started it
+    // from the bite's own animationstart -- so it landed on the frame
+    // the notch opened, never on a timer guessing at the CSS.
+    //
+    // Plan 200: the level-up no longer plays it (its voice is
+    // `level-burst`, below, since plan 173 made the level the card's
+    // engraving and not a punch). The milestone tickets' clipper
+    // (MilestoneTicket, MilestoneMonth) is the punch still, and this is
+    // its voice.
     key: 'pass-clip', category: 'ui', family: 'rewards', meter: 'peak',
-    label: 'Level up', jp: '改札鋏', where: 'The gate\'s punch clipping your pass as the level turns over',
+    label: 'Gate punch', jp: '改札鋏', where: 'The gate\'s punch clipping a streak\'s ticket (it clipped your pass as the level turned over until plan 200)',
     variants: [
       { key: 'punch-voiced', label: 'Punch, voiced', note: 'Steel jaws through card: the snip, a knock moved up into steel, and the jaws ringing, so a level-up reads on a phone as more than a click.',
-        play: (c, b) => {
+                play: (c, b) => {
           noiseTicks(c, b, [
             { freq: 3600, peak: 0.77, q: 7, dur: 0.022 },
             { at: 0.006, freq: 1250, peak: 0.572, q: 4, dur: 0.035 },
@@ -644,6 +778,74 @@ const EVENTS = [
             { at: 0.004, freq: 1300, peak: 0.30, q: 4, dur: 0.028 },
             { at: 0.105, freq: 3600, peak: 0.70, q: 7, dur: 0.022 },
             { at: 0.110, freq: 1250, peak: 0.45, q: 4, dur: 0.035 },
+          ])
+        } },
+    ],
+  },
+  {
+    // Plan 200: the burst the build (`level-charge`) leads to, played on
+    // the ring's own animationstart -- XpToast starts it -- so it lands
+    // on the frame the crossing flares, never on a timer guessing at the
+    // CSS. The gate's snip is still the first thing heard, then
+    // everything the build was holding: a crash and a boom, C major
+    // struck in bars over a pad, a glitter of the sparks and, as the new
+    // figure lands (0.32s, the CSS's `levelup-now`), two bars that
+    // settle it. The rarest sound in the app, so the biggest.
+    key: 'level-burst', category: 'ui', family: 'rewards',
+    label: 'Level up', jp: '進級', where: 'The card\'s crossing bursting as the level turns over',
+    variants: [
+      { key: 'crossing', label: 'Crossing', note: 'The gate\'s snip, a crash and a boom, C major struck in bars over a pad, a glitter of sparks, and two bars as the figure lands, all in the concourse.',
+        space: 0.3,
+        play: (c, b) => {
+          // The snip and the knock under it: the first 20ms are the punch's.
+          noiseTicks(c, b, [
+            { freq: 3600, peak: 0.6, q: 7, dur: 0.022 },
+            { at: 0.004, freq: 900, peak: 1.2, q: 2.5, dur: 0.08 },
+          ])
+          // The crash.
+          noiseSweep(c, b, { dur: 1.3, peak: 0.42, from: 9000, mid: 3500, to: 500, midAt: 0.25, q: 0.6, hold: 0.02, attack: 0.004 })
+          // The boom, voiced so a phone has something to play.
+          tones(c, b, voiced({ freq: 98.0, to: 46, dur: 1.1, peak: 0.34, attack: 0.006 }, [1.0, 0.8, 0.5]))
+          thump(c, b, { from: 140, to: 50, dur: 0.5, peak: 0.3 })
+          // C major, rolled up in four bars...
+          bar(c, b, [
+            { freq: 523.25, at: 0, dur: 1.8, peak: 0.2, material: 'metal' },
+            { freq: 783.99, at: 0.025, dur: 1.8, peak: 0.19, material: 'metal' },
+            { freq: 1046.5, at: 0.05, dur: 1.8, peak: 0.19, material: 'metal' },
+            { freq: 1318.51, at: 0.075, dur: 1.7, peak: 0.17, material: 'metal' },
+            { freq: 1567.98, at: 0.1, dur: 1.6, peak: 0.15, material: 'metal' },
+          ])
+          // ...over a pad, each note doubled a hair apart so it breathes.
+          tones(c, b, [261.63, 329.63, 392.0, 523.25].flatMap((freq, i) => [0.997, 1.003].map(d => ({
+            freq: freq * d, at: 0.01, dur: 1.8, peak: 0.1 - i * 0.01, type: 'triangle', attack: 0.06,
+          }))))
+          // The glitter of the sparks.
+          bar(c, b, [
+            [2093.0, 0.03], [2637.02, 0.08], [3135.96, 0.13], [2349.32, 0.2],
+            [3135.96, 0.26], [2637.02, 0.34], [2093.0, 0.43], [3135.96, 0.53],
+          ].map(([freq, at], i) => ({ freq, at, dur: 0.5, peak: 0.09 - i * 0.007, material: 'glass' })))
+          // The figure lands: G6 and C7, the fifth up to the octave.
+          bar(c, b, [
+            { freq: 1567.98, at: 0.32, dur: 1.1, peak: 0.16, material: 'metal' },
+            { freq: 2093.0, at: 0.38, dur: 1.3, peak: 0.15, material: 'glass' },
+          ])
+        } },
+
+      { key: 'bare', label: 'Crossing, bare', note: 'The same hit and the same chord, dry and short: no pad, no glitter, no room. A third of the length.',
+        level: 1.16,
+        play: (c, b) => {
+          noiseTicks(c, b, [
+            { freq: 3600, peak: 0.6, q: 7, dur: 0.022 },
+            { at: 0.004, freq: 900, peak: 1.2, q: 2.5, dur: 0.08 },
+          ])
+          noiseSweep(c, b, { dur: 0.7, peak: 0.42, from: 9000, mid: 3500, to: 500, midAt: 0.25, q: 0.6, hold: 0.02, attack: 0.004 })
+          tones(c, b, voiced({ freq: 98.0, to: 46, dur: 0.7, peak: 0.34, attack: 0.006 }, [1.0, 0.8, 0.5]))
+          bar(c, b, [
+            { freq: 523.25, at: 0, dur: 0.9, peak: 0.2, material: 'metal' },
+            { freq: 783.99, at: 0.025, dur: 0.9, peak: 0.19, material: 'metal' },
+            { freq: 1046.5, at: 0.05, dur: 0.9, peak: 0.19, material: 'metal' },
+            { freq: 1318.51, at: 0.075, dur: 0.9, peak: 0.17, material: 'metal' },
+            { freq: 1567.98, at: 0.1, dur: 0.9, peak: 0.15, material: 'metal' },
           ])
         } },
     ],

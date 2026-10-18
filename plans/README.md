@@ -7261,3 +7261,60 @@ Open: the six points no tour can light (〜て（理由）, 〜を（移動）, 
 to six questions where their catalogue holds too few contrast sentences
 and rivals' examples.
 
+
+## Plan 216 — 初見, a kana or a kanji met before it is drilled (2026-10-16)
+
+The owner: tutorials for kana and kanji the first time they are seen,
+like the grammar one -- a slide for how to read them and what they mean,
+one for how to write them (a guided exercise, each stroke dragged from
+point A to point B), one for how they are used (simple words). Built in
+the grammar tour's frame (the owner's "just like the grammar one"), not
+drawn on a canvas first: the trace board is a new piece of it, and the
+first thing to put in front of the owner.
+
+| Phase | What | Status |
+|---|---|---|
+| 216 | **Backend**: `study/glyph_tour.py` (KanjiVG's strokes in writing order, the kana and kanji payloads, the kanji's words one a reading at its level first, `mark_glyph_tours`: due once per character, never for a character reviewed on any kana or kanji track, two queries a batch), `glyph_tours` (first tour only: misses, shown), `POST /api/glyph/tour`, the tour on `/api/kana/cards` (now with `lang`), `/api/kanji/cards`, `/api/frequency/kanji/cards` and Today's queue, the account's erasure, `glyph_tour_done`. **Frontend**: `GlyphTour` (read, write, use), `TraceBoard`, `GlyphGate` in TodayRun, KanaRun and KanjiRun, `domain/strokePath.js` (KanjiVG's M/C/S read without the DOM) and `domain/trace.js` (the verdict: start, end, path), the `gt-*` rules and the desk's one. Tests: `test_glyph_tour.py`, `GlyphTour.browser`, `glyphTour.phone`, `strokePath`, `trace` | DONE (2026-10-16) |
+
+Open: personal decks (StudyRun) do not gate, as they do not for grammar;
+a combination (きゃ, えい) has no tour; the trace's tolerances
+(`domain/trace.TRACE`) were set by hand and want a learner's thumb.
+
+## Plan 217 — 回復運転, the irregular learner caught up (2026-10-16)
+
+The owner: irregular learners need a way back in, so they are not discouraged and swamped by everything they owe; a popup offering to reschedule, and an option in Settings. Measured in the code first: nothing bounded the day's reviews (the pace bounds the new cards only), a day cleared only on an empty gate (plan 191), so a learner back from ten days away met four hundred cards and a partial finish at every run for a week, and a rest ticket bridged two missed days at most. Proposed: the comeback sheet, a ceiling in Settings, the day cleared on the share, an absence declared ahead, notifications that invite back; the owner's answer: all of it. Built on the defaults proposed (spread over 5 days, 3/5/7 offered; gently 20 a day; offered past 3 days of the learner's load and 60 cards; a ceiling of 50/100/150), without a canvas: the owner asked for everything at once, so the screens reuse the components they stand beside rather than a drawn direction.
+
+| Phase | What | Status |
+|---|---|---|
+| 217a | **The share**: `study/review_cap.py` (pure: the due lanes cut to `cap - spent`, a pair reviewed today and every mode of a card met today exempt, the rest ranked learning first then least overdue for its interval; `owed`, `spread_per_day`), `core/review_plan.py` (the plan on `user_profiles`: `review_cap`, `catchup_cap/days/from`, `comeback_declined_on`, `away_from/until`; `cut`, `settle` -- a catch-up ends the reading its owed fits one share --, `comeback`, `daily_load`, `bridge_away`), `srs.get_reviewed_today`, `srs.last_studied_day`. `_day_queue`, `/api/today/cards` and `/api/today/ahead` cut; new cards paused during a catch-up and from two days before an absence; `extra=1` serves what the share held back; `next_due` the next share's midnight when only held reviews wait; tomorrow counted under the ceiling | DONE |
+| 217b | **The routes**: `GET /api/today`'s `review` (`cap`, `held`, `catchup`, `away`, `comeback` priced per spread); `routes/review_plan.py` (`GET /api/review-plan`, `PUT …/cap`, `POST`/`DELETE …/catchup`, `PUT`/`DELETE …/away`, every body bounded); an absence's passed days written as rest tickets of milestone 0 (`srs.bridge_away_days`, before the ticket bridge); events `catchup_offer` (client), `catchup_choice`, `catchup_done`, `review_cap_set`, `away_set`, `away_day_used`. Tests: `test_review_plan.py` | DONE |
+| 217c | **The screens**: `ComebackSheet` over the gate (Today's sheet, the paces as `.svc` cards, a spread's days as Today's seg), the catch-up a figure of the day (`TodayDay`, a door to Settings), « Réviser plus » over the cleared gate (`QuietButton`, `/today/run?extra=1`), Settings › Révisions (`ReviewsPage`: the ceiling and its warning under the load, the catch-up and its stop, an absence's two dates), the notification inviting back instead of counting a backlog (`ahead.js`). Tests: `ComebackSheet.browser`, `ReviewsPage.browser`, `TodayScreen.browser`, `TodayRun.browser`, `ahead.test` | DONE |
+
+Open: the screens were built without a canvas; if the owner wants them drawn, the comeback sheet is the one to draw first. The comeback's thresholds (3 days of load, 60 cards, a week's quiet after "all now") are first guesses for the weekly digest to correct once `catchup_offer` / `catchup_choice` have a few weeks behind them.
+
+## Plan 219 — 湖の刻, the ambiance of the hour (2026-10-16)
+
+The owner: change the ambiance to be in tune with the new Today screen; options to choose from; long enough and looping nicely. Measured first: the one ambiance was a 15-second metro-platform recording (`ambiant/selection`) behind the station pages only, `ambiant/home` played nowhere, and Today had none. Three rounds on an audition page (an Artifact): six directions drawn from the print (round 1); the owner's call, one per hour of the print, the setting a lake near Fuji with a train line (round 2); then less dense, and the train and birds reworked (round 3). Then: behind Today and the station pages. (First committed as 218, which plan 215's trail work, #353, had claimed on main meanwhile.)
+
+| Phase | What | Status |
+|---|---|---|
+| 219a | **The generator**: `frontend/scripts/ambiance/` (kit: the loop as a circle, so the seam is none; sounds; the four hours; build: `public/sounds/ambiant/<REV>/`, `src/lib/audio/ambiance.json`, each file the loop padded with a second of itself either side) | DONE |
+| 219b | **The player**: `lib/audio/ambiance.js` plays the hour's loop between its pads (`playBuffer`'s `loopStart`/`loopEnd`), from a random point, crossfades when the print's hour turns (`domain/printHour.js`, the print's rule moved out of `usePrint`), decodes at 24 kHz and holds one hour. `TodayScreen` and `SelectionScreen` start it. Test: `src/ambiance.test.js` | DONE |
+
+Open: synthesised, and checked by measurement rather than by ear; the owner's ear is the next round. The print's train crosses every 46 s and the sound's once a loop, unsynchronised.
+
+## Plan 235 — 訳, a Passage's lines held short, translated, and explained where they stand (2026-10-16)
+
+The owner, over two phone screenshots of a talk's track: "make sure the sentences can't get too long, and add the translation for each sentence; also for the explanation button give a bit of context to it, not just the sentence: a snippet of the text and some metadata." Measured first: one cue was one line (ADR 0003, 2026-08-27), and a 44-character cue drew five rows at display size; a line's translation came only with Explain's deep tier (plan 161), one call a line; Explain sent the line alone. Built without a canvas: the translation's place on the stage was already drawn (plan 219's `anl-m__tr`, plan 161's `anl-subs__tr`). Numbered 235: first claimed as 229 (main said 226, an open branch held 226–228), renumbered before the first push when main took 229–234 meanwhile (229, the carousel studio).
+
+| Phase | What | Status |
+|---|---|---|
+| 235a | **Lines held short**: `study/line_cut.py` (`MAX_LINE_WIDTH` 22, a Latin letter or space half; cut at a mark or space, a clause's end, a phrase's end, never before a particle, an auxiliary, a suffix or a mark nor inside a verb's chain; the fewest pieces, near one width; each piece's time from the track's word times or the beats between the nearest two, the pieces tiling the cue, their `word_times` rebased). `sentences_from_cues` cuts a wide Japanese cue; `routes/video._current` cuts a session stored before, and Explain reads lines through it. ADR 0003 amended. Tests: `test_line_cut.py`, `test_cue_sentences.py` | DONE |
+| 235b | **A translation per line**: `study/line_translate.py` (one call for a block of 20 lines, two either side and the video's title and channel as context, `accept=` its JSON), `POST /api/video/session/{id}/translations` (by block, kept on `video_sessions.translations` by the line's text, `LINE_TRANSLATION_DAILY_LIMIT` 60 blocks a day, 429 `translation_limit`, 503 `ai_unavailable`), `ai_use` feature `line_translation` (events.py, track.js), the cost model's row. Frontend: `useLineTranslations` (the block in focus and the next five lines ahead, once per Passage and language), the translation under the line on the phone's stage and on the desk's slab, holding its line while it comes; the explanation's sheet quotes it. ADR 0001 amended. Tests: `test_line_translate.py`, `AnalyzerScreen.translation.phone`, `.desktop` | DONE |
+| 235c | **Explain where the line stands**: `routes/phrase.deep_context` (the source, the video's title and channel read off the player, the line's place and time, two lines either side) in the deep tier's user block, cached under a key with the context; the phrase alone keeps its key, so no `CACHE_VERSION` bump. `VideoPlayer.channel()`. | DONE |
+
+| 235d | **Typed and photographed Passages alike** (the owner: "do it here"): `passage_sentences(lines=True)` holds the analyser's Passage to the line width (`PhraseRequest.lines`, sent by the analyser alone; `whole`, reading practice, the runs and the dictionary untouched), `GET /api/phrase/history/{id}` comes back in its lines with its `source`; `POST /api/phrase/history/{id}/translations` (the same `translate_block`, kind `text`, kept on `phrase_history.translations`); `POST /api/phrase/history/{id}/sentence/{i}/explain` with `passage_context` (two sentences either side; a one-sentence Passage asked alone, under the shared key), found again on reopening, an explanation bought before under the plain key too. Frontend: `passage.historyId`, `useLineTranslations` by `path`. Tests: `test_typed_lines.py`, `AnalyzerScreen.translation.phone` | DONE |
+
+| 235e | **The text desk's stage** (the canvas "Tsuji analyser — text desk stage", https://claude.ai/artifact/DNFMRELR86mTbncAYn9RmU: today and four directions at 1280×800 and 1280×600; the owner's pick **C**): several typed sentences' words fold to one line under the sumi (`WordsFold` in WordsList.jsx: "Mots de la phrase", the count, the words on chips with their state's rule, the one in focus edged in ink), the line opening the list in a sheet whose row puts its word in focus. The stage gets 220px back: at 1280×800 it holds the 22-character line at display size, its translation and Explain whole (550px for 550), and at 1280×600 at the short desk's sizes. The stage starts at its top when it overflows (`justify-content: safe center`). One sentence keeps its words over its grammar (B′). Tests: `analyzer.desktop` (the fold, the fit), `analyzer.short` | DONE |
+
+Open: a grammar point that spans a cut sentence is lost to both halves (the cut goes at a mark or a clause's end first). A kept video line reopened from the shelf no longer finds its explanation (cached under its context). The first block is often asked before the player knows the video's title. `docs/analytics/metabase/08-ia-plafonds.sql` does not list `line_translation`'s ceiling yet.

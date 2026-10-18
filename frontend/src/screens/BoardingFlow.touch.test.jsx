@@ -18,7 +18,9 @@ import '../index.css'
 // ── 短い車内 — the boarding on a short phone, under a thumb ──────
 // Reported from an Android install (2026-09-09): a pale rail down the
 // right of the welcome, of "why" and of "level", the choices ending
-// 10px short of the button under them. Three things had to be true at
+// 10px short of the button under them (the boarding asked more then:
+// since plan 247 the questions it no longer asks are the card's
+// sheets, held here too). Three things had to be true at
 // once for that, and this file holds two of them down:
 //
 //   1. the app styled `::-webkit-scrollbar` and `scrollbar-width` for
@@ -66,11 +68,13 @@ vi.mock('../lib/supabase', () => ({
     },
   },
 }))
-// The nudge is native-only, and this is the web: seven stops, no eighth.
+// The nudge is native-only, and this is the web: the hour's sheet adds
+// to a calendar instead.
 vi.mock('../lib/platform', () => ({
   isNative: () => false,
   canNudge: () => false,
   requestNudgePermission: async () => false,
+  nudgePermission: async () => 'denied',
 }))
 vi.mock('../lib/audio', async (importOriginal) => ({
   ...(await importOriginal()),
@@ -94,8 +98,9 @@ const live = screen => screen.container.querySelector('.brd__car:not(.brd__car--
 const q = (screen, sel) => live(screen)?.querySelector(sel) ?? screen.container.querySelector(sel)
 
 async function click(screen, sel) {
+  // The next screen comes a frame after the tap (a transition, go()).
+  await vi.waitFor(() => expect(q(screen, sel), sel).toBeTruthy(), { timeout: 2000 })
   const el = q(screen, sel)
-  expect(el, sel).toBeTruthy()
   el.click()
   await settle(20)
 }
@@ -112,12 +117,7 @@ describe('the boarding on a 390x667 handset', () => {
   it('asks every question, and answers, without scrolling', async () => {
     const screen = await render(
       <LangProvider>
-        <BoardingFlow
-          session={{ access_token: 'tok' }}
-          initialProfile={{ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 }}
-          onComplete={vi.fn()}
-          dryRun
-        />
+        <BoardingFlow session={{ access_token: 'tok' }} onComplete={vi.fn()} guest dryRun />
       </LangProvider>
     )
     const over = {}
@@ -125,69 +125,112 @@ describe('the boarding on a 390x667 handset', () => {
       await settle()
       over[stepOf(screen)] = overflowOf(screen)
     }
+    // A sheet is its own scroll (index.css, `.sheet`): one that ran past
+    // the handset would be read a row at a time over the card.
+    async function recordSheet(open, kind) {
+      await click(screen, open)
+      await settle(500)
+      const sheet = document.querySelector(`.brd-sheet--${kind}`)
+      expect(sheet, kind).toBeTruthy()
+      over[`sheet:${kind}`] = sheet.scrollHeight - sheet.clientHeight
+      document.querySelector('.scrim').click()
+      await settle(200)
+      expect(document.querySelector('.brd-sheet'), `${kind} shut`).toBeNull()
+    }
 
-    await record()                                    // name
-    await click(screen, '[data-action="continue"]')
-    await record()                                    // why
-    await click(screen, '[data-motive="trip"]')
-    await click(screen, '[data-action="continue"]')
     await record()                                    // kana
     // Both scripts -> the level list rather than the reveal. The level
     // is the longest list in the boarding: the novice and all five
     // stops, six rows each carrying a code, a name and a line of
-    // prose. It is the case that failed, and the goal behind it is the
+    // prose. It is the case that failed, and the goal's sheet is the
     // same rows, one fewer.
     await click(screen, '[data-kana="both"]')
     await record()                                    // level
     await click(screen, '[data-level="novice"]')
     await click(screen, '[data-action="continue"]')
-    await record()                                    // goal
-    await click(screen, '[data-goal="N5"]')
-    await click(screen, '[data-action="continue"]')
-    await record()                                    // lines
-    await click(screen, '[data-action="continue"]')
-    await record()                                    // rhythm
-    await click(screen, '[data-action="continue"]')
-    await record()                                    // time
-    await click(screen, '[data-action="continue"]')
-
-    // No Building since plan 168: the plan arrives under the arrival
-    // signboard, which any tap sends on its way.
-    expect(stepOf(screen)).toBe('plan')
-    await settle(200)
-    window.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
-    await record()                                    // plan
-    await click(screen, '[data-action="continue"]')
-    await record()                                    // pass
+    await record()                                    // card
+    await recordSheet('[data-door="destination"]', 'goal')
+    await recordSheet('[data-door="service"]', 'rhythm')
+    await recordSheet('[data-door="hour"]', 'hour')
+    await recordSheet('[data-door="lines"]', 'lines')
+    await recordSheet('[data-door="name"]', 'name')
+    await recordSheet('[data-action="keep"]', 'account')
 
     expect(Object.keys(over)).toEqual(
-      ['name', 'why', 'kana', 'level', 'goal', 'lines', 'rhythm', 'time', 'plan', 'pass'])
+      ['kana', 'level', 'card', 'sheet:goal', 'sheet:rhythm', 'sheet:hour', 'sheet:lines', 'sheet:name', 'sheet:account'])
     expect(Object.entries(over).filter(([, px]) => px > 0)).toEqual([])
   }, 90000)
+
+  // The test in the boarding (plan 224): its longest kind of question,
+  // a sentence with its gap, four words under it, the levels over it
+  // and its two ways out over the gate -- on the small handset too.
+  it('asks the test\'s longest question without scrolling', async () => {
+    apiJsonWithTimeout.mockImplementation(async () => ({
+      seed: 1, done: false, level: 'N3', perLevel: { N5: { correct: 3, total: 3, cleared: true }, N4: { correct: 4, total: 5, cleared: true } },
+      question: {
+        id: 'q', sectionId: 'N3', kind: 'context', type: 'mcq-text',
+        promptJp: 'この地域では、毎年夏になると大勢の観光客が（　　）ので、道路がとても混雑する。',
+        choices: ['押し寄せる', '打ち明ける', '立ち去る', '見落とす'].map((textJp, i) => ({ id: `c${i + 1}`, textJp })),
+      },
+    }))
+    const screen = await render(
+      <LangProvider>
+        <BoardingFlow session={{ access_token: 'tok' }} onComplete={vi.fn()} dryRun />
+      </LangProvider>
+    )
+    await settle()
+    await click(screen, '[data-kana="both"]')
+    await click(screen, '[data-action="level-test"]')
+    await settle()
+    expect(stepOf(screen)).toBe('test')
+    expect(screen.container.querySelectorAll('.brd__car:not(.brd__car--out) .mcq-row')).toHaveLength(4)
+    expect(overflowOf(screen)).toBe(0)
+  }, 30000)
 
   // The other road out of the kana (plan 168): one script read, the two
   // words read out as lines, and the first stop under them.
   it('reads the reveal without scrolling', async () => {
     const screen = await render(
       <LangProvider>
-        <BoardingFlow
-          session={{ access_token: 'tok' }}
-          initialProfile={{ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 }}
-          onComplete={vi.fn()}
-          dryRun
-        />
+        <BoardingFlow session={{ access_token: 'tok' }} onComplete={vi.fn()} dryRun />
       </LangProvider>
     )
-    await settle()
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    await click(screen, '[data-motive="trip"]')
-    await click(screen, '[data-action="continue"]')
     await settle()
     await click(screen, '[data-kana="hiragana"]')
     await settle()
     expect(stepOf(screen)).toBe('reveal')
     expect(overflowOf(screen)).toBe(0)
+  }, 30000)
+
+  // A session with an address boards a NEW pass for it (docs/oauth.md):
+  // the card's line says the address and holds the way to another
+  // account. The reader's card, in both tables, with an address as long
+  // as a real one runs.
+  it.each(['fr', 'en'])('names a pass its address, and the switch, without scrolling (%s)', async lang => {
+    localStorage.setItem('lang', lang)
+    try {
+      const screen = await render(
+        <LangProvider>
+          <BoardingFlow
+            session={{ access_token: 'tok', user: { email: 'marie-claire.dupont-moreau@gmail.com' } }}
+            onComplete={vi.fn()}
+            onSignIn={vi.fn()}
+            dryRun
+          />
+        </LangProvider>
+      )
+      await settle()
+      await click(screen, '[data-kana="both"]')
+      await settle()
+      await click(screen, '[data-level="N4"]')
+      await click(screen, '[data-action="continue"]')
+      await settle()
+      expect(stepOf(screen)).toBe('card')
+      expect(q(screen, '[data-action="switch-account"]')).toBeTruthy()
+      expect(overflowOf(screen)).toBe(0)
+    } finally {
+      localStorage.removeItem('lang')
+    }
   }, 30000)
 
   it('opens on a welcome that fits', async () => {

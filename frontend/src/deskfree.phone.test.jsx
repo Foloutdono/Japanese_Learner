@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { LangProvider } from './LangContext'
 import ModeSelector from './components/selection/ModeSelector'
@@ -47,12 +47,17 @@ const apiFetch = vi.hoisted(() => vi.fn())
 vi.mock('./lib/api', () => ({
   api: p => p,
   apiFetch,
-  apiJson: vi.fn(),
+  // The shared answers (lib/cachedJson, plan 211) ask through apiJson;
+  // a case that answers apiJson itself overrides this.
+  apiJson: vi.fn(async (...a) => (await apiFetch(...a)).json()),
   apiJsonWithTimeout: vi.fn(async path => (path === '/api/stats' ? STATS : REPORT)),
   apiUpload: vi.fn(),
   ApiError: class extends Error {},
 }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
+const { forgetCachedJson } = await import('./lib/cachedJson')
+// Each case asks with its own answers: none is kept across (plan 211).
+afterEach(() => { forgetCachedJson() })
 
 const settle = (ms = 120) => new Promise(r => setTimeout(r, ms))
 
@@ -373,7 +378,6 @@ describe('the mock exam (plan 115, P4)', () => {
     expect(document.querySelector('.exam-dock .exam-tiles')).not.toBeNull()
     expect(document.querySelector('.exam-run__head [role="timer"]')).not.toBeNull()
     expect(document.querySelector('.exam-page .exam-ask__scroll .exam-passage__text')).not.toBeNull()
-    expect(document.querySelector('.exam-sheetbar, .exam-meta, .exam-card')).toBeNull()
     expect(document.querySelector('[class*="desk-"], [aria-keyshortcuts]')).toBeNull()
     document.querySelector('.exam-run__sheet').click()
     await settle(250)
@@ -399,7 +403,7 @@ describe('the mock exam (plan 115, P4)', () => {
     const rows = document.querySelectorAll('.exam-miss')
     expect(rows).toHaveLength(1)
     expect(rows[0].getAttribute('aria-expanded')).toBe('false')
-    expect(document.querySelector('[aria-current="page"], .desk-split, .exam-card')).toBeNull()
+    expect(document.querySelector('[aria-current="page"], .desk-split, .desk-marksheet, .desk-book')).toBeNull()
     expect(document.querySelectorAll('.exam-res__part')).toHaveLength(1)
     rows[0].click()
     await settle()
@@ -609,17 +613,18 @@ describe('the keys and the boards (plan 115, P8)', () => {
   })
 })
 
-// ── plan 166 — the gate a phone keeps ──
-// On the desk the gate is plan 135's bands, head and fare foot
-// (today.wide.test.jsx). A phone draws the day in one gesture: one
-// card, the gate under it with no key printed, and the switches in a
-// sheet -- a column there, one lane to a row across the whole of it.
-describe('the gate on a phone (plan 166)', () => {
-  it('keeps the switches in a sheet, one lane to a row, and prints no key', async () => {
+// ── plans 166, 199 — the gate a phone keeps ──
+// On the desk the dial stands beside a column of the services, open
+// (today.wide.test.jsx). A phone draws the day at a glance: the dial,
+// the gate under it with no key printed, and the switches in a sheet --
+// a line to a row across the whole of it, its modes a row each.
+describe('the gate on a phone (plans 166, 199)', () => {
+  it('keeps the switches in a sheet, a line to a row, and prints no key', async () => {
     apiFetch.mockImplementation(async () => ({
       ok: true, status: 200, json: async () => ({ balance: 50, cap: 200, unlimited: false, enforced: false }),
     }))
     const { default: GateCard } = await import('./components/station/GateCard')
+    const { MemoryRouter } = await import('react-router-dom')
     const lane = (source, deck, mode, due) => ({ id: `${source}:${deck}:${mode}`, kind: 'section', source, deck, mode, due, new: 0 })
     const lanes = [
       lane('kana', 'hiragana_basic', 'kana.flashcard.f2b', 18),
@@ -631,28 +636,42 @@ describe('the gate on a phone (plan 166)', () => {
     ]
     await render(
       <LangProvider>
-        <main className="today">
-          <GateCard today={{ total: lanes.reduce((n, l) => n + l.due, 0), lanes, by_source: {}, next_due: null }} />
-        </main>
+        <MemoryRouter>
+          <main className="today">
+            <GateCard today={{ total: lanes.reduce((n, l) => n + l.due, 0), lanes, by_source: {}, next_due: null }} />
+          </main>
+        </MemoryRouter>
       </LangProvider>
     )
     await settle()
-    expect(document.querySelector('.gate-card--one')).not.toBeNull()
-    expect(document.querySelector('.lane')).toBeNull()
-    expect(document.querySelector('.gate-one .desk-kbd, .gate-one [aria-keyshortcuts]')).toBeNull()
-    document.querySelector('.gate-one__services').click()
+    expect(document.querySelector('.tdy .tdy-dial')).not.toBeNull()
+    expect(document.querySelector('.lane, .tdy-line')).toBeNull()
+    expect(document.querySelector('.tdy .desk-kbd, .tdy [aria-keyshortcuts]')).toBeNull()
+    document.querySelector('.tdy-door').click()
     await settle()
-    const box = document.querySelector('.gate-sheet__lines')
-    const rows = [...box.querySelectorAll('.lane')].map(el => el.getBoundingClientRect())
-    expect(rows).toHaveLength(6)
-    rows.forEach((r, i) => {
-      expect(Math.round(r.width)).toBe(box.clientWidth)
-      if (i === 0) return
-      expect(r.top).toBeGreaterThanOrEqual(rows[i - 1].bottom)
-      expect(Math.round(r.left)).toBe(Math.round(rows[0].left))
-    })
-    // Plan 135's gate is the desk's: no bands and no fare foot.
-    expect(document.querySelector('.gate-card--desk, .gate-band, .gate-card__fare')).toBeNull()
+    const box = document.querySelector('.tdy-sheet .tdy-lines')
+    const stacked = els => {
+      const rows = els.map(el => el.getBoundingClientRect())
+      rows.forEach((r, i) => {
+        if (i === 0) return
+        expect(r.top).toBeGreaterThanOrEqual(rows[i - 1].bottom)
+        expect(Math.round(r.left)).toBe(Math.round(rows[0].left))
+      })
+      return rows
+    }
+    const lines = stacked([...box.querySelectorAll(':scope > .tdy-line')])
+    expect(lines).toHaveLength(4)
+    for (const r of lines) expect(Math.round(r.width)).toBe(box.clientWidth)
+    // A line's modes, opened, a row each across the line, indented under
+    // its tick.
+    const vocab = box.querySelectorAll(':scope > .tdy-line')[1]
+    vocab.querySelector('.tdy-line__more').click()
+    await settle()
+    const modes = vocab.querySelector('.tdy-line__lanes')
+    const inner = modes.clientWidth - parseFloat(getComputedStyle(modes).paddingLeft) - parseFloat(getComputedStyle(modes).paddingRight)
+    for (const r of stacked([...modes.querySelectorAll('.lane')])) expect(Math.round(r.width)).toBe(Math.round(inner))
+    // The desk's gate is the desk's: no column and no key.
+    expect(document.querySelector('.tdy-desk, .tdy-desk__col')).toBeNull()
   })
 })
 
@@ -1300,8 +1319,12 @@ describe('the places (plan 123, P16)', () => {
     expect(document.querySelector('main a')).toBeNull()
     expect(getComputedStyle(rows[0].querySelector('.stg-row__chev')).display).not.toBe('none')
     rows.find(r => r.dataset.page === 'display').click()
-    await settle()
-    expect([seen.path, seen.type]).toEqual(['/profile/settings/display', 'PUSH'])
+    // Waited for, not slept on: the push comes through the router's
+    // transition, which a fixed 120ms lost on a loaded CI runner.
+    await vi.waitFor(
+      () => expect([seen.path, seen.type]).toEqual(['/profile/settings/display', 'PUSH']),
+      { timeout: 5000, interval: 20 },
+    )
   })
 
   it('keeps the shelf\'s decks and its library door buttons', async () => {
@@ -1389,6 +1412,57 @@ describe('the composition run (plan 125)', () => {
     expect(apiJson.mock.calls.some(c => String(c[0]).startsWith('/api/grammar/point'))).toBe(true)
     apiJson.mockReset()
     apiFetch.mockReset()
+  })
+})
+
+// ── plan 217 — 会話, the conversation run a phone keeps ──
+// On the desk the run stands the scene's brief in the side column once
+// the talk is under way, and the card holds the talk alone. A phone
+// keeps its single column: the place's plate heads the card, and no
+// column is drawn.
+describe('the conversation run (plan 217)', () => {
+  it('keeps the phone\'s column, the place on the route and no column', async () => {
+    const { apiJson } = await import('./lib/api')
+    const plain = text => [{ text }]
+    const SCRIPT = {
+      id: 'konbini-lunch', level: 'N5', title: 'Le déjeuner', situation: 'À la caisse.', goal: 'Payer.', steps: ['Paie par carte', 'Refuse le sac'], them: 'Vendeur', register: 'polite',
+      place: { jp: 'コンビニ', parts: plain('コンビニ'), name: 'Supérette' },
+      turns: [{
+        them: { jp: 'お弁当は温めますか。', parts: plain('お弁当は温めますか。'), translation: 'Je vous le réchauffe.' },
+        me: { jp: 'はい、お願いします。', parts: plain('はい、お願いします。'), romaji: 'hai, onegai shimasu', words: [], translation: 'Oui.', note: 'Poli.' },
+        alt: [],
+        choices: [
+          { jp: 'はい、お願いします。', parts: plain('はい、お願いします。'), translation: 'Oui.', note: 'Poli.', right: true },
+          { jp: 'いただきます。', parts: plain('いただきます。'), translation: 'Bon appétit.', note: 'À table.', right: false },
+          { jp: 'はい、温かいです。', parts: plain('はい、温かいです。'), translation: 'Il est chaud.', note: 'Une autre question.', right: false },
+        ],
+      }],
+      close: null,
+    }
+    apiJson.mockImplementation(async url => (String(url).startsWith('/api/conversation/scenario/') ? SCRIPT : {}))
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: ConversationRun } = await import('./screens/ConversationRun')
+    document.body.innerHTML = ''
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/practice/conversation/konbini-lunch/choose']}>
+          <Routes><Route path="/practice/conversation/:scenario/:mode" element={<ConversationRun session={null} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(300)
+    document.querySelector('.stage__foot .btn-primary').click()
+    await settle(200)
+    expect(document.querySelector('.screen').className).toBe('screen')
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    expect(document.querySelector('.desk-run__side')).toBeNull()
+    // The place heads the route, in the meter's place over the card, the
+    // mission's stub under it (plan 237); the card holds the talk.
+    const route = document.querySelector('.stage > .kaiwa-head > .kaiwa-route')
+    expect(route.querySelector('.kaiwa-route__place').textContent).toBe('コンビニ')
+    expect(route.nextElementSibling.classList).toContain('kaiwa-stub')
+    expect(document.querySelector('.kaiwa-card .kaiwa-talk .tour-line')).not.toBeNull()
+    apiJson.mockReset()
   })
 })
 
@@ -1739,29 +1813,33 @@ describe('the run\'s lines (plan 129)', () => {
 
 // ── plan 130 — the gates a phone keeps ──
 // On the desk the plates take the window, Learn's line stands upright
-// and Practice's plates hold their specimens (plan 165; the grades'
-// rows before it). A phone keeps its column: the chip row of five on
-// every platform, and no request for a record or a sample it has
+// and Practice's board holds the record and the chosen train's card
+// (plan 244; the plates' specimens, plan 165, before it). A phone keeps
+// its own: since plan 225 Practice's is the painted platform, its signs
+// where the chips were, and no request for a record or a sample it has
 // nowhere to print.
 describe('the gates taking the window (plan 130)', () => {
-  it('keeps Practice\'s chip row and never asks for the record', async () => {
+  it('keeps Practice\'s painted platform and never asks for the record', async () => {
     apiFetch.mockReset()
     apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({}) }))
     const { MemoryRouter } = await import('react-router-dom')
     const { default: PracticeScreen } = await import('./screens/PracticeScreen')
+    // How many platforms, asked of the registry: the seventh, 会話, came
+    // with plan 217.
+    const { getSections } = await import('./config/tabs')
     await render(<LangProvider><MemoryRouter initialEntries={['/practice']}><PracticeScreen /></MemoryRouter></LangProvider>)
     await settle(250)
-    const feet = [...document.querySelectorAll('.plate__foot--dests')]
-    expect(feet).toHaveLength(6)
-    for (const foot of feet) expect(foot.querySelectorAll('.chip')).toHaveLength(5)
-    // Nor the desk's specimens (plan 165): no body in the plate's head,
-    // and no request for the samples it would draw from.
-    expect(document.querySelector('.plate__body, .prc-spec')).toBeNull()
+    expect(document.querySelector('.practice > .pgate')).not.toBeNull()
+    expect(document.querySelector('.practice > .plates')).toBeNull()
+    // Every platform on the destination sign, five grades on the other.
+    const sign = document.querySelector('.pgate-sign--main')
+    expect(sign.querySelectorAll('.pgate-roll--dest .pgate-roll__row')).toHaveLength(getSections('practice', {}).length)
+    expect(sign.querySelectorAll('.pgate-roll--grade .pgate-roll__row')).toHaveLength(5)
+    // Nor the desk's board (plan 244), and no request for the samples
+    // its card would draw from.
+    expect(document.querySelector('.pdesk, .prc-spec')).toBeNull()
     expect(apiFetch.mock.calls.some(([path]) => path === '/api/practice/record')).toBe(false)
     expect(apiFetch.mock.calls.some(([path]) => path.startsWith('/api/station/'))).toBe(false)
-    // The column is the phone's, one plate to a row.
-    const plates = [...document.querySelectorAll('.practice > .plates > .plate')].map(p => p.getBoundingClientRect())
-    expect(new Set(plates.map(p => Math.round(p.left))).size).toBe(1)
   })
 })
 
@@ -1894,7 +1972,7 @@ describe('the practice stations filled (plan 159)', () => {
     await render(<LangProvider><MemoryRouter initialEntries={['/practice/exam?level=N5']}>{routes}</MemoryRouter></LangProvider>)
     await settle(250)
     expect(document.querySelectorAll('.exam-st__hero')).toHaveLength(1)
-    expect(document.querySelector('.prc-paper, .prc-papers, .desk-split')).toBeNull()
+    expect(document.querySelector('.desk-exams, .desk-hero, .desk-split')).toBeNull()
     expect(asked('/api/practice/record')).toBe(false)
     expect(asked('/api/station/exam')).toBe(false)
   })

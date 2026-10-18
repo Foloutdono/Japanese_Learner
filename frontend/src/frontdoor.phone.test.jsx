@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { userEvent } from 'vitest/browser'
 import { LangProvider } from './LangContext'
 import './index.css'
 
@@ -55,7 +54,6 @@ const $ = s => document.querySelector(s)
 const live = () => $('.brd__car:not(.brd__car--out)')
 const inCar = s => live()?.querySelector(s)
 const stepOf = () => $('.brd')?.dataset.step
-const enter = () => userEvent.keyboard('{Enter}')
 
 beforeEach(() => {
   apiJson.mockReset()
@@ -69,19 +67,18 @@ afterEach(() => { document.querySelectorAll('[data-probe-modal]').forEach(n => n
 async function board({ onComplete = vi.fn(), onExit = vi.fn() } = {}) {
   await render(
     <LangProvider>
-      <BoardingFlow session={{ access_token: 'tok' }} initialProfile={{ username: 'Tester' }} onComplete={onComplete} onExit={onExit} />
+      <BoardingFlow session={{ access_token: 'tok' }} onComplete={onComplete} onExit={onExit} />
     </LangProvider>
   )
   await settle(150)
 }
 
-/** Name → why, the name kept (no write), by Enter in the field. */
-async function pastName() {
-  expect(stepOf()).toBe('name')
-  expect(document.activeElement).toBe(inCar('.brd-plate__field'))
-  await enter()
+/** The kana → the line, by a thumb on the crossing. */
+async function toLevel() {
+  expect(stepOf()).toBe('kana')
+  inCar('[data-kana="both"]').click()
   await settle()
-  expect(stepOf()).toBe('why')
+  expect(stepOf()).toBe('level')
 }
 
 const pressEnter = () => document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }))
@@ -101,45 +98,35 @@ describe('the keys at first contact, on a phone (P8)', () => {
   it('goes on through the boarding by its buttons only', async () => {
     await board()
     expect($('[aria-keyshortcuts]')).toBeNull()
-    await pastName()
-    inCar('[data-motive="trip"]').click()
+    await toLevel()
+    inCar('[data-level="N4"]').click()
     await settle(60)
     document.activeElement?.blur?.()
     pressEnter()
     await settle()
-    expect(stepOf()).toBe('why')
+    expect(stepOf()).toBe('level')
     expect($('.desk-kbd')).toBeNull()
   })
 })
 
 // ── P9: the boarding frame stays the phone's ──
 describe('the boarding frame on a phone (P9)', () => {
-  it('keeps the plain frame with no side, and goes from the hour to the plan', async () => {
+  it('keeps the plain frame with no side, and goes from the line to the card', async () => {
     await board()
     expect($('main.brd').className).toBe('brd')
     expect($('.desk-brd__side')).toBeNull()
     expect($('.desk-brd__strip')).toBeNull()
-    await pastName()
-    const next = async () => { inCar('[data-action="continue"]').click(); await settle() }
-    inCar('[data-motive="trip"]').click()
-    await settle(40)
-    await next()
-    inCar('[data-kana="both"]').click()
-    await settle()
+    await toLevel()
+    expect($('main.brd').className).toBe('brd')
     inCar('[data-level="N1"]').click()
     await settle(40)
-    await next()        // → lines (N1: no goal)
-    await next()        // → rhythm
-    await next()        // → time
-    expect(stepOf()).toBe('time')
-    expect($('main.brd').className).toBe('brd')
-    // No Building since plan 168: the plan arrives under its signboard,
-    // an arrival screen with no head.
-    await next()
-    expect(stepOf()).toBe('plan')
+    inCar('[data-action="continue"]').click()
+    await settle()
+    // The card is an arrival (plan 247): no head, the phone's own frame.
+    expect(stepOf()).toBe('card')
     expect($('main.brd').className).toBe('brd brd--arrival')
     expect($('.brd__head')).toBeNull()
-    expect($('.brd-build__track')).toBeNull()
+    expect($('.desk-brd__side')).toBeNull()
   })
 })
 
@@ -186,10 +173,10 @@ describe('the front door on a phone (P10)', () => {
 describe('the digits at first contact, on a phone (P12)', () => {
   it('picks nothing by a digit and prints none', async () => {
     await board()
-    await pastName()
+    await toLevel()
     document.body.dispatchEvent(new KeyboardEvent('keydown', { key: '1', bubbles: true, cancelable: true }))
     await settle(60)
-    expect(inCar('[data-motive="studies"]').getAttribute('aria-pressed')).toBe('false')
+    expect(inCar('[data-level="N1"]').getAttribute('aria-pressed')).toBe('false')
     expect($('.desk-kbd')).toBeNull()
     expect($('[aria-keyshortcuts]')).toBeNull()
   })

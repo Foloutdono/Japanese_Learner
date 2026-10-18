@@ -193,16 +193,32 @@ const Fixture = () => (
       <span className="lib-warning__lead lib-warn-lead">Retiré.</span>
       <span className="lib-warn-body"> Son auteur a supprimé ce paquet.</span>
     </p>
-    {/* GateCard.jsx -- the fare gate on --surface, its lane tint, and
-        the gold depart action (the wall-map redesign's one fill) */}
-    <div className="gate-card">
-      <span className="gate-card__title gc-latin">Fare gate</span>
-      <span className="gate-card__unit gc-unit">due</span>
-      <span className="gate-card__when gc-when">3h</span>
-      <button type="button" className="lane" style={{ '--lane-color': 'var(--line-kanji)' }}>
-        <span className="lane__where gc-where">Kanji N4</span>
-        <span className="lane__mode gc-mode">writing</span>
-      </button>
+    {/* GateCard.jsx (plan 199) -- the day at a glance on the page: the
+        dial's figures, its legend, the row to the services, a line's
+        sub and a mode in the sheet, and the gold depart action (the
+        wall-map redesign's one fill) */}
+    <div className="tdy">
+      <div className="tdy-dial">
+        <div className="tdy-dial__c">
+          <span className="tdy-dial__count gc-count">48</span>
+          <span className="tdy-dial__unit gc-unit">due</span>
+          <span className="tdy-dial__time gc-time">≈ 12 min</span>
+          <span className="tdy-dial__end gc-when">done by 21:12</span>
+        </div>
+      </div>
+      <p className="tdy-key tdy-key--fare"><span className="tdy-key__item gc-key"><b>38</b> board</span></p>
+      <button type="button" className="tdy-door"><span className="tdy-door__what gc-door"><b>Main</b> · all · 5 services</span></button>
+      <ul className="tdy-lines">
+        <li className="tdy-line" style={{ '--lane-color': 'var(--line-kanji)' }}>
+          <span className="tdy-line__sub gc-sub">N5 · Kanji → meaning</span>
+          <div className="tdy-line__lanes">
+            <button type="button" className="lane">
+              <span className="lane__where gc-where">Kanji N4</span>
+              <span className="lane__mode gc-mode">writing</span>
+            </button>
+          </div>
+        </li>
+      </ul>
       <button type="button" className="btn-depart">
         <span className="btn-depart__jp gc-depart-jp">Depart</span>
         <span className="btn-depart__go gc-depart-latin" aria-hidden="true">▶</span>
@@ -248,6 +264,20 @@ const Fixture = () => (
         <span className="pf-line__roundel plate__roundel sb-roundel">SB</span>
         <span className="plate__names"><span className="plate__title">Rédaction</span></span>
       </button>
+    </div>
+
+    {/* 会話 (plan 217) -- the fourteenth pigment, 縹, measured where it
+        prints as an ink: its plate's roundel on the gate, and on the
+        run's card a scene line's voice ring, in the line's ink mixed
+        toward the text's as the tour's is. */}
+    <div className="plate" style={{ '--line-color': 'var(--line-kaiwa)' }}>
+      <button type="button" className="plate__head">
+        <span className="pf-line__roundel plate__roundel kw-roundel">KW</span>
+        <span className="plate__names"><span className="plate__title">Conversation</span></span>
+      </button>
+    </div>
+    <div className="stage--kaiwa" style={{ '--line-color': 'var(--line-kaiwa)', background: 'var(--surface)' }}>
+      <button type="button" className="tour-speak kw-speak">♪</button>
     </div>
 
     {/* --surface cards carrying secondary text */}
@@ -336,8 +366,7 @@ const Fixture = () => (
         1; the medal roundels are three metal inks on sumi. */}
     <div className="banzuke">
       <div className="bz__head">
-        <span className="bz__mark"><span className="bz__jp">Ranking</span></span>
-        <span className="seg bz__seg">
+        <span className="seg seg--full bz__seg">
           <button type="button" className="seg__opt seg__opt--on bz-seg-on"><span className="seg__opt-latin">This week</span></button>
           <button type="button" className="seg__opt bz-seg-off"><span className="seg__opt-latin">All time</span></button>
         </span>
@@ -478,10 +507,14 @@ const Fixture = () => (
             <span className="pcard-well__meter"><i style={{ inlineSize: '79%' }} /></span>
           </div>
           <ul className="pcard-misses">
-            <li className="pcard-missed">
-              <b className="pcard-missed__jp">少し</b>
-              <span className="pcard-missed__kana pr-missed-kana">すこし</span>
-              <span className="pcard-missed__en pr-missed-en">a little</span>
+            <li className="pcard-misses__item">
+              <button type="button" className="pcard-missed pcard-missed--door">
+                <span className="pcard-missed__word">
+                  <b className="pcard-missed__jp">少し</b>
+                  <span className="pcard-missed__kana pr-missed-kana">すこし</span>
+                </span>
+                <span className="pcard-missed__en pr-missed-en">a little</span>
+              </button>
             </li>
           </ul>
           <ol className="rvw__fixes">
@@ -912,36 +945,63 @@ const Fixture = () => (
               </button>
             </div>
           </section>
-          <section className="dict-block">
-            {/* The due state, where plan 089 put it: the schedule's own
-                record cell, and the action under the lattice. The
-                floating note this used to measure is retired. */}
-            <div className="records">
-              <div className="record">
+          {/* The due state, where plan 089 put it: the schedule's own
+              record cell -- since plan 235 the door itself, under the
+              stripe, its label saying what pressing it does. The
+              floating note and the ghost under the lattice are retired. */}
+          <section className="dict-record">
+            <div className="records records--entry">
+              <button type="button" className="record record--due">
                 <span className="record__body">
-                  <span className="record__value record__value--due dj-due">Now</span>
-                  <span className="record__label">Next review</span>
+                  <span className="record__value record__value--due record__value--word dj-due">Now</span>
+                  <span className="record__label record__label--go dj-due-action">Review</span>
                 </span>
-              </div>
+              </button>
             </div>
-            <button type="button" className="dict-due dj-due-action">Review this card</button>
           </section>
         </div>
       </article>
     </aside>
-    {/* ── 文法 — the lesson in its sheet (plan 146) ──
-        Its own shell, under 文法's pine: the Japanese picked out of the
-        prose and a use's forms in the lesson's ink (--dict-ink, named on
-        .gl too), a form's gloss and a paradigm's label in the secondary
-        register, and a sentence's numeral and register tag. */}
+    {/* ── 文法 — the lesson in its sheet (plans 146, 235) ──
+        Its own shell, under 文法's pine: a section's head in the primary
+        ink and the trap's in the due ink; the formula's slot, plus and
+        note in the secondary register and its pattern in the lesson's
+        ink (--dict-ink, named on .gl too), as are the forms the rule
+        sets in bold and a rival's pattern; the rest of the Japanese in
+        the prose, and a use's forms, in the prose's own ink; a form's
+        gloss and a table's label in the secondary register; a
+        sentence's numeral and register tag; the translations' switch. */}
     <div className="dict-sheet gl-sheet" style={{ position: 'static' }}>
       <article className="gl gl--sheet">
         <div className="dict-entry__body gl-body">
-          <section className="dict-block gl-block gl-block--steps">
-            <ol className="gl-steps">
-              <li className="gl-step gl-step--use">
-                <div className="gl-step__body">
-                  <p className="gl-step__p"><span className="gl-ja dj-gl-ja" lang="ja">です</span> relie</p>
+          <div className="gl-cols">
+            <div className="gl-col">
+              <section className="gl-sec gl-sec--structure">
+                <div className="gl-sec__head"><h3 className="gl-sec__name dj-gl-head">Construction</h3></div>
+                <p className="gl-formula">
+                  <span className="gl-formula__slot dj-gl-slot">nombre</span>
+                  <span className="gl-formula__plus dj-gl-plus">+</span>
+                  <span className="gl-formula__pat dj-gl-pat" lang="ja">回</span>
+                  <span className="gl-formula__note dj-gl-note">(combien de fois)</span>
+                </p>
+              </section>
+              <section className="gl-sec gl-sec--rule">
+                <div className="gl-sec__body">
+                  <p className="gl-step__p">
+                    <strong><span className="gl-ja dj-gl-strong" lang="ja">です</span></strong> relie : <span className="gl-ja dj-gl-ja" lang="ja">A は B です</span>
+                  </p>
+                </div>
+              </section>
+              <section className="gl-sec gl-sec--forms">
+                <dl className="gl-table"><div className="gl-table__row">
+                  <dt className="gl-table__label dj-gl-label">Passé</dt>
+                  <dd className="gl-table__forms"><span className="gl-forms"><span className="gl-form">
+                    <span className="gl-form__ja" lang="ja">でした</span>
+                  </span></span></dd>
+                </div></dl>
+              </section>
+              <section className="gl-sec gl-sec--use">
+                <div className="gl-sec__body">
                   <ul className="gl-step__list">
                     <li className="gl-use">
                       <span className="gl-use__say">Pour dire ce qu'une chose est</span>
@@ -950,26 +1010,42 @@ const Fixture = () => (
                         <span className="gl-form__gloss dj-gl-gloss">je suis étudiant</span>
                       </span></span>
                     </li>
-                    <li className="gl-use">
-                      <dl className="gl-paradigm"><div className="gl-paradigm__row">
-                        <dt className="gl-paradigm__label dj-gl-label">Passé</dt>
-                        <dd className="gl-paradigm__forms">でした</dd>
-                      </div></dl>
-                    </li>
                   </ul>
                 </div>
-              </li>
-            </ol>
-          </section>
-          <section className="dict-block gl-block gl-block--examples">
-            <div className="dict-examples">
-              <div className="dict-ex">
-                <span className="dict-sense__n dict-ex__n dj-gl-n">5</span>
-                <div className="dict-ex__jp" lang="ja">この店はしずかだ。</div>
-                <span className="dict-ex__tag dj-gl-tag">Familier</span>
-              </div>
+              </section>
+              <section className="gl-sec gl-sec--careful">
+                <div className="gl-sec__head"><h3 className="gl-sec__name dj-gl-careful">Attention</h3></div>
+              </section>
             </div>
-          </section>
+            <div className="gl-col">
+              <section className="gl-sec gl-sec--examples">
+                <div className="gl-sec__head">
+                  <h3 className="gl-sec__name">Exemples</h3>
+                  <button type="button" className="gl-tr-toggle dj-gl-toggle">Masquer la traduction</button>
+                </div>
+                <div className="dict-examples">
+                  <div className="dict-ex">
+                    <span className="dict-sense__n dict-ex__n dj-gl-n">5</span>
+                    <div className="dict-ex__jp" lang="ja">この店はしずかだ。</div>
+                    <span className="dict-ex__tag dj-gl-tag">Familier</span>
+                  </div>
+                </div>
+              </section>
+              <section className="gl-sec gl-sec--compare">
+                <div className="gl-compare">
+                  <div className="gl-door gl-door--inert">
+                    <span className="gl-door__body">
+                      <span className="gl-door__head">
+                        <span className="gl-door__pattern dj-gl-rival" lang="ja">が</span>
+                        <span className="gl-door__level dj-gl-rival-level">N5</span>
+                        <span className="gl-door__gloss dj-gl-rival-gloss">marque le sujet</span>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
         </div>
       </article>
     </div>
@@ -1003,11 +1079,15 @@ const SITES = [
   ['.dk-count', 'console count'],
   ['.lb-band-on', 'console band, the chosen ordering'],
   ['.lb-band-off', 'console band, the other ordering'],
-  ['.gc-latin', 'fare gate title'],
-  ['.gc-unit', 'fare gate unit'],
-  ['.gc-when', 'fare gate next-review line'],
-  ['.gc-where', 'gate lane name (tinted surface)'],
-  ['.gc-mode', 'gate lane mode (tinted surface)'],
+  ['.gc-count', 'today dial count (gold figure)'],
+  ['.gc-unit', 'today dial unit'],
+  ['.gc-time', 'today dial minutes'],
+  ['.gc-when', 'today dial end hour'],
+  ['.gc-key', 'today dial legend'],
+  ['.gc-door', 'today services row'],
+  ['.gc-sub', 'today line, what rides'],
+  ['.gc-where', 'gate lane name'],
+  ['.gc-mode', 'gate lane mode'],
   ['.gc-depart-jp', 'depart button name (gold fill)'],
   ['.gc-depart-latin', 'depart button arrow (gold fill)'],
   ['.lp-roundel', 'plate roundel (pigment mixed toward the ink)'],
@@ -1020,6 +1100,9 @@ const SITES = [
   ['.sb-btn', "composition's filled action at rest (the metal, under 紫)"],
   ['.sb-btn-hover', "composition's filled action hovering (the metal's lit stop)"],
   ['.sb-roundel', "composition's plate roundel (紫 mixed toward the ink)"],
+  // Plan 217 -- 縹, the conversation platform's pigment (see the fixture).
+  ['.kw-roundel', "conversation's plate roundel (縹 mixed toward the ink)"],
+  ['.kw-speak', "a conversation line's voice ring (縹 mixed toward the ink)"],
   ['.station-sign__kana', 'station sign kana'],
   ['.station-sign__romaji', 'station sign romaji'],
   ['.record__label', 'record label'],
@@ -1280,15 +1363,26 @@ const SITES = [
   ['.dj-fallback', 'stroke sheet fallback (fixed ink on washi)'],
   ['.dj-word-gloss', 'word row gloss'],
   ['.dj-hit', 'word row: the kanji picked out (辞書 pigment mixed toward the ink)'],
-  ['.dj-gl-ja', 'lesson: Japanese in the prose (文法 pigment mixed toward the ink)'],
-  ['.dj-gl-form', 'lesson: a use\'s form (文法 pigment mixed toward the ink)'],
+  ['.dj-gl-head', 'lesson: a section\'s head'],
+  ['.dj-gl-careful', 'lesson: the trap\'s head (due ink mixed toward the ink)'],
+  ['.dj-gl-slot', 'lesson: the formula\'s slot'],
+  ['.dj-gl-plus', 'lesson: the formula\'s plus'],
+  ['.dj-gl-pat', 'lesson: the formula\'s pattern (文法 pigment mixed toward the ink)'],
+  ['.dj-gl-note', 'lesson: the gloss a formula closes on'],
+  ['.dj-gl-strong', 'lesson: a form the rule sets in bold (文法 pigment mixed toward the ink)'],
+  ['.dj-gl-ja', 'lesson: Japanese in the prose'],
+  ['.dj-gl-form', 'lesson: a use\'s form'],
   ['.dj-gl-gloss', 'lesson: a form\'s gloss'],
-  ['.dj-gl-label', 'lesson: a paradigm\'s label'],
+  ['.dj-gl-label', 'lesson: a forms table\'s label'],
+  ['.dj-gl-toggle', 'lesson: the translations\' switch'],
+  ['.dj-gl-rival', 'lesson: a rival\'s pattern (文法 pigment mixed toward the ink)'],
+  ['.dj-gl-rival-level', 'lesson: a rival\'s level'],
+  ['.dj-gl-rival-gloss', 'lesson: a rival\'s gloss'],
   ['.dj-gl-n', 'lesson: a sentence\'s numeral (文法 pigment mixed toward the ink)'],
   ['.dj-gl-tag', 'lesson: a sentence\'s register tag (文法 pigment mixed toward the ink)'],
   ['.dj-hit-rt', 'word row: its furigana, in the same ink'],
   ['.dj-due', 'record cell: a card that is due (due ink mixed toward the ink)'],
-  ['.dj-due-action', 'the review action under the record (same ink, ghost ground)'],
+  ['.dj-due-action', 'the due cell\'s door label (same ink, the cell\'s ground)'],
   ['.dj-tip', 'tag note (panel ink on sumi)'],
   // Plan 173 -- the learner's card and the HUD's strip, on each material.
   ['.pc-free-value', 'card back: the print on white plastic'],

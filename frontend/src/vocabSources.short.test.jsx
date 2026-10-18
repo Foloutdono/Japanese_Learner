@@ -11,7 +11,7 @@ import './index.css'
 // A 600px window (plan 169): the first words give way, the strip's and
 // the line's, and the page shows whole -- the strip, the three plates to
 // the window's foot, JLPT's five rows each a row's height at least, the
-// gate and its halo in its card.
+// gate and the air round it in its card.
 
 vi.mock('./lib/audio', async o => ({
   ...(await o()),
@@ -26,7 +26,9 @@ const apiFetch = vi.hoisted(() => vi.fn())
 vi.mock('./lib/api', () => ({
   api: p => p,
   apiFetch,
-  apiJson: vi.fn(), apiJsonWithTimeout: vi.fn(), apiUpload: vi.fn(),
+  // The shared answers (lib/cachedJson, plan 211) ask through apiJson.
+  apiJson: async (...a) => (await apiFetch(...a)).json(),
+  apiJsonWithTimeout: vi.fn(), apiUpload: vi.fn(),
   ApiError: class extends Error {},
 }))
 const answer = path => {
@@ -59,6 +61,9 @@ vi.mock('./stores/boarding', async o => ({ ...(await o()), board: vi.fn(commit =
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: VocabScreen } = await import('./screens/VocabScreen')
+const { forgetCachedJson } = await import('./lib/cachedJson')
+// Each case asks with its own answers: none is kept across (plan 211).
+afterEach(() => { forgetCachedJson() })
 
 // Past the timer, the plates' staggered arrivals themselves: a plate a
 // fraction of a pixel short of its place is a row out of line.

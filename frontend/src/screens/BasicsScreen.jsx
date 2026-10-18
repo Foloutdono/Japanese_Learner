@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams, Navigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { apiJson } from '../lib/api'
+import { cachedJson, MINE_TTL_MS } from '../lib/cachedJson'
 import { playUi } from '../lib/audio'
 import { board } from '../stores/boarding'
 import { useBasics, refreshBasics } from '../stores/basics'
@@ -40,11 +40,12 @@ export default function BasicsScreen({ session }) {
 
   const units = data?.units ?? []
   const here = data?.at ? units[data.at - 1]?.id : null
+  // A unit is named in the learner's language alone, on the route as on
+  // its page.
   const stops = units.map(u => ({
     key: u.id,
     code: String(u.unit),
-    name: u.jp,
-    hint: u.title?.[lang] ?? u.title?.en,
+    name: u.title?.[lang] ?? u.title?.en,
     hereLabel: t.levelCurrentMark,
     learned: u.learned,
     total: u.total,
@@ -91,7 +92,7 @@ export default function BasicsScreen({ session }) {
   return (
     <SelectionScreen
       title={t.basicsTitle}
-      sub={open?.jp}
+      sub={open?.title?.[lang] ?? open?.title?.en}
       aside={<Leave to="/learn/basics">{t.basicsUnits}</Leave>}
     >
       {page}
@@ -109,7 +110,8 @@ function UnitPage({ unitId, session }) {
 
   useEffect(() => {
     let live = true
-    apiJson(`/api/basics/${encodeURIComponent(unitId)}?lang=${lang}`, session)
+    // Shared and kept briefly (lib/cachedJson, plan 211).
+    cachedJson(`/api/basics/${encodeURIComponent(unitId)}?lang=${lang}`, session, { ttlMs: MINE_TTL_MS })
       .then(body => { if (live) setUnit(body) })
       .catch(() => { if (live) setFailed(true) })
     return () => { live = false }
@@ -125,13 +127,10 @@ function UnitPage({ unitId, session }) {
 
   const title = unit.title?.[lang] ?? unit.title?.en
   return (
-    <section className="bsc-unit" aria-label={`${unit.jp} ${title}`}>
+    <section className="bsc-unit" aria-label={title}>
       <header className="bsc-unit__head">
         <span className="bsc-unit__of">{t.basicsUnit(unit.unit, unit.of)}</span>
-        <span className="bsc-unit__name">
-          <span className="bsc-unit__jp" lang="ja">{unit.jp}</span>
-          <span className="bsc-unit__title">{title}</span>
-        </span>
+        <span className="bsc-unit__name">{title}</span>
         <span className="bsc-unit__figs">
           <span className="bsc-unit__fig"><b>{unit.learned}</b> / {unit.total}</span>
           <span className="bsc-unit__met">{t.basicsMetOf(unit.met, unit.total)}</span>

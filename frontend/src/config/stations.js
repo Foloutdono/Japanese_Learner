@@ -1,10 +1,9 @@
 // ── 辻駅 — the station ────────────────────────────────────
 // The home screen is a railway platform, and every section of the app
 // is a train leaving it. That isn't decoration for its own sake: the
-// ambiance track playing behind this screen *is* a Japanese metro
-// platform, and the app already announces each destination out loud
-// when you pick it (playAnnouncement, see HomeScreen). The interface
-// was the only part still pretending otherwise.
+// app already announces each destination out loud when you pick it
+// (playAnnouncement, see HomeScreen). The interface was the only part
+// still pretending otherwise.
 //
 // Japanese railway signage is one of the most refined information
 // systems anywhere — the station plate (駅名標), the departure board
@@ -54,6 +53,7 @@ const STATIONS = {
   '/practice/translation':  { code: 'HY', kana: 'ほんやく' },
   '/practice/dictation':    { code: 'KT', kana: 'かきとり' },
   '/practice/composition':  { code: 'SB', kana: 'さくぶん' },
+  '/practice/conversation': { code: 'KW', kana: 'かいわ' },
   // 解析 — one station, three platforms (文字 / 写真 / 動画). Was two
   // entries, /phrase-analyzer and /video (DG どうが), until plan 027
   // merged them: both produced the same thing, a Passage of Sentences.

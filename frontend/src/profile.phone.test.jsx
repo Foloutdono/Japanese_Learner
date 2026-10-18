@@ -46,7 +46,7 @@ describe('the profile at phone width', () => {
           <button type="button" className="record record--door" style={{ '--line-color': 'var(--pass-ink)' }}><span className="pf-line__id"><span className="pf-line__roundel">S</span><span className="pf-line__names"><span className="pf-line__jp">Réglages</span></span></span></button>
         </div>
         <section className="banzuke">
-          <div className="bz__head"><span className="bz__mark"><span className="bz__jp">Ranking</span></span><div className="seg bz__seg"><button type="button" className="seg__opt seg__opt--on"><span className="seg__opt-latin">This week</span></button><button type="button" className="seg__opt"><span className="seg__opt-latin">All time</span></button></div></div>
+          <div className="bz__head"><div className="seg seg--full bz__seg"><button type="button" className="seg__opt seg__opt--on"><span className="seg__opt-latin">This week</span></button><button type="button" className="seg__opt"><span className="seg__opt-latin">All time</span></button></div></div>
           <div className="leaderboard-row"><span className="leaderboard-row__rank leaderboard-row__rank--gold">1</span><span className="leaderboard-row__name">Mei</span><span className="leaderboard-row__xp">1,240 XP</span></div>
           <div className="leaderboard-row leaderboard-row--me"><span className="leaderboard-row__rank leaderboard-row__rank--bronze">3</span><span className="leaderboard-row__name">Aiko</span><span className="leaderboard-row__xp">960 XP</span></div>
           <div className="leaderboard-row"><span className="leaderboard-row__rank">4</span><span className="leaderboard-row__name">Sora</span><span className="leaderboard-row__xp">720 XP</span></div>
@@ -96,15 +96,16 @@ describe('the profile at phone width', () => {
     const rank = $('.leaderboard-row__rank')
     expect(rank.getBoundingClientRect().width).toBe(30)
     expect(getComputedStyle(rank).borderTopLeftRadius).toBe('999px')
-    // The board's toggle sits on the head's right edge — and on the
-    // title's OWN line, not a second one under it: at 390px the head
-    // used to wrap, which put the only control in the card on a line
-    // of its own (index.css, "The head holds ONE row").
-    const mark = $('.bz__mark').getBoundingClientRect()
+    // The board's head is its two period tabs: edge to edge, on the
+    // head's top line, with no name above them (index.css, ".bz__head").
     const head = $('.bz__head').getBoundingClientRect()
     const seg = $('.bz__seg').getBoundingClientRect()
-    expect(head.right - seg.right).toBeLessThan(head.width / 2)
-    expect(seg.top).toBeLessThan(mark.bottom)
+    expect(Math.abs(seg.left - head.left)).toBeLessThan(1)
+    expect(Math.abs(seg.right - head.right)).toBeLessThan(1)
+    expect(seg.top - head.top).toBeLessThan(1)
+    const tabs = $$('.bz__seg .seg__opt').map(o => o.getBoundingClientRect())
+    expect(tabs).toHaveLength(2)
+    expect(Math.abs(tabs[0].top - tabs[1].top)).toBeLessThan(1)
   })
 
   it('the status sheet: distance, a 70px track, two rows, the moves side by side', async () => {

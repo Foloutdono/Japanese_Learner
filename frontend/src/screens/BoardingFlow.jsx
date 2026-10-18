@@ -1,122 +1,125 @@
-import { useEffect, useRef, useState } from 'react'
+import { startTransition, useEffect, useRef, useState } from 'react'
 import { useLang } from '../LangContext'
-import { ApiError, apiFetch, apiJson, apiJsonWithTimeout } from '../lib/api'
-import { canNudge, requestNudgePermission } from '../lib/platform'
+import { ApiError, apiJson, apiJsonWithTimeout } from '../lib/api'
+import { canNudge, nudgePermission, requestNudgePermission } from '../lib/platform'
 import { track } from '../lib/track'
 import { stopwatch } from '../lib/dwell'
 import { refreshSummary } from '../stores/profileSummary'
 import { refreshCredits } from '../stores/credits'
-import { USERNAME_RE } from '../components/profile/EditableUsername'
-import { TrainArrival, ARRIVAL_CHIME_MS } from '../components/onboarding/TrainArrival'
-import { playBoardFlap, playToggle, playUi, playVoice } from '../lib/audio'
+import { playBoardFlap, playToggle, playUi } from '../lib/audio'
+import { dailyTrain, saveCalendar } from '../lib/calendarFile'
 import { DEPART_TIMES } from '../components/onboarding/departures'
 import {
-  LINES, RECOMMENDED_RHYTHM, RHYTHMS, boardingDraft, bucketFor, goalStops, itemsForRhythm, kanaFigures,
-  levelAnswers, levelForKana, minutesToTime, planFigures, stopsAhead, timeToMinutes,
+  LINES, RECOMMENDED_RHYTHM, RHYTHMS, bucketFor, firstDeparture, goalStops, itemsForRhythm, kanaFigures,
+  levelAnswers, levelForKana, levelStop, minutesToTime, planFigures, timeToMinutes,
 } from '../domain/boarding'
+import { cleanCardName } from '../domain/passCard'
+import { dateFormat, paceLabel, stopParts } from '../components/settings/contract'
 import { BoardHead } from '../components/boarding/BoardFrame'
 import { useBoardKeys } from '../hooks/useBoardKeys'
 import { useDesk } from '../hooks/useDesk'
 import { useBoxWidth } from '../hooks/useBoxWidth'
-import NameStep from '../components/boarding/NameStep'
-import WhyStep from '../components/boarding/WhyStep'
 import { KanaStep, KanaReveal } from '../components/boarding/KanaStep'
-import { LevelStep, GoalStep } from '../components/boarding/LevelStep'
-import LinesStep from '../components/boarding/LinesStep'
-import RhythmStep from '../components/boarding/RhythmStep'
-import TimeStep from '../components/boarding/TimeStep'
-import NudgeStep from '../components/boarding/NudgeStep'
+import { LevelStep } from '../components/boarding/LevelStep'
+import { TestStep } from '../components/boarding/TestStep'
+import CardStep from '../components/boarding/CardStep'
+import { AccountSheet, GoalSheet, HourSheet, LinesSheet, NameSheet, RhythmSheet } from '../components/boarding/CardSheets'
 import { DeskStrip } from '../components/boarding/DeskStrip'
+import { FeedbackSheet } from '../components/feedback/FeedbackSheet'
+import { failureOf } from '../lib/feedback'
 import { BoardBack } from '../components/boarding/boardBack'
-import PlanStep from '../components/boarding/PlanStep'
-import PassStep from '../components/boarding/PassStep'
-import AccountStep from '../components/boarding/AccountStep'
 
-// ── 乗車 — the boarding (plan 075) ────────────────────────────────
-// The canvas's boarding, the owner's sketch drawn: name → why → the
-// kana check → (the reveal | the level) → goal → the lines → rhythm →
-// the hour → (the nudge, native only) → building → the plan → (the
-// account) → the pass. Welcome is step zero (components/boarding/Welcome.jsx,
-// mounted by App.jsx in place of the old landing page); the offer
-// stays out while domain/credits.js's HAS_STORE is false.
+// ── 乗車 — the boarding (plan 075; the card is the form, plan 247) ──
+// The owner's pick C of the boarding's canvas ("Tsuji — the boarding,
+// audit and new directions"): the boarding asks only what it cannot
+// guess, then hands the learner their card already filled in, every
+// printed field a door to a sheet. Welcome is step zero
+// (components/boarding/Welcome.jsx, mounted by App.jsx); then
 //
-// The account is asked for at the END, and refusably. Boarding starts
-// on a guest pass — a real Supabase user with no credentials on it, so
-// every question here writes to real server-side state (lib/guest.js
-// explains why that is a whole account rather than a local shadow) —
-// and `account` offers to put an email and a password onto the very
-// row the learner has been filling in. Nothing is migrated because
-// nothing moved. A learner who says no rides on exactly as they were.
-// The step is skipped for anyone who already has real credentials,
-// which is how an interrupted sign-up resumes without being asked
-// twice.
+//   the kana check → the reveal (a reader of one script or none)
+//                  → the level (a reader of both; the test is the line's
+//                    quiet way, and its verdict lands back on the line)
+//   → the card (CardStep: the goal, the rhythm, the hour, the lines, the
+//     name and the account, each a sheet) → the 改札.
 //
-// `onExit` is the way back OUT of the first question: back on step one
-// has nowhere to go inside the flow, so it leaves for Welcome, where
-// the sign-in is. `onSignIn` is the same door named directly, offered
-// on the name screen and again at the account step, so a returning
-// learner who tapped Embarquer by mistake is one tap from where they
-// meant to be.
+// What left the questions in plan 247: the name (a field on the card,
+// optional, a first name rather than the public username), why (no
+// longer asked), how the level is found (the test is the line's quiet
+// way), the goal, the lines, the rhythm and the hour (fields, filled
+// with what most keep), the nudge (the hour's sheet on a native shell),
+// the plan and the pass (the card is both), and the account (one line
+// under the card until it is kept).
 //
-// The track at the head is the progress bar -- one stop per question,
-// the train where you are; the three arrival screens have no track and
-// no back. Back keeps every answer and exists until the plan is built.
-// Nothing persists until the single POST /api/onboarding/complete on
-// "Enter the station" (the name is the one exception: it is the pass
-// holder's, written the moment the office accepts it, so a taken name
-// is refused on its own screen and never on the pass). A mid-flow
-// refresh is a clean restart. The TicketGate finale is rendered by
-// App, not here: this component unmounts the moment onComplete flips
-// the gate state, and a cutscene rendered by the thing it unmounts
-// would pop mid-wipe.
+// The boarding runs on a guest pass -- a real Supabase user with no
+// credentials on it (lib/guest.js) -- and the card's account sheet
+// offers to keep it on the very row the learner is filling in: Google,
+// or a link sent to an address. Nothing is migrated because nothing
+// moved; a learner who says « Plus tard » rides on as they were.
+//
+// `onExit` is the way back OUT of the first question: back on the kana
+// has nowhere to go inside the flow, so it leaves for Welcome, where the
+// sign-in is. `onSignIn` is the same door, named (the Welcome's), and
+// the card's line offers it to a session that holds an address: a new
+// pass for it, which may not be the one the learner meant.
+//
+// The track at the head is the progress bar -- a stop per question, the
+// card the last; the card is an arrival screen and stands with no head:
+// its origin is the door back to the question that set it, and Back (a
+// phone's, the browser's) keeps every answer. Nothing persists until
+// the single POST /api/onboarding/complete on « Émettre ma carte ». A
+// mid-flow refresh is a clean restart. The TicketGate finale is
+// rendered by App, not here: this component unmounts the moment
+// onComplete flips the gate state, and a cutscene rendered by the thing
+// it unmounts would pop mid-wipe.
 //
 // Between screens the train pulls: the leaving screen slides left as
-// the next arrives from the right, 260 ms ease-out, and back runs it
-// in reverse. The leaving screen stays mounted for the pull (the
-// `--out` car, inert) and is dropped after it. Under reduced motion no
-// car moves and only the rest state is drawn (index.css kills every
-// brd animation there too).
+// the next arrives from the right, 260 ms ease-out, and back runs it in
+// reverse. The leaving screen stays mounted for the pull (the `--out`
+// car, inert) and is dropped after it. Under reduced motion no car
+// moves and only the rest state is drawn.
 //
 // `dryRun` is the dev workbench's hook (/dev/onboarding): the whole
-// flow, the real volumes, and no write -- neither the name nor the
-// contract.
+// flow, the real volumes, and no write.
 //
-// 音 — the boarding speaks the app's own sound vocabulary
-// (lib/audio/chimes.js), so that the first minutes in Tsuji already
-// sound like the rest of it. The frame carries the presses every screen
-// shares (BoardFrame: the gate's departure, the click of ‹ and of the
-// quiet links); this file the answers, each where it is set -- a pick
-// the wood pick of every list in the app, a line switched the switch's
-// two step, the hour the departure board's flaps (one run a half hour,
-// so a drag along the day spins the board), the kana's answer, which
-// goes on by itself, the departure. Then the 案内 sign's chime on the
-// plan (TrainArrival), the welcome's coin on the pass (countUp), and
-// the gate's chime into the station (App.jsx's TicketGate).
+// 音 — the boarding speaks the app's own sound vocabulary: the frame
+// carries the presses every screen shares (BoardFrame: the gate's
+// departure, the click of ‹ and of the quiet links); this file the
+// answers, each where it is set -- a pick the wood pick of every list in
+// the app, a line switched the switch's two step, the hour the departure
+// board's flaps; then the gate's chime into the station (App.jsx's
+// TicketGate).
 
 // ── The stash — surviving an OAuth redirect ──────────────────────
-// Signing in with Google on the WEB navigates the page away and comes
-// back as a fresh load, which would otherwise mean answering all eight
-// questions again for the crime of choosing the fast way to keep them.
-// So the answers are written down at exactly the moment the redirect
-// is about to happen, and picked back up on the next mount.
+// Keeping the card with Google on the WEB navigates the page away and
+// comes back as a fresh load, which would otherwise mean answering
+// everything again for the crime of choosing the fast way to keep it.
+// So the answers are written down at exactly the moment the redirect is
+// about to happen, and picked back up on the next mount -- the card, its
+// account sheet open again if the round trip came back refused.
 //
 // sessionStorage, not local: the stash belongs to this tab and this
 // attempt. Cleared the instant it is read, and again when the contract
 // is signed, so a later boarding can never resume someone else's.
-// Deliberately NOT a general autosave — a mid-flow refresh is still a
-// clean restart, which is the behaviour every other screen here was
-// written against.
+// Deliberately NOT a general autosave -- a mid-flow refresh is still a
+// clean restart.
+//
+// And an hour at most (plan 247): a round trip that never came back to
+// the boarding -- Google's other account signed in instead, the tab
+// left -- must not seat a later boarding in this tab on a card it did
+// not fill in. A stash written before the stamp is read as fresh.
 const STASH_KEY = 'jp-boarding-stash'
+const STASH_TTL_MS = 60 * 60 * 1000
 
 function stash(state) {
-  try { sessionStorage.setItem(STASH_KEY, JSON.stringify(state)) } catch { /* private mode */ }
+  try { sessionStorage.setItem(STASH_KEY, JSON.stringify({ ...state, at: Date.now() })) } catch { /* private mode */ }
 }
 
 function takeStash() {
   try {
     const raw = sessionStorage.getItem(STASH_KEY)
     sessionStorage.removeItem(STASH_KEY)
-    return raw ? JSON.parse(raw) : null
+    const kept = raw ? JSON.parse(raw) : null
+    return kept && (kept.at == null || Date.now() - kept.at < STASH_TTL_MS) ? kept : null
   } catch {
     return null
   }
@@ -130,105 +133,88 @@ const PULL_MS = 260
 // 机 (plan 155): the desk's pull is a short one -- a rung sideways and a
 // fade, not the paper's whole width -- and the arriving car's answers
 // follow it in a beat apart (the 机 section of index.css, "the pull on
-// the desk"). The leaving car is kept until all of that has landed:
-// dropping it at the phone's 260 ms took the arriving car's `--in` with
-// it, and the answers still on their way snapped the rest of it.
+// the desk"). The leaving car is kept until all of that has landed.
 const DESK_PULL_MS = 820
 const REDUCED = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 const DEFAULT_TIME = DEPART_TIMES.am
+const STEPS = ['kana', 'reveal', 'level', 'test', 'card']
 
-// The answered stops, in line order -- the track's stops. Whether the
-// level is asked and whether a goal exists depend on answers given
-// later, so the count reads the answers so far. The reveal is the kana
-// stop's second half, never a stop of its own (plan 168, the owner's
-// decision 3): a reader of one script or none rides eight stops in the
-// app, a reader of both nine, the level being one.
+// The track's stops: the kana, a reader's level, the card -- the reveal
+// is the kana's stop's second half and the test the level's own, never
+// stops of their own. Whether the level is asked depends on the kana's
+// answer, so the count reads the answers so far.
 function trackStops(answers) {
-  const goal = answers.jlpt == null || stopsAhead(answers.jlpt).length > 0
-  return [
-    'name', 'why', 'kana',
-    ...(answers.kana === 'both' ? ['level'] : []),
-    ...(goal ? ['goal'] : []),
-    'lines', 'rhythm', 'time',
-    ...(canNudge() ? ['nudge'] : []),
-  ]
+  return ['kana', ...(answers.kana === 'both' ? ['level'] : []), 'card']
 }
 
-// The stop a screen stands at on the track: the reveal is the kana's.
-const stopOf = step => (step === 'reveal' ? 'kana' : step)
+const STOP_OF = { reveal: 'kana', test: 'level' }
+const stopOf = step => STOP_OF[step] ?? step
+
+// What the card's fields were before a sheet changed them: what
+// boarding_done reports, so "most keep the defaults" can be read.
+const UNEDITED = { goal: false, rhythm: false, hour: false, lines: false }
 
 export default function BoardingFlow({
-  session, initialProfile, onComplete, onExit = null, onSignIn = null,
-  guest = false, dryRun = false,
+  session, onComplete, onExit = null, onSignIn = null, guest = false, dryRun = false,
 }) {
   const { t, lang } = useLang()
   const desk = useDesk()
-  const profile = { level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100, username: '', ...(initialProfile ?? {}) }
 
   // Read once, in the initialiser rather than an effect: the flow must
-  // never paint question one before resuming the step it left from.
+  // never paint the first question before resuming the step it left from.
   const [resumed] = useState(takeStash)
 
   const [answers, setAnswers] = useState({
-    name: profile.username ?? '',
-    motive: null,
     kana: null,
     levelChoice: null,   // 'novice' | 'N5'..'N1' on the level list
     jlpt: null,          // the level the office stores
+    placed: null,        // the test's verdict, when it was taken
     goal: null,
     lines: LINES,        // what to learn: any of vocab / kanji / grammar
     rhythm: RECOMMENDED_RHYTHM,
     minute: timeToMinutes(DEFAULT_TIME),
     notifications: false,
+    cardName: '',
     ...(resumed?.answers ?? {}),
   })
-  // The account step is the one the stash can come back to having
-  // ANSWERED: on the web the Google button leaves the page, and a round
-  // trip that worked returns a learner who is no longer a guest — the
-  // button's own onDone never runs, because the component that would
-  // have called it was unmounted by the navigation. Resuming onto
-  // "Keep your progress." after they just kept it reads as the sign-in
-  // having done nothing, which is exactly what it looked like. So the
-  // resumed step is honoured only while there is still something to
-  // offer; the same predicate the forward path uses (`plan` → account
-  // or pass).
-  //
-  // On the desk the pass's screen folds into the plan (plan 140), so the
-  // same return lands on the plan, which then carries Enter the station.
-  const [step, setStep] = useState(() => {
-    const at = resumed?.step ?? 'name'
-    if (at === 'account' && !guest) return desk ? 'plan' : 'pass'
-    return at
-  })
-  const [history, setHistory] = useState([])
+  const [step, setStep] = useState(() => (STEPS.includes(resumed?.step) ? resumed.step : 'kana'))
+  // The card's open sheet. A Google round trip that came back refused
+  // reopens the account's, where the refusal is said; one that worked
+  // comes back to the card, kept.
+  const [sheet, setSheet] = useState(() => (resumed?.sheet === 'account' && guest ? 'account' : null))
+  const [edited, setEdited] = useState(() => ({ ...UNEDITED, ...(resumed?.edited ?? {}) }))
+  // How the card was kept here: 'google' (the round trip, or the native
+  // sheet), 'link' (an address sent its link). null is not kept here.
+  const [keptBy, setKeptBy] = useState(() => (!guest && resumed?.keeping === 'google' ? 'google' : null))
+  const [linkSent, setLinkSent] = useState(null)
+  const [history, setHistory] = useState(() => resumed?.history ?? [])
   const [leaving, setLeaving] = useState(null)   // { step, dir } during a pull
   const [volumes, setVolumes] = useState(null)
-  const [savedName, setSavedName] = useState(resumed?.savedName ?? profile.username ?? '')
-  const [nameError, setNameError] = useState(null)
   const [busy, setBusy] = useState(false)
-  // null | 'network' | 'refused' -- which of the two the pass says.
+  // null | 'network' | 'busy' | 'refused' -- which of the three the card
+  // says, and the status a refusal came with, for the report under it.
   const [saveError, setSaveError] = useState(null)
-  const [arrival, setArrival] = useState(false)
+  const [refusedWith, setRefusedWith] = useState(0)
+  // « Signaler ce problème » under a refusal: the feedback sheet, here
+  // rather than App's FeedbackHost, which the boarding stands in for.
+  const [reporting, setReporting] = useState(false)
+  // On a native shell, the OS's own answer when it will not ask again:
+  // the reminder's switch says why it stays off (plan 247).
+  const [nudgeDenied, setNudgeDenied] = useState(false)
   const [now] = useState(() => new Date())
   const frameRef = useRef(null)
   // 辻 (plan 163): the strip at the floor's left end, measured so the
   // floor gives way before it (--desk-strip-w).
   const [stripRef, stripW] = useBoxWidth(desk)
-  const arrivalPlayed = useRef(false)
   // Two stopwatches counting only time the tab was actually looked at
   // (lib/dwell.js): one lapped at every question, one for the whole
-  // line. Wall-clock would say a boarding left open over lunch took an
-  // hour to choose a study rhythm, and a handful of those makes "which
-  // question stalls people" unanswerable. Built in an effect, not in
-  // render — each attaches a listener, and StrictMode would double it.
+  // line. Built in an effect, not in render -- each attaches a listener,
+  // and StrictMode would double it.
   const watches = useRef(null)
 
   const set = patch => setAnswers(a => ({ ...a, ...patch }))
-  // An answer picked: the wood pick every list in the app makes, on every
-  // press, as those do -- the press is what it answers.
-  const pick = patch => { playUi('click-mode-selection'); set(patch) }
   // 机 (plan 122): Enter goes on from anywhere in the live car.
-  useBoardKeys(frameRef, { off: arrival })
+  useBoardKeys(frameRef)
 
   useEffect(() => {
     document.title = `${t.brdDocumentTitle} — ${t.appTitle}`
@@ -240,9 +226,9 @@ export default function BoardingFlow({
     return () => { w.total.stop(); w.step.stop(); watches.current = null }
   }, [])
 
-  // The volumes price the level list and the plan; the canvas's round
+  // The volumes price the level list and the card; the canvas's round
   // figures stand in until they arrive, and a failed fetch leaves the
-  // plan's date to the office (the POST then carries no date).
+  // card's date to the office (the POST then carries no date).
   useEffect(() => {
     let live = true
     apiJson('/api/onboarding/volumes', session)
@@ -258,89 +244,110 @@ export default function BoardingFlow({
     return () => clearTimeout(id)
   }, [leaving, desk])
 
-  // Focus lands on the new screen's question -- except on the name,
-  // whose field is already focused and must keep the keyboard.
+  // Focus lands on the new screen's question.
   useEffect(() => {
-    if (step === 'name') return
     const q = frameRef.current?.querySelector('.brd__car:not(.brd__car--out) .brd__q')
     q?.focus({ preventScroll: true })
   }, [step])
 
-  // 足跡 — every transition in the boarding runs through these two, so
-  // instrumenting them is the whole of it. Until now this flow wrote
-  // NOTHING until POST /api/onboarding/complete at the very end, which
-  // made the one thing worth knowing -- where people give up on the way
-  // in -- the one thing invisible. There is no "abandoned" event and
-  // there does not need to be: it is a boarding_step with no
-  // boarding_done after it.
-  //
-  // (`track` here is the analytics seam, lib/track.js. `trackStops`
-  // above is the railway kind. The collision is unfortunate and the
-  // metaphor is older, so the import keeps the shorter name.)
+  // 足跡 — every transition in the boarding runs through these, so
+  // instrumenting them is the whole of it. There is no "abandoned"
+  // event and there does not need to be: it is a boarding_step with no
+  // boarding_done after it. (`track` here is the analytics seam,
+  // lib/track.js; `trackStops` above is the railway kind.)
   function mark(from, to, dir) {
     track('boarding_step', {
       step: from, to, dir,
       // How long `from` actually held them, then reset for the next
-      // question. Read here because this is the one place that knows a
-      // question is being left.
+      // question.
       ms: watches.current?.step.lap() ?? 0,
-      // trackStops() rather than the `stops` const below: this is
-      // called from a handler, and computing it here keeps the two
-      // independent of declaration order.
       index: trackStops(answers).indexOf(stopOf(from)) + 1,
     })
   }
 
+  // 速度: a move between screens is a transition. Rendered inside the
+  // tap, the next screen held the tap's paint for 250-370 ms of a cheap
+  // phone's CPU (608 ms on a learner's, 2026-10-18, the trail's INP);
+  // as a transition the tap paints its press at once and the screen
+  // follows a frame later, in a render that can yield. Every move
+  // below is one.
   function go(next) {
     mark(step, next, 'fwd')
-    setHistory(h => [...h, step])
-    if (!REDUCED) setLeaving({ step, dir: 'fwd' })
-    setStep(next)
+    startTransition(() => {
+      setHistory(h => [...h, step])
+      if (!REDUCED) setLeaving({ step, dir: 'fwd' })
+      setStep(next)
+    })
   }
 
   function back() {
     if (history.length === 0) return
     const prev = history[history.length - 1]
     mark(step, prev, 'back')
-    setHistory(h => h.slice(0, -1))
-    if (!REDUCED) setLeaving({ step, dir: 'back' })
-    setStep(prev)
+    startTransition(() => {
+      setHistory(h => h.slice(0, -1))
+      if (!REDUCED) setLeaving({ step, dir: 'back' })
+      setSheet(null)
+      setStep(prev)
+    })
   }
 
-  // 机 (plan 140): a stop already passed on the line is a door straight
-  // back to its question -- Back pressed as many times as it takes, in
-  // one pull. Every answer is kept, as Back keeps them. Since plan 163
-  // the line is the strip at the floor's left end.
+  // 机 (plan 140): a stop already passed is a door straight back to its
+  // question -- Back pressed as many times as it takes, in one pull, every
+  // answer kept. The strip's stops on the desk, and the card's origin.
   function jumpTo(target) {
     const at = history.lastIndexOf(target)
     if (at < 0) return
     mark(step, target, 'back')
-    setHistory(h => h.slice(0, at))
-    if (!REDUCED) setLeaving({ step, dir: 'back' })
-    setStep(target)
+    startTransition(() => {
+      setHistory(h => h.slice(0, at))
+      if (!REDUCED) setLeaving({ step, dir: 'back' })
+      setSheet(null)
+      setStep(target)
+    })
+  }
+
+  // The test hands back to the line it was reached from: the test is not
+  // a question Back returns to, so it leaves the history as it goes.
+  function returnToLevel() {
+    mark(step, 'level', 'fwd')
+    startTransition(() => {
+      setHistory(h => (h[h.length - 1] === 'level' ? h.slice(0, -1) : h))
+      if (!REDUCED) setLeaving({ step, dir: 'back' })
+      setStep('level')
+    })
   }
 
   // ── The browser's Back (plan 123) ────────────────────────────
-  // The flow changes screens through state alone, so the browser's
-  // Back -- Alt+←, a mouse's side button, a phone's back gesture --
-  // left Tsuji from question 8, and coming back was a fresh load at
-  // question 1 with the answers gone. One guard entry stands in the
-  // browser's history exactly while the flow has a question behind it:
-  // Back pops the guard and steps back one question, and the guard is
-  // put back while more remain. It is taken out again (history.back(),
-  // its pop ignored) the moment none do -- ‹ back to the first
-  // question, or the plan being built -- so by the time the router
-  // mounts no dead entry is left, and returnToFrontDoor still replaces
-  // the entry the flow began on. From the first question Back leaves,
-  // as it always has.
+  // The flow changes screens through state alone, so the browser's Back
+  // -- Alt+←, a mouse's side button, a phone's back gesture -- would
+  // leave Tsuji from the card, and coming back would be a fresh load
+  // with the answers gone. One guard entry stands in the browser's
+  // history exactly while the flow has a question behind it: Back pops
+  // the guard and steps back one question, and the guard is put back
+  // while more remain. It is taken out again (history.back(), its pop
+  // ignored) the moment none do, so by the time the router mounts no
+  // dead entry is left. From the first question Back leaves, as it
+  // always has.
+  //
+  // A sheet open over the card is shut by Back first, as a phone's Back
+  // shuts any sheet, and the card stays (plan 247): the pop took the
+  // guard, so it goes straight back in.
   const guard = useRef(false)
   const ignorePop = useRef(false)
   const backRef = useRef(back)
-  useEffect(() => { backRef.current = back })
+  const overRef = useRef(false)
+  useEffect(() => { backRef.current = back; overRef.current = sheet != null || reporting })
   useEffect(() => {
     function onPop() {
       if (ignorePop.current) { ignorePop.current = false; return }
       if (!guard.current) return
+      if (overRef.current) {
+        setSheet(null)
+        setReporting(false)
+        try { window.history.pushState({ brd: true }, '') } catch { guard.current = false }
+        return
+      }
       guard.current = false
       backRef.current()
     }
@@ -362,39 +369,17 @@ export default function BoardingFlow({
   }, [depth])
 
   // ── The answers ──────────────────────────────────────────────
-  function continueName() {
-    const name = answers.name.trim()
-    if (!USERNAME_RE.test(name)) { setNameError(t.usernameInvalid); return }
-    if (name === savedName || dryRun) { setNameError(null); go('why'); return }
-    setBusy(true)
-    setNameError(null)
-    apiFetch('/api/profile', session, { method: 'PATCH', body: JSON.stringify({ username: name }) })
-      .then(r => {
-        if (r.status === 409) throw new Error(t.usernameTaken)
-        if (!r.ok) throw new Error(t.genericError)
-        setSavedName(name)
-        go('why')
-      })
-      .catch(err => setNameError(err.message || t.genericError))
-      .finally(() => setBusy(false))
-  }
-
-  // The learner's own CHOICE decides the goal list; the office stores
-  // the JLPT level it maps to. The two differ for exactly one answer —
-  // the novice, who is stored at N5 but has not passed it, so N5 is the
-  // first stop AHEAD of them rather than the one behind. The kana
-  // answer decides one more thing: a learner who cannot read both
-  // scripts has not reached the novice's stop either, so it heads
-  // their list as a destination they can take (goalStops).
-  //
-  // The default stays the nearest JLPT stop it has always been. The
-  // novice's stop is an offer rather than a preselection: it is a real
-  // destination (the office signs it, the pass measures it in kana),
-  // but which one to ride to is the learner's call to make rather than
-  // the flow's to make for them.
-  function afterLevel(choice, kana) {
-    set(levelAnswers(choice, kana))
-    return goalStops(choice, kana).length > 0 ? 'goal' : 'lines'
+  // The kana decides the level: a reader of both scripts is asked it on
+  // the line; anyone else is a novice, whose card takes the nearest stop
+  // ahead (levelAnswers) -- the kana's own stop, still ahead of them, is
+  // on the goal's sheet as a destination they can name.
+  // A goal the learner picked on the card rides on through a return to
+  // the question that set the level, while it is still a stop ahead of
+  // the answer given there (plan 247); a goal never picked is the new
+  // level's next stop, as the card was first filled in.
+  function keepingGoal(next, kana) {
+    const ahead = goalStops(next.levelChoice, kana)
+    return edited.goal && ahead.includes(answers.goal) ? { ...next, goal: answers.goal } : next
   }
 
   function answerKana(kana) {
@@ -402,8 +387,7 @@ export default function BoardingFlow({
     playUi('click-screen-selection')
     const choice = levelForKana(kana)
     if (choice) {
-      set({ kana })
-      afterLevel(choice, kana)
+      set({ kana, ...keepingGoal(levelAnswers(choice, kana), kana) })
       go('reveal')
     } else {
       set({ kana })
@@ -411,37 +395,84 @@ export default function BoardingFlow({
     }
   }
 
-  function continueReveal() {
-    go(afterLevel(answers.levelChoice ?? 'novice', answers.kana))
+  // The verdict: the line with the stop the answers reached chosen,
+  // still the learner's to change.
+  function placedBy(result) {
+    set({ placed: result, levelChoice: result.recommendedLevel })
+    returnToLevel()
+  }
+
+  function skipTest() {
+    set({ placed: null })
+    returnToLevel()
   }
 
   function continueLevel() {
-    go(afterLevel(answers.levelChoice, answers.kana))
+    set(keepingGoal(levelAnswers(answers.levelChoice, answers.kana), answers.kana))
+    go('card')
   }
 
-  function continueTime() {
-    if (canNudge()) go('nudge')
-    else toPlan()
+  // ── The card's sheets ────────────────────────────────────────
+  const close = () => setSheet(null)
+  const edit = field => setEdited(e => (e[field] ? e : { ...e, [field]: true }))
+  // The origin goes back to the question that set it: a reader's level,
+  // or the kana.
+  function openDoor(page) {
+    if (page === 'level') { jumpTo(answers.kana === 'both' ? 'level' : 'kana'); return }
+    setSheet({ destination: 'goal', service: 'rhythm', hour: 'hour', lines: 'lines' }[page] ?? null)
   }
-
-  // No Building (plan 122 on the desk, owner's call; plan 168 on the
-  // phone, the owner's decision 1). Its one job -- gathering the answers
-  // into the journey -- is done by every question as it is answered; the
-  // plan arrives straight after the hour (or the nudge), under the 案内
-  // signboard, and the funnel reads time → plan. Back ends here: the plan
-  // is built.
-  function toPlan() {
-    mark(step, 'plan', 'fwd')
-    if (!arrivalPlayed.current) {
-      arrivalPlayed.current = true
-      // Under reduced motion the sign is not drawn, but its chime is
-      // still rung, on the beat it lands on: a sound is not motion, and
-      // the gate's departure has just been played.
-      if (REDUCED) playVoice('platform-chime', { after: ARRIVAL_CHIME_MS / 1000 })
-      else setArrival(true)
-    }
-    setHistory([])
-    setStep('plan')
+  function pickGoal(goal) {
+    if (goal !== answers.goal) { set({ goal }); edit('goal') }
+    close()
+  }
+  function pickRhythm(rhythm) {
+    if (rhythm !== answers.rhythm) { set({ rhythm }); edit('rhythm') }
+    close()
+  }
+  // The board turns: a run of its flaps each half hour the hour moves.
+  function turnHour(minute) {
+    if (minute === answers.minute) return
+    playBoardFlap()
+    set({ minute })
+    edit('hour')
+  }
+  function pickHour(minute) {
+    turnHour(minute)
+    close()
+  }
+  function switchLines(lines) {
+    // A line is a switch, on or off: the switch's two step.
+    playToggle()
+    set({ lines })
+    edit('lines')
+  }
+  // Allow asks the OS -- its own prompt, its own words -- and the answer
+  // is the answer: a refusal boards without the nudge. One the OS keeps
+  // (it will not ask a second time) is said under the switch, which
+  // would otherwise do nothing at every press (plan 247).
+  function remind() {
+    if (answers.notifications) { set({ notifications: false }); return }
+    requestNudgePermission()
+      .then(granted => {
+        set({ notifications: granted })
+        if (granted) { setNudgeDenied(false); return null }
+        return nudgePermission().then(state => setNudgeDenied(state === 'denied'))
+      })
+      .catch(() => set({ notifications: false }))
+  }
+  function addToCalendar() {
+    const { first } = firstDeparture(new Date(), answers.minute)
+    saveCalendar(dailyTrain({
+      first,
+      minutes: answers.rhythm,
+      title: t.brdAgendaTitle,
+      body: t.brdAgendaBody(answers.rhythm),
+      url: `${window.location.origin}/app`,
+    }))
+  }
+  function saveName(name) {
+    set({ cardName: cleanCardName(name) })
+    close()
   }
 
   // ── The contract ─────────────────────────────────────────────
@@ -449,32 +480,61 @@ export default function BoardingFlow({
   const perDay = itemsForRhythm(answers.rhythm)
   const figures = planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, now, answers.lines)
   const time = minutesToTime(answers.minute)
-  // 辻 (plans 163, 168): the month the goal picked is reached in, hung
-  // over it on the line -- once the volumes that price it have answered.
+  const fullDate = dateFormat(lang)
+  // The month the goal picked is reached in, for the lines' sheet -- once
+  // the volumes that price it have answered.
   const arrivalMonth = volumes
     ? new Intl.DateTimeFormat(lang, { month: 'short', year: 'numeric' }).format(figures.date)
     : null
-  // What each line carries on the ride to the goal, taken or not, for
-  // the lines' cards.
+  // What each line carries on the ride to the goal, taken or not.
   const everyLine = volumes
     ? planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, now, LINES)
     : null
   const lineCarries = everyLine && { vocab: everyLine.words, kanji: everyLine.kanji, grammar: everyLine.grammar }
-  // What each rhythm's ride comes to, for the four roads.
+  // What each rhythm's ride comes to, for the departure board.
   const rhythmRides = volumes
     ? RHYTHMS.map(min => planFigures(volumes, jlpt, answers.goal, itemsForRhythm(min), answers.kana, now, answers.lines))
     : null
-  // And the kana's own stop -- the signs still unread, at the ride's pace
-  // (the recommended one, until it is asked): the reveal names it, and on
-  // a phone the rhythm's board moves it with the pace. A reader of both
-  // scripts has none.
+  // And the kana's own stop -- the signs still unread, at the ride's pace.
+  // A reader of both scripts has none.
   const kanaLeft = volumes ? kanaFigures(volumes, answers.kana, perDay, now) : null
   const kanaStop = kanaLeft && kanaLeft.kana > 0
-    ? {
-        date: new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' }).format(kanaLeft.date),
-        min: answers.rhythm,
-      }
+    ? { date: new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' }).format(kanaLeft.date), min: answers.rhythm }
     : null
+  // The goal's sheet: the stops ahead, each priced at the card's pace on
+  // its lines, and where a reader stands.
+  const choice = answers.levelChoice
+  const goalRows = choice
+    ? goalStops(choice, answers.kana).map(stop => ({
+        ...levelStop(t, lang, volumes, stop),
+        jp: stop === 'novice',
+        date: volumes ? fullDate.format(planFigures(volumes, jlpt, stop, perDay, answers.kana, now, answers.lines).date) : '',
+      }))
+    : []
+  const here = answers.kana === 'both' && choice ? levelStop(t, lang, volumes, choice) : null
+
+  // The print, as the card's back takes it (PassBack's data): a beginner
+  // rides from 初 -- the novice has passed no stop to print -- and the
+  // kana's own stop, as a destination, is printed in its sign.
+  const contract = {
+    from: choice && choice !== 'novice' ? stopParts(t, choice) : { code: '初', name: t.brdNovice, jp: true },
+    to: answers.goal === 'novice' ? { code: 'あ', name: t.kanaTitle, jp: true } : stopParts(t, answers.goal),
+    valid: answers.goal && volumes ? fullDate.format(figures.date) : null,
+    service: paceLabel(t, perDay),
+    hour: `${t.destHour[bucketFor(answers.minute)]} · ${time}`,
+    lines: answers.lines,
+    name: answers.cardName,
+  }
+
+  // Where the card lives: an account the learner boarded with, or one
+  // kept here; a link on its way; or this device alone.
+  const user = session?.user ?? null
+  const viaGoogle = keptBy === 'google'
+    || user?.app_metadata?.provider === 'google'
+    || (user?.identities ?? []).some(i => i.provider === 'google')
+  const kept = !guest
+    ? { state: viaGoogle ? 'google' : 'account', email: user?.email ?? null }
+    : linkSent ? { state: 'sent', email: linkSent } : { state: 'device' }
 
   function complete() {
     if (busy) return
@@ -491,7 +551,6 @@ export default function BoardingFlow({
       ...(answers.goal ? { goalLevel: answers.goal } : {}),
       ...(answers.goal && volumes ? { goalTargetDate: fresh.date.toISOString().slice(0, 10) } : {}),
       dailyDeparture: bucketFor(answers.minute),
-      motive: answers.motive,
       kanaKnown: answers.kana,
       // The lines to ride (backend core/lines.py): the plates' order,
       // the promise's price, the ghost train's scope.
@@ -500,6 +559,8 @@ export default function BoardingFlow({
       reminderTime: time,
       notifications: answers.notifications,
       tzOffsetMin: -new Date().getTimezoneOffset(),
+      // The name the card prints, '' for none (routes/profile.py card_name).
+      cardName: answers.cardName,
     }
     apiJsonWithTimeout('/api/onboarding/complete', session, {
       method: 'POST',
@@ -509,24 +570,34 @@ export default function BoardingFlow({
       .then(() => {
         clearStash()
         // The far end of the funnel every boarding_step above measures.
-        // The answers, not the name or the hour: `motive` is the one
-        // field that says WHY someone is here, and it is the most
-        // useful thing the app knows about a learner it has just met.
+        // The answers, never text a learner typed: whether a name was
+        // given, never the name.
         track('boarding_done', {
-          motive: answers.motive,
           kana_known: answers.kana,
           level: jlpt,
           pace: perDay,
           // The chosen names joined, never text a learner typed.
           lines: answers.lines.join(','),
           notifications: answers.notifications,
-          // The same measure across the whole line: does the boarding
-          // as a whole ask for too much of someone's evening?
+          // How the level was found (plan 224), and where the test placed
+          // the learner when they took it.
+          ...(answers.kana === 'both' ? { level_how: answers.placed ? 'test' : 'pick' } : {}),
+          ...(answers.placed ? { placed: answers.placed.recommendedLevel } : {}),
+          // The card (plan 247): which of its fields a sheet changed --
+          // the defaults are what most keep, or they are not -- whether
+          // it carries a name, and where it was left.
+          edited_goal: edited.goal,
+          edited_rhythm: edited.rhythm,
+          edited_hour: edited.hour,
+          edited_lines: edited.lines,
+          named: answers.cardName.length > 0,
+          kept: keptBy ?? (guest ? (linkSent ? 'link' : 'none') : 'already'),
+          // The same measure across the whole line.
           ms: watches.current?.total.read() ?? 0,
         })
-        // The gate reads the profile summary for the pass holder's
-        // name and the HUD reads the balance -- refresh both before the
-        // cutscene mounts. Fire-and-forget: both stores fail quietly.
+        // The gate reads the profile summary for the card's holder and
+        // the HUD reads the balance -- refresh both before the cutscene
+        // mounts. Fire-and-forget: both stores fail quietly.
         refreshSummary()
         refreshCredits()
         // What App's copy of the profile, read before the boarding,
@@ -536,171 +607,132 @@ export default function BoardingFlow({
       })
       .catch(err => {
         setBusy(false)
-        // An ApiError means the office ANSWERED and refused the
-        // contract; anything else -- a dead fetch, the timeout's own
-        // abort -- never reached it. The pass said "check your
-        // connection" for both, which on a 422 sent a learner to look
-        // at a connection that was plainly working, on the one screen
-        // that has no other way forward (2026-09-09).
-        setSaveError(err instanceof ApiError ? 'refused' : 'network')
+        // An ApiError means the office ANSWERED. A 4xx is a refusal,
+        // which the same press earns again; a 5xx, a 408 or a 429 is the
+        // office unable to answer just now, which a second press a moment
+        // later is not (plan 247). Anything else -- a dead fetch, the
+        // timeout's own abort -- never reached it.
+        const answered = err instanceof ApiError
+        const status = answered ? Number(err.status) || 0 : 0
+        setRefusedWith(status)
+        setSaveError(!answered ? 'network' : status >= 500 || status === 408 || status === 429 ? 'busy' : 'refused')
       })
   }
 
   // ── The screens ──────────────────────────────────────────────
   const stops = trackStops(answers)
-  const onTrack = stops.includes(stopOf(step))
+  const arrival = step === 'card'
+  const onTrack = !arrival && stops.includes(stopOf(step))
   const index = stops.indexOf(stopOf(step)) + 1
   const total = stops.length
-  const displayName = answers.name.trim() || savedName || profile.username || ''
-  // The number a question's hub prints: its place on the line -- the
-  // strip's on the desk, the track's on a phone.
-  const lineStops = stops
-  const hubNo = key => String(lineStops.indexOf(key) + 1).padStart(2, '0')
+  // The number a question's hub prints: its place on the line.
+  const hubNo = key => String(stops.indexOf(key) + 1).padStart(2, '0')
 
-  function renderStep(key) {
+  const sheets = (
+    <>
+      <GoalSheet
+        open={sheet === 'goal'}
+        onClose={close}
+        stops={goalRows}
+        here={here}
+        value={answers.goal}
+        onPick={pickGoal}
+        cap={t.brdGoalCap(answers.rhythm)}
+      />
+      <RhythmSheet
+        open={sheet === 'rhythm'}
+        onClose={close}
+        value={answers.rhythm}
+        onPick={pickRhythm}
+        rides={rhythmRides}
+        stop={answers.goal ?? jlpt}
+        first={kanaStop}
+      />
+      <HourSheet
+        open={sheet === 'hour'}
+        onClose={close}
+        minute={answers.minute}
+        onChange={turnHour}
+        onPick={pickHour}
+        now={now}
+        native={canNudge()}
+        notifications={answers.notifications}
+        denied={nudgeDenied}
+        onRemind={remind}
+        onAgenda={addToCalendar}
+      />
+      <LinesSheet
+        open={sheet === 'lines'}
+        onClose={close}
+        value={answers.lines}
+        onChange={switchLines}
+        carries={lineCarries}
+        stop={answers.goal ?? jlpt}
+        arrival={arrivalMonth}
+        novice={answers.kana !== 'both'}
+      />
+      <NameSheet open={sheet === 'name'} onClose={close} value={answers.cardName} onSave={saveName} />
+      <AccountSheet
+        open={sheet === 'account'}
+        onClose={close}
+        sent={linkSent}
+        // The last moment before the web navigates away for Google, when
+        // the answers still only exist in memory.
+        onLeaveForAuth={() => stash({ answers, step: 'card', sheet: 'account', keeping: 'google', edited, history })}
+        onKept={by => { setKeptBy(by); close() }}
+        onSent={email => { setLinkSent(email); setKeptBy('link'); close() }}
+      />
+    </>
+  )
+
+  // `leaving`: the car pulling out, drawn for the pull and dropped -- a
+  // screen that fetches as it mounts (the test) is drawn still there, and
+  // the card pulling out takes no sheet with it.
+  function renderStep(key, leaving = false) {
     switch (key) {
-      case 'name':
-        return (
-          <NameStep
-            value={answers.name}
-            onChange={v => { set({ name: v }); setNameError(null) }}
-            onContinue={continueName}
-            onSignIn={onSignIn}
-            // Whose pass this is, when it is anybody's: a guest has no
-            // address and the line stays off. See NameStep.
-            email={session?.user?.email ?? null}
-            error={nameError}
-            busy={busy}
-            no={hubNo('name')}
-            next={t.brdStop[lineStops[1]]}
-          />
-        )
-      case 'why':
-        return <WhyStep name={displayName} value={answers.motive} onChange={v => pick({ motive: v })} onContinue={() => go('kana')} no={hubNo('why')} />
       case 'kana':
         return <KanaStep value={answers.kana} onAnswer={answerKana} />
       case 'reveal':
-        return <KanaReveal onContinue={continueReveal} first={kanaStop} />
+        return <KanaReveal onContinue={() => go('card')} first={kanaStop} />
+      case 'test':
+        return <TestStep session={session} onResult={placedBy} onPick={skipTest} still={leaving} />
       case 'level':
-        return <LevelStep volumes={volumes} value={answers.levelChoice} onChange={v => pick({ levelChoice: v })} onContinue={continueLevel} no={hubNo('level')} />
-      case 'goal':
         return (
-          <GoalStep
+          <LevelStep
             volumes={volumes}
-            level={answers.levelChoice ?? jlpt}
-            kana={answers.kana}
-            value={answers.goal}
-            onChange={v => pick({ goal: v })}
-            onContinue={() => go('lines')}
-            arrival={arrivalMonth}
-            no={hubNo('goal')}
+            value={answers.levelChoice}
+            // An answer picked: the wood pick every list in the app makes.
+            onChange={v => { playUi('click-mode-selection'); set({ levelChoice: v }) }}
+            onContinue={continueLevel}
+            onTest={() => go('test')}
+            no={hubNo('level')}
+            placed={answers.placed}
           />
         )
-      case 'lines':
+      case 'card':
         return (
-          <LinesStep
-            value={answers.lines}
-            // A line is a switch, on or off: the switch's two step.
-            onChange={v => { playToggle(); set({ lines: v }) }}
-            onContinue={() => go('rhythm')}
-            carries={lineCarries}
-            stop={answers.goal ?? jlpt}
-            arrival={arrivalMonth}
-            no={hubNo('lines')}
-            novice={answers.kana !== 'both'}
-          />
-        )
-      case 'rhythm':
-        return (
-          <RhythmStep
-            value={answers.rhythm}
-            onChange={v => pick({ rhythm: v })}
-            onContinue={() => go('time')}
-            rides={rhythmRides}
-            stop={answers.goal ?? jlpt}
-            now={now}
-            first={kanaStop}
-          />
-        )
-      case 'time':
-        return (
-          <TimeStep
-            minute={answers.minute}
-            // The board turns: a run of its flaps each half hour the hour
-            // moves -- a ▲ or a ▼, a service, the train dragged along the
-            // day or its keys. A drag reports every move; only a change
-            // turns the board.
-            onChange={v => { if (v !== answers.minute) playBoardFlap(); set({ minute: v }) }}
-            onContinue={continueTime}
-            now={now}
-          />
-        )
-      case 'nudge':
-        return (
-          <NudgeStep
-            time={time}
-            minute={answers.minute}
-            now={now}
-            no={hubNo('nudge')}
-            // Allow asks the OS -- its own prompt, its own words -- and
-            // the answer is the answer: a refusal boards without the nudge.
-            onAllow={() => {
-              requestNudgePermission().then(granted => { set({ notifications: granted }); toPlan() })
-            }}
-            onSkip={() => { set({ notifications: false }); toPlan() }}
-          />
-        )
-      case 'plan':
-        // 机 (plan 140): on the desk the pass's own screen folds away, so
-        // the plan is the last screen and enters the station -- unless
-        // there is an account to offer first. The funnel reads plan →
-        // boarding_done there. The car names its step (`data-car`) for
-        // the width it stands at.
-        return (
-          <PlanStep
-            name={displayName}
-            motive={answers.motive ?? 'other'}
-            rhythm={answers.rhythm}
-            goal={answers.goal}
-            lines={answers.lines}
-            figures={figures}
-            now={now}
-            time={time}
-            hour={bucketFor(answers.minute)}
-            onContinue={desk && !guest ? complete : () => go(guest ? 'account' : 'pass')}
-            last={desk && !guest}
-            busy={busy}
-            error={saveError}
-          />
-        )
-      case 'account':
-        // And the account, when it is offered, is the desk's last screen:
-        // keeping the progress, or riding on without it, enters.
-        return (
-          <AccountStep
-            onCreated={() => (desk ? complete() : go('pass'))}
-            onSkip={() => (desk ? complete() : go('pass'))}
-            onSignIn={onSignIn}
-            onLeaveForAuth={() => stash({ answers, step, savedName })}
-            error={desk ? saveError : null}
-            ticket={{
-              name: displayName, now, figures, goal: answers.goal ?? jlpt,
-              rhythm: answers.rhythm, time, hour: bucketFor(answers.minute),
-            }}
-          />
-        )
-      case 'pass':
-        return (
-          <PassStep
-            name={displayName}
-            contract={{
-              jlpt, goal: answers.goal, perDay, departure: bucketFor(answers.minute),
-              lines: answers.lines, date: volumes ? figures.date : null,
-            }}
+          <CardStep
+            contract={contract}
+            kept={kept}
+            onOpen={openDoor}
+            onSign={() => setSheet('name')}
+            onKeep={() => setSheet('account')}
             onEnter={complete}
+            onSwitch={guest ? null : onSignIn}
+            onReport={() => setReporting(true)}
             busy={busy}
             error={saveError}
-          />
+          >
+            {!leaving && sheets}
+            {!leaving && (
+              <FeedbackSheet
+                open={reporting}
+                onClose={() => setReporting(false)}
+                session={session}
+                failure={failureOf('/api/onboarding/complete', refusedWith)}
+              />
+            )}
+          </CardStep>
         )
       default:
         return null
@@ -708,30 +740,16 @@ export default function BoardingFlow({
   }
 
   // ── 辻 — the strip at the floor's left end (plans 140, 163) ──────
-  // A stop per question (the reveal is the kana's own, not a stop), each
-  // named, the ones ridden filled and the one being asked lit. The
-  // answer given is said on its stop -- a level picked but not yet
-  // continued is already a goal, priced the way Continue will commit it
-  // (boardingDraft) -- and a stop behind is a door back to its question
-  // while there is a way back (the history).
-  const draft = boardingDraft(answers, step)
-  const draftLevel = draft.levelChoice === 'novice' ? t.brdNovice : draft.jlpt
-  const draftGoal = draft.levelChoice == null ? null
-    : draft.goal === 'novice' ? t.brdNovice
-      : draft.goal ? `${draftLevel} → ${draft.goal}` : draftLevel
+  // A stop per question, each named, the ones ridden filled and the one
+  // being asked lit; the answer given is said on its stop, and a stop
+  // behind is a door back to its question while there is a way back.
   const stopValue = {
-    name: displayName,
-    why: answers.motive ? t.brdMotive[answers.motive] : null,
     kana: answers.kana ? t.brdKana[answers.kana] : null,
-    level: answers.levelChoice == null ? null : answers.levelChoice === 'novice' ? t.brdNovice : answers.levelChoice,
-    goal: draftGoal,
-    lines: [t.kanaTitle, ...draft.lines.map(line => t.brdLine[line])].join(' · '),
-    rhythm: `${answers.rhythm} ${t.brdMinADay}`,
-    time,
-    nudge: answers.notifications ? time : t.brdNotNow,
+    level: choice == null ? null : choice === 'novice' ? t.brdNovice : choice,
+    card: null,
   }
-  const atStop = lineStops.indexOf(stopOf(step))
-  const deskStops = lineStops.map((key, i) => {
+  const atStop = stops.indexOf(stopOf(step))
+  const deskStops = stops.map((key, i) => {
     const state = atStop < 0 || i < atStop ? 'done' : i === atStop ? 'now' : 'next'
     return {
       key,
@@ -742,13 +760,12 @@ export default function BoardingFlow({
     }
   })
   // The way back the floor draws beside Continue (BoardBack): the
-  // question before, or out of the flow from the first -- the head's ‹,
-  // which the desk no longer draws.
+  // question before, or out of the flow from the first.
   const floorBack = desk && onTrack ? (history.length > 0 ? back : onExit) : null
 
   return (
     <main
-      // A phone's three arrival screens stand with no head (plan 168).
+      // The card stands with no head, as an arrival screen (plan 168).
       className={desk ? 'brd desk-brd' : onTrack ? 'brd' : 'brd brd--arrival'}
       id="main-content"
       data-step={step}
@@ -762,7 +779,7 @@ export default function BoardingFlow({
         <div className="brd__cars">
           {leaving && (
             <div key={`out:${leaving.step}`} className="brd__car brd__car--out" data-dir={leaving.dir} data-car={desk ? leaving.step : undefined} aria-hidden="true" inert>
-              {renderStep(leaving.step)}
+              {renderStep(leaving.step, true)}
             </div>
           )}
           <div key={step} className={`brd__car${leaving ? ' brd__car--in' : ''}`} data-dir={leaving?.dir ?? 'none'} data-car={desk ? step : undefined}>
@@ -771,9 +788,6 @@ export default function BoardingFlow({
         </div>
       </BoardBack.Provider>
       {desk && <DeskStrip stops={deskStops} stripRef={stripRef} />}
-      {/* 到着: the plan arrives under the signboard, once; skippable,
-          absent under reduced motion (TrainArrival's own rules). */}
-      {arrival && <TrainArrival jp="案内" title={t.brdArrivalTitle} onDone={() => setArrival(false)} />}
     </main>
   )
 }

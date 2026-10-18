@@ -27,6 +27,7 @@ import { supabase } from './supabase'
 // the name every backend caller imports.
 export { api } from './origin'
 import { api } from './origin'
+import { reportApiFailure } from './apiFailure'
 
 // ── 401 recovery ──────────────────────────────────────────────
 // A session the backend rejects used to be invisible: supabase-js
@@ -77,13 +78,59 @@ function recoverAuth() {
   return recovery
 }
 
+// 足跡 — a failed request is announced through lib/apiFailure.js (see there
+// for what counts), so this file never imports the trail it is carried by.
+function isAbort(err) {
+  return err?.name === 'AbortError'
+}
+
+async function send(path, init) {
+  let response
+  try {
+    response = await fetch(api(path), init)
+  } catch (err) {
+    if (!isAbort(err)) reportApiFailure(path, 0)
+    throw err
+  }
+  if (response.status >= 500) reportApiFailure(path, response.status)
+  return response
+}
+
+// ── 429, a learner asking too much at once (plan 211) ──────────
+// The server holds each learner to a few requests at once, queues the
+// next ones and refuses past the queue: a 429, {"detail":
+// "too_many_requests"}, with Retry-After. It is not a failure of the
+// server (lib/apiFailure counts 5xx and no answer only), and a read
+// is asked once more after the wait the server names, held to a few
+// seconds. A write is never sent twice: the caller hears the 429.
+const RETRY_CAP_MS = 5000
+
+function retryDelay(response) {
+  const seconds = Number(response.headers?.get?.('Retry-After'))
+  return seconds > 0 ? Math.min(RETRY_CAP_MS, seconds * 1000) : 1000
+}
+
+function wait(ms, signal) {
+  return new Promise((resolve, reject) => {
+    const abort = () => { clearTimeout(timer); reject(new DOMException('Aborted', 'AbortError')) }
+    const timer = setTimeout(() => { signal?.removeEventListener('abort', abort); resolve() }, ms)
+    if (signal?.aborted) abort()
+    else signal?.addEventListener('abort', abort, { once: true })
+  })
+}
+
 export async function apiFetch(path, session, options = {}) {
   const headers = {
     'Content-Type': 'application/json',
     ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
     ...options.headers,
   }
-  const response = await fetch(api(path), { ...options, headers })
+  let response = await send(path, { ...options, headers })
+  const method = (options.method ?? 'GET').toUpperCase()
+  if (response.status === 429 && (method === 'GET' || method === 'HEAD')) {
+    await wait(retryDelay(response), options.signal)
+    response = await send(path, { ...options, headers })
+  }
   // Only when a session was presented and refused — a 401 on a
   // sessionless call is the endpoint doing its job.
   if (response.status === 401 && session) recoverAuth()
@@ -104,21 +151,28 @@ export async function apiFetch(path, session, options = {}) {
 // matters most.
 export class ApiError extends Error {
   constructor(status, body, path) {
-    // `detail` is FastAPI's own error shape (HTTPException) — worth
-    // surfacing verbatim, since the backend's messages name the actual
-    // problem ("Invalid mode for kana: 'banana'").
+    // `detail` is FastAPI's own error shape (HTTPException). The message
+    // is for the console and the logs, never for a screen: the backend
+    // writes it in English, and a learner reads French first (plan 215).
+    // What a screen may say comes from `code`, below, through its own
+    // locale table.
     const detail = typeof body === 'object' && body !== null ? body.detail : null
-    super(detail ? String(detail) : `Request failed (${status}) for ${path}`)
+    const said = detail && typeof detail === 'object' ? detail.message : detail
+    super(said ? String(said) : `Request failed (${status}) for ${path}`)
     this.name = 'ApiError'
     this.status = status
     this.body = body
     this.path = path
-    // The fare gate's refusals (plan 069) arrive as a bare string in
-    // `detail` — 'out_of_credits', 'pass_required', 'limit_reached' —
-    // with their figures beside it in the body. `code` is that string
-    // when there is one, so a caller can tell them apart without
-    // matching on a sentence; every other error keeps code null.
-    this.code = typeof detail === 'string' && /^[a-z_]+$/.test(detail) ? detail : null
+    // Two shapes carry a code. The fare gate's refusals (plan 069)
+    // arrive as a bare string in `detail` — 'out_of_credits',
+    // 'pass_required', 'limit_reached' — with their figures beside it
+    // in the body; a refusal that also explains itself in English for
+    // the logs arrives as `detail: { code, message }` (routes/video.py,
+    // routes/agenda.py). `code` is the name either way, so a caller can
+    // tell refusals apart without matching on a sentence; every other
+    // error keeps code null.
+    const code = detail && typeof detail === 'object' ? detail.code : detail
+    this.code = typeof code === 'string' && /^[a-z][a-z0-9_]*$/.test(code) ? code : null
   }
 }
 
@@ -180,7 +234,7 @@ export async function apiJsonWithTimeout(path, session, { timeoutMs = 10000, sig
  */
 export async function apiUpload(path, session, formData) {
   const headers = session ? { Authorization: `Bearer ${session.access_token}` } : {}
-  const response = await fetch(api(path), { method: 'POST', body: formData, headers })
+  const response = await send(path, { method: 'POST', body: formData, headers })
   if (response.status === 401 && session) recoverAuth()
   const body = await readJson(response)
   if (!response.ok) throw new ApiError(response.status, body, path)

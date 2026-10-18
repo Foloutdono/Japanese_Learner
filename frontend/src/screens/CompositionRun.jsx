@@ -22,11 +22,12 @@ import { useSentenceKeys, currentLine } from '../components/study/sentenceLines'
 import { useRunLines } from '../hooks/useRunLines'
 import { useAsk } from '../hooks/useAsk'
 import { AskPanel } from '../components/study/AskPanel'
+import { AskEntry } from '../components/study/AskPage'
 import { askTarget } from '../domain/ask'
 import { startTally, countReview } from '../stores/runTally'
 import { RunStreak } from '../components/study/RunStreak'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
-import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
+import { vocabLookup, grammarLookup, docksInColumn, lookupKey } from '../components/analysis/lookup'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 
@@ -415,6 +416,12 @@ function Session({ session, level }) {
   // The asking's thread: a reopened line's, else the sentence on the
   // stage's, open once it is graded (plan 131).
   const target = askTarget(lines.opened, { key: point?._uiKey, base: askBase(), analysis, open: rated })
+  // The tag's door to the point's lesson (plan 213): the sheet on a
+  // phone, the column on the desk once the breakdown holds it -- before
+  // that the column IS the lesson, and the tag needs no door to it.
+  const tagDoor = point && (!desk || docksInColumn(desk, lines.opened, rated, analysis))
+    ? () => setLookup(grammarLookup(point))
+    : null
   const side = lines.opened
     ? <LineSide lines={lines} {...doors} />
     : rated
@@ -549,7 +556,12 @@ function Session({ session, level }) {
               and keeps the notes. */}
           <PromptCard page prose>
             {!showBreakdown && (
-              <PointTag point={point.pattern} label={t.pcardPoint} used={typeof found === 'boolean' ? found : null} />
+              <PointTag
+                point={point.pattern}
+                label={t.pcardPoint}
+                used={typeof found === 'boolean' ? found : null}
+                onOpen={tagDoor}
+              />
             )}
             <div className="pcard-group">
               {!showBreakdown && (
@@ -602,6 +614,7 @@ function Session({ session, level }) {
                     explainError={explainError}
                   />
                 )}
+                <AskEntry ask={asking} askKey={target.key} context={target.context} open={target.open} title={t.compositionTitle} />
               </div>
             )}
           </PromptCard>

@@ -3,21 +3,20 @@ import { useLocation, useNavigate, useParams, useSearchParams } from 'react-rout
 import { useLang } from '../LangContext'
 import { playUi, playCorrect } from '../lib/audio'
 import { Bar } from '../components/chrome/Bar'
-import { Chip } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
 import { useListWalk, useFollowFocus, WALK_KEYS_PAGED } from '../hooks/useListWalk'
-import QuestionRenderer, { GapText } from '../exam/QuestionRenderer'
-import ExamCard from '../exam/ExamCard'
+import QuestionRenderer, { GapText, PageChoices, PassageText } from '../exam/QuestionRenderer'
 import ExamStudy from '../exam/ExamStudy'
+import { MarkedSheet } from '../exam/DeskSheet'
 import { StationSplit } from '../components/selection/StationSplit'
-import { SplitRow } from '../components/selection/SplitRow'
+import { relativeDate } from '../lib/formatDate'
 import { useDesk } from '../hooks/useDesk'
 import { dialogOpen } from '../lib/dialogOpen'
 import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
 import { flattenQuestions, getAttempt, getExam } from '../exam/examService'
 import { paperTitle } from '../exam/examKinds'
-import { CheckIcon, CrossIcon, ChevronIcon, PageIcon } from '../components/ui/Icons'
+import { ChevronIcon, PageIcon } from '../components/ui/Icons'
 
 // A practice target, deliberately NOT a JLPT pass mark.
 //
@@ -35,14 +34,6 @@ import { CheckIcon, CrossIcon, ChevronIcon, PageIcon } from '../components/ui/Ic
 // own note on 尺度得点: the real score is IRT-scaled from official item
 // parameters, and no third party can reproduce it.
 const PRACTICE_TARGET_PCT = 60
-
-// Geometry of the score ring (canvas ExamResult: a 108 viewBox, the
-// arc at r=46). A bare red "48%" says you did badly without ever
-// saying badly against what — on the ring, the target sits as a tick
-// you can see yourself falling short of or clearing.
-const RING_BOX = 108
-const RING_R = 46
-const RING_C = 2 * Math.PI * RING_R
 
 const EXAM_COLOR = 'var(--line-exam)'
 
@@ -77,7 +68,7 @@ export default function ExamResult({ session }) {
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const desk = useDesk()
   const [expandedId, setExpandedId] = useState(null)
   // Missed questions are what a review is for, so that is what opens.
@@ -156,12 +147,14 @@ export default function ExamResult({ session }) {
     return out
   }, [summary, exam, section])
 
-  // ── 机 — the review as a list beside its page (plan 115) ──
-  // On the desk every row is a door to the question's revealed card,
-  // which stands beside the list rather than opening under its row: the
-  // first miss is open on arrival, a click or ←/→ swaps it in place. A
-  // clean sheet lists every question, so there is still something to
-  // open — a listening transcript, say.
+  // ── 机 — the sheet marked beside its page (plans 115, 117, 200) ──
+  // The owner's mix of the canvas "Tsuji — the mock exam on the desk"
+  // (M7): the answer sheet handed back marked, under the score, and
+  // beside it the booklet's page of the question open. Every row of the
+  // sheet is a door to its question (the first miss opens on arrival);
+  // ←/→ walk the misses -- "miss 2 of 9" -- or, on a clean sheet, every
+  // question, a listening transcript being what somebody who aced the
+  // paper may want to read.
   //
   // The open question is named in the URL, beside the attempt
   // (?question=, plan 117), and each row is a link to it: a question
@@ -169,16 +162,17 @@ export default function ExamResult({ session }) {
   // as a reload does. The link and ←/→ replace the URL, carrying the
   // paper and the attempt this screen was handed (router state), so the
   // swap refetches nothing. The phone keeps its rows opening in place.
-  const deskRows = useMemo(() => {
-    const missed = groups.some(g => g.rows.some(r => !r.isCorrect))
-    return groups.flatMap(g => (showAll || !missed ? g.rows : g.rows.filter(r => !r.isCorrect)))
-  }, [groups, showAll])
+  const allRows = useMemo(() => groups.flatMap(g => g.rows), [groups])
+  const walkRows = useMemo(() => {
+    const missed = allRows.filter(r => !r.isCorrect)
+    return missed.length > 0 ? missed : allRows
+  }, [allRows])
   const asked = searchParams.get('question')
-  const openRow = deskRows.find(r => String(r.id) === asked) ?? deskRows[0] ?? null
-  // The review is one tab stop, the open question, walked with ↑/↓
-  // across its parts (plan 123); ←/→ open the next, and the focus goes
-  // with them while it is in the list.
-  const onReviewWalk = useListWalk(desk, { items: '.exam-review-row' })
+  const openRow = allRows.find(r => String(r.id) === asked) ?? walkRows[0] ?? null
+  // The sheet is one tab stop, the open question, walked with ↑/↓
+  // across its parts (plan 123); ←/→ open the next miss, and the focus
+  // goes with them while it is in the sheet.
+  const onReviewWalk = useListWalk(desk, { items: '.desk-mark-row' })
   const reviewRef = useRef(null)
   useFollowFocus(reviewRef, openRow?.id, desk)
   useEffect(() => {
@@ -187,8 +181,12 @@ export default function ExamResult({ session }) {
       if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
       if (e.repeat || e.metaKey || e.ctrlKey || e.altKey || dialogOpen()) return
       if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target?.tagName ?? '') || e.target?.isContentEditable) return
-      const at = deskRows.indexOf(openRow)
-      const next = deskRows[at + (e.key === 'ArrowRight' ? 1 : -1)]
+      // From the open row's place on the paper, so a right answer
+      // opened from the sheet walks on to the miss after it.
+      const at = allRows.indexOf(openRow)
+      const next = e.key === 'ArrowRight'
+        ? walkRows.find(r => allRows.indexOf(r) > at)
+        : walkRows.findLast(r => allRows.indexOf(r) < at)
       if (!next) return
       e.preventDefault()
       playUi('click-mode-selection')
@@ -196,11 +194,11 @@ export default function ExamResult({ session }) {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [desk, deskRows, openRow, navigate, location.pathname, location.state, searchParams])
-  // The open row kept in view in the list's own scroll.
+  }, [desk, allRows, walkRows, openRow, navigate, location.pathname, location.state, searchParams])
+  // The open row kept in view in the sheet's own scroll.
   const openId = desk ? openRow?.id : null
   useEffect(() => {
-    if (openId) document.querySelector('.exam-review-row[aria-current="page"]')?.scrollIntoView?.({ block: 'nearest' })
+    if (openId) document.querySelector('.desk-mark-row[aria-current="page"]')?.scrollIntoView?.({ block: 'nearest' })
   }, [openId])
 
   // Real effect (not a call in the render body) — the render-body call
@@ -240,50 +238,6 @@ export default function ExamResult({ session }) {
     setExpandedId(prev => (prev === id ? null : id))
   }
 
-  const head = (
-    <>
-      <div className="exam-result-head">
-        <ScoreRing pct={sectionStats.pct} metTarget={metTarget} />
-        <div className="exam-result-figs">
-          <b className="exam-result-figs__score">{sectionStats.correct} / {sectionStats.total}</b>
-          <span className="exam-result-figs__cap">{t.examScoreCorrect}</span>
-          <span className="exam-result-figs__note">
-            {t.examPracticeTarget} {PRACTICE_TARGET_PCT}%
-            {elapsedMs !== null && <> · {t.examTimeTaken} {formatDuration(elapsedMs)}</>}
-          </span>
-          {/* The one screen in the app where somebody might mistake a
-              generated practice number for a real JLPT result, so it
-              says outright that it isn't one. */}
-          <span className="exam-result-figs__note">{t.examUnofficialNote}</span>
-        </div>
-      </div>
-
-      <div className="section-header section-header--paired">
-        <span className="section-header__mark">
-          <h2 className="section-header__jp">{t.examReviewTitle}</h2>
-        </span>
-        {/* Rendered even on a clean sheet. Gating it on missedCount
-            left a perfect run with the "nothing missed" line and no
-            control at all — no question expandable, and in particular
-            no way to reach the listening transcripts, which is exactly
-            what somebody who just aced a listening paper might want to
-            read. */}
-        <Chip
-          on={!showAll}
-          color={EXAM_COLOR}
-          className="section-header__chip"
-          onClick={() => { playUi('click-mode-selection'); setShowAll(v => !v) }}
-        >
-          {t.examShowWrongOnly}
-        </Chip>
-        <span className="section-header__rule" aria-hidden="true" />
-      </div>
-      {/* "Tap a question to see it again" says nothing on the desk,
-          where the missed question already stands open beside the list. */}
-      {desk && missedCount > 0 ? null : <p className="hint">{missedCount === 0 ? t.examAllCorrect : t.examReviewHint}</p>}
-    </>
-  )
-
   // A NEW paper, not this one again. Re-sitting a paper whose answers
   // you have just read through tests recall of those answers rather
   // than the language, so the server is asked for a different revision
@@ -305,46 +259,102 @@ export default function ExamResult({ session }) {
   )
 
   if (desk) {
-    const shown = new Set(deskRows.map(r => r.id))
+    const pct = sectionStats.pct
+    const group = groups.find(g => g.rows.includes(openRow)) ?? null
+    const q = openRow?.q ?? null
+    const misses = walkRows.filter(r => !r.isCorrect)
+    const missAt = openRow && !openRow.isCorrect ? misses.indexOf(openRow) : -1
+    // When it was handed in, as M7 prints it: the day, then the hour.
+    const day = relativeDate(summary.finishedAt, lang, t)
+    const when = day && `${day}, ${new Date(summary.finishedAt).toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' })}`
     return (
-      <main id="main-content" className="practice" style={{ '--line-color': EXAM_COLOR }}>
+      <main id="main-content" className="practice desk-res" style={{ '--line-color': EXAM_COLOR }}>
+        {/* The desk's bar is the screen's name for a screen reader, and
+            nothing drawn: the rail names the place (Bar). */}
         <Bar code={station.code} color={EXAM_COLOR} title={t.examTitle} sub={paperTitle(exam, t)} />
-        {head}
         <StationSplit
-          label={t.examReviewTitle}
+          label={t.examYourSheet}
+          className="desk-split--res"
           list={(
-            <div className="surface exam-review" ref={reviewRef} onKeyDown={onReviewWalk} aria-keyshortcuts={desk ? WALK_KEYS_PAGED : undefined}>
-              {groups.map(group => {
-                const rows = group.rows.filter(r => shown.has(r.id))
-                if (rows.length === 0) return null
-                return (
-                  <div key={group.key} className="exam-review__part">
-                    <div className="exam-group">
-                      <b className="exam-group__part">{t.examPart(group.number)}</b>
-                      <span className="exam-group__score">{group.correct} / {group.rows.length}</span>
-                    </div>
-                    {rows.map(r => (
-                      <ReviewRow
-                        key={r.id}
-                        r={r}
-                        desk
-                        open={r.id === openRow?.id}
-                        to={questionAt(location.pathname, searchParams, r.id)}
-                        navState={location.state}
-                        onClick={() => playUi('click-mode-selection')}
-                      />
-                    ))}
-                  </div>
-                )
-              })}
+            <div className="desk-res__sheet">
+              <div className="desk-res__paper">
+                <b>{paperTitle(exam, t)}</b>
+                {when && <span className="cap">{when}</span>}
+              </div>
+              <div className="desk-score">
+                <div className="desk-score__figs">
+                  <b className="desk-score__fig">{sectionStats.correct}</b>
+                  <span className="desk-score__of">/ {sectionStats.total}</span>
+                  <span className={metTarget ? 'desk-score__pct' : 'desk-score__pct desk-score__pct--low'}>{t.percent(pct)}</span>
+                </div>
+                <div className="desk-score__bar" role="img" aria-label={t.examScoreAgainst(pct, PRACTICE_TARGET_PCT)}>
+                  <i className={metTarget ? undefined : 'desk-score__low'} style={{ width: `${Math.min(100, Math.max(0, pct))}%` }} />
+                  <span className="desk-score__tick" style={{ left: `${PRACTICE_TARGET_PCT}%` }} />
+                </div>
+                {/* The one screen where a generated practice number could
+                    be taken for a real JLPT result, so it says it is not. */}
+                <div className="desk-score__cap">
+                  <span className="cap">{t.examPracticeTarget} {PRACTICE_TARGET_PCT} % · {t.examUnofficial}</span>
+                  {elapsedMs !== null && (
+                    <span className="desk-score__time">{formatDuration(elapsedMs)} <small>/ {section.timeLimitMin}:00</small></span>
+                  )}
+                </div>
+              </div>
+              <div ref={reviewRef} onKeyDown={onReviewWalk} aria-keyshortcuts={WALK_KEYS_PAGED}>
+                <MarkedSheet
+                  groups={groups}
+                  openId={openRow?.id ?? null}
+                  rowTo={id => questionAt(location.pathname, searchParams, id)}
+                  navState={location.state}
+                  onOpen={() => playUi('click-mode-selection')}
+                />
+              </div>
             </div>
           )}
         >
-          {openRow && <ExamCard key={openRow.id} question={openRow.q} selected={openRow.given} revealed keys />}
-          {openRow && <ExamStudy key={`study-${openRow.id}`} session={session} examId={examId} revision={exam.revision} question={openRow.q} />}
-          {/* The way back to the exams is the rail's; the page keeps
-              the one thing to do next, under the card. */}
-          <div className="btn-row">{newPaper}</div>
+          {q && (
+            <article key={q.id} className="desk-book desk-book--res" aria-label={`${t.examQuestionAbbrev}${q.number}`}>
+              <header className="desk-book__head">
+                {group && <span className="desk-mondai" lang="ja">問題{group.number}</span>}
+                {group && <span className="desk-book__part" lang="ja">{group.name ?? t.examPart(group.number)}</span>}
+                {missAt !== -1 && (
+                  <span className="desk-book__walk">
+                    <kbd className="desk-kbd" aria-hidden="true">←</kbd>
+                    {t.examMissOf(missAt + 1, misses.length)}
+                    <kbd className="desk-kbd" aria-hidden="true">→</kbd>
+                  </span>
+                )}
+                <span className="desk-folio"><b>{q.number}</b><small>/ {allRows.length}</small></span>
+              </header>
+              {q.type === 'reading-passage' && q.passage ? (
+                <div className="desk-spread">
+                  <div className="desk-spread__text"><PassageText passage={q.passage} /></div>
+                  <div className="desk-spread__ask">
+                    <div className="desk-q">
+                      <span className="desk-q__n" aria-hidden="true">{q.number}</span>
+                      <QuestionRenderer question={q} selected={openRow.given} revealed keys paged passageAside />
+                    </div>
+                    <PageChoices question={q} selected={openRow.given} revealed narrow keys />
+                  </div>
+                </div>
+              ) : (
+                <div className="desk-book__body">
+                  <div className="desk-q">
+                    <span className="desk-q__n" aria-hidden="true">{q.number}</span>
+                    <QuestionRenderer question={q} selected={openRow.given} revealed keys paged />
+                  </div>
+                  <PageChoices question={q} selected={openRow.given} revealed keys />
+                </div>
+              )}
+            </article>
+          )}
+          {q && <ExamStudy key={`study-${q.id}`} session={session} examId={examId} revision={exam.revision} question={q} />}
+          <div className="desk-res__acts">
+            <button type="button" className="btn-secondary" onClick={() => { playUi('click-screen-selection'); navigate('/practice/exam') }}>
+              {t.examPapers}
+            </button>
+            {newPaper}
+          </div>
         </StationSplit>
       </main>
     )
@@ -366,7 +376,7 @@ export default function ExamResult({ session }) {
         <div className="exam-res__figs">
           <b className="exam-res__fig">{sectionStats.correct}</b>
           <span className="exam-res__of">/ {sectionStats.total}</span>
-          <span className={metTarget ? 'exam-res__pct' : 'exam-res__pct exam-res__pct--low'}>{pct} %</span>
+          <span className={metTarget ? 'exam-res__pct' : 'exam-res__pct exam-res__pct--low'}>{t.percent(pct)}</span>
         </div>
         <div className="exam-res__bar" role="img" aria-label={t.examScoreAgainst(pct, PRACTICE_TARGET_PCT)}>
           <span className={metTarget ? 'exam-res__fill' : 'exam-res__fill exam-res__fill--low'} style={{ width: `${Math.min(100, Math.max(0, pct))}%` }} />
@@ -492,74 +502,4 @@ function questionAt(pathname, searchParams, id) {
   const next = new URLSearchParams(searchParams)
   next.set('question', String(id))
   return { pathname, search: `?${next}` }
-}
-
-// One question's row in the review: its mark, its number and its line.
-// On a phone it opens its question under itself (aria-expanded, the
-// chevron); on the desk it opens it beside the list, as the page shown,
-// and is a link to that question's URL (`to`, plan 117), `navState`
-// riding with the navigation.
-function ReviewRow({ r, open, onClick, desk = false, to = null, navState = null }) {
-  const { t } = useLang()
-  // Three outcomes, not two: a question left blank scores like a wrong
-  // answer but isn't one, and the two used to render identically.
-  const state = r.isCorrect ? 'ok' : r.given == null ? 'blank' : 'x'
-  const line = questionLine(r.q)
-  return (
-    <SplitRow
-      to={to}
-      state={navState}
-      className="exam-review-row"
-      onClick={onClick}
-      aria-expanded={desk ? undefined : open}
-      aria-current={desk && open ? 'page' : undefined}
-      tabIndex={desk ? (open ? 0 : -1) : undefined}
-    >
-      <span className={`exam-review-row__mark exam-review-row__mark--${state}`} aria-hidden="true">
-        {r.isCorrect ? <CheckIcon size={11} /> : <CrossIcon size={11} />}
-      </span>
-      <span className="exam-review-row__q">{t.examQuestionAbbrev}{r.q.number}</span>
-      {state === 'blank'
-        ? <span className="exam-review-row__blank">{t.examNotAnswered}</span>
-        : <span className="exam-review-row__jp" lang="ja"><GapText text={line} /></span>}
-      {desk ? null : (
-        <span className="exam-review-row__chev" aria-hidden="true">
-          <ChevronIcon direction={open ? 'up' : 'down'} size={14} />
-        </span>
-      )}
-    </SplitRow>
-  )
-}
-
-// Inline SVG, no dependency: an arc for the score and a tick for the
-// practice target, so "48% against 60%" is one glance instead of two
-// numbers to compare by reading. The tick is drawn at twelve o'clock
-// and rotated to the target; the arc starts there too (the SVG is
-// rotated a quarter turn in CSS).
-function ScoreRing({ pct, metTarget }) {
-  const c = RING_BOX / 2
-  const clamped = Math.min(100, Math.max(0, pct))
-  return (
-    <div className={`exam-score-ring${metTarget ? '' : ' exam-score-ring--low'}`}>
-      <svg className="exam-score-ring__svg" viewBox={`0 0 ${RING_BOX} ${RING_BOX}`} aria-hidden="true">
-        <circle className="exam-score-ring__track" cx={c} cy={c} r={RING_R} />
-        <circle
-          className="exam-score-ring__fill"
-          cx={c}
-          cy={c}
-          r={RING_R}
-          strokeDasharray={RING_C.toFixed(1)}
-          strokeDashoffset={(RING_C * (1 - clamped / 100)).toFixed(1)}
-        />
-        <line
-          className="exam-score-ring__tick"
-          x1={c} y1={4} x2={c} y2={14}
-          transform={`rotate(${(PRACTICE_TARGET_PCT / 100) * 360} ${c} ${c})`}
-        />
-      </svg>
-      {/* The number itself is the accessible content — the ring above is
-          the same fact drawn. */}
-      <span className="exam-score-ring__pct">{pct}%</span>
-    </div>
-  )
 }

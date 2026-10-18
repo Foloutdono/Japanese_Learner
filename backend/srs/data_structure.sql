@@ -12,10 +12,18 @@
 -- the learner's own rows (PLAN, erased by DELETE /api/account) or
 -- shared content (SHARED, never touched). tests/test_account.py fails
 -- when a table is declared here and classified in neither list.
+--
+-- Every table declared here is closed to Supabase's Data API: the
+-- ALTER after each CREATE TABLE turns Row Level Security on, as the
+-- owning module's self-migration does (core/rls.py). With no policy,
+-- that refuses the anon key every row and leaves the owner -- the
+-- backend -- reading as before. tests/test_rls.py fails on a table
+-- declared without it.
 
 CREATE TABLE cards (
     id TEXT PRIMARY KEY
 );
+ALTER TABLE cards ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE card_modes (
 
@@ -46,6 +54,7 @@ CREATE TABLE card_modes (
     REFERENCES cards(id)
     ON DELETE CASCADE
 );
+ALTER TABLE card_modes ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_due_reviews
 ON card_modes(mode, next_review);
@@ -71,8 +80,14 @@ CREATE TABLE review_log (
     -- just SUM(xp_earned) and never drift if the formula's constants
     -- change later.
     xp_earned INTEGER NOT NULL DEFAULT 0,
-    reviewed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    reviewed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- The first answer to a card the level rule marked known (plan 224):
+    -- a check, not a first sighting. A check passed spends no new card
+    -- of the day's pace, and the level-fit watch reads the checks per
+    -- stop (study/level_fit.py).
+    assumed BOOLEAN NOT NULL DEFAULT FALSE
 );
+ALTER TABLE review_log ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_review_log_card_id
 ON review_log(card_id, reviewed_at);
@@ -124,6 +139,7 @@ CREATE TABLE review_daily (
     q5 INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, day, hour)
 );
+ALTER TABLE review_daily ENABLE ROW LEVEL SECURITY;
 
 -- The first time each (card, mode) was ever answered. get_new_items_today
 -- and get_journey_item_counts are MIN(reviewed_at) queries: without this,
@@ -138,6 +154,7 @@ CREATE TABLE card_first_review (
     first_at TIMESTAMPTZ NOT NULL,
     PRIMARY KEY (card_id, mode)
 );
+ALTER TABLE card_first_review ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_card_first_review_prefix
 ON card_first_review(card_id text_pattern_ops);
@@ -157,6 +174,7 @@ CREATE TABLE review_compaction (
     best_run_min SMALLINT NOT NULL DEFAULT 4,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE review_compaction ENABLE ROW LEVEL SECURITY;
 
 -- Display identity for the Profile screen / leaderboard. Deliberately
 -- separate from Supabase's own auth.users table rather than reading/
@@ -242,8 +260,34 @@ CREATE TABLE user_profiles (
     -- The clock runs in the browser, which scales the server's
     -- standard figures; see routes/profile.py's READING_PACES and
     -- frontend/src/domain/readingPace.js.
-    reading_pace TEXT
+    reading_pace TEXT,
+    -- 回復運転 — the review plan (plan 217, core/review_plan.py): a
+    -- ceiling on the day's reviews (NULL none), a catch-up chosen on
+    -- the comeback sheet (its share a day, its days -- NULL for gentle,
+    -- which has no end -- and its first day; all NULL when none runs),
+    -- the day "all of them now" was answered, and an absence declared
+    -- ahead. All NULL is the gate as it always was.
+    review_cap INTEGER,
+    catchup_cap INTEGER,
+    catchup_days SMALLINT,
+    catchup_from DATE,
+    comeback_declined_on DATE,
+    away_from DATE,
+    away_until DATE,
+    -- 足跡を残さない (plan 218): the account asked not to be counted.
+    -- core/events.opted_out reads it on both of the trail's write paths.
+    analytics_off BOOLEAN NOT NULL DEFAULT FALSE,
+    -- 乗換 (plan 243b): when Today asked whether the learner studied
+    -- elsewhere, or an import made it moot. routes/transfer.py.
+    transfer_offered_at TIMESTAMPTZ,
+    -- 署名 (plan 247): the first name the card prints, in any script, up
+    -- to 24 characters -- not the username, which stays the public
+    -- handle (番付, the library). NULL = never asked (an account boarded
+    -- before the card was the form: the card prints its username), ''
+    -- = asked and left empty (the card prints no name).
+    card_name TEXT
 );
+ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 
 -- The Sentence bank: what the learner submitted, plus where it came
 -- from. Does NOT store the analysis itself -- badges would go stale the
@@ -264,8 +308,11 @@ CREATE TABLE phrase_history (
     source TEXT NOT NULL DEFAULT 'typed',
     source_ref TEXT NOT NULL DEFAULT '',
     kept BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- Each sentence's translation (plan 235), {lang: {sentence: translation}}.
+    translations JSONB NOT NULL DEFAULT '{}'::jsonb
 );
+ALTER TABLE phrase_history ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_phrase_history_user
 ON phrase_history(user_id, created_at DESC);
@@ -300,6 +347,7 @@ CREATE TABLE reading_log (
     accuracy    SMALLINT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE reading_log ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_reading_log_user
 ON reading_log(user_id, created_at DESC);
@@ -322,6 +370,7 @@ CREATE TABLE comprehension_log (
     -- written around points the learner has not just seen.
     grammar JSONB
 );
+ALTER TABLE comprehension_log ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_comprehension_log_user
 ON comprehension_log(user_id, created_at DESC);
@@ -346,6 +395,7 @@ CREATE TABLE frequency_overrides (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (user_id, domain, item_key)
 );
+ALTER TABLE frequency_overrides ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_frequency_overrides_user_domain
 ON frequency_overrides(user_id, domain);
@@ -384,6 +434,7 @@ CREATE TABLE decks (
     withdrawn_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE decks ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_decks_user
 ON decks(user_id);
@@ -413,6 +464,7 @@ CREATE TABLE custom_cards (
     fields JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE custom_cards ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_custom_cards_deck
 ON custom_cards(deck_id, user_id);
@@ -436,6 +488,7 @@ CREATE TABLE deck_cards (
     added_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (deck_id, source, raw_id)
 );
+ALTER TABLE deck_cards ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_deck_cards_deck
 ON deck_cards(deck_id, user_id);
@@ -456,6 +509,7 @@ CREATE TABLE deck_subscriptions (
     seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (deck_id, user_id)
 );
+ALTER TABLE deck_subscriptions ENABLE ROW LEVEL SECURITY;
 
 -- The PK already indexes (deck_id, ...); this is the other direction --
 -- "which decks does this learner follow" -- asked by GET /api/decks and
@@ -477,6 +531,7 @@ CREATE TABLE deck_reports (
     reported_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE (deck_id, user_id)
 );
+ALTER TABLE deck_reports ENABLE ROW LEVEL SECURITY;
 
 -- One row per video/subtitle analysis request. `sentences` holds the
 -- LOCAL tier only (study/analysis.py's analyze_local, no per-user
@@ -498,7 +553,10 @@ CREATE TABLE video_sessions (
     -- Retained so existing rows read back; nothing sets it any more.
     window_capped BOOLEAN NOT NULL DEFAULT FALSE,
     status        TEXT NOT NULL DEFAULT 'generating',  -- 'generating' | 'ready' | 'failed'
-    error         TEXT,
+    error         TEXT,                         -- why it failed, in English: for the logs
+    -- ... and as the stable snake_case code the client words in the
+    -- learner's language (plan 215). NULL on a row failed before it.
+    error_code    TEXT,
     sentences     JSONB,
     truncated     INTEGER NOT NULL DEFAULT 0,
     -- Optional YouTube id to embed alongside the transcript. Independent
@@ -509,8 +567,12 @@ CREATE TABLE video_sessions (
     -- Removed from the analyser's shelf, by the learner's ✕ or past the
     -- history's limit, and erased a day later (core/history.py). NULL is
     -- a session on the shelf.
-    deleted_at    TIMESTAMPTZ
+    deleted_at    TIMESTAMPTZ,
+    -- Each line's translation (plan 235), {lang: {line text: translation}},
+    -- filled a block of lines at a time as the learner reaches them.
+    translations  JSONB NOT NULL DEFAULT '{}'::jsonb
 );
+ALTER TABLE video_sessions ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_video_sessions_user
 ON video_sessions(user_id, created_at DESC);
@@ -527,6 +589,7 @@ CREATE TABLE video_session_jobs (
     started_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE video_session_jobs ENABLE ROW LEVEL SECURITY;
 
 -- Owned by study/exam_schema.py -- generated mock exams (one row per
 -- exam_id/revision, papers regenerated wholesale rather than patched),
@@ -560,6 +623,7 @@ CREATE TABLE comprehension_pool (
     -- rather than adding a copy.
     seed_key          TEXT
 );
+ALTER TABLE comprehension_pool ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX comprehension_pool_bucket
     ON comprehension_pool (level, lang, generator_version);
@@ -577,6 +641,7 @@ CREATE TABLE comprehension_served (
     served_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (user_id, pool_id)
 );
+ALTER TABLE comprehension_served ENABLE ROW LEVEL SECURITY;
 
 -- How many comprehension exercises this learner has had GENERATED for
 -- them today, on their own day (user_profiles.tz_offset_min). Owned by
@@ -595,6 +660,7 @@ CREATE TABLE comprehension_usage (
     count   INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, day)
 );
+ALTER TABLE comprehension_usage ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE exam_papers (
     exam_id           TEXT NOT NULL,
@@ -606,8 +672,16 @@ CREATE TABLE exam_papers (
     section_count     INTEGER NOT NULL,
     question_count    INTEGER NOT NULL,
     created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- The identity of a seed paper (plan 228, study/exam_seed.seed_key):
+    -- "{exam_id}#{n}@{hash}", NULL for every paper generated on demand.
+    -- study/exam_seed.py stores the seeds at import, a new hash being a
+    -- changed paper; NULLed when a changed seed retires a sat revision.
+    seed_key          TEXT,
     PRIMARY KEY (exam_id, revision)
 );
+ALTER TABLE exam_papers ENABLE ROW LEVEL SECURITY;
+
+CREATE UNIQUE INDEX exam_papers_seed ON exam_papers (seed_key);
 
 CREATE TABLE exam_attempts (
     id          BIGSERIAL PRIMARY KEY,
@@ -627,6 +701,7 @@ CREATE TABLE exam_attempts (
         FOREIGN KEY (exam_id, revision)
         REFERENCES exam_papers(exam_id, revision)
 );
+ALTER TABLE exam_attempts ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_exam_attempts_user
 ON exam_attempts(user_id, created_at DESC);
@@ -645,6 +720,7 @@ CREATE TABLE exam_generation_jobs (
     started_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE exam_generation_jobs ENABLE ROW LEVEL SECURITY;
 
 -- Created by study/exam_schema.py, read and written by
 -- study/exam_study.py: a sat question's sentence, choices and passage
@@ -655,6 +731,7 @@ CREATE TABLE exam_translations (
     payload    JSONB NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE exam_translations ENABLE ROW LEVEL SECURITY;
 
 -- Owned by study/grammar_sentence_store.py -- generated example
 -- sentences for one grammar point, cached wholesale per (level,
@@ -667,6 +744,7 @@ CREATE TABLE grammar_sentences (
     created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (level, pattern)
 );
+ALTER TABLE grammar_sentences ENABLE ROW LEVEL SECURITY;
 
 -- Owned by routes/phrase.py -- the deep-tier (LLM) analysis cache for
 -- the phrase analyzer, keyed by phrase+lang (see _phrase_key /
@@ -678,6 +756,7 @@ CREATE TABLE phrase_analysis_cache (
     result     JSONB NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE phrase_analysis_cache ENABLE ROW LEVEL SECURITY;
 
 -- Owned by srs/srs.py -- xp_ledger is the append-only source of truth
 -- for XP awarded outside a review (source/ref identify what earned it).
@@ -689,6 +768,7 @@ CREATE TABLE xp_ledger (
     xp          INTEGER NOT NULL,
     awarded_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE xp_ledger ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_xp_ledger_user
 ON xp_ledger(user_id);
@@ -712,6 +792,7 @@ CREATE TABLE day_clears (
     cleared_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (user_id, day)
 );
+ALTER TABLE day_clears ENABLE ROW LEVEL SECURITY;
 
 -- 運休 — rest days. A ticket is earned on clearing a milestone day of
 -- seven or more, two held at most; used_on is the missed day it bridged
@@ -726,6 +807,7 @@ CREATE TABLE rest_tickets (
     used_on     DATE,
     seen_at     TIMESTAMPTZ
 );
+ALTER TABLE rest_tickets ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_rest_tickets_user
 ON rest_tickets(user_id);
@@ -745,6 +827,7 @@ CREATE TABLE credit_ledger (
     ref      TEXT,
     at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE credit_ledger ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_credit_ledger_user
 ON credit_ledger(user_id);
@@ -760,6 +843,7 @@ CREATE TABLE credit_stops (
     cards    INTEGER NOT NULL,
     at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE credit_stops ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_credit_stops_user
 ON credit_stops(user_id, at);
@@ -785,6 +869,7 @@ CREATE TABLE translation_log (
     quality             SMALLINT,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE translation_log ENABLE ROW LEVEL SECURITY;
 
 -- Created at runtime by routes/translation.py alongside the table --
 -- declared here late, so this file shows the same shape a running
@@ -827,6 +912,7 @@ CREATE TABLE dictation_log (
     plays       SMALLINT NOT NULL DEFAULT 0,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE dictation_log ENABLE ROW LEVEL SECURITY;
 
 -- created_at ascending: a btree scans either way, so it serves
 -- /api/dictation/history's ORDER BY ... DESC.
@@ -868,9 +954,45 @@ CREATE TABLE composition_log (
     quality      SMALLINT NOT NULL,
     created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE composition_log ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_composition_log_user
 ON composition_log(user_id, created_at);
+
+-- 会話 (conversation, plan 217): one row per graded turn of a scenario
+-- (content/conversation), however it was ridden. Owned by
+-- routes/conversation.py, created there at import time.
+--
+-- Nothing the learner typed: which scenario, which turn, the mode and
+-- how it went, never the words -- the free talk's lines live on the
+-- learner's screen and in one request, and nowhere else.
+--   mode       choose | translate | free
+--   turn       the scenario's turn (choose, translate), or the line of
+--              the free talk, from 0
+--   accuracy   translate: the measure the learner saw, 0..100; NULL
+--              elsewhere and where the check never answered
+--   verdict    translate and free: the tutor's, as the model answered;
+--              NULL where there was no review
+--   quality    choose: 4 for the reply, 1 for a wrong one (a question's
+--              rates, comprehension's); else the learner's rating 0..5
+-- `correct` is derived from quality (q > 2 is a pass), as everywhere.
+CREATE TABLE conversation_log (
+    id         BIGSERIAL PRIMARY KEY,
+    user_id    TEXT NOT NULL,
+    level      TEXT NOT NULL DEFAULT '',
+    scenario   TEXT NOT NULL,
+    mode       TEXT NOT NULL,
+    turn       SMALLINT NOT NULL,
+    accuracy   SMALLINT,
+    verdict    TEXT,
+    correct    BOOLEAN NOT NULL,
+    quality    SMALLINT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE conversation_log ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX idx_conversation_log_user
+ON conversation_log(user_id, created_at);
 
 -- Owned by routes/ocr.py -- per-user daily counter for the vision OCR
 -- endpoint. Nothing here costs money (NVIDIA's vision models are on the
@@ -883,6 +1005,7 @@ CREATE TABLE ocr_usage (
     count    INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, day)
 );
+ALTER TABLE ocr_usage ENABLE ROW LEVEL SECURITY;
 
 -- ── The daily counters, one table (plan 125) ────────────────────────
 -- Owned by core/daily_limit.py. One row per (learner, feature, local
@@ -897,6 +1020,7 @@ CREATE TABLE daily_usage (
     count   INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, feature, day)
 );
+ALTER TABLE daily_usage ENABLE ROW LEVEL SECURITY;
 
 -- ── お気に入り — the dictionary's shelf of kept entries ─────────────
 -- Owned by routes/favorites.py (plan 093). A REFERENCE per row, never a
@@ -913,6 +1037,7 @@ CREATE TABLE dictionary_favorites (
     added_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (user_id, kind, key)
 );
+ALTER TABLE dictionary_favorites ENABLE ROW LEVEL SECURITY;
 
 -- ── 時間割 — the learner's weekly agenda ───────────────────────────
 -- Owned by routes/agenda.py (plan 181). One row per study block: a
@@ -932,6 +1057,7 @@ CREATE TABLE agenda_blocks (
     lead_min   INTEGER NOT NULL DEFAULT 10,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE agenda_blocks ENABLE ROW LEVEL SECURITY;
 CREATE INDEX agenda_blocks_user ON agenda_blocks (user_id);
 
 -- ── 発見 — how a grammar point's first tour went ─────────────────────
@@ -950,6 +1076,23 @@ CREATE TABLE grammar_tours (
     quiz_total SMALLINT,
     PRIMARY KEY (user_id, card_id)
 );
+ALTER TABLE grammar_tours ENABLE ROW LEVEL SECURITY;
+
+-- ── 初見 — how a kana or a kanji's first tour went ──────────────────
+-- Owned by study/glyph_tour.py (plan 216). One row per character a learner
+-- was toured through before its first card, the first tour only: the
+-- traces that missed and whether the board drew the strokes for them.
+-- Read by nothing the scheduler runs. No cascade from auth (ADR 0010):
+-- DELETE /api/account and scripts/purge_orphans.py clear it.
+CREATE TABLE glyph_tours (
+    user_id  TEXT NOT NULL,
+    card_id  TEXT NOT NULL,
+    misses   SMALLINT NOT NULL,
+    shown    BOOLEAN NOT NULL,
+    done_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, card_id)
+);
+ALTER TABLE glyph_tours ENABLE ROW LEVEL SECURITY;
 
 -- ── 足跡 — the trail of screens a learner walked ─────────────────────
 -- Owned by core/events.py, written by routes/events.py (a batch the
@@ -971,8 +1114,13 @@ CREATE TABLE event_log (
     -- The client's own id for the event (frontend/src/lib/track.js), so
     -- a batch the page sends twice is kept once. NULL for the server's
     -- own rows and an older client's.
-    cid     TEXT
+    cid     TEXT,
+    -- The client's random id for the visit (frontend/src/lib/track.js):
+    -- how long a session lasted and how many a day. NULL for the
+    -- server's own rows and an older client's.
+    sid     TEXT
 );
+ALTER TABLE event_log ENABLE ROW LEVEL SECURITY;
 CREATE UNIQUE INDEX idx_event_log_user_cid ON event_log(user_id, cid) WHERE cid IS NOT NULL;
 
 -- (user_id, at) reads one learner's trail in order; (name, at) is what
@@ -995,3 +1143,39 @@ CREATE TABLE event_daily (
     n       INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, day, name)
 );
+ALTER TABLE event_daily ENABLE ROW LEVEL SECURITY;
+
+-- A learner's message to the people who make the app (plan 222): a
+-- problem, an idea, a fault in what is taught, or a card reported from
+-- its flag. Self-migrated by routes/feedback.py. Unlike event_log, `body`
+-- IS what the learner typed -- the one table that keeps words on
+-- purpose, which is why it is its own table and route: the dashboards
+-- and the weekly digest count it, scripts/read_feedback.py is what reads
+-- it, by hand. Every other column is a closed class or a
+-- shape (core/events.VALUES, events.SHAPES): `route` a pattern App.jsx
+-- declared, `area`/`status` a failure's API area and HTTP status,
+-- `platform`/`vp`/`os`/`lang` the visit's classes. `card_id` is
+-- unprefixed (the content key), `reasons` a card's, from
+-- feedback.CARD_REASONS. `reply_to` is read from the account when the
+-- learner asks for an answer, never from the request. Erased with the
+-- account (routes/account.py).
+CREATE TABLE feedback (
+    id         BIGSERIAL PRIMARY KEY,
+    user_id    TEXT NOT NULL,
+    kind       TEXT NOT NULL,
+    body       TEXT NOT NULL DEFAULT '',
+    reasons    TEXT[] NOT NULL DEFAULT '{}',
+    card_id    TEXT,
+    route      TEXT,
+    area       TEXT,
+    status     SMALLINT,
+    platform   TEXT,
+    vp         TEXT,
+    os         TEXT,
+    lang       TEXT,
+    reply      BOOLEAN NOT NULL DEFAULT FALSE,
+    reply_to   TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
+CREATE INDEX feedback_user_at ON feedback (user_id, created_at);

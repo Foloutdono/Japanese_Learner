@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { userEvent } from 'vitest/browser'
 import { LangProvider } from './LangContext'
 import './index.css'
 
@@ -10,7 +9,8 @@ import './index.css'
 // Since plan 163 there is no column: the Welcome is the crossroads on
 // the canvas (--desk-board-w) centred in the window, its lines at the
 // drawing's length, and the boarding's questions stand in the canvas's
-// corners and draw their answers across it.
+// corners and draw their answers across it -- and since plan 247 the
+// card, filled in, stands in the canvas's middle under its question.
 
 const apiJson = vi.hoisted(() => vi.fn())
 const apiJsonWithTimeout = vi.hoisted(() => vi.fn())
@@ -68,7 +68,6 @@ const $ = s => document.querySelector(s)
 const live = () => $('.brd__car:not(.brd__car--out)')
 const inCar = s => live()?.querySelector(s)
 const stepOf = () => $('.brd')?.dataset.step
-const enter = () => userEvent.keyboard('{Enter}')
 
 beforeEach(() => {
   apiJson.mockReset()
@@ -82,19 +81,18 @@ afterEach(() => { document.querySelectorAll('[data-probe-modal]').forEach(n => n
 async function board({ onComplete = vi.fn(), onExit = vi.fn() } = {}) {
   await render(
     <LangProvider>
-      <BoardingFlow session={{ access_token: 'tok' }} initialProfile={{ username: 'Tester' }} onComplete={onComplete} onExit={onExit} />
+      <BoardingFlow session={{ access_token: 'tok' }} onComplete={onComplete} onExit={onExit} guest />
     </LangProvider>
   )
   await settle(150)
 }
 
-/** Name → why, the name kept (no write), by Enter in the field. */
-async function pastName() {
-  expect(stepOf()).toBe('name')
-  expect(document.activeElement).toBe(inCar('.brd-field'))
-  await enter()
+/** The kana → the line, a reader of both scripts. */
+async function toLevel() {
+  expect(stepOf()).toBe('kana')
+  inCar('[data-kana="both"]').click()
   await settle()
-  expect(stepOf()).toBe('why')
+  expect(stepOf()).toBe('level')
 }
 
 const box = el => el.getBoundingClientRect()
@@ -129,7 +127,7 @@ describe('first contact at 1440 (P10)', () => {
 
   it('stands the question in the canvas\'s top-left corner, the answers centred under it', async () => {
     await board()
-    await pastName()
+    await toLevel()
     // Once the question's car has landed (the desk's pull, plan 155).
     await settle(600)
     // No column (plan 163): the paper is the window's, and the canvas
@@ -139,32 +137,21 @@ describe('first contact at 1440 (P10)', () => {
     expect(Math.round(box(inCar('.brd__q')).left)).toBe(Math.round(gutter))
     expect(Math.round(box($('.desk-brd__strip')).left)).toBe(Math.round(gutter))
     expect(Math.round(bodyW() - box(inCar('[data-action="continue"]')).right)).toBe(Math.round(gutter))
-    // A ticket's width here: the floor has the room the strip leaves.
+    // A ticket's width here: the floor has the room the strip leaves,
+    // and the test (plan 247) stands on it, before the way back.
     expect(Math.round(box(inCar('[data-action="continue"]')).width)).toBe(360)
-    // The six roads across the canvas, at the drawing's height where the
-    // window has it: the top and the bottom rings' centres 440px apart,
-    // and the diagonals at 45 degrees out of the hub.
-    inCar('[data-motive="trip"]').click()
-    await settle(900)
-    const roads = inCar('.desk-brd__roads')
-    expect(Math.round(box(roads).width)).toBe(1240)
-    const ring = m => box(inCar(`[data-motive="${m}"] .desk-brd__ring`))
-    const hub = box(roads.querySelector('.desk-brd__hub'))
-    expect(Math.round(cy(ring('live')) - cy(ring('fun')))).toBe(440)
-    expect(Math.abs((mid(hub) - mid(ring('studies'))) - (cy(hub) - cy(ring('studies'))))).toBeLessThan(2)
+    const test = box(inCar('[data-action="level-test"]'))
+    const back = box(inCar('[data-action="back"]'))
+    expect(test.right).toBeLessThan(back.left)
+    expect(Math.abs(cy(test) - cy(back))).toBeLessThan(1)
+    expect(test.left).toBeGreaterThan(box($('.desk-brd__strip')).right)
   })
 
   it('draws the level list as the line climbing across the canvas at 45 degrees', async () => {
     await board()
-    await pastName()
-    inCar('[data-motive="trip"]').click()
-    await settle(40)
-    inCar('[data-action="continue"]').click()
-    await settle()
-    inCar('[data-kana="both"]').click()
+    await toLevel()
     await settle(900)
     await landed()
-    expect(stepOf()).toBe('level')
     const climb = inCar('.desk-brd__climb')
     expect(Math.round(box(climb).width)).toBe(1240)
     const rings = [...climb.querySelectorAll('.desk-brd__stop-ring')].map(box)
@@ -177,51 +164,26 @@ describe('first contact at 1440 (P10)', () => {
     }
   })
 
-  it('draws the day\'s arc at the drawing\'s span, the board in its bowl', async () => {
+  it('stands the card in the canvas\'s middle, under its question, the gate in the floor\'s corner', async () => {
     await board()
-    await pastName()
-    inCar('[data-motive="trip"]').click()
-    await settle(40)
-    inCar('[data-action="continue"]').click()
-    await settle()
-    inCar('[data-kana="both"]').click()
-    await settle()
+    await toLevel()
     inCar('[data-level="N3"]').click()
     await settle(40)
-    for (let i = 0; i < 4; i++) { inCar('[data-action="continue"]').click(); await settle() }
-    expect(stepOf()).toBe('time')
-    await settle(900)
-    const hours = [...inCar('.desk-brd__sky-map').querySelectorAll('.desk-brd__hour')]
-    const at = label => box(hours.find(h => h.textContent === label))
-    // Six in the morning to midnight across 1080px of sky.
-    expect(Math.round(mid(at('24')) - mid(at('06')))).toBe(1080)
-    // The board under the crown, clear of the morning's and the night's names.
-    const sheet = box(inCar('.desk-brd__sky-board'))
-    expect(Math.abs(mid(sheet) - mid(box(inCar('.desk-brd__sky'))))).toBeLessThan(1)
-    expect(sheet.left).toBeGreaterThan(box(inCar('[data-hour="am"] .desk-brd__hour-lab')).right)
-    expect(sheet.right).toBeLessThan(box(inCar('[data-hour="pm"] .desk-brd__hour-lab')).left)
-    expect(sheet.top).toBeGreaterThan(box(inCar('[data-hour="noon"]')).bottom)
-  })
-
-  it('stands the plan across the canvas, centred in the window', async () => {
-    await board()
-    await pastName()
-    inCar('[data-motive="trip"]').click()
-    await settle(40)
     inCar('[data-action="continue"]').click()
-    await settle()
-    inCar('[data-kana="both"]').click()
-    await settle()
-    inCar('[data-level="N1"]').click()
-    await settle(40)
-    for (let i = 0; i < 4; i++) { inCar('[data-action="continue"]').click(); await settle() }
-    expect(stepOf()).toBe('plan')
-    await settle(600)
-    // The ride drawn to scale across the canvas.
-    const plan = box(inCar('.brd__stage'))
-    expect(Math.round(plan.width)).toBe(1240)
-    expect(Math.abs(mid(plan) - bodyW() / 2)).toBeLessThan(1.5)
-    const route = box(inCar('.desk-brd__route'))
-    expect(Math.round(route.width)).toBe(1240)
+    await settle(900)
+    await landed()
+    expect(stepOf()).toBe('card')
+    const gutter = (bodyW() - 1240) / 2
+    expect(Math.round(box(inCar('.brd__q')).left)).toBe(Math.round(gutter))
+    const card = box(inCar('.brd-card .pcard'))
+    expect(Math.abs(mid(card) - bodyW() / 2)).toBeLessThan(1.5)
+    expect(card.top).toBeGreaterThan(box(inCar('.brd__hint')).bottom)
+    // The line under it, on the card's own centre line.
+    expect(Math.abs(mid(box(inCar('.brd-keep-line'))) - mid(card))).toBeLessThan(1.5)
+    // The way on, alone on the floor: the card is an arrival, no way back.
+    const issue = box(inCar('[data-action="issue"]'))
+    expect(Math.round(bodyW() - issue.right)).toBe(Math.round(gutter))
+    expect(inCar('[data-action="back"]')).toBeNull()
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
   })
 })

@@ -2,6 +2,7 @@ import { createContext, useContext, useRef, useState } from 'react'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import AudioPlayer from './AudioPlayer'
+import { Figure } from './DeskSheet'
 import { ImageIcon, StarIcon } from '../components/ui/Icons'
 
 // ── QuestionRenderer ─────────────────────────────────────────
@@ -23,18 +24,22 @@ import { ImageIcon, StarIcon } from '../components/ui/Icons'
 //                its cap printed on the player. Never passed on a phone.
 //                Revealed, on the desk's review (plan 123), the clip
 //                still answers Space and the transcript stands open.
-//   passageAside — the desk's too: a reading passage stands flat beside
-//                its questions (ExamRunner's .desk-paper), so the block
-//                draws the question without it.
+//   passageAside — the desk's too: a reading passage stands on the
+//                booklet's left page beside its questions (.desk-spread,
+//                plan 200), so the block draws the question without it.
 //   apart      — the phone's paper (plan 171): the choices are not drawn
 //                here but in the answer dock under the page (AnswerTiles,
 //                below), so the page holds the question alone -- a prompt
 //                set large, a passage that scrolls over its question, a
 //                clip round its play button.
-export default function QuestionRenderer({ question, selected, onSelect, revealed = false, devMode = false, keys = false, passageAside = false, apart = false }) {
+//   paged      — the desk's booklet (plan 200): the page holds the question
+//                alone as `apart` does, revealed too (the result's open
+//                question), and its choices are PageChoices, the sheet's
+//                ovals carried onto the page.
+export default function QuestionRenderer({ question, selected, onSelect, revealed = false, devMode = false, keys = false, passageAside = false, apart = false, paged = false }) {
   return (
     <KeysContext.Provider value={keys}>
-      <ApartContext.Provider value={apart && !revealed}>
+      <ApartContext.Provider value={(apart && !revealed) || paged}>
         <QuestionBlock question={question} selected={selected} onSelect={onSelect} revealed={revealed} devMode={devMode} passageAside={passageAside} />
       </ApartContext.Provider>
     </KeysContext.Provider>
@@ -64,6 +69,35 @@ export function AnswerTiles({ question, selected, onSelect }) {
       answer={null}
       label={label}
     />
+  )
+}
+
+// ── The booklet's choices (plan 200) ─────────────────────────
+// The owner's mix of the canvas "Tsuji — the mock exam on the desk":
+// on the desk's page the answers are printed as the paper prints them,
+// each numbered in the answer sheet's own oval, and picking one fills
+// the oval as a pencil fills the sheet's. The same radiogroup as the
+// rows; four brief answers across the page, a phrase two by two, a
+// sentence or a page beside a text (`narrow`) one under another.
+// Revealed, the result's: the right oval filled in the verdict's ink,
+// a wrong pick struck in its own, both said in words.
+export function PageChoices({ question, selected, onSelect = () => {}, revealed = false, narrow = false, keys = false }) {
+  const choices = question.choices ?? question.pieces ?? []
+  const label = question.promptJp ?? question.questionPromptJp ?? question.passage?.titleJp ?? ''
+  return (
+    <KeysContext.Provider value={keys}>
+    <ChoiceList
+      ovals
+      narrow={narrow}
+      choices={choices}
+      choiceType={question.choiceType || 'text'}
+      selected={selected}
+      onSelect={onSelect}
+      revealed={revealed}
+      answer={revealed ? question.answer : null}
+      label={label}
+    />
+    </KeysContext.Provider>
   )
 }
 
@@ -120,7 +154,7 @@ function selectWithSound(onSelect, id) {
 // The longest answer, in signs, that still reads whole in half a paper.
 const BRIEF_SIGNS = 8
 
-function ChoiceList({ choices, choiceType = 'text', selected, onSelect, revealed, answer, label, tiles = false }) {
+function ChoiceList({ choices, choiceType = 'text', selected, onSelect, revealed, answer, label, tiles = false, ovals = false, narrow = false }) {
   const { t } = useLang()
   const keys = useContext(KeysContext)
   const listRef = useRef(null)
@@ -153,7 +187,72 @@ function ChoiceList({ choices, choiceType = 'text', selected, onSelect, revealed
     e.stopPropagation()
     const next = (activeIndex + delta + choices.length) % choices.length
     selectWithSound(onSelect, choices[next].id)
-    listRef.current?.querySelectorAll(tiles ? '.exam-tile' : '.mcq-row')[next]?.focus()
+    listRef.current?.querySelectorAll(tiles ? '.exam-tile' : ovals ? '.desk-choice' : '.mcq-row')[next]?.focus()
+  }
+
+  if (ovals) {
+    // Across the page while the words are short: four readings or
+    // spellings in a row, a phrase two by two, a sentence (or anything
+    // beside a text) one under another. Three spoken answers stand
+    // three across. Marked, two at most: the verdict's tag needs the
+    // room the fourth answer had.
+    const longest = Math.max(0, ...choices.map(c => [...(c.textJp ?? '')].length))
+    const across = narrow || choiceType === 'image' ? 1
+      : longest > 20 ? 1
+      : revealed ? 2
+      : choices.length === 3 && longest <= 12 ? 3
+      : choices.length === 4 && longest <= BRIEF_SIGNS ? 4
+      : 2
+    const text = longest > BRIEF_SIGNS ? 'desk-choice__t desk-choice__t--long' : 'desk-choice__t'
+    return (
+      <>
+        <div
+          ref={listRef}
+          className={`desk-choices desk-choices--${across}`}
+          role={revealed ? undefined : 'radiogroup'}
+          aria-label={revealed ? undefined : label}
+          onKeyDown={revealed ? undefined : onKeyDown}
+        >
+          {choices.map((choice, i) => {
+            const on = selected === choice.id
+            const isCorrect = revealed && choice.id === answer
+            const isWrong = revealed && on && choice.id !== answer
+            const cls = [
+              'desk-choice',
+              !revealed && on && 'desk-choice--on',
+              isCorrect && 'desk-choice--right',
+              isWrong && 'desk-choice--wrong',
+              revealed && !isCorrect && !isWrong && 'desk-choice--dim',
+            ].filter(Boolean).join(' ')
+            let tag = null
+            if (isCorrect) tag = on ? `${t.examYourAnswer} · ${t.examCorrectAnswer}` : t.examCorrectAnswer
+            else if (isWrong) tag = t.examYourAnswer
+            return (
+              <button
+                key={choice.id}
+                type="button"
+                className={cls}
+                disabled={revealed}
+                role={revealed ? undefined : 'radio'}
+                aria-checked={revealed ? undefined : on}
+                tabIndex={revealed ? undefined : i === activeIndex ? 0 : -1}
+                aria-keyshortcuts={keys && !revealed ? String(i + 1) : undefined}
+                onClick={() => selectWithSound(onSelect, choice.id)}
+              >
+                <span className="desk-choice__o"><Figure n={i + 1} /></span>
+                {choiceType === 'image'
+                  ? <ImagePlaceholder alt={choice.imageAlt} compact />
+                  : <span className={text} lang="ja">{choice.textJp}</span>}
+                {tag && <span className="desk-choice__tag">{tag}</span>}
+              </button>
+            )
+          })}
+        </div>
+        {revealed && selected == null && (
+          <p className="exam-question__blank-note">{t.examNotAnswered}</p>
+        )}
+      </>
+    )
   }
 
   if (tiles) {
@@ -361,6 +460,11 @@ function SentenceOrderBlock({ question, selected, onSelect, revealed }) {
           ))}
         </div>
         <p className="exam-ask__hint">{t.examStarHint}</p>
+        {revealed && (
+          <p className="exam-order-solution" lang="ja">
+            {t.examFullSentence} {order.map(id => byId[id].textJp).join(' ')}
+          </p>
+        )}
       </div>
     )
   }
@@ -458,6 +562,13 @@ function ClozeText({ template, activeNumber }) {
 function ReadingPassageBlock({ question, selected, onSelect, revealed, passageAside }) {
   const { passage } = question
   const apart = useContext(ApartContext)
+  if (apart && passageAside) {
+    return (
+      <div className="exam-ask">
+        <p className="exam-ask__line" lang="ja"><GapText text={question.promptJp} /></p>
+      </div>
+    )
+  }
   if (apart) {
     return (
       <div className="exam-ask exam-ask--read">
@@ -576,14 +687,20 @@ function ListeningBlock({ question, selected, onSelect, revealed, devMode }) {
       <div className="exam-ask exam-ask--centre">
         {question.questionPromptJp && <p className="exam-ask__line" lang="ja">{question.questionPromptJp}</p>}
         {question.imageAlt && <ImagePlaceholder alt={question.imageAlt} />}
-        <AudioPlayer src={question.audioSrc} ring />
-        {devMode && (
+        <AudioPlayer src={question.audioSrc} ring keyHint={keys} />
+        {devMode && !revealed && (
           <div className="exam-dev-panel">
             <button type="button" className="exam-dev-panel__toggle" onClick={() => setShowScript(s => !s)}>
               {showScript ? 'Hide script (dev)' : 'Show script (dev)'}
             </button>
             {showScript && <p className="exam-dev-panel__script" lang="ja">{question.scriptJp}</p>}
           </div>
+        )}
+        {revealed && question.scriptJp && (
+          <details className="exam-transcript" open={keys || undefined}>
+            <summary className="exam-transcript__summary">{t.examTranscript}</summary>
+            <p className="exam-transcript__text" lang="ja">{question.scriptJp}</p>
+          </details>
         )}
       </div>
     )

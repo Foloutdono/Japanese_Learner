@@ -96,21 +96,22 @@ export async function nudgePermission() {
 
 /** 発車案内 (plan 156): the day's notifications, as lib/ahead.js planned
  *  them, replacing every one scheduled before -- an empty list cancels
- *  the lot. Resolves to what was scheduled. A no-op on the web. */
-export async function syncNudges(nudges) {
+ *  the lot. Resolves to what was scheduled. A no-op on the web.
+ *  `channel` names Android's channel for them, in the learner's language. */
+export async function syncNudges(nudges, channel) {
   if (!isNative()) return []
   const n = await native()
-  return n.scheduleNudges(nudges)
+  return n.scheduleNudges(nudges, channel)
 }
 
 /** 時間割 (plan 181): the agenda's notifications, as lib/agenda.js planned
  *  them, replacing the agenda's own -- an empty list cancels them. The
  *  day's train is not touched. Resolves to what was scheduled. A no-op on
- *  the web. */
-export async function syncAgenda(items) {
+ *  the web. `channel` as syncNudges's. */
+export async function syncAgenda(items, channel) {
   if (!isNative()) return []
   const n = await native()
-  return n.scheduleAgenda(items)
+  return n.scheduleAgenda(items, channel)
 }
 
 /** The widget's figures (lib/ahead.js's widgetPayload), handed to the

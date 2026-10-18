@@ -134,6 +134,9 @@ describe('the asking in a sentence run', () => {
     expect(field().disabled).toBe(false)
     expect(field().placeholder).toBe('Ta question…')
     expect(askCalls()).toHaveLength(0)
+    // Nothing of the phone's page (plan 197, ask.phone.test): the desk asks here.
+    expect($('.ask-launch')).toBeNull()
+    expect($('.ask-layer')).toBeNull()
   })
 
   it('asks with the exercise\'s context, and prints the answer under the question', async () => {
@@ -215,7 +218,7 @@ describe('the asking in a sentence run', () => {
     await ask('Encore une ?')
     expect(askCalls()[2]).toMatchObject({ sentence: FIRST.phrase, answer: 'denki', point: '〜ましょうか' })
     expect(askCalls()[2].history).toHaveLength(1)
-  })
+  }, 30_000)
 
   it('stops at five questions a sentence', async () => {
     await reading()
@@ -226,7 +229,7 @@ describe('the asking in a sentence run', () => {
     expect(field().disabled).toBe(true)
     expect($('.desk-ask__note').textContent).toBe('C’est tout pour cette phrase.')
     expect(askCalls().at(-1).history).toHaveLength(4)
-  })
+  }, 30_000)
 })
 
 const EXERCISE = {

@@ -14,6 +14,8 @@ import './index.css'
 // point with no tour keeps the lesson (the fallback study/grammar_tour.py
 // names). A written tour's scene (plan 187d) stands inside the screen
 // too: the place's plate, the lines with their voices, the gate docked.
+// Since plan 206 each stop is one card that takes the room between the
+// track and the gate: no stop leaves the screen's middle empty.
 
 const apiJson = vi.fn()
 vi.mock('./lib/api', () => ({
@@ -108,7 +110,8 @@ describe('the tour in the day’s queue, on a phone', () => {
     expect(screen.container.querySelector('.rating-bar')).toBeNull()
     // Nothing runs off the side of a 390px phone.
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
-    for (const el of tour.querySelectorAll('.tour-card, .tour__foot, .tour__track')) {
+    expect(tour.querySelector('.tour-leaf')).toBeTruthy()
+    for (const el of tour.querySelectorAll('.tour-leaf, .tour__foot, .tour__track')) {
       const box = el.getBoundingClientRect()
       expect(box.left).toBeGreaterThanOrEqual(0)
       expect(box.right).toBeLessThanOrEqual(window.innerWidth)
@@ -122,6 +125,62 @@ describe('the tour in the day’s queue, on a phone', () => {
     const pine = getComputedStyle(tour).getPropertyValue('--line-color').trim()
     expect(pine).not.toBe('')
     expect(here.borderTopWidth).toBe('3px')
+  }, 20000)
+
+  it('draws each stop as one card down to the gate, the sentence leading it (plan 206)', async () => {
+    const KA = tours.ka
+    const screen = await mount([card({
+      card_id: 'grammar_N5_か', raw_id: 'grammar_N5_か', grammar: 'か',
+      lesson: { ...LESSON, examples: KA.look, tour: KA },
+    })])
+    await settle()
+    const tour = () => screen.container.querySelector('.tour')
+    const gate = () => tour().querySelector('.tour__foot .btn-depart')
+    // Nothing between what the stop says and the gate: the body's last
+    // block meets the docked foot, give or take the body's own gap.
+    const filled = () => {
+      const body = tour().querySelector('.tour__body')
+      const last = body.lastElementChild.getBoundingClientRect()
+      const foot = tour().querySelector('.tour__foot').getBoundingClientRect()
+      expect(foot.top - last.bottom).toBeLessThanOrEqual(24)
+      expect(tour().querySelector('.tour-leaf').getBoundingClientRect().top)
+        .toBeGreaterThanOrEqual(tour().querySelector('.tour__track').getBoundingClientRect().bottom)
+    }
+    filled()
+    gate().click()
+    await settle(120)
+    tour().querySelector(`[data-guess="${KA.guesses.findIndex(g => g.correct)}"]`).click()
+    await settle(120)
+    gate().click()
+    await settle(120)
+    // Found: the card turned to the point, the screen's shortest stop.
+    expect(tour().dataset.stop).toBe('found')
+    filled()
+    expect(tour().querySelector('.tour-leaf--found .tour-pattern').textContent).toBe('か')
+    gate().click()
+    await settle(120)
+    gate().click()
+    await settle(120)
+    tour().querySelector(`[data-choice="${KA.scene.ask.choices.findIndex(c => c.correct)}"]`).click()
+    await settle(120)
+    gate().click()
+    await settle(120)
+    gate().click()
+    await settle(120)
+    // A usage: its sentence centred in the card at --fs-title, the
+    // readings under the card, all inside the phone.
+    expect(tour().dataset.stop).toBe('twist')
+    filled()
+    const leaf = tour().querySelector('.tour-leaf').getBoundingClientRect()
+    const jp = tour().querySelector('.tour-leaf__mid--spec .dict-ex__jp')
+    expect(getComputedStyle(jp).fontSize).toBe('20px')
+    // Centred: the ink, not the box (which is the card's width either way).
+    const ink = document.createRange()
+    ink.selectNodeContents(jp)
+    const sentence = ink.getBoundingClientRect()
+    expect(Math.abs((sentence.left - leaf.left) - (leaf.right - sentence.right))).toBeLessThanOrEqual(2)
+    expect(tour().querySelector('.tour-guesses').getBoundingClientRect().top).toBeGreaterThanOrEqual(leaf.bottom)
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
   }, 20000)
 
   it('records the tour at its terminus and boards the card', async () => {
@@ -156,7 +215,28 @@ describe('the tour in the day’s queue, on a phone', () => {
     })
     expect(screen.container.querySelector('.tour')).toBeNull()
     expect(screen.container.querySelector('.prompt-card')).toBeTruthy()
-    const cached = JSON.parse(localStorage.getItem(sessionKey('today', 'all')))
+    const cached = JSON.parse(localStorage.getItem(sessionKey('today', 'all', 'en')))
+    expect(cached[0].lesson_seen).toBe(true)
+  }, 20000)
+
+  // 飛ばす (plan 222): under the gate, inside the screen, the way past
+  // the lesson to its card -- which records no tour.
+  it('skips the tour for its card, recording nothing', async () => {
+    const screen = await mount([card()])
+    await settle()
+    const tour = () => screen.container.querySelector('.tour')
+    const skip = tour().querySelector('.tour__foot [data-action="skip"]')
+    const box = skip.getBoundingClientRect()
+    const gate = tour().querySelector('.tour__foot .btn-depart').getBoundingClientRect()
+    expect(box.top).toBeGreaterThanOrEqual(gate.bottom)
+    expect(box.bottom).toBeLessThanOrEqual(window.innerHeight)
+    expect(box.height).toBeGreaterThanOrEqual(44)
+    skip.click()
+    await settle()
+    expect(screen.container.querySelector('.tour')).toBeNull()
+    expect(screen.container.querySelector('.prompt-card')).toBeTruthy()
+    expect(apiJson.mock.calls.find(c => c[0] === '/api/grammar/tour')).toBeUndefined()
+    const cached = JSON.parse(localStorage.getItem(sessionKey('today', 'all', 'en')))
     expect(cached[0].lesson_seen).toBe(true)
   }, 20000)
 

@@ -15,8 +15,9 @@ import './index.css'
 // puts its point in focus, and Explain stands the explanation in the
 // description's place. A typed Passage has no video, and its sentence
 // takes the video's place (plan 161): one sentence's words over its
-// grammar on the left, several's under the sentence, the translation
-// under the sentence once Explain has bought it. The intake stands beside its history;
+// grammar on the left, several's folded to one line under the sentence
+// (plan 235, the owner's pick C) and opened as a list in a sheet, the
+// translation under the sentence. The intake stands beside its history;
 // Ctrl+Enter analyses. And the dictionary,
 // finding no entry for a sentence typed into it, offers to take it to
 // the analyser, which analyses it on arrival. The phone's side is
@@ -31,6 +32,18 @@ const ONE = [{
   tokens: [tok('駅', '駅', 'えき', 'station'), tok('で'), tok('待つ', '待つ', 'まつ', 'to wait')],
 }]
 const TWO = [ONE[0], { ...ONE[0], text: '電車に乗る', tokens: [tok('電車', '電車', 'でんしゃ', 'train'), tok('に'), tok('乗る', '乗る', 'のる', 'to ride')] }]
+// A line as wide as plan 235 lets one be (22 characters), with the
+// translation it carries: what the text desk's stage must hold whole.
+const WIDE_LINE = {
+  ...ONE[0], text: '昨日は雨が降っていたので、私は一日中家で',
+  translation: 'Hier, comme il pleuvait, je suis resté toute la journée chez moi à',
+  tokens: [
+    tok('昨日', '昨日', 'きのう', 'yesterday'), tok('は'), tok('雨', '雨', 'あめ', 'rain'), tok('が'),
+    tok('降っ', '降る', 'ふる', 'to fall'), tok('て'), tok('い'), tok('た'), tok('の'), tok('で'), tok('、'),
+    tok('私', '私', 'わたし', 'I'), tok('は'), tok('一日中', '一日中', 'いちにちじゅう', 'all day'),
+    tok('家', '家', 'いえ', 'home'), tok('で'),
+  ],
+}
 // A sentence built with a particle's marker (を) and a construction:
 // 〜ている written on て and いる -- listed after を, in the sentence's order.
 const GRAMMAR = [{
@@ -165,13 +178,14 @@ describe('the analyser on the desk (plan 134)', () => {
     const rail = box('.anl-desk__rail')
     const points = box('.anl-desk__points')
     const slab = box('.anl-slab')
-    const words = box('.anl-desk__words')
+    const words = box('.anl-fold')
     const right = box('.anl-desk__entry')
     expect(rail.right).toBeLessThanOrEqual(head.left)
     expect(head.right).toBeLessThanOrEqual(right.left)
     // Plan 161, several typed sentences (B): the Passage's line over the
-    // grammar on the left, the words under the sentence in the middle,
-    // and no card in focus beside them -- the entry is that card.
+    // grammar on the left, the words under the sentence in the middle --
+    // folded to one line since plan 235 -- and no card in focus beside
+    // them: the entry is that card.
     expect(points.top).toBeGreaterThan(rail.bottom - 1)
     expect(words.top).toBeGreaterThan(slab.bottom - 1)
     expect(Math.abs(words.left - slab.left)).toBeLessThan(2)
@@ -301,6 +315,27 @@ describe('the analyser on the desk (plan 134)', () => {
     expect($('.anl-words__item .anl-words__add').textContent).toBe('Ajouter au deck')
   })
 
+  // A gloss longer than the column: the row in focus shrinks to its
+  // ground and cuts the gloss after two lines, where it ran past the
+  // ground on one and the panel's edge clipped it mid-word (果て, "la fin, l'extrémité, la ou
+  // les limites, le…").
+  it('keeps a long gloss inside the word in focus\'s ground', async () => {
+    passage = [{ ...ONE[0], tokens: [ONE[0].tokens[0], ONE[0].tokens[1],
+      tok('待つ', '待つ', 'まつ', 'to wait, to await, to look forward to, to hold off, to hold on, to put up with')] }]
+    await mount()
+    await analyze()
+    $$('.anl-words__row').at(-1).click()
+    await settle()
+    const item = $('.anl-words__item')
+    const row = $('.anl-words__item .anl-words__row--on')
+    expect(row.getBoundingClientRect().right).toBeLessThanOrEqual(item.getBoundingClientRect().right + 0.5)
+    expect(item.scrollWidth).toBeLessThanOrEqual(item.clientWidth + 1)
+    // Two lines of it, then the cut.
+    const gloss = row.querySelector('.anl-words__gloss')
+    expect(gloss.scrollHeight).toBeGreaterThan(gloss.clientHeight)
+    expect(gloss.clientHeight / parseFloat(getComputedStyle(gloss).lineHeight)).toBeCloseTo(2, 0)
+  })
+
   it('draws no ring round the result while the arrows walk it', async () => {
     await mount()
     await analyze()
@@ -317,7 +352,9 @@ describe('the analyser on the desk (plan 134)', () => {
     passage = TWO
     await mount()
     await analyze('駅で待つ。電車に乗る。')
-    $$('.anl-words__row').at(-1).click()
+    $('.anl-fold').click()
+    await settle()
+    $$('[role="dialog"] .anl-words__row').at(-1).click()
     // The entry is fetched: waited for rather than read after a fixed
     // pause, which a slow CI runner outlasted (the plate still empty).
     await expect.poll(shown).toBe('待つ')
@@ -332,10 +369,64 @@ describe('the analyser on the desk (plan 134)', () => {
     await expect.poll(() => $('.anl-subs__count').textContent).toContain('1 / 2')
   })
 
-  it('stands the explanation in the description\'s place, and swaps back', async () => {
+  // Plan 235, the owner's pick C of "Tsuji analyser — text desk stage":
+  // several sentences' words give their height back to the sumi, folded
+  // to one line under it, and the line opens them as the list.
+  it('folds several sentences\' words to one line under the sentence, and opens them as the list', async () => {
+    passage = TWO
+    await mount()
+    await analyze('駅で待つ。電車に乗る。')
+    await expect.poll(shown).toBe('駅')
+    expect($('.anl-desk__words')).toBeNull()
+    const fold = $('.anl-fold')
+    const f = fold.getBoundingClientRect()
+    const slab = box('.anl-slab')
+    expect(f.top).toBeGreaterThan(slab.bottom - 1)
+    expect(Math.abs(f.left - slab.left)).toBeLessThan(1)
+    expect(Math.abs(f.right - slab.right)).toBeLessThan(1)
+    expect(Math.abs(f.bottom - box('.anl-desk').bottom)).toBeLessThan(2)
+    expect(f.height).toBeLessThan(64)
+    expect($('.anl-fold__cap').textContent).toBe('Mots de la phrase2')
+    expect($$('.anl-fold__chip').map(c => c.textContent)).toEqual(['駅', '待つ'])
+    expect($('.anl-fold__chip--on').textContent).toBe('駅')
+    expect(fold.getAttribute('aria-haspopup')).toBe('dialog')
+
+    fold.click()
+    await settle()
+    const rows = $$('[role="dialog"] .anl-words__row')
+    expect(rows.map(r => r.querySelector('.anl-words__word').textContent)).toEqual(['駅', '待つ'])
+    expect($('[role="dialog"] .anl-words__add').textContent).toBe('Ajouter au deck')
+    expect(fold.getAttribute('aria-expanded')).toBe('true')
+    rows.at(-1).click()
+    await expect.poll(shown).toBe('待つ')
+    expect($('[role="dialog"]')).toBeNull()
+    expect($('.anl-fold__chip--on').textContent).toBe('待つ')
+  })
+
+  it('gives the stage the column: a line as wide as one gets, its translation and Explain stand whole', async () => {
+    passage = [WIDE_LINE, TWO[1]]
+    await mount()
+    await analyze('昨日は雨が降っていたので、私は一日中家で。電車に乗る。')
+    await expect.poll(() => $('.anl-subs__tr')?.textContent).toBe(WIDE_LINE.translation)
+    await settle(300)
+    const stage = $('.anl-subs__stage')
+    const bottom = stage.getBoundingClientRect().bottom
+    expect(stage.scrollHeight).toBeLessThanOrEqual(stage.clientHeight + 1)
+    expect(box('.anl-subs__tr').bottom).toBeLessThanOrEqual(bottom + 1)
+    expect(box('.anl-subs__stage .anl-desk__explain').bottom).toBeLessThanOrEqual(bottom + 1)
+    expect(document.scrollingElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight + 1)
+  })
+
+  // Plan 242: the explanation is the panel's Construction face, its
+  // segment the way between it and the word -- the swap on the column's
+  // edge went. A typed sentence keeps its grammar in its own column, so
+  // its panel has the two faces.
+  it('turns the panel to the construction, and its segment turns it back', async () => {
     await mount()
     await analyze()
     expect($('.anl-swap')).toBeNull()
+    const faces = () => $$('.anl-faces .seg__opt')
+    expect(faces().map(o => o.textContent)).toEqual(['Mot駅', 'Construction'])
     // On a typed sentence, Explain stands under it on the sumi (plan 161).
     expect($('.anl-slab .anl-desk__explain').textContent).toContain('Expliquer la phrase')
     expect($('.anl-subs__tr')).toBeNull()
@@ -348,25 +439,54 @@ describe('the analyser on the desk (plan 134)', () => {
     expect(box('.anl-subs__tr').top).toBeGreaterThan(box('.anl-subs__line').bottom - 1)
     expect(box('.anl-desk__explain').top).toBeGreaterThan(box('.anl-subs__tr').bottom - 1)
     expect($('.anl-desk__explain').getAttribute('aria-pressed')).toBe('true')
-    // The card's head stays over it; its description gives way.
-    expect(shown()).toBe('駅')
-    expect(getComputedStyle($('.anl-desk__entry .dict-entry__body')).display).toBe('none')
+    // The panel's face is the construction, the segment lit on it.
+    expect(faces()[1].getAttribute('aria-checked')).toBe('true')
+    expect($('.anl-desk__entry .dict-entry__body')).toBeNull()
 
-    $('.anl-swap').click()
+    faces()[0].click()
     await settle()
     expect($('.anl-explainpanel')).toBeNull()
-    expect(getComputedStyle($('.anl-desk__entry .dict-entry__body')).display).not.toBe('none')
+    expect(shown()).toBe('駅')
     // Bought, the translation stays with the sentence.
     expect($('.anl-subs__tr').textContent).toBe(TRANSLATION)
-    // Bought once: the button goes back to it without a second call.
+    // Bought once: the segment goes back to it without a second call.
     const calls = apiJson.mock.calls.length
-    $('.anl-desk__explain').click()
+    faces()[1].click()
     await settle()
     expect($('.anl-explainpanel')).not.toBeNull()
     expect(apiJson.mock.calls.length).toBe(calls)
     press('Escape')
     await settle()
     expect($('.anl-explainpanel')).toBeNull()
+    expect(faces()[0].getAttribute('aria-checked')).toBe('true')
+  })
+
+  // Plan 220: under the explanation, a short question about the sentence,
+  // asked through the runs' own /api/ask in the analyser's mode.
+  it('takes a question under the explanation, and the arrows stay in the field', async () => {
+    await mount()
+    await analyze()
+    $('.anl-desk__explain').click()
+    await settle(300)
+    const field = $('.anl-explainpanel .desk-ask__field')
+    expect(field).not.toBeNull()
+    expect(field.disabled).toBe(false)
+    apiFetch.mockImplementation(async url => (String(url) === '/api/ask'
+      ? ok({ answer: 'Ici, 「は」 marque le thème.', off_topic: false, left: 39 })
+      : ok([])))
+    field.focus()
+    // An arrow typed in the field walks no token behind it.
+    const before = shown()
+    press('ArrowRight')
+    await settle()
+    expect(shown()).toBe(before)
+    $('.anl-explainpanel .desk-ask__offer').click()
+    await expect.poll(() => $('.anl-explainpanel .desk-ask__a')?.textContent ?? '').toContain('marque le thème')
+    const [, , init] = apiFetch.mock.calls.find(([u]) => String(u) === '/api/ask')
+    const body = JSON.parse(init.body)
+    expect(body.mode).toBe('analyser')
+    expect(body.review).toBe(EXPLANATION)
+    expect(body.translation).toBe(TRANSLATION)
   })
 
   it('numbers every point, the particles too, on its card and on the words it sits on, and puts it in focus', async () => {

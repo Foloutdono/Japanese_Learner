@@ -66,6 +66,11 @@ const BROWSER_OPTIMIZE = {
     'react/jsx-dev-runtime',
     'vitest-browser-react',
     'tesseract.js',
+    // Settings › Correspondance's Anki reader (plan 243), behind `await import()` in
+    // components/settings/TransferPage.jsx: the same cold-cache race.
+    'sql.js',
+    'fzstd',
+    'fflate',
   ],
 };
 
@@ -158,6 +163,9 @@ export default defineConfig(({ mode }) => {
         name: 'Tsuji — Apprendre le japonais',
         short_name: 'Tsuji',
         lang: 'fr',
+        // The landing page's own (landing/strings.mjs), as an install
+        // sheet or a store listing prints it.
+        description: 'L’application pour apprendre le japonais un peu chaque jour\u00a0: kana, vocabulaire, kanji et grammaire revus au bon moment, dictées et examens blancs du JLPT.',
         // `/` is the landing page (plan 167); the app opens at /app,
         // which routes as `/` did. `id` stays '/', the identity every
         // install already carries, so no install is taken for another app.
@@ -173,7 +181,7 @@ export default defineConfig(({ mode }) => {
           { src: 'maskable-icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
         shortcuts: [
-          { name: '本日 — Today', short_name: '本日', url: '/today' },
+          { name: '本日 — Aujourd’hui', short_name: '本日', url: '/today' },
           { name: 'かな — Kana', short_name: 'かな', url: '/kana' },
         ],
       },

@@ -36,18 +36,19 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 from core.auth import get_user_id
 from core.db import db_conn
+from core.rls import enable_rls
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 # What a block can be about: the day's queue, the Learn gate's four
-# lines, the Practice gate's six platforms. Closed, because the client
+# lines, the Practice gate's seven platforms. Closed, because the client
 # turns each into a place to open (frontend domain/agenda.js) and a
 # value it does not know has nowhere to go. A deck is not a subject: it
 # is a learner's own name for something (analytics never keeps those).
 Subject = Literal[
     "review", "kana", "vocab", "kanji", "grammar",
-    "reading", "translation", "dictation", "composition", "comprehension", "exam",
+    "reading", "translation", "dictation", "composition", "conversation", "comprehension", "exam",
 ]
 SUBJECTS = Subject.__args__
 
@@ -82,6 +83,7 @@ def _ensure_schema() -> None:
                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
+            enable_rls(cur, "agenda_blocks")
             cur.execute(
                 "CREATE INDEX IF NOT EXISTS agenda_blocks_user ON agenda_blocks (user_id)"
             )

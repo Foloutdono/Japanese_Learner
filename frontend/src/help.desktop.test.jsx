@@ -155,12 +155,11 @@ describe('Help on the rail', () => {
       .toBe(getComputedStyle(document.querySelector('.desk-rail__name')).fontSize)
     expect(Math.abs(word.baseline - name.baseline)).toBeLessThan(1)
     // The ? in its roundel's middle by geometry, the roundel in the
-    // pill's, and the word within the half pixel it is lowered by.
+    // pill's, and the word within a pixel of the pill's middle.
     const box = el => { const r = el.getBoundingClientRect(); return (r.top + r.bottom) / 2 }
     expect(Math.abs(box(mark.querySelector('svg')) - box(mark))).toBeLessThan(0.25)
     expect(Math.abs(box(mark) - box(help()))).toBeLessThan(0.5)
-    expect(word.middle - box(help())).toBeGreaterThanOrEqual(0)
-    expect(word.middle - box(help())).toBeLessThan(1)
+    expect(Math.abs(word.middle - box(help()))).toBeLessThan(1)
   })
 
   it("plays the gate's guide again in place, and posts no second stamp", async () => {

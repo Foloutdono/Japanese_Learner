@@ -3,15 +3,24 @@ import { useForecast } from '../../stores/forecast'
 import { useTodaySummary } from '../../stores/today'
 import { useLeft } from '../../stores/gateRun'
 
-// ── 七日 — the week ahead, under the journey (plan 135) ─────────────
-// The owner's pick (A·2 of the Today canvas) put the next seven days at
-// the foot of the desk's side column: a bar a day, its count over it
-// and its weekday under it, today's in gold; and, when the gate's run
-// is shorter than the day, what it leaves for tomorrow. Today's bar is
-// the gate's own total (/api/today), not the forecast's first figure,
-// which counts scheduler rows the queue may not serve: the two numbers
-// on one screen must agree. Desk only (TodayScreen's DeskSide).
+// ── 七日 — the week ahead (plans 135, 199) ──────────────────────────
+// The owner's pick (A·2 of the Today canvas) drew the next seven days on
+// the desk: a bar a day, its count over it and its weekday under it,
+// today's in gold; and, when the gate's run is shorter than the day,
+// what it leaves for tomorrow. It stands under the day's figures in
+// Today's column since plan 199. Desk only. Today's bar is the gate's
+// own total (/api/today), not the forecast's first figure, which counts
+// scheduler rows the queue may not serve: the two numbers on one screen
+// must agree. On a day with nothing left to review it is what the day
+// reviewed (/api/today's `reviewed`), the figure the cleared dial prints
+// beside it: a bar of 0 under "266 cartes aujourd'hui" read as a day off.
 const WEEKDAY = new Intl.DateTimeFormat('ja-JP', { weekday: 'narrow', timeZone: 'UTC' })
+
+function todayFigure(today, forecast) {
+  if (!today) return forecast
+  const due = today.total ?? forecast
+  return due > 0 ? due : today.reviewed?.total ?? 0
+}
 
 export function WeekAhead() {
   const { t } = useLang()
@@ -20,7 +29,7 @@ export function WeekAhead() {
   const left = useLeft()
   const days = data?.days
   if (!days?.length) return null
-  const counts = days.map((d, i) => (i === 0 && today ? today.total ?? d.count : d.count))
+  const counts = days.map((d, i) => (i === 0 ? todayFigure(today, d.count) : d.count))
   const top = Math.max(1, ...counts)
 
   return (

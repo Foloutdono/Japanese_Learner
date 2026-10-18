@@ -2,32 +2,30 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { LangProvider } from '../LangContext'
 import fr from '../locales/fr/index.js'
-// The pass tells a refusal from a dead line by `instanceof`, so the
-// refusal test has to throw the very class the screen imports: this
-// is the one from the mock below, not a second declaration that
-// would make that test pass for the wrong reason.
+// The card tells a refusal from a dead line by `instanceof`, so the
+// refusal test has to throw the very class the screen imports: this is
+// the one from the mock below, not a second declaration that would make
+// that test pass for the wrong reason.
 import { ApiError } from '../lib/api'
 import '../index.css'
 
-// ── The boarding, walked end to end (plan 075) ─────────────────
-// Everything stays in memory and POSTs exactly once on "Enter the
-// station", so what matters is: the screens chain in the canvas's
-// order, the kana check branches both ways, the choices survive to the
-// final payload, back walks the VISITED path with every answer kept,
-// the name is the one thing written early (and refused on its own
-// screen), the pass prints the balance, and the train pulls between
-// screens. The browser lane runs fr-FR, so every hook here is a class
-// or a data attribute, never a sentence.
+// ── The boarding, walked end to end (plan 075; the card, plan 247) ──
+// The owner's pick C: the boarding asks the kana and a reader's level,
+// then hands the card already filled in, every printed field a door to
+// a sheet. Everything stays in memory and POSTs exactly once on
+// « Émettre ma carte », so what matters is: the screens chain in C's
+// order, the kana branches both ways, the card prints the defaults, a
+// pick in a sheet reprints the card and rides on the contract, the
+// origin goes back with every answer kept, the account sheet keeps the
+// card by a link or by Google, and the train pulls between screens. The
+// browser lane runs fr-FR, so every hook here is a class or a data
+// attribute, never a sentence.
 
 const apiJson = vi.fn()
 const apiJsonWithTimeout = vi.fn()
-const patchResponse = { current: null }
 const CREDITS = { balance: 30, cap: 50, dailyRefill: 30, nextCreditAt: '2026-09-08T00:00:00+09:00', plan: 'free', unlimited: false }
-const apiFetch = vi.fn(async (path, _session, opts) => {
+const apiFetch = vi.fn(async path => {
   if (path === '/api/credits') return { ok: true, status: 200, json: async () => CREDITS }
-  if (path === '/api/profile' && opts?.method === 'PATCH') {
-    return patchResponse.current ?? { ok: true, status: 200, json: async () => JSON.parse(opts.body) }
-  }
   return { ok: true, status: 200, json: async () => ({}) }
 })
 
@@ -37,10 +35,18 @@ vi.mock('../lib/api', () => ({
   apiJson: (...a) => apiJson(...a),
   apiJsonWithTimeout: (...a) => apiJsonWithTimeout(...a),
   apiUpload: vi.fn(),
-  ApiError: class ApiError extends Error {},
+  // The real one's shape: a refusal has its status (lib/api.js).
+  ApiError: class ApiError extends Error {
+    constructor(status, body = null, path = '') {
+      super(`Request failed (${status}) for ${path}`)
+      this.status = status
+      this.body = body
+      this.path = path
+    }
+  },
 }))
-// The claim road: putting an address on the pass is one updateUser
-// call (lib/guest.js), and what it REFUSES with is the whole point of
+// The card kept by a link: one updateUser call with the address alone
+// (lib/guest.js claimByLink), and what it REFUSES with is the point of
 // one test below.
 const updateUser = vi.fn()
 vi.mock('../lib/supabase', () => ({
@@ -52,16 +58,20 @@ vi.mock('../lib/supabase', () => ({
     },
   },
 }))
-// The nudge is native-only; one test flips it on.
+// The reminder is native-only; one test flips it on.
 const nudgeRef = { current: false }
+const requestNudge = vi.fn(async () => nudgeRef.current)
+// What the OS says it will do when it is not asking (plan 247): one test
+// has it refuse for good.
+const nudgeState = { current: 'prompt' }
 vi.mock('../lib/platform', () => ({
   isNative: () => nudgeRef.current,
   canNudge: () => nudgeRef.current,
-  requestNudgePermission: async () => nudgeRef.current,
+  requestNudgePermission: () => requestNudge(),
+  nudgePermission: async () => nudgeState.current,
 }))
 // 改札 — what the Google round trip came back with. Only the pending
-// refusal is faked: the message and the classification stay real, so a
-// renamed code or a missing string fails here too.
+// refusal is faked: the message and the classification stay real.
 const oauthRefusal = { current: null }
 vi.mock('../lib/authRedirect', async (importOriginal) => ({
   ...(await importOriginal()),
@@ -72,11 +82,24 @@ vi.mock('../lib/audio', async (importOriginal) => ({
   playPlatformChime: vi.fn(),
   playClick: vi.fn(),
 }))
+// 足跡: what the boarding says it did, read off the seam.
+const tracked = vi.fn()
+vi.mock('../lib/track', async (importOriginal) => ({
+  ...(await importOriginal()),
+  track: (...a) => tracked(...a),
+}))
+// The web's calendar file: built for real, handed to a spy.
+const saved = vi.fn()
+vi.mock('../lib/calendarFile', async (importOriginal) => ({
+  ...(await importOriginal()),
+  saveCalendar: (...a) => saved(...a),
+}))
 // LangContext pulls the content-translation maps over the network on
 // mount — same stub the AnalyzerScreen polling test uses.
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: BoardingFlow } = await import('./BoardingFlow')
+const { seedCredits } = await import('../stores/credits')
 
 const VOLUMES = {
   vocab: { N5: 667, N4: 634, N3: 1832, N2: 1796, N1: 3476 },
@@ -86,20 +109,21 @@ const VOLUMES = {
 }
 
 // The stash the web writes before leaving for Google, and the answers
-// it carries back — the shortest walk's, so the resumed flow can price
-// a plan and print a pass without being asked anything again.
+// it carries back -- a reader at N4, on the card.
 const STASH_KEY = 'jp-boarding-stash'
 const RESUMED = {
-  name: 'Tester', motive: 'trip', kana: 'both', levelChoice: 'N1', jlpt: 'N1',
-  goal: null, rhythm: 10, minute: 480, notifications: false,
+  kana: 'both', levelChoice: 'N4', jlpt: 'N4', placed: null, goal: 'N3',
+  lines: ['vocab', 'kanji', 'grammar'], rhythm: 10, minute: 450, notifications: false, cardName: '',
 }
+const stashed = extra => sessionStorage.setItem(STASH_KEY, JSON.stringify({
+  answers: RESUMED, step: 'card', sheet: 'account', keeping: 'google', history: ['kana', 'level'], ...extra,
+}))
 
 // The pull is 260 ms; a settle clears it and the leaving car with it.
 const settle = (ms = 340) => new Promise(r => setTimeout(r, ms))
-// The head's track reads n/N off its progressbar: the stops are the
-// count, and no figure is printed.
+// The head's track reads n/N off its progressbar.
 function stepsOf(screen) {
-  const track = screen.container.querySelector('.brd__car:not(.brd__car--out) .brd__track, .brd__track')
+  const track = screen.container.querySelector('.brd__track')
   return `${track.getAttribute('aria-valuenow')}/${track.getAttribute('aria-valuemax')}`
 }
 
@@ -107,14 +131,29 @@ const stepOf = screen => screen.container.querySelector('.brd')?.dataset.step
 const live = screen => screen.container.querySelector('.brd__car:not(.brd__car--out)')
 // The head (the back button, the track) stands outside the cars.
 const q = (screen, sel) => live(screen).querySelector(sel) ?? screen.container.querySelector(sel)
+// The sheets portal to the document's body.
+const sheet = () => document.querySelector('.brd-sheet')
+const inSheet = sel => sheet()?.querySelector(sel) ?? null
 
 // A native click's state lands on the next tick, so every click waits
 // one before the next lands on the state it moved.
 async function click(screen, sel) {
+  // The next screen comes a frame after the tap (a transition, go()).
+  await vi.waitFor(() => expect(q(screen, sel), sel).toBeTruthy(), { timeout: 2000 })
   const el = q(screen, sel)
-  expect(el, sel).toBeTruthy()
   el.click()
   await settle(20)
+}
+async function clickSheet(sel) {
+  const el = inSheet(sel)
+  expect(el, sel).toBeTruthy()
+  el.click()
+  await settle(60)
+}
+async function door(screen, page) {
+  await click(screen, `[data-door="${page}"]`)
+  await settle(60)
+  expect(sheet(), `the ${page} door opens its sheet`).not.toBeNull()
 }
 
 const setValue = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
@@ -123,15 +162,11 @@ function type(el, value) {
   el.dispatchEvent(new Event('input', { bubbles: true }))
 }
 
-async function renderFlow({
-  onComplete = vi.fn(), username = 'Tester', dryRun = false,
-  onExit = undefined, onSignIn = undefined, guest = false, email = null,
-} = {}) {
+async function renderFlow({ onComplete = vi.fn(), dryRun = false, onExit = undefined, onSignIn = undefined, guest = false, user = null } = {}) {
   const screen = await render(
     <LangProvider>
       <BoardingFlow
-        session={{ access_token: 'tok', ...(email ? { user: { email } } : {}) }}
-        initialProfile={{ username, level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 }}
+        session={{ access_token: 'tok', ...(user ? { user } : {}) }}
         onComplete={onComplete}
         onExit={onExit}
         onSignIn={onSignIn}
@@ -144,55 +179,47 @@ async function renderFlow({
   return { screen, onComplete }
 }
 
-// Name → … → plan, by the shortest road: both scripts, N1, so the goal
-// stop drops out and every remaining answer is already the default.
-async function walkToPlan(screen) {
-  await passName(screen)
+// A beginner's line: « Pas encore », the reveal, the card.
+async function toCardBeginner(screen) {
+  expect(stepOf(screen)).toBe('kana')
+  await click(screen, '[data-kana="none"]')
+  await settle()
+  expect(stepOf(screen)).toBe('reveal')
+  await click(screen, '[data-action="continue"]')
+  await settle()
+  expect(stepOf(screen)).toBe('card')
+}
+
+// A reader's: both scripts, the level picked on the line, the card.
+async function toCardReader(screen, level = 'N4') {
+  expect(stepOf(screen)).toBe('kana')
   await click(screen, '[data-kana="both"]')
   await settle()
-  await click(screen, '[data-level="N1"]')
+  expect(stepOf(screen)).toBe('level')
+  await click(screen, `[data-level="${level}"]`)
   await click(screen, '[data-action="continue"]')
   await settle()
-  await click(screen, '[data-action="continue"]')   // the lines
-  await settle()
-  await click(screen, '[data-action="continue"]')   // the rhythm
-  await settle()
-  await click(screen, '[data-action="continue"]')   // the hour
-  await settle()
-  await arrive(screen)
+  expect(stepOf(screen)).toBe('card')
 }
 
-// Name → why: the saved name is kept, so no write happens here.
-async function passName(screen, motive = 'trip') {
-  expect(stepOf(screen)).toBe('name')
-  await click(screen, '[data-action="continue"]')
-  await settle()
-  expect(stepOf(screen)).toBe('why')
-  await click(screen, `[data-motive="${motive}"]`)
-  await click(screen, '[data-action="continue"]')
-  await settle()
-  expect(stepOf(screen)).toBe('kana')
-}
-
-// No Building since plan 168: the hour goes on to the plan, and the
-// arrival signboard plays once over it; any input skips it.
-async function arrive(screen) {
-  expect(stepOf(screen)).toBe('plan')
-  expect(document.querySelector('.onb-arrival')).not.toBeNull()
-  window.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
-  await settle(80)
-  expect(document.querySelector('.onb-arrival')).toBeNull()
-}
+const code = (screen, page) => q(screen, `[data-door="${page}"] .pcb__code`)
+const printed = (screen, page) => q(screen, `[data-door="${page}"] .pcb__value`)?.textContent
+const completes = () => apiJsonWithTimeout.mock.calls.filter(c => c[0] === '/api/onboarding/complete')
+const posted = () => JSON.parse(completes()[0][2].body)
+const done = () => tracked.mock.calls.filter(c => c[0] === 'boarding_done').map(c => c[1])
 
 beforeEach(() => {
   apiJson.mockReset()
   apiJsonWithTimeout.mockReset()
   apiFetch.mockClear()
-  patchResponse.current = null
+  tracked.mockClear()
+  saved.mockClear()
+  requestNudge.mockClear()
   nudgeRef.current = false
   oauthRefusal.current = null
   updateUser.mockReset()
   sessionStorage.removeItem(STASH_KEY)
+  seedCredits(CREDITS)
   apiJson.mockImplementation(async path => (path === '/api/onboarding/volumes' ? VOLUMES : {}))
   apiJsonWithTimeout.mockImplementation(async path => {
     if (path === '/api/onboarding/complete') return { jlptLevel: 'N5', dailyNewTarget: 10, onboardedAt: 'x' }
@@ -201,461 +228,358 @@ beforeEach(() => {
 })
 
 describe('BoardingFlow', () => {
-  it('walks name → why → kana (both) → level → goal → lines → rhythm → time → plan → pass and POSTs the whole contract once', async () => {
+  it('kana → the reveal → the card, filled in with what most keep, and one POST of the whole contract', async () => {
     const { screen, onComplete } = await renderFlow()
 
-    // 1/7 on the web: no nudge stop, and the level only once both
-    // scripts are read (plan 168). Back on the first screen leaves the
-    // flow, so with no `onExit` to leave for there is no button — the
-    // guest boarding always passes one (see its own tests below).
-    expect(stepOf(screen)).toBe('name')
-    expect(stepsOf(screen)).toBe('1/7')
-    expect(screen.container.querySelector('button.brd__back')).toBeNull()
-    expect(document.activeElement?.className).toContain('brd-plate__field')
-
-    // A new name is written before the office moves on.
-    type(q(screen, '.brd-plate__field'), 'Aiko')
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    const patches = apiFetch.mock.calls.filter(c => c[0] === '/api/profile' && c[2]?.method === 'PATCH')
-    expect(patches).toHaveLength(1)
-    expect(JSON.parse(patches[0][2].body)).toEqual({ username: 'Aiko' })
-    expect(stepOf(screen)).toBe('why')
-    expect(q(screen, '.brd__q').textContent).toContain('Aiko')
-    expect(q(screen, '.brd__q-em').textContent).toBe('Aiko')
-    // Focus landed on the question.
-    expect(document.activeElement?.className).toContain('brd__q')
-    // No choice, no way on.
-    expect(q(screen, '[data-action="continue"]').disabled).toBe(true)
-    await click(screen, '[data-motive="trip"]')
-    expect(q(screen, '[data-motive="trip"]').getAttribute('aria-pressed')).toBe('true')
-    await click(screen, '[data-action="continue"]')
-    await settle()
-
+    // 1/2: the kana, then the card. With no `onExit` to leave for there
+    // is no button on the first question.
     expect(stepOf(screen)).toBe('kana')
-    expect(stepsOf(screen)).toBe('3/7')
+    expect(stepsOf(screen)).toBe('1/2')
+    expect(screen.container.querySelector('button.brd__back')).toBeNull()
     // The answers are the foot: each one advances.
     expect(q(screen, '.brd__foot')).toBeNull()
+    await click(screen, '[data-kana="none"]')
+    await settle()
+    // The reveal is the kana's stop's second half, not a stop of its own.
+    expect(stepOf(screen)).toBe('reveal')
+    expect(stepsOf(screen)).toBe('1/2')
+    expect(document.activeElement?.className).toContain('brd__q')
+    await click(screen, '[data-action="continue"]')
+    await settle()
+
+    // The card: an arrival screen, no head, its back up.
+    expect(stepOf(screen)).toBe('card')
+    expect(screen.container.querySelector('.brd').classList.contains('brd--arrival')).toBe(true)
+    expect(screen.container.querySelector('.brd__head')).toBeNull()
+    const card = q(screen, '.brd-card .pcard')
+    expect(card.dataset.side).toBe('back')
+    // A beginner rides from 初 -- no stop behind them to print -- to the
+    // nearest JLPT stop, valid until the day the volumes price it.
+    expect(code(screen, 'level').textContent).toBe('初')
+    expect(code(screen, 'level').getAttribute('lang')).toBe('ja')
+    expect(code(screen, 'destination').textContent).toBe('N5')
+    expect(q(screen, '.pcb__valid b').textContent).toMatch(/\d{4}$/)
+    expect(printed(screen, 'service')).toBe('Rapide · 10 / jour')
+    expect(printed(screen, 'hour')).toBe('Matin · 07:30')
+    expect(live(screen).querySelectorAll('[data-door="lines"] .pcb__line')).toHaveLength(3)
+    // No name yet: the signature prints its placeholder, quietly.
+    expect(q(screen, '.pcb__sign-name').textContent).toBe(fr.brdNamePlaceholder)
+    expect(q(screen, '.pcb__sign-name').classList.contains('pcb__sign-name--empty')).toBe(true)
+    // The balance as the card holds it: 30 of 50, not a welcome.
+    expect(q(screen, '.pcb__meter--balance').textContent).toContain('30')
+    expect(q(screen, '.pcb__meter--balance').textContent).not.toContain('offerts')
+    // Nothing written until the gate.
+    expect(apiJsonWithTimeout).not.toHaveBeenCalled()
+
+    await click(screen, '[data-action="issue"]')
+    await settle(80)
+    expect(completes()).toHaveLength(1)
+    const body = posted()
+    expect(body.jlptLevel).toBe('N5')
+    expect(body.dailyNewTarget).toBe(10)
+    expect(body.goalLevel).toBe('N5')
+    expect(body.goalTargetDate).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    expect(body.dailyDeparture).toBe('am')
+    expect(body.kanaKnown).toBe('none')
+    expect(body.lines).toEqual(['vocab', 'kanji', 'grammar'])
+    expect(body.rhythmMin).toBe(10)
+    expect(body.reminderTime).toBe('07:30')
+    expect(body.notifications).toBe(false)
+    expect(body.cardName).toBe('')
+    expect(typeof body.tzOffsetMin).toBe('number')
+    // Why is no longer asked.
+    expect('motive' in body).toBe(false)
+    expect(onComplete).toHaveBeenCalledWith({ kanaKnown: 'none' })
+    // The far end of the funnel: no field changed, no name, an account
+    // the learner boarded with already.
+    expect(done()).toHaveLength(1)
+    expect(done()[0]).toMatchObject({
+      kana_known: 'none', level: 'N5', pace: 10, lines: 'vocab,kanji,grammar',
+      edited_goal: false, edited_rhythm: false, edited_hour: false, edited_lines: false,
+      named: false, kept: 'already',
+    })
+    expect('level_how' in done()[0]).toBe(false)
+  })
+
+  it('a reader of both scripts: the level on the line, the test its quiet way, and a card from N4 to N3', async () => {
+    const { screen } = await renderFlow()
     await click(screen, '[data-kana="both"]')
     await settle()
     // Both read: the level is a stop of its own, and the track grows one.
     expect(stepOf(screen)).toBe('level')
-    expect(stepsOf(screen)).toBe('4/8')
+    expect(stepsOf(screen)).toBe('2/3')
     expect(q(screen, '[data-level="novice"] .brd-stn__ring').textContent).toBe('あ')
-    // The volumes price the line: N5's ~100 kanji, N1's ~2,250.
+    // The volumes price the line: N5's ~100 kanji.
     expect(q(screen, '[data-level="N5"] .brd-stn__desc').textContent).toContain('100')
-    await click(screen, '[data-level="N5"]')
-    await click(screen, '[data-action="continue"]')
-    await settle()
-
-    expect(stepOf(screen)).toBe('goal')
-    // Only the stops ahead, the next one marked and preselected.
-    expect(live(screen).querySelectorAll('[data-goal]')).toHaveLength(4)
-    expect(q(screen, '[data-goal="N4"]').getAttribute('aria-pressed')).toBe('true')
-    expect(q(screen, '[data-goal="N4"] .brd-tag')).not.toBeNull()
-    expect(q(screen, '[data-goal="N3"] .brd-tag')).toBeNull()
-    await click(screen, '[data-action="continue"]')
-    await settle()
-
-    // The lines: all three on to begin with, any number of them, never
-    // none -- the last one out takes Continue with it.
-    expect(stepOf(screen)).toBe('lines')
-    expect(stepsOf(screen)).toBe('6/8')
-    expect([...live(screen).querySelectorAll('[data-line]')].map(el => el.getAttribute('aria-pressed'))).toEqual(['true', 'true', 'true'])
-    await click(screen, '[data-line="grammar"]')
-    expect(q(screen, '[data-line="grammar"]').getAttribute('aria-pressed')).toBe('false')
-    await click(screen, '[data-line="vocab"]')
-    await click(screen, '[data-line="kanji"]')
+    // The test is a quiet way over the gate, not a question of its own.
+    expect(q(screen, '[data-action="level-test"]').textContent).toBe(fr.brdLevelTest)
+    // No pick, no way on.
     expect(q(screen, '[data-action="continue"]').disabled).toBe(true)
-    expect(q(screen, '.brd-arrive--none[role="alert"]')).not.toBeNull()
-    await click(screen, '[data-line="kanji"]')
-    await click(screen, '[data-line="vocab"]')
-    expect(q(screen, '[data-action="continue"]').disabled).toBe(false)
+    await click(screen, '[data-level="N4"]')
     await click(screen, '[data-action="continue"]')
     await settle()
 
-    expect(stepOf(screen)).toBe('rhythm')
-    expect(q(screen, '[data-rhythm="10"]').getAttribute('aria-pressed')).toBe('true')
-    expect(q(screen, '[data-rhythm="10"] .brd-train__tag')).not.toBeNull()
-    await click(screen, '[data-rhythm="15"]')
-    expect(q(screen, '[data-rhythm="15"]').getAttribute('aria-pressed')).toBe('true')
-    await click(screen, '[data-action="continue"]')
-    await settle()
-
-    expect(stepOf(screen)).toBe('time')
-    expect(stepsOf(screen)).toBe('8/8')
-    expect(q(screen, '.brd-board__flaps').getAttribute('aria-label')).toBe('07:30')
-    // ── The board settles rather than arriving set ──
-    // A 発車標 lights with every drum turning and stops them one after
-    // another from the left. The label is the hour throughout, so a
-    // screen reader is told the time and never the shuffle.
-    expect(live(screen).querySelectorAll('.brd-flap--spin').length).toBeGreaterThan(0)
-    await settle(1100)
-    expect(live(screen).querySelectorAll('.brd-flap--spin')).toHaveLength(0)
-    expect([...live(screen).querySelectorAll('.brd-flap')].map(el => el.textContent).join(''))
-      .toBe('0730')
-    expect(q(screen, '[data-hour="am"]').getAttribute('aria-pressed')).toBe('true')
-    await click(screen, '[data-hour="pm"]')
-    expect(q(screen, '.brd-board__flaps').getAttribute('aria-label')).toBe('21:00')
-    // The board is the control (plan 168): ▲ and ▼ over and under the
-    // flaps turn the hour and the half hour.
-    expect(live(screen).querySelectorAll('.brd-clock__step')).toHaveLength(4)
-    await click(screen, `[aria-label="${fr.brdHalfEarlier}"]`)
-    expect(q(screen, '.brd-board__flaps').getAttribute('aria-label')).toBe('20:30')
-    expect(q(screen, '[data-hour="pm"]').getAttribute('aria-pressed')).toBe('true')
-    expect(q(screen, '.brd-clock__when').textContent).toContain('20:30')
-    await click(screen, '[data-action="continue"]')
-    await settle()
-
-    // The three arrival screens have no track and no back.
-    await arrive(screen)
-    expect(screen.container.querySelector('.brd__head')).toBeNull()
-    // The arrival first: the terminus, the ride to it, and what it holds
-    // on each line taken -- grammar was taken off.
-    expect(q(screen, '.brd-plan__cap').textContent).toBe('Terminus · JLPT N4')
-    expect(q(screen, '.brd-ride').getAttribute('role')).toBe('img')
-    const held = [...live(screen).querySelectorAll('.brd-held__cell')]
-    expect(held.map(cell => cell.dataset.line)).toEqual(['vocab', 'kanji'])
-    for (const cell of held) expect(cell.textContent).toContain('~')
-    expect(q(screen, '.brd-for').textContent.startsWith('Pour ton voyage')).toBe(true)
-    await click(screen, '[data-action="continue"]')
-    await settle()
-
-    expect(stepOf(screen)).toBe('pass')
-    // The learner's card (plan 173), issued face up to its holder.
-    const pass = q(screen, '.brd-issue .pcard')
-    expect(pass).not.toBeNull()
-    expect(pass.dataset.side).toBe('face')
-    expect(pass.textContent).toContain('Aiko')
-    // The 発行 seal that used to land on the card is gone (owner's
-    // call): the printed card says it is issued by being printed.
-    expect(screen.container.querySelector('.brd-issue__seal')).toBeNull()
-    // Once it has landed it turns over by itself, to the contract and
-    // the balance -- 30 of 50, counted up to rather than printed.
-    await settle(1500 + 1700)
-    expect(pass.dataset.side).toBe('back')
-    const balance = q(screen, '.pcb__meter--balance')
-    expect(balance.textContent).toContain('30')
-    expect(balance.textContent).toContain('/ 50')
-    // This account already had those 30; only a welcome is announced as
-    // one, and this is not a welcome.
-    expect(balance.textContent).not.toContain('offerts')
-    expect(apiJsonWithTimeout).not.toHaveBeenCalled()
-
-    await click(screen, '[data-action="enter"]')
+    expect(stepOf(screen)).toBe('card')
+    expect(code(screen, 'level').textContent).toBe('N4')
+    expect(code(screen, 'level').getAttribute('lang')).toBeNull()
+    expect(code(screen, 'destination').textContent).toBe('N3')
+    await click(screen, '[data-action="issue"]')
     await settle(80)
-    const completes = apiJsonWithTimeout.mock.calls.filter(c => c[0] === '/api/onboarding/complete')
-    expect(completes).toHaveLength(1)
-    const body = JSON.parse(completes[0][2].body)
-    expect(body.jlptLevel).toBe('N5')
-    expect(body.dailyNewTarget).toBe(15)
-    expect(body.goalLevel).toBe('N4')
-    expect(body.goalTargetDate).toMatch(/^\d{4}-\d{2}-\d{2}$/)
-    expect(body.dailyDeparture).toBe('pm')
-    expect(body.motive).toBe('trip')
+    const body = posted()
+    expect(body.jlptLevel).toBe('N4')
+    expect(body.goalLevel).toBe('N3')
     expect(body.kanaKnown).toBe('both')
-    expect(body.rhythmMin).toBe(15)
-    expect(body.reminderTime).toBe('20:30')
-    expect(body.notifications).toBe(false)
-    expect(typeof body.tzOffsetMin).toBe('number')
+    expect(done()[0]).toMatchObject({ level: 'N4', level_how: 'pick' })
+  })
+
+  it('every printed field is a door: a pick in its sheet reprints the card and rides on the contract', async () => {
+    const { screen } = await renderFlow()
+    await toCardBeginner(screen)
+
+    // Objectif: the stops ahead, the hardest on top, each its arrival.
+    await door(screen, 'destination')
+    const goals = [...sheet().querySelectorAll('[data-goal]')]
+    expect(goals.map(g => g.dataset.goal)).toEqual(['N1', 'N2', 'N3', 'N4', 'N5', 'novice'])
+    expect(inSheet('[data-goal="N5"]').getAttribute('aria-pressed')).toBe('true')
+    for (const g of goals) expect(g.querySelector('.brd-goal__date').textContent).toMatch(/\d{4}$/)
+    // The kana's own stop, a destination of its own, in its sign.
+    expect(inSheet('[data-goal="novice"] .brd-goal__dot').textContent).toBe('あ')
+    await clickSheet('[data-goal="N4"]')
+    // A pick is a save, and shuts the sheet.
+    expect(sheet()).toBeNull()
+    expect(code(screen, 'destination').textContent).toBe('N4')
+
+    // Rythme: four trains, the recommended one lit.
+    await door(screen, 'service')
+    expect(sheet().querySelectorAll('[data-rhythm]')).toHaveLength(4)
+    expect(inSheet('[data-rhythm="10"]').getAttribute('aria-pressed')).toBe('true')
+    expect(inSheet('[data-rhythm="10"] .brd-train__tag')).not.toBeNull()
+    await clickSheet('[data-rhythm="20"]')
+    expect(sheet()).toBeNull()
+    expect(printed(screen, 'service')).toBe('Express · 20 / jour')
+
+    // Départ: the flaps turn and the sheet stays; a ride is a pick.
+    await door(screen, 'hour')
+    expect(inSheet('.brd-board__flaps').getAttribute('aria-label')).toBe('07:30')
+    await clickSheet(`[aria-label="${fr.brdHalfLater}"]`)
+    expect(sheet()).not.toBeNull()
+    expect(inSheet('.brd-board__flaps').getAttribute('aria-label')).toBe('08:00')
+    expect(printed(screen, 'hour')).toBe('Matin · 08:00')
+    // On the web, no reminder: the calendar instead.
+    expect(inSheet('[data-action="remind"]')).toBeNull()
+    expect(inSheet('[data-action="agenda"]')).not.toBeNull()
+    await clickSheet('[data-hour="pm"]')
+    expect(sheet()).toBeNull()
+    expect(printed(screen, 'hour')).toBe('Soir · 21:00')
+
+    // Lignes: a check is a switch, so the sheet stays; never none.
+    await door(screen, 'lines')
+    expect([...sheet().querySelectorAll('[data-line]')].map(el => el.getAttribute('aria-pressed'))).toEqual(['true', 'true', 'true'])
+    await clickSheet('[data-line="grammar"]')
+    expect(inSheet('[data-line="grammar"]').getAttribute('aria-pressed')).toBe('false')
+    expect(live(screen).querySelectorAll('[data-door="lines"] .pcb__line')).toHaveLength(2)
+    await clickSheet('[data-line="kanji"]')
+    await clickSheet('[data-line="vocab"]')
+    // The last line on refuses to go off, and says so.
+    expect(inSheet('[data-line="vocab"]').getAttribute('aria-pressed')).toBe('true')
+    expect(inSheet('.brd-arrive--none[role="alert"]')).not.toBeNull()
+    await clickSheet('[data-line="kanji"]')
+    expect(inSheet('.brd-arrive--none')).toBeNull()
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle(60)
+    expect(sheet()).toBeNull()
+
+    // Nom: typed, so its own gate; printed on the signature.
+    await door(screen, 'name')
+    type(inSheet('.brd-plate__field'), '  Camille ')
+    await settle(20)
+    expect(inSheet('.brd-plate__count').textContent).toBe('7 / 24')
+    await clickSheet('[data-action="name-save"]')
+    expect(sheet()).toBeNull()
+    expect(q(screen, '.pcb__sign-name').textContent).toBe('Camille')
+    expect(q(screen, '.pcb__sign-name--empty')).toBeNull()
+
+    await click(screen, '[data-action="issue"]')
+    await settle(80)
+    const body = posted()
+    expect(body.goalLevel).toBe('N4')
+    expect(body.dailyNewTarget).toBe(20)
+    expect(body.rhythmMin).toBe(20)
+    expect(body.dailyDeparture).toBe('pm')
+    expect(body.reminderTime).toBe('21:00')
+    expect(body.lines).toEqual(['vocab', 'kanji'])
+    expect(body.cardName).toBe('Camille')
+    expect(done()[0]).toMatchObject({
+      edited_goal: true, edited_rhythm: true, edited_hour: true, edited_lines: true, named: true,
+    })
+  })
+
+  it('the origin goes back to the question that set it, every answer kept', async () => {
+    const { screen } = await renderFlow()
+    await toCardBeginner(screen)
+    await click(screen, '[data-door="level"]')
+    await settle()
+    expect(stepOf(screen)).toBe('kana')
+    expect(q(screen, '[data-kana="none"]').getAttribute('aria-pressed')).toBe('true')
+    // A reader this time: the line, then a card from where they said.
+    await click(screen, '[data-kana="both"]')
+    await settle()
+    await click(screen, '[data-level="N3"]')
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    expect(code(screen, 'level').textContent).toBe('N3')
+    await click(screen, '[data-door="level"]')
+    await settle()
+    expect(stepOf(screen)).toBe('level')
+    expect(q(screen, '[data-level="N3"]').getAttribute('aria-pressed')).toBe('true')
+  })
+
+  it('a reader at N1 has no stop ahead: the card prints no destination and posts none', async () => {
+    const { screen } = await renderFlow()
+    await toCardReader(screen, 'N1')
+    expect(code(screen, 'destination').textContent).toBe('—')
+    expect(q(screen, '.pcb__valid')).toBeNull()
+    await click(screen, '[data-action="issue"]')
+    await settle(80)
+    const body = posted()
+    expect(body.jlptLevel).toBe('N1')
+    expect('goalLevel' in body).toBe(false)
+    expect('goalTargetDate' in body).toBe(false)
+  })
+
+  // ── 実力診断 from the line (plan 224; its quiet way, plan 247) ──
+  // The climb, mocked as the server answers it: one question at a time,
+  // then the verdict. The line comes back with the stop reached chosen
+  // and each level asked carrying its score.
+  const question = (id, level) => ({
+    id, sectionId: level, kind: 'reading', type: 'mcq-text', promptJp: `${id}の問題`,
+    choices: ['一', '二', '三', '四'].map((textJp, i) => ({ id: `c${i + 1}`, textJp })),
+  })
+  function climb(...steps) {
+    const queue = [...steps]
+    apiJsonWithTimeout.mockImplementation(async (path, _s, opts) => {
+      if (path === '/api/onboarding/complete') return { jlptLevel: 'N4', dailyNewTarget: 10, onboardedAt: 'x' }
+      if (path.startsWith('/api/onboarding/placement/')) return queue.shift()
+      throw new Error(`unexpected ${path} ${opts?.body ?? ''}`)
+    })
+  }
+  const asking = (id, level, perLevel = {}) => ({ seed: 9, done: false, question: question(id, level), level, perLevel })
+  const sent = () => apiJsonWithTimeout.mock.calls
+    .filter(c => c[0] === '/api/onboarding/placement/answer')
+    .map(c => JSON.parse(c[2].body))
+
+  async function toTest(screen) {
+    await click(screen, '[data-kana="both"]')
+    await settle()
+    expect(stepOf(screen)).toBe('level')
+    await click(screen, '[data-action="level-test"]')
+    await settle()
+    expect(stepOf(screen)).toBe('test')
+    // The test is the level's own stop.
+    expect(stepsOf(screen)).toBe('2/3')
+  }
+
+  it('finds the level by the test, and lands on the line with the stop it reached chosen', async () => {
+    climb(
+      asking('q1', 'N5'),
+      asking('q2', 'N4', { N5: { correct: 3, total: 3, cleared: true } }),
+      { seed: 9, done: true, recommendedLevel: 'N4', correct: 4, total: 6, perLevel: {
+        N5: { correct: 3, total: 3, cleared: true }, N4: { correct: 1, total: 3, cleared: false },
+      } },
+    )
+    const { screen, onComplete } = await renderFlow()
+    await toTest(screen)
+    expect(q(screen, '.onb-climb__rung--at').textContent).toBe('N5')
+    // Nothing picked, no way on.
+    expect(q(screen, '[data-action="continue"]').disabled).toBe(true)
+    await click(screen, '.mcq-row')
+    await click(screen, '[data-action="continue"]')
+    await settle(60)
+    expect(sent()[0]).toEqual({ seed: 9, answers: { q1: 'c1' } })
+    await click(screen, '.mcq-row:nth-child(2)')
+    await click(screen, '[data-action="continue"]')
+    await settle()
+
+    expect(stepOf(screen)).toBe('level')
+    expect(q(screen, '[data-level="N4"]').getAttribute('aria-pressed')).toBe('true')
+    expect(q(screen, '.brd__q').textContent).toContain('N4')
+    expect(q(screen, '[data-level="N5"] .brd-tag').textContent).toBe('3 / 3')
+    expect(q(screen, '[data-level="N4"] .brd-tag--miss').textContent).toBe('1 / 3')
+
+    // Back goes to the question before the line, never into a test run.
+    await click(screen, '.brd__back')
+    await settle()
+    expect(stepOf(screen)).toBe('kana')
+    await click(screen, '[data-kana="both"]')
+    await settle()
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    expect(stepOf(screen)).toBe('card')
+    await click(screen, '[data-action="issue"]')
+    await settle(80)
+    expect(done()[0]).toMatchObject({ level_how: 'test', placed: 'N4' })
     expect(onComplete).toHaveBeenCalledTimes(1)
   })
 
-  // A reader of one script is a NOVICE, not an N5: they never saw the
-  // level list AND their goal list opened at N4, so the goal they are
-  // likeliest to have — reach N5 — was the one they could not pick
-  // (owner's report). The office still stores N5 for them.
-  it('kana → one script → the reveal, then the whole line ahead, the novice’s stop at its head', async () => {
+  it('stops where it gets too hard, and “I know my level” goes back to the line unmarked', async () => {
+    climb(asking('q1', 'N5'), { seed: 9, done: true, recommendedLevel: 'N5', correct: 0, total: 0, perLevel: {
+      N5: { correct: 0, total: 0, cleared: false },
+    } })
     const { screen } = await renderFlow()
-    await passName(screen, 'fun')
-    await click(screen, '[data-kana="hiragana"]')
+    await toTest(screen)
+    await click(screen, '[data-action="climb-stop"]')
     await settle()
+    expect(sent()[0]).toEqual({ seed: 9, answers: {}, stop: true })
+    expect(stepOf(screen)).toBe('level')
+    expect(q(screen, '[data-level="N5"]').getAttribute('aria-pressed')).toBe('true')
 
-    // The reveal is the kana stop's second half, not a stop of its own.
-    expect(stepOf(screen)).toBe('reveal')
-    expect(stepsOf(screen)).toBe('3/7')
-    // The two words read out, then the kanji named as the third script,
-    // for later (plan 170).
-    expect(live(screen).querySelectorAll('.brd-read__word:not(.brd-read__word--kanji)')).toHaveLength(2)
-    expect(live(screen).querySelectorAll('.brd-read__word--kanji')).toHaveLength(1)
-    await click(screen, '[data-action="continue"]')
+    climb(asking('q1', 'N5'))
+    await click(screen, '[data-action="level-test"]')
     await settle()
-
-    // Never the level list: the answer is the level. But it boards them
-    // before the novice's own stop as well — that stop IS the kana, and
-    // they read one script — so the whole line is ahead of them with the
-    // kana at its head, and there is no stop behind them to name.
-    // The phone says so by drawing it (plan 168): no hint, and no stop
-    // inked as known over the hub.
-    expect(stepOf(screen)).toBe('goal')
-    expect(q(screen, '.brd__hint')).toBeNull()
-    expect(live(screen).querySelectorAll('.brd-stn--known')).toHaveLength(0)
-    expect([...live(screen).querySelectorAll('[data-goal]')].map(el => el.dataset.goal))
-      .toEqual(['novice', 'N5', 'N4', 'N3', 'N2', 'N1'])
-    expect(q(screen, '[data-goal="novice"] .brd-stn__ring').textContent).toBe('あ')
-    expect(q(screen, '[data-goal="novice"] .brd-tag')).not.toBeNull()
-    // The default is still the nearest JLPT stop: the kana are an offer,
-    // and taking them signs a pace and no destination.
-    expect(q(screen, '[data-goal="N5"]').getAttribute('aria-pressed')).toBe('true')
-    expect(q(screen, '[data-goal="novice"]').getAttribute('aria-pressed')).toBe('false')
-    expect(q(screen, '[data-goal="N5"] .brd-tag')).toBeNull()
-
-    // Back walks the visited path, answers intact.
-    await click(screen, 'button.brd__back')
+    expect(stepOf(screen)).toBe('test')
+    await click(screen, '[data-action="climb-pick"]')
     await settle()
-    expect(stepOf(screen)).toBe('reveal')
-    await click(screen, 'button.brd__back')
-    await settle()
-    expect(stepOf(screen)).toBe('kana')
-    expect(q(screen, '[data-kana="hiragana"]').getAttribute('aria-pressed')).toBe('true')
-    await click(screen, 'button.brd__back')
-    await settle()
-    expect(stepOf(screen)).toBe('why')
-    expect(q(screen, '[data-motive="fun"]').getAttribute('aria-pressed')).toBe('true')
-    await click(screen, 'button.brd__back')
-    await settle()
-    expect(stepOf(screen)).toBe('name')
-    expect(q(screen, '.brd-plate__field').value).toBe('Tester')
-    expect(screen.container.querySelector('button.brd__back')).toBeNull()
-    // No write happened: the name never changed.
-    expect(apiFetch.mock.calls.filter(c => c[0] === '/api/profile')).toHaveLength(0)
+    expect(stepOf(screen)).toBe('level')
+    expect(q(screen, '.brd-tag')).toBeNull()
   })
 
-  // ── The kana as a destination ──
-  // The novice's stop is one a beginner can ride TO, and the office
-  // signs it like any other: it goes onto the pass as goalLevel
-  // 'novice' with a date, priced at the syllabary. The plan promises
-  // signs rather than the word count and the motive's two lines, which
-  // three weeks of kana could not honour.
-  it('takes the novice’s own stop as the goal: the plan promises the kana, the office signs it', async () => {
-    const { screen } = await renderFlow()
-    await passName(screen, 'trip')
-    await click(screen, '[data-kana="none"]')
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the reveal
-    await settle()
-
-    expect(stepOf(screen)).toBe('goal')
-    await click(screen, '[data-goal="novice"]')
-    expect(q(screen, '[data-goal="novice"]').getAttribute('aria-pressed')).toBe('true')
-    expect(q(screen, '[data-goal="N5"]').getAttribute('aria-pressed')).toBe('false')
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the lines
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the rhythm
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the hour
-    await settle()
-
-    // The terminus is the kana: the ride arrives at the signs and holds
-    // them, all ~220 -- no word count, and no motive's line.
-    await arrive(screen)
-    expect(q(screen, '.brd-plan__cap').textContent).toBe('Terminus · Kana')
-    const held = [...live(screen).querySelectorAll('.brd-held__cell')]
-    expect(held.map(cell => cell.dataset.line)).toEqual(['kana'])
-    expect(held[0].textContent).toContain('~220')
-    expect(held[0].textContent).toContain('signes')
-    expect(q(screen, '.brd-for').textContent.startsWith('En route vers les kana')).toBe(true)
-    expect(live(screen).textContent).not.toContain('mots')
-
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    await click(screen, '[data-action="enter"]')
-    await settle(80)
-    const body = JSON.parse(apiJsonWithTimeout.mock.calls[0][2].body)
-    expect(body.jlptLevel).toBe('N5')
-    expect(body.kanaKnown).toBe('none')
-    expect(body.goalLevel).toBe('novice')
-    expect(body.goalTargetDate).toMatch(/^\d{4}-\d{2}-\d{2}$/)
-  })
-
-  // ── The welcome, counted onto the card ──
-  // The balance a fresh account is given is the one figure on that
-  // screen the learner did not work for, and it printed like every
-  // other: already there, in the same grey as the refill line under
-  // it (owner's call — "transmitting the feeling that you are lucky to
-  // receive this").
-  it('counts the welcome onto a fresh card, and says it is a gift', async () => {
-    const { seedCredits } = await import('../stores/credits')
-    seedCredits({ balance: 200, cap: 50, dailyRefill: 30, plan: 'free', unlimited: false })
-    const { screen } = await renderFlow()
-    await walkToPlan(screen)
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    expect(stepOf(screen)).toBe('pass')
-
-    // Turned over, the figure climbs to the gift and the unit names it
-    // as given …
-    await settle(1500 + 200)
-    const figure = () => q(screen, '.pcb__meter--balance .pcb__fig')
-    expect(figure().textContent).toContain('crédits offerts')
-    expect(Number(figure().firstChild.textContent.trim())).toBeLessThan(200)
-    // … and the figure lands on what the account actually holds.
-    await settle(1700)
-    expect(figure().firstChild.textContent.trim()).toBe('200')
-    seedCredits(CREDITS)
-  })
-
-  it('a reader of both scripts at N1 has no stop ahead: the goal is skipped and the track shortens', async () => {
-    const { screen } = await renderFlow()
-    await passName(screen)
-    await click(screen, '[data-kana="both"]')
-    await settle()
-    await click(screen, '[data-level="N1"]')
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    expect(stepOf(screen)).toBe('lines')
-    expect(stepsOf(screen)).toBe('5/7')
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    expect(stepOf(screen)).toBe('rhythm')
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    await arrive(screen)
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    await click(screen, '[data-action="enter"]')
-    await settle(80)
-    const body = JSON.parse(apiJsonWithTimeout.mock.calls[0][2].body)
-    expect(body.jlptLevel).toBe('N1')
-    expect(body).not.toHaveProperty('goalLevel')
-    expect(body).not.toHaveProperty('goalTargetDate')
-  })
-
-  it('refuses a taken or invalid name on its own screen, never on the pass', async () => {
-    const { screen } = await renderFlow()
-    type(q(screen, '.brd-plate__field'), 'a')
-    await click(screen, '[data-action="continue"]')
-    await settle(60)
-    expect(stepOf(screen)).toBe('name')
-    expect(q(screen, '.brd__error')).not.toBeNull()
-    expect(apiFetch.mock.calls.filter(c => c[0] === '/api/profile')).toHaveLength(0)
-
-    patchResponse.current = { ok: false, status: 409, json: async () => ({ detail: 'Username already taken' }) }
-    type(q(screen, '.brd-plate__field'), 'Aiko')
-    expect(q(screen, '.brd__error')).toBeNull() // typing clears the refusal
-    await click(screen, '[data-action="continue"]')
-    await settle(60)
-    expect(stepOf(screen)).toBe('name')
-    expect(q(screen, '.brd__error')).not.toBeNull()
-
-    patchResponse.current = null
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    expect(stepOf(screen)).toBe('why')
-  })
-
-  it('on a native shell the nudge is the last stop and Allow signs the reminder', async () => {
-    nudgeRef.current = true
-    const { screen } = await renderFlow()
-    expect(stepsOf(screen)).toBe('1/8')
-    await passName(screen)
-    await click(screen, '[data-kana="none"]')
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the reveal
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the goal (N5 preselected: a novice)
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the lines
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the rhythm
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the hour
-    await settle()
-    expect(stepOf(screen)).toBe('nudge')
-    expect(stepsOf(screen)).toBe('8/8')
-    expect(q(screen, '.brd-notif__title').textContent).toContain('07:30')
-    await click(screen, '[data-action="allow"]')
-    await settle()
-    await arrive(screen)
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    await click(screen, '[data-action="enter"]')
-    await settle(80)
-    const body = JSON.parse(apiJsonWithTimeout.mock.calls[0][2].body)
-    expect(body.notifications).toBe(true)
-    expect(body.reminderTime).toBe('07:30')
-    expect(body.dailyDeparture).toBe('am')
-    expect(body.kanaKnown).toBe('none')
-    expect(body.jlptLevel).toBe('N5')
-  })
-
-  it('a failed save keeps the pass on screen with the error and the action live', async () => {
+  it('a failed save keeps the card on screen with the error and the gate live', async () => {
     apiJsonWithTimeout.mockRejectedValue(new Error('down'))
     const { screen, onComplete } = await renderFlow()
-    await passName(screen)
-    await click(screen, '[data-kana="both"]')
-    await settle()
-    await click(screen, '[data-level="N4"]')
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the goal
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the lines
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the rhythm
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the hour
-    await settle()
-    await arrive(screen)
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    await click(screen, '[data-action="enter"]')
+    await toCardReader(screen)
+    await click(screen, '[data-action="issue"]')
     await settle(80)
-    expect(stepOf(screen)).toBe('pass')
+    expect(stepOf(screen)).toBe('card')
     expect(q(screen, '.brd__error')?.dataset.error).toBe('network')
-    expect(q(screen, '[data-action="enter"]').disabled).toBe(false)
+    expect(q(screen, '[data-action="issue"]').disabled).toBe(false)
     expect(onComplete).not.toHaveBeenCalled()
   })
 
-  // A refusal is not a connection. The office answering 422 -- a
-  // contract it will not issue -- wore the same "check your connection"
-  // line as a dead network, which on the one screen with no other way
-  // forward sent the learner to look at a connection that was working
-  // (2026-09-09, the novice's own destination).
+  // A refusal is not a connection: the office answering 422 wore the same
+  // "check your connection" line as a dead network once (2026-09-09).
   it('says the office refused when the office answered, not that the line is down', async () => {
-    apiJsonWithTimeout.mockRejectedValue(new ApiError('refused'))
+    apiJsonWithTimeout.mockRejectedValue(new ApiError(422, { detail: 'refused' }, '/api/onboarding/complete'))
     const { screen, onComplete } = await renderFlow()
-    await passName(screen)
-    await click(screen, '[data-kana="both"]')
-    await settle()
-    await click(screen, '[data-level="N4"]')
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the goal
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the lines
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the rhythm
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the hour
-    await settle()
-    await arrive(screen)
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    await click(screen, '[data-action="enter"]')
+    await toCardReader(screen)
+    await click(screen, '[data-action="issue"]')
     await settle(80)
     const line = q(screen, '.brd__error')
     expect(line?.dataset.error).toBe('refused')
-    expect(line.textContent).toBe(fr.brdPassRefused)
-    expect(line.textContent).not.toBe(fr.onbPassError)
-    // Still no dead end: the pass stays up and the action stays live.
-    expect(stepOf(screen)).toBe('pass')
-    expect(q(screen, '[data-action="enter"]').disabled).toBe(false)
+    // The refusal, and the way to tell us under it (plan 247).
+    expect(line.textContent.startsWith(fr.brdPassRefused)).toBe(true)
+    expect(line.querySelector('[data-action="report"]').textContent).toBe(fr.reportProblem)
+    expect(stepOf(screen)).toBe('card')
+    expect(q(screen, '[data-action="issue"]').disabled).toBe(false)
     expect(onComplete).not.toHaveBeenCalled()
   })
 
   it('the train pulls: the leaving car slides out beside the arriving one, then is dropped', async () => {
     const { screen } = await renderFlow()
-    await click(screen, '[data-action="continue"]')
+    await click(screen, '[data-kana="none"]')
     await settle(30)
     const out = screen.container.querySelector('.brd__car--out')
     expect(out).not.toBeNull()
     expect(out.dataset.dir).toBe('fwd')
-    expect(out.dataset.step ?? stepOf(screen)).toBeTruthy()
     expect(screen.container.querySelector('.brd__car--in').dataset.dir).toBe('fwd')
     expect(getComputedStyle(out).animationName).toBe('brd-pull-out')
     await settle()
@@ -668,276 +592,230 @@ describe('BoardingFlow', () => {
     await settle()
   })
 
-  it('dryRun walks the whole ride and writes nothing', async () => {
+  it('dryRun issues the card and writes nothing', async () => {
     const { screen, onComplete } = await renderFlow({ dryRun: true })
-    type(q(screen, '.brd-plate__field'), 'Aiko')
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    expect(stepOf(screen)).toBe('why')
-    await click(screen, '[data-motive="other"]')
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    await click(screen, '[data-kana="katakana"]')
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the reveal
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the goal
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the lines
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the rhythm
-    await settle()
-    await click(screen, '[data-action="continue"]')   // the hour
-    await settle()
-    await arrive(screen)
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    await click(screen, '[data-action="enter"]')
-    await settle(60)
+    await toCardBeginner(screen)
+    await click(screen, '[data-action="issue"]')
+    await settle(80)
     expect(onComplete).toHaveBeenCalledTimes(1)
     expect(apiJsonWithTimeout).not.toHaveBeenCalled()
-    expect(apiFetch.mock.calls.filter(c => c[0] === '/api/profile')).toHaveLength(0)
+    expect(done()).toHaveLength(0)
   })
-
-  // ── 仮乗車券 — boarding without an account ──────────────────────
-  // The account moved from the door to the end of the line, and became
-  // refusable. Three things carry that: a way back out of the first
-  // question, a named way to an account you already have, and a last
-  // stop that takes no for an answer.
 
   it('leaves for Welcome from the first question, where the sign-in is', async () => {
     const onExit = vi.fn()
     const { screen } = await renderFlow({ onExit })
-    expect(stepOf(screen)).toBe('name')
-    const back = screen.container.querySelector('button.brd__back')
-    expect(back).not.toBeNull()
-    back.click()
+    expect(stepOf(screen)).toBe('kana')
+    screen.container.querySelector('button.brd__back').click()
     await settle(20)
     expect(onExit).toHaveBeenCalledTimes(1)
-
-    // Once inside the flow, back is back again — leaving is only ever
-    // the first question's meaning of it.
-    await click(screen, '[data-action="continue"]')
+    // Once inside the flow, back is back again.
+    await click(screen, '[data-kana="hiragana"]')
     await settle()
-    expect(stepOf(screen)).toBe('why')
+    expect(stepOf(screen)).toBe('reveal')
     screen.container.querySelector('button.brd__back').click()
     await settle()
-    expect(stepOf(screen)).toBe('name')
+    expect(stepOf(screen)).toBe('kana')
     expect(onExit).toHaveBeenCalledTimes(1)
   })
 
-  // ── the focus ring stands inside every box that clips ──
-  // The name field was the full width of the body, the body scrolls, and
-  // a box that scrolls one axis clips the other (`overflow-y: auto`
-  // computes overflow-x to `auto` — the spec, not a quirk). An outline
-  // is drawn OUTSIDE the border box and never counts as scrollable
-  // overflow, so the focused field's ring was sliced off flush with its
-  // own left and right edges: two corner arcs left hanging in the air,
-  // no sides. Since plan 168 the ring is the name's plate's -- its edge
-  // turns gold while the field inside holds the focus, drawn outside the
-  // plate as a shadow -- and it is walked up the whole chain the same
-  // way: the frame's own clip had already been widened for this once and
-  // the body inside it went on cutting anyway.
-  it('keeps the focused name plate’s ring clear of every clipping ancestor', async () => {
-    const { screen } = await renderFlow()
-    expect(stepOf(screen)).toBe('name')
-    const field = q(screen, '.brd-plate__field')
-    field.focus()
-    expect(document.activeElement).toBe(field)
-    const plate = field.closest('.brd-plate')
-
-    // The ring as drawn: the first shadow's spread. Reading it (rather
-    // than assuming 2) is what keeps the gutters below honest if the
-    // ring is ever restyled.
-    const ring = getComputedStyle(plate).boxShadow.split(/,(?![^(]*\))/)[0]
-    const reach = parseFloat(ring.match(/-?\d+(?:\.\d+)?px/g)[3])
-    expect(reach).toBe(2)
-    expect(getComputedStyle(field).outlineStyle).toBe('none')
-
-    const box = plate.getBoundingClientRect()
-    const clips = []
-    for (let el = plate.parentElement; el && el !== document.body; el = el.parentElement) {
-      const s = getComputedStyle(el)
-      if (s.overflowX === 'visible') continue
-      // Overflow clips at the padding box, not the border box.
-      const r = el.getBoundingClientRect()
-      const left = r.left + parseFloat(s.borderLeftWidth)
-      const right = r.right - parseFloat(s.borderRightWidth)
-      clips.push([el.className, left, right])
-      expect.soft(box.left - reach, `${el.className} cuts the ring on the left`).toBeGreaterThanOrEqual(left)
-      expect.soft(box.right + reach, `${el.className} cuts the ring on the right`).toBeLessThanOrEqual(right)
-    }
-    // The body is one of them: if it ever stops clipping, the gutter it
-    // carries for the ring is dead weight and this test proved nothing.
-    expect(clips.map(c => c[0])).toContain('brd__body')
-  })
-
-  it('names the way to an account you already have, on the very first screen', async () => {
-    const onSignIn = vi.fn()
-    const { screen } = await renderFlow({ onSignIn })
-    await click(screen, '[data-action="sign-in"]')
-    expect(onSignIn).toHaveBeenCalledTimes(1)
-  })
-
-  // The boarding only ever runs on an account with no journey on it,
-  // so an address on question one means a NEW pass for that address.
-  // It is written for the learner who pressed "Continue with Google",
-  // landed on a pass Supabase had just minted for an identity nobody
-  // carried, and was shown seven questions with no hint that their own
-  // journey was on another account — the sign-in link is right below.
-  it('names the pass when there is an address on it, and the way out beside it', async () => {
-    const { screen } = await renderFlow({ email: 'aiko@example.com', onSignIn: vi.fn() })
-    expect(stepOf(screen)).toBe('name')
-    const hint = q(screen, '.brd__hint')
-    expect(hint?.textContent).toBe(fr.brdNameNewPass('aiko@example.com'))
-    expect(q(screen, '[data-action="sign-in"]')).toBeTruthy()
-  })
-
-  it('says nothing of the sort on a guest pass, which has no address', async () => {
+  // ── Where the card lives ─────────────────────────────────────────
+  it('a guest’s card says it lives on this device, and the account sheet keeps it by a link', async () => {
+    updateUser.mockResolvedValue({ data: { user: { email: null, new_email: 'patou@gmail.com', is_anonymous: true } }, error: null })
     const { screen } = await renderFlow({ guest: true })
-    expect(stepOf(screen)).toBe('name')
-    expect(q(screen, '.brd__hint')).toBeNull()
-  })
-
-  it('asks a guest for an account at the END, and takes no for an answer', async () => {
-    const onSignIn = vi.fn()
-    const { screen } = await renderFlow({ guest: true, onSignIn })
-    await walkToPlan(screen)
-    await click(screen, '[data-action="continue"]')
-    await settle()
-
-    // The last stop before the pass, not the first before anything.
-    expect(stepOf(screen)).toBe('account')
-    expect(apiJsonWithTimeout).not.toHaveBeenCalled()
-    // Nothing is created from nothing here: no credentials, no way on
-    // through the gold button.
-    expect(q(screen, '[data-action="account-create"]').disabled).toBe(true)
-    // …and the account you already have is reachable from here too.
-    await click(screen, '[data-action="account-sign-in"]')
-    expect(onSignIn).toHaveBeenCalledTimes(1)
-
-    // The refusal is the point of the screen.
-    await click(screen, '[data-action="account-skip"]')
-    await settle()
-    expect(stepOf(screen)).toBe('pass')
-    await click(screen, '[data-action="enter"]')
+    await toCardBeginner(screen)
+    expect(q(screen, '.brd-keep-line').dataset.kept).toBe('device')
+    await click(screen, '[data-action="keep"]')
+    await settle(60)
+    expect(sheet()).not.toBeNull()
+    // Google, or an address; no password anywhere.
+    expect(sheet().querySelectorAll('.auth-provider')).toHaveLength(1)
+    expect(inSheet('input[type="password"]')).toBeNull()
+    expect(inSheet('[data-action="account-link"]').disabled).toBe(true)
+    type(inSheet('input[type="email"]'), 'patou@gmail.com')
+    await settle(20)
+    expect(inSheet('[data-action="account-link"]').disabled).toBe(false)
+    await clickSheet('[data-action="account-link"]')
+    await settle(60)
+    // The address alone, the learner's language for the mail's template,
+    // and the link back to this origin.
+    expect(updateUser).toHaveBeenCalledWith(
+      { email: 'patou@gmail.com', data: { lang: 'fr' } },
+      { emailRedirectTo: `${window.location.origin}/` },
+    )
+    expect(sheet()).toBeNull()
+    expect(q(screen, '.brd-keep-line').dataset.kept).toBe('sent')
+    expect(q(screen, '.brd-keep-line').textContent).toContain('patou@gmail.com')
+    await click(screen, '[data-action="issue"]')
     await settle(80)
-    // Refusing the account changes nothing about the contract: the same
-    // single POST, on the same real account the guest has been filling
-    // in all along.
-    expect(apiJsonWithTimeout.mock.calls.filter(c => c[0] === '/api/onboarding/complete')).toHaveLength(1)
+    expect(done()[0]).toMatchObject({ kept: 'link' })
   })
 
-  it('does not ask twice: a learner who already has credentials goes straight to the pass', async () => {
-    const { screen } = await renderFlow({ guest: false })
-    await walkToPlan(screen)
-    await click(screen, '[data-action="continue"]')
-    await settle()
-    expect(stepOf(screen)).toBe('pass')
+  it('takes « Plus tard » for an answer: the guest rides on, the card says so', async () => {
+    const { screen } = await renderFlow({ guest: true })
+    await toCardBeginner(screen)
+    await click(screen, '[data-action="keep"]')
+    await settle(60)
+    await clickSheet('[data-action="account-later"]')
+    expect(sheet()).toBeNull()
+    expect(q(screen, '.brd-keep-line').dataset.kept).toBe('device')
+    await click(screen, '[data-action="issue"]')
+    await settle(80)
+    // The same single POST, on the same account the guest filled in.
+    expect(completes()).toHaveLength(1)
+    expect(done()[0]).toMatchObject({ kept: 'none' })
+  })
+
+  it('an account boarded with says where the card is kept, and offers nothing', async () => {
+    const { screen } = await renderFlow({ user: { email: 'aiko@example.com' } })
+    await toCardBeginner(screen)
+    const line = q(screen, '.brd-keep-line')
+    expect(line.dataset.kept).toBe('account')
+    expect(line.textContent).toContain('aiko@example.com')
+    expect(q(screen, '[data-action="keep"]')).toBeNull()
+  })
+
+  // ── 名札 — whose pass it is (docs/oauth.md) ──────────────────────
+  // Google's chooser can land a learner on an account no pass carried:
+  // a NEW pass, with their journey on the other one. The card's line
+  // says the address and holds the way to another account; a guest's
+  // has nothing to switch from.
+  it('tells a session with an address whose pass it is, and opens the way to another', async () => {
+    const onSignIn = vi.fn()
+    const { screen } = await renderFlow({ user: { email: 'aiko@example.com' }, onSignIn })
+    await toCardBeginner(screen)
+    const line = q(screen, '.brd-keep-line')
+    expect(line.querySelector('.brd-keep-line__txt').textContent).toBe(fr.brdKeptEmail('aiko@example.com'))
+    const door = q(screen, '[data-action="switch-account"]')
+    expect(door.textContent).toBe(fr.brdKeptSwitch)
+    await click(screen, '[data-action="switch-account"]')
+    expect(onSignIn).toHaveBeenCalledTimes(1)
+    // Nothing was issued on the way out.
+    expect(completes()).toHaveLength(0)
+  })
+
+  it('offers a guest no account to switch from', async () => {
+    const { screen } = await renderFlow({ guest: true, user: { email: null, is_anonymous: true }, onSignIn: vi.fn() })
+    await toCardBeginner(screen)
+    expect(q(screen, '.brd-keep-line').dataset.kept).toBe('device')
+    expect(q(screen, '[data-action="switch-account"]')).toBeNull()
   })
 
   // ── 改札 — coming back from Google, on the web ──────────────────
-  // The web leaves the page for Google and returns as a FRESH load, so
-  // the account step is the one screen this flow can be re-entered on
-  // having already been answered. The button's own onDone never runs:
-  // the navigation unmounted the component that would have called it.
-  // Everything below is about what the learner is shown on that
-  // return, which — before this — was the same question again, with
-  // nothing said either way.
-
-  it('comes back from a Google sign-in onto the pass, not onto the offer it just answered', async () => {
-    sessionStorage.setItem(STASH_KEY, JSON.stringify({ answers: RESUMED, step: 'account', savedName: 'Tester' }))
-    // No longer a guest: the round trip put credentials on the pass.
+  // The web leaves the page for Google and returns as a FRESH load: the
+  // stash puts the learner back on the card, which says it is kept when
+  // the round trip worked and reopens the account's sheet when it did not.
+  it('comes back from Google onto the card, kept', async () => {
+    stashed()
     const { screen } = await renderFlow({ guest: false })
-    expect(stepOf(screen)).toBe('pass')
+    expect(stepOf(screen)).toBe('card')
+    expect(sheet()).toBeNull()
+    expect(q(screen, '.brd-keep-line').dataset.kept).toBe('google')
+    expect(q(screen, '.brd-keep-line').textContent).toBe(fr.brdKeptGoogle)
+    expect(code(screen, 'destination').textContent).toBe('N3')
+    await click(screen, '[data-action="issue"]')
+    await settle(80)
+    expect(done()[0]).toMatchObject({ kept: 'google' })
   })
 
-  it('comes back from a refused round trip to the offer, with the reason on it', async () => {
-    sessionStorage.setItem(STASH_KEY, JSON.stringify({ answers: RESUMED, step: 'account', savedName: 'Tester' }))
-    // Still a guest: nothing was linked, so the offer still stands.
+  it('says which Google account the card came back kept on', async () => {
+    stashed()
+    const { screen } = await renderFlow({ guest: false, user: { email: 'aiko@gmail.com', app_metadata: { provider: 'google' } }, onSignIn: vi.fn() })
+    expect(stepOf(screen)).toBe('card')
+    const line = q(screen, '.brd-keep-line')
+    expect(line.dataset.kept).toBe('google')
+    expect(line.querySelector('.brd-keep-line__txt').textContent).toBe(fr.brdKeptEmail('aiko@gmail.com'))
+    expect(q(screen, '[data-action="switch-account"]')).toBeTruthy()
+  })
+
+  it('comes back from a refused round trip to the account sheet, with the reason on it', async () => {
+    stashed()
     oauthRefusal.current = {
       error: 'server_error',
       code: 'identity_already_exists',
       description: 'Identity is already linked to another user',
     }
     const { screen } = await renderFlow({ guest: true })
-    expect(stepOf(screen)).toBe('account')
-    expect(q(screen, '[data-oauth="refused"]')).not.toBeNull()
-    // That Google account is somebody's pass already — so it is
-    // offered as a sign-in beside the link that could not happen.
-    expect(live(screen).querySelectorAll('.auth-provider')).toHaveLength(2)
+    expect(stepOf(screen)).toBe('card')
+    expect(inSheet('[data-oauth="refused"]')).not.toBeNull()
+    // That Google account is somebody's pass already: offered as a
+    // sign-in beside the link that could not happen.
+    expect(sheet().querySelectorAll('.auth-provider')).toHaveLength(2)
   })
 
   it('offers no second Google button for a refusal signing in cannot answer', async () => {
-    sessionStorage.setItem(STASH_KEY, JSON.stringify({ answers: RESUMED, step: 'account', savedName: 'Tester' }))
+    stashed()
     oauthRefusal.current = { error: 'server_error', code: 'manual_linking_disabled', description: 'Manual linking is disabled' }
-    const { screen } = await renderFlow({ guest: true })
-    expect(q(screen, '[data-oauth="refused"]')).not.toBeNull()
-    expect(live(screen).querySelectorAll('.auth-provider')).toHaveLength(1)
+    await renderFlow({ guest: true })
+    expect(inSheet('[data-oauth="refused"]')).not.toBeNull()
+    expect(sheet().querySelectorAll('.auth-provider')).toHaveLength(1)
   })
 
-  // ── Google turned them away, so they took the email road ────────
-  // Both refusals at once is the state this screen was found in: the
-  // Google line cannot expire (it is a fact about the page load), and
-  // Supabase's own refusal on the claim quotes the address it was
-  // about to MAIL — which for a guest is empty. So the learner read
-  // `Email address "" is invalid` with their address filled in one
-  // line above it, under a sentence about a road they had already
-  // left. Neither half of that survives here.
-  it('answers the email road in its own words, and stands the Google line down', async () => {
-    sessionStorage.setItem(STASH_KEY, JSON.stringify({ answers: RESUMED, step: 'account', savedName: 'Tester' }))
+  // Supabase's refusal on the claim quotes the address it was about to
+  // MAIL, which for a guest is empty: `Email address "" is invalid`, with
+  // the learner's own address filled in one line above it.
+  it('answers the link road in its own words, and stands the Google line down', async () => {
+    stashed()
     oauthRefusal.current = {
       error: 'server_error',
       code: 'identity_already_exists',
       description: 'Identity is already linked to another user',
     }
-    updateUser.mockResolvedValue({
-      data: {},
-      error: { code: 'email_address_invalid', message: 'Email address "" is invalid' },
-    })
-    const { screen } = await renderFlow({ guest: true })
-    expect(stepOf(screen)).toBe('account')
-    expect(q(screen, '[data-oauth="refused"]')).not.toBeNull()
-
-    type(q(screen, 'input[type="email"]'), 'patou@gmail.com')
-    type(q(screen, 'input[type="password"]'), 'hunter22')
+    updateUser.mockResolvedValue({ data: {}, error: { code: 'email_address_invalid', message: 'Email address "" is invalid' } })
+    await renderFlow({ guest: true })
+    type(inSheet('input[type="email"]'), 'patou@gmail.com')
     await settle(20)
-    // The address is a real one, so the gold button is a road again.
-    expect(q(screen, '[data-action="account-create"]').disabled).toBe(false)
-    await click(screen, '[data-action="account-create"]')
+    await clickSheet('[data-action="account-link"]')
     await settle(60)
-
-    const said = live(screen).textContent
-    expect(updateUser).toHaveBeenCalledWith({ email: 'patou@gmail.com', password: 'hunter22' })
+    const said = sheet().textContent
     expect(said).not.toContain('""')
     expect(said).toContain(fr.claimEmailUnreachable)
     // The older line steps aside rather than stacking under the new one…
-    expect(q(screen, '[data-oauth="refused"]')).toBeNull()
-    expect(said).not.toContain(fr.oauthAlreadyLinked)
-    // …while the way OUT of that refusal is still standing, because it
-    // is still true: that Google account is still somebody's pass.
-    expect(live(screen).querySelectorAll('.auth-provider')).toHaveLength(2)
+    expect(inSheet('[data-oauth="refused"]')).toBeNull()
+    // …while the way out of that refusal still stands.
+    expect(sheet().querySelectorAll('.auth-provider')).toHaveLength(2)
   })
 
-  // The account is on the pass, which is the next screen: a claim that
-  // went through moves on by itself rather than asking for a second
-  // tap to confirm what the green line already said.
-  it('moves on to the pass by itself once the claim succeeds', async () => {
-    sessionStorage.setItem(STASH_KEY, JSON.stringify({ answers: RESUMED, step: 'account', savedName: 'Tester' }))
-    updateUser.mockResolvedValue({
-      data: { user: { email: 'patou@gmail.com', is_anonymous: false } },
-      error: null,
-    })
-    const { screen } = await renderFlow({ guest: true })
-    expect(stepOf(screen)).toBe('account')
+  // ── The hour's reminder, by platform ─────────────────────────────
+  it('on a native shell the hour’s sheet carries the reminder, and the OS’s answer is the answer', async () => {
+    nudgeRef.current = true
+    const { screen } = await renderFlow()
+    await toCardBeginner(screen)
+    await door(screen, 'hour')
+    expect(inSheet('[data-action="agenda"]')).toBeNull()
+    expect(inSheet('[data-action="remind"]').getAttribute('aria-pressed')).toBe('false')
+    await clickSheet('[data-action="remind"]')
+    await settle(40)
+    expect(requestNudge).toHaveBeenCalledTimes(1)
+    expect(inSheet('[data-action="remind"]').getAttribute('aria-pressed')).toBe('true')
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle(60)
+    await click(screen, '[data-action="issue"]')
+    await settle(80)
+    expect(posted().notifications).toBe(true)
+  })
 
-    type(q(screen, 'input[type="email"]'), 'patou@gmail.com')
-    type(q(screen, 'input[type="password"]'), 'hunter22')
-    await settle(20)
-    await click(screen, '[data-action="account-create"]')
-    await settle()
+  it('on the web the hour’s sheet hands the learner a daily event for their own calendar', async () => {
+    const { screen } = await renderFlow()
+    await toCardBeginner(screen)
+    await door(screen, 'hour')
+    await clickSheet('[data-action="agenda"]')
+    expect(saved).toHaveBeenCalledTimes(1)
+    const ics = saved.mock.calls[0][0]
+    expect(ics).toContain('BEGIN:VCALENDAR')
+    expect(ics).toContain('RRULE:FREQ=DAILY')
+    expect(ics).toMatch(/DTSTART:\d{8}T073000/)
+    expect(ics).toContain(`SUMMARY:${fr.brdAgendaTitle}`)
+  })
 
-    expect(updateUser).toHaveBeenCalledWith({ email: 'patou@gmail.com', password: 'hunter22' })
-    expect(stepOf(screen)).toBe('pass')
+  // A welcome is announced as one: a fresh account's 200 are named as
+  // given on the card that carries them.
+  it('says the welcome is a gift on a fresh card', async () => {
+    seedCredits({ balance: 200, cap: 50, dailyRefill: 30, plan: 'free', unlimited: false })
+    const { screen } = await renderFlow()
+    await toCardBeginner(screen)
+    const balance = q(screen, '.pcb__meter--balance')
+    expect(balance.textContent).toContain('200')
+    expect(balance.textContent).toContain(fr.brdCreditsOffered)
   })
 })

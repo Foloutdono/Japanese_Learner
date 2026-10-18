@@ -1,28 +1,31 @@
-import { useEffect, useRef, useState } from 'react'
+import { startTransition, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { useTodaySummary, refreshToday } from '../stores/today'
 import { useProfileSummary } from '../stores/profileSummary'
-import { markRestSeen, restNoticeSeen } from '../stores/dayClear'
+import { comebackShut, markRestSeen, restNoticeSeen } from '../stores/dayClear'
 import GateCard from '../components/station/GateCard'
-import PassStrip from '../components/station/PassStrip'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
+import { useGuideHeld, wasShown } from '../stores/guide'
 import Empty from '../components/ui/Empty'
 import { useDesk } from '../hooks/useDesk'
-import { DeskSide } from '../components/chrome/DeskSide'
 import RestDayNotice from '../components/dayclear/RestDayNotice'
+import { ComebackSheet } from '../components/station/ComebackSheet'
+import { TransferSheet } from '../components/station/TransferSheet'
 import { InkFilters } from '../components/dayclear/kit'
 import { restWeek, utcToday } from '../domain/dayClear'
-import { JourneyPanel } from '../components/journey/JourneyPanel'
-import { WeekAhead } from '../components/journey/WeekAhead'
-import { AgendaNext } from '../components/agenda/AgendaNext'
-import { useAgenda } from '../stores/agenda'
-import { useMinute } from '../hooks/useMinute'
+import { startAmbiance, stopAmbiance } from '../lib/audio'
 
 // ── 本日 — the gate (plan 070) ────────────────────────────────
-// The Today tab: the bar, the pass at strip size, and under it the
-// fare gate with the day's lanes as the run's picker. The run itself
+// The Today tab: the fare gate, the day's lanes as the run's picker.
+// Since plan 199 (the canvas "Tsuji — Today at a glance") the gate is
+// the whole screen at either width: the day as a dial, the run's
+// choices and the day's figures a tap away on a phone and in the
+// gate's own column on the desk (GateCard). The pass's strip, the
+// agenda's card and the journey's panel that stood over or beside it
+// went: the HUD carries the journey and the balance, the rail's holder
+// too, and the sheet and the column the rest. The run itself
 // is /today/run on the stage (screens/TodayRun.jsx); since plan 191 it
 // finishes on /today/clear (screens/DayClearScreen.jsx, the day
 // cleared or the partial finish), which comes back here with nothing:
@@ -34,8 +37,22 @@ import { useMinute } from '../hooks/useMinute'
 // while Today's summary names a rest day not yet seen (`rest.unseen`).
 // Any way out tells the server it was seen.
 //
+// 運転再開 (plan 217): a gate whose reviews piled up past a few days of
+// the learner's own load opens on the comeback sheet (ComebackSheet),
+// over the gate and after the rest-day notice, never with it: the
+// paces to take the backlog at, chosen once.
+//
+// 乗換 (plan 243b): a learner new to the app is asked once, after the
+// first ride and the gate's guide and never over either sheet above,
+// whether they studied in another app (TransferSheet), while the
+// profile says the offer is open (`transferOffer`).
+//
 // Everything this screen reads is shared: /api/today from the store
 // the tab bar's badge already reads. One request, every consumer.
+//
+// 湖の刻 (plan 219): the gate stands on the print of the hour, and the
+// print is heard: the ambiance plays the same hour's lake behind it,
+// as it does behind every station page (SelectionScreen).
 
 export default function TodayScreen({ session }) {
   const { t } = useLang()
@@ -45,10 +62,11 @@ export default function TodayScreen({ session }) {
   const summary = useProfileSummary()
   // 案内 — the gate's guide, once, after the lanes have painted (plan 100).
   const guide = useGuide('today', Boolean(today) || failed)
-  // 時間割 (plan 181): what is next on the learner's agenda, read once a
-  // minute so a block starting while the gate is open is seen starting.
-  const { blocks } = useAgenda()
-  const now = useMinute()
+
+  useEffect(() => {
+    startAmbiance()
+    return () => stopAmbiance()
+  }, [])
 
   // 運休 — the rest days the learner has not been told of, once.
   const restKey = (today?.rest?.unseen ?? []).join(',')
@@ -62,11 +80,27 @@ export default function TodayScreen({ session }) {
     clearTimeout(leaving.current)
     return () => { leaving.current = setTimeout(() => markRestSeen(session, restKey), 0) }
   }, [showRest, restKey, session])
+  // The notice gives way to the run, not to the gate: the router moves
+  // in a transition, so leaving the notice outside it drew the gate (and
+  // fetched its print, plan 205) for a beat before the run took over.
   const depart = () => {
     markRestSeen(session, restKey)
-    setRestLeft(true)
-    navigate('/today/run')
+    startTransition(() => {
+      setRestLeft(true)
+      navigate('/today/run')
+    })
   }
+  // 運転再開 — the comeback offer, until it is answered or shut.
+  const [comebackLeft, setComebackLeft] = useState(false)
+  const offer = today?.review?.comeback ?? null
+  const showComeback = Boolean(offer) && !showRest && !comebackLeft && !comebackShut()
+  // 乗換 — the offer to bring another app's progress, once: after the
+  // gate's guide has had its turn (stamped, or shown on this visit) and
+  // while nothing holds the guides, so the two never meet.
+  const [transferLeft, setTransferLeft] = useState(false)
+  const held = useGuideHeld()
+  const showTransfer = Boolean(summary?.transferOffer) && !transferLeft && Boolean(today)
+    && (summary.guided?.today || wasShown('today')) && !guide.open && !held && !showRest && !showComeback
   const restMinutes = today?.seconds_per_review && today?.total
     ? Math.max(1, Math.ceil((today.total * today.seconds_per_review) / 60))
     : null
@@ -78,62 +112,40 @@ export default function TodayScreen({ session }) {
           The name stays as the screen's clipped <h1>. */}
       <h1 className="sr-only">{t.todayTitle}</h1>
 
+      {/* The seal and the stamps' ink, for the rest notice and the
+          cleared gate (plan 191's kit, plan 199). */}
+      <InkFilters />
       {showRest ? (
-        <>
-          <InkFilters />
-          <RestDayNotice
-            rest={today.rest}
-            week={restWeek(summary?.week, today.rest.unseen, utcToday())}
-            total={today.total}
-            lanes={today.lanes}
-            minutes={restMinutes}
-            desk={desk}
-            onDepart={depart}
-          />
-        </>
+        <RestDayNotice
+          rest={today.rest}
+          week={restWeek(summary?.week, today.rest.unseen, utcToday())}
+          total={today.total}
+          lanes={today.lanes}
+          minutes={restMinutes}
+          desk={desk}
+          onDepart={depart}
+        />
+      ) : failed && !today ? (
+        <Empty
+          tone="error"
+          message={t.errorTitle}
+          hint={t.errorHint}
+          action={{ label: t.tryAgain, onClick: refreshToday }}
+        />
       ) : (
-        <>
-          {/* The strip first: a status line — the week, the streak, the
-              day's new items — reads over the object it is about, and
-              the gate under it is then the last thing on the screen and
-              can take the rest of it. Owner's call. */}
-          {/* On the desk the strip stands beside the gate instead, with
-              the pass's back under it (below). */}
-          {desk ? null : <PassStrip pace={today?.pace} />}
-          {/* Under the strip, over the gate: the block under way (and the
-              way into it) or the next, and the door to the agenda. Nothing
-              for a learner with no agenda. On the desk it stands in the
-              side column instead (below). */}
-          {!desk && blocks?.length > 0 && <AgendaNext blocks={blocks} now={now} open />}
-          {failed && !today ? (
-            <Empty
-              tone="error"
-              message={t.errorTitle}
-              hint={t.errorHint}
-              action={{ label: t.tryAgain, onClick: refreshToday }}
-            />
-          ) : (
-            <GateCard today={today} failed={failed && !today} />
-          )}
-        </>
+        <GateCard today={today} failed={failed && !today} session={session} />
       )}
-      {guide.open && !showRest && <Guide gate="today" onEnd={guide.onEnd} />}
-      {/* 机 — the desk (plan 114): the gate is the work, and beside it
-          what the work is FOR — the pass at strip size (the week, the
-          streak, the day's new items) and the pass's back, the journey
-          it is on: how far along, how far behind the promise, and the
-          two honest moves when behind. On a phone the strip heads the
-          gate and the back is a tap on the HUD away. */}
-      {desk && (
-        <DeskSide label={t.passLabel}>
-          <PassStrip pace={today?.pace} />
-          {/* What is next on the agenda, and the two blocks after it:
-              the hour's business before the journey's. */}
-          {blocks?.length > 0 && <AgendaNext blocks={blocks} now={now} open then={2} />}
-          <JourneyPanel session={session} />
-          {/* 七日 (plan 135): the week ahead, at the column's foot. */}
-          <WeekAhead />
-        </DeskSide>
+      {showComeback && (
+        <ComebackSheet
+          offer={offer}
+          secondsPerReview={today.seconds_per_review}
+          session={session}
+          onClose={() => setComebackLeft(true)}
+        />
+      )}
+      {guide.open && !showRest && !showComeback && <Guide gate="today" onEnd={guide.onEnd} />}
+      {showTransfer && (
+        <TransferSheet session={session} onClose={() => setTransferLeft(true)} />
       )}
     </main>
   )

@@ -18,6 +18,7 @@ from core.credits import require_pass
 from core.auth import get_user_id
 from core.credits import local_today, resets_at
 from core.db import db_conn
+from core.rls import enable_rls
 from study.llm_shared import chat, LLMUnavailable
 from study.ocr_prompt import OCR_PROMPT, VERTICAL_HINT
 from study.text_normalize import normalize_recognized_text
@@ -83,6 +84,7 @@ def _ensure_ocr_schema() -> None:
                     PRIMARY KEY (user_id, day)
                 )
             """)
+            enable_rls(cur, "ocr_usage")
         conn.commit()
     finally:
         conn.close()
@@ -138,13 +140,18 @@ def _claim_daily_slot(user_id: str) -> int:
         conn.close()
 
 
+# A plain def, so FastAPI runs it on the threadpool (plan 211): as an
+# async def, its daily claim and its vision call (up to 90s a try, two
+# tries a provider) ran on the event loop and held the whole API -- one
+# worker -- for as long. Read bounded: the size check below needs no
+# more than one byte past the limit.
 @router.post("/api/ocr")
-async def recognize_image(
+def recognize_image(
     file: UploadFile = File(...),
     vertical: str = Form("false"),
     user_id: str = Depends(get_user_id),
 ):
-    raw = await file.read()
+    raw = file.file.read(_MAX_IMAGE_BYTES + 1)
     if not raw:
         raise HTTPException(status_code=400, detail="No image received")
     if len(raw) > _MAX_IMAGE_BYTES:

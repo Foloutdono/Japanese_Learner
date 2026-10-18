@@ -16,10 +16,12 @@ import {
 import { GrammarLessonSheet } from '../components/study/GrammarLesson'
 import { GrammarGate } from '../components/study/GrammarGate'
 import { TourRoute, TourLedger } from '../components/study/TourPanels'
+import { useAsk } from '../hooks/useAsk'
 import { GrammarWrite } from '../components/study/GrammarWork'
 import { BuildEntry, GrammarChoose, GrammarConstruire, GrammarTiles, PointLine } from '../components/study/GrammarPlate'
 import { useBuild } from '../hooks/useBuild'
-import { cardShape } from '../domain/cardShape'
+import { cardShape, choiceAnswer, grammarSentence } from '../domain/cardShape'
+import { useRevealSpeech } from '../hooks/useRevealSpeech'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
 import { ExampleSentence } from '../components/dictionary/ExampleSentence'
 import { Loading } from '../components/ui/Loading'
@@ -38,6 +40,7 @@ import {
   MODES as STUDY_MODES, HINTS, FAST_REVIEW, modeLabel,
 } from '../domain/studyModes'
 import HintBar from '../components/study/HintBar'
+import SpeakToggle from '../components/study/SpeakToggle'
 import { joinRuns } from '../domain/rubyRuns'
 import { ChevronIcon } from '../components/ui/Icons'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
@@ -96,6 +99,8 @@ export default function GrammarRun({ session }) {
   const desk = useDesk()
   const [compared, setCompared]     = useState(null)
   const [tourView, setTourView]     = useState(null)
+  // 問 in the tour (plan 204): a thread per stop, kept for the run.
+  const asking = useAsk(session, 'grammar')
   const closeCompared = useCallback(() => setCompared(null), [])
 
   // One session per level+mode+language (see useCardSession): the
@@ -207,6 +212,11 @@ export default function GrammarRun({ session }) {
   // Construire's answer (plan 194): typed into the entry under the card,
   // shown in the card's hole as it is typed.
   const entry = useBuild(card && cardShape(card).isBuild ? card : null, { session, lang, onDone: onFlashcardReveal })
+  // The card's sentence, said once the answer is out (unless the switch
+  // beside the hints is off). The card's id is the reset's key above:
+  // the next card is drawn under this one's reveal for a render.
+  const sentence = card ? grammarSentence(card, entry?.verdict) : null
+  useRevealSpeech(sentence, answered, card?.card_id)
 
   if (!valid) return <Navigate replace to={level ? platforms : '/learn/grammar'} />
 
@@ -311,14 +321,20 @@ export default function GrammarRun({ session }) {
     <StudyStage
       color="var(--line-grammar)"
       onLeave={leave}
+      report={showRating && card ? { card } : null}
       leaveLabel={t.grammarTitle}
       where={`${t.grammarTitle} ${level}`}
       sub={currentModeLabel}
+      // The speak-on-reveal switch, for a card that says a sentence: in
+      // the head, as the sentence runs keep it, rather than in a row of
+      // its own over a Choisir that has no hint to stand beside and no
+      // height to spare on a short desk.
+      aside={card && !gated && (isFill || isContrast || isBuild || isWrite) ? <SpeakToggle variant="head" /> : undefined}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
       records
       progress={progress}
-      panel={touring ? <TourRoute point={lessonOf(card)} view={tourView} /> : card ? <CardPanel card={card} /> : null}
+      panel={touring ? <TourRoute point={lessonOf(card)} view={tourView} ask={asking} /> : card ? <CardPanel card={card} /> : null}
       done={done}
       side={error && !card ? null : (
         <SideLookup lookup={comparing} onExit={closeCompared} session={session}>
@@ -329,7 +345,7 @@ export default function GrammarRun({ session }) {
     >
         <DeckProgress stats={progress} />
         {loading && <Loading />}
-        {error && !card && <SessionError error={error} onRetry={retry} />}
+        {error && !card && <SessionError error={error} onRetry={retry} session={session} />}
         {done    && <DoneMessage onBack={leave} pace={paceCtl.pace}
           onExtra={paceCtl.pacedOut ? () => paceCtl.boardExtra(retry) : undefined} />}
 
@@ -342,6 +358,7 @@ export default function GrammarRun({ session }) {
               onBoard={() => updateCurrent({ lesson_seen: true })}
               onLesson={() => setSheet(card.raw_id ?? card.card_id)}
               onView={setTourView}
+              ask={asking}
             />
           </div>
         )}
@@ -466,7 +483,7 @@ export default function GrammarRun({ session }) {
             {isContrast && (desk || !answered) && (
               <GrammarTiles
                 choices={card.contrast?.choices ?? []}
-                correct={card.grammar}
+                correct={choiceAnswer(card)}
                 readings={card.choices_furigana}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer} />
             )}

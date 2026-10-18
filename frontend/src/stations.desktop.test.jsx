@@ -191,15 +191,17 @@ describe('the other stations on the desk', () => {
     await mount('/practice/exam', <Route path="/practice/exam" element={<ExamScreen session={null} />} />)
     await settle()
     expect(where.search).toBe('?level=N4')
-    // The grade's papers, a row each since plan 159 (practiceStation.wide).
-    expect(document.querySelector('.desk-split__page .prc-paper__title')).not.toBeNull()
-    const n3 = [...document.querySelectorAll('.desk-split__list .route-stop')].find(s => s.textContent.includes('N3'))
+    // The grades as tabs over the grade's papers since plan 200
+    // (practiceStation.wide).
+    const grade = () => document.querySelector('.desk-grade[aria-current="page"] > b')?.textContent
+    expect(grade()).toBe('N4')
+    const n3 = [...document.querySelectorAll('.desk-grade')].find(s => s.textContent.includes('N3'))
     expect(n3.tagName).toBe('A')
     expect(n3.getAttribute('href')).toBe('/practice/exam?level=N3')
     n3.click()
     await settle()
     expect(where.search).toBe('?level=N3')
     expect(where.type).toBe('REPLACE')
-    expect(openStop()).toBe('N3')
+    expect(grade()).toBe('N3')
   })
 })

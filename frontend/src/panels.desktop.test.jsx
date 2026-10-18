@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
+import cards from './testing/grammarLadder.json'
 import './index.css'
 
 // ── 机 — 三面, the run on three panels (plan 126) ─────────────────────
@@ -44,6 +45,7 @@ const { DrawingQuiz } = await import('./components/study/DrawingCanvas')
 const { default: ReadingsInput } = await import('./components/study/ReadingsInput')
 const { startTally, countReview } = await import('./stores/runTally')
 const { seedSummary } = await import('./stores/profileSummary')
+const { setRatingScale } = await import('./stores/ratingScale')
 
 const settle = (ms = 150) => new Promise(r => setTimeout(r, ms))
 const press = key => window.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }))
@@ -270,6 +272,172 @@ describe('the card panel', () => {
   })
 })
 
+// ── 梯子 — the ladder card's panel (plan 198) ─────────────────────────
+// A grammar point on the ladder is the one card whose state is a walk,
+// and on a walk the verdicts are only a few outcomes: a miss asks the step
+// again, a pass climbs it. The panel says so on the stop in hand, a row an
+// outcome, and the tiles give way; every other card keeps its strip and its
+// tiles. The fixtures are the cards the backend serves (srs.preview_reviews_bulk
+// carrying where each rating leaves the point).
+describe('the card panel of a ladder card', () => {
+  // The card as the server served it before the forecast said where each rating lands.
+  const noLandings = card => ({
+    ...card,
+    review_preview: Object.fromEntries(Object.entries(card.review_preview).map(([q, p]) => [
+      q, Object.fromEntries(Object.entries(p).filter(([k]) => k !== 'step' && k !== 'passed')),
+    ])),
+  })
+  const panel = card => <CardPanel card={card} remaining={284} />
+  const bar = <RatingBar active={false} onRate={() => {}} />
+  const rows = () => $$('.gl-out')
+  const wait = r => [...r.querySelectorAll('.gl-out__when b, .gl-out__when small')].map(el => el.textContent).join('')
+  const digits = () => rows().map(r => [...r.querySelectorAll('.desk-kbd')].map(k => k.textContent))
+  // The run's rhythm: minutes in, cards rated.
+  function startedAgo(minutes, rated) {
+    const real = Date.now
+    Date.now = () => real() - minutes * 60000
+    startTally('grammar:N5:grammar.ladder')
+    Date.now = real
+    for (let i = 0; i < rated; i++) countReview({ quality: 4, xp: 8 })
+  }
+
+  it('walks the point\'s line, a check on each stop done and the wait on each one ahead', async () => {
+    await render(<Stage panel={panel(cards.choose)}><Card />{bar}</Stage>)
+    await settle()
+    const left = $('.desk-run__left > .desk-card')
+    expect(left.classList.contains('desk-card--ladder')).toBe(true)
+    expect($$('.gl-map__name').map(n => n.textContent)).toEqual([
+      'Tutoriel', 'Choisir 1', 'Choisir 2', 'Choisir 3', 'Construire 1', 'Construire 2', 'Construire 3', 'Construire 4', 'Maîtrisé',
+    ])
+    // Done: a check and no word (a screen reader has it); in hand: lit, no
+    // word either; ahead: the wait before it.
+    expect($$('.gl-map__stop--done .gl-map__dot svg')).toHaveLength(2)
+    expect($$('.gl-map__stop--done > .sr-only').map(el => el.textContent)).toEqual(['fait', 'fait'])
+    expect($('.gl-map__stop--now > .sr-only').textContent).toBe('maintenant')
+    expect($('.gl-map__stop--now').getAttribute('aria-current')).toBe('step')
+    expect($$('.gl-map__when').map(el => el.textContent)).toEqual(['+1 h', '+1 j', '+2 j', '+4 j', '+8 j', '+21 j'])
+    // The rail is the line's pigment as far as it is ridden, and the
+    // scheme's hairline beyond: a stop done draws both its halves in it, a
+    // stop ahead neither.
+    const rail = (el, which) => getComputedStyle(el, which).backgroundColor
+    expect(rail($('.gl-map__stop--done'), '::after')).toBe(probe('backgroundColor', 'var(--line-grammar)'))
+    expect(rail($('.gl-map__stop--now'), '::before')).toBe(probe('backgroundColor', 'var(--line-grammar)'))
+    expect(rail($('.gl-map__stop--now'), '::after')).toBe(probe('backgroundColor', 'var(--surface-line)'))
+    expect(rail($('.gl-map__stop--ahead'), '::before')).toBe(probe('backgroundColor', 'var(--surface-line)'))
+  })
+
+  it('draws each rating as a row on the stop in hand, in place of four tiles', async () => {
+    await render(<Stage panel={panel(cards.choose)}><Card />{bar}</Stage>)
+    await settle()
+    const left = $('.desk-run__left > .desk-card')
+    expect(left.querySelector('.desk-verdicts, .desk-verdict')).toBeNull()
+    const stop = $('.gl-map__stop--now')
+    // A miss asks Choisir 2 again, a pass climbs to Choisir 3: two outcomes.
+    expect(digits()).toEqual([['4', '3'], ['2', '1']])
+    expect($$('.gl-out__key b').map(b => b.textContent)).toEqual(['Raté', 'Presque', 'Difficile', 'Correct'])
+    expect(rows().map(wait)).toEqual(['10min', '1h'])
+    // The pass wears the pass key's ink; the miss, the miss's.
+    expect(rows().map(r => r.className.includes('gl-out--pass'))).toEqual([false, true])
+    expect(getComputedStyle(rows()[0].querySelector('.gl-out__go')).color).toBe(probe('color', 'var(--rating-wrong)'))
+    // A screen reader hears each row whole.
+    const said = rows().map(r => r.querySelector(':scope > .sr-only').textContent.replace(/\u00a0/g, ' '))
+    expect(said).toEqual(['Raté, Presque : à refaire, dans 10 min', 'Difficile, Correct : étape suivante, dans 1 h'])
+    // Under the stop's own name, inside its band, the walk's rail kept.
+    const name = rect('.gl-map__stop--now .gl-map__name')
+    rows().forEach(r => {
+      expect(r.getBoundingClientRect().top).toBeGreaterThanOrEqual(name.bottom)
+      expect(r.getBoundingClientRect().bottom).toBeLessThanOrEqual(stop.getBoundingClientRect().bottom + 1)
+    })
+    // Every stop whole in the panel, which takes the column's floor and scrolls nothing.
+    expect(left.scrollHeight).toBeLessThanOrEqual(left.clientHeight + 1)
+    expect(Math.abs(left.getBoundingClientRect().bottom - rect('.desk-run__left').bottom)).toBeLessThan(2)
+    // The numerals stand alone, so they are proportional: the tabular 1 has a foot.
+    expect(getComputedStyle($('.gl-out__when b')).fontVariantNumeric).toBe('proportional-nums')
+    expect(getComputedStyle($('.desk-rhythm .desk-fig__value')).fontVariantNumeric).toBe('proportional-nums')
+  })
+
+  it('groups the verdicts that do the same, in the learner\'s own scale, and names the relapse', async () => {
+    await render(<Stage panel={panel(cards.mastered)}><Card />{bar}</Stage>)
+    await settle()
+    // Mastered: a miss is the relapse, Difficile and Correct wait different weeks.
+    expect(digits()).toEqual([['4', '3'], ['2'], ['1']])
+    expect(rows().map(r => r.className)).toEqual(['gl-out gl-out--back', 'gl-out gl-out--stay gl-out--pass', 'gl-out gl-out--stay gl-out--pass'])
+    expect($$('.gl-out__note').map(el => el.textContent)).toEqual(['Rechute'])
+    expect(rows().map(wait)).toEqual(['10min', '4sem.', '5sem.'])
+    const mastered = $('.gl-map__stop--now')
+    expect(mastered.classList.contains('gl-map__stop--end')).toBe(true)
+    expect(mastered.querySelector('.gl-map__dot').textContent).toBe('★')
+    expect(getComputedStyle(mastered.querySelector('.gl-map__dot')).backgroundColor).toBe(probe('backgroundColor', 'var(--state-mastered)'))
+    const left = $('.desk-run__left > .desk-card')
+    expect(left.scrollHeight).toBeLessThanOrEqual(left.clientHeight + 1)
+  })
+
+  it('follows the six-button bar: three misses in a row, the passes together', async () => {
+    const learner = { username: 'Aiko', level: 12, xp: 1200, xpPrevLevel: 1000, xpForNext: 1500 }
+    // The scale is mirrored in the browser: put the four-button bar back for the tests that follow.
+    try {
+      seedSummary({ ...learner, ratingScale: 'full' })
+      await render(<Stage panel={panel(cards.mastered)}><Card />{bar}</Stage>)
+      await settle()
+      expect(digits()).toEqual([['6', '5', '4'], ['3'], ['2', '1']])
+    } finally {
+      await setRatingScale('simple', null)
+      seedSummary(learner)
+    }
+  })
+
+  it('keeps its four tiles when the card was served without its landings', async () => {
+    await render(<Stage panel={panel(noLandings(cards.choose))}><Card />{bar}</Stage>)
+    await settle()
+    expect($('.desk-run__left > .desk-card').classList.contains('desk-card--ladder')).toBe(false)
+    expect($$('.desk-verdict')).toHaveLength(4)
+    expect(rows()).toHaveLength(0)
+    expect($$('.gl-map__name')).toHaveLength(9)
+  })
+
+  it('leaves a card off the ladder its strip, its tiles and its minutes', async () => {
+    startedAgo(10, 5)
+    await render(<Stage panel={<CardPanel card={CARD} remaining={284} />}><Card />{bar}</Stage>)
+    await settle()
+    expect($('.desk-run__left > .desk-card').classList.contains('desk-card--ladder')).toBe(false)
+    expect($$('.desk-verdict')).toHaveLength(4)
+    expect($('.desk-stops')).toBeTruthy()
+    expect(rows()).toHaveLength(0)
+    // Said in minutes, as ever, and in the tabular figures.
+    expect($$('.desk-rhythm .desk-fig__value')[2].textContent).toMatch(/^≈ \d+min$/)
+    expect(getComputedStyle($('.desk-rhythm .desk-fig__value')).fontVariantNumeric).toBe('tabular-nums')
+  })
+
+  it('says what is left in hours once it passes two, on a ladder card', async () => {
+    startedAgo(10, 5)
+    await render(<Stage panel={panel(cards.choose)}><Card />{bar}</Stage>)
+    await settle()
+    expect($$('.desk-rhythm .desk-fig__value').map(el => el.textContent)).toEqual(['10min', '0,5', '≈ 9,5h'])
+    // The rhythm stands under a hairline, not a bare floor.
+    expect(getComputedStyle($('.desk-rhythm')).borderTopWidth).toBe('1px')
+  })
+
+  it('stands the verdicts\' words bare where the column is too narrow for them, and prints them where it is not', async () => {
+    // A laptop: the card panel at its 300px.
+    await render(<Frame width={1100}><Stage panel={panel(cards.choose)}><Card />{bar}</Stage></Frame>)
+    await settle(300)
+    expect(rect('.desk-run__left').width).toBeCloseTo(300, 0)
+    const words = () => $$('.gl-out__key b')
+    expect(words().every(w => w.classList.contains('sr-only')), 'bare on a laptop').toBe(true)
+    // Still the keys and their ink, and the row says it whole to a screen reader.
+    expect(digits()).toEqual([['4', '3'], ['2', '1']])
+    const keys = $$('.gl-out__keys')
+    expect(keys.every(k => k.scrollWidth <= k.clientWidth + 1)).toBe(true)
+    const left = $('.desk-run__left > .desk-card')
+    expect(left.scrollHeight).toBeLessThanOrEqual(left.clientHeight + 1)
+    // The owner's width has the room: the words come back, whole.
+    $('[data-frame]').style.width = '1877px'
+    await settle(300)
+    expect(words().some(w => w.classList.contains('sr-only')), 'named on a wide window').toBe(false)
+    expect($$('.gl-out__keys').every(k => k.scrollWidth <= k.clientWidth + 1)).toBe(true)
+  })
+})
+
 describe('the elements print no key caps', () => {
   it('leaves the head, the hint switch and the tiles bare, and the card its hint', async () => {
     await render(
@@ -361,7 +529,42 @@ describe('the card\'s details', () => {
     const body = rect('.dict-entry--band > .dict-entry__body')
     expect(top.bottom).toBeLessThanOrEqual(body.top)
     expect($('.dict-entry__top > .dict-plate')).not.toBeNull()
-    expect(getComputedStyle($('.dict-entry__top')).borderTopWidth).toBe('1px')
+    // One panel, the card over the dictionary: the band is drawn, its
+    // halves are not (owner's cut, 2026-10-17).
+    expect(getComputedStyle(entry).borderTopWidth).toBe('1px')
+    expect(getComputedStyle($('.dict-entry__top')).borderTopWidth).toBe('0px')
+    expect(getComputedStyle($('.dict-entry--band > .dict-entry__body')).borderTopWidth).toBe('0px')
+    const band = entry.getBoundingClientRect()
+    expect(top.top).toBeGreaterThanOrEqual(band.top)
+    expect(body.bottom).toBeLessThanOrEqual(band.bottom)
+  })
+
+  // An example opened from the docked entry stood its ‹ on a strip of
+  // panel and its breakdown loose on the page under it.
+  it('open an example as a panel of its own, the ‹ and the breakdown on it', async () => {
+    apiFetch.mockImplementation(async () => ({
+      ok: true, status: 200,
+      json: async () => ({ results: [{
+        type: 'vocab', kanji: '週間', kana: 'しゅうかん', meaning: 'week', level: 'N5',
+        senses: [{ number: 1, glossary: 'week' }],
+        examples: [{ jp: '二週間休みます。', en: 'I am off for two weeks.', sense_number: 1 }],
+      }] }),
+    }))
+    await render(<Stage><Revealing term="週間" category="vocab" /><RatingBar active={false} onRate={() => {}} /></Stage>)
+    await settle()
+    press(' ')
+    await settle(400)
+    $('.dict-ex--door').click()
+    await settle(200)
+    const sent = $('.desk-run__side .desk-entry > .dict-sent')
+    expect(sent).not.toBeNull()
+    expect(getComputedStyle(sent).borderTopWidth).toBe('1px')
+    expect(getComputedStyle(sent).backgroundColor).toBe(probe('backgroundColor', 'var(--surface)'))
+    const panel = sent.getBoundingClientRect()
+    const head = rect('.dict-sent__head')
+    const body = rect('.dict-sent__body')
+    expect(head.top).toBeGreaterThanOrEqual(panel.top)
+    expect(body.bottom).toBeLessThanOrEqual(panel.bottom)
   })
 
   // A kanji the learner has met, with its stroke sheet and more words
@@ -427,12 +630,13 @@ describe('the card\'s details', () => {
     press(' ')
     await settle(400)
     const word = rect('.dict-entry--band .dict-plate__word')
-    const structure = rect('.dict-entry--band .dict-plate__structure')
     const caption = rect('.dict-entry--band .dict-plate__caption')
     const row = rect('.dict-entry--band .dict-plate__row')
-    expect(structure.bottom).toBeLessThanOrEqual(word.top + 1)
+    // The marks over the pattern over its gloss; the formation opens the
+    // lesson in the panel under it (plan 235).
+    expect($('.dict-entry--band .dict-plate__structure')).toBeNull()
     expect(caption.top).toBeGreaterThanOrEqual(word.bottom - 1)
-    expect(row.bottom).toBeLessThanOrEqual(structure.top + 1)
+    expect(row.bottom).toBeLessThanOrEqual(word.top + 1)
     // The gloss reads in a line or two, not a word a line.
     const lineHeight = parseFloat(getComputedStyle($('.dict-entry--band .dict-plate__caption')).lineHeight)
     expect(caption.height).toBeLessThanOrEqual(2 * lineHeight + 1)

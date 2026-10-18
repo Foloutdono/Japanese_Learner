@@ -27,7 +27,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.125,
-        "due_in": 600
+        "due_in": 600,
+        "step": {
+          "step": 1,
+          "group": "choose",
+          "at": 2,
+          "of": 3,
+          "relapse": false
+        },
+        "passed": false
       },
       "1": {
         "xp_earned": 8,
@@ -36,7 +44,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.125,
-        "due_in": 600
+        "due_in": 600,
+        "step": {
+          "step": 1,
+          "group": "choose",
+          "at": 2,
+          "of": 3,
+          "relapse": false
+        },
+        "passed": false
       },
       "2": {
         "xp_earned": 8,
@@ -45,7 +61,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.125,
-        "due_in": 600
+        "due_in": 600,
+        "step": {
+          "step": 1,
+          "group": "choose",
+          "at": 2,
+          "of": 3,
+          "relapse": false
+        },
+        "passed": false
       },
       "3": {
         "xp_earned": 8,
@@ -54,7 +78,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.25,
-        "due_in": 3600
+        "due_in": 3600,
+        "step": {
+          "step": 2,
+          "group": "choose",
+          "at": 3,
+          "of": 3,
+          "relapse": false
+        },
+        "passed": true
       },
       "4": {
         "xp_earned": 8,
@@ -63,7 +95,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.25,
-        "due_in": 3600
+        "due_in": 3600,
+        "step": {
+          "step": 2,
+          "group": "choose",
+          "at": 3,
+          "of": 3,
+          "relapse": false
+        },
+        "passed": true
       },
       "5": {
         "xp_earned": 8,
@@ -72,7 +112,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.25,
-        "due_in": 3600
+        "due_in": 3600,
+        "step": {
+          "step": 2,
+          "group": "choose",
+          "at": 3,
+          "of": 3,
+          "relapse": false
+        },
+        "passed": true
       }
     },
     "hints": {},
@@ -162,7 +210,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.614,
-        "due_in": 600
+        "due_in": 600,
+        "step": {
+          "step": 4,
+          "group": "build",
+          "at": 2,
+          "of": 4,
+          "relapse": false
+        },
+        "passed": false
       },
       "1": {
         "xp_earned": 8,
@@ -171,7 +227,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.614,
-        "due_in": 600
+        "due_in": 600,
+        "step": {
+          "step": 4,
+          "group": "build",
+          "at": 2,
+          "of": 4,
+          "relapse": false
+        },
+        "passed": false
       },
       "2": {
         "xp_earned": 8,
@@ -180,7 +244,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.614,
-        "due_in": 600
+        "due_in": 600,
+        "step": {
+          "step": 4,
+          "group": "build",
+          "at": 2,
+          "of": 4,
+          "relapse": false
+        },
+        "passed": false
       },
       "3": {
         "xp_earned": 8,
@@ -189,7 +261,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.728,
-        "due_in": 345600
+        "due_in": 345600,
+        "step": {
+          "step": 5,
+          "group": "build",
+          "at": 3,
+          "of": 4,
+          "relapse": false
+        },
+        "passed": true
       },
       "4": {
         "xp_earned": 8,
@@ -198,7 +278,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.728,
-        "due_in": 345600
+        "due_in": 345600,
+        "step": {
+          "step": 5,
+          "group": "build",
+          "at": 3,
+          "of": 4,
+          "relapse": false
+        },
+        "passed": true
       },
       "5": {
         "xp_earned": 8,
@@ -207,7 +295,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.728,
-        "due_in": 345600
+        "due_in": 345600,
+        "step": {
+          "step": 5,
+          "group": "build",
+          "at": 3,
+          "of": 4,
+          "relapse": false
+        },
+        "passed": true
       }
     },
     "hints": {},
@@ -295,7 +391,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.5,
-        "due_in": 600
+        "due_in": 600,
+        "step": {
+          "step": 8,
+          "group": "choose",
+          "at": 1,
+          "of": 1,
+          "relapse": true
+        },
+        "passed": false
       },
       "1": {
         "xp_earned": 8,
@@ -304,7 +408,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.5,
-        "due_in": 600
+        "due_in": 600,
+        "step": {
+          "step": 8,
+          "group": "choose",
+          "at": 1,
+          "of": 1,
+          "relapse": true
+        },
+        "passed": false
       },
       "2": {
         "xp_earned": 8,
@@ -313,7 +425,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.5,
-        "due_in": 600
+        "due_in": 600,
+        "step": {
+          "step": 8,
+          "group": "choose",
+          "at": 1,
+          "of": 1,
+          "relapse": true
+        },
+        "passed": false
       },
       "3": {
         "xp_earned": 8,
@@ -322,7 +442,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 1.0,
-        "due_in": 2678400
+        "due_in": 2678400,
+        "step": {
+          "step": 7,
+          "group": "mastered",
+          "at": 1,
+          "of": 1,
+          "relapse": false
+        },
+        "passed": true
       },
       "4": {
         "xp_earned": 8,
@@ -331,7 +459,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 1.0,
-        "due_in": 2937600
+        "due_in": 2937600,
+        "step": {
+          "step": 7,
+          "group": "mastered",
+          "at": 1,
+          "of": 1,
+          "relapse": false
+        },
+        "passed": true
       },
       "5": {
         "xp_earned": 8,
@@ -340,7 +476,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 1.0,
-        "due_in": 3283200
+        "due_in": 3283200,
+        "step": {
+          "step": 7,
+          "group": "mastered",
+          "at": 1,
+          "of": 1,
+          "relapse": false
+        },
+        "passed": true
       }
     },
     "hints": {
@@ -667,5 +811,226 @@
       "right": "てください",
       "close": "でください"
     }
+  },
+  "authored": {
+    "card_id": "grammar_N4_可能形 〜(ら)れる",
+    "raw_id": "grammar_N4_可能形 〜(ら)れる",
+    "mode": "grammar.ladder",
+    "direction": null,
+    "grammar": "可能形 〜(ら)れる",
+    "grammar_furigana": [
+      {
+        "text": "可",
+        "reading": "か"
+      },
+      {
+        "text": "能",
+        "reading": "のう"
+      },
+      {
+        "text": "形",
+        "reading": "けい"
+      },
+      {
+        "text": " 〜(ら)れる"
+      }
+    ],
+    "structure": "verb potential stem + る・られる",
+    "structure_furigana": [
+      {
+        "text": "verb potential stem + る・られる"
+      }
+    ],
+    "meaning": "can do, be able to — the conjugated potential",
+    "register": "neutral",
+    "stage": "learning",
+    "review_preview": {
+      "0": {
+        "xp_earned": 8,
+        "leveled_up": false,
+        "new_level": 3,
+        "stage_up": null,
+        "stage_down": null,
+        "progress": 0.125,
+        "due_in": 600,
+        "step": {
+          "step": 1,
+          "group": "choose",
+          "at": 2,
+          "of": 3,
+          "relapse": false
+        },
+        "passed": false
+      },
+      "1": {
+        "xp_earned": 8,
+        "leveled_up": false,
+        "new_level": 3,
+        "stage_up": null,
+        "stage_down": null,
+        "progress": 0.125,
+        "due_in": 600,
+        "step": {
+          "step": 1,
+          "group": "choose",
+          "at": 2,
+          "of": 3,
+          "relapse": false
+        },
+        "passed": false
+      },
+      "2": {
+        "xp_earned": 8,
+        "leveled_up": false,
+        "new_level": 3,
+        "stage_up": null,
+        "stage_down": null,
+        "progress": 0.125,
+        "due_in": 600,
+        "step": {
+          "step": 1,
+          "group": "choose",
+          "at": 2,
+          "of": 3,
+          "relapse": false
+        },
+        "passed": false
+      },
+      "3": {
+        "xp_earned": 8,
+        "leveled_up": false,
+        "new_level": 3,
+        "stage_up": null,
+        "stage_down": null,
+        "progress": 0.25,
+        "due_in": 3600,
+        "step": {
+          "step": 2,
+          "group": "choose",
+          "at": 3,
+          "of": 3,
+          "relapse": false
+        },
+        "passed": true
+      },
+      "4": {
+        "xp_earned": 8,
+        "leveled_up": false,
+        "new_level": 3,
+        "stage_up": null,
+        "stage_down": null,
+        "progress": 0.25,
+        "due_in": 3600,
+        "step": {
+          "step": 2,
+          "group": "choose",
+          "at": 3,
+          "of": 3,
+          "relapse": false
+        },
+        "passed": true
+      },
+      "5": {
+        "xp_earned": 8,
+        "leveled_up": false,
+        "new_level": 3,
+        "stage_up": null,
+        "stage_down": null,
+        "progress": 0.25,
+        "due_in": 3600,
+        "step": {
+          "step": 2,
+          "group": "choose",
+          "at": 3,
+          "of": 3,
+          "relapse": false
+        },
+        "passed": true
+      }
+    },
+    "hints": {},
+    "contrast": {
+      "jp": "ここでは、クレジットカードが使えません。",
+      "tr": "You can't use a credit card here.",
+      "furigana": [
+        {
+          "text": "ここでは、"
+        },
+        {
+          "text": "クレジット"
+        },
+        {
+          "text": "カードが"
+        },
+        {
+          "text": "＿＿＿",
+          "blank": true
+        },
+        {
+          "text": "。"
+        }
+      ],
+      "fill": [
+        {
+          "text": "使",
+          "reading": "つか",
+          "word": 7
+        },
+        {
+          "text": "えません"
+        }
+      ],
+      "choices": [
+        "使われません",
+        "使えません",
+        "使いません"
+      ],
+      "answer": "使えません",
+      "why": {
+        "使いません": "The potential negative says you cannot: 使う → 使えない. 使いません says you do not, and 使われません is the passive, “is not used”.",
+        "使われません": "The potential negative says you cannot: 使う → 使えない. 使いません says you do not, and 使われません is the passive, “is not used”."
+      }
+    },
+    "choices_furigana": {
+      "使えません": [
+        {
+          "text": "使",
+          "reading": "つか",
+          "word": 7
+        },
+        {
+          "text": "えません"
+        }
+      ],
+      "使いません": [
+        {
+          "text": "使",
+          "reading": "つか",
+          "word": 7
+        },
+        {
+          "text": "いません"
+        }
+      ],
+      "使われません": [
+        {
+          "text": "使",
+          "reading": "つか",
+          "word": 7
+        },
+        {
+          "text": "われません"
+        }
+      ]
+    },
+    "exercise": "grammar.contrast",
+    "step": {
+      "step": 0,
+      "group": "choose",
+      "at": 1,
+      "of": 3,
+      "relapse": false
+    },
+    "asked": "choose"
   }
 }

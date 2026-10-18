@@ -54,19 +54,28 @@ export const BASE_GAIN = {
   //          XP landing a beat later is not masked by the answer
   //   0.044  the fare tick, the reward `correct` must not bury
   //   0.045  a screen change, a shade above an option pick
-  //   0.047  the level-up (the pass's punch) -- above the fare tick,
-  //          which the board's clatter it replaced took a round to be
+  //   0.047  the gate's punch (the milestone ticket's clipper), above
+  //          the fare tick; it was the level-up's too until plan 200
   //   0.060  doors running open
   //   0.070  the gate -- every departure, so it comes DOWN 38%
   //   0.075  the door chime
   //   0.080  arriving
   //   0.100  the platform sign (onboarding only)
+  //   0.115  the level-up's burst (plan 200), under 0.060 for its build
   sfx: {
     // The flip sits with the chrome, at the click's 0.030: its voices
     // are written at the click's loudness through the click's trim.
     'card-flip':       1.17,
     'card-transition': 1.60,
     'door-slide':      1.10,
+    // 菱 — the Practice gate's pantograph (plan 225), written on its
+    // canvas. The air under the doors running open, at the hour's
+    // flaps' 0.024 by the window (0.011 at unity): it plays on every
+    // visit to the gate, so it is texture, not news. The spark by
+    // peak, as noise bursts are: 0.13 at unity, over the canvas's
+    // ratio to the flaps' 0.18, so unity it is.
+    'pantograph-air':   2.18,
+    'pantograph-spark': 1.00,
   },
   ui: {
     click:                    1.17,
@@ -95,6 +104,15 @@ export const BASE_GAIN = {
     // a shorter sound than eight drums, and needs less to be heard.
     'fare-tick':              1.70,
     'pass-clip':              2.70,
+    // The level-up (plan 200) is two sounds, the build and the burst. Both
+    // are written as music, not as the noise bursts above, so they are
+    // levelled by the window like the chimes: the burst to 0.115, over the
+    // day-clear's 0.096 -- it is the rarest sound in the app -- with a
+    // peak of 0.43 on the bus, and the build to 0.060 at its last
+    // instant, half the burst's weight, so the hit is the louder of the
+    // two by 6dB.
+    'level-charge':           0.30,
+    'level-burst':            0.27,
     // The seal's press: the same knock the mode picker's 'stamp'
     // voice makes, levelled with the fare tick it lands beside.
     'card-stamp':             1.70,

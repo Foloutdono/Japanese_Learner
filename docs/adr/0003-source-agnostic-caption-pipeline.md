@@ -474,3 +474,96 @@ YouTube's srv3 format (`<s t="…">` per word), in words that are often wrong.
   and an anime run 6–13% of their lines stamped); the aligner spreads their
   kana over their lines' times, which would be measured against itself, so
   every track with fewer than 60% of its lines stamped was left out.
+
+---
+
+## Amendment, 2026-10-16 — the link fetch brings the word times too, and the audio stays YouTube's to read (plan 221)
+
+Asked for subtitles that follow the words more closely ("analyse the audio to
+find the words"), the first thing measured was where the words went without
+any times at all. Since 2026-10-16 the link fetch leads the intake wherever the
+server can fetch, and it read one track through `youtube-transcript-api`, in the
+library's plain format: a line's start and end, no word in it timed. Every
+session made from a link had its words lit on the estimate alone, the grab's
+v2 having brought the recogniser's word times since 2026-09-27 and the link
+fetch never.
+
+- **The link fetch reads what the grab reads.** The library lists each track's
+  URL with YouTube's `fmt=srv3` and takes it off; `fetch_youtube_track` asks the
+  same URL for srv3, through the library's own session and so through the same
+  proxy, for the hand-written track and, beside it, the recognised one, whose
+  times `study/word_timing.py` lends to the lines they agree with. A recognised
+  track alone keeps its own word stamps. srv3 is now a fourth format of
+  `parse_track`, read to the very cues the grab's VTT conversion parses to
+  (`tests/test_captions.py` holds the two equal on the grab's own fixtures).
+  Best effort, each half: a track that will not come as srv3 is read as before.
+- **The cost is nothing to the budget**: a recognised track in srv3 runs about
+  a kilobyte a minute of speech (12 KB for a twelve-minute podcast), against
+  the 0.4 MB watch page a fetch already pulls.
+- **The recognised track is the reading of the audio this design allows.** It
+  is YouTube's own speech recognition run over the video's sound, with a time on
+  each word. Reading the sound ourselves was looked at again and stays out, for
+  the reasons this ADR already records and one more measured today: the player
+  is a cross-origin iframe whose sound no page can read; and a server (or the
+  grab) fetching the media itself meets a third wall, the media URLs answering
+  403 without a proof-of-origin token minted by YouTube's anti-bot check. Getting
+  past that check is not something this app does. The audio routes that remain
+  clean are the learner's own: a media file they hold, played and listened to in
+  their own browser, or a tab's sound they choose to share (desktop Chromium
+  only). Either is a new way into the analyser, to be drawn before it is built.
+
+---
+
+## Amendment, 2026-10-16 — a Cue too wide to read is cut into lines (plan 235)
+
+The 2026-08-27 amendment made one Cue one Sentence, never split on its own
+punctuation. A talk's hand-written track disproved the half of that which
+assumed a cue is always sized for a screen: one cue of 44 characters
+(今日はAyaseさんとバンドメンバーとそしてぷらそにかの合唱のみなさんがいてくれるので、)
+drew five rows at display size on a phone, pushing the line's tools off it. The
+owner: *"make sure the sentences can't get too long."*
+
+**The correction.** A Japanese cue wider than `study/line_cut.MAX_LINE_WIDTH`
+(22 full-width characters, a Latin letter or a space counting half: three rows
+on a phone's stage, a broadcast subtitle's two rows of thirteen with room) is
+cut into the fewest lines that fit. Never inside a word or a verb's chain, never
+before a particle, an auxiliary or a mark; at a mark or space the line already
+has, then a clause's end, then a phrase's, the pieces kept near one width. What
+the 2026-08-27 amendment feared from a split -- two stops sharing a timestamp --
+does not happen: each piece runs from where its first word is said (a time the
+track measured there, else placed by the beats of the words between the nearest
+two) to where the next piece's is, and the pieces tile the cue.
+
+Every other cue is still exactly one Sentence, and a cue with no Japanese is never
+cut. A session stored before this is cut the same way the next time it is opened
+(`routes/video._current`), its indices with it.
+
+---
+
+## Amendment, 2026-10-17 — a video's own translation is taken where it has one (plan 242)
+
+The owner: *"If the subtitles translated are available take them, if not make
+them."* Since plan 235 every line's translation was the model's, even under a
+video whose makers had written French or English subtitles beside the Japanese.
+
+**The translated track is a source of translations, never of lines.** The rule
+the pasted-transcript ingest died of (2026-09-01: English handed to learners as
+the lines of a Japanese video) is untouched: the lines studied are still only
+ever a Japanese track. Beside it, the link fetch (`study/captions.py`) and the
+grab (`lib/captionGrab.js`, v3) now bring the video's hand-written tracks in the
+languages the app is read in (`line_translate.TRACK_LANGS`: French, English),
+and the worker reads each Japanese cue's translation off them by time
+(`study/line_translate.from_track`): the translated lines said within the cue,
+none where a translated line straddles two cues, none on a cue `line_cut` cuts
+in pieces. What it finds is kept on the session as the model's translations are
+(`video_sessions.translations`, by the line's text), so the block a learner
+reaches asks the model only for what the track left -- nothing, under a video
+translated end to end.
+
+Never a recognised track (one in French under a Japanese video is the recogniser
+hearing French in Japanese), and never YouTube's machine translation (`tlang`),
+which translates each cue alone, half a sentence as a whole one. Best effort,
+each: a translated track that will not come or will not read leaves its lines to
+the model, never the session. A v2 bookmark keeps working and brings none. An
+uploaded subtitle file carries none either: the upload accepts the translated
+tracks only as the grab sends them (`translation_fr`, `translation_en`).

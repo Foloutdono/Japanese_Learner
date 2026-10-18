@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { countUse } from '../../lib/screenTrail'
 import { apiJson, apiUpload, apiFetch } from '../../lib/api'
 import { useLang } from '../../LangContext'
+import { videoErrorMessage } from './videoErrors'
 
 // ── One Passage, three ways in ────────────────────────────
 // The seam that makes 解析 one screen instead of two (plan 027). A
@@ -22,6 +24,20 @@ import { useLang } from '../../LangContext'
 // Passage.
 
 const POLL_MS = 1200
+// A poll that got no answer is asked again, a little later each time,
+// for about a minute before the session is given up on.
+const RETRIES = 8
+const RETRY_CAP_MS = 10000
+
+// A failure that says nothing about the session: no answer at all (the
+// link dropped), a token being mended (lib/api refreshes it on a 401),
+// too many requests at once, or a server or its gateway down a moment.
+// A 503 carrying the stored failure is the session's own.
+function transient(e) {
+  if (e?.status == null) return e?.name !== 'AbortError'
+  if (e.status === 401 || e.status === 408 || e.status === 429) return true
+  return e.status >= 500 && e.body?.status !== 'failed'
+}
 
 /** An empty Passage, so callers never have to null-check the shape. */
 function emptyPassage() {
@@ -33,13 +49,15 @@ export function useAnalyzerSession(session) {
 
   const [passage, setPassage]   = useState(null)
   const [status, setStatus]     = useState('idle')   // idle | working | ready | failed
+  // A sentence from the table, or { video: <what was thrown> } for a
+  // video session's failure, which is worded at the return below.
   const [error, setError]       = useState(null)
   const [focusIndex, setFocus]  = useState(0)
   const [explaining, setExplaining] = useState({})
   // The failure of the one PAID action on this screen used to be an
   // empty catch: the button greyed out, came back, and nothing changed.
-  // A provider outage arrives as a 503 with a usable `detail` (see
-  // routes/phrase.py's LLMUnavailable handler); everything else is a
+  // A provider outage arrives as a 503 (see routes/phrase.py's
+  // LLMUnavailable handler), said as its own line; everything else is a
   // generic failure. Both are now reported per-Sentence, so a failure
   // on stop 12 does not blank the whole Passage's status.
   const [explainError, setExplainError] = useState({})
@@ -75,46 +93,56 @@ export function useAnalyzerSession(session) {
   // Each entry carries a `kind`: 'passage' or 'session'. That field is
   // what decides how a row is reopened, and it is the ONLY place the
   // difference shows.
+  //
+  // A half that cannot be asked (the link dropped, a server error) keeps
+  // the rows already in hand: read as an empty list, it unmarked every
+  // kept sentence each time a poor connection dropped a refresh -- and a
+  // refresh comes on every return to the tab (a new session object).
   const fetchHistory = useCallback(() => {
+    const rows = path => apiFetch(path, session)
+      .then(r => (r.ok ? r.json() : null))
+      .then(list => (Array.isArray(list) ? list : null))
+      .catch(() => null)
     return Promise.all([
-      apiFetch('/api/phrase/history', session)
-        .then(r => (r.ok ? r.json() : []))
-        .catch(() => []),
-      apiFetch('/api/video/sessions', session)
-        .then(r => (r.ok ? r.json() : []))
-        .catch(() => []),
+      rows('/api/phrase/history'),
+      rows('/api/video/sessions'),
     ]).then(([passages, sessions]) => {
-      const merged = [
-        ...passages.map(p => ({
-          kind: 'passage',
-          id: p.id,
-          label: p.phrase,
-          source: p.source,
-          createdAt: p.created_at,
-          kept: p.kept,
-        })),
-        ...sessions.map(s => ({
-          kind: 'session',
-          id: s.id,
-          label: s.sourceRef,
-          source: s.source,
-          createdAt: s.createdAt,
-          sentenceCount: s.sentenceCount,
-          videoId: s.videoId,
-          // The first sentence (plan 136), what a card prints in place
-          // of the file name the grab gave the session.
-          firstLine: s.firstLine ?? null,
-        })),
-      ]
-      merged.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      setHistory(merged)
-      setKept(new Set(
-        merged.filter(h => h.kind === 'passage' && h.kept).map(h => h.label),
-      ))
-    }).catch(() => setHistory([]))
+      if (passages === null && sessions === null) return
+      setHistory(prev => mergeHistory(prev, passages, sessions))
+      if (passages !== null) {
+        setKept(new Set(passages.filter(p => p.kept).map(p => p.phrase)))
+      }
+    })
   }, [session])
 
   useEffect(() => { fetchHistory() }, [fetchHistory])
+
+  function mergeHistory(prev, passages, sessions) {
+    const merged = [
+      ...(passages === null ? prev.filter(h => h.kind === 'passage') : passages.map(p => ({
+        kind: 'passage',
+        id: p.id,
+        label: p.phrase,
+        source: p.source,
+        createdAt: p.created_at,
+        kept: p.kept,
+      }))),
+      ...(sessions === null ? prev.filter(h => h.kind === 'session') : sessions.map(s => ({
+        kind: 'session',
+        id: s.id,
+        label: s.sourceRef,
+        source: s.source,
+        createdAt: s.createdAt,
+        sentenceCount: s.sentenceCount,
+        videoId: s.videoId,
+        // The first sentence (plan 136), what a card prints in place
+        // of the file name the grab gave the session.
+        firstLine: s.firstLine ?? null,
+      }))),
+    ]
+    merged.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    return merged
+  }
 
   function beginRun() {
     runIdRef.current += 1
@@ -156,18 +184,26 @@ export function useAnalyzerSession(session) {
   async function analyzeText(text, { source = 'typed' } = {}) {
     const trimmed = (text ?? '').trim()
     if (!trimmed || status === 'working') return
+    // 足跡 (plan 218): which door the breakdown was asked through, never
+    // the text. A photo's text arrives here too, after the OCR.
+    countUse('analyzer', source === 'typed' ? 'text' : 'photo')
 
     const run = beginRun()
     setVideoSessionId(null)
     try {
       const data = await apiJson('/api/phrase/analyze', session, {
         method: 'POST',
-        body: JSON.stringify({ phrase: trimmed, lang, source }),
+        // `lines` (plan 235): each sentence held to the width a video's
+        // lines are, which only the analyser asks for.
+        body: JSON.stringify({ phrase: trimmed, lang, source, lines: true }),
       })
       if (run !== runIdRef.current) return
       setPassage({
         ...emptyPassage(),
         source,
+        // The history row it was saved as: what its translations and its
+        // explanations are asked by (plan 235).
+        historyId: data.id ?? null,
         sentences: data.sentences ?? [],
         truncated: data.truncated ?? 0,
       })
@@ -194,6 +230,7 @@ export function useAnalyzerSession(session) {
       setPassage({
         ...emptyPassage(),
         source: data.source ?? 'typed',
+        historyId: id,
         text: data.passage ?? '',
         sentences: data.sentences ?? [],
         truncated: data.truncated ?? 0,
@@ -228,6 +265,7 @@ export function useAnalyzerSession(session) {
   // `url` is only ever the optional name of a video to play alongside
   // them. See docs/adr/0003's 2026-08-26 amendment.
   async function startVideoFromTranscript(transcript, { url, start, end }) {
+    countUse('analyzer', 'video')
     const run = beginRun()
     try {
       const data = await apiJson('/api/video/session', session, {
@@ -247,10 +285,10 @@ export function useAnalyzerSession(session) {
       setVideoSessionId(data.sessionId)
     } catch (e) {
       if (run !== runIdRef.current) return
-      // Surface the parser's own message: it says what was wrong with
-      // the paste, which is the useful thing. A generic failure here
-      // would leave the learner with nothing to act on.
-      setError((e.body && e.body.detail) || e.message)
+      // What was wrong with the paste, which is the useful thing -- in
+      // the learner's language, from the refusal's code
+      // (./videoErrors.js), never the server's English.
+      setError({ video: e })
       setStatus('failed')
     }
   }
@@ -270,6 +308,7 @@ export function useAnalyzerSession(session) {
   async function startVideoFromLink(url, { start, end } = {}) {
     const trimmed = url?.trim()
     if (!trimmed) return
+    countUse('analyzer', 'video')
     const run = beginRun()
     try {
       const data = await apiJson('/api/video/session', session, {
@@ -284,17 +323,19 @@ export function useAnalyzerSession(session) {
       setVideoSessionId(data.sessionId)
     } catch (e) {
       if (run !== runIdRef.current) return
-      // The API's own sentence, always. A 400 here means this server
-      // cannot fetch, a 429 means the day's allowance is spent, and
-      // both of those name the file path as the way through -- which a
-      // generic "something went wrong" would throw away.
-      setError((e.body && e.body.detail) || e.message)
+      // Named, always. A 400 here means this server cannot fetch, a
+      // 429 means the day's allowance is spent, and both sentences name
+      // the file path as the way through -- which a generic "something
+      // went wrong" would throw away. Worded from the refusal's code
+      // (./videoErrors.js), in the learner's language.
+      setError({ video: e })
       setStatus('failed')
     }
   }
 
-  async function startVideoFromFile(file, { url, start, end, timing }) {
+  async function startVideoFromFile(file, { url, start, end, timing, translations }) {
     if (!file) return
+    countUse('analyzer', 'video')
     const run = beginRun()
     try {
       const formData = new FormData()
@@ -302,6 +343,11 @@ export function useAnalyzerSession(session) {
       // The grab's recognised track, the clock the lines' words are
       // read out on (backend/study/word_timing.py). Never the lines.
       if (timing) formData.append('timing', timing)
+      // The video's own translation, {lang: file} (plan 242): what the
+      // server prints under the lines it lines up with. Never the lines.
+      for (const [lang, track] of Object.entries(translations ?? {})) {
+        formData.append(`translation_${lang}`, track)
+      }
       // Same rule as the JSON ingest: an absent bound is absent, not 0.
       if (start != null) formData.append('start', String(start))
       if (end != null) formData.append('end', String(end))
@@ -313,21 +359,31 @@ export function useAnalyzerSession(session) {
       setVideoSessionId(data.sessionId)
     } catch (e) {
       if (run !== runIdRef.current) return
-      setError((e.body && e.body.detail) || e.message || t.subtitleTooLarge)
+      setError({ video: e })
       setStatus('failed')
     }
   }
 
   // ── The poll ──────────────────────────────────────────────
+  // Keyed on the session id alone. Supabase hands the app a new session
+  // object on every token refresh and every return to the tab -- the
+  // same sign-in -- and a ready Passage asked for again on it put the
+  // line back on its first stop under a playing video, or, the request
+  // dropped on a poor connection, took the Passage and its player off
+  // the screen. The poll asks with the session current when it asks.
+  const sessionRef = useRef(session)
+  useEffect(() => { sessionRef.current = session })
   useEffect(() => {
     if (videoSessionId == null) return undefined
     let cancelled = false
     let timer = null
+    let misses = 0
 
     async function poll() {
       try {
-        const data = await apiJson(`/api/video/session/${videoSessionId}`, session)
+        const data = await apiJson(`/api/video/session/${videoSessionId}`, sessionRef.current)
         if (cancelled) return
+        misses = 0
         // "Still generating" arrives as HTTP 202 -- which is a SUCCESS
         // status, so apiJson RESOLVES with {status: 'generating'} and
         // the catch below never sees it. This used to be handled as
@@ -345,6 +401,9 @@ export function useAnalyzerSession(session) {
         }
         setPassage({
           ...emptyPassage(),
+          // What the line's translations are asked by (plan 235,
+          // ./useLineTranslations.js).
+          sessionId: videoSessionId,
           source: data.source ?? 'video',
           sourceRef: data.sourceRef,
           videoId: data.videoId ?? null,
@@ -356,7 +415,14 @@ export function useAnalyzerSession(session) {
         setStatus('ready')
       } catch (e) {
         if (cancelled) return
-        setError((e.body && e.body.error) || e.message)
+        if (transient(e) && misses < RETRIES) {
+          misses += 1
+          timer = setTimeout(poll, Math.min(POLL_MS * 2 ** (misses - 1), RETRY_CAP_MS))
+          return
+        }
+        // A failed session is a 503 whose body is the stored failure:
+        // its `code` is worded below, its English `error` is the logs'.
+        setError({ video: e })
         setStatus('failed')
       }
     }
@@ -368,15 +434,22 @@ export function useAnalyzerSession(session) {
     // mid-generation leaves a request loop running for the life of the
     // screen.
     return () => { cancelled = true; if (timer) clearTimeout(timer) }
-  }, [videoSessionId, session])
+  }, [videoSessionId])
 
   // ── The deep tier, one Sentence at a time ─────────────────
   // Never the whole Passage: it can be up to study/sentences
   // .MAX_SENTENCES long, and `deep` on every one of them would
   // multiply the cost by that many. See docs/adr/0001.
-  async function explain(index) {
+  //
+  // A line is explained where it stands (plan 235): the server has its
+  // place and its neighbours -- a video's on its session, a typed
+  // Passage's on its history row -- and `about` the video's title and
+  // channel, which only the player knows. A Passage saved nowhere is
+  // explained as the sentence alone.
+  async function explain(index, about = {}) {
     const sentence = passage?.sentences?.[index]
     if (!sentence || explaining[index]) return
+    countUse('explain', 'open')
 
     setExplaining(prev => ({ ...prev, [index]: true }))
     setExplainError(prev => ({ ...prev, [index]: null }))
@@ -386,12 +459,21 @@ export function useAnalyzerSession(session) {
         ? await apiJson(
             `/api/video/session/${videoSessionId}/sentence/${index}/explain`,
             session,
-            { method: 'POST', body: JSON.stringify({ lang }) },
+            {
+              method: 'POST',
+              body: JSON.stringify({ lang, title: about.title ?? '', channel: about.channel ?? '' }),
+            },
           )
-        : await apiJson('/api/phrase/analyze', session, {
-            method: 'POST',
-            body: JSON.stringify({ phrase: sentence.text, deep: true, lang, save: false }),
-          }).then(data => data.sentences?.[0] ?? data)
+        : passage?.historyId != null
+          ? await apiJson(
+              `/api/phrase/history/${passage.historyId}/sentence/${index}/explain`,
+              session,
+              { method: 'POST', body: JSON.stringify({ lang }) },
+            )
+          : await apiJson('/api/phrase/analyze', session, {
+              method: 'POST',
+              body: JSON.stringify({ phrase: sentence.text, deep: true, lang, save: false }),
+            }).then(data => data.sentences?.[0] ?? data)
 
       if (run !== runIdRef.current) return
       setPassage(prev => (prev
@@ -409,8 +491,10 @@ export function useAnalyzerSession(session) {
       setExplainError(prev => ({
         ...prev,
         // 503 is the provider being down, which is temporary and worth
-        // saying so. Anything else is a generic failure.
-        [index]: e?.status === 503 ? (e.message || t.explainUnavailable) : t.explainFailed,
+        // saying so. Anything else is a generic failure. Never the
+        // server's own sentence: ApiError's message is never empty, so
+        // the backend's English used to win every time (plan 215).
+        [index]: e?.status === 503 ? t.explainUnavailable : t.explainFailed,
       }))
     } finally {
       setExplaining(prev => ({ ...prev, [index]: false }))
@@ -420,9 +504,15 @@ export function useAnalyzerSession(session) {
   // 保存 -- pin or unpin ONE Sentence. Optimistic: pinning is a small,
   // reversible act and a spinner on it would cost more than the
   // occasional revert.
-  async function keepSentence(index) {
+  //
+  // One request per Sentence at a time (plan 211): a double press
+  // pinned and unpinned it in two crossing requests. `refresh: false`
+  // leaves the history to the caller (keepSentences, below).
+  const keeping = useRef(new Set())
+  async function keepSentence(index, { refresh = true } = {}) {
     const sentence = passage?.sentences?.[index]
-    if (!sentence) return
+    if (!sentence || keeping.current.has(sentence.text)) return
+    keeping.current.add(sentence.text)
     const alreadyKept = kept.has(sentence.text)
     setKept(prev => {
       const next = new Set(prev)
@@ -448,6 +538,21 @@ export function useAnalyzerSession(session) {
               : (passage.sourceRef ?? ''),
           }),
         })
+      }
+    } finally {
+      keeping.current.delete(sentence.text)
+      if (refresh) fetchHistory()
+    }
+  }
+
+  // Several Sentences pinned at once (the analyser's "keep every i+1"):
+  // one after another and the history asked once at the end, where a
+  // keep each in parallel sent three requests per Sentence at once
+  // (plan 211). A failure leaves the rest to go on.
+  async function keepSentences(indices) {
+    try {
+      for (const index of indices) {
+        await keepSentence(index, { refresh: false }).catch(() => {})
       }
     } finally {
       fetchHistory()
@@ -483,7 +588,7 @@ export function useAnalyzerSession(session) {
       } else {
         await apiJson('/api/phrase/analyze', session, {
           method: 'POST',
-          body: JSON.stringify({ phrase: entry.label, lang, source: entry.source ?? 'typed' }),
+          body: JSON.stringify({ phrase: entry.label, lang, source: entry.source ?? 'typed', lines: true }),
         })
       }
     } finally {
@@ -506,7 +611,10 @@ export function useAnalyzerSession(session) {
     passage,
     sentences,
     status,
-    error,
+    // A video failure is kept as it was thrown and worded here, at
+    // render, so the sentence follows the learner's language rather
+    // than the one in force when it failed (./videoErrors.js).
+    error: error?.video ? videoErrorMessage(error.video, t) : error,
     history,
     focusIndex: safeIndex,
     setFocusIndex: setFocus,
@@ -515,6 +623,7 @@ export function useAnalyzerSession(session) {
     explainError,
     kept,
     keepSentence,
+    keepSentences,
     analyzeText,
     startVideoFromFile,
     startVideoFromLink,

@@ -4,6 +4,8 @@ import { useLang } from '../../LangContext'
 import { Seg } from '../chrome/Console'
 import { ProviderButton } from './ProviderButton'
 import { authRedirectError, authRedirectMessage } from '../../lib/authRedirect'
+import { authErrorMessage } from '../../lib/authErrors'
+import { emailRedirectTarget } from '../../lib/oauth'
 import { playUi } from '../../lib/audio'
 
 // ── The sign-in card (plan 075; lifted out of AuthScreen, plan 122) ──
@@ -29,7 +31,7 @@ import { playUi } from '../../lib/audio'
 //                Welcome's Board did (the desk) or on the gold road
 //                round the form (a phone)
 export function AuthCard({ initialMode = 'login', autoFocus = false, seg = true, frame = null }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const [mode, setMode]         = useState(initialMode) // 'login' | 'signup'
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
@@ -51,6 +53,25 @@ export function AuthCard({ initialMode = 'login', autoFocus = false, seg = true,
     setSuccess(null)
   }
 
+  // 乗車 (plan 247): a card kept by a link has no password, so signing
+  // in mails a link too -- which is also the door a forgotten password
+  // had none of. Only an account that exists is mailed (shouldCreateUser
+  // false): a new learner boards from the Welcome, on a guest pass.
+  async function sendLink() {
+    playUi('click-mode-selection')
+    setError(null)
+    setSuccess(null)
+    const address = email.trim()
+    if (!/.+@.+\..+/.test(address)) { setError(t.authLinkNeedsEmail); return }
+    setLoading(true)
+    const { error } = await supabase.auth.signInWithOtp({
+      email: address, options: { shouldCreateUser: false, emailRedirectTo: emailRedirectTarget() },
+    })
+    setLoading(false)
+    if (error) setError(authErrorMessage(error, t, { form: true }))
+    else setSuccess(t.authLinkSent(address))
+  }
+
   // The action is drawn as the boarding's gate wherever the card stands
   // (the Welcome's frame), so it sounds the gate's departure -- from the
   // button and from Enter in either field alike.
@@ -59,13 +80,23 @@ export function AuthCard({ initialMode = 'login', autoFocus = false, seg = true,
     setError(null)
     setSuccess(null)
     setLoading(true)
+    // A refusal is worded from its code by the table every auth refusal
+    // goes through (lib/authErrors.js), never Supabase's own English
+    // ("Invalid login credentials", a dropped connection's "Failed to
+    // fetch"; plan 215).
     if (mode === 'signup') {
-      const { error } = await supabase.auth.signUp({ email, password })
-      if (error) setError(error.message)
+      // `lang` on the new user's metadata is what the dashboard's
+      // confirmation template branches on ({{ .Data.lang }}), so the
+      // mail is written in the language the learner signed up in, and
+      // its link returns to this origin rather than the Site URL.
+      const { error } = await supabase.auth.signUp({
+        email, password, options: { data: { lang }, emailRedirectTo: emailRedirectTarget() },
+      })
+      if (error) setError(authErrorMessage(error, t, { form: true }))
       else setSuccess(t.signupSuccess)
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) setError(error.message)
+      if (error) setError(authErrorMessage(error, t, { form: true }))
     }
     setLoading(false)
   }
@@ -106,6 +137,9 @@ export function AuthCard({ initialMode = 'login', autoFocus = false, seg = true,
         onChange={e => setPassword(e.target.value)}
         onKeyDown={onEnter}
       />
+      {mode === 'login' && (
+        <button type="button" className="auth-link" onClick={sendLink} disabled={loading} data-action="sign-in-link">{t.authLinkSend}</button>
+      )}
       {error && <p className="auth-message auth-message--error" role="alert">{error}</p>}
       {success && <p className="auth-message auth-message--success" role="status">{success}</p>}
     </>

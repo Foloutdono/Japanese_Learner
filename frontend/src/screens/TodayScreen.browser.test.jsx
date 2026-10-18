@@ -7,9 +7,10 @@ import { LangProvider } from '../LangContext'
 import '../index.css'
 
 // ── The gate (plan 070) ───────────────────────────────────────
-// /today is the fare gate with the day's lanes as the run's
-// picker, and the strip. The finish is the run's own since plan 191
-// (/today/clear); the gate prints none.
+// /today is the fare gate with the day's lanes as the run's picker,
+// drawn since plan 199 as a dial with the switches in the services
+// sheet. The finish is the run's own since plan 191 (/today/clear);
+// the gate prints none.
 //
 // The two .btn-primary contracts below predate the gate (plans 051 and
 // 052): the screen's filled action used to be a .btn-primary and the
@@ -43,6 +44,7 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 
 const { default: TodayScreen } = await import('./TodayScreen')
 const { beginDeparture } = await import('../stores/departure')
+const { forgetShown } = await import('../stores/guide')
 
 const settle = (ms = 80) => new Promise(r => setTimeout(r, ms))
 
@@ -92,43 +94,39 @@ beforeEach(() => {
 })
 
 // The switches stand in the services sheet since plan 166, which
-// portals to the body.
+// portals to the body. A line of one lane is its own switch.
 async function services(screen) {
-  screen.container.querySelector('.gate-one__services').click()
+  screen.container.querySelector('.tdy-door').click()
   await settle()
-  return [...document.querySelectorAll('.gate-sheet .lane')]
+  return [...document.querySelectorAll('.tdy-sheet .tdy-line__head')]
 }
 
 describe('TodayScreen — the gate', () => {
-  it('opens on the strip and the gate with every lane on, and no bar', async () => {
+  it('opens on the dial and the gate with every lane on, and no bar', async () => {
     const screen = await mount()
     await settle()
     // No bar (owner's call, 2026-09-20): the name is the clipped <h1>.
     expect(screen.container.querySelector('.bar')).toBeNull()
     expect(screen.container.querySelector('h1.sr-only').textContent).toBe('Service du jour')
-    // The strip reads over the gate, not under it: a status line
-    // belongs above the object it is about, and it leaves the gate the
-    // last thing on the screen, free to take the rest of it.
-    const order = [...screen.container.querySelectorAll('.pass--strip, .gate-card')]
-      .map(el => (el.classList.contains('pass--strip') ? 'strip' : 'gate'))
-    expect(order).toEqual(['strip', 'gate'])
-    const lanes = await services(screen)
-    expect(lanes).toHaveLength(3)
-    expect([...lanes].every(l => l.getAttribute('aria-pressed') === 'true')).toBe(true)
-    expect(screen.container.querySelector('.gate-card__count').textContent).toBe('19')
-    expect(screen.container.querySelector('.pass--strip .stamp-rally')).toBeTruthy()
-    expect(screen.container.querySelector('.hall-pace')).toBeTruthy()
+    // The day at a glance (plan 199): the strip and the pace that stood
+    // over the gate are the sheet's figures and the HUD's ring now.
+    expect(screen.container.querySelector('.pass--strip, .hall-pace')).toBeNull()
+    expect(screen.container.querySelector('.tdy-hero .tdy-dial')).toBeTruthy()
+    expect(screen.container.querySelector('.tdy-dial__count').textContent).toBe('19')
+    const lines = await services(screen)
+    expect(lines).toHaveLength(3)
+    expect(lines.every(l => l.getAttribute('aria-pressed') === 'true')).toBe(true)
   })
 
-  it('a lane switched off leaves the count, and the run carries the choice', async () => {
+  it('a line switched off leaves the count, and the run carries the choice', async () => {
     const screen = await mount()
     await settle()
     // The lanes are grouped by line, vocab before kanji: pick by name.
-    const kanji = (await services(screen)).find(l => l.textContent.includes('N4'))
+    const kanji = (await services(screen)).find(l => l.textContent.includes('Kanji'))
     kanji.click()
     await settle()
-    expect(kanji.classList.contains('lane--off')).toBe(true)
-    expect(screen.container.querySelector('.gate-card__count').textContent).toBe('10')
+    expect(kanji.getAttribute('aria-pressed')).toBe('false')
+    expect(screen.container.querySelector('.tdy-dial__count').textContent).toBe('10')
 
     screen.container.querySelector('.btn-depart').click()
     expect(beginDeparture).toHaveBeenCalledTimes(1)
@@ -145,12 +143,11 @@ describe('TodayScreen — the gate', () => {
     // Every line switched off is the whole day off — the all/none link
     // that used to do it in one tap is gone, and the line switches are
     // what stands in for it.
-    await services(screen)
-    for (const head of document.querySelectorAll('.gate-sheet__head')) {
+    for (const head of await services(screen)) {
       if (head.getAttribute('aria-pressed') === 'true') head.click()
       await settle()
     }
-    expect(document.querySelectorAll('.gate-sheet .lane--off')).toHaveLength(3)
+    expect(document.querySelectorAll('.tdy-sheet .tdy-line--off')).toHaveLength(3)
     expect(screen.container.querySelector('.btn-depart').disabled).toBe(true)
   })
 
@@ -167,7 +164,7 @@ describe('TodayScreen — the gate', () => {
     )
     await settle()
     expect(screen.container.querySelector('.today-clear')).toBeNull()
-    expect(screen.container.querySelector('.gate-card')).toBeTruthy()
+    expect(screen.container.querySelector('.tdy-hero')).toBeTruthy()
   })
 
   // 運休 (plan 191): the morning after a missed day a rest day covered,
@@ -197,7 +194,43 @@ describe('TodayScreen — the gate', () => {
     notice.querySelector('.btn-depart--gate').click()
     await settle()
     expect(apiJson).toHaveBeenCalledWith('/api/today/rest/seen', undefined, expect.objectContaining({ method: 'POST' }))
-    expect(screen.container.querySelector('.run-stub')).toBeTruthy()
+    // The router boards the run as a transition, after the urgent render
+    // that puts the gate back (since plan 205 a print, not a quick paint):
+    // wait for the run rather than a fixed beat, which a loaded runner
+    // outlasts.
+    await vi.waitFor(() => expect(screen.container.querySelector('.run-stub')).toBeTruthy())
+  })
+
+  // 回復運転 (plan 217): a catch-up is a figure of the day, and a door to
+  // where it is changed; a share spent with reviews held back leaves a
+  // quiet way on over the shut gate.
+  it('counts the catch-up among the day\'s figures, a door to Settings › Reviews', async () => {
+    todayRef.current = {
+      total: 19, by_source: {}, lanes: LANES, next_due: null,
+      review: { cap: null, held: 40, catchup: { per_day: 23, day: 2, of: 5 }, away: null, comeback: null },
+    }
+    const screen = await mount()
+    await settle()
+    await services(screen)
+    const cell = document.querySelector('.tdy-sheet a.tdy-day__cell[href="/profile/settings/reviews"]')
+    expect(cell).toBeTruthy()
+    expect(cell.querySelector('.tdy-day__fig').textContent).toBe('2/ 5')
+  })
+
+  it('offers the reviews held back past the spent share as a run of their own', async () => {
+    todayRef.current = {
+      total: 0, by_source: {}, lanes: [], next_due: null, reviewed: { total: 20, by_line: { vocab: 20 } },
+      tomorrow: { cards: 20, minutes: 4 },
+      review: { cap: 20, held: 37, catchup: null, away: null, comeback: null },
+    }
+    beginDeparture.mockClear()
+    const screen = await mount()
+    await settle()
+    const extra = screen.container.querySelector('[data-action="review-extra"]')
+    expect(extra).toBeTruthy()
+    expect(extra.textContent).toContain('37')
+    extra.click()
+    expect(beginDeparture.mock.calls[0][0].path).toBe('/today/run?extra=1')
   })
 })
 
@@ -249,12 +282,11 @@ describe('TodayScreen — the guide', () => {
     const screen = await mount()
     await settleLong()
     const root = screen.container
-    expect(root.querySelector('[data-guide="today.strip"]')).toBeTruthy()
     expect(root.querySelector('[data-guide="today.gate"]')).toBeTruthy()
     const guide = document.querySelector('.guide')
     expect(guide).toBeTruthy()
     // The tab bar is the shell's, not this screen's: the guide starts
-    // on the gate, and never stops at the strip.
+    // on the gate.
     expect(guide.dataset.stop).toBe('today.gate')
     document.querySelector('[data-action="guide-skip"]').click()
     await settleLong()
@@ -271,11 +303,96 @@ describe('TodayScreen — the guide', () => {
     let screen = await mount()
     await settleLong()
     expect(document.querySelector('.guide')).toBeNull()
-    screen.unmount()
+    await screen.unmount()
     summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }
     screen = await mount()
     await settleLong()
     expect(document.querySelector('.guide')).toBeNull()
-    screen.unmount()
+    await screen.unmount()
+  })
+})
+
+// 乗換 (plan 243b): the sheet that asks a new learner, once, whether
+// they studied in another app -- after the gate's guide, never with it,
+// and gone the moment it is answered, whichever way.
+describe('TodayScreen — the transfer sheet', () => {
+  const GUIDED = { today: '2026-10-17T00:00:00Z' }
+  const offered = extra => ({ username: 'Aiko', week: [], streak: 0, level: 1, guided: GUIDED, transferOffer: true, ...extra })
+  const sheet = () => document.querySelector('.tr-sheet')
+  const settleLong = (ms = 200) => new Promise(r => setTimeout(r, ms))
+
+  function mountWithSettings() {
+    return render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/today']}>
+          <Routes>
+            <Route path="/today" element={<TodayScreen />} />
+            <Route path="/profile/settings/:page" element={<p data-page="settings">settings</p>} />
+          </Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+  }
+
+  beforeEach(() => {
+    apiJson.mockClear()
+    forgetShown()
+  })
+
+  it('asks, with the apps it reads, and "I’m starting here" answers it', async () => {
+    summaryRef.current = offered()
+    const screen = await mountWithSettings()
+    await settleLong()
+    expect(document.querySelector('.guide')).toBeNull()
+    expect(sheet()).toBeTruthy()
+    expect(sheet().querySelector('h2').textContent.replace(/\u00a0/g, ' ')).toBe('Tu as déjà appris ailleurs ?')
+    expect([...sheet().querySelectorAll('.tr-chip')].map(c => c.textContent)).toEqual(['Anki', 'WaniKani', 'Renshuu'])
+    sheet().querySelector('[data-action="transfer-offer-later"]').click()
+    await settle()
+    expect(sheet()).toBeNull()
+    const posted = apiJson.mock.calls.filter(([u]) => u === '/api/transfer/offer')
+    expect(posted).toHaveLength(1)
+    expect(JSON.parse(posted[0][2].body)).toEqual({ choice: 'later' })
+    await screen.unmount()
+  })
+
+  it('goes to Settings › Correspondance', async () => {
+    summaryRef.current = offered()
+    const screen = await mountWithSettings()
+    await settleLong()
+    sheet().querySelector('[data-action="transfer-offer-go"]').click()
+    // Waited for, not slept on: the page arrives through the router's
+    // transition, which a fixed 80ms lost on a loaded CI runner.
+    await vi.waitFor(() => expect(document.querySelector('[data-page="settings"]')).toBeTruthy(), { timeout: 5000, interval: 20 })
+    const posted = apiJson.mock.calls.filter(([u]) => u === '/api/transfer/offer')
+    expect(posted.map(([, , o]) => JSON.parse(o.body))).toEqual([{ choice: 'go' }])
+    await screen.unmount()
+  })
+
+  it('shut with Escape counts as an answer', async () => {
+    summaryRef.current = offered()
+    const screen = await mountWithSettings()
+    await settleLong()
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle()
+    expect(sheet()).toBeNull()
+    expect(apiJson.mock.calls.filter(([u]) => u === '/api/transfer/offer')).toHaveLength(1)
+    await screen.unmount()
+  })
+
+  it('waits for the gate’s guide, and is not drawn when the profile does not offer', async () => {
+    summaryRef.current = offered({ guided: {} })
+    let screen = await mountWithSettings()
+    await settleLong()
+    expect(document.querySelector('.guide')).toBeTruthy()
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    localStorage.removeItem('jp-guided')
+    summaryRef.current = offered({ transferOffer: false })
+    screen = await mountWithSettings()
+    await settleLong()
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }
   })
 })

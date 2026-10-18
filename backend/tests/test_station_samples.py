@@ -20,6 +20,7 @@ import re
 import pytest
 
 from content import comprehension_seed, listening_clips, reading_sentences
+from study import conversation
 from content import frequency_data as freq
 from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
 from content.kana_data import KANA_SETS
@@ -200,7 +201,7 @@ def test_the_jmdict_pool_carries_no_sample(client):
 # something untrue: a size that is not the bank's, a specimen that is
 # not what the run serves first, a question in the wrong language, an
 # exam item whose word is not in its sentence.
-PRACTICE = ("reading", "translation", "comprehension", "dictation", "composition", "exam")
+PRACTICE = ("reading", "translation", "comprehension", "dictation", "composition", "conversation", "exam")
 KANA_ONLY = re.compile(r"^[ぁ-ゟ゠-ヿー]+$")
 
 
@@ -328,6 +329,27 @@ def test_the_exam_vocab_carries_the_paper_s_four_readings(client):
         assert all(KANA_ONLY.match(o) for o in options), (level, options)
     station_samples.cache_clear()
     assert _stops(client, "exam") == first
+
+
+def test_a_conversation_card_is_the_grade_s_first_scene(client):
+    # Plan 244: 会話 is the desk gate's seventh train, and its card is
+    # the scene a learner meets first at the grade -- its place, its
+    # title and the line it opens on -- in the learner's language.
+    fr = _stops(client, "conversation", "fr")
+    en = _stops(client, "conversation", "en")
+    for level in LEVELS:
+        scenes = conversation.bank()[level]
+        first = scenes[0]
+        card = fr[level]["card"]
+        assert card["opener"] == first["turns"][0]["them"]["jp"]
+        assert card["place"] == {"jp": first["place"]["jp"], "name": first["place"]["fr"]}
+        assert card["title"] == first["title"]["fr"]
+        assert card["them"] == first["them"]["fr"]
+        assert en[level]["card"]["title"] == first["title"]["en"]
+        assert en[level]["card"]["opener"] == card["opener"]
+        assert fr[level]["size"] == len(scenes)
+        assert fr[level]["sample"] == [scene["title"]["fr"] for scene in scenes]
+        assert fr[level]["points"] == []
 
 
 def test_an_unknown_practice_line_is_still_a_404(client):

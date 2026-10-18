@@ -4,13 +4,13 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 低 — Today on a laptop's short window (plan 169) ────────────────
-// The side column beside the gate runs the window's height and scrolls
-// when it holds more; nothing in it gives way to fit. On a 600px window
-// the pass's strip at its top, which clips its own sheen, had been
-// crushed to a 26px sliver. And a lane's tile holds its name and its
-// count apart: three tiles of 93px across a laptop's gate read "Hi…"
-// with GRATUIT printed over the count.
+// ── 低 — Today on a laptop's short window (plans 169, 199) ──────────
+// The column beside the dial runs the window's height and scrolls when
+// it holds more; nothing in it gives way to fit (plan 169's lesson: on
+// a 600px window the pass's strip that stood there had been crushed to
+// a 26px sliver). The dial gives way instead, to a smaller size, and
+// the gate stays under it. And a row holds its name and its count
+// apart: a tile of 93px had read "Hi…" with GRATUIT over the count.
 
 vi.mock('./lib/api', () => ({
   api: p => p,
@@ -21,8 +21,11 @@ vi.mock('./lib/api', () => ({
 }))
 vi.mock('./lib/audio', async o => ({ ...(await o()), playUi: vi.fn(), playClick: vi.fn() }))
 const TODAY = {
-  total: 10, by_source: { kana: 10 }, next_due: null, pace: { target: 10, newToday: 0, remaining: 10 },
-  lanes: [{ id: 'kana:hiragana_basic:kana.flashcard.f2b', kind: 'section', source: 'kana', deck: 'hiragana_basic', mode: 'kana.flashcard.f2b', due: 10, new: 10 }],
+  total: 16, by_source: { kana: 16 }, next_due: null, pace: { target: 10, newToday: 0, remaining: 10 },
+  lanes: [
+    { id: 'kana:hiragana_basic:kana.flashcard.f2b', kind: 'section', source: 'kana', deck: 'hiragana_basic', mode: 'kana.flashcard.f2b', due: 10, new: 10 },
+    { id: 'kana:katakana_basic:kana.write_romaji', kind: 'section', source: 'kana', deck: 'katakana_basic', mode: 'kana.write_romaji', due: 6, new: 0 },
+  ],
 }
 vi.mock('./stores/today', () => ({
   useTodaySummary: () => ({ data: TODAY, failed: false }),
@@ -61,29 +64,71 @@ function mount() {
 }
 
 describe('Today on a short window', () => {
-  it('keeps every block of the side column whole, the column scrolling instead', async () => {
+  it('keeps every panel of the column whole, the column scrolling instead', async () => {
     await mount()
     await settle()
-    const side = document.querySelector('.today > .desk-side')
-    // The pass's sheen reaches under its floor on purpose, so it is
-    // measured by its height: its whole strip, not the sliver.
-    for (const block of [...side.children].filter(b => !b.classList.contains('pass'))) {
-      expect(block.scrollHeight, block.className).toBeLessThanOrEqual(block.clientHeight + 1)
+    const col = document.querySelector('.today .tdy-desk__col')
+    for (const panel of col.children) {
+      expect(panel.scrollHeight, panel.className).toBeLessThanOrEqual(panel.clientHeight + 1)
     }
-    expect(box(side.querySelector('.pass--strip')).height).toBeGreaterThan(85)
-    expect(getComputedStyle(side).overflowY).toBe('auto')
+    expect(getComputedStyle(col).overflowY).toBe('auto')
+    expect(box(col).bottom).toBeLessThanOrEqual(window.innerHeight)
   })
 
-  it('holds a lane\'s name and its count apart on the tile', async () => {
+  // 一枚 (plan 199b, the owner's pick A3·1): a five-line day, every
+  // figure of the day and the week ahead, and still no scroll.
+  it('holds a five-line day on the board with no scroll, nothing clipped', async () => {
+    const lanes = TODAY.lanes
+    const lane = (source, deck, mode, due) => ({ id: `${source}:${deck}:${mode}`, kind: 'section', source, deck, mode, due, new: 0 })
+    TODAY.lanes = [
+      lane('kana', 'hiragana_basic', 'kana.flashcard.f2b', 8),
+      lane('vocab', 'N5', 'vocab.flashcard.f2b', 158),
+      lane('kanji', 'N5', 'kanji.flashcard.f2b', 51), lane('kanji', 'N4', 'kanji.flashcard.f2b', 35), lane('kanji', 'N5', 'kanji.readings', 33),
+      lane('grammar', 'N5', 'grammar.ladder', 14),
+      { id: 'personal:3:vocab.flashcard.f2b', kind: 'personal', deck_id: 3, deck_name: 'Mots', mode: 'vocab.flashcard.f2b', due: 11, new: 0 },
+    ]
+    TODAY.total = TODAY.lanes.reduce((n, l) => n + l.due, 0)
+    try {
+      await mount()
+      await settle()
+      expect(document.querySelectorAll('.tdy-desk .tdy-line')).toHaveLength(5)
+      const col = document.querySelector('.tdy-desk__col')
+      expect(col.scrollHeight).toBeLessThanOrEqual(col.clientHeight)
+      for (const el of document.querySelectorAll('.tdy-desk__svc .seg__opt, .tdy-day__fig, .tdy-day__what')) {
+        expect(el.scrollWidth, el.textContent).toBeLessThanOrEqual(el.clientWidth + 1)
+      }
+    } finally {
+      TODAY.lanes = lanes
+      TODAY.total = 16
+    }
+  })
+
+  it('gives the dial way to the window, the gate under it and in view', async () => {
     await mount()
     await settle()
-    const tile = document.querySelector('.lane--tile')
-    const where = box(tile.querySelector('.lane__where'))
-    const due = box(tile.querySelector('.lane__due'))
-    const tags = box(tile.querySelector('.lane__tags'))
-    expect(where.right).toBeLessThanOrEqual(due.left)
-    expect(tags.top).toBeGreaterThanOrEqual(due.bottom - 1)
-    // The one lane of its band takes the band's row.
-    expect(Math.round(box(tile).width)).toBe(Math.round(box(tile.parentElement).width))
+    // The dial by its rings (plan 205: its box is the disc's glow).
+    const dial = box(document.querySelector('.tdy-desk .tdy-dial__gate'))
+    const go = box(document.querySelector('.tdy-desk__go .btn-depart'))
+    expect(Math.round(dial.width)).toBeLessThanOrEqual(280)
+    expect(dial.top).toBeGreaterThanOrEqual(box(document.querySelector('.tdy-desk__hero')).top)
+    expect(dial.bottom).toBeLessThanOrEqual(go.top)
+    expect(go.bottom).toBeLessThanOrEqual(window.innerHeight)
+  })
+
+  it('holds a line\'s name and its count apart, and a mode\'s', async () => {
+    await mount()
+    await settle()
+    const head = document.querySelector('.tdy-desk .tdy-line__head')
+    expect(box(head.querySelector('.tdy-line__name')).right).toBeLessThanOrEqual(box(head.querySelector('.tdy-line__n')).left)
+    document.querySelector('.tdy-desk .tdy-line__more').click()
+    await settle(60)
+    expect(document.querySelectorAll('.tdy-desk .tdy-line__lanes .lane')).toHaveLength(2)
+    for (const row of document.querySelectorAll('.tdy-desk .tdy-line__lanes .lane')) {
+      const where = box(row.querySelector('.lane__names'))
+      const due = box(row.querySelector('.lane__due'))
+      expect(where.right).toBeLessThanOrEqual(due.left)
+      const free = row.querySelector('.lane__free')
+      if (free) expect(box(free).right).toBeLessThanOrEqual(due.left)
+    }
   })
 })

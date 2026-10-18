@@ -61,6 +61,10 @@ import { playUi } from '../../lib/audio'
  *       ~440px must EARN its width with a right-hand column (meta, a
  *       figure, a status) — this is that column. The analyser puts
  *       the learner's own record on each platform there.
+ *     meta   — optional node at the far end of the title's row: a
+ *       figure for a card too narrow to earn the aside's column, so a
+ *       long name keeps the card's width (the conversation station's
+ *       record, plan 217).
  *     specimen — optional node drawn between the body and the aside:
  *       the card the platform will ask, small (the desk's line split,
  *       plan 137; components/selection/LinePlatforms.jsx). Only the
@@ -107,6 +111,7 @@ export default function ModeSelector({ modes, onSelect }) {
             <span className="platform-card__body">
               <span className="platform-card__titlerow">
                 <span className="platform-card__title">{m.label}</span>
+                {m.meta && <span className="platform-card__meta">{m.meta}</span>}
               </span>
               {m.desc && <span className="platform-card__desc">{m.desc}</span>}
               {m.sample && (

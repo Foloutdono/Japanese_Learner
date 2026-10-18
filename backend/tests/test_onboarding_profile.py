@@ -5,6 +5,7 @@
 # leaked N2 here would silently change what reading-comprehension tests
 # elsewhere in the suite are served.
 import contextlib
+from datetime import date, timedelta
 
 import pytest
 
@@ -35,7 +36,7 @@ def _clean_onboarding_state(user_id: str):
                         daily_departure = NULL, rating_scale = NULL,
                         motive = NULL, kana_known = NULL, reminder_time = NULL,
                         notifications = FALSE, lines = NULL,
-                        reading_pace = NULL
+                        reading_pace = NULL, card_name = NULL
                     WHERE user_id = %s
                     """,
                     (user_id,),
@@ -93,6 +94,50 @@ def test_complete_creates_the_row_when_none_exists(client):
         assert done.status_code == 200
         assert done.json()["jlptLevel"] == "N5"
         assert client.get("/api/profile").json()["jlptLevel"] == "N5"
+
+
+def test_a_row_seeded_by_a_concurrent_request_is_returned_not_a_500(monkeypatch):
+    # A new account's boot sends PATCH /api/profile/learning and GET
+    # /api/profile at once: both find no row, and the second INSERT
+    # collides on user_id. It used to read that as five username
+    # collisions and answer 500 -- every new learner's first request.
+    # The other request's row is written here in the gap between the
+    # SELECT and the INSERT, where the race puts it.
+    user_id = "test-profile-race"
+    real_name = profile_module._random_username
+    raced = []
+
+    def other_request_wins():
+        if not raced:
+            raced.append(True)
+            conn = db_conn()
+            try:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "INSERT INTO user_profiles(user_id, username) VALUES (%s, %s)",
+                        (user_id, "RaceWinner42"),
+                    )
+                conn.commit()
+            finally:
+                conn.close()
+        return real_name()
+
+    def drop_row():
+        conn = db_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM user_profiles WHERE user_id = %s", (user_id,))
+            conn.commit()
+        finally:
+            conn.close()
+
+    drop_row()
+    monkeypatch.setattr(profile_module, "_random_username", other_request_wins)
+    try:
+        assert profile_module.ensure_profile_row(user_id) == "RaceWinner42"
+        assert raced
+    finally:
+        drop_row()
 
 
 def test_completing_twice_keeps_the_first_timestamp(client):
@@ -240,7 +285,8 @@ def test_volumes_counts_items_not_cards(client):
     # plan 153: 時 じ, 年 ねん, 月 がつ, 杯 はい; plan 186c: the basics moved
     # down (円, 分, 日本, 週, 週間, five greetings) and the months added.
     assert body["vocab"]["N5"] == 704
-    assert body["kanji"]["N1"] == 1232
+    # plan 226: the 93 jōyō characters the deck lacked at N1.
+    assert body["kanji"]["N1"] == 1325
     # 238: the gojūon and the yōon of both scripts, and the fourteen
     # long vowels the syllabary was missing (content/kana_data.py).
     assert body["kana"] == 238
@@ -393,6 +439,125 @@ def test_complete_rejects_bad_boarding_answers(client):
         {"tzOffsetMin": 900},
     ):
         assert client.post("/api/onboarding/complete", json={**base, **bad}).status_code == 422, bad
+
+
+# ── 署名 — the name on the card (plan 247) ───────────────────────
+# The boarding asks for a first name, not a handle: any script, nothing
+# at all an answer, printed on the learner's own card. Never asked reads
+# back as null (the card prints the username, as it did); asked and left
+# empty is '' and prints no name; a caller that does not send it leaves
+# it alone.
+def test_complete_stores_the_card_name_and_the_profile_serves_it(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        assert client.get("/api/profile").json()["cardName"] is None
+        done = client.post("/api/onboarding/complete", json={
+            "jlptLevel": "N5", "dailyNewTarget": 10, "cardName": "  Camille  ",
+        })
+        assert done.status_code == 200, done.text
+        assert done.json()["cardName"] == "Camille"
+        assert client.get("/api/profile").json()["cardName"] == "Camille"
+        # Settings' retake sends no name: the card keeps the one it has.
+        client.post("/api/onboarding/complete", json={"jlptLevel": "N5", "dailyNewTarget": 10})
+        assert client.get("/api/profile").json()["cardName"] == "Camille"
+        # Asked and left empty is an answer of its own.
+        client.post("/api/onboarding/complete", json={"jlptLevel": "N5", "dailyNewTarget": 10, "cardName": ""})
+        assert client.get("/api/profile").json()["cardName"] == ""
+
+
+def test_the_card_name_is_any_script_and_needs_no_uniqueness(client):
+    # Two Camilles are two Camilles: the column is not the username, and
+    # the username is left as it was.
+    with _clean_onboarding_state(DEV_USER_ID):
+        username = client.get("/api/profile").json()["username"]
+        for name in ("さくら", "Jean-Luc", "Zoë Ñúñez", "مریم"):
+            r = client.post("/api/onboarding/complete", json={
+                "jlptLevel": "N5", "dailyNewTarget": 10, "cardName": name,
+            })
+            assert r.status_code == 200, (name, r.text)
+            after = client.get("/api/profile").json()
+            assert after["cardName"] == name
+            assert after["username"] == username
+
+
+def test_the_card_name_is_cleaned_and_held_to_its_length():
+    clean = profile_module.clean_card_name
+    assert clean("  Anne   Marie ") == "Anne Marie"
+    # A tab, a bidi override, a zero-width space: none reaches a card.
+    assert clean("Ka\tito\u202e\u200b") == "Ka ito"
+    # The joiners a script spells names with are kept.
+    assert clean("\u0645\u0647\u200c\u0633\u0627") == "\u0645\u0647\u200c\u0633\u0627"
+    # Composed, so the length counted is the one printed.
+    assert clean("Zoe\u0308") == "Zoë"
+    assert clean("x" * profile_module.CARD_NAME_MAX) == "x" * profile_module.CARD_NAME_MAX
+    with pytest.raises(ValueError):
+        clean("x" * (profile_module.CARD_NAME_MAX + 1))
+
+
+def test_complete_and_patch_refuse_a_name_too_long(client):
+    long = "x" * (profile_module.CARD_NAME_MAX + 1)
+    base = {"jlptLevel": "N5", "dailyNewTarget": 10}
+    assert client.post("/api/onboarding/complete", json={**base, "cardName": long}).status_code == 422
+    assert client.patch("/api/profile", json={"cardName": long}).status_code == 422
+
+
+# ── Every contract the card can send is one the office signs ──────
+# The card (plan 247) is the last screen before the app, and the only
+# way past it is this POST: a 422 it cannot fix leaves a learner with
+# nowhere to go (it happened once, to every beginner, 2026-09-09; see
+# goal_is_coherent). So each extreme the card can build is posted here
+# as BoardingFlow builds it -- the kana's own stop, a goal equal to the
+# level, none at all, the day's first and last half hour, the planet's
+# two ends, one line, a full-length name in any script.
+_SOON = (date.today() + timedelta(days=12)).isoformat()
+_LATER = (date.today() + timedelta(days=900)).isoformat()
+
+
+@pytest.mark.parametrize("body, name", [
+    # « Pas encore »: a novice riding to the kana, at dawn, at 5 a day,
+    # on the far side of the date line, on one line, with no name.
+    ({"jlptLevel": "N5", "goalLevel": "novice", "goalTargetDate": _SOON, "dailyDeparture": "am",
+      "kanaKnown": "none", "lines": ["grammar"], "rhythmMin": 5, "dailyNewTarget": 5,
+      "reminderTime": "06:00", "notifications": False, "tzOffsetMin": 840, "cardName": ""}, ""),
+    # One script read: a novice riding to N5 -- the goal equal to the
+    # level -- at the last half hour, from the other side of the planet.
+    ({"jlptLevel": "N5", "goalLevel": "N5", "goalTargetDate": _SOON, "dailyDeparture": "pm",
+      "kanaKnown": "hiragana", "lines": ["vocab", "kanji"], "rhythmMin": 20, "dailyNewTarget": 20,
+      "reminderTime": "23:30", "notifications": True, "tzOffsetMin": -720,
+      "cardName": "José-María Ñúñez"}, "José-María Ñúñez"),
+    # A reader at N1: no stop ahead, so no goal and no date; a name of
+    # twenty-four kanji, the most a card holds.
+    ({"jlptLevel": "N1", "dailyDeparture": "noon", "kanaKnown": "both",
+      "lines": ["vocab", "kanji", "grammar"], "rhythmMin": 15, "dailyNewTarget": 15,
+      "reminderTime": "12:30", "notifications": False, "tzOffsetMin": 0,
+      "cardName": "山田" * 12}, "山田" * 12),
+    # A reader at N3 riding to N1, years away, named in a right-to-left
+    # script with a family emoji (joiners and all) and a decomposed accent.
+    ({"jlptLevel": "N3", "goalLevel": "N1", "goalTargetDate": _LATER, "dailyDeparture": "am",
+      "kanaKnown": "both", "lines": ["kanji"], "rhythmMin": 10, "dailyNewTarget": 10,
+      "reminderTime": "07:30", "notifications": False, "tzOffsetMin": 330,
+      "cardName": " مريم 👩‍👩‍👧 René "}, "مريم 👩‍👩‍👧 René"),
+])
+def test_every_contract_the_card_can_send_is_signed(client, body, name):
+    with _clean_onboarding_state(DEV_USER_ID):
+        done = client.post("/api/onboarding/complete", json=body)
+        assert done.status_code == 200, done.text
+        served = client.get("/api/profile").json()
+        assert served["onboardedAt"] is not None
+        assert served["cardName"] == name
+        assert served["jlptLevel"] == body["jlptLevel"]
+
+
+def test_patch_renames_the_card_alone_and_the_handle_alone(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        username = client.get("/api/profile").json()["username"]
+        r = client.patch("/api/profile", json={"cardName": "Hélène"})
+        assert r.status_code == 200, r.text
+        assert r.json() == {"username": username, "cardName": "Hélène"}
+        after = client.get("/api/profile").json()
+        assert after["cardName"] == "Hélène"
+        assert after["username"] == username
+        # Nothing to change is still a caller's bug.
+        assert client.patch("/api/profile", json={}).status_code == 422
 
 
 # ── The lines: what the learner chose to ride (core/lines.py) ─────

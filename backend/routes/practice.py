@@ -5,8 +5,8 @@
 The Practice gate on the desk hangs each platform's five grades as rows,
 and a row says what the learner has done there: how many sentences,
 texts or papers, and the share of them that went right. Everything is
-read from the logs the six platforms already keep, and nothing is
-stored here.
+read from the logs the platforms already keep, and nothing is stored
+here.
 
     GET /api/practice/record
 
@@ -16,6 +16,7 @@ stored here.
      "translation":   {...},
      "dictation":     {...},
      "composition":   {...},
+     "conversation":  {...},   # done = graded turns (plan 217)
      "exam":          {...}}   # done = papers sat, right/of = questions
 
 `right` over `of` is the figure's share, and `of` is not always `done`:
@@ -75,6 +76,9 @@ QUERIES = {
     "translation": _SENTENCES.format(table="translation_log"),
     "dictation": _SENTENCES.format(table="dictation_log"),
     "composition": _SENTENCES.format(table="composition_log"),
+    # 会話 (plan 217): a row is one graded turn of a scenario, so a turn
+    # is one done, and `right` the turns that passed.
+    "conversation": _SENTENCES.format(table="conversation_log"),
     # A paper's grade is the paper's, not the attempt's: the attempt
     # names its paper by (exam_id, revision), the key exam_papers is
     # stored under. A sitting is dated by when it was handed in.
@@ -220,7 +224,9 @@ def _parse_stop(platform: str, stop: str) -> tuple[str, str]:
             return stop, "phase"
         parts = stop.split(":")
         if len(parts) in (3, 4) and parts[0] == "freq" and parts[1] in TIER_DOMAINS:
-            numbers = [p for p in parts[2:] if p.isascii() and p.isdigit()]
+            # Six digits is past any tier or size; a longer run of them
+            # would reach int()'s digit limit and 500 instead of 400.
+            numbers = [p for p in parts[2:] if p.isascii() and p.isdigit() and len(p) <= 6]
             if len(numbers) == len(parts) - 2 and all(int(n) > 0 for n in numbers):
                 tier = int(numbers[0])
                 size = int(numbers[1]) if len(numbers) > 1 else freq.DEFAULT_TIER_SIZE

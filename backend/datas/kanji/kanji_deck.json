@@ -3068,6 +3068,131 @@
       "kanji": "窓",
       "kana": "ソウ・ス・まど・てんまど・けむだし",
       "meaning": "window; pane"
+    },
+    {
+      "kanji": "的",
+      "kana": "テキ・まと",
+      "meaning": "target; mark; -ic (adjective ending)"
+    },
+    {
+      "kanji": "無",
+      "kana": "ム・ブ・な.い",
+      "meaning": "nothing; none; without; not"
+    },
+    {
+      "kanji": "可",
+      "kana": "カ",
+      "meaning": "can; possible; passable; approval"
+    },
+    {
+      "kanji": "身",
+      "kana": "シン・み",
+      "meaning": "body; oneself; one's position"
+    },
+    {
+      "kanji": "誰",
+      "kana": "だれ",
+      "meaning": "who; someone"
+    },
+    {
+      "kanji": "頃",
+      "kana": "ころ・ごろ",
+      "meaning": "time; about; around (a time)"
+    },
+    {
+      "kanji": "畑",
+      "kana": "はた・はたけ",
+      "meaning": "field (cultivated); farm; one's specialty"
+    },
+    {
+      "kanji": "坊",
+      "kana": "ボウ・ボッ",
+      "meaning": "boy; monk; monk's residence"
+    },
+    {
+      "kanji": "丈",
+      "kana": "ジョウ・たけ・だけ",
+      "meaning": "length; height; stature; sturdy"
+    },
+    {
+      "kanji": "韓",
+      "kana": "カン",
+      "meaning": "Korea"
+    },
+    {
+      "kanji": "阪",
+      "kana": "ハン・さか",
+      "meaning": "slope; Osaka"
+    },
+    {
+      "kanji": "岡",
+      "kana": "コウ・おか",
+      "meaning": "hill; knoll"
+    },
+    {
+      "kanji": "貼",
+      "kana": "テン・は.る",
+      "meaning": "stick; paste; affix"
+    },
+    {
+      "kanji": "鍵",
+      "kana": "ケン・かぎ",
+      "meaning": "key"
+    },
+    {
+      "kanji": "椅",
+      "kana": "イ",
+      "meaning": "chair"
+    },
+    {
+      "kanji": "挨",
+      "kana": "アイ",
+      "meaning": "draw near; push open (挨拶: greeting)"
+    },
+    {
+      "kanji": "拶",
+      "kana": "サツ",
+      "meaning": "draw close (挨拶: greeting)"
+    },
+    {
+      "kanji": "匂",
+      "kana": "にお.う・にお.い",
+      "meaning": "smell; fragrance; scent"
+    },
+    {
+      "kanji": "喉",
+      "kana": "コウ・のど",
+      "meaning": "throat"
+    },
+    {
+      "kanji": "膝",
+      "kana": "シツ・ひざ",
+      "meaning": "knee; lap"
+    },
+    {
+      "kanji": "鍋",
+      "kana": "カ・なべ",
+      "meaning": "pot; pan; hot pot"
+    },
+    {
+      "kanji": "謎",
+      "kana": "メイ・なぞ",
+      "meaning": "riddle; puzzle; mystery"
+    },
+    {
+      "kanji": "戚",
+      "kana": "セキ",
+      "meaning": "relatives"
+    },
+    {
+      "kanji": "頬",
+      "kana": "キョウ・ほお・ほほ",
+      "meaning": "cheek"
+    },
+    {
+      "kanji": "叱",
+      "kana": "シツ・しか.る",
+      "meaning": "scold; reprove"
     }
   ],
   "N2": [
@@ -4905,6 +5030,271 @@
       "kanji": "航",
       "kana": "コウ",
       "meaning": "navigate; sail; cruise; fly"
+    },
+    {
+      "kanji": "狙",
+      "kana": "ソ・ねら.う",
+      "meaning": "aim at; target"
+    },
+    {
+      "kanji": "孝",
+      "kana": "コウ",
+      "meaning": "filial piety"
+    },
+    {
+      "kanji": "里",
+      "kana": "リ・さと",
+      "meaning": "village; hometown; parents' home; ri (unit of distance)"
+    },
+    {
+      "kanji": "寿",
+      "kana": "ジュ・ことぶき",
+      "meaning": "longevity; congratulations"
+    },
+    {
+      "kanji": "埼",
+      "kana": "さい・さき",
+      "meaning": "cape; promontory (Saitama)"
+    },
+    {
+      "kanji": "茨",
+      "kana": "いばら",
+      "meaning": "briar; thorn (Ibaraki)"
+    },
+    {
+      "kanji": "栃",
+      "kana": "とち",
+      "meaning": "horse chestnut (Tochigi)"
+    },
+    {
+      "kanji": "阜",
+      "kana": "フ",
+      "meaning": "hill; mound (Gifu)"
+    },
+    {
+      "kanji": "粧",
+      "kana": "ショウ",
+      "meaning": "cosmetics; adorn oneself"
+    },
+    {
+      "kanji": "尻",
+      "kana": "しり",
+      "meaning": "buttocks; bottom; rear end"
+    },
+    {
+      "kanji": "唐",
+      "kana": "トウ・から",
+      "meaning": "Tang dynasty; China; foreign"
+    },
+    {
+      "kanji": "柿",
+      "kana": "かき",
+      "meaning": "persimmon"
+    },
+    {
+      "kanji": "釜",
+      "kana": "かま",
+      "meaning": "iron pot; kettle; cauldron"
+    },
+    {
+      "kanji": "脇",
+      "kana": "キョウ・わき",
+      "meaning": "armpit; side; flank"
+    },
+    {
+      "kanji": "慌",
+      "kana": "コウ・あわ.てる・あわ.ただしい",
+      "meaning": "flustered; in a hurry; confused"
+    },
+    {
+      "kanji": "瓦",
+      "kana": "ガ・かわら",
+      "meaning": "roof tile; gram"
+    },
+    {
+      "kanji": "俺",
+      "kana": "おれ",
+      "meaning": "I; me (male, casual)"
+    },
+    {
+      "kanji": "闇",
+      "kana": "アン・やみ",
+      "meaning": "darkness; black market"
+    },
+    {
+      "kanji": "爪",
+      "kana": "つめ・つま",
+      "meaning": "nail; claw"
+    },
+    {
+      "kanji": "枕",
+      "kana": "チン・まくら",
+      "meaning": "pillow"
+    },
+    {
+      "kanji": "丼",
+      "kana": "どんぶり・どん",
+      "meaning": "bowl; rice bowl dish"
+    },
+    {
+      "kanji": "餅",
+      "kana": "ヘイ・もち",
+      "meaning": "rice cake (mochi)"
+    },
+    {
+      "kanji": "箸",
+      "kana": "はし",
+      "meaning": "chopsticks"
+    },
+    {
+      "kanji": "芯",
+      "kana": "シン",
+      "meaning": "wick; core; lead (of a pencil)"
+    },
+    {
+      "kanji": "麺",
+      "kana": "メン",
+      "meaning": "noodles"
+    },
+    {
+      "kanji": "麓",
+      "kana": "ロク・ふもと",
+      "meaning": "foot of a mountain"
+    },
+    {
+      "kanji": "稽",
+      "kana": "ケイ",
+      "meaning": "think; consider (稽古: practice)"
+    },
+    {
+      "kanji": "蹴",
+      "kana": "シュウ・け.る",
+      "meaning": "kick"
+    },
+    {
+      "kanji": "蓋",
+      "kana": "ガイ・ふた",
+      "meaning": "lid; cover"
+    },
+    {
+      "kanji": "拭",
+      "kana": "ショク・ふ.く・ぬぐ.う",
+      "meaning": "wipe"
+    },
+    {
+      "kanji": "煎",
+      "kana": "セン・い.る",
+      "meaning": "roast; parch; boil down"
+    },
+    {
+      "kanji": "嗅",
+      "kana": "キュウ・か.ぐ",
+      "meaning": "smell; sniff"
+    },
+    {
+      "kanji": "巾",
+      "kana": "キン",
+      "meaning": "cloth; towel; width"
+    },
+    {
+      "kanji": "肘",
+      "kana": "ひじ",
+      "meaning": "elbow"
+    },
+    {
+      "kanji": "宛",
+      "kana": "あ.てる・あて",
+      "meaning": "address (to); addressed to"
+    },
+    {
+      "kanji": "桁",
+      "kana": "けた",
+      "meaning": "beam; digit; order of magnitude"
+    },
+    {
+      "kanji": "捻",
+      "kana": "ネン・ひね.る・ねじ.る",
+      "meaning": "twist; twirl"
+    },
+    {
+      "kanji": "塞",
+      "kana": "ソク・サイ・ふさ.ぐ・ふさ.がる",
+      "meaning": "block; close; obstruct"
+    },
+    {
+      "kanji": "羨",
+      "kana": "セン・うらや.む・うらや.ましい",
+      "meaning": "envy; envious"
+    },
+    {
+      "kanji": "遜",
+      "kana": "ソン",
+      "meaning": "humble; modest"
+    },
+    {
+      "kanji": "遡",
+      "kana": "ソ・さかのぼ.る",
+      "meaning": "go upstream; go back (in time)"
+    },
+    {
+      "kanji": "隙",
+      "kana": "ゲキ・すき",
+      "meaning": "gap; crack; opening; chance"
+    },
+    {
+      "kanji": "箋",
+      "kana": "セン",
+      "meaning": "slip of paper; label; note paper"
+    },
+    {
+      "kanji": "潰",
+      "kana": "カイ・つぶ.す・つぶ.れる",
+      "meaning": "crush; smash; collapse"
+    },
+    {
+      "kanji": "籠",
+      "kana": "ロウ・かご・こ.もる・こ.める",
+      "meaning": "basket; cage; shut oneself in"
+    },
+    {
+      "kanji": "袖",
+      "kana": "シュウ・そで",
+      "meaning": "sleeve"
+    },
+    {
+      "kanji": "凄",
+      "kana": "セイ・すご.い・すさ.まじい",
+      "meaning": "amazing; terrible; dreadful"
+    },
+    {
+      "kanji": "痩",
+      "kana": "ソウ・や.せる",
+      "meaning": "become thin; lose weight"
+    },
+    {
+      "kanji": "諦",
+      "kana": "テイ・あきら.める",
+      "meaning": "give up; abandon; truth"
+    },
+    {
+      "kanji": "溺",
+      "kana": "デキ・おぼ.れる",
+      "meaning": "drown; indulge in"
+    },
+    {
+      "kanji": "餌",
+      "kana": "ジ・えさ・え",
+      "meaning": "feed (for animals); bait"
+    },
+    {
+      "kanji": "僅",
+      "kana": "キン・わず.か",
+      "meaning": "a little; slight"
+    },
+    {
+      "kanji": "剥",
+      "kana": "ハク・は.がす・は.がれる・む.く・は.げる",
+      "meaning": "peel; strip off; come off"
     }
   ],
   "N1": [
@@ -11067,6 +11457,471 @@
       "kanji": "惣",
       "kana": "ソウ・すべ.て",
       "meaning": "all"
+    },
+    {
+      "kanji": "曽",
+      "kana": "ソウ・ゾ",
+      "meaning": "formerly; great- (grandparent)"
+    },
+    {
+      "kanji": "葛",
+      "kana": "カツ・くず",
+      "meaning": "arrowroot; kudzu"
+    },
+    {
+      "kanji": "畿",
+      "kana": "キ",
+      "meaning": "capital region"
+    },
+    {
+      "kanji": "腎",
+      "kana": "ジン",
+      "meaning": "kidney"
+    },
+    {
+      "kanji": "挫",
+      "kana": "ザ・くじ.く・くじ.ける",
+      "meaning": "crush; sprain; be discouraged"
+    },
+    {
+      "kanji": "痕",
+      "kana": "コン・あと",
+      "meaning": "mark; scar; trace"
+    },
+    {
+      "kanji": "妖",
+      "kana": "ヨウ・あや.しい",
+      "meaning": "bewitching; supernatural; ominous"
+    },
+    {
+      "kanji": "捉",
+      "kana": "ソク・とら.える",
+      "meaning": "catch; grasp"
+    },
+    {
+      "kanji": "賭",
+      "kana": "ト・か.ける",
+      "meaning": "bet; gamble"
+    },
+    {
+      "kanji": "汎",
+      "kana": "ハン",
+      "meaning": "pan-; general; wide"
+    },
+    {
+      "kanji": "臼",
+      "kana": "キュウ・うす",
+      "meaning": "mortar"
+    },
+    {
+      "kanji": "牙",
+      "kana": "ガ・ゲ・きば",
+      "meaning": "fang; tusk"
+    },
+    {
+      "kanji": "惧",
+      "kana": "グ",
+      "meaning": "fear; dread"
+    },
+    {
+      "kanji": "膳",
+      "kana": "ゼン",
+      "meaning": "small low table; tray; set meal"
+    },
+    {
+      "kanji": "呪",
+      "kana": "ジュ・のろ.う",
+      "meaning": "curse; spell"
+    },
+    {
+      "kanji": "斬",
+      "kana": "ザン・き.る",
+      "meaning": "behead; cut down"
+    },
+    {
+      "kanji": "怨",
+      "kana": "エン・オン・うら.む",
+      "meaning": "grudge; resentment"
+    },
+    {
+      "kanji": "串",
+      "kana": "くし",
+      "meaning": "skewer; spit"
+    },
+    {
+      "kanji": "腫",
+      "kana": "シュ・は.れる・は.らす",
+      "meaning": "swelling; tumor"
+    },
+    {
+      "kanji": "斑",
+      "kana": "ハン・まだら",
+      "meaning": "spot; speck; patches"
+    },
+    {
+      "kanji": "摯",
+      "kana": "シ",
+      "meaning": "earnest; sincere"
+    },
+    {
+      "kanji": "堆",
+      "kana": "タイ・うずたか.い",
+      "meaning": "piled up; heap"
+    },
+    {
+      "kanji": "蜜",
+      "kana": "ミツ",
+      "meaning": "honey; nectar"
+    },
+    {
+      "kanji": "股",
+      "kana": "コ・また",
+      "meaning": "thigh; crotch"
+    },
+    {
+      "kanji": "玩",
+      "kana": "ガン",
+      "meaning": "play with; enjoy"
+    },
+    {
+      "kanji": "蜂",
+      "kana": "ホウ・はち",
+      "meaning": "bee; wasp"
+    },
+    {
+      "kanji": "脊",
+      "kana": "セキ",
+      "meaning": "spine; stature"
+    },
+    {
+      "kanji": "嫉",
+      "kana": "シツ",
+      "meaning": "jealousy; envy"
+    },
+    {
+      "kanji": "恣",
+      "kana": "シ",
+      "meaning": "arbitrary; selfish"
+    },
+    {
+      "kanji": "戴",
+      "kana": "タイ・いただ.く",
+      "meaning": "be crowned with; receive (humbly)"
+    },
+    {
+      "kanji": "裾",
+      "kana": "すそ",
+      "meaning": "hem; cuff; foot (of a mountain)"
+    },
+    {
+      "kanji": "冥",
+      "kana": "メイ・ミョウ",
+      "meaning": "dark; the afterlife"
+    },
+    {
+      "kanji": "訃",
+      "kana": "フ",
+      "meaning": "news of a death"
+    },
+    {
+      "kanji": "畏",
+      "kana": "イ・おそ.れる",
+      "meaning": "awe; fear; respectful"
+    },
+    {
+      "kanji": "緻",
+      "kana": "チ",
+      "meaning": "fine; detailed"
+    },
+    {
+      "kanji": "哺",
+      "kana": "ホ",
+      "meaning": "nurse; suckle"
+    },
+    {
+      "kanji": "罵",
+      "kana": "バ・ののし.る",
+      "meaning": "abuse; revile"
+    },
+    {
+      "kanji": "乞",
+      "kana": "コツ・こ.う",
+      "meaning": "beg; ask for"
+    },
+    {
+      "kanji": "蔑",
+      "kana": "ベツ・さげす.む",
+      "meaning": "despise; scorn"
+    },
+    {
+      "kanji": "勾",
+      "kana": "コウ",
+      "meaning": "bend; slope"
+    },
+    {
+      "kanji": "氾",
+      "kana": "ハン",
+      "meaning": "spread out; overflow"
+    },
+    {
+      "kanji": "弄",
+      "kana": "ロウ・もてあそ.ぶ・いじ.る",
+      "meaning": "play with; trifle with"
+    },
+    {
+      "kanji": "沃",
+      "kana": "ヨク",
+      "meaning": "fertile"
+    },
+    {
+      "kanji": "刹",
+      "kana": "セツ・サツ",
+      "meaning": "temple; moment"
+    },
+    {
+      "kanji": "妬",
+      "kana": "ト・ねた.む",
+      "meaning": "jealous; envy"
+    },
+    {
+      "kanji": "拉",
+      "kana": "ラ・ラツ",
+      "meaning": "abduct; take away"
+    },
+    {
+      "kanji": "苛",
+      "kana": "カ・いじ.める・いら.だつ",
+      "meaning": "torment; harsh; irritated"
+    },
+    {
+      "kanji": "侶",
+      "kana": "リョ",
+      "meaning": "companion"
+    },
+    {
+      "kanji": "勃",
+      "kana": "ボツ",
+      "meaning": "sudden; rise; break out"
+    },
+    {
+      "kanji": "咽",
+      "kana": "イン・むせ.ぶ",
+      "meaning": "throat; choke"
+    },
+    {
+      "kanji": "昧",
+      "kana": "マイ",
+      "meaning": "dark; obscure; foolish"
+    },
+    {
+      "kanji": "柵",
+      "kana": "サク・しがらみ",
+      "meaning": "fence; stockade; ties"
+    },
+    {
+      "kanji": "捗",
+      "kana": "チョク・はかど.る",
+      "meaning": "make progress"
+    },
+    {
+      "kanji": "酎",
+      "kana": "チュウ",
+      "meaning": "distilled liquor (shōchū)"
+    },
+    {
+      "kanji": "唾",
+      "kana": "ダ・つば",
+      "meaning": "saliva; spit"
+    },
+    {
+      "kanji": "崖",
+      "kana": "ガイ・がけ",
+      "meaning": "cliff; precipice"
+    },
+    {
+      "kanji": "梗",
+      "kana": "コウ",
+      "meaning": "stem; outline"
+    },
+    {
+      "kanji": "淫",
+      "kana": "イン・みだ.ら",
+      "meaning": "lewd; indecent"
+    },
+    {
+      "kanji": "羞",
+      "kana": "シュウ",
+      "meaning": "shame; bashfulness"
+    },
+    {
+      "kanji": "舷",
+      "kana": "ゲン",
+      "meaning": "gunwale; side of a ship"
+    },
+    {
+      "kanji": "萎",
+      "kana": "イ・な.える・しお.れる・しぼ.む",
+      "meaning": "wither; droop"
+    },
+    {
+      "kanji": "貪",
+      "kana": "ドン・むさぼ.る",
+      "meaning": "covet; greedy"
+    },
+    {
+      "kanji": "喩",
+      "kana": "ユ",
+      "meaning": "metaphor; compare"
+    },
+    {
+      "kanji": "傲",
+      "kana": "ゴウ",
+      "meaning": "proud; arrogant"
+    },
+    {
+      "kanji": "填",
+      "kana": "テン・は.まる・は.める",
+      "meaning": "fill in; insert"
+    },
+    {
+      "kanji": "彙",
+      "kana": "イ",
+      "meaning": "collection; category"
+    },
+    {
+      "kanji": "慄",
+      "kana": "リツ",
+      "meaning": "shiver; fear"
+    },
+    {
+      "kanji": "楷",
+      "kana": "カイ",
+      "meaning": "square style (calligraphy)"
+    },
+    {
+      "kanji": "毀",
+      "kana": "キ",
+      "meaning": "break; damage; slander"
+    },
+    {
+      "kanji": "窟",
+      "kana": "クツ",
+      "meaning": "cave; den"
+    },
+    {
+      "kanji": "腺",
+      "kana": "セン",
+      "meaning": "gland"
+    },
+    {
+      "kanji": "詣",
+      "kana": "ケイ・もう.でる",
+      "meaning": "visit (a shrine or temple)"
+    },
+    {
+      "kanji": "詮",
+      "kana": "セン",
+      "meaning": "inquire; after all"
+    },
+    {
+      "kanji": "賂",
+      "kana": "ロ",
+      "meaning": "bribe"
+    },
+    {
+      "kanji": "頓",
+      "kana": "トン",
+      "meaning": "suddenly; arrange; stumble"
+    },
+    {
+      "kanji": "瘍",
+      "kana": "ヨウ",
+      "meaning": "swelling; tumor; ulcer"
+    },
+    {
+      "kanji": "綻",
+      "kana": "タン・ほころ.びる",
+      "meaning": "come apart; begin to open"
+    },
+    {
+      "kanji": "貌",
+      "kana": "ボウ",
+      "meaning": "appearance; looks"
+    },
+    {
+      "kanji": "辣",
+      "kana": "ラツ",
+      "meaning": "pungent; harsh"
+    },
+    {
+      "kanji": "嘲",
+      "kana": "チョウ・あざけ.る",
+      "meaning": "ridicule; mock"
+    },
+    {
+      "kanji": "憬",
+      "kana": "ケイ",
+      "meaning": "yearn for; admire"
+    },
+    {
+      "kanji": "蔽",
+      "kana": "ヘイ",
+      "meaning": "cover; conceal"
+    },
+    {
+      "kanji": "踪",
+      "kana": "ソウ",
+      "meaning": "trace; footprint"
+    },
+    {
+      "kanji": "諧",
+      "kana": "カイ",
+      "meaning": "harmony; humor"
+    },
+    {
+      "kanji": "醒",
+      "kana": "セイ・さ.める",
+      "meaning": "awaken; sober up"
+    },
+    {
+      "kanji": "錮",
+      "kana": "コ",
+      "meaning": "confinement"
+    },
+    {
+      "kanji": "骸",
+      "kana": "ガイ",
+      "meaning": "bones; corpse"
+    },
+    {
+      "kanji": "曖",
+      "kana": "アイ",
+      "meaning": "obscure; unclear"
+    },
+    {
+      "kanji": "臆",
+      "kana": "オク",
+      "meaning": "timid; heart; guess"
+    },
+    {
+      "kanji": "璧",
+      "kana": "ヘキ",
+      "meaning": "round jade jewel; perfect"
+    },
+    {
+      "kanji": "顎",
+      "kana": "ガク・あご",
+      "meaning": "jaw; chin"
+    },
+    {
+      "kanji": "璽",
+      "kana": "ジ",
+      "meaning": "imperial seal"
+    },
+    {
+      "kanji": "鬱",
+      "kana": "ウツ",
+      "meaning": "gloom; depression; dense growth"
     }
   ]
 }

@@ -32,7 +32,9 @@ const apiFetch = vi.hoisted(() => vi.fn())
 vi.mock('./lib/api', () => ({
   api: p => p,
   apiFetch,
-  apiJson: vi.fn(), apiJsonWithTimeout: vi.fn(), apiUpload: vi.fn(),
+  // The shared answers (lib/cachedJson, plan 211) ask through apiJson.
+  apiJson: async (...a) => (await apiFetch(...a)).json(),
+  apiJsonWithTimeout: vi.fn(), apiUpload: vi.fn(),
   ApiError: class extends Error {},
 }))
 const answer = path => {
@@ -65,6 +67,9 @@ vi.mock('./stores/boarding', async o => ({ ...(await o()), board: vi.fn(commit =
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: VocabScreen } = await import('./screens/VocabScreen')
+const { forgetCachedJson } = await import('./lib/cachedJson')
+// Each case asks with its own answers: none is kept across (plan 211).
+afterEach(() => { forgetCachedJson() })
 
 // Past the timer, the plates' staggered arrivals themselves: a plate a
 // fraction of a pixel short of its place is a row out of line.
@@ -109,9 +114,9 @@ const plates = () => [...document.querySelectorAll('.desk-sources__lower > .desk
 const rows = plate => [...plate.querySelectorAll('.desk-source__rows > a')]
 const cells = () => [...plates()[1].querySelectorAll('.desk-source__cells > a')]
 const near = (a, b) => Math.abs(a - b) < 2
-// The gate's breathing ring stands 9px out of its pill (index.css,
-// btn-gate-breathe), and the reader's ripples as far: all of it inside
-// the card.
+// The gate stood in a breathing ring 9px out of its pill until plan 225
+// stilled it; the card keeps that air round it, so the drop it stands on
+// now (index.css, --gate-drop) falls on the card, not past it.
 const RING = 9
 const gateInside = card => {
   const c = card.getBoundingClientRect()
@@ -149,8 +154,8 @@ describe('the vocabulary\'s sources on the desk (plan 183)', () => {
     await mount()
     const card = lead()
     expect(card.getBoundingClientRect().width).toBeGreaterThan(others()[0].getBoundingClientRect().width * 1.4)
-    // The gate in a column of its own beside the words, its halo in the
-    // card, the level's name whole.
+    // The gate in a column of its own beside the words, the air round it
+    // in the card, the level's name whole.
     expect(card.classList.contains('desk-resume__card--split')).toBe(true)
     expect(gateInside(card)).toBe(true)
     const words = card.querySelector('.desk-resume__name').getBoundingClientRect()

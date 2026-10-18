@@ -100,6 +100,10 @@ export const ROUTES = [
   '/practice/dictation/:level',
   '/practice/composition',
   '/practice/composition/:level',
+  // 会話 (plan 217): its own station, and a run named by its scene
+  // and the way it is ridden.
+  '/practice/conversation',
+  '/practice/conversation/:scenario/:mode',
 
   '/dictionary',
   '/dictionary/analyzer',
@@ -146,4 +150,19 @@ export function routePattern(pathname) {
     }
   }
   return best
+}
+
+/**
+ * The area of an API path (`/api/decks/9f3…?x=1` -> `/api/decks`), or null.
+ *
+ * Two segments and no more, for the reason routePattern exists: the
+ * third segment of an API path is where an id, a deck slug or a theme
+ * the learner named lives. The area is a name the backend's routers
+ * chose, matched against a lowercase-word shape so that anything else
+ * in that place records nothing at all.
+ */
+export function apiArea(path) {
+  if (typeof path !== 'string') return null
+  const m = /^\/api\/([a-z][a-z0-9_-]{0,30})(?:[/?#]|$)/.exec(path)
+  return m ? `/api/${m[1]}` : null
 }

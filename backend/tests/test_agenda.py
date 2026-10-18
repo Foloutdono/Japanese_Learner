@@ -55,7 +55,7 @@ def test_days_mask_round_trips():
 def test_subjects_are_the_ones_the_page_can_open():
     assert set(agenda.SUBJECTS) == {
         "review", "kana", "vocab", "kanji", "grammar",
-        "reading", "translation", "dictation", "composition", "comprehension", "exam",
+        "reading", "translation", "dictation", "composition", "conversation", "comprehension", "exam",
     }
 
 

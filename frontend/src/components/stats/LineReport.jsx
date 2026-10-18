@@ -22,7 +22,7 @@ import { modeLabel, groupLabel, deckCode, cardHeadword } from '../../domain/stat
 // leak is the state's danger. The grid's column heads are the decks'
 // short names (N5, あ); the full ones are in each cell's name.
 export function LineReport({ section, grid, weakest, onStartReview }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const empty = grid.reviews === 0
   return (
     <section className="rep-plate" style={{ '--line-color': section.color }} aria-label={section.title}>
@@ -30,7 +30,7 @@ export function LineReport({ section, grid, weakest, onStartReview }) {
         <span className="pf-line__roundel" aria-hidden="true">{stationFor(section.path).code}</span>
         <span className="rep-plate__names">
           <h2 className="rep-plate__name">{section.title}</h2>
-          {!empty && <span className="rep-cap">{t.reportLineReviews(grid.reviews.toLocaleString())}</span>}
+          {!empty && <span className="rep-cap">{t.reportLineReviews(grid.reviews.toLocaleString(lang))}</span>}
         </span>
         <span className="rep-fig rep-fig--heading rep-plate__fig">
           {grid.retention === null ? '—' : grid.retention}
@@ -128,7 +128,7 @@ function WeakTile({ card, onStartReview }) {
       title={label}
     >
       <span className="rep-tile__glyph" lang="ja">{head}</span>
-      <span className="rep-tile__pct">{pct}%</span>
+      <span className="rep-tile__pct">{t.percent(pct)}</span>
     </button>
   )
 }

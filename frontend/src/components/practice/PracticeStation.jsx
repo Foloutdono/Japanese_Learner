@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback } from 'react'
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { playUi } from '../../lib/audio'
-import { apiFetch } from '../../lib/api'
+import { MINE_TTL_MS, useCachedJson } from '../../lib/cachedJson'
 import { relativeDate } from '../../lib/formatDate'
 import { board } from '../../stores/boarding'
 import { useStats } from '../../stores/stats'
@@ -335,21 +335,11 @@ function missRows(misses, t, lang) {
 // tier swapped in place never shows the last tier's words.
 function useTierDetail(domain, tier, size, session, enabled) {
   const { lang } = useLang()
-  const key = `${domain}:${tier}:${size}:${lang}`
-  const [detail, setDetail] = useState(null)
-  useEffect(() => {
-    if (!enabled) return undefined
-    let alive = true
-    const json = r => (r?.ok ? r.json() : null)
-    Promise.all([
-      apiFetch(`/api/frequency/${domain}/tier/${tier}/items?tier_size=${size}&lang=${lang}`, session).then(json),
-      apiFetch(`/api/frequency/${domain}/tiers/started?tier_size=${size}`, session).then(json),
-    ])
-      .then(([items, started]) => {
-        if (alive) setDetail({ key, items: items?.items ?? [], started: started?.started?.[String(tier)] ?? 0 })
-      })
-      .catch(() => { if (alive) setDetail({ key, items: [], started: null }) })
-    return () => { alive = false }
-  }, [enabled, key, domain, tier, size, lang, session])
-  return enabled && detail?.key === key ? detail : null
+  // Through the shared answers (lib/cachedJson, plan 211): walking the
+  // tiers asks each one once, and what was met is the same answer the
+  // tiers' own plates hold.
+  const items = useCachedJson(enabled ? `/api/frequency/${domain}/tier/${tier}/items?tier_size=${size}&lang=${lang}` : null, session, { ttlMs: MINE_TTL_MS })
+  const started = useCachedJson(enabled ? `/api/frequency/${domain}/tiers/started?tier_size=${size}` : null, session, { ttlMs: MINE_TTL_MS })
+  if (!enabled || items === undefined || started === undefined) return null
+  return { items: items?.items ?? [], started: started === null ? null : started?.started?.[String(tier)] ?? 0 }
 }

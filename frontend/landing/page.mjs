@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 import { DARK, LIGHT, SCALE, FONTS, block } from './tokens.mjs'
 import {
-  SITE_ORIGIN, PAGES, DEFAULT_LANG, APP_ENTRY, BOARD_ENTRY, STORES, CONTACT,
+  SITE_ORIGIN, PAGES, DEFAULT_LANG, APP_ENTRY, BOARD_ENTRY, SIGNIN_ENTRY, STORES, CONTACT,
   PRESENTATION, CLIPS, RHYTHMS, DEFAULT_RHYTHM, sessionKey,
 } from './config.mjs'
 import { LEVELS, EXAM_N5, arrivals, spanOf, kanjiStrokes } from './content.mjs'
@@ -161,7 +161,7 @@ function header(t, other) {
     + `<div class="top__end"><button type="button" class="top__sound" data-sound aria-pressed="true" aria-label="${esc(t.sound)}" title="${esc(t.sound)}" hidden>${SPEAKER}</button>`
     + `<nav class="seg langs" aria-label="${esc(t.langLabel)}">${langs}</nav>`
     + `<a class="top__other" href="${PAGES[other].path}" hreflang="${other}" lang="${other}">${other.toUpperCase()}</a>`
-    + `<a class="ghost top__signin" href="${APP_ENTRY}" data-board>${esc(t.signIn)}</a>`
+    + `<a class="ghost top__signin" href="${SIGNIN_ENTRY}" data-board>${esc(t.signIn)}</a>`
     // The way in, kept in reach once the hero's gate has scrolled away.
     + `<a class="top__board" href="${BOARD_ENTRY}" data-board data-top-board tabindex="-1" aria-hidden="true">${esc(t.board)}</a></div>`
     + '</div></header>'
@@ -578,11 +578,31 @@ function faq(t) {
     + `<div class="faqs__list">${items}</div></div></div></section>`
 }
 
-function pass(t, facts) {
+// The struck 辻 (src/components/offers/StruckMark.jsx): 十 and 辶 in
+// the mark's own strokes, the first two subpaths of the ink being 十.
+const INK_PARTS = MARK_INK.match(/M[^M]*/g)
+const CROSS = INK_PARTS.slice(0, 2).join('')
+const SHIN = INK_PARTS.slice(2).join('')
+
+/** The app's card face up (src/components/pass/PassCard.jsx's
+ *  FacePrint), in the material a new learner holds: 白, the free card.
+ *  `share` is the level climbed, which fills 辶 from its foot. */
+function card(t, share) {
   const P = t.pass
-  const n5 = arrivals(facts, DEFAULT_RHYTHM)[0].days
-  const dots = [['kana', 'あ'], ['vocab', '語'], ['kanji', '漢'], ['grammar', '文']]
-    .map(([l, g]) => `<span class="dot" style="--c:${pigment(l)}" lang="ja">${g}</span>`).join('')
+  return `<div class="pass pcard" role="img" aria-label="${esc(P.aria)}"><span class="pcs" aria-hidden="true"><span class="pcs__band"></span></span>`
+    + '<div class="pcf" aria-hidden="true">'
+    + `<svg class="pcf__seal" viewBox="0 0 1000 1000" focusable="false" style="--xp:${share}"><defs><clipPath id="pcf-xp"><rect class="pcf__bar" x="0" y="56" width="1000" height="921"/></clipPath></defs>`
+    + `<g class="pcf__ink"><path d="${CROSS}"/><path d="${SHIN}"/><path d="${MARK_ROAD}"/></g>`
+    + `<g class="pcf__xp" clip-path="url(#pcf-xp)"><path d="${SHIN}"/><path d="${MARK_ROAD}"/></g></svg>`
+    + `<div class="pcf__row"><span class="pcf__brand"><span class="pcf__wave"><i></i><i></i><i></i></span>${esc(P.brand)}</span>`
+    + `<svg class="pcf__corner" viewBox="0 0 1000 1000" focusable="false"><path class="pcf__road" d="${MARK_ROAD}"/><path d="${MARK_INK}"/></svg></div>`
+    + `<span class="pcf__who"><span class="pcf__name" data-pass-name>${esc(P.name)}</span><span class="pcf__lvl fig">1</span></span>`
+    + `<div class="pcf__row pcf__row--foot"><span class="pcf__meta">${esc(typo(t.lang, P.fare))}</span><span class="pcf__class">${esc(P.tier)}</span></div>`
+    + '</div></div>'
+}
+
+function pass(t) {
+  const P = t.pass
   // Three blocks: the words, the pass, the form. A tall phone and a
   // tablet stack them in that order, so the name typed prints on the pass
   // in view above the field (and above a phone's keyboard); a window
@@ -593,15 +613,7 @@ function pass(t, facts) {
     + `<div class="way__gate">${gate(t)}</div>${badges(t)}</div>`
   return `<section class="sec way" id="${t.ids.way}" aria-labelledby="way-h">${stop(t, 'way')}<div class="wrap split split--way cols">`
     + `<div class="split__copy" data-stagger><h2 class="h2 way__h" id="way-h">${esc(typo(t.lang, P.h2))}</h2><p class="body">${esc(typo(t.lang, P.body))}</p></div>`
-    + `<div class="way__pass" data-reveal data-tilt><div class="pass" role="img" aria-label="${esc(P.aria)}">`
-    + '<span class="pass__edge" aria-hidden="true"></span>'
-    + `<div class="pass__top"><span class="pass__brand">${mark(22)}<span class="pass__lbl pass__lbl--on">Tsuji</span><span class="pass__kind" lang="ja">定期券</span></span><span class="pwave" aria-hidden="true"><i></i><i></i><i></i></span></div>`
-    + `<div class="pass__who"><span class="pass__name serif" data-pass-name>${esc(P.name)}</span><span class="pass__route"><span lang="ja">かな</span><span class="pass__arrow">→</span><span class="fig">N5</span></span></div>`
-    + `<div class="pass__fields"><div><span class="pass__lbl">${esc(P.route)}</span><span class="pass__val" data-pass-per>${esc(P.per(DEFAULT_RHYTHM))}</span></div>`
-    + `<div><span class="pass__lbl">${esc(P.lines)}</span><span class="pass__dots" role="img" aria-label="${esc(P.linesAria)}">${dots}</span></div>`
-    + `<div><span class="pass__lbl">${esc(P.arrival)}</span><span class="pass__val pass__val--gold" data-pass-arrival data-days="${Math.ceil(n5)}">${esc(typo(t.lang, t.line.span(spanOf(n5))))}</span></div></div>`
-    + `<div class="pass__bal"><span class="fig">${esc(P.level)}</span><span class="pass__track"><i></i></span></div>`
-    + `</div></div>${form}</div></section>`
+    + `<div class="way__pass" data-reveal data-tilt>${card(t, 0.22)}</div>${form}</div></section>`
 }
 
 function footer(t, other) {
@@ -625,8 +637,6 @@ function clientData(t, facts, media) {
     media,
     rhythm: DEFAULT_RHYTHM,
     at: Object.fromEntries(RHYTHMS.map(m => [m, ty(t.line.at(m))])),
-    per: Object.fromEntries(RHYTHMS.map(m => [m, ty(t.pass.per(m))])),
-    n5Days: Object.fromEntries(RHYTHMS.map(m => [m, Math.ceil(arrivals(facts, m)[0].days)])),
     passName: t.pass.name,
     cards: CARDS.map((c, k) => ({
       glyph: c.glyph, serif: !!c.serif, reading: c.reading, example: c.example, clip: c.sound ? kanaClip(c.sound) : null,
@@ -792,7 +802,7 @@ ${jlpt(t)}
 ${tools(t)}
 ${fare(t)}
 ${faq(t)}
-${pass(t, facts)}
+${pass(t)}
 </main>
 ${footer(t, other)}
 <script type="application/json" id="landing-data">${safeJson(JSON.stringify(clientData(t, facts, media)))}</script>

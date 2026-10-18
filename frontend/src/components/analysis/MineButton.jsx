@@ -11,8 +11,8 @@ import { useMineAction, INERT_MINING } from './useMineAction'
 // cloze via mining.mineCloze) -- this component only owns picking the
 // target deck and showing the outcome.
 //
-// `className` replaces the default look outright (FocusCard prints the
-// card's one filled action as `.btn-primary`) — the outcome text and the
+// `className` replaces the default look outright (the text desk's word
+// row prints its one filled action as `.btn-primary`) — the outcome text and the
 // disabled note keep their own classes either way.
 //
 // `mining` is a useMining(session) instance, shared by every mine
@@ -34,14 +34,14 @@ export function MineButton({ mining, kind, disabled, disabledReason, label, succ
   if (disabled) {
     return (
       <span className="analysis-mine-btn analysis-mine-btn--disabled" title={disabledReason}>
-        {label ?? (t.mineToDeck ?? 'Mine')}
+        {label ?? t.mineToDeck}
       </span>
     )
   }
 
   const words = act.addedOnce
-    ? (t.addToAnotherDeck ?? 'Add to another deck')
-    : (ariaLabel ?? label ?? (t.mineToDeck ?? 'Mine'))
+    ? t.addToAnotherDeck
+    : (ariaLabel ?? label ?? t.mineToDeck)
 
   return (
     <>

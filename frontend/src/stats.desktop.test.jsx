@@ -131,8 +131,10 @@ describe('the statistics on the desk', () => {
   it('opens the exercise\'s run from its cell, and a card\'s from its tile', async () => {
     await mount()
     plate('Kanji').querySelector('.rep-cell--leak').click()
-    await settle(60)
-    expect($('[data-where]').textContent).toBe('/learn/kanji/N4/kanji.write_kanji')
+    // React Router renders a navigation as a transition: the route
+    // arrives when React gets to it, so it is waited for rather than
+    // timed (a fixed 60ms lost that race twice on a loaded CI runner).
+    await vi.waitFor(() => expect($('[data-where]').textContent).toBe('/learn/kanji/N4/kanji.write_kanji'))
   })
 
   it('tiles each line\'s own weakest; a line with none says so', async () => {
@@ -144,8 +146,8 @@ describe('the statistics on the desk', () => {
     const tile = plate('Kanji').querySelector('.rep-tile')
     expect(tile.textContent).toContain('仕')
     tile.click()
-    await settle(60)
-    expect($('[data-where]').textContent).toBe('/learn/kanji/N4/kanji.flashcard.f2b')
+    // A navigation, so waited for, as the cell's above is.
+    await vi.waitFor(() => expect($('[data-where]').textContent).toBe('/learn/kanji/N4/kanji.flashcard.f2b'))
   })
 
   it('cuts no caption and squeezes no name', async () => {

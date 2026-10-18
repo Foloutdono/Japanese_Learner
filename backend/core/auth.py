@@ -1,4 +1,9 @@
+import hashlib
 import os
+import threading
+import time
+from collections import OrderedDict
+
 import httpx
 import jwt
 import logging
@@ -122,7 +127,49 @@ def get_user_id(credentials: HTTPAuthorizationCredentials | None = Depends(secur
             logger.warning("Local JWT verification unavailable, falling back to network check", exc_info=True)
 
     # No JWKS client configured, or it just failed to resolve a key --
-    # fall back to the network check.
+    # fall back to the network check, remembered a minute per token.
+    return _network_check(token)
+
+
+# The network check's verdicts, a minute per token (plan 211). A token
+# whose `kid` no key matches reaches it on every request, and that
+# needs no account: a caller sending junk tokens had the API make a
+# Supabase round trip each, on the bounded threadpool. A definitive
+# answer is kept, either way; "the auth service did not answer" never.
+_FALLBACK_TTL = 60.0
+_FALLBACK_MAX = 4096
+_fallback_lock = threading.Lock()
+_fallback: OrderedDict[str, tuple[float, str | None]] = OrderedDict()
+
+
+def _network_check(token: str) -> str:
+    digest = hashlib.sha256(token.encode()).hexdigest()
+    now = time.monotonic()
+    with _fallback_lock:
+        hit = _fallback.get(digest)
+    if hit is not None and now - hit[0] < _FALLBACK_TTL:
+        if hit[1] is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        return hit[1]
+    try:
+        user_id = _ask_supabase(token)
+    except HTTPException as e:
+        if e.status_code == 401 and e.detail == "Invalid token":
+            _remember(digest, now, None)
+        raise
+    _remember(digest, now, user_id)
+    return user_id
+
+
+def _remember(digest: str, at: float, user_id: str | None) -> None:
+    with _fallback_lock:
+        _fallback[digest] = (at, user_id)
+        _fallback.move_to_end(digest)
+        while len(_fallback) > _FALLBACK_MAX:
+            _fallback.popitem(last=False)
+
+
+def _ask_supabase(token: str) -> str:
     try:
         response = httpx.get(
             f"{SUPABASE_URL}/auth/v1/user",
@@ -137,14 +184,19 @@ def get_user_id(credentials: HTTPAuthorizationCredentials | None = Depends(secur
             # a call that runs per request on a bounded threadpool.
             timeout=httpx.Timeout(5.0, connect=2.0),
         )
-        if response.status_code != 200:
+        if response.status_code in (401, 403):
             raise HTTPException(status_code=401, detail="Invalid token")
+        if response.status_code != 200:
+            # Supabase's own trouble says nothing about the token, so
+            # it is not remembered as a verdict (_network_check).
+            raise HTTPException(status_code=401, detail="Auth service unavailable")
         user_id = response.json().get("id")
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid token")
         return user_id
     except httpx.RequestError:
         raise HTTPException(status_code=401, detail="Auth service unavailable")
+
 
 def prefixed(card_ids: list[str], user_id: str) -> list[str]:
     return [f"{user_id}:{cid}" for cid in card_ids]

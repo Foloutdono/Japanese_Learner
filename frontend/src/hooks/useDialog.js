@@ -87,8 +87,12 @@ export function useDialog(onClose, { capture = false, focus = 'first' } = {}) {
 
       const first = items[0]
       const last = items[items.length - 1]
+      // Focus on the panel itself (`focus: 'panel'`, or the fallback
+      // above) is on none of the items: Shift+Tab from there would leave
+      // the dialog for whatever precedes it in the page.
+      const onPanel = document.activeElement === ref.current
 
-      if (e.shiftKey && document.activeElement === first) {
+      if (e.shiftKey && (onPanel || document.activeElement === first)) {
         e.preventDefault()
         last.focus()
       } else if (!e.shiftKey && document.activeElement === last) {

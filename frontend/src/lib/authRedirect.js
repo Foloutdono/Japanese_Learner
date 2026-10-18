@@ -77,15 +77,15 @@ export function isAlreadyLinked(err) {
 }
 
 /**
- * The sentence for a learner. Supabase's own `error_description` is
- * the fallback: it is English-only and written for developers, but a
- * true sentence beats a shrug, and the refusals that actually happen
- * are named in lib/authErrors.js — the one table both refusal shapes
- * read, so a code cannot mean one thing here and another to the
- * fields underneath.
+ * The sentence for a learner, from lib/authErrors.js — the one table
+ * both refusal shapes read, so a code cannot mean one thing here and
+ * another to the fields underneath. Supabase's own `error_description`
+ * is never shown: it is English-only and written for developers (plan
+ * 210); a refusal it would have explained is named in the table, and
+ * anything else gets the table's generic line.
  */
 export function authRedirectMessage(err, t) {
-  return authErrorMessage(err, t, err?.description)
+  return authErrorMessage(err, t)
 }
 
 // The capture, once, at import.

@@ -203,6 +203,42 @@ def _evict_if_over_cap(directory: str) -> None:
         logger.warning("Could not trim the study-audio store: %s", e)
 
 
+def clip_path(form: str) -> str:
+    """Where the clip for an already-normalized `form` lives (or will):
+    named by content key, so the route and scripts/prewarm_word_audio.py,
+    which both come here, cannot disagree about the file."""
+    key = content_key([{"speaker": "reader", "textJp": form}])
+    return os.path.join(words_dir(), f"{key}.mp3")
+
+
+def is_made(form: str) -> bool:
+    """Whether the clip for `form` is on disk and made by the current
+    voice -- the one condition under which clip_for answers without a
+    call to the engine."""
+    return is_current(clip_path(form))
+
+
+def deck_readings(levels) -> list[str]:
+    """The readings a learner at `levels` is asked to hear, each once,
+    in level order: the first reading of every vocab and kanji entry
+    there, which is exactly what a card sends (it speaks `card.kana`,
+    lib/audio/speech.js's spokenForm, and spoken_form takes the same
+    first reading). The written forms are not in the list, because no
+    card speaks them: they stay speakable for the dictionary, and are
+    made on the request that asks.
+
+    Only forms `speakable` accepts, so every one is something clip_for
+    will make. For scripts/prewarm_word_audio.py."""
+    forms: dict[str, None] = {}
+    for level in levels:
+        for decks in (VOCAB_BY_LEVEL, KANJI_BY_LEVEL):
+            for entry in decks.get(level, []):
+                form = spoken_form(entry.get("kana"))
+                if form and speakable(form):
+                    forms.setdefault(form)
+    return list(forms)
+
+
 def clip_for(text: str) -> str:
     """Path to the mp3 for `text`, synthesizing it if this is the first
     time anyone asked -- or if the clip on disk was made by an earlier
@@ -213,12 +249,11 @@ def clip_for(text: str) -> str:
         raise ValueError(f"not a reading this app teaches: {text!r}")
 
     directory = words_dir()
-    key = content_key([{"speaker": "reader", "textJp": form}])
-    path = os.path.join(directory, f"{key}.mp3")
+    path = clip_path(form)
     if is_current(path):
         return path
 
-    with _lock_for(key):
+    with _lock_for(path):
         if is_current(path):
             return path
         # A lone kana (a kanji's one-mora reading, a kana dictionary

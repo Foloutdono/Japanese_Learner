@@ -55,6 +55,7 @@ from content.vocab_data import VOCAB_BY_LEVEL
 from content.vocab_extras import is_written_in_kana
 from study.furigana import align_deck, is_kanji, reading_stem, reading_token_for
 from translations import get_meaning
+from content.jmdict_fr import pool_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 
 # Words shown per reading in the panel, and in the ledger overall.
@@ -251,7 +252,7 @@ def _buckets(char: str, lang: str, packed: str | None = None) -> tuple[list[str]
                 buckets[tok].append({
                     "kanji":    kanji,
                     "kana":     kana,
-                    "meaning":  meaning,
+                    "meaning":  pool_meaning({"kanji": kanji, "kana": kana, "meaning": meaning}, lang),
                     "level":    None,
                     "furigana": word_furigana(kanji, kana),
                 })
@@ -393,7 +394,10 @@ def course_shares(char: str, packed: str | None = None) -> dict:
     return _shares(counts, tokens)
 
 
-@lru_cache(maxsize=256)
+# As many as course_shares keeps (plan 211): an answer is a few
+# readings' counts, and past 256 characters each new one was a scan of
+# the whole JMdict pool again -- on a route that needs no account.
+@lru_cache(maxsize=4096)
 def full_shares(char: str, packed: str | None = None) -> dict:
     """The same counts over ALL of JMdict: the course's words plus every
     pool word written with `char` (the pool is everything the course is

@@ -36,6 +36,7 @@ from pydantic import BaseModel, Field
 from core.auth import get_user_id
 from core.credits import require_pass
 from core.db import db_conn
+from core.rls import enable_rls
 from core.srs_instance import srs
 from study import dictation
 
@@ -102,6 +103,7 @@ def _init_db() -> None:
                 )
                 """
             )
+            enable_rls(cur, "dictation_log")
             # For an install whose table predates the learner grading
             # their own answer: the create above only fires when the
             # table is absent, so it never revisits one that exists.
@@ -180,6 +182,9 @@ class CheckPayload(BaseModel):
     # Empty is a legitimate answer: it is a learner saying they caught
     # nothing, and it measures 0 rather than being rejected.
     answer: str = Field(default="", max_length=400)
+    # The language the translation is revealed in (plan 215). English
+    # when absent, which is what every client sent before it existed.
+    lang: str = Field(default="en", max_length=8)
 
 
 @router.post("/api/dictation/check")
@@ -196,7 +201,7 @@ def check_dictation(payload: CheckPayload, user_id: str = Depends(get_user_id)):
     return {
         "id": payload.clip_id,
         "level": row.get("level", ""),
-        **dictation.reveal(row),
+        **dictation.reveal(row, payload.lang),
         **dictation.measure(payload.answer, row),
     }
 

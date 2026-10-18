@@ -13,7 +13,7 @@ export function LevelBadge({ level, unknownCount, offDeckCount, t }) {
     <div className="analysis-level-badge">
       {level && (
         <span className="analysis-level-badge__level">
-          {t.sentenceLevel ?? 'Estimated level'}: {level}
+          {t.sentenceLevel(level)}
         </span>
       )}
       {typeof unknownCount === 'number' && (
@@ -21,13 +21,13 @@ export function LevelBadge({ level, unknownCount, offDeckCount, t }) {
           className={`analysis-level-badge__unknown${isIPlusOne ? ' analysis-level-badge__unknown--i-plus-one' : ''}`}
         >
           {isIPlusOne
-            ? (t.iPlusOne ?? 'One step beyond you')
-            : `${unknownCount} ${t.unknownWords ?? 'unknown words'}`}
+            ? t.iPlusOne
+            : `${unknownCount} ${t.unknownWords}`}
         </span>
       )}
       {typeof offDeckCount === 'number' && offDeckCount > 0 && (
         <span className="analysis-level-badge__off-deck">
-          {offDeckCount} {t.offDeckWords ?? 'not taught by the app'}
+          {offDeckCount} {t.offDeckWords}
         </span>
       )}
     </div>

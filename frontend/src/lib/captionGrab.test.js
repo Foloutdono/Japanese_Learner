@@ -5,6 +5,8 @@ import {
   encodeGrabPayload,
   decodeGrabHash,
 } from './captionGrab'
+import en from '../locales/en/index.js'
+import fr from '../locales/fr/index.js'
 
 // ── The measured facts this module rides on (2026-09-01) ──
 // From the app's origin, every caption route is walled off: the
@@ -86,12 +88,32 @@ describe('transcriptXmlToVtt', () => {
 describe('the grab hash codec', () => {
   it('round-trips videoId and both tracks through encode/decode', async () => {
     const payload = await encodeGrabPayload('UQecj-5Tiqw', { manual: SAMPLE_XML, asr: '<p t="0">x</p>' })
-    expect(payload.startsWith('v2.')).toBe(true)
+    expect(payload.startsWith('v3.')).toBe(true)
     const grab = await decodeGrabHash(`#grab=${payload}`)
     expect(grab).not.toBeNull()
     expect(grab.videoId).toBe('UQecj-5Tiqw')
     expect(grab.manual).toBe(SAMPLE_XML)
     expect(grab.asr).toBe('<p t="0">x</p>')
+    expect(grab.translations).toEqual({})
+  })
+
+  // Plan 242: the video's own translation rides beside the Japanese,
+  // in the languages the app is read in and no other.
+  it('carries the video’s own translations, and only the app’s languages', async () => {
+    const payload = await encodeGrabPayload('UQecj-5Tiqw', {
+      manual: SAMPLE_XML, translations: { fr: '<p t="0">Bonjour</p>', de: '<p t="0">Hallo</p>', en: '' },
+    })
+    const grab = await decodeGrabHash(`#grab=${payload}`)
+    expect(grab.translations).toEqual({ fr: '<p t="0">Bonjour</p>' })
+  })
+
+  it('still reads a v2 hash, a bookmark made before the translations came', async () => {
+    let bin = ''
+    new TextEncoder().encode(JSON.stringify({ m: SAMPLE_XML, a: null })).forEach(b => { bin += String.fromCharCode(b) })
+    const b64 = btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+    const grab = await decodeGrabHash(`#grab=v2.r.UQecj-5Tiqw.${b64}`)
+    expect(grab.manual).toBe(SAMPLE_XML)
+    expect(grab.translations).toEqual({})
   })
 
   it('carries a track missing on either side as null, and refuses none at all', async () => {
@@ -134,7 +156,7 @@ describe('the grab hash codec', () => {
 
 describe('buildBookmarklet', () => {
   it('is a javascript: URL carrying the app origin and the measured client', () => {
-    const bm = buildBookmarklet('https://example.app')
+    const bm = buildBookmarklet('https://example.app', en)
     expect(bm.startsWith('javascript:')).toBe(true)
     const src = decodeURIComponent(bm.slice('javascript:'.length))
     expect(src).toContain('https://example.app/analyzer#grab=')
@@ -147,6 +169,38 @@ describe('buildBookmarklet', () => {
     expect(src).toContain("languageCode==='ja'&&t.kind!=='asr'")
     expect(src).toContain("languageCode==='ja'&&t.kind==='asr'")
     expect(src).toContain("'&fmt=srv3'")
-    expect(src).toContain('#grab=v2.')
+    // And the video's own translation, hand-written, in the app's two
+    // languages (plan 242).
+    expect(src).toContain('["fr","en"]')
+    expect(src).toContain("t.kind!=='asr'&&(t.languageCode===L")
+    expect(src).toContain('t:tr')
+    expect(src).toContain('#grab=v3.')
+  })
+
+  // On youtube.com the bookmark has no app to ask, so it says what it
+  // says in the language of the table it was copied from (plan 215):
+  // a French learner's alerts are French, and tutoient.
+  it('speaks the language it was copied in', () => {
+    const said = lang => decodeURIComponent(buildBookmarklet('https://example.app', lang).slice('javascript:'.length))
+    for (const key of ['grabAlertNotYoutube', 'grabAlertNoVideo', 'grabAlertNotReady', 'grabAlertNoSubtitles',
+      'grabAlertNoJapanese', 'grabAlertEmpty', 'grabAlertFailed']) {
+      expect(fr[key]).toBeTruthy()
+      expect(said(fr)).toContain(JSON.stringify(fr[key]).slice(1, -1))
+      expect(said(en)).toContain(JSON.stringify(en[key]).slice(1, -1))
+    }
+    expect(said(fr)).not.toContain('No Japanese subtitles')
+    expect(said(fr)).not.toMatch(/Ouvrez/)
+    expect(fr.grabAlertNotYoutube).toMatch(/^Ouvre /)
+  })
+
+  // The walkthrough tells the learner what the alerts mean by quoting
+  // them, so a reworded alert would leave it quoting a sentence the
+  // bookmark no longer says.
+  it('is quoted word for word by the walkthrough', () => {
+    for (const t of [fr, en]) {
+      const firstSentence = s => s.split(/[.:\u00a0]/)[0].trim()
+      expect(t.tutTrouble1).toContain(firstSentence(t.grabAlertNoJapanese))
+      expect(t.tutTrouble1).toContain(firstSentence(t.grabAlertNotReady))
+    }
   })
 })

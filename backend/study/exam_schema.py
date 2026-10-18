@@ -31,6 +31,7 @@
 # unservable at once, without deleting anything, so past attempts still
 # render against the paper they were actually taken on.
 from core.db import db_conn
+from core.rls import enable_rls
 
 
 def ensure_exam_schema() -> None:
@@ -51,6 +52,7 @@ def ensure_exam_schema() -> None:
                     PRIMARY KEY (exam_id, revision)
                 )
             """)
+            enable_rls(cur, "exam_papers")
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS exam_attempts (
                     id          BIGSERIAL PRIMARY KEY,
@@ -71,6 +73,7 @@ def ensure_exam_schema() -> None:
                         REFERENCES exam_papers(exam_id, revision)
                 )
             """)
+            enable_rls(cur, "exam_attempts")
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_exam_attempts_user
                 ON exam_attempts(user_id, created_at DESC)
@@ -105,6 +108,7 @@ def ensure_exam_schema() -> None:
                     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
+            enable_rls(cur, "exam_generation_jobs")
             # The result screen's translations (study/exam_study.py),
             # keyed by a hash of what was translated, not by paper.
             cur.execute("""
@@ -114,6 +118,7 @@ def ensure_exam_schema() -> None:
                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
+            enable_rls(cur, "exam_translations")
             _migrate_to_revisions(cur)
         conn.commit()
     finally:
@@ -169,6 +174,12 @@ def _migrate_to_revisions(cur) -> None:
         CREATE INDEX IF NOT EXISTS idx_exam_attempts_paper
         ON exam_attempts(exam_id, revision, user_id)
     """)
+
+    # The seed papers' identity (plan 228, study/exam_seed.py). Unique,
+    # and NULL for every generated paper: Postgres treats NULLs as
+    # distinct in a unique index, so generated rows never collide.
+    cur.execute("ALTER TABLE exam_papers ADD COLUMN IF NOT EXISTS seed_key TEXT")
+    cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS exam_papers_seed ON exam_papers (seed_key)")
 
     cur.execute("""
         SELECT 1 FROM pg_constraint

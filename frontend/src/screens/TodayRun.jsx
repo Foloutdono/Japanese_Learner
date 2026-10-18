@@ -8,7 +8,9 @@ import { SessionPanel } from '../components/study/SessionPanel'
 import { SideLookup } from '../components/analysis/SideLookup'
 import { GrammarLessonSheet } from '../components/study/GrammarLesson'
 import { GrammarGate } from '../components/study/GrammarGate'
+import { GlyphGate, glyphGated } from '../components/study/GlyphGate'
 import { TourRoute, TourLedger } from '../components/study/TourPanels'
+import { useAsk } from '../hooks/useAsk'
 import { useDesk } from '../hooks/useDesk'
 import { CardPanel } from '../components/study/CardPanel'
 import { BuildEntry, GrammarTiles } from '../components/study/GrammarPlate'
@@ -21,13 +23,15 @@ import { DrawingQuiz } from '../components/study/DrawingCanvas'
 import ReadingsInput from '../components/study/ReadingsInput'
 import RatingBar from '../components/study/RatingBar'
 import HintBar from '../components/study/HintBar'
+import SpeakToggle from '../components/study/SpeakToggle'
+import { useRevealSpeech } from '../hooks/useRevealSpeech'
 import SessionError from '../components/study/SessionError'
 import CardPrompt from '../components/study/CardPrompt'
 import { GrammarChoice } from '../components/study/GrammarPieces'
 import { radicalChoiceRenderer } from '../components/study/radicalChoiceRenderer'
 import { ChevronIcon } from '../components/ui/Icons'
 import { ExampleSentence } from '../components/dictionary/ExampleSentence'
-import { normalizeCard, cardShape, availableHintsFor, wordForm } from '../domain/cardShape'
+import { normalizeCard, cardShape, availableHintsFor, wordForm, choiceAnswer, grammarSentence } from '../domain/cardShape'
 import { RENDER, HINTS, modeLabel } from '../domain/studyModes'
 import { LINE_COLOR } from '../config/tabs'
 import { postReview as sendReview, staleCards } from '../lib/reviews'
@@ -39,6 +43,7 @@ import { peekTally } from '../stores/runTally'
 import { cardFace } from '../domain/dayClear'
 import { formatGlossLine } from '../components/study/gloss'
 import { romajiEquals } from '../lib/romaji'
+import { speakJapanese, playKana, kanaSound, isSpeakOnReveal } from '../lib/audio'
 
 // ── 本日の運行 — the run (plan 070) ───────────────────────────
 // The day's queue on the stage: everything due, across every section
@@ -118,6 +123,10 @@ export default function TodayRun({ session }) {
   // lane choice either, and its own session.
   const unit = only ? '' : (params.get('unit') ?? '')
   const allChosen = laneParam === ''
+  // 回復運転 (plan 217): the run past the day's share, boarded from the
+  // cleared gate -- the reviews the learner's ceiling held back today.
+  // Its own session: it must not resume the day's.
+  const extra = !only && !unit && params.get('extra') === '1'
   // 区間 (plan 135): a run of a chosen length carries each lane's share
   // (`?quota=id:n,...`, domain/lanes.splitTake). The run counts what it
   // has answered and holds per lane and asks only for the rest.
@@ -194,6 +203,7 @@ export default function TodayRun({ session }) {
       + `&exclude=${encodeURIComponent(excludeIds.join(','))}`
       + (only ? `&only=${encodeURIComponent(only)}` : '')
       + (unit ? `&unit=${encodeURIComponent(unit)}` : '')
+      + (extra ? '&extra=1' : '')
       // Omitted when everything is chosen: an empty `lanes` already
       // means the whole queue on the backend, and sending the full list
       // would make the session key churn as lanes empty out mid-run.
@@ -206,7 +216,7 @@ export default function TodayRun({ session }) {
     for (const c of cards) if (c.lane?.id) laneOfRef.current.set(cardKey(c), c.lane.id)
     setBeyond(Number.isInteger(data.beyond) ? data.beyond : null)
     return cards
-  }, [lang, session, laneParam, allChosen, only, unit, capped, quota, cardKey])
+  }, [lang, session, laneParam, allChosen, only, unit, extra, capped, quota, cardKey])
 
   const extraExcludeIds = useCallback(
     () => Array.from(recentlyReviewedRef.current.keys()),
@@ -223,8 +233,10 @@ export default function TodayRun({ session }) {
   const { current: card, queueLength, loading, done, error, retry, advance, updateCurrent } = useCardSession({
     // The choice is part of the key: picking different lanes is a
     // different session, and resuming the previous one's cached queue
-    // would serve cards from lanes the learner just switched off.
-    storageKey: sessionKey('today', only ? `only:${only}` : unit ? `unit:${unit}` : capped ? `quota:${quotaRaw}` : allChosen ? 'all' : laneParam),
+    // would serve cards from lanes the learner just switched off. So is
+    // the language: the cards are localised server-side, so a switch is
+    // a fresh queue (as GrammarRun's).
+    storageKey: sessionKey('today', only ? `only:${only}` : unit ? `unit:${unit}` : extra ? 'extra' : capped ? `quota:${quotaRaw}` : allChosen ? 'all' : laneParam, lang),
     fetchBatch,
     batchSize: 10,
     cardKey,
@@ -295,7 +307,7 @@ export default function TodayRun({ session }) {
   })
 
   const nc = card ? normalizeCard(card) : null
-  const { structureKey, renderer, isRadical, isFill, isContrast, isF2B } = cardShape(nc ?? {})
+  const { structureKey, renderer, isRadical, isFill, isContrast, isBuild, isWrite, isF2B } = cardShape(nc ?? {})
 
   // 教順 (plan 186b): a grammar point the learner has never met is read
   // before it is drilled, here as on its own run (GrammarRun's gate,
@@ -317,10 +329,16 @@ export default function TodayRun({ session }) {
     level: /^grammar_(N[1-5])_/.exec(c.raw_id ?? c.card_id)?.[1],
     pattern: c.grammar, structure: c.structure, meaning: c.meaning, stage: c.stage,
   })
+  // 初見 (plan 216): a kana or a kanji never met is shown before it is
+  // drilled -- what it reads, its strokes traced, a few words -- as a
+  // grammar point is asked. Seen is the same flag on the queued card.
+  const glyphing = (structureKey === 'kana' || structureKey === 'kanji') && glyphGated(card)
   // 発見 on the desk (plan 187f): a point's tour stands on the three
   // panels, its stops at the left and its plate at the right, from what
   // the tour says of where it stands.
   const [tourView, setTourView] = useState(null)
+  // 問 in the tour (plan 204): a thread per stop, kept for the run.
+  const asking = useAsk(session, 'grammar')
   const touring = desk && gated && Boolean(card?.lesson?.tour)
   const comparing = desk && gated && compared?.card === transitionKey
     ? { category: 'grammar', id: compared.id }
@@ -343,10 +361,24 @@ export default function TodayRun({ session }) {
     setTimeout(() => recentlyReviewedRef.current.delete(key), 8000)
   }
 
+  // 音 — speak on reveal (lib/audio/reveal.js): a card says its answer
+  // as its own run has it say it, unless the switch is off. A kana says
+  // its sound and a word its reading, with the switch beside the hints;
+  // a kanji, a section's or a deck's, its reading once drawn; a grammar
+  // card its sentence (below), with the switch in the head. A personal
+  // deck's word or sentence says nothing, as in the deck's own run.
+  const personal = nc?.source === 'custom'
+  const speaksWord = !personal && (structureKey === 'kana' || structureKey === 'vocab')
+  const speaksSentence = !personal && structureKey === 'grammar' && (isFill || isContrast || isBuild || isWrite)
 
   function reveal() {
     setAnswered(true)
     setShowRating(true)
+    // The first reveal says it, in the reveal's own tick, the tap's:
+    // iOS speaks only from a gesture (lib/audio/speech.js).
+    if (answered || !isSpeakOnReveal()) return
+    if (structureKey === 'kana') playKana(kanaSound(nc))
+    else if (speaksWord || renderer === RENDER.DRAW) speakJapanese(nc.kana)
   }
 
   // Construire's answer (plan 194): typed into the entry under the card,
@@ -354,6 +386,11 @@ export default function TodayRun({ session }) {
   const entry = useBuild(card?.build && cardShape(card).isBuild ? card : null, {
     session, lang, onDone: reveal, resetKey: cardNonce,
   })
+  // The sentence, as GrammarRun says it: fill-in's, Choisir's with its
+  // hole filled, Construire's once the verdict brings it, Écrire's
+  // model. Keyed on the card in hand: the next card is drawn under this
+  // one's reveal for a render (the reset above is an effect).
+  useRevealSpeech(speaksSentence ? grammarSentence(nc, entry?.verdict) : null, answered, transitionKey)
 
   function onMCQAnswer(choice) {
     if (answered) return
@@ -442,15 +479,19 @@ export default function TodayRun({ session }) {
     <StudyStage
       color={color}
       onLeave={leaveToGate}
+      report={showRating && card ? { card } : null}
       leaveLabel={t.stageGate}
       where={where}
       sub={sub}
       remaining={remaining}
+      // The speak-on-reveal switch for a card that says a sentence, in
+      // the head as GrammarRun keeps it.
+      aside={card && !gated && speaksSentence ? <SpeakToggle variant="head" /> : undefined}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
       records
-      panel={touring ? <TourRoute point={lessonOf(card)} view={tourView} />
-        : card ? <CardPanel card={card} remaining={remaining} keys={structureKey === 'kanji' && renderer === RENDER.TYPE ? 'readings' : undefined} /> : null}
+      panel={touring ? <TourRoute point={lessonOf(card)} view={tourView} ask={asking} />
+        : card && !glyphing ? <CardPanel card={card} remaining={remaining} keys={structureKey === 'kanji' && renderer === RENDER.TYPE ? 'readings' : undefined} /> : null}
       done={done}
       side={error && !card ? null : (
         <SideLookup lookup={comparing} onExit={closeCompared} session={session}>
@@ -464,7 +505,7 @@ export default function TodayRun({ session }) {
           per-deck stage split to draw, so the bar is the run's. */}
       {length > 0 && <RunHairline pct={pct} color="var(--accent2)" />}
 
-      {error && !card && <SessionError error={error} onRetry={retry} />}
+      {error && !card && <SessionError error={error} onRetry={retry} session={session} />}
       {loading && !card && <Loading />}
 
         {card && gated && (
@@ -476,24 +517,32 @@ export default function TodayRun({ session }) {
               onBoard={() => updateCurrent({ lesson_seen: true })}
               onLesson={() => setSheet(card.raw_id ?? card.card_id)}
               onView={setTourView}
+              ask={asking}
             />
           </div>
         )}
 
-        {card && !gated && (
+        {card && glyphing && (
+          <div className="gt-gate">
+            <GlyphGate card={card} session={session} onBoard={() => updateCurrent({ lesson_seen: true })} />
+          </div>
+        )}
+
+        {card && !gated && !glyphing && (
           <>
             {/* The help switch sits above the card, which is where the
                 section screens put it. Below the card it was past the
                 fold on a drawing mode, so the one control that rescues
                 a card you cannot answer was hidden exactly when you
                 needed it. Where the card is from is on its own footer
-                strip (see laneFoot), as on every other study card. */}
-            {availableHints.length > 0 && (
-              <HintBar
-                available={availableHints} active={activeHints}
-                onToggle={toggleHint} disabled={gates.locked}
-              />
-            )}
+                strip (see laneFoot), as on every other study card.
+                A card that says its word keeps the speak-on-reveal
+                switch at the end of the row, which then stands even
+                with no hint to offer. */}
+            <HintBar
+              available={availableHints} active={activeHints}
+              onToggle={toggleHint} disabled={gates.locked} speaks={speaksWord}
+            />
 
             <CardTransition
               className={stageClassFor(structureKey)}
@@ -556,7 +605,7 @@ export default function TodayRun({ session }) {
               (desk || !answered) && (
                 <GrammarTiles
                   choices={nc.contrast?.choices ?? []}
-                  correct={nc.grammar}
+                  correct={choiceAnswer(nc)}
                   readings={nc.choices_furigana}
                   selected={selected} answered={answered} onAnswer={onMCQAnswer}
                 />

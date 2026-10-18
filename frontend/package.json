@@ -13,7 +13,7 @@
     "cap:sync": "npm run build:native && cap sync",
     "cap:android": "npm run cap:sync && cap run android",
     "cap:ios": "npm run cap:sync && cap open ios",
-    "assets:native": "capacitor-assets generate --android --ios --iconBackgroundColor '#100e13' --iconBackgroundColorDark '#100e13' --splashBackgroundColor '#17151a' --splashBackgroundColorDark '#17151a'",
+    "assets:native": "capacitor-assets generate --android --ios --iconBackgroundColor '#100e13' --iconBackgroundColorDark '#100e13' --splashBackgroundColor '#17151a' --splashBackgroundColorDark '#17151a' && node scripts/sharpen-launcher.mjs",
     "icons": "node scripts/render-icon.mjs && pwa-assets-generator && node scripts/place-icons.mjs",
     "landing": "node landing/build.mjs",
     "landing:og": "node landing/og.mjs",
@@ -24,7 +24,11 @@
     "lint:ink": "node scripts/check-ink-ground.mjs",
     "lint:artboards": "node scripts/check-artboards.mjs",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:node": "vitest run --project node",
+    "test:browsers": "vitest run --project browser --project phone --project tablet --project touch --project desktop --project wide --project short",
+    "test:browsers:mobile": "vitest run --project browser --project phone --project tablet --project touch",
+    "test:browsers:desk": "vitest run --project desktop --project wide --project short"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.1",
@@ -41,9 +45,12 @@
     "@fontsource/noto-serif-jp": "^5.3.0",
     "@fontsource/space-grotesk": "^5.3.0",
     "@supabase/supabase-js": "^2.106.1",
+    "fflate": "^0.8.2",
+    "fzstd": "^0.1.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.11.0",
+    "sql.js": "^1.14.1",
     "tesseract.js": "^7.0.0"
   },
   "devDependencies": {

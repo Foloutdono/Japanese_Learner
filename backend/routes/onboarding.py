@@ -1,13 +1,17 @@
 # ── みどりの窓口 — the onboarding endpoints ──────────────────────
 # Four routes, all synchronous, none touching the exam pipeline:
 #
-#   POST /api/onboarding/placement        a fresh 12-question paper
-#   POST /api/onboarding/placement/score  grade it, recommend a level
+#   POST /api/onboarding/placement/start  the climb's first question (plan 224)
+#   POST /api/onboarding/placement/answer the next one, or where to board
+#   POST /api/onboarding/placement        a fresh 12-question paper, and
+#   POST /api/onboarding/placement/score  its grade: the fixed test, kept
+#                                         for a client built before 224
 #   POST /api/onboarding/complete         stamp level + pace + onboarded_at
 #                                         (+ the boarding's own answers,
 #                                         plan 075: motive, kana, rhythm,
-#                                         the hour and the nudge; and the
-#                                         lines, core/lines.py)
+#                                         the hour and the nudge; the
+#                                         lines, core/lines.py; and the
+#                                         card's name, plan 247)
 #   GET  /api/onboarding/volumes          per-level item counts (projection)
 #
 # And the first ride (plan 097), the lesson after the boarding:
@@ -31,7 +35,7 @@ from datetime import date, datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, id_for
 from content.kana_data import get_all_kana
 from content.kanji_data import KANJI_BY_LEVEL
 from content import reading_sentences
@@ -41,7 +45,7 @@ from core.auth import get_user_id
 from core.db import db_conn
 from core.lines import clean_lines
 from core.user_level import GOAL_LEVELS, LEVELS, NOVICE_GOAL, note_stored_level, resolve_level
-from routes.profile import _profile_row, apply_kana_rule, apply_level_rule, ensure_profile_row
+from routes.profile import _profile_row, apply_kana_rule, apply_level_rule, clean_card_name, ensure_profile_row
 from routes.reading import _display_seconds, phrase_to_romaji
 from study.furigana import align_sentence
 from routes.vocab import _build_vocab_card
@@ -51,7 +55,7 @@ from study.dictation import measure_forms
 from study.exam_scoring import flatten_questions, score_attempt
 from study.level_rule import KANA_KNOWN
 from study.modes import resolve as resolve_mode
-from study.placement import build_placement_paper, recommend_level, strip_answers
+from study.placement import PER_LEVEL, build_placement_paper, recommend_level, strip_answers, walk
 from study.romaji import sentence_romaji, sentence_words
 
 router = APIRouter()
@@ -78,6 +82,24 @@ class ScorePayload(BaseModel):
     # Partial submissions are legal — "stop here, this is too hard" is
     # the early exit, and unanswered questions simply score as wrong.
     answers: dict[str, str] = {}
+
+
+class ClimbPayload(BaseModel):
+    seed: int = Field(ge=0, lt=2 ** _SEED_BITS)
+    # Every answer so far, question id -> choice id: the climb is
+    # replayed from its seed over them (study/placement.walk), so the
+    # server keeps nothing between two questions. Five levels of five
+    # questions at most, each id and choice a short token.
+    answers: dict[str, str] = Field(default_factory=dict, max_length=len(LEVELS) * PER_LEVEL)
+    # "Too hard? Stop here": the level being asked is not cleared.
+    stop: bool = False
+
+    @field_validator("answers")
+    @classmethod
+    def short_tokens(cls, v: dict[str, str]) -> dict[str, str]:
+        if any(len(k) > 40 or len(c) > 8 for k, c in v.items()):
+            raise ValueError("an answer is a question id and a choice id")
+        return v
 
 
 DEPARTURES = ("am", "noon", "pm")
@@ -125,11 +147,20 @@ class CompletePayload(BaseModel):
     # (core/lines.py). Optional like the rest: a client that does not
     # ask leaves NULL, which reads as all three; a replay overwrites.
     lines: list[str] | None = None
+    # 署名 (plan 247): the first name the card prints, '' for none. Absent
+    # (Settings' retake, a client before the card was the form) leaves
+    # the column as it stands; sent, it is written, empty included.
+    cardName: str | None = None
 
     @field_validator("lines")
     @classmethod
     def valid_lines(cls, v: list[str] | None) -> list[str] | None:
         return clean_lines(v)
+
+    @field_validator("cardName")
+    @classmethod
+    def valid_card_name(cls, v: str | None) -> str | None:
+        return None if v is None else clean_card_name(v)
 
     @field_validator("motive")
     @classmethod
@@ -243,6 +274,21 @@ class CompletePayload(BaseModel):
         return self
 
 
+@router.post("/api/onboarding/placement/start")
+def start_climb(user_id: str = Depends(get_user_id)):
+    """The climb's first question, at N5, and the seed every later
+    answer is replayed from (plan 224)."""
+    seed = random.randrange(2 ** _SEED_BITS)
+    return {"seed": seed, **walk(seed, {})}
+
+
+@router.post("/api/onboarding/placement/answer")
+def answer_climb(payload: ClimbPayload, user_id: str = Depends(get_user_id)):
+    """The next question, or, once a level is not cleared (or N1 is),
+    where to board. Never the answer key."""
+    return {"seed": payload.seed, **walk(payload.seed, payload.answers, stop=payload.stop)}
+
+
 @router.post("/api/onboarding/placement")
 def start_placement(user_id: str = Depends(get_user_id)):
     seed = random.randrange(2 ** _SEED_BITS)
@@ -268,6 +314,10 @@ def score_placement(payload: ScorePayload, user_id: str = Depends(get_user_id)):
 @router.post("/api/onboarding/complete")
 def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_user_id)):
     ensure_profile_row(user_id)
+    # A replay of the office below the level it last stored is a move
+    # down, and gives back what that level assumed (plan 224), as
+    # Settings' does; anything else seeds as the first boarding did.
+    previous = _profile_row(user_id)[1]
     has_goal = payload.goalLevel is not None
     conn = db_conn()
     try:
@@ -295,7 +345,8 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
                     reminder_time = %s,
                     notifications = %s,
                     lines = %s,
-                    tz_offset_min = COALESCE(%s, tz_offset_min)
+                    tz_offset_min = COALESCE(%s, tz_offset_min),
+                    card_name = CASE WHEN %s THEN %s ELSE card_name END
                 WHERE user_id = %s
                 RETURNING onboarded_at, goal_set_at
                 """,
@@ -313,6 +364,8 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
                     payload.notifications,
                     payload.lines,
                     payload.tzOffsetMin,
+                    payload.cardName is not None,
+                    payload.cardName,
                     user_id,
                 ),
             )
@@ -326,7 +379,8 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
     # The level rule (plan 074): the stops behind the boarding level are
     # marked known. Seeding is idempotent, so a replay of the office
     # costs nothing a second time.
-    level_rule_result = apply_level_rule(user_id, None, payload.jlptLevel)
+    moving_down = previous in LEVELS and LEVELS.index(payload.jlptLevel) < LEVELS.index(previous)
+    level_rule_result = apply_level_rule(user_id, previous if moving_down else None, payload.jlptLevel)
     # The kana door (plan 075): the scripts the learner already reads
     # start known, the same way and with the same spread.
     kana_rule_result = apply_kana_rule(user_id, payload.kanaKnown)
@@ -346,6 +400,7 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
         "reminderTime": payload.reminderTime,
         "notifications": payload.notifications,
         "lines": payload.lines,
+        "cardName": payload.cardName,
     }
 
 
@@ -518,6 +573,7 @@ def get_ride(lang: str = "fr", user_id: str = Depends(get_user_id)):
             "translation_lang": translation_lang,
             "display_seconds": _display_seconds(jp),
             "grammar": _RIDE_SENTENCE["grammar"],
+            "grammar_id": id_for(_RIDE_SENTENCE["grammar"]),
         },
     }
 

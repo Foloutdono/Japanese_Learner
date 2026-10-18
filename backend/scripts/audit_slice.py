@@ -17,17 +17,20 @@ rather than imported, so this runs in a fresh clone with nothing installed
 ── The rotation ──────────────────────────────────────────────
 Runs are Tuesday and Friday (ANCHOR is the first). The nth run audits
 
-    AREAS[n % 5]
+    AREAS[n % 6]
 
-so grammar, vocab, sentences, placement and tours advance in parallel — a
-whole area is never starved behind another's backlog — and within an area
-the cursor is n // 5, walking that area's slices in order and wrapping
+so grammar, vocab, sentences, placement, tours and conversation advance in
+parallel — a whole area is never starved behind another's backlog — and
+within an area the cursor is n // 6, walking that area's slices in order and wrapping
 when it reaches the end. (Placement joined on 2026-09-21, plan 109: the
 three candidate lists an outside ranking and the community JLPT lists
 raise against the deck. Runs before that date rotated over three areas.
 Tours joined on 2026-10-05, plan 187g: the twists (one per notion since
 plan 189) and the scene written for each grammar point's tour, which no gate reads for whether a native
-speaker would say them. Runs before that date rotated over four.)
+speaker would say them. Runs before that date rotated over four.
+Conversation joined on 2026-10-16, plan 217: the 会話 bank's scenarios,
+whose wrong replies no gate can tell from a second right answer. Runs
+before that date rotated over five.)
 Nothing is stored: the slice is a pure function of the date, so a
 run can be reproduced (--on) and the next months inspected (--schedule)
 without a ledger to keep in sync.
@@ -59,7 +62,7 @@ _CONTENT = os.path.join(_BASE_DIR, "content")
 _VOCAB = os.path.join(_BASE_DIR, "datas", "vocab")
 
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
-AREAS = ("grammar", "vocab", "sentences", "placement", "tours")
+AREAS = ("grammar", "vocab", "sentences", "placement", "tours", "conversation")
 
 # The first run — the Routine's own first firing. Tuesdays and Fridays
 # after it are the others, and the two must agree: a run on any other
@@ -78,6 +81,9 @@ CHUNK_PLACEMENT = 40
 # A tour block is its twists and a scene: a dialogue to read aloud in the
 # head, three answers each to try to make right. Fewer to a run.
 CHUNK_TOURS = 15
+# A conversation block is whole scenarios (plan 217): an exchange to read
+# aloud in the head, and two wrong replies a turn to try to make right.
+CHUNK_CONVERSATION = 4
 RICH_LEVELS = ("N5", "N4")
 
 
@@ -367,10 +373,13 @@ def _placement_slices() -> list[dict]:
 
 def toured_points(level: str) -> list[dict]:
     """The level's points that carry a written tour (plan 187), each as
-    the audit reads it: the point, its gloss and its rivals, the block."""
+    the audit reads it: the point, its gloss and its rivals, the block --
+    and, where the point is asked from questions of its own (plan 201),
+    its `choose` list, which the tutorial's quiz is read beside."""
     return [
         {"pattern": p["pattern"], "meaning": p.get("meaning"), "structure": p.get("structure"),
-         "compare": [c.get("pattern") for c in p.get("compare", [])], "tour": p["tour"]}
+         "compare": [c.get("pattern") for c in p.get("compare", [])], "tour": p["tour"],
+         **({"choose": p["choose"]} if p.get("choose") else {})}
         for p in grammar_points(level) if p.get("tour")
     ]
 
@@ -391,12 +400,34 @@ def _tour_slices() -> list[dict]:
     return out
 
 
+def conversation_scenarios(level: str) -> list[dict]:
+    """The level's scenarios of the 会話 bank (plan 217), whole."""
+    return _json(os.path.join(_CONTENT, "conversation", f"{level}.json"))
+
+
+def _conversation_slices() -> list[dict]:
+    out = []
+    for level in LEVELS:
+        scenes = conversation_scenarios(level)
+        if not scenes:
+            continue
+        for sid, start, stop in _chunk_ids(f"conversation-{level}", len(scenes), CHUNK_CONVERSATION):
+            out.append({
+                "id": sid, "area": "conversation",
+                "title": f"{level} conversation, scenarios {start + 1}–{stop}",
+                "source": f"backend/content/conversation/{level}.json",
+                "level": level, "start": start, "stop": stop,
+            })
+    return out
+
+
 def slices(area: str) -> list[dict]:
     return {"grammar": _grammar_slices,
             "vocab": _vocab_slices,
             "sentences": _sentence_slices,
             "placement": _placement_slices,
-            "tours": _tour_slices}[area]()
+            "tours": _tour_slices,
+            "conversation": _conversation_slices}[area]()
 
 
 def slice_for(index: int) -> dict:
@@ -428,6 +459,7 @@ CHECKS = {
         "Does each example actually use the point it illustrates, in the sense the lesson taught?",
         "Is the JLPT level defensible against the usual published lists?",
         "Does a `careful` step warn about a real trap rather than a made-up one?",
+        "Where the point carries `choose` (plan 201): is each question's right filling the ONLY one a native speaker would accept with the meaning its `tr` gives -- try every wrong filling written out in the sentence -- and is each `slips` entry really a form nobody says (not a clipped or colloquial form)?",
     ],
     "vocab": [
         "Is the reading right for this spelling, and is it the reading a learner will meet?",
@@ -454,6 +486,15 @@ CHECKS = {
         "Is a wrong line in fact acceptable Japanese for the task (then it is a second right answer, a finding)?",
         "Do the English and the French say what the Japanese says, at the same register, and does the `note` hold for the point and its rivals?",
         "Is anything above the level in kanji, grammar or vocabulary?",
+        "Where the point carries `choose` (plan 201): is the right filling the only right one, does the hole turn on the point and not on a word, is the filled sentence spelled right (a hole that swallows part of a stem), and is the `why` true of the sentence and of every wrong filling?",
+    ],
+    "conversation": [
+        "Each turn's two `wrong` replies: say each to the other person in the scene -- would a native speaker take it as a fine answer? (A second right answer is the commonest finding: the learner is marked wrong for a good reply.) Do the two fail for different reasons, and is each `why` the true one?",
+        "Is `me` what a native speaker would say there, in the scenario's `register` (casual, polite, or formal 敬語 without over-humble chains), and within the level?",
+        "Does each `alt` say what `me` says, as naturally and as completely? Translate scores the learner against them, so an alt that answers differently marks a wrong reply right.",
+        "Is every reading in `kana` the one this sentence takes (counters, dates, times, 何, 〜中, 一人), since the furigana is built from it?",
+        "Is each `them` line what that person would say at that place, and do the turns make one plausible exchange, start to end?",
+        "Do the English and the French say what the Japanese says, at the same register (the French « tu » to the learner), and is each `note` and `why` true of the Japanese it names?",
     ],
     "sentences": [
         "Is the Japanese natural — what someone would actually say or write, not translationese?",
@@ -478,6 +519,8 @@ def entries_of(chosen: dict) -> list[dict]:
         return list(placement_lists()[chosen["kind"]][chosen["start"]:chosen["stop"]])
     if area == "tours":
         return toured_points(chosen["level"])[chosen["start"]:chosen["stop"]]
+    if area == "conversation":
+        return conversation_scenarios(chosen["level"])[chosen["start"]:chosen["stop"]]
     if chosen["kind"] == "listening":
         return list(_literal("listening_clips.py", chosen["level"]))
     bank = _literal("reading_sentences.py", chosen["level"])

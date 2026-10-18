@@ -59,6 +59,18 @@ export function redirectTarget() {
   return `${window.location.origin}/`
 }
 
+/**
+ * Where a confirmation e-mail's link should land: the origin the
+ * learner signed up on, as Google's return is. Without it Supabase
+ * writes the project's Site URL into the link, and a learner who
+ * signed up on tsuji.app confirmed onto the Vercel address, signed in
+ * there and not where they started. Undefined in the shell, which
+ * keeps the Site URL: no WebView is waiting on a mail's link.
+ */
+export function emailRedirectTarget() {
+  return isNative() ? undefined : `${window.location.origin}/`
+}
+
 // What the callback carries depends on the client's flowType, and the
 // shell has to read it by hand either way — the deep link never
 // touches the page, so detectSessionInUrl (which does this for us on
@@ -87,6 +99,20 @@ function credentialsFrom(url) {
   }
 }
 
+// The refusal a callback carried instead of a session, by name: the
+// same `error_code` lib/authRedirect.js reads off the web's return
+// (query on PKCE, fragment on implicit), so a refusal in the shell
+// reaches the same sentence in lib/authErrors.js as one on the web.
+function refusalCode(url) {
+  try {
+    const u = new URL(url)
+    const frag = new URLSearchParams(u.hash.replace(/^#/, ''))
+    return u.searchParams.get('error_code') ?? frag.get('error_code')
+  } catch {
+    return null
+  }
+}
+
 /**
  * Sign in with a provider, or — with `link` — put that provider onto
  * the account already signed in, which is how a guest keeps every
@@ -95,7 +121,12 @@ function credentialsFrom(url) {
  * -> { ok: true }            the shell finished the round trip here
  * -> { ok: true, redirecting: true }  the web is leaving; nothing after
  *                            this call will run
- * -> { ok: false, message }  anything else, already human-readable
+ * -> { ok: false, code, message }  anything else: `code` is Supabase's
+ *                            name for the refusal (or this module's own
+ *                            for a broken round trip), which
+ *                            lib/authErrors.js words for a learner;
+ *                            `message` is English, for the console, and
+ *                            never shown (plan 215)
  *
  * `link` needs manual linking enabled on the project. Where losing the
  * current account would be silent data loss the caller must NOT retry
@@ -133,7 +164,7 @@ export async function connectProvider({ provider = 'google', link = false } = {}
       ? supabase.auth.linkIdentity({ provider, options })
       : supabase.auth.signInWithOAuth({ provider, options })
     const { data, error } = await call
-    if (error) return { ok: false, message: error.message }
+    if (error) return { ok: false, code: error.code, message: error.message }
 
     if (!inShell) {
       // supabase-js has already set window.location; this frame is
@@ -142,7 +173,7 @@ export async function connectProvider({ provider = 'google', link = false } = {}
       return { ok: true, redirecting: true }
     }
 
-    if (!data?.url) return { ok: false, message: 'no authorization url' }
+    if (!data?.url) return { ok: false, code: 'no_authorization_url', message: 'no authorization url' }
     const { openAuthTab } = await native()
     const back = await openAuthTab(data.url, `${NATIVE_REDIRECT.split('://')[0]}://`)
     if (!back) return { ok: false, cancelled: true }
@@ -150,11 +181,13 @@ export async function connectProvider({ provider = 'google', link = false } = {}
     const creds = credentialsFrom(back)
     // No code and no tokens means the callback carried a refusal (or
     // an error) — never a session, so never report one.
-    if (!creds) return { ok: false, message: 'no credentials on the callback' }
+    if (!creds) {
+      return { ok: false, code: refusalCode(back) ?? 'no_credentials', message: 'no credentials on the callback' }
+    }
     const { error: sessionError } = creds.code
       ? await supabase.auth.exchangeCodeForSession(creds.code)
       : await supabase.auth.setSession(creds)
-    if (sessionError) return { ok: false, message: sessionError.message }
+    if (sessionError) return { ok: false, code: sessionError.code, message: sessionError.message }
     return { ok: true }
   } catch (err) {
     return { ok: false, message: err?.message }

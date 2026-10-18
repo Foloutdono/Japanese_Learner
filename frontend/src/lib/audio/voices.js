@@ -1,9 +1,9 @@
 import { useSyncExternalStore } from 'react'
-import { getAudioContext, getBuffer } from './context'
+import { getAudioContext, getBuffer, whenUnlocked } from './context'
 import { busFor, playBuffer } from './mixer'
 import { isMuted, voiceLevel } from './settings'
 import { VOICE_EVENTS, VOICE_FAMILIES } from './recipes'
-import { voiceOut, later } from './synth'
+import { voiceOut, later, warmHall } from './synth'
 
 // ── The voice palette ─────────────────────────────────────
 // Every interface and effect sound in the app, and for each one a
@@ -117,6 +117,52 @@ export function useVoiceKeys() { return useSyncExternalStore(subscribe, snapshot
 // request per tap — hence the miss set: one attempt per path per
 // session, then straight to the synthesiser.
 const assetMissing = new Set()
+
+// ── The hall, made ahead ──────────────────────────────────
+// The hall's impulse and each bus's convolver are heavy to make (a
+// phone spends ~60ms of its main thread on them) and were made by the
+// first voice to ask for the hall: a level-up's fanfare, in the middle
+// of its scene, which hitched on it (plan 207). They are made once
+// audio may play, for every bus a voice sends into the hall from, in
+// the page's idle time and only as much as each idle period has room
+// for. Made in one go, they landed in the first idle gap after the tap
+// that unlocks audio, which is the first departure of a session more
+// often than not: ~100ms in the middle of the ticket gate on a phone
+// (plan 210).
+const HALL_BUSES = [...new Set(VOICE_EVENTS
+  .filter(e => e.variants.some(v => (v.space ?? 0) > 0))
+  .map(e => e.category))]
+// How long the hall waits for idle time before it is made regardless,
+// a piece per callback: counted from the first request, so a page that
+// never has an idle period long enough for a convolver (one with an
+// animation on the main thread) still has its hall before a fanfare.
+const HALL_WAIT_MS = 4000
+
+// Safari has no requestIdleCallback. A timer stands in for it, with a
+// budget of a few milliseconds a call and never a long idle period, so
+// there the slices go a few at a time and the convolvers wait for
+// HALL_WAIT_MS.
+function idleSoon(fn) {
+  if (window.requestIdleCallback) return window.requestIdleCallback(fn, { timeout: HALL_WAIT_MS })
+  return setTimeout(() => {
+    const t = performance.now()
+    fn({ didTimeout: false, timeRemaining: () => Math.max(0, 8 - (performance.now() - t)) })
+  }, 100)
+}
+
+if (typeof window !== 'undefined') {
+  whenUnlocked(() => {
+    const since = performance.now()
+    const ask = () => idleSoon(deadline => {
+      const ctx = getAudioContext()
+      if (!ctx) return
+      const buses = HALL_BUSES.map(busFor).filter(Boolean)
+      const late = deadline.didTimeout || performance.now() - since > HALL_WAIT_MS
+      if (!warmHall(ctx, buses, deadline, late)) ask()
+    })
+    ask()
+  })
+}
 
 /**
  * The per-sound trim, as a node the recipe plays into.

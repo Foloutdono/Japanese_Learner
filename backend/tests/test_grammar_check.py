@@ -16,6 +16,7 @@ def _good(**over) -> dict:
     entry = {
         "pattern": "〜てください",
         "structure": "verb て-form + ください",
+        "structure_fr": "verbe forme en て + ください",
         "meaning": {"en": "please do", "fr": "veuillez faire"},
         "register": "polite",
         "steps": [
@@ -38,6 +39,7 @@ def _good(**over) -> dict:
 RIVAL = {
     "pattern": "〜ないでください",
     "structure": "verb ない-form + でください",
+    "structure_fr": "verbe forme en ない + でください",
     "meaning": {"en": "please do not", "fr": "veuillez ne pas"},
     "steps": [], "compare": [],
     "examples": [
@@ -327,8 +329,8 @@ def _tour(**over) -> dict:
             "place": "窓口",
             "them": {"en": "Clerk", "fr": "Agent"},
             "lines": [
-                {"who": "them", "jp": "いらっしゃいませ。", "en": "Good morning.", "fr": "Bonjour."},
-                {"who": "them", "jp": "ここに名前を書いてください。", "en": "Please write your name here.", "fr": "Écrivez votre nom ici, s'il vous plaît."},
+                {"who": "them", "jp": "いらっしゃいませ。", "en": "Welcome.", "fr": "Bienvenue."},
+                {"who": "them", "jp": "ここにすわってください。", "en": "Please sit here.", "fr": "Asseyez-vous ici, s'il vous plaît."},
             ],
             "note": {"en": "A thing: をください. An action: てください.", "fr": "Une chose : をください. Une action : てください."},
             "ask": {
@@ -356,20 +358,26 @@ def _tour(**over) -> dict:
 DROP = object()
 
 
-class TourRuleTests(unittest.TestCase):
+class _TourCase(unittest.TestCase):
+    """The canvas tour, with the canvas quiz the gate now requires (plan 196)."""
+
     def _problems(self, **over):
-        entry = _good(tour=_tour(**over))
+        # The quiz first, so a path into it ("quiz.1.jp") has one to reach.
+        entry = _good(tour=_tour(**{"quiz": _quiz(), **over}))
         return check_entry("N5", entry, _catalogue("N5", entry))
 
     def _says(self, fragment, **over):
         found = self._problems(**over)
         self.assertTrue(any(fragment in p for p in found), f"{fragment!r} not in {found}")
 
+
+class TourRuleTests(_TourCase):
+
     def test_the_canvas_tour_is_clean(self) -> None:
         self.assertEqual(self._problems(), [])
 
-    def test_a_tour_is_both_halves(self) -> None:
-        self._says("tour must be {twists, scene}", scene=DROP)
+    def test_a_tour_has_its_twists_and_its_scene(self) -> None:
+        self._says("tour must be {twists, scene, quiz}", scene=DROP)
 
     def test_the_twist(self) -> None:
         self._says("has 1 choices, needs 3", **{"twists.0.choices": [{"en": "Only one choice.", "fr": "Un seul choix."}]})
@@ -386,7 +394,8 @@ class TourRuleTests(unittest.TestCase):
         self._says("tour has 7 twists, needs 1–6", twists=[dict(one, jp=f"{n}ばんでたばこをすわないでください。", notion={"en": f"Notion {n}", "fr": f"Notion {n}"}) for n in range(7)])
         self._says("tour twists repeat a sentence", twists=[one, dict(one, notion={"en": "Another notion", "fr": "Une autre notion"})])
         self._says("tour twists repeat a notion", twists=[one, dict(one, jp="ここでたべないでください。")])
-        self.assertEqual(self._problems(twists=[one, dict(one, jp="ここでたべないでください。", notion={"en": "Not eating", "fr": "Ne pas manger"})]), [])
+        self.assertEqual(self._problems(twists=[one, dict(one, jp="ここでたべないでください。", notion={"en": "Not eating", "fr": "Ne pas manger"},
+                                                          ask={"en": "What is being asked here?", "fr": "Que demande-t-on ici ?"})]), [])
 
     def test_the_place_is_a_station_place(self) -> None:
         self._says("place 'カフェ' not in", **{"scene.place": "カフェ"})
@@ -420,3 +429,158 @@ class TourRuleTests(unittest.TestCase):
         wrong = entry["tour"]["scene"]["ask"]["choices"][1:]
         self.assertTrue(all(_carries(jp, entry["pattern"], level) is not False for jp in wrong))
         self.assertEqual(check_entry(level, entry), [])
+
+
+# ── The tour's quiz (plan 196) ─────────────────────────────────────
+
+def _quiz() -> list[dict]:
+    """The quiz drawn for 〜てください: a sentence read, a form built, a
+    request said in a situation, a second sentence read."""
+    return [
+        {
+            "kind": "meaning",
+            "ask": {"en": "What is being asked of the listener?", "fr": "Que demande-t-on à celui qui écoute ?"},
+            "jp": "あした、七時に来てください。",
+            "tr": {"en": "Please come at seven tomorrow.", "fr": "Venez demain à sept heures, s'il vous plaît."},
+            "choices": [
+                {"en": "To come at seven o'clock tomorrow.", "fr": "De venir demain à sept heures."},
+                {"en": "Whether to come at seven o'clock.", "fr": "S'il faut venir à sept heures."},
+                {"en": "Not to come at seven o'clock.", "fr": "De ne pas venir à sept heures."},
+            ],
+            "why": {"en": "A verb in て and ください asks for an action.", "fr": "Un verbe en て et ください demandent une action."},
+        },
+        {
+            "kind": "form",
+            "ask": {"en": "Which form completes the sentence?", "fr": "Quelle forme complète la phrase ?"},
+            "jp": "すみません、ゆっくり＿＿＿。",
+            "tr": {"en": "Excuse me, please speak slowly.", "fr": "Excusez-moi, parlez lentement, s'il vous plaît."},
+            "choices": ["話してください", "話しました", "話さないでください"],
+            "why": {"en": "The て-form and ください ask for the action.", "fr": "La forme en て et ください demandent l'action."},
+        },
+        {
+            "kind": "use",
+            "ask": {"en": "You want a friend to look at this book, not that one. What do you say?", "fr": "Tu veux qu'un ami regarde ce livre-ci, pas celui-là. Que dis-tu ?"},
+            "choices": ["この本を見てください。", "あの本を読んでください。", "この本を見ないでください。"],
+            "why": {"en": "この and 見て: this book, to look at.", "fr": "この et 見て : ce livre-ci, à regarder."},
+        },
+        {
+            "kind": "meaning",
+            "ask": {"en": "Where is the speaker asking the other to sit?", "fr": "Où demande-t-on à l'autre de s'asseoir ?"},
+            "jp": "まどのそばにすわってください。",
+            "tr": {"en": "Please sit by the window.", "fr": "Asseyez-vous près de la fenêtre, s'il vous plaît."},
+            "choices": [
+                {"en": "By the window.", "fr": "Près de la fenêtre."},
+                {"en": "Away from the window.", "fr": "Loin de la fenêtre."},
+                {"en": "At the door.", "fr": "À la porte."},
+            ],
+            "why": {"en": "そばに means near.", "fr": "そばに veut dire près de."},
+        },
+    ]
+
+
+class QuizRuleTests(_TourCase):
+    def test_the_canvas_quiz_is_clean(self) -> None:
+        self.assertEqual(self._problems(), [])
+
+    def test_a_quiz_is_four_to_six_questions_of_two_kinds_at_least(self) -> None:
+        self._says("has 3 questions, needs 4–6", quiz=_quiz()[:3])
+        self._says("has 7 questions, needs 4–6", quiz=_quiz() + _quiz()[:3])
+        self._says("asks one kind of question only", quiz=[
+            dict(_quiz()[0], jp=f"{n}じに来てください。", ask={"en": f"Question {n}?", "fr": f"Question {n} ?"}) for n in range(4)])
+        self._says("kind must be one of", **{"quiz.0.kind": "which"})
+
+    def test_the_old_question_is_not_one_of_the_kinds(self) -> None:
+        # "Which of these uses it?" -- a sentence set against two that do
+        # not, answered by finding the point's characters.
+        self._says("kind must be one of", **{"quiz.2.kind": "which"})
+
+    def test_each_kind_has_its_keys(self) -> None:
+        self._says("(form) must be", **{"quiz.1.tr": DROP})
+        self._says("(use) must be", **{"quiz.2.jp": "この本を見てください。"})
+        self._says("(meaning) must be", **{"quiz.0.why": DROP})
+
+    def test_a_meaning_is_read_in_japanese_and_translated_in_prose(self) -> None:
+        self._says("tr holds Japanese", **{"quiz.0.tr": {"en": "Come at 七時 tomorrow.", "fr": "Venez à 七時 demain."}})
+        self._says("does not write the point", **{"quiz.0.jp": "あした、七時に来ました。"})
+        self._says("uses kanji above N5", **{"quiz.0.jp": "あした、東京に来てください。"})
+        self._says("choices repeat", **{"quiz.0.choices.2": {"en": "To come at seven o'clock tomorrow.", "fr": "Venir à sept heures."}})
+
+    def test_a_form_has_one_blank_and_three_fillings(self) -> None:
+        self._says("must hold the blank", **{"quiz.1.jp": "すみません、ゆっくり話してください。"})
+        self._says("must hold the blank", **{"quiz.1.jp": "すみません、＿＿＿ゆっくり＿＿＿。"})
+        self._says("must be Japanese forms", **{"quiz.1.choices": ["話してください", "slow", "話さないでください"]})
+        self._says("choices repeat", **{"quiz.1.choices": ["話してください", "話してください", "話しました"]})
+        self._says("does not write the point", **{"quiz.1.choices": ["話しました", "話してください", "話さないでください"]})
+
+    def test_a_use_is_not_answered_by_finding_the_point(self) -> None:
+        # Where the detector reads the point, a wrong line writes it too.
+        self._says("no wrong line writes the point", **{
+            "quiz.2.choices": ["この本を見てください。", "この本を見ました。", "この本を見ないでください。"]})
+        self._says("does not write the point", **{
+            "quiz.2.choices": ["この本を見ました。", "あの本を読んでください。", "この本を見ないでください。"]})
+        self._says("choices repeat", **{
+            "quiz.2.choices": ["この本を見てください。", "この本を見てください。", "あの本を読んでください。"]})
+
+    def test_no_sentence_stands_twice_in_the_tutorial(self) -> None:
+        # A quiz sentence that is an example, a twist's, a line or an answer of the scene, or another question's.
+        self._says("is in the tour twice (example 2, quiz 0)", **{"quiz.0.jp": "この本を読んでください。"})
+        self._says("is in the tour twice (twist 0, quiz 0)", **{"quiz.0.jp": "ここでたばこをすわないでください。"})
+        self._says("is in the tour twice (scene choice 0, quiz 2)", **{
+            "quiz.2.choices.0": "もういちど言ってください。"})
+        self._says("is in the tour twice (quiz 0, quiz 3)", **{"quiz.3.jp": "あした、七時に来てください。"})
+        # A form's fillings count as sentences too.
+        self._says("is in the tour twice (example 1, quiz 1)", **{"quiz.1.jp": "ちょっとまっ＿＿＿。", "quiz.1.choices": ["てください", "ました", "ないでください"]})
+
+    def test_a_tutorial_repeats_no_sentence_among_its_examples_twists_and_scene_either(self) -> None:
+        self._says("is in the tour twice (example 1, twist 0)", **{"twists.0.jp": "ちょっとまってください。"})
+        self._says("is in the tour twice (example 0, scene line 1)", **{"scene.lines.1.jp": "ここに名前を書いてください。"})
+
+    def test_no_question_is_worded_twice(self) -> None:
+        self._says("a question is put twice", **{"quiz.3.ask": _quiz()[0]["ask"]})
+        self._says("a question is put twice", **{"quiz.0.ask": _tour()["twists"][0]["ask"]})
+        # The generic line of a form is the form's own; two of them are fine.
+        two = [dict(_quiz()[1], jp="ここで＿＿＿。", choices=["まってください", "まちました", "またないでください"]), _quiz()[1]]
+        self.assertEqual(self._problems(quiz=[_quiz()[0], two[1], _quiz()[2], two[0]]), [])
+
+    def test_a_tour_without_a_quiz_fails_the_gate(self) -> None:
+        # A tour without a quiz is the half-written shape the catalogue was
+        # moved off (plan 196): the gate says so for every point.
+        entry = _good(tour=_tour())
+        self.assertTrue(any("tour has no quiz" in p for p in check_entry("N5", entry, _catalogue("N5", entry))))
+
+
+# ── structure_fr (plan 215) ──────────────────────────────────
+
+def _fr_problems(**over):
+    entry = _good(**over)
+    return [p for p in check_entry("N5", entry, _catalogue("N5", entry)) if "structure_fr" in p]
+
+
+def test_structure_fr_is_required():
+    entry = _good()
+    del entry["structure_fr"]
+    assert any("structure_fr" in p for p in check_entry("N5", entry, _catalogue("N5", entry)))
+
+
+def test_structure_fr_must_carry_the_japanese_in_order():
+    assert _fr_problems() == []
+    assert _fr_problems(structure_fr="verbe forme en て + くださ")
+    assert _fr_problems(structure_fr="ください + verbe forme en て")
+
+
+def test_structure_fr_may_not_keep_english():
+    assert _fr_problems(structure_fr="verb forme en て + ください")
+    assert _fr_problems(structure_fr="verbe て-form + ください")
+
+
+def test_structure_fr_takes_its_reading_from_the_english_line():
+    """The French ruby is carried over run by run (grammar_examples.
+    structure_furigana), so 〜の中で's 中 is read なか in both lines."""
+    from study.grammar_examples import structure_furigana, structure_text
+    entry = {"structure": "group + の中で", "structure_reading": "group + のなかで",
+             "structure_fr": "groupe + の中で"}
+    assert structure_text(entry, "fr") == "groupe + の中で"
+    assert structure_text(entry, "en") == "group + の中で"
+    parts = structure_furigana(entry, "fr")
+    assert "".join(p["text"] for p in parts) == "groupe + の中で"
+    assert {"text": "中", "reading": "なか"} in parts

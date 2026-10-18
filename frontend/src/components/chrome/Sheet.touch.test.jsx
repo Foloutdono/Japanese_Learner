@@ -96,6 +96,22 @@ describe('a sheet is dragged shut by a mouse, from its grip', () => {
     expect(sheet.style.transform).toBe('')
   })
 
+  it('does not close twice when it is shut mid-drag', async () => {
+    // Escape while the mouse is still down unmounts the sheet; the
+    // release that follows belongs to nothing any more.
+    const onClose = vi.fn()
+    const { rerender } = await render(<Sheet open onClose={onClose} label="sheet" jp="運行状況"><p>body</p></Sheet>)
+    const head = document.querySelector('.sheet__head')
+    mouse(head, 'pointerdown', 100)
+    mouse(window, 'pointermove', 200)
+    await tick(STEP)
+    await rerender(<Sheet open={false} onClose={onClose} label="sheet" jp="運行状況"><p>body</p></Sheet>)
+    mouse(window, 'pointermove', 280)
+    mouse(window, 'pointerup', 280)
+    await tick(0)
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
   it('springs back from a nudge', async () => {
     const onClose = vi.fn()
     const sheet = await open(onClose)
@@ -128,6 +144,28 @@ describe('a sheet is dragged shut', () => {
     expect(onClose).not.toHaveBeenCalled()
     // Back at rest means the stylesheet is in charge again — a
     // translateY(0px) left inline would still be an inline transform.
+    expect(sheet.style.transform).toBe('')
+    expect(sheet.classList.contains('sheet--dragging')).toBe(false)
+  })
+
+  it('lets go of a drag when a second finger lands', async () => {
+    // A second finger is a pinch, not a push, and the drag it
+    // interrupts must not leave the sheet hanging where the first one
+    // was: no touch after it can release the drag.
+    const onClose = vi.fn()
+    const sheet = await open(onClose)
+    touch(sheet, 'touchstart', 100)
+    touch(sheet, 'touchmove', 190)
+    await tick(STEP)
+    expect(sheet.style.transform).toContain('translateY')
+    const one = new Touch({ identifier: 1, target: sheet, clientX: 40, clientY: 190 })
+    const two = new Touch({ identifier: 2, target: sheet, clientX: 120, clientY: 190 })
+    sheet.dispatchEvent(new TouchEvent('touchstart', {
+      bubbles: true, cancelable: true, touches: [one, two], targetTouches: [one, two], changedTouches: [two],
+    }))
+    touch(sheet, 'touchend', 190)
+    await tick(0)
+    expect(onClose).not.toHaveBeenCalled()
     expect(sheet.style.transform).toBe('')
     expect(sheet.classList.contains('sheet--dragging')).toBe(false)
   })

@@ -1,6 +1,44 @@
 import { describe, it, expect } from 'vitest'
+import { readFileSync } from 'node:fs'
 import fr from './fr/index.js'
 import en from './en/index.js'
+
+// ── One key, one value ─────────────────────────────────────────
+// Each table is a row of groups spread into one object, so a key written
+// in two groups is no error anywhere: the later spread silently wins, and
+// the earlier copy is dead text a reviewer reads as live (plan 215 found
+// nine in French, eleven in English -- `noResults` among them, whose
+// later copy took the dictionary's "No results for «…»" from it). Read
+// from the source, since the exported table has already collapsed them.
+// A key is a line at the group's own two-space indent; the reader is
+// held to the exported table, so a key it cannot see fails here too.
+function groupKeys(lang) {
+  const src = readFileSync(new URL(`./${lang}/index.js`, import.meta.url), 'utf8')
+  const keys = []
+  let group = null
+  for (const [i, line] of src.split('\n').entries()) {
+    const open = /^const (\w+) = \{\s*$/.exec(line)
+    if (open) { group = open[1]; continue }
+    if (group && /^\}/.test(line)) { group = null; continue }
+    const key = group && /^ {2}(?:([A-Za-z_$][\w$]*)|'([^']+)')\s*:/.exec(line)
+    if (key) keys.push({ key: key[1] ?? key[2], at: `${group}:${i + 1}` })
+  }
+  return keys
+}
+
+describe('locale keys (each table)', () => {
+  for (const [lang, table] of [['fr', fr], ['en', en]]) {
+    it(`defines every ${lang} key once`, () => {
+      const keys = groupKeys(lang)
+      expect([...new Set(keys.map(k => k.key))].sort(), `${lang}/index.js: a key the reader cannot see (indented off the group's two spaces?)`)
+        .toEqual(Object.keys(table).sort())
+      const seen = new Map()
+      for (const { key, at } of keys) seen.set(key, [...(seen.get(key) ?? []), at])
+      const twice = [...seen].filter(([, at]) => at.length > 1).map(([key, at]) => `${key} (${at.join(', ')})`)
+      expect(twice, `defined more than once in ${lang}/index.js: ${twice.join('; ')}`).toEqual([])
+    })
+  }
+})
 
 // Plan 002 found two real defects this test would have caught: an English
 // speaker saw the French word "Exemples" (a missing en key falling through
@@ -71,7 +109,7 @@ describe('locale parity (fr <-> en)', () => {
 
 // Every leaf of a table, as the learner receives it: a plain string, a
 // copy function's result, or the same again inside a nested group
-// (brdFor, brdPromise, onbTestKind…), which the key-parity tests above
+// (brdKana, destHour, onbTestKind…), which the key-parity tests above
 // do not descend into.
 function walk(value, path, out) {
   if (typeof value === 'function') {

@@ -3,6 +3,8 @@ import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
+import en from '../locales/en/index.js'
+import fr from '../locales/fr/index.js'
 
 // The bug this pins, in one sentence: "still generating" arrives as HTTP
 // 202, which is a SUCCESS status, so apiJson RESOLVES rather than
@@ -142,6 +144,7 @@ beforeEach(async () => {
   playerSpies.play.mockReset()
   playerSpies.pause.mockReset()
   playerSpies.seekTo.mockReset()
+  apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => [] }))
   playerProps.last = null
   // The sound is persisted (lib/videoVolume), and the browser lane
   // shares one origin across the whole file: without this, a case that
@@ -350,20 +353,112 @@ describe('AnalyzerScreen polling', () => {
     }
   })
 
+  // ── A poor connection ──
+  // Supabase hands the app a new session object on every token refresh
+  // and every return to the tab -- the same sign-in. A Passage already
+  // on screen is not asked for again on it: asking moved the line back to
+  // the first stop under a playing video, and a request the link dropped
+  // took the Passage, and the player with it, off the screen.
+  it('neither asks for a ready session again nor moves the line on a refreshed sign-in', async () => {
+    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
+    apiJson.mockResolvedValue(videoSession())
+    const tree = session => (
+      <LangProvider>
+        <MemoryRouter>
+          <AnalyzerScreen session={session} />
+        </MemoryRouter>
+      </LangProvider>
+    )
+    const screen = await render(tree({ access_token: 't' }))
+    await settle(30)
+    await startFromFile(screen)
+    await settle(2000)
+    screen.container.querySelectorAll('.anl-stop')[1].click()
+    await settle(60)
+    expect(screen.container.querySelector('.anl-subs__count').textContent).toContain('2 / 2')
+    const asked = () => apiJson.mock.calls.filter(([url]) => url === '/api/video/session/1').length
+    const before = asked()
+
+    apiJson.mockRejectedValue(new TypeError('Failed to fetch'))
+    await screen.rerender(tree({ access_token: 't' }))
+    await settle(300)
+
+    expect(asked()).toBe(before)
+    expect(screen.container.querySelector('.anl-desk [data-testid="player"]')).not.toBeNull()
+    expect(screen.container.querySelector('.anl-subs__count').textContent).toContain('2 / 2')
+  })
+
+  // A request that got no answer says nothing about the session: it is
+  // asked again, rather than ending a session the server is still making.
+  it('asks again when the link drops while the session is being made', async () => {
+    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
+    let drops = 2
+    apiJson.mockImplementation(async url => {
+      if (url !== '/api/video/session/1') return {}
+      if (drops > 0) {
+        drops -= 1
+        throw new TypeError('Failed to fetch')
+      }
+      return videoSession()
+    })
+
+    const screen = await renderScreen()
+    await startFromFile(screen)
+    await vi.waitFor(() => expect(screen.container.querySelector('.anl-desk')).not.toBeNull(), { timeout: 8000 })
+    const text = screen.container.textContent
+    expect([en.analysisFailed, fr.analysisFailed].some(s => text.includes(s))).toBe(false)
+  })
+
+  // The history asked again on a refreshed sign-in, with the link down:
+  // what is kept stays marked kept.
+  it('keeps the kept marks when the history cannot be asked again', async () => {
+    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
+    apiJson.mockResolvedValue(videoSession())
+    apiFetch.mockImplementation(async url => ({
+      ok: true, status: 200,
+      json: async () => (url === '/api/phrase/history'
+        ? [{ id: 3, phrase: '猫が好き', kept: true, source: 'upload', created_at: '2026-10-01T00:00:00Z' }]
+        : []),
+    }))
+    const tree = session => (
+      <LangProvider>
+        <MemoryRouter>
+          <AnalyzerScreen session={session} />
+        </MemoryRouter>
+      </LangProvider>
+    )
+    const screen = await render(tree({ access_token: 't' }))
+    await settle(30)
+    await startFromFile(screen)
+    await settle(2000)
+    const keep = () => screen.container.querySelector('.anl-head__keep')
+    expect(keep().getAttribute('aria-pressed')).toBe('true')
+
+    apiFetch.mockImplementation(async () => { throw new TypeError('Failed to fetch') })
+    await screen.rerender(tree({ access_token: 't' }))
+    await settle(300)
+
+    expect(keep().getAttribute('aria-pressed')).toBe('true')
+  })
+
   it('surfaces a parse failure with the reason and a way back', async () => {
-    // The ONLY way to fail now: a file or paste we could not parse.
-    // Nothing is fetched, so nothing can be IP-blocked.
+    // A file or paste we could not parse. The poll's 503 carries the
+    // stored failure: its `code` is what the learner is told by, in
+    // their own language, and the server's English `error` is the
+    // logs' (plan 215).
     apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
     apiJson.mockRejectedValue(Object.assign(new Error('bad'), {
       status: 503,
-      body: { error: 'No cue timestamps found in VTT content' },
+      body: { status: 'failed', code: 'no_cues', error: 'No cue timestamps found in VTT content', isYoutube: false },
     }))
 
     const screen = await renderScreen()
     await startFromFile(screen)
     await settle(120)
 
-    expect(screen.container.textContent).toContain('No cue timestamps')
+    const text = screen.container.textContent
+    expect([en.subtitleNoCues, fr.subtitleNoCues].some(s => text.includes(s))).toBe(true)
+    expect(text).not.toContain('No cue timestamps')
     // And the dock is still there to try again with, rather than a dead
     // end. Since plan 029 the intake is always mounted, so the check is
     // that the failure did not replace it: its file is one press away
@@ -489,7 +584,9 @@ describe('AnalyzerScreen polling', () => {
     // The failure speaks in the panel the explanation would have filled,
     // and its button is there to try again.
     expect(screen.container.querySelector('.anl-explainpanel__error')).not.toBeNull()
-    expect(screen.container.querySelector('.anl-explainpanel__foot button').disabled).toBe(false)
+    const retry = screen.container.querySelector('.anl-explainpanel__read .anl-ghost')
+    expect(retry.textContent).toBe('Expliquer')
+    expect(retry.disabled).toBe(false)
   })
 
   it('says so when the provider is down', async () => {
@@ -516,7 +613,12 @@ describe('AnalyzerScreen polling', () => {
     screen.container.querySelector('.anl-desk__explain').click()
     await settle(500)
 
-    expect(screen.container.textContent).toContain('The AI service is temporarily unavailable.')
+    // The table's own line, never the server's English: ApiError's
+    // message is never empty, so `e.message || …` let it win every
+    // time (plan 215).
+    const text = screen.container.textContent
+    expect([en.explainUnavailable, fr.explainUnavailable].some(s => text.includes(s))).toBe(true)
+    expect(text).not.toContain('The AI service is temporarily unavailable.')
   })
 
   it('offers to explain again once explained', async () => {
@@ -544,11 +646,11 @@ describe('AnalyzerScreen polling', () => {
     await settle(1500)
 
     // The explanation stands in the right column, with the way to buy
-    // it again under it (it is cached per language, so a learner who
-    // switched the interface's gets it in the new one) and nothing
-    // beside that but an error, when there is one.
+    // it again under it, a quiet word (it is cached per language, so a
+    // learner who switched the interface's gets it in the new one) and
+    // nothing beside that but an error, when there is one.
     expect(screen.container.querySelector('.anl-explainpanel__body').textContent).toBe('An introduction.')
-    expect(screen.container.querySelector('.anl-explainpanel__foot button').textContent).toBe('Expliquer à nouveau')
+    expect(screen.container.querySelector('.anl-explainpanel__again').textContent).toBe('Expliquer à nouveau')
     expect(screen.container.querySelector('.anl-explainpanel__error')).toBeNull()
   })
 })

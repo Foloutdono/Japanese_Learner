@@ -56,15 +56,20 @@ function filenameFromDisposition(header) {
 //
 // A deck has ONE STRUCTURE, and it decides both halves: which app cards
 // can be browsed in, and which personal cards can be written. `standard`
-// is a plain front/back pair with no app source behind it.
-const SOURCE_FOR_TYPE = { kanji: ['kanji'], vocab: ['vocab'], grammar: ['grammar'] }
-const STRUCTURES = ['standard', 'kanji', 'vocab', 'grammar']
+// is a plain front/back pair with no app source behind it; `mixed` (plan
+// 215) takes every source's cards, and writes front/back pairs.
+const SOURCE_FOR_TYPE = {
+  kanji: ['kanji'], vocab: ['vocab'], grammar: ['grammar'],
+  mixed: ['kana', 'kanji', 'vocab', 'grammar'],
+}
+const STRUCTURES = ['standard', 'kanji', 'vocab', 'grammar', 'mixed']
 
 // A browsed-in card is tagged with the pigment of the section it came
 // from — the same colours components/decks/deckTypes.js gives the deck
 // types, so "this card is from 漢字" reads identically wherever it's
 // shown.
 const SOURCE_COLOR = {
+  kana: 'var(--line-kana)',
   kanji: 'var(--line-kanji)',
   vocab: 'var(--line-vocab)',
   grammar: 'var(--line-grammar)',
@@ -362,11 +367,19 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     board(() => navigate(`/today/run?lanes=${encodeURIComponent(lanes)}`, { state: { from: pathname } }))
   }
 
+  // One DELETE however often the confirm is pressed (plan 211): a ref,
+  // so two presses in one frame cannot both pass.
+  const deletingRef = useRef(false)
+  const [deleting, setDeleting] = useState(false)
   function deleteDeck() {
+    if (deletingRef.current) return
+    deletingRef.current = true
+    setDeleting(true)
     playUi('click-screen-selection')
     apiFetch(`/api/decks/${deck_id}`, session, { method: 'DELETE' })
       .then(() => { onGone?.(deck_id); navigate('/learn/decks') })
       .catch(() => setConfirmingDeck(false))
+      .finally(() => { deletingRef.current = false; setDeleting(false) })
   }
 
   // ── The library, from the deck's own page ───────────────────
@@ -659,8 +672,17 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     if (desk) { setAdding(false); setShowBrowse(false) }
   }
 
+  // One save per press (plan 211): Enter held in the notes, or a double
+  // click, posted the card as many times. A ref, so two presses in one
+  // frame cannot both pass; the state draws the button.
+  const savingRef = useRef(false)
+  const [saving, setSaving] = useState(false)
+  const saved = () => { savingRef.current = false; setSaving(false) }
+
   function saveCard() {
-    if (!formComplete()) return
+    if (!formComplete() || savingRef.current) return
+    savingRef.current = true
+    setSaving(true)
     const body = JSON.stringify({ fields: form, notes })
     // A refused save (a 400 names what is missing) used to be read as
     // the card itself and put in the list, as a row of nothing.
@@ -678,6 +700,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
           resetForm()
         })
         .catch(() => {})
+        .finally(saved)
     } else {
       apiFetch(`/api/decks/${deck_id}/cards`, session, {
         method: 'POST',
@@ -686,6 +709,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
         .then(ok)
         .then(card => { setCards(prev => [...prev, card]); resetForm() })
         .catch(() => {})
+        .finally(saved)
     }
   }
 
@@ -847,7 +871,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
           className="btn-secondary">
           {t.cancel}
         </button>
-        <button onClick={saveCard} disabled={!formComplete()}
+        <button onClick={saveCard} disabled={!formComplete() || saving}
           className="btn-primary">
           {editing ? t.save : t.addCard}
         </button>
@@ -1364,14 +1388,15 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
                         ("VOCABULARY · N5") until the badge was costing a
                         third of the row on a phone — and saying what the
                         deck's own type already says, in a deck that only
-                        accepts one source. The pigment still names it. */}
+                        accepts one source. The pigment still names it,
+                        which is how a mixed deck's rows tell apart. */}
                     {card.origin === 'app' && (
                       <span
                         className="card-row__badge"
                         style={{ '--rail': SOURCE_COLOR[card.source] ?? 'var(--text-secondary)' }}
                       >
                         {card.level
-                          || ({ kanji: t.kanjiType, vocab: t.vocabType, grammar: t.grammarType }[card.source] ?? card.source)}
+                          || ({ kana: t.kanaType, kanji: t.kanjiType, vocab: t.vocabType, grammar: t.grammarType }[card.source] ?? card.source)}
                       </span>
                     )}
                     {!selectMode && card.origin === 'custom' && (
@@ -1430,7 +1455,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
                 ? t.libraryDeleteFollowed(deck.followers)
                 : t.deleteDeckConfirm}
             </span>
-            <button type="button" className="btn-primary btn-primary--danger" onClick={deleteDeck}>
+            <button type="button" className="btn-primary btn-primary--danger" disabled={deleting} onClick={deleteDeck}>
               <TrashIcon size={14} /> {t.delete}
             </button>
             <button type="button" className="btn-secondary" onClick={() => setConfirmingDeck(false)}>{t.cancel}</button>
@@ -1448,7 +1473,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
             ? t.libraryDeleteFollowed(deck.followers)
             : t.deleteDeckConfirm}
         </span>
-        <button type="button" className="btn-primary btn-primary--danger" onClick={deleteDeck}>
+        <button type="button" className="btn-primary btn-primary--danger" disabled={deleting} onClick={deleteDeck}>
           <TrashIcon size={14} /> {t.delete}
         </button>
         <button type="button" className="btn-secondary" onClick={() => setConfirmingDeck(false)}>{t.cancel}</button>

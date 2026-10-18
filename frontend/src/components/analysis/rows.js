@@ -20,7 +20,7 @@
 // a component file exports components only (react-refresh), and the
 // tests read this directly.
 import { coversToken, isEnding } from './grammarSpans'
-import { lineState } from './tokens'
+import { lineState, tokState } from './tokens'
 
 const SKIP_POS = new Set(['symbol', 'punctuation', 'filler'])
 const FOLDS_AUXILIARY = new Set(['verb', 'adjective', 'auxiliary'])
@@ -87,6 +87,16 @@ export function wordRowsOf(analysis) {
     }))
 }
 
+// A row's word as the list names it: the dictionary's spelling where
+// the word has a card (話す, not the 話し of the sentence), else the
+// sentence's own; and its reading where that spelling is not kana.
+export function rowName(row) {
+  const entry = row.head.vocab_match?.entry
+  const name = entry ? (entry.kanji || entry.kana || row.surface) : row.surface
+  const reading = entry?.kana && entry.kana !== name ? entry.kana : ''
+  return { name, reading }
+}
+
 // The words a point is made of (plan 160), as a learner reads them
 // rather than as the tokenizer cut them: the rows it is written on
 // (て + は + いけません, not て + は + いけ + ませ + ん), after the word it
@@ -100,3 +110,20 @@ export function partsOf(point, analysis) {
   const parts = covered.map(row => ({ surface: row.surface, in: true }))
   return before?.head.vocab_match ? [{ surface: before.surface, in: false }, ...parts] : parts
 }
+
+// The words the phone's Words sheet shows (plan 220): the list's rows
+// written in Japanese. A line of a song can carry English ("Oh what do
+// you mean"), which has no card, no reading and no gloss, and the sheet
+// listed it word by word.
+const JAPANESE = /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u
+
+export function wordTileRows(analysis) {
+  return wordRowsOf(analysis).filter(row => JAPANESE.test(row.surface))
+}
+
+/** Whether a word is new to the learner: no card studied yet. */
+export function isFreshWord(row) {
+  const state = tokState(row.head)
+  return state === 'unknown' || state === 'offdeck'
+}
+

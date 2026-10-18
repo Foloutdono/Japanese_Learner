@@ -31,7 +31,13 @@ jobs:
           python-version: '3.12'
       - name: Install backend dependencies
         working-directory: backend
-        run: pip install -r requirements.txt
+        # numpy and ffmpeg are not the app's (requirements.txt is Render's
+        # image): scripts/long_video_audio.py imports numpy inside its
+        # functions and decodes the kana clips with ffmpeg, and
+        # tests/test_long_video_audio.py checks its mix with both.
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          pip install -r requirements.txt numpy
       - name: Load schema
         run: psql "$DATABASE_URL" -f backend/srs/data_structure.sql
       - name: Run backend tests
@@ -89,12 +95,62 @@ jobs:
       - name: Install Playwright chromium
         working-directory: frontend
         run: npx playwright install chromium
-      - name: Test
+      # The browser lanes of the phone and the small screens only: browser,
+      # phone, tablet, touch. The node lane is `frontend-node` below, and
+      # the desk's three lanes (desktop, wide, short) are `frontend-desk`,
+      # each on a runner of its own. Together on one 4-core runner they
+      # starved one another: every run lost one or two tests to a 15 s
+      # timeout or an animation or a route read before a frame had drawn,
+      # a different test each time, 7 of 20 runs red on 2026-10-17. Apart
+      # they pass here as they do alone.
+      - name: Test (browser lanes - browser, phone, tablet, touch)
         working-directory: frontend
-        run: npm test
+        run: npm run test:browsers:mobile
       # The production build was never exercised by CI: Vercel built it,
       # and a build-only break (a plugin config, an import that only the
       # bundler resolves) surfaced as a failed deploy after the merge.
       - name: Build
         working-directory: frontend
         run: npm run build
+
+  # vitest's node lane (everything that is not *.{browser,phone,tablet,
+  # touch,desktop,wide,short}.test.*), apart from the browser lanes so the
+  # two never share cores; see the Test step of `frontend`. promote.yml
+  # reads this job's result too, by this name.
+  frontend-node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          # 22 for the same reason as `frontend`: the supabase client the
+          # tests import needs a global WebSocket.
+          node-version: '22'
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Test (node lane)
+        working-directory: frontend
+        run: npm run test:node
+
+  # The desk's browser lanes (desktop, wide, short), apart from the others;
+  # see the Test step of `frontend`. promote.yml reads this job's result
+  # too, by this name.
+  frontend-desk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          # 22 for the same reason as `frontend`.
+          node-version: '22'
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      # Chromium from Playwright's CDN, no --with-deps: see `frontend`.
+      - name: Install Playwright chromium
+        working-directory: frontend
+        run: npx playwright install chromium
+      - name: Test (browser lanes - desktop, wide, short)
+        working-directory: frontend
+        run: npm run test:browsers:desk

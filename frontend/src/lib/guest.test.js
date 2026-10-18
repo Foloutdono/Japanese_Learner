@@ -14,6 +14,9 @@ const auth = {
   updateUser: vi.fn(),
 }
 vi.mock('./supabase', () => ({ supabase: { auth } }))
+// The confirmation's return is lib/oauth.js's to decide (and its test's
+// to pin); here it is only carried onto the call.
+vi.mock('./oauth', () => ({ emailRedirectTarget: () => 'https://app.test/' }))
 
 const { isGuest, startGuest, claimAccount } = await import('./guest')
 
@@ -116,6 +119,17 @@ describe('claiming the pass', () => {
   it('sends exactly the credentials it was given', async () => {
     auth.updateUser.mockResolvedValue({ data: { user: { email: 'a@b.co', is_anonymous: false } }, error: null })
     await claimAccount({ email: 'a@b.co', password: 'hunter22' })
-    expect(auth.updateUser).toHaveBeenCalledWith({ email: 'a@b.co', password: 'hunter22' })
+    expect(auth.updateUser).toHaveBeenCalledWith(
+      { email: 'a@b.co', password: 'hunter22' }, { emailRedirectTo: 'https://app.test/' })
+  })
+
+  // The confirmation e-mail is written from the dashboard's template,
+  // which branches on the user's metadata: `lang` rides along on the
+  // same call, before the mail goes (plan 215).
+  it('tells the template which language to write the confirmation in', async () => {
+    auth.updateUser.mockResolvedValue({ data: { user: { email: null, is_anonymous: true } }, error: null })
+    await claimAccount({ email: 'a@b.co', password: 'hunter22', lang: 'fr' })
+    expect(auth.updateUser).toHaveBeenCalledWith(
+      { email: 'a@b.co', password: 'hunter22', data: { lang: 'fr' } }, { emailRedirectTo: 'https://app.test/' })
   })
 })

@@ -6,6 +6,13 @@ import { loadYouTubeIframeAPI } from '../../lib/youtubePlayer'
 // Step 5).
 const POLL_MS = 250
 
+// YouTube's states: playing, and buffering -- a stall to load more,
+// which on a poor connection comes often. A stall is still the video
+// playing as far as the learner is concerned (the bar offers Pause,
+// and Pause pauses it), but its clock is not moving.
+const PLAYING = 1
+const BUFFERING = 3
+
 // The IFrame API grows its methods on the player object when the frame
 // is ready, not when `new YT.Player` returns -- so every call has to be
 // guarded, and the sound is applied again from onReady.
@@ -23,8 +30,10 @@ function applySound(player, { volume, muted }) {
 // pausing when the learner taps a word) and reports the current
 // playback time upward via onTimeUpdate, polled rather than push-driven
 // since the IFrame API has no time-update event of its own.
-// `onPlayingChange` (optional) reports whether the video is actually
-// playing -- the IFrame's own truth, not a guess kept beside it. The
+// `onPlayingChange(playing, moving)` (optional) reports whether the
+// video is playing -- the IFrame's own truth, not a guess kept beside
+// it, a stall to load more counted as playing -- and whether its clock
+// is moving, which a stall's is not. The
 // analyser's transport bar needs it: a play/pause control that tracks
 // its own boolean drifts the moment the learner uses the iframe's
 // native controls instead.
@@ -107,6 +116,19 @@ export const VideoPlayer = forwardRef(function VideoPlayer({
       report(live)
     }
 
+    // What the screen was last told; a fresh player is paused. Read on
+    // every poll as well as on every event, so a change no event told of
+    // (an iframe that reloaded itself, a message never delivered) is
+    // caught within a poll, and one already told is not told twice.
+    let told = { playing: false, moving: false }
+    function tellState(state) {
+      const playing = state === PLAYING || state === BUFFERING
+      const moving = state === PLAYING
+      if (playing === told.playing && moving === told.moving) return
+      told = { playing, moving }
+      handlersRef.current.onPlayingChange?.(playing, moving)
+    }
+
     // The length is 0 until the player has the video's metadata, and a
     // live stream's grows: read on every poll, told when it changes.
     let length = 0
@@ -132,15 +154,15 @@ export const VideoPlayer = forwardRef(function VideoPlayer({
             intervalRef.current = setInterval(() => {
               const player = playerRef.current
               if (!player || typeof player.getCurrentTime !== 'function') return
+              // The state before the clock: a stall read here stops the
+              // clock before its reading is carried.
+              if (typeof player.getPlayerState === 'function') tellState(player.getPlayerState())
               handlersRef.current.onTimeUpdate(player.getCurrentTime())
               readSound(player)
               readDuration(player)
             }, POLL_MS)
           },
-          // YT.PlayerState.PLAYING is 1; everything else (paused,
-          // buffering, cued, ended) reads as "not playing", which is
-          // exactly what a play/pause toggle wants to display.
-          onStateChange: e => handlersRef.current.onPlayingChange?.(e.data === 1),
+          onStateChange: e => tellState(e.data),
         },
       })
     })
@@ -164,21 +186,42 @@ export const VideoPlayer = forwardRef(function VideoPlayer({
     playerRef.current?.setPlaybackRate?.(rate)
   }, [rate])
 
+  // A player not ready yet has none of its methods -- on a slow
+  // connection the frame takes a while, and the learner presses on
+  // meanwhile -- so nothing is asked of it, and a seek not sent says so.
   useImperativeHandle(ref, () => ({
     seekTo(seconds) {
-      playerRef.current?.seekTo(seconds, true)
+      const player = playerRef.current
+      if (typeof player?.seekTo !== 'function') return false
+      player.seekTo(seconds, true)
+      return true
     },
     pause() {
-      playerRef.current?.pauseVideo()
+      const player = playerRef.current
+      if (typeof player?.pauseVideo === 'function') player.pauseVideo()
     },
     play() {
-      playerRef.current?.playVideo()
+      const player = playerRef.current
+      if (typeof player?.playVideo === 'function') player.playVideo()
     },
     // The clock now, not at the last poll: the stop at a sentence's end
     // (AnalyzerScreen) reads it to land inside the sentence it stopped.
     currentTime() {
       const player = playerRef.current
       return typeof player?.getCurrentTime === 'function' ? player.getCurrentTime() : null
+    },
+    // The video's own title, once the player has its metadata: the name
+    // the song sheet proposes for the song's decks (plan 215). Empty
+    // until then, or where the player does not say.
+    title() {
+      const player = playerRef.current
+      return typeof player?.getVideoData === 'function' ? (player.getVideoData()?.title ?? '') : ''
+    },
+    // ...and its channel, the same way: with the title, what a line's
+    // translation and its explanation are told the video is (plan 235).
+    channel() {
+      const player = playerRef.current
+      return typeof player?.getVideoData === 'function' ? (player.getVideoData()?.author ?? '') : ''
     },
   }), [])
 

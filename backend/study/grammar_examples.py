@@ -76,6 +76,24 @@ def blank_span(jp: str, pattern: str, level: str) -> tuple[int, int] | None:
     return start, end
 
 
+def span_parts(jp: str, span: tuple[int, int] | None) -> list[dict]:
+    """The parts `span` covers, as the sentence writes them: what stands
+    in the hole once the contrast drill is answered (plan 245).
+
+    Never the pattern itself. A point is quoted in its citation form and a
+    sentence holds what it holds there: から〜まで is blanked on its から
+    alone (十時＿＿＿七時まで), 〜てしまう on the てしま of てしまいました,
+    so the pattern poured back into the hole read 十時から〜まで七時まで
+    and 食べてしまういました. Empty when there is no span."""
+    parts = align_sentence(jp) if jp and span else []
+    if not parts:
+        return []
+    return [
+        {k: v for k, v in part.items() if k != "highlight"}
+        for part in mark_spans(parts, [span]) if part.get("highlight")
+    ]
+
+
 def parts_with_span(jp: str, span: tuple[int, int] | None, mark: str) -> list[dict]:
     """
     align_sentence's parts with the span marked.
@@ -113,6 +131,8 @@ def _payload(jp: str, en: str, fr: str, register: str | None, contrast: bool,
         "tr": translation({"en": en, "fr": fr}, lang),
         "furigana": parts_with_span(jp, span, "blank" if blank else "highlight"),
     }
+    if blank and span:
+        payload["fill"] = span_parts(jp, span)
     if register:
         payload["register"] = register
     if contrast:
@@ -123,7 +143,10 @@ def _payload(jp: str, en: str, fr: str, register: str | None, contrast: bool,
 def _frozen(payload: dict) -> dict:
     # lru_cache hands back the same object every time; a caller that
     # mutates the parts list would corrupt every later reader.
-    return {**payload, "furigana": [dict(p) for p in payload["furigana"]]}
+    out = {**payload, "furigana": [dict(p) for p in payload["furigana"]]}
+    if "fill" in payload:
+        out["fill"] = [dict(p) for p in payload["fill"]]
+    return out
 
 
 def example_payload(example: dict, pattern: str, lang: str) -> dict:
@@ -135,7 +158,8 @@ def example_payload(example: dict, pattern: str, lang: str) -> dict:
 
 
 def blanked_payload(example: dict, pattern: str, lang: str, level: str | None = None) -> dict:
-    """{jp, tr, furigana (with the pattern as one blank part), ...}. With
+    """{jp, tr, furigana (with the pattern as one blank part), fill (what
+    the sentence has in the hole, span_parts), ...}. With
     the point's `level`, a pattern the stems cannot point at is blanked
     where the detector finds it (blank_span)."""
     return _frozen(_payload(
@@ -171,10 +195,62 @@ def pattern_furigana(pattern: str, reading: str | None) -> list[dict]:
     return [dict(p) for p in _pattern_parts(pattern, reading)]
 
 
-def structure_furigana(entry: dict) -> list[dict]:
-    """The formation line (`structure`) as ruby, from `structure_reading`:
-    ["noun + の", 中 read なか, "で"] for "noun + の中で"."""
-    return pattern_furigana(entry.get("structure") or "", entry.get("structure_reading"))
+def structure_text(entry: dict, lang: str = "en") -> str:
+    """The formation line in the learner's language (plan 215):
+    `structure_fr` for French, `structure` otherwise.
+
+    `structure` itself stays English and is never localised in place:
+    grammar_detect reads what a point attaches to from it, and the tour
+    asks whether it starts with "verb"."""
+    if lang == "fr" and entry.get("structure_fr"):
+        return entry["structure_fr"]
+    return entry.get("structure") or ""
+
+
+def structure_furigana(entry: dict, lang: str = "en") -> list[dict]:
+    """The formation line as ruby, from `structure_reading`:
+    ["noun + の", 中 read なか, "で"] for "noun + の中で".
+
+    The French line carries the same Japanese runs, in the same order
+    (grammar_check holds it), so its reading is the English one's: each
+    kanji run of `structure_fr` takes the reading its twin takes in
+    `structure`. No second reading field to keep in step."""
+    text = structure_text(entry, lang)
+    if text != (entry.get("structure") or ""):
+        return pattern_furigana(text, _carried_reading(entry, text))
+    return pattern_furigana(text, entry.get("structure_reading"))
+
+
+def _carried_reading(entry: dict, text: str) -> str | None:
+    """`text` with each kanji run replaced by the reading the same run
+    has in `structure` -- the reading `pattern_furigana` wants -- or
+    None when the two lines' kanji runs differ (no ruby is better than a
+    misplaced one)."""
+    english = entry.get("structure") or ""
+    reading = entry.get("structure_reading")
+    runs = [m.group() for m in _KANJI_RUN.finditer(english)]
+    if not reading or not runs or [m.group() for m in _KANJI_RUN.finditer(text)] != runs:
+        return None
+    # What each character of the English line is read: a part's reading
+    # on its first character (an undivided run carries it whole there),
+    # "" on the rest of it, None where a kanji has no reading at all.
+    said, at = [], 0
+    for part in _pattern_parts(english, reading):
+        p = dict(part)
+        said += [p.get("reading") or None] + [""] * (len(p["text"]) - 1)
+        at += len(p["text"])
+    kana = []
+    for m in _KANJI_RUN.finditer(english):
+        chars = said[m.start():m.end()]
+        if not chars or chars[0] is None:
+            return None
+        kana.append("".join(c or "" for c in chars))
+    out, last = [], 0
+    for m, reading_of_run in zip(_KANJI_RUN.finditer(text), kana):
+        out += [text[last:m.start()], reading_of_run]
+        last = m.end()
+    out.append(text[last:])
+    return "".join(out)
 
 
 def furigana_by_pattern(patterns) -> dict[str, list[dict]]:

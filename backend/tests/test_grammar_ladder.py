@@ -130,6 +130,65 @@ def test_the_forecast_runs_the_steps_too(client):
         _clear(raw_id)
 
 
+# Where each rating leaves a point, as the card panel's walk draws it
+# (plan 198): a row at a step, and the step each quality lands on.
+LANDINGS = [
+    # Choisir 2: a miss asks it again, a pass climbs to Choisir 3.
+    (STEP_ROWS["choose"], {1: 1, 2: 1, 3: 2, 4: 2}),
+    # Construire 2 -> Construire 3.
+    (STEP_ROWS["build"], {1: 4, 2: 4, 3: 5, 4: 5}),
+    # Construire 4: a pass is mastered.
+    ((7, 8, False, 6), {1: 6, 3: 7, 4: 7}),
+    # Mastered: a miss is the relapse, a pass stays mastered.
+    (STEP_ROWS["mastered"], {1: ladder.RELAPSE_PICK, 2: ladder.RELAPSE_PICK, 3: ladder.MASTERED, 4: ladder.MASTERED}),
+    # The relapse: its Choisir, then its Construire, then mastered again.
+    ((10, 0, True, ladder.RELAPSE_PICK), {1: ladder.RELAPSE_PICK, 4: ladder.RELAPSE_BUILD}),
+    ((11, 1, False, ladder.RELAPSE_BUILD), {1: ladder.RELAPSE_BUILD, 4: ladder.MASTERED}),
+]
+
+
+@pytest.mark.parametrize("row,lands", LANDINGS)
+def test_the_forecast_says_where_each_rating_leaves_the_point(client, row, lands):
+    level, entry, raw_id = _point("〜てください")
+    _clear(raw_id)
+    try:
+        _place(raw_id, LADDER, row)
+        preview = _served(client, level, raw_id)["review_preview"]
+        for quality, step in lands.items():
+            landing = preview[str(quality)]
+            assert landing["step"]["step"] == step, quality
+            assert landing["passed"] is (quality >= ladder.PASS_QUALITY), quality
+    finally:
+        _clear(raw_id)
+
+
+def test_a_landing_has_the_shape_of_the_cards_own_step(client):
+    level, entry, raw_id = _point("〜てください")
+    _clear(raw_id)
+    try:
+        _place(raw_id, LADDER, STEP_ROWS["choose"])
+        card = _served(client, level, raw_id)
+        assert card["step"] == {"step": 1, "group": "choose", "at": 2, "of": 3, "relapse": False}
+        assert card["review_preview"]["1"]["step"] == card["step"]
+        assert card["review_preview"]["4"]["step"] == {"step": 2, "group": "choose", "at": 3, "of": 3, "relapse": False}
+    finally:
+        _clear(raw_id)
+
+
+def test_only_a_ladder_card_forecasts_where_it_lands(client):
+    level, entry, raw_id = _point("〜てください")
+    mode = "grammar.flashcard.f2b"
+    _clear(raw_id)
+    try:
+        _place(raw_id, mode, (1, 0, True, 1))
+        cards = client.get(f"/api/grammar/cards?level={level}&mode={mode}&lang=en&count=25").json()["cards"]
+        preview = next(c for c in cards if c["card_id"] == raw_id)["review_preview"]
+        assert preview["4"]["due_in"] > 0
+        assert all("step" not in p and "passed" not in p for p in preview.values())
+    finally:
+        _clear(raw_id)
+
+
 def test_each_step_falls_back_to_the_flashcard():
     assert grammar_ladder.chain_for("choose") == ("contrast", "fill_in", "flashcard")
     assert grammar_ladder.chain_for("build") == ("build", "contrast", "fill_in", "flashcard")
@@ -208,6 +267,41 @@ def test_construire_reads_romaji_and_names_the_one_kana_off():
     assert grammar_ladder.check_build(level, entry["pattern"], built["key"], ["ます"], "fr")["verdict"] == "wrong"
 
 
+def test_construire_takes_the_other_register_where_the_translation_cannot_say():
+    # Plan 241: « Demain, c'est l'examen » under あしたはテスト＿。 -- です
+    # was marked wrong for the sentence's だ, though nothing asked for it.
+    level, entry, _ = _point("です／だ")
+    key = next(i[0] for i in grammar_ladder._build_items(level, entry["pattern"]) if i[1] == "あしたはテストだ。")
+    for typed in ("です", "desu", "デス"):
+        verdict = grammar_ladder.check_build(level, entry["pattern"], key, [typed], "fr")
+        assert verdict["verdict"] == "right", typed
+        assert verdict["gaps"][0] == {"verdict": "right", "answer": "です", "reading": "だ", "marks": [],
+                                      "said": "だ", "register": "plain"}
+        assert verdict["jp"] == "あしたはテストだ。"
+    # The sentence's own answer says nothing more.
+    assert "said" not in grammar_ladder.check_build(level, entry["pattern"], key, ["だ"], "fr")["gaps"][0]
+    # One kana off the other form is close to it, and corrected towards it.
+    close = grammar_ladder.check_build(level, entry["pattern"], key, ["でず"], "fr")["gaps"][0]
+    assert close["verdict"] == "close" and close["answer"] == "です" and close["said"] == "だ"
+    assert close["marks"] == [{"ok": "で"}, {"wrong": "ず", "fix": "す"}]
+    # A wrong answer is corrected towards the sentence, as before.
+    wrong = grammar_ladder.check_build(level, entry["pattern"], key, ["でした"], "fr")["gaps"][0]
+    assert wrong["verdict"] == "wrong" and wrong["answer"] == "だ" and "said" not in wrong
+    # A question keeps its register: 学生だか is not one.
+    asked = next(i[0] for i in grammar_ladder._build_items(level, entry["pattern"]) if i[1] == "学生ですか。")
+    assert grammar_ladder.check_build(level, entry["pattern"], asked, ["だ"], "fr")["verdict"] == "wrong"
+
+
+def test_construire_reads_a_kanji_the_keyboard_put_in():
+    level, entry, _ = _point("〜と思います")
+    key = next(i[0] for i in grammar_ladder._build_items(level, entry["pattern"]) if i[1] == "この店は安いと思います。")
+    for typed in ("と思います", "とおもいます", "to omoimasu", "と思う", "とおもう"):
+        assert grammar_ladder.check_build(level, entry["pattern"], key, [typed], "en")["verdict"] == "right", typed
+    # Read, a wrong one is still wrong, and its correction is drawn in kana.
+    wrong = grammar_ladder.check_build(level, entry["pattern"], key, ["と言います"], "en")["gaps"][0]
+    assert wrong["verdict"] == "wrong" and "言" not in "".join(m.get("wrong", "") for m in wrong["marks"])
+
+
 def test_construire_asks_another_sentence_each_turn():
     level, entry, _ = _point("〜てください")
     keys = [grammar_ladder.build_payload(level, entry, "en", turn)["key"] for turn in range(4)]
@@ -260,9 +354,11 @@ def test_the_particles_the_detector_blanks_can_be_chosen_and_built():
                            ("N4", "〜方"), ("N4", "〜さ"), ("N3", "〜化")):
         assert card_index.contrast_ok(level, pattern), pattern
         assert grammar_ladder.build_ok(level, pattern), pattern
-    # は, が and も share too many sentences: は marks none, and stays on
-    # the flashcard until it can be written.
-    assert not card_index.contrast_ok("N5", "は")
+    # は, が and も share too many sentences for the detector to blank one:
+    # は marks none, and is asked from questions of its own instead
+    # (plan 201, study/grammar_choose.py), so it is chosen without the snapshot.
+    assert not grammar_ladder.blank_ok("N5", "は")
+    assert card_index.contrast_ok("N5", "は")
 
 
 def test_a_particle_on_choisir_is_asked_its_contrast(client):
@@ -372,17 +468,21 @@ def test_a_card_is_asked_the_exercise_of_its_step(client, where, exercise, asked
         _clear(raw_id)
 
 
-def test_a_point_with_no_marked_sentence_falls_back(client):
-    # は has no contrast sentence: Choisir asks it on fill_in or, where
-    # that cannot name it, the flashcard; Construire too, it having no
-    # sentence where は can be blanked once.
+def test_a_point_with_no_marked_sentence_is_asked_from_its_own_questions(client):
+    # は has no contrast sentence the detector can blank, and used to fall to
+    # the flashcard on Choisir (and to the flashcard or fill_in on Construire).
+    # Plan 201: it carries questions of its own, so Choisir asks a real one.
     level, entry, raw_id = _point("は")
-    expected = "grammar.fill_in" if card_index.fill_ok(level, "は") else "grammar.flashcard.f2b"
     _clear(raw_id)
     try:
         _place(raw_id, LADDER, STEP_ROWS["choose"])
         card = _served(client, level, raw_id)
-        assert card["exercise"] == expected and card["asked"] in ("choose", "flashcard")
+        assert card["exercise"] == "grammar.contrast" and card["asked"] == "choose"
+        drill = card["contrast"]
+        assert drill["answer"] in drill["choices"] and len(drill["choices"]) >= 3
+        assert "".join(p["text"] for p in drill["fill"]) == drill["answer"]
+        assert [p for p in drill["furigana"] if p.get("blank")]
+        assert card["choices_furigana"] == {} or set(card["choices_furigana"]) <= set(drill["choices"])
     finally:
         _clear(raw_id)
 

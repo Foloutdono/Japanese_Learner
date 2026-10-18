@@ -22,7 +22,7 @@ held over every sentence the app teaches from.
 import unittest
 
 from study import analysis, card_lookup, morphology
-from content import vocab_jmdict_data as jmdict
+from content import vocab_extras, vocab_jmdict_data as jmdict
 
 
 def matches(sentence: str) -> dict[str, dict]:
@@ -133,7 +133,8 @@ class ThePagesSpellingTests(unittest.TestCase):
         # The glosses meet: one word, two spellings.
         for sentence, word, expected in (
             ("眼が痛い。", "眼", "vocab_N5_目_め"),
-            ("競り合ったお陰で、彼が勝った。", "お陰", "vocab_N1_お蔭_おかげ"),
+            # The N1 お蔭 folded into the N4 おかげ, its word (plan 227).
+            ("競り合ったお陰で、彼が勝った。", "お陰", "vocab_N4__おかげ"),
         ):
             with self.subTest(word=word):
                 self.assertEqual(matches(sentence)[word]["raw_id"], expected)
@@ -396,10 +397,20 @@ class TheLowerTwinTests(unittest.TestCase):
         self.assertTrue(matches("為る")["為る"]["raw_id"].startswith("vocab_N3_為る_"))
 
     def test_a_homograph_is_not_a_twin(self) -> None:
-        """たとえ, "even if", tokenizes as 仮令, and the N3 kana card たとえ
-        is "simile": no gloss in common, so it never stands beside it."""
-        self.assertEqual(matches("たとえ雨が降っても、試合は行う。")["たとえ"]["raw_id"], "vocab_N1_仮令_たとえ")
-        self.assertEqual(matches("百歳にして、なお創作を続けている。")["なお"]["raw_id"], "vocab_N1_尚_なお")
+        """たとえ, "even if", tokenizes as 仮令. The N3 kana card たとえ
+        carried 例え's gloss, "simile", until plan 227 gave it the list's
+        word and folded the N1 仮令 into it; 例え, "simile", stays a card
+        of its own and never answers for the adverb."""
+        self.assertEqual(matches("たとえ雨が降っても、試合は行う。")["たとえ"]["raw_id"], "vocab_N3__たとえ")
+        self.assertEqual(matches("上手な例えだ。")["例え"]["raw_id"], "vocab_N1_例え_たとえ")
+
+    def test_a_corrected_gloss_makes_a_true_twin(self) -> None:
+        """The N3 kana cards なお and そば carried another word's gloss
+        (直 "straight, mischief"; 側 "third person") and stood apart from
+        their own word. Corrected, they share a gloss with it and the
+        lower card is the one a sentence shows."""
+        self.assertEqual(matches("百歳にして、なお創作を続けている。")["なお"]["raw_id"], "vocab_N3__なお")
+        self.assertEqual(matches("毎あさ、この川のそばをはしります。")["そば"]["raw_id"], "vocab_N5__そば")
         # いかん is not いかが, whatever lemma they share.
         found = matches("理由のいかんによらず、遅刻は認められない。").get("いかん")
         self.assertTrue(found is None or found["raw_id"] != "vocab_N5__いかが")
@@ -449,6 +460,75 @@ class EdgeInputTests(unittest.TestCase):
     def test_a_word_in_kana_is_not_a_row_read_otherwise(self) -> None:
         # まじか ("seriously?") comes back from UniDic as 間近, read まぢか.
         self.assertNotIn("まじか", matches("まじか"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class KanaStemTests(unittest.TestCase):
+    """Plan 213. A verb in hiragana says nothing of which verb it is
+    where two deck verbs are spelled alike in its form: 書取's 毎日、六時
+    におきます ("I get up at six") was glossed 置く, "poser", since UniDic
+    reads おき as 置く. The deck's own N5 kana sentences had 明日ははれる as
+    腫れる "to swell" and 雨がふりました as 振る "to wave". No card, and
+    no pool card in its place: the gap is visible, the error is learned."""
+
+    def test_a_stem_two_deck_verbs_share_has_no_card(self) -> None:
+        for sentence, word in (
+            ("毎日、六時におきます。", "おき"),          # 起きる or 置く
+            ("あさおきて、ごはんを食べて、学校へ行きます。", "おき"),
+            ("きのうは雨がふりませんでした。", "ふり"),   # 降る or 振る
+            ("明日ははれるかな。", "はれる"),            # 晴れる or 腫れる
+            ("子どもに早くねるように言いました。", "ねる"),  # was the N1 練る
+            ("つぎの駅で電車をおります。", "おり"),        # was 居る (おる)
+            ("春になると、さくらがさきます。", "さき"),    # was 裂く
+            ("すみませんけど、まどをしめてください。", "しめ"),  # 閉める or 締める
+            ("この薬はちっともきかない。", "きか"),        # 効く or 聞く
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(word, matches(sentence))
+
+    def test_a_form_only_one_deck_verb_spells_keeps_its_card(self) -> None:
+        for sentence, word, raw_id in (
+            # おきない: a godan verb's stem before ない is おか, so 起きる.
+            ("七時におきない。", "おき", "vocab_N5_起きる_おきる"),
+            # The kanji tells them apart.
+            ("毎朝六時に起きます。", "起き", "vocab_N5_起きる_おきる"),
+            ("机の上に本を置きます。", "置き", "vocab_N5_置く_おく"),
+            # A sound-changed stem is a godan verb's alone: すいて is すく,
+            # never 吸う (すいます), はいた 履く, never 這う (はいます).
+            ("朝から何も食べていなくて、おなかがすいてたまらない。", "すい", "vocab_N4__すく"),
+            ("くつをはいたまま、家に入らないでください。", "はい", "vocab_N3_履く_はく"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(matches(sentence)[word]["raw_id"], raw_id)
+
+    def test_a_rarer_rival_leaves_the_card(self) -> None:
+        for sentence, word, raw_id in (
+            ("あした、とうきょうへかえります。", "かえり", "vocab_N5_帰る_かえる"),  # not the N2 反る
+            ("ねるまえに、本を読みます。", "ねる", "vocab_N5_寝る_ねる"),            # not the N1 練る
+            ("駅まであるいて、電車にのります。", "のり", "vocab_N5_乗る_のる"),      # not the N2 載る
+            ("まどをあけましょうか。", "あけ", "vocab_N5_開ける_あける"),            # not the N3 明ける
+            ("めがねをかけたあの男性は、まじめな公務員に見える。", "かけ", "vocab_N4_掛ける_かける"),  # not the N3 欠ける
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(matches(sentence)[word]["raw_id"], raw_id)
+
+    def test_a_kana_card_the_page_spells_keeps_it(self) -> None:
+        for sentence, word, raw_id in (
+            ("子どもは大きくなりました。", "なり", "vocab_N5__なる"),        # not 鳴る
+            ("しゅうまつは何をするつもりですか。", "する", "vocab_N5__する"),  # not 刷る
+            ("駅まで五分ぐらいかかります。", "かかり", "vocab_N5__かかる"),    # not 罹る
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(matches(sentence)[word]["raw_id"], raw_id)
+
+    def test_the_refusal_never_trades_one_card_for_another(self) -> None:
+        for sentence in _corpus()[::7]:
+            morphemes = morphology.tokenize(sentence)
+            for i, m in enumerate(morphemes):
+                before = card_lookup._resolve_morpheme(morphemes, i)
+                after = card_lookup.resolve_morpheme(morphemes, i)
+                with self.subTest(sentence=sentence, word=m.surface):
+                    self.assertIn(after, (before, None))
 
 
 def _corpus() -> list[str]:
@@ -584,6 +664,77 @@ class WhatTheBankMetTests(unittest.TestCase):
             ("赤ちゃんが泣いている。", "赤ちゃん", "vocab_N4_赤ちゃん_あかちゃん"),
             ("あかちゃんが泣いている。", "あかちゃん", "vocab_N4_赤ちゃん_あかちゃん"),
             ("世論は大きく変わった。", "世論", "vocab_N1_世論_よろん/せろん"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(matches(sentence)[word]["raw_id"], raw_id)
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class QuotationTests(unittest.TestCase):
+    """Plan 236. UniDic spells some words half in kana (と博 for 賭博,
+    "gambling"), and after a quotation MeCab took the quotative と for
+    the first kana of one: 「…緊張するよ」と博がいいます came back と博, so
+    緊張's example put ばく over the name 博 (Hiroshi) and its breakdown
+    glossed it as gambling. Read again as と and the name, the name still
+    took the pool's 博 read はく, "doctor": JMdict files almost no names,
+    so the commonest row of a name's spelling is another word, and a name
+    takes a row read as it is read or none. A course card is no guess and
+    stays where UniDic takes its word for a name."""
+
+    SENTENCE = "「僕、飛行機に乗るのはこれが初めてなんだ。緊張するよ」と博がいいます。"
+
+    def test_the_quotations_to_is_the_particle_and_the_name_its_own(self) -> None:
+        tokens = morphology.tokenize(self.SENTENCE)
+        at = next(i for i, m in enumerate(tokens) if m.surface == "博")
+        self.assertEqual((tokens[at - 1].surface, tokens[at - 1].pos), ("と", "particle"))
+        self.assertEqual(tokens[at].reading, "ひろし")
+        self.assertNotIn("賭博", [m.lemma for m in tokens])
+        # Cut and tagged again, the tokens are still the text, offsets and all.
+        self.assertEqual([self.SENTENCE[m.start:m.end] for m in tokens], [m.surface for m in tokens])
+        self.assertEqual("".join(m.surface for m in tokens), self.SENTENCE)
+
+    def test_the_example_reads_the_name(self) -> None:
+        examples = vocab_extras.get_vocab_extras("緊張", "きんちょう")["examples"]
+        segments = next(ex["segments"] for ex in examples if ex["jp"] == self.SENTENCE)
+        self.assertIn({"text": "博", "reading": "ひろし"},
+                      [{"text": p["text"], "reading": p.get("reading")} for p in segments])
+
+    def test_a_mixed_spelling_anywhere_else_stays_one_word(self) -> None:
+        for sentence, surface, lemma in (
+            ("違法なと博に手を出した。", "と博", "賭博"),
+            ("スーパーでとり肉を買いました。", "とり肉", "鳥肉"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertIn((surface, lemma), [(m.surface, m.lemma) for m in morphology.tokenize(sentence)])
+
+    def test_a_quotations_to_before_a_word_is_left_as_it_was(self) -> None:
+        self.assertEqual(matches("「おはよう」と先生が言った。")["先生"]["raw_id"], "vocab_N5_先生_せんせい")
+
+    def test_a_name_takes_no_row_read_otherwise(self) -> None:
+        for sentence, name in (
+            (self.SENTENCE, "博"),
+            ("「博、君の気持ちは分かるよ」とマイクが言います。", "博"),  # はく, "doctor"
+            ("博が来た。", "博"),
+            ("こんにちは、山下さん。お出かけですか。", "山下"),  # さんか, "foot of a mountain"
+            ("週末、上野の国立博物館に行った。", "上野"),  # こうずけ, a former province
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(name, matches(sentence))
+
+    def test_a_name_read_as_its_row_keeps_it(self) -> None:
+        for sentence, word, meaning in (
+            ("彼は九州へ旅立った。", "九州", "Ky"),
+            ("東京に住んでいます。", "東京", "Tokyo"),
+            ("「行こう」と太郎が言った。", "太郎", "son"),
+            ("その汽船は香港に立ち寄った。", "香港", "Hong Kong"),  # the row is read ホンコン
+        ):
+            with self.subTest(word=word):
+                self.assertIn(meaning, matches(sentence)[word]["entry"]["meaning"])
+
+    def test_a_course_word_taken_for_a_name_keeps_its_card(self) -> None:
+        for sentence, word, raw_id in (
+            ("池に大きな蓮の葉が浮かんでいる。", "蓮", "vocab_N1_蓮_はす"),  # read れん, Ren
+            ("師匠は少年の利根を見込んで、弟子に取った。", "利根", "vocab_N1_利根_りこん"),  # とね, the river
         ):
             with self.subTest(sentence=sentence):
                 self.assertEqual(matches(sentence)[word]["raw_id"], raw_id)

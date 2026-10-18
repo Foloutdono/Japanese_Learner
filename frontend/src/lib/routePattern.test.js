@@ -14,7 +14,7 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { describe, it, expect } from 'vitest'
 
-import { ROUTES, routePattern } from './routePattern'
+import { ROUTES, routePattern, apiArea } from './routePattern'
 
 describe('routePattern', () => {
   it('reduces a path with an id in it to its pattern', () => {
@@ -96,6 +96,23 @@ describe('routePattern', () => {
   })
 })
 
+describe('apiArea', () => {
+  it('keeps the router and drops everything the learner could have named', () => {
+    expect(apiArea('/api/decks')).toBe('/api/decks')
+    expect(apiArea('/api/decks/9f3a-77/cards?q=ma%20liste')).toBe('/api/decks')
+    expect(apiArea('/api/vocab/theme/animaux/level/N4')).toBe('/api/vocab')
+    expect(apiArea('/api/today?lang=fr')).toBe('/api/today')
+  })
+
+  it('records nothing for a path that is not an API path', () => {
+    expect(apiArea('/learn/decks/42')).toBeNull()
+    expect(apiArea('/api/')).toBeNull()
+    expect(apiArea('/api/Mes Decks/x')).toBeNull()
+    expect(apiArea('https://evil.example/api/decks')).toBeNull()
+    expect(apiArea(null)).toBeNull()
+  })
+})
+
 describe('ROUTES against App.jsx', () => {
   const app = readFileSync(
     fileURLToPath(new URL('../App.jsx', import.meta.url)),
@@ -141,5 +158,21 @@ describe('ROUTES against App.jsx', () => {
     for (const base of ['reading', 'translation', 'comprehension', 'dictation', 'composition']) {
       expect(app).toContain(`/practice/${base}`)
     }
+  })
+})
+
+// ── 足跡 II (plan 218): the dashboard that lists the screens nobody opens ──
+// docs/analytics/metabase/02-fonctionnalites.sql left-joins the views
+// onto every route; a screen added here and not there would never show
+// up as unused, which is the one thing that question is for.
+describe('the unused-screens dashboard', () => {
+  it('lists exactly the routes App.jsx declares', () => {
+    const sql = readFileSync(
+      fileURLToPath(new URL('../../../docs/analytics/metabase/02-fonctionnalites.sql', import.meta.url)),
+      'utf8',
+    )
+    const block = sql.split('WITH routes(route) AS (VALUES')[1].split('), vues AS')[0]
+    const listed = [...block.matchAll(/\('([^']+)'\)/g)].map(m => m[1])
+    expect(listed).toEqual(ROUTES)
   })
 })

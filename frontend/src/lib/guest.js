@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { emailRedirectTarget } from './oauth'
 
 // ── 仮乗車券 — riding without an account ──────────────────────────
 // A guest is a REAL Supabase user that simply has no credentials on
@@ -94,9 +95,17 @@ export async function startGuest() {
  * that points at the routes which still work, rather than repeating
  * a quoted blank back at someone with their address on screen.
  */
-export async function claimAccount({ email, password }) {
+export async function claimAccount({ email, password, lang }) {
   try {
-    const { data, error } = await supabase.auth.updateUser({ email, password })
+    // `data` is the user's metadata, written before the confirmation is
+    // sent: `lang` is what the dashboard's e-mail templates branch on
+    // ({{ .Data.lang }}), so the learner who claimed the pass in French
+    // is mailed in French (plan 215). Omitted when unknown.
+    // `emailRedirectTo`: the confirmation lands on the origin the pass
+    // was claimed on, not on the project's Site URL (lib/oauth.js).
+    const { data, error } = await supabase.auth.updateUser({
+      email, password, ...(lang ? { data: { lang } } : {}),
+    }, { emailRedirectTo: emailRedirectTarget() })
     // `code` is the part worth having: the message is English-only and
     // sometimes describes the wrong field (see above).
     if (error) return { ok: false, code: error.code, message: error.message }
@@ -105,6 +114,27 @@ export async function claimAccount({ email, password }) {
     const confirmed = !!data?.user?.email && data.user.email === email
       && data.user.is_anonymous !== true
     return { ok: true, needsConfirmation: !confirmed }
+  } catch (err) {
+    return { ok: false, message: err?.message }
+  }
+}
+
+/**
+ * 本乗車券 by a link (plan 247) — the card's account sheet: an address
+ * and nothing else. Supabase mails it a link; followed, the address is
+ * the account's, on the same id as everything else, so nothing moves.
+ * No password is set, which is the point (the sign-in card mails a link
+ * too, components/account/AuthCard.jsx). The project's "confirm email"
+ * road is claimAccount's, above, refusals and all: `code` is carried out
+ * for lib/authErrors.js.
+ */
+export async function claimByLink({ email, lang }) {
+  try {
+    const { error } = await supabase.auth.updateUser({
+      email, ...(lang ? { data: { lang } } : {}),
+    }, { emailRedirectTo: emailRedirectTarget() })
+    if (error) return { ok: false, code: error.code, message: error.message }
+    return { ok: true }
   } catch (err) {
     return { ok: false, message: err?.message }
   }

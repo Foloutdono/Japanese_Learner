@@ -21,9 +21,16 @@
 //      learner who was never there.
 //
 // See docs/adr/0012.
-import { apiFetch } from './api'
-import { supabase } from './supabase'
+// The API client and the auth client are loaded when a flush needs them
+// (plan 218), not when this module is: everything that counts something
+// imports track, and importing it must not construct the Supabase client
+// -- a settings store or the language context would otherwise drag auth
+// into every module (and every test) that only wants to say a thing
+// happened. Both are long loaded by the app before the first flush.
+const clients = () => Promise.all([import('./api'), import('./supabase')])
 import { isOptedOut } from '../stores/analyticsOptOut'
+import { visitContext } from './visitContext'
+import { runHideHooks } from './pageHide'
 
 // The closed set: name -> the keys it may carry. Kept in the same order
 // as backend/core/events.py's EVENTS, which tests/test_events.py checks
@@ -32,8 +39,17 @@ export const EVENTS = {
   app_open: ['boot_ms', 'cold', 'platform', 'standalone'],
   boot_timeout: ['waited_ms'],
   screen_view: ['route', 'tab'],
+  // How long the screen was in front of someone (plan 218): engaged
+  // time, sent on leaving it and on the page being hidden
+  // (lib/screenTrail.js).
+  screen_leave: ['route', 'tab', 'ms'],
+  // A visit began (see the session below). The id rides beside the
+  // event, not inside it; the properties are the visit's coarse
+  // context (lib/visitContext.js), never a raw value.
+  session_start: ['platform', 'vp', 'os', 'lang', 'theme', 'input', 'standalone', 'reduced'],
   boarding_step: ['step', 'to', 'index', 'dir', 'ms'],
-  boarding_done: ['motive', 'kana_known', 'level', 'pace', 'notifications', 'lines', 'ms'],
+  boarding_done: ['motive', 'kana_known', 'level', 'pace', 'notifications', 'lines', 'ms', 'level_how', 'placed',
+    'edited_goal', 'edited_rhythm', 'edited_hour', 'edited_lines', 'named', 'kept'],
   account_claimed: ['from'],
   // The first ride (plan 097): the two lessons after the boarding and
   // the guide over each gate. Step and stop names are the app's own,
@@ -42,9 +58,12 @@ export const EVENTS = {
   ride_done: ['skipped', 'at', 'ms'],
   guide_step: ['gate', 'stop', 'index'],
   guide_done: ['gate', 'skipped', 'stops', 'ms'],
-  run_start: ['kind', 'mode', 'level'],
-  run_complete: ['kind', 'mode', 'level', 'items', 'secs'],
-  run_abandon: ['kind', 'mode', 'level', 'done'],
+  // Every run, the practice runs too since plan 218 (lib/runTrail.js),
+  // with how it went: engaged ms, the time per item's median and slow
+  // tail, how many right, and the door it was entered by.
+  run_start: ['kind', 'mode', 'level', 'where'],
+  run_complete: ['kind', 'mode', 'level', 'items', 'secs', 'ms', 'card_p50', 'card_p90', 'right', 'where'],
+  run_abandon: ['kind', 'mode', 'level', 'done', 'ms', 'card_p50', 'card_p90', 'right', 'where'],
   fare_blocked: ['balance', 'fare', 'kind'],
   limit_reached: ['kind', 'at'],
   offer_view: ['where'],
@@ -61,14 +80,24 @@ export const EVENTS = {
   // The dictionary's shelf (plan 093): the kind of entry kept or let
   // go, never its key — a key names the word a learner looked up.
   favorite_toggle: ['kind', 'on'],
+  // A song's decks (plan 215): the counts that went in, never its name.
+  song_deck: ['words', 'lines'],
   // The app opened from its notification or its widget (plan 156).
   nudge_opened: ['via'],
   // The basics course (plan 186f): its own unit number, never a card.
   basics_unit_done: ['unit'],
   basics_skipped: ['unit'],
+  // Another app's progress brought across (plans 243, 243b), written by
+  // the server: where from and counts only, never a word, a field, a
+  // deck's name or a key; and the sheet over Today answered.
+  transfer_import: ['source', 'notes', 'cards', 'written', 'kept'],
+  transfer_undo: ['removed'],
+  transfer_offer: ['choice'],
   // A grammar point's tour (plan 187b): the level, never the pattern.
   grammar_tour_step: ['level', 'stop', 'outcome'],
   grammar_tour_done: ['level', 'tries', 'helped', 'authored'],
+  // A kana or a kanji's first tour (plan 216): its line, never the character.
+  glyph_tour_done: ['source', 'misses', 'shown'],
   // The day cleared (plan 191). day_clear and rest_day_used are written
   // by the server (POST /api/today/clear, the rest-day bridge);
   // ticket_share is a milestone ticket shared, its days and nothing of
@@ -76,8 +105,75 @@ export const EVENTS = {
   day_clear: ['streak', 'milestone', 'tier'],
   rest_day_used: ['days'],
   ticket_share: ['days'],
+  // The review plan (plan 217): the comeback sheet opened (ours, once a
+  // sheet); its answer, a catch-up's end, the ceiling and an absence set
+  // in Settings, and the absence's days bridged (the server's).
+  catchup_offer: ['owed', 'away'],
+  catchup_choice: ['choice', 'days', 'per_day'],
+  catchup_done: ['days'],
+  review_cap_set: ['cap'],
+  away_set: ['days'],
+  away_day_used: ['days'],
+  // The small features, counted per screen and sent on leaving it
+  // (lib/screenTrail.js countUse), and a setting changed to one of the
+  // app's own values (plan 218). Both closed by VALUES below.
+  feature_use: ['feature', 'action', 'route', 'n'],
+  setting_change: ['setting', 'value'],
+  // Written by the server (core/daily_limit.claim): a rationed model
+  // call, its count against the day's ceiling. Declared here only so
+  // the two sets stay one.
+  ai_use: ['feature', 'count', 'limit', 'over'],
   api_error: ['path', 'status'],
   install_prompt: ['outcome'],
+  // An uncaught error, by screen -- never its message or stack -- and
+  // the page's own speed once per load (lib/clientErrors.js,
+  // lib/vitals.js; plan 218).
+  client_error: ['route', 'where'],
+  vitals: ['route', 'lcp', 'inp', 'cls', 'ttfb'],
+}
+
+// The values a string property may take where it is an enum (plan 218),
+// mirrored from backend/core/events.py's VALUES, which
+// tests/test_events.py reads this block against -- keep it plain data
+// (one name per key, single-quoted strings) and keep the end marker.
+// A value outside its list is dropped here and again on the server.
+export const VALUES = {
+  session_start: {
+    platform: ['web', 'native'],
+    vp: ['phone', 'tablet', 'desk', 'wide'],
+    os: ['ios', 'android', 'windows', 'mac', 'linux', 'chromeos', 'other'],
+    lang: ['fr', 'en'],
+    theme: ['light', 'dark', 'auto'],
+    input: ['touch', 'mouse'],
+  },
+  boarding_done: {
+    level_how: ['pick', 'test'],
+    placed: ['N5', 'N4', 'N3', 'N2', 'N1'],
+    kept: ['google', 'link', 'already', 'none'],
+  },
+  run_start: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
+  run_complete: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
+  run_abandon: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
+  feature_use: {
+    feature: ['speech', 'analyzer', 'ocr', 'ask', 'explain', 'dictionary', 'export', 'level_fit', 'conversation'],
+    action: ['play', 'text', 'photo', 'video', 'scan', 'send', 'open', 'search', 'progress', 'move', 'stay'],
+  },
+  transfer_import: { source: ['anki', 'wanikani', 'renshuu'] },
+  transfer_offer: { choice: ['go', 'later'] },
+  setting_change: {
+    setting: ['theme', 'lang', 'rating_scale', 'reading_pace', 'sound', 'notifications', 'level', 'lines', 'daily_target'],
+    value: ['light', 'dark', 'auto', 'fr', 'en', 'binary', 'simple', 'full', 'standard', 'relaxed', 'slow', 'untimed', 'on', 'off', 'N5', 'N4', 'N3', 'N2', 'N1', 'changed'],
+  },
+  ai_use: { feature: ['ask', 'composition', 'translation_review', 'deep_analysis', 'exam_paper', 'line_translation'] },
+  client_error: { where: ['error', 'rejection'] },
+}
+// end VALUES
+
+// `route` and `path` are held to a shape on every name, as the server
+// holds them: a pattern or an API area, never a learner's words.
+const SHAPES = {
+  route: /^\/[A-Za-z0-9/:_-]{0,63}$/,
+  path: /^\/api\/[a-z][a-z0-9_-]{0,30}$/,
 }
 
 const KEY = 'jp-trail'
@@ -105,6 +201,39 @@ const HAS_WINDOW = typeof window !== 'undefined'
 let queue = load()
 let timer = null
 let flushing = false
+
+// ── The visit ────────────────────────────────────────────────────────
+// A random id, minted here, for one visit: it lets the trail say how
+// long a session lasted and how many a day a learner has, which no row
+// can say alone. It carries nothing about the learner (the server
+// already attributes rows to the account), is not a device id, and
+// lives in sessionStorage -- gone with the tab, never shared between
+// two. A visit ends after thirty minutes without an event; the next
+// one begins a new one and says so with `session_start`.
+const SESSION_KEY = 'jp-sid'
+const SESSION_GAP_MS = 30 * 60_000
+
+let session = loadSession()
+
+function loadSession() {
+  if (!HAS_WINDOW) return null
+  try {
+    const parsed = JSON.parse(window.sessionStorage.getItem(SESSION_KEY) || 'null')
+    return parsed && typeof parsed.id === 'string' && Number.isFinite(parsed.last) ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+function saveSession() {
+  if (!HAS_WINDOW) return
+  try { window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(session)) } catch { /* in memory still */ }
+}
+
+// The live session's id, or null when there is none (or it lapsed).
+function liveSession(now) {
+  return session && now - session.last <= SESSION_GAP_MS ? session : null
+}
 
 function load() {
   if (!HAS_WINDOW) return []
@@ -136,9 +265,14 @@ function clean(name, props) {
   if (!allowed) return null
   const out = {}
   if (!props || typeof props !== 'object') return out
+  const enums = VALUES[name] || {}
   for (const key of allowed) {
     if (!(key in props)) continue
     const value = props[key]
+    if (typeof value === 'string') {
+      if (enums[key] && !enums[key].includes(value)) continue
+      if (SHAPES[key] && !SHAPES[key].test(value)) continue
+    }
     if (value === null || typeof value === 'boolean') out[key] = value
     else if (typeof value === 'number') out[key] = Number.isFinite(value) ? value : null
     else if (typeof value === 'string') out[key] = value.slice(0, MAX_STR)
@@ -172,7 +306,22 @@ export function track(name, props) {
     if (import.meta.env.DEV) console.warn(`track: unknown event "${name}"`)
     return
   }
-  queue.push({ id: eventId(), name, at: new Date().toISOString(), props: cleaned })
+  const now = Date.now()
+  const at = new Date(now).toISOString()
+  let live = liveSession(now)
+  // A failed request is not the learner doing anything: it joins the
+  // visit that is running, and neither begins one nor keeps one alive.
+  if (name !== 'api_error') {
+    if (!live) {
+      session = { id: eventId(), last: now }
+      live = session
+      queue.push({ id: eventId(), name: 'session_start', at, sid: live.id, props: clean('session_start', visitContext()) })
+    } else {
+      live.last = now
+    }
+    saveSession()
+  }
+  queue.push({ id: eventId(), name, at, ...(live ? { sid: live.id } : {}), props: cleaned })
   if (queue.length > MAX_QUEUE) queue = queue.slice(-MAX_QUEUE)
   save()
   if (queue.length >= BATCH) flush()
@@ -198,8 +347,11 @@ export async function flush() {
   if (timer !== null) { clearTimeout(timer); timer = null }
 
   let session
+  let apiFetch
   try {
-    ({ data: { session } } = await supabase.auth.getSession())
+    const [api, auth] = await clients()
+    apiFetch = api.apiFetch
+    ;({ data: { session } } = await auth.supabase.auth.getSession())
   } catch {
     return                      // signed out mid-flush; keep the queue
   }
@@ -238,10 +390,19 @@ export async function flush() {
 // `unload`, which a bfcache-eligible page never fires; `visibilitychange`
 // as well, because on iOS a tab switch is often the last thing that
 // happens before the process is reclaimed.
+//
+// Whatever must be queued BEFORE that flush registers in lib/pageHide.js
+// (the screen's dwell and feature counts, the page's vitals; plan 218)
+// and runs here, first.
+function onHide(kind) {
+  runHideHooks(kind)
+  flush()
+}
+
 if (HAS_WINDOW) {
-  window.addEventListener('pagehide', () => { flush() })
+  window.addEventListener('pagehide', () => { onHide('pagehide') })
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') flush()
+    if (document.visibilityState === 'hidden') onHide('hidden')
   })
 }
 
@@ -251,6 +412,8 @@ if (HAS_WINDOW) {
 export function _peek() { return queue.slice() }
 export function _reset() {
   queue = []
+  session = null
+  if (HAS_WINDOW) { try { window.sessionStorage.removeItem(SESSION_KEY) } catch { /* nothing to clear */ } }
   if (timer !== null) { clearTimeout(timer); timer = null }
   save()
 }

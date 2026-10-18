@@ -39,6 +39,29 @@ read it through the resolver seam (`core/user_level.resolve_level`) rather
 than the column: an explicit per-request choice still beats the stored
 value — see `docs/adr/0005`.
 
+**Placement test** (実力診断) — since plan 224, the climb: asked at N5, a
+level up each time one is cleared (three right in a row, or four right;
+a second miss ends the level), the first level not cleared where the
+learner boards. Offered at the boarding beside choosing the level, and
+in Settings › Level. Stateless: `study/placement.walk` replays it from
+its seed over the answers so far.
+
+**Assumed card** — a card the level rule marked known because the learner
+stands at a level above its stop (`study/level_rule.py`): a mastered row
+`SRSEngine.seed_known` wrote and no answer has touched since
+(`SRSEngine.is_assumed`). An assumption, never history: a move down gives
+the ones from the new level up back as new cards (`forget_assumed`).
+
+**Check** — the first answer to an assumed card, marked `review_log.assumed`
+(plan 224). Passed, the card stays known and spends nothing of the day's
+pace; missed, the card starts as new, never as a lapse.
+
+**Level fit** — whether the learner level fits the answers
+(`study/level_fit.py`, `GET /api/profile/level-fit`): a stop behind the
+level whose checks mostly fail is where to board, and words known the
+first time they are asked at the level point to the next. A suggestion;
+nothing moves the level but the learner.
+
 **First ride** — the lesson after the boarding (wave 21): the card ride and
 the reading ride, then the guide on each gate. Its state is on the profile
 row — `tutorial_at`, when the rides ended (finished or skipped), and
@@ -46,6 +69,14 @@ row — `tutorial_at`, when the rides ended (finished or skipped), and
 `tutorialAt` and `guided` on `GET /api/profile`, written only by
 `routes/onboarding.py`. A lesson is the real component fed a literal and
 writes nothing else — see `docs/adr/0017`.
+
+**First sight** (初見) — the tour a kana or a kanji opens on the first
+time it comes up, in the card's place: what it reads, its strokes traced
+from the dot to the ring, a few words it is met in. Once per character,
+never per mode; a combination (きゃ) has none. Carried on the card as
+`glyph_tour` while `tutorial` says it is due (`study/glyph_tour.py`),
+recorded in `glyph_tours`. The grammar point's counterpart is its tour
+(発見).
 
 **Ration** — the day's new cards on the daily queue: what is left of
 `daily_new_target` after today's first-ever reviews, offered beside the
@@ -79,6 +110,22 @@ the tutor *reviews* it (`study/tutor_review`, the shape translation's tutor
 answers in, rationed by the day through `core/daily_limit`), and the learner
 *grades* it — `docs/adr/0013`'s split, a third time. Say *composition*, never
 "writing mode": 書取 is writing too.
+
+**Conversation** (会話) — the practice mode where someone speaks to the
+learner in a place and they answer (plan 217). A *scenario* is ridden one
+of three ways: **Choose** (pick the reply among three, graded by the
+pick), **Translate** (write what you are told to say: measured, read by
+the tutor, graded by the learner) or **Free talk** (the other person
+played by the model, every line reviewed by the tutor and graded by the
+learner). Say *conversation*, never "chat" or "dialogue mode": the exam's
+聴解 has dialogues too, and a grammar tour has its scene.
+
+**Scenario** — one exchange of the conversation bank
+(`backend/content/conversation/N5.json` …): a place, the person who
+speaks to the learner there, the learner's errand (`goal`), and four to
+seven *turns*, each the other person's line, the model reply with its
+alternatives and two wrong replies with why. Its `id` keys the learner's
+history (`conversation_log`) and is never renamed.
 
 **Pace** — the learner's chosen number of NEW items per day
 (`user_profiles.daily_new_target`), set at onboarding as a service type

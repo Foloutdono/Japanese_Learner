@@ -1,4 +1,5 @@
 import { apiUpload } from './api'
+import { countUse } from './screenTrail'
 
 // ── In-browser OCR (tesseract.js) ─────────────────────────────
 // Tier 1 of the photo-input feature (docs/adr/0004-ocr-runs-client-
@@ -58,6 +59,8 @@ export function normalize(text) {
  * @returns {Promise<{ text: string, confidence: number }>}
  */
 export async function recognize(file, { vertical = false, onProgress } = {}) {
+  // 足跡 (plan 218): a photo read, on the device or the server below.
+  countUse('ocr', 'scan')
   const { createWorker } = await import('tesseract.js')
   const lang = vertical ? 'jpn_vert' : 'jpn'
   const worker = await createWorker(lang, undefined, {
@@ -92,6 +95,7 @@ export async function recognize(file, { vertical = false, onProgress } = {}) {
  * orientations, so this never selects a different model or mode.
  */
 export async function recognizeRemote(blob, session, { vertical = false } = {}) {
+  countUse('ocr', 'scan')
   const form = new FormData()
   form.append('file', blob, 'capture.jpg')
   form.append('vertical', String(vertical))

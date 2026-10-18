@@ -275,12 +275,10 @@ const fr = facts => {
       nameLabel: 'Ton prénom',
       name: 'Ton prénom',
       aria: 'Aperçu de ton pass',
-      route: 'Trajet',
-      per: m => `${m} min / jour`,
-      lines: 'Lignes',
-      linesAria: 'Kana, vocabulaire, kanji, grammaire',
-      arrival: 'Arrivée prévue',
-      level: 'Niv. 1',
+      // The app's card face (src/locales: ofrCardBrand, cardFareFree, cardFree).
+      brand: 'Pass',
+      fare: 'Pratique · verrouillée',
+      tier: 'Free',
     },
 
     // The feature screens drawn where a clip is not yet filmed: each is
@@ -522,12 +520,10 @@ const en = facts => {
       nameLabel: 'Your first name',
       name: 'Your name',
       aria: 'Preview of your pass',
-      route: 'Ride',
-      per: m => `${m} min a day`,
-      lines: 'Lines',
-      linesAria: 'Kana, vocabulary, kanji, grammar',
-      arrival: 'Arriving',
-      level: 'Lv. 1',
+      // The app's card face (src/locales: ofrCardBrand, cardFareFree, cardFree).
+      brand: 'Pass',
+      fare: 'Practice · locked',
+      tier: 'Free',
     },
 
     mock: {

@@ -3,9 +3,13 @@ import { useBuild } from '../../hooks/useBuild'
 import { useLang } from '../../LangContext'
 import { playClick, playFlip } from '../../lib/audio'
 import { useDesk } from '../../hooks/useDesk'
+import { useLabelsFit } from '../../hooks/useLabelsFit'
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
+import { dueText } from '../../domain/forecast'
 import { runKey } from '../../lib/keyGuards'
+import { choiceAnswer } from '../../domain/cardShape'
 import { bare, lineOf, mapOf } from '../../domain/ladderLine'
+import { ArrowIcon, CheckIcon, RetryIcon } from '../ui/Icons'
 import { GrammarAnswer } from './GrammarPieces'
 
 // ── 194 — Choisir and Construire, the point's roundel ──────────────
@@ -117,23 +121,79 @@ export function PointLine({ card, missed = false, t: tProp }) {
   )
 }
 
-/** The desk's map of the point's walk (plan 194): every stop on one
- *  upright rail, each done, now or with the wait before it. */
-export function LadderMap({ card, t: tProp }) {
+/** The desk's map of the point's walk (plan 194, redrawn in plan 198):
+ *  every stop on one upright rail, the rail filled as far as it is
+ *  ridden. A stop done wears a check and says nothing, the one in hand
+ *  is lit, each one ahead prints the wait before it; "fait" and
+ *  "maintenant" are left to a screen reader.
+ *
+ *  Where the card has its `outcomes` (domain/ladderLine's outcomesOf) the
+ *  stop in hand opens into what each rating would do to the point, one
+ *  row an outcome: the verdicts it answers as their keys, where it sends
+ *  the point -- asked again, down the line, back up it -- and when the
+ *  point comes back. */
+export function LadderMap({ card, outcomes = null, t: tProp }) {
   const t = useT(tProp)
+  const [outsRef, tight] = useLabelsFit('.gl-out__keys')
   const rows = mapOf(card?.step, t)
   if (!rows.length) return null
   return (
     <ol className="gl-map" aria-label={t.mapAria}>
-      {rows.map((r, i) => (
-        <li key={i} className={`gl-map__stop gl-map__stop--${r.state}${r.kind === 'end' ? ' gl-map__stop--end' : ''}`}
-            aria-current={r.state === 'now' ? 'step' : undefined}>
-          <span className="gl-map__dot" aria-hidden="true">{r.kind === 'end' ? '★' : null}</span>
-          <span className="gl-map__name">{r.name}</span>
-          <span className="gl-map__when">{r.state === 'now' ? t.mapNow : r.state === 'done' ? t.mapDone : r.wait}</span>
-        </li>
-      ))}
+      {rows.map((r, i) => {
+        const now = r.state === 'now'
+        const opens = now && outcomes
+        return (
+          <li key={i} aria-current={now ? 'step' : undefined}
+              className={`gl-map__stop gl-map__stop--${r.state}${r.kind === 'end' ? ' gl-map__stop--end' : ''}${opens ? ' gl-map__stop--outs' : ''}`}>
+            <span className="gl-map__dot" aria-hidden="true">
+              {r.kind === 'end' ? '★' : r.state === 'done' ? <CheckIcon size={8} /> : null}
+            </span>
+            <span className="gl-map__name">{r.name}</span>
+            {r.state === 'ahead'
+              ? <span className="gl-map__when">{r.wait}</span>
+              : <span className="sr-only">{now ? t.mapNow : t.mapDone}</span>}
+            {opens && <Outcomes rows={outcomes} tight={tight} rowRef={outsRef} t={t} />}
+          </li>
+        )
+      })}
     </ol>
+  )
+}
+
+/** What each rating does to the point (plan 198), inside the stop in
+ *  hand: a row an outcome, its glyph where it sends the point, the
+ *  verdicts it answers as the keys that press them, the wait. Where the
+ *  words do not fit beside their keys they stand bare (measured, as the
+ *  run panel's figures are), the sentence a screen reader gets whole. */
+function Outcomes({ rows, tight, rowRef, t }) {
+  return (
+    <ul className="gl-outs" ref={rowRef} aria-label={t.mapOutsAria} data-guide="run.verdicts">
+      {rows.map(o => {
+        const move = o.move === 'stay' && o.passed ? 'hold' : o.move
+        const Glyph = o.move === 'stay' ? RetryIcon : ArrowIcon
+        return (
+          <li key={o.verdicts[0].q} className={`gl-out gl-out--${o.move}${o.passed ? ' gl-out--pass' : ''}`}>
+            <Glyph direction={o.move === 'back' ? 'up' : 'down'} className="gl-out__go" />
+            <span className="gl-out__keys" aria-hidden="true">
+              {o.verdicts.map(v => (
+                <span key={v.q} className={`gl-out__key gl-out__key--q${v.q}`}>
+                  <kbd className="desk-kbd">{v.digit}</kbd>
+                  <i className="gl-out__dot" />
+                  <b className={tight ? 'sr-only' : undefined}>{v.label}</b>
+                </span>
+              ))}
+            </span>
+            <span className="gl-out__when" aria-hidden="true">
+              {o.move === 'back' && <span className="gl-out__note">{t.lineRelapse}</span>}
+              <b>{o.figure.value}</b><small>{o.figure.unit}</small>
+            </span>
+            <span className="sr-only">
+              {t.mapOutRow(o.verdicts.map(v => v.label).join(', '), t.mapOutMove(move), dueText(o.due, t))}
+            </span>
+          </li>
+        )
+      })}
+    </ul>
   )
 }
 
@@ -183,7 +243,12 @@ export function GrammarChoose({ card, revealed = false, selected = null, t: tPro
   const c = card.contrast
   if (!c?.jp) return null
   const parts = c.furigana?.length ? c.furigana : [{ text: c.jp }]
-  const answer = c.answer ?? card.grammar
+  const answer = choiceAnswer(card)
+  // The hole is filled with what the sentence has there (`fill`): an
+  // authored question's filling, or the piece of a pattern the server
+  // blanked (から of から〜まで, てしま of てしまいました). Never the
+  // pattern poured back in; its own form only for a payload without one.
+  const fill = c.fill?.length ? c.fill : null
   const trap = revealed && selected && selected !== answer
   const front = (
     <div className="gl-front">
@@ -192,7 +257,7 @@ export function GrammarChoose({ card, revealed = false, selected = null, t: tPro
           ? {
               gap: true,
               node: revealed
-                ? <span key={i} className="gl-gap gl-gap--filled"><Parts parts={formParts(card, answer)} /></span>
+                ? <span key={i} className="gl-gap gl-gap--filled"><Parts parts={fill ?? formParts(card, answer)} /></span>
                 : <span key={i} className="gl-gap" style={{ '--gap-size': bare(answer).length }} aria-label={t.glBlank} />,
             }
           : { node: <Parts key={i} parts={[part]} />, kanji: Boolean(part.reading) })))}
@@ -359,11 +424,15 @@ export function GrammarConstruire({ card, answered, entry: held, onDone, session
       <p className="gl-tr gl-tr--lead">{build.tr}</p>
     </div>
   )
+  // An answer in the other register is right too (plan 241): the hole
+  // holds it, and a line says what the sentence itself has there.
+  const other = verdict?.gaps?.find(g => g.said)
   const back = verdict && (
     <Back
       card={card}
       kind={whole === 'right' ? 'ok' : 'no'}
       head={whole === 'right' ? t.bldRight : whole === 'close' ? t.bldClose : whole === 'wrong' ? t.bldWrong : null}
+      note={other ? t.bldOther(other.said, other.register) : null}
       sentence={front}
     />
   )

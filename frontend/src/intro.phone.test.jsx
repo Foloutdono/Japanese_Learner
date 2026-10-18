@@ -45,8 +45,8 @@ const live = root => root.querySelector('.brd__car:not(.brd__car--out)')
 // runner caught it still sliding (katakana's stage 17 px past the
 // phone's edge, 2026-09-30). Waits for the arrival's own animations,
 // the pull and the rise, all over within a second and a half; the
-// gate's halo and ripples run forever, its idle nudge starts after four
-// seconds, and the scrim follows the scroll, so none of those is waited for.
+// gate's idle nudge starts after four seconds and the scrim follows the
+// scroll, so neither is waited for.
 const ARRIVAL_MS = 1500
 async function arrived(root) {
   const car = live(root)

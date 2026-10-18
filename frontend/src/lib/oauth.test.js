@@ -32,7 +32,7 @@ vi.mock('./native', () => ({ openAuthTab: (...a) => openAuthTab(...a) }))
 // stubbed before the import because lib/origin.js reads it as it loads.
 vi.stubEnv('VITE_API_ORIGIN', 'https://web.test')
 
-const { connectProvider, hasProvider, redirectTarget, NATIVE_REDIRECT } = await import('./oauth')
+const { connectProvider, hasProvider, redirectTarget, emailRedirectTarget, NATIVE_REDIRECT } = await import('./oauth')
 
 beforeEach(() => {
   for (const m of [auth.signInWithOAuth, auth.linkIdentity, auth.exchangeCodeForSession, auth.setSession, openAuthTab]) m.mockReset()
@@ -63,6 +63,14 @@ describe('where Supabase sends the learner back', () => {
     // The manifests are written against this exact string.
     expect(NATIVE_REDIRECT).toBe('app.tsuji://auth-callback')
   })
+
+  // A confirmation mail's link too: left to Supabase it is the Site URL,
+  // which sent a learner who signed up on tsuji.app to the Vercel address.
+  it('is the app\'s own origin for a confirmation e-mail, and the Site URL in the shell', () => {
+    expect(emailRedirectTarget()).toBe('https://app.test/')
+    isNative.mockReturnValue(true)
+    expect(emailRedirectTarget()).toBeUndefined()
+  })
 })
 
 describe('on the web', () => {
@@ -81,6 +89,13 @@ describe('on the web', () => {
   it('reports a refusal instead of pretending to have left', async () => {
     auth.signInWithOAuth.mockResolvedValue({ data: {}, error: { message: 'provider is not enabled' } })
     expect(await connectProvider({})).toEqual({ ok: false, message: 'provider is not enabled' })
+  })
+
+  it('carries Supabase’s code out with the refusal', async () => {
+    auth.signInWithOAuth.mockResolvedValue({
+      data: {}, error: { code: 'validation_failed', message: 'Unsupported provider: provider is not enabled' },
+    })
+    expect(await connectProvider({})).toMatchObject({ ok: false, code: 'validation_failed' })
   })
 })
 
@@ -135,6 +150,25 @@ describe('in the shell', () => {
     expect(r.ok).toBe(false)
     expect(auth.exchangeCodeForSession).not.toHaveBeenCalled()
     expect(auth.setSession).not.toHaveBeenCalled()
+    // Named, so the button words it from the table (lib/authErrors.js)
+    // rather than printing this module's own English.
+    expect(r.code).toBe('no_credentials')
+  })
+
+  // The web reads a refusal's code off the URL it comes back on
+  // (lib/authRedirect.js); the shell's callback carries the same one,
+  // and it reaches the same sentence (plan 215).
+  it('names the refusal the callback carried', async () => {
+    openAuthTab.mockResolvedValue(
+      'app.tsuji://auth-callback#error=server_error&error_code=identity_already_exists&error_description=Identity+is+already+linked',
+    )
+    const r = await connectProvider({ link: true })
+    expect(r).toMatchObject({ ok: false, code: 'identity_already_exists' })
+  })
+
+  it('names a missing authorization url', async () => {
+    auth.signInWithOAuth.mockResolvedValue({ data: {}, error: null })
+    expect(await connectProvider({})).toMatchObject({ ok: false, code: 'no_authorization_url' })
   })
 
   it('passes a failed exchange back rather than reporting success', async () => {

@@ -5,21 +5,22 @@ import { shortDate } from '../../lib/formatDate'
 import { useLang } from '../../LangContext'
 import { cachedLookup, fetchLookup, pickEntry } from '../../lib/dictionaryLookup'
 import { api } from '../../lib/origin'
-import { apiJson } from '../../lib/api'
+import { useCachedJson } from '../../lib/cachedJson'
 import { Seg } from '../chrome/Console'
 import {
   SCOPE_ALL, SCOPE_COURSE, formatPct, readingRows,
 } from '../../domain/readingShare'
 import { FuriganaParts, splitReadingTokens } from '../study/Readings'
-import { joinRuns } from '../../domain/rubyRuns'
 import { ExampleSentence, SenseNumeral } from './ExampleSentence'
+import { SentenceFrame } from './SentenceFrame'
+import { tokenLookup } from '../analysis/lookup'
 import { GrammarLesson } from '../study/GrammarLesson'
 import { StrokeOrderAnimation } from '../study/StrokeOrderAnimation'
 import { StageMark } from '../study/StageMark'
 import { isOnyomiToken, pickPlateReadings } from '../../domain/readingPick'
-import { GlossList, firstGloss, mergeSenses, splitGlosses } from '../study/gloss'
+import { GlossList, firstGloss, mergeSenses } from '../study/gloss'
 import { useMineAction, INERT_MINING } from '../analysis/useMineAction'
-import { BoltIcon, ChevronIcon, CloseIcon, PlusIcon, StarIcon } from '../ui/Icons'
+import { ChevronIcon, CloseIcon, PlusIcon, StarIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
 import { dialogOpen } from '../../lib/dialogOpen'
 import { composing } from '../../lib/keyGuards'
@@ -264,6 +265,11 @@ export function TagChip({ tag }) {
   )
 }
 
+// JMdict's priority marks, as content/vocab_extras.py codes them: the
+// high-priority star, the Ichimango and "spec" lists, a Mainichi rank.
+// All four say "a common word" (plan 235 folds them into one).
+const PRIORITY_TAG = /^(⭐|ichi|spec|news\d+k)$/
+
 // ── The ＋'s menu, out of the plate's panel ──
 // Portaled to document.body at fixed coordinates taken from the ＋, as
 // TagChip's tooltip is and for the same reason: a plate stands in
@@ -435,21 +441,26 @@ function readAsWhole(parts, char) {
 function WordRow({ w, char, onClick, reading = false }) {
   const { t } = useLang()
   const whole = !reading && readAsWhole(w.furigana, char)
+  // The word and its 熟 mark are one cell (plan 235): the ledger's rows
+  // share their columns (index.css, .dict-words), so every gloss starts
+  // where the others do, beside its word rather than a column away.
   const body = (
     <>
-      <span className="dict-word__jp" lang="ja">
-        {reading
-          ? <Picked text={w.kana} hit={char} />
-          : w.furigana?.length
-            ? <FuriganaParts parts={w.furigana} hit={char} hitClassName="dict-word__hit" />
-            : w.kanji}
-      </span>
-      {whole && (
-        <span className="dict-kind" title={t.readingsWhole}>
-          <span aria-hidden="true">熟</span>
-          <span className="sr-only">{t.readingsWhole}</span>
+      <span className="dict-word__head">
+        <span className="dict-word__jp" lang="ja">
+          {reading
+            ? <Picked text={w.kana} hit={char} />
+            : w.furigana?.length
+              ? <FuriganaParts parts={w.furigana} hit={char} hitClassName="dict-word__hit" />
+              : w.kanji}
         </span>
-      )}
+        {whole && (
+          <span className="dict-kind" title={t.readingsWhole}>
+            <span aria-hidden="true">熟</span>
+            <span className="sr-only">{t.readingsWhole}</span>
+          </span>
+        )}
+      </span>
       <span className="dict-word__gloss">{firstGloss(w.meaning)}</span>
     </>
   )
@@ -653,25 +664,11 @@ function saveScope(scope) {
 }
 
 // The counts over all of JMdict are a character's, not a learner's, so
-// they are kept for the page's life and asked for once.
-const allSharesCache = new Map()
-
+// they are kept for the page's life and asked for once, however fast
+// the scope is switched (lib/cachedJson, plan 211).
 function useAllShares(char, active) {
-  const [failed, setFailed] = useState(null)
-  const [, bump] = useState(0)
-  const cached = allSharesCache.get(char) ?? null
-  useEffect(() => {
-    if (!active || cached) return undefined
-    let cancelled = false
-    apiJson(`/api/dictionary/readings-share?char=${encodeURIComponent(char)}`, null)
-      .then(data => {
-        allSharesCache.set(char, data)
-        if (!cancelled) bump(n => n + 1)
-      })
-      .catch(() => { if (!cancelled) setFailed(char) })
-    return () => { cancelled = true }
-  }, [char, active, cached])
-  return { data: cached, failed: !cached && failed === char }
+  const body = useCachedJson(active ? `/api/dictionary/readings-share?char=${encodeURIComponent(char)}` : null, null, { ttlMs: Infinity })
+  return { data: body ?? null, failed: body === null }
 }
 
 function ReadingsByShare({ entry, groups, onClose, jump }) {
@@ -918,7 +915,7 @@ function headwordSize(text) {
 // without `favorites`, no deck row without `mining` and a card — and
 // with neither there is no ＋ at all: a sheet over a quiz files
 // nowhere.
-export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onKanaClick, onReview, mining, favorites, band = false }) {
+export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onKanaClick, onSentenceClick, onReview, mining, favorites, band = false }) {
   const { t, lang, contentMaps } = useLang()
   const map = entry.type === 'vocab' ? contentMaps?.vocab
     : entry.type === 'kanji' ? contentMaps?.kanji
@@ -935,9 +932,14 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   const isGrammar = entry.type === 'grammar'
   // Kana has no semantic "meaning" to translate — its romaji is its
   // plain-language name and takes the plate's caption instead.
+  // A JMdict pool word (no level; its app card says `pool`) is not the
+  // course's, and the course's map is keyed by written form: read
+  // through it, 殿 どの "Mr." printed 殿 しんがり's "arrière-garde".
+  // Its gloss is the server's, from the pool's own French (plan 215).
+  const isPoolWord = entry.type === 'vocab' && (entry.app_card?.pool || !entry.level)
   const meaning = isKana
     ? null
-    : isGrammar
+    : isGrammar || isPoolWord
       ? entry.meaning
       : lang === 'fr'
         // The card's own line first (plan 107: "{kanji}::{kana}", the
@@ -1010,6 +1012,20 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   // mergeSenses, plan 089). A merged sense keeps every number it
   // absorbed, so the sentences nested under those numbers still show.
   const senses = useMemo(() => mergeSenses(entry.senses), [entry.senses])
+  // ── The tags (plan 235) ──
+  // JMdict's priority marks (⭐, ichi, spec, newsNk) all say one thing --
+  // that the word is common -- and said it over every sense, as an
+  // emoji star and a code ("top 2k"). They fold into one plain word,
+  // printed once, on the first sense; the grammatical tags print as
+  // the words they are, between middots, a note behind each still.
+  const commonMark = senses
+    .map(sense => sense.tags?.find(tag => tag.code === '⭐') ?? sense.tags?.find(tag => PRIORITY_TAG.test(tag.code)))
+    .find(Boolean)
+  const commonTag = commonMark ? { code: 'common', label: t.dictCommon, tooltip: commonMark.tooltip } : null
+  const tagsOf = (sense, first) => {
+    const own = (sense.tags ?? []).filter(tag => !PRIORITY_TAG.test(tag.code))
+    return first && commonTag ? [...own, commonTag] : own
+  }
   const examples = entry.examples ?? []
   const senseNumbers = useMemo(() => new Set(senses.flatMap(s => s.numbers)), [senses])
   // Examples that don't get nested under a sense row: either there are
@@ -1019,23 +1035,23 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
     ? examples.filter(ex => !senseNumbers.has(ex.sense_number))
     : examples
   const examplesBySense = numbers => examples.filter(ex => numbers.includes(ex.sense_number))
+  // An example is a door to its breakdown where the shell can open one
+  // (plan 214, SentenceFrame).
+  const sentenceDoor = ex => (onSentenceClick && ex?.jp ? () => onSentenceClick(ex) : undefined)
 
-  // With no senses list, the definition is the app's own gloss line —
-  // and it only earns a block when there is more to say than the one
-  // word a caption could carry. A grammar point's body is its own
-  // (below), so it takes no gloss block here.
-  const glossCount = (senses.length > 0 || isGrammar) ? 0 : splitGlosses(meaning).length
-
-  // The plate's third register, decided AFTER the body's, because it
-  // stands down where the body would only repeat it: 土's plate said
-  // SOIL and the line directly under it said "Soil · earth · ground ·
-  // Turkey" — the same word twice, a rung apart, in a panel whose whole
-  // argument is that a block should say something new (plan 089). Where
-  // the gloss line does not print — a kanji with one meaning, a kana
-  // (whose caption is its romaji), a word whose senses the caption does
-  // not stand in for — the caption is the only place the meaning
-  // appears and it stays.
-  const bodyPrintsGloss = glossCount > 1
+  // ── The meaning, printed once (plan 235) ──
+  // The plate's third register is the meaning in the learner's words,
+  // set as a line to read and no longer an uppercase caption: a kanji's
+  // glosses, every one of them ("Sol · terre · terrain · Turquie"), a
+  // word with no senses its gloss line, a grammar point its gloss, a
+  // kana its romaji. A word WITH senses is defined by the body -- the
+  // senses list, its first line set at the lead rung -- so the plate
+  // names the word and the body defines it, and neither repeats the
+  // other: 緊張's plate said TENSION a rung above "Tension · contrainte ·
+  // nervosité · stress" (plan 089's rule, "a title the next line
+  // repeats in full is carrying nothing", carried through). The body
+  // prints no gloss block of its own any more: the plate holds it.
+  //
   // KANJIDIC2 glosses the characters in general use and little else:
   // 2,724 of its 13,108 carry a radical, a stroke count and readings but
   // no meaning in any language — rare and historic characters, and the
@@ -1050,8 +1066,12 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   const caption = isKana ? entry.romaji
     : isGrammar ? meaning
     : meaningAbsent ? t.noMeaningRecorded
-    : bodyPrintsGloss ? null
-    : firstGloss(meaning)
+    : senses.length > 0 ? null
+    : meaning
+  // A gloss line prints through GlossList, which sentence-cases the first
+  // gloss and sets the shared middot between them; the other three are
+  // a string already.
+  const captionIsGlosses = Boolean(caption) && !isKana && !isGrammar && !meaningAbsent
 
   // Stroke count and radical describe the *drawing* of the character,
   // so they sit beside the stroke-order sheet in one lattice rather
@@ -1174,62 +1194,76 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
     return <ReadingsInPlace entry={entry} groups={readingGroups} onClose={() => setOpenKey(null)} onVocabClick={onVocabClick} />
   }
 
-  // The learner's own record (plan 089), placed by the layout: last in
-  // the body, or, in the band (plan 126), under the plate in the top
-  // panel -- the card and your numbers over the dictionary alone. The
-  // band is a run's, where the schedule is the card panel's: each
+  // ── Your record, under the stripe (plan 235) ──
+  // The learner's own figures (plan 089), now one slim lattice right
+  // under the plate in every layout -- the phone, the dock, a lookup,
+  // the grammar page -- at the lead rung rather than the heading's: they
+  // are about the reader, and at the heading rung 100 %, 12/12 and 23
+  // jours were the largest type on the entry after the word itself. A
+  // card nobody has reviewed prints none, as before.
+  //
+  // A due card's one thing to do is the schedule's own cell (plan 089's
+  // two rules, "a state belongs to the figure that owns it" and "a due
+  // card names the one thing to do about it", in one cell): where a
+  // caller can board the run, "Maintenant" is a door, labelled with what
+  // it does; where it cannot (a lookup over a quiz) it is the figure it
+  // always was. The ghost across the record's foot went with it -- it
+  // was a fifth block saying what the fourth cell said.
+  //
+  // The band is a run's, where the schedule is the card panel's: each
   // verdict's tile says when the card comes back, and the card on the
   // stage is due by being there. So it keeps the two figures about the
   // learner and drops the interval and the next review (owner's cut).
+  const canBoard = Boolean(record && status.due && onReview && appCard && !appCard.pool)
   const recordBlock = record && (
-          <section className="dict-block" aria-label={t.cardStats}>
-            <div className="records">
-              <Figure
-                value={status.accuracy != null ? status.accuracy : '—'}
-                unit={status.accuracy != null ? '%' : null}
-                label={t.accuracy}
-              />
-              <Figure
-                value={`${status.correct_reviews}/${status.total_reviews}`}
-                label={t.totalReviews}
-              />
-              {!band && (
-                <>
-                  <Figure
-                    value={status.interval_days != null ? status.interval_days : '—'}
-                    unit={status.interval_days != null ? t.days : null}
-                    label={t.interval}
-                  />
-                  <Figure
-                    value={status.due ? t.dueValue : (shortDate(status.next_review, lang) ?? '—')}
-                    ink={status.due ? 'due' : undefined}
-                    word={Boolean(status.due)}
-                    label={t.nextReview}
-                  />
-                </>
-              )}
-            </div>
-            {/* A ghost, not a filled action: the panel has no primary,
-                and 辞書's gold could not carry one anyway (DESIGN.md,
-                "the primary button"). It boards the one card this entry
-                is — /today/run?only=… — in every mode it owes, which is
-                what clearing it means. */}
-            {status.due && onReview && appCard && !appCard.pool && (
+    <section className="dict-record" aria-label={t.cardStats}>
+      <div className={`records records--entry${band ? ' records--entry-two' : ''}`}>
+        <Figure
+          value={status.accuracy != null ? status.accuracy : '—'}
+          unit={status.accuracy != null ? '%' : null}
+          label={t.accuracy}
+        />
+        <Figure
+          value={`${status.correct_reviews}/${status.total_reviews}`}
+          label={t.totalReviews}
+        />
+        {!band && (
+          <>
+            <Figure
+              value={status.interval_days != null ? status.interval_days : '—'}
+              unit={status.interval_days != null ? t.days : null}
+              label={t.interval}
+            />
+            {canBoard ? (
               <button
                 type="button"
                 onClick={() => onReview(appCard.raw_id)}
-                className="dict-due"
+                className="record record--due"
+                aria-label={t.reviewThisCard}
               >
-                <BoltIcon size={14} />
-                {t.reviewThisCard}
-                <ChevronIcon direction="right" size={16} className="dict-due__chev" />
+                <span className="record__body">
+                  <span className="record__value record__value--due record__value--word">{t.dueValue}</span>
+                  <span className="record__label record__label--go">
+                    {t.dictReview}
+                    <ChevronIcon direction="right" size={12} />
+                  </span>
+                </span>
               </button>
+            ) : (
+              <Figure
+                value={status.due ? t.dueValue : (shortDate(status.next_review, lang) ?? '—')}
+                ink={status.due ? 'due' : undefined}
+                word={Boolean(status.due)}
+                label={t.nextReview}
+              />
             )}
-          </section>
-        )
+          </>
+        )}
+      </div>
+    </section>
+  )
   // The band wraps the plate and the record in a top panel; every
-  // other layout keeps the article's own children, so a phone's DOM
-  // does not change (plan 126).
+  // other layout keeps the article's own children (plan 126).
   const Top = band ? 'div' : Fragment
   return (
     <article className={`dict-entry${band ? ' dict-entry--band' : ''}`}>
@@ -1392,30 +1426,28 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
           {showKanaLine && (
             <div className="dict-plate__reading" lang="ja">{entry.kana}</div>
           )}
-          {/* How the pattern is formed, in the reading's place over it:
-              "verb て-form + から" is to 〜てから what やま is to 山. */}
-          {isGrammar && entry.structure && (
-            <div className="dict-plate__structure" lang="ja">
-              {entry.structure_furigana?.some(part => part.reading)
-                ? <FuriganaParts parts={joinRuns(entry.structure_furigana)} />
-                : entry.structure}
-            </div>
-          )}
+          {/* A grammar point's formation left the plate for the lesson's
+              first section, set there as a formula (plan 235): the plate
+              is the pattern over its gloss. */}
           <h2 className={`dict-plate__word dict-plate__word--${headwordSize(headword)}`} lang="ja">
             {headwordFurigana?.length
               ? <FuriganaParts parts={headwordFurigana} />
               : headword}
           </h2>
           {caption && (
-            <div className={`dict-plate__caption${meaningAbsent ? ' dict-plate__caption--absent' : ''}`}>
-              {caption}
+            <div className={[
+              'dict-plate__caption',
+              meaningAbsent && 'dict-plate__caption--absent',
+              isKana && 'dict-plate__caption--romaji',
+            ].filter(Boolean).join(' ')}>
+              {captionIsGlosses ? <GlossList meaning={caption} /> : caption}
             </div>
           )}
         </div>
 
         <div className="dict-plate__stripe" aria-hidden="true" />
       </header>
-      {band && recordBlock}
+      {recordBlock}
       </Top>
 
       <div className="dict-entry__body">
@@ -1429,38 +1461,49 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
             blocks it always had. A compare row is a door where the
             shell can open one (`onGrammarClick`). */}
         {isGrammar && (
-          <GrammarLesson variant="plate" point={entry} onCompare={onGrammarClick} />
+          <GrammarLesson variant="plate" point={entry} onCompare={onGrammarClick} onExample={onSentenceClick} />
         )}
 
         {/* ── What it means ────────────────────────────────
-            First, always. A word shows its JMdict senses (a
-            single-sense word renders through the same list, so there
-            is one model rather than a gloss row that then repeats
-            itself), each with the sentences that illustrate it; a
-            kanji, or a word JMdict had no senses for, lists its
-            glosses as one line of prose. */}
-        {senses.length > 0 ? (
+            First, always. A word shows its JMdict senses, each with the
+            sentences that illustrate it: the definition, the first
+            sense at the lead rung (plan 235) since the plate leaves the
+            meaning to it. Each sense says what it means, then what it
+            is (the grammatical tags, quietly), then how it is used. A
+            word of one sense is not numbered: a list of one is not a
+            list. A kanji, or a word JMdict had no senses for, has its
+            glosses on the plate. */}
+        {senses.length > 0 && (
           <section className="dict-block" aria-label={t.meaning}>
-            <ol className="dict-senses">
-              {senses.map(sense => {
+            <ol className={`dict-senses${senses.length === 1 ? ' dict-senses--one' : ''}`}>
+              {senses.map((sense, i) => {
                 const exs = examplesBySense(sense.numbers)
+                const tags = tagsOf(sense, i === 0)
                 return (
                   <li key={sense.number} className="dict-sense">
-                    <SenseNumeral number={sense.number} />
+                    {senses.length > 1 && <SenseNumeral number={sense.number} />}
                     <div className="dict-sense__body">
-                      {sense.tags?.length > 0 && (
+                      {/* English where the French layer has no line for
+                          this sense yet (plan 215): marked, so a screen
+                          reader reads it as English. */}
+                      <div className="dict-sense__gloss" lang={sense.glossary_lang && sense.glossary_lang !== lang ? sense.glossary_lang : undefined}>
+                        <GlossList meaning={sense.glossary} />
+                      </div>
+                      {tags.length > 0 && (
                         <div className="dict-sense__tags">
-                          {sense.tags.map(tag => (
-                            <TagChip key={`${sense.number}-${tag.code}`} tag={tag} />
+                          {tags.map((tag, j) => (
+                            <Fragment key={`${sense.number}-${tag.code}`}>
+                              {j > 0 && <span className="dict-tag__sep" aria-hidden="true">·</span>}
+                              <TagChip tag={tag} />
+                            </Fragment>
                           ))}
                         </div>
                       )}
-                      <div className="dict-sense__gloss">
-                        <GlossList meaning={sense.glossary} />
-                      </div>
                       {exs.length > 0 && (
                         <div className="dict-sense__examples">
-                          {exs.map((ex, i) => <ExampleSentence key={i} ex={ex} />)}
+                          {exs.map((ex, k) => (
+                            <ExampleSentence key={k} ex={ex} onOpen={sentenceDoor(ex)} openLabel={t.showBreakdown} />
+                          ))}
                         </div>
                       )}
                     </div>
@@ -1469,12 +1512,6 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
               })}
             </ol>
           </section>
-        ) : (
-          glossCount > 1 && (
-            <section className="dict-block" aria-label={t.meaning}>
-              <p className="dict-gloss"><GlossList meaning={meaning} /></p>
-            </section>
-          )
         )}
 
         {/* ── How it's used ────────────────────────────────
@@ -1485,7 +1522,8 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
           <section className="dict-block" aria-label={t.examples}>
             <div className="dict-examples">
               {flatExamples.map((ex, i) => (
-                <ExampleSentence key={i} ex={ex} senseNumber={senses.length > 0 ? ex.sense_number : null} />
+                <ExampleSentence key={i} ex={ex} senseNumber={senses.length > 0 ? ex.sense_number : null}
+                                 onOpen={sentenceDoor(ex)} openLabel={t.showBreakdown} />
               ))}
             </div>
           </section>
@@ -1584,20 +1622,9 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
           </section>
         )}
 
-        {/* ── Your own record ──────────────────────────────
-            Last, because it is about the reader rather than the word.
-            Four figures, two by two, in the profile's records lattice;
-            nothing renders at all for an entry never reviewed, since a
-            grid of dashes is noise, not information.
-
-            Due is not a fifth figure and no longer a note either. It
-            used to be a right-flush "⚡ DUE NOW" caption hanging over a
-            lattice it was not part of, beside a cell that said the next
-            review was two days ago — two facts for one state, with the
-            arithmetic left to the reader. The cell that owns the
-            schedule says it, in the due ink, and the block then names
-            the one thing to do about it. Plan 089. */}
-        {!band && recordBlock}
+        {/* Your own record stands under the plate now (recordBlock,
+            plan 235), one slim lattice whose schedule cell is the door
+            to the review when the card is due. */}
 
         {/* A thumb affordance on a phone, where the entry is the whole
             screen and the ✕ is at the far end of it. Hidden everywhere
@@ -1731,15 +1758,16 @@ function useDictionaryLookup(session, term, category, lang, active, kana, id, ex
 // entry at its head. Shared by the sheet (a portal over a quiz or the
 // catalogue) and the body the desk docks beside the catalogue (plan
 // 114), so the two walk their doors the same way.
-function useLookupStack(session, { term, kana, category, id }, exact = false, cached = false) {
+function useLookupStack(session, { term, kana, category, id, tr }, exact = false, cached = false) {
   const { lang } = useLang()
   // Reset by the caller remounting on a new term (the key it is opened
   // with is the term itself).
-  const [stack, setStack] = useState([{ term, kana, category, id }])
+  const [stack, setStack] = useState([{ term, kana, category, id, tr }])
   const here = stack[stack.length - 1]
   // Only the first lookup is the unasked one: a door opened from it is
-  // the learner's own tap and keeps the nearest match.
-  const { entry, loading, error } = useDictionaryLookup(session, here.term, here.category, lang, true, here.kana, here.id, exact && stack.length === 1, cached)
+  // the learner's own tap and keeps the nearest match. A sentence (plan
+  // 214) is no entry and asks the dictionary nothing.
+  const { entry, loading, error } = useDictionaryLookup(session, here.term, here.category, lang, here.category !== SENTENCE, here.kana, here.id, exact && stack.length === 1, cached)
 
   const open = (nextTerm, nextCategory, nextKana) => {
     if (!nextTerm) return
@@ -1751,18 +1779,45 @@ function useLookupStack(session, { term, kana, category, id }, exact = false, ca
     if (!nextId) return
     setStack(s => [...s, { category: 'grammar', id: nextId }])
   }
+  // An example sentence, broken down (plan 214): the same stack, so ‹
+  // walks back from a word in it to the sentence and on to the entry.
+  const openSentence = ex => {
+    if (!ex?.jp) return
+    setStack(s => [...s, { category: SENTENCE, term: ex.jp, tr: ex.tr ?? ex.en }])
+  }
   const back = stack.length > 1 ? () => setStack(s => s.slice(0, -1)) : undefined
   // Straight back to the entry the stack was opened on, however many
   // doors deep (plan 123): the run's docked entry's Esc.
   const root = stack.length > 1 ? () => setStack(s => s.slice(0, 1)) : undefined
-  return { here, entry, loading, error, open, openId, back, root }
+  return { here, entry, loading, error, open, openId, openSentence, back, root, session }
 }
+
+// The stack's frame for an example sentence (plan 214): a lookup
+// opened as {category: 'sentence', term: jp, tr} is its breakdown.
+const SENTENCE = 'sentence'
 
 // What a lookup shows: the loading line, the "not available" answer, or
 // the entry with its doors opening into the same stack.
 function LookupContent({ look, onClose, onRadicalClick, onReview, mining, favorites, band = false }) {
   const { t } = useLang()
-  const { entry, loading, error, open, openId, back } = look
+  const { here, entry, loading, error, open, openId, openSentence, back, session } = look
+  if (here.category === SENTENCE) {
+    return (
+      <SentenceFrame
+        key={here.term}
+        jp={here.term}
+        tr={here.tr}
+        session={session}
+        onBack={back}
+        onClose={onClose}
+        onToken={token => {
+          const next = tokenLookup(token)
+          if (next) open(next.term, next.category, next.kana)
+        }}
+        onGrammar={point => openId(point?.raw_id)}
+      />
+    )
+  }
   return (
     <>
       {loading && (
@@ -1796,6 +1851,7 @@ function LookupContent({ look, onClose, onRadicalClick, onReview, mining, favori
           // the card does.
           onVocabClick={(k, r) => open(k || r, 'vocab', r)}
           onGrammarClick={openId}
+          onSentenceClick={openSentence}
           mining={mining}
           favorites={favorites}
         />
@@ -1804,9 +1860,9 @@ function LookupContent({ look, onClose, onRadicalClick, onReview, mining, favori
   )
 }
 
-export function DictionaryLookupSheet({ term, kana, category, id, session, mining, favorites, onClose, over = false, onRadicalClick, onReview }) {
+export function DictionaryLookupSheet({ term, kana, category, id, tr, session, mining, favorites, onClose, over = false, onRadicalClick, onReview }) {
   const { t } = useLang()
-  const look = useLookupStack(session, { term, kana, category, id })
+  const look = useLookupStack(session, { term, kana, category, id, tr })
   const { here, entry } = look
   const dialogRef = useDialog(onClose, { capture: over })
 
@@ -1839,8 +1895,8 @@ export function DictionaryLookupSheet({ term, kana, category, id, session, minin
 // way. No portal, no scrim, no dialog: it is a column's content.
 // `band` (plan 126): the entry in the desk run's band layout -- the plate
 // and the learner's record in a top panel, the dictionary under it.
-export function DictionaryLookupBody({ term, kana, category, id, session, mining, favorites, onExit, onRadicalClick, onReview, exact = false, escBack = false, band = false, cached = false }) {
-  const look = useLookupStack(session, { term, kana, category, id }, exact, cached)
+export function DictionaryLookupBody({ term, kana, category, id, tr, session, mining, favorites, onExit, onRadicalClick, onReview, exact = false, escBack = false, band = false, cached = false }) {
+  const look = useLookupStack(session, { term, kana, category, id, tr }, exact, cached)
   // `escBack` (plan 123): a host with no way out of its own -- the run's
   // session panel, docked beside the card -- lets Escape step back out
   // of the doors opened in it, to the entry it was opened on. The key

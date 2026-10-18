@@ -15,6 +15,14 @@
 // a paused subtitle, which moves only when a seek does. None of it is
 // React state, so the screen does not render four times a second.
 //
+// A seek the screen asks for (`seek`) is where the clock stands at once.
+// The player answers a seek into video it has not loaded only once it
+// has it -- seconds later on a poor connection -- and until then reads
+// where the video was, up to a second past it while it played (the
+// IFrame carries its last report forward). Those readings are not
+// believed until the player reads where it was sent, or somewhere else
+// altogether: a seek of its own bar's.
+//
 // Pure but for the two clocks it is handed.
 
 // Wider than this apart, the reading is a seek.
@@ -24,6 +32,15 @@ const EASE = 0.25
 // A reading carried no further than this: a player that stops
 // reporting without saying it has stopped is not moving.
 const CARRY = 1
+// A reading this far before a place, or this far past it, is the player
+// still reading that place.
+const BEHIND = 0.25
+const AHEAD = 1.25
+// A seek nearer than this lands in what the player has loaded, at once,
+// and is left to its readings.
+const NEAR = 2
+// How many places a seek still waiting is told from.
+const KEEP = 3
 
 export function createPlayhead({ read = () => null, now = () => performance.now() } = {}) {
   let polled = 0
@@ -35,7 +52,20 @@ export function createPlayhead({ read = () => null, now = () => performance.now(
   let shownAt = null
   let playing = false
   let rate = 1
+  // A seek the screen asked for that the player has not answered yet:
+  // where to, and the places it may still be reading instead.
+  let sent = null
   const listeners = new Set()
+
+  const near = (seconds, place) => seconds >= place - BEHIND && seconds <= place + AHEAD
+  // What a reading says while a seek waits: the seek, as long as the
+  // player reads where the video was rather than where it was sent.
+  const believe = seconds => {
+    if (!sent) return seconds
+    if (!near(seconds, sent.to) && sent.from.some(place => near(seconds, place))) return sent.to
+    sent = null
+    return seconds
+  }
 
   const note = (seconds, at) => {
     if (seconds === reading) return
@@ -50,8 +80,8 @@ export function createPlayhead({ read = () => null, now = () => performance.now(
   return {
     // The player's poll: the new reading, and everyone told.
     poll(seconds) {
-      polled = seconds
-      note(seconds, now())
+      polled = believe(seconds)
+      note(polled, now())
       listeners.forEach(fn => fn())
     },
     polled: () => polled,
@@ -65,6 +95,7 @@ export function createPlayhead({ read = () => null, now = () => performance.now(
       polled = reading = shown = 0
       shownAt = null
       playing = false
+      sent = null
       listeners.forEach(fn => fn())
     },
     setPlaying(value) {
@@ -80,11 +111,24 @@ export function createPlayhead({ read = () => null, now = () => performance.now(
       carriedAt = t
       rate = value
     },
+    // A seek the screen asked for: where the clock stands from now, and
+    // everyone told.
+    seek(seconds) {
+      if (!Number.isFinite(seconds)) return
+      if (!sent && Math.abs(seconds - reading) < NEAR) return
+      sent = { to: seconds, from: (sent ? [...sent.from, sent.to] : [reading]).slice(-KEEP) }
+      const t = now()
+      polled = reading = shown = seconds
+      carried = 0
+      carriedAt = t
+      shownAt = t
+      listeners.forEach(fn => fn())
+    },
     // Where to draw, now.
     at() {
       const t = now()
       const direct = read()
-      note(Number.isFinite(direct) ? direct : polled, t)
+      note(Number.isFinite(direct) ? believe(direct) : polled, t)
       if (!playing) {
         shown = reading
         return shown

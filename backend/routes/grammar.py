@@ -13,7 +13,7 @@ from content.grammar_sentences_data import get_sentences
 from study import card_index
 from study.card_lookup import GRAMMAR_STATUS_MODES, card_stats
 from study.grammar_examples import (
-    example_payload, furigana_by_pattern, pattern_furigana, structure_furigana,
+    example_payload, furigana_by_pattern, pattern_furigana, structure_furigana, structure_text,
 )
 from study.grammar_lesson import contrast_payload, lesson_payload
 from study.grammar_tour import tour_payload
@@ -28,6 +28,7 @@ from study.grammar_match import verifiable
 from study.mcq import meaning_key, pick_distractors
 from pydantic import BaseModel, Field
 from core.db import db_conn
+from core.rls import enable_rls
 
 # The grammar section runs on the project's own catalogue,
 # content/grammar/*.json (plan 087) -- one file per level, each point
@@ -109,6 +110,9 @@ def _build_review_preview(stage: str | None, preview: dict[int, dict] | None) ->
             "due_in":     p["due_in"],
             # Where it leaves the card's bar (plan 147).
             "progress":   p.get("progress"),
+            # A ladder card only (plan 198): where this rating leaves the
+            # point on its line, and whether it passes.
+            **({"step": p["step"], "passed": p["passed"]} if "step" in p else {}),
         }
         for quality, p in preview.items()
     }
@@ -206,9 +210,10 @@ def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mo
         # call fill_in's sentence makes below -- and without it 〜の中で
         # asks a learner who cannot read 中 a kanji question.
         "grammar_furigana": pattern_furigana(pattern, entry.get("reading")),
-        "structure": entry["structure"],
-        # The formation line read the same way (`structure_reading`).
-        "structure_furigana": structure_furigana(entry),
+        # The formation line in the learner's language (plan 215), read
+        # the same way (`structure_reading`).
+        "structure": structure_text(entry, lang),
+        "structure_furigana": structure_furigana(entry, lang),
         "meaning":   gloss(entry, lang),
         "register":  entry.get("register"),
         # Current SRS stage, so the client can hand it straight back as
@@ -287,8 +292,11 @@ def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mo
         contrast = contrast_payload(level, entry, grammar_list, lang, turn=turn)
         if contrast is None:
             return None
+        # An authored question (plan 201) carries the ruby of its own
+        # fillings; a contrast on patterns reads theirs from the catalogue.
+        readings = contrast.pop("readings", None)
         payload["contrast"] = contrast
-        payload["choices_furigana"] = furigana_by_pattern(contrast["choices"])
+        payload["choices_furigana"] = readings if readings is not None else furigana_by_pattern(contrast["choices"])
 
     if m.base == BUILD:
         # Another sentence each review: the ladder passes its review count,
@@ -518,8 +526,8 @@ def get_grammar_review_cards(level: str, lang: str = "fr", user_id: str = Depend
             "raw_id":    raw_id,
             "grammar":   entry["pattern"],
             "grammar_furigana": pattern_furigana(entry["pattern"], entry.get("reading")),
-            "structure": entry["structure"],
-            "structure_furigana": structure_furigana(entry),
+            "structure": structure_text(entry, lang),
+            "structure_furigana": structure_furigana(entry, lang),
             "meaning":   gloss(entry, lang),
             "stage":     stage,
         })
@@ -592,7 +600,7 @@ def get_grammar_point(id: str, lang: str = "fr", user_id: str = Depends(get_user
         "raw_id":    id,
         "level":     level,
         "pattern":   entry["pattern"],
-        "structure": entry["structure"],
+        "structure": structure_text(entry, lang),
         "meaning":   gloss(entry, lang),
         **lesson_payload(level, entry, lang),
         "tour":      tour_payload(level, entry, lang),
@@ -624,6 +632,7 @@ def _ensure_tour_schema() -> None:
                     PRIMARY KEY (user_id, card_id)
                 )
             """)
+            enable_rls(cur, "grammar_tours")
             # The tutorial's closing quiz (plan 194): how many of its
             # questions were right, out of how many.
             cur.execute("ALTER TABLE grammar_tours ADD COLUMN IF NOT EXISTS quiz_right SMALLINT")

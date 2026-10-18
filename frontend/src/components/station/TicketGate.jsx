@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { useCredits } from '../../stores/credits'
-import { cardTier, xpClimb } from '../../domain/passCard'
+import { cardTier, holderName, xpClimb } from '../../domain/passCard'
 import { CardFace } from '../pass/PassCard'
 import { PassWave } from '../profile/PassWave'
 import { playGateChime } from '../../lib/audio'
@@ -130,22 +130,25 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
   useEffect(() => { cbs.current = { onNavigate, onDone } }, [onNavigate, onDone])
 
   // Before the first paint, so neither the push nor the name's growth
-  // ever starts from a guess.
+  // ever starts from a guess. Every reading is taken before anything is
+  // written: a write between two readings dirtied the page's style, and
+  // the next reading recalculated it again, twice in the tap's frame.
   useLayoutEffect(() => {
     const el = scene.current
     if (!el || !lane.current || !name.current) return
     const push = pushThrough(el, lane.current)
-    if (push) el.style.setProperty('--gate-push', push.toFixed(3))
     const fit = titleFit(el, name.current)
+    // Against the kinari the name wears in the lane, which is what it
+    // would keep.
+    const light = getComputedStyle(lane.current.querySelector('.gate__wipe')).backgroundColor
+    const ink = inkFor(light, getComputedStyle(name.current.firstChild).color)
+    if (push) el.style.setProperty('--gate-push', push.toFixed(3))
     if (fit) {
       el.style.setProperty('--gate-title-k', fit.k.toFixed(3))
       el.style.setProperty('--gate-title-dx', `${fit.dx.toFixed(1)}px`)
       el.style.setProperty('--gate-title-dy', `${fit.dy.toFixed(1)}px`)
     }
-    // Against the kinari the name wears in the lane, which is what it
-    // would keep.
-    const light = getComputedStyle(lane.current.querySelector('.gate__wipe')).backgroundColor
-    el.dataset.ink = inkFor(light, getComputedStyle(name.current.firstChild).color)
+    el.dataset.ink = ink
   }, [])
 
   useEffect(() => {
@@ -182,7 +185,12 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
       ground.setProperty('--gate-ground', wash.current)
     })
     at(NAVIGATE_MS, () => cbs.current.onNavigate())
-    at(LEAVE_MS, unwash)
+    // The scene's fade is declared here, as it starts, rather than with
+    // a delay from the mount (index.css, .gate[data-leaving]).
+    at(LEAVE_MS, () => {
+      if (scene.current) scene.current.dataset.leaving = ''
+      unwash()
+    })
     at(DONE_MS, () => cbs.current.onDone())
 
     // Any input cuts to the end. A cutscene you cannot skip is a
@@ -213,7 +221,8 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
   // The learner's own card (plan 173), face up: their material, the
   // name, the level under it and the road of its struck 辻 filled to the
   // climb -- the face every other screen draws.
-  const holder = summary?.username ?? '—'
+  // The card's own name (plan 247): none prints none.
+  const holder = holderName(summary)
   const level = summary?.level ?? null
   const { share } = xpClimb(summary)
   const tier = cardTier(credits)

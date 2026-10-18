@@ -19,7 +19,7 @@ app ──▶ <project>.supabase.co/auth/v1/authorize?provider=google
 
 | build | value |
 | --- | --- |
-| web (dev, Vercel) | `window.location.origin` + `/` |
+| web (dev, Vercel, tsuji.app) | `window.location.origin` + `/` |
 | shells (Capacitor) | `VITE_API_ORIGIN` + `/auth/native` — the **web** origin, which forwards to `app.tsuji://auth-callback` |
 
 The shells cannot navigate: the WebView's origin *is* the bundle, so a page
@@ -131,11 +131,14 @@ Two more parts of the same knot:
   the browser already holds whenever there is exactly one, and a learner whose
   journey is on their other address is never asked — they simply arrive
   somewhere else.
-- **Say whose pass it is.** The boarding's first question prints the session's
-  address when there is one (`brdNameNewPass`). The boarding only ever runs on
-  an account with nothing on it, so an address there always means *a new pass
-  for this address* — which is the one thing worth knowing before answering
-  seven questions, and the sign-in link is in the same foot.
+- **Say whose pass it is.** The card's line prints the session's address when
+  there is one (`brdKeptEmail`), with the way to another account beside it
+  (`brdKeptSwitch`, which signs out and opens the sign-in). The boarding only
+  ever runs on an account with nothing on it, so an address there always means
+  *a new pass for this address* — which is the one thing worth knowing before
+  the card is issued. Since plan 247 the card is the form: the first question
+  is the kana's, whose four answers fill a 667px phone, so the line on the
+  card is where the address is said.
 
 When it has already happened, the evidence is in **Authentication → Users**:
 two rows, one address, the newer one empty. Deleting the newer row from the
@@ -164,15 +167,32 @@ own error page without it.** Every `redirect_to` the app can send has to be
 listed:
 
 ```
+https://tsuji.app/**
 https://japanese-learner-seven.vercel.app/**
 app.tsuji://auth-callback
 http://localhost:5173/**          ← only if you sign in from `npm run dev`
 ```
 
-The first line is the one the shells now ride on too (`/auth/native`, above).
+The first line is the site's own domain: without it a learner who signs in on
+`tsuji.app` is sent back to the Site URL, the Vercel address, and is signed in
+there instead (a session is kept per origin, so `tsuji.app` still shows them
+signed out). The second is the one the shells ride on (`/auth/native`, above;
+`.env.native`'s `VITE_API_ORIGIN` is still the Vercel origin), so it stays.
 A `redirect_to` that matches nothing here is not an error: Supabase falls back
 to the Site URL, which is why a missing line reads as the app "forgetting" to
 come back rather than as a failure.
+
+The confirmation mails ask for the same return: `signUp` and a guest's claim
+send `emailRedirectTo` (`lib/oauth.js`'s `emailRedirectTarget`, the origin the
+learner is on), so the list above governs them too. The shells send none and
+get the Site URL.
+
+### Supabase → Authentication → URL Configuration → Site URL
+
+`https://tsuji.app`. It is what every fallback above lands on, and what the
+mail templates' `{{ .SiteURL }}` prints. With it moved off the Vercel address,
+the Vercel line in Redirect URLs is what keeps the shells' `/auth/native`
+honoured (no longer "the Site URL's own hostname"), so never drop that line.
 
 ### Supabase → Authentication → Providers → Email → Confirm email
 

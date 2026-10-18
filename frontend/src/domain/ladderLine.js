@@ -4,7 +4,10 @@
 // that group it is asked (`at` of `of`), and whether this is the short
 // relapse after a miss once mastered. The point's steps (PointLine) say
 // it at the card's head; the desk's map (LadderMap) draws every stop of
-// it. The waits mirror srs/ladder.py's _WAIT.
+// it, and what each rating would do to the point on the stop in hand
+// (outcomesOf, plan 198). The waits mirror srs/ladder.py's _WAIT.
+
+import { dueFigure } from './forecast'
 
 export const CHOOSE = 'choose'
 export const BUILD = 'build'
@@ -68,6 +71,51 @@ export function mapOf(step, t) {
     ...r,
     state: r.i < index ? 'done' : r.i === index ? 'now' : 'ahead',
   }))
+}
+
+/** Where a rating moves the point (plan 198), from the step it stands on
+ *  to the one the rating leaves it on -- both are `step`s, as srs/ladder.py's
+ *  `position` writes them: 'stay' on the same step (a miss asks it again;
+ *  a pass once mastered stays mastered), 'back' to the relapse from
+ *  mastered, 'next' one stop down the line otherwise. */
+export function moveOf(from, to) {
+  if (to.group === from.group && to.at === from.at && Boolean(to.relapse) === Boolean(from.relapse)) return 'stay'
+  if (from.group === MASTERED && to.relapse) return 'back'
+  return 'next'
+}
+
+/** What each verdict does to the point, grouped by what it does (plan
+ *  198). On the ladder a verdict is one of a few outcomes -- a miss asks
+ *  the step again, a pass climbs it -- and the forecast says so: two
+ *  verdicts with the same move and the same wait are one outcome, and
+ *  the walk draws them as one row. Worst to best, as the verdicts come;
+ *  each `{ move, passed, figure, due, verdicts }` with the figure the
+ *  wait as the tiles drew it (forecast.js's dueFigure) and `verdicts`
+ *  the `{ q, label, digit }` it answers.
+ *
+ *  Null where the card cannot say: off the ladder, or served before its
+ *  forecast carried the landing (a queue from before the plan, a server
+ *  one release behind) -- the panel then draws the tiles it always did. */
+export function outcomesOf(card, verdicts, t) {
+  const step = card?.step
+  const preview = card?.review_preview
+  if (!step || !preview) return null
+  const rows = []
+  for (const verdict of verdicts) {
+    const landing = preview[String(verdict.q)]
+    const figure = landing?.step ? dueFigure(landing.due_in, t) : null
+    if (!figure) return null
+    const move = moveOf(step, landing.step)
+    const passed = Boolean(landing.passed)
+    const last = rows[rows.length - 1]
+    if (last && last.move === move && last.passed === passed
+        && last.figure.value === figure.value && last.figure.unit === figure.unit) {
+      last.verdicts.push(verdict)
+    } else {
+      rows.push({ move, passed, figure, due: landing.due_in, verdicts: [verdict] })
+    }
+  }
+  return rows
 }
 
 /** A pattern as a form written in a sentence: 〜をください → をください. */

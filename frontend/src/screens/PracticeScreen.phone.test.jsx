@@ -5,14 +5,14 @@ import { LangProvider } from '../LangContext'
 import '../index.css'
 
 // ── 実践 — the gate's platforms, at 390px ────────────────────
-// One station plate per platform (plan 094), the Learn gate's own.
-// Each title once carried the section's Japanese name after it — 読書
-// 理解 翻訳 書取 模試 — a second name for a thing the line above
-// already named; at phone width the pair ran past the card and 理解
-// broke between its two characters. Then a line of description under
-// it, which the plate retired too: a plate prints the name once. The
-// Japanese lives on the roundel of every station these plates open
-// and on the gate the departure passes through.
+// Since plan 225 the phone's gate is the owner's painting of a
+// platform, made live (components/practice/gate): a car at the
+// platform, and on its side two roll signs -- the train's grade and
+// where it goes -- where the plates' chips and heads were. The lit
+// destination opens its station, as a plate's head did; the gold
+// button boards the train to the run at the sign's grade, as a chip
+// did. The desk's painted platform (plan 244) is
+// PracticeScreen.desktop.test.jsx.
 
 vi.mock('../lib/api', () => ({
   apiFetch: vi.fn(async () => ({ ok: true, status: 200, json: async () => ({}) })),
@@ -23,26 +23,28 @@ vi.mock('../lib/api', () => ({
 }))
 vi.mock('../lib/audio', async o => ({
   ...(await o()), playUi: vi.fn(), playAnnouncement: vi.fn(), playClick: vi.fn(),
+  playBoardFlap: vi.fn(), playGateChime: vi.fn(), playDoorChime: vi.fn(), playDoorSlide: vi.fn(),
+  playPantograph: vi.fn(), playSpark: vi.fn(),
 }))
-// The door is the run's, not this screen's: here it just has to let
-// the commit through so the destination is a location, not an
-// animation (the pattern the analyzer's tests use).
-vi.mock('../stores/boarding', () => ({ board: commit => commit() }))
 vi.mock('../stores/profileSummary', async (o) => ({ ...(await o()), useProfileSummary: () => ({ jlptLevel: 'N4' }) }))
+// The station's own departure is the cutscene's (stores/departure); here
+// it only has to be asked for.
+const beginDeparture = vi.hoisted(() => vi.fn())
+vi.mock('../stores/departure', async o => ({ ...(await o()), beginDeparture }))
+// The train's acts take seconds; most cases board under reduced motion,
+// where the gold button opens the run at once.
+const motion = vi.hoisted(() => ({ reduced: true }))
+vi.mock('../components/dayclear/useReducedMotion', () => ({
+  REDUCED_QUERY: '(prefers-reduced-motion: reduce)',
+  useReducedMotion: () => motion.reduced,
+}))
 
 const { default: PracticeScreen } = await import('./PracticeScreen')
 const { getSections } = await import('../config/tabs')
+const { practiceHow } = (await import('../locales/fr/index.js')).default
 
-// How many platforms the gate has, asked of the registry rather than
-// written down: this file pinned the number 4 in four places, and every
-// one of them had to be edited the day 書取 was added. The CONTRACT is
-// that each platform gets a plate, a full row of grades and an equal
-// share of the gate — not that there are four of them.
-const PLATFORMS = getSections('practice', {}).length
-
-// Long enough for the shared `arrive` to land: it starts the card
-// 10px low, and everything below measures against the page's foot.
-const settle = (ms = 620) => new Promise(r => setTimeout(r, ms))
+const SECTIONS = getSections('practice', {})
+const settle = (ms = 300) => new Promise(r => setTimeout(r, ms))
 
 const here = { path: null }
 function Probe() {
@@ -66,125 +68,176 @@ async function gate() {
   return screen
 }
 
-describe('the practice gate at phone width', () => {
-  it('names each platform once, in one language and on one line', async () => {
-    const screen = await render(
-      <LangProvider>
-        <MemoryRouter initialEntries={['/practice']}>
-          <PracticeScreen />
-        </MemoryRouter>
-      </LangProvider>
-    )
-    await settle()
+const main = root => root.querySelector('.pgate-sign--main')
+const lit = (root, sign) => main(root).querySelector(`.pgate-roll--${sign} [aria-current="true"]`)
+const rows = (root, sign) => [...main(root).querySelectorAll(`.pgate-roll--${sign} .pgate-roll__row`)]
+// The row a step `k` from the lit one (-1 above, 1 below).
+const at = (root, sign, k) => rows(root, sign).find(r => r.style.getPropertyValue('--k') === String(k))
+const titles = SECTIONS.map(s => s.path)
+const litPath = root => SECTIONS[rows(root, 'dest').indexOf(lit(root, 'dest'))].path
 
-    const grid = screen.container.querySelector('.plates')
-    // Not one Japanese caption left on the row — and the sections still
-    // carry their Japanese, for the roundel and the gate.
-    expect(grid.querySelector('[lang="ja"]')).toBeNull()
-    expect(getSections('practice', {}).every(s => s.icon)).toBe(true)
+/** Roll the destination sign, a row at a time, until `path` is lit. */
+async function rollTo(root, path) {
+  for (let i = 0; i < SECTIONS.length && litPath(root) !== path; i++) {
+    at(root, 'dest', 1).click()
+    await settle(60)
+  }
+  expect(litPath(root)).toBe(path)
+}
 
-    const titles = [...grid.querySelectorAll('.plate__title')]
-    expect(titles).toHaveLength(PLATFORMS)
-    // Nothing under the name either: a plate prints the name once.
-    expect(grid.querySelectorAll('.plate__meta, .platform-card__desc')).toHaveLength(0)
-    for (const title of titles) {
-      // The title is the title: nothing appended, nothing nested.
-      expect(title.children).toHaveLength(0)
-      expect(title.textContent.trim().length).toBeGreaterThan(0)
-      // One line of its own type — 理解 used to make a second one.
-      const line = parseFloat(getComputedStyle(title).lineHeight)
-      expect(title.getBoundingClientRect().height).toBeLessThan(line * 1.6)
+describe('the painted platform at phone width (plan 225)', () => {
+  it('stands where the plates stood, the painting filling the screen', async () => {
+    const screen = await gate()
+    const root = screen.container
+    expect(root.querySelector('.plates')).toBeNull()
+    const frame = root.querySelector('.pgate__frame').getBoundingClientRect()
+    const stage = root.querySelector('.pgate__stage').getBoundingClientRect()
+    const phone = root.querySelector('.phone').getBoundingClientRect()
+    // The whole width, edge to edge: the frame bleeds over the page's
+    // gutters, and from under the HUD down to the tab bar.
+    expect(frame.left).toBeCloseTo(phone.left, 0)
+    expect(frame.width).toBeCloseTo(phone.width, 0)
+    expect(frame.top).toBeCloseTo(phone.top, 0)
+    expect(frame.bottom).toBeCloseTo(phone.bottom, 0)
+    expect(stage.left).toBeLessThanOrEqual(frame.left + 0.5)
+    expect(stage.right).toBeGreaterThanOrEqual(frame.right - 0.5)
+    // The painting of the hour, its car and its pillars.
+    const hour = [...root.querySelector('.pgate').classList].find(c => c.startsWith('pgate--')).slice(7)
+    const lit = [...root.querySelectorAll('.pgate__layer.is-on')].map(img => img.getAttribute('src'))
+    for (const layer of ['bg', 'car', 'near']) expect(lit.some(src => src.endsWith(`/${layer}-${hour}.webp`)), layer).toBe(true)
+    // Nothing reaches past the screen's edge.
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth)
+  })
+
+  it('lights the learner\'s grade, with its dot, and says what the lit run asks', async () => {
+    const screen = await gate()
+    const root = screen.container
+    expect(lit(root, 'grade').textContent).toBe('N4')
+    expect(lit(root, 'grade').querySelector('.pgate-roll__here')).not.toBeNull()
+    // Three rows show on each sign; the rest are off the drum.
+    for (const sign of ['grade', 'dest']) {
+      const shown = rows(root, sign).filter(r => !r.hasAttribute('aria-hidden'))
+      expect(shown, sign).toHaveLength(3)
+      for (const row of shown) {
+        const box = row.getBoundingClientRect()
+        const drum = row.closest('.pgate-roll').getBoundingClientRect()
+        expect(box.top, sign).toBeGreaterThanOrEqual(drum.top - 0.5)
+        expect(box.bottom, sign).toBeLessThanOrEqual(drum.bottom + 0.5)
+      }
+    }
+    const key = { '/practice/reading': 'reading', '/practice/comprehension': 'comprehension', '/practice/translation': 'translation', '/practice/dictation': 'dictation', '/practice/composition': 'composition', '/practice/exam': 'exam', '/practice/conversation': 'conversation' }
+    expect(root.querySelector('.pgate-led__page--how').textContent).toBe(practiceHow[key[litPath(root)]])
+  })
+
+  it('holds what every run asks in the LED, on its sign\'s width', async () => {
+    const screen = await gate()
+    const root = screen.container
+    for (let i = 0; i < SECTIONS.length; i++) {
+      const how = root.querySelector('.pgate-led__page--how')
+      const led = root.querySelector('.pgate-sign--main .pgate-led').getBoundingClientRect()
+      const range = document.createRange()
+      range.selectNodeContents(how)
+      const text = range.getBoundingClientRect()
+      expect(text.top, litPath(root)).toBeGreaterThanOrEqual(led.top)
+      expect(text.bottom, litPath(root)).toBeLessThanOrEqual(led.bottom)
+      at(root, 'dest', 1).click()
+      await settle(60)
     }
   })
 
-  // ── The gate takes the gate ──
-  // Four cards of a title and a line of description filled 528px of a
-  // 746px screen and left 218 under them; the owner's word for the
-  // screen was bland. The platforms take the room and share it.
-  it('gives every platform the whole gate, one share each', async () => {
+  it('turns a sign a row at a tap, or an arrow, the stripe taking the line', async () => {
     const screen = await gate()
-    const content = screen.container.querySelector('.phone__content').getBoundingClientRect()
-    const grid = screen.container.querySelector('.plates').getBoundingClientRect()
-    expect(content.bottom - grid.bottom).toBeLessThanOrEqual(24)
-    const cards = [...screen.container.querySelectorAll('.plate')].map(el => el.getBoundingClientRect())
-    expect(cards).toHaveLength(PLATFORMS)
-    for (const box of cards) {
-      expect(box.height).toBeCloseTo(cards[0].height, 0)
-      expect(box.height).toBeGreaterThan(100)
-    }
-    // And every title starts on the same x whatever sits at the
-    // plate's trailing edge: the name is left of the roundel's gap,
-    // never centred against a chip.
-    const titles = [...screen.container.querySelectorAll('.plate__title')].map(el => el.getBoundingClientRect())
-    for (const box of titles) expect(box.left).toBeCloseTo(titles[0].left, 0)
+    const root = screen.container
+    const before = litPath(root)
+    const next = titles[(titles.indexOf(before) + 1) % titles.length]
+    at(root, 'dest', 1).click()
+    await settle(60)
+    expect(litPath(root)).toBe(next)
+    // The car's stripe and the leaves' take the lit line's pigment.
+    const key = next.split('/').pop()
+    expect(root.querySelector('.pgate').style.getPropertyValue('--pg-line')).toBe(`var(--pg-ink-${key})`)
+    // The arrows turn it back, and the focus rides the lit row.
+    lit(root, 'dest').focus()
+    lit(root, 'dest').dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }))
+    await settle(60)
+    expect(litPath(root)).toBe(before)
+    expect(document.activeElement).toBe(lit(root, 'dest'))
+    // The grade turns the same way, and stops at its ends.
+    at(root, 'grade', 1).click()
+    await settle(60)
+    expect(lit(root, 'grade').textContent).toBe('N3')
+    at(root, 'grade', -1).click()
+    await settle(60)
+    expect(lit(root, 'grade').textContent).toBe('N4')
   })
 
-  // ── Where the trains go ──
-  it('carries the five grades on every platform, and marks the learner\'s own', async () => {
+  it('boards each platform\'s train at the grade on its sign', async () => {
     const screen = await gate()
-    const rows = [...screen.container.querySelectorAll('.plate__foot--dests')]
-    expect(rows).toHaveLength(PLATFORMS)
-    for (const row of rows) {
-      const chips = [...row.querySelectorAll('.chip')]
-      expect(chips.map(c => c.textContent)).toEqual(['N5', 'N4', 'N3', 'N2', 'N1'])
-      // A destination is not a filter: nothing here is pressed.
-      for (const chip of chips) expect(chip.getAttribute('aria-pressed')).toBeNull()
-      // The learner's own grade, marked the way a route stop marks it.
-      const mine = chips.filter(c => c.classList.contains('chip--here'))
-      expect(mine).toHaveLength(1)
-      expect(mine[0].textContent).toBe('N4')
-      expect(mine[0].getAttribute('aria-current')).toBe('location')
-      // A thumb's worth of chip, five to a row, filling the card.
-      for (const chip of chips) expect(chip.getBoundingClientRect().height).toBeGreaterThanOrEqual(36)
-      const first = chips[0].getBoundingClientRect()
-      const last = chips[4].getBoundingClientRect()
-      expect(last.width).toBeCloseTo(first.width, 0)
-      expect(last.right - first.left).toBeGreaterThan(row.getBoundingClientRect().width * 0.9)
+    const root = screen.container
+    const go = () => root.querySelector('.pgate__go')
+    const board = async (path, steps, want) => {
+      await rollTo(root, path)
+      for (let i = 0; i < Math.abs(steps); i++) {
+        at(root, 'grade', Math.sign(steps)).click()
+        await settle(60)
+      }
+      go().click()
+      await vi.waitFor(() => expect(here.path).toBe(want))
     }
+    // From N4, the grade staying where the last train left it: the grade
+    // is the run for those that run on one axis, the station's papers or
+    // scenes for the two that are not a run.
+    await board('/practice/reading', 1, '/practice/reading/level/N3')
+    await board('/practice/comprehension', -2, '/practice/comprehension/N5')
+    await board('/practice/translation', 0, '/practice/translation/level/N5')
+    await board('/practice/dictation', 1, '/practice/dictation/N4')
+    await board('/practice/composition', 1, '/practice/composition/N3')
+    await board('/practice/exam', 1, '/practice/exam?level=N2')
+    await board('/practice/conversation', 1, '/practice/conversation?level=N1')
   })
 
-  it('boards that platform\'s train from the grade itself', async () => {
+  it('opens the lit destination\'s station, as a plate\'s head did', async () => {
     const screen = await gate()
-    const rows = [...screen.container.querySelectorAll('.plate__foot--dests')]
-    const chipAt = (row, level) => [...rows[row].querySelectorAll('.chip')].find(c => c.textContent === level)
-    // The router moves in a transition, rendered when the scheduler gets
-    // to it rather than in the tap: each place is waited for, as a
-    // loaded runner had not drawn the third after 60ms.
+    const root = screen.container
+    await rollTo(root, '/practice/translation')
+    beginDeparture.mockClear()
+    lit(root, 'dest').click()
+    expect(beginDeparture).toHaveBeenCalledTimes(1)
+    expect(beginDeparture.mock.calls[0][0].path).toBe('/practice/translation')
+    expect(lit(root, 'dest').getAttribute('aria-label')).toMatch(/station/)
+  })
 
-    // 読書 — the run at that grade, three taps saved.
-    chipAt(0, 'N3').click()
-    await vi.waitFor(() => expect(here.path).toBe('/practice/reading/level/N3'))
-
-    // 理解 — one axis, so its grades ARE the run.
-    chipAt(1, 'N5').click()
-    await vi.waitFor(() => expect(here.path).toBe('/practice/comprehension/N5'))
-
-    // 翻訳 — the same shape as 読書.
-    chipAt(2, 'N1').click()
-    await vi.waitFor(() => expect(here.path).toBe('/practice/translation/level/N1'))
-
-    // 書取 — one axis like 理解, and the grade is the run.
-    chipAt(3, 'N4').click()
-    await vi.waitFor(() => expect(here.path).toBe('/practice/dictation/N4'))
-
-    // 作文 — one axis too (plan 125).
-    chipAt(4, 'N3').click()
-    await vi.waitFor(() => expect(here.path).toBe('/practice/composition/N3'))
-
-    // 模試 — not a run: that grade's papers (ExamScreen reads ?level=).
-    chipAt(5, 'N2').click()
-    await vi.waitFor(() => expect(here.path).toBe('/practice/exam?level=N2'))
+  // Last: a departure leaves the next visit an arrival.
+  it('closes its doors and pulls out before the run, and a tap goes straight there', async () => {
+    motion.reduced = false
+    try {
+      const screen = await gate()
+      const root = screen.container
+      const pgate = root.querySelector('.pgate')
+      // Woken, it raises its pantograph to the wire and opens its doors.
+      await vi.waitFor(() => expect(root.querySelector('.pgate-door--open')).not.toBeNull(), { timeout: 4000 })
+      await rollTo(root, '/practice/dictation')
+      const level = lit(root, 'grade').textContent
+      here.path = null
+      root.querySelector('.pgate__go').click()
+      await vi.waitFor(() => expect(pgate.dataset.phase).toBe('closing'))
+      expect(here.path).toBeNull()
+      window.dispatchEvent(new PointerEvent('pointerdown'))
+      await vi.waitFor(() => expect(here.path).toBe(`/practice/dictation/${level}`))
+    } finally {
+      motion.reduced = true
+    }
   })
 })
 
-
 // ── 案内 — the anchors the guide points at (plan 100) ────────────
 describe('the practice gate\'s guide anchors', () => {
-  it('marks the first platform and its destinations, once each', async () => {
+  it('marks the two signs and the gate, once each', async () => {
     const screen = await gate()
     const root = screen.container
-    expect(root.querySelectorAll('[data-guide="practice.plate"]')).toHaveLength(1)
-    expect(root.querySelector('[data-guide="practice.plate"] [data-guide="practice.dests"]')).toBeTruthy()
+    for (const anchor of ['practice.sign', 'practice.grade', 'practice.board']) {
+      expect(root.querySelectorAll(`[data-guide="${anchor}"]`), anchor).toHaveLength(1)
+    }
     // No pass tag is drawn while nothing is for sale: the guide skips
     // that stop rather than pointing at nothing.
     expect(root.querySelector('[data-guide="practice.pass"]')).toBeNull()

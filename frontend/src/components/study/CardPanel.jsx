@@ -3,7 +3,8 @@ import { useLang } from '../../LangContext'
 import { ratingButtons } from '../../domain/ratingScales'
 import { useRatingScale } from '../../stores/ratingScale'
 import { useRunTally } from '../../stores/runTally'
-import { dueFigure, dueText } from '../../domain/forecast'
+import { dueFigure, dueText, finishFigure } from '../../domain/forecast'
+import { outcomesOf } from '../../domain/ladderLine'
 import { DeskFigure } from './RunRecords'
 import { useRegisterRunKeys } from '../../stores/runKeys'
 import { STAGES, cardProgress, stripFills } from '../../domain/cardProgress'
@@ -29,6 +30,15 @@ import { LadderMap } from './GrammarPlate'
 // No caption on the panel or its parts and no line under an interval
 // saying what the rating does to the card (owner's cut, for room and
 // legibility): the stops, the tiles and the caps name themselves.
+//
+// A grammar point on the ladder is the one card that is drawn otherwise
+// (plan 198, the owner's pick B of the canvas "Tsuji — the card panel"):
+// its state is its walk (LadderMap), and on a walk the four verdicts are
+// only a few outcomes -- a miss asks the step again, a pass climbs it --
+// so the tiles give way to what they said, a row an outcome on the stop
+// in hand (domain/ladderLine's outcomesOf), and the rhythm's last figure
+// is said in hours once it passes two. Every other card keeps its strip
+// and its tiles.
 //   - The keys the elements no longer print on the desk (RunPanelsContext):
 //     Space turns the card, C shows the choices, Esc leaves the run. The
 //     digits are on the tiles above. The readings drill (`keys="readings"`)
@@ -79,35 +89,43 @@ export function CardPanel({ card, remaining = null, keys = 'card' }) {
   const toFinish = perMinute && remaining != null ? Math.ceil(remaining / perMinute) : null
   const decimal = new Intl.NumberFormat(lang === 'fr' ? 'fr-FR' : 'en-GB', { maximumFractionDigits: 1 })
 
+  // A ladder card says what each verdict does to the point (plan 198);
+  // one served without its landings (a queue from before the plan, a
+  // server one release behind) draws the tiles it always did.
+  const outcomes = card?.step ? outcomesOf(card, verdicts, t) : null
+  const finish = finishFigure(toFinish, decimal, Boolean(outcomes))
+
   return (
-    <section className="desk-run__panel desk-card" aria-label={t.deskCardPanel}>
+    <section className={`desk-run__panel desk-card${outcomes ? ' desk-card--ladder' : ''}`} aria-label={t.deskCardPanel}>
       {/* A ladder card's state is its walk (plan 194): the point's line,
           upright, every stop with its wait, in the fare strip's place. */}
-      {card?.step ? <LadderMap card={card} /> : <StateLine stage={stage} progress={card?.progress} t={t} />}
-      <div className="desk-verdicts" role="list" aria-label={t.deskCardPanel} data-guide="run.verdicts">
-        {verdicts.map(({ q, label, digit }) => {
-          const due = preview?.[String(q)]?.due_in
-          const figure = dueFigure(due, t)
-          return (
-            <div key={q} role="listitem" className={`desk-verdict desk-verdict--q${q}`}>
-              <kbd className="desk-kbd desk-verdict__key" aria-hidden="true">{digit}</kbd>
-              <span className="desk-verdict__when" aria-hidden="true">
-                <span className="desk-verdict__value">{figure ? figure.value : '—'}</span>
-                {figure && <span className="desk-verdict__unit">{figure.unit}</span>}
-              </span>
-              <span className="desk-verdict__head">
-                <span className="desk-verdict__dot" aria-hidden="true" />
-                <span className="desk-verdict__word">{label}</span>
-              </span>
-              <span className="sr-only">{dueText(due, t)}</span>
-            </div>
-          )
-        })}
-      </div>
+      {card?.step ? <LadderMap card={card} outcomes={outcomes} /> : <StateLine stage={stage} progress={card?.progress} t={t} />}
+      {!outcomes && (
+        <div className="desk-verdicts" role="list" aria-label={t.deskCardPanel} data-guide="run.verdicts">
+          {verdicts.map(({ q, label, digit }) => {
+            const due = preview?.[String(q)]?.due_in
+            const figure = dueFigure(due, t)
+            return (
+              <div key={q} role="listitem" className={`desk-verdict desk-verdict--q${q}`}>
+                <kbd className="desk-kbd desk-verdict__key" aria-hidden="true">{digit}</kbd>
+                <span className="desk-verdict__when" aria-hidden="true">
+                  <span className="desk-verdict__value">{figure ? figure.value : '—'}</span>
+                  {figure && <span className="desk-verdict__unit">{figure.unit}</span>}
+                </span>
+                <span className="desk-verdict__head">
+                  <span className="desk-verdict__dot" aria-hidden="true" />
+                  <span className="desk-verdict__word">{label}</span>
+                </span>
+                <span className="sr-only">{dueText(due, t)}</span>
+              </div>
+            )
+          })}
+        </div>
+      )}
       <div className="desk-rhythm" role="group" aria-label={t.deskRhythm} data-guide="run.rhythm">
         <DeskFigure label={t.deskElapsed} value={minutes} unit="min" />
         <DeskFigure label={t.deskPerMinute} value={perMinute == null ? '—' : decimal.format(perMinute)} />
-        <DeskFigure label={t.deskToFinish} value={toFinish == null ? '—' : `≈ ${toFinish}`} unit={toFinish == null ? null : 'min'} />
+        <DeskFigure label={t.deskToFinish} value={finish.value} unit={finish.unit} />
       </div>
     </section>
   )

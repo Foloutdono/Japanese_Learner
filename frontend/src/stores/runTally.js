@@ -1,4 +1,6 @@
 import { useSyncExternalStore } from 'react'
+import { stopwatch } from '../lib/dwell'
+import { beginRun, endOpenRun, _bindTally } from '../lib/runTrail'
 
 // ── 本日の乗車 — this run's tally (plan 114) ────────────────────
 // What the desk's session panel prints beside a run: how many cards
@@ -49,7 +51,11 @@ import { useSyncExternalStore } from 'react'
 // docked on reveal) and keeps a card once; the ceremony sweeps every
 // review through the reader, a card rated twice twice, as the run's
 // count does. The run hands them to its finish (screens/TodayRun.jsx).
-const EMPTY = Object.freeze({ key: null, reviewed: 0, good: 0, xp: 0, cards: Object.freeze([]), faces: Object.freeze([]), verdicts: Object.freeze([]), startedAt: null, streak: 0, best: 0 })
+//
+// `laps` (plan 218): the engaged milliseconds each rating took, from the
+// run's start or the rating before (lib/dwell.js: a hidden tab does not
+// count), for the trail's time per card (lib/runTrail.js). Numbers only.
+const EMPTY = Object.freeze({ key: null, reviewed: 0, good: 0, xp: 0, cards: Object.freeze([]), faces: Object.freeze([]), verdicts: Object.freeze([]), startedAt: null, streak: 0, best: 0, laps: Object.freeze([]) })
 
 let tally = EMPTY
 const listeners = new Set()
@@ -57,10 +63,25 @@ function emit() { listeners.forEach(fn => fn()) }
 const subscribe = fn => { listeners.add(fn); return () => listeners.delete(fn) }
 
 /** A new run: the session's identity, and every figure back to zero. */
+// The run's engaged clock (plan 218): one at a time, restarted with the
+// tally. `total` reads the whole run, `lap` the time since the last
+// rating.
+let clock = null
+
 export function startTally(key) {
+  // The run before ends on the figures it had (lib/runTrail.js), then
+  // the clock and the figures start again.
+  endOpenRun()
+  clock?.total.stop()
+  clock?.lap.stop()
+  clock = { total: stopwatch(), lap: stopwatch() }
   tally = { ...EMPTY, key, startedAt: Date.now() }
   emit()
+  beginRun(key)
 }
+
+// What lib/runTrail.js reads at a run's end.
+_bindTally(() => ({ ...tally, engagedMs: clock ? clock.total.read() : 0 }))
 
 /** One rated card; `entry` is the dictionary entry it was revealed on, if
  *  any, `face` the card as the clear's ceremony draws it (plan 191). */
@@ -77,6 +98,7 @@ export function countReview({ quality, xp, entry, face } = {}) {
     cards: id ? [...tally.cards.filter(c => c.id !== id), { id, entry: shape(entry), quality }] : tally.cards,
     faces: face ? [...tally.faces, face] : tally.faces,
     verdicts: Number.isFinite(quality) ? [...tally.verdicts, quality] : tally.verdicts,
+    laps: clock ? [...tally.laps, clock.lap.lap()] : tally.laps,
     streak,
     best: Math.max(tally.best, streak),
   }

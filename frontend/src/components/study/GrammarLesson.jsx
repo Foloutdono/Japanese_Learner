@@ -1,10 +1,13 @@
 import { Fragment, useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useLang } from '../../LangContext'
-import { apiJson, ApiError } from '../../lib/api'
+import { ApiError } from '../../lib/api'
+import { cachedJson, MINE_TTL_MS } from '../../lib/cachedJson'
 import { playUi } from '../../lib/audio'
 import { useDialog } from '../../hooks/useDialog'
-import { ChevronIcon } from '../ui/Icons'
+import {
+  ChevronIcon, MessageIcon, OpenBookIcon, SlotsIcon, SwapIcon, TableIcon, TextLinesIcon, WarningIcon,
+} from '../ui/Icons'
 import { ExampleSentence } from '../dictionary/ExampleSentence'
 import { StageMark } from './StageMark'
 import { FuriganaParts } from './Readings'
@@ -13,27 +16,41 @@ import { inline, readUse, SHORT_RUN } from './lessonText'
 import { GrammarTour } from './GrammarTour'
 
 // ── 文法 — a grammar point, taught (plan 087) ───────────────────
-// One lesson, printed in three places: before a NEW card in a run
+// One lesson, printed in four places: before a NEW card in a run
 // (the gate), behind the door on every card and in the station's
-// index (the sheet), and as the body of the dictionary's grammar plate
-// (the plate variant, where the plate itself is already drawn).
+// index (the sheet), as the body of the dictionary's grammar plate
+// (the plate variant, where the plate itself is already drawn), and
+// on the desk's grammar page beside the points.
 //
-// Blocks divided by hairlines and no section headings (DESIGN.md, "a
-// body that names itself"): the steps carry their own mark (RULE, USE,
-// CAREFUL) the way the radical index marks a level; a row that opens a
-// neighbour is a door; a sentence over its translation is an example.
-// Each block carries its name as an aria-label only.
+// ── Sections a reader finds at a glance (plan 235) ──
+// The owner found the lesson hard to read: three caption-sized marks
+// over one wall of hairline-divided prose, the Japanese in the gold
+// wherever it appeared, and the formation a grey line above the
+// pattern. So the lesson is set in SECTIONS, each opening on a head --
+// a glyph in the entry's ink, the name in the primary ink, a hairline
+// running on to the column's edge -- and each holding one kind of
+// thing:
 //
-// The marks were pairs -- 規則 RULE -- until the owner's call of
-// 2026-09-21: the Japanese half named a part of a lesson rather than a
-// place, which is the caption "Say less" forbids (DESIGN.md), and it
-// was carrying the weight the plain-language half should have. The
-// name is the mark now, and .dict-mark__name is set to hold the line
-// on its own.
+//   Construction  the formation as a formula: the slot to fill, set as
+//                 a dashed blank in plain words, then the pattern
+//   Règle         the rule, the lesson's one lead sentence
+//   Formes        a use line that is a paradigm (Négatif : …. Passé :
+//                 ….), as a table: the label beside its forms
+//   Emploi        every other use: what it is for, over its forms
+//   Attention     the trap, a box on an edge of the due ink
+//   Exemples      the sentences, numbered, the translation switch on
+//                 the head
+//   À ne pas confondre  the rivals, each a door
+//
+// The gold is the pattern's alone: its forms in the formula, the
+// forms the rule sets in bold, the rivals' patterns. The rest of the
+// Japanese in the prose is set as Japanese (its face, never cut) in
+// the prose's own ink. The sections fall in two columns ('gl-col'):
+// the lesson, then the sentences and the rivals -- one after the other
+// on a phone, side by side where the desk's grammar page has the room.
 //
 // A point whose lesson is not written yet (a level before its content
-// wave) prints what it has: formation, meaning, examples — exactly the
-// plate as it was.
+// wave) prints what it has: the formula, the examples.
 //
 // `point` is any of: /api/grammar/point's body, a dictionary row, or a
 // card's embedded `lesson` merged with the card's own identity (see
@@ -52,9 +69,9 @@ function Read({ text, parts }) {
 // locale tables carry -- and the Japanese in the prose set as Japanese
 // and never cut (lessonText.inline). A use that names its forms prints
 // them under it (plan 146): "Pour poser ce dont on parle : わたしは,
-// 今日は" is the description over the two forms, whole, in the lesson's
-// ink; a paradigm (Négatif : …. Passé : ….) is its labels beside its
-// forms. A line that reads neither way is printed as it came.
+// 今日は" is the description over the two forms, whole; a paradigm
+// (Négatif : …. Passé : ….) is its labels beside its forms. A line that
+// reads neither way is printed as it came.
 export function StepText({ text }) {
   const lines = String(text ?? '').split('\n')
   const blocks = []
@@ -102,14 +119,7 @@ function UseItem({ text }) {
   if (shape?.table) {
     return (
       <li className="gl-use">
-        <dl className="gl-paradigm">
-          {shape.table.map((row, i) => (
-            <div key={i} className="gl-paradigm__row">
-              <dt className="gl-paradigm__label"><LessonInline text={row.label} /></dt>
-              <dd className="gl-paradigm__forms"><Forms forms={row.forms} /></dd>
-            </div>
-          ))}
-        </dl>
+        <FormsTable rows={shape.table} />
       </li>
     )
   }
@@ -124,6 +134,141 @@ function UseItem({ text }) {
   return <li className="gl-use"><span className="gl-use__say"><LessonInline text={text} /></span></li>
 }
 
+// A paradigm as a table (plan 235): each label in its own cell beside
+// its forms, rows divided by hairlines, so "le passé négatif" is found
+// by running an eye down one column rather than reading a paragraph.
+function FormsTable({ rows }) {
+  return (
+    <dl className="gl-table">
+      {rows.map((row, i) => (
+        <div key={i} className="gl-table__row">
+          <dt className="gl-table__label"><LessonInline text={row.label} /></dt>
+          <dd className="gl-table__forms"><Forms forms={row.forms} /></dd>
+        </div>
+      ))}
+    </dl>
+  )
+}
+
+// A use line that is a paradigm (Négatif : …. Passé : ….): its rows,
+// or null.
+function paradigm(line) {
+  return readUse(line.replace(/^- /, ''))?.table ?? null
+}
+
+// ── The formula (plan 235) ──
+// "verbe forme en て + から" is a slot to fill, a plus, and the pattern.
+// A segment that holds a Latin letter is a slot -- what the learner
+// brings, in plain words, drawn as a dashed blank; the rest is the
+// pattern, in the lesson's ink, with its furigana where it has a reading
+// (中 read なか in "nom + の中で"). The structure's furigana parts are cut
+// at the pluses so each piece keeps its own readings. A pattern that
+// closes on a gloss in brackets -- "回 (combien de fois)", "中（ちゅう：
+// pendant ／ じゅう：tout au long de）" -- is the pattern and a note after
+// it, not a slot: the words are about the form, not a place to fill.
+const LATIN = /[A-Za-zÀ-ÿ]/
+const NOTE = /^(.*?)\s*([（(][^（）()]*[）)])$/
+
+// The parts of `seg` that carry its first `n` characters.
+function headParts(seg, n) {
+  const out = []
+  let left = n
+  for (const part of seg) {
+    if (left <= 0) break
+    const len = [...part.text].length
+    if (len <= left || part.reading) out.push(part)
+    else out.push({ text: [...part.text].slice(0, left).join('') })
+    left -= len
+  }
+  return out
+}
+
+// A segment read as the formula sets it: a slot, or the pattern with
+// the note its brackets hold.
+function readSegment(seg) {
+  const plain = seg.map(p => p.text).join('')
+  if (!LATIN.test(plain)) return { pattern: seg }
+  const m = plain.match(NOTE)
+  if (m && m[1] && !LATIN.test(m[1]) && LATIN.test(m[2])) {
+    return { pattern: headParts(seg, [...m[1]].length), note: m[2] }
+  }
+  return { slot: plain }
+}
+
+function formulaSegments(text, parts) {
+  const source = parts?.length ? parts : [{ text: text ?? '' }]
+  const segs = [[]]
+  for (const part of source) {
+    if (part.reading) {
+      segs[segs.length - 1].push(part)
+      continue
+    }
+    String(part.text).split('+').forEach((piece, i) => {
+      if (i > 0) segs.push([])
+      if (piece) segs[segs.length - 1].push({ text: piece })
+    })
+  }
+  return segs
+    .map(seg => {
+      const out = seg.map(p => ({ ...p }))
+      if (out[0] && !out[0].reading) out[0].text = out[0].text.trimStart()
+      const last = out[out.length - 1]
+      if (last && !last.reading) last.text = last.text.trimEnd()
+      return out.filter(p => p.text)
+    })
+    .filter(seg => seg.length)
+}
+
+function Formula({ text, parts }) {
+  const segs = formulaSegments(text, joinRuns(parts))
+  return (
+    <p className="gl-formula">
+      {segs.map((seg, i) => {
+        const { slot, pattern, note } = readSegment(seg)
+        return (
+          <Fragment key={i}>
+            {i > 0 && <span className="gl-formula__plus">+</span>}
+            {slot != null
+              ? <span className="gl-formula__slot"><LessonInline text={slot} /></span>
+              : (
+                <span className="gl-formula__pat" lang="ja">
+                  {pattern.some(p => p.reading) ? <FuriganaParts parts={pattern} /> : pattern.map(p => p.text).join('')}
+                </span>
+              )}
+            {note && <span className="gl-formula__note"><LessonInline text={note} /></span>}
+          </Fragment>
+        )
+      })}
+    </p>
+  )
+}
+
+// A section's head: its glyph in the entry's ink, its name, and a
+// hairline running on to the column's edge -- the divider and the
+// label in one line, so no block needs a rule of its own above it.
+// `children` stand at the head's end (the translation switch).
+const HEAD_ICON = {
+  structure: SlotsIcon,
+  rule: OpenBookIcon,
+  forms: TableIcon,
+  use: TextLinesIcon,
+  careful: WarningIcon,
+  examples: MessageIcon,
+  compare: SwapIcon,
+}
+
+function SectionHead({ kind, label, children }) {
+  const Icon = HEAD_ICON[kind]
+  return (
+    <div className="gl-sec__head">
+      <Icon size={18} className="gl-sec__icon" />
+      <h3 className="gl-sec__name">{label}</h3>
+      <span className="gl-sec__rule" aria-hidden="true" />
+      {children}
+    </div>
+  )
+}
+
 // A sentence's register is worth a word only where the point has one
 // of its own and the sentence departs from it: この店はしずかだ under the
 // polite です／だ. Under a neutral point every sentence is polite or
@@ -133,7 +278,7 @@ function registerTag(point, ex, t) {
   return t.glRegister?.[ex.register] ?? ex.register
 }
 
-export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, onClose, onBack }) {
+export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, onClose, onBack, onExample }) {
   const { t, lang } = useLang()
   const [showTr, setShowTr] = useState(true)
   // 発見 again (plan 187e): the plate keeps the tour a tap away, from its
@@ -147,13 +292,25 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
   const stage = point.stage ?? (point.status?.status && point.status.status !== 'not_started' ? point.status.status : 'new')
   const register = point.register ? (t.glRegister?.[point.register] ?? point.register) : null
 
+  // The steps, sorted into their sections. A use line that reads as a
+  // paradigm is the point's forms, set as a table of its own; the rest
+  // of the use step prints as it reads, its "- " lines a list. A step
+  // of a kind the lesson does not name still prints, as the rule does.
+  const rules = steps.filter(s => s.kind === 'rule' || !STEP_KEY[s.kind])
+  const cautions = steps.filter(s => s.kind === 'careful')
+  const useLines = steps.filter(s => s.kind === 'use')
+    .flatMap(s => String(s.text ?? '').split('\n'))
+    .filter(line => line.trim())
+  const formRows = useLines.flatMap(line => paradigm(line) ?? [])
+  const useText = useLines.filter(line => !paradigm(line)).join('\n')
+
   return (
     <article className={`gl gl--${variant}`}>
       {variant !== 'plate' && (
         /* The plate, as the dictionary draws it: the seal and the level
            in one corner, the way back and the close in the other, the
-           three registers centred between them — formation over the
-           pattern over the gloss. */
+           pattern over its gloss between them. The formation left the
+           plate for the lesson's first section (plan 235). */
         <header className="dict-plate gl-plate">
           <div className="dict-plate__row">
             <div className="dict-plate__marks">
@@ -175,14 +332,6 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
             </div>
           </div>
           <div className="dict-plate__stack">
-            {/* The formation and the pattern with their furigana, as
-                the dictionary's plate sets its headword's
-                (lesson_payload's structure_furigana and pattern_furigana). */}
-            {point.structure && (
-              <div className="dict-plate__structure" lang="ja">
-                <Read text={point.structure} parts={joinRuns(point.structure_furigana)} />
-              </div>
-            )}
             <h2 className="dict-plate__word dict-plate__word--word" lang="ja">
               <Read text={point.pattern} parts={point.pattern_furigana} />
             </h2>
@@ -222,84 +371,102 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
       )}
 
       {!replay && <div className="dict-entry__body gl-body">
-        {/* The plate variant opens on the lesson. It used to open on
-            two blocks reprinting the formation and the gloss — and it
-            is the ONE variant where the plate above has already printed
-            both (DictionaryDetail's dict-plate__structure and
-            dict-plate__caption), so they said everything twice and
-            pushed the first step below the fold. The sheet and the gate draw
-            their own plate above, which carries the same two registers,
-            so neither ever printed them either. Plan 089.
+        <div className="gl-cols">
+          <div className="gl-col">
+            {point.structure && (
+              <section className="gl-sec gl-sec--structure" aria-label={t.glStructure}>
+                <SectionHead kind="structure" label={t.glStructure} />
+                <Formula text={point.structure} parts={point.structure_furigana} />
+              </section>
+            )}
+            {rules.length > 0 && (
+              <section className="gl-sec gl-sec--rule" aria-label={t.glRule}>
+                <SectionHead kind="rule" label={t.glRule} />
+                <div className="gl-sec__body">
+                  {rules.map((step, i) => <StepText key={i} text={step.text} />)}
+                </div>
+              </section>
+            )}
+            {formRows.length > 0 && (
+              <section className="gl-sec gl-sec--forms" aria-label={t.glForms}>
+                <SectionHead kind="forms" label={t.glForms} />
+                <FormsTable rows={formRows} />
+              </section>
+            )}
+            {useText && (
+              <section className="gl-sec gl-sec--use" aria-label={t.glUse}>
+                <SectionHead kind="use" label={t.glUse} />
+                <div className="gl-sec__body"><StepText text={useText} /></div>
+              </section>
+            )}
+            {cautions.length > 0 && (
+              <section className="gl-sec gl-sec--careful" aria-label={t.glCareful}>
+                <SectionHead kind="careful" label={t.glCareful} />
+                <div className="gl-sec__body">
+                  {cautions.map((step, i) => <StepText key={i} text={step.text} />)}
+                </div>
+              </section>
+            )}
+          </div>
 
-            The caption they used to back up is no longer clamped for a
-            grammar point (.dict-plate__caption--whole): a clamp defers
-            to a fuller copy in the body, and there is no longer one. */}
-        {steps.length > 0 && (
-          <section className="dict-block gl-block gl-block--steps" aria-label={t.glLesson}>
-            <ol className="gl-steps">
-              {steps.map((step, i) => (
-                <li key={i} className={`gl-step gl-step--${step.kind}`}>
-                  <div className="dict-mark gl-step__mark">
-                    <span className="dict-mark__name">{t[STEP_KEY[step.kind]] ?? step.kind}</span>
-                  </div>
-                  <div className="gl-step__body"><StepText text={step.text} /></div>
-                </li>
-              ))}
-            </ol>
-          </section>
-        )}
+          <div className="gl-col">
+            {examples.length > 0 && (
+              <section className="gl-sec gl-sec--examples" aria-label={t.examples}>
+                <SectionHead kind="examples" label={t.examples}>
+                  <button type="button" onClick={() => setShowTr(v => !v)} className="gl-tr-toggle">
+                    <ChevronIcon direction={showTr ? 'up' : 'down'} size={14} />
+                    {showTr ? t.hideTranslation : t.showTranslation}
+                  </button>
+                </SectionHead>
+                <div className="dict-examples">
+                  {examples.map((ex, i) => (
+                    <ExampleSentence key={i} ex={{ ...ex, segments: ex.furigana }} showTr={showTr}
+                                     onOpen={onExample ? () => onExample(ex) : undefined} openLabel={t.showBreakdown}
+                                     senseNumber={i + 1} tag={registerTag(point, ex, t)} />
+                  ))}
+                </div>
+              </section>
+            )}
 
-        {examples.length > 0 && (
-          <section className="dict-block gl-block gl-block--examples" aria-label={t.examples}>
-            <div className="dict-examples">
-              {examples.map((ex, i) => (
-                <ExampleSentence key={i} ex={{ ...ex, segments: ex.furigana }} showTr={showTr}
-                                 senseNumber={i + 1} tag={registerTag(point, ex, t)} />
-              ))}
-            </div>
-            <button type="button" onClick={() => setShowTr(v => !v)} className="gl-tr-toggle">
-              <ChevronIcon direction={showTr ? 'up' : 'down'} size={14} />
-              {showTr ? t.hideTranslation : t.showTranslation}
-            </button>
-          </section>
-        )}
-
-        {/* The neighbours, AFTER the sentences. A rival is what you
-            reach for once you have read the rule and seen it work —
-            above the examples it read as the next lesson rather than as
-            the thing this one is confused with, and it stood between a
-            learner and the sentences they came for. Plan 089. */}
-        {compare.length > 0 && (
-          <section className="dict-block gl-block gl-block--compare" aria-label={t.glCompare}>
-            <div className="gl-compare">
-              {compare.map(rival => {
-                const body = (
-                  <>
-                    <span className="gl-door__body">
-                      <span className="gl-door__head">
-                        <span className="gl-door__pattern" lang="ja"><Read text={rival.pattern} parts={rival.furigana} /></span>
-                        {rival.level && <span className="gl-door__level">{rival.level}</span>}
-                        {rival.meaning && <span className="gl-door__gloss"><LessonInline text={rival.meaning} /></span>}
-                      </span>
-                      <span className="gl-door__note"><LessonInline text={rival.text} /></span>
-                    </span>
-                    {onCompare && rival.raw_id && <ChevronIcon direction="right" size={16} className="gl-door__chev" />}
-                  </>
-                )
-                // A written card's rival names no catalogue point
-                // (structures.grammar_lesson): no id, so no door.
-                return onCompare && rival.raw_id
-                  ? (
-                    <button key={rival.raw_id ?? rival.pattern} type="button" className="gl-door"
-                            onClick={() => { playUi('click-screen-selection'); onCompare(rival.raw_id) }}>
-                      {body}
-                    </button>
-                  )
-                  : <div key={rival.raw_id ?? rival.pattern} className="gl-door gl-door--inert">{body}</div>
-              })}
-            </div>
-          </section>
-        )}
+            {/* The neighbours, AFTER the sentences. A rival is what you
+                reach for once you have read the rule and seen it work —
+                above the examples it read as the next lesson rather than as
+                the thing this one is confused with, and it stood between a
+                learner and the sentences they came for. Plan 089. */}
+            {compare.length > 0 && (
+              <section className="gl-sec gl-sec--compare" aria-label={t.glCompare}>
+                <SectionHead kind="compare" label={t.glConfuse} />
+                <div className="gl-compare">
+                  {compare.map(rival => {
+                    const body = (
+                      <>
+                        <span className="gl-door__body">
+                          <span className="gl-door__head">
+                            <span className="gl-door__pattern" lang="ja"><Read text={rival.pattern} parts={rival.furigana} /></span>
+                            {rival.level && <span className="gl-door__level">{rival.level}</span>}
+                            {rival.meaning && <span className="gl-door__gloss"><LessonInline text={rival.meaning} /></span>}
+                          </span>
+                          <span className="gl-door__note"><LessonInline text={rival.text} /></span>
+                        </span>
+                        {onCompare && rival.raw_id && <ChevronIcon direction="right" size={16} className="gl-door__chev" />}
+                      </>
+                    )
+                    // A written card's rival names no catalogue point
+                    // (structures.grammar_lesson): no id, so no door.
+                    return onCompare && rival.raw_id
+                      ? (
+                        <button key={rival.raw_id ?? rival.pattern} type="button" className="gl-door"
+                                onClick={() => { playUi('click-screen-selection'); onCompare(rival.raw_id) }}>
+                          {body}
+                        </button>
+                      )
+                      : <div key={rival.raw_id ?? rival.pattern} className="gl-door gl-door--inert">{body}</div>
+                  })}
+                </div>
+              </section>
+            )}
+          </div>
+        </div>
 
         {variant === 'gate' && (
           <div className="gl-gate__foot">
@@ -332,7 +499,8 @@ function useLessonStack(id, initial, session) {
     let cancelled = false
     // eslint-disable-next-line react-hooks/set-state-in-effect -- start-of-fetch reset that must land with the fetch it announces.
     setError(null)
-    apiJson(`/api/grammar/point?id=${encodeURIComponent(here)}&lang=${lang}`, session)
+    // One request per point however many sheets ask (lib/cachedJson, plan 211).
+    cachedJson(`/api/grammar/point?id=${encodeURIComponent(here)}&lang=${lang}`, session, { ttlMs: MINE_TTL_MS })
       .then(data => { if (!cancelled) setCache(c => ({ ...c, [here]: data })) })
       .catch(err => { if (!cancelled) setError(err) })
     return () => { cancelled = true }

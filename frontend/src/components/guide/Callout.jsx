@@ -24,6 +24,16 @@ import { createPortal } from 'react-dom'
 // inside a transformed ancestor would be positioned against the
 // transform rather than the viewport.
 //
+// A note per anchor, place and sentence (`key` below): a step that
+// moves the lesson on mounts a NEW note where it belongs, faded in, and
+// never carries the last one across the screen. The one note moved
+// between the ride's anchors -- the card's top, under the 🔍, over the
+// bar -- and for a frame stood at the old place's offset under the new
+// place's rule (606 → 10 → 562 px, the run's whole layout shift: 1.02
+// and 1.32 on a learner's phone, 2026-10-18). A note inserted is no
+// shift; the same note moved is one. Re-measures still move it with its
+// anchor, as they should.
+//
 // No buttons of its own here: the ride's note is read, not tapped, so
 // it takes no pointer events and a learner can tap the card through
 // it. The guide (plan 100) hands it a `foot` with Next and Skip, which
@@ -46,6 +56,9 @@ function measure(anchor, place) {
 }
 
 export function Callout({ anchor, place = 'top', text, foot, className = '', live = true }) {
+  const key = `${anchor}|${place}|${text}`
+  // The position, with the note it was measured for: a stale one is
+  // never drawn under a new note.
   const [pos, setPos] = useState(null)
 
   useLayoutEffect(() => {
@@ -53,7 +66,10 @@ export function Callout({ anchor, place = 'top', text, foot, className = '', liv
     const update = () => {
       cancelAnimationFrame(raf)
       // eslint-disable-next-line react-hooks/set-state-in-effect -- a measurement of the DOM, taken after layout; there is no render-time source for a rect.
-      raf = requestAnimationFrame(() => setPos(measure(anchor, place)))
+      raf = requestAnimationFrame(() => {
+        const style = measure(anchor, place)
+        setPos(style ? { key, style } : null)
+      })
     }
     update()
     window.addEventListener('resize', update)
@@ -67,14 +83,15 @@ export function Callout({ anchor, place = 'top', text, foot, className = '', liv
       window.removeEventListener('scroll', update, true)
       ro?.disconnect()
     }
-  }, [anchor, place, text])
+  }, [anchor, place, text, key])
 
-  if (!pos) return null
+  if (!pos || pos.key !== key) return null
   const classes = ['guide-callout', foot ? 'guide-callout--live' : '', className].filter(Boolean).join(' ')
   return createPortal(
     <div
+      key={key}
       className={classes}
-      style={pos}
+      style={pos.style}
       data-place={place}
       role={live ? 'status' : undefined}
       aria-live={live ? 'polite' : undefined}

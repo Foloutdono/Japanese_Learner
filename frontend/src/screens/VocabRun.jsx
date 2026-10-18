@@ -25,7 +25,7 @@ import PromptCard from '../components/study/PromptCard'
 import HintBar from '../components/study/HintBar'
 import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
-import { speakJapanese, playUi } from '../lib/audio'
+import { speakJapanese, playUi, isSpeakOnReveal } from '../lib/audio'
 import {
   MODES as STUDY_MODES, FAST_REVIEW, modeLabel,
 } from '../domain/studyModes'
@@ -135,6 +135,15 @@ export default function VocabRun({ session }) {
   // since that's also how the backend's vocab translation map is keyed.
   function translateCard(cardToTranslate, targetLang) {
     if (!cardToTranslate) return
+    // A JMdict tier's words are not the course's: the per-word map is
+    // keyed by written form and would hand a pool word a deck
+    // homograph's French (plan 215 -- 殿 どの "Mr." as "arrière-garde").
+    // The card keeps the gloss it was served in until the next batch,
+    // which the server builds in the new language from the pool's own.
+    if (freqDomain === 'vocab_jmdict') {
+      updateCurrent(cur => ({ ...cur, lang: targetLang }))
+      return
+    }
     const words = [wordForm(cardToTranslate), ...(cardToTranslate.hints?.indice_1 ?? []).map(wordForm)]
     const unique = [...new Set(words.filter(Boolean))]
     Promise.all(unique.map(word =>
@@ -228,14 +237,14 @@ export default function VocabRun({ session }) {
     setSelected(choice)
     setAnswered(true)
     setShowRating(true)
-    speakJapanese(card.kana)
+    if (isSpeakOnReveal()) speakJapanese(card.kana)
   }
 
   function onFlashcardReveal() {
     if (answered) return
     setAnswered(true)
     setShowRating(true)
-    speakJapanese(card.kana)
+    if (isSpeakOnReveal()) speakJapanese(card.kana)
   }
 
   if (!valid) return <Navigate replace to={studyBy ? platforms : '/learn/vocab'} />
@@ -308,6 +317,7 @@ export default function VocabRun({ session }) {
     <StudyStage
       color="var(--line-vocab)"
       onLeave={leave}
+      report={showRating && card ? { card } : null}
       leaveLabel={t.vocabTitle}
       where={`${t.vocabulary} ${sourceLabel}`}
       sub={title}
@@ -322,13 +332,13 @@ export default function VocabRun({ session }) {
     >
         <DeckProgress stats={progress} />
         {loading && <Loading />}
-        {error && !card && <SessionError error={error} onRetry={retry} />}
+        {error && !card && <SessionError error={error} onRetry={retry} session={session} />}
         {done    && <DoneMessage onBack={leave} pace={paceCtl.pace}
           onExtra={paceCtl.pacedOut ? () => paceCtl.boardExtra(retry) : undefined} />}
         {card && !loading && (
           <>
             <HintBar available={availableHints} active={activeHints}
-                     onToggle={toggleHint} disabled={gates.locked} />
+                     onToggle={toggleHint} disabled={gates.locked} speaks />
             <CardTransition
               className="vocab-card-boost"
               cardKey={card.card_id}

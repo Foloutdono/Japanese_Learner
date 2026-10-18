@@ -8,17 +8,21 @@ import { dialogOpen } from '../lib/dialogOpen'
 import { Seg } from '../components/chrome/Console'
 import { Sheet } from '../components/chrome/Sheet'
 import { stationFor } from '../config/stations'
-import { WordsList } from '../components/analysis/WordsList'
-import { FocusCard } from '../components/analysis/FocusCard'
+import { WordsFold, WordsList, WordsStrip, WordTiles } from '../components/analysis/WordsList'
+import { wordRowsOf, wordTileRows, isFreshWord } from '../components/analysis/rows'
+import { useAsk } from '../hooks/useAsk'
+import { askContext } from '../domain/ask'
 import { MineButton } from '../components/analysis/MineButton'
+import { SongDeckSheet } from '../components/analysis/SongDeckSheet'
 import { SubtitleLine } from '../components/analysis/SubtitleLine'
-import { PlayerBar } from '../components/analysis/PlayerBar'
+import { PlayerBar, PlayerTrack } from '../components/analysis/PlayerBar'
 import { createPlayhead } from '../components/analysis/playhead'
 import { passageTiming } from '../components/analysis/wordTimes'
 import { ExplainPanel, ExplainSheet } from '../components/analysis/ExplainPanel'
 import { GrammarPoints } from '../components/analysis/GrammarPoints'
 import { coversToken, numberedPointsOf } from '../components/analysis/grammarSpans'
 import { useLight } from '../components/analysis/useLight'
+import { useStageClaim } from '../stores/stage'
 import { Dots } from '../components/ui/Loading'
 import { DictionaryLookupSheet, DictionaryLookupBody } from '../components/dictionary/DictionaryDetail'
 import { grammarLookup, lookupKey, tokenLookup } from '../components/analysis/lookup'
@@ -26,11 +30,13 @@ import { prefetchLookup } from '../lib/dictionaryLookup'
 import { useMining } from '../components/analysis/useMining'
 import { useFavorites } from '../hooks/useFavorites'
 import { useAnalyzerSession } from '../components/analysis/useAnalyzerSession'
+import { useLineTranslations } from '../components/analysis/useLineTranslations'
 import { IntakeText } from '../components/analysis/IntakeText'
 import { IntakePhoto } from '../components/analysis/IntakePhoto'
 import { IntakeVideo } from '../components/analysis/IntakeVideo'
 import { GrabTutorial, GrabTutorialDock } from '../components/analysis/GrabTutorial'
 import { useBookmarkletCopy, watchUrlFor } from '../components/analysis/useBookmarkletCopy'
+import { useLabelsFit } from '../hooks/useLabelsFit'
 import { PassageLine } from '../components/analysis/PassageLine'
 import { Notices } from '../components/analysis/Notices'
 import { PassageShelf } from '../components/analysis/PassageShelf'
@@ -40,7 +46,8 @@ import { parseVideoId } from '../lib/youtube'
 import { apiJson } from '../lib/api'
 import { VideoPlayer } from '../components/video/VideoPlayer'
 import { decodeGrabHash, transcriptXmlToVtt } from '../lib/captionGrab'
-import { ChevronIcon, PlusIcon, CheckIcon, OpenBookIcon, TextLinesIcon, CameraIcon, VideoIcon, SearchIcon } from '../components/ui/Icons'
+import { heldTooSoon } from '../lib/keyRepeat'
+import { ChevronIcon, PlusIcon, CheckIcon, OpenBookIcon, TextLinesIcon, CameraIcon, VideoIcon, SearchIcon, SongIcon } from '../components/ui/Icons'
 import { readVideoSound, saveVideoSound, DEFAULT_VIDEO_SOUND } from '../lib/videoVolume'
 
 const KAISEKI = 'var(--line-kaiseki)'
@@ -185,7 +192,7 @@ export default function AnalyzerScreen({ session }) {
   // on the desk rather than over the intake, and the copy state its
   // button shares with the panel's (both are on screen at once there).
   // A phone leaves both to IntakeVideo, whose dialog it is.
-  const grab = useBookmarkletCopy()
+  const grab = useBookmarkletCopy(t)
   const [tutorial, setTutorial] = useState(false)
   const closeTutorial = useCallback(() => setTutorial(false), [])
 
@@ -270,18 +277,41 @@ export default function AnalyzerScreen({ session }) {
   const [lookup, setLookup] = useState(null)
   const closeLookup = useCallback(() => setLookup(null), [])
   // 机 (plan 134): on the desk the result is three columns and the
-  // right one is the card in focus -- its entry in the runs' band (plan
-  // 126), following the token the learner walks to, or the door they
-  // pressed (`lookup`). Explain puts the sentence's explanation in the
-  // entry's description's place, and the swap on the column's edge goes
-  // back and forth: `side` is which of the two the column shows.
+  // right one is a panel with three faces since plan 242 (the owner's
+  // pick C of the canvas "Tsuji analyser — the desk and Explain"), its
+  // segment the way between them: the card in focus -- its entry in the
+  // runs' band (plan 126), following the token the learner walks to, or
+  // the door they pressed (`lookup`) -- the line's grammar, and the
+  // sentence's construction, which Explain buys. `side` is the face
+  // shown: 'card', 'grammar' or 'explain'. A typed Passage keeps its
+  // grammar in its left column (plan 161), so its panel has two.
   const [side, setSide] = useState('card')
+  // The desk's player bar and the panel's segment, each told when the
+  // column it stands in is too narrow for it on one row (plan 242): the
+  // desk's stylesheet answers one width only, so the boxes are measured.
+  const [slabRef, barTight] = useLabelsFit('.anl-pbar')
+  const [panelRef, facesTight] = useLabelsFit('.anl-faces')
   // The phone's explanation opens in a sheet (plan 134).
   const [explainOpen, setExplainOpen] = useState(false)
+  // 問 after the explanation (plan 220): the runs' asking, a thread per
+  // sentence, opened once the sentence has been explained.
+  const asking = useAsk(session, 'analyser')
   const closeExplain = useCallback(() => setExplainOpen(false), [])
+  // 歌 (plan 215): the song sheet, open over the result with the name it
+  // proposes -- a video's title, read off the player as it opens.
+  const [song, setSong] = useState(null)
+  const closeSong = useCallback(() => setSong(null), [])
+  // The phone's dock opens the line's grammar or its words as a sheet
+  // (plan 219).
+  const [dock, setDock] = useState(null)
+  const closeDock = useCallback(() => setDock(null), [])
+  // The text desk's words, folded to one line under the sumi, open as a
+  // list in a sheet (plan 235, the owner's pick C).
+  const [wordsOpen, setWordsOpen] = useState(false)
+  const closeWords = useCallback(() => setWordsOpen(false), [])
   // Every route into a new Passage starts the focus over: the first
   // word, its own entry, the card rather than an explanation.
-  const clearFocus = useCallback(() => { setLookup(null); setSide('card'); setTokenIndex(0); setExplainOpen(false) }, [])
+  const clearFocus = useCallback(() => { setLookup(null); setSide('card'); setTokenIndex(0); setExplainOpen(false); setWordsOpen(false) }, [])
   // The desk's transport (plan 134, components/analysis/PlayerBar): the
   // focused sentence on a loop, a stop at each sentence's end, the
   // speed, and the video folded away to give the sentence the column.
@@ -303,10 +333,20 @@ export default function AnalyzerScreen({ session }) {
   useEffect(() => clearHoldTimer, [clearHoldTimer])
   // The clock's two inputs besides the poll. Play and pause reach the
   // playhead before the render that tells the subtitle, which reads it
-  // in its layout effect.
-  const changePlaying = useCallback(value => {
-    playhead.setPlaying(value)
+  // in its layout effect. A stall to load more (VideoPlayer) is playing
+  // to the bar -- Pause still pauses it -- but its clock stands: the
+  // playhead does not carry it, and no stop at a sentence's end is owed
+  // until it moves again (the poll sets that timer again then).
+  const changePlaying = useCallback((value, moving = value) => {
+    playhead.setPlaying(moving)
+    if (!moving) clearHoldTimer()
     setPlaying(value)
+  }, [playhead, clearHoldTimer])
+  // Every seek the screen asks for goes through here: the clock stands
+  // on it at once (components/analysis/playhead), rather than on where
+  // the video was until a player still loading says it has moved.
+  const seek = useCallback(seconds => {
+    if (playerRef.current?.seekTo(seconds) !== false) playhead.seek(seconds)
   }, [playhead])
   useEffect(() => { playhead.setRate(rate) }, [playhead, rate])
   // Paused by hand, or the stop turned off: no stop is owed.
@@ -338,6 +378,25 @@ export default function AnalyzerScreen({ session }) {
   // Where a grammar point sits, lit across the desk's three columns (the
   // subtitle line, the numbered points, the words list and the card).
   const light = useLight(analyzer.focused)
+  // 訳 (plan 235): what the player says the video is, where it knows --
+  // told to a line's translation and to its explanation -- and the
+  // Passage's translations, asked a block of lines at a time where the
+  // Passage is kept: a video's session, a typed Passage's history row.
+  const aboutVideo = useCallback(() => ({
+    title: (playerRef.current?.title?.() ?? '').slice(0, 200),
+    channel: (playerRef.current?.channel?.() ?? '').slice(0, 120),
+  }), [])
+  const translationsPath = passage?.sessionId != null
+    ? `/api/video/session/${passage.sessionId}/translations`
+    : passage?.historyId != null ? `/api/phrase/history/${passage.historyId}/translations` : null
+  const lineTranslations = useLineTranslations({
+    session,
+    path: translationsPath,
+    count: sentences.length,
+    focusIndex,
+    lang,
+    about: aboutVideo,
+  })
   const busy = status === 'working'
   const ready = status === 'ready' && Boolean(analyzer.focused)
   // The page is the intake until a Passage is ready, and the result
@@ -393,6 +452,14 @@ export default function AnalyzerScreen({ session }) {
       if (grab.manual && grab.asr) {
         try { timing = transcriptXmlToVtt(grab.asr) } catch { /* the words go estimated */ }
       }
+      // The video's own translation, where its makers wrote one (plan
+      // 238): what is printed under the lines, never the lines.
+      const translations = {}
+      for (const [lang, xml] of Object.entries(grab.translations ?? {})) {
+        try {
+          translations[lang] = new File([transcriptXmlToVtt(xml)], `${grab.videoId}.${lang}.vtt`, { type: 'text/vtt' })
+        } catch { /* the model translates its lines instead */ }
+      }
       const url = `https://youtu.be/${grab.videoId}`
       rememberGrabUsed()
       setGrabFlag(true)
@@ -401,7 +468,7 @@ export default function AnalyzerScreen({ session }) {
       clearFocus()
       analyzer.startVideoFromFile(
         new File([vtt], `${grab.videoId}.ja.vtt`, { type: 'text/vtt' }),
-        { url, timing: timing && new File([timing], `${grab.videoId}.ja-asr.vtt`, { type: 'text/vtt' }) },
+        { url, timing: timing && new File([timing], `${grab.videoId}.ja-asr.vtt`, { type: 'text/vtt' }), translations },
       )
     })
     return () => { cancelled = true }
@@ -429,8 +496,9 @@ export default function AnalyzerScreen({ session }) {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- id-keyed reset: a new Sentence starts at its first Token, or you land on token 7 of a 3-token line.
     setTokenIndex(0)
     // An explanation belongs to its sentence: another sentence opens on
-    // its card (plan 134).
-    setSide('card')
+    // its card (plan 134). The grammar face stays, the new line's points
+    // in it (plan 242).
+    setSide(v => (v === 'grammar' ? v : 'card'))
   }, [focusIndex, passageKey])
 
   // 机: the right column follows the word in focus, and each word's
@@ -508,6 +576,7 @@ export default function AnalyzerScreen({ session }) {
   // Sentences themselves, Space drives the player — the map the kbd
   // strip under the stage prints. Ignored while typing, or the arrow
   // keys would fight the caret in the writing slip.
+  const sentenceStepped = useRef(null)
   useEffect(() => {
     if (!ready) return undefined
     function onKey(e) {
@@ -521,8 +590,9 @@ export default function AnalyzerScreen({ session }) {
       const tag = el?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA' || el?.isContentEditable) return
       // The route map owns its own arrows (roving tabindex) -- inside
-      // it the arrow keys mean "move along the line", not this map.
-      if (el?.closest?.('.anl-line')) return
+      // it the arrow keys mean "move along the line", not this map; the
+      // panel's segment walks its faces with them (plan 242).
+      if (el?.closest?.('.anl-line, .anl-faces')) return
       // Space on a focused button is the button's own activation.
       if (e.key === ' ' && tag === 'BUTTON') return
 
@@ -537,6 +607,9 @@ export default function AnalyzerScreen({ session }) {
           : Math.max(0, i - 1))
       } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
         e.preventDefault()
+        // A held arrow at lib/keyRepeat's pace (plan 211): each sentence
+        // seeks the player and asks ahead for its words.
+        if (heldTooSoon(e, sentenceStepped)) return
         // Through goToStop, not setFocusIndex: walking the line by
         // key is the same act as clicking a stop, so it breaks 追従
         // and seeks the player exactly the same way.
@@ -569,15 +642,17 @@ export default function AnalyzerScreen({ session }) {
       if (e.key !== 'Escape' || dialogOpen()) return
       const tag = document.activeElement?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA') return
-      // One step back per press (plan 134): the explanation gives the
-      // card's description back first, then a door pressed gives the
-      // walked token's entry back.
+      // One step back per press (plan 134): the construction gives the
+      // card back first; a door pressed gives back what it was opened
+      // over -- the walked token's entry, or the grammar's list -- and
+      // the grammar's list gives the card back.
       if (side === 'explain') setSide('card')
-      else setLookup(null)
+      else if (lookup) setLookup(null)
+      else if (side === 'grammar') setSide('card')
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [wide, ready, side])
+  }, [wide, ready, side, lookup])
 
   function editDraft(text) {
     const link = videoLinkIn(text)
@@ -705,10 +780,13 @@ export default function AnalyzerScreen({ session }) {
   }
 
   // ── Playback sync ─────────────────────────────────────────
-  const handleTimeUpdate = useCallback(seconds => {
+  const handleTimeUpdate = useCallback(reported => {
+    playhead.poll(reported)
+    // Where the clock stands: the poll, unless it is a player still
+    // reading where it was before a seek the screen asked for.
+    const seconds = playhead.polled()
     const last = lastPollRef.current
     lastPollRef.current = seconds
-    playhead.poll(seconds)
     const played = seconds >= last && seconds - last < PLAYBACK_STEP
     // 反復 (plan 134): on a loop, the focused sentence's end sends the
     // clock back to its start -- the line does not move on, whatever
@@ -716,7 +794,7 @@ export default function AnalyzerScreen({ session }) {
     const here = sentences[focusIndex]
     if (loop && played && here?.cue_end != null && here.cue_start != null
         && last < here.cue_end && seconds >= here.cue_end) {
-      playerRef.current?.seekTo(here.cue_start)
+      seek(here.cue_start)
       return
     }
     // 一時停止 (plan 134): stop where the sentence that was playing ends,
@@ -735,7 +813,7 @@ export default function AnalyzerScreen({ session }) {
         const player = playerRef.current
         player?.pause()
         const at = player?.currentTime?.() ?? playhead.polled()
-        if (at >= s.cue_end - HOLD_INSET) player?.seekTo(Math.max(s.cue_start ?? 0, s.cue_end - HOLD_INSET))
+        if (at >= s.cue_end - HOLD_INSET) seek(Math.max(s.cue_start ?? 0, s.cue_end - HOLD_INSET))
         if (followPlayback) analyzer.setFocusIndex(i)
       }
       // The end crossed between two polls with no timer set (a clock
@@ -771,7 +849,7 @@ export default function AnalyzerScreen({ session }) {
       // rather than snapping back to the first one.
       return idx === -1 ? prev : idx
     })
-  }, [sentences, analyzer, followPlayback, loop, pauseEach, focusIndex, rate, clearHoldTimer, playhead, playing])
+  }, [sentences, analyzer, followPlayback, loop, pauseEach, focusIndex, rate, clearHoldTimer, playhead, playing, seek])
 
   // 追従 on time (2026-09-27): while the video plays, the line in focus
   // moves on at the moment the clock reaches the next line's cue, on a
@@ -827,9 +905,7 @@ export default function AnalyzerScreen({ session }) {
       playerRef.current?.pause()
       return
     }
-    if (hasWindow && playhead.polled() < windowStart) {
-      playerRef.current?.seekTo(windowStart)
-    }
+    if (hasWindow && playhead.polled() < windowStart) seek(windowStart)
     playerRef.current?.play()
   }
 
@@ -839,7 +915,7 @@ export default function AnalyzerScreen({ session }) {
     if (here?.cue_start == null) return
     // Heard again, stopped again at its end.
     heldRef.current = null
-    playerRef.current?.seekTo(here.cue_start)
+    seek(here.cue_start)
     playerRef.current?.play()
   }
 
@@ -875,7 +951,7 @@ export default function AnalyzerScreen({ session }) {
     if (!(span > 0)) return
     const r = e.currentTarget.getBoundingClientRect()
     const frac = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width))
-    playerRef.current?.seekTo(frac * span)
+    seek(frac * span)
   }
 
   // The line, the stage, and the player are three views of ONE
@@ -895,9 +971,7 @@ export default function AnalyzerScreen({ session }) {
     heldRef.current = null
     clearHoldTimer()
     const target = sentences[index]
-    if (target?.cue_start != null && playerRef.current) {
-      playerRef.current.seekTo(target.cue_start)
-    }
+    if (target?.cue_start != null && playerRef.current) seek(target.cue_start)
   }
 
   // ── The filtered line ─────────────────────────────────────
@@ -906,28 +980,32 @@ export default function AnalyzerScreen({ session }) {
   // focus, the player seek and keepSentence all speak original
   // indices, and a filtered view that renumbered them would keep the
   // wrong sentence.
-  function stopMatches(s) {
+  function stopMatches(s, i) {
     if (stopFilter === 'kept' && !analyzer.kept.has(s.text)) return false
     if (stopFilter === 'i1' && (s.foreign || s.unknown_count !== 1)) return false
     if (stopFilter === 'new' && !(s.unknown_count > 0)) return false
-    if (stopQuery && !s.text.includes(stopQuery)) return false
+    // In the Japanese or in its translation (plan 242): the line read as
+    // a bilingual transcript is searched as one.
+    if (stopQuery && !s.text.includes(stopQuery)
+      && !stopTranslation(s, i).toLowerCase().includes(stopQuery.toLowerCase())) return false
     return true
   }
+  const stopTranslation = (s, i) => lineTranslations[i] ?? s.translation ?? ''
   const visibleStops = sentences
     .map((s, i) => ({ s, i }))
-    .filter(({ s }) => stopMatches(s))
+    .filter(({ s, i }) => stopMatches(s, i))
 
   // i+1 in one press. Sequential keepSentence calls, because that is
   // the exact act the pin performs and the pin is already optimistic --
   // a bespoke bulk endpoint would be a second way to keep a Sentence.
+  // Sequential in time too since plan 211 (useAnalyzerSession's
+  // keepSentences): one at a time, the history asked once at the end.
   const iPlusOneStops = sentences.filter(s => !s.foreign && s.unknown_count === 1)
   const unkeptIPlusOne = iPlusOneStops.filter(s => !analyzer.kept.has(s.text))
   function keepAllIPlusOne() {
-    sentences.forEach((s, i) => {
-      if (!s.foreign && s.unknown_count === 1 && !analyzer.kept.has(s.text)) {
-        analyzer.keepSentence(i)
-      }
-    })
+    analyzer.keepSentences(sentences.flatMap((s, i) => (
+      !s.foreign && s.unknown_count === 1 && !analyzer.kept.has(s.text) ? [i] : []
+    )))
   }
 
   // ── A grammar point's lesson (pauses playback -- opening a rule to
@@ -938,7 +1016,9 @@ export default function AnalyzerScreen({ session }) {
     if (!target) return
     playerRef.current?.pause()
     setLookup(target)
-    setSide('card')
+    // The video desk's panel opens it on its grammar face (plan 242); a
+    // typed Passage's, whose grammar is in its left column, on its card.
+    setSide(playerVideoId ? 'grammar' : 'card')
   }
 
   function openHistoryEntry(entry) {
@@ -961,10 +1041,28 @@ export default function AnalyzerScreen({ session }) {
   }
 
   const focused = analyzer.focused
+  // The line's translation: the Passage's own (plan 235), or, before it
+  // comes and on a Passage saved nowhere, the one Explain bought (plan
+  // 161). A line holds its translation's place while it comes, so the
+  // line over it does not move when it lands.
+  const translation = lineTranslations[focusIndex] ?? focused?.translation ?? ''
+  const translationDue = translationsPath != null && Boolean(focused) && !focused.foreign
+  const explainHere = () => analyzer.explain(focusIndex, aboutVideo())
+  // The slot holds a space while its translation comes: a line of the
+  // same type, so the one that lands is no taller and nothing moves.
+  const trLine = className => (
+    <p className={className} lang={lang} aria-hidden={translation ? undefined : true}>
+      {translation || ' '}
+    </p>
+  )
   // A token picked on the stage; on the desk the dock follows it, so a
   // door pressed before stops being what the dock shows.
   function walkTo(i) {
-    if (wide) setLookup(null)
+    if (wide) {
+      setLookup(null)
+      // A word pressed is the word's card (plan 242): the panel turns to it.
+      setSide('card')
+    }
     setTokenIndex(i)
   }
   // The token on the stage — the one the desk's right column follows.
@@ -997,9 +1095,9 @@ export default function AnalyzerScreen({ session }) {
     explaining[focusIndex] ? t.explaining
     : explainError[focusIndex] ? explainError[focusIndex]
     : mining.lastOutcome ? (
-        mining.lastOutcome.error ? (t.mineFailed ?? "Couldn't add this card.")
-        : mining.lastOutcome.count > 0 ? (t.mineAdded ?? 'Added to your deck')
-        : (t.mineAlready ?? 'That card was already in the deck')
+        mining.lastOutcome.error ? t.mineFailed
+        : mining.lastOutcome.count > 0 ? t.mineAdded
+        : t.mineAlready
       )
     : busy ? t[platform.busy]
     : status === 'failed' ? t.analysisFailed
@@ -1009,6 +1107,29 @@ export default function AnalyzerScreen({ session }) {
 
   const isI1 = !!focused && !focused.foreign && focused.unknown_count === 1
   const isKept = !!focused && analyzer.kept.has(focused.text)
+
+  // 歌 — make the song yours (plan 215): beside 保存, which keeps the line
+  // in front of the learner, the door that takes the whole Passage into
+  // a deck -- its words and its lines with their readings
+  // (SongDeckSheet). A video's track, or lyrics pasted or photographed:
+  // any Passage of more than one line, since one line is not a deck.
+  const songPassage = sentences.length > 1
+  function openSong() {
+    playerRef.current?.pause()
+    setSong({ title: playerRef.current?.title?.() ?? '' })
+  }
+  const songButton = songPassage && (
+    <button
+      type="button"
+      className="anl-head__song"
+      aria-label={t.songDeckOpen}
+      title={t.songDeckOpen}
+      aria-haspopup="dialog"
+      onClick={openSong}
+    >
+      <SongIcon size={16} />
+    </button>
+  )
 
   // The video intake, in the desk's column or a phone's sheet. The
   // walkthrough opens where the screen keeps it: in the column on the
@@ -1120,19 +1241,30 @@ export default function AnalyzerScreen({ session }) {
     />
   )
 
-  // ── 机 — the result on three columns (plan 134) ─────────────
-  // The owner's drawing (the "Choix" boards of the analyser canvas), with
-  // the desk's rail taken away to give it the window: the Passage's
-  // sentences over the focused one's grammar, numbered, on the left; the
-  // head, then the video, the sentence as its subtitle and the player's
-  // bar as one sumi object, then the sentence's words beside the card in
-  // focus and Explain, in the middle; the card in focus in the runs' band
-  // (plan 126) on the right, Explain standing the explanation in its
-  // description's place. One grid, so the grammar's box and the words'
-  // row share their top and their foot.
-  const deskEntry = lookup ?? tokenLookup(stageToken)
+  // ── 机 — the result on three columns (plans 134, 238) ────────
+  // The owner's pick C of the canvas "Tsuji analyser — the desk and
+  // Explain" (plan 242), with the desk's rail taken away to give it the
+  // window: the Passage's lines on the left, each over its translation;
+  // the head, then the video edge to edge with no arrows beside it, the
+  // line as its subtitle over its translation and the player's bar as
+  // one sumi object, then the line's words on one strip, in the middle;
+  // on the right one panel, its segment turning it between the word's
+  // card (the runs' band, plan 126), the line's grammar and its
+  // construction. A typed Passage keeps plan 161's columns and the
+  // panel's two faces, card and construction.
+  //
+  // On the video desk a grammar point's lesson opens in the grammar
+  // face, its ✕ giving the list back; the card face keeps the word.
+  const pointEntry = playerVideoId && lookup?.category === 'grammar' ? lookup : null
+  const deskEntry = (pointEntry ? null : lookup) ?? tokenLookup(stageToken)
   const explainShown = side === 'explain'
   const hasExplanation = Boolean(focused?.explanation)
+  // What a question about the sentence carries (plan 220): the sentence,
+  // its translation and the explanation the learner has just read.
+  const sentenceAsk = focused && askContext({
+    sentence: focused.text, level: focused.level, translation,
+    review: focused.explanation, analysis: focused,
+  })
   const explainingHere = Boolean(explaining[focusIndex])
   const readable = Boolean(focused) && !focused.foreign && focused.available !== false
   const points = readable ? numberedPointsOf(focused) : []
@@ -1142,7 +1274,13 @@ export default function AnalyzerScreen({ session }) {
   function pressExplain() {
     if (explainShown) { setSide('card'); return }
     setSide('explain')
-    if (!hasExplanation && !explainingHere) analyzer.explain(focusIndex)
+    if (!hasExplanation && !explainingHere) explainHere()
+  }
+  // The panel's segment: the construction is bought the first time its
+  // face is turned to, as Explain buys it.
+  function pickFace(next) {
+    if (next === 'explain') { pressExplain(); return }
+    setSide(next)
   }
   const arrow = (dir, disabled, onClick, label) => (
     <button type="button" className="anl-slab__arrow" disabled={disabled} onClick={onClick} aria-label={label}>
@@ -1150,6 +1288,8 @@ export default function AnalyzerScreen({ session }) {
     </button>
   )
   const several = sentences.length > 1
+  // The typed sentence's own arrows; a video's line is walked from the
+  // player's bar, the arrows beside the picture gone (plan 242).
   const prevArrow = several && arrow('left', focusIndex === 0, () => goToStop(focusIndex - 1), t.prevSentence)
   const nextArrow = several && arrow('right', focusIndex >= sentences.length - 1, () => goToStop(focusIndex + 1), t.nextSentence)
   const railPanel = several && (
@@ -1217,6 +1357,8 @@ export default function AnalyzerScreen({ session }) {
       </div>
       <PassageLine
         sentences={visibleStops.map(v => v.s)}
+        translations={visibleStops.map(v => stopTranslation(v.s, v.i))}
+        trLang={lang}
         // Position WITHIN the filtered view; -1 when the
         // focused stop is filtered out, which simply draws no
         // current marker -- the stage still shows it.
@@ -1247,7 +1389,10 @@ export default function AnalyzerScreen({ session }) {
   // the entry on the right is that card, and its deck action rides the
   // word's row. One sentence (B′): the words over the grammar on the
   // left. Several (B): the Passage's line over the grammar on the left,
-  // the words under the sentence.
+  // the words under the sentence -- folded to one line since plan 235
+  // (the owner's pick C of the canvas "Tsuji analyser — text desk
+  // stage"), so the sentence, its translation and Explain have the
+  // stage, and opened as the list in a sheet.
   const textDesk = !playerVideoId
   const focusWord = pointAt === -1 && stageToken?.vocab_match ? stageToken : null
   const wordAction = textDesk && focusWord && (
@@ -1263,6 +1408,7 @@ export default function AnalyzerScreen({ session }) {
       t={t}
     />
   )
+  const foldRows = readable ? wordRowsOf(focused) : []
   const wordsPanel = readable && (
     <section className="anl-desk__words" aria-label={t.wordsInSentence}>
       <WordsList analysis={focused} current={pointAt === -1 ? stageToken : null} onSelect={selectRow} t={t} action={wordAction} />
@@ -1308,10 +1454,25 @@ export default function AnalyzerScreen({ session }) {
       {textDesk && nextArrow}
     </div>
   )
+  // The panel's faces: the card named by its word, the grammar by how
+  // many points the line has (none drawn for a line with none, or on a
+  // typed Passage, whose grammar has its column), the construction for
+  // a line there is a construction to explain.
+  const entryName = deskEntry?.term
+  const faces = [
+    {
+      key: 'card',
+      label: deskEntry?.category === 'grammar' ? t.facePoint : t.faceWord,
+      figure: entryName ? <span lang="ja">{entryName}</span> : null,
+    },
+    ...(!textDesk && points.length ? [{ key: 'grammar', label: t.faceGrammar, figure: points.length }] : []),
+    ...(readable ? [{ key: 'explain', label: t.faceExplain }] : []),
+  ]
+  const face = faces.some(f => f.key === side) ? side : 'card'
   const deskResult = focused && (
     <div
       ref={resultsRef}
-      className={`anl-results anl-desk${several ? '' : ' anl-desk--one'}${points.length ? '' : ' anl-desk--bare'}${textDesk ? ' anl-desk--text' : ''}`}
+      className={`anl-results anl-desk${several ? '' : ' anl-desk--one'}${textDesk ? ' anl-desk--text' : ' anl-desk--video'}`}
       tabIndex={-1}
       role="region"
       aria-label={t.analysisResult}
@@ -1322,16 +1483,12 @@ export default function AnalyzerScreen({ session }) {
           {!several && wordsPanel}
           {pointsPanel}
         </div>
-      ) : (
-        <>
-          {railPanel}
-          {pointsPanel}
-        </>
-      )}
+      ) : railPanel}
 
       <div className="anl-desk__head">
         <Leave onClick={() => setIntakeOpen(true)}>{t.leaveAnalyzer}</Leave>
         <h1 className={`anl-desk__title${textDesk && !several ? ' sr-only' : ''}`} lang="ja">{sentences[0]?.text}</h1>
+        {songButton}
         <button
           type="button"
           className={`anl-head__keep${isKept ? ' anl-head__keep--on' : ''}`}
@@ -1344,10 +1501,9 @@ export default function AnalyzerScreen({ session }) {
         </button>
       </div>
 
-      <div className={`anl-slab${videoFolded ? ' anl-slab--folded' : ''}`}>
+      <div ref={textDesk ? undefined : slabRef} className={`anl-slab${videoFolded ? ' anl-slab--folded' : ''}${barTight ? ' anl-slab--tight' : ''}`}>
         {playerVideoId && (
           <div className="anl-slab__screen">
-            {prevArrow}
             <div className="anl-slab__video">
               <VideoPlayer
                 ref={playerRef}
@@ -1361,7 +1517,6 @@ export default function AnalyzerScreen({ session }) {
                 onDurationChange={setDuration}
               />
             </div>
-            {nextArrow}
           </div>
         )}
         <div className="anl-subs" data-furigana={furigana}>
@@ -1386,10 +1541,15 @@ export default function AnalyzerScreen({ session }) {
           {textDesk ? (
             <div className="anl-subs__stage">
               {subsBody}
-              {focused.translation && <p className="anl-subs__tr" lang={lang}>{focused.translation}</p>}
+              {(translation || translationDue) && trLine('anl-subs__tr')}
               {readable && explainButton}
             </div>
-          ) : subsBody}
+          ) : (
+            <>
+              {subsBody}
+              {(translation || translationDue) && trLine('anl-subs__tr')}
+            </>
+          )}
         </div>
         {playerVideoId && (
           <PlayerBar
@@ -1422,72 +1582,79 @@ export default function AnalyzerScreen({ session }) {
       </div>
 
       {readable && !textDesk && (
-        <div className="anl-desk__work">
-          {wordsPanel}
-          <div className="anl-desk__focus">
-            <FocusCard
-              analysis={focused}
-              token={stageToken}
-              point={pointAt === -1 ? null : points[pointAt]}
-              number={pointAt + 1}
-              mining={mining}
-              t={t}
-            />
-            {explainButton}
-          </div>
+        <div className="anl-desk__strip">
+          <WordsStrip analysis={focused} current={pointAt === -1 ? stageToken : null} onSelect={selectRow} t={t} />
         </div>
       )}
-      {textDesk && several && wordsPanel}
+      {textDesk && several && readable && (
+        <WordsFold analysis={focused} current={pointAt === -1 ? stageToken : null}
+          open={wordsOpen} onOpen={() => setWordsOpen(true)} t={t} />
+      )}
 
-      <section className={`desk-entry anl-desk__entry${explainShown ? ' anl-desk__entry--explain' : ''}`} aria-label={t.openDictionary}>
-        {deskEntry ? (
+      <div ref={panelRef} className={`desk-entry anl-desk__entry${facesTight ? ' anl-desk__entry--tight' : ''}`}>
+        <Seg full className="anl-faces" label={t.panelFaces} value={face} onChange={pickFace} options={faces} />
+        {face === 'explain' ? (
+          <ExplainPanel
+            explanation={focused.explanation}
+            explaining={explainingHere}
+            error={explainError[focusIndex]}
+            onExplain={explainHere}
+            ask={asking}
+            askKey={focused.text}
+            askContext={sentenceAsk}
+            analysis={focused}
+            onWord={walkTo}
+            onPoint={openPoint}
+            t={t}
+          />
+        ) : face === 'grammar' ? (
+          pointEntry ? (
+            <DictionaryLookupBody
+              key={lookupKey(pointEntry)}
+              {...pointEntry}
+              session={session}
+              mining={mining}
+              favorites={favorites}
+              onExit={closeLookup}
+              band
+              cached
+            />
+          ) : (
+            <section className="anl-face__points anl-points" aria-label={t.grammarSpotted}>
+              <GrammarPoints analysis={focused} t={t} lit={light.litKey} onLight={light.onLight} onOpen={openPoint} />
+            </section>
+          )
+        ) : deskEntry ? (
           <DictionaryLookupBody
             key={lookupKey(deskEntry)}
             {...deskEntry}
-            exact={!lookup}
+            exact={deskEntry !== lookup}
             session={session}
             mining={mining}
             favorites={favorites}
-            onExit={lookup ? closeLookup : undefined}
+            onExit={deskEntry === lookup ? closeLookup : undefined}
             band
             cached
           />
         ) : (
           <p className="anl-desk__none">{t.dockNoEntry}</p>
         )}
-        {explainShown && (
-          <ExplainPanel
-            explanation={focused.explanation}
-            explaining={explainingHere}
-            error={explainError[focusIndex]}
-            onExplain={() => analyzer.explain(focusIndex)}
-            t={t}
-          />
-        )}
-        {(hasExplanation || explainShown) && (
-          <button
-            type="button"
-            className="anl-swap"
-            onClick={() => setSide(v => (v === 'explain' ? 'card' : 'explain'))}
-            aria-pressed={explainShown}
-            aria-label={explainShown ? t.showEntry : t.showExplanation}
-            title={explainShown ? t.showEntry : t.showExplanation}
-          >
-            <ChevronIcon direction={explainShown ? 'left' : 'right'} size={16} />
-          </button>
-        )}
-      </section>
+      </div>
     </div>
   )
 
-  // ── 手 — the result on a phone (plan 134) ─────────────────
-  // The owner's drawing for every width under the desk: the way back and
-  // keep; the video with a trimmed bar under it; the subtitles -- the
-  // next sentence over the current one, the previous one under it, both
-  // quieter and neither lit, each a tap away; the grammar points,
-  // numbered; Explain. A word tapped on the line opens its dictionary
-  // card, a point its lesson, both in the dictionary's sheet; Explain
-  // opens the explanation in a sheet of the same shape.
+  // ── 舞台 — the result on a phone (plan 219, the owner's pick D) ──
+  // Drawn like a run, under the shell's two bars taken away (stores/
+  // stage.js): at the head the way back, where the Passage is, and the
+  // door that makes it a deck -- what the head holds is about the whole
+  // video; the video edge to edge with its track along its foot; the
+  // line in the middle of the screen at display size, the sentence
+  // before over it and the one after under it, quieter, each a tap
+  // away, the translation once Explain has bought it; and at the foot
+  // the thumb's dock, what it holds about the line alone -- its grammar
+  // and its words (each a sheet), Explain, keep -- over the transport.
+  // A word tapped on the line opens its dictionary card, a point its
+  // lesson, both in the dictionary's sheet.
   const nextText = sentences[focusIndex + 1]?.text
   const prevText = sentences[focusIndex - 1]?.text
   function openTokenAt(i) {
@@ -1500,18 +1667,23 @@ export default function AnalyzerScreen({ session }) {
     playerRef.current?.pause()
     setLookup(target)
   }
+  function openDock(which) {
+    playerRef.current?.pause()
+    setDock(which)
+  }
   function openExplain() {
     playerRef.current?.pause()
     setExplainOpen(true)
-    if (!hasExplanation && !explainingHere) analyzer.explain(focusIndex)
+    if (!hasExplanation && !explainingHere) explainHere()
   }
-  const sideLine = (text, dir, go) => (text
+  const sideLine = (text, dir, go, where) => (text
     ? (
-      <button type="button" className="anl-m__line" onClick={go} aria-label={`${dir}: ${text}`} lang="ja">
+      <button type="button" className={`anl-m__line anl-m__line--${where}`} onClick={go} aria-label={`${dir}: ${text}`} lang="ja">
         {text}
       </button>
     )
-    : <span className="anl-m__line anl-m__line--none" aria-hidden="true" />)
+    : <span className={`anl-m__line anl-m__line--${where} anl-m__line--none`} aria-hidden="true" />)
+  const wordRows = readable ? wordTileRows(focused) : []
   const mobileResult = focused && (
     <div
       ref={resultsRef}
@@ -1523,16 +1695,25 @@ export default function AnalyzerScreen({ session }) {
       <div className="anl-m__head">
         <Leave onClick={() => setIntakeOpen(true)}>{t.leaveAnalyzer}</Leave>
         <h1 className="sr-only" lang="ja">{sentences[0]?.text}</h1>
-        <button
-          type="button"
-          className={`anl-head__keep${isKept ? ' anl-head__keep--on' : ''}`}
-          aria-pressed={isKept}
-          aria-label={isKept ? t.unkeepSentence : t.keepSentence}
-          title={isKept ? t.unkeepSentence : t.keepSentence}
-          onClick={() => analyzer.keepSentence(focusIndex)}
-        >
-          {isKept ? <CheckIcon size={16} /> : <PlusIcon size={16} />}
-        </button>
+        <span className="anl-m__where" aria-hidden="true">
+          <span className="anl-m__track">
+            <span className="anl-m__fill" style={{ width: `${(100 * (focusIndex + 1)) / sentences.length}%` }} />
+          </span>
+          <span className="anl-m__count">{focusIndex + 1} / {sentences.length}</span>
+        </span>
+        {songPassage && (
+          <button
+            type="button"
+            className="anl-m__song"
+            aria-haspopup="dialog"
+            aria-label={t.songDeckOpen}
+            title={t.songDeckOpen}
+            onClick={openSong}
+          >
+            <SongIcon size={16} />
+            <span aria-hidden="true">{t.songDeckShort}</span>
+          </button>
+        )}
       </div>
 
       {playerVideoId && (
@@ -1549,31 +1730,12 @@ export default function AnalyzerScreen({ session }) {
               onDurationChange={setDuration}
             />
           </div>
-          <PlayerBar
-            compact
-            t={t}
-            playing={playing}
-            // Play takes the line back to the clock: the phone has no
-            // 追従 toggle, so a stop picked by hand lets go of it until
-            // the learner plays again.
-            onToggle={() => { if (!playing) setFollowPlayback(true); togglePassagePlayback() }}
-            onPrev={() => goToStop(focusIndex - 1)}
-            onNext={() => goToStop(focusIndex + 1)}
-            canPrev={focusIndex > 0}
-            canNext={focusIndex < sentences.length - 1}
-            onReplay={replaySentence}
-            canReplay={focused.cue_start != null}
-            loop={loop}
-            onLoop={() => setLoop(v => !v)}
-            playhead={playhead}
-            span={span}
-            onSeek={seekFromTrack}
-          />
+          <PlayerTrack playhead={playhead} span={span} onSeek={seekFromTrack} />
         </div>
       )}
 
       <section className="anl-m__subs" data-furigana={furigana} aria-label={t.stopNumber(focusIndex + 1, sentences.length)}>
-        {sideLine(nextText, t.nextSentence, () => goToStop(focusIndex + 1))}
+        {sideLine(prevText, t.prevSentence, () => goToStop(focusIndex - 1), 'prev')}
         {focused.foreign ? (
           <p className="anl-m__note">
             <span lang="ja">{focused.text}</span>
@@ -1593,23 +1755,88 @@ export default function AnalyzerScreen({ session }) {
             timing={timing}
           />
         )}
-        {sideLine(prevText, t.prevSentence, () => goToStop(focusIndex - 1))}
+        {(translation || translationDue) && trLine('anl-m__tr')}
+        {sideLine(nextText, t.nextSentence, () => goToStop(focusIndex + 1), 'next')}
       </section>
 
-      {points.length > 0 && (
-        <section className="anl-m__points anl-points" aria-label={t.grammarSpotted}>
-          <GrammarPoints analysis={focused} t={t} lit={light.litKey} onLight={light.onLight} onOpen={openPoint} />
-        </section>
-      )}
+      <div className="anl-m__dock">
+        <div className="anl-m__tools">
+          {points.length > 0 && (
+            <button type="button" className="anl-m__tool" aria-haspopup="dialog" onClick={() => openDock('grammar')}>
+              <span className="anl-num" aria-hidden="true">{points.length}</span>
+              {t.dockGrammar}
+            </button>
+          )}
+          {wordRows.length > 0 && (
+            <button type="button" className="anl-m__tool" aria-haspopup="dialog" onClick={() => openDock('words')}>
+              <span className="anl-m__toolnum" aria-hidden="true">{wordRows.length}</span>
+              {t.dockWords}
+            </button>
+          )}
+          {readable && (
+            <button type="button" className="anl-m__tool anl-m__tool--explain anl-m__explain" aria-haspopup="dialog" onClick={openExplain}>
+              <OpenBookIcon size={18} />
+              {explainingHere && !hasExplanation ? <span>{t.explaining}</span> : t.dockExplain}
+            </button>
+          )}
+          <button
+            type="button"
+            className={`anl-m__tool anl-head__keep${isKept ? ' anl-head__keep--on' : ''}`}
+            aria-pressed={isKept}
+            aria-label={isKept ? t.unkeepSentence : t.keepSentence}
+            title={isKept ? t.unkeepSentence : t.keepSentence}
+            onClick={() => analyzer.keepSentence(focusIndex)}
+          >
+            {isKept ? <CheckIcon size={18} /> : <PlusIcon size={18} />}
+            <span aria-hidden="true">{isKept ? t.dockKept : t.dockKeep}</span>
+          </button>
+        </div>
+        <PlayerBar
+          stage
+          t={t}
+          playing={playing}
+          // Play takes the line back to the clock: the phone has no
+          // 追従 toggle, so a stop picked by hand lets go of it until
+          // the learner plays again. A typed Passage has no clock: its
+          // dock is the stops alone.
+          onToggle={() => { if (!playing) setFollowPlayback(true); togglePassagePlayback() }}
+          onPrev={() => goToStop(focusIndex - 1)}
+          onNext={() => goToStop(focusIndex + 1)}
+          canPrev={focusIndex > 0}
+          canNext={focusIndex < sentences.length - 1}
+          onReplay={replaySentence}
+          canReplay={Boolean(playerVideoId) && focused.cue_start != null}
+          loop={loop}
+          onLoop={() => setLoop(v => !v)}
+          video={Boolean(playerVideoId)}
+        />
+      </div>
 
-      {readable && (
-        <button type="button" className="anl-explainbtn anl-m__explain" onClick={openExplain}>
-          <OpenBookIcon size={14} />
-          {explainingHere && !hasExplanation ? <>{t.explaining}<Dots /></> : t.explainThisSentence}
-        </button>
-      )}
+      {/* The line's two lists, each a sheet over the stage; a row pressed
+          in either opens the dictionary's sheet in its place. */}
+      <Sheet open={dock === 'grammar'} onClose={closeDock} jp={t.grammarSpotted} className="anl-m__sheet">
+        <section className="anl-m__points anl-points" style={{ '--line-color': KAISEKI }}>
+          <GrammarPoints analysis={focused} t={t} lit={light.litKey} onLight={light.onLight}
+            onOpen={g => { closeDock(); openPoint(g) }} />
+        </section>
+      </Sheet>
+      {/* 札 (plan 220, the owner's W2): a card per word, two to a row. */}
+      <Sheet
+        open={dock === 'words'}
+        onClose={closeDock}
+        jp={t.wordsSheetTitle}
+        cap={t.wordsSheetCount(wordRows.length, wordRows.filter(isFreshWord).length)}
+        label={t.wordsInSentence}
+        className="anl-m__sheet"
+      >
+        <WordTiles analysis={focused} t={t}
+          onSelect={row => { closeDock(); openTokenAt(stageTokens.indexOf(row.head)) }} />
+      </Sheet>
     </div>
   )
+
+  // The phone's result takes the stage: no HUD, no tab bar (plan 219).
+  useStageClaim(Boolean(showResult && focused && !wide))
 
   return (
     <main id="main-content" className="dictionary analyzer" style={{ '--line-color': KAISEKI }}>
@@ -1718,6 +1945,33 @@ export default function AnalyzerScreen({ session }) {
           moves the same position the stepper reads from. */}
       {showResult && focused && wide && deskResult}
 
+      {/* The text desk's words, opened from their folded line (plan 235):
+          the list that stood under the sumi, a row putting its word in
+          focus -- the entry on the right follows -- and closing it. A
+          sheet is portalled to the body, so the station's pigment is
+          set again on what it holds. */}
+      {showResult && focused && wide && textDesk && (
+        <Sheet
+          open={wordsOpen}
+          onClose={closeWords}
+          jp={t.wordsSheetTitle}
+          cap={t.wordsSheetCount(foldRows.length, foldRows.filter(isFreshWord).length)}
+          label={t.wordsInSentence}
+          className="anl-wordsheet"
+          dismiss
+        >
+          <div style={{ '--line-color': KAISEKI }}>
+            <WordsList
+              analysis={focused}
+              current={pointAt === -1 ? stageToken : null}
+              onSelect={row => { closeWords(); selectRow(row) }}
+              t={t}
+              action={wordAction}
+            />
+          </div>
+        </Sheet>
+      )}
+
       {showResult && focused && !wide && mobileResult}
 
       {lookup && !wide && (
@@ -1734,12 +1988,27 @@ export default function AnalyzerScreen({ session }) {
       {explainOpen && !wide && focused && (
         <ExplainSheet
           sentence={focused.text}
+          translation={translation}
           explanation={focused.explanation}
           explaining={explainingHere}
           error={explainError[focusIndex]}
-          onExplain={() => analyzer.explain(focusIndex)}
+          onExplain={explainHere}
           onClose={closeExplain}
+          ask={asking}
+          askKey={focused.text}
+          askContext={sentenceAsk}
           t={t}
+        />
+      )}
+
+      {song && showResult && (
+        <SongDeckSheet
+          session={session}
+          mining={mining}
+          sentences={sentences}
+          title={song.title}
+          t={t}
+          onClose={closeSong}
         />
       )}
     </main>

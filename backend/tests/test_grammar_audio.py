@@ -28,8 +28,12 @@ def test_the_catalogue_says_each_line_by_its_speaker():
     assert grammar_audio.speakable(me, "me")
     # Every reply the learner can pick is heard in their own voice.
     assert all(grammar_audio.speakable(r, "me") for r in replies)
-    # A line in the wrong mouth, or one nobody says, is no clip.
-    assert not grammar_audio.speakable(them, "me")
+    # A line in the wrong mouth, or one nobody says, is no clip. (Not
+    # this scene's いらっしゃいませ。: in 会話 a learner says it, as a
+    # wrong reply, plan 217.)
+    said = grammar_audio.catalog()
+    only_them = next(line for line in sorted(said["them"]) if line not in said["me"])
+    assert not grammar_audio.speakable(only_them, "me")
     assert not grammar_audio.speakable("これは何でもない文です。", "reader")
     assert not grammar_audio.speakable(example, "narrator")
 
