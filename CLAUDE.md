@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **247**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **248**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -406,7 +406,15 @@ One more is read-only and needs no flag, so it is safe to run at any time:
 ```bash
 python -m scripts.weekly_digest        # the four numbers, as markdown
 python -m scripts.read_feedback        # what learners wrote to us (plan 222), newest first
+python -m scripts.learner_trail <user_id>  # one learner's visits, where they left, and why it may have been (plan 247)
 ```
+
+`learner_trail` merges the 足跡 trail with the study tables onto one
+clock, visit by visit, and names the patterns that have cost learners
+before (a boarding left, the first ride begun again, a dead-end sheet,
+a failed request, a slow page, no first answer). It never reads a text
+column a learner wrote into and reads nobody who objected
+(`analytics_off`); run it by hand, never from a workflow.
 
 Two others fill a shared cache ahead of demand rather than maintaining
 one. Neither is required — both caches fill themselves from real traffic
