@@ -94,6 +94,10 @@ runtime purpose.
   no more than 36% (`likeness_tells`; a blind pick of four wins 25%, and the
   N4 and N3 grammar seeds' answers were that choice 45% and 43% of the
   time), as the longest and the shortest may not either (`length_tells`).
+  Nor may the keys step through the slots, 1 2 3 4 1 2 (`rotation_tells`: the
+  balance check passes it and the next answer is known from the last; seed
+  mondai had it 98% of the time): `python -m scripts.exam_seed reslot EXAM_ID`
+  re-places them, position only.
   A wrong choice is a real form or expression the learner could choose,
   never a corruption of the right one (ないければなりません). The
   漢字読み / 表記 choices are made by `study/exam_kanji_choices.py`: the

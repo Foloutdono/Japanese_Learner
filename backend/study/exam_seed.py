@@ -34,6 +34,7 @@
 import hashlib
 import json
 import logging
+import random
 import re
 from pathlib import Path
 
@@ -286,6 +287,102 @@ def likeness_tells(papers: list[dict]) -> list[str]:
             f"looks must say nothing, {LIKENESS_TELL:.0%} at most"]
 
 
+# Which slot the key sits in must not step through the slots. A seed writer
+# who spreads the keys by hand counts 1, 2, 3, 4, 1, 2 ...: the balance
+# check (validate_answer_balance, a slot at most 60% of a paper) passes it,
+# and a learner who has seen the first answer has the next ones (the keys of
+# n3-vocab-01's 言い換え stepped one slot on 98% of the time; a blind pick
+# of four does 25%). Per mondai, over an exam id's ten papers.
+ROTATION_TELL = 0.40
+ROTATION_MIN_STEPS = 20
+
+
+def _key_runs(papers: list[dict]) -> dict[str, list[list[dict]]]:
+    """mondai id -> the runs of consecutive 4-choice questions that carry
+    their key in the choices (a passage's questions are one run, a cloze
+    passage's blanks another), in paper order. A listening question's
+    choices are the figures its recording gives, in their own order."""
+    out: dict[str, list[list[dict]]] = {}
+    for paper in papers:
+        for section in paper.get("sections") or []:
+            for m in section.get("mondai") or []:
+                groups = [m.get("questions") or []]
+                for passage in m.get("passages") or []:
+                    groups += [(passage.get("blanks") or []) + (passage.get("questions") or [])]
+                for group in groups:
+                    run = [q for q in group if len(q.get("choices") or []) == 4 and not q.get("audioSrc")
+                           and any(c.get("id") == q.get("answer") for c in q["choices"])]
+                    if run:
+                        out.setdefault(m.get("id"), []).append(run)
+    return out
+
+
+def _slot(q: dict) -> int:
+    return next(i for i, c in enumerate(q["choices"]) if c.get("id") == q.get("answer"))
+
+
+def _steps(runs: list[list[dict]]) -> tuple[int, int, int]:
+    """(steps, steps one slot on, steps to the same slot) over the runs."""
+    n = on = same = 0
+    for run in runs:
+        slots = [_slot(q) for q in run]
+        for a, b in zip(slots, slots[1:]):
+            n += 1
+            on += (b - a) % 4 == 1
+            same += a == b
+    return n, on, same
+
+
+def rotation_tells(papers: list[dict]) -> list[str]:
+    out = []
+    for mondai, runs in _key_runs(papers).items():
+        n, on, _same = _steps(runs)
+        if n >= ROTATION_MIN_STEPS and on / n > ROTATION_TELL:
+            out.append(f"{mondai}: the key sits one slot after the previous one {on / n:.0%} of the time "
+                       f"({on} of {n}); a blind pick does 25%, at most {ROTATION_TELL:.0%}")
+    return out
+
+
+def reslot(data: dict) -> int:
+    """Move the keys of every mondai `rotation_tells` names to a balanced,
+    unpatterned set of slots, in place, and return how many questions were
+    moved. Position only: no choice's text changes and the same one is still
+    the key, so nothing that reads the content can tell this ran. The
+    result is seeded by the exam id and the mondai, so it is repeatable."""
+    papers = [entry["paper"] for entry in data["papers"]]
+    flagged = {m.split(":", 1)[0] for m in rotation_tells(papers)}
+    moved = 0
+    for mondai, runs in _key_runs(papers).items():
+        if mondai not in flagged:
+            continue
+        rng = random.Random(f"{data.get('examId')}:{mondai}")
+        questions = [q for run in runs for q in run]
+        for _ in range(500):
+            slots = [i % 4 for i in range(len(questions))]
+            rng.shuffle(slots)
+            at = iter(slots)
+            n = on = same = 0
+            for run in runs:
+                chosen = [next(at) for _ in run]
+                for a, b in zip(chosen, chosen[1:]):
+                    n += 1
+                    on += (b - a) % 4 == 1
+                    same += a == b
+            if n and on / n <= 0.30 and same / n <= 0.30:
+                break
+        at = iter(slots)
+        for q in questions:
+            slot = next(at)
+            key = next(c for c in q["choices"] if c.get("id") == q.get("answer"))
+            rest = [c for c in q["choices"] if c is not key]
+            rng.shuffle(rest)
+            rest.insert(slot, key)
+            q["choices"] = [{"id": f"c{i + 1}", "textJp": c["textJp"]} for i, c in enumerate(rest)]
+            q["answer"] = f"c{slot + 1}"
+            moved += 1
+    return moved
+
+
 def authored_texts(paper: dict) -> list[str]:
     """The texts of a paper a model wrote (passages, scripts, sentences),
     not the deck-built items: no two seeds of an exam id may share one.
@@ -339,6 +436,7 @@ def exam_problems(exam_id: str) -> list[str]:
             seen.setdefault(t, e.get("n"))
     out += [f"{exam_id}: {t}" for t in length_tells([e["paper"] for e in entries])]
     out += [f"{exam_id}: {t}" for t in likeness_tells([e["paper"] for e in entries])]
+    out += [f"{exam_id} {t}" for t in rotation_tells([e["paper"] for e in entries])]
     return out
 
 

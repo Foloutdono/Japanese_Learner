@@ -6,6 +6,7 @@
 # test file writes papers under, wiped before and after.
 import copy
 import json
+import random
 
 import pytest
 
@@ -87,6 +88,40 @@ def test_the_choice_nearest_to_the_others_must_not_be_the_answer():
     one_in_four = _paper_of([_star(i % 4) for i in range(50)])
     assert exam_seed.likeness_tells([one_in_four]) == []
     assert exam_seed.likeness_tells([_paper_of([_star(0) for _ in range(10)])]) == []     # too few to say
+
+
+def _cycling(n: int) -> list[dict]:
+    """n questions whose key sits in slot 1, 2, 3, 4, 1, 2 ..."""
+    ids = ["c1", "c2", "c3", "c4"]
+    return [{"id": f"q{i}", "choices": [{"id": ids[j], "textJp": f"{i}-{j}"} for j in range(4)], "answer": ids[i % 4]}
+            for i in range(n)]
+
+
+def _words(paper: dict) -> list[tuple[list[str], str]]:
+    qs = paper["sections"][0]["mondai"][0]["questions"]
+    return [(sorted(c["textJp"] for c in q["choices"]), next(c["textJp"] for c in q["choices"] if c["id"] == q["answer"])) for q in qs]
+
+
+def test_keys_that_step_through_the_slots_are_not_a_seed():
+    assert any("one slot after" in t for t in exam_seed.rotation_tells([_paper_of(_cycling(50))]))
+    rng = random.Random(5)
+    ids = ["c1", "c2", "c3", "c4"]
+    scattered = [{"id": f"q{i}", "choices": [{"id": ids[j], "textJp": f"{i}-{j}"} for j in range(4)], "answer": ids[rng.randrange(4)]}
+                 for i in range(50)]
+    assert exam_seed.rotation_tells([_paper_of(scattered)]) == []
+    assert exam_seed.rotation_tells([_paper_of(_cycling(12))]) == []      # too few steps to say
+
+
+def test_reslot_moves_the_keys_and_nothing_else():
+    paper = _paper_of(_cycling(50))
+    before = _words(paper)
+    data = {"examId": "x-vocab-01", "papers": [{"n": 1, "paper": paper}]}
+    assert exam_seed.reslot(data) == 50
+    assert _words(paper) == before                      # the same four words, the same one right
+    assert exam_seed.rotation_tells([paper]) == []
+    slots = [next(i for i, c in enumerate(q["choices"]) if c["id"] == q["answer"]) for q in paper["sections"][0]["mondai"][0]["questions"]]
+    assert all(slots.count(k) in (12, 13) for k in range(4))        # and the slots stay balanced
+    assert [c["id"] for c in paper["sections"][0]["mondai"][0]["questions"][0]["choices"]] == ["c1", "c2", "c3", "c4"]
 
 
 # ── What the choices give away, and the level (plan 254) ─────────────
