@@ -13,6 +13,7 @@ import '../../index.css'
 const creditsRef = { current: null }
 vi.mock('../../stores/credits', () => ({
   useCredits: () => creditsRef.current,
+  openBalance: vi.fn(),
 }))
 vi.mock('../../stores/departure', () => ({ beginDeparture: vi.fn(), useDeparture: () => null }))
 vi.mock('../../lib/audio', async (o) => ({ ...(await o()), playAnnouncement: vi.fn() }))

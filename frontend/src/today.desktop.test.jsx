@@ -30,7 +30,7 @@ const TODAY = {
 }
 vi.mock('./stores/today', () => ({
   useTodaySummary: () => ({ data: TODAY, failed: false }),
-  refreshToday: vi.fn(), seedTodaySummary: vi.fn(),
+  refreshToday: vi.fn(), refetchToday: vi.fn(() => Promise.resolve()), seedTodaySummary: vi.fn(),
 }))
 const journeyRef = { current: null }
 vi.mock('./stores/journey', () => ({
