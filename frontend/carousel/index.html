@@ -178,6 +178,10 @@ body[data-mode="long"] [data-long="hide"] { display: none !important; }
 /* The reading challenges (plan 247): a video, with its own controls. */
 body:not([data-video="challenge"]) [data-challenge="only"] { display: none !important; }
 body[data-video="challenge"] [data-challenge="hide"] { display: none !important; }
+/* A 9:16 video's post per feed (plan 251): Reels and TikTok take a caption alone. */
+body:not([data-feeds="on"]) [data-feeds="only"] { display: none !important; }
+body[data-post="caption"] [data-caption="hide"] { display: none !important; }
+body:not([data-post="caption"]) [data-caption="only"] { display: none !important; }
 .music { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .music__name { color: var(--ink2); font-size: 13px; overflow-wrap: anywhere; }
 .player canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
@@ -394,12 +398,17 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
 
     <div class="export">
       <div class="export__text">
-        <div class="title-field">
+        <div class="seg" role="group" aria-label="The post, for" data-feeds="only">
+          <button type="button" data-set="feed:shorts">YouTube Shorts</button>
+          <button type="button" data-set="feed:reels">Instagram Reels</button>
+          <button type="button" data-set="feed:tiktok">TikTok</button>
+        </div>
+        <div class="title-field" data-caption="hide">
           <input id="title" type="text" maxlength="90" aria-label="Title to post with the slides" spellcheck="false">
           <span id="title-count" class="title-count" aria-hidden="true"></span>
         </div>
         <textarea id="caption" aria-label="Caption to post with the slides" spellcheck="false"></textarea>
-        <input id="tags" class="text-input" type="text" data-long="only" aria-label="Tags for the video" spellcheck="false">
+        <input id="tags" class="text-input" type="text" data-long="only" data-caption="hide" aria-label="Tags for the video" spellcheck="false">
         <p class="label" data-long="only">Make it <span>from frontend/, with the voice engine running</span></p>
         <pre id="command" class="command" data-long="only"></pre>
       </div>
@@ -412,9 +421,9 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
         <button id="copy-short" type="button" class="btn" data-long="hide" hidden>Copy the command: the short, voiced</button>
         <button id="export-clip" type="button" class="btn btn--metal" data-long="hide" hidden>Download the cover clip (.mp4, 7 s, with sound)</button>
         <button id="export-end-clip" type="button" class="btn btn--metal" data-promo="only" data-long="hide" hidden>Download the call-to-action clip (.mp4, 7 s, with sound)</button>
-        <button id="copy-title" type="button" class="btn">Copy title</button>
-        <button id="copy" type="button" class="btn">Copy <span data-long="hide">caption</span><span data-long="only">description</span></button>
-        <button id="copy-tags" type="button" class="btn" data-long="only">Copy tags</button>
+        <button id="copy-title" type="button" class="btn" data-caption="hide">Copy title</button>
+        <button id="copy" type="button" class="btn">Copy <span data-long="hide">caption</span><span data-long="only" data-caption="hide">description</span><span data-long="only" data-caption="only">caption</span></button>
+        <button id="copy-tags" type="button" class="btn" data-long="only" data-caption="hide">Copy tags</button>
       </div>
       <p id="status" class="status" role="status"></p>
     </div>

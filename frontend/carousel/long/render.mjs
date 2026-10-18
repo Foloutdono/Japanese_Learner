@@ -28,7 +28,9 @@
 //                     command" writes the values changed, so the render is the preview
 //
 // Writes <name>.mp4, <name>.txt (the title, then the description with
-// its chapters and the voice's credit) and <name>.jpg (a thumbnail).
+// its chapters and the voice's credit; for a 9:16 video, its post for
+// each feed: YouTube Shorts, Instagram Reels, TikTok, plan 251) and
+// <name>.jpg (a thumbnail).
 // It needs the voice engine (VOICEVOX_URL, CLAUDE.md "Speech"), the
 // backend's Python (numpy), ffmpeg, and Playwright's Chromium; the
 // voices are kept in carousel/long/cache/, so making a video again, or
@@ -43,6 +45,7 @@ import { SITE_ORIGIN } from '../../landing/config.mjs'
 import { FPS, TALL, WIDE, cueKey, describe, fitShort, longPlan, stillAt, timeline } from '../long.js'
 import { fromRecipe, shortTimeline } from '../short.js'
 import { TRACKS, challengeCues, challengePage, challengePlan, challengeTimeline } from '../challenge.js'
+import { pageFile } from '../feeds.js'
 import { parseTune } from '../tune.js'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -314,8 +317,7 @@ await new Promise((r, j) => ff.on('close', code => (code === 0 ? r() : j(new Err
 // ── The thumbnail, the title and the description ──
 const thumb = await page.evaluate(t => { window.__draw(t); return window.__canvas.toDataURL('image/jpeg', 0.92) }, thumbAt)
 writeFileSync(join(OUT, `${slug}.jpg`), Buffer.from(thumb.split(',')[1], 'base64'))
-const { title, description, tags } = pageText
-writeFileSync(join(OUT, `${slug}.txt`), `TITLE\n${title}\n\nDESCRIPTION\n${description}\n\nTAGS\n${tags}\n`)
+writeFileSync(join(OUT, `${slug}.txt`), pageFile(pageText))
 await browser.close()
 server.close()
 rmSync(WORK, { recursive: true, force: true })

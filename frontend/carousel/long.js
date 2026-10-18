@@ -28,6 +28,7 @@ import { plan as sourcePlan, itemsOf } from './sources.js'
 import { particleLabel } from './explain.js'
 import * as A from './app.js'
 import { tuned } from './tune.js'
+import { feedPosts } from './feeds.js'
 
 export const WIDE = { id: 'wide', w: 1920, h: 1080 }
 // A short (plan 233): the same video standing, under a minute, for
@@ -878,8 +879,11 @@ const SHORT_PAGE = {
       reply: (lv, n) => `What would you answer? ${n} JLPT ${lv} Japanese conversation questions #shorts`,
     },
     lead: { vocab: 'Read each word before it is revealed, then say it with the voice.', kanji: 'Watch the strokes, then read it.', quiz: 'Five seconds a question. How many did you get?', grammar: 'One grammar point: its form, two examples, one question.', reply: 'Someone speaks to you: pick your reply before the timer ends. How many did you get?' },
-    app: (f, site) => `Keep going on Tsuji: ${f.words} words, ${f.kanji} kanji and ${f.points} grammar points with spaced repetition. No ads, no trackers.\n${site}`,
+    app: f => `Keep going on Tsuji: ${f.words} words, ${f.kanji} kanji and ${f.points} grammar points with spaced repetition. No ads, no trackers.`,
+    more: 'Keep going on Tsuji.',
     hashtags: lv => `#Shorts #LearnJapanese #Japanese${lv ? ` #JLPT${lv}` : ''} #日本語`,
+    // The video's own hashtag in a feed's five (plan 251).
+    tag: { vocab: 'JapaneseVocabulary', kanji: 'Kanji', quiz: 'JLPT', grammar: 'JapaneseGrammar', reply: 'JapaneseConversation' },
   },
   fr: {
     title: {
@@ -890,8 +894,10 @@ const SHORT_PAGE = {
       reply: (lv, n) => `Que répondrais-tu ? ${n} questions de conversation en japonais JLPT ${lv} #shorts`,
     },
     lead: { vocab: 'Lis chaque mot avant qu’il soit révélé, puis répète-le avec la voix.', kanji: 'Regarde les traits, puis lis-le.', quiz: 'Cinq secondes par question. Combien en as-tu ?', grammar: 'Un point de grammaire : sa forme, deux exemples, une question.', reply: 'On te parle : choisis ta réponse avant la fin du chrono. Combien en as-tu ?' },
-    app: (f, site) => `Continue sur Tsuji : ${f.words} mots, ${f.kanji} kanji et ${f.points} points de grammaire en répétition espacée. Sans pub, sans traqueur.\n${site}`,
+    app: f => `Continue sur Tsuji : ${f.words} mots, ${f.kanji} kanji et ${f.points} points de grammaire en répétition espacée. Sans pub, sans traqueur.`,
+    more: 'Continue sur Tsuji.',
     hashtags: lv => `#Shorts #ApprendreLeJaponais #Japonais${lv ? ` #JLPT${lv}` : ''} #日本語`,
+    tag: { vocab: 'VocabulaireJaponais', kanji: 'Kanji', quiz: 'JLPT', grammar: 'GrammaireJaponaise', reply: 'ConversationJaponaise' },
   },
 }
 
@@ -943,14 +949,26 @@ function describeShort(plan, tl, site, figures) {
   const title = plan.kind === 'grammar' ? P.title.grammar(lv, plan.point, meaning) : P.title[plan.kind](lv, n, plan.theme)
   const fmt = x => Number(x).toLocaleString(plan.lang === 'fr' ? 'fr-FR' : 'en-US')
   const kana = tl.cues.some(c => LONE.test(c.text))
+  const app = figures ? P.app({ words: fmt(figures.words), kanji: fmt(figures.kanji), points: fmt(figures.points) }) : null
+  const credits = (PAGE[plan.lang] || PAGE.en).credits(kana, plan.music !== false)
+  const hashtags = P.hashtags(plan.theme ? null : lv)
   const body = [
     P.lead[plan.kind], '',
-    figures ? P.app({ words: fmt(figures.words), kanji: fmt(figures.kanji), points: fmt(figures.points) }, site) : site, '',
-    (PAGE[plan.lang] || PAGE.en).credits(kana, plan.music !== false), '',
-    P.hashtags(plan.theme ? null : lv),
+    app ? `${app}\n${site}` : site, '',
+    credits, '',
+    hashtags,
   ]
   const tags = [...new Set((PAGE[plan.lang] || PAGE.en).tags(lv, plan.kind).filter(t => !plan.theme || !/JLPT|N\d/.test(t)))].concat('shorts').join(', ')
-  return { title, description: body.join('\n'), tags }
+  const page = { title, description: body.join('\n'), tags }
+  // The same short in Reels and on TikTok (plan 251): a reply short's
+  // scene named under the hook, and its own hashtag fifth.
+  const scenes = plan.items.filter(x => x.type === 'scene')
+  const scene = plan.kind === 'reply' && scenes.length === 1 ? `${scenes[0].place.jp} · ${scenes[0].place.tr}` : null
+  const feed = {
+    hook: title.replace(/\s*#shorts$/i, ''), lines: [scene, P.lead[plan.kind]], app: app || P.more, credits: [credits],
+    hashtags: [...hashtags.split(' '), P.tag[plan.kind], 'nihongo'],
+  }
+  return { ...page, feeds: feedPosts(page, feed, plan.lang) }
 }
 
 // ── Drawing ───────────────────────────────────────────────────────

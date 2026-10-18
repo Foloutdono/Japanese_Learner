@@ -16,6 +16,7 @@ import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf } from '../carousel/funnel
 import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, stillAt, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
 import { CH as CHALLENGE, CPM, SCROLL, TRACK, TRACKS, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
+import { CAPTION_MAX, FEEDS, HASHTAGS, pageFile } from '../carousel/feeds.js'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
@@ -43,6 +44,30 @@ const glossEn = r => (r.en || [])[0] || ''
 // its own gate, a word echo is one frame and its clip, a long video is a
 // player of its own (plan 233).
 const STATIONED = SOURCES.filter(s => s.id !== 'promo' && s.id !== 'echo' && !s.video)
+
+/** A 9:16 video's three posts (plan 251): YouTube's page as it is, and a
+ *  caption each for Reels and TikTok that opens on the hook, links to
+ *  nothing of ours ("in bio"), keeps every credit, carries five hashtags
+ *  at most and never #shorts, and fits Instagram's 2,200 characters. */
+function expectFeeds(page, site, label) {
+  expect(Object.keys(page.feeds), label).toEqual(FEEDS)
+  expect(page.feeds.shorts, label).toEqual({ title: page.title, description: page.description, tags: page.tags })
+  const credits = page.description.split('\n').filter(l => /VOICEVOX|MacLeod|Music|Musique/.test(l))
+  for (const f of ['reels', 'tiktok']) {
+    const c = page.feeds[f].caption
+    const at = `${label} ${f}`
+    expect(c.split('\n')[0], at).toBe(page.title.replace(/\s*#shorts$/i, ''))
+    expect([...c].length, at).toBeLessThanOrEqual(CAPTION_MAX)
+    expect(c, at).not.toContain(new URL(site).host)
+    expect(c, at).toMatch(/(Link in|Lien en) bio\./)
+    const tags = c.match(/#[^\s#]+/g) || []
+    expect(tags.length, at).toBeGreaterThanOrEqual(3)
+    expect(tags.length, at).toBeLessThanOrEqual(HASHTAGS)
+    expect(tags.map(t => t.toLowerCase()), at).not.toContain('#shorts')
+    for (const line of credits) for (const part of line.split(/(?<=\.) /)) expect(c, at).toContain(part.replace(/^▸.*$/, '').trim())
+  }
+  expect(page.feeds.reels.caption, label).not.toBe(page.feeds.tiktok.caption)
+}
 const LAST = { promo: id => (id === 'pass' ? 'free' : 'board'), echo: () => 'keep' }
 
 /** Every file a source reads: one per level, one per kana set, or one. */
@@ -1218,6 +1243,7 @@ describe('the short formats (plan 233)', () => {
           expect(page.title, kind).toMatch(/#shorts$/)
           expect(page.description, kind).toMatch(/VOICEVOX Nemo/)
           expect(page.description, kind).toMatch(/#Shorts/)
+          expectFeeds(page, 'https://example.org', `${kind} ${level} ${lang}`)
         }
       }
     }
@@ -1319,6 +1345,7 @@ describe('the short formats (plan 233)', () => {
       expect(page.title.length, src.id).toBeLessThanOrEqual(100)
       expect(page.title, src.id).toMatch(/#shorts$/)
       expect(page.description.includes('VOICEVOX Nemo'), src.id).toBe(!!line)
+      expectFeeds(page, 'https://example.org', src.id)
     }
     // What a slide writes, each character once.
     expect(chars({ draw: ctx => { ctx.fillText('駅で', 0, 0); ctx.fillText('station', 0, 0) } }, { fillText() {} })).toBe(9)
@@ -2142,5 +2169,42 @@ describe('the reply videos (plan 249)', () => {
         expect(timeline(pl).seconds, it.id).toBeLessThanOrEqual(REPLY_SHORT)
       }
     }
+  })
+})
+
+describe('a post for each feed (plan 251)', () => {
+  const data = bank('comprehension.json')
+  it('writes a reading challenge’s three posts, with its track or none, read or read along', () => {
+    for (const style of CHALLENGE_STYLES) {
+      for (const lang of ['en', 'fr']) {
+        for (const music of [undefined, null]) {
+          const pl = challengePlan(data, 'n5-02', { style, lang, music })
+          const page = challengePage(pl, challengeTimeline(pl), 'https://tsuji.app')
+          expectFeeds(page, 'https://tsuji.app', `${style} ${lang} ${music}`)
+          expect(page.feeds.tiktok.caption.includes('MacLeod'), `${style} ${lang} ${music}`).toBe(music === undefined)
+        }
+      }
+    }
+  })
+
+  it('names a reply short’s scene under its hook', () => {
+    const files = { 'conversation.json': bank('conversation.json'), 'index.json': bank('index.json') }
+    const pl = longPlan('reply', files, { level: 'N5', part: 1, format: 'short' })
+    const page = describeVideo(pl, timeline(pl), LONG_SITE, FIGURES)
+    const scene = pl.items[0]
+    expect(page.feeds.tiktok.caption.split('\n\n')[1]).toBe(`${scene.place.jp} · ${scene.place.tr}`)
+  })
+
+  it('keeps a 16:9 video’s page YouTube’s alone, and writes a 9:16 one’s three in its text file', () => {
+    const files = { 'conversation.json': bank('conversation.json') }
+    const wide = longPlan('reply', files, { level: 'N5', part: 1 })
+    const page = describeVideo(wide, timeline(wide), LONG_SITE, FIGURES)
+    expect(page.feeds).toBeUndefined()
+    expect(pageFile(page)).toBe(`TITLE\n${page.title}\n\nDESCRIPTION\n${page.description}\n\nTAGS\n${page.tags}\n`)
+    const pl = challengePlan(data, 'n5-02', {})
+    const text = pageFile(challengePage(pl, challengeTimeline(pl), LONG_SITE))
+    expect(text.match(/^(YOUTUBE SHORTS|INSTAGRAM REELS|TIKTOK)$/gm)).toEqual(['YOUTUBE SHORTS', 'INSTAGRAM REELS', 'TIKTOK'])
+    expect(text.match(/^CAPTION$/gm)).toHaveLength(2)
+    expect(text.match(/^TITLE$/gm)).toHaveLength(1)
   })
 })

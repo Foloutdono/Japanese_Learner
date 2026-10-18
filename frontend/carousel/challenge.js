@@ -20,6 +20,7 @@ import { drawPrint } from './app.js'
 import { unpack } from './common.js'
 import { SITE } from './strings.js'
 import { tuneFlag, tuned } from './tune.js'
+import { feedPosts } from './feeds.js'
 
 export const STYLES = ['scroll', 'along']
 // The tracks the studio carries (carousel/music/, its README): the first
@@ -91,6 +92,8 @@ const W = {
     title: (lv, t) => `Can you read this Japanese text? JLPT ${lv} reading challenge: ${t}`,
     body: { scroll: 'Read the text as it scrolls up, then answer the question.', along: 'Read along with the voice, word by word, then answer the question.' },
     site: site => `More texts like this one, each with its questions, on Tsuji: ${site}`,
+    app: 'More texts like this one, each with its questions, on Tsuji.',
+    ask: 'Did you get it right? Tell me in the comments.',
     credit: 'Voice: VOICEVOX Nemo.',
     tags: ['japanese', 'learnjapanese', 'japanesereading', 'jlpt'],
   },
@@ -106,6 +109,8 @@ const W = {
     title: (lv, t) => `Tu arrives à lire ce texte japonais ? Défi lecture JLPT ${lv} : ${t}`,
     body: { scroll: 'Lis le texte pendant qu’il défile, puis réponds à la question.', along: 'Lis avec la voix, mot à mot, puis réponds à la question.' },
     site: site => `D’autres textes comme celui-ci, avec leurs questions, sur Tsuji : ${site}`,
+    app: 'D’autres textes comme celui-ci, avec leurs questions, sur Tsuji.',
+    ask: 'Tu avais trouvé ? Dis-le-moi en commentaire.',
     credit: 'Voix : VOICEVOX Nemo.',
     tags: ['japonais', 'apprendrelejaponais', 'lecturejaponaise', 'jlpt'],
   },
@@ -230,15 +235,21 @@ export function challengeCommand(plan) {
 export function challengePage(plan, tl, site) {
   const S = W[plan.lang]
   const tags = [...S.tags, `jlpt${plan.lv.toLowerCase()}`, '日本語', '読解']
+  const credits = [plan.style === 'along' ? S.credit : null, TRACKS[plan.music]?.credit[plan.lang]].filter(Boolean)
   const lines = [
     `${plan.title} · JLPT ${plan.lv} · ${S.sentences(plan.sents.length)} · ${clock(tl.reading)}`,
     S.body[plan.style],
     S.site(site),
-    plan.style === 'along' ? S.credit : null,
-    TRACKS[plan.music]?.credit[plan.lang],
+    ...credits,
     tags.map(x => `#${x}`).join(' '),
-  ].filter(Boolean)
-  return { title: S.title(plan.lv, plan.title), description: lines.join('\n\n'), tags: tags.join(', ') }
+  ]
+  const page = { title: S.title(plan.lv, plan.title), description: lines.join('\n\n'), tags: tags.join(', ') }
+  // The same video in Reels and on TikTok (plan 251), the comments asked for the answer.
+  const feed = {
+    hook: page.title, lines: [S.body[plan.style]], app: S.app, ask: S.ask, credits,
+    hashtags: [S.tags[1], S.tags[0], S.tags[2], `jlpt${plan.lv.toLowerCase()}`, '日本語'],
+  }
+  return { ...page, feeds: feedPosts(page, feed, plan.lang) }
 }
 
 // ── Drawing ──────────────────────────────────────────────────────

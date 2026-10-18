@@ -1,4 +1,4 @@
-# The carousel studio (plans 229–229n, 231–235, 237, 247–250)
+# The carousel studio (plans 229–229n, 231–235, 237, 247–251)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -853,6 +853,22 @@ cd frontend
 VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --format short --kind kanji --level N5
 node carousel/long/render.mjs --carousel <recipe from the studio>
 ```
+
+**A post for each feed (plan 251).** A 9:16 video (a long video's
+short, a carousel's, a reading challenge) is posted to three feeds, and
+its page carries a post for each (`feeds.feedPosts`): YouTube Shorts,
+the title, description and tags above; Instagram Reels and TikTok, one
+caption each. A caption opens on the hook, what a feed shows before its
+"more"; a reply short names its scene under it. It asks for what the
+feed rewards (a save on Instagram, a comment on TikTok), says the app
+with "Link in bio." since a link in a caption is not one, keeps every
+credit the description has (VOICEVOX Nemo, the music's licence), and
+ends on five hashtags at most, never `#shorts`: Instagram has kept five
+since December 2025, and TikTok's reach falls past about as many. The
+render's text file holds the three, one under the other; the studio
+shows the one picked under the video ("YouTube Shorts", "Instagram
+Reels", "TikTok"), where Reels and TikTok take the caption alone. A
+16:9 video's page stays YouTube's.
 
 ## The reading challenges (plan 247)
 

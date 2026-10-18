@@ -15,6 +15,7 @@ import { formatOf } from './draw.js'
 import { FORMATS, deck } from './slides.js'
 import { depsOf, picked, plan as sourcePlan, sourceOf, titleOf } from './sources.js'
 import { tuned } from './tune.js'
+import { feedPosts } from './feeds.js'
 
 export const SWIPE = 0.35 // a swipe from one slide to the next
 export const FPS = 30
@@ -186,13 +187,23 @@ export function shortPage(pl, type, picks, site, voiced) {
   const fr = pl.lang === 'fr'
   const n = type === 'exam' ? picked(pl, picks, 3).length : 1
   const c = pl.caption
-  const tags = [...(fr ? ['japonais', 'apprendrelejaponais'] : ['japanese', 'learnjapanese']), ...c.tags, '日本語', 'shorts']
+  const base = fr ? ['japonais', 'apprendrelejaponais'] : ['japanese', 'learnjapanese']
+  const tags = [...base, ...c.tags, '日本語', 'shorts']
+  const head = [c.jp, c.romaji, c.tr].filter(Boolean).join('\n')
+  const credit = voiced ? (fr ? 'Voix : VOICEVOX Nemo.' : 'Voices: VOICEVOX Nemo.') : null
   const lines = [
-    [c.jp, c.romaji, c.tr].filter(Boolean).join('\n'),
+    head,
     c.ask,
     `${fr ? 'Continue sur Tsuji' : 'Keep going on Tsuji'}: ${site}`,
-    voiced ? (fr ? 'Voix : VOICEVOX Nemo.' : 'Voices: VOICEVOX Nemo.') : null,
+    credit,
     tags.map(t => `#${t}`).join(' '),
   ].filter(Boolean)
-  return { title: `${titleOf(pl, type, n)} #shorts`, description: lines.join('\n\n'), tags: tags.join(', ') }
+  const hook = titleOf(pl, type, n)
+  const page = { title: `${hook} #shorts`, description: lines.join('\n\n'), tags: tags.join(', ') }
+  // The same short in Reels and on TikTok (plan 251): the item's own two hashtags among the five.
+  const feed = {
+    hook, lines: [head, c.ask], app: fr ? 'Continue sur Tsuji.' : 'Keep going on Tsuji.', credits: [credit],
+    hashtags: [base[1], base[0], ...c.tags.slice(0, 2), '日本語'],
+  }
+  return { ...page, feeds: feedPosts(page, feed, pl.lang) }
 }

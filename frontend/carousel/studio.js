@@ -20,6 +20,7 @@ import { FPS as SHORT_FPS, chars, depsFor as depsOfWord, drawShortFrame, recipeO
 import { LONG_SITE, TALL, describe as describeLong, drawLong, fitShort, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, stillAt, timeline, WIDE } from './long.js'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 import { TUNABLES, changed, tuned, tuneFlag, tunablesFor } from './tune.js'
+import { FEEDS } from './feeds.js'
 
 const STORE = 'tsuji-carousel'
 const $ = sel => document.querySelector(sel)
@@ -49,6 +50,8 @@ const DEFAULTS = {
   challengeStyle: 'scroll',
   // Plan 248: the values tuned in the Tune panel (tune.js), only those changed.
   tune: {},
+  // Plan 251: the feed whose post a 9:16 video's fields hold.
+  feed: 'shorts',
 }
 const state = load()
 // The type drawn: the one chosen (state.type) where the item can be drawn
@@ -69,6 +72,7 @@ function load() {
     if (saved.story && !STORIES.includes(saved.story)) delete saved.story
     if (saved.fit && !FITS.includes(saved.fit)) delete saved.fit
     if (saved.challengeStyle && !CHALLENGE_STYLES.includes(saved.challengeStyle)) delete saved.challengeStyle
+    if (saved.feed && !FEEDS.includes(saved.feed)) delete saved.feed
     // A source, a format or a view saved before a rename is forgotten, not drawn as a blank stage.
     if (saved.source && !SOURCES.some(x => x.id === saved.source)) delete saved.source
     if (saved.format && !(saved.format in FORMATS)) delete saved.format
@@ -471,6 +475,11 @@ async function renderNow() {
   // A video (a long one, a reading challenge) has a page and a command, not slides.
   document.body.dataset.mode = videoSource() ? 'long' : ''
   document.body.dataset.video = state.source === 'challenge' ? 'challenge' : ''
+  // A 9:16 video is posted to three feeds, a post each (plan 251): Reels
+  // and TikTok take a caption alone.
+  const feeds = state.source === 'challenge' || (state.source === 'long' && state.longFormat === 'short')
+  document.body.dataset.feeds = feeds ? 'on' : ''
+  document.body.dataset.post = feeds && state.feed !== 'shorts' ? 'caption' : ''
   if (tuneFor !== state.source) renderTune()
   $('#hour-field').hidden = !['promo', 'challenge'].includes(state.source)
   const funnel = DESIGNS.includes(state.design)
@@ -751,15 +760,8 @@ async function renderLong(mine) {
   })
   draw()
   // The video's page: written when the video or its language changes.
-  const key = `long|${id}|${state.level}|${state.lang}|${state.longFormat}|${state.fit}`
-  if (key !== captionFor) {
-    $('#caption').value = page.description
-    $('#title').value = page.title
-    $('#tags').value = page.tags
-    captionFor = key
-    titleFor = key
-    countTitle()
-  }
+  const key = `long|${id}|${state.level}|${state.lang}|${state.longFormat}|${state.fit}|${state.feed}`
+  if (key !== captionFor) fillPost(page, key)
   $('#command').textContent = longCommand(id, state.level, state.lang, short ? 'short' : 'long', state.fit) + tuneFlag(state.tune, 'long')
 }
 // ── The reading challenges (plan 247) ─────────────────────────
@@ -878,14 +880,8 @@ async function renderChallenge(mine) {
     player.raf = requestAnimationFrame(tick)
   })
   draw()
-  if (key !== captionFor) {
-    $('#caption').value = page.description
-    $('#title').value = page.title
-    $('#tags').value = page.tags
-    captionFor = key
-    titleFor = key
-    countTitle()
-  }
+  // The post, for the feed chosen: a switch of feed keeps the player where it is.
+  if (`${key}|${state.feed}` !== captionFor) fillPost(page, `${key}|${state.feed}`)
   $('#command').textContent = challengeCommand(pl)
   // The scroll is made here, whole; the one read along needs the voice engine.
   $('#export-video').disabled = pl.style !== 'scroll'
@@ -1255,6 +1251,17 @@ function status(msg) {
 }
 
 // ── The caption to post with it ───────────────────────────────
+/** A video's post in the fields: a 16:9 video's YouTube page, a 9:16
+ *  one's for the feed chosen (plan 251). */
+function fillPost(page, key) {
+  const post = page.feeds?.[state.feed] || page
+  $('#caption').value = post.caption ?? post.description
+  $('#title').value = post.title ?? ''
+  $('#tags').value = post.tags ?? ''
+  captionFor = key
+  titleFor = key
+  countTitle()
+}
 function captionOf(pl) {
   const c = pl.caption
   const fr = pl.lang === 'fr'
@@ -1384,7 +1391,7 @@ function wire() {
   $('#export').addEventListener('click', exportZip)
   $('#export-clip').addEventListener('click', () => exportClip('cover'))
   $('#export-end-clip').addEventListener('click', () => exportClip('end'))
-  $('#copy').addEventListener('click', () => copyField('#caption', videoSource() ? 'Description' : 'Caption'))
+  $('#copy').addEventListener('click', () => copyField('#caption', videoSource() && document.body.dataset.post !== 'caption' ? 'Description' : 'Caption'))
   $('#copy-tags').addEventListener('click', () => copyField('#tags', 'Tags'))
   $('#copy-command').addEventListener('click', async () => {
     try { await navigator.clipboard.writeText($('#command').textContent); status('Command copied: run it from frontend/.') } catch { status('Select the command and copy it.') }
