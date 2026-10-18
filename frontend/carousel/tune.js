@@ -30,8 +30,10 @@ function hold(t, v) {
   return +stepped.toFixed(decimals(t.step))
 }
 
-// The sources a carousel is drawn from, and so a short made of one.
-const SLIDES = ['sentence', 'translation', 'lesson', 'word', 'kanji', 'kana', 'passage', 'theme', 'lookalike', 'dialogue', 'trap']
+// Every source drawn as slides, and so a short made of one: any source
+// but the clips and the videos, a source added later included.
+const SLIDES = 'carousel'
+const NOT_SLIDES = new Set(['promo', 'echo', 'long', 'challenge'])
 
 group('Reading challenge', ['challenge'], [
   { key: 'challenge.pace', label: 'Reading pace', unit: '×', def: 1, min: 0.5, max: 1.6, step: 0.05, hint: 'the characters a minute of every level, times this' },
@@ -54,7 +56,7 @@ group('Word echo', ['echo'], [
   { key: 'echo.gap', label: 'Silence between two', unit: 's', def: 0.3, min: 0.1, max: 1.2, step: 0.05 },
   { key: 'echo.keep', label: 'Word kept', unit: 's', def: 3.5, min: 2, max: 7, step: 0.5, hint: 'the ask and the way to the app, last' },
 ])
-group('Short video', SLIDES, [
+group('Short video', [SLIDES], [
   { key: 'short.pace', label: 'Slide held', unit: '×', def: 1, min: 0.6, max: 1.8, step: 0.05, hint: 'each slide’s reading time, times this' },
   { key: 'short.answer', label: 'Time to answer', unit: 's', def: 4, min: 2, max: 8, step: 0.5, hint: 'added on a slide that asks' },
   { key: 'short.limit', label: 'Longest short', unit: 's', def: 59, min: 30, max: 90, step: 1, hint: 'past it, every hold is tightened alike' },
@@ -63,7 +65,7 @@ group('Long video', ['long'], [
   { key: 'long.pause', label: 'Pauses', unit: '×', def: 1, min: 0.5, max: 2, step: 0.05, hint: 'thinking time and the silences between lines' },
   { key: 'long.count', label: 'Quiz countdown', unit: 's', def: 5, min: 3, max: 10, step: 1 },
 ])
-group('Export', [...SLIDES, 'promo', 'echo', 'challenge'], [
+group('Export', [SLIDES, 'promo', 'echo', 'challenge'], [
   { key: 'export.mbps', label: 'Video quality', unit: 'Mb/s', def: 8, min: 4, max: 20, step: 1, hint: 'at thirty frames a second; doubled at sixty' },
   { key: 'export.audio', label: 'Sound quality', unit: 'kb/s', def: 160, min: 96, max: 256, step: 32 },
   { key: 'export.keyframe', label: 'Keyframe every', unit: 's', def: 1, min: 0.5, max: 4, step: 0.5, hint: 'shorter seeks better, longer is smaller' },
@@ -78,7 +80,7 @@ export function tuned(tune, key) {
 }
 
 /** The tunables a source shows in the panel. */
-export const tunablesFor = source => TUNABLES.filter(t => t.sources.includes(source))
+export const tunablesFor = source => TUNABLES.filter(t => t.sources.includes(source) || (t.sources.includes(SLIDES) && !NOT_SLIDES.has(source)))
 
 /** Only the values that differ from their defaults, held to their ranges. */
 export function changed(tune) {
