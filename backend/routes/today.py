@@ -937,11 +937,12 @@ AHEAD_WORDS = 8
 
 def _instants(raw: str) -> list[datetime]:
     now = datetime.now(timezone.utc)
+    # Counted before any is parsed: past the bound, none needs reading.
+    parts = [p.strip() for p in raw.split(",") if p.strip()]
+    if not parts or len(parts) > AHEAD_MAX_POINTS:
+        raise HTTPException(status_code=422, detail=f"between 1 and {AHEAD_MAX_POINTS} instants")
     out = []
-    for part in raw.split(","):
-        part = part.strip()
-        if not part:
-            continue
+    for part in parts:
         try:
             t = datetime.fromisoformat(part.replace("Z", "+00:00"))
         except ValueError:
@@ -951,8 +952,6 @@ def _instants(raw: str) -> list[datetime]:
         if not (now - timedelta(days=1) <= t <= now + timedelta(days=AHEAD_MAX_DAYS)):
             raise HTTPException(status_code=422, detail=f"out of range: {part}")
         out.append(t.astimezone(timezone.utc))
-    if not out or len(out) > AHEAD_MAX_POINTS:
-        raise HTTPException(status_code=422, detail=f"between 1 and {AHEAD_MAX_POINTS} instants")
     return out
 
 
