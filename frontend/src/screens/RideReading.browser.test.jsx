@@ -152,10 +152,60 @@ describe('RideReading', () => {
     expect(root.querySelector('.ride__done-note')).toBeNull()
   })
 
+  // The first ride (App's rideDue): the entry behind it is the front
+  // door, which boarded the ride again from the start when Back landed
+  // there (reported 2026-10-17). So Back is the head's Skip, the
+  // same stamp and the same ride_done; and every way out takes the guard
+  // out of the history first, so nothing of the ride is left behind.
+  it('on the first ride, Back is the head\'s Skip', async () => {
+    serve()
+    const onDone = vi.fn()
+    const screen = await mount({ onDone, first: true })
+    await settle(150)
+    expect(window.history.state?.guard).toBe(true)
+    window.history.back()
+    await settle(200)
+    const done = posts().find(([u]) => u === '/api/onboarding/ride/done')
+    expect(JSON.parse(done[2].body)).toEqual({ skipped: true })
+    expect(onDone).toHaveBeenCalledTimes(1)
+    expect(screen.container.querySelector('.gate-probe')).toBeTruthy()
+    expect(track.mock.calls.find(([n]) => n === 'ride_done')[1]).toMatchObject({ skipped: true, at: 'reading' })
+    expect(window.history.state?.guard).toBeFalsy()
+  })
+
+  it('on the first ride, Enter takes the guard out before it leaves', async () => {
+    serve()
+    const screen = await mount({ first: true, sentence: { ...SENTENCE, display_seconds: 5 } })
+    await settle(150)
+    const root = screen.container
+    type(root.querySelector('input'), 'eki')
+    await settle(50)
+    root.querySelector('.stage__foot button').click()
+    await settle(100)
+    root.querySelector('.rating-bar__btn--q1').click()
+    await settle(100)
+    expect(window.history.state?.guard).toBe(true)
+    root.querySelector('[data-action="enter"]').click()
+    await settle(200)
+    expect(root.querySelector('.gate-probe')).toBeTruthy()
+    expect(window.history.state?.guard).toBeFalsy()
+    expect(track.mock.calls.find(([n]) => n === 'ride_done')[1]).toMatchObject({ skipped: false, at: 'reading' })
+  })
+
+  it('a ride taken again stands no guard: Back goes where it came from', async () => {
+    serve()
+    const length = window.history.length
+    const state = window.history.state
+    await mount()
+    await settle(150)
+    expect(window.history.length).toBe(length)
+    expect(window.history.state).toEqual(state)
+  })
+
   it('Skip stamps the lesson as skipped and leaves for the app', async () => {
     serve()
     const onDone = vi.fn()
-    const screen = await mount({ onDone })
+    const screen = await mount({ onDone, first: true })
     await settle(150)
     screen.container.querySelector('.stage__leave').click()
     await settle(200)
@@ -164,6 +214,8 @@ describe('RideReading', () => {
     expect(onDone).toHaveBeenCalledTimes(1)
     expect(screen.container.querySelector('.gate-probe')).toBeTruthy()
     expect(track.mock.calls.find(([n]) => n === 'ride_done')[1]).toMatchObject({ skipped: true, at: 'reading' })
+    // The first ride's guard went out with it.
+    expect(window.history.state?.guard).toBeFalsy()
   })
 
   // 入門 (plan 170): a learner with no kana was handed the map of the
@@ -196,9 +248,11 @@ describe('RideReading', () => {
       if (String(url).startsWith('/api/onboarding/ride?')) throw new Error('offline')
       return {}
     })
-    const screen = await mount()
+    const screen = await mount({ first: true })
     await settle(200)
     expect(screen.container.querySelector('.gate-probe')).toBeTruthy()
     expect(posts()).toHaveLength(0)
+    // And it leaves no guard of its own behind it.
+    expect(window.history.state?.guard).toBeFalsy()
   })
 })
