@@ -830,11 +830,13 @@ scanner — the pass's contactless arcs it carried read as a speaker's):
   scroll).
 - **One gate, in one place** (plan 168, the owner's word on the built
   boarding: the buttons are the feature that matters most). In the
-  boarding the gate is the foot's last row, so from Board to the pass it
+  boarding the gate is the foot's last row, so from Board to the card it
   stands at the same height and width on every screen; a quiet way — the
-  sign-in, Not now, the account already held, the offer — stands a rung
-  over it, never under, and is drawn as a quiet way (`.brd__link`), never
-  as a second button. Its word is short enough to hold one line beside
+  level's test, the test's own two, Later, the offer — stands a rung
+  over it, never under (on the desk, where a laptop's short window has
+  no rung to spare, on the floor's own row before the way back, plan
+  247), and is drawn as a quiet way (`.brd__link`), never as a second
+  button. Its word is short enough to hold one line beside
   the reader at the gate's own size: a screen whose word will not fit
   gets a shorter word ("Activer le rappel", not a smaller one). Held by
   `src/boarding.phone.test.jsx`.
@@ -1807,11 +1809,15 @@ line here says otherwise.
   put behind a tap — a sheet, a toggle, a second screen — never a
   decoration found to fill it. The plates go two by two with the odd fifth
   across the row (a lattice with no short last row); the profile opens the
-  holder flat, the pass and its stamps at the side column's width beside the
-  record — its lines drawn with a rail per stop, both rankings at once, and
-  no door to Statistics or Settings, which hang under the lit gate on the
-  rail (plan 143); Settings sets its column (the pass and the
-  list, plan 139) beside the open page, neither printing a title.
+  holder flat, whole in the window from the narrowest desk (plan 248, the
+  owner's pick A 一望): the pass, its two doors and its stamps at the side
+  column's width beside the record — the stamp book's three figures
+  opening the records' lattice, its lines drawn with a rail per stop, both
+  rankings at once on one board, the ranks down its middle, and no door to
+  Statistics or Settings, which hang under the lit gate on the rail (plan
+  143), the two columns ending together; Settings sets its column (the
+  pass and the list, plan 139) beside the open page, neither printing a
+  title.
 - **The canvas is `--desk-board-w` (1240px)**, the width a plated screen
   was always allowed, and a second column is **`--desk-side-w` (360px)** —
   a phone's content width, so a phone-born component set in it (the pass's

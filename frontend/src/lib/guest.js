@@ -118,3 +118,24 @@ export async function claimAccount({ email, password, lang }) {
     return { ok: false, message: err?.message }
   }
 }
+
+/**
+ * 本乗車券 by a link (plan 247) — the card's account sheet: an address
+ * and nothing else. Supabase mails it a link; followed, the address is
+ * the account's, on the same id as everything else, so nothing moves.
+ * No password is set, which is the point (the sign-in card mails a link
+ * too, components/account/AuthCard.jsx). The project's "confirm email"
+ * road is claimAccount's, above, refusals and all: `code` is carried out
+ * for lib/authErrors.js.
+ */
+export async function claimByLink({ email, lang }) {
+  try {
+    const { error } = await supabase.auth.updateUser({
+      email, ...(lang ? { data: { lang } } : {}),
+    }, { emailRedirectTo: emailRedirectTarget() })
+    if (error) return { ok: false, code: error.code, message: error.message }
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, message: err?.message }
+  }
+}

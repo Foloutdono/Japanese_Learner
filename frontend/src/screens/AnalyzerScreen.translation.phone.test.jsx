@@ -156,6 +156,32 @@ describe('a video line\'s translation on a phone', () => {
     expect(screen.container.querySelector('.anl-m__subs .anl-subs__line')).not.toBeNull()
     expect(screen.container.querySelector('.anl-m__tr').textContent.trim()).toBe('')
     expect(screen.container.querySelector('[role="alert"]')).toBeNull()
+    // A refusal is an answer: the block is not asked again at every line.
+    screen.container.querySelector('.anl-m__line--next').click()
+    await settle(100)
+    expect(calls('/api/video/session/7/translations')).toHaveLength(1)
+  })
+
+  // A request the link dropped got no answer at all: the block is asked
+  // again at the next line, rather than left untranslated for good.
+  it('asks a block again when its request got no answer', async () => {
+    let drops = 1
+    apiJson.mockImplementation(async url => {
+      if (url === '/api/video/session/7') return SESSION
+      if (url === '/api/video/session/7/translations') {
+        if (drops > 0) {
+          drops -= 1
+          throw new TypeError('Failed to fetch')
+        }
+        return { start: 0, lines: ['La nuit vient', 'Je t’appelle'] }
+      }
+      return {}
+    })
+    const screen = await openVideo()
+    expect(calls('/api/video/session/7/translations')).toHaveLength(1)
+    screen.container.querySelector('.anl-m__line--next').click()
+    await vi.waitFor(() => expect(screen.container.querySelector('.anl-m__tr').textContent).toBe('Je t’appelle'))
+    expect(calls('/api/video/session/7/translations')).toHaveLength(2)
   })
 
   it('is what the explanation\'s sheet quotes, and Explain is told the video too', async () => {

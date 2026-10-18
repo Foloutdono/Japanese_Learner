@@ -1,4 +1,4 @@
-# ── 足跡 — one learner's trail, read back (plan 247) ──
+# ── 足跡 — one learner's trail, read back (plan 249) ──
 # scripts/learner_trail.py is read by a person deciding what to fix, so
 # the way it breaks is a finding that is not there: a renamed property
 # and the ride begun twice reads as a quiet account. These walk a

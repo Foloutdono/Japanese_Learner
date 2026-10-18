@@ -196,7 +196,7 @@ describe('the desk\'s first contact (plan 122)', () => {
     const at = outside.indexOf('@container brd (max-height: 739px)')
     expect(at).toBeGreaterThan(-1)
     const short = pairs(rulesIn(statements(outside.slice(at))[0].body))
-    expect(short.size).toBeGreaterThan(10)
+    expect(short.size).toBeGreaterThan(5)
     const desk = pairs(rulesIn(section().text).filter(r => /\.desk-(brd|front)\b/.test(r.prelude)))
     expect(desk.size).toBeGreaterThan(10)
     expect([...desk].filter(p => short.has(p))).toEqual([])

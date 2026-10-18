@@ -6,10 +6,10 @@ import { LangProvider } from './LangContext'
 import './index.css'
 
 // ── A key that skips a cutscene is spent on it (plan 123) ──────────
-// The 改札, the train door and the arrival each cut to their end on
-// any key, and each plays over a screen that is already mounted: the
-// ride's first card under the gate, a run under the door, the plan
-// under the arrival. The skip never took the key, so the same Space
+// The 改札 and the train door each cut to their end on any key, and
+// each plays over a screen that is already mounted: the ride's first
+// card under the gate, a run under the door (the arrival over the plan
+// went with the plan, plan 247). The skip never took the key, so the same Space
 // also turned the card underneath (and on the desk the same Esc left
 // the ride the gate was opening). Now the key is caught in the capture
 // phase and stopped, and a browser chord still skips without being
@@ -22,7 +22,6 @@ vi.mock('./lib/audio', async o => ({
 vi.mock('./stores/profileSummary', () => ({ useProfileSummary: () => ({ username: 'aiko', level: 3 }) }))
 
 const { TicketGate } = await import('./components/station/TicketGate')
-const { TrainArrival } = await import('./components/onboarding/TrainArrival')
 const { TrainDoor } = await import('./components/station/TrainDoor')
 const { board } = await import('./stores/boarding')
 
@@ -42,11 +41,6 @@ const SCENES = {
   gate: async () => {
     const onDone = vi.fn()
     await render(<LangProvider><TicketGate section={{ color: 'var(--line-kana)', name: 'Kana' }} station={{ code: 'KN' }} onNavigate={() => {}} onDone={onDone} /></LangProvider>)
-    return onDone
-  },
-  arrival: async () => {
-    const onDone = vi.fn()
-    await render(<TrainArrival jp="案内" title="Tour" onDone={onDone} />)
     return onDone
   },
   door: async () => {

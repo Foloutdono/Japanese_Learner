@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { useCredits } from '../../stores/credits'
-import { cardTier, xpClimb } from '../../domain/passCard'
+import { cardTier, holderName, xpClimb } from '../../domain/passCard'
 import { CardFace } from '../pass/PassCard'
 import { PassWave } from '../profile/PassWave'
 import { playGateChime } from '../../lib/audio'
@@ -221,7 +221,8 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
   // The learner's own card (plan 173), face up: their material, the
   // name, the level under it and the road of its struck 辻 filled to the
   // climb -- the face every other screen draws.
-  const holder = summary?.username ?? '—'
+  // The card's own name (plan 247): none prints none.
+  const holder = holderName(summary)
   const level = summary?.level ?? null
   const { share } = xpClimb(summary)
   const tier = cardTier(credits)

@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **248**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **250**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -271,6 +271,14 @@ runtime purpose.
   processes -- a set, or anything built by iterating one, is sorted
   before a seeded random touches it (`tests/test_placement.py` builds
   the climb under two hash seeds).
+- **The card's name is not the handle (plan 247).** `user_profiles.card_name`
+  is the first name a learner's own card prints: any script, up to 24
+  characters (`routes/profile.clean_card_name`), `''` for none and NULL
+  for never asked, which prints the username as before. The username
+  stays the public handle (番付, the library), unique and in Latin
+  letters. Whatever prints the holder of a learner's own card or gate
+  reads `holderName` (`domain/passCard.js`); whatever another learner
+  can see prints the username, never the card's name.
 
 ## Commands
 
@@ -421,7 +429,7 @@ One more is read-only and needs no flag, so it is safe to run at any time:
 ```bash
 python -m scripts.weekly_digest        # the four numbers, as markdown
 python -m scripts.read_feedback        # what learners wrote to us (plan 222), newest first
-python -m scripts.learner_trail <user_id>  # one learner's visits, where they left, and why it may have been (plan 247)
+python -m scripts.learner_trail <user_id>  # one learner's visits, where they left, and why it may have been (plan 249)
 ```
 
 `learner_trail` merges the 足跡 trail with the study tables onto one

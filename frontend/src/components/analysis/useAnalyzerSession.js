@@ -24,6 +24,20 @@ import { videoErrorMessage } from './videoErrors'
 // Passage.
 
 const POLL_MS = 1200
+// A poll that got no answer is asked again, a little later each time,
+// for about a minute before the session is given up on.
+const RETRIES = 8
+const RETRY_CAP_MS = 10000
+
+// A failure that says nothing about the session: no answer at all (the
+// link dropped), a token being mended (lib/api refreshes it on a 401),
+// too many requests at once, or a server or its gateway down a moment.
+// A 503 carrying the stored failure is the session's own.
+function transient(e) {
+  if (e?.status == null) return e?.name !== 'AbortError'
+  if (e.status === 401 || e.status === 408 || e.status === 429) return true
+  return e.status >= 500 && e.body?.status !== 'failed'
+}
 
 /** An empty Passage, so callers never have to null-check the shape. */
 function emptyPassage() {
@@ -79,46 +93,56 @@ export function useAnalyzerSession(session) {
   // Each entry carries a `kind`: 'passage' or 'session'. That field is
   // what decides how a row is reopened, and it is the ONLY place the
   // difference shows.
+  //
+  // A half that cannot be asked (the link dropped, a server error) keeps
+  // the rows already in hand: read as an empty list, it unmarked every
+  // kept sentence each time a poor connection dropped a refresh -- and a
+  // refresh comes on every return to the tab (a new session object).
   const fetchHistory = useCallback(() => {
+    const rows = path => apiFetch(path, session)
+      .then(r => (r.ok ? r.json() : null))
+      .then(list => (Array.isArray(list) ? list : null))
+      .catch(() => null)
     return Promise.all([
-      apiFetch('/api/phrase/history', session)
-        .then(r => (r.ok ? r.json() : []))
-        .catch(() => []),
-      apiFetch('/api/video/sessions', session)
-        .then(r => (r.ok ? r.json() : []))
-        .catch(() => []),
+      rows('/api/phrase/history'),
+      rows('/api/video/sessions'),
     ]).then(([passages, sessions]) => {
-      const merged = [
-        ...passages.map(p => ({
-          kind: 'passage',
-          id: p.id,
-          label: p.phrase,
-          source: p.source,
-          createdAt: p.created_at,
-          kept: p.kept,
-        })),
-        ...sessions.map(s => ({
-          kind: 'session',
-          id: s.id,
-          label: s.sourceRef,
-          source: s.source,
-          createdAt: s.createdAt,
-          sentenceCount: s.sentenceCount,
-          videoId: s.videoId,
-          // The first sentence (plan 136), what a card prints in place
-          // of the file name the grab gave the session.
-          firstLine: s.firstLine ?? null,
-        })),
-      ]
-      merged.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      setHistory(merged)
-      setKept(new Set(
-        merged.filter(h => h.kind === 'passage' && h.kept).map(h => h.label),
-      ))
-    }).catch(() => setHistory([]))
+      if (passages === null && sessions === null) return
+      setHistory(prev => mergeHistory(prev, passages, sessions))
+      if (passages !== null) {
+        setKept(new Set(passages.filter(p => p.kept).map(p => p.phrase)))
+      }
+    })
   }, [session])
 
   useEffect(() => { fetchHistory() }, [fetchHistory])
+
+  function mergeHistory(prev, passages, sessions) {
+    const merged = [
+      ...(passages === null ? prev.filter(h => h.kind === 'passage') : passages.map(p => ({
+        kind: 'passage',
+        id: p.id,
+        label: p.phrase,
+        source: p.source,
+        createdAt: p.created_at,
+        kept: p.kept,
+      }))),
+      ...(sessions === null ? prev.filter(h => h.kind === 'session') : sessions.map(s => ({
+        kind: 'session',
+        id: s.id,
+        label: s.sourceRef,
+        source: s.source,
+        createdAt: s.createdAt,
+        sentenceCount: s.sentenceCount,
+        videoId: s.videoId,
+        // The first sentence (plan 136), what a card prints in place
+        // of the file name the grab gave the session.
+        firstLine: s.firstLine ?? null,
+      }))),
+    ]
+    merged.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    return merged
+  }
 
   function beginRun() {
     runIdRef.current += 1
@@ -341,15 +365,25 @@ export function useAnalyzerSession(session) {
   }
 
   // ── The poll ──────────────────────────────────────────────
+  // Keyed on the session id alone. Supabase hands the app a new session
+  // object on every token refresh and every return to the tab -- the
+  // same sign-in -- and a ready Passage asked for again on it put the
+  // line back on its first stop under a playing video, or, the request
+  // dropped on a poor connection, took the Passage and its player off
+  // the screen. The poll asks with the session current when it asks.
+  const sessionRef = useRef(session)
+  useEffect(() => { sessionRef.current = session })
   useEffect(() => {
     if (videoSessionId == null) return undefined
     let cancelled = false
     let timer = null
+    let misses = 0
 
     async function poll() {
       try {
-        const data = await apiJson(`/api/video/session/${videoSessionId}`, session)
+        const data = await apiJson(`/api/video/session/${videoSessionId}`, sessionRef.current)
         if (cancelled) return
+        misses = 0
         // "Still generating" arrives as HTTP 202 -- which is a SUCCESS
         // status, so apiJson RESOLVES with {status: 'generating'} and
         // the catch below never sees it. This used to be handled as
@@ -381,6 +415,11 @@ export function useAnalyzerSession(session) {
         setStatus('ready')
       } catch (e) {
         if (cancelled) return
+        if (transient(e) && misses < RETRIES) {
+          misses += 1
+          timer = setTimeout(poll, Math.min(POLL_MS * 2 ** (misses - 1), RETRY_CAP_MS))
+          return
+        }
         // A failed session is a 503 whose body is the stored failure:
         // its `code` is worded below, its English `error` is the logs'.
         setError({ video: e })
@@ -395,7 +434,7 @@ export function useAnalyzerSession(session) {
     // mid-generation leaves a request loop running for the life of the
     // screen.
     return () => { cancelled = true; if (timer) clearTimeout(timer) }
-  }, [videoSessionId, session])
+  }, [videoSessionId])
 
   // ── The deep tier, one Sentence at a time ─────────────────
   // Never the whole Passage: it can be up to study/sentences

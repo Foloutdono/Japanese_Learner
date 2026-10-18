@@ -1,6 +1,6 @@
 """
 One learner's whole trail, in order: every visit, what they did in it,
-where they stopped, and what in the trail may say why (plan 247).
+where they stopped, and what in the trail may say why (plan 249).
 
     python -m scripts.learner_trail <user_id>           # the report, as markdown
     python -m scripts.learner_trail <user_id> --all     # every event, none folded

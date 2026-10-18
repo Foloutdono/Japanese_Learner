@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { useLang } from '../../LangContext'
 import { playFareTick, playLevelCharge, playLevelBurst, FARE_BEAT } from '../../lib/audio'
 import { rewardTier } from '../../domain/rewardTier'
-import { cardTier, xpClimb } from '../../domain/passCard'
+import { cardTier, holderName, xpClimb } from '../../domain/passCard'
 import { crossShare } from '../offers/markParts'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { useCredits } from '../../stores/credits'
@@ -210,7 +210,7 @@ function RewardScene({ toast, dock, onDone }) {
       <div className="levelup__shake">
         <CardFace
           tier={material}
-          name={summary?.username ?? ''}
+          name={holderName(summary)}
           level={level}
           share={0}
           className="levelup__card"
