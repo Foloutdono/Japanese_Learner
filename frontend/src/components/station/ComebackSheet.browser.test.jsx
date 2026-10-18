@@ -17,6 +17,7 @@ const refreshToday = vi.fn(async () => {})
 vi.mock('../../stores/today', () => ({
   useTodaySummary: () => ({ data: todayRef.current, failed: false }),
   refreshToday: (...a) => refreshToday(...a),
+  refetchToday: vi.fn(() => Promise.resolve()),
   seedTodaySummary: vi.fn(),
 }))
 vi.mock('../../stores/profileSummary', async (o) => ({ ...(await o()),

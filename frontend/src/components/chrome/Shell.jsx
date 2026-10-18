@@ -10,7 +10,7 @@ import { Hud } from './Hud'
 import { TabBar } from './TabBar'
 import { DeskRail } from './DeskRail'
 import { useChrome } from './useChrome'
-import { useStaged } from '../../stores/stage'
+import { useChromeArriving, useChromeAwayState, useStaged } from '../../stores/stage'
 
 // ── 車内 — the two frames every screen renders in (plan 068) ──
 // The canvas's backbone: the HUD across the top (level · goal status ·
@@ -64,6 +64,11 @@ export function Shell() {
   // A screen that takes the stage (stores/stage.js, plan 219) is drawn
   // without the two bars on a phone, as a run is; the desk keeps its rail.
   const staged = useStaged() && !desk
+  // The day cleared (plan 250) sends the bars away in their places and
+  // draws them back in: their room stays, so the print under the screen
+  // never moves (stores/stage.js).
+  const away = useChromeAwayState() && !desk && !staged
+  const arriving = useChromeArriving() && !desk && !staged && !away
   useChrome(staged ? 'stage' : 'shell')
   const { pathname } = useLocation()
   const navigate = useNavigate()
@@ -90,12 +95,12 @@ export function Shell() {
   // The flick is the phone's: it walks the tab bar's row, and the
   // desk has no row to walk — its gates are a column, in another order.
   // Nor on a stage: a flick there belongs to the screen.
-  useGateSwipe(content, step, !departing && !desk && !staged)
+  useGateSwipe(content, step, !departing && !desk && !staged && !away)
 
   return (
     <div className={desk ? 'phone phone--desk' : staged ? 'phone phone--staged' : 'phone'}>
       <SkipLink />
-      {desk ? <DeskRail /> : staged ? null : <Hud />}
+      {desk ? <DeskRail /> : staged ? null : <Hud away={away} arrive={arriving} />}
       <div
         ref={content}
         className="phone__content"
@@ -107,7 +112,7 @@ export function Shell() {
       >
         <Outlet />
       </div>
-      {desk || staged ? null : <TabBar />}
+      {desk || staged ? null : <TabBar away={away} arrive={arriving} />}
     </div>
   )
 }
@@ -120,13 +125,4 @@ export function StageFrame() {
       <Outlet />
     </div>
   )
-}
-
-// ── 終着 — the day cleared's frame (plan 191) ──
-// The finish of the day's run (/today/clear) is drawn as the canvas drew
-// it: on a phone full screen, as a run's stage (no HUD, no tab bar); on
-// the desk beside the real rail, the ceremony in the content area. One
-// layout route answering by the width, so the one route is both.
-export function DeskShellStage() {
-  return useDesk() ? <Shell /> : <StageFrame />
 }

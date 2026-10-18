@@ -4333,18 +4333,6 @@
     "fr": "Cette chemise est un peu petite."
    }
   ],
-  "お目出度う::おめでとう": [
-   {
-    "jp": "「合格したんだって？お目出度う！」",
-    "en": "\"I heard you passed? Congratulations!\"",
-    "fr": "« Il paraît que tu as réussi ? Félicitations ! »"
-   },
-   {
-    "jp": "お誕生日お目出度うございます。素敵な一年になりますように。",
-    "en": "Happy birthday. I hope you have a wonderful year.",
-    "fr": "Joyeux anniversaire. Je vous souhaite une merveilleuse année."
-   }
-  ],
   "お祝い::おいわい": [
    {
     "jp": "友だちの新しい店のお祝いに、花を送りました。",
@@ -5701,30 +5689,6 @@
     "fr": "Pendant la guerre froide, l'Europe était divisée entre le bloc communiste à l'est et les pays occidentaux."
    }
   ],
-  "其れから::それから": [
-   {
-    "jp": "駅で友達と会って、それから一緒に映画を見に行った。",
-    "en": "I met my friend at the station, and then we went to see a movie together.",
-    "fr": "J'ai retrouvé mon ami à la gare, puis nous sommes allés voir un film ensemble."
-   },
-   {
-    "jp": "「それから、どうなったの？」と、娘は話の続きをせがんだ。",
-    "en": "\"And then what happened?\" my daughter asked, begging for the rest of the story.",
-    "fr": "« Et après, qu'est-ce qui s'est passé ? » m'a demandé ma fille, impatiente d'entendre la suite."
-   }
-  ],
-  "其れでは::それでは": [
-   {
-    "jp": "其れでは、本日の会議を始めます。",
-    "en": "Well then, we will now begin today's meeting.",
-    "fr": "Bien, nous allons commencer la réunion d'aujourd'hui."
-   },
-   {
-    "jp": "「午後は雨になりそうですね。」「其れでは、出かけるのは明日にしましょう。」",
-    "en": "\"It looks like it's going to rain this afternoon.\" \"In that case, let's go out tomorrow instead.\"",
-    "fr": "« On dirait qu'il va pleuvoir cet après-midi. » « Dans ce cas, sortons plutôt demain. »"
-   }
-  ],
   "具体::ぐたい": [
    {
     "jp": "旅行の計画を具体的に決めよう。",
@@ -6503,18 +6467,6 @@
     "jp": "遠くにいる友だちの名前を叫んだ。",
     "en": "I shouted the name of my friend, who was far away.",
     "fr": "J'ai crié le nom de mon ami, qui était loin."
-   }
-  ],
-  "可成::かなり": [
-   {
-    "jp": "今日の試験は、思っていたより可成難しかった。",
-    "en": "Today's exam was quite a bit harder than I had expected.",
-    "fr": "L'examen d'aujourd'hui était bien plus difficile que je ne le pensais."
-   },
-   {
-    "jp": "この町は、十年前と比べて可成変わった。",
-    "en": "This town has changed considerably compared with ten years ago.",
-    "fr": "Cette ville a beaucoup changé par rapport à il y a dix ans."
    }
   ],
   "司法::しほう": [

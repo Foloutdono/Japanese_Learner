@@ -821,6 +821,27 @@ MOVES: dict[str, str] = {
     "vocab_N1_仮令_たとえ": "vocab_N3__たとえ",
     "vocab_N1_お蔭_おかげ": "vocab_N4__おかげ",
     "vocab_N1_百科辞典_ひゃっかじてん": "vocab_N1_百科事典_ひゃっかじてん",
+
+    # ── The content audit's second placement run (#360) ──────────
+    # そして was the N1 然して, a spelling JMdict marks rare for a word
+    # it marks usually kana, and the N5 lesson of そして teaches it beside
+    # それから and しかし, both N5 kana cards: down to N5 in kana, as
+    # 然し went to しかし in plan 112. 其れから, 其れでは, 可成 and
+    # お目出度う were second cards, at N1, for kana cards the deck already
+    # has lower; JMdict's row for each is a redirect to the kana word.
+    # (嗚呼 stays: the N4 ああ is the adverb "like that", not the "ah!".)
+    "vocab_N1_然して_そして": "vocab_N5__そして",
+    "vocab_N1_其れから_それから": "vocab_N5__それから",
+    "vocab_N1_其れでは_それでは": "vocab_N5__それでは",
+    "vocab_N1_可成_かなり": "vocab_N3__かなり",
+    "vocab_N1_お目出度う_おめでとう": "vocab_N3__おめでとう",
+    # The spelling a learner meets: 取引 is JMdict's first form and the
+    # one the reading bank writes, four times out of four; 追いかける is
+    # 448 of the subtitles' 457; とりあえず is usually kana in JMdict and
+    # the course's own sentences write it so.
+    "vocab_N1_取り引き_とりひき": "vocab_N1_取引_とりひき",
+    "vocab_N2_追い掛ける_おいかける": "vocab_N2_追いかける_おいかける",
+    "vocab_N1_取りあえず_とりあえず": "vocab_N1__とりあえず",
 }
 
 # MOVES keys that are not a spelling of their target. The move carries

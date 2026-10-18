@@ -1621,28 +1621,38 @@ moments, three objects, none waiting to be dismissed:
 So nothing holds the queue. Every reward plays over the next card, because
 a learner who has just rated one card is already looking for the next.
 
-**The one ceremony: the cleared day (終着, plan 191).** The owner's ruling
-on the canvas "Tsuji — the day cleared" (2026-10-07): clearing the day's
-queue is the app's biggest win — the learner showed up and finished — and
-it is the one moment that is a ceremony, played after the last card, when
-nothing is waiting. The run's cards go through the gate's reader one by
-one into their piles (À revoir · Justes · Parfaites, the verdicts' inks;
-two piles when the learner's bar has no Perfect), the day's 駅スタンプ is
-slammed onto the place the reader left and flies into the week of stamps,
-and the fare — the run's XP and the streak's prime (25 + 5 a day, up to 60
-days) — counts into a gold total that keeps a slow shimmer while it rests.
-A streak milestone takes the stamp's hand: 3, 7 and 14 days a paper 硬券
-fed by the ticket machine and clipped by the 改札鋏, 30 days and on a
-night of 花火 over the station and a gold ticket — with the milestone's
-jackpot. The rest state *is* the review: the piles open their cards,
-tomorrow is one dashed line. A tap, a click or Enter skips to it at any
-moment; under reduced motion it is drawn at once, fades only. A run that
-ends with cards still due is a 途中下車, not a finish: no stamp, the
-teaser of what clearing would pay, Continue as the one action. The
-stamps are the People family (stamp ink); gold stays the XP's and the
-gate's, and the 30-day ticket's foil and the fireworks are the pass's
-metal caught in the sky. Components in `components/dayclear/`, CSS in the
-`191:*` regions of `index.css`.
+**The one ceremony: the cleared day (終着, plans 191, 250).** The owner's
+ruling on the canvas "Tsuji — the day cleared" (2026-10-07): clearing the
+day's queue is the app's biggest win — the learner showed up and finished —
+and it is the one moment that is a ceremony, played after the last card,
+when nothing is waiting. Since plan 250 (the owner's picks of "Tsuji — the
+day cleared, new directions", 2026-10-18) it plays **on Today's print
+itself and ends as Today**: the run comes back to the gate (`/today/clear`
+is the same screen), the phone's bars step away in their places while it
+plays and are drawn back in at its chrome beat, so nothing on the print
+moves, and every part stands in the print's units. Every day the day's
+駅スタンプ is slammed onto the sun or the moon, the dial's ring turning in
+round it; under it what the day was, the fare and the streak's prime
+(25 + 5 a day, up to 60 days), the week's stamp pressed; the board over
+the shut gate takes the run's wrong pile (À revoir, a door to its cards).
+A streak's ticket (3, 7 and 14 days) sends a crane a day of the streak
+across the sky and comes to the board as a punched 硬券 with its jackpot;
+a month (30 days and on) lets night fall, on the print and in the lake's
+ambiance alike, sets a lantern a day on the lake (灯籠流し) and raises
+the gold ticket out of their light under the moon, clipped by the 改札鋏. The fare is said once, whole, on the pass at
+its beat (`stores/fare.js`). A tap, a click or Enter skips to the rest at
+any moment, silently; under reduced motion it is drawn at once, fades
+only. A run that ends with cards still due is a 途中下車, not a finish:
+no stamp, the dial's thin ring the day's thread with a stop where the run
+left it, what clearing would pay under it, Continue as the one action.
+The stamps are the People family (stamp ink); gold stays the XP's and the
+gate's, the gold ticket's foil is the pass's metal, and the cranes and the
+lanterns are drawn things with their own colours, as the print's are.
+The beats are `components/dayclear/useFinish.js`'s, the parts
+`FinishSky.jsx` and `FinishBoard.jsx` beside it, placed by
+`components/station/GateCard.jsx`; the CSS is the `250:finish` region of
+`index.css`, over the kit's `191:primitives`, and `/dev/dayclear` plays
+every finish with no backend.
 
 ## Structure
 

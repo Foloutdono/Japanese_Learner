@@ -3038,13 +3038,7 @@ const nyumon = {
 
 // ── 191:primitives ──
 const clrPrimitives = {
-  clrStreakWord: 'jours de suite',
-  clrStreakDays: n => `${n}\u00a0jour${n === 1 ? '' : 's'} de suite`,
   clrXpUnit: 'xp',
-  clrFareRun: 'trajet',
-  clrFarePrime: 'prime de série',
-  clrFareTicket: 'billet',
-  clrPrimeChip: 'prime de série',
   // The week, said for a screen reader: its parts joined (week row).
   clrWeekAria: parts => `Semaine : ${parts.join(', ')}`,
   clrWeekStamped: (from, to) => (from === to ? `${from} tamponné` : `${from} à ${to} tamponnés`),
@@ -3052,104 +3046,53 @@ const clrPrimitives = {
   clrWeekRest: day => `${day} couvert par un jour de repos`,
   clrWeekToday: day => `${day} aujourd’hui`,
   clrSealAria: date => `Tampon du jour : gare de Tsuji, ${date}`,
-  clrLevelAria: (level, pct) => `Niveau ${level}, ${pct}\u00a0% vers le niveau ${level + 1}`,
   // A ticket's caption: "7 jours de suite", a month's and a year's by name.
   clrTicketCaption: days => (days === 30 ? 'Un mois de suite' : days === 365 ? 'Un an de suite' : `${days} jours de suite`),
-  clrTicketAria: (days, no, date) => `Billet des ${days} jours, numéro ${no}, émis le ${date}`,
-  clrKeep: 'Garder le billet',
-  clrShare: 'Partager',
 }
 // ── 191:primitives end ──
 
 
 
 
-// ── 191:day ──
+// ── 191:piles ──
+// The piles' names and a pile's sheet (PileSheet): the À revoir row of
+// the finish opens the run's wrong pile there (plan 250).
 const clrDay = {
-  clrTripOfDay: 'Le trajet du jour',
-  clrTitle: 'Service terminé',
   clrPiles: ['À revoir', 'Justes', 'Parfaites'],
-  clrPileAria: (name, n) => `${name} : ${n} carte${n === 1 ? '' : 's'}`,
-  clrVerdicts: ['à revoir', 'juste', 'parfaite'],
-  clrCardUp: 'monte d’une étape',
-  clrCardMastered: 'maîtrisée',
-  clrSumUp: n => (n === 1 ? 'monte' : 'montent'),
-  clrSumMastered: n => (n === 1 ? 'maîtrisée' : 'maîtrisées'),
-  clrSumMin: 'min',
-  clrTomorrow: (cards, min) => `Demain · ~${cards} carte${cards > 1 ? 's' : ''} · ${min} min`,
-  clrTomorrowDay: day => `Demain · ${day}`,
-  clrTomorrowSub: (cards, min) => `~${cards} carte${cards > 1 ? 's' : ''} · ${min} min`,
-  // "7ᵉ jour : billet de la semaine +250 xp": the ordinal's suffix is
-  // set as a superscript, the jackpot in gold, by the component.
-  clrOrdinalSuffix: n => (n === 1 ? 'er' : 'e'),
-  clrNextDay: ' jour : ',
-  clrNextTicketName: days => (days === 7 ? 'billet de la semaine' : days === 30 ? 'billet du mois' : days === 365 ? 'billet de l’année' : `billet des ${days} jours`),
-  clrNextTicketAria: days => `Billet des ${days} jours, à gagner demain`,
-  clrNextTag: 'demain',
-  clrRestTitle: 'Jours de repos',
-  clrRestHeld: 'en réserve',
-  clrRestFirstAt: 'le premier au',
-  clrRestNextAt: 'le prochain au',
-  clrRestDayWord: ' jour',
-  clrRestFirst: n => `le premier au ${n}ᵉ jour`,
-  clrRestNext: n => `le prochain au ${n}ᵉ jour`,
-  // The desk's board (ClearDesk): the grid named for a screen reader,
-  // the streak's word by its count, the ticket to come when it is not
-  // tomorrow's, the rest day's line in parts (the ordinal's suffix set
-  // as a superscript), and a tomorrow with nothing due.
-  clrDeskGridAria: n => (n === 1 ? 'La carte du trajet' : `Les ${n} cartes du trajet`),
-  clrDeskStreakWord: n => (n === 1 ? 'jour de suite' : 'jours de suite'),
-  clrDeskNextIn: n => `dans ${n}\u00a0j`,
-  clrDeskNextAria: (days, inDays) => `Billet des ${days} jours, à gagner ${inDays === 1 ? 'demain' : `dans ${inDays} jours`}`,
-  clrDeskRestAt: (n, first) => ({ pre: first ? 'le premier au ' : 'le prochain au ', sup: n === 1 ? 'er' : 'e', post: ' jour' }),
-  clrDeskTomorrowNone: 'Rien de prévu',
-  // ClearPhone (the board Main): the streak's word beside its figure,
-  // tomorrow with nothing due, a pile's list of cards.
-  clrStreakWordN: n => (n === 1 ? 'jour de suite' : 'jours de suite'),
-  clrTomorrowNone: 'Demain · rien de prévu',
   clrPileCount: n => `${n}\u00a0carte${n === 1 ? '' : 's'}`,
   clrPileEmpty: 'Aucune carte',
   clrPileOpen: term => `Ouvrir ${term} dans le dictionnaire`,
 }
-// ── 191:day end ──
+// ── 191:piles end ──
 
 
 
 
-// ── 191:partial ──
-const clrPartial = {
-  ptlTitle: 'Trajet terminé',
-  ptlRunAria: 'Ce trajet',
-  ptlReviews: 'révisions',
-  ptlRight: 'justes',
-  ptlDayAria: 'La journée',
-  ptlLoopAria: (done, total, left) => `${done} carte${done > 1 ? 's' : ''} sur ${total} aujourd’hui ; le tampon du jour attend au bout ${left === 1 ? 'de la dernière' : `des ${left} autres`}`,
-  ptlLeft: n => (n === 1 ? 'carte reste aujourd’hui' : 'cartes restent aujourd’hui'),
-  ptlTease: min => `~${min}\u00a0min pour le tampon du jour et la prime de série`,
-  ptlContinue: n => `Continuer · ${n} carte${n === 1 ? '' : 's'}`,
-  // The tease on a milestone's eve, and with no pace to time it by.
-  ptlTeaseTicket: (min, name) => `~${min}\u00a0min pour le tampon du jour et le ${name}`,
-  ptlTeaseNoMin: 'Au bout : le tampon du jour et la prime de série',
-  ptlTeaseTicketNoMin: name => `Au bout : le tampon du jour et le ${name}`,
+// ── 250:finish ──
+// The finish played on Today (components/dayclear/useFinish.js and its
+// parts): the day's fare under the dial, the board's rows, the month's
+// ticket and the rest day it brought, the partial run's line and its
+// thread, and what the sky's crossings say to a screen reader.
+const clrFinish = {
+  // "+252 xp · dont +55 de prime de série": the figures set in gold.
+  finFareOf: 'dont',
+  finFarePrime: 'de prime de série',
+  finMissGo: 'Revoir',
+  finTicketName: days => (days === 7 ? 'Billet de la semaine' : days === 30 ? 'Billet du mois' : days === 365 ? 'Billet de l’année' : `Billet des ${days} jours`),
+  finTicketAria: (days, jackpot, rest) => `${days === 7 ? 'Billet de la semaine' : `Billet des ${days} jours`} : +${jackpot} xp${rest ? ', +1 jour de repos' : ''}`,
+  finShare: 'Partager le billet',
+  finShareGo: 'Image',
+  finRestLine: held => `+1 jour de repos · ${held} en réserve`,
+  finMonthTicketAria: (days, jackpot) => `${days === 30 ? 'Billet du mois' : days === 365 ? 'Billet de l’année' : `Billet des ${days} jours`}, ${days === 30 ? 'un mois de suite' : days === 365 ? 'un an de suite' : `${days} jours de suite`} : +${jackpot} xp`,
+  finCranesAria: n => `${n} grue${n === 1 ? '' : 's'} traverse${n === 1 ? '' : 'nt'} le ciel, une par jour de suite`,
+  finLanternsAria: n => (n >= 365 ? 'Une rivière de lanternes sur le lac, une année de jours' : `${n} lanternes sur le lac, une par jour`),
+  // "≈ 5 min pour le tampon du jour · +55 xp" under the open gate's dial.
+  finStake: 'pour le tampon du jour',
+  finThreadDone: n => (n === 1 ? 'faite' : 'faites'),
+  finThreadLeft: n => (n === 1 ? 'reste' : 'restent'),
+  finContinue: 'Continuer',
 }
-// ── 191:partial end ──
-
-
-
-
-// ── 191:milestones ──
-const clrMilestones = {
-  msRestEarned: 'jour de repos',
-  msRestNote: 'Si tu manques un jour, ta série tient.',
-  msWeekFullAria: (from, to) => `Semaine complète : sept jours tamponnés, de ${from} à ${to}`,
-  // The jackpot's caption while it counts: the month's, the year's, else the days'.
-  msTicketLabel: days => (days === 30 ? 'Billet du mois' : days === 365 ? 'Billet de l’année' : `Billet des ${days} jours`),
-  msSheetAria: (n, from, to) => `Carnet de tampons : ${n} jours de suite, du ${from} au ${to}`,
-  msTotalAria: (total, run, prime, ticket, days = 30) => `+${total} xp : +${run} trajet, +${prime} prime de série, +${ticket} ${days === 30 ? 'billet du mois' : days === 365 ? 'billet de l’année' : `billet des ${days} jours`}`,
-  msFareAria: (n, days = 30) => `+${n} xp, ${days === 30 ? 'billet du mois' : days === 365 ? 'billet de l’année' : `billet des ${days} jours`}`,
-  msTicketMonthAria: (no, date) => `Billet du mois : un mois de suite, numéro ${no}, émis le ${date}`,
-}
-// ── 191:milestones end ──
+// ── 250:finish end ──
 
 
 
@@ -3371,8 +3314,7 @@ export default welded({
   ...guide,
   ...clrPrimitives,
   ...clrDay,
-  ...clrPartial,
-  ...clrMilestones,
+  ...clrFinish,
   ...clrRestday,
   ...clrTickets,
   ...reviewPlan,

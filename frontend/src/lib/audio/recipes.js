@@ -738,9 +738,10 @@ const EVENTS = [
     //
     // Plan 200: the level-up no longer plays it (its voice is
     // `level-burst`, below, since plan 173 made the level the card's
-    // engraving and not a punch). The milestone tickets' clipper
-    // (MilestoneTicket, MilestoneMonth) is the punch still, and this is
-    // its voice.
+    // engraving and not a punch). The streak tickets' punch on Today's
+    // board and the month ticket's clipper (plan 250, components/
+    // dayclear/FinishBoard.jsx) are the punch still, and this is its
+    // voice.
     key: 'pass-clip', category: 'ui', family: 'rewards', meter: 'peak',
     label: 'Gate punch', jp: '改札鋏', where: 'The gate\'s punch clipping a streak\'s ticket (it clipped your pass as the level turned over until plan 200)',
     variants: [
