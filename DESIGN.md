@@ -1327,13 +1327,13 @@ Today's column's width (`components/practice/gate/DeskGate`):
 - **The open door shows the car's inside as the owner painted it**
   (plan 244c, `source/interior.webp`): shown narrower than painted,
   never squeezed (plain columns let out between its rings, posters and
-  stanchions), and lit at each hour as the car is lit, its far window
-  showing the hour's sky behind the trees and, after dark, the lit car
-  faintly in the glass. After dark the car's other windows look across
-  it: the strap rail and its rings along the car, the far wall, one far
-  window across from each window (its panes as many, a stretch of the
-  hour's own sky and trees of its own) and the far seats' backs -- never
-  a copy of the doorway in each pane.
+  stanchions), and lit at each hour as the car is lit.
+- **Every window is the painting's** (owner-directed): the trees it
+  shows through the car, in each window and the doorway's far one, at
+  every hour, their colours kept and only the light changed, with what
+  the hour puts on the glass -- its sky fading down the pane, a soft
+  sheen, after dark the lit car's warmth and its tubes along each pane's
+  top. Never a view built for the window.
 
 ## Space
 

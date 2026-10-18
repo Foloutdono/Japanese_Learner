@@ -11,8 +11,9 @@ revision the app asks for and where the scene keeps what the app draws
 over it or reads to fit it (the car, the door, the clock, the sign, the
 pillars). The day is the painting itself; dawn, dusk and night are it
 lit again by the phone's own recipes (hours.py), on this painting's
-parts (desk_parts.py), the car's windows showing its lit inside as the
-open doorway does (lit_windows). Needs numpy, Pillow and
+parts (desk_parts.py), every window showing the trees the painting
+shows through the car, lit for the hour, with the hour's light on its
+glass (windows_at). Needs numpy, Pillow and
 opencv-contrib-python-headless, as build.py does.
 
 A change to anything it writes bumps REV: the layers are cached under
@@ -31,7 +32,7 @@ sys.path.insert(0, str(HERE))
 import clouds                   # noqa: E402
 import desk_cut as cut          # noqa: E402
 import desk_parts as parts      # noqa: E402
-from hours import Geometry, Lighter, HOUR_ORDER   # noqa: E402
+from hours import Geometry, Lighter, HOUR_ORDER, lin, srgb   # noqa: E402
 
 REV = 4
 FRONT = HERE.parent.parent
@@ -136,36 +137,22 @@ AMBIENT = {'dawn': (0.80, 0.75, 0.86), 'dusk': (0.74, 0.60, 0.58), 'night': (0.3
 # the white letters keep their light, the steel round the panel is steel.
 SIGN_LIT = {'dawn': 0.86, 'dusk': 0.8, 'night': 0.62}
 SIGN_FRAME = 7                # px: the steel ring round a sign's panel, twice over and one
-# The open doorway's inside between its two stanchions, whose wall over
-# the far window it mirrors after dark.
-INTERIOR = (cut.STANCHIONS[0] + 4, cut.STANCHIONS[1] - 3)
 # The sun the painted inside has on its floor, after dark the lamps': how
 # much of the floor's light above its own middle each hour keeps.
 FLOOR_SHINE = {'dawn': 0.55, 'dusk': 0.5, 'night': 0.4}
 SILL = 8                      # px: the yellow edge and the sill, under the floor, keep theirs
-DOOR_VIEW = 1500              # where in the scene the doorway's far window's stretch begins
-# What the car's side windows show after dark (across): measured on the
-# inside's picture -- a plain stretch of its wall, one ring's bay (rail,
-# hanger and ring) and its rows in the scene, one cushion -- how much of
-# a window's width the far window across from it fills, how far apart a
-# window's panes may stand and still be one window, the far window's
-# frame (px), the scene's rows its view is taken from, and how much of
-# the doorway's mirroring its glass keeps.
-WALL_COLS = (403, 415)
-RING_BAY = (340, 398)
-RING_ROWS = (470, 506)
-CUSHION = (292, 403)
-ACROSS = 0.8
-PANE_GAP = 12
-FRAME = 3
-VIEW_ROWS = (262, 392)
-ACROSS_MIRROR = 0.8
-SEEN_THROUGH = 0.94           # what the near glass keeps of the light inside
-# Lit inside and darker out, the far glass gives the inside back: how much
-# of its light the far window shows over what lies past it, at each hour.
-MIRROR = {'dawn': 0.12, 'dusk': 0.22, 'night': 0.42}
-GLASS_DIM = 0.66              # the glass gives back less than the wall it mirrors
-STREAK = (7, 3.0)             # px under the far window's top, and half its height
+# The windows at the hour (windows_at): the trees the painting shows
+# through the car, their colours kept, in the hour's light (GRADE, linear),
+# and on the glass the hour's sky (from these rows of the scene) fading
+# down the pane, the lit car's warm light, the ceiling's tubes caught
+# along a pane's top and a soft sheen across it: how much of each.
+GAP_SKY = (286, 326)
+GRADE = {'dawn': (0.3, 0.25, 0.36), 'dusk': (0.3, 0.19, 0.15), 'night': (0.022, 0.03, 0.055)}
+SKY_IN = {'dawn': 0.26, 'dusk': 0.26, 'night': 0.1}
+GLOW = {'dawn': 0.05, 'dusk': 0.1, 'night': 0.15}
+TUBES = {'dawn': 0.16, 'dusk': 0.3, 'night': 0.42}
+SHEEN = {'dawn': 0.12, 'dusk': 0.09, 'night': 0.06}
+TUBE_ROW = (4, 2.2)           # px under a pane's top, and the streak's half height
 EDGE = 2                      # px: the near layer's soft edge past a pillar's band
 
 
@@ -221,111 +208,52 @@ def sign_lit(rgb, day, mask, hour):
     return out
 
 
-def lit_windows(cars, Mc, scene, sky, hour):
-    """Each car's windows at the hour: the car's lit inside seen through
-    them (across), where the painting showed the trees through the car
-    (lit as glass, the trees glowed amber in the panes); and the doorway's
-    far window giving back the lit inside. The day keeps the painting's own."""
+def windows_at(cars, day, Mc, scene, sky, T, hour):
+    """Every window at the hour as the painting has it by day: the trees
+    seen through the car, the doorway's far window's too, their colours
+    kept, in the hour's light; and on the glass what the hour puts there
+    -- its sky, fading down the pane, the lit car's warm light, its
+    ceiling's tubes caught along each pane's top, and a soft sheen."""
     if hour == 'day':
         return cars
-    # the far window, in the doorway and so in every window, mirroring the
-    # lit inside: the wall's light, brightest under the ceiling, over the
-    # forest past it, softened by the glass
-    rgb, al = cars['car']
-    far, inside = Mc['car']['far'], Mc['car']['inside']
-    rows = np.arange(rgb.shape[0])[:, None]
-    ys = np.nonzero(far)[0]
-    top, foot = ys.min(), ys.max()
-    wall = np.median(rgb[inside & (rows < top) & (np.arange(rgb.shape[1]) >= INTERIOR[0])[None, :]
-                         & (np.arange(rgb.shape[1]) < INTERIOR[1])[None, :]], axis=0)
-    fall = 1 - 0.3 * np.clip((rows - top) / max(foot - top, 1), 0, 1)
-    glow = wall[None, None, :] * fall[..., None] * GLASS_DIM
-    # and the ceiling's tubes caught in it, a soft streak under its top
-    tube = rgb[inside & (rows < top)].max(axis=0)
-    streak = np.exp(-((rows - top - STREAK[0]) / STREAK[1]) ** 2)[..., None]
-    glow = glow * (1 - streak * 0.55) + tube[None, None, :] * streak * 0.55
-    past = cv2.GaussianBlur(rgb, (0, 0), 0.7)
-    m = (cv2.GaussianBlur(far.astype(np.float32), (3, 3), 0) * MIRROR[hour])[..., None]
-    soft = cv2.GaussianBlur(far.astype(np.float32), (3, 3), 0)[..., None]
-    rgb = rgb * (1 - soft) + (past * (1 - m / np.maximum(soft, 1e-3)) + glow * (m / np.maximum(soft, 1e-3))) * soft
-    cars = dict(cars, car=(np.clip(rgb, 0, 1), al))
+    band = scene[GAP_SKY[0]:GAP_SKY[1]][sky[GAP_SKY[0]:GAP_SKY[1]]]
+    gap = np.median(band, axis=0)
+    sheen = np.clip(gap * 0.6 + 0.4, 0, 1)
+    lamp = np.asarray(T['glass'], np.float32)
+    tube = np.asarray(T['tube'], np.float32)
     out = {}
     for name, (rgb, al) in cars.items():
         M = Mc[name]
-        seen = across(cars['car'][0], M, name, scene, sky, glow, hour) * SEEN_THROUGH
-        w = (cv2.GaussianBlur(M['glass'].astype(np.float32), (3, 3), 0) * M['windows'])[..., None]
-        out[name] = (rgb * (1 - w) + seen * w, al)
+        glass = M['glass'] | M['far']
+        # the painting's own trees, their colours kept, in the hour's light
+        # (in linear light: the hour's colour and how much of the day's)
+        d = day[name][..., :3]
+        view = srgb(lin(d) * np.asarray(GRADE[hour], np.float32))
+        view = view * (1 - GLOW[hour]) + lamp * GLOW[hour]
+        rows = np.arange(rgb.shape[0], dtype=np.float32)[:, None]
+        cols = np.arange(rgb.shape[1], dtype=np.float32)[None, :]
+        n, lab, stats, _ = cv2.connectedComponentsWithStats(glass.astype(np.uint8), 8)
+        for k in range(1, n):
+            bx, by, bw, bh, area = stats[k]
+            if area < 40:
+                continue
+            own = (lab == k)[by:by + bh, bx:bx + bw]
+            r, c = rows[by:by + bh], cols[:, bx:bx + bw]
+            pane = view[by:by + bh, bx:bx + bw]
+            # the hour's sky in the glass, faint, fading down the pane
+            sk = np.clip(1 - (r - by) / max(bh * 0.6, 1), 0, 1) * SKY_IN[hour]
+            pane = pane * (1 - sk[..., None]) + gap * sk[..., None]
+            # the ceiling's tubes, along the pane's top
+            st = np.exp(-((r - by - TUBE_ROW[0]) / TUBE_ROW[1]) ** 2) * TUBES[hour]
+            pane = pane * (1 - st[..., None]) + tube * st[..., None]
+            # a sheen across the glass, leaning, a little apart in each pane
+            at = bx + bw * (0.3 + 0.4 * ((bx * 0.618) % 1))
+            sh = np.exp(-((c - at + (r - by) * 0.55) / max(bw * 0.09, 3)) ** 2) * SHEEN[hour]
+            pane = pane * (1 - sh[..., None]) + sheen * sh[..., None]
+            view[by:by + bh, bx:bx + bw][own] = pane[own]
+        w = cv2.GaussianBlur(glass.astype(np.float32), (3, 3), 0)[..., None] * (M['windows'] | M['far'])[..., None]
+        out[name] = (np.clip(rgb * (1 - w) + view * w, 0, 1), al)
     return out
-
-
-def across(lit, M, name, scene, sky, glow, hour):
-    """What a car's side window shows of the car after dark, over its
-    whole length, so each window shows its own part of it (tiled from
-    the doorway, every pane held a copy of the doorway's own window):
-    the strap rail and its rings running the car's length, the far wall,
-    the far window across from each near one -- one to a window, its
-    panes as many as the near one's, the hour's sky and trees in it, a
-    stretch of them of its own -- and the far seats' backs under it.
-    Drawn from the doorway's inside at the hour, so it is lit as that is."""
-    H, W = lit.shape[:2]
-    r = -cut.CAR[0]                                    # the scene's rows in the layer's
-    out = np.zeros_like(lit)
-    # the wall, row by row, from a plain stretch of the doorway's
-    c0, c1 = (round(cut.inside_at(x)) for x in WALL_COLS)
-    assert c1 > c0, 'WALL_COLS must lie in one of desk_cut.KEEP'
-    wall = np.median(lit[:, c0:c1], axis=1)
-    out[:] = wall[:, None, :]
-    # the rail and its rings: one ring's bay of the doorway, run along the car
-    b0, b1 = (round(cut.inside_at(x)) for x in RING_BAY)
-    y0, y1 = RING_ROWS[0] + r, RING_ROWS[1] + r
-    bay = lit[y0:y1, b0:b1]
-    reps = np.arange(W) % (b1 - b0)
-    out[y0:y1] = bay[:, reps]
-    # the far seats' backs: one cushion of the doorway, run along the car
-    s0, s1 = (round(cut.inside_at(x)) for x in CUSHION)
-    y2 = cut.FAR[3] + FRAME + r
-    seat = lit[y2:, s0:s1]
-    out[y2:] = seat[:, np.arange(W) % (s1 - s0)]
-    # the far window across from each window: its frame, as the doorway's
-    # far window's, and the hour's sky and trees in it
-    frame = np.median(lit[cut.FAR[1] - FRAME + r:cut.FAR[1] - 1 + r, cut.FAR[0]:cut.FAR[2]].reshape(-1, 3), axis=0)
-    gasket = lit[cut.FAR[1] + r:cut.FAR[3] + r, cut.FAR[0]:cut.FAR[0] + 2].reshape(-1, 3).min(axis=0)
-    groups = cv2.dilate(M['windows'].astype(np.uint8), np.ones((1, 2 * PANE_GAP + 1), np.uint8))
-    n, lab, stats, _ = cv2.connectedComponentsWithStats(groups, 8)
-    spans = [(a + 6, b - 6) for a, b in zip((cut.P0[1],) + tuple(x1 for _, x1 in cut.PILLARS),
-                                             tuple(x0 for x0, _ in cut.PILLARS) + (cut.W,)) if b - a > 120]
-    fy0, fy1 = cut.FAR[1] + r, cut.FAR[3] + r
-    for k in sorted(range(1, n), key=lambda i: stats[i][0]):
-        bx, by, bw, bh, _ = stats[k]
-        inset = round(bw * (1 - ACROSS) / 2)
-        x0, x1 = bx + inset, bx + bw - inset
-        if x1 - x0 < 12:
-            continue
-        box = parts.rounded(lit.shape[:2], x0 - FRAME, fy0 - FRAME, x1 + FRAME, fy1 + FRAME, 5)
-        out[box] = frame
-        glass = parts.rounded(lit.shape[:2], x0, fy0, x1, fy1, 4)
-        ring = parts.rounded(lit.shape[:2], x0 - 1, fy0 - 1, x1 + 1, fy1 + 1, 4) & ~glass
-        out[ring] = gasket
-        # its own stretch of the scene's sky and trees, never over a pillar
-        a, b = spans[(k * 7 + (name == 'car2') * 3) % len(spans)]
-        w = x1 - x0
-        sx = a + ((k * 211 + bx * 3) % max(b - a - w, 1))
-        view = cv2.resize(scene[VIEW_ROWS[0]:VIEW_ROWS[1], sx:sx + w], (w, fy1 - fy0), interpolation=cv2.INTER_AREA)
-        # the near window's panes, again across the car, a little closer together
-        own = (lab[by:by + bh, bx:bx + bw] == k) & M['glass'][by:by + bh, bx:bx + bw]
-        cols = own.any(axis=0)
-        edges = np.nonzero(np.diff(cols.astype(np.int8)) == 1)[0][1:] + 1    # where a pane begins, past the first
-        for e in edges:
-            mx = round(x0 + (e / bw) * w) if bw else x0
-            view[:, max(mx - x0 - 1, 0):mx - x0 + 2] = frame
-        # after dark the lit car in its glass, faintly
-        m = MIRROR[hour] * ACROSS_MIRROR
-        g = glow[fy0:fy1][:, :1, :]
-        view = view * (1 - m) + g * m
-        region = out[fy0:fy1, x0:x1]
-        gl = glass[fy0:fy1, x0:x1]
-        region[gl] = view[gl]
-    return np.clip(out, 0, 1)
 
 
 def pillars_edged(lit, near_rgb):
@@ -346,26 +274,6 @@ def pillars_edged(lit, near_rgb):
     lit = lit.copy()
     lit[band] = near_rgb[band]
     return lit
-
-
-def far_view(cars, Mc, scene, hour):
-    """What the inside's far window shows at the hour: a stretch of the
-    scene's own sky, hills and trees, as every far window across the car
-    shows its own (across): the picture's trees, lit as the forest, stood
-    blurred behind the glass, and lit as one, the sky between them a slab."""
-    if hour == 'day':
-        return cars
-    rgb, al = cars['car']
-    far = Mc['car']['far']
-    ys, xs = np.nonzero(far)
-    y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
-    sx = DOOR_VIEW
-    view = cv2.resize(scene[VIEW_ROWS[0]:VIEW_ROWS[1], sx:sx + x1 - x0], (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
-    out = rgb.copy()
-    box = out[y0:y1, x0:x1]
-    own = far[y0:y1, x0:x1]
-    box[own] = view[own]
-    return dict(cars, car=(np.clip(out, 0, 1), al))
 
 
 def inside_lit(cars, Mc, hour):
@@ -458,9 +366,8 @@ def main():
         light.rng.bit_generator.state = state
         drawn, light.placed = light.placed, []
         clear = finish(light.scene(hour, bg_a, M, clouds=False)[0])
-        cars = {name: light.car(hour, a, Mc[name]) for name, a in car.items()}
-        cars = far_view(inside_lit(cars, Mc, hour), Mc, clear, hour)
-        cars = lit_windows(cars, Mc, clear, M['sky'], hour)
+        cars = inside_lit({name: light.car(hour, a, Mc[name]) for name, a in car.items()}, Mc, hour)
+        cars = windows_at(cars, car, Mc, clear, M['sky'], light.H[hour], hour)
         fill[hour] = write(hour, lit, clear, cars, near_rgb)
         stars[hour] = [[round(float(x), 1), round(float(y), 1), round(float(b), 2)]
                        for x, y, b in sorted(drawn, key=lambda st: -st[2])[:TWINKLE[hour]]]
