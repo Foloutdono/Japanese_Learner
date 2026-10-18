@@ -1298,7 +1298,7 @@
 {"t":"大家","r":"おおや","ro":"ooya","en":["landlord, landlady, owner (of a rented home)"],"fr":["propriétaire (d'un logement loué), bailleur"],"fu":[["大","おお"],["家","や"]],"hy":["大夜","大也","大冶"]},
 {"t":"刈る","r":"かる","ro":"karu","en":["to cut (hair), to mow (grass), to harvest"],"fr":["couper (les cheveux), faucher (l'herbe), récolter"],"fu":[["刈","か"],["る",""]],"hy":["何る","火る","花る"],"ex":["N3.54"]},
 {"t":"丸","r":"まる","ro":"maru","en":["circle","whole, full, complete"],"fr":["cercle, rond","entier, complet"],"fu":[["丸","まる"]]},
-{"t":"御","r":"お","ro":"o","en":["honourable (polite prefix)"],"fr":["honorifique (préfixe de politesse)"],"fu":[["御","お"]],"hy":["於"],"ex":["N4.5","N4.23"]},
+{"t":"御","r":"お","ro":"o","en":["honourable (polite prefix)"],"fr":["honorifique (préfixe de politesse)"],"fu":[["御","お"]],"hy":["於"]},
 {"t":"国語","r":"こくご","ro":"kokugo","en":["national language, Japanese (school subject)"],"fr":["langue nationale, japonais (matière scolaire)"],"fu":[["国","こく"],["語","ご"]],"hy":["黒語","国五","刻語"]},
 {"t":"我々","r":"われわれ","ro":"wareware","en":["we (formal)"],"fr":["nous (soutenu)"],"fu":[["我","われ"],["々","われ"]],"ex":["N1.230"]},
 {"t":"地球","r":"ちきゅう","ro":"chikyuu","en":["the earth"],"fr":["la Terre"],"fu":[["地","ち"],["球","きゅう"]],"hy":["知球","地九","質球"],"ex":["N3.37"]},

@@ -10,7 +10,8 @@ import { STRINGS, weld, weldIf } from '../carousel/strings.js'
 import { APP_INKS } from '../carousel/app.js'
 import { CLIP, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
-import { SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
+import { LIMIT, SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
+import { TUNABLES, tuned } from '../carousel/tune.js'
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf } from '../carousel/funnel.js'
 import { KINDS, LONG_SITE, PART, SHORT, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
@@ -1641,7 +1642,7 @@ describe('the reading challenges (plan 247)', () => {
       const pl = challengePlan(data, 'n5-01', { style })
       const tl = challengeTimeline(pl)
       expect(pl.music, style).toBe(TRACK)
-      expect(tl.bed, style).toEqual({ src: `carousel/${file}` })
+      expect(tl.bed, style).toEqual({ src: `carousel/${file}`, gain: 1, fade: 2.5 })
       expect(tl.loudness, style).toBe(-16)
       expect(challengeCommand(pl), style).not.toMatch(/--music/)
       // Its licence's credit (CC BY 4.0) in the description of every video it plays under.
@@ -1655,7 +1656,7 @@ describe('the reading challenges (plan 247)', () => {
       expect(challengeCommand(none), style).toMatch(/ --music none$/)
       expect(challengePage(none, challengeTimeline(none), 'x').description, style).not.toMatch(/MacLeod/)
       const jazz = challengePlan(data, 'n5-01', { style, music: 'music/late train.mp3' })
-      expect(challengeTimeline(jazz).bed, style).toEqual({ src: 'music/late train.mp3' })
+      expect(challengeTimeline(jazz).bed, style).toMatchObject({ src: 'music/late train.mp3' })
       expect(challengeTimeline(jazz).loudness, style).toBe(-16)
       expect(challengeCommand(jazz), style).toMatch(/ --music "music\/late train\.mp3"$/)
       expect(challengePage(jazz, challengeTimeline(jazz), 'x').description, style).not.toMatch(/MacLeod/)
@@ -1854,4 +1855,68 @@ describe('the reading challenges (plan 247)', () => {
       globalThis.OffscreenCanvas = had
     }
   }))
+})
+
+describe('tuned from the studio (plan 248)', () => {
+  const def = key => TUNABLES.find(t => t.key === key).def
+
+  it('defaults to what each video did before it was tunable', () => {
+    for (const k of ['hook', 'into', 'out', 'gap', 'ask', 'count', 'answer', 'cta']) expect(def(`challenge.${k}`), k).toBe(CHALLENGE[k])
+    expect([def('echo.seconds'), def('echo.gap'), def('echo.keep')]).toEqual([ECHO.seconds, ECHO.gap, ECHO.keep])
+    expect(def('short.limit')).toBe(LIMIT)
+  })
+
+  it('times a short by its pace, its time to answer and its limit, a voiced line still said whole', () => {
+    expect(slideSeconds(40, 'point', { 'short.pace': 1.5 }).hold).toBeCloseTo(slideSeconds(40, 'point').hold * 1.5, 2)
+    const slides = ['hook', 'question-1', 'answer-1', 'outro'].map(key => ({ key }))
+    const six = shortTimeline(slides, [30, 40, 40, 20], null, null, { 'short.answer': 6 })
+    const ask = six.segs[1]
+    const ticks = six.sfx.filter(x => x.key === 'click')
+    expect(ticks).toHaveLength(6)
+    expect(ask.start + ask.dur - ticks[0].at).toBeCloseTo(6, 2)
+    const exam = ['cover', 'question-1', 'answer-1', 'question-2', 'answer-2', 'question-3', 'answer-3', 'sheet', 'outro'].map(key => ({ key }))
+    const counts = [60, 120, 160, 120, 160, 120, 160, 200, 80]
+    const free = shortTimeline(exam, counts, null, null, { 'short.limit': 90 })
+    expect(free.seconds).toBeGreaterThan(LIMIT)
+    expect(shortTimeline(exam, counts).seconds).toBeLessThanOrEqual(LIMIT + 0.01)
+    // A line eight seconds long keeps its slide long enough to be heard to its end.
+    const said = shortTimeline(exam, counts, 'まいげつ', () => 8, { 'short.limit': 30 })
+    const reveal = said.segs.find(x => x.key === 'answer-3')
+    expect(reveal.start + reveal.dur).toBeGreaterThanOrEqual(said.cues[0].at + 8 + 0.5)
+  })
+
+  it('says a word as often as its tuned clip and silence allow, and keeps it as long', () => {
+    const span = { on: 0.14, off: 0.6 }
+    const voiced = span.off - span.on
+    const wide = beats(span, { 'echo.gap': 0.6 })
+    for (let i = 1; i < wide.length; i++) expect(wide[i] - wide[i - 1]).toBeCloseTo(voiced + 0.6, 2)
+    expect(beats(span, { 'echo.seconds': 16 }).length).toBeGreaterThan(beats(span).length)
+    const themes = bank('themes.json')
+    const pl = echoPlan(themes, echoItems(themes, 'en')[0].id, { lang: 'en' })
+    const { clip } = echoDeck(pl, FORMATS.story, { ground: 'sumi', tune: { 'echo.keep': 6 } })
+    expect(clip.seconds).toBeCloseTo(clip.keepAt + 6, 3)
+  })
+
+  it('reads a challenge at its tuned pace and writes the tune into its command', () => {
+    const data = bank('comprehension.json')
+    const id = data.passages[0].id
+    const base = challengePlan(data, id, { lang: 'en' })
+    const slow = challengePlan(data, id, { lang: 'en', tune: { 'challenge.pace': 0.5, 'challenge.hook': 5 } })
+    expect(slow.cpm).toBe(Math.round(base.cpm * 0.5))
+    expect(challengeTimeline(slow).seconds).toBeGreaterThan(challengeTimeline(base).seconds + 1.8)
+    expect(challengeCommand(slow)).toContain('--tune challenge.pace=0.5,challenge.hook=5')
+    expect(challengeCommand(base)).not.toContain('--tune')
+    expect(tuned(slow.tune, 'challenge.pace')).toBe(0.5)
+  })
+
+  it('stretches a long video’s pauses and its quiz countdown', () => {
+    const files = {}
+    for (const f of ['N5.json', 'words-N5.json', 'kanji-N5.json', 'grammar-N5.json', 'themes.json']) files[f] = bank(f)
+    const base = timeline(longPlan('vocab', files, { level: 'N5', part: 1 }))
+    const slow = timeline(longPlan('vocab', files, { level: 'N5', part: 1, tune: { 'long.pause': 1.5 } }))
+    expect(slow.seconds).toBeGreaterThan(base.seconds * 1.1)
+    const quiz = timeline(longPlan('quiz', files, { level: 'N5', tune: { 'long.count': 8 } }))
+    const quiz5 = timeline(longPlan('quiz', files, { level: 'N5' }))
+    expect(quiz.seconds).toBeGreaterThan(quiz5.seconds)
+  })
 })

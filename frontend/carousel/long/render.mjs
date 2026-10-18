@@ -21,6 +21,9 @@
 //   --hour night      ... the print's hour: dawn, day, dusk or night
 //   --music FILE      ... a track of your own under it (any audio ffmpeg reads), looped if
 //                     short; `none` for none; the studio's own (Cool Vibes) when left out
+//   --unvoiced        ... a read-along made even when the voice engine fails (silent lines)
+//   --tune k=v,k=v    the studio's Tune panel (plan 248, tune.js): its "Copy the
+//                     command" writes the values changed, so the render is the preview
 //
 // Writes <name>.mp4, <name>.txt (the title, then the description with
 // its chapters and the voice's credit) and <name>.jpg (a thumbnail).
@@ -29,7 +32,7 @@
 // voices are kept in carousel/long/cache/, so making a video again, or
 // one that shares lines with another, waits only for what is new.
 import { spawn, spawnSync } from 'node:child_process'
-import { createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
+import { createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { dirname, extname, isAbsolute, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -38,6 +41,7 @@ import { SITE_ORIGIN } from '../../landing/config.mjs'
 import { FPS, TALL, WIDE, cueKey, describe, fitShort, longPlan, timeline } from '../long.js'
 import { fromRecipe, shortTimeline } from '../short.js'
 import { TRACKS, challengeCues, challengePage, challengePlan, challengeTimeline } from '../challenge.js'
+import { parseTune } from '../tune.js'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const FRONT = resolve(HERE, '../..')
@@ -55,9 +59,13 @@ const opts = {
   // The feed a short stands in (plan 239): TikTok's, Instagram's or none.
   fit: ['instagram', 'normal'].includes(args.fit) ? args.fit : 'tiktok',
 }
+// The values tuned in the studio (plan 248), unknown keys and bad numbers dropped.
+const tune = parseTune(typeof args.tune === 'string' ? args.tune : '')
 const OUT = resolve(args.out || join(HERE, 'out'))
 const CACHE = join(HERE, 'cache')
-const WORK = join(OUT, '.work')
+// A work folder of this run's own: two renders into one --out never share a mix (plan 248).
+const WORK = join(OUT, '.work', `${process.pid}-${Date.now()}`)
+if (spawnSync('ffmpeg', ['-version']).status !== 0) throw new Error('ffmpeg is needed, and is not on the PATH')
 for (const d of [OUT, CACHE, WORK, join(WORK, 'sfx')]) mkdirSync(d, { recursive: true })
 const python = existsSync(join(BACKEND, '.venv/bin/python')) ? join(BACKEND, '.venv/bin/python') : 'python3'
 const log = (...a) => console.log(new Date().toISOString().slice(11, 19), ...a)
@@ -90,8 +98,9 @@ function voiceAll(cues) {
   writeFileSync(join(WORK, 'cues.json'), JSON.stringify(cues))
   const voiced = spawnSync(python, ['-m', 'scripts.long_video_audio', 'voice', join(WORK, 'cues.json'), '--cache', CACHE, '--out', join(WORK, 'durs.json')], { cwd: BACKEND, stdio: 'inherit' })
   if (voiced.status !== 0) log('some lines could not be voiced: they are timed by a guess and left unsaid')
-  const { durs, marks = {} } = JSON.parse(readFileSync(join(WORK, 'durs.json'), 'utf8'))
+  const { durs, marks = {} } = existsSync(join(WORK, 'durs.json')) ? JSON.parse(readFileSync(join(WORK, 'durs.json'), 'utf8')) : { durs: {} }
   const dur = c => durs[cueKey(c)]
+  dur.ok = voiced.status === 0
   // A line read along is also known syllable by syllable (plan 247).
   dur.marks = c => marks[cueKey(c)] || null
   return dur
@@ -99,6 +108,10 @@ function voiceAll(cues) {
 const site = lang === 'en' ? `${SITE_ORIGIN}/en` : SITE_ORIGIN
 const banks = {}
 for (const f of readdirSync(BANK)) if (f.endsWith('.json')) banks[f] = JSON.parse(readFileSync(join(BANK, f), 'utf8'))
+// Every character the plan draws, once each: a long plan's text runs past
+// any cut, and a glyph whose font never loaded is drawn in a fallback face
+// for as long as its still lasts (plan 248).
+const glyphs = value => [...new Set(JSON.stringify(value))].join('')
 const fontsFor = async text => page.evaluate(async text => {
   const W = await import('/carousel/draw.js')
   await Promise.all(W.FONT_FACES.map(([fam, w]) => document.fonts.load(W.font(w, 40, fam), text)))
@@ -118,13 +131,15 @@ if (args.challenge) {
   const named = typeof args.music === 'string' ? args.music : undefined
   const music = named === undefined ? undefined : named === 'none' ? null : TRACKS[named] ? named : resolve(named)
   if (music && !TRACKS[music] && !existsSync(music)) throw new Error(`no track at ${music}`)
-  const plan = challengePlan(banks['comprehension.json'], String(args.challenge), { lang, style: args.style, hour: args.hour, music })
+  const plan = challengePlan(banks['comprehension.json'], String(args.challenge), { lang, style: args.style, hour: args.hour, music, tune })
   const cues = challengeCues(plan)
   const dur = cues.length ? voiceAll(cues) : null
+  // A read-along whose voice did not come is no read-along: stop, unless asked for it anyway.
+  if (dur && !dur.ok && !args.unvoiced) throw new Error('the voice engine did not voice every line (VOICEVOX_URL): start it, or pass --unvoiced')
   tl = challengeTimeline(plan, dur ? c => (dur(c) ? { dur: dur(c), marks: dur.marks(c) } : null) : null)
   SIZE = TALL
   slug = ['challenge', plan.id, plan.style, plan.hour, lang].join('-')
-  await fontsFor(JSON.stringify(plan))
+  await fontsFor(glyphs(plan))
   await canvasOf(SIZE)
   await page.evaluate(async ({ plan, tl }) => {
     const C = await import('/carousel/challenge.js')
@@ -157,9 +172,11 @@ if (args.challenge) {
     return { counts, keys: slides.map(sl => sl.key), spoken: S.spokenLine(pl), page: null, id: pl.id }
   }, recipe)
   const slides = made.keys.map(key => ({ key }))
-  const draft = shortTimeline(slides, made.counts, made.spoken)
+  // The studio's tune rides in the recipe; a --tune flag overrides it.
+  const shortTune = { ...(recipe.tune || {}), ...tune }
+  const draft = shortTimeline(slides, made.counts, made.spoken, null, shortTune)
   const dur = voiceAll(draft.cues)
-  tl = shortTimeline(slides, made.counts, made.spoken, dur)
+  tl = shortTimeline(slides, made.counts, made.spoken, dur, shortTune)
   SIZE = TALL
   slug = ['short', recipe.source, recipe.id, recipe.type, lang, ...(recipe.fit && recipe.fit !== 'tiktok' ? [recipe.fit] : [])].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
   pageText = await page.evaluate(async ({ st, site, voiced }) => {
@@ -173,7 +190,7 @@ if (args.challenge) {
   log(`${pageText.title}: ${made.keys.length} slides, ${tl.seconds.toFixed(1)} s${made.spoken ? `, says ${made.spoken}` : ''}`)
 } else {
   // ── A long video, or its short: the plan, its lines voiced, the timeline ──
-  let plan = longPlan(kind, banks, opts)
+  let plan = longPlan(kind, banks, { ...opts, tune })
   slug = [...(opts.format === 'short' ? ['short'] : []), kind, opts.theme || opts.level, kind === 'grammar' ? plan.point : opts.ids ? 'pick' : `part${opts.part}`, lang, ...(opts.format === 'short' && opts.fit !== 'tiktok' ? [opts.fit] : [])].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
   log(`${plan.title}: ${plan.items.length} items`)
   const dur = voiceAll(timeline(plan).cues)
@@ -181,7 +198,7 @@ if (args.challenge) {
   if (opts.format === 'short') plan = fitShort(plan, dur)
   tl = timeline(plan, dur)
   SIZE = opts.format === 'short' ? TALL : WIDE
-  await fontsFor(JSON.stringify(plan).slice(0, 20000))
+  await fontsFor(glyphs(plan))
   await canvasOf(SIZE)
   await page.evaluate(async ({ plan, tl }) => {
     const L = await import('/carousel/long.js')
@@ -192,6 +209,8 @@ if (args.challenge) {
   log(`${(tl.seconds / 60).toFixed(1)} min, ${tl.cues.length} lines, ${tl.sfx.length} sounds`)
 }
 const seconds = Math.min(tl.seconds, Number(args.seconds) || Infinity)
+// A draft is named so: it never overwrites the finished video (plan 248).
+if (seconds < tl.seconds) slug += `-draft${Math.round(seconds)}s`
 
 if (args.stills) {
   for (const t of String(args.stills).split(',').map(Number)) {
@@ -227,7 +246,7 @@ if (tl.bed?.src) {
   const bedWav = join(WORK, 'bed.wav')
   const src = isAbsolute(tl.bed.src) ? tl.bed.src : join(FRONT, tl.bed.src)
   const conv = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', src, '-ar', '48000', '-ac', '2', bedWav])
-  if (conv.status === 0) bedArgs.push('--bed', bedWav)
+  if (conv.status === 0) bedArgs.push('--bed', bedWav, '--bed-gain', String(tl.bed.gain ?? 1), '--bed-fade', String(tl.bed.fade ?? 2.5))
   else throw new Error(`the track ${src} could not be read`)
 } else if (tl.bed === null) {
   // A challenge with no track: its sounds and its voice alone, no music made up.
@@ -241,7 +260,9 @@ if (mixed.status !== 0) throw new Error('the mix failed')
 const probe = spawnSync('ffmpeg', ['-hide_banner', '-i', join(WORK, 'mix.wav'), '-af', 'loudnorm=I=-16:TP=-1.5:print_format=json', '-f', 'null', '-'], { encoding: 'utf8' })
 const loud = JSON.parse(probe.stderr.slice(probe.stderr.lastIndexOf('{')))
 // A challenge read in silence is kept calmer (its timeline says how loud).
-const gain = Math.min((tl.loudness ?? -16) - Number(loud.input_i), -1.5 - Number(loud.input_tp))
+// A silent draft measures -inf: it is left as it is rather than turned up by NaN.
+const measured = Number(loud.input_i)
+const gain = Number.isFinite(measured) ? Math.min((tl.loudness ?? -16) - measured, -1.5 - Number(loud.input_tp)) : 0
 log(`loudness ${loud.input_i} LUFS, peak ${loud.input_tp} dBTP: ${gain.toFixed(1)} dB`)
 
 // ── The frames, each still drawn once, into ffmpeg ──
@@ -253,7 +274,15 @@ const quality = args.challenge ? 0.98 : 0.93
 const mp4 = join(OUT, `${slug}.mp4`)
 const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(fps), '-c:v', 'mjpeg', '-i', '-', '-i', join(WORK, 'mix.wav'),
   '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-r', String(fps), '-af', `volume=${gain.toFixed(2)}dB`, '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', '-shortest', mp4], { stdio: ['pipe', 'inherit', 'inherit'] })
-const write = buf => new Promise(r => (ff.stdin.write(buf) ? r() : ff.stdin.once('drain', r)))
+// ffmpeg failing midway is said, not left to crash the pipe (plan 248).
+let ffFailed = null
+ff.on('error', e => { ffFailed = e })
+ff.stdin.on('error', e => { ffFailed = e })
+const write = buf => new Promise((r, j) => {
+  if (ffFailed) { j(ffFailed); return }
+  if (ff.stdin.write(buf)) r()
+  else ff.stdin.once('drain', r)
+})
 const frames = Math.round(seconds * fps)
 let last = null
 let drawn = 0
@@ -287,4 +316,5 @@ const { title, description, tags } = pageText
 writeFileSync(join(OUT, `${slug}.txt`), `TITLE\n${title}\n\nDESCRIPTION\n${description}\n\nTAGS\n${tags}\n`)
 await browser.close()
 server.close()
+rmSync(WORK, { recursive: true, force: true })
 log(`wrote ${mp4} (${(seconds / 60).toFixed(1)} min, ${drawn} of ${frames} frames drawn)`)

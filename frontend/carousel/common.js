@@ -135,9 +135,10 @@ export function readingMisses(row, kanji, known = []) {
     }
   })
   // Another reading of one of its kanji, in place of the one it takes here;
-  // never for a word that is one kanji alone, whose other reading is
-  // usually the same word read another way (店 みせ, てん: plan 229l).
-  for (const [text, r] of [...row.t].length > 1 ? row.fu || [] : []) {
+  // never for a word written with one kanji, whose other reading is
+  // usually the same word read another way (店 みせ, てん: plan 229l;
+  // 怒って いかって, okurigana or not: plan 248).
+  for (const [text, r] of [...row.t].filter(c => /[\u3400-\u9fff々]/.test(c)).length > 1 ? row.fu || [] : []) {
     if (!r || [...text].length !== 1 || !kanji?.[text]) continue
     const k = kanji[text]
     for (const other of [...k.on.map(toHira), ...k.kun.map(([stem]) => stem)]) {

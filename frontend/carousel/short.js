@@ -14,6 +14,7 @@
 import { formatOf } from './draw.js'
 import { FORMATS, deck } from './slides.js'
 import { depsOf, picked, plan as sourcePlan, sourceOf, titleOf } from './sources.js'
+import { tuned } from './tune.js'
 
 export const SWIPE = 0.35 // a swipe from one slide to the next
 export const FPS = 30
@@ -22,10 +23,12 @@ const ASKS = /^(question-|scene-question|round-|ask$)/
 const ease = x => 1 - (1 - Math.min(1, Math.max(0, x))) ** 3
 const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x))
 
-/** How long a slide is held: its reading time, and four seconds more to answer a question. */
-export function slideSeconds(chars, key) {
+/** How long a slide is held: its reading time (times the tuned pace),
+ *  and the tuned time to answer more on a question (plan 248). */
+export function slideSeconds(chars, key, tune) {
   const ask = ASKS.test(key)
-  return { hold: clamp(1.2 + chars * 0.045, 2.4, 7) + (ask ? 4 : 0), ask }
+  const read = clamp(1.2 + chars * 0.045, 2.4, 7) * tuned(tune, 'short.pace')
+  return { hold: +(read + (ask ? tuned(tune, 'short.answer') : 0)).toFixed(3), ask }
 }
 
 /** What a slide writes, counted as it draws (each character once). */
@@ -50,8 +53,9 @@ export function spokenLine(pl) {
 
 /** The video, timed: each slide held, swiped to the next; the line said on
  *  the last slide before the station, once all is revealed. `dur(cue)`
- *  is how long a line lasts once voiced, else a guess. */
-export function shortTimeline(slides, counts, spoken = null, dur = null) {
+ *  is how long a line lasts once voiced, else a guess; `tune` the
+ *  studio's (plan 248). */
+export function shortTimeline(slides, counts, spoken = null, dur = null, tune = null) {
   const segs = []
   const cues = []
   const sfx = [{ at: 0.1, key: 'board-flap' }]
@@ -60,31 +64,36 @@ export function shortTimeline(slides, counts, spoken = null, dur = null) {
   const sayAt = reveals.length ? reveals.at(-1) : Math.max(0, slides.length - 2)
   let at = 0
   slides.forEach((s, i) => {
-    let { hold, ask } = slideSeconds(counts[i] || 0, s.key)
+    let { hold, ask } = slideSeconds(counts[i] || 0, s.key, tune)
+    const answer = ask ? tuned(tune, 'short.answer') : 0
+    let floor = Math.max(2.4, ask ? 2 + answer : 0)
     if (i) sfx.push({ at: +at.toFixed(3), key: 'card-transition', gain: 0.7 })
-    if (ask) for (let k = 0; k < 4; k++) sfx.push({ at: +(at + hold - 4 + k).toFixed(3), key: 'click', gain: 0.35 })
+    if (ask) for (let k = 0; k < Math.floor(answer); k++) sfx.push({ at: +(at + hold - Math.floor(answer) + k).toFixed(3), key: 'click', gain: 0.35 })
     if (i && ASKS.test(slides[i - 1].key)) sfx.push({ at: +(at + SWIPE).toFixed(3), key: 'correct' })
     if (spoken && i === sayAt) {
       const cue = { at: +(at + SWIPE + 0.5).toFixed(3), text: spoken, who: 'reader' }
       cues.push(cue)
       const said = dur?.(cue) ?? 0.35 + [...spoken].length * 0.14
       hold = Math.max(hold, SWIPE + 0.5 + said + 1.2)
+      // Tightened, the slide still lets its line be said whole.
+      floor = Math.max(floor, SWIPE + 0.5 + said + 0.6)
     }
     if (i === slides.length - 1) sfx.push({ at: +(at + 0.3).toFixed(3), key: 'platform-chime' })
-    segs.push({ i, key: s.key, start: +at.toFixed(3), dur: +hold.toFixed(3), ask })
+    segs.push({ i, key: s.key, start: +at.toFixed(3), dur: +hold.toFixed(3), ask, floor: +floor.toFixed(3) })
     at += hold
   })
-  return fitted({ seconds: +at.toFixed(3), segs, cues, sfx, chapters: [] })
+  return fitted({ seconds: +at.toFixed(3), segs, cues, sfx, chapters: [] }, tuned(tune, 'short.limit'))
 }
 
-// A short holds under a minute where it can: past it, every hold is
-// tightened alike (to three quarters at most), never under its floor:
-// a slide's least reading time, a question's four seconds, its line said.
+// A short holds under a minute where it can (the tuned limit): past it,
+// every hold is tightened alike (to three quarters at most), never under
+// its floor: a slide's least reading time, a question's time to answer,
+// its line said whole.
 export const LIMIT = 59
-function fitted(tl) {
-  if (tl.seconds <= LIMIT) return tl
-  const k = Math.max(0.75, LIMIT / tl.seconds)
-  const floor = sg => Math.max(2.4, sg.ask ? 6 : 0, ...tl.cues.filter(c => c.at >= sg.start && c.at < sg.start + sg.dur).map(c => c.at - sg.start + 1.6))
+function fitted(tl, limit = LIMIT) {
+  if (tl.seconds <= limit) return tl
+  const k = Math.max(0.75, limit / tl.seconds)
+  const floor = sg => sg.floor ?? 2.4
   let at = 0
   const moved = []
   const segs = tl.segs.map(sg => {

@@ -329,9 +329,13 @@ function buildOf(rows, translation, how, p, lang, glossOf, pointLabel = () => ''
   // is that pattern, labelled by its meaning, never a possessive.
   const patternOf = r => (r.k === 'word' ? null : (r.g || []).find(x => x !== r.t && !ROLES[x]) || (r.lit && p !== r.t && !ROLES[p] ? p : null))
   // A label short enough to stand under its piece.
+  // A gloss to its first sense; a long one cut at a word, never inside one
+  // ("asking to be given someth…": plan 248), and only past 32 letters.
   const short = s => {
     const head = String(s || '').split(/[,;:(]/)[0].trim()
-    return head.length > 26 ? `${head.slice(0, 25).trim()}…` : head
+    if (head.length <= 32) return head
+    const cut = head.slice(0, 32).replace(/\s+\S*$/, '').replace(/[\s,.;:–-]+$/, '')
+    return `${cut || head.slice(0, 31)}…`
   }
   const steps = chunks.map(c => {
     const items = []
@@ -735,8 +739,9 @@ const PICTURES = 8
  *  pictures are posts of five and four, never of eight and one. */
 function themeParts(th) {
   const pics = th.words.filter(w => w.t !== th.head.t && w.e)
-  const size = Math.ceil(pics.length / Math.ceil(pics.length / PICTURES))
-  return Array.from({ length: Math.ceil(pics.length / size) }, (_, i) => pics.slice(i * size, (i + 1) * size)).filter(x => x.length >= 4)
+  // Cut evenly: k posts of n/k each, never a short last one dropped (plan 248).
+  const k = Math.max(1, Math.ceil(pics.length / PICTURES))
+  return Array.from({ length: k }, (_, i) => pics.slice(Math.round((i * pics.length) / k), Math.round(((i + 1) * pics.length) / k))).filter(x => x.length >= 4)
 }
 /** A theme's item id: its key, and `~2`, `~3` … for its later posts. */
 export const themePartOf = id => {

@@ -22,7 +22,7 @@ import {
   fit, wrap, paragraph, paragraphH, roundel, mark, metal, chevron, layoutSentence, drawSentence, lineOf, frame,
   ground, masthead, heading, pageMark, pages, strokeBox, marked, stamp, METAL_H,
 } from './draw.js'
-import { SELF_CHECK_JP, SITE, formOf, tr, weldIf } from './strings.js'
+import { SELF_CHECK_JP, SITE, formOf, quoted, tr, weldIf } from './strings.js'
 import { picked } from './sources.js'
 import { withoutGiveaways } from './quizzes.js'
 import { furiganaOf } from './common.js'
@@ -1224,7 +1224,7 @@ const KINDS = {
     const b = s.build
     const st = b.steps[s.n - 1]
     let y = title(c, c.plan.t.step(s.n, b.steps.length))
-    const goal = fit(ctx, `“${b.translation}”`, { weight: 500, sizes: [FS.title, FS.lead, FS.body], maxW: f.w, maxLines: 2, balanced: false })
+    const goal = fit(ctx, quoted(c.plan.lang, b.translation), { weight: 500, sizes: [FS.title, FS.lead, FS.body], maxW: f.w, maxLines: 2, balanced: false })
     y += paragraph(ctx, goal, f.x, y, ink2) + SP[7]
     // The whole sentence sets the size, so it grows the same on every step,
     // in the room the pieces under it leave; the pieces step down before
@@ -2330,7 +2330,7 @@ function quizSlide(c, q, revealed, head, number = 1) {
   // stem and the circled answer are the slide.
   // A quoted translation keeps the room it takes at the body rung: it is
   // the question, and is never cut (plan 229l).
-  const quoteMin = st?.text ? paragraphH(fit(ctx, `“${st.text}”`, { sizes: [FS.sm], maxW: f.w, lh: 1.15 }), 1.15) : 0
+  const quoteMin = st?.text ? paragraphH(fit(ctx, quoted(c.plan?.lang, st.text), { sizes: [FS.sm], maxW: f.w, lh: 1.15 }), 1.15) : 0
   const stemMin = st ? (st.cue ? FS.display * 2.4 : st.rows ? FS.display * 1.5 : Math.max(FS.display, quoteMin)) : 0
   if (exWhy && f.bottom - y - SP[7] * 2 - foot - stemMin < rowsN * FS.body * 1.6) { exWhy = null; foot = footOf() }
   // Answers that are sentences take a taller row each.
@@ -2435,7 +2435,7 @@ function quizSlide(c, q, revealed, head, number = 1) {
   } else if (st?.emoji) {
     picture(ctx, st.emoji, f.cx, y + room / 2, Math.min(FS.glyph * 1.2, room * 0.8))
   } else if (st?.text) {
-    const b = fit(ctx, `“${st.text}”`, { sizes: [FS.display, FS.heading, FS.title, FS.lead, FS.body, FS.sm, ...(quoteYields ? [FS.caption] : [])], maxW: f.w, maxH: room + 1, lh: 1.15 })
+    const b = fit(ctx, quoted(c.plan?.lang, st.text), { sizes: [FS.display, FS.heading, FS.title, FS.lead, FS.body, FS.sm, ...(quoteYields ? [FS.caption] : [])], maxW: f.w, maxH: room + 1, lh: 1.15 })
     // Cut short on the answer, it is left out: it was read whole on the question.
     if (!(quoteYields && b.cut)) paragraph(ctx, b, f.x, y + Math.max(0, (room - paragraphH(b, 1.15)) / 2), ink, 'left', 1.15)
   } else if (st?.cue && cue.alone) {
@@ -2693,7 +2693,7 @@ function hookContent(c, plan, maxW, maxH, fam, align, hook = plan.hook) {
   }
   if (h.kind === 'prompt') {
     // What to say, in the reader's language (plan 229k: the shuffled tiles under it are gone).
-    const b = fit(ctx, `“${h.text}”`, { sizes: [FS.display, FS.heading, FS.title], maxW, maxH, lh: 1.15 })
+    const b = fit(ctx, quoted(plan.lang, h.text), { sizes: [FS.display, FS.heading, FS.title], maxW, maxH, lh: 1.15 })
     return { h: paragraphH(b, 1.15), draw: (x, y) => paragraph(ctx, b, x, y, ink, align, 1.15) }
   }
   return { h: 0, draw() {} }

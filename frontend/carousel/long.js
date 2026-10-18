@@ -26,6 +26,7 @@ import { gloss, unpack } from './common.js'
 import { plan as sourcePlan, itemsOf } from './sources.js'
 import { particleLabel } from './explain.js'
 import * as A from './app.js'
+import { tuned } from './tune.js'
 
 export const WIDE = { id: 'wide', w: 1920, h: 1080 }
 // A short (plan 233): the same video standing, under a minute, for
@@ -138,7 +139,8 @@ const silent = row => row.k === 'punct' || /^[＿_]+$/.test(row.t)
  *  a quiz's part is a seeded deal), or a `theme`, or exact `ids`; a
  *  grammar video takes a `point`. */
 export function longPlan(kind, banks, opts0 = {}) {
-  const pl = planOf(kind, banks, opts0)
+  // The values tuned in the studio go with it (plan 248, tune.js `long.*`).
+  const pl = { ...planOf(kind, banks, opts0), tune: opts0.tune || {} }
   // A short stands in a feed: TikTok's, Instagram's or none (plan 239).
   return opts0.format === 'short' ? { ...shorten(pl), fit: opts0.fit || 'tiktok' } : pl
 }
@@ -493,7 +495,7 @@ function quizDeal(banks, level, lang, opts, part, n, ids) {
 }
 
 // ── When everything happens ───────────────────────────────────────
-const GAP = 0.7 // between a line said and the next
+const GAP0 = 0.7 // between a line said and the next (timeline() tunes it)
 /** The time to read a line on the screen. */
 export const READ = s => Math.max(2.5, 1 + [...String(s || '')].length * 0.06)
 /** A line's length where it was not measured: ~0.14s a kana. */
@@ -525,6 +527,9 @@ export function answered(q) {
  *  segs, cues (what is said, by whom, when), sfx (the app's sounds),
  *  chapters, of (the stations on the line) }. */
 export function timeline(plan, dur = null) {
+  // The pauses (thinking time, the silences between lines) times the tuned factor (plan 248).
+  const P = tuned(plan.tune, 'long.pause')
+  const GAP = GAP0 * P
   const segs = []
   const cues = []
   const sfx = []
@@ -559,18 +564,18 @@ export function timeline(plan, dur = null) {
     fx(start + 0.1, 'card-transition', 0.8)
     if (plan.kind === 'vocab') {
       // Three seconds alone (two in a short), the reading said twice, the meaning, a sentence.
-      const think = short ? 2 : 3
+      const think = (short ? 2 : 3) * P
       let u = think + 0.2
       fx(start + think, 'card-flip', 0.6)
       u += say(start + u, it.r) + GAP
       u += say(start + u, it.r) + 0.4
       const marks = { think, meaning: u }
-      u += 1.6
+      u += 1.6 * P
       if (it.ex) {
         marks.ex = u
         u += 0.5
-        u += say(start + u, it.ex.jp) + 2.6
-      } else u += short ? 1.2 : 3.0
+        u += say(start + u, it.ex.jp) + 2.6 * P
+      } else u += (short ? 1.2 : 3.0) * P
       seg('vocab', u, it, marks, n)
     } else if (plan.kind === 'kanji') {
       // The strokes in their order, the meaning, the readings, two words.
@@ -592,11 +597,11 @@ export function timeline(plan, dur = null) {
     } else if (it.type === 'q') {
       const q = it.q
       const show = 1.2 + Math.min(3, READ(q.ask) * 0.3)
-      const count = 5
+      const count = tuned(plan.tune, 'long.count')
       for (let k = 0; k < count; k++) fx(start + show + k, 'click', 0.35)
       const reveal = show + count
       fx(start + reveal, 'correct')
-      const answer = reveal + 1.4
+      const answer = reveal + 1.4 * P
       let u = answer + 0.4
       const line = answered(q)
       if (line) u += say(start + u, line) + GAP
@@ -1152,7 +1157,9 @@ function drawKanji(ctx, p, S, line, d, m, u, k, fade, para) {
     ctx.stroke(shape)
     if (v <= 0) return
     const len = strokeLength(path)
-    ctx.strokeStyle = u < from + m.per ? line : p.ink
+    // Lit in the line's colour until the next stroke starts: read through k(),
+    // so the switch is in the frame's key and a render never holds it (plan 248).
+    ctx.strokeStyle = k(from + m.per, 0.001) < 1 ? line : p.ink
     if (len && v < 1) { ctx.setLineDash([len, len + 10]); ctx.lineDashOffset = len * (1 - v) }
     ctx.globalAlpha = len ? 1 : v
     ctx.stroke(shape)
@@ -1325,7 +1332,8 @@ function drawQuestion(ctx, p, line, S, it, m, u, k, fade, sentence, para, card, 
       // Five seconds, on a ring that empties: under the answers when there is room, else beside the ask.
       const left = m.reveal - u
       const share = Math.max(0, left / m.count)
-      state.push(Math.round(share * 90))
+      // The digit is in the key too: it can turn while the ring's step stays (plan 248).
+      state.push(`${Math.round(share * 90)}|${Math.ceil(left)}`)
       const bottom = top + rows * (ch + 12)
       const [cx, cy, r] = bottom + 170 < 950 ? [W / 2, bottom + 90, 60] : [W - 150, askY + 40, 48]
       ctx.lineWidth = 12
@@ -1477,7 +1485,7 @@ function drawTallFrame(ctx, plan, tl, t) {
         ctx.stroke(shape)
         if (v <= 0) return
         const len = strokeLength(path)
-        ctx.strokeStyle = u < from + m.per ? line : p.ink
+        ctx.strokeStyle = k(from + m.per, 0.001) < 1 ? line : p.ink
         if (len && v < 1) { ctx.setLineDash([len, len + 10]); ctx.lineDashOffset = len * (1 - v) }
         ctx.globalAlpha = len ? 1 : v
         ctx.stroke(shape)
@@ -1598,7 +1606,8 @@ function drawTallQuestion(ctx, p, line, S, it, m, u, k, fade, sentence, para, ca
     if (!revealed && u >= m.show) {
       const left = m.reveal - u
       const share = Math.max(0, left / m.count)
-      state.push(Math.round(share * 90))
+      // The digit is in the key too: it can turn while the ring's step stays (plan 248).
+      state.push(`${Math.round(share * 90)}|${Math.ceil(left)}`)
       const ry = Math.min(1420, top + n * (ch + 14) + 90)
       ctx.lineWidth = 12
       ctx.strokeStyle = p.surfaceLine

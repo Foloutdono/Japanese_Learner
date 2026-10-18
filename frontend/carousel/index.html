@@ -114,7 +114,23 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px
 .btn { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 8px 16px; cursor: pointer; min-height: 40px; font-weight: 700; }
 .btn--quiet { min-height: 34px; padding: 5px 14px; font-weight: 500; }
 .btn--metal { border: 0; background: linear-gradient(180deg, var(--gold-lit), var(--gold-mid)); color: var(--on-fill); box-shadow: 0 4px 16px color-mix(in srgb, var(--gold-mid) 30%, transparent); padding: 10px 22px; min-height: 44px; }
-.btn:disabled { opacity: 0.55; cursor: progress; }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.tune summary { cursor: pointer; list-style: none; justify-content: flex-start; }
+.tune summary::-webkit-details-marker { display: none; }
+.tune summary::before { content: "▸"; letter-spacing: 0; transition: transform 0.15s; }
+.tune[open] summary::before { transform: rotate(90deg); }
+.tune summary span { margin-left: auto; }
+.tune__groups { display: flex; flex-direction: column; gap: 18px; }
+.tune__group { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.tune__group legend { padding: 0; margin-bottom: 4px; font-size: 13px; font-weight: 700; }
+.tune__row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 2px 8px; }
+.tune__row label { font-size: 13px; }
+.tune__row output { font-size: 13px; font-variant-numeric: tabular-nums; color: var(--ink2); }
+.tune__row.is-changed output { color: var(--sel-ink); font-weight: 700; }
+.tune__row input { grid-column: 1 / -1; width: 100%; margin: 0; accent-color: var(--gold); }
+.tune__row small { grid-column: 1 / -1; color: var(--ink2); font-size: 12px; }
+.tune__reset { border: 0; background: transparent; color: var(--ink2); font-size: 12px; text-decoration: underline; cursor: pointer; padding: 2px 4px; }
+.tune__reset[hidden] { display: none; }
 
 .stage { display: flex; flex-direction: column; gap: 28px; }
 .deck { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
@@ -163,7 +179,6 @@ body[data-mode="long"] [data-long="hide"] { display: none !important; }
 body:not([data-video="challenge"]) [data-challenge="only"] { display: none !important; }
 body[data-video="challenge"] [data-challenge="hide"] { display: none !important; }
 .music { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.music__add { cursor: pointer; }
 .music__name { color: var(--ink2); font-size: 13px; overflow-wrap: anywhere; }
 .player canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
 .player__bar { display: flex; align-items: center; gap: 12px; }
@@ -211,7 +226,8 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
     <div class="field" data-challenge="only">
       <div class="label">Music <span>the studio’s track, one of yours, or none</span></div>
       <div class="music">
-        <label class="btn btn--quiet music__add"><input id="music-file" type="file" accept="audio/*" hidden>Add a track</label>
+        <input id="music-file" type="file" accept="audio/*" hidden>
+        <button id="music-add" type="button" class="btn btn--quiet">Add a track</button>
         <button id="music-track" type="button" class="btn btn--quiet" hidden>Cool Vibes</button>
         <span id="music-name" class="music__name">Cool Vibes · Kevin MacLeod</span>
         <button id="music-clear" type="button" class="btn btn--quiet">Remove</button>
@@ -343,6 +359,12 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
       <label class="label" for="handle">On the last slide</label>
       <input id="handle" class="text-input" type="text" maxlength="40" placeholder="@yourhandle or a link (optional)">
     </div>
+
+    <details class="field tune" id="tune-field">
+      <summary class="label">Tune <span id="tune-count">defaults</span></summary>
+      <div id="tune" class="tune__groups"></div>
+      <button id="tune-reset" type="button" class="btn btn--quiet" hidden>Reset all</button>
+    </details>
   </aside>
 
   <section class="work" aria-label="Slides">

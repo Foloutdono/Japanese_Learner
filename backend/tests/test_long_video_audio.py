@@ -157,3 +157,36 @@ def test_no_bed_is_silence_under_the_voice(tmp_path):
     left, rate = data[0::2], lva.RATE
     assert np.abs(left[int(6.5 * rate):int(9.5 * rate)]).max() == 0
     assert _rms_db(left[int(4.2 * rate):int(4.8 * rate)]) > -40
+
+
+def test_a_beds_level_and_fades_are_the_studios(tmp_path):
+    # Plan 248: the Tune panel's music volume and fade reach the mix, the
+    # music fades out where the video ends (never cut at a fraction of its
+    # level a second past it), and the mix's last moment is faded too.
+    track = tmp_path / "track.wav"
+    _tone(track, 2.0, lva.RATE, hz=110.0, amp=0.9)
+    n = 10 * lva.RATE
+    plain = lva.recorded_bed(track, n)
+    loud = lva.recorded_bed(track, n, gain=2.0)
+    mid = slice(4 * lva.RATE, 6 * lva.RATE)
+    assert _rms_db(loud[mid, 0]) - _rms_db(plain[mid, 0]) == pytest.approx(6.02, abs=0.1)
+    slow = lva.recorded_bed(track, n, fade_s=4.0)
+    at = int(2.0 * lva.RATE)
+    assert abs(slow[at - 200:at + 200, 0]).max() < abs(plain[at - 200:at + 200, 0]).max()
+    assert abs(plain[-50:, 0]).max() < 0.01
+    flat = lva.recorded_bed(track, n, fade_s=0)
+    assert abs(flat[:200, 0]).max() > 0.01
+
+    cache, sfx = tmp_path / "cache", tmp_path / "sfx"
+    cache.mkdir()
+    sfx.mkdir()
+    (tmp_path / "tl.json").write_text(json.dumps({"seconds": 8.0, "cues": [], "sfx": []}), encoding="utf-8")
+    out = tmp_path / "mix.wav"
+    assert lva.mix(tmp_path / "tl.json", cache, sfx, out, track, bed_fade=0) == 0
+    with wave.open(str(out)) as w:
+        assert abs(w.getnframes() / w.getframerate() - 8.0) < 0.01
+        data = np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").astype(np.float64) / 32768
+    left = data[0::2]
+    # Unfaded, the music plays to the end, and the last few frames close on silence.
+    assert _rms_db(left[int(7.0 * lva.RATE):int(7.5 * lva.RATE)]) > -40
+    assert abs(left[-20:]).max() < 0.01

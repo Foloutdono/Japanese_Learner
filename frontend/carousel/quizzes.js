@@ -15,7 +15,7 @@
 // sentence, where a second particle could fit (CLAUDE.md, "A quiz
 // question is one only understanding answers").
 import { hasKanji, reading } from './draw.js'
-import { EXAM_ASK_JP, formOf, tr, weldIf } from './strings.js'
+import { EXAM_ASK_JP, formOf, quoted, tr, weldIf } from './strings.js'
 import { deal, dealChoices, gloss, lineRomaji, readingMisses, seeded, shuffle, unpack } from './common.js'
 import { lookalikesOf } from './explain.js'
 
@@ -594,7 +594,7 @@ export function lookalikeQuizzes(set, lang, t) {
       kind: 'kanjiPick', id: `pick-${k.c}`, ask: t.examAsk.kanjiPick, stem: { text: weldIf(lang, meaning) },
       choices: d.choices.map(text => ({ text, fam: 'serif' })), right: d.right,
       explain: { head: read ? `${k.c}\u3000${read}` : k.c, sense: tr(k.note, lang) },
-      label: `${t.kinds.kanjiPick} · ${weldIf(lang, meaning)}`, cover: `“${weldIf(lang, meaning)}”`,
+      label: `${t.kinds.kanjiPick} · ${weldIf(lang, meaning)}`, cover: quoted(lang, weldIf(lang, meaning)),
     }
   })
   return withId(qs, q => t.kinds[q.kind])

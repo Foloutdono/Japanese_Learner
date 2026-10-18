@@ -447,6 +447,9 @@ export function weld(text) {
  *  an opening mark never ends a line on its own (plan 229j). */
 const curly = text => String(text ?? '').replace(/«\s*/g, '“').replace(/\s*»/g, '”')
 export const weldIf = (lang, text) => (lang === 'fr' ? weld(text) : curly(text))
+/** A text quoted as its language quotes: « … » in French, held to it by
+ *  no-break spaces, “…” in English (plan 248). */
+export const quoted = (lang, text) => (lang === 'fr' ? `«\u00a0${text}\u00a0»` : `“${text}”`)
 
 /** A point's form in the reader's language, or none: the catalogue writes
  *  it in English, and carousel_bank.py turns the French over where it can. */

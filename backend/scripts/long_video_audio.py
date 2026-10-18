@@ -291,9 +291,10 @@ def limited(x, block: int = 120, release: float = 0.08):
 BED_RMS = 0.05
 
 
-def recorded_bed(path: Path, n: int):
-    """A WAV at RATE looped to `n` frames, stereo, levelled to BED_RMS,
-    opening and closing on a fade as the music does."""
+def recorded_bed(path: Path, n: int, gain: float = 1.0, fade_s: float = 2.5):
+    """A WAV at RATE looped to `n` frames, stereo, levelled to BED_RMS
+    times `gain`, opening and closing on a fade of `fade_s` seconds as the
+    music does (plan 248: both as the studio's Tune panel sets them)."""
     import numpy as np
     data, rate = read_wav(path)
     if rate != RATE:
@@ -304,15 +305,21 @@ def recorded_bed(path: Path, n: int):
     reps = -(-n // max(1, len(data)))
     loop = np.tile(data, (reps, 1))[:n].astype(np.float32)
     rms = float(np.sqrt(np.mean(loop ** 2))) or 1.0
-    loop *= BED_RMS / rms
-    fade = min(int(2.5 * RATE), n // 2)
-    ramp = np.linspace(0, 1, fade, dtype=np.float32)[:, None]
-    loop[:fade] *= ramp
-    loop[n - fade:] *= ramp[::-1]
+    loop *= BED_RMS * gain / rms
+    fade = min(int(fade_s * RATE), n // 2)
+    if fade > 0:
+        ramp = np.linspace(0, 1, fade, dtype=np.float32)[:, None]
+        loop[:fade] *= ramp
+        loop[n - fade:] *= ramp[::-1]
     return loop
 
 
-def mix(tl_path: Path, cache: Path, sfx: Path, out: Path, bed_path: Path | None = None, no_bed: bool = False) -> int:
+# The whole mix's last moment, faded: a chime's tail or the music never stops on a cut.
+END_FADE_S = 0.3
+
+
+def mix(tl_path: Path, cache: Path, sfx: Path, out: Path, bed_path: Path | None = None, no_bed: bool = False,
+        bed_gain: float = 1.0, bed_fade: float = 2.5) -> int:
     import numpy as np
 
     from study import voice_engine as engine
@@ -357,12 +364,17 @@ def mix(tl_path: Path, cache: Path, sfx: Path, out: Path, bed_path: Path | None 
     # carries the video: it rises, up to twice its level, still stepping
     # back under the voice.
     spoken = float(np.mean(np.abs(voice_track) > 0.02)) if n else 0.0
+    # The bed is as long as the video, not the second of room after it, so
+    # its fade-out ends where the video does (plan 248: it was cut at 40%).
+    m = int(seconds * RATE)
     if bed_path:
-        music = recorded_bed(bed_path, n)
+        music = recorded_bed(bed_path, m, bed_gain, bed_fade)
     elif no_bed:
-        music = np.zeros(n, dtype=np.float32)
+        music = np.zeros(m, dtype=np.float32)
     else:
-        music = bed(n / RATE) * MUSIC * float(np.clip(0.12 / max(spoken, 0.06), 1.0, 2.0))
+        music = bed(m / RATE)[:m] * MUSIC * float(np.clip(0.12 / max(spoken, 0.06), 1.0, 2.0))
+    pad = [(0, n - len(music))] + [(0, 0)] * (music.ndim - 1)
+    music = np.pad(music, pad).astype(np.float32)
     level = np.abs(voice_track)
     win = int(0.25 * RATE)
     run = np.concatenate([[0], np.cumsum(level, dtype=np.float64)])
@@ -387,6 +399,9 @@ def mix(tl_path: Path, cache: Path, sfx: Path, out: Path, bed_path: Path | None 
     stereo *= 10 ** (LOUD / 20) / max(rms, 1e-6)
     stereo = limited(stereo)
     stereo = stereo[: int(seconds * RATE)]
+    tail = min(len(stereo), int(END_FADE_S * RATE))
+    if tail:
+        stereo[-tail:] *= np.linspace(1, 0, tail, dtype=np.float32)[:, None]
     pcm = (np.clip(stereo, -1, 1) * 32767).astype("<i2").tobytes()
     write_wav(out, pcm, RATE, channels=2)
     print(f"wrote {out}: {seconds:.1f}s, {len(tl['cues'])} line(s) ({missing} unsaid), {len(tl['sfx'])} sound(s).")
@@ -407,10 +422,12 @@ def main() -> int:
     m.add_argument("--out", type=Path, required=True)
     m.add_argument("--bed", type=Path, help="a recorded bed (WAV) in place of the music: a reading challenge's own track")
     m.add_argument("--no-bed", action="store_true", help="no bed at all: a reading challenge with no track")
+    m.add_argument("--bed-gain", type=float, default=1.0, help="the recorded bed's level, times BED_RMS (the studio's music volume)")
+    m.add_argument("--bed-fade", type=float, default=2.5, help="the recorded bed's fade in and out, in seconds")
     args = ap.parse_args()
     if args.step == "voice":
         return voice(args.cues, args.cache, args.out)
-    return mix(args.timeline, args.cache, args.sfx, args.out, args.bed, args.no_bed)
+    return mix(args.timeline, args.cache, args.sfx, args.out, args.bed, args.no_bed, args.bed_gain, args.bed_fade)
 
 
 if __name__ == "__main__":

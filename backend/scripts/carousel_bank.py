@@ -85,9 +85,114 @@ def _plain(text: str) -> str:
     return re.sub(r"\*\*(.+?)\*\*", r"\1", text or "").strip()
 
 
+# ── Words a page spells in kana (plan 248) ──────────────────────────
+# A word whose kanji are above a text's level is written in kana
+# (としょかん), or half in kana (食どう), and the tokenizer, which knows
+# it only in kanji, cuts it into other words: は|と|しょ|か|んで, 食|どう.
+# Each spelling here is read as the word it spells: the line is analysed
+# with the word's kanji in its place, and its tokens are given back the
+# page's own spelling, readings only over the kanji it writes. A list
+# reviewed by hand, not a guess: a guessing pass read ふりそう as ふ理想.
+# A verb's spelling (ねます) is read so only where the plain analysis
+# starts a token at it (はやく|ね|ます, never わかり|かね|ます).
+_RESPELL = {
+    "しんかんせん": "新幹線", "しゅくだい": "宿題", "かいさつ": "改札", "としょかん": "図書館",
+    "食どう": "食堂", "野さい": "野菜", "らい週": "来週", "でんち": "電池", "てんいん": "店員",
+    "ちかてつ": "地下鉄", "れいぞうこ": "冷蔵庫", "きっさてん": "喫茶店", "ゆうびんきょく": "郵便局",
+    "つうろ": "通路", "じしょ": "辞書", "ひこうき": "飛行機", "ていきけん": "定期券",
+    "うんてんしゅ": "運転手", "まどぐち": "窓口", "るすばん": "留守番", "ぶんぽう": "文法",
+    "よやく": "予約", "でぐち": "出口", "ふじさん": "富士山", "ひるごはん": "昼ご飯",
+    "ばんごはん": "晩ご飯", "たんじょうび": "誕生日", "ごぶさた": "ご無沙汰",
+}
+_RESPELL_VERBS = {"ねます": "寝ます", "ねました": "寝ました", "ねましょう": "寝ましょう", "ねません": "寝ません"}
+_RESPELL_RE = re.compile("|".join(re.escape(k) for k in sorted({**_RESPELL, **_RESPELL_VERBS}, key=len, reverse=True)))
+_KANJI_CHAR = re.compile(r"[㐀-鿿々]")
+
+
+def _spelled_back(tokens: list[dict], original: str) -> bool:
+    """The tokens of a respelled word given the page's spelling back: each
+    furigana segment is its kanji where the page writes them, its reading
+    where the page writes that. False where the two do not line up."""
+    at = 0
+    for tok in tokens:
+        segs = tok.get("furigana") or [{"text": tok["surface"]}]
+        out = []
+        for seg in segs:
+            text, reading = seg["text"], seg.get("reading") or ""
+            if original.startswith(text, at):
+                out.append({"text": text, "reading": reading} if reading else {"text": text})
+                at += len(text)
+            elif reading and original.startswith(reading, at):
+                out.append({"text": reading})
+                at += len(reading)
+            else:
+                return False
+        tok["surface"] = "".join(x["text"] for x in out)
+        tok["furigana"] = out
+        written = set(tok["surface"])
+        tok["kanji_matches"] = [m for m in tok.get("kanji_matches") or [] if m.get("kanji") in written]
+    return at == len(original)
+
+
+def _analyze(jp: str, level: str | None = None) -> dict:
+    """analyze_local, with the page's kana spellings read as the words they
+    spell (_RESPELL); positions are the page's own."""
+    plain = analyze_local(jp, level) if level else analyze_local(jp)
+    starts = {t["start"] for t in plain["tokens"]}
+    spans, parts, last, shift = [], [], 0, 0
+    for m in _RESPELL_RE.finditer(jp):
+        if m.group() in _RESPELL_VERBS and m.start() not in starts:
+            continue
+        word = _RESPELL.get(m.group()) or _RESPELL_VERBS[m.group()]
+        parts.append(jp[last:m.start()])
+        parts.append(word)
+        spans.append((m.start() + shift, m.start() + shift + len(word), m.start(), m.group()))
+        shift += len(word) - len(m.group())
+        last = m.end()
+    if not spans:
+        return plain
+    parts.append(jp[last:])
+    analysis = analyze_local("".join(parts), level) if level else analyze_local("".join(parts))
+
+    def back(pos: int) -> int:
+        """A position in the respelled line, in the page's line."""
+        moved = 0
+        for a, b, o, orig in spans:
+            if pos >= b:
+                moved += (b - a) - len(orig)
+            elif pos > a:
+                return o + min(len(orig), pos - a)
+        return pos - moved
+
+    placed = {}
+    for a, b, o, orig in spans:
+        inside = [t for t in analysis["tokens"] if t["start"] < b and a < t["end"]]
+        if not inside or inside[0]["start"] != a or inside[-1]["end"] != b or not _spelled_back(inside, orig):
+            return plain
+        # The word's own tokens laid end to end from where the page writes it.
+        at = o
+        for tok in inside:
+            placed[id(tok)] = (at, at + len(tok["surface"]))
+            at += len(tok["surface"])
+    for tok in analysis["tokens"]:
+        tok["start"], tok["end"] = placed.get(id(tok)) or (back(tok["start"]), back(tok["end"]))
+    for g in analysis.get("grammar") or []:
+        g["start"], g["end"] = back(g["start"]), back(g["end"])
+        g["segments"] = [[back(x), back(y)] for x, y in g.get("segments") or []]
+    analysis["text"] = jp
+    return analysis
+
+
+_KATAKANA = re.compile(r"^[\u30a0-\u30ffー]+$")
+
+
 def _romaji(reading: str, kind: str, surface: str) -> str:
     if kind == "particle" and surface in PARTICLE_ROMAJI:
         return PARTICLE_ROMAJI[surface]
+    # A word in katakana is romanised as it is written: its reading spells
+    # ー as a vowel (コーヒー こうひい), which gave "kouhii" (plan 248).
+    if _KATAKANA.match(surface):
+        return to_romaji(surface)
     return to_romaji(reading)
 
 
@@ -211,7 +316,45 @@ def _counted_row(group: list[dict], after: dict | None) -> dict | None:
     return row
 
 
+# ── Tokens a beginner reads as one word (plan 248) ──────────────────
+# The analyser cuts a number written in parts (十|五年, which glossed 十 as
+# "ten" beside 五年 "5 years"), でも opening a clause (で|も) and お or ご
+# from the word they honour (お|ちゃ); each is joined back before the rows
+# are made, in every source (お and ご were joined in the conversations only).
+_DIGITS = re.compile(r"^[〇一二三四五六七八九十百千万億0-9０-９]+$")
+_DEMO = next(({"entry": e, "level": lv} for lv, es in __import__("content.vocab_data", fromlist=["VOCAB_BY_LEVEL"]).VOCAB_BY_LEVEL.items()
+              for e in es if e.get("kana") == "でも" and not e.get("kanji")), None)
+
+
+def _joined(tokens: list[dict]) -> list[dict]:
+    out: list[dict] = []
+    for tok in tokens:
+        prev = out[-1] if out else None
+        if prev and _DIGITS.match(prev["surface"]) and _DIGITS.match(tok["surface"]):
+            out[-1] = {**prev, "surface": prev["surface"] + tok["surface"], "end": tok.get("end"),
+                       "reading": (prev.get("reading") or prev["surface"]) + (tok.get("reading") or tok["surface"]),
+                       "furigana": (prev.get("furigana") or []) + (tok.get("furigana") or []),
+                       "kanji_matches": (prev.get("kanji_matches") or []) + (tok.get("kanji_matches") or []),
+                       # 十 is "ten", 十五 is not: a number in parts is left bare unless a counter glosses it.
+                       "vocab_match": None}
+            continue
+        before = out[-2] if len(out) >= 2 else None
+        if (prev and prev["surface"] == "で" and prev["pos"] == "particle" and tok["surface"] == "も" and tok["pos"] == "particle"
+                and (before is None or before["pos"] in SKIP_POS)):
+            out[-1] = {**prev, "surface": "でも", "reading": "でも", "lemma": "でも", "pos": "conjunction", "end": tok.get("end"),
+                       "furigana": [{"text": "でも"}], "vocab_match": _DEMO, "grammar": []}
+            continue
+        if prev and prev["pos"] == "prefix" and prev["surface"] in ("お", "ご") and tok["pos"] in ("noun", "verb"):
+            out[-1] = {**tok, "surface": prev["surface"] + tok["surface"], "start": prev.get("start"),
+                       "reading": (prev.get("reading") or prev["surface"]) + (tok.get("reading") or tok["surface"]),
+                       "furigana": (prev.get("furigana") or [{"text": prev["surface"]}]) + (tok.get("furigana") or [{"text": tok["surface"]}])}
+            continue
+        out.append(tok)
+    return out
+
+
 def rows_of(tokens: list[dict]) -> list[dict]:
+    tokens = _joined(tokens)
     rows: list[dict] = []
     i = 0
     while i < len(tokens):
@@ -287,7 +430,7 @@ def _focus_index(rows: list[dict], focus: str) -> int | None:
 
 
 def sentence(level: str, index: int, row: dict, kanji: set) -> dict:
-    analysis = analyze_local(row["jp"], level)
+    analysis = _analyze(row["jp"], level)
     rows = rows_of(analysis["tokens"])
     grammar = []
     for g in analysis["grammar"]:
@@ -566,7 +709,7 @@ def text_rows(jp: str, level: str | None = None, pattern: str | None = None) -> 
     (0 where none), 1 where `pattern` is written on it]; trailing empties
     dropped. No glosses: a lesson's line is read, not taken apart.
     The studio unpacks them (sources.js, unpack)."""
-    analysis = analyze_local(jp, level)
+    analysis = _analyze(jp, level)
     out = []
     for r in rows_of(analysis["tokens"]):
         if r["k"] == "punct":
@@ -839,7 +982,7 @@ def _passage_words(parts: list[str], level: str, want: int = 6) -> list[dict]:
     rank = {lv: i for i, lv in enumerate(LEVELS)}
     seen, found = set(), []
     for n, part in enumerate(parts):
-        for r in rows_of(analyze_local(part, level)["tokens"]):
+        for r in rows_of(_analyze(part, level)["tokens"]):
             if r["k"] != "word" or not r.get("fu") or not r.get("en") or r.get("pool"):
                 continue
             written = (r.get("lemma") or [r["t"]])[0]

@@ -464,7 +464,7 @@
 {"t":"習う","r":"ならう","ro":"narau","en":["to learn (from a teacher), to take lessons"],"fr":["apprendre (auprès d'un professeur), prendre des cours"],"fu":[["習","なら"],["う",""]],"ex":["N3.26"]},
 {"t":"皆さん","r":"みなさん","ro":"minasan","en":["everyone (polite, addressing a group)"],"fr":["tout le monde (poli, pour s'adresser à un groupe)"],"fu":[["皆","みな"],["さん",""]]},
 {"t":"角","r":"かど","ro":"kado","en":["a corner"],"fr":["coin, angle"],"fu":[["角","かど"]],"ex":["N4.124"]},
-{"t":"十","r":"じゅう","ro":"juu","en":["ten"],"fr":["dix"],"fu":[["十","じゅう"]],"hy":["拾","充"],"ex":["N2.224"]},
+{"t":"十","r":"じゅう","ro":"juu","en":["ten"],"fr":["dix"],"fu":[["十","じゅう"]],"hy":["拾","充"]},
 {"t":"遊ぶ","r":"あそぶ","ro":"asobu","en":["to play (have fun, not sports/instruments), to make a visit"],"fr":["jouer (s'amuser, pas sport/instrument), rendre visite"],"fu":[["遊","あそ"],["ぶ",""]],"ex":["N2.153"]},
 {"t":"去年","r":"きょねん","ro":"kyonen","en":["last year"],"fr":["l'année dernière"],"fu":[["去","きょ"],["年","ねん"]],"hy":["居年","去念","許年"],"ex":["N2.140"]},
 {"t":"先","r":"さき","ro":"saki","en":["tip, end","ahead, front","first (before others)"],"fr":["bout, pointe","devant, l'avant","d'abord (avant les autres)"],"fu":[["先","さき"]],"ex":["N4.173","N2.220"]},

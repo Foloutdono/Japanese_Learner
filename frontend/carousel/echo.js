@@ -19,6 +19,7 @@
 import { FS, METAL_H, SP, address, alpha, font, fit, frame, ground, hasKanji, masthead, palette, paragraphH, text } from './draw.js'
 import * as A from './app.js'
 import { SITE, STRINGS, weldIf } from './strings.js'
+import { tuned } from './tune.js'
 
 /** The clip: ten seconds of sayings at thirty frames; the card comes in
  *  by FIRST, when the word is first said, and GAP of silence follows each
@@ -102,12 +103,14 @@ export function voiceSpan(samples, rate) {
 const guessed = r => ({ on: 0.135, off: 0.135 + 0.11 * [...r].length })
 
 /** When each saying's voice starts, in the clip's seconds: from FIRST,
- *  one every (voice + GAP), as many as end inside the clip. */
-export function beats(span) {
+ *  one every (voice + gap), as many as end inside the clip (the gap and
+ *  the clip's length as tuned, plan 248). */
+export function beats(span, tune) {
   const voiced = span.off - span.on
-  const period = voiced + ECHO.gap
+  const period = voiced + tuned(tune, 'echo.gap')
+  const seconds = tuned(tune, 'echo.seconds')
   const out = []
-  for (let at = ECHO.first; at + voiced <= ECHO.seconds - 0.1; at += period) out.push(Math.round(at * 1000) / 1000)
+  for (let at = ECHO.first; at + voiced <= seconds - 0.1; at += period) out.push(Math.round(at * 1000) / 1000)
   return out
 }
 
@@ -212,7 +215,7 @@ export function echoDeck(plan, fmt, opts = {}) {
   const voice = opts.voice || null
   const span = voice ? { on: voice.on, off: voice.off } : guessed(word.r)
   const track = opts.track || null
-  const at = track ? track.beats : beats(span)
+  const at = track ? track.beats : beats(span, opts.tune)
   // The word is kept once its last saying has been said (a recording of
   // its own, once it has played whole).
   const keepAt = track ? track.seconds : Math.round(((at.at(-1) ?? ECHO.first) + span.off - span.on + ECHO.after) * 1000) / 1000
@@ -360,7 +363,7 @@ export function echoDeck(plan, fmt, opts = {}) {
   const still = { key: 'echo', draw: ctx => { ctx.save(); drawAt(ctx, null); ctx.restore() } }
   const kept = { key: 'keep', draw: ctx => { ctx.save(); drawKeep(ctx, null); ctx.restore() } }
   const clip = {
-    seconds: Math.round((keepAt + ECHO.keep) * 1000) / 1000,
+    seconds: Math.round((keepAt + tuned(opts.tune, 'echo.keep')) * 1000) / 1000,
     fps: ECHO.fps,
     print: false,
     beats: at,

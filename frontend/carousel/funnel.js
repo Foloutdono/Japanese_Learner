@@ -20,7 +20,7 @@ import {
   address, mix, palette, paragraph, paragraphH, rrect, strokeBox, text,
 } from './draw.js'
 import { analyserLine, departButton, pointCard } from './app.js'
-import { SITE } from './strings.js'
+import { SITE, quoted } from './strings.js'
 import { picked } from './sources.js'
 import { withoutGiveaways } from './quizzes.js'
 
@@ -301,7 +301,7 @@ function platesOf(pl, f, base) {
       hook: { kind: 'glyph', text: f.kana.k, ask: 'read', seconds: 3 },
       solution: { kind: 'kana', kana: f.kana, strokes: f.strokes },
       detail: f.lookalike?.length > 1 ? { kind: 'kanas', items: f.lookalike, here: f.kana.k, label: 'lookalike' }
-        : f.words?.length ? { kind: 'rows', items: f.words, label: 'sentences' } : null,
+        : f.words?.length ? { kind: 'rows', items: f.words, label: 'kanjiWords' } : null,
     }
     case 'passage': {
       const q = pl.quizzes.find(x => x.kind === 'passage') || pl.quizzes[0]
@@ -595,12 +595,16 @@ function measured(ctx, fn) {
 }
 /** The longest list that fits: `make(k)` for k from `n` down to one. */
 function fitting(n, maxH, make) {
+  // As many as fit whole; fewer before one is cut, and only where none
+  // fits whole the most that fit at all (plan 248).
   let b = none
+  let fits = null
   for (let k = n; k >= 1; k--) {
     b = make(k)
-    if (b.h <= maxH) return b
+    if (b.h <= maxH && !b.cut) return b
+    if (b.h <= maxH) fits ||= b
   }
-  return b
+  return fits || b
 }
 const textBlock = (c, str, { x, w, sizes, weight = 700, fam = 'latin', color = c.p.ink, align = 'center', maxLines = 3, lh = 1.2, maxH = Infinity }) => {
   if (!str) return none
@@ -648,7 +652,7 @@ function glyphBlock(c, str, { x, w, maxH, max, fam = 'serif', color = c.p.ink, r
     },
   }
 }
-const quoteBlock = (c, str, o) => textBlock(c, `“${str}”`, { sizes: [FS.display, FS.heading, FS.title, FS.lead], fam: 'serif', weight: 700, maxLines: 5, lh: 1.15, ...o })
+const quoteBlock = (c, str, o) => textBlock(c, quoted(c.lang, str), { sizes: [FS.display, FS.heading, FS.title, FS.lead], fam: 'serif', weight: 700, maxLines: 5, lh: 1.15, ...o })
 
 /** A question's choices as the app's answer rows: a numbered roundel and
  *  the answer, the right one in the success ink once answered. */
@@ -737,6 +741,11 @@ function questionBlock(c, q, { x, w, maxH, revealed = false }) {
   let pick = null
   let firstFit = null
   const whole = L => !L.ask.cut && !L.stem.cut && !L.choices.cut && !L.why.cut
+  // Where something must be cut, the least is: never the question or what
+  // it quotes before a choice, a choice before the why, a size down before
+  // a cut (plan 248: the largest layout that fit was kept, and cut the
+  // quoted translation a translation exam asks about).
+  const cost = L => (L.ask.cut ? 8 : 0) + (L.stem.cut ? 8 : 0) + (L.choices.cut ? 2 : 0) + (L.why.cut ? 1 : 0)
   for (const withWhy of revealed && whyText ? [true, false] : [false]) {
     for (const z of [FS.title, FS.lead, FS.body, FS.sm, FS.caption, FS.xs]) {
       const gap = z >= FS.body ? SP[6] : z >= FS.caption ? SP[5] : SP[4]
@@ -749,8 +758,7 @@ function questionBlock(c, q, { x, w, maxH, revealed = false }) {
       lay = { gap, ask, why, choices, stem, total }
       if (total > maxH || (q.stem && !stem.h)) continue
       if (z >= FS.sm && whole(lay)) { pick = lay; break }
-      firstFit ||= lay
-      if (z < FS.sm) break
+      if (!firstFit || cost(lay) < cost(firstFit)) firstFit = lay
     }
     if (pick) break
   }
@@ -971,7 +979,7 @@ function answerBlock(c, s, { x, w, maxH }) {
   for (let k = 0; k < 4; k++) {
     const z = i => RUNGS[Math.min(RUNGS.length - 1, i + k)]
     const ro = k < 3 ? textBlock(c, s.romaji, { x, w, sizes: [z(4), z(5)], weight: 500, color: c.p.ink2, maxLines: 3 }) : none
-    const tr = textBlock(c, `“${s.translation}”`, { x, w, sizes: [z(2), z(3), z(4)], maxLines: 4 })
+    const tr = textBlock(c, quoted(c.lang, s.translation), { x, w, sizes: [z(2), z(3), z(4)], maxLines: 4 })
     const gap = k < 2 ? SP[7] : SP[5]
     const sent = sentenceBlock(c, s.rows, { x, w, maxH: maxH - ro.h - tr.h - gap * 2, max: z(0), min: z(3), script: 'furigana', fewest: true })
     out = stackOf([sent, ro, tr], [SP[5], gap])
@@ -1015,11 +1023,12 @@ function pointBlock(c, s, { x, w, maxH }) {
 /** One sentence on a card: the lit words ruled in gold, its sense under it. */
 function exampleCard(c, item, { x, w, maxH, lit = r => r.lit, head }) {
   const pad = SP[6]
-  const t = textBlock(c, item.tr, { x: x + pad, w: w - pad * 2, sizes: [FS.body, FS.sm, FS.caption], weight: 500, color: c.p.ink2, maxLines: 3 })
+  // Its sense on up to four lines before it is cut (plan 248).
+  const t = textBlock(c, item.tr, { x: x + pad, w: w - pad * 2, sizes: [FS.body, FS.sm, FS.caption], weight: 500, color: c.p.ink2, maxLines: 4 })
   const hd = head ? textBlock(c, head, { x: x + pad, w: w - pad * 2, sizes: [FS.lead, FS.body], fam: 'serif', color: c.p.line.grammar, align: 'left', maxLines: 1 }) : none
   const s = sentenceBlock(c, item.rows, { x: x + pad, w: w - pad * 2, maxH: Math.max(FS.lead * 2, maxH - t.h - hd.h - pad * 2 - SP[4] * 2), max: FS.title * 1.1, min: FS.sm, script: 'furigana', lit, fam: 'jp', lines: 3 })
   const h = pad * 2 + hd.h + (hd.h ? SP[3] : 0) + s.h + SP[4] + t.h
-  return { h, draw: y => { card(c, x, y, w, h); hd.draw(y + pad); s.draw(y + pad + hd.h + (hd.h ? SP[3] : 0)); t.draw(y + pad + hd.h + (hd.h ? SP[3] : 0) + s.h + SP[4]) } }
+  return { h, cut: !!(t.cut || s.cut), draw: y => { card(c, x, y, w, h); hd.draw(y + pad); s.draw(y + pad + hd.h + (hd.h ? SP[3] : 0)); t.draw(y + pad + hd.h + (hd.h ? SP[3] : 0) + s.h + SP[4]) } }
 }
 /** A word answered: its reading over it, its romaji, its sense. */
 function wordBlock(c, word, { x, w, maxH }) {
@@ -1096,7 +1105,7 @@ function kanaBlock(c, s, { x, w, maxH }) {
 function stackOf(blocks, gaps) {
   const list = blocks.map((b, i) => ({ b, gap: i ? gaps[i - 1] ?? gaps.at(-1) : 0 })).filter(x => x.b.h > 0)
   const h = list.reduce((a, x, i) => a + x.b.h + (i ? x.gap : 0), 0)
-  return { h, draw: y => { let at = y; list.forEach((x, i) => { if (i) at += x.gap; x.b.draw(at); at += x.b.h }) } }
+  return { h, cut: list.some(x => x.b.cut), draw: y => { let at = y; list.forEach((x, i) => { if (i) at += x.gap; x.b.draw(at); at += x.b.h }) } }
 }
 
 // ── The detail ────────────────────────────────────────────────
@@ -1803,14 +1812,16 @@ function detailSlide(c, s) {
 function suiteOf(spec, pl) {
   const f = pl.funnel || {}
   const seen = new Set([spec.hook?.q, spec.solution?.q, spec.detail?.q].filter(Boolean))
-  const same = (a, b) => a.kind === b.kind && (a.label || '') === (b.label || '')
+  // The same part twice is the same kind under the same label, or the same
+  // items under any (a kana's words were dealt as its detail and again: plan 248).
+  const same = (a, b) => a.kind === b.kind && ((a.label || '') === (b.label || '') || (a.items && a.items === b.items))
   const rowsOf = list => list.map(x => ({ t: x.t, reading: x.kanji ? x.reading : x.reading || '', ro: x.ro, main: x.main, sub: x.pos, line: x.line || 'vocab' }))
   // A sentence's suite (spec.lead) is its breakdown and more of it, no question.
   const lead = spec.lead || []
   const parts = [
     f.breakdown?.length && !spec.lead ? { kind: 'rows', items: rowsOf(f.breakdown), label: 'words' } : null,
     f.examples?.length ? { kind: 'examples', items: f.examples, label: 'sentences' } : null,
-    f.words?.length ? { kind: 'rows', items: f.words, label: pl.source === 'kanji' || pl.source === 'word' ? 'kanjiWords' : 'words' } : null,
+    f.words?.length ? { kind: 'rows', items: f.words, label: ['kanji', 'word', 'kana'].includes(pl.source) ? 'kanjiWords' : 'words' } : null,
     f.lookalike?.length > 1 ? { kind: 'kanas', items: f.lookalike, here: f.kana?.k, label: 'lookalike' } : null,
   ].filter(d => d && !(spec.detail && same(spec.detail, d)) && !lead.some(x => same(x, d)))
   const asks = spec.lead ? [] : [
@@ -2544,7 +2555,7 @@ function drawTranslation(c) {
   const ink = p.line.honyaku
   const it = itemOf(c)
   panels(c, [
-    (x, y, w) => boardText(c, `“${it.tr || '…'}”`, x, y + 4, w, { sizes: [38, 36, 34, 32, 30], lines: 5, fam: 'serif', balanced: true }),
+    (x, y, w) => boardText(c, quoted(c.lang, it.tr || '…'), x, y + 4, w, { sizes: [38, 36, 34, 32, 30], lines: 5, fam: 'serif', balanced: true }),
     (x, y, w) => {
       const b = fit(ctx, it.jp || '日本語', { fam: 'jp', weight: 700, sizes: [42, 38, 34, 32, 30], maxW: w, maxLines: 4, balanced: false })
       b.lines.forEach((ln, i) => {

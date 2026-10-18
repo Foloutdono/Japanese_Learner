@@ -1189,7 +1189,7 @@
 {"t":"実態","r":"じったい","ro":"jittai","en":["actual state, reality, true condition"],"fr":["état réel, réalité, situation véritable"],"fu":[["実","じっ"],["態","たい"]],"hy":["十態","実大","実来"]},
 {"t":"経る","r":"へる","ro":"heru","en":["to pass, to elapse","to go through, to experience"],"fr":["passer, s'écouler","passer par, traverser (une épreuve)"],"fu":[["経","へ"],["る",""]],"ex":["N1.170","N1.195"]},
 {"t":"銅","r":"あかがね","ro":"akagane","en":["copper (literary)"],"fr":["cuivre (littéraire)"],"fu":[["銅","あかがね"]]},
-{"t":"御","r":"ご","ro":"go","en":["go-, honourable"],"fr":["honorifique (préfixe ご〜)"],"fu":[["御","ご"]],"hy":["互","降","伍"],"ex":["N1.99","N1.100"]},
+{"t":"御","r":"ご","ro":"go","en":["go-, honourable"],"fr":["honorifique (préfixe ご〜)"],"fu":[["御","ご"]],"hy":["互","降","伍"]},
 {"t":"逸らす","r":"そらす","ro":"sorasu","en":["to turn away, to avert"],"fr":["détourner, éviter"],"fu":[["逸","そ"],["らす",""]],"hy":["想らす","祖らす","組らす"]},
 {"t":"吝嗇","r":"けち","ro":"kechi","en":["stinginess, miserliness","miser, tightwad"],"fr":["avarice, radinerie","avare, radin"],"fu":[["吝嗇","けち"]]},
 {"t":"大げさ","r":"おおげさ","ro":"oogesa","en":["grandiose, exaggerated"],"fr":["grandiose, exagéré"],"fu":[["大","おお"],["げさ",""]]},

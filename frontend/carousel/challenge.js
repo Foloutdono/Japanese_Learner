@@ -19,6 +19,7 @@ import { FS, SP, R, METAL_H, RATING_INKS, FORMATS, address, alpha, drawSentence,
 import { drawPrint } from './app.js'
 import { unpack } from './common.js'
 import { SITE } from './strings.js'
+import { tuneFlag, tuned } from './tune.js'
 
 export const STYLES = ['scroll', 'along']
 // The tracks the studio carries (carousel/music/, its README): the first
@@ -45,7 +46,8 @@ export const CPM = { N5: 130, N4: 145, N3: 175, N2: 200, N1: 230 }
 const RUBY = new Set(['N5', 'N4', 'N3'])
 // The read-along voice slows for the first two levels, as a card's slow line does.
 const SLOW = new Set(['N5', 'N4'])
-// The video's beats, in seconds.
+// The video's beats, in seconds: the defaults; the tunable ones are read
+// through `beat`, as the studio's Tune panel or `--tune` set them (plan 248).
 export const CH = {
   hook: 3.2,
   // scroll: the text comes in for INTO seconds before it moves, and the
@@ -116,6 +118,8 @@ const SMALL = new Set([...'ゃゅょぁぃぅぇぉゎャュョァィゥェォ�
 /** A word's syllables (morae) as it is read: small ゃ joins the kana before it. */
 export const moraeOf = row => (row.k === 'punct' || PUNCT.test(row.t) ? 0 : [...reading(row)].filter(c => !SMALL.has(c)).length)
 const ease = x => 1 - (1 - Math.min(1, Math.max(0, x))) ** 3
+/** A beat of the video, as tuned (tune.js `challenge.*`). */
+const beat = (plan, key) => tuned(plan.tune, `challenge.${key}`)
 const clock = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`.replace(/:60$/, ':59')
 
 /** The texts the challenge can read: every comprehension passage. */
@@ -137,7 +141,7 @@ export function challengePlan(data, id, opts = {}) {
   const q = { ask: Q.question[lang] || Q.question.en, choices: Q.options[lang] || Q.options.en, right: Q.correct }
   return {
     source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, title: P.title, sents, q, music: opts.music === undefined ? TRACK : opts.music || null,
-    chars: sents.reduce((n, rows) => n + charsOf(rows), 0), cpm: CPM[P.lv] || CPM.N3, ruby: RUBY.has(P.lv), slow: SLOW.has(P.lv),
+    chars: sents.reduce((n, rows) => n + charsOf(rows), 0), cpm: Math.round((CPM[P.lv] || CPM.N3) * tuned(opts.tune, 'challenge.pace')), tune: opts.tune || {}, ruby: RUBY.has(P.lv), slow: SLOW.has(P.lv),
   }
 }
 
@@ -174,12 +178,12 @@ export function challengeTimeline(plan, voiced = null) {
   const lines = []
   let t = 0
   const seg = (key, dur) => { segs.push({ key, start: +t.toFixed(3), dur: +dur.toFixed(3) }); t += dur }
-  seg('hook', CH.hook)
+  seg('hook', beat(plan, 'hook'))
   const from = t
   if (plan.style === 'scroll') {
     // The whole text past the reading line at the level's pace, a moment
     // for it to come in before and the last line's read after.
-    t += CH.into + plan.chars / (plan.cpm / 60) + CH.out
+    t += beat(plan, 'into') + plan.chars / (plan.cpm / 60) + beat(plan, 'out')
   } else {
     plan.sents.forEach((rows, i) => {
       const cue = { text: sentenceText(rows), who: 'reader', slow: plan.slow, marks: true }
@@ -190,17 +194,17 @@ export function challengeTimeline(plan, voiced = null) {
       const at = t + CH.lead
       cues.push({ ...cue, at: +at.toFixed(3) })
       lines.push({ i, at: +t.toFixed(3), voice: +at.toFixed(3), dur: +dur.toFixed(3), words: wordTimes(rows, at, dur, v?.marks).map(x => +x.toFixed(3)) })
-      t = at + dur + CH.gap
+      t = at + dur + beat(plan, 'gap')
     })
   }
   segs.push({ key: 'reading', start: +from.toFixed(3), dur: +(t - from).toFixed(3) })
   const qAt = t
-  seg('question', CH.ask + CH.count)
-  for (let k = 0; k < CH.count; k++) sfx.push({ at: +(qAt + CH.ask + k).toFixed(3), key: 'click', gain: 0.35 })
+  seg('question', beat(plan, 'ask') + beat(plan, 'count'))
+  for (let k = 0; k < beat(plan, 'count'); k++) sfx.push({ at: +(qAt + beat(plan, 'ask') + k).toFixed(3), key: 'click', gain: 0.35 })
   sfx.push({ at: +t.toFixed(3), key: 'correct' })
-  seg('answer', CH.answer)
+  seg('answer', beat(plan, 'answer'))
   sfx.push({ at: +(t + 0.5).toFixed(3), key: 'platform-chime' })
-  seg('cta', CH.cta)
+  seg('cta', beat(plan, 'cta'))
   segs.sort((a, b) => a.start - b.start)
   const reading = +(segs.find(s => s.key === 'reading').dur).toFixed(1)
   return {
@@ -208,7 +212,8 @@ export function challengeTimeline(plan, voiced = null) {
     // The scroll at sixty frames a second, so its slow climb glides; the one read along at thirty.
     fps: plan.style === 'scroll' ? 60 : 30,
     // The music under it, if any (the studio's, from frontend/): a video read in silence is kept calm.
-    bed: plan.music ? { src: TRACKS[plan.music] ? `carousel/${TRACKS[plan.music].file}` : plan.music } : null, loudness: plan.music || plan.style === 'along' ? -16 : -20,
+    // Its level and fades as tuned, the same in the studio and the render.
+    bed: plan.music ? { src: TRACKS[plan.music] ? `carousel/${TRACKS[plan.music].file}` : plan.music, gain: tuned(plan.tune, 'music.volume'), fade: tuned(plan.tune, 'music.fade') } : null, loudness: plan.music || plan.style === 'along' ? -16 : -20,
     chapters: segs.map(s => ({ at: s.start, title: s.key })),
   }
 }
@@ -218,7 +223,7 @@ export function challengeCommand(plan) {
   const voice = plan.style === 'along' ? 'VOICEVOX_URL=http://localhost:50121 ' : ''
   // The studio's track is the command's own; another is named, none is said.
   const music = plan.music === TRACK ? '' : !plan.music ? ' --music none' : TRACKS[plan.music] ? ` --music ${plan.music}` : ` --music "${plan.music}"`
-  return `${voice}node carousel/long/render.mjs --challenge ${plan.id} --style ${plan.style} --hour ${plan.hour} --lang ${plan.lang}${music}`
+  return `${voice}node carousel/long/render.mjs --challenge ${plan.id} --style ${plan.style} --hour ${plan.hour} --lang ${plan.lang}${music}${tuneFlag(plan.tune, 'challenge')}`
 }
 
 /** The video's page: its title, its description, its tags. */
@@ -250,11 +255,11 @@ function layOf(ctx, plan, i, z, w, { maxLines = 6, min = FS.title, fam = 'serif'
 
 // The hour's print under it: darkened where the words go (`dark`), or
 // washed whole with the app's paper, the words in ink over it.
-function backdrop(ctx, P, T, dark = 0.5, hour = 'day') {
+function backdrop(ctx, P, T, dark = 0.5, hour = 'day', wash = 1) {
   if (P) drawPrint(ctx, P, 0, 0, FMT.w / P.scene.w, { W: FMT.w, H: FMT.h })
   else { ctx.fillStyle = T.ground === 'paper' ? PAPER.card : '#17151a'; ctx.fillRect(0, 0, FMT.w, FMT.h) }
   if (T.ground === 'paper') {
-    ctx.fillStyle = alpha(PAPER.bg, WASH[hour] ?? WASH.day)
+    ctx.fillStyle = alpha(PAPER.bg, Math.min(0.97, (WASH[hour] ?? WASH.day) * wash))
     ctx.fillRect(0, 0, FMT.w, FMT.h)
     return
   }
@@ -323,7 +328,7 @@ export function drawChallenge(ctx, plan, tl, t, P = null) {
 
 function hook(ctx, plan, tl, into, P, T) {
   const S = W[plan.lang]
-  backdrop(ctx, P, T, 0.5, plan.hour)
+  backdrop(ctx, P, T, 0.5, plan.hour, tuned(plan.tune, 'challenge.wash'))
   masthead(ctx, T)
   const k = ease(into / 0.6)
   let y = TOP + 90
@@ -401,13 +406,13 @@ function fades(x) {
 }
 function scroll(ctx, plan, tl, t, P) {
   const T = LOOK.paper
-  backdrop(ctx, P, T, 0.5, plan.hour)
+  backdrop(ctx, P, T, 0.5, plan.hour, tuned(plan.tune, 'challenge.wash'))
   masthead(ctx, T)
   const seg = tl.segs.find(x => x.key === 'reading')
   const { rows, length } = scrollRows(ctx, plan)
   // One speed: the whole text past the reading line in its reading time.
   const speed = length / (plan.chars / (plan.cpm / 60))
-  const off = speed * Math.max(0, t - seg.start - CH.into)
+  const off = speed * Math.max(0, t - seg.start - beat(plan, 'into'))
   const k = ease((t - seg.start) / 0.6)
   const top = SCROLL.read - off
   // The sentence at the reading line: the last one to have reached it.
@@ -500,7 +505,7 @@ function along(ctx, plan, tl, t, P) {
 
 function question(ctx, plan, into, answered, P, T) {
   const S = W[plan.lang]
-  backdrop(ctx, P, T, 0.5, plan.hour)
+  backdrop(ctx, P, T, 0.5, plan.hour, tuned(plan.tune, 'challenge.wash'))
   masthead(ctx, T)
   let y = lines(ctx, T, plan.q.ask, TOP + 30, [FS.heading, FS.title, FS.lead, FS.body], { maxLines: 4 }) + SP[6]
   plan.q.choices.forEach((c, i) => {
@@ -522,8 +527,9 @@ function question(ctx, plan, into, answered, P, T) {
   })
   y += SP[6]
   if (!answered) {
-    // Five seconds to answer, as the clicks count them.
-    const left = Math.max(0, CH.count - Math.max(0, into - CH.ask))
+    // The seconds to answer, as the clicks count them (none when the countdown is tuned away).
+    const count = beat(plan, 'count')
+    const left = Math.max(0, count - Math.max(0, into - beat(plan, 'ask')))
     const r = 54
     ctx.strokeStyle = T.track
     ctx.lineWidth = 10
@@ -532,7 +538,7 @@ function question(ctx, plan, into, answered, P, T) {
     ctx.stroke()
     ctx.strokeStyle = T.ring
     ctx.beginPath()
-    ctx.arc(fr.cx, y + r, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (left / CH.count))
+    ctx.arc(fr.cx, y + r, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (count ? left / count : 0))
     ctx.stroke()
     text(ctx, String(Math.ceil(left) || ''), fr.cx, y + r + 18, { f: font(800, FS.heading, 'latin'), color: T.ink, align: 'center' })
     lines(ctx, T, S.comments, y + r * 2 + SP[4], [FS.body], { weight: 600, maxLines: 1 })
@@ -543,7 +549,7 @@ function question(ctx, plan, into, answered, P, T) {
 
 function cta(ctx, plan, into, P, T) {
   const S = W[plan.lang]
-  backdrop(ctx, P, T, 0.62, plan.hour)
+  backdrop(ctx, P, T, 0.62, plan.hour, tuned(plan.tune, 'challenge.wash'))
   masthead(ctx, T)
   let y = TOP + 70
   y = lines(ctx, T, plan.title, y, [FS.display * 0.8, FS.heading], { weight: 900, fam: 'serif', maxLines: 2, lh: 1.08, k: ease(into / 0.6) })
