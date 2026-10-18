@@ -939,13 +939,13 @@
             }
           },
           {
-            "jp": "分かりました。明日、家まで持ってきてもらえますか。",
-            "kana": "わかりました。あした、うちまでもってきてもらえますか。",
-            "en": "I see. Could you bring it round to my place tomorrow?",
-            "fr": "D'accord. Vous pourriez me l'apporter chez moi demain ?",
+            "jp": "分かりました。明日、家まで取りに来てもらえますか。",
+            "kana": "わかりました。あした、うちまでとりにきてもらえますか。",
+            "en": "I see. Could you come round to my place tomorrow to pick it up?",
+            "fr": "D'accord. Vous pourriez passer la chercher chez moi demain ?",
             "why": {
-              "en": "「持ってきてもらえますか」 asks the receptionist to do the fetching, when the card is yours to bring.",
-              "fr": "「持ってきてもらえますか」 demande à l'accueil d'aller la chercher, alors que c'est à toi d'apporter ta carte."
+              "en": "「取りに来てもらえますか」 asks the clinic to come and fetch the card, when it is yours to bring.",
+              "fr": "「取りに来てもらえますか」 demande au cabinet de venir chercher la carte, alors que c'est à toi de l'apporter."
             }
           }
         ]
@@ -2395,8 +2395,8 @@
     "place": {"jp": "郵便局", "kana": "ゆうびんきょく", "en": "Post office", "fr": "Bureau de poste"},
     "title": {"en": "Not allowed in the post", "fr": "Interdit à l'envoi"},
     "situation": {
-      "en": "You are at the post office counter with a box you packed yourself for your family in Spain: clothes, sweets and a can of hair spray. The clerk takes your parcel.",
-      "fr": "Tu es au guichet de la poste avec un carton que tu as préparé pour ta famille en Espagne : des vêtements, des friandises et une bombe de laque. Le guichetier prend ton colis."
+      "en": "You are at the post office counter with a box you packed yourself for your family in Spain: clothes, sweets and a can of hair spray. You have already filled in the customs form, and the clerk takes your parcel.",
+      "fr": "Tu es au guichet de la poste avec un carton que tu as préparé pour ta famille en Espagne : des vêtements, des friandises et une bombe de laque. Tu as déjà rempli la déclaration de douane, et le guichetier prend ton colis."
     },
     "goal": {
       "en": "Send your parcel abroad once the one thing that cannot go is out of it.",
@@ -2533,13 +2533,13 @@
             }
           },
           {
-            "jp": "分かりました。じゃあ、スプレーも入れておきます。",
-            "kana": "わかりました。じゃあ、スプレーもいれておきます。",
-            "en": "I see. Then I'll put the spray in as well.",
-            "fr": "D'accord. Alors je mets aussi la bombe de laque dedans.",
+            "jp": "分かりました。じゃあ、スプレーは入れたままにします。",
+            "kana": "わかりました。じゃあ、スプレーはいれたままにします。",
+            "en": "I see. Then I'll leave the spray in.",
+            "fr": "D'accord. Alors je laisse la bombe dedans.",
             "why": {
-              "en": "「入れておきます」 leaves the spray in the box, when it is the one thing that must come out: 「出す」.",
-              "fr": "「入れておきます」 laisse la bombe dans le carton, alors que c'est justement ce qu'il faut sortir : 「出す」."
+              "en": "「入れたまま」 leaves the spray in the box, the one thing that must come out: 「出す」.",
+              "fr": "「入れたまま」 laisse la bombe dans le carton, alors que c'est justement ce qu'il faut sortir : 「出す」."
             }
           }
         ]
@@ -3239,13 +3239,13 @@
             }
           },
           {
-            "jp": "一時間も待たせて、すみません。",
-            "kana": "いちじかんもまたせて、すみません。",
-            "en": "Sorry to have kept you waiting a whole hour.",
-            "fr": "Pardon de vous avoir fait attendre toute une heure.",
+            "jp": "一時間は待てないので、今すぐ切ってください。",
+            "kana": "いちじかんはまてないので、いますぐきってください。",
+            "en": "I can't wait an hour, so please cut it right now.",
+            "fr": "Je ne peux pas attendre une heure, alors coupez-les tout de suite, s'il vous plaît.",
             "why": {
-              "en": "「待たせて」 is the causative: it apologises for keeping the salon waiting, when you are the one who would have to wait.",
-              "fr": "「待たせて」 est le causatif : il s'excuse d'avoir fait attendre le salon, alors que c'est toi qui devrais attendre."
+              "en": "「今すぐ切ってください」 asks for a cut this minute, when the hairdresser has just said the salon is full.",
+              "fr": "「今すぐ切ってください」 demande une coupe sur-le-champ, alors que le coiffeur vient de dire que le salon est complet."
             }
           }
         ]
@@ -3327,13 +3327,13 @@
             }
           },
           {
-            "jp": "いいえ、だれでも大丈夫です。",
-            "kana": "いいえ、だれでもだいじょうぶです。",
-            "en": "No, anyone is fine.",
-            "fr": "Non, n'importe qui, ça me va.",
+            "jp": "はい、だれでも大丈夫でした。",
+            "kana": "はい、だれでもだいじょうぶでした。",
+            "en": "Yes, anyone was fine.",
+            "fr": "Oui, n'importe qui, ça m'allait.",
             "why": {
-              "en": "「いいえ」 says any stylist will not do, and 「だれでも大丈夫です」 says any will: the two cannot both stand.",
-              "fr": "「いいえ」 dit que ça ne te va pas, et 「だれでも大丈夫です」 dit que si : les deux ne vont pas ensemble."
+              "en": "「大丈夫でした」 is past, as if the cut were over, when you are being asked about tomorrow's stylist.",
+              "fr": "「大丈夫でした」 est au passé, comme si la coupe était finie, alors qu'on te demande pour le coiffeur de demain."
             }
           }
         ]
@@ -5029,8 +5029,8 @@
             "en": "No, I'm an adult. Is it cheaper for students?",
             "fr": "Non, moi, je suis adulte. C'est moins cher pour les étudiants ?",
             "why": {
-              "en": "「いいえ」 corrects two adults, then 「私は大人です」 agrees with it: the reply contradicts itself.",
-              "fr": "「いいえ」 corrige « deux adultes », puis 「私は大人です」 le confirme : la réponse se contredit."
+              "en": "「私は大人です」 backs up the two adults that 「いいえ」 has just corrected, and you are the student in the pair.",
+              "fr": "「私は大人です」 confirme les deux places adulte que 「いいえ」 vient de corriger, alors que c'est toi qui as la carte d'étudiant."
             }
           },
           {
@@ -5618,13 +5618,13 @@
             }
           },
           {
-            "jp": "失礼しました。",
-            "kana": "しつれいしました。",
-            "en": "I'm sorry to have troubled you.",
-            "fr": "Pardon pour le dérangement.",
+            "jp": "どういたしまして。",
+            "kana": "どういたしまして。",
+            "en": "You're welcome.",
+            "fr": "De rien.",
             "why": {
-              "en": "「失礼しました」 apologises for a trouble you caused, and it is she who dialled the wrong number.",
-              "fr": "「失礼しました」 s'excuse d'un dérangement qu'on a causé, alors que c'est elle qui s'est trompée de numéro."
+              "en": "「どういたしまして」 answers thanks, and she has apologised: an apology is answered with 「いいえ、大丈夫ですよ」.",
+              "fr": "「どういたしまして」 répond à un remerciement, alors qu'elle s'excuse : une excuse, on y répond par 「いいえ、大丈夫ですよ」."
             }
           }
         ]
@@ -5793,10 +5793,10 @@
       },
       {
         "them": {
-          "jp": "はい、今日は振替輸送をしていますので、その切符で乗れますよ。",
-          "kana": "はい、きょうはふりかえゆそうをしていますので、そのきっぷでのれますよ。",
-          "en": "Yes: the other lines are taking our passengers today, so you can ride with that ticket.",
-          "fr": "Oui : aujourd'hui, les autres lignes acceptent nos voyageurs, donc vous pouvez le prendre avec ce billet."
+          "jp": "はい、今日はほかの線でも、その切符で乗れますよ。",
+          "kana": "はい、きょうはほかのせんでも、そのきっぷでのれますよ。",
+          "en": "Yes, today you can use that ticket on the other lines too.",
+          "fr": "Oui, aujourd'hui, ce billet est aussi valable sur les autres lignes."
         },
         "me": {
           "jp": "よかったです。地下鉄の入り口はどこですか。",
@@ -5955,10 +5955,10 @@
       },
       {
         "them": {
-          "jp": "かしこまりました。どうなさいましたか。",
-          "kana": "かしこまりました。どうなさいましたか。",
-          "en": "Certainly. What's the matter with it?",
-          "fr": "Bien sûr. Qu'est-ce qui ne va pas ?"
+          "jp": "はい、お取り替えですね。どうなさいましたか。",
+          "kana": "はい、おとりかえですね。どうなさいましたか。",
+          "en": "Certainly, an exchange. What's the matter with it?",
+          "fr": "Bien sûr, un échange. Qu'est-ce qui ne va pas ?"
         },
         "me": {
           "jp": "プレゼントにもらったんですが、少し小さいんです。",
@@ -6087,10 +6087,10 @@
       },
       {
         "them": {
-          "jp": "申し訳ございません。エルは今、売り切れなんです。お取り寄せでもよろしいですか。",
-          "kana": "もうしわけございません。エルはいま、うりきれなんです。おとりよせでもよろしいですか。",
-          "en": "I'm very sorry, the large is sold out at the moment. Would you mind if we ordered one in?",
-          "fr": "Je suis désolée, le L est épuisé pour le moment. Ça vous irait qu'on le commande ?"
+          "jp": "申し訳ございません。エルは今、売り切れなんです。ほかの店から送ってもらいましょうか。",
+          "kana": "もうしわけございません。エルはいま、うりきれなんです。ほかのみせからおくってもらいましょうか。",
+          "en": "I'm very sorry, the large is sold out at the moment. Shall I have one sent over from another branch?",
+          "fr": "Je suis désolée, le L est épuisé pour le moment. Voulez-vous qu'on en fasse venir un d'un autre magasin ?"
         },
         "me": {
           "jp": "はい。どのぐらいで届きますか。",
@@ -6099,8 +6099,8 @@
           "en": "Yes. How soon would it come?",
           "fr": "Oui. Il arriverait dans combien de temps ?",
           "note": {
-            "en": "「はい」 accepts the order, and 「どのぐらいで届きますか」 asks how long it takes to arrive.",
-            "fr": "「はい」 accepte la commande, et 「どのぐらいで届きますか」 demande dans combien de temps il arrivera."
+            "en": "「はい」 accepts the offer, and 「どのぐらいで届きますか」 asks how long it takes to arrive.",
+            "fr": "「はい」 accepte la proposition, et 「どのぐらいで届きますか」 demande dans combien de temps il arrivera."
           },
           "alt": [
             {"jp": "はい。何日ぐらいかかりますか。", "kana": "はい。なんにちぐらいかかりますか。", "romaji": "hai. nannichi gurai kakarimasu ka"}
@@ -6113,8 +6113,8 @@
             "en": "No. How soon would it come?",
             "fr": "Non. Il arriverait dans combien de temps ?",
             "why": {
-              "en": "「いいえ」 turns the order down, and then you ask when it will arrive.",
-              "fr": "「いいえ」 refuse la commande, puis tu demandes quand il arrivera."
+              "en": "「いいえ」 turns the offer down, and then you ask when it will arrive.",
+              "fr": "「いいえ」 refuse la proposition, puis tu demandes quand il arrivera."
             }
           },
           {
@@ -6412,13 +6412,13 @@
             }
           },
           {
-            "jp": "はい、一箱ずつ別の袋に入れてもらえますか。",
-            "kana": "はい、ひとはこずつべつのふくろにいれてもらえますか。",
-            "en": "Yes, could you put each box in a bag of its own?",
-            "fr": "Oui, vous pourriez mettre chaque boîte dans un sac à part ?",
+            "jp": "いいえ、一箱ずつ別の袋に入れておきました。",
+            "kana": "いいえ、ひとはこずつべつのふくろにいれておきました。",
+            "en": "No, I've already put each box in a bag of its own.",
+            "fr": "Non, j'ai déjà mis chaque boîte dans un sac à part.",
             "why": {
-              "en": "「はい」 agrees to one bag for both, and the rest asks for separate ones: the reply contradicts itself.",
-              "fr": "「はい」 accepte un seul sac pour tout, et la suite en demande plusieurs : la réponse se contredit."
+              "en": "「入れておきました」 says you have already bagged the boxes, when they are still on the counter for the assistant to bag.",
+              "fr": "「入れておきました」 dit que tu as déjà mis les boîtes dans des sacs, alors qu'elles sont encore sur le comptoir, à emballer par la vendeuse."
             }
           }
         ]
