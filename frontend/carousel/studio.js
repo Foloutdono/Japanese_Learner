@@ -122,15 +122,23 @@ function printFor(hour) {
 }
 // A word echo's voice (plan 232): voices/index.json names each reading's
 // clip; the clip is decoded once, and where its voice starts and stops
-// measured from the sound.
+// measured from the sound. Published as an artifact, whose files are
+// counted, the clips travel in one file (plan 248): the index names it
+// (`pack`), and it holds each clip as a data URI under its name.
 const spoken = new Map()
+let voiceIndex = null
+const voicesOf = () => (voiceIndex ||= (async () => {
+  const index = await (await fetch('voices/index.json', { cache: 'no-cache' })).json()
+  if (index.pack) index.packed = await (await fetch(`voices/${index.pack}`, { cache: 'no-cache' })).json()
+  return index
+})().catch(e => { voiceIndex = null; throw e }))
 function voiceFor(reading) {
   if (!spoken.has(reading)) {
     spoken.set(reading, (async () => {
-      const index = await (await fetch('voices/index.json', { cache: 'no-cache' })).json()
+      const index = await voicesOf()
       const file = index.words[reading]
       if (!file) throw new Error(`no voice for ${reading}`)
-      const src = `voices/${file}`
+      const src = index.packed?.[file] || `voices/${file}`
       const audio = await decoded(src)
       return { src, ...voiceSpan(audio.getChannelData(0), audio.sampleRate) }
     })().catch(e => { spoken.delete(reading); throw e }))

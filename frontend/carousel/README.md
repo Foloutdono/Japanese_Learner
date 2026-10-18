@@ -637,7 +637,11 @@ owner's pick by ear from three takes, `ENERGY` in
 touch higher and louder, through `voice_engine.say`'s `tone`; the app's
 own voices take none). `voices/index.json` names each clip, the voice's
 revision, which a test holds equal to the app's `VOICE_REV`, and the
-energy; a clip's name carries the energy, so a new take is a new file. Its licence's one condition is the credit "VOICEVOX Nemo",
+energy; a clip's name carries the energy, so a new take is a new file.
+Published as a claude.ai artifact, which holds at most 511 files, the
+clips travel in one file instead (plan 248): the index's `pack` names
+it, and it holds each clip as a data URI under its name; the studio
+reads either. Its licence's one condition is the credit "VOICEVOX Nemo",
 printed on the card's foot and in the caption; it also forbids using
 the audio for machine learning, so never publish the clips as a
 dataset. After a change of voice or of the themes:
