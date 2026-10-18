@@ -7793,7 +7793,10 @@ textarea:focus-visible {
 }
 .pcb__print {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 0.95fr);
+  /* Measured (plan 247): the longest pace and departure either language
+     prints keep 7px to spare -- at 1fr the hour cut "Morning · 06:00" --
+     and the lines keep their three marks. */
+  grid-template-columns: minmax(0, 1.17fr) minmax(0, 1.08fr) minmax(0, 0.95fr);
   border-radius: var(--r-panel);
 }
 .pcb__route {
@@ -7928,6 +7931,9 @@ textarea:focus-visible {
 .pcb__door { margin: 0; border-radius: var(--r-flat); background: none; color: inherit; font: inherit; text-decoration: none; cursor: pointer; }
 .pcb__door:hover { color: inherit; filter: none; }
 .pcb__chev { position: absolute; right: var(--sp-2); top: 50%; translate: 0 -50%; opacity: 0.4; }
+/* The lines' marks fill their field to its edge, so its › stands on the
+   key's row, clear of the third (plan 247: it sat on 文法's corner). */
+.pcb__door:has(.pcb__lines) .pcb__chev { top: var(--sp-3); translate: none; }
 .pcb__door--on { outline: none; border-radius: var(--r-plate); }
 /* The doors' touch. The print is drawn at the card's scale, so on a
    phone a stop or a field stands under a thumb's 44px; each door's touch
@@ -38804,17 +38810,18 @@ button.brd-stn { cursor: pointer; }
     .desk-front__door-btn:focus-visible { border-color: var(--text-secondary); }
   }
 
-  /* A quiet way over a floor (plan 247, the line's test) stands on the
-     floor's own row, before the way back: the phone's rung over its
-     gate is a row of the paper's height, which a laptop's short window
-     has not got to spare. Set here, after every rule of the floor, the
-     gate and the quiet ways that these refine. */
-  .desk-brd .brd__foot:has(> .brd__link + .desk-brd__floor) { flex-direction: row; align-items: center; gap: var(--sp-5); }
-  .desk-brd .brd__foot > .brd__link:has(+ .desk-brd__floor) { margin-left: auto; }
-  .desk-brd .brd__foot > .brd__link + .desk-brd__floor { flex: 0 1 auto; width: auto; min-width: 0; }
+  /* A quiet way over a floor (plan 247, the line's test; the test's own
+     two, its pick and its stop) stands on the floor's own row, before
+     the way back: the phone's rung over its gate is a row of the paper's
+     height, which a laptop's short window has not got to spare. Set
+     here, after every rule of the floor, the gate and the quiet ways
+     that these refine. */
+  .desk-brd .brd__foot:has(> :is(.brd__link, .brd-test__ways) + .desk-brd__floor) { flex-direction: row; align-items: center; gap: var(--sp-5); }
+  .desk-brd .brd__foot > :is(.brd__link, .brd-test__ways):has(+ .desk-brd__floor) { margin-left: auto; }
+  .desk-brd .brd__foot > :is(.brd__link, .brd-test__ways) + .desk-brd__floor { flex: 0 1 auto; width: auto; min-width: 0; }
   /* Sized by its content now, the floor would hold Continue at its
      words' width: the ticket's is set, and still gives way. */
-  .desk-brd .brd__foot > .brd__link + .desk-brd__floor > .btn-depart:last-child { width: var(--desk-side-w); }
+  .desk-brd .brd__foot > :is(.brd__link, .brd-test__ways) + .desk-brd__floor > .btn-depart:last-child { width: var(--desk-side-w); }
 
   /* ── copied, focused (plan 123) ──
      A reading copied from a desk's page is the word, not the word and
@@ -41586,6 +41593,11 @@ button.brd-stn { cursor: pointer; }
       padding: var(--sp-5);
     }
     .desk-brd__sign { height: 64px; }
+    /* The level's test: its four answers a rung closer, so its longest
+       question, a sentence on two lines, stands whole over the floor
+       (plan 247; its two ways stand on the floor's row). */
+    .desk-brd .brd-test .mcq-row { padding-block: var(--sp-3); }
+    .desk-brd .brd-test .mcq-row + .mcq-row { margin-top: var(--sp-2); }
   }
 }
 @media (min-width: 1100px) {

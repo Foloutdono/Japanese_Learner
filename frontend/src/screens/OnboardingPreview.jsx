@@ -17,12 +17,17 @@ import { playClick } from '../lib/audio'
 // DEV_USER_ID and never verifies it; the volumes call is therefore
 // live, which is the point — a preview of fake data would not
 // exercise the thing being polished. `?guest` boards on a guest pass,
-// so the card's line offers to keep it (plan 247).
+// so the card's line offers to keep it (plan 247); `?email=` on an
+// account that holds that address, so the line names it and offers the
+// switch to another account, which replays here.
 export default function OnboardingPreview() {
   const [run, setRun] = useState(1)
   const [phase, setPhase] = useState('flow') // flow | gate | done
-  const session = { access_token: 'dev-preview' }
-  const [guest] = useState(() => new URLSearchParams(window.location.search).has('guest'))
+  const [{ guest, email }] = useState(() => {
+    const query = new URLSearchParams(window.location.search)
+    return { guest: query.has('guest'), email: query.get('email') }
+  })
+  const session = { access_token: 'dev-preview', ...(email ? { user: { email } } : {}) }
 
   function replay() {
     playClick()
@@ -42,6 +47,7 @@ export default function OnboardingPreview() {
           // Back out of the first question leaves the boarding in the
           // app; here it replays it.
           onExit={replay}
+          onSignIn={replay}
         />
       )}
 

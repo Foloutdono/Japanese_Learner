@@ -2,6 +2,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
 import { LangProvider } from './LangContext'
+// The real cascade, fonts and all, as the handset's lane has it: a
+// question holds whole in the metrics a learner's window draws.
+import '@fontsource/space-grotesk/latin-400.css'
+import '@fontsource/space-grotesk/latin-500.css'
+import '@fontsource/space-grotesk/latin-700.css'
+import '@fontsource/noto-serif-jp/600.css'
+import '@fontsource/noto-serif-jp/700.css'
+import '@fontsource/noto-sans-jp/400.css'
+import '@fontsource/noto-sans-jp/500.css'
+import '@fontsource/noto-sans-jp/700.css'
 import './index.css'
 
 // ── 低 — first contact on a laptop's short window (plan 169) ───────
@@ -152,6 +162,31 @@ describe('first contact on a short window', { timeout: 40000 }, () => {
     await next()
     holdsWhole('card')
     expect(inCar('[data-action="switch-account"]')).toBeTruthy()
+  })
+
+  // The level's test (plan 224): its longest question, a sentence with
+  // its gap on two lines over four words, holds whole too, its two ways
+  // on the floor's row beside the way back (plan 247).
+  it('holds the test\'s longest question whole, its ways on the floor\'s row', async () => {
+    apiJsonWithTimeout.mockImplementation(async () => ({
+      seed: 1, done: false, level: 'N3', perLevel: { N5: { correct: 3, total: 3, cleared: true }, N4: { correct: 4, total: 5, cleared: true } },
+      question: {
+        id: 'q', sectionId: 'N3', kind: 'context', type: 'mcq-text',
+        promptJp: 'この地域では、毎年夏になると大勢の観光客が（　　）ので、道路がとても混雑する。',
+        choices: ['押し寄せる', '打ち明ける', '立ち去る', '見落とす'].map((textJp, i) => ({ id: `c${i + 1}`, textJp })),
+      },
+    }))
+    await board()
+    await pick('[data-kana="both"]')
+    await settle()
+    await pick('[data-action="level-test"]')
+    await settle()
+    expect(live().querySelectorAll('.mcq-row')).toHaveLength(4)
+    holdsWhole('test')
+    const ways = box(inCar('.brd-test__ways'))
+    const floor = box(inCar('.desk-brd__floor'))
+    expect(ways.bottom).toBeGreaterThan(floor.top)
+    expect(ways.right).toBeLessThanOrEqual(floor.left)
   })
 
   it('reads the two words out whole for a learner who reads one script', async () => {
