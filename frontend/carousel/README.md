@@ -1,4 +1,4 @@
-# The carousel studio (plans 229–229n, 231–235, 237, 247–253)
+# The carousel studio (plans 229–229n, 231–235, 237, 247–254)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -22,6 +22,7 @@ Each source is one of the app's own lines, and wears its pigment:
 | 似た字 | Lookalike kanji | one of 63 sets of kanji that look alike (大 太 犬 天 夫, 晴 清 情 精 請, `content/lookalikes.json`) | each kanji with its readings, its meaning, what sets it apart and a word it writes, then the set side by side, then "which kanji means this?" |
 | 返事 | Your reply | one of 36 conversations of three turns, N5 to N1, from a birthday to a business call (`content/dialogues.json`) | what they say, three replies to choose from, then the reply said and why; every line with its furigana, and at N5 and N4 its romaji under every word, for a beginner. A turn's line is set as large as the frame lets it (plan 240, `turnBlock`): every rung from the display's down is tried, the replies to choose from (never above the line) and the why sized into what is left, the smaller of the line and the replies (a third up) made as large as it goes, and a bubble keeps its romaji and its sense only while they cost under 3% and 10% of the size; the reply said is set at the line's size, and both bubbles stand wider and leaner (`snug`) |
 | 落とし穴 | Traps | a catalogue tour's trap: a sentence that reads one way to the eye and means another | the sentence and what it says (three readings, its translation never printed over it), the answer and why, the two forms side by side, watch out |
+| 短文 | Short sentences | one of 47 sentences of three words, a noun, a particle and a verb or adjective (頭が痛い。水を飲む。, `content/short.json`, plan 254) | drawn as Read it and nothing else, in kana (ふりがな gives the kanji with their furigana): the sentence, its words a card each with "Literally" under them where it reads otherwise, the answer with the sentence said politely, then the app |
 
 The four of plan 229m stop at the station the app teaches them on (a
 theme's words at 単語, lookalike kanji at 漢字, a reply and a trap at
@@ -157,7 +158,7 @@ the content for (the studio greys out the others).
 | 会話 | Conversation | the tour's scene line by line, then "what do you say?" | a lesson with a scene |
 | 表記 | Kanji spelling | the word and up to four words of its level that share a kanji with it, each heard in kana and asked how it is written (among spellings that are no word), then the sheet | a word with a kanji spelling to ask |
 | 仲間外れ | Find the impostor | three rounds of six words: five of the theme and one from another theme no word of it could be mistaken for (fruits and vegetables, birds and insects), each asked, then answered with every word's meaning and the impostor circled | a theme |
-| 一読 | Read it | four slides, always (plan 253, after a reading challenge the owner saw in a feed): the sentence alone, "Can you read it?" and the way to swipe; its words, a card each (the line's bar, the word with its furigana and romaji, what it says from the deck or bare); the answer, its romaji under each word, what it says in the line's colour, and a bonus card, the catalogue's own line on its point (the mistake to avoid where it is short, else what it means, never the breakdown's own line); then the app's call to action. Drawn in the look picked (Clarté where the studio says Classic), never on an ending | a reading-bank sentence of seven words at most |
+| 一読 | Read it | four slides, always (plan 253, after a reading challenge the owner saw in a feed): the sentence alone, "Can you read it?" and the way to swipe; its words, a card each (the line's bar, the word with its furigana and romaji, what it says from the deck or bare); the answer, its romaji under each word, what it says in the line's colour, and a bonus card; then the app's call to action. Drawn in the look picked (Clarté where the studio says Classic), never on an ending. Since plan 254 it is set to be read at a glance: the question a headline, the sentence as large as it fits (on two lines where they set it a third larger), the cards' words a display size, "Literally" under them where the sentence has a literal reading; and the bonus is the sentence said the other way, politely where it is plain, among friends where it is polite, its romaji and what changed in a line (頭が痛いです。 "Just add です to sound polite — at the doctor's, say."). The other way is `study/plain_polite.other_register`'s, the module Construire judges by, never written here; a sentence it reads one way only (a question, a clause inside) keeps the catalogue's own line on its point (the mistake to avoid where it is short, else what it means, never the breakdown's own line). Its caption never gives the answer away: the hook, the sentence as the post sets it, the question | a reading-bank sentence of seven words at most, or a short sentence (短文) |
 
 ## The last slide
 
@@ -287,12 +288,26 @@ Every slide is drawn from the app's own data, written once into
 | `lookalikes.json` | each set's kanji: readings, meanings, what sets it apart, a deck word it writes | `frontend/carousel/content/lookalikes.json`, KANJIDIC2, the deck |
 | `dialogues.json` | each conversation's turns, every line split into words with its furigana and romaji (お and ご joined to their word) | `frontend/carousel/content/dialogues.json` |
 | `traps.json` | every tour twist of kind "trap": its sentence, question, three readings, why, the pair, the point's "careful" step | `content/grammar/*.json` |
+| `short.json` | Read it's own sentences: each word's row, its card's gloss in both languages (the deck's sense the sentence picked, the particle's role written beside it), the sentence said politely and where | `frontend/carousel/content/short.json`, the deck, `study/plain_polite` |
 | `index.json` | the figures the last slide quotes: sentences, points, words, kanji, kana, passages, themes, traps | all of the above |
 
 `frontend/carousel/content/` is the studio's own hand-written content:
 the picture for each theme word (keyed by the theme's English gloss), the
 lookalike sets with what tells each kanji apart, and the conversations,
 each turn's right reply first (the studio deals them in a seeded order).
+Since plan 254 it also holds Read it's short sentences (`short.json`):
+a noun, a particle and a verb or adjective, every word an N5 deck word,
+each with its translation, a literal reading where it reads otherwise
+(“Head is painful.”, never the translation again, its dropped subject
+in brackets so a plain form never reads as an order), the particle's role
+in this sentence and a situation where the polite version is said
+(`when`). A card's gloss is the deck's: `sense` picks which of the deck's
+glosses the sentence means (電車 is a “train”, not an “electric train”)
+and `carousel_bank` refuses a pick the deck does not say, a word outside
+N5, a sentence of any other shape and one `plain_polite` cannot make
+polite. The translation's tense is the situation's: a habit in the
+present (I drink water), what one is about to do as “I'll” (I'll open the
+window). An independent reviewer read the first batch before it shipped.
 They teach, so they are held as the catalogue is: a reply is wrong only
 where it cannot be right too (a particle, a tense, a counter, humble
 speech used of the other person), its why says what makes it wrong, and

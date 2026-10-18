@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { FORMATS, FS, RATING_INKS, drawFeedHud, formatOf, layoutSentence } from '../carousel/draw.js'
+import { FORMATS, FS, RATING_INKS, drawFeedHud, formatOf, layoutSentence, reading } from '../carousel/draw.js'
 import { LEVELS, SOURCES, TITLE_MAX, chunksOf, depsOf, itemsOf, lineRomaji, picked, plan, readingMisses, themePartOf, titleOf, unpack } from '../carousel/sources.js'
 import { ENDING_IDS, TYPES, available, deck, endingSlide } from '../carousel/slides.js'
 import { assemblyQ, kanjiQuizzes, overlaps, withoutGiveaways } from '../carousel/quizzes.js'
@@ -176,7 +176,8 @@ describe('the carousel studio', () => {
     const had = globalThis.Path2D
     globalThis.Path2D = class {}
     try {
-      for (const src of STATIONED) {
+      // Read it's own sentences are read and nothing else (plan 254).
+      for (const src of STATIONED.filter(x => x.id !== 'short')) {
         const { p } = every.find(x => x.src === src)
         // Read it ends on the app's call to action, never an ending (plan 253).
         const type = TYPES.map(x => x.id).find(x => x !== 'plates' && x !== 'read' && available(x, p)) || 'plates'
@@ -1369,7 +1370,8 @@ describe('the conversion carousels (plan 234)', () => {
   // The first item of every file of every source, in English; of each
   // source's first file, in French too.
   const some = []
-  for (const src of STATIONED) {
+  // Read it's own sentences have tests of their own (plan 254).
+  for (const src of STATIONED.filter(x => x.id !== 'short')) {
     filesOf(src).forEach(({ data, filter }, n) => {
       const { id } = itemsOf(src.id, data, 'en', filter)[0]
       for (const lang of n ? ['en'] : ['en', 'fr']) some.push({ src, id, lang, p: plan(src.id, data, id, { ...OPTS, lang }, depsFor(src, data, id)) })
@@ -2348,9 +2350,13 @@ describe('Read it (plan 253)', () => {
           expect(available('read', p), `${id}`).toBe(readable(p))
           expect(readable(p), `${id}`).toBe(words.length > 0 && words.length <= 7 && !!p.funnel.translation)
           if (!readable(p)) continue
-          // The bonus is the catalogue's line on the point, never the breakdown's own.
+          // The bonus is the sentence said the other way where the app reads
+          // its ending both ways (plan 254), else the catalogue's line on the
+          // point, never the breakdown's own.
           const bonus = funnelOf('read', p).solution.bonus
-          if (bonus) expect(['careful', 'mean'], id).toContain(bonus.kind)
+          const s = banks[lv].sentences.find(x => x.id === id)
+          if (s.v) expect(bonus, id).toEqual({ kind: 'version', ...s.v })
+          else if (bonus) expect(['careful', 'mean'], id).toContain(bonus.kind)
           for (const design of [...DESIGNS, 'classic']) {
             for (const fmt of [FORMATS.post, FORMATS.story]) {
               const slides = deck('read', p, fmt, { design, length: '8', ending: 'pass' })
@@ -2368,6 +2374,7 @@ describe('Read it (plan 253)', () => {
                   }
                 }
                 if (sl.key === 'answer') expect(all.join(' '), where).toContain(p.funnel.translation.split(' ')[0])
+                if (sl.key === 'answer' && bonus?.kind === 'version') expect(all.join(' '), where).toContain(lineRomaji(bonus.rows).split(' ')[0])
                 if (k === 3) return
                 for (const x of texts) {
                   const at = `${where} ${sl.key} ${x.t}`
@@ -2387,6 +2394,92 @@ describe('Read it (plan 253)', () => {
     const data = bank('words-N5.json')
     const wp = plan('word', data, itemsOf('word', data, 'en')[0].id, OPTS, depsFor(SOURCES.find(x => x.id === 'word'), data, itemsOf('word', data, 'en')[0].id))
     expect(available('read', wp)).toBe(false)
+  })
+})
+
+describe('Read it’s own short sentences (plan 254)', () => {
+  const content = JSON.parse(read('carousel/content/short.json'))
+  const data = bank('short.json')
+  const both = (o, at) => { expect(o?.en, at).toBeTruthy(); expect(o?.fr, at).toBeTruthy() }
+
+  it('writes every sentence in both languages: its role, its situation, its literal reading', () => {
+    expect(new Set(content.map(x => x.id)).size).toBe(content.length)
+    expect(data.sentences.map(s => s.id)).toEqual(content.map(x => x.id))
+    for (const x of content) {
+      both(x, x.id)
+      expect(x.e, x.id).toBeTruthy()
+      for (const lang of ['en', 'fr']) expect(x.role[lang], x.id).toHaveLength(2)
+      both(x.when, `${x.id} when`)
+      if (x.lit) both(x.lit, `${x.id} lit`)
+      // A literal reading is a reading, never the translation again.
+      if (x.lit) expect(x.lit.en, x.id).not.toBe(x.en)
+    }
+  })
+
+  it('reads each as a noun, a particle and a word, said politely, and nothing but Read it', { timeout: 240000 }, () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class { constructor(d) { this.d = d } }
+    let drawn = 0
+    try {
+      for (const s of data.sentences) {
+        const words = s.rows.filter(r => r.k !== 'punct')
+        expect(words.map(r => r.k), s.id).toEqual(['word', 'particle', 'word'])
+        expect(s.v.to, s.id).toBe('polite')
+        for (const lang of ['en', 'fr']) {
+          // Set in kana unless the studio asks for the furigana.
+          const p = plan('short', data, s.id, { ...OPTS, lang })
+          expect(p.script, s.id).toBe('kana')
+          expect(plan('short', data, s.id, { ...OPTS, lang, script: 'furigana' }).script).toBe('furigana')
+          expect(TYPES.filter(ty => available(ty.id, p)).map(ty => ty.id), s.id).toEqual(['read'])
+          expect(titleOf(p, 'read').length, s.id).toBeLessThanOrEqual(TITLE_MAX)
+          const spec = funnelOf('read', p)
+          expect(spec.solution.bonus.kind, s.id).toBe('version')
+          for (const design of DESIGNS) {
+            for (const fmt of [FORMATS.post, FORMATS.story]) {
+              const where = `${s.id} ${lang} ${design} ${fmt.id}`
+              const slides = deck('read', p, fmt, { design, length: '5', ending: 'pass' })
+              expect(slides.map(x => x.key), where).toEqual(['ask', 'words', 'answer', 'cta'])
+              const own = [p.funnel.translation, p.funnel.lit, ...p.funnel.breakdown.flatMap(w => [w.main, w.sub, w.pos])].filter(Boolean)
+              slides.slice(0, 3).forEach(sl => {
+                const { ctx, texts } = placedTexts()
+                sl.draw(ctx)
+                const all = texts.map(x => x.t).join(' ')
+                if (sl.key === 'ask') for (const w of words) expect(all, `${where} ${w.t}`).toContain(reading(w))
+                if (sl.key === 'words') {
+                  for (const w of p.funnel.breakdown) expect(all, `${where} ${w.t}`).toContain(w.main.split(' ')[0])
+                  // French sets a narrow space before its colon.
+                  if (p.funnel.lit) expect(all.replace(/[\u00a0\u202f]/g, ' '), where).toContain(FUNNEL[lang].literally)
+                }
+                if (sl.key === 'answer') {
+                  expect(all, where).toContain(p.funnel.translation.split(' ')[0])
+                  // The bonus: the polite sentence, its romaji, and its situation.
+                  expect(all, where).toContain(lineRomaji(s.v.rows).split(' ')[0])
+                  // Its kind is set tracked, a letter at a time.
+                  expect(all.replace(/\s+/g, ''), where).toContain(FUNNEL[lang].version.polite.toLocaleUpperCase().replace(/\s+/g, ''))
+                  expect(all.replace(/\s+/g, ' '), where).toContain(s.v.when[lang].split(' ')[0])
+                }
+                for (const x of texts) {
+                  const at = `${where} ${sl.key} ${x.t}`
+                  expect(x.y - x.z * 0.85, at).toBeGreaterThanOrEqual(fmt.safe.t - 1)
+                  expect(x.y + x.z * 0.25, at).toBeLessThanOrEqual(fmt.h - fmt.safe.b + 1)
+                  expect(x.t.endsWith('…') && !own.some(o => o.includes(x.t)), at).toBe(false)
+                }
+              })
+              drawn += 1
+            }
+          }
+        }
+      }
+    } finally { globalThis.Path2D = had }
+    expect(drawn).toBe(data.sentences.length * 2 * DESIGNS.length * 2)
+  })
+
+  it('says what changed in the line the reader reads, in kana where the post is', () => {
+    const W = FUNNEL.en
+    expect(W.versionRule('polite', '', 'です')).toBe('Just add です to sound polite')
+    expect(W.versionRule('polite', 'のむ', 'のみます')).toBe('のむ becomes のみます to sound polite')
+    expect(W.versionRule('plain', 'です', '')).toBe('Among friends, just drop です')
+    expect(FUNNEL.fr.versionRule('plain', '飲みます', '飲む')).toBe('飲みます devient 飲む entre amis')
   })
 })
 

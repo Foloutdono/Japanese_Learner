@@ -2818,6 +2818,8 @@ export function available(type, pl) {
   if (pl.source === 'promo' || type === 'story') return pl.source === 'promo' && type === 'story'
   // And a word echo as the clip it is (plan 232).
   if (pl.source === 'echo' || type === 'echo') return pl.source === 'echo' && type === 'echo'
+  // And a short sentence is read (plan 254).
+  if (pl.source === 'short') return type === 'read'
   switch (type) {
     case 'read': return readable(pl)
     case 'exam': return pl.quizzes.length > 0

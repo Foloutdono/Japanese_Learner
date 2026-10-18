@@ -41,6 +41,8 @@ export const SOURCES = [
   { id: 'lookalike', jp: '似た字', line: 'kanji', name: { en: 'Lookalike kanji', fr: 'Kanji jumeaux' }, file: () => 'lookalikes.json', noLevels: true },
   { id: 'dialogue', jp: '返事', line: 'grammar', name: { en: 'Your reply', fr: 'Ta réponse' }, file: () => 'dialogues.json', noLevels: true },
   { id: 'trap', jp: '落とし穴', line: 'grammar', name: { en: 'Traps', fr: 'Pièges' }, file: () => 'traps.json', byLevel: true },
+  // Plan 254: Read it's own sentences, a noun, a particle and a verb (content/short.json).
+  { id: 'short', jp: '短文', line: 'reading', name: { en: 'Short sentences', fr: 'Phrases courtes' }, file: () => 'short.json', noLevels: true },
   // Plan 231: the app itself, in five stories (promo.js); its "levels"
   // are the stories, each reading the file its pick comes from.
   { id: 'promo', jp: '宣伝', line: 'gold', name: { en: 'Promo stories', fr: 'Stories promo' }, file: story => STORY_FILES[story] || 'index.json', levels: STORIES, levelNames: PROMO.en.names },
@@ -96,8 +98,9 @@ const LINES = [
   { key: 'practice', jp: '実践', stops: ['tsuji', 'sentence', 'passage', 'translation', 'dictation', 'composition', 'exam'] },
 ]
 // Plan 229m's modes stop at the station the app teaches them on: a
-// theme's words at 単語, lookalike kanji at 漢字, a reply and a trap at 文法.
-const ALIAS = { theme: 'word', lookalike: 'kanji', dialogue: 'lesson', trap: 'lesson' }
+// theme's words at 単語, lookalike kanji at 漢字, a reply and a trap at 文法,
+// a short sentence at 読書.
+const ALIAS = { theme: 'word', lookalike: 'kanji', dialogue: 'lesson', trap: 'lesson', short: 'sentence' }
 function stationOf(source, lang) {
   const id = ALIAS[source] || source
   const line = LINES.find(l => l.stops.includes(id))
@@ -118,7 +121,8 @@ function figureOf(source, figures, t, lang) {
   if (!figures) return ''
   const f = t.figure
   switch (source) {
-    case 'sentence': return f.sentence(count(figures.sentences, lang))
+    case 'sentence':
+    case 'short': return f.sentence(count(figures.sentences, lang))
     case 'translation': return f.translation(count(figures.sentences, lang))
     case 'lesson': return f.lesson(count(figures.points, lang))
     case 'word': return f.word(count(figures.words, lang))
@@ -290,6 +294,8 @@ function rowItems(rows, lang, t, p, meaning) {
 }
 /** The analyser's tokens for rows the catalogue lit for point `p`. */
 const litToks = (rows, p) => rows.map(r => ({ t: r.t, fu: r.fu && hasKanji(r.t) ? reading(r) : '', k: r.k, point: (r.g || []).includes(p) || r.lit ? 1 : 0 }))
+/** A sentence as kana, its punctuation kept. */
+const kanaOf = rows => rows.map(r => (r.k === 'punct' ? r.t : reading(r))).join('')
 const wordRowsOf = list => list.map((w, n) => ({ n: n + 1, t: w.t, reading: w.r || '', ro: w.ro || '', main: w.main, line: 'vocab' }))
 
 function base(source, item, opts, level) {
@@ -420,6 +426,8 @@ function sentenceFunnel(data, s, x, { t, lang }) {
     rows: s.rows, translation: x.translation, romaji: x.romaji, ...analysed(s, data, lang),
     breakdown: wordItems(s, data.points, lang, t), examples: x.more, ...sentenceKeys(s, data, lang),
     strokes: x.bonus.k ? { char: x.bonus.char, k: x.bonus.k } : null,
+    // Read it's bonus, the sentence said the other way (plan 254).
+    version: s.v || null,
   }
 }
 
@@ -447,7 +455,34 @@ function sentencePlan(data, s, opts) {
     hook: { kind: 'sentence', rows: s.rows }, prompt: t.prompt.sentence,
     quizzes, quiz: quizzes[0] || null, slides, compare, build: x.build, list: x.list,
     funnel: sentenceFunnel(data, s, x, p),
-    caption: { jp: s.jp, romaji: x.romaji, tr: x.translation, ask: lang === 'fr' ? 'Tu l’as lue sans aide ?' : 'Could you read it without help?', tags: [`jlpt${s.lv.toLowerCase()}`], point: s.p },
+    caption: { jp: s.jp, kana: kanaOf(s.rows), romaji: x.romaji, tr: x.translation, ask: lang === 'fr' ? 'Tu l’as lue sans aide ?' : 'Could you read it without help?', tags: [`jlpt${s.lv.toLowerCase()}`], point: s.p },
+  }
+}
+
+// ── 短文, Read it's own sentences (plan 254) ──────────────────
+// A noun, a particle and a verb or adjective, read in kana unless the
+// studio asks for the kanji's furigana: the words glossed from the deck
+// (the sense the sentence means, content/short.json's pick), the
+// particle by its role here, and the sentence said politely.
+function shortPlan(data, s, opts) {
+  const src = sourceOf('short')
+  const p = base(src, s, { ...opts, script: opts.script === 'furigana' ? 'furigana' : 'kana' }, s.lv)
+  const { t, lang } = p
+  const translation = weldIf(lang, s[lang] || s.en)
+  const breakdown = s.rows.map((row, i) => ({ row, i })).filter(({ row }) => row.k !== 'punct').map(({ row, i }, n) => {
+    const [main, sub] = row[`g${lang}`] || row.gen || ['', '']
+    return {
+      i, j: i, n: n + 1, t: row.t, reading: reading(row), ro: row.ro, main: weldIf(lang, main), sub: weldIf(lang, sub), fu: row.fu || [[row.t, '']],
+      line: row.k === 'word' ? 'vocab' : 'grammar', kanji: hasKanji(row.t), pos: t.pos[row.k === 'word' ? row.pos : row.k] || row.pos || '',
+    }
+  })
+  const romaji = lineRomaji(s.rows)
+  return {
+    ...p, emoji: s.e,
+    hook: { kind: 'sentence', rows: s.rows }, prompt: t.prompt.sentence,
+    quizzes: [], quiz: null, slides: [],
+    funnel: { rows: s.rows, translation, romaji, breakdown, lit: s.lit ? weldIf(lang, tr(s.lit, lang)) : '', version: s.v },
+    caption: { jp: s.jp, kana: kanaOf(s.rows), romaji, tr: translation, ask: t.modes.read, tags: ['jlptn5'] },
   }
 }
 
@@ -953,6 +988,8 @@ export function itemsOf(sourceId, data, lang, filter) {
       return data.dialogues.map(d => ({ id: d.id, jp: d.place.jp, sub: tr(d.place, lang), tag: d.lv }))
     case 'trap':
       return data.traps.map(x => ({ id: x.id, jp: x.p, sub: tr(x.notion, lang), tag: x.lv }))
+    case 'short':
+      return data.sentences.map(s => ({ id: s.id, jp: s.jp, sub: s[lang] || s.en, tag: s.e }))
     case 'promo':
       return promoItems(filter || 'pitch', data, lang)
     case 'echo':
@@ -998,6 +1035,8 @@ export function plan(sourceId, data, id, opts, deps = {}) {
       return dialoguePlan(data, data.dialogues.find(d => d.id === id) ?? data.dialogues[0], opts)
     case 'trap':
       return trapPlan(data, data.traps.find(x => x.id === id) ?? data.traps[0], opts)
+    case 'short':
+      return shortPlan(data, data.sentences.find(x => x.id === id) ?? data.sentences[0], opts)
     case 'promo':
       return promoPlan(opts.story || 'pitch', data, id, opts)
     case 'echo':
@@ -1043,6 +1082,7 @@ const TITLES = {
     dialogue: c => `${c.jp}: what would you answer in Japanese?`,
     trap: (c, lv) => `A ${lv} grammar trap with ${c.jp}: will you fall for it?`,
     impostor: c => `Find the impostor: which word is not in “${c.jp}”?`,
+    short: () => 'Can you read this? A tiny Japanese reading challenge',
   },
   fr: {
     sentence: (c, lv) => `Tu sais lire cette phrase ${lv} sans aide ?`,
@@ -1063,6 +1103,7 @@ const TITLES = {
     dialogue: c => `${c.jp} : que répondrais-tu en japonais ?`,
     trap: (c, lv) => `Un piège de grammaire ${lv} avec ${c.jp} : vas-tu tomber dedans ?`,
     impostor: c => `Trouve l’intrus : quel mot n’est pas dans « ${c.jp} » ?`,
+    short: () => 'Tu sais lire ça ? Un petit défi de lecture en japonais',
   },
 }
 /** The title of a plan posted as `type` asking `n` questions. */

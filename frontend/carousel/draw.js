@@ -524,7 +524,7 @@ function layoutSentence(ctx, rows, o) {
       // Furigana at 0.4 of the word, never under the scale's smallest caption.
       const rs = Math.max(size * 0.4, RUBY_MIN)
       const rf = font(500, rs, 'jp')
-      const romF = font(500, Math.max(size * 0.3, FS.sm * 0.9), 'latin')
+      const romF = font(500, Math.max(size * (opts.romajiK || 0.3), FS.sm * 0.9), 'latin')
       for (const u of list) {
         let x = measure(ctx, u.prefix, f)
         u.segX = u.segs.map(([t, r], k) => {
@@ -598,7 +598,7 @@ function layoutSentence(ctx, rows, o) {
       const rubyH = ruby ? rs * 1.3 : 0
       // The room under the word: its rule's, or (`under`) as the caller sets it.
       const ruleGap = size * (opts.under ?? (opts.rules ? 0.22 : 0.12))
-      const romH = opts.romaji ? Math.max(size * 0.3, FS.sm * 0.9) * 1.5 : 0
+      const romH = opts.romaji ? Math.max(size * (opts.romajiK || 0.3), FS.sm * 0.9) * 1.5 : 0
       const lineH = rubyH + size + ruleGap + romH
       const lineGap = size * 0.32
       if (lines.length * lineH + (lines.length - 1) * lineGap > opts.maxH && !last) continue

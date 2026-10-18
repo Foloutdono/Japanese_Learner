@@ -466,6 +466,10 @@ def sentence(level: str, index: int, row: dict, kanji: set) -> dict:
         hy = orthography(rows[fi].get("fu") or [])
         if hy:
             out["hy"] = hy
+    # The sentence said the other way, Read it's bonus (plan 254).
+    other = version(row["jp"], level, rows)
+    if other:
+        out["v"] = other
     return out
 
 
@@ -1055,6 +1059,7 @@ def files(deck: dict):
     dialogue_file = dialogues()
     yield "dialogues.json", dialogue_file
     yield "conversation.json", conversation()
+    yield "short.json", shorts()
     trap_file = traps()
     yield "traps.json", trap_file
     yield "index.json", figures(sentences, kana, comprehension, {
@@ -1264,6 +1269,129 @@ def dialogues() -> dict:
             })
         out.append({"id": d["id"], "lv": d["lv"], "place": d["place"], "them": d["them"], "turns": turns})
     return {"rev": REV, "dialogues": out}
+
+
+# ── The other register, and Read it's own sentences (plan 254) ────
+# Read it's bonus is the sentence said the other way: politely where it
+# is plain (頭が痛い → 頭が痛いです), plainly where it is polite. The
+# other way is never written here: it is plain_polite.other_register's,
+# the module Construire judges a typed answer by (plan 241), which reads
+# a sentence's closing ending both ways and refuses everything else (a
+# clause inside, a question, a polite-only verb).
+_CLOSE = "。！？!?"
+
+
+def _kana(row: dict) -> str:
+    return "".join(r or t for t, r in row.get("fu") or [[row["t"], ""]])
+
+
+def version(jp: str, level: str, rows: list[dict]) -> dict | None:
+    """The sentence in its other register: its rows, the register it is
+    in, and the words that changed, written and in kana ([] where only
+    です is added or dropped); None where the ending reads one way only."""
+    from study.morphology import kata_to_hira, tokenize
+    from study.plain_polite import other_register
+
+    body = jp.rstrip(_CLOSE)
+    tokens = tokenize(body)
+    if not tokens:
+        return None
+    reading = "".join(kata_to_hira(t.reading or t.surface) for t in tokens)
+    swapped = other_register(jp, 0, len(body), reading)
+    if not swapped:
+        return None
+    register, forms = swapped
+    other = forms[0][0] + jp[len(body):]
+    them = rows_of(_analyze(other, level)["tokens"])
+    a = [r for r in rows if r["k"] != "punct"]
+    b = [r for r in them if r["k"] != "punct"]
+    if "".join(_kana(r) for r in b) == "".join(_kana(r) for r in a):
+        return None
+    # What changed, the words both share either side of it left out (安いですよ → 安いよ drops です).
+    k = 0
+    while k < min(len(a), len(b)) and a[k]["t"] == b[k]["t"]:
+        k += 1
+    n = 0
+    while n < min(len(a), len(b)) - k and a[-1 - n]["t"] == b[-1 - n]["t"]:
+        n += 1
+
+    def said(part: list[dict]) -> list[str]:
+        return ["".join(r["t"] for r in part), "".join(_kana(r) for r in part)]
+
+    return {"to": "plain" if register == "polite" else "polite", "rows": them,
+            "from": said(a[k:len(a) - n]), "into": said(b[k:len(b) - n])}
+
+
+_PAREN = re.compile(r"\s*\([^)]*\)")
+
+
+def _glosses(sense: str) -> list[str]:
+    """A sense cut at its commas, never inside its brackets."""
+    out, depth, cur = [], 0, ""
+    for ch in sense:
+        depth += ch == "("
+        depth -= ch == ")"
+        if ch == "," and not depth:
+            out.append(cur.strip())
+            cur = ""
+        else:
+            cur += ch
+    return [g for g in out + [cur.strip()] if g]
+
+
+def _card_gloss(senses: list[str], pick: str | None) -> list[str]:
+    """[what the word says here, the rest of that sense]: the deck's own
+    words, never written here. `pick` names the deck's gloss the sentence
+    means (電車, "electric train", is a "train"); else its first."""
+    sense = next((s for s in senses if pick and pick.lower() in s.lower()), senses[0] if senses else "")
+    glosses = _glosses(sense)
+    main = pick or (_PAREN.sub("", glosses[0]).strip() if glosses else "")
+    rest = []
+    for g in glosses:
+        g = _PAREN.sub("", g).strip()
+        if g and main.lower() not in g.lower() and g not in rest:
+            rest.append(g)
+    # One more where the sentence picked its sense: the rest is another sense's.
+    return [main, ", ".join(rest[:1 if pick else 2])]
+
+
+def shorts() -> dict:
+    """Read it's own sentences (content/short.json): a noun, a particle
+    and a verb or adjective, each word an N5 deck word glossed from the
+    deck, the particle's role written beside it, and the sentence said
+    politely."""
+    out = []
+    for x in json.loads((CONTENT / "short.json").read_text(encoding="utf-8")):
+        name = f"short.json: {x['id']}"
+        rows = rows_of(_analyze(x["jp"], "N5")["tokens"])
+        words = [r for r in rows if r["k"] != "punct"]
+        if len(words) != 3 or [r["k"] for r in words] != ["word", "particle", "word"]:
+            raise SystemExit(f"{name} is not a noun, a particle and a verb or adjective: {[r['t'] for r in words]}")
+        picks = x.get("sense") or {}
+        for t in picks:
+            if t not in (words[0]["t"], words[2]["t"]):
+                raise SystemExit(f"{name}: {t} is no word of the sentence")
+        for r in (words[0], words[2]):
+            if r.get("lv") != "N5" or r.get("pool"):
+                raise SystemExit(f"{name}: {r['t']} is no N5 deck word")
+            pick = picks.get(r["t"], {})
+            for lang in ("en", "fr"):
+                if pick.get(lang) and not any(pick[lang].lower() in s.lower() for s in r.get(lang) or []):
+                    raise SystemExit(f"{name}: “{pick[lang]}” is not among {r['t']}'s glosses: {r.get(lang)}")
+                r[f"g{lang}"] = _card_gloss(r.get(lang) or [], pick.get(lang))
+        for lang in ("en", "fr"):
+            words[1][f"g{lang}"] = x["role"][lang]
+        polite = version(x["jp"], "N5", rows)
+        if not polite or polite["to"] != "polite":
+            raise SystemExit(f"{name}: no polite version of a plain sentence")
+        polite["when"] = x["when"]
+        entry = {"id": x["id"], "lv": "N5", "jp": x["jp"], "e": x["e"], "en": x["en"], "fr": x["fr"], "rows": rows, "v": polite}
+        if x.get("lit"):
+            entry["lit"] = x["lit"]
+        out.append(entry)
+    if len({e["id"] for e in out}) != len(out):
+        raise SystemExit("short.json: an id twice")
+    return {"rev": REV, "sentences": out}
 
 
 # ── The station's own conversations (plan 250) ────────────────────

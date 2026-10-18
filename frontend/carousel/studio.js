@@ -38,7 +38,7 @@ const TOGGLE_LABELS = {
   apart: 'What tells them apart', pair: 'The two side by side', careful: 'Watch out',
 }
 const T = STRINGS.en
-const LIST_NAME = { long: 'Video', words: 'Short', challenge: 'Text', promo: 'Story', echo: 'Word', sentence: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
+const LIST_NAME = { long: 'Video', words: 'Short', challenge: 'Text', promo: 'Story', echo: 'Word', sentence: 'Sentence', short: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
 
 const DEFAULTS = {
   source: 'sentence', level: 'N5', longFormat: 'long', kanaSet: 'hiragana', story: 'pitch', hour: 'day', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20' },
@@ -1315,6 +1315,13 @@ function captionOf(pl) {
   const fr = pl.lang === 'fr'
   const base = fr ? ['#japonais', '#apprendrelejaponais'] : ['#japanese', '#learnjapanese']
   const tags = [...base, ...c.tags.map(t => `#${t}`), '#日本語', '#nihongo', '#tsuji'].join(' ')
+  // A reading challenge never gives its answer away: the sentence as the
+  // post sets it, and the question (plan 254).
+  if (shown === 'read') {
+    const R = pl.t.readPost
+    const jp = (pl.script === 'kana' && c.kana ? c.kana : c.jp).replace(/。$/, '')
+    return [`${R.hook}${pl.emoji ? ` ${pl.emoji}` : ''}`, jp, R.ask, tags].join('\n\n')
+  }
   // A passage's line is the question picked for it, not always its first.
   const tr = pl.source === 'passage' ? picked(pl, state.picks[pickKey()], 1)[0]?.ask || c.tr : c.tr
   // A spelling quiz never prints the kanji it asks for: the word in kana.

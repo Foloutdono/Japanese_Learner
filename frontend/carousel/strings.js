@@ -195,6 +195,8 @@ export const STRINGS = {
       impostor: 'Found them all? Comment your score.',
       read: 'Could you read it? Tell us in the comments.',
     },
+    // Read it's caption, which never gives the answer away (plan 254).
+    readPost: { hook: 'Today’s tiny Japanese reading challenge', ask: 'Can you read it and guess what it means? Swipe for the answer 👉' },
     pos: {
       noun: 'noun', verb: 'verb', adjective: 'adjective', adverb: 'adverb', particle: 'particle',
       copula: 'copula', pronoun: 'pronoun', auxiliary: 'ending', adnominal: 'determiner',
@@ -403,6 +405,7 @@ export const STRINGS = {
       impostor: 'Tu les as tous trouvés ? Donne ton score en commentaire.',
       read: 'Tu as su la lire ? Dis-le-nous en commentaire.',
     },
+    readPost: { hook: 'Le petit défi de lecture japonais du jour', ask: 'Tu sais la lire et deviner ce qu’elle veut dire ? Glisse pour la réponse 👉' },
     pos: {
       noun: 'nom', verb: 'verbe', adjective: 'adjectif', adverb: 'adverbe', particle: 'particule',
       copula: 'copule', pronoun: 'pronom', auxiliary: 'terminaison', adnominal: 'déterminant',
