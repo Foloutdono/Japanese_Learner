@@ -4,7 +4,6 @@ import { useProfileSummary } from '../../stores/profileSummary'
 import { useCredits } from '../../stores/credits'
 import { cardTier, holderName, xpClimb } from '../../domain/passCard'
 import { CardFace } from '../pass/PassCard'
-import { PassWave } from '../profile/PassWave'
 import { playGateChime } from '../../lib/audio'
 import { spendKey } from '../../lib/keyGuards'
 
@@ -278,12 +277,15 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
         <div className="gate__cab gate__cab--r">
           <span className="gate__flap" />
           <span className="gate__face-plate" />
-          {/* The reader. The contactless mark is the same component
-              the pass and the top bar draw, so the thing tapping and
-              the thing being tapped are visibly the same object. */}
+          {/* The reader, with the contactless mark every reader in a
+              station carries: three arcs, drawn whole. (The pass's own
+              mark, half-circles fading out, read at this size as a
+              stray dot and two brackets.) */}
           <span className="gate__reader">
             <span className="gate__reader-lit" />
-            <PassWave className="pass__wave gate__wave" />
+            <svg className="gate__nfc" viewBox="0 0 12 24">
+              <path d="M1.28 9.03A4 4 0 0 1 1.28 14.97M3.95 6.05A8 8 0 0 1 3.95 17.95M6.63 3.08A12 12 0 0 1 6.63 20.92" />
+            </svg>
           </span>
         </div>
       </div>
