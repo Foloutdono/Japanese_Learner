@@ -80,17 +80,30 @@ def test_a_wrong_spelling_may_not_be_another_spelling_of_the_word():
 
 def test_wrong_spellings_are_made_of_the_levels_kanji():
     allowed = kanji_set_for_level("N5")
-    for kanji, reading in (("大学", "だいがく"), ("電話", "でんわ"), ("日本語", "にほんご"), ("来る", "くる")):
+    asked = 0
+    for w in VOCAB_BY_LEVEL["N5"]:
+        if not K.askable(w, "N5"):
+            continue
+        kanji, reading = w["kanji"], K._first_reading(w)
         sets = K.orthography_sets(kanji, reading, "N5")
-        assert sets, kanji
         for _, wrong in sets[:6]:
-            assert all(c in allowed for w in wrong for c in w if "一" <= c <= "龯"), wrong
+            assert all(c in allowed for x in wrong for c in x if "一" <= c <= "龯"), wrong
             assert exam_tells.tell([kanji] + wrong) is None, wrong
+        asked += bool(sets)
+    assert asked >= 10        # an N5 paper can find its five 表記 items
 
 
-def test_a_word_of_two_kanji_is_asked_as_a_grid_of_lookalikes():
-    wrong = K.orthography_sets("大学", "だいがく", "N5")[0][1]
-    assert exam_tells.structure(["大学"] + wrong) == "ring"
+def test_a_wrong_spelling_is_a_kanji_that_looks_like_the_right_one():
+    # 大学 has no kanji at N5 that looks like 学 or 大 (天 is the one): it is not asked there
+    # rather than offered 花 for 先 or 午 for 気, which scored 2.0 to 2.7 and fooled no one
+    assert K.orthography_sets("大学", "だいがく", "N5") == []
+    assert K.orthography_sets("先月", "せんげつ", "N5") == [] or all(
+        "花" not in x for _, wrong in K.orthography_sets("先月", "せんげつ", "N5") for x in wrong)
+
+
+def test_a_word_of_several_kanji_is_asked_as_a_grid_of_lookalikes():
+    wrong = K.orthography_sets("日本語", "にほんご", "N5")[0][1]
+    assert exam_tells.structure(["日本語"] + wrong) == "ring"
     assert len(set(wrong)) == 3
 
 
@@ -152,3 +165,9 @@ def test_a_kanji_is_asked_once_in_a_paper():
 
 def test_a_word_an_exam_leaves_out_is_not_asked():
     assert not K.askable({"kanji": "自殺", "kana": "じさつ"}, "N1")
+
+
+def test_a_key_alone_in_its_length_is_not_a_symmetric_set():
+    # き against きい / きの / きく: the one mora is the answer
+    assert not K._symmetric(["き", "きい", "きの", "きく"])
+    assert K._symmetric(["きく", "きい", "きの", "きし"])

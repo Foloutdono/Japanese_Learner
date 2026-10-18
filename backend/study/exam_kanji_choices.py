@@ -323,7 +323,12 @@ def _apply(parts: list[dict], *edits: Edit) -> str:
 
 
 def _symmetric(choices: list[str], answer: int = 0) -> bool:
-    return structure(choices) in SYMMETRIC and answer not in (centre(choices), outlier(choices))
+    """No look gives the answer away: a symmetric set, the key neither the
+    centre nor the outlier, and not the only shortest or longest (き against
+    きい / きの / きく is answered by its length)."""
+    sizes = [len(c) for c in choices]
+    alone = sizes.count(sizes[answer]) == 1 and sizes[answer] in (min(sizes), max(sizes))
+    return structure(choices) in SYMMETRIC and answer not in (centre(choices), outlier(choices)) and not alone
 
 
 def reading_sets(kanji: str, reading: str, level: str = "N1") -> list[tuple[float, list[str]]]:
@@ -454,13 +459,22 @@ def lookalikes(char: str, level: str, count: int = 8) -> list[str]:
     return [c for score, c in ranked if score >= 1.0][:count]
 
 
-def lookalike_ranking(char: str, level: str, count: int = 8) -> list[tuple[float, str]]:
+# A wrong spelling is a kanji the learner could take for the right one. The
+# curated sets (日 目 白 百, 入 人 八) and the strongest shape/reading matches
+# score 6 and over; below that the score is mostly a shared stroke count and
+# a corner (花 for 先 scored 2.7, 午 for 気 2.0, 車 for 中 3.5), and the
+# reviewers threw those out of every paper. 3.5 is the floor at which an N5
+# paper can still find its five 表記 items (4.0 leaves 32 words, 5.0 too few).
+LOOKALIKE_FLOOR = 3.5
+
+
+def lookalike_ranking(char: str, level: str, count: int = 8, floor: float = 0.3) -> list[tuple[float, str]]:
     """(score, kanji) for the kanji of `level` that look most like `char`."""
     from study.llm_shared import kanji_set_for_level
 
     pool = [c for c in sorted(kanji_set_for_level(level)) if c != char]
     ranked = sorted(((lookalike_score(char, c), c) for c in pool), key=lambda t: (-t[0], t[1]))
-    return [(score, c) for score, c in ranked if score >= 0.3][:count]
+    return [(score, c) for score, c in ranked if score >= floor][:count]
 
 
 @lru_cache(maxsize=None)
@@ -491,7 +505,7 @@ def orthography_sets(kanji: str, reading: str, level: str) -> list[tuple[float, 
     slots = [i for i, c in enumerate(kanji) if _is_kanji(c)]
     if not slots:
         return []
-    near = {i: lookalike_ranking(kanji[i], level, 5) for i in slots}
+    near = {i: lookalike_ranking(kanji[i], level, 5, LOOKALIKE_FLOOR) for i in slots}
     taken = spellings_read(reading) | {kanji}
 
     def sound(wrong: list[str]) -> bool:
