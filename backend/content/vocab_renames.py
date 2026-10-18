@@ -1032,6 +1032,14 @@ RETIRED: dict[str, str] = {
     "vocab_N1_凝らす_こごらす": "plan 227: こごらす is a rare or wrong reading; the word is 凝らす read こらす",
     "vocab_N1_画期_かっき": "plan 227: かっき is a rare or wrong reading; the word is 画期的 read かっきてき",
     "vocab_N2_反る_かえる": "plan 227: かえる is a rare or wrong reading; the word is 反る read そる",
+    # ── Plan 252: 私 is read わたし ───────────────────────────────
+    # The N5 list gives 私 twice, わたし and the very formal わたくし,
+    # and the deck carried both: a learner shown 私 was asked for
+    # わたくし beside the card asking わたし, and every 私 in a sentence
+    # resolved to the formal card (the tokenizer reads 私 わたくし,
+    # study/reading_context.py reads it back as わたし). The owner's
+    # call: わたし is the word; わたくし leaves, as plans 153 and 176.
+    "vocab_N5_私_わたくし": "plan 252: the very formal reading; 私 read わたし is the word",
 }
 
 
