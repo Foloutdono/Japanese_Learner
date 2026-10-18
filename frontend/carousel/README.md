@@ -1,4 +1,4 @@
-# The carousel studio (plans 229–229n, 231–235, 237, 247–251)
+# The carousel studio (plans 229–229n, 231–235, 237, 247–252)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -750,7 +750,9 @@ the screen.
 
 **No music.** `--music none` makes a long video or its short with no bed
 of music, its voices and the app's sounds alone, and drops the music from
-its credits; the file is named `…-nomusic`.
+its credits; the file is named `…-nomusic`. In the studio it is the
+"Music" switch (plan 252, "With music" / "No music"), for the long
+videos and the vocabulary shorts alike: the command and the page follow it.
 
 **Pick per video.** A level's `--part` walks the deck in its order (a
 quiz's part is a seeded deal), and two parts never share an item;
@@ -869,6 +871,47 @@ render's text file holds the three, one under the other; the studio
 shows the one picked under the video ("YouTube Shorts", "Instagram
 Reels", "TikTok"), where Reels and TikTok take the caption alone. A
 16:9 video's page stays YouTube's.
+
+## Vocabulary shorts (plan 252)
+
+A level's deck, or a theme's words, nine at a time as a 9:16 short
+(`words.js`, the studio's source 語彙 "Word shorts"), in the two looks
+the owner picked from three drawn:
+
+- **Card** (`card`, 札): washi and the vocabulary line, as the reply
+  shorts. The band names the level (or the theme) with a ring that
+  counts the seconds to read the word; nine stops under it, one a word.
+  The word stands on a card, asked first ("How do you read it?"), then
+  turned over: its furigana, its romaji, its meaning (its first three
+  parts, `cardSense`), its reading said; then its sentence under the
+  card, the word underlined, said too. The first word opens on the hook
+  ("Can you read these 9 words?").
+- **Quiz** (`quiz`, 挑): sumi and gold, as the Défi look. The word, four
+  meanings against a gold fuse that burns a tick a second; at the answer
+  the wrong ones go, the right one rises with a tick, the reading is said
+  and the sentence comes under it. A score asked for at the end ("? / 9").
+
+A wrong meaning is another word's first sense, cut short as the right
+one is (`shortSense`), that shares no word with any sense of the word
+wherever the banks write it (a theme's 地下鉄 is "subway", the deck's
+"underground train") nor with each other (`quizzes.overlaps`), a verb's
+among verbs, and near the right one's length (`wrongMeanings`): a test
+holds the right one to the longest less than a third of the time. A
+theme's words are asked among the theme's own (a cat among a dog and a
+horse), never its name. Both end on the carousel's call to action for
+the words station, in their look. A theme's words carry their picture.
+A short runs past the minute (about 1:15 as a card, 1:40 as a quiz) and
+under Shorts' three (`LIMIT`); the Tune panel's "Word short" sets its
+beats. Every frame is fitted to the feed's safe area, the word a size
+down before anything is cut, and its page is the three feeds' (plan 251).
+The long videos' 9:16 list no longer carries words or themes: they are
+these.
+
+```bash
+cd frontend
+VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --words N5:3 --style quiz
+node carousel/long/render.mjs --words theme:animals:1 --style card --lang fr --music none
+```
 
 ## The reading challenges (plan 247)
 

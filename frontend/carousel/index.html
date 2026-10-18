@@ -178,6 +178,9 @@ body[data-mode="long"] [data-long="hide"] { display: none !important; }
 /* The reading challenges (plan 247): a video, with its own controls. */
 body:not([data-video="challenge"]) [data-challenge="only"] { display: none !important; }
 body[data-video="challenge"] [data-challenge="hide"] { display: none !important; }
+/* The vocabulary shorts (plan 252): a look and a feed of their own. */
+body:not([data-video="words"]) [data-words="only"] { display: none !important; }
+body[data-video="words"] [data-words="hide"] { display: none !important; }
 /* A 9:16 video's post per feed (plan 251): Reels and TikTok take a caption alone. */
 body:not([data-feeds="on"]) [data-feeds="only"] { display: none !important; }
 body[data-post="caption"] [data-caption="hide"] { display: none !important; }
@@ -306,7 +309,28 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
       <div id="questions" class="chips" role="group" aria-label="Questions"></div>
     </div>
 
+    <div class="field" data-words="only">
+      <div class="label">Look <span>nine words a short</span></div>
+      <div class="seg" role="group" aria-label="Word short look">
+        <button type="button" data-set="wordsStyle:card">Card <span lang="ja">札</span></button>
+        <button type="button" data-set="wordsStyle:quiz">Quiz <span lang="ja">挑</span></button>
+      </div>
+      <div class="seg" role="group" aria-label="Where the word short is posted">
+        <button type="button" data-set="fit:tiktok">For TikTok</button>
+        <button type="button" data-set="fit:instagram">For Instagram</button>
+        <button type="button" data-set="fit:normal">Normal</button>
+      </div>
+    </div>
+
     <div class="field" data-long="only" data-challenge="hide">
+      <div class="label">Music <span>the bed of music under the voices, or none</span></div>
+      <div class="seg" role="group" aria-label="Music">
+        <button type="button" data-set="bed:on">With music</button>
+        <button type="button" data-set="bed:off">No music</button>
+      </div>
+    </div>
+
+    <div class="field" data-long="only" data-challenge="hide" data-words="hide">
       <div class="label">Format <span>YouTube, or a short for any feed</span></div>
       <div class="seg" role="group" aria-label="Video format">
         <button type="button" data-set="longFormat:long">16:9 video</button>

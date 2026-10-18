@@ -21,6 +21,7 @@ import { LONG_SITE, TALL, describe as describeLong, drawLong, fitShort, longComm
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 import { TUNABLES, changed, tuned, tuneFlag, tunablesFor } from './tune.js'
 import { FEEDS } from './feeds.js'
+import { STYLES as WORDS_STYLES, drawWords, wordsCommand, wordsFiles, wordsItems, wordsPage, wordsPlan, wordsStillAt, wordsTimeline } from './words.js'
 
 const STORE = 'tsuji-carousel'
 const $ = sel => document.querySelector(sel)
@@ -37,7 +38,7 @@ const TOGGLE_LABELS = {
   apart: 'What tells them apart', pair: 'The two side by side', careful: 'Watch out',
 }
 const T = STRINGS.en
-const LIST_NAME = { long: 'Video', challenge: 'Text', promo: 'Story', echo: 'Word', sentence: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
+const LIST_NAME = { long: 'Video', words: 'Short', challenge: 'Text', promo: 'Story', echo: 'Word', sentence: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
 
 const DEFAULTS = {
   source: 'sentence', level: 'N5', longFormat: 'long', kanaSet: 'hiragana', story: 'pitch', hour: 'day', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20' },
@@ -52,6 +53,8 @@ const DEFAULTS = {
   tune: {},
   // Plan 251: the feed whose post a 9:16 video's fields hold.
   feed: 'shorts',
+  // Plan 252: a vocabulary short's look, and whether a video plays its bed of music.
+  wordsStyle: 'card', bed: 'on',
 }
 const state = load()
 // The type drawn: the one chosen (state.type) where the item can be drawn
@@ -73,6 +76,8 @@ function load() {
     if (saved.fit && !FITS.includes(saved.fit)) delete saved.fit
     if (saved.challengeStyle && !CHALLENGE_STYLES.includes(saved.challengeStyle)) delete saved.challengeStyle
     if (saved.feed && !FEEDS.includes(saved.feed)) delete saved.feed
+    if (saved.wordsStyle && !WORDS_STYLES.includes(saved.wordsStyle)) delete saved.wordsStyle
+    if (saved.bed && !['on', 'off'].includes(saved.bed)) delete saved.bed
     // A source, a format or a view saved before a rename is forgotten, not drawn as a blank stage.
     if (saved.source && !SOURCES.some(x => x.id === saved.source)) delete saved.source
     if (saved.format && !(saved.format in FORMATS)) delete saved.format
@@ -114,7 +119,7 @@ async function banksOf(names) {
   await Promise.all([...new Set(names)].map(async n => { out[n] = await fetchJson(n) }))
   return out
 }
-const dataNow = () => (state.source === 'long' ? banksOf(longListFiles(state.level)) : fetchJson(fileFor(sourceOf(state.source))))
+const dataNow = () => (state.source === 'long' ? banksOf(longListFiles(state.level)) : state.source === 'words' ? banksOf(wordsFiles(state.level)) : fetchJson(fileFor(sourceOf(state.source))))
 
 // Where the app's own files are, as the page sees them: the print, the voices.
 const BASE = '../'
@@ -218,7 +223,7 @@ async function listNow() {
   const data = await dataNow()
   if (mine !== listToken) return
   const src = sourceOf(state.source)
-  let items = state.source === 'long' ? longItems(data, state.level, state.lang, state.longFormat) : itemsOf(state.source, data, state.lang, src.levels ? state[setKey(src)] : null)
+  let items = state.source === 'long' ? longItems(data, state.level, state.lang, state.longFormat) : state.source === 'words' ? wordsItems(data, state.level, state.lang) : itemsOf(state.source, data, state.lang, src.levels ? state[setKey(src)] : null)
   if (src.byLevel) items = items.filter(x => x.tag === state.level)
   listCache = items
   const q = $('#search').value.trim().toLowerCase()
@@ -474,10 +479,10 @@ async function renderNow() {
   stopPlayer()
   // A video (a long one, a reading challenge) has a page and a command, not slides.
   document.body.dataset.mode = videoSource() ? 'long' : ''
-  document.body.dataset.video = state.source === 'challenge' ? 'challenge' : ''
+  document.body.dataset.video = ['challenge', 'words'].includes(state.source) ? state.source : ''
   // A 9:16 video is posted to three feeds, a post each (plan 251): Reels
   // and TikTok take a caption alone.
-  const feeds = state.source === 'challenge' || (state.source === 'long' && state.longFormat === 'short')
+  const feeds = ['challenge', 'words'].includes(state.source) || (state.source === 'long' && state.longFormat === 'short')
   document.body.dataset.feeds = feeds ? 'on' : ''
   document.body.dataset.post = feeds && state.feed !== 'shorts' ? 'caption' : ''
   if (tuneFor !== state.source) renderTune()
@@ -494,6 +499,7 @@ async function renderNow() {
   if (!listCache.length) await renderList()
   if (mine !== token) return
   if (state.source === 'long') return renderLong(mine)
+  if (state.source === 'words') return renderWords(mine)
   if (state.source === 'challenge') return renderChallenge(mine)
   const id = currentId()
   const deps = await depsFor(data, id)
@@ -668,18 +674,35 @@ async function renderLong(mine) {
   const { kind, opts } = longPick(id, state.level, state.lang, short ? 'short' : 'long')
   // A short at the margins chosen (plan 239): TikTok's, Instagram's or none.
   for (const el of document.querySelectorAll('[data-short]')) el.hidden = !short
-  const pl = short ? fitShort(longPlan(kind, banks, { ...opts, fit: state.fit, tune: state.tune })) : longPlan(kind, banks, { ...opts, tune: state.tune })
+  // Its bed of music, or none (plan 252): the command and the credits follow.
+  const music = state.bed !== 'off'
+  const pl = short ? fitShort(longPlan(kind, banks, { ...opts, fit: state.fit, tune: state.tune, music })) : longPlan(kind, banks, { ...opts, tune: state.tune, music })
   const tl = timeline(pl)
   const page = describeLong(pl, tl, state.lang === 'en' ? `${LONG_SITE}/en` : LONG_SITE, banks['index.json']?.figures)
   await fonts(JSON.stringify(pl.items).slice(0, 40000) + pl.title + page.title)
   if (mine !== token) return
   current = { plan: pl, fmt: size, decks: [], long: { id, page, tl } }
+  // A reply video's stations are its questions (plan 249).
+  mountVideo({
+    id, jp: '長編', title: pl.title, label: 'Long video', size, tl, start: 4.5,
+    count: `about ${clock(tl.seconds)} · ${pl.kind === 'reply' ? `${tl.of} questions` : `${tl.of} stations`} · ${short ? '9:16 short' : '16:9'}`,
+    draw: (ctx, t) => drawLong(ctx, pl, tl, t),
+  })
+  // The video's page: written when the video or its language changes.
+  const key = `long|${id}|${state.level}|${state.lang}|${state.longFormat}|${state.fit}|${state.feed}|${state.bed}`
+  if (key !== captionFor) fillPost(page, key)
+  $('#command').textContent = longCommand(id, state.level, state.lang, short ? 'short' : 'long', state.fit) + (music ? '' : ' --music none') + tuneFlag(state.tune, 'long')
+}
+/** A video in the stage (plans 233, 252): its head, its frames played in
+ *  place, a scrub bar, its chapters. The preview is silent: the voices
+ *  are made, and every line measured, where it is rendered. */
+function mountVideo({ id, jp: station, title, label, size, tl, start, count, draw: paint }) {
   const stage = $('#stage')
   stage.replaceChildren()
   stage.dataset.view = 'long'
   const row = document.createElement('section')
   row.className = 'deck'
-  row.setAttribute('aria-label', 'Long video')
+  row.setAttribute('aria-label', label)
   const head = document.createElement('div')
   head.className = 'deck__head'
   const name = document.createElement('h2')
@@ -687,12 +710,11 @@ async function renderLong(mine) {
   const jp = document.createElement('span')
   jp.lang = 'ja'
   jp.className = 'deck__jp'
-  jp.textContent = '長編'
-  name.append(jp, ` ${pl.title}`)
+  jp.textContent = station
+  name.append(jp, ` ${title}`)
   const n = document.createElement('span')
   n.className = 'deck__count'
-  // A reply video's stations are its questions (plan 249).
-  n.textContent = `about ${clock(tl.seconds)} · ${pl.kind === 'reply' ? `${tl.of} questions` : `${tl.of} stations`} · ${short ? '9:16 short' : '16:9'}`
+  n.textContent = count
   head.append(name, n)
   const screen = document.createElement('div')
   screen.className = 'player'
@@ -700,7 +722,7 @@ async function renderLong(mine) {
   c.width = size.w
   c.height = size.h
   c.style.aspectRatio = `${size.w} / ${size.h}`
-  if (short) c.style.maxWidth = '420px'
+  if (size.h > size.w) c.style.maxWidth = '420px'
   c.setAttribute('aria-label', 'The video, drawn frame by frame')
   screen.append(c)
   const bar = document.createElement('div')
@@ -725,13 +747,12 @@ async function renderLong(mine) {
   chapters.className = 'chapters'
   row.append(head, screen, bar, note, chapters)
   stage.append(row)
-  player = { c, pl, tl, t: Math.min(player?.id === id ? player.t : 4.5, tl.seconds), raf: 0, id, play, scrub, time }
+  player = { c, tl, t: Math.min(player?.id === id ? player.t : start, tl.seconds), raf: 0, id, play, scrub, time }
   const draw = () => {
-    drawLong(c.getContext('2d'), pl, tl, player.t)
+    paint(c.getContext('2d'), player.t)
     scrub.value = String(player.t)
     time.textContent = `${clock(player.t)} / ${clock(tl.seconds)}`
   }
-  player.draw = draw
   const seek = t => { player.t = Math.max(0, Math.min(tl.seconds, t)); draw() }
   for (const ch of tl.chapters) {
     const li = document.createElement('li')
@@ -759,10 +780,28 @@ async function renderLong(mine) {
     player.raf = requestAnimationFrame(tick)
   })
   draw()
-  // The video's page: written when the video or its language changes.
-  const key = `long|${id}|${state.level}|${state.lang}|${state.longFormat}|${state.fit}|${state.feed}`
+}
+// ── The vocabulary shorts (plan 252) ──────────────────────────
+// A level's deck or a theme's words, nine at a time, as a card on washi
+// or a quiz on sumi (words.js); made by the same command as the shorts.
+async function renderWords(mine) {
+  const id = currentId()
+  const banks = await banksOf(wordsFiles(state.level))
+  if (mine !== token) return
+  const pl = wordsPlan(banks, id, { lang: state.lang, style: state.wordsStyle, music: state.bed !== 'off', tune: state.tune, fit: state.fit })
+  const tl = wordsTimeline(pl)
+  const page = wordsPage(pl, tl, state.lang === 'en' ? `${LONG_SITE}/en` : LONG_SITE, banks['index.json']?.figures)
+  await fonts(`${JSON.stringify(pl.items)}${pl.title}${page.title}語彙主題`)
+  if (mine !== token) return
+  current = { plan: pl, fmt: TALL, decks: [], words: { id, page, tl } }
+  mountVideo({
+    id, jp: '語彙', title: pl.title, label: 'Word short', size: TALL, tl, start: wordsStillAt(pl, tl),
+    count: `about ${clock(tl.seconds)} · ${pl.items.length} words · ${pl.style === 'quiz' ? 'quiz' : 'card'} · 9:16`,
+    draw: (ctx, t) => drawWords(ctx, pl, tl, t),
+  })
+  const key = `words|${id}|${state.level}|${state.lang}|${state.wordsStyle}|${state.fit}|${state.feed}|${state.bed}`
   if (key !== captionFor) fillPost(page, key)
-  $('#command').textContent = longCommand(id, state.level, state.lang, short ? 'short' : 'long', state.fit) + tuneFlag(state.tune, 'long')
+  $('#command').textContent = wordsCommand(pl, tuneFlag(state.tune, 'words'))
 }
 // ── The reading challenges (plan 247) ─────────────────────────
 // A comprehension text as a 9:16 video over Today's print: going slowly
@@ -908,6 +947,15 @@ async function exportThumb() {
     c.height = FORMATS.story.h
     drawChallenge(c.getContext('2d'), current.plan, current.challenge.tl, 1.6, current.challenge.P)
     const result = await offer(`tsuji-challenge-${safeName(current.challenge.id)}-${state.lang}.png`, await png(c))
+    status(result === 'saved' ? 'Saved the thumbnail.' : MESSAGE[result])
+    return
+  }
+  if (current.words) {
+    const c = document.createElement('canvas')
+    c.width = TALL.w
+    c.height = TALL.h
+    drawWords(c.getContext('2d'), current.plan, current.words.tl, wordsStillAt(current.plan, current.words.tl))
+    const result = await offer(`tsuji-words-${safeName(current.words.id.replace(/:/g, '-'))}-${current.plan.style}-${state.lang}.png`, await png(c))
     status(result === 'saved' ? 'Saved the thumbnail.' : MESSAGE[result])
     return
   }
@@ -1150,8 +1198,8 @@ async function exportShort() {
     frame: (ctx, t) => { drawShortFrame(ctx, slides, tl, t, fmt) },
   })
 }
-const clippedSource = () => ['promo', 'echo', 'long', 'challenge'].includes(state.source)
-const videoSource = () => ['long', 'challenge'].includes(state.source)
+const clippedSource = () => ['promo', 'echo', 'long', 'challenge', 'words'].includes(state.source)
+const videoSource = () => ['long', 'challenge', 'words'].includes(state.source)
 
 /** A clip encoded as the feeds take a video, H.264 in an MP4 with its sounds. */
 // The H.264 level a size and a rate need: 4.0 holds 1080×1920 at 30

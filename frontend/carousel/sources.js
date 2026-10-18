@@ -48,6 +48,8 @@ export const SOURCES = [
   { id: 'echo', jp: '木霊', line: 'vocab', name: { en: 'Word echo', fr: 'Mot en écho' }, file: () => 'themes.json', noLevels: true },
   // The long videos (plan 233): a level's videos, drawn by long.js, made by long/render.mjs.
   { id: 'long', jp: '長編', line: 'exam', name: { en: 'Long video', fr: 'Vidéo longue' }, file: lv => `words-${lv}.json`, video: true },
+  // Plan 252: a level's words, or a theme's, nine a short, as a card or a quiz (words.js).
+  { id: 'words', jp: '語彙', line: 'vocab', name: { en: 'Word shorts', fr: 'Shorts de mots' }, file: lv => `words-${lv}.json`, video: true },
   // Plan 247: a comprehension text read as a 9:16 video, falling or read along (challenge.js).
   { id: 'challenge', jp: '速読', line: 'rikai', name: { en: 'Reading challenge', fr: 'Défi lecture' }, file: () => 'comprehension.json', byLevel: true, video: true },
 ]

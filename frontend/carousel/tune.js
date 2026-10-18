@@ -33,7 +33,7 @@ function hold(t, v) {
 // Every source drawn as slides, and so a short made of one: any source
 // but the clips and the videos, a source added later included.
 const SLIDES = 'carousel'
-const NOT_SLIDES = new Set(['promo', 'echo', 'long', 'challenge'])
+const NOT_SLIDES = new Set(['promo', 'echo', 'long', 'challenge', 'words'])
 
 group('Reading challenge', ['challenge'], [
   { key: 'challenge.pace', label: 'Reading pace', unit: '×', def: 1, min: 0.5, max: 1.6, step: 0.05, hint: 'the characters a minute of every level, times this' },
@@ -67,6 +67,13 @@ group('Long video', ['long'], [
 ])
 group('Reply video', ['long'], [
   { key: 'reply.count', label: 'Time to reply', unit: 's', def: 7, min: 3, max: 15, step: 1, hint: 'the timer on each question, once the three replies are up (plan 249)' },
+])
+// Plan 252: the vocabulary shorts, a word's beats in either look.
+group('Word short', ['words'], [
+  { key: 'words.think', label: 'Time to read it', unit: 's', def: 3, min: 1, max: 8, step: 0.5, hint: 'the card: the word alone, before its reading is shown and said' },
+  { key: 'words.count', label: 'Time to answer', unit: 's', def: 5, min: 2, max: 10, step: 1, hint: 'the quiz: the four meanings against the fuse, a tick a second' },
+  { key: 'words.hold', label: 'Meaning held', unit: 's', def: 1.4, min: 0.6, max: 4, step: 0.2, hint: 'after the word is said, before its sentence' },
+  { key: 'words.after', label: 'Sentence held', unit: 's', def: 1.6, min: 0.6, max: 4, step: 0.2, hint: 'after the sentence is said, before the next word' },
 ])
 group('Export', [SLIDES, 'promo', 'echo', 'challenge'], [
   { key: 'export.mbps', label: 'Video quality', unit: 'Mb/s', def: 8, min: 4, max: 20, step: 1, hint: 'at thirty frames a second; doubled at sixty' },

@@ -13,10 +13,11 @@ import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '
 import { LIMIT, SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
 import { TUNABLES, tuned } from '../carousel/tune.js'
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf } from '../carousel/funnel.js'
-import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, stillAt, timeline } from '../carousel/long.js'
+import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, TALL, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, stillAt, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
 import { CH as CHALLENGE, CPM, SCROLL, TRACK, TRACKS, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
 import { CAPTION_MAX, FEEDS, HASHTAGS, pageFile } from '../carousel/feeds.js'
+import { COUNT as WORDS_COUNT, LIMIT as WORDS_LIMIT, STYLES as WORDS_STYLES, drawWords, shortSense, wordsCommand, wordsFiles, wordsItems, wordsPage, wordsPlan, wordsTimeline } from '../carousel/words.js'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
@@ -2208,3 +2209,141 @@ describe('a post for each feed (plan 251)', () => {
     expect(text.match(/^TITLE$/gm)).toHaveLength(1)
   })
 })
+
+describe('the vocabulary shorts (plan 252)', () => {
+  const banksFor = lv => Object.fromEntries(wordsFiles(lv).map(n => [n, bank(n)]))
+  const B = Object.fromEntries(LEVELS.map(lv => [lv, banksFor(lv)]))
+  const deckIds = lv => wordsItems(B[lv], lv).filter(x => !x.id.startsWith('theme:')).map(x => x.id)
+  const themeIds = () => wordsItems(B.N5, 'N5').filter(x => x.id.startsWith('theme:')).map(x => x.id)
+  // Every N5 short, and a spread of the others: each tenth part, every theme.
+  const sample = () => [...LEVELS.flatMap(lv => deckIds(lv).filter((_, i) => lv === 'N5' || i % 10 === 0).map(id => [lv, id])), ...themeIds().map(id => ['N5', id])]
+
+  it('deals a level’s deck nine words a short, every word once, and each theme the same', () => {
+    for (const lv of LEVELS) {
+      const words = bank(`words-${lv}.json`).words.filter(w => w.en?.[0])
+      const seen = deckIds(lv).flatMap(id => wordsPlan(B[lv], id).items.map(x => `${x.t}::${x.r}`))
+      expect(seen.length, lv).toBe(words.length)
+      expect(new Set(seen).size, lv).toBe(new Set(words.map(w => `${w.t}::${w.r}`)).size)
+    }
+    for (const id of themeIds()) expect(wordsPlan(B.N5, id).items.length, id).toBeLessThanOrEqual(WORDS_COUNT)
+    expect(new Set(wordsItems(B.N5, 'N5').map(x => x.id)).size).toBe(wordsItems(B.N5, 'N5').length)
+  })
+
+  it('asks each word’s meaning among three that cannot be right too, and lets no length answer', () => {
+    let longest = 0
+    let asked = 0
+    const at = [0, 0, 0, 0]
+    for (const [lv, id] of sample()) {
+      for (const lang of ['en', 'fr']) {
+        const pl = wordsPlan(B[lv], id, { style: 'quiz', lang })
+        const card = wordsPlan(B[lv], id, { style: 'card', lang })
+        // No word is dropped for want of wrong meanings.
+        expect(pl.items.length, `${id} ${lang}`).toBe(card.items.length)
+        for (const it of pl.items) {
+          const where = `${id} ${lang} ${it.t}`
+          expect(it.choices, where).toHaveLength(4)
+          expect(new Set(it.choices.map(c => c.toLowerCase())).size, where).toBe(4)
+          const right = it.choices[it.right]
+          expect(right, where).toBe(weldIf(lang, shortSense(it.gloss)))
+          const w = [...bank(`words-${lv}.json`).words, ...Object.values(bank('themes.json').themes).flatMap(th => th.words)].find(x => x.t === it.t && x.r === it.r)
+          const senses = [...(w[lang] || []), ...(w.en || [])]
+          for (const c of it.choices.filter((_, k) => k !== it.right)) {
+            expect(senses.some(s => overlaps(s, c)), `${where}: ${c}`).toBe(false)
+            expect(c.endsWith('…') && c.length < 4, `${where}: ${c}`).toBe(false)
+          }
+          asked += 1
+          at[it.right] += 1
+          if (it.choices.every((c, k) => k === it.right || c.length < right.length)) longest += 1
+        }
+      }
+    }
+    // The longest is the right one about as often as a blind pick would be (plan 217's LENGTH_TELL).
+    expect(longest / asked).toBeLessThan(0.35)
+    for (const n of at) expect(n / asked).toBeGreaterThan(0.18)
+  }, 120000)
+
+  it('stays under Shorts’ three minutes, every reading and sentence said', () => {
+    for (const [lv, id] of sample()) {
+      for (const style of WORDS_STYLES) {
+        const pl = wordsPlan(B[lv], id, { style })
+        const tl = wordsTimeline(pl)
+        expect(tl.seconds, `${id} ${style}`).toBeLessThanOrEqual(WORDS_LIMIT)
+        const said = tl.cues.map(c => c.text)
+        for (const it of pl.items) {
+          expect(said, `${id} ${it.t}`).toContain(it.r)
+          if (it.ex) expect(said, `${id} ${it.t}`).toContain(it.ex.jp)
+        }
+        expect(tl.segs.at(-1).type).toBe('cta')
+        expect(tl.segs.some(s => s.type === 'score'), style).toBe(style === 'quiz')
+      }
+    }
+  }, 120000)
+
+  it('stands every frame inside the feed’s safe area, nothing cut', () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class { constructor(d) { this.d = d } }
+    try {
+      for (const [lv, id] of sample()) {
+        for (const style of WORDS_STYLES) {
+          for (const lang of ['en', 'fr']) {
+            const pl = wordsPlan(B[lv], id, { style, lang })
+            const tl = wordsTimeline(pl)
+            const own = new Set(pl.items.flatMap(it => [it.gloss, ...(it.choices || []), it.ex?.tr].filter(Boolean)))
+            for (const sg of tl.segs.filter(x => x.type !== 'cta')) {
+              const m = sg.marks
+              for (const u of [0.05, (m.reveal ?? 1) - 0.1, (m.reveal ?? 1) + 1, (m.ex ?? m.reveal ?? 1) + 0.6, sg.dur - 0.05]) {
+                const { ctx, texts } = placedTexts()
+                drawWords(ctx, pl, tl, sg.start + Math.min(u, sg.dur - 0.01))
+                for (const x of texts) {
+                  const where = `${id} ${style} ${lang} ${sg.type}#${sg.i ?? ''} ${u.toFixed(1)} ${x.t}`
+                  expect(x.y - x.z * 0.85, where).toBeGreaterThanOrEqual(TALL.safe.t - 1)
+                  expect(x.y + x.z * 0.25, where).toBeLessThanOrEqual(TALL.h - TALL.safe.b + 1)
+                  expect(x.t.endsWith('…') && ![...own].some(o => o.endsWith(x.t)), where).toBe(false)
+                }
+              }
+            }
+          }
+        }
+      }
+    } finally { globalThis.Path2D = had }
+  }, 240000)
+
+  it('writes its page for three feeds, crediting music only where it plays, and its command', () => {
+    const pl = wordsPlan(B.N5, 'N5:2', { style: 'quiz' })
+    const tl = wordsTimeline(pl)
+    const page = wordsPage(pl, tl, 'https://tsuji.app/en', FIGURES)
+    expect(Object.keys(page.feeds)).toEqual(FEEDS)
+    expect(page.title).toMatch(/^JLPT N5 word quiz: .* 9 .*#shorts$/)
+    expect(page.description).toContain('Music: made for Tsuji.')
+    expect(page.feeds.tiktok.caption).not.toContain('tsuji.app')
+    expect(wordsCommand(pl)).toBe('VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --words N5:2 --style quiz --lang en')
+    const quiet = wordsPlan(B.N5, 'theme:animals:1', { style: 'card', music: false, lang: 'fr', fit: 'instagram' })
+    const qp = wordsPage(quiet, wordsTimeline(quiet), 'https://tsuji.app', FIGURES)
+    expect(qp.description).not.toMatch(/Musique/)
+    expect(qp.title).toMatch(/^9 mots de japonais : Animaux #shorts$/)
+    expect(qp.description).not.toMatch(/JLPT/)
+    expect(wordsCommand(quiet)).toBe('VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --words theme:animals:1 --style card --lang fr --fit instagram --music none')
+    // A long video's own short no longer lists words or themes: they are the word shorts'.
+    expect(longItems({ ...B.N5, 'kanji-N5.json': bank('kanji-N5.json'), 'grammar-N5.json': bank('grammar-N5.json') }, 'N5', 'en', 'short').some(x => x.kind === 'vocab' || x.kind === 'theme')).toBe(false)
+  })
+})
+
+/** Every text drawn, where: its baseline, moved by translate and scale, and its size. */
+function placedTexts() {
+  const texts = []
+  const state = { font: '10px sans-serif' }
+  const size = () => parseFloat(/([\d.]+)px/.exec(state.font)?.[1] || '10')
+  const widthOf = t => [...String(t)].reduce((w, c) => w + (/[\u3000-\u9fff\uff00-\uffef]/.test(c) ? 1 : 0.56), 0) * size()
+  let m = { dy: 0, k: 1 }
+  const stack = []
+  const methods = {
+    measureText: t => ({ width: widthOf(t), actualBoundingBoxAscent: size() * 0.72, actualBoundingBoxDescent: size() * 0.12, actualBoundingBoxLeft: 0, actualBoundingBoxRight: widthOf(t) }),
+    fillText: (t, x, y) => { if (String(t).trim()) texts.push({ t: String(t), y: m.dy + y * m.k, z: size() * m.k }) },
+    save: () => stack.push({ ...m }), restore: () => { m = stack.pop() ?? { dy: 0, k: 1 } },
+    translate: (x, y) => { m.dy += y * m.k }, scale: (a, b) => { m.k *= b },
+    createLinearGradient: () => ({ addColorStop() {} }), createRadialGradient: () => ({ addColorStop() {} }),
+    getTransform: () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }),
+  }
+  const ctx = new Proxy(state, { get: (o, k) => (k in methods ? methods[k] : k in o ? o[k] : () => {}), set: (o, k, v) => { o[k] = v; return true } })
+  return { ctx, texts }
+}

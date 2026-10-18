@@ -297,7 +297,8 @@ const LIST_KIND = { vocab: '語彙', kanji: '漢字', quiz: '試験', grammar: '
 export const longListFiles = level => [`words-${level}.json`, `kanji-${level}.json`, `${level}.json`, `grammar-${level}.json`, 'themes.json', 'conversation.json']
 
 /** The videos a level can make: its vocabulary and kanji parts, its
- *  quiz's parts, each grammar point, each theme. */
+ *  quiz's parts, each grammar point, each theme. As shorts, its words
+ *  and themes are the vocabulary shorts' (words.js, plan 252). */
 export function longItems(banks, level, lang = 'en', format = 'long') {
   const S = SAY[lang] || SAY.en
   const out = []
@@ -308,7 +309,8 @@ export function longItems(banks, level, lang = 'en', format = 'long') {
       out.push({ id: `${kind}:${p}`, kind, jp: `${LIST_KIND[kind]} ${p}`, sub: `${some.slice(0, 6).map(name).join('、')}…`, tag: S.count[kind](some.length) })
     }
   }
-  parts('vocab', (banks[`words-${level}.json`]?.words || []).filter(w => gloss(w, lang)[0]), w => w.t)
+  const shorts = format === 'short'
+  if (!shorts) parts('vocab', (banks[`words-${level}.json`]?.words || []).filter(w => gloss(w, lang)[0]), w => w.t)
   const kanji = banks[`kanji-${level}.json`]?.kanji || {}
   parts('kanji', Object.keys(kanji).filter(c => kanji[c].s?.d?.length), c => c)
   // A quiz part deals from its own slice of each list: as many parts as the shortest allows.
@@ -327,7 +329,7 @@ export function longItems(banks, level, lang = 'en', format = 'long') {
     const sub = format === 'short' ? `${ds[0].place.jp} · ${weldIf(lang, ds[0].place[lang] || ds[0].place.en)}` : ds.map(d => d.place.jp).join('、')
     out.push({ id: `reply:${i + 1}`, kind: 'reply', jp: `${LIST_KIND.reply} ${i + 1}`, sub, tag: S.count.reply(ds.reduce((n, d) => n + d.turns.length, 0)) })
   })
-  for (const [key, th] of Object.entries(banks['themes.json']?.themes || {})) {
+  for (const [key, th] of shorts ? [] : Object.entries(banks['themes.json']?.themes || {})) {
     out.push({ id: `theme:${key}`, kind: 'theme', jp: th.head?.t || key, sub: th.name?.[lang] || th.name?.en || key, tag: S.count.vocab(th.words.length) })
   }
   return out
@@ -373,7 +375,7 @@ export function longCommand(id, level, lang = 'en', format = 'long', fit = 'tikt
 }
 
 /** A word, with the first sentence of the bank it is read in that asks nothing above the word's level. */
-function wordItem(w, banks, lang, level) {
+export function wordItem(w, banks, lang, level) {
   const own = levelNo(level || 'N5')
   let ex = null
   for (const id of w.ex || []) {
@@ -899,6 +901,18 @@ const SHORT_PAGE = {
     hashtags: lv => `#Shorts #ApprendreLeJaponais #Japonais${lv ? ` #JLPT${lv}` : ''} #日本語`,
     tag: { vocab: 'VocabulaireJaponais', kanji: 'Kanji', quiz: 'JLPT', grammar: 'GrammaireJaponaise', reply: 'ConversationJaponaise' },
   },
+}
+
+/** What a short's page says of the app, its credits and its tags, for
+ *  another 9:16 video that writes its own page (words.js, plan 252). */
+export function pageParts(tl, lang, { figures = null, music = true, level = 'N5', kind = 'vocab' } = {}) {
+  const P = SHORT_PAGE[lang] || SHORT_PAGE.en
+  const fmt = x => Number(x).toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-US')
+  return {
+    app: figures ? P.app({ words: fmt(figures.words), kanji: fmt(figures.kanji), points: fmt(figures.points) }) : P.more,
+    credits: (PAGE[lang] || PAGE.en).credits(tl.cues.some(c => LONE.test(c.text)), music),
+    tags: (PAGE[lang] || PAGE.en).tags(level, kind),
+  }
 }
 
 /** The video's title, description and tags. `figures` is the bank's

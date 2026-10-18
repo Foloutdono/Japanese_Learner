@@ -23,6 +23,9 @@
 //                     short; `none` for none; the studio's own (Cool Vibes) when left out
 //   --music none      a long video or its short with no bed of music: its voices
 //                     and the app's sounds alone, and no music in its credits
+//   --words ID        a vocabulary short (plan 252, words.js): nine words, 9:16,
+//                     a level's (N5:3) or a theme's (theme:animals:1)
+//   --style quiz      ... as a card on washi (card, the default) or a quiz on sumi (quiz)
 //   --unvoiced        ... a read-along made even when the voice engine fails (silent lines)
 //   --tune k=v,k=v    the studio's Tune panel (plan 248, tune.js): its "Copy the
 //                     command" writes the values changed, so the render is the preview
@@ -46,6 +49,7 @@ import { FPS, TALL, WIDE, cueKey, describe, fitShort, longPlan, stillAt, timelin
 import { fromRecipe, shortTimeline } from '../short.js'
 import { TRACKS, challengeCues, challengePage, challengePlan, challengeTimeline } from '../challenge.js'
 import { pageFile } from '../feeds.js'
+import { wordsCues, wordsPage, wordsPlan, wordsStillAt, wordsTimeline } from '../words.js'
 import { parseTune } from '../tune.js'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -156,6 +160,23 @@ if (args.challenge) {
   pageText = challengePage(plan, tl, site)
   thumbAt = 1.6
   log(`${pageText.title}: ${plan.sents.length} sentences, ${tl.seconds.toFixed(1)} s, ${tl.cues.length} lines voiced`)
+} else if (args.words) {
+  // ── A vocabulary short (plan 252): nine words, as a card or a quiz ──
+  const id = String(args.words)
+  const plan = wordsPlan(banks, id, { lang, style: args.style, music: args.music !== 'none', tune, fit: opts.fit })
+  const dur = voiceAll(wordsCues(plan))
+  tl = wordsTimeline(plan, dur)
+  SIZE = TALL
+  slug = ['words', id.replace(/:/g, '-'), plan.style, lang, ...(opts.fit !== 'tiktok' ? [opts.fit] : []), ...(plan.music ? [] : ['nomusic'])].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
+  await fontsFor(glyphs(plan))
+  await canvasOf(SIZE)
+  await page.evaluate(async ({ plan, tl }) => {
+    const Wd = await import('/carousel/words.js')
+    window.__draw = t => Wd.drawWords(window.__ctx, plan, tl, t)
+  }, { plan, tl })
+  pageText = wordsPage(plan, tl, site, banks['index.json']?.figures)
+  thumbAt = wordsStillAt(plan, tl)
+  log(`${pageText.title}: ${plan.items.length} words, ${tl.seconds.toFixed(1)} s, ${tl.cues.length} lines`)
 } else if (recipe) {
   // ── A carousel of the studio, standing, its line voiced ──
   const made = await page.evaluate(async st => {
