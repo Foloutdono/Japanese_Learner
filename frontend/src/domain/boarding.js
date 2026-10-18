@@ -225,13 +225,6 @@ export function planFigures(volumes, level, goal, perDay, kanaAnswer, now = new 
   return { words, kanji, grammar, kana, items, days, date: addDays(now, days) }
 }
 
-// The chart is an illustration (the canvas says so on the card): two
-// curves over the ride's months, the steady line climbing to the words
-// promised and the crammer's flattening early. Fractions of the box,
-// left to right; the caller scales them onto the SVG.
-export const CHART_US = [0, 0.16, 0.32, 0.49, 0.67, 0.83, 1]
-export const CHART_THEM = [0, 0.15, 0.22, 0.26, 0.28, 0.29, 0.29]
-
 /** 1,500 → "1.5k", 500 → "500", for the chart's axis. */
 export function axisLabel(n) {
   if (n >= 1000) {

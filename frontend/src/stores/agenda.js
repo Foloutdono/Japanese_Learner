@@ -20,10 +20,6 @@ export function refreshAgenda() {
   return store.refresh()
 }
 
-export function seedAgenda(blocks) {
-  store.seed({ blocks })
-}
-
 /** Replace the week. Resolves to the blocks as stored; rejects with the
  *  ApiError the page words (an overlap is a 422 whose detail.code says
  *  so). */

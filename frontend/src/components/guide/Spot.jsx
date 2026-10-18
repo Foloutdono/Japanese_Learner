@@ -11,6 +11,13 @@ import { createPortal } from 'react-dom'
 //
 // It takes no pointer events, and neither does its shadow: the thing
 // it frames is pressed through it, and so is anything it dims.
+//
+// It stands at the window's corner and is MOVED by a transform, never
+// by top and left: a glide of top/left is a layout on every frame, and
+// every frame a layout shift -- the spot is the size of the screen with
+// its shadow, so each frame of a glide counted up to 0.08 (the trail of
+// 2026-10-18 read 1.3 over a first ride). A transform is the
+// compositor's, and moves nothing in the layout.
 export const PAD = 6
 const MOVE_MS = 260
 
@@ -19,7 +26,7 @@ export function Spot({ rect, radius = 'card', className = '' }) {
     <div
       className={`guide__spot guide__spot--${radius}${className ? ` ${className}` : ''}`}
       style={{
-        top: rect.top - PAD, left: rect.left - PAD,
+        transform: `translate(${rect.left - PAD}px, ${rect.top - PAD}px)`,
         width: rect.width + 2 * PAD, height: rect.height + 2 * PAD,
         '--guide-move': `${MOVE_MS}ms`,
       }}

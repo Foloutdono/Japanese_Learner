@@ -21,6 +21,7 @@ const todayRef = { current: null }
 vi.mock('../stores/today', () => ({
   useTodaySummary: () => ({ data: todayRef.current, failed: false }),
   refreshToday: vi.fn(),
+  refetchToday: vi.fn(() => Promise.resolve()),
   seedTodaySummary: vi.fn(),
 }))
 const summaryRef = { current: { username: 'Aiko', week: [], streak: 3, level: 12 } }

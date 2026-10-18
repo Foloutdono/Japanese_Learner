@@ -90,6 +90,13 @@ export function createRemoteStore(path, { ttlMs = 30_000 } = {}) {
   return {
     use,
     refresh: fetchOnce,
+    /**
+     * A fresh answer: one asked after any request already in flight has
+     * landed (that one may have left before what the caller changed).
+     */
+    refreshAfter() {
+      return (inflight ?? Promise.resolve()).catch(() => {}).then(() => fetchOnce())
+    },
     seed(data) { cache = data; seededAt = Date.now(); failed = false; notify() },
     /**
      * Drop the answer: the learner it belongs to has signed out.

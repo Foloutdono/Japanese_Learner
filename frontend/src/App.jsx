@@ -10,7 +10,7 @@ import { OfferScreen } from './components/offers/OfferScreen'
 import { StatusSheet } from './components/journey/StatusSheet'
 import { sectionFor, HOME_STATION } from './config/stations'
 import { getTabs, tabFor } from './config/tabs'
-import { Shell, StageFrame, DeskShellStage } from './components/chrome/Shell'
+import { Shell, StageFrame } from './components/chrome/Shell'
 import { NativeBridge } from './components/chrome/NativeBridge'
 import { identityFor } from './config/identity'
 import { apiJson, apiJsonWithTimeout } from './lib/api'
@@ -32,6 +32,7 @@ import { rememberOnboarded, wasOnboardedHere } from './stores/onboarded'
 import { holdGuide } from './stores/guide'
 import { forgetAccount } from './stores/account'
 import { track } from './lib/track'
+import { cardsRidden } from './lib/rideProgress'
 import { routePattern } from './lib/routePattern'
 import { watchApiFailures } from './lib/apiTrail'
 import { watchClientErrors } from './lib/clientErrors'
@@ -50,7 +51,6 @@ import LearnScreen from './screens/LearnScreen'
 import PracticeScreen from './screens/PracticeScreen'
 import TodayScreen from './screens/TodayScreen'
 import TodayRun from './screens/TodayRun'
-import DayClearScreen from './screens/DayClearScreen'
 import TicketsScreen from './screens/TicketsScreen'
 import KanaScreen  from './screens/KanaScreen'
 import KanaRun from './screens/KanaRun'
@@ -510,7 +510,10 @@ export default function App({ front = NO_FRONT }) {
   // 入門 (plan 170): a learner who answered « Pas encore » to the kana
   // question meets the introduction before the cards; everyone else
   // boards the cards as before.
-  const rideStart = onboardingProfile?.kanaKnown === 'none' ? '/ride/intro' : '/ride/cards'
+  // A ride left after its cards (a reload, the tab closed) is boarded
+  // again at the reading, never the first card (lib/rideProgress.js).
+  const rideStart = cardsRidden(session?.user?.id) ? '/ride/reading'
+    : onboardingProfile?.kanaKnown === 'none' ? '/ride/intro' : '/ride/cards'
   // 案内 — no gate's guide may open under the 改札 cutscene (plan 100).
   useEffect(() => { holdGuide(onboarding === 'finishing') }, [onboarding])
   const rideDone = () => setGate(g => (
@@ -570,10 +573,11 @@ export default function App({ front = NO_FRONT }) {
             <Route path="/dev/ride" element={<RidePreview />} />
             <Route path="/dev/sounds" element={<SoundPalette />} />
             <Route path="/dev/offers" element={<OffersPreview />} />
-            {/* 終着 (plan 191): every scene of the day cleared, from the
-                canvas's fixtures (?scene=…&reduced=1&desk=1), in the
-                route's own frame: the real rail beside it on the desk. */}
-            <Route element={<DeskShellStage />}>
+            {/* 終着 (plans 191, 250): every finish of the day's run, from
+                the canvas's fixtures (?scene=…&reduced=1), on Today under
+                the shell: the bars leave and come back on a phone, the
+                real rail beside it on the desk. */}
+            <Route element={<Shell />}>
               <Route path="/dev/dayclear" element={<DayClearPreview />} />
             </Route>
           </Routes>
@@ -676,6 +680,10 @@ export default function App({ front = NO_FRONT }) {
           <Route element={<Shell />}>
             {/* 本日の運行 — everything due, in one queue. See TodayScreen. */}
             <Route path="/today"                element={<TodayScreen session={session} />} />
+            {/* 終着 — the day's run finished, on Today itself (plan 250):
+                the same screen, so the URL leaves when the finish rests
+                and nothing is remounted. */}
+            <Route path="/today/clear"          element={<TodayScreen session={session} />} />
             <Route path="/learn"                element={<LearnScreen session={session} />} />
             {/* The stations and the platforms (plan 071): the sources,
                 then a line's stops, then a stop's modes, under the
@@ -757,12 +765,6 @@ export default function App({ front = NO_FRONT }) {
                 destination, data, account — each its own page under
                 the list. */}
             <Route path="/profile/settings/:page" element={<SettingsScreen session={session} />} />
-          </Route>
-
-          {/* 終着 — the day's run finished (plan 191): full screen on a
-              phone, as a run's stage; beside the rail on the desk. */}
-          <Route element={<DeskShellStage />}>
-            <Route path="/today/clear"          element={<DayClearScreen session={session} />} />
           </Route>
 
           {/* The stage: both bars leave, the rating bar or the field

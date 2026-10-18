@@ -87,7 +87,7 @@ describe('the door opens before it leaves (plan 144)', () => {
   })
 })
 
-// ── The gate, up close (plan 249) ───────────────────────────────────
+// ── The gate, up close (plan 253) ───────────────────────────────────
 // The owner's pick B of three drawn as game assets: the two cabinets are
 // the screen's two halves, the flaps close the lane between them, and
 // the cabinets part on the door's keyframes. What it replaced grew a
@@ -96,7 +96,7 @@ describe('the door opens before it leaves (plan 144)', () => {
 // that keep it smooth: no blur anywhere, and nothing animated but a
 // transform or an opacity. Read off the scene's own animations, not a
 // clock.
-describe('the gate stands up close and parts like the door (plan 249)', () => {
+describe('the gate stands up close and parts like the door (plan 253)', () => {
   const X = 1.4
   const box = s => document.querySelector(s).getBoundingClientRect()
   const anims = () => document.querySelector('.gate').getAnimations({ subtree: true })

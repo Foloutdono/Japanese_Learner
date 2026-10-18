@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { startTransition, useEffect, useRef, useState } from 'react'
 import { useLang } from '../LangContext'
 import { ApiError, apiJson, apiJsonWithTimeout } from '../lib/api'
 import { canNudge, nudgePermission, requestNudgePermission } from '../lib/platform'
@@ -265,21 +265,31 @@ export default function BoardingFlow({
     })
   }
 
+  // 速度: a move between screens is a transition. Rendered inside the
+  // tap, the next screen held the tap's paint for 250-370 ms of a cheap
+  // phone's CPU (608 ms on a learner's, 2026-10-18, the trail's INP);
+  // as a transition the tap paints its press at once and the screen
+  // follows a frame later, in a render that can yield. Every move
+  // below is one.
   function go(next) {
     mark(step, next, 'fwd')
-    setHistory(h => [...h, step])
-    if (!REDUCED) setLeaving({ step, dir: 'fwd' })
-    setStep(next)
+    startTransition(() => {
+      setHistory(h => [...h, step])
+      if (!REDUCED) setLeaving({ step, dir: 'fwd' })
+      setStep(next)
+    })
   }
 
   function back() {
     if (history.length === 0) return
     const prev = history[history.length - 1]
     mark(step, prev, 'back')
-    setHistory(h => h.slice(0, -1))
-    if (!REDUCED) setLeaving({ step, dir: 'back' })
-    setSheet(null)
-    setStep(prev)
+    startTransition(() => {
+      setHistory(h => h.slice(0, -1))
+      if (!REDUCED) setLeaving({ step, dir: 'back' })
+      setSheet(null)
+      setStep(prev)
+    })
   }
 
   // 机 (plan 140): a stop already passed is a door straight back to its
@@ -289,19 +299,23 @@ export default function BoardingFlow({
     const at = history.lastIndexOf(target)
     if (at < 0) return
     mark(step, target, 'back')
-    setHistory(h => h.slice(0, at))
-    if (!REDUCED) setLeaving({ step, dir: 'back' })
-    setSheet(null)
-    setStep(target)
+    startTransition(() => {
+      setHistory(h => h.slice(0, at))
+      if (!REDUCED) setLeaving({ step, dir: 'back' })
+      setSheet(null)
+      setStep(target)
+    })
   }
 
   // The test hands back to the line it was reached from: the test is not
   // a question Back returns to, so it leaves the history as it goes.
   function returnToLevel() {
     mark(step, 'level', 'fwd')
-    setHistory(h => (h[h.length - 1] === 'level' ? h.slice(0, -1) : h))
-    if (!REDUCED) setLeaving({ step, dir: 'back' })
-    setStep('level')
+    startTransition(() => {
+      setHistory(h => (h[h.length - 1] === 'level' ? h.slice(0, -1) : h))
+      if (!REDUCED) setLeaving({ step, dir: 'back' })
+      setStep('level')
+    })
   }
 
   // ── The browser's Back (plan 123) ────────────────────────────

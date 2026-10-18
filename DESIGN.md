@@ -1621,28 +1621,38 @@ moments, three objects, none waiting to be dismissed:
 So nothing holds the queue. Every reward plays over the next card, because
 a learner who has just rated one card is already looking for the next.
 
-**The one ceremony: the cleared day (終着, plan 191).** The owner's ruling
-on the canvas "Tsuji — the day cleared" (2026-10-07): clearing the day's
-queue is the app's biggest win — the learner showed up and finished — and
-it is the one moment that is a ceremony, played after the last card, when
-nothing is waiting. The run's cards go through the gate's reader one by
-one into their piles (À revoir · Justes · Parfaites, the verdicts' inks;
-two piles when the learner's bar has no Perfect), the day's 駅スタンプ is
-slammed onto the place the reader left and flies into the week of stamps,
-and the fare — the run's XP and the streak's prime (25 + 5 a day, up to 60
-days) — counts into a gold total that keeps a slow shimmer while it rests.
-A streak milestone takes the stamp's hand: 3, 7 and 14 days a paper 硬券
-fed by the ticket machine and clipped by the 改札鋏, 30 days and on a
-night of 花火 over the station and a gold ticket — with the milestone's
-jackpot. The rest state *is* the review: the piles open their cards,
-tomorrow is one dashed line. A tap, a click or Enter skips to it at any
-moment; under reduced motion it is drawn at once, fades only. A run that
-ends with cards still due is a 途中下車, not a finish: no stamp, the
-teaser of what clearing would pay, Continue as the one action. The
-stamps are the People family (stamp ink); gold stays the XP's and the
-gate's, and the 30-day ticket's foil and the fireworks are the pass's
-metal caught in the sky. Components in `components/dayclear/`, CSS in the
-`191:*` regions of `index.css`.
+**The one ceremony: the cleared day (終着, plans 191, 250).** The owner's
+ruling on the canvas "Tsuji — the day cleared" (2026-10-07): clearing the
+day's queue is the app's biggest win — the learner showed up and finished —
+and it is the one moment that is a ceremony, played after the last card,
+when nothing is waiting. Since plan 250 (the owner's picks of "Tsuji — the
+day cleared, new directions", 2026-10-18) it plays **on Today's print
+itself and ends as Today**: the run comes back to the gate (`/today/clear`
+is the same screen), the phone's bars step away in their places while it
+plays and are drawn back in at its chrome beat, so nothing on the print
+moves, and every part stands in the print's units. Every day the day's
+駅スタンプ is slammed onto the sun or the moon, the dial's ring turning in
+round it; under it what the day was, the fare and the streak's prime
+(25 + 5 a day, up to 60 days), the week's stamp pressed; the board over
+the shut gate takes the run's wrong pile (À revoir, a door to its cards).
+A streak's ticket (3, 7 and 14 days) sends a crane a day of the streak
+across the sky and comes to the board as a punched 硬券 with its jackpot;
+a month (30 days and on) lets night fall, on the print and in the lake's
+ambiance alike, sets a lantern a day on the lake (灯籠流し) and raises
+the gold ticket out of their light under the moon, clipped by the 改札鋏. The fare is said once, whole, on the pass at
+its beat (`stores/fare.js`). A tap, a click or Enter skips to the rest at
+any moment, silently; under reduced motion it is drawn at once, fades
+only. A run that ends with cards still due is a 途中下車, not a finish:
+no stamp, the dial's thin ring the day's thread with a stop where the run
+left it, what clearing would pay under it, Continue as the one action.
+The stamps are the People family (stamp ink); gold stays the XP's and the
+gate's, the gold ticket's foil is the pass's metal, and the cranes and the
+lanterns are drawn things with their own colours, as the print's are.
+The beats are `components/dayclear/useFinish.js`'s, the parts
+`FinishSky.jsx` and `FinishBoard.jsx` beside it, placed by
+`components/station/GateCard.jsx`; the CSS is the `250:finish` region of
+`index.css`, over the kit's `191:primitives`, and `/dev/dayclear` plays
+every finish with no backend.
 
 ## Structure
 
@@ -1931,7 +1941,10 @@ line here says otherwise.
   bare list opens on the learner's own stop, and another stop swaps the
   page by *replacing* the URL, so Back is never a walk through every stop
   looked at. A mock exam's grade is in its URL. A route that boards
-  directly (a sentence station's levels) is drawn across as a line. The
+  directly (a sentence station's levels) is drawn across as a line, and
+  so, since plan 251, is a line's own station, its stops over the open
+  stop's exercises (below, "A line's station is the line over its
+  cars"). The
   second screens fold the same way (plan 115): a grammar level's points
   beside the open point's lesson (←/→ walk them), a theme's bands and the
   frequency tiers beside the open one's platforms, figured from the stats
@@ -1970,30 +1983,46 @@ line here says otherwise.
   radical swaps the page in place; the family's door no longer takes the
   lesson's place but swaps the index for the family, in the list, and
   back. The bare index opens on its page's biggest family.
-- **A line's station takes the window** (plan 137, the owner's pick A of
-  the station screens canvas). A kana set or a JLPT level of vocab, kanji
-  or grammar stood a third of the way down the window, its stops
-  wrapping their names and its platforms 850px wide with nothing between
-  the description and the figures. Both columns now fill the window,
-  the rows sharing it the way the gates' plates do, never below their
-  content. A **stop** is its code and name on one line, the first things
-  it teaches under them (a few kana, the level's commonest words, its
-  first grammar points), the Learn plate's bar of its make-up, then
-  "you are here" and its figure. A **platform** carries, in a well
-  between its description and its figures, **the card it will ask** —
-  何 → quoi on Word → meaning, quoi → 何 on Meaning → word, the sentence
-  and its gap among the rivals on Which one fits — drawn from the open
-  stop's own card, so N1's platforms show an N1 word. The well is the
-  paper the run's card lies on, seen through the platform; it is
-  decorative for a screen reader, the description saying the same. The
-  wells need a platform row a third of which is at least a side column,
-  so they are drawn only where the page is 720px or wider — measured,
-  not set at a window width — and a laptop keeps its descriptions whole
-  instead. The figures add what is in progress when nothing is due (the
-  bar's red sliver, named). The **fast review**, which rates nothing,
-  and the grammar level's **points**, which open rather than board, are
-  doors at the page's foot, one row. The bar names no level: the open
-  stop does.
+- **A line's station is the line over its cars** (plan 251, the owner's
+  pick C of the canvas "Tsuji — the learning modes on the desk"). A kana
+  set or a JLPT level of vocab, kanji or grammar takes the window. The
+  **line** runs across its top in one panel, as a line map hangs over a
+  platform: one rail through every stop's marker, each stop a column
+  under it, its code and name on one line (cut short, never wrapped,
+  where the page is narrow) and its figure; the open stop lit as a
+  selection is (the switch's wash and gold edge), the stops behind the
+  learner filled and their own marker in the lead rung, said in words to
+  a screen reader. Every stop is a link that replaces the page, the line
+  one tab stop walked with ←/→. Under it the stop's exercises stand as
+  the **cars** of its train, two to four to a row by the page's measured
+  width, the first (the line's main exercise: the ladder, a word to its
+  meaning) spanning what the last row would leave empty, so the train
+  has no gap; the rows share the window's height and never go under
+  five `--sp-9`, so a short or narrow window scrolls rather than crush a
+  car. A car's **face** is **the card it asks, drawn as its run draws
+  it**, from the open stop's own card, so N1's cars show an N1 word: a
+  flashcard over its fold (何 → quoi on Word → meaning), the field with
+  what is typed and its caret, the readings' two fields, the writing
+  slab with the character ghosted, the sentence with its rule marked,
+  the gap among its rivals (with the ladder's walk on the ladder),
+  Construire's holes filled under its translation, Écrire's situation
+  with the point and the words it offers. The faces are what tell the
+  cars apart at a glance, so they take the room: the well (the paper the
+  run's card lies on, seen through the car) is sized by the car, the face
+  on the largest rung it allows — the study card's own specimen rungs in
+  a well that holds them — and a rung down while it overflows, its
+  extras (the walk, the words) going last. It is decorative for a screen
+  reader, the name and description under it saying the same. Under the
+  face, the name, two lines of description (none on the short desk) and
+  the **record**: what is due in the state's ink or what is under way,
+  then learned / total, or before any card is met how many there are,
+  over the composition bar. The **fast review**, which rates nothing, and
+  the grammar level's **points**, which open rather than board, are
+  doors at the page's foot, half the row each. The bar names no level:
+  the open stop does. (Plan 137 had stood the stops upright beside the
+  platforms, each platform a row holding its card small in a well; the
+  basics' units and the practice stations keep that split, each stop a
+  grid of its name, its first things, its bar and its figure.)
 - **Vocabulary's sources open on what you started** (plan 183, the
   owner's pick C of the canvas "Tsuji — the vocabulary's sources"; plan
   137 had hung the three sources as equal plates, and on a real window

@@ -46,11 +46,20 @@ import AMBIANCE from './ambiance.json'
 //     it is decoded at (nothing in it is above 12 kHz; at 48 kHz it
 //     would be twice that), so only the hour playing is kept, never
 //     in the shared buffer cache.
+//
+//  6. **A print turned to another hour is heard at it** (plan 250b).
+//     The month's finish brings the night down on Today's print
+//     whatever the clock says (B3·b); while it stands the lake is the
+//     night's (holdAmbianceHour), crossfaded in and, when the hold is
+//     let go, back to the clock's hour. One hold at a time.
 
 const FADE_IN   = 1.2
 const FADE_OUT  = 0.7
 const HIDE_FADE = 0.25
 const HOUR_FADE = 6
+// The night falling on the print in about a second and a half: the
+// lakes cross over as long.
+const TURN_FADE = 1.6
 const CLOCK_MS  = 30_000
 const DECODE_RATE = 24000
 
@@ -68,6 +77,7 @@ let clock = null
 let hidden = false
 let cancelDeferred = null // unsubscribe for a start waiting on a gesture
 let held = null           // { url, promise }: the one decoded hour kept
+let heldHour = null       // { hour }: the hour a print holds over the clock's
 
 export const ambianceUrl = hour => `/sounds/ambiant/${AMBIANCE.rev}/${hour}.mp3`
 
@@ -99,6 +109,11 @@ function load(hour) {
   return promise
 }
 
+// The hour the lake is at: a print's held one, else the clock's.
+function hourNow() {
+  return heldHour?.hour ?? printHour(new Date())
+}
+
 function play(hour, fadeIn) {
   loading = hour
   load(hour).then(buffer => {
@@ -110,7 +125,8 @@ function play(hour, fadeIn) {
     const handle = playBuffer(buffer, 'ambiance', 'lake', {
       loop: true, loopStart: pad, loopEnd: pad + loop, offset: pad + Math.random() * loop, fadeIn,
     })
-    if (outgoing) fadeOutAndStop(outgoing.handle, fadeIn === HOUR_FADE ? HOUR_FADE : FADE_OUT)
+    // A turn (the hour's, a print's) crosses over; a start replaces.
+    if (outgoing) fadeOutAndStop(outgoing.handle, fadeIn === FADE_IN ? FADE_OUT : fadeIn)
     if (!handle) { current = null; return }
     current = { hour, handle }
     // Started while the tab was in the background (a route change in
@@ -121,8 +137,16 @@ function play(hour, fadeIn) {
 
 function tick() {
   if (hidden || !wanted || loading || !current) return
-  const hour = printHour(new Date())
+  const hour = hourNow()
   if (hour !== current.hour) play(hour, HOUR_FADE)
+}
+
+// The hour asked for changed under a lake playing (or on its way).
+function retune(fade) {
+  if (!wanted || (!current && !loading)) return
+  const hour = hourNow()
+  if ((loading ?? current?.hour) === hour) return
+  play(hour, fade)
 }
 
 function reallyStop(fade = FADE_OUT) {
@@ -161,8 +185,22 @@ export function startAmbiance() {
     return
   }
 
-  play(printHour(new Date()), FADE_IN)
+  play(hourNow(), FADE_IN)
   if (!clock) clock = setInterval(tick, CLOCK_MS)
+}
+
+/** Hold the lake at `hour` over the clock's while a screen's print is
+ *  turned to it (the month's night, plan 250b); the returned release
+ *  gives the clock its hour back. Both cross over. */
+export function holdAmbianceHour(hour) {
+  const hold = { hour }
+  heldHour = hold
+  retune(TURN_FADE)
+  return () => {
+    if (heldHour !== hold) return
+    heldHour = null
+    retune(TURN_FADE)
+  }
 }
 
 export function stopAmbiance() {

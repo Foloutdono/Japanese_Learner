@@ -20,6 +20,7 @@ import { useProfileSummary } from '../stores/profileSummary'
 import { startTally, countReview } from '../stores/runTally'
 import { useDesk } from '../hooks/useDesk'
 import { useBackGuard } from '../hooks/useBackGuard'
+import { markCardsRidden } from '../lib/rideProgress'
 import { EnterKey } from '../components/chrome/DeskKeys'
 import { SessionPanel } from '../components/study/SessionPanel'
 import { CardPanel } from '../components/study/CardPanel'
@@ -78,8 +79,10 @@ import { LookupWatchContext } from '../components/study/lookupWatch'
 // way out is `onDone` alone -- the workbench has no /today to land on.
 
 // Where a finished card ride goes: the reading ride (plan 099), whose
-// last plate carries the lesson's stamp. Only a SKIP stamps from here,
-// because a skip is the whole lesson declined.
+// grade carries the lesson's stamp. Only a SKIP stamps from here,
+// because a skip is the whole lesson declined. The cards done leave a
+// note on the device (lib/rideProgress.js), so a ride left before the
+// reading's stamp is boarded again at the reading, not the first card.
 export const RIDE_NEXT = '/ride/reading'
 
 // The steps, as ride_step names them: known, known-back, unknown,
@@ -188,6 +191,10 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
       return
     }
     track('ride_done', { skipped: true, at: 'cards', ms: watches.current?.total.read() ?? 0 })
+    // App's copy of the stamp at once, not when the POST answers: a Back
+    // that Chrome took past the guard to the front door lands there in
+    // the same pop, and the door must already send to the gate.
+    onDone?.()
     const stamped = dryRun
       ? Promise.resolve()
       : apiJson('/api/onboarding/ride/done', session, {
@@ -197,7 +204,6 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
     // the ride shows again next launch, which costs a learner one more
     // Skip and nothing else.
     stamped.then(() => {
-      onDone?.()
       if (!dryRun) release().then(() => navigate('/today', { replace: true }))
     })
   }
@@ -248,6 +254,12 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
     if (lookedOnKnown && !desk) mark('known-dict', 'known-back')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lookedOnKnown])
+
+  // Both cards answered: the half of the lesson the front door need not
+  // board again.
+  useEffect(() => {
+    if (step === 'done' && !dryRun) markCardsRidden(session?.user?.id)
+  }, [step, dryRun, session])
 
   const panels = desk && Boolean(cards?.length) && step !== 'done'
 

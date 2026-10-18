@@ -45,11 +45,20 @@ import { JourneyCard } from './JourneyCard'
 // under it, and the two moves beneath the card. The desk keeps the
 // body, the same one its Today panel stands.
 
+// Mounted for the whole session (App.jsx), so the closed sheet reads
+// nothing: asking for the status and the volumes at every boot put them
+// in the learner's six-at-a-time queue (core/concurrency.py) ahead of
+// the screen's own requests -- the first ride's cards among them
+// (2026-10-18). The HUD that opens it reads the status already.
 export function StatusSheet({ session }) {
-  const { t } = useLang()
   // 0 while the sheet is closed; the moment it opened otherwise.
   const nowMs = useStatusOpenedAt()
-  const open = nowMs > 0
+  if (!(nowMs > 0)) return null
+  return <OpenStatus session={session} nowMs={nowMs} />
+}
+
+function OpenStatus({ session, nowMs }) {
+  const { t } = useLang()
   const { data: status } = useJourneyStatus()
   const { data: volumes } = useVolumes()
   const summary = useProfileSummary()
@@ -61,7 +70,6 @@ export function StatusSheet({ session }) {
     [status, nowMs],
   )
 
-  if (!open) return null
   if (!model || model.status == null) return null
 
   return (

@@ -108,19 +108,6 @@ export function romajiEquals(a, b) {
   return na.length > 0 && na === normalizeRomaji(b)
 }
 
-/**
- * True when `answer` matches any of the accepted spellings — the deck
- * packs alternates into one field with "/" separators in places, and
- * `readings` will need the same any-of behaviour per group.
- */
-export function romajiMatchesAny(answer, accepted) {
-  const list = Array.isArray(accepted) ? accepted : String(accepted ?? '').split(/[/;,]/)
-  return list.some(one => romajiEquals(answer, one))
-}
-
-// Exported for the unit test, which is the only reason to see inside.
-export const _internals = { FOLD, LONG }
-
 // ── Kana, in the other script and in romaji ───────────────────
 // A kanji's readings are stored in kana -- the on'yomi in katakana, the
 // kun'yomi in hiragana -- and the readings drill takes them "in kana or

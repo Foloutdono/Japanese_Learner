@@ -162,6 +162,35 @@ def test_an_explanation_bought_before_the_context_is_still_found_on_reopening(cl
     assert reopened["sentences"][1]["explanation"] == "Bought before."
 
 
+def test_a_reopened_passage_reads_the_cache_once(client, monkeypatch):
+    # One query for every sentence, not a connection each: a reopened
+    # chapter is up to MAX_SENTENCES of them, each with two keys.
+    tag = uuid.uuid4().hex[:6]
+    saved = _analyze(client, f"{tag}は猫です。{tag}は犬です。{tag}は鳥です。", lines=True)
+    phrase._store_analysis(f"{tag}は犬です。", "fr", {"words": [], "explanation": "Un chien."})
+
+    def one_by_one(*args, **kwargs):
+        raise AssertionError("a Passage's sentences are read in one query")
+
+    reads: list = []
+    batch = phrase._cached_analyses
+    monkeypatch.setattr(phrase, "_cached_analysis", one_by_one)
+    monkeypatch.setattr(phrase, "_cached_analyses", lambda keys: reads.append(keys) or batch(keys))
+    reopened = client.get(f"/api/phrase/history/{saved['id']}?lang=fr").json()
+    assert len(reads) == 1
+    assert len(reads[0]) == 6, "each sentence's key where it stands, and alone"
+    assert reopened["sentences"][1]["explanation"] == "Un chien."
+
+
+def test_a_sentence_twice_in_a_passage_is_bought_once(client, monkeypatch):
+    sentence = f"{uuid.uuid4().hex[:6]}は猫です。"
+    seen: list = []
+    _fake_explainer(monkeypatch, seen)
+    body = _analyze(client, sentence + sentence, deep=True, save=False)
+    assert [s["explanation"] for s in body["sentences"]] == ["Une raison.", "Une raison."]
+    assert len(seen) == 1
+
+
 def test_explain_s_index_is_the_reopened_passage_s(client):
     saved = _analyze(client, "猫が好き。犬も好き。", lines=True)
     assert client.post(f"/api/phrase/history/{saved['id']}/sentence/2/explain",

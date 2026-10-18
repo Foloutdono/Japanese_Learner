@@ -190,6 +190,34 @@ describe('Settings › Correspondance', () => {
     expect($('[data-action="transfer-choose"]')).not.toBeNull()
   })
 
+  it('never punches the decks the chips no longer show', async () => {
+    await mount()
+    pick(await ankiFile())
+    await vi.waitFor(() => expect($$('[data-deck]')).toHaveLength(2), { timeout: 5000 })
+
+    // A deck taken out while its new preview is still on its way: the
+    // old ticket (both decks) is printed, but cannot be punched.
+    let release
+    const held = new Promise(r => { release = r })
+    apiJson.mockImplementation(async (path, _s, opts = {}) => {
+      if (path === '/api/transfer/preview') { await held; return PREVIEW }
+      if (path === '/api/transfer/import') return { ...PREVIEW, written: 2, waiting: 2 }
+      if (opts.method !== 'DELETE') return { waiting: 0 }
+      throw new Error(path)
+    })
+    await userEvent.click($('[data-deck="2"]'))
+    await settle()
+    expect($('[data-action="transfer-punch"]').disabled).toBe(true)
+
+    release()
+    await vi.waitFor(() => expect($('[data-action="transfer-punch"]').disabled).toBe(false))
+    await userEvent.click($('[data-action="transfer-punch"]'))
+    await settle()
+    const [path, , opts] = apiJson.mock.calls.at(-1)
+    expect(path).toBe('/api/transfer/import')
+    expect(JSON.parse(opts.body).notes.map(n => n.f[0])).toEqual(['食べる', '蜃気楼'])
+  })
+
   it('drops a read the learner left for another source', async () => {
     let release
     const held = new Promise(r => { release = r })

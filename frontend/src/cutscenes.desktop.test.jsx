@@ -45,7 +45,7 @@ describe('the ticket gate under the desk\'s rail', () => {
     // box reaches (TicketGate paints it in the light through the hold).
     expect(box.right).toBeGreaterThan(window.innerWidth - rail())
     // Its two cabinets stand on the window's own edges, the rail's
-    // strip included (plan 249).
+    // strip included (plan 253).
     expect(document.querySelector('.gate__cab--l').getBoundingClientRect().left).toBeLessThanOrEqual(0)
     expect(document.querySelector('.gate__cab--r').getBoundingClientRect().right).toBeGreaterThanOrEqual(box.right)
   })

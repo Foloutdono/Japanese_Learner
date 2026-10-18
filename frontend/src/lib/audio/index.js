@@ -35,7 +35,7 @@ export {
   playGateChime, playDoorChime, playDoorSlide, playPantograph, playSpark, playFareTick, FARE_BEAT, playPassClip, playLevelCharge, playLevelBurst, playStamp,
   playArrival, playPlatformChime, playBoardFlap, playDayClear, playMilestone,
 } from './chimes'
-export { startAmbiance, stopAmbiance } from './ambiance'
+export { startAmbiance, stopAmbiance, holdAmbianceHour } from './ambiance'
 export { speakJapanese, speakSentence, speakLine, stopSpeaking, voicedUrl } from './speech'
 // The palette itself is not part of the app's own surface — nothing
 // but the /dev/sounds screen picks a voice, and it imports voices.js

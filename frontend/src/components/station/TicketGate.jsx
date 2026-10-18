@@ -27,7 +27,7 @@ import { spendKey } from '../../lib/keyGuards'
 // of times a session: 980ms end to end, skippable by any input, and
 // skipped outright under prefers-reduced-motion.
 //
-// Drawn as a game asset since plan 249 (the owner's pick B of three
+// Drawn as a game asset since plan 253 (the owner's pick B of three
 // drawn on the canvas "Tsuji — the ticket gate, redrawn", and "improve
 // it one more time"): flat fills, one ink outline, no blurred shadow.
 // The gate stands up close, its two cabinets the screen's two halves

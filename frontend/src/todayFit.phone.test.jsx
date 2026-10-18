@@ -44,7 +44,7 @@ vi.mock('./stores/today', () => ({
     pace: { target: 20, newToday: 0 },
     basics: { id: 'u2', unit: 2, of: 14, title: { fr: 'Ceci et cela', en: 'This and that' } },
   }, failed: false }),
-  refreshToday: vi.fn(), seedTodaySummary: vi.fn(),
+  refreshToday: vi.fn(), refetchToday: vi.fn(() => Promise.resolve()), seedTodaySummary: vi.fn(),
 }))
 // Fewer credits than cards, so the shortfall is the dial's legend.
 vi.mock('./stores/credits', async o => ({ ...(await o()),
