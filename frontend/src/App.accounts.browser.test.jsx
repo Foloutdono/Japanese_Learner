@@ -151,23 +151,12 @@ describe('the boarding reached on a stale address', () => {
     await settle(300)
     expect(screen.container.querySelector('.brd')).not.toBeNull()
 
-    // The eight questions, then the three arrival screens.
-    await click(screen, '[data-action="continue"]')              // the name, already the profile's
-    await click(screen, '[data-motive="trip"]')
-    await click(screen, '[data-action="continue"]')              // why
-    await click(screen, '[data-kana="both"]')                    // → choose or test
-    await click(screen, '[data-how="pick"]')
-    await click(screen, '[data-action="continue"]')              // → the level list
+    // The two questions, then the card (plan 247), issued as it stands.
+    await click(screen, '[data-kana="both"]')                    // → the level list
     await click(screen, '[data-level="N5"]')
-    await click(screen, '[data-action="continue"]')              // the level
-    await click(screen, 'button[data-goal]')                     // the first stop ahead
-    await click(screen, '[data-action="continue"]')              // the goal
-    await click(screen, '[data-action="continue"]')              // the lines, all on by default
-    await click(screen, '[data-action="continue"]')              // the rhythm
-    await click(screen, '[data-action="continue"]')              // the hour, on to the plan
+    await click(screen, '[data-action="continue"]')              // → the card, filled in
     await settle(120)
-    await click(screen, '[data-action="continue"]')              // the plan
-    await click(screen, '[data-action="enter"]')                 // the pass
+    await click(screen, '[data-action="issue"]')                 // the card, issued
     await settle(400)
 
     expect(screen.container.querySelector('.brd')).toBeNull()

@@ -6,7 +6,7 @@ import { useOnline } from '../../hooks/useOnline'
 import { journeyModel } from '../../domain/goalMath'
 import { linesOrAll } from '../../domain/boarding'
 import { CAP, nextCreditClock } from '../../domain/credits'
-import { cardTier, xpClimb, driftWords, sinceMonth } from '../../domain/passCard'
+import { cardTier, holderName, xpClimb, driftWords, sinceMonth } from '../../domain/passCard'
 import { statusOf } from '../chrome/hudStatus'
 import { dateFormat, hourLabel, paceLabel, stopParts } from '../settings/contract'
 
@@ -54,7 +54,7 @@ export function usePassData(profile = null) {
 
   return {
     tier,
-    face: { tier, name: s?.username ?? '', level: s?.level ?? 1, share: climb.share },
+    face: { tier, name: holderName(s), level: s?.level ?? 1, share: climb.share },
     back: {
       from: stopParts(t, s?.jlptLevel ?? null),
       to: stopParts(t, goal),
@@ -72,7 +72,7 @@ export function usePassData(profile = null) {
       unit: balance == null ? '' : `/ ${cap} ${t.creditsUnit}`,
       note,
       status,
-      name: s?.username ?? '',
+      name: holderName(s),
       since: sinceMonth(s?.onboardedAt, lang),
     },
     credits,
