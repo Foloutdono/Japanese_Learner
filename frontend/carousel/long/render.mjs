@@ -21,6 +21,8 @@
 //   --hour night      ... the print's hour: dawn, day, dusk or night
 //   --music FILE      ... a track of your own under it (any audio ffmpeg reads), looped if
 //                     short; `none` for none; the studio's own (Cool Vibes) when left out
+//   --music none      a long video or its short with no bed of music: its voices
+//                     and the app's sounds alone, and no music in its credits
 //   --unvoiced        ... a read-along made even when the voice engine fails (silent lines)
 //   --tune k=v,k=v    the studio's Tune panel (plan 248, tune.js): its "Copy the
 //                     command" writes the values changed, so the render is the preview
@@ -190,8 +192,8 @@ if (args.challenge) {
   log(`${pageText.title}: ${made.keys.length} slides, ${tl.seconds.toFixed(1)} s${made.spoken ? `, says ${made.spoken}` : ''}`)
 } else {
   // ── A long video, or its short: the plan, its lines voiced, the timeline ──
-  let plan = longPlan(kind, banks, { ...opts, tune })
-  slug = [...(opts.format === 'short' ? ['short'] : []), kind, opts.theme || opts.level, kind === 'grammar' ? plan.point : opts.ids ? 'pick' : `part${opts.part}`, lang, ...(opts.format === 'short' && opts.fit !== 'tiktok' ? [opts.fit] : [])].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
+  let plan = longPlan(kind, banks, { ...opts, tune, music: args.music !== 'none' })
+  slug = [...(opts.format === 'short' ? ['short'] : []), kind, opts.theme || opts.level, kind === 'grammar' ? plan.point : opts.ids ? 'pick' : `part${opts.part}`, lang, ...(opts.format === 'short' && opts.fit !== 'tiktok' ? [opts.fit] : []), ...(args.music === 'none' ? ['nomusic'] : [])].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
   log(`${plan.title}: ${plan.items.length} items`)
   const dur = voiceAll(timeline(plan).cues)
   // A short holds under its minute on the lines as they are said.
@@ -248,8 +250,8 @@ if (tl.bed?.src) {
   const conv = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', src, '-ar', '48000', '-ac', '2', bedWav])
   if (conv.status === 0) bedArgs.push('--bed', bedWav, '--bed-gain', String(tl.bed.gain ?? 1), '--bed-fade', String(tl.bed.fade ?? 2.5))
   else throw new Error(`the track ${src} could not be read`)
-} else if (tl.bed === null) {
-  // A challenge with no track: its sounds and its voice alone, no music made up.
+} else if (tl.bed === null || (!args.challenge && args.music === 'none')) {
+  // A challenge with no track, or a video asked for none: its sounds and its voice alone, no music made up.
   bedArgs.push('--no-bed')
 }
 const mixed = spawnSync(python, ['-m', 'scripts.long_video_audio', 'mix', join(WORK, 'timeline.json'), '--cache', CACHE, '--sfx', join(WORK, 'sfx'), '--out', join(WORK, 'mix.wav'), ...bedArgs], { cwd: BACKEND, stdio: 'inherit' })

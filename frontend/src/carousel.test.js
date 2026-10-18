@@ -2123,6 +2123,16 @@ describe('the reply videos (plan 249)', () => {
     } finally { globalThis.Path2D = had }
   }, 120000)
 
+  it('credits no music where the video is asked for none', () => {
+    for (const format of ['long', 'short']) {
+      const { kind, opts } = longPick('reply:1', 'N5', 'en', format)
+      const withBed = longPlan(kind, files, opts)
+      const without = longPlan(kind, files, { ...opts, music: false })
+      expect(describeVideo(withBed, timeline(withBed), LONG_SITE).description, format).toContain('Music: made for Tsuji.')
+      expect(describeVideo(without, timeline(without), LONG_SITE).description, format).not.toContain('Music')
+    }
+  })
+
   it('holds a short under three minutes, its scene whole', () => {
     for (const lv of LEVELS) {
       for (const it of parts(lv, 'short')) {

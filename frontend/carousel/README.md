@@ -748,6 +748,10 @@ the screen.
   Speaker A is the app's woman's voice and B its man's, as the 会話
   station and the tours set them.
 
+**No music.** `--music none` makes a long video or its short with no bed
+of music, its voices and the app's sounds alone, and drops the music from
+its credits; the file is named `…-nomusic`.
+
 **Pick per video.** A level's `--part` walks the deck in its order (a
 quiz's part is a seeded deal), and two parts never share an item;
 `--theme`, `--point` or `--ids` pick exactly.
