@@ -36,6 +36,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 from core.auth import get_user_id
 from core.db import db_conn
+from core.rls import enable_rls
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -82,6 +83,7 @@ def _ensure_schema() -> None:
                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
+            enable_rls(cur, "agenda_blocks")
             cur.execute(
                 "CREATE INDEX IF NOT EXISTS agenda_blocks_user ON agenda_blocks (user_id)"
             )

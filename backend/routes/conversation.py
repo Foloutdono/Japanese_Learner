@@ -50,6 +50,7 @@ from core import daily_limit
 from core.auth import get_user_id
 from core.credits import require_pass, resets_at
 from core.db import db_conn
+from core.rls import enable_rls
 from core.srs_instance import srs
 from study import conversation, tutor_review
 from study.llm_shared import llm_configured
@@ -103,6 +104,7 @@ def _init_db() -> None:
                 )
                 """
             )
+            enable_rls(cur, "conversation_log")
             cur.execute(
                 """
                 CREATE INDEX IF NOT EXISTS idx_conversation_log_user

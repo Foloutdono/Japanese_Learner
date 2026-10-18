@@ -1321,6 +1321,26 @@ Today's column's width (`components/practice/gate/DeskGate`):
   the scene moves on until the clock stands whole, with the sign there it
   is drawn a little larger, the roof giving way, until the clock stands
   wholly under the board.
+- **Its sky lives** (plan 244b, `DeskSky`): a painting is still, a
+  platform is not. Behind the sky's own mask -- the canopy, the wires,
+  the pillars and the land stay in front -- the clouds drift slowly
+  either way from where the painting has them, the brightest stars catch
+  the light, the sun's or the moon's glow breathes, and now and then the
+  hour's birds cross, jointed as Today's print draws them (cranes at
+  dawn, swallows by day, each on its own swooping way, the geese of 落雁 at dusk; none at night). Each
+  is slow enough to be noticed only by a learner who stays, and every
+  loop but the clouds' is a Web Animation. Under reduced motion the sky
+  is the painting's.
+- **The open door shows the car's inside as the owner painted it**
+  (plan 244c, `source/interior.webp`), its far window full of the car's own painted trees: shown narrower than painted,
+  never squeezed (plain columns let out between its rings, posters and
+  stanchions), and lit at each hour as the car is lit.
+- **Every window is the painting's** (owner-directed): the trees it
+  shows through the car, in each window and the doorway's far one, at
+  every hour, their colours kept and only the light changed, with what
+  the hour puts on the glass -- its sky fading down the pane, a soft
+  sheen, after dark the lit car's warmth and its tubes along each pane's
+  top. Never a view built for the window.
 
 ## Space
 

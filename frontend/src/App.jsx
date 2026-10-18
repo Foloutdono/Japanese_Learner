@@ -800,20 +800,24 @@ export default function App({ front = NO_FRONT }) {
                 boarding, on the stage like any run. Reachable at any
                 time (Settings replays it); the index route below is
                 what sends a new learner here first. `covered` is the
-                改札 cutscene still playing over the router. */}
+                改札 cutscene still playing over the router. `first` is
+                the ride that index route sends to, never a replay: the
+                entry behind it is that route, which would board the
+                ride again, so each screen holds Back
+                (hooks/useBackGuard.js). */}
             <Route path="/ride" element={<Navigate to="/ride/cards" replace />} />
             {/* 入門 (plan 170): six screens before the cards, for the
                 learner with no kana; its way on and its way out both
                 board the cards. */}
             <Route
               path="/ride/intro"
-              element={<RideIntro session={session} covered={onboarding === 'finishing'} />}
+              element={<RideIntro session={session} covered={onboarding === 'finishing'} first={rideDue} />}
             />
             <Route
               path="/ride/cards"
-              element={<RideRun session={session} onDone={rideDone} covered={onboarding === 'finishing'} />}
+              element={<RideRun session={session} onDone={rideDone} covered={onboarding === 'finishing'} first={rideDue} />}
             />
-            <Route path="/ride/reading" element={<RideReading session={session} onDone={rideDone} />} />
+            <Route path="/ride/reading" element={<RideReading session={session} onDone={rideDone} first={rideDue} />} />
           </Route>
 
           {/* The gate hall retired with the chrome; the front door is

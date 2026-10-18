@@ -75,22 +75,30 @@ where each hour puts its sun or moon in this sky).
 
 ```bash
 cd frontend && python3 scripts/practice-gate/desk.py
-# same needs as build.py; about a minute, deterministic
+# same needs as build.py; a few minutes, deterministic
 ```
 
 It writes:
 
+It reads `source/desk.webp` (the platform) and `source/interior.webp`
+(the car's inside, through the open door).
+
 - `public/practice/gate/desk/<REV>/`: at each hour, `bg` (the scene, the
-  roof's gear and what the app draws painted out), `car` (the standing
+  roof's gear and what the app draws painted out, its sky without its
+  clouds), `clouds` (the clouds lifted off it, `clouds.py`'s, carried
+  past the scene's two sides as far as they drift), `car` (the standing
   car, its door open), `car2` (the same car, door shut: the cars before
   and after it), `near` (the pillars, the pillar's sign, the bench) and
   the shut door's two leaves, `leaf-l` and `leaf-r`, as WebP; and
   `band-car.png`, `band-car2.png`, `band-leaf-l.png`, `band-leaf-r.png`,
-  the stripe's masks;
+  the stripe's masks, and `sky.png`, the sky's own mask, behind which
+  the app moves what lives in it;
 - `src/components/practice/gate/desk.json`: the revision, the scene's
   size (2127 × 940 units, one px each) and where the car, the door, the
-  clock, the sign and the pillars stand in it, and the frame's fill at
-  each hour.
+  clock, the sign and the pillars stand in it, the frame's fill at
+  each hour, and the sky's (plan 244b): its rows and how far its clouds
+  drift, the brightest stars each hour drew (the app's glints) and its
+  sun's or moon's glow.
 
 The rules are the phone's: bump `REV` in `desk.py` whenever its output
 changes (the service worker keeps `/practice/gate/` cache-first, the
@@ -101,12 +109,18 @@ the app asks for, and the fit.
 
 | module | what it does |
 | --- | --- |
-| `desk_cut.py` | cuts the picture's name strip off; paints out the gate button and the clock's face (the app draws both); draws the platform under the board again from the painting's own bays and one bay more past the right edge, for a wide window: the canopy at the rafters' repeat; the sky quilted from the sky past Fuji, in strips at seeded offsets joined on their least-error cut (mirrored at the seam, it showed a house and a cloud twice, face to face); the floor carried at the pillars' own pitch, so each shadow and reflection falls from its pillar (mirrored, the shadows met in a V under every bay); the car carried along its doors and windows from the car with its pillar drawn out (carried with it, the pillar stood as a sliver beside the next); a pillar carried one bay on. Each car ends in a body panel and its part of a gangway, the left one's hidden behind the frame's pillar, so the cars of a passing train meet as cars do. Then it cuts the layers and the stripe's masks |
+| `desk_cut.py` | cuts the picture's name strip off; paints out the gate button and the clock's face (the app draws both); draws the platform under the board again from the painting's own bays and one bay more past the right edge, for a wide window: the canopy at the rafters' repeat; the sky quilted from the sky past Fuji, in strips at seeded offsets joined on their least-error cut (mirrored at the seam, it showed a house and a cloud twice, face to face); the floor carried at the pillars' own pitch, so each shadow and reflection falls from its pillar (mirrored, the shadows met in a V under every bay); the car carried along its doors and windows from the car with its pillar drawn out (carried with it, the pillar stood as a sliver beside the next); a pillar carried one bay on. Each car ends in a body panel and its part of a gangway, the left one's hidden behind the frame's pillar, so the cars of a passing train meet as cars do. In the open doorway it draws the car's inside from the owner's second picture, `source/interior.webp` (plan 244c): the picture's opening is wider than the car's door, so its columns are kept in runs (`KEEP`) that let out only plain wall, trees and bench between the rings, posters and stanchions, joined over a few px and brought to the doorway's size (`INSIDE`); `FAR`, `STANCHIONS` and `FLOOR_IN` are measured on the picture through the same map. Then it cuts the layers and the stripe's masks |
 | `desk_parts.py` | the scene's parts as masks, as `parts.py` does for the phone's (the sky and its clouds, Fuji's snow, the far hills, the forest, the canopy, what hangs from it and its lamps, the wires, the platform and its tactile strip, the sign less the sky round it; on the cars their roof, side, windows and their glass apart from the mullions and transom, the lit inside and its far window, the underframe; in front the pillars, the pillar's sign and the bench) |
-| `desk.py` | lights the parts at each hour and writes the app's files. After dark the windows show what the open doorway shows -- the strap rail and its rings, the cream wall, the far window -- tiled along each, the far glass mirroring the lit inside with the ceiling's tubes caught in it (the phone's recipe lit the trees seen through the car, and they glowed amber); the signs' panels dim, their letters keep their light, their steel frames are steel; the stars are the phone's at this painting's scale |
+| `desk_parts.py`, the land | the land is told from the sky by a matte (plan 244b), not a line: GrabCut seeded by what is surely sky (high up, over Fuji's traced outline) and surely land (the forest low down, Fuji under its outline), softened by a guided filter and read again, at the edge, as the share of the way from the sky's colour to the land's. Each hour lights the sky from the sky's colour and the land from the land's, and lays them together by it: cut by a line per column, a tree's top stood in steps and the sky's light it held stood round it as a rim, Fuji's slope wore a pale line, and the far hills, as pale as the sky, were taken for it and lit away (they are the land's now, and the hour's far colour). The town's windows are the forest's, never Fuji's slope. The roof's gear is traced (`desk_cut.PANTO`, `COOLER`): its dark steel is the forest's shade's, and the cooler let the forest through its vents |
+| `desk.py` | lights the parts at each hour and writes the app's files. After dark the windows show what the open doorway shows -- the strap rail and its rings, the cream wall, the far window -- tiled along each, the far glass mirroring the lit inside with the ceiling's tubes caught in it (the phone's recipe lit the trees seen through the car, and they glowed amber). Every window, the inside's far one too, keeps the trees the painting shows through the car, their colours kept and only the light changed (`windows_at`, `GRADE` in linear light), with what the hour puts on the glass: its sky fading down the pane, a soft sheen, after dark the lit car's warmth and its tubes along each pane's top (lit as the forest, the trees glowed amber; tiled from the doorway, every pane held a copy of its window; built as a view across the car, the windows were no longer the painting's); the sun the picture lays on the inside's floor goes with the sun (`inside_lit`); the signs' panels dim, their letters keep their light, their steel frames are steel; the stars are the phone's at this painting's scale. The pillars: the near layer's soft edge takes the pillar's lit colour on both sides (it kept the day's sky, a pale line by each pillar after dark), the scene under each pillar is the pillar, its round base included (`desk_cut.BASE`), and the sun's white rim on their right is lit as the lamps leave it (`Desk.pillar_knee`) |
 
 The app fits the scene to its frame in `deskFit.js` (the open door kept
 left of the board, the sign whole or gone, the clock never cut by the
 board's edge where the painting can help it) and draws the board, the
 leaves, the clock, the stripe's pigment and the gate button over it
-(`DeskGate.jsx`).
+(`DeskGate.jsx`), and lets its sky live behind `sky.png` (`DeskSky.jsx`,
+plan 244b): the clouds drift, the brightest stars catch the light, the
+sun's or the moon's glow breathes, and the hour's birds cross, jointed
+as Today's print draws them (`DeskBirds.jsx`, plan 244c: cranes at dawn,
+swallows by day, each on its own swooping way, the geese of 落雁 at dusk); under reduced motion, the
+painting's own sky.

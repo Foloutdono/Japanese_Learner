@@ -16,6 +16,7 @@ import { EnterKey } from '../../chrome/DeskKeys'
 import { Seg } from '../../chrome/Console'
 import { PracticeSpecimen } from '../PracticeSpecimen'
 import { ClockFace, Spill } from './GateParts'
+import { DeskFlicker, DeskSky } from './DeskSky'
 import DESK from './desk.json'
 import { fitDesk, SCENE } from './deskFit'
 
@@ -33,7 +34,10 @@ import { fitDesk, SCENE } from './deskFit'
 //                 standing at it with its door open, its stripe in the
 //                 chosen train's pigment (a colour blend over the
 //                 stripe's own mask, as on the phone); the station clock
-//                 drawn over the painted one (a tap shows the next hour)
+//                 drawn over the painted one (a tap shows the next hour);
+//                 its sky alive (DeskSky, plan 244b): the clouds
+//                 drifting, the stars catching the light, the sun's or
+//                 the moon's glow breathing, birds crossing by day
 //   the board     at the right, over the painting, as Today's column
 //                 stands beside its dial: the levels as a band at its
 //                 head (the learner's own marked), the seven trains with
@@ -277,6 +281,8 @@ export default function DeskGate({ platforms, here, pathFor, onStation }) {
         <div className="pdesk__stage" style={{ '--pd-u': placed.u, '--pd-x': placed.x, '--pd-y': placed.y }}>
           <div className="pdesk__scene">
             <Layers name="bg" hours={hours} hour={hour} />
+            <DeskSky hour={hour} hours={hours} still={still} />
+            <DeskFlicker key={hour} hour={hour} still={still} />
             <div className={`pdesk__train pdesk__train--${phase}`} aria-hidden="true">
               <i className="pdesk-car2" style={{ left: -SCENE.w }} />
               <i className="pdesk-band pdesk-band--b" style={{ left: -SCENE.w }} />

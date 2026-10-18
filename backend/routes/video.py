@@ -27,6 +27,7 @@ from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 
 from core.db import db_conn
+from core.rls import enable_rls
 from core.auth import get_user_id
 from core.history import HISTORY_LIMIT, trim_history
 from core.srs_instance import srs
@@ -150,6 +151,7 @@ def _ensure_video_schema() -> None:
                     created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
+            enable_rls(cur, "video_sessions")
             # Additive, for databases created before video_id existed.
             # A session's video is independent of where its captions came
             # from now: you can upload an .srt AND name a video to play
@@ -195,6 +197,7 @@ def _ensure_video_schema() -> None:
                     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
+            enable_rls(cur, "video_session_jobs")
         conn.commit()
     finally:
         conn.close()

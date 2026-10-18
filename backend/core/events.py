@@ -27,6 +27,7 @@ import re
 from datetime import datetime, timedelta, timezone
 
 from core.db import db_conn
+from core.rls import enable_rls
 
 logger = logging.getLogger(__name__)
 
@@ -497,6 +498,7 @@ def _ensure_events_schema() -> None:
                     at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
+            enable_rls(cur, "event_log")
             # (user_id, at) for one learner's trail in order; (name, at)
             # for the digest's per-name counts across everyone.
             # The client's own id per event (routes/events.py), so a
@@ -530,6 +532,7 @@ def _ensure_events_schema() -> None:
                     PRIMARY KEY (user_id, day, name)
                 )
             """)
+            enable_rls(cur, "event_daily")
         conn.commit()
     finally:
         conn.close()

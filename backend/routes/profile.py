@@ -16,6 +16,7 @@ from psycopg2 import errors as pg_errors
 from pydantic import BaseModel, field_validator
 
 from core.db import db_conn
+from core.rls import enable_rls
 from core.auth import get_user_id, prefixed
 from core.srs_instance import srs
 from core.user_level import LEVELS, note_stored_level
@@ -52,6 +53,7 @@ def _init_db() -> None:
                     rating_scale TEXT
                 )
             """)
+            enable_rls(cur, "user_profiles")
             # And the same columns again as ALTERs, because the table
             # already exists for every current user: CREATE TABLE IF
             # NOT EXISTS is a no-op on them, so onboarding's fields
@@ -192,6 +194,7 @@ def _init_db() -> None:
                     at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
+            enable_rls(cur, "credit_ledger")
             cur.execute("CREATE INDEX IF NOT EXISTS idx_credit_ledger_user ON credit_ledger(user_id)")
             # 止 — where the credits stopped a learner (plan 172): a
             # row a stop, `cards` the reviews it kept waiting. Shadow
@@ -207,6 +210,7 @@ def _init_db() -> None:
                     at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
+            enable_rls(cur, "credit_stops")
             cur.execute("CREATE INDEX IF NOT EXISTS idx_credit_stops_user ON credit_stops(user_id, at)")
         conn.commit()
     finally:
