@@ -799,8 +799,8 @@
       "fr": "Tu t'installes au comptoir d'un restaurant de ramen, avec une grosse envie de ramen au miso. Le serveur vient prendre ta commande."
     },
     "goal": {
-      "en": "Order a ramen when the one you wanted has run out: ask what is good, order it without green onions and find out where the water is.",
-      "fr": "Commande un ramen alors que celui que tu voulais n'est plus disponible : demande ce qui est bon, commande-le sans ciboule et trouve où est l'eau."
+      "en": "Order a ramen when the one you wanted has run out: ask what is good, order it without green onions and ask where the glasses are for the water.",
+      "fr": "Commande un ramen alors que celui que tu voulais n'est plus disponible : demande ce qui est bon, commande-le sans ciboule et demande où sont les verres pour l'eau."
     },
     "steps": [
       {"en": "Order a miso ramen", "fr": "Commande un ramen au miso"},
@@ -905,8 +905,8 @@
         "them": {
           "jp": "しおがおいしいですよ。",
           "kana": "しおがおいしいですよ。",
-          "en": "The shio, the salt ramen, is very good.",
-          "fr": "Le shio, le ramen au sel, est très bon."
+          "en": "The shio, the salt ramen, is good.",
+          "fr": "Le shio, le ramen au sel, est bon."
         },
         "me": {
           "jp": "じゃあ、しおをお願いします。",
@@ -2208,7 +2208,6 @@
             "fr": "「また来ます」, je reviendrai, permet de partir sur une note aimable, et 「来週」 correspond à l'arrivée du blanc."
           },
           "alt": [
-            {"jp": "じゃあ、また来ます。", "kana": "じゃあ、またきます。", "romaji": "jaa, mata kimasu"},
             {"jp": "そうですか。じゃあ、来週また来ます。", "kana": "そうですか。じゃあ、らいしゅうまたきます。", "romaji": "sou desu ka. jaa, raishuu mata kimasu"}
           ]
         },
@@ -2229,18 +2228,18 @@
             "en": "I see. Then I'll go there again next week.",
             "fr": "Je vois. Alors j'irai là-bas la semaine prochaine.",
             "why": {
-              "en": "Standing in the shop, coming back here is 「来ます」; 「行きます」 is going somewhere else.",
-              "fr": "Dans le magasin, revenir ici, c'est 「来ます」 ; 「行きます」, c'est aller ailleurs."
+              "en": "You are in the shop, so coming back here is 「来ます」; 「行きます」 is going to a place you are not at.",
+              "fr": "Tu es dans le magasin, donc revenir ici, c'est 「来ます」 ; 「行きます」, c'est aller là où tu n'es pas."
             }
           }
         ]
       }
     ],
     "close": {
-      "jp": "ありがとうございました。来週、待っていますね。",
-      "kana": "ありがとうございました。らいしゅう、まっていますね。",
-      "en": "Thank you very much. We'll see you next week, then.",
-      "fr": "Merci beaucoup. À la semaine prochaine, alors."
+      "jp": "ありがとうございました。またどうぞ。",
+      "kana": "ありがとうございました。またどうぞ。",
+      "en": "Thank you very much. Do come again.",
+      "fr": "Merci beaucoup. Revenez quand vous voulez !"
     }
   },
   {
@@ -3881,10 +3880,10 @@
       },
       {
         "them": {
-          "jp": "ひまわりですか。すみません、知りませんね。どこにありますか。",
-          "kana": "ひまわりですか。すみません、しりませんね。どこにありますか。",
-          "en": "Himawari? Sorry, I don't know it. Where is it?",
-          "fr": "Himawari ? Désolé, je ne connais pas. C'est où ?"
+          "jp": "ひまわりですか。すみません、ちょっと分かりません。どこにありますか。",
+          "kana": "ひまわりですか。すみません、ちょっとわかりません。どこにありますか。",
+          "en": "Himawari? Sorry, I'm not sure I know it. Where is it?",
+          "fr": "Himawari ? Désolé, je ne vois pas trop. C'est où ?"
         },
         "me": {
           "jp": "駅の近くです。",
@@ -4965,10 +4964,10 @@
       },
       {
         "them": {
-          "jp": "はい、来ますよ。でも、十分に一本ぐらいです。",
-          "kana": "はい、きますよ。でも、じゅっぷんにいっぽんぐらいです。",
-          "en": "Yes, it does. But there's only one every ten minutes or so.",
-          "fr": "Oui, il passe ici. Mais il n'y en a qu'un toutes les dix minutes environ."
+          "jp": "はい、来ますよ。でも、二十分に一本ぐらいです。",
+          "kana": "はい、きますよ。でも、にじゅっぷんにいっぽんぐらいです。",
+          "en": "Yes, it does. But there's only one every twenty minutes or so.",
+          "fr": "Oui, il passe ici. Mais il n'y en a qu'un toutes les vingt minutes environ."
         },
         "me": {
           "jp": "そうですか。じゃあ、ここで待ちます。",
@@ -5001,8 +5000,8 @@
             "en": "I see. So it won't come any more.",
             "fr": "D'accord. Alors il ne passera plus.",
             "why": {
-              "en": "「もう来ません」 says no more buses will come, when she has just said one comes every ten minutes.",
-              "fr": "「もう来ません」 dit qu'il n'y aura plus de bus, alors qu'elle vient de dire qu'il en passe un toutes les dix minutes."
+              "en": "「もう来ません」 says no more buses will come, when she has just said one comes every twenty minutes.",
+              "fr": "「もう来ません」 dit qu'il n'y aura plus de bus, alors qu'elle vient de dire qu'il en passe un toutes les vingt minutes."
             }
           }
         ]
@@ -5074,13 +5073,13 @@
         },
         "wrong": [
           {
-            "jp": "あ、本当ですね。じゃあ、ここで待ちます。",
-            "kana": "あ、ほんとうですね。じゃあ、ここでまちます。",
-            "en": "Oh, so it is. Then I'll wait here.",
-            "fr": "Ah oui, c'est vrai. Alors j'attends ici.",
+            "jp": "あ、本当ですね。じゃあ、五番に乗りますね。",
+            "kana": "あ、ほんとうですね。じゃあ、ごばんにのりますね。",
+            "en": "Oh, so it is. I'll get on the five, then.",
+            "fr": "Ah oui, c'est vrai. Alors je prends le cinq.",
             "why": {
-              "en": "「ここで待ちます」 stays at the stop just as your bus pulls in.",
-              "fr": "「ここで待ちます」 te fait rester à l'arrêt au moment même où ton bus arrive."
+              "en": "「五番」 is the bus she said does not go to the station; yours is 「三番」.",
+              "fr": "「五番」, c'est le bus qui ne va pas à la gare, d'après la dame ; le tien, c'est le 「三番」."
             }
           },
           {
@@ -5468,7 +5467,7 @@
           "jp": "どうぞ、座ってください。あ、嫌いな物はありますか。",
           "kana": "どうぞ、すわってください。あ、きらいなものはありますか。",
           "en": "Do sit down. Oh, is there anything you don't like?",
-          "fr": "Asseyez-vous, je vous en prie. Ah, il y a des choses que vous n'aimez pas ?"
+          "fr": "Assieds-toi. Ah, il y a des choses que tu n'aimes pas ?"
         },
         "me": {
           "jp": "すみません、魚はあまり食べません。",
@@ -5479,10 +5478,7 @@
           "note": {
             "en": "「あまり」 with a negative means not much, a soft way to say what you do not eat, and 「すみません」 makes it kinder still.",
             "fr": "「あまり」 avec une négation veut dire pas beaucoup, une façon douce de dire ce que tu ne manges pas, et 「すみません」 la rend plus aimable encore."
-          },
-          "alt": [
-            {"jp": "すみません、魚はあまり好きじゃありません。", "kana": "すみません、さかなはあまりすきじゃありません。", "romaji": "sumimasen, sakana wa amari suki ja arimasen"}
-          ]
+          }
         },
         "wrong": [
           {
@@ -5512,7 +5508,7 @@
           "jp": "そうですか。今日はカレーですから、大丈夫ですよ。どうぞ。",
           "kana": "そうですか。きょうはカレーですから、だいじょうぶですよ。どうぞ。",
           "en": "I see. Tonight it's curry, so that's fine. Go ahead.",
-          "fr": "Je vois. Ce soir, c'est du curry, alors pas de souci. Allez-y, je vous en prie."
+          "fr": "Je vois. Ce soir, c'est du curry, alors pas de souci. Vas-y, sers-toi."
         },
         "me": {
           "jp": "ありがとうございます。いただきます。",
@@ -5597,7 +5593,7 @@
           "jp": "よかった。もう少しどうですか。",
           "kana": "よかった。もうすこしどうですか。",
           "en": "I'm so glad. Would you like a little more?",
-          "fr": "Tant mieux. Vous en reprenez un peu ?"
+          "fr": "Tant mieux. Tu en reprends un peu ?"
         },
         "me": {
           "jp": "すみません、もうおなかがいっぱいです。",
@@ -5641,7 +5637,7 @@
           "jp": "全部食べましたね。",
           "kana": "ぜんぶたべましたね。",
           "en": "You've eaten it all!",
-          "fr": "Vous avez tout mangé !"
+          "fr": "Tu as tout mangé !"
         },
         "me": {
           "jp": "はい、ごちそうさまでした。",
@@ -5992,8 +5988,8 @@
       "fr": "Tu fais tes courses au supermarché et tu ne trouves pas les œufs. Tu viens de demander à une employée qui range les rayons où ils sont."
     },
     "goal": {
-      "en": "Find the eggs and the milk; when the milk has sold out, find out when more comes in and take what is left today.",
-      "fr": "Trouve les œufs et le lait ; comme il n'y a plus de lait, demande quand il en arrive et prends ce qui reste aujourd'hui."
+      "en": "Find the eggs and the milk; when the big cartons have sold out, find out when more come in and take what is left today.",
+      "fr": "Trouve les œufs et le lait ; comme il n'y a plus de grandes briques, demande quand il en arrive et prends ce qui reste aujourd'hui."
     },
     "steps": [
       {"en": "Ask where the milk is", "fr": "Demande où est le lait"},
@@ -6050,10 +6046,10 @@
       },
       {
         "them": {
-          "jp": "牛乳は、すみません、今日はもうありません。",
-          "kana": "ぎゅうにゅうは、すみません、きょうはもうありません。",
-          "en": "The milk, I'm sorry, has all gone for today.",
-          "fr": "Le lait, désolée, il n'y en a plus aujourd'hui."
+          "jp": "牛乳は、すみません、大きいのは今日はもうありません。",
+          "kana": "ぎゅうにゅうは、すみません、おおきいのはきょうはもうありません。",
+          "en": "The milk, I'm sorry, the big cartons have all gone for today.",
+          "fr": "Le lait, pardon, il n'y a plus de grandes briques aujourd'hui."
         },
         "me": {
           "jp": "そうですか。明日はありますか。",
@@ -6078,13 +6074,13 @@
             }
           },
           {
-            "jp": "そうですか。まだありますね。",
-            "kana": "そうですか。まだありますね。",
-            "en": "I see. So there's still some.",
-            "fr": "Ah bon. Donc il en reste encore.",
+            "jp": "そうですか。大きいのはまだありますね。",
+            "kana": "そうですか。おおきいのはまだありますね。",
+            "en": "I see. So there are still big ones.",
+            "fr": "Ah bon. Donc il reste encore des grandes.",
             "why": {
-              "en": "「まだあります」 says there is still some left, when she has just said 「もうありません」, all gone.",
-              "fr": "「まだあります」 dit qu'il en reste encore, alors qu'elle vient de dire 「もうありません」 : il n'y en a plus."
+              "en": "「まだあります」 says there are still big cartons, when she has just said 「もうありません」: they are all gone.",
+              "fr": "「まだあります」 dit qu'il reste encore des grandes briques, alors qu'elle vient de dire 「もうありません」 : il n'y en a plus."
             }
           }
         ]
@@ -6259,17 +6255,17 @@
           "fr": "À partir de six heures."
         },
         "me": {
-          "jp": "ごめん、ちょっと遅く行ってもいい？",
-          "kana": "ごめん、ちょっとおそくいってもいい？",
-          "romaji": "gomen, chotto osoku itte mo ii?",
+          "jp": "ごめん、ちょっと遅くなってもいい？",
+          "kana": "ごめん、ちょっとおそくなってもいい？",
+          "romaji": "gomen, chotto osoku natte mo ii?",
           "en": "Sorry, is it OK if I'm a bit late?",
           "fr": "Pardon, ça te va si j'arrive un peu plus tard ?",
           "note": {
-            "en": "「遅く」 turns 「遅い」 into an adverb, late, and 「〜てもいい？」 asks your friend, plainly, whether that is all right.",
-            "fr": "「遅く」 fait de 「遅い」 un adverbe, tard, et 「〜てもいい？」 demande à ton amie, à la forme simple, si ça lui va."
+            "en": "「遅くなる」 is to end up late, and 「〜てもいい？」 asks your friend, plainly, whether that is all right.",
+            "fr": "「遅くなる」, c'est finir par arriver tard, et 「〜てもいい？」 demande à ton amie, à la forme simple, si ça lui va."
           },
           "alt": [
-            {"jp": "ごめん、少し遅く行ってもいい？", "kana": "ごめん、すこしおそくいってもいい？", "romaji": "gomen, sukoshi osoku itte mo ii?"}
+            {"jp": "ごめん、ちょっと遅く行ってもいい？", "kana": "ごめん、ちょっとおそくいってもいい？", "romaji": "gomen, chotto osoku itte mo ii?"}
           ]
         },
         "wrong": [
@@ -6289,8 +6285,8 @@
             "en": "Sorry, I went a bit late.",
             "fr": "Pardon, j'y ai été un peu en retard.",
             "why": {
-              "en": "「行った」 says it has already happened, and the party is on Saturday: ahead of it you ask, 「行ってもいい？」.",
-              "fr": "「行った」 dit que c'est déjà arrivé, alors que la fête a lieu samedi : à l'avance, on demande 「行ってもいい？」."
+              "en": "「行った」 says it has already happened, and the party is on Saturday: ahead of it you ask, 「遅くなってもいい？」.",
+              "fr": "「行った」 dit que c'est déjà arrivé, alors que la fête a lieu samedi : à l'avance, on demande 「遅くなってもいい？」."
             }
           }
         ]
