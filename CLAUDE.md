@@ -863,7 +863,8 @@ credits do, in ink on the print washed pale, or read along by the app's
 reader, each word lit on the voice's own syllables, over the owner's
 own music or none; since plan 249 reply videos: the conversations
 answered against a timer, six questions a video at least, every line
-said. Since plan 248 every number a maker may set per
+said, drawn since plan 249b as a chat thread in the Fiche look, a
+short one scene whole and ending on the carousel's call to action. Since plan 248 every number a maker may set per
 post (a video's timing and pace, the music's level, the export's
 quality) is one line of `tune.js`, set in the studio's Tune panel and
 written into the render command, so the video rendered is the one

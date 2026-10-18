@@ -13,7 +13,7 @@ import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '
 import { LIMIT, SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
 import { TUNABLES, tuned } from '../carousel/tune.js'
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf } from '../carousel/funnel.js'
-import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, timeline } from '../carousel/long.js'
+import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, stillAt, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
 import { CH as CHALLENGE, CPM, SCROLL, TRACK, TRACKS, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
@@ -1204,7 +1204,7 @@ describe('the short formats (plan 233)', () => {
           const pl = fitShort(longPlan(kind, files, { lang, level, format: 'short', point: bank(`grammar-${level}.json`).lessons[1].p }))
           const tl = timeline(pl)
           expect(pl.format, kind).toBe('short')
-          // A reply short keeps its six questions past the minute, under Shorts' three (plan 249).
+          // A reply short is one scene whole, past the minute, under Shorts' three (plan 249b).
           expect(tl.seconds, `${kind} ${level}`).toBeLessThanOrEqual(kind === 'reply' ? REPLY_SHORT : SHORT.seconds)
           expect(tl.seconds, `${kind} ${level}`).toBeGreaterThan(20)
           if (kind !== 'grammar' && kind !== 'reply') expect(pl.items.length, kind).toBeLessThanOrEqual(SHORT[kind])
@@ -1998,7 +1998,7 @@ describe('tuned from the studio (plan 248)', () => {
 describe('the reply videos (plan 249)', () => {
   const dialogues = bank('dialogues.json')
   const files = { 'dialogues.json': dialogues }
-  const parts = lv => longItems(files, lv, 'en').filter(x => x.kind === 'reply')
+  const parts = (lv, format = 'long') => longItems(files, lv, 'en', format).filter(x => x.kind === 'reply')
   const planFor = (lv, id, format = 'long', lang = 'en') => { const { kind, opts } = longPick(id, lv, lang, format); return longPlan(kind, files, opts) }
   // Every text drawn, where: its baseline and its size.
   const placed = () => {
@@ -2034,6 +2034,26 @@ describe('the reply videos (plan 249)', () => {
     expect(longCommand('reply:2', 'N3', 'fr', 'short')).toContain('--kind reply --level N3 --part 2 --lang fr --format short')
   })
 
+  it('makes a short of each conversation, one scene a short (plan 249b)', () => {
+    for (const lv of LEVELS) {
+      const talks = dialogues.dialogues.filter(d => d.lv === lv)
+      const shorts = parts(lv, 'short')
+      expect(shorts.map(x => x.sub), lv).toEqual(talks.map(d => `${d.place.jp} · ${d.place.en}`))
+      shorts.forEach((it, i) => {
+        const pl = planFor(lv, it.id, 'short')
+        expect(pl.items.filter(x => x.type === 'scene').map(x => x.id), it.id).toEqual([talks[i].id])
+        expect(pl.items.filter(x => x.type === 'reply'), it.id).toHaveLength(talks[i].turns.length)
+        expect(pl.title, it.id).toBe(`${talks[i].place.en} · JLPT ${lv}`)
+      })
+    }
+    // A short opens on its scene: no title card before the question, its still taken there.
+    const pl = planFor('N5', 'reply:1', 'short')
+    const tl = timeline(pl)
+    expect(tl.segs[0].type).toBe('scene')
+    expect(stillAt(pl, tl)).toBeLessThan(tl.segs[0].dur)
+    expect(tl.segs.at(-1).type).toBe('outro')
+  })
+
   it('says their line, then yours once the timer is out, a tick a second', () => {
     const pl = longPlan('reply', files, { level: 'N5', part: 1, tune: { 'reply.count': 6 } })
     const tl = timeline(pl)
@@ -2061,10 +2081,11 @@ describe('the reply videos (plan 249)', () => {
     const had = globalThis.Path2D
     globalThis.Path2D = class { constructor(d) { this.d = d } }
     try {
-      const box = { long: { top: 160, bottom: 930, head: 150, foot: 950 }, short: { top: 400, bottom: 1490, head: 380, foot: 1600 } }
+      // Under the band (plan 249b): the band's own words stand above `head`.
+      const box = { long: { top: 160, bottom: 1010, head: 140, foot: 1075 }, short: { top: 346, bottom: 1490, head: 325, foot: 1600 } }
       for (const lv of LEVELS) {
-        for (const it of parts(lv)) {
-          for (const format of ['long', 'short']) {
+        for (const format of ['long', 'short']) {
+          for (const it of parts(lv, format)) {
             for (const lang of ['en', 'fr']) {
               const pl = planFor(lv, it.id, format, lang)
               const tl = timeline(pl)
@@ -2082,6 +2103,17 @@ describe('the reply videos (plan 249)', () => {
                   }
                 }
               }
+              // The scene's card and the score, whole and inside too (plan 249b).
+              for (const sg of tl.segs.filter(x => x.type === 'scene' || x.type === 'score' || x.type === 'intro')) {
+                const { ctx, at } = placed()
+                drawLong(ctx, pl, tl, sg.start + sg.dur - 0.05)
+                for (const x of at.filter(x => x.y > b.head && x.y < b.foot)) {
+                  const where = `${lv} ${it.id} ${format} ${lang} ${sg.type} ${x.t}`
+                  expect(x.y - x.z * 0.85, where).toBeGreaterThanOrEqual(b.top - 1)
+                  expect(x.y + x.z * 0.25, where).toBeLessThanOrEqual(b.bottom + 1)
+                  expect(x.t.endsWith('…'), where).toBe(false)
+                }
+              }
             }
           }
         }
@@ -2089,13 +2121,13 @@ describe('the reply videos (plan 249)', () => {
     } finally { globalThis.Path2D = had }
   }, 120000)
 
-  it('holds a short under three minutes, never under six questions', () => {
+  it('holds a short under three minutes, its scene whole', () => {
     for (const lv of LEVELS) {
-      for (const it of parts(lv)) {
-        const pl = fitShort(planFor(lv, it.id, 'short'))
-        const tl = timeline(pl)
-        expect(tl.of, it.id).toBeGreaterThanOrEqual(6)
-        if (tl.of > 6) expect(tl.seconds, it.id).toBeLessThanOrEqual(REPLY_SHORT)
+      for (const it of parts(lv, 'short')) {
+        const pl0 = planFor(lv, it.id, 'short')
+        const pl = fitShort(pl0)
+        expect(pl.items, it.id).toEqual(pl0.items)
+        expect(timeline(pl).seconds, it.id).toBeLessThanOrEqual(REPLY_SHORT)
       }
     }
   })

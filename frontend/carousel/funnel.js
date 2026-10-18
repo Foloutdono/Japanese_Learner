@@ -392,6 +392,12 @@ export function funnelDeck(type, pl, fmt, opts = {}) {
   return out.map(sl => ({ key: sl.key, draw: ctx => sl.fn(context(ctx, look)) }))
 }
 
+/** The call to action alone, on a format of the caller's: a video's
+ *  ending (a reply video's, plan 249b) is the carousel's own slide. */
+export function drawCta(ctx, fmt, { lang = 'en', feature = 'conversation', design = 'fiche', line = 'kaiwa' } = {}) {
+  ctaSlide(context(ctx, lookOf(design, fmt, { lang, line })), FEATURES.includes(feature) ? feature : 'conversation')
+}
+
 // ── The look ──────────────────────────────────────────────────
 function lookOf(design, fmt, pl) {
   const p = palette(design === 'defi' ? 'sumi' : 'paper')

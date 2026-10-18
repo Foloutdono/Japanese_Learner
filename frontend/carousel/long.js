@@ -20,7 +20,8 @@
 // reveal lands on its voice), and `drawLong` draws the frame at any
 // second and returns a key that is the same for two frames that look
 // the same, so the renderer (long/render.mjs) draws each still once.
-import { alpha, drawSentence, fit, font, formatOf, hasKanji, layoutSentence, mark, measure, palette, paragraphH, rrect, text } from './draw.js'
+import { FS, R, SP, alpha, drawSentence, fit, font, formatOf, hasKanji, layoutSentence, lineOf, mark, measure, mix, palette, paragraph, paragraphH, rrect, text } from './draw.js'
+import { drawCta } from './funnel.js'
 import { weldIf } from './strings.js'
 import { deal, gloss, unpack } from './common.js'
 import { plan as sourcePlan, itemsOf } from './sources.js'
@@ -53,6 +54,7 @@ const SAY = {
       grammar: (lv, p) => `JLPT ${lv} grammar · ${p}`,
       quiz: (lv, part) => `JLPT ${lv} quiz${part ? ` · part ${part}` : ''}`,
       reply: (lv, part) => `JLPT ${lv} conversations${part ? ` · part ${part}` : ''}`,
+      scene: (lv, place) => `${place} · JLPT ${lv}`,
     },
     count: { vocab: n => `${n} words`, kanji: n => `${n} kanji`, quiz: n => `${n} questions`, reply: n => `${n} questions` },
     hook: {
@@ -78,7 +80,9 @@ const SAY = {
     voices: 'Voices: VOICEVOX Nemo.',
     study: 'Study with Tsuji:',
     // A reply video (plan 249).
-    replyAsk: 'Your reply?', you: 'You', sceneHead: 'A new scene', speaks: who => `Speaking to you: ${who}`,
+    replyAsk: 'Your reply?', you: 'You', sceneHead: 'A new scene',
+    // The thread (plan 249b).
+    conv: 'Conversation', online: 'online', replyHook: 'What would you answer?', seconds: n => `${n} seconds each`, whyOne: 'Why this one',
   },
   fr: {
     title: {
@@ -88,6 +92,7 @@ const SAY = {
       grammar: (lv, p) => `Grammaire JLPT ${lv} · ${p}`,
       quiz: (lv, part) => `Quiz JLPT ${lv}${part ? ` · partie ${part}` : ''}`,
       reply: (lv, part) => `Conversations JLPT ${lv}${part ? ` · partie ${part}` : ''}`,
+      scene: (lv, place) => `${place} · JLPT ${lv}`,
     },
     count: { vocab: n => `${n} mots`, kanji: n => `${n} kanji`, quiz: n => `${n} questions`, reply: n => `${n} questions` },
     hook: {
@@ -112,7 +117,8 @@ const SAY = {
     chapters: { intro: 'Intro', outro: 'La suite', score: 'Point d’étape', final: 'Ton score' },
     voices: 'Voix : VOICEVOX Nemo.',
     study: 'Apprendre avec Tsuji :',
-    replyAsk: 'Ta réponse ?', you: 'Toi', sceneHead: 'Nouvelle scène', speaks: who => `Te parle : ${who}`,
+    replyAsk: 'Ta réponse ?', you: 'Toi', sceneHead: 'Nouvelle scène',
+    conv: 'Conversation', online: 'en ligne', replyHook: 'Que répondrais-tu ?', seconds: n => `${n} secondes chacune`, whyOne: 'Pourquoi celle-ci',
   },
 }
 export const LONG_SAY = SAY
@@ -172,20 +178,12 @@ function shorten(pl) {
 }
 
 /** A short under its minute: its last items let go until it fits. A
- *  reply video keeps six questions at least, past the minute, as Shorts,
- *  Reels and TikTok now allow; under three minutes (Shorts' limit) it
- *  lets a last whole conversation go, never a question of one (plan 249). */
+ *  reply short is one scene whole, every question of it (plan 249b),
+ *  past the minute as Shorts, Reels and TikTok now allow, and well under
+ *  three (Shorts' limit, a test holds it). */
 export const REPLY_SHORT = 179
 export function fitShort(plan, dur = null, seconds = SHORT.seconds) {
-  if (plan.kind === 'reply') {
-    let pl = plan
-    while (timeline(pl, dur).seconds > REPLY_SHORT) {
-      const cut = pl.items.findLastIndex(x => x.type === 'scene')
-      if (pl.items.slice(0, cut).filter(x => x.type === 'reply').length < 6) break
-      pl = { ...pl, items: pl.items.slice(0, cut) }
-    }
-    return pl
-  }
+  if (plan.kind === 'reply') return plan
   let pl = plan
   while (pl.items.length > 1 && timeline(pl, dur).seconds > seconds) pl = { ...pl, items: pl.items.slice(0, -1) }
   return pl
@@ -232,6 +230,11 @@ function planOf(kind, banks, { lang = 'en', level = 'N5', part = 1, theme = null
   }
   if (kind === 'reply') {
     const all = (banks['dialogues.json']?.dialogues || []).filter(d => d.lv === level)
+    // A short is one scene (plan 249b): its part is the scene's number.
+    if (format === 'short' && !ids) {
+      const d = all[part - 1]
+      return { ...base, title: d ? S.title.scene(level, weldIf(lang, d.place[lang] || d.place.en)) : S.title.reply(level, part), items: d ? replyItems(d, lang) : [] }
+    }
     const ds = ids ? ids.map(id => all.find(d => d.id === id)).filter(Boolean) : replyParts(all)[part - 1] || []
     return { ...base, title: S.title.reply(level, ids ? 0 : part), items: ds.flatMap(d => replyItems(d, lang)) }
   }
@@ -241,7 +244,8 @@ function planOf(kind, banks, { lang = 'en', level = 'N5', part = 1, theme = null
 // ── 返事 — what would you answer? (plan 249) ─────────────────────
 // A reply video deals the studio's conversations (content/dialogues.json):
 // the other person's line said, three replies, a timer, then yours said
-// and why the others are wrong. Two conversations a video, six questions.
+// and why the others are wrong. Two conversations a video, six questions;
+// its short, one conversation (plan 249b).
 
 /** A level's conversations in parts of two; a last part under six
  *  questions rides with the one before it, so no video asks fewer. */
@@ -287,7 +291,7 @@ export const longListFiles = level => [`words-${level}.json`, `kanji-${level}.js
 
 /** The videos a level can make: its vocabulary and kanji parts, its
  *  quiz's parts, each grammar point, each theme. */
-export function longItems(banks, level, lang = 'en') {
+export function longItems(banks, level, lang = 'en', format = 'long') {
   const S = SAY[lang] || SAY.en
   const out = []
   const parts = (kind, list, name) => {
@@ -309,9 +313,12 @@ export function longItems(banks, level, lang = 'en') {
   )
   for (let p = 1; p <= quizParts; p++) out.push({ id: `quiz:${p}`, kind: 'quiz', jp: `${LIST_KIND.quiz} ${p}`, sub: S.title.quiz(level, p), tag: S.count.quiz(PART.quiz) })
   for (const L of banks[`grammar-${level}.json`]?.lessons || []) out.push({ id: `grammar:${L.p}`, kind: 'grammar', jp: L.p, sub: weldIf(lang, L[lang] || L.en), tag: LIST_KIND.grammar })
-  // The level's conversations, two a video (plan 249).
-  replyParts((banks['dialogues.json']?.dialogues || []).filter(d => d.lv === level)).forEach((ds, i) => {
-    out.push({ id: `reply:${i + 1}`, kind: 'reply', jp: `${LIST_KIND.reply} ${i + 1}`, sub: ds.map(d => d.place.jp).join('、'), tag: S.count.reply(ds.reduce((n, d) => n + d.turns.length, 0)) })
+  // The level's conversations, two a video (plan 249); a short, one (plan 249b).
+  const talks = (banks['dialogues.json']?.dialogues || []).filter(d => d.lv === level)
+  const groups = format === 'short' ? talks.map(d => [d]) : replyParts(talks)
+  groups.forEach((ds, i) => {
+    const sub = format === 'short' ? `${ds[0].place.jp} · ${weldIf(lang, ds[0].place[lang] || ds[0].place.en)}` : ds.map(d => d.place.jp).join('、')
+    out.push({ id: `reply:${i + 1}`, kind: 'reply', jp: `${LIST_KIND.reply} ${i + 1}`, sub, tag: S.count.reply(ds.reduce((n, d) => n + d.turns.length, 0)) })
   })
   for (const [key, th] of Object.entries(banks['themes.json']?.themes || {})) {
     out.push({ id: `theme:${key}`, kind: 'theme', jp: th.head?.t || key, sub: th.name?.[lang] || th.name?.en || key, tag: S.count.vocab(th.words.length) })
@@ -619,7 +626,8 @@ export function timeline(plan, dur = null) {
   const short = plan.format === 'short'
   chapters.push({ at: 0, title: S.chapters.intro })
   fx(0.3, 'board-flap')
-  seg('intro', short ? 2.5 : 5.5, {})
+  // A reply short opens on its scene, which asks the question (plan 249b).
+  if (!(short && plan.kind === 'reply')) seg('intro', short ? 2.5 : 5.5, {})
   plan.items.forEach((it, i) => {
     const start = at
     // A scene stands at the question it opens.
@@ -750,7 +758,8 @@ export function timeline(plan, dur = null) {
   })
   chapters.push({ at, title: S.chapters.outro })
   fx(at + 0.3, 'platform-chime')
-  seg('outro', short ? 4 : 8, {})
+  // A reply video ends on the carousel's call to action: time to read it (plan 249b).
+  seg('outro', short ? (plan.kind === 'reply' ? 5 : 4) : 8, {})
   return { seconds: +at.toFixed(3), segs, cues, sfx, chapters, kind: plan.kind, of }
 }
 
@@ -965,8 +974,8 @@ function strokeLength(d) {
 /** Where a frame stands: its segment, the second into it, and the two
  *  helpers every part is drawn with (`k`, a part's share of the way in,
  *  kept in the frame's key while it moves; `fade`, a part drawn at it). */
-function begin(ctx, plan, tl, t, w, h) {
-  const p = palette('sumi')
+function begin(ctx, plan, tl, t, w, h, ground = 'sumi') {
+  const p = palette(ground)
   const S = SAY[plan.lang] || SAY.en
   const line = p.line[plan.line] || p.gold
   let i = tl.segs.findIndex(s => t < s.start + s.dur)
@@ -1033,6 +1042,7 @@ function tools(ctx, p, line) {
  *  are the same picture. A short is drawn standing (drawTall). */
 export function drawLong(ctx, plan, tl, t) {
   if (plan.format === 'short') return drawTall(ctx, plan, tl, t)
+  if (plan.kind === 'reply') return drawThread(ctx, plan, tl, t, THREAD.wide)
   const { p, S, line, sg, u, state, k, fade } = begin(ctx, plan, tl, t, W, H)
   // The masthead, the title, the line of stations.
   if (sg.type !== 'intro' && sg.type !== 'outro') {
@@ -1060,7 +1070,7 @@ export function drawLong(ctx, plan, tl, t) {
       fade(k(0.2, 0.6), () => mark(ctx, W / 2 - 90, 170, 180, p.ink, p.gold))
       fade(k(0.6, 0.6), () => para(S.outro, W / 2, 440, 1500, [88, 76], p.ink, 'center', 700, 1))
       fade(k(1.0, 0.6), () => para(S.outroSub, W / 2, 570, 1500, [44, 38], p.ink2, 'center', 500, 1))
-      if (plan.kind === 'quiz' || plan.kind === 'reply') fade(k(1.3, 0.6), () => para(S.comment, W / 2, 650, 1500, [44, 38], p.gold, 'center', 700, 1))
+      if (plan.kind === 'quiz') fade(k(1.3, 0.6), () => para(S.comment, W / 2, 650, 1500, [44, 38], p.gold, 'center', 700, 1))
       fade(k(1.8, 0.6), () => {
         const bw = 760
         A.departButton(ctx, p, W / 2 - bw / 2, 760, bw, 2, S.depart)
@@ -1158,8 +1168,6 @@ export function drawLong(ctx, plan, tl, t) {
       break
     }
     case 'q': drawQuestion(ctx, p, line, S, sg.data, m, u, k, fade, sentence, para, card, state); break
-    case 'scene': drawScene(ctx, p, line, S, d, k, fade, para, REPLY_WIDE); break
-    case 'reply': drawReply(ctx, p, line, S, d, m, u, k, fade, card, state, REPLY_WIDE); break
     case 'score': {
       fade(k(0.1, 0.5), () => para(S.score(d.n, d.of), W / 2, 380, 1600, [84, 72, 60], p.ink, 'center', 700, 2))
       // The last asks the viewer's own score (plan 249): ? / 6, never 6 / 6.
@@ -1495,13 +1503,22 @@ function tallBox(fit) {
   const s = fit === 'tiktok' ? TALL.safe : formatOf('story', fit).safe
   return { x: s.l, y: s.t, w: TW - s.l - s.r, h: TH - s.t - s.b }
 }
+/** Where a video's still is taken (its thumbnail, the studio's PNG): a
+ *  reply short's on its scene, which asks the question (plan 249b). */
+export function stillAt(plan, tl) {
+  if (plan.kind === 'reply' && plan.format === 'short') {
+    const sc = tl.segs.find(x => x.type === 'scene')
+    if (sc) return sc.start + sc.dur - 0.2
+  }
+  return plan.format === 'short' ? 3.4 : 4.5
+}
 /** The frame of a short at second `t`, and its key. */
 function drawTall(ctx, plan, tl, t) {
   if (!plan.fit || plan.fit === 'tiktok') return drawTallFrame(ctx, plan, tl, t)
   const from = tallBox('tiktok')
   const to = tallBox(plan.fit)
   const s = Math.min(to.w / from.w, to.h / from.h)
-  ctx.fillStyle = palette('sumi').bg
+  ctx.fillStyle = palette(plan.kind === 'reply' ? 'paper' : 'sumi').bg
   ctx.fillRect(0, 0, TW, TH)
   ctx.save()
   ctx.translate(to.x + (to.w - from.w * s) / 2, to.y + (to.h - from.h * s) / 2)
@@ -1512,6 +1529,7 @@ function drawTall(ctx, plan, tl, t) {
   return key
 }
 function drawTallFrame(ctx, plan, tl, t) {
+  if (plan.kind === 'reply') return drawThread(ctx, plan, tl, t, THREAD.tall)
   const { p, S, line, sg, u, state, k, fade, d, m } = begin(ctx, plan, tl, t, TW, TH)
   const { card, sentence, para, pill } = tools(ctx, p, line)
   const cx = TW / 2
@@ -1541,14 +1559,13 @@ function drawTallFrame(ctx, plan, tl, t) {
       fade(k(0.1, 0.4), () => mark(ctx, cx - 90, 420, 180, p.ink, p.gold))
       fade(k(0.3, 0.4), () => para(plan.title, cx, 700, TWIDE, [84, 72, 62, 54], p.ink, 'center', 700, 3))
       fade(k(0.8, 0.4), () => para(S.hook[plan.kind], cx, 1080, TWIDE, [52, 46, 40], p.gold, 'center', 700, 2))
-      if (plan.kind === 'reply') fade(k(1.2, 0.4), () => para(`${S.count.reply(tl.of)} · ${S.how.reply}`, cx, 1290, TWIDE, [38, 32], p.ink2, 'center', 500, 2))
       break
     }
     case 'outro': {
       fade(k(0.1, 0.4), () => mark(ctx, cx - 80, 440, 160, p.ink, p.gold))
       fade(k(0.3, 0.4), () => para(S.outro, cx, 700, TWIDE, [76, 64], p.ink, 'center', 700, 2))
       fade(k(0.6, 0.4), () => para(S.outroSub, cx, 900, TWIDE, [40, 34], p.ink2, 'center', 500, 3))
-      if (plan.kind === 'quiz' || plan.kind === 'reply') fade(k(0.8, 0.4), () => para(S.comment, cx, 1060, TWIDE, [44, 38], p.gold, 'center', 700, 2))
+      if (plan.kind === 'quiz') fade(k(0.8, 0.4), () => para(S.comment, cx, 1060, TWIDE, [44, 38], p.gold, 'center', 700, 2))
       fade(k(1.0, 0.4), () => A.departButton(ctx, p, cx - 330, 1200, 660, 2, S.depart))
       break
     }
@@ -1642,8 +1659,6 @@ function drawTallFrame(ctx, plan, tl, t) {
       break
     }
     case 'q': drawTallQuestion(ctx, p, line, S, d, m, u, k, fade, sentence, para, card, state); break
-    case 'scene': drawScene(ctx, p, line, S, d, k, fade, para, REPLY_TALL); break
-    case 'reply': drawReply(ctx, p, line, S, d, m, u, k, fade, card, state, REPLY_TALL); break
     case 'score': {
       fade(k(0.1, 0.5), () => para(S.score(d.n, d.of), cx, 620, TWIDE, [66, 58, 50], p.ink, 'center', 700, 3))
       fade(k(0.6, 0.5), () => para(`${d.n === d.of ? '?' : d.n} / ${d.of}`, cx, 940, TWIDE, [150], p.gold, 'center', 700, 1))
@@ -1758,148 +1773,469 @@ function drawTallQuestion(ctx, p, line, S, it, m, u, k, fade, sentence, para, ca
   }
 }
 
-// ── A reply video's frames (plan 249) ─────────────────────────────
-// The same parts in both formats, each at its own measures: a scene's
-// card, then each question: their line in a bubble (who says it, its
-// readings, its romaji for a beginner, what it means), the three
-// replies numbered, the timer's ring, the right one lit, then yours in
-// a bubble of its own and why. Standing (9:16), one column; wide
-// (16:9), their line and the timer on the left, the replies and then
-// yours on the right. Every size steps down together until the
-// question stands in the frame; the answer steps on its own.
-const REPLY_TALL = { id: 'tall', stack: true, top: 400, bottom: 1490, them: { x: TX, w: TWIDE }, mine: { x: TX, w: TWIDE }, big: 60, mid: 52, small: 32, label: 28, num: 60, pad: 28 }
-const REPLY_WIDE = { id: 'wide', stack: false, top: 160, bottom: 930, them: { x: 120, w: 760 }, mine: { x: 940, w: 860 }, big: 60, mid: 50, small: 32, label: 28, num: 64, pad: 30 }
-const STEPS = [1, 0.92, 0.84, 0.76, 0.68, 0.6, 0.54]
-const RING = 190 // the timer's room under what it stands below
-const GAP = 12 // between two replies
+// ── A reply video's frames: the thread (plan 249b) ────────────────
+// Drawn as the owner picked it from three (B, "the thread"): the
+// carousel's Fiche look on washi, the conversation's line (会話) in the
+// band, a chat that scrolls on. Their line comes in on the left; your
+// three replies wait on the right as dashed drafts, the timer a ring in
+// the band. The right one is sent and the others fade; then yours, said,
+// over a note of why. The next question scrolls the thread up: your last
+// reply's foot still shows under the band. Both formats draw the same
+// parts, the 16:9 with their line beside your replies; every size steps
+// down together until a frame stands inside its safe area. The video
+// ends on the carousel's own call to action (funnel.drawCta).
+const OK = '#4d7639' // the carousel's success, on paper (funnel.js)
+const THREAD = {
+  tall: { id: 'tall', w: TW, h: TH, x: TX, right: TW - TALL.safe.r, band: TALL.safe.t + 96, bottom: TH - TALL.safe.b, jp: FS.display * 0.62, label: FS.caption, ring: 46, stack: true },
+  wide: { id: 'wide', w: W, h: H, x: 120, right: W - 120, band: 160, bottom: H - 70, jp: 84, label: 34, ring: 54, stack: false },
+}
+// The call to action's frame: the short's safe area, or the 16:9's own margins.
+const CTA_FMT = {
+  tall: { id: 'story', fit: 'tiktok', w: TW, h: TH, safe: TALL.safe },
+  wide: { id: 'wide', fit: 'normal', w: W, h: H, safe: { t: 70, r: 160, b: 70, l: 160 } },
+}
+const PEEK = 110 // how much of your last reply shows under the band
+const STEPS = [1, 0.92, 0.84, 0.76, 0.68, 0.6]
+const RIM = 28 // a bubble's tail, under it
 
-const replyLayouts = new WeakMap()
-/** A question's parts laid out once per format: the question at the
- *  largest step that stands in the frame, the answer at its own. */
-function replyLayout(ctx, it, g) {
-  let byFormat = replyLayouts.get(it)
-  if (!byFormat) replyLayouts.set(it, (byFormat = {}))
-  if (byFormat[g.id]) return byFormat[g.id]
-  const room = g.bottom - g.top
-  // A beginner's romaji stands under each word: the words a little further apart for it.
-  const lay = (rows, z, maxW, maxLines) => layoutSentence(ctx, rows, { max: z, min: Math.round(z * 0.75), maxW, maxLines, script: 'furigana', romaji: it.romaji, rules: false, gap: it.romaji ? 0.22 : 0.06, fam: 'jp', weight: 700 })
-  const part = (s, rows, tr, w, z) => {
-    const pad = g.pad * Math.max(0.75, s)
-    const label = g.label * Math.max(0.85, s)
-    const L = lay(rows, z * s, w - 2 * pad, 3)
-    // What it means: two lines, else three a little smaller; never cut.
-    const T = fit(ctx, tr, { weight: 500, sizes: [g.small * s, g.small * s * 0.88], maxW: w - 2 * pad, maxLines: 3, lh: 1.22, fam: 'latin', balanced: false })
-    return { s, pad, label, L, T, h: pad + label + 12 + L.h + 14 + paragraphH(T, 1.22) + pad }
+/** The band: the line's station (会話), what the frame is, the mark or what stands for it. */
+function threadBand(ctx, p, g, labels, right = null) {
+  ctx.fillStyle = p.line.kaiwa
+  ctx.fillRect(0, 0, g.w, g.band)
+  const base = g.band - 32
+  const x = g.x + text(ctx, '会話', g.x, base, { f: font(900, g.jp, 'serif'), color: p.onLine }) + SP[5]
+  // The label at the largest size it fits at; too long, its shorter form.
+  const room = g.right - g.ring * 2 - SP[5] - x
+  const sizes = [g.label, g.label * 0.9, g.label * 0.8]
+  let caps = labels[0].toLocaleUpperCase()
+  let z = null
+  for (const l of labels) {
+    caps = l.toLocaleUpperCase()
+    z = sizes.find(s => measure(ctx, caps, font(700, s, 'latin'), 0.16) <= room)
+    if (z) break
   }
-  let q = null
-  for (const s of STEPS) {
-    const them = part(s, it.them.rows, it.them.tr, g.them.w, g.big)
-    const cw = g.mine.w
-    const choices = it.choices.map(rows => lay(rows, g.mid * s, cw - g.num * s - 2 * them.pad, 2))
-    const choiceH = choices.map(L => Math.max(g.num * s + 20, L.h + them.pad))
-    const askH = them.label * 1.9
-    const list = askH + choiceH.reduce((a, b) => a + b, 0) + GAP * (choiceH.length - 1)
-    const total = g.stack ? them.h + 28 + list + RING : Math.max(them.h + 28 + RING, list)
-    q = { s, them, choices, choiceH, askH, total }
-    if (total <= room) break
+  text(ctx, caps, x, base - 10, { f: font(700, z || sizes.at(-1), 'latin'), color: p.onLine, tr: 0.16 })
+  const cx = g.right - g.ring
+  const cy = base - g.ring * 0.48
+  if (right) right(cx, cy)
+  else {
+    const s = g.ring * 1.3
+    mark(ctx, g.right - s, base - s, s, p.onLine, p.goldLit)
   }
-  // The answer: yours in its bubble, what it means, and room for why (three lines at least).
-  const above = g.stack ? q.them.h + 28 : 0
-  let a = null
-  for (const s of STEPS.filter(x => x <= q.s)) {
-    a = part(s, it.choices[it.right], it.reply, g.mine.w, g.mid)
-    if (above + a.h + 24 + 3 * g.small * Math.max(0.8, s) * 1.22 <= room) break
-  }
-  byFormat[g.id] = { ...q, mine: a }
-  return byFormat[g.id]
+}
+/** The timer: a ring in the band that empties, its digit in it. */
+function ringOf(ctx, p, cx, cy, r, share, digit) {
+  ctx.lineWidth = r * 0.22
+  ctx.strokeStyle = alpha(p.onLine, 0.3)
+  ctx.beginPath()
+  ctx.arc(cx, cy, r, 0, 7)
+  ctx.stroke()
+  ctx.strokeStyle = p.onLine
+  ctx.lineCap = 'round'
+  ctx.beginPath()
+  ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * share)
+  ctx.stroke()
+  ctx.lineCap = 'butt'
+  text(ctx, String(digit), cx, cy + r * 0.41, { f: font(700, r * 1.17, 'latin'), color: p.onLine, align: 'center' })
+}
+/** A tick in a green disc: sent, or right. */
+function tick(ctx, p, cx, cy, r) {
+  ctx.fillStyle = OK
+  ctx.beginPath()
+  ctx.arc(cx, cy, r, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.strokeStyle = p.card
+  ctx.lineWidth = r * 0.22
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  ctx.beginPath()
+  ctx.moveTo(cx - r * 0.42, cy + r * 0.02)
+  ctx.lineTo(cx - r * 0.1, cy + r * 0.34)
+  ctx.lineTo(cx + r * 0.44, cy - r * 0.3)
+  ctx.stroke()
+  ctx.lineCap = 'butt'
+}
+/** A card with the carousel's soft shadow. */
+function sheet(ctx, p, x, y, w, h) {
+  ctx.save()
+  ctx.shadowColor = 'rgba(60,45,20,0.13)'
+  ctx.shadowBlur = 36
+  ctx.shadowOffsetY = 12
+  ctx.fillStyle = p.card
+  rrect(ctx, x, y, w, h, R.card * 2)
+  ctx.fill()
+  ctx.restore()
+}
+/** A small heading in capitals. */
+function capsAt(ctx, str, x, y, color, align = 'left') {
+  const z = FS.caption * 1.08
+  text(ctx, str.toLocaleUpperCase(), x, y + z * 0.8, { f: font(700, z, 'latin'), color, align, tr: 0.18 })
+  return z * 1.2
 }
 
-/** A bubble: a card with who speaks over its line, its readings and what it means. */
-function bubble(ctx, p, card, x, y, w, b, who, whoColor, edge, width) {
-  card(x, y, w, b.h, edge, width)
-  text(ctx, who.toUpperCase(), x + b.pad, y + b.pad + b.label * 0.8, { f: font(700, b.label, 'latin'), color: whoColor, tr: 0.14 })
-  const top = y + b.pad + b.label + 12
-  drawSentence(ctx, b.L, x + b.pad, top, 'left', () => ({ ink: p.ink, ruby: p.ink2, romaji: p.ink2 }))
-  b.T.lines.forEach((l, j) => text(ctx, l, x + b.pad, top + b.L.h + 14 + b.T.size * (0.8 + j * 1.22), { f: b.T.f, color: p.ink2 }))
-}
-
-/** A scene's card: where it happens, said, and who speaks to you. */
-function drawScene(ctx, p, line, S, d, k, fade, para, g) {
-  const x = g.them.x
-  const w = g.stack ? g.them.w : g.mine.x + g.mine.w - g.them.x
-  const cx = x + w / 2
-  const mid = (g.top + g.bottom) / 2
-  fade(k(0.1, 0.4), () => text(ctx, S.sceneHead.toUpperCase(), cx, mid - 230, { f: font(700, g.label, 'latin'), color: line, align: 'center', tr: 0.16 }))
-  fade(k(0.25, 0.45), () => {
-    const fam = hasKanji(d.place.jp) ? 'serif' : 'jp'
-    const z = Math.min(150, (150 * w) / Math.max(1, measure(ctx, d.place.jp, font(900, 150, fam))))
-    text(ctx, d.place.jp, cx, mid - 50, { f: font(900, z, fam), color: p.ink, align: 'center' })
-  })
-  fade(k(0.6, 0.4), () => para(d.place.tr, cx, mid + 20, w, [g.big, g.mid], p.ink, 'center', 700, 2))
-  fade(k(0.9, 0.4), () => para(`${S.speaks(d.who)} · ${S.count.reply(d.asks)}`, cx, mid + 120, w, [g.small, g.small * 0.85], p.ink2, 'center', 500, 2))
-}
-
-/** A question: their line, the replies and the timer; the right one lit; yours, and why. */
-function drawReply(ctx, p, line, S, it, m, u, k, fade, card, state, g) {
-  const revealed = u >= m.reveal
-  const done = u >= m.why
-  state.push(done ? 'A' : revealed ? 'R' : '')
-  const Ly = replyLayout(ctx, it, g)
-  const s = Ly.s
-  fade(k(0, 0.3), () => bubble(ctx, p, card, g.them.x, g.top, g.them.w, Ly.them, it.who, line, p.surfaceLine, 2))
-  // Under their line standing, beside it wide.
-  const y0 = g.stack ? g.top + Ly.them.h + 28 : g.top
-  if (done) {
-    // Yours, said: the reply in its own bubble, in gold, what it means; why.
-    const a = Ly.mine
-    fade(k(m.why, 0.35), () => bubble(ctx, p, card, g.mine.x, y0, g.mine.w, a, S.you, p.gold, p.gold, 6))
-    const ey = y0 + a.h + 24
-    fade(k(m.why + 0.35, 0.4), () => {
-      const room = g.bottom - ey
-      const sizes = [1.25, 1.12, 1, 0.9, 0.8].map(x => g.small * x * Math.max(0.8, a.s))
-      const b = fit(ctx, it.why, { weight: 500, sizes, maxW: g.mine.w, maxLines: Math.max(2, Math.floor(room / (sizes.at(-1) * 1.22))), maxH: room, lh: 1.22, fam: 'latin', balanced: false })
-      b.lines.forEach((l, j) => text(ctx, l, g.mine.x, ey + b.size * (0.8 + j * 1.22), { f: b.f, color: p.ink }))
-    })
-    return
-  }
-  const label = Ly.them.label
-  if (u >= m.choicesAt) fade(k(m.choicesAt, 0.3), () => text(ctx, S.replyAsk.toUpperCase(), g.mine.x, y0 + label * 1.1, { f: font(700, label, 'latin'), color: p.gold, tr: 0.14 }))
-  let cy = y0 + Ly.askH
-  const pad = Ly.them.pad
-  it.choices.forEach((rows, j) => {
-    const h = Ly.choiceH[j]
-    const at = cy
-    if (u >= m.choicesAt) fade(k(m.choicesAt + 0.1 + j * 0.12, 0.3), () => {
-      const right = j === it.right
+/** A speech bubble laid out: who speaks, the line (its words ruled in
+ *  their line's colour), what it means; drawn at (x, y), its tail on the
+ *  speaker's side. Yours (`me`) stands right, in the green of a reply sent. */
+function bubbleOf(ctx, p, rows, { tr = null, who = null, w, z, romaji = false, script = 'furigana', pad = SP[5], lines = 3, me = false, tail = true, trSizes = [FS.body, FS.sm], foot = false }) {
+  const inner = w - pad * 2
+  const L = layoutSentence(ctx, rows, { max: z, min: Math.round(z * 0.7), maxW: inner, maxLines: lines, script, romaji, rules: true, gap: romaji ? 0.22 : 0.06, fam: 'jp', weight: 700 })
+  const nameH = who ? FS.caption * 1.25 + SP[3] : 0
+  const T = tr ? fit(ctx, tr, { weight: 500, sizes: trSizes, maxW: inner, maxLines: 3, lh: 1.22, balanced: false }) : null
+  const box = pad * 2 + nameH + L.h + (T ? SP[4] + paragraphH(T, 1.22) : 0)
+  const lw = Math.max(...L.lines.map(l => L.lineW(l)))
+  return {
+    w, box, h: box + (tail ? RIM : 0), cut: !!T?.cut || L.lines.length > lines,
+    draw: (x, y, { dim = false } = {}) => {
       ctx.save()
-      if (revealed && !right) ctx.globalAlpha *= 0.35
-      card(g.mine.x, at, g.mine.w, h, revealed && right ? p.gold : p.surfaceLine, revealed && right ? 6 : 2)
-      const nz = g.mid * 0.95 * s
-      text(ctx, String(j + 1), g.mine.x + pad + (g.num * s) / 2 - 6, at + h / 2 + nz * 0.36, { f: font(700, nz, 'latin'), color: revealed && right ? p.gold : line, align: 'center' })
-      const L = Ly.choices[j]
-      drawSentence(ctx, L, g.mine.x + pad + g.num * s, at + (h - L.h) / 2, 'left', () => ({ ink: p.ink, ruby: p.ink2, romaji: p.ink2 }))
+      if (dim) ctx.globalAlpha *= 0.45
+      ctx.fillStyle = me ? mix(OK, p.card, 0.12) : p.surface
+      rrect(ctx, x, y, w, box, R.card * 2)
+      ctx.fill()
+      if (me) {
+        ctx.strokeStyle = OK
+        ctx.lineWidth = 4
+        rrect(ctx, x + 2, y + 2, w - 4, box - 4, R.card * 2)
+        ctx.stroke()
+      }
+      if (tail) {
+        ctx.fillStyle = me ? OK : p.surface
+        const tx = me ? x + w - 44 : x + 44
+        ctx.beginPath()
+        ctx.moveTo(tx - 18, y + box - 2)
+        ctx.lineTo(tx + (me ? 26 : -26), y + box + RIM)
+        ctx.lineTo(tx + 18, y + box - 2)
+        ctx.fill()
+      }
+      const ix = me ? x + w - pad : x + pad
+      if (who) text(ctx, who.toLocaleUpperCase(), ix, y + pad + FS.caption * 0.85, { f: font(700, FS.caption, 'latin'), color: me ? OK : p.ink2, align: me ? 'right' : 'left', tr: 0.14 })
+      const ink = dim ? p.ink2 : p.ink
+      // Its foot alone (the thread's, under the band): the line that shows, never the ones the band covers.
+      const shown = foot ? { ...L, lines: L.lines.slice(-1) } : L
+      const sy = y + pad + nameH + (foot ? (L.lines.length - 1) * (L.lineH + L.lineGap) : 0)
+      drawSentence(ctx, shown, me ? x + w - pad - lw : x + pad, sy, 'left', u => ({ ink, ruby: p.ink2, romaji: p.ink2, rule: u.row.k === 'punct' ? null : dim ? alpha(p.ink2, 0.4) : lineOf(p, u.row), ruleW: 5 }))
+      if (T) paragraph(ctx, T, ix, y + pad + nameH + L.h + SP[4], p.ink2, me ? 'right' : 'left', 1.22)
       ctx.restore()
-    })
-    cy += h + GAP
-  })
-  if (!revealed && u >= m.show) {
-    // The timer: a ring that empties, a second a tick, its digit in the frame's key.
-    const left = m.reveal - u
-    const share = Math.max(0, left / m.count)
-    state.push(`${Math.round(share * 90)}|${Math.ceil(left)}`)
-    const [rx, ry] = g.stack ? [g.them.x + g.them.w / 2, cy - GAP + RING / 2] : [g.them.x + g.them.w / 2, g.top + Ly.them.h + 28 + RING / 2]
-    const r = 60
-    ctx.lineWidth = 12
-    ctx.strokeStyle = p.surfaceLine
-    ctx.beginPath()
-    ctx.arc(rx, ry, r, 0, 7)
-    ctx.stroke()
-    ctx.strokeStyle = p.gold
-    ctx.lineCap = 'round'
-    ctx.beginPath()
-    ctx.arc(rx, ry, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * share)
-    ctx.stroke()
-    ctx.lineCap = 'butt'
-    text(ctx, String(Math.ceil(left)), rx, ry + 20, { f: font(700, 56, 'latin'), color: p.ink, align: 'center' })
+    },
   }
+}
+/** Your three replies, as drafts down the right: dashed and numbered
+ *  while you choose; then the right one sent, the others fading. */
+function draftsOf(ctx, p, choices, { w, z, romaji, tight = false }) {
+  const r = 28
+  const gap = SP[3]
+  const vp = tight ? SP[3] : SP[4]
+  const rows = choices.map(rs => {
+    const L = layoutSentence(ctx, rs, { max: z, min: Math.round(z * 0.7), maxW: w - SP[5] * 2 - r * 2 - SP[4], maxLines: 2, script: 'furigana', romaji, rules: false, gap: romaji ? 0.22 : 0.06, fam: 'jp', weight: 700 })
+    const lw = Math.max(...L.lines.map(l => L.lineW(l)))
+    return { L, h: L.h + vp, bw: Math.min(w, lw + SP[5] * 2 + r * 2 + SP[4]), cut: L.lines.length > 2 }
+  })
+  return {
+    h: rows.reduce((a, x) => a + x.h, 0) + gap * (rows.length - 1),
+    cut: rows.some(x => x.cut),
+    draw: (x, y, right, shown, sent) => {
+      let at = y
+      rows.forEach((row, j) => {
+        const v = shown(j)
+        const top = at
+        at += row.h + gap
+        if (v <= 0) return
+        const isSent = sent >= 0.5 && j === right
+        const bx = x + w - row.bw
+        ctx.save()
+        ctx.globalAlpha *= v * (sent > 0 && j !== right ? 1 - 0.7 * sent : 1)
+        ctx.translate(0, (1 - v) * 16)
+        if (isSent) {
+          ctx.fillStyle = mix(OK, p.card, 0.12)
+          rrect(ctx, bx, top, row.bw, row.h, R.card * 2)
+          ctx.fill()
+          ctx.strokeStyle = OK
+          ctx.lineWidth = 4
+          rrect(ctx, bx + 2, top + 2, row.bw - 4, row.h - 4, R.card * 2)
+          ctx.stroke()
+          ctx.fillStyle = OK
+          ctx.beginPath()
+          ctx.moveTo(bx + row.bw - 60, top + row.h - 2)
+          ctx.lineTo(bx + row.bw - 18, top + row.h + gap - 2)
+          ctx.lineTo(bx + row.bw - 26, top + row.h - 2)
+          ctx.fill()
+          tick(ctx, p, bx + SP[5] + r, top + row.h / 2, r)
+        } else {
+          ctx.setLineDash([14, 10])
+          ctx.strokeStyle = p.line.kaiwa
+          ctx.lineWidth = 3
+          rrect(ctx, bx + 1.5, top + 1.5, row.bw - 3, row.h - 3, R.card * 2)
+          ctx.stroke()
+          ctx.setLineDash([])
+          ctx.fillStyle = p.line.kaiwa
+          ctx.beginPath()
+          ctx.arc(bx + SP[5] + r, top + row.h / 2, r, 0, Math.PI * 2)
+          ctx.fill()
+          text(ctx, String(j + 1), bx + SP[5] + r, top + row.h / 2 + r * 0.38, { f: font(700, r * 1.07, 'latin'), color: p.onLine, align: 'center' })
+        }
+        drawSentence(ctx, row.L, bx + SP[5] + r * 2 + SP[4], top + vp / 2, 'left', () => ({ ink: isSent ? OK : p.ink, ruby: p.ink2, romaji: p.ink2 }))
+        ctx.restore()
+      })
+    },
+  }
+}
+/** Why the right reply is right: the carousel's note card, its "?" disc in gold. */
+function noteOf(ctx, p, head, body, { w, sizes }) {
+  const pad = SP[5]
+  const r = 34
+  const tx = pad + r * 2 + SP[5]
+  const b = fit(ctx, body, { weight: 500, sizes, maxW: w - pad - tx, maxLines: 7, lh: 1.22, balanced: false })
+  const kh = FS.caption * 1.2
+  const h = pad * 2 + kh + SP[2] + paragraphH(b, 1.22)
+  return {
+    h, cut: !!b.cut,
+    draw: (x, y) => {
+      sheet(ctx, p, x, y, w, h)
+      ctx.fillStyle = mix(p.gold, p.card, 0.18)
+      ctx.beginPath()
+      ctx.arc(x + pad + r, y + pad + r, r, 0, Math.PI * 2)
+      ctx.fill()
+      text(ctx, '?', x + pad + r, y + pad + r + 15, { f: font(900, 44, 'serif'), color: p.gold, align: 'center' })
+      capsAt(ctx, head, x + tx, y + pad, p.gold)
+      paragraph(ctx, b, x + tx, y + pad + kh + SP[2], p.ink, 'left', 1.22)
+    },
+  }
+}
+
+/** Their line on the left, your replies on the right: one under the
+ *  other standing, side by side wide. Short of room, the replies take
+ *  the whole width standing, a wider column wide. */
+function columns(g, wider = false) {
+  const w = g.right - g.x
+  const tw = g.stack ? w * 0.9 : Math.round(w * (wider ? 0.42 : 0.5))
+  const rx = g.stack ? g.x + (wider ? 0 : w * 0.12) : g.x + tw + SP[8]
+  return { w, tw, rx, dw: g.right - rx }
+}
+/** A question's parts laid out once per format: the largest sizes at
+ *  which it stands in the frame. Short of room, the thread's foot under
+ *  the band goes first, then the replies widen, then every size steps
+ *  down; the answer steps on its own, its reminder of their line the
+ *  first to go. */
+const threadLayouts = new WeakMap()
+function threadLayout(ctx, p, S, it, g, peek) {
+  let byKey = threadLayouts.get(it)
+  if (!byKey) threadLayouts.set(it, (byKey = {}))
+  const key = `${g.id}|${peek}`
+  if (byKey[key]) return byKey[key]
+  const room = g.bottom - g.band
+  const askH = g.stack ? 0 : FS.caption * 1.3 + SP[4]
+  // The furigana keep their least size, so a long line at the last
+  // steps is set lean (a tighter bubble, no name over it: the scene's
+  // card said who), and a beginner's replies, last of all, lose their
+  // romaji (their line keeps it).
+  const tries = STEPS.flatMap(s => (peek ? [true, false] : [false]).flatMap(foot => [false, true].map(wider => ({ s, foot, wider }))))
+  for (const s of [0.68, 0.6, 0.54]) tries.push({ s, foot: false, wider: true, lean: true })
+  if (it.romaji) for (const s of [0.68, 0.6, 0.54]) tries.push({ s, foot: false, wider: true, lean: true, bare: true })
+  let q = null
+  for (const { s, foot, wider, lean = false, bare = false } of tries) {
+    const { w, tw, rx, dw } = columns(g, wider)
+    const top = foot ? PEEK : 0
+    const pad = lean ? SP[3] : s >= 0.84 ? SP[5] : SP[4]
+    const gap = lean ? SP[4] : SP[5]
+    const trSizes = [FS.body, FS.sm].map(z => z * Math.max(0.85, s))
+    const them = bubbleOf(ctx, p, it.them.rows, { tr: it.them.tr, who: lean ? null : it.who, w: tw, z: (g.stack ? FS.title : FS.heading) * s, romaji: it.romaji, pad, trSizes })
+    const drafts = draftsOf(ctx, p, it.choices, { w: dw, z: (g.stack ? FS.lead : FS.title) * s, romaji: it.romaji && !bare, tight: lean })
+    const total = g.stack ? top + gap + them.h + gap + drafts.h : Math.max(SP[6] + them.h, top + gap + askH + drafts.h)
+    q = { s, foot, them, drafts, total, w, tw, rx, dw, top, gap }
+    if (total <= room && !them.cut && !drafts.cut) break
+  }
+  // The answer: their line shrunk to a reminder (the first to go short
+  // of room), yours in its bubble, what it means, and why: under it
+  // standing, beside the thread wide.
+  let a = null
+  const answers = STEPS.flatMap(s => [false, true].map(lean => ({ s, lean })))
+  const lw = g.stack ? q.w : q.tw
+  for (const { s, lean } of answers) {
+    const ns = [FS.body, FS.sm, FS.caption].map(z => z * Math.max(0.85, s))
+    const pad = lean ? SP[3] : s >= 0.84 ? SP[5] : SP[4]
+    const trSizes = [FS.body, FS.sm].map(z => z * Math.max(0.85, s))
+    const you = bubbleOf(ctx, p, it.choices[it.right], { tr: it.reply, who: S.you, w: lw * 0.9, z: (g.stack ? FS.title : FS.heading) * s, romaji: it.romaji, me: true, pad, trSizes })
+    const note = noteOf(ctx, p, S.whyOne, it.why, { w: g.stack ? q.w : q.dw, sizes: ns })
+    let fits = false
+    for (const back of [true, false]) {
+      const b = back ? bubbleOf(ctx, p, it.them.rows, { w: lw * 0.8, z: FS.body * Math.max(0.85, s), pad: SP[4], lines: 2 }) : null
+      const thread = SP[5] + (b ? b.h + SP[4] : 0) + you.h
+      const total = g.stack ? thread + SP[5] + note.h : Math.max(thread, SP[6] + note.h)
+      a = { back: b, you, note, total }
+      fits = total <= room && !you.cut && !note.cut
+      if (fits) break
+    }
+    if (fits) break
+  }
+  byKey[key] = { ...q, a, askH }
+  return byKey[key]
+}
+/** The foot of your last reply, under the band: the thread scrolled on. */
+function peekOf(ctx, p, prev, g) {
+  const { w, dw } = columns(g)
+  const pw = g.stack ? w * 0.6 : dw * 0.75
+  const b = bubbleOf(ctx, p, prev.choices[prev.right], { w: pw, z: FS.body, script: 'kanji', me: true, tail: false, lines: 1, foot: true })
+  return { draw: () => b.draw(g.right - pw, g.band + PEEK - b.box, { dim: true }) }
+}
+
+/** A frame of a reply video, in either format. */
+function drawThread(ctx, plan, tl, t, g) {
+  const { p, S, sg, u, state, k, fade, d, m } = begin(ctx, plan, tl, t, g.w, g.h, 'paper')
+  const at = sg.n ? `${sg.n} / ${tl.of}` : ''
+  switch (sg.type) {
+    case 'intro': {
+      const cx = (g.x + g.right) / 2
+      const w = g.right - g.x
+      // The title, the hook, how it goes: one block, in the middle.
+      const title = fit(ctx, plan.title, { weight: 900, fam: 'serif', sizes: g.stack ? [FS.display * 0.8, FS.heading] : [FS.display, FS.display * 0.8], maxW: w, maxLines: 2, lh: 1.06 })
+      const hook = fit(ctx, S.hook.reply, { weight: 700, sizes: [FS.title, FS.lead], maxW: w, maxLines: 2 })
+      const how = fit(ctx, `${S.count.reply(tl.of)} · ${S.how.reply}`, { weight: 500, sizes: [FS.body, FS.sm], maxW: w, maxLines: 2 })
+      const hs = [paragraphH(title, 1.06), paragraphH(hook), paragraphH(how)]
+      const y = (g.band + g.bottom) / 2 - (hs[0] + hs[1] + hs[2] + SP[7] + SP[6]) / 2
+      fade(k(0.2, 0.5), () => paragraph(ctx, title, cx, y, p.ink, 'center', 1.06))
+      fade(k(0.8, 0.5), () => paragraph(ctx, hook, cx, y + hs[0] + SP[7], p.gold, 'center'))
+      fade(k(1.4, 0.5), () => paragraph(ctx, how, cx, y + hs[0] + SP[7] + hs[1] + SP[6], p.ink2, 'center'))
+      threadBand(ctx, p, g, [`JLPT ${plan.level}`])
+      break
+    }
+    case 'scene': drawThreadScene(ctx, p, S, plan, d, k, fade, g); threadBand(ctx, p, g, [S.conv]); break
+    case 'reply': {
+      const it = d
+      const i = plan.items.indexOf(it)
+      const prev = plan.items[i - 1]?.type === 'reply' ? plan.items[i - 1] : null
+      const Ly = threadLayout(ctx, p, S, it, g, !!prev)
+      const revealed = u >= m.reveal
+      // The thread scrolls on: the last answer goes up under the band, the foot of your reply stays.
+      if (prev) {
+        const v = k(0, 0.45)
+        if (v < 1) {
+          ctx.save()
+          ctx.globalAlpha *= 1 - v
+          ctx.translate(0, -v * 700)
+          drawAnswer(ctx, g, threadLayout(ctx, p, S, prev, g, false))
+          ctx.restore()
+        }
+        // The answer takes the room from the top: the foot gives way to it.
+        const vA = k(m.why, 0.4)
+        if (Ly.foot) fade(v * (1 - vA), () => peekOf(ctx, p, prev, g).draw())
+      }
+      const vA = k(m.why, 0.4)
+      const y0 = g.band + Ly.top + Ly.gap
+      // Their line, until the answer takes its place.
+      if (vA < 1) fade(k(m.lineAt, 0.35) * (1 - vA), () => Ly.them.draw(g.x, g.stack ? y0 : g.band + SP[6]))
+      if (vA < 1 && u >= m.choicesAt) {
+        ctx.save()
+        ctx.globalAlpha *= 1 - vA
+        const dy = g.stack ? y0 + Ly.them.h + Ly.gap : y0 + Ly.askH
+        if (!g.stack) fade(k(m.choicesAt, 0.3), () => capsAt(ctx, S.replyAsk, g.right, y0, p.gold, 'right'))
+        Ly.drafts.draw(Ly.rx, dy, it.right, j => k(m.choicesAt + 0.1 + j * 0.12, 0.3), revealed ? k(m.reveal, 0.35) : 0)
+        ctx.restore()
+      }
+      if (vA > 0) {
+        ctx.save()
+        ctx.globalAlpha *= vA
+        drawAnswer(ctx, g, Ly)
+        ctx.restore()
+      }
+      // The band over the thread: the ring while you choose, a tick once it is out.
+      const right = u < m.choicesAt ? null : (cx, cy) => {
+        if (revealed) return tick(ctx, p, cx, cy, g.ring)
+        const left = u < m.show ? m.count : m.reveal - u
+        const share = Math.max(0, Math.min(1, left / m.count))
+        state.push(`${Math.round(share * 90)}|${Math.ceil(left)}`)
+        ringOf(ctx, p, cx, cy, g.ring, share, Math.max(1, Math.ceil(left)))
+      }
+      if (revealed) state.push('R')
+      threadBand(ctx, p, g, [`${it.place.tr} · ${at}`, at], right)
+      break
+    }
+    case 'score': {
+      const cx = (g.x + g.right) / 2
+      const w = g.right - g.x
+      const mid = (g.band + g.bottom) / 2
+      fade(k(0.1, 0.5), () => { const b = fit(ctx, S.score(d.n, d.of), { weight: 700, sizes: [FS.heading, FS.title], maxW: w, maxLines: 3 }); paragraph(ctx, b, cx, mid - (g.stack ? 330 : 260), p.ink, 'center') })
+      // It asks the viewer's own score (plan 249): ? / 3, never 3 / 3.
+      fade(k(0.6, 0.5), () => text(ctx, `? / ${d.of}`, cx, mid + (g.stack ? 70 : 60), { f: font(900, g.stack ? 200 : 170, 'serif'), color: p.gold, align: 'center' }))
+      fade(k(1.2, 0.5), () => { const b = fit(ctx, S.comment, { weight: 500, sizes: [FS.lead, FS.body], maxW: w, maxLines: 2 }); paragraph(ctx, b, cx, mid + (g.stack ? 180 : 150), p.ink2, 'center') })
+      threadBand(ctx, p, g, [S.chapters.final])
+      break
+    }
+    case 'outro': fade(k(0.1, 0.5), () => drawCta(ctx, CTA_FMT[g.id], { lang: plan.lang, feature: 'conversation', design: 'fiche', line: 'kaiwa' })); break
+    default:
+  }
+  return state.join(',')
+}
+/** The answer: their line as a reminder, yours, said, and a note of why:
+ *  under the thread standing, beside it wide. */
+function drawAnswer(ctx, g, Ly) {
+  const a = Ly.a
+  let y = g.band + SP[5]
+  if (a.back) {
+    a.back.draw(g.x, y, { dim: true })
+    y += a.back.h + SP[4]
+  }
+  const lw = g.stack ? Ly.w : Ly.tw
+  a.you.draw(g.x + lw * 0.1, y)
+  if (g.stack) a.note.draw(g.x, y + a.you.h + SP[5])
+  else a.note.draw(Ly.rx, g.band + SP[6])
+}
+/** A scene's card: the chat's head, the place and who speaks to you. A
+ *  short's one scene opens on the question it asks. */
+function drawThreadScene(ctx, p, S, plan, d, k, fade, g) {
+  const w = g.right - g.x
+  const cw = g.stack ? w : Math.min(1200, w)
+  const x = (g.x + g.right) / 2 - cw / 2
+  const cx = (g.x + g.right) / 2
+  const opens = plan.format === 'short' && plan.items.indexOf(d) === 0
+  const hook = opens ? fit(ctx, S.replyHook, { weight: 900, fam: 'serif', sizes: [FS.display * 0.8, FS.heading], maxW: w, maxLines: 2, lh: 1.06 }) : null
+  const headH = hook ? paragraphH(hook, 1.06) + SP[7] : FS.caption * 1.3 + SP[5]
+  // The chat's head: who it is with (a disc), the place, what it is, who speaks; two lines each at most.
+  const r = 80
+  const pad = SP[6]
+  const tx = x + pad + r * 2 + SP[6]
+  const tw = x + cw - pad - tx
+  const fam = hasKanji(d.place.jp) ? 'serif' : 'jp'
+  const jz = Math.min(FS.display, (FS.display * tw) / Math.max(1, measure(ctx, d.place.jp, font(900, FS.display, fam))))
+  const place = fit(ctx, d.place.tr, { weight: 700, sizes: [FS.lead, FS.body, FS.sm], maxW: tw, maxLines: 2, lh: 1.18, balanced: false })
+  const who = fit(ctx, `${d.who} · ${S.online}`, { weight: 500, sizes: [FS.body, FS.sm], maxW: tw - 36, maxLines: 2, lh: 1.18, balanced: false })
+  const textH = jz * 1.05 + SP[3] + paragraphH(place) + SP[4] + paragraphH(who)
+  const ch = Math.max(r * 2 + pad * 2, textH + pad * 2)
+  const pillH = 64
+  const total = headH + ch + SP[7] + pillH
+  let y = (g.band + g.bottom) / 2 - total / 2
+  const y1 = y
+  fade(k(0.1, 0.4), () => {
+    if (hook) paragraph(ctx, hook, cx, y1, p.ink, 'center', 1.06)
+    else capsAt(ctx, S.sceneHead, cx, y1, p.gold, 'center')
+  })
+  y += headH
+  const y2 = y
+  fade(k(0.35, 0.4), () => {
+    sheet(ctx, p, x, y2, cw, ch)
+    ctx.fillStyle = p.line.kaiwa
+    ctx.beginPath()
+    ctx.arc(x + pad + r, y2 + ch / 2, r, 0, Math.PI * 2)
+    ctx.fill()
+    text(ctx, '話', x + pad + r, y2 + ch / 2 + r * 0.4, { f: font(900, r * 1.1, 'serif'), color: p.onLine, align: 'center' })
+    let ty = y2 + ch / 2 - textH / 2
+    text(ctx, d.place.jp, tx, ty + jz * 0.86, { f: font(900, jz, fam), color: p.ink })
+    ty += jz * 1.05 + SP[3]
+    paragraph(ctx, place, tx, ty, p.ink2, 'left')
+    ty += paragraphH(place) + SP[4]
+    ctx.fillStyle = OK
+    ctx.beginPath()
+    ctx.arc(tx + 12, ty + who.size * 0.45, 10, 0, Math.PI * 2)
+    ctx.fill()
+    paragraph(ctx, who, tx + 36, ty, p.ink2, 'left')
+  })
+  y += ch + SP[7]
+  const y3 = y
+  fade(k(0.7, 0.4), () => {
+    const lbl = `${S.count.reply(d.asks)} · ${S.seconds(tuned(plan.tune, 'reply.count'))}`.toLocaleUpperCase()
+    const f = font(700, FS.caption, 'latin')
+    const dw = Math.min(w, measure(ctx, lbl, f, 0.16) + SP[7] * 2)
+    ctx.fillStyle = p.surface
+    rrect(ctx, cx - dw / 2, y3, dw, pillH, pillH / 2)
+    ctx.fill()
+    text(ctx, lbl, cx, y3 + 42, { f, color: p.ink2, align: 'center', tr: 0.16 })
+  })
 }

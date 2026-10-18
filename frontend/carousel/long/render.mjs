@@ -38,7 +38,7 @@ import { dirname, extname, isAbsolute, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 import { SITE_ORIGIN } from '../../landing/config.mjs'
-import { FPS, TALL, WIDE, cueKey, describe, fitShort, longPlan, timeline } from '../long.js'
+import { FPS, TALL, WIDE, cueKey, describe, fitShort, longPlan, stillAt, timeline } from '../long.js'
 import { fromRecipe, shortTimeline } from '../short.js'
 import { TRACKS, challengeCues, challengePage, challengePlan, challengeTimeline } from '../challenge.js'
 import { parseTune } from '../tune.js'
@@ -205,7 +205,7 @@ if (args.challenge) {
     window.__draw = t => L.drawLong(window.__ctx, plan, tl, t)
   }, { plan, tl })
   pageText = describe(plan, tl, site, banks['index.json']?.figures)
-  thumbAt = opts.format === 'short' ? 3.4 : 4.5
+  thumbAt = stillAt(plan, tl)
   log(`${(tl.seconds / 60).toFixed(1)} min, ${tl.cues.length} lines, ${tl.sfx.length} sounds`)
 }
 const seconds = Math.min(tl.seconds, Number(args.seconds) || Infinity)

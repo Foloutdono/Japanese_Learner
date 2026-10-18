@@ -17,7 +17,7 @@ import { RATE, clipAudio, decoded, loadVoices } from './sound.js'
 import { voiceSpan } from './echo.js'
 import { STYLES as CHALLENGE_STYLES, TRACK, TRACKS, challengeCommand, challengePage, challengePlan, challengeTimeline, drawChallenge } from './challenge.js'
 import { FPS as SHORT_FPS, chars, depsFor as depsOfWord, drawShortFrame, recipeOf, shortTimeline } from './short.js'
-import { LONG_SITE, TALL, describe as describeLong, drawLong, fitShort, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, timeline, WIDE } from './long.js'
+import { LONG_SITE, TALL, describe as describeLong, drawLong, fitShort, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, stillAt, timeline, WIDE } from './long.js'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 import { TUNABLES, changed, tuned, tuneFlag, tunablesFor } from './tune.js'
 
@@ -214,7 +214,7 @@ async function listNow() {
   const data = await dataNow()
   if (mine !== listToken) return
   const src = sourceOf(state.source)
-  let items = state.source === 'long' ? longItems(data, state.level, state.lang) : itemsOf(state.source, data, state.lang, src.levels ? state[setKey(src)] : null)
+  let items = state.source === 'long' ? longItems(data, state.level, state.lang, state.longFormat) : itemsOf(state.source, data, state.lang, src.levels ? state[setKey(src)] : null)
   if (src.byLevel) items = items.filter(x => x.tag === state.level)
   listCache = items
   const q = $('#search').value.trim().toLowerCase()
@@ -919,7 +919,7 @@ async function exportThumb() {
   const c = document.createElement('canvas')
   c.width = current.fmt.w
   c.height = current.fmt.h
-  drawLong(c.getContext('2d'), current.plan, current.long.tl, current.plan.format === 'short' ? 3.4 : 4.5)
+  drawLong(c.getContext('2d'), current.plan, current.long.tl, stillAt(current.plan, current.long.tl))
   const name = `tsuji-${current.plan.format === 'short' ? 'short-' : ''}${safeName(current.long.id.replace(':', '-'))}-${state.level}-${state.lang}.png`
   const result = await offer(name, await png(c))
   status(result === 'saved' ? 'Saved the thumbnail.' : MESSAGE[result])
@@ -1335,7 +1335,8 @@ function wire() {
     const [key, value] = b.dataset.set.split(':')
     state[key] = value
     if (key === 'type') state.view = 'single'
-    if (key === 'lang') { sync(); renderList().then(render); return }
+    // A reply short is a scene, its 16:9 two (plan 249b): the list is the format's.
+    if (key === 'lang' || key === 'longFormat') { sync(); renderList().then(render); return }
     sync()
     render()
   })
