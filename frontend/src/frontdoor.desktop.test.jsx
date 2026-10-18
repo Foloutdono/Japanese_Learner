@@ -886,6 +886,14 @@ const { default: AppLoading } = await import('./screens/AppLoading')
 const landed = () => settle(900)
 const centreY = r => (r.top + r.bottom) / 2
 const opacityOf = el => Number(getComputedStyle(el).opacity)
+// An opacity read when it has come to its value, not after a fixed sleep:
+// with the lanes' pages running side by side a frame can be late by more
+// than the beat a test waited, and an element was read at 0.82 mid-fade.
+// `of` is a getter, the element can be replaced while it waits.
+const opacityIs = (of, value) => vi.waitFor(
+  () => expect(opacityOf(of())).toBe(value),
+  { timeout: 5000, interval: 20 },
+)
 
 describe('first contact, finished (P13, plan 155)', () => {
   it('stands the way on where it stood, on every question and on the card', async () => {
@@ -971,11 +979,10 @@ describe('first contact, finished (P13, plan 155)', () => {
     expect(station.querySelectorAll('.desk-kbd')).toHaveLength(1)
     expect(key().textContent).toBe('5')
     expect(opacityOf(key())).toBeGreaterThan(0.5)
-    expect(opacityOf(tick())).toBe(0)
+    await opacityIs(() => tick(), 0)
     await pick('[data-level="N5"]')
-    await settle(300)
-    expect(opacityOf(key())).toBe(0)
-    expect(opacityOf(tick())).toBe(1)
+    await opacityIs(() => key(), 0)
+    await opacityIs(() => tick(), 1)
   })
 
   it('prices the four trains on the rhythm\'s sheet, the more minutes the sooner, and reprints the card', async () => {
@@ -1077,16 +1084,16 @@ describe('first contact, finished (P13, plan 155)', () => {
     beats.forEach(a => { a.pause(); a.currentTime = 300 })
     // The way in and the corner pull away, the map a beat after them.
     expect($('.desk-front').classList.contains('desk-front--leaving')).toBe(true)
-    expect(opacityOf($('.desk-front__block'))).toBe(0)
-    expect(opacityOf($('.desk-front__door'))).toBe(0)
+    await opacityIs(() => $('.desk-front__block'), 0)
+    await opacityIs(() => $('.desk-front__door'), 0)
     // The pass being issued: its dots a beat after the press, on the
     // paper's middle.
-    expect(opacityOf($('.desk-wait'))).toBe(0)
+    await opacityIs(() => $('.desk-wait'), 0)
     beats.forEach(a => a.play())
     await landed()
-    expect(opacityOf($('.desk-front__map'))).toBe(0)
-    expect(opacityOf($('.desk-front__hub'))).toBe(0)
-    expect(opacityOf($('.desk-wait'))).toBe(1)
+    await opacityIs(() => $('.desk-front__map'), 0)
+    await opacityIs(() => $('.desk-front__hub'), 0)
+    await opacityIs(() => $('.desk-wait'), 1)
     const dots = dotsAt()
     expect(Math.abs(dots[0] - bodyW() / 2)).toBeLessThan(2)
     await screen.unmount()
@@ -1095,15 +1102,15 @@ describe('first contact, finished (P13, plan 155)', () => {
     const wait = await render(<LangProvider><AppLoading wakesServer frame since={performance.now() - 1000} /></LangProvider>)
     await settle(60)
     expect($('.desk-rail__mast')).toBeNull()
-    expect(opacityOf($('.desk-brd--wait .desk-wait'))).toBe(1)
+    await opacityIs(() => $('.desk-brd--wait .desk-wait'), 1)
     expect(dotsAt()).toEqual(dots)
     await wait.unmount()
     // With no press to time from, a beat before they are drawn at all.
     const cold = await render(<LangProvider><AppLoading wakesServer frame /></LangProvider>)
     await settle(100)
-    expect(opacityOf($('.desk-wait'))).toBe(0)
+    await opacityIs(() => $('.desk-wait'), 0)
     await landed()
-    expect(opacityOf($('.desk-wait'))).toBe(1)
+    await opacityIs(() => $('.desk-wait'), 1)
     await cold.unmount()
   })
 
@@ -1113,23 +1120,27 @@ describe('first contact, finished (P13, plan 155)', () => {
     await screen.rerender(<Door authMode="signup" />)
     await landed()
     expect($('.desk-front').classList.contains('desk-front--leaving')).toBe(false)
-    expect(opacityOf($('.desk-front__block'))).toBe(1)
-    expect(opacityOf($('.desk-front__map'))).toBe(1)
-    expect(opacityOf($('.desk-front__hub'))).toBe(1)
+    await opacityIs(() => $('.desk-front__block'), 1)
+    await opacityIs(() => $('.desk-front__map'), 1)
+    await opacityIs(() => $('.desk-front__hub'), 1)
     expect([en.signup, fr.signup]).toContain($('h1').textContent)
   })
 
   it('keeps the leaving car until the arriving one has landed, and runs Back the other way', async () => {
     await board()
     await pick('[data-kana="both"]')
-    await settle(160)
     // Gone from sight, not from the page: the arriving answers are still
-    // coming in, and dropping it took their entrance with it.
-    const out = $('.brd__car--out')
-    expect(out).not.toBeNull()
+    // coming in, and dropping it took their entrance with it. Read when
+    // the fade has drawn, not after a sleep: with the lanes' pages
+    // running side by side a frame can be late by more than a fixed
+    // wait, and the car was read at its opacity of 1.
+    await vi.waitFor(() => {
+      const out = $('.brd__car--out')
+      expect(out).not.toBeNull()
+      expect(opacityOf(out)).toBe(0)
+    }, { timeout: 5000, interval: 20 })
     expect(getComputedStyle(live()).animationName).toBe('desk-brd-pull-in')
-    await settle(900)
-    expect($('.brd__car--out')).toBeNull()
+    await vi.waitFor(() => expect($('.brd__car--out')).toBeNull(), { timeout: 5000, interval: 20 })
     inCar('[data-action="back"]').click()
     await settle(40)
     expect(live().dataset.dir).toBe('back')

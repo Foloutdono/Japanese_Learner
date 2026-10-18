@@ -361,8 +361,9 @@ describe('TodayScreen — the transfer sheet', () => {
     const screen = await mountWithSettings()
     await settleLong()
     sheet().querySelector('[data-action="transfer-offer-go"]').click()
-    await settle()
-    expect(document.querySelector('[data-page="settings"]')).toBeTruthy()
+    // Waited for, not slept on: the page arrives through the router's
+    // transition, which a fixed 80ms lost on a loaded CI runner.
+    await vi.waitFor(() => expect(document.querySelector('[data-page="settings"]')).toBeTruthy(), { timeout: 5000, interval: 20 })
     const posted = apiJson.mock.calls.filter(([u]) => u === '/api/transfer/offer')
     expect(posted.map(([, , o]) => JSON.parse(o.body))).toEqual([{ choice: 'go' }])
     await screen.unmount()

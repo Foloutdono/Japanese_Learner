@@ -340,9 +340,10 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         # sentence's explanation opened. dictionary: a search run.
         # export: the progress downloaded. level_fit: Today's line that
         # says the level does not fit (plan 224) -- opened, the move
-        # taken, or the level kept.
+        # taken, or the level kept. conversation: the 会話 station's
+        # search started (plan 246).
         "feature": frozenset({"speech", "analyzer", "ocr", "ask", "explain",
-                              "dictionary", "export", "level_fit"}),
+                              "dictionary", "export", "level_fit", "conversation"}),
         "action":  frozenset({"play", "text", "photo", "video", "scan", "send",
                               "open", "search", "progress", "move", "stay"}),
     },
