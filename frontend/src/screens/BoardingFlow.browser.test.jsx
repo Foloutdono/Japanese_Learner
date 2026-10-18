@@ -162,6 +162,21 @@ function type(el, value) {
   el.dispatchEvent(new Event('input', { bubbles: true }))
 }
 
+// The name's own screen (plan 255), between the level and the card: its
+// gate waits for a name, its quiet way goes on without one. `name`
+// null skips; a string is typed into the plate and the gate pressed.
+async function throughName(screen, name = null) {
+  await vi.waitFor(() => expect(stepOf(screen)).toBe('name'), { timeout: 2000 })
+  if (name == null) {
+    await click(screen, '[data-action="name-skip"]')
+  } else {
+    type(q(screen, '.brd-plate__field'), name)
+    await settle(20)
+    await click(screen, '[data-action="continue"]')
+  }
+  await settle()
+}
+
 async function renderFlow({ onComplete = vi.fn(), dryRun = false, onExit = undefined, onSignIn = undefined, guest = false, user = null } = {}) {
   const screen = await render(
     <LangProvider>
@@ -179,19 +194,20 @@ async function renderFlow({ onComplete = vi.fn(), dryRun = false, onExit = undef
   return { screen, onComplete }
 }
 
-// A beginner's line: « Pas encore », the reveal, the card.
-async function toCardBeginner(screen) {
+// A beginner's line: « Pas encore », the reveal, the name, the card.
+async function toCardBeginner(screen, name = null) {
   expect(stepOf(screen)).toBe('kana')
   await click(screen, '[data-kana="none"]')
   await settle()
   expect(stepOf(screen)).toBe('reveal')
   await click(screen, '[data-action="continue"]')
   await settle()
+  await throughName(screen, name)
   expect(stepOf(screen)).toBe('card')
 }
 
-// A reader's: both scripts, the level picked on the line, the card.
-async function toCardReader(screen, level = 'N4') {
+// A reader's: both scripts, the level picked on the line, the name, the card.
+async function toCardReader(screen, level = 'N4', name = null) {
   expect(stepOf(screen)).toBe('kana')
   await click(screen, '[data-kana="both"]')
   await settle()
@@ -199,6 +215,7 @@ async function toCardReader(screen, level = 'N4') {
   await click(screen, `[data-level="${level}"]`)
   await click(screen, '[data-action="continue"]')
   await settle()
+  await throughName(screen, name)
   expect(stepOf(screen)).toBe('card')
 }
 
@@ -231,10 +248,10 @@ describe('BoardingFlow', () => {
   it('kana → the reveal → the card, filled in with what most keep, and one POST of the whole contract', async () => {
     const { screen, onComplete } = await renderFlow()
 
-    // 1/2: the kana, then the card. With no `onExit` to leave for there
-    // is no button on the first question.
+    // 1/3: the kana, the name, then the card. With no `onExit` to leave
+    // for there is no button on the first question.
     expect(stepOf(screen)).toBe('kana')
-    expect(stepsOf(screen)).toBe('1/2')
+    expect(stepsOf(screen)).toBe('1/3')
     expect(screen.container.querySelector('button.brd__back')).toBeNull()
     // The answers are the foot: each one advances.
     expect(q(screen, '.brd__foot')).toBeNull()
@@ -242,9 +259,21 @@ describe('BoardingFlow', () => {
     await settle()
     // The reveal is the kana's stop's second half, not a stop of its own.
     expect(stepOf(screen)).toBe('reveal')
-    expect(stepsOf(screen)).toBe('1/2')
+    expect(stepsOf(screen)).toBe('1/3')
     expect(document.activeElement?.className).toContain('brd__q')
     await click(screen, '[data-action="continue"]')
+    await settle()
+
+    // The name (plan 255): a stop of its own, its plate holding the focus
+    // so the keyboard comes up, the gate shut until a name is written,
+    // and a quiet way on without one.
+    expect(stepOf(screen)).toBe('name')
+    expect(stepsOf(screen)).toBe('2/3')
+    expect(document.activeElement?.className).toContain('brd-plate__field')
+    expect(q(screen, '.brd__q').textContent).toBe(fr.brdNameQ)
+    expect(q(screen, '[data-action="continue"]').disabled).toBe(true)
+    expect(q(screen, '[data-action="name-skip"]').textContent).toBe(fr.brdNameSkip)
+    await click(screen, '[data-action="name-skip"]')
     await settle()
 
     // The card: an arrival screen, no head, its back up.
@@ -307,7 +336,7 @@ describe('BoardingFlow', () => {
     await settle()
     // Both read: the level is a stop of its own, and the track grows one.
     expect(stepOf(screen)).toBe('level')
-    expect(stepsOf(screen)).toBe('2/3')
+    expect(stepsOf(screen)).toBe('2/4')
     expect(q(screen, '[data-level="novice"] .brd-stn__ring').textContent).toBe('あ')
     // The volumes price the line: N5's ~100 kanji.
     expect(q(screen, '[data-level="N5"] .brd-stn__desc').textContent).toContain('100')
@@ -318,6 +347,8 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-level="N4"]')
     await click(screen, '[data-action="continue"]')
     await settle()
+    expect(stepsOf(screen)).toBe('3/4')
+    await throughName(screen)
 
     expect(stepOf(screen)).toBe('card')
     expect(code(screen, 'level').textContent).toBe('N4')
@@ -427,6 +458,7 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-level="N3"]')
     await click(screen, '[data-action="continue"]')
     await settle()
+    await throughName(screen)
     expect(code(screen, 'level').textContent).toBe('N3')
     await click(screen, '[data-door="level"]')
     await settle()
@@ -476,7 +508,7 @@ describe('BoardingFlow', () => {
     await settle()
     expect(stepOf(screen)).toBe('test')
     // The test is the level's own stop.
-    expect(stepsOf(screen)).toBe('2/3')
+    expect(stepsOf(screen)).toBe('2/4')
   }
 
   it('finds the level by the test, and lands on the line with the stop it reached chosen', async () => {
@@ -514,6 +546,7 @@ describe('BoardingFlow', () => {
     await settle()
     await click(screen, '[data-action="continue"]')
     await settle()
+    await throughName(screen)
     expect(stepOf(screen)).toBe('card')
     await click(screen, '[data-action="issue"]')
     await settle(80)

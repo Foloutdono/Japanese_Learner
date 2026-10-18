@@ -126,10 +126,17 @@ async function toLevel() {
   await settle()
   expect(stepOf()).toBe('level')
 }
-/** From the level list, at `level`, to the card. */
+/** The name's own screen (plan 255), gone past by its quiet way. */
+async function skipName() {
+  expect(stepOf()).toBe('name')
+  await pick('[data-action="name-skip"]')
+  await settle()
+}
+/** From the level list, at `level`, through the name, to the card. */
 async function toCard(level = 'N3') {
   await pick(`[data-level="${level}"]`)
   await next()
+  await skipName()
   expect(stepOf()).toBe('card')
 }
 const fits = el => el.scrollHeight <= el.clientHeight + 1
@@ -152,6 +159,17 @@ describe('Enter at first contact (P8)', () => {
     await userEvent.click(inCar('[data-level="N3"]'))
     await enter()
     await settle()
+    // The name (plan 255): its plate holds the focus, Enter goes on only
+    // once a name is written in it, and the gate prints the key too.
+    expect(stepOf()).toBe('name')
+    expect(document.activeElement).toBe(inCar('.brd-plate__field'))
+    expect(cap().getAttribute('aria-keyshortcuts')).toBe('Enter')
+    await enter()
+    await settle()
+    expect(stepOf()).toBe('name')
+    await userEvent.keyboard('Aiko')
+    await enter()
+    await settle()
     expect(stepOf()).toBe('card')
     // The card's gate names it too, and Enter issues the card.
     expect(inCar('[data-action="issue"]').getAttribute('aria-keyshortcuts')).toBe('Enter')
@@ -171,7 +189,7 @@ describe('Enter at first contact (P8)', () => {
     expect(inCar('[data-level="N2"]').getAttribute('aria-pressed')).toBe('true')
     await enter()
     await settle()
-    expect(stepOf()).toBe('card')
+    expect(stepOf()).toBe('name')
   })
 
   it('keeps a sheet\'s keys its own, and goes on from the card with what it set', async () => {
@@ -238,7 +256,8 @@ describe('the Welcome\'s Enter (P8)', () => {
 // its stop and a stop behind a door back to its question (plan 140's
 // rules); the floor in the bottom-right corner, Back beside Continue.
 // Since plan 247 the stops are the kana, a reader's level and the card,
-// and the card is the last screen: its gate issues it.
+// and the card is the last screen: its gate issues it. Since plan 255 the
+// name is a stop of its own before the card.
 
 describe('the boarding frame on the desk (P9, plans 140, 163, 247)', () => {
   it('draws the journey as a strip at the floor\'s left end, a stop per question, and keeps it to the card', async () => {
@@ -250,9 +269,9 @@ describe('the boarding frame on the desk (P9, plans 140, 163, 247)', () => {
     expect($('.brd__track')).toBeNull()
     expect(side()).toBeNull()
     // The reveal is the kana's own stop; the level joins once both are read.
-    expect(stops()).toEqual(['kana', 'card'])
+    expect(stops()).toEqual(['kana', 'name', 'card'])
     await toLevel()
-    expect(stops()).toEqual(['kana', 'level', 'card'])
+    expect(stops()).toEqual(['kana', 'level', 'name', 'card'])
     await settle(600)
     // On the floor's line, at its left end, clear of the way back.
     const at = box(strip())
@@ -261,9 +280,10 @@ describe('the boarding frame on the desk (P9, plans 140, 163, 247)', () => {
     expect(at.right).toBeLessThan(box(inCar('[data-action="level-test"]')).left)
     await toCard()
     // The strip stays, the questions behind the card doors back to them.
-    expect(stops().map(stateOf)).toEqual(['done', 'done', 'now'])
+    expect(stops().map(stateOf)).toEqual(['done', 'done', 'done', 'now'])
     expect(doorOf('kana')).not.toBeNull()
     expect(doorOf('level')).not.toBeNull()
+    expect(doorOf('name')).not.toBeNull()
     expect(doorOf('card')).toBeNull()
     // The card is the last screen: its gate posts the contract.
     const go = inCar('[data-action="issue"]')
@@ -279,7 +299,7 @@ describe('the boarding frame on the desk (P9, plans 140, 163, 247)', () => {
 
   it('says each answer on its stop, the pick as it stands, and lights the one asked', async () => {
     await board()
-    expect(stops().map(stateOf)).toEqual(['now', 'next'])
+    expect(stops().map(stateOf)).toEqual(['now', 'next', 'next'])
     expect(stop('kana').getAttribute('aria-current')).toBe('step')
     expect(valueOf('kana')).toBeNull()
     await toLevel()
@@ -295,8 +315,16 @@ describe('the boarding frame on the desk (P9, plans 140, 163, 247)', () => {
     // A stop ahead says nothing.
     expect(stateOf('card')).toBe('next')
     expect(valueOf('card')).toBeNull()
+    expect(valueOf('name')).toBeNull()
     await next()
     expect(stateOf('level')).toBe('done')
+    // The name (plan 255) says the name as it is written.
+    expect(stateOf('name')).toBe('now')
+    await userEvent.keyboard('Aiko')
+    await settle(40)
+    expect(valueOf('name')).toBe('Aiko')
+    await next()
+    expect(stateOf('name')).toBe('done')
     expect(stateOf('card')).toBe('now')
   })
 
@@ -315,6 +343,7 @@ describe('the boarding frame on the desk (P9, plans 140, 163, 247)', () => {
     expect(stepOf()).toBe('level')
     expect(inCar('[data-level="N3"]').getAttribute('aria-pressed')).toBe('true')
     await next()
+    await skipName()
     expect(stepOf()).toBe('card')
     // The card's origin is a door back to the question that set it.
     inCar('[data-door="level"]').click()
@@ -491,6 +520,7 @@ describe('the boarding frame on the desk (P9, plans 140, 163, 247)', () => {
     // top, where the learner stands under them and no answer; the next
     // one is the card's to begin with, each priced with its day.
     await next()
+    await skipName()
     expect(inCar('[data-door="destination"] .pcb__code').textContent).toBe('N3')
     await door('destination')
     const goals = () => [...sheet().querySelectorAll('.brd-goal')]
@@ -516,6 +546,7 @@ describe('the boarding frame on the desk (P9, plans 140, 163, 247)', () => {
     await settle()
     expect(stepOf()).toBe('reveal')
     await next()
+    await skipName()
     await settle(600)
     expect(stepOf()).toBe('card')
     // From 初 -- the novice has passed no stop -- to the first stop ahead.
@@ -563,7 +594,10 @@ describe('the boarding frame on the desk (P9, plans 140, 163, 247)', () => {
       await check()       // kana
       await toLevel()
       await check()       // level
-      await toCard('N5')
+      await pick('[data-level="N5"]')
+      await next()
+      await check()       // name (plan 255)
+      await skipName()
       await check()       // card
       await checkSheet('[data-door="destination"]', 'goal')
       await checkSheet('[data-door="service"]', 'rhythm')
@@ -862,6 +896,10 @@ describe('the digits at first contact (P12)', () => {
     expect(inCar('[data-level="novice"]').getAttribute('aria-pressed')).toBe('true')
     await userEvent.keyboard('{Enter}')
     await settle()
+    // The name (plan 255): a digit is the name's, not a pick.
+    expect(stepOf()).toBe('name')
+    expect(inCar('[aria-keyshortcuts~="1"]')).toBeNull()
+    await skipName()
     // The card: no digit picks a field; its sheets are the pointer's and
     // Enter's.
     expect(stepOf()).toBe('card')
@@ -920,8 +958,10 @@ describe('first contact, finished (P13, plan 155)', () => {
     await pick('[data-level="N3"]')
     await read('[data-action="continue"]')       // level, the test on its floor
     await next()
+    await read('[data-action="continue"]')       // name, its quiet way on its floor
+    await skipName()
     await read('[data-action="issue"]')          // card, the gate alone
-    expect(floors.map(f => f.step)).toEqual(['reveal', 'level', 'card'])
+    expect(floors.map(f => f.step)).toEqual(['reveal', 'level', 'name', 'card'])
     // Continue's end and its top in the corner on every screen, Back a
     // rung before it where there is one. At 1100 the ticket gives some of
     // its width to the strip -- never so much that its label wraps.
@@ -931,7 +971,7 @@ describe('first contact, finished (P13, plan 155)', () => {
       expect(f.width, f.step).toBeGreaterThanOrEqual(240)
       expect(f.width, f.step).toBeLessThanOrEqual(360)
     }
-    expect(floors[2].gap).toBeNull()
+    expect(floors[3].gap).toBeNull()
   })
 
   it('lights the stop being asked, and moves the light with the question', async () => {
@@ -949,6 +989,9 @@ describe('first contact, finished (P13, plan 155)', () => {
     expect(Math.round(ring('kana').width)).toBe(10)
     await pick('[data-level="N4"]')
     await next()
+    await landed()
+    expect(lit()).toBe('name')
+    await skipName()
     await landed()
     expect(lit()).toBe('card')
     doorOf('kana').click()

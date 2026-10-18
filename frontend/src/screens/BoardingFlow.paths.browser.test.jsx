@@ -125,12 +125,20 @@ async function renderFlow({ onComplete = vi.fn(), onExit = vi.fn(), guest = fals
   return { screen, onComplete, onExit }
 }
 
+// The name's own screen (plan 255): its quiet way on, without one.
+async function skipName(screen) {
+  expect(stepOf(screen)).toBe('name')
+  await click(screen, '[data-action="name-skip"]')
+  await settle()
+}
+
 async function toCardReader(screen, level = 'N4') {
   await click(screen, '[data-kana="both"]')
   await settle()
   await click(screen, `[data-level="${level}"]`)
   await click(screen, '[data-action="continue"]')
   await settle()
+  await skipName(screen)
   expect(stepOf(screen)).toBe('card')
 }
 
@@ -185,7 +193,27 @@ describe('every road from the kana reaches the card', () => {
     if (kana === 'both') expect(q(screen, '[data-level="N3"]').getAttribute('aria-pressed')).toBe('true')
     await click(screen, '[data-action="continue"]')
     await settle()
+
+    // The name (plan 255): the gate shut until a name is written, the
+    // quiet way on without one, and the way back to the question before,
+    // its answer kept. On again, the name written is kept too.
+    expect(stepOf(screen)).toBe('name')
+    expect(q(screen, '[data-action="continue"]').disabled).toBe(true)
+    expect(q(screen, '[data-action="name-skip"]')).not.toBeNull()
+    type(q(screen, '.brd-plate__field'), 'Aiko')
+    await settle(20)
+    expect(q(screen, '[data-action="continue"]').disabled).toBe(false)
+    await click(screen, 'button.brd__back')
+    await settle()
+    expect(stepOf(screen)).toBe(kana === 'both' ? 'level' : 'reveal')
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    expect(stepOf(screen)).toBe('name')
+    expect(q(screen, '.brd-plate__field').value).toBe('Aiko')
+    await click(screen, '[data-action="continue"]')
+    await settle()
     expect(stepOf(screen)).toBe('card')
+    expect(q(screen, '.pcb__sign-name').textContent).toBe('Aiko')
 
     // The card: no head, and its origin is the way back to the question
     // that set it -- the level, or the kana.
@@ -196,6 +224,10 @@ describe('every road from the kana reaches the card', () => {
     if (kana === 'both') await click(screen, '[data-action="continue"]')
     else await answer()
     if (kana !== 'both') await click(screen, '[data-action="continue"]')
+    await settle()
+    expect(stepOf(screen)).toBe('name')
+    expect(q(screen, '.brd-plate__field').value).toBe('Aiko')
+    await click(screen, '[data-action="continue"]')
     await settle()
     expect(stepOf(screen)).toBe('card')
 
@@ -297,7 +329,13 @@ describe('the phone\'s Back', () => {
     await settle()
     expect(sheet()).toBeNull()
     expect(stepOf(screen)).toBe('card')
-    // The guard went back in: Back now steps to the level, as it did.
+    // The guard went back in: Back now steps to the name (plan 255), and
+    // the next to the level, as it did.
+    back = popped()
+    window.history.back()
+    await back
+    await settle()
+    expect(stepOf(screen)).toBe('name')
     back = popped()
     window.history.back()
     await back
@@ -318,6 +356,7 @@ describe('a goal picked on the card', () => {
     await settle()
     await click(screen, '[data-action="continue"]')
     await settle()
+    await skipName(screen)
     expect(q(screen, '[data-door="destination"] .pcb__code').textContent).toBe('N2')
     // A level past it: the goal is the new level's next stop.
     await click(screen, '[data-door="level"]')
@@ -325,6 +364,7 @@ describe('a goal picked on the card', () => {
     await click(screen, '[data-level="N2"]')
     await click(screen, '[data-action="continue"]')
     await settle()
+    await skipName(screen)
     expect(q(screen, '[data-door="destination"] .pcb__code').textContent).toBe('N1')
   })
 
@@ -337,6 +377,7 @@ describe('a goal picked on the card', () => {
     await click(screen, '[data-level="N5"]')
     await click(screen, '[data-action="continue"]')
     await settle()
+    await skipName(screen)
     expect(q(screen, '[data-door="destination"] .pcb__code').textContent).toBe('N4')
   })
 })

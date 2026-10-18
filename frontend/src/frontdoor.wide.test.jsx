@@ -172,6 +172,11 @@ describe('first contact at 1440 (P10)', () => {
     inCar('[data-action="continue"]').click()
     await settle(900)
     await landed()
+    // The name's own screen (plan 255), gone past by its quiet way.
+    expect(stepOf()).toBe('name')
+    inCar('[data-action="name-skip"]').click()
+    await settle(900)
+    await landed()
     expect(stepOf()).toBe('card')
     const gutter = (bodyW() - 1240) / 2
     expect(Math.round(box(inCar('.brd__q')).left)).toBe(Math.round(gutter))

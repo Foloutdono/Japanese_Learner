@@ -35,6 +35,11 @@ const { default: Welcome } = await import('./components/boarding/Welcome')
 
 const settle = (ms = 340) => new Promise(r => setTimeout(r, ms))
 const rect = el => el.getBoundingClientRect()
+const setValue = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
+function type(el, value) {
+  setValue.call(el, value)
+  el.dispatchEvent(new Event('input', { bubbles: true }))
+}
 async function click(root, sel) {
   // The next screen comes a frame after the tap (a transition, go()).
   await vi.waitFor(() => expect(root.querySelector(sel), sel).toBeTruthy(), { timeout: 2000 })
@@ -83,10 +88,14 @@ async function toLevel(screen) {
   await arrived(screen, 'level')
 }
 
+// The reveal, the name's own screen (plan 255) gone past without one,
+// the card.
 async function toCard(screen) {
   await click(screen.container, '[data-kana="none"]')
   await settle()
   await click(screen.container, '[data-action="continue"]')
+  await arrived(screen, 'name')
+  await click(screen.container, '[data-action="name-skip"]')
   await arrived(screen, 'card')
 }
 
@@ -194,9 +203,9 @@ describe('the boarding at 390×844', () => {
     expect(rect(head.querySelector('.brd__rail')).height).toBe(2)
     // One stop per question, the one you stand at a larger ring -- your
     // train -- the ones behind filled, the ones ahead empty: the kana,
-    // the level, the card.
+    // the level, the name (plan 255), the card.
     const stops = [...track.querySelectorAll('.brd__stop')]
-    expect(stops).toHaveLength(3)
+    expect(stops).toHaveLength(4)
     expect(stops).toHaveLength(Number(track.getAttribute('aria-valuemax')))
     const here = track.querySelector('.brd__stop--here')
     expect(Math.round(rect(here).width)).toBe(19)
@@ -459,8 +468,11 @@ describe('the boarding at 390×844', () => {
       measure()                                   // the level, the test over it
       expect(live(screen.container).querySelector('.brd__foot > [data-action="level-test"] + .btn-depart--gate')).not.toBeNull()
       await on('[data-action="continue"]')
+      measure()                                   // the name, its quiet way over it
+      expect(live(screen.container).querySelector('.brd__foot > [data-action="name-skip"] + .btn-depart--gate')).not.toBeNull()
+      await on('[data-action="name-skip"]')
       measure()                                   // the card
-      expect(seen).toEqual(['level', 'card'])
+      expect(seen).toEqual(['level', 'name', 'card'])
     } finally {
       localStorage.removeItem('lang')
     }
@@ -569,13 +581,25 @@ describe('the browser\'s Back in the boarding', () => {
     const screen = await mountFlow()
     await toLevel(screen)
     await click(screen.container, '[data-level="N3"]')
-    await click(screen.container, '[data-action="continue"]')        // level → card
+    await click(screen.container, '[data-action="continue"]')        // level → name
+    await arrived(screen, 'name')
+    type(live(screen.container).querySelector('.brd-plate__field'), 'Aiko')
+    await settle(20)
+    await click(screen.container, '[data-action="continue"]')        // name → card
     await settle()
     expect(screen.container.querySelector('.brd').dataset.step).toBe('card')
     // One entry for the whole flow, however deep.
     expect(window.history.length).toBe(start + 1)
 
     let back = popped()
+    window.history.back()
+    await back
+    await settle()
+    // Back on the name (plan 255), the name written still written.
+    expect(screen.container.querySelector('.brd').dataset.step).toBe('name')
+    expect(live(screen.container).querySelector('.brd-plate__field').value).toBe('Aiko')
+
+    back = popped()
     window.history.back()
     await back
     await settle()

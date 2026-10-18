@@ -66,6 +66,12 @@ describe('BoardingFlow under reduced motion', () => {
 
     await click(screen, '[data-action="continue"]')
     await settle(20)
+    // The name (plan 255) at once and at rest.
+    expect(stepOf(screen)).toBe('name')
+    expect(screen.container.querySelector('.brd__car--out')).toBeNull()
+    expect(screen.container.querySelector('.brd__car--in')).toBeNull()
+    await click(screen, '[data-action="name-skip"]')
+    await settle(20)
     // The card at once and at rest.
     expect(stepOf(screen)).toBe('card')
     expect(screen.container.querySelector('.brd__car--in')).toBeNull()

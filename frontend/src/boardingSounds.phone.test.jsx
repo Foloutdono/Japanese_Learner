@@ -90,11 +90,13 @@ async function press(sel) {
   await settle()
 }
 
-/** Kana (both) → level N1 → the card. */
+/** Kana (both) → level N1 → the name, gone past (plan 255) → the card. */
 async function toCard() {
   await press('[data-kana="both"]')
   await press('[data-level="N1"]')
   await press('[data-action="continue"]')
+  expect(stepOf()).toBe('name')
+  await press('[data-action="name-skip"]')
   expect(stepOf()).toBe('card')
 }
 
@@ -140,9 +142,31 @@ describe('the questions', () => {
 
     quiet()
     await press('[data-action="continue"]')
-    expect(stepOf()).toBe('card')
+    expect(stepOf()).toBe('name')
     expect(ui('click-screen-selection')).toBe(1)
     expect(ui('click-mode-selection')).toBe(0)
+
+    // The name's quiet way (plan 255) is a link's click, not the gate.
+    quiet()
+    await press('[data-action="name-skip"]')
+    expect(stepOf()).toBe('card')
+    expect(sound.playClick).toHaveBeenCalledTimes(1)
+    expect(ui('click-screen-selection')).toBe(0)
+  })
+
+  it('sounds the gate once when Enter in the name\'s own screen goes on', async () => {
+    await board()
+    await press('[data-kana="both"]')
+    await press('[data-level="N1"]')
+    await press('[data-action="continue"]')
+    expect(stepOf()).toBe('name')
+
+    quiet()
+    await userEvent.keyboard('Aiko{Enter}')
+    await settle()
+    expect(stepOf()).toBe('card')
+    expect(ui('click-screen-selection')).toBe(1)
+    expect(inCar('.pcb__sign-name').textContent).toBe('Aiko')
   })
 })
 

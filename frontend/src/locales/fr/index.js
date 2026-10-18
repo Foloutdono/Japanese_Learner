@@ -2459,7 +2459,7 @@ const boarding = {
   // La carte est le formulaire (plan 247) : la carte remplie, ses champs
   // des portes, une feuille par champ.
   brdCardQ: 'Vérifie ta carte.',
-  brdCardHint: 'Tout est juste ? Touche une ligne pour la changer.',
+  brdCardHint: 'Tout est juste ? Touche une ligne.',
   brdIssue: 'Émettre ma carte',
   brdLevelTest: 'Pas sûr ? Le test te place',
   brdKeepDevice: 'Sur cet appareil seulement',

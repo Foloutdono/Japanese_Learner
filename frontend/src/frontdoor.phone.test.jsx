@@ -122,6 +122,13 @@ describe('the boarding frame on a phone (P9)', () => {
     await settle(40)
     inCar('[data-action="continue"]').click()
     await settle()
+    // The name (plan 255) is a question on the line, the phone's frame
+    // with its head; past it by its quiet way, the card.
+    expect(stepOf()).toBe('name')
+    expect($('main.brd').className).toBe('brd')
+    expect($('.desk-brd__side')).toBeNull()
+    inCar('[data-action="name-skip"]').click()
+    await settle()
     // The card is an arrival (plan 247): no head, the phone's own frame.
     expect(stepOf()).toBe('card')
     expect($('main.brd').className).toBe('brd brd--arrival')

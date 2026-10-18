@@ -88,6 +88,10 @@ describe('App onboarding gate', () => {
     await settle(700)
     live('[data-action="continue"]').click()
     await settle(700)
+    // The name's own screen (plan 255), gone past without one.
+    expect(screen.container.querySelector('.brd').dataset.step).toBe('name')
+    live('[data-action="name-skip"]').click()
+    await settle(700)
     expect(screen.container.querySelector('.brd').dataset.step).toBe('card')
     expect(live('.brd-keep-line').textContent).toContain('aiko@gmail.com')
     live('[data-action="switch-account"]').click()

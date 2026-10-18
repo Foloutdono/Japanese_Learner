@@ -167,6 +167,8 @@ describe('the boarding on a 390x667 handset', () => {
     await record()                                    // level
     await click(screen, '[data-level="novice"]')
     await click(screen, '[data-action="continue"]')
+    await record()                                    // name (plan 255)
+    await click(screen, '[data-action="name-skip"]')
     await record()                                    // card
     await cardInReach(screen)
     delete over.card
@@ -178,7 +180,7 @@ describe('the boarding on a 390x667 handset', () => {
     await recordSheet('[data-action="keep"]', 'account')
 
     expect(Object.keys(over)).toEqual(
-      ['kana', 'level', 'sheet:goal', 'sheet:rhythm', 'sheet:hour', 'sheet:lines', 'sheet:name', 'sheet:account'])
+      ['kana', 'level', 'name', 'sheet:goal', 'sheet:rhythm', 'sheet:hour', 'sheet:lines', 'sheet:name', 'sheet:account'])
     expect(Object.entries(over).filter(([, px]) => px > 0)).toEqual([])
   }, 90000)
 
@@ -245,6 +247,9 @@ describe('the boarding on a 390x667 handset', () => {
       await settle()
       await click(screen, '[data-level="N4"]')
       await click(screen, '[data-action="continue"]')
+      await settle()
+      expect(stepOf(screen)).toBe('name')
+      await click(screen, '[data-action="name-skip"]')
       await settle()
       expect(stepOf(screen)).toBe('card')
       expect(q(screen, '[data-action="switch-account"]')).toBeTruthy()

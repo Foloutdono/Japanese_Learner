@@ -2520,7 +2520,7 @@ const boarding = {
   // The card is the form (plan 247): the card filled in, its fields
   // doors, a sheet a field.
   brdCardQ: 'Check your card.',
-  brdCardHint: 'All correct? Tap a line to change it.',
+  brdCardHint: 'All correct? Tap a line.',
   brdIssue: 'Issue my card',
   brdLevelTest: 'Not sure? The test places you',
   brdKeepDevice: 'On this device only',

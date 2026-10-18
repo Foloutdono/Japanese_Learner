@@ -154,10 +154,12 @@ describe('the boarding reached on a stale address', () => {
     await settle(300)
     expect(screen.container.querySelector('.brd')).not.toBeNull()
 
-    // The two questions, then the card (plan 247), issued as it stands.
+    // The two questions and the name (plan 255), then the card (plan
+    // 247), issued as it stands.
     await click(screen, '[data-kana="both"]')                    // → the level list
     await click(screen, '[data-level="N5"]')
-    await click(screen, '[data-action="continue"]')              // → the card, filled in
+    await click(screen, '[data-action="continue"]')              // → the name
+    await click(screen, '[data-action="name-skip"]')             // → the card, filled in
     await settle(120)
     await click(screen, '[data-action="issue"]')                 // the card, issued
     await settle(400)
