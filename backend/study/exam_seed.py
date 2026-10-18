@@ -39,7 +39,9 @@ from pathlib import Path
 from study.exam_audio_repair import questions_with_audio, turns_from_script
 from study.exam_blueprint import LEVEL_BLUEPRINT
 from study.exam_catalogue import EXAM_GENERATORS, KIND_META
+from study.exam_levels import kanji_outside, paper_grammar_above
 from study.exam_scoring import flatten_questions
+from study.exam_tells import centre, outlier, tell
 from study.exam_tts import content_key
 from study.exam_validation import paper_gives_answer_away, validate_answer_balance, validate_content
 
@@ -111,9 +113,12 @@ def problems(exam_id: str, paper: dict) -> list[str]:
     it is. The paper-level checks the generators run (exam_pipeline:
     validate_content, the answer-position balance), the one the route
     runs before serving (paper_gives_answer_away), completeness, a
-    sentence-order ★ on a middle slot (exam_grammar_gen.star_slot), and,
-    for listening, that every clip can be remade from its own script
-    (study/exam_audio_repair.py), since no seed ships its audio."""
+    sentence-order ★ on a middle slot (exam_grammar_gen.star_slot), the
+    choices' looks (choice_tells) and the level of what is printed -- no
+    kanji and no grammar point above the paper's level
+    (study/exam_levels.py, plan 254) -- and, for listening, that every
+    clip can be remade from its own script (study/exam_audio_repair.py),
+    since no seed ships its audio."""
     _version, kind, level, _generate = EXAM_GENERATORS[exam_id]
     out = []
     if paper.get("level") != level:
@@ -129,10 +134,62 @@ def problems(exam_id: str, paper: dict) -> list[str]:
     for q in flat:
         if "pieces" in q and q.get("starIndex") not in (1, 2):
             out.append(f"{q.get('id')}: the ★ is on the first or last piece, answered by punctuation")
+    out += choice_tells(paper, level)
+    out += kanji_item_problems(paper, level)
+    out += [f"{where}: kanji outside {level}: {chars}" for where, chars in kanji_outside(paper, kind)]
+    out += [f"{where}: grammar above {level}: {pattern} ({point_level})"
+            for where, pattern, point_level in paper_grammar_above(paper, kind)]
     for q in questions_with_audio(paper):
         turns = turns_from_script(q.get("scriptJp") or "")
         if turns is None or q.get("audioSrc") != f"/exam-audio/{content_key(turns)}.mp3":
             out.append(f"{q.get('id')}: audioSrc is not the clip of its scriptJp")
+    return out
+
+
+# What the choices give away by how they look beside each other
+# (study/exam_tells.py, plan 254): an answer that is one of two choices a
+# character apart, or the one choice nearest to all the others, is found
+# without reading the question. A listening item is spared the first: its
+# choices are the figures and places the recording gives (5時 / 5時半 /
+# 6時), and what tells them apart is heard.
+def choice_tells(paper: dict, level: str) -> list[str]:
+    kinds = {m["id"]: m["type"] for s in LEVEL_BLUEPRINT[level]["sections"] for m in s["mondai"]}
+    out = []
+    for section in paper.get("sections") or []:
+        for m in section.get("mondai") or []:
+            blueprint = kinds.get(m.get("id"))
+            groups = [m.get("questions") or []]
+            for passage in m.get("passages") or []:
+                groups += [passage.get("blanks") or [], passage.get("questions") or []]
+            for q in (q for group in groups for q in group):
+                choices = [c.get("textJp") or "" for c in q.get("choices") or []]
+                if len(choices) != 4 or q.get("audioSrc"):
+                    continue
+                answer = next((i for i, c in enumerate(q["choices"]) if c.get("id") == q.get("answer")), None)
+                why = tell(choices)
+                if why:
+                    out.append(f"{q.get('id')}: {why}: {' / '.join(choices)}")
+                elif blueprint in ("kanji-reading", "kanji-orthography") and answer in (centre(choices), outlier(choices)):
+                    out.append(f"{q.get('id')}: the answer is the choice most or least like the others: {' / '.join(choices)}")
+    return out
+
+
+# A 漢字読み item's wrong readings are readings (no ぱじめ), none is a
+# reading of the word, and a 表記 item's wrong spellings are no spelling of
+# the word (study/exam_kanji_choices.py, plan 254).
+def kanji_item_problems(paper: dict, level: str) -> list[str]:
+    from study import exam_kanji_choices as kc
+
+    kinds = {m["id"]: m["type"] for s in LEVEL_BLUEPRINT[level]["sections"] for m in s["mondai"]}
+    out = []
+    for section in paper.get("sections") or []:
+        for m in section.get("mondai") or []:
+            check = {"kanji-reading": kc.reading_item_problems, "kanji-orthography": kc.orthography_item_problems}.get(kinds.get(m.get("id")))
+            for q in m.get("questions") or [] if check else []:
+                choices = [c.get("textJp") or "" for c in q.get("choices") or []]
+                answer = next((i for i, c in enumerate(q.get("choices") or []) if c.get("id") == q.get("answer")), None)
+                if len(choices) == 4 and answer is not None:
+                    out += [f"{q.get('id')}: {why}" for why in check(q.get("promptJp") or "", choices, answer)]
     return out
 
 

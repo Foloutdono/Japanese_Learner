@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **254**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **255**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -62,6 +62,8 @@ runtime purpose.
   `REV` in `frontend/scripts/practice-gate/build.py` (the painted platform,
   plan 225), `REV` in `frontend/scripts/practice-gate/desk.py` (the desk's
   painted platform, plan 244).
+  An exam id's `generator_version` (`study/exam_catalogue.py`) is one too: a bump
+  retires the papers it made without deleting them (plan 254 bumped `vocab-gen`).
   A change to what any of them produces bumps it, or learners keep the old.
 - **The grammar detector and the lookups change by counter-case.** Every new
   rule or refusal is pinned in `tests/test_grammar_precision.py` /
@@ -80,6 +82,35 @@ runtime purpose.
   the longest about as often as a blind pick (plan 217, `LENGTH_TELL`).
   `study/grammar_check.py` holds it; `content/grammar/README.md`, "The
   quiz", is the style guide. Draft with `python -m scripts.check_tour_quiz`.
+- **A mock-exam choice is told apart by understanding, never by its look
+  (plan 254).** `study/exam_tells.py` is what four choices give away: a
+  minimal pair among unlike choices (たいです / たくです, 午前 / 午後), or a
+  star -- every wrong choice one edit from the right one, which is then the
+  choice nearest to the rest (picked blind it won 96% of the old 漢字読み
+  and 60% of the 表記 items). `study/exam_seed.problems` refuses both on
+  every seed paper but listening's, whose choices are the figures the
+  recording gives; symmetry is not a tell (a shared frame, a 2×2 grid).
+  A wrong choice is a real form or expression the learner could choose,
+  never a corruption of the right one (ないければなりません). The
+  漢字読み / 表記 choices are made by `study/exam_kanji_choices.py`: the
+  readings the course's own words give a kanji and the sound changes of
+  a compound, set as a grid; wrong spellings from lookalike kanji of the
+  paper's own level. `exam_kanji_gen` still builds the placement test's
+  items, replayed from a seed (`study/placement.py`): leave it.
+- **A paper shows only its level's kanji and grammar (plan 254).**
+  `study/exam_levels.py` holds every text a paper prints to
+  `kanji_set_for_level` (a grammar paper may spell its own patterns, に伴って),
+  so 漢字読み and 表記 ask only the words the level has taught in the kanji it
+  has taught, and a word above it is printed in kana
+  (`exam_vocab_gen._display(word, level)`). A word the course reads two ways
+  (一月 ひとつき / いちがつ) is not asked alone. What a paper says is held to
+  the catalogue's levels too: a stem with its blank filled by the key, a
+  passage, a script, read without the spaces that mark phrases, uses no point
+  the catalogue files above the paper (`paper_grammar_above`; the choices of
+  a blank are pieces of its stem, not read alone). The detector's misreadings
+  of ordinary text (noun と, 持って来る, ならんで) are named in
+  `_NOT_THE_POINT` and pinned in `tests/test_exam_levels.py` with the
+  sentence that must still be found; a new exemption brings its counter-case.
 - **Every grammar point is asked in Choisir.** The contrast drill needs a
   sentence the matcher or the detector can blank and a rival that is
   certainly wrong in the gap; a point with neither (は, も, ない形, 〜て（理由）)

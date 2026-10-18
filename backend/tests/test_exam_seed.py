@@ -74,6 +74,72 @@ def test_length_must_not_answer():
     assert exam_seed.length_tells([rotating]) == []
 
 
+# ── What the choices give away, and the level (plan 254) ─────────────
+
+def _grammar_question(texts: list[str], answer: int) -> tuple[dict, str]:
+    paper = _first("n5-grammar-01")
+    q = paper["sections"][0]["mondai"][0]["questions"][0]
+    q["choices"] = [{"id": f"c{i + 1}", "textJp": t} for i, t in enumerate(texts)]
+    q["answer"] = f"c{answer + 1}"
+    return paper, q["id"]
+
+
+def _about(found: list[str], qid: str, what: str) -> list[str]:
+    return [p for p in found if p.startswith(qid + ":") and what in p]
+
+
+def test_choices_one_character_apart_are_not_a_seed():
+    paper, qid = _grammar_question(["ほしいです", "たいです", "ましょう", "たくです"], 1)
+    assert _about(exam_seed.problems("n5-grammar-01", paper), qid, "one small difference")
+
+
+def test_a_shared_frame_is_a_seed():
+    paper, qid = _grammar_question(["がください", "をください", "にください", "でください"], 1)
+    assert not _about(exam_seed.problems("n5-grammar-01", paper), qid, "small difference")
+
+
+def test_a_listening_item_may_offer_figures_a_character_apart():
+    paper = _first("n4-listening-01")
+    q = paper["sections"][0]["mondai"][0]["questions"][0]
+    q["choices"] = [{"id": f"c{i + 1}", "textJp": t} for i, t in enumerate(["5時", "5時半", "6時", "7時半"])]
+    q["answer"] = "c1"
+    assert not _about(exam_seed.problems("n4-listening-01", paper), q["id"], "small difference")
+
+
+def test_a_kanji_above_the_level_is_not_a_seed():
+    paper = _first("n5-grammar-01")
+    paper["sections"][0]["mondai"][0]["questions"][0]["promptJp"] += "曇"
+    assert any("kanji outside N5: 曇" in p for p in exam_seed.problems("n5-grammar-01", paper))
+
+
+def test_a_grammar_point_above_the_level_is_not_a_seed():
+    paper = _first("n5-grammar-01")
+    q = paper["sections"][0]["mondai"][0]["questions"][0]
+    q["promptJp"] = "あしたは　雨が　ふるそうです。"          # 〜そうだ（伝聞） is an N4 point
+    found = exam_seed.problems("n5-grammar-01", paper)
+    assert _about(found, q["id"], "grammar above N5: 〜そうだ（伝聞） (N4)")
+
+
+def test_a_made_up_reading_is_not_a_seed():
+    paper = _first("n5-vocab-01")
+    q = paper["sections"][0]["mondai"][0]["questions"][0]
+    q["promptJp"] = "初め"
+    q["choices"] = [{"id": f"c{i + 1}", "textJp": t} for i, t in enumerate(["ぱじめ", "はじめ", "はしめ", "ばじめ"])]
+    q["answer"] = "c2"
+    found = exam_seed.problems("n5-vocab-01", paper)
+    assert _about(found, q["id"], "'ぱじめ' is no reading")
+    assert _about(found, q["id"], "one small difference")        # and a star: はじめ is the centre
+
+
+def test_a_wrong_spelling_of_the_word_itself_is_not_a_seed():
+    paper = _first("n5-vocab-01")
+    q = paper["sections"][0]["mondai"][1]["questions"][0]
+    q["promptJp"] = "かう"
+    q["choices"] = [{"id": f"c{i + 1}", "textJp": t} for i, t in enumerate(["買う", "飼う", "貫う", "貴う"])]
+    q["answer"] = "c1"
+    assert _about(exam_seed.problems("n5-vocab-01", paper), q["id"], "'飼う' is also a spelling read かう")
+
+
 # ── The loader ────────────────────────────────────────────────
 
 EXAM = "n3-reading-01"

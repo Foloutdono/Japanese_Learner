@@ -1,8 +1,8 @@
 # ── 文脈規定 / 言い換え類義 / 用法 + section orchestrator ────────
 # This module is also the vocabulary SECTION's orchestrator now — the
 # top-level entry point registered in routes/exams.py — not just the
-# three new mondai types in its name. exam_kanji_gen.py's 漢字読み/
-# 表記 builders are called from here too, so a level's paper is one
+# three new mondai types in its name. study/exam_kanji_choices.py's
+# 漢字読み/表記 builders (plan 254) are called from here too, so a level's paper is one
 # coherent "vocabulary" section built from every mondai type this
 # project can currently generate for it.
 #
@@ -41,7 +41,7 @@ from study.exam_blueprint import LEVEL_BLUEPRINT
 from study.exam_gen_utils import GenerationFailed, make_choices, kanji_instruction, call_llm_json_batch
 from study.exam_pipeline import generate_paper
 from study.llm_shared import chat, sentence_kanji_ok, llm_configured, offending_kanji
-import study.exam_kanji_gen as exam_kanji_gen
+import study.exam_kanji_choices as exam_kanji_choices
 
 logger = logging.getLogger(__name__)
 
@@ -61,13 +61,22 @@ def _first_reading(word: dict) -> str:
     return (word.get("kana") or "").split("/")[0].strip()
 
 
-def _display(word: dict) -> str:
+def _display(word: dict, level: str | None = None) -> str:
     # word["kana"] can itself be "/"-separated for a kana-only entry
     # (e.g. "いい/よい", "じゃ/じゃあ" — 11 across the deck) the same
     # way word["kanji"] sometimes is — falling back to the raw kana
     # field here would show "いい/よい" as a single, garbled choice.
     # _first_reading picks one real, complete, unambiguous reading.
-    return word.get("kanji") or _first_reading(word)
+    #
+    # With a `level`, a word written with a kanji the level has not been
+    # taught is shown in kana, as a paper at that level shows it (plan
+    # 254): the deck files 溺れる and 吠える at N3, and an N3 paper
+    # printed them. The placement test builds its context items through
+    # here without a level and is left as it was.
+    kanji = word.get("kanji") or ""
+    if level and kanji and not sentence_kanji_ok(kanji, level):
+        return _first_reading(word)
+    return kanji or _first_reading(word)
 
 
 # ── 文脈規定 (deterministic) ──────────────────────────────────
@@ -104,7 +113,8 @@ def _pick_context_example(word: dict, level: str, rng: random.Random) -> dict | 
     return None
 
 
-def build_vocab_context_distractors(word: dict, pool: list[dict], rng: random.Random) -> list[str]:
+def build_vocab_context_distractors(word: dict, pool: list[dict], rng: random.Random,
+                                    level: str | None = None) -> list[str]:
     # Near-miss by construction: same coarse part of speech (so a
     # distractor is at least grammatically the right SHAPE for the
     # blank), genuinely different meaning (no shared gloss words with
@@ -124,7 +134,7 @@ def build_vocab_context_distractors(word: dict, pool: list[dict], rng: random.Ra
     for other in pool:
         if other["kanji"] == word["kanji"] and other["kana"] == word["kana"]:
             continue
-        text = _display(other)
+        text = _display(other, level)
         if not text:
             continue
         if word_category(other.get("kanji") or "", other["kana"]) != target_category:
@@ -139,13 +149,14 @@ def build_vocab_context_distractors(word: dict, pool: list[dict], rng: random.Ra
 # Public (no leading underscore) since study/placement.py builds its
 # cross-level placement paper from the same deterministic primitive.
 def build_vocab_context_mondai(spec: dict, pool: list[dict], used_words: set, used_prompts: set,
-                               rng: random.Random, level: str) -> dict:
+                               rng: random.Random, level: str, kana_beyond_level: bool = False) -> dict:
+    shown = level if kana_beyond_level else None
     questions = []
     for word in pool:
         if len(questions) >= spec["count"]:
             break
         key = (word["kanji"], word["kana"])
-        display = _display(word)
+        display = _display(word, shown)
         if key in used_words or not display or display in used_prompts:
             continue
         example = _pick_context_example(word, level, rng)
@@ -154,7 +165,7 @@ def build_vocab_context_mondai(spec: dict, pool: list[dict], used_words: set, us
         blanked = _blank_sentence(example)
         if "＿＿＿＿" not in blanked:
             continue
-        distractors = build_vocab_context_distractors(word, pool, rng)
+        distractors = build_vocab_context_distractors(word, pool, rng, shown)
         made = make_choices(rng, display, distractors)
         if made is None:
             continue
@@ -200,9 +211,9 @@ def _extract_bracket(sentence: str) -> tuple[str, str] | tuple[None, None]:
 # defined here but never actually called; only the batch form was.
 
 
-def _words_block(words: list[dict]) -> str:
+def _words_block(words: list[dict], level: str | None = None) -> str:
     return "\n".join(
-        f"{i + 1}. {_display(w)} ({_first_reading(w)}) -- meaning: \"{w.get('meaning', '')}\""
+        f"{i + 1}. {_display(w, level)} ({_first_reading(w)}) -- meaning: \"{w.get('meaning', '')}\""
         for i, w in enumerate(words)
     )
 
@@ -357,7 +368,7 @@ def _dropped(what: str, display: str, why: str) -> None:
 
 
 def _pick_batch(candidates: list[dict], pos: int, batch_size: int,
-                 used_words: set, used_prompts: set) -> tuple[list[dict], int]:
+                 used_words: set, used_prompts: set, level: str | None = None) -> tuple[list[dict], int]:
     """Walks `candidates` from `pos`, skipping words already used
     elsewhere in the paper, collecting up to `batch_size` fresh ones.
     Returns (batch, new_pos)."""
@@ -366,7 +377,7 @@ def _pick_batch(candidates: list[dict], pos: int, batch_size: int,
         word = candidates[pos]
         pos += 1
         key = (word["kanji"], word["kana"])
-        display = _display(word)
+        display = _display(word, level)
         if key in used_words or not display or display in used_prompts:
             continue
         batch.append(word)
@@ -382,12 +393,12 @@ def _build_vocab_paraphrase_mondai(spec: dict, pool: list[dict], used_words: set
 
     pos = 0
     while len(questions) < spec["count"] and pos < len(candidates):
-        batch, pos = _pick_batch(candidates, pos, _PARAPHRASE_BATCH_SIZE, used_words, used_prompts)
+        batch, pos = _pick_batch(candidates, pos, _PARAPHRASE_BATCH_SIZE, used_words, used_prompts, level)
         if not batch:
             continue
 
         prompt = _PARAPHRASE_PROMPT_BATCH.format(
-            n=len(batch), level=level, words_block=_words_block(batch), allowed_kanji=allowed_kanji,
+            n=len(batch), level=level, words_block=_words_block(batch, level), allowed_kanji=allowed_kanji,
         )
         try:
             items = call_llm_json_batch(prompt, task="exam-vocab-paraphrase")
@@ -399,7 +410,7 @@ def _build_vocab_paraphrase_mondai(spec: dict, pool: list[dict], used_words: set
         # the ones worth verifying.
         pending = []  # (word, display, clean, bracketed, choices, answer_id)
         for word, item in zip(batch, items):
-            display = _display(word)
+            display = _display(word, level)
             if not isinstance(item, dict):
                 _dropped("paraphrase", display, "not an object")
                 continue
@@ -480,12 +491,12 @@ def _build_vocab_usage_mondai(spec: dict, pool: list[dict], used_words: set, use
 
     pos = 0
     while len(questions) < spec["count"] and pos < len(candidates):
-        batch, pos = _pick_batch(candidates, pos, _USAGE_BATCH_SIZE, used_words, used_prompts)
+        batch, pos = _pick_batch(candidates, pos, _USAGE_BATCH_SIZE, used_words, used_prompts, level)
         if not batch:
             continue
 
         prompt = _USAGE_PROMPT_BATCH.format(
-            n=len(batch), level=level, words_block=_words_block(batch), allowed_kanji=allowed_kanji,
+            n=len(batch), level=level, words_block=_words_block(batch, level), allowed_kanji=allowed_kanji,
         )
         try:
             items = call_llm_json_batch(prompt, task="exam-vocab-usage")
@@ -496,7 +507,7 @@ def _build_vocab_usage_mondai(spec: dict, pool: list[dict], used_words: set, use
         for word, item in zip(batch, items):
             if len(questions) >= spec["count"]:
                 break
-            display = _display(word)
+            display = _display(word, level)
             if not isinstance(item, dict):
                 _dropped("usage", display, "not an object")
                 continue
@@ -598,16 +609,17 @@ def _generate_vocabulary_paper_once(level: str, seed: int) -> dict:
         mtype = spec["type"]
 
         if mtype == "kanji-reading":
-            mondai.append(exam_kanji_gen.build_reading_mondai(spec, kanji_pool, used_words, used_prompts, rng))
+            mondai.append(exam_kanji_choices.build_reading_mondai(spec, kanji_pool, used_words, used_prompts, rng, level))
             included_items += spec["count"]
 
         elif mtype == "kanji-orthography":
-            mondai.append(exam_kanji_gen.build_orthography_mondai(spec, kanji_pool, used_words, used_prompts, rng))
+            mondai.append(exam_kanji_choices.build_orthography_mondai(spec, kanji_pool, used_words, used_prompts, rng, level))
             included_items += spec["count"]
 
         elif mtype == "vocab-context":
             try:
-                mondai.append(build_vocab_context_mondai(spec, vocab_pool, used_words, used_prompts, rng, level))
+                mondai.append(build_vocab_context_mondai(spec, vocab_pool, used_words, used_prompts, rng, level,
+                                                          kana_beyond_level=True))
                 included_items += spec["count"]
             except GenerationFailed as e:
                 logger.warning("Skipping %s (%s): %s", spec["id"], mtype, e)
