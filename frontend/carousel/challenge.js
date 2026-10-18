@@ -5,8 +5,8 @@
 // owner's own reference); `along`, the text standing while the app's
 // reader says it, each word lit as it is said (the owner's pick D of four
 // drawn). Before it the hook; after it one of its questions, asked and
-// answered, and the way to the app. Under it, a
-// track of the owner's own music, or nothing.
+// answered, and the way to the app. Under it, the studio's own track
+// (Cool Vibes), one of the owner's, or nothing.
 //
 // Everything a viewer must read is set large, in ink on the washed print
 // (scroll) or light on the darkened one (along), so it reads at every
@@ -21,6 +21,20 @@ import { unpack } from './common.js'
 import { SITE } from './strings.js'
 
 export const STYLES = ['scroll', 'along']
+// The tracks the studio carries (carousel/music/, its README): the first
+// is laid under a challenge unless another or none is asked for. Each
+// is used under its licence, whose credit goes with every video that
+// plays it (`challengePage`).
+export const TRACKS = {
+  'cool-vibes': {
+    title: 'Cool Vibes', by: 'Kevin MacLeod', file: 'music/cool-vibes.mp3',
+    credit: {
+      en: 'Music: "Cool Vibes" Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By Attribution 4.0 License, http://creativecommons.org/licenses/by/4.0/',
+      fr: 'Musique : « Cool Vibes » Kevin MacLeod (incompetech.com). Sous licence Creative Commons Attribution 4.0 : http://creativecommons.org/licenses/by/4.0/',
+    },
+  },
+}
+export const TRACK = 'cool-vibes'
 export const HOURS = ['dawn', 'day', 'dusk', 'night']
 // A learner's pace at each level, in characters a minute: the scroll
 // carries the text past the reading line at this pace (two notches under
@@ -110,7 +124,8 @@ export function challengeItems(data, lang = 'en') {
 }
 
 /** A text's challenge: its sentences and one of its questions.
- *  `opts.music`: the track laid under it (a file's path or name), or none. */
+ *  `opts.music`: the track laid under it, one of `TRACKS` (the first if
+ *  left out) or a file of the owner's (its path or name); null for none. */
 export function challengePlan(data, id, opts = {}) {
   const lang = opts.lang === 'fr' ? 'fr' : 'en'
   const P = data.passages.find(x => x.id === id) ?? data.passages[0]
@@ -121,7 +136,7 @@ export function challengePlan(data, id, opts = {}) {
   const Q = P.questions.find(q => q.type === 'comprehension') ?? P.questions[0]
   const q = { ask: Q.question[lang] || Q.question.en, choices: Q.options[lang] || Q.options.en, right: Q.correct }
   return {
-    source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, title: P.title, sents, q, music: opts.music || null,
+    source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, title: P.title, sents, q, music: opts.music === undefined ? TRACK : opts.music || null,
     chars: sents.reduce((n, rows) => n + charsOf(rows), 0), cpm: CPM[P.lv] || CPM.N3, ruby: RUBY.has(P.lv), slow: SLOW.has(P.lv),
   }
 }
@@ -192,8 +207,8 @@ export function challengeTimeline(plan, voiced = null) {
     seconds: +t.toFixed(3), segs, lines, cues, sfx, reading,
     // The scroll at sixty frames a second, so its slow climb glides; the one read along at thirty.
     fps: plan.style === 'scroll' ? 60 : 30,
-    // The owner's music under it, if any: a video read in silence is kept calm.
-    bed: plan.music ? { src: plan.music } : null, loudness: plan.music || plan.style === 'along' ? -16 : -20,
+    // The music under it, if any (the studio's, from frontend/): a video read in silence is kept calm.
+    bed: plan.music ? { src: TRACKS[plan.music] ? `carousel/${TRACKS[plan.music].file}` : plan.music } : null, loudness: plan.music || plan.style === 'along' ? -16 : -20,
     chapters: segs.map(s => ({ at: s.start, title: s.key })),
   }
 }
@@ -201,7 +216,8 @@ export function challengeTimeline(plan, voiced = null) {
 /** The command that makes it, from frontend/ (the voice engine running for `along`). */
 export function challengeCommand(plan) {
   const voice = plan.style === 'along' ? 'VOICEVOX_URL=http://localhost:50121 ' : ''
-  const music = plan.music ? ` --music "${plan.music}"` : ''
+  // The studio's track is the command's own; another is named, none is said.
+  const music = plan.music === TRACK ? '' : !plan.music ? ' --music none' : TRACKS[plan.music] ? ` --music ${plan.music}` : ` --music "${plan.music}"`
   return `${voice}node carousel/long/render.mjs --challenge ${plan.id} --style ${plan.style} --hour ${plan.hour} --lang ${plan.lang}${music}`
 }
 
@@ -214,6 +230,7 @@ export function challengePage(plan, tl, site) {
     S.body[plan.style],
     S.site(site),
     plan.style === 'along' ? S.credit : null,
+    TRACKS[plan.music]?.credit[plan.lang],
     tags.map(x => `#${x}`).join(' '),
   ].filter(Boolean)
   return { title: S.title(plan.lv, plan.title), description: lines.join('\n\n'), tags: tags.join(', ') }

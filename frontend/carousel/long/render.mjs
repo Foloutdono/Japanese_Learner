@@ -19,7 +19,8 @@
 //                     comprehension text, 9:16, over Today's print
 //   --style scroll    ... going up the screen as credits do (scroll), or read along by the voice (along)
 //   --hour night      ... the print's hour: dawn, day, dusk or night
-//   --music FILE      ... a track of your own under it (any audio ffmpeg reads), looped if short
+//   --music FILE      ... a track of your own under it (any audio ffmpeg reads), looped if
+//                     short; `none` for none; the studio's own (Cool Vibes) when left out
 //
 // Writes <name>.mp4, <name>.txt (the title, then the description with
 // its chapters and the voice's credit) and <name>.jpg (a thumbnail).
@@ -36,7 +37,7 @@ import { chromium } from 'playwright'
 import { SITE_ORIGIN } from '../../landing/config.mjs'
 import { FPS, TALL, WIDE, cueKey, describe, fitShort, longPlan, timeline } from '../long.js'
 import { fromRecipe, shortTimeline } from '../short.js'
-import { challengeCues, challengePage, challengePlan, challengeTimeline } from '../challenge.js'
+import { TRACKS, challengeCues, challengePage, challengePlan, challengeTimeline } from '../challenge.js'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const FRONT = resolve(HERE, '../..')
@@ -114,8 +115,9 @@ const canvasOf = size => page.evaluate(size => {
 let tl, slug, SIZE, pageText, thumbAt
 if (args.challenge) {
   // ── A reading challenge: the text over the hour's print, read along voiced ──
-  const music = typeof args.music === 'string' ? resolve(args.music) : null
-  if (music && !existsSync(music)) throw new Error(`no track at ${music}`)
+  const named = typeof args.music === 'string' ? args.music : undefined
+  const music = named === undefined ? undefined : named === 'none' ? null : TRACKS[named] ? named : resolve(named)
+  if (music && !TRACKS[music] && !existsSync(music)) throw new Error(`no track at ${music}`)
   const plan = challengePlan(banks['comprehension.json'], String(args.challenge), { lang, style: args.style, hour: args.hour, music })
   const cues = challengeCues(plan)
   const dur = cues.length ? voiceAll(cues) : null

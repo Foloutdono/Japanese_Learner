@@ -861,21 +861,28 @@ at the title's size (the scroll) or a little over it (read along), with
 its readings at N5 to N3. The tests hold every text whole inside the frame, at every
 level, in both languages.
 
-**The sound** makes up no music. The owner adds a track of their own
-(the app's jazz) in the studio, under "Music", or gives it to the
-command (`--music FILE`, any format ffmpeg reads); it is looped to the
-video's length, faded in and out over 2.5 s and, under the voice, held
-some 12 dB below it (`long_video_audio mix --bed`). Without one the
-video has only the board's flap on the hook, the clicks of the
-countdown, the answer's chime and the platform's on the way out
-(`--no-bed`), kept calm (-20 LUFS) when nobody speaks either. The scroll,
-which nobody says, can be downloaded from the studio as it is, the
-track mixed in the browser; the one read along is made by the command,
-which voices each sentence. The track is not kept anywhere: the studio
-reads it from the file chosen, the command from its path.
+**The sound** is the studio's own track unless another or none is
+asked for: "Cool Vibes" by Kevin MacLeod (`TRACKS`, in `carousel/music/`,
+given by the owner), under Creative Commons Attribution 4.0, so its
+credit is written into the description of every video it plays under
+(`challengePage`; keep it there when posting). The owner can put a
+track of their own in its place in the studio, under "Music", or give
+it to the command (`--music FILE`, any format ffmpeg reads), or take
+the music away (`Remove`, `--music none`). The track is looped to the
+video's length if it is shorter, faded in and out over 2.5 s and, under
+the voice, held some 12 dB below it (`long_video_audio mix --bed`).
+Without one the video has only the board's flap on the hook, the clicks
+of the countdown, the answer's chime and the platform's on the way out
+(`--no-bed`), kept calm (-20 LUFS) when nobody speaks either. The
+scroll, which nobody says, can be downloaded from the studio as it is,
+the track mixed in the browser; the one read along is made by the
+command, which voices each sentence. An owner's own track is not kept
+anywhere: the studio reads it from the file chosen, the command from
+its path.
 
 ```bash
 cd frontend
+node carousel/long/render.mjs --challenge n5-01 --style scroll --hour day --lang en
 node carousel/long/render.mjs --challenge n5-01 --style scroll --hour day --lang en --music ~/music/late-train.mp3
 VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --challenge n5-01 --style along --hour night --lang fr
 ```

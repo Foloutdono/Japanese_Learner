@@ -14,7 +14,7 @@ import { SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTim
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf } from '../carousel/funnel.js'
 import { KINDS, LONG_SITE, PART, SHORT, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
-import { CH as CHALLENGE, CPM, SCROLL, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
+import { CH as CHALLENGE, CPM, SCROLL, TRACK, TRACKS, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
@@ -1634,15 +1634,31 @@ describe('the reading challenges (plan 247)', () => {
   const jp = t => /[\u3040-\u30ff\u3400-\u9fff]/.test(t)
   const each = data.passages
 
-  it('makes up no music: the owner’s track under it, or nothing but its sounds', () => {
+  it('lays the studio’s track under it, credited, unless another or none is asked for', () => {
+    const { file } = TRACKS[TRACK]
+    expect(() => read(`carousel/${file}`)).not.toThrow()
     for (const style of CHALLENGE_STYLES) {
       const pl = challengePlan(data, 'n5-01', { style })
-      expect(challengeTimeline(pl).bed, style).toBeNull()
+      const tl = challengeTimeline(pl)
+      expect(pl.music, style).toBe(TRACK)
+      expect(tl.bed, style).toEqual({ src: `carousel/${file}` })
+      expect(tl.loudness, style).toBe(-16)
       expect(challengeCommand(pl), style).not.toMatch(/--music/)
+      // Its licence's credit (CC BY 4.0) in the description of every video it plays under.
+      for (const lang of ['en', 'fr']) {
+        const page = challengePage({ ...pl, lang }, tl, 'x').description
+        expect(page, `${style} ${lang}`).toContain('Kevin MacLeod (incompetech.com)')
+        expect(page, `${style} ${lang}`).toContain('http://creativecommons.org/licenses/by/4.0/')
+      }
+      const none = challengePlan(data, 'n5-01', { style, music: null })
+      expect(challengeTimeline(none).bed, style).toBeNull()
+      expect(challengeCommand(none), style).toMatch(/ --music none$/)
+      expect(challengePage(none, challengeTimeline(none), 'x').description, style).not.toMatch(/MacLeod/)
       const jazz = challengePlan(data, 'n5-01', { style, music: 'music/late train.mp3' })
       expect(challengeTimeline(jazz).bed, style).toEqual({ src: 'music/late train.mp3' })
       expect(challengeTimeline(jazz).loudness, style).toBe(-16)
       expect(challengeCommand(jazz), style).toMatch(/ --music "music\/late train\.mp3"$/)
+      expect(challengePage(jazz, challengeTimeline(jazz), 'x').description, style).not.toMatch(/MacLeod/)
     }
     expect(challengePlan(data, 'n5-01').style).toBe('scroll')
     expect(Object.keys(CPM).sort()).toEqual([...LEVELS].sort())

@@ -15,7 +15,7 @@ import { PROMO, STORIES } from './promo.js'
 import { PRINT_HOURS, loadPrint } from './app.js'
 import { RATE, clipAudio, decoded, loadVoices } from './sound.js'
 import { voiceSpan } from './echo.js'
-import { STYLES as CHALLENGE_STYLES, challengeCommand, challengePage, challengePlan, challengeTimeline, drawChallenge } from './challenge.js'
+import { STYLES as CHALLENGE_STYLES, TRACK, TRACKS, challengeCommand, challengePage, challengePlan, challengeTimeline, drawChallenge } from './challenge.js'
 import { FPS as SHORT_FPS, chars, depsFor as depsOfWord, drawShortFrame, recipeOf, shortTimeline } from './short.js'
 import { LONG_SITE, TALL, describe as describeLong, drawLong, fitShort, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, timeline, WIDE } from './long.js'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
@@ -640,20 +640,24 @@ async function renderLong(mine) {
 // A comprehension text as a 9:16 video over Today's print: going slowly
 // up the screen as a film's credits do, or read along by the app's
 // reader. Drawn here as it is made; the scroll is encoded here too, with
-// the app's sounds and a track of the owner's music if one is added, and
+// the app's sounds and its music (the studio's track, or the owner's), and
 // the voice of the one read along is made where it is rendered (the
 // command below), every word timed on it.
 const CHAPTER = { hook: 'Hook', reading: 'Reading', question: 'Question', answer: 'Answer', cta: 'The app' }
-// The track laid under it, picked from this computer: kept for the visit
-// only, never stored ({ name, url }).
-let music = null
+// The music laid under it: the studio's own track ({ track }), one picked
+// from this computer, kept for the visit only and never stored ({ name,
+// url }), or none (null).
+let music = { track: TRACK }
+const musicOf = () => (music?.track ?? music?.name ?? null)
+const musicName = () => (music?.track ? `${TRACKS[music.track].title} · ${TRACKS[music.track].by}` : music?.name ?? 'No music')
 async function renderChallenge(mine) {
   const data = await fetchJson('comprehension.json')
   if (mine !== token) return
   const id = currentId()
-  const pl = challengePlan(data, id, { lang: state.lang, style: state.challengeStyle, hour: state.hour, music: music?.name })
-  $('#music-name').textContent = music ? music.name : 'No music'
+  const pl = challengePlan(data, id, { lang: state.lang, style: state.challengeStyle, hour: state.hour, music: musicOf() })
+  $('#music-name').textContent = musicName()
   $('#music-clear').hidden = !music
+  $('#music-track').hidden = Boolean(music?.track)
   const tl = challengeTimeline(pl)
   const P = await printFor(state.hour).catch(e => { status(`Today's print did not load (${e.message}).`); return null })
   await fonts(JSON.stringify(pl))
@@ -706,13 +710,13 @@ async function renderChallenge(mine) {
   const note = document.createElement('p')
   note.className = 'player__note'
   note.textContent = pl.style === 'scroll'
-    ? `A silent preview: the app’s sounds${music ? ' and your track' : ''} are laid under it when it is downloaded or rendered.`
+    ? `A silent preview: the app’s sounds${music ? ' and the music' : ''} are laid under it when it is downloaded or rendered.`
     : 'A silent preview, timed on a guess: the voice is made, and every word lit on it, when the video is rendered (the command below).'
   const chapters = document.createElement('ol')
   chapters.className = 'chapters'
   row.append(head, screen, bar, note, chapters)
   stage.append(row)
-  const key = `challenge|${id}|${state.lang}|${state.challengeStyle}|${state.hour}|${music?.name || ''}`
+  const key = `challenge|${id}|${state.lang}|${state.challengeStyle}|${state.hour}|${musicOf() || ''}`
   const reading = tl.segs.find(sg => sg.key === 'reading')
   player = { c, pl, tl, t: Math.min(player?.key === key ? player.t : reading.start + 12, tl.seconds), raf: 0, id, key, play, scrub, time }
   const draw = () => {
@@ -759,7 +763,7 @@ async function renderChallenge(mine) {
   $('#command').textContent = challengeCommand(pl)
   // The scroll is made here, whole; the one read along needs the voice engine.
   $('#export-video').disabled = pl.style !== 'scroll'
-  $('#export-video').textContent = pl.style === 'scroll' ? `Download the video (.mp4, ${clock(tl.seconds)}${music ? ', with your track' : ''})` : 'Read along is made by the command (the voice)'
+  $('#export-video').textContent = pl.style === 'scroll' ? `Download the video (.mp4, ${clock(tl.seconds)}${music ? `, with ${music.track ? TRACKS[music.track].title : 'your track'}` : ''})` : 'Read along is made by the command (the voice)'
 }
 async function exportChallenge() {
   const ch = current.challenge
@@ -769,7 +773,7 @@ async function exportChallenge() {
     btn: '#export-video', name: `tsuji-challenge-${safeName(ch.id)}-${current.plan.hour}-${state.lang}`, said: 'reading challenge',
     fmt: FORMATS.story, fps: tl.fps, seconds: tl.seconds,
     // The track under it all, looped if it is shorter, coming in and going out.
-    sounds: [...(music ? [{ at: 0, src: music.url, gain: 0.7, loop: true, fade: 2.5 }] : []), ...tl.sfx],
+    sounds: [...(music ? [{ at: 0, src: music.track ? TRACKS[music.track].file : music.url, gain: 0.7, loop: true, fade: 2.5 }] : []), ...tl.sfx],
     frame: (ctx, t) => { drawChallenge(ctx, current.plan, tl, t, P) },
   })
 }
@@ -1209,14 +1213,19 @@ function wire() {
   $('#music-file').addEventListener('change', e => {
     const file = e.target.files?.[0]
     if (!file) return
-    if (music) URL.revokeObjectURL(music.url)
+    if (music?.url) URL.revokeObjectURL(music.url)
     music = { name: file.name, url: URL.createObjectURL(file) }
     e.target.value = ''
     render()
   })
   $('#music-clear').addEventListener('click', () => {
-    if (music) URL.revokeObjectURL(music.url)
+    if (music?.url) URL.revokeObjectURL(music.url)
     music = null
+    render()
+  })
+  $('#music-track').addEventListener('click', () => {
+    if (music?.url) URL.revokeObjectURL(music.url)
+    music = { track: TRACK }
     render()
   })
   $('#export-short').addEventListener('click', exportShort)
