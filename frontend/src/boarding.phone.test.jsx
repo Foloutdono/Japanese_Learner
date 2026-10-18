@@ -128,12 +128,26 @@ describe('the boarding at 390×844', () => {
     const pill = rect(go())
     expect(Math.abs((word.left + word.right) / 2 - (pill.left + pill.right) / 2)).toBeLessThanOrEqual(1)
 
+    // The wake is witnessed, not caught in flight: the class lives for
+    // the pop's 540 ms of real time, and a starved runner whose settle
+    // overruns that (CI, 2026-10-18) found it already let go. The class
+    // set and the pop started are recorded as they happen instead.
+    const gate = go()
+    const woke = []
+    const seen = new MutationObserver(() => {
+      if (gate.classList.contains('btn-depart--waking')) woke.push('class')
+    })
+    seen.observe(gate, { attributes: true, attributeFilter: ['class'] })
+    gate.addEventListener('animationstart', e => woke.push(e.animationName))
     await click(screen.container, '[data-level="N4"]')
+    expect(go()).toBe(gate)
     expect(go().disabled).toBe(false)
-    expect(go().classList.contains('btn-depart--waking')).toBe(true)
-    expect(getComputedStyle(go()).animationName).toContain('btn-gate-wake')
+    await expect.poll(() => woke).toContain('class')
+    await expect.poll(() => woke).toContain('btn-gate-wake')
     // The pop lets go once it has landed, and the gate stands still.
     await settle(700)
+    seen.disconnect()
+    expect(woke.filter(w => w === 'btn-gate-wake')).toHaveLength(1)
     expect(go().classList.contains('btn-depart--waking')).toBe(false)
     expect(getComputedStyle(go()).animationName).toBe('none')
     expect(getComputedStyle(go(), '::before').opacity).toBe('1')
