@@ -1320,7 +1320,7 @@ Today's column's width (`components/practice/gate/DeskGate`):
   either way from where the painting has them, the brightest stars catch
   the light, the sun's or the moon's glow breathes, and now and then the
   hour's birds cross, jointed as Today's print draws them (cranes at
-  dawn, black kites by day, the geese of 落雁 at dusk; none at night). Each
+  dawn, swallows by day, each on its own swooping way, the geese of 落雁 at dusk; none at night). Each
   is slow enough to be noticed only by a learner who stays, and every
   loop but the clouds' is a Web Animation. Under reduced motion the sky
   is the painting's.
@@ -1329,7 +1329,11 @@ Today's column's width (`components/practice/gate/DeskGate`):
   never squeezed (plain columns let out between its rings, posters and
   stanchions), and lit at each hour as the car is lit, its far window
   showing the hour's sky behind the trees and, after dark, the lit car
-  faintly in the glass. The car's other windows show that inside.
+  faintly in the glass. After dark the car's other windows look across
+  it: the strap rail and its rings along the car, the far wall, one far
+  window across from each window (its panes as many, a stretch of the
+  hour's own sky and trees of its own) and the far seats' backs -- never
+  a copy of the doorway in each pane.
 
 ## Space
 

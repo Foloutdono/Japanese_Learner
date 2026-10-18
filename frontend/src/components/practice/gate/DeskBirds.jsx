@@ -3,16 +3,15 @@ import DESK from './desk.json'
 
 // ── 鳥 — the desk's birds, jointed (plan 244c) ───────────────────────
 // Today's print's birds (scripts/today-print/birds5.py): cranes (丹頂) at
-// dawn and the geese of 落雁 at dusk, as the print flies them, and by day
-// black kites (鳶), the print's gull drawn in a kite's brown -- the bird
-// that soars over hills, as dark against the sky as the gull was lost in
-// it; none at night. Each wing is an arm hinged at the shoulder and a
+// dawn and the geese of 落雁 at dusk, as the print flies them; by day the
+// station's own bird, swallows (燕), which nest under a platform's
+// canopy, each on its own swooping way, a few quick beats then a glide;
+// none at night. Each wing is an arm hinged at the shoulder and a
 // hand hinged at the wrist: the arm beats (a quicker downstroke, a
 // slower recovery), the hand follows a beat late so the tip bends
 // against the air, and the body rises a little on each downstroke. Seen
 // from the side (the goose, the crane) a beating wing folds through its
-// own edge; seen from below (the kite) the wings turn about the
-// shoulders, gliding, then a short run of beats. All fly left to right,
+// own edge. All fly left to right,
 // so the board, over the scene's right, never hides a crossing's start.
 //
 // Every joint is an HTML box at its hinge, holding its part's drawing
@@ -21,7 +20,7 @@ import DESK from './desk.json'
 // breathing, its heave, its arms and its hands. The paths are the
 // print's, in its units; a bird is scaled where it flies.
 
-const INK = { goose: '#1b2238', gooseFar: '#2c3552', crane: '#f6f3ec', craneFar: '#d9d4ca', craneTip: '#14141c', gull: '#4a3f37', gullEdge: '#2c2520' }
+const INK = { goose: '#1b2238', gooseFar: '#2c3552', crane: '#f6f3ec', craneFar: '#d9d4ca', craneTip: '#14141c', swallow: '#141a28', swallowFar: '#2a3246', throat: '#9a3b2a' }
 
 // A crossing at each hour: the kind, whether its drawing faces left
 // (and is turned to fly right), the row it flies at (the sky's units,
@@ -32,13 +31,17 @@ const INK = { goose: '#1b2238', gooseFar: '#2c3552', crane: '#f6f3ec', craneFar:
 const FLIGHTS = {
   dawn: { kind: 'crane', turned: true, y: 150, scale: 0.78, cross: 62000, rest: 12000, beat: 1.8,
     birds: [[0, 0], [-46, 14]] },
-  day: { kind: 'gull', y: 150, scale: 2.1, cross: 84000, rest: 8000, beat: 0.5,
-    birds: [[0, 0], [-44, 22], [-96, -8]] },
+  // swallows fly alone: each its own row, its own pace and its own wait
+  day: { kind: 'swallow', solo: true, scale: 1.25, beat: 0.13,
+    birds: [{ y: 118, cross: 16000, rest: 12000, wait: 2500, dips: 1.6 },
+      { y: 176, cross: 19000, rest: 15000, wait: 8500, dips: 1.2 },
+      { y: 146, cross: 14500, rest: 19000, wait: 15000, dips: 2.1 }] },
   dusk: { kind: 'goose', y: 176, scale: 1.25, cross: 52000, rest: 14000, beat: 0.9,
     birds: [[0, 0], [-26, -13], [-52, -26], [-26, 13], [-52, 26]] },
 }
 const FIRST = 4000        // ms before the first crossing
 const SWAY = 16           // units the flight rises and falls along its way
+const DIP = 26            // units a swallow swoops down and up
 
 // A spread of numbers in [0, 1) drawn from an index (each bird keeps its
 // own pace, the same on every visit).
@@ -77,10 +80,11 @@ const HEAVE_GLIDE = [
   { offset: 0, transform: 'translateY(0.6px)' }, { offset: 0.14, transform: 'translateY(-0.9px)' }, { offset: 0.4, transform: 'translateY(0.6px)' },
   { offset: 0.54, transform: 'translateY(-0.9px)' }, { offset: 0.8, transform: 'translateY(0.2px)' }, { offset: 1, transform: 'translateY(0.6px)' },
 ]
-const GULL_ARM = s => [0, 0.62, 0.68, 0.74, 0.8, 0.86, 0.92, 1].map((offset, i) => (
-  { offset, transform: `rotate(${s * [0, 0, -26, 22, -24, 20, -6, 0][i]}deg)` }))
-const GULL_HAND = s => [0, 0.62, 0.7, 0.76, 0.82, 0.88, 1].map((offset, i) => (
-  { offset, transform: `rotate(${s * [0, 0, 14, -16, 14, -12, 0][i]}deg)` }))
+// The swallow: three quick beats, then a glide on wings held half up.
+const BEATS = [0, 0.08, 0.16, 0.24, 0.32, 0.4, 0.5, 0.75, 1]
+const SW_ARM = k => BEATS.map((offset, i) => (
+  { offset, transform: `scaleY(${k * [1, -0.86, 1, -0.86, 1, -0.86, 0.5, 0.42, 0.5][i]})`, easing: 'ease-in-out' }))
+const SW_HAND = BEATS.map((offset, i) => ({ offset, transform: `rotate(${[14, -22, 14, -22, 14, -22, 4, 8, 4][i]}deg)`, easing: 'ease-in-out' }))
 
 /** A hinge: a box at a joint, turning about it, its part drawn from it. */
 function Joint({ at = [0, 0], move, d, fill, stroke, children }) {
@@ -155,33 +159,38 @@ function Crane() {
   )
 }
 
-/** A gull seen from below, gliding on bent wings (birds5.gull): by day,
-    in a kite's brown. */
-function Gull() {
-  const { gull: ink, gullEdge: edge } = INK
-  const wing = s => (
-    <Joint at={[s * 1.2, 0]} move={`garm-${s > 0 ? 'r' : 'l'}`}
-      d={`M0 0 C${s * 2} -1.2 ${s * 4} -2.4 ${s * 5.6} -2.8 L${s * 5.8} -1.6 C${s * 4} -1 ${s * 2} 0.2 0 1 Z`} fill={ink} stroke={edge}>
-      <Joint at={[s * 5.6, -2.2]} move={`ghand-${s > 0 ? 'r' : 'l'}`}
-        d={`M0 0 C${s * 1.6} 0.5 ${s * 3.4} 1.4 ${s * 5.2} 2.6 C${s * 3.4} 2.2 ${s * 1.6} 1.6 0 1.1 Z`} fill={ink} stroke={edge} />
-    </Joint>
-  )
+/** A swallow (燕) flying right, seen from the side: its forked tail,
+    its red throat, its long swept wings. */
+function Swallow() {
+  const { swallow: k, swallowFar: far, throat } = INK
+  const arm = 'M-1.2 0 C-1 -2.6 0 -5 1.2 -6.8 L2.9 -6.3 C2.2 -4.2 1.9 -2 2 0 Z'
+  const hand = 'M-1.2 -0.3 C-2.8 -3 -5.2 -5.8 -9 -8 C-5.8 -5.2 -2.9 -2.4 1.3 0.4 Z'
   return (
-    <span className="pdesk-joint" data-move="bank">
-      {wing(-1)}{wing(1)}
-      <Body><ellipse cx="0" cy="0.4" rx="1.3" ry="2.6" fill={ink} stroke={edge} strokeWidth="0.25" /></Body>
+    <span className="pdesk-joint" data-move="heave">
+      <Joint at={[-0.6, 0.2]} move="sw-arm-far" d={arm} fill={far}>
+        <Joint at={[2.1, -6.7]} move="sw-hand" d={hand} fill={far} />
+      </Joint>
+      <Body>
+        <path d="M-5 0.2 C-2.5 -1.7 2.5 -2.1 5.2 -1.1 C6.6 -0.5 6.8 0.8 5.4 1.2 C2.6 1.9 -2 1.6 -5 0.2 Z" fill={k} />
+        <path d="M6.5 -0.3 L8.1 0.15 L6.5 0.6 Z" fill={k} />
+        <path d="M-4.4 -0.2 L-12.8 -2.3 L-4.9 0.8 Z" fill={k} />
+        <path d="M-4.4 0.3 L-12.2 2.9 L-4.6 1.1 Z" fill={k} />
+        <path d="M4.2 0.6 C5.2 0.9 5.8 0.9 6.2 0.7 C5.6 1.4 4.6 1.4 3.8 1.2 Z" fill={throat} />
+      </Body>
+      <Joint at={[0.6, -0.6]} move="sw-arm" d={arm} fill={k}>
+        <Joint at={[2.1, -6.7]} move="sw-hand" d={hand} fill={k} />
+      </Joint>
     </span>
   )
 }
 
-const KINDS = { goose: Goose, crane: Crane, gull: Gull }
+const KINDS = { goose: Goose, crane: Crane, swallow: Swallow }
 
 // Each joint's motion, by its name, for a bird beating every `beat` s.
 function motions(beat, phase) {
   const b = beat * 1000
   const ph = -phase * 1000
   const loop = { iterations: Infinity }
-  const gull = { ...loop, duration: b * 9, delay: ph, easing: 'ease-in-out' }
   return {
     heave: [HEAVE, { ...loop, duration: b, delay: ph, easing: 'ease-in-out' }],
     'heave-glide': [HEAVE_GLIDE, { ...loop, duration: b, delay: ph, easing: 'ease-in-out' }],
@@ -191,46 +200,76 @@ function motions(beat, phase) {
     'arm-far-glide': [FOLD_GLIDE(0.8, -0.6, 0.42), { ...loop, duration: b, delay: ph }],
     hand: [BEND, { ...loop, duration: b, delay: ph - b * 0.12, easing: 'ease-in-out' }],
     'hand-glide': [BEND_GLIDE, { ...loop, duration: b, delay: ph - b * 0.12, easing: 'ease-in-out' }],
-    'garm-r': [GULL_ARM(1), gull],
-    'garm-l': [GULL_ARM(-1), gull],
-    'ghand-r': [GULL_HAND(1), gull],
-    'ghand-l': [GULL_HAND(-1), gull],
-    bank: [[{ transform: 'rotate(-9deg)' }, { transform: 'rotate(9deg)' }],
-      { ...loop, duration: b * 14, delay: ph, direction: 'alternate', easing: 'ease-in-out' }],
+    'sw-arm': [SW_ARM(1), { ...loop, duration: b * 8, delay: ph }],
+    'sw-arm-far': [SW_ARM(0.82), { ...loop, duration: b * 8, delay: ph }],
+    'sw-hand': [SW_HAND, { ...loop, duration: b * 8, delay: ph - b * 0.4 }],
   }
 }
 
-/** The hour's crossing, now and then, over the sky (none at night). */
+// A flock's way across: in at the left, out at the right, rising and
+// falling a little as it goes, slowing a touch in the middle.
+function flockWay(root, f) {
+  const W = DESK.scene.w
+  const total = f.cross + f.rest
+  const end = f.cross / total
+  const [from, to] = [-140, W + 120]
+  const way = [0, 0.22, 0.5, 0.78, 1].map((t, i) => ({
+    offset: t * end,
+    transform: `translate(${from + (to - from) * (t + 0.04 * Math.sin(t * Math.PI * 2))}px, ${f.y + SWAY * [0.6, -0.4, 0.3, -0.8, 0.2][i]}px)`,
+    opacity: 1,
+  }))
+  const last = way[way.length - 1].transform
+  return [play(root, [
+    ...way,
+    { offset: Math.min(1, end + 0.0005), transform: last, opacity: 0 },
+    { offset: 1, transform: last, opacity: 0 },
+  ], { duration: total, delay: FIRST, iterations: Infinity, fill: 'both' })]
+}
+
+// A swallow's own way: swooping down and up as it goes, its body along
+// its way, then gone until its next.
+function soloWay(el, b, i) {
+  const W = DESK.scene.w
+  const total = b.cross + b.rest
+  const end = b.cross / total
+  const n = 16
+  const phase = spread(i, 17) * Math.PI * 2
+  const at = t => [-80 + (W + 160) * t, b.y + DIP * Math.sin(phase + t * Math.PI * 2 * b.dips)]
+  const way = Array.from({ length: n + 1 }, (_, k) => {
+    const t = k / n
+    const [x, y] = at(t)
+    const [x2, y2] = at(Math.min(1, t + 0.01))
+    const [x1, y1] = at(Math.max(0, t - 0.01))
+    const turn = Math.max(-28, Math.min(28, Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI))
+    return { offset: t * end, transform: `translate(${x}px, ${y}px) rotate(${turn}deg)`, opacity: 1 }
+  })
+  const last = way[n].transform
+  return play(el, [
+    ...way,
+    { offset: Math.min(1, end + 0.0005), transform: last, opacity: 0 },
+    { offset: 1, transform: last, opacity: 0 },
+  ], { duration: total, delay: b.wait, iterations: Infinity, fill: 'both' })
+}
+
+/** The hour's birds, now and then, over the sky (none at night). */
 export function DeskBirds({ hour }) {
   const box = useRef(null)
   const f = FLIGHTS[hour]
   useEffect(() => {
     const root = box.current
     if (!root || !f) return undefined
-    const W = DESK.scene.w
-    const total = f.cross + f.rest
-    const end = f.cross / total
-    // the way across: in at one side, out at the other, rising and
-    // falling a little as it goes, slowing a touch in the middle
-    const [from, to] = [-140, W + 120]
-    const way = [0, 0.22, 0.5, 0.78, 1].map((t, i) => ({
-      offset: t * end,
-      transform: `translate(${from + (to - from) * (t + 0.04 * Math.sin(t * Math.PI * 2))}px, ${f.y + SWAY * [0.6, -0.4, 0.3, -0.8, 0.2][i]}px)`,
-      opacity: 1,
-    }))
-    const last = way[way.length - 1].transform
-    const anims = [play(root, [
-      ...way,
-      { offset: Math.min(1, end + 0.0005), transform: last, opacity: 0 },
-      { offset: 1, transform: last, opacity: 0 },
-    ], { duration: total, delay: FIRST, iterations: Infinity, fill: 'both' })]
+    const anims = f.solo
+      ? [...root.querySelectorAll('.pdesk-way')].map((el, i) => soloWay(el, f.birds[i], i))
+      : flockWay(root, f)
     root.querySelectorAll('.pdesk-bird').forEach((bird, i) => {
       const m = motions(f.beat * (0.94 + 0.12 * spread(i, 5)), spread(i, 13) * f.beat)
-      // each bird keeps its place in the flock loosely
-      anims.push(play(bird.firstElementChild, [
-        { transform: 'translate(0, 0)' },
-        { transform: `translate(${(spread(i, 3) - 0.5) * 8}px, ${(spread(i, 7) - 0.5) * 6}px)` },
-      ], { duration: 4200 + spread(i, 11) * 3000, direction: 'alternate', iterations: Infinity, easing: 'ease-in-out' }))
+      // in a flock, each bird keeps its place loosely
+      if (!f.solo) {
+        anims.push(play(bird.firstElementChild, [
+          { transform: 'translate(0, 0)' },
+          { transform: `translate(${(spread(i, 3) - 0.5) * 8}px, ${(spread(i, 7) - 0.5) * 6}px)` },
+        ], { duration: 4200 + spread(i, 11) * 3000, direction: 'alternate', iterations: Infinity, easing: 'ease-in-out' }))
+      }
       bird.querySelectorAll('[data-move]').forEach(el => {
         const [frames, options] = m[el.dataset.move]
         anims.push(play(el, frames, options))
@@ -240,14 +279,17 @@ export function DeskBirds({ hour }) {
   }, [f])
   if (!f) return null
   const Kind = KINDS[f.kind]
+  const bird = (x, y, i) => (
+    <span key={i} className="pdesk-bird"
+      style={{ left: x * f.scale, top: y * f.scale, transform: `scale(${f.turned ? -f.scale : f.scale}, ${f.scale})` }}>
+      <span className="pdesk-joint"><Kind /></span>
+    </span>
+  )
   return (
-    <span ref={box} className="pdesk-flock">
-      {f.birds.map(([x, y], i) => (
-        <span key={i} className="pdesk-bird"
-          style={{ left: x * f.scale, top: y * f.scale, transform: `scale(${f.turned ? -f.scale : f.scale}, ${f.scale})` }}>
-          <span className="pdesk-joint"><Kind /></span>
-        </span>
-      ))}
+    <span ref={box} className={`pdesk-flock${f.solo ? ' pdesk-flock--solo' : ''}`}>
+      {f.solo
+        ? f.birds.map((_, i) => <span key={i} className="pdesk-way">{bird(0, 0, i)}</span>)
+        : f.birds.map(([x, y], i) => bird(x, y, i))}
     </span>
   )
 }

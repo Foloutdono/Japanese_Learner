@@ -35051,8 +35051,11 @@ button.brd-stn { cursor: pointer; }
     top: 0;
     opacity: 0;
   }
+  /* Swallows fly alone (DeskBirds): the flock stands, each bird's way moves. */
+  .pdesk-flock--solo { opacity: 1; }
   /* A bird (DeskBirds), jointed: every box is a hinge, its size nought,
      turning about its own corner; its part drawn from it. */
+  .pdesk-way,
   .pdesk-bird,
   .pdesk-joint {
     position: absolute;
