@@ -27,6 +27,7 @@ import re
 from datetime import datetime, timedelta, timezone
 
 from core.db import db_conn
+from core.rls import enable_rls
 
 logger = logging.getLogger(__name__)
 
@@ -332,9 +333,10 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         # sentence's explanation opened. dictionary: a search run.
         # export: the progress downloaded. level_fit: Today's line that
         # says the level does not fit (plan 224) -- opened, the move
-        # taken, or the level kept.
+        # taken, or the level kept. conversation: the 会話 station's
+        # search started (plan 246).
         "feature": frozenset({"speech", "analyzer", "ocr", "ask", "explain",
-                              "dictionary", "export", "level_fit"}),
+                              "dictionary", "export", "level_fit", "conversation"}),
         "action":  frozenset({"play", "text", "photo", "video", "scan", "send",
                               "open", "search", "progress", "move", "stay"}),
     },
@@ -488,6 +490,7 @@ def _ensure_events_schema() -> None:
                     at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
+            enable_rls(cur, "event_log")
             # (user_id, at) for one learner's trail in order; (name, at)
             # for the digest's per-name counts across everyone.
             # The client's own id per event (routes/events.py), so a
@@ -521,6 +524,7 @@ def _ensure_events_schema() -> None:
                     PRIMARY KEY (user_id, day, name)
                 )
             """)
+            enable_rls(cur, "event_daily")
         conn.commit()
     finally:
         conn.close()

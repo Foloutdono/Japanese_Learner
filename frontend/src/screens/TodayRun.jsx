@@ -23,13 +23,15 @@ import { DrawingQuiz } from '../components/study/DrawingCanvas'
 import ReadingsInput from '../components/study/ReadingsInput'
 import RatingBar from '../components/study/RatingBar'
 import HintBar from '../components/study/HintBar'
+import SpeakToggle from '../components/study/SpeakToggle'
+import { useRevealSpeech } from '../hooks/useRevealSpeech'
 import SessionError from '../components/study/SessionError'
 import CardPrompt from '../components/study/CardPrompt'
 import { GrammarChoice } from '../components/study/GrammarPieces'
 import { radicalChoiceRenderer } from '../components/study/radicalChoiceRenderer'
 import { ChevronIcon } from '../components/ui/Icons'
 import { ExampleSentence } from '../components/dictionary/ExampleSentence'
-import { normalizeCard, cardShape, availableHintsFor, wordForm, choiceAnswer } from '../domain/cardShape'
+import { normalizeCard, cardShape, availableHintsFor, wordForm, choiceAnswer, grammarSentence } from '../domain/cardShape'
 import { RENDER, HINTS, modeLabel } from '../domain/studyModes'
 import { LINE_COLOR } from '../config/tabs'
 import { postReview as sendReview, staleCards } from '../lib/reviews'
@@ -41,6 +43,7 @@ import { peekTally } from '../stores/runTally'
 import { cardFace } from '../domain/dayClear'
 import { formatGlossLine } from '../components/study/gloss'
 import { romajiEquals } from '../lib/romaji'
+import { speakJapanese, playKana, kanaSound, isSpeakOnReveal } from '../lib/audio'
 
 // ── 本日の運行 — the run (plan 070) ───────────────────────────
 // The day's queue on the stage: everything due, across every section
@@ -304,7 +307,7 @@ export default function TodayRun({ session }) {
   })
 
   const nc = card ? normalizeCard(card) : null
-  const { structureKey, renderer, isRadical, isFill, isContrast, isF2B } = cardShape(nc ?? {})
+  const { structureKey, renderer, isRadical, isFill, isContrast, isBuild, isWrite, isF2B } = cardShape(nc ?? {})
 
   // 教順 (plan 186b): a grammar point the learner has never met is read
   // before it is drilled, here as on its own run (GrammarRun's gate,
@@ -358,10 +361,24 @@ export default function TodayRun({ session }) {
     setTimeout(() => recentlyReviewedRef.current.delete(key), 8000)
   }
 
+  // 音 — speak on reveal (lib/audio/reveal.js): a card says its answer
+  // as its own run has it say it, unless the switch is off. A kana says
+  // its sound and a word its reading, with the switch beside the hints;
+  // a kanji, a section's or a deck's, its reading once drawn; a grammar
+  // card its sentence (below), with the switch in the head. A personal
+  // deck's word or sentence says nothing, as in the deck's own run.
+  const personal = nc?.source === 'custom'
+  const speaksWord = !personal && (structureKey === 'kana' || structureKey === 'vocab')
+  const speaksSentence = !personal && structureKey === 'grammar' && (isFill || isContrast || isBuild || isWrite)
 
   function reveal() {
     setAnswered(true)
     setShowRating(true)
+    // The first reveal says it, in the reveal's own tick, the tap's:
+    // iOS speaks only from a gesture (lib/audio/speech.js).
+    if (answered || !isSpeakOnReveal()) return
+    if (structureKey === 'kana') playKana(kanaSound(nc))
+    else if (speaksWord || renderer === RENDER.DRAW) speakJapanese(nc.kana)
   }
 
   // Construire's answer (plan 194): typed into the entry under the card,
@@ -369,6 +386,11 @@ export default function TodayRun({ session }) {
   const entry = useBuild(card?.build && cardShape(card).isBuild ? card : null, {
     session, lang, onDone: reveal, resetKey: cardNonce,
   })
+  // The sentence, as GrammarRun says it: fill-in's, Choisir's with its
+  // hole filled, Construire's once the verdict brings it, Écrire's
+  // model. Keyed on the card in hand: the next card is drawn under this
+  // one's reveal for a render (the reset above is an effect).
+  useRevealSpeech(speaksSentence ? grammarSentence(nc, entry?.verdict) : null, answered, transitionKey)
 
   function onMCQAnswer(choice) {
     if (answered) return
@@ -462,6 +484,9 @@ export default function TodayRun({ session }) {
       where={where}
       sub={sub}
       remaining={remaining}
+      // The speak-on-reveal switch for a card that says a sentence, in
+      // the head as GrammarRun keeps it.
+      aside={card && !gated && speaksSentence ? <SpeakToggle variant="head" /> : undefined}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
       records
@@ -510,13 +535,14 @@ export default function TodayRun({ session }) {
                 fold on a drawing mode, so the one control that rescues
                 a card you cannot answer was hidden exactly when you
                 needed it. Where the card is from is on its own footer
-                strip (see laneFoot), as on every other study card. */}
-            {availableHints.length > 0 && (
-              <HintBar
-                available={availableHints} active={activeHints}
-                onToggle={toggleHint} disabled={gates.locked}
-              />
-            )}
+                strip (see laneFoot), as on every other study card.
+                A card that says its word keeps the speak-on-reveal
+                switch at the end of the row, which then stands even
+                with no hint to offer. */}
+            <HintBar
+              available={availableHints} active={activeHints}
+              onToggle={toggleHint} disabled={gates.locked} speaks={speaksWord}
+            />
 
             <CardTransition
               className={stageClassFor(structureKey)}

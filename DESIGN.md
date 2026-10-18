@@ -1147,8 +1147,13 @@ adds no idiom of its own: it is the tour's scene made to answer back.
 - **The station is a console over platform cards.** How the learner
   will answer applies to every scene below, so it is the console's band
   (Choose · Translate · Free talk); the grades are its chips, opening on
-  the learner's own; nothing between them and the scenes (the band's
-  word says how the learner answers). A
+  the learner's own; the search well is its second row (plan 246),
+  asking the grade's scenes for every word typed (their titles,
+  situations, errands, roles, places and opening lines, folded for case,
+  accents and the two kana scripts), the count at the well's end, and a
+  grade that holds none of it names the grades that do and moves to the
+  nearest, the query kept; nothing between the console and the scenes
+  (the band's word says how the learner answers). A
   scene is a platform card: its title, its situation, its first line as
   the card's specimen (what the train stops at), and the learner's
   record there at the end of the title's row (ModeSelector's `meta`: a

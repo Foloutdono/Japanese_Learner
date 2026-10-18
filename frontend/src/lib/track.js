@@ -150,7 +150,7 @@ export const VALUES = {
   run_complete: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
   run_abandon: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
   feature_use: {
-    feature: ['speech', 'analyzer', 'ocr', 'ask', 'explain', 'dictionary', 'export', 'level_fit'],
+    feature: ['speech', 'analyzer', 'ocr', 'ask', 'explain', 'dictionary', 'export', 'level_fit', 'conversation'],
     action: ['play', 'text', 'photo', 'video', 'scan', 'send', 'open', 'search', 'progress', 'move', 'stay'],
   },
   transfer_import: { source: ['anki', 'wanikani', 'renshuu'] },

@@ -32,8 +32,9 @@ reaches a tag.
 Two branches. **`main` is where work lands and is tested; `production` is
 what learners run.** Render (the backend) and Vercel (the frontend) deploy
 `production` only, and `.github/workflows/promote.yml` fast-forwards it to
-`main` once a day at 03:17 UTC (05:17 in Paris), when CI is green on
-`main`'s head and `main` is ahead. So:
+`main` once a day at 03:17 UTC (05:17 in Paris), to the newest commit of
+`main` whose CI passed (the head, or the last one before a red or still
+running head) when that is ahead of it. So:
 
 - A merge to `main` ships to nobody. Merge as often as you like.
 - Every deploy restarts the one-worker backend, and a learner opening the
@@ -56,9 +57,17 @@ Set up once, in the dashboards (the repository cannot do these):
    workflow); it creates `production` at `main`'s head.
 2. **Render**: the backend service → Settings → Build & Deploy → Branch →
    `production`. Optionally Auto-Deploy → *After CI checks pass*.
-3. **Vercel**: the project → Settings → Git → Production Branch →
-   `production`. `main` and every pull request then get preview
-   deployments, which is the place to try a frontend change.
+3. **Vercel**: the project → Settings → Environments → Production →
+   Branch Tracking → `production`, then Save. (Not Settings → Git: the
+   setting is not there any more.) Vercel refuses a branch it has never
+   deployed ("No deployments found for production"), and the branch the
+   workflow creates at `main`'s head carries a commit Vercel already
+   built for `main`, so it may deploy nothing. If it refuses, let the
+   next release put a new commit on `production` (merge anything to
+   `main`, then run the workflow: it ships the newest green commit), wait
+   for that deployment to appear, and Save again. `main` and every pull
+   request then get preview deployments, which is the place to try a
+   frontend change.
 
 A preview's `/api` is rewritten to the **production** backend and database
 (`vercel.json`), running the code last promoted, so a frontend change that

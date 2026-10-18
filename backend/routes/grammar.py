@@ -28,6 +28,7 @@ from study.grammar_match import verifiable
 from study.mcq import meaning_key, pick_distractors
 from pydantic import BaseModel, Field
 from core.db import db_conn
+from core.rls import enable_rls
 
 # The grammar section runs on the project's own catalogue,
 # content/grammar/*.json (plan 087) -- one file per level, each point
@@ -631,6 +632,7 @@ def _ensure_tour_schema() -> None:
                     PRIMARY KEY (user_id, card_id)
                 )
             """)
+            enable_rls(cur, "grammar_tours")
             # The tutorial's closing quiz (plan 194): how many of its
             # questions were right, out of how many.
             cur.execute("ALTER TABLE grammar_tours ADD COLUMN IF NOT EXISTS quiz_right SMALLINT")

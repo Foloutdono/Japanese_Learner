@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **245**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **247**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -91,6 +91,11 @@ runtime purpose.
   the translation printed under it carry what the grammar does not, keep the
   stem outside the hole (悲し＿＿＿ + み), and let an independent reviewer
   attack the batch before it ships.
+  Answered, the hole holds what the sentence has there (the payload's
+  `fill`, `grammar_examples.span_parts`), never the pattern poured back
+  in: a point is blanked on one piece of it (から of から〜まで, ます of
+  〜ます／〜ません), so the pattern doubled the sentence (plan 245,
+  `tests/test_contrast_fill.py`).
 - **Construire takes what the translation cannot tell apart (plan 241).**
   A translation never says polite or plain, so where Construire's hole
   closes its sentence the ending in the other register is right too
@@ -169,6 +174,15 @@ runtime purpose.
   `DELETE /api/account` (`routes/account.py`) in the same change.
 - **One table's self-migration per transaction.** A failing `ALTER` must not
   roll back another table's.
+- **A table is born closed to the Data API.** Supabase serves `public` to
+  the anon key, which ships in the bundle, and grants it every new table
+  there, so the transaction that creates a table closes it:
+  `core/rls.enable_rls(cur, table)` right after the CREATE, and an
+  `ALTER TABLE … ENABLE ROW LEVEL SECURITY` after its CREATE TABLE in
+  `srs/data_structure.sql` (`tests/test_rls.py`). No policy, never FORCE:
+  the backend reads as the tables' owner, which RLS leaves alone, and
+  nothing reads them through the Data API. A table made by hand in
+  `public` is closed by hand (`scripts/sql/close_data_api.sql`).
 - **The reading bank is held at its level from both sides.** A row of
   `content/reading_sentences.py` (which reading and translation share) has
   nothing above its level and, at N4–N1, two deck words of its own level
@@ -945,8 +959,8 @@ Frontend calls same-origin `/api/*` FastAPI routes in both dev and prod (Vite pr
 
 - **Two branches, one release a day.** `main` is where work lands and is
   tested; `production` is what Render and Vercel deploy, moved by
-  `.github/workflows/promote.yml` once a day (03:17 UTC) when CI is green on
-  `main`. A merge to `main` ships to no learner, because each backend
+  `.github/workflows/promote.yml` once a day (03:17 UTC) to the newest `main`
+  commit whose CI passed. A merge to `main` ships to no learner, because each backend
   restart shows learners the boot gate. Never push to `production` by hand;
   a hotfix is a merge to `main` and a manual run of the workflow
   (`docs/release.md`, "Web: the daily release").
