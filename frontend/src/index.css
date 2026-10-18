@@ -10820,7 +10820,8 @@ textarea:focus-visible {
   box-shadow: inset 0 0 0 1.5px var(--surface-line);
 }
 .btn-depart--gate:disabled .btn-depart__reader::after { background: var(--surface-line); }
-/* The wake: set by Continue for the one render after a pick enables it. */
+/* The wake: set by GateButton in the very render a pick enables it,
+   and dropped when the pop lands. */
 .btn-depart--waking {
   animation: btn-gate-wake 540ms ease-out;
 }
