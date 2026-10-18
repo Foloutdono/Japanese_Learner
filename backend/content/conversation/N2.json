@@ -288,6 +288,256 @@
     }
   },
   {
+    "id": "job-interview-conditions",
+    "place": {"jp": "面接", "kana": "めんせつ", "en": "Job interview", "fr": "Entretien d'embauche"},
+    "title": {"en": "Interview: weekends and closing time", "fr": "Entretien : le week-end et la fermeture"},
+    "situation": {
+      "en": "You are being interviewed for a part-time job at a café, so speak formally. You can work Saturdays, but not Sundays, and never after ten at night.",
+      "fr": "Tu passes un entretien pour un petit boulot dans un café : parle de façon soutenue. Tu peux travailler le samedi, mais pas le dimanche, et jamais après vingt-deux heures."
+    },
+    "goal": {
+      "en": "Tell the manager which shifts you can and cannot do, offer a middle ground for the ones he needs, and ask about travel expenses.",
+      "fr": "Dis au gérant quels services tu peux assurer ou non, propose un compromis pour ceux dont il a besoin, et renseigne-toi sur les frais de transport."
+    },
+    "steps": [
+      {"en": "Say Saturdays yes, Sundays no", "fr": "Dis oui au samedi, non au dimanche"},
+      {"en": "Say you must leave by ten", "fr": "Dis que tu pars à vingt-deux heures"},
+      {"en": "Offer to start early instead", "fr": "Propose de commencer tôt à la place"},
+      {"en": "Ask about travel expenses", "fr": "Pose la question des frais de transport"},
+      {"en": "Check the cap covers your fare", "fr": "Vérifie que le plafond suffit"}
+    ],
+    "them": {"en": "Café manager", "fr": "Gérant du café"},
+    "register": "formal",
+    "turns": [
+      {
+        "them": {
+          "jp": "では早速ですが、うちは今、週末と閉店までの時間に入れる方を探しているんです。土日はどうですか。",
+          "kana": "ではさっそくですが、うちはいま、しゅうまつとへいてんまでのじかんにはいれるかたをさがしているんです。どにちはどうですか。",
+          "en": "Right, let's get straight to it: we're looking for people who can work weekends and until closing time. How are you for weekends?",
+          "fr": "Bien, allons droit au but : nous cherchons des gens disponibles le week-end et jusqu'à la fermeture. Le week-end, ça vous est possible ?"
+        },
+        "me": {
+          "jp": "土曜日でしたら入れますが、日曜日はあいにく毎週予定がございまして。",
+          "kana": "どようびでしたらはいれますが、にちようびはあいにくまいしゅうよていがございまして。",
+          "romaji": "doyoubi deshitara hairemasu ga, nichiyoubi wa ainiku maishuu yotei ga gozaimashite",
+          "en": "Saturdays I can do, but Sundays, unfortunately, I have a standing commitment every week.",
+          "fr": "Le samedi, c'est possible, mais le dimanche, malheureusement, j'ai un engagement toutes les semaines.",
+          "note": {
+            "en": "「でしたら」 offers Saturday, and 「あいにく〜がございまして」 turns Sunday down formally, letting the sentence trail off.",
+            "fr": "「でしたら」 propose le samedi, et 「あいにく〜がございまして」 refuse le dimanche de façon soutenue, en laissant la phrase en suspens."
+          },
+          "alt": [
+            {"jp": "土曜日は入れますが、日曜日はどうしても都合がつかないんです。", "kana": "どようびははいれますが、にちようびはどうしてもつごうがつかないんです。", "romaji": "doyoubi wa hairemasu ga, nichiyoubi wa doushite mo tsugou ga tsukanai n desu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "土曜はいいけど、日曜はちょっと無理なんだよね。",
+            "kana": "どようはいいけど、にちようはちょっとむりなんだよね。",
+            "en": "Saturdays are fine, but Sundays are kind of a no-go, you know.",
+            "fr": "Le samedi, ça va, mais le dimanche, c'est un peu mort, tu vois.",
+            "why": {
+              "en": "「いいけど」 and 「なんだよね」 are how you talk to a friend; to the manager interviewing you, keep to formal speech.",
+              "fr": "「いいけど」 et 「なんだよね」, c'est le ton entre amis ; au gérant qui te reçoit en entretien, tu restes dans le registre soutenu."
+            }
+          },
+          {
+            "jp": "日曜日でしたら朝から入れますが、土曜日はあいにく毎週予定がございまして。",
+            "kana": "にちようびでしたらあさからはいれますが、どようびはあいにくまいしゅうよていがございまして。",
+            "en": "Sundays I can do from the morning, but Saturdays, unfortunately, I have a standing commitment every week.",
+            "fr": "Le dimanche, je peux venir dès le matin, mais le samedi, malheureusement, j'ai un engagement toutes les semaines.",
+            "why": {
+              "en": "It swaps your days: Saturday is the day you are free and Sunday the one you are not, so 「日曜日でしたら入れます」 promises the wrong one.",
+              "fr": "Tu inverses tes jours : c'est le samedi que tu as de libre, pas le dimanche, donc 「日曜日でしたら入れます」 promet le mauvais."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "わかりました。それから、閉店が夜十一時なんですが、最後まで残れますか。",
+          "kana": "わかりました。それから、へいてんがよるじゅういちじなんですが、さいごまでのこれますか。",
+          "en": "I see. And we close at eleven at night: could you stay until the end?",
+          "fr": "Entendu. Et nous fermons à vingt-trois heures : vous pourriez rester jusqu'au bout ?"
+        },
+        "me": {
+          "jp": "申し訳ございません。終電もありますし、翌朝の授業に遅れるわけにもいきませんので、十時までしかいられないんです。",
+          "kana": "もうしわけございません。しゅうでんもありますし、よくあさのじゅぎょうにおくれるわけにもいきませんので、じゅうじまでしかいられないんです。",
+          "romaji": "moushiwake gozaimasen. shuuden mo arimasu shi, yokuasa no jugyou ni okureru wake ni mo ikimasen node, juuji made shika irarenai n desu",
+          "en": "I'm very sorry. There's the last train, and I can't afford to be late for my classes the next morning, so I can only stay until ten.",
+          "fr": "Toutes mes excuses. Il y a le dernier train, et je ne peux pas me permettre d'arriver en retard à mes cours le lendemain matin : je ne peux rester que jusqu'à vingt-deux heures.",
+          "note": {
+            "en": "「わけにもいきません」 gives a reason you cannot set aside, and 「までしかいられない」 sets ten as your limit.",
+            "fr": "「わけにもいきません」 donne une raison que tu ne peux pas écarter, et 「までしかいられない」 fixe vingt-deux heures comme limite."
+          },
+          "alt": [
+            {"jp": "申し訳ございません。終電と翌日の授業がありますので、夜は十時までが限界なんです。", "kana": "もうしわけございません。しゅうでんとよくじつのじゅぎょうがありますので、よるはじゅうじまでがげんかいなんです。", "romaji": "moushiwake gozaimasen. shuuden to yokujitsu no jugyou ga arimasu node, yoru wa juuji made ga genkai nan desu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "申し訳ございません。終電がありますので、十時からしかいられないんです。",
+            "kana": "もうしわけございません。しゅうでんがありますので、じゅうじからしかいられないんです。",
+            "en": "I'm very sorry. There's the last train, so I can only be there from ten.",
+            "fr": "Toutes mes excuses. Il y a le dernier train, donc je ne peux être là qu'à partir de vingt-deux heures.",
+            "why": {
+              "en": "「十時から」 says you could only come in after ten, the very hours the last train rules out; until ten is 「十時まで」.",
+              "fr": "「十時から」 dit que tu ne pourrais venir qu'à partir de vingt-deux heures, justement les heures que le dernier train t'interdit ; jusqu'à vingt-deux heures, c'est 「十時まで」."
+            }
+          },
+          {
+            "jp": "申し訳ございません。終電もありますし、翌朝も授業がありますので、十時までしかいらっしゃれないんです。",
+            "kana": "もうしわけございません。しゅうでんもありますし、よくあさもじゅぎょうがありますので、じゅうじまでしかいらっしゃれないんです。",
+            "en": "I'm very sorry. There's the last train, and classes the next morning, so I can only graciously stay until ten.",
+            "fr": "Toutes mes excuses. Il y a le dernier train, et des cours le lendemain matin, donc je ne peux daigner rester que jusqu'à vingt-deux heures.",
+            "why": {
+              "en": "「いらっしゃる」 is the honorific of 「いる」 and raises whoever stays, here yourself; of your own staying you say 「いられない」.",
+              "fr": "「いらっしゃる」 est l'honorifique de 「いる」 et élève la personne qui reste, ici toi-même ; pour toi, on dit 「いられない」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "そうですか。土曜日だけでも、閉店までお願いできませんか。",
+          "kana": "そうですか。どようびだけでも、へいてんまでおねがいできませんか。",
+          "en": "I see. Couldn't you stay until closing, at least on Saturdays?",
+          "fr": "Je vois. Et le samedi, au moins, vous ne pourriez pas rester jusqu'à la fermeture ?"
+        },
+        "me": {
+          "jp": "あいにく土曜日も十時までになってしまいますが、その分、朝から入ることはできます。",
+          "kana": "あいにくどようびもじゅうじまでになってしまいますが、そのぶん、あさからはいることはできます。",
+          "romaji": "ainiku doyoubi mo juuji made ni natte shimaimasu ga, sono bun, asa kara hairu koto wa dekimasu",
+          "en": "I'm afraid Saturdays would end at ten too, but to make up for it, I can come in from the morning.",
+          "fr": "Malheureusement, le samedi aussi, je devrai m'arrêter à vingt-deux heures, mais en contrepartie, je peux venir dès le matin.",
+          "note": {
+            "en": "「その分」 offers something in return for what you refuse: the morning, in place of closing time.",
+            "fr": "「その分」 offre une contrepartie à ce que tu refuses : le matin, à la place de la fermeture."
+          },
+          "alt": [
+            {"jp": "申し訳ございません。土曜日も十時までですが、その代わり、朝から入れます。", "kana": "もうしわけございません。どようびもじゅうじまでですが、そのかわり、あさからはいれます。", "romaji": "moushiwake gozaimasen. doyoubi mo juuji made desu ga, sono kawari, asa kara hairemasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "はい、土曜日でしたら閉店まで残らせていただきます。",
+            "kana": "はい、どようびでしたらへいてんまでのこらせていただきます。",
+            "en": "Yes, on Saturdays I'll stay until closing.",
+            "fr": "Oui, le samedi, je resterai jusqu'à la fermeture.",
+            "why": {
+              "en": "「閉店まで」 promises to stay until eleven on Saturdays, past the ten o'clock you cannot work beyond.",
+              "fr": "「閉店まで」 promet de rester jusqu'à vingt-trois heures le samedi, au-delà de l'heure que tu ne peux pas dépasser."
+            }
+          },
+          {
+            "jp": "あいにく土曜日も十時までになってしまいますが、その分、日曜日も入れません。",
+            "kana": "あいにくどようびもじゅうじまでになってしまいますが、そのぶん、にちようびもはいれません。",
+            "en": "I'm afraid Saturdays would end at ten too, and to make up for it, I can't do Sundays either.",
+            "fr": "Malheureusement, le samedi aussi, je devrai m'arrêter à vingt-deux heures, et en contrepartie, je ne peux pas non plus le dimanche.",
+            "why": {
+              "en": "「その分」 introduces something you give in return, and 「日曜日も入れません」 gives nothing: it is one more refusal.",
+              "fr": "「その分」 annonce une contrepartie, et 「日曜日も入れません」 n'en donne aucune : c'est un refus de plus."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "朝からですか。それは助かります。では、何か確認しておきたいことはありますか。",
+          "kana": "あさからですか。それはたすかります。では、なにかかくにんしておきたいことはありますか。",
+          "en": "From the morning? That would help. Now, is there anything you'd like to check with me?",
+          "fr": "Dès le matin ? Ça nous arrangerait. Bon, y a-t-il quelque chose que vous voudriez vérifier ?"
+        },
+        "me": {
+          "jp": "ありがとうございます。一つ伺いたいのですが、交通費は支給していただけるのでしょうか。",
+          "kana": "ありがとうございます。ひとつうかがいたいのですが、こうつうひはしきゅうしていただけるのでしょうか。",
+          "romaji": "arigatou gozaimasu. hitotsu ukagaitai no desu ga, koutsuuhi wa shikyuu shite itadakeru no deshou ka",
+          "en": "Thank you. There's one thing I'd like to ask: would my travel expenses be covered?",
+          "fr": "Merci beaucoup. J'aimerais vous poser une question : les frais de transport sont-ils pris en charge ?",
+          "note": {
+            "en": "「伺いたいのですが」 humbly asks leave to put a question, and 「していただけるのでしょうか」 raises money, a delicate subject, gently.",
+            "fr": "「伺いたいのですが」 demande humblement à poser une question, et 「していただけるのでしょうか」 aborde en douceur un sujet délicat, l'argent."
+          },
+          "alt": [
+            {"jp": "ありがとうございます。一つよろしいでしょうか。交通費は出していただけますか。", "kana": "ありがとうございます。ひとつよろしいでしょうか。こうつうひはだしていただけますか。", "romaji": "arigatou gozaimasu. hitotsu yoroshii deshou ka. koutsuuhi wa dashite itadakemasu ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "ありがとうございます。一つ伺いたいのですが、交通費はいくらお支払いすればよろしいでしょうか。",
+            "kana": "ありがとうございます。ひとつうかがいたいのですが、こうつうひはいくらおしはらいすればよろしいでしょうか。",
+            "en": "Thank you. There's one thing I'd like to ask: how much should I pay for travel expenses?",
+            "fr": "Merci beaucoup. J'aimerais vous poser une question : combien dois-je payer pour les frais de transport ?",
+            "why": {
+              "en": "「お支払いすれば」 asks how much you must pay, when travel expenses are what the café pays its staff.",
+              "fr": "「お支払いすれば」 demande combien tu dois payer, alors que les frais de transport, c'est le café qui les rembourse à son personnel."
+            }
+          },
+          {
+            "jp": "ありがとうございます。一つ伺いたいのですが、先月の交通費は、もう振り込んでいただけましたか。",
+            "kana": "ありがとうございます。ひとつうかがいたいのですが、せんげつのこうつうひは、もうふりこんでいただけましたか。",
+            "en": "Thank you. There's one thing I'd like to ask: has last month's travel money been paid in yet?",
+            "fr": "Merci beaucoup. J'aimerais vous poser une question : les frais de transport du mois dernier ont-ils déjà été versés ?",
+            "why": {
+              "en": "「先月の交通費」 asks about last month's travel, when you have not worked a single shift there yet.",
+              "fr": "「先月の交通費」 porte sur les trajets du mois dernier, alors que tu n'y as encore travaillé aucun service."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "ええ、出しますよ。ただ、一日五百円までなんですが、大丈夫ですか。",
+          "kana": "ええ、だしますよ。ただ、いちにちごひゃくえんまでなんですが、だいじょうぶですか。",
+          "en": "Yes, we cover them. But only up to five hundred yen a day: is that all right?",
+          "fr": "Oui, nous les prenons en charge. Mais seulement jusqu'à cinq cents yens par jour : ça vous va ?"
+        },
+        "me": {
+          "jp": "はい、往復で四百円ほどですので、問題ございません。",
+          "kana": "はい、おうふくでよんひゃくえんほどですので、もんだいございません。",
+          "romaji": "hai, oufuku de yonhyaku en hodo desu node, mondai gozaimasen",
+          "en": "Yes, the return fare is about four hundred yen, so that's no problem.",
+          "fr": "Oui, l'aller-retour coûte environ quatre cents yens, donc aucun problème.",
+          "note": {
+            "en": "「往復で」 gives the fare there and back, under the cap, and 「問題ございません」 is the formal 「問題ありません」.",
+            "fr": "「往復で」 donne le prix aller-retour, sous le plafond, et 「問題ございません」 est le 「問題ありません」 soutenu."
+          },
+          "alt": [
+            {"jp": "はい、往復でも四百円ぐらいですので、大丈夫です。", "kana": "はい、おうふくでもよんひゃくえんぐらいですので、だいじょうぶです。", "romaji": "hai, oufuku demo yonhyaku en gurai desu node, daijoubu desu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "はい、往復で八百円ほどかかりますので、問題ございません。",
+            "kana": "はい、おうふくではっぴゃくえんほどかかりますので、もんだいございません。",
+            "en": "Yes, the return fare comes to about eight hundred yen, so that's no problem.",
+            "fr": "Oui, l'aller-retour revient à environ huit cents yens, donc aucun problème.",
+            "why": {
+              "en": "「八百円」 is over the five hundred yen a day they cover, so it cannot be 「問題ございません」.",
+              "fr": "「八百円」 dépasse les cinq cents yens par jour pris en charge : ce ne peut pas être 「問題ございません」."
+            }
+          },
+          {
+            "jp": "はい、家から電車とバスで、片道四十分ほどかかります。",
+            "kana": "はい、いえからでんしゃとバスで、かたみちよんじゅっぷんほどかかります。",
+            "en": "Yes, it takes about forty minutes each way from home, by train and bus.",
+            "fr": "Oui, il faut environ quarante minutes dans chaque sens depuis chez moi, en train et en bus.",
+            "why": {
+              "en": "It says how long the journey takes, but 「五百円まで」 asked whether the cap covers your fare.",
+              "fr": "Tu dis combien de temps dure le trajet, mais 「五百円まで」 demandait si le plafond couvre ton billet."
+            }
+          }
+        ]
+      }
+    ],
+    "close": {
+      "jp": "わかりました。では、シフトを考えてみて、二、三日中にご連絡しますね。",
+      "kana": "わかりました。では、シフトをかんがえてみて、に、さんにちちゅうにごれんらくしますね。",
+      "en": "Right. I'll work out the rota, then, and get back to you in two or three days.",
+      "fr": "Très bien. Je vais réfléchir au planning et je vous recontacte d'ici deux ou trois jours."
+    }
+  },
+  {
     "id": "day-off",
     "place": {"jp": "会社", "kana": "かいしゃ", "en": "At the office", "fr": "Au bureau"},
     "title": {"en": "Asking for days off", "fr": "Demander des congés"},
@@ -3002,6 +3252,256 @@
     }
   },
   {
+    "id": "staff-allergy",
+    "place": {"jp": "カフェ", "kana": "カフェ", "en": "Café", "fr": "Café"},
+    "title": {"en": "A nut allergy", "fr": "Une allergie aux fruits à coque"},
+    "situation": {
+      "en": "You are serving at the café's counter again. A mother with a little boy asks you about a cake: her son is allergic to nuts.",
+      "fr": "Tu es de nouveau au comptoir du café. Une mère accompagnée d'un petit garçon t'interroge sur un gâteau : son fils est allergique aux fruits à coque."
+    },
+    "goal": {
+      "en": "Check the allergy list, tell her what the cake contains, suggest one without nuts and be honest that the kitchen also uses them, all in formal speech.",
+      "fr": "Vérifie la liste des allergènes, dis-lui ce que contient le gâteau, propose-en un sans fruits à coque et sois honnête : la cuisine en utilise aussi, le tout dans un registre soutenu."
+    },
+    "steps": [
+      {"en": "Offer to check the allergy list", "fr": "Propose de vérifier les allergènes"},
+      {"en": "Say the cake contains walnuts", "fr": "Dis que le gâteau contient des noix"},
+      {"en": "Suggest a cake without nuts", "fr": "Propose un gâteau sans fruits à coque"},
+      {"en": "Say the kitchen also uses nuts", "fr": "Préviens que la cuisine en utilise"},
+      {"en": "Apologise you could not help", "fr": "Excuse-toi de ne pas pouvoir aider"}
+    ],
+    "them": {"en": "Customer", "fr": "Cliente"},
+    "register": "formal",
+    "turns": [
+      {
+        "them": {
+          "jp": "すみません。このチョコレートケーキって、ナッツは入っていますか。息子がナッツアレルギーなんです。",
+          "kana": "すみません。このチョコレートケーキって、ナッツははいっていますか。むすこがナッツアレルギーなんです。",
+          "en": "Excuse me. Does this chocolate cake have nuts in it? My son is allergic to nuts.",
+          "fr": "Excusez-moi. Ce gâteau au chocolat, il contient des fruits à coque ? Mon fils y est allergique."
+        },
+        "me": {
+          "jp": "ただいまアレルギー表で確認いたしますので、少々お待ちいただけますか。",
+          "kana": "ただいまアレルギーひょうでかくにんいたしますので、しょうしょうおまちいただけますか。",
+          "romaji": "tadaima arerugii hyou de kakunin itashimasu node, shoushou omachi itadakemasu ka",
+          "en": "I'll check our allergy list right away. Could you wait just a moment?",
+          "fr": "Je vérifie tout de suite dans notre liste des allergènes. Pourriez-vous patienter un instant ?",
+          "note": {
+            "en": "「確認いたします」 humbly says you will check, and 「お待ちいただけますか」 asks her, as a favour, to wait.",
+            "fr": "「確認いたします」 dit humblement que tu vas vérifier, et 「お待ちいただけますか」 lui demande, comme une faveur, de patienter."
+          },
+          "alt": [
+            {"jp": "アレルギー表を確認してまいりますので、少々お待ちください。", "kana": "アレルギーひょうをかくにんしてまいりますので、しょうしょうおまちください。", "romaji": "arerugii hyou o kakunin shite mairimasu node, shoushou omachi kudasai"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "ご確認になりますので、少々お待ちいただけますか。",
+            "kana": "ごかくにんになりますので、しょうしょうおまちいただけますか。",
+            "en": "I shall graciously check. Could you wait just a moment?",
+            "fr": "Je vais daigner vérifier. Pourriez-vous patienter un instant ?",
+            "why": {
+              "en": "「ご確認になる」 is honorific and raises whoever checks, here yourself; your own checking is 「確認いたします」.",
+              "fr": "「ご確認になる」 est honorifique et élève la personne qui vérifie, ici toi-même ; ta propre vérification, c'est 「確認いたします」."
+            }
+          },
+          {
+            "jp": "ちょっと待ってね。今、調べてくるから。",
+            "kana": "ちょっとまってね。いま、しらべてくるから。",
+            "en": "Hang on a sec. I'll go and look it up.",
+            "fr": "Attends deux secondes. Je vais regarder.",
+            "why": {
+              "en": "「待ってね」 and 「から」 are how you talk to a friend; serving a customer, you keep to formal speech.",
+              "fr": "「待ってね」 et 「から」, c'est le ton entre amis ; face à une cliente, tu restes dans le registre soutenu."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "お願いします。くるみもアーモンドも、ナッツは全部だめなんです。",
+          "kana": "おねがいします。くるみもアーモンドも、ナッツはぜんぶだめなんです。",
+          "en": "Please do. Walnuts, almonds: he can't have any nuts at all.",
+          "fr": "Oui, s'il vous plaît. Noix, amandes : il ne peut manger aucun fruit à coque."
+        },
+        "me": {
+          "jp": "お待たせいたしました。申し訳ございませんが、こちらにはくるみが入っております。",
+          "kana": "おまたせいたしました。もうしわけございませんが、こちらにはくるみがはいっております。",
+          "romaji": "omatase itashimashita. moushiwake gozaimasen ga, kochira ni wa kurumi ga haitte orimasu",
+          "en": "Thank you for waiting. I'm sorry, but this one has walnuts in it.",
+          "fr": "Merci d'avoir patienté. Je regrette, mais celui-ci contient des noix.",
+          "note": {
+            "en": "「お待たせいたしました」 is what you say on coming back to her, and 「申し訳ございませんが」 softens news she did not want.",
+            "fr": "「お待たせいたしました」 se dit quand tu reviens vers elle, et 「申し訳ございませんが」 adoucit une nouvelle qu'elle n'espérait pas."
+          },
+          "alt": [
+            {"jp": "お待たせいたしました。あいにく、こちらのケーキにはくるみが使われております。", "kana": "おまたせいたしました。あいにく、こちらのケーキにはくるみがつかわれております。", "romaji": "omatase itashimashita. ainiku, kochira no keeki ni wa kurumi ga tsukawarete orimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "お待たせいたしました。申し訳ございませんが、こちらのケーキにはくるみが入ってあります。",
+            "kana": "おまたせいたしました。もうしわけございませんが、こちらのケーキにはくるみがはいってあります。",
+            "en": "Thank you for waiting. I'm sorry, but walnuts have gone into this cake.",
+            "fr": "Merci d'avoir patienté. Je regrette, mais des noix sont entrées dans ce gâteau.",
+            "why": {
+              "en": "「〜てある」 follows a verb someone does to a thing, 「入れる」, never 「入る」: the walnuts 「入っております」.",
+              "fr": "「〜てある」 suit un verbe qu'on fait subir à une chose, 「入れる」, jamais 「入る」 : les noix 「入っております」."
+            }
+          },
+          {
+            "jp": "お待たせいたしました。こちらのケーキは、今朝早く、お店で焼いたばかりでございます。",
+            "kana": "おまたせいたしました。こちらのケーキは、けさはやく、おみせでやいたばかりでございます。",
+            "en": "Thank you for waiting. This cake was baked here in the shop early this morning.",
+            "fr": "Merci d'avoir patienté. Ce gâteau a été cuit ici, au café, tôt ce matin.",
+            "why": {
+              "en": "It says how fresh the cake is, but she is waiting to hear whether it contains nuts.",
+              "fr": "Tu dis à quel point le gâteau est frais, mais elle attend de savoir s'il contient des fruits à coque."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "やっぱり。じゃあ、ナッツが入っていないケーキはありますか。",
+          "kana": "やっぱり。じゃあ、ナッツがはいっていないケーキはありますか。",
+          "en": "I thought so. Is there a cake without any nuts, then?",
+          "fr": "Je m'en doutais. Alors, vous avez un gâteau sans fruits à coque ?"
+        },
+        "me": {
+          "jp": "こちらのチーズケーキでしたら、ナッツは使っておりません。",
+          "kana": "こちらのチーズケーキでしたら、ナッツはつかっておりません。",
+          "romaji": "kochira no chiizukeeki deshitara, nattsu wa tsukatte orimasen",
+          "en": "This cheesecake has no nuts in it.",
+          "fr": "Ce cheesecake-ci, lui, ne contient pas de fruits à coque.",
+          "note": {
+            "en": "「でしたら」 puts the cheesecake forward, and 「使っておりません」 says, with the humble 「おる」, that no nuts go into it.",
+            "fr": "「でしたら」 met en avant le cheesecake, et 「使っておりません」 dit, avec l'humble 「おる」, qu'aucun fruit à coque n'y entre."
+          },
+          "alt": [
+            {"jp": "チーズケーキには、ナッツは入っておりません。", "kana": "チーズケーキには、ナッツははいっておりません。", "romaji": "chiizukeeki ni wa, nattsu wa haitte orimasen"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "こちらのチーズケーキでしたら、ナッツしか使っておりません。",
+            "kana": "こちらのチーズケーキでしたら、ナッツしかつかっておりません。",
+            "en": "This cheesecake is made with nothing but nuts.",
+            "fr": "Ce cheesecake-ci n'est fait qu'avec des fruits à coque.",
+            "why": {
+              "en": "「しか〜ない」 means nothing but, so 「ナッツしか使っておりません」 says the cake is all nuts; none at all is 「ナッツは使っておりません」.",
+              "fr": "「しか〜ない」 veut dire « rien que », donc 「ナッツしか使っておりません」 dit que le gâteau n'est fait que de fruits à coque ; « aucun », c'est 「ナッツは使っておりません」."
+            }
+          },
+          {
+            "jp": "こちらのチョコレートケーキでしたら、ナッツは使っておりません。",
+            "kana": "こちらのチョコレートケーキでしたら、ナッツはつかっておりません。",
+            "en": "This chocolate cake has no nuts in it.",
+            "fr": "Ce gâteau au chocolat-ci ne contient pas de fruits à coque.",
+            "why": {
+              "en": "「チョコレートケーキ」 is the very cake you have just said contains walnuts.",
+              "fr": "「チョコレートケーキ」, c'est justement le gâteau dont tu viens de dire qu'il contient des noix."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "よかった。じゃあ、それなら安心ですね。",
+          "kana": "よかった。じゃあ、それならあんしんですね。",
+          "en": "Oh good. So that one's safe, then.",
+          "fr": "Ah, tant mieux. Alors, celui-là, il n'y a pas de risque."
+        },
+        "me": {
+          "jp": "ただ、同じ厨房でナッツも扱っておりますので、絶対に入っていないとは申し上げかねます。",
+          "kana": "ただ、おなじちゅうぼうでナッツもあつかっておりますので、ぜったいにはいっていないとはもうしあげかねます。",
+          "romaji": "tada, onaji chuubou de nattsu mo atsukatte orimasu node, zettai ni haitte inai to wa moushiage kanemasu",
+          "en": "However, we handle nuts in the same kitchen, so I can't promise there are none in it at all.",
+          "fr": "Cela dit, nous utilisons aussi des fruits à coque dans la même cuisine : je ne peux pas vous garantir qu'il n'y en a aucune trace.",
+          "note": {
+            "en": "「ただ」 adds a warning to good news, and 「申し上げかねます」 is the humble, formal way to say you cannot promise.",
+            "fr": "「ただ」 ajoute une mise en garde à une bonne nouvelle, et 「申し上げかねます」 est la façon humble et soutenue de dire que tu ne peux rien promettre."
+          },
+          "alt": [
+            {"jp": "ただ、同じキッチンでナッツも使っておりますので、絶対に大丈夫とは言い切れないんです。", "kana": "ただ、おなじキッチンでナッツもつかっておりますので、ぜったいにだいじょうぶとはいいきれないんです。", "romaji": "tada, onaji kitchin de nattsu mo tsukatte orimasu node, zettai ni daijoubu to wa iikirenai n desu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "はい、同じ厨房でナッツも扱っておりますので、どうぞご安心ください。",
+            "kana": "はい、おなじちゅうぼうでナッツもあつかっておりますので、どうぞごあんしんください。",
+            "en": "Yes, we handle nuts in the same kitchen, so please don't worry.",
+            "fr": "Oui, nous utilisons aussi des fruits à coque dans la même cuisine, alors soyez tranquille.",
+            "why": {
+              "en": "「ので、ご安心ください」 makes the nuts in the kitchen a reason to feel safe, when they are the very risk she needs to know about.",
+              "fr": "「ので、ご安心ください」 fait des fruits à coque en cuisine une raison d'être rassurée, alors que c'est justement le risque qu'elle doit connaître."
+            }
+          },
+          {
+            "jp": "ただ、同じ厨房でナッツも扱っておりますので、絶対に入っていないとは申し上げかねません。",
+            "kana": "ただ、おなじちゅうぼうでナッツもあつかっておりますので、ぜったいにはいっていないとはもうしあげかねません。",
+            "en": "However, we handle nuts in the same kitchen, so I'm liable to tell you there are none in it at all.",
+            "fr": "Cela dit, nous utilisons aussi des fruits à coque dans la même cuisine, alors je risque de vous dire qu'il n'y en a aucune trace.",
+            "why": {
+              "en": "「かねません」 means you might well do it, not that you cannot: refusing to promise is 「申し上げかねます」.",
+              "fr": "「かねません」 veut dire que tu risques de le faire, pas que tu ne peux pas : refuser de promettre, c'est 「申し上げかねます」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "そうなんですね。正直に教えてもらえて、助かりました。今日はケーキはやめておきます。",
+          "kana": "そうなんですね。しょうじきにおしえてもらえて、たすかりました。きょうはケーキはやめておきます。",
+          "en": "I see. Thank you for being honest with me. I'll skip the cake today.",
+          "fr": "Je vois. Merci de m'avoir répondu franchement. Je vais me passer de gâteau aujourd'hui."
+        },
+        "me": {
+          "jp": "お力になれず、申し訳ございません。またのお越しをお待ちしております。",
+          "kana": "おちからになれず、もうしわけございません。またのおこしをおまちしております。",
+          "romaji": "ochikara ni narezu, moushiwake gozaimasen. mata no okoshi o omachi shite orimasu",
+          "en": "I'm sorry we couldn't be of more help. We hope to see you again.",
+          "fr": "Je regrette de ne pas avoir pu vous aider davantage. Au plaisir de vous revoir.",
+          "note": {
+            "en": "「お力になれず」 apologises for not being able to help, and 「またのお越しをお待ちしております」 is the set phrase that sees a customer off.",
+            "fr": "「お力になれず」 s'excuse de n'avoir pas pu aider, et 「またのお越しをお待ちしております」 est la formule pour raccompagner une cliente."
+          },
+          "alt": [
+            {"jp": "お役に立てず、申し訳ございません。またぜひお越しください。", "kana": "おやくにたてず、もうしわけございません。またぜひおこしください。", "romaji": "oyaku ni tatezu, moushiwake gozaimasen. mata zehi okoshi kudasai"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "かしこまりました。では、チーズケーキをお一つお包みいたします。",
+            "kana": "かしこまりました。では、チーズケーキをおひとつおつつみいたします。",
+            "en": "Certainly. I'll wrap up one cheesecake for you, then.",
+            "fr": "Très bien. Je vous emballe donc un cheesecake.",
+            "why": {
+              "en": "「お包みいたします」 wraps up a cake for her, when she has just said she will skip the cake today.",
+              "fr": "「お包みいたします」 lui emballe un gâteau, alors qu'elle vient de dire qu'elle s'en passera aujourd'hui."
+            }
+          },
+          {
+            "jp": "申し訳ございません。またのお越しをお待たせしております。",
+            "kana": "もうしわけございません。またのおこしをおまたせしております。",
+            "en": "I'm sorry. We are keeping your next visit waiting.",
+            "fr": "Je regrette. Nous faisons attendre votre prochaine visite.",
+            "why": {
+              "en": "「お待たせしております」 apologises for keeping someone waiting, when you mean you look forward to her next visit: 「お待ちしております」.",
+              "fr": "「お待たせしております」 s'excuse de faire attendre quelqu'un, alors que tu veux dire que tu espères sa prochaine visite : 「お待ちしております」."
+            }
+          }
+        ]
+      }
+    ],
+    "close": {
+      "jp": "いえいえ。また来ますね。",
+      "kana": "いえいえ。またきますね。",
+      "en": "Not at all. We'll come again.",
+      "fr": "Mais non. Nous reviendrons."
+    }
+  },
+  {
     "id": "professor-extension",
     "place": {"jp": "研究室", "kana": "けんきゅうしつ", "en": "Professor's office", "fr": "Bureau de la professeure"},
     "title": {"en": "More time for a report", "fr": "Un délai pour un rapport"},
@@ -3293,6 +3793,2138 @@
       "kana": "はい。では、もくようびに。",
       "en": "Right. Thursday, then.",
       "fr": "Bien. À jeudi, alors."
+    }
+  },
+  {
+    "id": "professor-recommendation",
+    "place": {"jp": "研究室", "kana": "けんきゅうしつ", "en": "Professor's office", "fr": "Bureau du professeur"},
+    "title": {"en": "A letter of recommendation", "fr": "Une lettre de recommandation"},
+    "situation": {
+      "en": "You want to apply for a year's exchange at a university in Germany, and you need a letter from a professor. You have an appointment with your seminar professor.",
+      "fr": "Tu veux postuler à un échange d'un an dans une université allemande, et il te faut une lettre d'un professeur. Tu as rendez-vous avec le professeur de ton séminaire."
+    },
+    "goal": {
+      "en": "Ask your professor for a letter of recommendation, give the deadline, explain why you want to go and offer to bring what he needs to write it.",
+      "fr": "Demande une lettre de recommandation à ton professeur, donne la date limite, explique pourquoi tu veux partir et propose de lui apporter ce qu'il lui faut pour l'écrire."
+    },
+    "steps": [
+      {"en": "Ask for a recommendation letter", "fr": "Demande une lettre de recommandation"},
+      {"en": "Give the deadline", "fr": "Donne la date limite"},
+      {"en": "Say why you want to go", "fr": "Explique pourquoi tu veux partir"},
+      {"en": "Say what the letter should cover", "fr": "Dis sur quoi doit porter la lettre"},
+      {"en": "Offer to bring your CV and plan", "fr": "Propose d'apporter CV et projet"}
+    ],
+    "them": {"en": "Professor", "fr": "Professeur"},
+    "register": "formal",
+    "turns": [
+      {
+        "them": {
+          "jp": "どうぞ、かけてください。メールにあった相談というのは何ですか。",
+          "kana": "どうぞ、かけてください。メールにあったそうだんというのはなんですか。",
+          "en": "Come in, have a seat. So what's the matter you mentioned in your email?",
+          "fr": "Asseyez-vous. Alors, de quoi vouliez-vous me parler dans votre message ?"
+        },
+        "me": {
+          "jp": "はい。交換留学に申し込むにあたって、先生に推薦状をお願いできないかと思いまして。",
+          "kana": "はい。こうかんりゅうがくにもうしこむにあたって、せんせいにすいせんじょうをおねがいできないかとおもいまして。",
+          "romaji": "hai. koukan ryuugaku ni moushikomu ni atatte, sensei ni suisenjou o onegai dekinai ka to omoimashite",
+          "en": "Yes. I'm applying for an exchange programme, and I wondered whether I might ask you for a letter of recommendation.",
+          "fr": "Oui. Je postule à un programme d'échange, et je me demandais si je pouvais vous demander une lettre de recommandation.",
+          "note": {
+            "en": "「にあたって」 sets the occasion, your application, and 「お願いできないかと思いまして」 asks the favour without pressing it.",
+            "fr": "「にあたって」 pose l'occasion, ta candidature, et 「お願いできないかと思いまして」 demande la faveur sans insister."
+          },
+          "alt": [
+            {"jp": "はい。交換留学に申し込みたいので、推薦状を書いていただけないでしょうか。", "kana": "はい。こうかんりゅうがくにもうしこみたいので、すいせんじょうをかいていただけないでしょうか。", "romaji": "hai. koukan ryuugaku ni moushikomitai node, suisenjou o kaite itadakenai deshou ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "はい、メールは昨日の夜にお送りいたしました。",
+            "kana": "はい、メールはきのうのよるにおおくりいたしました。",
+            "en": "Yes, I sent you the email last night.",
+            "fr": "Oui, je vous ai envoyé le message hier soir.",
+            "why": {
+              "en": "It says when you sent the email, but the professor asked what the matter in it is.",
+              "fr": "Tu dis quand tu as envoyé le message, mais le professeur demandait de quoi il s'agit."
+            }
+          },
+          {
+            "jp": "あ、交換留学に申し込むから、推薦状書いてくれない？",
+            "kana": "あ、こうかんりゅうがくにもうしこむから、すいせんじょうかいてくれない？",
+            "en": "Oh, I'm applying for an exchange, so could you write me a recommendation?",
+            "fr": "Ah, je postule pour un échange, alors tu pourrais m'écrire une recommandation ?",
+            "why": {
+              "en": "「くれない？」 is how you ask a friend a favour; asking your professor, you keep to formal speech.",
+              "fr": "「くれない？」, c'est ainsi qu'on demande un service à un ami ; à ton professeur, tu restes dans le registre soutenu."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "推薦状ですか。いいですよ。締め切りはいつですか。",
+          "kana": "すいせんじょうですか。いいですよ。しめきりはいつですか。",
+          "en": "A recommendation? Certainly. When's the deadline?",
+          "fr": "Une lettre de recommandation ? Volontiers. C'est pour quand ?"
+        },
+        "me": {
+          "jp": "再来週の金曜日です。急なお願いで、申し訳ございません。",
+          "kana": "さらいしゅうのきんようびです。きゅうなおねがいで、もうしわけございません。",
+          "romaji": "saraishuu no kin'youbi desu. kyuu na onegai de, moushiwake gozaimasen",
+          "en": "Friday the week after next. I'm sorry to ask at such short notice.",
+          "fr": "Le vendredi de la semaine d'après. Pardon de vous le demander si tard.",
+          "note": {
+            "en": "「再来週」 is the week after next, two weeks off, and 「急なお願いで」 apologises for the short notice.",
+            "fr": "「再来週」, c'est la semaine d'après la prochaine, dans deux semaines, et 「急なお願いで」 s'excuse du délai court."
+          },
+          "alt": [
+            {"jp": "再来週の金曜日までです。急なお願いで、すみません。", "kana": "さらいしゅうのきんようびまでです。きゅうなおねがいで、すみません。", "romaji": "saraishuu no kin'youbi made desu. kyuu na onegai de, sumimasen"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "締め切りは、先週の金曜日でした。急なお願いで、申し訳ございません。",
+            "kana": "しめきりは、せんしゅうのきんようびでした。きゅうなおねがいで、もうしわけございません。",
+            "en": "The deadline was last Friday. I'm sorry to ask at such short notice.",
+            "fr": "La date limite, c'était vendredi dernier. Pardon de vous le demander si tard.",
+            "why": {
+              "en": "「先週の金曜日でした」 puts the deadline in the past: there would be no letter left to write.",
+              "fr": "「先週の金曜日でした」 place la date limite dans le passé : il n'y aurait plus de lettre à écrire."
+            }
+          },
+          {
+            "jp": "再来週の金曜日です。お急ぎのところ、申し訳ございません。",
+            "kana": "さらいしゅうのきんようびです。おいそぎのところ、もうしわけございません。",
+            "en": "Friday the week after next. I'm sorry to trouble you when you're in a hurry.",
+            "fr": "Le vendredi de la semaine d'après. Pardon de vous déranger alors que vous êtes pressé.",
+            "why": {
+              "en": "「お急ぎのところ」 apologises to someone in a hurry; the professor is not, and what is hurried is your request: 「急なお願いで」.",
+              "fr": "「お急ぎのところ」 s'excuse auprès de quelqu'un de pressé ; le professeur ne l'est pas, c'est ta demande qui est pressante : 「急なお願いで」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "二週間あれば大丈夫ですよ。ところで、どうして留学しようと思ったんですか。",
+          "kana": "にしゅうかんあればだいじょうぶですよ。ところで、どうしてりゅうがくしようとおもったんですか。",
+          "en": "Two weeks is plenty. By the way, what made you decide to study abroad?",
+          "fr": "Deux semaines, ça suffit. Au fait, qu'est-ce qui vous a donné envie de partir étudier à l'étranger ?"
+        },
+        "me": {
+          "jp": "先生の授業をきっかけに環境問題に興味を持ちまして、ドイツで学んでみたいと考えております。",
+          "kana": "せんせいのじゅぎょうをきっかけにかんきょうもんだいにきょうみをもちまして、ドイツでまなんでみたいとかんがえております。",
+          "romaji": "sensei no jugyou o kikkake ni kankyou mondai ni kyoumi o mochimashite, doitsu de manande mitai to kangaete orimasu",
+          "en": "Your lectures got me interested in environmental issues, and I would like to study it in Germany.",
+          "fr": "C'est votre cours qui m'a fait m'intéresser aux questions environnementales, et j'aimerais les étudier en Allemagne.",
+          "note": {
+            "en": "「をきっかけに」 names what started your interest, and 「と考えております」 presents your plan in the humble register.",
+            "fr": "「をきっかけに」 désigne ce qui a éveillé ton intérêt, et 「と考えております」 présente ton projet dans le registre humble."
+          },
+          "alt": [
+            {"jp": "先生の授業で環境問題に興味を持ちまして、ドイツで勉強したいと思ったんです。", "kana": "せんせいのじゅぎょうでかんきょうもんだいにきょうみをもちまして、ドイツでべんきょうしたいとおもったんです。", "romaji": "sensei no jugyou de kankyou mondai ni kyoumi o mochimashite, doitsu de benkyou shitai to omotta n desu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "先生の授業をきっかけに環境問題に興味を持ちまして、ドイツの大学で教えてみたいと考えております。",
+            "kana": "せんせいのじゅぎょうをきっかけにかんきょうもんだいにきょうみをもちまして、ドイツのだいがくでおしえてみたいとかんがえております。",
+            "en": "Your lectures got me interested in environmental issues, and I would like to try teaching it at a German university.",
+            "fr": "C'est votre cours qui m'a fait m'intéresser aux questions environnementales, et j'aimerais les enseigner dans une université allemande.",
+            "why": {
+              "en": "「教えてみたい」 is to teach, when an exchange student goes abroad to learn: 「学んでみたい」.",
+              "fr": "「教えてみたい」, c'est enseigner, alors qu'un étudiant en échange part pour apprendre : 「学んでみたい」."
+            }
+          },
+          {
+            "jp": "来年の九月から、一年間の予定でございます。",
+            "kana": "らいねんのくがつから、いちねんかんのよていでございます。",
+            "en": "From next September, for one year.",
+            "fr": "À partir de septembre prochain, pour un an.",
+            "why": {
+              "en": "It says when you would go and for how long, but 「どうして」 asked why you want to.",
+              "fr": "Tu dis quand tu partirais et pour combien de temps, mais 「どうして」 demandait pourquoi tu veux partir."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "それはいいですね。推薦状には、どんなことを書けばいいですか。",
+          "kana": "それはいいですね。すいせんじょうには、どんなことをかけばいいですか。",
+          "en": "That's good to hear. What would you like me to put in the letter?",
+          "fr": "Très bien. Qu'aimeriez-vous que je mette dans la lettre ?"
+        },
+        "me": {
+          "jp": "ゼミでの研究の様子を中心に書いていただけると、大変ありがたいです。",
+          "kana": "ゼミでのけんきゅうのようすをちゅうしんにかいていただけると、たいへんありがたいです。",
+          "romaji": "zemi de no kenkyuu no yousu o chuushin ni kaite itadakeru to, taihen arigatai desu",
+          "en": "It would mean a great deal if you could write mainly about my work in the seminar.",
+          "fr": "Cela m'aiderait beaucoup que vous parliez surtout de mon travail au séminaire.",
+          "note": {
+            "en": "「を中心に」 says what the letter should dwell on, and 「書いていただけると、ありがたい」 asks for it as a favour.",
+            "fr": "「を中心に」 dit sur quoi la lettre doit insister, et 「書いていただけると、ありがたい」 le demande comme une faveur."
+          },
+          "alt": [
+            {"jp": "ゼミでの研究のことを中心に書いていただけると助かります。", "kana": "ゼミでのけんきゅうのことをちゅうしんにかいていただけるとたすかります。", "romaji": "zemi de no kenkyuu no koto o chuushin ni kaite itadakeru to tasukarimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "先生ご自身のご研究を中心に書いていただけると、ありがたいです。",
+            "kana": "せんせいごじしんのごけんきゅうをちゅうしんにかいていただけると、ありがたいです。",
+            "en": "It would help if you could write mainly about your own research.",
+            "fr": "Cela m'aiderait que vous parliez surtout de vos propres recherches.",
+            "why": {
+              "en": "「先生ご自身のご研究」 is the professor's own work, when a recommendation speaks of the student it recommends.",
+              "fr": "「先生ご自身のご研究」, ce sont les travaux du professeur lui-même, alors qu'une recommandation parle de l'étudiant qu'elle recommande."
+            }
+          },
+          {
+            "jp": "何でも結構ですので、適当に書いてください。",
+            "kana": "なんでもけっこうですので、てきとうにかいてください。",
+            "en": "Anything will do, so just write whatever.",
+            "fr": "N'importe quoi fera l'affaire, écrivez ce que vous voulez.",
+            "why": {
+              "en": "「適当に書いてください」 tells your professor to dash off anything, which is rude when he is doing you a favour.",
+              "fr": "「適当に書いてください」 dit à ton professeur d'écrire n'importe quoi, ce qui est impoli alors qu'il te rend service."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "わかりました。ただ、留学の計画をもう少し詳しく知っておきたいですね。",
+          "kana": "わかりました。ただ、りゅうがくのけいかくをもうすこしくわしくしっておきたいですね。",
+          "en": "All right. I'd like to know a little more about your plans for the exchange, though.",
+          "fr": "Entendu. J'aimerais toutefois en savoir un peu plus sur votre projet d'échange."
+        },
+        "me": {
+          "jp": "では、明日までに履歴書と留学計画書をお持ちいたします。",
+          "kana": "では、あしたまでにりれきしょとりゅうがくけいかくしょをおもちいたします。",
+          "romaji": "dewa, ashita made ni rirekisho to ryuugaku keikakusho o omochi itashimasu",
+          "en": "Then I'll bring you my CV and my study plan by tomorrow.",
+          "fr": "Alors je vous apporterai mon CV et mon projet d'études d'ici demain.",
+          "note": {
+            "en": "「お持ちいたします」 humbly offers to bring them to him, and 「までに」 sets the day by which you will.",
+            "fr": "「お持ちいたします」 propose humblement de les lui apporter, et 「までに」 fixe le jour où ce sera fait."
+          },
+          "alt": [
+            {"jp": "では、明日までに履歴書と留学計画書を持ってまいります。", "kana": "では、あしたまでにりれきしょとりゅうがくけいかくしょをもってまいります。", "romaji": "dewa, ashita made ni rirekisho to ryuugaku keikakusho o motte mairimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "では、明日の午前中までに、履歴書と留学計画書をお持ちください。",
+            "kana": "では、あしたのごぜんちゅうまでに、りれきしょとりゅうがくけいかくしょをおもちください。",
+            "en": "Then please bring my CV and my study plan by tomorrow morning.",
+            "fr": "Alors apportez mon CV et mon projet d'études d'ici demain matin.",
+            "why": {
+              "en": "「お持ちください」 asks the professor to bring them, when they are your papers to bring him: 「お持ちいたします」.",
+              "fr": "「お持ちください」 demande au professeur de les apporter, alors que ce sont tes documents, à toi de les lui apporter : 「お持ちいたします」."
+            }
+          },
+          {
+            "jp": "では、明日までに、私の履歴書と留学計画書を拝見いたします。",
+            "kana": "では、あしたまでに、わたしのりれきしょとりゅうがくけいかくしょをはいけんいたします。",
+            "en": "Then I'll humbly look at my own CV and study plan by tomorrow.",
+            "fr": "Alors je regarderai humblement mon propre CV et mon projet d'études d'ici demain.",
+            "why": {
+              "en": "「拝見いたします」 is the humble 「見る」, for looking at something of his, not for handing him your own papers.",
+              "fr": "「拝見いたします」 est l'humble 「見る」, pour regarder ce qui lui appartient, pas pour lui remettre tes propres documents."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "そうしてもらえると助かります。それを読んでから書きますね。",
+          "kana": "そうしてもらえるとたすかります。それをよんでからかきますね。",
+          "en": "That would help. I'll read them and then write it.",
+          "fr": "Ça m'aiderait. Je les lirai, puis j'écrirai la lettre."
+        },
+        "me": {
+          "jp": "ありがとうございます。お忙しいところ恐縮ですが、どうぞよろしくお願いいたします。",
+          "kana": "ありがとうございます。おいそがしいところきょうしゅくですが、どうぞよろしくおねがいいたします。",
+          "romaji": "arigatou gozaimasu. oisogashii tokoro kyoushuku desu ga, douzo yoroshiku onegai itashimasu",
+          "en": "Thank you very much. I'm sorry to impose on you when you're so busy, and thank you for doing this.",
+          "fr": "Merci beaucoup. Pardon de vous solliciter alors que vous êtes si occupé, et merci encore.",
+          "note": {
+            "en": "「恐縮ですが」 owns the imposition on his time, and 「よろしくお願いいたします」 leaves the letter in his hands.",
+            "fr": "「恐縮ですが」 reconnaît que tu empiètes sur son temps, et 「よろしくお願いいたします」 lui confie la lettre."
+          },
+          "alt": [
+            {"jp": "ありがとうございます。お忙しいところ申し訳ございませんが、よろしくお願いいたします。", "kana": "ありがとうございます。おいそがしいところもうしわけございませんが、よろしくおねがいいたします。", "romaji": "arigatou gozaimasu. oisogashii tokoro moushiwake gozaimasen ga, yoroshiku onegai itashimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "ありがとうございます。では、推薦状はもう結構です。",
+            "kana": "ありがとうございます。では、すいせんじょうはもうけっこうです。",
+            "en": "Thank you. Then I won't be needing the letter after all.",
+            "fr": "Merci beaucoup. Alors, finalement, je n'ai plus besoin de la lettre.",
+            "why": {
+              "en": "「推薦状はもう結構です」 turns down the very letter you came to ask for, just as he agrees to write it.",
+              "fr": "「推薦状はもう結構です」 refuse la lettre même qui t'amène, au moment où il accepte de l'écrire."
+            }
+          },
+          {
+            "jp": "ありがとうございます。履歴書を読んでから推薦状を書いていただいて、本当に助かりました。",
+            "kana": "ありがとうございます。りれきしょをよんでからすいせんじょうをかいていただいて、ほんとうにたすかりました。",
+            "en": "Thank you. It was a great help that you read my CV and then wrote the letter.",
+            "fr": "Merci beaucoup. Ça m'a beaucoup aidé que vous lisiez mon CV avant d'écrire la lettre.",
+            "why": {
+              "en": "「書いていただいて、助かりました」 thanks him for a letter already written, when he has yet to read your papers.",
+              "fr": "「書いていただいて、助かりました」 le remercie d'une lettre déjà écrite, alors qu'il n'a pas encore lu tes documents."
+            }
+          }
+        ]
+      }
+    ],
+    "close": {
+      "jp": "はい。いい結果になるといいですね。",
+      "kana": "はい。いいけっかになるといいですね。",
+      "en": "Not at all. I hope it goes well.",
+      "fr": "Je vous en prie. J'espère que ça marchera."
+    }
+  },
+  {
+    "id": "minor-collision",
+    "place": {"jp": "駐車場", "kana": "ちゅうしゃじょう", "en": "Car park", "fr": "Parking"},
+    "title": {"en": "A bump in the car park", "fr": "Un accrochage sur le parking"},
+    "situation": {
+      "en": "Reversing out of a space in a supermarket car park, you have bumped into another car. Its driver gets out, and so do you.",
+      "fr": "En sortant en marche arrière d'une place, sur le parking d'un supermarché, tu as heurté une autre voiture. Son conducteur descend, toi aussi."
+    },
+    "goal": {
+      "en": "Apologise, check he is not hurt, insist on reporting the accident to the police although he says there is no need, and exchange contact details.",
+      "fr": "Excuse-toi, vérifie qu'il n'est pas blessé, insiste pour déclarer l'accident à la police même s'il dit que c'est inutile, et échangez vos coordonnées."
+    },
+    "steps": [
+      {"en": "Apologise, ask if he is hurt", "fr": "Excuse-toi, demande s'il est blessé"},
+      {"en": "Say you will call the police", "fr": "Dis que tu appelles la police"},
+      {"en": "Insist that it must be reported", "fr": "Insiste : il faut le déclarer"},
+      {"en": "Give your name and number", "fr": "Donne ton nom et ton numéro"},
+      {"en": "Apologise for his time", "fr": "Excuse-toi de lui prendre son temps"}
+    ],
+    "them": {"en": "Other driver", "fr": "Autre conducteur"},
+    "register": "polite",
+    "turns": [
+      {
+        "them": {
+          "jp": "ちょっと！今、ぶつかりましたよね？",
+          "kana": "ちょっと！いま、ぶつかりましたよね？",
+          "en": "Hey! You just hit my car, didn't you?",
+          "fr": "Hé ! Vous venez de me rentrer dedans, non ?"
+        },
+        "me": {
+          "jp": "申し訳ありません！お怪我はありませんか。",
+          "kana": "もうしわけありません！おけがはありませんか。",
+          "romaji": "moushiwake arimasen! okega wa arimasen ka",
+          "en": "I'm so sorry! Are you hurt?",
+          "fr": "Toutes mes excuses ! Vous n'êtes pas blessé ?",
+          "note": {
+            "en": "「申し訳ありません」 apologises at once, and 「お怪我はありませんか」 asks about him first, before the car.",
+            "fr": "「申し訳ありません」 s'excuse tout de suite, et 「お怪我はありませんか」 s'inquiète d'abord de lui, avant la voiture."
+          },
+          "alt": [
+            {"jp": "すみません！大丈夫ですか。お怪我はありませんか。", "kana": "すみません！だいじょうぶですか。おけがはありませんか。", "romaji": "sumimasen! daijoubu desu ka. okega wa arimasen ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "いいえ、私の車はぶつかっていませんよ。",
+            "kana": "いいえ、わたしのくるまはぶつかっていませんよ。",
+            "en": "No, my car didn't hit anything.",
+            "fr": "Non, ma voiture n'a rien touché.",
+            "why": {
+              "en": "「ぶつかっていません」 denies the bump you have just made: you hit his car reversing.",
+              "fr": "「ぶつかっていません」 nie l'accrochage que tu viens de provoquer : tu as heurté sa voiture en reculant."
+            }
+          },
+          {
+            "jp": "お邪魔します！お怪我はありませんか。",
+            "kana": "おじゃまします！おけがはありませんか。",
+            "en": "Excuse me for intruding! Are you hurt?",
+            "fr": "Je me permets d'entrer ! Vous n'êtes pas blessé ?",
+            "why": {
+              "en": "「お邪魔します」 is what you say on stepping into someone's home, not an apology for hitting his car.",
+              "fr": "「お邪魔します」 se dit en entrant chez quelqu'un, ce n'est pas une excuse pour avoir heurté sa voiture."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "私は大丈夫ですけど、ほら、ここに傷がついてますよ。",
+          "kana": "わたしはだいじょうぶですけど、ほら、ここにきずがついてますよ。",
+          "en": "I'm fine, but look, there's a scratch here.",
+          "fr": "Moi, ça va, mais regardez, il y a une rayure ici."
+        },
+        "me": {
+          "jp": "本当に申し訳ありません。すぐに警察に連絡します。",
+          "kana": "ほんとうにもうしわけありません。すぐにけいさつにれんらくします。",
+          "romaji": "hontou ni moushiwake arimasen. sugu ni keisatsu ni renraku shimasu",
+          "en": "I'm really sorry. I'll call the police right away.",
+          "fr": "Je vous demande vraiment pardon. J'appelle la police tout de suite.",
+          "note": {
+            "en": "「すぐに警察に連絡します」 does the first thing an accident calls for in Japan, even a small one.",
+            "fr": "「すぐに警察に連絡します」 fait la première chose qu'exige un accident au Japon, même petit."
+          },
+          "alt": [
+            {"jp": "本当にすみません。今から警察を呼びます。", "kana": "ほんとうにすみません。いまからけいさつをよびます。", "romaji": "hontou ni sumimasen. ima kara keisatsu o yobimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "本当に申し訳ありません。今すぐ救急車を呼びますね。",
+            "kana": "ほんとうにもうしわけありません。いますぐきゅうきゅうしゃをよびますね。",
+            "en": "I'm really sorry. I'll call an ambulance right now.",
+            "fr": "Je vous demande vraiment pardon. J'appelle une ambulance tout de suite.",
+            "why": {
+              "en": "「救急車」 is for someone hurt, and he has just told you he is fine: it is the scratch that needs reporting.",
+              "fr": "「救急車」, c'est pour un blessé, et il vient de te dire qu'il va bien : c'est la rayure qu'il faut déclarer."
+            }
+          },
+          {
+            "jp": "よかった、傷だけですね。では、私はこれで失礼します。",
+            "kana": "よかった、きずだけですね。では、わたしはこれでしつれいします。",
+            "en": "Good, it's only a scratch. Well, I'll be off, then.",
+            "fr": "Tant mieux, ce n'est qu'une rayure. Bon, je vous laisse.",
+            "why": {
+              "en": "「これで失礼します」 drives off from an accident you caused, and in Japan leaving without reporting it is an offence.",
+              "fr": "「これで失礼します」 quitte les lieux d'un accident que tu as causé, et au Japon, partir sans le déclarer est un délit."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "いや、これくらいの傷なら、警察を呼ぶほどのことじゃないですよ。",
+          "kana": "いや、これくらいのきずなら、けいさつをよぶほどのことじゃないですよ。",
+          "en": "Oh, a scratch like this isn't worth calling the police over.",
+          "fr": "Oh, une rayure comme ça, ça ne vaut pas la peine d'appeler la police."
+        },
+        "me": {
+          "jp": "いえ、小さな事故でも届けることになっているので、連絡させてください。",
+          "kana": "いえ、ちいさなじこでもとどけることになっているので、れんらくさせてください。",
+          "romaji": "ie, chiisa na jiko demo todokeru koto ni natte iru node, renraku sasete kudasai",
+          "en": "No, even a small accident has to be reported, so please let me call them.",
+          "fr": "Si, même un petit accident doit être déclaré, alors laissez-moi les appeler.",
+          "note": {
+            "en": "「ことになっている」 states the rule, that every accident is reported, and 「させてください」 asks him to let you do it.",
+            "fr": "「ことになっている」 énonce la règle, tout accident se déclare, et 「させてください」 lui demande de te laisser le faire."
+          },
+          "alt": [
+            {"jp": "いえ、どんなに小さな事故でも届けないといけないので、警察を呼ばせてください。", "kana": "いえ、どんなにちいさなじこでもとどけないといけないので、けいさつをよばせてください。", "romaji": "ie, donna ni chiisa na jiko demo todokenai to ikenai node, keisatsu o yobasete kudasai"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "そうですね。小さな事故でも届けることになっているので、やめておきます。",
+            "kana": "そうですね。ちいさなじこでもとどけることになっているので、やめておきます。",
+            "en": "You're right. Even a small accident has to be reported, so I won't call them.",
+            "fr": "Vous avez raison. Même un petit accident doit être déclaré, alors je n'appelle pas.",
+            "why": {
+              "en": "「やめておきます」 gives up the call for the very reason you need to make it: the rule is to report it.",
+              "fr": "「やめておきます」 renonce à l'appel pour la raison même qui l'impose : la règle, c'est de déclarer."
+            }
+          },
+          {
+            "jp": "いや、どんなにちっちゃい事故でも、ちゃんと警察に届けなきゃダメなんだってば。",
+            "kana": "いや、どんなにちっちゃいじこでも、ちゃんとけいさつにとどけなきゃダメなんだってば。",
+            "en": "Nah, any accident, however tiny, has to go to the police, I'm telling you.",
+            "fr": "Mais non, même un tout petit accident, faut le déclarer à la police, je te dis.",
+            "why": {
+              "en": "「なきゃダメなんだってば」 is blunt casual speech; to a stranger whose car you have just hit, you keep to です and ます.",
+              "fr": "「なきゃダメなんだってば」, c'est du langage familier et brusque ; à un inconnu dont tu viens d'abîmer la voiture, tu gardes les formes en です et ます."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "そうですね、保険のこともありますしね。じゃあ、その前に連絡先を交換しましょうか。",
+          "kana": "そうですね、ほけんのこともありますしね。じゃあ、そのまえにれんらくさきをこうかんしましょうか。",
+          "en": "Fair enough, there's the insurance to think of too. Let's swap contact details first, then.",
+          "fr": "C'est vrai, il y a aussi l'assurance. Alors, échangeons d'abord nos coordonnées."
+        },
+        "me": {
+          "jp": "はい。マルタンと申します。こちらが私の電話番号です。",
+          "kana": "はい。マルタンともうします。こちらがわたしのでんわばんごうです。",
+          "romaji": "hai. marutan to moushimasu. kochira ga watashi no denwa bangou desu",
+          "en": "Yes. My name is Martin. Here's my phone number.",
+          "fr": "Oui. Je m'appelle Martin. Voici mon numéro de téléphone.",
+          "note": {
+            "en": "「と申します」 gives your name humbly, and 「こちらが」 shows him your number on your phone.",
+            "fr": "「と申します」 donne ton nom humblement, et 「こちらが」 lui présente ton numéro, affiché sur ton téléphone."
+          },
+          "alt": [
+            {"jp": "はい。マルタンです。電話番号はこちらです。", "kana": "はい。マルタンです。でんわばんごうはこちらです。", "romaji": "hai. marutan desu. denwa bangou wa kochira desu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "いえ、連絡先は結構です。",
+            "kana": "いえ、れんらくさきはけっこうです。",
+            "en": "No, there's no need to swap details.",
+            "fr": "Non, pas besoin d'échanger nos coordonnées.",
+            "why": {
+              "en": "「結構です」 turns the exchange down, when after an accident the two drivers must be able to reach each other.",
+              "fr": "「結構です」 refuse l'échange, alors qu'après un accident, les deux conducteurs doivent pouvoir se joindre."
+            }
+          },
+          {
+            "jp": "マルタンとおっしゃいます。こちらが電話番号です。",
+            "kana": "マルタンとおっしゃいます。こちらがでんわばんごうです。",
+            "en": "My honourable name is Martin. Here's the phone number.",
+            "fr": "Mon honorable nom est Martin. Voici le numéro de téléphone.",
+            "why": {
+              "en": "「おっしゃいます」 is the honorific of 「言う」 and raises the one named, here yourself; your own name takes 「と申します」.",
+              "fr": "「おっしゃいます」 est l'honorifique de 「言う」 et élève la personne nommée, ici toi-même ; ton propre nom se dit avec 「と申します」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "警察、何て言ってました？すぐ来るって？",
+          "kana": "けいさつ、なんていってました？すぐくるって？",
+          "en": "What did the police say? Are they coming straight away?",
+          "fr": "La police, qu'est-ce qu'elle a dit ? Ils arrivent tout de suite ?"
+        },
+        "me": {
+          "jp": "十五分ほどで来るそうです。お時間を取らせてしまって、すみません。",
+          "kana": "じゅうごふんほどでくるそうです。おじかんをとらせてしまって、すみません。",
+          "romaji": "juugofun hodo de kuru sou desu. ojikan o torasete shimatte, sumimasen",
+          "en": "They said they'll be about fifteen minutes. I'm sorry for taking up your time.",
+          "fr": "Ils arrivent dans un quart d'heure environ. Pardon de vous faire perdre votre temps.",
+          "note": {
+            "en": "「来るそうです」 passes on what the police said, and 「お時間を取らせてしまって」 apologises for the time he will lose waiting.",
+            "fr": "「来るそうです」 rapporte ce qu'a dit la police, et 「お時間を取らせてしまって」 s'excuse du temps qu'il va perdre à attendre."
+          },
+          "alt": [
+            {"jp": "十五分ぐらいで来るそうです。お待たせしてしまって、申し訳ありません。", "kana": "じゅうごふんぐらいでくるそうです。おまたせしてしまって、もうしわけありません。", "romaji": "juugofun gurai de kuru sou desu. omatase shite shimatte, moushiwake arimasen"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "十五分ほど前に来たそうです。お時間を取らせてしまって、すみません。",
+            "kana": "じゅうごふんほどまえにきたそうです。おじかんをとらせてしまって、すみません。",
+            "en": "They said they came about fifteen minutes ago. I'm sorry for taking up your time.",
+            "fr": "Ils disent être venus il y a un quart d'heure. Pardon de vous faire perdre votre temps.",
+            "why": {
+              "en": "「前に来た」 says the police came a quarter of an hour ago, when you are both still waiting for them.",
+              "fr": "「前に来た」 dit que la police est venue il y a un quart d'heure, alors que vous l'attendez encore tous les deux."
+            }
+          },
+          {
+            "jp": "十五分ほどで来るそうです。どうぞ、お先にお帰りください。",
+            "kana": "じゅうごふんほどでくるそうです。どうぞ、おさきにおかえりください。",
+            "en": "They said they'll be about fifteen minutes. Please, go on home without me.",
+            "fr": "Ils arrivent dans un quart d'heure environ. Je vous en prie, rentrez sans m'attendre.",
+            "why": {
+              "en": "「お先にお帰りください」 sends him home, when the police need both drivers there to make their report.",
+              "fr": "「お先にお帰りください」 le renvoie chez lui, alors que la police a besoin des deux conducteurs pour son constat."
+            }
+          }
+        ]
+      }
+    ],
+    "close": {
+      "jp": "いえいえ、こういうこともありますよ。",
+      "kana": "いえいえ、こういうこともありますよ。",
+      "en": "Not at all. These things happen.",
+      "fr": "Mais non, ça arrive."
+    }
+  },
+  {
+    "id": "card-stop",
+    "place": {"jp": "電話", "kana": "でんわ", "en": "On the phone", "fr": "Au téléphone"},
+    "title": {"en": "A lost credit card", "fr": "Une carte de crédit perdue"},
+    "situation": {
+      "en": "You have not been able to find your credit card since this afternoon. You call the card company to have it stopped.",
+      "fr": "Depuis cet après-midi, impossible de retrouver ta carte de crédit. Tu appelles la société émettrice pour la faire bloquer."
+    },
+    "goal": {
+      "en": "Have your lost card stopped: prove who you are, say when and where you lost it, and check that nobody else has used it.",
+      "fr": "Fais bloquer ta carte perdue : prouve ton identité, dis quand et où tu l'as perdue, et vérifie que personne d'autre ne s'en est servi."
+    },
+    "steps": [
+      {"en": "Ask them to stop your card", "fr": "Demande de bloquer ta carte"},
+      {"en": "Give your name and date of birth", "fr": "Donne ton nom et ta date de naissance"},
+      {"en": "Say when and where you lost it", "fr": "Dis quand et où tu l'as perdue"},
+      {"en": "Ask about charges you did not make", "fr": "Demande s'il y a des achats inconnus"},
+      {"en": "Confirm the charge is yours", "fr": "Confirme que l'achat vient de toi"}
+    ],
+    "them": {"en": "Card company operator", "fr": "Opératrice de la société de cartes"},
+    "register": "polite",
+    "turns": [
+      {
+        "them": {
+          "jp": "お電話ありがとうございます。さくらカード、お客様センターでございます。",
+          "kana": "おでんわありがとうございます。さくらカード、おきゃくさまセンターでございます。",
+          "en": "Thank you for calling Sakura Card customer services.",
+          "fr": "Sakura Card, service clients, bonjour, merci de votre appel."
+        },
+        "me": {
+          "jp": "クレジットカードをなくしてしまったので、利用を止めていただきたいんです。",
+          "kana": "クレジットカードをなくしてしまったので、りようをとめていただきたいんです。",
+          "romaji": "kurejitto kaado o nakushite shimatta node, riyou o tomete itadakitai n desu",
+          "en": "I've lost my credit card, so I'd like you to stop it.",
+          "fr": "J'ai perdu ma carte de crédit, alors j'aimerais que vous la bloquiez.",
+          "note": {
+            "en": "「なくしてしまった」 reports the loss with regret, and 「止めていただきたいんです」 says what you need them to do.",
+            "fr": "「なくしてしまった」 annonce la perte avec regret, et 「止めていただきたいんです」 dit ce que tu attends d'eux."
+          },
+          "alt": [
+            {"jp": "カードをなくしてしまったんですが、すぐに止めてもらえますか。", "kana": "カードをなくしてしまったんですが、すぐにとめてもらえますか。", "romaji": "kaado o nakushite shimatta n desu ga, sugu ni tomete moraemasu ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "クレジットカードをなくしてしまったので、利用をもう一度始めていただきたいんです。",
+            "kana": "クレジットカードをなくしてしまったので、りようをもういちどはじめていただきたいんです。",
+            "en": "I've lost my credit card, so I'd like you to start it working again.",
+            "fr": "J'ai perdu ma carte de crédit, alors j'aimerais que vous la remettiez en service.",
+            "why": {
+              "en": "「始めて」 would set the lost card working, the opposite of what a lost card needs: 「止めて」.",
+              "fr": "「始めて」 remettrait la carte perdue en service, l'inverse de ce qu'il faut : 「止めて」."
+            }
+          },
+          {
+            "jp": "カードなくしちゃったんだけど、止めてくれる？",
+            "kana": "カードなくしちゃったんだけど、とめてくれる？",
+            "en": "I've gone and lost my card. Can you stop it?",
+            "fr": "J'ai paumé ma carte. Tu peux la bloquer ?",
+            "why": {
+              "en": "「なくしちゃった」 and 「くれる？」 are how you talk to a friend; to the operator, you keep to です and ます.",
+              "fr": "「なくしちゃった」 et 「くれる？」, c'est le ton entre amis ; avec l'opératrice, tu gardes les formes en です et ます."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "かしこまりました。ご本人確認のため、お名前と生年月日をお願いいたします。",
+          "kana": "かしこまりました。ごほんにんかくにんのため、おなまえとせいねんがっぴをおねがいいたします。",
+          "en": "Certainly. To confirm your identity, may I have your name and date of birth?",
+          "fr": "Très bien. Pour vérifier votre identité, pouvez-vous me donner votre nom et votre date de naissance ?"
+        },
+        "me": {
+          "jp": "マルタンです。生年月日は、二千年五月三日です。",
+          "kana": "マルタンです。せいねんがっぴは、にせんねんごがつみっかです。",
+          "romaji": "marutan desu. seinengappi wa, nisen nen gogatsu mikka desu",
+          "en": "It's Martin. My date of birth is the third of May, two thousand.",
+          "fr": "Martin. Ma date de naissance, c'est le 3 mai 2000.",
+          "note": {
+            "en": "「三日」 is read みっか, and a Japanese date runs from the year down to the day.",
+            "fr": "「三日」 se lit みっか, et une date japonaise va de l'année jusqu'au jour."
+          },
+          "alt": [
+            {"jp": "マルタンと申します。二千年の五月三日生まれです。", "kana": "マルタンともうします。にせんねんのごがつみっかうまれです。", "romaji": "marutan to moushimasu. nisen nen no gogatsu mikka umare desu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "マルタンです。カードは、今日の午後になくしました。",
+            "kana": "マルタンです。カードは、きょうのごごになくしました。",
+            "en": "It's Martin. I lost the card this afternoon.",
+            "fr": "Martin. J'ai perdu la carte cet après-midi.",
+            "why": {
+              "en": "It says when you lost the card, but the operator asked for your 「生年月日」, your date of birth.",
+              "fr": "Tu dis quand tu as perdu la carte, mais l'opératrice demandait ton 「生年月日」, ta date de naissance."
+            }
+          },
+          {
+            "jp": "お名前は、マルタンです。生年月日は、二千年五月三日です。",
+            "kana": "おなまえは、マルタンです。せいねんがっぴは、にせんねんごがつみっかです。",
+            "en": "My honourable name is Martin. My date of birth is the third of May, two thousand.",
+            "fr": "Mon honorable nom est Martin. Ma date de naissance, c'est le 3 mai 2000.",
+            "why": {
+              "en": "「お名前」 is the operator's respectful word for your name; of your own you say 「名前」, or simply 「マルタンです」.",
+              "fr": "「お名前」 est le mot respectueux de l'opératrice pour ton nom ; pour le tien, on dit 「名前」, ou simplement 「マルタンです」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "マルタン様ですね。確認いたしました。いつ、どちらでなくされたか、お分かりになりますか。",
+          "kana": "マルタンさまですね。かくにんいたしました。いつ、どちらでなくされたか、おわかりになりますか。",
+          "en": "Thank you, that's confirmed. Do you know when and where you lost it?",
+          "fr": "Merci, c'est vérifié. Savez-vous quand et où vous l'avez perdue ?"
+        },
+        "me": {
+          "jp": "たぶん、今日のお昼に駅前のデパートで買い物をしたときだと思います。",
+          "kana": "たぶん、きょうのおひるにえきまえのデパートでかいものをしたときだとおもいます。",
+          "romaji": "tabun, kyou no ohiru ni ekimae no depaato de kaimono o shita toki da to omoimasu",
+          "en": "I think it was probably at lunchtime today, when I was shopping at the department store by the station.",
+          "fr": "Sans doute ce midi, quand j'ai fait des courses au grand magasin devant la gare.",
+          "note": {
+            "en": "「たぶん」 and 「と思います」 say you cannot be certain, and 「したとき」 places the loss at a moment you remember.",
+            "fr": "「たぶん」 et 「と思います」 disent que tu n'en as pas la certitude, et 「したとき」 situe la perte à un moment dont tu te souviens."
+          },
+          "alt": [
+            {"jp": "今日のお昼ごろ、駅前のデパートで落としたんだと思います。", "kana": "きょうのおひるごろ、えきまえのデパートでおとしたんだとおもいます。", "romaji": "kyou no ohiru goro, ekimae no depaato de otoshita n da to omoimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "たぶん、今日のお昼に駅前のデパートで拾ったんだと思います。",
+            "kana": "たぶん、きょうのおひるにえきまえのデパートでひろったんだとおもいます。",
+            "en": "I think I probably picked it up at the department store by the station at lunchtime today.",
+            "fr": "Je crois que je l'ai sans doute ramassée ce midi au grand magasin devant la gare.",
+            "why": {
+              "en": "「拾った」 is to pick something up, the opposite of losing it: 「落とした」 or 「なくした」.",
+              "fr": "「拾った」, c'est ramasser quelque chose, l'inverse de le perdre : 「落とした」 ou 「なくした」."
+            }
+          },
+          {
+            "jp": "たぶん、明日のお昼に駅前のデパートでなくすと思います。",
+            "kana": "たぶん、あしたのおひるにえきまえのデパートでなくすとおもいます。",
+            "en": "I think I'll probably lose it at the department store by the station tomorrow lunchtime.",
+            "fr": "Je crois que je la perdrai sans doute demain midi au grand magasin devant la gare.",
+            "why": {
+              "en": "「明日」 and 「なくす」 put the loss in the future, when the card is already gone.",
+              "fr": "「明日」 et 「なくす」 placent la perte dans l'avenir, alors que la carte a déjà disparu."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "ありがとうございます。ただいまカードを停止いたしました。新しいカードは、一週間ほどでご自宅にお届けします。",
+          "kana": "ありがとうございます。ただいまカードをていしいたしました。あたらしいカードは、いっしゅうかんほどでごじたくにおとどけします。",
+          "en": "Thank you. I've just stopped the card. A new one will reach your home in about a week.",
+          "fr": "Merci. Je viens de bloquer la carte. Vous recevrez la nouvelle chez vous d'ici une semaine environ."
+        },
+        "me": {
+          "jp": "ありがとうございます。念のため、心当たりのない利用がないか、確認していただけますか。",
+          "kana": "ありがとうございます。ねんのため、こころあたりのないりようがないか、かくにんしていただけますか。",
+          "romaji": "arigatou gozaimasu. nen no tame, kokoroatari no nai riyou ga nai ka, kakunin shite itadakemasu ka",
+          "en": "Thank you. Just to be safe, could you check there are no charges I don't recognise?",
+          "fr": "Merci beaucoup. Par précaution, pourriez-vous vérifier qu'il n'y a pas d'achats que je ne reconnais pas ?",
+          "note": {
+            "en": "「念のため」 makes it a precaution, and 「心当たりのない利用」 is any charge you cannot account for.",
+            "fr": "「念のため」 en fait une précaution, et 「心当たりのない利用」, c'est tout achat que tu ne t'expliques pas."
+          },
+          "alt": [
+            {"jp": "ありがとうございます。念のため、私が使っていない支払いがないか、調べていただけますか。", "kana": "ありがとうございます。ねんのため、わたしがつかっていないしはらいがないか、しらべていただけますか。", "romaji": "arigatou gozaimasu. nen no tame, watashi ga tsukatte inai shiharai ga nai ka, shirabete itadakemasu ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "ありがとうございます。では、新しいカードは明日そちらに取りに行きます。",
+            "kana": "ありがとうございます。では、あたらしいカードはあしたそちらにとりにいきます。",
+            "en": "Thank you. I'll come and collect the new card from you tomorrow, then.",
+            "fr": "Merci beaucoup. Alors je passerai chercher la nouvelle carte chez vous demain.",
+            "why": {
+              "en": "「取りに行きます」 plans to collect the card tomorrow, when she has just said it will be sent to your home in a week.",
+              "fr": "「取りに行きます」 prévoit d'aller chercher la carte demain, alors qu'elle vient de dire qu'on te l'enverra chez toi d'ici une semaine."
+            }
+          },
+          {
+            "jp": "念のため、心当たりのある利用がないか、確認していただけますか。",
+            "kana": "ねんのため、こころあたりのあるりようがないか、かくにんしていただけますか。",
+            "en": "Just to be safe, could you check there are no charges I do recognise?",
+            "fr": "Par précaution, pourriez-vous vérifier qu'il n'y a pas d'achats que je reconnais ?",
+            "why": {
+              "en": "「心当たりのある」 asks about the charges you do recognise, when what worries you is any you did not make: 「心当たりのない」.",
+              "fr": "「心当たりのある」 porte sur les achats que tu reconnais, alors que ce qui t'inquiète, ce sont ceux que tu n'as pas faits : 「心当たりのない」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "確認いたします。本日のご利用は、お昼十二時ごろ、駅前のデパートでの一件のみでございます。",
+          "kana": "かくにんいたします。ほんじつのごりようは、おひるじゅうにじごろ、えきまえのデパートでのいっけんのみでございます。",
+          "en": "Let me check. Today there's only one charge: at the department store by the station, at about twelve noon.",
+          "fr": "Je vérifie. Aujourd'hui, il n'y a qu'un seul achat : au grand magasin devant la gare, vers midi."
+        },
+        "me": {
+          "jp": "それは私が使ったものです。よかった、安心しました。",
+          "kana": "それはわたしがつかったものです。よかった、あんしんしました。",
+          "romaji": "sore wa watashi ga tsukatta mono desu. yokatta, anshin shimashita",
+          "en": "That one was me. Good, that's a relief.",
+          "fr": "Celui-là, c'est bien moi. Ouf, ça me rassure.",
+          "note": {
+            "en": "「私が使ったものです」 claims the one charge as yours, the lunchtime shopping, and 「安心しました」 says your worry is gone.",
+            "fr": "「私が使ったものです」 reconnaît le seul achat comme le tien, les courses de midi, et 「安心しました」 dit que ton inquiétude est levée."
+          },
+          "alt": [
+            {"jp": "それは私の買い物です。よかった、ほっとしました。", "kana": "それはわたしのかいものです。よかった、ほっとしました。", "romaji": "sore wa watashi no kaimono desu. yokatta, hotto shimashita"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "それは私が使ったものではありません。よかった、安心しました。",
+            "kana": "それはわたしがつかったものではありません。よかった、あんしんしました。",
+            "en": "That one wasn't me. Good, that's a relief.",
+            "fr": "Celui-là, ce n'est pas moi. Ouf, ça me rassure.",
+            "why": {
+              "en": "「使ったものではありません」 disowns the charge, which would mean someone used your card, and yet you call it a relief.",
+              "fr": "「使ったものではありません」 renie l'achat, ce qui voudrait dire que quelqu'un a utilisé ta carte, et pourtant tu t'en réjouis."
+            }
+          },
+          {
+            "jp": "それは私が使ったものです。では、その分を返金していただけますか。",
+            "kana": "それはわたしがつかったものです。では、そのぶんをへんきんしていただけますか。",
+            "en": "That one was me. Could you refund it, then?",
+            "fr": "Celui-là, c'est moi. Alors, vous pourriez me le rembourser ?",
+            "why": {
+              "en": "「返金」 asks for your money back on a purchase you have just said you made.",
+              "fr": "「返金」 réclame le remboursement d'un achat que tu viens de reconnaître comme le tien."
+            }
+          }
+        ]
+      }
+    ],
+    "close": {
+      "jp": "かしこまりました。新しいカードが届くまで、今しばらくお待ちください。",
+      "kana": "かしこまりました。あたらしいカードがとどくまで、いましばらくおまちください。",
+      "en": "Very good. Please bear with us until the new card arrives.",
+      "fr": "Très bien. Merci de patienter jusqu'à l'arrivée de la nouvelle carte."
+    }
+  },
+  {
+    "id": "senpai-favour",
+    "place": {"jp": "会社", "kana": "かいしゃ", "en": "At the office", "fr": "Au bureau"},
+    "title": {"en": "A look at your slides", "fr": "Un œil sur tes diapositives"},
+    "situation": {
+      "en": "You have made the slides for tomorrow's meeting and would like a senior colleague to look them over first. You go to her desk.",
+      "fr": "Tu as préparé les diapositives de la réunion de demain et tu aimerais qu'une collègue plus ancienne y jette un œil. Tu vas la voir à son bureau."
+    },
+    "goal": {
+      "en": "Ask your senior colleague to look over your slides, find a time in her busy day, say what to look at and thank her properly.",
+      "fr": "Demande à ta collègue plus ancienne de relire tes diapositives, trouvez un moment dans sa journée chargée, dis-lui sur quoi porter son attention et remercie-la comme il se doit."
+    },
+    "steps": [
+      {"en": "Ask her to look at your slides", "fr": "Demande-lui de relire tes diapositives"},
+      {"en": "Ask for a moment after four", "fr": "Demande un moment après seize heures"},
+      {"en": "Agree to five o'clock", "fr": "Accepte dix-sept heures"},
+      {"en": "Say which part to check", "fr": "Dis quelle partie vérifier"},
+      {"en": "Promise to send them, thank her", "fr": "Promets de les envoyer, remercie-la"}
+    ],
+    "them": {"en": "Senior colleague", "fr": "Collègue plus ancienne"},
+    "register": "polite",
+    "turns": [
+      {
+        "them": {
+          "jp": "あ、マルタンさん。どうしたの？",
+          "kana": "あ、マルタンさん。どうしたの？",
+          "en": "Oh, Martin. What's up?",
+          "fr": "Ah, Martin. Qu'est-ce qu'il y a ?"
+        },
+        "me": {
+          "jp": "お忙しいところすみません。明日の会議のスライドを、事前に見ていただけないでしょうか。",
+          "kana": "おいそがしいところすみません。あしたのかいぎのスライドを、じぜんにみていただけないでしょうか。",
+          "romaji": "oisogashii tokoro sumimasen. ashita no kaigi no suraido o, jizen ni mite itadakenai deshou ka",
+          "en": "Sorry to bother you when you're busy. Could you possibly look over my slides for tomorrow's meeting beforehand?",
+          "fr": "Pardon de vous déranger alors que vous êtes occupée. Pourriez-vous jeter un œil à mes diapositives pour la réunion de demain, avant ?",
+          "note": {
+            "en": "「お忙しいところ」 apologises for taking her time, and 「見ていただけないでしょうか」 asks the favour as softly as you can.",
+            "fr": "「お忙しいところ」 s'excuse de lui prendre du temps, et 「見ていただけないでしょうか」 demande le service aussi doucement que possible."
+          },
+          "alt": [
+            {"jp": "お忙しいところすみません。明日の会議の資料を、前もって見ていただけませんか。", "kana": "おいそがしいところすみません。あしたのかいぎのしりょうを、まえもってみていただけませんか。", "romaji": "oisogashii tokoro sumimasen. ashita no kaigi no shiryou o, maemotte mite itadakemasen ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "お忙しいところすみません。明日の会議のスライドを、事前に見せていただけないでしょうか。",
+            "kana": "おいそがしいところすみません。あしたのかいぎのスライドを、じぜんにみせていただけないでしょうか。",
+            "en": "Sorry to bother you when you're busy. Could you possibly show me your slides for tomorrow's meeting beforehand?",
+            "fr": "Pardon de vous déranger alors que vous êtes occupée. Pourriez-vous me montrer vos diapositives pour la réunion de demain, avant ?",
+            "why": {
+              "en": "「見せていただけないでしょうか」 asks her to show you slides, when it is yours you want her to look at: 「見ていただけないでしょうか」.",
+              "fr": "「見せていただけないでしょうか」 lui demande de te montrer des diapositives, alors que ce sont les tiennes que tu veux lui faire relire : 「見ていただけないでしょうか」."
+            }
+          },
+          {
+            "jp": "明日の会議のスライド、ちょっと見といてくれない？",
+            "kana": "あしたのかいぎのスライド、ちょっとみといてくれない？",
+            "en": "Have a quick look at my slides for tomorrow's meeting, would you?",
+            "fr": "Tu pourrais jeter un œil à mes diapos pour la réunion de demain ?",
+            "why": {
+              "en": "「見といてくれない？」 is how you ask a friend; asking a favour of a senior colleague, you keep to です and ます.",
+              "fr": "「見といてくれない？」, c'est ainsi qu'on demande à un ami ; pour demander un service à une collègue plus ancienne, tu gardes les formes en です et ます."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "見てあげたいんだけど、今日は四時まで打ち合わせが続いてるんだよね。",
+          "kana": "みてあげたいんだけど、きょうはよじまでうちあわせがつづいてるんだよね。",
+          "en": "I'd like to help, but I've got meetings back to back until four today.",
+          "fr": "Je voudrais bien t'aider, mais j'ai des réunions à la suite jusqu'à seize heures aujourd'hui."
+        },
+        "me": {
+          "jp": "そうですか。では、四時以降に少しだけお時間をいただけませんか。",
+          "kana": "そうですか。では、よじいこうにすこしだけおじかんをいただけませんか。",
+          "romaji": "sou desu ka. dewa, yoji ikou ni sukoshi dake ojikan o itadakemasen ka",
+          "en": "I see. Then could you spare me just a little time after four?",
+          "fr": "Je vois. Alors, vous pourriez m'accorder un petit moment après seize heures ?",
+          "note": {
+            "en": "「以降」 takes the time from four on, and 「お時間をいただけませんか」 asks for her time as a favour.",
+            "fr": "「以降」 prend le temps à partir de seize heures, et 「お時間をいただけませんか」 demande son temps comme une faveur."
+          },
+          "alt": [
+            {"jp": "そうですか。では、四時を過ぎてから、少しだけお時間をいただけますか。", "kana": "そうですか。では、よじをすぎてから、すこしだけおじかんをいただけますか。", "romaji": "sou desu ka. dewa, yoji o sugite kara, sukoshi dake ojikan o itadakemasu ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "そうですか。では、四時までに、ほんの少しだけお時間をいただけませんか。",
+            "kana": "そうですか。では、よじまでに、ほんのすこしだけおじかんをいただけませんか。",
+            "en": "I see. Then could you spare me just a tiny bit of time before four?",
+            "fr": "Je vois. Alors, vous pourriez m'accorder un tout petit moment avant seize heures ?",
+            "why": {
+              "en": "「四時までに」 asks for time before four, the very hours she has just said are taken by meetings.",
+              "fr": "「四時までに」 demande du temps avant seize heures, justement les heures qu'elle vient de dire prises par ses réunions."
+            }
+          },
+          {
+            "jp": "よかったです。では、四時以降に少しだけお時間をいただけませんか。",
+            "kana": "よかったです。では、よじいこうにすこしだけおじかんをいただけませんか。",
+            "en": "That's good. Then could you spare me just a little time after four?",
+            "fr": "Tant mieux. Alors, vous pourriez m'accorder un petit moment après seize heures ?",
+            "why": {
+              "en": "「よかったです」 welcomes her news as good, when she has just told you she is tied up all afternoon.",
+              "fr": "「よかったです」 accueille sa nouvelle comme une bonne nouvelle, alors qu'elle vient de te dire qu'elle est prise tout l'après-midi."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "四時過ぎもちょっと予定があって。五時からなら十五分くらい取れるけど、それでもいい？",
+          "kana": "よじすぎもちょっとよていがあって。ごじからならじゅうごふんくらいとれるけど、それでもいい？",
+          "en": "Just after four I've got something on too. I could make fifteen minutes or so at five, if that's OK?",
+          "fr": "Juste après seize heures, j'ai aussi quelque chose. À dix-sept heures, je peux te donner un quart d'heure, ça te va ?"
+        },
+        "me": {
+          "jp": "はい、ぜひお願いします。では、五時に伺います。",
+          "kana": "はい、ぜひおねがいします。では、ごじにうかがいます。",
+          "romaji": "hai, zehi onegai shimasu. dewa, goji ni ukagaimasu",
+          "en": "Yes, please. I'll come to you at five, then.",
+          "fr": "Oui, avec plaisir. Je passerai vous voir à dix-sept heures, alors.",
+          "note": {
+            "en": "「ぜひお願いします」 takes the fifteen minutes gladly, and 「伺います」 humbly says you will go to her.",
+            "fr": "「ぜひお願いします」 accepte volontiers le quart d'heure, et 「伺います」 dit humblement que tu iras la voir."
+          },
+          "alt": [
+            {"jp": "はい、ありがとうございます。五時に先輩の席に伺います。", "kana": "はい、ありがとうございます。ごじにせんぱいのせきにうかがいます。", "romaji": "hai, arigatou gozaimasu. goji ni senpai no seki ni ukagaimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "はい、ぜひお願いします。では、四時に先輩の席に伺います。",
+            "kana": "はい、ぜひおねがいします。では、よじにせんぱいのせきにうかがいます。",
+            "en": "Yes, please. I'll come to your desk at four, then.",
+            "fr": "Oui, avec plaisir. Je passerai à votre bureau à seize heures, alors.",
+            "why": {
+              "en": "「四時」 is when her meetings end and something else begins; the time she offered is 「五時」.",
+              "fr": "「四時」, c'est l'heure où ses réunions finissent et où autre chose commence ; l'heure qu'elle propose, c'est 「五時」."
+            }
+          },
+          {
+            "jp": "はい、ぜひお願いします。では、五時にいらっしゃいます。",
+            "kana": "はい、ぜひおねがいします。では、ごじにいらっしゃいます。",
+            "en": "Yes, please. I shall graciously come at five, then.",
+            "fr": "Oui, avec plaisir. Je daignerai venir à dix-sept heures, alors.",
+            "why": {
+              "en": "「いらっしゃいます」 is the honorific of 「行く」 and raises whoever goes, here yourself; going to her is the humble 「伺います」.",
+              "fr": "「いらっしゃいます」 est l'honorifique de 「行く」 et élève la personne qui y va, ici toi-même ; aller la voir, c'est l'humble 「伺います」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "うん。スライドは何枚くらいあるの？",
+          "kana": "うん。スライドはなんまいくらいあるの？",
+          "en": "Got it. How many slides are there?",
+          "fr": "Ça marche. Il y a combien de diapositives, à peu près ?"
+        },
+        "me": {
+          "jp": "十枚ほどです。特に、最後の売り上げのグラフを見ていただけると助かります。",
+          "kana": "じゅうまいほどです。とくに、さいごのうりあげのグラフをみていただけるとたすかります。",
+          "romaji": "juumai hodo desu. toku ni, saigo no uriage no gurafu o mite itadakeru to tasukarimasu",
+          "en": "About ten. It would really help if you could look at the sales graph at the end in particular.",
+          "fr": "Une dizaine. Ça m'aiderait beaucoup que vous regardiez surtout le graphique des ventes, à la fin.",
+          "note": {
+            "en": "「十枚」 counts flat things like slides with 「枚」, and 「特に」 points her to the part that needs her most.",
+            "fr": "「十枚」 compte les choses plates comme les diapositives avec 「枚」, et 「特に」 lui indique la partie qui a le plus besoin d'elle."
+          },
+          "alt": [
+            {"jp": "十枚くらいです。特に、最後の売り上げのグラフを見ていただきたいです。", "kana": "じゅうまいくらいです。とくに、さいごのうりあげのグラフをみていただきたいです。", "romaji": "juumai kurai desu. toku ni, saigo no uriage no gurafu o mite itadakitai desu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "三時間ほどかかりました。特に、最後の売り上げのグラフが大変でした。",
+            "kana": "さんじかんほどかかりました。とくに、さいごのうりあげのグラフがたいへんでした。",
+            "en": "It took me about three hours. The sales graph at the end was the hardest part.",
+            "fr": "Ça m'a pris environ trois heures. Le graphique des ventes, à la fin, a été le plus dur.",
+            "why": {
+              "en": "It says how long the slides took you, but she asked 「何枚」, how many there are.",
+              "fr": "Tu dis combien de temps tu as passé sur les diapositives, mais elle demandait 「何枚」 : combien il y en a."
+            }
+          },
+          {
+            "jp": "十枚ほどです。特に、最後の売り上げのグラフを見ていただけると助けます。",
+            "kana": "じゅうまいほどです。とくに、さいごのうりあげのグラフをみていただけるとたすけます。",
+            "en": "About ten. If you could look at the sales graph at the end in particular, I'll help.",
+            "fr": "Une dizaine. Si vous regardez surtout le graphique des ventes, à la fin, j'aiderai.",
+            "why": {
+              "en": "「助けます」 says that you will help someone; for something that would help you, the verb is 「助かります」.",
+              "fr": "「助けます」 dit que c'est toi qui aideras quelqu'un ; pour dire que ça t'aiderait, le verbe est 「助かります」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "わかった。じゃあ、五時までにメールで送っといてくれる？",
+          "kana": "わかった。じゃあ、ごじまでにメールでおくっといてくれる？",
+          "en": "OK. Can you email them to me before five, then?",
+          "fr": "D'accord. Alors, tu me les envoies par mail avant dix-sept heures ?"
+        },
+        "me": {
+          "jp": "はい、すぐにお送りします。お忙しいのに、本当にありがとうございます。",
+          "kana": "はい、すぐにおおくりします。おいそがしいのに、ほんとうにありがとうございます。",
+          "romaji": "hai, sugu ni ookuri shimasu. oisogashii no ni, hontou ni arigatou gozaimasu",
+          "en": "Yes, I'll send them right away. Thank you so much, when you're so busy.",
+          "fr": "Oui, je vous les envoie tout de suite. Merci infiniment, alors que vous êtes si occupée.",
+          "note": {
+            "en": "「お送りします」 humbly promises the email, and 「お忙しいのに」 thanks her for making time she hardly has.",
+            "fr": "「お送りします」 promet humblement le mail, et 「お忙しいのに」 la remercie de prendre un temps qu'elle n'a guère."
+          },
+          "alt": [
+            {"jp": "はい、今すぐ送ります。お忙しいところ、ありがとうございます。", "kana": "はい、いますぐおくります。おいそがしいところ、ありがとうございます。", "romaji": "hai, ima sugu okurimasu. oisogashii tokoro, arigatou gozaimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "はい、すぐにお送りください。",
+            "kana": "はい、すぐにおおくりください。",
+            "en": "Yes, please send them right away.",
+            "fr": "Oui, envoyez-les tout de suite, s'il vous plaît.",
+            "why": {
+              "en": "「お送りください」 asks her to send them, when the slides are yours to email her: 「お送りします」.",
+              "fr": "「お送りください」 lui demande de les envoyer, alors que c'est à toi de lui envoyer tes diapositives : 「お送りします」."
+            }
+          },
+          {
+            "jp": "はい、明日の会議が終わってから、お送りします。",
+            "kana": "はい、あしたのかいぎがおわってから、おおくりします。",
+            "en": "Yes, I'll send them after tomorrow's meeting.",
+            "fr": "Oui, je vous les enverrai après la réunion de demain.",
+            "why": {
+              "en": "「会議が終わってから」 would send the slides once the meeting is over, too late for her to check them.",
+              "fr": "「会議が終わってから」 enverrait les diapositives une fois la réunion passée, trop tard pour qu'elle les relise."
+            }
+          }
+        ]
+      }
+    ],
+    "close": {
+      "jp": "いいよいいよ。じゃあ、五時にね。",
+      "kana": "いいよいいよ。じゃあ、ごじにね。",
+      "en": "No problem. Five o'clock, then.",
+      "fr": "Pas de souci. À dix-sept heures, alors."
+    }
+  },
+  {
+    "id": "parent-teacher",
+    "place": {"jp": "小学校", "kana": "しょうがっこう", "en": "Primary school", "fr": "École primaire"},
+    "title": {"en": "Meeting your son's teacher", "fr": "Rendez-vous avec l'institutrice"},
+    "situation": {
+      "en": "Your son Louis has been at a Japanese primary school since you moved to Japan six months ago. You have come in to meet his class teacher.",
+      "fr": "Ton fils Louis va à l'école primaire japonaise depuis votre arrivée au Japon, il y a six mois. Tu viens rencontrer son institutrice."
+    },
+    "goal": {
+      "en": "Hear what the teacher has noticed, explain that your son is new to Japan, ask how to help at home and agree to check his homework notebook every evening.",
+      "fr": "Écoute ce que l'institutrice a remarqué, explique que ton fils est arrivé au Japon depuis peu, demande comment l'aider à la maison et promets de vérifier son cahier de liaison chaque soir."
+    },
+    "steps": [
+      {"en": "Say how he is at home", "fr": "Dis comment il est à la maison"},
+      {"en": "Explain he is new to Japan", "fr": "Explique qu'il vient d'arriver"},
+      {"en": "Ask how to help at home", "fr": "Demande comment l'aider à la maison"},
+      {"en": "Agree to check his notebook", "fr": "Promets de vérifier son cahier"},
+      {"en": "Thank the teacher", "fr": "Remercie l'institutrice"}
+    ],
+    "them": {"en": "Class teacher", "fr": "Institutrice"},
+    "register": "polite",
+    "turns": [
+      {
+        "them": {
+          "jp": "今日はお忙しい中、ありがとうございます。ルイくん、おうちではどんな様子ですか。",
+          "kana": "きょうはおいそがしいなか、ありがとうございます。ルイくん、おうちではどんなようすですか。",
+          "en": "Thank you for coming in today, I know you're busy. How is Louis at home?",
+          "fr": "Merci d'avoir pris le temps de passer aujourd'hui. Comment est Louis à la maison ?"
+        },
+        "me": {
+          "jp": "家ではよく話すんですが、学校のことはあまり話してくれないんです。",
+          "kana": "いえではよくはなすんですが、がっこうのことはあまりはなしてくれないんです。",
+          "romaji": "ie de wa yoku hanasu n desu ga, gakkou no koto wa amari hanashite kurenai n desu",
+          "en": "He talks a lot at home, but he doesn't tell me much about school.",
+          "fr": "À la maison, il parle beaucoup, mais il ne me raconte pas grand-chose de l'école.",
+          "note": {
+            "en": "「くれない」 says he does not tell you, though you would like him to, and 「んですが」 sets home against school.",
+            "fr": "「くれない」 dit qu'il ne te raconte pas, alors que tu aimerais qu'il le fasse, et 「んですが」 oppose la maison à l'école."
+          },
+          "alt": [
+            {"jp": "家ではよくしゃべるんですが、学校の話はあまりしないんです。", "kana": "いえではよくしゃべるんですが、がっこうのはなしはあまりしないんです。", "romaji": "ie de wa yoku shaberu n desu ga, gakkou no hanashi wa amari shinai n desu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "家ではよく話すんですが、学校のことは、私があまり話してあげないんです。",
+            "kana": "いえではよくはなすんですが、がっこうのことは、わたしがあまりはなしてあげないんです。",
+            "en": "He talks a lot at home, but I don't do him the favour of telling him much about school.",
+            "fr": "À la maison, il parle beaucoup, mais moi, je ne lui fais pas la faveur de lui parler de l'école.",
+            "why": {
+              "en": "「私が話してあげない」 says it is you who do not tell him; that he does not tell you is 「話してくれない」.",
+              "fr": "「私が話してあげない」 dit que c'est toi qui ne lui racontes pas ; qu'il ne te raconte pas, c'est 「話してくれない」."
+            }
+          },
+          {
+            "jp": "学校までは、家から歩いて十分ほどなので、毎朝友達と一緒に通っています。",
+            "kana": "がっこうまでは、いえからあるいてじゅっぷんほどなので、まいあさともだちといっしょにかよっています。",
+            "en": "School is about ten minutes' walk from home, so he goes with his friends every morning.",
+            "fr": "L'école est à dix minutes à pied de la maison, alors il y va chaque matin avec ses copains.",
+            "why": {
+              "en": "It says how far the school is, but the teacher asked how Louis is at home.",
+              "fr": "Tu dis à quelle distance est l'école, mais l'institutrice demandait comment est Louis à la maison."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "そうですか。実は、授業中はとても静かで、なかなか手を挙げないんです。",
+          "kana": "そうですか。じつは、じゅぎょうちゅうはとてもしずかで、なかなかてをあげないんです。",
+          "en": "I see. The thing is, he's very quiet in class and hardly ever puts his hand up.",
+          "fr": "Je vois. En fait, en classe, il est très silencieux et lève rarement la main."
+        },
+        "me": {
+          "jp": "そうでしたか。日本に来てまだ半年なので、日本語で話すのが不安なのかもしれません。",
+          "kana": "そうでしたか。にほんにきてまだはんとしなので、にほんごではなすのがふあんなのかもしれません。",
+          "romaji": "sou deshita ka. nihon ni kite mada hantoshi na node, nihongo de hanasu no ga fuan na no ka mo shiremasen",
+          "en": "I see. We've only been in Japan six months, so perhaps he's nervous about speaking Japanese.",
+          "fr": "Ah, je vois. Nous ne sommes au Japon que depuis six mois, alors il a peut-être peur de parler en japonais.",
+          "note": {
+            "en": "「まだ半年なので」 gives how new he is as the reason, and 「のかもしれません」 offers it as a guess, not an excuse.",
+            "fr": "「まだ半年なので」 donne son arrivée récente comme raison, et 「のかもしれません」 la propose comme une hypothèse, pas comme une excuse."
+          },
+          "alt": [
+            {"jp": "そうですか。まだ日本に来て半年なので、日本語にまだ慣れていないのかもしれません。", "kana": "そうですか。まだにほんにきてはんとしなので、にほんごにまだなれていないのかもしれません。", "romaji": "sou desu ka. mada nihon ni kite hantoshi na node, nihongo ni mada narete inai no ka mo shiremasen"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "そうでしたか。日本に来てまだ半年なのに、話すのが不安なのかもしれません。",
+            "kana": "そうでしたか。にほんにきてまだはんとしなのに、はなすのがふあんなのかもしれません。",
+            "en": "I see. Even though we've only been in Japan six months, perhaps he's nervous about speaking.",
+            "fr": "Ah, je vois. Bien que nous ne soyons au Japon que depuis six mois, il a peut-être peur de parler.",
+            "why": {
+              "en": "「のに」 means even though, which sets his newness against his shyness, when it is the cause of it: 「ので」.",
+              "fr": "「のに」 veut dire « bien que » : il oppose son arrivée récente à sa timidité, alors qu'elle en est la cause : 「ので」."
+            }
+          },
+          {
+            "jp": "へえ、そうなんだ。まだ慣れてないのかもね。",
+            "kana": "へえ、そうなんだ。まだなれてないのかもね。",
+            "en": "Huh, really? Maybe he's just not used to it yet.",
+            "fr": "Ah bon, tiens. Il est peut-être pas encore habitué, quoi.",
+            "why": {
+              "en": "「そうなんだ」 and 「かもね」 are how you talk to a friend; with your son's teacher, you keep to です and ます.",
+              "fr": "「そうなんだ」 et 「かもね」, c'est le ton entre amis ; avec l'institutrice de ton fils, tu gardes les formes en です et ます."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "なるほど、それもあるかもしれませんね。それと、宿題を忘れてくることが多いんです。",
+          "kana": "なるほど、それもあるかもしれませんね。それと、しゅくだいをわすれてくることがおおいんです。",
+          "en": "I see, that may be part of it. And he often comes to school without his homework.",
+          "fr": "Je comprends, ça joue peut-être. Et puis, il oublie souvent ses devoirs."
+        },
+        "me": {
+          "jp": "それは申し訳ありません。家では、どのように手伝えばいいでしょうか。",
+          "kana": "それはもうしわけありません。いえでは、どのようにてつだえばいいでしょうか。",
+          "romaji": "sore wa moushiwake arimasen. ie de wa, dono you ni tetsudaeba ii deshou ka",
+          "en": "I'm sorry about that. How should I help him at home?",
+          "fr": "Pardon pour ça. Comment puis-je l'aider à la maison ?",
+          "note": {
+            "en": "「申し訳ありません」 owns the forgotten homework as the family's, and 「〜ばいいでしょうか」 asks the teacher for advice.",
+            "fr": "「申し訳ありません」 reconnaît les devoirs oubliés comme l'affaire de la famille, et 「〜ばいいでしょうか」 demande conseil à l'institutrice."
+          },
+          "alt": [
+            {"jp": "すみません。家で、私にできることはありますか。", "kana": "すみません。いえで、わたしにできることはありますか。", "romaji": "sumimasen. ie de, watashi ni dekiru koto wa arimasu ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "おかげさまで。家では、どのように手伝えばいいでしょうか。",
+            "kana": "おかげさまで。いえでは、どのようにてつだえばいいでしょうか。",
+            "en": "All's well, thanks to you. How should I help him at home?",
+            "fr": "Tout va bien, grâce à vous. Comment puis-je l'aider à la maison ?",
+            "why": {
+              "en": "「おかげさまで」 thanks someone for good news, and forgotten homework is not good news.",
+              "fr": "「おかげさまで」 remercie pour une bonne nouvelle, et des devoirs oubliés n'en sont pas une."
+            }
+          },
+          {
+            "jp": "それは申し訳ありません。これからは、宿題をしないように言っておきます。",
+            "kana": "それはもうしわけありません。これからは、しゅくだいをしないようにいっておきます。",
+            "en": "I'm sorry about that. From now on, I'll tell him not to do his homework.",
+            "fr": "Pardon pour ça. Désormais, je lui dirai de ne pas faire ses devoirs.",
+            "why": {
+              "en": "「しないように」 tells him not to do his homework, the opposite of what he needs: 「するように」.",
+              "fr": "「しないように」 lui dit de ne pas faire ses devoirs, l'inverse de ce qu'il lui faut : 「するように」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "毎晩、連絡帳を一緒に見て、次の日の宿題を確認していただけると助かります。",
+          "kana": "まいばん、れんらくちょうをいっしょにみて、つぎのひのしゅくだいをかくにんしていただけるとたすかります。",
+          "en": "It would help if you could go through his homework notebook with him every evening and check the next day's homework.",
+          "fr": "Ce serait précieux que vous regardiez chaque soir son cahier de liaison avec lui, pour vérifier les devoirs du lendemain."
+        },
+        "me": {
+          "jp": "わかりました。これからは毎晩、連絡帳を一緒に確認するようにします。",
+          "kana": "わかりました。これからはまいばん、れんらくちょうをいっしょにかくにんするようにします。",
+          "romaji": "wakarimashita. kore kara wa maiban, renrakuchou o issho ni kakunin suru you ni shimasu",
+          "en": "All right. From now on, I'll make a point of checking the notebook with him every evening.",
+          "fr": "D'accord. Désormais, je veillerai à vérifier le cahier avec lui chaque soir.",
+          "note": {
+            "en": "「ようにします」 promises to make it a habit, and 「毎晩」 takes up the teacher's every evening.",
+            "fr": "「ようにします」 promet d'en faire une habitude, et 「毎晩」 reprend le « chaque soir » de l'institutrice."
+          },
+          "alt": [
+            {"jp": "わかりました。毎晩、連絡帳を見て、宿題を一緒に確認します。", "kana": "わかりました。まいばん、れんらくちょうをみて、しゅくだいをいっしょにかくにんします。", "romaji": "wakarimashita. maiban, renrakuchou o mite, shukudai o issho ni kakunin shimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "わかりました。これからは毎朝、学校に行く前に連絡帳を確認するようにします。",
+            "kana": "わかりました。これからはまいあさ、がっこうにいくまえにれんらくちょうをかくにんするようにします。",
+            "en": "All right. From now on, I'll make a point of checking the notebook every morning before school.",
+            "fr": "D'accord. Désormais, je veillerai à vérifier le cahier chaque matin avant l'école.",
+            "why": {
+              "en": "「毎朝、学校に行く前に」 checks the homework on the morning it is due, too late to do it; the teacher asked for 「毎晩」.",
+              "fr": "「毎朝、学校に行く前に」 vérifie les devoirs le matin même, trop tard pour les faire ; l'institutrice demandait 「毎晩」."
+            }
+          },
+          {
+            "jp": "わかりました。では、これからは先生に毎晩、連絡帳を確認していただけますか。",
+            "kana": "わかりました。では、これからはせんせいにまいばん、れんらくちょうをかくにんしていただけますか。",
+            "en": "All right. Then from now on, could you check the notebook every evening yourself?",
+            "fr": "D'accord. Alors, désormais, vous pourriez vérifier vous-même le cahier chaque soir ?",
+            "why": {
+              "en": "「確認していただけますか」 hands the evening check back to the teacher, when it is what she has asked you to do at home.",
+              "fr": "「確認していただけますか」 renvoie la vérification du soir à l'institutrice, alors que c'est ce qu'elle te demande de faire à la maison."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "ありがとうございます。学校でも、ルイくんが話しやすいように、声をかけていきますね。",
+          "kana": "ありがとうございます。がっこうでも、ルイくんがはなしやすいように、こえをかけていきますね。",
+          "en": "Thank you. At school, too, I'll keep speaking to Louis so that he finds it easier to talk.",
+          "fr": "Merci. À l'école aussi, je continuerai à aller vers Louis, pour qu'il ose davantage parler."
+        },
+        "me": {
+          "jp": "ありがとうございます。そうしていただけると、本当にありがたいです。",
+          "kana": "ありがとうございます。そうしていただけると、ほんとうにありがたいです。",
+          "romaji": "arigatou gozaimasu. sou shite itadakeru to, hontou ni arigatai desu",
+          "en": "Thank you. That would mean a great deal to us.",
+          "fr": "Merci beaucoup. Ce serait vraiment précieux pour nous.",
+          "note": {
+            "en": "「そうしていただけると」 takes up what she has offered, and 「ありがたいです」 says how much it means to you.",
+            "fr": "「そうしていただけると」 reprend ce qu'elle propose, et 「ありがたいです」 dit combien cela compte pour toi."
+          },
+          "alt": [
+            {"jp": "ありがとうございます。そうしていただけると助かります。", "kana": "ありがとうございます。そうしていただけるとたすかります。", "romaji": "arigatou gozaimasu. sou shite itadakeru to tasukarimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "でも、学校ではルイに話しかけないでください。",
+            "kana": "でも、がっこうではルイにはなしかけないでください。",
+            "en": "But please don't speak to Louis at school.",
+            "fr": "Mais à l'école, ne parlez pas à Louis, s'il vous plaît.",
+            "why": {
+              "en": "「話しかけないでください」 turns down the very help you need, the teacher drawing him out.",
+              "fr": "「話しかけないでください」 refuse justement l'aide qu'il te faut : que l'institutrice aille vers lui."
+            }
+          },
+          {
+            "jp": "そうしていただけて、本当にありがたかったです。",
+            "kana": "そうしていただけて、ほんとうにありがたかったです。",
+            "en": "It was such a help that you did that.",
+            "fr": "Ça a été vraiment précieux que vous fassiez cela.",
+            "why": {
+              "en": "「ありがたかったです」 is past, thanking her for help she has only just offered.",
+              "fr": "「ありがたかったです」 est au passé et la remercie d'une aide qu'elle vient seulement de proposer."
+            }
+          }
+        ]
+      }
+    ],
+    "close": {
+      "jp": "はい。何かあったら、いつでも連絡帳に書いてくださいね。",
+      "kana": "はい。なにかあったら、いつでもれんらくちょうにかいてくださいね。",
+      "en": "Of course. If anything comes up, just write it in the notebook any time.",
+      "fr": "Je vous en prie. S'il y a quoi que ce soit, écrivez-le dans le cahier de liaison, à tout moment."
+    }
+  },
+  {
+    "id": "moving-quote",
+    "place": {"jp": "電話", "kana": "でんわ", "en": "On the phone", "fr": "Au téléphone"},
+    "title": {"en": "A quote for the move", "fr": "Un devis de déménagement"},
+    "situation": {
+      "en": "You are moving to a new flat next month, and you call a removal company for a quote. You live on the second floor, with no lift.",
+      "fr": "Tu déménages le mois prochain dans un nouvel appartement, et tu appelles une entreprise de déménagement pour un devis. Tu habites au deuxième étage, sans ascenseur."
+    },
+    "goal": {
+      "en": "Get a quote for your move: pick a cheaper weekday, describe the stairs and the big items, pack yourself and ask for a discount and boxes.",
+      "fr": "Obtiens un devis pour ton déménagement : choisis un jour de semaine moins cher, décris l'escalier et les gros objets, fais tes cartons toi-même et demande une remise et des cartons vides."
+    },
+    "steps": [
+      {"en": "Ask for a quote", "fr": "Demande un devis"},
+      {"en": "Switch to a cheaper weekday", "fr": "Passe à un jour de semaine"},
+      {"en": "Describe the stairs and big items", "fr": "Décris l'escalier et les gros objets"},
+      {"en": "Pack yourself, ask for a discount", "fr": "Emballe toi-même, demande une remise"},
+      {"en": "Ask for cardboard boxes", "fr": "Demande des cartons"}
+    ],
+    "them": {"en": "Removal company staff", "fr": "Employé de déménagement"},
+    "register": "polite",
+    "turns": [
+      {
+        "them": {
+          "jp": "お電話ありがとうございます。ひまわり引越センターでございます。",
+          "kana": "おでんわありがとうございます。ひまわりひっこしセンターでございます。",
+          "en": "Thank you for calling Himawari Removals.",
+          "fr": "Déménagements Himawari, bonjour, merci de votre appel."
+        },
+        "me": {
+          "jp": "来月二十日の土曜日に引っ越すので、見積もりをお願いしたいんですが。",
+          "kana": "らいげつはつかのどようびにひっこすので、みつもりをおねがいしたいんですが。",
+          "romaji": "raigetsu hatsuka no doyoubi ni hikkosu node, mitsumori o onegai shitai n desu ga",
+          "en": "I'm moving on Saturday the twentieth next month, and I'd like a quote, please.",
+          "fr": "Je déménage le samedi 20 du mois prochain, et je voudrais un devis, s'il vous plaît.",
+          "note": {
+            "en": "「二十日」 is read はつか, and 「お願いしたいんですが」 states your errand and leaves the clerk to take it up.",
+            "fr": "「二十日」 se lit はつか, et 「お願いしたいんですが」 annonce ta demande en laissant l'employé la prendre en main."
+          },
+          "alt": [
+            {"jp": "来月の二十日、土曜日に引っ越すので、見積もりをお願いできますか。", "kana": "らいげつのはつか、どようびにひっこすので、みつもりをおねがいできますか。", "romaji": "raigetsu no hatsuka, doyoubi ni hikkosu node, mitsumori o onegai dekimasu ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "先月の二十日に、もう引っ越しは済んだので、見積もりをお願いしたいんですが。",
+            "kana": "せんげつのはつかに、もうひっこしはすんだので、みつもりをおねがいしたいんですが。",
+            "en": "I finished moving on the twentieth last month, and I'd like a quote, please.",
+            "fr": "Mon déménagement a eu lieu le 20 du mois dernier, et je voudrais un devis, s'il vous plaît.",
+            "why": {
+              "en": "「先月〜もう引っ越しは済んだ」 puts the move in the past, when a quote is for a move still to come.",
+              "fr": "「先月〜もう引っ越しは済んだ」 place le déménagement dans le passé, alors qu'un devis porte sur un déménagement à venir."
+            }
+          },
+          {
+            "jp": "来月二十日の土曜日にお引っ越しになるので、見積もりをお願いしたいんですが。",
+            "kana": "らいげつはつかのどようびにおひっこしになるので、みつもりをおねがいしたいんですが。",
+            "en": "I shall graciously be moving on Saturday the twentieth next month, and I'd like a quote, please.",
+            "fr": "Je daignerai déménager le samedi 20 du mois prochain, et je voudrais un devis, s'il vous plaît.",
+            "why": {
+              "en": "「お引っ越しになる」 is honorific and raises the person who moves, here yourself; your own move is 「引っ越す」.",
+              "fr": "「お引っ越しになる」 est honorifique et élève la personne qui déménage, ici toi-même ; ton propre déménagement, c'est 「引っ越す」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "二十日の土曜日ですね。土日ですと料金が高めになりまして、平日でしたら二割ほどお安くなりますが。",
+          "kana": "はつかのどようびですね。どにちですとりょうきんがたかめになりまして、へいじつでしたらにわりほどおやすくなりますが。",
+          "en": "Saturday the twentieth. Weekends cost a little more, I'm afraid: on a weekday it would be about twenty per cent cheaper.",
+          "fr": "Le samedi 20, c'est noté. Le week-end, le tarif est un peu plus élevé : en semaine, ce serait environ vingt pour cent moins cher."
+        },
+        "me": {
+          "jp": "そうなんですか。では、前の日の金曜日にします。",
+          "kana": "そうなんですか。では、まえのひのきんようびにします。",
+          "romaji": "sou nan desu ka. dewa, mae no hi no kin'youbi ni shimasu",
+          "en": "Really? Then I'll make it the day before, the Friday.",
+          "fr": "Ah bon ? Alors je prends la veille, le vendredi.",
+          "note": {
+            "en": "「にします」 makes your choice, and 「前の日の金曜日」 is the nineteenth, a weekday.",
+            "fr": "「にします」 arrête ton choix, et 「前の日の金曜日」, c'est le 19, un jour de semaine."
+          },
+          "alt": [
+            {"jp": "そうですか。じゃあ、十九日の金曜日でお願いします。", "kana": "そうですか。じゃあ、じゅうくにちのきんようびでおねがいします。", "romaji": "sou desu ka. jaa, juukunichi no kin'youbi de onegai shimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "そうなんですか。では、一日ずらして、次の日の日曜日にします。",
+            "kana": "そうなんですか。では、いちにちずらして、つぎのひのにちようびにします。",
+            "en": "Really? Then I'll push it back a day, to the Sunday.",
+            "fr": "Ah bon ? Alors je décale d'un jour, au dimanche.",
+            "why": {
+              "en": "「日曜日」 is a weekend day too, so it saves nothing; the cheaper days are 「平日」.",
+              "fr": "「日曜日」 tombe aussi le week-end, donc ça ne fait rien économiser ; les jours moins chers, ce sont les 「平日」."
+            }
+          },
+          {
+            "jp": "そうなんですか。高くなるなら、土曜日のままでお願いします。",
+            "kana": "そうなんですか。たかくなるなら、どようびのままでおねがいします。",
+            "en": "Really? If it costs more, then keep it on the Saturday, please.",
+            "fr": "Ah bon ? Si c'est plus cher, alors gardons le samedi.",
+            "why": {
+              "en": "「高くなるなら」 makes the higher price your reason for keeping the dearer day.",
+              "fr": "「高くなるなら」 fait du prix plus élevé ta raison de garder le jour le plus cher."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "かしこまりました。今のお部屋は何階で、エレベーターはございますか。",
+          "kana": "かしこまりました。いまのおへやはなんがいで、エレベーターはございますか。",
+          "en": "Certainly. Which floor is your current flat on, and is there a lift?",
+          "fr": "Très bien. À quel étage se trouve votre logement actuel, et y a-t-il un ascenseur ?"
+        },
+        "me": {
+          "jp": "三階なんですが、エレベーターはないんです。",
+          "kana": "さんがいなんですが、エレベーターはないんです。",
+          "romaji": "sangai nan desu ga, erebeetaa wa nai n desu",
+          "en": "It's on the second floor, and there's no lift.",
+          "fr": "C'est au deuxième étage, et il n'y a pas d'ascenseur.",
+          "note": {
+            "en": "「三階」 counts the ground floor as the first, so it is a British second floor, and 「ないんです」 warns of the stairs.",
+            "fr": "「三階」 compte le rez-de-chaussée comme premier niveau : c'est un deuxième étage chez nous, et 「ないんです」 prévient de l'escalier."
+          },
+          "alt": [
+            {"jp": "三階で、エレベーターはありません。", "kana": "さんがいで、エレベーターはありません。", "romaji": "sangai de, erebeetaa wa arimasen"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "三階ですが、エレベーターはいないんです。",
+            "kana": "さんがいですが、エレベーターはいないんです。",
+            "en": "It's on the second floor, but the lift isn't in.",
+            "fr": "C'est au deuxième étage, mais l'ascenseur n'est pas là.",
+            "why": {
+              "en": "「いない」 is for people and animals; a lift, like any thing, takes 「ない」.",
+              "fr": "「いない」 s'emploie pour les personnes et les animaux ; un ascenseur, comme toute chose, veut 「ない」."
+            }
+          },
+          {
+            "jp": "新しい部屋は、駅から歩いて五分です。",
+            "kana": "あたらしいへやは、えきからあるいてごふんです。",
+            "en": "The new flat is five minutes' walk from the station.",
+            "fr": "Le nouvel appartement est à cinq minutes à pied de la gare.",
+            "why": {
+              "en": "It says where the new flat is, but the clerk asked about the floor and the lift where you live now.",
+              "fr": "Tu dis où se trouve le nouvel appartement, mais l'employé demandait l'étage et l'ascenseur de ton logement actuel."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "承知いたしました。大きなお荷物は、何がございますか。",
+          "kana": "しょうちいたしました。おおきなおにもつは、なにがございますか。",
+          "en": "Noted. What large items do you have?",
+          "fr": "C'est noté. Quels gros objets avez-vous ?"
+        },
+        "me": {
+          "jp": "冷蔵庫と洗濯機とベッドです。といっても、一人暮らしなので、全部小さめです。",
+          "kana": "れいぞうことせんたくきとベッドです。といっても、ひとりぐらしなので、ぜんぶちいさめです。",
+          "romaji": "reizouko to sentakuki to beddo desu. to itte mo, hitorigurashi na node, zenbu chiisame desu",
+          "en": "A fridge, a washing machine and a bed. Mind you, it's a one-person home, so they're all on the small side.",
+          "fr": "Un frigo, une machine à laver et un lit. Cela dit, c'est un logement pour une personne, donc tout est plutôt petit.",
+          "note": {
+            "en": "「といっても」 takes back part of what you have just said, and 「小さめ」 says the items are on the small side.",
+            "fr": "「といっても」 nuance ce que tu viens de dire, et 「小さめ」 dit que les objets sont plutôt petits."
+          },
+          "alt": [
+            {"jp": "冷蔵庫と洗濯機、それからベッドです。一人暮らしなので、どれも小さめです。", "kana": "れいぞうことせんたくき、それからベッドです。ひとりぐらしなので、どれもちいさめです。", "romaji": "reizouko to sentakuki, sore kara beddo desu. hitorigurashi na node, dore mo chiisame desu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "段ボール箱は、二十箱ほどになると思います。",
+            "kana": "だんボールばこは、にじゅっぱこほどになるとおもいます。",
+            "en": "I think it'll come to about twenty cardboard boxes.",
+            "fr": "Je pense qu'il y aura une vingtaine de cartons.",
+            "why": {
+              "en": "It counts your boxes, but the clerk asked which large items you have: furniture and appliances.",
+              "fr": "Tu comptes tes cartons, mais l'employé demandait quels gros objets tu as : meubles et électroménager."
+            }
+          },
+          {
+            "jp": "冷蔵庫と洗濯機とベッドかな。一人暮らしだから、全部小さいよ。",
+            "kana": "れいぞうことせんたくきとベッドかな。ひとりぐらしだから、ぜんぶちいさいよ。",
+            "en": "A fridge, a washing machine and a bed, I guess. It's a one-person home, so it's all small.",
+            "fr": "Un frigo, une machine à laver et un lit, je crois. C'est un logement pour une personne, donc tout est petit.",
+            "why": {
+              "en": "「かな」 and 「よ」 are how you talk to a friend; on the phone to the company, you keep to です and ます.",
+              "fr": "「かな」 et 「よ」, c'est le ton entre amis ; au téléphone avec l'entreprise, tu gardes les formes en です et ます."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "では、お見積もりは四万八千円になります。荷造りもこちらでいたしますと、プラス二万円でございます。",
+          "kana": "では、おみつもりはよんまんはっせんえんになります。にづくりもこちらでいたしますと、プラスにまんえんでございます。",
+          "en": "Then the quote comes to forty-eight thousand yen. If we do the packing too, it's twenty thousand more.",
+          "fr": "Alors, le devis s'élève à quarante-huit mille yens. Si nous faisons aussi les cartons, c'est vingt mille yens de plus."
+        },
+        "me": {
+          "jp": "荷物は自分で詰めます。それと、もう少し安くなりませんか。",
+          "kana": "にもつはじぶんでつめます。それと、もうすこしやすくなりませんか。",
+          "romaji": "nimotsu wa jibun de tsumemasu. sore to, mou sukoshi yasuku narimasen ka",
+          "en": "I'll pack my things myself. And could you bring the price down a little?",
+          "fr": "Les cartons, je les ferai moi-même. Et vous ne pourriez pas baisser un peu le prix ?",
+          "note": {
+            "en": "「自分で詰めます」 turns down the packing service, and 「安くなりませんか」 asks for a discount without pushing.",
+            "fr": "「自分で詰めます」 refuse le service d'emballage, et 「安くなりませんか」 demande une remise sans insister."
+          },
+          "alt": [
+            {"jp": "荷物は自分で詰めるので、結構です。あと、もう少し安くしていただけませんか。", "kana": "にもつはじぶんでつめるので、けっこうです。あと、もうすこしやすくしていただけませんか。", "romaji": "nimotsu wa jibun de tsumeru node, kekkou desu. ato, mou sukoshi yasuku shite itadakemasen ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "荷物は自分で詰めますので、荷造りのプラス二万円もお願いします。",
+            "kana": "にもつはじぶんでつめますので、にづくりのプラスにまんえんもおねがいします。",
+            "en": "I'll pack my things myself, so the twenty thousand extra for packing too, please.",
+            "fr": "Les cartons, je les ferai moi-même, donc ajoutez aussi les vingt mille yens d'emballage, s'il vous plaît.",
+            "why": {
+              "en": "「プラス二万円」 is the price of the packing you have just said you will do yourself.",
+              "fr": "「プラス二万円」, c'est le prix de l'emballage que tu viens de dire faire toi-même."
+            }
+          },
+          {
+            "jp": "荷物は自分で詰めさせます。それと、もう少し安くなりませんか。",
+            "kana": "にもつはじぶんでつめさせます。それと、もうすこしやすくなりませんか。",
+            "en": "I'll have my things packed by someone, myself. And could you bring the price down a little?",
+            "fr": "Les cartons, je les ferai faire par quelqu'un, moi-même. Et vous ne pourriez pas baisser un peu le prix ?",
+            "why": {
+              "en": "「詰めさせます」 is causative and has someone else pack, which clashes with 「自分で」, by yourself.",
+              "fr": "「詰めさせます」 est un causatif qui fait emballer par quelqu'un d'autre, ce qui jure avec 「自分で」, toi-même."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "わかりました。平日ですので、四万五千円でいかがでしょうか。",
+          "kana": "わかりました。へいじつですので、よんまんごせんえんでいかがでしょうか。",
+          "en": "All right. Since it's a weekday, how about forty-five thousand yen?",
+          "fr": "D'accord. Comme c'est en semaine, que diriez-vous de quarante-cinq mille yens ?"
+        },
+        "me": {
+          "jp": "助かります。それでお願いします。あと、段ボール箱はもらえますか。",
+          "kana": "たすかります。それでおねがいします。あと、だんボールばこはもらえますか。",
+          "romaji": "tasukarimasu. sore de onegai shimasu. ato, danbooru bako wa moraemasu ka",
+          "en": "That helps. Let's go with that. Oh, and could I have some cardboard boxes?",
+          "fr": "Ça m'arrange. Va pour ce prix. Et sinon, vous pourriez me fournir des cartons ?",
+          "note": {
+            "en": "「それでお願いします」 accepts the new price, and 「もらえますか」 asks whether boxes come with it.",
+            "fr": "「それでお願いします」 accepte le nouveau prix, et 「もらえますか」 demande si des cartons sont fournis."
+          },
+          "alt": [
+            {"jp": "ありがとうございます。それでお願いします。段ボール箱はいただけますか。", "kana": "ありがとうございます。それでおねがいします。だんボールばこはいただけますか。", "romaji": "arigatou gozaimasu. sore de onegai shimasu. danbooru bako wa itadakemasu ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "助かります。それでお願いします。あと、段ボール箱はあげられますか。",
+            "kana": "たすかります。それでおねがいします。あと、だんボールばこはあげられますか。",
+            "en": "That helps. Let's go with that. Oh, and can I give you some cardboard boxes?",
+            "fr": "Ça m'arrange. Va pour ce prix. Et sinon, je peux vous donner des cartons ?",
+            "why": {
+              "en": "「あげられますか」 asks whether you can give them boxes, when you want to receive some: 「もらえますか」.",
+              "fr": "「あげられますか」 demande si tu peux leur donner des cartons, alors que tu veux en recevoir : 「もらえますか」."
+            }
+          },
+          {
+            "jp": "いいえ、それでお願いします。段ボール箱はもらえますか。",
+            "kana": "いいえ、それでおねがいします。だんボールばこはもらえますか。",
+            "en": "No, let's go with that. Could I have some cardboard boxes?",
+            "fr": "Non, va pour ce prix. Vous pourriez me fournir des cartons ?",
+            "why": {
+              "en": "「いいえ」 turns the price down, then 「それでお願いします」 accepts it: the reply contradicts itself.",
+              "fr": "「いいえ」 refuse le prix, puis 「それでお願いします」 l'accepte : la réponse se contredit."
+            }
+          }
+        ]
+      }
+    ],
+    "close": {
+      "jp": "はい、段ボールは二十枚まで無料でお届けいたします。",
+      "kana": "はい、だんボールはにじゅうまいまでむりょうでおとどけいたします。",
+      "en": "Yes, we'll deliver up to twenty boxes free of charge.",
+      "fr": "Oui, nous vous livrons jusqu'à vingt cartons gratuitement."
+    }
+  },
+  {
+    "id": "rent-renewal",
+    "place": {"jp": "不動産屋", "kana": "ふどうさんや", "en": "Estate agent", "fr": "Agence immobilière"},
+    "title": {"en": "Renewing the lease", "fr": "Le renouvellement du bail"},
+    "situation": {
+      "en": "Your lease is up for renewal, and the agency that manages your flat has asked you in. You have lived there four years without a single problem, and similar flats nearby cost no more.",
+      "fr": "Ton bail arrive à renouvellement, et l'agence qui gère ton appartement t'a demandé de passer. Tu y habites depuis quatre ans sans le moindre problème, et les logements semblables du quartier ne coûtent pas plus cher."
+    },
+    "goal": {
+      "en": "Push back on the rent rise the landlord wants, with the rents nearby and your record as a tenant, settle on a smaller rise and ask about the renewal fee.",
+      "fr": "Conteste la hausse de loyer que veut le propriétaire, en invoquant les loyers du quartier et ton dossier de locataire, accepte une hausse moindre et renseigne-toi sur les frais de renouvellement."
+    },
+    "steps": [
+      {"en": "React to the rise", "fr": "Réagis à la hausse"},
+      {"en": "Compare with rents nearby", "fr": "Compare avec les loyers du quartier"},
+      {"en": "Point to four years without trouble", "fr": "Rappelle tes quatre ans sans souci"},
+      {"en": "Accept the smaller rise", "fr": "Accepte la hausse réduite"},
+      {"en": "Ask when to pay the renewal fee", "fr": "Demande quand payer le renouvellement"}
+    ],
+    "them": {"en": "Estate agent", "fr": "Agent immobilier"},
+    "register": "polite",
+    "turns": [
+      {
+        "them": {
+          "jp": "早速ですが、今回の更新にあたって、大家さんが家賃を五千円上げたいとおっしゃっていまして。",
+          "kana": "さっそくですが、こんかいのこうしんにあたって、おおやさんがやちんをごせんえんあげたいとおっしゃっていまして。",
+          "en": "Let's get straight to it: for this renewal, the landlord would like to raise the rent by five thousand yen.",
+          "fr": "Allons droit au but : pour ce renouvellement, le propriétaire souhaite augmenter le loyer de cinq mille yens."
+        },
+        "me": {
+          "jp": "五千円もですか。どうして急に上がるんでしょうか。",
+          "kana": "ごせんえんもですか。どうしてきゅうにあがるんでしょうか。",
+          "romaji": "gosen en mo desu ka. doushite kyuu ni agaru n deshou ka",
+          "en": "Five thousand yen? Why is it going up all of a sudden?",
+          "fr": "Cinq mille yens ? Pourquoi une hausse aussi soudaine ?",
+          "note": {
+            "en": "「も」 after the amount says it strikes you as a lot, and 「んでしょうか」 asks for the reason without accusing anyone.",
+            "fr": "「も」 après la somme dit qu'elle te paraît élevée, et 「んでしょうか」 demande la raison sans accuser personne."
+          },
+          "alt": [
+            {"jp": "五千円もですか。急に上がるのは、どうしてでしょうか。", "kana": "ごせんえんもですか。きゅうにあがるのは、どうしてでしょうか。", "romaji": "gosen en mo desu ka. kyuu ni agaru no wa, doushite deshou ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "五千円もですか。どうして今回、急に下がるんでしょうか。",
+            "kana": "ごせんえんもですか。どうしてこんかい、きゅうにさがるんでしょうか。",
+            "en": "Five thousand yen? Why is it coming down so suddenly this time?",
+            "fr": "Cinq mille yens ? Pourquoi une baisse aussi soudaine, cette fois ?",
+            "why": {
+              "en": "「下がる」 is to go down, when the landlord wants the rent to rise: 「上がる」.",
+              "fr": "「下がる」, c'est baisser, alors que le propriétaire veut faire monter le loyer : 「上がる」."
+            }
+          },
+          {
+            "jp": "は？五千円も？なんで急に上がるわけ？",
+            "kana": "は？ごせんえんも？なんできゅうにあがるわけ？",
+            "en": "What? Five thousand? How come it's suddenly going up?",
+            "fr": "Quoi ? Cinq mille ? Pourquoi ça augmente d'un coup, là ?",
+            "why": {
+              "en": "「は？」 and 「なんで〜わけ？」 are blunt casual speech; with the agent, you keep to です and ます, however unwelcome the news.",
+              "fr": "「は？」 et 「なんで〜わけ？」, c'est du langage familier et brusque ; avec l'agent, tu gardes les formes en です et ます, même face à une mauvaise nouvelle."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "最近、このあたりの家賃が全体的に上がってきておりまして。",
+          "kana": "さいきん、このあたりのやちんがぜんたいてきにあがってきておりまして。",
+          "en": "Rents round here have been going up across the board lately, you see.",
+          "fr": "Voyez-vous, ces derniers temps, les loyers du quartier augmentent un peu partout."
+        },
+        "me": {
+          "jp": "でも、近くの同じような部屋の家賃からすると、五千円は高すぎると思うんですが。",
+          "kana": "でも、ちかくのおなじようなへやのやちんからすると、ごせんえんはたかすぎるとおもうんですが。",
+          "romaji": "demo, chikaku no onaji you na heya no yachin kara suru to, gosen en wa takasugiru to omou n desu ga",
+          "en": "But going by the rents of similar flats nearby, I think five thousand yen is too much.",
+          "fr": "Mais vu les loyers des appartements semblables du quartier, cinq mille yens, ça me paraît trop.",
+          "note": {
+            "en": "「からすると」 measures the rise against the rents nearby, and 「と思うんですが」 disagrees while leaving the door open.",
+            "fr": "「からすると」 mesure la hausse aux loyers du quartier, et 「と思うんですが」 exprime ton désaccord en laissant la porte ouverte."
+          },
+          "alt": [
+            {"jp": "でも、近所の似た部屋と比べても、五千円は少し高いと思うんですが。", "kana": "でも、きんじょのにたへやとくらべても、ごせんえんはすこしたかいとおもうんですが。", "romaji": "demo, kinjo no nita heya to kurabete mo, gosen en wa sukoshi takai to omou n desu ga"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "近くの同じような部屋の家賃からすると、五千円は安すぎると思うんですが。",
+            "kana": "ちかくのおなじようなへやのやちんからすると、ごせんえんはやすすぎるとおもうんですが。",
+            "en": "Going by the rents of similar flats nearby, I think five thousand yen is too little.",
+            "fr": "Vu les loyers des appartements semblables du quartier, cinq mille yens, ça me paraît trop peu.",
+            "why": {
+              "en": "「安すぎる」 says the rise is too small, an argument for raising the rent further.",
+              "fr": "「安すぎる」 dit que la hausse est trop faible : un argument pour augmenter encore le loyer."
+            }
+          },
+          {
+            "jp": "でも、近くの同じような部屋の家賃からすると、五千円上げてもいいと思います。",
+            "kana": "でも、ちかくのおなじようなへやのやちんからすると、ごせんえんあげてもいいとおもいます。",
+            "en": "But going by the rents of similar flats nearby, I think it's fine to raise it by five thousand yen.",
+            "fr": "Mais vu les loyers des appartements semblables du quartier, je trouve normal de l'augmenter de cinq mille yens.",
+            "why": {
+              "en": "「でも」 announces an objection, then 「上げてもいい」 agrees to the full rise: the reply contradicts itself.",
+              "fr": "「でも」 annonce une objection, puis 「上げてもいい」 accepte toute la hausse : la réponse se contredit."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "確かに、駅の反対側には、同じくらいの家賃の物件もございますね。",
+          "kana": "たしかに、えきのはんたいがわには、おなじくらいのやちんのぶっけんもございますね。",
+          "en": "True, there are places on the other side of the station at about the same rent.",
+          "fr": "C'est vrai, de l'autre côté de la gare, il y a des logements à peu près au même loyer."
+        },
+        "me": {
+          "jp": "それに、この四年間、一度もトラブルはありませんし、家賃も遅れずに払ってきました。",
+          "kana": "それに、このよねんかん、いちどもトラブルはありませんし、やちんもおくれずにはらってきました。",
+          "romaji": "sore ni, kono yonenkan, ichido mo toraburu wa arimasen shi, yachin mo okurezu ni haratte kimashita",
+          "en": "Besides, in these four years there hasn't been a single problem, and I've always paid the rent on time.",
+          "fr": "En plus, en quatre ans, il n'y a jamais eu le moindre problème, et j'ai toujours payé le loyer à temps.",
+          "note": {
+            "en": "「それに」 adds a second argument, and 「払ってきました」 tells of a record kept up from then till now.",
+            "fr": "「それに」 ajoute un second argument, et 「払ってきました」 raconte une régularité tenue jusqu'à aujourd'hui."
+          },
+          "alt": [
+            {"jp": "それに、四年間一度もトラブルがなく、家賃もきちんと払ってきました。", "kana": "それに、よねんかんいちどもトラブルがなく、やちんもきちんとはらってきました。", "romaji": "sore ni, yonenkan ichido mo toraburu ga naku, yachin mo kichinto haratte kimashita"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "それに、この四年間、一度もトラブルはありませんし、家賃もよく遅れて払ってきました。",
+            "kana": "それに、このよねんかん、いちどもトラブルはありませんし、やちんもよくおくれてはらってきました。",
+            "en": "Besides, in these four years there hasn't been a single problem, and I've often paid the rent late.",
+            "fr": "En plus, en quatre ans, il n'y a jamais eu le moindre problème, et j'ai souvent payé le loyer en retard.",
+            "why": {
+              "en": "「よく遅れて払ってきました」 admits you have often paid late, which argues against you.",
+              "fr": "「よく遅れて払ってきました」 reconnaît que tu as souvent payé en retard, ce qui joue contre toi."
+            }
+          },
+          {
+            "jp": "それに、この四年間、一度もトラブルはございませんし、家賃も遅れずにお払いになってきました。",
+            "kana": "それに、このよねんかん、いちどもトラブルはございませんし、やちんもおくれずにおはらいになってきました。",
+            "en": "Besides, in these four years there hasn't been a single problem, and I have graciously paid the rent on time.",
+            "fr": "En plus, en quatre ans, il n'y a jamais eu le moindre problème, et j'ai daigné payer le loyer à temps.",
+            "why": {
+              "en": "「お払いになる」 is honorific and raises whoever pays, here yourself; of your own paying you say 「払ってきました」.",
+              "fr": "「お払いになる」 est honorifique et élève la personne qui paie, ici toi-même ; pour toi, on dit 「払ってきました」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "大家さんに確認いたしましたところ、三千円でしたらとのことですが、いかがでしょうか。",
+          "kana": "おおやさんにかくにんいたしましたところ、さんぜんえんでしたらとのことですが、いかがでしょうか。",
+          "en": "I've checked with the landlord, and he says three thousand would do. How would that be?",
+          "fr": "J'ai vu avec le propriétaire : il accepterait trois mille yens. Qu'en dites-vous ?"
+        },
+        "me": {
+          "jp": "三千円でしたら、納得せざるを得ませんね。それでお願いします。",
+          "kana": "さんぜんえんでしたら、なっとくせざるをえませんね。それでおねがいします。",
+          "romaji": "sanzen en deshitara, nattoku sezaru o emasen ne. sore de onegai shimasu",
+          "en": "At three thousand, I suppose I have to accept it. Let's go with that.",
+          "fr": "Pour trois mille yens, je ne peux que l'accepter. Va pour ça.",
+          "note": {
+            "en": "「ざるを得ません」 accepts with reluctance, as having no real choice, and 「それでお願いします」 settles it.",
+            "fr": "「ざるを得ません」 accepte à contrecœur, faute de vrai choix, et 「それでお願いします」 conclut."
+          },
+          "alt": [
+            {"jp": "三千円なら、仕方ないですね。それでお願いします。", "kana": "さんぜんえんなら、しかたないですね。それでおねがいします。", "romaji": "sanzen en nara, shikata nai desu ne. sore de onegai shimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "では、五千円でお願いします。",
+            "kana": "では、ごせんえんでおねがいします。",
+            "en": "Then five thousand, please.",
+            "fr": "Alors cinq mille, s'il vous plaît.",
+            "why": {
+              "en": "「五千円でお願いします」 agrees to the full rise, when the landlord has just come down to three thousand.",
+              "fr": "「五千円でお願いします」 accepte toute la hausse, alors que le propriétaire vient de descendre à trois mille yens."
+            }
+          },
+          {
+            "jp": "三千円でしたら、納得しざるを得ませんね。",
+            "kana": "さんぜんえんでしたら、なっとくしざるをえませんね。",
+            "en": "At three thousand, I suppose I have to accept it.",
+            "fr": "Pour trois mille yens, je ne peux que l'accepter.",
+            "why": {
+              "en": "「ざるを得ない」 attaches to the 「ない」 stem, and for 「する」 that stem is 「せ」: 「せざるを得ない」, never 「しざる」.",
+              "fr": "「ざるを得ない」 se greffe sur le radical de la forme en 「ない」, et pour 「する」 ce radical est 「せ」 : 「せざるを得ない」, jamais 「しざる」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "ありがとうございます。それから、更新料として家賃の一か月分をお願いしております。",
+          "kana": "ありがとうございます。それから、こうしんりょうとしてやちんのいっかげつぶんをおねがいしております。",
+          "en": "Thank you. Also, the renewal fee is one month's rent.",
+          "fr": "Merci. Par ailleurs, les frais de renouvellement s'élèvent à un mois de loyer."
+        },
+        "me": {
+          "jp": "わかりました。更新料は、いつまでに払えばいいですか。",
+          "kana": "わかりました。こうしんりょうは、いつまでにはらえばいいですか。",
+          "romaji": "wakarimashita. koushinryou wa, itsu made ni haraeba ii desu ka",
+          "en": "I see. By when should I pay the renewal fee?",
+          "fr": "D'accord. Je dois payer les frais de renouvellement avant quand ?",
+          "note": {
+            "en": "「いつまでに」 asks for the deadline, the day by which it must be paid, and 「〜ばいいですか」 asks what you should do.",
+            "fr": "「いつまでに」 demande l'échéance, le jour avant lequel il faut payer, et 「〜ばいいですか」 demande ce que tu dois faire."
+          },
+          "alt": [
+            {"jp": "わかりました。更新料の支払いは、いつまでですか。", "kana": "わかりました。こうしんりょうのしはらいは、いつまでですか。", "romaji": "wakarimashita. koushinryou no shiharai wa, itsu made desu ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "わかりました。更新料は、いつまでにそちらからいただけますか。",
+            "kana": "わかりました。こうしんりょうは、いつまでにそちらからいただけますか。",
+            "en": "I see. By when could I receive the renewal fee from you?",
+            "fr": "D'accord. Je pourrai recevoir de votre part les frais de renouvellement avant quand ?",
+            "why": {
+              "en": "「いただけますか」 asks when you will receive the fee, when it is you who pay it.",
+              "fr": "「いただけますか」 demande quand tu recevras ces frais, alors que c'est toi qui les paies."
+            }
+          },
+          {
+            "jp": "わかりました。更新料は、いつまでに払えばよかったですか。",
+            "kana": "わかりました。こうしんりょうは、いつまでにはらえばよかったですか。",
+            "en": "I see. By when should I have paid the renewal fee?",
+            "fr": "D'accord. J'aurais dû payer les frais de renouvellement avant quand ?",
+            "why": {
+              "en": "「よかったですか」 asks when you should have paid, as if the date had passed, when you have only now been told of the fee.",
+              "fr": "「よかったですか」 demande quand tu aurais dû payer, comme si la date était passée, alors qu'on vient seulement de t'annoncer ces frais."
+            }
+          }
+        ]
+      }
+    ],
+    "close": {
+      "jp": "今月末までに、こちらの口座へお振り込みをお願いいたします。",
+      "kana": "こんげつまつまでに、こちらのこうざへおふりこみをおねがいいたします。",
+      "en": "Please transfer it to this account by the end of the month.",
+      "fr": "Merci de le virer sur ce compte d'ici la fin du mois."
+    }
+  },
+  {
+    "id": "share-house-chores",
+    "place": {"jp": "シェアハウス", "kana": "シェアハウス", "en": "Shared house", "fr": "Colocation"},
+    "title": {"en": "Dishes and rubbish", "fr": "La vaisselle et les poubelles"},
+    "situation": {
+      "en": "You live in a shared house, and a housemate you get on with stops you in the kitchen. She is fed up: the dishes pile up, and nobody took the rubbish out.",
+      "fr": "Tu vis en colocation, et une colocataire avec qui tu t'entends bien t'arrête dans la cuisine. Elle en a assez : la vaisselle s'entasse, et personne n'a sorti les poubelles."
+    },
+    "goal": {
+      "en": "Own your part in the mess, explain without making excuses, and propose a rota you will stick to.",
+      "fr": "Reconnais ta part du désordre, explique-toi sans te chercher d'excuses, et propose un planning que tu respecteras."
+    },
+    "steps": [
+      {"en": "Own the dirty dishes", "fr": "Reconnais la vaisselle sale"},
+      {"en": "Apologise for the rubbish", "fr": "Excuse-toi pour les poubelles"},
+      {"en": "Propose a rota", "fr": "Propose un planning"},
+      {"en": "Promise to stick to it", "fr": "Promets de t'y tenir"},
+      {"en": "Wash the dishes now", "fr": "Fais la vaisselle tout de suite"}
+    ],
+    "them": {"en": "Housemate", "fr": "Colocataire"},
+    "register": "casual",
+    "turns": [
+      {
+        "them": {
+          "jp": "ねえ、ちょっといい？台所のお皿、また山みたいにたまってるんだけど。",
+          "kana": "ねえ、ちょっといい？だいどころのおさら、またやまみたいにたまってるんだけど。",
+          "en": "Hey, got a minute? The dishes in the kitchen are piled up like a mountain again.",
+          "fr": "Dis, t'as une minute ? La vaisselle s'entasse encore dans la cuisine, c'est une vraie montagne."
+        },
+        "me": {
+          "jp": "あ、ごめん。昨日の夜のお皿、まだ洗ってなかった。",
+          "kana": "あ、ごめん。きのうのよるのおさら、まだあらってなかった。",
+          "romaji": "a, gomen. kinou no yoru no osara, mada aratte nakatta",
+          "en": "Oh, sorry. I still haven't washed my plates from last night.",
+          "fr": "Ah, pardon. Je n'ai toujours pas lavé mes assiettes d'hier soir.",
+          "note": {
+            "en": "「まだ〜なかった」 admits the plates are still unwashed, and 「ごめん」 owns it before she has to ask.",
+            "fr": "「まだ〜なかった」 reconnaît que les assiettes ne sont toujours pas lavées, et 「ごめん」 assume la faute avant qu'elle ait à le demander."
+          },
+          "alt": [
+            {"jp": "あ、ごめん。昨日の夜のお皿、洗うの忘れてた。", "kana": "あ、ごめん。きのうのよるのおさら、あらうのわすれてた。", "romaji": "a, gomen. kinou no yoru no osara, arau no wasureteta"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "あ、ごめん。昨日の夜に使ったお皿、もう洗ってなかった。",
+            "kana": "あ、ごめん。きのうのよるにつかったおさら、もうあらってなかった。",
+            "en": "Oh, sorry. The plates I used last night, I'd stopped washing them.",
+            "fr": "Ah, pardon. Les assiettes d'hier soir, je ne les lavais déjà plus.",
+            "why": {
+              "en": "「もう〜ない」 means no longer, as if you had given up washing; still not done is 「まだ〜ない」.",
+              "fr": "「もう〜ない」 veut dire « ne plus », comme si tu avais renoncé à laver ; « toujours pas », c'est 「まだ〜ない」."
+            }
+          },
+          {
+            "jp": "申し訳ございません。昨夜のお皿は、まだ洗っておりませんでした。",
+            "kana": "もうしわけございません。さくやのおさらは、まだあらっておりませんでした。",
+            "en": "I do apologise. Last night's plates had not yet been washed.",
+            "fr": "Je vous prie de m'excuser. Les assiettes d'hier soir n'avaient pas encore été lavées.",
+            "why": {
+              "en": "「申し訳ございません」 and 「おりませんでした」 are a clerk's apology to a customer; to a housemate you get on with, they sound cold and odd.",
+              "fr": "「申し訳ございません」 et 「おりませんでした」, ce sont les excuses d'un employé à un client ; à une colocataire avec qui tu t'entends bien, ça sonne froid et bizarre."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "それに、ゴミも出てなかったよね。今朝、燃えるゴミの日だったのに。",
+          "kana": "それに、ゴミもでてなかったよね。けさ、もえるゴミのひだったのに。",
+          "en": "And the rubbish didn't go out either, did it? This morning was burnable rubbish day.",
+          "fr": "Et puis, les poubelles n'ont pas été sorties non plus. Ce matin, c'était le jour des déchets incinérables, en plus."
+        },
+        "me": {
+          "jp": "ほんとにごめん。今週はバイトで朝が早くて、すっかり忘れてた。",
+          "kana": "ほんとにごめん。こんしゅうはバイトであさがはやくて、すっかりわすれてた。",
+          "romaji": "honto ni gomen. konshuu wa baito de asa ga hayakute, sukkari wasureteta",
+          "en": "I'm really sorry. I've had early starts at work this week, and it went clean out of my head.",
+          "fr": "Vraiment pardon. Cette semaine, je commence tôt au boulot, et ça m'est complètement sorti de la tête.",
+          "note": {
+            "en": "「すっかり忘れてた」 owns the slip plainly, and 「朝が早くて」 explains it without blaming anyone else.",
+            "fr": "「すっかり忘れてた」 reconnaît l'oubli sans détour, et 「朝が早くて」 l'explique sans rejeter la faute sur personne."
+          },
+          "alt": [
+            {"jp": "ほんとにごめん。今週はバイトが朝早くて、完全に忘れてた。", "kana": "ほんとにごめん。こんしゅうはバイトがあさはやくて、かんぜんにわすれてた。", "romaji": "honto ni gomen. konshuu wa baito ga asa hayakute, kanzen ni wasureteta"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "ほんとにごめん。今週はバイトで朝が早くて、ゴミが出るのを忘れてた。",
+            "kana": "ほんとにごめん。こんしゅうはバイトであさがはやくて、ゴミがでるのをわすれてた。",
+            "en": "I'm really sorry. I've had early starts at work this week, and I forgot the rubbish goes out.",
+            "fr": "Vraiment pardon. Cette semaine, je commence tôt au boulot, et j'ai oublié que la poubelle sortait.",
+            "why": {
+              "en": "「ゴミが出る」 has the rubbish go out by itself; taking it out is something you do: 「ゴミを出す」.",
+              "fr": "「ゴミが出る」 fait sortir la poubelle toute seule ; la sortir, c'est toi qui le fais : 「ゴミを出す」."
+            }
+          },
+          {
+            "jp": "ほんとにごめん。でも、ゴミなら今朝早く、ちゃんと出したばかりなんだ。",
+            "kana": "ほんとにごめん。でも、ゴミならけさはやく、ちゃんとだしたばかりなんだ。",
+            "en": "I'm really sorry. But the rubbish, I took it out properly first thing this morning.",
+            "fr": "Vraiment pardon. Mais les poubelles, je les ai bien sorties tôt ce matin.",
+            "why": {
+              "en": "「今朝早く、ちゃんと出した」 says you took the rubbish out this morning, when she has just told you it never went.",
+              "fr": "「今朝早く、ちゃんと出した」 dit que tu as sorti les poubelles ce matin, alors qu'elle vient de te dire qu'elles ne l'ont jamais été."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "忙しいのはわかるけど、気づいたらいつも私が片付けてるんだよ。正直、ちょっと疲れちゃった。",
+          "kana": "いそがしいのはわかるけど、きづいたらいつもわたしがかたづけてるんだよ。しょうじき、ちょっとつかれちゃった。",
+          "en": "I know you're busy, but somehow it's always me who ends up clearing up. Honestly, I'm a bit worn out.",
+          "fr": "Je sais que tu as beaucoup à faire, mais au bout du compte, c'est toujours moi qui range. Franchement, j'en ai un peu marre."
+        },
+        "me": {
+          "jp": "そうだよね。忙しいからって、いつも任せていいわけじゃないよね。",
+          "kana": "そうだよね。いそがしいからって、いつもまかせていいわけじゃないよね。",
+          "romaji": "sou da yo ne. isogashii kara tte, itsumo makasete ii wake ja nai yo ne",
+          "en": "You're right. Being busy doesn't mean I can always leave it to you.",
+          "fr": "Tu as raison. Ce n'est pas parce que j'ai du travail que je peux toujours te laisser tout faire.",
+          "note": {
+            "en": "「からって」 is the casual 「からといって」, being busy is no reason, and 「わけじゃない」 owns that plainly.",
+            "fr": "「からって」 est le 「からといって」 familier, avoir du travail n'est pas une raison, et 「わけじゃない」 le reconnaît franchement."
+          },
+          "alt": [
+            {"jp": "そうだよね。忙しいからといって、全部任せていいわけじゃないよね。", "kana": "そうだよね。いそがしいからといって、ぜんぶまかせていいわけじゃないよね。", "romaji": "sou da yo ne. isogashii kara to itte, zenbu makasete ii wake ja nai yo ne"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "そうだよね。忙しいからって、いつも任されていいわけじゃないよね。",
+            "kana": "そうだよね。いそがしいからって、いつもまかされていいわけじゃないよね。",
+            "en": "You're right. Being busy doesn't mean I should always be the one left with it.",
+            "fr": "Tu as raison. Ce n'est pas parce que j'ai du travail qu'on doit toujours tout me laisser.",
+            "why": {
+              "en": "「任されて」 is passive and makes you the one always left with the chores, when it is your housemate who has been: 「任せて」.",
+              "fr": "「任されて」 est au passif et fait de toi la personne à qui l'on laisse toujours les corvées, alors que c'est ta colocataire : 「任せて」."
+            }
+          },
+          {
+            "jp": "じゃあ、やらなきゃいいじゃん。誰も頼んでないし。",
+            "kana": "じゃあ、やらなきゃいいじゃん。だれもたのんでないし。",
+            "en": "Then just don't do it. Nobody asked you to.",
+            "fr": "Ben, t'as qu'à pas le faire. Personne te l'a demandé.",
+            "why": {
+              "en": "「誰も頼んでないし」 throws her effort back at her and turns her complaint into a quarrel instead of owning your part.",
+              "fr": "「誰も頼んでないし」 lui renvoie ses efforts à la figure : sa plainte tourne à la dispute au lieu que tu reconnaisses ta part."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "うん。じゃあ、これからどうしたらいいと思う？",
+          "kana": "うん。じゃあ、これからどうしたらいいとおもう？",
+          "en": "Yeah. So what do you think we should do from now on?",
+          "fr": "Ouais. Alors, à ton avis, on fait comment à partir de maintenant ?"
+        },
+        "me": {
+          "jp": "当番を決めない？皿洗いとゴミ出しを、一週間ずつ交代でやるとか。",
+          "kana": "とうばんをきめない？さらあらいとゴミだしを、いっしゅうかんずつこうたいでやるとか。",
+          "romaji": "touban o kimenai? saraarai to gomidashi o, isshuukan zutsu koutai de yaru to ka",
+          "en": "Why don't we set up a rota? Like taking turns with the dishes and the rubbish, a week at a time.",
+          "fr": "Et si on faisait un planning ? Genre, on alterne la vaisselle et les poubelles, une semaine sur deux.",
+          "note": {
+            "en": "「決めない？」 proposes the rota as a question, and 「交代で」 says you will take turns.",
+            "fr": "「決めない？」 propose le planning sous forme de question, et 「交代で」 dit que vous ferez à tour de rôle."
+          },
+          "alt": [
+            {"jp": "当番表を作らない？一週間ずつ、交代で皿洗いとゴミ出しをするとか。", "kana": "とうばんひょうをつくらない？いっしゅうかんずつ、こうたいでさらあらいとゴミだしをするとか。", "romaji": "toubanhyou o tsukuranai? isshuukan zutsu, koutai de saraarai to gomidashi o suru to ka"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "当番を決めない？皿洗いもゴミ出しも、全部そっちがやるとか。",
+            "kana": "とうばんをきめない？さらあらいもゴミだしも、ぜんぶそっちがやるとか。",
+            "en": "Why don't we set up a rota? Like you doing all the dishes and all the rubbish.",
+            "fr": "Et si on faisait un planning ? Genre, toi, tu fais toute la vaisselle et toutes les poubelles.",
+            "why": {
+              "en": "「全部そっちがやる」 hands every chore to her, the very thing she is fed up with.",
+              "fr": "「全部そっちがやる」 lui laisse toutes les corvées, justement ce dont elle a assez."
+            }
+          },
+          {
+            "jp": "先週は、ゴミ出しを三回やったよ。",
+            "kana": "せんしゅうは、ゴミだしをさんかいやったよ。",
+            "en": "I took the rubbish out three times last week.",
+            "fr": "La semaine dernière, j'ai sorti les poubelles trois fois.",
+            "why": {
+              "en": "It boasts of what you did last week, but she asked what you should both do from now on.",
+              "fr": "Tu vantes ce que tu as fait la semaine dernière, mais elle demandait ce que vous allez faire à partir de maintenant."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "当番か、いいね。でも、ちゃんと守ってくれる？",
+          "kana": "とうばんか、いいね。でも、ちゃんとまもってくれる？",
+          "en": "A rota, good idea. But will you actually stick to it?",
+          "fr": "Un planning, bonne idée. Mais tu vas vraiment t'y tenir ?"
+        },
+        "me": {
+          "jp": "うん、約束する。忘れないように、当番表を冷蔵庫に貼っておくね。",
+          "kana": "うん、やくそくする。わすれないように、とうばんひょうをれいぞうこにはっておくね。",
+          "romaji": "un, yakusoku suru. wasurenai you ni, toubanhyou o reizouko ni hatte oku ne",
+          "en": "Yes, I promise. I'll stick the rota on the fridge so I don't forget.",
+          "fr": "Oui, promis. Pour ne pas oublier, j'afficherai le planning sur le frigo.",
+          "note": {
+            "en": "「約束する」 gives your word, and 「貼っておく」 prepares something now so you will not forget later.",
+            "fr": "「約束する」 donne ta parole, et 「貼っておく」 prépare dès maintenant de quoi ne pas oublier ensuite."
+          },
+          "alt": [
+            {"jp": "うん、約束する。忘れないように、当番表を冷蔵庫に貼っとくよ。", "kana": "うん、やくそくする。わすれないように、とうばんひょうをれいぞうこにはっとくよ。", "romaji": "un, yakusoku suru. wasurenai you ni, toubanhyou o reizouko ni hattoku yo"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "うん、約束する。忘れるように、当番表を冷蔵庫に貼っておくね。",
+            "kana": "うん、やくそくする。わすれるように、とうばんひょうをれいぞうこにはっておくね。",
+            "en": "Yes, I promise. I'll stick the rota on the fridge so that I forget.",
+            "fr": "Oui, promis. Pour bien oublier, j'afficherai le planning sur le frigo.",
+            "why": {
+              "en": "「忘れるように」 makes forgetting the aim of the rota on the fridge; so as not to forget is 「忘れないように」.",
+              "fr": "「忘れるように」 fait de l'oubli le but du planning sur le frigo ; pour ne pas oublier, c'est 「忘れないように」."
+            }
+          },
+          {
+            "jp": "うん、約束する。当番表は、もう冷蔵庫に貼ってあるよ。",
+            "kana": "うん、やくそくする。とうばんひょうは、もうれいぞうこにはってあるよ。",
+            "en": "Yes, I promise. The rota's already up on the fridge.",
+            "fr": "Oui, promis. Le planning est déjà affiché sur le frigo.",
+            "why": {
+              "en": "「もう貼ってある」 says the rota is already up, when you have only just thought of it.",
+              "fr": "「もう貼ってある」 dit que le planning est déjà affiché, alors que tu viens juste d'en avoir l'idée."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "それなら安心かな。で、今たまってるお皿はどうする？",
+          "kana": "それならあんしんかな。で、いまたまってるおさらはどうする？",
+          "en": "That's reassuring, I suppose. And what about the dishes piled up right now?",
+          "fr": "Bon, là, je suis plus tranquille. Et la vaisselle qui s'entasse en ce moment, on en fait quoi ?"
+        },
+        "me": {
+          "jp": "今からすぐ洗うよ。今週は先にやらせて。",
+          "kana": "いまからすぐあらうよ。こんしゅうはさきにやらせて。",
+          "romaji": "ima kara sugu arau yo. konshuu wa saki ni yarasete",
+          "en": "I'll wash them right now. And let me go first this week.",
+          "fr": "Je la fais tout de suite. Et cette semaine, laisse-moi commencer.",
+          "note": {
+            "en": "「今からすぐ」 acts on the spot, and 「先にやらせて」 asks to take the first week, which makes up for the pile.",
+            "fr": "「今からすぐ」 passe aux actes sur-le-champ, et 「先にやらせて」 demande à prendre la première semaine, ce qui rattrape la pile."
+          },
+          "alt": [
+            {"jp": "今すぐ洗うね。最初の一週間は、先にやらせて。", "kana": "いますぐあらうね。さいしょのいっしゅうかんは、さきにやらせて。", "romaji": "ima sugu arau ne. saisho no isshuukan wa, saki ni yarasete"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "今からすぐ洗ってもらうね。",
+            "kana": "いまからすぐあらってもらうね。",
+            "en": "I'll get you to wash them right now.",
+            "fr": "Je te la fais faire tout de suite.",
+            "why": {
+              "en": "「洗ってもらう」 has her do the washing for you, the very chore you have just promised to take on.",
+              "fr": "「洗ってもらう」 lui fait faire la vaisselle à ta place, la corvée même que tu viens de promettre de prendre."
+            }
+          },
+          {
+            "jp": "来週になったら洗うよ。今週は先にやってね。",
+            "kana": "らいしゅうになったらあらうよ。こんしゅうはさきにやってね。",
+            "en": "I'll wash them once it's next week. You go first this week.",
+            "fr": "Je la ferai la semaine prochaine. Cette semaine, commence, toi.",
+            "why": {
+              "en": "「来週になったら」 leaves the pile for another week, and 「先にやってね」 hands her the first turn after all.",
+              "fr": "「来週になったら」 laisse la pile une semaine de plus, et 「先にやってね」 lui donne finalement le premier tour."
+            }
+          }
+        ]
+      }
+    ],
+    "close": {
+      "jp": "ありがとう。言いにくかったけど、話してよかった。",
+      "kana": "ありがとう。いいにくかったけど、はなしてよかった。",
+      "en": "Thanks. It wasn't easy to say, but I'm glad we talked.",
+      "fr": "Merci. C'était pas facile à dire, mais je suis contente qu'on en ait parlé."
     }
   }
 ]
