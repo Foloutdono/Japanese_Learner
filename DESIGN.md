@@ -830,11 +830,13 @@ scanner — the pass's contactless arcs it carried read as a speaker's):
   scroll).
 - **One gate, in one place** (plan 168, the owner's word on the built
   boarding: the buttons are the feature that matters most). In the
-  boarding the gate is the foot's last row, so from Board to the pass it
+  boarding the gate is the foot's last row, so from Board to the card it
   stands at the same height and width on every screen; a quiet way — the
-  sign-in, Not now, the account already held, the offer — stands a rung
-  over it, never under, and is drawn as a quiet way (`.brd__link`), never
-  as a second button. Its word is short enough to hold one line beside
+  level's test, the test's own two, Later, the offer — stands a rung
+  over it, never under (on the desk, where a laptop's short window has
+  no rung to spare, on the floor's own row before the way back, plan
+  247), and is drawn as a quiet way (`.brd__link`), never as a second
+  button. Its word is short enough to hold one line beside
   the reader at the gate's own size: a screen whose word will not fit
   gets a shorter word ("Activer le rappel", not a smaller one). Held by
   `src/boarding.phone.test.jsx`.

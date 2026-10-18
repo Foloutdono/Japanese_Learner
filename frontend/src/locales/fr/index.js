@@ -25,6 +25,12 @@ const auth = {
   authCheckFields:       'Vérifie ton adresse e-mail et ton mot de passe.',
   authSignupDisabled:    'Les inscriptions sont fermées pour le moment.',
   authLinkExpired:       'Ce lien a expiré ou a déjà servi. Essaie de te connecter ; sinon, recommence pour en recevoir un nouveau.',
+  // Un lien de connexion (plan 247) : une carte gardée par un lien n’a pas
+  // de mot de passe, et un mot de passe oublié trouve ici sa porte.
+  authLinkSend:          'Recevoir un lien de connexion',
+  authLinkSent:          (email) => `Lien envoyé à ${email}. Ouvre-le sur cet appareil.`,
+  authLinkNoAccount:     'Aucune carte n’est gardée à cette adresse.',
+  authLinkNeedsEmail:    'Écris ton adresse, puis demande le lien.',
 }
 
 // ── Landing screen ────────────────────────────────────────
@@ -2238,7 +2244,6 @@ const boarding = {
   brdHaveAccountQ: 'Déjà un compte ?',
   brdNoAccountYet: 'Pas encore de compte ?',
   brdBackHome: 'Retour à l’accueil',
-  brdHaveAccount: 'Déjà un compte ? Se connecter',
   // Google : « continuer », jamais « s'inscrire » ni « se connecter »
   // — un fournisseur ne distingue pas les deux, on arrive, c'est tout.
   continueWithGoogle: 'Continuer avec Google',
@@ -2263,35 +2268,17 @@ const boarding = {
   claimEmailUnreachable: 'La confirmation n\u2019a pas pu être envoyée à cette adresse. Essaie-en une autre, ou garde ta progression avec Google.',
   claimWeakPassword: 'Ce mot de passe est trop facile à deviner. Essaie-en un plus long.',
   claimTooSoon: 'Trop de tentatives pour le moment. Attends une minute et réessaie.',
-  // Dernier arrêt : le compte, proposé une fois tout vu — et
-  // refusable. « Garder » plutôt que « créer » : la progression
-  // existe déjà, on ne fait qu'y mettre une clé (lib/guest.js).
-  brdAccountQ: 'Garde ta progression.',
+  // Le compte d’un invité, gardé depuis Réglages › Compte : la
+  // progression existe déjà, on ne fait qu'y mettre une clé
+  // (lib/guest.js).
   brdAccountCreate: 'Créer mon compte',
-  brdAccountSkip: 'Continuer sans compte',
-  // 辻 (plan 163): the desk's account, beside the ticket it keeps.
-  brdTicketKind: 'Billet · Tsuji',
-  brdIssued: (date) => `Émis le ${date}`,
+  // La carte (plan 247) : les crédits qu’elle offre, au dos, et le
+  // service nommé sur la feuille du rythme.
   brdCreditsOffered: 'crédits offerts',
-  brdPunched: 'Composté',
   brdTermService: 'Service',
-  brdTermRoute: 'Trajet',
-  brdTermValid: 'Valable jusqu’au',
-  brdServiceValue: (name, n) => `${name} · ${n} / jour`,
-  brdTicketNote: 'Sans compte, ton billet reste sur cet appareil.',
+  // L’accueil : l’étiquette de chaque démo.
   brdDemoTag: { kanji: 'Kanji', vocab: 'Vocabulaire', grammar: 'Grammaire', dictation: 'Dictée', reading: 'Lecture', kana: 'Kana', translation: 'Traduction', analyzer: 'Analyseur', exam: 'Examen blanc' },
   // Les questions.
-  brdNameQ: 'Comment tu t’appelles ?',
-  brdNameAria: 'Ton nom',
-  // L’adresse à laquelle la carte est émise, dite dès la première
-  // question. L’embarquement ne tourne que sur un compte vierge :
-  // une adresse ici veut donc toujours dire une NOUVELLE carte pour
-  // cette adresse — la seule chose à dire à qui voulait retrouver
-  // l’ancienne, avant sept questions. Un invité n’a pas d’adresse et
-  // ne voit rien. « Ci-dessous » : le lien de connexion, en pied.
-  brdNameNewPass: email => `Une nouvelle carte, pour ${email}. Si ton trajet est sur un autre compte, connecte-toi ci-dessous.`,
-  brdWhyQ: (name) => `Pourquoi tu apprends le japonais, **${name}** ?`,
-  brdMotive: { studies: 'Pour mes études', fun: 'Pour le plaisir', trip: 'Pour un voyage au Japon', live: 'Pour vivre au Japon', friends: 'Pour me faire des amis', other: 'Autre chose' },
   brdKanaQ: 'Tu sais lire ça ?',
   brdKana: { hiragana: 'Hiragana', katakana: 'Katakana', both: 'Les deux', none: 'Pas encore' },
   brdKanaWord: { sushi: 'sushi', hotel: 'hôtel', station: 'gare' },
@@ -2309,10 +2296,6 @@ const boarding = {
   brdRevealFirst: (date, min) => `Ton premier arrêt : **les kana**, lus d’ici le **${date}** à ${min} min par jour.`,
   brdLevelQ: 'Super ! Quel est ton niveau ?',
   brdLevelHint: 'Les arrêts derrière toi seront marqués connus.',
-  brdHowQ: 'Super ! Tu connais ton niveau ?',
-  brdHowHint: 'Sinon, le test monte depuis N5 et s’arrête là où ça devient dur.',
-  brdHow: { pick: 'Je le connais', test: 'Trouve-le pour moi' },
-  brdHowDesc: { pick: 'Je le choisis sur la ligne', test: 'De N5 vers le haut, jusqu’à ce que ça coince' },
   brdTestQ: 'Trouvons ton arrêt',
   brdTestPick: 'Je choisis',
   brdPlacedQ: level => `Tes réponses s’arrêtent à ${level}`,
@@ -2326,35 +2309,16 @@ const boarding = {
     N2: (k) => `Presse et travail · ~${k} kanji`,
     N1: (k) => `Presque tout · ~${k} kanji`,
   },
-  brdGoalQ: 'Quel est ton objectif ?',
-  brdGoalHint: (level) => `Les arrêts après ${level}.`,
-  // Personne n’a d’arrêt derrière soi avant les kana : la liste s’ouvre
-  // sur celui du novice et ne nomme donc aucun niveau (goalStops).
-  brdGoalHintStart: 'Tous les arrêts sont devant toi.',
-  brdNextStop: 'Prochain arrêt',
   // Les lignes : quoi apprendre. Les kana ne sont pas une ligne à
-  // choisir -- chaque billet les emprunte -- l’indication le dit
-  // (components/boarding/LinesStep.jsx).
-  brdLinesQ: 'Que veux-tu apprendre ?',
-  brdLinesHint: 'Les kana sont sur chaque billet. Choisis le reste.',
+  // choisir -- chaque billet les emprunte -- la feuille des lignes le
+  // dit (components/boarding/CardSheets.jsx).
   brdLinesNone: 'Choisis au moins une ligne.',
   brdLine: { vocab: 'Vocabulaire', kanji: 'Kanji', grammar: 'Grammaire' },
-  // 入門 (plan 170): the lines in a beginner's words, for a learner
-  // short of both scripts, and when they start.
-  brdLineDescNovice: {
-    vocab: 'Les mots',
-    kanji: 'Un sens par caractère',
-    grammar: 'Comment se construit une phrase',
-  },
+  // 入門 (plan 170): when the lines start, for a learner short of
+  // both scripts.
   brdLinesHintNovice: 'Elles commencent après les kana.',
-  brdLineDesc: {
-    vocab: 'Les mots, de N5 à N1',
-    kanji: 'Lectures, sens, écriture',
-    grammar: 'Les structures, avec des exemples',
-  },
-  // 辻 (plan 163): the desk's lines -- the kana's strip and what each
-  // line carries on the ride to its goal.
-  brdKanaFirst: 'hiragana et katakana, en premier',
+  // The lines' sheet: the kana's strip and what each line carries on
+  // the ride to its goal.
   brdOnEveryTicket: 'Sur chaque billet',
   brdLineCarries: {
     vocab: (stop) => `mots jusqu’au ${stop}`,
@@ -2362,35 +2326,19 @@ const boarding = {
     grammar: (stop) => `points jusqu’au ${stop}`,
   },
   brdLinesArrive: (n, stop, date) => `${n === 1 ? 'Avec cette ligne' : n === 2 ? 'Avec ces deux lignes' : 'Avec ces trois lignes'}, arrivée au ${stop} en **${date}**.`,
-  brdRhythmQ: 'Quel est ton rythme ?',
-  // 辻 (plan 163): the desk's four roads -- a rhythm's minutes and its
-  // service, and the days its ride takes.
-  brdRhythmHint: 'Plus tu roules chaque jour, plus tôt tu arrives. Modifiable plus tard.',
+  // The rhythm's departure board: a train's minutes and its service,
+  // and the days its ride takes; the hour's board.
   brdADay: 'par jour',
   brdRhythmName: { 5: 'Omnibus', 10: 'Rapide', 15: 'Rapide spécial', 20: 'Express' },
   brdRideDays: (n) => (n === 1 ? '1 jour' : `${n} jours`),
-  brdMinADay: 'min par jour',
   brdNewItems: (n) => `~${n} nouveautés`,
-  brdChangeLater: 'Modifiable plus tard.',
-  brdTimeQ: 'Quand étudies-tu ?',
   brdDeparture: 'Départ',
   brdDayAria: 'Heure de départ',
-  // 辻 (plan 163): the desk's hour, the day as the sun's arc.
-  brdTimeHint: 'Ton train part chaque jour à cette heure.',
-  brdYourTrain: 'Ton train',
-  brdThenDaily: 'puis chaque jour',
-  brdTimeFine: 'ou glisse le train le long du jour, par demi-heure',
-  // Le rappel (natif seulement), et la notification telle que l’appli
-  // l’envoie. brdAppName est le nom sur les stores ; à garder en
-  // phase avec appName dans capacitor.config.json.
-  brdNudgeQ: (time) => `Un rappel à **${time}** ?`,
+  // La notification telle que l’appli l’envoie. brdAppName est le nom
+  // sur les stores ; à garder en phase avec appName dans
+  // capacitor.config.json.
   brdAppName: 'Tsuji',
-  brdNotifNow: 'maintenant',
-  brdNotifTitle: (time) => `Ton train part à ${time}`,
   brdNotifText: 'Tes cartes t’attendent au portillon.',
-  brdNudgeHint: 'Un par jour, à ton heure. Jamais plus.',
-  brdAllow: 'Activer le rappel',
-  brdNotNow: 'Pas maintenant',
   // ── 発車案内 — le rappel du jour tiré de la file, le widget et
   // Réglages › Notifications (plan 156). Le titre et le texte du rappel
   // disent ce que le portillon tiendra à l’heure de l’apprenant.
@@ -2479,50 +2427,14 @@ const boarding = {
   agdThen: 'Ensuite',
   agdStartWith: 'Pour commencer',
   agdWeekTotalLabel: 'Par semaine',
-  // L’arrivée : le plan, la carte.
+  // 机 (plan 140) : la colonne du bureau, son nom pour un lecteur
+  // d’écran et ses arrêts, un par question.
   brdBuildingAria: 'Préparation de ton trajet',
-  // 机 (plan 140) : les arrêts de la colonne du bureau, un par question.
-  brdStop: { name: 'Nom', why: 'Pourquoi', kana: 'Kana', level: 'Niveau', goal: 'Objectif', lines: 'Lignes', rhythm: 'Rythme', time: 'Départ', nudge: 'Rappel' },
-  brdArrivalTitle: 'Ton plan',
-  brdPlanQ: (name) => `Ton plan est prêt, **${name}**.`,
-  brdFor: { studies: 'pour tes études', fun: 'pour le plaisir', trip: 'pour ton voyage', live: 'pour ta vie au Japon', friends: 'pour tes amis', other: 'pour toi' },
-  // Un chiffre par ligne du billet.
-  brdFigWords: (n) => `~${n} mots`,
-  brdFigKanji: (n) => `~${n} kanji`,
-  brdFigGrammar: (n) => `~${n} points de grammaire`,
-  // L’arrêt du novice pris comme objectif : les kana, puis la ligne qui
-  // attend derrière. Pas de compte de mots, et aucune promesse de
-  // motif — trois semaines de signes ne font pas un drama sans pause.
-  brdBulletKana: 'Les deux écritures kana, lues à vue',
-  brdBulletThenLine: 'Puis toute la ligne, arrêt par arrêt',
-  // Deux promesses par motif (la note « boarding » de la maquette).
-  brdPromise: {
-    studies: ['Tes supports de cours', 'Les termes clés d’un cours'],
-    fun: ['Des cases de manga, des paroles', 'Un drama sans pause'],
-    trip: ['Lire les panneaux, les menus, les billets', 'Demander son chemin, commander, réserver une chambre'],
-    live: ['La mairie, la banque, le médecin', 'Ton courrier et tes contrats'],
-    friends: ['Discuter par message', 'Une conversation au dîner'],
-    other: ['Lire ce que tu croises chaque jour', 'Dire ce que tu veux dire'],
-  },
-  brdOnTrackKana: 'En route vers les kana',
-  brdPassQ: (name) => `Ta carte est prête, **${name}**.`,
-  brdEnjoy: 'Bon voyage.',
-  brdCreditsGift: (n) => `+${n} crédits offerts`,
+  brdStop: { kana: 'Kana', level: 'Niveau', card: 'Carte' },
+  // La fin de la première course (screens/RideReading.jsx).
   brdEnter: 'Entrer en gare',
-  // 辻 (plan 163): the desk's plan, the ride drawn to scale -- its stops'
-  // days and names, what the terminus holds, what the ride is for.
-  brdInDays: (n) => (n === 1 ? 'demain' : `dans ${n} jours`),
-  brdEvery: { am: 'chaque matin', noon: 'chaque midi', pm: 'chaque soir' },
-  brdAtTime: (every, time) => `${every} à ${time}`,
-  brdKanaDone: 'Kana lus',
-  brdBothScripts: 'hiragana et katakana',
-  brdTerminus: (stop) => `Terminus · ${stop}`,
-  brdAtTerminus: 'Au terminus, tu connaîtras',
-  brdUnit: { vocab: 'mots', kanji: 'kanji', grammar: 'points de grammaire' },
-  brdUnitKana: 'signes',
   // 辻 on a phone (plan 168): the kana over the lines' hub, the board's
-  // arrival column and first stop, the hour's arrows and first train, the
-  // plan's arrival and what the ride is for.
+  // arrival column and first stop, the hour's arrows and first train.
   brdKanaFirstShort: 'Kana, en premier',
   brdArriveAt: (stop) => `Arrivée au ${stop}`,
   brdFirstStop: (date) => `Premier arrêt : les kana, lus d’ici le **${date}**`,
@@ -2531,8 +2443,42 @@ const boarding = {
   brdHalfLater: 'Une demi-heure plus tard',
   brdHalfEarlier: 'Une demi-heure plus tôt',
   brdTrainAt: (today, time) => `Ton train · ${today ? 'aujourd’hui' : 'demain'}, **${time}**, puis chaque jour`,
-  brdArriveIn: (days, every, time) => `${days === 1 ? '**demain**' : `dans **${days} jours**`}, ${every} à ${time}`,
-  brdForLine: (purpose, promise) => `${purpose.charAt(0).toUpperCase()}${purpose.slice(1)} : **${promise.charAt(0).toLowerCase()}${promise.slice(1)}**.`,
+  // La carte est le formulaire (plan 247) : la carte remplie, ses champs
+  // des portes, une feuille par champ.
+  brdCardQ: 'Ta carte, remplie pour toi.',
+  brdCardHint: 'Touche un champ pour le changer.',
+  brdIssue: 'Émettre ma carte',
+  brdLevelTest: 'Pas sûr ? Le test te place',
+  brdKeepDevice: 'Sur cet appareil seulement',
+  brdKeepGo: 'Garder ma carte',
+  brdKeepSent: (email) => `Lien envoyé à ${email}`,
+  brdKeepChange: 'Changer',
+  brdKeptGoogle: 'Gardée sur ton compte Google',
+  brdKeptEmail: (email) => `Gardée · ${email}`,
+  brdKeptAccount: 'Gardée sur ton compte',
+  brdKeptSwitch: 'Changer de compte',
+  brdSheetGoal: 'Objectif',
+  brdSheetRhythm: 'Rythme',
+  brdSheetHour: 'Départ',
+  brdSheetLines: 'Lignes',
+  brdSheetName: 'Nom',
+  brdSheetAccount: 'Compte',
+  brdSheetDone: 'C’est bon',
+  brdGoalCap: (min) => `à ${min} min par jour`,
+  brdNameOptional: 'facultatif',
+  brdNamePlaceholder: 'Ton prénom',
+  brdNameNote: 'Il s’imprime sur ta carte.',
+  brdNameSave: 'Valider',
+  cardNameTooLong: (n) => `${n} caractères au plus.`,
+  brdAccountLede: 'Sans compte, ta carte ne vit que sur cet appareil.',
+  brdLinkNote: 'On t’envoie un lien. Pas de mot de passe à retenir.',
+  brdLinkSentNote: (email) => `Un lien est parti vers ${email}. Renvoie-le, ou corrige l’adresse.`,
+  brdLinkSend: 'Recevoir mon lien',
+  brdLater: 'Plus tard',
+  brdRemindAt: (time) => `Me rappeler à **${time}**`,
+  brdAgendaAdd: 'Ajouter à mon agenda',
+  brdAgendaTitle: 'Tsuji · ton train de japonais',
+  brdAgendaBody: (min) => `${min} min de japonais, chaque jour.`,
 }
 
 const ride = {
@@ -2648,6 +2594,7 @@ const onboarding = {
   onbPaceRecommended: 'Recommandé',
   onbPassError: 'L’enregistrement a échoué — vérifie ta connexion et réessaie.',
   brdPassRefused: 'Le guichet n’a pas pu émettre ce titre — cela vient de nous, pas de ta connexion. Rien n’a été enregistré.',
+  brdPassBusy: 'Le guichet ne répond pas pour l’instant. Rien n’a été enregistré : réessaie dans un instant.',
   // Le rythme quotidien, vécu : la jauge 新規 du hall et le terminus
   // de session des écrans d'étude (voir components/study/usePace.js).
   paceDoneTitle: 'Objectif du jour atteint',

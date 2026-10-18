@@ -256,6 +256,14 @@ runtime purpose.
   processes -- a set, or anything built by iterating one, is sorted
   before a seeded random touches it (`tests/test_placement.py` builds
   the climb under two hash seeds).
+- **The card's name is not the handle (plan 247).** `user_profiles.card_name`
+  is the first name a learner's own card prints: any script, up to 24
+  characters (`routes/profile.clean_card_name`), `''` for none and NULL
+  for never asked, which prints the username as before. The username
+  stays the public handle (番付, the library), unique and in Latin
+  letters. Whatever prints the holder of a learner's own card or gate
+  reads `holderName` (`domain/passCard.js`); whatever another learner
+  can see prints the username, never the card's name.
 
 ## Commands
 

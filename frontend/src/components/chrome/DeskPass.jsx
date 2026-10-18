@@ -9,7 +9,7 @@ import { FareFigure } from './Hud'
 import { statusOf, showStatus } from './hudStatus'
 import { journeyModel } from '../../domain/goalMath'
 import { CAP, showsCap, nextCreditClock } from '../../domain/credits'
-import { cardTier, xpClimb } from '../../domain/passCard'
+import { cardTier, holderName, xpClimb } from '../../domain/passCard'
 import { StruckMark } from '../offers/StruckMark'
 import { CardFace } from '../pass/PassCard'
 import { InfinitySign } from '../pass/InfinitySign'
@@ -88,7 +88,7 @@ export function DeskPass() {
         ? <span className="desk-holder__slot">{t.cardOnPage}</span>
         : (
           <span className="desk-holder__card">
-            <CardFace tier={tier} name={summary?.username ?? ''} level={summary?.level ?? ''} share={climb.share} />
+            <CardFace tier={tier} name={holderName(summary)} level={summary?.level ?? ''} share={climb.share} />
           </span>
         )}
       <div className="desk-holder__case">

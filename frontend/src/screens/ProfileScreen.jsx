@@ -156,7 +156,7 @@ export default function ProfileScreen({ session }) {
       <ProfileCard
         profile={profile}
         session={session}
-        onUsernameChange={u => setProfile(p => ({ ...p, username: u }))}
+        onUsernameChange={(name, field = 'username') => setProfile(p => ({ ...p, [field]: name }))}
       />
     ),
     stamps: (

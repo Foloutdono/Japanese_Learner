@@ -20,7 +20,6 @@
    flips correctly with the light/dark theme for free since every
    colour here is a var(), never a literal hex. */
 
-
 /* ── Generating ──
    A never-before-opened paper is written on demand (several LLM calls
    per mondai), so this can hold for a minute or two. Three brush
@@ -89,7 +88,6 @@
   animation: exam-timer-pulse 1s ease-in-out infinite;
 }
 
-
 /* The flag ("come back to this one"): icon-only, so the box IS the
    target, and 44 is the minimum. */
 .exam-flag {
@@ -109,7 +107,6 @@
   border-color: color-mix(in srgb, var(--warning) 55%, transparent);
   background: color-mix(in srgb, var(--warning) 12%, transparent);
 }
-
 
 /* The mark: three outcomes, not two — a question left blank scores
    like a wrong answer but isn't one. Pigment as ink is mixed toward
@@ -141,14 +138,12 @@
   text-align: left;
 }
 
-
 @keyframes exam-timer-pulse {
   50% { opacity: 0.45; }
 }
 @media (prefers-reduced-motion: reduce) {
   .exam-timer--low { animation: none; }
 }
-
 
 .exam-question__prompt {
   font-family: var(--font-jp);
@@ -301,7 +296,6 @@
   line-height: 1.7;
   white-space: pre-line;
 }
-
 
 @media (max-width: 560px) {
   .exam-flyer__dates { min-width: 0; }
@@ -536,7 +530,6 @@
   font-size: var(--fs-lead);
 }
 
-
 .exam-sheet__grid {
   display: flex;
   flex-wrap: wrap;
@@ -582,8 +575,6 @@
   outline-offset: 2px;
 }
 
-
-
 @media (max-width: 560px) {
   .exam-sheet__chip { width: 34px; height: 34px; font-size: 0.75rem; }
   .exam-audio-player { gap: 10px; padding: 10px 12px; }
@@ -620,7 +611,6 @@
    defines no colours of its own -- one palette, one place.
 
    Written by plans 027-030; each block below names its plan. */
-
 
 /* The workbench's quiet button — the stub's exits and the working
    rail's bulk action are the same idiom: a ghost beside content, never
@@ -729,7 +719,6 @@
   border-radius: 0;
   outline-offset: -2px;
 }
-
 
 @media (prefers-reduced-motion: reduce) {
   .anl-ghost,
@@ -1016,7 +1005,6 @@
   margin-bottom: var(--sp-5);
 }
 
-
 /* 動画 — the video intake as a column (plan 136, the owner's pick C).
    The link, the video's still once the link names one, ONE filled
    action -- the link's own fetch where the server has the proxy
@@ -1250,7 +1238,6 @@
   word-break: break-all;
   overflow-x: auto;
 }
-
 
 /* 案内表示 — notices. Two tones, and the difference is not decorative:
    a capped Window and a truncated Passage are true statements about
@@ -1906,7 +1893,6 @@ a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; t
   color: var(--text-secondary);
 }
 
-
 @media (prefers-reduced-motion: reduce) {
   .anl-mine__options { transition: none; }
 }
@@ -1960,7 +1946,6 @@ a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; t
   letter-spacing: 0.04em;
 }
 
-
 /* 音声 — hear it. Two sizes: beside a Sentence's level badge, and on a
    Token's card. Both clear WCAG 2.5.8's 24x24 minimum; the md size
    clears the 44px comfort target as well. */
@@ -1984,7 +1969,6 @@ a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; t
   .anl-speak { transition: none; }
   .anl-speak:active { transform: none; }
 }
-
 
 .anl-undo {
   display: flex;
@@ -2016,8 +2000,8 @@ a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; t
    Settings › Learning and the boarding still use: the dial (the one
    slider everywhere), the placement test (.onb-test*) with its
    action/link pair (.onb-action, .onb-link, .onb-step__actions), the
-   gold pill (.onb-reco-badge), the 到着 cutscene (.onb-arrival*) and
-   the /dev/onboarding workbench chrome (.onb-preview*).
+   gold pill (.onb-reco-badge) and the /dev/onboarding workbench
+   chrome (.onb-preview*).
    Ends where this file's own design-system body begins, below. ══ */
 /* ── The office's survivors ─────────────────────────────────
    Per-feature section, merged into index.css the same way the exam and
@@ -2270,91 +2254,6 @@ a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; t
   text-indent: 0.08em;
   text-transform: uppercase;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-}
-
-/* ══ 到着 — the arrival cutscene ═══════════════════════════
-   The station family's third scene, and the first that means "you
-   have arrived": the scrim drops and the platform signboard slides
-   down into place over the tour. Onboarding-only (see TrainArrival's
-   header for why it is not in index.css's gate/door block), same
-   discipline: transform/opacity only, one --onb-arrival-x speed dial
-   shared with the JS timers, skippable, and absent under reduced
-   motion — JS never mounts it, and the display:none below is the
-   same belt-and-braces the gate and door carry. */
-.onb-arrival {
-  --onb-arrival-x: 1;
-  position: fixed;
-  inset: 0;
-  z-index: 300;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  animation: onb-arrival-leave calc(150ms * var(--onb-arrival-x)) linear calc(630ms * var(--onb-arrival-x)) backwards;
-}
-@keyframes onb-arrival-leave { to { opacity: 0; } }
-.onb-arrival__scrim {
-  position: absolute;
-  inset: 0;
-  background: var(--bg-main);
-  opacity: 0;
-  animation: onb-arrival-scrim calc(160ms * var(--onb-arrival-x)) ease-out forwards;
-}
-/* 0.995, not 1 — the gate's own documented fix for a light-theme
-   scrim reading cream-on-cream. Same value, same reason. */
-@keyframes onb-arrival-scrim { to { opacity: 0.995; } }
-
-.onb-arrival__board {
-  position: relative;
-  width: min(420px, 88vw);
-  padding: 22px 26px;
-  border-radius: 10px;
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
-  transform: translateY(-140%);
-  animation: onb-arrival-slide calc(260ms * var(--onb-arrival-x)) cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
-}
-@keyframes onb-arrival-slide { to { transform: translateY(0); } }
-/* The sign settles: one soft ring of the line colour, as the chime
-   lands (phase 'arrived', see TrainArrival's SIGN_MS). */
-.onb-arrival--arrived .onb-arrival__board {
-  transform: translateY(0);
-  animation: onb-arrival-settle calc(320ms * var(--onb-arrival-x)) ease-out;
-}
-@keyframes onb-arrival-settle {
-  0% { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
-  100% { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), 0 0 0 10px transparent; }
-}
-
-.onb-arrival__dest {
-  display: block;
-  margin-top: 4px;
-  font-family: var(--font-serif);
-  font-size: 1.7rem;
-  font-weight: 700;
-  line-height: 1.2;
-  opacity: 0;
-  animation: onb-arrival-fade calc(220ms * var(--onb-arrival-x)) ease-out calc(340ms * var(--onb-arrival-x)) forwards;
-}
-.onb-arrival__latin {
-  display: block;
-  margin-top: 2px;
-  font-family: var(--font-display);
-  font-size: 0.65rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--text-on-panel-soft);
-  opacity: 0;
-  animation: onb-arrival-fade calc(220ms * var(--onb-arrival-x)) ease-out calc(380ms * var(--onb-arrival-x)) forwards;
-}
-@keyframes onb-arrival-fade { to { opacity: 1; } }
-
-@media (prefers-reduced-motion: reduce) {
-  /* TrainArrival fires onDone immediately and never mounts this when
-     motion is unwelcome — belt and braces, like .gate and .door. */
-  .onb-arrival { display: none; }
 }
 
 /* ── /dev/onboarding — the replay workbench ─────────────────
@@ -3338,7 +3237,6 @@ button:focus-visible {
 /* .container caps at --max-w and is declared later in this file, so
    the override has to out-specify it rather than out-order it. */
 
-
 /* ── Selector header (eyebrow / title / subtitle) ────────── */
 /* Shared by SelectionScreen, LevelSelector and ModeSelector so every
    selection screen reads the same way regardless of which list it wraps.
@@ -3347,7 +3245,6 @@ button:focus-visible {
 /* ── Tier-size toggle (TierSelector) ─────────────────────── */
 /* Same segmented idea as .mode-toggle, sized down to sit inline under
    a selector header rather than as a standalone control row. */
-
 
 /* ── のりば案内 — the platform signs ────────────────────────
    Every selection screen's choices: the sign at the head of a
@@ -3645,7 +3542,6 @@ button:focus-visible {
   opacity: 1;
   transform: translateX(0);
 }
-
 
 input {
   font-family: inherit;
@@ -4032,7 +3928,6 @@ textarea:focus-visible {
   text-align: left;
 }
 .section-header:first-child { margin-top: 0; }
-
 
 .section-header__title {
   margin: 0;
@@ -4598,7 +4493,7 @@ textarea:focus-visible {
 }
 .ofr {
   /* The pass's gold as a text ink on paper (the bare metal is under
-     the floor at body size in the light theme, as .brd__q-em says),
+     the floor at body size in the light theme),
      and the hero's own green: the stage is sumi in both themes. */
   --ofr-gold-ink: color-mix(in srgb, var(--accent2) 68%, var(--text-primary));
   --ofr-ok: #8fb069;
@@ -7472,7 +7367,6 @@ textarea:focus-visible {
   padding: 35px 30px;
 }
 
-
 /* ── Responsive grid ── */
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--gap); }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); }
@@ -7670,7 +7564,6 @@ textarea:focus-visible {
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-
 
 /* ══ 定期券 — the learner's card (plan 173) ════════════════════
    One card in three materials (domain/passCard.js's cardTier), the
@@ -7900,7 +7793,10 @@ textarea:focus-visible {
 }
 .pcb__print {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 0.95fr);
+  /* Measured (plan 247): the longest pace and departure either language
+     prints keep 7px to spare -- at 1fr the hour cut "Morning · 06:00" --
+     and the lines keep their three marks. */
+  grid-template-columns: minmax(0, 1.17fr) minmax(0, 1.08fr) minmax(0, 0.95fr);
   border-radius: var(--r-panel);
 }
 .pcb__route {
@@ -8035,6 +7931,9 @@ textarea:focus-visible {
 .pcb__door { margin: 0; border-radius: var(--r-flat); background: none; color: inherit; font: inherit; text-decoration: none; cursor: pointer; }
 .pcb__door:hover { color: inherit; filter: none; }
 .pcb__chev { position: absolute; right: var(--sp-2); top: 50%; translate: 0 -50%; opacity: 0.4; }
+/* The lines' marks fill their field to its edge, so its › stands on the
+   key's row, clear of the third (plan 247: it sat on 文法's corner). */
+.pcb__door:has(.pcb__lines) .pcb__chev { top: var(--sp-3); translate: none; }
 .pcb__door--on { outline: none; border-radius: var(--r-plate); }
 /* The doors' touch. The print is drawn at the card's scale, so on a
    phone a stop or a field stands under a thumb's 44px; each door's touch
@@ -8111,7 +8010,6 @@ textarea:focus-visible {
   .pcard--turned .pcard__side--back { opacity: 1; }
   .pcard--turned .pcard__side--face { opacity: 0; }
 }
-
 
 /* ── 帯 — the learner's card at pocket size (plan 173) ──
    One strip in the card's own stuff (components/chrome/Hud.jsx's
@@ -8261,7 +8159,6 @@ textarea:focus-visible {
 .pass__wave span:nth-child(2) { width: 13px; height: 13px; margin-top: -6.5px; opacity: 0.45; }
 .pass__wave span:nth-child(3) { width: 20px; height: 20px; margin-top: -10px;  opacity: 0.25; }
 
-
 /* The tally beside a section title — data, so tracked and tabular
    against the serif heading. */
 .section-header__count {
@@ -8355,7 +8252,6 @@ textarea:focus-visible {
 @media (max-width: 560px) {
   .seg { margin-left: 0; }
 }
-
 
 /* ── The lanes are the picker (plan 070) ──
    Each row is one (section, level, mode) service due today, and each
@@ -10189,7 +10085,6 @@ textarea:focus-visible {
 }
 .wmap-roundel--sm { width: 24px; height: 24px; }
 
-
 /* ── 路線図 — the route diagram ────────────────────────────
    The stopping-pattern strip inside a train car, turned upright. One
    rail down the left, a marker at every station, and the level you
@@ -10824,7 +10719,7 @@ textarea:focus-visible {
    centre line whatever the cap, and the cap can stand clear of the
    pill's curve without pushing it. The reader keeps plan 164's place,
    8px in and 48px across, its centre where the boarding's gold road
-   comes down into it (Welcome.jsx's READER, .brd__foot--road). The fill
+   comes down into it (Welcome.jsx's READER). The fill
    is a layer under the content (::before), so a pick can fade it in over
    the outline: a background gradient cannot transition. */
 .btn-depart--gate {
@@ -12378,7 +12273,6 @@ textarea:focus-visible {
   align-items: center;
   gap: 5px;
 }
-
 
 /* ── Review deck (self-paced, ungraded browse) ─────────────
    Counter + prev/next nav for ReviewDeck.jsx — sits where
@@ -15195,7 +15089,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   .card-transition-outgoing { animation-duration: 10ms; }
 }
 
-
 /* ── Rating bar (SRS quality scale) ──────────────────────────
    DESIGN.md calls this out by name: the app's most-used control is
    one continuous instrument, not a row of flat-UI buttons. A single
@@ -15959,7 +15852,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .profile-card__name--editable:hover .profile-card__edit-glyph { opacity: 1; }
 
-
 .profile-card__name-edit {
   display: flex;
   align-items: center;
@@ -16046,7 +15938,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 
 /* Leaderboard */
 .leaderboard-card { padding: 0; }
-
 
 /* ── もしかして — the query the answer is actually for ────────
    Printed only when what was typed found nothing and the search was
@@ -16160,7 +16051,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   justify-content: center;
   min-height: 56px;
 }
-
 
 .syllabary-cell--col-header,
 
@@ -17333,7 +17223,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   display: inline-block;
 }
 
-
 /* `.btn-deck-primary` was retired here in 052 onto the shared
    `.btn-primary` family. Its one call site (the create-deck submit)
    now reads `btn-primary decks-create-submit`, and the shell injects
@@ -17417,7 +17306,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 /* The one control here that CREATES rather than finds, so it is
    filled where the filters are outlines — the difference has to be
    visible at a glance or it reads as a sixth filter. */
-
 
 /* The field runs the console's full width and carries no border of
    its own — the console is its frame. Mirrors .dict-console's own
@@ -17535,7 +17423,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 /* The type's one-character name, sized to sit in the same chip as the
    label rather than above it. */
 
-
 /* No opacity. This line was dimmed to 0.75 on top of already being
    --text-secondary and already being 10.5px against the label's 13px
    — three dimmings for one "this is the quieter half", and the third
@@ -17543,7 +17430,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    description came out at 3.80:1 dark and 2.79:1 light, worse than
    the active state 055 was sent here to fix. Size and ink say
    "secondary" on their own; opacity only ever subtracts contrast. */
-
 
 /* ── Deck card ──
    A .platform-card (see the block near the top of this file) rather
@@ -17909,7 +17795,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    (it's one deck, not a place), so this is what tells you where you
    are once the auto-hiding TopBar has scrolled away. */
 
-
 .deckdetail-count { color: var(--text-secondary); font-size: 13px; }
 
 /* flex-wrap is not cosmetic here. This row holds up to five buttons and
@@ -17950,7 +17835,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    it is these two idioms that stretch, not any element that happens to
    be a button. It also leaves the select-mode row's count `<span>`
    alone, which must keep its natural width. */
-
 
 /* The toolbar is the shared family now (`.btn-primary` / `.btn-secondary`
    in the JSX), the same move 055 made on the deck shelf. What stood here
@@ -18044,7 +17928,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   margin-top: var(--sp-5);
 }
 
-
 /* Selected reads as the deck line picking the row out, not as the
    quiz screens' "correct answer" accent. */
 
@@ -18069,7 +17952,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    labelled ("Front", "Back / Meaning", "かな") in a row of columns,
    which made the labels outnumber the content and turned a deck into a
    spreadsheet. */
-
 
 /* Where a browsed-in card came from, in that section's own pigment —
    a quiet tag at the end of the row rather than a word wedged into a
@@ -18504,9 +18386,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .detail-header { display: flex; justify-content: space-between; align-items: flex-start; }
 .detail-close-btn { background: none; font-size: 18px; color: var(--text-secondary); }
 
-
 /* ── Phrase analyzer screen ───────────────────────────────── */
-
 
 .phrase-input-actions { display: flex; justify-content: space-between; margin-top: 12px; }
 
@@ -18602,13 +18482,10 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    and plan 029 replaced its setup form with the dock. The player is
    the one part that was never a layout problem. */
 
-
 /* File-first video setup (2026-08-26). The yt-dlp help and the paste
    fallback are <details>, so the default view is just "pick a file". */
 
-
 /* The failure state is a handoff, not a dead end (plans/026). */
-
 
 .video-player__frame {
   position: relative;
@@ -18627,7 +18504,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   width: 100%;
   height: 100%;
 }
-
 
 .phrase-result-card { margin-bottom: 24px; padding: 20px 24px; }
 .phrase-line {
@@ -18710,12 +18586,10 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    sumi one. The ambient --text-secondary measured 3.04:1 in light. */
 .phrase-kanji-chip__level { font-size: 11px; color: var(--text-on-panel-soft); }
 
-
 /* The chip's press is a flourish: under reduced motion it stays put. */
 @media (prefers-reduced-motion: reduce) {
   .phrase-kanji-chip__char:active { transform: none; }
 }
-
 
 /* The level badge and the speak button on one row (the list layout's
    .rdg-breakdown-badges). The one-card-at-a-time carousel this class
@@ -18724,7 +18598,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    layout still reads. */
 .rdg-breakdown-badges { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-
 /* .trn-feedback-card carries no styles of its own — it exists purely
    to scope the mobile max-height override further down (PromptCard
    caps at 60vh with internal scroll, which becomes an unwanted second
@@ -18732,7 +18605,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    used to be declared here as an empty ruleset to "hold" the name; a
    class needs no such declaration to be selectable, so the empty rule
    is gone and only the override that actually does something remains. */
-
 
 /* ── Study screen ──────────────────────────────────────────── */
 .study-config-page { padding: 40px 24px; max-width: 560px; }
@@ -20171,7 +20043,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   .dict-sheet { animation: arrive-soft 0.15s linear; }
 }
 
-
 /* ── 辞書 — the catalogue and the entry plate (canvas, plan 073) ──
    The analyzer's door, the entry cards, and the plate an entry opens
    as: the marks row, the reading over the headword, two readings and
@@ -20464,7 +20335,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 
 .dict-layout { display: flex; gap: 28px; align-items: flex-start; }
 .dict-results-wrap { flex: 1; min-width: 0; }
-
 
 /* ── The console on a phone ────────────────────────────────
    Five collection chips, a mode toggle and a field: at 360px that was
@@ -22194,7 +22064,6 @@ html {
   margin-top: var(--sp-6);
 }
 
-
 /* ══════════════════════════════════════════════════════════════
    路線図の影 section — the journey pass (plan 063, phase C).
    Owns .jour-*: the status sheet's distance and comparisons (the
@@ -22857,7 +22726,6 @@ form.stage__foot > .btn-primary {
   gap: var(--sp-1);
   color: color-mix(in srgb, var(--state-due) 65%, var(--text-primary));
 }
-
 
 /* ══ 定期券 — the profile, the statistics and the settings (plan 074) ══
    The canvas's Profile, ProfileInserts, StatusSheet, Statistics,
@@ -24710,7 +24578,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      wash under a pick; the gold as ink ON that wash, a rung deeper, where
      the paper's ink gives 4.3:1; the kana line's pigment as ink (plan
      168). A soft ink on the wash is the ambient ink instead, as the
-     chosen tint always took it (.brd-cell--on). */
+     chosen tint always took it. */
   --brd-ink: color-mix(in srgb, var(--accent2) 65%, var(--text-primary));
   --brd-wash: color-mix(in srgb, var(--accent2) 12%, var(--surface));
   --brd-wash-ink: color-mix(in srgb, var(--accent2) 50%, var(--text-primary));
@@ -24783,7 +24651,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
    not always at the top of the screen -- the room spent round the
    question and its answers rather than between them. The question is
    set centred, its hint under it, and stands a rung over its answers,
-   drawn as the thing they are -- a plate, a junction, a line climbing;
+   drawn as the thing they are -- a crossing, a line climbing, a card;
    the two stand as one block in the middle of the room between the head
    and the docked foot. Auto margins over the question and under the
    answers, never justify-content: a block taller than its room keeps its
@@ -24880,16 +24748,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 }
 /* The room over the question: the pair on the room's middle (above). */
 .brd__body > .brd__q { margin-top: auto; }
-/* Gold text on paper reads at ~3.4:1 in light theme; the name in a
-   question, a kana's meaning, are mixed toward the ambient ink (the
-   same move the status inks make on sumi). */
-.brd__q-em { font-weight: 700; color: color-mix(in srgb, var(--accent2) 65%, var(--text-primary)); }
 /* The hint a short rung under its question (the body's gap, less). */
 .brd__hint { margin: calc(var(--sp-3) - var(--sp-5)) 0 0; font-size: var(--fs-body); line-height: 1.45; text-align: center; text-wrap: balance; color: var(--text-secondary); }
 .brd__error { margin: 0; font-size: var(--fs-body); line-height: 1.5; text-align: start; color: color-mix(in srgb, var(--danger) 55%, var(--text-primary)); }
-/* The gate, and a quiet way over it where a screen has one (plan 168:
-   the sign-in on the name and the account, Not now on the nudge, the
-   offer on the pass), a rung apart. Over it, never under: the gate is
+/* The gate, and a quiet way over it where a screen has one (plan 168;
+   since plan 247 the line's test over the level's gate, and the climb's
+   two ways out over the test's), a rung apart. Over it, never under: the gate is
    the foot's last row, so it stands in the same place on every screen
    whatever else the foot holds (the owner's word -- the gate is the
    feature that matters most, and a thumb finds it where it was). */
@@ -24988,64 +24852,15 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 /* ── welcome: the promise (the phone's crossroads is plan 168's, below) ── */
 .brd-tagline { margin: 0; font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-title); text-align: center; line-height: 1.4; text-wrap: pretty; }
 
-/* ── the name ── */
-.brd-field {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-height: 72px;
-  padding: 0 var(--sp-5);
-  background: var(--surface);
-  border: 1.5px solid var(--accent2);
-  border-radius: var(--r-card);
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-display-fluid);
-  color: var(--text-primary);
-  caret-color: var(--accent2);
-  outline: none;
-}
-.brd-field--empty { border-color: var(--surface-line); }
-.brd-field::placeholder { color: var(--text-secondary); font-weight: 500; }
-.brd-field:focus-visible { border-color: var(--accent2); outline: none; }
-
-/* ── the rhythm and the hours: cards in a lattice ── */
+/* ── the kana's answers: cards in a lattice ── */
 .brd-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
-.brd-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .brd-grid > * { animation: brd-in 360ms ease-out backwards; }
 .brd-grid > :nth-child(2) { animation-delay: 40ms; }
 .brd-grid > :nth-child(3) { animation-delay: 80ms; }
 .brd-grid > :nth-child(4) { animation-delay: 120ms; }
-.brd-cell {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-1);
-  min-height: 132px;
-  padding: var(--sp-5) var(--sp-4);
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  font: inherit;
-  color: var(--text-primary);
-  text-align: center;
-  cursor: pointer;
-}
-.brd-cell--on { border-color: var(--accent2); background: color-mix(in srgb, var(--accent2) 14%, var(--surface)); }
-.brd-cell__n { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-display); line-height: 1; font-variant-numeric: tabular-nums; }
-.brd-cell__u { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
-.brd-cell__sub { margin-top: var(--sp-1); font-size: var(--fs-sm); color: var(--text-secondary); }
-.brd-cell--on .brd-cell__u, .brd-cell--on .brd-cell__sub { color: var(--text-primary); }
-.brd-cell__label { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); }
-.brd-cell__time { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-heading); font-variant-numeric: tabular-nums; }
-.brd-cell .brd-tag { margin-bottom: var(--sp-1); }
-.brd-cell--sm { min-height: 84px; }
 
-/* ── the departure board and the day track ── */
+/* ── the departure board ── */
 .brd-board { display: flex; flex-direction: column; align-items: center; gap: var(--sp-4); padding: var(--sp-5); background: var(--bg-panel); color: var(--text-on-panel); border: 1px solid color-mix(in srgb, var(--accent2) 16%, transparent); border-radius: var(--r-panel); animation: brd-in 420ms ease-out backwards; }
-.brd-board__cap { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-on-panel-soft); }
 .brd-board__flaps { display: flex; align-items: center; gap: var(--sp-1); perspective: 400px; }
 .brd-board__colon { padding: 0 var(--sp-1); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-heading); color: var(--text-on-panel-soft); }
 /* The board's own tile: a split-flap face at rest (the level-up's
@@ -25068,7 +24883,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 }
 .brd-flap--turn { animation: brd-flip 900ms ease-in-out 380ms 1 backwards; }
 /* A drum still spinning: the board lights with all four turning and
-   they stop left to right (components/boarding/TimeStep.jsx). The face
+   they stop left to right (the hour's sheet, CardSheets.jsx). The face
    is changing on its own tick, so the tile only has to say it is not a
    number to read yet — dimmer, and one drum's worth of blur. */
 .brd-flap--spin {
@@ -25092,63 +24907,17 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 .brd-notif__title { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lead); }
 .brd-notif__text { font-size: var(--fs-body); color: var(--text-secondary); }
 
-/* ── the pass, issued ── */
-.brd-issue { position: relative; margin-top: var(--sp-3); animation: brd-up 700ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
-/* The 発行 seal that landed on the printed pass is gone (owner's
-   call): the pass already says it is issued by being printed, and the
-   arrival's own moment is the welcome the account is given, which now
-   has that beat to itself.
-
-   ── The welcome ──
-   One pass of light across the printed card, once, as the balance
-   counts up under it (components/boarding/PassStep.jsx): the pass's
-   own metal caught for a moment, not a shower of confetti over a
-   station. It is the only thing on the screen that moves after the
-   card lands, so the eye is on the figure while the figure is
-   climbing. */
-.brd-issue__shine {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  border-radius: var(--r-identity);
-  overflow: hidden;
-}
-.brd-issue__shine::before {
-  content: '';
-  position: absolute;
-  top: -20%;
-  bottom: -20%;
-  width: 40%;
-  background: linear-gradient(
-    100deg,
-    transparent,
-    color-mix(in srgb, var(--accent2) 22%, transparent),
-    transparent);
-  animation: brd-shine 1100ms cubic-bezier(0.3, 0, 0.2, 1) 620ms both;
-}
-@keyframes brd-shine {
-  from { transform: translateX(-160%) skewX(-12deg); }
-  to   { transform: translateX(420%) skewX(-12deg); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  /* The light does not sweep and the note does not rise; the note
-     still says what the balance is, and stays. */
-  .brd-issue__shine { display: none; }
-}
-
 /* ══ 辻 on a phone — the boarding drawn as maps (plan 168) ═════════
    The owner's pick A of the canvas "Onboarding on the phone", direction
    A, built as drawn. The frame never moves (above): ‹ and the track at
    the head, the question top-left at the display rung, the gate at the
    foot. Between them each question draws its answers as roads out of a
-   hub numbered as its stop -- the name's plate on a pole, a junction of
-   six reasons, the two words at a crossing, the line climbing through
-   the levels, three lines fanning out of the kana -- or as the thing
-   they are: a departure board, a flap board turned by hand, a week of
-   bells, the arrival and the ride, the ticket an account keeps, the
-   pass over the gate's reader. The desk keeps plan 163's drawings
-   (the 机 section), and every class here is the phone's.
+   hub numbered as its stop -- the two words at a crossing, the line
+   climbing through the levels. Since plan 247 the rest are the card's
+   sheets, drawn as the thing they are: a departure board, a flap board
+   turned by hand, the lines' checks, the name's plate. The desk keeps
+   plan 163's drawings (the 机 section), and every class here is the
+   phone's.
 
    ── The map ──
    A drawing is drawn on the canvas's own stage, 358px wide at 390 and
@@ -25189,9 +24958,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 }
 .brd-map__at--start { translate: 0 -50%; }
 .brd-map__at--corner { translate: 0 0; }
-.brd-map__at--top { translate: -50% 0; }
 .brd-road { stroke: var(--surface-line); stroke-width: 5; }
-.brd-road--on { stroke: var(--accent2); stroke-width: 8; }
 /* The question's hub: its stop's number in a ring of ink. */
 .brd-hub {
   display: inline-flex;
@@ -25210,10 +24977,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   color: var(--text-primary);
 }
 .brd-hub--sm { width: 40px; height: 40px; font-size: var(--fs-sm); }
-.brd-hub--md { width: 44px; height: 44px; font-size: var(--fs-sm); }
 
-/* ── 01 the name: your station's plate ── */
-.brd-name { display: flex; flex-direction: column; gap: var(--sp-3); }
+/* ── the name: your station's plate, on its sheet ── */
 .brd-plate {
   position: relative;
   display: flex;
@@ -25231,7 +24996,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 /* The plate's name at the heading rung, past the phone's 1rem floor on
    fields (".field, input:not(…)", 0-3-1): a name that size is already
    past the 16px under which iOS zooms, which is all that floor is for. */
-.brd .brd-plate > input.brd-plate__field {
+.brd-sheet .brd-plate > input.brd-plate__field {
   flex: 1;
   min-width: 0;
   width: 100%;
@@ -25256,72 +25021,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   color: var(--text-secondary);
 }
 .brd-plate__stripe { flex: none; height: 4px; background: color-mix(in srgb, var(--accent2) 30%, transparent); }
-/* A pole down from the plate to the hub, and the line on to the next
-   stop, named. */
-.brd-name__line { position: relative; flex: none; height: calc(172px * var(--ys, 1)); }
-.brd-name__pole { position: absolute; left: 30px; top: calc(-1 * var(--sp-3)); width: 4px; height: calc((88px + var(--sp-3)) * var(--ys, 1)); background: var(--text-primary); }
-.brd-name__hub { position: absolute; left: 8px; top: calc(110px * var(--ys, 1) - 24px); }
-.brd-name__road { position: absolute; left: 54px; right: 43px; top: calc(110px * var(--ys, 1) - 2.5px); height: 5px; border-radius: var(--r-pill); background: var(--surface-line); }
-.brd-name__next { position: absolute; right: 19.5px; top: calc(110px * var(--ys, 1) - 12.5px); width: 25px; height: 25px; }
-.brd-name__ring { position: absolute; inset: 0; border: 3px solid var(--surface-line); border-radius: var(--r-pill); background: var(--bg-main); }
-.brd-name__lab {
-  position: absolute;
-  left: 50%;
-  top: calc(100% + var(--sp-3));
-  translate: -50% 0;
-  white-space: nowrap;
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  color: var(--text-secondary);
-}
 
-/* ── 02 why: the junction ── */
-.brd-way {
-  position: absolute;
-  left: calc(var(--x, 0) / 358 * 100%);
-  top: calc(var(--y, 0) * var(--ys, 1) * 1px);
-  translate: -50% -34px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-3);
-  width: calc(170 / 358 * 100%);
-  padding: 0;
-  background: none;
-  border: 0;
-  font: inherit;
-  color: var(--text-primary);
-  text-align: center;
-  cursor: pointer;
-}
-.brd-way__ring {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 68px;
-  height: 68px;
-  border: 3px solid var(--surface-line);
-  border-radius: var(--r-pill);
-  background: var(--bg-main);
-  color: var(--text-primary);
-}
-.brd-way__ring > svg { width: 34px; height: 34px; }
-.brd-way[aria-pressed="true"] .brd-way__ring {
-  border: 4px solid var(--accent2);
-  background: var(--brd-wash);
-  color: var(--brd-ink);
-  box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent2) 18%, transparent);
-}
-.brd-way__name { font-size: var(--fs-body); font-weight: 700; line-height: 1.25; text-wrap: balance; }
-
-/* ── 04 the level asked first, and its test (plan 224) ──
-   Choose it or let the test find it: two ways on the junction's one
-   rung, each with a line under its name. The test stands in the car's
-   stage, the climb's levels over the question, its two ways out over
-   the gate. A level the test asked carries its score on the line, in
-   the pass's gold where it was cleared. */
-.brd-how__code { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; }
-.brd-how__desc { font-size: var(--fs-sm); line-height: 1.3; color: var(--text-secondary); text-wrap: balance; }
+/* ── 04 the level's test (plan 224; the line's quiet way, plan 247) ──
+   The test stands in the car's stage, the climb's levels over the
+   question, its two ways out over the gate. A level the test asked
+   carries its score on the line, in the pass's gold where it was
+   cleared. */
 /* A rung tighter than the stage's own gaps: a sentence, its four words,
    the levels and the two ways out hold on a 667px handset. */
 .brd-test { gap: var(--sp-3); }
@@ -25496,6 +25201,10 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 }
 .brd-climb__rail--ink { stroke: var(--accent2); stroke-width: 9; }
 .brd-climb__hub { position: absolute; left: 12px; top: calc(var(--y, 0) * var(--ys, 1) * 1px); translate: -50% -50%; }
+/* The hub keeps its size as the line closes, its centre the drawing's
+   height less its radius: that radius stays whole under it, or the hub
+   hangs past the drawing and the body scrolls by what is left out. */
+.brd-map.brd-climb { height: calc((var(--h, 0) * var(--ys, 1) + 20 * (1 - var(--ys, 1))) * 1px); }
 .brd-stn {
   position: absolute;
   left: 0;
@@ -25552,91 +25261,7 @@ button.brd-stn { cursor: pointer; }
 .brd-stn__note { font-size: var(--fs-sm); font-weight: 700; line-height: 1.3; color: var(--brd-ink); }
 .brd-stn__tag { height: 20px; padding: 0 var(--sp-3); border-width: 1.5px; font-size: var(--fs-caption-xs); }
 
-/* ── 05 the lines: the kana into the hub, three lines out ── */
-.brd-fan__trunk { stroke: var(--line-kana); stroke-width: 6; }
-.brd-fan__road { stroke-width: 6; }
-.brd-fan__road[data-road="vocab"] { stroke: var(--line-vocab); }
-.brd-fan__road[data-road="kanji"] { stroke: var(--line-kanji); }
-.brd-fan__road[data-road="grammar"] { stroke: var(--line-grammar); }
-.brd-fan__road.brd-fan__road--off { stroke: var(--surface-line); stroke-width: 3; stroke-dasharray: 6 7; }
-.brd-fan__kana {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  background: var(--bg-main);
-  border: 4px solid var(--line-kana);
-  border-radius: var(--r-pill);
-  font-family: var(--font-jp);
-  font-size: var(--fs-lead);
-  font-weight: 700;
-  line-height: 1;
-  color: var(--brd-kana-ink);
-}
-.brd-fan__ticket { display: flex; flex-direction: column; margin: 0; }
-.brd-fan__ticket-name { font-size: var(--fs-body); font-weight: 700; }
-.brd-fan__ticket-lock { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-sm); color: var(--text-secondary); }
-.brd-fan__ticket-lock .svg { width: 13px; height: 13px; }
-.brd-lcard {
-  --pig: var(--accent2);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--sp-2);
-  width: calc(112 / 358 * 100%);
-  height: 224px;
-  padding: var(--sp-4) var(--sp-3) var(--sp-3);
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  font: inherit;
-  color: var(--text-primary);
-  text-align: left;
-  cursor: pointer;
-}
-.brd-lcard[data-line="vocab"] { --pig: var(--line-vocab); }
-.brd-lcard[data-line="kanji"] { --pig: var(--line-kanji); }
-.brd-lcard[data-line="grammar"] { --pig: var(--line-grammar); }
-.brd-lcard[aria-pressed="true"] { border: 2px solid var(--accent2); background: var(--brd-wash); }
-.brd-lcard__chk {
-  position: absolute;
-  top: var(--sp-3);
-  right: var(--sp-3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border: 1.5px solid var(--surface-line);
-  border-radius: var(--r-pill);
-  color: transparent;
-}
-.brd-lcard__chk .svg { width: 12px; height: 12px; stroke-width: 2.5; }
-.brd-lcard[aria-pressed="true"] .brd-lcard__chk { border-color: var(--accent2); color: var(--accent2); }
-.brd-lcard__ring {
-  display: flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: var(--bg-main);
-  border: 2.5px solid var(--pig);
-  border-radius: var(--r-pill);
-  font-family: var(--font-jp);
-  font-size: var(--fs-title);
-  font-weight: 700;
-  line-height: 1;
-  color: color-mix(in srgb, var(--pig) 70%, var(--text-primary));
-}
-.brd-lcard__name { margin-top: 2px; font-size: var(--fs-body); font-weight: 700; line-height: 1.2; }
-.brd-lcard__desc { font-size: var(--fs-sm); line-height: 1.3; color: var(--text-secondary); }
-.brd-lcard__vol { display: flex; flex-direction: column; margin-top: auto; }
-.brd-lcard__fig { font-size: var(--fs-title); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-.brd-lcard__unit { font-size: var(--fs-caption); line-height: 1.3; color: var(--text-secondary); }
-.brd-lcard[aria-pressed="true"] :is(.brd-lcard__desc, .brd-lcard__unit) { color: var(--text-primary); }
-.brd-lcard[aria-pressed="false"] :is(.brd-lcard__ring, .brd-lcard__vol) { opacity: 0.55; }
+/* ── the lines: the arrival their sheet's checks reach ── */
 .brd-arrive { margin: 0; font-size: var(--fs-body); line-height: 1.45; text-align: center; text-wrap: balance; }
 .brd-arrive strong { font-weight: 700; color: var(--brd-ink); }
 .brd-arrive--none { color: color-mix(in srgb, var(--danger) 55%, var(--text-primary)); }
@@ -25755,259 +25380,9 @@ button.brd-stn { cursor: pointer; }
 .brd-clock__when { margin: 0; font-size: var(--fs-body); line-height: 1.45; text-align: center; }
 .brd-clock__when strong { font-weight: 700; color: var(--brd-ink); }
 
-/* ── 08 the nudge: the notification, and the week it arrives in ── */
-.brd-nudge { display: flex; flex-direction: column; }
-/* The notification as a phone's lock screen prints it: the app's name
-   in capitals, the time as it is said, the title and a line under it. */
-.brd-nudge .brd-notif {
-  align-items: center;
-  min-height: 96px;
-  padding: var(--sp-4) var(--sp-5);
-  border-radius: var(--r-identity);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-.brd-nudge .brd-notif__app { border-radius: var(--r-panel); }
-.brd-nudge .brd-notif__app > .mark { width: 28px; height: 28px; vertical-align: 0; }
-.brd-nudge .brd-notif__body { gap: 0; }
-.brd-nudge .brd-notif__head { font-weight: 400; letter-spacing: normal; text-transform: none; }
-.brd-nudge .brd-notif__name { font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; }
-.brd-nudge .brd-notif__title { font-size: var(--fs-body); }
-.brd-nudge .brd-notif__text { font-size: var(--fs-sm); }
-.brd-week__drop { stroke: var(--accent2); stroke-width: 3; }
-.brd-week__road { stroke: var(--surface-line); stroke-width: 4; }
-.brd-week__day {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28.5px;
-  height: 28.5px;
-  background: var(--bg-main);
-  border: 2.5px solid var(--accent2);
-  border-radius: var(--r-pill);
-  color: var(--brd-ink);
-}
-.brd-week__day--first { width: 33.5px; height: 33.5px; border-width: 3.5px; background: var(--brd-wash); }
-.brd-week__bell { width: 14px; height: 14px; fill: none; stroke: currentcolor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-.brd-week__cap {
-  position: absolute;
-  left: 50%;
-  top: calc(50% + 25px);
-  translate: -50% 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  white-space: nowrap;
-  font-size: var(--fs-caption);
-  line-height: 1.4;
-}
-.brd-week__name { font-weight: 700; color: var(--text-primary); }
-.brd-week__date { color: var(--text-secondary); }
-
-/* ── Le plan: the arrival first ── */
-.brd-plan { display: flex; flex-direction: column; }
-.brd-plan__arrive { display: flex; flex-direction: column; gap: var(--sp-2); }
-.brd-plan__cap { margin: 0; font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
-.brd-plan__date { display: flex; align-items: baseline; gap: var(--sp-4); margin: 0; font-weight: 700; line-height: 1; color: var(--brd-ink); }
-.brd-plan__day { font-size: var(--fs-specimen-word); }
-.brd-plan__year { font-size: var(--fs-display); }
-.brd-plan__sub { margin: 0; font-size: var(--fs-lead); color: var(--text-secondary); }
-.brd-plan__sub strong { font-weight: 700; color: var(--text-primary); }
-.brd-ride { margin-top: var(--sp-8); }
-.brd-ride__line { stroke: var(--accent2); stroke-width: 6; }
-.brd-ride__stop { border-radius: var(--r-pill); background: var(--bg-main); }
-.brd-ride__stop--today { width: 16px; height: 16px; background: var(--text-primary); }
-.brd-ride__stop--kana { width: 21px; height: 21px; border: 3px solid var(--line-kana); }
-.brd-ride__stop--by { width: 16.5px; height: 16.5px; border: 2.5px solid var(--text-secondary); }
-.brd-ride__stop--end { width: 28px; height: 28px; border: 4px solid var(--accent2); background: var(--brd-wash); }
-.brd-ride__lab {
-  position: absolute;
-  left: clamp(48px, calc(var(--x, 0) / 358 * 100%), calc(100% - 64px));
-  translate: -50% 0;
-  white-space: nowrap;
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--text-primary);
-}
-.brd-ride__lab--over { top: 7px; }
-.brd-ride__lab--under { top: 59px; }
-.brd-ride__lab--today { left: 0; translate: none; font-weight: 400; color: var(--text-secondary); }
-.brd-ride__lab--end { left: auto; right: 0; translate: none; }
-.brd-held {
-  display: grid;
-  grid-auto-columns: minmax(0, 1fr);
-  grid-auto-flow: column;
-  margin: var(--sp-7) 0 0;
-  padding: 0;
-  overflow: hidden;
-  list-style: none;
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-}
-.brd-held__cell {
-  --pig: var(--accent2);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--sp-2);
-  padding: var(--sp-4);
-  background: var(--surface);
-}
-.brd-held__cell + .brd-held__cell { border-left: 1px solid var(--surface-line); }
-.brd-held__cell[data-line="vocab"] { --pig: var(--line-vocab); }
-.brd-held__cell[data-line="kanji"] { --pig: var(--line-kanji); }
-.brd-held__cell[data-line="grammar"] { --pig: var(--line-grammar); }
-.brd-held__cell[data-line="kana"] { --pig: var(--line-kana); }
-.brd-held__jp { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 700; line-height: 1; color: color-mix(in srgb, var(--pig) 70%, var(--text-primary)); }
-.brd-held__fig { font-size: var(--fs-heading); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-.brd-held__unit { font-size: var(--fs-sm); line-height: 1.3; color: var(--text-secondary); }
-.brd-for { display: flex; align-items: flex-start; gap: var(--sp-3); margin: var(--sp-7) 0 0; font-size: var(--fs-sm); line-height: 1.4; }
-.brd-for > .svg { flex: none; width: 18px; height: 18px; stroke: var(--accent2); stroke-width: 2.5; }
-/* The promise on a line of its own, its full stop kept beside it. */
-.brd-for strong { font-weight: 700; }
-.brd-for strong::before { content: "\A"; white-space: pre; }
-
-/* ── Compte: the ticket the account keeps, the form under it ── */
-.brd-keep { display: flex; flex-direction: column; gap: var(--sp-4); }
-.brd-keep__skip { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); margin: 0; }
-.brd-keep__note { font-size: var(--fs-sm); line-height: 1.35; color: var(--text-secondary); }
-.brd-keep__skip-btn {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  height: 44px;
-  padding: 0 var(--sp-4);
-  background: none;
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-pill);
-  font: inherit;
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  white-space: nowrap;
-  color: var(--text-primary);
-  cursor: pointer;
-}
+/* ── Compte: the account's sheet, Google over the address ── */
 .auth-provider.brd-provider { min-height: 52px; }
 .field.brd-fld { min-height: 52px; padding-inline: var(--sp-5); border-color: var(--surface-line); }
-.brd-tk {
-  display: flex;
-  flex: none;
-  height: 150px;
-  overflow: hidden;
-  background-color: var(--surface);
-  background-image: repeating-linear-gradient(135deg, transparent 0 7px, color-mix(in srgb, var(--pass-ink) 5%, transparent) 7px 8px);
-  border: 1px solid color-mix(in srgb, var(--pass-ink) 40%, var(--border));
-  border-radius: var(--r-identity);
-}
-.brd-tk__body { position: relative; flex: 1; min-width: 0; padding: var(--sp-4); }
-.brd-tk__top { display: flex; align-items: baseline; justify-content: space-between; margin: 0; }
-.brd-tk__kind { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
-.brd-tk__date { font-size: var(--fs-caption); color: var(--text-secondary); }
-.brd-tk__map { position: absolute; left: 0; right: 0; top: 30px; height: 64px; }
-.brd-tk__lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.brd-tk__ride { fill: none; stroke: var(--accent2); stroke-width: 4; stroke-linecap: round; vector-effect: non-scaling-stroke; }
-.brd-tk__stop { position: absolute; left: calc(var(--x, 0) / 284 * 100%); top: 22px; translate: -50% -50%; }
-.brd-tk__ring {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24.5px;
-  height: 24.5px;
-  background: var(--bg-main);
-  border: 2.5px solid var(--text-primary);
-  border-radius: var(--r-pill);
-  font-family: var(--font-jp);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  line-height: 1;
-}
-.brd-tk__stop--kana .brd-tk__ring { border-color: var(--line-kana); }
-.brd-tk__stop--end .brd-tk__ring {
-  width: 31px;
-  height: 31px;
-  background: var(--brd-wash);
-  border: 3px solid var(--accent2);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  color: var(--brd-wash-ink);
-}
-.brd-tk__day {
-  position: absolute;
-  left: 50%;
-  top: calc(50% + 21px);
-  translate: -50% 0;
-  white-space: nowrap;
-  font-size: var(--fs-caption);
-  color: var(--text-secondary);
-}
-.brd-tk__stop--end .brd-tk__day { font-weight: 700; color: var(--text-primary); }
-.brd-tk__terms {
-  position: absolute;
-  left: var(--sp-4);
-  right: var(--sp-3);
-  bottom: var(--sp-3);
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 var(--sp-3);
-  margin: 0;
-}
-.brd-tk__term { display: flex; flex-direction: column; min-width: 0; }
-.brd-tk__term dt { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
-.brd-tk__term dd { margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: var(--fs-sm); font-weight: 700; }
-.brd-tk__stub {
-  position: relative;
-  display: flex;
-  flex: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 74px;
-  border-left: 1.5px dashed color-mix(in srgb, var(--pass-ink) 35%, var(--border));
-  text-align: center;
-}
-.brd-tk__credits { font-size: var(--fs-heading); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; color: var(--brd-ink); }
-.brd-tk__unit { font-size: var(--fs-caption); line-height: 1.25; color: var(--text-secondary); }
-.brd-tk__punch {
-  margin-top: var(--sp-3);
-  padding: 0 var(--sp-2);
-  border: 1.5px solid var(--stamp-ink);
-  border-radius: var(--r-plate);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-name);
-  text-transform: uppercase;
-  /* Mixed toward the ambient ink, as every stamp on paper is
-     (.anl-head__keep--on): the raw shu-iro is 2.9:1 on a dark surface. */
-  color: color-mix(in srgb, var(--stamp-ink) 65%, var(--text-primary));
-  rotate: -8deg;
-}
-
-/* ── La carte: the pass over the gate's reader ──
-   The question over the pass as every question over its drawing, its
-   air between them, and a road in the pass's metal from the pass down to the
-   room's foot; the gate's foot draws the rest of the road, over the gap
-   between the two and past the offer over the gate, into the reader
-   (32px in: the gate's --sp-3 and half its reader), ending on the
-   reader's middle -- half the gate's height off the foot's floor, the
-   gate being the foot's last row. The stage grows to the foot -- the road with it -- so an
-   auto margin over the question would be left nothing: the room over
-   the question is a spacer growing alike, and the pair stands on the
-   room's middle with the road for its lower half. */
-.brd__body:has(> .brd-issue-stn)::before { content: ""; flex: 1 0 0; margin-bottom: calc(-1 * var(--sp-5)); }
-.brd__body > .brd__stage.brd-issue-stn { flex: 1 0 auto; gap: 0; margin-bottom: 0; }
-.brd-issue-stn > .brd-issue { margin-top: 0; }
-.brd-issue__road { flex: 1 0 var(--sp-5); width: 6px; margin-left: 29px; background: var(--accent2); }
-.brd__foot--road { position: relative; }
-.brd__foot--road::before {
-  content: "";
-  position: absolute;
-  left: 29px;
-  top: calc(-1 * var(--sp-5));
-  bottom: 33px;
-  width: 6px;
-  background: var(--accent2);
-}
-.brd__foot--road:has(> .brd__error)::before { content: none; }
 
 /* ── The front door: the crossroads ── */
 .brd.brd-front { gap: 0; }
@@ -26138,11 +25513,10 @@ button.brd-stn { cursor: pointer; }
    air between them, above); what yields after it, under 740px -- which
    is also a phone with a notch and a home bar -- is the room inside the
    drawings (plan 168): a map's places and lines draw at 86% of their
-   height (`--ys`), the stage's pieces stand a rung closer, the plan's
-   rows likewise, the question steps down to the heading rung and the
-   gate gives back its height. The rings, names and
-   answers keep their size and no line is dropped -- the crossing and the
-   lines' fan, which hold whole answers at their two ends, keep their
+   height (`--ys`), the stage's pieces stand a rung closer, the question
+   steps down to the heading rung and the gate gives back its height.
+   The rings, names and answers keep their size and no line is dropped
+   -- the crossing, which holds whole answers at its ends, keeps its
    height too. What goes is the room around the content, which is the
    order the density contract sets (DESIGN.md, "Air gives way before
    content does"). 740px is one definition of "short" for the whole
@@ -26157,38 +25531,27 @@ button.brd-stn { cursor: pointer; }
 }
 /* The gate is drawn 66px tall on the 844px artboard (plan 164); a
    phone shorter than 800px gets back the 10px it added, the height the
-   action stood at before it, so the six motives still clear it with
-   the air the block's rungs promise -- then the step below takes it to
-   52px with everything else. */
+   action stood at before it, so the level's line still clears it with
+   the air its rungs promise -- then the step below takes it to 52px
+   with everything else. */
 @container brd (max-height: 799px) {
   .brd .btn-depart { min-height: 56px; }
-  .brd__foot--road::before { bottom: 28px; }
 }
 @container brd (max-height: 739px) {
   .brd__car { gap: var(--sp-4); }
   .brd__q { font-size: var(--fs-heading); }
   .brd .btn-depart { min-height: 52px; }
-  .brd__foot--road::before { bottom: 26px; }
   /* The drawings close their rungs rather than scroll (plan 168): a
      map's places and lines draw at 86% of their height, and its rings,
-     names and answers keep their size. The crossing and the lines' fan
-     hold whole answers at their two ends, so they keep theirs; the
-     junction, whose names wrap under their rings a rung over the next
-     row's, keeps its own down to a 680px frame (below). */
+     names and answers keep their size. The crossing holds whole
+     answers at its ends, so it keeps its height. */
   .brd__body > .brd__stage { gap: var(--sp-4); --ys: 0.86; }
-  .brd-map.brd-cross,
-  .brd-map.brd-fan,
-  .brd-map.brd-junction { --ys: 1; }
-  .brd-ride { margin-top: var(--sp-6); }
-  .brd-held,
-  .brd-for { margin-top: var(--sp-5); }
-}
-/* The junction's rows close up only on a frame under 680px -- an SE --
-   where six reasons and their names would not otherwise stand over the
-   gate; a phone with a notch and a home bar (a 723px frame) keeps them a
-   rung apart, as the owner asked of the built screen. */
-@container brd (max-height: 679px) {
-  .brd-map.brd-junction { --ys: 0.86; }
+  .brd-map.brd-cross { --ys: 1; }
+  /* The line climbing has carried the test over its gate since plan
+     247, a quiet way the foot did not hold before, so it closes
+     further: its rung at 80% is 53px, still clear of a 40px ring and
+     its halo. */
+  .brd-map.brd-climb { --ys: 0.8; }
 }
 
 /* ── What a landed animation leaves behind ──
@@ -26217,7 +25580,6 @@ button.brd-stn { cursor: pointer; }
 @keyframes brd-pull-out-back { to { transform: translateX(100%); } }
 @keyframes brd-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes brd-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-@keyframes brd-up { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
 @keyframes brd-drop { from { opacity: 0; transform: translateY(-24px); } to { opacity: 1; transform: none; } }
 @keyframes brd-draw-line { from { stroke-dashoffset: 400; } }
 @keyframes brd-flip { 0% { transform: rotateX(0); } 50% { transform: rotateX(90deg); } 100% { transform: rotateX(0); } }
@@ -26253,7 +25615,6 @@ button.brd-stn { cursor: pointer; }
   .brd__car { animation: none; }
   .brd__done { transition: none; }
 }
-
 
 /* ══ 部首 — study by radical (plan 086) ═══════════════════════
    The kanji station's third source. The index is the dictionary's
@@ -27143,7 +26504,6 @@ button.brd-stn { cursor: pointer; }
 .gl-tiles--long .gl-tile { min-height: 48px; }
 .gl-tile--on { background: color-mix(in srgb, var(--text-on-panel) 8%, var(--bg-panel)); border-color: var(--text-on-panel); }
 .gl-tile--on .gl-tile__b { background: var(--text-on-panel); border-color: var(--text-on-panel); color: var(--bg-panel); }
-
 
 /* The desk's map of the walk (CardPanel; redrawn in plan 198, the owner's
    pick B of the canvas "Tsuji — the card panel"): one upright rail, filled
@@ -28088,7 +27448,6 @@ button.brd-stn { cursor: pointer; }
   opacity: 0.8;
 }
 
-
 /* ── 案内 — the callout (plan 098; the guide's from plan 100) ──
    One sentence beside the thing it is about, on the panel ink so it
    reads as the console speaking rather than as content: the same
@@ -28193,7 +27552,7 @@ button.brd-stn { cursor: pointer; }
   width: 100%;
   max-width: var(--card-w);
   /* The quiet offer over the one filled action (plan 099's plate),
-     PassStep's own order; the card ride's foot holds the action alone. */
+     the boarding's own order; the card ride's foot holds the action alone. */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -28212,7 +27571,7 @@ button.brd-stn { cursor: pointer; }
    the platforms as a lattice of roundel-and-name in each line's own
    pigment (a line colour is a section's name, never decoration), the
    open-for-now note, and the foot with the quiet offer over the one
-   filled action -- PassStep's own order. */
+   filled action -- the boarding's own order. */
 /* The plate's heading: it captioned 定期券 above it until 2026-09-21
    and stands alone now, so it takes the rung and the ink the term had
    (and loses the negative margin that tucked it under it). */
@@ -28262,7 +27621,6 @@ button.brd-stn { cursor: pointer; }
   font-size: var(--fs-sm);
   color: var(--text-primary);
 }
-
 
 /* ── 案内 — the guide over a gate (plan 100) ──
    One element over the anchor whose shadow IS the scrim, wearing the
@@ -31058,8 +30416,271 @@ button.brd-stn { cursor: pointer; }
 .clrdev-share img { max-width: 100%; height: auto; box-shadow: var(--elev-board); }
 /* ── 191:primitives end ── */
 
-
 /* ── 191:day ── */
+/* ══ 247 — 乗車, the card is the form ══════════════════════════════
+   The owner's pick C of the boarding's canvas: the card's back, filled
+   in with what most keep, every printed field a door to its sheet
+   (components/boarding/CardStep.jsx, CardSheets.jsx). The card is the
+   app's own (PassBack): what is new here is its stage, its doors' extra
+   marks, the line under it and the sheets' bodies. */
+
+/* The card at the column's width, no wider than its back is drawn at,
+   and under it the one line it cannot print: where it lives. */
+.brd-card__card { align-self: center; width: 100%; max-width: var(--pcard-back-w); }
+.brd-keep-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  column-gap: var(--sp-3);
+  min-height: 44px;
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.4;
+  text-align: center;
+  color: var(--text-secondary);
+}
+.brd-keep-line .svg { flex: none; width: 16px; height: 16px; }
+.brd-keep-line__txt { min-width: 0; overflow-wrap: anywhere; }
+.brd-keep-line__go {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--sp-2);
+  background: none;
+  border: 0;
+  font: inherit;
+  font-weight: 700;
+  color: var(--brd-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.brd-keep-line--kept { color: var(--text-primary); }
+.brd-keep-line--kept .svg { color: var(--accent2); }
+
+/* 初 and あ as a stop's code: the Japanese face, set as the Latin
+   codes are. */
+.pcb__code--jp { font-family: var(--font-jp); letter-spacing: 0; }
+/* The boarding's signature: the panel itself the door to the name's
+   sheet; an empty one prints the placeholder in the quiet ink, as the
+   profile's does. */
+.pcb__sign-door {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 0 var(--sp-4);
+  background: none;
+  border: 0;
+  border-radius: inherit;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+/* The panel is under a thumb's height, and less once the card is
+   fitted to a phone's column: the door reaches past it, as the stops'
+   do, into the strip's own margins. */
+.pcb__sign-door::after { content: ''; position: absolute; inset: calc(-1 * var(--sp-3)) 0; }
+.pcb__sign-name--empty { opacity: 0.45; }
+.profile-card__name-text--empty { font-style: italic; color: var(--text-secondary); }
+
+/* The sign-in's link (plan 247), a quiet way under its fields: a card
+   kept by a link has no password, and a forgotten one had no door. */
+.auth-link {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--sp-3);
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* The sheets portal out of the boarding's frame, so they name its inks
+   again (.brd's own): the boards they borrow are drawn in them. */
+.brd-sheet {
+  --brd-ink: color-mix(in srgb, var(--accent2) 65%, var(--text-primary));
+  --brd-wash: color-mix(in srgb, var(--accent2) 12%, var(--surface));
+  --brd-wash-ink: color-mix(in srgb, var(--accent2) 50%, var(--text-primary));
+  --brd-kana-ink: color-mix(in srgb, var(--line-kana) 70%, var(--text-primary));
+}
+.brd-sheet__lede { margin: 0; font-size: var(--fs-body); line-height: 1.45; }
+.brd-sheet__note { margin: 0; font-size: var(--fs-sm); line-height: 1.4; text-align: center; color: var(--text-secondary); }
+.brd-sheet__field,
+.brd-sheet__ways { display: flex; flex-direction: column; gap: var(--sp-3); }
+/* On the sheet's surface the hours' cells stand on the paper, as they
+   did on the page. */
+.brd-sheet .brd-hour { background: var(--bg-main); }
+
+/* Objectif: the line climbing, a row a stop. The rail runs a row's
+   height between the stops' centres, the ride in the pass's gold from
+   the pick down to where the learner stands (the counts are plain
+   numbers, set by the sheet). */
+.brd-goals { --row: var(--sp-9); position: relative; }
+.brd-goals__list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.brd-goals__rail,
+.brd-goals__ride { position: absolute; left: 16px; translate: -50% 0; }
+.brd-goals__rail { top: calc(var(--row) / 2); width: 2px; height: calc(var(--rows, 0) * var(--row)); background: var(--surface-line); }
+.brd-goals__ride { top: calc(var(--row) / 2 + var(--from, 0) * var(--row)); width: 3px; height: calc(var(--ride, 0) * var(--row)); background: var(--accent2); }
+.brd-goal {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  height: var(--row);
+  padding: 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.brd-goal--here { cursor: default; }
+.brd-goal__dot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--surface);
+  border: 2px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  line-height: 1;
+}
+.brd-goal__dot--jp { font-family: var(--font-jp); font-size: var(--fs-sm); }
+.brd-goal--ride .brd-goal__dot { border-color: var(--accent2); }
+.brd-goal--on .brd-goal__dot { background: var(--gate-gold); border-color: var(--gate-gold); color: var(--text-on-fill); box-shadow: 0 0 0 5px var(--sel-wash); }
+.brd-goal--here .brd-goal__dot { border: 3px solid var(--accent2); color: var(--brd-ink); }
+.brd-goal__txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.brd-goal__top { display: flex; align-items: baseline; gap: var(--sp-3); }
+.brd-goal__name { flex: 1; min-width: 0; font-size: var(--fs-body); font-weight: 700; line-height: 1.25; }
+.brd-goal__date { flex: none; font-size: var(--fs-sm); font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.brd-goal--on .brd-goal__date { color: var(--brd-ink); }
+.brd-goal__desc { overflow: hidden; font-size: var(--fs-sm); line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); }
+.brd-goal--here .brd-goal__desc { font-weight: 700; color: var(--brd-ink); }
+
+/* Lignes: the kana on every ticket, then a check per line in its
+   pigment's ring. */
+.brd-lines__kana { display: flex; align-items: center; gap: var(--sp-4); margin: 0; }
+.brd-lines__disc {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: var(--bg-main);
+  border: 4px solid var(--line-kana);
+  border-radius: var(--r-pill);
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--brd-kana-ink);
+}
+.brd-lines__kana-txt { display: flex; flex-direction: column; font-size: var(--fs-body); }
+.brd-lines__lock { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-sm); color: var(--text-secondary); }
+.brd-lines__lock .svg { width: 13px; height: 13px; }
+.brd-lines {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+  background: var(--bg-main);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+}
+.brd-lines li + li { border-top: 1px solid var(--surface-line); }
+.brd-line {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 64px;
+  padding: var(--sp-3) var(--sp-4);
+  background: none;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.brd-line[data-line="vocab"] { --pig: var(--line-vocab); }
+.brd-line[data-line="kanji"] { --pig: var(--line-kanji); }
+.brd-line[data-line="grammar"] { --pig: var(--line-grammar); }
+.brd-line__ring {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--bg-main);
+  border: 2.5px solid var(--pig);
+  border-radius: var(--r-pill);
+  font-family: var(--font-jp);
+  font-size: var(--fs-title);
+  font-weight: 700;
+  line-height: 1;
+  color: color-mix(in srgb, var(--pig) 70%, var(--text-primary));
+}
+.brd-line__txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.brd-line__name { font-size: var(--fs-body); font-weight: 700; line-height: 1.25; }
+.brd-line__vol { font-size: var(--fs-sm); line-height: 1.3; color: var(--text-secondary); }
+.brd-line[aria-pressed="false"] :is(.brd-line__ring, .brd-line__txt) { opacity: 0.55; }
+/* A check, the lines' and the reminder's alike. */
+.brd-line__chk,
+.brd-remind__chk {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  color: transparent;
+}
+.brd-line__chk .svg,
+.brd-remind__chk .svg { width: 12px; height: 12px; stroke-width: 2.5; }
+:is(.brd-line, .brd-remind)[aria-pressed="true"] :is(.brd-line__chk, .brd-remind__chk) { border-color: var(--accent2); color: var(--accent2); }
+
+/* Départ, on a native shell: the nudge's own switch under the board. */
+.brd-remind {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 52px;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--bg-main);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.brd-remind__txt { font-size: var(--fs-body); }
+.brd-remind__txt strong { font-weight: 700; color: var(--brd-ink); }
+
 /* ══ 終着 — the everyday clear on a phone (plan 191) ════════════════
    ClearPhone (components/dayclear/ClearPhone.jsx), the canvas's Main
    board drawn as it is: its geometry in the board's px, the
@@ -31648,7 +31269,6 @@ button.brd-stn { cursor: pointer; }
 }
 /* ── 191:day end ── */
 
-
 /* ── 191:partial ── */
 /* ══ 途中下車 — a run that ended with cards left today (plan 191) ═════
    PartialFinish (components/dayclear/PartialFinish.jsx), the canvas's
@@ -31769,7 +31389,6 @@ button.brd-stn { cursor: pointer; }
   .ptl__ripple { animation: none; }
 }
 /* ── 191:partial end ── */
-
 
 /* ── 191:milestones ── */
 /* ══ 記念 — the milestone ceremonies (plan 191) ══════════════════════
@@ -32849,7 +32468,6 @@ button.brd-stn { cursor: pointer; }
 }
 /* ── 191:milestones end ── */
 
-
 /* ── 191:restday ── */
 /* ══ 運休 — the rest-day notice (plan 191) ══════════════════════════
    The canvas's RestDay board (components/dayclear/RestDayNotice.jsx),
@@ -33049,7 +32667,6 @@ button.brd-stn { cursor: pointer; }
   mask-composite: intersect;
 }
 /* ── 191:restday end ── */
-
 
 /* ── 191:tickets ── */
 /* ══ 記念切符 — Profile › Billets (plan 191) ══════════════════════════
@@ -33444,7 +33061,6 @@ button.brd-stn { cursor: pointer; }
   padding-top: var(--sp-5);
   border-top: 1px solid var(--surface-line);
 }
-
 
 /* ══ 217 — 会話, the conversation platform ═══════════════════════════
    Someone speaks to the learner in a place, and they answer
@@ -35503,7 +35119,6 @@ button.brd-stn { cursor: pointer; }
   }
   .desk-line__fig > b { color: var(--text-primary); }
 
-
   /* A Learn line across its plate (plan 132, LineFoot's `across`): the
      four lines stand in one column beside the shelf, so each is a row
      of stops rather than a column of them — the stop's name, its ring
@@ -36115,7 +35730,6 @@ button.brd-stn { cursor: pointer; }
   .tdy--print .tdy-desk__col { position: relative; z-index: 1; filter: drop-shadow(var(--elev-board)); }
   .tdy--desk .tpr-title { right: auto; left: calc(var(--tpr-x) + 664 * var(--tpr-u)); top: var(--sp-7); }
   .tdy--desk .tdy-desk__keys { gap: var(--sp-4); }
-
 
   /* The profile: the holder opened flat — the pass and its stamp book
      on the left, the record (the figures, the ledger, the 番付) on the
@@ -38368,11 +37982,8 @@ button.brd-stn { cursor: pointer; }
   }
   /* A step's answers stand at the width that serves them, set on its
      car so a leaving car keeps its own while it pulls away: the canvas
-     for every question -- the name's line, the six roads, the kana's
-     tree, the line of stations, the lines' cards, the four roads, the
-     day's arc, the ride drawn to scale and the account beside its
-     ticket -- and three columns and a gutter for the two words read
-     out. */
+     for every question -- the kana's tree, the line of stations, the
+     card -- and three columns and a gutter for the two words read out. */
   .desk-brd .brd__car {
     --desk-brd-w: var(--desk-board-w);
     --pull: 1;
@@ -38555,18 +38166,15 @@ button.brd-stn { cursor: pointer; }
      sign-in and band, the wait's dots. */
   @keyframes desk-brd-show { from { opacity: 0; } }
   .desk-brd .brd__car .brd__q { animation: none; }
-  .desk-brd .brd__car :is(.brd-board, .brd-notif, .brd-issue) { animation-delay: 160ms; }
-  .desk-brd .brd__car :is(.brd-kopt, .brd-cell) { animation-delay: 200ms; }
-  .desk-brd .brd__car :is(.brd-kopt, .brd-cell):nth-child(2) { animation-delay: 240ms; }
-  .desk-brd .brd__car :is(.brd-kopt, .brd-cell):nth-child(3) { animation-delay: 280ms; }
-  .desk-brd .brd__car :is(.brd-kopt, .brd-cell):nth-child(4) { animation-delay: 320ms; }
-  .desk-brd .brd__car :is(.brd-kopt, .brd-cell):nth-child(5) { animation-delay: 360ms; }
-  .desk-brd .brd__car :is(.brd-kopt, .brd-cell):nth-child(6) { animation-delay: 400ms; }
+  .desk-brd .brd__car :is(.brd-kopt) { animation-delay: 200ms; }
+  .desk-brd .brd__car :is(.brd-kopt):nth-child(2) { animation-delay: 240ms; }
+  .desk-brd .brd__car :is(.brd-kopt):nth-child(3) { animation-delay: 280ms; }
+  .desk-brd .brd__car :is(.brd-kopt):nth-child(4) { animation-delay: 320ms; }
   /* A pick answers as the pointer's hover does, at the same pace: the
      edge and the wash come on, the station's stretch of rail lights,
      and Continue comes up from its disabled 0.45 rather than blinking
      on. */
-  .desk-brd :is(.brd-kopt, .brd-cell) {
+  .desk-brd :is(.brd-kopt) {
     transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
   }
   .desk-brd .brd__foot .btn-depart { transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 200ms ease; }
@@ -38588,130 +38196,18 @@ button.brd-stn { cursor: pointer; }
   .desk-brd .brd__foot .btn-depart--gate,
   .desk-front .desk-front__block > .btn-depart--gate { min-height: 66px; }
   .desk-brd .brd__foot .btn-depart--gate { transition: transform 0.15s ease, color 270ms ease; }
-  /* ── 辻 — the name as the station's (plan 163) ──
-     The owner's D01 (NameStep): the name on its plate -- the field at
-     the card's width, set in from the question by a stop's width, the
-     letters it has left at its end -- a pole down to the question's hub
-     and the line leaving it for the next stop, named under its ring. */
-  .desk-brd__name {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding-left: calc(var(--sp-9) + var(--sp-7));
-  }
-  .desk-brd__name > .brd__link { margin-top: var(--sp-4); }
-  .desk-brd__plate {
-    position: relative;
-    width: min(100%, var(--card-w));
-  }
-  .desk-brd__plate > .brd-field { padding-right: calc(var(--sp-9) + var(--sp-8)); }
-  .desk-brd__plate-count {
-    position: absolute;
-    top: 50%;
-    right: var(--sp-6);
-    font-family: var(--font-display);
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: var(--text-secondary);
-    transform: translateY(-50%);
-  }
-  .desk-brd__name-line {
-    position: relative;
-    align-self: stretch;
-    height: calc(var(--sp-9) + var(--sp-4) + 80px);
-  }
-  /* The line, from the hub to the paper's edge... */
-  .desk-brd__name-line::before {
-    content: "";
-    position: absolute;
-    top: calc(var(--sp-9) + var(--sp-4) + 40px - 4px);
-    right: 0;
-    left: 40px;
-    height: 8px;
-    border-radius: var(--r-pill);
-    background: var(--surface-line);
-  }
-  /* ...and the pole from the plate down to the hub. */
-  .desk-brd__name-line::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: calc(40px - 1px);
-    width: 2px;
-    height: calc(var(--sp-9) + var(--sp-4));
-    background: var(--text-primary);
-  }
-  .desk-brd__name-line > .desk-brd__hub--pole {
-    top: calc(var(--sp-9) + var(--sp-4) + 40px);
-    left: 40px;
-    z-index: 1;
-  }
-  .desk-brd__name-next {
-    position: absolute;
-    top: calc(var(--sp-9) + var(--sp-4) + 40px - 14px);
-    /* Halfway from the plate's end to the paper's. */
-    right: calc((100% - var(--card-w)) / 2);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--sp-3);
-    font-family: var(--font-display);
-    font-size: var(--fs-body);
-    font-weight: 700;
-    color: var(--text-secondary);
-    transform: translateX(50%);
-  }
-  .desk-brd__name-next-ring {
-    width: 28px;
-    height: 28px;
-    border: 4px solid var(--surface-line);
-    border-radius: var(--r-pill);
-    background: var(--bg-main);
-  }
-  /* ── 辻 — six reasons, six roads (plan 163) ──
-     The owner's D02 (components/boarding/WhyStep's WhyRoads): the
-     question's hub in the middle of the paper and a road out of it to
-     each reason, which stands at its road's end as a pictogram in a
-     ring, its name on the ring's far side. The stage takes the paper
-     the question and the floor leave, up to the drawing's height (the
-     rings' centres 440px apart, the diagonals at 45 degrees on the
-     canvas's width); the roads stretch with it -- their ends placed out
-     of 100 across the width and down the band between the top and the
-     bottom rings' centres, ROADS's --x and --y -- and the rings keep
-     their size. A name with no room left beside its ring takes a
-     second line rather than leave the paper. */
-  .desk-brd .brd__stage:has(> :is(.desk-brd__roads, .desk-brd__climb, .desk-brd__rides, .desk-brd__day)) {
+  /* ── 辻 — the drawing's stage and the question's hub (plan 163) ──
+     The stage takes the paper the question and the floor leave, up to
+     the drawing's height; the question's hub, a ring numbered as its
+     stop, stands where the drawing puts it -- the climbing line's foot
+     (LevelStep's ClimbLine). */
+  .desk-brd .brd__stage:has(> .desk-brd__climb) {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
     /* The body's gap made up to a rung under the question. */
     padding-top: calc(var(--sp-6) - var(--sp-5));
   }
-  .desk-brd__roads {
-    position: relative;
-    flex: 1 1 auto;
-    min-height: 288px;
-    max-height: 536px;
-    margin-block: auto;
-  }
-  .desk-brd__map {
-    position: absolute;
-    top: 48px;
-    left: 0;
-    width: 100%;
-    height: calc(100% - 96px);
-    overflow: visible;
-    animation: desk-brd-show 320ms ease-out 160ms backwards;
-  }
-  .desk-brd__road {
-    stroke: var(--surface-line);
-    stroke-width: 6;
-    stroke-linecap: round;
-    vector-effect: non-scaling-stroke;
-    transition: stroke 160ms ease;
-  }
-  .desk-brd__road--on { stroke: var(--accent2); stroke-width: 10; }
   .desk-brd__hub {
     position: absolute;
     top: 50%;
@@ -38729,66 +38225,6 @@ button.brd-stn { cursor: pointer; }
     font-variant-numeric: tabular-nums;
     transform: translate(-50%, -50%);
   }
-  .desk-brd__way {
-    position: absolute;
-    top: calc(var(--y, 50) * (100% - 96px) / 100);
-    display: flex;
-    align-items: center;
-    gap: var(--sp-5);
-    padding: 0;
-    border: 0;
-    border-radius: var(--r-card);
-    background: none;
-    font: inherit;
-    color: var(--text-primary);
-    text-align: start;
-    cursor: pointer;
-    animation: brd-in 360ms ease-out 200ms backwards;
-  }
-  .desk-brd__way:nth-of-type(2) { animation-delay: 240ms; }
-  .desk-brd__way:nth-of-type(3) { animation-delay: 280ms; }
-  .desk-brd__way:nth-of-type(4) { animation-delay: 320ms; }
-  .desk-brd__way:nth-of-type(5) { animation-delay: 360ms; }
-  .desk-brd__way:nth-of-type(6) { animation-delay: 400ms; }
-  .desk-brd__way--end { left: calc(var(--x, 50) * 1% - 48px); }
-  .desk-brd__way--start {
-    right: calc((100 - var(--x, 50)) * 1% - 48px);
-    flex-direction: row-reverse;
-  }
-  .desk-brd__way--under {
-    left: calc(var(--x, 50) * 1% - var(--desk-run-col-min) / 2);
-    width: var(--desk-run-col-min);
-    flex-direction: column;
-    gap: var(--sp-4);
-  }
-  .desk-brd__ring {
-    display: grid;
-    flex: none;
-    place-items: center;
-    width: 96px;
-    height: 96px;
-    border: 3px solid var(--surface-line);
-    border-radius: var(--r-pill);
-    background: var(--bg-main);
-    transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
-  }
-  .desk-brd__pic { width: 48px; height: 48px; }
-  .desk-brd__way[aria-pressed="true"] .desk-brd__ring {
-    border-color: var(--accent2);
-    background: color-mix(in srgb, var(--accent2) 14%, var(--bg-main));
-    box-shadow: inset 0 0 0 1px var(--accent2), 0 0 0 6px color-mix(in srgb, var(--accent2) 18%, transparent);
-  }
-  .desk-brd__way-name {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-4);
-    font-family: var(--font-display);
-    font-size: var(--fs-title);
-    font-weight: 700;
-    line-height: 1.25;
-    text-wrap: balance;
-  }
-  .desk-brd__way--under > .desk-brd__way-name { justify-content: center; text-align: center; }
   /* ── 辻 — the two words, the four answers hung from them (plan 163) ──
      The owner's D03 (KanaStep's KanaTree): the two words as large as
      a word is set, and a tree from them to the four answers -- a stem
@@ -39073,781 +38509,8 @@ button.brd-stn { cursor: pointer; }
   .desk-brd__kanji-sound { font-family: var(--font-display); font-weight: 700; }
   .desk-brd__kanji b { font-family: var(--font-serif); font-weight: 700; color: var(--text-primary); }
   .desk-brd__kanji-later { font-size: var(--fs-sm); text-wrap: balance; }
-  /* ── 辻 — the lines as cards, the kana over them (plan 163) ──
-     The owner's D05 (LinesStep's LineCards): the kana a strip across the
-     paper under their pigment, locked -- on every ticket, no answer --
-     and the three lines a card each under their own: the line's glyph
-     in its ring, its name and what it is, and at its foot what it
-     carries on the ride. A line taken off greys its ring and its figure
-     and keeps its pigment's edge, so it still reads as that line. */
-  .desk-brd__ticket {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-5);
-    min-height: 68px;
-    padding: 0 var(--sp-6);
-    border: 1px solid var(--surface-line);
-    border-left: 4px solid var(--line-kana);
-    border-radius: var(--r-card);
-    animation: brd-in 360ms ease-out 160ms backwards;
-  }
-  .desk-brd__glyph--ticket,
-  .desk-brd__glyph--goal {
-    width: 40px;
-    height: 40px;
-    border-width: 3px;
-  }
-  .desk-brd__glyph--ticket { font-size: var(--fs-lead); }
-  .desk-brd__glyph--goal {
-    border-color: var(--accent2);
-    font-family: var(--font-display);
-    font-size: var(--fs-caption);
-  }
-  .desk-brd__ticket-txt {
-    display: flex;
-    align-items: baseline;
-    gap: var(--sp-4);
-    font-size: var(--fs-body);
-    color: var(--text-secondary);
-  }
-  .desk-brd__ticket-txt > b {
-    font-family: var(--font-display);
-    font-size: var(--fs-title);
-    font-weight: 700;
-    color: var(--text-primary);
-  }
-  .desk-brd__ticket-lock {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sp-3);
-    margin-left: auto;
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    color: var(--text-secondary);
-  }
-  .desk-brd__ticket-lock > .svg { width: 16px; height: 16px; }
-  .desk-brd__lines {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--sp-6);
-  }
-  .desk-brd__line {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--sp-3);
-    min-height: 320px;
-    padding: var(--sp-8) var(--sp-7) var(--sp-6);
-    border: 1px solid var(--surface-line);
-    border-top: 4px solid var(--c, var(--accent2));
-    border-radius: var(--r-card);
-    background: var(--surface);
-    font: inherit;
-    color: var(--text-primary);
-    text-align: center;
-    cursor: pointer;
-    animation: brd-in 360ms ease-out 200ms backwards;
-    transition: border-color 160ms ease, box-shadow 160ms ease;
-  }
-  .desk-brd__line:nth-child(2) { animation-delay: 240ms; }
-  .desk-brd__line:nth-child(3) { animation-delay: 280ms; }
-  .desk-brd__line[data-line="vocab"] { --c: var(--line-vocab); }
-  .desk-brd__line[data-line="kanji"] { --c: var(--line-kanji); }
-  .desk-brd__line[data-line="grammar"] { --c: var(--line-grammar); }
-  .desk-brd__line-ring {
-    display: grid;
-    place-items: center;
-    width: 96px;
-    height: 96px;
-    margin-bottom: var(--sp-4);
-    border: 4px solid var(--c, var(--accent2));
-    border-radius: var(--r-pill);
-    background: var(--bg-main);
-    font-family: var(--font-serif);
-    font-size: var(--fs-display);
-    font-weight: 700;
-    line-height: 1;
-    color: color-mix(in srgb, var(--c, var(--accent2)) 70%, var(--text-primary));
-    transition: border-color 160ms ease, color 160ms ease;
-  }
-  .desk-brd__line-name {
-    font-family: var(--font-display);
-    font-size: var(--fs-title);
-    font-weight: 700;
-  }
-  .desk-brd__line-desc { font-size: var(--fs-body); color: var(--text-secondary); }
-  .desk-brd__line-vol {
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: var(--sp-3);
-    width: 100%;
-    margin-top: auto;
-    padding-top: var(--sp-5);
-    border-top: 1px solid var(--surface-line);
-  }
-  .desk-brd__line-fig {
-    font-family: var(--font-display);
-    font-size: var(--fs-heading);
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    color: color-mix(in srgb, var(--c, var(--accent2)) 80%, var(--text-primary));
-  }
-  .desk-brd__line-unit {
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    color: var(--text-secondary);
-  }
-  .desk-brd__line[aria-pressed="false"] .desk-brd__line-ring {
-    border-color: var(--surface-line);
-    color: var(--text-secondary);
-  }
-  .desk-brd__line[aria-pressed="false"] .desk-brd__line-fig { color: var(--text-secondary); }
-  /* ── 辻 — four roads from today (plan 163) ──
-     The owner's D06 (RhythmStep's RideRoads): the rhythms as four roads
-     out of today on one calendar, each as long as its ride, the stop in
-     its ring at the road's end and its month and days beside it, the
-     rhythm picked on a gold band. The calendar is measured off the box
-     (--x, --y, --h and --end, plain pixels); the rows are the answers,
-     laid over the drawing with no ground of their own, so the band and
-     the roads show through. */
-  .desk-brd__rides {
-    position: relative;
-    flex: 1 1 auto;
-    min-height: 336px;
-    max-height: 512px;
-    margin-block: auto;
-  }
-  .desk-brd__ride-map {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-    animation: desk-brd-show 320ms ease-out 160ms backwards;
-  }
-  .desk-brd__ride-band { fill: color-mix(in srgb, var(--accent2) 14%, var(--bg-main)); }
-  .desk-brd__ride-grid { stroke: color-mix(in srgb, var(--text-primary) 10%, transparent); stroke-width: 1; }
-  .desk-brd__ride-grid--jan {
-    stroke: color-mix(in srgb, var(--text-primary) 30%, transparent);
-    stroke-dasharray: 3 4;
-  }
-  .desk-brd__ride-today { stroke: var(--text-primary); stroke-width: 2; }
-  .desk-brd__ride-road {
-    stroke: var(--surface-line);
-    stroke-width: 10;
-    stroke-linecap: round;
-    transition: stroke 160ms ease;
-  }
-  .desk-brd__ride-start { fill: var(--text-primary); }
-  .desk-brd__ride-stn {
-    fill: var(--bg-main);
-    stroke: var(--surface-line);
-    stroke-width: 4;
-  }
-  .desk-brd__ride-code {
-    font-family: var(--font-display);
-    font-size: var(--fs-caption);
-    font-weight: 700;
-    text-anchor: middle;
-    dominant-baseline: central;
-    fill: var(--text-secondary);
-  }
-  .desk-brd__ride-code--jp { font-family: var(--font-jp); }
-  .desk-brd__ride-line--on .desk-brd__ride-road { stroke: var(--accent2); stroke-width: 12; }
-  .desk-brd__ride-line--on .desk-brd__ride-stn { stroke: var(--accent2); stroke-width: 5; }
-  .desk-brd__ride-line--on .desk-brd__ride-code { fill: var(--text-primary); }
-  .desk-brd__ride-cap,
-  .desk-brd__ride-month {
-    position: absolute;
-    left: calc(var(--x, 0) * 1px);
-    font-family: var(--font-display);
-    font-size: var(--fs-caption);
-    font-weight: 700;
-    color: var(--text-secondary);
-    white-space: nowrap;
-  }
-  .desk-brd__ride-cap {
-    top: 0;
-    padding-left: var(--sp-1);
-    letter-spacing: var(--tr-caption);
-    text-transform: uppercase;
-  }
-  .desk-brd__ride-cap--today {
-    padding-left: 0;
-    transform: translateX(-50%);
-  }
-  .desk-brd__ride-month {
-    top: calc(var(--sp-6) + 2px);
-    letter-spacing: var(--tr-term);
-    text-transform: uppercase;
-    transform: translateX(-50%);
-  }
-  .desk-brd__ride {
-    position: absolute;
-    top: calc(var(--y, 0) * 1px);
-    left: 0;
-    width: 100%;
-    height: calc(var(--h, 116) * 1px);
-    padding: 0 var(--sp-5);
-    border: 1px solid transparent;
-    border-radius: var(--r-card);
-    background: none;
-    font: inherit;
-    color: var(--text-primary);
-    text-align: start;
-    cursor: pointer;
-    animation: brd-in 360ms ease-out 200ms backwards;
-    transition: border-color 160ms ease, box-shadow 160ms ease;
-  }
-  .desk-brd__ride:nth-of-type(2) { animation-delay: 240ms; }
-  .desk-brd__ride:nth-of-type(3) { animation-delay: 280ms; }
-  .desk-brd__ride:nth-of-type(4) { animation-delay: 320ms; }
-  .desk-brd__ride-svc {
-    position: absolute;
-    top: 50%;
-    left: var(--sp-5);
-    display: flex;
-    align-items: center;
-    gap: var(--sp-5);
-    transform: translateY(-50%);
-  }
-  .desk-brd__ride-txt {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-2);
-  }
-  .desk-brd__ride-min {
-    display: inline-flex;
-    align-items: baseline;
-    gap: var(--sp-3);
-    font-family: var(--font-display);
-    font-size: var(--fs-heading);
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-  }
-  .desk-brd__ride-unit,
-  .desk-brd__ride-name {
-    font-family: var(--font-display);
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    color: var(--text-secondary);
-  }
-  .desk-brd__ride-name {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sp-3);
-  }
-  .desk-brd .desk-brd__ride-name > .brd-tag { margin-bottom: 0; }
-  .desk-brd__ride-arr {
-    position: absolute;
-    top: 50%;
-    left: calc(var(--end, 0) * 1px + 24px + var(--sp-3));
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-1);
-    padding: var(--sp-1) var(--sp-2);
-    border-radius: var(--r-plate);
-    background: var(--bg-main);
-    white-space: nowrap;
-    transform: translateY(-50%);
-  }
-  .desk-brd__ride-when {
-    font-family: var(--font-display);
-    font-size: var(--fs-body);
-    font-weight: 700;
-    color: var(--text-secondary);
-  }
-  .desk-brd__ride-days {
-    font-family: var(--font-display);
-    font-size: var(--fs-caption);
-    font-weight: 700;
-    color: var(--text-secondary);
-  }
-  .desk-brd__ride[aria-pressed="true"] .desk-brd__ride-arr { background: color-mix(in srgb, var(--accent2) 14%, var(--bg-main)); }
-  .desk-brd__ride[aria-pressed="true"] .desk-brd__ride-when { font-size: var(--fs-lead); color: var(--text-primary); }
-  .desk-brd__ride[aria-pressed="true"] :is(.desk-brd__ride-days, .desk-brd__ride-unit, .desk-brd__ride-name) { color: var(--text-primary); }
-  /* ── 辻 — the day as the sun's arc (plan 163, option 3) ──
-     The owner's 空の弧 (TimeStep's DayArc): the day as the sky on its
-     horizon, sunrise at the left, noon near the crown, night at the
-     right; the three rides as stations on it; the train riding the arc,
-     the stretch of day behind it gold; the departure board in the bowl.
-     The arc is measured off the box (--x/--y, a station's or the
-     train's centre; --w, the board's width, plain pixels). Standing on a
-     ride's own hour the station is the train, so the knob steps out of
-     sight -- and back, while it holds the focus. */
-  .desk-brd__day {
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    gap: var(--sp-4);
-    min-height: 0;
-  }
-  .desk-brd__sky {
-    position: relative;
-    flex: 1 1 auto;
-    min-height: 380px;
-    max-height: 508px;
-    margin-top: auto;
-    touch-action: none;
-  }
-  .desk-brd__sky-map {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-    animation: desk-brd-show 320ms ease-out 160ms backwards;
-  }
-  .desk-brd__horizon { stroke: var(--text-secondary); stroke-width: 2; }
-  .desk-brd__arc {
-    fill: none;
-    stroke: var(--surface-line);
-    stroke-width: 8;
-    stroke-linecap: round;
-  }
-  .desk-brd__arc--done { stroke: var(--accent2); }
-  .desk-brd__sky-tick { stroke: var(--surface-line); stroke-width: 2; }
-  .desk-brd__sky-tick--major { stroke: var(--text-secondary); }
-  .desk-brd__hour {
-    font-family: var(--font-display);
-    font-size: var(--fs-caption);
-    font-weight: 700;
-    text-anchor: middle;
-    dominant-baseline: central;
-    fill: var(--text-secondary);
-  }
-  .desk-brd__sun > path { fill: var(--bg-main); stroke: var(--accent2); stroke-width: 3; }
-  .desk-brd__sun > line { stroke: var(--accent2); stroke-width: 3; stroke-linecap: round; }
-  .desk-brd__moon { fill: var(--text-secondary); }
-  .desk-brd__hour-stn {
-    position: absolute;
-    top: calc(var(--y, 0) * 1px - 48px);
-    left: calc(var(--x, 0) * 1px - 48px);
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: var(--sp-5);
-    padding: 0;
-    border: 0;
-    border-radius: var(--r-card);
-    background: none;
-    font: inherit;
-    color: var(--text-primary);
-    text-align: start;
-    cursor: pointer;
-    animation: brd-in 360ms ease-out 200ms backwards;
-  }
-  .desk-brd__hour-stn--noon {
-    left: calc(var(--x, 0) * 1px - 90px);
-    flex-direction: column;
-    gap: var(--sp-3);
-    width: 180px;
-    text-align: center;
-    animation-delay: 240ms;
-  }
-  .desk-brd__hour-stn--pm {
-    right: calc(100% - var(--x, 0) * 1px - 48px);
-    left: auto;
-    flex-direction: row-reverse;
-    text-align: end;
-    animation-delay: 280ms;
-  }
-  .desk-brd__hour-ring {
-    display: grid;
-    flex: none;
-    place-items: center;
-    width: 96px;
-    height: 96px;
-    border: 3px solid var(--surface-line);
-    border-radius: var(--r-pill);
-    background: var(--bg-main);
-    font-family: var(--font-serif);
-    font-size: var(--fs-display);
-    font-weight: 700;
-    line-height: 1;
-    transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
-  }
-  .desk-brd__hour-stn[aria-pressed="true"] .desk-brd__hour-ring {
-    border-color: var(--accent2);
-    background: color-mix(in srgb, var(--accent2) 14%, var(--bg-main));
-    box-shadow: inset 0 0 0 2px var(--accent2), 0 0 0 7px color-mix(in srgb, var(--accent2) 16%, transparent);
-  }
-  .desk-brd__hour-lab {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--sp-1);
-  }
-  .desk-brd__hour-stn--noon .desk-brd__hour-lab { align-items: center; }
-  .desk-brd__hour-stn--pm .desk-brd__hour-lab { align-items: flex-end; }
-  .desk-brd__hour-name {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sp-3);
-    font-family: var(--font-display);
-    font-size: var(--fs-lead);
-    font-weight: 700;
-  }
-  .desk-brd__hour-time {
-    font-family: var(--font-display);
-    font-size: var(--fs-body);
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: var(--text-secondary);
-  }
-  .desk-brd__train {
-    position: absolute;
-    top: calc(var(--y, 0) * 1px - 13px);
-    left: calc(var(--x, 0) * 1px - 13px);
-    z-index: 2;
-    width: 26px;
-    height: 26px;
-    padding: 0;
-    border: 3px solid var(--accent2);
-    border-radius: var(--r-pill);
-    background: var(--bg-main);
-    cursor: grab;
-    transition: opacity 160ms ease;
-  }
-  /* A hand's width to take hold of. */
-  .desk-brd__train::before {
-    content: "";
-    position: absolute;
-    inset: calc(-1 * var(--sp-4));
-  }
-  .desk-brd__train--docked { pointer-events: none; }
-  .desk-brd__train--docked:not(:focus-visible) { opacity: 0; }
-  .desk-brd__sky-board {
-    position: absolute;
-    top: calc(var(--y, 0) * 1px - var(--sp-8));
-    left: calc(var(--x, 0) * 1px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--sp-4);
-    width: calc(var(--w, 500) * 1px);
-    padding: var(--sp-5) var(--sp-6) var(--sp-6);
-    border-radius: var(--r-panel);
-    background: var(--bg-panel);
-    color: var(--text-on-panel);
-    text-align: center;
-    transform: translate(-50%, -100%);
-    animation: desk-brd-show 320ms ease-out 200ms backwards;
-  }
-  /* The last drum's one flip (.brd-flap--turn) is seen from in front of
-     its own tile: the row's vantage point, at the row's middle, sheared
-     a tile this size into a flat blade as it turned. */
-  .desk-brd__sky-board .brd-board__flaps {
-    gap: var(--sp-2);
-    perspective: none;
-  }
-  .desk-brd__sky-board .brd-flap {
-    width: 64px;
-    height: 88px;
-    font-size: var(--fs-specimen-word);
-    color: var(--accent2);
-  }
-  .desk-brd__sky-board .brd-flap--turn { animation-name: desk-brd-flip; }
-  @keyframes desk-brd-flip {
-    0%, 100% { transform: perspective(600px) rotateX(0); }
-    50% { transform: perspective(600px) rotateX(90deg); }
-  }
-  .desk-brd__sky-board .brd-board__colon { font-size: var(--fs-display); }
-  .desk-brd__sky-when { font-size: var(--fs-sm); color: var(--text-on-panel-soft); }
-  .desk-brd__sky-when > b { font-weight: 700; color: var(--text-on-panel); }
-  .desk-brd__fine {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--sp-3);
-    margin: 0 0 auto;
-    font-size: var(--fs-sm);
-    font-weight: 500;
-    color: var(--text-secondary);
-  }
-  /* The kana's four answers and the four rhythms, one row of tiles. */
-  .desk-brd .brd__car:is([data-car="kana"], [data-car="rhythm"]) .brd-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  /* The recommended rhythm's tag rides its tile's top edge, a badge on
-     the card rather than a line in it: inside, it pushed the 10 a rung
-     below the 5, the 15 and the 20 beside it, and the tile's corner is
-     the key's. */
-  .desk-brd .brd-cell > .brd-tag {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    margin-bottom: 0;
-    background: var(--bg-main);
-    transform: translate(-50%, -50%);
-  }
-  /* ...and the corner's key steps down a rung, clear of the badge. */
-  .desk-brd .brd-cell > .desk-brd__mark--corner { top: var(--sp-4); }
-  /* ── 辻 — the account beside the ticket it keeps (plan 163) ──
-     The owner's D09 (AccountStep, PaperTicket): the form in the left
-     column, the learner's 乗車券 in the right -- a stub with the balance
-     and the gate's punch, torn along a perforation from the ticket
-     proper: its kind and the mark, the holder and the day it was issued,
-     the ride to scale (--at, 0..1, as the plan's), and three terms. */
-  .desk-brd__keep {
-    display: grid;
-    grid-template-columns: minmax(300px, 460px) minmax(540px, 740px);
-    align-items: start;
-    justify-content: space-between;
-    gap: var(--sp-8);
-  }
-  .desk-brd__tkt-col {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-5);
-    animation: brd-in 360ms ease-out 200ms backwards;
-  }
-  .desk-brd__tkt {
-    position: relative;
-    display: grid;
-    grid-template-columns: 172px minmax(0, 1fr);
-    min-height: 340px;
-    border: 1px solid var(--surface-line);
-    border-radius: var(--r-panel);
-    background:
-      repeating-linear-gradient(135deg, transparent 0 7px, color-mix(in srgb, var(--accent2) 7%, transparent) 7px 8px),
-      var(--bg-card);
-    box-shadow: var(--elev-hang);
-  }
-  /* The perforation's two notches. */
-  .desk-brd__tkt::before,
-  .desk-brd__tkt::after {
-    content: "";
-    position: absolute;
-    left: calc(172px - 11px);
-    width: 22px;
-    height: 22px;
-    border: 1px solid var(--surface-line);
-    border-radius: var(--r-pill);
-    background: var(--bg-main);
-  }
-  .desk-brd__tkt::before { top: -12px; }
-  .desk-brd__tkt::after { bottom: -12px; }
-  .desk-brd__tkt-stub {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--sp-2);
-    padding: var(--sp-7) var(--sp-5) var(--sp-6);
-    border-right: 2px dashed var(--surface-line);
-    text-align: center;
-  }
-  .desk-brd__tkt-cap {
-    font-family: var(--font-display);
-    font-size: var(--fs-caption-xs);
-    font-weight: 700;
-    letter-spacing: var(--tr-caption);
-    text-transform: uppercase;
-    color: var(--text-secondary);
-  }
-  .desk-brd__tkt-bal {
-    margin-top: var(--sp-4);
-    font-family: var(--font-display);
-    font-size: var(--fs-display);
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    color: var(--accent2);
-  }
-  .desk-brd__tkt-sub { font-size: var(--fs-sm); font-weight: 700; }
-  .desk-brd__tkt-punch {
-    width: 26px;
-    height: 26px;
-    margin-top: auto;
-    border-radius: var(--r-pill);
-    background: var(--bg-main);
-    box-shadow: inset 0 2px 3px color-mix(in srgb, var(--bg-panel) 22%, transparent);
-  }
-  .desk-brd__tkt-main {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    padding: var(--sp-6) var(--sp-7);
-  }
-  .desk-brd__tkt-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-bottom: var(--sp-4);
-    border-bottom: 1px solid var(--surface-line);
-  }
-  .desk-brd__tkt-kind {
-    display: inline-flex;
-    align-items: baseline;
-    gap: var(--sp-4);
-  }
-  .desk-brd__tkt-jp {
-    font-family: var(--font-jp);
-    font-size: var(--fs-title);
-    font-weight: 700;
-    letter-spacing: var(--tr-name);
-  }
-  .desk-brd__tkt-mark { width: 30px; height: 30px; }
-  .desk-brd__tkt-who {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--sp-4);
-    margin-top: var(--sp-5);
-  }
-  .desk-brd__tkt-name {
-    overflow: hidden;
-    font-family: var(--font-serif);
-    font-size: var(--fs-title);
-    font-weight: 700;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-  .desk-brd__tkt-issued {
-    flex: none;
-    font-size: var(--fs-sm);
-    color: var(--text-secondary);
-  }
-  /* The ride: a rail from the departure's dot to the terminus's ring,
-     a stop's name and day under it -- the first set left, the last
-     right, one between centred. */
-  .desk-brd__tkt-route {
-    position: relative;
-    height: 96px;
-    margin: var(--sp-6) 0 var(--sp-5);
-    padding: 0;
-    list-style: none;
-  }
-  .desk-brd__tkt-route::before {
-    content: "";
-    position: absolute;
-    top: calc(24px - 3px);
-    right: 24px;
-    left: 10px;
-    height: 6px;
-    border-radius: var(--r-pill);
-    background: var(--accent2);
-  }
-  .desk-brd__tkt-stop {
-    position: absolute;
-    top: 0;
-    left: calc(var(--at, 0) * 100%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--sp-1);
-    transform: translateX(-50%);
-  }
-  .desk-brd__tkt-stop--start {
-    align-items: flex-start;
-    transform: none;
-  }
-  .desk-brd__tkt-stop--end {
-    right: 0;
-    left: auto;
-    align-items: flex-end;
-    transform: none;
-  }
-  .desk-brd__tkt-dot {
-    display: grid;
-    place-items: center;
-    width: 20px;
-    height: 20px;
-    margin-block: 14px var(--sp-3);
-    border-radius: var(--r-pill);
-    background: var(--text-primary);
-  }
-  .desk-brd__tkt-stop--kana .desk-brd__tkt-dot {
-    width: 36px;
-    height: 36px;
-    margin-block: 6px var(--sp-1);
-    border: 3px solid var(--line-kana);
-    background: var(--bg-card);
-    font-family: var(--font-jp);
-    font-size: var(--fs-body);
-    font-weight: 700;
-  }
-  .desk-brd__tkt-stop--end .desk-brd__tkt-dot {
-    width: 48px;
-    height: 48px;
-    margin-block: 0;
-    border: 4px solid var(--accent2);
-    background: color-mix(in srgb, var(--accent2) 22%, var(--bg-card));
-    font-family: var(--font-display);
-    font-size: var(--fs-sm);
-    font-weight: 700;
-  }
-  .desk-brd__tkt-at {
-    font-family: var(--font-display);
-    font-size: var(--fs-body);
-    font-weight: 700;
-  }
-  .desk-brd__tkt-day {
-    font-family: var(--font-display);
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    color: var(--text-secondary);
-  }
-  .desk-brd__tkt-terms {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--sp-4);
-    margin: auto 0 0;
-    padding-top: var(--sp-4);
-    border-top: 1px solid var(--surface-line);
-  }
-  .desk-brd__tkt-term {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-1);
-    min-width: 0;
-  }
-  .desk-brd__tkt-term > dd {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: var(--fs-body);
-    font-weight: 700;
-    text-wrap: balance;
-  }
-  .desk-brd__tkt-term--valid > dd { color: var(--accent2); }
-  .desk-brd__tkt-note {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--sp-2);
-    margin: 0;
-    font-size: var(--fs-sm);
-    color: var(--text-secondary);
-  }
-  /* The account's form at a column's width, its two fields the sign-in's
-     size: an address and a password are not answers to a question, and
-     at the name's display size "E-mail" ran as tall as the heading over
-     it. The Google button, the rule and the fields stand closer than a
-     question's answers do -- one form, not four blocks. */
-  .desk-brd__form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-4);
-  }
-  .desk-brd__form .brd-field {
-    min-height: var(--sp-9);
-    font-size: var(--fs-lead);
-    font-weight: 500;
-  }
-  /* A field's focus is one edge (the owner: "make the name focus
-     simpler"): the pass's gold, as thick as the name field's own 1.5px,
-     where the frame's ring drew a second line 2px outside it. At rest
-     the edge is the answers' hairline, filled or not, so the gold says
-     "you are typing here" and nothing else; an answer under the pointer
-     takes the same edge. */
-  .desk-brd .brd-field { border-color: var(--surface-line); }
-  .desk-brd .brd-field:focus-visible {
-    border-color: var(--accent2);
-    outline: none;
-    box-shadow: 0 0 0 0.5px var(--accent2);
-  }
+  /* The kana's four answers, one row of tiles. */
+  .desk-brd .brd__car[data-car="kana"] .brd-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   /* ── 辻 — the stops as a climbing line (plans 140, 163) ──
      The owner's D04 (LevelStep's ClimbLine): the line climbing a step a
      level from the question's hub, a ring per stop on its platform, its
@@ -40017,207 +38680,6 @@ button.brd-stn { cursor: pointer; }
     font-size: var(--fs-lead);
     font-weight: 700;
     line-height: 1;
-    color: var(--accent2);
-  }
-  /* ── 辻 — the ride drawn to scale (plan 163) ──
-     The owner's D08 (PlanStep's PlanRoute): the route in gold from the
-     crossroads to the terminus, each stop where its day falls (--at,
-     0..1, between the two ends' own room), its day over it and its name
-     under; then under a rule, what the terminus holds beside what the
-     ride is for. */
-  .desk-brd__plan {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-8);
-  }
-  .desk-brd__route {
-    position: relative;
-    height: 232px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    animation: brd-in 360ms ease-out 160ms backwards;
-  }
-  /* The rail from the departure's centre to the terminus's: each end
-     stands half a stop's width (110px) in from the paper's edge. */
-  .desk-brd__route::before {
-    content: "";
-    position: absolute;
-    top: calc(var(--sp-9) + 58px - 5px);
-    right: 110px;
-    left: 110px;
-    height: 10px;
-    border-radius: var(--r-pill);
-    background: var(--accent2);
-  }
-  .desk-brd__halt {
-    position: absolute;
-    top: 0;
-    left: calc(110px + var(--at, 0) * (100% - 220px));
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 220px;
-    margin-left: -110px;
-    text-align: center;
-  }
-  .desk-brd__halt-when {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    gap: var(--sp-1);
-    height: var(--sp-9);
-  }
-  .desk-brd__halt-cap {
-    font-family: var(--font-display);
-    font-size: var(--fs-caption-xs);
-    font-weight: 700;
-    letter-spacing: var(--tr-caption);
-    text-transform: uppercase;
-    color: var(--text-secondary);
-  }
-  .desk-brd__halt-date {
-    font-family: var(--font-display);
-    font-size: var(--fs-lead);
-    font-weight: 700;
-    line-height: 1.1;
-    color: var(--text-primary);
-  }
-  .desk-brd__halt--end .desk-brd__halt-date { font-size: var(--fs-heading); }
-  .desk-brd__halt--by .desk-brd__halt-date { font-size: var(--fs-body); color: var(--text-secondary); }
-  /* Every ring is centred on the rail: a box of the terminus's height,
-     the ring in its middle. */
-  .desk-brd__halt-ring {
-    display: grid;
-    place-items: center;
-    width: 88px;
-    height: 88px;
-    margin-block: calc((116px - 88px) / 2);
-    border: 4px solid var(--text-primary);
-    border-radius: var(--r-pill);
-    background: var(--bg-main);
-    font-family: var(--font-display);
-    font-weight: 700;
-    line-height: 1;
-  }
-  .desk-brd__halt-ring--hub > .mark { width: 60%; height: 60%; }
-  .desk-brd__halt-ring--kana {
-    width: 80px;
-    height: 80px;
-    margin-block: calc((116px - 80px) / 2);
-    border-color: var(--line-kana);
-    font-family: var(--font-jp);
-    font-size: var(--fs-heading);
-  }
-  .desk-brd__halt-ring--by {
-    width: 22px;
-    height: 22px;
-    margin-block: calc((116px - 22px) / 2);
-    border: 4px solid var(--accent2);
-  }
-  .desk-brd__halt-ring--end {
-    width: 116px;
-    height: 116px;
-    margin-block: 0;
-    border: 6px solid var(--accent2);
-    background: color-mix(in srgb, var(--accent2) 22%, var(--bg-main));
-    font-size: var(--fs-heading);
-  }
-  .desk-brd__halt-ring--jp { font-family: var(--font-jp); }
-  .desk-brd__halt-lab {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-1);
-    margin-top: var(--sp-2);
-    font-size: var(--fs-sm);
-    color: var(--text-secondary);
-  }
-  .desk-brd__halt-name {
-    font-family: var(--font-display);
-    font-size: var(--fs-body);
-    font-weight: 700;
-    color: var(--text-primary);
-  }
-  .desk-brd__halt--by .desk-brd__halt-name { font-size: var(--fs-lead); }
-  /* What the terminus holds beside what the ride is for. The first has
-     no caption since plan 168 (the owner's cut, as on a phone), so it
-     stands on the middle of the second rather than on its caption. */
-  .desk-brd__plan-foot {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: center;
-    gap: var(--sp-8);
-    padding-top: var(--sp-6);
-    border-top: 1px solid var(--surface-line);
-    animation: brd-in 360ms ease-out 280ms backwards;
-  }
-  .desk-brd__plan-cap {
-    margin: 0 0 var(--sp-5);
-    font-family: var(--font-display);
-    font-size: var(--fs-caption);
-    font-weight: 700;
-    letter-spacing: var(--tr-caption);
-    text-transform: uppercase;
-    color: var(--text-secondary);
-  }
-  .desk-brd__held-list,
-  .desk-brd__for-list {
-    display: flex;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .desk-brd__held-list { gap: var(--sp-6); }
-  .desk-brd__for-list { flex-direction: column; gap: var(--sp-4); }
-  .desk-brd__held-item {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-4);
-    min-width: 0;
-  }
-  .desk-brd__held-item[data-line="vocab"] { --c: var(--line-vocab); }
-  .desk-brd__held-item[data-line="kanji"] { --c: var(--line-kanji); }
-  .desk-brd__held-item[data-line="grammar"] { --c: var(--line-grammar); }
-  .desk-brd__held-item[data-line="kana"] { --c: var(--line-kana); }
-  .desk-brd__held-ring {
-    display: grid;
-    flex: none;
-    place-items: center;
-    width: 52px;
-    height: 52px;
-    border: 3px solid var(--c, var(--accent2));
-    border-radius: var(--r-pill);
-    font-family: var(--font-serif);
-    font-size: var(--fs-title);
-    font-weight: 700;
-    color: color-mix(in srgb, var(--c, var(--accent2)) 70%, var(--text-primary));
-  }
-  .desk-brd__held-txt { display: flex; flex-direction: column; }
-  .desk-brd__held-fig {
-    font-family: var(--font-display);
-    font-size: var(--fs-heading);
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    color: color-mix(in srgb, var(--c, var(--accent2)) 80%, var(--text-primary));
-  }
-  .desk-brd__held-unit {
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    color: var(--text-secondary);
-  }
-  .desk-brd__for-item {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-4);
-    font-size: var(--fs-lead);
-    font-weight: 500;
-  }
-  .desk-brd__for-item > .svg {
-    flex: none;
-    width: 18px;
-    height: 18px;
     color: var(--accent2);
   }
   /* ── 辻 — the front door as the crossroads (plans 140, 155, 163) ──
@@ -40435,39 +38897,19 @@ button.brd-stn { cursor: pointer; }
     .desk-brd__sp + .desk-brd__sp::before,
     .desk-brd__sp-door,
     .desk-brd__sp-dot { transition: none; }
-    .desk-brd__map,
-    .desk-brd__way,
     .desk-brd__rails,
     .desk-brd__stop,
     .desk-brd__call,
     .desk-brd__tree,
-    .desk-brd__ticket,
-    .desk-brd__line,
-    .desk-brd__ride-map,
-    .desk-brd__ride,
-    .desk-brd__sky-map,
-    .desk-brd__hour-stn,
-    .desk-brd__sky-board,
-    .desk-brd__sky-board .brd-flap--turn,
     .desk-brd__word,
-    .desk-brd__route,
-    .desk-brd__plan-foot,
-    .desk-brd__tkt-col,
     .desk-brd__kanji,
     .desk-brd__first { animation: none; }
-    .desk-brd__road,
-    .desk-brd__ring,
     .desk-brd__stop-ring,
-    .desk-brd__line-ring,
-    .desk-brd__ride-road,
-    .desk-brd__hour-ring,
-    .desk-brd__train,
     .desk-brd__tree::before,
     .desk-brd__branch { transition: none; }
   }
-  /* A pointer's answer to "is this one I can pick": the name field's
-     edge (.brd-field, 1.5px of the pass's gold on the answer's own
-     ground) and nothing else -- no wash, no lift, no brightness (plan
+  /* A pointer's answer to "is this one I can pick": a gold edge (1.5px
+     of the pass's gold on the answer's own ground) and nothing else -- no wash, no lift, no brightness (plan
      155, the owner: make the answers' hover like the name's, simpler).
      A pick keeps its wash and its check, so the two never read alike;
      the focus ring's twin. The sheet's bare button:hover brightened a
@@ -40475,22 +38917,12 @@ button.brd-stn { cursor: pointer; }
      boarding's answers, its doors and its way back, and the Welcome's
      sign-in, are spared it. */
   @media (pointer: fine) {
-    .desk-brd :is(.brd-kopt, .brd-cell, .desk-brd__stop, .desk-brd__way, .desk-brd__line, .desk-brd__ride, .desk-brd__hour-stn, .desk-brd__train, .desk-brd__back, .desk-brd__sp-door):hover,
+    .desk-brd :is(.brd-kopt, .desk-brd__stop, .desk-brd__back, .desk-brd__sp-door):hover,
     .desk-front :is(.desk-front__door-btn, .auth-provider):hover { filter: none; }
     .desk-brd .brd-kopt:not(.brd-kopt--on):hover,
     .desk-brd .brd-kopt:not(.brd-kopt--on):focus-visible,
-    .desk-brd .brd-cell:not(.brd-cell--on):hover,
-    .desk-brd .brd-cell:not(.brd-cell--on):focus-visible,
     button.desk-brd__stop:not(.desk-brd__stop--on):hover > .desk-brd__stop-ring,
-    button.desk-brd__stop:not(.desk-brd__stop--on):focus-visible > .desk-brd__stop-ring,
-    .desk-brd__line:hover,
-    .desk-brd__line:focus-visible,
-    .desk-brd__ride:not([aria-pressed="true"]):hover,
-    .desk-brd__ride:not([aria-pressed="true"]):focus-visible,
-    .desk-brd__hour-stn:not([aria-pressed="true"]):hover > .desk-brd__hour-ring,
-    .desk-brd__hour-stn:not([aria-pressed="true"]):focus-visible > .desk-brd__hour-ring,
-    .desk-brd__way:not([aria-pressed="true"]):hover > .desk-brd__ring,
-    .desk-brd__way:not([aria-pressed="true"]):focus-visible > .desk-brd__ring {
+    button.desk-brd__stop:not(.desk-brd__stop--on):focus-visible > .desk-brd__stop-ring {
       border-color: var(--accent2);
       box-shadow: 0 0 0 0.5px var(--accent2);
     }
@@ -40506,6 +38938,19 @@ button.brd-stn { cursor: pointer; }
     .desk-front__door-btn:hover,
     .desk-front__door-btn:focus-visible { border-color: var(--text-secondary); }
   }
+
+  /* A quiet way over a floor (plan 247, the line's test; the test's own
+     two, its pick and its stop) stands on the floor's own row, before
+     the way back: the phone's rung over its gate is a row of the paper's
+     height, which a laptop's short window has not got to spare. Set
+     here, after every rule of the floor, the gate and the quiet ways
+     that these refine. */
+  .desk-brd .brd__foot:has(> :is(.brd__link, .brd-test__ways) + .desk-brd__floor) { flex-direction: row; align-items: center; gap: var(--sp-5); }
+  .desk-brd .brd__foot > :is(.brd__link, .brd-test__ways):has(+ .desk-brd__floor) { margin-left: auto; }
+  .desk-brd .brd__foot > :is(.brd__link, .brd-test__ways) + .desk-brd__floor { flex: 0 1 auto; width: auto; min-width: 0; }
+  /* Sized by its content now, the floor would hold Continue at its
+     words' width: the ticket's is set, and still gives way. */
+  .desk-brd .brd__foot > :is(.brd__link, .brd-test__ways) + .desk-brd__floor > .btn-depart:last-child { width: var(--desk-side-w); }
 
   /* ── copied, focused (plan 123) ──
      A reading copied from a desk's page is the word, not the word and
@@ -43268,18 +41713,6 @@ button.brd-stn { cursor: pointer; }
     /* ── first contact ──
        The drawings take the room the question and the floor leave,
        down to a floor of their own that a 600px window holds. */
-    .desk-brd__roads { min-height: 240px; }
-    /* The reason straight out to the right names itself beside its
-       ring, as its five neighbours do: under it, the name stood on the
-       ring below once the rows closed up (reported on a 1366x768
-       laptop). A long name takes a second line in the room it has. */
-    .desk-brd__way--under {
-      left: calc(var(--x, 50) * 1% - 48px);
-      width: auto;
-      flex-direction: row;
-      gap: var(--sp-5);
-    }
-    .desk-brd__way--under > .desk-brd__way-name { justify-content: flex-start; text-align: start; }
     /* The kana's tree: a shorter stem and the answers at their content. */
     .desk-brd__kana { --stem: var(--sp-7); }
     .desk-brd__tree {
@@ -43294,20 +41727,7 @@ button.brd-stn { cursor: pointer; }
     .desk-brd__chip { height: 48px; }
     /* The line of levels climbs less steeply; it keeps every stop. */
     .desk-brd__climb { min-height: 300px; }
-    /* The lines' cards at their content, the ring a rung smaller. */
-    .desk-brd__ticket { min-height: 52px; }
-    .desk-brd__line {
-      gap: var(--sp-2);
-      min-height: 0;
-      padding: var(--sp-4) var(--sp-6);
-    }
-    .desk-brd__line-ring {
-      width: 56px;
-      height: 56px;
-      margin-bottom: var(--sp-2);
-      font-size: var(--fs-heading);
-    }
-    .desk-brd__line-vol { padding-top: var(--sp-3); }
+    /* The reveal's first stop a rung closer under its words. */
     .desk-brd__first { margin-top: var(--sp-3); }
     /* The two words read out: each card a rung tighter round its word
        and its signs. */
@@ -43316,32 +41736,11 @@ button.brd-stn { cursor: pointer; }
       padding: var(--sp-5);
     }
     .desk-brd__sign { height: 64px; }
-    .desk-brd__rides { min-height: 280px; }
-    /* The day's arc: noon names itself beside its ring, and the board
-       sits lower in the bowl on smaller flaps, so the name never stands
-       on the board (it did under 800px). */
-    .desk-brd__day { gap: var(--sp-3); }
-    .desk-brd__sky { min-height: 300px; }
-    .desk-brd__hour-stn--noon {
-      left: calc(var(--x, 0) * 1px - 48px);
-      flex-direction: row;
-      gap: var(--sp-5);
-      width: auto;
-      text-align: start;
-    }
-    .desk-brd__hour-stn--noon .desk-brd__hour-lab { align-items: flex-start; }
-    .desk-brd__sky-board {
-      top: calc(var(--y, 0) * 1px - var(--sp-5));
-      gap: var(--sp-3);
-      padding: var(--sp-4) var(--sp-5) var(--sp-5);
-    }
-    .desk-brd__sky-board .brd-flap {
-      width: 48px;
-      height: 64px;
-      font-size: var(--fs-display);
-    }
-    /* The plan's two halves a rung closer. */
-    .desk-brd__plan { gap: var(--sp-5); }
+    /* The level's test: its four answers a rung closer, so its longest
+       question, a sentence on two lines, stands whole over the floor
+       (plan 247; its two ways stand on the floor's row). */
+    .desk-brd .brd-test .mcq-row { padding-block: var(--sp-3); }
+    .desk-brd .brd-test .mcq-row + .mcq-row { margin-top: var(--sp-2); }
   }
 }
 @media (min-width: 1100px) {
@@ -43689,7 +42088,6 @@ button.brd-stn { cursor: pointer; }
   /* The compact gate's Enter cap (kit's gate, 52px): a rung closer to
      the pill's end than the 66px gate's. */
   .clrk-gate--compact .desk-kbd { margin-inline-end: var(--sp-3); }
-
 
   /* ── 191:desk-day ── */
   /* ClearDesk (components/dayclear/ClearDesk.jsx): the everyday clear on
@@ -44375,7 +42773,6 @@ button.brd-stn { cursor: pointer; }
   }
   /* ── 191:desk-day end ── */
 
-
   /* ── 191:desk-milestones ── */
   /* The milestone ceremonies in the content area beside the rail: the
      frame starts at the rail's edge, the composition centred in what is
@@ -44386,7 +42783,6 @@ button.brd-stn { cursor: pointer; }
   .ms-ticket--desk,
   .ms-month--desk { left: var(--desk-rail-w); }
   /* ── 191:desk-milestones end ── */
-
 
   /* ── 191:desk-tickets ── */
   /* 運休 on the desk (the RestDay board, components/dayclear/
