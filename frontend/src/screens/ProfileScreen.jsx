@@ -8,7 +8,7 @@ import { ProfileCard } from '../components/pass/LearnerCard'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
 import { useDesk } from '../hooks/useDesk'
-import { StampBook, Records, ProfileDoors, TicketsDoor, AgendaDoor } from '../components/profile/ProfileBlocks'
+import { StampBook, Records, ProfileDoors, TicketsDoor, AgendaDoor, HolderDoors } from '../components/profile/ProfileBlocks'
 import { Banzuke } from '../components/profile/Banzuke'
 import { LineLedger } from '../components/profile/LineLedger'
 import { useAgenda } from '../stores/agenda'
@@ -32,6 +32,11 @@ import { useAgenda } from '../stores/agenda'
 // shows five. The doors stand straight under the pass (the owner's
 // call after the first round): they are the ways out of the holder,
 // and at the foot of the lines they were a scroll away.
+//
+// Plan 247 (the owner's pick A 一望 of the canvas "Tsuji — the profile
+// on the desk") fitted the desk's holder to the window: the same two
+// leaves, whole from the narrowest desk, with the stamp book's figures
+// in the records' lattice and both rankings on one board.
 
 // ── Mock fallback ─────────────────────────────────────────
 // Kept in sync with profile.py's real response shape so a backend
@@ -134,7 +139,9 @@ export default function ProfileScreen({ session }) {
   const desk = useDesk()
 
   // Each insert once, so the phone's column and the desk's two are the
-  // same objects in the same order — only the holder differs.
+  // same objects in the same order — only the holder differs, and on the
+  // desk (plan 247) the stamp book's three figures, which open the
+  // records' lattice there.
   const inserts = loading ? null : {
     stale: stale && (
       <p className="hint profile__stale" role="status">
@@ -159,6 +166,7 @@ export default function ProfileScreen({ session }) {
         longest={profile.streakLongest}
         t={t}
         lang={lang}
+        figures={!desk}
       />
     ),
     // 記念切符 (plan 191): the tickets the streak earned, behind the
@@ -166,12 +174,16 @@ export default function ProfileScreen({ session }) {
     tickets: <TicketsDoor t={t} navigate={navigate} count={profile.tickets?.length ?? 0} />,
     // 時間割 (plan 202): the door to the agenda, under the tickets'.
     agenda: <AgendaDoor t={t} navigate={navigate} blocks={agenda} />,
-    // Three figures: the reviews, the retention, the best perfect run.
-    records: <Records profile={profile} t={t} lang={lang} />,
+    // Three figures: the reviews, the retention, the best perfect run --
+    // on the desk after the stamp book's three.
+    records: <Records profile={profile} t={t} lang={lang} book={desk} />,
     ledger: stats && <LineLedger stats={stats} t={t} lang={lang} navigate={navigate} />,
     // Statistics and Settings — the phone's; the desk's rail hangs both
     // under the lit gate.
     doors: <ProfileDoors t={t} navigate={navigate} />,
+    // The tickets' and the agenda's doors as one lattice under the card:
+    // the desk's (plan 247).
+    holderDoors: <HolderDoors t={t} navigate={navigate} count={profile.tickets?.length ?? 0} blocks={agenda} />,
     board: <Banzuke all={leaderboard} week={weekBoard} t={t} lang={lang} both={desk} />,
   }
 
@@ -183,19 +195,20 @@ export default function ProfileScreen({ session }) {
       {inserts && (desk ? (
         // 机 — the desk (plan 113): the holder opened flat, the pass and
         // its stamp book on the left, at the phone's own size since plan
-        // 115 (--desk-side-w), the record taking the rest on the right. The same
-        // inserts in the same order, split after the stamps — so a
-        // screen reader, the Tab key and the guide walk them exactly as
-        // they walk the phone's column — less the two doors, which the
-        // rail already holds (plan 143).
+        // 115 (--desk-side-w), the record taking the rest on the right. The
+        // phone's inserts, split after the stamps — so a screen reader, the
+        // Tab key and the guide walk the card, the stamps and the record in
+        // the phone's order — less the two doors the rail already holds
+        // (plan 143). Since plan 247 the tickets' and the agenda's doors
+        // stand straight under the card, one lattice of two slim rows, and
+        // the two columns end together, whole in the window.
         <>
           {inserts.stale}
           <div className="desk-profile">
             <div className="desk-profile__col">
               {inserts.pass}
+              {inserts.holderDoors}
               {inserts.stamps}
-              {inserts.tickets}
-              {inserts.agenda}
             </div>
             <div className="desk-profile__col">
               {inserts.records}

@@ -1787,11 +1787,15 @@ line here says otherwise.
   put behind a tap — a sheet, a toggle, a second screen — never a
   decoration found to fill it. The plates go two by two with the odd fifth
   across the row (a lattice with no short last row); the profile opens the
-  holder flat, the pass and its stamps at the side column's width beside the
-  record — its lines drawn with a rail per stop, both rankings at once, and
-  no door to Statistics or Settings, which hang under the lit gate on the
-  rail (plan 143); Settings sets its column (the pass and the
-  list, plan 139) beside the open page, neither printing a title.
+  holder flat, whole in the window from the narrowest desk (plan 247, the
+  owner's pick A 一望): the pass, its two doors and its stamps at the side
+  column's width beside the record — the stamp book's three figures
+  opening the records' lattice, its lines drawn with a rail per stop, both
+  rankings at once on one board, the ranks down its middle, and no door to
+  Statistics or Settings, which hang under the lit gate on the rail (plan
+  143), the two columns ending together; Settings sets its column (the
+  pass and the list, plan 139) beside the open page, neither printing a
+  title.
 - **The canvas is `--desk-board-w` (1240px)**, the width a plated screen
   was always allowed, and a second column is **`--desk-side-w` (360px)** —
   a phone's content width, so a phone-born component set in it (the pass's

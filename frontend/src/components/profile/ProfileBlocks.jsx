@@ -13,7 +13,8 @@ import { AGENDA_PATH } from '../agenda/AgendaNext'
 // one, every day ridden inked in the eki stamp's lacquer, a missed day
 // dashed, today pressed harder, the days ahead faint. Under it, the
 // three figures in one row of three: the streak, the longest, the
-// days stamped.
+// days stamped. On the desk (plan 247) the three join the records in
+// one lattice of six (Records' `book`) and the sheet prints none.
 //
 // The sheet names itself by its month (plan 143): the month is the
 // title and the year sits in the margin, where "Stamp book" over
@@ -34,7 +35,11 @@ function localIso(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-export function StampBook({ calendar, streak, longest, t, lang = 'en' }) {
+// The sheet's five weeks, a slot a day from the Monday four weeks before
+// this one, against the local midnight `today` -- and how many of the
+// days so far were stamped: what the sheet draws and what its figures
+// count, the desk's records lattice included (plan 247).
+function bookDays(calendar, today) {
   // A day is stamped for a review or, since plan 178, a graded practice
   // answer: the streak counts both, so the book has to.
   const byDate = new Map((calendar ?? []).map(d => [d.date, (d.count ?? 0) + (d.practice ?? 0)]))
@@ -42,8 +47,6 @@ export function StampBook({ calendar, streak, longest, t, lang = 'en' }) {
   // miss -- the streak walked through it -- so the board's stub is laid
   // over it, in pass ink, as on Today's stamp rally.
   const rested = new Set((calendar ?? []).filter(d => d.rest).map(d => d.date))
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
   const dow = (today.getDay() + 6) % 7 // Monday-first
   const start = new Date(today)
   start.setDate(today.getDate() - dow - 7 * (WEEKS - 1))
@@ -67,8 +70,23 @@ export function StampBook({ calendar, streak, longest, t, lang = 'en' }) {
       tilt: ((i * 37) % 13) - 6,
     })
   }
-  const elapsed = cells.filter(c => !c.future).length
-  const stamped = cells.filter(c => c.stamped).length
+  return {
+    cells,
+    elapsed: cells.filter(c => !c.future).length,
+    stamped: cells.filter(c => c.stamped).length,
+  }
+}
+
+// Local midnight, the day the sheet ends its week on.
+function localToday() {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return today
+}
+
+export function StampBook({ calendar, streak, longest, t, lang = 'en', figures = true }) {
+  const today = localToday()
+  const { cells, elapsed, stamped } = bookDays(calendar, today)
 
   // A title, so capitalised: French writes its months in lower case.
   const month = new Intl.DateTimeFormat(lang, { month: 'long' }).format(today)
@@ -107,13 +125,15 @@ export function StampBook({ calendar, streak, longest, t, lang = 'en' }) {
         ))}
       </div>
 
-      <div className="sbook__side">
-        <div className="sbook__figs">
-          <Figure value={streak ?? 0} unit={t.daysUnit(streak ?? 0)} label={t.streak} lang={lang} />
-          <Figure value={longest ?? 0} unit={t.daysUnit(longest ?? 0)} label={t.longestStreak} lang={lang} />
-          <Figure value={stamped} unit={`/ ${elapsed}`} label={t.daysStamped} lang={lang} />
+      {figures && (
+        <div className="sbook__side">
+          <div className="sbook__figs">
+            <Figure value={streak ?? 0} unit={t.daysUnit(streak ?? 0)} label={t.streak} lang={lang} />
+            <Figure value={longest ?? 0} unit={t.daysUnit(longest ?? 0)} label={t.longestStreak} lang={lang} />
+            <Figure value={stamped} unit={`/ ${elapsed}`} label={t.daysStamped} lang={lang} />
+          </div>
         </div>
-      </div>
+      )}
     </section>
   )
 }
@@ -140,8 +160,21 @@ function Figure({ value, unit, label, lang }) {
 // three across, so the count divides its content at every width
 // (DESIGN.md, Surfaces). A figure with nothing to count yet prints a
 // dash rather than leaving the lattice a bare slab.
-export function Records({ profile, t, lang }) {
+//
+// `book` is the desk's (plan 247): the stamp book's three figures -- the
+// streak, the longest, the days stamped -- open the lattice, three by
+// two, so the holder's figures are one record at the head of its column
+// and the sheet beside the card is the stamps alone.
+export function Records({ profile, t, lang, book = false }) {
+  const { elapsed, stamped } = book ? bookDays(profile.calendar ?? profile.week, localToday()) : {}
+  const streak = profile.streak ?? 0
+  const longest = profile.streakLongest ?? 0
   const figures = [
+    ...(book ? [
+      { key: 'streak',  value: streak,  unit: t.daysUnit(streak),  label: t.streak },
+      { key: 'longest', value: longest, unit: t.daysUnit(longest), label: t.longestStreak },
+      { key: 'stamped', value: stamped, unit: `/ ${elapsed}`,      label: t.daysStamped },
+    ] : []),
     { key: 'reviews',   value: profile.totalReviews, label: t.totalReviews },
     {
       key: 'retention',
@@ -222,24 +255,30 @@ export function ProfileDoors({ t, navigate }) {
 // the learner holds. On the phone and the desk alike -- the rail holds
 // no door to it. A place, so a link on the desk (plan 123).
 export function TicketsDoor({ t, navigate, count = 0 }) {
-  const desk = useDesk()
   return (
     <div className="records records--one">
-      <SplitRow
-        to={desk ? '/profile/tickets' : undefined}
-        push
-        className="record record--door"
-        style={{ '--line-color': 'var(--stamp-ink)' }}
-        onClick={() => { if (!desk) navigate('/profile/tickets') }}
-      >
-        <span className="pf-line__id">
-          <span className="pf-line__roundel" aria-hidden="true" lang="ja">券</span>
-          <span className="pf-line__names"><span className="pf-line__jp">{t.tkbDoor}</span></span>
-        </span>
-        <span className="record__value record__value--door">{count}</span>
-        <ChevronIcon direction="right" size={15} className="record__chev" />
-      </SplitRow>
+      <TicketsCell t={t} navigate={navigate} count={count} />
     </div>
+  )
+}
+
+function TicketsCell({ t, navigate, count }) {
+  const desk = useDesk()
+  return (
+    <SplitRow
+      to={desk ? '/profile/tickets' : undefined}
+      push
+      className="record record--door"
+      style={{ '--line-color': 'var(--stamp-ink)' }}
+      onClick={() => { if (!desk) navigate('/profile/tickets') }}
+    >
+      <span className="pf-line__id">
+        <span className="pf-line__roundel" aria-hidden="true" lang="ja">券</span>
+        <span className="pf-line__names"><span className="pf-line__jp">{t.tkbDoor}</span></span>
+      </span>
+      <span className="record__value record__value--door">{count}</span>
+      <ChevronIcon direction="right" size={15} className="record__chev" />
+    </SplitRow>
   )
 }
 
@@ -253,25 +292,45 @@ export function TicketsDoor({ t, navigate, count = 0 }) {
 // an empty or unread week prints none. A place, so a link on the desk
 // (plan 123).
 export function AgendaDoor({ t, navigate, blocks }) {
+  return (
+    <div className="records records--one">
+      <AgendaCell t={t} navigate={navigate} blocks={blocks} />
+    </div>
+  )
+}
+
+function AgendaCell({ t, navigate, blocks }) {
   const desk = useDesk()
   const { total } = weekShare(blocks ?? [])
   const { h, m } = durationParts(total)
   return (
-    <div className="records records--one">
-      <SplitRow
-        to={desk ? AGENDA_PATH : undefined}
-        push
-        className="record record--door"
-        style={{ '--line-color': 'var(--pass-ink)' }}
-        onClick={() => { if (!desk) navigate(AGENDA_PATH) }}
-      >
-        <span className="pf-line__id">
-          <span className="pf-line__roundel" aria-hidden="true" lang="ja">時</span>
-          <span className="pf-line__names"><span className="pf-line__jp">{t.settingsAgenda}</span></span>
-        </span>
-        {total > 0 && <span className="record__value record__value--door">{t.agdDuration(h, m)}</span>}
-        <ChevronIcon direction="right" size={15} className="record__chev" />
-      </SplitRow>
+    <SplitRow
+      to={desk ? AGENDA_PATH : undefined}
+      push
+      className="record record--door"
+      style={{ '--line-color': 'var(--pass-ink)' }}
+      onClick={() => { if (!desk) navigate(AGENDA_PATH) }}
+    >
+      <span className="pf-line__id">
+        <span className="pf-line__roundel" aria-hidden="true" lang="ja">時</span>
+        <span className="pf-line__names"><span className="pf-line__jp">{t.settingsAgenda}</span></span>
+      </span>
+      {total > 0 && <span className="record__value record__value--door">{t.agdDuration(h, m)}</span>}
+      <ChevronIcon direction="right" size={15} className="record__chev" />
+    </SplitRow>
+  )
+}
+
+// ── 机 — the holder's two doors, under the card (plan 247) ──────────
+// The tickets' and the agenda's doors as one lattice of two slim rows,
+// straight under the card: places rather than figures, so they stand
+// apart from the records, and the stamp book under them is the stamps
+// alone. The phone keeps a lattice each under its stamp book.
+export function HolderDoors({ t, navigate, count = 0, blocks }) {
+  return (
+    <div className="records records--one desk-doors">
+      <TicketsCell t={t} navigate={navigate} count={count} />
+      <AgendaCell t={t} navigate={navigate} blocks={blocks} />
     </div>
   )
 }
