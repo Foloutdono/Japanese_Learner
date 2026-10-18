@@ -1318,11 +1318,18 @@ Today's column's width (`components/practice/gate/DeskGate`):
   platform is not. Behind the sky's own mask -- the canopy, the wires,
   the pillars and the land stay in front -- the clouds drift slowly
   either way from where the painting has them, the brightest stars catch
-  the light, the sun's or the moon's glow breathes, and now and then a
-  few birds cross by day (the geese of 落雁 at dusk; none at night). Each
+  the light, the sun's or the moon's glow breathes, and now and then the
+  hour's birds cross, jointed as Today's print draws them (cranes at
+  dawn, black kites by day, the geese of 落雁 at dusk; none at night). Each
   is slow enough to be noticed only by a learner who stays, and every
   loop but the clouds' is a Web Animation. Under reduced motion the sky
   is the painting's.
+- **The open door shows the car's inside as the owner painted it**
+  (plan 244c, `source/interior.webp`): shown narrower than painted,
+  never squeezed (plain columns let out between its rings, posters and
+  stanchions), and lit at each hour as the car is lit, its far window
+  showing the hour's sky behind the trees and, after dark, the lit car
+  faintly in the glass. The car's other windows show that inside.
 
 ## Space
 

@@ -302,10 +302,20 @@ describe('the painted platform on the desk (plan 244)', () => {
     expect($('.pdesk-flicker').getAnimations()).toHaveLength(1)
     await turnTo('day')
     expect($$('.pdesk-glint, .pdesk-disc, .pdesk-flicker')).toHaveLength(0)
+    // by day, gulls: each bird jointed, its wings beating at the shoulder
+    // and the wrist (DeskBirds, plan 244c)
     const birds = $$('.pdesk-flock .pdesk-bird')
     expect(birds.length).toBeGreaterThan(2)
     expect($('.pdesk-flock').getAnimations()).toHaveLength(1)
-    expect(birds.every(b => b.getAnimations().length === 1)).toBe(true)
+    for (const bird of birds) {
+      const joints = $$('[data-move]', bird)
+      expect(joints.map(j => j.dataset.move)).toEqual(expect.arrayContaining(['garm-l', 'garm-r', 'ghand-l', 'ghand-r']))
+      expect(joints.every(j => j.getAnimations().length === 1)).toBe(true)
+    }
+    // at dusk, the geese of 落雁 in their V
+    await turnTo('dusk')
+    expect($$('.pdesk-flock .pdesk-bird')).toHaveLength(5)
+    expect($$('.pdesk-flock [data-move="arm"]')).toHaveLength(5)
     // the birds fly in the sky, behind the pillars and the land
     expect($('.pdesk-flock').closest('.pdesk__sky')).not.toBeNull()
     motion.reduced = true

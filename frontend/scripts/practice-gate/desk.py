@@ -1,5 +1,6 @@
 """The Practice gate's painted platform on the desk (plan 244), from the
-owner's painting of it: source/desk.webp.
+owner's painting of it, source/desk.webp, and of the car's inside seen
+through its open door, source/interior.webp (plan 244c).
 
   python3 scripts/practice-gate/desk.py
 
@@ -32,7 +33,7 @@ import desk_cut as cut          # noqa: E402
 import desk_parts as parts      # noqa: E402
 from hours import Geometry, Lighter, HOUR_ORDER   # noqa: E402
 
-REV = 3
+REV = 4
 FRONT = HERE.parent.parent
 PRINT = FRONT / 'src/components/station/print/print.json'
 OUT = FRONT / 'public/practice/gate/desk'
@@ -138,12 +139,17 @@ SIGN_FRAME = 7                # px: the steel ring round a sign's panel, twice o
 # The open doorway's inside between its two stanchions, as a window shows
 # it at every hour but the painting's own: the strap rail and its rings,
 # the cream wall and the far window in it, at the window's own rows.
-INTERIOR = (435, 561)
-FAR_MID = 503.5               # the far window's middle
+INTERIOR = (cut.STANCHIONS[0] + 4, cut.STANCHIONS[1] - 3)
+FAR_MID = (cut.FAR[0] + cut.FAR[2]) / 2     # the far window's middle
+# The sun the painted inside has on its floor, after dark the lamps': how
+# much of the floor's light above its own middle each hour keeps.
+FLOOR_SHINE = {'dawn': 0.55, 'dusk': 0.5, 'night': 0.4}
+SILL = 8                      # px: the yellow edge and the sill, under the floor, keep theirs
+VIEW_SKY = (230, 326)         # the scene's sky rows the far window looks out at, top to foot
 SEEN_THROUGH = 0.94           # what the near glass keeps of the light inside
 # Lit inside and darker out, the far glass gives the inside back: how much
 # of its light the far window shows over what lies past it, at each hour.
-MIRROR = {'dawn': 0.34, 'dusk': 0.45, 'night': 0.8}
+MIRROR = {'dawn': 0.12, 'dusk': 0.22, 'night': 0.42}
 GLASS_DIM = 0.66              # the glass gives back less than the wall it mirrors
 STREAK = (7, 3.0)             # px under the far window's top, and half its height
 EDGE = 2                      # px: the near layer's soft edge past a pillar's band
@@ -224,7 +230,7 @@ def lit_windows(cars, Mc, hour):
     tube = rgb[inside & (rows < top)].max(axis=0)
     streak = np.exp(-((rows - top - STREAK[0]) / STREAK[1]) ** 2)[..., None]
     glow = glow * (1 - streak * 0.55) + tube[None, None, :] * streak * 0.55
-    past = cv2.GaussianBlur(rgb, (0, 0), 2)
+    past = cv2.GaussianBlur(rgb, (0, 0), 0.7)
     m = (cv2.GaussianBlur(far.astype(np.float32), (3, 3), 0) * MIRROR[hour])[..., None]
     soft = cv2.GaussianBlur(far.astype(np.float32), (3, 3), 0)[..., None]
     rgb = rgb * (1 - soft) + (past * (1 - m / np.maximum(soft, 1e-3)) + glow * (m / np.maximum(soft, 1e-3))) * soft
@@ -266,6 +272,50 @@ def pillars_edged(lit, near_rgb):
     lit = lit.copy()
     lit[band] = near_rgb[band]
     return lit
+
+
+def far_view(cars, Mc, day, sky_rgb, sky, hour):
+    """What the inside's far window shows at the hour: the trees past the
+    car darkened as the hour darkens the forest, and between and over
+    them the hour's own sky at the horizon's height, taken from the scene
+    (lit as one forest, the bright sky between the leaves went the
+    forest's grey and the window stood as a slab)."""
+    if hour == 'day':
+        return cars
+    rgb, al = cars['car']
+    far = Mc['car']['far']
+    ys, xs = np.nonzero(far)
+    top, foot = ys.min(), ys.max()
+    # the sky in the scene's rows from high over the hills down to them,
+    # each row's median where the scene shows clear sky
+    rows = np.linspace(VIEW_SKY[0], VIEW_SKY[1], foot - top + 1).astype(int)
+    band = np.stack([np.median(sky_rgb[r][sky[r]], axis=0) if sky[r].any() else sky_rgb[r].mean(axis=0)
+                     for r in rows])
+    L = parts.lum(day)
+    leaf = np.clip((0.74 - L) / 0.16, 0, 1) * np.clip((parts.sat(day) - 0.12) / 0.12, 0, 1)
+    leaf = np.clip(cv2.GaussianBlur(leaf.astype(np.float32), (0, 0), 0.8), 0, 1)
+    out = rgb.copy()
+    yy = np.clip(np.arange(rgb.shape[0]) - top, 0, foot - top)
+    view = band[yy][:, None, :] * (1 - leaf[..., None]) + rgb * leaf[..., None]
+    out[far] = view[far]
+    return dict(cars, car=(np.clip(out, 0, 1), al))
+
+
+def inside_lit(cars, Mc, hour):
+    """The open doorway's inside at the hour: the sun the owner painted on
+    its floor gone with the sun, the floor keeping the lamps' sheen."""
+    if hour == 'day':
+        return cars
+    rgb, al = cars['car']
+    ins = Mc['car']['inside']
+    rows = np.arange(rgb.shape[0])[:, None]
+    floor = ins & (rows >= cut.FLOOR_IN - cut.CAR[0]) & (rows < cut.INSIDE[3] - SILL - cut.CAR[0])
+    L = parts.lum(rgb)
+    mid = np.median(L[floor])
+    keep = FLOOR_SHINE[hour]
+    k = np.where(floor & (L > mid), (mid + (L - mid) * keep) / np.maximum(L, 1e-4), 1)
+    k = cv2.GaussianBlur(k.astype(np.float32), (0, 0), 1.2) * floor + (1 - floor)
+    return dict(cars, car=(np.clip(rgb * k[..., None], 0, 1), al))
 
 
 def leaves(car2, al):
@@ -341,7 +391,9 @@ def main():
         light.rng.bit_generator.state = state
         drawn, light.placed = light.placed, []
         clear = finish(light.scene(hour, bg_a, M, clouds=False)[0])
-        cars = lit_windows({name: light.car(hour, a, Mc[name]) for name, a in car.items()}, Mc, hour)
+        cars = {name: light.car(hour, a, Mc[name]) for name, a in car.items()}
+        cars = far_view(inside_lit(cars, Mc, hour), Mc, car['car'][..., :3], clear, M['sky'], hour)
+        cars = lit_windows(cars, Mc, hour)
         fill[hour] = write(hour, lit, clear, cars, near_rgb)
         stars[hour] = [[round(float(x), 1), round(float(y), 1), round(float(b), 2)]
                        for x, y, b in sorted(drawn, key=lambda st: -st[2])[:TWINKLE[hour]]]

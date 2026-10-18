@@ -10,7 +10,7 @@ The scene is desk_cut's: one px to a unit, rows from the canopy's top."""
 import numpy as np
 import cv2
 
-from desk_cut import (BENCH, CAR, DOORWAY, FLOOR, LAMPS, P0, PILLARS, PILLAR_FOOT, ROOF,
+from desk_cut import (BENCH, CAR, DOORWAY, FAR, FLOOR, INSIDE, LAMPS, P0, PILLARS, PILLAR_FOOT, ROOF,
                       SIGN, SIGN_RODS, STRIPE, H, W, bases)
 
 SKY_TOP = 88                  # the sky's top, between the lamps
@@ -49,6 +49,16 @@ def box(shape, x0, y0, x1, y1):
     m = np.zeros(shape, bool)
     m[max(y0, 0):max(y1, 0), max(x0, 0):max(x1, 0)] = True
     return m
+
+
+def rounded(shape, x0, y0, x1, y1, r):
+    """A box with its corners rounded by r px."""
+    m = np.zeros(shape, np.uint8)
+    cv2.rectangle(m, (x0 + r, y0), (x1 - 1 - r, y1 - 1), 1, -1)
+    cv2.rectangle(m, (x0, y0 + r), (x1 - 1, y1 - 1 - r), 1, -1)
+    for cx, cy in ((x0 + r, y0 + r), (x1 - 1 - r, y0 + r), (x0 + r, y1 - 1 - r), (x1 - 1 - r, y1 - 1 - r)):
+        cv2.circle(m, (cx, cy), r, 1, -1)
+    return m > 0
 
 
 def pillars(shape, rows=None):
@@ -289,11 +299,16 @@ def car(a, open_door):
     inside = np.zeros(shape, bool)
     far = np.zeros(shape, bool)
     if open_door:
-        x0, y0, x1, y1 = DOORWAY
+        # the inside the owner painted (desk_cut.INSIDE), and its far
+        # window's glass, measured on the picture, its corners rounded
+        x0, y0, x1, y1 = INSIDE
         inside = box(shape, x0, y0 - CAR[0], x1, y1 - CAR[0]) & on
-        far = inside & glass
-        glass &= ~inside
-        windows &= ~inside
+        fx0, fy0, fx1, fy1 = FAR
+        far = rounded(shape, fx0, fy0 - CAR[0], fx1, fy1 - CAR[0], 4) & inside
+        dx0, dy0, dx1, dy1 = DOORWAY
+        door = box(shape, dx0, dy0 - CAR[0], dx1, dy1 - CAR[0])
+        glass &= ~door
+        windows &= ~door
     body = side & ~glass & ~inside
     return dict(roof=roof, under=under, glass=glass, inside=inside & ~far, far=far, body=body, windows=windows)
 

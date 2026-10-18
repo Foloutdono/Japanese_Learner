@@ -78,6 +78,19 @@ COOLER = ((573, 398), (573, 378), (575, 374), (579, 372), (740, 371), (744, 372)
 # the car's own parts
 DOORWAY = (384, 448, 592, 705)     # the open door's opening
 SHUT = (984, 448, 1140, 705)       # the shut door, its two leaves
+# The car's inside as the owner painted it (plan 244c, source/interior.webp,
+# 546 x 541: the open door from the platform, its frame round it), drawn in
+# the doorway, inside its frame. The picture's opening is wider than the
+# car's door, so the inside is shown narrower, never squeezed: of its
+# columns, those kept (KEEP) run from past the left stanchion to the right
+# one, and what is let out between them is plain -- the wall by a pocket,
+# two runs of the window's trees and the bench under them, the wall
+# between a ring and a poster -- so every ring, poster, stanchion and the
+# window's frame keep their shape. The runs meet over JOIN px each.
+INSIDE = (389, 450, 583, 703)      # where it is drawn: the opening, inside the door's frame
+INSIDE_ROWS = (76, 500)            # the picture's rows from the ceiling's edge to the sill
+KEEP = ((83, 222), (258, 298), (338, 418), (434, 495))
+JOIN = 3
 STRIPE = (601, 633)                # the stripe's rows
 BENCH = (0, 600, 92, 726)          # the bench, where it stands in front of the car
 
@@ -154,6 +167,47 @@ def quilted(S, rows, x0, x1, src, seed, overlap=40, strip=(120, 200)):
         x += n
 
 
+def inside_at(x, y=None):
+    """Where a point of the inside's picture lands in the scene."""
+    kept = sum(b - a for a, b in KEEP)
+    k = (INSIDE[2] - INSIDE[0]) / kept
+    off = 0
+    for a, b in KEEP:
+        if x < b:
+            off += max(x - a, 0)
+            break
+        off += b - a
+    sx = INSIDE[0] + off * k
+    if y is None:
+        return sx
+    r0, r1 = INSIDE_ROWS
+    return sx, INSIDE[1] + (y - r0) * (INSIDE[3] - INSIDE[1]) / (r1 - r0)
+
+
+# What the hours need of it, measured on the picture: the far window's
+# glass (inside its frame and rounded corners), its two stanchions, and
+# its floor (the sun lies on it by day).
+FAR = tuple(round(v) for v in inside_at(198, 181) + inside_at(393, 284))
+STANCHIONS = (round(inside_at(90)), round(inside_at(469)))
+FLOOR_IN = round(inside_at(0, 432)[1])
+
+
+def inside(path):
+    """The inside as the scene draws it: KEEP's runs joined, then brought
+    to INSIDE's size (RGB uint8)."""
+    im = np.asarray(Image.open(path).convert('RGB')).astype(np.float32)
+    r0, r1 = INSIDE_ROWS
+    runs = [im[r0:r1, max(a - JOIN, 0):b + JOIN] for a, b in KEEP]
+    out = runs[0]
+    ramp = np.linspace(0, 1, 2 * JOIN)[None, :, None]
+    for run in runs[1:]:
+        both = out[:, -2 * JOIN:] * (1 - ramp) + run[:, :2 * JOIN] * ramp
+        out = np.concatenate([out[:, :-2 * JOIN], both, run[:, 2 * JOIN:]], axis=1)
+    out = out[:, JOIN:-JOIN]
+    x0, y0, x1, y1 = INSIDE
+    return cv2.resize(np.clip(out, 0, 255).astype(np.uint8), (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
+
+
 def clean(path):
     """The painting as the scene: H x W, RGB uint8."""
     im = np.asarray(Image.open(path).convert('RGB'))[TOP:TOP + H, :PAINTED]
@@ -223,6 +277,13 @@ def clean(path):
 
     # ── the roof's cooler, closed ──
     cooler(S)
+
+    # ── the car's inside, as the owner painted it, in the open doorway ──
+    x0, y0, x1, y1 = INSIDE
+    edge = np.ones((y1 - y0, x1 - x0), np.float32)
+    edge[[0, -1], :] = edge[:, [0, -1]] = 0.5
+    S[y0:y1, x0:x1] = (inside(path.parent / 'interior.webp') * edge[..., None]
+                       + S[y0:y1, x0:x1] * (1 - edge[..., None])).astype(np.uint8)
     return S
 
 
