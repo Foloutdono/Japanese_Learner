@@ -162,10 +162,11 @@ export function sweepPlan(cards, { piles = 3 } = {}) {
   const HOME = GLIDE + 500
   const CHIP = HOME + 20
   const MERGE = CHIP + 704
-  const TAIL = MERGE + 420
+  // The tail's beat, in ms -- not the module's TAIL, a count of flights.
+  const TAIL_AT = MERGE + 420
   const beats = {
     SWEEP: 0, DONE, SEAL, IMPACT, ROLL: IMPACT + 90, FLY, RISE: PRESSED - 100, PRESSED, GLIDE,
-    FARE: GLIDE + 260, HOME, CHIP, MERGE, CHIPGONE: CHIP + 800, TAIL, FINAL: TAIL + 900,
+    FARE: GLIDE + 260, HOME, CHIP, MERGE, CHIPGONE: CHIP + 800, TAIL: TAIL_AT, FINAL: TAIL_AT + 900,
   }
   const order = ['SWEEP', 'DONE', 'SEAL', 'IMPACT', 'ROLL', 'FLY', 'RISE', 'PRESSED', 'GLIDE', 'FARE', 'HOME',
     'CHIP', 'MERGE', 'CHIPGONE', 'TAIL', 'FINAL']

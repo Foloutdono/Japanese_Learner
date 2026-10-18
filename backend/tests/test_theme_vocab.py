@@ -306,3 +306,32 @@ def test_every_mode_the_ui_offers_can_serve_the_smallest_band(client):
                        params={"level": "expert", "mode": mode, "count": 5})
         assert r.status_code == 200, (mode, r.text)
         assert "cards" in r.json()
+
+
+def test_an_empty_pool_is_no_cards_not_every_learners(client):
+    """`card_ids=[]` scopes to nothing. It once fell through to the
+    unscoped branch, which reads every learner's rows in the mode."""
+    from core.db import db_conn
+    from core.srs_instance import srs
+
+    # Another learner's cards, one due and one new, so the unscoped
+    # branch would find both.
+    entries = theme_data.theme_entries("animals")
+    due_id = "someone-else:" + entries[0]["card_id"]
+    new_id = "someone-else:" + entries[1]["card_id"]
+    srs.review(due_id, MODE, 4)
+    conn = db_conn()
+    with conn.cursor() as cur:
+        cur.execute("UPDATE card_modes SET next_review = now() - interval '1 day' WHERE card_id = %s", (due_id,))
+        cur.execute("INSERT INTO cards (id) VALUES (%s) ON CONFLICT DO NOTHING", (new_id,))
+    conn.commit()
+    try:
+        assert srs.get_due_cards(MODE, card_ids=[]) == []
+        assert srs.get_new_cards(MODE, limit=10, card_ids=[]) == []
+    finally:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM review_log WHERE card_id = %s", (due_id,))
+            cur.execute("DELETE FROM card_modes WHERE card_id IN (%s, %s)", (due_id, new_id))
+            cur.execute("DELETE FROM cards WHERE id IN (%s, %s)", (due_id, new_id))
+        conn.commit()
+        conn.close()

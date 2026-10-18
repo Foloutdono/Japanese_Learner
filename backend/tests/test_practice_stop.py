@@ -99,7 +99,9 @@ class PracticeStopTests(unittest.TestCase):
     def test_a_stop_the_platform_never_logs_is_a_400(self) -> None:
         bad = {
             "reading": ["N6", "", "level:N5", "freq:kanji:3", "freq:vocab:0", "freq:vocab:x",
-                        "freq:vocab:3:0", "freq:vocab:3:200:1", "freq:vocab"],
+                        "freq:vocab:3:0", "freq:vocab:3:200:1", "freq:vocab",
+                        # Past int()'s 4300-digit limit: a 400, not a 500.
+                        "freq:vocab:" + "9" * 5000, "freq:vocab:3:" + "9" * 5000],
             # Only reading and translation start from a tier or mastery.
             "dictation": ["mastery", "freq:vocab:3"],
             "composition": ["mastery"],

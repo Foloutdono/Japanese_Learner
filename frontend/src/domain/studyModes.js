@@ -53,12 +53,6 @@ export const RENDER = {
 //   review  (0)      not a service at all — an ungraded browse
 const SERVICE = { RAPID: 'rapid', EXPRESS: 'express', LTD: 'ltd', REVIEW: 'review' }
 
-// statsModel's old FORMAT axis. Note `choice` is gone: multiple choice is
-// a hint now, not a format, so a flashcard is a flashcard whether or not
-// the learner asked for the options.
-export const FORMATS = ['flashcard', 'typing', 'writing', 'fill']
-export const DIRECTIONS = ['recognition', 'recall', 'production']
-
 /** Locale key for a mode, e.g. 'kana.flashcard.f2b' -> 'mode_kana_flashcard_f2b'. */
 function localeKey(key) {
   return `mode_${key.replace(/\./g, '_')}`
@@ -222,9 +216,6 @@ export const MODES = Object.fromEntries(LIST.map(m => [m.key, m]))
 
 export const FAST_REVIEW = 'fast_review'
 
-/** Every graded key, in registry order. */
-export const GRADED_KEYS = LIST.filter(m => m.graded).map(m => m.key)
-
 /** Keys a source offers, in picker order, with the browse last. */
 export const MODES_FOR_SOURCE = Object.fromEntries(
   SOURCES.map(source => [
@@ -259,11 +250,6 @@ export function modePickerEntries(t, source) {
 export function serviceKeyFor(key) {
   return MODES[key]?.service ?? null
 }
-
-export const usesDrawing = key => MODES[key]?.renderer === RENDER.DRAW
-export const usesTyping = key => MODES[key]?.renderer === RENDER.TYPE
-export const isGraded = key => MODES[key]?.graded ?? false
-export const hintsFor = key => MODES[key]?.hints ?? []
 
 /**
  * Where the handwriting drill after a bad rating applies: being asked to

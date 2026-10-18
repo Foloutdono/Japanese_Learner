@@ -65,6 +65,30 @@ describe('useDialog', () => {
     expect(document.activeElement).toBe(last)
   })
 
+  it('keeps Shift+Tab inside when focus is on the panel itself', async () => {
+    // `focus: 'panel'` opens on the dialog, not a control: Shift+Tab from
+    // there would otherwise leave the dialog for whatever precedes it.
+    function PanelDialog() {
+      const dialogRef = useDialog(() => {}, { focus: 'panel' })
+      return (
+        <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Test dialog">
+          <button type="button">First</button>
+          <button type="button">Last</button>
+        </div>
+      )
+    }
+    const screen = await render(<PanelDialog />)
+    const last = screen.getByText('Last').element()
+    const panel = screen.getByRole('dialog').element()
+
+    panel.focus()
+    expect(document.activeElement).toBe(panel)
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true })
+    )
+    expect(document.activeElement).toBe(last)
+  })
+
   it('restores focus to the opener on unmount', async () => {
     const onClose = vi.fn()
     // Mount without the dialog first and focus the opener button, so that

@@ -17,6 +17,7 @@ import { dialogOpen } from '../lib/dialogOpen'
 import { MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries } from '../domain/studyModes'
 import { useDesk } from '../hooks/useDesk'
 import { StationSplit, LevelRedirect } from '../components/selection/StationSplit'
+import { LineStation } from '../components/selection/LineStation'
 import { LinePlatforms } from '../components/selection/LinePlatforms'
 import { useStationSamples } from '../stores/stationSamples'
 import { GateButton } from '../components/ui/GateButton'
@@ -151,21 +152,20 @@ export default function GrammarScreen({ session }) {
     )
   }
 
-  // Both columns take the window (plan 137, LinePlatforms): each level
-  // with its first points and its bar, each platform with the card it
-  // asks, and the points' door at the foot beside the fast review —
-  // both open something rather than board. The bar prints no sub: the
-  // open stop names the level.
+  // The JLPT line across the top, the level's exercises under it as
+  // cars, each with the card it asks (plan 251, LineStation), and the
+  // points' door at the foot beside the fast review — both open
+  // something rather than board. The bar prints no sub: the open stop
+  // names the level.
   if (desk) {
     return (
       <SelectionScreen
         title={t.grammarTitle}
         aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
       >
-        <StationSplit
-          className="desk-split--line"
+        <LineStation
           label={t.stationJlpt}
-          list={<LevelSelector source="grammar" selected={level} linkTo={lvl => `/learn/grammar/${lvl}`} figured />}
+          line={<LevelSelector source="grammar" selected={level} linkTo={lvl => `/learn/grammar/${lvl}`} across />}
         >
           <LinePlatforms
             source="grammar"
@@ -177,7 +177,7 @@ export default function GrammarScreen({ session }) {
               <button type="button" className="rad-door gl-points-door" onClick={() => { playUi('click-screen-selection'); swap({ index: '1' }) }}>
                 <span className="rad-door__body">
                   <span className="rad-door__head">
-                    <span className="rad-door__fig"><b>{index.learned}</b>/ {index.total}</span>
+                    <span className="rad-door__fig"><b className="gl-points-door__n">{index.learned}</b>/ {index.total}</span>
                     {startedNote && <span className="rad-door__started">{startedNote}</span>}
                   </span>
                   <span className="rad-door__label">{t.glPoints}</span>
@@ -186,7 +186,7 @@ export default function GrammarScreen({ session }) {
               </button>
             )}
           />
-        </StationSplit>
+        </LineStation>
       </SelectionScreen>
     )
   }
