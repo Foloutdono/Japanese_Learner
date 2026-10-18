@@ -74,6 +74,51 @@ def test_length_must_not_answer():
     assert exam_seed.length_tells([rotating]) == []
 
 
+def _passage_paper(text: str, questions: list[tuple[list[str], int]]) -> dict:
+    ids = ["c1", "c2", "c3", "c4"]
+    qs = [{"id": f"q{n}", "choices": [{"id": i, "textJp": c} for i, c in zip(ids, choices)], "answer": ids[right]}
+          for n, (choices, right) in enumerate(questions)]
+    return {"sections": [{"id": "reading", "mondai": [{"id": "m", "number": 1, "type": "reading-passage",
+                                                        "passages": [{"id": "p", "textJp": text, "questions": qs}]}]}]}
+
+
+def test_the_passages_wording_must_not_answer():
+    # Plan 247: the keys copied the passage, the wrong choices did not.
+    text = "毎朝、駅前のパン屋で焼きたてのパンを買ってから会社へ行きます。"
+    copied = (["駅前のパン屋で焼きたてのパンを買う", "会社の食堂で食べる", "家で作る", "何も食べない"], 0)
+    assert any("copies the most" in t for t in exam_seed.echo_tells([_passage_paper(text, [copied] * 8)]))
+    reworded = (["店で朝ごはんを用意する", "駅前のパン屋で焼きたてのパンを食べる", "家で作る", "何も食べない"], 0)
+    mixed = [copied] * 2 + [reworded] * 6
+    assert exam_seed.echo_tells([_passage_paper(text, mixed)]) == []
+
+
+def _dialogue(n: int, lines: list[str]) -> dict:
+    script = "\n".join(["narrator: 二人が話しています。"] + [f"{'AB'[i % 2]}: {line}" for i, line in enumerate(lines)])
+    return {"n": n, "paper": {"sections": [{"id": "listening", "mondai": [
+        {"id": "m", "type": "listening-mcq", "questions": [{"id": "choukai_1_q1", "scriptJp": script}]}]}]}}
+
+
+def test_a_story_told_twice_is_found():
+    seats = ["映画のせきはどこがいいですか。", "まえのほうがいいです。", "じゃあ、まんなかのせきにしましょう。"]
+    retold = ["映画のせきは、どこにしますか。", "まえのほうがいいですね。", "では、まんなかのせきを買いましょう。"]
+    other = ["あしたのテスト、何時からですか。", "九時からですよ。", "早く起きなければなりませんね。"]
+    found = exam_seed.retold_stories([_dialogue(1, seats), _dialogue(2, retold), _dialogue(3, other)])
+    assert len(found) == 1 and found[0].startswith("#2 choukai_1_q1 retells #1 choukai_1_q1")
+    # The narrator's frame is the same in every item and is not the story.
+    assert exam_seed.retold_stories([_dialogue(1, seats), _dialogue(3, other)]) == []
+
+
+def test_a_word_tested_twice_is_found():
+    def entry(n, prompt, right):
+        q = {"id": "moji_1_q1", "promptJp": prompt, "answer": "c1",
+             "choices": [{"id": "c1", "textJp": right}, {"id": "c2", "textJp": "x"}]}
+        return {"n": n, "paper": {"sections": [{"id": "vocabulary", "mondai": [{"id": "moji_1", "questions": [q]}]}]}}
+
+    found = exam_seed.retested_words("N2", [entry(1, "両側", "りょうがわ"), entry(2, "洗剤", "せんざい"),
+                                            entry(3, "両側", "りょうがわ")])
+    assert found == ["#3 moji_1_q1 tests 両側 again (#1 moji_1_q1)"]
+
+
 # ── The loader ────────────────────────────────────────────────
 
 EXAM = "n3-reading-01"

@@ -32,6 +32,7 @@
 # version bump is exactly the statement that they should not be.
 # tests/test_exam_seed.py fails until they are rebuilt.
 import hashlib
+import itertools
 import json
 import logging
 from pathlib import Path
@@ -41,7 +42,9 @@ from study.exam_blueprint import LEVEL_BLUEPRINT
 from study.exam_catalogue import EXAM_GENERATORS, KIND_META
 from study.exam_scoring import flatten_questions
 from study.exam_tts import content_key
-from study.exam_validation import paper_gives_answer_away, validate_answer_balance, validate_content
+from study.exam_validation import (
+    copied_run, paper_gives_answer_away, validate_answer_balance, validate_content,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -172,6 +175,127 @@ def length_tells(papers: list[dict]) -> list[str]:
     return out
 
 
+# A key is no more often the choice copying the most of its passage
+# than a blind pick of four (plan 247): the seed papers' keys copied the
+# passage's wording, and picking the closest copy was right 42-60% of
+# the time. Reading passages only: a listening script is heard, not
+# held beside the choices.
+ECHO_TELL = (0.15, 0.35)
+
+
+def echo_tells(papers: list[dict]) -> list[str]:
+    wins = 0.0
+    items = 0
+    for paper in papers:
+        for section in paper.get("sections") or []:
+            for m in section.get("mondai") or []:
+                if m.get("type") != "reading-passage":
+                    continue
+                for p in m.get("passages") or []:
+                    for q in p.get("questions") or []:
+                        choices = q.get("choices") or []
+                        right = [i for i, c in enumerate(choices) if c.get("id") == q.get("answer")]
+                        if len(choices) != 4 or len(right) != 1:
+                            continue
+                        runs = [len(copied_run(c.get("textJp") or "", p.get("textJp") or "")) for c in choices]
+                        items += 1
+                        if runs[right[0]] == max(runs):
+                            wins += 1 / runs.count(max(runs))
+    if not items:
+        return []
+    low, high = ECHO_TELL
+    share = wins / items
+    if low <= share <= high:
+        return []
+    return [f"picking the choice that copies the most of the passage wins {share:.0%} "
+            f"({wins:.1f} of {items}); the text's wording must say nothing, {low:.0%} to {high:.0%}"]
+
+
+# One story told twice (plan 247). A model given one subject twice
+# writes much the same text twice, and the subjects used to be drawn
+# without memory of the other parts or papers (study/exam_topics.py,
+# TopicDeck): the seeds chose cinema seats in three papers. Two texts
+# of an exam id whose content words overlap by RETOLD or more (Jaccard
+# over their lemmas) tell one story; below it they share a setting,
+# which ten papers of everyday life must be allowed to.
+RETOLD = 0.25
+_CONTENT_POS = {"noun", "verb", "adjective", "adjectival_noun", "adverb"}
+
+
+def stories(paper: dict) -> list[tuple[str, str]]:
+    """(id, text) of every story a paper tells: a passage, or a
+    dialogue's lines, without the narrator's."""
+    out = []
+    for section in paper.get("sections") or []:
+        for m in section.get("mondai") or []:
+            for p in m.get("passages") or []:
+                out.append((p.get("id"), p.get("textJp") or p.get("textTemplateJp") or ""))
+            for q in m.get("questions") or []:
+                turns = turns_from_script(q.get("scriptJp") or "") if q.get("scriptJp") else None
+                if turns:
+                    out.append((q.get("id"), "\n".join(t["textJp"] for t in turns if t["speaker"] != "narrator")))
+    return out
+
+
+def retold_stories(entries: list[dict]) -> list[str]:
+    from study.morphology import tokenize
+
+    told = []
+    for e in entries:
+        for where, text in stories(e["paper"]):
+            words = {m.lemma for m in tokenize(text) or [] if m.pos in _CONTENT_POS and len(m.lemma) > 1}
+            told.append((e.get("n"), where, text, words))
+    out = []
+    retold = set()
+    for (n1, w1, _t1, a), (n2, w2, t2, b) in itertools.combinations(told, 2):
+        if (n2, w2) in retold or not a or not b:
+            continue
+        overlap = len(a & b) / len(a | b)
+        if overlap >= RETOLD:
+            retold.add((n2, w2))
+            start = " / ".join(t2.split("\n"))[:30]
+            out.append(f"#{n2} {w2} retells #{n1} {w1} ({overlap:.2f} of their words): {start}...")
+    return out
+
+
+# A word asked twice (plan 247): the deck words were drawn per paper
+# with no memory of the others, so 両側 was the word of three N2 papers.
+# The generator now deals them from one walk through the level's deck
+# (study/exam_topics.dealt_order), ten papers apart at the least; no two
+# seeds of a vocabulary exam id test one word. The word an item tests
+# is where its kind puts it.
+_TESTED = {
+    "kanji-reading": lambda q, right: q.get("promptJp"),
+    "kanji-orthography": lambda q, right: right,
+    "vocab-context": lambda q, right: right,
+    "vocab-paraphrase": lambda q, right: q.get("underlineJp"),
+    "vocab-usage": lambda q, right: q.get("promptJp"),
+}
+
+
+def retested_words(level: str, entries: list[dict]) -> list[str]:
+    kinds = {m["id"]: m["type"] for s in LEVEL_BLUEPRINT[level]["sections"] for m in s["mondai"]}
+    first: dict[str, str] = {}
+    out = []
+    for e in entries:
+        for section in e["paper"].get("sections") or []:
+            for m in section.get("mondai") or []:
+                tested = _TESTED.get(kinds.get(m.get("id")))
+                if tested is None:
+                    continue
+                for q in m.get("questions") or []:
+                    right = next((c.get("textJp") for c in q.get("choices") or [] if c.get("id") == q.get("answer")), None)
+                    word = tested(q, right)
+                    where = f"#{e.get('n')} {q.get('id')}"
+                    if not word:
+                        continue
+                    if word in first:
+                        out.append(f"{where} tests {word} again ({first[word]})")
+                    else:
+                        first[word] = where
+    return out
+
+
 def authored_texts(paper: dict) -> list[str]:
     """The texts of a paper a model wrote (passages, scripts, sentences),
     not the deck-built items: no two seeds of an exam id may share one.
@@ -223,7 +347,11 @@ def exam_problems(exam_id: str) -> list[str]:
             if t in seen and seen[t] != e.get("n"):
                 out.append(f"{exam_id} #{e.get('n')}: shares a text with #{seen[t]}: {t[:40]}...")
             seen.setdefault(t, e.get("n"))
-    out += [f"{exam_id}: {t}" for t in length_tells([e["paper"] for e in entries])]
+    papers = [e["paper"] for e in entries]
+    out += [f"{exam_id}: {t}" for t in length_tells(papers) + echo_tells(papers)]
+    out += [f"{exam_id} {t}" for t in retold_stories(entries)]
+    if EXAM_GENERATORS[exam_id][1] == "vocab":
+        out += [f"{exam_id} {t}" for t in retested_words(EXAM_GENERATORS[exam_id][2], entries)]
     return out
 
 

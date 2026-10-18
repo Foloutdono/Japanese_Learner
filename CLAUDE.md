@@ -114,6 +114,16 @@ runtime purpose.
   checked against its kana on the engine (`/audio_query` returns the
   moras it will say), and a word it misreads is respelled in kana, with
   a comma or a small rewording, never left for the learner to hear.
+- **A paper deals what it asks (plan 247).** An exam paper's subjects,
+  grammar points and deck words come from its exam's walk
+  (`study/exam_topics.py`: `TopicDeck`, `dealt_order`), dealt by the
+  paper's place (its revision, a seed's number), never drawn from its
+  own rng: drawn without memory, ten seed papers told one story many
+  times, asked one point four times and one word three. A generator
+  that draws anything new deals it the same way. The seeds are held to
+  it (`study/exam_seed`: no story retold, no word tested twice), and a
+  reading key copies its passage no more often than a blind pick
+  (`ECHO_TELL`).
 - **One progress number.** A card's progress is `srs._progress`, 0 (new) to
   1 (mastered); every `learned / total`, bar and figure sums it. Never add a
   second curve beside it.
