@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **247**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **248**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -106,6 +106,14 @@ runtime purpose.
   A new rule or refusal there is pinned in `tests/test_plain_polite.py`
   with the sentence it reads both ways and the one it must not, and
   diffed over every sentence Construire asks.
+- **A line the app voices says what its kana says (plan 247).** The
+  engine reads `jp` as written, and its dictionary has habits no reader
+  has: 何ですか なにですか, 十分 じゅうぶん where it means minutes, 方 ほう
+  for a person, 時の間 ときのま, 一かい いちかい, a は fused with the next
+  word. So a conversation line, a dictation line or an exam script is
+  checked against its kana on the engine (`/audio_query` returns the
+  moras it will say), and a word it misreads is respelled in kana, with
+  a comma or a small rewording, never left for the learner to hear.
 - **One progress number.** A card's progress is `srs._progress`, 0 (new) to
   1 (mastered); every `learned / total`, bar and figure sums it. Never add a
   second curve beside it.
