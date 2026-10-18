@@ -189,15 +189,16 @@ describe('the gates\' last doors', () => {
     expect(seen.type).toBe('REPLACE')
   })
 
-  it('shows both rankings at once, one over the other at 1100', async () => {
+  it('shows both rankings at once, on one board (plan 248)', async () => {
     const board = n => ({ entries: [{ rank: 1, username: `a${n}`, xp: 100 }, { rank: 2, username: 'me', xp: 50 }], me: { rank: 2, username: 'me', xp: 50 } })
     const { default: t } = await import('./locales/en/index.js')
     await wrap(<div style={{ width: '560px' }}><Banzuke all={board(1)} week={board(2)} t={t} both /></div>)
     await settle()
-    const boards = $$('.desk-banzuke > .banzuke')
-    expect(boards).toHaveLength(2)
+    expect($$('.banzuke')).toHaveLength(1)
     expect($('.bz__seg')).toBeNull()
-    expect(boards[1].getBoundingClientRect().top).toBeGreaterThan(boards[0].getBoundingClientRect().bottom - 1)
+    // A rank's row holds both periods: this week's name, then all time's.
+    const first = $$('.desk-bz__row')[0]
+    expect([...first.querySelectorAll('.leaderboard-row__name')].map(n => n.textContent)).toEqual(['a2', 'a1'])
   })
 
   it('stands a guide note beside an anchor in the rail, in the desk\'s words', async () => {
