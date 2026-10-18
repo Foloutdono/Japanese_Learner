@@ -239,6 +239,50 @@
             }
           }
         ]
+      },
+      {
+        "them": {
+          "jp": "はい、お弁当です。熱いですよ。",
+          "kana": "はい、おべんとうです。あついですよ。",
+          "en": "Here's your bento. It's hot.",
+          "fr": "Voici votre bento. Il est chaud."
+        },
+        "me": {
+          "jp": "はい、ありがとうございます。",
+          "kana": "はい、ありがとうございます。",
+          "romaji": "hai, arigatou gozaimasu",
+          "en": "Thank you.",
+          "fr": "Merci beaucoup.",
+          "note": {
+            "en": "「ありがとうございます」 thanks the clerk as you take the bento and the warning.",
+            "fr": "「ありがとうございます」 remercie le vendeur pour le bento et pour l'avertissement."
+          },
+          "alt": [
+            {"jp": "ありがとうございます。", "kana": "ありがとうございます。", "romaji": "arigatou gozaimasu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "はい、熱かったです。",
+            "kana": "はい、あつかったです。",
+            "en": "Yes, it was hot.",
+            "fr": "Oui, il était chaud.",
+            "why": {
+              "en": "「熱かった」 is past: you have not touched the bento yet, and the clerk is warning you now.",
+              "fr": "「熱かった」 est au passé : tu n'as pas encore touché le bento, et le vendeur te prévient maintenant."
+            }
+          },
+          {
+            "jp": "はい、熱くしてください。",
+            "kana": "はい、あつくしてください。",
+            "en": "Yes, please make it hot.",
+            "fr": "Oui, faites-le chauffer, s'il vous plaît.",
+            "why": {
+              "en": "「熱くしてください」 asks for the bento to be heated, and it already is: the clerk has just said so.",
+              "fr": "「熱くしてください」 demande de faire chauffer le bento, et il l'est déjà : le vendeur vient de le dire."
+            }
+          }
+        ]
       }
     ],
     "close": {
@@ -777,6 +821,47 @@
             }
           }
         ]
+      },
+      {
+        "them": {
+          "jp": "渋谷は四つ目の駅です。",
+          "kana": "しぶやはよっつめのえきです。",
+          "en": "Shibuya is the fourth stop.",
+          "fr": "Shibuya, c'est le quatrième arrêt."
+        },
+        "me": {
+          "jp": "四つ目ですね。ありがとうございます。",
+          "kana": "よっつめですね。ありがとうございます。",
+          "romaji": "yottsume desu ne. arigatou gozaimasu",
+          "en": "The fourth one. Thank you.",
+          "fr": "La quatrième, d'accord. Merci beaucoup.",
+          "note": {
+            "en": "「四つ目」 counts in order: you repeat that Shibuya is the fourth stop.",
+            "fr": "「四つ目」 compte dans l'ordre : tu répètes que Shibuya est le quatrième arrêt."
+          }
+        },
+        "wrong": [
+          {
+            "jp": "四回目ですね。ありがとうございます。",
+            "kana": "よんかいめですね。ありがとうございます。",
+            "en": "The fourth time. Thank you.",
+            "fr": "La quatrième fois, d'accord. Merci beaucoup.",
+            "why": {
+              "en": "「四回目」 counts times, the fourth time you do something, not the fourth stop.",
+              "fr": "「四回目」 compte les fois, la quatrième fois qu'on fait quelque chose, pas le quatrième arrêt."
+            }
+          },
+          {
+            "jp": "四つ目の電車ですね。ありがとうございます。",
+            "kana": "よっつめのでんしゃですね。ありがとうございます。",
+            "en": "The fourth train. Thank you.",
+            "fr": "Le quatrième train, d'accord. Merci beaucoup.",
+            "why": {
+              "en": "「四つ目の電車」 is the fourth train; the attendant said Shibuya is the fourth stop.",
+              "fr": "「四つ目の電車」, c'est le quatrième train ; l'agent a dit que Shibuya est le quatrième arrêt."
+            }
+          }
+        ]
       }
     ],
     "close": {
@@ -1020,6 +1105,47 @@
             "why": {
               "en": "「よろしくお願いします」 is a set phrase said as it is; in the past, 「お願いしました」 sounds like a favour asked and done with.",
               "fr": "「よろしくお願いします」 est une formule figée ; au passé, 「お願いしました」 sonne comme une faveur déjà demandée, affaire classée."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "あとで、一緒に昼ご飯を食べませんか。",
+          "kana": "あとで、いっしょにひるごはんをたべませんか。",
+          "en": "Would you like to have lunch together later?",
+          "fr": "Tu veux qu'on déjeune ensemble tout à l'heure ?"
+        },
+        "me": {
+          "jp": "いいですね。食べましょう。",
+          "kana": "いいですね。たべましょう。",
+          "romaji": "ii desu ne. tabemashou",
+          "en": "Sounds good. Let's.",
+          "fr": "Bonne idée, avec plaisir.",
+          "note": {
+            "en": "「食べましょう」 accepts and joins in: it is how to say yes to an invitation in 「ませんか」.",
+            "fr": "「食べましょう」 accepte et s'y joint : c'est ainsi qu'on dit oui à une invitation en 「ませんか」."
+          }
+        },
+        "wrong": [
+          {
+            "jp": "いいですね。食べませんでした。",
+            "kana": "いいですね。たべませんでした。",
+            "en": "Sounds good. I didn't eat.",
+            "fr": "Bonne idée. Je n'ai pas mangé.",
+            "why": {
+              "en": "「食べませんでした」 says you did not eat: it is past, and the lunch is still to come.",
+              "fr": "「食べませんでした」 dit que tu n'as pas mangé : c'est du passé, et le déjeuner est encore à venir."
+            }
+          },
+          {
+            "jp": "はい、食べません。",
+            "kana": "はい、たべません。",
+            "en": "Right, I won't be eating.",
+            "fr": "En effet, je ne mangerai pas.",
+            "why": {
+              "en": "「はい、食べません」 answers 「食べませんか」 as a plain question (you won't eat?) and so turns the invitation down flatly; you accept with 「食べましょう」.",
+              "fr": "「はい、食べません」 prend 「食べませんか」 pour une simple question (tu ne manges pas ?) et refuse sèchement l'invitation ; on accepte avec 「食べましょう」."
             }
           }
         ]
@@ -1272,6 +1398,50 @@
             }
           }
         ]
+      },
+      {
+        "them": {
+          "jp": "プレゼントですか。",
+          "kana": "プレゼントですか。",
+          "en": "Is it a present?",
+          "fr": "C'est pour offrir ?"
+        },
+        "me": {
+          "jp": "いいえ、ちがいます。",
+          "kana": "いいえ、ちがいます。",
+          "romaji": "iie, chigaimasu",
+          "en": "No, it isn't.",
+          "fr": "Non, ce n'est pas un cadeau.",
+          "note": {
+            "en": "「ちがいます」 says no: the T-shirt is not a present.",
+            "fr": "「ちがいます」 dit que non : le t-shirt n'est pas un cadeau."
+          },
+          "alt": [
+            {"jp": "いいえ、自分のです。", "kana": "いいえ、じぶんのです。", "romaji": "iie, jibun no desu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "いいえ、プレゼントです。",
+            "kana": "いいえ、プレゼントです。",
+            "en": "No, it's a present.",
+            "fr": "Non, c'est un cadeau.",
+            "why": {
+              "en": "「いいえ」 says it is not a present, then 「プレゼントです」 says it is.",
+              "fr": "「いいえ」 dit que ce n'est pas un cadeau, puis 「プレゼントです」 que c'en est un."
+            }
+          },
+          {
+            "jp": "いいえ、プレゼントをもらいました。",
+            "kana": "いいえ、プレゼントをもらいました。",
+            "en": "No, I was given a present.",
+            "fr": "Non, on m'a offert un cadeau.",
+            "why": {
+              "en": "「もらいました」 says someone gave you a present; the assistant asked whether this T-shirt is one.",
+              "fr": "「もらいました」 dit qu'on t'a offert un cadeau ; le vendeur demandait si ce t-shirt en est un."
+            }
+          }
+        ]
       }
     ],
     "close": {
@@ -1514,6 +1684,47 @@
             "why": {
               "en": "「休みましょう」 suggests you both take a rest; the passer-by was telling you how long the walk takes.",
               "fr": "「休みましょう」 propose de vous reposer ensemble ; le passant te disait combien de temps dure le trajet."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "郵便局は五時までですよ。",
+          "kana": "ゆうびんきょくはごじまでですよ。",
+          "en": "The post office is open until five, mind.",
+          "fr": "La poste est ouverte jusqu'à cinq heures, attention."
+        },
+        "me": {
+          "jp": "五時までですね。ありがとうございます。",
+          "kana": "ごじまでですね。ありがとうございます。",
+          "romaji": "goji made desu ne. arigatou gozaimasu",
+          "en": "Until five. Thank you.",
+          "fr": "Jusqu'à cinq heures, d'accord. Merci.",
+          "note": {
+            "en": "「五時まで」 repeats what you heard: it is open until five.",
+            "fr": "「五時まで」 reprend ce que tu as entendu : elle est ouverte jusqu'à cinq heures."
+          }
+        },
+        "wrong": [
+          {
+            "jp": "五時からですね。ありがとうございます。",
+            "kana": "ごじからですね。ありがとうございます。",
+            "en": "From five. Thank you.",
+            "fr": "À partir de cinq heures, d'accord. Merci.",
+            "why": {
+              "en": "「五時から」 is from five, the opposite of 「まで」, until.",
+              "fr": "「五時から」, c'est à partir de cinq heures, l'inverse de 「まで」, jusqu'à."
+            }
+          },
+          {
+            "jp": "五時までですね。どういたしまして。",
+            "kana": "ごじまでですね。どういたしまして。",
+            "en": "Until five. You're welcome.",
+            "fr": "Jusqu'à cinq heures, d'accord. De rien.",
+            "why": {
+              "en": "「どういたしまして」 answers a thank-you; here you are the one who should thank.",
+              "fr": "「どういたしまして」 répond à un merci ; ici, c'est toi qui dois remercier."
             }
           }
         ]

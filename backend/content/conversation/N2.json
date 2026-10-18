@@ -527,6 +527,47 @@
             }
           }
         ]
+      },
+      {
+        "them": {
+          "jp": "北海道か。いいね。戻るのはいつ？",
+          "kana": "ほっかいどうか。いいね。もどるのはいつ？",
+          "en": "Hokkaido, eh? Nice. When are you back?",
+          "fr": "Hokkaidō ? Sympa. Tu reviens quand ?"
+        },
+        "me": {
+          "jp": "十八日の月曜日から出社いたします。",
+          "kana": "じゅうはちにちのげつようびからしゅっしゃいたします。",
+          "romaji": "juuhachinichi no getsuyoubi kara shussha itashimasu",
+          "en": "I'll be back at the office from Monday the eighteenth.",
+          "fr": "Je serai de retour au bureau à partir du lundi 18.",
+          "note": {
+            "en": "「出社いたします」 says, humbly, when you will be back at the office.",
+            "fr": "「出社いたします」 dit, avec modestie, quand tu reviendras au bureau."
+          }
+        },
+        "wrong": [
+          {
+            "jp": "十八日の月曜日から出社なさいます。",
+            "kana": "じゅうはちにちのげつようびからしゅっしゃなさいます。",
+            "en": "I shall graciously be back at the office from Monday the eighteenth.",
+            "fr": "Je daignerai revenir au bureau à partir du lundi 18.",
+            "why": {
+              "en": "「なさいます」 honours the one who acts: it cannot be said of yourself to your manager.",
+              "fr": "「なさいます」 honore celui qui agit : on ne le dit pas de soi devant son supérieur."
+            }
+          },
+          {
+            "jp": "十八日の月曜日に戻ってまいりました。",
+            "kana": "じゅうはちにちのげつようびにもどってまいりました。",
+            "en": "I came back on Monday the eighteenth.",
+            "fr": "Je suis de retour depuis le lundi 18.",
+            "why": {
+              "en": "「戻ってまいりました」 is past: you have not even taken the days off yet.",
+              "fr": "「戻ってまいりました」 est au passé : tu n'as même pas encore pris tes congés."
+            }
+          }
+        ]
       }
     ],
     "close": {
@@ -1063,6 +1104,47 @@
             "why": {
               "en": "「どういたしまして」 answers a thank-you, and the neighbour has made a promise, not thanked you.",
               "fr": "「どういたしまして」 répond à un merci, et le voisin vient de promettre, pas de te remercier."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "もしまたうるさかったら、遠慮なく言ってくださいね。",
+          "kana": "もしまたうるさかったら、えんりょなくいってくださいね。",
+          "en": "If it's loud again, don't hesitate to tell me.",
+          "fr": "Si c'est de nouveau bruyant, n'hésitez pas à me le dire."
+        },
+        "me": {
+          "jp": "ありがとうございます。そうさせていただきます。",
+          "kana": "ありがとうございます。そうさせていただきます。",
+          "romaji": "arigatou gozaimasu. sou sasete itadakimasu",
+          "en": "Thank you. I will.",
+          "fr": "Merci. Je n'y manquerai pas.",
+          "note": {
+            "en": "「そうさせていただきます」 accepts his offer humbly: you will tell him if it happens again.",
+            "fr": "「そうさせていただきます」 accepte son offre avec modestie : tu le lui diras si ça recommence."
+          }
+        },
+        "wrong": [
+          {
+            "jp": "ありがとうございます。そうしてさしあげます。",
+            "kana": "ありがとうございます。そうしてさしあげます。",
+            "en": "Thank you. I'll do that for you.",
+            "fr": "Merci. Je vous ferai cette faveur.",
+            "why": {
+              "en": "「さしあげます」 offers it as a favour to him; the offer was his, made to you.",
+              "fr": "「さしあげます」 le présente comme une faveur que tu lui fais ; c'est lui qui t'a fait l'offre."
+            }
+          },
+          {
+            "jp": "いいえ、うるさくありませんでした。",
+            "kana": "いいえ、うるさくありませんでした。",
+            "en": "No, it wasn't loud.",
+            "fr": "Non, ce n'était pas bruyant.",
+            "why": {
+              "en": "「うるさくありませんでした」 says it was not loud, just after you came to complain about the noise.",
+              "fr": "「うるさくありませんでした」 dit que ce n'était pas bruyant, alors que tu viens de te plaindre du bruit."
             }
           }
         ]

@@ -240,6 +240,47 @@
             }
           }
         ]
+      },
+      {
+        "them": {
+          "jp": "ほかに何かございますか。",
+          "kana": "ほかになにかございますか。",
+          "en": "Is there anything else?",
+          "fr": "Puis-je faire autre chose pour vous ?"
+        },
+        "me": {
+          "jp": "明日の朝八時に、タクシーを呼んでいただけますか。",
+          "kana": "あしたのあさはちじに、タクシーをよんでいただけますか。",
+          "romaji": "ashita no asa hachiji ni, takushii o yonde itadakemasu ka",
+          "en": "Could you call me a taxi for eight tomorrow morning?",
+          "fr": "Pourriez-vous m'appeler un taxi pour huit heures demain matin ?",
+          "note": {
+            "en": "「呼んでいただけますか」 asks the receptionist, politely, to call a taxi for you.",
+            "fr": "「呼んでいただけますか」 demande poliment à la réception d'appeler un taxi pour toi."
+          }
+        },
+        "wrong": [
+          {
+            "jp": "明日の朝八時に、タクシーを呼んであげます。",
+            "kana": "あしたのあさはちじに、タクシーをよんであげます。",
+            "en": "I'll call a taxi for you at eight tomorrow morning.",
+            "fr": "Je vous appellerai un taxi pour huit heures demain matin.",
+            "why": {
+              "en": "「呼んであげます」 offers to call one for the receptionist: 「あげる」 turns the favour the wrong way.",
+              "fr": "「呼んであげます」 propose d'en appeler un pour la réception : 「あげる」 inverse le sens du service."
+            }
+          },
+          {
+            "jp": "はい、タクシーで来ました。",
+            "kana": "はい、タクシーできました。",
+            "en": "Yes, I came by taxi.",
+            "fr": "Oui, j'ai pris un taxi pour venir.",
+            "why": {
+              "en": "「タクシーで来ました」 says how you got here; the receptionist asked whether there is anything else.",
+              "fr": "「タクシーで来ました」 dit par quel moyen tu as fait le trajet ; on te demandait s'il te faut autre chose."
+            }
+          }
+        ]
       }
     ],
     "close": {
@@ -1079,13 +1120,54 @@
             }
           }
         ]
+      },
+      {
+        "them": {
+          "jp": "十時半から、二十三番ゲートです。",
+          "kana": "じゅうじはんから、にじゅうさんばんゲートです。",
+          "en": "From half past ten, at gate twenty-three.",
+          "fr": "À partir de dix heures et demie, porte vingt-trois."
+        },
+        "me": {
+          "jp": "二十三番ゲートはどちらですか。",
+          "kana": "にじゅうさんばんゲートはどちらですか。",
+          "romaji": "nijuusanban geeto wa dochira desu ka",
+          "en": "Which way is gate twenty-three?",
+          "fr": "La porte vingt-trois, c'est par où ?",
+          "note": {
+            "en": "「どちらですか」 asks, politely, which way the gate is.",
+            "fr": "「どちらですか」 demande poliment de quel côté est la porte."
+          }
+        },
+        "wrong": [
+          {
+            "jp": "二十三番ゲートはいつですか。",
+            "kana": "にじゅうさんばんゲートはいつですか。",
+            "en": "When is gate twenty-three?",
+            "fr": "La porte vingt-trois, c'est quand ?",
+            "why": {
+              "en": "「いつですか」 asks when, and the agent has just given you the time.",
+              "fr": "「いつですか」 demande quand, et l'agent vient de te donner l'heure."
+            }
+          },
+          {
+            "jp": "二十三番ゲートで降ります。",
+            "kana": "にじゅうさんばんゲートでおります。",
+            "en": "I'll get off at gate twenty-three.",
+            "fr": "Je descends à la porte vingt-trois.",
+            "why": {
+              "en": "「降ります」 is to get off: at the gate you get on the plane, 「乗ります」.",
+              "fr": "「降ります」, c'est descendre : à la porte, on monte dans l'avion, 「乗ります」."
+            }
+          }
+        ]
       }
     ],
     "close": {
-      "jp": "十時半から、二十三番ゲートです。いってらっしゃいませ。",
-      "kana": "じゅうじはんから、にじゅうさんばんゲートです。いってらっしゃいませ。",
-      "en": "From half past ten, at gate twenty-three. Have a good trip.",
-      "fr": "À partir de dix heures et demie, porte vingt-trois. Bon voyage !"
+      "jp": "あちらの階段を上がって、右です。いってらっしゃいませ。",
+      "kana": "あちらのかいだんをあがって、みぎです。いってらっしゃいませ。",
+      "en": "Up those stairs, then on the right. Have a good trip.",
+      "fr": "Montez cet escalier, puis c'est à droite. Bon voyage !"
     }
   },
   {
@@ -1624,13 +1706,57 @@
             }
           }
         ]
+      },
+      {
+        "them": {
+          "jp": "少し眠くなるかもしれません。車を運転しますか。",
+          "kana": "すこしねむくなるかもしれません。くるまをうんてんしますか。",
+          "en": "It may make you a little sleepy. Do you drive?",
+          "fr": "Il peut vous donner un peu sommeil. Vous conduisez ?"
+        },
+        "me": {
+          "jp": "いいえ、運転しません。",
+          "kana": "いいえ、うんてんしません。",
+          "romaji": "iie, unten shimasen",
+          "en": "No, I don't.",
+          "fr": "Non, je ne conduis pas.",
+          "note": {
+            "en": "「運転しません」 says you will not be driving, which is what the pharmacist needs to know.",
+            "fr": "「運転しません」 dit que tu ne conduiras pas, ce que le pharmacien a besoin de savoir."
+          },
+          "alt": [
+            {"jp": "いいえ、しません。", "kana": "いいえ、しません。", "romaji": "iie, shimasen"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "いいえ、運転してもいいです。",
+            "kana": "いいえ、うんてんしてもいいです。",
+            "en": "No, you may drive.",
+            "fr": "Non, vous pouvez conduire.",
+            "why": {
+              "en": "「運転してもいいです」 gives permission to drive; nobody asked for it.",
+              "fr": "「運転してもいいです」 donne la permission de conduire ; personne ne l'a demandée."
+            }
+          },
+          {
+            "jp": "はい、眠くなりません。",
+            "kana": "はい、ねむくなりません。",
+            "en": "Yes, it won't make me sleepy.",
+            "fr": "Oui, ça ne me donnera pas sommeil.",
+            "why": {
+              "en": "「眠くなりません」 says it won't make you sleepy; the question was whether you drive.",
+              "fr": "「眠くなりません」 dit que tu n'auras pas sommeil ; on demandait si tu conduis."
+            }
+          }
+        ]
       }
     ],
     "close": {
-      "jp": "少し眠くなるかもしれません。車の運転はしないでくださいね。お大事に。",
-      "kana": "すこしねむくなるかもしれません。くるまのうんてんはしないでくださいね。おだいじに。",
-      "en": "It may make you a little sleepy, so please don't drive. Get well soon.",
-      "fr": "Il peut donner un peu sommeil, alors évitez de conduire. Prompt rétablissement !"
+      "jp": "それなら大丈夫ですね。お大事に。",
+      "kana": "それならだいじょうぶですね。おだいじに。",
+      "en": "Then you'll be fine. Get well soon.",
+      "fr": "Alors ça ira. Prompt rétablissement !"
     }
   },
   {
@@ -1870,6 +1996,47 @@
             "why": {
               "en": "「いかがですか」 here asks how you like the cut, not how you are.",
               "fr": "「いかがですか」 demande ici si la coupe te plaît, pas comment tu vas."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "次は一か月後ぐらいがいいですよ。",
+          "kana": "つぎはいっかげつごぐらいがいいですよ。",
+          "en": "About a month from now would be good for the next one.",
+          "fr": "La prochaine fois, revenez dans un mois environ."
+        },
+        "me": {
+          "jp": "分かりました。また来ます。",
+          "kana": "わかりました。またきます。",
+          "romaji": "wakarimashita. mata kimasu",
+          "en": "Got it. I'll come back.",
+          "fr": "D'accord. Je reviendrai.",
+          "note": {
+            "en": "「また来ます」 says you will come back, as the stylist suggests.",
+            "fr": "「また来ます」 dit que tu reviendras, comme le coiffeur te le conseille."
+          }
+        },
+        "wrong": [
+          {
+            "jp": "分かりました。一か月後に来ました。",
+            "kana": "わかりました。いっかげつごにきました。",
+            "en": "Got it. I came a month later.",
+            "fr": "D'accord. J'étais là un mois plus tard.",
+            "why": {
+              "en": "「来ました」 is past: the stylist is talking about your next visit, still to come.",
+              "fr": "「来ました」 est au passé : le coiffeur parle de ta prochaine visite, encore à venir."
+            }
+          },
+          {
+            "jp": "分かりました。一か月前ですね。",
+            "kana": "わかりました。いっかげつまえですね。",
+            "en": "Got it. A month ago.",
+            "fr": "D'accord. Il y a un mois, c'est ça ?",
+            "why": {
+              "en": "「前」 is before: the stylist said a month from now, 「後」.",
+              "fr": "「前」, c'est avant : le coiffeur a dit dans un mois, 「後」."
             }
           }
         ]
@@ -2122,13 +2289,54 @@
             }
           }
         ]
+      },
+      {
+        "them": {
+          "jp": "いいよ。チケットはどうする？",
+          "kana": "いいよ。チケットはどうする？",
+          "en": "Sure. What about the tickets?",
+          "fr": "OK. Et les billets, on fait comment ?"
+        },
+        "me": {
+          "jp": "じゃあ、私がネットで買っておくね。",
+          "kana": "じゃあ、わたしがネットでかっておくね。",
+          "romaji": "jaa, watashi ga netto de katte oku ne",
+          "en": "I'll buy them online beforehand, then.",
+          "fr": "Bon, je les achète en ligne à l'avance.",
+          "note": {
+            "en": "「買っておく」 says you will buy them ahead of time, so it is done before Saturday.",
+            "fr": "「買っておく」 dit que tu les achètes à l'avance, pour que ce soit fait avant samedi."
+          }
+        },
+        "wrong": [
+          {
+            "jp": "チケットは高かったよ。",
+            "kana": "チケットはたかかったよ。",
+            "en": "The tickets were expensive.",
+            "fr": "Les billets étaient chers.",
+            "why": {
+              "en": "「高かったよ」 remarks on the price; your friend asked what you'll do about the tickets.",
+              "fr": "「高かったよ」 commente le prix ; on te demandait ce que vous faites pour les billets."
+            }
+          },
+          {
+            "jp": "じゃあ、ネットで売っておくね。",
+            "kana": "じゃあ、ネットでうっておくね。",
+            "en": "I'll sell them online beforehand, then.",
+            "fr": "Bon, je les vends en ligne à l'avance.",
+            "why": {
+              "en": "「売っておく」 is to sell them ahead of time; you need to buy them, 「買う」.",
+              "fr": "「売っておく」, c'est les vendre à l'avance ; il faut les acheter, 「買う」."
+            }
+          }
+        ]
       }
     ],
     "close": {
-      "jp": "いいよ。じゃあ、土曜日にね！",
-      "kana": "いいよ。じゃあ、どようびにね！",
-      "en": "Sure. See you Saturday, then!",
-      "fr": "Ça marche. À samedi, alors !"
+      "jp": "ありがとう。じゃあ、土曜日にね！",
+      "kana": "ありがとう。じゃあ、どようびにね！",
+      "en": "Thanks. See you Saturday, then!",
+      "fr": "Merci. À samedi, alors !"
     }
   }
 ]

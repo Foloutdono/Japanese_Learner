@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **250**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **251**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -864,7 +864,9 @@ reader, each word lit on the voice's own syllables, over the owner's
 own music or none; since plan 249 reply videos: the conversations
 answered against a timer, six questions a video at least, every line
 said, drawn since plan 249b as a chat thread in the Fiche look, a
-short one scene whole and ending on the carousel's call to action. Since plan 248 every number a maker may set per
+short one scene whole and ending on the carousel's call to action,
+and asking since plan 250 the 会話 station's own scenes (six turns
+each, `bank/conversation.json`, every reading the bank's own kana). Since plan 248 every number a maker may set per
 post (a video's timing and pace, the music's level, the export's
 quality) is one line of `tune.js`, set in the studio's Tune panel and
 written into the render command, so the video rendered is the one

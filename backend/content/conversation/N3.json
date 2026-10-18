@@ -884,8 +884,8 @@
     "place": {"jp": "電話", "kana": "でんわ", "en": "On the phone", "fr": "Au téléphone"},
     "title": {"en": "Asking for a redelivery", "fr": "Faire relivrer un colis"},
     "situation": {
-      "en": "A parcel came while you were out, and the driver left a missed-delivery notice in your letterbox. You call the number on it.",
-      "fr": "Un colis est arrivé pendant ton absence, et le livreur a laissé un avis de passage dans ta boîte aux lettres. Tu appelles le numéro indiqué."
+      "en": "A parcel for you, Brown, came while you were out, and the driver left a missed-delivery notice in your letterbox. You call the number on it.",
+      "fr": "Un colis à ton nom, Brown, est arrivé pendant ton absence, et le livreur a laissé un avis de passage dans ta boîte aux lettres. Tu appelles le numéro indiqué."
     },
     "goal": {
       "en": "Ask for the parcel to be delivered again tomorrow evening.",
@@ -895,7 +895,8 @@
       {"en": "Ask for a redelivery", "fr": "Demande une nouvelle livraison"},
       {"en": "Give the slip number", "fr": "Donne le numéro de l'avis"},
       {"en": "Choose tomorrow evening", "fr": "Choisis demain soir"},
-      {"en": "Confirm your address", "fr": "Confirme ton adresse"}
+      {"en": "Confirm your address", "fr": "Confirme ton adresse"},
+      {"en": "Give your name", "fr": "Donne ton nom"}
     ],
     "them": {"en": "Delivery company operator", "fr": "Opérateur du transporteur"},
     "register": "polite",
@@ -1114,6 +1115,50 @@
             "why": {
               "en": "「住みます」 talks of where you will live; where you live now is 「住んでいます」.",
               "fr": "「住みます」 parle de là où tu vas habiter ; là où tu habites maintenant, c'est 「住んでいます」."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "最後に、お名前をお願いできますか。",
+          "kana": "さいごに、おなまえをおねがいできますか。",
+          "en": "Lastly, could I have your name?",
+          "fr": "Pour finir, puis-je avoir votre nom ?"
+        },
+        "me": {
+          "jp": "はい、ブラウンと申します。",
+          "kana": "はい、ブラウンともうします。",
+          "romaji": "hai, buraun to moushimasu",
+          "en": "Yes, my name is Brown.",
+          "fr": "Oui, je m'appelle Brown.",
+          "note": {
+            "en": "「と申します」 gives your own name humbly, as you would to a company on the phone.",
+            "fr": "「と申します」 donne ton nom avec modestie, comme on le fait au téléphone avec une entreprise."
+          },
+          "alt": [
+            {"jp": "はい、ブラウンです。", "kana": "はい、ブラウンです。", "romaji": "hai, buraun desu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "はい、ブラウンさんです。",
+            "kana": "はい、ブラウンさんです。",
+            "en": "Yes, this is the honourable Brown.",
+            "fr": "Oui, c'est l'honorable Brown.",
+            "why": {
+              "en": "「さん」 goes on other people's names, never on your own.",
+              "fr": "「さん」 se met au nom des autres, jamais au sien."
+            }
+          },
+          {
+            "jp": "はい、ブラウンに申します。",
+            "kana": "はい、ブラウンにもうします。",
+            "en": "Yes, I'll tell Brown.",
+            "fr": "Oui, je le dirai à Brown.",
+            "why": {
+              "en": "「に申します」 says whom you tell something to; a name you give takes 「と」: 「ブラウンと申します」.",
+              "fr": "「に申します」 dit à qui l'on parle ; le nom qu'on donne prend 「と」 : 「ブラウンと申します」."
             }
           }
         ]
@@ -1365,13 +1410,54 @@
             }
           }
         ]
+      },
+      {
+        "them": {
+          "jp": "何時ごろなら来られますか。",
+          "kana": "なんじごろならこられますか。",
+          "en": "Around what time could you make it?",
+          "fr": "Vers quelle heure pourriez-vous venir ?"
+        },
+        "me": {
+          "jp": "七時ごろなら行けると思います。",
+          "kana": "しちじごろならいけるとおもいます。",
+          "romaji": "shichiji goro nara ikeru to omoimasu",
+          "en": "I think I can make it around seven.",
+          "fr": "Vers sept heures, je pense pouvoir venir.",
+          "note": {
+            "en": "「行けると思います」 says when you think you can get there, which is what 「何時ごろ」 asks.",
+            "fr": "「行けると思います」 dit à quelle heure tu penses pouvoir y être, ce que demande 「何時ごろ」."
+          }
+        },
+        "wrong": [
+          {
+            "jp": "七時ごろなら行けたと思います。",
+            "kana": "しちじごろならいけたとおもいます。",
+            "en": "I think I could have made it around seven.",
+            "fr": "Vers sept heures, j'aurais pu venir, je pense.",
+            "why": {
+              "en": "「行けた」 is past: it says you could have gone, and the drinks are next Friday.",
+              "fr": "「行けた」 est au passé : tu aurais pu y aller, alors que c'est vendredi prochain."
+            }
+          },
+          {
+            "jp": "七時ごろに来てもらえますか。",
+            "kana": "しちじごろにきてもらえますか。",
+            "en": "Could you come around seven?",
+            "fr": "Pourriez-vous venir vers sept heures ?",
+            "why": {
+              "en": "「来てもらえますか」 asks your colleague to come; the question was when you can come.",
+              "fr": "「来てもらえますか」 demande à l'autre de venir ; la question était de savoir quand toi, tu peux venir."
+            }
+          }
+        ]
       }
     ],
     "close": {
       "jp": "はい。じゃあ、今日はお友達と楽しんでくださいね。",
       "kana": "はい。じゃあ、きょうはおともだちとたのしんでくださいね。",
-      "en": "Sure. Well, enjoy this evening with your friend.",
-      "fr": "Avec plaisir. Bonne soirée avec votre ami, alors !"
+      "en": "OK. Well, enjoy this evening with your friend.",
+      "fr": "D'accord. Alors, bonne soirée avec votre ami !"
     }
   },
   {
@@ -1613,6 +1699,50 @@
             "why": {
               "en": "「いいえ」 declines and 「お願いします」 accepts: the clerk cannot tell what you want.",
               "fr": "「いいえ」 refuse et 「お願いします」 accepte : l'agent ne peut pas savoir ce que tu veux."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "はい、できますよ。ほかに何か手続きはございますか。",
+          "kana": "はい、できますよ。ほかになにかてつづきはございますか。",
+          "en": "Yes, you can. Is there any other procedure?",
+          "fr": "Oui, c'est possible. Avez-vous d'autres démarches à faire ?"
+        },
+        "me": {
+          "jp": "いいえ、それだけです。",
+          "kana": "いいえ、それだけです。",
+          "romaji": "iie, sore dake desu",
+          "en": "No, that's all.",
+          "fr": "Non, c'est tout.",
+          "note": {
+            "en": "「それだけです」 says these two procedures are all you need today.",
+            "fr": "「それだけです」 dit que ces deux démarches sont tout ce qu'il te faut aujourd'hui."
+          },
+          "alt": [
+            {"jp": "いいえ、以上です。", "kana": "いいえ、いじょうです。", "romaji": "iie, ijou desu"}
+          ]
+        },
+        "wrong": [
+          {
+            "jp": "いいえ、ほかの手続きをお願いします。",
+            "kana": "いいえ、ほかのてつづきをおねがいします。",
+            "en": "No, I'd like another procedure, please.",
+            "fr": "Non, je voudrais une autre démarche, s'il vous plaît.",
+            "why": {
+              "en": "「いいえ」 says there is nothing else, then 「ほかの手続きをお願いします」 asks for another one.",
+              "fr": "「いいえ」 dit qu'il n'y a rien d'autre, puis 「ほかの手続きをお願いします」 en demande une autre."
+            }
+          },
+          {
+            "jp": "いいえ、今日の手続きはもう終わりました。",
+            "kana": "いいえ、きょうのてつづきはもうおわりました。",
+            "en": "No, today's procedures are already done.",
+            "fr": "Non, les démarches d'aujourd'hui sont déjà faites.",
+            "why": {
+              "en": "「終わりました」 says the procedures are finished; the clerk has not done them yet.",
+              "fr": "「終わりました」 dit que les démarches sont finies ; l'agent ne les a pas encore faites."
             }
           }
         ]
