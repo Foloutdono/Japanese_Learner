@@ -5,7 +5,7 @@ import { LangProvider } from './LangContext'
 import { liveLearner } from './testing/profileRecord'
 import './index.css'
 
-// ── 低 — the holder on a laptop's short window (plans 169, 247) ──
+// ── 低 — the holder on a laptop's short window (plans 169, 248) ──
 // At 1280×600 the holder is taller than the window: the room round its
 // inserts gives way a rung (the gaps, the doors', the figures', the
 // lines' and the board's rows), the card and the stamps keep their
@@ -45,7 +45,7 @@ const settle = (ms = 500) => new Promise(r => setTimeout(r, ms))
 const $ = sel => document.querySelector(sel)
 const $$ = sel => [...document.querySelectorAll(sel)]
 
-describe('the profile on the short desk (plan 247)', () => {
+describe('the profile on the short desk (plan 248)', () => {
   it('keeps every insert whole, the card and the stamps at their size, the columns ending together', async () => {
     api.live = liveLearner()
     await render(

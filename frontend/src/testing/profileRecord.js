@@ -1,4 +1,4 @@
-// ── A learner's profile, for the profile's desk lanes (plan 247) ──
+// ── A learner's profile, for the profile's desk lanes (plan 248) ──
 // Four and a half months in: twenty days stamped up to today, five
 // tickets, third on this week's board and ninth all time (off the top
 // five, so the board closes on the learner's own row), the four lines

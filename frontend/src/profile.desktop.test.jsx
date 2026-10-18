@@ -5,11 +5,11 @@ import { LangProvider } from './LangContext'
 import { liveLearner, lv } from './testing/profileRecord'
 import './index.css'
 
-// ── 机 — the pass holder opened flat (plans 113, 247) ───────────
+// ── 机 — the pass holder opened flat (plans 113, 248) ───────────
 // On the desk the profile's inserts are the phone's, in the phone's
 // order, split after the stamp book into two columns: the pass, its two
 // doors and its stamps on the left, the record on the right. Since plan
-// 247 (the owner's pick A 一望 of the canvas "Tsuji — the profile on
+// 248 (the owner's pick A 一望 of the canvas "Tsuji — the profile on
 // the desk") the stamp book's three figures open the records' lattice,
 // both rankings stand on one board, and the holder is whole in the
 // window at the narrowest desk. The backend is down unless a test says
@@ -77,7 +77,7 @@ describe('the profile on the desk', () => {
     // record taking the rest.
     expect(Math.round(left.width)).toBe(360)
     expect(right.width).toBeGreaterThan(left.width)
-    // Down the left: the card, its two doors, the stamps (plan 247).
+    // Down the left: the card, its two doors, the stamps (plan 248).
     expect([...cols[0].children].map(c => c.dataset.guide ?? c.className.split(' ').at(-1)))
       .toEqual(['profile.pass', 'desk-doors', 'profile.stamps'])
     expect(cols[1].querySelector('[data-guide="profile.records"]')).not.toBeNull()
@@ -90,7 +90,7 @@ describe('the profile on the desk', () => {
     // Statistics and Settings hang under the lit gate on the rail; the
     // doors the page draws are the tickets' (plan 191) and the agenda's
     // (plan 202), which the rail does not hold: one lattice of two slim
-    // rows under the card since plan 247.
+    // rows under the card since plan 248.
     const doors = $$('.record--door')
     expect(doors.map(d => d.getAttribute('href'))).toEqual(['/profile/tickets', '/profile/settings/agenda'])
     expect(doors.every(d => d.parentElement === doors[0].parentElement)).toBe(true)
@@ -104,7 +104,7 @@ describe('the profile on the desk', () => {
     expect($('.pcard-slot--profile button.pcb__meter--balance')).not.toBeNull()
   })
 
-  it('opens the record with the stamp book\'s figures, six in one lattice (plan 247)', async () => {
+  it('opens the record with the stamp book\'s figures, six in one lattice (plan 248)', async () => {
     await mount()
     // The sheet beside the card is the stamps alone...
     expect($('.sbook .sbook__figs')).toBeNull()
@@ -123,7 +123,7 @@ describe('the profile on the desk', () => {
     expect(boxes[3].left).toBeCloseTo(boxes[0].left, 0)
   })
 
-  it('stands both rankings on one board, the ranks down its middle (plan 247)', async () => {
+  it('stands both rankings on one board, the ranks down its middle (plan 248)', async () => {
     api.live = liveLearner()
     await mount()
     expect($$('.banzuke')).toHaveLength(1)
@@ -155,7 +155,7 @@ describe('the profile on the desk', () => {
     expect(rows[2].querySelector('.desk-bz__cell--me').classList.contains('desk-bz__cell--west')).toBe(true)
   })
 
-  it('holds the whole holder in the window, its two columns ending together (plan 247)', async () => {
+  it('holds the whole holder in the window, its two columns ending together (plan 248)', async () => {
     api.live = liveLearner()
     await mount()
     expect($('.pf-ledger')).not.toBeNull()

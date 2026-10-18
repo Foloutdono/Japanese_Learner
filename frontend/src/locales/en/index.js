@@ -2680,7 +2680,7 @@ const guide = {
   guidePracticeSignDesk: 'The trains leaving, one per exercise, with what you have done on each at this level. Click one to see what it will ask of you.',
   guidePracticeBoardDesk: 'Depart: the doors close and the train takes you to the exercise. Enter works from anywhere here.',
   guideDictEntryDesk: 'An entry, open beside the list. ← and → move through the list.',
-  // 机 (plan 247): on the desk the stamp book's figures open the profile's record.
+  // 机 (plan 248): on the desk the stamp book's figures open the profile's record.
   guideProfileRecordsDesk: 'Your numbers: your streak and your longest, the days stamped, total reviews, what you remember, your best perfect run.',
   // Settings, the two ways back.
   settingsFirstRide: 'First ride',

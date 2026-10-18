@@ -31,7 +31,7 @@ function Row({ e, isMe, lang }) {
 
 // `both` is the desk's (plan 115): the profile's record column has room
 // for the two boards at once, so neither hides behind a toggle. Since
-// plan 247 (the owner's pick A of the canvas "Tsuji — the profile on the
+// plan 248 (the owner's pick A of the canvas "Tsuji — the profile on the
 // desk") they are one board, the ranks down its middle: this week to
 // their left, all time to their right, each name beside its rank and
 // its XP at the board's edge. Side by side, the two boards were two
@@ -65,7 +65,7 @@ export function Banzuke({ all, week, t, lang, both = false }) {
   )
 }
 
-// ── 東西 — both periods on one board (plan 247) ──────────────────
+// ── 東西 — both periods on one board (plan 248) ──────────────────
 // A table, so a screen reader reads each row as a rank with its two
 // names under their period's heading; the ranks are the rows' headers.
 // The rows a period's top N and the learner's own row hold, by rank:

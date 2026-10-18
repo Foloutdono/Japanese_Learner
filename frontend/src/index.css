@@ -36121,7 +36121,7 @@ button.brd-stn { cursor: pointer; }
      on the left, the record (the figures, the ledger, the 番付) on the
      right (screens/ProfileScreen.jsx). The pass and its stamps are drawn
      for a phone's width and read as objects at it; the record is what
-     grows into the rest (plan 115). Since plan 247 (the owner's pick A
+     grows into the rest (plan 115). Since plan 248 (the owner's pick A
      一望 of the canvas "Tsuji — the profile on the desk") the holder is
      whole in the window from the narrowest desk: the tickets' and the
      agenda's doors one lattice of slim rows under the card, the stamp
@@ -36187,7 +36187,7 @@ button.brd-stn { cursor: pointer; }
     text-transform: none;
   }
   .pf-line__stop--here .pf-line__stop-name { color: var(--text-primary); }
-  /* 東西 — the two rankings on one board (Banzuke's `both`, plan 247):
+  /* 東西 — the two rankings on one board (Banzuke's `both`, plan 248):
      the ranks down its middle column, this week's names to their left
      and all time's to their right, each name beside its rank and its XP
      at the board's edge. Every row is a subgrid of the board's three
@@ -43242,7 +43242,7 @@ button.brd-stn { cursor: pointer; }
     .prc-spec--compact { padding: var(--sp-4); }
     .prc-lower { flex: none; }
     .prc-panel { max-height: calc(6 * var(--sp-8)); }
-    /* ── the profile (plan 247) ──
+    /* ── the profile (plan 248) ──
        The holder is whole in the window down to 800px; under that the
        room round its inserts gives way a rung -- the gaps, the stamp
        book's margins, and the doors', the figures', the lines' and the

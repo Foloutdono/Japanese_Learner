@@ -13,7 +13,7 @@ import { AGENDA_PATH } from '../agenda/AgendaNext'
 // one, every day ridden inked in the eki stamp's lacquer, a missed day
 // dashed, today pressed harder, the days ahead faint. Under it, the
 // three figures in one row of three: the streak, the longest, the
-// days stamped. On the desk (plan 247) the three join the records in
+// days stamped. On the desk (plan 248) the three join the records in
 // one lattice of six (Records' `book`) and the sheet prints none.
 //
 // The sheet names itself by its month (plan 143): the month is the
@@ -38,7 +38,7 @@ function localIso(d) {
 // The sheet's five weeks, a slot a day from the Monday four weeks before
 // this one, against the local midnight `today` -- and how many of the
 // days so far were stamped: what the sheet draws and what its figures
-// count, the desk's records lattice included (plan 247).
+// count, the desk's records lattice included (plan 248).
 function bookDays(calendar, today) {
   // A day is stamped for a review or, since plan 178, a graded practice
   // answer: the streak counts both, so the book has to.
@@ -161,7 +161,7 @@ function Figure({ value, unit, label, lang }) {
 // (DESIGN.md, Surfaces). A figure with nothing to count yet prints a
 // dash rather than leaving the lattice a bare slab.
 //
-// `book` is the desk's (plan 247): the stamp book's three figures -- the
+// `book` is the desk's (plan 248): the stamp book's three figures -- the
 // streak, the longest, the days stamped -- open the lattice, three by
 // two, so the holder's figures are one record at the head of its column
 // and the sheet beside the card is the stamps alone.
@@ -321,7 +321,7 @@ function AgendaCell({ t, navigate, blocks }) {
   )
 }
 
-// ── 机 — the holder's two doors, under the card (plan 247) ──────────
+// ── 机 — the holder's two doors, under the card (plan 248) ──────────
 // The tickets' and the agenda's doors as one lattice of two slim rows,
 // straight under the card: places rather than figures, so they stand
 // apart from the records, and the stamp book under them is the stamps

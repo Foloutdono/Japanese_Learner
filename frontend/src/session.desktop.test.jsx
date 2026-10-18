@@ -189,7 +189,7 @@ describe('the gates\' last doors', () => {
     expect(seen.type).toBe('REPLACE')
   })
 
-  it('shows both rankings at once, on one board (plan 247)', async () => {
+  it('shows both rankings at once, on one board (plan 248)', async () => {
     const board = n => ({ entries: [{ rank: 1, username: `a${n}`, xp: 100 }, { rank: 2, username: 'me', xp: 50 }], me: { rank: 2, username: 'me', xp: 50 } })
     const { default: t } = await import('./locales/en/index.js')
     await wrap(<div style={{ width: '560px' }}><Banzuke all={board(1)} week={board(2)} t={t} both /></div>)

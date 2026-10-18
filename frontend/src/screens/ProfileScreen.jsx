@@ -33,7 +33,7 @@ import { useAgenda } from '../stores/agenda'
 // call after the first round): they are the ways out of the holder,
 // and at the foot of the lines they were a scroll away.
 //
-// Plan 247 (the owner's pick A 一望 of the canvas "Tsuji — the profile
+// Plan 248 (the owner's pick A 一望 of the canvas "Tsuji — the profile
 // on the desk") fitted the desk's holder to the window: the same two
 // leaves, whole from the narrowest desk, with the stamp book's figures
 // in the records' lattice and both rankings on one board.
@@ -140,7 +140,7 @@ export default function ProfileScreen({ session }) {
 
   // Each insert once, so the phone's column and the desk's two are the
   // same objects in the same order — only the holder differs, and on the
-  // desk (plan 247) the stamp book's three figures, which open the
+  // desk (plan 248) the stamp book's three figures, which open the
   // records' lattice there.
   const inserts = loading ? null : {
     stale: stale && (
@@ -182,7 +182,7 @@ export default function ProfileScreen({ session }) {
     // under the lit gate.
     doors: <ProfileDoors t={t} navigate={navigate} />,
     // The tickets' and the agenda's doors as one lattice under the card:
-    // the desk's (plan 247).
+    // the desk's (plan 248).
     holderDoors: <HolderDoors t={t} navigate={navigate} count={profile.tickets?.length ?? 0} blocks={agenda} />,
     board: <Banzuke all={leaderboard} week={weekBoard} t={t} lang={lang} both={desk} />,
   }
@@ -199,7 +199,7 @@ export default function ProfileScreen({ session }) {
         // phone's inserts, split after the stamps — so a screen reader, the
         // Tab key and the guide walk the card, the stamps and the record in
         // the phone's order — less the two doors the rail already holds
-        // (plan 143). Since plan 247 the tickets' and the agenda's doors
+        // (plan 143). Since plan 248 the tickets' and the agenda's doors
         // stand straight under the card, one lattice of two slim rows, and
         // the two columns end together, whole in the window.
         <>

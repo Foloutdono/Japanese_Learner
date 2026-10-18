@@ -1807,7 +1807,7 @@ line here says otherwise.
   put behind a tap — a sheet, a toggle, a second screen — never a
   decoration found to fill it. The plates go two by two with the odd fifth
   across the row (a lattice with no short last row); the profile opens the
-  holder flat, whole in the window from the narrowest desk (plan 247, the
+  holder flat, whole in the window from the narrowest desk (plan 248, the
   owner's pick A 一望): the pass, its two doors and its stamps at the side
   column's width beside the record — the stamp book's three figures
   opening the records' lattice, its lines drawn with a rail per stop, both
