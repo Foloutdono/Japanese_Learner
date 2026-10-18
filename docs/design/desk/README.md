@@ -207,6 +207,7 @@ the JavaScript. What it changes, in the density contract's order:
 | Today | the side column's blocks never shrink (the pass's strip had been crushed); the week's bars shorter. At every height: a band's lanes drop under its switch when a tile would be under a third of a side column, the lanes `auto-fit`, and a tile's tags run under its name and count |
 | Learn, Practice | Learn's plates a rung tighter and never under their content; Practice's board a rung tighter (plan 244): the trains' rows closed up, the card without its head and link, its well's compact face |
 | the profile (plan 248) | the gaps and the doors', the figures', the lines' and the board's rows a rung closer, the stamp book's room a rung in; the card and the stamps keep their size and the page scrolls the rest |
+| a line's station (plan 251) | the cars at their floor (five `--sp-9`) and the page scrolling the rest, the line whole over them; each car's description gives way, its face, name and record kept |
 | the practice stations | the page at its own height (the narrow page's rule), the well and the panels at their content |
 | the analyser's typed Passage | the sentence at the board rung, its subtitle at the title rung |
 | a run's side (every height) | a headword of two to six signs stacked in the band (as a long one was), the gloss under the marks too |
