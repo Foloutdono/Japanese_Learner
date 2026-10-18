@@ -299,6 +299,25 @@ class SoftenKanjiTest(unittest.TestCase):
         if result is not None:
             self.assertTrue(sentence_kanji_ok(result, "N5"))
 
+    def test_a_counter_goes_to_kana_with_its_number(self):
+        # 一かい is いちかい to the voice engine, 何まい なにまい: the
+        # number goes with the counter, in the reading the pair takes
+        # (plan 247).
+        for text, softened in (("一階のへやです。", "いっかいのへやです。"),
+                               ("何階ですか。", "なんがいですか。"),
+                               ("1階のロビーで。", "いっかいのロビーで。"),
+                               ("本を一冊買った。", "本をいっさつ買った。"),
+                               ("何枚いりますか。", "なんまいいりますか。")):
+            with self.subTest(text=text):
+                self.assertEqual(soften_kanji(text, "N5"), softened)
+
+    def test_spoken_text_spells_what_the_engine_misreads_in_katakana(self):
+        # A lone は is the particle わ to the engine, and さつ after a
+        # number is cut to さっ.
+        self.assertEqual(soften_kanji("歯ブラシを買う。", "N5", spoken=True), "ハブラシを買う。")
+        self.assertEqual(soften_kanji("歯ブラシを買う。", "N5"), "はブラシを買う。")
+        self.assertEqual(soften_kanji("何冊ありますか。", "N5", spoken=True), "なんサツありますか。")
+
 
 class OffendingKanjiTest(unittest.TestCase):
     """What a rejection tells the model to fix. The allowed list is

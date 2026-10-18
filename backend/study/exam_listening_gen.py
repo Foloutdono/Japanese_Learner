@@ -115,7 +115,7 @@ def _validate_listening_mcq_item(item, q_id: str) -> tuple[str, list, str, list,
 
 
 def _soften_or_fail(text: str, level: str, q_id: str, what: str) -> str:
-    softened = soften_kanji(text, level)
+    softened = soften_kanji(text, level, spoken=True)
     if softened is None:
         raise GenerationFailed(f"{q_id}: {what} has kanji outside {level}'s allowed set that could not be read as kana")
     return softened

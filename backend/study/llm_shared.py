@@ -31,6 +31,7 @@ import requests
 
 from content.kanji_data import get_kanji_string
 from study.morphology import tokenize
+from study.reading_context import numeral_furigana
 
 logger = logging.getLogger(__name__)
 
@@ -471,7 +472,10 @@ def offending_kanji(text: str, level: str) -> str:
     return "".join(seen)
 
 
-def soften_kanji(text: str, level: str) -> str | None:
+_NUMBER = re.compile(r"^(?:[0-9０-９]+|[〇一二三四五六七八九十百千万何]+)$")
+
+
+def soften_kanji(text: str, level: str, *, spoken: bool = False) -> str | None:
     """Rewrite out-of-level kanji to their hiragana reading, or None if
     that can't be done reliably.
 
@@ -497,7 +501,14 @@ def soften_kanji(text: str, level: str) -> str | None:
     analyzer is unavailable, when a morpheme has no reading to
     substitute, or when the rewritten text somehow still fails the gate
     — never a partially-softened string, so a caller can trust that a
-    non-None result passes sentence_kanji_ok()."""
+    non-None result passes sentence_kanji_ok().
+
+    A counter goes to kana with the number before it, in the reading the
+    pair takes: 一階 is いっかい, never 一かい, which the voice engine
+    reads いちかい, as it reads 何まい なにまい and 一さつ いちさっ (plan
+    247). `spoken` is for text the engine will voice: a noun softened to
+    a lone は or へ (歯, 葉) is written ハ or ヘ there, since the engine
+    takes the hiragana for the particle and says わ (わブラシ)."""
     if sentence_kanji_ok(text, level):
         return text
 
@@ -506,13 +517,29 @@ def soften_kanji(text: str, level: str) -> str | None:
         return None
 
     out = []
-    for m in morphemes:
+    for i, m in enumerate(morphemes):
         if sentence_kanji_ok(m.surface, level):
             out.append(m.surface)
             continue
         if not m.reading:
             return None
-        out.append(m.reading)
+        reading = m.reading
+        before = morphemes[i - 1] if i else None
+        if before is not None and out[-1:] == [before.surface] and _NUMBER.match(before.surface):
+            # The tokenizer reads a kanji numeral the pair's way (一 いっ
+            # before 階); a digit it leaves as itself, read here.
+            number, counter = numeral_furigana(before.surface, m.surface, m.reading, m.pos)
+            number = number or before.reading
+            if number and not number.isdigit():
+                out[-1] = number
+                reading = counter or reading
+            # さつ in kana the engine cuts to さっ after any number but
+            # one (にさっ, なんさっ); in katakana it says it.
+            if spoken and reading == "さつ":
+                reading = "サツ"
+        if spoken and reading in ("は", "へ") and m.pos != "particle":
+            reading = "ハ" if reading == "は" else "ヘ"
+        out.append(reading)
 
     softened = "".join(out)
     # A reading can itself contain kanji when UniDic has nothing better
