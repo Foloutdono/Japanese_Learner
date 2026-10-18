@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { createRef } from 'react'
 import { render } from 'vitest-browser-react'
 
 // ── One fake IFrame player, driven by hand ────────────────
@@ -21,7 +22,7 @@ vi.mock('../../lib/youtubePlayer', () => ({
 const { VideoPlayer } = await import('./VideoPlayer')
 
 function makePlayer() {
-  const live = { volume: 100, muted: false, time: 0, duration: 0 }
+  const live = { volume: 100, muted: false, time: 0, duration: 0, state: -1 }
   return {
     live,
     setVolume: vi.fn(v => { live.volume = v }),
@@ -31,6 +32,7 @@ function makePlayer() {
     isMuted: () => live.muted,
     getCurrentTime: () => live.time,
     getDuration: () => live.duration,
+    getPlayerState: () => live.state,
     seekTo: vi.fn(),
     playVideo: vi.fn(),
     pauseVideo: vi.fn(),
@@ -131,6 +133,52 @@ describe('VideoPlayer sound', () => {
 
     expect(second).toHaveBeenCalledWith(12)
     expect(first).not.toHaveBeenCalled()
+  })
+})
+
+// ── 再生 — playing, and a stall on a poor connection ──
+// YouTube's states: 1 playing, 3 buffering, 2 paused. A stall to load
+// more is the video still playing as far as the learner is concerned --
+// the transport offers Pause, not Play -- but its clock is not moving.
+describe('VideoPlayer playing', () => {
+  it('counts a stall to load more as playing, its clock stopped', async () => {
+    const onPlayingChange = vi.fn()
+    await mount({ onPlayingChange })
+    fake.events.onStateChange({ data: 1 })
+    expect(onPlayingChange).toHaveBeenLastCalledWith(true, true)
+    fake.events.onStateChange({ data: 3 })
+    expect(onPlayingChange).toHaveBeenLastCalledWith(true, false)
+    fake.events.onStateChange({ data: 2 })
+    expect(onPlayingChange).toHaveBeenLastCalledWith(false, false)
+  })
+
+  // The poll reads the state too: a change no event told of (an iframe
+  // that reloaded itself, a message never delivered) is caught within a
+  // poll, and one already told is not told twice.
+  it('reads the state back on the poll', async () => {
+    const onPlayingChange = vi.fn()
+    await mount({ onPlayingChange })
+    await tick()
+    fake.player.live.state = 1
+    await tick()
+    expect(onPlayingChange).toHaveBeenCalledTimes(1)
+    expect(onPlayingChange).toHaveBeenLastCalledWith(true, true)
+    fake.events.onStateChange({ data: 1 })
+    await tick()
+    expect(onPlayingChange).toHaveBeenCalledTimes(1)
+  })
+
+  // On a slow connection the frame takes a while to be ready, and the
+  // learner presses on meanwhile: nothing is asked of a player that
+  // cannot answer yet, and a seek not sent says so.
+  it('asks nothing of a player that is not ready yet', async () => {
+    fake.player = {}
+    const ref = createRef()
+    await render(<VideoPlayer ref={ref} videoId="dQw4w9WgXcQ" onTimeUpdate={() => {}} />)
+    await tick(30)
+    expect(ref.current.seekTo(12)).toBe(false)
+    expect(() => { ref.current.play(); ref.current.pause() }).not.toThrow()
+    expect(ref.current.currentTime()).toBeNull()
   })
 })
 
