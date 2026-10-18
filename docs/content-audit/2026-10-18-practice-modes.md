@@ -154,12 +154,19 @@ context and pinned in `tests/test_furigana_context.py`:
   `retold_stories`) are new scenes or passages, on subjects no other
   text of the exam id tells, with new questions at the same answer ids.
   Five more, just under the line, read as one story and were rewritten
-  too.
+  too. Read through, the files still told one subject many times in
+  other words below the line (a present for a colleague eight times in
+  N3 listening, a bicycle that keeps breaking five times in N1 and N2
+  reading), so every listening item and reading passage was given its
+  subject against the pools, and the later of each that shared one was
+  rewritten: 284 listening items and 116 passages. No subject now comes
+  back within an exam id, as the generator's deal promises for ten
+  papers.
 - Keys that copied the passage. Picking the choice that copies the most
   of its passage won 53%, 60%, 55%, 57% and 42% of the reading questions,
   N5 to N1, against 25% for a blind pick. 178 keys are now said in other
   words, and where it helps a wrong choice reuses the text's words in
-  something untrue: 23%, 26%, 20%, 23% and 21% (`echo_tells`, 15-35%).
+  something untrue: 21%, 22%, 18%, 23% and 22% (`echo_tells`, 15-35%).
 - Words tested twice: 78 vocabulary items tested a word an earlier paper
   of the exam id had tested, 21 of them in another spelling or form
   (水曜日 and すいようび, 言う and 言いました). Each later one is now on a
@@ -225,8 +232,14 @@ context and pinned in `tests/test_furigana_context.py`:
   N2, so N2 papers write けっか and にもとづいて in kana. Moving a
   character is a migration (`kanji_renames`).
 - In listening, the choice repeating the most of its script is the key
-  in 37-39% of items. No check bounds it, since a script is heard rather
+  in 31-38% of items. No check bounds it, since a script is heard rather
   than read beside the choices.
+- Inside one mondai, length still answers in places: in 漢字読み the key
+  is the longest choice 7-11% of the time (a near-miss reading adds a
+  mora), in N4 and N2 用法 10-11%, in N3 文脈規定 36%, in N3's short
+  reading passages 14% (10% before this audit). Across each exam id it
+  stays inside `LENGTH_TELL`, which is all the check asks; a check per
+  mondai would ask more.
 - Never-right distractors: にかたくない is a wrong choice 14 times on N1
   grammar papers and never the key, を皮切りに 8 times.
 - Mondai below their level:
@@ -318,8 +331,9 @@ seeds and the dictation bank are never in its slice.
 - **Dictation.** Eleven lines changed their `jp`, so their clips have
   new names. Run `python -m scripts.revoice_audio --yes` (or
   `build_dictation_audio`); the old files are garbage.
-- **Exam listening.** 105 clips were renamed by `reclip`. They are
-  made on first request, or ahead of time by the same `revoice_audio`.
+- **Exam listening.** 473 of the 620 listening items name a new clip
+  (`reclip`). They are made on first request, or ahead of time by the
+  same `revoice_audio`, which deletes the old ones.
 - **Conversation.** The rewritten lines are new clips in the grammar
   store: `python -m scripts.prewarm_all_audio --part conversation --yes`.
 - **Seeds.** The comprehension and exam seeds are re-stored on import
