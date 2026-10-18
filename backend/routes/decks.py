@@ -11,6 +11,7 @@ from core.auth import get_user_id, prefixed, unprefixed
 from core import credits
 from core.db import db_conn
 from core.pace import new_card_limit, resolve_pace
+from core.rls import enable_rls
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
@@ -633,6 +634,7 @@ def _ensure_deck_schema() -> None:
                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
+            enable_rls(cur, "decks")
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_decks_user
                 ON decks(user_id)
@@ -650,6 +652,7 @@ def _ensure_deck_schema() -> None:
                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
+            enable_rls(cur, "custom_cards")
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_custom_cards_deck
                 ON custom_cards(deck_id, user_id)
@@ -699,6 +702,7 @@ def _ensure_deck_schema() -> None:
                     PRIMARY KEY (deck_id, source, raw_id)
                 )
             """)
+            enable_rls(cur, "deck_cards")
             # A previous deploy created deck_cards before `decks`
             # existed, with deck_id as TEXT and no FK (see the comment
             # above _ensure_deck_schema) — CREATE TABLE IF NOT EXISTS
@@ -786,6 +790,7 @@ def _ensure_deck_schema() -> None:
                     PRIMARY KEY (deck_id, user_id)
                 )
             """)
+            enable_rls(cur, "deck_subscriptions")
             # The PK already indexes (deck_id, ...); this is the other
             # direction — "which decks does this learner follow" — asked
             # by GET /api/decks and by routes/today.py on every queue
@@ -820,6 +825,7 @@ def _ensure_deck_schema() -> None:
                     UNIQUE (deck_id, user_id)
                 )
             """)
+            enable_rls(cur, "deck_reports")
         conn.commit()
     finally:
         conn.close()

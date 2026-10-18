@@ -32,6 +32,7 @@ import logging
 from core.credits import local_today
 from core.db import db_conn
 from core.pool import PoolBusy
+from core.rls import enable_rls
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +52,7 @@ def _init_db() -> None:
                 )
                 """
             )
+            enable_rls(cur, "daily_usage")
         conn.commit()
     finally:
         conn.close()

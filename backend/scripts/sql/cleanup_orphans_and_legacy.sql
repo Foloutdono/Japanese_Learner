@@ -170,6 +170,9 @@ BEGIN
     CREATE TABLE public.cleanup_report (
         step INT, table_name TEXT, rows_deleted BIGINT
     );
+    -- Closed like every table in public (backend/core/rls.py): the anon
+    -- key reaches public, and this one stands there until PART 3.
+    ALTER TABLE public.cleanup_report ENABLE ROW LEVEL SECURITY;
 
     -- Who goes. Held in an array for the whole block, so nothing has to
     -- survive between statements.
