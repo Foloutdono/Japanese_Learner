@@ -252,30 +252,6 @@ export function TypeInput({
   )
 }
 
-// ── Mode toggle ───────────────────────────────────────────
-export function ModeToggle({ mode, onChange, modes }) {
-  const { t } = useLang()
-  const defaultModes = [
-    ['qcm', t.modeQCM],
-    ['flashcard', t.modeFlashcard],
-    ['write', t.modeWrite],
-  ]
-
-  return (
-    <div className="mode-toggle">
-      {(modes ?? defaultModes).map(([key, label]) => (
-        <button
-          key={key}
-          onClick={() => { playClick(); onChange(key) }}
-          className={`mode-toggle__btn${mode === key ? ' mode-toggle__btn--active' : ''}`}
-        >
-          {label}
-        </button>
-      ))}
-    </div>
-  )
-}
-
 // ── Done message ──────────────────────────────────────────
 // Two endings, one component. The plain one means the deck is
 // genuinely exhausted. The paced one (pace + onExtra) means the
