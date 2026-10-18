@@ -32,7 +32,7 @@ import { spendKey } from '../../lib/keyGuards'
 // drawn on the canvas "Tsuji — the ticket gate, redrawn", and "improve
 // it one more time"): flat fills, one ink outline, no blurred shadow.
 // The gate stands up close, its two cabinets the screen's two halves
-// like the door's leaves, the destination lit beyond them. The pass
+// like the door's leaves, the line's light beyond them, a flat fill. The pass
 // taps the reader, the flaps snap into the cabinets, and the cabinets
 // part on the door's own keyframes onto the line's light, the name
 // growing out of the hall to hold on it before the scene fades off the
@@ -249,12 +249,9 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
       <div className="gate__scrim" />
 
       <div className="gate__set">
-        {/* What is through the gate: the platform in the line's light,
-            dim until the flaps open, its floor and the guide strip
-            running through the lane. */}
+        {/* What is through the gate: the line's light, one flat fill,
+            dim until the flaps open. */}
         <div className="gate__beyond" ref={beyond}>
-          <span className="gate__floor" />
-          <span className="gate__guide" />
           <span className="gate__dim" />
         </div>
 
@@ -268,11 +265,9 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
         </div>
 
         {/* The two cabinets, the screen's two halves. Each carries its
-            flap, tucked behind its face, and its inner side, the face
-            the flap comes out of. */}
+            flap, tucked behind its face. */}
         <div className="gate__cab gate__cab--l" ref={cab}>
           <span className="gate__flap" />
-          <span className="gate__side" />
           <span className="gate__face-plate" />
           {/* The gate's own sign: shut, then the way through. */}
           <span className="gate__led">
@@ -282,7 +277,6 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
         </div>
         <div className="gate__cab gate__cab--r">
           <span className="gate__flap" />
-          <span className="gate__side" />
           <span className="gate__face-plate" />
           {/* The reader. The contactless mark is the same component
               the pass and the top bar draw, so the thing tapping and

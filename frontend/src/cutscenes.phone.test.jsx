@@ -131,9 +131,17 @@ describe('the gate stands up close and parts like the door (plan 249)', () => {
     expect(l.left).toBeLessThanOrEqual(scene.left)
     expect(r.right).toBeGreaterThanOrEqual(scene.right)
     const [fl, fr] = [...document.querySelectorAll('.gate__flap')].map(f => f.getBoundingClientRect())
-    // They meet in the middle of the lane, a pixel either way.
-    expect(Math.abs(fl.right - fr.left)).toBeLessThanOrEqual(2)
+    // They meet in the middle of the lane, a hair apart.
+    expect(fr.left - fl.right).toBeGreaterThanOrEqual(0)
+    expect(fr.left - fl.right).toBeLessThanOrEqual(6)
     expect(Math.abs((fl.right + fr.left) / 2 - (scene.left + scene.right) / 2)).toBeLessThan(2)
+  })
+
+  it('holds on the line\'s light alone: one flat fill behind the name', async () => {
+    await gate()
+    const beyond = document.querySelector('.gate__beyond')
+    expect(getComputedStyle(beyond).backgroundImage).toBe('none')
+    expect([...beyond.children].map(c => c.className)).toEqual(['gate__dim'])
   })
 
   it('draws no blurred shadow, on any part', async () => {

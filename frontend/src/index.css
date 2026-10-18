@@ -20839,40 +20839,14 @@ button.syllabary-cell:focus-visible {
     door-settle calc(280ms * var(--gate-x)) cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
 }
 
-/* ── Beyond the gate: the platform in the line's light ── */
-/* A flat fill, the one large thing that scales: a step in as the
-   cabinets part, from 455ms, so the platform comes to meet you. */
+/* ── Beyond the gate: the line's light ── */
+/* One flat fill, nothing on it but the name: what the hold shows is the
+   colour of where you are going and its name, and nothing else (the
+   owner cut the platform's floor and its guide strip). */
 .gate__beyond {
   position: absolute;
   inset: 0;
   background: var(--gate-light);
-  animation: gate-step calc(210ms * var(--gate-x)) cubic-bezier(0.4, 0, 0.6, 1) calc(455ms * var(--gate-x)) forwards;
-}
-@keyframes gate-step { to { transform: scale(1.06); } }
-/* The platform's floor, its edge catching the light. */
-.gate__floor {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 35%;
-  background: color-mix(in srgb, var(--gate-light) 84%, #fff);
-  border-top: 4px solid color-mix(in srgb, var(--gate-light) 58%, #fff);
-}
-/* The guide strip (誘導ブロック) running through the lane and on across
-   the platform: its ridges along the way you walk, narrowing as it goes.
-   In the light's own tones, as everything beyond the gate is. */
-.gate__guide {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: calc(var(--gate-lane) * 0.6);
-  height: 35%;
-  margin-left: calc(var(--gate-lane) * -0.3);
-  background: repeating-linear-gradient(90deg,
-    color-mix(in srgb, var(--gate-light) 45%, #fff) 0 6px,
-    color-mix(in srgb, var(--gate-light) 65%, #fff) 6px 9px);
-  clip-path: polygon(36% 0, 64% 0, 100% 100%, 0 100%);
 }
 /* Dim until the flaps open: the light comes up with them. */
 .gate__dim {
@@ -20949,14 +20923,17 @@ button.syllabary-cell:focus-visible {
 /* The face: a sumi cap on top, its lit lip, the body, the line's belt
    between two ink rules with its pinstripe under it, and the kick plate
    at the foot. Bands of one gradient, hard-stopped, so the face is one
-   box drawn once. */
+   box drawn once. The inner side, the face toward the lane, is a shade
+   laid over the same bands at the lane's edge behind one ink rule, so
+   the cabinet is one shape under one outline, its single round corner
+   at the top of the lane, and reads as a box rather than a panel. */
 .gate__face-plate {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  inset: 0;
   box-sizing: border-box;
   border: 4px solid var(--gate-ink);
   background:
+    var(--gate-side-band),
     linear-gradient(180deg, var(--gate-ink) 0 4px, var(--gate-kick) 4px) bottom / 100% 22% no-repeat,
     linear-gradient(180deg,
       var(--bg-panel) 0 42px,
@@ -20969,99 +20946,108 @@ button.syllabary-cell:focus-visible {
       color-mix(in srgb, var(--gate-light) 55%, var(--gate-body)) 198px 201px,
       var(--gate-body) 201px);
 }
+.gate__cab--l .gate__face-plate {
+  --gate-side-band: linear-gradient(270deg,
+    rgb(0 0 0 / 0.2) 0 var(--gate-depth),
+    var(--gate-ink) var(--gate-depth) calc(var(--gate-depth) + 3px),
+    transparent calc(var(--gate-depth) + 3px));
+  border-radius: 0 var(--r-panel) 0 0;
+}
+.gate__cab--r .gate__face-plate {
+  --gate-side-band: linear-gradient(90deg,
+    rgb(0 0 0 / 0.2) 0 var(--gate-depth),
+    var(--gate-ink) var(--gate-depth) calc(var(--gate-depth) + 3px),
+    transparent calc(var(--gate-depth) + 3px));
+  border-radius: var(--r-panel) 0 0 0;
+}
 /* The service panel under the belt: an inset outline and its two
-   screws, the one detail that says a cabinet rather than a wall. */
+   screws, the one detail that says a cabinet rather than a wall. Clear
+   of the side, so it stands on the face alone. */
 .gate__face-plate::before {
   content: '';
   position: absolute;
-  inset: 214px var(--sp-5) calc(22% + var(--sp-4));
+  top: 214px;
+  bottom: calc(22% + var(--sp-4));
   border: 3px solid color-mix(in srgb, var(--gate-ink) 22%, var(--gate-body));
   border-radius: var(--r-card);
   background:
     radial-gradient(circle, color-mix(in srgb, var(--gate-ink) 35%, var(--gate-body)) 0 3px, transparent 3.5px) top 6px left 6px / 8px 8px no-repeat,
     radial-gradient(circle, color-mix(in srgb, var(--gate-ink) 35%, var(--gate-body)) 0 3px, transparent 3.5px) top 6px right 6px / 8px 8px no-repeat;
 }
-.gate__cab--l .gate__face-plate { left: 0; right: var(--gate-depth); border-radius: 0 var(--r-panel) 0 0; }
-.gate__cab--r .gate__face-plate { right: 0; left: var(--gate-depth); border-radius: var(--r-panel) 0 0 0; }
-/* The inner side, the face toward the lane: the same bands, a shade
-   down, so the cabinet reads as a box and not a panel. The flap comes
-   out of it. */
-.gate__side {
-  position: absolute;
-  top: var(--sp-3);
-  bottom: 0;
-  width: var(--gate-depth);
-  box-sizing: border-box;
-  border: 4px solid var(--gate-ink);
-  background:
-    linear-gradient(180deg, var(--gate-ink) 0 4px, color-mix(in srgb, var(--gate-kick) 82%, #000) 4px) bottom / 100% 22% no-repeat,
-    linear-gradient(180deg,
-      color-mix(in srgb, var(--bg-panel) 80%, #000) 0 34px,
-      var(--gate-shade) 34px 154px,
-      var(--gate-ink) 154px 158px,
-      color-mix(in srgb, var(--gate-light) 72%, #000) 158px 178px,
-      var(--gate-ink) 178px 182px,
-      var(--gate-shade) 182px);
-}
-.gate__cab--l .gate__side { right: 0; border-left: 0; border-radius: 0 var(--r-card) 0 0; }
-.gate__cab--r .gate__side { left: 0; border-right: 0; border-radius: var(--r-card) 0 0 0; }
+.gate__cab--l .gate__face-plate::before { left: var(--sp-5); right: calc(var(--gate-depth) + var(--sp-5)); }
+.gate__cab--r .gate__face-plate::before { right: var(--sp-5); left: calc(var(--gate-depth) + var(--sp-5)); }
 
-/* The flaps: shut, in the shut state's red with a kinari stripe and a
-   shaded underside, meeting in the middle of the lane. From 300ms they
-   give a finger, then snap back into their cabinets, behind the inner
-   side they came out of. */
+/* The flaps: paddles in the shut state's red, each with a lit top edge,
+   a shaded underside and a kinari stripe with round ends, their free
+   ends rounded and stopping a hair short of each other in the middle
+   of the lane. From 300ms they give a finger, then snap back into
+   their cabinets, behind the face. */
 .gate__flap {
   position: absolute;
   top: 76px;
   height: 62px;
-  width: calc(var(--gate-lane) / 2 + var(--gate-depth) + var(--sp-1));
+  width: calc(var(--gate-lane) / 2 + var(--sp-3) - 2px);
   z-index: -1;
   box-sizing: border-box;
   border: 4px solid var(--gate-ink);
   background:
     linear-gradient(180deg,
-      transparent 0 10px,
-      var(--text-on-panel) 10px 18px,
-      transparent 18px calc(100% - 10px),
-      color-mix(in srgb, var(--danger) 70%, #000) calc(100% - 10px)),
+      color-mix(in srgb, var(--danger) 62%, #fff) 0 5px,
+      transparent 5px calc(100% - 9px),
+      color-mix(in srgb, var(--danger) 70%, #000) calc(100% - 9px)),
     var(--danger);
   animation: calc(145ms * var(--gate-x)) linear calc(305ms * var(--gate-x)) both;
 }
+.gate__flap::after {
+  content: '';
+  position: absolute;
+  top: 15px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: var(--text-on-panel);
+}
 .gate__cab--l .gate__flap {
-  left: calc(100% - var(--gate-depth) - var(--sp-1));
+  left: calc(100% - var(--sp-3));
   border-left: 0;
-  border-radius: 0 var(--r-pill) var(--r-pill) 0;
+  border-radius: 0 var(--r-panel) var(--r-panel) 0;
   animation-name: gate-flap-l;
 }
+.gate__cab--l .gate__flap::after { left: 0; right: var(--sp-3); }
 .gate__cab--r .gate__flap {
-  right: calc(100% - var(--gate-depth) - var(--sp-1));
+  right: calc(100% - var(--sp-3));
   border-right: 0;
-  border-radius: var(--r-pill) 0 0 var(--r-pill);
+  border-radius: var(--r-panel) 0 0 var(--r-panel);
   animation-name: gate-flap-r;
 }
+.gate__cab--r .gate__flap::after { right: 0; left: var(--sp-3); }
 @keyframes gate-flap-l {
   0%   { transform: none; animation-timing-function: ease-out; }
   12%  { transform: translateX(var(--sp-1)); animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1); }
-  100% { transform: translateX(calc(var(--gate-lane) / -2 - var(--sp-2))); }
+  100% { transform: translateX(calc(var(--gate-lane) / -2 - var(--sp-1))); }
 }
 @keyframes gate-flap-r {
   0%   { transform: none; animation-timing-function: ease-out; }
   12%  { transform: translateX(calc(-1 * var(--sp-1))); animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1); }
-  100% { transform: translateX(calc(var(--gate-lane) / 2 + var(--sp-2))); }
+  100% { transform: translateX(calc(var(--gate-lane) / 2 + var(--sp-1))); }
 }
 
-/* The gate's sign, in the cap of the left cabinet: a cross while it is
-   shut, the way through once the pass is read — states, so in the
-   state colours, lit on a dark glass. */
-.gate__led {
+/* The two fittings in the caps, a matched pair: the gate's sign on the
+   left, the reader on the right, the same size, set the same rung in
+   from the side and centred in the cap, each in the same bezel. */
+.gate__led,
+.gate__reader {
   position: absolute;
   top: 9px;
-  right: calc(var(--gate-depth) + var(--sp-6));
-  width: 52px;
-  height: 28px;
+  width: 64px;
+  height: 32px;
   box-sizing: border-box;
   border: 3px solid color-mix(in srgb, var(--bg-panel) 70%, var(--text-on-panel));
   border-radius: var(--r-card);
+}
+/* The sign: a cross while the gate is shut, the way through once the
+   pass is read — states, so in the state colours, lit on a dark glass. */
+.gate__led {
+  right: calc(var(--gate-depth) + var(--sp-5));
   background: color-mix(in srgb, var(--bg-panel) 60%, #000);
 }
 .gate__led svg {
@@ -21093,28 +21079,21 @@ button.syllabary-cell:focus-visible {
 @keyframes gate-hand-on { to { opacity: 1; } }
 @keyframes gate-hand-off { to { opacity: 0; } }
 
-/* The reader, standing proud of the right cabinet's cap, where the
-   pass is tapped: a sumi pad that takes the line's light when the pass
-   lands, and throws one ring. */
+/* The reader, where the pass is tapped: a sumi pad whose bezel takes
+   the line's light when the pass lands (the colour an edge, the mark on
+   the pad kept kinari on sumi), and throws one ring. */
 .gate__reader {
-  position: absolute;
-  top: -16px;
   left: calc(var(--gate-depth) + var(--sp-5));
-  width: 76px;
-  height: 36px;
-  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 4px solid var(--gate-ink);
-  border-radius: var(--r-panel);
   background: var(--bg-panel);
 }
 .gate__reader-lit {
   position: absolute;
-  inset: 0;
+  inset: -3px;
+  border: 3px solid var(--gate-light);
   border-radius: var(--r-card);
-  background: var(--gate-light);
   opacity: 0;
   animation: gate-hand-on calc(1ms * var(--gate-x)) linear calc(300ms * var(--gate-x)) forwards;
 }
@@ -21124,9 +21103,9 @@ button.syllabary-cell:focus-visible {
 .gate__reader::after {
   content: '';
   position: absolute;
-  inset: -4px;
+  inset: -3px;
   border-radius: inherit;
-  border: 4px solid var(--gate-light);
+  border: 3px solid var(--gate-light);
   opacity: 0;
   pointer-events: none;
   animation: gate-ring calc(440ms * var(--gate-x)) cubic-bezier(0.2, 0.6, 0.3, 1) calc(300ms * var(--gate-x)) forwards;
@@ -21137,18 +21116,23 @@ button.syllabary-cell:focus-visible {
 }
 /* The reader's contactless mark is borrowed from the pass (.pass__wave),
    and the pass is sumi — so the arcs are inked --text-on-panel, a kinari
-   that never flips, on the pad's sumi and on the line's light alike. */
+   that never flips, on the pad's sumi, and at full strength here: at the
+   pass's fading 0.7, 0.45 and 0.25 they were lost at the pad's size. */
 .gate__wave span {
-  border-width: 1.3px;
+  border-width: 1.6px;
 }
-.gate__wave span:nth-child(1) { width: 6px;  height: 6px;  margin-top: -3px; }
-.gate__wave span:nth-child(2) { width: 11px; height: 11px; margin-top: -5.5px; }
-.gate__wave span:nth-child(3) { width: 16px; height: 16px; margin-top: -8px; }
+.gate__wave span:nth-child(1) { width: 7px;  height: 7px;  margin-top: -3.5px; opacity: 1; }
+.gate__wave span:nth-child(2) { width: 13px; height: 13px; margin-top: -6.5px; opacity: 0.8; }
+.gate__wave span:nth-child(3) { width: 19px; height: 19px; margin-top: -9.5px; opacity: 0.6; }
 /* One pulse on contact, not a loop: it answers the tap. */
 .gate__wave {
   position: relative;
-  width: 16px;
-  height: 18px;
+  width: 19px;
+  height: 21px;
+  /* The arcs are the right halves of circles hung from the box's left
+     edge, so their ink sits right of the box's middle: drawn back a
+     rung, they stand in the pad's middle. */
+  margin-left: calc(-1 * var(--sp-1));
   animation: gate-wave calc(420ms * var(--gate-x)) ease-out calc(300ms * var(--gate-x));
 }
 @keyframes gate-wave {
@@ -21161,14 +21145,14 @@ button.syllabary-cell:focus-visible {
 /* The learner's 定期券 as the profile draws it, at a card's own
    proportions (272:172), centred on the reader: the reader's centre is
    the right cabinet's inner edge, its side, a rung and half the pad in,
-   and 2px under the cabinets' tops. It starts low and off to the right
+   and the middle of the cap. It starts low and off to the right
    — where a hand comes from — lands, gives under the tap, holds there
    while the reader answers, and lifts clear of the pad. */
 .gate__card {
   --gate-card-w: clamp(108px, 30vw, 156px);
   position: absolute;
-  left: calc(50% + var(--gate-lane) / 2 + var(--gate-depth) + var(--sp-5) + 38px);
-  top: calc(var(--gate-top) + 2px);
+  left: calc(50% + var(--gate-lane) / 2 + var(--gate-depth) + var(--sp-5) + 32px);
+  top: calc(var(--gate-top) + 25px);
   z-index: 2;
   width: var(--gate-card-w);
   margin-left: calc(var(--gate-card-w) / -2);
