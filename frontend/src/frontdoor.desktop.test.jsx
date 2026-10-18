@@ -583,8 +583,14 @@ describe('the boarding frame on the desk (P9, plans 140, 163, 247)', () => {
     await settle(900)
     const q = box(inCar('.brd__q'))
     expect(Math.round(q.left)).toBe(Math.round(box(strip()).left))
+    // The card and its fields in words beside it (plan 247), the pair
+    // in the paper's middle, the list at the side column's width.
     const card = box(inCar('.brd-card .pcard'))
-    expect(Math.abs(mid(card) - bodyW() / 2)).toBeLessThan(1.5)
+    const rows = box(inCar('.brd-rows'))
+    expect(Math.abs((card.left + rows.right) / 2 - bodyW() / 2)).toBeLessThan(1.5)
+    expect(rows.left).toBeGreaterThan(card.right)
+    expect(Math.round(rows.width)).toBe(360)
+    expect(Math.abs(mid({ left: rows.top, right: rows.bottom }) - mid({ left: card.top, right: card.bottom }))).toBeLessThan(1.5)
     expect(card.top).toBeGreaterThan(box(inCar('.brd__hint')).bottom)
     // Every field of the print a door, named for a screen reader.
     expect([...inCar('.brd-card').querySelectorAll('[data-door]')].map(d => d.dataset.door))

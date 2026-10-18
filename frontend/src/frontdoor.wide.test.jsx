@@ -175,11 +175,16 @@ describe('first contact at 1440 (P10)', () => {
     expect(stepOf()).toBe('card')
     const gutter = (bodyW() - 1240) / 2
     expect(Math.round(box(inCar('.brd__q')).left)).toBe(Math.round(gutter))
+    // The card and its fields in words beside it (plan 247), the pair
+    // in the canvas's middle.
     const card = box(inCar('.brd-card .pcard'))
-    expect(Math.abs(mid(card) - bodyW() / 2)).toBeLessThan(1.5)
+    const rows = box(inCar('.brd-rows'))
+    const pair = { left: card.left, right: rows.right }
+    expect(Math.abs(mid(pair) - bodyW() / 2)).toBeLessThan(1.5)
+    expect(rows.left).toBeGreaterThan(card.right)
     expect(card.top).toBeGreaterThan(box(inCar('.brd__hint')).bottom)
-    // The line under it, on the card's own centre line.
-    expect(Math.abs(mid(box(inCar('.brd-keep-line'))) - mid(card))).toBeLessThan(1.5)
+    // The line under both, on the pair's centre line.
+    expect(Math.abs(mid(box(inCar('.brd-keep-line'))) - mid(pair))).toBeLessThan(1.5)
     // The way on, alone on the floor: the card is an arrival, no way back.
     const issue = box(inCar('[data-action="issue"]'))
     expect(Math.round(bodyW() - issue.right)).toBe(Math.round(gutter))

@@ -524,6 +524,8 @@ export default function BoardingFlow({
     hour: `${t.destHour[bucketFor(answers.minute)]} · ${time}`,
     lines: answers.lines,
     name: answers.cardName,
+    // The list under the card names the rhythm in minutes, as its sheet does.
+    minutes: answers.rhythm,
   }
 
   // Where the card lives: an account the learner boarded with, or one
