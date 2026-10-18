@@ -878,10 +878,15 @@ main flashcards are the default. **A day with nothing due** closes the
 dial round the day's 駅スタンプ (the seal the cleared day's ceremony
 presses), its ring the day's reviews by line, with the week's stamps under
 it and tomorrow as a row of a departure board over the shut gate.
-**A gate whose reviews piled up opens once on the comeback sheet**
-(運転再開, plan 217): Today's sheet holding a line of welcome, how many
-cards wait and three paces as Settings' service cards (`.svc`), a
-spread's days as the services sheet's seg. It never stands over the
+**A gate whose reviews piled up says so in a notice on the gate, never
+a sheet over it** (運転再開, plan 217; plan 254, the owner's word: a
+notification inside the screen, gone for the day once closed). It is one
+quiet row over the run's own, as the level that does not fit is (plan
+224): a ring in the due ink, the cards that wait, « Étaler › », and past
+a hairline the ✕ that hides it until the next day on that device. The
+row opens the comeback sheet: Today's sheet holding a line of welcome,
+how many cards wait and three paces as Settings' service cards (`.svc`),
+a spread's days as the services sheet's seg. Neither stands with the
 rest-day notice. A day whose share is spent with reviews held back
 keeps its shut gate, and the way on to them is the board's first row
 over tomorrow's (« En attente · 144 cartes · Réviser › », plan 238,

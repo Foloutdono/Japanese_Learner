@@ -166,19 +166,3 @@ export function markRestSeen(session, key) {
     .then(() => refreshToday())
     .catch(() => { /* shown again tomorrow at worst */ })
 }
-
-// ── 運転再開 — the comeback sheet, shut (plan 217) ─────────────────
-// Shut without an answer (the scrim, Escape, a push down), the sheet
-// keeps out of the way for the rest of the visit and opens again on the
-// next one: an offer, never a toll at the gate.
-let comebackWasShut = false
-
-/** Whether the comeback sheet was shut on this visit. */
-export function comebackShut() {
-  return comebackWasShut
-}
-
-/** The comeback sheet was shut without an answer. */
-export function shutComeback() {
-  comebackWasShut = true
-}
