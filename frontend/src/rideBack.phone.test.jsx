@@ -14,8 +14,8 @@ import './index.css'
 // The whole app, on a real router, over that history. Back is now the
 // head's Skip on the cards and the reading (the stamp, ride_done, the
 // day's gate) once any sheet open over them is closed, and the frame's ‹
-// on the introduction; and a second Back finds the front door sending
-// to the gate, never the ride.
+// on the introduction, its Skip on the first screen; and a second Back
+// finds the front door sending to the gate, never the ride.
 
 const apiJsonWithTimeout = vi.hoisted(() => vi.fn())
 const apiJson = vi.hoisted(() => vi.fn())
@@ -171,9 +171,10 @@ describe('Back on the first ride, at 390×844', () => {
   })
 
   // 入門 (plan 170): the learner with no kana boards the introduction,
-  // whose ‹ goes back a screen. Back does the same, and the cards it
-  // boards skip as everyone's do.
-  it('walks the introduction back a screen at a time, and skips from the cards', async () => {
+  // whose ‹ goes back a screen. Back does the same, and on the first
+  // screen, which has no ‹, takes its Skip to the cards -- which skip as
+  // everyone's do.
+  it('walks the introduction back a screen at a time, skips it from the first, and the ride from the cards', async () => {
     const root = await boot({ ...PROFILE, kanaKnown: 'none' })
     await at('/ride/intro')
     await found(root, 'main.brd.nyu')
@@ -196,8 +197,9 @@ describe('Back on the first ride, at 390×844', () => {
     window.history.back()
     await onStep('scripts')
     expect(window.location.pathname).toBe('/ride/intro')
+    await guarded()
 
-    live(root).querySelector('[data-action="skip"]').click()
+    window.history.back()
     await at('/ride/cards')
     await found(root, '.flashcard')
     window.history.back()

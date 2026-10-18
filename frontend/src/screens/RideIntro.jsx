@@ -47,8 +47,9 @@ import RouteStep from '../components/intro/RouteStep'
 // there is one, through a guard entry (hooks/useBackGuard.js). Without
 // it Back left for the entry behind the ride, the front door, which
 // opened the introduction again on its first screen (reported
-// 2026-10-17). From the first screen Back is the browser's, as from
-// the boarding's first question: beginning there again loses nothing.
+// 2026-10-17). The first screen has no ‹, so there Back takes the
+// screen's way out instead, Skip, to the cards (the owner's call,
+// 2026-10-18).
 //
 // `covered` is App's "the 改札 cutscene is still playing": the stopwatch
 // waits for it. `dryRun` is the workbench's (/dev/ride): `onNext` instead
@@ -125,10 +126,10 @@ export default function RideIntro({ session, covered = false, first = false, dry
   }, [])
 
   // Back on the first ride: one screen back, as the ‹ (above), the
-  // guard stood again on each screen that still has one behind it. Read
+  // guard stood again on each new screen; from the first, Skip. Read
   // once, like the cards' own.
   const [held] = useState(first)
-  const release = useBackGuard(held && index > 0, () => goTo(index - 1, 'back'), index)
+  const release = useBackGuard(held, () => (index > 0 ? goTo(index - 1, 'back') : leave('skip')), index)
 
   function leave(dir) {
     if (done.current) return
