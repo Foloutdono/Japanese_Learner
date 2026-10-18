@@ -90,6 +90,10 @@ runtime purpose.
   and 60% of the 表記 items). `study/exam_seed.problems` refuses both on
   every seed paper but listening's, whose choices are the figures the
   recording gives; symmetry is not a tell (a shared frame, a 2×2 grid).
+  Across an exam id's ten papers the choice nearest to the others may win
+  no more than 36% (`likeness_tells`; a blind pick of four wins 25%, and the
+  N4 and N3 grammar seeds' answers were that choice 45% and 43% of the
+  time), as the longest and the shortest may not either (`length_tells`).
   A wrong choice is a real form or expression the learner could choose,
   never a corruption of the right one (ないければなりません). The
   漢字読み / 表記 choices are made by `study/exam_kanji_choices.py`: the
@@ -111,6 +115,9 @@ runtime purpose.
   of ordinary text (noun と, 持って来る, ならんで) are named in
   `_NOT_THE_POINT` and pinned in `tests/test_exam_levels.py` with the
   sentence that must still be found; a new exemption brings its counter-case.
+  A fill-in stem keeps its one ＿＿＿＿ and a paraphrase its underlined word
+  (`item_shape_problems`): a stem edited by hand can lose either, and no
+  other check notices.
 - **Every grammar point is asked in Choisir.** The contrast drill needs a
   sentence the matcher or the detector can blank and a rival that is
   certainly wrong in the gap; a point with neither (は, も, ない形, 〜て（理由）)

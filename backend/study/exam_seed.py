@@ -34,6 +34,7 @@
 import hashlib
 import json
 import logging
+import re
 from pathlib import Path
 
 from study.exam_audio_repair import questions_with_audio, turns_from_script
@@ -136,6 +137,7 @@ def problems(exam_id: str, paper: dict) -> list[str]:
             out.append(f"{q.get('id')}: the ★ is on the first or last piece, answered by punctuation")
     out += choice_tells(paper, level)
     out += kanji_item_problems(paper, level)
+    out += item_shape_problems(paper, level)
     out += [f"{where}: kanji outside {level}: {chars}" for where, chars in kanji_outside(paper, kind)]
     out += [f"{where}: grammar above {level}: {pattern} ({point_level})"
             for where, pattern, point_level in paper_grammar_above(paper, kind)]
@@ -146,6 +148,12 @@ def problems(exam_id: str, paper: dict) -> list[str]:
     return out
 
 
+def _kinds(level: str) -> dict[str, str]:
+    """The blueprint's type of each mondai id at `level` (the stored papers
+    all say mcq-text)."""
+    return {m["id"]: m["type"] for s in LEVEL_BLUEPRINT[level]["sections"] for m in s["mondai"]}
+
+
 # What the choices give away by how they look beside each other
 # (study/exam_tells.py, plan 254): an answer that is one of two choices a
 # character apart, or the one choice nearest to all the others, is found
@@ -153,7 +161,7 @@ def problems(exam_id: str, paper: dict) -> list[str]:
 # choices are the figures and places the recording gives (5時 / 5時半 /
 # 6時), and what tells them apart is heard.
 def choice_tells(paper: dict, level: str) -> list[str]:
-    kinds = {m["id"]: m["type"] for s in LEVEL_BLUEPRINT[level]["sections"] for m in s["mondai"]}
+    kinds = _kinds(level)
     out = []
     for section in paper.get("sections") or []:
         for m in section.get("mondai") or []:
@@ -180,7 +188,7 @@ def choice_tells(paper: dict, level: str) -> list[str]:
 def kanji_item_problems(paper: dict, level: str) -> list[str]:
     from study import exam_kanji_choices as kc
 
-    kinds = {m["id"]: m["type"] for s in LEVEL_BLUEPRINT[level]["sections"] for m in s["mondai"]}
+    kinds = _kinds(level)
     out = []
     for section in paper.get("sections") or []:
         for m in section.get("mondai") or []:
@@ -190,6 +198,28 @@ def kanji_item_problems(paper: dict, level: str) -> list[str]:
                 answer = next((i for i, c in enumerate(q.get("choices") or []) if c.get("id") == q.get("answer")), None)
                 if len(choices) == 4 and answer is not None:
                     out += [f"{q.get('id')}: {why}" for why in check(q.get("promptJp") or "", choices, answer)]
+    return out
+
+
+# A fill-in item has its blank and a paraphrase item its underline. A stem
+# edited by hand can lose either, and then shows a finished sentence over
+# four loose words, which no other check notices (plan 254).
+def item_shape_problems(paper: dict, level: str) -> list[str]:
+    kinds = _kinds(level)
+    out = []
+    for section in paper.get("sections") or []:
+        for m in section.get("mondai") or []:
+            kind = kinds.get(m.get("id"))
+            for q in m.get("questions") or []:
+                prompt = q.get("promptJp") or ""
+                if kind == "vocab-context":
+                    blanks = re.findall(r"＿+", prompt)
+                    if len(blanks) != 1 or len(blanks[0]) != 4:
+                        out.append(f"{q.get('id')}: a fill-in stem has one ＿＿＿＿, not {blanks or 'none'}")
+                elif kind == "vocab-paraphrase":
+                    underline = q.get("underlineJp") or ""
+                    if not underline or underline not in prompt:
+                        out.append(f"{q.get('id')}: the underlined word {underline!r} is not in the stem")
     return out
 
 
@@ -227,6 +257,33 @@ def length_tells(papers: list[dict]) -> list[str]:
             out.append(f"picking {name} choice wins {share:.0%} ({wins:.1f} of {items}); "
                        f"length must say nothing, {low:.0%} to {high:.0%}")
     return out
+
+
+# The choice nearest to all the others (study/exam_tells.centre) is what a
+# set of wrong choices written by editing the right one leaves the right
+# one: picked blind, it was the answer of 95% of the old 漢字読み items and
+# of 45% of the N4 grammar ones. Across an exam id's seeds, a blind pick of
+# it must win about as often as a blind pick of four.
+LIKENESS_TELL = 0.36
+LIKENESS_MIN_ITEMS = 40       # fewer items than this say nothing
+
+
+def likeness_tells(papers: list[dict]) -> list[str]:
+    items = hits = 0
+    for paper in papers:
+        for q in flatten_questions(paper):
+            choices = q.get("choices") or []
+            right = [i for i, c in enumerate(choices) if c.get("id") == q.get("answer")]
+            if len(choices) != 4 or len(right) != 1 or q.get("audioSrc"):
+                continue
+            middle = centre([c.get("textJp") or "" for c in choices])
+            if middle is not None:
+                items += 1
+                hits += middle == right[0]
+    if items < LIKENESS_MIN_ITEMS or hits / items <= LIKENESS_TELL:
+        return []
+    return [f"picking the choice most like the others wins {hits / items:.0%} ({hits} of {items}); "
+            f"looks must say nothing, {LIKENESS_TELL:.0%} at most"]
 
 
 def authored_texts(paper: dict) -> list[str]:
@@ -281,6 +338,7 @@ def exam_problems(exam_id: str) -> list[str]:
                 out.append(f"{exam_id} #{e.get('n')}: shares a text with #{seen[t]}: {t[:40]}...")
             seen.setdefault(t, e.get("n"))
     out += [f"{exam_id}: {t}" for t in length_tells([e["paper"] for e in entries])]
+    out += [f"{exam_id}: {t}" for t in likeness_tells([e["paper"] for e in entries])]
     return out
 
 

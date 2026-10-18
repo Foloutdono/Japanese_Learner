@@ -74,6 +74,21 @@ def test_length_must_not_answer():
     assert exam_seed.length_tells([rotating]) == []
 
 
+def _star(right: int) -> dict:
+    # はじめ is the choice every other one is a character from: index 0
+    ids = ["c1", "c2", "c3", "c4"]
+    return {"id": "q", "choices": [{"id": i, "textJp": t} for i, t in zip(ids, ["はじめ", "はしめ", "ばじめ", "ぱじめ"])],
+            "answer": ids[right]}
+
+
+def test_the_choice_nearest_to_the_others_must_not_be_the_answer():
+    always_the_centre = _paper_of([_star(0) for _ in range(50)])
+    assert any("most like the others" in t for t in exam_seed.likeness_tells([always_the_centre]))
+    one_in_four = _paper_of([_star(i % 4) for i in range(50)])
+    assert exam_seed.likeness_tells([one_in_four]) == []
+    assert exam_seed.likeness_tells([_paper_of([_star(0) for _ in range(10)])]) == []     # too few to say
+
+
 # ── What the choices give away, and the level (plan 254) ─────────────
 
 def _grammar_question(texts: list[str], answer: int) -> tuple[dict, str]:
@@ -118,6 +133,24 @@ def test_a_grammar_point_above_the_level_is_not_a_seed():
     q["promptJp"] = "あしたは　雨が　ふるそうです。"          # 〜そうだ（伝聞） is an N4 point
     found = exam_seed.problems("n5-grammar-01", paper)
     assert _about(found, q["id"], "grammar above N5: 〜そうだ（伝聞） (N4)")
+
+
+def test_a_fill_in_stem_without_its_blank_is_not_a_seed():
+    paper = _first("n5-vocab-01")
+    q = next(q for m in paper["sections"][0]["mondai"] if m["id"] == "moji_3" for q in m["questions"])
+    assert not _about(exam_seed.problems("n5-vocab-01", paper), q["id"], "fill-in stem")
+    q["promptJp"] = q["promptJp"].replace("＿＿＿＿", "とても")
+    assert _about(exam_seed.problems("n5-vocab-01", paper), q["id"], "fill-in stem has one ＿＿＿＿, not none")
+    q["promptJp"] = "＿＿＿＿＿＿ " + q["promptJp"]
+    assert _about(exam_seed.problems("n5-vocab-01", paper), q["id"], "fill-in stem")
+
+
+def test_a_paraphrase_whose_underline_left_the_stem_is_not_a_seed():
+    paper = _first("n5-vocab-01")
+    q = next(q for m in paper["sections"][0]["mondai"] if m["id"] == "moji_4" for q in m["questions"])
+    assert not _about(exam_seed.problems("n5-vocab-01", paper), q["id"], "underlined word")
+    q["underlineJp"] = "ぜんぜんちがう"
+    assert _about(exam_seed.problems("n5-vocab-01", paper), q["id"], "underlined word 'ぜんぜんちがう' is not in the stem")
 
 
 def test_a_made_up_reading_is_not_a_seed():
