@@ -37,6 +37,9 @@ import { RouteStops } from './RouteStops'
  *   figured — the desk's line split (plan 137): each stop prints its
  *            first few items (/api/station/{source}/samples) and its
  *            bar. Only the desk passes it, so a phone never asks.
+ *   across — the desk's line station (plan 251): the stops laid across
+ *            the top of the page, over the open level's cars (see
+ *            RouteStops). Only the desk passes it.
  *   sampleSource — whose samples the stops print, where it is not the
  *            line whose figures they print (plan 159): a practice
  *            station prints the level's VOCABULARY figures under a
@@ -50,7 +53,7 @@ import { RouteStops } from './RouteStops'
 
 const DEFAULT_LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
-export default function LevelSelector({ onSelect, source, levels = DEFAULT_LEVELS, selected = null, linkTo = null, figured = false, sampleSource = null, extra = null }) {
+export default function LevelSelector({ onSelect, source, levels = DEFAULT_LEVELS, selected = null, linkTo = null, figured = false, across = false, sampleSource = null, extra = null }) {
   const { t } = useLang()
   const stats = useStats().data
   const samples = useStationSamples(sampleSource || source, figured && sampleSource !== false)
@@ -78,5 +81,5 @@ export default function LevelSelector({ onSelect, source, levels = DEFAULT_LEVEL
     }
   })
 
-  return <RouteStops stops={stops} here={here} selected={selected} onSelect={onSelect} linkTo={linkTo} figured={figured} />
+  return <RouteStops stops={stops} here={here} selected={selected} onSelect={onSelect} linkTo={linkTo} figured={figured} across={across} />
 }

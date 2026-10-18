@@ -28,6 +28,14 @@ let generation = 0
 // otherwise hold three dots forever over controls that still work.
 let failed = false
 const TTL_MS = 30_000
+// The TTL's fetch in flight, shared by every hook that mounts while it
+// is out: a screen's first paint mounts several (the HUD, the stage,
+// the guide), and each asked again -- four /api/profile at once on a
+// first ride's boot, in the learner's six-at-a-time queue
+// (core/concurrency.py) ahead of the screen's own requests.
+// refreshSummary never shares it: it is called after a write, and an
+// answer asked before the write is the stale one it exists to replace.
+let inflight = null
 const listeners = new Set()
 
 function notify() {
@@ -67,6 +75,13 @@ export function refreshSummary() {
   return fetchSummary()
 }
 
+function fetchIfStale() {
+  if (inflight) return inflight
+  const gen = generation
+  inflight = fetchSummary().finally(() => { if (gen === generation) inflight = null })
+  return inflight
+}
+
 // Development only: the reward workbench (/dev/rewards) needs a
 // summary to exist so the level HUD has something to report a gain
 // against, and there is no session there to fetch one. Not a real
@@ -86,6 +101,7 @@ export function seedSummary(data) {
  */
 export function forgetSummary() {
   generation += 1
+  inflight = null
   cache = null
   cacheAt = 0
   failed = false
@@ -106,7 +122,7 @@ export function useProfileSummaryState() {
   useEffect(() => {
     const sync = () => setState({ summary: cache, failed })
     listeners.add(sync)
-    if (!cache || Date.now() - cacheAt >= TTL_MS) fetchSummary()
+    if (!cache || Date.now() - cacheAt >= TTL_MS) fetchIfStale()
     return () => { listeners.delete(sync) }
   }, [])
 

@@ -3066,15 +3066,6 @@ def _clause_before(tokens, start: int):
     return out[::-1]
 
 
-def _clause_after(tokens, end: int):
-    out = []
-    for t in (t for t in tokens if t.start >= end):
-        if t.pos == "symbol" and (t.surface in _COMMAS or t.surface in _UTTERANCE_ENDS):
-            break
-        out.append(t)
-    return out
-
-
 def _after_nakute(tokens, start: int) -> bool:
     """Whether the hit at `start` follows なく: なくてはならない and
     なくちゃいけない are "must", the opposite of the prohibitions they

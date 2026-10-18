@@ -147,8 +147,9 @@ describe('the profile at phone width (plan 143)', () => {
       // One line, like the tickets' door above it.
       expect(box.getBoundingClientRect().height).toBeCloseTo(tickets.getBoundingClientRect().height, 0)
       door.click()
-      await settle(50)
-      expect($('[data-where]').textContent).toBe('/profile/settings/agenda')
+      // Waited for, not slept on: a fixed 50 ms read '/profile' on a
+      // loaded runner (CI, twice) before the push had rendered.
+      await expect.poll(() => $('[data-where]').textContent).toBe('/profile/settings/agenda')
     } finally {
       agenda.blocks = null
     }

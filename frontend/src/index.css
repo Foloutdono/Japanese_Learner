@@ -27630,11 +27630,15 @@ button.brd-stn { cursor: pointer; }
    stops with the boarding's ease; none under reduced motion. */
 .guide__spot {
   position: fixed;
+  /* Placed by its transform (guide/Spot.jsx): a glide of top/left is a
+     layout shift on every frame. */
+  top: 0;
+  left: 0;
   z-index: 219;
   box-shadow: 0 0 0 100vmax var(--scrim-bg, rgba(0, 0, 0, 0.55));
   border-radius: var(--r-card);
   pointer-events: none;
-  transition: top var(--guide-move, 260ms) ease-out, left var(--guide-move, 260ms) ease-out,
+  transition: transform var(--guide-move, 260ms) ease-out,
     width var(--guide-move, 260ms) ease-out, height var(--guide-move, 260ms) ease-out;
 }
 .guide__spot--pill { border-radius: var(--r-pill); }
@@ -36486,15 +36490,19 @@ button.brd-stn { cursor: pointer; }
   .desk-split__page > .platform-grid { grid-template-columns: minmax(0, 1fr); }
   .tier-picker > .platform-grid,
   .theme-picker > .platform-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  /* A line's split, filled (plan 137): the page's grid shares the
-     page's height, each platform a row of it; the foot's grid holds its
-     one door across. */
-  .desk-split--line .platform-grid {
+  /* A line's cars (plan 251, components/selection/LinePlatforms): as
+     many to a row as domain/cars.js says the page holds (--cars), the
+     first spanning what the last row would leave empty (--lead), the
+     rows sharing the page's height, never under a car's floor; the
+     foot's grid holds its one door across. */
+  .desk-platforms > .platform-grid {
     flex: 1;
-    grid-template-columns: minmax(0, 1fr);
-    grid-auto-rows: 1fr;
+    grid-template-columns: repeat(var(--cars, 2), minmax(0, 1fr));
+    grid-auto-rows: minmax(calc(5 * var(--sp-9)), 1fr);
+    gap: var(--sp-5);
   }
-  .desk-split__foot > .platform-grid { grid-template-columns: minmax(0, 1fr); }
+  .desk-platforms > .platform-grid > .platform-slot:first-child { grid-column: span var(--lead, 1); }
+  .desk-platforms__foot > .platform-grid { grid-template-columns: minmax(0, 1fr); }
   /* ... except a list beside its page (plan 115) — the tiers, the
      library's shelf: one to a row, in the list's column, never as wide
      as a card's content would like. */
@@ -36769,27 +36777,40 @@ button.brd-stn { cursor: pointer; }
      secondary ink: a count of work under way, not a call to act. */
   .desk-mode-fig__now { color: var(--text-secondary); }
 
-  /* ── 机 — a line's split, filled (plan 137) ──
-     The owner's pick A of the station screens canvas. A line's station
-     (a kana set, a JLPT level of vocab, kanji or grammar) stood a third
-     of the way down the window, its stops wrapping their names in a
-     360px column and its platforms 850px wide with nothing between the
-     description and the figures. Now both columns take the window, the
-     way the gates' plates do (plan 130), and the room goes to what each
-     row has to say:
+  /* A car's record (plan 251, ModeFigures' `line`): one line under the
+     car's description -- what is due in the state's ink, or what is
+     under way, then the figure, or before any card is met how many
+     there are -- over the composition bar across the car's foot. */
+  .desk-mode-fig--line {
+    gap: var(--sp-3);
+    font-size: var(--fs-sm);
+    font-weight: 400;
+    line-height: 1.3;
+    text-align: left;
+  }
+  .desk-mode-fig__rec {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--sp-2);
+  }
+  .desk-mode-fig__rec > * + *::before {
+    content: '·';
+    margin-inline-end: var(--sp-2);
+    color: var(--text-secondary);
+  }
+  .desk-mode-fig--line .desk-mode-fig__due,
+  .desk-mode-fig--line .desk-mode-fig__now { font-weight: 700; }
 
-     - a stop is a grid: its code and name on one line, the first things
-       it teaches under them (/api/station's samples, in the pigment the
-       platform card's own sample wears), the Learn plate's bar of its
-       make-up, then "you are here" and its figure; the stops share the
-       column's height, never below their content;
-     - a platform shares the page's height with the others, and carries
-       the card it will ask in a well between its description and its
-       figures (LinePlatforms' Specimen): the paper the run's card lies
-       on, seen through the platform;
-     - the fast review, which rates nothing, and the grammar level's
-       points, which open rather than board, are doors at the page's
-       foot, side by side, at the height of the one row they fill. */
+  /* ── 机 — a line's split, filled (plan 137) ──
+     The owner's pick A of the station screens canvas, which the basics'
+     units and the practice stations keep (a line's own station is the
+     line over its cars since plan 251, below): both columns take the
+     window, the way the gates' plates do (plan 130), and a stop is a
+     grid -- its code and name on one line, the first things it teaches
+     under them, the Learn plate's bar of its make-up, then "you are
+     here" and its figure -- the stops sharing the column's height,
+     never below their content. */
   .learn > .desk-split--line {
     flex: 1;
     align-items: stretch;
@@ -36799,6 +36820,120 @@ button.brd-stn { cursor: pointer; }
     flex-direction: column;
   }
   .desk-split--line > .desk-split__list > .route { flex: 1; }
+
+  /* ── 号車 — a line's station: the line over its cars (plan 251) ──
+     The owner's pick C of the canvas "Tsuji — the learning modes on the
+     desk", for a kana set and a JLPT level of vocab, kanji or grammar
+     (components/selection/LineStation.jsx, LinePlatforms.jsx). Plan
+     137 stood the stops in a column beside the platforms, each platform
+     a row holding its card in a small well: eleven rows of words and two
+     narrow columns of air. The page still takes the window, and:
+
+     - the line runs across its top, as a line map hangs over a
+       platform: one rail through every stop's marker, each stop a column
+       under it, its code and name on one line and its figure under
+       them; the open stop lit as a selection is (the switch's wash and
+       gold edge), the stops behind the learner filled, their own marker
+       in the lead rung;
+     - the open stop's exercises stand under it as the cars of its
+       train, sharing the rest of the window (the grid, above), each
+       car's face the card it asks, drawn as the run draws it, in a well
+       of the page's ground, over its name, its description and its
+       record;
+     - the fast review and the grammar level's points are doors at the
+       foot, side by side.
+
+     A window too short or too narrow for the cars scrolls rather than
+     crush one under its floor (five --sp-9). */
+  .learn > .desk-station {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+  }
+  .desk-station__line {
+    flex: none;
+    padding: var(--sp-3) var(--sp-4);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+  }
+  .desk-station > .desk-station__line > .route {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    gap: 0;
+  }
+  /* A stop takes the band's ground, opaque, so its hollow marker -- the
+     route's, which takes its stop's ground -- hides the rail inside it;
+     and it does not lift on approach, the rail running through it. */
+  .desk-station__line > .route > .route-stop {
+    display: grid;
+    grid-template-columns: auto minmax(0, auto);
+    grid-template-areas:
+      "code name"
+      "fig fig";
+    justify-content: center;
+    align-items: baseline;
+    gap: var(--sp-2) var(--sp-3);
+    min-height: 0;
+    padding: var(--sp-7) var(--sp-3) var(--sp-3);
+    background: var(--surface);
+    border: 0;
+    border-radius: var(--r-card);
+    text-align: center;
+  }
+  .desk-station__line .route-stop:hover,
+  .desk-station__line .route-stop:focus-visible { transform: none; }
+  .desk-station__line > .route > .route-stop > .route-stop__rail {
+    inset: calc(var(--sp-7) / 2) 0 auto;
+    width: auto;
+    height: 3px;
+    transform: translateY(-50%);
+  }
+  .desk-station__line > .route > .route-stop > .route-stop__marker {
+    top: calc(var(--sp-7) / 2);
+    left: 50%;
+  }
+  .desk-station__line > .route > .route-stop > .route-stop__code {
+    grid-area: code;
+    min-width: 0;
+  }
+  .desk-station__line > .route > .route-stop > .route-stop__names { grid-area: name; }
+  .desk-station__line > .route > .route-stop > .route-stop__names > .route-stop__jp {
+    overflow: hidden;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .desk-station__line > .route > .route-stop > .route-stop__fig {
+    grid-area: fig;
+    justify-self: center;
+    font-size: var(--fs-caption);
+  }
+  .desk-station__line > .route > .route-stop > .route-stop__go { display: none; }
+  .desk-station__line > .route > .route-stop--first > .route-stop__rail { left: 50%; }
+  .desk-station__line > .route > .route-stop--last > .route-stop__rail { right: 50%; }
+  .desk-station__line > .route > .desk-stop--open {
+    background: color-mix(in srgb, var(--accent2) 15%, var(--surface));
+    box-shadow: inset 0 -2px 0 var(--accent2);
+  }
+  .desk-station__line > .route > .desk-stop--open > .route-stop__code { color: var(--sel-ink); }
+  /* The stops are links (plan 117), as the split's were: they take back
+     the button's face the same way (.desk-split__list a.route-stop). */
+  .desk-station__line > .route > a.route-stop {
+    font-weight: 600;
+    line-height: normal;
+    text-decoration: none;
+  }
+  .desk-station__line > .route > a.route-stop:focus-visible {
+    outline: 2px solid var(--accent2);
+    outline-offset: -2px;
+  }
+
   .desk-platforms {
     flex: 1;
     display: flex;
@@ -36806,164 +36941,389 @@ button.brd-stn { cursor: pointer; }
     gap: var(--sp-5);
     min-width: 0;
   }
-  /* With wells, the figures take a column of their own width, so every
-     row's bar starts where the others' do; without (a laptop's narrower
-     page), the aside keeps the width its figures ask for, and the room
-     goes to the description. */
-  .desk-platforms--wells .platform-card__aside { flex-basis: calc(var(--desk-side-w) / 2); }
-  .desk-spec {
-    flex: 0 0 30%;
-    display: flex;
-    align-items: center;
-    min-width: 0;
-    padding: var(--sp-4) var(--sp-6) var(--sp-4) 0;
+  /* A car: its face on top, then its name, its description (two lines
+     at most) and its record, the composition bar across its foot. The
+     service's badge and the ▶ go: the face says what the car is. */
+  .desk-platforms > .platform-grid .platform-card { flex-direction: column; }
+  .desk-platforms > .platform-grid .platform-card__lead,
+  .desk-platforms > .platform-grid .platform-card__go { display: none; }
+  .desk-platforms > .platform-grid .platform-card__body {
+    flex: none;
+    justify-content: flex-start;
+    gap: var(--sp-2);
+    padding: var(--sp-4) var(--sp-5) var(--sp-2);
   }
-  .desk-spec__well {
+  .desk-platforms > .platform-grid .platform-card__desc {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: var(--fs-sm);
+    line-height: 1.4;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .desk-platforms > .platform-grid .platform-card__aside {
+    flex: none;
+    align-items: stretch;
+    min-width: 0;
+    padding: 0 var(--sp-5) var(--sp-4);
+    border-left: 0;
+  }
+  /* The face's well: the paper the run's card lies on, seen through the
+     car. It takes what the car has left and never its face's measure
+     (`contain`), so the face's rung, read off the well's size
+     (domain/cars.js's rungFor), cannot move the well it was read from. */
+  .desk-spec {
+    order: -1;
+    flex: 1 1 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--sp-4);
-    width: 100%;
-    height: 100%;
-    max-height: calc(3 * var(--sp-8));
-    padding: var(--sp-4) var(--sp-5);
+    min-height: calc(2 * var(--sp-8));
+    margin: var(--sp-4) var(--sp-4) 0;
+    padding: var(--sp-4);
     overflow: hidden;
+    contain: size;
     background: var(--bg-main);
-    border: 1px solid var(--surface-line);
-    border-radius: var(--r-plate);
-  }
-  .desk-spec__well--sentence,
-  .desk-spec__well--blank,
-  .desk-spec__well--stack {
-    flex-direction: column;
-    gap: var(--sp-2);
+    border-radius: var(--r-card);
   }
   .desk-spec__face {
-    min-width: 0;
-    overflow: hidden;
-    font-family: var(--font-display);
-    font-size: var(--fs-body);
-    font-weight: 700;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-  .desk-spec__face--jp {
-    font-family: var(--font-jp);
-    font-size: var(--fs-heading);
-    font-weight: 500;
-    line-height: 1.2;
-  }
-  .desk-spec__face--answer { color: var(--text-secondary); }
-  .desk-spec__face--answer.desk-spec__face--jp,
-  .desk-spec__face--long.desk-spec__face--jp { font-size: var(--fs-title); }
-  .desk-spec__to {
-    flex: none;
-    color: color-mix(in srgb, var(--text-secondary) 60%, transparent);
-  }
-  .desk-spec__well--stack > .desk-spec__to { transform: rotate(90deg); }
-  .desk-spec__typed {
-    padding-inline: var(--sp-1);
-    border-bottom: 2px solid var(--line-color);
-    font-size: var(--fs-lead);
-    font-weight: 700;
-  }
-  .desk-spec__grid {
-    flex: none;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-width: var(--sp-9);
-    height: var(--sp-9);
-    padding-inline: var(--sp-2);
-    border: 1px dashed color-mix(in srgb, var(--text-secondary) 45%, transparent);
-    border-radius: var(--r-plate);
-    background:
-      linear-gradient(color-mix(in srgb, var(--text-secondary) 18%, transparent), color-mix(in srgb, var(--text-secondary) 18%, transparent)) center / 100% 1px no-repeat,
-      linear-gradient(color-mix(in srgb, var(--text-secondary) 18%, transparent), color-mix(in srgb, var(--text-secondary) 18%, transparent)) center / 1px 100% no-repeat;
+    gap: var(--sp-3);
+    width: 100%;
+    text-align: center;
+    color: var(--text-primary);
+  }
+  .desk-spec__jp {
     font-family: var(--font-jp);
-    font-size: var(--fs-heading);
-    color: color-mix(in srgb, var(--text-secondary) 35%, transparent);
+    font-weight: 500;
+    line-height: 1.1;
   }
-  .desk-spec__sentence {
-    max-width: 100%;
-    overflow: hidden;
-    font-family: var(--font-jp);
-    font-size: var(--fs-body);
-    white-space: nowrap;
-    text-overflow: ellipsis;
+  .desk-spec__latin {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.15;
+    text-wrap: balance;
   }
-  /* The run's gap in miniature (see "The gap"): its ＿＿＿ holds the
-     slot's width and is not drawn, the pigment's rule at its foot. The
-     specimen's well is already --bg-main, so the slot steps up to
-     --surface, as a field on the page does. */
-  .desk-spec__gap {
-    display: inline-block;
-    line-height: 1.4;
-    padding-inline: var(--sp-2);
-    margin-inline: var(--sp-1);
-    color: transparent;
-    background: var(--surface);
-    border-bottom: 2px solid color-mix(in srgb, var(--line-color, var(--accent2)) 75%, transparent);
-    border-radius: var(--r-plate) var(--r-plate) 0 0;
+  .desk-spec__a { color: var(--text-secondary); }
+  /* The card's fold: what is asked over it, its answer under it. */
+  .desk-spec__fold {
+    width: 40%;
+    border-top: 1px dashed var(--surface-line);
   }
-  .desk-spec__rule {
-    display: flex;
-    align-items: center;
+  .desk-spec__pair {
+    display: inline-flex;
+    align-items: baseline;
     gap: var(--sp-3);
   }
-  .desk-spec__rule > .desk-spec__face--jp { font-size: var(--fs-lead); }
-  .desk-spec__choices {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--sp-2);
-  }
-  .desk-spec__choice {
-    padding-inline: var(--sp-3);
+  .desk-spec__tag {
+    padding: 0 var(--sp-2);
     border: 1px solid var(--surface-line);
-    border-radius: var(--r-pill);
-    font-family: var(--font-jp);
+    border-radius: var(--r-plate);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-spec__gloss {
     font-size: var(--fs-sm);
     color: var(--text-secondary);
   }
-  .desk-split__foot {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    grid-auto-columns: max-content;
-    grid-auto-flow: column;
-    gap: var(--sp-5);
+  .desk-spec__sentence {
+    font-family: var(--font-jp);
+    line-height: 1.6;
   }
-  .desk-split__foot .platform-card__lead,
-  .desk-split__foot .platform-card__body { padding-block: var(--sp-4); }
-  .desk-split__foot .platform-card__body {
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: baseline;
-    gap: var(--sp-5);
+  /* Nommer la règle: the rule at work, marked in the sentence. */
+  .desk-spec__mark {
+    color: color-mix(in srgb, var(--line-color) 62%, var(--text-primary));
+    text-decoration: underline 2px color-mix(in srgb, var(--line-color) 75%, transparent);
+    text-underline-offset: 0.3em;
   }
-  .desk-split__foot .platform-card__title { white-space: nowrap; }
-  .desk-split__foot .platform-card__desc {
+  /* The run's gap (see "The gap"), one step up from the well's ground,
+     as a field on the page is: empty and holding its slot's width, or
+     holding what is typed in it. */
+  .desk-spec__hole {
+    display: inline-block;
+    min-width: 2.2em;
+    margin-inline: var(--sp-1);
+    padding-inline: var(--sp-2);
+    line-height: 1.3;
+    background: var(--surface);
+    border-bottom: 2px dashed color-mix(in srgb, var(--line-color) 75%, transparent);
+    border-radius: var(--r-plate) var(--r-plate) 0 0;
+  }
+  .desk-spec__hole--in {
+    font-weight: 700;
+    border-bottom-style: solid;
+  }
+  .desk-spec__tiles {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--sp-3);
+  }
+  .desk-spec__tile {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-1) var(--sp-4) var(--sp-1) var(--sp-1);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    font-family: var(--font-jp);
+  }
+  .desk-spec__tile > b {
+    display: inline-grid;
+    place-items: center;
+    width: var(--sp-5);
+    height: var(--sp-5);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-spec__tr,
+  .desk-spec__situation {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+  .desk-spec__fields {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-2);
+    width: 100%;
+  }
+  .desk-spec__field {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    width: min(100%, var(--desk-side-w));
+    min-height: calc(var(--sp-7) + var(--sp-3));
+    padding: 0 var(--sp-4);
+    background: var(--surface);
+    border-radius: var(--r-card);
+    text-align: left;
+  }
+  .desk-spec__typed {
     min-width: 0;
     overflow: hidden;
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--text-secondary);
     white-space: nowrap;
     text-overflow: ellipsis;
   }
-  /* Beside the points' door the review keeps its name and drops its
-     sentence, which a laptop's half row cut to its first letter. */
-  .desk-split__foot:has(> :nth-child(2)) .platform-card__desc { display: none; }
-  .desk-split__foot > .gl-points-door { padding-inline: var(--sp-6) var(--sp-4); }
-  .desk-split__foot .rad-door__body {
+  .desk-spec__typed:lang(ja) {
+    font-family: var(--font-jp);
+    font-weight: 500;
+  }
+  .desk-spec__caret {
+    flex: none;
+    width: 2px;
+    height: 1.2em;
+    background: var(--accent2);
+  }
+  /* The writing slab: the run's drawing square (sumi in both themes),
+     its guides, the character ghosted where the hand will trace it. Its
+     inks are named on it and read by the ghost, as the run's guide reads
+     --grid-ink: the ghost is the face's element, on the slab's ground. */
+  .desk-spec__slab {
+    --slab-guide: color-mix(in srgb, var(--text-on-panel) 14%, var(--bg-panel));
+    --slab-ghost: color-mix(in srgb, var(--text-on-panel) 28%, var(--bg-panel));
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    background:
+      linear-gradient(var(--slab-guide), var(--slab-guide)) center / 100% 1px no-repeat,
+      linear-gradient(var(--slab-guide), var(--slab-guide)) center / 1px 100% no-repeat,
+      var(--bg-panel);
+    border-radius: var(--r-card);
+  }
+  .desk-spec__ghost {
+    font-family: var(--font-jp);
+    line-height: 1;
+    color: var(--slab-ghost);
+  }
+  .desk-spec__helpers {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+    gap: var(--sp-3);
+  }
+  .desk-spec__chip {
+    padding: var(--sp-1) var(--sp-3);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    font-family: var(--font-jp);
+    font-size: var(--fs-sm);
+  }
+  .desk-spec__chip--point {
+    border-color: color-mix(in srgb, var(--line-color) 55%, transparent);
+    color: color-mix(in srgb, var(--line-color) 62%, var(--text-primary));
+  }
+  .desk-spec__chip rt {
+    font-size: var(--fs-caption-xs);
+    color: var(--text-secondary);
+  }
+  /* The ladder's walk (srs/ladder.py), the rung a point starts on lit. */
+  .desk-spec__walk {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: var(--sp-5);
+  }
+  .desk-spec__stage {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+  .desk-spec__dots {
+    display: inline-flex;
+    gap: var(--sp-2);
+  }
+  .desk-spec__dot {
+    width: var(--sp-3);
+    height: var(--sp-3);
+    border: 2px solid color-mix(in srgb, var(--line-color) 60%, var(--text-secondary));
+    border-radius: var(--r-pill);
+  }
+  .desk-spec__dot--now {
+    border-color: var(--text-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--line-color) 30%, transparent);
+  }
+  .desk-spec__star {
+    height: var(--sp-3);
+    font-size: var(--fs-lead);
+    line-height: var(--sp-3);
+    color: var(--state-mastered);
+  }
+  .desk-spec__stagename {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-indent: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  /* The face's three rungs (LinePlatforms' Specimen, from the largest
+     domain/cars.js's rungFor allows, down while the face overflows):
+     the study card's own specimen rungs in a well that holds them (lg),
+     each part a rung down per step after that. A face that asks for
+     more than one line -- the readings' two fields, the pair under a
+     sentence -- takes its Japanese a rung down again. */
+  .desk-spec--lg .desk-spec__face { gap: var(--sp-4); }
+  .desk-spec--lg .desk-spec__jp { font-size: var(--fs-specimen-word); }
+  .desk-spec--md .desk-spec__jp { font-size: var(--fs-display); }
+  .desk-spec--sm .desk-spec__jp { font-size: var(--fs-heading); }
+  .desk-spec--lg .desk-spec__jp--glyph { font-size: var(--fs-specimen-glyph); }
+  .desk-spec--md .desk-spec__jp--glyph { font-size: var(--fs-specimen-word); }
+  .desk-spec--sm .desk-spec__jp--glyph { font-size: var(--fs-display); }
+  .desk-spec--lg .desk-spec__jp--long { font-size: var(--fs-display); }
+  .desk-spec--md .desk-spec__jp--long { font-size: var(--fs-heading); }
+  .desk-spec--sm .desk-spec__jp--long { font-size: var(--fs-title); }
+  .desk-spec--lg .desk-spec__q.desk-spec__latin { font-size: var(--fs-title); }
+  .desk-spec--md .desk-spec__q.desk-spec__latin { font-size: var(--fs-lead); }
+  .desk-spec--sm .desk-spec__q.desk-spec__latin { font-size: var(--fs-body); }
+  .desk-spec--lg .desk-spec__a.desk-spec__latin { font-size: var(--fs-lead); }
+  .desk-spec--md .desk-spec__a.desk-spec__latin { font-size: var(--fs-body); }
+  .desk-spec--sm .desk-spec__a.desk-spec__latin { font-size: var(--fs-sm); }
+  .desk-spec--lg .desk-spec__sentence { font-size: var(--fs-heading); }
+  .desk-spec--md .desk-spec__sentence { font-size: var(--fs-lead); }
+  .desk-spec--sm .desk-spec__sentence { font-size: var(--fs-body); }
+  .desk-spec--lg .desk-spec__tile,
+  .desk-spec--lg .desk-spec__typed { font-size: var(--fs-title); }
+  .desk-spec--md .desk-spec__tile,
+  .desk-spec--md .desk-spec__typed { font-size: var(--fs-body); }
+  .desk-spec--sm .desk-spec__tile,
+  .desk-spec--sm .desk-spec__typed { font-size: var(--fs-sm); }
+  .desk-spec--lg .desk-spec__tr,
+  .desk-spec--lg .desk-spec__situation { font-size: var(--fs-lead); }
+  .desk-spec--md .desk-spec__tr,
+  .desk-spec--md .desk-spec__situation,
+  .desk-spec--sm .desk-spec__tr,
+  .desk-spec--sm .desk-spec__situation { font-size: var(--fs-sm); }
+  .desk-spec--sm .desk-spec__field { min-height: var(--sp-7); }
+  .desk-spec--lg .desk-spec__slab { height: calc(2 * var(--sp-9)); }
+  .desk-spec--md .desk-spec__slab { height: calc(2 * var(--sp-8)); }
+  .desk-spec--sm .desk-spec__slab { height: var(--sp-9); }
+  .desk-spec--lg .desk-spec__ghost { font-size: var(--fs-specimen-word); }
+  .desk-spec--md .desk-spec__ghost { font-size: var(--fs-display); }
+  .desk-spec--sm .desk-spec__ghost { font-size: var(--fs-heading); }
+  .desk-spec--lg .desk-spec__pair .desk-spec__jp { font-size: var(--fs-display); }
+  .desk-spec--md .desk-spec__pair .desk-spec__jp { font-size: var(--fs-heading); }
+  .desk-spec--sm .desk-spec__pair .desk-spec__jp { font-size: var(--fs-title); }
+  .desk-spec--lg .desk-spec__face--readings .desk-spec__jp--glyph { font-size: var(--fs-specimen-word); }
+  .desk-spec--md .desk-spec__face--readings .desk-spec__jp--glyph { font-size: var(--fs-display); }
+  .desk-spec--sm .desk-spec__face--readings .desk-spec__jp--glyph { font-size: var(--fs-heading); }
+  /* A face that overflows its well at the small rung lets its extras
+     go (LinePlatforms' last step): the ladder's walk, the words Écrire
+     offers -- the card itself is the face. */
+  .desk-spec--bare .desk-spec__walk,
+  .desk-spec--bare .desk-spec__helpers { display: none; }
+
+  /* The doors at the foot: the fast review, which rates nothing, and
+     the grammar level's points, which open rather than board -- each a
+     low card, its name and its line or figure on one row, side by side
+     at half the width each, or the whole width alone. */
+  .desk-platforms__foot {
+    flex: none;
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    gap: var(--sp-5);
+  }
+  .desk-platforms__foot > .platform-grid .platform-card__lead { display: none; }
+  .desk-platforms__foot > .platform-grid .platform-card__body {
+    flex-direction: row;
+    align-self: center;
+    justify-content: flex-start;
+    align-items: baseline;
+    gap: var(--sp-4);
+    padding: var(--sp-4) var(--sp-5);
+  }
+  .desk-platforms__foot > .platform-grid .platform-card__title {
+    font-size: var(--fs-body);
+    white-space: nowrap;
+  }
+  .desk-platforms__foot > .platform-grid .platform-card__desc {
+    min-width: 0;
+    overflow: hidden;
+    font-size: var(--fs-sm);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .desk-platforms__foot > .gl-points-door {
+    padding: var(--sp-4) var(--sp-5);
+    border-radius: var(--r-panel);
+  }
+  .desk-platforms__foot .rad-door__body {
     flex-direction: row-reverse;
     justify-content: flex-end;
     align-items: baseline;
-    gap: var(--sp-5);
+    gap: var(--sp-4);
   }
-  .desk-split__foot .rad-door__head { flex-direction: row-reverse; }
-  .desk-split__foot .rad-door__label {
-    font-size: var(--fs-title);
+  .desk-platforms__foot .rad-door__fig,
+  .desk-platforms__foot .gl-points-door__n { font-size: var(--fs-sm); }
+  .desk-platforms__foot .rad-door__label {
+    font-size: var(--fs-body);
     letter-spacing: normal;
     text-transform: none;
     color: var(--text-primary);
+  }
+  /* The short desk: the cars stand at their floor and the page scrolls,
+     so their descriptions give way and the face keeps the room (the
+     name and the record still say what each car is). */
+  @media (max-height: 799px) {
+    .desk-platforms > .platform-grid .platform-card__desc { display: none; }
   }
 
   /* ── 机 — the vocabulary's sources as plates (plan 137) ──

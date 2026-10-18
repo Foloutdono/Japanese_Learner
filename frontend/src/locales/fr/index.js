@@ -620,6 +620,9 @@ const quiz = {
   // ── 読み入力 (kanji.readings) ──
   readingsOn:          'On (lecture sino-japonaise)',
   readingsKun:         'Kun (lecture japonaise)',
+  // Les étiquettes des deux champs sur la face d'une voiture (plan 251).
+  readingsOnTag:       'On',
+  readingsKunTag:      'Kun',
   readingsAdd:         'ajouter une lecture',
   readingsRemove:      (r) => `Retirer ${r}`,
   readingsFound:       'trouvée',
@@ -1209,6 +1212,8 @@ const video = {
   analyzingVideo:      'Analyse des sous-titres…',
   captionsUnavailable: "Impossible de récupérer les sous-titres de cette vidéo.",
   subtitleTooLarge:    'Ce fichier de sous-titres est trop volumineux.',
+  transcriptTooLong:   'Cette transcription est trop longue. Colle-en une partie plus courte.',
+  videoStillPreparing: 'Une vidéo est encore en préparation. Attends-la, puis ajoute la suivante.',
   // 動画 — pourquoi une vidéo ne s’est pas ouverte (plan 215). Le
   // serveur nomme chaque refus par un code ; ces phrases le disent
   // dans la langue de l’apprenant (components/analysis/videoErrors.js),

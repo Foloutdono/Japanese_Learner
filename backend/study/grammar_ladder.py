@@ -170,6 +170,16 @@ def can_build(level: str, pattern: str) -> bool:
     return bool(_build_items(level, pattern))
 
 
+def _build_item(level: str, pattern: str, turn: int = 0) -> tuple | None:
+    """The sentence a Construire asks on its `turn`: the point's items in
+    an order shuffled once per point, so each review asks another one."""
+    items = list(_build_items(level, pattern))
+    if not items:
+        return None
+    random.Random(f"build:{level}:{pattern}").shuffle(items)
+    return items[turn % len(items)]
+
+
 def build_payload(level: str, entry: dict, lang: str, turn: int = 0) -> dict | None:
     """{key, tr, pieces} for one of the point's sentences, or None where
     none can be cut (build_ok). `pieces` is the sentence in order, each
@@ -178,11 +188,10 @@ def build_payload(level: str, entry: dict, lang: str, turn: int = 0) -> dict | N
     asks another one (the review count); the order is shuffled once per
     point. The answer stays here: the client sends what was typed to
     check_build with the `key`."""
-    items = list(_build_items(level, entry["pattern"]))
-    if not items:
+    item = _build_item(level, entry["pattern"], turn)
+    if item is None:
         return None
-    random.Random(f"build:{level}:{entry['pattern']}").shuffle(items)
-    key, jp, spans, en, fr = items[turn % len(items)]
+    key, jp, spans, en, fr = item
     parts = align_sentence(jp)
     pieces, pos = [], 0
     for n, (a, b) in enumerate(spans):
@@ -193,6 +202,27 @@ def build_payload(level: str, entry: dict, lang: str, turn: int = 0) -> dict | N
     if pos < len(jp):
         pieces.append({"furigana": _slice(parts, pos, len(jp))})
     return {"key": key, "tr": translation({"en": en, "fr": fr}, lang), "pieces": pieces}
+
+
+def build_specimen(level: str, entry: dict, lang: str) -> dict | None:
+    """Construire's first card with what is typed into its holes, for a
+    line's station to show the exercise by (plan 251): {pieces, tr}, the
+    pieces {text} or {gap} with the gap's text. The sentence is the one
+    build_payload asks first; the station is static content, the same
+    for every learner, so the answer it shows is one illustration's."""
+    item = _build_item(level, entry["pattern"])
+    if item is None:
+        return None
+    _key, jp, spans, en, fr = item
+    pieces, pos = [], 0
+    for a, b in spans:
+        if a > pos:
+            pieces.append({"text": jp[pos:a]})
+        pieces.append({"gap": jp[a:b]})
+        pos = b
+    if pos < len(jp):
+        pieces.append({"text": jp[pos:]})
+    return {"pieces": pieces, "tr": translation({"en": en, "fr": fr}, lang)}
 
 
 def _norm(text: str) -> str:

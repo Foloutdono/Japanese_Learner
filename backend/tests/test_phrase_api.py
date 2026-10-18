@@ -363,6 +363,22 @@ def test_keep_creates_a_kept_row(client):
     assert entry["phrase"] == sentence
 
 
+def test_keep_takes_a_video_sentence_under_its_session_s_source(client):
+    for source in ("youtube", "paste", "upload"):
+        sentence = f"{uuid.uuid4().hex[:6]}を保存します。"
+        response = client.post("/api/phrase/keep", json={"sentence": sentence, "source": source,
+                                                         "source_ref": "abc123@12.5"})
+        assert response.status_code == 200, source
+
+
+def test_keep_is_bounded(client):
+    # Plan 211: every text a route takes has a bound, and a source the
+    # shelf cannot classify is refused rather than stored.
+    assert client.post("/api/phrase/keep", json={"sentence": "猫。", "source": "anything"}).status_code == 422
+    assert client.post("/api/phrase/keep", json={"sentence": "猫" * 20_001}).status_code == 422
+    assert client.post("/api/phrase/keep", json={"sentence": "猫。", "source_ref": "x" * 1_001}).status_code == 422
+
+
 def test_keep_is_idempotent(client):
     sentence = "二回保存しても一つの文です。"
     first = client.post("/api/phrase/keep", json={"sentence": sentence})

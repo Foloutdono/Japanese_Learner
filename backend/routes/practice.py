@@ -224,7 +224,9 @@ def _parse_stop(platform: str, stop: str) -> tuple[str, str]:
             return stop, "phase"
         parts = stop.split(":")
         if len(parts) in (3, 4) and parts[0] == "freq" and parts[1] in TIER_DOMAINS:
-            numbers = [p for p in parts[2:] if p.isascii() and p.isdigit()]
+            # Six digits is past any tier or size; a longer run of them
+            # would reach int()'s digit limit and 500 instead of 400.
+            numbers = [p for p in parts[2:] if p.isascii() and p.isdigit() and len(p) <= 6]
             if len(numbers) == len(parts) - 2 and all(int(n) > 0 for n in numbers):
                 tier = int(numbers[0])
                 size = int(numbers[1]) if len(numbers) > 1 else freq.DEFAULT_TIER_SIZE
