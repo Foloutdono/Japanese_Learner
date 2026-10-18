@@ -1245,6 +1245,8 @@ const video = {
   analyzingVideo:      'Analyzing the subtitles…',
   captionsUnavailable: "Couldn't get this video's captions.",
   subtitleTooLarge:    'This subtitle file is too large.',
+  transcriptTooLong:   'This transcript is too long. Paste a shorter part of it.',
+  videoStillPreparing: 'A video is still being prepared. Wait for it, then add the next one.',
   // 動画 — why a video did not open (plan 215). The server names each
   // refusal with a code; these say it in the learner's language
   // (components/analysis/videoErrors.js), never the server's English.
