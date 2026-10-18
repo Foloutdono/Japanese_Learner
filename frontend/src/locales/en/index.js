@@ -1438,6 +1438,16 @@ const conversationMode = {
   cvsLevelLabel:       'Grade',
   cvsModes:            { choose: 'Choose', translate: 'Translate', free: 'Free talk' },
   cvsEmpty:            'No conversation at this grade yet.',
+  // The station's search (plan 246): the well, its count, and what it
+  // says when the grade holds nothing of the query.
+  cvsSearchPlaceholder: 'Find a scene…',
+  cvsCount:            n => (n === 1 ? '1 scene' : `${n} scenes`),
+  cvsNoMatchHere:      level => `No ${level} scene matches that.`,
+  cvsFoundAt:          levels => `Found at ${levels.length < 2 ? levels.join('') : `${levels.slice(0, -1).join(', ')} and ${levels.at(-1)}`}.`,
+  cvsGoTo:             level => `Go to ${level}`,
+  cvsNoMatch:          'No scene matches that.',
+  cvsNoMatchHint:      'Try a place, a person or a word from the scene.',
+  cvsClearSearch:      'Clear the search',
   cvsRecordAria:       (right, done) => `${right} of ${done} replies right`,
   cvsLeave:            'Scenes',
   cvsRepliesRated:     'Replies',

@@ -50,3 +50,52 @@ export function talkHistory(lines) {
 export function linesSaid(lines) {
   return lines.filter(line => line.who === 'me').length
 }
+
+// ── The station's search (plan 246) ──
+// A query is read the way a learner types it, so the two sides are
+// folded alike: case and accents set aside (« hôtel » finds Hotel),
+// full width read as half, and katakana as hiragana (こんびに finds
+// コンビニ). Each word is looked for on its own, and a scene must hold
+// every one, in whatever field: its title, situation, errand and steps
+// in the learner's language, the role it puts in front of them, its
+// place written and read, and the line it opens on.
+
+export function fold(text) {
+  return String(text ?? '')
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[ァ-ヶ]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60))
+    .normalize('NFC')
+}
+
+/** The words of a query, folded; none for a blank one. */
+export function searchWords(query) {
+  return fold(query).split(/\s+/).filter(Boolean)
+}
+
+function haystack(scene) {
+  const place = scene.place ?? {}
+  const reading = (place.parts ?? []).map(part => part.reading ?? part.text).join('')
+  return fold([
+    scene.title, scene.situation, scene.goal, ...(scene.steps ?? []), scene.them,
+    place.name, place.jp, reading, scene.opener,
+  ].filter(Boolean).join('\n'))
+}
+
+/** Whether a scene of the catalogue holds every word of a query. */
+export function sceneMatches(scene, words) {
+  if (!words.length) return true
+  const hay = haystack(scene)
+  return words.every(word => hay.includes(word))
+}
+
+/** The grade nearest `level` among `levels` (the easier one on a tie),
+ *  in the order `all` lists the grades: where a search that found
+ *  nothing at the learner's grade sends them. */
+export function nearestLevel(level, levels, all) {
+  const at = all.indexOf(level)
+  return [...levels].sort((a, b) =>
+    Math.abs(all.indexOf(a) - at) - Math.abs(all.indexOf(b) - at) || all.indexOf(a) - all.indexOf(b)
+  )[0] ?? null
+}
