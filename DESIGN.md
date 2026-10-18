@@ -1635,9 +1635,9 @@ round it; under it what the day was, the fare and the streak's prime
 the shut gate takes the run's wrong pile (À revoir, a door to its cards).
 A streak's ticket (3, 7 and 14 days) sends a crane a day of the streak
 across the sky and comes to the board as a punched 硬券 with its jackpot;
-a month (30 days and on) lets night fall, sets a lantern a day on the
-lake (灯籠流し) and raises the gold ticket out of their light under the
-moon, clipped by the 改札鋏. The fare is said once, whole, on the pass at
+a month (30 days and on) lets night fall, on the print and in the lake's
+ambiance alike, sets a lantern a day on the lake (灯籠流し) and raises
+the gold ticket out of their light under the moon, clipped by the 改札鋏. The fare is said once, whole, on the pass at
 its beat (`stores/fare.js`). A tap, a click or Enter skips to the rest at
 any moment, silently; under reduced motion it is drawn at once, fades
 only. A run that ends with cards still due is a 途中下車, not a finish:

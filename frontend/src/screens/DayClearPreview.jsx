@@ -4,7 +4,6 @@ import { useLang } from '../LangContext'
 import { useDesk } from '../hooks/useDesk'
 import { seedSummary } from '../stores/profileSummary'
 import { seedTodaySummary } from '../stores/today'
-import { useStageClaim } from '../stores/stage'
 import GateCard from '../components/station/GateCard'
 import RestDayNotice from '../components/dayclear/RestDayNotice'
 import TicketsScreen from './TicketsScreen'
@@ -23,8 +22,8 @@ import { SCENES, SUMMARY, REST_MINUTES, TODAY_PARTIAL, todayCleared } from '../c
 // image. Development only: App registers it under import.meta.env.DEV,
 // so a production build does not carry it. It stands under the shell,
 // so the layout is the window's: a phone's bars leave and come back,
-// the desk's rail stays. The three scenes that are not a finish stand
-// on the stage on a phone (no bars), as the workbench drew them before.
+// the desk's rail stays. The rest-day notice and the tickets stand under
+// the bars as Today and the profile show them (plan 247b).
 //
 //   ?scene=day | again | ticket3 | ticket7 | ticket14 | month30 |
 //          month100 | month365 | partial | restday | tickets | share
@@ -98,7 +97,6 @@ export default function DayClearPreview() {
     [scene, cards, perfect, take],
   )
   const [png, setPng] = useState(null)
-  useStageClaim(!scene.result)
 
   useEffect(() => {
     seedSummary(summaryFor(scene.result))

@@ -18,6 +18,11 @@ import { laneCount, laneTypeOf } from '../../domain/lanes'
 // (POST /api/today/rest/seen) the moment it leaves, by Départ or any
 // other way out.
 //
+// Under the Shell (Today's bars) a short phone has less room than the
+// board: its rhythm gives way after the screen's air (two spacers in the
+// hero), and the foot -- today's card and the gate -- docks on the tab
+// bar as Today's does, so the gate never leaves the screen (plan 247b).
+//
 // The entrance tells it once, on the board's own clock: the stations
 // arrive, the line runs to the day before the miss and stops there, the
 // stub is laid over the missed day (from above, a turn, one settle, a
@@ -192,11 +197,13 @@ export default function RestDayNotice({ rest, week, total, minutes, lanes, desk,
             </ol>
           </div>
 
+          <span className="rst-air rst-air--in" aria-hidden="true" />
           <p className={cls('rst-streak', play('clrk-arrive'), late(T.streak))} style={{ '--d': `${T.streak}ms` }}>
             <span className="rst-streak__n">{streak}</span>
             <span className="rst-streak__w">{t.rstStreakWord(streak)}</span>
           </p>
 
+          <span className="rst-air rst-air--in rst-air--wide" aria-hidden="true" />
           <div className={cls('clrk-dash', 'rst-reserve', play('clrk-arrive'), late(T.reserve))} style={{ '--d': `${T.reserve}ms` }}>
             <span className="rst-stub" lang="ja" aria-hidden="true">運休</span>
             <p className="rst-reserve__txt">

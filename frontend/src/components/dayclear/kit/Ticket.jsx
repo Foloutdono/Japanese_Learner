@@ -19,17 +19,12 @@ import { ticketName, ticketRoute, ticketNumber } from '../../../domain/dayClear'
 // the clipper's jaws close). Under skip and reduced it is simply cut.
 //
 // `hang` wraps it in .clrk-tk-hang, whose drop-shadow follows the bite
-// (a mask clips the element's own box-shadow). `chip` drops the bitten
-// disc from the notch (a sibling: the ticket clips its own children).
-// A mask flattens 3D, so `flip` turns it edge-on to face; a ticket with
-// a back face flips a wrapper of two unmasked faces (the screen's).
-// `children` go first inside the ticket, under the print: a holographic
-// layer, a glint.
+// (a mask clips the element's own box-shadow). The disc the punch bites
+// out is the clipper's (ClipperChip).
 export function Ticket({
   days, material = 'paper', date, caption, label,
-  notch = 'cut', punchDelay = 0, flip = false,
-  hang = true, chip = false, chipDelay = 0,
-  className = '', style, children,
+  notch = 'cut', punchDelay = 0, hang = true,
+  className = '', style,
 }) {
   const gold = material === 'gold'
   const classes = [
@@ -37,12 +32,10 @@ export function Ticket({
     gold ? 'clrk-tk--gold' : 'clrk-tk--paper',
     notch === 'cut' && 'clrk-tk--notch',
     notch === 'punch' && 'clrk-tk--punch',
-    flip && 'clrk-tk--flip',
     className,
   ].filter(Boolean).join(' ')
   const ticket = (
     <article className={classes} style={notch === 'punch' ? { '--d': `${punchDelay}ms`, ...style } : style} aria-label={label}>
-      {children}
       <div className="clrk-tk__row">
         <span className="clrk-tk__kind" lang="ja">記念乗車券</span>
         <span className="clrk-tk__no">N° {ticketNumber(days)}</span>
@@ -57,26 +50,5 @@ export function Ticket({
       </div>
     </article>
   )
-  if (!hang && !chip) return ticket
-  return (
-    <div className={hang ? 'clrk-tk-hang' : undefined} style={hang ? undefined : { position: 'relative' }}>
-      {ticket}
-      {chip && <TicketChip gold={gold} delay={chipDelay} />}
-    </div>
-  )
-}
-
-/**
- * The disc the punch bit out, centred on the notch of a ticket in the
- * same positioned wrapper: invisible at rest, it drops 120px with a turn
- * and one small bounce, then fades (1s). Remount it to replay.
- */
-export function TicketChip({ gold = false, delay = 0 }) {
-  return (
-    <span
-      className={['clrk-tk-chip', 'clrk-tk-chip--fall', gold && 'clrk-tk-chip--gold'].filter(Boolean).join(' ')}
-      style={{ right: -11.5, top: '50%', marginTop: -11.5, '--d': `${delay}ms` }}
-      aria-hidden="true"
-    />
-  )
+  return hang ? <div className="clrk-tk-hang">{ticket}</div> : ticket
 }

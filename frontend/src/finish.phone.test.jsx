@@ -17,9 +17,13 @@ import './index.css'
 
 const api = vi.hoisted(() => ({ next: null }))
 const day = vi.hoisted(() => ({ today: null }))
-const sounds = vi.hoisted(() => ({
-  playStamp: vi.fn(), playDayClear: vi.fn(), playMilestone: vi.fn(), playPassClip: vi.fn(), playArrival: vi.fn(),
-}))
+const sounds = vi.hoisted(() => {
+  const letGo = vi.fn()
+  return {
+    playStamp: vi.fn(), playDayClear: vi.fn(), playMilestone: vi.fn(), playPassClip: vi.fn(), playArrival: vi.fn(),
+    letGo, holdAmbianceHour: vi.fn(() => letGo),
+  }
+})
 vi.mock('./lib/api', () => ({
   api: p => p,
   apiFetch: vi.fn(async () => ({ ok: true, status: 200, json: async () => ({}) })),
@@ -63,7 +67,7 @@ const { Shell } = await import('./components/chrome/Shell')
 const { default: TodayScreen } = await import('./screens/TodayScreen')
 const { resetDayClear, runKey } = await import('./stores/dayClear')
 const { apiJson } = await import('./lib/api')
-const { RUN_DAY, CLEAR_DAY, RUN_PARTIAL, CLEAR_PARTIAL, TODAY_PARTIAL, todayCleared } = await import('./components/dayclear/fixtures')
+const { RUN_DAY, CLEAR_DAY, RUN_MONTH30, CLEAR_MONTH30, RUN_PARTIAL, CLEAR_PARTIAL, TODAY_PARTIAL, todayCleared } = await import('./components/dayclear/fixtures')
 
 const SESSION = { access_token: 't' }
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
@@ -161,6 +165,19 @@ describe('/today/clear on a phone', () => {
     expect(await until(() => text('.where') === '/today')).toBe(true)
     expect(sounds.playStamp).not.toHaveBeenCalled()
     expect(sounds.playDayClear).not.toHaveBeenCalled()
+  })
+
+  it('hears the month\'s night: the night\'s lake held while Today shows it', async () => {
+    api.next = () => Promise.resolve(CLEAR_MONTH30)
+    day.today = todayCleared(RUN_MONTH30)
+    const screen = await mount({ run: RUN_MONTH30 })
+    expect(await until(() => $('.tdy--fin.tdy--clear'))).toBeTruthy()
+    expect(sounds.holdAmbianceHour).toHaveBeenCalledWith('night')
+    expect(await until(() => text('.where') === '/today', 6000)).toBe(true)
+    // The rest is still the night's; leaving Today gives the clock back.
+    expect(sounds.letGo).not.toHaveBeenCalled()
+    await screen.unmount()
+    expect(sounds.letGo).toHaveBeenCalledTimes(1)
   })
 
   it('keeps the bars for a partial run and opens the gate on the cards left', async () => {

@@ -5,7 +5,7 @@ import { kanaSetLabel } from '../../domain/kanaSets'
 import { sectionFor } from '../../config/stations'
 import { LINE_COLOR } from '../../config/tabs'
 import { beginDeparture } from '../../stores/departure'
-import { playAnnouncement, playClick } from '../../lib/audio'
+import { holdAmbianceHour, playAnnouncement, playClick } from '../../lib/audio'
 import { Seg } from '../chrome/Console'
 import { Sheet } from '../chrome/Sheet'
 import { DepartKey } from '../chrome/DeskKeys'
@@ -23,7 +23,7 @@ import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext, splitTake, lan
 import { restWeek, sealDate, ticketDate, utcToday, weekdayKanji } from '../../domain/dayClear'
 import { longDate } from '../dayclear/aria'
 import { WeekStamps } from '../dayclear/kit/WeekStamps'
-import { Odometer } from '../dayclear/kit/XpTotal'
+import { Odometer } from '../dayclear/kit/Odometer'
 import { VERDICT_INK } from '../dayclear/kit/constants'
 import { Cranes, Lanterns, NightVeil } from '../dayclear/FinishSky'
 import { MissRow, MonthTicket, ShareRow, TicketRow } from '../dayclear/FinishBoard'
@@ -764,6 +764,9 @@ function ClearedGate({ today, desk, finish = null }) {
   useEffect(() => {
     if (kind === 'month' && p.print) preloadPrint('night', p.print)
   }, [kind, p.print])
+  // ... and heard: the night's lake from the dusk on, for as long as the
+  // print holds the night (plan 247b).
+  useEffect(() => (kind === 'month' ? holdAmbianceHour('night') : undefined), [kind])
   const sealBeat = kind === 'day' ? 'SLAM' : 'PRESS_SEAL'
   const seal = stamped && came(sealBeat)
     ? { day: weekdayKanji(day), foot: sealDate(day), label: t.clrSealAria(longDate(day, lang)) }

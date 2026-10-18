@@ -97,9 +97,9 @@ const MARIA = [[-0.56, -0.42, 0.2, 0.781], [-0.2, -0.66, 0.16, 0.7377], [0.52, -
 // left, the disc is the day's 駅スタンプ cut the other way, a disc of
 // red with its rings and characters left in the paper, hung where the
 // sun or the moon was. At dawn the sun is already red: the seal is cut
-// into it, in the sun's own red under its own glow. Drawn in the
-// seal's 192-unit box (components/dayclear/kit/Seal.jsx), its type the
-// kit's rungs; its grain the canvas's, sparse voids where the ink did
+// into it, in the sun's own red under its own glow. Drawn in the kit's
+// 192-unit seal box (the canvas kit's §5), its type the kit's rungs;
+// its grain the canvas's, sparse voids where the ink did
 // not take (the kit's #clrk-ink blots and its slots' finer voids both
 // wash a disc this size pale).
 const SEAL_GLOW = 0.42

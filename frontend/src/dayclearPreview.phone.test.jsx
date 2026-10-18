@@ -10,7 +10,7 @@ import './index.css'
 // fixtures, at a phone's width, under the Shell as Today has it, with
 // nothing to fetch. A cleared day's finish sends the bars away; a
 // partial run's keeps them; the three scenes that are not a finish
-// stand on the stage, as the workbench always drew them.
+// stand under them, as Today and the profile show them.
 
 vi.mock('./lib/audio', async o => ({
   ...(await o()),
@@ -66,11 +66,11 @@ describe('/dev/dayclear at a phone\'s width', () => {
   })
 
   for (const [scene, root] of Object.entries(OTHERS)) {
-    it(`draws ${scene} on the stage`, async () => {
+    it(`draws ${scene} under the bars`, async () => {
       await mount(`?scene=${scene}&reduced=1`)
       expect(await until(() => $(root))).toBeTruthy()
-      expect($('.phone--staged')).not.toBeNull()
-      expect($('.hud')).toBeNull()
+      expect($('.hud')).not.toBeNull()
+      expect($('.hud--away')).toBeNull()
     })
   }
 
