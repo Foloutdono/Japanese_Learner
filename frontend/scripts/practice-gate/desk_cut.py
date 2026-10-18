@@ -47,6 +47,9 @@ PLAIN = (942, 980)            # plain body between the window and the shut door:
 PILLARS = ((296, 355), (798, 854), (1346, 1402), (1894, 1950))
 P0 = (0, 10)                  # the frame's own pillar, at the painting's left edge
 PILLAR_FOOT = 796             # the pillars' bases end here; their reflections are the floor's
+# A pillar's round base stands out of its band on the left (on the right it
+# is flush): its outline there, traced, as (px left of the band, row).
+BASE = ((0, 762), (2, 764), (5, 766), (6, 769), (6, 790), (4, 793), (0, 796))
 # the scene's bands, in rows
 CANOPY = (0, 108)             # the roof, its beam and the lamps' row
 SKY = (108, 338)              # the sky, the wire, the hills and the forest
@@ -62,10 +65,32 @@ LAMPS_ON = (1262, 1656, 2050)  # where it hangs again past the seam
 LAMPS = ((53, 212), (466, 708), (880, 1085), (1274, 1479), (1668, 1873), (2062, W))  # the tubes
 SIGN = (8, 109, 233, 196)     # x0, y0, x1, y1: 辻駅 TSUJI STATION, on its two rods
 SIGN_RODS = ((34, 50, 48, 112), (210, 50, 224, 112))
-GEAR = ((398, 336, 534, 398), (566, 364, 752, 398))
+# The roof's gear, traced on the painting: the pantograph (its feet, its
+# frame, its folded arm; its dark steel is the forest's shade's, which it
+# touches) and the cooler, one closed box (its end caps and vents, where
+# the painting lets the forest through, are the box's).
+PANTO = (((404, 396), (404, 385), (406, 383), (440, 383), (442, 385), (442, 396)),
+         ((496, 396), (496, 385), (498, 383), (530, 383), (532, 385), (532, 396)),
+         ((423, 387), (423, 375), (426, 372), (518, 372), (520, 375), (520, 387)),
+         ((466, 340), (470, 336), (512, 372), (508, 377), (503, 377)))
+COOLER = ((573, 398), (573, 378), (575, 374), (579, 372), (740, 371), (744, 372), (746, 375),
+          (747, 379), (747, 398))
 # the car's own parts
 DOORWAY = (384, 448, 592, 705)     # the open door's opening
 SHUT = (984, 448, 1140, 705)       # the shut door, its two leaves
+# The car's inside as the owner painted it (plan 244c, source/interior.webp,
+# 546 x 541: the open door from the platform, its frame round it), drawn in
+# the doorway, inside its frame. The picture's opening is wider than the
+# car's door, so the inside is shown narrower, never squeezed: of its
+# columns, those kept (KEEP) run from past the left stanchion to the right
+# one, and what is let out between them is plain -- the wall by a pocket,
+# two runs of the window's trees and the bench under them, the wall
+# between a ring and a poster -- so every ring, poster, stanchion and the
+# window's frame keep their shape. The runs meet over JOIN px each.
+INSIDE = (389, 450, 583, 703)      # where it is drawn: the opening, inside the door's frame
+INSIDE_ROWS = (76, 500)            # the picture's rows from the ceiling's edge to the sill
+KEEP = ((83, 222), (258, 298), (338, 418), (434, 495))
+JOIN = 3
 STRIPE = (601, 633)                # the stripe's rows
 BENCH = (0, 600, 92, 726)          # the bench, where it stands in front of the car
 
@@ -142,6 +167,53 @@ def quilted(S, rows, x0, x1, src, seed, overlap=40, strip=(120, 200)):
         x += n
 
 
+def inside_at(x, y=None):
+    """Where a point of the inside's picture lands in the scene."""
+    kept = sum(b - a for a, b in KEEP)
+    k = (INSIDE[2] - INSIDE[0]) / kept
+    off = 0
+    for a, b in KEEP:
+        if x < b:
+            off += max(x - a, 0)
+            break
+        off += b - a
+    sx = INSIDE[0] + off * k
+    if y is None:
+        return sx
+    r0, r1 = INSIDE_ROWS
+    return sx, INSIDE[1] + (y - r0) * (INSIDE[3] - INSIDE[1]) / (r1 - r0)
+
+
+# Where the trees the inside's far window shows are taken from: the
+# corner of a stretch of the car's own first pane (x 45..129, rows 487..589),
+# clear of every pillar.
+FAR_TREES = (50, 512)
+
+
+# What the hours need of it, measured on the picture: the far window's
+# glass (inside its frame and rounded corners), its two stanchions, and
+# its floor (the sun lies on it by day).
+FAR = tuple(round(v) for v in inside_at(198, 181) + inside_at(393, 284))
+STANCHIONS = (round(inside_at(90)), round(inside_at(469)))
+FLOOR_IN = round(inside_at(0, 432)[1])
+
+
+def inside(path):
+    """The inside as the scene draws it: KEEP's runs joined, then brought
+    to INSIDE's size (RGB uint8)."""
+    im = np.asarray(Image.open(path).convert('RGB')).astype(np.float32)
+    r0, r1 = INSIDE_ROWS
+    runs = [im[r0:r1, max(a - JOIN, 0):b + JOIN] for a, b in KEEP]
+    out = runs[0]
+    ramp = np.linspace(0, 1, 2 * JOIN)[None, :, None]
+    for run in runs[1:]:
+        both = out[:, -2 * JOIN:] * (1 - ramp) + run[:, :2 * JOIN] * ramp
+        out = np.concatenate([out[:, :-2 * JOIN], both, run[:, 2 * JOIN:]], axis=1)
+    out = out[:, JOIN:-JOIN]
+    x0, y0, x1, y1 = INSIDE
+    return cv2.resize(np.clip(out, 0, 255).astype(np.uint8), (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
+
+
 def clean(path):
     """The painting as the scene: H x W, RGB uint8."""
     im = np.asarray(Image.open(path).convert('RGB'))[TOP:TOP + H, :PAINTED]
@@ -208,6 +280,27 @@ def clean(path):
     #    base and its reflection on the floor ──
     for x0, x1 in (P3, P4):
         S[:, x0 - 2:x1 + 1] = S[:, P2[0] - 2:P2[1] + 1]
+
+    # ── the roof's cooler, closed ──
+    cooler(S)
+
+    # ── the car's inside, as the owner painted it, in the open doorway ──
+    x0, y0, x1, y1 = INSIDE
+    edge = np.ones((y1 - y0, x1 - x0), np.float32)
+    edge[[0, -1], :] = edge[:, [0, -1]] = 0.5
+    S[y0:y1, x0:x1] = (inside(path.parent / 'interior.webp') * edge[..., None]
+                       + S[y0:y1, x0:x1] * (1 - edge[..., None])).astype(np.uint8)
+
+    # ── its far window full of the trees the car's own windows show (the
+    #    picture's had sky and a mountain over them): a stretch of a pane of
+    #    the painting's, at its own scale, inside the far window's frame ──
+    fx0, fy0, fx1, fy1 = FAR
+    glass = np.zeros((fy1 - fy0, fx1 - fx0), np.uint8)
+    cv2.rectangle(glass, (0, 0), (fx1 - fx0 - 1, fy1 - fy0 - 1), 1, -1)
+    w = cv2.GaussianBlur(cv2.erode(glass, np.ones((3, 3), np.uint8)).astype(np.float32), (3, 3), 0)[..., None]
+    sx, sy = FAR_TREES
+    trees = S[sy:sy + fy1 - fy0, sx:sx + fx1 - fx0].astype(np.float32)
+    S[fy0:fy1, fx0:fx1] = (trees * w + S[fy0:fy1, fx0:fx1] * (1 - w)).astype(np.uint8)
     return S
 
 
@@ -222,18 +315,33 @@ def sat(rgb):
     return np.where(mx > 1e-4, (mx - mn) / np.maximum(mx, 1e-4), 0)
 
 
+def bases(shape):
+    """The pillars' round bases, out of their bands."""
+    m = np.zeros(shape, np.uint8)
+    for x0, _ in PILLARS:
+        cv2.fillPoly(m, [np.array([(x0 - dx, y) for dx, y in BASE], np.int32)], 1)
+    return m > 0
+
+
 def gear_mask(S):
-    """The roof's gear against the forest behind it: grey or dark, never green."""
-    f = S.astype(np.float32) / 255
-    L, Sa = lum(f), sat(f)
+    """The roof's gear against the forest behind it, as traced: the
+    pantograph and the cooler."""
     m = np.zeros(S.shape[:2], np.uint8)
-    for x0, y0, x1, y1 in GEAR:
-        box = np.zeros_like(m)
-        box[y0:y1, x0:x1] = 1
-        m |= (box & ((Sa < 0.16) | (L < 0.3))).astype(np.uint8)
-    m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
+    for part in PANTO + (COOLER,):
+        cv2.fillPoly(m, [np.array(part, np.int32)], 1)
     m[ROOF:] = 0
     return m > 0
+
+
+def cooler(S):
+    """The roof's cooler without the greens the painting let through its
+    vents and end caps: those pixels drawn again from the grey round them."""
+    box = np.zeros(S.shape[:2], np.uint8)
+    cv2.fillPoly(box, [np.array(COOLER, np.int32)], 1)
+    f = S.astype(np.float32) / 255
+    green = (box > 0) & (f[..., 1] - np.maximum(f[..., 0], f[..., 2]) > 0.03) & (sat(f) > 0.18)
+    green = cv2.dilate(green.astype(np.uint8), np.ones((3, 3), np.uint8))
+    S[:] = cv2.inpaint(S, green, 3, cv2.INPAINT_TELEA)
 
 
 def ended(car):
@@ -310,6 +418,7 @@ def layers(S):
     near_a[:PILLAR_FOOT, P0[0]:P0[1]] = 1
     for x0, x1 in PILLARS:
         near_a[:PILLAR_FOOT, x0:x1] = 1
+    near_a = np.maximum(near_a, bases(near_a.shape).astype(np.float32))
     bx0, by0, bx1, by1 = BENCH
     diff = np.abs(S[by0:by1, bx0:bx1].astype(np.int16) - car[by0:by1, bx0:bx1].astype(np.int16)).max(axis=2)
     bench = (diff > 34).astype(np.uint8)
