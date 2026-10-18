@@ -4,33 +4,37 @@ import { useLang } from '../LangContext'
 import { useDesk } from '../hooks/useDesk'
 import { seedSummary } from '../stores/profileSummary'
 import { seedTodaySummary } from '../stores/today'
-import DayClearView from '../components/dayclear/DayClearView'
+import { useStageClaim } from '../stores/stage'
+import GateCard from '../components/station/GateCard'
 import RestDayNotice from '../components/dayclear/RestDayNotice'
 import TicketsScreen from './TicketsScreen'
 import { InkFilters } from '../components/dayclear/kit'
-import { renderTicketPng, shareTicket } from '../lib/shareTicket'
-import { SCENES, SUMMARY, REST_MINUTES } from '../components/dayclear/fixtures'
+import { useFinishScreen } from '../components/dayclear/useFinish'
+import { useReducedMotion } from '../components/dayclear/useReducedMotion'
+import { XpToast } from '../components/rewards/XpToast'
+import { renderTicketPng } from '../lib/shareTicket'
+import { SCENES, SUMMARY, REST_MINUTES, TODAY_PARTIAL, todayCleared } from '../components/dayclear/fixtures'
 
-// ── 試写 — the day cleared, every scene (plan 191) ─────────────────────
-// /dev/dayclear: each board of the canvas "Tsuji — the day cleared"
-// played with its own data story (components/dayclear/fixtures.js) and
-// no backend, for review and for the videos. Development only: App
-// registers it under import.meta.env.DEV, so a production build does
-// not carry it.
+// ── 試写 — the day cleared, every scene (plans 191, 247) ────────────────
+// /dev/dayclear: each finish of the canvas "Tsuji — the day cleared,
+// new directions" played on Today with its own data story
+// (components/dayclear/fixtures.js) and no backend, for review and for
+// the videos; and the rest-day notice, the tickets' book and the share
+// image. Development only: App registers it under import.meta.env.DEV,
+// so a production build does not carry it. It stands under the shell,
+// so the layout is the window's: a phone's bars leave and come back,
+// the desk's rail stays. The three scenes that are not a finish stand
+// on the stage on a phone (no bars), as the workbench drew them before.
 //
-//   ?scene=day | ticket3 | ticket7 | ticket14 | month30 | month100 |
-//          partial | restday | tickets | share      (default day)
+//   ?scene=day | again | ticket3 | ticket7 | ticket14 | month30 |
+//          month100 | month365 | partial | restday | tickets | share
+//                (default day)
 //   &reduced=1   the rest state at once, as under reduced motion
-//   &desk=1|0    the desk's layout or the phone's, whatever the width
-//                (the real rail stands beside it only at 1100px and up,
-//                where the route's frame is the Shell)
 //   &bare=1      no scene bar (for recording)
 //   &cards=N     the run's length: the scene's cards dealt round again
-//                (a short run of 5, a long one of 120)
-//   &perfect=0   a bar with no Perfect: every perfect card a correct one,
-//                so the clear sorts two verdicts, not three (alias &piles=2)
+//   &perfect=0   a bar with no Perfect (alias &piles=2)
 //
-// "Rejouer" remounts the scene (the app itself has no replay).
+// "Rejouer" plays the scene again (the app itself has no replay).
 const NAMES = Object.keys(SCENES)
 
 // The scene's run at another length, or with no Perfect (see above).
@@ -46,36 +50,60 @@ function variantRun(run, cards, perfect) {
   return { ...run, cleared: n, xp: Math.round(run.xp * n / deck.length), cards: faces }
 }
 
-// The pass at the fixture's level after the fare, so a level-up scene's
-// 進級 has the summary it reads (XpToast).
+// The pass once the clear has paid, as the store leaves it (the fare
+// said at its beat rises from where the run began), so a level-up
+// scene's 進級 has the summary it reads (XpToast).
 function summaryFor(result) {
   if (!result?.level) return SUMMARY
   const { level, into, span } = result.level
   const base = 30000 + (level - 14) * 1000
-  return { ...SUMMARY, level, xpPrevLevel: base, xpForNext: base + span, xp: base + into }
+  return { ...SUMMARY, level, xpPrevLevel: base, xpForNext: base + span, xp: base + into, streak: result.streak ?? SUMMARY.streak }
+}
+
+// One finish, on Today: the fixture's answer as the store would hand it.
+function Finish({ run, result, reduced }) {
+  const desk = useDesk()
+  const clear = useMemo(() => ({
+    status: result.cleared ? 'cleared' : 'partial',
+    result,
+    levelUp: result.xp?.leveled_up ? { newLevel: result.xp.new_level } : null,
+  }), [result])
+  const fin = useFinishScreen({ run, clear, desk, reduced })
+  const today = useMemo(() => (result.cleared ? todayCleared(run) : TODAY_PARTIAL), [run, result])
+  return (
+    <main id="main-content" className="today today--fin" onClickCapture={fin.onClickCapture}>
+      <InkFilters />
+      <GateCard today={today} finish={fin} />
+      {fin.toast && <XpToast toast={fin.toast} onDone={() => {}} />}
+    </main>
+  )
 }
 
 export default function DayClearPreview() {
   const { t, lang } = useLang()
   const navigate = useNavigate()
-  const deskWidth = useDesk()
+  const desk = useDesk()
   const [params] = useSearchParams()
   const name = NAMES.includes(params.get('scene')) ? params.get('scene') : 'day'
-  const reduced = params.get('reduced') === '1' ? true : undefined
-  const deskParam = params.get('desk')
-  const desk = deskParam === '1' ? true : deskParam === '0' ? false : deskWidth
+  const reducedSystem = useReducedMotion()
+  const reduced = params.get('reduced') === '1' || reducedSystem
   const bare = params.get('bare') === '1'
   const scene = SCENES[name]
   const cards = Math.max(0, Math.min(400, Number(params.get('cards')) || 0))
   const perfect = params.get('perfect') !== '0' && params.get('piles') !== '2'
-  const run = useMemo(() => variantRun(scene.run, cards, perfect), [scene, cards, perfect])
   const [take, setTake] = useState(0)
+  // A new run each take: the finish keys its clock and its fare on it.
+  const run = useMemo(
+    () => (scene.run ? { ...variantRun(scene.run, cards, perfect), at: scene.run.at + take * 10 } : null),
+    [scene, cards, perfect, take],
+  )
   const [png, setPng] = useState(null)
+  useStageClaim(!scene.result)
 
   useEffect(() => {
     seedSummary(summaryFor(scene.result))
-    seedTodaySummary(scene.today ?? { ...SCENES.restday.today, rest: { held: 0, unseen: [], streak: 6, next_at: 7 } })
-  }, [scene])
+    if (scene.today) seedTodaySummary(scene.today)
+  }, [scene, take])
 
   useEffect(() => {
     if (name !== 'share') return undefined
@@ -94,25 +122,11 @@ export default function DayClearPreview() {
     Object.entries(next).forEach(([k, v]) => (v == null ? q.delete(k) : q.set(k, v)))
     return `/dev/dayclear?${q}`
   }
-  const leave = () => setTake(n => n + 1)
+  const again = () => setTake(n => n + 1)
 
   let body
   if (scene.result) {
-    body = (
-      <DayClearView
-        key={`${name}:${take}:${reduced}:${desk}:${cards}:${perfect}`}
-        status={scene.result.cleared ? 'cleared' : 'partial'}
-        result={scene.result}
-        run={run}
-        levelUp={scene.result.xp?.leveled_up ? { newLevel: scene.result.xp.new_level } : null}
-        desk={desk}
-        reduced={reduced}
-        onLeave={leave}
-        onContinue={leave}
-        onShare={ticket => shareTicket({ ...SCENES.share.share, ...ticket, t, lang })}
-        onRetry={leave}
-      />
-    )
+    body = <Finish key={`${name}:${take}:${reduced}:${cards}:${perfect}`} run={run} result={scene.result} reduced={reduced} />
   } else if (name === 'restday') {
     body = (
       <main id="main-content" className="today">
@@ -125,13 +139,13 @@ export default function DayClearPreview() {
           minutes={REST_MINUTES}
           lanes={scene.today.lanes}
           desk={desk}
-          reduced={reduced}
-          onDepart={leave}
+          reduced={reduced || undefined}
+          onDepart={again}
         />
       </main>
     )
   } else if (name === 'tickets') {
-    body = <TicketsScreen key={take} profile={scene.profile} stats={scene.stats} reduced={reduced} />
+    body = <TicketsScreen key={take} profile={scene.profile} stats={scene.stats} reduced={reduced || undefined} />
   } else {
     body = (
       <main id="main-content" className="clrdev-share">
@@ -149,7 +163,7 @@ export default function DayClearPreview() {
           ))}
           <Link className="clrdev-bar__item" to={query({ reduced: reduced ? null : '1' })}>{reduced ? 'motion' : 'reduced'}</Link>
           <Link className="clrdev-bar__item" to={query({ piles: null, perfect: perfect ? '0' : null })}>{perfect ? '2 piles' : '3 piles'}</Link>
-          <button type="button" className="clrdev-bar__item" onClick={() => setTake(n => n + 1)}>Rejouer</button>
+          <button type="button" className="clrdev-bar__item" onClick={again}>Rejouer</button>
           <button type="button" className="clrdev-bar__item" onClick={() => navigate('/dev/sounds')}>sons</button>
         </nav>
       )}

@@ -171,11 +171,18 @@ export function liftLayer(layer) {
  * gate stuttered (plan 207). A Web Animation fires no such event.
  * Returns the animations made, for the caller to cancel. Nothing moves
  * under reduced motion (the sheet stops every part), so nothing is made.
+ *
+ * `loops` hands over the looping parts alone and `keep` leaves the
+ * boxes' own custom properties where they are: the day cleared's flock
+ * and lanterns (plan 247), placed by theirs, whose ways in are single
+ * turns that end on their own.
  */
-export function handOver(root) {
+export function handOver(root, { loops = false, keep = false } = {}) {
   const made = []
+  if (!root?.getAnimations) return made
   for (const css of root.getAnimations({ subtree: true })) {
     if (typeof CSSAnimation === 'undefined' || !(css instanceof CSSAnimation)) continue
+    if (loops && css.effect.getTiming().iterations !== Infinity) continue
     const el = css.effect.target
     const keyframes = css.effect.getKeyframes()
     for (const k of keyframes) delete k.computedOffset
@@ -191,7 +198,7 @@ export function handOver(root) {
   // restyle a change of an inherited variable at the page's root makes
   // (a box with properties of its own cannot share its parent's), and
   // the page's root changes one as the run's stage opens (plan 207).
-  if (made.length) {
+  if (made.length && !keep) {
     for (const el of root.querySelectorAll('[style*="--"]')) {
       for (const name of [...el.style].filter(n => n.startsWith('--'))) el.style.removeProperty(name)
     }

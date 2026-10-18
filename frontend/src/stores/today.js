@@ -17,6 +17,13 @@ export function refreshToday() {
   return store.refresh()
 }
 
+/** The summary asked again after any request in flight: the day cleared
+ *  plays on the gate it fetches (plan 247), never on one that left
+ *  before the run's last review landed. */
+export function refetchToday() {
+  return store.refreshAfter()
+}
+
 export function seedTodaySummary(data) {
   store.seed(data)
 }

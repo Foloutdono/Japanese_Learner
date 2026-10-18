@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// ── 終着 — the day cleared, asked once a run (plan 191) ───────────────
+// ── 終着 — the day cleared, asked once a run (plans 191, 247) ─────────
 const api = vi.hoisted(() => ({ apiJson: vi.fn() }))
-const xp = vi.hoisted(() => ({ applyXpGain: vi.fn() }))
-const today = vi.hoisted(() => ({ refreshToday: vi.fn() }))
+const xp = vi.hoisted(() => ({ applyXpGain: vi.fn(), applyStreak: vi.fn() }))
+const today = vi.hoisted(() => ({ refreshToday: vi.fn(), refetchToday: vi.fn(() => Promise.resolve()) }))
 const reviews = vi.hoisted(() => ({ reviewsSettled: vi.fn(() => Promise.resolve()) }))
 vi.mock('../lib/api', () => ({ apiJson: api.apiJson }))
-vi.mock('./profileSummary', () => ({ applyXpGain: xp.applyXpGain }))
-vi.mock('./today', () => ({ refreshToday: today.refreshToday }))
+vi.mock('./profileSummary', () => ({ applyXpGain: xp.applyXpGain, applyStreak: xp.applyStreak }))
+vi.mock('./today', () => ({ refreshToday: today.refreshToday, refetchToday: today.refetchToday }))
 vi.mock('../lib/reviews', () => ({ reviewsSettled: reviews.reviewsSettled }))
 
 const { requestClear, retryClear, peekDayClear, resetDayClear, runKey, markRestSeen, restNoticeSeen } = await import('./dayClear')
@@ -58,7 +58,42 @@ describe('asking whether the day is cleared', () => {
     expect(xp.applyXpGain).toHaveBeenCalledTimes(1)
     expect(xp.applyXpGain).toHaveBeenCalledWith({ amount: 1175 })
     expect(peekDayClear(RUN_MONTH30)).toMatchObject({ status: 'cleared', levelUp: { newLevel: 15 } })
-    expect(today.refreshToday).toHaveBeenCalled()
+    expect(today.refetchToday).toHaveBeenCalled()
+  })
+
+  it('holds the answer until Today\'s summary has come again (plan 247)', async () => {
+    // The finish plays on the gate, which must already say the day.
+    let fetched
+    today.refetchToday.mockReturnValueOnce(new Promise(r => { fetched = r }))
+    api.apiJson.mockResolvedValue(CLEAR_DAY)
+    requestClear(RUN_DAY, SESSION)
+    await settle()
+    await settle()
+    expect(today.refetchToday).toHaveBeenCalledTimes(1)
+    expect(peekDayClear(RUN_DAY).status).toBe('loading')
+    fetched()
+    await settle()
+    expect(peekDayClear(RUN_DAY).status).toBe('cleared')
+  })
+
+  it('plays the answer though Today\'s summary could not come again', async () => {
+    today.refetchToday.mockReturnValueOnce(Promise.reject(new Error('offline')))
+    api.apiJson.mockResolvedValue(CLEAR_DAY)
+    requestClear(RUN_DAY, SESSION)
+    await settle()
+    await settle()
+    await settle()
+    expect(peekDayClear(RUN_DAY).status).toBe('cleared')
+  })
+
+  it('carries the streak the clear made to the pass, and none on a partial run', async () => {
+    api.apiJson.mockResolvedValueOnce(CLEAR_DAY).mockResolvedValueOnce(CLEAR_PARTIAL)
+    requestClear(RUN_DAY, SESSION)
+    requestClear(RUN_PARTIAL, SESSION)
+    await settle()
+    await settle()
+    expect(xp.applyStreak).toHaveBeenCalledTimes(1)
+    expect(xp.applyStreak).toHaveBeenCalledWith(CLEAR_DAY.streak)
   })
 
   it('takes the server\'s word on the level when no pass is cached', async () => {

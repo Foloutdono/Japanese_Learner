@@ -3139,111 +3139,53 @@ const nyumon = {
 
 // ── 191:primitives ──
 const clrPrimitives = {
-  clrStreakWord: 'days in a row',
-  clrStreakDays: n => `${n} day${n === 1 ? '' : 's'} in a row`,
   clrXpUnit: 'xp',
-  clrFareRun: 'trip',
-  clrFarePrime: 'streak bonus',
-  clrFareTicket: 'ticket',
-  clrPrimeChip: 'streak bonus',
   clrWeekAria: parts => `Week: ${parts.join(', ')}`,
   clrWeekStamped: (from, to) => (from === to ? `${from} stamped` : `${from} to ${to} stamped`),
   clrWeekMissed: day => `${day} missed`,
   clrWeekRest: day => `${day} covered by a rest day`,
   clrWeekToday: day => `${day} today`,
   clrSealAria: date => `Today’s stamp: Tsuji station, ${date}`,
-  clrLevelAria: (level, pct) => `Level ${level}, ${pct}% to level ${level + 1}`,
   clrTicketCaption: days => (days === 30 ? 'A month in a row' : days === 365 ? 'A year in a row' : `${days} days in a row`),
-  clrTicketAria: (days, no, date) => `${days}-day ticket, number ${no}, issued ${date}`,
-  clrKeep: 'Keep the ticket',
-  clrShare: 'Share',
 }
 // ── 191:primitives end ──
 
 
 
 
-// ── 191:day ──
+// ── 191:piles ──
+// See the French table.
 const clrDay = {
-  clrTripOfDay: 'Today’s trip',
-  clrTitle: 'Service complete',
   clrPiles: ['To review', 'Correct', 'Perfect'],
-  clrPileAria: (name, n) => `${name}: ${n} card${n === 1 ? '' : 's'}`,
-  clrVerdicts: ['to review', 'correct', 'perfect'],
-  clrCardUp: 'moves up a stage',
-  clrCardMastered: 'mastered',
-  clrSumUp: () => 'moved up',
-  clrSumMastered: () => 'mastered',
-  clrSumMin: 'min',
-  clrTomorrow: (cards, min) => `Tomorrow · ~${cards} card${cards === 1 ? '' : 's'} · ${min} min`,
-  clrTomorrowDay: day => `Tomorrow · ${day}`,
-  clrTomorrowSub: (cards, min) => `~${cards} card${cards === 1 ? '' : 's'} · ${min} min`,
-  clrOrdinalSuffix: n => {
-    const t = n % 100
-    if (t >= 11 && t <= 13) return 'th'
-    return ['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'
-  },
-  clrNextDay: ' day: ',
-  clrNextTicketName: days => (days === 7 ? 'the week’s ticket' : days === 30 ? 'the month’s ticket' : days === 365 ? 'the year’s ticket' : `the ${days}-day ticket`),
-  clrNextTicketAria: days => `${days}-day ticket, to earn tomorrow`,
-  clrNextTag: 'tomorrow',
-  clrRestTitle: 'Rest days',
-  clrRestHeld: 'in reserve',
-  clrRestFirstAt: 'the first on day',
-  clrRestNextAt: 'the next on day',
-  clrRestDayWord: '',
-  clrRestFirst: n => `the first on day ${n}`,
-  clrRestNext: n => `the next on day ${n}`,
-  // The desk's board (ClearDesk): see the French table.
-  clrDeskGridAria: n => (n === 1 ? 'The trip’s card' : `The trip’s ${n} cards`),
-  clrDeskStreakWord: n => (n === 1 ? 'day in a row' : 'days in a row'),
-  clrDeskNextIn: n => `in ${n} days`,
-  clrDeskNextAria: (days, inDays) => `${days}-day ticket, to earn ${inDays === 1 ? 'tomorrow' : `in ${inDays} days`}`,
-  clrDeskRestAt: (n, first) => ({ pre: first ? 'the first on day ' : 'the next on day ', sup: '', post: '' }),
-  clrDeskTomorrowNone: 'Nothing due',
-  clrStreakWordN: n => (n === 1 ? 'day in a row' : 'days in a row'),
-  clrTomorrowNone: 'Tomorrow · nothing due',
   clrPileCount: n => `${n} card${n === 1 ? '' : 's'}`,
   clrPileEmpty: 'No cards',
   clrPileOpen: term => `Open ${term} in the dictionary`,
 }
-// ── 191:day end ──
+// ── 191:piles end ──
 
 
 
 
-// ── 191:partial ──
-const clrPartial = {
-  ptlTitle: 'Trip complete',
-  ptlRunAria: 'This trip',
-  ptlReviews: 'reviews',
-  ptlRight: 'correct',
-  ptlDayAria: 'The day',
-  ptlLoopAria: (done, total, left) => `${done} of ${total} cards today; today’s stamp waits at the end of ${left === 1 ? 'the last one' : `the other ${left}`}`,
-  ptlLeft: n => (n === 1 ? 'card left today' : 'cards left today'),
-  ptlTease: min => `~${min} min to today’s stamp and the streak bonus`,
-  ptlContinue: n => `Continue · ${n} card${n === 1 ? '' : 's'}`,
-  ptlTeaseTicket: (min, name) => `~${min} min to today’s stamp and ${name}`,
-  ptlTeaseNoMin: 'At the end: today’s stamp and the streak bonus',
-  ptlTeaseTicketNoMin: name => `At the end: today’s stamp and ${name}`,
+// ── 247:finish ──
+// See the French table.
+const clrFinish = {
+  finFareOf: 'including',
+  finFarePrime: 'streak bonus',
+  finMissGo: 'See them',
+  finTicketName: days => (days === 7 ? 'The week’s ticket' : days === 30 ? 'The month’s ticket' : days === 365 ? 'The year’s ticket' : `The ${days}-day ticket`),
+  finTicketAria: (days, jackpot, rest) => `${days === 7 ? 'The week’s ticket' : `The ${days}-day ticket`}: +${jackpot} xp${rest ? ', +1 rest day' : ''}`,
+  finShare: 'Share the ticket',
+  finShareGo: 'Image',
+  finRestLine: held => `+1 rest day · ${held} in reserve`,
+  finMonthTicketAria: (days, jackpot) => `${days === 30 ? 'The month’s ticket' : days === 365 ? 'The year’s ticket' : `The ${days}-day ticket`}, ${days === 30 ? 'a month in a row' : days === 365 ? 'a year in a row' : `${days} days in a row`}: +${jackpot} xp`,
+  finCranesAria: n => `${n} crane${n === 1 ? '' : 's'} cross${n === 1 ? 'es' : ''} the sky, one for each day in a row`,
+  finLanternsAria: n => (n >= 365 ? 'A river of lanterns on the lake, a year of days' : `${n} lanterns on the lake, one for each day`),
+  finStake: 'to today’s stamp',
+  finThreadDone: () => 'done',
+  finThreadLeft: () => 'left',
+  finContinue: 'Continue',
 }
-// ── 191:partial end ──
-
-
-
-
-// ── 191:milestones ──
-const clrMilestones = {
-  msRestEarned: 'rest day',
-  msRestNote: 'Miss a day and your streak holds.',
-  msWeekFullAria: (from, to) => `A full week: seven days stamped, ${from} to ${to}`,
-  msTicketLabel: days => (days === 30 ? 'The month’s ticket' : days === 365 ? 'The year’s ticket' : `The ${days}-day ticket`),
-  msSheetAria: (n, from, to) => `Stamp sheet: ${n} days in a row, ${from} to ${to}`,
-  msTotalAria: (total, run, prime, ticket, days = 30) => `+${total} xp: +${run} trip, +${prime} streak bonus, +${ticket} ${days === 30 ? 'month’s ticket' : days === 365 ? 'year’s ticket' : `${days}-day ticket`}`,
-  msFareAria: (n, days = 30) => `+${n} xp, ${days === 30 ? 'the month’s ticket' : days === 365 ? 'the year’s ticket' : `the ${days}-day ticket`}`,
-  msTicketMonthAria: (no, date) => `The month’s ticket: a month in a row, number ${no}, issued ${date}`,
-}
-// ── 191:milestones end ──
+// ── 247:finish end ──
 
 
 
@@ -3462,8 +3404,7 @@ export default {
   ...guide,
   ...clrPrimitives,
   ...clrDay,
-  ...clrPartial,
-  ...clrMilestones,
+  ...clrFinish,
   ...clrRestday,
   ...clrTickets,
   ...reviewPlan,

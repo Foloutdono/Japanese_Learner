@@ -121,6 +121,22 @@ export const CLEAR_MONTH100 = Object.freeze({
   tomorrow: { cards: 18, minutes: 6 },
 })
 
+// The year: +212 run, +325 prime, +10 000 billet, the lake a river.
+export const CLEAR_MONTH365 = Object.freeze({
+  cleared: true, already: false, day: TODAY, streak: 365, longest: 365,
+  bonus: 325, jackpot: 10000, milestone: 365, tier: 'month',
+  next_milestone: 400, next_jackpot: 10000,
+  rest: { held: 2, earned: true, next_at: 400 },
+  week: week(['studied', 'studied', 'studied', 'studied', 'studied', 'studied', 'studied']),
+  xp: { xp_earned: 10325, leveled_up: true, new_level: 21 },
+  level: { level: 21, into: 537, span: 1250 },
+  tomorrow: { cards: 18, minutes: 6 },
+})
+
+// A second run the same day, after the clear: nothing paid, the day
+// stamped again (plan 247: the everyday finish, its fare the run's).
+export const CLEAR_AGAIN = Object.freeze({ ...CLEAR_DAY, already: true, bonus: 0, xp: { xp_earned: 0, leveled_up: false, new_level: 14 } })
+
 // A run that ended with cards left: 20 done, 14 left, ~5 min (21.4 s a card).
 export const CLEAR_PARTIAL = Object.freeze({
   cleared: false, remaining: 14, seconds_per_review: 21.4,
@@ -199,6 +215,41 @@ export const SUMMARY = Object.freeze({
   week: [], guided: { today: true },
 })
 
+// ── Today, as the finish finds it (plan 247) ─────────────────────────
+// GET /api/today after the run: cleared (nothing left, the day's
+// reviews by line, tomorrow, the gate opening in 22 hours), or the 14
+// a partial run left (kanji 5, vocab 6, grammar 3; 20 reviewed).
+function byLine(cards) {
+  const out = {}
+  for (const c of cards) out[c.line] = (out[c.line] ?? 0) + 1
+  return out
+}
+
+/** Today's summary once a run has cleared the day. */
+export function todayCleared(run, now = Date.now()) {
+  return {
+    total: 0, lanes: [], by_source: {}, seconds_per_review: 20,
+    reviewed: { total: run.cleared, by_line: byLine(run.cards) },
+    tomorrow: { cards: 18, minutes: 6 },
+    next_due: new Date(now + 22 * 3600_000).toISOString(),
+    review: { held: 0 },
+    rest: { held: 0, unseen: [], streak: 6, next_at: 7 },
+  }
+}
+
+const lane = (source, mode, due) => ({ id: `${source}:N5:${mode}`, kind: 'section', source, deck: 'N5', mode, due, new: 0 })
+export const TODAY_PARTIAL = Object.freeze({
+  total: 14,
+  lanes: [lane('vocab', 'vocab.flashcard.f2b', 6), lane('kanji', 'kanji.flashcard.f2b', 5), lane('grammar', 'grammar.ladder', 3)],
+  by_source: { vocab: 6, kanji: 5, grammar: 3 },
+  seconds_per_review: 21.4,
+  next_due: null,
+  reviewed: { total: 20, by_line: byLine(CARDS_32.slice(0, 20)) },
+  tomorrow: { cards: 18, minutes: 6 },
+  review: { held: 0 },
+  rest: { held: 0, unseen: [], streak: 5, next_at: 7 },
+})
+
 /** Every scene /dev/dayclear plays: the run, the clear and what the screen shows. */
 export const SCENES = Object.freeze({
   day: { run: RUN_DAY, result: CLEAR_DAY },
@@ -207,6 +258,8 @@ export const SCENES = Object.freeze({
   ticket14: { run: RUN_TICKET7, result: CLEAR_TICKET14 },
   month30: { run: RUN_MONTH30, result: CLEAR_MONTH30 },
   month100: { run: RUN_MONTH30, result: CLEAR_MONTH100 },
+  month365: { run: RUN_MONTH30, result: CLEAR_MONTH365 },
+  again: { run: RUN_DAY, result: CLEAR_AGAIN },
   partial: { run: RUN_PARTIAL, result: CLEAR_PARTIAL },
   restday: { today: TODAY_REST, week: REST_WEEK },
   tickets: { profile: PROFILE_TICKETS, stats: STATS_TICKETS },

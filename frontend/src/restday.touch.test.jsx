@@ -13,7 +13,7 @@ vi.mock('./lib/audio', async o => ({ ...(await o()), playClick: vi.fn() }))
 vi.mock('./lib/shareTicket', async o => ({ ...(await o()), renderTicketPng: vi.fn(async () => new Blob(['png'], { type: 'image/png' })) }))
 globalThis.fetch = vi.fn().mockRejectedValue(new Error('no backend'))
 
-const { DeskShellStage } = await import('./components/chrome/Shell')
+const { Shell } = await import('./components/chrome/Shell')
 const { default: DayClearPreview } = await import('./screens/DayClearPreview')
 
 const settle = (ms = 500) => new Promise(r => setTimeout(r, ms))
@@ -30,7 +30,7 @@ function mount(query) {
     <LangProvider>
       <MemoryRouter initialEntries={[`/dev/dayclear${query}`]}>
         <Routes>
-          <Route element={<DeskShellStage />}>
+          <Route element={<Shell />}>
             <Route path="/dev/dayclear" element={<DayClearPreview />} />
           </Route>
         </Routes>

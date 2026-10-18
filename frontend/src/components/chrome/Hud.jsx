@@ -240,9 +240,9 @@ export function HudInstruments() {
   )
 }
 
-export function Hud() {
+export function Hud({ away = false, arrive = false }) {
   return (
-    <header className="hud">
+    <header className={away ? 'hud hud--away' : arrive ? 'hud hud--arrive' : 'hud'}>
       <div className="hud__inner">
         <HudInstruments />
       </div>

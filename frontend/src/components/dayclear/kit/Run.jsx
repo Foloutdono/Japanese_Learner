@@ -1,10 +1,11 @@
 import { VERDICT_INK, lineInk } from './constants'
 
 // ── 改札機 — the reader, a run's card and its piles (plan 191) ───────
-// The canvas kit's §8 and §9, shared by the phone's sweep (ClearPhone)
-// and the desk's (ClearDesk): the run's cards dive through a gate
-// reader's slot, its lamp flashing each card's verdict, and land in
-// three piles -- À revoir, Justes, Parfaites -- in the verdict inks.
+// The canvas kit's §8 and §9, drawn by plan 191's sweep: the run's cards
+// dive through a gate reader's slot, its lamp flashing each card's
+// verdict, and land in three piles -- À revoir, Justes, Parfaites -- in
+// the verdict inks. The finish on Today (plan 247) draws no sweep; the
+// header heads the rest-day notice and the tickets.
 
 /** The contactless mark (three arcs, 24 grid), the reader's and the gate's. */
 export function ContactlessMark({ size = 24 }) {
