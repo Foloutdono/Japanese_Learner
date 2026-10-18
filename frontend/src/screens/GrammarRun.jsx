@@ -213,9 +213,10 @@ export default function GrammarRun({ session }) {
   // shown in the card's hole as it is typed.
   const entry = useBuild(card && cardShape(card).isBuild ? card : null, { session, lang, onDone: onFlashcardReveal })
   // The card's sentence, said once the answer is out (unless the switch
-  // beside the hints is off).
+  // beside the hints is off). The card's id is the reset's key above:
+  // the next card is drawn under this one's reveal for a render.
   const sentence = card ? grammarSentence(card, entry?.verdict) : null
-  useRevealSpeech(sentence, answered)
+  useRevealSpeech(sentence, answered, card?.card_id)
 
   if (!valid) return <Navigate replace to={level ? platforms : '/learn/grammar'} />
 
