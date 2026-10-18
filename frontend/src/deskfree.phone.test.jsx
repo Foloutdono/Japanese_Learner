@@ -1884,7 +1884,7 @@ describe('the stations filled (plan 137)', () => {
     expect(cards.length).toBe(4)
     expect(cards.at(-1).textContent).toContain('Révision rapide')
     expect(document.querySelector('.bar__sub').textContent).toMatch(/^N5/)
-    expect(document.querySelector('.desk-platforms, .desk-spec, .desk-split__foot, .desk-stop__sample, .desk-stop__bar')).toBeNull()
+    expect(document.querySelector('.desk-station, .desk-platforms, .desk-spec, .desk-platforms__foot, .desk-mode-fig, .desk-stop__sample, .desk-stop__bar')).toBeNull()
   })
 
   it('keeps a route\'s rows as they were, whatever samples a stop carries', async () => {

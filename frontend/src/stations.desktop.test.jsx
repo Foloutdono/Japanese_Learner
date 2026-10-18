@@ -2,16 +2,17 @@ import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'react-router-dom'
 import { LangProvider } from './LangContext'
-import { contentBox } from './testing/contentBox'
+import { StationSplit } from './components/selection/StationSplit'
 import './index.css'
 
-// ── 机 — a station as two panes (plan 114) ───────────────────────
+// ── 机 — a station on the desk (plans 114, 251) ──────────────────
 // On a phone a station is two screens: the stops, then one tap later the
-// chosen stop's platforms. On the desk the stops stand upright beside
-// the platforms (StationSplit): the bare list opens on the learner's own
-// stop, another stop swaps the platforms in place by REPLACING the URL
-// (so Back is not a walk through every stop looked at), and each
-// platform carries its own figures. The phone's side is deskfree.phone.
+// chosen stop's platforms. On the desk both are one page: since plan 251
+// a line's stops run across the top of its cars (LineStation), the bare
+// line opens on the learner's own stop, another stop swaps the cars in
+// place by REPLACING the URL (so Back is not a walk through every stop
+// looked at), and each car carries its own figures. The phone's side is
+// deskfree.phone; the station itself, lineStation.wide.
 //
 // Each stop is a link to its stop's URL (plan 117): the click replaces
 // the page in place, and the middle click or Ctrl/⌘-click opens it in a
@@ -87,7 +88,8 @@ const vocabRoutes = (
     <Route path="/learn/vocab/:level" element={<VocabScreen session={null} />} />
   </>
 )
-const openStop = () => document.querySelector('.desk-split__list .route-stop[aria-current="page"] .route-stop__code')?.textContent
+const line = () => document.querySelector('.desk-station__line')
+const openStop = () => line()?.querySelector('.route-stop[aria-current="page"] .route-stop__code')?.textContent
 
 describe('a level\'s platforms on the desk', () => {
   it('opens the bare line on the learner\'s own stop, replacing it', async () => {
@@ -97,29 +99,31 @@ describe('a level\'s platforms on the desk', () => {
     expect(where.type).toBe('REPLACE')
   })
 
-  it('stands the line beside the platforms, the open stop marked', async () => {
+  it('lays the line across the top of the cars, the open stop marked', async () => {
     await mount('/learn/vocab/N4', vocabRoutes)
     await settle()
-    const list = document.querySelector('.desk-split__list')
-    const page = document.querySelector('.desk-split__page')
-    expect(list.querySelectorAll('.route-stop')).toHaveLength(5)
+    // Past the stops' staggered arrivals, so each stands where it stays.
+    await Promise.all(document.getAnimations().map(a => a.finished.catch(() => {})))
+    const page = document.querySelector('.desk-platforms')
+    expect(line().querySelectorAll('.route-stop')).toHaveLength(5)
     expect(openStop()).toBe('N4')
-    expect(list.querySelector('.desk-stop--open')).not.toBeNull()
+    expect(line().querySelector('.desk-stop--open')).not.toBeNull()
     expect(page.querySelectorAll('.platform-card').length).toBeGreaterThan(2)
-    const l = contentBox(list)
+    const l = line().getBoundingClientRect()
     const p = page.getBoundingClientRect()
-    expect(Math.round(l.top)).toBe(Math.round(p.top))
-    expect(p.left).toBeGreaterThan(l.right)
-    expect(Math.round(l.width)).toBe(360)
-    // Upright: a list, not the page-wide line.
-    const [a, b] = [...list.querySelectorAll('.route-stop')].map(el => el.getBoundingClientRect())
-    expect(b.top).toBeGreaterThan(a.bottom - 1)
+    expect(p.top).toBeGreaterThan(l.bottom - 1)
+    expect(Math.round(l.left)).toBe(Math.round(p.left))
+    expect(Math.round(l.width)).toBe(Math.round(p.width))
+    // Across: a line, not a list.
+    const [a, b] = [...line().querySelectorAll('.route-stop')].map(el => el.getBoundingClientRect())
+    expect(Math.round(b.top)).toBe(Math.round(a.top))
+    expect(b.left).toBeGreaterThan(a.right - 1)
   })
 
   it('swaps the platforms in place when another stop is chosen', async () => {
     await mount('/learn/vocab/N4', vocabRoutes)
     await settle()
-    const stops = [...document.querySelectorAll('.desk-split__list .route-stop')]
+    const stops = [...line().querySelectorAll('.route-stop')]
     expect(stops.every(s => s.tagName === 'A')).toBe(true)
     expect(stops.map(s => s.getAttribute('href'))).toEqual(['N5', 'N4', 'N3', 'N2', 'N1'].map(l => `/learn/vocab/${l}`))
     stops.find(s => s.textContent.includes('N5')).click()
@@ -129,10 +133,10 @@ describe('a level\'s platforms on the desk', () => {
     expect(openStop()).toBe('N5')
   })
 
-  it('prints each platform\'s own figures: due, and mastered over total', async () => {
+  it('prints each car\'s own figures: due, and learned over total', async () => {
     await mount('/learn/vocab/N4', vocabRoutes)
     await settle()
-    const figs = [...document.querySelectorAll('.desk-split__page .desk-mode-fig')]
+    const figs = [...document.querySelectorAll('.desk-platforms .desk-mode-fig')]
     expect(figs.length).toBeGreaterThanOrEqual(2)
     expect(figs[0].querySelector('.desk-mode-fig__due').textContent).toMatch(/^7/)
     expect(figs[0].querySelector('.desk-mode-fig__count').textContent).toMatch(/20\s*\/\s*80/)
@@ -147,7 +151,7 @@ describe('a level\'s platforms on the desk', () => {
 // scroll from there.
 describe('a split\'s list and the wheel', () => {
   it('hands the wheel on to the page at its ends', async () => {
-    await mount('/learn/vocab/N4', vocabRoutes)
+    await mount('/learn/basics/u1', <Route path="/learn/basics/:unit" element={<StationSplit label="u" list={<p>u1</p>}><p>page</p></StationSplit>} />)
     await settle()
     const list = document.querySelector('.desk-split__list')
     expect(getComputedStyle(list).overscrollBehaviorY).toBe('auto')
@@ -164,12 +168,12 @@ describe('the other stations on the desk', () => {
     ))
     await settle()
     expect(where.path).toBe('/learn/kana/katakana_basic')
-    const open = document.querySelector('.desk-split__list .route-stop[aria-current="page"]')
+    const open = line().querySelector('.route-stop[aria-current="page"]')
     expect(open.tagName).toBe('A')
     expect(open.getAttribute('href')).toBe('/learn/kana/katakana_basic')
   })
 
-  it('opens grammar on the learner\'s level, its points door beside the line', async () => {
+  it('opens grammar on the learner\'s level, its points door at the cars\' foot', async () => {
     await mount('/learn/grammar', (
       <>
         <Route path="/learn/grammar" element={<GrammarScreen session={null} />} />
@@ -178,8 +182,8 @@ describe('the other stations on the desk', () => {
     ))
     await settle()
     expect(where.path).toBe('/learn/grammar/N4')
-    expect(document.querySelector('.desk-split__page .gl-points-door')).not.toBeNull()
-    const n3 = [...document.querySelectorAll('.desk-split__list .route-stop')].find(s => s.textContent.includes('N3'))
+    expect(document.querySelector('.desk-platforms__foot .gl-points-door')).not.toBeNull()
+    const n3 = [...line().querySelectorAll('.route-stop')].find(s => s.textContent.includes('N3'))
     expect(n3.getAttribute('href')).toBe('/learn/grammar/N3')
     n3.click()
     await settle()

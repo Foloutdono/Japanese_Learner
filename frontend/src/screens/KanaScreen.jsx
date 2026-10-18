@@ -10,7 +10,8 @@ import { MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries } from '../domain/
 import { kanaSets, currentKanaSet } from '../domain/kanaSets'
 import { deckItems } from '../domain/lineProgress'
 import { useDesk } from '../hooks/useDesk'
-import { StationSplit, KanaSetRedirect } from '../components/selection/StationSplit'
+import { KanaSetRedirect } from '../components/selection/StationSplit'
+import { LineStation } from '../components/selection/LineStation'
 import { LinePlatforms } from '../components/selection/LinePlatforms'
 import { useStationSamples } from '../stores/stationSamples'
 
@@ -51,16 +52,13 @@ export default function KanaScreen() {
   if (set && !selectedSet) return <Navigate replace to="/learn/kana" />
 
   // The sets as a route: the station page on a phone, and on the desk
-  // the list beside a set's platforms (plan 114).
-  // On the desk a set's stop prints its sample (あ い う え お …), so the
-  // code in front of its name (あ, きゃ) said the first of them twice
-  // and is left off (2026-09-26, the owner's call); the phone's route
-  // has no sample, and keeps it.
-  const setStops = (coded = true) => SETS.map(s => {
+  // the line across the top of a set's cars (plan 251), each set its
+  // code (あ, きゃ) and its name as on the phone.
+  const setStops = () => SETS.map(s => {
       const { learned, total, started } = deckItems(stats, 'kana', s.slug)
       return {
         key: s.slug,
-        code: coded ? s.code : null,
+        code: s.code,
         codeLang: 'ja',
         name: s.label,
         hereLabel: t.levelCurrentMark,
@@ -68,7 +66,6 @@ export default function KanaScreen() {
         total,
         started,
         startedLabel: t.startedNote(started),
-        sample: samples?.[s.slug]?.sample?.join(' '),
       }
     })
   const here = currentKanaSet(stats?.items?.kana)
@@ -92,20 +89,19 @@ export default function KanaScreen() {
   // ── The platforms: the set's modes ──
   const run = m => navigate(`/learn/kana/${set}/${m}`)
 
-  // ── 机 — the sets beside a set's platforms (plans 114, 137) ──
-  // Both columns take the window (LinePlatforms): each set with its
-  // first kana and its bar, each platform with the card it asks. The
-  // bar prints no sub: the open set names itself.
+  // ── 机 — the sets over a set's cars (plans 114, 251) ──
+  // The kana line across the top, the open set lit, and its exercises
+  // under it as cars, each with the card it asks (LineStation,
+  // LinePlatforms). The bar prints no sub: the open set names itself.
   if (desk) {
     return (
       <SelectionScreen
         title={t.kanaTitle}
         aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
       >
-        <StationSplit
-          className="desk-split--line"
+        <LineStation
           label={t.stationSets}
-          list={<RouteStops stops={setStops(false)} here={here} selected={set} linkTo={slug => `/learn/kana/${slug}`} figured />}
+          line={<RouteStops stops={setStops()} here={here} selected={set} linkTo={slug => `/learn/kana/${slug}`} across />}
         >
           <LinePlatforms
             source="kana"
@@ -114,7 +110,7 @@ export default function KanaScreen() {
             modes={MODES}
             onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))}
           />
-        </StationSplit>
+        </LineStation>
       </SelectionScreen>
     )
   }

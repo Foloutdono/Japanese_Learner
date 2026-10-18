@@ -145,7 +145,6 @@ export const CLEAR_PARTIAL = Object.freeze({
 
 // ── The rest day (運休), on Today ───────────────────────────────────
 // Wednesday 7 Oct: 火 was missed and covered by a rest ticket; 水 is today.
-export const REST_TODAY = '2026-10-07'
 export const REST_WEEK = Object.freeze([
   { day: '2026-10-01', kanji: '木', state: 'studied' },
   { day: '2026-10-02', kanji: '金', state: 'studied' },

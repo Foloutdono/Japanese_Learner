@@ -1,5 +1,5 @@
 import { playUi } from '../../lib/audio'
-import { useListWalk, WALK_KEYS } from '../../hooks/useListWalk'
+import { useListWalk, WALK_KEYS, WALK_KEYS_ACROSS } from '../../hooks/useListWalk'
 import { SplitRow } from './SplitRow'
 
 // ── 路線図 — the stops of a line (plan 071) ──────────────────
@@ -52,24 +52,36 @@ import { SplitRow } from './SplitRow'
 //           stops can share the column's height with something to say.
 //           Only the desk passes it.
 //
+//   across — the desk's line station (plan 251, LineStation): the stops
+//           laid across the top of the page, over the open stop's cars,
+//           each a column under its marker on the one rail -- its code
+//           and name, then its figure. The stop the learner is at is the
+//           marker in the lead rung, said in words to a screen reader
+//           only; the started note goes, each car under the line
+//           carrying its own record. Walked with ←/→ as well. Only the
+//           desk passes it.
+//
 // In the split the route is also walked by key (hooks/useListWalk,
 // plan 115): one tab stop, the open one, and ↑/↓/Home/End along it.
-export function RouteStops({ stops, here = null, selected = null, onSelect, linkTo = null, figured = false }) {
+export function RouteStops({ stops, here = null, selected = null, onSelect, linkTo = null, figured = false, across = false }) {
   const hereIndex = stops.findIndex(s => s.key === here)
   const walked = selected != null
-  const onWalk = useListWalk(walked)
+  const onWalk = useListWalk(walked, { across })
   const tabStop = walked && stops.some(s => s.key === selected) ? selected : stops[0]?.key
+  const keys = across ? WALK_KEYS_ACROSS : WALK_KEYS
   return (
-    <div className="route" onKeyDown={onWalk} aria-keyshortcuts={walked ? WALK_KEYS : undefined}>
+    <div className="route" onKeyDown={onWalk} aria-keyshortcuts={walked ? keys : undefined}>
       {stops.map((stop, i) => {
         const past = hereIndex >= 0 && i < hereIndex
         const current = stop.key === here
         // The stop the learner is at wears its landmark in place of a
-        // hint; every other stop wears the hint, if it has one.
-        const caption = current
-          ? <span className="route-stop__here">{stop.hereLabel}</span>
+        // hint; every other stop wears the hint, if it has one. Across,
+        // the marker is the landmark, and the words are a screen
+        // reader's.
+        const caption = across ? null
+          : current ? <span className="route-stop__here">{stop.hereLabel}</span>
           : stop.hint ? <span className="route-stop__hint" lang={stop.hintLang}>{stop.hint}</span> : null
-        const started = stop.startedLabel && (stop.started ?? 0) > (stop.learned ?? 0)
+        const started = !across && stop.startedLabel && (stop.started ?? 0) > (stop.learned ?? 0)
         const open = selected != null && stop.key === selected
         const classes = [
           'route-stop',
@@ -96,6 +108,7 @@ export function RouteStops({ stops, here = null, selected = null, onSelect, link
             {stop.code && <span className="route-stop__code" lang={stop.codeLang}>{stop.code}</span>}
             <span className="route-stop__names">
               <span className="route-stop__jp">{stop.name}</span>
+              {across && current && <span className="sr-only">{stop.hereLabel}</span>}
               {(caption || started || stop.note) && (
                 <span className="route-stop__caption">
                   {caption}

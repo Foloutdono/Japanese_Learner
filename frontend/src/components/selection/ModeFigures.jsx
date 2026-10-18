@@ -19,8 +19,14 @@ import { Composition } from '../stats/Composition'
 //
 // Mounted only on the desk, so the stats fetch it reads is shared with
 // the route beside it and costs a phone nothing.
-export function ModeFigures({ source, deck, mode }) {
-  return <Figures row={modeRow(useStats().data, source, deck, mode)} />
+//
+// `line` is a car's (plan 251, components/selection/LinePlatforms): the
+// figures as one line under the car's description -- what is due, or
+// under way, then what the cards add up to, or before any is met how
+// many there are -- over the composition bar across the car's foot.
+export function ModeFigures({ source, deck, mode, line = false }) {
+  const row = modeRow(useStats().data, source, deck, mode)
+  return line ? <Record row={row} /> : <Figures row={row} />
 }
 
 // The same figures for a stop /api/stats does not carry (plan 115): a
@@ -58,6 +64,29 @@ function Figures({ row }) {
         <span className="sr-only">{t.learnedLabel} </span>
         <b>{row.learned}</b>/ {row.total}
       </span>
+    </span>
+  )
+}
+
+function Record({ row }) {
+  const { t } = useLang()
+  if (!row || row.total === 0) return null
+  const met = row.learning + row.mastered > 0
+  return (
+    <span className="desk-mode-fig desk-mode-fig--line">
+      <span className="desk-mode-fig__rec">
+        {row.due > 0 && <span className="desk-mode-fig__due">{row.due} {t.dueUnit}</span>}
+        {row.due === 0 && row.learning > 0 && <span className="desk-mode-fig__now">{row.learning} {t.learningUnit}</span>}
+        {met
+          ? (
+            <span className="desk-mode-fig__count">
+              <span className="sr-only">{t.learnedLabel} </span>
+              <b>{row.learned}</b> / {row.total}
+            </span>
+          )
+          : <span className="desk-mode-fig__count">{t.cardsCount(row.total)}</span>}
+      </span>
+      <Composition row={row} />
     </span>
   )
 }
