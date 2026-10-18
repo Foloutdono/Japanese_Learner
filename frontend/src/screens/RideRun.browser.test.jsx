@@ -202,7 +202,7 @@ describe('RideRun', () => {
   it('Skip is the head\'s ‹ and stamps the ride as skipped', async () => {
     serve()
     const onDone = vi.fn()
-    const screen = await mount({ onDone })
+    const screen = await mount({ onDone, first: true })
     await settle(200)
     screen.container.querySelector('.stage__leave').click()
     await settle(200)
@@ -212,6 +212,91 @@ describe('RideRun', () => {
     expect(onDone).toHaveBeenCalledTimes(1)
     expect(screen.container.querySelector('.gate-probe')).toBeTruthy()
     expect(track.mock.calls.find(([n]) => n === 'ride_done')[1]).toMatchObject({ skipped: true, at: 'cards' })
+    // The first ride's guard went out with it.
+    expect(window.history.state?.guard).toBeFalsy()
+  })
+
+  // The first ride (App's rideDue): the entry behind it is the front
+  // door, which boarded the ride again from the start when Back landed
+  // there (reported 2026-10-17). Back is the head's Skip, and Continue
+  // takes the guard out before it goes on, so the reading ride has
+  // nothing of the cards behind it.
+  it('on the first ride, Back is the head\'s Skip', async () => {
+    serve()
+    const onDone = vi.fn()
+    const screen = await mount({ onDone, first: true })
+    await settle(200)
+    expect(window.history.state?.guard).toBe(true)
+    window.history.back()
+    await settle(200)
+    const [url, , init] = posts()[0]
+    expect(url).toBe('/api/onboarding/ride/done')
+    expect(JSON.parse(init.body)).toEqual({ skipped: true })
+    expect(onDone).toHaveBeenCalledTimes(1)
+    expect(screen.container.querySelector('.gate-probe')).toBeTruthy()
+    expect(track.mock.calls.find(([n]) => n === 'ride_done')[1]).toMatchObject({ skipped: true, at: 'cards' })
+    expect(window.history.state?.guard).toBeFalsy()
+  })
+
+  // The ride asks a phone to open the known card's entry, and Back is how
+  // an Android hand closes a sheet: it closes the entry, as the scrim
+  // does, and only the Back after it skips.
+  it('on the first ride, Back closes an open entry first, and the next one skips', async () => {
+    serve()
+    const screen = await mount({ first: true })
+    await settle(200)
+    const root = screen.container
+    root.querySelector('.flashcard').click()
+    await settle(80)
+    root.querySelector('[data-guide="card.lookup"]').click()
+    await settle(120)
+    expect(document.querySelector('.dict-sheet')).toBeTruthy()
+
+    window.history.back()
+    await settle(150)
+    expect(document.querySelector('.dict-sheet')).toBeNull()
+    expect(root.querySelector('.rating-bar--idle')).toBeNull()
+    expect(document.querySelector('.guide-callout__text').textContent).toContain(fr.rideKnownBack)
+    expect(posts()).toHaveLength(0)
+    expect(window.history.state?.guard).toBe(true)
+
+    window.history.back()
+    await settle(200)
+    expect(root.querySelector('.gate-probe')).toBeTruthy()
+    expect(track.mock.calls.find(([n]) => n === 'ride_done')[1]).toMatchObject({ skipped: true, at: 'cards' })
+  })
+
+  it('on the first ride, Continue takes the guard out before the reading ride', async () => {
+    serve()
+    const screen = await mount({ first: true })
+    await settle(200)
+    const root = screen.container
+    root.querySelector('.flashcard').click()
+    await settle(80)
+    await lookUp(root)
+    rateButton(root, 4).click()
+    await settle(600)
+    root.querySelector('.flashcard').click()
+    await settle(80)
+    rateButton(root, 1).click()
+    await settle(600)
+    expect(window.history.state?.guard).toBe(true)
+    root.querySelector('.btn-depart').click()
+    await settle(200)
+    expect(root.querySelector('.reading-probe')).toBeTruthy()
+    expect(window.history.state?.guard).toBeFalsy()
+    expect(posts()).toHaveLength(0)
+    expect(track.mock.calls.find(([n]) => n === 'ride_done')).toBeUndefined()
+  })
+
+  it('a ride taken again stands no guard: Back goes where it came from', async () => {
+    serve()
+    const length = window.history.length
+    const state = window.history.state
+    await mount()
+    await settle(200)
+    expect(window.history.length).toBe(length)
+    expect(window.history.state).toEqual(state)
   })
 
   it('a ride that cannot be served is never a locked door: leaves for the app, stamps nothing', async () => {
@@ -220,11 +305,13 @@ describe('RideRun', () => {
       return {}
     })
     const onDone = vi.fn()
-    const screen = await mount({ onDone })
+    const screen = await mount({ onDone, first: true })
     await settle(200)
     expect(screen.container.querySelector('.gate-probe')).toBeTruthy()
     expect(posts()).toHaveLength(0)
     expect(onDone).toHaveBeenCalledTimes(1)
+    // And it leaves no guard of its own behind it.
+    expect(window.history.state?.guard).toBeFalsy()
   })
 
   it('a learner with no kana gets the reading in letters over the word, and hears it on the flip', async () => {

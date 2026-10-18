@@ -24,6 +24,7 @@ import { useCredits } from '../stores/credits'
 import { startTally, countReview } from '../stores/runTally'
 import { EnterKey } from '../components/chrome/DeskKeys'
 import { useDesk } from '../hooks/useDesk'
+import { useBackGuard } from '../hooks/useBackGuard'
 import { paceFactor } from '../domain/readingPace'
 import { useReadingPace } from '../stores/readingPace'
 import { useProfileSummary } from '../stores/profileSummary'
@@ -46,6 +47,13 @@ import { useProfileSummary } from '../stores/profileSummary'
 // stamp on "Enter the station" -- or on Skip, the same stamp: a
 // learner who skipped is not asked again.
 //
+// On the first ride (`first`, App's rideDue) the browser's Back is that
+// Skip too: the entry behind the ride is the front door, which boarded
+// it again from the start (reported 2026-10-17), so Back is held
+// (hooks/useBackGuard.js) and skips as the head's ‹ does, once any
+// sheet open over it is closed. A ride taken again from Settings ›
+// Help goes back to it.
+//
 // 机 (plan 133): on the desk the ride stands on the practice runs'
 // three panels (plan 129) -- this run's figures and its lines at the
 // left, the sentence in the middle, the breakdown sealed at the right
@@ -59,7 +67,7 @@ const READING_COLOR = 'var(--line-reading)'
 // The steps, as ride_step names them: read, type, measure, pass; on the
 // desk graded between measure and pass.
 
-export default function RideReading({ session, onDone, dryRun = false, sentence: given = null }) {
+export default function RideReading({ session, onDone, first = false, dryRun = false, sentence: given = null }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
   const credits = useCredits()
@@ -94,6 +102,10 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
   const timer = useRef(null)
   const watches = useRef(null)
   const finished = useRef(false)
+  // Back on the first ride: the head's Skip (above). Read once, since
+  // the ride's own stamp turns App's answer on the way out.
+  const [held] = useState(first)
+  const release = useBackGuard(held, () => finish(true))
 
   useEffect(() => {
     document.title = `${t.rideDocumentTitle} — ${t.appTitle}`
@@ -198,7 +210,7 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
     // its way out is onDone alone.
     stamped.then(() => {
       onDone?.()
-      if (!dryRun) navigate('/today', { replace: true })
+      if (!dryRun) release().then(() => navigate('/today', { replace: true }))
     })
   }
 
@@ -206,8 +218,8 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
     if (!failed || finished.current) return
     finished.current = true
     onDone?.()
-    if (!dryRun) navigate('/today', { replace: true })
-  }, [failed, navigate, onDone, dryRun])
+    if (!dryRun) release().then(() => navigate('/today', { replace: true }))
+  }, [failed, navigate, onDone, dryRun, release])
 
   const platforms = getAllSections(t).filter(s => Object.values(PASS_PLATFORMS).includes(s.path))
   const callouts = {
