@@ -83,6 +83,8 @@ class Geometry:
     towns = ((300, 366, 284, 297, 0.55), (180, 300, 289, 298, 0.3), (40, 175, 292, 300, 0.15))
     rims = (23.5, 366.4)        # the pillars' inner edges, lit by the lamps
     bloom = (6, 18, 44)         # the lamps' glow, px
+    pillar_knee = None          # the pillars' light above it grows slower (the sun's rim on
+                                # them dimmed with the sun), or None
     recipe = {}                 # an hour's recipe, as this painting needs it: its sun
                                 # or moon where it has its sky, its stars, its town
 
@@ -142,6 +144,7 @@ class Lighter:
                 T[key] = dict(T[key], **value) if isinstance(value, dict) and isinstance(T.get(key), dict) else value
             self.H[hour] = T
         self.rng = np.random.default_rng(205)
+        self.placed = []            # the stars the last scenes drew: (x, y, brightness), px
 
     # ── the sky's disc, its stars, the far town ──
     def disc(self, img_lin, d):
@@ -188,6 +191,7 @@ class Lighter:
             x0, x1, y0, y1 = max(0, xi - 4), min(Ww, xi + 5), max(0, yi - 4), min(Hh, yi + 5)
             gy, gx = np.mgrid[y0:y1, x0:x1].astype(np.float32)
             g = np.exp(-((gx - x) ** 2 + (gy - y) ** 2) / (2 * s * s)) * b * fade
+            self.placed.append((x, y, b * fade))
             out[y0:y1, x0:x1] += (g[..., None] * tint[None, None, :] * (1 - clouds[y0:y1, x0:x1, None] * 6).clip(0, 1)).astype(np.float32)
             placed += 1
         return out
@@ -221,13 +225,19 @@ class Lighter:
         rgb = a[..., :3]
         L, S = lum(rgb), sat(rgb)
         Hh, Ww = L.shape
+        # a painting whose land has a soft edge over the sky (the desk's,
+        # desk_parts.matte) lights each from its own colour and lays them
+        # together by how much of a pixel is land
+        mt = M.get('matte')
+        Ls, Ss = (lum(mt['sky']), sat(mt['sky'])) if mt else (L, S)
+        Ll = lum(mt['land']) if mt else L
         v = (np.arange(Hh, dtype=np.float32) / G.px)[:, None] * np.ones((1, Ww), np.float32)
         sky, land, horizon = M['sky'], M['land'], M['horizon']
 
         # the sky and its clouds
         t = np.clip((v - G.sky_top) / (G.horizon - G.sky_top), 0, 1)
         base = grad(T['sky'], t)
-        Lsky = np.where(sky, L, np.nan)
+        Lsky = np.where(sky, Ls, np.nan)
         with np.errstate(all='ignore'):
             import warnings
             with warnings.catch_warnings():
@@ -235,9 +245,9 @@ class Lighter:
                 Lb = np.nanpercentile(Lsky, 22, axis=1)
         Lb = np.where(np.isnan(Lb), np.nanmean(Lb), Lb)
         Lb = cv2.GaussianBlur(Lb.reshape(-1, 1).astype(np.float32), (0, 0), 6).ravel()
-        cloud = np.clip((L - Lb[:, None] - 0.012) / 0.2, 0, 1) * sky
-        cloud = cloud * np.clip((S < 0.3).astype(np.float32) + 0.3, 0, 1)
-        shade = np.clip((L - Lb[:, None]) / np.maximum(1 - Lb[:, None], 0.05), 0, 1)
+        cloud = np.clip((Ls - Lb[:, None] - 0.012) / 0.2, 0, 1) * sky
+        cloud = cloud * np.clip((Ss < 0.3).astype(np.float32) + 0.3, 0, 1)
+        shade = np.clip((Ls - Lb[:, None]) / np.maximum(1 - Lb[:, None], 0.05), 0, 1)
         cl = T['cloud']
         # what the low sun lights: the clouds' undersides (the painting's shaded half)
         under = np.clip(1 - shade, 0, 1) ** 1.4 * cl['under']
@@ -249,16 +259,21 @@ class Lighter:
 
         # the land: Fuji's snow, the mountains, the forest
         snow_s, snow_l = T['snow']
-        snow = mix(np.broadcast_to(snow_s, rgb.shape), np.broadcast_to(snow_l, rgb.shape), np.clip((L - 0.72) / 0.28, 0, 1))
-        mount = tone(T['mount'], L, T['mount_ref'], 1.25)
-        farness = np.clip((L - 0.45) / 0.35, 0, 1)          # the far hills lean to the hour's far colour
+        snow = mix(np.broadcast_to(snow_s, rgb.shape), np.broadcast_to(snow_l, rgb.shape), np.clip((Ll - 0.72) / 0.28, 0, 1))
+        mount = tone(T['mount'], Ll, T['mount_ref'], 1.25)
+        farness = np.clip((Ll - 0.45) / 0.35, 0, 1)         # the far hills lean to the hour's far colour
         mount = mix(mount, np.broadcast_to(T['far'], rgb.shape), farness * 0.6)
-        forest = tone(T['forest'], L, T['forest_ref'], 1.15)
-        landc = rgb.copy()
+        forest = tone(T['forest'], Ll, T['forest_ref'], 1.15)
+        landc = (mt['land'] if mt else rgb).copy()
         landc[M['snow']] = snow[M['snow']]
         landc[M['mount']] = mount[M['mount']]
         landc[M['forest']] = forest[M['forest']]
-        w_land = smooth(land, 0.9)                           # the land's edge against the sky, softened
+        if 'snow_w' in M:                                    # a streak of snow's soft edge on the slope
+            sw = M['snow_w']
+            peak = sw > 0
+            landc[peak] = mix(mount, snow, sw)[peak]
+        # the land's edge against the sky: the matte's, or softened
+        w_land = mt['alpha'] * land if mt else smooth(land, 0.9)
         zone = smooth(land | sky, 0.6) > 0.5
         blend = mix(out, landc, w_land)
         out[zone] = blend[zone]
@@ -297,12 +312,15 @@ class Lighter:
         # light: the sky's disc, the stars, the town, the lamps and their glow
         lo = lin(out)
         d = T['disc']
-        lo = mix(lo, self.disc(lo, d), smooth(sky, 0.7 if d['kind'] == 'sun' else 0.8))
+        on_sky = smooth(sky, 0.7 if d['kind'] == 'sun' else 0.8)
+        if mt:                                               # the land's edge stands in front of it
+            on_sky = on_sky * (1 - mt['alpha'])
+        lo = mix(lo, self.disc(lo, d), on_sky)
         if T['stars']:
             keep = (d['at'][0] * G.px, d['at'][1] * G.px, d['r'] * G.px * 3.2)
             lo = self.stars(lo, T['stars'], sky, cloud, horizon, keep)
         if T['town']:
-            lo = self.town(lo, T['town'] * (1 if hour == 'night' else 0.5), M['forest'] | M['mount'])
+            lo = self.town(lo, T['town'] * (1 if hour == 'night' else 0.5), M.get('town', M['forest'] | M['mount']))
         tube = M['tube']
         lo[tube] = lin(T['tube'])
         bc, bk = T['bloom']
@@ -316,6 +334,9 @@ class Lighter:
         T = self.H[hour]
         rgb, al = a[..., :3], a[..., 3]
         L = lum(rgb)
+        knee = self.G.pillar_knee
+        if knee is not None:
+            L = np.where(L > knee, knee + (L - knee) * 0.3, L)
         out = tone(T['pillar'], L, 0.3, 1.0)
         # a warm rim on the pillars' inner edges, from the platform's lamps
         Hh, Ww = L.shape

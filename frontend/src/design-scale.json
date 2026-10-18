@@ -467,7 +467,13 @@
     "--pd-band-l",
     "--pd-band-r",
     "--pd-fill",
-    "--pd-stage"
+    "--pd-stage",
+    "--pd-sky",
+    "--pd-sky-top",
+    "--pd-sky-h",
+    "--pd-sky-pad",
+    "--pd-drift",
+    "--pd-glow"
   ],
   "duplicateKeyframes": [
     "card-stamp-strike",

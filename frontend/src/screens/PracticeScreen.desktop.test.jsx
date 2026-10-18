@@ -269,6 +269,58 @@ describe('the painted platform on the desk (plan 244)', () => {
     expect($('[data-guide="practice.pass"]')).toBeNull()
   })
 
+  // plan 244b: the sky alive -- its clouds drift behind its own mask,
+  // the stars catch the light, the glow breathes, birds cross by day --
+  // and under reduced motion the painting's own sky.
+  it('keeps the painting\'s sky under reduced motion', async () => {
+    await gate()
+    const sky = $('.pdesk__sky')
+    expect(getComputedStyle(sky).maskImage).toContain(`/practice/gate/desk/${DESK.rev}/sky.png`)
+    const hour = printHour(new Date())
+    expect($('.pdesk__clouds img.is-on').getAttribute('src')).toBe(`/practice/gate/desk/${DESK.rev}/clouds-${hour}.webp`)
+    expect(getComputedStyle($('.pdesk__clouds')).animationName).toBe('none')
+    expect($$('.pdesk-glint, .pdesk-flock, .pdesk-disc, .pdesk-flicker')).toHaveLength(0)
+  })
+
+  it('brings its sky to life: stars and the moon\'s glow at night, birds by day', async () => {
+    motion.reduced = false
+    await gate()
+    const turnTo = async h => {
+      for (let i = 0; i < 4 && !$('.pdesk').classList.contains(`pgate--${h}`); i++) {
+        $('.pdesk-clock .pgate-clock').click()
+        await settle(60)
+      }
+    }
+    expect(getComputedStyle($('.pdesk__clouds')).animationName).toBe('desk-drift')
+    await turnTo('night')
+    expect($$('.pdesk-glint')).toHaveLength(DESK.stars.night.length)
+    expect($$('.pdesk-glint').every(g => g.getAnimations().length === 1)).toBe(true)
+    expect($('.pdesk-disc').getAnimations()).toHaveLength(1)
+    expect($('.pdesk-flock')).toBeNull()
+    // a tube of the canopy stutters now and then, once the lamps are on
+    expect($$('.pdesk-flicker')).toHaveLength(1)
+    expect($('.pdesk-flicker').getAnimations()).toHaveLength(1)
+    await turnTo('day')
+    expect($$('.pdesk-glint, .pdesk-disc, .pdesk-flicker')).toHaveLength(0)
+    // by day, swallows, each on its own way, jointed, its wings beating
+    // at the shoulder and the wrist (DeskBirds, plan 244c)
+    const birds = $$('.pdesk-flock .pdesk-bird')
+    expect(birds.length).toBeGreaterThan(2)
+    expect($$('.pdesk-way').every(w => w.getAnimations().length === 1)).toBe(true)
+    for (const bird of birds) {
+      const joints = $$('[data-move]', bird)
+      expect(joints.map(j => j.dataset.move)).toEqual(expect.arrayContaining(['sw-arm', 'sw-arm-far', 'sw-hand']))
+      expect(joints.every(j => j.getAnimations().length === 1)).toBe(true)
+    }
+    // at dusk, the geese of 落雁 in their V
+    await turnTo('dusk')
+    expect($$('.pdesk-flock .pdesk-bird')).toHaveLength(5)
+    expect($$('.pdesk-flock [data-move="arm"]')).toHaveLength(5)
+    // the birds fly in the sky, behind the pillars and the land
+    expect($('.pdesk-flock').closest('.pdesk__sky')).not.toBeNull()
+    motion.reduced = true
+  })
+
   // Last: the train leaves, and the gate remembers it did (the next
   // visit sees it come in).
   it('plays the departure: the doors close, the train pulls out, the veil, then the run', async () => {
