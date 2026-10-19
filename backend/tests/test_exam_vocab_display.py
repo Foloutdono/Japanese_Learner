@@ -1,5 +1,5 @@
 # A vocabulary paper shows a word in kana when its kanji are above the
-# paper's level (plan 254); the placement test, which builds its context
+# paper's level (plan 257); the placement test, which builds its context
 # items through the same primitive without a level, is left as it was.
 import random
 

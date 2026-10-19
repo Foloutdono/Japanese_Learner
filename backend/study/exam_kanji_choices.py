@@ -1,4 +1,4 @@
-# ── The choices of a 漢字読み / 表記 item (plan 254) ───────────────────
+# ── The choices of a 漢字読み / 表記 item (plan 257) ───────────────────
 # exam_kanji_gen.py built these items' wrong choices by editing the right
 # one at random: a voicing flipped anywhere, a う added after a verb, a っ
 # put in front of any hard consonant. Three things were wrong with what

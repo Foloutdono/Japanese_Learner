@@ -1,4 +1,4 @@
-# What a question's choices give away by how they look (plan 254): the
+# What a question's choices give away by how they look (plan 257): the
 # shapes study/exam_tells.py names, with the counter-case for each -- the
 # symmetric set that looks alike and gives nothing away.
 from study import exam_tells as T

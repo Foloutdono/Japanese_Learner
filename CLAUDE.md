@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **255**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **258**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -63,7 +63,7 @@ runtime purpose.
   plan 225), `REV` in `frontend/scripts/practice-gate/desk.py` (the desk's
   painted platform, plan 244).
   An exam id's `generator_version` (`study/exam_catalogue.py`) is one too: a bump
-  retires the papers it made without deleting them (plan 254 bumped `vocab-gen`).
+  retires the papers it made without deleting them (plan 257 bumped `vocab-gen`).
   A change to what any of them produces bumps it, or learners keep the old.
 - **The grammar detector and the lookups change by counter-case.** Every new
   rule or refusal is pinned in `tests/test_grammar_precision.py` /
@@ -83,7 +83,7 @@ runtime purpose.
   `study/grammar_check.py` holds it; `content/grammar/README.md`, "The
   quiz", is the style guide. Draft with `python -m scripts.check_tour_quiz`.
 - **A mock-exam choice is told apart by understanding, never by its look
-  (plan 254).** `study/exam_tells.py` is what four choices give away: a
+  (plan 257).** `study/exam_tells.py` is what four choices give away: a
   minimal pair among unlike choices (たいです / たくです, 午前 / 午後), or a
   star -- every wrong choice one edit from the right one, which is then the
   choice nearest to the rest (picked blind it won 96% of the old 漢字読み
@@ -106,7 +106,7 @@ runtime purpose.
   and the sound changes of a compound, set as a grid; wrong spellings from
   lookalike kanji of the paper's own level. `exam_kanji_gen` still builds the placement test's
   items, replayed from a seed (`study/placement.py`): leave it.
-- **A paper shows only its level's kanji and grammar (plan 254).**
+- **A paper shows only its level's kanji and grammar (plan 257).**
   `study/exam_levels.py` holds every text a paper prints to
   `kanji_set_for_level` (a grammar paper may spell its own patterns, に伴って),
   so 漢字読み and 表記 ask only the words the level has taught in the kanji it

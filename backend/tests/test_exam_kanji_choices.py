@@ -1,4 +1,4 @@
-# The choices of a 漢字読み / 表記 item (plan 254): readings a Japanese word
+# The choices of a 漢字読み / 表記 item (plan 257): readings a Japanese word
 # could have, a set with no centre, and only the kanji the paper's level has
 # been taught. The counter-cases are what the old builder (exam_kanji_gen)
 # made: ぱじめ, まぢ, a star around the answer, 燵 in an N5 paper.

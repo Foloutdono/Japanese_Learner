@@ -349,7 +349,7 @@ def _exam_vocab(level: str) -> dict | None:
     And its four `options` (plan 165: the Practice gate prints the
     question whole, as the canvas's "Every platform's specimen" draws
     it): the paper's own 漢字読み choices -- the reading and the three
-    wrong readings study/exam_kanji_choices builds for a paper (plan 254:
+    wrong readings study/exam_kanji_choices builds for a paper (plan 257:
     the slips a compound makes, set as a grid), dealt under a fixed seed
     so the order is the same on every process. A word the paper would not
     ask, or that has no such set, is passed over here too."""

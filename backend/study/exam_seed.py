@@ -118,7 +118,7 @@ def problems(exam_id: str, paper: dict) -> list[str]:
     sentence-order ★ on a middle slot (exam_grammar_gen.star_slot), the
     choices' looks (choice_tells) and the level of what is printed -- no
     kanji and no grammar point above the paper's level
-    (study/exam_levels.py, plan 254) -- and, for listening, that every
+    (study/exam_levels.py, plan 257) -- and, for listening, that every
     clip can be remade from its own script (study/exam_audio_repair.py),
     since no seed ships its audio."""
     _version, kind, level, _generate = EXAM_GENERATORS[exam_id]
@@ -158,7 +158,7 @@ def _kinds(level: str) -> dict[str, str]:
 
 
 # What the choices give away by how they look beside each other
-# (study/exam_tells.py, plan 254): an answer that is one of two choices a
+# (study/exam_tells.py, plan 257): an answer that is one of two choices a
 # character apart, or the one choice nearest to all the others, is found
 # without reading the question. A listening item is spared the first: its
 # choices are the figures and places the recording gives (5時 / 5時半 /
@@ -187,7 +187,7 @@ def choice_tells(paper: dict, level: str) -> list[str]:
 
 # A 漢字読み item's wrong readings are readings (no ぱじめ), none is a
 # reading of the word, and a 表記 item's wrong spellings are no spelling of
-# the word (study/exam_kanji_choices.py, plan 254).
+# the word (study/exam_kanji_choices.py, plan 257).
 def kanji_item_problems(paper: dict, level: str) -> list[str]:
     from study import exam_kanji_choices as kc
 
@@ -206,7 +206,7 @@ def kanji_item_problems(paper: dict, level: str) -> list[str]:
 
 # A fill-in item has its blank and a paraphrase item its underline. A stem
 # edited by hand can lose either, and then shows a finished sentence over
-# four loose words, which no other check notices (plan 254).
+# four loose words, which no other check notices (plan 257).
 def item_shape_problems(paper: dict, level: str) -> list[str]:
     kinds = _kinds(level)
     out = []

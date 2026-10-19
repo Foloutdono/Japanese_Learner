@@ -1,4 +1,4 @@
-# ── What a question's choices give away by how they look (plan 254) ──
+# ── What a question's choices give away by how they look (plan 257) ──
 # A choice is told apart from the others by understanding, never by the
 # eye. The papers the generators wrote broke that two ways, and both are
 # read here from the choices alone, so the gate (study/exam_seed.py) and

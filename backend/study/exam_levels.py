@@ -1,4 +1,4 @@
-# ── Is what a paper shows the paper's level? (plan 254) ───────────────
+# ── Is what a paper shows the paper's level? (plan 257) ───────────────
 # study/llm_shared.sentence_kanji_ok has gated the model-written text of
 # every paper since the generators began: no kanji outside the level's
 # cumulative set. The deck-built items never went through it -- 漢字読み

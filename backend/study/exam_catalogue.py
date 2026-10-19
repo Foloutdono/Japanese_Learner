@@ -65,7 +65,7 @@ EXAM_GENERATORS = {
         # 用法 where each has a generator), not kanji items alone — see
         # exam_vocab_gen.py. Renamed rather than kept for continuity
         # since nothing has shipped to real users under the old id yet.
-        # -gen-2 (plan 254): the 漢字読み / 表記 items are built by
+        # -gen-2 (plan 257): the 漢字読み / 表記 items are built by
         # study/exam_kanji_choices.py (words and kanji the level has been
         # taught, readings a word could have, no choice the answer is
         # nearest to), and a word above the level's kanji is shown in

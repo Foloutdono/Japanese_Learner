@@ -135,7 +135,7 @@ def test_reslot_moves_the_keys_and_nothing_else():
     assert [c["id"] for c in paper["sections"][0]["mondai"][0]["questions"][0]["choices"]] == ["c1", "c2", "c3", "c4"]
 
 
-# ── What the choices give away, and the level (plan 254) ─────────────
+# ── What the choices give away, and the level (plan 257) ─────────────
 
 def _grammar_question(texts: list[str], answer: int) -> tuple[dict, str]:
     paper = _first("n5-grammar-01")

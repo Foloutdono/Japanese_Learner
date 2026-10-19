@@ -1,4 +1,4 @@
-# A paper shows only the kanji of its level (plan 254).
+# A paper shows only the kanji of its level (plan 257).
 from study import exam_levels as L
 
 

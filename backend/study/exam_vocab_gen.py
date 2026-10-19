@@ -2,7 +2,7 @@
 # This module is also the vocabulary SECTION's orchestrator now — the
 # top-level entry point registered in routes/exams.py — not just the
 # three new mondai types in its name. study/exam_kanji_choices.py's
-# 漢字読み/表記 builders (plan 254) are called from here too, so a level's paper is one
+# 漢字読み/表記 builders (plan 257) are called from here too, so a level's paper is one
 # coherent "vocabulary" section built from every mondai type this
 # project can currently generate for it.
 #
@@ -70,7 +70,7 @@ def _display(word: dict, level: str | None = None) -> str:
     #
     # With a `level`, a word written with a kanji the level has not been
     # taught is shown in kana, as a paper at that level shows it (plan
-    # 254): the deck files 溺れる and 吠える at N3, and an N3 paper
+    # 257): the deck files 溺れる and 吠える at N3, and an N3 paper
     # printed them. The placement test builds its context items through
     # here without a level and is left as it was.
     kanji = word.get("kanji") or ""
