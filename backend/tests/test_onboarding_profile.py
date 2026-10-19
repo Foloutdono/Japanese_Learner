@@ -21,6 +21,16 @@ from study import level_rule
 
 @contextlib.contextmanager
 def _clean_onboarding_state(user_id: str):
+    # A first boarding with a name takes the username too (plan 247b), so
+    # the handle the test user came in with is put back with the rest.
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT username FROM user_profiles WHERE user_id = %s", (user_id,))
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    handle = row[0] if row else None
     try:
         yield
     finally:
@@ -36,10 +46,11 @@ def _clean_onboarding_state(user_id: str):
                         daily_departure = NULL, rating_scale = NULL,
                         motive = NULL, kana_known = NULL, reminder_time = NULL,
                         notifications = FALSE, lines = NULL,
-                        reading_pace = NULL, card_name = NULL
+                        reading_pace = NULL, card_name = NULL,
+                        username = COALESCE(%s, username)
                     WHERE user_id = %s
                     """,
-                    (user_id,),
+                    (handle, user_id),
                 )
             conn.commit()
         finally:
@@ -466,18 +477,155 @@ def test_complete_stores_the_card_name_and_the_profile_serves_it(client):
 
 
 def test_the_card_name_is_any_script_and_needs_no_uniqueness(client):
-    # Two Camilles are two Camilles: the column is not the username, and
-    # the username is left as it was.
-    with _clean_onboarding_state(DEV_USER_ID):
-        username = client.get("/api/profile").json()["username"]
-        for name in ("さくら", "Jean-Luc", "Zoë Ñúñez", "مریم"):
+    # Two Camilles are two Camilles: the column holds the name as typed,
+    # whoever else holds it, and never the number the handle may carry.
+    for name in ("さくら", "Jean-Luc", "Zoë Ñúñez", "مریم"):
+        with _clean_onboarding_state(DEV_USER_ID):
             r = client.post("/api/onboarding/complete", json={
                 "jlptLevel": "N5", "dailyNewTarget": 10, "cardName": name,
             })
             assert r.status_code == 200, (name, r.text)
             after = client.get("/api/profile").json()
             assert after["cardName"] == name
-            assert after["username"] == username
+
+
+# ── 署名 → handle: the first name is the username too (plan 247b) ──
+# At the first boarding the username becomes the Latin letters of the
+# card's name if nobody holds them (in any case), the name and a number
+# if somebody does. A learner who has no Latin letters in their name, who
+# chose a handle of their own, or who boards again keeps what they have.
+@pytest.mark.parametrize("name, handle", [
+    ("Camille", "Camille"),
+    ("Jean-Luc", "JeanLuc"),
+    ("Anne Marie", "AnneMarie"),
+    ("Zoë Ñúñez", "ZoeNunez"),
+    ("José-María", "JoseMaria"),
+    ("Søren", "Soren"),
+    ("Straße", "Strasse"),
+    ("Cœur", "Coeur"),
+    ("山田 Taro", "Taro"),
+    ("x" * 24, "x" * 20),
+    ("さくら", ""),
+    ("مریم", ""),
+    ("👩‍👩‍👧", ""),
+    ("", ""),
+])
+def test_the_handle_a_name_spells(name, handle):
+    assert profile_module.handle_from_name(name) == handle
+
+
+def _hold(user_id: str, username: str) -> None:
+    """Give `user_id` this username, as a learner who chose it has."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE user_profiles SET username = %s WHERE user_id = %s", (username, user_id))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def _board(client, name):
+    r = client.post("/api/onboarding/complete", json={
+        "jlptLevel": "N5", "dailyNewTarget": 10, "cardName": name,
+    })
+    assert r.status_code == 200, (name, r.text)
+    return r.json()
+
+
+def test_the_first_boarding_takes_the_name_as_the_handle(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        done = _board(client, "  Zephyrine  ")
+        assert done["username"] == "Zephyrine"
+        assert done["cardName"] == "Zephyrine"
+        served = client.get("/api/profile").json()
+        assert served["username"] == "Zephyrine"
+        assert served["cardName"] == "Zephyrine"
+
+
+def test_a_taken_name_takes_numbers_behind_it(client, other_user):
+    _hold(other_user, "Zephyrine")
+    with _clean_onboarding_state(DEV_USER_ID):
+        done = _board(client, "Zephyrine")
+        assert done["username"] != "Zephyrine"
+        assert done["username"][:9] == "Zephyrine"
+        assert done["username"][9:].isdigit() and 2 <= len(done["username"][9:]) <= 4
+        assert profile_module.USERNAME_RE.match(done["username"])
+        assert client.get("/api/profile").json()["username"] == done["username"]
+        # The card still says the name as typed.
+        assert client.get("/api/profile").json()["cardName"] == "Zephyrine"
+
+
+def test_a_name_is_taken_whatever_its_case(client, other_user):
+    _hold(other_user, "ZEPHYRINE")
+    with _clean_onboarding_state(DEV_USER_ID):
+        done = _board(client, "zephyrine")
+        assert done["username"] != "zephyrine"
+        assert done["username"][:9] == "zephyrine"
+        assert done["username"][9:].isdigit()
+
+
+def test_a_name_too_short_for_a_handle_takes_numbers(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        done = _board(client, "Xi")
+        assert done["username"] != "Xi"
+        assert done["username"].startswith("Xi")
+        assert profile_module.USERNAME_RE.match(done["username"])
+
+
+def test_a_long_name_keeps_the_handle_within_the_username_length(client, other_user):
+    name = "Abcdefghijklmnopqrstuvwx"
+    _hold(other_user, name[:20])
+    with _clean_onboarding_state(DEV_USER_ID):
+        done = _board(client, name)
+        assert done["username"] != name[:20]
+        assert done["username"].startswith(name[:16])
+        assert profile_module.USERNAME_RE.match(done["username"])
+
+
+def test_a_name_with_no_latin_letters_keeps_the_handle_the_app_drew(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        before = client.get("/api/profile").json()["username"]
+        done = _board(client, "さくら")
+        assert done["username"] is None
+        assert client.get("/api/profile").json()["username"] == before
+        # And no name at all is an answer that costs the handle nothing.
+        assert _board(client, "")["username"] is None
+
+
+def test_a_handle_the_learner_chose_is_never_replaced(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        client.get("/api/profile")
+        _hold(DEV_USER_ID, "MyOwnHandle")
+        done = _board(client, "Zephyrine")
+        assert done["username"] is None
+        assert client.get("/api/profile").json()["username"] == "MyOwnHandle"
+
+
+def test_only_the_first_boarding_moves_the_handle(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        assert _board(client, "Zephyrine")["username"] == "Zephyrine"
+        # A replay with another name, then the card's own rename: the
+        # handle is on the 番付 and under decks, so it stays put.
+        assert _board(client, "Philomène")["username"] is None
+        assert client.patch("/api/profile", json={"cardName": "Hélène"}).status_code == 200
+        served = client.get("/api/profile").json()
+        assert served["username"] == "Zephyrine"
+        assert served["cardName"] == "Hélène"
+
+
+def test_a_failure_to_take_the_handle_does_not_fail_the_boarding(client, monkeypatch):
+    def refuse(user_id, card_name):
+        raise RuntimeError("the database went away")
+    monkeypatch.setattr("routes.onboarding.claim_handle", refuse)
+    with _clean_onboarding_state(DEV_USER_ID):
+        before = client.get("/api/profile").json()["username"]
+        done = _board(client, "Zephyrine")
+        assert done["username"] is None
+        served = client.get("/api/profile").json()
+        assert served["onboardedAt"] is not None
+        assert served["cardName"] == "Zephyrine"
+        assert served["username"] == before
 
 
 def test_the_card_name_is_cleaned_and_held_to_its_length():

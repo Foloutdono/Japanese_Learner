@@ -265,6 +265,81 @@ def clean_card_name(value: str) -> str:
     return text
 
 
+# ── The handle a first name spells (plan 247b) ────────────────
+# The boarding's first name is also the learner's public handle when its
+# Latin letters make one: the username is the name if nobody holds it,
+# the name and a number if somebody does. Only the first boarding does
+# it, and only over the handle the app drew (a learner's own pick is
+# never replaced), so a replay or a later rename leaves the handle
+# where it is: it is on the 番付 and under every published deck.
+_GENERATED_RE = re.compile(rf"^(?:{'|'.join(_ADJECTIVES)})(?:{'|'.join(_NOUNS)})\d{{3,4}}$")
+USERNAME_MAX = 20
+# Letters NFKD does not take apart (é and ñ become e and n by themselves).
+_LETTERS = str.maketrans({
+    "ß": "ss", "æ": "ae", "Æ": "AE", "œ": "oe", "Œ": "OE",
+    "ø": "o", "Ø": "O", "ł": "l", "Ł": "L", "đ": "d", "Đ": "D",
+})
+
+
+def handle_from_name(card_name: str) -> str:
+    """The Latin letters and digits of a card name, accents folded and
+    spaces and hyphens closed up ("José-María" -> "JoseMaria"), cut to
+    the username's length. '' when none survive (さくら, مریم): such a
+    learner keeps the handle the app drew."""
+    folded = unicodedata.normalize("NFKD", card_name.translate(_LETTERS))
+    return "".join(ch for ch in folded if ch.isascii() and ch.isalnum())[:USERNAME_MAX]
+
+
+def _handle_candidates(base: str):
+    """The name as it is, when it is long enough to be a username, then
+    the name with two, three and four digits behind it (the stem leaves
+    room for them within USERNAME_MAX)."""
+    if len(base) >= 3:
+        yield base
+    stem = base[:USERNAME_MAX - 4]
+    for width in (2, 2, 2, 3, 3, 3, 4, 4, 4, 4):
+        yield f"{stem}{random.randint(10 ** (width - 1), 10 ** width - 1)}"
+
+
+def claim_handle(user_id: str, card_name: str) -> str | None:
+    """Make the username the one the card name spells, and return it;
+    None when the learner keeps the handle they have (the name has no
+    Latin letters, the handle is not the one the app drew, or every
+    candidate was taken). A name is taken whatever its case: "tifa" is
+    not offered beside "Tifa"."""
+    base = handle_from_name(card_name)
+    if not base:
+        return None
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT username FROM user_profiles WHERE user_id = %s", (user_id,))
+            row = cur.fetchone()
+            if not row or not _GENERATED_RE.match(row[0]):
+                return None
+            for candidate in _handle_candidates(base):
+                cur.execute(
+                    "SELECT 1 FROM user_profiles WHERE lower(username) = lower(%s) AND user_id <> %s",
+                    (candidate, user_id),
+                )
+                if cur.fetchone():
+                    continue
+                try:
+                    cur.execute(
+                        "UPDATE user_profiles SET username = %s WHERE user_id = %s",
+                        (candidate, user_id),
+                    )
+                    conn.commit()
+                    return candidate
+                except pg_errors.UniqueViolation:
+                    # Somebody boarded with the same name between the
+                    # check and the write: the next candidate.
+                    conn.rollback()
+            return None
+    finally:
+        conn.close()
+
+
 def _get_or_create_username(user_id: str) -> str:
     conn = db_conn()
     try:

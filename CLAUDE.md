@@ -324,7 +324,14 @@ runtime purpose.
   stays the public handle (番付, the library), unique and in Latin
   letters. Whatever prints the holder of a learner's own card or gate
   reads `holderName` (`domain/passCard.js`); whatever another learner
-  can see prints the username, never the card's name.
+  can see prints the username, never the card's name. The two start
+  alike (plan 247b): a learner's first boarding makes the username the
+  Latin letters of the name if nobody holds them (in any case), the name
+  and two to four digits if somebody does (`routes/profile.claim_handle`,
+  `handle_from_name`). Only over the handle the app drew, and only once:
+  a name with no Latin letters, a handle the learner chose, a replay or
+  a later rename of the card leaves the username where it is, as it is
+  on the 番付 and under every published deck.
 
 ## Commands
 
