@@ -491,8 +491,8 @@ def test_the_card_name_is_any_script_and_needs_no_uniqueness(client):
 
 # ── 署名 → handle: the first name is the username too (plan 247b) ──
 # At the first boarding the username becomes the Latin letters of the
-# card's name if nobody holds them (in any case), the name and a number
-# if somebody does. A learner who has no Latin letters in their name, who
+# card's name if nobody holds them (in any case), the name and the first
+# number free (Zephyrine2) if somebody does. A learner who has no Latin letters in their name, who
 # chose a handle of their own, or who boards again keeps what they have.
 @pytest.mark.parametrize("name, handle", [
     ("Camille", "Camille"),
@@ -543,13 +543,11 @@ def test_the_first_boarding_takes_the_name_as_the_handle(client):
         assert served["cardName"] == "Zephyrine"
 
 
-def test_a_taken_name_takes_numbers_behind_it(client, other_user):
+def test_a_taken_name_takes_a_number_behind_it(client, other_user):
     _hold(other_user, "Zephyrine")
     with _clean_onboarding_state(DEV_USER_ID):
         done = _board(client, "Zephyrine")
-        assert done["username"] != "Zephyrine"
-        assert done["username"][:9] == "Zephyrine"
-        assert done["username"][9:].isdigit() and 2 <= len(done["username"][9:]) <= 4
+        assert done["username"] == "Zephyrine2"
         assert profile_module.USERNAME_RE.match(done["username"])
         assert client.get("/api/profile").json()["username"] == done["username"]
         # The card still says the name as typed.
@@ -560,16 +558,13 @@ def test_a_name_is_taken_whatever_its_case(client, other_user):
     _hold(other_user, "ZEPHYRINE")
     with _clean_onboarding_state(DEV_USER_ID):
         done = _board(client, "zephyrine")
-        assert done["username"] != "zephyrine"
-        assert done["username"][:9] == "zephyrine"
-        assert done["username"][9:].isdigit()
+        assert done["username"] == "zephyrine2"
 
 
-def test_a_name_too_short_for_a_handle_takes_numbers(client):
+def test_a_name_too_short_for_a_handle_takes_a_number(client):
     with _clean_onboarding_state(DEV_USER_ID):
         done = _board(client, "Xi")
-        assert done["username"] != "Xi"
-        assert done["username"].startswith("Xi")
+        assert done["username"] == "Xi2"
         assert profile_module.USERNAME_RE.match(done["username"])
 
 
@@ -578,8 +573,8 @@ def test_a_long_name_keeps_the_handle_within_the_username_length(client, other_u
     _hold(other_user, name[:20])
     with _clean_onboarding_state(DEV_USER_ID):
         done = _board(client, name)
-        assert done["username"] != name[:20]
-        assert done["username"].startswith(name[:16])
+        # Nineteen letters and the number: the handle stops at twenty.
+        assert done["username"] == name[:19] + "2"
         assert profile_module.USERNAME_RE.match(done["username"])
 
 

@@ -237,9 +237,10 @@ def _random_username() -> str:
 # The boarding's card asks for a first name rather than a handle: any
 # script, spaces and hyphens and all, up to CARD_NAME_MAX characters,
 # and nothing at all is an answer. It is printed on the learner's own
-# card and nowhere public, so it needs no uniqueness -- two Camilles are
-# two Camilles -- which is what made the old name step refuse a common
-# name as "taken" (the username is UNIQUE, and stays the public handle).
+# card, so it needs no uniqueness -- two Camilles are two Camilles --
+# which is what made the old name step refuse a common name as "taken"
+# (the username is UNIQUE, and stays the public handle, which a first
+# boarding takes from the name when it can: plan 247b, below).
 CARD_NAME_MAX = 24
 # The two joiners some scripts spell names with (Persian's ZWNJ, an
 # Indic conjunct's ZWJ); every other control or format character is
@@ -268,7 +269,8 @@ def clean_card_name(value: str) -> str:
 # ── The handle a first name spells (plan 247b) ────────────────
 # The boarding's first name is also the learner's public handle when its
 # Latin letters make one: the username is the name if nobody holds it,
-# the name and a number if somebody does. Only the first boarding does
+# the name and the first number free (Tifa, Tifa2, Tifa3) if somebody
+# does. Only the first boarding does
 # it, and only over the handle the app drew (a learner's own pick is
 # never replaced), so a replay or a later rename leaves the handle
 # where it is: it is on the 番付 and under every published deck.
@@ -292,50 +294,63 @@ def handle_from_name(card_name: str) -> str:
 
 def _handle_candidates(base: str):
     """The name as it is, when it is long enough to be a username, then
-    the name with two, three and four digits behind it (the stem leaves
-    room for them within USERNAME_MAX)."""
+    the name numbered 2, 3, ... 999 (a long name gives up letters to its
+    number, within USERNAME_MAX). In order and without chance, so the
+    migration's report is what its run does."""
     if len(base) >= 3:
         yield base
-    stem = base[:USERNAME_MAX - 4]
-    for width in (2, 2, 2, 3, 3, 3, 4, 4, 4, 4):
-        yield f"{stem}{random.randint(10 ** (width - 1), 10 ** width - 1)}"
+    for n in range(2, 1000):
+        digits = str(n)
+        yield f"{base[:USERNAME_MAX - len(digits)]}{digits}"
 
 
-def claim_handle(user_id: str, card_name: str) -> str | None:
-    """Make the username the one the card name spells, and return it;
-    None when the learner keeps the handle they have (the name has no
-    Latin letters, the handle is not the one the app drew, or every
-    candidate was taken). A name is taken whatever its case: "tifa" is
-    not offered beside "Tifa"."""
+def claim_handle_with(cur, user_id: str, card_name: str) -> str | None:
+    """Make the username the one the card name spells, on `cur`'s
+    transaction (the caller commits), and return it; None when the
+    learner keeps the handle they have (the name has no Latin letters,
+    the handle is not the one the app drew, or every candidate was
+    taken). A name is taken whatever its case: "tifa" is not offered
+    beside "Tifa"."""
     base = handle_from_name(card_name)
     if not base:
         return None
+    cur.execute("SELECT username FROM user_profiles WHERE user_id = %s", (user_id,))
+    row = cur.fetchone()
+    if not row or not _GENERATED_RE.match(row[0]):
+        return None
+    for candidate in _handle_candidates(base):
+        cur.execute(
+            "SELECT 1 FROM user_profiles WHERE lower(username) = lower(%s) AND user_id <> %s",
+            (candidate, user_id),
+        )
+        if cur.fetchone():
+            continue
+        # A savepoint, so a refusal leaves the caller's transaction (the
+        # migration's, with every handle it has moved) standing.
+        cur.execute("SAVEPOINT claim_handle")
+        try:
+            cur.execute(
+                "UPDATE user_profiles SET username = %s WHERE user_id = %s",
+                (candidate, user_id),
+            )
+        except pg_errors.UniqueViolation:
+            # Somebody took the same name between the check and the
+            # write: the next candidate.
+            cur.execute("ROLLBACK TO SAVEPOINT claim_handle")
+            continue
+        cur.execute("RELEASE SAVEPOINT claim_handle")
+        return candidate
+    return None
+
+
+def claim_handle(user_id: str, card_name: str) -> str | None:
+    """claim_handle_with, in a transaction of its own."""
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT username FROM user_profiles WHERE user_id = %s", (user_id,))
-            row = cur.fetchone()
-            if not row or not _GENERATED_RE.match(row[0]):
-                return None
-            for candidate in _handle_candidates(base):
-                cur.execute(
-                    "SELECT 1 FROM user_profiles WHERE lower(username) = lower(%s) AND user_id <> %s",
-                    (candidate, user_id),
-                )
-                if cur.fetchone():
-                    continue
-                try:
-                    cur.execute(
-                        "UPDATE user_profiles SET username = %s WHERE user_id = %s",
-                        (candidate, user_id),
-                    )
-                    conn.commit()
-                    return candidate
-                except pg_errors.UniqueViolation:
-                    # Somebody boarded with the same name between the
-                    # check and the write: the next candidate.
-                    conn.rollback()
-            return None
+            handle = claim_handle_with(cur, user_id, card_name)
+        conn.commit()
+        return handle
     finally:
         conn.close()
 
