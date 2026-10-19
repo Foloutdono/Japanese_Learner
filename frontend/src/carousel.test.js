@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { FORMATS, FS, RATING_INKS, drawFeedHud, formatOf, layoutSentence, palette, reading } from '../carousel/draw.js'
 import { LEVELS, SOURCES, TITLE_MAX, chunksOf, depsOf, itemsOf, lineRomaji, picked, plan, readingMisses, themePartOf, titleOf, unpack } from '../carousel/sources.js'
 import { ENDING_IDS, TYPES, available, deck, endingSlide } from '../carousel/slides.js'
@@ -17,7 +17,7 @@ import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, TALL, fitShort, answered, c
 import { SITE_ORIGIN } from '../landing/config.mjs'
 import { CH as CHALLENGE, CPM, SCROLL, TRACK, TRACKS, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
 import { CAPTION_MAX, FEEDS, HASHTAGS, pageFile } from '../carousel/feeds.js'
-import { COUNT as WORDS_COUNT, LIMIT as WORDS_LIMIT, STYLES as WORDS_STYLES, drawWords, shortSense, wordsCommand, wordsFiles, wordsItems, wordsPage, wordsPlan, wordsTimeline } from '../carousel/words.js'
+import { COUNT as WORDS_COUNT, LIMIT as WORDS_LIMIT, STYLES as WORDS_STYLES, drawWords, loadPictures, shortSense, wordsCommand, wordsFiles, wordsItems, wordsPage, wordsPlan, wordsTimeline } from '../carousel/words.js'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
@@ -2330,6 +2330,49 @@ describe('the vocabulary shorts (plan 252)', () => {
     expect(wordsCommand(quiet)).toBe('VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --words theme:animals:1 --style card --lang fr --fit instagram --music none')
     // A long video's own short no longer lists words or themes: they are the word shorts'.
     expect(longItems({ ...B.N5, 'kanji-N5.json': bank('kanji-N5.json'), 'grammar-N5.json': bank('grammar-N5.json') }, 'N5', 'en', 'short').some(x => x.kind === 'vocab' || x.kind === 'theme')).toBe(false)
+  })
+
+  it('turns a word over onto its picture, every picture a word’s, inside the frame (plan 257)', async () => {
+    const pics = bank('pictures.json').pictures
+    const known = new Set([...LEVELS.flatMap(lv => bank(`words-${lv}.json`).words), ...Object.values(bank('themes.json').themes).flatMap(th => th.words)].map(w => `${w.t}::${w.r}`))
+    expect(Object.keys(pics).length).toBeGreaterThan(0)
+    for (const [key, src] of Object.entries(pics)) {
+      expect(known.has(key), key).toBe(true)
+      expect(existsSync(new URL(`../carousel/${src}`, import.meta.url)), src).toBe(true)
+    }
+    const had = globalThis.Path2D
+    globalThis.Path2D = class { constructor(d) { this.d = d } }
+    try {
+      for (const lang of ['en', 'fr']) {
+        const pl = wordsPlan(B.N5, 'N5:2', { style: 'card', lang })
+        expect(pl.items.every(it => it.pic === pics[`${it.t}::${it.r}`]), lang).toBe(true)
+        // Loaded as a page loads them; a wide one and a square one.
+        expect(await loadPictures(pl, '/carousel/', async src => ({ width: src.includes('doa') ? 820 : 405, height: 374 }))).toBe(pl.items.length)
+        const tl = wordsTimeline(pl)
+        for (const sg of tl.segs.filter(x => x.type === 'word')) {
+          const it = pl.items[sg.i]
+          const m = sg.marks
+          for (const u of [m.reveal - 0.1, m.reveal + 0.1, m.reveal + 1, (m.ex ?? m.reveal + 1) + 0.6, sg.dur - 0.05]) {
+            const { ctx, texts } = placedTexts()
+            drawWords(ctx, pl, tl, sg.start + u)
+            const where = `${lang} ${it.t} ${u.toFixed(1)}`
+            for (const x of texts) {
+              expect(x.y - x.z * 0.85, `${where} ${x.t}`).toBeGreaterThanOrEqual(TALL.safe.t - 1)
+              expect(x.y + x.z * 0.25, `${where} ${x.t}`).toBeLessThanOrEqual(TALL.h - TALL.safe.b + 1)
+            }
+            const said = texts.map(x => x.t)
+            // Asked, the front; turned over, the back: the word with its romaji beside it, and its sentence once said.
+            if (u < m.reveal) expect(said, where).not.toContain(it.ro)
+            if (u > m.reveal + 0.5) {
+              expect(said, where).toContain(it.t)
+              expect(said, where).toContain(it.ro)
+              if (it.r !== it.t) expect(said, where).toContain(it.r)
+            }
+            if (it.ex && u > m.ex + 0.5) expect(said.join(''), where).toContain(it.ex.tr.split(' ')[0])
+          }
+        }
+      }
+    } finally { globalThis.Path2D = had }
   })
 })
 

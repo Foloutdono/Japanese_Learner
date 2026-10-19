@@ -9,6 +9,10 @@
 //             against a burning fuse, the right one kept with its reading
 //             and its sentence; a score asked for at the end.
 // Both end on the carousel's call to action for the words station.
+// Since plan 257 a card whose word has a picture (content/pictures/,
+// bank/pictures.json) turns over at the reveal onto it, as the owner's
+// sheet draws a word: the picture across the card's top, the word and
+// its reading under it, what it means; it gives its sentence room.
 //
 // Pure but for the canvas: render.mjs --words makes it with the voice,
 // the app's sounds and the music bed (none with --music none); the
@@ -93,7 +97,7 @@ const PAGE = {
 // ── What a short teaches ──────────────────────────────────────────
 /** The bank files a level's shorts read: its deck, the sentences of its
  *  level and the easier ones (a word's example), the themes, the figures. */
-export const wordsFiles = level => [`words-${level}.json`, ...LEVELS.slice(0, LEVELS.indexOf(level) + 1).map(lv => `${lv}.json`), 'themes.json', 'index.json']
+export const wordsFiles = level => [`words-${level}.json`, ...LEVELS.slice(0, LEVELS.indexOf(level) + 1).map(lv => `${lv}.json`), 'themes.json', 'pictures.json', 'index.json']
 
 const glossed = (list, lang) => list.filter(w => gloss(w, lang)[0])
 const parts = list => Math.ceil(list.length / COUNT)
@@ -195,11 +199,12 @@ export function wordsPlan(banks, id, { lang = 'en', style = 'card', music = true
   const themeName = th ? weldIf(lang, th.name?.[lang] || th.name?.en || theme) : null
   const st = STYLES.includes(style) ? style : 'card'
   const kin = kinOf(banks)
+  const pics = banks['pictures.json']?.pictures || {}
   // A theme's words are no level's: their examples are left for the deck's shorts.
   const items = words.map(w => {
     const it = theme ? { t: w.t, r: w.r, ro: w.ro, gloss: weldIf(lang, gloss(w, lang)[0]), ex: null } : wordItem(w, banks, lang, level)
     const fu = w.fu || furiganaOf(w.t, w.r)
-    const out = { ...it, fu, e: w.e || null }
+    const out = { ...it, fu, e: w.e || null, pic: pics[`${w.t}::${w.r}`] || null }
     if (st !== 'quiz') return out
     // The theme's other words first (a cat among a dog and a horse), then the level's deck.
     // Never the theme's own name (動物, "animal", is no wrong answer for a monkey).
@@ -421,6 +426,51 @@ const cached = (key, fn) => {
   return cache.get(key)
 }
 
+// ── The pictures (plan 257) ──
+// Loaded once, before the first frame (the studio, render.mjs): a frame
+// is drawn synchronously, and a card whose picture has not come stays
+// the card it was, so a test or a slow page draws nothing broken.
+const PICTURES = new Map()
+const fetchPicture = src => new Promise(done => {
+  const img = new Image()
+  img.onload = () => done(img)
+  img.onerror = () => done(null)
+  img.src = src
+})
+/** Loads the plan's pictures from `base` (the studio's page is beside
+ *  them; render.mjs serves the front end from its root, '/carousel/'). */
+export async function loadPictures(plan, base = '', load = typeof Image === 'undefined' ? null : fetchPicture) {
+  if (!load) return 0
+  const want = [...new Set(plan.items.map(it => it.pic).filter(src => src && !PICTURES.has(src)))]
+  const got = await Promise.all(want.map(src => load(base + src)))
+  want.forEach((src, i) => got[i] && PICTURES.set(src, got[i]))
+  return plan.items.filter(it => PICTURES.has(it.pic)).length
+}
+const pictureOf = it => (it.pic && PICTURES.get(it.pic)) || null
+/** The picture across a box: whole where its shape is the box's, else
+ *  whole over itself blurred, so none of it is cut to fit. */
+function drawPicture(ctx, img, x, y, w, h) {
+  const cover = Math.max(w / img.width, h / img.height)
+  const whole = Math.min(w / img.width, h / img.height)
+  ctx.imageSmoothingQuality = 'high'
+  if (whole / cover > 0.9) {
+    ctx.drawImage(img, x + (w - img.width * cover) / 2, y + (h - img.height * cover) / 2, img.width * cover, img.height * cover)
+    return
+  }
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(x, y, w, h)
+  ctx.clip()
+  ctx.filter = 'blur(28px)'
+  const k = cover * 1.15
+  ctx.drawImage(img, x + (w - img.width * k) / 2, y + (h - img.height * k) / 2, img.width * k, img.height * k)
+  ctx.filter = 'none'
+  ctx.fillStyle = alpha(palette('paper').bg, 0.35)
+  ctx.fillRect(x, y, w, h)
+  ctx.restore()
+  ctx.drawImage(img, x + (w - img.width * whole) / 2, y + (h - img.height * whole) / 2, img.width * whole, img.height * whole)
+}
+
 // ── A · the card ──
 const BAND = G.top + 96
 const STOPS = BAND + 64
@@ -457,6 +507,72 @@ function cardLayout(ctx, plan, it, first) {
     return last
   })
 }
+/** The card's back (plan 257), measured once: the picture as large as
+ *  the room allows while its word is said (`open`), and smaller once its
+ *  sentence comes (`shut`), the sentence a size down before the picture
+ *  goes under half the card's width. */
+function backLayout(ctx, plan, it, img) {
+  return cached(`back|${plan.lang}|${it.t}|${it.r}|${it.gloss}|${img.width}x${img.height}`, () => {
+    const top = STOPS + 56
+    const cw = G.w + SP[2] * 2
+    const inner = cw - SP[5] * 2
+    const kanaOnly = it.r === it.t
+    let row
+    for (const z of [FS.word * 0.62, FS.word * 0.52, FS.word * 0.44, FS.heading]) {
+      const wf = font(900, z, 'serif')
+      const kf = font(700, FS.lead, 'jp')
+      const rf = font(500, FS.lead, 'latin')
+      const rw = Math.max(kanaOnly ? 0 : measure(ctx, it.r, kf), measure(ctx, it.ro, rf))
+      row = { z, h: z * 1.15, wf, kf, rf, ww: measure(ctx, it.t, wf), kanaOnly }
+      row.w = row.ww + SP[5] * 2 + 4 + rw
+      if (row.w <= inner) break
+    }
+    const mean = fit(ctx, cardSense(it.gloss), { weight: 700, sizes: [FS.title, FS.lead, FS.body], maxW: inner, maxLines: 2, lh: 1.2, balanced: true })
+    const textH = SP[5] + row.h + SP[4] + paragraphH(mean, 1.2) + SP[5] + 10
+    const natural = cw * img.height / img.width
+    const open = Math.min(natural, G.bottom - top - textH)
+    let E = null
+    let shut = open
+    if (it.ex) {
+      for (const sizes of [[FS.lead], [FS.body], [FS.sm]]) {
+        E = exampleOf(ctx, it.ex, G.w - 40, sizes)
+        shut = Math.min(natural, G.bottom - top - textH - SP[6] - FS.caption - SP[4] - E.h)
+        if (shut * img.width / img.height >= cw * 0.45) break
+      }
+    }
+    return { top, cw, row, mean, textH, open, shut, E }
+  })
+}
+function drawBack(ctx, it, img, B, ph, p, line) {
+  const x0 = G.x - SP[2]
+  const h = B.textH + ph
+  shadowCard(ctx, x0, B.top, B.cw, h, mix(p.bg, '#ffffff', 0.6))
+  ctx.save()
+  rrect(ctx, x0, B.top, B.cw, h, R.card * 2)
+  ctx.clip()
+  drawPicture(ctx, img, x0, B.top, B.cw, ph)
+  ctx.restore()
+  ctx.fillStyle = line
+  ctx.fillRect(x0, B.top + h - 10, B.cw, 10)
+  // The word, a rule, its reading over its romaji (the romaji alone where the word is kana).
+  let y = B.top + ph + SP[5]
+  const R0 = B.row
+  let x = G.cx - R0.w / 2
+  text(ctx, it.t, x, y + R0.z * 0.86, { f: R0.wf, color: p.ink })
+  x += R0.ww + SP[5]
+  ctx.fillStyle = alpha(p.ink, 0.18)
+  ctx.fillRect(x, y + R0.h * 0.12, 4, R0.h * 0.76)
+  x += 4 + SP[5]
+  const mid = y + R0.h / 2
+  if (R0.kanaOnly) text(ctx, it.ro, x, mid + FS.lead * 0.34, { f: R0.rf, color: p.ink2 })
+  else {
+    text(ctx, it.r, x, mid - FS.lead * 0.2, { f: R0.kf, color: p.ink2 })
+    text(ctx, it.ro, x, mid + FS.lead * 0.95, { f: R0.rf, color: p.ink2 })
+  }
+  y += R0.h + SP[4]
+  paragraph(ctx, B.mean, G.cx, y, p.ink, 'center', 1.2)
+}
+const FLIP = 0.4
 function drawCard(ctx, plan, tl, sg, u) {
   const p = palette('paper')
   const S = SAY[plan.lang] || SAY.en
@@ -465,7 +581,9 @@ function drawCard(ctx, plan, tl, sg, u) {
   ctx.fillRect(0, 0, W, H)
   const it = plan.items[sg.i] || plan.items[plan.items.length - 1]
   const m = sg.marks
-  const asking = sg.type === 'word' && u < m.reveal
+  // A word with a picture turns over at the reveal, its front kept until it is edge-on.
+  const img = sg.type === 'word' ? pictureOf(it) : null
+  const asking = sg.type === 'word' && u < m.reveal + (img ? FLIP / 2 : 0)
   // The band: the line's colour, the station, what it is, the timer.
   ctx.fillStyle = line
   ctx.fillRect(0, 0, W, BAND)
@@ -475,7 +593,7 @@ function drawCard(ctx, plan, tl, sg, u) {
   text(ctx, label.lines[0], x, BAND - 42, { f: label.f, color: p.onLine, tr: 0.16 })
   const rx = G.right - 46
   const ry = BAND - 58
-  if (sg.type === 'word' && asking) {
+  if (sg.type === 'word' && u < m.reveal) {
     const left = m.reveal - u
     ctx.lineWidth = 10
     ctx.strokeStyle = alpha(p.onLine, 0.25)
@@ -502,32 +620,46 @@ function drawCard(ctx, plan, tl, sg, u) {
   // The card: the picture (a theme's), the word, its reading, what it means.
   const Ly = cardLayout(ctx, plan, it, sg.i === 0)
   ctx.globalAlpha = sg.i === 0 ? 1 : ease(u / 0.3)
-  shadowCard(ctx, G.x - SP[2], Ly.top, G.w + SP[2] * 2, Ly.h, mix(p.bg, '#ffffff', 0.6))
-  ctx.fillStyle = line
-  ctx.fillRect(G.x - SP[2], Ly.top + Ly.h - 10, G.w + SP[2] * 2, 10)
-  let y = Ly.top + SP[6]
-  if (it.e) { picture(ctx, it.e, G.cx, y + Ly.picH / 2 - SP[2], Ly.picH * 0.78); y += Ly.picH }
-  drawWordAt(ctx, Ly.L, G.cx, y, p.ink, p.ink2, !asking)
-  y += Ly.L.h + SP[4]
-  if (asking) caps(ctx, S.read, G.cx, y + FS.sm * 0.8, p.gold, { z: FS.sm, align: 'center' })
+  // Turned over: squeezed edge-on, then opened on its back.
+  const f = img ? clamp((u - m.reveal) / FLIP) : 1
+  const sx = f >= 1 || u < m.reveal ? 1 : f < 0.5 ? 1 - ease(f * 2) : ease((f - 0.5) * 2)
+  ctx.save()
+  if (sx < 1) { ctx.translate(G.cx, 0); ctx.scale(Math.max(0.001, sx), 1); ctx.translate(-G.cx, 0) }
+  const B = img && !asking ? backLayout(ctx, plan, it, img) : null
+  // The picture gives its sentence room as the sentence comes.
+  const ph = B ? B.open + (B.shut - B.open) * (B.E && m.ex != null ? ease((u - m.ex + 0.5) / 0.45) : 0) : 0
+  if (B) drawBack(ctx, it, img, B, ph, p, line)
   else {
-    ctx.globalAlpha = ease((u - m.reveal) / 0.3)
-    text(ctx, it.ro, G.cx, y + FS.lead * 0.8, { f: font(500, FS.lead, 'latin'), color: p.ink2, align: 'center' })
-    paragraph(ctx, Ly.mb, G.cx, y + FS.lead * 1.1 + SP[5], p.ink, 'center', 1.2)
+    shadowCard(ctx, G.x - SP[2], Ly.top, G.w + SP[2] * 2, Ly.h, mix(p.bg, '#ffffff', 0.6))
+    ctx.fillStyle = line
+    ctx.fillRect(G.x - SP[2], Ly.top + Ly.h - 10, G.w + SP[2] * 2, 10)
+    let y = Ly.top + SP[6]
+    if (it.e) { picture(ctx, it.e, G.cx, y + Ly.picH / 2 - SP[2], Ly.picH * 0.78); y += Ly.picH }
+    drawWordAt(ctx, Ly.L, G.cx, y, p.ink, p.ink2, !asking)
+    y += Ly.L.h + SP[4]
+    if (asking) caps(ctx, S.read, G.cx, y + FS.sm * 0.8, p.gold, { z: FS.sm, align: 'center' })
+    else {
+      ctx.globalAlpha = ease((u - m.reveal) / 0.3)
+      text(ctx, it.ro, G.cx, y + FS.lead * 0.8, { f: font(500, FS.lead, 'latin'), color: p.ink2, align: 'center' })
+      paragraph(ctx, Ly.mb, G.cx, y + FS.lead * 1.1 + SP[5], p.ink, 'center', 1.2)
+    }
   }
+  ctx.restore()
   ctx.globalAlpha = 1
+  const below = B ? B.top + B.textH + ph + SP[6] : Ly.below
+  const E = B ? B.E : Ly.E
   // Under the card: the hook and the hint while it is asked; its sentence once said.
   if (asking) {
     let hy = Ly.below
     if (Ly.hook) { paragraph(ctx, Ly.hook, G.cx, hy, p.ink, 'center', 1.1); hy += paragraphH(Ly.hook, 1.1) + SP[5] }
     if (Ly.hint) paragraph(ctx, Ly.hint, G.cx, hy, p.ink2, 'center', 1.2)
-  } else if (it.ex && Ly.E && m.ex != null && u >= m.ex) {
+  } else if (it.ex && E && m.ex != null && u >= m.ex) {
     ctx.globalAlpha = ease((u - m.ex) / 0.35)
-    caps(ctx, S.inSentence, G.x, Ly.below + FS.caption * 0.8, p.gold)
-    const ey = Ly.below + FS.caption + SP[4]
+    caps(ctx, S.inSentence, G.x, below + FS.caption * 0.8, p.gold)
+    const ey = below + FS.caption + SP[4]
     ctx.fillStyle = line
-    ctx.fillRect(G.x, ey, 8, Ly.E.h)
-    drawExample(ctx, Ly.E, it.ex, G.x + 40, ey, { ink: p.ink, ruby: p.ink2, under: line, tr: p.ink2 })
+    ctx.fillRect(G.x, ey, 8, E.h)
+    drawExample(ctx, E, it.ex, G.x + 40, ey, { ink: p.ink, ruby: p.ink2, under: line, tr: p.ink2 })
     ctx.globalAlpha = 1
   }
 }

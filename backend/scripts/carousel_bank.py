@@ -1043,9 +1043,11 @@ def files(deck: dict):
         sentences[level] = build(level, deck)
         yield f"{level}.json", sentences[level]
     index = word_index([s for lv in LEVELS for s in sentences[lv]["sentences"]])
+    word_files = {}
     for level in LEVELS:
         yield f"grammar-{level}.json", lessons(level)
-        yield f"words-{level}.json", words(level, index)
+        word_files[level] = words(level, index)
+        yield f"words-{level}.json", word_files[level]
         yield f"kanji-{level}.json", kanji_cards(level, deck)
     yield "kanji-index.json", kanji_index(deck)
     kana = kana_cards()
@@ -1054,6 +1056,7 @@ def files(deck: dict):
     yield "comprehension.json", comprehension
     theme_file = themes()
     yield "themes.json", theme_file
+    yield "pictures.json", pictures(word_files, theme_file)
     lookalike_file = lookalikes(deck)
     yield "lookalikes.json", lookalike_file
     dialogue_file = dialogues()
@@ -1123,6 +1126,24 @@ def themes() -> dict:
         out[key] = {"name": {"en": name.get("en", key), "fr": name.get("fr", key)},
                     "head": {"t": head_t, "r": head_r or head_t}, "words": words}
     return {"rev": REV, "themes": out}
+
+
+def pictures(word_files: dict, theme_file: dict) -> dict:
+    """The words a vocabulary short turns over on a picture (plan 257):
+    content/pictures/pictures.json, a word's key (written::kana) and its
+    file beside it. A key no deck or theme word has, or a file that is
+    not there, stops the build rather than leave a picture on no word."""
+    spec = json.loads((CONTENT / "pictures" / "pictures.json").read_text(encoding="utf-8"))
+    known = {f"{w['t']}::{w['r']}" for data in word_files.values() for w in data["words"]}
+    known |= {f"{w['t']}::{w['r']}" for th in theme_file["themes"].values() for w in th["words"]}
+    out = {}
+    for key, name in spec.items():
+        if key not in known:
+            raise SystemExit(f"content/pictures/pictures.json: {key} is no deck or theme word")
+        if not (CONTENT / "pictures" / name).is_file():
+            raise SystemExit(f"content/pictures/pictures.json: {name} is not in content/pictures/")
+        out[key] = f"content/pictures/{name}"
+    return {"rev": REV, "pictures": out}
 
 
 def lookalikes(deck: dict) -> dict:

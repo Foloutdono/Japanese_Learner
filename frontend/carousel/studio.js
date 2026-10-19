@@ -21,7 +21,7 @@ import { LONG_SITE, TALL, describe as describeLong, drawLong, fitShort, longComm
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 import { TUNABLES, changed, tuned, tuneFlag, tunablesFor } from './tune.js'
 import { FEEDS } from './feeds.js'
-import { STYLES as WORDS_STYLES, drawWords, wordsCommand, wordsFiles, wordsItems, wordsPage, wordsPlan, wordsStillAt, wordsTimeline } from './words.js'
+import { STYLES as WORDS_STYLES, drawWords, loadPictures, wordsCommand, wordsFiles, wordsItems, wordsPage, wordsPlan, wordsStillAt, wordsTimeline } from './words.js'
 
 const STORE = 'tsuji-carousel'
 const $ = sel => document.querySelector(sel)
@@ -791,7 +791,7 @@ async function renderWords(mine) {
   const pl = wordsPlan(banks, id, { lang: state.lang, style: state.wordsStyle, music: state.bed !== 'off', tune: state.tune, fit: state.fit })
   const tl = wordsTimeline(pl)
   const page = wordsPage(pl, tl, state.lang === 'en' ? `${LONG_SITE}/en` : LONG_SITE, banks['index.json']?.figures)
-  await fonts(`${JSON.stringify(pl.items)}${pl.title}${page.title}語彙主題`)
+  await Promise.all([fonts(`${JSON.stringify(pl.items)}${pl.title}${page.title}語彙主題`), loadPictures(pl)])
   if (mine !== token) return
   current = { plan: pl, fmt: TALL, decks: [], words: { id, page, tl } }
   mountVideo({

@@ -285,6 +285,7 @@ Every slide is drawn from the app's own data, written once into
 | `kana.json` | each kana: romaji, strokes, its twin, words written with it | the kana sets |
 | `comprehension.json` | the passages, their questions and the words worth learning first | `content/comprehension/*.json` |
 | `themes.json` | each theme's name, its word for itself, its words easiest first, each with its picture where it has one | `content/theme_data.py`, `frontend/carousel/content/emoji.json`, the app's theme names |
+| `pictures.json` | the words a vocabulary short turns over on a picture, each a word's key and its file (plan 257) | `frontend/carousel/content/pictures/pictures.json` |
 | `lookalikes.json` | each set's kanji: readings, meanings, what sets it apart, a deck word it writes | `frontend/carousel/content/lookalikes.json`, KANJIDIC2, the deck |
 | `dialogues.json` | each conversation's turns, every line split into words with its furigana and romaji (お and ご joined to their word) | `frontend/carousel/content/dialogues.json` |
 | `traps.json` | every tour twist of kind "trap": its sentence, question, three readings, why, the pair, the point's "careful" step | `content/grammar/*.json` |
@@ -936,6 +937,30 @@ cd frontend
 VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --words N5:3 --style quiz
 node carousel/long/render.mjs --words theme:animals:1 --style card --lang fr --music none
 ```
+
+### A word's picture (plan 257)
+
+A word can carry an illustration of its own (`content/pictures/`: the
+picture, and `pictures.json`, the word's key `written::kana` and its
+file). On the card, a word that has one turns over at the reveal, on
+the card-flip the short already plays, onto its back as the owner's
+sheet draws a word (the owner's pick of three drawn): the picture across
+the card's top, the word with a rule and its reading and romaji beside
+it, its meaning under them. The picture is as large as the room allows
+while the word is said, and gives way as its sentence comes, the
+sentence a size down before the picture goes under half the card's
+width; a picture whose shape is not the box's stands whole over itself
+blurred and washed with the paper, never cut to fit. A word without
+one, and the quiz, are drawn as before.
+
+The pictures are the owner's, drawn for the words they name; one of a
+square-ish shape gives the largest picture. `carousel_bank.py` checks
+each key is a deck or theme word and its file is there, and writes
+`bank/pictures.json`; a test holds the same and draws every frame of a
+pictured short inside the safe area. The studio and `render.mjs` load
+the pictures before the first frame (`loadPictures`): a picture that
+does not come leaves its card as it was. After adding pictures, run
+`python -m scripts.carousel_bank` (backend) and commit both.
 
 ## The reading challenges (plan 247)
 

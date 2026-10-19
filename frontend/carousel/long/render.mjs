@@ -80,7 +80,7 @@ const python = existsSync(join(BACKEND, '.venv/bin/python')) ? join(BACKEND, '.v
 const log = (...a) => console.log(new Date().toISOString().slice(11, 19), ...a)
 
 // ── A page to draw on: the frontend served as the studio is ──
-const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.woff2': 'font/woff2', '.woff': 'font/woff', '.svg': 'image/svg+xml' }
+const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.woff2': 'font/woff2', '.woff': 'font/woff', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.png': 'image/png' }
 const server = createServer((req, res) => {
   const path = join(FRONT, decodeURIComponent(new URL(req.url, 'http://x').pathname))
   if (!path.startsWith(FRONT) || !existsSync(path) || statSync(path).isDirectory()) { res.writeHead(404); res.end(); return }
@@ -172,6 +172,8 @@ if (args.challenge) {
   await canvasOf(SIZE)
   await page.evaluate(async ({ plan, tl }) => {
     const Wd = await import('/carousel/words.js')
+    // A word's picture (plan 257), loaded before the first frame is drawn.
+    await Wd.loadPictures(plan, '/carousel/')
     window.__draw = t => Wd.drawWords(window.__ctx, plan, tl, t)
   }, { plan, tl })
   pageText = wordsPage(plan, tl, site, banks['index.json']?.figures)

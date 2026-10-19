@@ -2,6 +2,8 @@
 scripts/carousel_bank.py): a word the page writes in kana is read as the
 word it spells, a number, でも and an honorific prefix stay whole, and a
 katakana word is romanised as it is written."""
+import pytest
+
 from scripts import carousel_bank as cb
 
 
@@ -82,3 +84,19 @@ def test_every_short_sentence_is_a_noun_a_particle_and_a_word_said_politely():
         assert all(r["lv"] == "N5" for r in (words[0], words[2])), s["id"]
         assert all(r["gen"][0] and r["gfr"][0] for r in words), s["id"]
         assert s["v"]["to"] == "polite" and s["v"]["when"]["en"] and s["v"]["when"]["fr"], s["id"]
+
+
+def test_a_picture_names_a_word_and_a_file_there(tmp_path, monkeypatch):
+    """Plan 257: a picture on no word, or a word with no file, stops the build."""
+    words = {"N5": {"words": [{"t": "店", "r": "みせ"}]}}
+    themes = {"themes": {"food": {"words": [{"t": "りんご", "r": "りんご"}]}}}
+    (tmp_path / "pictures").mkdir()
+    (tmp_path / "pictures" / "mise.webp").write_bytes(b"x")
+    monkeypatch.setattr(cb, "CONTENT", tmp_path)
+    spec = tmp_path / "pictures" / "pictures.json"
+    spec.write_text('{"店::みせ": "mise.webp"}', encoding="utf-8")
+    assert cb.pictures(words, themes)["pictures"] == {"店::みせ": "content/pictures/mise.webp"}
+    for bad in ('{"店::てん": "mise.webp"}', '{"りんご::りんご": "ringo.webp"}'):
+        spec.write_text(bad, encoding="utf-8")
+        with pytest.raises(SystemExit):
+            cb.pictures(words, themes)
