@@ -164,6 +164,7 @@ export default function ProfileScreen({ session }) {
         calendar={profile.calendar ?? profile.week}
         streak={profile.streak}
         longest={profile.streakLongest}
+        cleared={profile.dayCleared}
         t={t}
         lang={lang}
         figures={!desk}

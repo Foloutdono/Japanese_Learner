@@ -219,4 +219,20 @@ describe('a covered day on Today\'s stamp rally and the stamp book', () => {
     expect(rest[0].textContent).toBe('運休')
     expect(getComputedStyle(rest[0]).backgroundColor).toBe('rgb(87, 80, 96)')
   })
+
+  it('holds today\'s stamp back in the stamp book until the day is cleared', async () => {
+    const calendar = [{ date: localIso(new Date()), count: 4, practice: 0 }]
+    await render(<StampBook calendar={calendar} streak={1} longest={4} cleared={false} t={fr} lang="fr" />)
+    expect($$('.sbook__stamp--wait')).toHaveLength(1)
+    expect($$('.sbook__stamp--today')).toHaveLength(0)
+    // Waiting is not a miss.
+    expect($$('.sbook__stamp--wait')[0].classList.contains('sbook__stamp--missed')).toBe(false)
+  })
+
+  it('inks today in the stamp book once the day is cleared', async () => {
+    const calendar = [{ date: localIso(new Date()), count: 4, practice: 0 }]
+    await render(<StampBook calendar={calendar} streak={1} longest={4} cleared t={fr} lang="fr" />)
+    expect($$('.sbook__stamp--wait')).toHaveLength(0)
+    expect($$('.sbook__stamp--today')).toHaveLength(1)
+  })
 })

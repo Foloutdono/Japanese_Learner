@@ -270,10 +270,13 @@ export function clearModel(result, run) {
  * The week on Today's rest-day notice: the 7 UTC days ending `today`,
  * from the profile's `week` ([{ date, count, practice }], days with
  * nothing absent) and the rest days Today's summary names (`rest`).
- * Today is 'today' until it has a review.
+ * Today is 'today' until its goal is met (`cleared`, the profile's
+ * `dayCleared`): a review alone does not stamp it. A caller that knows
+ * the day is done (the cleared gate) leaves `cleared` true.
  */
-export function restWeek(profileWeek, restDays, today) {
+export function restWeek(profileWeek, restDays, today, cleared = true) {
   const studied = new Set((profileWeek ?? []).filter(d => (d.count ?? 0) + (d.practice ?? 0) > 0).map(d => d.date))
+  if (!cleared) studied.delete(today)
   // The days told of now, and any other this week the profile's week
   // marks as covered (`rest: true`, a 運休 already seen).
   const rest = new Set([...(restDays ?? []), ...(profileWeek ?? []).filter(d => d.rest).map(d => d.date)])

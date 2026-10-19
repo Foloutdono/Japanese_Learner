@@ -803,6 +803,11 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # rest ticket bridged (plan 191): `rest: true`, nothing counted.
         "week": [d for d in calendar if d["date"] >= week_from],
         "calendar": calendar,
+        # Today's stamp is inked when the day's goal is met, not at the
+        # first review: whether today is cleared (day_clears), which the
+        # week and the book hold today's mark back for. Past days stay
+        # stamped by the streak's own rule (srs._studied_days).
+        "dayCleared": cleared,
         # 終着 (plan 191): the ticket book -- a ticket per milestone day
         # cleared, oldest first -- the rest days held, and the milestone
         # the next ticket is printed at.

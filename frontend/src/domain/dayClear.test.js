@@ -131,4 +131,13 @@ describe('the rest-day notice\'s week', () => {
     ]
     expect(restWeek(profileWeek, [], '2026-10-07')).toEqual(REST_WEEK)
   })
+
+  it('stamps today only once its goal is met, not at the first review', () => {
+    const profileWeek = ['2026-10-05', '2026-10-06', '2026-10-07'].map(date => ({ date, count: 3 }))
+    const today = week => week[6].state
+    expect(today(restWeek(profileWeek, [], '2026-10-07', false))).toBe('today')
+    expect(today(restWeek(profileWeek, [], '2026-10-07', true))).toBe('studied')
+    // Yesterday keeps its stamp either way: it was a day shown up.
+    expect(restWeek(profileWeek, [], '2026-10-07', false)[5].state).toBe('studied')
+  })
 })

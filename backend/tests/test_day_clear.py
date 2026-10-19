@@ -379,6 +379,16 @@ def test_the_profile_s_next_milestone_is_today_s_until_it_is_cleared(client, lea
         assert client.get("/api/profile").json()["nextMilestone"] == 14
 
 
+def test_the_profile_says_whether_today_s_stamp_is_earned(client, learner):
+    # Studied today, queue not emptied by the test: the stamp is held back
+    # until the day is cleared, not inked at the first review.
+    _studied(learner, range(0, 7))
+    with acting_as(learner):
+        assert client.get("/api/profile").json()["dayCleared"] is False
+        client.post("/api/today/clear")
+        assert client.get("/api/profile").json()["dayCleared"] is True
+
+
 # ── Erasure ──────────────────────────────────────────────────────
 
 def test_deleting_the_account_takes_the_days_and_the_rest_tickets(client, learner):

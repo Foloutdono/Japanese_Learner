@@ -147,7 +147,7 @@ export default function TodayScreen({ session }) {
       {showRest ? (
         <RestDayNotice
           rest={today.rest}
-          week={restWeek(summary?.week, today.rest.unseen, utcToday())}
+          week={restWeek(summary?.week, today.rest.unseen, utcToday(), today.day_clear?.done ?? false)}
           total={today.total}
           lanes={today.lanes}
           minutes={restMinutes}

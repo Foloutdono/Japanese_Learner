@@ -39,7 +39,7 @@ function localIso(d) {
 // this one, against the local midnight `today` -- and how many of the
 // days so far were stamped: what the sheet draws and what its figures
 // count, the desk's records lattice included (plan 248).
-function bookDays(calendar, today) {
+function bookDays(calendar, today, cleared = true) {
   // A day is stamped for a review or, since plan 178, a graded practice
   // answer: the streak counts both, so the book has to.
   const byDate = new Map((calendar ?? []).map(d => [d.date, (d.count ?? 0) + (d.practice ?? 0)]))
@@ -57,13 +57,18 @@ function bookDays(calendar, today) {
     d.setDate(start.getDate() + i)
     const key = localIso(d)
     const count = byDate.get(key) ?? 0
+    const isToday = d.getTime() === today.getTime()
+    // Today is stamped when its goal is met (the day cleared), not at the
+    // first review: until then it waits, as the week's slot does.
+    const waits = isToday && count > 0 && !cleared
     cells.push({
       key,
       day: d.getDate(),
       count,
       future: d > today,
-      today: d.getTime() === today.getTime(),
-      stamped: count > 0,
+      today: isToday,
+      waits,
+      stamped: count > 0 && !waits,
       rest: count === 0 && rested.has(key),
       // A deterministic wobble per slot — a rubber stamp never lands
       // perfectly square (same as the strip's StampRally).
@@ -84,9 +89,9 @@ function localToday() {
   return today
 }
 
-export function StampBook({ calendar, streak, longest, t, lang = 'en', figures = true }) {
+export function StampBook({ calendar, streak, longest, cleared = true, t, lang = 'en', figures = true }) {
   const today = localToday()
-  const { cells, elapsed, stamped } = bookDays(calendar, today)
+  const { cells, elapsed, stamped } = bookDays(calendar, today, cleared)
 
   // A title, so capitalised: French writes its months in lower case.
   const month = new Intl.DateTimeFormat(lang, { month: 'long' }).format(today)
@@ -113,7 +118,7 @@ export function StampBook({ calendar, streak, longest, t, lang = 'en', figures =
             key={c.key}
             className={
               'sbook__stamp'
-              + (c.future ? ' sbook__stamp--future' : c.stamped ? '' : c.rest ? ' sbook__stamp--rest' : ' sbook__stamp--missed')
+              + (c.future ? ' sbook__stamp--future' : c.stamped ? '' : c.waits ? ' sbook__stamp--wait' : c.rest ? ' sbook__stamp--rest' : ' sbook__stamp--missed')
               + (c.today && c.stamped ? ' sbook__stamp--today' : '')
             }
             style={{ '--stamp-tilt': `${c.stamped ? c.tilt : c.rest ? -4 : 0}deg` }}

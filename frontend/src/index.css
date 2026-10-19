@@ -22230,6 +22230,15 @@ form.stage__foot > .btn-primary {
   opacity: 0.6;
   transform: none;
 }
+/* Today, reviewed but the day's goal not met yet: the ring waits in stamp
+   ink, dashed like the week's waiting slot, and is inked at the clear. */
+.sbook__stamp--wait {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--stamp-ink) 55%, transparent);
+  background: transparent;
+  color: var(--text-secondary);
+  transform: none;
+}
 .sbook__stamp--future {
   border-color: transparent;
   background: transparent;
