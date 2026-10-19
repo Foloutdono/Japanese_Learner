@@ -22250,6 +22250,12 @@ form.stage__foot > .btn-primary {
   border-width: 2px;
   border-color: var(--stamp-ink);
   background: color-mix(in srgb, var(--stamp-ink) 22%, transparent);
+  /* Pressed in when the day is cleared and the mark is inked (it is
+     drawn only then, see bookDays), as the rally's today mark was. */
+  animation: stamp-press 0.45s ease-out backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sbook__stamp--today { animation: none; }
 }
 .sbook__side { padding-top: var(--sp-4); border-top: 1px solid var(--surface-line); }
 /* One row of three, whatever the width (plan 143): the third figure

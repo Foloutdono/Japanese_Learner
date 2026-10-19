@@ -234,5 +234,13 @@ describe('a covered day on Today\'s stamp rally and the stamp book', () => {
     await render(<StampBook calendar={calendar} streak={1} longest={4} cleared t={fr} lang="fr" />)
     expect($$('.sbook__stamp--wait')).toHaveLength(0)
     expect($$('.sbook__stamp--today')).toHaveLength(1)
+    // The press plays with the ink, at the clear.
+    expect(getComputedStyle($$('.sbook__stamp--today')[0]).animationName).toBe('stamp-press')
+  })
+
+  it('does not press the waiting mark', async () => {
+    const calendar = [{ date: localIso(new Date()), count: 4, practice: 0 }]
+    await render(<StampBook calendar={calendar} streak={1} longest={4} cleared={false} t={fr} lang="fr" />)
+    expect(getComputedStyle($$('.sbook__stamp--wait')[0]).animationName).toBe('none')
   })
 })

@@ -46,7 +46,9 @@ export function TodayDay({ today, strip = false }) {
     cells.push(
       <div key="streak" className="tdy-day__cell">
         <span className="tdy-day__fig">
-          <Slot glyph={weekdayKanji(utcToday())} state="now" tilt={-4} aria-hidden="true" />
+          {/* Today's stamp is inked when the day is cleared (the
+              ceremony pressed it), and waits until then. */}
+          <Slot glyph={weekdayKanji(utcToday())} state={today?.day_clear?.done ? 'now' : 'wait'} tilt={-4} aria-hidden="true" />
           {summary.streak}
         </span>
         <span className="tdy-day__what">{strip ? t.todayStreakShort : t.todayStreakDays(summary.streak)}</span>
