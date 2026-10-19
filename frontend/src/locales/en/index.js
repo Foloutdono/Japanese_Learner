@@ -2542,7 +2542,7 @@ const boarding = {
   brdGoalCap: (min) => `at ${min} min a day`,
   brdNameOptional: 'optional',
   brdNamePlaceholder: 'Your first name',
-  brdNameNote: 'It is printed on your card.',
+  brdNameNote: 'It is printed on your card. In Latin letters, it is also your public name on the leaderboard.',
   brdNameSave: 'Save',
   cardNameTooLong: (n) => `${n} characters at most.`,
   brdAccountLede: 'Without an account, your card lives on this device alone.',

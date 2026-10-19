@@ -2481,7 +2481,7 @@ const boarding = {
   brdGoalCap: (min) => `à ${min} min par jour`,
   brdNameOptional: 'facultatif',
   brdNamePlaceholder: 'Ton prénom',
-  brdNameNote: 'Il s’imprime sur ta carte.',
+  brdNameNote: 'Il s’imprime sur ta carte. En lettres latines, c’est aussi ton nom public dans le classement.',
   brdNameSave: 'Valider',
   cardNameTooLong: (n) => `${n} caractères au plus.`,
   brdAccountLede: 'Sans compte, ta carte ne vit que sur cet appareil.',

@@ -237,9 +237,10 @@ def _random_username() -> str:
 # The boarding's card asks for a first name rather than a handle: any
 # script, spaces and hyphens and all, up to CARD_NAME_MAX characters,
 # and nothing at all is an answer. It is printed on the learner's own
-# card and nowhere public, so it needs no uniqueness -- two Camilles are
-# two Camilles -- which is what made the old name step refuse a common
-# name as "taken" (the username is UNIQUE, and stays the public handle).
+# card, so it needs no uniqueness -- two Camilles are two Camilles --
+# which is what made the old name step refuse a common name as "taken"
+# (the username is UNIQUE, and stays the public handle, which a first
+# boarding takes from the name when it can: plan 247b, below).
 CARD_NAME_MAX = 24
 # The two joiners some scripts spell names with (Persian's ZWNJ, an
 # Indic conjunct's ZWJ); every other control or format character is
@@ -263,6 +264,95 @@ def clean_card_name(value: str) -> str:
     if len(text) > CARD_NAME_MAX:
         raise ValueError(f"at most {CARD_NAME_MAX} characters")
     return text
+
+
+# ── The handle a first name spells (plan 247b) ────────────────
+# The boarding's first name is also the learner's public handle when its
+# Latin letters make one: the username is the name if nobody holds it,
+# the name and the first number free (Tifa, Tifa2, Tifa3) if somebody
+# does. Only the first boarding does
+# it, and only over the handle the app drew (a learner's own pick is
+# never replaced), so a replay or a later rename leaves the handle
+# where it is: it is on the 番付 and under every published deck.
+_GENERATED_RE = re.compile(rf"^(?:{'|'.join(_ADJECTIVES)})(?:{'|'.join(_NOUNS)})\d{{3,4}}$")
+USERNAME_MAX = 20
+# Letters NFKD does not take apart (é and ñ become e and n by themselves).
+_LETTERS = str.maketrans({
+    "ß": "ss", "æ": "ae", "Æ": "AE", "œ": "oe", "Œ": "OE",
+    "ø": "o", "Ø": "O", "ł": "l", "Ł": "L", "đ": "d", "Đ": "D",
+})
+
+
+def handle_from_name(card_name: str) -> str:
+    """The Latin letters and digits of a card name, accents folded and
+    spaces and hyphens closed up ("José-María" -> "JoseMaria"), cut to
+    the username's length. '' when none survive (さくら, مریم): such a
+    learner keeps the handle the app drew."""
+    folded = unicodedata.normalize("NFKD", card_name.translate(_LETTERS))
+    return "".join(ch for ch in folded if ch.isascii() and ch.isalnum())[:USERNAME_MAX]
+
+
+def _handle_candidates(base: str):
+    """The name as it is, when it is long enough to be a username, then
+    the name numbered 2, 3, ... 999 (a long name gives up letters to its
+    number, within USERNAME_MAX). In order and without chance, so the
+    migration's report is what its run does."""
+    if len(base) >= 3:
+        yield base
+    for n in range(2, 1000):
+        digits = str(n)
+        yield f"{base[:USERNAME_MAX - len(digits)]}{digits}"
+
+
+def claim_handle_with(cur, user_id: str, card_name: str) -> str | None:
+    """Make the username the one the card name spells, on `cur`'s
+    transaction (the caller commits), and return it; None when the
+    learner keeps the handle they have (the name has no Latin letters,
+    the handle is not the one the app drew, or every candidate was
+    taken). A name is taken whatever its case: "tifa" is not offered
+    beside "Tifa"."""
+    base = handle_from_name(card_name)
+    if not base:
+        return None
+    cur.execute("SELECT username FROM user_profiles WHERE user_id = %s", (user_id,))
+    row = cur.fetchone()
+    if not row or not _GENERATED_RE.match(row[0]):
+        return None
+    for candidate in _handle_candidates(base):
+        cur.execute(
+            "SELECT 1 FROM user_profiles WHERE lower(username) = lower(%s) AND user_id <> %s",
+            (candidate, user_id),
+        )
+        if cur.fetchone():
+            continue
+        # A savepoint, so a refusal leaves the caller's transaction (the
+        # migration's, with every handle it has moved) standing.
+        cur.execute("SAVEPOINT claim_handle")
+        try:
+            cur.execute(
+                "UPDATE user_profiles SET username = %s WHERE user_id = %s",
+                (candidate, user_id),
+            )
+        except pg_errors.UniqueViolation:
+            # Somebody took the same name between the check and the
+            # write: the next candidate.
+            cur.execute("ROLLBACK TO SAVEPOINT claim_handle")
+            continue
+        cur.execute("RELEASE SAVEPOINT claim_handle")
+        return candidate
+    return None
+
+
+def claim_handle(user_id: str, card_name: str) -> str | None:
+    """claim_handle_with, in a transaction of its own."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            handle = claim_handle_with(cur, user_id, card_name)
+        conn.commit()
+        return handle
+    finally:
+        conn.close()
 
 
 def _get_or_create_username(user_id: str) -> str:

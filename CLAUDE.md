@@ -324,7 +324,16 @@ runtime purpose.
   stays the public handle (番付, the library), unique and in Latin
   letters. Whatever prints the holder of a learner's own card or gate
   reads `holderName` (`domain/passCard.js`); whatever another learner
-  can see prints the username, never the card's name.
+  can see prints the username, never the card's name. The two start
+  alike (plan 247b): a learner's first boarding makes the username the
+  Latin letters of the name if nobody holds them (in any case), the name
+  and the first number free if somebody does (Tifa, Tifa2;
+  `routes/profile.claim_handle`, `handle_from_name`). Only over the
+  handle the app drew, and only once: a name with no Latin letters, a
+  handle the learner chose, a replay or a later rename of the card leaves
+  the username where it is, as it is on the 番付 and under every
+  published deck. Accounts that boarded before it are brought in line by
+  `scripts/migrate_handles.py`, once, by hand.
 
 ## Commands
 
@@ -574,6 +583,17 @@ how to flip a card. Same shape as the others — reports first.
 
 ```bash
 python -m scripts.backfill_first_ride  # report; --yes to apply, --user to scope
+```
+
+And one after the deploy that carries plan 247b: it gives every account that
+boarded before it the username its card name spells (the name if nobody holds
+it, then Tifa2, Tifa3), oldest account first, over the handles the app drew
+only. A username is public (the 番付, the author of every published deck), and
+those learners typed the name for their card, so read the report before
+`--yes`: it is the run, rolled back, and the old handle is kept nowhere.
+
+```bash
+python -m scripts.migrate_handles      # report; --yes to apply, --user to scope (repeatable)
 ```
 
 And one after any deploy that changes the voice (plan 121 did, from edge-tts
