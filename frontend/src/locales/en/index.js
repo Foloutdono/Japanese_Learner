@@ -2211,6 +2211,10 @@ const exam = {
   // honest thing to show is raw proportion correct plus a practice
   // target — and to say plainly that that is what it is.
   examPracticeTarget:  'Target',
+  // The line the score's bar lands on (plan 254): the target met, or how
+  // many more right answers it wanted.
+  examTargetReached:   'Target reached',
+  examTargetShort: n => `${n} ${n > 1 ? 'answers' : 'answer'} short of the target`,
   // Wrong answers are what a review is for, so that's what opens by
   // default — a 21-question paper otherwise lists 21 identical rows to
   // click through before finding the two that went wrong.
@@ -2604,11 +2608,11 @@ const guide = {
   guideLearnStops: 'Where you are on the line, and the stops around you.',
   guideLearnShelf: 'Your own decks, plus a library of decks shared by other learners.',
   guidePracticePass: 'These modes come with the pass.',
-  // The painted platform (plan 225): its two signs and its gate; on the
-  // desk (plan 244), the departures board and the gate.
-  guidePracticeSign: 'Where the train goes. Tap the row above or below to turn the sign, the lit one to open its station.',
-  guidePracticeGrade: 'The train’s level. Yours carries a dot: turn the sign to try another.',
-  guidePracticeBoard: 'Depart: the doors close and the train takes you to the exercise.',
+  // Practice's plates (plan 254): a platform, its foot (your level,
+  // what you did there) and the mock exam.
+  guidePracticePlate: 'A practice mode: read, understand, translate, listen, write or talk. Tap it to open it at your level.',
+  guidePracticeStops: 'Your level, with what you have done there and how much of it you got right.',
+  guidePracticeExam: 'The mock exam: a JLPT-style test at the level you pick, graded when you hand it in.',
   guideDictConsole: 'Search by word, reading or meaning.',
   guideDictOptions: 'Fine-tune your search: exact word, starts with or contains. Search the Japanese, the meaning or both.',
   guideDictChips: 'Browse by collection. Your saved entries are at the end.',
@@ -2629,11 +2633,8 @@ const guide = {
   guideLearnStopsDesk: 'The whole line. Click any stop to study it.',
   // Worded for a pointer (plan 123): the notes that said "tap".
   guideLearnPlateDesk: 'A line. Click it to open it. The badge shows what’s due today.',
-  // The painted platform on the desk (plan 244): the departures board,
-  // its levels at its head, and the gate, which Enter presses too.
-  guidePracticeGradeDesk: 'The trains’ level. Yours carries a dot: click another to try it anyway.',
-  guidePracticeSignDesk: 'The trains leaving, one per exercise, with what you have done on each at this level. Click one to see what it will ask of you.',
-  guidePracticeBoardDesk: 'Depart: the doors close and the train takes you to the exercise. Enter works from anywhere here.',
+  // Practice's plates on the desk (plans 165, 254): each carries its exercise.
+  guidePracticePlateDesk: 'A practice mode, and what it asks of you at your level. Click it to open it.',
   guideDictEntryDesk: 'An entry, open beside the list. ← and → move through the list.',
   // 机 (plan 248): on the desk the stamp book's figures open the profile's record.
   guideProfileRecordsDesk: 'Your numbers: your streak and your longest, the days stamped, total reviews, what you remember, your best perfect run.',
@@ -2691,8 +2692,8 @@ const onboarding = {
   settingsLineOn: 'On your route',
   settingsLineOff: 'Off your route',
   plateOffRoute: 'Off your route',
-  // A grade's record on a Practice platform, on the desk (plan 130; on
-  // the departures board since plan 244): what was done at that grade,
+  // A grade's record on a Practice platform (plan 130; at the foot of
+  // its plate on the phone since plan 254): what was done at that grade,
   // then the share of it that went right.
   practiceDone: {
     sentences: n => `${n} sentence${n === 1 ? '' : 's'}`,
@@ -2715,35 +2716,10 @@ const onboarding = {
     dictation: 'Two listens, no more: write in rōmaji what you hear.',
     composition: 'You are given a grammar point: write a sentence that uses it, and a tutor reads it.',
     conversation: 'Someone speaks to you in a scene: choose your reply, write it, or answer freely.',
-    // On the chosen train's card, on the desk (plan 244, plan 165's
-    // plate before it): the question its well shows.
+    // On its plate, on the desk (plans 165, 254): the question its well
+    // shows.
     exam: 'A question in the JLPT’s format, here 漢字読み: the reading of the underlined word.',
   },
-  // ── The painted platform, on the phone (plan 225) ─────────
-  // Each platform's short name, under its Japanese on the train's sign;
-  // the names a screen reader reads.
-  practiceGateShort: {
-    reading: 'Reading',
-    comprehension: 'Comprehension',
-    translation: 'Translation',
-    dictation: 'Dictation',
-    composition: 'Composition',
-    exam: 'Exam',
-    conversation: 'Conversation',
-  },
-  practiceGateGrade: 'The train’s level',
-  practiceGateDest: 'The train’s destination',
-  practiceGateStation: title => `${title}: open the station`,
-  practiceGateBoard: (title, level) => `Depart · ${title} · ${level}`,
-  practiceGateClock: hour => `Platform clock, ${hour}. Tap for the next hour.`,
-  practiceGateHour: { dawn: 'dawn', day: 'day', dusk: 'dusk', night: 'night' },
-  practiceGatePantoRaise: 'Raise the pantograph',
-  practiceGatePantoLower: 'Lower the pantograph',
-  // ── The painted platform, on the desk (plan 244) ──────────────
-  // The clock for a pointer, and the station's door on the chosen
-  // train's card.
-  practiceGateClockDesk: hour => `Platform clock, ${hour}. Click for the next hour.`,
-  practiceDeskOpen: 'Open the station',
   practiceBank: {
     sentences: n => `${n} sentences written for the grade.`,
     texts: n => `${n} questions a text.`,
@@ -3200,9 +3176,10 @@ const clrTickets = {
 
 
 // ── 217:reviews ──
-// 回復運転 — the review plan (plan 217): the comeback sheet on Today,
-// the catch-up's figure in the day, the run past the share, Settings ›
-// Reviews and the notification that invites back.
+// 回復運転 — the review plan (plan 217): the comeback notice on Today
+// and its sheet (plan 254), the catch-up's figure in the day, the run
+// past the share, Settings › Reviews and the notification that invites
+// back.
 const reviewPlan = {
   cbJp: '運転再開',
   cbCap: 'Service resumes',
@@ -3224,6 +3201,9 @@ const reviewPlan = {
   cbNewPaused: 'New cards come back as soon as you’re caught up.',
   cbGo: 'Let’s go',
   cbError: 'Your choice couldn’t be saved. Try again.',
+  cbLinePiled: n => (n === 1 ? 'card piled up' : 'cards piled up'),
+  cbLineGo: 'Spread out',
+  cbHide: 'Hide for today',
   todayCatchupDay: 'catch-up day',
   todayCatchupGentle: 'a day, catching up',
   todayCatchupShort: 'catch-up',

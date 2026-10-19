@@ -2,11 +2,11 @@
 実践の記録 — what a learner has done on each practice platform, by grade
 (plan 130), and at one stop of one platform (plan 159).
 
-The Practice gate on the desk hangs each platform's five grades as rows,
-and a row says what the learner has done there: how many sentences,
-texts or papers, and the share of them that went right. Everything is
-read from the logs the platforms already keep, and nothing is stored
-here.
+The Practice gate on a phone prints, at the foot of each platform's
+plate, the learner's grade and what they have done there (plan 254):
+how many sentences, texts or papers, and the share of them that went
+right; the desk's stations print every grade's. Everything is read from
+the logs the platforms already keep, and nothing is stored here.
 
     GET /api/practice/record
 

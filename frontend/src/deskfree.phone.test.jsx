@@ -1813,13 +1813,12 @@ describe('the run\'s lines (plan 129)', () => {
 
 // ── plan 130 — the gates a phone keeps ──
 // On the desk the plates take the window, Learn's line stands upright
-// and Practice's board holds the record and the chosen train's card
-// (plan 244; the plates' specimens, plan 165, before it). A phone keeps
-// its own: since plan 225 Practice's is the painted platform, its signs
-// where the chips were, and no request for a record or a sample it has
-// nowhere to print.
+// and Practice's plates hold each platform's exercise in a well (plan
+// 165, seven since plan 254). A phone keeps its own: Practice's are
+// Learn's plates (plan 254), each foot the learner's grade and their
+// record there, and no request for a sample it has nowhere to draw.
 describe('the gates taking the window (plan 130)', () => {
-  it('keeps Practice\'s painted platform and never asks for the record', async () => {
+  it('keeps Practice\'s plates, a foot each, and never asks for a sample', async () => {
     apiFetch.mockReset()
     apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({}) }))
     const { MemoryRouter } = await import('react-router-dom')
@@ -1829,16 +1828,12 @@ describe('the gates taking the window (plan 130)', () => {
     const { getSections } = await import('./config/tabs')
     await render(<LangProvider><MemoryRouter initialEntries={['/practice']}><PracticeScreen /></MemoryRouter></LangProvider>)
     await settle(250)
-    expect(document.querySelector('.practice > .pgate')).not.toBeNull()
-    expect(document.querySelector('.practice > .plates')).toBeNull()
-    // Every platform on the destination sign, five grades on the other.
-    const sign = document.querySelector('.pgate-sign--main')
-    expect(sign.querySelectorAll('.pgate-roll--dest .pgate-roll__row')).toHaveLength(getSections('practice', {}).length)
-    expect(sign.querySelectorAll('.pgate-roll--grade .pgate-roll__row')).toHaveLength(5)
-    // Nor the desk's board (plan 244), and no request for the samples
-    // its card would draw from.
-    expect(document.querySelector('.pdesk, .prc-spec')).toBeNull()
-    expect(apiFetch.mock.calls.some(([path]) => path === '/api/practice/record')).toBe(false)
+    const plates = [...document.querySelectorAll('.practice > .plates > .plate')]
+    expect(plates).toHaveLength(getSections('practice', {}).length)
+    for (const plate of plates) expect(plate.querySelector('.plate__foot--stops')).not.toBeNull()
+    // Nor the desk's specimens, and no request for the samples their
+    // wells draw from.
+    expect(document.querySelector('.plate__body, .prc-spec')).toBeNull()
     expect(apiFetch.mock.calls.some(([path]) => path.startsWith('/api/station/'))).toBe(false)
   })
 })

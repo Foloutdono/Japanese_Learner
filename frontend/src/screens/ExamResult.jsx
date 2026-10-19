@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { playUi, playCorrect } from '../lib/audio'
+import { playUi } from '../lib/audio'
 import { Bar } from '../components/chrome/Bar'
 import { stationFor } from '../config/stations'
 import { useListWalk, useFollowFocus, WALK_KEYS_PAGED } from '../hooks/useListWalk'
 import QuestionRenderer, { GapText, PageChoices, PassageText } from '../exam/QuestionRenderer'
 import ExamStudy from '../exam/ExamStudy'
+import { ScoreReveal } from '../exam/ScoreReveal'
 import { MarkedSheet } from '../exam/DeskSheet'
 import { StationSplit } from '../components/selection/StationSplit'
 import { relativeDate } from '../lib/formatDate'
@@ -77,6 +78,10 @@ export default function ExamResult({ session }) {
   // wrong.
   const [showAll, setShowAll] = useState(false)
   const [loaded, setLoaded] = useState(location.state ?? null)
+  // The score is read off its bar on arrival (plan 254), but not on a
+  // link to one question (?question=, plan 117): whoever opened that came
+  // for the question. Read once: the desk's walk rewrites the param.
+  const [toQuestion] = useState(() => searchParams.has('question'))
 
   const attemptId = searchParams.get('attempt')
   const station = stationFor('/practice/exam')
@@ -115,7 +120,6 @@ export default function ExamResult({ session }) {
   // plans/022-exam-generating-shape-crash.md.
   const section = exam?.sections?.[0] ?? null
   const sectionStats = section ? summary?.perSection?.[section.id] ?? null : null
-  const metTarget = (sectionStats?.pct ?? 0) >= PRACTICE_TARGET_PCT
 
   // Grouped into the mondai they came from, so the result reads as
   // "Part 3 cost me four marks" rather than as one undifferentiated
@@ -201,13 +205,6 @@ export default function ExamResult({ session }) {
     if (openId) document.querySelector('.desk-mark-row[aria-current="page"]')?.scrollIntoView?.({ block: 'nearest' })
   }, [openId])
 
-  // Real effect (not a call in the render body) — the render-body call
-  // used to re-fire on every re-render, e.g. each time a review row
-  // was expanded.
-  useEffect(() => {
-    if (metTarget) playCorrect()
-  }, [metTarget])
-
   if (loaded === null && attemptId) {
     return (
       <main id="main-content" className="practice" style={{ '--line-color': EXAM_COLOR }}>
@@ -282,15 +279,14 @@ export default function ExamResult({ session }) {
                 {when && <span className="cap">{when}</span>}
               </div>
               <div className="desk-score">
-                <div className="desk-score__figs">
-                  <b className="desk-score__fig">{sectionStats.correct}</b>
-                  <span className="desk-score__of">/ {sectionStats.total}</span>
-                  <span className={metTarget ? 'desk-score__pct' : 'desk-score__pct desk-score__pct--low'}>{t.percent(pct)}</span>
-                </div>
-                <div className="desk-score__bar" role="img" aria-label={t.examScoreAgainst(pct, PRACTICE_TARGET_PCT)}>
-                  <i className={metTarget ? undefined : 'desk-score__low'} style={{ width: `${Math.min(100, Math.max(0, pct))}%` }} />
-                  <span className="desk-score__tick" style={{ left: `${PRACTICE_TARGET_PCT}%` }} />
-                </div>
+                <ScoreReveal
+                  base="desk-score"
+                  correct={sectionStats.correct}
+                  total={sectionStats.total}
+                  pct={pct}
+                  target={PRACTICE_TARGET_PCT}
+                  still={toQuestion}
+                />
                 {/* The one screen where a generated practice number could
                     be taken for a real JLPT result, so it says it is not. */}
                 <div className="desk-score__cap">
@@ -373,15 +369,14 @@ export default function ExamResult({ session }) {
       <Bar code={station.code} color={EXAM_COLOR} title={t.examTitle} sub={paperTitle(exam, t)} />
 
       <div className="exam-res__score">
-        <div className="exam-res__figs">
-          <b className="exam-res__fig">{sectionStats.correct}</b>
-          <span className="exam-res__of">/ {sectionStats.total}</span>
-          <span className={metTarget ? 'exam-res__pct' : 'exam-res__pct exam-res__pct--low'}>{t.percent(pct)}</span>
-        </div>
-        <div className="exam-res__bar" role="img" aria-label={t.examScoreAgainst(pct, PRACTICE_TARGET_PCT)}>
-          <span className={metTarget ? 'exam-res__fill' : 'exam-res__fill exam-res__fill--low'} style={{ width: `${Math.min(100, Math.max(0, pct))}%` }} />
-          <span className="exam-res__tick" style={{ left: `${PRACTICE_TARGET_PCT}%` }} />
-        </div>
+        <ScoreReveal
+          base="exam-res"
+          correct={sectionStats.correct}
+          total={sectionStats.total}
+          pct={pct}
+          target={PRACTICE_TARGET_PCT}
+          still={toQuestion}
+        />
         {/* The one screen where a generated practice number could be
             taken for a real JLPT result, so it says it is not one. */}
         <span className="cap">{t.examPracticeTarget} {PRACTICE_TARGET_PCT} % · {t.examUnofficial}</span>

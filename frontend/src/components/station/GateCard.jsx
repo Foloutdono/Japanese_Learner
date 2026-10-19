@@ -15,6 +15,7 @@ import { useMinute } from '../../hooks/useMinute'
 import { Loading } from '../ui/Loading'
 import { CheckIcon, ChevronIcon } from '../ui/Icons'
 import LevelFitLine from './LevelFitLine'
+import ComebackLine from './ComebackLine'
 import { useCredits } from '../../stores/credits'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { publishLeft } from '../../stores/gateRun'
@@ -515,7 +516,9 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
       <span className="tdy__air" aria-hidden="true" />
 
       <div className="tdy__foot">
-        {/* The level that does not fit (plan 224), over the run's own row. */}
+        {/* The reviews piled up (plan 254) and the level that does not
+            fit (plan 224), over the run's own row. */}
+        <ComebackLine today={today} session={session} hold={Boolean(fin?.playing)} />
         <LevelFitLine session={session} />
         <button type="button" className="tdy-door" onClick={() => { playClick(); setOpen(true) }} aria-haspopup="dialog">
           <span className="tdy-door__what">
@@ -610,6 +613,7 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
         </div>
       </div>
       <aside className="tdy-desk__col">
+        <ComebackLine today={today} session={session} hold={Boolean(fin?.playing)} />
         <LevelFitLine session={session} />
         <section className="tdy-desk__panel tdy-desk__svc" aria-label={t.gateServicesTitle}>
           <Services

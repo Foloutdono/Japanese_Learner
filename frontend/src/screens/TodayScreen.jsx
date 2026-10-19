@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { useTodaySummary, refreshToday } from '../stores/today'
 import { useProfileSummary } from '../stores/profileSummary'
-import { comebackShut, finishShown, markRestSeen, restNoticeSeen, useDayClear } from '../stores/dayClear'
+import { finishShown, markRestSeen, restNoticeSeen, useDayClear } from '../stores/dayClear'
 import { useFinishScreen } from '../components/dayclear/useFinish'
 import { useReducedMotion } from '../components/dayclear/useReducedMotion'
 import { XpToast } from '../components/rewards/XpToast'
@@ -14,7 +14,6 @@ import { useGuideHeld, wasShown } from '../stores/guide'
 import Empty from '../components/ui/Empty'
 import { useDesk } from '../hooks/useDesk'
 import RestDayNotice from '../components/dayclear/RestDayNotice'
-import { ComebackSheet } from '../components/station/ComebackSheet'
 import { TransferSheet } from '../components/station/TransferSheet'
 import { InkFilters } from '../components/dayclear/kit'
 import { restWeek, utcToday } from '../domain/dayClear'
@@ -46,12 +45,13 @@ import { startAmbiance, stopAmbiance } from '../lib/audio'
 // Any way out tells the server it was seen.
 //
 // 運転再開 (plan 217): a gate whose reviews piled up past a few days of
-// the learner's own load opens on the comeback sheet (ComebackSheet),
-// over the gate and after the rest-day notice, never with it: the
-// paces to take the backlog at, chosen once.
+// the learner's own load says so in a notice on the gate itself, which
+// opens the paces to take the backlog at -- the gate's business
+// (station/ComebackLine), never a sheet over it since plan 254, and
+// never with the rest-day notice, which stands in the gate's place.
 //
 // 乗換 (plan 243b): a learner new to the app is asked once, after the
-// first ride and the gate's guide and never over either sheet above,
+// first ride and the gate's guide and never over the rest-day notice,
 // whether they studied in another app (TransferSheet), while the
 // profile says the offer is open (`transferOffer`).
 //
@@ -118,17 +118,13 @@ export default function TodayScreen({ session }) {
       navigate('/today/run')
     })
   }
-  // 運転再開 — the comeback offer, until it is answered or shut.
-  const [comebackLeft, setComebackLeft] = useState(false)
-  const offer = today?.review?.comeback ?? null
-  const showComeback = Boolean(offer) && !showRest && !comebackLeft && !comebackShut() && !finishing
   // 乗換 — the offer to bring another app's progress, once: after the
   // gate's guide has had its turn (stamped, or shown on this visit) and
   // while nothing holds the guides, so the two never meet.
   const [transferLeft, setTransferLeft] = useState(false)
   const held = useGuideHeld()
   const showTransfer = Boolean(summary?.transferOffer) && !transferLeft && Boolean(today)
-    && (summary.guided?.today || wasShown('today')) && !guide.open && !held && !showRest && !showComeback && !finishing
+    && (summary.guided?.today || wasShown('today')) && !guide.open && !held && !showRest && !finishing
   const restMinutes = today?.seconds_per_review && today?.total
     ? Math.max(1, Math.ceil((today.total * today.seconds_per_review) / 60))
     : null
@@ -169,15 +165,7 @@ export default function TodayScreen({ session }) {
         <GateCard today={today} failed={failed && !today} session={session} finish={run ? fin : null} />
       )}
       {fin.toast && <XpToast toast={fin.toast} onDone={() => {}} />}
-      {showComeback && (
-        <ComebackSheet
-          offer={offer}
-          secondsPerReview={today.seconds_per_review}
-          session={session}
-          onClose={() => setComebackLeft(true)}
-        />
-      )}
-      {guide.open && !showRest && !showComeback && <Guide gate="today" onEnd={guide.onEnd} />}
+      {guide.open && !showRest && <Guide gate="today" onEnd={guide.onEnd} />}
       {showTransfer && (
         <TransferSheet session={session} onClose={() => setTransferLeft(true)} />
       )}

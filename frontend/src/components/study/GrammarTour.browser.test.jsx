@@ -392,6 +392,25 @@ describe('the results', () => {
     expect(screen.container.querySelectorAll('.tour-tally__arc--no')).toHaveLength(1)
     expect(screen.container.querySelector('.tour-score__right').textContent).toBe(String(tours.en.quiz.length - 1))
   })
+
+  it('strikes the form the option printed, not its rule whole (plan 254)', async () => {
+    // Each option of a gap question prints the one form its rule takes in
+    // the hole (`form`): あれ for これ／それ／あれ／どれ.
+    const quiz = tours.en.quiz.map((q, i) => (i !== GAP ? q : {
+      ...q, fill: [], choices: q.choices.map((c, n) => ({ ...c, form: `${'あいうえ'[n]}の` })),
+    }))
+    const picks = quiz.map(q => q.choices.findIndex(c => c.correct))
+    const taken = quiz[GAP].choices.findIndex(c => !c.correct)
+    picks[GAP] = taken
+    const screen = await render(
+      <LangProvider>
+        <Results tour={{ ...tours.en, quiz }} point={POINT} picks={picks} onLesson={() => {}} replay={false} />
+      </LangProvider>
+    )
+    const row = screen.container.querySelectorAll('.tour-recap__row')[GAP]
+    expect(row.querySelector('.tour-recap__form').textContent).toBe(quiz[GAP].choices.find(c => c.correct).form)
+    expect(row.querySelector('.tour-recap__fix').textContent).toBe(quiz[GAP].choices[taken].form)
+  })
 })
 
 // ── Plan 196: the quiz asks what only understanding answers ───────

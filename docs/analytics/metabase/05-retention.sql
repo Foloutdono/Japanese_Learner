@@ -201,7 +201,7 @@ GROUP BY 1 ORDER BY 1;
 -- title: Plan de retour (回復運転) : proposé, choisi, tenu
 -- display: funnel
 -- size: 12x7
--- description: catchup_offer (la feuille de retour ouverte), catchup_choice hors « tout d'un coup » (un plan étalé ou en douceur), catchup_done (le plan arrivé au bout).
+-- description: catchup_offer (l'offre de retour montrée, une fois par visite : la feuille ouverte sur le portique, puis depuis le plan 254 l'avis sur le portique ; ouvert ou masqué pour la journée, voir feature_use comeback), catchup_choice hors « tout d'un coup » (un plan étalé ou en douceur), catchup_done (le plan arrivé au bout).
 WITH e AS (
   SELECT name, user_id, props FROM event_log
   WHERE name IN ('catchup_offer', 'catchup_choice', 'catchup_done')
@@ -220,7 +220,7 @@ SELECT "Étape", "Apprenants" FROM (
 -- title: Plan de retour : les choix
 -- display: table
 -- size: 12x7
--- description: spread = étalé sur des jours, gentle = en douceur, all = tout d'un coup (pas de plan). Le retard et l'absence viennent de la feuille proposée (catchup_offer).
+-- description: spread = étalé sur des jours, gentle = en douceur, all = tout d'un coup (pas de plan). Le retard et l'absence viennent de l'offre montrée (catchup_offer).
 WITH offers AS (
   SELECT round((percentile_cont(0.5) WITHIN GROUP (ORDER BY (props->>'owed')::numeric))::numeric, 0) AS owed,
          round((percentile_cont(0.5) WITHIN GROUP (ORDER BY (props->>'away')::numeric))::numeric, 0) AS away
