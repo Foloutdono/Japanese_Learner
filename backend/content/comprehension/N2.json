@@ -6317,5 +6317,4158 @@
     ]
    }
   ]
+ },
+ {
+  "id": "n2-07",
+  "level": "N2",
+  "title": "捨てられる食品",
+  "grammar": [
+   "〜ばかりか",
+   "〜に基づいて",
+   "〜に応じて"
+  ],
+  "text": "日本では、まだ食べられるのに捨てられる食品が、年間数百万トンにのぼるという。原因は家庭ばかりか、店や工場にもある。多くの店は、商品が足りなくなるのを恐れて多めに並べ、期限が近づいたものを捨ててきた。こうした無駄を減らそうと、ある大手のスーパーは昨年から、過去の売り上げのデータに基づいて、仕入れる量を決めるようにした。さらに、天気や地域の行事に応じて量を細かく変えた結果、捨てる食品は三割減ったそうだ。ただ、店の努力だけでは限界がある。買う側にも、必要な分だけを買う習慣が求められている。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "About how much food that could still be eaten is thrown away in Japan each year?",
+     "fr": "Quelle quantité d'aliments encore mangeables jette-t-on chaque année au Japon ?"
+    },
+    "options": {
+     "en": [
+      "Several hundred tonnes",
+      "Several thousand tonnes",
+      "Several million tonnes",
+      "Several billion tonnes"
+     ],
+     "fr": [
+      "Plusieurs centaines de tonnes",
+      "Plusieurs milliers de tonnes",
+      "Plusieurs millions de tonnes",
+      "Plusieurs milliards de tonnes"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「家庭ばかりか」 say about where the cause lies?",
+     "fr": "Que dit 「家庭ばかりか」 de l'origine du problème ?"
+    },
+    "options": {
+     "en": [
+      "In households, and in other places too",
+      "In households, and nowhere else",
+      "In other places, but not in households",
+      "Mostly in households, rarely elsewhere"
+     ],
+     "fr": [
+      "Dans les foyers, et ailleurs aussi",
+      "Dans les foyers, et nulle part ailleurs",
+      "Ailleurs, mais pas dans les foyers",
+      "Surtout dans les foyers, rarement ailleurs"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Why have many shops put out more goods than they need?",
+     "fr": "Pourquoi beaucoup de magasins exposent-ils plus de marchandises que nécessaire ?"
+    },
+    "options": {
+     "en": [
+      "Factories sending them too much",
+      "Customers asking them for more",
+      "Full shelves looking more attractive",
+      "Fear of running out of stock"
+     ],
+     "fr": [
+      "Des usines qui leur en envoient trop",
+      "Des clients qui en demandent plus",
+      "Des rayons pleins plus attirants",
+      "La peur de la rupture de stock"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What is meant by 「期限」 in 「期限が近づいたもの」?",
+     "fr": "Que désigne 「期限」 dans 「期限が近づいたもの」 ?"
+    },
+    "options": {
+     "en": [
+      "A sale price",
+      "A use-by date",
+      "A delivery time",
+      "A closing time"
+     ],
+     "fr": [
+      "Un prix soldé",
+      "Une date limite de consommation",
+      "Une heure de livraison",
+      "Une heure de fermeture"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「データに基づいて」 mean?",
+     "fr": "Que signifie 「データに基づいて」 ?"
+    },
+    "options": {
+     "en": [
+      "In spite of the data",
+      "Instead of the data",
+      "On the basis of the data",
+      "Before collecting the data"
+     ],
+     "fr": [
+      "Malgré les données",
+      "À la place des données",
+      "En se fondant sur les données",
+      "Avant de recueillir les données"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What did the supermarket start doing last year?",
+     "fr": "Qu'a commencé à faire le supermarché l'an dernier ?"
+    },
+    "options": {
+     "en": [
+      "Selling goods near their date cheaply",
+      "Ordering stock according to past sales",
+      "Giving its leftover food to households",
+      "Asking shoppers what it should stock"
+     ],
+     "fr": [
+      "Vendre à bas prix les produits en fin de date",
+      "Commander selon ses ventes passées",
+      "Donner ses invendus aux foyers",
+      "Demander aux clients quoi commander"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "In 「行事に応じて」, what does 「〜に応じて」 express?",
+     "fr": "Dans 「行事に応じて」, qu'exprime 「〜に応じて」 ?"
+    },
+    "options": {
+     "en": [
+      "Changing in line with something",
+      "Acting in spite of something",
+      "Acting before something happens",
+      "Acting in place of something"
+     ],
+     "fr": [
+      "Changer en fonction de quelque chose",
+      "Agir malgré quelque chose",
+      "Agir avant que quelque chose arrive",
+      "Agir à la place de quelque chose"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What came of the supermarket's efforts?",
+     "fr": "Qu'ont donné les efforts du supermarché ?"
+    },
+    "options": {
+     "en": [
+      "Its sales went up by thirty percent",
+      "It throws away three tonnes less food",
+      "It puts thirty percent fewer goods out",
+      "It throws away thirty percent less food"
+     ],
+     "fr": [
+      "Ses ventes ont augmenté de trente pour cent",
+      "Il jette trois tonnes d'aliments en moins",
+      "Il expose trente pour cent de produits en moins",
+      "Il jette trente pour cent d'aliments en moins"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「限界がある」 mean here?",
+     "fr": "Que signifie ici 「限界がある」 ?"
+    },
+    "options": {
+     "en": [
+      "It goes further than needed",
+      "It can only achieve so much",
+      "It is the key to success",
+      "It has already succeeded"
+     ],
+     "fr": [
+      "Cela va plus loin que nécessaire",
+      "Cela ne peut pas tout faire",
+      "C'est la clé du succès",
+      "Cela a déjà réussi"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What is the writer's main point?",
+     "fr": "Quelle est l'idée principale de l'auteur ?"
+    },
+    "options": {
+     "en": [
+      "Supermarkets have now solved the problem",
+      "Households are the main cause of waste",
+      "Shops and shoppers must both play a part",
+      "Weather matters more than sales data"
+     ],
+     "fr": [
+      "Les supermarchés ont réglé le problème",
+      "Les foyers sont la cause principale",
+      "Magasins et clients doivent tous agir",
+      "La météo compte plus que les ventes"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "Why would the supermarket's method cut waste?",
+     "fr": "Pourquoi la méthode du supermarché réduit-elle le gaspillage ?"
+    },
+    "options": {
+     "en": [
+      "It orders closer to what will sell",
+      "It sells food after its date has passed",
+      "It sends unsold food back to factories",
+      "It keeps fewer kinds of goods in stock"
+     ],
+     "fr": [
+      "Il commande au plus près de ce qui se vendra",
+      "Il vend les aliments après leur date",
+      "Il renvoie les invendus aux usines",
+      "Il propose moins de sortes de produits"
+     ]
+    },
+    "correct": 0
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "日本では、まだ食べられるのに捨てられる食品が、年間数百万トンにのぼるという。",
+    "translation": {
+     "en": "In Japan, food that is thrown away while it could still be eaten is said to reach several million tonnes a year.",
+     "fr": "Au Japon, les aliments jetés alors qu'ils sont encore mangeables atteindraient plusieurs millions de tonnes par an."
+    },
+    "note": {
+     "en": "「〜にのぼる」 means to reach a large figure; the closing 「という」 marks hearsay: it is said that.",
+     "fr": "「〜にのぼる」 signifie atteindre un chiffre élevé ; 「という」 en fin de phrase rapporte un on-dit."
+    },
+    "words": [
+     {
+      "surface": "日本",
+      "meaning": {
+       "en": "Japan",
+       "fr": "Japon"
+      }
+     },
+     {
+      "surface": "では",
+      "meaning": {
+       "en": "in (as the topic)",
+       "fr": "au (en thème)"
+      }
+     },
+     {
+      "surface": "まだ",
+      "meaning": {
+       "en": "still",
+       "fr": "encore"
+      }
+     },
+     {
+      "surface": "食べられる",
+      "meaning": {
+       "en": "can be eaten",
+       "fr": "pouvoir être mangé"
+      }
+     },
+     {
+      "surface": "のに",
+      "meaning": {
+       "en": "although",
+       "fr": "alors que"
+      }
+     },
+     {
+      "surface": "捨てられる",
+      "meaning": {
+       "en": "is thrown away",
+       "fr": "être jeté"
+      }
+     },
+     {
+      "surface": "食品",
+      "meaning": {
+       "en": "food",
+       "fr": "aliments"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "年間",
+      "meaning": {
+       "en": "per year",
+       "fr": "par an"
+      }
+     },
+     {
+      "surface": "数百万",
+      "meaning": {
+       "en": "several million",
+       "fr": "plusieurs millions"
+      }
+     },
+     {
+      "surface": "トン",
+      "meaning": {
+       "en": "tonnes",
+       "fr": "tonnes"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "to (a figure)",
+       "fr": "à (un chiffre)"
+      }
+     },
+     {
+      "surface": "のぼる",
+      "meaning": {
+       "en": "amount",
+       "fr": "s'élever"
+      }
+     },
+     {
+      "surface": "という",
+      "meaning": {
+       "en": "it is said",
+       "fr": "dit-on"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "原因は家庭ばかりか、店や工場にもある。",
+    "translation": {
+     "en": "The cause lies not only in households but also in shops and factories.",
+     "fr": "La cause ne se trouve pas seulement dans les foyers, mais aussi dans les magasins et les usines."
+    },
+    "note": {
+     "en": "「AばかりかBも」 means not only A but also B; here the 「も」 sits in 「にもある」.",
+     "fr": "「AばかりかBも」 signifie non seulement A mais aussi B ; ici, le 「も」 se trouve dans 「にもある」."
+    },
+    "words": [
+     {
+      "surface": "原因",
+      "meaning": {
+       "en": "cause",
+       "fr": "cause"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "家庭",
+      "meaning": {
+       "en": "households",
+       "fr": "foyers"
+      }
+     },
+     {
+      "surface": "ばかりか",
+      "meaning": {
+       "en": "not only",
+       "fr": "non seulement"
+      }
+     },
+     {
+      "surface": "店",
+      "meaning": {
+       "en": "shops",
+       "fr": "magasins"
+      }
+     },
+     {
+      "surface": "や",
+      "meaning": {
+       "en": "and",
+       "fr": "et"
+      }
+     },
+     {
+      "surface": "工場",
+      "meaning": {
+       "en": "factories",
+       "fr": "usines"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "in",
+       "fr": "dans"
+      }
+     },
+     {
+      "surface": "も",
+      "meaning": {
+       "en": "also",
+       "fr": "aussi"
+      }
+     },
+     {
+      "surface": "ある",
+      "meaning": {
+       "en": "lies",
+       "fr": "se trouve"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "多くの店は、商品が足りなくなるのを恐れて多めに並べ、期限が近づいたものを捨ててきた。",
+    "translation": {
+     "en": "Many shops, afraid of running short of goods, have put out more than they need and thrown away whatever neared its date.",
+     "fr": "Par peur de manquer de marchandises, beaucoup de magasins en ont exposé plus que nécessaire et ont jeté ce dont la date approchait."
+    },
+    "note": {
+     "en": "「〜てきた」 describes a practice that has gone on up to now; 「多めに」 means a little more than needed.",
+     "fr": "「〜てきた」 décrit une pratique qui dure jusqu'à aujourd'hui ; 「多めに」 signifie un peu plus que nécessaire."
+    },
+    "words": [
+     {
+      "surface": "多く",
+      "meaning": {
+       "en": "many",
+       "fr": "beaucoup"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "店",
+      "meaning": {
+       "en": "shops",
+       "fr": "magasins"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "商品",
+      "meaning": {
+       "en": "goods",
+       "fr": "marchandises"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "足りなくなる",
+      "meaning": {
+       "en": "run short",
+       "fr": "venir à manquer"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "(nominaliser)",
+       "fr": "(nominalise)"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "恐れて",
+      "meaning": {
+       "en": "fearing",
+       "fr": "craignant"
+      }
+     },
+     {
+      "surface": "多めに",
+      "meaning": {
+       "en": "in larger amounts",
+       "fr": "en plus grande quantité"
+      }
+     },
+     {
+      "surface": "並べ",
+      "meaning": {
+       "en": "display, and",
+       "fr": "exposer, et"
+      }
+     },
+     {
+      "surface": "期限",
+      "meaning": {
+       "en": "date (expiry)",
+       "fr": "date limite"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "近づいた",
+      "meaning": {
+       "en": "has neared",
+       "fr": "s'est approchée"
+      }
+     },
+     {
+      "surface": "もの",
+      "meaning": {
+       "en": "things",
+       "fr": "choses"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "捨ててきた",
+      "meaning": {
+       "en": "have thrown away (until now)",
+       "fr": "ont jeté (jusqu'ici)"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "こうした無駄を減らそうと、ある大手のスーパーは昨年から、過去の売り上げのデータに基づいて、仕入れる量を決めるようにした。",
+    "translation": {
+     "en": "To cut such waste, one large supermarket chain began last year to decide how much stock to buy on the basis of its past sales data.",
+     "fr": "Pour réduire ce gaspillage, une grande chaîne de supermarchés décide depuis l'an dernier des quantités qu'elle achète en se fondant sur ses ventes passées."
+    },
+    "note": {
+     "en": "「〜に基づいて」 means based on; 「〜ようにした」 marks a deliberate change of practice.",
+     "fr": "「〜に基づいて」 signifie en se fondant sur ; 「〜ようにした」 marque un changement de pratique délibéré."
+    },
+    "words": [
+     {
+      "surface": "こうした",
+      "meaning": {
+       "en": "such",
+       "fr": "ce genre de"
+      }
+     },
+     {
+      "surface": "無駄",
+      "meaning": {
+       "en": "waste",
+       "fr": "gaspillage"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "減らそう",
+      "meaning": {
+       "en": "to reduce",
+       "fr": "réduire"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "(aiming) to",
+       "fr": "(dans le but de)"
+      }
+     },
+     {
+      "surface": "ある",
+      "meaning": {
+       "en": "a certain",
+       "fr": "un certain"
+      }
+     },
+     {
+      "surface": "大手",
+      "meaning": {
+       "en": "major company",
+       "fr": "grande entreprise"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "スーパー",
+      "meaning": {
+       "en": "supermarket",
+       "fr": "supermarché"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "昨年",
+      "meaning": {
+       "en": "last year",
+       "fr": "l'an dernier"
+      }
+     },
+     {
+      "surface": "から",
+      "meaning": {
+       "en": "since",
+       "fr": "depuis"
+      }
+     },
+     {
+      "surface": "過去",
+      "meaning": {
+       "en": "past",
+       "fr": "passé"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "売り上げ",
+      "meaning": {
+       "en": "sales",
+       "fr": "ventes"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "データ",
+      "meaning": {
+       "en": "data",
+       "fr": "données"
+      }
+     },
+     {
+      "surface": "に基づいて",
+      "meaning": {
+       "en": "based on",
+       "fr": "en se fondant sur"
+      }
+     },
+     {
+      "surface": "仕入れる",
+      "meaning": {
+       "en": "buy in (stock)",
+       "fr": "s'approvisionner"
+      }
+     },
+     {
+      "surface": "量",
+      "meaning": {
+       "en": "amount",
+       "fr": "quantité"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "決める",
+      "meaning": {
+       "en": "decide",
+       "fr": "décider"
+      }
+     },
+     {
+      "surface": "ようにした",
+      "meaning": {
+       "en": "made it a practice to",
+       "fr": "a pris l'habitude de"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "さらに、天気や地域の行事に応じて量を細かく変えた結果、捨てる食品は三割減ったそうだ。",
+    "translation": {
+     "en": "Moreover, by finely adjusting the amounts to the weather and to local events, it has reportedly cut the food it throws away by thirty percent.",
+     "fr": "De plus, en ajustant finement les quantités selon la météo et les fêtes locales, elle aurait réduit de trente pour cent les aliments jetés."
+    },
+    "note": {
+     "en": "「〜に応じて」 means according to, in response to; 「〜た結果」 presents what followed; 「そうだ」 after a plain form reports hearsay.",
+     "fr": "「〜に応じて」 signifie selon, en fonction de ; 「〜た結果」 présente ce qui en a découlé ; 「そうだ」 après une forme neutre rapporte un ouï-dire."
+    },
+    "words": [
+     {
+      "surface": "さらに",
+      "meaning": {
+       "en": "moreover",
+       "fr": "de plus"
+      }
+     },
+     {
+      "surface": "天気",
+      "meaning": {
+       "en": "weather",
+       "fr": "météo"
+      }
+     },
+     {
+      "surface": "や",
+      "meaning": {
+       "en": "and",
+       "fr": "et"
+      }
+     },
+     {
+      "surface": "地域",
+      "meaning": {
+       "en": "local area",
+       "fr": "région"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "行事",
+      "meaning": {
+       "en": "events",
+       "fr": "fêtes"
+      }
+     },
+     {
+      "surface": "に応じて",
+      "meaning": {
+       "en": "according to",
+       "fr": "selon"
+      }
+     },
+     {
+      "surface": "量",
+      "meaning": {
+       "en": "amounts",
+       "fr": "quantités"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "細かく",
+      "meaning": {
+       "en": "finely",
+       "fr": "finement"
+      }
+     },
+     {
+      "surface": "変えた",
+      "meaning": {
+       "en": "changed",
+       "fr": "a modifié"
+      }
+     },
+     {
+      "surface": "結果",
+      "meaning": {
+       "en": "as a result",
+       "fr": "résultat"
+      }
+     },
+     {
+      "surface": "捨てる",
+      "meaning": {
+       "en": "throw away",
+       "fr": "jeter"
+      }
+     },
+     {
+      "surface": "食品",
+      "meaning": {
+       "en": "food",
+       "fr": "aliments"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "三割",
+      "meaning": {
+       "en": "thirty percent",
+       "fr": "trente pour cent"
+      }
+     },
+     {
+      "surface": "減った",
+      "meaning": {
+       "en": "decreased",
+       "fr": "ont diminué"
+      }
+     },
+     {
+      "surface": "そうだ",
+      "meaning": {
+       "en": "reportedly",
+       "fr": "paraît-il"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "ただ、店の努力だけでは限界がある。",
+    "translation": {
+     "en": "Still, the shops' efforts alone can only go so far.",
+     "fr": "Toutefois, les efforts des magasins ne suffisent pas à eux seuls."
+    },
+    "note": {
+     "en": "「ただ」 at the head of a sentence adds a reservation: still, however.",
+     "fr": "「ただ」 en tête de phrase introduit une réserve : toutefois."
+    },
+    "words": [
+     {
+      "surface": "ただ",
+      "meaning": {
+       "en": "still, however",
+       "fr": "toutefois"
+      }
+     },
+     {
+      "surface": "店",
+      "meaning": {
+       "en": "shops",
+       "fr": "magasins"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "努力",
+      "meaning": {
+       "en": "efforts",
+       "fr": "efforts"
+      }
+     },
+     {
+      "surface": "だけ",
+      "meaning": {
+       "en": "alone",
+       "fr": "seuls"
+      }
+     },
+     {
+      "surface": "では",
+      "meaning": {
+       "en": "with (as the topic)",
+       "fr": "avec (en thème)"
+      }
+     },
+     {
+      "surface": "限界",
+      "meaning": {
+       "en": "limit",
+       "fr": "limite"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "ある",
+      "meaning": {
+       "en": "there is",
+       "fr": "il y a"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "買う側にも、必要な分だけを買う習慣が求められている。",
+    "translation": {
+     "en": "Buyers, too, are expected to make a habit of buying only what they need.",
+     "fr": "On attend aussi des acheteurs qu'ils prennent l'habitude de n'acheter que ce dont ils ont besoin."
+    },
+    "note": {
+     "en": "「側」 is the side or party; 「求められている」 is the passive of 「求める」: it is asked of them.",
+     "fr": "「側」 désigne le côté, la partie ; 「求められている」 est le passif de 「求める」 : on le leur demande."
+    },
+    "words": [
+     {
+      "surface": "買う",
+      "meaning": {
+       "en": "buying",
+       "fr": "qui achète"
+      }
+     },
+     {
+      "surface": "側",
+      "meaning": {
+       "en": "side",
+       "fr": "côté"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "of (asked of)",
+       "fr": "de (demandé à)"
+      }
+     },
+     {
+      "surface": "も",
+      "meaning": {
+       "en": "too",
+       "fr": "aussi"
+      }
+     },
+     {
+      "surface": "必要",
+      "meaning": {
+       "en": "necessary",
+       "fr": "nécessaire"
+      }
+     },
+     {
+      "surface": "な",
+      "meaning": {
+       "en": "(links the adjective)",
+       "fr": "(relie l'adjectif)"
+      }
+     },
+     {
+      "surface": "分",
+      "meaning": {
+       "en": "amount",
+       "fr": "quantité"
+      }
+     },
+     {
+      "surface": "だけ",
+      "meaning": {
+       "en": "only",
+       "fr": "seulement"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "買う",
+      "meaning": {
+       "en": "buy",
+       "fr": "acheter"
+      }
+     },
+     {
+      "surface": "習慣",
+      "meaning": {
+       "en": "habit",
+       "fr": "habitude"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "求められている",
+      "meaning": {
+       "en": "is called for",
+       "fr": "est demandée"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "n2-08",
+  "level": "N2",
+  "title": "方言のゆくえ",
+  "grammar": [
+   "〜一方だ",
+   "〜反面",
+   "〜をめぐって"
+  ],
+  "text": "テレビやインターネットが広まったことで、若い世代が方言を使う機会は減る一方だ。標準語が全国どこでも通じるのは便利な反面、地域ごとの言葉の違いが失われていくのはさびしいという声も多い。方言を学校で教えるべきかどうかをめぐっては、意見が分かれている。教えれば言葉を残せると考える人もいれば、日常で話されなくなった言葉を教室で守っても意味がないと考える人もいる。ところが最近、方言を使った商品や観光のポスターが、若者の間で人気を集めている。方言は消えるのではなく、形を変えて生き続けるのかもしれない。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "According to the text, what has cut young people's use of dialect?",
+     "fr": "D'après le texte, qu'est-ce qui a réduit l'usage du dialecte chez les jeunes ?"
+    },
+    "options": {
+     "en": [
+      "Schools that teach only standard speech",
+      "The spread of TV and the internet",
+      "Young people leaving their regions",
+      "Parents who choose not to speak it"
+     ],
+     "fr": [
+      "Des écoles qui n'enseignent que le standard",
+      "La diffusion de la télé et d'internet",
+      "Le départ des jeunes de leur région",
+      "Des parents qui ne le parlent plus"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「減る一方だ」 say about the chances to use dialect?",
+     "fr": "Que dit 「減る一方だ」 des occasions de parler le dialecte ?"
+    },
+    "options": {
+     "en": [
+      "They shrank, then levelled off",
+      "They will soon start to shrink",
+      "They keep on shrinking",
+      "They shrink in some regions only"
+     ],
+     "fr": [
+      "Elles ont baissé, puis se sont stabilisées",
+      "Elles vont bientôt diminuer",
+      "Elles ne cessent de diminuer",
+      "Elles ne baissent que dans certaines régions"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「便利な反面」 do in the second sentence?",
+     "fr": "Quel rôle joue 「便利な反面」 dans la deuxième phrase ?"
+    },
+    "options": {
+     "en": [
+      "Gives the reason for the advantage",
+      "Sets a drawback against an advantage",
+      "Adds a second advantage to the first",
+      "Casts doubt on the advantage itself"
+     ],
+     "fr": [
+      "Donner la raison de l'avantage",
+      "Opposer un inconvénient à un avantage",
+      "Ajouter un second avantage au premier",
+      "Mettre en doute l'avantage lui-même"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What is 「標準語」?",
+     "fr": "Qu'est-ce que le 「標準語」 ?"
+    },
+    "options": {
+     "en": [
+      "The common national language",
+      "A local way of speaking",
+      "The language of old books",
+      "Polite speech used at work"
+     ],
+     "fr": [
+      "La langue commune du pays",
+      "Une façon de parler locale",
+      "La langue des livres anciens",
+      "Le langage poli du travail"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「〜をめぐって」 mean in 「教えるべきかどうかをめぐっては」?",
+     "fr": "Que signifie 「〜をめぐって」 dans 「教えるべきかどうかをめぐっては」 ?"
+    },
+    "options": {
+     "en": [
+      "Because of a decision already made",
+      "Instead of a question left aside",
+      "Following a rule set by the school",
+      "Concerning an issue under debate"
+     ],
+     "fr": [
+      "À cause d'une décision déjà prise",
+      "À la place d'une question écartée",
+      "Selon une règle fixée par l'école",
+      "Au sujet d'une question débattue"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What do those in favour of teaching dialect at school believe?",
+     "fr": "Que pensent les partisans de l'enseignement du dialecte à l'école ?"
+    },
+    "options": {
+     "en": [
+      "It will help pupils find work",
+      "It can keep the language alive",
+      "It will make standard speech easier",
+      "It will bring tourists to the region"
+     ],
+     "fr": [
+      "Il aidera les élèves à trouver du travail",
+      "Il peut faire vivre ces parlers",
+      "Il rendra le japonais standard plus facile",
+      "Il attirera des touristes dans la région"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What do those against it think?",
+     "fr": "Que pensent ceux qui s'y opposent ?"
+    },
+    "options": {
+     "en": [
+      "It takes time away from more useful subjects",
+      "Teachers do not know the local dialect well",
+      "Saving it in class means little if nobody speaks it",
+      "Dialect should be learnt from one's family"
+     ],
+     "fr": [
+      "Il prend du temps aux matières plus utiles",
+      "Les enseignants connaissent mal le dialecte local",
+      "Le sauver en classe sert peu si personne ne le parle",
+      "Le dialecte doit s'apprendre en famille"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「人気を集めている」 mean?",
+     "fr": "Que signifie 「人気を集めている」 ?"
+    },
+    "options": {
+     "en": [
+      "Is becoming popular",
+      "Is gathering opinions",
+      "Is drawing a crowd to an event",
+      "Is losing its appeal"
+     ],
+     "fr": [
+      "Gagne en popularité",
+      "Recueille des avis",
+      "Attire la foule à un événement",
+      "Perd de son attrait"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What has recently become popular among young people?",
+     "fr": "Qu'est-ce qui plaît depuis peu aux jeunes ?"
+    },
+    "options": {
+     "en": [
+      "Dialect lessons given at school",
+      "TV programmes made in dialect",
+      "Websites that teach dialect",
+      "Goods and posters written in dialect"
+     ],
+     "fr": [
+      "Des cours de dialecte à l'école",
+      "Des émissions de télé en dialecte",
+      "Des sites qui enseignent le dialecte",
+      "Des produits et affiches en dialecte"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What does the writer suggest in the last sentence?",
+     "fr": "Que suggère l'auteur dans la dernière phrase ?"
+    },
+    "options": {
+     "en": [
+      "Dialect will be gone within a generation",
+      "Dialect can survive only if schools teach it",
+      "Dialect may survive by taking new forms",
+      "Standard speech will itself become a dialect"
+     ],
+     "fr": [
+      "Le dialecte aura disparu d'ici une génération",
+      "Le dialecte ne survivra que si l'école l'enseigne",
+      "Le dialecte peut survivre sous d'autres formes",
+      "Le japonais standard deviendra un dialecte"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "Which best describes the writer's view of the future of dialect?",
+     "fr": "Quel mot décrit le mieux le regard de l'auteur sur l'avenir du dialecte ?"
+    },
+    "options": {
+     "en": [
+      "Quietly hopeful",
+      "Deeply pessimistic",
+      "Openly indifferent",
+      "Strongly critical"
+     ],
+     "fr": [
+      "Prudemment optimiste",
+      "Profondément pessimiste",
+      "Franchement indifférent",
+      "Très critique"
+     ]
+    },
+    "correct": 0
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "テレビやインターネットが広まったことで、若い世代が方言を使う機会は減る一方だ。",
+    "translation": {
+     "en": "With the spread of television and the internet, the chances young people have to use dialect keep shrinking.",
+     "fr": "Avec la diffusion de la télévision et d'internet, les jeunes ont de moins en moins l'occasion de parler leur dialecte."
+    },
+    "note": {
+     "en": "「〜ことで」 gives the cause; 「〜一方だ」 after a verb says a change keeps going one way.",
+     "fr": "「〜ことで」 donne la cause ; 「〜一方だ」 après un verbe dit qu'un changement ne fait que s'accentuer."
+    },
+    "words": [
+     {
+      "surface": "テレビ",
+      "meaning": {
+       "en": "television",
+       "fr": "télévision"
+      }
+     },
+     {
+      "surface": "や",
+      "meaning": {
+       "en": "and",
+       "fr": "et"
+      }
+     },
+     {
+      "surface": "インターネット",
+      "meaning": {
+       "en": "internet",
+       "fr": "internet"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "広まった",
+      "meaning": {
+       "en": "spread",
+       "fr": "se sont répandus"
+      }
+     },
+     {
+      "surface": "ことで",
+      "meaning": {
+       "en": "through the fact that",
+       "fr": "du fait que"
+      }
+     },
+     {
+      "surface": "若い",
+      "meaning": {
+       "en": "young",
+       "fr": "jeune"
+      }
+     },
+     {
+      "surface": "世代",
+      "meaning": {
+       "en": "generation",
+       "fr": "génération"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker (in a clause)",
+       "fr": "marque le sujet (dans une proposition)"
+      }
+     },
+     {
+      "surface": "方言",
+      "meaning": {
+       "en": "dialect",
+       "fr": "dialecte"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "使う",
+      "meaning": {
+       "en": "use",
+       "fr": "utiliser"
+      }
+     },
+     {
+      "surface": "機会",
+      "meaning": {
+       "en": "chances",
+       "fr": "occasions"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "減る一方だ",
+      "meaning": {
+       "en": "keep decreasing",
+       "fr": "ne cessent de diminuer"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "標準語が全国どこでも通じるのは便利な反面、地域ごとの言葉の違いが失われていくのはさびしいという声も多い。",
+    "translation": {
+     "en": "Being understood anywhere in the country in standard Japanese is convenient, but many also say it is sad to see each region's own way of speaking being lost.",
+     "fr": "Pouvoir se faire comprendre partout dans le pays en japonais standard est pratique, mais beaucoup trouvent triste de voir disparaître les différences de parler d'une région à l'autre."
+    },
+    "note": {
+     "en": "「〜反面」 sets a drawback against an advantage of the same thing; 「〜ていく」 shows a loss that goes on.",
+     "fr": "「〜反面」 oppose un inconvénient à un avantage de la même chose ; 「〜ていく」 montre une perte qui se poursuit."
+    },
+    "words": [
+     {
+      "surface": "標準語",
+      "meaning": {
+       "en": "standard Japanese",
+       "fr": "japonais standard"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "全国",
+      "meaning": {
+       "en": "the whole country",
+       "fr": "tout le pays"
+      }
+     },
+     {
+      "surface": "どこでも",
+      "meaning": {
+       "en": "anywhere",
+       "fr": "partout"
+      }
+     },
+     {
+      "surface": "通じる",
+      "meaning": {
+       "en": "be understood",
+       "fr": "être compris"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "(nominaliser)",
+       "fr": "(nominalise)"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "便利",
+      "meaning": {
+       "en": "convenient",
+       "fr": "pratique"
+      }
+     },
+     {
+      "surface": "な",
+      "meaning": {
+       "en": "(links the adjective)",
+       "fr": "(relie l'adjectif)"
+      }
+     },
+     {
+      "surface": "反面",
+      "meaning": {
+       "en": "but on the other hand",
+       "fr": "mais en revanche"
+      }
+     },
+     {
+      "surface": "地域",
+      "meaning": {
+       "en": "region",
+       "fr": "région"
+      }
+     },
+     {
+      "surface": "ごと",
+      "meaning": {
+       "en": "each",
+       "fr": "chaque"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "言葉",
+      "meaning": {
+       "en": "speech",
+       "fr": "parler"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "違い",
+      "meaning": {
+       "en": "differences",
+       "fr": "différences"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "失われていく",
+      "meaning": {
+       "en": "being lost",
+       "fr": "se perdre peu à peu"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "(nominaliser)",
+       "fr": "(nominalise)"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "さびしい",
+      "meaning": {
+       "en": "sad",
+       "fr": "triste"
+      }
+     },
+     {
+      "surface": "という",
+      "meaning": {
+       "en": "that says",
+       "fr": "qui dit que"
+      }
+     },
+     {
+      "surface": "声",
+      "meaning": {
+       "en": "voices",
+       "fr": "voix"
+      }
+     },
+     {
+      "surface": "も",
+      "meaning": {
+       "en": "also",
+       "fr": "aussi"
+      }
+     },
+     {
+      "surface": "多い",
+      "meaning": {
+       "en": "are many",
+       "fr": "sont nombreuses"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "方言を学校で教えるべきかどうかをめぐっては、意見が分かれている。",
+    "translation": {
+     "en": "Opinions are divided over whether dialect should be taught at school.",
+     "fr": "Les avis sont partagés sur la question de savoir s'il faut enseigner le dialecte à l'école."
+    },
+    "note": {
+     "en": "「〜をめぐって」 names the issue a debate turns on; 「〜べきかどうか」 is whether one ought to.",
+     "fr": "「〜をめぐって」 désigne la question autour de laquelle tourne un débat ; 「〜べきかどうか」 signifie s'il faut ou non."
+    },
+    "words": [
+     {
+      "surface": "方言",
+      "meaning": {
+       "en": "dialect",
+       "fr": "dialecte"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "学校",
+      "meaning": {
+       "en": "school",
+       "fr": "école"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "at",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "教えるべき",
+      "meaning": {
+       "en": "ought to teach",
+       "fr": "devoir enseigner"
+      }
+     },
+     {
+      "surface": "かどうか",
+      "meaning": {
+       "en": "whether or not",
+       "fr": "si oui ou non"
+      }
+     },
+     {
+      "surface": "をめぐって",
+      "meaning": {
+       "en": "over (an issue)",
+       "fr": "au sujet de"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "意見",
+      "meaning": {
+       "en": "opinions",
+       "fr": "avis"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "分かれている",
+      "meaning": {
+       "en": "are divided",
+       "fr": "sont partagés"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "教えれば言葉を残せると考える人もいれば、日常で話されなくなった言葉を教室で守っても意味がないと考える人もいる。",
+    "translation": {
+     "en": "Some think teaching it can keep the language alive, while others think there is no point protecting in the classroom a way of speaking no longer used in daily life.",
+     "fr": "Certains pensent qu'en l'enseignant on peut préserver ces parlers, d'autres qu'il ne sert à rien de protéger en classe une langue qu'on ne parle plus au quotidien."
+    },
+    "note": {
+     "en": "「〜人もいれば、〜人もいる」 sets two groups side by side: some... others...",
+     "fr": "「〜人もいれば、〜人もいる」 met deux groupes côte à côte : les uns..., les autres..."
+    },
+    "words": [
+     {
+      "surface": "教えれば",
+      "meaning": {
+       "en": "if it is taught",
+       "fr": "si on l'enseigne"
+      }
+     },
+     {
+      "surface": "言葉",
+      "meaning": {
+       "en": "the language",
+       "fr": "ces parlers"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "残せる",
+      "meaning": {
+       "en": "can preserve",
+       "fr": "pouvoir préserver"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "that",
+       "fr": "que"
+      }
+     },
+     {
+      "surface": "考える",
+      "meaning": {
+       "en": "think",
+       "fr": "pensent"
+      }
+     },
+     {
+      "surface": "人",
+      "meaning": {
+       "en": "people",
+       "fr": "gens"
+      }
+     },
+     {
+      "surface": "も",
+      "meaning": {
+       "en": "also",
+       "fr": "aussi"
+      }
+     },
+     {
+      "surface": "いれば",
+      "meaning": {
+       "en": "there are, and",
+       "fr": "il y en a, et"
+      }
+     },
+     {
+      "surface": "日常",
+      "meaning": {
+       "en": "daily life",
+       "fr": "vie quotidienne"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "in",
+       "fr": "dans"
+      }
+     },
+     {
+      "surface": "話されなくなった",
+      "meaning": {
+       "en": "no longer spoken",
+       "fr": "qu'on ne parle plus"
+      }
+     },
+     {
+      "surface": "言葉",
+      "meaning": {
+       "en": "language",
+       "fr": "langue"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "教室",
+      "meaning": {
+       "en": "classroom",
+       "fr": "salle de classe"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "in",
+       "fr": "en"
+      }
+     },
+     {
+      "surface": "守っても",
+      "meaning": {
+       "en": "even if one protects",
+       "fr": "même si l'on protège"
+      }
+     },
+     {
+      "surface": "意味",
+      "meaning": {
+       "en": "point",
+       "fr": "sens"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "ない",
+      "meaning": {
+       "en": "there is none",
+       "fr": "il n'y a pas"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "that",
+       "fr": "que"
+      }
+     },
+     {
+      "surface": "考える",
+      "meaning": {
+       "en": "think",
+       "fr": "pensent"
+      }
+     },
+     {
+      "surface": "人",
+      "meaning": {
+       "en": "people",
+       "fr": "gens"
+      }
+     },
+     {
+      "surface": "も",
+      "meaning": {
+       "en": "also",
+       "fr": "aussi"
+      }
+     },
+     {
+      "surface": "いる",
+      "meaning": {
+       "en": "there are",
+       "fr": "il y en a"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "ところが最近、方言を使った商品や観光のポスターが、若者の間で人気を集めている。",
+    "translation": {
+     "en": "Recently, though, goods and tourist posters that use dialect have been winning popularity among young people.",
+     "fr": "Pourtant, depuis peu, des produits et des affiches touristiques en dialecte ont du succès auprès des jeunes."
+    },
+    "note": {
+     "en": "「ところが」 introduces something unexpected after what came before; 「人気を集める」 is to win popularity.",
+     "fr": "「ところが」 introduit un fait inattendu après ce qui précède ; 「人気を集める」 signifie gagner en popularité."
+    },
+    "words": [
+     {
+      "surface": "ところが",
+      "meaning": {
+       "en": "however, yet",
+       "fr": "pourtant"
+      }
+     },
+     {
+      "surface": "最近",
+      "meaning": {
+       "en": "recently",
+       "fr": "depuis peu"
+      }
+     },
+     {
+      "surface": "方言",
+      "meaning": {
+       "en": "dialect",
+       "fr": "dialecte"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "使った",
+      "meaning": {
+       "en": "using",
+       "fr": "utilisant"
+      }
+     },
+     {
+      "surface": "商品",
+      "meaning": {
+       "en": "goods",
+       "fr": "produits"
+      }
+     },
+     {
+      "surface": "や",
+      "meaning": {
+       "en": "and",
+       "fr": "et"
+      }
+     },
+     {
+      "surface": "観光",
+      "meaning": {
+       "en": "tourism",
+       "fr": "tourisme"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "ポスター",
+      "meaning": {
+       "en": "posters",
+       "fr": "affiches"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "若者",
+      "meaning": {
+       "en": "young people",
+       "fr": "jeunes"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "間",
+      "meaning": {
+       "en": "among",
+       "fr": "parmi"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "in",
+       "fr": "chez"
+      }
+     },
+     {
+      "surface": "人気",
+      "meaning": {
+       "en": "popularity",
+       "fr": "popularité"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "集めている",
+      "meaning": {
+       "en": "are gathering",
+       "fr": "gagnent"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "方言は消えるのではなく、形を変えて生き続けるのかもしれない。",
+    "translation": {
+     "en": "Perhaps dialect is not disappearing, but living on in another form.",
+     "fr": "Peut-être le dialecte ne disparaît-il pas, mais continue-t-il de vivre sous une autre forme."
+    },
+    "note": {
+     "en": "「AのではなくB」 rejects A in favour of B; 「〜続ける」 after a stem means to go on doing.",
+     "fr": "「AのではなくB」 écarte A au profit de B ; 「〜続ける」 après un radical signifie continuer à."
+    },
+    "words": [
+     {
+      "surface": "方言",
+      "meaning": {
+       "en": "dialect",
+       "fr": "dialecte"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "消える",
+      "meaning": {
+       "en": "disappear",
+       "fr": "disparaître"
+      }
+     },
+     {
+      "surface": "のではなく",
+      "meaning": {
+       "en": "it is not that... but",
+       "fr": "ce n'est pas que... mais"
+      }
+     },
+     {
+      "surface": "形",
+      "meaning": {
+       "en": "form",
+       "fr": "forme"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "変えて",
+      "meaning": {
+       "en": "changing",
+       "fr": "en changeant"
+      }
+     },
+     {
+      "surface": "生き続ける",
+      "meaning": {
+       "en": "go on living",
+       "fr": "continuer à vivre"
+      }
+     },
+     {
+      "surface": "のかもしれない",
+      "meaning": {
+       "en": "perhaps",
+       "fr": "peut-être"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "n2-09",
+  "level": "N2",
+  "title": "眠りと勉強",
+  "grammar": [
+   "〜に反して",
+   "〜ことから",
+   "〜というより"
+  ],
+  "text": "ある大学の研究チームが、学生を二つのグループに分け、夜に新しい単語を覚えてもらった。一方のグループはその後すぐに眠り、もう一方は朝まで起きていた。起きていたグループは試験の直前まで単語を見直せるので、有利だろうと思われていた。ところが、予想に反して、眠ったグループのほうがずっと多くの単語を覚えていた。眠った学生のほうが成績がよかったことから、研究者は、眠っている間に脳が覚えたことをまとめているのだと考えている。試験の前に一晩中起きて勉強するのは、努力というより、せっかく覚えたことをむだにするやり方なのかもしれない。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "When did the students learn the new words?",
+     "fr": "Quand les étudiants ont-ils appris les nouveaux mots ?"
+    },
+    "options": {
+     "en": [
+      "In the evening",
+      "In the morning",
+      "Just before the test",
+      "Over a whole week"
+     ],
+     "fr": [
+      "Le soir",
+      "Le matin",
+      "Juste avant l'examen",
+      "Pendant une semaine"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What did the other group do?",
+     "fr": "Qu'a fait l'autre groupe ?"
+    },
+    "options": {
+     "en": [
+      "Slept as soon as they had learnt",
+      "Went over the words with the team",
+      "Took the test that same evening",
+      "Stayed awake until morning"
+     ],
+     "fr": [
+      "Il a dormi juste après avoir appris",
+      "Il a revu les mots avec l'équipe",
+      "Il a passé l'examen le soir même",
+      "Il est resté éveillé jusqu'au matin"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Why was the group that stayed awake expected to do better?",
+     "fr": "Pourquoi pensait-on que le groupe resté éveillé ferait mieux ?"
+    },
+    "options": {
+     "en": [
+      "They had learnt the words earlier in the day",
+      "They could go over the words until the test",
+      "They had been chosen from the best students",
+      "They were given fewer words to remember"
+     ],
+     "fr": [
+      "Ils avaient appris les mots plus tôt dans la journée",
+      "Ils pouvaient revoir les mots jusqu'à l'examen",
+      "Ils avaient été choisis parmi les meilleurs",
+      "Ils avaient moins de mots à retenir"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「予想に反して」 tell us about the result?",
+     "fr": "Que dit 「予想に反して」 du résultat ?"
+    },
+    "options": {
+     "en": [
+      "It was just what had been expected",
+      "It came sooner than had been expected",
+      "It was the opposite of what was expected",
+      "It was too unclear to compare with anything"
+     ],
+     "fr": [
+      "Il était exactement celui qu'on attendait",
+      "Il est arrivé plus tôt qu'on ne l'attendait",
+      "Il était contraire à ce qu'on attendait",
+      "Il était trop flou pour être comparé"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「〜ことから」 do in 「成績がよかったことから」?",
+     "fr": "Quel rôle joue 「〜ことから」 dans 「成績がよかったことから」 ?"
+    },
+    "options": {
+     "en": [
+      "Gives the fact a conclusion is drawn from",
+      "Gives the moment something first began",
+      "Gives a condition not yet fulfilled",
+      "Gives one example among several"
+     ],
+     "fr": [
+      "Donner le fait dont on tire une conclusion",
+      "Donner le moment où quelque chose a commencé",
+      "Donner une condition pas encore remplie",
+      "Donner un exemple parmi d'autres"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「有利」 mean in 「有利だろうと思われていた」?",
+     "fr": "Que signifie 「有利」 dans 「有利だろうと思われていた」 ?"
+    },
+    "options": {
+     "en": [
+      "At a disadvantage",
+      "Very tired",
+      "Very nervous",
+      "At an advantage"
+     ],
+     "fr": [
+      "Désavantagé",
+      "Très fatigué",
+      "Très nerveux",
+      "Avantagé"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What do the researchers think happens during sleep?",
+     "fr": "Que se passe-t-il pendant le sommeil, selon les chercheurs ?"
+    },
+    "options": {
+     "en": [
+      "The brain forgets the less useful words",
+      "The body rests so the brain can work later",
+      "The brain sorts out what was learnt",
+      "New words are learnt more quickly"
+     ],
+     "fr": [
+      "Le cerveau oublie les mots moins utiles",
+      "Le corps se repose pour que le cerveau travaille plus tard",
+      "Le cerveau range ce qui a été appris",
+      "On apprend plus vite de nouveaux mots"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「一晩中」 mean?",
+     "fr": "Que signifie 「一晩中」 ?"
+    },
+    "options": {
+     "en": [
+      "All night long",
+      "One evening",
+      "Every night",
+      "Late at night"
+     ],
+     "fr": [
+      "Toute la nuit",
+      "Un soir",
+      "Chaque nuit",
+      "Tard dans la nuit"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「努力というより」 suggest about staying up all night?",
+     "fr": "Que suggère 「努力というより」 à propos des nuits blanches ?"
+    },
+    "options": {
+     "en": [
+      "It is effort, and something more besides",
+      "It is the hardest kind of effort there is",
+      "It is an effort that always pays off",
+      "It is not so much effort as something else"
+     ],
+     "fr": [
+      "C'est un effort, et autre chose en plus",
+      "C'est la forme d'effort la plus dure",
+      "C'est un effort qui paie toujours",
+      "Ce n'est pas tant un effort qu'autre chose"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What advice would the writer most likely give a student?",
+     "fr": "Quel conseil l'auteur donnerait-il sans doute à un étudiant ?"
+    },
+    "options": {
+     "en": [
+      "Study only in the morning before a test",
+      "Sleep after studying instead of staying up",
+      "Review right up to the moment of the test",
+      "Learn fewer new words at any one time"
+     ],
+     "fr": [
+      "N'étudier que le matin avant un examen",
+      "Dormir après avoir étudié plutôt que veiller",
+      "Réviser jusqu'à la dernière minute",
+      "Apprendre moins de mots à la fois"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "Which best describes the finding of the research?",
+     "fr": "Qu'est-ce qui décrit le mieux le résultat de la recherche ?"
+    },
+    "options": {
+     "en": [
+      "It confirmed what everyone had assumed",
+      "It could not be explained by the team",
+      "It went against what people had assumed",
+      "It held true for only a few students"
+     ],
+     "fr": [
+      "Il confirme ce que tous supposaient",
+      "L'équipe n'a pas pu l'expliquer",
+      "Il contredit ce qu'on supposait",
+      "Il ne vaut que pour quelques étudiants"
+     ]
+    },
+    "correct": 2
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "ある大学の研究チームが、学生を二つのグループに分け、夜に新しい単語を覚えてもらった。",
+    "translation": {
+     "en": "A university research team divided students into two groups and had them learn new words in the evening.",
+     "fr": "Une équipe de chercheurs d'une université a réparti des étudiants en deux groupes et leur a fait apprendre de nouveaux mots le soir."
+    },
+    "note": {
+     "en": "「〜てもらう」 here means having someone do something at your request: the students learnt the words for the team.",
+     "fr": "「〜てもらう」 signifie ici faire faire quelque chose à quelqu'un à sa demande : les étudiants apprennent les mots pour l'équipe."
+    },
+    "words": [
+     {
+      "surface": "ある",
+      "meaning": {
+       "en": "a certain",
+       "fr": "un certain"
+      }
+     },
+     {
+      "surface": "大学",
+      "meaning": {
+       "en": "university",
+       "fr": "université"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "研究",
+      "meaning": {
+       "en": "research",
+       "fr": "recherche"
+      }
+     },
+     {
+      "surface": "チーム",
+      "meaning": {
+       "en": "team",
+       "fr": "équipe"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "学生",
+      "meaning": {
+       "en": "students",
+       "fr": "étudiants"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "二つ",
+      "meaning": {
+       "en": "two",
+       "fr": "deux"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "グループ",
+      "meaning": {
+       "en": "groups",
+       "fr": "groupes"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "into",
+       "fr": "en"
+      }
+     },
+     {
+      "surface": "分け",
+      "meaning": {
+       "en": "divided, and",
+       "fr": "a réparti, et"
+      }
+     },
+     {
+      "surface": "夜",
+      "meaning": {
+       "en": "evening",
+       "fr": "soir"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "in",
+       "fr": "le"
+      }
+     },
+     {
+      "surface": "新しい",
+      "meaning": {
+       "en": "new",
+       "fr": "nouveaux"
+      }
+     },
+     {
+      "surface": "単語",
+      "meaning": {
+       "en": "words",
+       "fr": "mots"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "覚えてもらった",
+      "meaning": {
+       "en": "had them learn",
+       "fr": "leur a fait apprendre"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "一方のグループはその後すぐに眠り、もう一方は朝まで起きていた。",
+    "translation": {
+     "en": "One group went to sleep straight afterwards; the other stayed awake until morning.",
+     "fr": "Un groupe s'est endormi tout de suite après, l'autre est resté éveillé jusqu'au matin."
+    },
+    "note": {
+     "en": "「一方の〜」 and 「もう一方」 mean one (of two) and the other.",
+     "fr": "「一方の〜」 et 「もう一方」 signifient l'un (des deux) et l'autre."
+    },
+    "words": [
+     {
+      "surface": "一方",
+      "meaning": {
+       "en": "one (of two)",
+       "fr": "l'un"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "des"
+      }
+     },
+     {
+      "surface": "グループ",
+      "meaning": {
+       "en": "group",
+       "fr": "groupe"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "その後",
+      "meaning": {
+       "en": "after that",
+       "fr": "après cela"
+      }
+     },
+     {
+      "surface": "すぐに",
+      "meaning": {
+       "en": "straight away",
+       "fr": "tout de suite"
+      }
+     },
+     {
+      "surface": "眠り",
+      "meaning": {
+       "en": "slept, and",
+       "fr": "s'est endormi, et"
+      }
+     },
+     {
+      "surface": "もう一方",
+      "meaning": {
+       "en": "the other",
+       "fr": "l'autre"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "朝",
+      "meaning": {
+       "en": "morning",
+       "fr": "matin"
+      }
+     },
+     {
+      "surface": "まで",
+      "meaning": {
+       "en": "until",
+       "fr": "jusqu'au"
+      }
+     },
+     {
+      "surface": "起きていた",
+      "meaning": {
+       "en": "stayed awake",
+       "fr": "est resté éveillé"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "起きていたグループは試験の直前まで単語を見直せるので、有利だろうと思われていた。",
+    "translation": {
+     "en": "The group that stayed awake could go over the words right up to the test, so it was expected to have the advantage.",
+     "fr": "Le groupe resté éveillé pouvait revoir les mots jusqu'à juste avant l'examen ; on pensait donc qu'il serait avantagé."
+    },
+    "note": {
+     "en": "「思われていた」 is the passive of 「思う」: it was generally thought, by no one in particular.",
+     "fr": "「思われていた」 est le passif de 「思う」 : on le pensait, sans dire qui."
+    },
+    "words": [
+     {
+      "surface": "起きていた",
+      "meaning": {
+       "en": "that stayed awake",
+       "fr": "resté éveillé"
+      }
+     },
+     {
+      "surface": "グループ",
+      "meaning": {
+       "en": "group",
+       "fr": "groupe"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "試験",
+      "meaning": {
+       "en": "test",
+       "fr": "examen"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "直前",
+      "meaning": {
+       "en": "right before",
+       "fr": "juste avant"
+      }
+     },
+     {
+      "surface": "まで",
+      "meaning": {
+       "en": "until",
+       "fr": "jusqu'à"
+      }
+     },
+     {
+      "surface": "単語",
+      "meaning": {
+       "en": "words",
+       "fr": "mots"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "見直せる",
+      "meaning": {
+       "en": "can review",
+       "fr": "pouvoir revoir"
+      }
+     },
+     {
+      "surface": "ので",
+      "meaning": {
+       "en": "so",
+       "fr": "donc"
+      }
+     },
+     {
+      "surface": "有利",
+      "meaning": {
+       "en": "at an advantage",
+       "fr": "avantagé"
+      }
+     },
+     {
+      "surface": "だろう",
+      "meaning": {
+       "en": "probably",
+       "fr": "sans doute"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "that",
+       "fr": "que"
+      }
+     },
+     {
+      "surface": "思われていた",
+      "meaning": {
+       "en": "was thought",
+       "fr": "on pensait"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "ところが、予想に反して、眠ったグループのほうがずっと多くの単語を覚えていた。",
+    "translation": {
+     "en": "Yet, contrary to expectations, the group that slept remembered far more of the words.",
+     "fr": "Or, contrairement aux attentes, c'est le groupe qui avait dormi qui se souvenait de bien plus de mots."
+    },
+    "note": {
+     "en": "「〜に反して」 means contrary to; 「〜のほうが」 marks the one of two that comes out ahead.",
+     "fr": "「〜に反して」 signifie contrairement à ; 「〜のほうが」 marque celui des deux qui l'emporte."
+    },
+    "words": [
+     {
+      "surface": "ところが",
+      "meaning": {
+       "en": "yet",
+       "fr": "or"
+      }
+     },
+     {
+      "surface": "予想",
+      "meaning": {
+       "en": "expectations",
+       "fr": "attentes"
+      }
+     },
+     {
+      "surface": "に反して",
+      "meaning": {
+       "en": "contrary to",
+       "fr": "contrairement à"
+      }
+     },
+     {
+      "surface": "眠った",
+      "meaning": {
+       "en": "that slept",
+       "fr": "qui avait dormi"
+      }
+     },
+     {
+      "surface": "グループ",
+      "meaning": {
+       "en": "group",
+       "fr": "groupe"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "ほう",
+      "meaning": {
+       "en": "side (of a comparison)",
+       "fr": "côté (d'une comparaison)"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "ずっと",
+      "meaning": {
+       "en": "far",
+       "fr": "bien"
+      }
+     },
+     {
+      "surface": "多く",
+      "meaning": {
+       "en": "many",
+       "fr": "beaucoup"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "単語",
+      "meaning": {
+       "en": "words",
+       "fr": "mots"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "覚えていた",
+      "meaning": {
+       "en": "remembered",
+       "fr": "se souvenait"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "眠った学生のほうが成績がよかったことから、研究者は、眠っている間に脳が覚えたことをまとめているのだと考えている。",
+    "translation": {
+     "en": "Since the students who slept did better, the researchers think the brain puts what it has learnt in order during sleep.",
+     "fr": "Comme les étudiants qui avaient dormi ont eu de meilleurs résultats, les chercheurs pensent que le cerveau met en ordre pendant le sommeil ce qu'il a appris."
+    },
+    "note": {
+     "en": "「〜ことから」 gives the fact a conclusion is drawn from: since, judging from.",
+     "fr": "「〜ことから」 donne le fait dont on tire une conclusion : puisque, d'après."
+    },
+    "words": [
+     {
+      "surface": "眠った",
+      "meaning": {
+       "en": "who slept",
+       "fr": "qui avaient dormi"
+      }
+     },
+     {
+      "surface": "学生",
+      "meaning": {
+       "en": "students",
+       "fr": "étudiants"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "ほう",
+      "meaning": {
+       "en": "side (of a comparison)",
+       "fr": "côté (d'une comparaison)"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "成績",
+      "meaning": {
+       "en": "results",
+       "fr": "résultats"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "よかった",
+      "meaning": {
+       "en": "were good",
+       "fr": "étaient bons"
+      }
+     },
+     {
+      "surface": "ことから",
+      "meaning": {
+       "en": "from the fact that",
+       "fr": "du fait que"
+      }
+     },
+     {
+      "surface": "研究者",
+      "meaning": {
+       "en": "researchers",
+       "fr": "chercheurs"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "眠っている",
+      "meaning": {
+       "en": "sleeping",
+       "fr": "dormir"
+      }
+     },
+     {
+      "surface": "間に",
+      "meaning": {
+       "en": "while",
+       "fr": "pendant que"
+      }
+     },
+     {
+      "surface": "脳",
+      "meaning": {
+       "en": "brain",
+       "fr": "cerveau"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "覚えた",
+      "meaning": {
+       "en": "learnt",
+       "fr": "appris"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "what",
+       "fr": "ce que"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "まとめている",
+      "meaning": {
+       "en": "is putting in order",
+       "fr": "met en ordre"
+      }
+     },
+     {
+      "surface": "のだ",
+      "meaning": {
+       "en": "(explains)",
+       "fr": "(explique)"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "that",
+       "fr": "que"
+      }
+     },
+     {
+      "surface": "考えている",
+      "meaning": {
+       "en": "think",
+       "fr": "pensent"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "試験の前に一晩中起きて勉強するのは、努力というより、せっかく覚えたことをむだにするやり方なのかもしれない。",
+    "translation": {
+     "en": "Staying up all night to study before a test may be less a matter of effort than a way of wasting what one worked so hard to learn.",
+     "fr": "Passer la nuit à réviser avant un examen relève peut-être moins de l'effort que d'une façon de gâcher ce qu'on a eu tant de mal à apprendre."
+    },
+    "note": {
+     "en": "「AというよりB」 means B rather than A; 「せっかく」 stresses the effort that is about to be wasted.",
+     "fr": "「AというよりB」 signifie B plutôt que A ; 「せっかく」 souligne la peine qui risque d'être perdue."
+    },
+    "words": [
+     {
+      "surface": "試験",
+      "meaning": {
+       "en": "test",
+       "fr": "examen"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "前に",
+      "meaning": {
+       "en": "before",
+       "fr": "avant"
+      }
+     },
+     {
+      "surface": "一晩中",
+      "meaning": {
+       "en": "all night",
+       "fr": "toute la nuit"
+      }
+     },
+     {
+      "surface": "起きて",
+      "meaning": {
+       "en": "staying up",
+       "fr": "en veillant"
+      }
+     },
+     {
+      "surface": "勉強する",
+      "meaning": {
+       "en": "study",
+       "fr": "étudier"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "(nominaliser)",
+       "fr": "(nominalise)"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "努力",
+      "meaning": {
+       "en": "effort",
+       "fr": "effort"
+      }
+     },
+     {
+      "surface": "というより",
+      "meaning": {
+       "en": "rather than",
+       "fr": "plutôt que"
+      }
+     },
+     {
+      "surface": "せっかく",
+      "meaning": {
+       "en": "with such effort",
+       "fr": "avec tant de peine"
+      }
+     },
+     {
+      "surface": "覚えた",
+      "meaning": {
+       "en": "learnt",
+       "fr": "appris"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "what",
+       "fr": "ce que"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "むだにする",
+      "meaning": {
+       "en": "waste",
+       "fr": "gâcher"
+      }
+     },
+     {
+      "surface": "やり方",
+      "meaning": {
+       "en": "way",
+       "fr": "façon de faire"
+      }
+     },
+     {
+      "surface": "なのかもしれない",
+      "meaning": {
+       "en": "may be",
+       "fr": "est peut-être"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "n2-10",
+  "level": "N2",
+  "title": "自転車とヘルメット",
+  "grammar": [
+   "〜かねない",
+   "〜に加えて",
+   "〜ないことには"
+  ],
+  "text": "来月から、市内で自転車に乗る人は全員、ヘルメットをかぶるよう求められる。これまでは子どもだけが対象だったが、昨年、大人の事故が増えたことを受けて、市が決めたものだ。頭を守らずに転ぶと、小さな事故でも大けがにつながりかねない。市はヘルメットの代金に加えて、自転車を直すのにかかる費用の半分も出すという。しかし、髪型がくずれる、夏はあついといった理由で、かぶりたがらない人は少なくない。決まりを作っても、一人一人が安全の大切さを理解しないことには、事故は減らないだろう。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Who will be asked to wear a helmet from next month?",
+     "fr": "Qui devra porter un casque à partir du mois prochain ?"
+    },
+    "options": {
+     "en": [
+      "Only children who ride bicycles",
+      "Only adults who have had an accident",
+      "Everyone riding a bicycle in the city",
+      "Only people who cycle to work"
+     ],
+     "fr": [
+      "Seulement les enfants à vélo",
+      "Seulement les adultes déjà accidentés",
+      "Toute personne circulant à vélo en ville",
+      "Seulement ceux qui vont au travail à vélo"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Why did the city make this decision?",
+     "fr": "Pourquoi la ville a-t-elle pris cette décision ?"
+    },
+    "options": {
+     "en": [
+      "Adults had more accidents last year",
+      "Children had more accidents last year",
+      "Helmets became cheaper last year",
+      "Other cities had made the same rule"
+     ],
+     "fr": [
+      "Les adultes ont eu plus d'accidents l'an dernier",
+      "Les enfants ont eu plus d'accidents l'an dernier",
+      "Les casques ont baissé de prix l'an dernier",
+      "D'autres villes avaient adopté la même règle"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「対象」 mean in 「子どもだけが対象だった」?",
+     "fr": "Que signifie 「対象」 dans 「子どもだけが対象だった」 ?"
+    },
+    "options": {
+     "en": [
+      "Those who make a rule",
+      "Those who break a rule",
+      "Those who enforce a rule",
+      "Those a rule applies to"
+     ],
+     "fr": [
+      "Ceux qui font une règle",
+      "Ceux qui enfreignent une règle",
+      "Ceux qui font respecter une règle",
+      "Ceux à qui s'applique une règle"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「つながりかねない」 express?",
+     "fr": "Qu'exprime 「つながりかねない」 ?"
+    },
+    "options": {
+     "en": [
+      "A bad outcome that is certain",
+      "An outcome that cannot happen",
+      "A bad outcome that could happen",
+      "A good outcome to hope for"
+     ],
+     "fr": [
+      "Un résultat fâcheux certain",
+      "Un résultat impossible",
+      "Un résultat fâcheux possible",
+      "Un bon résultat à espérer"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「〜ずに」 mean in 「頭を守らずに転ぶ」?",
+     "fr": "Que signifie 「〜ずに」 dans 「頭を守らずに転ぶ」 ?"
+    },
+    "options": {
+     "en": [
+      "Without (doing)",
+      "After (doing)",
+      "While (doing)",
+      "In order to (do)"
+     ],
+     "fr": [
+      "Sans (faire)",
+      "Après (avoir fait)",
+      "Pendant que (l'on fait)",
+      "Afin de (faire)"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「代金に加えて」 tell us about the city's help?",
+     "fr": "Que dit 「代金に加えて」 de l'aide de la ville ?"
+    },
+    "options": {
+     "en": [
+      "It covers repairs instead of the helmet",
+      "It covers the helmet but nothing else",
+      "It covers the helmet once repairs are paid",
+      "It covers the helmet and something more"
+     ],
+     "fr": [
+      "Elle couvre les réparations au lieu du casque",
+      "Elle couvre le casque et rien d'autre",
+      "Elle couvre le casque une fois les réparations payées",
+      "Elle couvre le casque et autre chose en plus"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "How much will the city pay towards bicycle repairs?",
+     "fr": "Quelle part des réparations du vélo la ville paiera-t-elle ?"
+    },
+    "options": {
+     "en": [
+      "All of the cost",
+      "Half of the cost",
+      "A tenth of the cost",
+      "None of the cost"
+     ],
+     "fr": [
+      "La totalité des frais",
+      "La moitié des frais",
+      "Un dixième des frais",
+      "Rien du tout"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "Who are the people described as 「かぶりたがらない」?",
+     "fr": "Qui sont les personnes décrites comme 「かぶりたがらない」 ?"
+    },
+    "options": {
+     "en": [
+      "People who cannot afford to buy one",
+      "People who forget to put one on",
+      "People who do not want to wear one",
+      "People who wear one the wrong way"
+     ],
+     "fr": [
+      "Ceux qui n'ont pas les moyens d'en acheter",
+      "Ceux qui oublient d'en mettre un",
+      "Ceux qui n'ont pas envie d'en porter",
+      "Ceux qui le portent mal"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Which reason for not wearing a helmet does the text give?",
+     "fr": "Quelle raison de ne pas porter de casque le texte donne-t-il ?"
+    },
+    "options": {
+     "en": [
+      "It costs too much",
+      "It spoils one's hair",
+      "It slows one down",
+      "It is hard to carry"
+     ],
+     "fr": [
+      "Cela coûte trop cher",
+      "Cela abîme la coiffure",
+      "Cela ralentit",
+      "C'est encombrant"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What does the writer think is needed most to cut accidents?",
+     "fr": "Qu'est-ce qui compte le plus pour réduire les accidents, selon l'auteur ?"
+    },
+    "options": {
+     "en": [
+      "Riders seeing for themselves why safety matters",
+      "Fines for anyone who rides without a helmet",
+      "More money from the city for bicycle repairs",
+      "A rule that covers children as well as adults"
+     ],
+     "fr": [
+      "Que chacun saisisse l'importance de la sécurité",
+      "Des amendes pour qui roule sans casque",
+      "Plus d'argent de la ville pour les réparations",
+      "Une règle valable aussi pour les enfants"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What is the writer's attitude to the new rule?",
+     "fr": "Quelle est l'attitude de l'auteur envers la nouvelle règle ?"
+    },
+    "options": {
+     "en": [
+      "Thinks it is costly and unnecessary",
+      "Expects it to end accidents quickly",
+      "Finds it unfair to adult riders",
+      "Supports it, but doubts it is enough alone"
+     ],
+     "fr": [
+      "Il la juge coûteuse et inutile",
+      "Il pense qu'elle mettra vite fin aux accidents",
+      "Il la trouve injuste pour les adultes",
+      "Il l'approuve, mais doute qu'elle suffise"
+     ]
+    },
+    "correct": 3
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "来月から、市内で自転車に乗る人は全員、ヘルメットをかぶるよう求められる。",
+    "translation": {
+     "en": "From next month, everyone who rides a bicycle in the city will be asked to wear a helmet.",
+     "fr": "À partir du mois prochain, toute personne qui circule à vélo en ville sera priée de porter un casque."
+    },
+    "note": {
+     "en": "「〜よう求められる」 is the passive of 「〜よう求める」: to be asked to do something.",
+     "fr": "「〜よう求められる」 est le passif de 「〜よう求める」 : être prié de faire quelque chose."
+    },
+    "words": [
+     {
+      "surface": "来月",
+      "meaning": {
+       "en": "next month",
+       "fr": "le mois prochain"
+      }
+     },
+     {
+      "surface": "から",
+      "meaning": {
+       "en": "from",
+       "fr": "à partir de"
+      }
+     },
+     {
+      "surface": "市内",
+      "meaning": {
+       "en": "in the city",
+       "fr": "en ville"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "in",
+       "fr": "dans"
+      }
+     },
+     {
+      "surface": "自転車",
+      "meaning": {
+       "en": "bicycle",
+       "fr": "vélo"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "(marks what is ridden)",
+       "fr": "(marque le véhicule)"
+      }
+     },
+     {
+      "surface": "乗る",
+      "meaning": {
+       "en": "ride",
+       "fr": "monter"
+      }
+     },
+     {
+      "surface": "人",
+      "meaning": {
+       "en": "people",
+       "fr": "personnes"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "全員",
+      "meaning": {
+       "en": "all, everyone",
+       "fr": "tous"
+      }
+     },
+     {
+      "surface": "ヘルメット",
+      "meaning": {
+       "en": "helmet",
+       "fr": "casque"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "かぶる",
+      "meaning": {
+       "en": "wear (on the head)",
+       "fr": "porter (sur la tête)"
+      }
+     },
+     {
+      "surface": "よう",
+      "meaning": {
+       "en": "to (do)",
+       "fr": "de (faire)"
+      }
+     },
+     {
+      "surface": "求められる",
+      "meaning": {
+       "en": "will be asked",
+       "fr": "seront priés"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "これまでは子どもだけが対象だったが、昨年、大人の事故が増えたことを受けて、市が決めたものだ。",
+    "translation": {
+     "en": "Until now only children were covered, but the city made the decision after accidents involving adults rose last year.",
+     "fr": "Jusqu'ici, seuls les enfants étaient concernés, mais la ville en a décidé ainsi après la hausse des accidents d'adultes l'an dernier."
+    },
+    "note": {
+     "en": "「〜を受けて」 means in response to; 「〜ものだ」 here explains where a decision came from.",
+     "fr": "「〜を受けて」 signifie à la suite de ; 「〜ものだ」 explique ici l'origine d'une décision."
+    },
+    "words": [
+     {
+      "surface": "これまで",
+      "meaning": {
+       "en": "until now",
+       "fr": "jusqu'ici"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "子ども",
+      "meaning": {
+       "en": "children",
+       "fr": "enfants"
+      }
+     },
+     {
+      "surface": "だけ",
+      "meaning": {
+       "en": "only",
+       "fr": "seuls"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "対象",
+      "meaning": {
+       "en": "those covered",
+       "fr": "personnes concernées"
+      }
+     },
+     {
+      "surface": "だった",
+      "meaning": {
+       "en": "were",
+       "fr": "étaient"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "but",
+       "fr": "mais"
+      }
+     },
+     {
+      "surface": "昨年",
+      "meaning": {
+       "en": "last year",
+       "fr": "l'an dernier"
+      }
+     },
+     {
+      "surface": "大人",
+      "meaning": {
+       "en": "adults",
+       "fr": "adultes"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "事故",
+      "meaning": {
+       "en": "accidents",
+       "fr": "accidents"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "増えた",
+      "meaning": {
+       "en": "increased",
+       "fr": "ont augmenté"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "(the fact)",
+       "fr": "(le fait)"
+      }
+     },
+     {
+      "surface": "を受けて",
+      "meaning": {
+       "en": "in response to",
+       "fr": "à la suite de"
+      }
+     },
+     {
+      "surface": "市",
+      "meaning": {
+       "en": "city",
+       "fr": "ville"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "決めた",
+      "meaning": {
+       "en": "decided",
+       "fr": "a décidé"
+      }
+     },
+     {
+      "surface": "ものだ",
+      "meaning": {
+       "en": "it is (what)",
+       "fr": "c'est (ce que)"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "頭を守らずに転ぶと、小さな事故でも大けがにつながりかねない。",
+    "translation": {
+     "en": "Falling with your head unprotected can turn even a small accident into a serious injury.",
+     "fr": "Une chute sans protection pour la tête peut transformer même un petit accident en blessure grave."
+    },
+    "note": {
+     "en": "「〜かねない」 says a bad outcome could happen; 「〜ずに」 is a written way of saying without.",
+     "fr": "「〜かねない」 dit qu'un résultat fâcheux pourrait se produire ; 「〜ずに」 est une forme écrite de « sans »."
+    },
+    "words": [
+     {
+      "surface": "頭",
+      "meaning": {
+       "en": "head",
+       "fr": "tête"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "守らずに",
+      "meaning": {
+       "en": "without protecting",
+       "fr": "sans protéger"
+      }
+     },
+     {
+      "surface": "転ぶ",
+      "meaning": {
+       "en": "fall",
+       "fr": "tomber"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "if, when",
+       "fr": "si"
+      }
+     },
+     {
+      "surface": "小さな",
+      "meaning": {
+       "en": "small",
+       "fr": "petit"
+      }
+     },
+     {
+      "surface": "事故",
+      "meaning": {
+       "en": "accident",
+       "fr": "accident"
+      }
+     },
+     {
+      "surface": "でも",
+      "meaning": {
+       "en": "even",
+       "fr": "même"
+      }
+     },
+     {
+      "surface": "大けが",
+      "meaning": {
+       "en": "serious injury",
+       "fr": "blessure grave"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "to",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "つながりかねない",
+      "meaning": {
+       "en": "could lead",
+       "fr": "pourrait mener"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "市はヘルメットの代金に加えて、自転車を直すのにかかる費用の半分も出すという。",
+    "translation": {
+     "en": "The city says it will pay for the helmet and, on top of that, half the cost of repairing a bicycle.",
+     "fr": "La ville prendrait en charge le prix du casque et, en plus, la moitié des frais de réparation du vélo."
+    },
+    "note": {
+     "en": "「〜に加えて」 means in addition to; 「という」 at the end reports what the city has said.",
+     "fr": "「〜に加えて」 signifie en plus de ; 「という」 en fin de phrase rapporte ce qu'a annoncé la ville."
+    },
+    "words": [
+     {
+      "surface": "市",
+      "meaning": {
+       "en": "city",
+       "fr": "ville"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "ヘルメット",
+      "meaning": {
+       "en": "helmet",
+       "fr": "casque"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "du"
+      }
+     },
+     {
+      "surface": "代金",
+      "meaning": {
+       "en": "price",
+       "fr": "prix"
+      }
+     },
+     {
+      "surface": "に加えて",
+      "meaning": {
+       "en": "in addition to",
+       "fr": "en plus de"
+      }
+     },
+     {
+      "surface": "自転車",
+      "meaning": {
+       "en": "bicycle",
+       "fr": "vélo"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "直す",
+      "meaning": {
+       "en": "repair",
+       "fr": "réparer"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "(nominaliser)",
+       "fr": "(nominalise)"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "for",
+       "fr": "pour"
+      }
+     },
+     {
+      "surface": "かかる",
+      "meaning": {
+       "en": "cost",
+       "fr": "coûter"
+      }
+     },
+     {
+      "surface": "費用",
+      "meaning": {
+       "en": "expenses",
+       "fr": "frais"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "半分",
+      "meaning": {
+       "en": "half",
+       "fr": "moitié"
+      }
+     },
+     {
+      "surface": "も",
+      "meaning": {
+       "en": "also",
+       "fr": "aussi"
+      }
+     },
+     {
+      "surface": "出す",
+      "meaning": {
+       "en": "pay",
+       "fr": "payer"
+      }
+     },
+     {
+      "surface": "という",
+      "meaning": {
+       "en": "it is said",
+       "fr": "dit-on"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "しかし、髪型がくずれる、夏はあついといった理由で、かぶりたがらない人は少なくない。",
+    "translation": {
+     "en": "But quite a few people are reluctant to wear one, for reasons such as it spoiling their hair or being hot in summer.",
+     "fr": "Mais nombreux sont ceux qui rechignent à en porter, parce que cela abîme la coiffure ou qu'il fait chaud en été."
+    },
+    "note": {
+     "en": "「〜たがらない」 describes someone else's unwillingness; 「少なくない」 means not a few: quite a lot.",
+     "fr": "「〜たがらない」 décrit le manque d'envie d'autrui ; 「少なくない」 signifie pas rares : assez nombreux."
+    },
+    "words": [
+     {
+      "surface": "しかし",
+      "meaning": {
+       "en": "but",
+       "fr": "mais"
+      }
+     },
+     {
+      "surface": "髪型",
+      "meaning": {
+       "en": "hairstyle",
+       "fr": "coiffure"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "くずれる",
+      "meaning": {
+       "en": "get messed up",
+       "fr": "s'abîmer"
+      }
+     },
+     {
+      "surface": "夏",
+      "meaning": {
+       "en": "summer",
+       "fr": "été"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "あつい",
+      "meaning": {
+       "en": "hot",
+       "fr": "chaud"
+      }
+     },
+     {
+      "surface": "といった",
+      "meaning": {
+       "en": "such as",
+       "fr": "comme"
+      }
+     },
+     {
+      "surface": "理由",
+      "meaning": {
+       "en": "reasons",
+       "fr": "raisons"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "for",
+       "fr": "pour"
+      }
+     },
+     {
+      "surface": "かぶりたがらない",
+      "meaning": {
+       "en": "unwilling to wear",
+       "fr": "rechigner à porter"
+      }
+     },
+     {
+      "surface": "人",
+      "meaning": {
+       "en": "people",
+       "fr": "personnes"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "少なくない",
+      "meaning": {
+       "en": "are not few",
+       "fr": "ne sont pas rares"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "決まりを作っても、一人一人が安全の大切さを理解しないことには、事故は減らないだろう。",
+    "translation": {
+     "en": "Even with a rule in place, accidents will not fall unless each person understands how much safety matters.",
+     "fr": "Même avec une règle, les accidents ne diminueront pas tant que chacun ne comprendra pas l'importance de la sécurité."
+    },
+    "note": {
+     "en": "「〜ないことには」 means unless, and is followed by a negative result; 「〜さ」 turns 「大切」 into a noun: importance.",
+     "fr": "「〜ないことには」 signifie tant que... ne... pas, suivi d'un résultat négatif ; 「〜さ」 fait de 「大切」 un nom : l'importance."
+    },
+    "words": [
+     {
+      "surface": "決まり",
+      "meaning": {
+       "en": "rule",
+       "fr": "règle"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "作っても",
+      "meaning": {
+       "en": "even if one makes",
+       "fr": "même si l'on fait"
+      }
+     },
+     {
+      "surface": "一人一人",
+      "meaning": {
+       "en": "each person",
+       "fr": "chacun"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "安全",
+      "meaning": {
+       "en": "safety",
+       "fr": "sécurité"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "大切さ",
+      "meaning": {
+       "en": "importance",
+       "fr": "importance"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "理解しない",
+      "meaning": {
+       "en": "not understand",
+       "fr": "ne pas comprendre"
+      }
+     },
+     {
+      "surface": "ことには",
+      "meaning": {
+       "en": "unless",
+       "fr": "tant que"
+      }
+     },
+     {
+      "surface": "事故",
+      "meaning": {
+       "en": "accidents",
+       "fr": "accidents"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "減らない",
+      "meaning": {
+       "en": "will not decrease",
+       "fr": "ne diminueront pas"
+      }
+     },
+     {
+      "surface": "だろう",
+      "meaning": {
+       "en": "probably",
+       "fr": "sans doute"
+      }
+     }
+    ]
+   }
+  ]
  }
 ]

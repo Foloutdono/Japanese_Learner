@@ -7069,5 +7069,4128 @@
     ]
    }
   ]
+ },
+ {
+  "id": "n1-07",
+  "level": "N1",
+  "title": "待つという時間",
+  "grammar": [
+   "〜きらいがある",
+   "〜に越したことはない",
+   "〜ではあるまいか"
+  ],
+  "text": "現代人は、待つことを無駄な時間と見なすきらいがある。注文した品は翌日に届き、調べたいことは数秒で分かる。もちろん、速いに越したことはない場面も多い。急病の際の救急車や、災害時の情報がそうだ。しかし、あらゆるものが速くなった結果、私たちはわずかな遅れにも苛立つようになった。かつて人は、手紙の返事を何日も待ちながら、相手の気持ちを思いやったり、自分の言葉を見直したりした。待つ時間は、考える時間でもあったのだ。速さを手に入れた代わりに、私たちは考える余白を失いつつあるのではあるまいか。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "How does the writer say people today see waiting?",
+     "fr": "Comment, selon l'auteur, les gens d'aujourd'hui voient-ils l'attente ?"
+    },
+    "options": {
+     "en": [
+      "As a chance to rest",
+      "As a sign of good manners",
+      "As time thrown away",
+      "As part of every purchase"
+     ],
+     "fr": [
+      "Comme une occasion de se reposer",
+      "Comme une marque de politesse",
+      "Comme du temps perdu",
+      "Comme une étape de tout achat"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「〜きらいがある」 add in 「見なすきらいがある」?",
+     "fr": "Qu'apporte 「〜きらいがある」 dans 「見なすきらいがある」 ?"
+    },
+    "options": {
+     "en": [
+      "That it is a tendency the writer finds regrettable",
+      "That it is a habit people are rightly proud of",
+      "That it is a rule everyone is obliged to follow",
+      "That it is something people dislike doing"
+     ],
+     "fr": [
+      "Qu'il s'agit d'une tendance que l'auteur juge fâcheuse",
+      "Qu'il s'agit d'une habitude dont on est fier à juste titre",
+      "Qu'il s'agit d'une règle que chacun doit suivre",
+      "Qu'il s'agit d'une chose qu'on n'aime pas faire"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「翌日」 mean in 「翌日に届き」?",
+     "fr": "Que signifie 「翌日」 dans 「翌日に届き」 ?"
+    },
+    "options": {
+     "en": [
+      "The same day",
+      "The day before",
+      "Within the week",
+      "The next day"
+     ],
+     "fr": [
+      "Le jour même",
+      "La veille",
+      "Dans la semaine",
+      "Le lendemain"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Which does the writer give as an example where speed is best?",
+     "fr": "Lequel l'auteur cite-t-il comme exemple où la rapidité vaut mieux ?"
+    },
+    "options": {
+     "en": [
+      "A reply to a letter from a friend",
+      "An ambulance called for a sudden illness",
+      "The time it takes to choose a word",
+      "A train journey to a distant town"
+     ],
+     "fr": [
+      "La réponse à la lettre d'un ami",
+      "Une ambulance appelée pour un malaise soudain",
+      "Le temps qu'il faut pour choisir un mot",
+      "Un trajet en train vers une ville lointaine"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「速いに越したことはない」 mean?",
+     "fr": "Que signifie 「速いに越したことはない」 ?"
+    },
+    "options": {
+     "en": [
+      "Faster is never quite enough",
+      "Faster is not always better",
+      "Faster has no real limit",
+      "Faster is always better"
+     ],
+     "fr": [
+      "Ce n'est jamais assez rapide",
+      "Plus rapide n'est pas toujours mieux",
+      "La rapidité n'a pas de vraie limite",
+      "Plus c'est rapide, mieux c'est"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What has changed in us since everything became faster?",
+     "fr": "Qu'est-ce qui a changé en nous depuis que tout s'est accéléré ?"
+    },
+    "options": {
+     "en": [
+      "We get irritated by even a small delay",
+      "We have more free time to think",
+      "We write more letters than before",
+      "We trust information more easily"
+     ],
+     "fr": [
+      "Le moindre retard nous agace",
+      "Nous avons plus de temps libre pour penser",
+      "Nous écrivons plus de lettres qu'avant",
+      "Nous croyons plus facilement les informations"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「思いやったり」 mean in 「相手の気持ちを思いやったり」?",
+     "fr": "Que signifie 「思いやったり」 dans 「相手の気持ちを思いやったり」 ?"
+    },
+    "options": {
+     "en": [
+      "Paying no attention to",
+      "Writing down plainly",
+      "Thinking with care about",
+      "Asking directly about"
+     ],
+     "fr": [
+      "Ne prêter aucune attention à",
+      "Mettre noir sur blanc",
+      "Penser avec égard à",
+      "Interroger directement sur"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Besides thinking of the other person, what did people do while waiting for a reply?",
+     "fr": "En plus de penser à l'autre, que faisait-on en attendant une réponse ?"
+    },
+    "options": {
+     "en": [
+      "Wrote another letter at once",
+      "Looked over their own words again",
+      "Went to see the other person",
+      "Forgot about what they had written"
+     ],
+     "fr": [
+      "On écrivait aussitôt une autre lettre",
+      "On relisait ses propres mots",
+      "On allait voir l'autre",
+      "On oubliait ce qu'on avait écrit"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「〜ではあるまいか」 express at the end of the text?",
+     "fr": "Qu'exprime 「〜ではあるまいか」 à la fin du texte ?"
+    },
+    "options": {
+     "en": [
+      "A cautious opinion put as a question",
+      "A firm denial of the previous point",
+      "A real question the writer cannot answer",
+      "A guess about what other people think"
+     ],
+     "fr": [
+      "Un avis prudent formulé en question",
+      "Un démenti ferme du point précédent",
+      "Une vraie question à laquelle l'auteur ne sait répondre",
+      "Une supposition sur ce que pensent les autres"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What does the writer mean by 「考える余白」?",
+     "fr": "Qu'entend l'auteur par 「考える余白」 ?"
+    },
+    "options": {
+     "en": [
+      "Blank space left on a page",
+      "A room set apart for study",
+      "Room for more information",
+      "Spare time in which to reflect"
+     ],
+     "fr": [
+      "L'espace blanc laissé sur une page",
+      "Une pièce réservée à l'étude",
+      "De la place pour plus d'informations",
+      "Du temps libre pour réfléchir"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What is the writer's overall view of speed?",
+     "fr": "Quel est l'avis général de l'auteur sur la rapidité ?"
+    },
+    "options": {
+     "en": [
+      "It should be refused wherever possible",
+      "It has solved most of our problems",
+      "It has a hidden cost worth noticing",
+      "It matters in emergencies alone"
+     ],
+     "fr": [
+      "Il faut la refuser autant que possible",
+      "Elle a résolu la plupart de nos problèmes",
+      "Elle a un coût caché qu'il faut voir",
+      "Elle ne compte qu'en cas d'urgence"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "Why does the writer bring up letters?",
+     "fr": "Pourquoi l'auteur parle-t-il des lettres ?"
+    },
+    "options": {
+     "en": [
+      "To show that the post was faster than we think",
+      "To show what waiting used to give people",
+      "To complain that nobody writes by hand",
+      "To explain how mail is delivered today"
+     ],
+     "fr": [
+      "Pour montrer que la poste était plus rapide qu'on ne croit",
+      "Pour montrer ce que l'attente apportait autrefois",
+      "Pour se plaindre que plus personne n'écrit à la main",
+      "Pour expliquer comment le courrier est livré aujourd'hui"
+     ]
+    },
+    "correct": 1
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "現代人は、待つことを無駄な時間と見なすきらいがある。",
+    "translation": {
+     "en": "People today tend to regard waiting as wasted time.",
+     "fr": "Les gens d'aujourd'hui ont tendance à considérer l'attente comme du temps perdu."
+    },
+    "note": {
+     "en": "The pattern 「〜きらいがある」 names a tendency the writer finds regrettable; 「AをBと見なす」 means to regard A as B.",
+     "fr": "La structure 「〜きらいがある」 désigne une tendance que l'auteur juge fâcheuse ; 「AをBと見なす」 signifie considérer A comme B."
+    },
+    "words": [
+     {
+      "surface": "現代人",
+      "meaning": {
+       "en": "people today",
+       "fr": "les gens d'aujourd'hui"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "待つ",
+      "meaning": {
+       "en": "to wait",
+       "fr": "attendre"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "the act of",
+       "fr": "le fait de"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "無駄な",
+      "meaning": {
+       "en": "wasted",
+       "fr": "perdu"
+      }
+     },
+     {
+      "surface": "時間",
+      "meaning": {
+       "en": "time",
+       "fr": "temps"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "as",
+       "fr": "comme"
+      }
+     },
+     {
+      "surface": "見なす",
+      "meaning": {
+       "en": "to regard",
+       "fr": "considérer"
+      }
+     },
+     {
+      "surface": "きらいがある",
+      "meaning": {
+       "en": "tend to (regrettably)",
+       "fr": "avoir fâcheusement tendance à"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "注文した品は翌日に届き、調べたいことは数秒で分かる。",
+    "translation": {
+     "en": "What we order arrives the next day, and whatever we want to look up we find out in a few seconds.",
+     "fr": "Ce qu'on commande arrive le lendemain, et ce qu'on veut savoir se trouve en quelques secondes."
+    },
+    "note": {
+     "en": "The stem 「届き」 closes the first clause and links it to the next: the written equivalent of 届いて.",
+     "fr": "Le radical 「届き」 clôt la première proposition et l'enchaîne à la suivante : c'est l'équivalent écrit de 届いて."
+    },
+    "words": [
+     {
+      "surface": "注文した",
+      "meaning": {
+       "en": "ordered",
+       "fr": "commandé"
+      }
+     },
+     {
+      "surface": "品",
+      "meaning": {
+       "en": "item",
+       "fr": "article"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "翌日",
+      "meaning": {
+       "en": "the next day",
+       "fr": "le lendemain"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "on (a time)",
+       "fr": "(marque le moment)"
+      }
+     },
+     {
+      "surface": "届き",
+      "meaning": {
+       "en": "arrives, and",
+       "fr": "arrive, et"
+      }
+     },
+     {
+      "surface": "調べたい",
+      "meaning": {
+       "en": "want to look up",
+       "fr": "qu'on veut chercher"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "thing",
+       "fr": "chose"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "数秒",
+      "meaning": {
+       "en": "a few seconds",
+       "fr": "quelques secondes"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "in (time taken)",
+       "fr": "en (durée)"
+      }
+     },
+     {
+      "surface": "分かる",
+      "meaning": {
+       "en": "becomes known",
+       "fr": "se sait"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "もちろん、速いに越したことはない場面も多い。",
+    "translation": {
+     "en": "Of course, there are also many situations in which nothing beats speed.",
+     "fr": "Bien sûr, nombreuses sont aussi les situations où rien ne vaut la rapidité."
+    },
+    "note": {
+     "en": "The pattern 「〜に越したことはない」 says nothing is better than; the whole phrase describes 「場面」, the situations.",
+     "fr": "La structure 「〜に越したことはない」 signifie que rien ne vaut… ; toute la tournure qualifie 「場面」, les situations."
+    },
+    "words": [
+     {
+      "surface": "もちろん",
+      "meaning": {
+       "en": "of course",
+       "fr": "bien sûr"
+      }
+     },
+     {
+      "surface": "速い",
+      "meaning": {
+       "en": "fast",
+       "fr": "rapide"
+      }
+     },
+     {
+      "surface": "に越したことはない",
+      "meaning": {
+       "en": "nothing beats",
+       "fr": "rien ne vaut"
+      }
+     },
+     {
+      "surface": "場面",
+      "meaning": {
+       "en": "situation",
+       "fr": "situation"
+      }
+     },
+     {
+      "surface": "も",
+      "meaning": {
+       "en": "also",
+       "fr": "aussi"
+      }
+     },
+     {
+      "surface": "多い",
+      "meaning": {
+       "en": "are many",
+       "fr": "sont nombreuses"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "急病の際の救急車や、災害時の情報がそうだ。",
+    "translation": {
+     "en": "An ambulance in a sudden illness, or information in a disaster, are cases in point.",
+     "fr": "L'ambulance lors d'un malaise soudain ou l'information en cas de catastrophe en sont des exemples."
+    },
+    "note": {
+     "en": "「〜の際」 is a formal way to say at the time of; 「そうだ」 here means is such a case, not hearsay.",
+     "fr": "「〜の際」 est une façon formelle de dire lors de ; 「そうだ」 signifie ici c'est le cas, et non un ouï-dire."
+    },
+    "words": [
+     {
+      "surface": "急病",
+      "meaning": {
+       "en": "sudden illness",
+       "fr": "malaise soudain"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "際",
+      "meaning": {
+       "en": "time of",
+       "fr": "lors de"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "救急車",
+      "meaning": {
+       "en": "ambulance",
+       "fr": "ambulance"
+      }
+     },
+     {
+      "surface": "や",
+      "meaning": {
+       "en": "and",
+       "fr": "et"
+      }
+     },
+     {
+      "surface": "災害時",
+      "meaning": {
+       "en": "time of disaster",
+       "fr": "en cas de catastrophe"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "情報",
+      "meaning": {
+       "en": "information",
+       "fr": "information"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "そうだ",
+      "meaning": {
+       "en": "is such a case",
+       "fr": "en est un exemple"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "しかし、あらゆるものが速くなった結果、私たちはわずかな遅れにも苛立つようになった。",
+    "translation": {
+     "en": "But now that everything has become faster, we have come to be irritated by even the slightest delay.",
+     "fr": "Mais tout s'étant accéléré, nous en sommes venus à nous agacer du moindre retard."
+    },
+    "note": {
+     "en": "「〜た結果」 presents what follows as the outcome; 「〜ようになった」 marks a change of habit.",
+     "fr": "「〜た結果」 présente la suite comme une conséquence ; 「〜ようになった」 marque un changement d'habitude."
+    },
+    "words": [
+     {
+      "surface": "しかし",
+      "meaning": {
+       "en": "however",
+       "fr": "cependant"
+      }
+     },
+     {
+      "surface": "あらゆる",
+      "meaning": {
+       "en": "every",
+       "fr": "tout"
+      }
+     },
+     {
+      "surface": "もの",
+      "meaning": {
+       "en": "thing",
+       "fr": "chose"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "速くなった",
+      "meaning": {
+       "en": "became faster",
+       "fr": "s'est accéléré"
+      }
+     },
+     {
+      "surface": "結果",
+      "meaning": {
+       "en": "as a result",
+       "fr": "résultat"
+      }
+     },
+     {
+      "surface": "私たち",
+      "meaning": {
+       "en": "we",
+       "fr": "nous"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "わずかな",
+      "meaning": {
+       "en": "slight",
+       "fr": "moindre"
+      }
+     },
+     {
+      "surface": "遅れ",
+      "meaning": {
+       "en": "delay",
+       "fr": "retard"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "at",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "も",
+      "meaning": {
+       "en": "even",
+       "fr": "même"
+      }
+     },
+     {
+      "surface": "苛立つ",
+      "meaning": {
+       "en": "to get irritated",
+       "fr": "s'agacer"
+      }
+     },
+     {
+      "surface": "ようになった",
+      "meaning": {
+       "en": "have come to",
+       "fr": "en sommes venus à"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "かつて人は、手紙の返事を何日も待ちながら、相手の気持ちを思いやったり、自分の言葉を見直したりした。",
+    "translation": {
+     "en": "In the past, while waiting days for the reply to a letter, people would think kindly about the other person's feelings and look over their own words again.",
+     "fr": "Autrefois, en attendant des jours la réponse à une lettre, on pensait avec égard à ce que ressentait l'autre, on relisait ses propres mots."
+    },
+    "note": {
+     "en": "「〜たり〜たりした」 gives examples of what people did, without claiming to list everything.",
+     "fr": "「〜たり〜たりした」 donne des exemples de ce qu'on faisait, sans prétendre tout énumérer."
+    },
+    "words": [
+     {
+      "surface": "かつて",
+      "meaning": {
+       "en": "once, in the past",
+       "fr": "autrefois"
+      }
+     },
+     {
+      "surface": "人",
+      "meaning": {
+       "en": "people",
+       "fr": "les gens"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "手紙",
+      "meaning": {
+       "en": "letter",
+       "fr": "lettre"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "返事",
+      "meaning": {
+       "en": "reply",
+       "fr": "réponse"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "何日も",
+      "meaning": {
+       "en": "for days",
+       "fr": "pendant des jours"
+      }
+     },
+     {
+      "surface": "待ちながら",
+      "meaning": {
+       "en": "while waiting",
+       "fr": "tout en attendant"
+      }
+     },
+     {
+      "surface": "相手",
+      "meaning": {
+       "en": "the other person",
+       "fr": "l'autre"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "気持ち",
+      "meaning": {
+       "en": "feelings",
+       "fr": "sentiments"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "思いやったり",
+      "meaning": {
+       "en": "thought kindly about, and",
+       "fr": "pensaient avec égard à, et"
+      }
+     },
+     {
+      "surface": "自分",
+      "meaning": {
+       "en": "one's own",
+       "fr": "soi-même"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "言葉",
+      "meaning": {
+       "en": "words",
+       "fr": "mots"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "見直したり",
+      "meaning": {
+       "en": "looked over again, and",
+       "fr": "relisaient, et"
+      }
+     },
+     {
+      "surface": "した",
+      "meaning": {
+       "en": "did",
+       "fr": "faisaient"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "待つ時間は、考える時間でもあったのだ。",
+    "translation": {
+     "en": "Time spent waiting was also time spent thinking.",
+     "fr": "Le temps de l'attente était aussi un temps de réflexion."
+    },
+    "note": {
+     "en": "「のだ」 presents the sentence as the point the examples before it lead to.",
+     "fr": "「のだ」 présente la phrase comme la conclusion à laquelle mènent les exemples précédents."
+    },
+    "words": [
+     {
+      "surface": "待つ",
+      "meaning": {
+       "en": "waiting",
+       "fr": "d'attente"
+      }
+     },
+     {
+      "surface": "時間",
+      "meaning": {
+       "en": "time",
+       "fr": "temps"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "考える",
+      "meaning": {
+       "en": "thinking",
+       "fr": "de réflexion"
+      }
+     },
+     {
+      "surface": "時間",
+      "meaning": {
+       "en": "time",
+       "fr": "temps"
+      }
+     },
+     {
+      "surface": "でもあった",
+      "meaning": {
+       "en": "was also",
+       "fr": "était aussi"
+      }
+     },
+     {
+      "surface": "のだ",
+      "meaning": {
+       "en": "(it is that)",
+       "fr": "(c'est que)"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "速さを手に入れた代わりに、私たちは考える余白を失いつつあるのではあるまいか。",
+    "translation": {
+     "en": "Might it not be that, in gaining speed, we are slowly losing the margin we had for thinking?",
+     "fr": "En gagnant la rapidité, ne serions-nous pas en train de perdre la marge qui nous permettait de réfléchir ?"
+    },
+    "note": {
+     "en": "「〜ではあるまいか」 offers the writer's view as a cautious question; 「〜つつある」 shows a change under way.",
+     "fr": "「〜ではあるまいか」 avance l'avis de l'auteur sous forme de question prudente ; 「〜つつある」 montre un changement en cours."
+    },
+    "words": [
+     {
+      "surface": "速さ",
+      "meaning": {
+       "en": "speed",
+       "fr": "la rapidité"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "手に入れた",
+      "meaning": {
+       "en": "obtained",
+       "fr": "avoir obtenu"
+      }
+     },
+     {
+      "surface": "代わりに",
+      "meaning": {
+       "en": "in exchange",
+       "fr": "en échange"
+      }
+     },
+     {
+      "surface": "私たち",
+      "meaning": {
+       "en": "we",
+       "fr": "nous"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "考える",
+      "meaning": {
+       "en": "for thinking",
+       "fr": "pour réfléchir"
+      }
+     },
+     {
+      "surface": "余白",
+      "meaning": {
+       "en": "margin, free space",
+       "fr": "marge"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "失いつつある",
+      "meaning": {
+       "en": "are gradually losing",
+       "fr": "sommes en train de perdre"
+      }
+     },
+     {
+      "surface": "のではあるまいか",
+      "meaning": {
+       "en": "might it not be that",
+       "fr": "ne serait-ce pas que"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "n1-08",
+  "level": "N1",
+  "title": "翻訳という橋",
+  "grammar": [
+   "〜といえども",
+   "〜にかたくない",
+   "〜なくして(は)"
+  ],
+  "text": "翻訳は、二つの言語の間に橋を架ける仕事だと言われる。だが、いかに優れた翻訳者といえども、原文のすべてを移すことはできない。言葉には、その土地の歴史や習慣が染み込んでいるからだ。例えば、日本語の「いただきます」にぴったり当たる表現は、多くの言語に存在しない。訳者が言葉を一つ選ぶたびに、何かが失われ、何かが付け加えられることは想像にかたくない。それでも、翻訳なくしては、私たちは異国の文学に触れることすらできなかっただろう。完全な翻訳はない。だからこそ訳者は、失われるものを知りつつ、最も近い言葉を探し続けるのである。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What is translation compared to at the start?",
+     "fr": "À quoi la traduction est-elle comparée au début ?"
+    },
+    "options": {
+     "en": [
+      "Crossing a river between two countries",
+      "Building a bridge between two languages",
+      "Opening a door onto a foreign land",
+      "Drawing a map of an unknown place"
+     ],
+     "fr": [
+      "Traverser un fleuve entre deux pays",
+      "Jeter un pont entre deux langues",
+      "Ouvrir une porte sur un pays étranger",
+      "Dessiner la carte d'un lieu inconnu"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「いかに優れた翻訳者といえども」 mean?",
+     "fr": "Que signifie 「いかに優れた翻訳者といえども」 ?"
+    },
+    "options": {
+     "en": [
+      "Only a highly skilled translator",
+      "Since the translator is so skilled",
+      "Unless the translator is skilled",
+      "However skilled a translator may be"
+     ],
+     "fr": [
+      "Seul un traducteur très doué",
+      "Puisque le traducteur est si doué",
+      "À moins que le traducteur soit doué",
+      "Si doué que soit le traducteur"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Why can't everything in the original be carried over, according to the writer?",
+     "fr": "Pourquoi, selon l'auteur, ne peut-on pas tout transposer de l'original ?"
+    },
+    "options": {
+     "en": [
+      "Words hold the history and customs of their place",
+      "Translators rarely know both languages well",
+      "Publishers ask for shorter translated texts",
+      "Some languages have far fewer words than others"
+     ],
+     "fr": [
+      "Les mots portent l'histoire et les coutumes de leur pays",
+      "Les traducteurs connaissent rarement bien les deux langues",
+      "Les éditeurs demandent des traductions plus courtes",
+      "Certaines langues ont bien moins de mots que d'autres"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「染み込んでいる」 mean here?",
+     "fr": "Que signifie ici 「染み込んでいる」 ?"
+    },
+    "options": {
+     "en": [
+      "Have been washed out of",
+      "Have been written over",
+      "Have soaked deep into",
+      "Have slowly dried up"
+     ],
+     "fr": [
+      "Ont été effacés de",
+      "Ont été réécrits par-dessus",
+      "Ont pénétré en profondeur",
+      "Se sont peu à peu taris"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What does the writer use 「いただきます」 to show?",
+     "fr": "Que veut montrer l'auteur avec 「いただきます」 ?"
+    },
+    "options": {
+     "en": [
+      "That Japanese has too many polite expressions",
+      "That some expressions have no exact match elsewhere",
+      "That table manners differ between countries",
+      "That Japanese is harder than other languages"
+     ],
+     "fr": [
+      "Que le japonais a trop de formules de politesse",
+      "Que certaines expressions n'ont pas d'équivalent exact ailleurs",
+      "Que les manières de table varient selon les pays",
+      "Que le japonais est plus difficile que les autres langues"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「想像にかたくない」 mean?",
+     "fr": "Que signifie 「想像にかたくない」 ?"
+    },
+    "options": {
+     "en": [
+      "It is hard to imagine",
+      "It is wrong to imagine",
+      "It is not worth imagining",
+      "It is easy to imagine"
+     ],
+     "fr": [
+      "On a du mal à l'imaginer",
+      "On aurait tort de l'imaginer",
+      "Ce n'est pas la peine de l'imaginer",
+      "On l'imagine sans peine"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What happens each time a translator chooses a word?",
+     "fr": "Que se passe-t-il chaque fois que le traducteur choisit un mot ?"
+    },
+    "options": {
+     "en": [
+      "The meaning becomes a little clearer",
+      "The original text has to be changed",
+      "Something is lost and something is added",
+      "The reader's task becomes harder"
+     ],
+     "fr": [
+      "Le sens devient un peu plus clair",
+      "Le texte original doit être modifié",
+      "Quelque chose se perd et quelque chose s'ajoute",
+      "La tâche du lecteur devient plus difficile"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「翻訳なくしては」 mean?",
+     "fr": "Que signifie 「翻訳なくしては」 ?"
+    },
+    "options": {
+     "en": [
+      "Without translation",
+      "Thanks to translation",
+      "Besides translation",
+      "Through translation alone"
+     ],
+     "fr": [
+      "Sans la traduction",
+      "Grâce à la traduction",
+      "En plus de la traduction",
+      "Par la seule traduction"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「異国」 mean in 「異国の文学」?",
+     "fr": "Que signifie 「異国」 dans 「異国の文学」 ?"
+    },
+    "options": {
+     "en": [
+      "Ancient times",
+      "Foreign countries",
+      "Remote villages",
+      "Other social classes"
+     ],
+     "fr": [
+      "Les temps anciens",
+      "Les pays étrangers",
+      "Les villages reculés",
+      "Les autres classes sociales"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What is the writer's attitude toward translators?",
+     "fr": "Quelle est l'attitude de l'auteur envers les traducteurs ?"
+    },
+    "options": {
+     "en": [
+      "Respect for a task that can never be perfect",
+      "Disappointment that they lose so much",
+      "Doubt that their work is really needed",
+      "Envy of all the languages they know"
+     ],
+     "fr": [
+      "Du respect pour une tâche qui ne peut être parfaite",
+      "De la déception parce qu'ils perdent tant",
+      "Un doute sur l'utilité réelle de leur travail",
+      "De l'envie pour toutes les langues qu'ils savent"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "Which statement would the writer most likely agree with?",
+     "fr": "Avec quelle affirmation l'auteur serait-il le plus probablement d'accord ?"
+    },
+    "options": {
+     "en": [
+      "A good translation loses nothing of the original",
+      "Readers should learn the original language",
+      "A translation is always a choice among losses",
+      "Machines will soon translate better than people"
+     ],
+     "fr": [
+      "Une bonne traduction ne perd rien de l'original",
+      "Les lecteurs devraient apprendre la langue d'origine",
+      "Traduire, c'est toujours choisir ce qu'on perd",
+      "Les machines traduiront bientôt mieux que les humains"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What does 「何かが付け加えられる」 suggest about translation?",
+     "fr": "Que suggère 「何かが付け加えられる」 sur la traduction ?"
+    },
+    "options": {
+     "en": [
+      "It is always longer than the original text",
+      "It must explain the original in footnotes",
+      "It should correct mistakes in the original",
+      "It brings in meanings the original did not have"
+     ],
+     "fr": [
+      "Elle est toujours plus longue que l'original",
+      "Elle doit expliquer l'original en notes",
+      "Elle doit corriger les erreurs de l'original",
+      "Elle introduit des sens que l'original n'avait pas"
+     ]
+    },
+    "correct": 3
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "翻訳は、二つの言語の間に橋を架ける仕事だと言われる。",
+    "translation": {
+     "en": "Translation is said to be the work of building a bridge between two languages.",
+     "fr": "On dit que traduire, c'est jeter un pont entre deux langues."
+    },
+    "note": {
+     "en": "「〜と言われる」 is a passive: it is said that. 「架ける」 is the verb for putting a bridge across.",
+     "fr": "「〜と言われる」 est un passif : on dit que. 「架ける」 est le verbe qui sert à jeter un pont."
+    },
+    "words": [
+     {
+      "surface": "翻訳",
+      "meaning": {
+       "en": "translation",
+       "fr": "traduction"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "二つ",
+      "meaning": {
+       "en": "two",
+       "fr": "deux"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "言語",
+      "meaning": {
+       "en": "language",
+       "fr": "langue"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "間",
+      "meaning": {
+       "en": "between",
+       "fr": "entre"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "at",
+       "fr": "(lieu)"
+      }
+     },
+     {
+      "surface": "橋",
+      "meaning": {
+       "en": "bridge",
+       "fr": "pont"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "架ける",
+      "meaning": {
+       "en": "to build (a bridge)",
+       "fr": "jeter (un pont)"
+      }
+     },
+     {
+      "surface": "仕事",
+      "meaning": {
+       "en": "work",
+       "fr": "travail"
+      }
+     },
+     {
+      "surface": "だ",
+      "meaning": {
+       "en": "is",
+       "fr": "est"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "(quotes what is said)",
+       "fr": "(cite ce qui est dit)"
+      }
+     },
+     {
+      "surface": "言われる",
+      "meaning": {
+       "en": "it is said",
+       "fr": "on dit"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "だが、いかに優れた翻訳者といえども、原文のすべてを移すことはできない。",
+    "translation": {
+     "en": "But however fine a translator may be, no one can carry over everything in the original.",
+     "fr": "Mais si excellent soit-il, aucun traducteur ne peut transposer tout le texte original."
+    },
+    "note": {
+     "en": "「いかに〜といえども」 means however... one may be: it grants the point, then denies what one would expect from it.",
+     "fr": "「いかに〜といえども」 signifie si... soit-il : il concède le point, puis nie ce qu'on en attendrait."
+    },
+    "words": [
+     {
+      "surface": "だが",
+      "meaning": {
+       "en": "but",
+       "fr": "mais"
+      }
+     },
+     {
+      "surface": "いかに",
+      "meaning": {
+       "en": "however",
+       "fr": "si... soit-il"
+      }
+     },
+     {
+      "surface": "優れた",
+      "meaning": {
+       "en": "excellent",
+       "fr": "excellent"
+      }
+     },
+     {
+      "surface": "翻訳者",
+      "meaning": {
+       "en": "translator",
+       "fr": "traducteur"
+      }
+     },
+     {
+      "surface": "といえども",
+      "meaning": {
+       "en": "even, granted that",
+       "fr": "même, quand bien même"
+      }
+     },
+     {
+      "surface": "原文",
+      "meaning": {
+       "en": "original text",
+       "fr": "texte original"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "すべて",
+      "meaning": {
+       "en": "everything",
+       "fr": "tout"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "移す",
+      "meaning": {
+       "en": "to carry over",
+       "fr": "transposer"
+      }
+     },
+     {
+      "surface": "ことはできない",
+      "meaning": {
+       "en": "cannot",
+       "fr": "ne peut pas"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "言葉には、その土地の歴史や習慣が染み込んでいるからだ。",
+    "translation": {
+     "en": "For words are steeped in the history and customs of the place they come from.",
+     "fr": "Car les mots sont imprégnés de l'histoire et des coutumes du pays d'où ils viennent."
+    },
+    "note": {
+     "en": "「からだ」 at the end gives the reason for the sentence before.",
+     "fr": "「からだ」 en fin de phrase donne la raison de la phrase précédente."
+    },
+    "words": [
+     {
+      "surface": "言葉",
+      "meaning": {
+       "en": "words",
+       "fr": "mots"
+      }
+     },
+     {
+      "surface": "には",
+      "meaning": {
+       "en": "in",
+       "fr": "dans"
+      }
+     },
+     {
+      "surface": "その",
+      "meaning": {
+       "en": "that",
+       "fr": "ce"
+      }
+     },
+     {
+      "surface": "土地",
+      "meaning": {
+       "en": "place, land",
+       "fr": "pays"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "歴史",
+      "meaning": {
+       "en": "history",
+       "fr": "histoire"
+      }
+     },
+     {
+      "surface": "や",
+      "meaning": {
+       "en": "and",
+       "fr": "et"
+      }
+     },
+     {
+      "surface": "習慣",
+      "meaning": {
+       "en": "customs",
+       "fr": "coutumes"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "染み込んでいる",
+      "meaning": {
+       "en": "have soaked into",
+       "fr": "sont imprégnés"
+      }
+     },
+     {
+      "surface": "からだ",
+      "meaning": {
+       "en": "it is because",
+       "fr": "c'est que"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "例えば、日本語の「いただきます」にぴったり当たる表現は、多くの言語に存在しない。",
+    "translation": {
+     "en": "For example, many languages have no expression that corresponds exactly to the Japanese 「いただきます」.",
+     "fr": "Par exemple, bien des langues n'ont aucune expression qui corresponde exactement au 「いただきます」 japonais."
+    },
+    "note": {
+     "en": "「Aに当たる」 means to correspond to A; 「ぴったり」 makes the match exact.",
+     "fr": "「Aに当たる」 signifie correspondre à A ; 「ぴったり」 rend la correspondance exacte."
+    },
+    "words": [
+     {
+      "surface": "例えば",
+      "meaning": {
+       "en": "for example",
+       "fr": "par exemple"
+      }
+     },
+     {
+      "surface": "日本語",
+      "meaning": {
+       "en": "Japanese",
+       "fr": "japonais"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "いただきます",
+      "meaning": {
+       "en": "itadakimasu (said before eating)",
+       "fr": "itadakimasu (dit avant de manger)"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "to",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "ぴったり",
+      "meaning": {
+       "en": "exactly",
+       "fr": "exactement"
+      }
+     },
+     {
+      "surface": "当たる",
+      "meaning": {
+       "en": "to correspond",
+       "fr": "correspondre"
+      }
+     },
+     {
+      "surface": "表現",
+      "meaning": {
+       "en": "expression",
+       "fr": "expression"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "多く",
+      "meaning": {
+       "en": "many",
+       "fr": "beaucoup"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "言語",
+      "meaning": {
+       "en": "languages",
+       "fr": "langues"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "in",
+       "fr": "dans"
+      }
+     },
+     {
+      "surface": "存在しない",
+      "meaning": {
+       "en": "does not exist",
+       "fr": "n'existe pas"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "訳者が言葉を一つ選ぶたびに、何かが失われ、何かが付け加えられることは想像にかたくない。",
+    "translation": {
+     "en": "It is not hard to imagine that each time a translator chooses a word, something is lost and something is added.",
+     "fr": "On imagine sans peine que, chaque fois que le traducteur choisit un mot, quelque chose se perd et quelque chose s'ajoute."
+    },
+    "note": {
+     "en": "「〜にかたくない」 means it is not hard to: 「想像にかたくない」, easy to imagine.",
+     "fr": "「〜にかたくない」 signifie il n'est pas difficile de : 「想像にかたくない」, facile à imaginer."
+    },
+    "words": [
+     {
+      "surface": "訳者",
+      "meaning": {
+       "en": "translator",
+       "fr": "traducteur"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "言葉",
+      "meaning": {
+       "en": "word",
+       "fr": "mot"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "一つ",
+      "meaning": {
+       "en": "one",
+       "fr": "un"
+      }
+     },
+     {
+      "surface": "選ぶ",
+      "meaning": {
+       "en": "to choose",
+       "fr": "choisir"
+      }
+     },
+     {
+      "surface": "たびに",
+      "meaning": {
+       "en": "each time",
+       "fr": "chaque fois que"
+      }
+     },
+     {
+      "surface": "何か",
+      "meaning": {
+       "en": "something",
+       "fr": "quelque chose"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "失われ",
+      "meaning": {
+       "en": "is lost, and",
+       "fr": "se perd, et"
+      }
+     },
+     {
+      "surface": "何か",
+      "meaning": {
+       "en": "something",
+       "fr": "quelque chose"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "付け加えられる",
+      "meaning": {
+       "en": "is added",
+       "fr": "s'ajoute"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "the fact that",
+       "fr": "le fait que"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "想像にかたくない",
+      "meaning": {
+       "en": "is easy to imagine",
+       "fr": "s'imagine sans peine"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "それでも、翻訳なくしては、私たちは異国の文学に触れることすらできなかっただろう。",
+    "translation": {
+     "en": "Even so, without translation we could not even have come near the literature of foreign lands.",
+     "fr": "Pourtant, sans la traduction, nous n'aurions même pas pu approcher la littérature des pays étrangers."
+    },
+    "note": {
+     "en": "「〜なくしては」 means without: what follows would be impossible; 「すら」 stresses even.",
+     "fr": "「〜なくしては」 signifie sans : ce qui suit serait impossible ; 「すら」 insiste sur même."
+    },
+    "words": [
+     {
+      "surface": "それでも",
+      "meaning": {
+       "en": "even so",
+       "fr": "pourtant"
+      }
+     },
+     {
+      "surface": "翻訳",
+      "meaning": {
+       "en": "translation",
+       "fr": "traduction"
+      }
+     },
+     {
+      "surface": "なくしては",
+      "meaning": {
+       "en": "without",
+       "fr": "sans"
+      }
+     },
+     {
+      "surface": "私たち",
+      "meaning": {
+       "en": "we",
+       "fr": "nous"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "異国",
+      "meaning": {
+       "en": "foreign lands",
+       "fr": "pays étrangers"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "文学",
+      "meaning": {
+       "en": "literature",
+       "fr": "littérature"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks what is touched",
+       "fr": "marque ce qu'on approche"
+      }
+     },
+     {
+      "surface": "触れる",
+      "meaning": {
+       "en": "to come into contact with",
+       "fr": "approcher"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "the act of",
+       "fr": "le fait de"
+      }
+     },
+     {
+      "surface": "すら",
+      "meaning": {
+       "en": "even",
+       "fr": "même"
+      }
+     },
+     {
+      "surface": "できなかった",
+      "meaning": {
+       "en": "could not",
+       "fr": "n'aurions pas pu"
+      }
+     },
+     {
+      "surface": "だろう",
+      "meaning": {
+       "en": "would (have)",
+       "fr": "sans doute"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "完全な翻訳はない。",
+    "translation": {
+     "en": "There is no perfect translation.",
+     "fr": "La traduction parfaite n'existe pas."
+    },
+    "note": {
+     "en": "A short sentence, set apart, states the conclusion reached so far.",
+     "fr": "Une phrase brève, mise à part, énonce la conclusion à ce stade."
+    },
+    "words": [
+     {
+      "surface": "完全な",
+      "meaning": {
+       "en": "perfect",
+       "fr": "parfaite"
+      }
+     },
+     {
+      "surface": "翻訳",
+      "meaning": {
+       "en": "translation",
+       "fr": "traduction"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "ない",
+      "meaning": {
+       "en": "there is no",
+       "fr": "n'existe pas"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "だからこそ訳者は、失われるものを知りつつ、最も近い言葉を探し続けるのである。",
+    "translation": {
+     "en": "That is precisely why translators, knowing what will be lost, keep searching for the closest word.",
+     "fr": "C'est justement pour cela que le traducteur, tout en sachant ce qui se perd, continue de chercher le mot le plus proche."
+    },
+    "note": {
+     "en": "「だからこそ」 stresses that this is the very reason; 「〜つつ」 is a formal while.",
+     "fr": "「だからこそ」 souligne que c'est justement la raison ; 「〜つつ」 est un tout en formel."
+    },
+    "words": [
+     {
+      "surface": "だからこそ",
+      "meaning": {
+       "en": "that is precisely why",
+       "fr": "c'est justement pourquoi"
+      }
+     },
+     {
+      "surface": "訳者",
+      "meaning": {
+       "en": "translator",
+       "fr": "traducteur"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "失われる",
+      "meaning": {
+       "en": "is lost",
+       "fr": "se perd"
+      }
+     },
+     {
+      "surface": "もの",
+      "meaning": {
+       "en": "what",
+       "fr": "ce qui"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "知りつつ",
+      "meaning": {
+       "en": "while knowing",
+       "fr": "tout en sachant"
+      }
+     },
+     {
+      "surface": "最も",
+      "meaning": {
+       "en": "most",
+       "fr": "le plus"
+      }
+     },
+     {
+      "surface": "近い",
+      "meaning": {
+       "en": "close",
+       "fr": "proche"
+      }
+     },
+     {
+      "surface": "言葉",
+      "meaning": {
+       "en": "word",
+       "fr": "mot"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "探し続ける",
+      "meaning": {
+       "en": "to keep searching for",
+       "fr": "continuer à chercher"
+      }
+     },
+     {
+      "surface": "のである",
+      "meaning": {
+       "en": "(it is that, written)",
+       "fr": "(c'est que, écrit)"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "n1-09",
+  "level": "N1",
+  "title": "平均という幻",
+  "grammar": [
+   "〜にひきかえ",
+   "〜ばそれまでだ",
+   "〜を踏まえて"
+  ],
+  "text": "「平均的な家庭」という言葉をよく耳にする。だが、平均の通りに暮らしている家庭は、実はほとんどない。ある町の平均年収が高くても、ごく一部の富裕層が数字を押し上げているだけかもしれないのだ。数字は一目で比べられ、客観的に見える。それにひきかえ、一人一人の暮らしの事情は、数字にはなかなか表れない。だからといって、数字を捨ててしまえばそれまでだ。必要なのは、平均だけでなく、そのばらつきや例外を踏まえて判断することだろう。数字の背後にどんな人々がいるのかを想像して初めて、数字は意味を持つ。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "How many households, says the writer, live exactly as the average says?",
+     "fr": "Combien de foyers, selon l'auteur, vivent exactement selon la moyenne ?"
+    },
+    "options": {
+     "en": [
+      "About half",
+      "Most of them",
+      "Only the wealthy ones",
+      "Almost none"
+     ],
+     "fr": [
+      "Environ la moitié",
+      "La plupart",
+      "Seulement les plus riches",
+      "Presque aucun"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「耳にする」 mean in the first sentence?",
+     "fr": "Que signifie 「耳にする」 dans la première phrase ?"
+    },
+    "options": {
+     "en": [
+      "To agree with",
+      "To hear",
+      "To repeat",
+      "To ignore"
+     ],
+     "fr": [
+      "Approuver",
+      "Entendre",
+      "Répéter",
+      "Ignorer"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What possibility does the writer raise about a town with a high average income?",
+     "fr": "Quelle possibilité l'auteur évoque-t-il pour une ville au revenu moyen élevé ?"
+    },
+    "options": {
+     "en": [
+      "A few very rich residents push the figure up",
+      "Most residents there earn a good salary",
+      "Prices there are higher than elsewhere",
+      "Only working adults have been counted"
+     ],
+     "fr": [
+      "Quelques habitants très riches font monter le chiffre",
+      "La plupart des habitants y gagnent bien leur vie",
+      "Les prix y sont plus élevés qu'ailleurs",
+      "Seuls les adultes qui travaillent ont été comptés"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「それにひきかえ」 do in its sentence?",
+     "fr": "Quel est le rôle de 「それにひきかえ」 dans sa phrase ?"
+    },
+    "options": {
+     "en": [
+      "It gives an example of what came before",
+      "It explains the cause of what came before",
+      "It sets what follows against what came before",
+      "It repeats what came before in other words"
+     ],
+     "fr": [
+      "Il donne un exemple de ce qui précède",
+      "Il explique la cause de ce qui précède",
+      "Il oppose ce qui suit à ce qui précède",
+      "Il redit ce qui précède autrement"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Which quality of figures does the writer mention?",
+     "fr": "Quelle qualité des chiffres l'auteur mentionne-t-il ?"
+    },
+    "options": {
+     "en": [
+      "They are always kept up to date",
+      "They can be compared at a glance",
+      "They are easy to remember",
+      "They are hard to falsify"
+     ],
+     "fr": [
+      "Ils sont toujours à jour",
+      "Ils se comparent d'un coup d'œil",
+      "Ils se retiennent facilement",
+      "Ils sont difficiles à falsifier"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「数字を捨ててしまえばそれまでだ」 mean?",
+     "fr": "Que signifie 「数字を捨ててしまえばそれまでだ」 ?"
+    },
+    "options": {
+     "en": [
+      "Keep the figures and we can go no further",
+      "Figures thrown away can always be found again",
+      "Throw the figures away until they are needed",
+      "Throw the figures away and we have nothing left"
+     ],
+     "fr": [
+      "Si l'on garde les chiffres, on n'ira pas plus loin",
+      "Des chiffres jetés se retrouvent toujours",
+      "Jetons les chiffres jusqu'à ce qu'on en ait besoin",
+      "Si l'on jette les chiffres, il ne reste plus rien"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「〜を踏まえて」 mean in 「例外を踏まえて」?",
+     "fr": "Que signifie 「〜を踏まえて」 dans 「例外を踏まえて」 ?"
+    },
+    "options": {
+     "en": [
+      "Taking into account",
+      "Leaving aside",
+      "Correcting",
+      "Counting as normal"
+     ],
+     "fr": [
+      "En tenant compte de",
+      "En laissant de côté",
+      "En corrigeant",
+      "En comptant comme normaux"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「ばらつき」 mean here?",
+     "fr": "Que signifie ici 「ばらつき」 ?"
+    },
+    "options": {
+     "en": [
+      "How quickly the figures change",
+      "How the figures were gathered",
+      "How widely the figures are spread",
+      "How far the figures can be trusted"
+     ],
+     "fr": [
+      "À quelle vitesse les chiffres changent",
+      "Comment les chiffres ont été recueillis",
+      "À quel point les chiffres sont dispersés",
+      "À quel point on peut se fier aux chiffres"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "When, according to the last sentence, do figures take on meaning?",
+     "fr": "D'après la dernière phrase, quand les chiffres prennent-ils un sens ?"
+    },
+    "options": {
+     "en": [
+      "When they are compared with other towns",
+      "When they are worked out with great care",
+      "When they are shown to the public",
+      "When we imagine the people behind them"
+     ],
+     "fr": [
+      "Quand on les compare à d'autres villes",
+      "Quand on les calcule avec grand soin",
+      "Quand on les montre au public",
+      "Quand on imagine les personnes derrière eux"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What is the writer's position on figures?",
+     "fr": "Quelle est la position de l'auteur sur les chiffres ?"
+    },
+    "options": {
+     "en": [
+      "Trust them over personal stories",
+      "Use them, but never on their own",
+      "Stop relying on them altogether",
+      "Look at the average and nothing else"
+     ],
+     "fr": [
+      "Les croire plutôt que les récits",
+      "S'en servir, mais jamais seuls",
+      "Cesser tout à fait de s'y fier",
+      "Ne regarder que la moyenne"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What would the writer most likely say of a report that gives only an average?",
+     "fr": "Que dirait sans doute l'auteur d'un rapport qui ne donne qu'une moyenne ?"
+    },
+    "options": {
+     "en": [
+      "It may hide how people really live",
+      "It is the fairest picture of a town",
+      "It is useless and should be ignored",
+      "It is misleading only in rich towns"
+     ],
+     "fr": [
+      "Il peut cacher la vie réelle des gens",
+      "C'est l'image la plus juste d'une ville",
+      "Il est inutile et à ignorer",
+      "Il n'induit en erreur que dans les villes riches"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "Why does the writer put 「平均的な家庭」 in brackets at the start?",
+     "fr": "Pourquoi l'auteur met-il 「平均的な家庭」 entre crochets au début ?"
+    },
+    "options": {
+     "en": [
+      "To give the official name of a survey",
+      "To show that the phrase is a book's title",
+      "To question a phrase people use without thinking",
+      "To mark it as a word from another language"
+     ],
+     "fr": [
+      "Pour donner le nom officiel d'une enquête",
+      "Pour montrer que l'expression est un titre de livre",
+      "Pour mettre en doute une expression employée sans réfléchir",
+      "Pour signaler un mot d'une autre langue"
+     ]
+    },
+    "correct": 2
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "「平均的な家庭」という言葉をよく耳にする。",
+    "translation": {
+     "en": "We often hear the phrase 「平均的な家庭」, the average household.",
+     "fr": "On entend souvent l'expression 「平均的な家庭」, le foyer moyen."
+    },
+    "note": {
+     "en": "「耳にする」 is a set phrase for to hear, to happen to hear; 「という」 names the phrase.",
+     "fr": "「耳にする」 est une expression figée qui signifie entendre, entendre dire ; 「という」 introduit l'expression citée."
+    },
+    "words": [
+     {
+      "surface": "平均的な",
+      "meaning": {
+       "en": "average",
+       "fr": "moyen"
+      }
+     },
+     {
+      "surface": "家庭",
+      "meaning": {
+       "en": "household",
+       "fr": "foyer"
+      }
+     },
+     {
+      "surface": "という",
+      "meaning": {
+       "en": "called, the phrase",
+       "fr": "que l'on appelle"
+      }
+     },
+     {
+      "surface": "言葉",
+      "meaning": {
+       "en": "phrase",
+       "fr": "expression"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "よく",
+      "meaning": {
+       "en": "often",
+       "fr": "souvent"
+      }
+     },
+     {
+      "surface": "耳にする",
+      "meaning": {
+       "en": "to hear",
+       "fr": "entendre"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "だが、平均の通りに暮らしている家庭は、実はほとんどない。",
+    "translation": {
+     "en": "Yet in fact almost no household lives exactly as the average says.",
+     "fr": "Pourtant, en réalité, presque aucun foyer ne vit exactement selon la moyenne."
+    },
+    "note": {
+     "en": "「Nの通りに」 means just as N says; 「ほとんどない」 means there are almost none.",
+     "fr": "「Nの通りに」 signifie exactement comme N l'indique ; 「ほとんどない」 signifie il n'y en a presque pas."
+    },
+    "words": [
+     {
+      "surface": "だが",
+      "meaning": {
+       "en": "yet",
+       "fr": "pourtant"
+      }
+     },
+     {
+      "surface": "平均",
+      "meaning": {
+       "en": "average",
+       "fr": "moyenne"
+      }
+     },
+     {
+      "surface": "の通りに",
+      "meaning": {
+       "en": "just as",
+       "fr": "exactement selon"
+      }
+     },
+     {
+      "surface": "暮らしている",
+      "meaning": {
+       "en": "live",
+       "fr": "vivent"
+      }
+     },
+     {
+      "surface": "家庭",
+      "meaning": {
+       "en": "households",
+       "fr": "foyers"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "実は",
+      "meaning": {
+       "en": "in fact",
+       "fr": "en réalité"
+      }
+     },
+     {
+      "surface": "ほとんどない",
+      "meaning": {
+       "en": "there are almost none",
+       "fr": "il n'y en a presque pas"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "ある町の平均年収が高くても、ごく一部の富裕層が数字を押し上げているだけかもしれないのだ。",
+    "translation": {
+     "en": "Even if a town's average yearly income is high, it may be that only a small handful of wealthy people are pushing the figure up.",
+     "fr": "Même si le revenu annuel moyen d'une ville est élevé, il se peut qu'une poignée de riches tire seule le chiffre vers le haut."
+    },
+    "note": {
+     "en": "「〜ても」 is even if; 「〜だけかもしれない」 suggests it may be no more than that.",
+     "fr": "「〜ても」 signifie même si ; 「〜だけかもしれない」 suggère que ce n'est peut-être que cela."
+    },
+    "words": [
+     {
+      "surface": "ある",
+      "meaning": {
+       "en": "a certain",
+       "fr": "un certain"
+      }
+     },
+     {
+      "surface": "町",
+      "meaning": {
+       "en": "town",
+       "fr": "ville"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "平均年収",
+      "meaning": {
+       "en": "average yearly income",
+       "fr": "revenu annuel moyen"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "高くても",
+      "meaning": {
+       "en": "even if high",
+       "fr": "même s'il est élevé"
+      }
+     },
+     {
+      "surface": "ごく",
+      "meaning": {
+       "en": "very",
+       "fr": "toute"
+      }
+     },
+     {
+      "surface": "一部",
+      "meaning": {
+       "en": "small part",
+       "fr": "petite partie"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "富裕層",
+      "meaning": {
+       "en": "the wealthy",
+       "fr": "les riches"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "数字",
+      "meaning": {
+       "en": "figure",
+       "fr": "chiffre"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "押し上げている",
+      "meaning": {
+       "en": "are pushing up",
+       "fr": "tirent vers le haut"
+      }
+     },
+     {
+      "surface": "だけ",
+      "meaning": {
+       "en": "only",
+       "fr": "seulement"
+      }
+     },
+     {
+      "surface": "かもしれない",
+      "meaning": {
+       "en": "may",
+       "fr": "il se peut que"
+      }
+     },
+     {
+      "surface": "のだ",
+      "meaning": {
+       "en": "(it is that)",
+       "fr": "(c'est que)"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "数字は一目で比べられ、客観的に見える。",
+    "translation": {
+     "en": "Figures can be compared at a glance and look objective.",
+     "fr": "Les chiffres se comparent d'un coup d'œil et paraissent objectifs."
+    },
+    "note": {
+     "en": "「比べられ」 is the potential stem, linking the two clauses in written style.",
+     "fr": "「比べられ」 est le radical du potentiel, qui enchaîne les deux propositions en style écrit."
+    },
+    "words": [
+     {
+      "surface": "数字",
+      "meaning": {
+       "en": "figures",
+       "fr": "chiffres"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "一目で",
+      "meaning": {
+       "en": "at a glance",
+       "fr": "d'un coup d'œil"
+      }
+     },
+     {
+      "surface": "比べられ",
+      "meaning": {
+       "en": "can be compared, and",
+       "fr": "se comparent, et"
+      }
+     },
+     {
+      "surface": "客観的に",
+      "meaning": {
+       "en": "objective",
+       "fr": "objectifs"
+      }
+     },
+     {
+      "surface": "見える",
+      "meaning": {
+       "en": "to look",
+       "fr": "paraître"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "それにひきかえ、一人一人の暮らしの事情は、数字にはなかなか表れない。",
+    "translation": {
+     "en": "By contrast, the circumstances of each person's life hardly show in the figures.",
+     "fr": "En revanche, la situation de chacun n'apparaît guère dans les chiffres."
+    },
+    "note": {
+     "en": "「それにひきかえ」 sets what follows against what came before, as its opposite; 「なかなか〜ない」 is not easily.",
+     "fr": "「それにひきかえ」 oppose ce qui suit à ce qui précède ; 「なかなか〜ない」 signifie difficilement."
+    },
+    "words": [
+     {
+      "surface": "それにひきかえ",
+      "meaning": {
+       "en": "by contrast",
+       "fr": "en revanche"
+      }
+     },
+     {
+      "surface": "一人一人",
+      "meaning": {
+       "en": "each person",
+       "fr": "chacun"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "暮らし",
+      "meaning": {
+       "en": "life",
+       "fr": "vie"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "事情",
+      "meaning": {
+       "en": "circumstances",
+       "fr": "situation"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "数字",
+      "meaning": {
+       "en": "figures",
+       "fr": "chiffres"
+      }
+     },
+     {
+      "surface": "には",
+      "meaning": {
+       "en": "in",
+       "fr": "dans"
+      }
+     },
+     {
+      "surface": "なかなか",
+      "meaning": {
+       "en": "not easily",
+       "fr": "guère"
+      }
+     },
+     {
+      "surface": "表れない",
+      "meaning": {
+       "en": "do not show",
+       "fr": "n'apparaît pas"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "だからといって、数字を捨ててしまえばそれまでだ。",
+    "translation": {
+     "en": "That said, if we throw the figures away, that is the end of it.",
+     "fr": "Pour autant, si l'on jette les chiffres, c'en est fini."
+    },
+    "note": {
+     "en": "「だからといって」 blocks the conclusion one might draw; 「〜ばそれまでだ」 means if..., there is nothing more to be done.",
+     "fr": "「だからといって」 écarte la conclusion qu'on pourrait tirer ; 「〜ばそれまでだ」 signifie si..., il n'y a plus rien à faire."
+    },
+    "words": [
+     {
+      "surface": "だからといって",
+      "meaning": {
+       "en": "that does not mean",
+       "fr": "pour autant"
+      }
+     },
+     {
+      "surface": "数字",
+      "meaning": {
+       "en": "figures",
+       "fr": "chiffres"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "捨ててしまえば",
+      "meaning": {
+       "en": "if we throw away",
+       "fr": "si l'on jette"
+      }
+     },
+     {
+      "surface": "それまでだ",
+      "meaning": {
+       "en": "that is the end of it",
+       "fr": "c'en est fini"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "必要なのは、平均だけでなく、そのばらつきや例外を踏まえて判断することだろう。",
+    "translation": {
+     "en": "What is needed, surely, is to judge by taking into account not only the average but also its spread and its exceptions.",
+     "fr": "Ce qu'il faut, sans doute, c'est juger en tenant compte non seulement de la moyenne, mais aussi de sa dispersion et de ses exceptions."
+    },
+    "note": {
+     "en": "「〜を踏まえて」 means on the basis of, taking into account; 「必要なのは〜ことだ」 names what is needed.",
+     "fr": "「〜を踏まえて」 signifie en s'appuyant sur, compte tenu de ; 「必要なのは〜ことだ」 désigne ce qu'il faut."
+    },
+    "words": [
+     {
+      "surface": "必要な",
+      "meaning": {
+       "en": "needed",
+       "fr": "nécessaire"
+      }
+     },
+     {
+      "surface": "のは",
+      "meaning": {
+       "en": "what (is)",
+       "fr": "ce qui"
+      }
+     },
+     {
+      "surface": "平均",
+      "meaning": {
+       "en": "average",
+       "fr": "moyenne"
+      }
+     },
+     {
+      "surface": "だけでなく",
+      "meaning": {
+       "en": "not only",
+       "fr": "non seulement"
+      }
+     },
+     {
+      "surface": "その",
+      "meaning": {
+       "en": "its",
+       "fr": "sa"
+      }
+     },
+     {
+      "surface": "ばらつき",
+      "meaning": {
+       "en": "spread",
+       "fr": "dispersion"
+      }
+     },
+     {
+      "surface": "や",
+      "meaning": {
+       "en": "and",
+       "fr": "et"
+      }
+     },
+     {
+      "surface": "例外",
+      "meaning": {
+       "en": "exceptions",
+       "fr": "exceptions"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "踏まえて",
+      "meaning": {
+       "en": "taking into account",
+       "fr": "en tenant compte de"
+      }
+     },
+     {
+      "surface": "判断する",
+      "meaning": {
+       "en": "to judge",
+       "fr": "juger"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "the act of",
+       "fr": "le fait de"
+      }
+     },
+     {
+      "surface": "だろう",
+      "meaning": {
+       "en": "surely",
+       "fr": "sans doute"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "数字の背後にどんな人々がいるのかを想像して初めて、数字は意味を持つ。",
+    "translation": {
+     "en": "Only when we imagine what people stand behind the figures do the figures take on meaning.",
+     "fr": "Ce n'est qu'en imaginant qui se trouve derrière les chiffres que ceux-ci prennent un sens."
+    },
+    "note": {
+     "en": "「〜て初めて」 means only once... does...; 「のか」 makes the question a part of the sentence.",
+     "fr": "「〜て初めて」 signifie ce n'est qu'après... que ; 「のか」 intègre la question à la phrase."
+    },
+    "words": [
+     {
+      "surface": "数字",
+      "meaning": {
+       "en": "figures",
+       "fr": "chiffres"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "背後",
+      "meaning": {
+       "en": "behind",
+       "fr": "derrière"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "at",
+       "fr": "(lieu)"
+      }
+     },
+     {
+      "surface": "どんな",
+      "meaning": {
+       "en": "what kind of",
+       "fr": "quelles"
+      }
+     },
+     {
+      "surface": "人々",
+      "meaning": {
+       "en": "people",
+       "fr": "personnes"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "いる",
+      "meaning": {
+       "en": "are",
+       "fr": "se trouvent"
+      }
+     },
+     {
+      "surface": "のか",
+      "meaning": {
+       "en": "whether, what",
+       "fr": "(question indirecte)"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "想像して",
+      "meaning": {
+       "en": "imagine",
+       "fr": "imaginer"
+      }
+     },
+     {
+      "surface": "初めて",
+      "meaning": {
+       "en": "only then",
+       "fr": "seulement alors"
+      }
+     },
+     {
+      "surface": "数字",
+      "meaning": {
+       "en": "figures",
+       "fr": "chiffres"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "意味",
+      "meaning": {
+       "en": "meaning",
+       "fr": "sens"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "持つ",
+      "meaning": {
+       "en": "to have",
+       "fr": "prendre"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "n1-10",
+  "level": "N1",
+  "title": "町並みを残す",
+  "grammar": [
+   "〜あっての",
+   "〜ないまでも",
+   "〜をよそに"
+  ],
+  "text": "古い町並みを残そうとする動きが、各地で広がっている。しかし、保存は建物を守るだけでは成り立たない。町並みとは、そこに暮らす人あってのものだからだ。住民の不便をよそに外観だけを整えれば、町は観光客のための舞台装置になりかねない。実際、ある町では保存地区に指定された後、住民が次々と離れ、昼間は人であふれるのに、夜は明かり一つ灯らない通りになった。すべての家を昔のまま残すことはできないまでも、暮らしと両立する形を探る必要がある。町並みを守るとは、そこにある生活を守ることでもあるはずだ。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What is spreading in many places?",
+     "fr": "Qu'est-ce qui se répand un peu partout ?"
+    },
+    "options": {
+     "en": [
+      "Plans to replace old houses",
+      "Tourist visits to old towns",
+      "Efforts to preserve old townscapes",
+      "New shops in old streets"
+     ],
+     "fr": [
+      "Les projets de remplacer les vieilles maisons",
+      "Les visites touristiques des villes anciennes",
+      "Les initiatives pour préserver les quartiers anciens",
+      "Les nouvelles boutiques dans les vieilles rues"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「人あってのもの」 mean?",
+     "fr": "Que signifie 「人あってのもの」 ?"
+    },
+    "options": {
+     "en": [
+      "Something that people own together",
+      "Something that exists only thanks to people",
+      "Something that people made long ago",
+      "Something that exists in spite of people"
+     ],
+     "fr": [
+      "Une chose que les gens possèdent ensemble",
+      "Une chose qui n'existe que grâce aux gens",
+      "Une chose que les gens ont faite autrefois",
+      "Une chose qui existe malgré les gens"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Why, according to the writer, is protecting buildings not enough?",
+     "fr": "Pourquoi, selon l'auteur, ne suffit-il pas de protéger les bâtiments ?"
+    },
+    "options": {
+     "en": [
+      "Old buildings cost too much to repair",
+      "Tourists prefer new buildings to old ones",
+      "Buildings can always be rebuilt later",
+      "A townscape depends on the people living in it"
+     ],
+     "fr": [
+      "Les vieux bâtiments coûtent trop cher à réparer",
+      "Les touristes préfèrent le neuf à l'ancien",
+      "On peut toujours reconstruire plus tard",
+      "Un quartier dépend des gens qui y vivent"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「住民の不便をよそに」 mean?",
+     "fr": "Que signifie 「住民の不便をよそに」 ?"
+    },
+    "options": {
+     "en": [
+      "Paying no attention to the residents' inconvenience",
+      "Taking great care over the residents' inconvenience",
+      "Moving the residents' inconvenience somewhere else",
+      "Because the residents complain of inconvenience"
+     ],
+     "fr": [
+      "Sans se soucier des désagréments des habitants",
+      "En prenant grand soin des désagréments des habitants",
+      "En déplaçant ailleurs les désagréments des habitants",
+      "Parce que les habitants se plaignent de désagréments"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「舞台装置」 suggest here?",
+     "fr": "Que suggère ici 「舞台装置」 ?"
+    },
+    "options": {
+     "en": [
+      "A hall where plays are performed",
+      "A machine that keeps the town clean",
+      "A set made only to be looked at",
+      "A plan for building new homes"
+     ],
+     "fr": [
+      "Une salle où l'on joue des pièces",
+      "Une machine qui garde la ville propre",
+      "Un décor fait seulement pour être regardé",
+      "Un projet de nouveaux logements"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「〜かねない」 in 「なりかねない」 express?",
+     "fr": "Qu'exprime 「〜かねない」 dans 「なりかねない」 ?"
+    },
+    "options": {
+     "en": [
+      "Something that cannot happen at all",
+      "Something the writer hopes will happen",
+      "Something that has already happened",
+      "A risk that something bad may happen"
+     ],
+     "fr": [
+      "Une chose qui ne peut pas arriver",
+      "Une chose que l'auteur souhaite voir arriver",
+      "Une chose qui est déjà arrivée",
+      "Le risque qu'une chose fâcheuse arrive"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What happened in the town made a conservation area?",
+     "fr": "Que s'est-il passé dans la ville classée secteur protégé ?"
+    },
+    "options": {
+     "en": [
+      "Residents left and its nights went dark",
+      "More families moved in to live there",
+      "Tourists stopped coming in the daytime",
+      "New shops stayed open late at night"
+     ],
+     "fr": [
+      "Les habitants sont partis et ses nuits sont devenues noires",
+      "D'autres familles sont venues s'y installer",
+      "Les touristes ont cessé de venir le jour",
+      "De nouvelles boutiques restaient ouvertes tard"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「次々と」 mean?",
+     "fr": "Que signifie 「次々と」 ?"
+    },
+    "options": {
+     "en": [
+      "All at the same time",
+      "One after another",
+      "Without telling anyone",
+      "Only for a short time"
+     ],
+     "fr": [
+      "Tous en même temps",
+      "L'un après l'autre",
+      "Sans prévenir personne",
+      "Pour peu de temps seulement"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「できないまでも」 mean?",
+     "fr": "Que signifie 「できないまでも」 ?"
+    },
+    "options": {
+     "en": [
+      "Until it can be done",
+      "Because it cannot be done",
+      "Even if it cannot be done",
+      "Unless it can be done"
+     ],
+     "fr": [
+      "Jusqu'à ce qu'on puisse le faire",
+      "Parce qu'on ne peut pas le faire",
+      "Même si on ne peut pas le faire",
+      "À moins de pouvoir le faire"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What does the contrast between day and night in that town show?",
+     "fr": "Que montre le contraste entre le jour et la nuit dans cette ville ?"
+    },
+    "options": {
+     "en": [
+      "People visit, but hardly anyone lives there now",
+      "The town is too dangerous to visit at night",
+      "The town saves energy by turning lights off",
+      "Tourists would rather visit the town by day"
+     ],
+     "fr": [
+      "On la visite, mais presque plus personne n'y vit",
+      "La ville est trop dangereuse la nuit",
+      "La ville économise l'énergie en éteignant",
+      "Les touristes préfèrent la visiter le jour"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "Which would the writer most likely support?",
+     "fr": "Qu'est-ce que l'auteur soutiendrait le plus probablement ?"
+    },
+    "options": {
+     "en": [
+      "Turning old towns into open-air museums",
+      "Rebuilding old towns exactly as they were",
+      "Letting old buildings fall into ruin",
+      "Rules that let residents modernise their homes"
+     ],
+     "fr": [
+      "Faire des villes anciennes des musées à ciel ouvert",
+      "Reconstruire les villes anciennes à l'identique",
+      "Laisser les vieux bâtiments tomber en ruine",
+      "Des règles qui laissent les habitants moderniser leur maison"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What is the writer's main point?",
+     "fr": "Quelle est l'idée principale de l'auteur ?"
+    },
+    "options": {
+     "en": [
+      "Old towns should stay exactly as they were",
+      "Preserving a town means preserving its life",
+      "Tourism is the best way to save old towns",
+      "Old buildings matter more than residents"
+     ],
+     "fr": [
+      "Les villes anciennes doivent rester telles quelles",
+      "Préserver une ville, c'est préserver sa vie",
+      "Le tourisme est le meilleur moyen de les sauver",
+      "Les bâtiments comptent plus que les habitants"
+     ]
+    },
+    "correct": 1
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "古い町並みを残そうとする動きが、各地で広がっている。",
+    "translation": {
+     "en": "Efforts to preserve old townscapes are spreading in many places.",
+     "fr": "Les initiatives pour préserver les quartiers anciens se multiplient un peu partout."
+    },
+    "note": {
+     "en": "「〜ようとする」 is to try to; 「動き」 here means a movement, a trend.",
+     "fr": "「〜ようとする」 signifie chercher à ; 「動き」 désigne ici un mouvement, une tendance."
+    },
+    "words": [
+     {
+      "surface": "古い",
+      "meaning": {
+       "en": "old",
+       "fr": "ancien"
+      }
+     },
+     {
+      "surface": "町並み",
+      "meaning": {
+       "en": "townscape",
+       "fr": "quartier ancien"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "残そうとする",
+      "meaning": {
+       "en": "to try to preserve",
+       "fr": "chercher à préserver"
+      }
+     },
+     {
+      "surface": "動き",
+      "meaning": {
+       "en": "movement",
+       "fr": "mouvement"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "各地",
+      "meaning": {
+       "en": "many places",
+       "fr": "un peu partout"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "in",
+       "fr": "dans"
+      }
+     },
+     {
+      "surface": "広がっている",
+      "meaning": {
+       "en": "is spreading",
+       "fr": "se répand"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "しかし、保存は建物を守るだけでは成り立たない。",
+    "translation": {
+     "en": "But preservation cannot work by protecting buildings alone.",
+     "fr": "Mais la préservation ne tient pas si l'on se contente de protéger les bâtiments."
+    },
+    "note": {
+     "en": "「〜だけでは成り立たない」 means... alone is not enough for it to hold together.",
+     "fr": "「〜だけでは成り立たない」 signifie que... ne suffit pas à le faire tenir."
+    },
+    "words": [
+     {
+      "surface": "しかし",
+      "meaning": {
+       "en": "but",
+       "fr": "mais"
+      }
+     },
+     {
+      "surface": "保存",
+      "meaning": {
+       "en": "preservation",
+       "fr": "préservation"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "建物",
+      "meaning": {
+       "en": "buildings",
+       "fr": "bâtiments"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "守る",
+      "meaning": {
+       "en": "to protect",
+       "fr": "protéger"
+      }
+     },
+     {
+      "surface": "だけでは",
+      "meaning": {
+       "en": "by... alone",
+       "fr": "à lui seul"
+      }
+     },
+     {
+      "surface": "成り立たない",
+      "meaning": {
+       "en": "cannot work",
+       "fr": "ne tient pas"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "町並みとは、そこに暮らす人あってのものだからだ。",
+    "translation": {
+     "en": "For a townscape exists only thanks to the people who live in it.",
+     "fr": "Car un quartier n'existe que grâce aux gens qui y vivent."
+    },
+    "note": {
+     "en": "「AあってのB」 means B exists only because of A; 「とは」 introduces a definition.",
+     "fr": "「AあってのB」 signifie que B n'existe que grâce à A ; 「とは」 introduit une définition."
+    },
+    "words": [
+     {
+      "surface": "町並み",
+      "meaning": {
+       "en": "townscape",
+       "fr": "quartier ancien"
+      }
+     },
+     {
+      "surface": "とは",
+      "meaning": {
+       "en": "is (by definition)",
+       "fr": "c'est"
+      }
+     },
+     {
+      "surface": "そこ",
+      "meaning": {
+       "en": "there",
+       "fr": "là"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "in",
+       "fr": "(lieu)"
+      }
+     },
+     {
+      "surface": "暮らす",
+      "meaning": {
+       "en": "to live",
+       "fr": "vivre"
+      }
+     },
+     {
+      "surface": "人",
+      "meaning": {
+       "en": "people",
+       "fr": "gens"
+      }
+     },
+     {
+      "surface": "あっての",
+      "meaning": {
+       "en": "existing only thanks to",
+       "fr": "qui n'existe que grâce à"
+      }
+     },
+     {
+      "surface": "もの",
+      "meaning": {
+       "en": "thing",
+       "fr": "chose"
+      }
+     },
+     {
+      "surface": "だからだ",
+      "meaning": {
+       "en": "it is because",
+       "fr": "c'est que"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "住民の不便をよそに外観だけを整えれば、町は観光客のための舞台装置になりかねない。",
+    "translation": {
+     "en": "If only the outward look is put in order, with no regard for the residents' inconvenience, the town may well become a stage set for tourists.",
+     "fr": "Si l'on ne soigne que l'aspect extérieur sans se soucier des désagréments des habitants, la ville risque de devenir un décor de théâtre pour touristes."
+    },
+    "note": {
+     "en": "「〜をよそに」 means paying no regard to; 「〜かねない」 warns that something bad could happen.",
+     "fr": "「〜をよそに」 signifie sans se soucier de ; 「〜かねない」 avertit qu'une chose fâcheuse pourrait arriver."
+    },
+    "words": [
+     {
+      "surface": "住民",
+      "meaning": {
+       "en": "residents",
+       "fr": "habitants"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "不便",
+      "meaning": {
+       "en": "inconvenience",
+       "fr": "désagréments"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "よそに",
+      "meaning": {
+       "en": "with no regard for",
+       "fr": "sans se soucier de"
+      }
+     },
+     {
+      "surface": "外観",
+      "meaning": {
+       "en": "outward look",
+       "fr": "aspect extérieur"
+      }
+     },
+     {
+      "surface": "だけ",
+      "meaning": {
+       "en": "only",
+       "fr": "seulement"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "整えれば",
+      "meaning": {
+       "en": "if one puts in order",
+       "fr": "si l'on soigne"
+      }
+     },
+     {
+      "surface": "町",
+      "meaning": {
+       "en": "town",
+       "fr": "ville"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "観光客",
+      "meaning": {
+       "en": "tourists",
+       "fr": "touristes"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "ための",
+      "meaning": {
+       "en": "for",
+       "fr": "destiné à"
+      }
+     },
+     {
+      "surface": "舞台装置",
+      "meaning": {
+       "en": "stage set",
+       "fr": "décor de théâtre"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "into",
+       "fr": "en"
+      }
+     },
+     {
+      "surface": "なりかねない",
+      "meaning": {
+       "en": "may well become",
+       "fr": "risque de devenir"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "実際、ある町では保存地区に指定された後、住民が次々と離れ、昼間は人であふれるのに、夜は明かり一つ灯らない通りになった。",
+    "translation": {
+     "en": "Indeed, in one town, after it was made a conservation area, residents left one after another, and its street became one that teems with people by day yet has not a single light on at night.",
+     "fr": "De fait, dans une ville classée secteur protégé, les habitants sont partis l'un après l'autre, et la rue est devenue un lieu bondé le jour où pas une lumière ne s'allume la nuit."
+    },
+    "note": {
+     "en": "「のに」 sets two facts against each other with surprise; 「一つ〜ない」 means not even one.",
+     "fr": "「のに」 oppose deux faits avec étonnement ; 「一つ〜ない」 signifie pas même un seul."
+    },
+    "words": [
+     {
+      "surface": "実際",
+      "meaning": {
+       "en": "indeed",
+       "fr": "de fait"
+      }
+     },
+     {
+      "surface": "ある",
+      "meaning": {
+       "en": "a certain",
+       "fr": "un certain"
+      }
+     },
+     {
+      "surface": "町",
+      "meaning": {
+       "en": "town",
+       "fr": "ville"
+      }
+     },
+     {
+      "surface": "では",
+      "meaning": {
+       "en": "in",
+       "fr": "dans"
+      }
+     },
+     {
+      "surface": "保存地区",
+      "meaning": {
+       "en": "conservation area",
+       "fr": "secteur protégé"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "as",
+       "fr": "en"
+      }
+     },
+     {
+      "surface": "指定された",
+      "meaning": {
+       "en": "was designated",
+       "fr": "a été classé"
+      }
+     },
+     {
+      "surface": "後",
+      "meaning": {
+       "en": "after",
+       "fr": "après"
+      }
+     },
+     {
+      "surface": "住民",
+      "meaning": {
+       "en": "residents",
+       "fr": "habitants"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "次々と",
+      "meaning": {
+       "en": "one after another",
+       "fr": "l'un après l'autre"
+      }
+     },
+     {
+      "surface": "離れ",
+      "meaning": {
+       "en": "left, and",
+       "fr": "sont partis, et"
+      }
+     },
+     {
+      "surface": "昼間",
+      "meaning": {
+       "en": "daytime",
+       "fr": "la journée"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "人",
+      "meaning": {
+       "en": "people",
+       "fr": "gens"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "with",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "あふれる",
+      "meaning": {
+       "en": "to overflow",
+       "fr": "déborder"
+      }
+     },
+     {
+      "surface": "のに",
+      "meaning": {
+       "en": "yet",
+       "fr": "alors que"
+      }
+     },
+     {
+      "surface": "夜",
+      "meaning": {
+       "en": "night",
+       "fr": "la nuit"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "明かり",
+      "meaning": {
+       "en": "light",
+       "fr": "lumière"
+      }
+     },
+     {
+      "surface": "一つ",
+      "meaning": {
+       "en": "not a single (with a negative)",
+       "fr": "pas une seule (avec une négation)"
+      }
+     },
+     {
+      "surface": "灯らない",
+      "meaning": {
+       "en": "is not lit",
+       "fr": "ne s'allume pas"
+      }
+     },
+     {
+      "surface": "通り",
+      "meaning": {
+       "en": "street",
+       "fr": "rue"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "into",
+       "fr": "en"
+      }
+     },
+     {
+      "surface": "なった",
+      "meaning": {
+       "en": "became",
+       "fr": "est devenue"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "すべての家を昔のまま残すことはできないまでも、暮らしと両立する形を探る必要がある。",
+    "translation": {
+     "en": "Even if not every house can be kept just as it was, we need to look for a form that can live alongside daily life.",
+     "fr": "Même si l'on ne peut pas garder toutes les maisons telles qu'autrefois, il faut chercher une forme qui se concilie avec la vie quotidienne."
+    },
+    "note": {
+     "en": "「〜ないまでも」 grants that the full goal is out of reach and asks at least for something less.",
+     "fr": "「〜ないまでも」 admet que le but entier est hors d'atteinte et demande au moins quelque chose de moindre."
+    },
+    "words": [
+     {
+      "surface": "すべて",
+      "meaning": {
+       "en": "all",
+       "fr": "tout"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "家",
+      "meaning": {
+       "en": "houses",
+       "fr": "maisons"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "昔",
+      "meaning": {
+       "en": "the past",
+       "fr": "autrefois"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "まま",
+      "meaning": {
+       "en": "as it was",
+       "fr": "tel quel"
+      }
+     },
+     {
+      "surface": "残す",
+      "meaning": {
+       "en": "to keep",
+       "fr": "garder"
+      }
+     },
+     {
+      "surface": "ことはできない",
+      "meaning": {
+       "en": "cannot",
+       "fr": "on ne peut pas"
+      }
+     },
+     {
+      "surface": "までも",
+      "meaning": {
+       "en": "even if (not)",
+       "fr": "même si (ne... pas)"
+      }
+     },
+     {
+      "surface": "暮らし",
+      "meaning": {
+       "en": "daily life",
+       "fr": "vie quotidienne"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "with",
+       "fr": "avec"
+      }
+     },
+     {
+      "surface": "両立する",
+      "meaning": {
+       "en": "to be compatible",
+       "fr": "se concilier"
+      }
+     },
+     {
+      "surface": "形",
+      "meaning": {
+       "en": "form",
+       "fr": "forme"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "探る",
+      "meaning": {
+       "en": "to look for",
+       "fr": "chercher"
+      }
+     },
+     {
+      "surface": "必要がある",
+      "meaning": {
+       "en": "it is necessary",
+       "fr": "il faut"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "町並みを守るとは、そこにある生活を守ることでもあるはずだ。",
+    "translation": {
+     "en": "Protecting a townscape should also mean protecting the life that goes on there.",
+     "fr": "Protéger un quartier ancien, ce devrait être aussi protéger la vie qui s'y déroule."
+    },
+    "note": {
+     "en": "「AとはBことだ」 defines A as B; 「はずだ」 is what should be so, by reasoning.",
+     "fr": "「AとはBことだ」 définit A comme B ; 「はずだ」 exprime ce qui devrait être, par raisonnement."
+    },
+    "words": [
+     {
+      "surface": "町並み",
+      "meaning": {
+       "en": "townscape",
+       "fr": "quartier ancien"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "守る",
+      "meaning": {
+       "en": "to protect",
+       "fr": "protéger"
+      }
+     },
+     {
+      "surface": "とは",
+      "meaning": {
+       "en": "means",
+       "fr": "c'est"
+      }
+     },
+     {
+      "surface": "そこ",
+      "meaning": {
+       "en": "there",
+       "fr": "là"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "in",
+       "fr": "(lieu)"
+      }
+     },
+     {
+      "surface": "ある",
+      "meaning": {
+       "en": "that is",
+       "fr": "qui s'y trouve"
+      }
+     },
+     {
+      "surface": "生活",
+      "meaning": {
+       "en": "life",
+       "fr": "vie"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "守る",
+      "meaning": {
+       "en": "to protect",
+       "fr": "protéger"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "the act of",
+       "fr": "le fait de"
+      }
+     },
+     {
+      "surface": "でもある",
+      "meaning": {
+       "en": "is also",
+       "fr": "est aussi"
+      }
+     },
+     {
+      "surface": "はずだ",
+      "meaning": {
+       "en": "should be",
+       "fr": "devrait être"
+      }
+     }
+    ]
+   }
+  ]
  }
 ]

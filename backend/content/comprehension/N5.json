@@ -5837,5 +5837,3807 @@
     ]
    }
   ]
+ },
+ {
+  "id": "n5-07",
+  "level": "N5",
+  "title": "日よう日のパンや",
+  "grammar": [
+   "〜に行きます",
+   "〜まえに",
+   "〜ずつ"
+  ],
+  "text": "わたしのうちのちかくに、小さいパンやがあります。日よう日のあさ、母とパンを買いに行きました。店の前には人がたくさんいました。店に入るまえに、十分ぐらいまちました。店の中はあたたかくて、いいにおいがしました。わたしはメロンパンとチーズパンを二つずつ買いました。母は大きいしょくパンを買いました。ぜんぶで千二百円でした。うちへかえって、父と三人であさごはんを食べました。メロンパンはあまくて、とてもおいしかったです。父は「この店のパンはいちばんおいしいね。」と言いました。来週の日よう日も行きたいです。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "How long did they wait before going into the shop?",
+     "fr": "Combien de temps ont-ils attendu avant d'entrer dans la boutique ?"
+    },
+    "options": {
+     "en": [
+      "About two minutes",
+      "About ten minutes",
+      "About twenty minutes",
+      "About an hour"
+     ],
+     "fr": [
+      "Deux minutes environ",
+      "Une dizaine de minutes",
+      "Une vingtaine de minutes",
+      "Une heure environ"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「店に入るまえに」 mean?",
+     "fr": "Que signifie 「店に入るまえに」 ?"
+    },
+    "options": {
+     "en": [
+      "Before going into the shop",
+      "After going into the shop",
+      "While inside the shop",
+      "Because they went into the shop"
+     ],
+     "fr": [
+      "Avant d'entrer dans la boutique",
+      "Après être entrés dans la boutique",
+      "Pendant qu'ils sont dans la boutique",
+      "Parce qu'ils sont entrés dans la boutique"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「二つずつ買いました」 tell us?",
+     "fr": "Qu'apprend-on avec 「二つずつ買いました」 ?"
+    },
+    "options": {
+     "en": [
+      "The writer bought two buns in all",
+      "The writer bought one of each kind of bun",
+      "The writer bought two of each kind of bun",
+      "The writer bought buns two days in a row"
+     ],
+     "fr": [
+      "L'auteur a acheté deux pains en tout",
+      "L'auteur a acheté un pain de chaque sorte",
+      "L'auteur a acheté deux pains de chaque sorte",
+      "L'auteur a acheté des pains deux jours de suite"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What is a 「パンや」?",
+     "fr": "Qu'est-ce qu'une 「パンや」 ?"
+    },
+    "options": {
+     "en": [
+      "A café",
+      "A cake shop",
+      "A supermarket",
+      "A bakery"
+     ],
+     "fr": [
+      "Un café",
+      "Une pâtisserie",
+      "Un supermarché",
+      "Une boulangerie"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "How much did they pay in all?",
+     "fr": "Combien ont-ils payé en tout ?"
+    },
+    "options": {
+     "en": [
+      "1,000 yen",
+      "1,200 yen",
+      "2,200 yen",
+      "200 yen"
+     ],
+     "fr": [
+      "1 000 yens",
+      "1 200 yens",
+      "2 200 yens",
+      "200 yens"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「買いに行きました」 express?",
+     "fr": "Qu'exprime 「買いに行きました」 ?"
+    },
+    "options": {
+     "en": [
+      "They went out in order to buy",
+      "They bought it on the way home",
+      "They meant to buy but did not",
+      "They bought it and then went out"
+     ],
+     "fr": [
+      "Ils sont sortis pour acheter",
+      "Ils ont acheté en rentrant",
+      "Ils voulaient acheter mais n'ont pas pu",
+      "Ils ont acheté puis sont sortis"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Who ate breakfast together?",
+     "fr": "Qui a pris le petit-déjeuner ensemble ?"
+    },
+    "options": {
+     "en": [
+      "Only the writer and the mother",
+      "The writer, the father and a friend",
+      "The writer alone, after the others",
+      "The writer, the mother and the father"
+     ],
+     "fr": [
+      "Seulement l'auteur et la mère",
+      "L'auteur, le père et un ami",
+      "L'auteur seul, après les autres",
+      "L'auteur, la mère et le père"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What does the writer think of the bakery?",
+     "fr": "Que pense l'auteur de la boulangerie ?"
+    },
+    "options": {
+     "en": [
+      "They found it too expensive",
+      "They won't return: it was too crowded",
+      "They liked it and want to go back",
+      "They prefer another shop nearby"
+     ],
+     "fr": [
+      "Il l'a trouvée trop chère",
+      "Il n'y retournera pas : trop de monde",
+      "Elle lui a plu et il veut y retourner",
+      "Il préfère une autre boutique du quartier"
+     ]
+    },
+    "correct": 2
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "わたしのうちのちかくに、小さいパンやがあります。",
+    "translation": {
+     "en": "There is a small bakery near my house.",
+     "fr": "Il y a une petite boulangerie près de chez moi."
+    },
+    "note": {
+     "en": "「〜に〜があります」 says where a thing is: near my home, there is a bakery.",
+     "fr": "「〜に〜があります」 dit où se trouve une chose : près de chez moi, il y a une boulangerie."
+    },
+    "words": [
+     {
+      "surface": "わたし",
+      "meaning": {
+       "en": "I",
+       "fr": "je"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "'s (possession)",
+       "fr": "de (appartenance)"
+      }
+     },
+     {
+      "surface": "うち",
+      "meaning": {
+       "en": "home",
+       "fr": "maison"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "ちかく",
+      "meaning": {
+       "en": "near",
+       "fr": "près"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks the place",
+       "fr": "marque le lieu"
+      }
+     },
+     {
+      "surface": "小さい",
+      "meaning": {
+       "en": "small",
+       "fr": "petit"
+      }
+     },
+     {
+      "surface": "パンや",
+      "meaning": {
+       "en": "bakery",
+       "fr": "boulangerie"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks the subject",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "あります",
+      "meaning": {
+       "en": "there is",
+       "fr": "il y a"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "日よう日のあさ、母とパンを買いに行きました。",
+    "translation": {
+     "en": "On Sunday morning, I went with my mother to buy bread.",
+     "fr": "Dimanche matin, je suis allé acheter du pain avec ma mère."
+    },
+    "note": {
+     "en": "In 「買いに行きました」, verb stem + に + 行く gives the purpose of going: went to buy.",
+     "fr": "Dans 「買いに行きました」, radical du verbe + に + 行く donne le but du déplacement : aller acheter."
+    },
+    "words": [
+     {
+      "surface": "日よう日",
+      "meaning": {
+       "en": "Sunday",
+       "fr": "dimanche"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "あさ",
+      "meaning": {
+       "en": "morning",
+       "fr": "matin"
+      }
+     },
+     {
+      "surface": "母",
+      "meaning": {
+       "en": "my mother",
+       "fr": "ma mère"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "with",
+       "fr": "avec"
+      }
+     },
+     {
+      "surface": "パン",
+      "meaning": {
+       "en": "bread",
+       "fr": "pain"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "買い",
+      "meaning": {
+       "en": "buy (stem)",
+       "fr": "acheter (radical)"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "in order to",
+       "fr": "pour"
+      }
+     },
+     {
+      "surface": "行きました",
+      "meaning": {
+       "en": "went",
+       "fr": "suis allé"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "店の前には人がたくさんいました。",
+    "translation": {
+     "en": "There were a lot of people in front of the shop.",
+     "fr": "Il y avait beaucoup de monde devant la boutique."
+    },
+    "note": {
+     "en": "「いました」 is used for people; 「には」 makes the place the topic.",
+     "fr": "「いました」 s'emploie pour les personnes ; 「には」 fait du lieu le thème."
+    },
+    "words": [
+     {
+      "surface": "店",
+      "meaning": {
+       "en": "shop",
+       "fr": "boutique"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "前",
+      "meaning": {
+       "en": "front",
+       "fr": "devant"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "at",
+       "fr": "à (lieu)"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "人",
+      "meaning": {
+       "en": "people",
+       "fr": "gens"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks the subject",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "たくさん",
+      "meaning": {
+       "en": "many",
+       "fr": "beaucoup"
+      }
+     },
+     {
+      "surface": "いました",
+      "meaning": {
+       "en": "there were (people)",
+       "fr": "il y avait (des personnes)"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "店に入るまえに、十分ぐらいまちました。",
+    "translation": {
+     "en": "Before going into the shop, we waited about ten minutes.",
+     "fr": "Avant d'entrer dans la boutique, nous avons attendu une dizaine de minutes."
+    },
+    "note": {
+     "en": "「入るまえに」: dictionary form + まえに means before doing; 「ぐらい」 means about.",
+     "fr": "「入るまえに」 : forme du dictionnaire + まえに signifie avant de faire ; 「ぐらい」 veut dire environ."
+    },
+    "words": [
+     {
+      "surface": "店",
+      "meaning": {
+       "en": "shop",
+       "fr": "boutique"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "into",
+       "fr": "dans"
+      }
+     },
+     {
+      "surface": "入る",
+      "meaning": {
+       "en": "go in",
+       "fr": "entrer"
+      }
+     },
+     {
+      "surface": "まえに",
+      "meaning": {
+       "en": "before",
+       "fr": "avant de"
+      }
+     },
+     {
+      "surface": "十分",
+      "meaning": {
+       "en": "ten minutes",
+       "fr": "dix minutes"
+      }
+     },
+     {
+      "surface": "ぐらい",
+      "meaning": {
+       "en": "about",
+       "fr": "environ"
+      }
+     },
+     {
+      "surface": "まちました",
+      "meaning": {
+       "en": "waited",
+       "fr": "avons attendu"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "店の中はあたたかくて、いいにおいがしました。",
+    "translation": {
+     "en": "Inside the shop it was warm, and it smelled good.",
+     "fr": "Dans la boutique, il faisait chaud et ça sentait bon."
+    },
+    "note": {
+     "en": "「あたたかくて」 is the て-form of an い-adjective and links two descriptions; 「においがしました」 means there was a smell.",
+     "fr": "「あたたかくて」 est la forme en て d'un adjectif en い et relie deux descriptions ; 「においがしました」 veut dire qu'il y avait une odeur."
+    },
+    "words": [
+     {
+      "surface": "店",
+      "meaning": {
+       "en": "shop",
+       "fr": "boutique"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "中",
+      "meaning": {
+       "en": "inside",
+       "fr": "intérieur"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "あたたかくて",
+      "meaning": {
+       "en": "warm, and",
+       "fr": "chaud, et"
+      }
+     },
+     {
+      "surface": "いい",
+      "meaning": {
+       "en": "good",
+       "fr": "bonne"
+      }
+     },
+     {
+      "surface": "におい",
+      "meaning": {
+       "en": "smell",
+       "fr": "odeur"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks the subject",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "しました",
+      "meaning": {
+       "en": "there was (a smell)",
+       "fr": "se faisait sentir"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "わたしはメロンパンとチーズパンを二つずつ買いました。",
+    "translation": {
+     "en": "I bought two melon buns and two cheese buns.",
+     "fr": "J'ai acheté deux pains au melon et deux pains au fromage."
+    },
+    "note": {
+     "en": "「ずつ」 after 「二つ」 means two of each: two melon buns and two cheese buns, four in all.",
+     "fr": "「ずつ」 après 「二つ」 veut dire deux de chaque : deux pains au melon et deux au fromage, quatre en tout."
+    },
+    "words": [
+     {
+      "surface": "わたし",
+      "meaning": {
+       "en": "I",
+       "fr": "je"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "メロンパン",
+      "meaning": {
+       "en": "melon bun",
+       "fr": "pain au melon"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "and",
+       "fr": "et"
+      }
+     },
+     {
+      "surface": "チーズパン",
+      "meaning": {
+       "en": "cheese bun",
+       "fr": "pain au fromage"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "二つ",
+      "meaning": {
+       "en": "two",
+       "fr": "deux"
+      }
+     },
+     {
+      "surface": "ずつ",
+      "meaning": {
+       "en": "each",
+       "fr": "chacun"
+      }
+     },
+     {
+      "surface": "買いました",
+      "meaning": {
+       "en": "bought",
+       "fr": "ai acheté"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "母は大きいしょくパンを買いました。",
+    "translation": {
+     "en": "My mother bought a big loaf of sandwich bread.",
+     "fr": "Ma mère a acheté un grand pain de mie."
+    },
+    "note": {
+     "en": "「しょくパン」 is a square loaf of white bread, often eaten as toast.",
+     "fr": "「しょくパン」 est un pain de mie carré, qu'on mange souvent grillé."
+    },
+    "words": [
+     {
+      "surface": "母",
+      "meaning": {
+       "en": "my mother",
+       "fr": "ma mère"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "大きい",
+      "meaning": {
+       "en": "big",
+       "fr": "grand"
+      }
+     },
+     {
+      "surface": "しょくパン",
+      "meaning": {
+       "en": "sandwich loaf",
+       "fr": "pain de mie"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "買いました",
+      "meaning": {
+       "en": "bought",
+       "fr": "a acheté"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "ぜんぶで千二百円でした。",
+    "translation": {
+     "en": "It came to 1,200 yen in all.",
+     "fr": "En tout, ça a fait 1 200 yens."
+    },
+    "note": {
+     "en": "「で」 after 「ぜんぶ」 means in total: everything together.",
+     "fr": "「で」 après 「ぜんぶ」 signifie au total : tout ensemble."
+    },
+    "words": [
+     {
+      "surface": "ぜんぶ",
+      "meaning": {
+       "en": "all",
+       "fr": "tout"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "in (total)",
+       "fr": "en (tout)"
+      }
+     },
+     {
+      "surface": "千二百円",
+      "meaning": {
+       "en": "1,200 yen",
+       "fr": "1 200 yens"
+      }
+     },
+     {
+      "surface": "でした",
+      "meaning": {
+       "en": "was",
+       "fr": "c'était"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "うちへかえって、父と三人であさごはんを食べました。",
+    "translation": {
+     "en": "We went back home and had breakfast with my father, the three of us.",
+     "fr": "Nous sommes rentrés et avons pris le petit-déjeuner à trois avec mon père."
+    },
+    "note": {
+     "en": "「三人で」: で after a number of people says how many did it together.",
+     "fr": "「三人で」 : で après un nombre de personnes dit combien l'ont fait ensemble."
+    },
+    "words": [
+     {
+      "surface": "うち",
+      "meaning": {
+       "en": "home",
+       "fr": "maison"
+      }
+     },
+     {
+      "surface": "へ",
+      "meaning": {
+       "en": "to",
+       "fr": "vers"
+      }
+     },
+     {
+      "surface": "かえって",
+      "meaning": {
+       "en": "went back, and",
+       "fr": "sommes rentrés, et"
+      }
+     },
+     {
+      "surface": "父",
+      "meaning": {
+       "en": "my father",
+       "fr": "mon père"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "with",
+       "fr": "avec"
+      }
+     },
+     {
+      "surface": "三人",
+      "meaning": {
+       "en": "three people",
+       "fr": "trois personnes"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "as (a group of)",
+       "fr": "à (nombre de personnes)"
+      }
+     },
+     {
+      "surface": "あさごはん",
+      "meaning": {
+       "en": "breakfast",
+       "fr": "petit-déjeuner"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "食べました",
+      "meaning": {
+       "en": "ate",
+       "fr": "avons mangé"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "メロンパンはあまくて、とてもおいしかったです。",
+    "translation": {
+     "en": "The melon bun was sweet and very good.",
+     "fr": "Le pain au melon était sucré et très bon."
+    },
+    "note": {
+     "en": "「おいしかった」 is the past of 「おいしい」; with 「です」 it stays polite.",
+     "fr": "「おいしかった」 est le passé de 「おいしい」 ; avec 「です」, la phrase reste polie."
+    },
+    "words": [
+     {
+      "surface": "メロンパン",
+      "meaning": {
+       "en": "melon bun",
+       "fr": "pain au melon"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "あまくて",
+      "meaning": {
+       "en": "sweet, and",
+       "fr": "sucré, et"
+      }
+     },
+     {
+      "surface": "とても",
+      "meaning": {
+       "en": "very",
+       "fr": "très"
+      }
+     },
+     {
+      "surface": "おいしかった",
+      "meaning": {
+       "en": "was delicious",
+       "fr": "était délicieux"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "polite ending",
+       "fr": "terminaison polie"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "父は「この店のパンはいちばんおいしいね。」と言いました。",
+    "translation": {
+     "en": "My father said, \"This shop's bread is the best.\"",
+     "fr": "Mon père a dit : « Le pain de cette boutique est le meilleur. »"
+    },
+    "note": {
+     "en": "「いちばん」 before an adjective makes it the most: the most delicious.",
+     "fr": "「いちばん」 devant un adjectif en fait le plus haut degré : le plus délicieux."
+    },
+    "words": [
+     {
+      "surface": "父",
+      "meaning": {
+       "en": "my father",
+       "fr": "mon père"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "この",
+      "meaning": {
+       "en": "this",
+       "fr": "ce"
+      }
+     },
+     {
+      "surface": "店",
+      "meaning": {
+       "en": "shop",
+       "fr": "boutique"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "'s",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "パン",
+      "meaning": {
+       "en": "bread",
+       "fr": "pain"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "いちばん",
+      "meaning": {
+       "en": "the most",
+       "fr": "le plus"
+      }
+     },
+     {
+      "surface": "おいしい",
+      "meaning": {
+       "en": "delicious",
+       "fr": "bon"
+      }
+     },
+     {
+      "surface": "ね",
+      "meaning": {
+       "en": "(seeks agreement)",
+       "fr": "(cherche l'accord)"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "marks the words said",
+       "fr": "marque les paroles rapportées"
+      }
+     },
+     {
+      "surface": "言いました",
+      "meaning": {
+       "en": "said",
+       "fr": "a dit"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "来週の日よう日も行きたいです。",
+    "translation": {
+     "en": "I want to go again next Sunday.",
+     "fr": "Je veux y retourner dimanche prochain."
+    },
+    "note": {
+     "en": "「も」 means also: next Sunday too; 「行きたい」 means want to go.",
+     "fr": "「も」 veut dire aussi : dimanche prochain aussi ; 「行きたい」 veut dire vouloir aller."
+    },
+    "words": [
+     {
+      "surface": "来週",
+      "meaning": {
+       "en": "next week",
+       "fr": "la semaine prochaine"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "日よう日",
+      "meaning": {
+       "en": "Sunday",
+       "fr": "dimanche"
+      }
+     },
+     {
+      "surface": "も",
+      "meaning": {
+       "en": "also",
+       "fr": "aussi"
+      }
+     },
+     {
+      "surface": "行きたい",
+      "meaning": {
+       "en": "want to go",
+       "fr": "veux aller"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "polite ending",
+       "fr": "terminaison polie"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "n5-08",
+  "level": "N5",
+  "title": "かぜの日",
+  "grammar": [
+   "〜なくてもいいです",
+   "〜ほうがいいです",
+   "何も／誰も〜ない"
+  ],
+  "text": "きのうのよるから、あたまがいたくて、ねつもありました。けさ、母は「今日は学校へ行かなくてもいいですよ。」と言いました。九時ごろ、母といっしょにびょういんへ行きました。おいしゃさんは「かぜですね。くすりを飲んで、よくねたほうがいいですよ。」と言いました。うちへかえって、くすりを飲んで、ねました。ひるはあまり食べたくなかったから、何も食べませんでした。よる、母がやさいのスープをつくりました。少し飲みました。あたたかくて、おいしかったです。あしたは学校へ行きたいです。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What was wrong with the writer?",
+     "fr": "Qu'est-ce qui n'allait pas chez l'auteur ?"
+    },
+    "options": {
+     "en": [
+      "A stomach ache and a fever",
+      "A headache and a cough",
+      "A headache and a fever",
+      "A sore leg and a cough"
+     ],
+     "fr": [
+      "Mal au ventre et de la fièvre",
+      "Mal à la tête et de la toux",
+      "Mal à la tête et de la fièvre",
+      "Mal à la jambe et de la toux"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does the mother mean by 「行かなくてもいいですよ」?",
+     "fr": "Que veut dire la mère par 「行かなくてもいいですよ」 ?"
+    },
+    "options": {
+     "en": [
+      "You must not go",
+      "You don't have to go",
+      "You have to go",
+      "You should go early"
+     ],
+     "fr": [
+      "Tu ne dois pas y aller",
+      "Tu n'es pas obligé d'y aller",
+      "Tu dois y aller",
+      "Tu devrais y aller tôt"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "When did they go to the hospital?",
+     "fr": "Quand sont-ils allés à l'hôpital ?"
+    },
+    "options": {
+     "en": [
+      "Around nine in the morning",
+      "Around ten in the morning",
+      "Around noon",
+      "In the evening"
+     ],
+     "fr": [
+      "Vers neuf heures du matin",
+      "Vers dix heures du matin",
+      "Vers midi",
+      "Le soir"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does the doctor mean by 「よくねたほうがいいですよ」?",
+     "fr": "Que veut dire le médecin par 「よくねたほうがいいですよ」 ?"
+    },
+    "options": {
+     "en": [
+      "You have slept too much",
+      "You must not sleep yet",
+      "You may sleep if you like",
+      "You had better get plenty of sleep"
+     ],
+     "fr": [
+      "Vous avez trop dormi",
+      "Vous ne devez pas encore dormir",
+      "Vous pouvez dormir si vous voulez",
+      "Vous feriez mieux de bien dormir"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「何も食べませんでした」 mean?",
+     "fr": "Que signifie 「何も食べませんでした」 ?"
+    },
+    "options": {
+     "en": [
+      "I ate a little",
+      "I ate nothing",
+      "I ate everything",
+      "I ate something"
+     ],
+     "fr": [
+      "J'ai mangé un peu",
+      "Je n'ai rien mangé",
+      "J'ai tout mangé",
+      "J'ai mangé quelque chose"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「くすり」 mean in this text?",
+     "fr": "Que signifie 「くすり」 dans ce texte ?"
+    },
+    "options": {
+     "en": [
+      "Water",
+      "Tea",
+      "Medicine",
+      "Juice"
+     ],
+     "fr": [
+      "De l'eau",
+      "Du thé",
+      "Un médicament",
+      "Du jus"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What did the writer have in the evening?",
+     "fr": "Qu'est-ce que l'auteur a pris le soir ?"
+    },
+    "options": {
+     "en": [
+      "A little vegetable soup",
+      "A lot of vegetable soup",
+      "A little meat soup",
+      "Nothing at all"
+     ],
+     "fr": [
+      "Un peu de soupe de légumes",
+      "Beaucoup de soupe de légumes",
+      "Un peu de soupe à la viande",
+      "Rien du tout"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "How does the writer most likely feel at the end of the day?",
+     "fr": "Comment l'auteur se sent-il sans doute à la fin de la journée ?"
+    },
+    "options": {
+     "en": [
+      "Still very ill, and staying home all week",
+      "Happy to stay at home again tomorrow",
+      "Worried because the medicine did not work",
+      "Better, and keen to go back to school"
+     ],
+     "fr": [
+      "Encore très malade, chez soi toute la semaine",
+      "Content de rester encore chez soi demain",
+      "Inquiet car le médicament n'a pas marché",
+      "Mieux, et pressé de retourner à l'école"
+     ]
+    },
+    "correct": 3
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "きのうのよるから、あたまがいたくて、ねつもありました。",
+    "translation": {
+     "en": "Since last night my head had been hurting, and I had a fever too.",
+     "fr": "Depuis hier soir, j'avais mal à la tête, et j'avais aussi de la fièvre."
+    },
+    "note": {
+     "en": "「いたくて」 is the て-form of 「いたい」: my head hurt, and on top of that…",
+     "fr": "「いたくて」 est la forme en て de 「いたい」 : j'avais mal à la tête, et en plus…"
+    },
+    "words": [
+     {
+      "surface": "きのう",
+      "meaning": {
+       "en": "yesterday",
+       "fr": "hier"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "よる",
+      "meaning": {
+       "en": "night",
+       "fr": "soir"
+      }
+     },
+     {
+      "surface": "から",
+      "meaning": {
+       "en": "since",
+       "fr": "depuis"
+      }
+     },
+     {
+      "surface": "あたま",
+      "meaning": {
+       "en": "head",
+       "fr": "tête"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks the subject",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "いたくて",
+      "meaning": {
+       "en": "hurt, and",
+       "fr": "faisait mal, et"
+      }
+     },
+     {
+      "surface": "ねつ",
+      "meaning": {
+       "en": "fever",
+       "fr": "fièvre"
+      }
+     },
+     {
+      "surface": "も",
+      "meaning": {
+       "en": "also",
+       "fr": "aussi"
+      }
+     },
+     {
+      "surface": "ありました",
+      "meaning": {
+       "en": "there was, I had",
+       "fr": "il y avait, j'avais"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "けさ、母は「今日は学校へ行かなくてもいいですよ。」と言いました。",
+    "translation": {
+     "en": "This morning my mother said, \"You don't have to go to school today.\"",
+     "fr": "Ce matin, ma mère m'a dit : « Tu n'es pas obligé d'aller à l'école aujourd'hui. »"
+    },
+    "note": {
+     "en": "「行かなくてもいいです」 (〜なくてもいいです) means you do not have to go.",
+     "fr": "「行かなくてもいいです」 (〜なくてもいいです) signifie qu'on n'est pas obligé d'y aller."
+    },
+    "words": [
+     {
+      "surface": "けさ",
+      "meaning": {
+       "en": "this morning",
+       "fr": "ce matin"
+      }
+     },
+     {
+      "surface": "母",
+      "meaning": {
+       "en": "my mother",
+       "fr": "ma mère"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "今日",
+      "meaning": {
+       "en": "today",
+       "fr": "aujourd'hui"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "学校",
+      "meaning": {
+       "en": "school",
+       "fr": "école"
+      }
+     },
+     {
+      "surface": "へ",
+      "meaning": {
+       "en": "to",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "行かなくてもいいです",
+      "meaning": {
+       "en": "you don't have to go",
+       "fr": "tu n'es pas obligé d'aller"
+      }
+     },
+     {
+      "surface": "よ",
+      "meaning": {
+       "en": "(tells the listener)",
+       "fr": "(informe l'interlocuteur)"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "marks the words said",
+       "fr": "marque les paroles rapportées"
+      }
+     },
+     {
+      "surface": "言いました",
+      "meaning": {
+       "en": "said",
+       "fr": "a dit"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "九時ごろ、母といっしょにびょういんへ行きました。",
+    "translation": {
+     "en": "Around nine, I went to the hospital with my mother.",
+     "fr": "Vers neuf heures, je suis allé à l'hôpital avec ma mère."
+    },
+    "note": {
+     "en": "「ごろ」 after a clock time means about: around nine o'clock.",
+     "fr": "「ごろ」 après une heure veut dire vers : vers neuf heures."
+    },
+    "words": [
+     {
+      "surface": "九時",
+      "meaning": {
+       "en": "nine o'clock",
+       "fr": "neuf heures"
+      }
+     },
+     {
+      "surface": "ごろ",
+      "meaning": {
+       "en": "around",
+       "fr": "vers"
+      }
+     },
+     {
+      "surface": "母",
+      "meaning": {
+       "en": "my mother",
+       "fr": "ma mère"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "with",
+       "fr": "avec"
+      }
+     },
+     {
+      "surface": "いっしょに",
+      "meaning": {
+       "en": "together",
+       "fr": "ensemble"
+      }
+     },
+     {
+      "surface": "びょういん",
+      "meaning": {
+       "en": "hospital",
+       "fr": "hôpital"
+      }
+     },
+     {
+      "surface": "へ",
+      "meaning": {
+       "en": "to",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "行きました",
+      "meaning": {
+       "en": "went",
+       "fr": "suis allé"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "おいしゃさんは「かぜですね。くすりを飲んで、よくねたほうがいいですよ。」と言いました。",
+    "translation": {
+     "en": "The doctor said, \"It's a cold. You had better take some medicine and get plenty of sleep.\"",
+     "fr": "Le médecin a dit : « C'est un rhume. Vous feriez mieux de prendre un médicament et de bien dormir. »"
+    },
+    "note": {
+     "en": "「ねたほうがいいです」: た-form + ほうがいいです gives advice, you had better sleep. A medicine is 「飲む」, drunk.",
+     "fr": "「ねたほうがいいです」 : forme en た + ほうがいいです donne un conseil, vous feriez mieux de dormir. Un médicament se « boit » : 「飲む」."
+    },
+    "words": [
+     {
+      "surface": "おいしゃさん",
+      "meaning": {
+       "en": "doctor",
+       "fr": "médecin"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "かぜ",
+      "meaning": {
+       "en": "a cold",
+       "fr": "un rhume"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "it is",
+       "fr": "c'est"
+      }
+     },
+     {
+      "surface": "ね",
+      "meaning": {
+       "en": "(seeks agreement)",
+       "fr": "(cherche l'accord)"
+      }
+     },
+     {
+      "surface": "くすり",
+      "meaning": {
+       "en": "medicine",
+       "fr": "médicament"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "飲んで",
+      "meaning": {
+       "en": "take, and",
+       "fr": "prendre, et"
+      }
+     },
+     {
+      "surface": "よく",
+      "meaning": {
+       "en": "well",
+       "fr": "bien"
+      }
+     },
+     {
+      "surface": "ねたほうがいいです",
+      "meaning": {
+       "en": "had better sleep",
+       "fr": "feriez mieux de dormir"
+      }
+     },
+     {
+      "surface": "よ",
+      "meaning": {
+       "en": "(tells the listener)",
+       "fr": "(informe l'interlocuteur)"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "marks the words said",
+       "fr": "marque les paroles rapportées"
+      }
+     },
+     {
+      "surface": "言いました",
+      "meaning": {
+       "en": "said",
+       "fr": "a dit"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "うちへかえって、くすりを飲んで、ねました。",
+    "translation": {
+     "en": "I went home, took the medicine and went to bed.",
+     "fr": "Je suis rentré, j'ai pris le médicament et je me suis couché."
+    },
+    "note": {
+     "en": "Two て-forms, 「かえって」 and 「飲んで」, put three actions in order.",
+     "fr": "Deux formes en て, 「かえって」 et 「飲んで」, mettent trois actions dans l'ordre."
+    },
+    "words": [
+     {
+      "surface": "うち",
+      "meaning": {
+       "en": "home",
+       "fr": "maison"
+      }
+     },
+     {
+      "surface": "へ",
+      "meaning": {
+       "en": "to",
+       "fr": "vers"
+      }
+     },
+     {
+      "surface": "かえって",
+      "meaning": {
+       "en": "went back, and",
+       "fr": "suis rentré, et"
+      }
+     },
+     {
+      "surface": "くすり",
+      "meaning": {
+       "en": "medicine",
+       "fr": "médicament"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "飲んで",
+      "meaning": {
+       "en": "took, and",
+       "fr": "ai pris, et"
+      }
+     },
+     {
+      "surface": "ねました",
+      "meaning": {
+       "en": "went to bed",
+       "fr": "me suis couché"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "ひるはあまり食べたくなかったから、何も食べませんでした。",
+    "translation": {
+     "en": "At midday I didn't really want to eat, so I ate nothing.",
+     "fr": "À midi, je n'avais pas trop envie de manger, alors je n'ai rien mangé."
+    },
+    "note": {
+     "en": "「何も」 with a negative verb means nothing at all: 「何も食べませんでした」, I ate nothing.",
+     "fr": "「何も」 avec un verbe négatif signifie rien du tout : 「何も食べませんでした」, je n'ai rien mangé."
+    },
+    "words": [
+     {
+      "surface": "ひる",
+      "meaning": {
+       "en": "midday",
+       "fr": "midi"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "あまり",
+      "meaning": {
+       "en": "not really (with a negative)",
+       "fr": "pas trop (avec une négation)"
+      }
+     },
+     {
+      "surface": "食べたくなかった",
+      "meaning": {
+       "en": "didn't want to eat",
+       "fr": "n'avais pas envie de manger"
+      }
+     },
+     {
+      "surface": "から",
+      "meaning": {
+       "en": "so (gives the reason)",
+       "fr": "donc (donne la raison)"
+      }
+     },
+     {
+      "surface": "何も",
+      "meaning": {
+       "en": "nothing (with a negative)",
+       "fr": "rien (avec une négation)"
+      }
+     },
+     {
+      "surface": "食べませんでした",
+      "meaning": {
+       "en": "did not eat",
+       "fr": "n'ai pas mangé"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "よる、母がやさいのスープをつくりました。",
+    "translation": {
+     "en": "In the evening, my mother made vegetable soup.",
+     "fr": "Le soir, ma mère a fait une soupe de légumes."
+    },
+    "note": {
+     "en": "「やさいのスープ」: の links the two nouns, a soup of vegetables.",
+     "fr": "「やさいのスープ」 : の relie les deux noms, une soupe de légumes."
+    },
+    "words": [
+     {
+      "surface": "よる",
+      "meaning": {
+       "en": "evening",
+       "fr": "soir"
+      }
+     },
+     {
+      "surface": "母",
+      "meaning": {
+       "en": "my mother",
+       "fr": "ma mère"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks the subject",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "やさい",
+      "meaning": {
+       "en": "vegetables",
+       "fr": "légumes"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "スープ",
+      "meaning": {
+       "en": "soup",
+       "fr": "soupe"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "つくりました",
+      "meaning": {
+       "en": "made",
+       "fr": "a fait"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "少し飲みました。",
+    "translation": {
+     "en": "I had a little of it.",
+     "fr": "J'en ai bu un peu."
+    },
+    "note": {
+     "en": "Soup is drunk in Japanese, 「スープを飲む」; the soup itself is left unsaid.",
+     "fr": "En japonais, la soupe se boit, 「スープを飲む」 ; la soupe elle-même n'est pas redite."
+    },
+    "words": [
+     {
+      "surface": "少し",
+      "meaning": {
+       "en": "a little",
+       "fr": "un peu"
+      }
+     },
+     {
+      "surface": "飲みました",
+      "meaning": {
+       "en": "drank",
+       "fr": "ai bu"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "あたたかくて、おいしかったです。",
+    "translation": {
+     "en": "It was warm and tasty.",
+     "fr": "Elle était chaude et bonne."
+    },
+    "note": {
+     "en": "The subject, the soup, is dropped: Japanese often leaves out what is clear.",
+     "fr": "Le sujet, la soupe, est omis : le japonais laisse souvent de côté ce qui est clair."
+    },
+    "words": [
+     {
+      "surface": "あたたかくて",
+      "meaning": {
+       "en": "warm, and",
+       "fr": "chaude, et"
+      }
+     },
+     {
+      "surface": "おいしかった",
+      "meaning": {
+       "en": "was tasty",
+       "fr": "était bonne"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "polite ending",
+       "fr": "terminaison polie"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "あしたは学校へ行きたいです。",
+    "translation": {
+     "en": "Tomorrow I want to go to school.",
+     "fr": "Demain, je veux aller à l'école."
+    },
+    "note": {
+     "en": "「行きたいです」: stem + たいです says what the writer wants to do.",
+     "fr": "「行きたいです」 : radical + たいです dit ce que l'auteur veut faire."
+    },
+    "words": [
+     {
+      "surface": "あした",
+      "meaning": {
+       "en": "tomorrow",
+       "fr": "demain"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "学校",
+      "meaning": {
+       "en": "school",
+       "fr": "école"
+      }
+     },
+     {
+      "surface": "へ",
+      "meaning": {
+       "en": "to",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "行きたい",
+      "meaning": {
+       "en": "want to go",
+       "fr": "veux aller"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "polite ending",
+       "fr": "terminaison polie"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "n5-09",
+  "level": "N5",
+  "title": "テニスとすいえい",
+  "grammar": [
+   "〜と〜とどちらが",
+   "〜が上手です／下手です",
+   "〜と思います"
+  ],
+  "text": "わたしは四月から高校生です。学校にはテニスとすいえいのクラブがあります。きのう、あにに「テニスとすいえいとどちらがいいですか。」と聞きました。あにはテニスが上手です。高校のとき、テニスのクラブにいました。でも、あには「すいえいのほうがいいと思います。」と言いました。わたしはなつがすきで、水の中であそぶのもすきだからです。わたしはテニスが下手です。ボールがはやくて、こわいです。だから、すいえいのクラブに入ります。来週から、毎日学校のプールでおよぎます。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What did the writer ask the older brother?",
+     "fr": "Qu'a demandé l'auteur à son grand frère ?"
+    },
+    "options": {
+     "en": [
+      "Whether he could teach tennis",
+      "When the swimming club meets",
+      "Where the school pool is",
+      "Which is better, tennis or swimming"
+     ],
+     "fr": [
+      "S'il pouvait lui apprendre le tennis",
+      "Quand le club de natation se réunit",
+      "Où se trouve la piscine du lycée",
+      "Lequel est mieux, le tennis ou la natation"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「あにはテニスが上手です」 mean?",
+     "fr": "Que signifie 「あにはテニスが上手です」 ?"
+    },
+    "options": {
+     "en": [
+      "My brother is good at tennis",
+      "My brother likes tennis",
+      "My brother is bad at tennis",
+      "My brother teaches tennis"
+     ],
+     "fr": [
+      "Mon frère joue bien au tennis",
+      "Mon frère aime le tennis",
+      "Mon frère joue mal au tennis",
+      "Mon frère enseigne le tennis"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Which club was the brother in at high school?",
+     "fr": "À quel club le frère était-il au lycée ?"
+    },
+    "options": {
+     "en": [
+      "The swimming club",
+      "The football club",
+      "The tennis club",
+      "No club at all"
+     ],
+     "fr": [
+      "Le club de natation",
+      "Le club de foot",
+      "Le club de tennis",
+      "Aucun club"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "In 「すいえいのほうがいいと思います」, what does 「と思います」 do?",
+     "fr": "Dans 「すいえいのほうがいいと思います」, que fait 「と思います」 ?"
+    },
+    "options": {
+     "en": [
+      "It reports what someone else heard",
+      "It gives the speaker's opinion",
+      "It asks the listener a question",
+      "It gives the listener an order"
+     ],
+     "fr": [
+      "Il rapporte ce qu'un autre a entendu",
+      "Il donne l'avis de celui qui parle",
+      "Il pose une question à l'auditeur",
+      "Il donne un ordre à l'auditeur"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「こわい」 mean in this text?",
+     "fr": "Que signifie 「こわい」 dans ce texte ?"
+    },
+    "options": {
+     "en": [
+      "Boring",
+      "Difficult",
+      "Tiring",
+      "Frightening"
+     ],
+     "fr": [
+      "Ennuyeux",
+      "Difficile",
+      "Fatigant",
+      "Qui fait peur"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "Why does the brother most likely advise swimming?",
+     "fr": "Pourquoi le frère conseille-t-il sans doute la natation ?"
+    },
+    "options": {
+     "en": [
+      "He knows the writer loves summer and water",
+      "He wants the writer to join his old club",
+      "He thinks the writer plays tennis well",
+      "He swims in the school pool every day"
+     ],
+     "fr": [
+      "Il sait que l'auteur aime l'été et l'eau",
+      "Il veut que l'auteur entre dans son ancien club",
+      "Il trouve que l'auteur joue bien au tennis",
+      "Il nage tous les jours à la piscine du lycée"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Why is the writer afraid when playing tennis?",
+     "fr": "Pourquoi l'auteur a-t-il peur au tennis ?"
+    },
+    "options": {
+     "en": [
+      "The ball is heavy",
+      "The brother is strong",
+      "The ball is fast",
+      "The court is too big"
+     ],
+     "fr": [
+      "La balle est lourde",
+      "Le frère est fort",
+      "La balle va vite",
+      "Le terrain est trop grand"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "From when will the writer swim every day?",
+     "fr": "Quand l'auteur commencera-t-il à nager tous les jours ?"
+    },
+    "options": {
+     "en": [
+      "From tomorrow",
+      "From next week",
+      "From April",
+      "From the summer"
+     ],
+     "fr": [
+      "Demain",
+      "La semaine prochaine",
+      "En avril",
+      "Cet été"
+     ]
+    },
+    "correct": 1
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "わたしは四月から高校生です。",
+    "translation": {
+     "en": "From April, I am a high school student.",
+     "fr": "À partir d'avril, je suis lycéen."
+    },
+    "note": {
+     "en": "「から」 after a time marks the start: from April.",
+     "fr": "「から」 après un moment marque le début : à partir d'avril."
+    },
+    "words": [
+     {
+      "surface": "わたし",
+      "meaning": {
+       "en": "I",
+       "fr": "je"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "四月",
+      "meaning": {
+       "en": "April",
+       "fr": "avril"
+      }
+     },
+     {
+      "surface": "から",
+      "meaning": {
+       "en": "from",
+       "fr": "à partir de"
+      }
+     },
+     {
+      "surface": "高校生",
+      "meaning": {
+       "en": "high school student",
+       "fr": "lycéen"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "am",
+       "fr": "suis"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "学校にはテニスとすいえいのクラブがあります。",
+    "translation": {
+     "en": "My school has a tennis club and a swimming club.",
+     "fr": "Au lycée, il y a un club de tennis et un club de natation."
+    },
+    "note": {
+     "en": "「と」 between two nouns means and: tennis and swimming.",
+     "fr": "「と」 entre deux noms veut dire et : le tennis et la natation."
+    },
+    "words": [
+     {
+      "surface": "学校",
+      "meaning": {
+       "en": "school",
+       "fr": "école, lycée"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "at",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "テニス",
+      "meaning": {
+       "en": "tennis",
+       "fr": "tennis"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "and",
+       "fr": "et"
+      }
+     },
+     {
+      "surface": "すいえい",
+      "meaning": {
+       "en": "swimming",
+       "fr": "natation"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "クラブ",
+      "meaning": {
+       "en": "club",
+       "fr": "club"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks the subject",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "あります",
+      "meaning": {
+       "en": "there is",
+       "fr": "il y a"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "きのう、あにに「テニスとすいえいとどちらがいいですか。」と聞きました。",
+    "translation": {
+     "en": "Yesterday I asked my older brother, \"Which is better, tennis or swimming?\"",
+     "fr": "Hier, j'ai demandé à mon grand frère : « Lequel est mieux, le tennis ou la natation ? »"
+    },
+    "note": {
+     "en": "「AとBとどちらが〜ですか」 asks which of the two is more so: which is better?",
+     "fr": "「AとBとどちらが〜ですか」 demande lequel des deux l'est le plus : lequel est mieux ?"
+    },
+    "words": [
+     {
+      "surface": "きのう",
+      "meaning": {
+       "en": "yesterday",
+       "fr": "hier"
+      }
+     },
+     {
+      "surface": "あに",
+      "meaning": {
+       "en": "my older brother",
+       "fr": "mon grand frère"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks the person asked",
+       "fr": "marque la personne interrogée"
+      }
+     },
+     {
+      "surface": "テニス",
+      "meaning": {
+       "en": "tennis",
+       "fr": "tennis"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "and",
+       "fr": "et"
+      }
+     },
+     {
+      "surface": "すいえい",
+      "meaning": {
+       "en": "swimming",
+       "fr": "natation"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "(closes the pair)",
+       "fr": "(ferme la paire)"
+      }
+     },
+     {
+      "surface": "どちら",
+      "meaning": {
+       "en": "which (of two)",
+       "fr": "lequel (des deux)"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks the subject",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "いい",
+      "meaning": {
+       "en": "good",
+       "fr": "bien"
+      }
+     },
+     {
+      "surface": "ですか",
+      "meaning": {
+       "en": "is it?",
+       "fr": "est-ce ?"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "marks the words said",
+       "fr": "marque les paroles rapportées"
+      }
+     },
+     {
+      "surface": "聞きました",
+      "meaning": {
+       "en": "asked",
+       "fr": "ai demandé"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "あにはテニスが上手です。",
+    "translation": {
+     "en": "My brother is good at tennis.",
+     "fr": "Mon frère joue bien au tennis."
+    },
+    "note": {
+     "en": "「〜が上手です」 says what someone is good at; the skill takes 「が」.",
+     "fr": "「〜が上手です」 dit en quoi quelqu'un est doué ; l'activité prend 「が」."
+    },
+    "words": [
+     {
+      "surface": "あに",
+      "meaning": {
+       "en": "my older brother",
+       "fr": "mon grand frère"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "テニス",
+      "meaning": {
+       "en": "tennis",
+       "fr": "tennis"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks the skill",
+       "fr": "marque l'activité"
+      }
+     },
+     {
+      "surface": "上手",
+      "meaning": {
+       "en": "good at",
+       "fr": "doué"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "polite ending",
+       "fr": "terminaison polie"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "高校のとき、テニスのクラブにいました。",
+    "translation": {
+     "en": "In high school, he was in the tennis club.",
+     "fr": "Au lycée, il était au club de tennis."
+    },
+    "note": {
+     "en": "「高校のとき」: noun + のとき means at the time of, here when he was in high school.",
+     "fr": "「高校のとき」 : nom + のとき veut dire à l'époque de, ici quand il était au lycée."
+    },
+    "words": [
+     {
+      "surface": "高校",
+      "meaning": {
+       "en": "high school",
+       "fr": "lycée"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "とき",
+      "meaning": {
+       "en": "time, when",
+       "fr": "époque, quand"
+      }
+     },
+     {
+      "surface": "テニス",
+      "meaning": {
+       "en": "tennis",
+       "fr": "tennis"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "クラブ",
+      "meaning": {
+       "en": "club",
+       "fr": "club"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "in",
+       "fr": "dans"
+      }
+     },
+     {
+      "surface": "いました",
+      "meaning": {
+       "en": "was",
+       "fr": "était"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "でも、あには「すいえいのほうがいいと思います。」と言いました。",
+    "translation": {
+     "en": "But my brother said, \"I think swimming is better.\"",
+     "fr": "Mais mon frère a dit : « Je pense que la natation, c'est mieux. »"
+    },
+    "note": {
+     "en": "「と思います」 gives an opinion, I think that…; 「のほうが」 picks one of the two.",
+     "fr": "「と思います」 donne un avis, je pense que… ; 「のほうが」 choisit l'un des deux."
+    },
+    "words": [
+     {
+      "surface": "でも",
+      "meaning": {
+       "en": "but",
+       "fr": "mais"
+      }
+     },
+     {
+      "surface": "あに",
+      "meaning": {
+       "en": "my older brother",
+       "fr": "mon grand frère"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "すいえい",
+      "meaning": {
+       "en": "swimming",
+       "fr": "natation"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "(links)",
+       "fr": "(relie)"
+      }
+     },
+     {
+      "surface": "ほう",
+      "meaning": {
+       "en": "side, the one",
+       "fr": "côté, celui-là"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks the subject",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "いい",
+      "meaning": {
+       "en": "better",
+       "fr": "mieux"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "that (quotes a thought)",
+       "fr": "que (cite une pensée)"
+      }
+     },
+     {
+      "surface": "思います",
+      "meaning": {
+       "en": "think",
+       "fr": "pense"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "marks the words said",
+       "fr": "marque les paroles rapportées"
+      }
+     },
+     {
+      "surface": "言いました",
+      "meaning": {
+       "en": "said",
+       "fr": "a dit"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "わたしはなつがすきで、水の中であそぶのもすきだからです。",
+    "translation": {
+     "en": "That is because I like summer, and I also like playing in the water.",
+     "fr": "C'est parce que j'aime l'été, et que j'aime aussi jouer dans l'eau."
+    },
+    "note": {
+     "en": "「〜からです」 at the end gives the reason for what came before.",
+     "fr": "「〜からです」 en fin de phrase donne la raison de ce qui précède."
+    },
+    "words": [
+     {
+      "surface": "わたし",
+      "meaning": {
+       "en": "I",
+       "fr": "je"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "なつ",
+      "meaning": {
+       "en": "summer",
+       "fr": "été"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks what is liked",
+       "fr": "marque ce qu'on aime"
+      }
+     },
+     {
+      "surface": "すきで",
+      "meaning": {
+       "en": "like, and",
+       "fr": "aime, et"
+      }
+     },
+     {
+      "surface": "水",
+      "meaning": {
+       "en": "water",
+       "fr": "eau"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "中",
+      "meaning": {
+       "en": "inside",
+       "fr": "dedans"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "marks where",
+       "fr": "marque le lieu"
+      }
+     },
+     {
+      "surface": "あそぶ",
+      "meaning": {
+       "en": "play",
+       "fr": "jouer"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "(makes the verb a noun)",
+       "fr": "(fait du verbe un nom)"
+      }
+     },
+     {
+      "surface": "も",
+      "meaning": {
+       "en": "also",
+       "fr": "aussi"
+      }
+     },
+     {
+      "surface": "すき",
+      "meaning": {
+       "en": "like",
+       "fr": "aime"
+      }
+     },
+     {
+      "surface": "だ",
+      "meaning": {
+       "en": "is (plain)",
+       "fr": "est (neutre)"
+      }
+     },
+     {
+      "surface": "から",
+      "meaning": {
+       "en": "because",
+       "fr": "parce que"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "it is",
+       "fr": "c'est"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "わたしはテニスが下手です。",
+    "translation": {
+     "en": "I am bad at tennis.",
+     "fr": "Moi, je joue mal au tennis."
+    },
+    "note": {
+     "en": "「下手です」 is the opposite of 「上手です」: bad at something.",
+     "fr": "「下手です」 est le contraire de 「上手です」 : mauvais dans un domaine."
+    },
+    "words": [
+     {
+      "surface": "わたし",
+      "meaning": {
+       "en": "I",
+       "fr": "je"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "テニス",
+      "meaning": {
+       "en": "tennis",
+       "fr": "tennis"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks the skill",
+       "fr": "marque l'activité"
+      }
+     },
+     {
+      "surface": "下手",
+      "meaning": {
+       "en": "bad at",
+       "fr": "mauvais"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "polite ending",
+       "fr": "terminaison polie"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "ボールがはやくて、こわいです。",
+    "translation": {
+     "en": "The ball is fast, and it scares me.",
+     "fr": "La balle va vite, et ça me fait peur."
+    },
+    "note": {
+     "en": "「はやくて」 gives the reason for 「こわい」: the ball is fast, so it is frightening.",
+     "fr": "「はやくて」 donne la raison de 「こわい」 : la balle va vite, donc elle fait peur."
+    },
+    "words": [
+     {
+      "surface": "ボール",
+      "meaning": {
+       "en": "ball",
+       "fr": "balle"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks the subject",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "はやくて",
+      "meaning": {
+       "en": "fast, so",
+       "fr": "rapide, alors"
+      }
+     },
+     {
+      "surface": "こわい",
+      "meaning": {
+       "en": "frightening",
+       "fr": "qui fait peur"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "polite ending",
+       "fr": "terminaison polie"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "だから、すいえいのクラブに入ります。",
+    "translation": {
+     "en": "So I will join the swimming club.",
+     "fr": "Alors, je vais entrer au club de natation."
+    },
+    "note": {
+     "en": "「だから」 opens a sentence that follows from what came before: so.",
+     "fr": "「だから」 ouvre une phrase qui découle de ce qui précède : donc."
+    },
+    "words": [
+     {
+      "surface": "だから",
+      "meaning": {
+       "en": "so",
+       "fr": "alors"
+      }
+     },
+     {
+      "surface": "すいえい",
+      "meaning": {
+       "en": "swimming",
+       "fr": "natation"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "クラブ",
+      "meaning": {
+       "en": "club",
+       "fr": "club"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "into",
+       "fr": "dans"
+      }
+     },
+     {
+      "surface": "入ります",
+      "meaning": {
+       "en": "will join",
+       "fr": "vais entrer"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "来週から、毎日学校のプールでおよぎます。",
+    "translation": {
+     "en": "From next week, I will swim in the school pool every day.",
+     "fr": "À partir de la semaine prochaine, je nagerai tous les jours dans la piscine du lycée."
+    },
+    "note": {
+     "en": "The non-past 「およぎます」 with 「来週から」 speaks of the future.",
+     "fr": "Le non-passé 「およぎます」 avec 「来週から」 parle du futur."
+    },
+    "words": [
+     {
+      "surface": "来週",
+      "meaning": {
+       "en": "next week",
+       "fr": "la semaine prochaine"
+      }
+     },
+     {
+      "surface": "から",
+      "meaning": {
+       "en": "from",
+       "fr": "à partir de"
+      }
+     },
+     {
+      "surface": "毎日",
+      "meaning": {
+       "en": "every day",
+       "fr": "tous les jours"
+      }
+     },
+     {
+      "surface": "学校",
+      "meaning": {
+       "en": "school",
+       "fr": "lycée"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "'s",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "プール",
+      "meaning": {
+       "en": "pool",
+       "fr": "piscine"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "marks where",
+       "fr": "marque le lieu"
+      }
+     },
+     {
+      "surface": "およぎます",
+      "meaning": {
+       "en": "will swim",
+       "fr": "nagerai"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "n5-10",
+  "level": "N5",
+  "title": "たんじょう日のじゅんび",
+  "grammar": [
+   "〜ましょうか",
+   "〜がほしいです",
+   "〜あとで"
+  ],
+  "text": "来週の土よう日は、友だちのまりさんのたんじょう日です。まりさんのうちで小さいパーティーをします。わたしはまりさんのお母さんに「何かてつだいましょうか。」と聞きました。お母さんは「じゃ、ケーキをおねがいします。」と言いました。まりさんは先月「あおいぼうしがほしいです。」と言っていました。だから、きのうデパートであおいぼうしを買いました。ケーキは土よう日のあさ、駅の前の店で買います。パーティーのあとで、みんなでこうえんへ行って、しゃしんをとります。まりさんはきっとよろこぶでしょう。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "When is Mari's birthday?",
+     "fr": "Quand est l'anniversaire de Mari ?"
+    },
+    "options": {
+     "en": [
+      "This Saturday",
+      "Next Saturday",
+      "Next Sunday",
+      "Last month"
+     ],
+     "fr": [
+      "Ce samedi",
+      "Samedi prochain",
+      "Dimanche prochain",
+      "Le mois dernier"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What is the writer doing with 「何かてつだいましょうか」?",
+     "fr": "Que fait l'auteur avec 「何かてつだいましょうか」 ?"
+    },
+    "options": {
+     "en": [
+      "Asking for help",
+      "Refusing to help",
+      "Saying they have helped",
+      "Offering to help"
+     ],
+     "fr": [
+      "Il demande de l'aide",
+      "Il refuse d'aider",
+      "Il dit qu'il a aidé",
+      "Il propose son aide"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What did Mari's mother ask the writer to take care of?",
+     "fr": "De quoi la mère de Mari a-t-elle chargé l'auteur ?"
+    },
+    "options": {
+     "en": [
+      "The cake",
+      "The drinks",
+      "The photos",
+      "The decorations"
+     ],
+     "fr": [
+      "Du gâteau",
+      "Des boissons",
+      "Des photos",
+      "De la décoration"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「あおいぼうしがほしいです」 tell us about Mari?",
+     "fr": "Qu'apprend-on sur Mari avec 「あおいぼうしがほしいです」 ?"
+    },
+    "options": {
+     "en": [
+      "She had a blue hat",
+      "She made a blue hat",
+      "She wanted a blue hat",
+      "She lost a blue hat"
+     ],
+     "fr": [
+      "Elle avait un chapeau bleu",
+      "Elle a fait un chapeau bleu",
+      "Elle voulait un chapeau bleu",
+      "Elle a perdu un chapeau bleu"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What is a 「こうえん」?",
+     "fr": "Qu'est-ce qu'un 「こうえん」 ?"
+    },
+    "options": {
+     "en": [
+      "A station",
+      "A park",
+      "A school",
+      "A hospital"
+     ],
+     "fr": [
+      "Une gare",
+      "Un parc",
+      "Une école",
+      "Un hôpital"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Where will the writer buy the cake?",
+     "fr": "Où l'auteur achètera-t-il le gâteau ?"
+    },
+    "options": {
+     "en": [
+      "At the department store",
+      "At a shop near the park",
+      "At a shop near Mari's home",
+      "At the shop in front of the station"
+     ],
+     "fr": [
+      "Au grand magasin",
+      "Dans une boutique près du parc",
+      "Dans une boutique près de chez Mari",
+      "À la boutique devant la gare"
+     ]
+    },
+    "correct": 3
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「パーティーのあとで」 mean?",
+     "fr": "Que signifie 「パーティーのあとで」 ?"
+    },
+    "options": {
+     "en": [
+      "After the party",
+      "Before the party",
+      "During the party",
+      "Instead of the party"
+     ],
+     "fr": [
+      "Après la fête",
+      "Avant la fête",
+      "Pendant la fête",
+      "À la place de la fête"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "Why did the writer most likely choose a blue hat?",
+     "fr": "Pourquoi l'auteur a-t-il sans doute choisi un chapeau bleu ?"
+    },
+    "options": {
+     "en": [
+      "It was the cheapest in the store",
+      "Mari's mother asked for it",
+      "Mari had said she wanted one",
+      "The writer likes blue hats"
+     ],
+     "fr": [
+      "C'était le moins cher du magasin",
+      "La mère de Mari l'avait demandé",
+      "Mari avait dit qu'elle en voulait un",
+      "L'auteur aime les chapeaux bleus"
+     ]
+    },
+    "correct": 2
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "来週の土よう日は、友だちのまりさんのたんじょう日です。",
+    "translation": {
+     "en": "Next Saturday is my friend Mari's birthday.",
+     "fr": "Samedi prochain, c'est l'anniversaire de mon amie Mari."
+    },
+    "note": {
+     "en": "In 「友だちのまりさん」, の links the two: my friend Mari.",
+     "fr": "Dans 「友だちのまりさん」, の relie les deux : mon amie Mari."
+    },
+    "words": [
+     {
+      "surface": "来週",
+      "meaning": {
+       "en": "next week",
+       "fr": "la semaine prochaine"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "土よう日",
+      "meaning": {
+       "en": "Saturday",
+       "fr": "samedi"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "友だち",
+      "meaning": {
+       "en": "friend",
+       "fr": "amie"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "links to the name",
+       "fr": "relie au nom"
+      }
+     },
+     {
+      "surface": "まり",
+      "meaning": {
+       "en": "Mari (a name)",
+       "fr": "Mari (prénom)"
+      }
+     },
+     {
+      "surface": "さん",
+      "meaning": {
+       "en": "(polite suffix)",
+       "fr": "(suffixe poli)"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "'s",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "たんじょう日",
+      "meaning": {
+       "en": "birthday",
+       "fr": "anniversaire"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "is",
+       "fr": "c'est"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "まりさんのうちで小さいパーティーをします。",
+    "translation": {
+     "en": "We are having a small party at Mari's house.",
+     "fr": "On fait une petite fête chez Mari."
+    },
+    "note": {
+     "en": "「で」 marks where the party happens: at Mari's home.",
+     "fr": "「で」 marque le lieu de la fête : chez Mari."
+    },
+    "words": [
+     {
+      "surface": "まり",
+      "meaning": {
+       "en": "Mari (a name)",
+       "fr": "Mari (prénom)"
+      }
+     },
+     {
+      "surface": "さん",
+      "meaning": {
+       "en": "(polite suffix)",
+       "fr": "(suffixe poli)"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "'s",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "うち",
+      "meaning": {
+       "en": "home",
+       "fr": "maison"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "marks where",
+       "fr": "marque le lieu"
+      }
+     },
+     {
+      "surface": "小さい",
+      "meaning": {
+       "en": "small",
+       "fr": "petite"
+      }
+     },
+     {
+      "surface": "パーティー",
+      "meaning": {
+       "en": "party",
+       "fr": "fête"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "します",
+      "meaning": {
+       "en": "will have, do",
+       "fr": "allons faire"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "わたしはまりさんのお母さんに「何かてつだいましょうか。」と聞きました。",
+    "translation": {
+     "en": "I asked Mari's mother, \"Shall I help with something?\"",
+     "fr": "J'ai demandé à la mère de Mari : « Voulez-vous que je vous aide pour quelque chose ? »"
+    },
+    "note": {
+     "en": "「〜ましょうか」 offers to do something: shall I help? 「何か」 means something.",
+     "fr": "「〜ましょうか」 propose de faire quelque chose : voulez-vous que j'aide ? 「何か」 veut dire quelque chose."
+    },
+    "words": [
+     {
+      "surface": "わたし",
+      "meaning": {
+       "en": "I",
+       "fr": "je"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "まり",
+      "meaning": {
+       "en": "Mari (a name)",
+       "fr": "Mari (prénom)"
+      }
+     },
+     {
+      "surface": "さん",
+      "meaning": {
+       "en": "(polite suffix)",
+       "fr": "(suffixe poli)"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "'s",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "お母さん",
+      "meaning": {
+       "en": "mother (someone else's)",
+       "fr": "mère (de quelqu'un d'autre)"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks the person asked",
+       "fr": "marque la personne interrogée"
+      }
+     },
+     {
+      "surface": "何か",
+      "meaning": {
+       "en": "something",
+       "fr": "quelque chose"
+      }
+     },
+     {
+      "surface": "てつだいましょうか",
+      "meaning": {
+       "en": "shall I help?",
+       "fr": "voulez-vous que j'aide ?"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "marks the words said",
+       "fr": "marque les paroles rapportées"
+      }
+     },
+     {
+      "surface": "聞きました",
+      "meaning": {
+       "en": "asked",
+       "fr": "ai demandé"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "お母さんは「じゃ、ケーキをおねがいします。」と言いました。",
+    "translation": {
+     "en": "Her mother said, \"Then could you take care of the cake?\"",
+     "fr": "Sa mère a répondu : « Alors, je te confie le gâteau. »"
+    },
+    "note": {
+     "en": "「〜をおねがいします」 asks someone to take care of something: here, the cake.",
+     "fr": "「〜をおねがいします」 demande à quelqu'un de s'occuper de quelque chose : ici, le gâteau."
+    },
+    "words": [
+     {
+      "surface": "お母さん",
+      "meaning": {
+       "en": "mother (someone else's)",
+       "fr": "mère (de quelqu'un d'autre)"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "じゃ",
+      "meaning": {
+       "en": "then, well",
+       "fr": "alors"
+      }
+     },
+     {
+      "surface": "ケーキ",
+      "meaning": {
+       "en": "cake",
+       "fr": "gâteau"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "おねがいします",
+      "meaning": {
+       "en": "please (take care of it)",
+       "fr": "s'il te plaît (occupe-t'en)"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "marks the words said",
+       "fr": "marque les paroles rapportées"
+      }
+     },
+     {
+      "surface": "言いました",
+      "meaning": {
+       "en": "said",
+       "fr": "a dit"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "まりさんは先月「あおいぼうしがほしいです。」と言っていました。",
+    "translation": {
+     "en": "Last month Mari was saying, \"I want a blue hat.\"",
+     "fr": "Le mois dernier, Mari disait : « Je voudrais un chapeau bleu. »"
+    },
+    "note": {
+     "en": "「〜がほしいです」 says what one wants to have; the thing wanted takes 「が」.",
+     "fr": "「〜がほしいです」 dit ce qu'on veut avoir ; la chose voulue prend 「が」."
+    },
+    "words": [
+     {
+      "surface": "まり",
+      "meaning": {
+       "en": "Mari (a name)",
+       "fr": "Mari (prénom)"
+      }
+     },
+     {
+      "surface": "さん",
+      "meaning": {
+       "en": "(polite suffix)",
+       "fr": "(suffixe poli)"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "先月",
+      "meaning": {
+       "en": "last month",
+       "fr": "le mois dernier"
+      }
+     },
+     {
+      "surface": "あおい",
+      "meaning": {
+       "en": "blue",
+       "fr": "bleu"
+      }
+     },
+     {
+      "surface": "ぼうし",
+      "meaning": {
+       "en": "hat",
+       "fr": "chapeau"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks what is wanted",
+       "fr": "marque ce qu'on veut"
+      }
+     },
+     {
+      "surface": "ほしい",
+      "meaning": {
+       "en": "want",
+       "fr": "veux"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "polite ending",
+       "fr": "terminaison polie"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "marks the words said",
+       "fr": "marque les paroles rapportées"
+      }
+     },
+     {
+      "surface": "言っていました",
+      "meaning": {
+       "en": "was saying",
+       "fr": "disait"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "だから、きのうデパートであおいぼうしを買いました。",
+    "translation": {
+     "en": "So yesterday I bought a blue hat at a department store.",
+     "fr": "Alors hier, j'ai acheté un chapeau bleu dans un grand magasin."
+    },
+    "note": {
+     "en": "「だから」 ties this act to its reason, in the sentence before.",
+     "fr": "「だから」 relie cet acte à sa raison, dans la phrase précédente."
+    },
+    "words": [
+     {
+      "surface": "だから",
+      "meaning": {
+       "en": "so",
+       "fr": "alors"
+      }
+     },
+     {
+      "surface": "きのう",
+      "meaning": {
+       "en": "yesterday",
+       "fr": "hier"
+      }
+     },
+     {
+      "surface": "デパート",
+      "meaning": {
+       "en": "department store",
+       "fr": "grand magasin"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "marks where",
+       "fr": "marque le lieu"
+      }
+     },
+     {
+      "surface": "あおい",
+      "meaning": {
+       "en": "blue",
+       "fr": "bleu"
+      }
+     },
+     {
+      "surface": "ぼうし",
+      "meaning": {
+       "en": "hat",
+       "fr": "chapeau"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "買いました",
+      "meaning": {
+       "en": "bought",
+       "fr": "ai acheté"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "ケーキは土よう日のあさ、駅の前の店で買います。",
+    "translation": {
+     "en": "As for the cake, I will buy it on Saturday morning at the shop in front of the station.",
+     "fr": "Le gâteau, je l'achèterai samedi matin, à la boutique devant la gare."
+    },
+    "note": {
+     "en": "「ケーキは」 puts the cake first as the topic; 「買います」 speaks of what is still to come.",
+     "fr": "「ケーキは」 met le gâteau en tête comme thème ; 「買います」 parle de ce qui reste à faire."
+    },
+    "words": [
+     {
+      "surface": "ケーキ",
+      "meaning": {
+       "en": "cake",
+       "fr": "gâteau"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "土よう日",
+      "meaning": {
+       "en": "Saturday",
+       "fr": "samedi"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "あさ",
+      "meaning": {
+       "en": "morning",
+       "fr": "matin"
+      }
+     },
+     {
+      "surface": "駅",
+      "meaning": {
+       "en": "station",
+       "fr": "gare"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "前",
+      "meaning": {
+       "en": "front",
+       "fr": "devant"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "(links)",
+       "fr": "(relie)"
+      }
+     },
+     {
+      "surface": "店",
+      "meaning": {
+       "en": "shop",
+       "fr": "boutique"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "at",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "買います",
+      "meaning": {
+       "en": "will buy",
+       "fr": "achèterai"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "パーティーのあとで、みんなでこうえんへ行って、しゃしんをとります。",
+    "translation": {
+     "en": "After the party, we will all go to the park and take photos.",
+     "fr": "Après la fête, nous irons tous au parc prendre des photos."
+    },
+    "note": {
+     "en": "「パーティーのあとで」: noun + のあとで means after; 「みんなで」 means all together.",
+     "fr": "「パーティーのあとで」 : nom + のあとで veut dire après ; 「みんなで」 signifie tous ensemble."
+    },
+    "words": [
+     {
+      "surface": "パーティー",
+      "meaning": {
+       "en": "party",
+       "fr": "fête"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "あとで",
+      "meaning": {
+       "en": "after",
+       "fr": "après"
+      }
+     },
+     {
+      "surface": "みんな",
+      "meaning": {
+       "en": "everyone",
+       "fr": "tout le monde"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "(all) together",
+       "fr": "ensemble"
+      }
+     },
+     {
+      "surface": "こうえん",
+      "meaning": {
+       "en": "park",
+       "fr": "parc"
+      }
+     },
+     {
+      "surface": "へ",
+      "meaning": {
+       "en": "to",
+       "fr": "vers"
+      }
+     },
+     {
+      "surface": "行って",
+      "meaning": {
+       "en": "go, and",
+       "fr": "aller, et"
+      }
+     },
+     {
+      "surface": "しゃしん",
+      "meaning": {
+       "en": "photo",
+       "fr": "photo"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "とります",
+      "meaning": {
+       "en": "will take",
+       "fr": "prendrons"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "まりさんはきっとよろこぶでしょう。",
+    "translation": {
+     "en": "Mari will surely be happy.",
+     "fr": "Mari sera sûrement contente."
+    },
+    "note": {
+     "en": "「でしょう」 after a verb is a guess; 「きっと」 makes it surer.",
+     "fr": "「でしょう」 après un verbe exprime une supposition ; 「きっと」 la rend plus sûre."
+    },
+    "words": [
+     {
+      "surface": "まり",
+      "meaning": {
+       "en": "Mari (a name)",
+       "fr": "Mari (prénom)"
+      }
+     },
+     {
+      "surface": "さん",
+      "meaning": {
+       "en": "(polite suffix)",
+       "fr": "(suffixe poli)"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "きっと",
+      "meaning": {
+       "en": "surely",
+       "fr": "sûrement"
+      }
+     },
+     {
+      "surface": "よろこぶ",
+      "meaning": {
+       "en": "be pleased",
+       "fr": "être contente"
+      }
+     },
+     {
+      "surface": "でしょう",
+      "meaning": {
+       "en": "probably",
+       "fr": "sans doute"
+      }
+     }
+    ]
+   }
+  ]
  }
 ]
