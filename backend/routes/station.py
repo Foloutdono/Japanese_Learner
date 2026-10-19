@@ -15,8 +15,7 @@ from content.kanji_readings import display_reading, split_readings
 from content.radical_data import radical_for
 from content.vocab_data import VOCAB_BY_LEVEL
 from study import conversation
-from study.exam_gen_utils import make_choices
-from study.exam_kanji_gen import build_kanji_reading_distractors
+from study import exam_kanji_choices
 from study.grammar_forms import choice_forms
 from study.grammar_ladder import build_specimen, write_payload
 from study.grammar_lesson import contrast_payload
@@ -357,30 +356,30 @@ def _exam_vocab(level: str) -> dict | None:
 
     And its four `options` (plan 165: the Practice gate prints the
     question whole, as the canvas's "Every platform's specimen" draws
-    it): the paper's own 漢字読み choices -- the reading and three of
-    exam_kanji_gen's near-misses (a voicing, a long vowel, a small っ,
-    the character's other readings), dealt by make_choices under a
-    fixed seed so the order is the same on every process. A word with
-    fewer than three near-misses never reaches a paper
-    (build_reading_mondai skips it), so it is passed over here too."""
+    it): the paper's own 漢字読み choices -- the reading and the three
+    wrong readings study/exam_kanji_choices builds for a paper (plan 257:
+    the slips a compound makes, set as a grid), dealt under a fixed seed
+    so the order is the same on every process. A word the paper would not
+    ask, or that has no such set, is passed over here too."""
     bank = reading_sentences.BY_LEVEL.get(level, [])
     for readings in _deck_readings(level):
         for row in bank:
             focus = row.get("focus", "")
             if not (_KANJI.search(focus) and focus in row["jp"] and focus in readings):
                 continue
-            kana = readings[focus]
-            reading = kana.split("/")[0].strip()
-            rng = random.Random(f"{level}:{focus}")
-            made = make_choices(rng, reading, build_kanji_reading_distractors({"kanji": focus, "kana": kana}, rng))
-            if made is None:
+            reading = readings[focus].split("/")[0].strip()
+            if not exam_kanji_choices.askable({"kanji": focus, "kana": reading}, level):
                 continue
-            choices, _ = made
+            sets = exam_kanji_choices.reading_sets(focus, reading, level)
+            if not sets:
+                continue
+            options = [reading] + sets[0][1]
+            random.Random(f"{level}:{focus}").shuffle(options)
             return {
                 "sentence": row["jp"],
                 "word": focus,
                 "reading": reading,
-                "options": [c["textJp"] for c in choices],
+                "options": options,
             }
     return None
 
