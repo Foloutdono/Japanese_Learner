@@ -52,6 +52,7 @@ vi.mock('../lib/audio', async importOriginal => ({
 vi.mock('../stores/stats', () => ({ useStats: () => ({ data: null, failed: false }), refreshStats: vi.fn(), seedStats: vi.fn() }))
 
 const { default: ComprehensionRun } = await import('./ComprehensionRun')
+const { setRollMode } = await import('../stores/readingRoll')
 
 // A real mix — kanji, kana and punctuation. The marks matter: 。and 、
 // each take a full em, so a text measured without them measures short.
@@ -67,12 +68,12 @@ const ok = body => ({ ok: true, status: 200, json: async () => body })
 // in measures a few pixels low.
 const settle = (ms = 700) => new Promise(r => setTimeout(r, ms))
 
-async function reading(text) {
+async function reading(text, sentences = null) {
   apiFetch.mockReset()
   apiFetch.mockImplementation(async () => ok({
     text,
     translation: 'The whole thing, in English.',
-    breakdown: [{ jp: text, translation: 'The whole thing, in English.', note: '' }],
+    breakdown: (sentences ?? [text]).map(jp => ({ jp, translation: 'The whole thing, in English.', note: '' })),
     read_seconds: 240,
     questions: [{ type: 'comprehension', question: 'When?', options: ['六時', '七時', '八時', '九時'], correct: 1 }],
   }))
@@ -114,5 +115,47 @@ describe('the comprehension band at 390×667', () => {
     // one screen, not the first screenful of it.
     const doc = document.documentElement
     expect(doc.scrollHeight).toBeLessThanOrEqual(doc.clientHeight + 1)
+  })
+})
+
+// 巻物 (plan 258): the same card with the text rolling in it. Its clock
+// chips stand out of the flow and its controls are inside the card, so
+// the rolling card must fit the smallest phone as the whole one does.
+describe('the rolling text at 390×667', () => {
+  it('keeps the card, its controls and the chips on the screen, clear of the clock', async () => {
+    setRollMode('rolling')
+    const sentences = UNIT.split(/(?<=。)/).filter(Boolean)
+    const root = await reading(sentences.join(''), sentences)
+    setRollMode('whole')
+    const card = root.querySelector('.prompt-card--roll')
+    const roll = card.querySelector('.roll')
+    expect(roll.getBoundingClientRect().height).toBeGreaterThan(150)
+    expect(card.getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight)
+    expect(card.querySelector('.prompt-card__foot').getBoundingClientRect().bottom)
+      .toBeLessThanOrEqual(window.innerHeight)
+    for (const b of card.querySelectorAll('.roll-ctl button')) {
+      const r = b.getBoundingClientRect()
+      expect(r.left).toBeGreaterThanOrEqual(card.getBoundingClientRect().left)
+      expect(r.right).toBeLessThanOrEqual(card.getBoundingClientRect().right)
+      expect(r.bottom).toBeLessThanOrEqual(card.querySelector('.prompt-card__foot').getBoundingClientRect().top + 1)
+    }
+
+    // The two chips and the label's own text share the clock's line
+    // without touching.
+    const label = root.querySelector('.timer__label')
+    const range = document.createRange()
+    range.selectNodeContents(label)
+    const text = range.getBoundingClientRect()
+    const roller = root.querySelector('.roll-chip').getBoundingClientRect()
+    const pacer = root.querySelector('.pace-chip').getBoundingClientRect()
+    expect(roller.right).toBeLessThanOrEqual(text.left)
+    expect(pacer.left).toBeGreaterThanOrEqual(text.right)
+    expect(roller.left).toBeGreaterThanOrEqual(0)
+    expect(pacer.right).toBeLessThanOrEqual(window.innerWidth)
+
+    // The page under it stays still, and the foot is one button.
+    const doc = document.documentElement
+    expect(doc.scrollHeight).toBeLessThanOrEqual(doc.clientHeight + 1)
+    expect(root.querySelectorAll('.stage__foot button')).toHaveLength(1)
   })
 })

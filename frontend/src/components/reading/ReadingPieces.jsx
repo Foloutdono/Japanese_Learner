@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef } from 'react'
 import { CardTransition } from '../study/CardTransition'
 import PromptCard from '../study/PromptCard'
 import { SentenceCheck } from '../study/PracticeCard'
-import { EyeOffIcon, PlayIcon } from '../ui/Icons'
+import { EyeOffIcon, PlayIcon, RollIcon } from '../ui/Icons'
 import { runKey } from '../../lib/keyGuards'
 import { useLang } from '../../LangContext'
 import { useDesk } from '../../hooks/useDesk'
@@ -74,6 +74,27 @@ export function PaceChip({ session }) {
       onClick={() => setReadingPace(next, session).catch(() => {})}
     >
       {t.readingPaceShort[pace]}
+    </button>
+  )
+}
+
+/** The text's way of showing, on the clock's other end (plan 258):
+ *  lit while the text rolls up its card, pressed to roll it or to put
+ *  it back whole. The mirror of PaceChip, out of the flow as it is --
+ *  the card under the clock has no line to spare. */
+export function RollChip({ rolling, onToggle }) {
+  const { t } = useLang()
+  const label = rolling ? t.rollWhole : t.rollText
+  return (
+    <button
+      type="button"
+      className={`chip roll-chip${rolling ? ' chip--on' : ''}`}
+      aria-pressed={rolling}
+      aria-label={label}
+      title={label}
+      onClick={onToggle}
+    >
+      <RollIcon size={16} />
     </button>
   )
 }

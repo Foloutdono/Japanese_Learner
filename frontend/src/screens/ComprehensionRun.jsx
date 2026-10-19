@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, useParams, Navigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
@@ -32,8 +32,11 @@ import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import { paceFactor } from '../domain/readingPace'
 import { useReadingPace } from '../stores/readingPace'
-import { Clock, ReadingTimer, PaceChip } from '../components/reading/ReadingPieces'
-import { CheckIcon, CrossIcon, ChevronIcon } from '../components/ui/Icons'
+import { Clock, ReadingTimer, PaceChip, RollChip } from '../components/reading/ReadingPieces'
+import { CheckIcon, CrossIcon, ChevronIcon, PauseIcon, PlayIcon } from '../components/ui/Icons'
+import { RollingPassage } from '../components/reading/RollingPassage'
+import { useReadingRoll, setRollMode, nudgeRollSpeed } from '../stores/readingRoll'
+import { ROLL_LEAD, ROLL_TAIL, rollLines, rollSeconds } from '../domain/readingRoll'
 
 const RIKAI_COLOR = 'var(--line-rikai)'
 
@@ -96,12 +99,18 @@ export default function ComprehensionRun({ session }) {
   // no clock: the text stays until Done reading.
   const [timeLeft, setTimeLeft] = useState(0)
   const factor = paceFactor(useReadingPace())
+  // The text whole, or rolling up the card at the learner's speed
+  // (plan 258). A roll is the first read's: Re-read shows the text whole.
+  const { mode: viewMode, speed: rollSpeed } = useReadingRoll()
   // When this reading began, for the Enter key's guard below.
   const readFrom = useRef(0)
   // Re-reading the text from the questions pauses the clock: the
   // reading window was for the first read, and coming back to check
   // a detail is what the paper allows.
   const [rereading, setRereading] = useState(false)
+  // The roll's place on its timeline (0 to 1) and whether it is held.
+  const [rollAt, setRollAt] = useState(0)
+  const [rollHeld, setRollHeld] = useState(false)
   const [currentQ, setCurrentQ] = useState(0)
   const [answers, setAnswers]   = useState([])     // chosen option index per question
   const [picked, setPicked]     = useState(null)   // the current question's choice, until Next commits it
@@ -139,6 +148,8 @@ export default function ComprehensionRun({ session }) {
     startTally(`comprehension:${lvl}`)
     asking.reset()
     setRereading(false)
+    setRollAt(0)
+    setRollHeld(false)
     setShowBreakdown(false)
     setOpenIndex(0)
     setLookup(null)
@@ -179,11 +190,17 @@ export default function ComprehensionRun({ session }) {
       })
   }
 
-  // Reading countdown — the first read only.
+  const rolling = viewMode === 'rolling' && stage === 'reading' && !rereading && Boolean(exercise)
+  const lines = useMemo(() => rollLines(exercise), [exercise])
+  const rollLength = rollSeconds(lines, rollSpeed)
+  const rollTotal = ROLL_LEAD + rollLength + ROLL_TAIL
+
+  // Reading countdown — the first read only. A roll is its own clock:
+  // it ends the reading when its last line has stood (RollingPassage).
   useEffect(() => {
     if (stage !== 'reading' || rereading) return
     readFrom.current = Date.now()
-    if (factor == null) return
+    if (factor == null || rolling) return
 
     const tick = 1 / factor
     timerRef.current = setInterval(() => {
@@ -198,7 +215,7 @@ export default function ComprehensionRun({ session }) {
     }, 1000)
 
     return clearTimer
-  }, [stage, rereading, factor])
+  }, [stage, rereading, factor, rolling])
 
   function clearTimer() {
     if (timerRef.current) {
@@ -211,6 +228,13 @@ export default function ComprehensionRun({ session }) {
     clearTimer()
     setRereading(false)
     setStage('questions')
+  }
+
+  function toggleRoll() {
+    playUi('click-mode-selection')
+    setRollAt(0)
+    setRollHeld(false)
+    setRollMode(rolling ? 'whole' : 'rolling')
   }
 
   function reread() {
@@ -485,6 +509,14 @@ export default function ComprehensionRun({ session }) {
     }
   }
 
+  // The way the text shows at the clock's start, the pace at its end.
+  const chips = (
+    <>
+      <RollChip rolling={rolling} onToggle={toggleRoll} />
+      <PaceChip session={session} />
+    </>
+  )
+
   return (
     <StudyStage
       color={RIKAI_COLOR}
@@ -555,13 +587,13 @@ export default function ComprehensionRun({ session }) {
         <>
           {/* The window, and the pace's chip at its end (PaceChip). No
               clock: the reading run's own word for it, in its place. */}
-          {!rereading && factor == null && <ReadingTimer untimed t={t} aside={<PaceChip session={session} />} />}
+          {!rereading && factor == null && <ReadingTimer untimed t={t} aside={chips} />}
           {!rereading && factor != null && (
             <Clock
-              fill={timeLeft / exercise.read_seconds}
-              low={timeLeft * factor < 60}
-              label={`${t.timeRemaining} · ${formatTime(timeLeft * factor)}`}
-              aside={<PaceChip session={session} />}
+              fill={rolling ? 1 - rollAt : timeLeft / exercise.read_seconds}
+              low={rolling ? rollTotal * (1 - rollAt) < 10 : timeLeft * factor < 60}
+              label={`${t.timeRemaining} · ${formatTime(rolling ? Math.ceil(rollTotal * (1 - rollAt)) : timeLeft * factor)}`}
+              aside={chips}
             />
           )}
 
@@ -572,7 +604,36 @@ export default function ComprehensionRun({ session }) {
               now the breakdown on the result (below) — the same
               sentences, in the same order, but bought AFTER the
               answers are in rather than instead of them. */}
-          <Passage className="prompt-card--passage" text={exercise.text} level={level} t={t} />
+          {rolling ? (
+            <PromptCard className="prompt-card--passage prompt-card--roll" foot={{ left: level, right: t.comprehensionTitle }}>
+              <RollingPassage
+                lines={lines}
+                seconds={rollLength}
+                paused={rollHeld}
+                label={t.rollLabel}
+                onProgress={setRollAt}
+                onEnd={factor != null ? finishReading : undefined}
+              />
+              <div className="roll-ctl">
+                <button
+                  type="button"
+                  className="chip"
+                  aria-pressed={rollHeld}
+                  aria-label={rollHeld ? t.rollResume : t.rollPause}
+                  onClick={() => setRollHeld(h => !h)}
+                >
+                  {rollHeld ? <PlayIcon size={12} /> : <PauseIcon size={12} />}
+                </button>
+                <div className="roll-ctl__speed" role="group" aria-label={t.rollSpeedLabel}>
+                  <button type="button" className="chip" aria-label={t.rollSlower} onClick={() => nudgeRollSpeed(-1)}>−</button>
+                  <span className="roll-ctl__value" aria-live="polite">{t.rollSpeed(rollSpeed)}</span>
+                  <button type="button" className="chip" aria-label={t.rollFaster} onClick={() => nudgeRollSpeed(1)}>+</button>
+                </div>
+              </div>
+            </PromptCard>
+          ) : (
+            <Passage className="prompt-card--passage" text={exercise.text} level={level} t={t} />
+          )}
 
           <div className="stage__foot btn-row">
             <button type="button" className="btn-primary" onClick={finishReading} aria-keyshortcuts={desk ? 'Enter' : undefined}>

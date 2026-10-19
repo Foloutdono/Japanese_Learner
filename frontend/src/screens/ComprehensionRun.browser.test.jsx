@@ -4,6 +4,8 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 import fr from '../locales/fr/index.js'
 import { TrainDoor } from '../components/station/TrainDoor'
+import { setRollMode, setRollSpeed } from '../stores/readingRoll'
+import { ROLL_LEAD, ROLL_TAIL, rollLines, rollSeconds } from '../domain/readingRoll'
 
 // ── Comprehension: the station, then the stage (plan 072) ───────
 // The level list on the station page, then the whole exercise on the
@@ -480,5 +482,124 @@ describe('ComprehensionRun — the reading pace', () => {
     await settle(20)
     expect(label(root)).toBe(fr.readingUntimed)
     expect(root.querySelector('.mcq-list')).toBeNull()
+  })
+})
+
+describe('ComprehensionRun — the rolling text (plan 258)', () => {
+  async function reading(exercise = EXERCISE) {
+    apiFetch.mockImplementation(async url => (
+      String(url).startsWith('/api/reading/comprehension') ? ok(exercise) : ok({})
+    ))
+    const screen = await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/practice/comprehension/N5']}>
+          <Routes>
+            <Route path="/practice/comprehension/:level" element={<ComprehensionRun session={{ access_token: 'tok' }} />} />
+          </Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(150)
+    return screen.container
+  }
+  const label = root => root.querySelector('.timer__label').textContent
+  const total = (exercise, speed) => ROLL_LEAD + rollSeconds(rollLines(exercise), speed) + ROLL_TAIL
+  const mmss = secs => `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`
+
+  beforeEach(() => {
+    paced.pace = 'standard'
+    setRollMode('whole')
+    setRollSpeed(3)
+  })
+
+  it('shows the whole text until the learner asks for the roll', async () => {
+    const root = await reading()
+    expect(root.querySelector('.roll')).toBeNull()
+    expect(root.textContent).toContain(EXERCISE.text)
+    expect(label(root)).toBe(`${fr.timeRemaining} · 1:00`)
+  })
+
+  it('rolls the sentences one line each, and the roll is the clock', async () => {
+    const root = await reading()
+    root.querySelector('.roll-chip').click()
+    await settle(60)
+    const lines = [...root.querySelectorAll('.roll__line')]
+    expect(lines.map(l => l.textContent)).toEqual(EXERCISE.breakdown.map(b => b.jp))
+    expect(lines[0].classList.contains('roll__line--now')).toBe(true)
+    // Its own length, not the standard minute: ceil of the timeline.
+    expect(label(root)).toMatch(new RegExp(`^${fr.timeRemaining} · ${mmss(Math.ceil(total(EXERCISE, 3)))}$`))
+
+    // And back to the whole text.
+    root.querySelector('.roll-chip').click()
+    await settle(60)
+    expect(root.querySelector('.roll')).toBeNull()
+    expect(root.textContent).toContain(EXERCISE.text)
+  })
+
+  it('remembers the choice for the next text', async () => {
+    const first = await reading()
+    first.querySelector('.roll-chip').click()
+    await settle(60)
+    const second = await reading()
+    expect(second.querySelector('.roll')).not.toBeNull()
+  })
+
+  it('takes its speed from the stepper, shortening the roll', async () => {
+    setRollMode('rolling')
+    const root = await reading()
+    expect(root.querySelector('.roll-ctl__value').textContent).toBe(fr.rollSpeed(3))
+    root.querySelector(`[aria-label="${fr.rollFaster}"]`).click()
+    await settle(60)
+    expect(root.querySelector('.roll-ctl__value').textContent).toBe(fr.rollSpeed(4))
+    expect(label(root)).toMatch(new RegExp(`· ${mmss(Math.ceil(total(EXERCISE, 4)))}$`))
+    root.querySelector(`[aria-label="${fr.rollSlower}"]`).click()
+    root.querySelector(`[aria-label="${fr.rollSlower}"]`).click()
+    await settle(60)
+    expect(root.querySelector('.roll-ctl__value').textContent).toBe(fr.rollSpeed(2))
+  })
+
+  it('holds the clock and the column while paused', async () => {
+    setRollMode('rolling')
+    const root = await reading()
+    root.querySelector(`[aria-label="${fr.rollPause}"]`).click()
+    await settle(50)
+    const held = [label(root), root.querySelector('.roll__column').style.transform]
+    await settle(1300)
+    expect([label(root), root.querySelector('.roll__column').style.transform]).toEqual(held)
+    root.querySelector(`[aria-label="${fr.rollResume}"]`).click()
+    await settle(1300)
+    expect(label(root)).not.toBe(held[0])
+  })
+
+  it('turns to the questions when the roll has ended', async () => {
+    setRollMode('rolling')
+    setRollSpeed(10)
+    const root = await reading({ ...EXERCISE, text: 'はい。', breakdown: [{ jp: 'はい。', translation: 'Yes.', note: '', analysis: null }] })
+    expect(root.querySelector('.mcq-list')).toBeNull()
+    await settle(ROLL_LEAD * 1000 + 1000 + ROLL_TAIL * 1000 + 700)
+    expect(root.querySelector('.mcq-list')).not.toBeNull()
+  })
+
+  it('rolls with no clock at the untimed pace, and leaves the text up', async () => {
+    paced.pace = 'untimed'
+    setRollMode('rolling')
+    setRollSpeed(10)
+    const root = await reading({ ...EXERCISE, text: 'はい。', breakdown: [{ jp: 'はい。', translation: 'Yes.', note: '', analysis: null }] })
+    expect(label(root)).toBe(fr.readingUntimed)
+    await settle(ROLL_LEAD * 1000 + 1000 + ROLL_TAIL * 1000 + 700)
+    expect(root.querySelector('.roll')).not.toBeNull()
+    expect(root.querySelector('.mcq-list')).toBeNull()
+  })
+
+  it('re-reads the text whole, never rolling', async () => {
+    setRollMode('rolling')
+    const root = await reading()
+    clickText(root, fr.doneReading)
+    await settle(80)
+    clickText(root, fr.reReadText)
+    await settle(80)
+    expect(root.querySelector('.roll')).toBeNull()
+    expect(root.textContent).toContain(EXERCISE.text)
+    expect(root.querySelector('.roll-chip')).toBeNull()
   })
 })

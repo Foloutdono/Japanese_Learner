@@ -12374,16 +12374,24 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    bar's end and the gap, neither of which takes a press. */
 .timer--aside { position: relative; }
 .timer--aside > .timer__label { padding-inline: calc(var(--sp-9) + var(--sp-3)); }
-.timer--aside > .pace-chip {
+.timer--aside > .pace-chip,
+.timer--aside > .roll-chip {
   position: absolute;
-  inset-inline-end: 0;
   top: calc(var(--sp-1) + var(--sp-2));
   justify-content: center;
   min-width: var(--sp-9);
   height: var(--sp-7);
   font-size: var(--fs-sm);
 }
-.timer--aside > .pace-chip::after {
+.timer--aside > .pace-chip { inset-inline-end: 0; }
+/* The roll's chip (plan 258) stands at the clock's other end, a chip of
+   the same box and target; its icon is the only thing in it. */
+.timer--aside > .roll-chip {
+  inset-inline-start: 0;
+  padding-inline: 0;
+}
+.timer--aside > .pace-chip::after,
+.timer--aside > .roll-chip::after {
   content: '';
   position: absolute;
   inset: calc(-1 * var(--sp-3)) calc(-1 * var(--sp-2));
@@ -18356,6 +18364,64 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+}
+
+/* ── The passage rolling (plan 258, RollingPassage) ──
+   The same bounded card, its body no longer a scroll: the lines pass
+   up a viewport that fades them out at its top and bottom, the one at
+   the middle lit, and a row of controls under it (pause, speed). The
+   column is moved by a transform from the frame loop, never by top. */
+.prompt-card--footed.prompt-card--roll > .prompt-card__body {
+  overflow: hidden;
+  padding: var(--sp-5);
+  gap: var(--sp-3);
+}
+.roll {
+  position: relative;
+  flex: 1 1 0;
+  min-height: calc(var(--sp-9) * 4);
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, transparent, black 24%, black 76%, transparent);
+}
+.roll__column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  will-change: transform;
+}
+.roll__line {
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-title);
+  font-weight: 500;
+  line-height: 1.7;
+  text-align: center;
+  overflow-wrap: anywhere;
+  color: var(--text-primary);
+  opacity: 0.4;
+  transition: opacity 0.4s var(--ease-out);
+}
+.roll__line--past { opacity: 0.2; }
+.roll__line--now { opacity: 1; }
+.roll-ctl {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-4);
+}
+.roll-ctl__speed {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.roll-ctl__value {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  text-align: center;
 }
 
 /* The flashcard is the body's whole height, not just its face. The

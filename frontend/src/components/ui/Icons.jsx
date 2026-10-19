@@ -420,6 +420,20 @@ export function ChevronIcon({ direction = 'left', size = 18, className }) {
   )
 }
 
+// The text rolling up its card (plan 258): lines passing, the middle one
+// the one being read, an arrow for the way they go.
+export function RollIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <path d="M4 7h9" opacity="0.45" />
+      <path d="M4 12h9" />
+      <path d="M4 17h9" opacity="0.45" />
+      <path d="M19 18V6" />
+      <polyline points="16 9 19 6 22 9" />
+    </svg>
+  )
+}
+
 export function PlayIcon({ size = 14, className }) {
   return (
     <svg {...base} width={size} height={size} className={className} strokeLinejoin="round">
