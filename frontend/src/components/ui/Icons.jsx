@@ -69,6 +69,14 @@ export function ExportIcon({ size = 18, className }) {
 // register to the card (the choices, the furigana) rather than offer a
 // hint about it. Heavier stroke than `base` because at 14px a 2px plus
 // reads as thin next to the label beside it.
+export function MinusIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className} strokeWidth="2.5">
+      <path d="M5 12h14" />
+    </svg>
+  )
+}
+
 export function PlusIcon({ size = 18, className }) {
   return (
     <svg {...base} width={size} height={size} className={className} strokeWidth="2.5">
@@ -416,6 +424,20 @@ export function ChevronIcon({ direction = 'left', size = 18, className }) {
   return (
     <svg {...base} width={size} height={size} className={className} strokeWidth={2.5}>
       <polyline points={points} />
+    </svg>
+  )
+}
+
+// The text rolling up its card (plan 258): lines passing, the middle one
+// the one being read, an arrow for the way they go.
+export function RollIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <path d="M4 7h9" opacity="0.45" />
+      <path d="M4 12h9" />
+      <path d="M4 17h9" opacity="0.45" />
+      <path d="M19 18V6" />
+      <polyline points="16 9 19 6 22 9" />
     </svg>
   )
 }

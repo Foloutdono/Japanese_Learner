@@ -12405,16 +12405,24 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    bar's end and the gap, neither of which takes a press. */
 .timer--aside { position: relative; }
 .timer--aside > .timer__label { padding-inline: calc(var(--sp-9) + var(--sp-3)); }
-.timer--aside > .pace-chip {
+.timer--aside > .pace-chip,
+.timer--aside > .roll-chip {
   position: absolute;
-  inset-inline-end: 0;
   top: calc(var(--sp-1) + var(--sp-2));
   justify-content: center;
   min-width: var(--sp-9);
   height: var(--sp-7);
   font-size: var(--fs-sm);
 }
-.timer--aside > .pace-chip::after {
+.timer--aside > .pace-chip { inset-inline-end: 0; }
+/* The roll's chip (plan 258) stands at the clock's other end, a chip of
+   the same box and target; its icon is the only thing in it. */
+.timer--aside > .roll-chip {
+  inset-inline-start: 0;
+  padding-inline: 0;
+}
+.timer--aside > .pace-chip::after,
+.timer--aside > .roll-chip::after {
   content: '';
   position: absolute;
   inset: calc(-1 * var(--sp-3)) calc(-1 * var(--sp-2));
@@ -18393,6 +18401,109 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+}
+
+/* ── The passage rolling (plan 258, RollingPassage) ──
+   The same bounded card, its body no longer a scroll: the lines pass
+   up a viewport that fades them out at its top and bottom, the one at
+   the middle lit, and a row of controls under it (pause, speed). The
+   column is moved by a transform from the frame loop, never by top. */
+.prompt-card--footed.prompt-card--roll > .prompt-card__body {
+  overflow: hidden;
+  padding: var(--sp-5);
+  gap: var(--sp-3);
+}
+.roll {
+  position: relative;
+  flex: 1 1 0;
+  min-height: calc(var(--sp-9) * 4);
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, transparent, black 24%, black 76%, transparent);
+}
+.roll__column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+  /* Moved by a Web Animation on its transform (RollingPassage), which
+     the browser keeps on the compositor: promoted up front, so the
+     first frame of the roll is not a repaint. */
+  will-change: transform;
+}
+/* One rung up from the card's own title, fluid: the text is the only
+   thing on this card, and a roll is read at a distance. */
+.roll__line {
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-heading-fluid);
+  font-weight: 500;
+  line-height: 1.7;
+  text-align: center;
+  overflow-wrap: anywhere;
+  /* A sentence that wraps wraps into lines of one length, never a
+     last line of a single kana and its full stop. */
+  text-wrap: balance;
+  color: var(--text-primary);
+  /* Stepped back by the line's distance from the middle (--d, 0 to 3
+     from RollingPassage): the line being read at full ink, its
+     neighbours at two thirds, then a third, then a ghost. The card's
+     mask takes the rest at its edges. */
+  opacity: max(0.12, calc(1 - var(--d, 3) * 0.35));
+  transition: opacity 0.45s var(--ease-out);
+}
+/* Furigana over the kanji (the option's chip, RollingPassage): leading
+   for the readings, which are drawn outside the line box, and a
+   reading that is a reading and never a second sentence. Ruby does not
+   break inside a word. */
+.roll--furigana .roll__line { line-height: 2; }
+.roll__line ruby {
+  ruby-position: over;
+  ruby-align: center;
+  white-space: nowrap;
+}
+.roll__line rt {
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--text-secondary);
+  user-select: none;
+}
+.roll-ctl {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-4);
+}
+/* The row's buttons are one round box each, the icon alone in it: a
+   chip pads its label, and the end of that padding is trimmed by the
+   label's tracking (.chip), which left an icon half a pixel off its
+   own centre. */
+.roll-ctl__btn {
+  width: 36px;
+  padding: 0;
+  justify-content: center;
+}
+/* A triangle's weight is at its base, a third of the way in: it is
+   nudged to where the eye centres it, as a pause's two bars need none. */
+.roll-ctl__play { transform: translateX(1px); }
+.roll-ctl__furi {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.roll-ctl__speed {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.roll-ctl__value {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  text-align: center;
 }
 
 /* The flashcard is the body's whole height, not just its face. The
