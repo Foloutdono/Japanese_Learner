@@ -16,10 +16,11 @@ function read() {
     return {
       mode: isRollMode(stored?.mode) ? stored.mode : DEFAULT_ROLL_MODE,
       speed: isRollSpeed(stored?.speed) ? stored.speed : DEFAULT_ROLL_SPEED,
+      furigana: stored?.furigana === true,
     }
   } catch {
     // Private mode, blocked site data, a copy that is not JSON.
-    return { mode: DEFAULT_ROLL_MODE, speed: DEFAULT_ROLL_SPEED }
+    return { mode: DEFAULT_ROLL_MODE, speed: DEFAULT_ROLL_SPEED, furigana: false }
   }
 }
 
@@ -35,7 +36,8 @@ function set(next) {
   listeners.forEach(l => l())
 }
 
-/** { mode: 'whole' | 'rolling', speed: characters a second } -- never null. */
+/** { mode: 'whole' | 'rolling', speed: characters a second, furigana: over
+ *  the kanji of a rolling line, off until asked for } -- never null. */
 export const useReadingRoll = () => useSyncExternalStore(subscribe, getState)
 
 export const setRollMode = mode => { if (isRollMode(mode)) set({ mode }) }
@@ -43,3 +45,4 @@ export const setRollSpeed = speed => { if (isRollSpeed(speed)) set({ speed }) }
 // From the speed now held, not the one a press was drawn with: two quick
 // presses before a render are two steps.
 export const nudgeRollSpeed = dir => set({ speed: stepSpeed(state.speed, dir) })
+export const setRollFurigana = on => set({ furigana: on === true })

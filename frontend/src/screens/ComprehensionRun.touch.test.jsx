@@ -52,7 +52,7 @@ vi.mock('../lib/audio', async importOriginal => ({
 vi.mock('../stores/stats', () => ({ useStats: () => ({ data: null, failed: false }), refreshStats: vi.fn(), seedStats: vi.fn() }))
 
 const { default: ComprehensionRun } = await import('./ComprehensionRun')
-const { setRollMode } = await import('../stores/readingRoll')
+const { setRollMode, setRollFurigana } = await import('../stores/readingRoll')
 
 // A real mix — kanji, kana and punctuation. The marks matter: 。and 、
 // each take a full em, so a text measured without them measures short.
@@ -158,4 +158,32 @@ describe('the rolling text at 390×667', () => {
     expect(doc.scrollHeight).toBeLessThanOrEqual(doc.clientHeight + 1)
     expect(root.querySelectorAll('.stage__foot button')).toHaveLength(1)
   })
+
+  it('centres each icon in its own round button, furigana on or off', async () => {
+    setRollMode('rolling')
+    setRollFurigana(true)
+    const sentences = UNIT.split(/(?<=。)/).filter(Boolean)
+    const root = await reading(sentences.join(''), sentences.map(jp => jp))
+    const buttons = [...root.querySelectorAll('.roll-ctl__btn')]
+    expect(buttons.length).toBeGreaterThanOrEqual(3)
+    for (const b of buttons) {
+      const box = b.getBoundingClientRect()
+      expect(Math.abs(box.width - box.height), b.getAttribute('aria-label')).toBeLessThan(1)
+      const icon = b.querySelector('svg')
+      if (!icon) continue
+      const ib = icon.getBoundingClientRect()
+      expect(Math.abs((ib.left + ib.width / 2) - (box.left + box.width / 2))).toBeLessThan(1.5)
+      expect(Math.abs((ib.top + ib.height / 2) - (box.top + box.height / 2))).toBeLessThan(1.5)
+    }
+    // The pause swaps to a play that is as centred.
+    root.querySelector('.roll-ctl__btn').click()
+    await settle(100)
+    const play = root.querySelector('.roll-ctl__btn')
+    const pb = play.getBoundingClientRect()
+    const ib = play.querySelector('svg').getBoundingClientRect()
+    expect(Math.abs((ib.left + ib.width / 2) - (pb.left + pb.width / 2))).toBeLessThan(2)
+    setRollMode('whole')
+    setRollFurigana(false)
+  })
 })
+

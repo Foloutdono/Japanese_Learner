@@ -35,15 +35,32 @@ export function stepSpeed(speed, dir) {
   return ROLL_SPEEDS[Math.min(ROLL_SPEEDS.length - 1, Math.max(0, i + dir))]
 }
 
-/** The lines a roll passes: the breakdown's sentences as the exercise
- *  was served, or -- from a backend that sends none -- the text cut
- *  after its sentence ends. Never an empty line. */
-export function rollLines(exercise) {
-  const parts = exercise?.breakdown?.length
-    ? exercise.breakdown.map(s => s.jp)
-    : String(exercise?.text ?? '').split(/(?<=[。！？!?])|\n+/)
-  return parts.map(s => String(s ?? '').trim()).filter(Boolean)
+/** What a roll passes, a line each: the breakdown's sentences as the
+ *  exercise was served, or -- from a backend that sends none -- the text
+ *  cut after its sentence ends. Each is { text, parts }, `parts` its
+ *  furigana as the analysis gave it ({ text, reading? }, a reading on the
+ *  kanji alone) or the line whole when there is none, or when the
+ *  analysis does not spell the line it was made for. Never an empty line. */
+export function rollEntries(exercise) {
+  const given = exercise?.breakdown?.length
+    ? exercise.breakdown.map(s => ({ jp: s.jp, analysis: s.analysis }))
+    : String(exercise?.text ?? '').split(/(?<=[。！？!?])|\n+/).map(jp => ({ jp }))
+  return given
+    .map(({ jp, analysis }) => ({ text: String(jp ?? '').trim(), analysis }))
+    .filter(e => e.text)
+    .map(({ text, analysis }) => {
+      const parts = (analysis?.tokens ?? []).flatMap(tok => tok.furigana ?? [{ text: tok.surface }])
+      const spells = parts.length > 0 && parts.map(p => p.text).join('').trim() === text
+      return { text, parts: spells ? parts : [{ text }] }
+    })
 }
+
+/** The lines alone, for what only needs their text. */
+export const rollLines = exercise => rollEntries(exercise).map(e => e.text)
+
+/** Whether any line of a roll carries a reading: without one the
+ *  furigana option has nothing to show and is not offered. */
+export const hasReadings = entries => entries.some(e => e.parts.some(p => p.reading))
 
 /** Seconds the roll itself takes between its first line and its last. */
 export function rollSeconds(lines, speed) {

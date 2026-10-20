@@ -33,10 +33,10 @@ import Empty from '../components/ui/Empty'
 import { paceFactor } from '../domain/readingPace'
 import { useReadingPace } from '../stores/readingPace'
 import { Clock, ReadingTimer, PaceChip, RollChip } from '../components/reading/ReadingPieces'
-import { CheckIcon, CrossIcon, ChevronIcon, PauseIcon, PlayIcon } from '../components/ui/Icons'
+import { CheckIcon, CrossIcon, ChevronIcon, PauseIcon, PlayIcon, PlusIcon, MinusIcon } from '../components/ui/Icons'
 import { RollingPassage } from '../components/reading/RollingPassage'
-import { useReadingRoll, setRollMode, nudgeRollSpeed } from '../stores/readingRoll'
-import { ROLL_LEAD, ROLL_TAIL, rollLines, rollSeconds } from '../domain/readingRoll'
+import { useReadingRoll, setRollMode, setRollFurigana, nudgeRollSpeed } from '../stores/readingRoll'
+import { ROLL_LEAD, ROLL_TAIL, rollEntries, hasReadings, rollSeconds } from '../domain/readingRoll'
 
 const RIKAI_COLOR = 'var(--line-rikai)'
 
@@ -101,7 +101,7 @@ export default function ComprehensionRun({ session }) {
   const factor = paceFactor(useReadingPace())
   // The text whole, or rolling up the card at the learner's speed
   // (plan 258). A roll is the first read's: Re-read shows the text whole.
-  const { mode: viewMode, speed: rollSpeed } = useReadingRoll()
+  const { mode: viewMode, speed: rollSpeed, furigana: rollFurigana } = useReadingRoll()
   // When this reading began, for the Enter key's guard below.
   const readFrom = useRef(0)
   // Re-reading the text from the questions pauses the clock: the
@@ -191,8 +191,9 @@ export default function ComprehensionRun({ session }) {
   }
 
   const rolling = viewMode === 'rolling' && stage === 'reading' && !rereading && Boolean(exercise)
-  const lines = useMemo(() => rollLines(exercise), [exercise])
-  const rollLength = rollSeconds(lines, rollSpeed)
+  const entries = useMemo(() => rollEntries(exercise), [exercise])
+  const readings = useMemo(() => hasReadings(entries), [entries])
+  const rollLength = rollSeconds(entries.map(e => e.text), rollSpeed)
   const rollTotal = ROLL_LEAD + rollLength + ROLL_TAIL
 
   // Reading countdown — the first read only. A roll is its own clock:
@@ -590,6 +591,7 @@ export default function ComprehensionRun({ session }) {
           {!rereading && factor == null && <ReadingTimer untimed t={t} aside={chips} />}
           {!rereading && factor != null && (
             <Clock
+              smooth={rolling}
               fill={rolling ? 1 - rollAt : timeLeft / exercise.read_seconds}
               low={rolling ? rollTotal * (1 - rollAt) < 10 : timeLeft * factor < 60}
               label={`${t.timeRemaining} · ${formatTime(rolling ? Math.ceil(rollTotal * (1 - rollAt)) : timeLeft * factor)}`}
@@ -607,9 +609,10 @@ export default function ComprehensionRun({ session }) {
           {rolling ? (
             <PromptCard className="prompt-card--passage prompt-card--roll" foot={{ left: level, right: t.comprehensionTitle }}>
               <RollingPassage
-                lines={lines}
+                entries={entries}
                 seconds={rollLength}
                 paused={rollHeld}
+                furigana={rollFurigana && readings}
                 label={t.rollLabel}
                 onProgress={setRollAt}
                 onEnd={factor != null ? finishReading : undefined}
@@ -617,18 +620,29 @@ export default function ComprehensionRun({ session }) {
               <div className="roll-ctl">
                 <button
                   type="button"
-                  className="chip"
+                  className="chip roll-ctl__btn"
                   aria-pressed={rollHeld}
                   aria-label={rollHeld ? t.rollResume : t.rollPause}
                   onClick={() => setRollHeld(h => !h)}
                 >
-                  {rollHeld ? <PlayIcon size={12} /> : <PauseIcon size={12} />}
+                  {rollHeld ? <PlayIcon size={14} className="roll-ctl__play" /> : <PauseIcon size={14} />}
                 </button>
                 <div className="roll-ctl__speed" role="group" aria-label={t.rollSpeedLabel}>
-                  <button type="button" className="chip" aria-label={t.rollSlower} onClick={() => nudgeRollSpeed(-1)}>−</button>
+                  <button type="button" className="chip roll-ctl__btn" aria-label={t.rollSlower} onClick={() => nudgeRollSpeed(-1)}><MinusIcon size={14} /></button>
                   <span className="roll-ctl__value" aria-live="polite">{t.rollSpeed(rollSpeed)}</span>
-                  <button type="button" className="chip" aria-label={t.rollFaster} onClick={() => nudgeRollSpeed(1)}>+</button>
+                  <button type="button" className="chip roll-ctl__btn" aria-label={t.rollFaster} onClick={() => nudgeRollSpeed(1)}><PlusIcon size={14} /></button>
                 </div>
+                {readings && (
+                  <button
+                    type="button"
+                    className={`chip roll-ctl__btn roll-ctl__furi${rollFurigana ? ' chip--on' : ''}`}
+                    aria-pressed={rollFurigana}
+                    aria-label={rollFurigana ? t.rollFuriganaOn : t.rollFuriganaOff}
+                    onClick={() => setRollFurigana(!rollFurigana)}
+                  >
+                    <span lang="ja" aria-hidden="true">ふ</span>
+                  </button>
+                )}
               </div>
             </PromptCard>
           ) : (

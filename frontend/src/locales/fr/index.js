@@ -1687,6 +1687,8 @@ const comprehension = {
   rollResume:               'Reprendre le défilement',
   rollSpeedLabel:           'Vitesse de défilement',
   rollSlower:               'Plus lent',
+  rollFuriganaOn:           'Masquer les furigana',
+  rollFuriganaOff:          'Afficher les furigana',
   rollFaster:               'Plus rapide',
   rollSpeed:                n => `${n} car./s`,
   tryAgain:                'Réessayer',

@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 import fr from '../locales/fr/index.js'
 import { TrainDoor } from '../components/station/TrainDoor'
-import { setRollMode, setRollSpeed } from '../stores/readingRoll'
+import { setRollMode, setRollSpeed, setRollFurigana } from '../stores/readingRoll'
 import { ROLL_LEAD, ROLL_TAIL, rollLines, rollSeconds } from '../domain/readingRoll'
 
 // ── Comprehension: the station, then the stage (plan 072) ───────
@@ -510,6 +510,7 @@ describe('ComprehensionRun — the rolling text (plan 258)', () => {
     paced.pace = 'standard'
     setRollMode('whole')
     setRollSpeed(3)
+    setRollFurigana(false)
   })
 
   it('shows the whole text until the learner asks for the roll', async () => {
@@ -563,9 +564,10 @@ describe('ComprehensionRun — the rolling text (plan 258)', () => {
     const root = await reading()
     root.querySelector(`[aria-label="${fr.rollPause}"]`).click()
     await settle(50)
-    const held = [label(root), root.querySelector('.roll__column').style.transform]
+    const column = root.querySelector('.roll__column')
+    const held = [label(root), getComputedStyle(column).transform]
     await settle(1300)
-    expect([label(root), root.querySelector('.roll__column').style.transform]).toEqual(held)
+    expect([label(root), getComputedStyle(column).transform]).toEqual(held)
     root.querySelector(`[aria-label="${fr.rollResume}"]`).click()
     await settle(1300)
     expect(label(root)).not.toBe(held[0])
@@ -601,5 +603,71 @@ describe('ComprehensionRun — the rolling text (plan 258)', () => {
     expect(root.querySelector('.roll')).toBeNull()
     expect(root.textContent).toContain(EXERCISE.text)
     expect(root.querySelector('.roll-chip')).toBeNull()
+  })
+
+  it('moves by an animation on the compositor, not by script setting a transform', async () => {
+    setRollMode('rolling')
+    setRollSpeed(10)
+    const root = await reading()
+    const column = root.querySelector('.roll__column')
+    const animations = column.getAnimations()
+    expect(animations).toHaveLength(1)
+    expect(animations[0].playState).toBe('running')
+    expect(column.style.transform).toBe('')
+    // The lead stands first; after it the column is on its way.
+    await settle(ROLL_LEAD * 1000 + 100)
+    const early = getComputedStyle(column).transform
+    await settle(400)
+    expect(getComputedStyle(column).transform).not.toBe(early)
+    // The line at the middle is the lit one, the rest stepped back.
+    const lines = [...root.querySelectorAll('.roll__line')]
+    const lit = lines.findIndex(l => l.classList.contains('roll__line--now'))
+    expect(lit).toBeGreaterThanOrEqual(0)
+    lines.forEach((l, i) => expect(l.style.getPropertyValue('--d')).toBe(String(Math.min(3, Math.abs(i - lit)))))
+  })
+
+  it('keeps the place when the speed changes, rather than starting over', async () => {
+    setRollMode('rolling')
+    setRollSpeed(10)
+    const root = await reading()
+    const animation = root.querySelector('.roll__column').getAnimations()[0]
+    await settle(ROLL_LEAD * 1000 + 600)
+    const { delay, duration } = animation.effect.getTiming()
+    const before = (animation.currentTime - delay) / duration
+    expect(before).toBeGreaterThan(0)
+    root.querySelector(`[aria-label="${fr.rollSlower}"]`).click()
+    await settle(30)
+    const t = animation.effect.getTiming()
+    expect(t.duration).toBeGreaterThan(duration)
+    const after = (animation.currentTime - t.delay) / t.duration
+    expect(Math.abs(after - before)).toBeLessThan(0.05)
+  })
+
+  it('offers furigana over the kanji, off until asked for, and remembers it', async () => {
+    setRollMode('rolling')
+    const root = await reading()
+    const chip = () => root.querySelector('.roll-ctl__furi')
+    expect(chip().getAttribute('aria-pressed')).toBe('false')
+    expect(root.querySelector('.roll ruby')).toBeNull()
+
+    chip().click()
+    await settle(60)
+    expect(chip().getAttribute('aria-pressed')).toBe('true')
+    const readings = [...root.querySelectorAll('.roll ruby rt')].map(r => r.textContent)
+    expect(readings).toEqual(expect.arrayContaining(['えき', 'とも', 'ま']))
+    // The line still says what it said.
+    expect(root.querySelector('.roll__line').textContent.replace(/[ぁ-んァ-ヶ]*$/, '')).toContain('駅')
+
+    const next = await reading()
+    expect(next.querySelector('.roll ruby')).not.toBeNull()
+  })
+
+  it('does not offer furigana when the text carries no readings', async () => {
+    setRollMode('rolling')
+    const root = await reading({
+      ...EXERCISE,
+      breakdown: EXERCISE.breakdown.map(b => ({ ...b, analysis: null })),
+    })
+    expect(root.querySelector('.roll-ctl__furi')).toBeNull()
   })
 })

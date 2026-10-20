@@ -1724,6 +1724,8 @@ const comprehension = {
   rollResume:               'Resume the roll',
   rollSpeedLabel:           'Scroll speed',
   rollSlower:               'Slower',
+  rollFuriganaOn:           'Hide furigana',
+  rollFuriganaOff:          'Show furigana',
   rollFaster:               'Faster',
   rollSpeed:                n => `${n} char/s`,
   tryAgain:                'Try again',

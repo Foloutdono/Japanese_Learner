@@ -69,6 +69,14 @@ export function ExportIcon({ size = 18, className }) {
 // register to the card (the choices, the furigana) rather than offer a
 // hint about it. Heavier stroke than `base` because at 14px a 2px plus
 // reads as thin next to the label beside it.
+export function MinusIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className} strokeWidth="2.5">
+      <path d="M5 12h14" />
+    </svg>
+  )
+}
+
 export function PlusIcon({ size = 18, className }) {
   return (
     <svg {...base} width={size} height={size} className={className} strokeWidth="2.5">

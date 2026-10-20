@@ -18386,29 +18386,74 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .roll__column {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-5);
+  gap: var(--sp-6);
+  /* Moved by a Web Animation on its transform (RollingPassage), which
+     the browser keeps on the compositor: promoted up front, so the
+     first frame of the roll is not a repaint. */
   will-change: transform;
 }
+/* One rung up from the card's own title, fluid: the text is the only
+   thing on this card, and a roll is read at a distance. */
 .roll__line {
   margin: 0;
   font-family: var(--font-jp);
-  font-size: var(--fs-title);
+  font-size: var(--fs-heading-fluid);
   font-weight: 500;
   line-height: 1.7;
   text-align: center;
   overflow-wrap: anywhere;
+  /* A sentence that wraps wraps into lines of one length, never a
+     last line of a single kana and its full stop. */
+  text-wrap: balance;
   color: var(--text-primary);
-  opacity: 0.4;
-  transition: opacity 0.4s var(--ease-out);
+  /* Stepped back by the line's distance from the middle (--d, 0 to 3
+     from RollingPassage): the line being read at full ink, its
+     neighbours at two thirds, then a third, then a ghost. The card's
+     mask takes the rest at its edges. */
+  opacity: max(0.12, calc(1 - var(--d, 3) * 0.35));
+  transition: opacity 0.45s var(--ease-out);
 }
-.roll__line--past { opacity: 0.2; }
-.roll__line--now { opacity: 1; }
+/* Furigana over the kanji (the option's chip, RollingPassage): leading
+   for the readings, which are drawn outside the line box, and a
+   reading that is a reading and never a second sentence. Ruby does not
+   break inside a word. */
+.roll--furigana .roll__line { line-height: 2; }
+.roll__line ruby {
+  ruby-position: over;
+  ruby-align: center;
+  white-space: nowrap;
+}
+.roll__line rt {
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--text-secondary);
+  user-select: none;
+}
 .roll-ctl {
   flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--sp-4);
+}
+/* The row's buttons are one round box each, the icon alone in it: a
+   chip pads its label, and the end of that padding is trimmed by the
+   label's tracking (.chip), which left an icon half a pixel off its
+   own centre. */
+.roll-ctl__btn {
+  width: 36px;
+  padding: 0;
+  justify-content: center;
+}
+/* A triangle's weight is at its base, a third of the way in: it is
+   nudged to where the eye centres it, as a pause's two bars need none. */
+.roll-ctl__play { transform: translateX(1px); }
+.roll-ctl__furi {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  letter-spacing: 0;
+  text-transform: none;
 }
 .roll-ctl__speed {
   display: flex;
