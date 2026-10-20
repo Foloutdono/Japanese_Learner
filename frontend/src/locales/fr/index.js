@@ -1471,6 +1471,9 @@ const dictionary = {
   runMeter:          (n, total) => (total == null ? `${n} noté${n > 1 ? 's' : ''}` : `${n} sur ${total}`),
   listen:            'Écouter',
   displayedKanji:    'kanji affichés',
+  displayedEntries:  'entrées affichées',
+  displayedWords:   'mots affichés',
+  displayedPoints:  'points affichés',
   radical:           'Radical',
   // Additional dictionary keys used by screens
   dictAll:           'Tout',
