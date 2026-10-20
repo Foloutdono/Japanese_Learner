@@ -9,8 +9,9 @@
 #   POST /api/onboarding/complete         stamp level + pace + onboarded_at
 #                                         (+ the boarding's own answers,
 #                                         plan 075: motive, kana, rhythm,
-#                                         the hour and the nudge; and the
-#                                         lines, core/lines.py)
+#                                         the hour and the nudge; the
+#                                         lines, core/lines.py; and the
+#                                         card's name, plan 247)
 #   GET  /api/onboarding/volumes          per-level item counts (projection)
 #
 # And the first ride (plan 097), the lesson after the boarding:
@@ -27,6 +28,7 @@
 # rather than storing it. See placement.py's header for why this is not
 # a 21st EXAM_GENERATORS entry.
 import json
+import logging
 import random
 import re
 from datetime import date, datetime, timezone
@@ -44,7 +46,9 @@ from core.auth import get_user_id
 from core.db import db_conn
 from core.lines import clean_lines
 from core.user_level import GOAL_LEVELS, LEVELS, NOVICE_GOAL, note_stored_level, resolve_level
-from routes.profile import _profile_row, apply_kana_rule, apply_level_rule, ensure_profile_row
+from routes.profile import (
+    _profile_row, apply_kana_rule, apply_level_rule, claim_handle, clean_card_name, ensure_profile_row,
+)
 from routes.reading import _display_seconds, phrase_to_romaji
 from study.furigana import align_sentence
 from routes.vocab import _build_vocab_card
@@ -58,6 +62,7 @@ from study.placement import PER_LEVEL, build_placement_paper, recommend_level, s
 from study.romaji import sentence_romaji, sentence_words
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 _SEED_BITS = 32
 
@@ -146,11 +151,20 @@ class CompletePayload(BaseModel):
     # (core/lines.py). Optional like the rest: a client that does not
     # ask leaves NULL, which reads as all three; a replay overwrites.
     lines: list[str] | None = None
+    # 署名 (plan 247): the first name the card prints, '' for none. Absent
+    # (Settings' retake, a client before the card was the form) leaves
+    # the column as it stands; sent, it is written, empty included.
+    cardName: str | None = None
 
     @field_validator("lines")
     @classmethod
     def valid_lines(cls, v: list[str] | None) -> list[str] | None:
         return clean_lines(v)
+
+    @field_validator("cardName")
+    @classmethod
+    def valid_card_name(cls, v: str | None) -> str | None:
+        return None if v is None else clean_card_name(v)
 
     @field_validator("motive")
     @classmethod
@@ -307,7 +321,9 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
     # A replay of the office below the level it last stored is a move
     # down, and gives back what that level assumed (plan 224), as
     # Settings' does; anything else seeds as the first boarding did.
-    previous = _profile_row(user_id)[1]
+    previous_row = _profile_row(user_id)
+    previous = previous_row[1]
+    first_boarding = previous_row[3] is None
     has_goal = payload.goalLevel is not None
     conn = db_conn()
     try:
@@ -335,7 +351,8 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
                     reminder_time = %s,
                     notifications = %s,
                     lines = %s,
-                    tz_offset_min = COALESCE(%s, tz_offset_min)
+                    tz_offset_min = COALESCE(%s, tz_offset_min),
+                    card_name = CASE WHEN %s THEN %s ELSE card_name END
                 WHERE user_id = %s
                 RETURNING onboarded_at, goal_set_at
                 """,
@@ -353,6 +370,8 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
                     payload.notifications,
                     payload.lines,
                     payload.tzOffsetMin,
+                    payload.cardName is not None,
+                    payload.cardName,
                     user_id,
                 ),
             )
@@ -360,6 +379,15 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
         conn.commit()
     finally:
         conn.close()
+    # 署名 → handle (plan 247b): the first boarding's name is the public
+    # username too, when it spells one. The card is already saved, so a
+    # failure here costs the boarding nothing: the handle stays as drawn.
+    username = None
+    if first_boarding and payload.cardName:
+        try:
+            username = claim_handle(user_id, payload.cardName)
+        except Exception:
+            logger.exception("the handle could not be claimed from the card name")
     # Write-through so this worker's resolver serves the new level
     # immediately rather than after its TTL (core/user_level.py).
     note_stored_level(user_id, payload.jlptLevel)
@@ -387,6 +415,9 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
         "reminderTime": payload.reminderTime,
         "notifications": payload.notifications,
         "lines": payload.lines,
+        "cardName": payload.cardName,
+        # The handle the name became, null when the learner's stayed.
+        "username": username,
     }
 
 

@@ -14,6 +14,7 @@ import { tierLabelFor, tierAtSize } from '../domain/tiers'
 import { THEME_LEVELS, themeLabelFor, themeLevelLabel, isThemeLevel } from '../domain/themes'
 import { useDesk } from '../hooks/useDesk'
 import { StationSplit, LevelRedirect } from '../components/selection/StationSplit'
+import { LineStation } from '../components/selection/LineStation'
 import { ScopeFigures } from '../components/selection/ModeFigures'
 import { LinePlatforms } from '../components/selection/LinePlatforms'
 import VocabSources from '../components/selection/VocabSources'
@@ -196,20 +197,18 @@ export default function VocabScreen({ session }) {
   const modes = level ? MODES : MODES.filter(m => m.key !== FAST_REVIEW)
   const run = m => navigate(`${pathname}/${m}${search}`)
 
-  // ── 机 — the line beside its platforms (plans 114, 137) ──
-  // On the desk a level's platforms stand beside the JLPT line itself
-  // (StationSplit): another stop swaps the platforms in place. Both
-  // columns take the window (plan 137, LinePlatforms): each stop with
-  // its first words and its bar, each platform with the card it asks
-  // and its figures, the fast review a door at the foot. The bar prints
-  // no sub: the open stop names the level. The way out is the sources.
+  // ── 机 — the line over its cars (plans 114, 251) ──
+  // On the desk a level's exercises stand under the JLPT line itself
+  // (LineStation): another stop swaps the cars in place. Each car shows
+  // the card it asks and its figures (LinePlatforms), the fast review a
+  // door at the foot. The bar prints no sub: the open stop names the
+  // level. The way out is the sources.
   if (desk && level) {
     return (
       <SelectionScreen title={t.vocabulary} aside={leaveSources}>
-        <StationSplit
-          className="desk-split--line"
+        <LineStation
           label={t.stationJlpt}
-          list={<LevelSelector source="vocab" selected={level} linkTo={lvl => `${BASE}/${lvl}`} figured />}
+          line={<LevelSelector source="vocab" selected={level} linkTo={lvl => `${BASE}/${lvl}`} across />}
         >
           <LinePlatforms
             source="vocab"
@@ -218,7 +217,7 @@ export default function VocabScreen({ session }) {
             modes={modes}
             onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))}
           />
-        </StationSplit>
+        </LineStation>
       </SelectionScreen>
     )
   }

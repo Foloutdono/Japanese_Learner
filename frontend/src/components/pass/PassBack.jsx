@@ -1,4 +1,5 @@
 import { useLang } from '../../LangContext'
+import { playClick } from '../../lib/audio'
 import { ChevronIcon } from '../ui/Icons'
 import { SettingsDoor } from '../settings/SettingsDoor'
 import { EditableUsername } from '../profile/EditableUsername'
@@ -30,10 +31,32 @@ import { InfinitySign } from './InfinitySign'
 //             phone, the profile); a page id: the desk's Settings, the
 //             open page marked
 //   onBalance, onStatus   the two meters' doors, or none
-//   sign      { session, onChange } to rename in place, or none
+//   sign      { session, onChange, field } to rename in place, or none
+//   open      the boarding's card (plan 247): each line of the print a
+//             button that hands its page to `open` -- 'level' (the
+//             origin), 'destination', 'service', 'hour', 'lines' -- for
+//             the sheet that changes it, Settings being no part of a
+//             boarding; the signature one too when `onSign` is given
+//   onSign    the signature as a door (the boarding's name sheet)
+// A stop's `jp` prints its code as Japanese: the beginner's origin, 初.
 const GLYPH = { vocab: '単語', kanji: '漢字', grammar: '文法' }
 
-function Door({ page, settings, className, chev = true, label, children }) {
+function Door({ page, settings, open = null, className, chev = true, label, children }) {
+  if (open) {
+    return (
+      <button
+        type="button"
+        className={`${className} pcb__door`}
+        aria-haspopup="dialog"
+        aria-label={label}
+        onClick={() => { playClick(); open(page) }}
+        data-door={page}
+      >
+        {children}
+        {chev && <ChevronIcon direction="right" size={12} className="pcb__chev" />}
+      </button>
+    )
+  }
   if (settings === undefined) return <span className={className}>{children}</span>
   return (
     <SettingsDoor page={page} current={settings} className={`${className} pcb__door`} onClassName="pcb__door--on" aria-label={label}>
@@ -56,20 +79,20 @@ function Meter({ onClick, label, className, children }) {
 
 export function PassBack({ tier, data, doors = {}, onTurn }) {
   const { t, lang } = useLang()
-  const { settings, onBalance, onStatus, sign } = doors
+  const { settings, onBalance, onStatus, sign, open = null, onSign = null } = doors
   const fmt = n => Number(n).toLocaleString(lang)
   const unlimited = Boolean(data.unlimited)
   return (
     <div className={`pcb pcb--${tier}`}>
       <div className="pcb__print">
         <div className="pcb__route">
-          <Door page="level" settings={settings} className="pcb__stop" chev={false} label={`${t.settingsJlptLevel}, ${data.from.code} ${data.from.name}`}>
-            <b className="pcb__code">{data.from.code}</b>
+          <Door page="level" settings={settings} open={open} className="pcb__stop" chev={false} label={`${t.settingsJlptLevel}, ${data.from.jp ? '' : `${data.from.code} `}${data.from.name}`}>
+            <b className={`pcb__code${data.from.jp ? ' pcb__code--jp' : ''}`} lang={data.from.jp ? 'ja' : undefined}>{data.from.code}</b>
             <span className="pcb__stopname">{data.from.name}</span>
           </Door>
           <span className="pcb__rail" aria-hidden="true" />
-          <Door page="destination" settings={settings} className="pcb__stop" chev={false} label={`${t.settingsGoal}, ${data.to.code === '—' ? '' : `${data.to.code} `}${data.to.name}`}>
-            <b className="pcb__code">{data.to.code}</b>
+          <Door page="destination" settings={settings} open={open} className="pcb__stop" chev={false} label={`${t.settingsGoal}, ${data.to.code === '—' || data.to.jp ? '' : `${data.to.code} `}${data.to.name}`}>
+            <b className={`pcb__code${data.to.jp ? ' pcb__code--jp' : ''}`} lang={data.to.jp ? 'ja' : undefined}>{data.to.code}</b>
             <span className="pcb__stopname">{data.to.name}</span>
           </Door>
           {data.valid && (
@@ -79,15 +102,15 @@ export function PassBack({ tier, data, doors = {}, onTurn }) {
             </span>
           )}
         </div>
-        <Door page="service" settings={settings} className="pcb__field">
+        <Door page="service" settings={settings} open={open} className="pcb__field" label={open ? `${t.destService}, ${data.service}` : undefined}>
           <span className="pcb__key">{t.destService}</span>
           <b className="pcb__value">{data.service}</b>
         </Door>
-        <Door page="hour" settings={settings} className="pcb__field">
+        <Door page="hour" settings={settings} open={open} className="pcb__field" label={open ? `${t.passFieldHour}, ${data.hour}` : undefined}>
           <span className="pcb__key">{t.passFieldHour}</span>
           <b className="pcb__value">{data.hour}</b>
         </Door>
-        <Door page="lines" settings={settings} className="pcb__field" label={t.cardLines(data.lines.map(l => t.brdLine[l]).join(' · '))}>
+        <Door page="lines" settings={settings} open={open} className="pcb__field" label={t.cardLines(data.lines.map(l => t.brdLine[l]).join(' · '))}>
           <span className="pcb__key">{t.passFieldLines}</span>
           <span className="pcb__lines">
             {data.lines.map(l => <i key={l} className={`pcb__line pcb__line--${l}`} lang="ja">{GLYPH[l]}</i>)}
@@ -116,9 +139,17 @@ export function PassBack({ tier, data, doors = {}, onTurn }) {
 
       <div className="pcb__strip">
         <span className="pcb__sign">
-          {sign
-            ? <EditableUsername username={data.name} session={sign.session} onChange={sign.onChange} t={t} ground="card" />
-            : <span className="pcb__sign-name">{data.name}</span>}
+          {onSign
+            ? (
+              // The boarding's signature (plan 247): a door to the name
+              // sheet, the placeholder in the quiet ink while it is empty.
+              <button type="button" className="pcb__sign-door" aria-haspopup="dialog" aria-label={data.name ? `${t.brdSheetName}, ${data.name}` : t.brdSheetName} onClick={() => { playClick(); onSign() }} data-door="name">
+                <span className={`pcb__sign-name${data.name ? '' : ' pcb__sign-name--empty'}`}>{data.name || t.brdNamePlaceholder}</span>
+              </button>
+            )
+            : sign
+              ? <EditableUsername username={data.name} session={sign.session} onChange={sign.onChange} t={t} ground="card" field={sign.field} />
+              : <span className="pcb__sign-name">{data.name}</span>}
         </span>
         {onTurn
           ? (

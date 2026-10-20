@@ -24,6 +24,8 @@ import { useCredits } from '../stores/credits'
 import { startTally, countReview } from '../stores/runTally'
 import { EnterKey } from '../components/chrome/DeskKeys'
 import { useDesk } from '../hooks/useDesk'
+import { useErrorStep } from '../hooks/useErrorStep'
+import { useBackGuard } from '../hooks/useBackGuard'
 import { paceFactor } from '../domain/readingPace'
 import { useReadingPace } from '../stores/readingPace'
 import { useProfileSummary } from '../stores/profileSummary'
@@ -43,8 +45,22 @@ import { useProfileSummary } from '../stores/profileSummary'
 // card is scheduled, and the measure is the ticket office's own
 // (POST /api/onboarding/ride/check, against this sentence only) rather
 // than the pass-gated reading router's. The one write is the lesson's
-// stamp on "Enter the station" -- or on Skip, the same stamp: a
-// learner who skipped is not asked again.
+// stamp, the moment the sentence is graded -- or on Skip, the same
+// stamp: a learner who skipped is not asked again. Not on "Enter the
+// station": a learner who reached the plate and left it any other way
+// (a reload, a back gesture out of the document, the tab closed) was
+// boarded onto the first card again by the front door, the lesson they
+// had just finished begun from nothing (the trail of 2026-10-18). The
+// plate is a welcome; the lesson is over before it. App's copy of the
+// stamp is set with it (`onDone`), before the POST answers, so the front
+// door sends to the gate from that moment.
+//
+// On the first ride (`first`, App's rideDue) the browser's Back is that
+// Skip too: the entry behind the ride is the front door, which boarded
+// it again from the start (reported 2026-10-17), so Back is held
+// (hooks/useBackGuard.js) and skips as the head's ‹ does, once any
+// sheet open over it is closed -- or, once graded, leaves for the gate
+// as Enter does. A ride taken again from Settings › Help goes back to it.
 //
 // 机 (plan 133): on the desk the ride stands on the practice runs'
 // three panels (plan 129) -- this run's figures and its lines at the
@@ -57,9 +73,10 @@ import { useProfileSummary } from '../stores/profileSummary'
 // the ride it had.
 const READING_COLOR = 'var(--line-reading)'
 // The steps, as ride_step names them: read, type, measure, pass; on the
-// desk graded between measure and pass.
+// desk graded between measure and pass (domain/flowSteps.js's
+// READING_STEPS).
 
-export default function RideReading({ session, onDone, dryRun = false, sentence: given = null }) {
+export default function RideReading({ session, onDone, first = false, dryRun = false, sentence: given = null }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
   const credits = useCredits()
@@ -74,6 +91,7 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
   // their ride goes from the cards straight to the plate.
   const plateOnly = useProfileSummary()?.kanaKnown === 'none'
   const step = plateOnly ? 'pass' : readStep
+  useErrorStep(step)
   // null until the sentence is up: a clock that starts at zero would
   // read as already run out, and cover the sentence before it showed.
   const [timeLeft, setTimeLeft] = useState(null)
@@ -94,6 +112,12 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
   const timer = useRef(null)
   const watches = useRef(null)
   const finished = useRef(false)
+  // The stamp's request, once sent: the way out waits on it.
+  const stamped = useRef(null)
+  // Back on the first ride: the head's Skip (above). Read once, since
+  // the ride's own stamp turns App's answer on the way out.
+  const [held] = useState(first)
+  const release = useBackGuard(held, () => finish(true))
 
   useEffect(() => {
     document.title = `${t.rideDocumentTitle} — ${t.appTitle}`
@@ -182,23 +206,39 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
     setQuality(q)
     countReview({ quality: q })
     go(desk ? 'graded' : 'pass')
+    stamp(false)
   }
+
+  // The lesson's stamp, once: the grade's, or a skip's. A stamp that
+  // could not land is not a reason to hold the door: the ride shows
+  // again next launch.
+  function stamp(skipped) {
+    if (stamped.current) return stamped.current
+    track('ride_done', { skipped, at: 'reading', ms: watches.current?.total.read() ?? 0 })
+    onDone?.()
+    stamped.current = dryRun
+      ? Promise.resolve()
+      : apiJson('/api/onboarding/ride/done', session, {
+          method: 'POST', body: JSON.stringify({ skipped }),
+        }).catch(() => {})
+    return stamped.current
+  }
+
+  // A learner with no kana is handed the plate alone: theirs is the
+  // cards' lesson, over when the plate shows.
+  useEffect(() => {
+    if (plateOnly) stamp(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plateOnly])
 
   function finish(skipped) {
     if (finished.current) return
     finished.current = true
     setBusy(true)
-    track('ride_done', { skipped, at: 'reading', ms: watches.current?.total.read() ?? 0 })
-    const stamped = dryRun
-      ? Promise.resolve()
-      : apiJson('/api/onboarding/ride/done', session, {
-          method: 'POST', body: JSON.stringify({ skipped }),
-        }).catch(() => {})
     // A dry run is the workbench's (/dev/ride), which has no /today:
     // its way out is onDone alone.
-    stamped.then(() => {
-      onDone?.()
-      if (!dryRun) navigate('/today', { replace: true })
+    stamp(skipped).then(() => {
+      if (!dryRun) release().then(() => navigate('/today', { replace: true }))
     })
   }
 
@@ -206,8 +246,8 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
     if (!failed || finished.current) return
     finished.current = true
     onDone?.()
-    if (!dryRun) navigate('/today', { replace: true })
-  }, [failed, navigate, onDone, dryRun])
+    if (!dryRun) release().then(() => navigate('/today', { replace: true }))
+  }, [failed, navigate, onDone, dryRun, release])
 
   const platforms = getAllSections(t).filter(s => Object.values(PASS_PLATFORMS).includes(s.path))
   const callouts = {
@@ -240,6 +280,8 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
       color={READING_COLOR}
       onLeave={() => finish(true)}
       leaveLabel={t.rideSkip}
+      // A way out that skips rather than goes back keeps its word (StageHead).
+      leaveWord
       where={t.rideJp}
       sub={t.readingTitle}
       pass={false}

@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import {
-  LINES, approx, axisLabel, boardingDraft, bucketFor, clampDeparture, dayFraction, firstDeparture, goalStops, jlptFor,
-  kanaFigures, kanaKnownCount, kanjiThrough, levelAnswers, levelForKana, linesOrAll, minuteAtFraction,
-  minutesToTime, planFigures, rideAxis, stopsAhead, timeToMinutes, toggleLine,
+  LINES, approx, axisLabel, bucketFor, clampDeparture, firstDeparture, goalStops, jlptFor,
+  kanaFigures, kanaKnownCount, kanjiThrough, levelAnswers, levelForKana, linesOrAll,
+  minutesToTime, planFigures, stopsAhead, timeToMinutes, toggleLine,
 } from './boarding'
 
 const VOLUMES = {
@@ -23,13 +23,6 @@ describe('the day track', () => {
     expect(clampDeparture(7 * 60 + 16)).toBe(7 * 60 + 30)
     expect(clampDeparture(3 * 60)).toBe(6 * 60)
     expect(clampDeparture(25 * 60)).toBe(23 * 60 + 30)
-  })
-  it('maps a minute to the rail and back', () => {
-    expect(dayFraction(6 * 60)).toBe(0)
-    expect(dayFraction(15 * 60)).toBeCloseTo(0.5)
-    expect(minuteAtFraction(0)).toBe(6 * 60)
-    expect(minuteAtFraction(1)).toBe(23 * 60 + 30)
-    expect(minuteAtFraction(0.5)).toBe(15 * 60)
   })
   it('buckets the hour into the three announced rides', () => {
     expect(bucketFor(timeToMinutes('07:30'))).toBe('am')
@@ -188,17 +181,10 @@ describe('the level answer', () => {
     expect(levelAnswers('N3', 'both')).toEqual({ levelChoice: 'N3', jlpt: 'N3', goal: 'N2' })
     expect(levelAnswers('N1', 'both')).toEqual({ levelChoice: 'N1', jlpt: 'N1', goal: null })
   })
-
-  it('drafts a picked level before Continue, and nothing on any other question', () => {
-    const answers = { kana: 'both', levelChoice: 'N3', jlpt: null, goal: null, rhythm: 10 }
-    expect(boardingDraft(answers, 'level')).toEqual({ ...answers, jlpt: 'N3', goal: 'N2' })
-    expect(boardingDraft(answers, 'goal')).toBe(answers)
-    expect(boardingDraft({ ...answers, levelChoice: null }, 'level').goal).toBeNull()
-  })
 })
 
-// ── 辻 — the desk's figures (plan 163) ──
-describe('the desk’s reveal and rhythm', () => {
+// ── 辻 — the kana's own stop (plan 163) ──
+describe('the reveal', () => {
   it('prices the kana’s own stop at the signs still unread', () => {
     const now = new Date(2026, 8, 28)
     expect(kanaFigures(VOLUMES, 'none', 10, now).kana).toBe(224)
@@ -207,28 +193,5 @@ describe('the desk’s reveal and rhythm', () => {
     expect(half.days).toBe(12)
     expect(half.date.getDate()).toBe(10)
     expect(kanaFigures(null, 'none', 10, now).days).toBe(1)
-  })
-  it('marks every month start between today and the last arrival, and names January’s year', () => {
-    const now = new Date(2026, 8, 28)
-    const last = new Date(2027, 4, 9)
-    const { at, marks } = rideAxis(now, last, 'en')
-    expect(marks.map(m => m.label)).toEqual(['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May'])
-    expect(marks.filter(m => m.year).map(m => m.year)).toEqual(['2027'])
-    expect(at(now)).toBe(0)
-    expect(at(last)).toBe(1)
-    for (const m of marks) {
-      expect(m.at).toBeGreaterThan(0)
-      expect(m.at).toBeLessThanOrEqual(1)
-      expect(m.mid).toBeGreaterThan(m.at)
-      expect(m.mid).toBeLessThanOrEqual(1)
-    }
-  })
-  it('thins the marks to quarters past a year and a half, and to years past four', () => {
-    const now = new Date(2026, 8, 28)
-    expect(rideAxis(now, new Date(2028, 11, 1), 'en').marks.map(m => m.label))
-      .toEqual(['Oct', 'Jan', 'Apr', 'Jul', 'Oct', 'Jan', 'Apr', 'Jul', 'Oct'])
-    const years = rideAxis(now, new Date(2032, 0, 15), 'en').marks
-    expect(years.map(m => m.label)).toEqual(['2027', '2028', '2029', '2030', '2031', '2032'])
-    expect(years.every(m => m.year === null && m.mid === m.at)).toBe(true)
   })
 })

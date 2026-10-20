@@ -48,7 +48,8 @@ export const EVENTS = {
   // context (lib/visitContext.js), never a raw value.
   session_start: ['platform', 'vp', 'os', 'lang', 'theme', 'input', 'standalone', 'reduced'],
   boarding_step: ['step', 'to', 'index', 'dir', 'ms'],
-  boarding_done: ['motive', 'kana_known', 'level', 'pace', 'notifications', 'lines', 'ms', 'level_how', 'placed'],
+  boarding_done: ['motive', 'kana_known', 'level', 'pace', 'notifications', 'lines', 'ms', 'level_how', 'placed',
+    'edited_goal', 'edited_rhythm', 'edited_hour', 'edited_lines', 'named', 'kept'],
   account_claimed: ['from'],
   // The first ride (plan 097): the two lessons after the boarding and
   // the guide over each gate. Step and stop names are the app's own,
@@ -104,9 +105,10 @@ export const EVENTS = {
   day_clear: ['streak', 'milestone', 'tier'],
   rest_day_used: ['days'],
   ticket_share: ['days'],
-  // The review plan (plan 217): the comeback sheet opened (ours, once a
-  // sheet); its answer, a catch-up's end, the ceiling and an absence set
-  // in Settings, and the absence's days bridged (the server's).
+  // The review plan (plan 217): the comeback offer put before the
+  // learner (ours, once a visit: the notice on the gate since plan 254);
+  // its answer, a catch-up's end, the ceiling and an absence set in
+  // Settings, and the absence's days bridged (the server's).
   catchup_offer: ['owed', 'away'],
   catchup_choice: ['choice', 'days', 'per_day'],
   catchup_done: ['days'],
@@ -127,7 +129,7 @@ export const EVENTS = {
   // An uncaught error, by screen -- never its message or stack -- and
   // the page's own speed once per load (lib/clientErrors.js,
   // lib/vitals.js; plan 218).
-  client_error: ['route', 'where'],
+  client_error: ['route', 'step', 'where'],
   vitals: ['route', 'lcp', 'inp', 'cls', 'ttfb'],
 }
 
@@ -145,13 +147,17 @@ export const VALUES = {
     theme: ['light', 'dark', 'auto'],
     input: ['touch', 'mouse'],
   },
-  boarding_done: { level_how: ['pick', 'test'], placed: ['N5', 'N4', 'N3', 'N2', 'N1'] },
+  boarding_done: {
+    level_how: ['pick', 'test'],
+    placed: ['N5', 'N4', 'N3', 'N2', 'N1'],
+    kept: ['google', 'link', 'already', 'none'],
+  },
   run_start: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
   run_complete: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
   run_abandon: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
   feature_use: {
-    feature: ['speech', 'analyzer', 'ocr', 'ask', 'explain', 'dictionary', 'export', 'level_fit'],
-    action: ['play', 'text', 'photo', 'video', 'scan', 'send', 'open', 'search', 'progress', 'move', 'stay'],
+    feature: ['speech', 'analyzer', 'ocr', 'ask', 'explain', 'dictionary', 'export', 'level_fit', 'conversation', 'comeback'],
+    action: ['play', 'text', 'photo', 'video', 'scan', 'send', 'open', 'search', 'progress', 'move', 'stay', 'hide'],
   },
   transfer_import: { source: ['anki', 'wanikani', 'renshuu'] },
   transfer_offer: { choice: ['go', 'later'] },
@@ -160,7 +166,10 @@ export const VALUES = {
     value: ['light', 'dark', 'auto', 'fr', 'en', 'binary', 'simple', 'full', 'standard', 'relaxed', 'slow', 'untimed', 'on', 'off', 'N5', 'N4', 'N3', 'N2', 'N1', 'changed'],
   },
   ai_use: { feature: ['ask', 'composition', 'translation_review', 'deep_analysis', 'exam_paper', 'line_translation'] },
-  client_error: { where: ['error', 'rejection'] },
+  client_error: {
+    where: ['error', 'rejection'],
+    step: ['kana', 'reveal', 'level', 'test', 'card', 'intro-scripts', 'intro-sounds', 'intro-table', 'intro-katakana', 'intro-sentence', 'intro-route', 'known', 'known-dict', 'known-back', 'unknown', 'unknown-back', 'done', 'read', 'type', 'measure', 'graded', 'pass'],
+  },
 }
 // end VALUES
 

@@ -9,7 +9,6 @@
 // `pass`, the paid one, unlimited, with Max's deck and card figures
 // (domain/paywall.js). So `pass` is drawn as Max; `pro` and `max` are
 // read as themselves the day the store splits the paid plan in two.
-export const CARD_TIERS = Object.freeze(['free', 'pro', 'max'])
 
 /** The card a learner carries, from the credits summary's plan. */
 export function cardTier(credits) {
@@ -50,4 +49,32 @@ export function sinceMonth(iso, lang) {
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return null
   return new Intl.DateTimeFormat(lang, { month: 'long', year: 'numeric' }).format(d)
+}
+
+// 署名 (plan 247): the card prints a first name the boarding asked for,
+// any script, or none -- not the username, which stays the public handle
+// (番付, the library). /api/profile's cardName is null for an account
+// boarded before the card was the form, whose username was the name it
+// chose; '' is asked and left empty. The longest a name may be, as the
+// server holds it (routes/profile.py CARD_NAME_MAX).
+export const CARD_NAME_MAX = 24
+
+/** The holder the card prints: the card's name, or for an account
+ *  never asked, its username; '' prints no name. */
+export function holderName(summary) {
+  if (!summary) return ''
+  return typeof summary.cardName === 'string' ? summary.cardName : (summary.username ?? '')
+}
+
+/** A name as the card prints it: composed, its runs of spaces one,
+ *  trimmed -- the server's own cleaning, so the field counts what is
+ *  kept (routes/profile.py clean_card_name). */
+export function cleanCardName(value) {
+  return String(value ?? '').normalize('NFC').split(/\s+/).filter(Boolean).join(' ')
+}
+
+/** Its length in characters, as the server counts them (code points,
+ *  not UTF-16 units: a rare kanji is one). */
+export function cardNameLength(value) {
+  return [...cleanCardName(value)].length
 }

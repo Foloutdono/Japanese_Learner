@@ -28,13 +28,14 @@ export const GUIDES = Object.freeze({
     { anchor: 'learn.shelf',  key: 'LearnShelf',  radius: 'plate' },
     { anchor: 'learn.library', key: 'LearnLibrary', radius: 'plate' },
   ],
-  // The painted platform's three stops, on either width (plan 225, the
-  // desk's plan 244): the destination, the level and the gate -- the
-  // phone's two roll signs, the desk's departures board.
+  // The plates again (plan 254): a platform, the foot that says where
+  // it opens and what was done there (the phone's; the desk's plates
+  // carry their exercise instead), and the exam, a paper rather than
+  // sentences.
   practice: [
-    { anchor: 'practice.sign',  key: 'PracticeSign',  radius: 'flat' },
-    { anchor: 'practice.grade', key: 'PracticeGrade', radius: 'flat' },
-    { anchor: 'practice.board', key: 'PracticeBoard', radius: 'pill' },
+    { anchor: 'practice.plate', key: 'PracticePlate', radius: 'plate' },
+    { anchor: 'practice.stops', key: 'PracticeStops', radius: 'flat' },
+    { anchor: 'practice.exam',  key: 'PracticeExam',  radius: 'plate' },
     { anchor: 'practice.pass',  key: 'PracticePass',  radius: 'pill' },
   ],
   today: [
@@ -71,13 +72,8 @@ export const GUIDES = Object.freeze({
 // 143), not a door under the pass, so there it closes the walk: the
 // page first, then the way out -- Statistics, the rail's other station,
 // just before it.
-// The Practice gate's board (plan 244) holds its levels over its
-// trains, the band that applies to every one of them, and its gate
-// stands on the platform beside it: the board top to bottom, then the
-// gate.
 export const DESK_ORDER = Object.freeze({
   today: ['tabbar', 'today.gate'],
-  practice: ['practice.grade', 'practice.sign', 'practice.board', 'practice.pass'],
   profile: ['profile.pass', 'profile.stamps', 'profile.records', 'profile.ledger', 'profile.board', 'profile.stats', 'profile.settings'],
 })
 
@@ -105,9 +101,3 @@ export function deskStops(gate) {
 // gate's guide plays the first time THAT gate is opened, when the thing
 // it explains is under the learner's thumb.
 export const GUIDE_CHAIN = false
-
-/** The stops of `gate` whose anchors are on the screen right now. */
-export function presentStops(gate) {
-  if (typeof document === 'undefined') return []
-  return (GUIDES[gate] ?? []).filter(stop => document.querySelector(`[data-guide="${stop.anchor}"]`))
-}

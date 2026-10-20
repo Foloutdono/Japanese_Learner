@@ -28,6 +28,7 @@ from study.grammar_match import verifiable
 from study.mcq import meaning_key, pick_distractors
 from pydantic import BaseModel, Field
 from core.db import db_conn
+from core.rls import enable_rls
 
 # The grammar section runs on the project's own catalogue,
 # content/grammar/*.json (plan 087) -- one file per level, each point
@@ -291,11 +292,12 @@ def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mo
         contrast = contrast_payload(level, entry, grammar_list, lang, turn=turn)
         if contrast is None:
             return None
-        # An authored question (plan 201) carries the ruby of its own
-        # fillings; a contrast on patterns reads theirs from the catalogue.
-        readings = contrast.pop("readings", None)
+        # Every question carries the ruby of its own options: an authored
+        # question's fillings (plan 201), or the form each rule takes in
+        # the hole, cut from the catalogue's reading (plan 254).
+        payload["choices_furigana"] = contrast.pop("readings")
+        contrast.pop("rules", None)
         payload["contrast"] = contrast
-        payload["choices_furigana"] = readings if readings is not None else furigana_by_pattern(contrast["choices"])
 
     if m.base == BUILD:
         # Another sentence each review: the ladder passes its review count,
@@ -631,6 +633,7 @@ def _ensure_tour_schema() -> None:
                     PRIMARY KEY (user_id, card_id)
                 )
             """)
+            enable_rls(cur, "grammar_tours")
             # The tutorial's closing quiz (plan 194): how many of its
             # questions were right, out of how many.
             cur.execute("ALTER TABLE grammar_tours ADD COLUMN IF NOT EXISTS quiz_right SMALLINT")

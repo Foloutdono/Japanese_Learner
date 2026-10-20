@@ -15,23 +15,25 @@ from content.kanji_readings import display_reading, split_readings
 from content.radical_data import radical_for
 from content.vocab_data import VOCAB_BY_LEVEL
 from study import conversation
-from study.exam_gen_utils import make_choices
-from study.exam_kanji_gen import build_kanji_reading_distractors
+from study import exam_kanji_choices
+from study.grammar_forms import choice_forms
+from study.grammar_ladder import build_specimen, write_payload
 from study.grammar_lesson import contrast_payload
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 
 # ── 見本 — what each stop of a line holds (plan 137) ──────────────
-# The desk's station split draws a line's stops beside the open stop's
-# platforms, and since plan 137 both columns take the window: each stop
-# prints a few of the things it teaches under its name, and each
-# platform prints the card it will ask, in a small well beside its
-# description (the owner's pick A of the station screens canvas). This
-# is where both come from: per stop, `sample` (the first things the
-# stop teaches, in the order a learner meets them -- frequency for
-# vocab and kanji, the catalogue's own order for grammar, the chart's
-# for kana) and `card` (one item with every field a platform's
-# specimen draws from).
+# The desk's line station shows each platform with the card it will
+# ask: since plan 251 (the owner's pick C of the canvas "Tsuji — the
+# learning modes on the desk") each exercise is a car whose face is that
+# card, as the run draws it; plan 137's split printed it small, in a
+# well beside the platform's description, and each stop's first things
+# under its name. This is where both come from: per stop, `sample` (the
+# first things the stop teaches, in the order a learner meets them --
+# frequency for vocab and kanji, the catalogue's own order for grammar,
+# the chart's for kana; the practice stations print theirs beside their
+# grades, plan 159) and `card` (one item with every field a platform's
+# face draws from).
 #
 # Static content, no learner and no database: the answer is the same
 # for everyone, so it is built once per (source, lang) and kept. The
@@ -43,7 +45,9 @@ from translations.fr.vocab_fr import VOCAB_FR
 # (get_sentences' first), its blank is the contrast card's own
 # (contrast_payload, with a fixed seed so the sentence does not change
 # from one call to the next), and its choices are the rivals the lesson
-# names beside the point.
+# names beside the point. Construire's sentence is the first one the
+# run asks (grammar_ladder.build_specimen) and Écrire's situation the
+# write card's own (write_payload, seeded the same way).
 
 router = APIRouter()
 
@@ -151,8 +155,15 @@ def _grammar_card(level: str, entry: dict, points: list[dict], lang: str) -> dic
     # lesson names no rival at all.
     pattern = entry["pattern"]
     rivals = list(dict.fromkeys(r["pattern"] for r in entry.get("compare", []) if r["pattern"] != pattern))
-    choices = (rivals or [c for c in contrast["choices"] if c != pattern])[:3] + [pattern]
-    return {
+    rules = contrast["rules"]
+    choices = (rivals or [rules[c] for c in contrast["choices"] if rules[c] != pattern])[:3]
+    # Each tile prints the form its rule takes in the hole, as the run's do
+    # (plan 254): あの and あれ, not the two series whole.
+    fill = "".join(p["text"] for p in contrast.get("fill", []))
+    forms = choice_forms(pattern, fill, [pattern] + choices,
+                         {r["pattern"]: r["en"] for r in entry.get("compare", [])})
+    choices = [forms[c].text for c in choices + [pattern]]
+    card = {
         "jp": pattern,
         "meaning": gloss(entry, lang),
         "sentence": sentences[0]["jp"],
@@ -162,6 +173,17 @@ def _grammar_card(level: str, entry: dict, points: list[dict], lang: str) -> dic
             "choices": choices,
         },
     }
+    # Construire's and Écrire's own cards (plan 251): each platform shows
+    # the card it asks, so the two the ladder climbs to are drawn from
+    # what the run builds -- the first sentence build_payload asks, and a
+    # write card with a fixed seed, as the blank has one.
+    build = build_specimen(level, entry, lang)
+    if build:
+        card["build"] = build
+    write = write_payload(level, entry, lang, random.Random(0))
+    if write:
+        card["write"] = {"situation": write["situation"], "helpers": write["helpers"], "model": write["model"]["jp"]}
+    return card
 
 
 def _grammar_line(lang: str) -> dict:
@@ -253,11 +275,11 @@ def _comprehension_line(lang: str) -> dict:
     seed's opening and its first question, as comprehension_seed.render
     puts it in `lang`; `size` is the questions a text asks."""
     stops = {}
-    for level, seeds in comprehension_seed.by_level().items():
+    for level, seeds in comprehension_seed.index().items():
         if level not in LEVELS or not seeds:
             continue
         first = seeds[0]
-        question = comprehension_seed.render(first, lang)["questions"][0]
+        question = comprehension_seed.render_question(first["questions"][0], lang)
         stops[level] = {
             "sample": [seed["title"] for seed in seeds],
             "card": {
@@ -334,30 +356,30 @@ def _exam_vocab(level: str) -> dict | None:
 
     And its four `options` (plan 165: the Practice gate prints the
     question whole, as the canvas's "Every platform's specimen" draws
-    it): the paper's own 漢字読み choices -- the reading and three of
-    exam_kanji_gen's near-misses (a voicing, a long vowel, a small っ,
-    the character's other readings), dealt by make_choices under a
-    fixed seed so the order is the same on every process. A word with
-    fewer than three near-misses never reaches a paper
-    (build_reading_mondai skips it), so it is passed over here too."""
+    it): the paper's own 漢字読み choices -- the reading and the three
+    wrong readings study/exam_kanji_choices builds for a paper (plan 257:
+    the slips a compound makes, set as a grid), dealt under a fixed seed
+    so the order is the same on every process. A word the paper would not
+    ask, or that has no such set, is passed over here too."""
     bank = reading_sentences.BY_LEVEL.get(level, [])
     for readings in _deck_readings(level):
         for row in bank:
             focus = row.get("focus", "")
             if not (_KANJI.search(focus) and focus in row["jp"] and focus in readings):
                 continue
-            kana = readings[focus]
-            reading = kana.split("/")[0].strip()
-            rng = random.Random(f"{level}:{focus}")
-            made = make_choices(rng, reading, build_kanji_reading_distractors({"kanji": focus, "kana": kana}, rng))
-            if made is None:
+            reading = readings[focus].split("/")[0].strip()
+            if not exam_kanji_choices.askable({"kanji": focus, "kana": reading}, level):
                 continue
-            choices, _ = made
+            sets = exam_kanji_choices.reading_sets(focus, reading, level)
+            if not sets:
+                continue
+            options = [reading] + sets[0][1]
+            random.Random(f"{level}:{focus}").shuffle(options)
             return {
                 "sentence": row["jp"],
                 "word": focus,
                 "reading": reading,
-                "options": [c["textJp"] for c in choices],
+                "options": options,
             }
     return None
 
@@ -369,7 +391,7 @@ def _exam_line(lang: str) -> dict:
     漢字読み, the grammar paper's sentence and its point, the reading
     paper's passage. A kind the grade has nothing to draw from is left
     out rather than filled. No sample: a paper is not a list."""
-    seeds = comprehension_seed.by_level()
+    seeds = comprehension_seed.index()
     stops = {}
     for level in LEVELS:
         card = {}

@@ -11,6 +11,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from core.db import db_conn
+from core.rls import enable_rls
 from core.auth import get_user_id
 from core.srs_instance import srs
 from core.history import trim_history
@@ -263,6 +264,7 @@ def _init_cache() -> None:
                 )
                 """
             )
+            enable_rls(cur, "phrase_analysis_cache")
         conn.commit()
     finally:
         conn.close()
@@ -326,6 +328,9 @@ def _migrate_history_schema() -> None:
             cur.execute(
                 "ALTER TABLE phrase_history ADD COLUMN IF NOT EXISTS translations JSONB NOT NULL DEFAULT '{}'::jsonb"
             )
+            # Closed to the Data API like every table (core/rls.py). The
+            # table predates the self-migrations, so nothing creates it.
+            enable_rls(cur, "phrase_history")
         conn.commit()
     finally:
         conn.close()
@@ -365,6 +370,32 @@ def _cached_analysis(phrase: str, lang: str, context: str = "") -> dict | None:
         return None
     result = row[0]
     return json.loads(result) if isinstance(result, str) else result
+
+
+def _cached_analyses(keys: list[str]) -> dict[str, dict]:
+    """The stored results under `keys`, in one query: a Passage's
+    sentences (up to MAX_SENTENCES, twice that reopened) read on one
+    connection rather than one each. A failed read is an empty dict,
+    every sentence a miss, as _cached_analysis's None is."""
+    if not keys:
+        return {}
+    try:
+        conn = db_conn()
+    except Exception:
+        return {}
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT phrase_key, result FROM phrase_analysis_cache WHERE phrase_key = ANY(%s)",
+                (list(set(keys)),),
+            )
+            rows = cur.fetchall()
+    except Exception:
+        logger.exception("phrase cache read failed")
+        return {}
+    finally:
+        conn.close()
+    return {key: json.loads(result) if isinstance(result, str) else result for key, result in rows}
 
 
 def _store_analysis(phrase: str, lang: str, result: dict, context: str = "") -> None:
@@ -529,7 +560,8 @@ DEEP_DAILY_LIMIT = int(os.environ.get("DEEP_DAILY_LIMIT", "150"))
 
 
 def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: str,
-                       allow_llm_call: bool = True, context: str = "") -> dict:
+                       allow_llm_call: bool = True, context: str = "",
+                       cached: dict[str, dict] | None = None) -> dict:
     """One Sentence through the full local (+ optional deep) pipeline,
     with per-user SRS state attached. Shared by the live analyze path
     and the history re-derive path (Step 3) so the two can never drift.
@@ -544,9 +576,18 @@ def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: s
     `context` (deep_context) is where the phrase stands, for a caller
     that knows it (a video's line, plan 235): asked with the phrase and
     cached under a key of its own.
+
+    `cached`, when a caller already read the cache for a whole Passage
+    (_analyze_passage, _cached_analyses), is that read: looked up here
+    instead of a query per sentence.
     """
     analysis = analyze_local(text)
     lang = known_lang(lang)
+
+    def lookup(ctx: str) -> dict | None:
+        if cached is None:
+            return _cached_analysis(text, lang, ctx)
+        return cached.get(_phrase_key(text, lang, ctx))
 
     if deep:
         # The deep tier is bought explicitly, per call, per Sentence --
@@ -554,11 +595,11 @@ def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: s
         # docs/adr/0001). The cached half (llm_result) is the expensive,
         # user-independent half; everything from attach_user_state
         # onward is per-user and recomputed every time.
-        llm_result = _cached_analysis(text, lang, context)
+        llm_result = lookup(context)
         if llm_result is None and context and not allow_llm_call:
             # Reopened, a sentence explained before it was explained
             # where it stands still finds what was bought for it.
-            llm_result = _cached_analysis(text, lang)
+            llm_result = lookup("")
         if llm_result is None and allow_llm_call:
             if daily_limit.claim(user_id, DEEP_FEATURE, DEEP_DAILY_LIMIT) > DEEP_DAILY_LIMIT:
                 raise HTTPException(
@@ -570,6 +611,10 @@ def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: s
                 )
             llm_result = _call_llm(text, lang, _deep_points(analysis, lang), context)
             _store_analysis(text, lang, llm_result, context)
+            if cached is not None:
+                # The same sentence again further down the Passage
+                # finds it, as it would have found the stored row.
+                cached[_phrase_key(text, lang, context)] = llm_result
         if llm_result is not None:
             llm_result = _normalize_explanation_key(llm_result)
             analysis = merge_deep(
@@ -603,11 +648,21 @@ def _analyze_passage(passage: str, deep: bool, lang: str, user_id: str,
     texts = [s["text"] for s in kept]
 
     states = srs.get_user_states(user_id)
+    contexts = [passage_context(texts, i, source) if deep and lines else "" for i in range(len(texts))]
+    # Every sentence's cache rows in one read, not one connection each:
+    # a reopened chapter is up to MAX_SENTENCES of them, each with a
+    # second key when it stands in a context (_analyze_sentence).
+    cached = None
+    if deep:
+        key_lang = known_lang(lang)
+        keys = [_phrase_key(text, key_lang, ctx) for text, ctx in zip(texts, contexts)]
+        keys += [_phrase_key(text, key_lang) for text, ctx in zip(texts, contexts) if ctx]
+        cached = _cached_analyses(keys)
     sentences = [
-        _analyze_sentence(s["text"], deep, lang, states, user_id,
+        _analyze_sentence(text, deep, lang, states, user_id,
                           allow_llm_call and i < MAX_DEEP_SENTENCES,
-                          context=passage_context(texts, i, source) if deep and lines else "")
-        for i, s in enumerate(kept)
+                          context=contexts[i], cached=cached)
+        for i, text in enumerate(texts)
     ]
 
     result = {"passage": passage, "sentences": sentences, "truncated": truncated}
@@ -856,9 +911,13 @@ def delete_phrase_history_entry(entry_id: int, user_id: str = Depends(get_user_i
 
 
 class KeepRequest(BaseModel):
-    sentence: str
-    source: str = "typed"
-    source_ref: str = ""
+    # Bounded (plan 211), as PhraseRequest is. A video Sentence is kept
+    # under its session's own source (routes/video.py: youtube, paste,
+    # upload) and a ref of "<ref>@<cue_start>", the ref an upload's
+    # file name at most.
+    sentence: str = Field(max_length=20_000)
+    source: Literal["typed", "image", "video", "youtube", "paste", "upload"] = "typed"
+    source_ref: str = Field("", max_length=1_000)
 
 
 @router.post("/api/phrase/keep")

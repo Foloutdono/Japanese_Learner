@@ -26,7 +26,7 @@ the widths this canvas covers.
 | `.hud`, `.hud__status*`, `.hstrip` (`--free`, `--pro`, `--max`, `--low`, `--out`, `--solo`, `__lv`, `__mark`, `__perf`, `__bal`, `__fig`), `.hud-fare` | 運行案内 — the HUD: the station panel and the learner's card as one strip, its level and its balance (帯, plan 173; the level roundel and the pocket pass before it) | `components/chrome/Hud.jsx` (`Hud`, `HudPass`, `useXpGain`, `FareFigure`) |
 | `.tabbar`, `.tab`, `.tab__ico`, `.tab__cap`, `.tab__due`, `.tab--on`, `.tab--badged` | 改札口 — the tab bar; the canvas's `.tab__jp` (a kanji where the pictogram goes) and its row of captions are retired — see below | `components/chrome/TabBar.jsx`, `GateIcon.jsx`; the five gates in `config/tabs.js` |
 | `.bar`, `.bar__row`, `.bar__roundel`, `.bar__names`, `.bar__names--stacked`, `.bar__title`, `.bar__sub`, `.bar__aside`, `.bar__stripe`, `.bar--register` | the compact header; the canvas set the sub a gap after the title, the app sets the two registers at the row's two ends — see below | `components/chrome/Bar.jsx` (`Bar`; `ScreenBar` is the transitional adapter for screens plans 070–074 have not rebuilt) |
-| `.stage__head`, `.stage__leave`, `.stage__where*`, `.today-remaining` | the head of a run | `components/chrome/StageHead.jsx`, `Leave` in `Bar.jsx` |
+| `.stage__head`, `.stage__end`, `.stage__leave` (`--bare`), `.stage__where*` (`-line`), `.today-remaining` | the head of a run: the way out and the controls at the ends, the place centred between | `components/chrome/StageHead.jsx`, `Leave` in `Bar.jsx` |
 | `.scrim`, `.sheet`, `.sheet--sumi`, `.sheet__handle`, `.sheet__head`, `.sheet__jp`, `.sheet__cap` | bottom sheets | `components/chrome/Sheet.jsx` (modal behaviour from `hooks/useDialog`) |
 | `.console`, `.console__top`, `.console__chips`, `.console__action`, `.console__index` (`--bare`), `.console__field`, `.console__clear`, `.console__count`, `.console__toggle` | the console | `components/chrome/Console.jsx` (`Console`, `ConsoleTop`, `Chips`, `ConsoleAction`, `ConsoleIndex`) |
 | `.chip`, `.chip--on`, `.chip__glyph`, `.chip-row` | chips | `Chip` in `Console.jsx` |
@@ -467,29 +467,32 @@ width.
 |---|---|---|
 | `.brd` (`--arrival`: no head), `.brd__stop` (`--passed`, `--here`), `.brd__air`, `.brd-map` (`__lines`, `__at` `--start`/`--corner`/`--top`), `.brd-road` (`--on`), `.brd-hub` (`--sm`, `--md`) | the frame, the track, the rung under a question, the map, a question's hub | `screens/BoardingFlow.jsx`, `BoardFrame.jsx` (`BoardQuestion`, `BoardAir`) |
 | `.brd-front` (`--auth`, `__head`, `__door`, `__door-btn`, `__promise`, `__map`, `__roads`, `__road`, `__way`, `__stn` `--over`/`--under`, `__sign`, `__name`, `__hub`, `__foot`), `.brd-tagline`; `.brd-signin` (`__stage`, `__road`, `__map`, `__sign`, `__hub`, `__form`, `__card`, `__gate`: its action, the boarding's gate, the road running into its reader) | the Welcome as the crossroads; the sign-in in the promise's place | `Welcome.jsx`'s `PhoneWelcome`, `FrontMap`, `PhoneSignIn` over `AuthCard`'s `frame` |
-| `.brd-name` (`__line`, `__pole`, `__hub`, `__road`, `__next`, `__ring`, `__lab`), `.brd-plate` (`__field`, `__count`, `__stripe`) | the name: the station's plate on its pole | `NameStep.jsx` |
-| `.brd-junction`, `.brd-way` (`__ring`, `__name`) | why: six reasons off one trunk, a row every 140px (the canvas's 134 and a rung, so a name that wraps clears the ring under it) and drawn short only under a 680px frame | `WhyStep.jsx`'s `Junction` |
 | `.brd-cross` (`__words`, `__ans`, `__chips`, `__chip` `--not`, `__label`, `__jp`, `__sub`) | the kana: two words at a crossing, an answer at each end | `KanaStep.jsx`'s `Crossing` |
 | `.brd-read` (`__line`, `__head`, `__word`, `__script`, `__glyph`, `__sign`, `__sign-jp`, `__sound`, `__means`, `__cap`, `__word-fr`), `.brd-first` (`__ring`, `__txt`) | the reveal: each word read as a line, the first stop | `KanaStep.jsx`'s `ReadLines` |
-| `.brd-climb` (`__rails`, `__rail` `--ink`, `__hub`), `.brd-stn` (`--known`, `--ride`, `--on`, `__ring` `--jp`, `__lab`, `__name`, `__desc`, `__note`, `__tag`) | the level and the goal: the line climbing | `LevelStep.jsx`'s `Climb` |
-| `.brd-fan` (`__trunk`, `__road` `--off` with `[data-road]`, `__kana`, `__ticket`), `.brd-lcard` (`__chk`, `__ring`, `__name`, `__desc`, `__vol`, `__fig`, `__unit`), `.brd-arrive` (`--none`) | the lines: the kana into the hub, three lines out | `LinesStep.jsx`'s `LineFan` |
-| `.brd-trains` (`__cols`, `__head`, `__first`), `.brd-train` (`__svc`, `__jp`, `__name`, `__tag`, `__min`, `__fig`, `__new`, `__arr`, `__date`, `__days`) | the rhythm: four trains on the departure board | `RhythmStep.jsx`'s `DepartureBoard` |
-| `.brd-clock` on `.brd-board` (`__steps`, `__step`, `__when`), `.brd-hours`, `.brd-hour` (`__jp`, `__name`, `__time`) | the hour: the flap board turned by hand | `TimeStep.jsx`'s `HourBoard` |
-| `.brd-nudge`, `.brd-notif` (`__name`), `.brd-week` (`__drop`, `__road`, `__day` `--first`, `__bell`, `__cap`, `__name`, `__date`) | the nudge: the notification and the week it arrives in | `NudgeStep.jsx`'s `Week` |
-| `.brd-plan` (`__arrive`, `__cap`, `__date`, `__day`, `__year`, `__sub`), `.brd-ride` (`__line`, `__stop`, `__lab`), `.brd-held` (`__cell`, `__jp`, `__fig`, `__unit`), `.brd-for` | the plan: the arrival first, the ride, what it holds | `PlanStep.jsx`'s `Arrival` |
-| `.brd-keep` (`__skip`, `__note`, `__skip-btn`), `.brd-tk` (`__map`, `__ride`, `__stop`, `__ring`, `__terms`, `__stub`, `__credits`, `__punch`), `.brd-provider`, `.brd-fld` | the account: the ticket it keeps over the form | `AccountStep.jsx`, `PaperTicket.jsx`'s `RideTicket` |
-| `.brd-issue-stn`, `.brd-issue__road`, `.brd__foot--road` | the card over the gate's reader | `PassStep.jsx` |
+| `.brd-climb` (`__rails`, `__rail` `--ink`, `__hub`), `.brd-stn` (`--known`, `--ride`, `--on`, `__ring` `--jp`, `__lab`, `__name`, `__desc`, `__note`, `__tag`) | the level: the line climbing | `LevelStep.jsx`'s `Climb` |
+| `.brd-card` (`__card`), `.brd-rows`, `.brd-row` (`__txt`, `__name`, `__val`, `--empty`, `__chev`), `.brd-keep-line` (`--kept`, `__txt`, `__go`), `.pcb__sign-door`, `.pcb__sign-name--empty`, `.pcb__code--jp` | the card (plan 247): the pass's back filled in with what most keep, each printed field a door to its sheet; under it the same fields in words (the destination and its date, the rhythm in minutes, the hour, the lines, the name), each row a door to the same sheet, as the canvas drew them; then the line saying where it is kept, an account's address with the way to another beside it. On a frame under about 760 px the step scrolls by less than the list, the gate docked | `CardStep.jsx` over `components/pass/PassBack.jsx` (`doors`) |
+| `.brd-sheet` (`__lede`, `__note`, `__field`, `__ways`) | a field's sheet over the card: the board it opens, shut by its own gate on a phone and its ✕ on the desk | `CardSheets.jsx` (`CardSheet`, `SheetDone`) |
+| `.brd-goals` (`__list`, `__rail`, `__ride`), `.brd-goal` (`--here`, `--on`, `--ride`, `__top`, `__dot` `--jp`, `__txt`, `__name`, `__desc`, `__date`) | the goal: the line climbing, a row a stop, the ride in gold | `CardSheets.jsx`'s `GoalSheet` |
+| `.brd-trains` (`__cols`, `__head`, `__first`), `.brd-train` (`__svc`, `__jp`, `__name`, `__tag`, `__min`, `__fig`, `__new`, `__arr`, `__date`, `__days`) | the rhythm: four trains on the departure board | `CardSheets.jsx`'s `DepartureBoard` |
+| `.brd-clock` (`__steps`, `__step`, `__when`) on `.brd-board` (`__flaps`, `__colon`; `.brd-flap` `--turn`, `--spin`), `.brd-hours`, `.brd-hour` (`__jp`, `__name`, `__time`), `.brd-remind` (`__chk`, `__txt`) | the hour: the flap board turned by hand, and the reminder's switch (native shells only, `lib/platform.js`) | `CardSheets.jsx`'s `HourBoard`, `HourSheet` |
+| `.brd-lines` (`__kana`, `__kana-txt`, `__lock`, `__disc`), `.brd-line` (`__chk`, `__ring`, `__name`, `__txt`, `__vol`), `.brd-arrive` (`--none`) | the lines: the kana on every card, three lines to check | `CardSheets.jsx`'s `LineChecks` |
+| `.brd-plate` (`__field`, `__count`, `__stripe`) | the name: the station's plate, on its sheet | `CardSheets.jsx`'s `NamePlate` |
+| `.brd-provider`, `.brd-fld` | the account: Google, or a link sent to an address, keeping the card on the row it is filled in on | `CardSheets.jsx`'s `KeepForm` |
 
-Building is gone on the phone as on the desk: the hour (or the nudge) goes
-on to the plan under its 案内 signboard, and the reveal is the kana stop's
-second half on the track. The way on is one gate on every screen, the
-foot's last row, so it stands in one place from Board to the pass; a quiet
-way (the sign-in, Not now, the account already held, the offer) stands a
-rung over it as a `.brd__link` (DESIGN.md, "The gate button"). Pinned in `boarding.phone.test.jsx` (the frame,
-the junction, the crossing, the boards, the crossroads and the sign-in),
-`BoardingFlow.browser.test.jsx` (the walk and its stops),
-`BoardingFlow.touch.test.jsx` (every question at 390x667 without a scroll),
-`Welcome.browser.test.jsx` and the contrast guard's boarding sites.
+Building is gone on the phone as on the desk, and since plan 247 so are
+the questions after the level: the card is the last stop, filled in with
+what most keep, and the goal, the rhythm, the hour, the lines, the name and
+the account are its sheets. The reveal is the kana stop's second half on
+the track. The way on is one gate on every screen, the foot's last row, so
+it stands in one place from Board to the card; a quiet way (the sign-in,
+Later, the level's test, the offer) stands a rung over it as a `.brd__link`
+(DESIGN.md, "The gate button"). Pinned in `boarding.phone.test.jsx` (the
+frame, the crossing, the boards in their sheets, the crossroads and the
+sign-in), `BoardingFlow.browser.test.jsx` (the walk and its stops),
+`BoardingFlow.paths.browser.test.jsx` (every road, door and sheet, none of
+them a dead end), `BoardingFlow.touch.test.jsx` (every question and sheet
+at 390x667 without a scroll), `Welcome.browser.test.jsx` and the contrast
+guard's boarding sites.
 
 Retired with it: `screens/AuthScreen.jsx` (`.auth`, `.auth__head`,
 `.auth-header*`), `Building.jsx` (`.brd-build*`, `.brd-steps`, `.brd-step*`),
@@ -497,6 +500,18 @@ Retired with it: `screens/AuthScreen.jsx` (`.auth`, `.auth__head`,
 `.brd-demo*`), `BoardOption` (`.brd__opts`, `.brd-opt*`), the kana card (`.brd-kana*`), the day track (`.brd-day*`),
 the chart (`.brd-chart*`, `.brd-legend*`, `.brd-lead*`, `.brd-bullet*`) and
 their locale keys.
+
+Retired with plan 247, for the card and its sheets: `NameStep.jsx`
+(`.brd-name*`, `.brd-field`), `WhyStep.jsx` and the six reasons' glyphs
+(`.brd-junction`, `.brd-way*`), `LinesStep.jsx` (`.brd-fan*`,
+`.brd-lcard*`), `RhythmStep.jsx` and `TimeStep.jsx` (their boards moved
+into the sheets; `.brd-grid--3`, `.brd-cell*`), `NudgeStep.jsx`
+(`.brd-nudge`, `.brd-week*`), `PlanStep.jsx` and `TrainArrival.jsx`
+(`.brd-plan*`, `.brd-ride*`, `.brd-held*`, `.brd-for`), `AccountStep.jsx`
+and `PaperTicket.jsx` (`.brd-keep*`, `.brd-tk*`), `PassStep.jsx` and
+`countUp.js` (`.brd-issue*`, `.brd__foot--road`), the desk's drawings of
+the same (`.desk-brd__name*`, `__roads`, `__ticket`, `__rides`, `__day`,
+`__plan`, `__keep`, `__tkt*`) and their locale keys.
 
 ## What retired with the plan 075 boarding
 

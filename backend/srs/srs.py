@@ -8,6 +8,8 @@ from datetime import datetime, timedelta, timezone
 from psycopg2.extras import execute_values
 from typing import Any
 
+from core.rls import enable_rls
+
 from .models import CardState
 from .scheduler import LEARNING_STEPS, Scheduler, clamp_quality
 from .storage import Storage
@@ -302,6 +304,7 @@ class SRSEngine:
                         id TEXT PRIMARY KEY
                     )
                 """)
+                enable_rls(cur, "cards")
 
                 self._log_sql("drop_stale_data_col", "ALTER TABLE cards DROP COLUMN IF EXISTS data")
                 cur.execute("ALTER TABLE cards DROP COLUMN IF EXISTS data")
@@ -344,6 +347,7 @@ class SRSEngine:
                         FOREIGN KEY(card_id) REFERENCES cards(id) ON DELETE CASCADE
                     )
                 """)
+                enable_rls(cur, "card_modes")
 
                 self._log_sql("create_due_index", """
                     CREATE INDEX IF NOT EXISTS idx_due_reviews
@@ -380,6 +384,7 @@ class SRSEngine:
                         reviewed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                     )
                 """)
+                enable_rls(cur, "review_log")
 
                 self._log_sql("create_review_log_card_index", """
                     CREATE INDEX IF NOT EXISTS idx_review_log_card_id
@@ -431,6 +436,7 @@ class SRSEngine:
                 """
                 self._log_sql("create_xp_ledger_table", sql)
                 cur.execute(sql)
+                enable_rls(cur, "xp_ledger")
 
                 sql = "CREATE INDEX IF NOT EXISTS idx_xp_ledger_user ON xp_ledger(user_id)"
                 self._log_sql("create_xp_ledger_index", sql)
@@ -507,6 +513,7 @@ class SRSEngine:
                 """
                 self._log_sql("create_review_daily_table", sql)
                 cur.execute(sql)
+                enable_rls(cur, "review_daily")
 
                 # The first time each (card, mode) was ever answered.
                 # get_new_items_today and get_journey_item_counts are
@@ -527,6 +534,7 @@ class SRSEngine:
                 """
                 self._log_sql("create_card_first_review_table", sql)
                 cur.execute(sql)
+                enable_rls(cur, "card_first_review")
 
                 sql = """
                     CREATE INDEX IF NOT EXISTS idx_card_first_review_prefix
@@ -556,6 +564,7 @@ class SRSEngine:
                 """
                 self._log_sql("create_review_compaction_table", sql)
                 cur.execute(sql)
+                enable_rls(cur, "review_compaction")
 
                 # ── 終着 — the day cleared (plan 191) ───────────────
                 # One row per day a learner emptied the day's queue,
@@ -581,6 +590,7 @@ class SRSEngine:
                 """
                 self._log_sql("create_day_clears_table", sql)
                 cur.execute(sql)
+                enable_rls(cur, "day_clears")
 
                 # 運休 — rest days. A ticket per milestone day of seven
                 # or more cleared, REST_HELD_MAX held at most; used_on
@@ -598,6 +608,7 @@ class SRSEngine:
                 """
                 self._log_sql("create_rest_tickets_table", sql)
                 cur.execute(sql)
+                enable_rls(cur, "rest_tickets")
 
                 sql = "CREATE INDEX IF NOT EXISTS idx_rest_tickets_user ON rest_tickets(user_id)"
                 self._log_sql("create_rest_tickets_index", sql)
@@ -998,6 +1009,10 @@ class SRSEngine:
         return self.award_xp(user_id, source, ref, xp)
 
     def get_due_cards(self, mode: str, limit: int | None = None, card_ids: list[str] | None = None) -> list[str]:
+        # An empty pool is no cards, never every learner's: only None
+        # means unscoped.
+        if card_ids is not None and not card_ids:
+            return []
         now = datetime.now(timezone.utc)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
@@ -1059,6 +1074,9 @@ class SRSEngine:
         today. (get_due_count was the other, and was deleted: it counted
         every user's due cards with no scoping at all.)
         """
+        # As in get_due_cards: an empty pool is no cards, not the table.
+        if card_ids is not None and not card_ids:
+            return []
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 if card_ids:

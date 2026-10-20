@@ -25,13 +25,19 @@ export const WALK_KEYS = 'ArrowUp ArrowDown Home End'
 // A list whose open row the page's ←/→ also move (the grammar points,
 // the exam's questions).
 export const WALK_KEYS_PAGED = `${WALK_KEYS} ArrowLeft ArrowRight`
+// A list laid across (plan 251, a line's stops over its cars): ←/→ walk
+// it as the eye reads it, ↑/↓ still do.
+export const WALK_KEYS_ACROSS = WALK_KEYS_PAGED
 
-export function useListWalk(active, { items = ROWS } = {}) {
-  return active ? e => walk(e, items) : undefined
+const NEXT = { ArrowDown: 1, ArrowUp: -1 }
+const ACROSS = { ...NEXT, ArrowRight: 1, ArrowLeft: -1 }
+
+export function useListWalk(active, { items = ROWS, across = false } = {}) {
+  return active ? e => walk(e, items, across ? ACROSS : NEXT) : undefined
 }
 
-function walk(e, selector) {
-  if (![' ', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) return
+function walk(e, selector, steps) {
+  if (!(e.key === ' ' || e.key === 'Home' || e.key === 'End' || Object.hasOwn(steps, e.key))) return
   const items = [...e.currentTarget.querySelectorAll(selector)]
   const at = items.indexOf(document.activeElement)
   if (at < 0) return
@@ -44,7 +50,7 @@ function walk(e, selector) {
   const last = items.length - 1
   const next = e.key === 'Home' ? 0
     : e.key === 'End' ? last
-    : Math.min(last, Math.max(0, at + (e.key === 'ArrowDown' ? 1 : -1)))
+    : Math.min(last, Math.max(0, at + steps[e.key]))
   e.preventDefault()
   items[next].focus()
 }

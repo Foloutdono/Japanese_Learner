@@ -7,9 +7,8 @@ import { playClick } from '../lib/audio'
 // ── /dev/onboarding — the boarding on repeat ──────────────────
 // Development-only workbench, the RewardsPreview of the boarding: the
 // REAL flow (the real volumes, the real screens, the real TicketGate
-// finale) with two dev affordances — dryRun, so neither the name nor
-// the contract is ever written, and a replay control that remounts the
-// flow fresh (key bump), arrival cutscene included.
+// finale) with two dev affordances — dryRun, so the contract is never
+// written, and a replay control that remounts the flow fresh (key bump).
 //
 // Registered next to /dev/rewards in App.jsx, outside the auth gate
 // and dropped from production bundles the same way (the route only
@@ -18,12 +17,17 @@ import { playClick } from '../lib/audio'
 // DEV_USER_ID and never verifies it; the volumes call is therefore
 // live, which is the point — a preview of fake data would not
 // exercise the thing being polished. `?guest` boards on a guest pass,
-// so the plan goes on to the account's screen.
+// so the card's line offers to keep it (plan 247); `?email=` on an
+// account that holds that address, so the line names it and offers the
+// switch to another account, which replays here.
 export default function OnboardingPreview() {
   const [run, setRun] = useState(1)
   const [phase, setPhase] = useState('flow') // flow | gate | done
-  const session = { access_token: 'dev-preview' }
-  const [guest] = useState(() => new URLSearchParams(window.location.search).has('guest'))
+  const [{ guest, email }] = useState(() => {
+    const query = new URLSearchParams(window.location.search)
+    return { guest: query.has('guest'), email: query.get('email') }
+  })
+  const session = { access_token: 'dev-preview', ...(email ? { user: { email } } : {}) }
 
   function replay() {
     playClick()
@@ -39,10 +43,9 @@ export default function OnboardingPreview() {
           session={session}
           dryRun
           guest={guest}
-          initialProfile={{ username: 'Preview', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 }}
           onComplete={() => setPhase('gate')}
-          // Back out of the first question, and "Have an account?",
-          // leave the boarding in the app; here they replay it.
+          // Back out of the first question leaves the boarding in the
+          // app; here it replays it.
           onExit={replay}
           onSignIn={replay}
         />

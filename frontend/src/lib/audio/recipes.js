@@ -539,39 +539,6 @@ const EVENTS = [
         } },
     ],
   },
-  // 菱 — the Practice gate's pantograph (plan 225): the air that lifts
-  // it to the wire or lets it fold, and the spark where its head meets
-  // the wire. Written on the canvas that drew the gate, at its levels;
-  // shipped with their first voices until the listening panel's round.
-  {
-    key: 'pantograph-air', category: 'sfx', family: 'station',
-    label: 'Pantograph', jp: '菱', where: 'The Practice gate: the pantograph rising to the wire or folding onto the roof',
-    variants: [
-      { key: 'air', label: 'Air', note: 'The air that lifts it: a soft band of noise swelling as the arms unfold and settling as the head meets the wire.',
-        play: (c, b) => noiseSweep(c, b, { dur: 0.9, peak: 0.05, from: 650, mid: 1500, to: 600, q: 0.5, hold: 0.5, attack: 0.15 }) },
-      { key: 'breath', label: 'Short breath', note: 'Half the travel and a narrower band: the same air, further down the platform.',
-        level: 1.16,
-        play: (c, b) => noiseSweep(c, b, { dur: 0.55, peak: 0.05, from: 700, mid: 1400, to: 650, q: 0.7, hold: 0.45, attack: 0.1 }) },
-    ],
-  },
-  {
-    key: 'pantograph-spark', category: 'sfx', family: 'station', meter: 'peak',
-    label: 'Spark at the wire', jp: '火花', where: 'The Practice gate: the head touching the wire, and a train arcing as it brakes or pulls out',
-    variants: [
-      { key: 'crackle', label: 'Crackle', note: 'Four bright ticks in a tenth of a second, high and dry: the arc as the strip meets the wire.',
-        play: (c, b) => noiseTicks(c, b, [
-          { at: 0, freq: 5200, peak: 0.5, q: 3, dur: 0.02 },
-          { at: 0.03, freq: 6900, peak: 0.35, q: 3, dur: 0.015 },
-          { at: 0.07, freq: 4600, peak: 0.3, q: 3, dur: 0.02 },
-          { at: 0.11, freq: 7400, peak: 0.2, q: 3, dur: 0.012 },
-        ]) },
-      { key: 'snap', label: 'Snap', note: 'One tick and its echo: a spark you see more than hear.',
-        play: (c, b) => noiseTicks(c, b, [
-          { at: 0, freq: 6000, peak: 0.5, q: 3, dur: 0.02 },
-          { at: 0.035, freq: 5200, peak: 0.2, q: 3, dur: 0.015 },
-        ]) },
-    ],
-  },
   {
     key: 'platform-chime', category: 'ui', family: 'station',
     label: 'Platform sign lands', jp: '到着ホーム', where: 'The onboarding arrival cutscene',
@@ -738,9 +705,10 @@ const EVENTS = [
     //
     // Plan 200: the level-up no longer plays it (its voice is
     // `level-burst`, below, since plan 173 made the level the card's
-    // engraving and not a punch). The milestone tickets' clipper
-    // (MilestoneTicket, MilestoneMonth) is the punch still, and this is
-    // its voice.
+    // engraving and not a punch). The streak tickets' punch on Today's
+    // board and the month ticket's clipper (plan 250, components/
+    // dayclear/FinishBoard.jsx) are the punch still, and this is its
+    // voice.
     key: 'pass-clip', category: 'ui', family: 'rewards', meter: 'peak',
     label: 'Gate punch', jp: '改札鋏', where: 'The gate\'s punch clipping a streak\'s ticket (it clipped your pass as the level turned over until plan 200)',
     variants: [

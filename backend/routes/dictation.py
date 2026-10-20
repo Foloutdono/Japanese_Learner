@@ -36,6 +36,7 @@ from pydantic import BaseModel, Field
 from core.auth import get_user_id
 from core.credits import require_pass
 from core.db import db_conn
+from core.rls import enable_rls
 from core.srs_instance import srs
 from study import dictation
 
@@ -102,6 +103,7 @@ def _init_db() -> None:
                 )
                 """
             )
+            enable_rls(cur, "dictation_log")
             # For an install whose table predates the learner grading
             # their own answer: the create above only fires when the
             # table is absent, so it never revisits one that exists.

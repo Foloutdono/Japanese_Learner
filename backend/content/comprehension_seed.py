@@ -1,7 +1,8 @@
 """
 The seed pool: hand-written reading-comprehension exercises, one file
 per JLPT level, in both of the app's languages (plan 111; six per level
-since plan 230, drafted and reviewed with scripts/comprehension_seed_report).
+since plan 230, ten since plan 258, thirty since plan 259, drafted and
+reviewed with scripts/comprehension_seed_report).
 
 ── Why this exists ───────────────────────────────────────────
 理解 (reading comprehension, routes/reading.py) is the most expensive
@@ -79,24 +80,29 @@ LEVELS: tuple[str, ...] = ("N5", "N4", "N3", "N2", "N1")
 LANGS: tuple[str, ...] = ("en", "fr")
 
 # The smallest number of exercises each level's file may carry. A first
-# request at a level needs one; six (plan 230, from three) is a new
-# learner's first six sittings before the model is ever asked for them,
-# and _pool_take serves them before anything generated. Raise it with
-# the content that meets it, never ahead of it.
-MIN_PER_LEVEL = 6
+# request at a level needs one; thirty (plan 259, from ten in plan 258,
+# six in plan 230, three before) is a new learner's first thirty sittings
+# before the model is ever asked for them, and _pool_take serves them
+# before anything generated. Raise it with the content that meets it,
+# never ahead of it.
+MIN_PER_LEVEL = 30
 
 
-def _load(level: str) -> list[dict]:
+def _load(level: str, object_hook=None) -> list[dict]:
     path = os.path.join(_BASE_DIR, f"{level}.json")
     if not os.path.exists(path):
         return []
     with open(path, encoding="utf-8") as f:
-        return json.load(f)
+        return json.load(f, object_hook=object_hook)
 
 
-@lru_cache(maxsize=1)
 def entries() -> tuple[dict, ...]:
-    """Every seed exercise, every level, in file order."""
+    """Every seed exercise, every level, in file order, read from the
+    files at each call. Never cache it: parsed, the seeds weigh some
+    86 KB each in dicts and strings (13 MB at 150 seeds), which a
+    process that kept them would carry for its whole life inside the
+    backend's 512 MB. Only the pool's upsert at import (rows) needs
+    them whole; what a request reads of them is index()."""
     return tuple(e for level in LEVELS for e in _load(level))
 
 
@@ -105,6 +111,45 @@ def by_level() -> dict[str, list[dict]]:
     for e in entries():
         out.setdefault(e["level"], []).append(e)
     return out
+
+
+# What a request reads of every seed: routes/practice names a text the
+# learner read by its seed's title and grammar, and routes/station lists
+# each level's titles and points and opens its card on the first text.
+_INDEXED = ("title", "text", "grammar")
+
+
+@lru_cache(maxsize=1)
+def index() -> dict[str, tuple[dict, ...]]:
+    """by_level(), cut to what a request reads: each seed's title, text
+    and grammar, and the questions of each level's first seed besides,
+    which the station's card asks the first of. The breakdowns and the
+    other questions, most of a seed's weight, stay in the files: at
+    150 seeds this keeps 257 KB of the 13 MB entries() reads.
+
+    Cut as the files are parsed, never out of by_level(): read whole,
+    the seeds grow the process by their 13 MB, and the strings kept,
+    spread through all of it, hold that memory from going back, so the
+    process stays as large as if it had kept everything."""
+    out: dict[str, list[dict]] = {level: [] for level in LEVELS}
+
+    def cut(obj: dict) -> dict:
+        # json calls this on every object it builds, innermost first: a
+        # seed is the one with a breakdown, and it is cut before the next
+        # one is read. A question, a sentence, a word or an {en, fr}
+        # pair passes through as it was.
+        if "breakdown" not in obj:
+            return obj
+        seeds = out.setdefault(obj["level"], [])
+        kept = {key: obj[key] for key in _INDEXED if key in obj}
+        if not seeds:
+            kept["questions"] = obj["questions"]
+        seeds.append(kept)
+        return kept
+
+    for level in LEVELS:
+        _load(level, object_hook=cut)
+    return {level: tuple(seeds) for level, seeds in out.items()}
 
 
 def seed_key(entry: dict, lang: str) -> str:
@@ -142,15 +187,7 @@ def render(entry: dict, lang: str) -> dict:
     ]
     return {
         "text": entry["text"],
-        "questions": [
-            {
-                "type": q["type"],
-                "question": _pick(q["question"], lang),
-                "options": [_pick(o, lang) for o in _pick_list(q["options"], lang)],
-                "correct": q["correct"],
-            }
-            for q in entry["questions"]
-        ],
+        "questions": [render_question(q, lang) for q in entry["questions"]],
         "breakdown": breakdown,
         # Derived from the breakdown, exactly as _parse_comprehension
         # derives it for a model answer: the two can never disagree.
@@ -166,6 +203,16 @@ def render(entry: dict, lang: str) -> dict:
             for pattern in entry.get("grammar", [])
             if pattern in points
         ],
+    }
+
+
+def render_question(question: dict, lang: str) -> dict:
+    """One of a seed's questions in one language, as render() puts it."""
+    return {
+        "type": question["type"],
+        "question": _pick(question["question"], lang),
+        "options": [_pick(o, lang) for o in _pick_list(question["options"], lang)],
+        "correct": question["correct"],
     }
 
 

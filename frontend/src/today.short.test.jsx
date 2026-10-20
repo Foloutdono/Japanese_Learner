@@ -29,7 +29,7 @@ const TODAY = {
 }
 vi.mock('./stores/today', () => ({
   useTodaySummary: () => ({ data: TODAY, failed: false }),
-  refreshToday: vi.fn(), seedTodaySummary: vi.fn(),
+  refreshToday: vi.fn(), refetchToday: vi.fn(() => Promise.resolve()), seedTodaySummary: vi.fn(),
 }))
 vi.mock('./stores/journey', () => ({
   useJourneyStatus: () => ({ data: {
@@ -100,6 +100,38 @@ describe('Today on a short window', () => {
     } finally {
       TODAY.lanes = lanes
       TODAY.total = 16
+    }
+  })
+
+  // 運転再開 (plan 254): the reviews piled up are a notice heading the
+  // column, never a sheet over the gate -- whole, its ✕ at its end, and
+  // the column's panels as whole as they were without it.
+  it('heads the column with the comeback notice, nothing under it crushed', async () => {
+    const { resetComeback } = await import('./stores/comeback')
+    resetComeback()
+    TODAY.review = {
+      cap: null, held: 0, catchup: null, away: null,
+      comeback: { owed: 412, days_away: 21, default_days: 5, gentle: { per_day: 20 },
+        spread: [{ days: 3, per_day: 154 }, { days: 5, per_day: 102 }, { days: 7, per_day: 77 }] },
+    }
+    try {
+      await mount()
+      await settle()
+      expect(document.querySelector('[role="dialog"]')).toBeNull()
+      const col = document.querySelector('.tdy-desk__col')
+      expect(col.firstElementChild.classList.contains('tdy-cb')).toBe(true)
+      const what = col.querySelector('.tdy-cb .tdy-door__what')
+      expect(what.scrollWidth, what.textContent).toBeLessThanOrEqual(what.clientWidth)
+      const cb = box(col.querySelector('.tdy-cb'))
+      const hide = box(col.querySelector('.tdy-cb__hide'))
+      expect(Math.round(cb.height)).toBeGreaterThanOrEqual(44)
+      expect(Math.round(cb.right - hide.right)).toBeLessThanOrEqual(1)
+      for (const panel of col.children) {
+        expect(panel.scrollHeight, panel.className).toBeLessThanOrEqual(panel.clientHeight + 1)
+      }
+      expect(box(document.querySelector('.tdy-desk__go .btn-depart')).bottom).toBeLessThanOrEqual(window.innerHeight)
+    } finally {
+      delete TODAY.review
     }
   })
 

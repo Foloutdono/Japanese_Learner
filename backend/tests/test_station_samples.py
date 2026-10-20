@@ -1,20 +1,23 @@
-# ── The station's samples and the tiers' met counts (plan 137) ─────
-# The desk's station split prints, on each stop, the first things it
-# teaches, and on each platform the card it will ask. Both come from
-# /api/station/{source}/samples, and the things worth pinning are the
-# ones that would print something untrue on the screen rather than
-# fail:
+# ── The station's samples and the tiers' met counts (plans 137, 251) ──
+# The desk's station prints, on each platform, the card it will ask --
+# since plan 251 each exercise is a car whose face is that card -- and
+# the practice stations print, on each grade, the first things it
+# teaches. Both come from /api/station/{source}/samples, and the things
+# worth pinning are the ones that would print something untrue on the
+# screen rather than fail:
 #
 #   * a sample is the stop's own content, in the order a learner meets
 #     it (frequency for vocab and kanji, the catalogue for grammar, the
 #     chart for kana) -- never another level's words
 #   * a specimen is a card the platforms can actually ask: a vocab word
 #     with a kanji (the reading platform serves no other), a grammar
-#     point with a sentence and a contrast blank whose choices hold it
+#     point with a sentence and a contrast blank whose choices hold it,
+#     and Construire's and Écrire's cards as their runs ask them
 #   * a gloss is in the language asked for
 #
 # And /api/frequency/{domain}/tiers/started counts a tier's met cards
 # the way /api/stats counts a level's: reviewed in any mode, once.
+import random
 import re
 
 import pytest
@@ -26,7 +29,10 @@ from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
 from content.kana_data import KANA_SETS
 from content.vocab_data import VOCAB_BY_LEVEL
 from core.db import db_conn
+from study.grammar_forms import choice_forms
+from study.grammar_lesson import contrast_payload
 from routes.station import station_samples
+from study.grammar_ladder import build_payload
 from tests.conftest import acting_as
 
 LEVELS = ["N5", "N4", "N3", "N2", "N1"]
@@ -88,15 +94,50 @@ def test_a_grammar_specimen_carries_its_sentence_and_its_blank(client):
         assert card["jp"] in patterns
         if "blank" in card:
             assert card["sentence"]
-            assert card["blank"]["choices"][-1] == card["jp"]
             assert len(card["blank"]["choices"]) >= 2
             assert card["blank"]["before"] or card["blank"]["after"]
             # The lesson's own rivals, so the specimen is the same on
-            # every process rather than drawn with random fillers.
+            # every process rather than drawn with random fillers, and the
+            # point last; each tile the form its rule takes in the hole, as
+            # the run's are (plan 254).
             entry = next(p for p in GRAMMAR_POINTS_BY_LEVEL[level] if p["pattern"] == card["jp"])
-            named = {r["pattern"] for r in entry.get("compare", [])}
-            if named - {card["jp"]}:
-                assert set(card["blank"]["choices"][:-1]) <= named
+            named = list(dict.fromkeys(r["pattern"] for r in entry.get("compare", []) if r["pattern"] != card["jp"]))
+            drill = contrast_payload(level, entry, GRAMMAR_POINTS_BY_LEVEL[level], "en", random.Random(0), authored=False)
+            rules = named[:3] or [drill["rules"][c] for c in drill["choices"] if drill["rules"][c] != card["jp"]][:3]
+            forms = choice_forms(card["jp"], "".join(p["text"] for p in drill["fill"]), [card["jp"]] + rules,
+                                 {r["pattern"]: r["en"] for r in entry.get("compare", [])})
+            assert card["blank"]["choices"] == [forms[r].text for r in rules + [card["jp"]]]
+
+
+def test_a_grammar_specimen_shows_construire_and_ecrire_as_their_runs_ask_them(client):
+    """Plan 251: Construire's car shows the first sentence its run asks,
+    the same words around the same holes, each hole holding what goes in
+    it; Écrire's shows one of the point's own examples to say, from its
+    translation, with the words offered for it."""
+    built = written = 0
+    for lang in ("fr", "en"):
+        for level, stop in _stops(client, "grammar", lang).items():
+            card = stop["card"]
+            entry = next(p for p in GRAMMAR_POINTS_BY_LEVEL[level] if p["pattern"] == card["jp"])
+            run = build_payload(level, entry, lang)
+            if run is None:
+                assert "build" not in card, level
+            else:
+                built += 1
+                build = card["build"]
+                assert build["tr"] == run["tr"]
+                assert ["gap" in p for p in build["pieces"]] == ["gap" in p for p in run["pieces"]]
+                around = [p["text"] for p in build["pieces"] if "text" in p]
+                asked = ["".join(part["text"] for part in p["furigana"]) for p in run["pieces"] if "furigana" in p]
+                assert around == asked, level
+                assert all(p["gap"] for p in build["pieces"] if "gap" in p)
+            write = card.get("write")
+            if write:
+                written += 1
+                example = next(e for e in entry["examples"] if e["jp"] == write["model"])
+                assert write["situation"] == example[lang]
+                assert all(h["text"] for h in write["helpers"])
+    assert built and written
 
 
 def test_a_kana_specimen_is_the_set_s_first_kana(client):

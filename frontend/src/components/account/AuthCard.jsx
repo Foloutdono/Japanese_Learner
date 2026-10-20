@@ -53,6 +53,25 @@ export function AuthCard({ initialMode = 'login', autoFocus = false, seg = true,
     setSuccess(null)
   }
 
+  // 乗車 (plan 247): a card kept by a link has no password, so signing
+  // in mails a link too -- which is also the door a forgotten password
+  // had none of. Only an account that exists is mailed (shouldCreateUser
+  // false): a new learner boards from the Welcome, on a guest pass.
+  async function sendLink() {
+    playUi('click-mode-selection')
+    setError(null)
+    setSuccess(null)
+    const address = email.trim()
+    if (!/.+@.+\..+/.test(address)) { setError(t.authLinkNeedsEmail); return }
+    setLoading(true)
+    const { error } = await supabase.auth.signInWithOtp({
+      email: address, options: { shouldCreateUser: false, emailRedirectTo: emailRedirectTarget() },
+    })
+    setLoading(false)
+    if (error) setError(authErrorMessage(error, t, { form: true }))
+    else setSuccess(t.authLinkSent(address))
+  }
+
   // The action is drawn as the boarding's gate wherever the card stands
   // (the Welcome's frame), so it sounds the gate's departure -- from the
   // button and from Enter in either field alike.
@@ -118,6 +137,9 @@ export function AuthCard({ initialMode = 'login', autoFocus = false, seg = true,
         onChange={e => setPassword(e.target.value)}
         onKeyDown={onEnter}
       />
+      {mode === 'login' && (
+        <button type="button" className="auth-link" onClick={sendLink} disabled={loading} data-action="sign-in-link">{t.authLinkSend}</button>
+      )}
       {error && <p className="auth-message auth-message--error" role="alert">{error}</p>}
       {success && <p className="auth-message auth-message--success" role="status">{success}</p>}
     </>

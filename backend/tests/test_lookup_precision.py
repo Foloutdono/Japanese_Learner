@@ -293,7 +293,7 @@ class AffixTests(unittest.TestCase):
         """人 + たち is 人 said of several: the N5 card stays."""
         self.assertEqual(matches("その人たちは崇高な心をもつべきだ。")["人"]["raw_id"], "vocab_N5_人_ひと")
         found = matches("この停戦が世界平和に役立つことを私達はみな望んでいる。")
-        self.assertEqual(found["私"]["raw_id"], "vocab_N5_私_わたくし")
+        self.assertEqual(found["私"]["raw_id"], "vocab_N5_私_わたし")
         self.assertIn("plural", found["達"]["entry"]["meaning"])
 
     def test_an_affix_carries_its_affix_sense_or_none(self) -> None:

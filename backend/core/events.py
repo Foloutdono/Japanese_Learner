@@ -27,6 +27,7 @@ import re
 from datetime import datetime, timedelta, timezone
 
 from core.db import db_conn
+from core.rls import enable_rls
 
 logger = logging.getLogger(__name__)
 
@@ -84,8 +85,15 @@ EVENTS: dict[str, frozenset[str]] = {
     # `level_how` and `placed` (plan 224): whether the learner chose
     # their level or took the test, and where the test placed them --
     # beside `level`, what they boarded at, so an override shows.
+    # The card (plan 247): which of its fields a sheet changed (the
+    # defaults are what most keep, or they are not), whether it carries
+    # a name -- never the name -- and where it was left: kept with
+    # Google or by a link, boarded on an account already, or a guest's.
+    # `motive` stays for a client from before the card, which asked why.
     "boarding_done":  frozenset({"motive", "kana_known", "level", "pace", "notifications", "lines", "ms",
-                                 "level_how", "placed"}),
+                                 "level_how", "placed",
+                                 "edited_goal", "edited_rhythm", "edited_hour", "edited_lines",
+                                 "named", "kept"}),
     # "Embarquer" mints an anonymous Supabase guest (lib/guest.js), so an
     # abandoned boarding leaves an auth user with no profile row. `from`
     # tells the two apart.
@@ -242,13 +250,14 @@ EVENTS: dict[str, frozenset[str]] = {
     "ticket_share":   frozenset({"days"}),
 
     # ── 回復運転 — the review plan (plan 217) ─────────────────────
-    # catchup_offer is the client's, once a sheet: the gate opened on
-    # the comeback sheet (`owed` the reviews it would have printed,
-    # `away` the days since the learner last studied). The rest are
-    # written server-side: catchup_choice
-    # the answer (`choice` spread | gentle | all, `days` a spread's,
-    # `per_day` its share); catchup_done the day its share stopped
-    # holding anything back (`days` it took). review_cap_set is the
+    # catchup_offer is the client's, once a visit: the comeback offer
+    # put before the learner -- the sheet the gate opened on, the notice
+    # on the gate since plan 254 (`owed` the reviews it would have
+    # printed, `away` the days since the learner last studied). The
+    # rest are written server-side: catchup_choice the answer (`choice`
+    # spread | gentle | all, `days` a spread's, `per_day` its share);
+    # catchup_done the day its share stopped holding anything back
+    # (`days` it took). review_cap_set is the
     # ceiling chosen in Settings (`cap`, null for none); away_set an
     # absence declared or withdrawn (`days` long, 0 withdrawn), and
     # away_day_used the lazy bridge writing its days (`days`). Every
@@ -282,8 +291,10 @@ EVENTS: dict[str, frozenset[str]] = {
     # ── Friction ─────────────────────────────────────────────────
     # An uncaught error or rejected promise, by screen. NO MESSAGE AND
     # NO STACK: either can quote what was on the screen or typed into
-    # it. `where` says which of the two it was.
-    "client_error":   frozenset({"route", "where"}),
+    # it. `where` says which of the two it was, and `step` which step of
+    # the boarding or the first ride was on screen, when one was: the
+    # name their boarding_step / ride_step give it.
+    "client_error":   frozenset({"route", "step", "where"}),
     # The page's own speed, once per page load, from the browser's
     # PerformanceObserver (lib/vitals.js, no library): largest paint,
     # the slowest interaction, layout shift (x1000, an integer) and
@@ -321,6 +332,7 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
     "boarding_done": {
         "level_how": frozenset({"pick", "test"}),
         "placed":    frozenset({"N5", "N4", "N3", "N2", "N1"}),
+        "kept":      frozenset({"google", "link", "already", "none"}),
     },
     "run_start":    {"where": _RUN_DOORS},
     "run_complete": {"where": _RUN_DOORS},
@@ -332,11 +344,15 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         # sentence's explanation opened. dictionary: a search run.
         # export: the progress downloaded. level_fit: Today's line that
         # says the level does not fit (plan 224) -- opened, the move
-        # taken, or the level kept.
+        # taken, or the level kept. conversation: the 会話 station's
+        # search started (plan 246). comeback: Today's notice that the
+        # reviews piled up (plan 254) -- its paces opened, or the notice
+        # hidden for the day.
         "feature": frozenset({"speech", "analyzer", "ocr", "ask", "explain",
-                              "dictionary", "export", "level_fit"}),
+                              "dictionary", "export", "level_fit", "conversation",
+                              "comeback"}),
         "action":  frozenset({"play", "text", "photo", "video", "scan", "send",
-                              "open", "search", "progress", "move", "stay"}),
+                              "open", "search", "progress", "move", "stay", "hide"}),
     },
     "transfer_import": {"source": frozenset({"anki", "wanikani", "renshuu"})},
     "transfer_offer":  {"choice": frozenset({"go", "later"})},
@@ -350,7 +366,17 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
     },
     "ai_use":       {"feature": frozenset({"ask", "composition", "translation_review",
                                          "deep_analysis", "exam_paper", "line_translation"})},
-    "client_error": {"where": frozenset({"error", "rejection"})},
+    "client_error": {
+        "where": frozenset({"error", "rejection"}),
+        # The boarding's and the rides' steps, frontend/src/domain/
+        # flowSteps.js; its test holds the flows to this list.
+        "step":  frozenset({"kana", "reveal", "level", "test", "card",
+                            "intro-scripts", "intro-sounds", "intro-table",
+                            "intro-katakana", "intro-sentence", "intro-route",
+                            "known", "known-dict", "known-back", "unknown",
+                            "unknown-back", "done",
+                            "read", "type", "measure", "graded", "pass"}),
+    },
 }
 
 # The two keys held to a shape on every name. A route is a pattern
@@ -488,6 +514,7 @@ def _ensure_events_schema() -> None:
                     at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
+            enable_rls(cur, "event_log")
             # (user_id, at) for one learner's trail in order; (name, at)
             # for the digest's per-name counts across everyone.
             # The client's own id per event (routes/events.py), so a
@@ -521,6 +548,7 @@ def _ensure_events_schema() -> None:
                     PRIMARY KEY (user_id, day, name)
                 )
             """)
+            enable_rls(cur, "event_daily")
         conn.commit()
     finally:
         conn.close()

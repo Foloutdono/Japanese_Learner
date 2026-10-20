@@ -6,6 +6,7 @@ import random
 import re
 import threading
 import time
+import unicodedata
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 
@@ -15,6 +16,7 @@ from psycopg2 import errors as pg_errors
 from pydantic import BaseModel, field_validator
 
 from core.db import db_conn
+from core.rls import enable_rls
 from core.auth import get_user_id, prefixed
 from core.srs_instance import srs
 from core.user_level import LEVELS, note_stored_level
@@ -51,6 +53,7 @@ def _init_db() -> None:
                     rating_scale TEXT
                 )
             """)
+            enable_rls(cur, "user_profiles")
             # And the same columns again as ALTERs, because the table
             # already exists for every current user: CREATE TABLE IF
             # NOT EXISTS is a no-op on them, so onboarding's fields
@@ -167,6 +170,13 @@ def _init_db() -> None:
                 # an import made the question moot. NULL is not asked
                 # yet; routes/transfer.py writes and reads it.
                 ("transfer_offered_at", "TIMESTAMPTZ"),
+                # 署名 — the first name the card prints (plan 247), in
+                # any script: not the username, which stays the public
+                # handle. NULL = never asked (an account boarded before
+                # the card was the form, whose card prints its
+                # username); '' = asked and left empty, printed as no
+                # name. See clean_card_name below.
+                ("card_name", "TEXT"),
             ):
                 cur.execute(
                     f"ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS {col} {typ}"
@@ -184,6 +194,7 @@ def _init_db() -> None:
                     at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
+            enable_rls(cur, "credit_ledger")
             cur.execute("CREATE INDEX IF NOT EXISTS idx_credit_ledger_user ON credit_ledger(user_id)")
             # 止 — where the credits stopped a learner (plan 172): a
             # row a stop, `cards` the reviews it kept waiting. Shadow
@@ -199,6 +210,7 @@ def _init_db() -> None:
                     at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
+            enable_rls(cur, "credit_stops")
             cur.execute("CREATE INDEX IF NOT EXISTS idx_credit_stops_user ON credit_stops(user_id, at)")
         conn.commit()
     finally:
@@ -219,6 +231,128 @@ USERNAME_RE = re.compile(r"^[a-zA-Z0-9_]{3,20}$")
 
 def _random_username() -> str:
     return f"{random.choice(_ADJECTIVES)}{random.choice(_NOUNS)}{random.randint(100, 9999)}"
+
+
+# ── 署名 — the name on the card (plan 247) ────────────────────
+# The boarding's card asks for a first name rather than a handle: any
+# script, spaces and hyphens and all, up to CARD_NAME_MAX characters,
+# and nothing at all is an answer. It is printed on the learner's own
+# card, so it needs no uniqueness -- two Camilles are two Camilles --
+# which is what made the old name step refuse a common name as "taken"
+# (the username is UNIQUE, and stays the public handle, which a first
+# boarding takes from the name when it can: plan 247b, below).
+CARD_NAME_MAX = 24
+# The two joiners some scripts spell names with (Persian's ZWNJ, an
+# Indic conjunct's ZWJ); every other control or format character is
+# dropped rather than stored on a card.
+_JOINERS = {"\u200c", "\u200d"}
+
+
+def clean_card_name(value: str) -> str:
+    """The name as the card prints it: NFC, its runs of spaces one
+    space, its ends trimmed, no control or format character but the two
+    joiners. Longer than CARD_NAME_MAX once cleaned is a ValueError (a
+    422 to the client, whose field stops at the same length)."""
+    # Whitespace first, so a tab or a line break between two names
+    # stays the space it stood for; then what no card prints.
+    text = " ".join(unicodedata.normalize("NFC", value).split())
+    text = "".join(
+        ch for ch in text
+        if ch in _JOINERS or unicodedata.category(ch) not in ("Cc", "Cf")
+    )
+    text = " ".join(text.split())
+    if len(text) > CARD_NAME_MAX:
+        raise ValueError(f"at most {CARD_NAME_MAX} characters")
+    return text
+
+
+# ── The handle a first name spells (plan 247b) ────────────────
+# The boarding's first name is also the learner's public handle when its
+# Latin letters make one: the username is the name if nobody holds it,
+# the name and the first number free (Tifa, Tifa2, Tifa3) if somebody
+# does. Only the first boarding does
+# it, and only over the handle the app drew (a learner's own pick is
+# never replaced), so a replay or a later rename leaves the handle
+# where it is: it is on the 番付 and under every published deck.
+_GENERATED_RE = re.compile(rf"^(?:{'|'.join(_ADJECTIVES)})(?:{'|'.join(_NOUNS)})\d{{3,4}}$")
+USERNAME_MAX = 20
+# Letters NFKD does not take apart (é and ñ become e and n by themselves).
+_LETTERS = str.maketrans({
+    "ß": "ss", "æ": "ae", "Æ": "AE", "œ": "oe", "Œ": "OE",
+    "ø": "o", "Ø": "O", "ł": "l", "Ł": "L", "đ": "d", "Đ": "D",
+})
+
+
+def handle_from_name(card_name: str) -> str:
+    """The Latin letters and digits of a card name, accents folded and
+    spaces and hyphens closed up ("José-María" -> "JoseMaria"), cut to
+    the username's length. '' when none survive (さくら, مریم): such a
+    learner keeps the handle the app drew."""
+    folded = unicodedata.normalize("NFKD", card_name.translate(_LETTERS))
+    return "".join(ch for ch in folded if ch.isascii() and ch.isalnum())[:USERNAME_MAX]
+
+
+def _handle_candidates(base: str):
+    """The name as it is, when it is long enough to be a username, then
+    the name numbered 2, 3, ... 999 (a long name gives up letters to its
+    number, within USERNAME_MAX). In order and without chance, so the
+    migration's report is what its run does."""
+    if len(base) >= 3:
+        yield base
+    for n in range(2, 1000):
+        digits = str(n)
+        yield f"{base[:USERNAME_MAX - len(digits)]}{digits}"
+
+
+def claim_handle_with(cur, user_id: str, card_name: str) -> str | None:
+    """Make the username the one the card name spells, on `cur`'s
+    transaction (the caller commits), and return it; None when the
+    learner keeps the handle they have (the name has no Latin letters,
+    the handle is not the one the app drew, or every candidate was
+    taken). A name is taken whatever its case: "tifa" is not offered
+    beside "Tifa"."""
+    base = handle_from_name(card_name)
+    if not base:
+        return None
+    cur.execute("SELECT username FROM user_profiles WHERE user_id = %s", (user_id,))
+    row = cur.fetchone()
+    if not row or not _GENERATED_RE.match(row[0]):
+        return None
+    for candidate in _handle_candidates(base):
+        cur.execute(
+            "SELECT 1 FROM user_profiles WHERE lower(username) = lower(%s) AND user_id <> %s",
+            (candidate, user_id),
+        )
+        if cur.fetchone():
+            continue
+        # A savepoint, so a refusal leaves the caller's transaction (the
+        # migration's, with every handle it has moved) standing.
+        cur.execute("SAVEPOINT claim_handle")
+        try:
+            cur.execute(
+                "UPDATE user_profiles SET username = %s WHERE user_id = %s",
+                (candidate, user_id),
+            )
+        except pg_errors.UniqueViolation:
+            # Somebody took the same name between the check and the
+            # write: the next candidate.
+            cur.execute("ROLLBACK TO SAVEPOINT claim_handle")
+            continue
+        cur.execute("RELEASE SAVEPOINT claim_handle")
+        return candidate
+    return None
+
+
+def claim_handle(user_id: str, card_name: str) -> str | None:
+    """claim_handle_with, in a transaction of its own."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            handle = claim_handle_with(cur, user_id, card_name)
+        conn.commit()
+        return handle
+    finally:
+        conn.close()
 
 
 def _get_or_create_username(user_id: str) -> str:
@@ -275,7 +409,7 @@ def ensure_profile_row(user_id: str) -> str:
 def _profile_row(user_id: str) -> tuple:
     """(username, jlpt_level, daily_new_target, onboarded_at,
     rating_scale, motive, kana_known, reminder_time, notifications,
-    lines, tutorial_at, guided, reading_pace, analytics_off) —
+    lines, tutorial_at, guided, reading_pace, analytics_off, card_name) —
     seeding the row lazily like _get_or_create_username, whose creation
     path it reuses. The onboarding fields are NULL until the flow runs,
     and rating_scale and reading_pace until the learner changes them."""
@@ -287,7 +421,7 @@ def _profile_row(user_id: str) -> tuple:
                 SELECT username, jlpt_level, daily_new_target, onboarded_at,
                        rating_scale, motive, kana_known, reminder_time,
                        notifications, lines, tutorial_at, guided,
-                       reading_pace, analytics_off
+                       reading_pace, analytics_off, card_name
                 FROM user_profiles WHERE user_id = %s
                 """,
                 (user_id,),
@@ -297,7 +431,7 @@ def _profile_row(user_id: str) -> tuple:
                 return row
     finally:
         conn.close()
-    return (_get_or_create_username(user_id), None, None, None, None, None, None, None, False, None, None, {}, None, False)
+    return (_get_or_create_username(user_id), None, None, None, None, None, None, None, False, None, None, {}, None, False, None)
 
 
 def usernames_for(user_ids: list[str]) -> dict[str, str]:
@@ -324,15 +458,25 @@ def usernames_for(user_ids: list[str]) -> dict[str, str]:
         conn.close()
 
 
-class UsernamePayload(BaseModel):
-    username: str
+class ProfilePayload(BaseModel):
+    """The two names, each optional, at least one sent: the username is
+    the public handle (番付, the library), unique and in Latin letters;
+    cardName the first name the card prints (plan 247), any script, ''
+    for none."""
+    username: str | None = None
+    cardName: str | None = None
 
     @field_validator("username")
     @classmethod
-    def valid_username(cls, v: str) -> str:
-        if not USERNAME_RE.match(v):
+    def valid_username(cls, v: str | None) -> str | None:
+        if v is not None and not USERNAME_RE.match(v):
             raise ValueError("3-20 characters: letters, numbers, underscore only")
         return v
+
+    @field_validator("cardName")
+    @classmethod
+    def valid_card_name(cls, v: str | None) -> str | None:
+        return None if v is None else clean_card_name(v)
 
 
 # Which rating bar the learner grades with. The buttons live in
@@ -579,7 +723,7 @@ def counted_from(figures: dict, cleared: bool) -> int:
 def get_profile(user_id: str = Depends(get_user_id)):
     (username, jlpt_level, daily_new_target, onboarded_at, rating_scale,
      motive, kana_known, reminder_time, notifications, lines,
-     tutorial_at, guided, reading_pace, analytics_off) = _profile_row(user_id)
+     tutorial_at, guided, reading_pace, analytics_off, card_name) = _profile_row(user_id)
     xp = srs.get_lifetime_xp(user_id)
     progress = level_progress(xp)
     bridge_rest_days(user_id)
@@ -601,6 +745,11 @@ def get_profile(user_id: str = Depends(get_user_id)):
 
     return {
         "username": username,
+        # 署名 (plan 247): the name the card prints. null is an account
+        # that was never asked, whose card prints `username` as it always
+        # has; '' was asked and printed as no name (domain/passCard.js
+        # holderName is the one reading of the two).
+        "cardName": card_name,
         **progress,
         # The learner's own JLPT level — deliberately NOT "level", which
         # is the XP level spread in from `progress` above. NULL until
@@ -766,23 +915,35 @@ def export_trail(user_id: str = Depends(get_user_id)):
 
 
 @router.patch("/api/profile")
-def update_profile(payload: UsernamePayload, user_id: str = Depends(get_user_id)):
-    _get_or_create_username(user_id)  # ensure a row exists to update
+def update_profile(payload: ProfilePayload, user_id: str = Depends(get_user_id)):
+    if payload.username is None and payload.cardName is None:
+        raise HTTPException(status_code=422, detail="Nothing to update")
+    username = _get_or_create_username(user_id)  # ensure a row exists to update
     conn = db_conn()
     try:
         with conn.cursor() as cur:
             try:
-                cur.execute(
-                    "UPDATE user_profiles SET username = %s WHERE user_id = %s",
-                    (payload.username, user_id),
-                )
+                if payload.username is not None:
+                    cur.execute(
+                        "UPDATE user_profiles SET username = %s WHERE user_id = %s",
+                        (payload.username, user_id),
+                    )
+                    username = payload.username
+                if payload.cardName is not None:
+                    cur.execute(
+                        "UPDATE user_profiles SET card_name = %s WHERE user_id = %s",
+                        (payload.cardName, user_id),
+                    )
                 conn.commit()
             except pg_errors.UniqueViolation:
                 conn.rollback()
                 raise HTTPException(status_code=409, detail="Username already taken")
     finally:
         conn.close()
-    return {"username": payload.username}
+    return {
+        "username": username,
+        **({"cardName": payload.cardName} if payload.cardName is not None else {}),
+    }
 
 
 @router.patch("/api/profile/learning")

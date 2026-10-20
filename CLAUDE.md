@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **258**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **260**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -58,10 +58,9 @@ runtime purpose.
   breakdown), the `phrase_analysis_cache` version (the deep tier),
   `TOUR_REV` in `study/grammar_tour.py`, `VOICE_REV` and `KANA_REV` (audio),
   `REV` in `frontend/scripts/today-print/build.py` (Today's print, plan 205),
-  `REV` in `frontend/scripts/ambiance/build.py` (the ambiance, plan 219),
-  `REV` in `frontend/scripts/practice-gate/build.py` (the painted platform,
-  plan 225), `REV` in `frontend/scripts/practice-gate/desk.py` (the desk's
-  painted platform, plan 244).
+  `REV` in `frontend/scripts/ambiance/build.py` (the ambiance, plan 219).
+  An exam id's `generator_version` (`study/exam_catalogue.py`) is one too: a bump
+  retires the papers it made without deleting them (plan 257 bumped `vocab-gen`).
   A change to what any of them produces bumps it, or learners keep the old.
 - **The grammar detector and the lookups change by counter-case.** Every new
   rule or refusal is pinned in `tests/test_grammar_precision.py` /
@@ -80,6 +79,47 @@ runtime purpose.
   the longest about as often as a blind pick (plan 217, `LENGTH_TELL`).
   `study/grammar_check.py` holds it; `content/grammar/README.md`, "The
   quiz", is the style guide. Draft with `python -m scripts.check_tour_quiz`.
+- **A mock-exam choice is told apart by understanding, never by its look
+  (plan 257).** `study/exam_tells.py` is what four choices give away: a
+  minimal pair among unlike choices (たいです / たくです, 午前 / 午後), or a
+  star -- every wrong choice one edit from the right one, which is then the
+  choice nearest to the rest (picked blind it won 96% of the old 漢字読み
+  and 60% of the 表記 items). `study/exam_seed.problems` refuses both on
+  every seed paper but listening's, whose choices are the figures the
+  recording gives; symmetry is not a tell (a shared frame, a 2×2 grid).
+  Across an exam id's ten papers the choice nearest to the others may win
+  no more than 36% (`likeness_tells`; a blind pick of four wins 25%, and the
+  N4 and N3 grammar seeds' answers were that choice 45% and 43% of the
+  time), as the longest and the shortest may not either (`length_tells`).
+  Nor may the keys step through the slots, 1 2 3 4 1 2 (`rotation_tells`: the
+  balance check passes it and the next answer is known from the last; seed
+  mondai had it 98% of the time): `python -m scripts.exam_seed reslot EXAM_ID`
+  re-places them, position only.
+  A wrong choice is a real form or expression the learner could choose,
+  never a corruption of the right one (ないければなりません). The
+  漢字読み / 表記 choices are made by `study/exam_kanji_choices.py`: the
+  readings the course's own words give a kanji, in the word's own okurigana
+  (しめる offered for a printed 閉じる is wrong at a glance: `fits_prompt`),
+  and the sound changes of a compound, set as a grid; wrong spellings from
+  lookalike kanji of the paper's own level. `exam_kanji_gen` still builds the placement test's
+  items, replayed from a seed (`study/placement.py`): leave it.
+- **A paper shows only its level's kanji and grammar (plan 257).**
+  `study/exam_levels.py` holds every text a paper prints to
+  `kanji_set_for_level` (a grammar paper may spell its own patterns, に伴って),
+  so 漢字読み and 表記 ask only the words the level has taught in the kanji it
+  has taught, and a word above it is printed in kana
+  (`exam_vocab_gen._display(word, level)`). A word the course reads two ways
+  (一月 ひとつき / いちがつ) is not asked alone. What a paper says is held to
+  the catalogue's levels too: a stem with its blank filled by the key, a
+  passage, a script, read without the spaces that mark phrases, uses no point
+  the catalogue files above the paper (`paper_grammar_above`; the choices of
+  a blank are pieces of its stem, not read alone). The detector's misreadings
+  of ordinary text (noun と, 持って来る, ならんで) are named in
+  `_NOT_THE_POINT` and pinned in `tests/test_exam_levels.py` with the
+  sentence that must still be found; a new exemption brings its counter-case.
+  A fill-in stem keeps its one ＿＿＿＿ and a paraphrase its underlined word
+  (`item_shape_problems`): a stem edited by hand can lose either, and no
+  other check notices.
 - **Every grammar point is asked in Choisir.** The contrast drill needs a
   sentence the matcher or the detector can blank and a rival that is
   certainly wrong in the gap; a point with neither (は, も, ない形, 〜て（理由）)
@@ -91,6 +131,17 @@ runtime purpose.
   the translation printed under it carry what the grammar does not, keep the
   stem outside the hole (悲し＿＿＿ + み), and let an independent reviewer
   attack the batch before it ships.
+  Answered, the hole holds what the sentence has there (the payload's
+  `fill`, `grammar_examples.span_parts`), never the pattern poured back
+  in: a point is blanked on one piece of it (から of から〜まで, ます of
+  〜ます／〜ません), so the pattern doubled the sentence (plan 245,
+  `tests/test_contrast_fill.py`). Asked, each option prints the one
+  form its rule would take in the hole (`study/grammar_forms.py`, plan
+  254): あの beside あれ, never この／その／あの／どの against
+  これ／それ／あれ／どれ, the payload's `rules` naming the rule behind each.
+  A rule no lone piece can stand for (〜か〜か, whose か fits
+  電話＿＿メール; お〜になる, whose になる is "become") stays whole, and
+  no two options print alike (`tests/test_choice_forms.py`).
 - **Construire takes what the translation cannot tell apart (plan 241).**
   A translation never says polite or plain, so where Construire's hole
   closes its sentence the ending in the other register is right too
@@ -169,6 +220,15 @@ runtime purpose.
   `DELETE /api/account` (`routes/account.py`) in the same change.
 - **One table's self-migration per transaction.** A failing `ALTER` must not
   roll back another table's.
+- **A table is born closed to the Data API.** Supabase serves `public` to
+  the anon key, which ships in the bundle, and grants it every new table
+  there, so the transaction that creates a table closes it:
+  `core/rls.enable_rls(cur, table)` right after the CREATE, and an
+  `ALTER TABLE … ENABLE ROW LEVEL SECURITY` after its CREATE TABLE in
+  `srs/data_structure.sql` (`tests/test_rls.py`). No policy, never FORCE:
+  the backend reads as the tables' owner, which RLS leaves alone, and
+  nothing reads them through the Data API. A table made by hand in
+  `public` is closed by hand (`scripts/sql/close_data_api.sql`).
 - **The reading bank is held at its level from both sides.** A row of
   `content/reading_sentences.py` (which reading and translation share) has
   nothing above its level and, at N4–N1, two deck words of its own level
@@ -233,8 +293,23 @@ runtime purpose.
   equal. A new source is a reader in `lib/transfer/` that returns
   `kindCollection`'s shape, a `SOURCES` entry on both sides and a value
   of `transfer_import.source` in `events.VALUES` and `track.js`. A new
-  learner is offered it once on Today (`TransferSheet`), after the
-  gate's guide, while `transferOffer` says so (`transfer_offered_at`).
+  learner is offered it once on Today (`TransferSheet`), after their
+  first answer, never before it (`routes/transfer.offer_open`), while
+  `transferOffer` says so (`transfer_offered_at`).
+- **The boot asks for the screen first (2026-10-18).** The API runs a
+  learner's requests six at a time (`core/concurrency.py`), so whatever
+  is mounted for the whole session -- a sheet, a store, the chrome --
+  reads nothing while it draws nothing: a closed `RunOutSheet` asking for
+  `/api/today` put the day's queue ahead of the first ride's card. A
+  store's fetch shares the one in flight (`stores/remote.js`,
+  `profileSummary`'s `fetchIfStale`).
+- **Nothing moves by top or left (2026-10-18).** A highlight or a note
+  that glides between anchors is placed by a transform (`guide/Spot.jsx`),
+  and one that moves to a new anchor is a new element (`guide/Callout.jsx`'s
+  key): a glide of top/left is a layout shift on every frame, and a first
+  ride read CLS 1.3 from the ride's own notes. A tap that changes the
+  screen renders it as a transition (`BoardingFlow`'s `go()`), so the tap
+  paints before the screen does.
 - **The placement test is replayed from its seed (plan 224).** The climb
   (`study/placement.walk`) keeps nothing between two answers: it is
   rebuilt from the seed at each one, in whatever process answers it. So
@@ -242,6 +317,23 @@ runtime purpose.
   processes -- a set, or anything built by iterating one, is sorted
   before a seeded random touches it (`tests/test_placement.py` builds
   the climb under two hash seeds).
+- **The card's name is not the handle (plan 247).** `user_profiles.card_name`
+  is the first name a learner's own card prints: any script, up to 24
+  characters (`routes/profile.clean_card_name`), `''` for none and NULL
+  for never asked, which prints the username as before. The username
+  stays the public handle (番付, the library), unique and in Latin
+  letters. Whatever prints the holder of a learner's own card or gate
+  reads `holderName` (`domain/passCard.js`); whatever another learner
+  can see prints the username, never the card's name. The two start
+  alike (plan 247b): a learner's first boarding makes the username the
+  Latin letters of the name if nobody holds them (in any case), the name
+  and the first number free if somebody does (Tifa, Tifa2;
+  `routes/profile.claim_handle`, `handle_from_name`). Only over the
+  handle the app drew, and only once: a name with no Latin letters, a
+  handle the learner chose, a replay or a later rename of the card leaves
+  the username where it is, as it is on the 番付 and under every
+  published deck. Accounts that boarded before it are brought in line by
+  `scripts/migrate_handles.py`, once, by hand.
 
 ## Commands
 
@@ -392,7 +484,15 @@ One more is read-only and needs no flag, so it is safe to run at any time:
 ```bash
 python -m scripts.weekly_digest        # the four numbers, as markdown
 python -m scripts.read_feedback        # what learners wrote to us (plan 222), newest first
+python -m scripts.learner_trail <user_id>  # one learner's visits, where they left, and why it may have been (plan 249)
 ```
+
+`learner_trail` merges the 足跡 trail with the study tables onto one
+clock, visit by visit, and names the patterns that have cost learners
+before (a boarding left, the first ride begun again, a dead-end sheet,
+a failed request, a slow page, no first answer). It never reads a text
+column a learner wrote into and reads nobody who objected
+(`analytics_off`); run it by hand, never from a workflow.
 
 Two others fill a shared cache ahead of demand rather than maintaining
 one. Neither is required — both caches fill themselves from real traffic
@@ -406,7 +506,7 @@ python -m scripts.prewarm_exam_papers --dry-run         # one paper per exam id
 
 None of the three is what makes a fresh deploy usable: the comprehension
 pool is never empty, because `content/comprehension/*.json` (plan 111,
-six hand-written exercises per level since plan 230, in both languages,
+thirty hand-written exercises per level since plan 259, in both languages,
 held to the same checks as a model answer by
 `tests/test_comprehension_seed.py`, and served before any generated one) is
 upserted into `comprehension_pool` when `routes/reading.py` is imported,
@@ -483,6 +583,17 @@ how to flip a card. Same shape as the others — reports first.
 
 ```bash
 python -m scripts.backfill_first_ride  # report; --yes to apply, --user to scope
+```
+
+And one after the deploy that carries plan 247b: it gives every account that
+boarded before it the username its card name spells (the name if nobody holds
+it, then Tifa2, Tifa3), oldest account first, over the handles the app drew
+only. A username is public (the 番付, the author of every published deck), and
+those learners typed the name for their card, so read the report before
+`--yes`: it is the run, rolled back, and the old handle is kept nowhere.
+
+```bash
+python -m scripts.migrate_handles      # report; --yes to apply, --user to scope (repeatable)
 ```
 
 And one after any deploy that changes the voice (plan 121 did, from edge-tts
@@ -768,7 +879,7 @@ ledger to keep in sync and no state to corrupt. Read-only, no database, no `.env
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does
 not). `tests/test_audit_slice.py` holds the rotation to the playbook's
-promises. Vocab is the one bank too big to walk exhaustively — 7,971 entries
+promises. Vocab is the one bank too big to walk exhaustively — 7,965 entries
 at 40 a run — so its slices are ordered risk-first by the disagreements with
 JMdict the script can find on its own, and the `flags` it prints are a reason
 to look rather than findings.
@@ -786,8 +897,6 @@ npm run landing   # the landing page (plan 167): public/landing/, sitemap.xml, r
 npm run landing:og  # its two share cards, rendered in Chromium
 python3 scripts/today-print/build.py  # Today's print of the hour (plan 205; numpy, Pillow)
 python3 scripts/ambiance/build.py     # the ambiance of the hour (plan 219; numpy, ffmpeg)
-python3 scripts/practice-gate/build.py  # Practice's painted platform (plan 225; numpy, Pillow, opencv-contrib)
-python3 scripts/practice-gate/desk.py   # ... and the desk's, from its own painting (plan 244)
 ```
 
 Today's gate stands on a print drawn ahead of time (plan 205):
@@ -800,18 +909,6 @@ hour of the lake under Fuji, behind Today and every station page,
 generated by `scripts/ambiance/` into `public/sounds/ambiant/<REV>/`
 and `src/lib/audio/ambiance.json`. Same rules: never by hand, and
 `scripts/ambiance/README.md` has them. Keep it sparse.
-
-Practice's gate on the phone stands on the owner's own painting of a
-platform (plan 225): `scripts/practice-gate/` cuts it into layers and
-lights them at Today's four hours, into `public/practice/gate/<REV>/`
-and `src/components/practice/gate/gate.json`. Same rules again, and
-`scripts/practice-gate/README.md` has them; the roll signs, the door,
-the pantograph and the clock are drawn by the app over the painting
-(`components/practice/gate/`). The desk's gate stands on a second
-painting of the owner's (plan 244): `desk.py` in the same folder lights
-it with the phone's recipes into `public/practice/gate/desk/<REV>/` and
-`src/components/practice/gate/desk.json`, and `DeskGate` hangs the
-board of levels and trains over its right side.
 
 The landing page is the site's **`/`** (and `/en`), and the app's front
 door is **`/app`**: on the web the app's document is built as `app.html`
@@ -975,8 +1072,8 @@ Frontend calls same-origin `/api/*` FastAPI routes in both dev and prod (Vite pr
 
 - **Two branches, one release a day.** `main` is where work lands and is
   tested; `production` is what Render and Vercel deploy, moved by
-  `.github/workflows/promote.yml` once a day (03:17 UTC) when CI is green on
-  `main`. A merge to `main` ships to no learner, because each backend
+  `.github/workflows/promote.yml` once a day (03:17 UTC) to the newest `main`
+  commit whose CI passed. A merge to `main` ships to no learner, because each backend
   restart shows learners the boot gate. Never push to `production` by hand;
   a hotfix is a merge to `main` and a manual run of the workflow
   (`docs/release.md`, "Web: the daily release").

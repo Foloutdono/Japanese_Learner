@@ -244,9 +244,15 @@ export function GrammarChoose({ card, revealed = false, selected = null, t: tPro
   if (!c?.jp) return null
   const parts = c.furigana?.length ? c.furigana : [{ text: c.jp }]
   const answer = choiceAnswer(card)
-  // An authored question says what stands in its hole as the sentence has
-  // it (`fill`); a contrast on patterns fills it with the point's own form.
+  // The hole is filled with what the sentence has there (`fill`): an
+  // authored question's filling, or the piece of a pattern the server
+  // blanked (から of から〜まで, てしま of てしまいました). Never the
+  // pattern poured back in; its own form only for a payload without one.
   const fill = c.fill?.length ? c.fill : null
+  // The hole is as wide as the longest option, not as the answer: each
+  // option prints one form (plan 254), and a hole the answer's width
+  // would point at the one form that fits it.
+  const holeSize = Math.max(...[answer, ...(c.choices ?? [])].map(x => [...bare(x)].length))
   const trap = revealed && selected && selected !== answer
   const front = (
     <div className="gl-front">
@@ -256,7 +262,7 @@ export function GrammarChoose({ card, revealed = false, selected = null, t: tPro
               gap: true,
               node: revealed
                 ? <span key={i} className="gl-gap gl-gap--filled"><Parts parts={fill ?? formParts(card, answer)} /></span>
-                : <span key={i} className="gl-gap" style={{ '--gap-size': bare(answer).length }} aria-label={t.glBlank} />,
+                : <span key={i} className="gl-gap" style={{ '--gap-size': holeSize }} aria-label={t.glBlank} />,
             }
           : { node: <Parts key={i} parts={[part]} />, kanji: Boolean(part.reading) })))}
       </p>

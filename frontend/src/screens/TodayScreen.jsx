@@ -1,9 +1,12 @@
 import { startTransition, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { useTodaySummary, refreshToday } from '../stores/today'
 import { useProfileSummary } from '../stores/profileSummary'
-import { comebackShut, markRestSeen, restNoticeSeen } from '../stores/dayClear'
+import { finishShown, markRestSeen, restNoticeSeen, useDayClear } from '../stores/dayClear'
+import { useFinishScreen } from '../components/dayclear/useFinish'
+import { useReducedMotion } from '../components/dayclear/useReducedMotion'
+import { XpToast } from '../components/rewards/XpToast'
 import GateCard from '../components/station/GateCard'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
@@ -11,7 +14,6 @@ import { useGuideHeld, wasShown } from '../stores/guide'
 import Empty from '../components/ui/Empty'
 import { useDesk } from '../hooks/useDesk'
 import RestDayNotice from '../components/dayclear/RestDayNotice'
-import { ComebackSheet } from '../components/station/ComebackSheet'
 import { TransferSheet } from '../components/station/TransferSheet'
 import { InkFilters } from '../components/dayclear/kit'
 import { restWeek, utcToday } from '../domain/dayClear'
@@ -26,11 +28,16 @@ import { startAmbiance, stopAmbiance } from '../lib/audio'
 // agenda's card and the journey's panel that stood over or beside it
 // went: the HUD carries the journey and the balance, the rail's holder
 // too, and the sheet and the column the rest. The run itself
-// is /today/run on the stage (screens/TodayRun.jsx); since plan 191 it
-// finishes on /today/clear (screens/DayClearScreen.jsx, the day
-// cleared or the partial finish), which comes back here with nothing:
-// the finish this screen used to print (RunComplete, the fare slip)
-// retired with it.
+// is /today/run on the stage (screens/TodayRun.jsx).
+//
+// 終着 (plan 250): the run finishes here, on /today/clear, its tally in
+// the router's state. The screen asks the server once whether it
+// cleared the day (stores/dayClear) and plays the answer on the gate
+// itself (components/dayclear/useFinish, GateCard's `finish`): on a
+// phone as a run's stage until its chrome beat, the bars then drawn
+// back in; the fare said on the pass at its beat; the URL /today once
+// it rests. A tap, a click or Enter skips to the rest. A reload does not
+// replay it (finishShown): the gate as it stands.
 //
 // 運休 (plan 191): the morning after a missed day a rest day covered,
 // the gate gives way once to the notice saying so (RestDayNotice) --
@@ -38,12 +45,13 @@ import { startAmbiance, stopAmbiance } from '../lib/audio'
 // Any way out tells the server it was seen.
 //
 // 運転再開 (plan 217): a gate whose reviews piled up past a few days of
-// the learner's own load opens on the comeback sheet (ComebackSheet),
-// over the gate and after the rest-day notice, never with it: the
-// paces to take the backlog at, chosen once.
+// the learner's own load says so in a notice on the gate itself, which
+// opens the paces to take the backlog at -- the gate's business
+// (station/ComebackLine), never a sheet over it since plan 254, and
+// never with the rest-day notice, which stands in the gate's place.
 //
 // 乗換 (plan 243b): a learner new to the app is asked once, after the
-// first ride and the gate's guide and never over either sheet above,
+// first ride and the gate's guide and never over the rest-day notice,
 // whether they studied in another app (TransferSheet), while the
 // profile says the offer is open (`transferOffer`).
 //
@@ -58,10 +66,30 @@ export default function TodayScreen({ session }) {
   const { t } = useLang()
   const desk = useDesk()
   const navigate = useNavigate()
+  const { pathname, state: routed } = useLocation()
   const { data: today, failed } = useTodaySummary()
   const summary = useProfileSummary()
+
+  // 終着 — the run's finish, taken from the router once.
+  const [run] = useState(() => {
+    const handed = pathname === '/today/clear' ? routed?.run ?? null : null
+    return handed && !finishShown(handed) ? handed : null
+  })
+  const clear = useDayClear(run, session)
+  const reduced = useReducedMotion()
+  const fin = useFinishScreen({
+    run, clear, desk, reduced,
+    // At rest the finish is Today's: Back from here does not replay it.
+    onEnd: () => navigate('/today', { replace: true, state: null }),
+  })
+  const finishing = Boolean(run) && !fin.ended
+  // A finish with no run to finish (a reload, a typed address) is the gate's.
+  useEffect(() => {
+    if (pathname === '/today/clear' && !run) navigate('/today', { replace: true, state: null })
+  }, [pathname, run, navigate])
+
   // 案内 — the gate's guide, once, after the lanes have painted (plan 100).
-  const guide = useGuide('today', Boolean(today) || failed)
+  const guide = useGuide('today', (Boolean(today) || failed) && !finishing)
 
   useEffect(() => {
     startAmbiance()
@@ -71,7 +99,7 @@ export default function TodayScreen({ session }) {
   // 運休 — the rest days the learner has not been told of, once.
   const restKey = (today?.rest?.unseen ?? []).join(',')
   const [restLeft, setRestLeft] = useState(false)
-  const showRest = restKey !== '' && !restLeft && !restNoticeSeen(restKey)
+  const showRest = restKey !== '' && !restLeft && !restNoticeSeen(restKey) && !run
   // Seen the moment the notice leaves, whichever way: deferred a tick so
   // StrictMode's rehearsed unmount (and a remount) cancels it.
   const leaving = useRef(null)
@@ -90,23 +118,24 @@ export default function TodayScreen({ session }) {
       navigate('/today/run')
     })
   }
-  // 運転再開 — the comeback offer, until it is answered or shut.
-  const [comebackLeft, setComebackLeft] = useState(false)
-  const offer = today?.review?.comeback ?? null
-  const showComeback = Boolean(offer) && !showRest && !comebackLeft && !comebackShut()
   // 乗換 — the offer to bring another app's progress, once: after the
   // gate's guide has had its turn (stamped, or shown on this visit) and
   // while nothing holds the guides, so the two never meet.
   const [transferLeft, setTransferLeft] = useState(false)
   const held = useGuideHeld()
   const showTransfer = Boolean(summary?.transferOffer) && !transferLeft && Boolean(today)
-    && (summary.guided?.today || wasShown('today')) && !guide.open && !held && !showRest && !showComeback
+    && (summary.guided?.today || wasShown('today')) && !guide.open && !held && !showRest && !finishing
   const restMinutes = today?.seconds_per_review && today?.total
     ? Math.max(1, Math.ceil((today.total * today.seconds_per_review) / 60))
     : null
 
   return (
-    <main id="main-content" className="today">
+    <main
+      id="main-content"
+      className={run ? 'today today--fin' : 'today'}
+      // A tap skips the finish to its rest, and does nothing else.
+      onClickCapture={fin.onClickCapture}
+    >
       {/* No bar: the gate's head (本日 · Today · the date) came off the
           four gates on the owner's call (2026-09-20, see LearnScreen.jsx).
           The name stays as the screen's clipped <h1>. */}
@@ -125,25 +154,18 @@ export default function TodayScreen({ session }) {
           desk={desk}
           onDepart={depart}
         />
-      ) : failed && !today ? (
+      ) : (failed && !today) || clear.status === 'error' ? (
         <Empty
           tone="error"
           message={t.errorTitle}
           hint={t.errorHint}
-          action={{ label: t.tryAgain, onClick: refreshToday }}
+          action={{ label: t.tryAgain, onClick: clear.status === 'error' ? clear.retry : refreshToday }}
         />
       ) : (
-        <GateCard today={today} failed={failed && !today} session={session} />
+        <GateCard today={today} failed={failed && !today} session={session} finish={run ? fin : null} />
       )}
-      {showComeback && (
-        <ComebackSheet
-          offer={offer}
-          secondsPerReview={today.seconds_per_review}
-          session={session}
-          onClose={() => setComebackLeft(true)}
-        />
-      )}
-      {guide.open && !showRest && !showComeback && <Guide gate="today" onEnd={guide.onEnd} />}
+      {fin.toast && <XpToast toast={fin.toast} onDone={() => {}} />}
+      {guide.open && !showRest && <Guide gate="today" onEnd={guide.onEnd} />}
       {showTransfer && (
         <TransferSheet session={session} onClose={() => setTransferLeft(true)} />
       )}

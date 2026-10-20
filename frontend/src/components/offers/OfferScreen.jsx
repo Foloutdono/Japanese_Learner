@@ -10,6 +10,7 @@ import { xpShare } from './format'
 import { DiscoverOffer } from './DiscoverOffer'
 import { WeekOffer } from './WeekOffer'
 import { MaxOffer } from './MaxOffer'
+import { holderName } from '../../domain/passCard'
 
 // ── 定期券 — the three offers (plan 172) ───────────────────────────
 // The screen every door opens (domain/paywall.js's SOURCES), and which
@@ -59,7 +60,7 @@ function Offer({ paywall }) {
   }
 
   const pass = {
-    name: profile?.username ?? '',
+    name: holderName(profile),
     level: profile?.level ?? 1,
     xp: xpShare(profile),
   }

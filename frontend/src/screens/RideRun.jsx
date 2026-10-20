@@ -19,6 +19,10 @@ import { normalizeCard, wordForm } from '../domain/cardShape'
 import { useProfileSummary } from '../stores/profileSummary'
 import { startTally, countReview } from '../stores/runTally'
 import { useDesk } from '../hooks/useDesk'
+import { useErrorStep } from '../hooks/useErrorStep'
+import { stepFor } from '../domain/flowSteps'
+import { useBackGuard } from '../hooks/useBackGuard'
+import { markCardsRidden } from '../lib/rideProgress'
 import { EnterKey } from '../components/chrome/DeskKeys'
 import { SessionPanel } from '../components/study/SessionPanel'
 import { CardPanel } from '../components/study/CardPanel'
@@ -62,6 +66,14 @@ import { LookupWatchContext } from '../components/study/lookupWatch'
 // not need ninety seconds of this, and whether people skip is the one
 // question the feature has to answer (ride_done's `skipped`).
 //
+// On the first ride (`first`, App's rideDue) the browser's Back is that
+// ‹ too. The entry behind the ride is the front door, which boarded it
+// again from the start (reported 2026-10-17), so Back is held
+// (hooks/useBackGuard.js) and skips as the head does, ride_done and
+// all -- unless the card's entry is open, which that Back closes, as
+// its scrim does. A ride taken again from Settings › Help has the page
+// it came from behind it, and Back goes there.
+//
 // `covered` is App's word for "the 改札 cutscene is still playing over
 // the router": the ride's first paint is under that scrim, so the
 // stopwatch and the known card's sound wait for it. `dryRun` is the
@@ -69,22 +81,18 @@ import { LookupWatchContext } from '../components/study/lookupWatch'
 // way out is `onDone` alone -- the workbench has no /today to land on.
 
 // Where a finished card ride goes: the reading ride (plan 099), whose
-// last plate carries the lesson's stamp. Only a SKIP stamps from here,
-// because a skip is the whole lesson declined.
+// grade carries the lesson's stamp. Only a SKIP stamps from here,
+// because a skip is the whole lesson declined. The cards done leave a
+// note on the device (lib/rideProgress.js), so a ride left before the
+// reading's stamp is boarded again at the reading, not the first card.
 export const RIDE_NEXT = '/ride/reading'
 
-// The steps, as ride_step names them: known, known-back, unknown,
-// unknown-back, done (stepFor below); on a phone known-dict between
-// the known card's turn and its grade.
+// The steps, as ride_step names them: domain/flowSteps.js's CARD_STEPS,
+// read by its stepFor.
 // The rating bar's own pressed-state beat (RatingBar.PRESSED_MS): the
 // seal the learner pressed stays lit while the card moves on.
 const HOLD_MS = 420
 
-function stepFor(index, answered, lookFirst = false) {
-  if (index >= 2) return 'done'
-  if (index === 0 && answered && lookFirst) return 'known-dict'
-  return `${index === 0 ? 'known' : 'unknown'}${answered ? '-back' : ''}`
-}
 
 /** The card as CardPrompt wants it, with the romaji riding on it for
  *  a learner who does not yet read kana: the furigana hint's own
@@ -102,7 +110,7 @@ function rideCard(card, latin) {
   }
 }
 
-export default function RideRun({ session, onDone, onNext = null, covered = false, dryRun = false, cards: given = null }) {
+export default function RideRun({ session, onDone, onNext = null, covered = false, first = false, dryRun = false, cards: given = null }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
   const desk = useDesk()
@@ -125,6 +133,10 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
   const watches = useRef(null)
   const holdTimer = useRef(null)
   const finished = useRef(false)
+  // Back on the first ride: the head's Skip (above). Read once, since
+  // the ride's own stamp turns App's answer on the way out.
+  const [held] = useState(first)
+  const release = useBackGuard(held, () => finish(true))
 
   useEffect(() => {
     document.title = `${t.rideDocumentTitle} — ${t.appTitle}`
@@ -158,6 +170,7 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
   // step is the phone's alone.
   const lookFirst = !desk && !looked
   const step = stepFor(index, answered, lookFirst)
+  useErrorStep(step)
 
   function mark(from, to) {
     track('ride_step', { step: from, to, dir: 'fwd', ms: watches.current?.step.lap() ?? 0 })
@@ -171,10 +184,14 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
       // On to the reading ride; the lesson's stamp is its plate's.
       mark(step, 'reading')
       if (onNext) onNext()
-      else navigate(RIDE_NEXT, { replace: true })
+      else release().then(() => navigate(RIDE_NEXT, { replace: true }))
       return
     }
     track('ride_done', { skipped: true, at: 'cards', ms: watches.current?.total.read() ?? 0 })
+    // App's copy of the stamp at once, not when the POST answers: a Back
+    // that Chrome took past the guard to the front door lands there in
+    // the same pop, and the door must already send to the gate.
+    onDone?.()
     const stamped = dryRun
       ? Promise.resolve()
       : apiJson('/api/onboarding/ride/done', session, {
@@ -184,8 +201,7 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
     // the ride shows again next launch, which costs a learner one more
     // Skip and nothing else.
     stamped.then(() => {
-      onDone?.()
-      if (!dryRun) navigate('/today', { replace: true })
+      if (!dryRun) release().then(() => navigate('/today', { replace: true }))
     })
   }
 
@@ -196,8 +212,8 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
     if (!failed || finished.current) return
     finished.current = true
     onDone?.()
-    if (!dryRun) navigate('/today', { replace: true })
-  }, [failed, navigate, onDone, dryRun])
+    if (!dryRun) release().then(() => navigate('/today', { replace: true }))
+  }, [failed, navigate, onDone, dryRun, release])
 
   const card = cards?.[index] ?? null
   const nc = rideCard(card, latin)
@@ -236,6 +252,12 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lookedOnKnown])
 
+  // Both cards answered: the half of the lesson the front door need not
+  // board again.
+  useEffect(() => {
+    if (step === 'done' && !dryRun) markCardsRidden(session?.user?.id)
+  }, [step, dryRun, session])
+
   const panels = desk && Boolean(cards?.length) && step !== 'done'
 
   const remaining = cards ? Math.max(0, cards.length - index) : null
@@ -267,6 +289,8 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
       color="var(--line-vocab)"
       onLeave={() => finish(true)}
       leaveLabel={t.rideSkip}
+      // A way out that skips rather than goes back keeps its word (StageHead).
+      leaveWord
       where={t.rideJp}
       sub={t.rideCap}
       remaining={step === 'done' ? undefined : remaining}

@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { useLang } from '../../LangContext'
 import { modeLabel } from '../../domain/studyModes'
 import { kanaSetLabel } from '../../domain/kanaSets'
 import { sectionFor } from '../../config/stations'
 import { LINE_COLOR } from '../../config/tabs'
 import { beginDeparture } from '../../stores/departure'
-import { playAnnouncement, playClick } from '../../lib/audio'
+import { holdAmbianceHour, playAnnouncement, playClick } from '../../lib/audio'
 import { Seg } from '../chrome/Console'
 import { Sheet } from '../chrome/Sheet'
 import { DepartKey } from '../chrome/DeskKeys'
@@ -15,19 +15,26 @@ import { useMinute } from '../../hooks/useMinute'
 import { Loading } from '../ui/Loading'
 import { CheckIcon, ChevronIcon } from '../ui/Icons'
 import LevelFitLine from './LevelFitLine'
+import ComebackLine from './ComebackLine'
 import { useCredits } from '../../stores/credits'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { publishLeft } from '../../stores/gateRun'
 import { runFit, isFreeLane, laneFreeShare, nextCreditClock, refillClock } from '../../domain/credits'
 import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext, splitTake, laneCount, isMainLane, TAKE_STEPS } from '../../domain/lanes'
-import { restWeek, sealDate, utcToday, weekdayKanji } from '../../domain/dayClear'
+import { restWeek, sealDate, ticketDate, utcToday, weekdayKanji } from '../../domain/dayClear'
 import { longDate } from '../dayclear/aria'
 import { WeekStamps } from '../dayclear/kit/WeekStamps'
+import { Odometer } from '../dayclear/kit/Odometer'
+import { VERDICT_INK } from '../dayclear/kit/constants'
+import { Cranes, Lanterns, NightVeil } from '../dayclear/FinishSky'
+import { MissRow, MonthTicket, ShareRow, TicketRow } from '../dayclear/FinishBoard'
+import PileSheet from '../dayclear/PileSheet'
+import { shareTicket } from '../../lib/shareTicket'
 import { WeekAhead } from '../journey/WeekAhead'
-import { TodayDial, FareKey, LineKeys } from './TodayDial'
+import { TodayDial, FareKey, LineKeys, ThreadKey } from './TodayDial'
 import { TodayDay } from './TodayDay'
 import { TodayPrint, PrintTitle } from './TodayPrint'
-import { BELOW, PRINT, at, printHour, printVars, usePrintFrame } from './print/usePrint'
+import { BELOW, PRINT, at, printHour, printVars, usePrintFrame, preloadPrint } from './print/usePrint'
 
 // ── 改札 — the fare gate ─────────────────────────────────────
 // The day's reviews, first thing on Today, and the run's picker: each
@@ -76,7 +83,13 @@ const LINE_TITLE = {
 }
 const titlesOf = t => Object.fromEntries(Object.entries(LINE_TITLE).map(([k, f]) => [k, f(t)]))
 
-export default function GateCard({ today, failed, session = null }) {
+// 終着 (plan 250): the day's run finishes here. `finish` is the finish's
+// state (components/dayclear/useFinish.js): while its answer is awaited
+// the print stands with the dial waiting; a clear plays on the cleared
+// gate, a partial run on the open one, and both end as Today.
+const CLEARED = new Set(['day', 'ticket', 'month'])
+
+export default function GateCard({ today, failed, session = null, finish = null }) {
   const { t, lang } = useLang()
   const desk = useDesk()
   const credits = useCredits()
@@ -104,9 +117,10 @@ export default function GateCard({ today, failed, session = null }) {
   }
 
   if (failed) return null
-  if (!today) return <PrintWait desk={desk} t={t} />
+  if (!today || finish?.status === 'loading') return <PrintWait desk={desk} t={t} finishing={Boolean(finish)} />
 
-  if ((today.total ?? 0) === 0) return <ClearedGate today={today} desk={desk} />
+  const cleared = finish && CLEARED.has(finish.kind) ? finish : null
+  if (cleared || (today.total ?? 0) === 0) return <ClearedGate today={today} desk={desk} finish={cleared} />
 
   const lanes = orderLanes(today.lanes ?? [])
   const isOn = lane => !off.has(lane.id) && (!main || isMainLane(lane))
@@ -164,7 +178,7 @@ export default function GateCard({ today, failed, session = null }) {
       toggle={toggle} toggleLine={toggleLine} take={take} setTake={setTake}
       main={main} setMain={setMain} chosen={lanes.filter(l => !off.has(l.id))}
       credits={credits} metered={metered} enforced={Boolean(credits?.enforced)} t={t} lang={lang}
-      session={session}
+      session={session} finish={finish?.kind === 'partial' ? finish : null}
     />
   )
 }
@@ -264,10 +278,19 @@ function unitOf({ taken, cut, chosenTotal, owed }, t) {
   return cut != null ? t.gateTakeOf(chosenTotal) : (owed === 0 && taken > 0 ? t.newUnit : t.dueUnit)
 }
 
-function DialCount({ run, t }) {
+function DialCount({ run, t, roll = null }) {
   return (
     <>
-      <span className="tdy-dial__count">{run.taken}</span>
+      {roll ? (
+        // 途中下車 (plan 250, B4·a): the count rolls down from what the gate
+        // held before the run to what it holds now.
+        <span className="tdy-dial__count tdy-dial__count--roll">
+          <Odometer value={roll.rolled ? run.taken : roll.from} />
+          <span className="sr-only">{run.taken}</span>
+        </span>
+      ) : (
+        <span className="tdy-dial__count">{run.taken}</span>
+      )}
       <span className="tdy-dial__unit">{unitOf(run, t)}</span>
     </>
   )
@@ -297,26 +320,28 @@ function DialTime({ run, t, lang, style }) {
 // stands where the canvas drew it at any size. The frame chooses the
 // print (`print`, null until it has been measured): a wide one in the
 // phone's layout takes the desk's.
-function usePrint(layout, anchorRef) {
+function usePrint(layout, anchorRef, hourOverride = null) {
   const now = useMinute()
-  const hour = printHour(now)
+  // A month's finish is a night's, whatever the hour (plan 250, B3·b).
+  const hour = hourOverride ?? printHour(now)
   const [frameRef, box] = usePrintFrame(layout, anchorRef)
   const print = box?.print ?? layout
   const frame = PRINT.frames[print]
   return {
-    now, hour, frame, frameRef, print: box?.print ?? null,
+    now, hour, frame, frameRef, box, print: box?.print ?? null,
     style: printVars(hour, print, box), dial: { frame, disc: PRINT.hours[hour].disc },
   }
 }
 
 // The wait, drawn: the print of the hour comes first, the dial empty
 // over it until the day has.
-function PrintWait({ desk, t }) {
+function PrintWait({ desk, t, finishing = false }) {
   const layout = desk ? 'desk' : 'phone'
   const p = usePrint(layout)
   const { frame } = p
   return (
     <div className={`tdy tdy--print tdy--${layout}`} style={p.style} data-hour={p.hour}>
+      {finishing && !desk && <FinishGround />}
       <TodayPrint hour={p.hour} device={p.print} frameRef={p.frameRef} />
       <section className="tdy-hero tdy-hero--print tdy-wait" aria-busy="true" aria-label={t.fareGate}>
         <PrintTitle now={p.now} hour={p.hour} />
@@ -445,44 +470,55 @@ function Services({ lines, isOn, share, toggle, toggleLine, choices, main, setMa
 // row that says what the run is (and opens the services) over the gate.
 // The foot never leaves the screen (owner-directed): it docks on the
 // tab bar on the page's own ground, and the air gives way first.
-function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, setTake, main, setMain, chosen, credits, metered, enforced, t, lang, session }) {
+function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, setTake, main, setMain, chosen, credits, metered, enforced, t, lang, session, finish = null }) {
   const [open, setOpen] = useState(false)
   const run = runOf({ today, isOn, take, metered, credits, enforced, lang })
   const choices = choicesOf(chosen, run.chosenTotal, run.spr, t)
   const { mix, parts, short, fare } = dialOf({ lines, isOn, run, metered })
+  const fin = finish
+  const thread = fin && !short ? threadOf(today, fin) : null
   const riding = lanes.filter(isOn).length
   const depart = () => { setOpen(false); departWith(today, off, run.cut, t) }
   const gate = (
     <GateButton
-      label={t.depart}
+      label={fin ? t.finContinue : t.depart}
       onClick={depart}
       aria-label={t.todayDue(run.taken)}
       disabled={run.closed || run.taken === 0}
+      arrive={Boolean(fin?.live)}
+      arriveDelay={fin ? fin.ms('KEY') : 0}
     />
   )
 
   const p = usePrint('phone')
   const { frame } = p
   return (
-    <div className="tdy tdy--print tdy--phone" style={p.style} data-hour={p.hour}>
+    <div className={finishClass('tdy tdy--print tdy--phone', fin)} style={p.style} data-hour={p.hour}>
+      {fin && <FinishGround />}
       <TodayPrint hour={p.hour} device={p.print} frameRef={p.frameRef} />
       <section className="tdy-hero tdy-hero--print" aria-label={t.fareGate}>
         <PrintTitle now={p.now} hour={p.hour} />
-        <TodayDial parts={parts} fare={fare} print={p.dial} className="tpr-at" style={at(frame.cx, frame.cy)}>
+        <TodayDial parts={parts} fare={fare} thread={thread} print={p.dial} className="tpr-at" style={at(frame.cx, frame.cy)}>
           <span className="tdy-dial__gate" data-guide="today.gate" aria-hidden="true" />
-          <DialCount run={run} t={t} />
+          <DialCount run={run} t={t} roll={rollOf(run, fin)} />
         </TodayDial>
-        <DialTime run={run} t={t} lang={lang} style={at(frame.cx, frame.cy + frame.fare + BELOW.time)} />
+        {fin
+          ? <FinishStake today={today} fin={fin} t={t} style={at(frame.cx, frame.cy + frame.fare + BELOW.time)} />
+          : <DialTime run={run} t={t} lang={lang} style={at(frame.cx, frame.cy + frame.fare + BELOW.time)} />}
         <div className="tpr-at" style={at(frame.cx, frame.cy + frame.fare + BELOW.keys)}>
           {short
             ? <FareKey rides={run.rides} waits={run.waits} clock={run.clock} t={t} />
-            : <LineKeys mix={mix} titles={titlesOf(t)} label={t.todayLines} />}
+            : thread
+              ? fin.at('KEY') && <ThreadKey done={thread.rides} left={thread.total - thread.rides} t={t} className="clrk-fade" />
+              : <LineKeys mix={mix} titles={titlesOf(t)} label={t.todayLines} />}
         </div>
       </section>
       <span className="tdy__air" aria-hidden="true" />
 
       <div className="tdy__foot">
-        {/* The level that does not fit (plan 224), over the run's own row. */}
+        {/* The reviews piled up (plan 254) and the level that does not
+            fit (plan 224), over the run's own row. */}
+        <ComebackLine today={today} session={session} hold={Boolean(fin?.playing)} />
         <LevelFitLine session={session} />
         <button type="button" className="tdy-door" onClick={() => { playClick(); setOpen(true) }} aria-haspopup="dialog">
           <span className="tdy-door__what">
@@ -518,10 +554,12 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
 // of the canvas): a line a row, the day a strip of four figures over a
 // slim week, so the column holds a five-line day without scrolling
 // down to the short desk.
-function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, main, setMain, chosen, credits, metered, enforced, t, lang, session }) {
+function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, main, setMain, chosen, credits, metered, enforced, t, lang, session, finish = null }) {
   const run = runOf({ today, isOn, take, metered, credits, enforced, lang })
   const choices = choicesOf(chosen, run.chosenTotal, run.spr, t)
   const { mix, parts, short, fare } = dialOf({ lines, isOn, run, metered })
+  const fin = finish
+  const thread = fin && !short ? threadOf(today, fin) : null
   // What this choice leaves for tomorrow, for the week ahead beside it.
   const left = Math.max(0, (today.total ?? 0) - run.taken)
   useEffect(() => {
@@ -536,15 +574,17 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
   const { frame } = p
 
   return (
-    <div className="tdy-desk tdy--print tdy--desk" style={p.style} data-hour={p.hour}>
+    <div className={finishClass('tdy-desk tdy--print tdy--desk', fin)} style={p.style} data-hour={p.hour}>
       <TodayPrint hour={p.hour} device={p.print} frameRef={p.frameRef} />
       <section className="tdy-hero tdy-hero--print" aria-label={t.fareGate}>
         <PrintTitle now={p.now} hour={p.hour} />
-        <TodayDial parts={parts} fare={fare} print={p.dial} className="tpr-at" style={at(frame.cx, frame.cy)}>
+        <TodayDial parts={parts} fare={fare} thread={thread} print={p.dial} className="tpr-at" style={at(frame.cx, frame.cy)}>
           <span className="tdy-dial__gate" data-guide="today.gate" aria-hidden="true" />
-          <DialCount run={run} t={t} />
+          <DialCount run={run} t={t} roll={rollOf(run, fin)} />
         </TodayDial>
-        <DialTime run={run} t={t} lang={lang} style={at(frame.cx, frame.cy + frame.fare + 28)} />
+        {fin
+          ? <FinishStake today={today} fin={fin} t={t} style={at(frame.cx, frame.cy + frame.fare + 28)} />
+          : <DialTime run={run} t={t} lang={lang} style={at(frame.cx, frame.cy + frame.fare + 28)} />}
         <div className="tdy-desk__keys tpr-at tpr-at--top" style={at(frame.cx, frame.cy + frame.fare + 62)}>
           <LineKeys mix={mix} titles={titlesOf(t)} named label={t.todayLines} />
         </div>
@@ -553,13 +593,27 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
             <FareKey rides={run.rides} waits={run.waits} clock={run.clock} t={t} />
           </div>
         )}
+        {thread && fin.at('KEY') && (
+          <div className="tpr-at" style={at(frame.cx, frame.cy + frame.fare + 128)}>
+            <ThreadKey done={thread.rides} left={thread.total - thread.rides} t={t} className="clrk-fade" />
+          </div>
+        )}
       </section>
       <div className="tdy-desk__hero" ref={hero}>
         <div className="tdy-desk__go">
-          <GateButton label={t.depart} onClick={depart} aria-label={t.todayDue(run.taken)} keys disabled={closed} />
+          <GateButton
+            label={fin ? t.finContinue : t.depart}
+            onClick={depart}
+            aria-label={t.todayDue(run.taken)}
+            keys
+            disabled={closed}
+            arrive={Boolean(fin?.live)}
+            arriveDelay={fin ? fin.ms('KEY') : 0}
+          />
         </div>
       </div>
       <aside className="tdy-desk__col">
+        <ComebackLine today={today} session={session} hold={Boolean(fin?.playing)} />
         <LevelFitLine session={session} />
         <section className="tdy-desk__panel tdy-desk__svc" aria-label={t.gateServicesTitle}>
           <Services
@@ -572,6 +626,56 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
       </aside>
       <DepartKey onDepart={depart} disabled={closed} />
     </div>
+  )
+}
+
+// ── 終着 — the finish's marks on an open gate (plan 250, B4·a) ─────
+// A run that left cards comes back to the gate for them; the dial's
+// thin ring says the day (what it has ridden solid, what waits dotted,
+// a stop where the learner got off), the count rolls down from what the
+// gate held, and the line under the dial says what the rest is for.
+
+/** The finish's state on a gate's root: a skip and reduced motion, as
+ *  the kit's primitives read them (index.css, 191:primitives). */
+function finishClass(base, fin) {
+  if (!fin) return base
+  return [base, 'tdy--fin', fin.skipped && 'clrk--skip', fin.reduced && 'clrk--reduced'].filter(Boolean).join(' ')
+}
+
+/** What stands under the phone's bars while a finish has sent them away
+ *  (stores/stage's useChromeAway): the print's sky over its top, its
+ *  ground under its foot, so the bars arrive over the print. */
+function FinishGround() {
+  return <div className="tdy-fin-ground" aria-hidden="true" />
+}
+
+/** The day's thread: what today has reviewed and what is left of it. */
+function threadOf(today, fin) {
+  const left = today.total ?? 0
+  const done = today.reviewed?.total ?? fin.run?.cleared ?? 0
+  if (!(left > 0) || !(done > 0)) return null
+  return { rides: done, total: done + left, ride: fin.at('THREAD'), stop: fin.at('STOP') }
+}
+
+/** The count's roll, from what the gate held before the run. */
+function rollOf(run, fin) {
+  if (!fin) return null
+  return { from: run.taken + (fin.run?.cleared ?? 0), rolled: fin.at('ROLL') }
+}
+
+/** Under the dial: the minutes the rest of the day takes and what
+ *  clearing it pays, the day's stamp and its prime. */
+function FinishStake({ today, fin, t, style }) {
+  if (!fin.at('LINE')) return null
+  const minutes = minutesFor(today.total ?? 0, today.seconds_per_review)
+  const preview = fin.result?.preview
+  const stake = (preview?.bonus ?? 0) + (preview?.jackpot ?? 0)
+  return (
+    <p className="tdy-dial__line tdy-fin-stake tpr-at clrk-fade" style={style}>
+      {minutes != null && <><b className="tdy-dial__time" role="img" aria-label={t.gateMinutesLabel(minutes)}>≈ {minutes} {t.gateMinutes}</b>{' '}</>}
+      {t.finStake}
+      {stake > 0 && <>{' · '}<b className="tdy-fin-stake__xp">+{stake}&#160;{t.clrXpUnit}</b></>}
+    </p>
   )
 }
 
@@ -607,47 +711,159 @@ function DeskDay({ today, part = false }) {
 // CutSeal), and the last train has gone from the viaduct. A day with
 // nothing reviewed and nothing due stamps nothing: the hour's own disc,
 // saying the learner is up to date.
-function ClearedGate({ today, desk }) {
+//
+// 終着 (plan 250): the day's run finishes here (`finish`, useFinish's
+// state, timed by its beats). Every day the seal is slammed onto the
+// disc, the ring closing round it; the day's fare and its prime under
+// what the day was, the week's stamp pressed; the board takes the run's
+// wrong pile (À revoir, a door to its cards). On a streak's ticket
+// (3, 7, 14) a crane a day crosses the print and the ticket comes to
+// the board, punched there; on a month (30 and on) night falls, a
+// lantern a day is set on the lake and the gold ticket rises out of
+// their light under the moon. What the finish adds stays for the visit.
+function ClearedGate({ today, desk, finish = null }) {
   const { t, lang } = useLang()
   const summary = useProfileSummary()
-  const day = utcToday()
+  const fin = finish
+  const kind = fin?.kind ?? null
+  const model = fin?.model ?? null
+  // A beat has come (always, without a finish); the transients play only
+  // on a clock running as drawn. (`at` is the print's place.)
+  const came = beat => !fin || fin.at(beat)
+  const live = Boolean(fin?.live)
+  const day = fin?.result?.day ?? utcToday()
   const reviewed = today.reviewed
-  const stamped = (reviewed?.total ?? 0) > 0
+  const stamped = Boolean(fin) || (reviewed?.total ?? 0) > 0
   const parts = TYPE_ORDER
     .map(key => ({ key, n: reviewed?.by_line?.[key] ?? 0 }))
     .filter(p => p.n > 0)
-  const week = summary?.streak > 0 ? restWeek(summary.week, [], day) : null
+  // The week: the answer's on a finish (today's stamp counted), the
+  // profile's otherwise.
+  const streak = model ? model.streak : summary?.streak ?? 0
+  const week = model?.week?.length ? model.week : summary?.streak > 0 ? restWeek(summary.week, [], day) : null
   const tomorrow = today.tomorrow
   const opens = opensWords(today.next_due, t, lang)
   const held = today.review?.held ?? 0
+  const [pile, setPile] = useState(false)
   function rideExtra() {
     playAnnouncement('today')
     beginDeparture({ ...sectionFor('/today', t), path: '/today/run?extra=1', stage: true })
   }
+  function share() {
+    if (!model?.ticket) return
+    shareTicket({
+      days: model.ticket.days,
+      day: fin.result.day,
+      t,
+      lang,
+      figures: { reviews: summary?.totalReviews, words: summary?.wordsLearned, level: summary?.jlptLevel },
+    })
+  }
   // On the desk the print centres on the gate's column, as DeskGate's does.
   const heroRef = useRef(null)
-  const p = usePrint(desk ? 'desk' : 'phone', desk ? heroRef : null)
+  // A month's finish is a night's (B3·b): the print turns under the veil.
+  const p = usePrint(desk ? 'desk' : 'phone', desk ? heroRef : null, fin?.night ? 'night' : null)
   const { frame } = p
-  const seal = stamped
+  const nightFalls = kind === 'month' && p.hour !== 'night'
+  useEffect(() => {
+    if (kind === 'month' && p.print) preloadPrint('night', p.print)
+  }, [kind, p.print])
+  // ... and heard: the night's lake from the dusk on, for as long as the
+  // print holds the night (plan 250b).
+  useEffect(() => (kind === 'month' ? holdAmbianceHour('night') : undefined), [kind])
+  const sealBeat = kind === 'day' ? 'SLAM' : 'PRESS_SEAL'
+  const seal = stamped && came(sealBeat)
     ? { day: weekdayKanji(day), foot: sealDate(day), label: t.clrSealAria(longDate(day, lang)) }
     : null
+  // The stamp comes down until its way in has ended; then it is the disc.
+  const stamp = seal && fin && !came('SEALED') ? (kind === 'day' ? 'slam' : 'press') : null
+  const k = frame.disc / 80
+  // Under the dial, in the print's units: the day's fare in the legend's
+  // place on the everyday finish, and the week under it.
+  const fareLine = kind === 'day'
+  const weekAt = fareLine ? BELOW.under : BELOW.week
+  // The room the lines take over a phone's foot (printVars' --tpr-room),
+  // down to the lowest the finish draws.
+  const lowest = kind === 'month' ? 214 * k : weekAt + 14
+  const style = { ...p.style, '--tpr-room': p.style['--tpr-room'] + lowest - (BELOW.week + 14) }
+  // The month's ticket takes the room the desk's foot leaves it.
+  const footRef = useRef(null)
+  const ticketRef = useRef(null)
+  const fit = useTicketFit(desk && kind === 'month' && came('TICKET'), footRef, ticketRef, p.box)
 
+  const fx = live && (
+    <>
+      {kind === 'day' && came('IMPACT') && <span className="tdy-dial__flash" aria-hidden="true" />}
+      {came(kind === 'day' ? 'LAND' : 'BLOOM') && <span className="tdy-dial__bloom" aria-hidden="true" />}
+    </>
+  )
+  // The slam's hit shakes what stands on the print, not the print.
+  const shake = kind === 'day' && live && came('LAND') ? ' clrk-shake' : ''
   const hero = (
-    <section className="tdy-hero tdy-hero--print tdy-hero--clear" aria-label={t.fareGate}>
+    <section className={`tdy-hero tdy-hero--print tdy-hero--clear${shake}`} aria-label={t.fareGate}>
+      {live && nightFalls && came('DUSK') && !came('TICKET') && <NightVeil sky={printVars('night', p.print ?? (desk ? 'desk' : 'phone'), null)['--tpr-sky']} />}
       <PrintTitle now={p.now} hour={p.hour} />
-      <TodayDial parts={parts} print={p.dial} seal={seal} className="tpr-at" style={at(frame.cx, frame.cy)}>
+      {kind === 'month' && came('LANTERNS') && (
+        <Lanterns days={model.ticket.days} frame={frame} desk={p.print === 'desk'} play={!fin.reduced} label={t.finLanternsAria(model.ticket.days)} />
+      )}
+      <TodayDial
+        parts={came('RING') ? parts : []}
+        print={p.dial}
+        seal={seal}
+        stamp={stamp}
+        ringIn={kind === 'day' && live}
+        fx={fx}
+        className="tpr-at"
+        style={at(frame.cx, frame.cy)}
+      >
         <span className="tdy-dial__gate" data-guide="today.gate" aria-hidden="true" />
         {!stamped && <span className="tdy-dial__clear">{t.todayNothingDueShort}</span>}
       </TodayDial>
-      {stamped && (
-        <p className="tdy-recap tdy-dial__line tpr-at" style={at(frame.cx, frame.cy + frame.fare + BELOW.time)}>
-          <b>{reviewed.total}</b> {t.todayReviewedUnit(reviewed.total)}
+      {kind === 'ticket' && live && came('CRANES') && !came('END') && (
+        <Cranes streak={model.streak} frame={frame} desk={p.print === 'desk'} label={t.finCranesAria(model.streak)} />
+      )}
+      {kind === 'month' && came('TICKET') && (
+        <MonthTicket
+          days={model.ticket.days}
+          date={model.ticket.date ?? ticketDate(day)}
+          jackpot={model.fare.jackpot}
+          rest={model.rest?.earned ? model.rest : null}
+          clip={live ? fin.ms('CLIP') - fin.ms('TICKET') : null}
+          glow={live}
+          ref={ticketRef}
+          style={monthTicketAt(frame, p.print === 'desk', fit)}
+        />
+      )}
+      {stamped && kind !== 'month' && came('RECAP') && (
+        <p className={`tdy-recap tdy-dial__line tpr-at${fin ? ' clrk-fade' : ''}`} style={at(frame.cx, frame.cy + frame.fare + BELOW.time)}>
+          <b>{reviewed?.total ?? model.count}</b> {t.todayReviewedUnit(reviewed?.total ?? model.count)}
         </p>
       )}
-      {week && (
-        <div className="tdy-rally tpr-at" style={at(frame.cx, frame.cy + frame.fare + BELOW.week)}>
-          <WeekStamps week={week} label={t.todayWeekStamps(summary.streak)} />
-          <span className="tdy-rally__n" aria-hidden="true"><b>{summary.streak}</b>{t.todayStreakDays(summary.streak)}</span>
+      {fareLine && came('FARE_LINE') && (
+        <p className="tdy-recap tdy-fin-fare tdy-dial__line tpr-at clrk-fade" style={at(frame.cx, frame.cy + frame.fare + BELOW.keys)}>
+          <b className="tdy-fin-fare__xp">+{model.fare.total}&#160;{t.clrXpUnit}</b>
+          {model.fare.bonus > 0 && <>{' · '}{t.finFareOf} <b className="tdy-fin-fare__xp">+{model.fare.bonus}</b> {t.finFarePrime}</>}
+        </p>
+      )}
+      {week && kind !== 'month' && came('WEEK') && (
+        <div
+          className={`tdy-rally tpr-at${fin ? ' clrk-fade' : ''}${kind === 'ticket' && live ? ' tdy-rally--rings' : ''}`}
+          style={at(frame.cx, frame.cy + frame.fare + weekAt)}
+        >
+          <WeekStamps
+            week={week}
+            pending={Boolean(fin) && !came('PRESS')}
+            press={Boolean(fin) && live}
+            gold={kind === 'ticket' && week.every(d => d.state !== 'missed')}
+            label={t.todayWeekStamps(streak)}
+            slotProps={kind === 'ticket' && live ? (entry, i) => ({ style: { '--rd': `${200 + i * 40}ms` } }) : undefined}
+          />
+          <span className="tdy-rally__n" aria-hidden="true">
+            {fin
+              ? <b><Odometer value={came('ROLL') ? streak : Math.max(0, streak - 1)} /></b>
+              : <b>{streak}</b>}
+            {t.todayStreakDays(streak)}
+          </span>
         </div>
       )}
     </section>
@@ -657,52 +873,134 @@ function ClearedGate({ today, desk }) {
   // over tomorrow's, on its glass, so it reads on every print (plan 238,
   // the owner's pick A of the canvas "Tsuji — Réviser plus"). The
   // ceiling is a default, never a lock.
+  const missed = kind === 'day' ? (model?.piles?.[0] ?? 0) : 0
+  const rows = [
+    held > 0 && (
+      <button key="held" type="button" className="tdy-next tdy-board__go" data-action="review-extra" onClick={rideExtra}>
+        <span className="tdy-next__day">{t.todayHeld}</span>
+        <b className="tdy-next__n">{held}<small>{t.todayCardsUnit(held)}</small></b>
+        <span className="tdy-board__way">{t.todayHeldGo}<ChevronIcon direction="right" size={16} /></span>
+      </button>
+    ),
+    missed > 0 && <MissRow key="miss" count={missed} onOpen={() => { playClick(); setPile(true) }} />,
+    kind === 'ticket' && (
+      <TicketRow
+        key="ticket"
+        days={model.ticket.days}
+        jackpot={model.fare.jackpot}
+        rest={Boolean(model.rest?.earned)}
+        punch={live ? fin.ms('PUNCH') - fin.ms('BOARD') : null}
+      />
+    ),
+    kind === 'month' && <ShareRow key="share" onShare={() => { playClick(); share() }} />,
+    kind !== 'month' && tomorrow?.cards > 0 && (
+      <div key="tomorrow" className="tdy-next" role="group" aria-label={t.nudgeWhen.tomorrow}>
+        <span className="tdy-next__day">{t.nudgeWhen.tomorrow}</span>
+        <b className="tdy-next__n">{tomorrow.cards}<small>{t.todayCardsUnit(tomorrow.cards)}</small></b>
+        <span className="tdy-next__min">≈ {tomorrow.minutes} {t.gateMinutes}</span>
+      </div>
+    ),
+  ].filter(Boolean)
+  // A month's foot holds its place from the first beat, unseen until its
+  // own: the ticket under the moon is drawn to the room it leaves.
+  const hold = kind === 'month'
+  const boardCome = came('BOARD')
+  const gateCome = came('GATE')
   const foot = (
     <>
-      {(held > 0 || tomorrow?.cards > 0) && (
-        <div className="tdy-board">
-          {held > 0 && (
-            <button type="button" className="tdy-next tdy-board__go" data-action="review-extra" onClick={rideExtra}>
-              <span className="tdy-next__day">{t.todayHeld}</span>
-              <b className="tdy-next__n">{held}<small>{t.todayCardsUnit(held)}</small></b>
-              <span className="tdy-board__way">{t.todayHeldGo}<ChevronIcon direction="right" size={16} /></span>
-            </button>
-          )}
-          {tomorrow?.cards > 0 && (
-            <div className="tdy-next" role="group" aria-label={t.nudgeWhen.tomorrow}>
-              <span className="tdy-next__day">{t.nudgeWhen.tomorrow}</span>
-              <b className="tdy-next__n">{tomorrow.cards}<small>{t.todayCardsUnit(tomorrow.cards)}</small></b>
-              <span className="tdy-next__min">≈ {tomorrow.minutes} {t.gateMinutes}</span>
-            </div>
-          )}
-        </div>
+      {rows.length > 0 && (boardCome || hold) && (
+        <div className={`tdy-board${fin ? (boardCome ? ' clrk-arrive' : ' clrk-held') : ''}`}>{rows}</div>
       )}
-      <GateButton label={opens ?? t.depart} aria-label={opens ?? t.todayNothingDueShort} disabled />
+      {(gateCome || hold) && (
+        <GateButton
+          label={opens ?? t.depart}
+          aria-label={opens ?? t.todayNothingDueShort}
+          disabled
+          arrive={live && gateCome}
+          className={gateCome ? '' : 'clrk-held'}
+        />
+      )}
     </>
+  )
+  const sheet = pile && model && (
+    <PileSheet
+      name={t.clrPiles[0]}
+      count={missed}
+      cards={model.cards.filter(c => c.verdict === 0)}
+      ink={VERDICT_INK[0]}
+      onClose={() => setPile(false)}
+    />
   )
 
   if (desk) {
     return (
-      <div className="tdy-desk tdy--print tdy--desk tdy--clear" style={p.style} data-hour={p.hour}>
+      <div className={finishClass('tdy-desk tdy--print tdy--desk tdy--clear', fin)} style={style} data-hour={p.hour}>
         <TodayPrint hour={p.hour} device={p.print} frameRef={p.frameRef} train={false} />
         {hero}
         <div className="tdy-desk__hero" ref={heroRef}>
-          <div className="tdy-desk__go tdy-desk__go--clear">{foot}</div>
+          <div className="tdy-desk__go tdy-desk__go--clear" ref={footRef}>{foot}</div>
         </div>
-        <aside className="tdy-desk__col">
-          <DeskDay today={today} />
-        </aside>
+        {came('CHROME') && (
+          <aside className={`tdy-desk__col${fin ? ' clrk-fade' : ''}`}>
+            <DeskDay today={today} />
+          </aside>
+        )}
+        {sheet}
       </div>
     )
   }
   return (
-    <div className="tdy tdy--print tdy--phone tdy--clear" style={p.style} data-hour={p.hour}>
+    <div className={finishClass('tdy tdy--print tdy--phone tdy--clear', fin)} style={style} data-hour={p.hour}>
+      {fin && <FinishGround />}
       <TodayPrint hour={p.hour} device={p.print} frameRef={p.frameRef} train={false} />
       {hero}
       <span className="tdy__air" aria-hidden="true" />
       <div className="tdy__foot">{foot}</div>
+      {sheet}
     </div>
   )
+}
+
+// The month's gold ticket under the moon (B3·b), in the print's units:
+// its top a little under the dial's rings, and how far its foot rises
+// from, the lake's middle under the horizon. The kit's ticket is 206px
+// tall, drawn at three quarters of the print's scale (four fifths on the
+// desk's print, as the canvas drew it), or at `fit` where the window
+// leaves it less (useTicketFit).
+function monthTicketAt(frame, desk, fit = null) {
+  const k = frame.disc / 80
+  const top = frame.cy + frame.fare + 14 * k
+  const zoom = Math.min(desk ? 0.8 : 0.76, fit ?? Infinity)
+  return { '--at-x': frame.cx, '--at-y': top, '--tk-zoom': zoom, '--rise': frame.horizon + 30 - (top + 206 * zoom) }
+}
+
+// A short desk (1280×600) has less room under the moon than the canvas
+// drew: there the ticket is drawn smaller, down to the room between its
+// top and the foot (the board and the gate, in their places from the
+// first beat), never under the board. The phone's column grows to hold
+// it instead (--tpr-room). The zoom on the print it may take, or null
+// while unmeasured; measured from the layout (offsetHeight is the
+// ticket's height unzoomed, the rest line under it as it is).
+function useTicketFit(on, footRef, ticketRef, box) {
+  const [fit, setFit] = useState(null)
+  useLayoutEffect(() => {
+    const foot = footRef.current
+    const ticket = ticketRef.current
+    if (!on || !foot || !ticket || !box || typeof ResizeObserver === 'undefined') return undefined
+    const measure = () => {
+      const body = ticket.querySelector('.tdy-mtkt__hold')
+      if (!body?.offsetHeight) return
+      const rest = ticket.querySelector('.tdy-mtkt__rest')
+      const under = rest ? rest.offsetHeight + (parseFloat(getComputedStyle(ticket).rowGap) || 0) : 0
+      const room = foot.getBoundingClientRect().top - ticket.getBoundingClientRect().top - under
+      setFit(Math.max(0, room) / (body.offsetHeight * box.u))
+    }
+    const ro = new ResizeObserver(measure)
+    ro.observe(foot)
+    ro.observe(ticket)
+    return () => ro.disconnect()
+  }, [on, footRef, ticketRef, box])
+  return on ? fit : null
 }
 
 // When the shut gate opens: its hour within the day, else the day.

@@ -1,10 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useLang } from '../../LangContext'
 import { apiJson } from '../../lib/api'
 import { playClick, playUi } from '../../lib/audio'
-import { track } from '../../lib/track'
 import { refreshToday } from '../../stores/today'
-import { shutComeback } from '../../stores/dayClear'
 import { Sheet } from '../chrome/Sheet'
 import { Seg } from '../chrome/Console'
 import { useDesk } from '../../hooks/useDesk'
@@ -15,9 +13,10 @@ import { useRadioWalk, radioTab } from '../../hooks/useRadioWalk'
 // and a day that could not be cleared until they were all done. When
 // GET /api/today's `review.comeback` names an offer (the reviews the
 // gate would print are past a few days of the learner's own load,
-// core/review_plan.comeback), the gate opens on this sheet instead:
-// one line of welcome, how many cards wait, and three paces as the
-// service cards Settings draws for the new cards (.svc):
+// core/review_plan.comeback), the gate says so in a notice
+// (ComebackLine, plan 254: it no longer opens on this sheet) and the
+// notice opens it: one line of welcome, how many cards wait, and three
+// paces as the service cards Settings draws for the new cards (.svc):
 //
 //   Spread out   the backlog over 3, 5 or 7 days, plus a day's own --
 //                a figure a day, the days under it (the default, 5)
@@ -27,10 +26,9 @@ import { useRadioWalk, radioTab } from '../../hooks/useRadioWalk'
 // Each offer is priced by the server, so the sheet never copies the
 // arithmetic. Spread and gently pause the new cards until the learner
 // is caught up, and say so. "Let's go" posts the choice
-// (POST /api/review-plan/catchup) and the gate redraws on its share.
-// Shut any other way, the sheet keeps out of the way for the rest of
-// the visit (stores/dayClear's comebackShut) and opens again on the
-// next one.
+// (POST /api/review-plan/catchup) and the gate redraws on its share,
+// the notice gone with the offer. Shut any other way, the sheet goes
+// back to the notice, which stays until it is answered or closed.
 //
 // Props:
 //   offer             today.review.comeback
@@ -52,21 +50,12 @@ export function ComebackSheet({ offer, secondsPerReview, session, onClose }) {
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState(false)
 
-  useEffect(() => {
-    track('catchup_offer', { owed: offer.owed, away: offer.days_away })
-  }, [offer.owed, offer.days_away])
-
   const spread = offer.spread.find(s => s.days === days) ?? offer.spread[0]
   const minutes = n => Math.max(1, Math.ceil((n * (secondsPerReview || DEFAULT_SECONDS)) / 60))
   const cards = {
     spread: { name: t.cbSpread, figure: t.cbPerDay(spread.per_day), words: t.cbOverDays(spread.days) },
     gentle: { name: t.cbGentle, figure: t.cbPerDay(offer.gentle.per_day), words: t.cbNoEnd },
     all: { name: t.cbAll, figure: t.cbCards(offer.owed), words: t.cbMinutes(minutes(offer.owed)) },
-  }
-
-  function close() {
-    shutComeback()
-    onClose()
   }
 
   function go() {
@@ -83,7 +72,7 @@ export function ComebackSheet({ offer, secondsPerReview, session, onClose }) {
   }
 
   return (
-    <Sheet open onClose={close} jp={t.cbJp} cap={t.cbCap} label={t.cbLabel} className="tdy-sheet cb-sheet" initialFocus=".cb-sheet .svc--on">
+    <Sheet open onClose={onClose} jp={t.cbJp} cap={t.cbCap} label={t.cbLabel} className="tdy-sheet cb-sheet" initialFocus=".cb-sheet .svc--on">
       <div className="cb-lead">
         <p className="cb-lead__hello">{offer.days_away > 1 ? t.cbAway(offer.days_away) : t.cbPiled}</p>
         <p className="slip__hint">{t.cbOwed(offer.owed)}</p>

@@ -2,8 +2,9 @@ import { createElement, useId } from 'react'
 import { CLIPPER_ART, CLIPPER_VIEWBOX } from './clipperArt'
 
 // ── 改札鋏 — the ticket clipper (plan 191) ──────────────────────────
-// The gate clerk's punch, as the canvas drew it (clipper/clipper.py,
-// shared by Milestone-7 and -30): two crossed steel arms on a rivet, in
+// The gate clerk's punch, as the canvas drew it (clipper/clipper.py; the
+// month's gold ticket is clipped with it, plan 250): two crossed steel
+// arms on a rivet, in
 // along its own axis from the lower right, the jaws opening, biting the
 // ticket's edge at 34% of its one-second clock and parting at 55%, then
 // leaving the way it came. Its art is clipperArt.js, generated.
@@ -16,7 +17,6 @@ import { CLIPPER_ART, CLIPPER_VIEWBOX } from './clipperArt'
 // part) -- one clock, so a late timer cannot set them apart.
 export const CLIP_BITE_MS = 340
 export const CLIP_PART_MS = 550
-export const CLIP_MS = 1000
 
 function render(node, key, ids) {
   const [tag, attrs, children] = node

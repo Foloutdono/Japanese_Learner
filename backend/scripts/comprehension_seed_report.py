@@ -30,6 +30,9 @@ The review flags, none of them a test failure:
     not -- the eye matches it
   * a wrong option of a vocabulary question that shares a word with the
     right one -- two answers that can both be right
+  * across a level's exercises, picking the longest option, or the
+    shortest, winning more or less often than a blind pick of four
+    (plan 259; the exam seeds' LENGTH_TELL, study/exam_seed.py)
 """
 import argparse
 import json
@@ -44,6 +47,7 @@ from routes import reading
 from scripts.carousel_bank import rows_of
 from study import difficulty as D
 from study.analysis import analyze_local
+from study.exam_seed import LENGTH_TELL
 from study.grammar_match import verifiable
 
 QUOTE = re.compile(r"「([^」]+)」")
@@ -133,6 +137,35 @@ def review(entry: dict) -> list[str]:
     return out
 
 
+def length_tells(entries: list[dict]) -> list[str]:
+    """Written with care, the right option drifts to the longest: per
+    level and language, picking the longest of the four, or the
+    shortest, ties shared, must win about as often as a blind pick."""
+    wins: dict[tuple[str, str], list[float]] = {}
+    for e in entries:
+        for q in e.get("questions", []):
+            for lang in seed.LANGS:
+                sizes = [len(o) for o in q["options"][lang]]
+                if len(sizes) != 4 or not 0 <= q["correct"] < 4:
+                    continue
+                size = sizes[q["correct"]]
+                tally = wins.setdefault((e["level"], lang), [0.0, 0.0, 0])
+                if size == max(sizes):
+                    tally[0] += 1 / sizes.count(size)
+                if size == min(sizes):
+                    tally[1] += 1 / sizes.count(size)
+                tally[2] += 1
+    low, high = LENGTH_TELL
+    out = []
+    for (level, lang), (longest, shortest, items) in wins.items():
+        for name, won in (("the longest", longest), ("the shortest", shortest)):
+            share = won / items
+            if not low <= share <= high:
+                out.append(f"{level} [{lang}] picking {name} option wins {share:.0%} ({won:.1f} of {items}); "
+                           f"length must say nothing, {low:.0%} to {high:.0%}")
+    return out
+
+
 def report(entries: list[dict]) -> int:
     bad = 0
     for e in entries:
@@ -147,6 +180,8 @@ def report(entries: list[dict]) -> int:
         for line in flags:
             print(f"       ? {line}")
         bad += bool(found)
+    for line in length_tells(entries):
+        print(f"? {line}")
     print(f"\n{len(entries) - bad}/{len(entries)} clean")
     return bad
 

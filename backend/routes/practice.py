@@ -2,11 +2,11 @@
 実践の記録 — what a learner has done on each practice platform, by grade
 (plan 130), and at one stop of one platform (plan 159).
 
-The Practice gate on the desk hangs each platform's five grades as rows,
-and a row says what the learner has done there: how many sentences,
-texts or papers, and the share of them that went right. Everything is
-read from the logs the platforms already keep, and nothing is stored
-here.
+The Practice gate on a phone prints, at the foot of each platform's
+plate, the learner's grade and what they have done there (plan 254):
+how many sentences, texts or papers, and the share of them that went
+right; the desk's stations print every grade's. Everything is read from
+the logs the platforms already keep, and nothing is stored here.
 
     GET /api/practice/record
 
@@ -224,7 +224,9 @@ def _parse_stop(platform: str, stop: str) -> tuple[str, str]:
             return stop, "phase"
         parts = stop.split(":")
         if len(parts) in (3, 4) and parts[0] == "freq" and parts[1] in TIER_DOMAINS:
-            numbers = [p for p in parts[2:] if p.isascii() and p.isdigit()]
+            # Six digits is past any tier or size; a longer run of them
+            # would reach int()'s digit limit and 500 instead of 400.
+            numbers = [p for p in parts[2:] if p.isascii() and p.isdigit() and len(p) <= 6]
             if len(numbers) == len(parts) - 2 and all(int(n) > 0 for n in numbers):
                 tier = int(numbers[0])
                 size = int(numbers[1]) if len(numbers) > 1 else freq.DEFAULT_TIER_SIZE
@@ -245,9 +247,10 @@ def _bank_grammar() -> dict[str, str]:
 
 @lru_cache(maxsize=1)
 def _seeds_by_text() -> dict[str, dict]:
-    """A seed exercise by its text, at any level: a text the learner
-    read from the seed pool is named by the seed's title."""
-    return {seed["text"]: seed for seed in comprehension_seed.entries()}
+    """A seed by its text, at any level, as comprehension_seed.index
+    keeps it: a text the learner read from the seed pool is named by the
+    seed's title."""
+    return {seed["text"]: seed for seeds in comprehension_seed.index().values() for seed in seeds}
 
 
 def _text_line(text: str, logged_grammar, score: int, total: int, at) -> dict:

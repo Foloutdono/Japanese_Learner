@@ -70,8 +70,11 @@ import { CardFlag } from '../feedback/FeedbackSheet'
 // (components/feedback/FeedbackSheet.jsx, CardFlag); null before the
 // answer and after the rating, so the flag is there only while the
 // card's answer is. Its sheet is App's (FeedbackHost).
+// `tally` is what the run counts beside its place (RunStreak): the head
+// prints it under the name, with the sub and the remaining pill
+// (StageHead, 両端); `aside` is for what the learner presses.
 export function StudyStage({
-  color, onLeave, leaveLabel, where, sub, remaining, pass = true, aside,
+  color, onLeave, leaveLabel, leaveWord, where, sub, remaining, tally, pass = true, aside,
   toast, onToastDone, className = '', levelBar = true, side, sideLabel, records = false, done = false,
   panel = null, progress = null, recordsLabel = null, meter = true, report = null, children,
 }) {
@@ -101,8 +104,8 @@ export function StudyStage({
       <main id="main-content" className={classes} style={color ? { '--line-color': color } : undefined}>
         <EntryDockContext.Provider value={split}>
           <StageHead
-            onLeave={onLeave} leaveLabel={leaveLabel}
-            where={where} sub={sub} remaining={panels || runConsole ? undefined : remaining}
+            onLeave={onLeave} leaveLabel={leaveLabel} leaveWord={leaveWord}
+            where={where} sub={sub} tally={tally} remaining={panels || runConsole ? undefined : remaining}
             pass={pass} onPass={openBalance} keys={!panels} help={panels}
             aside={report ? <>{aside}<CardFlag card={report.card} /></> : aside}
           />

@@ -120,6 +120,25 @@ def test_a_rendered_seed_has_the_generated_shape():
         assert g["raw_id"].startswith(f"grammar_{g['level']}_")
 
 
+def test_a_request_reads_the_index_and_nothing_keeps_the_seeds():
+    """Parsed, the seeds weigh some 86 KB each (13 MB at 150), which a
+    process that kept them would carry for its whole life inside the
+    backend's 512 MB. So entries() reads the files at each call, and a
+    request reads index(): each seed's title, text and grammar, and the
+    questions of each level's first seed besides, 257 KB at 150 seeds.
+    index() parses the files on its own, cutting each seed as it is
+    read, so it is held to by_level(): the same seeds in the same order,
+    and nothing else."""
+    assert seed.entries() is not seed.entries(), "entries() reads the files at each call"
+    whole = seed.by_level()
+    index = seed.index()
+    assert list(index) == list(whole)
+    for level, rows in whole.items():
+        expected = [{"title": e["title"], "text": e["text"], "grammar": e["grammar"]} for e in rows]
+        expected[0]["questions"] = rows[0]["questions"]
+        assert list(index[level]) == expected, level
+
+
 # ── The pool ─────────────────────────────────────────────────
 
 def _sql(query, params=(), fetch=False):

@@ -2,15 +2,13 @@ import { describe, it, expect } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { LangProvider } from '../../../LangContext'
 import '../../../index.css'
-import {
-  InkFilters, Seal, WeekStamps, Slot, XpTotal, Odometer, LevelBar, XpChip,
-  Ticket, Clipper, ClipperChip, Reader, RunCard, Pile, GateButton, ClearHeader,
-} from './index'
-import { CLEAR_DAY, CARDS_32 } from '../fixtures'
+import { InkFilters, WeekStamps, Slot, Odometer, Ticket, Clipper, ClipperChip, GateButton, ClearHeader } from './index'
+import { CLEAR_DAY } from '../fixtures'
 
-// ── 終着 — the ceremony's kit, drawn (plan 191) ──────────────────────
-// The shared pieces of the canvas's kit.css, ported once: each draws
-// its board's geometry from the app's tokens.
+// ── 終着 — the ceremony's kit, drawn (plans 191, 250b) ──────────────
+// The shared pieces of the canvas's kit.css that the finish, the
+// rest-day notice and the tickets draw: each its board's geometry from
+// the app's tokens.
 
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 const px = v => parseFloat(v)
@@ -20,13 +18,8 @@ function mount(node) {
 }
 
 describe('the kit', () => {
-  it('presses the seal in its grain, scaled from 192px by its size', async () => {
-    const screen = await mount(<><InkFilters /><Seal day="火" foot="06·10·2026" size={168} tilt={-8} label="Tampon du jour" /></>)
-    const seal = screen.container.querySelector('.clrk-seal')
-    expect(seal.getAttribute('role')).toBe('img')
-    expect(seal.getBoundingClientRect().width).toBeGreaterThan(160)
-    const face = getComputedStyle(seal.querySelector('.clrk-seal__face'))
-    expect(face.filter).toContain('clrk-ink')
+  it('lays the ink\'s grain filters on the screen', async () => {
+    const screen = await mount(<InkFilters />)
     expect(screen.container.querySelector('#clrk-ink')).not.toBeNull()
     expect(screen.container.querySelector('#clrk-ink-fine')).not.toBeNull()
   })
@@ -54,27 +47,8 @@ describe('the kit', () => {
     expect(px(getComputedStyle(rest).width)).toBe(36)
   })
 
-  it('prints the fare in gold, its shimmer only once asked, and its level bar', async () => {
-    const screen = await mount(
-      <>
-        <XpTotal value={252} shine glints={[{ x: 186, y: 2, size: 14, delay: 900 }]} />
-        <XpTotal value={197} />
-        <LevelBar from={0.38} to={0.64} label="Niveau 14" />
-        <XpChip amount={55} label="prime de série" />
-      </>
-    )
-    const [lit, plain] = screen.container.querySelectorAll('.clrk-xp')
-    expect(lit.className).toContain('clrk-xp-shine')
-    expect(lit.querySelectorAll('.clrk-xp-glint')).toHaveLength(1)
-    expect(plain.className).not.toContain('clrk-xp-shine')
-    expect(plain.textContent).toBe('+197')
-    expect(screen.container.querySelector('.clrk-xp__unit').textContent).toBe('xp')
-    expect(px(getComputedStyle(screen.container.querySelector('.clrk-lvl')).height)).toBe(6)
-    expect(screen.container.querySelector('.clrk-xp-chip').textContent).toBe('+55 prime de série')
-  })
-
   it('rolls an odometer column per digit, the thousands apart', async () => {
-    const screen = await mount(<Odometer value={1387} sign="+" group shine label="+1 387 xp" />)
+    const screen = await mount(<Odometer value={1387} sign="+" group label="+1 387 xp" />)
     const cols = screen.container.querySelectorAll('.clrk-odo__col')
     expect(cols).toHaveLength(4)
     expect([...cols].map(c => c.style.getPropertyValue('--n'))).toEqual(['1', '3', '8', '7'])
@@ -110,17 +84,6 @@ describe('the kit', () => {
     expect(new Set(ids).size).toBe(4)
     expect(screen.container.querySelectorAll('.clrk-clp__arm')).toHaveLength(4)
     expect(screen.container.querySelector('.clrk-clp-chip--paper')).not.toBeNull()
-  })
-
-  it('reads a card through the reader, its lamp in the verdict\'s ink', async () => {
-    const screen = await mount(<><Reader flash={3} verdict={0} /><RunCard face={CARDS_32[3]} paper /><Pile verdict={2} count={2}><b>8</b></Pile></>)
-    const reader = screen.container.querySelector('.clrk-reader')
-    expect(reader.className).toContain('clrk-reader--a')
-    expect(px(getComputedStyle(reader).height)).toBe(72)
-    const card = screen.container.querySelector('.clrk-tcard--paper')
-    expect(card.querySelector('.clrk-tcard__term').textContent).toBe('〜は')
-    expect(card.querySelector('.clrk-tcard__read--latin').textContent).toBe('topic')
-    expect(screen.container.querySelector('.clrk-pile').className).toContain('clrk-pile--d1')
   })
 
   it('draws the boards\' 52px gate, and its head', async () => {

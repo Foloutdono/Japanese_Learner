@@ -15,8 +15,20 @@ import { DIAL, dialArcs, fareArc } from '../../domain/dial'
 //
 //   parts  [{ key, n, lit }]: a line's cards and the run's share of them
 //   fare   { rides, total } while some of the run waits, else null
-export function TodayDial({ parts, fare = null, className = '', print = null, seal = null, style, children }) {
-  if (print) return <PrintDial parts={parts} fare={fare} className={className} print={print} seal={seal} style={style}>{children}</PrintDial>
+//
+// On the print, the day cleared plays on the dial (plan 250): `stamp`
+// ('slam' | 'press') brings the day's seal down onto the disc, `ringIn`
+// turns the lines' ring in, `thread` ({ rides, total, ride, stop }) is
+// the day's thread on the thin ring, and `fx` the transients over it
+// (a flash, a bloom).
+export function TodayDial({ parts, fare = null, className = '', print = null, seal = null, stamp = null, ringIn = false, thread = null, fx = null, style, children }) {
+  if (print) {
+    return (
+      <PrintDial parts={parts} fare={fare} className={className} print={print} seal={seal} stamp={stamp} ringIn={ringIn} thread={thread} fx={fx} style={style}>
+        {children}
+      </PrintDial>
+    )
+  }
   const arcs = dialArcs(parts)
   const mid = DIAL.size / 2
   const c = 2 * Math.PI * DIAL.r
@@ -85,9 +97,9 @@ const MARIA = [[-0.56, -0.42, 0.2, 0.781], [-0.2, -0.66, 0.16, 0.7377], [0.52, -
 // left, the disc is the day's 駅スタンプ cut the other way, a disc of
 // red with its rings and characters left in the paper, hung where the
 // sun or the moon was. At dawn the sun is already red: the seal is cut
-// into it, in the sun's own red under its own glow. Drawn in the
-// seal's 192-unit box (components/dayclear/kit/Seal.jsx), its type the
-// kit's rungs; its grain the canvas's, sparse voids where the ink did
+// into it, in the sun's own red under its own glow. Drawn in the kit's
+// 192-unit seal box (the canvas kit's §5), its type the kit's rungs;
+// its grain the canvas's, sparse voids where the ink did
 // not take (the kit's #clrk-ink blots and its slots' finer voids both
 // wash a disc this size pale).
 const SEAL_GLOW = 0.42
@@ -113,9 +125,13 @@ function CutSeal({ id, mid, r, day, foot, fill }) {
   )
 }
 
-function PrintDial({ parts, fare, className, print, seal, style, children }) {
+function PrintDial({ parts, fare, className, print, seal, stamp, ringIn, thread, fx, style, children }) {
   const id = useId().replace(/[^\w-]/g, '')
   const { frame, disc } = print
+  // While the day's seal comes down (the finish, plan 250) the disc is
+  // the hour's own and the seal a layer of its own over it: an <svg>
+  // the compositor moves. Once it has landed it is the disc again.
+  const falling = Boolean(seal && stamp)
   // The seal keeps the dawn sun's red and glow; at any other hour its own.
   const sun = disc.kind === 'sun_red'
   const [glowInk, glowOp] = seal && !sun ? ['var(--tpr-seal-glow)', SEAL_GLOW] : [disc.glow, disc.glowOp]
@@ -143,8 +159,19 @@ function PrintDial({ parts, fare, className, print, seal, style, children }) {
   )
   const paid = fare && fare.total > 0 && fare.rides < fare.total ? fareArc(fare.rides, fare.total, { r: frame.fare, size }) : null
   const fc = 2 * Math.PI * frame.fare
+  const run = thread && thread.total > 0 ? fareArc(thread.rides, thread.total, { r: frame.fare, size }) : null
+  const classes = ['tdy-dial', 'tdy-dial--print', falling && `tdy-dial--${stamp}`, className].filter(Boolean).join(' ')
+  const vars = {
+    ...style,
+    '--dial-units': size,
+    '--dial-ring': (2 * (frame.fare + 4)) / size,
+    // The disc's and the stop's shares of the dial's box, for what is
+    // drawn over it in boxes (TodayDial's fx, the thread's stop).
+    '--dial-disc': (2 * r) / size,
+    '--dial-stop': (8 * k) / size,
+  }
   return (
-    <div className={`tdy-dial tdy-dial--print ${className}`.trim()} style={{ ...style, '--dial-units': size, '--dial-ring': (2 * (frame.fare + 4)) / size }}>
+    <div className={classes} style={vars}>
       {/* The glow on a sheet of its own, so its breath is the
           compositor's to draw and not a reason to draw the disc's blurs
           again every frame (plan 208). */}
@@ -162,9 +189,9 @@ function PrintDial({ parts, fare, className, print, seal, style, children }) {
         className="tdy-dial__disc"
         viewBox={`0 0 ${size} ${size}`}
         focusable="false"
-        role={seal ? 'img' : undefined}
-        aria-label={seal?.label}
-        aria-hidden={seal ? undefined : 'true'}
+        role={seal && !falling ? 'img' : undefined}
+        aria-label={falling ? undefined : seal?.label}
+        aria-hidden={seal && !falling ? undefined : 'true'}
       >
         <defs>
           <radialGradient id={`${id}f`} cx="0.4" cy="0.36" r="0.72">
@@ -184,10 +211,10 @@ function PrintDial({ parts, fare, className, print, seal, style, children }) {
             ))}
           </g>
         )}
-        {seal
+        {seal && !falling
           ? <CutSeal id={id} mid={mid} r={r} day={seal.day} foot={seal.foot} fill={sun ? `url(#${id}f)` : null} />
           : <circle cx={mid} cy={mid} r={r} fill={`url(#${id}f)`} />}
-        {disc.maria && !seal && (
+        {disc.maria && (!seal || falling) && (
           <g clipPath={`url(#${id}c)`} fill="#c9b68a" opacity="0.2" filter={`url(#${id}s)`}>
             {MARIA.map(([x, y, s, q]) => (
               <ellipse key={`${x}${y}`} cx={mid + x * r} cy={mid + y * r} rx={s * r} ry={s * r * q} />
@@ -195,7 +222,18 @@ function PrintDial({ parts, fare, className, print, seal, style, children }) {
           </g>
         )}
       </svg>
-      <svg className="tdy-dial__ring" viewBox={`0 0 ${size} ${size}`} aria-hidden="true" focusable="false">
+      {falling && (
+        <svg
+          className={`tdy-dial__stamp tdy-dial__stamp--${stamp}`}
+          viewBox={`0 0 ${size} ${size}`}
+          focusable="false"
+          role="img"
+          aria-label={seal.label}
+        >
+          <CutSeal id={`${id}st`} mid={mid} r={r} day={seal.day} foot={seal.foot} fill={sun ? `url(#${id}f)` : null} />
+        </svg>
+      )}
+      <svg className={`tdy-dial__ring${ringIn ? ' tdy-dial__ring--in' : ''}`} viewBox={`0 0 ${size} ${size}`} aria-hidden="true" focusable="false">
         {arcs.map(a => (
           <g key={a.key} style={{ '--lane-color': LINE_COLOR[a.key] ?? 'var(--text-secondary)' }}>
             {ring('all', `tdy-dial__arc${a.cut ? ' tdy-dial__arc--dim' : ''}`, a.len, a.start, width)}
@@ -220,8 +258,51 @@ function PrintDial({ parts, fare, className, print, seal, style, children }) {
           </g>
         )}
       </svg>
+      {/* 運賃 — the day's thread (plan 250, B4·a): the thin ring solid as
+          far as the day has ridden, dotted for what waits, a stop where
+          the learner got off. Boxes of their own, so its way in is the
+          compositor's. */}
+      {run && (
+        <svg className="tdy-dial__thread" viewBox={`0 0 ${size} ${size}`} aria-hidden="true" focusable="false">
+          <circle className="tdy-dial__thread-wait" cx={mid} cy={mid} r={frame.fare} style={{ strokeWidth: 1.6 * k, strokeDasharray: `0.01 ${6.2 * k}` }} />
+        </svg>
+      )}
+      {run && thread.ride && run.len > 0 && (
+        <svg className="tdy-dial__thread tdy-dial__thread--ride" viewBox={`0 0 ${size} ${size}`} aria-hidden="true" focusable="false">
+          <circle
+            className="tdy-dial__thread-ride"
+            cx={mid}
+            cy={mid}
+            r={frame.fare}
+            strokeDasharray={`${run.len} ${fc}`}
+            style={{ strokeWidth: 2.2 * k }}
+            transform={turn}
+          />
+        </svg>
+      )}
+      {run && thread.stop && (
+        <span className="tdy-dial__stop" style={{ left: `${(run.x / size) * 100}%`, top: `${(run.y / size) * 100}%` }} aria-hidden="true" />
+      )}
+      {fx}
       <div className="tdy-dial__c">{children}</div>
     </div>
+  )
+}
+
+/** The day's thread said under the dial (plan 250, B4·a): the thin
+ *  ring's two marks beside what the day has ridden and what waits. */
+export function ThreadKey({ done, left, t, className = '' }) {
+  return (
+    <p className={`tdy-key tdy-key--fare ${className}`.trim()}>
+      <span className="tdy-key__item">
+        <i className="tdy-key__ride" aria-hidden="true" />
+        <b>{done}</b> {t.finThreadDone(done)}
+      </span>
+      <span className="tdy-key__item">
+        <i className="tdy-key__wait" aria-hidden="true" />
+        <b>{left}</b> {t.finThreadLeft(left)}
+      </span>
+    </p>
   )
 }
 

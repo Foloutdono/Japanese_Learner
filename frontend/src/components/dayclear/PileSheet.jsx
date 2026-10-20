@@ -4,9 +4,9 @@ import { supabase } from '../../lib/supabase'
 import { Sheet } from '../chrome/Sheet'
 import { DictionaryLookupSheet } from '../dictionary/DictionaryDetail'
 
-// ── 終着 — a pile's cards (plan 191) ─────────────────────────────────
-// At the clear's rest each pile is a button (À revoir, Justes,
-// Parfaites): it opens this sheet, the pile's cards as rows -- the term
+// ── 終着 — a pile's cards (plans 191, 250) ───────────────────────────
+// At the finish's rest the board's À revoir row (components/dayclear/
+// FinishBoard.jsx) opens this sheet, the pile's cards as rows -- the term
 // over its reading, the pile's ink on the edge -- and a row opens the
 // card's dictionary entry, as the 🔍 of a run does (DictionaryLookupSheet,
 // its doors opening into its own stack). The list stands aside while the

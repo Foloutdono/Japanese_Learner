@@ -1531,7 +1531,7 @@
 "禎":{"lv":"N1","on":["テイ"],"kun":[["さいわ","い"]],"en":["happiness","blessed","good fortune"],"fr":["bonheur","béni","bonne fortune"]},
 "福":{"lv":"N3","on":["フク"],"kun":[],"en":["blessing","fortune","luck"],"fr":["bénédiction","fortune","chance"]},
 "秀":{"lv":"N1","on":["シュウ"],"kun":[["ひい","でる"]],"en":["excel","excellence","beauty"],"fr":["excellence","exceller","beauté"]},
-"私":{"lv":"N4","on":["シ"],"kun":[["わたくし",""],["わたし",""]],"en":["private","I","me"],"fr":["privé","je","moi"]},
+"私":{"lv":"N4","on":["シ"],"kun":[["わたし",""],["わたくし",""]],"en":["private","I","me"],"fr":["privé","je","moi"]},
 "秋":{"lv":"N4","on":["シュウ"],"kun":[["あき",""],["とき",""]],"en":["autumn"],"fr":["automne"]},
 "科":{"lv":"N3","on":["カ"],"kun":[],"en":["department","course","section"],"fr":["département","section","cours"]},
 "秒":{"lv":"N2","on":["ビョウ"],"kun":[],"en":["second (1/60 minute)"],"fr":["seconde"]},

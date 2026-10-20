@@ -51,10 +51,6 @@ export function getAudioContext() {
   return ctx
 }
 
-export function isRunning() {
-  return !!ctx && ctx.state === 'running'
-}
-
 /**
  * Run `fn` once audio is actually allowed to play — synchronously if
  * a gesture has already happened. For the sounds nobody clicked for:

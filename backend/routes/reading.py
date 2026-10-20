@@ -12,6 +12,7 @@ from core.credits import local_today, require_pass, resets_at
 from pydantic import BaseModel, Field
 
 from core.db import db_conn
+from core.rls import enable_rls
 from core.auth import get_user_id, unprefixed
 from core.srs_instance import srs
 from core.user_level import resolve_level
@@ -117,6 +118,12 @@ def _migrate_reading_log_schema() -> None:
         "ALTER TABLE IF EXISTS reading_log ADD COLUMN IF NOT EXISTS quality SMALLINT",
         "ALTER TABLE IF EXISTS reading_log ADD COLUMN IF NOT EXISTS accuracy SMALLINT",
         "ALTER TABLE IF EXISTS comprehension_log ADD COLUMN IF NOT EXISTS grammar JSONB",
+        # Closed to the Data API like every table (core/rls.py). These
+        # two predate the self-migrations, so nothing creates them; plain
+        # statements, as the ADD COLUMNs above already take the same
+        # lock at every boot.
+        "ALTER TABLE IF EXISTS reading_log ENABLE ROW LEVEL SECURITY",
+        "ALTER TABLE IF EXISTS comprehension_log ENABLE ROW LEVEL SECURITY",
     )
     for sql in statements:
         conn = db_conn()
@@ -1805,6 +1812,7 @@ def _init_comprehension_pool() -> None:
                 )
                 """
             )
+            enable_rls(cur, "comprehension_pool")
             cur.execute(
                 """
                 CREATE INDEX IF NOT EXISTS comprehension_pool_bucket
@@ -1838,6 +1846,7 @@ def _init_comprehension_pool() -> None:
                 )
                 """
             )
+            enable_rls(cur, "comprehension_served")
         conn.commit()
     finally:
         conn.close()
@@ -2098,6 +2107,7 @@ def _init_comprehension_usage() -> None:
                 )
                 """
             )
+            enable_rls(cur, "comprehension_usage")
         conn.commit()
     finally:
         conn.close()

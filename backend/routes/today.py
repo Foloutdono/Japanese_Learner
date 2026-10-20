@@ -676,7 +676,7 @@ def get_today(user_id: str = Depends(get_user_id)):
         # clearing it pays, and the rest days.
         **_day_status(user_id),
         # 回復運転 (plan 217): the review plan and what it did today,
-        # and the comeback sheet's offer when the gate opens on one.
+        # and the comeback offer when the gate has one (its notice).
         "review": _review_status(user_id, queue),
     }
 
@@ -937,11 +937,12 @@ AHEAD_WORDS = 8
 
 def _instants(raw: str) -> list[datetime]:
     now = datetime.now(timezone.utc)
+    # Counted before any is parsed: past the bound, none needs reading.
+    parts = [p.strip() for p in raw.split(",") if p.strip()]
+    if not parts or len(parts) > AHEAD_MAX_POINTS:
+        raise HTTPException(status_code=422, detail=f"between 1 and {AHEAD_MAX_POINTS} instants")
     out = []
-    for part in raw.split(","):
-        part = part.strip()
-        if not part:
-            continue
+    for part in parts:
         try:
             t = datetime.fromisoformat(part.replace("Z", "+00:00"))
         except ValueError:
@@ -951,8 +952,6 @@ def _instants(raw: str) -> list[datetime]:
         if not (now - timedelta(days=1) <= t <= now + timedelta(days=AHEAD_MAX_DAYS)):
             raise HTTPException(status_code=422, detail=f"out of range: {part}")
         out.append(t.astimezone(timezone.utc))
-    if not out or len(out) > AHEAD_MAX_POINTS:
-        raise HTTPException(status_code=422, detail=f"between 1 and {AHEAD_MAX_POINTS} instants")
     return out
 
 
@@ -1048,8 +1047,8 @@ def get_today_ahead(at: str = Query(..., description="comma-separated ISO instan
     # 回復運転 (plan 217): what the gate will hold is the day's share
     # under the learner's ceiling or catch-up -- today's what is left of
     # it, a later day's a whole one -- and no new card on a day the plan
-    # pauses them. Without a ceiling, a point whose reviews would open
-    # the gate on the comeback sheet says so (`comeback`), and the
+    # pauses them. Without a ceiling, a point whose reviews would put
+    # the comeback offer on the gate says so (`comeback`), and the
     # notification invites back rather than counting the backlog.
     plan = review_plan.read_plan(user_id)
     prefix = len(user_id) + 1

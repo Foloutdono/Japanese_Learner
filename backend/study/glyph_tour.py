@@ -35,6 +35,7 @@ from content.kanji_data import DECK_BY_CHAR, kanji_to_id
 from content.kanji_meanings import KANJI_FR
 from core.auth import prefixed, unprefixed
 from core.db import db_conn
+from core.rls import enable_rls
 from study.kana_words import kana_words
 from study.kanji_words import kanji_words
 from translations import get_meaning
@@ -295,6 +296,7 @@ def _ensure_schema() -> None:
                     PRIMARY KEY (user_id, card_id)
                 )
             """)
+            enable_rls(cur, "glyph_tours")
         conn.commit()
     finally:
         conn.close()

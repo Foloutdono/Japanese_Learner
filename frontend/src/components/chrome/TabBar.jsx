@@ -41,14 +41,14 @@ import { GateIcon } from './GateIcon'
 const GLYPH = 21
 const GLYPH_ON = 25
 
-export function TabBar() {
+export function TabBar({ away = false, arrive = false }) {
   const { t } = useLang()
   const { pathname } = useLocation()
   const active = tabFor(pathname)
   const due = useTodaySummary().data?.total ?? 0
 
   return (
-    <nav className="tabbar" aria-label={t.tabBarLabel} data-guide="tabbar">
+    <nav className={away ? 'tabbar tabbar--away' : arrive ? 'tabbar tabbar--arrive' : 'tabbar'} aria-label={t.tabBarLabel} data-guide="tabbar">
       <div className="tabbar__inner">
         {getTabs(t).map(tab => {
           const on = tab.id === active

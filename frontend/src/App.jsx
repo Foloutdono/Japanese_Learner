@@ -10,7 +10,7 @@ import { OfferScreen } from './components/offers/OfferScreen'
 import { StatusSheet } from './components/journey/StatusSheet'
 import { sectionFor, HOME_STATION } from './config/stations'
 import { getTabs, tabFor } from './config/tabs'
-import { Shell, StageFrame, DeskShellStage } from './components/chrome/Shell'
+import { Shell, StageFrame } from './components/chrome/Shell'
 import { NativeBridge } from './components/chrome/NativeBridge'
 import { identityFor } from './config/identity'
 import { apiJson, apiJsonWithTimeout } from './lib/api'
@@ -32,6 +32,7 @@ import { rememberOnboarded, wasOnboardedHere } from './stores/onboarded'
 import { holdGuide } from './stores/guide'
 import { forgetAccount } from './stores/account'
 import { track } from './lib/track'
+import { cardsRidden } from './lib/rideProgress'
 import { routePattern } from './lib/routePattern'
 import { watchApiFailures } from './lib/apiTrail'
 import { watchClientErrors } from './lib/clientErrors'
@@ -50,7 +51,6 @@ import LearnScreen from './screens/LearnScreen'
 import PracticeScreen from './screens/PracticeScreen'
 import TodayScreen from './screens/TodayScreen'
 import TodayRun from './screens/TodayRun'
-import DayClearScreen from './screens/DayClearScreen'
 import TicketsScreen from './screens/TicketsScreen'
 import KanaScreen  from './screens/KanaScreen'
 import KanaRun from './screens/KanaRun'
@@ -323,7 +323,8 @@ export default function App({ front = NO_FRONT }) {
   const [boardedHere, setBoardedHere] = useState(() => (front.entry === 'board' ? performance.now() : null))
   // 正面口 (lib/frontEntry.js): Board pressed on the landing page is
   // honoured before any screen is drawn -- the pass is minted at once and
-  // the boarding opens on its name, with no Welcome asking a second time.
+  // the boarding opens on its first question, with no Welcome asking a
+  // second time.
   // On until a session arrives, or until the pass could not be minted (the
   // Welcome then opens on the sign-up, as its own Board does).
   const [pageBoard, setPageBoard] = useState(front.entry === 'board')
@@ -509,7 +510,10 @@ export default function App({ front = NO_FRONT }) {
   // 入門 (plan 170): a learner who answered « Pas encore » to the kana
   // question meets the introduction before the cards; everyone else
   // boards the cards as before.
-  const rideStart = onboardingProfile?.kanaKnown === 'none' ? '/ride/intro' : '/ride/cards'
+  // A ride left after its cards (a reload, the tab closed) is boarded
+  // again at the reading, never the first card (lib/rideProgress.js).
+  const rideStart = cardsRidden(session?.user?.id) ? '/ride/reading'
+    : onboardingProfile?.kanaKnown === 'none' ? '/ride/intro' : '/ride/cards'
   // 案内 — no gate's guide may open under the 改札 cutscene (plan 100).
   useEffect(() => { holdGuide(onboarding === 'finishing') }, [onboarding])
   const rideDone = () => setGate(g => (
@@ -569,10 +573,11 @@ export default function App({ front = NO_FRONT }) {
             <Route path="/dev/ride" element={<RidePreview />} />
             <Route path="/dev/sounds" element={<SoundPalette />} />
             <Route path="/dev/offers" element={<OffersPreview />} />
-            {/* 終着 (plan 191): every scene of the day cleared, from the
-                canvas's fixtures (?scene=…&reduced=1&desk=1), in the
-                route's own frame: the real rail beside it on the desk. */}
-            <Route element={<DeskShellStage />}>
+            {/* 終着 (plans 191, 250): every finish of the day's run, from
+                the canvas's fixtures (?scene=…&reduced=1), on Today under
+                the shell: the bars leave and come back on a phone, the
+                real rail beside it on the desk. */}
+            <Route element={<Shell />}>
               <Route path="/dev/dayclear" element={<DayClearPreview />} />
             </Route>
           </Routes>
@@ -636,7 +641,6 @@ export default function App({ front = NO_FRONT }) {
       <LangProvider>
         <BoardingFlow
           session={session}
-          initialProfile={onboardingProfile}
           guest={isGuest(session)}
           onComplete={signed => {
             // The contract is signed server-side by now: this device
@@ -663,14 +667,6 @@ export default function App({ front = NO_FRONT }) {
           onExit={() => leaveBoarding()}
           onSignIn={() => leaveBoarding('login')}
         />
-        {/* 定期券 — the offer, for the last boarding screen's door to
-            open. This branch returns BEFORE the router, so the copy
-            mounted beside <Routes/> is not in the tree here: without
-            this one, the pass line on PassStep would be exactly the
-            dead control domain/paywall.js argues against. Portals to
-            document.body and uses no router hook, so it is at home
-            outside the BrowserRouter. */}
-        <OfferScreen />
       </LangProvider>
     )
   }
@@ -684,6 +680,10 @@ export default function App({ front = NO_FRONT }) {
           <Route element={<Shell />}>
             {/* 本日の運行 — everything due, in one queue. See TodayScreen. */}
             <Route path="/today"                element={<TodayScreen session={session} />} />
+            {/* 終着 — the day's run finished, on Today itself (plan 250):
+                the same screen, so the URL leaves when the finish rests
+                and nothing is remounted. */}
+            <Route path="/today/clear"          element={<TodayScreen session={session} />} />
             <Route path="/learn"                element={<LearnScreen session={session} />} />
             {/* The stations and the platforms (plan 071): the sources,
                 then a line's stops, then a stop's modes, under the
@@ -767,12 +767,6 @@ export default function App({ front = NO_FRONT }) {
             <Route path="/profile/settings/:page" element={<SettingsScreen session={session} />} />
           </Route>
 
-          {/* 終着 — the day's run finished (plan 191): full screen on a
-              phone, as a run's stage; beside the rail on the desk. */}
-          <Route element={<DeskShellStage />}>
-            <Route path="/today/clear"          element={<DayClearScreen session={session} />} />
-          </Route>
-
           {/* The stage: both bars leave, the rating bar or the field
               docks on the bottom edge, and the bar's ‹ is the way out.
               A run's set, level, tier, theme or deck and its mode are its
@@ -808,20 +802,24 @@ export default function App({ front = NO_FRONT }) {
                 boarding, on the stage like any run. Reachable at any
                 time (Settings replays it); the index route below is
                 what sends a new learner here first. `covered` is the
-                改札 cutscene still playing over the router. */}
+                改札 cutscene still playing over the router. `first` is
+                the ride that index route sends to, never a replay: the
+                entry behind it is that route, which would board the
+                ride again, so each screen holds Back
+                (hooks/useBackGuard.js). */}
             <Route path="/ride" element={<Navigate to="/ride/cards" replace />} />
             {/* 入門 (plan 170): six screens before the cards, for the
                 learner with no kana; its way on and its way out both
                 board the cards. */}
             <Route
               path="/ride/intro"
-              element={<RideIntro session={session} covered={onboarding === 'finishing'} />}
+              element={<RideIntro session={session} covered={onboarding === 'finishing'} first={rideDue} />}
             />
             <Route
               path="/ride/cards"
-              element={<RideRun session={session} onDone={rideDone} covered={onboarding === 'finishing'} />}
+              element={<RideRun session={session} onDone={rideDone} covered={onboarding === 'finishing'} first={rideDue} />}
             />
-            <Route path="/ride/reading" element={<RideReading session={session} onDone={rideDone} />} />
+            <Route path="/ride/reading" element={<RideReading session={session} onDone={rideDone} first={rideDue} />} />
           </Route>
 
           {/* The gate hall retired with the chrome; the front door is
