@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 
-// ── 工事 — a release is coming (plan 264) ────────────────────
+// ── 工事 — a release is coming (plan 265) ────────────────────
 // The daily release restarts the one-worker backend, and for a few
 // minutes requests hang or fail with nothing saying why. The release
 // workflow announces itself first (backend/core/release_notice.py), and

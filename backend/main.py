@@ -174,7 +174,7 @@ CORS_ORIGINS = ["https://japanese-learner-seven.vercel.app", *NATIVE_ORIGINS] + 
 # still carries the CORS headers the native shell needs to read it.
 app.add_middleware(PerCallerConcurrency)
 
-# 工事 -- the release the workflow announced (plan 264,
+# 工事 -- the release the workflow announced (plan 265,
 # core/release_notice.py), on every /api answer, a 429 included. Exposed
 # through CORS for the native shell, whose requests are cross-origin.
 app.add_middleware(ReleaseNoticeHeader)

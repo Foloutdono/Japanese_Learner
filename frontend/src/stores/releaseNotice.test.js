@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { GRACE_MS, releaseNotice } from './releaseNotice'
 
-// 工事 (plan 264): what the request path's answers say about a release.
+// 工事 (plan 265): what the request path's answers say about a release.
 function answer(status, at) {
   return { status, headers: { get: name => (name === 'X-Release-At' && at != null ? String(at) : null) } }
 }

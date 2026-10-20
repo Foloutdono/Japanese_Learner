@@ -40,7 +40,7 @@ running head) when that is ahead of it. So:
 - Every deploy restarts the one-worker backend, and a learner opening the
   app meanwhile waits on the boot gate (the `boot_timeout` events in the
   trail). One restart a day, in the small hours, keeps that off the day.
-- **Learners are warned first (plan 264).** Before it pushes, the
+- **Learners are warned first (plan 265).** Before it pushes, the
   workflow tells the running backend the minute of the push
   (`POST /api/release/notice`), waits that long (10 minutes; a manual
   run's *notice_minutes*, 0 for none) and then pushes. Meanwhile every
@@ -77,7 +77,7 @@ Set up once, in the dashboards (the repository cannot do these):
    for that deployment to appear, and Save again. `main` and every pull
    request then get preview deployments, which is the place to try a
    frontend change.
-4. **The release warning** (plan 264): mint a random token
+4. **The release warning** (plan 265): mint a random token
    (`openssl rand -hex 32`) and set it twice, as `RELEASE_NOTICE_TOKEN`:
    on Render (the backend service → Environment) and as a repository
    secret (Settings → Secrets → Actions). Until both are set the workflow

@@ -281,11 +281,11 @@ describe('TodayScreen — the guide', () => {
     apiJson.mockReset()
     apiJson.mockResolvedValue({})
     const screen = await mount()
-    await settleLong()
+    // Waited for, not slept on (the transfer sheet's tests below say why).
+    await vi.waitFor(() => expect(document.querySelector('.guide')).toBeTruthy(), { timeout: 5000, interval: 20 })
     const root = screen.container
     expect(root.querySelector('[data-guide="today.gate"]')).toBeTruthy()
     const guide = document.querySelector('.guide')
-    expect(guide).toBeTruthy()
     // The tab bar is the shell's, not this screen's: the guide starts
     // on the gate.
     expect(guide.dataset.stop).toBe('today.gate')
@@ -321,6 +321,10 @@ describe('TodayScreen — the transfer sheet', () => {
   const offered = extra => ({ username: 'Aiko', week: [], streak: 0, level: 1, guided: GUIDED, transferOffer: true, ...extra })
   const sheet = () => document.querySelector('.tr-sheet')
   const settleLong = (ms = 200) => new Promise(r => setTimeout(r, ms))
+  // What should appear is waited for, never slept on: the guide and the
+  // sheet open after the lanes paint, which a fixed 200ms lost on a
+  // loaded CI runner. A fixed settle stays only before an absence.
+  const arrives = el => vi.waitFor(() => expect(el()).toBeTruthy(), { timeout: 5000, interval: 20 })
 
   function mountWithSettings() {
     return render(
@@ -343,9 +347,8 @@ describe('TodayScreen — the transfer sheet', () => {
   it('asks, with the apps it reads, and "I’m starting here" answers it', async () => {
     summaryRef.current = offered()
     const screen = await mountWithSettings()
-    await settleLong()
+    await arrives(sheet)
     expect(document.querySelector('.guide')).toBeNull()
-    expect(sheet()).toBeTruthy()
     expect(sheet().querySelector('h2').textContent.replace(/\u00a0/g, ' ')).toBe('Tu as déjà appris ailleurs ?')
     expect([...sheet().querySelectorAll('.tr-chip')].map(c => c.textContent)).toEqual(['Anki', 'WaniKani', 'Renshuu'])
     sheet().querySelector('[data-action="transfer-offer-later"]').click()
@@ -360,7 +363,7 @@ describe('TodayScreen — the transfer sheet', () => {
   it('goes to Settings › Correspondance', async () => {
     summaryRef.current = offered()
     const screen = await mountWithSettings()
-    await settleLong()
+    await arrives(sheet)
     sheet().querySelector('[data-action="transfer-offer-go"]').click()
     // Waited for, not slept on: the page arrives through the router's
     // transition, which a fixed 80ms lost on a loaded CI runner.
@@ -373,7 +376,7 @@ describe('TodayScreen — the transfer sheet', () => {
   it('shut with Escape counts as an answer', async () => {
     summaryRef.current = offered()
     const screen = await mountWithSettings()
-    await settleLong()
+    await arrives(sheet)
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
     await settle()
     expect(sheet()).toBeNull()
@@ -384,8 +387,7 @@ describe('TodayScreen — the transfer sheet', () => {
   it('waits for the gate’s guide, and is not drawn when the profile does not offer', async () => {
     summaryRef.current = offered({ guided: {} })
     let screen = await mountWithSettings()
-    await settleLong()
-    expect(document.querySelector('.guide')).toBeTruthy()
+    await arrives(() => document.querySelector('.guide'))
     expect(sheet()).toBeNull()
     await screen.unmount()
     localStorage.removeItem('jp-guided')

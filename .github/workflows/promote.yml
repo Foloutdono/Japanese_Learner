@@ -118,7 +118,7 @@ jobs:
           echo "ship=true" >> "$GITHUB_OUTPUT"
           echo "sha=$pick" >> "$GITHUB_OUTPUT"
 
-      # 工事 (plan 264): learners are told before the restart, not left to
+      # 工事 (plan 265): learners are told before the restart, not left to
       # wonder why the app stalls. The running backend is told the minute
       # of the push and says it on every answer (core/release_notice.py,
       # the docked note in UpdateToast.jsx); the restart clears it. Best

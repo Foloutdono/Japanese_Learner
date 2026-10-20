@@ -41,7 +41,7 @@ export function UpdateToast() {
   )
 }
 
-// ── 工事 — a release is coming (plan 264) ──
+// ── 工事 — a release is coming (plan 265) ──
 // The release workflow announced the minute it pushes, and the server
 // says so on every answer (stores/releaseNotice.js). For a few minutes
 // after it the app may stall or show the boot gate: this says why

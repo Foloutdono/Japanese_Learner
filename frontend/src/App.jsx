@@ -855,7 +855,7 @@ export default function App({ front = NO_FRONT }) {
         <NativeBridge />
 
         {/* 掲示 — the docked notes (plan 065): a new build waiting, a
-            release coming (plan 264), or no network. Beside <Routes/> for
+            release coming (plan 265), or no network. Beside <Routes/> for
             the same reason as the gate below: they must outlive the
             navigation that would unmount a screen. */}
         <UpdateToast />
