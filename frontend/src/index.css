@@ -9114,6 +9114,12 @@ textarea:focus-visible {
 .tpr-scull { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: view-box; animation-name: tpr-scull; }
 .tpr-spark { animation-iteration-count: infinite; opacity: 0; animation-name: tpr-spark; animation-timing-function: ease-out; }
 .tpr-glitter { opacity: 0; animation-name: tpr-glitter; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+/* The seasons' own (plan 261): the snow's sway, the fireflies' wander
+   and blink, the fireworks opening. */
+.tpr-sway { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-sway; animation-direction: alternate; }
+.tpr-wander { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-wander; animation-direction: alternate; }
+.tpr-blink { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-blink; }
+.tpr-burst { transform-box: view-box; opacity: 0; animation-iteration-count: infinite; animation-name: tpr-burst; animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
 @keyframes tpr-bird-bend { 0%, 100% { rotate: 14deg; } 42% { rotate: -22deg; } }
 @keyframes tpr-bird-bend-glide { 0%, 40%, 100% { rotate: 12deg; } 18%, 58% { rotate: -20deg; } 80% { rotate: 4deg; } }
 @keyframes tpr-bird-fold { 0% { scale: 1 1; animation-timing-function: cubic-bezier(0.55, 0, 0.7, 0.4); }
@@ -9181,6 +9187,10 @@ textarea:focus-visible {
 @keyframes tpr-scull { 0%, 100% { rotate: -5deg; } 50% { rotate: 6deg; } }
 @keyframes tpr-spark { 0% { opacity: 0; translate: 0 0; } 15% { opacity: 1; } 100% { opacity: 0; translate: 1.6px -7px; } }
 @keyframes tpr-glitter { 0%, 50%, 100% { opacity: 0; } 68% { opacity: 1; } }
+@keyframes tpr-sway { from { translate: calc(var(--sx, 0%) * -1) 0; } to { translate: var(--sx, 0%) 0; } }
+@keyframes tpr-wander { 0% { translate: 0 0; } 50% { translate: var(--wx, 0%) var(--wy, 0%); } 100% { translate: calc(var(--wx, 0%) * -0.6) calc(var(--wy, 0%) * 0.4); } }
+@keyframes tpr-blink { 0%, 100% { opacity: 0.12; } 30% { opacity: 1; } 55% { opacity: 0.85; } 75% { opacity: 0.08; } }
+@keyframes tpr-burst { 0% { opacity: 0; scale: 0.15; } 6% { opacity: 1; } 34% { opacity: 0.85; scale: 1; translate: 0 2px; } 52% { opacity: 0; scale: 1.05; translate: 0 6px; } 100% { opacity: 0; scale: 1.05; } }
 
 @media (prefers-reduced-motion: reduce) {
   /* The still print: the moving parts at rest, the train halfway
@@ -9198,6 +9208,11 @@ textarea:focus-visible {
   .tpr-glint { opacity: 0.4; }
   .tpr-glitter { opacity: 0.6; }
   .tpr-puff { opacity: 0.25; }
+  /* The fireflies lit, the fireworks open; and the evening snow (暮雪)
+     is the view itself: still, it stays (plan 261). */
+  .tpr-blink { opacity: 0.9; }
+  .tpr-burst { opacity: 0.85; }
+  .tpr-flake { opacity: 0.9; }
 }
 
 /* The screen's one filled action. Gold, because Today is gold — and

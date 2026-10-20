@@ -13,7 +13,12 @@ import { PRINT, usePrintScene } from './print/usePrint'
 // coming home on the bay; 落雁 dusk, the geese coming down under the
 // moon; 秋月 the night, the autumn moon, the fishing fires. Fuji over
 // the bay, the bullet train crossing on its stone viaduct, a pine and
-// the autumn's grasses in front.
+// the autumn's grasses in front. And the year choosing the season
+// (plan 261, the canvas "Tsuji — Today, the seasons"): the cherry and
+// its petals in spring; in summer Red Fuji, the cloud peak, the crape
+// myrtle, the fireflies, August's fireworks; the maples in autumn; the
+// snow and the red plum in winter. `look` names the print
+// (domain/printHour's printName).
 //
 // The print is layered the way it is drawn: the sky; the sky's wood
 // grain (a tile, drawn once); what lies behind the train; the train on
@@ -78,8 +83,8 @@ function useUnderGate() {
   return departing != null && covered === departing
 }
 
-export function TodayPrint({ hour, device, frameRef, train = true }) {
-  const scene = usePrintScene(hour, device)
+export function TodayPrint({ look, device, frameRef, train = true }) {
+  const scene = usePrintScene(look, device)
   const under = useUnderGate()
   const box = scene ? `0 0 ${scene.w} ${scene.h}` : null
   return (
@@ -116,16 +121,16 @@ export function TodayPrint({ hour, device, frameRef, train = true }) {
 // print's vermilion, set down its right edge the way a print carries
 // it. Said whole to a screen reader, in the learner's language (a
 // paragraph cannot be named, so the words are there, unseen).
-export function PrintTitle({ now, hour }) {
+export function PrintTitle({ now, look }) {
   const { t, lang } = useLang()
   const day = new Intl.DateTimeFormat(lang === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long' }).format(now)
   return (
     <p className="tpr-title">
       <span lang="ja" aria-hidden="true">
         {kanjiNumber(now.getMonth() + 1)}月{kanjiNumber(now.getDate())}日
-        <span className="tpr-title__view">{PRINT.hours[hour].view}</span>
+        <span className="tpr-title__view">{PRINT.prints[look].view}</span>
       </span>
-      <span className="sr-only">{t.printTitle(day, t.printViews[hour])}</span>
+      <span className="sr-only">{t.printTitle(day, t.printViews[look])}</span>
     </p>
   )
 }

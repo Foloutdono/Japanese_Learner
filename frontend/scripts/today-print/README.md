@@ -1,9 +1,13 @@
-# 浮世絵 — the print of the hour (plan 205)
+# 浮世絵 — the print of the hour (plans 205, 261)
 
-Today's gate stands on a print: one landscape, four prints, the hour
-choosing which (曙 dawn, 帰帆 the day, 落雁 dusk, 秋月 the night). The
+Today's gate stands on a print: one landscape, four prints a season, the
+hour choosing which (dawn, the day, dusk, the night) and the month the
+season (plan 261: the cherry in spring; Red Fuji, the cloud peak, the
+crape myrtle and the fireflies in summer, the fireworks on an August
+night; the maples in autumn; the snow and the red plum in winter). The
 owner picked it on the canvas "Tsuji — Today, the visit card" (direction
-F, round 9). This folder is the canvas's generator, moved into the repo
+F, round 9), and its seasons on the canvas "Tsuji — Today, the seasons"
+(round 3). This folder is the canvases' generator, moved into the repo
 so the print can be rebuilt. The app draws its output and nothing else.
 
 ```bash
@@ -12,15 +16,24 @@ cd frontend && python3 scripts/today-print/build.py   # needs numpy and Pillow
 
 It writes:
 
-- `public/today/print/<REV>/<hour>-<phone|desk>.json`: the print in four
+- `public/today/print/<REV>/<print>-<phone|desk>.json`: a print in four
   layers (sky, behind the train, the train, in front of it), with the
-  train's run and its time;
+  train's run and its time; a print is a season at an hour
+  (`spring-dawn` … `winter-night`), or the summer's August night
+  (`summer-hanabi`), seventeen of them;
 - `public/today/print/<REV>/grain.png`, `paper.png`: the sky's wood grain
   and the paper's fibre, tiles drawn once;
-- `src/components/station/print/print.json`: what the app draws itself
-  (the dial's inks, the inks of the lines set on the print, the sky's
-  stops for the moment before the print has come) and the two frames'
-  geometry.
+- `src/components/station/print/print.json`: what the app draws itself,
+  per print (the dial's inks, the inks of the lines set on the print, the
+  sky's stops for the moment before the print has come, its view) and the
+  two frames' geometry.
+
+Which print shows is the app's: `printName` in `src/domain/printHour.js`,
+the hour by the clock (`printHour`, shared with the ambiance) and the
+season by the month (`printSeason`: spring from March, summer from June,
+autumn from September, winter from December), August's night the
+fireworks'. `src/todayPrint.test.js` holds every print it can name on
+disk, and nothing else there.
 
 The output is deterministic: two builds write the same bytes.
 
@@ -32,8 +45,8 @@ The output is deterministic: two builds write the same bytes.
   old revision's folder in the same commit.
 - **A moving part is a class here and a rule in `index.css`** (the
   print's section, `/* ── 浮世絵 — the print of the hour (plan 205)`).
-  `build.py` maps the rounds' prefixes (`f4-`, `f5-` …, `b5-`) onto the
-  app's one namespace, `tpr-`. `src/todayPrint.test.js` fails on a class
+  `build.py` maps the rounds' prefixes (`f4-`, `f5-` …, `b5-`, the
+  seasons' `s1-`) onto the app's one namespace, `tpr-`. `src/todayPrint.test.js` fails on a class
   with no rule, an animation with no keyframes, a reference to an id the
   print does not hold, or a print missing on disk.
 - **Every animation has a reduced-motion answer:** the print keeps still
@@ -58,6 +71,7 @@ it, so the modules import one another in the order they were drawn:
 | `el8.py` | round 8: the pine's boughs placed clear of the train |
 | `boughs9.py` | round 9: each branch seated in its tier |
 | `scene_f9.py` | round 9: the print in its layers (`scene()`) |
+| `s1_*` … `s3_*` | the seasons (below): `s3_scene.scene(L, hour, season)` is what `build.py` draws |
 | `layouts.py` | the two frames: phone 390 × 746, desk 1184 × 900 |
 | `textures.py` | the grain and paper tiles |
 | `build.py` | the app's files |
@@ -93,8 +107,8 @@ Round S¹ of the canvas "Tsuji — Today, the seasons"
 its four hours, dressed by the year. Spring has its cherry, haze and
 hazy moon; summer, Red Fuji, the cloud peak and fireflies; autumn is
 the print as built, with its maples; winter, snow on the pine, the hills
-and the bank. It is drawn for the owner's pick: `build.py` draws none of
-it yet, and the app shows the print as built.
+and the bank. Rounds S² and S³ redrew what the owner asked of it, and
+`build.py` draws round S³, the owner's pick.
 
 | module | what it draws |
 | --- | --- |
@@ -121,4 +135,21 @@ as the rounds before it did:
 cd frontend && python3 scripts/today-print/s1_preview.py /tmp/seasons phone   # round 1, every season and hour
 SCENE=s2_scene python3 scripts/today-print/s1_preview.py /tmp/seasons phone   # round 2
 SCENE=s2_scene VARIANT='{"tree": "yanagi"}' TAG=yanagi python3 scripts/today-print/s1_preview.py /tmp/seasons phone summer day
+SCENE=s3_scene python3 scripts/today-print/s1_preview.py /tmp/seasons phone   # round 3, as built
+SCENE=s3_scene VARIANT='{"fireworks": true, "flies": null}' TAG=hanabi python3 scripts/today-print/s1_preview.py /tmp/seasons desk summer night
 ```
+
+Round S³ is the owner's pick, and what `build.py` draws: the summer as
+chosen, every other season as round 2 drew it.
+
+| module | what it draws |
+| --- | --- |
+| `s3_inks.py` | round 2's inks with the picks: the crape myrtle summer's tree, the red plum winter's; the August night (`NIGHTS`) |
+| `s3_air.py` | the cloud peak as a cumulus: a tower of great lobes lit from the dial's sun, soft crevices between them; the desk's fireworks clear of the dial's lines |
+| `s3_flora.py` | the crape myrtle: stems from one root, mottled and smooth; cones of flowers over small leaves; florets falling and fallen |
+| `s3_scene.py` | round 2's print with round 3's parts: `scene(L, hour, season, variant=None)` |
+| `s3_canvas.py` | round 3's artboards, and the year as chosen |
+
+The text under the dial keeps 4.5:1 on every print (`s1_preview.py`'s
+contrast, the 1st percentile of each line's zone): rerun it over every
+season on both frames, and the August night, after any change.
