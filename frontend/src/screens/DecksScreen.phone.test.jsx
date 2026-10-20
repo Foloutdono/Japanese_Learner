@@ -173,7 +173,7 @@ describe('a deck made on a filtered shelf', () => {
   })
 })
 
-// ── 歌 — a lyrics deck is made from its song (plan 262) ─────────
+// ── 歌 — a lyrics deck is made from its song (plan 263) ─────────
 // Picked in the create form, the lyrics type turns the form's action
 // into the import, which opens over the shelf with the name typed and
 // posts no deck of its own: the deck is made once its song is read.

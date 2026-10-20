@@ -2086,7 +2086,7 @@ const decks = {
   mixedDesc:         'Words, kanji, grammar and your own cards, in one deck',
   lyricsType:        'Lyrics',
   lyricsDesc:        'A song, from a subtitle file, its lyrics or a YouTube link',
-  // 歌 (plan 262) — a song's lyrics into a deck, from the shelf.
+  // 歌 (plan 263) — a song's lyrics into a deck, from the shelf.
   lyricsImport:           'Import the lyrics',
   lyricsImportTitle:      'A song into a deck',
   lyricsSource:           'Where the lyrics come from',

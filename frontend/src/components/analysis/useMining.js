@@ -18,14 +18,14 @@ const DECK_TYPE_FOR_KIND = {
   grammar: 'grammar',
   cloze: 'standard',
   mixed: 'mixed',
-  // The song sheet's own deck (plan 262; a mixed one before it), which
+  // The song sheet's own deck (plan 263; a mixed one before it), which
   // holds both halves.
   lyrics: 'lyrics',
 }
 // A mixed deck (plan 215) takes every kind above: an app card of any
 // source, and a written front/back pair -- so it is offered beside the
 // decks of the kind's own type, wherever something can be added. A
-// lyrics deck (plan 262) holds the same, and is offered the same: a
+// lyrics deck (plan 263) holds the same, and is offered the same: a
 // word met in a song goes in the song's deck.
 const TAKES_EVERY_KIND = new Set(['mixed', 'lyrics'])
 

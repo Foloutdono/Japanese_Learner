@@ -1839,7 +1839,7 @@ a.anl-song__deck { color: var(--text-primary); text-decoration: none; }
 a.anl-song__deck:hover .picker-row__name,
 a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; text-underline-offset: 3px; }
 
-/* ── 歌 — a song's lyrics into a deck, from the shelf (plan 262) ──
+/* ── 歌 — a song's lyrics into a deck, from the shelf (plan 263) ──
    The song sheet's form (.anl-song) on 教材's sheet: the source, the
    wait, then the two piles the sort made -- the sung lines ticked, the
    rest not -- a line a row, its tick at the lead, how often it comes
@@ -7052,7 +7052,7 @@ textarea:focus-visible {
   text-transform: uppercase;
   color: var(--sheet-cap-ink);
 }
-/* 歌 — the lyrics import's head (plan 262; option A of three drawn,
+/* 歌 — the lyrics import's head (plan 263; option A of three drawn,
    the owner's pick of 2026-10-20): the song's icon in the analyser's
    roundel, and the title in words at a card title's size, where every
    other sheet prints a kanji over a caption. */
@@ -8344,7 +8344,7 @@ textarea:focus-visible {
 /* The global ring, inset, as the analyser's pill's (.anl-seg__opt):
    `.seg` clips, and the ring of the option a sheet focused on opening
    showed as a gold edge on its neighbour's side, read as a border the
-   selected option does not have (plan 262). */
+   selected option does not have (plan 263). */
 .seg__opt:focus-visible { outline-offset: -2px; }
 .seg__opt--on { background: var(--sel-wash); color: var(--sel-ink); box-shadow: inset 0 -2px 0 var(--accent2); }
 /* The canvas's variants (plan 068): a plain-word option, the full-width

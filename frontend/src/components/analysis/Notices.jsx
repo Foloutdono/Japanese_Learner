@@ -50,7 +50,7 @@ export function Notices({ notices = [], announcement, t, lines = true, region = 
         >
           {/* One row, the dots before the sentence: as two children of
               the panel's column the dots stood over the line, centred
-              above a sentence set to the left (plan 262). */}
+              above a sentence set to the left (plan 263). */}
           {n.wait ? <Loading inline copy={n.text} /> : n.text}
         </div>
       ))}

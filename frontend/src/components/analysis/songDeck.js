@@ -20,7 +20,7 @@ import { tokFurigana } from './tokens'
 //
 // Pure, so the node lane can read it without a page -- but for
 // fillSongDeck, the one write, which both doors share: the analyser's
-// song sheet and the shelf's lyrics import (plan 262).
+// song sheet and the shelf's lyrics import (plan 263).
 
 // A chorus comes back three times and is one card: the identity of a
 // line is its text, as the bank's is (useAnalyzerSession's `kept`).
@@ -93,7 +93,7 @@ export function songLines(sentences) {
   return out
 }
 
-/** The lines the shelf's lyrics import shows (plan 262): the readable
+/** The lines the shelf's lyrics import shows (plan 263): the readable
  *  ones, once each, in the order first sung, each with how often it
  *  comes back and the sort's verdict on it (`kinds`, one per sentence,
  *  study/lyrics_sort.py's KINDS). */

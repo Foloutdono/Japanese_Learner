@@ -574,7 +574,7 @@ CREATE TABLE video_sessions (
     -- Each line's translation (plan 235), {lang: {line text: translation}},
     -- filled a block of lines at a time as the learner reaches them.
     translations  JSONB NOT NULL DEFAULT '{}'::jsonb,
-    -- Which lines are the song (plan 262, study/lyrics_sort.py),
+    -- Which lines are the song (plan 263, study/lyrics_sort.py),
     -- {"rev", "kinds": {line text: kind}}; NULL until a lyrics deck is
     -- made of the session.
     lyrics_sort   JSONB

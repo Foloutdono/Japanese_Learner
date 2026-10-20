@@ -2029,7 +2029,7 @@ const decks = {
   mixedDesc:         'Un peu de tout : mots, kanji, grammaire et tes propres cartes',
   lyricsType:        'Paroles',
   lyricsDesc:        'Une chanson, depuis un fichier de sous-titres, ses paroles ou un lien YouTube',
-  // 歌 (plan 262) — les paroles d'une chanson en deck, depuis l'étagère.
+  // 歌 (plan 263) — les paroles d'une chanson en deck, depuis l'étagère.
   lyricsImport:           'Importer les paroles',
   lyricsImportTitle:      'Une chanson en deck',
   lyricsSource:           'D’où viennent les paroles',

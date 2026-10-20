@@ -15,7 +15,7 @@ import { songWords, songLines, songDeckName, fillSongDeck } from './songDeck'
 // to understand it, and its lines with their readings, to read it aloud
 // in time (songDeck.js says what each holds).
 //
-// One deck, of the lyrics type (plan 262; of the mixed type before it,
+// One deck, of the lyrics type (plan 263; of the mixed type before it,
 // routes/decks.py), which holds app cards beside written ones and
 // studies each in its own modes: the words as vocab, the lines as
 // front/back pairs. Nothing here is a new endpoint.

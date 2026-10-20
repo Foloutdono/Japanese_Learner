@@ -181,7 +181,7 @@ def _ensure_video_schema() -> None:
             cur.execute(
                 "ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS translations JSONB NOT NULL DEFAULT '{}'::jsonb"
             )
-            # Which lines are the song (plan 262, study/lyrics_sort.py),
+            # Which lines are the song (plan 263, study/lyrics_sort.py),
             # as {"rev": SORT_REV, "kinds": {line text: kind}}: by the
             # text, as the translations are. NULL is a session nobody
             # has made a lyrics deck of. Additive.
@@ -1083,7 +1083,7 @@ def translate_video_lines(session_id: int, payload: TranslationsPayload,
                             session["translations"], payload, "video")
 
 
-# ── 歌 — which lines are the song (plan 262) ─────────────────────
+# ── 歌 — which lines are the song (plan 263) ─────────────────────
 # The lyrics import's second step (components/decks/LyricsImportSheet.jsx):
 # the session's lines sorted into the song and the rest -- a spoken
 # intro, the credits, a sound cue -- by study/lyrics_sort.py, which the

@@ -36,7 +36,7 @@
 // was the one kind with nowhere to put it. It takes 仮名's own glyph
 // and pigment from config/tabs.js, like every type here.
 //
-// 'lyrics' (plan 262) is a song's deck: what a mixed one holds, its
+// 'lyrics' (plan 263) is a song's deck: what a mixed one holds, its
 // words and its lines, under its own name so its own study modes can
 // come later. It takes 解析's pigment, the analyser's, whose pipeline
 // every song comes through (the shelf's import too), and 歌 for a name.

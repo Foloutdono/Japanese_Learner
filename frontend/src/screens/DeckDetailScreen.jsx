@@ -57,7 +57,7 @@ function filenameFromDisposition(header) {
 // A deck has ONE STRUCTURE, and it decides both halves: which app cards
 // can be browsed in, and which personal cards can be written. `standard`
 // is a plain front/back pair with no app source behind it; `mixed` (plan
-// 215) and `lyrics` (plan 262) take every source's cards, and write
+// 215) and `lyrics` (plan 263) take every source's cards, and write
 // front/back pairs.
 const SOURCE_FOR_TYPE = {
   kanji: ['kanji'], vocab: ['vocab'], grammar: ['grammar'],

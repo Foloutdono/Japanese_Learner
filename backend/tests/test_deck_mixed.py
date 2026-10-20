@@ -6,7 +6,7 @@
 # deck offers, which cards a session in each serves, the counts, and the
 # states on the deck's page.
 #
-# A lyrics deck (plan 262), a song's deck, holds what a mixed deck holds
+# A lyrics deck (plan 263), a song's deck, holds what a mixed deck holds
 # by the same rule until its own modes come, so every test here that
 # makes a mixed deck makes one of each.
 from datetime import datetime, timedelta, timezone

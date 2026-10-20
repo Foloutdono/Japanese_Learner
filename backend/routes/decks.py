@@ -217,7 +217,7 @@ SOURCES = {
 # is what makes "write your own kanji card" a thing that exists; a mixed
 # deck's are front/back pairs.
 #
-# 'lyrics' (plan 262) is a song's deck, the analyser's song sheet's and
+# 'lyrics' (plan 263) is a song's deck, the analyser's song sheet's and
 # the shelf's lyrics import's (components/decks/LyricsImportSheet.jsx):
 # its words as app cards and its lines as written ones, in the order
 # they are sung. It holds what a mixed deck holds, by the same rule, and
@@ -280,7 +280,7 @@ def _mode_source(deck_type: str, card_source: str) -> str:
     """The registry source ONE card of this deck studies under: the
     deck's own for every structure but mixed and lyrics, where a card
     brings its own -- an app card its source's, a written card ("custom")
-    the standard pair's (plans 215, 262)."""
+    the standard pair's (plans 215, 263)."""
     if deck_type in CARD_LED:
         return MODE_STANDARD if card_source == "custom" else card_source
     return _registry_source(deck_type)

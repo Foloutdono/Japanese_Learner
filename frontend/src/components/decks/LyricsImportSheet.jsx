@@ -12,7 +12,7 @@ import { parseVideoId } from '../../lib/youtube'
 import { videoErrorMessage } from '../analysis/videoErrors'
 import { songWords, songLines, songDeckName, fillSongDeck, lyricRows } from '../analysis/songDeck'
 
-// ── 歌 — a song's lyrics into a deck (plan 262) ───────────────────
+// ── 歌 — a song's lyrics into a deck (plan 263) ───────────────────
 // The owner (2026-10-20): the analyser's song sheet, from the shelf.
 // A subtitle or lyrics file (.srt, .vtt, .ass, .lrc, .txt), lyrics
 // pasted, or a YouTube link whose Japanese track the server fetches, is
