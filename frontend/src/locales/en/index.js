@@ -1499,6 +1499,9 @@ const dictionary = {
   level:             'Level',
   listen:            'Listen',
   displayedKanji:    'kanji displayed',
+  displayedEntries:  'entries displayed',
+  displayedWords:   'words displayed',
+  displayedPoints:  'points displayed',
   radical:           'Radical',
   // Additional dictionary keys used by screens
   dictAll:           'All',
