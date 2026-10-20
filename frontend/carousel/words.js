@@ -482,10 +482,12 @@ function cardLayout(ctx, plan, it, first) {
     const inner = G.w - SP[6] * 2
     const top = STOPS + 56
     let last = null
-    for (const k of [1.1, 0.95, 0.82, 0.7, 0.6, 0.5]) {
+    // The meaning at its largest first; where no word's size leaves the
+    // sentence its room (a long one, read in French), a size down too.
+    for (const most of [FS.heading, FS.lead]) for (const k of [1.1, 0.95, 0.82, 0.7, 0.6, 0.5]) {
       const L = wordLayout(ctx, it, FS.word * k, inner)
       // Two lines a size down before three: the card leaves its sentence the room.
-      const mean = (lines, sizes) => fit(ctx, cardSense(it.gloss), { weight: 700, sizes, maxW: inner, maxLines: lines, lh: 1.2, balanced: true })
+      const mean = (lines, sizes) => fit(ctx, cardSense(it.gloss), { weight: 700, sizes: sizes.filter(z => z <= most), maxW: inner, maxLines: lines, lh: 1.2, balanced: true })
       const mb = [mean(2, [FS.heading, FS.title, FS.lead, FS.body, FS.sm]), mean(3, [FS.lead, FS.body, FS.sm])].find(b => !b.cut) || mean(5, [FS.sm, FS.caption])
       const picH = it.e ? FS.word * k * 0.8 + SP[4] : 0
       const askH = FS.sm * 1.2
