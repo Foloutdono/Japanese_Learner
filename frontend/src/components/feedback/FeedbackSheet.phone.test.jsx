@@ -210,6 +210,6 @@ describe('the flag on a sat exam question', () => {
     await userEvent.click(document.querySelectorAll('.fb-reasons .chip')[1])
     await userEvent.click($('.fb-form__send'))
     await settle()
-    expect(sent()).toEqual({ kind: 'card', card_id: 'exam_n5-listening-01_r2_m1_q9', reasons: ['ambiguous'], text: '' })
+    expect(sent()).toEqual({ kind: 'question', exam_id: 'n5-listening-01', revision: 2, question_id: 'm1_q9', reasons: ['ambiguous'], text: '' })
   })
 })

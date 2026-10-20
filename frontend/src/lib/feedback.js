@@ -10,21 +10,14 @@ import { visitContext } from './visitContext'
 // never a path: the server drops any value outside them all the same.
 
 export const KINDS = ['problem', 'idea', 'fault']
-export const CARD_REASONS = ['reading', 'meaning', 'audio', 'example', 'answer', 'ambiguous', 'other']
-// What a learner may say of each: a card's, and a mock-exam question's.
-export const CARD_ONLY_REASONS = ['reading', 'meaning', 'audio', 'example', 'other']
+export const CARD_REASONS = ['reading', 'meaning', 'audio', 'example', 'other']
+// A mock-exam question's: `answer` is a wrong key.
 export const QUESTION_REASONS = ['answer', 'ambiguous', 'audio', 'other']
 
-/** A mock-exam question's report id: names the paper (exam id and
- *  revision) and the question, so the one to retire can be found. */
-export function questionReportId(examId, revision, questionId) {
-  return `exam_${examId}_r${revision}_${questionId}`
-}
-
-/** The card a question's report is opened with: the id, and the number
- *  the strip prints. */
+/** What a mock-exam question's sheet is opened with: the paper (exam id
+ *  and revision) and the question, which is all its report carries. */
 export function questionReport(examId, revision, question) {
-  return { card_id: questionReportId(examId, revision, question.id), exam: { examId, number: question.number } }
+  return { exam: { examId, revision, questionId: question.id, number: question.number } }
 }
 export const TEXT_MAX = 1000
 

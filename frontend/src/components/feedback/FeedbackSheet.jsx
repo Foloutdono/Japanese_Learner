@@ -5,7 +5,7 @@ import { Sheet } from '../chrome/Sheet'
 import { Seg, Chip } from '../chrome/Console'
 import { FlagIcon } from '../ui/Icons'
 import {
-  KINDS, CARD_ONLY_REASONS, QUESTION_REASONS, TEXT_MAX,
+  KINDS, CARD_REASONS, QUESTION_REASONS, TEXT_MAX,
   feedbackContext, contextWords, failureOf, cardFace, reportable, sendFeedback, questionReport,
 } from '../../lib/feedback'
 import { useFeedbackSheet, openFeedback, openCardReport, closeFeedback } from '../../stores/feedbackSheet'
@@ -177,7 +177,7 @@ function CardReport({ session, card, onClose }) {
   const inFlight = useRef(false)
   const face = cardFace(card)
   const exam = card.exam ?? null
-  const reasonKeys = exam ? QUESTION_REASONS : CARD_ONLY_REASONS
+  const reasonKeys = exam ? QUESTION_REASONS : CARD_REASONS
 
   if (sent) return <Sent at={sent} reply={false} onClose={onClose} />
 
@@ -192,7 +192,9 @@ function CardReport({ session, card, onClose }) {
     setError(null)
     // The card is what is joined, and the strip above says so: its id,
     // nothing about the device.
-    sendFeedback(session, { kind: 'card', card_id: card.card_id, reasons, text })
+    sendFeedback(session, exam
+      ? { kind: 'question', exam_id: exam.examId, revision: exam.revision, question_id: exam.questionId, reasons, text }
+      : { kind: 'card', card_id: card.card_id, reasons, text })
       .then(res => setSent(res?.at ? new Date(res.at) : new Date()))
       .catch(err => { inFlight.current = false; setError(refusal(err)); setBusy(false) })
   }

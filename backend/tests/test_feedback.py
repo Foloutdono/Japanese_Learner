@@ -38,7 +38,7 @@ def _rows():
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT kind, body, reasons, card_id, route, area, status, platform, vp, os, lang, "
+                "SELECT kind, body, reasons, card_id, exam_id, revision, question_id, route, area, status, platform, vp, os, lang, "
                 "reply, reply_to FROM feedback WHERE user_id = %s ORDER BY id",
                 (DEV_USER_ID,),
             )
@@ -97,16 +97,37 @@ def test_a_status_without_an_area_is_not_kept(client):
     assert row["status"] is None
 
 
-def test_a_sat_exam_question_is_reported_by_the_id_of_its_paper(client):
-    r = client.post("/api/feedback", json={
-        "kind": "card", "card_id": "exam_n5-listening-01_r2_m1_q9",
-        "reasons": ["ambiguous", "answer"],
-    })
+def _question(**over):
+    return {"kind": "question", "exam_id": "n5-listening-01", "revision": 2,
+            "question_id": "listening_m1_q9", "reasons": ["ambiguous", "answer"], **over}
+
+
+def test_a_question_report_names_its_paper_and_its_question(client):
+    r = client.post("/api/feedback", json=_question())
     assert r.status_code == 200, r.text
     [row] = _rows()
-    assert row["card_id"] == "exam_n5-listening-01_r2_m1_q9"
+    assert (row["exam_id"], row["revision"], row["question_id"]) == ("n5-listening-01", 2, "listening_m1_q9")
+    assert row["card_id"] is None and row["body"] == ""
     # In the closed list's order, whatever order they were sent in.
     assert row["reasons"] == ["answer", "ambiguous"]
+
+
+@pytest.mark.parametrize("body,code", [
+    (_question(exam_id="N5 listening"), "feedback_question"),
+    (_question(exam_id=None), "feedback_question"),
+    (_question(question_id="q 9; DROP"), "feedback_question"),
+    (_question(question_id=None), "feedback_question"),
+    (_question(revision=None), "feedback_question"),
+    (_question(reasons=["reading"]), "feedback_reason"),
+    (_question(reasons=[]), "feedback_empty"),
+])
+def test_a_question_report_is_held_to_closed_shapes(client, body, code):
+    r = client.post("/api/feedback", json=body)
+    assert r.status_code == 400 and _code(r) == code
+
+
+def test_a_question_report_may_be_words_alone(client):
+    assert client.post("/api/feedback", json=_question(reasons=[], text="La clé est fausse.")).status_code == 200
 
 
 def test_a_card_report_names_its_card_and_what_is_wrong(client):
@@ -233,7 +254,8 @@ def test_the_sheet_declares_what_the_server_accepts():
     js = (Path(__file__).resolve().parents[2] / "frontend" / "src" / "lib" / "feedback.js").read_text(encoding="utf-8")
     # The sheet's kinds are the server's but the card's, which only the
     # flag sends.
-    assert _js_list(js, "KINDS") == [k for k in feedback.KINDS if k != "card"]
+    assert _js_list(js, "KINDS") == [k for k in feedback.KINDS if k not in ("card", "question")]
     assert _js_list(js, "CARD_REASONS") == list(feedback.CARD_REASONS)
+    assert _js_list(js, "QUESTION_REASONS") == list(feedback.QUESTION_REASONS)
     m = re.search(r"export const TEXT_MAX = (\d+)", js)
     assert m and int(m.group(1)) == feedback.TEXT_MAX

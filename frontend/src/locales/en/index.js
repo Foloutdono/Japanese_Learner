@@ -2933,7 +2933,7 @@ const onboarding = {
   fbErrSend: 'The message did not go. Try again.',
   cardReport: 'Report this card',
   cardReportReasons: 'What is wrong',
-  cardReason: { reading: 'Reading', meaning: 'Meaning', audio: 'Audio', example: 'Example', answer: 'Wrong answer', ambiguous: 'Ambiguous', other: 'Other' },
+  cardReason: { reading: 'Reading', meaning: 'Meaning', audio: 'Audio', example: 'Example', other: 'Other' },
   questionReport: 'Report this question',
   questionReason: { answer: 'Wrong answer', ambiguous: 'Ambiguous', audio: 'Audio', other: 'Other' },
   cardReportNote: 'A word more, if you like.',
