@@ -19,6 +19,8 @@
 //                     comprehension text, 9:16, over Today's print
 //   --style scroll    ... going up the screen as credits do (scroll), or read along by the voice (along)
 //   --hour night      ... the print's hour: dawn, day, dusk or night
+//   --question 4      ... the text's question asked (1-based, as the studio
+//                     lists them; the first about what it says by default)
 //   --music FILE      ... a track of your own under it (any audio ffmpeg reads), looped if
 //                     short; `none` for none; the studio's own (Cool Vibes) when left out
 //   --music none      a long video or its short with no bed of music: its voices
@@ -140,14 +142,14 @@ if (args.challenge) {
   const named = typeof args.music === 'string' ? args.music : undefined
   const music = named === undefined ? undefined : named === 'none' ? null : TRACKS[named] ? named : resolve(named)
   if (music && !TRACKS[music] && !existsSync(music)) throw new Error(`no track at ${music}`)
-  const plan = challengePlan(banks['comprehension.json'], String(args.challenge), { lang, style: args.style, hour: args.hour, music, tune })
+  const plan = challengePlan(banks['comprehension.json'], String(args.challenge), { lang, style: args.style, hour: args.hour, question: args.question, music, tune })
   const cues = challengeCues(plan)
   const dur = cues.length ? voiceAll(cues) : null
   // A read-along whose voice did not come is no read-along: stop, unless asked for it anyway.
   if (dur && !dur.ok && !args.unvoiced) throw new Error('the voice engine did not voice every line (VOICEVOX_URL): start it, or pass --unvoiced')
   tl = challengeTimeline(plan, dur ? c => (dur(c) ? { dur: dur(c), marks: dur.marks(c) } : null) : null)
   SIZE = TALL
-  slug = ['challenge', plan.id, plan.style, plan.hour, lang, ...(plan.music ? [] : ['nomusic'])].join('-')
+  slug = ['challenge', plan.id, plan.style, plan.hour, lang, ...(plan.chosen ? [`q${plan.q.n}`] : []), ...(plan.music ? [] : ['nomusic'])].join('-')
   await fontsFor(glyphs(plan))
   await canvasOf(SIZE)
   await page.evaluate(async ({ plan, tl }) => {

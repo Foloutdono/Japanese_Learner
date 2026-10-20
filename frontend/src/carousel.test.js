@@ -15,7 +15,7 @@ import { TUNABLES, tuned } from '../carousel/tune.js'
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf, readInks, readable, unstopped } from '../carousel/funnel.js'
 import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, TALL, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, stillAt, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
-import { CH as CHALLENGE, CPM, SCROLL, TRACK, TRACKS, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
+import { CH as CHALLENGE, CPM, SCROLL, TRACK, TRACKS, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeQuestions, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
 import { CAPTION_MAX, FEEDS, HASHTAGS, pageFile } from '../carousel/feeds.js'
 import { COUNT as WORDS_COUNT, LIMIT as WORDS_LIMIT, STYLES as WORDS_STYLES, drawWords, loadPictures, shortSense, wordsCommand, wordsFiles, wordsItems, wordsPage, wordsPlan, wordsTimeline } from '../carousel/words.js'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
@@ -1798,6 +1798,37 @@ describe('the reading challenges (plan 247)', () => {
       expect(challengeKey(tl.cues[i])).toBe(`reader|slow|${cues[i].text}`)
       if (i) expect(l.at).toBeCloseTo(tl.lines[i - 1].voice + tl.lines[i - 1].dur + CHALLENGE.gap, 2)
     })
+  })
+
+  it('asks the question chosen, its answers dealt across A to D, the right one kept (plan 260)', () => {
+    const at = [0, 0, 0, 0]
+    for (const P of each) {
+      const qs = challengeQuestions(data, P.id)
+      expect(qs.map(q => q.n), P.id).toEqual(P.questions.map((_, i) => i + 1))
+      // Unless chosen, the first about what the text says, never one about its grammar.
+      const first = qs.find(q => q.first)
+      expect(P.questions[first.n - 1].type, P.id).toBe('comprehension')
+      expect(challengePlan(data, P.id, {}).q.n, P.id).toBe(first.n)
+      for (const bad of [0, P.questions.length + 1, 'x']) expect(challengePlan(data, P.id, { question: bad }).q.n, `${P.id} ${bad}`).toBe(first.n)
+      for (const q of qs) {
+        const Q = P.questions[q.n - 1]
+        const en = challengePlan(data, P.id, { question: q.n })
+        const fr = challengePlan(data, P.id, { question: q.n, lang: 'fr' })
+        // The same four, the right one still right, in the same place in both languages.
+        expect([...en.q.choices].sort(), `${P.id} ${q.n}`).toEqual([...Q.options.en].sort())
+        expect(en.q.choices[en.q.right], `${P.id} ${q.n}`).toBe(Q.options.en[Q.correct])
+        expect(fr.q.choices[fr.q.right], `${P.id} ${q.n}`).toBe(Q.options.fr[Q.correct])
+        expect(fr.q.right, `${P.id} ${q.n}`).toBe(en.q.right)
+        at[en.q.right] += 1
+      }
+    }
+    // The right answer stands at A, B, C and D alike, where the bank writes it first most often.
+    const n = at.reduce((a, b) => a + b, 0)
+    for (const k of at) expect(k / n).toBeGreaterThan(0.2)
+    for (const k of at) expect(k / n).toBeLessThan(0.3)
+    // The command names the question only where it is not the default.
+    expect(challengeCommand(challengePlan(data, 'n5-03', { question: 7 }))).toContain(' --question 7')
+    expect(challengeCommand(challengePlan(data, 'n5-03', {}))).not.toContain('--question')
   })
 
   it('sets what a viewer reads large, inside the frame, whole', () => withPath2D(() => {

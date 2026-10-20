@@ -15,7 +15,7 @@ import { PROMO, STORIES } from './promo.js'
 import { PRINT_HOURS, loadPrint } from './app.js'
 import { RATE, clipAudio, decoded, loadVoices } from './sound.js'
 import { voiceSpan } from './echo.js'
-import { STYLES as CHALLENGE_STYLES, TRACK, TRACKS, challengeCommand, challengePage, challengePlan, challengeTimeline, drawChallenge } from './challenge.js'
+import { STYLES as CHALLENGE_STYLES, TRACK, TRACKS, challengeCommand, challengePage, challengePlan, challengeQuestions, challengeTimeline, drawChallenge } from './challenge.js'
 import { FPS as SHORT_FPS, chars, depsFor as depsOfWord, drawShortFrame, recipeOf, shortTimeline } from './short.js'
 import { LONG_SITE, TALL, describe as describeLong, drawLong, fitShort, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, stillAt, timeline, WIDE } from './long.js'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
@@ -49,6 +49,8 @@ const DEFAULTS = {
   design: 'clarte', length: '5', feature: 'auto',
   // Plan 247: how a reading challenge's text moves.
   challengeStyle: 'scroll',
+  // Plan 260: the question a reading challenge asks, by text (1-based); the default where none is set.
+  challengeQ: {},
   // Plan 248: the values tuned in the Tune panel (tune.js), only those changed.
   tune: {},
   // Plan 251: the feed whose post a 9:16 video's fields hold.
@@ -85,6 +87,7 @@ function load() {
     return {
       ...DEFAULTS, ...saved, type, ids: { ...DEFAULTS.ids, ...(saved.ids || {}) }, slides: { ...(saved.slides || {}) },
       picks: { ...(saved.picks || {}) }, types: { ...(saved.types || {}) }, tune: changed(saved.tune),
+      challengeQ: saved.challengeQ && typeof saved.challengeQ === 'object' ? { ...saved.challengeQ } : {},
     }
   } catch {
     return structuredClone(DEFAULTS)
@@ -817,11 +820,21 @@ const CHAPTER = { hook: 'Hook', reading: 'Reading', question: 'Question', answer
 let music = { track: TRACK }
 const musicOf = () => (music?.track ?? music?.name ?? null)
 const musicName = () => (music?.track ? `${TRACKS[music.track].title} · ${TRACKS[music.track].by}` : music?.name ?? 'No music')
+const QUESTION_KINDS = { comprehension: 'about the text', inference: 'reading between the lines', grammar: 'grammar', vocabulary: 'a word' }
 async function renderChallenge(mine) {
   const data = await fetchJson('comprehension.json')
   if (mine !== token) return
   const id = currentId()
-  const pl = challengePlan(data, id, { lang: state.lang, style: state.challengeStyle, hour: state.hour, music: musicOf(), tune: state.tune })
+  const pl = challengePlan(data, id, { lang: state.lang, style: state.challengeStyle, hour: state.hour, question: state.challengeQ[id], music: musicOf(), tune: state.tune })
+  // The text's questions to choose from, the one asked selected (plan 260).
+  const pick = $('#challenge-q')
+  pick.replaceChildren(...challengeQuestions(data, id, state.lang).map(q => {
+    const o = document.createElement('option')
+    o.value = String(q.n)
+    o.textContent = `${q.n} · ${QUESTION_KINDS[q.type] || q.type} · ${q.ask}${q.first ? ' (default)' : ''}`
+    return o
+  }))
+  pick.value = String(pl.q.n)
   $('#music-name').textContent = musicName()
   $('#music-clear').hidden = !music
   $('#music-track').hidden = Boolean(music?.track)
@@ -883,7 +896,7 @@ async function renderChallenge(mine) {
   chapters.className = 'chapters'
   row.append(head, screen, bar, note, chapters)
   stage.append(row)
-  const key = `challenge|${id}|${state.lang}|${state.challengeStyle}|${state.hour}|${musicOf() || ''}`
+  const key = `challenge|${id}|${state.lang}|${state.challengeStyle}|${state.hour}|${pl.q.n}|${musicOf() || ''}`
   const reading = tl.segs.find(sg => sg.key === 'reading')
   player = { c, pl, tl, t: Math.min(player?.key === key ? player.t : reading.start + 12, tl.seconds), raf: 0, id, key, play, scrub, time }
   const draw = () => {
@@ -1400,6 +1413,12 @@ function wire() {
     // A reply short is a scene, its 16:9 two (plan 249b): the list is the format's.
     if (key === 'lang' || key === 'longFormat') { sync(); renderList().then(render); return }
     sync()
+    render()
+  })
+  // A reading challenge's question, kept for its text (plan 260).
+  $('#challenge-q').addEventListener('change', e => {
+    state.challengeQ = { ...state.challengeQ, [currentId()]: Number(e.target.value) }
+    save()
     render()
   })
   $('#sources').addEventListener('click', e => {

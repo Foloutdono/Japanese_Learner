@@ -6,7 +6,10 @@
 // reader says it, each word lit as it is said (the owner's pick D of four
 // drawn). Before it the hook; after it one of its questions, asked and
 // answered, and the way to the app. Under it, the studio's own track
-// (Cool Vibes), one of the owner's, or nothing.
+// (Cool Vibes), one of the owner's, or nothing. Since plan 260 the
+// question is the maker's to choose (the first about what the text says
+// unless chosen), its four answers dealt in a seeded order, so the right
+// one stands at A, B, C or D alike across the bank.
 //
 // Everything a viewer must read is set large, in ink on the washed print
 // (scroll) or light on the darkened one (along), so it reads at every
@@ -17,7 +20,7 @@
 // else on a close guess), `drawChallenge` draws any second of it.
 import { FS, SP, R, METAL_H, RATING_INKS, FORMATS, address, alpha, drawSentence, fit, font, frame, layoutSentence, mark, measure, palette, reading, rrect, text } from './draw.js'
 import { drawPrint } from './app.js'
-import { unpack } from './common.js'
+import { seeded, shuffle, unpack } from './common.js'
 import { SITE } from './strings.js'
 import { tuneFlag, tuned } from './tune.js'
 import { feedPosts } from './feeds.js'
@@ -132,7 +135,19 @@ export function challengeItems(data, lang = 'en') {
   return data.passages.map(P => ({ id: P.id, jp: P.title, sub: W[lang === 'fr' ? 'fr' : 'en'].chars(P.sents.map(unpack).reduce((n, rows) => n + charsOf(rows), 0)), tag: P.lv }))
 }
 
+/** The question a challenge asks unless one is chosen: the first about
+ *  what the text says, never one about its grammar (1-based). */
+const askedFirst = P => Math.max(0, P.questions.findIndex(q => q.type === 'comprehension')) + 1
+/** A text's questions, to choose from (plan 260): each one's number
+ *  (1-based, as `--question` takes it), its kind and what it asks. */
+export function challengeQuestions(data, id, lang = 'en') {
+  const P = data.passages.find(x => x.id === id) ?? data.passages[0]
+  return P.questions.map((Q, i) => ({ n: i + 1, type: Q.type, ask: Q.question[lang] || Q.question.en, first: i + 1 === askedFirst(P) }))
+}
+
 /** A text's challenge: its sentences and one of its questions.
+ *  `opts.question`: the question asked (1-based), the first about what
+ *  the text says when left out or out of range.
  *  `opts.music`: the track laid under it, one of `TRACKS` (the first if
  *  left out) or a file of the owner's (its path or name); null for none. */
 export function challengePlan(data, id, opts = {}) {
@@ -141,11 +156,17 @@ export function challengePlan(data, id, opts = {}) {
   const style = STYLES.includes(opts.style) ? opts.style : 'scroll'
   const hour = HOURS.includes(opts.hour) ? opts.hour : 'dusk'
   const sents = P.sents.map(unpack)
-  // The question about what the text says, never about its grammar.
-  const Q = P.questions.find(q => q.type === 'comprehension') ?? P.questions[0]
-  const q = { ask: Q.question[lang] || Q.question.en, choices: Q.options[lang] || Q.options.en, right: Q.correct }
+  const chosen = Number(opts.question)
+  const qn = Number.isInteger(chosen) && chosen >= 1 && chosen <= P.questions.length ? chosen : askedFirst(P)
+  const Q = P.questions[qn - 1]
+  // Its answers dealt in an order seeded by the text and the question, the
+  // same in both languages: the bank writes the right one first more often
+  // than not, and a viewer would learn to answer A (plan 260).
+  const order = shuffle(Q.options.en.map((_, i) => i), seeded(`${P.id}|${qn}`))
+  const options = Q.options[lang] || Q.options.en
+  const q = { n: qn, ask: Q.question[lang] || Q.question.en, choices: order.map(i => options[i]), right: order.indexOf(Q.correct) }
   return {
-    source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, title: P.title, sents, q, music: opts.music === undefined ? TRACK : opts.music || null,
+    source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, title: P.title, sents, q, chosen: qn !== askedFirst(P), music: opts.music === undefined ? TRACK : opts.music || null,
     chars: sents.reduce((n, rows) => n + charsOf(rows), 0), cpm: Math.round((CPM[P.lv] || CPM.N3) * tuned(opts.tune, 'challenge.pace')), tune: opts.tune || {}, ruby: RUBY.has(P.lv), slow: SLOW.has(P.lv),
   }
 }
@@ -228,7 +249,9 @@ export function challengeCommand(plan) {
   const voice = plan.style === 'along' ? 'VOICEVOX_URL=http://localhost:50121 ' : ''
   // The studio's track is the command's own; another is named, none is said.
   const music = plan.music === TRACK ? '' : !plan.music ? ' --music none' : TRACKS[plan.music] ? ` --music ${plan.music}` : ` --music "${plan.music}"`
-  return `${voice}node carousel/long/render.mjs --challenge ${plan.id} --style ${plan.style} --hour ${plan.hour} --lang ${plan.lang}${music}${tuneFlag(plan.tune, 'challenge')}`
+  // The question is named where it is not the one asked unless chosen (plan 260).
+  const question = plan.chosen ? ` --question ${plan.q.n}` : ''
+  return `${voice}node carousel/long/render.mjs --challenge ${plan.id} --style ${plan.style} --hour ${plan.hour} --lang ${plan.lang}${question}${music}${tuneFlag(plan.tune, 'challenge')}`
 }
 
 /** The video's page: its title, its description, its tags. */

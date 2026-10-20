@@ -1041,9 +1041,21 @@ command, which voices each sentence. An owner's own track is not kept
 anywhere: the studio reads it from the file chosen, the command from
 its path.
 
+The question asked after the text is the maker's to choose (plan 260):
+the studio's "Question" lists the text's eight to twelve, each with its
+kind (about the text, reading between the lines, grammar, a word), and
+the command takes it as `--question N` (1-based, named only where it is
+not the default: the first about what the text says). Its four answers
+are dealt in an order seeded by the text and the question, the same in
+both languages and the same in the studio and the render: the bank
+writes the right one first two times in five, and a viewer would learn
+to answer A. Over the bank the right one stands at A, B, C and D a
+quarter of the time each (a test holds each between 20% and 30%).
+
 ```bash
 cd frontend
 node carousel/long/render.mjs --challenge n5-01 --style scroll --hour day --lang en
+node carousel/long/render.mjs --challenge n5-03 --style scroll --hour dawn --lang en --question 7
 node carousel/long/render.mjs --challenge n5-01 --style scroll --hour day --lang en --music ~/music/late-train.mp3
 VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --challenge n5-01 --style along --hour night --lang fr
 ```

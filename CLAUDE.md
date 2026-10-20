@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **260**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **261**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -979,7 +979,9 @@ since plan 256 each word an ink of its own on every slide (`readInks`,
 the app's tokens: the one place a line's pigment names a word); since
 plan 257 a vocabulary short's card turns over at the reveal onto the
 word's own picture where `frontend/carousel/content/pictures/` has one
-(the owner's illustrations, keyed by `written::kana`). Since plan 248 every number a maker may set per
+(the owner's illustrations, keyed by `written::kana`); since plan 260 a
+reading challenge asks the question chosen (`--question`), its answers
+dealt so the right one stands at A, B, C or D alike. Since plan 248 every number a maker may set per
 post (a video's timing and pace, the music's level, the export's
 quality) is one line of `tune.js`, set in the studio's Tune panel and
 written into the render command, so the video rendered is the one
