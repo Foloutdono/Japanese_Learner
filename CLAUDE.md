@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **262**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **263**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -202,6 +202,17 @@ runtime purpose.
   or serves the ration does too. A tour can always be skipped for its
   card; a run the learner boards on purpose (a grammar run, a unit) is
   not capped.
+- **A place on the 番付 is read off one list (plan 262).** `study/banzuke.py`
+  ranks each board (all time, the calendar week from Monday 00:00 UTC, a
+  division) from one sum, `srs.xp_totals`, a minute old at most, a tie
+  broken by the user id: a page, the learner's own place, the rows around
+  it, the gap to the next and the move since the day began are all read
+  off it, never off a second count. The divisions (序ノ口 … 幕内) are
+  settled lazily by the week's first board, once (`banzuke_marks`). A
+  learner who keeps off the board (`board_hidden`) is in no list another
+  learner reads and still sees their own place; a row's card shows what
+  the board already does (XP, level, places, division) and published
+  decks, never the streak, the JLPT level or the card's name.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.

@@ -285,7 +285,10 @@ CREATE TABLE user_profiles (
     -- handle (番付, the library). NULL = never asked (an account boarded
     -- before the card was the form: the card prints its username), ''
     -- = asked and left empty (the card prints no name).
-    card_name TEXT
+    card_name TEXT,
+    -- 番付に載らない (plan 262): the learner keeps off the board, left out
+    -- of every list another learner reads (study/banzuke.py).
+    board_hidden BOOLEAN NOT NULL DEFAULT FALSE
 );
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 
@@ -1179,3 +1182,42 @@ CREATE TABLE feedback (
 );
 ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
 CREATE INDEX feedback_user_at ON feedback (user_id, created_at);
+
+-- 番付 -- the board's divisions and its days (plan 262, study/banzuke.py).
+-- banzuke_division: the 段 (0 序ノ口 .. 5 幕内) a learner rides for the
+-- week starting `week` (a Monday, UTC), and `moved`, the step the week
+-- before put them there (+1 up, -1 down, 0 stayed). Written once a week
+-- by the first board to settle it; the current and the previous week
+-- are kept. Erased with the account.
+CREATE TABLE banzuke_division (
+    user_id  TEXT NOT NULL,
+    week     DATE NOT NULL,
+    division SMALLINT NOT NULL,
+    moved    SMALLINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, week)
+);
+ALTER TABLE banzuke_division ENABLE ROW LEVEL SECURITY;
+CREATE INDEX idx_banzuke_division_week ON banzuke_division(week, division);
+
+-- banzuke_rank: each learner's place on a global board ('all' |
+-- 'week') at the start of `day`, written by the day's first board:
+-- what a row's ▲3 is measured from. One row per learner and board,
+-- replaced daily. Erased with the account.
+CREATE TABLE banzuke_rank (
+    user_id TEXT NOT NULL,
+    period  TEXT NOT NULL,
+    day     DATE NOT NULL,
+    rank    INTEGER NOT NULL,
+    PRIMARY KEY (user_id, period)
+);
+ALTER TABLE banzuke_rank ENABLE ROW LEVEL SECURITY;
+
+-- banzuke_marks: which week has been settled ('week') and which day's
+-- places taken ('rank:all', 'rank:week'): whoever inserts the mark
+-- does the write. No learner's rows.
+CREATE TABLE banzuke_marks (
+    kind TEXT NOT NULL,
+    at   DATE NOT NULL,
+    PRIMARY KEY (kind, at)
+);
+ALTER TABLE banzuke_marks ENABLE ROW LEVEL SECURITY;

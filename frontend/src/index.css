@@ -3191,6 +3191,7 @@ button:focus-visible {
 .stage,
 .profile,
 .stats,
+.bzp,
 .settings {
   animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
 }
@@ -22477,6 +22478,252 @@ form.stage__foot > .btn-primary {
 }
 .leaderboard-row__gap { justify-content: center; color: var(--text-secondary); }
 
+/* ── 番付 — the board's window and the whole of it (plan 262) ──
+   A row's move since the day began sits between the name and the XP,
+   in the secondary ink: the arrow says which way, so no state colour
+   is spent on it. A name that opens its learner's card is a bare
+   button that keeps the name's type. The board's foot holds the
+   learner's gap to the next place and the door to the whole board. */
+.bz-move {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.bz-pick {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.bz-pick:hover,
+.bz-pick:focus-visible { text-decoration: underline; filter: none; }
+.bz__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-2) var(--sp-5);
+}
+.bz__gap-to {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.bz__whole {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  min-height: 44px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.bz__whole svg { color: var(--text-secondary); }
+
+/* ── /profile/banzuke — the whole board (plan 262) ──
+   The profile's box, the board's tabs over the list, the division's
+   head or last week's podium between them, the learner's own row riding
+   the foot while it is off the screen, the switch to keep off the board
+   at the end. */
+.bzp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: 0 var(--sp-5) var(--sp-6);
+}
+.bzp__controls { display: flex; flex-direction: column; gap: var(--sp-3); }
+.bzp__scope { margin-left: 0; align-self: flex-start; }
+.bzp__division { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
+.bzp__division-row { display: flex; align-items: center; gap: var(--sp-5); }
+.bzp__step {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.bzp__step:disabled { opacity: 0.35; cursor: default; }
+.bzp__division-name { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
+.bzp__division-jp {
+  font-family: var(--font-jp);
+  font-size: var(--fs-heading);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.bzp__division-latin,
+.bzp__podium-cap {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.bzp__division-notes,
+.bzp__division-moved,
+.bzp__ends {
+  margin: 0;
+  text-align: center;
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.bzp__podium { display: flex; flex-direction: column; gap: var(--sp-2); }
+.bzp__podium-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-3);
+}
+.bzp__champ {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-4) var(--sp-3);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--surface-radius);
+}
+.bzp__champ .leaderboard-row__name { flex: none; max-width: 100%; text-align: center; }
+.bzp__more {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: var(--sp-3) var(--sp-5);
+  border: 0;
+  border-bottom: 1px solid var(--surface-line);
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.bzp__more:last-child { border-bottom: 0; }
+.bzp__empty { margin: 0; padding: var(--sp-6) var(--sp-5); text-align: center; color: var(--text-secondary); }
+/* Where Monday's move up or down starts: a dashed hairline, named. */
+.bzp__zone {
+  padding: var(--sp-1) var(--sp-5);
+  border-bottom: 1px dashed var(--surface-line);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.bzp__me {
+  position: sticky;
+  bottom: var(--sp-3);
+  z-index: 2;
+  display: flex;
+  align-items: stretch;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--surface-radius);
+  overflow: hidden;
+}
+.bzp__me-row { flex: 1; min-width: 0; border-bottom: 0; }
+.bzp__jump {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  border: 0;
+  border-left: 1px solid var(--surface-line);
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.bzp__gap { text-align: center; }
+.bzp__seen { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-2); }
+.bzp__seen-seg { margin-left: 0; }
+.bzp__seen-hint { font-size: var(--fs-caption); color: var(--text-secondary); }
+
+/* ── A row's card (LearnerSheet, plan 262) ──
+   Three figures three across, the division's name, the decks published. */
+.bz-card__figs {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-3);
+}
+.bz-card__fig {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.bz-card__fig dt {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.bz-card__fig dd {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+.bz-card__fig small { font-size: var(--fs-caption); color: var(--text-secondary); }
+.bz-card__division { margin: 0; display: flex; align-items: baseline; justify-content: center; gap: var(--sp-3); color: var(--text-secondary); }
+.bz-card__division-jp { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 700; color: var(--text-primary); }
+.bz-card__decks { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--surface-line); }
+.bz-card__deck {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  border-bottom: 1px solid var(--surface-line);
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.bz-card__wait { margin: 0; text-align: center; color: var(--text-secondary); }
+
 /* ── The status sheet (進捗が主役 round) ──
    The pass's back as a sumi sheet: the distance travelled, the ghost
    track under it as the proof, two comparison rows, the two honest
@@ -33335,19 +33582,15 @@ button.brd-stn { cursor: pointer; }
      at the board's edge. Every row is a subgrid of the board's three
      columns, so the ranks stand in one column and both heads over their
      sides; the rows share the board's height either side of the
-     elision (--bz-top, --bz-out, Banzuke's counts), the head and the ⋯
+     elision (--bz-rows, Banzuke's template), the head, the ⋯ and the foot
      keep their own. The learner's own place is washed on its side, the
      pass ink's rail at the board's edge. */
   .desk-bz {
     flex: 1 0 auto;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    grid-template-rows: auto repeat(var(--bz-top, 5), minmax(min-content, 1fr));
-  }
-  .desk-bz--out {
-    grid-template-rows:
-      auto repeat(var(--bz-top, 5), minmax(min-content, 1fr))
-      auto repeat(var(--bz-out, 1), minmax(min-content, 1fr));
+    /* The head, a row per rank or ⋯, the foot (Banzuke's --bz-rows). */
+    grid-template-rows: var(--bz-rows, auto);
   }
   .desk-bz__head,
   .desk-bz__row {
@@ -33396,6 +33639,38 @@ button.brd-stn { cursor: pointer; }
   .desk-bz__cell--west .leaderboard-row__name { text-align: right; }
   .desk-bz__cell--me { background: var(--overlay-hover); box-shadow: inset -3px 0 0 var(--pass-ink); }
   .desk-bz__cell--west.desk-bz__cell--me { box-shadow: inset 3px 0 0 var(--pass-ink); }
+  /* The foot (plan 262): the gap to the next place, the door to the
+     whole board, across the three columns. */
+  .desk-bz__foot {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    padding: var(--sp-1) var(--sp-5);
+  }
+  .desk-bz__cell--west .bz-pick { text-align: right; }
+
+  /* ── /profile/banzuke on the desk (plan 262) ──
+     The list in the entry's width, the division's head, last week's
+     podium and the switch beside it in the side's. */
+  .phone__content > .bzp {
+    display: grid;
+    grid-template-columns: minmax(0, var(--desk-entry-w)) var(--desk-side-w);
+    grid-auto-flow: dense;
+    place-content: start center;
+    align-items: start;
+    gap: var(--sp-6) var(--sp-9);
+    padding: 0 var(--sp-7) var(--sp-6);
+  }
+  .bzp > .bar { grid-column: 1 / -1; }
+  .bzp__controls { grid-column: 1; grid-row: 2; }
+  .bzp__ends { grid-column: 1; grid-row: 3; }
+  .bzp__list { grid-column: 1; grid-row: 4 / span 3; }
+  .bzp__me { grid-column: 1; grid-row: 7; }
+  .bzp__division,
+  .bzp__podium { grid-column: 2; grid-row: 2 / span 2; }
+  .bzp__gap { grid-column: 2; grid-row: 4; text-align: left; }
+  .bzp__seen { grid-column: 2; grid-row: 5; }
 
   /* ── 教材 on the desk: the shelf beside the open deck (plan 154) ──
      The owner's pick B of four layouts drawn on the canvas "Tsuji — the
