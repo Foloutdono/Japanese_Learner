@@ -161,10 +161,14 @@ describe('the analyser result on a phone', () => {
       expect(screen.container.querySelector(sel), `${sel} is still built`).toBeNull()
     }
 
-    // What replaces it: the subtitles' next line walks the stops (plan 134),
-    // under the sentence since plan 219.
-    expect(screen.container.querySelector('.anl-m__subs > .anl-m__line--next').textContent)
-      .toBe('犬も好き')
+    // What replaces it: the transport's skips walk the stops. The
+    // subtitles' quieter lines either side (plan 219) are a tablet's: a
+    // phone's line takes their room.
+    expect(screen.container.querySelector('.anl-m__dock button[aria-label="Phrase suivante"]')).not.toBeNull()
+    const nextLine = screen.container.querySelector('.anl-m__subs > .anl-m__line--next')
+    expect(nextLine.textContent).toBe('犬も好き')
+    expect(getComputedStyle(nextLine).display).toBe('none')
+    expect(getComputedStyle(screen.container.querySelector('.anl-m__line--prev')).display).toBe('none')
   })
 
   it('puts 保存 in the dock as a real toggle at a thumb-sized target', async () => {
@@ -208,11 +212,10 @@ describe('the analyser result on a phone', () => {
     await analyze(screen)
 
     const keep = () => screen.container.querySelector('.anl-head__keep')
-    // The subtitles' two quieter lines: the previous above, the next
-    // below (plan 219). Walk to the second stop first: what gets kept is
-    // where you are, not where the Passage starts.
-    const next = () => screen.container.querySelector('.anl-m__subs > .anl-m__line--next')
-    const prev = () => screen.container.querySelector('.anl-m__subs > .anl-m__line--prev')
+    // The transport's two skips. Walk to the second stop first: what
+    // gets kept is where you are, not where the Passage starts.
+    const next = () => screen.container.querySelector('.anl-m__dock button[aria-label="Phrase suivante"]')
+    const prev = () => screen.container.querySelector('.anl-m__dock button[aria-label="Phrase précédente"]')
     next().click()
     await settle(60)
 

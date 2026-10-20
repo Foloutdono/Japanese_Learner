@@ -28091,6 +28091,11 @@ button.brd-stn { cursor: pointer; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* On a phone they go: the line at display size and its translation take
+   the room, and the transport's two skips walk the stops. */
+@media (max-width: 560px) {
+  .anl-m__line { display: none; }
+}
 .anl-m__subs .anl-subs__line {
   justify-content: center;
   row-gap: var(--sp-5);

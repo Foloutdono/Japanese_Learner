@@ -1650,7 +1650,8 @@ export default function AnalyzerScreen({ session }) {
   // video; the video edge to edge with its track along its foot; the
   // line in the middle of the screen at display size, the sentence
   // before over it and the one after under it, quieter, each a tap
-  // away, the translation once Explain has bought it; and at the foot
+  // away (a tablet's only: a phone hides them, index.css), the
+  // translation once Explain has bought it; and at the foot
   // the thumb's dock, what it holds about the line alone -- its grammar
   // and its words (each a sheet), Explain, keep -- over the transport.
   // A word tapped on the line opens its dictionary card, a point its
