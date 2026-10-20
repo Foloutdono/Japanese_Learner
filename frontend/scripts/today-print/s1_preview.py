@@ -50,7 +50,8 @@ def moving_css():
 
 
 def class_name(c, _old=build.class_name):
-    return 'tpr-' + c[3:] if c.startswith('s1-') else _old(c)
+    # the seasons' rounds' own prefixes (s1-, s4- ...) as the build maps them
+    return 'tpr-' + c[3:] if c[:1] == 's' and c[1:2].isdigit() and c[2:3] == '-' else _old(c)
 
 
 def page(L, layers, run, css):
