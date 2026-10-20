@@ -26795,9 +26795,12 @@ button.brd-stn { cursor: pointer; }
    the middle takes the card's free height and the board the smaller of
    its two sides, so a miss's word never lands under the gate. Never
    under 200px, where the screen scrolls instead. The strokes are its
-   brush: traced ones in the brush's ink, the ones ahead faint, the one
-   asked in the line's pigment lit toward the ink so it reads on the
-   sumi, with a full dot where it starts and a ring where it ends. */
+   brush, at a brush's weight: traced ones in the brush's ink, the ones
+   ahead faint. The one asked is a hollow (plan 263) in the line's
+   pigment lit toward the ink so it reads on the sumi, drawn in from its
+   start, three chevrons walking its way inside it, a full dot with its
+   number where it starts and a ring where it ends; the ink fills it as
+   the hand goes (TraceBoard). */
 .gt-write {
   flex: 1 1 0;
   min-height: 200px;
@@ -26820,42 +26823,79 @@ button.brd-stn { cursor: pointer; }
 .gt-pen { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .gt-glyph,
 .gt-missed { pointer-events: none; }
-.gt-stroke {
+.gt-stroke,
+.gt-ink {
   fill: none;
   stroke: var(--brush-ink);
-  stroke-width: 4;
+  stroke-width: 6;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.gt-stroke--ahead,
-.gt-stroke--here { opacity: 0.2; }
-/* Drawn in along its way: the stroke asked (again after each miss),
-   a stroke the board traced for the learner, and « Montre-moi »'s,
-   one after the other. */
-.gt-stroke--now,
+.gt-stroke--ahead { opacity: 0.16; }
+/* A stroke the board traced for the learner, and « Montre-moi »'s, one
+   after the other, drawn in along their way. */
 .gt-stroke--given,
 .gt-stroke--shown { stroke-dasharray: 1; animation: gt-draw 600ms ease-in-out both; }
-.gt-stroke--now { stroke: var(--gt-now); }
 .gt-stroke--shown { animation-delay: calc(var(--i, 0) * 450ms); }
 @keyframes gt-draw {
   from { stroke-dashoffset: 1; }
   to   { stroke-dashoffset: 0; }
 }
+/* The hollow: an edge in the pigment, the slab inside it, drawn in from
+   the stroke's start (TraceBoard's INTRO_MS). The strokes already traced
+   stand over it, where two cross. */
+.gt-hollow path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  animation: gt-draw 520ms ease-out both;
+}
+.gt-hollow__edge { stroke: var(--gt-now); stroke-width: 10.4; }
+.gt-hollow__in { stroke: var(--bg-panel); stroke-width: 8; }
+/* The chevrons, placed and faded by the board as they walk. */
+.gt-chevron {
+  fill: none;
+  stroke: var(--gt-now);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+}
+/* The ink, filled to where the hand has come; lifted short, it drains
+   back along the stroke, then goes. */
+.gt-ink--drain { transition: stroke-dasharray 300ms ease-out, opacity 120ms linear 260ms; }
 .gt-start { fill: var(--gt-now); }
-.gt-end { fill: none; stroke: var(--gt-now); stroke-width: 1.5; }
+.gt-start__n {
+  fill: var(--bg-panel);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+/* A stroke begun away from the dot calls the dot. */
+.gt-start--call circle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: gt-call 1.2s ease-in-out infinite;
+}
+@keyframes gt-call {
+  50% { transform: scale(1.5); }
+}
+.gt-end { fill: transparent; stroke: var(--gt-now); stroke-width: 1.4; transition: fill 0.15s ease; }
+.gt-end--reached { fill: var(--gt-now); }
 /* The pen takes the pointer; a finger on it never scrolls the page. */
 .gt-pen { touch-action: none; cursor: crosshair; }
 .gt-pen--off { cursor: default; }
-.gt-pen polyline,
+/* A missed line -- the finger's own, as it went -- a moment in the
+   miss's ink, then gone. */
 .gt-missed polyline {
   fill: none;
-  stroke: var(--brush-ink);
-  stroke-width: 5;
+  stroke: var(--rating-wrong);
+  stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-/* A missed line, a moment in the miss's ink, then gone. */
-.gt-missed polyline { stroke: var(--rating-wrong); }
 .gt-missed { animation: gt-fade 700ms ease-out forwards; }
 @keyframes gt-fade {
   from { opacity: 0.9; }
@@ -26882,9 +26922,12 @@ button.brd-stn { cursor: pointer; }
 .gt-word__hit rt { color: var(--tour-ink); font-weight: 700; }
 .gt-word__gloss { font-size: var(--fs-body); line-height: 1.4; color: var(--text-secondary); text-align: end; text-wrap: pretty; }
 @media (prefers-reduced-motion: reduce) {
-  .gt-stroke--now,
   .gt-stroke--given,
-  .gt-stroke--shown { animation: none; stroke-dasharray: none; }
+  .gt-stroke--shown,
+  .gt-hollow path { animation: none; stroke-dasharray: none; }
+  .gt-start--call circle { animation: none; }
+  .gt-ink--drain,
+  .gt-end { transition: none; }
 }
 
 /* The register, in the plate's corner: a word in the caption register,

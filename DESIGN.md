@@ -993,22 +993,31 @@ drawn only where there is something to show:
   them (`Readings`, on'yomi and kun'yomi apart).
 - **Write.** The strokes traced in turn on **the writing board's slab**
   (the sumi square, sumi in both themes, the practice sheet's 田 over it)
-  with the brush's ink. The stroke asked is in the line's pigment lit
-  toward the ink, drawn in once along its way, **a full dot where it
-  starts and a ring where it ends**; the strokes ahead are faint, the
-  ones traced stand in the ink. A trace is judged in KanjiVG's units
-  (`domain/trace.js`): begun at the dot, ended at the ring, along the
-  stroke, a fingertip of slack. A miss is a line a moment in the miss's
-  ink and one line at the card's foot saying what to fix (« Pars du
-  point plein. », « Va jusqu'au rond. », « Suis le trait. »), the stroke
-  drawn in again; after three misses on one stroke the board draws it
-  and says so in the selection's ink (given, not found). « Montre-moi » is the quiet
-  way over the gate and draws the rest in order. As a writing run's
-  board is, **the board is the square the card leaves**: the middle
-  takes the card's free height and the board the smaller of its sides,
-  so a miss's word never lands under the gate (never under 200px, where
-  the screen scrolls instead). The gate is its outline until the glyph
-  is whole.
+  with the brush's ink, at a brush's weight. The stroke asked is **a
+  hollow the hand fills** (plan 263, the owner's pick A1 + A2): its
+  outline in the line's pigment lit toward the ink, drawn in from its
+  start as it is asked, so its way is seen before it is traced; **a full
+  dot with the stroke's number where it starts, a ring where it ends**,
+  filled once the ink reaches it; and three chevrons inside it, ahead of
+  the ink, walking its way while the hand waits (still, under reduced
+  motion). The strokes ahead are faint, the ones traced stand in the
+  ink, over the hollow where two cross. **The ink is the stroke's own**,
+  carried along it as far as the finger has come and only forward
+  (`domain/trace.js`, in KanjiVG's units, a fingertip of slack): a
+  wavering line leaves the stroke's shape, a finger off the stroke
+  carries nothing until it comes back to where the ink stopped, and the
+  ring reached makes the stroke whole without the finger lifting. A
+  stroke begun away from the dot calls the dot. Lifted short, the ink
+  drains back along the stroke, the finger's own line shows a moment in
+  the miss's ink, and one line at the card's foot says what to fix
+  (« Pars du point plein. », « Va jusqu'au rond. », « Suis le trait. »);
+  after three misses on one stroke the board draws it and says so in the
+  selection's ink (given, not found). « Montre-moi » is the quiet way
+  over the gate and draws the rest in order. As a writing run's board
+  is, **the board is the square the card leaves**: the middle takes the
+  card's free height and the board the smaller of its sides, so a miss's
+  word never lands under the gate (never under 200px, where the screen
+  scrolls instead). The gate is its outline until the glyph is whole.
 - **Use.** Up to three simple words, as the dictionary's ledger has
   them: the word at `--fs-heading` with the glyph picked out in the
   line's ink (a kana's word printed as it is read, a kanji's with its
