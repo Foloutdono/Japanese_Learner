@@ -85,3 +85,26 @@ A day with nothing due (`ClearedGate`, plan 206, the owner's pick G3 of
 the canvas's round 10) stands on the same print without its train (the
 last one has gone; `TodayPrint`'s `train={false}`), its disc the day's
 seal cut in red (`TodayDial`'s `CutSeal`), in the sun's own red at dawn.
+
+## The seasons (plan 261)
+
+Round S¹ of the canvas "Tsuji — Today, the seasons"
+(https://claude.ai/artifact/RsQaXzEqW86yeouw6M9Th8): the same bay at
+its four hours, dressed by the year. Spring has its cherry, haze and
+hazy moon; summer, Red Fuji, the cloud peak and fireflies; autumn is
+the print as built, with its maples; winter, snow on the pine, the hills
+and the bank. It is drawn for the owner's pick: `build.py` draws none of
+it yet, and the app shows the print as built.
+
+| module | what it draws |
+| --- | --- |
+| `s1_inks.py` | each season's inks over each hour's, and the hour's view (題箋) as the season names it |
+| `s1_scene.py` | the print in its season, `scene(L, hour, season)`: Fuji's snow line, the hills' woods turning |
+| `s1_flora.py` | the season's tree (cherry, maple), the pine under its snow, the bank's flowers |
+| `s1_air.py` | the season's clouds and birds, what falls, the fireflies, the fireworks; its moving parts' CSS |
+| `s1_canvas.py` | the canvas's artboards, from round 9's (read from "Tsuji — Today, the visit card") |
+| `s1_preview.py` | stills of the prints, and the contrast the lines under the dial keep on each |
+
+```bash
+cd frontend && python3 scripts/today-print/s1_preview.py /tmp/seasons phone   # every season and hour
+```
