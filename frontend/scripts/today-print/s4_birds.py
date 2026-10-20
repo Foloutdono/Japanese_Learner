@@ -97,7 +97,7 @@ def gulls(L, h, o, hour, uid='s4'):
 
 
 CSS = '''/* ── S⁴ · the day's gulls: a long glide, then three slow beats ──── */
-.s4-gwing, .s4-ghand, .s4-gbody { transform-box: view-box; transform-origin: 0 0; animation-duration: var(--cyc); animation-delay: var(--ph); animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+.s4-gwing, .s4-ghand, .s4-gbody { transform-box: view-box; transform-origin: 0 0; animation-duration: var(--cyc, 15s); animation-delay: var(--ph, 0s); animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
 .s4-gwing--r { animation-name: s4-gbeat-r; }
 .s4-gwing--l { animation-name: s4-gbeat-l; }
 .s4-ghand--r { animation-name: s4-gflex-r; }

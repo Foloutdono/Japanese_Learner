@@ -315,9 +315,11 @@ def _scene(L, hour, season, h, s, o, uid, with_disc):
       <path d="M-10 {f(L.ground + 4)} C{f(L.W * 0.15)} {f(L.ground - 4)} {f(L.W * 0.3)} {f(L.ground + 6)} {f(L.W * 0.5)} {f(L.ground)} S{f(L.W * 0.82)} {f(L.ground + 4)} {L.W + 10} {f(L.ground - 2)} L{L.W + 10} {f(L.ground + 12)} L-10 {f(L.ground + 12)} Z" fill="{h['ground']}"></path>
       {ground9(L, h, uid)}
       {grass7(L, h) if o.get('crowns') != 'snow' else ''}
+      {flora.fore_back(L, h, o, hour, gust, uid)}
       {flora.tree(L, h, o, hour, gust, uid)}
       {flora.pine_s(L, h, o, hour, gust)}
       {flora.bank(L, h, o, hour, gust, anim)}
+      {flora.fore_front(L, h, o, hour, gust, uid)}
       {air.falls(L, h, o, hour)}
       {air.fireflies(L, h, o, hour, 'near')}
 '''

@@ -8,15 +8,18 @@ Writes what Today's gate draws behind itself
       the train, what stands in front of it -- each an <svg>, with the
       train's run across the print and its time; a print for each
       season at each hour (spring-dawn ... winter-night), and the
-      summer's August night, the fireworks (summer-hanabi);
+      summer's August night, the fireworks (summer-hanabi); and the
+      summer's again with its crape myrtle drawn the other way
+      (summer-dawn-b ... summer-hanabi-b), shown on every other day;
   public/today/print/<REV>/grain.png, paper.png
       the sky's wood grain and the paper's fibre, tiles drawn once;
   src/components/station/print/print.json
       what the app draws itself, per print: the disc's inks (the dial is
       the app's, live), the inks of the lines set on the print, the
-      sky's stops for the frame under it, its view; and the two frames'
-      geometry. Which print the clock and the calendar show is the
-      app's (domain/printHour.js).
+      sky's stops for the frame under it, its view (and the print whose
+      view it is, `viewKey`, the key of its name in the locales); and
+      the two frames' geometry. Which print the clock and the calendar
+      show is the app's (domain/printHour.js).
 
 The print's moving parts carry tpr-* classes, styled in index.css (the
 print's section); a class renamed here is renamed there.
@@ -26,7 +29,7 @@ src/todayPrint.test.js holds the two equal.
 
 Needs numpy and Pillow (the textures). The print is the canvas
 "Tsuji — Today, the visit card", round 9, in the seasons of the canvas
-"Tsuji — Today, the seasons", round 3 (plan 261): the modules are the
+"Tsuji — Today, the seasons", round 5 (plan 261): the modules are the
 rounds' own (see README.md), and their output is the canvas's byte for
 byte. Bump REV whenever the output changes, so no learner keeps a
 cached print (the service worker keeps /today/ cache-first).
@@ -43,17 +46,22 @@ sys.path.insert(0, HERE)
 import textures  # noqa: E402
 from layouts import PHONE, DESK  # noqa: E402
 import s3_inks  # noqa: E402
-import s3_scene  # noqa: E402
+import s5_scene  # noqa: E402
 
-REV = 2
+REV = 3
 FRONTEND = os.path.normpath(os.path.join(HERE, '..', '..'))
 OUT = os.path.join(FRONTEND, 'public', 'today', 'print', str(REV))
 SRC = os.path.join(FRONTEND, 'src', 'components', 'station', 'print', 'print.json')
 ORDER = ('dawn', 'day', 'dusk', 'night')
-# every print the year shows: (name, season, hour, what it adds), the
-# season's at each hour, and the summer's night in August
-PRINTS = [(f'{season}-{hour}', season, hour, None) for season in s3_inks.SEASONS for hour in ORDER] + [
-    ('summer-hanabi', 'summer', 'night', s3_inks.NIGHTS['hanabi'])]
+# every print the year shows: (name, season, hour, what it adds, the
+# night it is), the season's at each hour and the summer's night in
+# August; and the summer's again with the crape myrtle as the kachō-e
+# draws it (B), the owner's two picks taking turns a day each
+B = {'myrtle': 'kacho'}
+PRINTS = [(f'{season}-{hour}', season, hour, None, None) for season in s3_inks.SEASONS for hour in ORDER] + [
+    ('summer-hanabi', 'summer', 'night', s3_inks.NIGHTS['hanabi'], 'hanabi')]
+PRINTS += [(f'{name}-b', season, hour, {**(variant or {}), **B}, night)
+           for name, season, hour, variant, night in PRINTS if season == 'summer']
 # the train's crossing in seconds, and how far into it the print opens
 DEVICES = (('phone', PHONE, 46, 20), ('desk', DESK, 84, 31))
 
@@ -72,8 +80,8 @@ def class_name(c):
         return 'tpr-flare'          # the lantern's glow; f7-flame is the fire's tongues
     if c == 'fuji':
         return 'tpr-fuji'
-    if c.startswith('s1-'):
-        return 'tpr-' + c[3:]       # the seasons' own (plan 261)
+    if re.match(r's\d-', c):
+        return 'tpr-' + c[3:]       # the seasons' rounds' own (plan 261)
     m = re.match(r'f\d-(.+)$', c)
     if not m:
         raise ValueError(f'a class the build does not know: {c}')
@@ -154,9 +162,9 @@ def png(data_uri):
 def main():
     os.makedirs(OUT, exist_ok=True)
     seen = {}
-    for name, season, hour, variant in PRINTS:
+    for name, season, hour, variant, _night in PRINTS:
         for device, L, dur, delay in DEVICES:
-            sky, back, train, front, run = s3_scene.scene(L, hour, season, with_disc=False, variant=variant)
+            sky, back, train, front, run = s5_scene.scene(L, hour, season, with_disc=False, variant=variant)
             layers = rename_ids([rename_classes(lighter(tight(p)), seen) for p in (sky, back, train, front)])
             doc = {
                 'rev': REV, 'print': name, 'device': device, 'w': L.W, 'h': L.H,
@@ -176,13 +184,13 @@ def main():
         return {'w': L.W, 'h': L.H, 'cx': L.cx, 'cy': L.cy, 'disc': L.disc_r, 'halo': L.halo_r, 'fare': L.fare_r,
                 'horizon': L.horizon}
     prints = {}
-    for name, season, hour, variant in PRINTS:
-        h, _, _ = s3_scene.inks(season, hour)
-        night = next((k for k, v in s3_inks.NIGHTS.items() if v == variant), None) if variant else None
+    for name, season, hour, variant, night in PRINTS:
+        h, _, _ = s5_scene.inks(season, hour)
         prints[name] = {
             'season': season,
             'hour': hour,
             'view': s3_inks.NIGHT_VIEWS[night] if night else h['view'],
+            'viewKey': name.removesuffix('-b'),
             'sky': [[o, c] for o, c in h['sky']],
             'band': h['band'],
             'ground': h['ground'],

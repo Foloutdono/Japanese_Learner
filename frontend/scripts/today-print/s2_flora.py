@@ -175,7 +175,7 @@ def tree(L, h, o, hour, gust, uid):
                         for x, y, w in T['trunk'][:-1] for _ in range(2))
         skin = f'<path d="{spots}" fill="{mottle}" opacity="0.55"></path>'
     fallen = ''
-    if kind in ('sakura', 'sarusuberi'):
+    if kind in ('sakura', 'sarusuberi') and o.get('fallen', True):
         fr = random.Random(L.seed + 205)
         bx = T['trunk'][0][0]
         col = o['bloom'][1] if kind == 'sakura' else CRAPE[hour][1][1]

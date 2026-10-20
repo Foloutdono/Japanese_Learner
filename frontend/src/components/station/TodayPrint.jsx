@@ -130,7 +130,7 @@ export function PrintTitle({ now, look }) {
         {kanjiNumber(now.getMonth() + 1)}月{kanjiNumber(now.getDate())}日
         <span className="tpr-title__view">{PRINT.prints[look].view}</span>
       </span>
-      <span className="sr-only">{t.printTitle(day, t.printViews[look])}</span>
+      <span className="sr-only">{t.printTitle(day, t.printViews[PRINT.prints[look].viewKey])}</span>
     </p>
   )
 }

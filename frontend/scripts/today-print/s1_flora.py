@@ -425,6 +425,17 @@ def snow_cap(top, hh, o):
             f'<path d="{d}" fill="{o["cap"]}"></path>')
 
 
+# ── the foreground: what a later round lays on the ground behind the
+# trees (fore_back) and in front of them (fore_front); none here ────
+
+def fore_back(L, h, o, hour, gust, uid):
+    return ''
+
+
+def fore_front(L, h, o, hour, gust, uid):
+    return ''
+
+
 # ── the bank ──────────────────────────────────────────────────────
 
 def bank(L, h, o, hour, gust, anim_):

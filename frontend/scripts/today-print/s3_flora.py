@@ -231,7 +231,7 @@ def crape(L, h, o, hour, gust, uid):
         out.append(_sway(stems[i], i, held, gust, L))
     rx, ry = root[0][0], root[0][1]
     base = f'<path d="{limb(root, rng, wobble=0.05)}" fill="{skin}"></path>'
-    fallen = _fallen(L, inks[1])
+    fallen = _fallen(L, inks[1]) if o.get('fallen', True) else ''
     falling = _falling(L, inks[1], lobes, k)
     return (f'{fallen}<g class="f5-gust" style="transform-origin: {f(rx)}px {f(ry)}px; --a: 0.2deg; {gust(rx, L.W)}">'
             f'{base}{"".join(out)}</g>{falling}')

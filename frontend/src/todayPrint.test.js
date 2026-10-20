@@ -15,8 +15,9 @@ import fr from './locales/fr/index.js'
 // reduced motion the whole print keeps still.
 
 const HOURS = ['dawn', 'day', 'dusk', 'night']
-// Every print the year shows (plan 261): a season's at each hour, and
-// the summer's August night.
+// Every print the year shows (plan 261): a season's at each hour, the
+// summer's August night, and the summer's again with the other crape
+// myrtle (`-b`, round 5).
 const PRINTS = Object.keys(PRINT.prints)
 const DEVICES = ['phone', 'desk']
 const ROOT = new URL(`../public/today/print/${PRINT.rev}/`, import.meta.url)
@@ -48,9 +49,12 @@ describe('the hour the print shows', () => {
       expect(look.sky.length, name).toBeGreaterThan(1)
       expect(HOURS, name).toContain(look.hour)
       expect(Object.keys(printVars(name, 'phone', null))).toContain('--tpr-sky')
+      // a B print is said as the print whose view it shows
+      expect(PRINT.prints[look.viewKey]?.view, name).toBe(look.view)
     }
-    expect(Object.keys(en.printViews).sort()).toEqual([...PRINTS].sort())
-    expect(Object.keys(fr.printViews).sort()).toEqual([...PRINTS].sort())
+    const views = [...new Set(PRINTS.map(name => PRINT.prints[name].viewKey))].sort()
+    expect(Object.keys(en.printViews).sort()).toEqual(views)
+    expect(Object.keys(fr.printViews).sort()).toEqual(views)
   })
 })
 
@@ -69,22 +73,35 @@ describe('the season the print shows (plan 261)', () => {
 
   it('shows the fireflies on a June or July night and the fireworks on an August one', () => {
     expect(printName(on(6, 20, 22))).toBe('summer-night')
-    expect(printName(on(7, 31, 23))).toBe('summer-night')
+    expect(printName(on(7, 30, 23))).toBe('summer-night')
     expect(printName(on(8, 1, 21))).toBe('summer-hanabi')
-    expect(printName(on(8, 31, 3))).toBe('summer-hanabi')
+    expect(printName(on(8, 31, 23))).toBe('summer-hanabi')
     expect(printName(on(8, 15, 13))).toBe('summer-day')
     expect(printName(on(9, 1, 21))).toBe('autumn-night')
   })
 
+  it('takes the two crape myrtles in turn, a day each, a night keeping its evening’s (round 5)', () => {
+    expect(printName(on(7, 20, 13))).toBe('summer-day')
+    expect(printName(on(7, 21, 13))).toBe('summer-day-b')
+    expect(printName(on(7, 21, 7))).toBe('summer-dawn-b')
+    expect(printName(on(7, 21, 22))).toBe('summer-night-b')
+    // the print's day starts at its dawn: past midnight, still the 21st's
+    expect(printName(on(7, 22, 3))).toBe('summer-night-b')
+    expect(printName(on(7, 22, 5))).toBe('summer-dawn')
+    expect(printName(on(8, 16, 21))).toBe('summer-hanabi-b')
+    // one print an hour in the other seasons
+    expect(printName(on(10, 21, 13))).toBe('autumn-day')
+  })
+
   it('names the hour a finish keeps, in the season of the day', () => {
-    expect(printName(on(8, 10, 9), 'night')).toBe('summer-hanabi')
+    expect(printName(on(8, 15, 9), 'night')).toBe('summer-hanabi')
     expect(printName(on(4, 5, 7), 'night')).toBe('spring-night')
   })
 
   it('asks only for prints there are, and every print is asked for some hour of the year', () => {
     const asked = new Set()
     for (let month = 1; month <= 12; month++) {
-      for (const h of [0, 5, 9, 16, 20]) asked.add(printName(on(month, 15, h)))
+      for (const day of [15, 16]) for (const h of [0, 5, 9, 16, 20]) asked.add(printName(on(month, day, h)))
     }
     expect([...asked].sort()).toEqual([...PRINTS].sort())
   })

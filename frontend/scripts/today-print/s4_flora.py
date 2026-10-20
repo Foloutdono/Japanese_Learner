@@ -189,7 +189,7 @@ def photo(L, h, o, hour, gust, uid):
         _heap(x, y, r, k, rng, 0.5 + 0.6 * (u * lx + v * ly), tone, flowers, fl)
     flower = [f'<path d="{"".join(ds)}" fill="{c}"></path>' for c, ds in fl.items() if ds]
     ax, ay = p(358, 600)
-    tree_ = (_fallen(L, (light, pink, magenta, deep)) +
+    tree_ = ((_fallen(L, (light, pink, magenta, deep)) if o.get('fallen', True) else '') +
              _sway(rx0, ry0, 0.2, ''.join(body) + _sway(ax, ay, 0.45, ''.join(crown) + ''.join(flower), gust, L), gust, L) +
              _falling(L, (pink, lilac), cx, cy, RX, RY, k))
     return tree_
@@ -385,7 +385,7 @@ def kacho(L, h, o, hour, gust, uid):
     leaf_s = ''.join(f'<path d="{"".join(ds)}" fill="{c}"></path>' for c, ds in leaves.items() if ds)
     rx0, ry0 = trunk[0][0], trunk[0][1]
     ax, ay = trunk[-1][0], trunk[-1][1]
-    return (_fallen(L, (flit, fcrim, fdeep, fbud)) +
+    return ((_fallen(L, (flit, fcrim, fdeep, fbud)) if o.get('fallen', True) else '') +
             _sway(rx0, ry0, 0.15, ''.join(body) + _sway(ax, ay, 0.4, leaf_s + flower, gust, L), gust, L))
 
 
@@ -429,7 +429,7 @@ def flat(L, h, o, hour, gust, uid):
     rx0, ry0 = stems[0][0][0], stems[0][0][1]
     ax, ay = p(352, 600)
     crown = ''.join(shapes) + ''.join(flowers) + f'<path d="{"".join(dots)}" fill="{fdot}"></path>'
-    return (f'<defs>{grad}</defs>' + _fallen(L, (fdot, ftop, ffoot, ffoot)) +
+    return (f'<defs>{grad}</defs>' + (_fallen(L, (fdot, ftop, ffoot, ffoot)) if o.get('fallen', True) else '') +
             _sway(rx0, ry0, 0.2, body + _sway(ax, ay, 0.45, crown, gust, L), gust, L))
 
 
