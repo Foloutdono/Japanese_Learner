@@ -977,7 +977,10 @@ over Today's print of the hour, in one of two ways:
   drawn and a perspective crawl after them): the whole text goes slowly
   up the screen as a film's credits do, flat and at one size, in the
   app's ink on the print of the hour washed with its paper (`WASH`,
-  heavier at dusk and night so the page stays paper), on short airy
+  heavier at dusk so the page stays paper; at night the print is
+  brightened first, `LIFT`, and washed lighter, so the moonlit scene
+  shows under a pale blue page: plan 261, the owner's pick of three
+  drawn, made lighter still), on short airy
   lines broken between phrases, each sentence on a line of its own
   (`SCROLL`). It comes in with its first line at the reading line and
   moves at one speed, worked out from its own laid-out length, so the

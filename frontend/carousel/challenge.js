@@ -290,7 +290,9 @@ function layOf(ctx, plan, i, z, w, { maxLines = 6, min = FS.title, fam = 'serif'
 // The hour's print under it: darkened where the words go (`dark`), or
 // washed whole with the app's paper, the words in ink over it.
 function backdrop(ctx, P, T, dark = 0.5, hour = 'day', wash = 1) {
-  if (P) drawPrint(ctx, P, 0, 0, FMT.w / P.scene.w, { W: FMT.w, H: FMT.h })
+  const lift = T.ground === 'paper' && P ? liftedPrint(P, LIFT[hour]) : null
+  if (lift) ctx.drawImage(lift, 0, 0)
+  else if (P) drawPrint(ctx, P, 0, 0, FMT.w / P.scene.w, { W: FMT.w, H: FMT.h })
   else { ctx.fillStyle = T.ground === 'paper' ? PAPER.card : '#17151a'; ctx.fillRect(0, 0, FMT.w, FMT.h) }
   if (T.ground === 'paper') {
     ctx.fillStyle = alpha(PAPER.bg, Math.min(0.97, (WASH[hour] ?? WASH.day) * wash))
@@ -307,8 +309,29 @@ function backdrop(ctx, P, T, dark = 0.5, hour = 'day', wash = 1) {
 }
 // How much of the paper lies over the print at each hour: the picture
 // is still there, the ink reads over all of it, and the page stays
-// paper, never the grey a dark sky washed thin would leave.
-const WASH = { dawn: 0.72, day: 0.72, dusk: 0.82, night: 0.88 }
+// paper, never the grey a dark sky washed thin would leave. The night's
+// print is brightened first (LIFT, plan 261): washed as heavily as dusk
+// its dark sky left a blank page; brightened, the moonlit scene stands
+// under a lighter wash, the page a pale moonlit blue (the owner's pick).
+const WASH = { dawn: 0.72, day: 0.72, dusk: 0.82, night: 0.6 }
+const LIFT = { night: 3 }
+// The print brightened once and kept: it stands still under the text, so
+// every frame lays the same picture. Where there is no canvas to draw it
+// on (the tests), it is drawn as it is.
+const lifts = new WeakMap()
+function liftedPrint(P, lift) {
+  if (!lift) return null
+  if (!lifts.has(P)) {
+    const c = canvasOf(FMT.w, FMT.h)
+    if (c) {
+      const x = c.getContext('2d')
+      x.filter = `brightness(${lift})`
+      drawPrint(x, P, 0, 0, FMT.w / P.scene.w, { W: FMT.w, H: FMT.h })
+    }
+    lifts.set(P, c)
+  }
+  return lifts.get(P)
+}
 
 function masthead(ctx, T) {
   mark(ctx, fr.x, fr.y, 64, T.ink, T.road)
