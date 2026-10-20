@@ -1995,6 +1995,7 @@ const decks = {
   // browser's own confirm() dialog — short, because it sits inline.
   deleteDeckConfirm: 'Delete this deck?',
   deleteCardsConfirm: 'Delete selected?',
+  deleteCardConfirm: 'Delete this card?',
   study:             'Study',
   deckEdit:          'Edit',
   deckAddCards:      'Add cards',

@@ -344,6 +344,8 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
   const [selectMode, setSelectMode] = useState(false)
   const [selected, setSelected]     = useState(new Set())
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  // The open editor's own deletion, asked in the same sheet.
+  const [confirmingCard, setConfirmingCard] = useState(false)
   // The desk's card table past its first rows (plan 154).
   const [showAll, setShowAll] = useState(false)
   // The More sheet (plan 071): import, export and the deck's own
@@ -446,6 +448,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     setConfirmingMine(false)
     setConfirmingUnfollow(false)
     setConfirmingDelete(false)
+    setConfirmingCard(false)
     setSelectMode(false)
     setSelected(new Set())
     setAdding(false)
@@ -713,6 +716,29 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     }
   }
 
+  // The editor's Delete: the card it has open, without a trip through
+  // Select. One DELETE however often the confirm is pressed (plan 211).
+  const editedCard = editing != null ? cards.find(c => c.origin === 'custom' && c.id === editing) : null
+  const deletingCardRef = useRef(false)
+  function deleteEdited() {
+    if (!editedCard || deletingCardRef.current) return
+    deletingCardRef.current = true
+    playUi('click-screen-selection')
+    const card = editedCard
+    deleteCard(card)
+      .then(r => {
+        if (!r.ok) return
+        const key = cardKey(card)
+        setCards(prev => prev.filter(c => cardKey(c) !== key))
+        setSelected(prev => { if (!prev.has(key)) return prev; const next = new Set(prev); next.delete(key); return next })
+        setAdding(false)
+        setEditing(null)
+        resetForm()
+      })
+      .catch(() => {})
+      .finally(() => { deletingCardRef.current = false; setConfirmingCard(false) })
+  }
+
   function toggleSelect(key) {
     setSelected(prev => {
       const next = new Set(prev)
@@ -871,6 +897,13 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
           className="btn-secondary">
           {t.cancel}
         </button>
+        {editedCard && (
+          <button type="button" aria-haspopup="dialog"
+            onClick={() => { playUi('click-mode-selection'); setConfirmingCard(true) }}
+            className="btn-secondary btn-secondary--danger">
+            <TrashIcon size={14} /> {t.delete}
+          </button>
+        )}
         <button onClick={saveCard} disabled={!formComplete() || saving}
           className="btn-primary">
           {editing ? t.save : t.addCard}
@@ -1193,7 +1226,9 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
       {/* The one part of the page that scrolls, so the head and the gate
           over it never leave the window. */}
       <div className="dk-scroll">
-        {(deskSlot || adding) && <div className="desk-deck__slot">{deskSlot}</div>}
+        {/* An edit's form follows the table down (sticky): a card opened
+            far down the list keeps its form in view while it scrolls. */}
+        {(deskSlot || adding) && <div className={`desk-deck__slot${editing ? ' desk-deck__slot--edit' : ''}`}>{deskSlot}</div>}
 
         {loading && <Loading />}
 
@@ -1496,6 +1531,22 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
           <TrashIcon size={14} /> {t.delete}
         </button>
         <button type="button" className="btn-secondary" onClick={() => setConfirmingDelete(false)}>{t.cancel}</button>
+      </Sheet>
+
+      {/* The open card's deletion, from its editor: its front stands
+          where the selection puts its count. */}
+      <Sheet
+        open={confirmingCard && Boolean(editedCard)}
+        onClose={() => setConfirmingCard(false)}
+        jp={editedCard?.front ?? ''}
+        cap={t.delete}
+        initialFocus=".btn-secondary"
+      >
+        <span className="sheet__q">{t.deleteCardConfirm}</span>
+        <button type="button" className="btn-primary btn-primary--danger" onClick={deleteEdited}>
+          <TrashIcon size={14} /> {t.delete}
+        </button>
+        <button type="button" className="btn-secondary" onClick={() => setConfirmingCard(false)}>{t.cancel}</button>
       </Sheet>
 
       {showImport && (

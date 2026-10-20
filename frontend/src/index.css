@@ -33734,6 +33734,18 @@ button.brd-stn { cursor: pointer; }
   /* The phone's form spaces itself from the list under it; in the slot
      the page's own gap does. */
   .desk-deck__slot .deckdetail-form { margin-bottom: 0; }
+  /* An edit's form follows the table down: a card opened far down the
+     list has its form held at the scroller's top, the rows passing
+     under it on the page's ground. */
+  .desk-deck__slot--edit {
+    position: sticky;
+    /* Over the scroller's own gutter, so no row shows above it. */
+    top: calc(-1 * var(--sp-2));
+    z-index: 1;
+    margin-block: calc(-1 * var(--sp-2));
+    padding-block: var(--sp-2);
+    background: var(--bg-main);
+  }
   .dk-ways {
     display: flex;
     gap: var(--sp-3);
