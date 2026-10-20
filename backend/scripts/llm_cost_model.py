@@ -139,6 +139,17 @@ FEATURES = {
         "LINE_TRANSLATION_DAILY_LIMIT caps it at 60 blocks/day (1,200 "
         "lines), which bounds the abuse row.",
     ),
+    "lyrics_sort": (
+        4, 1400, 900,
+        "Which lines of a song are the song (plan 262): the lyrics import "
+        "on the deck shelf asks it once a song, every line numbered in one "
+        "call (150 a call past that). In: a ~550-token system block "
+        "(stable, cached) and ~50 lines. Out: a key and a word a line. "
+        "Kept on the session by the line's text, so a second look costs "
+        "nothing, and a sound cue or a credit a pattern can tell is never "
+        "asked. Four songs a month. LYRICS_SORT_DAILY_LIMIT caps it at 20 "
+        "songs/day, which bounds the abuse row.",
+    ),
     "ocr_vision": (
         20, 1400, 400,
         "20 photos/mo. An image is ~1.1k tokens plus OCR_PROMPT. The daily "

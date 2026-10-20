@@ -1839,6 +1839,74 @@ a.anl-song__deck { color: var(--text-primary); text-decoration: none; }
 a.anl-song__deck:hover .picker-row__name,
 a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; text-underline-offset: 3px; }
 
+/* ── 歌 — a song's lyrics into a deck, from the shelf (plan 262) ──
+   The song sheet's form (.anl-song) on 教材's sheet: the source, the
+   wait, then the two piles the sort made -- the sung lines ticked, the
+   rest not -- a line a row, its tick at the lead, how often it comes
+   back and what the sort took it for at the end. A row keeps its place
+   when it is ticked: the pile is the sort's, the tick the learner's. */
+.lyr-source {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.lyr-note,
+.lyr-wait {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+.lyr-wait { padding-block: var(--sp-6); text-align: center; }
+.lyr-pile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.lyr-pile > legend { margin-bottom: var(--sp-2); padding: 0; }
+.lyr-line {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px; /* a hit target, as .btn-secondary's */
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.lyr-line--on {
+  border-color: var(--line-kaiseki);
+  color: var(--text-primary);
+}
+.lyr-line:has(.lyr-line__check:focus-visible) { outline: 2px solid var(--text-primary); outline-offset: 2px; }
+.lyr-line__check {
+  flex: none;
+  margin: 0;
+  accent-color: var(--line-kaiseki);
+}
+.lyr-line__text {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  overflow-wrap: anywhere;
+}
+.lyr-line__times,
+.lyr-line__kind {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
 /* There is no rule for the rail under 1100px because there is no rail
    under 1100px (2026-09-11). It used to stack above the stage as a
    170px WINDOW — about three stops of a Passage the stepper already

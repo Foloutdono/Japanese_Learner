@@ -216,8 +216,18 @@ SOURCES = {
 # Now every structure accepts personal cards OF ITS OWN STRUCTURE, which
 # is what makes "write your own kanji card" a thing that exists; a mixed
 # deck's are front/back pairs.
+#
+# 'lyrics' (plan 262) is a song's deck, the analyser's song sheet's and
+# the shelf's lyrics import's (components/decks/LyricsImportSheet.jsx):
+# its words as app cards and its lines as written ones, in the order
+# they are sung. It holds what a mixed deck holds, by the same rule, and
+# is its own type so the modes a song wants (singing along, the lines in
+# order) can be added to it later without changing what a mixed deck is.
 MIXED = "mixed"
-STRUCTURES = ("standard", "kana", "kanji", "vocab", "grammar", MIXED)
+LYRICS = "lyrics"
+STRUCTURES = ("standard", "kana", "kanji", "vocab", "grammar", MIXED, LYRICS)
+# The structures where a card, not the deck, decides its modes.
+CARD_LED = (MIXED, LYRICS)
 
 # Structure -> the one app source it browses in. `standard` is a plain
 # front/back pair with no app source behind it.
@@ -227,6 +237,7 @@ SOURCE_FOR_TYPE = {
     "vocab":   {"vocab"},
     "grammar": {"grammar"},
     MIXED:     {"kana", "kanji", "vocab", "grammar"},
+    LYRICS:    {"kana", "kanji", "vocab", "grammar"},
 }
 
 # Structure -> the registry source its cards study under. A personal
@@ -241,6 +252,7 @@ REGISTRY_SOURCE_FOR_TYPE = {
     "vocab":    MODE_VOCAB,
     "grammar":  MODE_GRAMMAR,
     MIXED:      MODE_STANDARD,
+    LYRICS:     MODE_STANDARD,
 }
 
 
@@ -266,24 +278,24 @@ def _registry_source(deck_type: str) -> str:
 
 def _mode_source(deck_type: str, card_source: str) -> str:
     """The registry source ONE card of this deck studies under: the
-    deck's own for every structure but mixed, where a card brings its
-    own -- an app card its source's, a written card ("custom") the
-    standard pair's (plan 215)."""
-    if deck_type == MIXED:
+    deck's own for every structure but mixed and lyrics, where a card
+    brings its own -- an app card its source's, a written card ("custom")
+    the standard pair's (plans 215, 262)."""
+    if deck_type in CARD_LED:
         return MODE_STANDARD if card_source == "custom" else card_source
     return _registry_source(deck_type)
 
 
 def _deck_modes(deck_type: str, held: set[str]) -> list[str]:
     """The modes a deck offers, given the card sources it holds ("custom"
-    for a written card): its structure's, or, for a mixed deck, every
-    held source's in the registry's order -- the 種別 ladder of each, the
-    written cards' last with standard."""
+    for a written card): its structure's, or, for a mixed or lyrics deck,
+    every held source's in the registry's order -- the 種別 ladder of
+    each, the written cards' last with standard."""
     if not held:
         return []
-    if deck_type != MIXED:
+    if deck_type not in CARD_LED:
         return list(GRADED_ORDER_FOR_SOURCE[_registry_source(deck_type)])
-    sources = {_mode_source(MIXED, s) for s in held}
+    sources = {_mode_source(deck_type, s) for s in held}
     return [m for src in MODE_SOURCES if src in sources for m in GRADED_ORDER_FOR_SOURCE[src]]
 
 

@@ -17,13 +17,17 @@ const DECK_TYPE_FOR_KIND = {
   kanji: 'kanji',
   grammar: 'grammar',
   cloze: 'standard',
-  // The song sheet's own deck (plan 215), which holds both halves.
   mixed: 'mixed',
+  // The song sheet's own deck (plan 262; a mixed one before it), which
+  // holds both halves.
+  lyrics: 'lyrics',
 }
 // A mixed deck (plan 215) takes every kind above: an app card of any
 // source, and a written front/back pair -- so it is offered beside the
-// decks of the kind's own type, wherever something can be added.
-const MIXED = 'mixed'
+// decks of the kind's own type, wherever something can be added. A
+// lyrics deck (plan 262) holds the same, and is offered the same: a
+// word met in a song goes in the song's deck.
+const TAKES_EVERY_KIND = new Set(['mixed', 'lyrics'])
 
 const STORAGE_PREFIX = 'jp-mine-target'
 const BLANK = '＿＿＿'
@@ -88,7 +92,7 @@ export function useMining(session) {
   }, [session])
 
   const decksTaking = useCallback(
-    type => decks.filter(d => d.type === type || d.type === MIXED),
+    type => decks.filter(d => d.type === type || TAKES_EVERY_KIND.has(d.type)),
     [decks]
   )
 

@@ -1,3 +1,4 @@
+import { apiJson } from '../../lib/api'
 import { wordRowsOf } from './rows'
 import { tokFurigana } from './tokens'
 
@@ -17,7 +18,9 @@ import { tokFurigana } from './tokens'
 //          turned over, the line's translation in its notes where
 //          Explain has bought one.
 //
-// Pure, so the node lane can read it without a page.
+// Pure, so the node lane can read it without a page -- but for
+// fillSongDeck, the one write, which both doors share: the analyser's
+// song sheet and the shelf's lyrics import (plan 262).
 
 // A chorus comes back three times and is one card: the identity of a
 // line is its text, as the bank's is (useAnalyzerSession's `kept`).
@@ -90,6 +93,22 @@ export function songLines(sentences) {
   return out
 }
 
+/** The lines the shelf's lyrics import shows (plan 262): the readable
+ *  ones, once each, in the order first sung, each with how often it
+ *  comes back and the sort's verdict on it (`kinds`, one per sentence,
+ *  study/lyrics_sort.py's KINDS). */
+export function lyricRows(sentences, kinds) {
+  const rows = new Map()
+  ;(sentences ?? []).forEach((sentence, i) => {
+    const text = (sentence?.text ?? '').trim()
+    if (!text || !readable(sentence)) return
+    const row = rows.get(text)
+    if (row) row.times += 1
+    else rows.set(text, { text, kind: kinds?.[i] ?? 'sung', times: 1 })
+  })
+  return [...rows.values()]
+}
+
 const NAME_MAX = 60
 const LINE_MAX = 40
 
@@ -105,4 +124,36 @@ export function songDeckName(title, sentences) {
   if (named) return clip(named, NAME_MAX)
   const first = (sentences ?? []).find(s => readable(s) && lineText(s))
   return first ? clip(lineText(first), LINE_MAX) : ''
+}
+
+// The written-card batch's ceiling (routes/decks.py's MAX_BATCH).
+const BATCH = 25
+
+/** Puts a song's words and lines into the deck `deckId`: the words as
+ *  one batch of app cards, the lines in batches of written ones, each
+ *  line once -- a deck filled a second time from the same song is
+ *  topped up, never doubled (a word already there conflicts and counts
+ *  nothing on the server; a line already there is not written again).
+ *  Returns whether the free tier's card ceiling stopped a batch: the
+ *  batch reports a refused row by its index rather than failing whole. */
+export async function fillSongDeck(session, deckId, { words = [], lines = [] }) {
+  if (words.length) {
+    await apiJson(`/api/decks/${deckId}/cards/app`, session, {
+      method: 'POST',
+      body: JSON.stringify({ cards: words }),
+    })
+  }
+  if (!lines.length) return false
+  const held = await apiJson(`/api/decks/${deckId}/cards`, session)
+  const have = new Set((held?.cards ?? []).filter(c => c.origin === 'custom').map(c => c.front))
+  const fresh = lines.filter(line => !have.has(line.front))
+  let refused = false
+  for (let i = 0; i < fresh.length && !refused; i += BATCH) {
+    const result = await apiJson(`/api/decks/${deckId}/cards/batch`, session, {
+      method: 'POST',
+      body: JSON.stringify({ cards: fresh.slice(i, i + BATCH) }),
+    })
+    refused = (result?.errors ?? []).some(e => e.limit)
+  }
+  return refused
 }

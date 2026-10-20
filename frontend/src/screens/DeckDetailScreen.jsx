@@ -57,12 +57,14 @@ function filenameFromDisposition(header) {
 // A deck has ONE STRUCTURE, and it decides both halves: which app cards
 // can be browsed in, and which personal cards can be written. `standard`
 // is a plain front/back pair with no app source behind it; `mixed` (plan
-// 215) takes every source's cards, and writes front/back pairs.
+// 215) and `lyrics` (plan 262) take every source's cards, and write
+// front/back pairs.
 const SOURCE_FOR_TYPE = {
   kanji: ['kanji'], vocab: ['vocab'], grammar: ['grammar'],
   mixed: ['kana', 'kanji', 'vocab', 'grammar'],
+  lyrics: ['kana', 'kanji', 'vocab', 'grammar'],
 }
-const STRUCTURES = ['standard', 'kanji', 'vocab', 'grammar', 'mixed']
+const STRUCTURES = ['standard', 'kanji', 'vocab', 'grammar', 'mixed', 'lyrics']
 
 // A browsed-in card is tagged with the pigment of the section it came
 // from — the same colours components/decks/deckTypes.js gives the deck

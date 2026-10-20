@@ -86,8 +86,50 @@ class ParseTrackTests(unittest.TestCase):
 
     def test_an_unknown_format_is_named_as_one(self) -> None:
         with self.assertRaises(CaptionParseError) as caught:
-            parse_track("this is not a subtitle file at all", "notes.txt")
+            parse_track("this is not a subtitle file at all", "notes.doc")
         self.assertEqual(caught.exception.code, "unknown_format")
+
+    # ── Lyrics (plan 262) ──
+    def test_a_text_file_is_a_line_each_in_order(self) -> None:
+        cues = parse_track("君の名前を\n\n呼ぶよ\n呼ぶよ\n", "song.txt")
+        self.assertEqual([c["text"] for c in cues], ["君の名前を", "呼ぶよ", "呼ぶよ"])
+        self.assertEqual([c["start"] for c in cues], [0.0, 5.0, 10.0])
+
+    def test_a_timed_track_saved_as_text_is_read_as_what_it_is(self) -> None:
+        cues = parse_track("1\n00:00:01,000 --> 00:00:02,500\nこんにちは\n", "track.txt")
+        self.assertEqual(cues, [{"start": 1.0, "end": 2.5, "text": "こんにちは"}])
+
+    def test_an_lrc_is_read_by_its_times(self) -> None:
+        lrc = (
+            "[ti:夜に駆ける]\n[ar:YOASOBI]\n"
+            "[00:12.50]沈むように\n"
+            "[00:18.00][01:30.00]二人だけの空\n"
+            "[00:24.10]\n"
+            "[00:30.00]<00:30.00>さよ<00:31.20>なら\n"
+        )
+        cues = parse_track(lrc, "song.lrc")
+        self.assertEqual([(c["start"], c["end"], c["text"]) for c in cues], [
+            (12.5, 18.0, "沈むように"),
+            # Ended by the bare time after it: an instrumental break.
+            (18.0, 24.1, "二人だけの空"),
+            (30.0, 90.0, "さよなら"),
+            # A chorus line stamped twice is sung twice.
+            (90.0, 95.0, "二人だけの空"),
+        ])
+        self.assertEqual(cues[2]["words"], [[0, 30.0], [2, 31.2]])
+
+    def test_an_lrc_offset_moves_its_lines_and_words(self) -> None:
+        cues = parse_track("[offset:+500]\n[00:10.00]<00:10.00>あ<00:11.00>い\n[00:12.00]う\n", "x.lrc")
+        self.assertEqual([c["start"] for c in cues], [9.5, 11.5])
+        self.assertEqual(cues[0]["words"], [[0, 9.5], [1, 10.5]])
+
+    def test_an_lrc_is_found_without_its_extension(self) -> None:
+        cues = parse_track("[00:01.00]あ\n[00:02.00]い\n", "lyrics")
+        self.assertEqual([c["text"] for c in cues], ["あ", "い"])
+
+    def test_a_lyric_sung_twice_in_a_row_stays_twice(self) -> None:
+        cues = parse_track("[00:01.00]ラララ\n[00:02.00]ラララ\n", "x.lrc")
+        self.assertEqual(len(cues), 2)
 
     def test_a_file_with_nothing_to_read_is_named_as_one(self) -> None:
         with self.assertRaises(CaptionParseError) as caught:
