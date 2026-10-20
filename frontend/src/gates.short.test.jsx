@@ -98,7 +98,7 @@ describe('the gates on a short window', () => {
       for (const grade of ['N5', 'N4', 'N3', 'N2', 'N1']) {
         learner.grade = grade
         const screen = await framed('/practice', <PracticeScreen />)
-        await new Promise(r => setTimeout(r, 400))
+        await settle(400)
         await document.fonts.ready
         const plates = $$('.practice > .plates > .plate')
         expect(plates).toHaveLength(7)
