@@ -43,12 +43,12 @@ GROUP BY 1 ORDER BY 1;
 -- title: Erreurs côté client par écran
 -- display: table
 -- size: 12x6
-SELECT props->>'route' AS "Écran", props->>'where' AS "Nature",
+SELECT props->>'route' AS "Écran", props->>'step' AS "Étape", props->>'where' AS "Nature",
        count(*) AS "Fois", count(DISTINCT user_id) AS "Apprenants", max(at) AS "Dernière"
 FROM event_log
 WHERE name = 'client_error' AND at >= now() - ({{days}} || ' days')::interval
   AND user_id NOT IN {{snippet: internal_users}}
-GROUP BY 1, 2 ORDER BY 3 DESC;
+GROUP BY 1, 2, 3 ORDER BY 4 DESC;
 
 -- ==== question
 -- title: Vitesse des pages (P75)

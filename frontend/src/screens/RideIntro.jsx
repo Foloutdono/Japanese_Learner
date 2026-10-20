@@ -6,6 +6,8 @@ import { track } from '../lib/track'
 import { stopwatch } from '../lib/dwell'
 import { playClick } from '../lib/audio'
 import { useDesk } from '../hooks/useDesk'
+import { useErrorStep } from '../hooks/useErrorStep'
+import { introStep } from '../domain/flowSteps'
 import { useBoardKeys } from '../hooks/useBoardKeys'
 import { useBoxWidth } from '../hooks/useBoxWidth'
 import { useBackGuard } from '../hooks/useBackGuard'
@@ -81,6 +83,7 @@ export default function RideIntro({ session, covered = false, first = false, dry
   const done = useRef(false)
   const [stripRef, stripW] = useBoxWidth(desk)
   const step = INTRO_STEPS[index]
+  useErrorStep(introStep(step))
 
   useBoardKeys(frameRef)
 
