@@ -12,17 +12,78 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const auth = {
   signInAnonymously: vi.fn(),
   updateUser: vi.fn(),
+  setSession: vi.fn(),
 }
 vi.mock('./supabase', () => ({ supabase: { auth } }))
 // The confirmation's return is lib/oauth.js's to decide (and its test's
 // to pin); here it is only carried onto the call.
 vi.mock('./oauth', () => ({ emailRedirectTarget: () => 'https://app.test/' }))
 
-const { isGuest, startGuest, claimAccount } = await import('./guest')
+const { isGuest, startGuest, claimAccount, parkGuest, forgetParkedGuest } = await import('./guest')
+
+// The node lane has no localStorage: a Map stands in for it.
+const store = new Map()
+vi.stubGlobal('localStorage', {
+  getItem: k => (store.has(k) ? store.get(k) : null),
+  setItem: (k, v) => { store.set(k, String(v)) },
+  removeItem: k => { store.delete(k) },
+})
 
 beforeEach(() => {
   auth.signInAnonymously.mockReset()
   auth.updateUser.mockReset()
+  auth.setSession.mockReset()
+  store.clear()
+})
+
+describe('a pass put down at the boarding', () => {
+  const guest = { access_token: 'a', refresh_token: 'r', user: { is_anonymous: true } }
+
+  it('is taken up again by the next Board, not minted anew', async () => {
+    parkGuest(guest)
+    auth.setSession.mockResolvedValue({ data: { session: guest }, error: null })
+    expect(await startGuest()).toEqual({ ok: true })
+    expect(auth.setSession).toHaveBeenCalledWith({ access_token: 'a', refresh_token: 'r' })
+    expect(auth.signInAnonymously).not.toHaveBeenCalled()
+  })
+
+  it('is used once: the Board after it mints', async () => {
+    parkGuest(guest)
+    auth.setSession.mockResolvedValue({ data: { session: guest }, error: null })
+    await startGuest()
+    auth.signInAnonymously.mockResolvedValue({ data: { session: { user: {} } }, error: null })
+    await startGuest()
+    expect(auth.signInAnonymously).toHaveBeenCalledTimes(1)
+    expect(auth.setSession).toHaveBeenCalledTimes(1)
+  })
+
+  it('falls back to minting when the old tokens are dead', async () => {
+    parkGuest(guest)
+    auth.setSession.mockResolvedValue({ data: {}, error: { message: 'refresh_token_not_found' } })
+    auth.signInAnonymously.mockResolvedValue({ data: { session: { user: {} } }, error: null })
+    expect(await startGuest()).toEqual({ ok: true })
+    expect(auth.signInAnonymously).toHaveBeenCalledTimes(1)
+  })
+
+  it('never takes back a pass that became an account', async () => {
+    parkGuest(guest)
+    auth.setSession.mockResolvedValue({
+      data: { session: { user: { is_anonymous: false } } }, error: null,
+    })
+    auth.signInAnonymously.mockResolvedValue({ data: { session: { user: {} } }, error: null })
+    await startGuest()
+    expect(auth.signInAnonymously).toHaveBeenCalledTimes(1)
+  })
+
+  it('is not kept for a real account, nor once forgotten', async () => {
+    parkGuest({ access_token: 'a', refresh_token: 'r', user: { email: 'a@b.co' } })
+    expect(store.size).toBe(0)
+    parkGuest(guest)
+    forgetParkedGuest()
+    auth.signInAnonymously.mockResolvedValue({ data: { session: { user: {} } }, error: null })
+    await startGuest()
+    expect(auth.setSession).not.toHaveBeenCalled()
+  })
 })
 
 describe('who is a guest', () => {

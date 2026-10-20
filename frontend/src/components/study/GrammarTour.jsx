@@ -136,9 +136,16 @@ function Pattern({ point }) {
   )
 }
 
-export function Track({ at, total }) {
+/** The tour's track (plan 264, the owner's pick C of the canvas "Tour
+    track"): a segment a stop, the ones passed full in the line's
+    pigment, the one in hand tinted with it and filling with what is done
+    of it (`part`, 0 to 1: a glyph's strokes, a quiz's questions), its
+    name over the line's start and where it stands, of how many, at its
+    end. The card under it never names the stop again. */
+export function Track({ at, total, label, part = 0 }) {
   const { t } = useLang()
-  const pos = n => (total > 1 ? (n / (total - 1)) * 100 : 0)
+  const steps = t.onbStepsAria(at + 1, total)
+  const fill = `${Math.round(Math.min(1, Math.max(0, part)) * 100)}%`
   return (
     <div
       className="tour__track"
@@ -146,17 +153,23 @@ export function Track({ at, total }) {
       aria-valuemin={1}
       aria-valuemax={total}
       aria-valuenow={at + 1}
-      aria-label={t.onbStepsAria(at + 1, total)}
+      aria-valuetext={label ? `${label} · ${steps}` : undefined}
+      aria-label={steps}
     >
-      <div className="tour__rail" />
-      <div className="tour__done" style={{ width: `${pos(at)}%` }} />
-      {Array.from({ length: total }, (_, i) => (
-        <span
-          key={i}
-          className={`tour__stop tour__stop--${i < at ? 'passed' : i === at ? 'here' : 'ahead'}`}
-          style={{ left: `${pos(i)}%` }}
-        />
-      ))}
+      <p className="tour__track-head" aria-hidden="true">
+        <span className="tour__track-name">{label}</span>
+        <span className="tour__track-count">{at + 1} / {total}</span>
+      </p>
+      <div className="tour__segs" aria-hidden="true">
+        {Array.from({ length: total }, (_, i) => {
+          const state = i < at ? 'passed' : i === at ? 'here' : 'ahead'
+          return (
+            <span key={i} className={`tour__stop tour__stop--${state}`}>
+              {state === 'here' && <span className="tour__stop-fill" style={{ width: fill }} />}
+            </span>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -776,7 +789,14 @@ export function GrammarTour({ point, onBoard, onSkip, onLesson, replay = false, 
 
   return (
     <section ref={rootRef} className={`tour${desk ? ' tour--desk' : ''}`} data-stop={kind} data-twist={ti >= 0 ? ti : undefined} aria-label={t.tourAria(point.pattern)}>
-      {!desk && <Track at={at} total={stops.length} />}
+      {!desk && (
+        <Track
+          at={at}
+          total={stops.length}
+          label={t.tourStops[kind]}
+          part={stop === 'quiz' ? quizDone.filter(Boolean).length / Math.max(1, quiz.length) : 0}
+        />
+      )}
       <div className="tour__body" ref={bodyRef} key={`${stop}:${stop === 'scene' ? phase : stop === 'quiz' ? qi : ''}`}>
         {stop === 'look' && <Look tour={tour} point={point} />}
         {stop === 'guess' && (

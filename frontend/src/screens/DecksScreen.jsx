@@ -19,6 +19,7 @@ import { useRadioWalk, radioTab } from '../hooks/useRadioWalk'
 import { useListWalk, useFollowFocus, WALK_KEYS } from '../hooks/useListWalk'
 import { StationSplit } from '../components/selection/StationSplit'
 import DeckDetailScreen from './DeckDetailScreen'
+import { LyricsImportSheet } from '../components/decks/LyricsImportSheet'
 
 // ── 教材 — the shelf (plan 071) ───────────────────────────────
 // /learn/decks on the canvas: the bar, the shelf's two doors under
@@ -51,6 +52,15 @@ import DeckDetailScreen from './DeckDetailScreen'
 // keeps the shelf's search, its chip and its focus while the deck beside
 // it changes. The bare shelf opens on its first deck. On a phone a deck
 // is a screen of its own, as it always was.
+//
+// ── 歌 — a song's lyrics, from the create form (plan 264) ──
+// A lyrics deck is made from its song: picking the type turns the
+// form's action into the import (components/decks/LyricsImportSheet.jsx:
+// a subtitle or lyrics file, a paste or a YouTube link, broken down into
+// the deck), on a sheet over the shelf at every width, the name typed
+// carried in. Not a third door beside the two: on a phone the pair is
+// already 304px of a 348px row (DecksScreen.phone.test.jsx). The deck it
+// makes joins the shelf when it is made.
 export default function DecksScreen({ session }) {
   const { deck_id } = useParams()
   const desk = useDesk()
@@ -78,6 +88,7 @@ function DecksShelf({ session, open }) {
   const [newType, setNewType]   = useState('standard')
   const [query, setQuery]       = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
+  const [importing, setImporting] = useState(false)
   const searchRef = useRef(null)
   // The deck's type, one tab stop walked with the arrows on the desk
   // (plan 123), where the form is a dialog.
@@ -150,6 +161,14 @@ function DecksShelf({ session, open }) {
       .finally(() => { makingRef.current = false; setMaking(false) })
   }
 
+  // A lyrics deck is made from its song (plan 264): the form gives way
+  // to the import, which the name typed, if any, goes along to.
+  function importLyrics() {
+    playUi('click-mode-selection')
+    setCreating(false)
+    setImporting(true)
+  }
+
   // Only the types actually on the shelf get a chip: a filter for a
   // structure you own no decks of can only ever return nothing.
   const presentTypes = useMemo(() => {
@@ -202,7 +221,7 @@ function DecksShelf({ session, open }) {
       <input
         value={newName}
         onChange={e => setNewName(e.target.value)}
-        onKeyDown={e => e.key === 'Enter' && !composing(e) && createDeck()}
+        onKeyDown={e => e.key === 'Enter' && !composing(e) && (newType === 'lyrics' ? importLyrics() : createDeck())}
         placeholder={t.deckNamePlaceholder}
         autoFocus
         className="field"
@@ -230,9 +249,15 @@ function DecksShelf({ session, open }) {
           )
         })}
       </div>
-      <button type="button" onClick={createDeck} className="btn-primary" disabled={!newName.trim() || making}>
-        {t.createDeck}
-      </button>
+      {newType === 'lyrics' ? (
+        <button type="button" onClick={importLyrics} className="btn-primary">
+          {t.lyricsImport}
+        </button>
+      ) : (
+        <button type="button" onClick={createDeck} className="btn-primary" disabled={!newName.trim() || making}>
+          {t.createDeck}
+        </button>
+      )}
     </div>
   )
 
@@ -324,6 +349,24 @@ function DecksShelf({ session, open }) {
     >
       <BooksIcon size={14} />{t.libraryBrowse}
     </Chip>
+  )
+
+  // The deck the import made joins the shelf, clear of anything that
+  // would filter it out, as a deck made here does (plan 123).
+  const lyricsSheet = importing && (
+    <LyricsImportSheet
+      session={session}
+      t={t}
+      name={newName.trim()}
+      onClose={() => setImporting(false)}
+      onMade={() => {
+        setNewName('')
+        setNewType('standard')
+        setQuery('')
+        setTypeFilter('all')
+        fetchDecks({ quiet: true })
+      }}
+    />
   )
 
   const createSheet = desk && (
@@ -424,6 +467,7 @@ function DecksShelf({ session, open }) {
           <DeckDetailScreen session={session} deckId={open} pane onCount={onCount} onGone={onGone} onChanged={onChanged} />
         </StationSplit>
         {createSheet}
+        {lyricsSheet}
       </main>
     )
   }
@@ -471,6 +515,7 @@ function DecksShelf({ session, open }) {
         </div>
       )}
       {createSheet}
+      {lyricsSheet}
     </main>
   )
 }

@@ -29,6 +29,50 @@ export function isGuest(session) {
   return session?.user?.is_anonymous === true
 }
 
+// ── A pass put down is picked up again ────────────────────────────
+// Backing out of the boarding's first question signs the guest out (the
+// Welcome is only drawn without a session), and the next Board used to
+// mint a second guest: a visitor who bounced three times left three
+// users behind, 36 of the first 46 anonymous accounts never answered a
+// card. A guest left at that point has done nothing, so its tokens are
+// parked on this device and the next Board takes the SAME user back.
+// Only the boarding's own exit parks one; Settings' sign-out of a guest
+// with progress ("will erase it for good") never does.
+const PARKED_KEY = 'tsuji.parkedGuest'
+
+/** Keep the tokens of a guest session about to be signed out. */
+export function parkGuest(session) {
+  if (!isGuest(session) || !session.access_token || !session.refresh_token) return
+  try {
+    localStorage.setItem(PARKED_KEY, JSON.stringify({
+      access_token: session.access_token,
+      refresh_token: session.refresh_token,
+    }))
+  } catch { /* storage refused: the next Board mints a pass, as before */ }
+}
+
+/** Drop a parked pass (the learner went to sign in to an account). */
+export function forgetParkedGuest() {
+  try { localStorage.removeItem(PARKED_KEY) } catch { /* nothing to drop */ }
+}
+
+// True when the parked pass was restored. Single use: it is removed
+// before it is tried, so a dead one is never tried twice.
+async function resumeParkedGuest() {
+  let creds = null
+  try {
+    creds = JSON.parse(localStorage.getItem(PARKED_KEY) ?? 'null')
+  } catch { /* unreadable: treated as none */ }
+  forgetParkedGuest()
+  if (!creds?.access_token || !creds?.refresh_token) return false
+  try {
+    const { data, error } = await supabase.auth.setSession(creds)
+    return !error && isGuest(data?.session)
+  } catch {
+    return false
+  }
+}
+
 /**
  * Board without an account.
  *
@@ -41,6 +85,7 @@ export function isGuest(session) {
  */
 export async function startGuest() {
   try {
+    if (await resumeParkedGuest()) return { ok: true }
     const { data, error } = await supabase.auth.signInAnonymously()
     if (error) {
       // Supabase names the disabled provider in `code`; older

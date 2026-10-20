@@ -17,7 +17,8 @@ import { tokFurigana, tokState } from './tokens'
 //          turned over, the line's translation in its notes where
 //          Explain has bought one.
 //
-// Pure, so the node lane can read it without a page.
+// Pure, so the node lane can read it without a page. The writes are
+// songDeckApi.js's.
 
 // A chorus comes back three times and is one card: the identity of a
 // line is its text, as the bank's is (useAnalyzerSession's `kept`).
@@ -100,6 +101,22 @@ export function songLines(sentences) {
     out.push({ front: text, back: reading, notes: translation })
   }
   return out
+}
+
+/** The lines the shelf's lyrics import shows (plan 264): the readable
+ *  ones, once each, in the order first sung, each with how often it
+ *  comes back and the sort's verdict on it (`kinds`, one per sentence,
+ *  study/lyrics_sort.py's KINDS). */
+export function lyricRows(sentences, kinds) {
+  const rows = new Map()
+  ;(sentences ?? []).forEach((sentence, i) => {
+    const text = (sentence?.text ?? '').trim()
+    if (!text || !readable(sentence)) return
+    const row = rows.get(text)
+    if (row) row.times += 1
+    else rows.set(text, { text, kind: kinds?.[i] ?? 'sung', times: 1 })
+  })
+  return [...rows.values()]
 }
 
 const NAME_MAX = 60

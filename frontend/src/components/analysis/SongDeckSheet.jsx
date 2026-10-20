@@ -16,15 +16,17 @@ import { addWords, addLines } from './songDeckApi'
 // to understand it, and its lines with their readings, to read it aloud
 // in time (songDeck.js says what each holds).
 //
-// One deck, of the mixed type (routes/decks.py), which holds app cards
-// beside written ones and studies each in its own modes: the words as
-// vocab, the lines as front/back pairs. Nothing here is a new endpoint.
+// One deck, of the lyrics type (plan 264; of the mixed type before it,
+// routes/decks.py), which holds app cards beside written ones and
+// studies each in its own modes: the words as vocab, the lines as
+// front/back pairs. Nothing here is a new endpoint.
 // The deck is made the way the analyser's ＋ makes one (useMining's
 // ensureDeck, which reuses a deck of the same name rather than minting a
 // clone), the words go in as one batch of app cards, and the lines in
-// the import dialog's slices. Pressed a second time for the same song,
-// it tops the deck up: a word already there conflicts and counts nothing
-// on the server, and a line already there is not written again.
+// the import dialog's slices (songDeckApi.js, which the keep sheet and
+// the shelf's lyrics import share). Pressed a second time for the same
+// song, it tops the deck up: a word already there conflicts and counts
+// nothing on the server, and a line already there is not written again.
 
 export function SongDeckSheet({ session, mining, sentences, title, t, onClose }) {
   const words = useMemo(() => songWords(sentences), [sentences])
@@ -49,7 +51,7 @@ export function SongDeckSheet({ session, mining, sentences, title, t, onClose })
     setError(null)
     let deck = null
     try {
-      deck = await mining.ensureDeck('mixed', name.trim(), { remember: false })
+      deck = await mining.ensureDeck('lyrics', name.trim(), { remember: false })
       if (takes.words) await addWords(session, deck.id, words)
       if (takes.lines && await addLines(session, deck.id, lines)) setError(t.songDeckLimit)
       // Counts only: the song's name is the learner's own words.
@@ -66,7 +68,7 @@ export function SongDeckSheet({ session, mining, sentences, title, t, onClose })
 
   const wordsType = deckTypeOf('vocab', t)
   const linesType = deckTypeOf('standard', t)
-  const deckType = deckTypeOf('mixed', t)
+  const deckType = deckTypeOf('lyrics', t)
   const count = (takes.words ? words.length : 0) + (takes.lines ? lines.length : 0)
 
   return (
