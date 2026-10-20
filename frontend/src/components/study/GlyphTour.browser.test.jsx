@@ -94,7 +94,12 @@ describe('a kana met for the first time', () => {
     await settle()
     expect(t.gate().disabled).toBe(true)
     expect(t.board().dataset.stroke).toBe('1')
-    expect(t.root().querySelector('.tour__notion-count').textContent).toBe('Stroke 1 of 3')
+    // The track names the stop and how far it is (plan 264); the card
+    // says only which stroke, never the stop's name again.
+    expect(t.root().querySelector('.tour__track-name').textContent).toBe('Write')
+    expect(t.root().querySelector('.tour__track-count').textContent).toBe('2 / 3')
+    expect(t.root().querySelector('.tour__stop-fill').style.width).toBe('0%')
+    expect(t.root().querySelector('.tour-leaf__head .tour__notion').textContent).toBe('Stroke 1 of 3')
     // The stroke asked: its hollow, its dot with its number, its ring,
     // the chevrons inside it and its ink, empty; the others faint.
     expect(t.board().querySelector('.gt-hollow')).not.toBeNull()
@@ -106,12 +111,16 @@ describe('a kana met for the first time', () => {
     await trace(t, 0)
     expect(t.board().dataset.stroke).toBe('2')
     expect(t.board().querySelector('[data-state="done"]')).not.toBeNull()
+    // The stop's segment fills a stroke at a time.
+    expect(t.root().querySelector('.tour__stop-fill').style.width).toBe('33%')
     await trace(t, 1)
     await trace(t, 2)
     expect(t.board().dataset.stroke).toBeUndefined()
     expect(t.board().querySelectorAll('[data-state="done"]')).toHaveLength(3)
     expect(t.board().querySelector('.gt-hollow')).toBeNull()
     expect(t.root().querySelector('.tour-said--ok').textContent).toContain('Traced first time.')
+    expect(t.root().querySelector('.tour__stop-fill').style.width).toBe('100%')
+    expect(t.root().querySelector('.tour-leaf__head .tour__notion')).toBeNull()
     expect(t.root().querySelector('[data-action="show"]')).toBeNull()
     expect(t.gate().disabled).toBe(false)
   })
@@ -224,6 +233,10 @@ describe('a kana met for the first time', () => {
     t.gate().click()
     await settle()
     expect(t.root().dataset.stop).toBe('use')
+    expect(t.root().querySelector('.tour__track-name').textContent).toBe('In words')
+    expect(t.root().querySelector('.tour__track-count').textContent).toBe('3 / 3')
+    expect(t.root().querySelectorAll('.tour__stop--passed')).toHaveLength(2)
+    expect(t.root().querySelector('.tour-leaf__head .tour__notion')).toBeNull()
     const words = [...t.root().querySelectorAll('.gt-word')]
     expect(words).toHaveLength(tours.kana.words.length)
     // A word printed as it is read, the kana picked out of it.
@@ -254,7 +267,7 @@ describe('a kanji met for the first time', () => {
     const t = await mount(tours.kanji)
     t.gate().click()
     await settle()
-    expect(t.root().querySelector('.tour__notion-count').textContent).toBe('Stroke 1 of 4')
+    expect(t.root().querySelector('.tour-leaf__head .tour__notion').textContent).toBe('Stroke 1 of 4')
     t.root().querySelector('[data-action="show"]').click()
     await settle()
     t.gate().click()

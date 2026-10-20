@@ -904,9 +904,16 @@ confirmation, then the terminus (`components/study/GrammarTour.jsx`,
 chosen by `GrammarGate`). It is the boarding's frame inside a run's
 stage, not a new idiom:
 
-- **A track of stops at the head**, drawn in the line's pigment: where
-  you are keeps the line's colour (the boarding's own track is the pass's
-  gold, because the boarding is the learner's).
+- **A track of stops at the head** (plan 264, the owner's pick C of the
+  canvas "Tour track"): a segment a stop, in the line's pigment, under
+  the stop's name (the caption register, in the line's ink) and where it
+  stands of how many (« 2 / 3 »). The stops passed are full; the one in
+  hand is the pigment sunk into the ground and fills with what is done
+  of it (a glyph's strokes traced, a quiz's questions checked); the ones
+  ahead are the hairline. **The track names the stop, so the card never
+  does**: its caption says only what is left inside it (« Trait 1 sur
+  3 »). The boarding's own track is the pass's gold, because the
+  boarding is the learner's.
 - **One card a stop** (一枚, plan 206, the owner's pick B of the canvas
   "Tsuji — the tour, fuller"). The stops used to hang from the head in
   boxes of one weight over an empty middle; each stop is now one card,

@@ -106,10 +106,10 @@ function Write({ tour, trace, onVerdict }) {
   return (
     <div className="tour-leaf">
       <header className="tour-leaf__head">
-        <p className="tour__notion">
-          <span className="tour__notion-head">{t.glyphStops.write}</span>
-          {total > 1 && !traced && <span className="tour__notion-count">{t.glyphStrokeCount(n, total)}</span>}
-        </p>
+        {/* The stop is named on the track (plan 264); the card says how far. */}
+        {total > 1 && !traced && (
+          <p className="tour__notion"><span className="tour__notion-head">{t.glyphStrokeCount(n, total)}</span></p>
+        )}
         <h2 className="tour__q" tabIndex={-1}>{t.glyphTraceQ}</h2>
       </header>
       <div className="tour-leaf__mid gt-write">
@@ -133,7 +133,6 @@ function Use({ tour }) {
   return (
     <div className="tour-leaf">
       <header className="tour-leaf__head">
-        <p className="tour__notion"><span className="tour__notion-head">{t.glyphStops.use}</span></p>
         <h2 className="tour__q sr-only" tabIndex={-1}>{t.glyphStops.use}</h2>
       </header>
       <ul className="tour-leaf__mid gt-words">
@@ -249,7 +248,14 @@ export function GlyphTour({ tour, onBoard, desk = false }) {
       data-stop={stop}
       aria-label={t.glyphAria(tour.glyph)}
     >
-      {stops.length > 1 && <Track at={at} total={stops.length} />}
+      {stops.length > 1 && (
+        <Track
+          at={at}
+          total={stops.length}
+          label={t.glyphStops[stop]}
+          part={stop === 'write' && total ? (traced ? 1 : trace.at / total) : 0}
+        />
+      )}
       <div className="tour__body" ref={bodyRef} key={stop}>
         {stop === 'read' && <Read tour={tour} />}
         {stop === 'write' && <Write tour={tour} trace={trace} onVerdict={onVerdict} />}
