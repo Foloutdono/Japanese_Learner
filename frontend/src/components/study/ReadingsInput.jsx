@@ -96,14 +96,23 @@ export default function ReadingsInput({ readings, shares, submitted, onSubmit })
 
   // Adds each reading in `texts` to `kind`'s chips, past the ones it
   // already holds and up to the cap, and returns the whole new set --
-  // Enter needs it before the state it sets has landed.
-  function added(from, kind, texts) {
+  // Enter needs it before the state it sets has landed. `cap: false` is
+  // Enter's: the form stops growing there, so what was typed is graded.
+  function added(from, kind, texts, cap = true) {
     const next = { ...from, [kind]: [...from[kind]] }
     for (const text of texts) {
-      if (next.on.length + next.kun.length >= MAX_READINGS) break
+      if (cap && next.on.length + next.kun.length >= MAX_READINGS) break
       if (!next[kind].includes(text)) next[kind].push(text)
     }
     return next
+  }
+
+  // What of `texts` the cap leaves out of `from`'s chips: it stays in
+  // the box, where the cap's note says why, rather than vanishing.
+  function leftOver(from, kind, texts) {
+    const room = MAX_READINGS - from.on.length - from.kun.length
+    const fresh = texts.filter((text, i) => !from[kind].includes(text) && texts.indexOf(text) === i)
+    return fresh.slice(Math.max(room, 0))
   }
 
   function type(kind, value, open) {
@@ -115,21 +124,24 @@ export default function ReadingsInput({ readings, shares, submitted, onSubmit })
     // is still being typed.
     const parts = value.split(SEPARATOR)
     const rest = parts.pop()
-    setChips(c => added(c, kind, parts.map(s => s.trim()).filter(Boolean)))
-    setDrafts(d => ({ ...d, [kind]: rest }))
+    const texts = parts.map(s => s.trim()).filter(Boolean)
+    const left = leftOver(chips, kind, texts)
+    setChips(c => added(c, kind, texts))
+    setDrafts(d => ({ ...d, [kind]: left.length ? [...left, rest].join(' ') : rest }))
   }
 
   function commit(kind) {
     const texts = pieces(drafts[kind])
     if (!texts.length) return
+    const left = leftOver(chips, kind, texts)
     setChips(c => added(c, kind, texts))
-    setDrafts(d => ({ ...d, [kind]: '' }))
+    setDrafts(d => ({ ...d, [kind]: left.join(' ') }))
   }
 
   function check() {
     playClick()
     let next = chips
-    for (const g of GROUPS) next = added(next, g.kind, pieces(drafts[g.kind]))
+    for (const g of GROUPS) next = added(next, g.kind, pieces(drafts[g.kind]), false)
     setChips(next)
     setDrafts({ on: '', kun: '' })
     onSubmit()
