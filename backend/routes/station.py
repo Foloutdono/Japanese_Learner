@@ -275,11 +275,11 @@ def _comprehension_line(lang: str) -> dict:
     seed's opening and its first question, as comprehension_seed.render
     puts it in `lang`; `size` is the questions a text asks."""
     stops = {}
-    for level, seeds in comprehension_seed.by_level().items():
+    for level, seeds in comprehension_seed.index().items():
         if level not in LEVELS or not seeds:
             continue
         first = seeds[0]
-        question = comprehension_seed.render(first, lang)["questions"][0]
+        question = comprehension_seed.render_question(first["questions"][0], lang)
         stops[level] = {
             "sample": [seed["title"] for seed in seeds],
             "card": {
@@ -391,7 +391,7 @@ def _exam_line(lang: str) -> dict:
     漢字読み, the grammar paper's sentence and its point, the reading
     paper's passage. A kind the grade has nothing to draw from is left
     out rather than filled. No sample: a paper is not a list."""
-    seeds = comprehension_seed.by_level()
+    seeds = comprehension_seed.index()
     stops = {}
     for level in LEVELS:
         card = {}
