@@ -15,7 +15,7 @@ async function print(props) {
   const screen = await render(
     <LangProvider>
       <div style={{ position: 'relative', width: 390, height: 746 }}>
-        <TodayPrint hour="night" device="phone" {...props} />
+        <TodayPrint look="autumn-night" device="phone" {...props} />
       </div>
     </LangProvider>
   )
@@ -38,7 +38,7 @@ describe('the print of the hour', () => {
   })
 
   it('fetches nothing before the frame has said which print it takes', async () => {
-    const screen = await render(<LangProvider><TodayPrint hour="night" device={null} /></LangProvider>)
+    const screen = await render(<LangProvider><TodayPrint look="autumn-night" device={null} /></LangProvider>)
     await settle(200)
     expect(screen.container.querySelector('.tpr__art--in')).toBeNull()
   })

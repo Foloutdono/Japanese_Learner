@@ -133,9 +133,19 @@ const nav = {
   gateEndsAt:        at => `fini vers ${at}`,
   gateAdjust:        'Ajuster',
   // 浮世絵 (plan 205): the print's title slip, said whole -- the day and
-  // the hour's view, as the print's series would name it.
+  // the view of the print the hour and the season show (plan 261), as
+  // the print's series would name it.
   printTitle:        (day, view) => `${day} — ${view}`,
-  printViews:        { dawn: 'l’aube', day: 'les voiles qui rentrent', dusk: 'les oies qui se posent', night: 'la lune d’automne' },
+  printViews: {
+    'spring-dawn': 'l’aube de printemps', 'spring-day': 'les cerisiers dans la brume',
+    'spring-dusk': 'les oies qui repartent', 'spring-night': 'la lune voilée',
+    'summer-dawn': 'le vent du sud', 'summer-day': 'les nuages d’orage',
+    'summer-dusk': 'le calme du soir', 'summer-night': 'les lucioles', 'summer-hanabi': 'les feux d’artifice',
+    'autumn-dawn': 'l’aube', 'autumn-day': 'les voiles qui rentrent',
+    'autumn-dusk': 'les oies qui se posent', 'autumn-night': 'la lune d’automne',
+    'winter-dawn': 'l’aube froide', 'winter-day': 'le ciel clair après la neige',
+    'winter-dusk': 'la neige du soir', 'winter-night': 'la lune d’hiver',
+  },
   gateServicesN:     n => (n === 1 ? '1 service' : `${n} services`),
   gateLineModes:     name => `Les modes : ${name}`,
   gateLineNone:      'Aucun service aujourd’hui',
