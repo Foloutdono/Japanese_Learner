@@ -369,6 +369,27 @@ def test_kanji_feedback_rides_along_when_something_else_is_asked_again(answered)
     assert "kanji above" not in _prompt(calls, 2)
 
 
+def _checked(sentence: str, level: str = "N5"):
+    data = reading._parse_comprehension(_reply(text=SENTENCE_1 + sentence, breakdown=[
+        {"jp": SENTENCE_1, "translation": "", "note": "", "words": WORDS_1},
+        {"jp": sentence, "translation": "", "note": "", "words": []},
+    ]))
+    return reading._check_comprehension(data, level, [])
+
+
+def test_grammar_above_the_level_is_read_as_the_mock_papers_read_it():
+    """Feedback only, and the detector's (study/exam_levels, plan 261):
+    天気が is the weather, no 〜気がする, and ありがとうございます no
+    〜でございます; a 〜んです an N5 reader has not met is named."""
+    assert _checked("きょうは天気がいいです。").grammar_over == []
+    assert _checked("ありがとうございます。").grammar_over == []
+    verdict = _checked("時間がないんです。")
+    assert verdict.grammar_over == [
+        "grammar above N5: 〜んです／〜のです (N4) -- rewrite that sentence with grammar a JLPT N5 learner knows."
+    ]
+    assert not verdict.retry
+
+
 # ── The breakdown ────────────────────────────────────────────────────
 
 def test_breakdown_survives_the_round_trip_in_order(answered):

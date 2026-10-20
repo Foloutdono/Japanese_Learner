@@ -86,9 +86,11 @@ def kanji_outside(paper: dict, kind: str) -> list[tuple[str, str]]:
 # about nothing), so it carries known misreadings of ordinary text, which
 # are named here rather than hidden: a hit is not counted when the words
 # around it are one of these.
+# 置いて: put it down and leave it there, or behind, never "in" or "but for"
+_PUT_DOWN = (r"[にを]おいて(ください|くれ|もいい|もかまわ|はいけ|はだめ|ある|あり|あっ|おく|おき|おい|しまう|しまい|しまっ"
+             r"|行く|行き|行こう|来た|来て|来ま|来る|いきま|いった|いって|いこう|きた|きて|きました|きます)")
 _NOT_THE_POINT = (
     # (pattern, regex the text from the start of the hit must match)
-    ("〜をもって", r"をもっ[てた]"),                                  # 持って, not "by means of"
     ("〜に足る", r"に足[をがはも]"),                                  # 足, the foot
     ("〜まい", r"まい(あさ|にち|しゅう|つき|ねん|とし|ばん|かい|ど)"),    # 毎
     ("〜のみ", r"のみ(もの|かい|すぎ|ほうだい|やすい)"),                  # 飲み
@@ -97,9 +99,16 @@ _NOT_THE_POINT = (
     ("〜はじめる／〜おわる／〜つづける", r"はじめまして"),                # the greeting
     ("こんな／そんな／あんな／どんな", r"どんな"),                      # どんな〜ですか is an N5 question
     ("それに", r"それに(し|なり|なっ)"),                              # それにします: that one, not "besides"
-    ("それで", r"それで(おねがい|いい|けっこう|だいじょうぶ)"),          # それでおねがいします
+    ("それで", r"それで(おねがい|お願い|いい|けっこう|結構|だいじょうぶ|大丈夫)"),   # それでお願いします
+    ("それで", r"それでは"),                                         # well then: an N5 word of its own
     ("〜なら", r"なら[んびべぶ]"),                                    # ならんで: 並ぶ, not "if"
     ("〜ものがある", r"ものがあっ[たて]"),                             # ほしいものがあったら: a thing there is
+    ("〜やすい／〜にくい", r"(やす|にく)(?![いくかけさそす])"),          # とりにく: 肉, no adjective ending
+    ("〜において", _PUT_DOWN),                                       # 上においてください
+    ("〜をおいて", _PUT_DOWN),                                       # にもつをおいてはいけません
+    ("〜をはじめ", r"をはじめ(て|ま|た|る|よう|な|ず|られ|させ)"),        # べんきょうをはじめました: 始める
+    ("〜にしたら", r"にしたら(いかが|どう|いい|[？?])"),                # きっぷにしたらいかがですか: にする, "how about"
+    ("〜ことに", r"ことに(気|き)(が|づ|付)"),                          # わすれたことに気がついた: noticed it
 )
 # two sentences of the seeds the tokenizer misreads in a way no rule here can
 # tell from the real thing: the pattern, and the words around it as printed
@@ -117,12 +126,29 @@ _PLAIN_ENDINGS = tuple("うくぐすつぬぶむるいだ")
 _NOMINALISER_TAIL = r"の([はがをにでともへ]|から|より|まで|です|だ|よ|ね|か|[？?。！!]|$)"
 # the kana nouns the tokenizer reads as verbs (往ぬ, 因る), after the の that makes them nouns
 _KANA_NOUNS_READ_AS_VERBS = ("のいぬ", "のよる")
+# N5's 〜のが好きです turns the verb into a thing to like, and its lesson
+# says the same の works with 上手 and きらい: あそぶのもすき is that point
+_LIKING = r"の[がもは](とても|大|いちばん|一番|あまり)?(好き|すき|きらい|嫌い|上手|じょうず|下手|へた)"
+# what makes a sentence's ところだった the past of 〜ところだ, "was just about
+# to", rather than "nearly": the moment it names
+_THE_MOMENT = r"ちょうど|丁度|まさに|これから|今から|いまから"
+_PREDICATES = frozenset({"verb", "adjective", "auxiliary"})
+# the auxiliaries a verb in its dictionary form may end in
+_DICTIONARY_ENDINGS = frozenset({"れる", "られる", "せる", "させる", "ない"})
 
 
-def _is_not_the_point(pattern: str, text: str, start: int) -> bool:
+def _at(tokens, start: int):
+    """The index of the token the hit opens on, or None."""
+    return next((i for i, t in enumerate(tokens or ()) if t.start == start), None)
+
+
+def _is_not_the_point(pattern: str, text: str, start: int, tokens=None) -> bool:
     import re
 
     tail, head = text[start:start + 12], text[max(0, start - 4): start]
+    i = _at(tokens, start)
+    first = tokens[i] if i is not None else None
+    prev = tokens[i - 1] if i else None
     if any(pattern == pat and re.search(rx, text[max(0, start - 8): start + 12]) for pat, rx in _READ_BY_HAND):
         return True
     if pattern == "受身形 〜られる":
@@ -130,28 +156,84 @@ def _is_not_the_point(pattern: str, text: str, start: int) -> bool:
     if pattern == "〜中":
         return head.endswith(("午前", "午後", "一日", "今日", "家", "世界", "一年", "夜", "毎日"))
     if pattern == "〜ていく／〜てくる":
-        return head.endswith(_LEXICAL_COMING_GOING)
+        if (re.search(r"(^|[、。！？!?「『\s　])(いっ|行っ)$", text[:start])
+                and re.match(r"てきます([。！？!?」』\s　]|$)", tail)):
+            return True        # じゃ、いってきます: the greeting
+        # 休まないで来ました: came without resting, ないで and not a て-form
+        return head.endswith(_LEXICAL_COMING_GOING) or head.endswith("ない")
     if pattern == "〜うちに":
-        return True            # 家に: judged by reading, never counted
+        # 家に at a phrase's start or after a noun (うちにかえる, 友だちのうちに);
+        # the point after a predicate (熱いうちに, 話しているうちに), unless what
+        # follows is lived in (大きいうちに住みたい)
+        if not (prev and prev.pos in _PREDICATES and prev.cform.startswith("連体形")):
+            return True
+        return bool(re.match(r"うちに(住|すま|すみ|すむ|すん|引っ越|ひっこ|泊ま|とま)", tail))
+    if pattern == "〜をもって":
+        # かさをもって行く (持って) and 書面をもって ("by means of") are written
+        # and cut alike; after a date or a period's end it is "as of" (本日をもって)
+        return not text[:start].endswith(("日", "末", "度"))
+    if pattern == "〜せいで":
+        # after の or a plain form (雨のせいで, おくれたせいで); こうこうせいでした is 高校生
+        return not (prev and (prev.pos in _PREDICATES or (prev.pos == "particle" and prev.surface == "の")))
+    if pattern == "〜んです／〜のです":
+        # a kana noun cut into a verb and ん: きっさてん as 喫さ + て(る) + ん,
+        # らいねん as 払い + ね + ん. No ん follows a 仮定形, nor a てる on a 未然形
+        return bool(prev) and (prev.cform.startswith("仮定形") or (
+            prev.lemma == "てる" and i >= 2 and tokens[i - 2].cform.startswith("未然形")))
+    if pattern == "〜ところだった":
+        # "nearly" is a verb's dictionary form (転ぶところだった); 大事なところだった
+        # is a part of something, 食べているところだった and ちょうど出るところでした
+        # are 〜ところだ in the past
+        if not (prev and prev.cform.startswith(("連体形", "終止形")) and (
+                (prev.pos == "verb" and prev.lemma != "居る")
+                or (prev.pos == "auxiliary" and prev.lemma in _DICTIONARY_ENDINGS))):
+            return True
+        return bool(re.search(_THE_MOMENT, re.split(r"[。！？!?\n]", text[:start])[-1]))
+    if pattern == "まいる／もうす／いたす":
+        if head.endswith("どう") and tail.startswith("いたしまして"):
+            return True        # the reply to thanks
+        # もうしました is もう + しました, "already"; 田中ともうします is 申す,
+        # and the tokenizer reads both the first way
+        return bool(first) and first.pos == "adverb" and first.surface == "もう" and not head.endswith("と")
+    if pattern == "〜さ":
+        return head.endswith("でか")         # どこかでかさを: で + かさ (傘), not でか + さ
+    if pattern == "〜にしたら" and head.endswith(("よう", "こと")):
+        return True            # 歩くようにしたら: ようにする, ことにする + たら
+    if pattern == "〜ものがある" and prev and (
+            prev.lemma == "欲しい" or (prev.pos == "auxiliary" and prev.lemma == "たい")):
+        return True            # ほしいものがあります, 食べたいもの: a thing wanted
     if pattern == "〜と":
         return head.endswith(_KANA_NOUNS_READ_AS_VERBS) or not head.endswith(_PLAIN_ENDINGS)
     if pattern == "〜の":
-        return not re.match(_NOMINALISER_TAIL, tail)
+        return not re.match(_NOMINALISER_TAIL, tail) or bool(re.match(_LIKING, tail))
     return any(pattern == pat and re.match(rx, tail) for pat, rx in _NOT_THE_POINT)
 
 
 def grammar_above(text: str, level: str) -> list[tuple[str, str]]:
     """(pattern, its level) for each catalogue point the text visibly uses
-    that the catalogue files above `level` and the detector can really find."""
-    from study import difficulty, grammar_detect
+    that the catalogue files above `level` and the detector can really find.
+    Read for the mock papers (plan 257) and for comprehension (plan 261,
+    study/level_mix)."""
+    return list(_grammar_above(text, level))
+
+
+# a comprehension exercise is checked once per language over one Japanese text
+@lru_cache(maxsize=1024)
+def _grammar_above(text: str, level: str) -> tuple[tuple[str, str], ...]:
+    from study import difficulty, grammar_detect, morphology
 
     limit = difficulty.rank(level)
+    tokens = None
     out = []
     for pattern, point_level, start, _end in difficulty.points_in(text):
-        if (difficulty.rank(point_level) > limit and grammar_detect.can_find(pattern)
-                and not _is_not_the_point(pattern, text, start) and (pattern, point_level) not in out):
+        if (difficulty.rank(point_level) <= limit or not grammar_detect.can_find(pattern)
+                or (pattern, point_level) in out):
+            continue
+        if tokens is None:
+            tokens = morphology.tokenize(text) or []
+        if not _is_not_the_point(pattern, text, start, tokens):
             out.append((pattern, point_level))
-    return out
+    return tuple(out)
 
 
 _BLANK = None

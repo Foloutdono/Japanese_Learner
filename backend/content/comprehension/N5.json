@@ -5847,7 +5847,7 @@
    "〜まえに",
    "〜ずつ"
   ],
-  "text": "わたしのうちのちかくに、小さいパンやがあります。日よう日のあさ、母とパンを買いに行きました。店の前には人がたくさんいました。店に入るまえに、十分ぐらいまちました。店の中はあたたかくて、いいにおいがしました。わたしはメロンパンとチーズパンを二つずつ買いました。母は大きいしょくパンを買いました。ぜんぶで千二百円でした。うちへかえって、父と三人であさごはんを食べました。メロンパンはあまくて、とてもおいしかったです。父は「この店のパンはいちばんおいしいね。」と言いました。来週の日よう日も行きたいです。",
+  "text": "わたしのうちのちかくに、小さいパンやがあります。日よう日のあさ、母とパンを買いに行きました。店の前には人がたくさんいました。店に入るまえに、十分ぐらいまちました。店の中はあたたかくて、いいにおいでした。わたしはメロンパンとチーズパンを二つずつ買いました。母は大きいしょくパンを買いました。ぜんぶで千二百円でした。うちへかえって、父と三人であさごはんを食べました。メロンパンはあまくて、とてもおいしかったです。父は「この店のパンはいちばんおいしいね。」と言いました。来週の日よう日も行きたいです。",
   "questions": [
    {
     "type": "comprehension",
@@ -6332,14 +6332,14 @@
     ]
    },
    {
-    "jp": "店の中はあたたかくて、いいにおいがしました。",
+    "jp": "店の中はあたたかくて、いいにおいでした。",
     "translation": {
      "en": "Inside the shop it was warm, and it smelled good.",
      "fr": "Dans la boutique, il faisait chaud et ça sentait bon."
     },
     "note": {
-     "en": "「あたたかくて」 is the て-form of an い-adjective and links two descriptions; 「においがしました」 means there was a smell.",
-     "fr": "「あたたかくて」 est la forme en て d'un adjectif en い et relie deux descriptions ; 「においがしました」 veut dire qu'il y avait une odeur."
+     "en": "「あたたかくて」 is the て-form of an い-adjective and links two descriptions; 「いいにおいでした」 says the shop smelled good.",
+     "fr": "「あたたかくて」 est la forme en て d'un adjectif en い et relie deux descriptions ; 「いいにおいでした」 dit que la boutique sentait bon."
     },
     "words": [
      {
@@ -6392,17 +6392,10 @@
       }
      },
      {
-      "surface": "が",
+      "surface": "でした",
       "meaning": {
-       "en": "marks the subject",
-       "fr": "marque le sujet"
-      }
-     },
-     {
-      "surface": "しました",
-      "meaning": {
-       "en": "there was (a smell)",
-       "fr": "se faisait sentir"
+       "en": "was",
+       "fr": "était"
       }
      }
     ]
