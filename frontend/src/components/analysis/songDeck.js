@@ -1,5 +1,5 @@
-import { wordRowsOf } from './rows'
-import { tokFurigana } from './tokens'
+import { rowName, wordRowsOf } from './rows'
+import { tokFurigana, tokState } from './tokens'
 
 // ── 歌 — a song made the learner's own (plan 215) ────────────────
 // A learner who likes a song wants two things of it: to understand it
@@ -58,6 +58,14 @@ export function lineReading(sentence) {
  *  sung: refs in the shape POST /api/decks/{id}/cards/app takes. A pool
  *  word carries no level (plan 148), and the server stores its marker. */
 export function songWords(sentences) {
+  return songWordRows(sentences).map(word => word.ref)
+}
+
+/** The words songWords takes, as the keep sheet shows them (plan 263):
+ *  each its card's ref, its dictionary spelling and reading (rowName),
+ *  and whether the learner has mastered it already -- a word they know
+ *  is offered unticked, a card they would only be shown again. */
+export function songWordRows(sentences) {
   const seen = new Set()
   const out = []
   for (const sentence of sentences ?? []) {
@@ -66,7 +74,11 @@ export function songWords(sentences) {
       const match = row.head.vocab_match
       if (!match?.raw_id || seen.has(match.raw_id)) continue
       seen.add(match.raw_id)
-      out.push({ source: 'vocab', level: match.level ?? null, raw_id: match.raw_id })
+      out.push({
+        ref: { source: 'vocab', level: match.level ?? null, raw_id: match.raw_id },
+        ...rowName(row),
+        known: tokState(row.head) === 'mastered',
+      })
     }
   }
   return out

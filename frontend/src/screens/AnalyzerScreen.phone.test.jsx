@@ -171,25 +171,21 @@ describe('the analyser result on a phone', () => {
     expect(getComputedStyle(screen.container.querySelector('.anl-m__line--prev')).display).toBe('none')
   })
 
-  it('puts 保存 in the dock as a real toggle at a thumb-sized target', async () => {
+  it('puts 保存 in the dock as the door to the keep sheet, at a thumb-sized target', async () => {
     const screen = await renderScreen()
     await analyze(screen)
 
-    // Plan 219: keep acts on the line, so it is one of the dock's tools.
+    // Plan 219: keep acts on the line, so it is one of the dock's tools;
+    // since plan 263 it opens the sheet that puts the line in a deck.
     const keep = screen.container.querySelector('.anl-m__dock .anl-head__keep')
     expect(keep).not.toBeNull()
     expect(keep.tagName).toBe('BUTTON')
-    // A toggle, not a link that looks like one: the state is on the
-    // control, so a screen reader hears it change...
-    expect(keep.getAttribute('aria-pressed')).toBe('false')
-    // ...and the glyph carries no name of its own, so the whole
-    // sentence is the accessible one -- the rail pin's arrangement.
-    expect(keep.getAttribute('aria-label')).toBeTruthy()
-    // The mark is drawn, not typed: a text "+" beside the head's
-    // stroked × is a 9px speck next to a 14px icon. The word under it
-    // is the tool's caption, hidden from the accessible name.
-    expect(keep.querySelector('svg[aria-hidden="true"]')).not.toBeNull()
-    expect(keep.querySelector('span[aria-hidden="true"]').textContent).toBe('Garder')
+    expect(keep.getAttribute('aria-haspopup')).toBe('dialog')
+    // A door, not a toggle: the state is in the sheet it opens.
+    expect(keep.hasAttribute('aria-pressed')).toBe(false)
+    // The mark is drawn, not typed, and the caption is the tool's name.
+    expect(keep.querySelector('svg')).not.toBeNull()
+    expect(keep.textContent).toBe('Garder')
     const box = keep.getBoundingClientRect()
     // Measured to within a hair of 44, not to 44 exactly. The keep is
     // the one thumb target here DECLARED at 44px square (index.css,
@@ -204,9 +200,14 @@ describe('the analyser result on a phone', () => {
     const HAIR = 0.01
     expect(box.height, `the keep is ${box.height}px tall`).toBeGreaterThanOrEqual(44 - HAIR)
     expect(box.width, `the keep is ${box.width}px wide`).toBeGreaterThanOrEqual(44 - HAIR)
+
+    keep.click()
+    await vi.waitFor(() => expect(document.querySelector('.anl-keep')).not.toBeNull())
+    // The sheet stays inside the handset, nothing pushed sideways.
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth + 1)
   })
 
-  it('keeps the stop the stage is on, and lets it go again', async () => {
+  it('keeps the stop the stage is on without a deck, and lets it go again', async () => {
     const rows = statefulKeeps()
     const screen = await renderScreen()
     await analyze(screen)
@@ -216,30 +217,42 @@ describe('the analyser result on a phone', () => {
     // gets kept is where you are, not where the Passage starts.
     const next = () => screen.container.querySelector('.anl-m__dock button[aria-label="Phrase suivante"]')
     const prev = () => screen.container.querySelector('.anl-m__dock button[aria-label="Phrase précédente"]')
+    const pin = () => document.querySelector('.anl-keep .anl-keep__pin')
     next().click()
     await settle(60)
 
+    // Garder sans deck: the pin the button always was, one press inside.
     keep().click()
+    await vi.waitFor(() => expect(pin()).not.toBeNull())
+    expect(pin().textContent).toBe('Garder sans deck')
+    pin().click()
     await settle(200)
-    expect(keep().getAttribute('aria-pressed')).toBe('true')
-    expect(keep().querySelector('svg polyline'), 'the pressed mark is the check').not.toBeNull()
+    expect(document.querySelector('.anl-keep')).toBeNull()
     expect(rows.map(r => r.phrase)).toEqual(['犬も好き'])
+    expect(keep().classList.contains('anl-head__keep--on')).toBe(true)
+    expect(keep().textContent).toBe('Gardée')
 
+    // Kept, the same press lets it go.
     keep().click()
+    await vi.waitFor(() => expect(pin()).not.toBeNull())
+    expect(pin().textContent).toBe('Ne plus garder cette phrase')
+    pin().click()
     await settle(200)
-    expect(keep().getAttribute('aria-pressed')).toBe('false')
     expect(rows).toEqual([])
+    expect(keep().classList.contains('anl-head__keep--on')).toBe(false)
 
-    // Stepping back to a kept stop finds the control already pressed:
-    // the head reads the same set the history does.
+    // Stepping back to a kept stop finds the tool already lit: the dock
+    // reads the same set the history does.
     keep().click()
+    await vi.waitFor(() => expect(pin()).not.toBeNull())
+    pin().click()
     await settle(200)
     prev().click()
     await settle(60)
-    expect(keep().getAttribute('aria-pressed')).toBe('false')
+    expect(keep().classList.contains('anl-head__keep--on')).toBe(false)
     next().click()
     await settle(60)
-    expect(keep().getAttribute('aria-pressed')).toBe('true')
+    expect(keep().classList.contains('anl-head__keep--on')).toBe(true)
   })
 
   it('fits the head on 390px without a sideways scroll', async () => {
