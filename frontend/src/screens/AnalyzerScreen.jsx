@@ -266,13 +266,13 @@ export default function AnalyzerScreen({ session }) {
   // Since plan 263 one of the phone's three helps (the Affichage sheet:
   // the readings, the rōmaji, the translation), remembered by this
   // browser; the desk's dial walks the same setting.
+  // A change is merged into the latest settings, not the ones a sheet
+  // was drawn with: two taps in one frame each keep theirs.
   const [display, setDisplay] = useState(readDisplay)
-  const changeDisplay = useCallback(next => {
-    setDisplay(next)
-    saveDisplay(next)
-  }, [])
+  const changeDisplay = useCallback(patch => setDisplay(prev => ({ ...prev, ...patch })), [])
+  useEffect(() => { saveDisplay(display) }, [display])
   const furigana = display.furigana
-  const setFurigana = walk => changeDisplay({ ...display, furigana: walk(display.furigana) })
+  const setFurigana = walk => setDisplay(prev => ({ ...prev, furigana: walk(prev.furigana) }))
   const [displayOpen, setDisplayOpen] = useState(false)
   const closeDisplay = useCallback(() => setDisplayOpen(false), [])
 

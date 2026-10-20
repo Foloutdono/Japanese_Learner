@@ -120,8 +120,8 @@ async function pasteLyrics(screen, text) {
 
 async function openKeep(screen) {
   screen.container.querySelector('.anl-m__dock .anl-head__keep').click()
-  await vi.waitFor(() => expect(document.querySelector('.anl-keep .anl-keep__deck')).not.toBeNull())
-  return document.querySelector('.anl-keep')
+  await vi.waitFor(() => expect(document.querySelector('.anl-keepsheet .anl-keepsheet__deck')).not.toBeNull())
+  return document.querySelector('.anl-keepsheet')
 }
 
 const buttonNamed = (root, text) => [...root.querySelectorAll('button')].find(b => b.textContent.trim() === text)
@@ -174,13 +174,46 @@ describe('the Affichage door on a phone', () => {
     optionNamed(sheet.querySelectorAll('[role="radiogroup"]')[0], 'Aucun').click()
     await settle(30)
     expect(subs().getAttribute('data-furigana')).toBe('none')
+    // The rōmaji is painted, under the word's rule, not clipped away.
+    const ro = subs().querySelector('.tok__ro').getBoundingClientRect()
+    const word = subs().querySelector('.tok').getBoundingClientRect()
+    expect(ro.height).toBeGreaterThan(0)
+    expect(ro.top).toBeGreaterThanOrEqual(word.bottom - 1)
 
     // Remembered by this browser for the next Passage.
     expect(JSON.parse(window.localStorage.getItem('tsuji.anlDisplay'))).toEqual({ furigana: 'none', romaji: true, translation: true })
   })
+
+  it('keeps both of two changes made in one frame', async () => {
+    const screen = await renderScreen()
+    await openTrack(screen)
+    screen.container.querySelector('.anl-m__show').click()
+    await vi.waitFor(() => expect(document.querySelector('.anl-show')).not.toBeNull())
+    const groups = document.querySelectorAll('.anl-show [role="radiogroup"]')
+    // No wait between them: the second must not undo the first.
+    optionNamed(groups[1], 'Affichés').click()
+    optionNamed(groups[0], 'Tous').click()
+    await settle(30)
+    const subs = screen.container.querySelector('.anl-m__subs')
+    expect(subs.getAttribute('data-furigana')).toBe('all')
+    expect(subs.hasAttribute('data-romaji')).toBe(true)
+  })
 })
 
 describe('Garder on a phone: the line into a deck', () => {
+  it('rises as a sheet the width of the screen', async () => {
+    const screen = await renderScreen()
+    await openTrack(screen)
+    const sheet = await openKeep(screen)
+    const box = sheet.getBoundingClientRect()
+    // Edge to edge, as every sheet is (it once took the desk rail's 28px
+    // pin's size, sharing its class name).
+    expect(box.left).toBe(0)
+    expect(box.width).toBeGreaterThan(window.innerWidth * 0.9)
+    expect(box.height).toBeGreaterThan(200)
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth + 1)
+  })
+
   it('proposes the song\'s own deck, named after the video, and fills it', async () => {
     const screen = await renderScreen()
     await openTrack(screen)
@@ -188,16 +221,16 @@ describe('Garder on a phone: the line into a deck', () => {
     // The video stops for the sheet.
     expect(player.pause).toHaveBeenCalled()
 
-    const deck = sheet.querySelector('.anl-keep__deck')
+    const deck = sheet.querySelector('.anl-keepsheet__deck')
     expect(deck.querySelector('b').textContent).toBe('YOASOBI「夜に駆ける」')
     expect(deck.querySelector('small').textContent).toBe('Nouveau deck · cette chanson')
-    expect(sheet.querySelector('.anl-keep__line').textContent).toBe('夜が来るよるがくる')
-    expect([...sheet.querySelectorAll('.anl-keep__chip b')].map(b => b.textContent)).toEqual(['夜', '来る'])
-    const go = sheet.querySelector('.anl-keep__go')
+    expect(sheet.querySelector('.anl-keepsheet__line').textContent).toBe('夜が来るよるがくる')
+    expect([...sheet.querySelectorAll('.anl-keepsheet__chip b')].map(b => b.textContent)).toEqual(['夜', '来る'])
+    const go = sheet.querySelector('.anl-keepsheet__go')
     expect(go.textContent).toBe('Garder · 3 cartes')
 
     go.click()
-    await vi.waitFor(() => expect(document.querySelector('.anl-keep a.anl-song__deck')).not.toBeNull())
+    await vi.waitFor(() => expect(document.querySelector('.anl-keepsheet a.anl-song__deck')).not.toBeNull())
     expect(ensureDeck).toHaveBeenCalledWith('mixed', 'YOASOBI「夜に駆ける」', { remember: false })
     const posted = url => apiJson.mock.calls.filter(([u]) => u === url).map(([, , opts]) => JSON.parse(opts.body))
     expect(posted('/api/decks/9/cards/app')).toEqual([{ cards: [
@@ -207,7 +240,7 @@ describe('Garder on a phone: the line into a deck', () => {
     expect(posted('/api/decks/9/cards/batch')).toEqual([{ cards: [{ front: '夜が来る', back: 'よるがくる', notes: '' }] }])
     // The line in hand is pinned as the old button pinned it.
     expect(posted('/api/phrase/keep').map(b => b.sentence)).toEqual(['夜が来る'])
-    expect(document.querySelector('.anl-keep a.anl-song__deck').getAttribute('href')).toBe('/learn/decks/9')
+    expect(document.querySelector('.anl-keepsheet a.anl-song__deck').getAttribute('href')).toBe('/learn/decks/9')
   })
 
   it('takes more lines of the song, a line a row', async () => {
@@ -215,23 +248,23 @@ describe('Garder on a phone: the line into a deck', () => {
     await openTrack(screen)
     const sheet = await openKeep(screen)
 
-    const more = sheet.querySelector('.anl-keep__more')
+    const more = sheet.querySelector('.anl-keepsheet__more')
     expect(more.textContent).toBe('Choisir d’autres lignes · 2')
     more.click()
-    await vi.waitFor(() => expect(sheet.querySelector('.anl-keep__list')).not.toBeNull())
-    const rows = [...sheet.querySelectorAll('.anl-keep__row')]
-    expect(rows.map(r => r.querySelector('.anl-keep__text').textContent)).toEqual(['夜が来る', '君を呼ぶ'])
+    await vi.waitFor(() => expect(sheet.querySelector('.anl-keepsheet__list')).not.toBeNull())
+    const rows = [...sheet.querySelectorAll('.anl-keepsheet__row')]
+    expect(rows.map(r => r.querySelector('.anl-keepsheet__text').textContent)).toEqual(['夜が来る', '君を呼ぶ'])
     // The line in hand is on the rail, ticked.
-    expect(rows[0].classList.contains('anl-keep__row--here')).toBe(true)
+    expect(rows[0].classList.contains('anl-keepsheet__row--here')).toBe(true)
     expect(rows[0].querySelector('input').checked).toBe(true)
     rows[1].querySelector('input').click()
     await settle(20)
     buttonNamed(sheet, 'Valider · 2 lignes').click()
-    await vi.waitFor(() => expect(sheet.querySelector('.anl-keep__deck')).not.toBeNull())
+    await vi.waitFor(() => expect(sheet.querySelector('.anl-keepsheet__deck')).not.toBeNull())
 
-    expect(sheet.querySelector('.anl-keep__tick span').textContent).toBe('Les lignes · 2')
-    expect([...sheet.querySelectorAll('.anl-keep__chip b')].map(b => b.textContent)).toEqual(['夜', '来る', '君'])
-    expect(sheet.querySelector('.anl-keep__go').textContent).toBe('Garder · 5 cartes')
+    expect(sheet.querySelector('.anl-keepsheet__tick span').textContent).toBe('Les lignes · 2')
+    expect([...sheet.querySelectorAll('.anl-keepsheet__chip b')].map(b => b.textContent)).toEqual(['夜', '来る', '君'])
+    expect(sheet.querySelector('.anl-keepsheet__go').textContent).toBe('Garder · 5 cartes')
   })
 
   it('goes in another deck, taking only what that deck can hold', async () => {
@@ -244,23 +277,23 @@ describe('Garder on a phone: the line into a deck', () => {
     await openTrack(screen)
     const sheet = await openKeep(screen)
 
-    sheet.querySelector('.anl-keep__deck').click()
-    await vi.waitFor(() => expect(sheet.querySelector('.anl-keep__decks')).not.toBeNull())
+    sheet.querySelector('.anl-keepsheet__deck').click()
+    await vi.waitFor(() => expect(sheet.querySelector('.anl-keepsheet__decks')).not.toBeNull())
     // The song's deck first; a deck followed from the library is not
     // the learner's to fill.
-    expect([...sheet.querySelectorAll('.anl-keep__opt b')].map(b => b.textContent))
+    expect([...sheet.querySelectorAll('.anl-keepsheet__opt b')].map(b => b.textContent))
       .toEqual(['YOASOBI「夜に駆ける」', 'Mots de chansons', 'Paroles'])
-    sheet.querySelectorAll('.anl-keep__opt input')[1].click()
+    sheet.querySelectorAll('.anl-keepsheet__opt input')[1].click()
     await settle(20)
     buttonNamed(sheet, 'Garder dans Mots de chansons').click()
-    await vi.waitFor(() => expect(sheet.querySelector('.anl-keep__deck')).not.toBeNull())
+    await vi.waitFor(() => expect(sheet.querySelector('.anl-keepsheet__deck')).not.toBeNull())
 
-    expect(sheet.querySelector('.anl-keep__deck b').textContent).toBe('Mots de chansons')
+    expect(sheet.querySelector('.anl-keepsheet__deck b').textContent).toBe('Mots de chansons')
     // A vocab deck takes the words, not the line.
-    expect(sheet.querySelector('.anl-keep__note').textContent).toBe('Ce deck ne prend que des mots.')
-    expect(sheet.querySelector('.anl-keep__tick input').disabled).toBe(true)
-    sheet.querySelector('.anl-keep__go').click()
-    await vi.waitFor(() => expect(document.querySelector('.anl-keep a.anl-song__deck')).not.toBeNull())
+    expect(sheet.querySelector('.anl-keepsheet__note').textContent).toBe('Ce deck ne prend que des mots.')
+    expect(sheet.querySelector('.anl-keepsheet__tick input').disabled).toBe(true)
+    sheet.querySelector('.anl-keepsheet__go').click()
+    await vi.waitFor(() => expect(document.querySelector('.anl-keepsheet a.anl-song__deck')).not.toBeNull())
     expect(ensureDeck).not.toHaveBeenCalled()
     expect(apiJson.mock.calls.some(([u]) => u === '/api/decks/4/cards/app')).toBe(true)
     expect(apiJson.mock.calls.some(([u]) => u === '/api/decks/4/cards/batch')).toBe(false)
@@ -270,7 +303,7 @@ describe('Garder on a phone: the line into a deck', () => {
     const screen = await renderScreen()
     await pasteLyrics(screen, '夜が来る\n君を呼ぶ')
     const sheet = await openKeep(screen)
-    expect(sheet.querySelector('.anl-keep__deck b').textContent).toBe('夜が来る')
+    expect(sheet.querySelector('.anl-keepsheet__deck b').textContent).toBe('夜が来る')
   })
 
   it('leaves one line no lines to pick, and its deck no song', async () => {
@@ -280,7 +313,7 @@ describe('Garder on a phone: the line into a deck', () => {
     const screen = await renderScreen()
     await pasteLyrics(screen, '夜が来る')
     const sheet = await openKeep(screen)
-    expect(sheet.querySelector('.anl-keep__more')).toBeNull()
-    expect(sheet.querySelector('.anl-keep__deck small').textContent).toBe('Nouveau deck')
+    expect(sheet.querySelector('.anl-keepsheet__more')).toBeNull()
+    expect(sheet.querySelector('.anl-keepsheet__deck small').textContent).toBe('Nouveau deck')
   })
 })

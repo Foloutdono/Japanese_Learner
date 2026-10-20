@@ -28438,13 +28438,13 @@ button.brd-stn { cursor: pointer; }
 .anl-show__done { min-height: 44px; }
 
 /* The keep sheet: three faces in one panel. */
-.anl-keep__body {
+.anl-keepsheet__body {
   display: flex;
   flex-direction: column;
   gap: var(--sp-4);
   min-height: 0;
 }
-.anl-keep__cap {
+.anl-keepsheet__cap {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
@@ -28454,8 +28454,8 @@ button.brd-stn { cursor: pointer; }
   color: var(--text-secondary);
 }
 /* The deck it goes in: a row that is a door (Changer). */
-.anl-keep__deck,
-.anl-keep__opt {
+.anl-keepsheet__deck,
+.anl-keepsheet__opt {
   display: flex;
   align-items: center;
   gap: var(--sp-4);
@@ -28470,16 +28470,16 @@ button.brd-stn { cursor: pointer; }
   text-align: left;
   cursor: pointer;
 }
-.anl-keep__deck:hover,
-.anl-keep__deck:focus-visible { border-color: var(--text-secondary); }
-.anl-keep__deckname {
+.anl-keepsheet__deck:hover,
+.anl-keepsheet__deck:focus-visible { border-color: var(--text-secondary); }
+.anl-keepsheet__deckname {
   display: flex;
   flex: 1;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
 }
-.anl-keep__deckname b {
+.anl-keepsheet__deckname b {
   overflow: hidden;
   font-family: var(--font-jp);
   font-size: var(--fs-lead);
@@ -28487,12 +28487,12 @@ button.brd-stn { cursor: pointer; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.anl-keep__deckname small,
-.anl-keep__title small {
+.anl-keepsheet__deckname small,
+.anl-keepsheet__title small {
   font-size: var(--fs-sm);
   color: var(--text-secondary);
 }
-.anl-keep__change {
+.anl-keepsheet__change {
   display: inline-flex;
   flex: none;
   align-items: center;
@@ -28503,7 +28503,7 @@ button.brd-stn { cursor: pointer; }
 }
 /* What goes in: the line and its words, each a card ticked as a whole,
    lit in the selection's gold while it is in. */
-.anl-keep__item {
+.anl-keepsheet__item {
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
@@ -28512,11 +28512,11 @@ button.brd-stn { cursor: pointer; }
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
 }
-.anl-keep__item--on {
+.anl-keepsheet__item--on {
   background: var(--sel-wash);
   border-color: var(--sel-line);
 }
-.anl-keep__tick {
+.anl-keepsheet__tick {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
@@ -28526,19 +28526,19 @@ button.brd-stn { cursor: pointer; }
   font-weight: 700;
   cursor: pointer;
 }
-.anl-keep__check {
+.anl-keepsheet__check {
   flex: none;
   width: var(--sp-5);
   height: var(--sp-5);
   margin: 0;
   accent-color: var(--accent2);
 }
-.anl-keep__note {
+.anl-keepsheet__note {
   margin: 0;
   font-size: var(--fs-sm);
   color: var(--text-secondary);
 }
-.anl-keep__line {
+.anl-keepsheet__line {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -28547,11 +28547,11 @@ button.brd-stn { cursor: pointer; }
   font-size: var(--fs-lead);
   letter-spacing: var(--tr-term);
 }
-.anl-keep__reading {
+.anl-keepsheet__reading {
   font-size: var(--fs-sm);
   color: var(--text-secondary);
 }
-.anl-keep__lines {
+.anl-keepsheet__lines {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -28562,13 +28562,13 @@ button.brd-stn { cursor: pointer; }
   font-size: var(--fs-body);
   letter-spacing: var(--tr-term);
 }
-.anl-keep__rest {
+.anl-keepsheet__rest {
   font-family: var(--font-display);
   font-size: var(--fs-sm);
   letter-spacing: 0;
   color: var(--text-secondary);
 }
-.anl-keep__more {
+.anl-keepsheet__more {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -28583,13 +28583,13 @@ button.brd-stn { cursor: pointer; }
   font-weight: 700;
   color: var(--sel-ink);
 }
-.anl-keep__chips {
+.anl-keepsheet__chips {
   display: flex;
   flex-wrap: wrap;
   gap: var(--sp-3);
 }
 /* A word out is dashed and quiet; a word in stands in the line's ink. */
-.anl-keep__chip {
+.anl-keepsheet__chip {
   display: inline-flex;
   flex-direction: column;
   align-items: flex-start;
@@ -28602,30 +28602,30 @@ button.brd-stn { cursor: pointer; }
   font-family: var(--font-jp);
   color: var(--text-secondary);
 }
-.anl-keep__chip b {
+.anl-keepsheet__chip b {
   font-size: var(--fs-body);
   font-weight: 500;
   letter-spacing: var(--tr-term);
 }
-.anl-keep__chip small {
+.anl-keepsheet__chip small {
   font-size: var(--fs-caption);
   color: var(--text-secondary);
 }
-.anl-keep__chip--on {
+.anl-keepsheet__chip--on {
   background: var(--bg-main);
   border-style: solid;
   border-color: var(--sel-line);
   color: var(--text-primary);
 }
-.anl-keep__chip--more {
+.anl-keepsheet__chip--more {
   font-family: var(--font-display);
   font-size: var(--fs-sm);
   font-weight: 700;
   color: var(--sel-ink);
 }
-.anl-keep__chip:disabled { cursor: not-allowed; opacity: 0.45; }
-.anl-keep__go { width: 100%; }
-.anl-keep__pin {
+.anl-keepsheet__chip:disabled { cursor: not-allowed; opacity: 0.45; }
+.anl-keepsheet__go { width: 100%; }
+.anl-keepsheet__pin {
   align-self: center;
   min-height: 44px;
   padding: 0 var(--sp-4);
@@ -28639,13 +28639,13 @@ button.brd-stn { cursor: pointer; }
   text-underline-offset: 3px;
 }
 /* A face past the first: the way back, its name, and what it acts on. */
-.anl-keep__head {
+.anl-keepsheet__head {
   display: flex;
   align-items: center;
   gap: var(--sp-2);
   min-height: 44px;
 }
-.anl-keep__back {
+.anl-keepsheet__back {
   display: inline-flex;
   flex: none;
   align-items: center;
@@ -28658,24 +28658,24 @@ button.brd-stn { cursor: pointer; }
   border: 0;
   color: var(--text-secondary);
 }
-.anl-keep__title {
+.anl-keepsheet__title {
   display: flex;
   flex: 1;
   flex-direction: column;
   min-width: 0;
   font-size: var(--fs-body);
 }
-.anl-keep__all { flex: none; min-height: 44px; }
-.anl-keep__decks {
+.anl-keepsheet__all { flex: none; min-height: 44px; }
+.anl-keepsheet__decks {
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
 }
-.anl-keep__opt--on {
+.anl-keepsheet__opt--on {
   background: var(--sel-wash);
   border-color: var(--sel-line);
 }
-.anl-keep__count {
+.anl-keepsheet__count {
   flex: none;
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
@@ -28684,7 +28684,7 @@ button.brd-stn { cursor: pointer; }
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-.anl-keep__tag {
+.anl-keepsheet__tag {
   flex: none;
   padding: 0 var(--sp-2);
   border: 1px solid var(--sel-line);
@@ -28696,7 +28696,7 @@ button.brd-stn { cursor: pointer; }
   text-transform: uppercase;
   color: var(--sel-ink);
 }
-.anl-keep__new {
+.anl-keepsheet__new {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
@@ -28710,23 +28710,23 @@ button.brd-stn { cursor: pointer; }
   font-weight: 700;
   color: var(--text-secondary);
 }
-.anl-keep__name {
+.anl-keepsheet__name {
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
 }
-.anl-keep__namerow {
+.anl-keepsheet__namerow {
   display: flex;
   gap: var(--sp-3);
 }
-.anl-keep__namerow .field { flex: 1; min-width: 0; }
+.anl-keepsheet__namerow .field { flex: 1; min-width: 0; }
 /* The song a line a row: the shortcuts over it, the list scrolling
    between the head and the action, the line in hand on the rail. */
-.anl-keep__quick {
+.anl-keepsheet__quick {
   display: flex;
   gap: var(--sp-2);
 }
-.anl-keep__pick {
+.anl-keepsheet__pick {
   flex: 1 1 0;
   min-height: 44px;
   padding: 0 var(--sp-2);
@@ -28738,10 +28738,10 @@ button.brd-stn { cursor: pointer; }
   font-weight: 700;
   color: var(--text-secondary);
 }
-.anl-keep__pick:hover,
-.anl-keep__pick:focus-visible { border-color: var(--text-secondary); color: var(--text-primary); }
-.anl-keep__pick:disabled { cursor: not-allowed; opacity: 0.45; }
-.anl-keep__list {
+.anl-keepsheet__pick:hover,
+.anl-keepsheet__pick:focus-visible { border-color: var(--text-secondary); color: var(--text-primary); }
+.anl-keepsheet__pick:disabled { cursor: not-allowed; opacity: 0.45; }
+.anl-keepsheet__list {
   display: flex;
   flex-direction: column;
   max-height: 50vh;
@@ -28750,7 +28750,7 @@ button.brd-stn { cursor: pointer; }
   overscroll-behavior-y: contain;
   border-block: 1px solid var(--surface-line);
 }
-.anl-keep__row {
+.anl-keepsheet__row {
   display: grid;
   flex: none;
   grid-template-columns: var(--sp-5) var(--sp-7) minmax(0, 1fr);
@@ -28762,14 +28762,14 @@ button.brd-stn { cursor: pointer; }
   color: var(--text-secondary);
   cursor: pointer;
 }
-.anl-keep__row:last-child { border-bottom: 0; }
-.anl-keep__row--on { color: var(--text-primary); }
-.anl-keep__row--here {
+.anl-keepsheet__row:last-child { border-bottom: 0; }
+.anl-keepsheet__row--on { color: var(--text-primary); }
+.anl-keepsheet__row--here {
   background: var(--sel-wash);
   box-shadow: inset 3px 0 0 var(--accent2);
   font-weight: 700;
 }
-.anl-keep__n {
+.anl-keepsheet__n {
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: 700;
@@ -28777,20 +28777,20 @@ button.brd-stn { cursor: pointer; }
   text-align: right;
   color: var(--text-secondary);
 }
-.anl-keep__text {
+.anl-keepsheet__text {
   display: flex;
   flex-direction: column;
   font-family: var(--font-jp);
   font-size: var(--fs-body);
   letter-spacing: var(--tr-term);
 }
-.anl-keep__text small {
+.anl-keepsheet__text small {
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: 400;
   letter-spacing: 0;
 }
-.anl-keep__close { min-height: 44px; }
+.anl-keepsheet__close { min-height: 44px; }
 
 /* ── 入門 — the introduction before the first card (plan 170) ──
    Six screens for a learner who answered « Pas encore » to the kana

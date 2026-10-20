@@ -12,7 +12,8 @@ import { Seg } from '../chrome/Console'
 // Explain has bought it (plan 161): the switch is there all the same,
 // and says so.
 export function DisplaySheet({ open, onClose, display, onChange, translationBought = true, t }) {
-  const set = patch => onChange({ ...display, ...patch })
+  // `onChange` merges what changed into the screen's settings.
+  const set = patch => onChange(patch)
   return (
     <Sheet open={open} onClose={onClose} label={t.displayOpen} className="anl-show" dismiss>
       <div className="anl-show__rows">

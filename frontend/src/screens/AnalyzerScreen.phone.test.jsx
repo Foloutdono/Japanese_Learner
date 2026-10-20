@@ -202,7 +202,7 @@ describe('the analyser result on a phone', () => {
     expect(box.width, `the keep is ${box.width}px wide`).toBeGreaterThanOrEqual(44 - HAIR)
 
     keep.click()
-    await vi.waitFor(() => expect(document.querySelector('.anl-keep')).not.toBeNull())
+    await vi.waitFor(() => expect(document.querySelector('.anl-keepsheet')).not.toBeNull())
     // The sheet stays inside the handset, nothing pushed sideways.
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth + 1)
   })
@@ -217,7 +217,7 @@ describe('the analyser result on a phone', () => {
     // gets kept is where you are, not where the Passage starts.
     const next = () => screen.container.querySelector('.anl-m__dock button[aria-label="Phrase suivante"]')
     const prev = () => screen.container.querySelector('.anl-m__dock button[aria-label="Phrase précédente"]')
-    const pin = () => document.querySelector('.anl-keep .anl-keep__pin')
+    const pin = () => document.querySelector('.anl-keepsheet .anl-keepsheet__pin')
     next().click()
     await settle(60)
 
@@ -227,7 +227,7 @@ describe('the analyser result on a phone', () => {
     expect(pin().textContent).toBe('Garder sans deck')
     pin().click()
     await settle(200)
-    expect(document.querySelector('.anl-keep')).toBeNull()
+    expect(document.querySelector('.anl-keepsheet')).toBeNull()
     expect(rows.map(r => r.phrase)).toEqual(['犬も好き'])
     expect(keep().classList.contains('anl-head__keep--on')).toBe(true)
     expect(keep().textContent).toBe('Gardée')

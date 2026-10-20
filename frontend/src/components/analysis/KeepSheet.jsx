@@ -151,8 +151,8 @@ export function KeepSheet({ session, mining, sentences, focusIndex, kept, title,
   }
 
   return (
-    <Sheet open onClose={onClose} label={t.keepTitle} className="anl-keep" dismiss>
-      <div ref={bodyRef} className="anl-keep__body">
+    <Sheet open onClose={onClose} label={t.keepTitle} className="anl-keepsheet" dismiss>
+      <div ref={bodyRef} className="anl-keepsheet__body">
         {view === 'main' && (
           <KeepMain
             t={t}
@@ -240,22 +240,22 @@ function KeepMain({
   const linesIn = takes.lines && lineOn && lineCount > 0
   return (
     <>
-      <p className="anl-keep__cap">{t.keepIn}</p>
-      <button type="button" className="anl-keep__deck" onClick={onDeck} aria-label={t.keepDeckChange(deck.name)}>
+      <p className="anl-keepsheet__cap">{t.keepIn}</p>
+      <button type="button" className="anl-keepsheet__deck" onClick={onDeck} aria-label={t.keepDeckChange(deck.name)}>
         <DeckRoundel type={deck.type} t={t} />
-        <span className="anl-keep__deckname">
+        <span className="anl-keepsheet__deckname">
           <b>{deck.name}</b>
           <small>
             {isNew ? (songDeck ? t.keepNewSongDeck : t.keepNewDeck) : t.cardsUnit(deck.card_count ?? 0)}
           </small>
         </span>
-        <span className="anl-keep__change" aria-hidden="true">{t.keepChange}<ChevronIcon direction="right" size={16} /></span>
+        <span className="anl-keepsheet__change" aria-hidden="true">{t.keepChange}<ChevronIcon direction="right" size={16} /></span>
       </button>
 
-      <div className={`anl-keep__item${linesIn ? ' anl-keep__item--on' : ''}`}>
-        <label className="anl-keep__tick">
+      <div className={`anl-keepsheet__item${linesIn ? ' anl-keepsheet__item--on' : ''}`}>
+        <label className="anl-keepsheet__tick">
           <input
-            className="anl-keep__check"
+            className="anl-keepsheet__check"
             type="checkbox"
             checked={linesIn}
             disabled={!takes.lines || !lineCount}
@@ -263,20 +263,20 @@ function KeepMain({
           />
           <span>{many ? t.keepLines(chosen.length) : t.keepLine}</span>
         </label>
-        {!takes.lines && <p className="anl-keep__note">{t.keepDeckWordsOnly}</p>}
+        {!takes.lines && <p className="anl-keepsheet__note">{t.keepDeckWordsOnly}</p>}
         {many ? (
-          <ul className="anl-keep__lines" lang="ja">
+          <ul className="anl-keepsheet__lines" lang="ja">
             {chosen.slice(0, 2).map(s => <li key={s.text}>{s.text}</li>)}
-            {chosen.length > 2 && <li className="anl-keep__rest" lang={lang}>{t.keepAndOthers(chosen.length - 2)}</li>}
+            {chosen.length > 2 && <li className="anl-keepsheet__rest" lang={lang}>{t.keepAndOthers(chosen.length - 2)}</li>}
           </ul>
         ) : chosen[0] && (
-          <p className="anl-keep__line" lang="ja">
+          <p className="anl-keepsheet__line" lang="ja">
             <span>{chosen[0].text}</span>
-            <span className="anl-keep__reading">{lineReading(chosen[0])}</span>
+            <span className="anl-keepsheet__reading">{lineReading(chosen[0])}</span>
           </p>
         )}
         {several && (
-          <button type="button" className="anl-keep__more" onClick={onLines}>
+          <button type="button" className="anl-keepsheet__more" onClick={onLines}>
             <span>{many ? t.keepEditLines : t.keepMoreLines(total)}</span>
             <ChevronIcon direction="right" size={16} />
           </button>
@@ -284,10 +284,10 @@ function KeepMain({
       </div>
 
       {words.length > 0 && (
-        <div className={`anl-keep__item${takes.words && wordsOn ? ' anl-keep__item--on' : ''}`}>
-          <label className="anl-keep__tick">
+        <div className={`anl-keepsheet__item${takes.words && wordsOn ? ' anl-keepsheet__item--on' : ''}`}>
+          <label className="anl-keepsheet__tick">
             <input
-              className="anl-keep__check"
+              className="anl-keepsheet__check"
               type="checkbox"
               checked={takes.words && wordsOn}
               disabled={!takes.words}
@@ -295,15 +295,15 @@ function KeepMain({
             />
             <span>{many ? t.keepTheirWords(words.length) : t.keepItsWords(words.length)}</span>
           </label>
-          {!takes.words && <p className="anl-keep__note">{t.keepDeckLinesOnly}</p>}
-          <div className="anl-keep__chips" lang="ja">
+          {!takes.words && <p className="anl-keepsheet__note">{t.keepDeckLinesOnly}</p>}
+          <div className="anl-keepsheet__chips" lang="ja">
             {shown.map(word => {
               const on = ticked(word)
               return (
                 <button
                   key={word.ref.raw_id}
                   type="button"
-                  className={`anl-keep__chip${on ? ' anl-keep__chip--on' : ''}`}
+                  className={`anl-keepsheet__chip${on ? ' anl-keepsheet__chip--on' : ''}`}
                   aria-pressed={on}
                   disabled={!takes.words || !wordsOn}
                   onClick={() => onTick(word)}
@@ -316,7 +316,7 @@ function KeepMain({
               )
             })}
             {shown.length < words.length && (
-              <button type="button" className="anl-keep__chip anl-keep__chip--more" lang={lang}
+              <button type="button" className="anl-keepsheet__chip anl-keepsheet__chip--more" lang={lang}
                 aria-label={t.keepMoreWords(words.length - shown.length)} onClick={onAllWords}>
                 +{words.length - shown.length}
               </button>
@@ -326,10 +326,10 @@ function KeepMain({
       )}
 
       {error && <p className="anl-song__error" role="alert">{error}</p>}
-      <button type="button" className="btn-primary anl-keep__go" disabled={!count || busy} onClick={onKeep}>
+      <button type="button" className="btn-primary anl-keepsheet__go" disabled={!count || busy} onClick={onKeep}>
         {busy ? <>{t.songDeckMaking}<Dots /></> : count ? t.keepCards(count) : t.keepNothing}
       </button>
-      <button type="button" className="anl-keep__pin" onClick={onPinOnly}>
+      <button type="button" className="anl-keepsheet__pin" onClick={onPinOnly}>
         {pinned ? t.unkeepSentence : t.keepNoDeck}
       </button>
     </>
@@ -338,11 +338,11 @@ function KeepMain({
 
 function KeepHead({ t, title, sub, onBack, children }) {
   return (
-    <div className="anl-keep__head">
-      <button type="button" className="anl-keep__back" onClick={onBack} aria-label={t.back}>
+    <div className="anl-keepsheet__head">
+      <button type="button" className="anl-keepsheet__back" onClick={onBack} aria-label={t.back}>
         <ChevronIcon direction="left" size={20} />
       </button>
-      <span className="anl-keep__title">
+      <span className="anl-keepsheet__title">
         <b>{title}</b>
         {sub && <small>{sub}</small>}
       </span>
@@ -373,28 +373,28 @@ function KeepDeck({ t, decks, songDeck, several, current, onBack, onPick }) {
   return (
     <>
       <KeepHead t={t} title={t.keepIn} onBack={onBack} />
-      <div className="anl-keep__decks" role="radiogroup" aria-label={t.keepIn}>
+      <div className="anl-keepsheet__decks" role="radiogroup" aria-label={t.keepIn}>
         {options.map(d => {
           const on = keyOf(d) === choice
           return (
-            <label key={keyOf(d)} className={`anl-keep__opt${on ? ' anl-keep__opt--on' : ''}`}>
-              <input className="anl-keep__check" type="radio" name="anl-keep-deck" checked={on} onChange={() => setChoice(keyOf(d))} />
+            <label key={keyOf(d)} className={`anl-keepsheet__opt${on ? ' anl-keepsheet__opt--on' : ''}`}>
+              <input className="anl-keepsheet__check" type="radio" name="anl-keep-deck" checked={on} onChange={() => setChoice(keyOf(d))} />
               <DeckRoundel type={d.type} t={t} />
-              <span className="anl-keep__deckname">
+              <span className="anl-keepsheet__deckname">
                 <b>{d.name}</b>
                 <small>{d === songDeck && several ? t.keepThisSong : takesCaption(d.type, t)}</small>
               </span>
               {d.id
-                ? <span className="anl-keep__count">{t.cardsUnit(d.card_count ?? 0)}</span>
-                : <span className="anl-keep__tag">{t.keepNew}</span>}
+                ? <span className="anl-keepsheet__count">{t.cardsUnit(d.card_count ?? 0)}</span>
+                : <span className="anl-keepsheet__tag">{t.keepNew}</span>}
             </label>
           )
         })}
       </div>
       {naming ? (
-        <form className="anl-keep__name" onSubmit={useName} noValidate>
+        <form className="anl-keepsheet__name" onSubmit={useName} noValidate>
           <label className="anl-song__label" htmlFor="anl-keep-name">{t.songDeckName}</label>
-          <div className="anl-keep__namerow">
+          <div className="anl-keepsheet__namerow">
             <input
               id="anl-keep-name"
               className="field"
@@ -407,7 +407,7 @@ function KeepDeck({ t, decks, songDeck, several, current, onBack, onPick }) {
           </div>
         </form>
       ) : (
-        <button type="button" className="anl-keep__new" onClick={() => setNaming(true)}>
+        <button type="button" className="anl-keepsheet__new" onClick={() => setNaming(true)}>
           <PlusIcon size={16} />{t.keepNewDeck}
         </button>
       )}
@@ -428,31 +428,31 @@ function KeepLines({ t, sentences, focusIndex, picked, kept, held, onBack, onDon
 
   // The line in hand stands in the list's middle, where the learner is.
   useEffect(() => {
-    listRef.current?.querySelector('.anl-keep__row--here')?.scrollIntoView?.({ block: 'center' })
+    listRef.current?.querySelector('.anl-keepsheet__row--here')?.scrollIntoView?.({ block: 'center' })
   }, [])
 
   return (
     <>
       <KeepHead t={t} title={t.keepLinesTitle} sub={t.keepLinesOf(draft.size, rows.length)} onBack={onBack}>
-        <button type="button" className="btn-secondary anl-keep__all" onClick={() => set(open.map(r => r.i))}>{t.keepAll}</button>
+        <button type="button" className="btn-secondary anl-keepsheet__all" onClick={() => set(open.map(r => r.i))}>{t.keepAll}</button>
       </KeepHead>
-      <div className="anl-keep__quick">
-        <button type="button" className="anl-keep__pick" disabled={!keptRows.length} onClick={() => set(keptRows.map(r => r.i))}>
+      <div className="anl-keepsheet__quick">
+        <button type="button" className="anl-keepsheet__pick" disabled={!keptRows.length} onClick={() => set(keptRows.map(r => r.i))}>
           {t.keepPickKept(keptRows.length)}
         </button>
-        <button type="button" className="anl-keep__pick" onClick={() => set(open.filter(({ s }) => s.unknown_count > 0).map(r => r.i))}>
+        <button type="button" className="anl-keepsheet__pick" onClick={() => set(open.filter(({ s }) => s.unknown_count > 0).map(r => r.i))}>
           {t.keepPickUnknown}
         </button>
-        <button type="button" className="anl-keep__pick" onClick={() => set([])}>{t.keepPickNone}</button>
+        <button type="button" className="anl-keepsheet__pick" onClick={() => set([])}>{t.keepPickNone}</button>
       </div>
-      <div ref={listRef} className="anl-keep__list" lang="ja">
+      <div ref={listRef} className="anl-keepsheet__list" lang="ja">
         {rows.map(({ s, i }) => {
           const already = isHeld(s)
           const on = draft.has(i) && !already
           return (
-            <label key={i} className={`anl-keep__row${i === focusIndex ? ' anl-keep__row--here' : ''}${on ? ' anl-keep__row--on' : ''}`}>
+            <label key={i} className={`anl-keepsheet__row${i === focusIndex ? ' anl-keepsheet__row--here' : ''}${on ? ' anl-keepsheet__row--on' : ''}`}>
               <input
-                className="anl-keep__check"
+                className="anl-keepsheet__check"
                 type="checkbox"
                 checked={on}
                 disabled={already}
@@ -463,8 +463,8 @@ function KeepLines({ t, sentences, focusIndex, picked, kept, held, onBack, onDon
                   return next
                 })}
               />
-              <span className="anl-keep__n" aria-hidden="true">{i + 1}</span>
-              <span className="anl-keep__text">
+              <span className="anl-keepsheet__n" aria-hidden="true">{i + 1}</span>
+              <span className="anl-keepsheet__text">
                 {s.text}
                 {already && <small lang={lang}>{t.keepHeld}</small>}
               </span>
@@ -489,7 +489,7 @@ function KeepMade({ t, made, error, onClose }) {
         </Link>
         {error && <p className="anl-song__error" role="alert">{error}</p>}
       </div>
-      <button type="button" className="btn-secondary anl-keep__close" onClick={onClose}>{t.displayDone}</button>
+      <button type="button" className="btn-secondary anl-keepsheet__close" onClick={onClose}>{t.displayDone}</button>
     </>
   )
 }
