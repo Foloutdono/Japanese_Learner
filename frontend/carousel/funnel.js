@@ -26,7 +26,7 @@ import { picked } from './sources.js'
 import { withoutGiveaways } from './quizzes.js'
 
 export const DESIGNS = ['clarte', 'defi', 'fiche']
-export const LENGTHS = [3, 4, 5, 6, 7, 8]
+export const LENGTHS = [3, 4, 5, 6, 7, 8, 9]
 // The app's features a call to action can show (plan 234b: every practice
 // mode, the analyser, the question after an exercise, Today).
 export const FEATURES = ['reading', 'comprehension', 'translation', 'listen', 'composition', 'conversation', 'exam', 'analyser', 'ask', 'today', 'words', 'kanji', 'grammar', 'kana']
