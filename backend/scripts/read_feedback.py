@@ -45,7 +45,7 @@ def fetch(cur, days: int, kind: str | None, reply: bool) -> list[dict]:
         where.append("reply")
     cur.execute(
         f"""
-        SELECT id, user_id, kind, body, reasons, card_id, route, area, status,
+        SELECT id, user_id, kind, body, reasons, card_id, exam_id, revision, question_id, route, area, status,
                platform, vp, os, lang, reply, reply_to, created_at
           FROM feedback
          WHERE {' AND '.join(where)}
@@ -61,6 +61,9 @@ def fetch(cur, days: int, kind: str | None, reply: bool) -> list[dict]:
 def render(row: dict) -> str:
     head = f"### #{row['id']} · {row['kind']} · {row['created_at']:%Y-%m-%d %H:%M} UTC"
     facts = []
+    if row.get("question_id"):
+        reasons = ", ".join(row["reasons"]) if row["reasons"] else "—"
+        facts.append(f"question `{row['exam_id']}` r{row['revision']} `{row['question_id']}` · {reasons}")
     if row["card_id"]:
         reasons = ", ".join(row["reasons"]) if row["reasons"] else "—"
         facts.append(f"card `{row['card_id']}` · {reasons}")

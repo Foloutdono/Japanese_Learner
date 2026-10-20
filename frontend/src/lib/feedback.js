@@ -11,6 +11,14 @@ import { visitContext } from './visitContext'
 
 export const KINDS = ['problem', 'idea', 'fault']
 export const CARD_REASONS = ['reading', 'meaning', 'audio', 'example', 'other']
+// A mock-exam question's: `answer` is a wrong key.
+export const QUESTION_REASONS = ['answer', 'ambiguous', 'audio', 'other']
+
+/** What a mock-exam question's sheet is opened with: the paper (exam id
+ *  and revision) and the question, which is all its report carries. */
+export function questionReport(examId, revision, question) {
+  return { exam: { examId, revision, questionId: question.id, number: question.number } }
+}
 export const TEXT_MAX = 1000
 
 const OS_NAMES = {

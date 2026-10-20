@@ -54,7 +54,7 @@ MOVES: dict[str, str] = {
     "vocab_N3_それ_（接。感）": "vocab_N5__それ",
     "vocab_N3_しまった_（感）": "vocab_N3__しまった",
     "vocab_N3_うん_（感）": "vocab_N4__うん",
-    "vocab_N3_よろしく_（感）": "vocab_N3__よろしく",
+    "vocab_N3_よろしく_（感）": "vocab_N5__よろしく",
     "vocab_N3_ふと_（副）": "vocab_N3__ふと",
     "vocab_N2_だいいち_（副）": "vocab_N2__だいいち",
     "vocab_N2_じゅうたん_（カーペット）": "vocab_N2__じゅうたん",
@@ -244,8 +244,8 @@ MOVES: dict[str, str] = {
     "vocab_N1_物置き_ものおき": "vocab_N2_物置_ものおき",
     "vocab_N2_乗換_のりかえ": "vocab_N2_乗り換え_のりかえ",
     "vocab_N1_乗り換え_のりかえ": "vocab_N2_乗り換え_のりかえ",
-    "vocab_N2_代る_かわる": "vocab_N2_代わる_かわる",
-    "vocab_N1_代わる_かわる": "vocab_N2_代わる_かわる",
+    "vocab_N2_代る_かわる": "vocab_N3_代わる_かわる",
+    "vocab_N1_代わる_かわる": "vocab_N3_代わる_かわる",
     "vocab_N1_組み合わせ_くみあわせ": "vocab_N2_組み合わせ_くみあわせ",
     "vocab_N2_組合せ_くみあわせ": "vocab_N2_組み合わせ_くみあわせ",
     "vocab_N1_錆び_さび": "vocab_N2_錆_さび",
@@ -452,7 +452,7 @@ MOVES: dict[str, str] = {
     "vocab_N1_有難う_ありがとう": "vocab_N5__ありがとう",
     "vocab_N1_何故なら_なぜなら": "vocab_N3__なぜなら",
     "vocab_N1_何時でも_いつでも": "vocab_N3__いつでも",
-    "vocab_N1_宜しく_よろしく": "vocab_N3__よろしく",
+    "vocab_N1_宜しく_よろしく": "vocab_N5__よろしく",
     "vocab_N1_而も_しかも": "vocab_N3__しかも",
     "vocab_N1_今日は_こんにちは": "vocab_N5__こんにちは",
     "vocab_N1_所謂_いわゆる": "vocab_N3__いわゆる",
@@ -530,7 +530,7 @@ MOVES: dict[str, str] = {
     "vocab_N1_捻子_ねじ": "vocab_N2__ねじ",
     "vocab_N1_滅茶苦茶_めちゃくちゃ": "vocab_N2__めちゃくちゃ",
     "vocab_N1_炙る_あぶる": "vocab_N2__あぶる",
-    "vocab_N1_大人しい_おとなしい": "vocab_N2__おとなしい",
+    "vocab_N1_大人しい_おとなしい": "vocab_N3__おとなしい",
     "vocab_N1_噛る_かじる": "vocab_N2__かじる",
     "vocab_N1_草臥れる_くたびれる": "vocab_N2__くたびれる",
     "vocab_N1_畏まりました_かしこまりました": "vocab_N2__かしこまりました",
@@ -546,13 +546,13 @@ MOVES: dict[str, str] = {
     # the 2010 常用漢字表 gives 十 ジュッ as well, and it is what a learner
     # hears -- the app's own dictation bank reads 10分 じゅっぷん. Packed,
     # modern reading first, so the lookups index both.
-    "vocab_N1_十分_じっぷん": "vocab_N1_十分_じゅっぷん/じっぷん",
+    "vocab_N1_十分_じっぷん": "vocab_N5_十分_じゅっぷん/じっぷん",
     # 頃 read けい is no word: the reading lives in 頃日 and 頃刻, and
     # JMdict's only 頃【けい】 is a Chinese unit of land. The card taught
     # ころ's meaning, KANJIDIC's for the character, so what a learner
-    # drilled on it is the N3 ころ card's -- which takes the rows, and
-    # (NOT_FOLDED below) not the pair.
-    "vocab_N1_頃_けい": "vocab_N3_頃_ころ",
+    # drilled on it is the ころ card's (N3, N5 since plan 260) -- which
+    # takes the rows, and (NOT_FOLDED below) not the pair.
+    "vocab_N1_頃_けい": "vocab_N5_頃_ころ",
     # ── A reading that is not the word's ─────────────────────────
     # Found while looking into example words in the kanji entry panel
     # that did not light their kanji. Each was checked against the JMdict match the deck's senses were
@@ -842,6 +842,153 @@ MOVES: dict[str, str] = {
     "vocab_N1_取り引き_とりひき": "vocab_N1_取引_とりひき",
     "vocab_N2_追い掛ける_おいかける": "vocab_N2_追いかける_おいかける",
     "vocab_N1_取りあえず_とりあえず": "vocab_N1__とりあえず",
+
+    # ── Plan 260: the levels two signals agree on ────────────────
+    # A card moves down here only when two things outside the card say
+    # so: the community JLPT lists (datas/vocab/sources/jlpt_tanos.json,
+    # the deck's own ancestor) put the word lower, and the app itself
+    # puts it in front of a learner lower -- a grammar point of that
+    # level teaches it, or a sentence of that level (grammar example,
+    # tour, reading bank, conversation, dictation) has it, read by hand
+    # so that a breakdown's wrong badge (ホット read as ほっと, ゆうびん
+    # きょく as 曲) counts for nothing. It goes to the level both
+    # support: the lists' level, or the app's when that is higher. A
+    # word the lists do not have moves to the lowest level whose
+    # sentences use it, when its subtitle rank sits inside that level's
+    # (docs/vocab-deck-review.md, plan 260). The older lines that
+    # pointed at these ids point straight here, since a move is one hop.
+    #
+    # Counters and affixes. The lists write them with a tilde (～枚,
+    # ～さん), which placement_report could not match until this plan,
+    # so the N1 shelf held さん, 枚 and 冊 while the N5 lesson of
+    # 助数詞 teaches 枚 and names 冊 and 匹, and N5 sentences say
+    # 二まい, 五さつ, 二十さい, 一か月, すずきさん. 階, 日, 度 and 台 stop
+    # at N4, the first level whose sentences count with them; 〜がる
+    # (N4) and 〜的 (N3) go where the catalogue teaches them.
+    "vocab_N1__さん": "vocab_N5__さん",
+    "vocab_N1_歳_さい": "vocab_N5_歳_さい",
+    "vocab_N1_枚_まい": "vocab_N5_枚_まい",
+    "vocab_N1_冊_さつ": "vocab_N5_冊_さつ",
+    "vocab_N1_匹_ひき": "vocab_N5_匹_ひき",
+    "vocab_N1_ヶ月_かげつ": "vocab_N5_ヶ月_かげつ",
+    "vocab_N1_側_がわ": "vocab_N5_側_がわ",
+    "vocab_N1_人_じん": "vocab_N5_人_じん",
+    "vocab_N1__ぐらい": "vocab_N5__ぐらい",
+    "vocab_N3_時_とき": "vocab_N5_時_とき",
+    "vocab_N3_語_ご": "vocab_N5_語_ご",
+    "vocab_N3_番_ばん": "vocab_N5_番_ばん",
+    "vocab_N3_回_かい": "vocab_N5_回_かい",
+    "vocab_N3_中_ちゅう": "vocab_N5_中_ちゅう",
+    "vocab_N3_御_お": "vocab_N5_御_お",
+    "vocab_N3_頃_ころ": "vocab_N5_頃_ころ",
+    "vocab_N1_階_かい": "vocab_N4_階_かい",
+    "vocab_N1_様_さま": "vocab_N4_様_さま",
+    "vocab_N1_御_ご": "vocab_N4_御_ご",
+    "vocab_N1__がる": "vocab_N4__がる",
+    "vocab_N3_日_にち": "vocab_N4_日_にち",
+    "vocab_N3_度_ど": "vocab_N4_度_ど",
+    "vocab_N3_台_だい": "vocab_N4_台_だい",
+    "vocab_N3_会_かい": "vocab_N4_会_かい",
+    "vocab_N1_的_てき": "vocab_N3_的_てき",
+    "vocab_N1_丁目_ちょうめ": "vocab_N2_丁目_ちょうめ",
+    "vocab_N1_再_さい": "vocab_N2_再_さい",
+    "vocab_N1_泊_はく": "vocab_N2_泊_はく",
+    "vocab_N1_毎_ごと": "vocab_N2_毎_ごと",
+    "vocab_N1_料_りょう": "vocab_N2_料_りょう",
+    "vocab_N1_費_ひ": "vocab_N2_費_ひ",
+    "vocab_N1_部_ぶ": "vocab_N2_部_ぶ",
+    "vocab_N1_向け_むけ": "vocab_N2_向け_むけ",
+    "vocab_N1_行_ぎょう": "vocab_N2_行_ぎょう",
+    # The first lessons' words. どんな beside the N5 こんな (the lists:
+    # どんな N5); ひらがな and カタカナ, the two scripts the app teaches
+    # before anything else, N5 in the lists as a pair; よろしく, said ten
+    # times in the N5 conversations; 十分 "ten minutes", whose
+    # 十 and 分 are N5 cards and which N5 sentences say. また is the
+    # N3 又, a spelling JMdict marks usually kana and gives no priority
+    # tag, which the lists write in kana at N5 and the course's own
+    # sentences write in kana all 94 times: down to N5 in kana, as
+    # 然して went to そして (#360).
+    "vocab_N3__どんな": "vocab_N5__どんな",
+    "vocab_N2_平仮名_ひらがな": "vocab_N5_平仮名_ひらがな",
+    "vocab_N2_片仮名_かたかな": "vocab_N5_片仮名_かたかな",
+    "vocab_N3_又_また": "vocab_N5__また",
+    "vocab_N3__よろしく": "vocab_N5__よろしく",
+    "vocab_N1_十分_じゅっぷん/じっぷん": "vocab_N5_十分_じゅっぷん/じっぷん",
+    "vocab_N2_点く_つく": "vocab_N4_点く_つく",
+    "vocab_N3_通り_とおり": "vocab_N4_通り_とおり",
+    "vocab_N3_失礼_しつれい": "vocab_N4_失礼_しつれい",
+    "vocab_N3_様_よう": "vocab_N4_様_よう",
+    # お客様 was put at N1 by plan 105's rule, the level of the lowest
+    # sentence that used it; the conversation bank (plan 217) uses it at
+    # N4, beside 客 and 〜様. 間違う is 間違える's intransitive, which the
+    # lists hold at N4; 混む is the lists' N4 込む, the spelling the
+    # course's sentences use for "crowded" (混んでいる, twelve of
+    # fourteen), and stays its own card as 計る/量る/測る do.
+    "vocab_N1_お客様_おきゃくさま": "vocab_N4_お客様_おきゃくさま",
+    "vocab_N1__あら": "vocab_N4__あら",
+    "vocab_N1_間違う_まちがう": "vocab_N4_間違う_まちがう",
+    "vocab_N1_混む_こむ": "vocab_N4_混む_こむ",
+    # Down from N1 to the lists' N3, each in an N3 sentence: 振り
+    # (寝たふりをして, and the N3 lesson 〜ふりをする) and 片付け
+    # (あとかたづけ), which #256 left only because the subtitle ranking
+    # could not tell them from their verbs -- the course's own sentences
+    # can; デザート, 枠; and four the lists lack whose N3 sentences and
+    # ranks agree: 指示, 曲, 自信, 近付く.
+    "vocab_N1__デザート": "vocab_N3__デザート",
+    "vocab_N1_振り_ふり": "vocab_N3_振り_ふり",
+    "vocab_N1_片付け_かたづけ": "vocab_N3_片付け_かたづけ",
+    "vocab_N1_枠_わく": "vocab_N3_枠_わく",
+    "vocab_N1_指示_しじ": "vocab_N3_指示_しじ",
+    "vocab_N1_曲_きょく": "vocab_N3_曲_きょく",
+    "vocab_N1_自信_じしん": "vocab_N3_自信_じしん",
+    "vocab_N1_近付く_ちかづく": "vocab_N3_近付く_ちかづく",
+    # Down from N1 to N2, the first level whose sentences use them
+    # (the lists say N3, or have no row): 〜を契機に, 〜を問わず and
+    # 〜あまり are N2 lessons, and their examples are 契機, 問う and
+    # 驚き's (おどろきのあまり).
+    "vocab_N1_契機_けいき": "vocab_N2_契機_けいき",
+    "vocab_N1_遅れ_おくれ": "vocab_N2_遅れ_おくれ",
+    "vocab_N1__ショック": "vocab_N2__ショック",
+    "vocab_N1_挑戦_ちょうせん": "vocab_N2_挑戦_ちょうせん",
+    "vocab_N1__デザイン": "vocab_N2__デザイン",
+    "vocab_N1_驚き_おどろき": "vocab_N2_驚き_おどろき",
+    "vocab_N1_問う_とう": "vocab_N2_問う_とう",
+    "vocab_N1__アンケート": "vocab_N2__アンケート",
+    "vocab_N1_広まる_ひろまる": "vocab_N2_広まる_ひろまる",
+    "vocab_N1_一部_いちぶ": "vocab_N2_一部_いちぶ",
+    "vocab_N1__クラブ": "vocab_N2__クラブ",
+    "vocab_N1_向き_むき": "vocab_N2_向き_むき",
+    "vocab_N1__スピード": "vocab_N2__スピード",
+    "vocab_N1_やり遂げる_やりとげる": "vocab_N2_やり遂げる_やりとげる",
+    "vocab_N1_新_しん": "vocab_N2_新_しん",
+    # The lists' N3, which the deck held at N2 since the old level-2
+    # split, each in a sentence at N3 or below. A transitive and its
+    # intransitive move together where the lists hold both at N3 (代える,
+    # 繋げる, 溜まる, 揃う, 暖まる), so a learner meets the pair at once.
+    "vocab_N2_蒸し暑い_むしあつい": "vocab_N3_蒸し暑い_むしあつい",
+    "vocab_N2_蹴る_ける": "vocab_N3_蹴る_ける",
+    "vocab_N2_中身_なかみ": "vocab_N3_中身_なかみ",
+    "vocab_N2_上る_のぼる": "vocab_N3_上る_のぼる",
+    "vocab_N2_量る_はかる": "vocab_N3_量る_はかる",
+    "vocab_N2_測る_はかる": "vocab_N3_測る_はかる",
+    "vocab_N2_代わる_かわる": "vocab_N3_代わる_かわる",
+    "vocab_N2_代える_かえる": "vocab_N3_代える_かえる",
+    "vocab_N2_破れる_やぶれる": "vocab_N3_破れる_やぶれる",
+    "vocab_N2_繋がる_つながる": "vocab_N3_繋がる_つながる",
+    "vocab_N2_繋げる_つなげる": "vocab_N3_繋げる_つなげる",
+    "vocab_N2_羨ましい_うらやましい": "vocab_N3_羨ましい_うらやましい",
+    "vocab_N2_助かる_たすかる": "vocab_N3_助かる_たすかる",
+    "vocab_N2_溜める_ためる": "vocab_N3_溜める_ためる",
+    "vocab_N2_溜まる_たまる": "vocab_N3_溜まる_たまる",
+    "vocab_N2__プラスチック": "vocab_N3__プラスチック",
+    "vocab_N2_揃える_そろえる": "vocab_N3_揃える_そろえる",
+    "vocab_N2_揃う_そろう": "vocab_N3_揃う_そろう",
+    "vocab_N2_引越し_ひっこし": "vocab_N3_引越し_ひっこし",
+    "vocab_N2_預かる_あずかる": "vocab_N3_預かる_あずかる",
+    "vocab_N2__おとなしい": "vocab_N3__おとなしい",
+    "vocab_N2_楽器_がっき": "vocab_N3_楽器_がっき",
+    "vocab_N2_暖める_あたためる": "vocab_N3_暖める_あたためる",
+    "vocab_N2_暖まる_あたたまる": "vocab_N3_暖まる_あたたまる",
 }
 
 # MOVES keys that are not a spelling of their target. The move carries

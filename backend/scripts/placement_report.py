@@ -355,21 +355,56 @@ def _jlpt_index() -> tuple[dict[tuple[str, str], str], dict[str, str]]:
     来る read きたる is not the N5 来る (くる) and 人 read じん not the N5
     人 (ひと); a row's reading alone is a key only when the row is
     written in kana, so a kanji homophone (琴 for 事's こと) never
-    borrows a level."""
+    borrows a level.
+
+    A row the lists write as an affix (～枚, ～さん, 御～) is also keyed
+    as the word the deck writes bare, and a counter's か as the deck's
+    ヶ (～か月 is ヶ月): matched only as written, those rows reached no
+    card, so the N1 shelf held さん, 枚 and 冊, which the lists put at
+    N5, where nothing could see them (plan 260). It is still a pair:
+    ～人 read じん is 人 read じん, and never 人 read ひと."""
     by_pair: dict[tuple[str, str], str] = {}
     by_kana: dict[str, str] = {}
+
+    def index(expression: str, reading: str, level: str) -> None:
+        if _has_kanji(expression):
+            for r in reading.replace(";", "/").split("/"):
+                if r.strip():
+                    by_pair.setdefault((expression, r.strip()), level)
+        else:
+            for key in (expression, reading):
+                if key:
+                    by_kana.setdefault(key, level)
+
     for level in LEVELS:
         for expression, reading in _json(JLPT_SOURCE).get(level, []):
             expression, reading = expression.strip(), reading.strip()
-            if _has_kanji(expression):
-                for r in reading.replace(";", "/").split("/"):
-                    if r.strip():
-                        by_pair.setdefault((expression, r.strip()), level)
-            else:
-                for key in (expression, reading):
-                    if key:
-                        by_kana.setdefault(key, level)
+            index(expression, reading, level)
+            if any(ch in _TILDES for ch in expression + reading):
+                for part in expression.split(";"):
+                    for form in _affix_word(part):
+                        for r in reading.replace(";", "/").split("/"):
+                            for bare in _affix_word(r):
+                                index(form, bare, level)
     return by_pair, by_kana
+
+
+# The lists write a counter or an affix with a tilde, and a counter's
+# small ke as か (～か月, where the deck writes ヶ月).
+_TILDES = "～〜"
+_SMALL_KE = ("ヶ", "ヵ", "カ", "ケ")
+
+
+def _affix_word(text: str) -> list[str]:
+    """A list row's affix as the deck writes the word: ～枚 is 枚, 御～ is
+    御, and ～か月 is also ヶ月 (and ヵ月, カ月, ケ月). A reading has no
+    kanji, so its か stays a か."""
+    bare = "".join(ch for ch in text if ch not in _TILDES).strip()
+    if not bare:
+        return []
+    if "か" in bare and _has_kanji(bare):
+        return [bare] + [bare.replace("か", ke) for ke in _SMALL_KE]
+    return [bare]
 
 
 def _is_pattern(expression: str) -> bool:
