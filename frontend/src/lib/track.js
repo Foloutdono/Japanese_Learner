@@ -129,7 +129,7 @@ export const EVENTS = {
   // An uncaught error, by screen -- never its message or stack -- and
   // the page's own speed once per load (lib/clientErrors.js,
   // lib/vitals.js; plan 218).
-  client_error: ['route', 'where'],
+  client_error: ['route', 'step', 'where'],
   vitals: ['route', 'lcp', 'inp', 'cls', 'ttfb'],
 }
 
@@ -166,7 +166,10 @@ export const VALUES = {
     value: ['light', 'dark', 'auto', 'fr', 'en', 'binary', 'simple', 'full', 'standard', 'relaxed', 'slow', 'untimed', 'on', 'off', 'N5', 'N4', 'N3', 'N2', 'N1', 'changed'],
   },
   ai_use: { feature: ['ask', 'composition', 'translation_review', 'deep_analysis', 'exam_paper', 'line_translation'] },
-  client_error: { where: ['error', 'rejection'] },
+  client_error: {
+    where: ['error', 'rejection'],
+    step: ['kana', 'reveal', 'level', 'test', 'card', 'intro-scripts', 'intro-sounds', 'intro-table', 'intro-katakana', 'intro-sentence', 'intro-route', 'known', 'known-dict', 'known-back', 'unknown', 'unknown-back', 'done', 'read', 'type', 'measure', 'graded', 'pass'],
+  },
 }
 // end VALUES
 

@@ -19,6 +19,8 @@ import { normalizeCard, wordForm } from '../domain/cardShape'
 import { useProfileSummary } from '../stores/profileSummary'
 import { startTally, countReview } from '../stores/runTally'
 import { useDesk } from '../hooks/useDesk'
+import { useErrorStep } from '../hooks/useErrorStep'
+import { stepFor } from '../domain/flowSteps'
 import { useBackGuard } from '../hooks/useBackGuard'
 import { markCardsRidden } from '../lib/rideProgress'
 import { EnterKey } from '../components/chrome/DeskKeys'
@@ -85,18 +87,12 @@ import { LookupWatchContext } from '../components/study/lookupWatch'
 // reading's stamp is boarded again at the reading, not the first card.
 export const RIDE_NEXT = '/ride/reading'
 
-// The steps, as ride_step names them: known, known-back, unknown,
-// unknown-back, done (stepFor below); on a phone known-dict between
-// the known card's turn and its grade.
+// The steps, as ride_step names them: domain/flowSteps.js's CARD_STEPS,
+// read by its stepFor.
 // The rating bar's own pressed-state beat (RatingBar.PRESSED_MS): the
 // seal the learner pressed stays lit while the card moves on.
 const HOLD_MS = 420
 
-function stepFor(index, answered, lookFirst = false) {
-  if (index >= 2) return 'done'
-  if (index === 0 && answered && lookFirst) return 'known-dict'
-  return `${index === 0 ? 'known' : 'unknown'}${answered ? '-back' : ''}`
-}
 
 /** The card as CardPrompt wants it, with the romaji riding on it for
  *  a learner who does not yet read kana: the furigana hint's own
@@ -174,6 +170,7 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
   // step is the phone's alone.
   const lookFirst = !desk && !looked
   const step = stepFor(index, answered, lookFirst)
+  useErrorStep(step)
 
   function mark(from, to) {
     track('ride_step', { step: from, to, dir: 'fwd', ms: watches.current?.step.lap() ?? 0 })

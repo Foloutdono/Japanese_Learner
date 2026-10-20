@@ -17,6 +17,8 @@ import { cleanCardName } from '../domain/passCard'
 import { dateFormat, paceLabel, stopParts } from '../components/settings/contract'
 import { BoardHead } from '../components/boarding/BoardFrame'
 import { useBoardKeys } from '../hooks/useBoardKeys'
+import { useErrorStep } from '../hooks/useErrorStep'
+import { BOARDING_STEPS } from '../domain/flowSteps'
 import { useDesk } from '../hooks/useDesk'
 import { useBoxWidth } from '../hooks/useBoxWidth'
 import { KanaStep, KanaReveal } from '../components/boarding/KanaStep'
@@ -137,7 +139,6 @@ const PULL_MS = 260
 const DESK_PULL_MS = 820
 const REDUCED = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 const DEFAULT_TIME = DEPART_TIMES.am
-const STEPS = ['kana', 'reveal', 'level', 'test', 'card']
 
 // The track's stops: the kana, a reader's level, the card -- the reveal
 // is the kana's stop's second half and the test the level's own, never
@@ -177,7 +178,8 @@ export default function BoardingFlow({
     cardName: '',
     ...(resumed?.answers ?? {}),
   })
-  const [step, setStep] = useState(() => (STEPS.includes(resumed?.step) ? resumed.step : 'kana'))
+  const [step, setStep] = useState(() => (BOARDING_STEPS.includes(resumed?.step) ? resumed.step : 'kana'))
+  useErrorStep(step)
   // The card's open sheet. A Google round trip that came back refused
   // reopens the account's, where the refusal is said; one that worked
   // comes back to the card, kept.
