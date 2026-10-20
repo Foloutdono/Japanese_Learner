@@ -26136,22 +26136,65 @@ button.brd-stn { cursor: pointer; }
   min-height: 0;
   text-align: start;
 }
-.tour__track { position: relative; height: 44px; margin-inline: var(--sp-3); flex: none; }
-.tour__rail { position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; background: var(--surface-line); }
-.tour__done { position: absolute; left: 0; top: 50%; height: 3px; margin-top: -1.5px; background: var(--line-color); transition: width 300ms ease-out; }
-.tour__stop {
-  position: absolute;
-  top: 50%;
-  width: 10px;
-  height: 10px;
-  box-sizing: border-box;
-  border-radius: var(--r-pill);
-  border: 2px solid var(--surface-line);
-  background: var(--bg-main);
-  transform: translate(-50%, -50%);
+/* The track (plan 264, the owner's pick C of the canvas "Tour track"):
+   a segment a stop under the stop's name and where it stands. The ones
+   passed are full in the line's pigment, the one in hand is the pigment
+   sunk into the ground and fills with what is done of it, the ones ahead
+   are the hairline's. The stop is named here, and the card under it
+   never names it again. */
+.tour__track {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-inline: var(--sp-3);
+  padding-top: var(--sp-3);
+  flex: none;
 }
-.tour__stop--passed { border-color: var(--line-color); background: var(--line-color); }
-.tour__stop--here { width: 18px; height: 18px; border: 3px solid var(--line-color); }
+.tour__track-head {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-3);
+  line-height: 1;
+}
+.tour__track-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-caption);
+  color: var(--tour-ink);
+}
+.tour__track-count {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.tour__segs { display: flex; gap: var(--sp-1); }
+.tour__stop {
+  position: relative;
+  flex: 1;
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--r-pill);
+  background: var(--surface-line);
+}
+.tour__stop--passed { background: var(--line-color); }
+.tour__stop--here { background: color-mix(in srgb, var(--line-color) 40%, var(--bg-main)); }
+.tour__stop-fill {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  background: var(--line-color);
+  transition: width 300ms ease-out;
+}
 .tour__body {
   flex: 1;
   display: flex;
@@ -26850,7 +26893,7 @@ button.brd-stn { cursor: pointer; }
 .gl-replay .tour__foot { bottom: 0; }
 @media (prefers-reduced-motion: reduce) {
   .tour__body { animation: none; }
-  .tour__done, .tour-guess { transition: none; }
+  .tour__stop-fill, .tour-guess { transition: none; }
 }
 
 /* ══ 初見 — a kana or a kanji met before it is drilled (plan 216) ══════
