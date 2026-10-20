@@ -27,7 +27,7 @@ import DayClearPreview from './screens/DayClearPreview'
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from './lib/supabase'
 import { authRedirectError } from './lib/authRedirect'
-import { isGuest, startGuest } from './lib/guest'
+import { forgetParkedGuest, isGuest, parkGuest, startGuest } from './lib/guest'
 import { rememberOnboarded, wasOnboardedHere } from './stores/onboarded'
 import { holdGuide } from './stores/guide'
 import { forgetAccount } from './stores/account'
@@ -388,6 +388,10 @@ export default function App({ front = NO_FRONT }) {
   // and signing out is what puts Welcome back on screen. `local`
   // scope, like Settings' own sign-out: this device only.
   function leaveBoarding(mode = null) {
+    // Backing out keeps the empty pass for the next Board (lib/guest.js);
+    // going to sign in to an account has no use for it.
+    if (mode == null) parkGuest(session)
+    else forgetParkedGuest()
     setAuthMode(mode)
     const out = supabase.auth.signOut({ scope: 'local' })
     const page = mode == null ? pageBehind.current : null
