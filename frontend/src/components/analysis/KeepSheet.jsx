@@ -21,11 +21,12 @@ import { addLines, addWords, heldLines } from './songDeckApi'
 //          chips -- a word the SRS says is mastered offered unticked.
 //          The one filled action counts the cards it writes; Garder
 //          sans deck is the pin it always was.
-//   deck   the learner's own decks that take a line or a word: a mixed
-//          deck takes both, a vocab deck the words, a standard deck the
-//          lines (useMining's DECK_TYPE_FOR_KIND); + Nouveau deck names
-//          one. The song's deck comes first, made on the press if there
-//          is none of its name yet.
+//   deck   the learner's own decks that take a line or a word: a lyrics
+//          or a mixed deck takes both, a vocab deck the words, a standard
+//          deck the lines (useMining's DECK_TYPE_FOR_KIND); + Nouveau
+//          deck names one. The song's deck comes first, made on the press
+//          if there is none of its name yet: a lyrics deck (plan 264), as
+//          the song sheet makes, or the mixed one of its name made before.
 //   lines  the whole Passage, a line a row, ticked to go in with the
 //          line in hand: all of them, the ones kept already, the ones
 //          with a word the learner does not know, none. A line the deck
@@ -40,10 +41,13 @@ import { addLines, addWords, heldLines } from './songDeckApi'
 // a deck of the same name rather than minting a clone).
 
 const TAKES = {
+  lyrics: { words: true, lines: true },
   mixed: { words: true, lines: true },
   vocab: { words: true, lines: false },
   standard: { words: false, lines: true },
 }
+// The decks that take a whole song, its words and its lines.
+const SONG_TYPES = new Set(['lyrics', 'mixed'])
 const NOTHING = new Set()
 // Past this many, the words fold behind a "+n" chip.
 const WORDS_SHOWN = 6
@@ -62,8 +66,8 @@ export function KeepSheet({ session, mining, sentences, focusIndex, kept, title,
       .filter(d => TAKES[d.type] && (d.role ?? 'owner') === 'owner' && !seen.has(d.id) && seen.add(d.id))
   }, [mining])
   const songDeck = useMemo(
-    () => decks.find(d => d.type === 'mixed' && (d.name ?? '').trim().toLowerCase() === songName.trim().toLowerCase())
-      ?? { id: null, name: songName, type: 'mixed' },
+    () => decks.find(d => SONG_TYPES.has(d.type) && (d.name ?? '').trim().toLowerCase() === songName.trim().toLowerCase())
+      ?? { id: null, name: songName, type: 'lyrics' },
     [decks, songName],
   )
 
@@ -123,7 +127,7 @@ export function KeepSheet({ session, mining, sentences, focusIndex, kept, title,
     setError(null)
     let into = deck.id ? deck : null
     try {
-      if (!into) into = await mining.ensureDeck('mixed', deck.name, { remember: false })
+      if (!into) into = await mining.ensureDeck(deck.type, deck.name, { remember: false })
       await addWords(session, into.id, takeWords)
       const refused = takeLines.length ? await addLines(session, into.id, takeLines) : false
       if (picked.has(focusIndex) && !pinned) onPin()
@@ -366,7 +370,7 @@ function KeepDeck({ t, decks, songDeck, several, current, onBack, onPick }) {
     e.preventDefault()
     const named = name.trim()
     if (!named) return
-    const same = options.find(d => d.type === 'mixed' && (d.name ?? '').trim().toLowerCase() === named.toLowerCase())
+    const same = options.find(d => SONG_TYPES.has(d.type) && (d.name ?? '').trim().toLowerCase() === named.toLowerCase())
     onPick(same ?? { id: null, name: named, type: 'mixed' })
   }
 

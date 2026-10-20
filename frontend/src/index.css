@@ -1839,6 +1839,80 @@ a.anl-song__deck { color: var(--text-primary); text-decoration: none; }
 a.anl-song__deck:hover .picker-row__name,
 a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; text-underline-offset: 3px; }
 
+/* ── 歌 — a song's lyrics into a deck, from the shelf (plan 264) ──
+   The song sheet's form (.anl-song) on 教材's sheet: the source, the
+   wait, then the two piles the sort made -- the sung lines ticked, the
+   rest not -- a line a row, its tick at the lead, how often it comes
+   back and what the sort took it for at the end. A row keeps its place
+   when it is ticked: the pile is the sort's, the tick the learner's. */
+.lyr-source {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.lyr-note {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+/* The wait: the dots and the sentence on one line, in the middle. */
+.lyr-wait {
+  display: flex;
+  justify-content: center;
+  padding-block: var(--sp-6);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.lyr-pile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.lyr-pile > legend { margin-bottom: var(--sp-2); padding: 0; }
+.lyr-line {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px; /* a hit target, as .btn-secondary's */
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.lyr-line--on {
+  border-color: var(--line-kaiseki);
+  color: var(--text-primary);
+}
+.lyr-line:has(.lyr-line__check:focus-visible) { outline: 2px solid var(--text-primary); outline-offset: 2px; }
+.lyr-line__check {
+  flex: none;
+  margin: 0;
+  accent-color: var(--line-kaiseki);
+}
+.lyr-line__text {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  overflow-wrap: anywhere;
+}
+.lyr-line__times,
+.lyr-line__kind {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
 /* There is no rule for the rail under 1100px because there is no rail
    under 1100px (2026-09-11). It used to stack above the stage as a
    170px WINDOW — about three stops of a Passage the stepper already
@@ -6978,6 +7052,24 @@ textarea:focus-visible {
   text-transform: uppercase;
   color: var(--sheet-cap-ink);
 }
+/* 歌 — the lyrics import's head (plan 264; option A of three drawn,
+   the owner's pick of 2026-10-20): the song's icon in the analyser's
+   roundel, and the title in words at a card title's size, where every
+   other sheet prints a kanji over a caption. */
+.lyr-sheet .sheet__head { align-items: center; }
+.lyr-sheet .sheet__jp { display: inline-flex; line-height: 1; }
+/* Two classes: .wmap-roundel, later in the file, sets its own 30px. */
+.sheet__head .lyr-sheet__badge {
+  --line-color: var(--line-kaiseki);
+  width: 40px;
+  height: 40px;
+}
+.lyr-sheet .sheet__cap {
+  font-size: var(--fs-title);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-primary);
+}
 
 /* ── the console: chips over a field with a count ── */
 .console {
@@ -8249,6 +8341,11 @@ textarea:focus-visible {
 .seg__opt:first-child { border-left: 0; }
 .seg__opt:hover,
 .seg__opt:focus-visible { color: var(--text-primary); filter: none; }
+/* The global ring, inset, as the analyser's pill's (.anl-seg__opt):
+   `.seg` clips, and the ring of the option a sheet focused on opening
+   showed as a gold edge on its neighbour's side, read as a border the
+   selected option does not have (plan 264). */
+.seg__opt:focus-visible { outline-offset: -2px; }
 .seg__opt--on { background: var(--sel-wash); color: var(--sel-ink); box-shadow: inset 0 -2px 0 var(--accent2); }
 /* The canvas's variants (plan 068): a plain-word option, the full-width
    form (the analyzer's Text / Photo / Video), the analyzer's pigment. */

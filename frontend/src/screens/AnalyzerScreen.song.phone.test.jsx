@@ -38,12 +38,12 @@ vi.mock('../lib/api', () => ({
 }))
 // The learner's shelf, as each test sets it; a deck made is deck 9.
 const shelf = { decks: [] }
-const ensureDeck = vi.fn(async (_kind, name) => ({ id: 9, name, type: 'mixed' }))
+const ensureDeck = vi.fn(async (kind, name) => ({ id: 9, name, type: kind }))
 vi.mock('../components/analysis/useMining', async importOriginal => ({
   ...(await importOriginal()),
   useMining: () => ({
     decks: shelf.decks,
-    decksFor: kind => shelf.decks.filter(d => d.type === 'mixed' || d.type === (kind === 'cloze' ? 'standard' : kind)),
+    decksFor: kind => shelf.decks.filter(d => d.type === 'mixed' || d.type === 'lyrics' || d.type === (kind === 'cloze' ? 'standard' : kind)),
     mineApp: vi.fn(),
     mineCloze: vi.fn(),
     ensureDeck,
@@ -231,7 +231,8 @@ describe('Garder on a phone: the line into a deck', () => {
 
     go.click()
     await vi.waitFor(() => expect(document.querySelector('.anl-keepsheet a.anl-song__deck')).not.toBeNull())
-    expect(ensureDeck).toHaveBeenCalledWith('mixed', 'YOASOBI「夜に駆ける」', { remember: false })
+    // A lyrics deck (plan 264), as the song sheet makes.
+    expect(ensureDeck).toHaveBeenCalledWith('lyrics', 'YOASOBI「夜に駆ける」', { remember: false })
     const posted = url => apiJson.mock.calls.filter(([u]) => u === url).map(([, , opts]) => JSON.parse(opts.body))
     expect(posted('/api/decks/9/cards/app')).toEqual([{ cards: [
       { source: 'vocab', level: 'N5', raw_id: 'vocab_N5_夜_よる' },

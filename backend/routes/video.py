@@ -31,7 +31,8 @@ from core.rls import enable_rls
 from core.auth import get_user_id
 from core.history import HISTORY_LIMIT, trim_history
 from core.srs_instance import srs
-from study import line_translate, morphology
+from study import line_translate, lyrics_sort, morphology
+from study.llm_shared import LLMUnavailable
 from study.analysis import LOCAL_REV, analyze_local, attach_user_state
 from study.captions import (
     parse_track, parse_pasted_transcript, parse_video_id, fetch_youtube_track,
@@ -180,6 +181,11 @@ def _ensure_video_schema() -> None:
             cur.execute(
                 "ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS translations JSONB NOT NULL DEFAULT '{}'::jsonb"
             )
+            # Which lines are the song (plan 264, study/lyrics_sort.py),
+            # as {"rev": SORT_REV, "kinds": {line text: kind}}: by the
+            # text, as the translations are. NULL is a session nobody
+            # has made a lyrics deck of. Additive.
+            cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS lyrics_sort JSONB")
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_video_sessions_user
                 ON video_sessions(user_id, created_at DESC)
@@ -1075,3 +1081,76 @@ def translate_video_lines(session_id: int, payload: TranslationsPayload,
     sentences = _current(session_id, session["sentences"] or [])
     return translated_block(user_id, "video_sessions", session_id, sentences,
                             session["translations"], payload, "video")
+
+
+# ── 歌 — which lines are the song (plan 264) ─────────────────────
+# The lyrics import's second step (components/decks/LyricsImportSheet.jsx):
+# the session's lines sorted into the song and the rest -- a spoken
+# intro, the credits, a sound cue -- by study/lyrics_sort.py, which the
+# learner then corrects before the deck is made. Kept on the session by
+# the line's text under SORT_REV, so asking again costs nothing.
+#
+# Never a refusal the learner cannot go on from: a spent ration or a
+# model that will not answer still returns every line, sorted by the
+# patterns alone, with `sorted` false and the `reason` the sheet words.
+# Such a sort is not kept, so the next look asks the model again.
+def _stored_kinds(raw) -> dict:
+    if isinstance(raw, dict) and raw.get("rev") == lyrics_sort.SORT_REV and isinstance(raw.get("kinds"), dict):
+        return raw["kinds"]
+    return {}
+
+
+@router.post("/api/video/session/{session_id}/lyrics")
+def sort_video_lyrics(session_id: int, user_id: str = Depends(get_user_id)):
+    """{"sorted", "reason", "kinds"}: one of lyrics_sort.KINDS per line
+    of the session, in order (the indices GET /api/video/session/{id}
+    reads its sentences by); `sorted` says whether the model sorted
+    them, and `reason` ("over_limit" | "ai_unavailable") why not."""
+    session = _load_session(session_id, user_id)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if session["status"] != "ready":
+        raise HTTPException(status_code=409, detail="Session is not ready yet")
+    sentences = _current(session_id, session["sentences"] or [])
+    known = _stored_kinds(_load_lyrics_sort(session_id))
+    # The file's name says which song it is more often than not
+    # ("YOASOBI - 夜に駆ける.srt"); a link's video id says nothing.
+    about = session["source_ref"] if session["source"] == "upload" else ""
+    try:
+        kinds, fresh = lyrics_sort.sort_lines(user_id, sentences, known, about)
+    except lyrics_sort.OverLimit:
+        return {"sorted": False, "reason": "over_limit",
+                "kinds": lyrics_sort.sort_by_patterns(sentences, known)}
+    except LLMUnavailable:
+        logger.warning("Lyrics sort unavailable for session %s", session_id)
+        return {"sorted": False, "reason": "ai_unavailable",
+                "kinds": lyrics_sort.sort_by_patterns(sentences, known)}
+    if fresh:
+        # Best effort: a failed save costs the next look a call, never
+        # this answer.
+        try:
+            conn = db_conn()
+            try:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "UPDATE video_sessions SET lyrics_sort = %s WHERE id = %s AND user_id = %s",
+                        (json.dumps({"rev": lyrics_sort.SORT_REV, "kinds": {**known, **fresh}},
+                                    ensure_ascii=False), session_id, user_id),
+                    )
+                conn.commit()
+            finally:
+                conn.close()
+        except Exception:
+            logger.exception("Could not store the lyrics sort of video session %s", session_id)
+    return {"sorted": True, "reason": None, "kinds": kinds}
+
+
+def _load_lyrics_sort(session_id: int):
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT lyrics_sort FROM video_sessions WHERE id = %s", (session_id,))
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    return row[0] if row else None
