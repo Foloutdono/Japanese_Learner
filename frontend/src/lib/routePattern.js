@@ -111,6 +111,8 @@ export const ROUTES = [
   '/profile',
   '/profile/stats',
   '/profile/tickets',
+  // 番付 (plan 262): the whole board.
+  '/profile/banzuke',
   '/profile/settings',
   '/profile/settings/:page',
 ]

@@ -51,6 +51,7 @@ from routes.conversation     import router as conversation_router
 from routes.ask              import router as ask_router
 from routes.practice         import router as practice_router
 from routes.profile          import router as profile_router
+from routes.banzuke          import router as banzuke_router
 from routes.frequency       import router as frequency_router
 from routes.theme_vocab      import router as theme_vocab_router
 from routes.translation import router as translation_router
@@ -204,6 +205,7 @@ app.include_router(conversation_router)
 app.include_router(ask_router)
 app.include_router(practice_router)
 app.include_router(profile_router)
+app.include_router(banzuke_router)
 app.include_router(frequency_router)
 app.include_router(theme_vocab_router)
 app.include_router(today_router)

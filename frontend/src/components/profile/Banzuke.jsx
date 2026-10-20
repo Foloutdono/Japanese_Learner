@@ -1,31 +1,84 @@
-import { Fragment, useState } from 'react'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Seg } from '../chrome/Console'
+import { ChevronIcon } from '../ui/Icons'
+import { boardRows, bothRows, moveOf } from '../../domain/banzuke'
+import { LearnerSheet } from './LearnerSheet'
 
 // ── The ranking (canvas ProfileInserts, plan 074) ─────────────
 // One list of rows: the rank in a roundel (gold, silver and bronze for
-// the first three), the name, the XP. Two boards ride in: the last
-// seven days and lifetime (通算). The head is the board's period tabs
-// and nothing above them: the tabs name the board. The week is the one
-// you can actually move tonight, so it is the one the board opens on.
-// Only the week board's tabs render both periods; without it the head
-// keeps the lifetime tab alone, so the board still says what it is.
+// the first three), the name, the XP. Two boards ride in: this week and
+// lifetime (通算). The head is the board's period tabs and nothing above
+// them: the tabs name the board. The week is the one you can actually
+// move tonight, so it is the one the board opens on. Only the week
+// board's tabs render both periods; without it the head keeps the
+// lifetime tab alone, so the board still says what it is.
 //
-// `entries` is the top N; `me` is the current user's own row, which
-// the backend includes separately whenever they are not already inside
-// that top N (see profile.py's get_leaderboard). Then they close the
-// list after an elision row, exactly as before.
+// Since plan 262 the board is a window on the whole one: its top three,
+// a dashed hairline, and the learner between their two neighbours, so the board
+// says who is within reach rather than who is out of it
+// (domain/banzuke.boardRows). A row says how far it moved since the day
+// began, a name opens that learner's card (LearnerSheet), the learner's
+// own gap to the next place is printed under the board, and the board's
+// foot is the door to the whole of it (/profile/banzuke).
 const MEDAL = { 1: 'gold', 2: 'silver', 3: 'bronze' }
 
-function Row({ e, isMe, lang }) {
+export function Move({ e, t }) {
+  const dir = moveOf(e)
+  if (!dir) return null
+  const n = Math.abs(e.move)
+  return (
+    <span className={`bz-move bz-move--${dir}`} aria-label={dir === 'up' ? t.bzMoveUp(n) : t.bzMoveDown(n)}>
+      <span aria-hidden="true">{dir === 'up' ? '▲' : '▼'}{n}</span>
+    </span>
+  )
+}
+
+// The name, a way to the learner's card when the board can open one.
+export function Name({ e, t, onPick }) {
+  if (!onPick) return <span className="leaderboard-row__name">{e.username}</span>
+  return (
+    <button type="button" className="leaderboard-row__name bz-pick" aria-label={t.bzRowAria(e.username)} onClick={() => onPick(e.username)}>
+      {e.username}
+    </button>
+  )
+}
+
+export function Row({ e, isMe, lang, t, onPick, className = '', rowRef }) {
   const medal = MEDAL[e.rank]
   return (
-    <div className={`leaderboard-row${isMe ? ' leaderboard-row--me' : ''}`}>
+    <div ref={rowRef} className={`leaderboard-row${isMe ? ' leaderboard-row--me' : ''}${className ? ` ${className}` : ''}`}>
       <span className={`leaderboard-row__rank${medal ? ` leaderboard-row__rank--${medal}` : ''}`}>
         {e.rank ?? '—'}
       </span>
-      <span className="leaderboard-row__name">{e.username}</span>
+      <Name e={e} t={t} onPick={onPick} />
+      <Move e={e} t={t} />
       <span className="leaderboard-row__xp">{e.xp.toLocaleString(lang)} XP</span>
     </div>
+  )
+}
+
+// The learner's own gap to the next place, at the board's foot: short,
+// "+19 XP → CalmTsuki880", so it holds one line beside the door, and the
+// sentence for a screen reader (plan 262's A1).
+function GapTo({ me, t, lang }) {
+  if (!me?.gap) return <span className="bz__gap-to" />
+  const xp = me.gap.xp.toLocaleString(lang)
+  return (
+    <p className="bz__gap-to">
+      <span className="sr-only">{t.bzGapTo(xp, me.gap.username)}</span>
+      <span aria-hidden="true"><b className="bz__gap-xp">+{xp} XP</b> → {me.gap.username}</span>
+    </p>
+  )
+}
+
+// The board's foot: the door to the whole of it.
+function WholeDoor({ t }) {
+  return (
+    <Link to="/profile/banzuke" className="bz__whole">
+      <span>{t.bzWhole}</span>
+      <ChevronIcon direction="right" size={15} />
+    </Link>
   )
 }
 
@@ -37,10 +90,20 @@ function Row({ e, isMe, lang }) {
 // its XP at the board's edge. Side by side, the two boards were two
 // heights whenever the learner's own row closed one and not the other,
 // and stacked they ran the page past a laptop's window.
-export function Banzuke({ all, week, t, lang, both = false }) {
+export function Banzuke({ all, week, t, lang, both = false, session = null }) {
   const [scope, setScope] = useState(week ? 'week' : 'all')
+  const [picked, setPicked] = useState(null)
+  const onPick = session ? setPicked : undefined
+  const sheet = picked && <LearnerSheet username={picked} session={session} onClose={() => setPicked(null)} />
 
-  if (both && week && all) return <BothBoard week={week} all={all} t={t} lang={lang} />
+  if (both && week && all) {
+    return (
+      <>
+        <BothBoard week={week} all={all} t={t} lang={lang} onPick={onPick} />
+        {sheet}
+      </>
+    )
+  }
 
   const board = scope === 'week' && week ? week : all
   if (!board) return null
@@ -51,56 +114,38 @@ export function Banzuke({ all, week, t, lang, both = false }) {
       ]
     : [{ key: 'all', label: t.periodAll }]
   return (
-    <Board board={board} guide="profile.board" lang={lang}>
-      {/* The label is the board's accessible name; the tabs show it. */}
-      <Seg
-        full
-        className="bz__seg"
-        label={t.ranking}
-        value={scope}
-        onChange={setScope}
-        options={options}
-      />
-    </Board>
+    <>
+      <Board board={board} guide="profile.board" lang={lang} t={t} onPick={onPick}>
+        {/* The label is the board's accessible name; the tabs show it. */}
+        <Seg
+          full
+          className="bz__seg"
+          label={t.ranking}
+          value={scope}
+          onChange={setScope}
+          options={options}
+        />
+      </Board>
+      {sheet}
+    </>
   )
 }
 
 // ── 東西 — both periods on one board (plan 248) ──────────────────
 // A table, so a screen reader reads each row as a rank with its two
 // names under their period's heading; the ranks are the rows' headers.
-// The rows a period's top N and the learner's own row hold, by rank:
-// the top ranks first, then the learner's own wherever the top N left it
-// out, after the board's elision.
-function sideOf(board) {
-  const rows = new Map(board.entries.map(e => [e.rank, e]))
-  const me = board.me ?? null
-  const out = me && !board.entries.some(e => e.username === me.username) ? me : null
-  if (out) rows.set(out.rank, out)
-  return { rows, me, out }
-}
-
-function BothBoard({ week, all, t, lang }) {
-  const sides = [sideOf(week), sideOf(all)]
-  const top = [...new Set([...week.entries, ...all.entries].map(e => e.rank))].sort((a, b) => a - b)
-  const out = [...new Set(sides.map(s => s.out?.rank).filter(r => r != null && !top.includes(r)))]
-    .sort((a, b) => a - b)
-  // The rows that share the board's height, either side of the elision.
-  const style = { '--bz-top': top.length, '--bz-out': out.length }
-  const row = rank => {
-    const medal = MEDAL[rank]
-    return (
-      <div key={rank} className="desk-bz__row" role="row">
-        <SideCell e={sides[0].rows.get(rank)} me={sides[0].me} lang={lang} west />
-        <span className="desk-bz__rank" role="rowheader">
-          <span className={`leaderboard-row__rank${medal ? ` leaderboard-row__rank--${medal}` : ''}`}>{rank}</span>
-        </span>
-        <SideCell e={sides[1].rows.get(rank)} me={sides[1].me} lang={lang} />
-      </div>
-    )
+// The ranks either side shows (domain/banzuke.bothRows), a ⋯ wherever
+// two are not next to each other; the rows share the board's height,
+// the head, the ⋯ and the foot keep their own (--bz-rows).
+function BothBoard({ week, all, t, lang, onPick }) {
+  const { lines, sides } = bothRows(week, all)
+  const mes = [week.me ?? null, all.me ?? null]
+  const style = {
+    '--bz-rows': ['auto', ...lines.map(l => (l.gap ? 'auto' : 'minmax(min-content, 1fr)')), 'auto'].join(' '),
   }
   return (
     <section
-      className={`banzuke desk-bz${out.length ? ' desk-bz--out' : ''}`}
+      className="banzuke desk-bz"
       role="table"
       aria-label={t.ranking}
       data-guide="profile.board"
@@ -111,9 +156,24 @@ function BothBoard({ week, all, t, lang }) {
         <span className="desk-bz__period" role="columnheader"><span className="sr-only">{t.rankColumn}</span></span>
         <span className="desk-bz__period" role="columnheader">{t.periodAll}</span>
       </div>
-      {top.map(row)}
-      {out.length > 0 && <div className="desk-bz__gap" aria-hidden="true">⋯</div>}
-      {out.map(row)}
+      {lines.map((line, i) => {
+        if (line.gap) return <div key={`gap${i}`} className="desk-bz__gap" aria-hidden="true" />
+        const { rank } = line
+        const medal = MEDAL[rank]
+        return (
+          <div key={rank} className="desk-bz__row" role="row">
+            <SideCell e={sides[0].get(rank)} me={mes[0]} lang={lang} t={t} onPick={onPick} west />
+            <span className="desk-bz__rank" role="rowheader">
+              <span className={`leaderboard-row__rank${medal ? ` leaderboard-row__rank--${medal}` : ''}`}>{rank}</span>
+            </span>
+            <SideCell e={sides[1].get(rank)} me={mes[1]} lang={lang} t={t} onPick={onPick} />
+          </div>
+        )
+      })}
+      <div className="desk-bz__foot">
+        <GapTo me={week.me} t={t} lang={lang} />
+        <WholeDoor t={t} />
+      </div>
     </section>
   )
 }
@@ -121,36 +181,32 @@ function BothBoard({ week, all, t, lang }) {
 // One period's place in a row: the name beside the rank and the XP at
 // the board's edge, so the week's side reads from its edge in. Empty
 // where that period has no one at the rank.
-function SideCell({ e, me, lang, west = false }) {
+function SideCell({ e, me, lang, t, onPick, west = false }) {
   const isMe = e != null && me != null && e.username === me.username
   return (
     <span className={`desk-bz__cell${west ? ' desk-bz__cell--west' : ''}${isMe ? ' desk-bz__cell--me' : ''}`} role="cell">
-      {e && <span className="leaderboard-row__name">{e.username}</span>}
+      {e && <Name e={e} t={t} onPick={onPick} />}
+      {e && <Move e={e} t={t} />}
       {e && <span className="leaderboard-row__xp">{e.xp.toLocaleString(lang)} XP</span>}
     </span>
   )
 }
 
-// One board: its head (the caller's), then the rows.
-function Board({ board, guide, lang, children }) {
-  const { entries, me } = board
-  const meInList = me && entries.some(e => e.username === me.username)
-  const rows = meInList || !me ? [...entries] : [...entries, { ...me, elided: true }]
-
+// One board: its head (the caller's), then the rows, the gap to the
+// next place and the door to the whole board.
+function Board({ board, guide, lang, t, onPick, children }) {
+  const { me } = board
   return (
     <section className="banzuke" data-guide={guide}>
       <div className="bz__head">{children}</div>
-      {/* Fragments, not wrappers: the rows stay direct children of the
-          board so .leaderboard-row:last-child drops only the last
-          hairline, not every one. */}
-      {rows.map(r => (
-        <Fragment key={r.rank ?? r.username}>
-          {r.elided && (
-            <div className="leaderboard-row leaderboard-row__gap" aria-hidden="true">⋯</div>
-          )}
-          <Row e={r} isMe={me != null && r.username === me.username} lang={lang} />
-        </Fragment>
+      {boardRows(board).map((r, i) => (r.gap
+        ? <div key={`gap${i}`} className="bz__cut" aria-hidden="true" />
+        : <Row key={r.e.rank} e={r.e} isMe={me != null && r.e.username === me.username} lang={lang} t={t} onPick={onPick} />
       ))}
+      <div className="bz__foot">
+        <GapTo me={me} t={t} lang={lang} />
+        <WholeDoor t={t} />
+      </div>
     </section>
   )
 }
