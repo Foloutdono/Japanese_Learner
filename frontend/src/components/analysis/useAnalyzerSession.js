@@ -3,6 +3,7 @@ import { countUse } from '../../lib/screenTrail'
 import { apiJson, apiUpload, apiFetch } from '../../lib/api'
 import { useLang } from '../../LangContext'
 import { videoErrorMessage } from './videoErrors'
+import { explainErrorText } from '../../lib/explainSentence'
 
 // ── One Passage, three ways in ────────────────────────────
 // The seam that makes 解析 one screen instead of two (plan 027). A
@@ -490,11 +491,11 @@ export function useAnalyzerSession(session) {
       if (run !== runIdRef.current) return
       setExplainError(prev => ({
         ...prev,
-        // 503 is the provider being down, which is temporary and worth
-        // saying so. Anything else is a generic failure. Never the
+        // 429 is the day's explanations spent, 503 the provider down,
+        // anything else a generic failure (explainErrorText). Never the
         // server's own sentence: ApiError's message is never empty, so
         // the backend's English used to win every time (plan 215).
-        [index]: e?.status === 503 ? t.explainUnavailable : t.explainFailed,
+        [index]: explainErrorText(e, t),
       }))
     } finally {
       setExplaining(prev => ({ ...prev, [index]: false }))

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useParams, useLocation, Navigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { postResult } from '../lib/postResult'
-import { explainSentence } from '../lib/explainSentence'
+import { explainSentence, explainErrorText } from '../lib/explainSentence'
 import { useLang } from '../LangContext'
 import { runSource, logLabel } from '../domain/sentenceSource'
 import { StudyStage } from '../components/study/StudyStage'
@@ -218,7 +218,7 @@ export default function TranslationRun({ session }) {
       .then(d => { if (breakdownPhraseRef.current === key) setBreakdown(d) })
       .catch(e => {
         if (breakdownPhraseRef.current !== key) return
-        setExplainError(e?.message === '503' ? t.explainUnavailable : t.explainFailed)
+        setExplainError(explainErrorText(e, t))
       })
       .finally(() => { if (breakdownPhraseRef.current === key) setExplaining(false) })
   }

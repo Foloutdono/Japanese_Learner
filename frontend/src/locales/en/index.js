@@ -1145,6 +1145,7 @@ const phraseAnalyzer = {
   explaining:          'Explaining…',
   explainFailed:       'The explanation did not come through. Try again.',
   explainUnavailable:  'Explanations are unavailable right now. Try again shortly.',
+  explainLimitReached: "That's every explanation for today. They're back tomorrow.",
   passageTruncated:    n => `Only the first ${n} ${n === 1 ? 'sentence was' : 'sentences were'} analyzed.`,
   sentenceAnalysisUnavailable: 'Analysis is temporarily unavailable for this sentence.',
   mineToDeck:          'Mine',

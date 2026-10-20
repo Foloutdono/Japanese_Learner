@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import { apiJson, apiFetch } from '../lib/api'
-import { explainSentence } from '../lib/explainSentence'
+import { explainSentence, explainErrorText } from '../lib/explainSentence'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
@@ -75,7 +75,7 @@ export default function ExamStudy({ session, examId, revision, question }) {
     explainSentence(session, key, lang)
       .then(d => { if (sentenceRef.current === key) setAnalysis(d) })
       .catch(e => {
-        if (sentenceRef.current === key) setExplainError(e?.message === '503' ? t.explainUnavailable : t.explainFailed)
+        if (sentenceRef.current === key) setExplainError(explainErrorText(e, t))
       })
       .finally(() => { if (sentenceRef.current === key) setExplaining(false) })
   }
