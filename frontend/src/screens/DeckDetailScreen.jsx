@@ -661,6 +661,19 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     if (desk) { setShowBrowse(false); closeMore() }
   }
 
+  // On a phone the form opens over the list, so a card pressed far down
+  // it would open its editor out of sight: the page is carried up to it
+  // (its scroll-margin clears the HUD). Smoothly, unless the phone has
+  // asked for stillness. The desk's form is held in view by its slot.
+  const formRef = useRef(null)
+  useEffect(() => {
+    if (desk || editing == null) return
+    const el = formRef.current
+    if (!el?.scrollIntoView) return
+    const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    el.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' })
+  }, [desk, editing])
+
   function openBrowse() {
     playUi('click-mode-selection')
     if (desk && showBrowse && !adding) { closeBrowse(); return }
@@ -814,7 +827,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
   // On the desk it stands in the column's dock (plan 123), whose caption
   // says what the phone's label says.
   const cardForm = adding && (
-    <div className="form deckdetail-form">
+    <div className="form deckdetail-form" ref={formRef}>
       {!desk && (
         <span className="form__label">
           {editing ? t.editCard : t.newCard}
