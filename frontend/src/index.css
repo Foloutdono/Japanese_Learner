@@ -6807,6 +6807,20 @@ textarea:focus-visible {
   gap: var(--sp-4);
   min-height: 40px;
 }
+/* 両端 (2026-10-20, the owner's pick C of "Tsuji -- the run's head,
+   centred"): the way out at one end, what you press at the other, the
+   place between. The two ends grow alike from nothing, so the name
+   stands on the screen's middle whatever each end holds; neither gives
+   up its own width, so a crowded end pushes the name aside before it
+   clips a control. */
+.stage__end {
+  flex: 1 1 0;
+  min-width: max-content;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+.stage__end--end { justify-content: flex-end; }
 
 /* ‹ and the name of where it goes. Bare since plan 174 (一戻, one way
    back): it was the one boxed control in a bar of plain words, and the
@@ -6829,13 +6843,22 @@ textarea:focus-visible {
 }
 .stage__leave:hover,
 .stage__leave:focus-visible { color: var(--text-primary); filter: none; }
+/* The run head's way out, its chevron alone: the 44px square is the
+   target, its word the .sr-only inside it and the tooltip. */
+.stage__leave--bare {
+  min-width: var(--sp-8);
+  padding: 0;
+}
 .stage__where {
   display: flex;
   flex-direction: column;
+  align-items: center;
   min-width: 0;
-  flex: 1;
+  flex: 0 1 auto;
+  text-align: center;
 }
 .stage__where-jp {
+  max-width: 100%;
   margin: 0;
   font-family: var(--font-display);
   font-weight: 700;
@@ -6843,6 +6866,14 @@ textarea:focus-visible {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+/* Under the name, what counts: the sub, the remaining pill, the
+   streak's stamp (a rung smaller there, by the stamp's own rule). */
+.stage__where-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
 }
 .stage__where-latin {
   font-family: var(--font-display);
@@ -13615,6 +13646,12 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .run-streak--hot {
   background: var(--stamp-ink);
   color: var(--text-on-panel);
+}
+/* In the run head the stamp sits under the name (StageHead, 両端): a
+   rung smaller, the pill's height, so the head stays one row. */
+.stage__where-line > .run-streak {
+  min-width: var(--sp-6);
+  height: var(--sp-6);
 }
 .run-streak__count {
   font-family: var(--font-display);

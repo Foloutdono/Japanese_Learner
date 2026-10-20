@@ -495,7 +495,7 @@ export default function ComprehensionRun({ session }) {
       // On the desk the count is the run's lines' (plan 129).
       remaining={stage === 'questions' && !desk ? `${currentQ + 1} / ${total}` : undefined}
       pass={false}
-      aside={<RunStreak />}
+      tally={<RunStreak />}
       toast={fare.toast}
       onToastDone={fare.toastDone}
       records
