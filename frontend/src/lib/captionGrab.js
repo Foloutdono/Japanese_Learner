@@ -44,8 +44,25 @@
 // off them by time (backend/study/line_translate.from_track) and asks
 // the model only for what they leave. A v2 bookmark still works; its
 // lines are translated by the model alone.
+//
+// p1 (plan 265, "not only YouTube"): off youtube.com the same bookmark
+// reads the page's own player. A site that plays its video in an HTML5
+// <video> with its subtitles as text tracks (a <track> file, or cues a
+// player script added) has them in the page, on the learner's screen,
+// from the learner's own IP: the bookmark takes the Japanese track,
+// writes it as WebVTT, and comes back through the same hash, with the
+// page's media address where it is a plain https file the analyser's
+// own player can play (never a blob: of a streaming player, which
+// nothing outside the page can). A page that only embeds a YouTube
+// video is sent to that video's own page, where the v3 grab works. A
+// DRM service's subtitles are drawn by its player, not served as text
+// tracks: those still come in as a file (plan 265's TTML).
 
 const GRAB_VERSION = 'v3'
+const PAGE_VERSION = 'p1'
+// A page's host, which names the session's file: a hostname and
+// nothing else, so nothing but a name reaches the hash's decoder.
+const PAGE_HOST = /^[a-z0-9-]+(\.[a-z0-9-]+)*$/i
 // YouTube video ids: 11 URL-safe base64 chars today; bounded loosely
 // so a format drift fails soft, but injection through the hash fails
 // hard.
@@ -210,6 +227,7 @@ export async function decodeGrabHash(hash) {
   try {
     const match = /[#&]grab=([^&]+)/.exec(hash ?? '')
     if (!match) return null
+    if (match[1].startsWith(`${PAGE_VERSION}.`)) return await decodePageGrab(match[1])
     const [version, mode, videoId, data] = match[1].split('.')
     if (!['v1', 'v2', GRAB_VERSION].includes(version) || !data || !VIDEO_ID.test(videoId ?? '')) return null
     if (mode !== 'z' && mode !== 'r') return null
@@ -231,6 +249,37 @@ export async function decodeGrabHash(hash) {
   }
 }
 
+// A page's grab (p1): `p1.<z|r>.<host>.<base64url>`, the host's own
+// dots inside it, so the payload is the last part and the host is all
+// between the mode and it. The payload: {v: the Japanese track as
+// WebVTT, s: the page's media address or '', n: the page's title}.
+// {page, vtt, mediaUrl, title}, or null.
+async function decodePageGrab(raw) {
+  const parts = raw.split('.')
+  const mode = parts[1]
+  const data = parts[parts.length - 1]
+  const page = parts.slice(2, -1).join('.')
+  if ((mode !== 'z' && mode !== 'r') || !data || !PAGE_HOST.test(page) || page.length > 253) return null
+  let bytes = fromBase64Url(data)
+  if (mode === 'z') bytes = await pipeBytes(bytes, DecompressionStream, 'gzip')
+  const { v, s, n } = JSON.parse(new TextDecoder().decode(bytes))
+  if (typeof v !== 'string' || !v.includes('-->')) return null
+  const mediaUrl = typeof s === 'string' && /^https?:\/\//.test(s) && s.length <= 2000 ? s : null
+  const title = typeof n === 'string' ? n.slice(0, 200) : ''
+  return { page, vtt: v, mediaUrl, title }
+}
+
+// What the page grab sends, as the bookmark does (the tests' half).
+export async function encodePagePayload(host, { vtt, mediaUrl = '', title = '' }) {
+  let bytes = new TextEncoder().encode(JSON.stringify({ v: vtt, s: mediaUrl, n: title }))
+  let mode = 'r'
+  if (typeof CompressionStream !== 'undefined') {
+    bytes = await pipeBytes(bytes, CompressionStream, 'gzip')
+    mode = 'z'
+  }
+  return `${PAGE_VERSION}.${mode}.${host}.${toBase64Url(bytes)}`
+}
+
 // ── The bookmarklet ───────────────────────────────────────
 // Self-contained, runs on youtube.com. Everything it does, the
 // learner's own player does on the same page: one InnerTube player
@@ -244,7 +293,8 @@ export async function decodeGrabHash(hash) {
 // `t` is the locale table the copy button holds; only the grabAlert*
 // lines are taken from it, as a JSON literal the source reads.
 const GRAB_ALERTS = {
-  notYoutube: 'grabAlertNotYoutube',
+  noMedia: 'grabAlertNoMedia',
+  embedYoutube: 'grabAlertEmbedYoutube',
   noVideo: 'grabAlertNoVideo',
   notReady: 'grabAlertNotReady',
   noSubtitles: 'grabAlertNoSubtitles',
@@ -257,7 +307,32 @@ export function buildBookmarklet(appOrigin, t) {
   const said = Object.fromEntries(Object.entries(GRAB_ALERTS).map(([k, key]) => [k, t[key]]))
   const src =
     `(async()=>{var S=${JSON.stringify(said)};try{` +
-    `if(!/(^|\\.)youtube\\.com$/.test(location.hostname)){alert(S.notYoutube);return}` +
+    `var B=async function(bytes,tag){var mode='r';` +
+    `if(window.CompressionStream){bytes=new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer());mode='z'}` +
+    `var bin='';for(var i=0;i<bytes.length;i+=32768){bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+32768))}` +
+    `location.href='${appOrigin}/analyzer#grab='+tag(mode)+'.'+btoa(bin).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'')};` +
+    `if(!/(^|\\.)youtube\\.com$/.test(location.hostname)){` +
+    // Off YouTube: the page's own player (p1, see the head).
+    `var yt=[].slice.call(document.querySelectorAll('iframe')).map(function(f){return(f.src.match(/youtube(?:-nocookie)?\\.com\\/embed\\/([\\w-]{11})/)||[])[1]}).filter(Boolean)[0];` +
+    `var ms=[].slice.call(document.querySelectorAll('video,audio'));` +
+    `if(!ms.length){if(yt&&confirm(S.embedYoutube)){location.href='https://www.youtube.com/watch?v='+yt}else if(!yt){alert(S.noMedia)}return}` +
+    `var J=function(l,n){return/^(ja|jpn?)([-_]|$)/i.test(l||'')||/日本語|japan|japon/i.test(n||'')};` +
+    `var K=/[\\u3040-\\u30ff\\u4e00-\\u9fff]/;` +
+    `var T=function(x){var z=Math.max(0,Math.round(x*1000)),p=function(n,w){return String(n).padStart(w,'0')};return p(Math.floor(z/3600000),2)+':'+p(Math.floor(z/60000)%60,2)+':'+p(Math.floor(z/1000)%60,2)+'.'+p(z%1000,3)};` +
+    `var langs=[],got=null;` +
+    `for(var m of ms){` +
+    `for(var el of [].slice.call(m.querySelectorAll('track'))){var k=el.kind||'subtitles';if(k!=='subtitles'&&k!=='captions')continue;langs.push(el.srclang||el.label||'?');` +
+    `if(got||!(J(el.srclang,el.label)||!(el.srclang||el.label))||!el.src)continue;` +
+    `try{var x=await fetch(el.src).then(function(r){return r.text()});if(x.indexOf('-->')>=0&&K.test(x))got=x}catch(e){}}` +
+    `for(var tt of [].slice.call(m.textTracks||[])){if(tt.kind!=='subtitles'&&tt.kind!=='captions')continue;langs.push(tt.language||tt.label||'?');` +
+    `if(got||!(J(tt.language,tt.label)||!(tt.language||tt.label)))continue;` +
+    `var was=tt.mode;if(was==='disabled'){tt.mode='hidden';await new Promise(function(r){setTimeout(r,1500)})}` +
+    `var cs=[].slice.call(tt.cues||[]).map(function(c){return T(c.startTime)+' --> '+T(c.endTime)+'\\n'+String(c.text||'').replace(/\\s*\\n\\s*/g,' ').replace(/-->/g,'→').trim()}).filter(function(c){return!/\\n$/.test(c)});` +
+    `tt.mode=was;var v='WEBVTT\\n\\n'+cs.join('\\n\\n')+'\\n';if(cs.length&&K.test(v))got=v}}` +
+    `if(!got){if(yt&&confirm(S.embedYoutube)){location.href='https://www.youtube.com/watch?v='+yt;return}` +
+    `alert(langs.length?S.noJapanese+langs.filter(function(l,i){return langs.indexOf(l)===i}).join(', '):S.noSubtitles);return}` +
+    `var src=ms.map(function(m){return m.currentSrc||''}).filter(function(u){return/^https?:\\/\\//.test(u)})[0]||'';` +
+    `await B(new TextEncoder().encode(JSON.stringify({v:got,s:src,n:document.title.slice(0,200)})),function(mode){return'${PAGE_VERSION}.'+mode+'.'+location.hostname});return}` +
     `var vid=new URLSearchParams(location.search).get('v')||(location.pathname.match(/\\/(?:shorts|embed|live)\\/([\\w-]{11})/)||[])[1];` +
     `if(!vid){alert(S.noVideo);return}` +
     `var key=window.ytcfg&&ytcfg.data_&&ytcfg.data_.INNERTUBE_API_KEY;` +
@@ -275,11 +350,7 @@ export function buildBookmarklet(appOrigin, t) {
     // The video's own translation, hand-written, in each language the
     // app is read in; best effort, a track that will not come is left out.
     `var tr={};for(var L of ${JSON.stringify(TRANSLATION_LANGS)}){try{var x=await get(ts.find(function(t){return t.kind!=='asr'&&(t.languageCode===L||t.languageCode.indexOf(L+'-')===0)}));if(x)tr[L]=x}catch(e){}}` +
-    `var bytes=new TextEncoder().encode(JSON.stringify({m:m,a:a,t:tr}));var mode='r';` +
-    `if(window.CompressionStream){bytes=new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer());mode='z'}` +
-    `var bin='';for(var i=0;i<bytes.length;i+=32768){bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+32768))}` +
-    `var b64=btoa(bin).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');` +
-    `location.href='${appOrigin}/analyzer#grab=${GRAB_VERSION}.'+mode+'.'+vid+'.'+b64` +
+    `await B(new TextEncoder().encode(JSON.stringify({m:m,a:a,t:tr})),function(mode){return'${GRAB_VERSION}.'+mode+'.'+vid})` +
     `}catch(e){alert(S.failed+e)}})()`
   return `javascript:${encodeURIComponent(src)}`
 }

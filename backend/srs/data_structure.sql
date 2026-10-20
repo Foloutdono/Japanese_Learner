@@ -577,7 +577,14 @@ CREATE TABLE video_sessions (
     -- Which lines are the song (plan 264, study/lyrics_sort.py),
     -- {"rev", "kinds": {line text: kind}}; NULL until a lyrics deck is
     -- made of the session.
-    lyrics_sort   JSONB
+    lyrics_sort   JSONB,
+    -- A recording the lines were heard from (plan 265,
+    -- study/transcribe.py): the address its player plays (a podcast's
+    -- episode, a page's media file; NULL for a file on the learner's
+    -- device), its name, and the seconds the recogniser was paid for.
+    media_url     TEXT,
+    media_title   TEXT,
+    media_seconds DOUBLE PRECISION
 );
 ALTER TABLE video_sessions ENABLE ROW LEVEL SECURITY;
 

@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { CameraIcon, SubtitleFileIcon } from '../ui/Icons'
+import { SUBTITLE_ACCEPT, MEDIA_ACCEPT } from '../../lib/subtitleFiles'
 
 // ── The phone's way in (plan 136) ─────────────────────────
 // Under the desk the analyser opens on the learner's passages, so the
@@ -12,7 +13,9 @@ import { CameraIcon, SubtitleFileIcon } from '../ui/Icons'
 //
 // The field grows with its content, as the slip's does, and folds back
 // to one line when it is empty and left.
-export function EntryLine({ t, value, onChange, onAnalyze, busy, onPhoto, onFile }) {
+// `media` (plan 265): the server can hear a recording, so the file
+// button takes a sound or a film as well as a subtitle file.
+export function EntryLine({ t, value, onChange, onAnalyze, busy, onPhoto, onFile, media = false }) {
   const fieldRef = useRef(null)
   const fileRef = useRef(null)
   const [focused, setFocused] = useState(false)
@@ -44,7 +47,7 @@ export function EntryLine({ t, value, onChange, onAnalyze, busy, onPhoto, onFile
         <button type="button" className="anl-entry__tool" onClick={onPhoto} aria-label={t.sourcePhoto} aria-haspopup="dialog">
           <CameraIcon size={20} />
         </button>
-        <button type="button" className="anl-entry__tool" onClick={() => fileRef.current?.click()} aria-label={t.chooseSubtitles}>
+        <button type="button" className="anl-entry__tool" onClick={() => fileRef.current?.click()} aria-label={media ? t.chooseSubtitlesOrRecording : t.chooseSubtitles}>
           <SubtitleFileIcon size={20} />
         </button>
         {/* Clipped, not display:none; the MIME types are what Android's
@@ -52,7 +55,7 @@ export function EntryLine({ t, value, onChange, onAnalyze, busy, onPhoto, onFile
         <input
           ref={fileRef}
           type="file"
-          accept=".srt,.vtt,.ass,.ssa,.lrc,.txt,text/vtt,text/plain,text/*,application/octet-stream"
+          accept={media ? `${SUBTITLE_ACCEPT},${MEDIA_ACCEPT}` : SUBTITLE_ACCEPT}
           className="anl-drop__input"
           tabIndex={-1}
           aria-hidden="true"

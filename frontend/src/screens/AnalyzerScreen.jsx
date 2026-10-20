@@ -48,8 +48,10 @@ import { sourceFor, SOURCES, DEFAULT_SOURCE } from '../components/analysis/sourc
 import { parseVideoId } from '../lib/youtube'
 import { apiJson } from '../lib/api'
 import { VideoPlayer } from '../components/video/VideoPlayer'
+import { MediaPlayer } from '../components/video/MediaPlayer'
 import { decodeGrabHash, transcriptXmlToVtt } from '../lib/captionGrab'
 import { heldTooSoon } from '../lib/keyRepeat'
+import { isSubtitleFile, isMediaFile } from '../lib/subtitleFiles'
 import { ChevronIcon, PlusIcon, CheckIcon, OpenBookIcon, TextLinesIcon, CameraIcon, VideoIcon, SearchIcon, SongIcon, SlidersIcon } from '../components/ui/Icons'
 import { readVideoSound, saveVideoSound, DEFAULT_VIDEO_SOUND } from '../lib/videoVolume'
 
@@ -63,10 +65,6 @@ function videoLinkIn(text) {
   const s = text.trim()
   return /^https?:\/\/\S+$/.test(s) && parseVideoId(s) ? s : null
 }
-// A subtitle file, by its name or its type: what a drop on the desk's
-// page hands the video intake rather than the photo one. Anything else
-// dropped is refused quietly (the browser would open it over the page).
-const SUBTITLE_FILE = /\.(srt|vtt|ass|ssa)$/i
 // The grab has been used on this browser (plan 136) -- a bookmark lives
 // in a browser, so the browser is what remembers it. The history says
 // so too, by the name the arrival gives its file (see the grab arrival).
@@ -153,13 +151,18 @@ export default function AnalyzerScreen({ session }) {
   // the cost of guessing wrong in this direction is a hidden button
   // rather than a broken promise.
   const [linkFetch, setLinkFetch] = useState(false)
-  useEffect(() => {
-    let cancelled = false
-    apiJson('/api/video/capabilities', session)
-      .then(caps => { if (!cancelled) setLinkFetch(Boolean(caps?.linkFetch)) })
-      .catch(() => {})
-    return () => { cancelled = true }
-  }, [session])
+  // ...and whether it can hear a recording (plan 265): `transcribe`, the
+  // longest one a session takes and what is left of the learner's day,
+  // asked again once a recording has spent some of it.
+  const [videoCaps, setVideoCaps] = useState(null)
+  const readCaps = useCallback(() => apiJson('/api/video/capabilities', session)
+    .then(caps => {
+      setLinkFetch(Boolean(caps?.linkFetch))
+      setVideoCaps(caps ?? null)
+    })
+    .catch(() => {}), [session])
+  useEffect(() => { readCaps() }, [readCaps])
+  const transcribeOn = Boolean(videoCaps?.transcribe)
 
   const [sp] = useSearchParams()
   const [source, setSource] = useState(() => (sourceFor(sp.get('intake')) ? sp.get('intake') : DEFAULT_SOURCE))
@@ -427,6 +430,13 @@ export default function AnalyzerScreen({ session }) {
   // has typed right now, fall back to whatever the session was created
   // with. This is what makes a link pasted AFTER an upload work.
   const playerVideoId = parseVideoId(videoUrl) ?? passage?.videoId ?? null
+  // A recording's own player (plan 265, MediaPlayer): a podcast's
+  // episode, a page's media file, or a file this device holds, where
+  // there is no YouTube video to play. `hasPlayer` is what every
+  // "is there a clock to follow" below asks.
+  const playerMedia = playerVideoId ? null : (passage?.mediaUrl ?? null)
+  const hasPlayer = Boolean(playerVideoId || playerMedia)
+  const playerKey = playerVideoId ?? playerMedia
   // 字幕の流れ: what the whole track says about when its words are said
   // (its pace, how early its subtitles come up), for the lines it did
   // not time word by word. Read once a Passage, not once a line.
@@ -454,6 +464,20 @@ export default function AnalyzerScreen({ session }) {
     decodeGrabHash(window.location.hash).then(grab => {
       if (!grab || cancelled) return
       window.history.replaceState(null, '', window.location.pathname + window.location.search)
+      // A page's own player (p1, plan 265): its Japanese track as the
+      // file, named by the page's host, and its media file, where the
+      // page plays a plain one, for the analyser's player.
+      if (grab.page) {
+        rememberGrabUsed()
+        setGrabFlag(true)
+        boardPlatform('video')
+        clearFocus()
+        analyzer.startVideoFromFile(
+          new File([grab.vtt], `${grab.page}.ja.vtt`, { type: 'text/vtt' }),
+          { url: '', mediaUrl: grab.mediaUrl, mediaTitle: grab.title },
+        )
+        return
+      }
       // The lines studied are the hand-written track's where there is
       // one; the recognised track then goes up beside it only as the
       // clock its words are read out on. Alone, the recognised track is
@@ -551,7 +575,7 @@ export default function AnalyzerScreen({ session }) {
     setPlaying(false)
     setDuration(0)
     playhead.reset()
-  }, [playerVideoId, playhead])
+  }, [playerKey, playhead])
 
   useEffect(() => {
     if (status !== 'ready') return
@@ -634,7 +658,7 @@ export default function AnalyzerScreen({ session }) {
           ? Math.min(sentences.length - 1, focusIndex + 1)
           : Math.max(0, focusIndex - 1)
         if (next !== focusIndex) goToStop(next)
-      } else if (e.key === ' ' && playerVideoId) {
+      } else if (e.key === ' ' && hasPlayer) {
         e.preventDefault()
         // Through togglePassagePlayback, not a bare play(): Space is
         // the transport bar's key, and from before the Passage's
@@ -648,7 +672,7 @@ export default function AnalyzerScreen({ session }) {
     // closure re-binds on every dep change below, which covers every
     // value it reads.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, analyzer.focused, focusIndex, sentences.length, playing, playerVideoId, wide])
+  }, [ready, analyzer.focused, focusIndex, sentences.length, playing, hasPlayer, wide])
 
   // Esc gives the dock back: the route map for a longer Passage, the
   // stage's own token for a one-sentence one. Not from a field, not
@@ -729,7 +753,11 @@ export default function AnalyzerScreen({ session }) {
     if (file.type.startsWith('image/')) {
       boardPlatform('photo')
       setIncomingImage(file)
-    } else if (SUBTITLE_FILE.test(file.name) || file.type === 'text/vtt') {
+    } else if (isSubtitleFile(file) || (transcribeOn && isMediaFile(file))) {
+      // A subtitle file, by its name or its type (lib/subtitleFiles.js):
+      // what a drop hands the video intake rather than the photo one.
+      // Anything else dropped is refused quietly (the browser would open
+      // it over the page).
       if (source === 'video' && videoDropRef.current) videoDropRef.current(file)
       else {
         boardPlatform('video')
@@ -750,7 +778,24 @@ export default function AnalyzerScreen({ session }) {
     if (!file) return
     clearFocus()
     setSheet(null)
+    // A recording rather than a subtitle file (plan 265): heard by the
+    // server's recogniser, where this deployment can.
+    if (isMediaFile(file)) {
+      if (!transcribeOn) {
+        analyzer.fail(t.mediaNotHere)
+        return
+      }
+      analyzer.startVideoFromRecording(file, { ...opts, caps: videoCaps }).then(readCaps)
+      return
+    }
     analyzer.startVideoFromFile(file, opts)
+  }
+
+  // A podcast's episode (plan 265), picked from its feed in the intake.
+  function startVideoFromEpisode(episode, opts) {
+    clearFocus()
+    setSheet(null)
+    analyzer.startVideoFromEpisode(episode, { ...opts, caps: videoCaps }).then(readCaps)
   }
 
   function startVideoFromLink(url, opts) {
@@ -877,7 +922,7 @@ export default function AnalyzerScreen({ session }) {
   // each sentence's end own the line's end, so they keep the poll.
   const setFocusIndex = analyzer.setFocusIndex
   useEffect(() => {
-    if (!playing || !followPlayback || loop || pauseEach || !playerVideoId) return undefined
+    if (!playing || !followPlayback || loop || pauseEach || !hasPlayer) return undefined
     const timer = { id: 0 }
     const step = () => {
       clearTimeout(timer.id)
@@ -898,7 +943,7 @@ export default function AnalyzerScreen({ session }) {
       off()
       clearTimeout(timer.id)
     }
-  }, [playing, followPlayback, loop, pauseEach, playerVideoId, sentences, focusIndex, playhead, setFocusIndex, rate])
+  }, [playing, followPlayback, loop, pauseEach, hasPlayer, sentences, focusIndex, playhead, setFocusIndex, rate])
 
   // The Passage's window, the first cue to the last: where Play starts.
   const cued = sentences.filter(s => s.cue_end != null)
@@ -1035,7 +1080,7 @@ export default function AnalyzerScreen({ session }) {
     setLookup(target)
     // The video desk's panel opens it on its grammar face (plan 242); a
     // typed Passage's, whose grammar is in its left column, on its card.
-    setSide(playerVideoId ? 'grammar' : 'card')
+    setSide(hasPlayer ? 'grammar' : 'card')
   }
 
   function openHistoryEntry(entry) {
@@ -1099,9 +1144,18 @@ export default function AnalyzerScreen({ session }) {
   // analysed, not failures, and used to be drawn in --danger alongside
   // a real error.
   const notices = []
-  if (busy) notices.push({ id: 'busy', tone: 'info', text: t[platform.busy], wait: true })
+  // A recording on its way (plan 265) says which step it is at: the
+  // encoding takes as long as the browser needs, and the hearing as long
+  // as the recogniser does.
+  const busyText = analyzer.progress ? t.recordingStage(analyzer.progress.stage, analyzer.progress.ratio) : t[platform.busy]
+  if (busy) notices.push({ id: 'busy', tone: 'info', text: busyText, wait: true })
   if (status === 'failed' && error) notices.push({ id: 'failed', tone: 'bad', text: error })
   if (passage?.windowCapped) notices.push({ id: 'capped', tone: 'info', text: t.windowCapped })
+  // Heard, not read (plan 265): a recogniser can mishear, and a learner
+  // memorises what they are shown, so the Passage says where it came from.
+  if (ready && (passage?.source === 'media' || passage?.source === 'podcast')) {
+    notices.push({ id: 'heard', tone: 'info', text: t.heardNotice })
+  }
   if (passage?.truncated > 0) notices.push({ id: 'truncated', tone: 'info', text: t.passageTruncated(sentences.length) })
 
   // What a screen reader hears. Deliberately NOT the notice text: the
@@ -1116,7 +1170,7 @@ export default function AnalyzerScreen({ session }) {
         : mining.lastOutcome.count > 0 ? t.mineAdded
         : t.mineAlready
       )
-    : busy ? t[platform.busy]
+    : busy ? busyText
     : status === 'failed' ? t.analysisFailed
     : ready ? t.passageReady(sentences.length)
     : analyzer.lastDeleted ? t.entryDeleted
@@ -1148,6 +1202,25 @@ export default function AnalyzerScreen({ session }) {
     </button>
   )
 
+  // The one player the Passage has (plan 265): YouTube's, or a
+  // recording's own (MediaPlayer), with the same props and handle. A
+  // recording from this device is named by its file, without the
+  // extension, as a song's deck is (SongDeckSheet reads title()).
+  function stagePlayer(extra = {}) {
+    const common = {
+      volume: sound.volume,
+      muted: sound.muted,
+      onTimeUpdate: handleTimeUpdate,
+      onPlayingChange: changePlaying,
+      onVolumeChange: changeSound,
+      onDurationChange: setDuration,
+      ...extra,
+    }
+    if (playerVideoId) return <VideoPlayer ref={playerRef} videoId={playerVideoId} {...common} />
+    const title = passage?.mediaTitle || (passage?.sourceRef ?? '').replace(/\.[^.]+$/, '')
+    return <MediaPlayer ref={playerRef} src={playerMedia} title={title} {...common} />
+  }
+
   // The video intake, in the desk's column or a phone's sheet. The
   // walkthrough opens where the screen keeps it: in the column on the
   // desk (plan 120), as a dialog from the sheet on a phone.
@@ -1158,6 +1231,9 @@ export default function AnalyzerScreen({ session }) {
       onUrlChange={setVideoUrl}
       onStartFromFile={startVideoFromFile}
       onStartFromLink={startVideoFromLink}
+      onStartFromEpisode={startVideoFromEpisode}
+      session={session}
+      transcribe={transcribeOn}
       linkFetch={linkFetch}
       grab={grab}
       onTutorial={() => (wide ? setTutorial(true) : setSheet('tutorial'))}
@@ -1272,7 +1348,7 @@ export default function AnalyzerScreen({ session }) {
   //
   // On the video desk a grammar point's lesson opens in the grammar
   // face, its ✕ giving the list back; the card face keeps the word.
-  const pointEntry = playerVideoId && lookup?.category === 'grammar' ? lookup : null
+  const pointEntry = hasPlayer && lookup?.category === 'grammar' ? lookup : null
   const deskEntry = (pointEntry ? null : lookup) ?? tokenLookup(stageToken)
   const explainShown = side === 'explain'
   const hasExplanation = Boolean(focused?.explanation)
@@ -1410,7 +1486,7 @@ export default function AnalyzerScreen({ session }) {
   // (the owner's pick C of the canvas "Tsuji analyser — text desk
   // stage"), so the sentence, its translation and Explain have the
   // stage, and opened as the list in a sheet.
-  const textDesk = !playerVideoId
+  const textDesk = !hasPlayer
   const focusWord = pointAt === -1 && stageToken?.vocab_match ? stageToken : null
   const wordAction = textDesk && focusWord && (
     <MineButton
@@ -1463,7 +1539,7 @@ export default function AnalyzerScreen({ session }) {
           setIndex={walkTo}
           lit={light.lit}
           t={t}
-          playhead={playerVideoId ? playhead : null}
+          playhead={hasPlayer ? playhead : null}
           playing={playing}
           timing={timing}
         />
@@ -1519,20 +1595,10 @@ export default function AnalyzerScreen({ session }) {
       </div>
 
       <div ref={textDesk ? undefined : slabRef} className={`anl-slab${videoFolded ? ' anl-slab--folded' : ''}${barTight ? ' anl-slab--tight' : ''}`}>
-        {playerVideoId && (
+        {hasPlayer && (
           <div className="anl-slab__screen">
             <div className="anl-slab__video">
-              <VideoPlayer
-                ref={playerRef}
-                videoId={playerVideoId}
-                volume={sound.volume}
-                muted={sound.muted}
-                rate={rate}
-                onTimeUpdate={handleTimeUpdate}
-                onPlayingChange={changePlaying}
-                onVolumeChange={changeSound}
-                onDurationChange={setDuration}
-              />
+              {stagePlayer({ rate })}
             </div>
           </div>
         )}
@@ -1568,7 +1634,7 @@ export default function AnalyzerScreen({ session }) {
             </>
           )}
         </div>
-        {playerVideoId && (
+        {hasPlayer && (
           <PlayerBar
             t={t}
             playing={playing}
@@ -1739,19 +1805,10 @@ export default function AnalyzerScreen({ session }) {
         </button>
       </div>
 
-      {playerVideoId && (
+      {hasPlayer && (
         <div className="anl-m__player">
           <div className="anl-m__video">
-            <VideoPlayer
-              ref={playerRef}
-              videoId={playerVideoId}
-              volume={sound.volume}
-              muted={sound.muted}
-              onTimeUpdate={handleTimeUpdate}
-              onPlayingChange={changePlaying}
-              onVolumeChange={changeSound}
-              onDurationChange={setDuration}
-            />
+            {stagePlayer()}
           </div>
           <PlayerTrack playhead={playhead} span={span} onSeek={seekFromTrack} />
         </div>
@@ -1773,7 +1830,7 @@ export default function AnalyzerScreen({ session }) {
             setIndex={openTokenAt}
             lit={light.lit}
             t={t}
-            playhead={playerVideoId ? playhead : null}
+            playhead={hasPlayer ? playhead : null}
             playing={playing}
             timing={timing}
             romaji={display.romaji}
@@ -1830,10 +1887,10 @@ export default function AnalyzerScreen({ session }) {
           canPrev={focusIndex > 0}
           canNext={focusIndex < sentences.length - 1}
           onReplay={replaySentence}
-          canReplay={Boolean(playerVideoId) && focused.cue_start != null}
+          canReplay={hasPlayer && focused.cue_start != null}
           loop={loop}
           onLoop={() => setLoop(v => !v)}
-          video={Boolean(playerVideoId)}
+          video={hasPlayer}
         />
       </div>
 
@@ -1919,6 +1976,7 @@ export default function AnalyzerScreen({ session }) {
             busy={busy}
             onPhoto={() => openSheet('photo')}
             onFile={file => startVideoFromFile(file, { url: videoUrl })}
+            media={transcribeOn}
           />
         </>
       ))}

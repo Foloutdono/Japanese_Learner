@@ -7,6 +7,9 @@ import { isNative } from '../../lib/platform'
 import { GrabTutorial } from './GrabTutorial'
 import { useDesk } from '../../hooks/useDesk'
 import { composing } from '../../lib/keyGuards'
+import { SUBTITLE_ACCEPT, MEDIA_ACCEPT } from '../../lib/subtitleFiles'
+import { readFeed, feedAddress } from '../../lib/podcast'
+import { videoErrorMessage } from './videoErrors'
 
 // ── 3番線 動画 — the subtitle dock ────────────────────────
 // Three ways in, in the order they should be tried:
@@ -56,7 +59,13 @@ import { composing } from '../../lib/keyGuards'
 // `dropRef` is the screen's hold
 // on this panel's file ingest, for a file dropped anywhere on the desk's
 // page: it is cut to the window set here, as one chosen here is.
-export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromLink, linkFetch, grab, onTutorial, tutorialPopup, grabUsed = false, dropRef }) {
+//
+// `transcribe` (plan 265): the server can hear a recording, so the file
+// button takes a sound or a film too (the screen sends one to the
+// recogniser), and a web address that is no YouTube link can be read as
+// a podcast's feed, its episodes listed here to pick from
+// (`onStartFromEpisode`, cut to the same window).
+export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromLink, onStartFromEpisode, session, transcribe = false, linkFetch, grab, onTutorial, tutorialPopup, grabUsed = false, dropRef }) {
   // The Window is OPTIONAL and blank by default -- the whole Track is
   // the sensible thing to study, and MAX_SENTENCES already bounds the
   // work. See docs/adr/0003's 2026-08-27 amendment.
@@ -67,6 +76,10 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
   const { copied, copy: copyBookmarklet } = grab ?? own
   const [showTutorial, setShowTutorial] = useState(false)
   const fileRef = useRef(null)
+  // A podcast's feed, once read: { url, title, episodes } | { url,
+  // error } | { url, loading }. Kept for the address it was read for, so
+  // a new address in the field puts the list away.
+  const [feed, setFeed] = useState(null)
 
   const parsedVideoId = parseVideoId(url)
   const watchUrl = watchUrlFor(url)
@@ -99,6 +112,18 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
   // that names a video, rather than the column leading with the
   // bookmark and switching under the learner's paste.
   const canFetch = Boolean(linkFetch && parsedVideoId)
+  const feedUrl = transcribe ? feedAddress(url, s => Boolean(parseVideoId(s))) : null
+  const shownFeed = feed && feed.url === feedUrl ? feed : null
+  async function openFeed() {
+    if (!feedUrl || shownFeed?.loading) return
+    setFeed({ url: feedUrl, loading: true })
+    try {
+      const read = await readFeed(session, feedUrl)
+      setFeed({ url: feedUrl, ...read })
+    } catch (e) {
+      setFeed({ url: feedUrl, error: videoErrorMessage(e, t) })
+    }
+  }
   const grabbable = !isNative()
   const startLink = () => onStartFromLink(url, { start: startSec, end: endSec })
   const onUrlKey = desk && canFetch
@@ -111,8 +136,10 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
   const openTutorial = () => (onTutorial ? onTutorial() : setShowTutorial(true))
   const popup = onTutorial ? tutorialPopup : 'dialog'
 
-  // Which of the three is the one filled action (see the head).
-  const lead = linkFetch ? 'fetch' : !grabbable ? 'file' : grabUsed ? 'open' : 'install'
+  // Which of the three is the one filled action (see the head). An
+  // address read as a podcast's feed (plan 265) is the fourth: it names
+  // no video to fetch, open or grab, so its own button leads instead.
+  const lead = feedUrl ? 'feed' : linkFetch ? 'fetch' : !grabbable ? 'file' : grabUsed ? 'open' : 'install'
 
   const openLink = (className, children) => (
     <a className={className} href={watchUrl ?? 'https://www.youtube.com/'} target="_blank" rel="noopener noreferrer">
@@ -138,12 +165,48 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
           value={url}
           onChange={e => onUrlChange(e.target.value)}
           onKeyDown={onUrlKey}
-          placeholder="https://youtu.be/…"
+          placeholder={transcribe ? t.videoUrlOrFeed : 'https://youtu.be/…'}
           aria-label={t.videoUrlOptional}
         />
       </label>
 
       <VideoStill videoId={parsedVideoId} frame="anl-still" className="anl-still__img" />
+
+      {/* 聴 — a podcast's feed (plan 265): an address that names no
+          video is offered as one, and its episodes are listed under it,
+          each a press away from being heard. */}
+      {feedUrl && (
+        <div className="anl-pod">
+          {!shownFeed?.episodes && (
+            <button type="button" className="btn-primary" onClick={openFeed} disabled={Boolean(shownFeed?.loading)}>
+              {shownFeed?.loading ? t.podcastReading : t.podcastOpen}
+            </button>
+          )}
+          {shownFeed?.error && <p className="anl-pod__error" role="alert">{shownFeed.error}</p>}
+          {shownFeed?.episodes && (
+            <>
+              <p className="anl-pod__show">{shownFeed.title || t.podcastUntitled}</p>
+              <ul className="anl-pod__list" aria-label={t.podcastEpisodes}>
+                {shownFeed.episodes.map(ep => (
+                  <li key={ep.audioUrl}>
+                    <button
+                      type="button"
+                      className="anl-pod__ep"
+                      onClick={() => onStartFromEpisode?.(ep, { start: startSec, end: endSec })}
+                    >
+                      <span className="anl-pod__title">{ep.title}</span>
+                      <span className="anl-pod__meta">
+                        {[ep.published, ep.duration ? formatTimecode(ep.duration) : null].filter(Boolean).join(' · ')}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <p className="anl-link__say">{t.podcastSay}</p>
+            </>
+          )}
+        </div>
+      )}
 
       {lead === 'fetch' && (
         <div className="anl-link">
@@ -180,14 +243,14 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
         type="button"
         className={`${lead === 'file' ? 'btn-primary' : 'btn-secondary'} anl-file`}
         onClick={() => fileRef.current?.click()}
-        title={t.subtitleAccepted}
+        title={transcribe ? t.recordingAccepted : t.subtitleAccepted}
       >
-        {t.chooseSubtitles}
+        {transcribe ? t.chooseSubtitlesOrRecording : t.chooseSubtitles}
       </button>
       <input
         ref={fileRef}
         type="file"
-        accept=".srt,.vtt,.ass,.ssa,.lrc,.txt,text/vtt,text/plain,text/*,application/octet-stream"
+        accept={transcribe ? `${SUBTITLE_ACCEPT},${MEDIA_ACCEPT}` : SUBTITLE_ACCEPT}
         className="anl-drop__input"
         tabIndex={-1}
         aria-hidden="true"

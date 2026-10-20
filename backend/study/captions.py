@@ -25,6 +25,7 @@
 # uploaded .srt does.
 
 import html
+import json
 import logging
 import os
 import re
@@ -97,8 +98,17 @@ def _fold_lookalike(m: re.Match) -> str:
     return folded if len(folded) == 1 else m.group(0)
 
 
+# A reading written over its kanji, as WebVTT and HTML write furigana:
+# <ruby>漢字<rt>かんじ</rt></ruby>. The reading is what the tokenizer
+# prints over the line anyway, and left in by the tag strip it doubled
+# every word (漢字かんじ), so it goes with its tags (plan 265: the page
+# grab brings Japanese sites' own tracks, which carry it).
+_RUBY_READING_RE = re.compile(r"<(rt|rp)\b[^>]*>.*?</\1\s*>", re.S | re.IGNORECASE)
+
+
 def _strip_tags(text: str) -> str:
     text = _VTT_STAMP_RE.sub("", text)
+    text = _RUBY_READING_RE.sub("", text)
     text = _HTML_TAG_RE.sub("", text)
     text = _ASS_POSITION_TAG_RE.sub("", text)
     text = _LOOKALIKE_RE.sub(_fold_lookalike, text)
@@ -404,12 +414,243 @@ def _parse_srv3(content: str) -> list[dict]:
             words = []
         if stripped:
             paras.append((start, (t + (d or 2000)) / 1000, stripped, words))
+    return _cut_rolling(paras)
+
+
+def _cut_rolling(paras: list[tuple]) -> list[dict]:
+    """(start, end, text, words) paragraphs as cues, each cut where the
+    next one starts: a recognised track's lines roll together on screen,
+    two at a time, in srv3 and json3 alike."""
     cues = []
     for i, (start, end, text, words) in enumerate(paras):
         nxt = paras[i + 1][0] if i + 1 < len(paras) else None
         if nxt is not None and start < nxt < end:
             end = nxt
         cues.append(_cue(start, end, text, words))
+    return cues
+
+
+# ── json3 ───────────────────────────────────────────────────────
+# The same timed text as srv3, as JSON (plan 265): what YouTube's own
+# player asks for, and what most subtitle downloaders save as .json.
+# {"events": [{"tStartMs", "dDurationMs", "segs": [{"utf8", "tOffsetMs"}]}]};
+# an event of a line break alone ("aAppend") and a window's definition
+# (no segs) say nothing, and a word's tOffsetMs is its time, as an
+# srv3 <s>'s t is.
+def _parse_json3(content: str) -> list[dict]:
+    try:
+        data = json.loads(content)
+    except ValueError as e:
+        raise CaptionParseError(f"Not valid JSON: {e}", "parse_failed") from e
+    events = data.get("events") if isinstance(data, dict) else None
+    if not isinstance(events, list):
+        raise CaptionParseError("No events in the JSON track", "no_cues")
+    paras = []
+    for ev in events:
+        if not isinstance(ev, dict) or not isinstance(ev.get("segs"), list):
+            continue
+        try:
+            t = float(ev.get("tStartMs", 0))
+            d = float(ev.get("dDurationMs") or 2000)
+        except (TypeError, ValueError):
+            continue
+        text, anchors = "", []
+        for seg in ev["segs"]:
+            word = _strip_tags(re.sub(r"\s*\n\s*", " ", str(seg.get("utf8", ""))))
+            if not word.strip():
+                if text:
+                    text += word
+                continue
+            try:
+                offset = float(seg.get("tOffsetMs") or 0)
+            except (TypeError, ValueError):
+                offset = 0
+            if text and offset > 0:
+                anchors.append((len(text), (t + offset) / 1000))
+            text += word if text else word.lstrip()
+        stripped = text.strip()
+        if not stripped:
+            continue
+        lead = len(text) - len(text.lstrip())
+        if anchors:
+            anchors.insert(0, (0, t / 1000))
+        paras.append((t / 1000, (t + d) / 1000, stripped, _tidy_anchors(stripped, anchors, lead)))
+    return _cut_rolling(paras)
+
+
+# ── SBV ─────────────────────────────────────────────────────────
+# YouTube Studio's own export (plan 265): "0:00:01.000,0:00:04.000" over
+# the cue's lines, a blank line between cues.
+_SBV_TIME_RE = re.compile(r"(\d+):(\d{2}):(\d{2})\.(\d{3})")
+_SBV_LINE_RE = re.compile(rf"^\s*{_SBV_TIME_RE.pattern}\s*,\s*{_SBV_TIME_RE.pattern}\s*$")
+
+
+def _parse_sbv(content: str) -> list[dict]:
+    cues = []
+    for block in re.split(r"\n\s*\n", content.strip()):
+        lines = [l for l in block.splitlines() if l.strip()]
+        if not lines:
+            continue
+        m = _SBV_LINE_RE.match(lines[0])
+        if not m:
+            raise CaptionParseError(f"No timestamp line found in block: {block[:80]!r}")
+        start = _srt_time_to_seconds(*m.groups()[0:4])
+        end = _srt_time_to_seconds(*m.groups()[4:8])
+        text = _strip_markup(" ".join(lines[1:]))
+        if text:
+            cues.append(_cue(start, end, text))
+    return cues
+
+
+# ── TTML / DFXP ─────────────────────────────────────────────────
+# The broadcast and streaming format (plan 265): what Netflix, Prime
+# Video, NHK and Crunchyroll's subtitle exports are, as .ttml, .dfxp or
+# .xml. A <p begin end> per cue, its times in a clock ("00:01:02.500",
+# "00:01:02:12" in frames) or an offset ("62.5s", "625000000t" in the
+# ticks ttp:tickRate counts), relative to the <div>/<body> that holds it.
+#
+# A Japanese track carries its own furigana as ruby: <span
+# tts:ruby="base">漢字</span><span tts:ruby="text">かんじ</span>. The
+# reading is what the tokenizer would print over the line anyway, and
+# read into the text it doubled every word, so only the base is kept.
+_TTML_RUBY_DROPPED = {"text", "textContainer", "delimiter"}
+_TTML_CLOCK_RE = re.compile(r"^(\d+):(\d{2}):(\d{2})(?:(\.\d+)|:(\d+)(?:\.(\d+))?)?$")
+_TTML_OFFSET_RE = re.compile(r"^(\d+(?:\.\d+)?)(h|ms|m|s|f|t)$")
+
+
+_XML_ENCODING_RE = re.compile(rb"^\s*<\?xml[^>]*?encoding=[\"']([A-Za-z0-9._-]+)[\"']")
+# What expat reads itself; any other declared encoding (Shift_JIS,
+# EUC-JP: a Japanese feed's) is decoded here and parsed as text.
+_EXPAT_ENCODINGS = {"utf-8", "utf8", "us-ascii", "ascii", "iso-8859-1", "latin-1", "latin1", "utf-16"}
+
+
+def _xml_text(content: bytes) -> bytes | str:
+    content = content.strip()
+    m = _XML_ENCODING_RE.match(content.removeprefix(b"\xef\xbb\xbf"))
+    encoding = m.group(1).decode("ascii").lower() if m else "utf-8"
+    if encoding in _EXPAT_ENCODINGS:
+        return content
+    try:
+        text = content.decode(encoding, errors="replace")
+    except LookupError as e:
+        raise CaptionParseError(f"Unknown XML encoding {encoding}", "parse_failed") from e
+    return re.sub(r"^\s*<\?xml[^>]*\?>", "", text, count=1).strip()
+
+
+def safe_xml(content: str | bytes):
+    """An XML document as an ElementTree root, refusing any DTD first.
+    Nothing a subtitle file or a podcast feed needs is declared in one,
+    and an entity declared there is how an XML bomb expands: refused on
+    sight rather than trusted to the parser's own limits. Bytes are
+    read in the encoding their own declaration names (a feed's)."""
+    import xml.etree.ElementTree as ET
+
+    head = content[:65536].decode("latin-1") if isinstance(content, bytes) else content[:65536]
+    if re.search(r"<!(?:DOCTYPE|ENTITY)", head, re.IGNORECASE):
+        raise CaptionParseError("XML with a DTD is not read", "parse_failed")
+    try:
+        if isinstance(content, bytes):
+            return ET.fromstring(_xml_text(content))
+        return ET.fromstring(content.lstrip("\ufeff").strip())
+    except ET.ParseError as e:
+        raise CaptionParseError(f"Malformed XML: {e}", "parse_failed") from e
+
+
+def _local(name: str) -> str:
+    return name.rsplit("}", 1)[-1]
+
+
+def _attr(el, name: str) -> str | None:
+    for key, value in el.attrib.items():
+        if _local(key) == name:
+            return value
+    return None
+
+
+class _TtmlClock:
+    def __init__(self, root):
+        def num(name, default):
+            try:
+                return float(_attr(root, name) or default)
+            except ValueError:
+                return default
+        multiplier = (_attr(root, "frameRateMultiplier") or "1 1").split()
+        try:
+            ratio = float(multiplier[0]) / float(multiplier[1])
+        except (IndexError, ValueError, ZeroDivisionError):
+            ratio = 1.0
+        self.frames = num("frameRate", 30.0) * ratio
+        self.subframes = num("subFrameRate", 1.0)
+        self.ticks = num("tickRate", self.frames * self.subframes if _attr(root, "frameRate") else 1.0) or 1.0
+
+    def seconds(self, raw: str | None) -> float | None:
+        if not raw:
+            return None
+        raw = raw.strip()
+        m = _TTML_CLOCK_RE.match(raw)
+        if m:
+            h, mi, s, frac, frames, sub = m.groups()
+            out = int(h) * 3600 + int(mi) * 60 + int(s)
+            if frac:
+                out += float(frac)
+            if frames:
+                out += int(frames) / self.frames
+                if sub:
+                    out += int(sub) / (self.frames * self.subframes)
+            return out
+        m = _TTML_OFFSET_RE.match(raw)
+        if m:
+            value, unit = float(m.group(1)), m.group(2)
+            return {
+                "h": value * 3600, "m": value * 60, "s": value, "ms": value / 1000,
+                "f": value / self.frames, "t": value / self.ticks,
+            }[unit]
+        return None
+
+
+def _ttml_text(el) -> str:
+    """A <p>'s words: its text and its spans', a <br/> a space, and a
+    ruby reading (see above) dropped."""
+    out = [el.text or ""]
+    for child in el:
+        tag = _local(child.tag)
+        if tag == "br":
+            out.append(" ")
+        elif tag == "span" and (_attr(child, "ruby") or "") not in _TTML_RUBY_DROPPED:
+            out.append(_ttml_text(child))
+        out.append(child.tail or "")
+    return "".join(out)
+
+
+def _parse_ttml(content: str) -> list[dict]:
+    root = safe_xml(content)
+    if _local(root.tag) != "tt":
+        raise CaptionParseError("Not a TTML document", "unknown_format")
+    clock = _TtmlClock(root)
+    cues = []
+
+    def walk(el, begin: float, end: float | None):
+        own = clock.seconds(_attr(el, "begin"))
+        start = begin + (own or 0.0)
+        stop = clock.seconds(_attr(el, "end"))
+        stop = begin + stop if stop is not None else None
+        dur = clock.seconds(_attr(el, "dur"))
+        if stop is None and dur is not None:
+            stop = start + dur
+        if stop is None:
+            stop = end
+        if _local(el.tag) == "p":
+            text = _strip_markup(re.sub(r"\s+", " ", _ttml_text(el)))
+            if text and stop is not None and stop > start:
+                cues.append(_cue(round(start, 3), round(stop, 3), text))
+            return
+        for child in el:
+            walk(child, start, stop)
+
+    for child in root:
+        if _local(child.tag) == "body":
+            walk(child, 0.0, None)
+    cues.sort(key=lambda c: c["start"])
     return cues
 
 
@@ -498,7 +739,11 @@ def _parse_text(content: str) -> list[dict]:
 
 
 _PARSERS = {"srt": _parse_srt, "vtt": _parse_vtt, "ass": _parse_ass, "ssa": _parse_ass, "srv3": _parse_srv3,
-            "lrc": _parse_lrc, "txt": _parse_text}
+            "lrc": _parse_lrc, "txt": _parse_text, "sbv": _parse_sbv, "json3": _parse_json3,
+            "ttml": _parse_ttml, "dfxp": _parse_ttml}
+# Extensions that name no one format: an .xml is a TTML or an srv3, a
+# .json YouTube's json3 (or nothing we read), so each is sniffed.
+_SNIFFED_EXTENSIONS = ("xml", "json")
 _LYRIC_FORMATS = ("lrc", "txt")
 
 
@@ -508,6 +753,13 @@ def _sniff_format(content: str) -> str:
         return "vtt"
     if "<timedtext" in head:
         return "srv3"
+    if re.search(r"<(?:\w+:)?tt\b", head) and re.search(r"ttml|ttaf1", head):
+        return "ttml"
+    if head.lstrip().startswith("{") and '"events"' in head:
+        return "json3"
+    first = next((l for l in head.splitlines() if l.strip()), "")
+    if _SBV_LINE_RE.match(first):
+        return "sbv"
     if "[Script Info]" in head or "[Events]" in head:
         return "ass"
     if _SRT_ARROW_RE.search(head):
@@ -532,7 +784,7 @@ def parse_track(content: str, filename: str) -> list[dict]:
             ext = _sniff_format(content)
         except CaptionParseError:
             pass
-    parser = _PARSERS.get(ext)
+    parser = None if ext in _SNIFFED_EXTENSIONS else _PARSERS.get(ext)
     if parser is None:
         ext = _sniff_format(content)
         parser = _PARSERS[ext]

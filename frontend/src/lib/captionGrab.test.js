@@ -3,6 +3,7 @@ import {
   buildBookmarklet,
   transcriptXmlToVtt,
   encodeGrabPayload,
+  encodePagePayload,
   decodeGrabHash,
 } from './captionGrab'
 import en from '../locales/en/index.js'
@@ -154,6 +155,86 @@ describe('the grab hash codec', () => {
   })
 })
 
+// p1 (plan 265): a page that is not YouTube, read through its own
+// <video>'s text tracks, comes back on the same hash with its host.
+describe('the page grab', () => {
+  const VTT = 'WEBVTT\n\n00:00:01.000 --> 00:00:03.000\n今日は暑い\n'
+
+  it('round-trips the track, the media address and the title', async () => {
+    const payload = await encodePagePayload('www3.nhk.or.jp', { vtt: VTT, mediaUrl: 'https://cdn.example/a.mp4', title: 'ニュース' })
+    expect(payload.startsWith('p1.')).toBe(true)
+    expect(await decodeGrabHash(`#grab=${payload}`)).toEqual({
+      page: 'www3.nhk.or.jp', vtt: VTT, mediaUrl: 'https://cdn.example/a.mp4', title: 'ニュース',
+    })
+  })
+
+  it('keeps only a plain web address for the player, and refuses what is no host or no track', async () => {
+    const blob = await decodeGrabHash(`#grab=${await encodePagePayload('example.com', { vtt: VTT, mediaUrl: 'blob:https://example.com/1' })}`)
+    expect(blob.mediaUrl).toBeNull()
+    expect(await decodeGrabHash(`#grab=${await encodePagePayload('<b>', { vtt: VTT })}`)).toBeNull()
+    expect(await decodeGrabHash(`#grab=${await encodePagePayload('example.com', { vtt: 'no cues' })}`)).toBeNull()
+  })
+
+  // The bookmark's own source, run against a page: `location`, `alert`,
+  // `confirm`, `document` and `window` are what it reads of the page,
+  // handed in so the test page is the only one it can touch.
+  async function runOn(page) {
+    const said = { alerts: [], confirms: [], href: null }
+    const location = {
+      hostname: page.hostname,
+      search: '',
+      pathname: '/',
+      set href(v) { said.href = v },
+    }
+    const document = {
+      title: page.title ?? '',
+      querySelectorAll: sel => (sel === 'iframe' ? page.iframes ?? [] : page.media ?? []),
+    }
+    const src = decodeURIComponent(buildBookmarklet('https://example.app', en).slice('javascript:'.length))
+    const run = new Function('location', 'alert', 'confirm', 'document', 'window', `return ${src}`)
+    await run(location, m => said.alerts.push(m), m => { said.confirms.push(m); return true }, document, globalThis)
+    return said
+  }
+
+  it('takes a Japanese text track off the page’s player and comes back with it', async () => {
+    const track = {
+      kind: 'subtitles', language: 'ja', label: '日本語', mode: 'hidden',
+      cues: [{ startTime: 1, endTime: 3, text: '今日は\n暑い' }, { startTime: 4, endTime: 5, text: '' }],
+    }
+    const english = { kind: 'subtitles', language: 'en', label: 'English', mode: 'hidden', cues: [{ startTime: 1, endTime: 3, text: 'Hot' }] }
+    const said = await runOn({
+      hostname: 'www.example.jp',
+      title: 'ニュース',
+      media: [{ querySelectorAll: () => [], textTracks: [english, track], currentSrc: 'https://cdn.example/a.mp4' }],
+    })
+    expect(said.alerts).toEqual([])
+    expect(said.href).toMatch(/^https:\/\/example\.app\/analyzer#grab=p1\.[zr]\.www\.example\.jp\./)
+    const grab = await decodeGrabHash(said.href.slice(said.href.indexOf('#')))
+    expect(grab.page).toBe('www.example.jp')
+    expect(grab.vtt).toBe('WEBVTT\n\n00:00:01.000 --> 00:00:03.000\n今日は 暑い\n')
+    expect(grab.mediaUrl).toBe('https://cdn.example/a.mp4')
+    expect(grab.title).toBe('ニュース')
+  })
+
+  it('names the languages a page has when none is Japanese', async () => {
+    const english = { kind: 'captions', language: 'en', label: 'English', mode: 'hidden', cues: [{ startTime: 1, endTime: 3, text: 'Hot' }] }
+    const said = await runOn({ hostname: 'example.com', media: [{ querySelectorAll: () => [], textTracks: [english] }] })
+    expect(said.href).toBeNull()
+    expect(said.alerts).toEqual([`${en.grabAlertNoJapanese}en`])
+  })
+
+  it('sends a page that only embeds a YouTube video to that video’s own page', async () => {
+    const said = await runOn({ hostname: 'blog.example', iframes: [{ src: 'https://www.youtube-nocookie.com/embed/UQecj-5Tiqw?rel=0' }] })
+    expect(said.confirms).toEqual([en.grabAlertEmbedYoutube])
+    expect(said.href).toBe('https://www.youtube.com/watch?v=UQecj-5Tiqw')
+  })
+
+  it('says so on a page with no player at all', async () => {
+    const said = await runOn({ hostname: 'example.com' })
+    expect(said.alerts).toEqual([en.grabAlertNoMedia])
+  })
+})
+
 describe('buildBookmarklet', () => {
   it('is a javascript: URL carrying the app origin and the measured client', () => {
     const bm = buildBookmarklet('https://example.app', en)
@@ -174,7 +255,8 @@ describe('buildBookmarklet', () => {
     expect(src).toContain('["fr","en"]')
     expect(src).toContain("t.kind!=='asr'&&(t.languageCode===L")
     expect(src).toContain('t:tr')
-    expect(src).toContain('#grab=v3.')
+    expect(src).toContain('/analyzer#grab=')
+    expect(src).toContain("'v3.'+mode+'.'+vid")
   })
 
   // On youtube.com the bookmark has no app to ask, so it says what it
@@ -182,7 +264,7 @@ describe('buildBookmarklet', () => {
   // a French learner's alerts are French, and tutoient.
   it('speaks the language it was copied in', () => {
     const said = lang => decodeURIComponent(buildBookmarklet('https://example.app', lang).slice('javascript:'.length))
-    for (const key of ['grabAlertNotYoutube', 'grabAlertNoVideo', 'grabAlertNotReady', 'grabAlertNoSubtitles',
+    for (const key of ['grabAlertNoMedia', 'grabAlertEmbedYoutube', 'grabAlertNoVideo', 'grabAlertNotReady', 'grabAlertNoSubtitles',
       'grabAlertNoJapanese', 'grabAlertEmpty', 'grabAlertFailed']) {
       expect(fr[key]).toBeTruthy()
       expect(said(fr)).toContain(JSON.stringify(fr[key]).slice(1, -1))
@@ -190,7 +272,7 @@ describe('buildBookmarklet', () => {
     }
     expect(said(fr)).not.toContain('No Japanese subtitles')
     expect(said(fr)).not.toMatch(/Ouvrez/)
-    expect(fr.grabAlertNotYoutube).toMatch(/^Ouvre /)
+    expect(fr.grabAlertEmbedYoutube).toMatch(/Ouvre-la /)
   })
 
   // The walkthrough tells the learner what the alerts mean by quoting

@@ -168,6 +168,26 @@ FEATURES = {
     ),
 }
 
+# Billed by the minute of sound, not by the token (plan 265): a
+# recording or a podcast episode heard into lines by study/transcribe.py.
+# name -> (minutes/month, $/minute, why)
+MINUTE_FEATURES = {
+    "transcription": (
+        40, 0.006,
+        "Two recordings a month of ~20 minutes (a film's scene, a podcast "
+        "episode), at whisper-1's $0.006 a minute. The minute is counted "
+        "from the MP3's own frames, rounded up, and claimed before the "
+        "call: TRANSCRIBE_DAILY_MINUTES caps a learner at 60 a day, which "
+        "bounds the abuse row at ~$0.36 a day, and "
+        "TRANSCRIBE_DAILY_MINUTES_TOTAL caps the whole app at 600 ($3.60).",
+    ),
+}
+
+
+def minute_cost(mult: float = 1.0) -> float:
+    return sum(m * mult * price for m, price, _why in MINUTE_FEATURES.values())
+
+
 # The one feature whose calls are shared rather than paid per learner
 # (routes/reading.py, "The exercise pool"). Kept as a name rather than a
 # flag on the row so it is obvious there is exactly one, and why.
@@ -230,6 +250,9 @@ def main():
         note = "  (pooled)" if name == POOLED and args.pool_share > 1 else ""
         print(f"  {name:24s} {n:6.1f} calls  {n * i:9,.0f} in  {n * o:9,.0f} out{note}")
 
+    for name, (m, price, _why) in MINUTE_FEATURES.items():
+        print(f"  {name:24s} {m:6.1f} min    ${m * price:.3f} a month, whatever the model below")
+
     names = [args.model] if args.model else list(PRICES)
     print(f"\n{'model':24s} {'as-is':>9s} {'+cache/batch':>13s}")
     for name in names:
@@ -243,7 +266,7 @@ def main():
         name = args.model or "Gemini 3.1 Flash-Lite"
         pin, pout = PRICES[name]
         blended = sum(
-            share * cost(tin * mult, tout * mult, pin, pout)
+            share * (cost(tin * mult, tout * mult, pin, pout) + minute_cost(mult))
             for share, mult in MIX.values()
         )
         if args.pool_share > 1:

@@ -117,3 +117,111 @@ def claim(user_id: str, feature: str, limit: int) -> int:
     })
     return count
 
+
+
+def claim_up_to(user_id: str, feature: str, limit: int, amount: int) -> int | None:
+    """Take `amount` of today's `feature` allowance at once (plan 265:
+    a transcription spends its minutes, not one slot), or nothing when
+    that would pass `limit`: the total taken, this claim included, or
+    None for a refusal.
+
+    Unlike claim(), a refusal spends nothing. A slot is one call, and a
+    call refused over the cap is one the learner retries; a claim is a
+    recording's length, and a forty-minute one refused must not eat the
+    ten minutes a shorter one could still have used. The rest is
+    claim()'s: claimed before the model call, the learner's day, and a
+    database failure open (the amount, under any cap)."""
+    if amount > limit:
+        return None
+    try:
+        conn = db_conn()
+    except PoolBusy:
+        raise
+    except Exception:
+        logger.exception("daily_usage: no connection; %s counted as under the cap", feature)
+        return amount
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT tz_offset_min FROM user_profiles WHERE user_id = %s",
+                (user_id,),
+            )
+            row = cur.fetchone()
+            cur.execute(
+                """
+                INSERT INTO daily_usage (user_id, feature, day, count)
+                VALUES (%s, %s, %s, %s)
+                ON CONFLICT (user_id, feature, day)
+                DO UPDATE SET count = daily_usage.count + EXCLUDED.count
+                WHERE daily_usage.count + EXCLUDED.count <= %s
+                RETURNING count
+                """,
+                (user_id, feature, local_today(row[0] if row else None), amount, limit),
+            )
+            got = cur.fetchone()
+        conn.commit()
+    except Exception:
+        logger.exception("daily_usage: counter failed; %s counted as under the cap", feature)
+        return amount
+    finally:
+        conn.close()
+    count = got[0] if got else None
+    if count is None:
+        logger.info("daily limit refused feature=%s user=%s limit=%d amount=%d", feature, user_id, limit, amount)
+    from core import events
+    events.record(user_id, "ai_use", {
+        "feature": feature, "count": count if count is not None else limit,
+        "limit": limit, "over": count is None,
+    })
+    return count
+
+
+def used_today(user_id: str, feature: str) -> int:
+    """What `user_id` has taken of today's `feature`, read and not
+    claimed: what an intake shows before it asks (plan 265). 0 on a
+    database failure, as the counters fail open."""
+    try:
+        conn = db_conn()
+    except Exception:
+        return 0
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT tz_offset_min FROM user_profiles WHERE user_id = %s", (user_id,))
+            row = cur.fetchone()
+            cur.execute(
+                "SELECT count FROM daily_usage WHERE user_id = %s AND feature = %s AND day = %s",
+                (user_id, feature, local_today(row[0] if row else None)),
+            )
+            got = cur.fetchone()
+        return got[0] if got else 0
+    except Exception:
+        logger.exception("daily_usage: read failed for %s", feature)
+        return 0
+    finally:
+        conn.close()
+
+
+def give_back(user_id: str, feature: str, amount: int) -> None:
+    """Return `amount` of today's `feature` a claim took for work that
+    was then refused before it began (plan 265: a recording whose session
+    could not open). Never below nothing; a failure is logged, and costs
+    the learner that much of the day."""
+    try:
+        conn = db_conn()
+    except Exception:
+        logger.exception("daily_usage: no connection to give back %s", feature)
+        return
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT tz_offset_min FROM user_profiles WHERE user_id = %s", (user_id,))
+            row = cur.fetchone()
+            cur.execute(
+                "UPDATE daily_usage SET count = GREATEST(0, count - %s) "
+                "WHERE user_id = %s AND feature = %s AND day = %s",
+                (amount, user_id, feature, local_today(row[0] if row else None)),
+            )
+        conn.commit()
+    except Exception:
+        logger.exception("daily_usage: give back failed for %s", feature)
+    finally:
+        conn.close()

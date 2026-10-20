@@ -175,6 +175,17 @@ Python package, which bundles it.
 License: GNU Lesser General Public License, version 3 or later (LGPL-3.0-or-later).
 https://github.com/chrisstaite/lameenc
 
+## lamejs (via @breezystack/lamejs)
+
+The browser encodes a recording's sound to MP3 before it is sent to be
+transcribed (plan 265, `frontend/src/lib/mediaAudio.js`), with lamejs, a
+JavaScript port of LAME. It is loaded as its own file, unmodified, and
+only when a recording is first made, so it can be replaced with any
+compatible build.
+
+License: GNU Lesser General Public License, version 3 (LGPL-3.0).
+https://github.com/shijinyu/lamejs
+
 ## Typefaces
 
 Noto Sans JP and Noto Serif JP (Google) and Space Grotesk (Florian

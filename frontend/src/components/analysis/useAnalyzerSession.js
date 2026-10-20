@@ -3,6 +3,9 @@ import { countUse } from '../../lib/screenTrail'
 import { apiJson, apiUpload, apiFetch } from '../../lib/api'
 import { useLang } from '../../LangContext'
 import { videoErrorMessage } from './videoErrors'
+import { recordingFor } from '../../lib/mediaAudio'
+import { episodeAudio } from '../../lib/podcast'
+import { keepLocalMedia, localMediaFor } from '../../lib/localMedia'
 
 // ── One Passage, three ways in ────────────────────────────
 // The seam that makes 解析 one screen instead of two (plan 027). A
@@ -41,7 +44,7 @@ function transient(e) {
 
 /** An empty Passage, so callers never have to null-check the shape. */
 function emptyPassage() {
-  return { sentences: [], truncated: 0, videoId: null, windowCapped: false, source: 'typed' }
+  return { sentences: [], truncated: 0, videoId: null, mediaUrl: null, mediaTitle: '', windowCapped: false, source: 'typed' }
 }
 
 export function useAnalyzerSession(session) {
@@ -52,6 +55,11 @@ export function useAnalyzerSession(session) {
   // A sentence from the table, or { video: <what was thrown> } for a
   // video session's failure, which is worded at the return below.
   const [error, setError]       = useState(null)
+  // Where a recording is on its way to being heard (plan 265): null, or
+  // { stage: 'fetch' | 'read' | 'decode' | 'encode' | 'upload' | 'hear',
+  // ratio? } -- what the busy line says while the browser keeps its
+  // sound and the server's recogniser listens.
+  const [progress, setProgress] = useState(null)
   const [focusIndex, setFocus]  = useState(0)
   const [explaining, setExplaining] = useState({})
   // The failure of the one PAID action on this screen used to be an
@@ -147,6 +155,7 @@ export function useAnalyzerSession(session) {
   function beginRun() {
     runIdRef.current += 1
     setStatus('working')
+    setProgress(null)
     setError(null)
     setExplaining({})
     setExplainError({})
@@ -157,6 +166,7 @@ export function useAnalyzerSession(session) {
     runIdRef.current += 1        // orphan anything in flight
     setVideoSessionId(null)
     setPassage(null)
+    setProgress(null)
     setStatus('idle')
     setError(null)
     setFocus(0)
@@ -170,6 +180,7 @@ export function useAnalyzerSession(session) {
   // appear rather than each intake inventing its own.
   function fail(message) {
     runIdRef.current += 1
+    setProgress(null)
     setError(message)
     setStatus('failed')
   }
@@ -333,7 +344,7 @@ export function useAnalyzerSession(session) {
     }
   }
 
-  async function startVideoFromFile(file, { url, start, end, timing, translations }) {
+  async function startVideoFromFile(file, { url, start, end, timing, translations, mediaUrl, mediaTitle }) {
     if (!file) return
     countUse('analyzer', 'video')
     const run = beginRun()
@@ -354,6 +365,10 @@ export function useAnalyzerSession(session) {
       // Optional, and never fetched from -- it just tells the player
       // which video to embed next to the subtitles.
       if (url?.trim()) formData.append('url', url.trim())
+      // The page grab's own media file (plan 265), played beside the
+      // lines by the analyser's player where it is a plain web address.
+      if (mediaUrl) formData.append('media_url', mediaUrl)
+      if (mediaTitle) formData.append('media_title', mediaTitle)
       const data = await apiUpload('/api/video/session', session, formData)
       if (run !== runIdRef.current) return
       setVideoSessionId(data.sessionId)
@@ -362,6 +377,74 @@ export function useAnalyzerSession(session) {
       setError({ video: e })
       setStatus('failed')
     }
+  }
+
+  // ── A recording, heard (plan 265) ─────────────────────────
+  // A file the learner holds, or a podcast's episode: its sound kept
+  // and encoded here (lib/mediaAudio.js), heard by the server's
+  // recogniser, the session polled like any other. `caps` is what the
+  // server said it takes (/api/video/capabilities), checked before a
+  // minute is spent encoding. A file's player plays the file itself,
+  // this visit (lib/localMedia.js); an episode's plays its address.
+  async function startVideoFromRecording(file, { start, end, caps, url, name, podcast = null }) {
+    if (!file) return
+    countUse('analyzer', 'video')
+    const run = beginRun()
+    const step = next => { if (run === runIdRef.current) setProgress(next) }
+    try {
+      const recording = await recordingFor(file, {
+        start, end,
+        maxSeconds: caps?.transcribeMaxSeconds ?? null,
+        minutesLeft: caps?.transcribeMinutesLeft ?? null,
+        onProgress: step,
+      })
+      if (run !== runIdRef.current) return
+      step({ stage: 'upload' })
+      const formData = new FormData()
+      formData.append('audio', recording.blob, 'audio.mp3')
+      formData.append('source', podcast ? 'podcast' : 'media')
+      formData.append('name', (name ?? file.name ?? '').slice(0, 200))
+      // Where the recording starts in the video: the window's start, as
+      // the cut made it. Its end only bounds the lines.
+      formData.append('start', String(recording.offset))
+      if (end != null) formData.append('end', String(end))
+      if (podcast?.audioUrl) formData.append('media_url', podcast.audioUrl)
+      if (podcast?.title) formData.append('media_title', podcast.title.slice(0, 200))
+      if (url?.trim()) formData.append('url', url.trim())
+      const data = await apiUpload('/api/video/recording', session, formData)
+      if (run !== runIdRef.current) return
+      if (!podcast) keepLocalMedia(data.sessionId, file)
+      step({ stage: 'hear' })
+      setVideoSessionId(data.sessionId)
+    } catch (e) {
+      if (run !== runIdRef.current) return
+      setProgress(null)
+      setError({ video: e })
+      setStatus('failed')
+    }
+  }
+
+  // A podcast's episode: its audio fetched (its own address, or the
+  // server's relay), then heard as a recording.
+  async function startVideoFromEpisode(episode, { start, end, caps }) {
+    if (!episode?.audioUrl) return
+    const run = beginRun()
+    setProgress({ stage: 'fetch' })
+    let blob
+    try {
+      blob = await episodeAudio(session, episode.audioUrl)
+    } catch (e) {
+      if (run !== runIdRef.current) return
+      setProgress(null)
+      setError({ video: e?.code ? e : Object.assign(new Error('episode_unreachable'), { code: 'episode_unreachable' }) })
+      setStatus('failed')
+      return
+    }
+    if (run !== runIdRef.current) return
+    const name = episode.title || episode.audioUrl.split('/').pop()
+    await startVideoFromRecording(new File([blob], name, { type: blob.type || 'audio/mpeg' }), {
+      start, end, caps, name, podcast: episode,
+    })
   }
 
   // ── The poll ──────────────────────────────────────────────
@@ -407,11 +490,16 @@ export function useAnalyzerSession(session) {
           source: data.source ?? 'video',
           sourceRef: data.sourceRef,
           videoId: data.videoId ?? null,
+          // A recording's player (plan 265): its own address where the
+          // server keeps one, else the file this device holds, this visit.
+          mediaUrl: data.mediaUrl ?? localMediaFor(videoSessionId),
+          mediaTitle: data.mediaTitle ?? '',
           windowCapped: !!data.windowCapped,
           truncated: data.truncated ?? 0,
           sentences: data.sentences,
         })
         setFocus(0)
+        setProgress(null)
         setStatus('ready')
       } catch (e) {
         if (cancelled) return
@@ -422,6 +510,7 @@ export function useAnalyzerSession(session) {
         }
         // A failed session is a 503 whose body is the stored failure:
         // its `code` is worded below, its English `error` is the logs'.
+        setProgress(null)
         setError({ video: e })
         setStatus('failed')
       }
@@ -611,6 +700,7 @@ export function useAnalyzerSession(session) {
     passage,
     sentences,
     status,
+    progress,
     // A video failure is kept as it was thrown and worded here, at
     // render, so the sentence follows the learner's language rather
     // than the one in force when it failed (./videoErrors.js).
@@ -626,6 +716,8 @@ export function useAnalyzerSession(session) {
     keepSentences,
     analyzeText,
     startVideoFromFile,
+    startVideoFromRecording,
+    startVideoFromEpisode,
     startVideoFromLink,
     startVideoFromTranscript,
     explain,

@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **265**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **266**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -222,6 +222,16 @@ runtime purpose.
   goes through `core/daily_limit.py` (`daily_usage`) for its daily ceiling and
   into `scripts/llm_cost_model.py` for its cost. Nothing the learner typed is
   kept.
+- **A recording is heard, never kept (plan 265).** A file or a podcast
+  episode reaches the recogniser (`study/transcribe.py`) only as the sound
+  the browser kept of it (`lib/mediaAudio.js`: one channel, 16 kHz, the
+  window, an MP3), and the server keeps its lines, not its sound. Its
+  minutes are read from the MP3's own frames and claimed before the call
+  (`daily_limit.claim_up_to`), the learner's and the app's. A URL a
+  learner types that the server fetches goes through `study/podcast.py`'s
+  guard (every address and redirect public, the connection pinned to the
+  address checked), never a bare `httpx.get`. A Passage heard rather than
+  read says so (`source` media/podcast).
 - **No learner can flood the server (plan 211).** The API is one worker:
   `core/concurrency.py` runs a learner's requests a few at a time, and
   both DB pools wait for a connection (`core/pool.py`) rather than fail.

@@ -41,6 +41,31 @@ const NAMED = {
   transcript_failed: t => t.videoTranscriptFailed,
   // The poll: a worker lost on the way.
   stalled: t => t.videoStalled,
+  // A recording (plan 265): at the door, in the browser before it, and
+  // in the worker.
+  transcribe_disabled: t => t.transcribeDisabled,
+  transcribe_allowance_mine: t => t.transcribeAllowanceMine,
+  transcribe_allowance_app: t => t.transcribeAllowanceApp,
+  transcribe_failed: t => t.transcribeFailed,
+  transcribe_busy: t => t.transcribeBusy,
+  no_speech: t => t.noSpeech,
+  audio_unreadable: t => t.audioUnreadable,
+  audio_too_large: t => t.mediaTooLarge,
+  media_too_long: t => t.mediaTooLong,
+  media_too_large: t => t.mediaTooLarge,
+  media_unreadable: t => t.mediaUnreadable,
+  bad_media_url: t => t.mediaBadUrl,
+  // A podcast's feed and its episodes.
+  feed_bad_url: t => t.feedBadUrl,
+  feed_refused: t => t.feedRefused,
+  feed_unreachable: t => t.feedUnreachable,
+  feed_unreadable: t => t.feedUnreadable,
+  feed_no_episodes: t => t.feedNoEpisodes,
+  feed_too_large: t => t.feedTooLarge,
+  episode_not_audio: t => t.episodeNotAudio,
+  episode_too_large: t => t.episodeTooLarge,
+  episode_unreachable: t => t.episodeUnreachable,
+  relay_allowance_mine: t => t.relayAllowanceMine,
 }
 
 /**

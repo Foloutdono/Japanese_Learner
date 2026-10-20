@@ -29,7 +29,7 @@ GROUP BY 1 ORDER BY 2 DESC;
 -- title: Compteurs quotidiens des 30 derniers jours
 -- display: table
 -- size: 12x7
--- description: Plafonds par défaut du code : ask 40, composition 30, translation_review 60, deep_analysis 150, exam_paper 5, conversation_talk 80 (répliques), conversation_review 60 (corrections), lyrics_sort 20 (chansons triées), OCR 20, compréhension générée 10 (variables d'env. sur Render).
+-- description: Plafonds par défaut du code : ask 40, composition 30, translation_review 60, deep_analysis 150, exam_paper 5, conversation_talk 80 (répliques), conversation_review 60 (corrections), lyrics_sort 20 (chansons triées), transcription 60 (minutes d'enregistrement entendues), OCR 20, compréhension générée 10 (variables d'env. sur Render).
 WITH c AS (
   SELECT feature, user_id, day, count FROM daily_usage
   UNION ALL SELECT 'ocr', user_id, day, count FROM ocr_usage
@@ -37,6 +37,7 @@ WITH c AS (
 ), caps(feature, cap) AS (VALUES ('ask', 40), ('composition', 30), ('translation_review', 60),
                              ('deep_analysis', 150), ('exam_paper', 5),
                              ('conversation_talk', 80), ('conversation_review', 60), ('lyrics_sort', 20),
+                             ('transcription', 60),
                              ('ocr', 20), ('comprehension', 10))
 SELECT c.feature AS "Fonction", sum(c.count) AS "Appels", count(DISTINCT c.user_id) AS "Apprenants",
        max(c.count) AS "Max par apprenant et par jour", caps.cap AS "Plafond",

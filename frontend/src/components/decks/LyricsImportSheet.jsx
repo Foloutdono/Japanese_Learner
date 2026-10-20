@@ -12,6 +12,7 @@ import { parseVideoId } from '../../lib/youtube'
 import { videoErrorMessage } from '../analysis/videoErrors'
 import { songWords, songLines, songDeckName, lyricRows } from '../analysis/songDeck'
 import { addWords, addLines } from '../analysis/songDeckApi'
+import { SUBTITLE_ACCEPT } from '../../lib/subtitleFiles'
 
 // ── 歌 — a song's lyrics into a deck (plan 264) ───────────────────
 // The owner (2026-10-20): the analyser's song sheet, from the shelf.
@@ -312,7 +313,7 @@ export function LyricsImportSheet({ session, t, name: named = '', onClose, onMad
             <input
               ref={fileRef}
               type="file"
-              accept=".srt,.vtt,.ass,.ssa,.lrc,.txt,text/vtt,text/plain,text/*,application/octet-stream"
+              accept={SUBTITLE_ACCEPT}
               className="anl-drop__input"
               tabIndex={-1}
               aria-hidden="true"

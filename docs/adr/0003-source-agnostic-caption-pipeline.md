@@ -567,3 +567,87 @@ each: a translated track that will not come or will not read leaves its lines to
 the model, never the session. A v2 bookmark keeps working and brings none. An
 uploaded subtitle file carries none either: the upload accepts the translated
 tracks only as the grab sends them (`translation_fr`, `translation_en`).
+
+---
+
+## Amendment, 2026-10-20 — a recording is heard, a page is read, a podcast is listed (plan 265)
+
+The owner: *"being limited by subbed youtube videos is a bit lacking"*, and the
+pick, of the options put to them: a recording the learner holds, transcribed;
+more subtitle formats; the grab on any page; podcasts.
+
+**This file's first premise is withdrawn.** "No provider in `study/llm_shared.py`'s
+catalog does audio transcription" was true of the chat-completions endpoints it
+was written against. Plan 092 bought an OpenAI account, and the same key reaches
+`/v1/audio/transcriptions`. A self-hosted Whisper still does not fit the Render
+instance (the small models that would fit are poor at Japanese, the good ones
+slower than real time on its CPUs), so the recogniser is the API's, rationed and
+costed like every model call.
+
+**Four ways in, and nothing downstream of Cue knows.** As every amendment before
+this one, each is a new road to a Track:
+
+- **Formats** (`study/captions.parse_track`): TTML/DFXP, the streaming services'
+  and broadcasters' exports (often an `.xml`; ticks, frames and offsets read on
+  the document's own clock, a `<div>`'s begin moving what it holds, ruby readings
+  dropped for their base), SBV (YouTube Studio's) and json3 (YouTube's timed text
+  as JSON, its words timed as srv3's are). WebVTT's `<rt>` readings are dropped
+  too: a Japanese site's own track carries them, and the tag strip left them in
+  the text (学生がくせい). A document with a DTD is refused on sight
+  (`safe_xml`), the same guard a podcast's feed passes through.
+- **The page grab** (`lib/captionGrab.js`, p1): off youtube.com the same bookmark
+  reads the page's own `<video>`: its `<track>` files and the cues a player script
+  added, the Japanese one taken (by its language, or by its script where it names
+  none), and comes back through the same hash with the page's host as its name
+  and the page's media file where it is a plain web address. Same standing as the
+  YouTube grab: the learner's screen, the learner's IP, our servers contact
+  nobody. A page that only embeds a YouTube video is sent to that video's page.
+  A DRM service draws its subtitles itself rather than serving them as tracks:
+  those come in as a file, which is what the TTML parser is for.
+- **A recording** (`lib/mediaAudio.js`, `study/transcribe.py`,
+  `POST /api/video/recording`): the browser decodes the file, keeps its sound
+  alone, one channel at 16 kHz, cut to the window, and encodes that as a 32 kbps
+  MP3 (lamejs, LGPL, loaded on first use). The picture never leaves the device,
+  and ten minutes is ~2.4 MB. The server measures the MP3 from its own frames
+  (what the allowance is counted in, never the client's figure), sends it to
+  whisper-1 for every word's time (the one OpenAI model that gives them), keeps
+  nothing of the sound, and drops the segments the recogniser itself doubts (the
+  ご視聴ありがとうございました it writes over silence, a phrase on a loop).
+  Its own route because a recording is up to sixteen times what a subtitle upload
+  may be, and `/api/video/session` refuses a body on its declared length.
+- **A podcast** (`study/podcast.py`, `lib/podcast.js`): its feed is read by the
+  server, which is the one URL a learner types that this server fetches, so every
+  address and every redirect is resolved, refused unless public, and connected to
+  as the address that was checked (the voice engine on the private network has
+  no auth). An episode's audio is asked of its own address by the browser and of
+  the server's relay where the host sends no CORS headers; either way it is heard
+  as a recording, and the Passage plays the episode from its own address, which a
+  media element does without CORS.
+
+**Heard is not read.** A recogniser can mishear, and a learner memorises what
+they are shown, so a session's `source` says where its lines came from (`media`,
+`podcast`), the Passage says so on screen, and an explanation is told the lines
+are a recogniser's.
+
+**The money is bounded the way the link fetch's is.** A minute of sound is
+claimed before the call, the learner's day in `core/daily_limit` (`claim_up_to`:
+a recording past what is left is refused without spending it), the whole app's
+summed from the sessions' `media_seconds`, both spending decisions read from the
+environment (`TRANSCRIBE_DAILY_MINUTES`, `TRANSCRIBE_DAILY_MINUTES_TOTAL`,
+`TRANSCRIBE_MAX_SECONDS`). Off without a key: `/api/video/capabilities` says
+`transcribe: false`, and the intake offers no recording and no feed.
+
+**The player is two.** `MediaPlayer` is `VideoPlayer`'s twin over the browser's
+own `<video>`, same props and handle, so the analyser follows either clock. A
+podcast's episode and a page's media file play from their address, kept on the
+session (`media_url`); a file on the learner's device has none, and plays from
+an object URL for the visit it was heard in (`lib/localMedia.js`), its session
+reopened later being its lines alone.
+
+**Still out:** downloading YouTube's media (the third wall of 2026-10-16 stands,
+and so do its terms), a DRM service's player, and a self-hosted recogniser on
+Render. The intake gained a door, not a redesign: the file button takes a
+recording where the server can hear one, and an address that names no video
+offers to be read as a feed, its episodes listed under it. It was built into the
+column plan 136 drew rather than drawn on a canvas first; a different layout is
+the owner's to pick.

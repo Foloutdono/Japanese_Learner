@@ -20,9 +20,11 @@ import logging
 import os
 import threading
 
+import httpx
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from core.credits import require_pass
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 
@@ -31,7 +33,8 @@ from core.rls import enable_rls
 from core.auth import get_user_id
 from core.history import HISTORY_LIMIT, trim_history
 from core.srs_instance import srs
-from study import line_translate, lyrics_sort, morphology
+from core import daily_limit
+from study import line_translate, lyrics_sort, morphology, podcast, transcribe
 from study.llm_shared import LLMUnavailable
 from study.analysis import LOCAL_REV, analyze_local, attach_user_state
 from study.captions import (
@@ -186,6 +189,15 @@ def _ensure_video_schema() -> None:
             # text, as the translations are. NULL is a session nobody
             # has made a lyrics deck of. Additive.
             cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS lyrics_sort JSONB")
+            # A recording the session's lines were heard from (plan 265):
+            # the address its player plays (a podcast's episode, a page's
+            # own media file; NULL for a file on the learner's device,
+            # which only that device holds), the name it is shown under,
+            # and the seconds the recogniser was paid for, which the
+            # app's day of transcription is summed from. Additive.
+            cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS media_url TEXT")
+            cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS media_title TEXT")
+            cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS media_seconds DOUBLE PRECISION")
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_video_sessions_user
                 ON video_sessions(user_id, created_at DESC)
@@ -255,6 +267,62 @@ def _fetch_refusal(user_id: str) -> tuple[str, str] | None:
     return None
 
 
+# ── The transcription budget (plan 265) ────────────────────────
+# A recogniser bills by the minute, as the link fetch's proxy bills by
+# the gigabyte, so it has the same two ceilings: the learner's day, in
+# core/daily_limit's counter (claimed before the call, refused without
+# spending), and the whole app's, summed from the sessions themselves
+# as the fetch budget is, so there is no second counter to drift.
+TRANSCRIBE_FEATURE = "transcription"
+# The sources whose lines a recogniser heard.
+_HEARD = ("media", "podcast")
+
+
+def _app_minutes_today() -> float:
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT COALESCE(SUM(media_seconds), 0)
+                  FROM video_sessions
+                 WHERE source IN %s AND created_at > NOW() - INTERVAL '1 day'
+                """,
+                (_HEARD,),
+            )
+            (seconds,) = cur.fetchone()
+    finally:
+        conn.close()
+    return float(seconds) / 60
+
+
+def _transcribe_refusal(user_id: str, seconds: float) -> tuple[str, str] | None:
+    """None when `seconds` of recording may be transcribed now -- and
+    then its minutes are claimed -- else the (code, sentence) to refuse
+    with."""
+    if _app_minutes_today() + transcribe.minutes(seconds) > transcribe.DAILY_MINUTES_TOTAL:
+        return ("transcribe_allowance_app",
+                "Today's transcription allowance for the whole app is used up.")
+    taken = daily_limit.claim_up_to(
+        user_id, TRANSCRIBE_FEATURE, transcribe.DAILY_MINUTES, transcribe.minutes(seconds),
+    )
+    if taken is None:
+        return ("transcribe_allowance_mine",
+                "This recording is longer than what is left of today's transcription allowance.")
+    return None
+
+
+def _minutes_left(user_id: str) -> int:
+    """What is left of the learner's day of transcription, in minutes:
+    what the intake checks a recording against before it encodes one."""
+    left = transcribe.DAILY_MINUTES - daily_limit.used_today(user_id, TRANSCRIBE_FEATURE)
+    try:
+        left = min(left, int(transcribe.DAILY_MINUTES_TOTAL - _app_minutes_today()))
+    except Exception:
+        logger.warning("The app's transcription minutes could not be read", exc_info=True)
+    return max(0, left)
+
+
 # ── The worker ─────────────────────────────────────────────────
 def _fail_session(session_id: int, message: str, code: str) -> None:
     conn = db_conn()
@@ -281,7 +349,8 @@ def _fail_session(session_id: int, message: str, code: str) -> None:
 
 def _video_worker(session_id: int, source: str, source_ref: str, content: str | None,
                    filename: str | None, window_start: float | None, window_end: float | None,
-                   timing: str | None = None, tracks: dict | None = None) -> None:
+                   timing: str | None = None, tracks: dict | None = None,
+                   audio: bytes | None = None, offset: float = 0.0) -> None:
     """Runs off-request. Parses/fetches the Track, reconstructs
     Sentences, analyzes each with the LOCAL tier only (never a model --
     see docs/adr/0001), and materializes the result. Owns the job row
@@ -298,6 +367,12 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
         # outright when none is configured. See study/captions.py.
         if source == "youtube":
             cues = fetch_youtube_track(source_ref, translated)
+        elif source in _HEARD:
+            # A recording (plan 265): the fourth road, and the second that
+            # leaves this server -- to the speech recogniser, with the
+            # sound the browser kept and nothing else. `offset` is where
+            # in the video the recording starts (the window's start).
+            cues = transcribe.transcribe(audio or b"", offset)
         elif source == "paste":
             cues = parse_pasted_transcript(content or "")
         else:
@@ -446,10 +521,12 @@ def _with_translations(cues: list[dict], translated: dict) -> list[dict]:
 
 def _start_worker(session_id: int, source: str, source_ref: str, content: str | None,
                    filename: str | None, window_start: float | None, window_end: float | None,
-                   timing: str | None = None, tracks: dict | None = None) -> None:
+                   timing: str | None = None, tracks: dict | None = None,
+                   audio: bytes | None = None, offset: float = 0.0) -> None:
     threading.Thread(
         target=_video_worker,
-        args=(session_id, source, source_ref, content, filename, window_start, window_end, timing, tracks),
+        args=(session_id, source, source_ref, content, filename, window_start, window_end, timing, tracks,
+              audio, offset),
         name=f"video-session:{session_id}", daemon=True,
     ).start()
 
@@ -467,11 +544,107 @@ def video_capabilities(user_id: str = Depends(get_user_id)):
     first cannot repeat it -- and the answer flips the moment the
     proxy credentials are set, with no deploy.
     """
-    return {"linkFetch": proxy_configured()}
+    caps = {"linkFetch": proxy_configured(), "transcribe": transcribe.configured()}
+    # A recording (plan 265): the longest one the server takes, and what
+    # is left of the learner's day, so the intake refuses one past
+    # either before the browser spends a minute encoding it.
+    if caps["transcribe"]:
+        caps["transcribeMaxSeconds"] = transcribe.MAX_SECONDS
+        caps["transcribeMinutesLeft"] = _minutes_left(user_id)
+    return caps
+
+
+# ── A podcast (plan 265) ───────────────────────────────────────
+# Its feed, read here (study/podcast.py: every address checked public,
+# every redirect checked again), and an episode's audio relayed to the
+# learner's browser, which keeps the sound and sends it back to be
+# transcribed like any recording it holds. The browser tries the
+# episode's own address first; this relay is for the hosts that send
+# no CORS headers, which is most of them.
+_PODCAST_STATUS = {
+    "feed_bad_url": 400, "feed_refused": 400, "feed_unreachable": 502,
+    "feed_unreadable": 422, "feed_no_episodes": 422, "feed_too_large": 413,
+    "episode_not_audio": 422, "episode_too_large": 413,
+}
+# Episodes a learner may have relayed in a day. The relay spends no
+# model call, but each is up to podcast.MAX_AUDIO_BYTES of the server's
+# bandwidth twice over, and one worker carries it (plan 211). Counted
+# in process, which is where the API runs: one worker.
+_RELAYS_PER_DAY = int(os.environ.get("PODCAST_RELAYS_PER_DAY", "20"))
+_relays: dict[tuple[str, str], int] = {}
+_relays_lock = threading.Lock()
+
+
+def _podcast_refusal(e: "podcast.PodcastError") -> HTTPException:
+    return _refusal(_PODCAST_STATUS.get(e.code, 502), e.code, str(e))
+
+
+@router.get("/api/video/podcast")
+def read_podcast(url: str = Query(..., min_length=1, max_length=podcast.MAX_URL),
+                 user_id: str = Depends(get_user_id)):
+    """A feed's title, picture and episodes, newest first. Only where
+    recordings can be transcribed: an episode is studied by its speech,
+    and a feed this server could not hear would be a list of doors that
+    open on nothing."""
+    if not transcribe.configured():
+        raise _refusal(400, "transcribe_disabled", "This server cannot transcribe recordings.")
+    try:
+        return podcast.read_feed(url)
+    except podcast.PodcastError as e:
+        logger.info("Podcast feed refused: %s", e.code)
+        raise _podcast_refusal(e)
+
+
+@router.get("/api/video/podcast/audio")
+def relay_episode(url: str = Query(..., min_length=1, max_length=podcast.MAX_URL),
+                  user_id: str = Depends(get_user_id)):
+    """An episode's audio, streamed through, never stored: for the
+    browser to keep the sound of (lib/mediaAudio.js). Bounded in size
+    and in episodes a day."""
+    if not transcribe.configured():
+        raise _refusal(400, "transcribe_disabled", "This server cannot transcribe recordings.")
+    from datetime import date
+    key = (user_id, date.today().isoformat())
+    with _relays_lock:
+        if _relays.get(key, 0) >= _RELAYS_PER_DAY:
+            raise _refusal(429, "relay_allowance_mine", "Today's episode allowance is used up.")
+        if len(_relays) > 10_000:
+            _relays.clear()
+        _relays[key] = _relays.get(key, 0) + 1
+    try:
+        c, response, kind = podcast.open_audio(url)
+    except podcast.PodcastError as e:
+        raise _podcast_refusal(e)
+
+    def body():
+        sent = 0
+        try:
+            for chunk in response.iter_bytes(64 * 1024):
+                sent += len(chunk)
+                if sent > podcast.MAX_AUDIO_BYTES:
+                    # A body longer than it said: cut, and the browser's
+                    # decode of a truncated file says so.
+                    break
+                yield chunk
+        except httpx.HTTPError:
+            # The host dropped it half way: the same cut, said the same way.
+            logger.info("An episode's relay was cut by its host")
+        finally:
+            response.close()
+            c.close()
+
+    headers = {"Cache-Control": "private, no-store"}
+    length = response.headers.get("content-length")
+    # Passed on only for a body sent as it is: httpx undoes a
+    # Content-Encoding, and the length would then be the wrong one.
+    if length and length.isdigit() and not response.headers.get("content-encoding"):
+        headers["Content-Length"] = length
+    return StreamingResponse(body(), media_type=kind, headers=headers)
 
 
 # ── Session creation ───────────────────────────────────────────
-def _open_session(user_id, source, source_ref, window_start, window_end, window_capped, video_id) -> int:
+def _open_session(user_id, source, source_ref, window_start, window_end, window_capped, video_id,
+                  media: dict | None = None) -> int:
     """The session's row and its job's, or a 429 while the learner
     already has _MAX_PREPARING_PER_USER sessions in preparation."""
     conn = db_conn()
@@ -498,14 +671,17 @@ def _open_session(user_id, source, source_ref, window_start, window_end, window_
                     429, "session_preparing",
                     "A session is still being prepared. Wait for it, then add the next one.",
                 )
+            media = media or {}
             cur.execute(
                 """
                 INSERT INTO video_sessions
-                    (user_id, source, source_ref, window_start, window_end, window_capped, video_id)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    (user_id, source, source_ref, window_start, window_end, window_capped, video_id,
+                     media_url, media_title, media_seconds)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
                 """,
-                (user_id, source, source_ref, window_start, window_end, window_capped, video_id),
+                (user_id, source, source_ref, window_start, window_end, window_capped, video_id,
+                 media.get("url"), media.get("title"), media.get("seconds")),
             )
             (session_id,) = cur.fetchone()
             cur.execute(
@@ -526,6 +702,9 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
     Request rather than declaring a single Pydantic body (FastAPI
     cannot mix a JSON model and File/Form fields on one route)."""
     content_type = request.headers.get("content-type", "")
+    # Where a page's media file plays from (plan 265), which only an
+    # upload carries.
+    media = None
 
     if content_type.startswith("multipart/form-data"):
         # Refused on the declared length before the body is parsed, so an
@@ -580,6 +759,9 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
         # Optional, and NEVER fetched from -- it only names a video to
         # embed alongside the transcript. See the JSON branch below.
         video_id = parse_video_id(form.get("url") or "")
+        # Optional too: a page's own media file the page grab found
+        # (plan 265), played by the analyser's player beside the lines.
+        media = _media_fields(form)
         window_start = _optional_seconds(form.get("start"), "start")
         window_end = _optional_seconds(form.get("end"), "end")
         filename = upload.filename
@@ -663,13 +845,96 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
     # raw request), and a blocking call here held the event loop -- the
     # whole API, on one worker -- for its duration.
     session_id = await run_in_threadpool(
-        _open_session, user_id, source, source_ref, window_start, window_end, window_capped, video_id,
+        _open_session, user_id, source, source_ref, window_start, window_end, window_capped, video_id, media,
     )
 
     _start_worker(session_id, source, source_ref, content, filename, window_start, window_end, timing, tracks)
     return JSONResponse(
         status_code=202,
         content={"sessionId": session_id, "status": "generating", "windowCapped": window_capped},
+    )
+
+
+def _media_fields(form) -> dict | None:
+    """Where a session's recording plays from and what it is called: a
+    web address the analyser's player plays (never fetched here) and a
+    title, both optional and bounded."""
+    url = (form.get("media_url") or "").strip()
+    if url and (len(url) > podcast.MAX_URL or not url.startswith(("https://", "http://"))):
+        raise _refusal(400, "bad_media_url", "media_url must be a web address")
+    title = (form.get("media_title") or "").strip()[:200]
+    if not url and not title:
+        return None
+    return {"url": url or None, "title": title or None}
+
+
+@router.post("/api/video/recording")
+async def create_recording_session(request: Request, user_id: str = Depends(get_user_id)):
+    """A recording to transcribe (plan 265): `audio`, the MP3 the
+    browser made of its sound (lib/mediaAudio.js), `name` the file or
+    episode it came from, `source` media (a file the learner holds) or
+    podcast (an episode, whose `media_url` the player plays), and the
+    window it was cut to: `start` is where the recording begins in the
+    video, so the lines' times are the video's.
+
+    Its own route, not a fifth shape of /api/video/session: a recording
+    is up to sixteen times the size a subtitle upload may be, and that
+    route refuses a body on its declared length before parsing it."""
+    if not transcribe.configured():
+        raise _refusal(400, "transcribe_disabled", "This server cannot transcribe recordings.")
+    try:
+        declared = int(request.headers.get("content-length", ""))
+    except ValueError:
+        declared = None
+    if declared is not None and declared > transcribe.MAX_AUDIO_BYTES + _MULTIPART_OVERHEAD_BYTES:
+        raise _refusal(413, "audio_too_large", "The recording is too large")
+    if not request.headers.get("content-type", "").startswith("multipart/form-data"):
+        raise _refusal(400, "bad_body", "Expected a multipart upload")
+    form = await request.form()
+    upload = form.get("audio")
+    if not hasattr(upload, "read"):
+        raise _refusal(400, "file_required", "audio must be a file")
+    raw = await upload.read(transcribe.MAX_AUDIO_BYTES + 1)
+    if len(raw) > transcribe.MAX_AUDIO_BYTES:
+        raise _refusal(413, "audio_too_large", "The recording is too large")
+    seconds = await run_in_threadpool(transcribe.mp3_duration, raw)
+    if seconds is None:
+        raise _refusal(400, "audio_unreadable", "The recording is not an MP3 stream")
+    # A second of slack for the encoder's last frame.
+    if seconds > transcribe.MAX_SECONDS + 1:
+        raise _refusal(413, "media_too_long", "The recording is longer than one session takes")
+    source = form.get("source") or "media"
+    if source not in _HEARD:
+        raise _refusal(400, "bad_source", "source must be media or podcast")
+    media = _media_fields(form) or {}
+    if source == "podcast" and not media.get("url"):
+        raise _refusal(400, "bad_media_url", "A podcast session plays its episode's address")
+    name = (form.get("name") or "").strip()[:200] or ("podcast" if source == "podcast" else "recording")
+    window_start = _optional_seconds(form.get("start"), "start")
+    window_end = _optional_seconds(form.get("end"), "end")
+    if window_start is not None and window_end is not None and window_end <= window_start:
+        raise _refusal(400, "end_before_start", "end must be after start")
+    refusal = await run_in_threadpool(_transcribe_refusal, user_id, seconds)
+    if refusal:
+        raise _refusal(429, *refusal)
+    media["seconds"] = round(seconds, 1)
+    try:
+        session_id = await run_in_threadpool(
+            _open_session, user_id, source, name, window_start, window_end, False,
+            parse_video_id(form.get("url") or ""), media,
+        )
+    except HTTPException:
+        # Refused after its minutes were claimed (two sessions already in
+        # preparation): given back, since nothing was heard.
+        await run_in_threadpool(
+            daily_limit.give_back, user_id, TRANSCRIBE_FEATURE, transcribe.minutes(seconds),
+        )
+        raise
+    _start_worker(session_id, source, name, None, None, window_start, window_end,
+                  audio=raw, offset=window_start or 0.0)
+    return JSONResponse(
+        status_code=202,
+        content={"sessionId": session_id, "status": "generating", "windowCapped": False},
     )
 
 
@@ -681,7 +946,7 @@ def _load_session(session_id: int, user_id: str) -> dict | None:
                 """
                 SELECT source, source_ref, window_start, window_end, window_capped,
                        status, error, sentences, truncated, created_at, video_id,
-                       error_code, translations
+                       error_code, translations, media_url, media_title
                   FROM video_sessions
                  WHERE id = %s AND user_id = %s AND deleted_at IS NULL
                 """,
@@ -693,7 +958,8 @@ def _load_session(session_id: int, user_id: str) -> dict | None:
     if row is None:
         return None
     (source, source_ref, window_start, window_end, window_capped,
-     status, error, sentences, truncated, created_at, video_id, error_code, translations) = row
+     status, error, sentences, truncated, created_at, video_id, error_code, translations,
+     media_url, media_title) = row
     return {
         "source": source, "source_ref": source_ref,
         "window_start": window_start, "window_end": window_end, "window_capped": window_capped,
@@ -701,6 +967,7 @@ def _load_session(session_id: int, user_id: str) -> dict | None:
         "sentences": sentences, "truncated": truncated,
         "created_at": created_at, "video_id": video_id,
         "translations": translations or {},
+        "media_url": media_url, "media_title": media_title,
     }
 
 
@@ -856,6 +1123,11 @@ def get_video_session(session_id: int, user_id: str = Depends(get_user_id)):
         # None when there is no video to play -- a subtitle file studied
         # on its own is a perfectly normal session.
         "videoId": session["video_id"],
+        # A recording's own address, where it has one the player can play
+        # (plan 265: a podcast's episode, a page's media file), and its
+        # name. None for a file on the learner's device.
+        "mediaUrl": session["media_url"],
+        "mediaTitle": session["media_title"],
         "windowStart": session["window_start"],
         "windowEnd": session["window_end"],
         "windowCapped": session["window_capped"],
@@ -890,7 +1162,7 @@ def list_video_sessions(user_id: str = Depends(get_user_id),
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT id, source, source_ref, video_id, truncated, created_at,
+                SELECT id, source, source_ref, video_id, truncated, created_at, media_url,
                        COALESCE(jsonb_array_length(sentences), 0) AS sentence_count,
                        sentences->0->>'text' AS first_line
                   FROM video_sessions
@@ -910,12 +1182,13 @@ def list_video_sessions(user_id: str = Depends(get_user_id),
             "source": source,
             "sourceRef": source_ref,
             "videoId": video_id,
+            "mediaUrl": media_url,
             "sentenceCount": sentence_count,
             "firstLine": first_line,
             "truncated": truncated,
             "createdAt": created_at.isoformat(),
         }
-        for row_id, source, source_ref, video_id, truncated, created_at, sentence_count, first_line in rows
+        for row_id, source, source_ref, video_id, truncated, created_at, media_url, sentence_count, first_line in rows
     ]
 
 
@@ -976,6 +1249,10 @@ _SOURCE_NAMES = {
     "youtube": "the Japanese subtitles of a YouTube video",
     "upload": "a video's Japanese subtitle file",
     "paste": "a video's Japanese transcript",
+    # Heard, not read (plan 265): the model is told the lines are a
+    # recogniser's, which can mishear.
+    "media": "a recording's speech, transcribed by a speech recogniser",
+    "podcast": "a podcast episode's speech, transcribed by a speech recogniser",
 }
 
 
@@ -1115,7 +1392,7 @@ def sort_video_lyrics(session_id: int, user_id: str = Depends(get_user_id)):
     known = _stored_kinds(_load_lyrics_sort(session_id))
     # The file's name says which song it is more often than not
     # ("YOASOBI - 夜に駆ける.srt"); a link's video id says nothing.
-    about = session["source_ref"] if session["source"] == "upload" else ""
+    about = session["source_ref"] if session["source"] in ("upload", *_HEARD) else ""
     try:
         kinds, fresh = lyrics_sort.sort_lines(user_id, sentences, known, about)
     except lyrics_sort.OverLimit:

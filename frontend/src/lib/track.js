@@ -165,7 +165,7 @@ export const VALUES = {
     setting: ['theme', 'lang', 'rating_scale', 'reading_pace', 'sound', 'notifications', 'level', 'lines', 'daily_target'],
     value: ['light', 'dark', 'auto', 'fr', 'en', 'binary', 'simple', 'full', 'standard', 'relaxed', 'slow', 'untimed', 'on', 'off', 'N5', 'N4', 'N3', 'N2', 'N1', 'changed'],
   },
-  ai_use: { feature: ['ask', 'composition', 'translation_review', 'deep_analysis', 'exam_paper', 'line_translation'] },
+  ai_use: { feature: ['ask', 'composition', 'translation_review', 'deep_analysis', 'exam_paper', 'line_translation', 'transcription'] },
   client_error: {
     where: ['error', 'rejection'],
     step: ['kana', 'reveal', 'level', 'test', 'card', 'intro-scripts', 'intro-sounds', 'intro-table', 'intro-katakana', 'intro-sentence', 'intro-route', 'known', 'known-dict', 'known-back', 'unknown', 'unknown-back', 'done', 'read', 'type', 'measure', 'graded', 'pass'],
