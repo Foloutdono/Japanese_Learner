@@ -11,18 +11,23 @@ import { LearnerSheet } from '../components/profile/LearnerSheet'
 import { DIVISIONS } from '../domain/banzuke'
 import { stationFor } from '../config/stations'
 import { useProfileSummaryState } from '../stores/profileSummary'
+import { useDesk } from '../hooks/useDesk'
 import { playClick } from '../lib/audio'
 
 // ── 番付 — the whole board (plan 262) ──────────────────────────────
 // /profile/banzuke, the door at the foot of the profile's board: every
 // place, a page of PAGE at a time, on one of three boards -- this week
-// (the calendar week, its podium of the week before above it), the
-// learner's division (段: its name and the ones either side to browse,
-// how many go up and down on Monday, the lines where they do), and all
-// time. The week and all time can be narrowed to the learner's own JLPT
-// level. The learner's own row, when it is not on the screen, rides at
-// the foot with the way to it; any name opens that learner's card; and
-// the page ends on the switch that keeps the learner off the board.
+// (the calendar week, the week before's podium opening its list), the
+// learner's division (段) and all time. Drawn as A1, the owner's pick of
+// the canvas "Tsuji — the 番付 redesign": one card heads the board (the
+// tabs, then the level filter and the week's end, or the division's name
+// between its neighbours); on a division the rows Monday moves up and
+// down ride a rail of their state's colour under a head naming them, and
+// the line under the list says what moving up (or staying) takes. On the
+// phone the learner's row, off the list, rides the foot with its gap and
+// the jump to it; on the desk a side column holds the learner's place
+// and gap, the six divisions as a ladder to browse, and the switch that
+// keeps the learner off the board. Any name opens that learner's card.
 //
 // The places come from GET /api/leaderboard (routes/banzuke.py), one
 // ranked list per board: a page is a slice of it, so a place is the same
@@ -40,14 +45,10 @@ function query(view, offset, limit) {
   return `/api/leaderboard?${p}`
 }
 
-// Days left until the board's week ends, the day of the end counted.
-function daysLeft(end) {
-  const ms = new Date(end).getTime() - Date.now()
-  return Math.max(0, Math.ceil(ms / 86_400_000) - 1)
-}
 
 export default function BanzukeScreen({ session }) {
   const { t, lang } = useLang()
+  const desk = useDesk()
   const { summary } = useProfileSummaryState()
   const myLevel = summary?.jlptLevel ?? null
 
@@ -172,6 +173,8 @@ export default function BanzukeScreen({ session }) {
   ]
   const division = board?.division ?? null
   const isMe = e => me != null && e.username === me.username
+  const ends = board?.week && view.period !== 'all' ? endsIn(board.week.end, t) : null
+  const showBar = !desk && me?.rank != null && !meVisible
 
   return (
     <main id="main-content" className="bzp" style={{ '--line-color': 'var(--pass-ink)' }}>
@@ -182,58 +185,71 @@ export default function BanzukeScreen({ session }) {
         aside={<Leave to="/profile">{t.profileTitle}</Leave>}
       />
 
-      <div className="bzp__controls">
-        <section className="banzuke bzp__tabs">
-          <div className="bz__head">
-            <Seg full className="bz__seg" label={t.ranking} value={view.period}
-              onChange={period => setView(v => ({ ...v, period, division: null }))} options={periods} />
+      {/* The board's head, one card: the tabs, then the filter and the
+          week's end, or the division's name between its neighbours. */}
+      <section className="banzuke bzp__controls">
+        <div className="bz__head">
+          <Seg full className="bz__seg" label={t.ranking} value={view.period}
+            onChange={period => setView(v => ({ ...v, period, division: null }))} options={periods} />
+        </div>
+        {view.period !== 'division' && (myLevel || ends) && (
+          <div className="bzp__sub">
+            {myLevel && (
+              <label className="bzp__scope">
+                <span className="sr-only">{t.bzScopeLabel}</span>
+                <select value={view.scope} onChange={e => setView(v => ({ ...v, scope: e.target.value }))}>
+                  <option value="all">{t.bzScopeAll}</option>
+                  <option value="level">{t.bzScopeLevel(myLevel)}</option>
+                </select>
+                <ChevronIcon direction="down" size={12} />
+              </label>
+            )}
+            {ends && <span className="bzp__ends">{ends}</span>}
           </div>
-        </section>
-        {view.period !== 'division' && myLevel && (
-          <Seg className="bzp__scope" label={t.bzScopeLabel} value={view.scope}
-            onChange={scope => setView(v => ({ ...v, scope }))}
-            options={[{ key: 'all', label: t.bzScopeAll }, { key: 'level', label: t.bzScopeLevel(myLevel) }]} />
         )}
-      </div>
-
-      {division && <DivisionHead division={division} board={board} t={t}
-        onBrowse={index => setView(v => ({ ...v, division: index }))} />}
-
-      {view.period === 'week' && board?.champions?.length > 0 && (
-        <section className="bzp__podium" aria-label={t.bzChampions}>
-          <span className="bzp__podium-cap">{t.bzChampions}</span>
-          <ol className="bzp__podium-list">
-            {board.champions.map(c => (
-              <li key={c.rank} className="bzp__champ">
-                <span className={`leaderboard-row__rank leaderboard-row__rank--${['gold', 'silver', 'bronze'][c.rank - 1]}`}>{c.rank}</span>
-                <button type="button" className="leaderboard-row__name bz-pick" aria-label={t.bzRowAria(c.username)} onClick={() => setPicked(c.username)}>{c.username}</button>
-                <span className="leaderboard-row__xp">{c.xp.toLocaleString(lang)} XP</span>
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
-
-      {view.period === 'week' && board && <p className="bzp__ends">{t.bzEnds(daysLeft(board.week.end))}</p>}
+        {division && (
+          <DivisionHead division={division} ends={ends} t={t} arrows={!desk}
+            onBrowse={index => setView(v => ({ ...v, division: index }))} />
+        )}
+      </section>
 
       {!board && !failed && <Loading />}
       {failed && <p className="hint" role="alert">{t.bzLoadFailed}</p>}
 
       {board && (
         <section className="banzuke bzp__list" aria-label={t.ranking} aria-busy={busy}>
+          {view.period === 'week' && list.from === 0 && board.champions?.length > 0 && (
+            <div className="bzp__podium">
+              <span className="bzp__podium-cap">{t.bzPodiumCap}</span>
+              <span className="bzp__podium-names">
+                {board.champions.map(c => (
+                  <span key={c.rank} className="bzp__champ">
+                    <span className={`bzp__medal bzp__medal--${MEDALS[c.rank - 1]}`} aria-hidden="true">{CIRCLED[c.rank - 1]}</span>
+                    <button type="button" className="bz-pick" aria-label={t.bzRowAria(c.username)} onClick={() => setPicked(c.username)}>{c.username}</button>
+                  </span>
+                ))}
+              </span>
+            </div>
+          )}
           {list.from > 0 && (
             <button type="button" className="bzp__more" onClick={earlier} disabled={busy}>{t.bzEarlier}</button>
           )}
           {list.rows.length === 0 && <p className="bzp__empty">{t.bzEmpty}</p>}
           {list.rows.map((e, i) => {
             const prev = list.rows[i - 1]
+            const zone = e.zone === 1 ? 'up' : e.zone === -1 ? 'down' : ''
+            // A group's head over its first row: the top of the list for
+            // those going up, the first going down below them.
+            const head = (zone === 'up' && !prev && list.from === 0)
+              || (zone === 'down' && prev && prev.zone !== -1)
+              || (zone === 'down' && !prev && list.from === 0)
             return (
               // Fragments, not wrappers: the rows stay the board's own
               // children, so only the last drops its hairline.
               <Fragment key={e.rank}>
-                {prev?.zone === 1 && e.zone !== 1 && <Zone dir="up" t={t} />}
-                {e.zone === -1 && prev?.zone !== -1 && (prev || list.from === 0) && <Zone dir="down" t={t} />}
-                <Row e={e} isMe={isMe(e)} lang={lang} t={t} onPick={setPicked} rowRef={isMe(e) ? meRef : undefined} />
+                {head && <GroupHead zone={zone} n={zone === 'up' ? division.upCount : division.downCount} t={t} />}
+                <Row e={e} isMe={isMe(e)} lang={lang} t={t} onPick={setPicked}
+                  className={zone ? `bzp__row--${zone}` : ''} rowRef={isMe(e) ? meRef : undefined} />
               </Fragment>
             )
           })}
@@ -245,16 +261,41 @@ export default function BanzukeScreen({ session }) {
         </section>
       )}
 
-      {me?.rank != null && !meVisible && (
+      {/* The phone's foot: the learner's row while it is off the list,
+          the gap to the next place on it and the jump to it. */}
+      {showBar && (
         <div className="bzp__me">
-          <Row e={me} isMe lang={lang} t={t} className="bzp__me-row" />
-          <button type="button" className="bzp__jump" onClick={jumpToMe} disabled={busy}>
-            <span>{t.bzJumpToMe}</span>
-            <ChevronIcon direction="down" size={15} />
+          <div className="leaderboard-row leaderboard-row--me bzp__me-row">
+            <span className="leaderboard-row__rank">{me.rank}</span>
+            <span className="leaderboard-row__name">{me.username}</span>
+            {me.gap && <GapShort gap={me.gap} t={t} lang={lang} />}
+            <span className="leaderboard-row__xp">{me.xp.toLocaleString(lang)} XP</span>
+          </div>
+          <button type="button" className="bzp__jump" aria-label={t.bzJumpToMe} title={t.bzJumpToMe} onClick={jumpToMe} disabled={busy}>
+            <ChevronIcon direction="down" size={16} />
           </button>
         </div>
       )}
-      {me?.gap && <p className="bz__gap-to bzp__gap">{t.bzGapTo(me.gap.xp.toLocaleString(lang), me.gap.username)}</p>}
+      {!desk && division && <ZoneLine division={division} t={t} lang={lang} className="bzp__line" />}
+      {!desk && !division && !showBar && me?.gap && (
+        <p className="bzp__line">{t.bzGapTo(me.gap.xp.toLocaleString(lang), me.gap.username)}</p>
+      )}
+
+      {/* The desk's side: the learner's place and what it takes, and the
+          six divisions to browse. */}
+      {desk && board && me?.rank != null && (
+        <section className="banzuke bzp__mine">
+          <span className="bzp__mine-rank">{me.rank.toLocaleString(lang)}</span>
+          <span className="bzp__mine-lines">
+            {division ? <ZoneLine division={division} t={t} lang={lang} className="bzp__mine-lead" />
+              : me.gap && <span className="bzp__mine-lead">{t.bzGapTo(me.gap.xp.toLocaleString(lang), me.gap.username)}</span>}
+            {division && me.gap && <span className="bzp__mine-sub">{t.bzGapTo(me.gap.xp.toLocaleString(lang), me.gap.username)}</span>}
+          </span>
+        </section>
+      )}
+      {desk && division && (
+        <Ladder division={division} t={t} lang={lang} onBrowse={index => setView(v => ({ ...v, division: index }))} />
+      )}
 
       {board && (
         <section className="bzp__seen">
@@ -270,47 +311,100 @@ export default function BanzukeScreen({ session }) {
   )
 }
 
-// ── 段 — the division's head ──────────────────────────────────────
-// Its name, the ones either side a press away, how many go up and down
-// on Monday, and the step the learner's last Monday took.
-function DivisionHead({ division, board, t, onBrowse }) {
+const MEDALS = ['gold', 'silver', 'bronze']
+const CIRCLED = ['①', '②', '③']
+
+// The week's end, to the hour.
+function endsIn(end, t) {
+  const ms = Math.max(0, new Date(end).getTime() - Date.now())
+  const d = Math.floor(ms / 86_400_000)
+  const h = Math.floor((ms % 86_400_000) / 3_600_000)
+  return t.bzEndsIn(d, h)
+}
+
+// The gap to the next place, short, for the pinned row: "+11 → L89",
+// the sentence for a screen reader.
+function GapShort({ gap, t, lang }) {
+  return (
+    <span className="bzp__me-gap">
+      <span className="sr-only">{t.bzGapTo(gap.xp.toLocaleString(lang), gap.username)}</span>
+      <span aria-hidden="true">+{gap.xp.toLocaleString(lang)} → {gap.username}</span>
+    </span>
+  )
+}
+
+// What the week's move asks of the learner in this division: the XP to
+// go up, the zone they stand in, or the XP to stay.
+function ZoneLine({ division, t, lang, className }) {
+  if (division.index !== division.mine) return null
+  let text = null
+  if (division.zone === 1) text = t.bzInUp
+  else if (division.toStay != null) text = t.bzToStay(division.toStay.toLocaleString(lang))
+  else if (division.toUp != null) text = t.bzToUp(division.toUp.toLocaleString(lang))
+  return text && <p className={className}>{text}</p>
+}
+
+// ── 段 — the division's name in the board's head ────────────────────
+// The name between the ones either side a press away (on the phone; the
+// desk browses by its ladder), the step the learner's last Monday took
+// and the week's end.
+function DivisionHead({ division, ends, t, arrows, onBrowse }) {
   const d = DIVISIONS[division.index]
   const below = division.index > 0 ? division.index - 1 : null
   const above = division.index < division.count - 1 ? division.index + 1 : null
   const notes = [
-    division.up > 0 && t.bzZoneUp(division.up),
-    division.down > 0 && t.bzZoneDown(division.down),
-    board?.week && t.bzEnds(daysLeft(board.week.end)),
+    division.index === division.mine && division.moved !== 0 && (division.moved > 0 ? t.bzMovedUp : t.bzMovedDown),
+    ends,
   ].filter(Boolean)
+  const step = (to, dir, label) => (
+    <button type="button" className="bzp__step" aria-label={to == null ? label : `${label} : ${DIVISIONS[to].latin}`}
+      disabled={to == null} onClick={() => { playClick(); onBrowse(to) }}>
+      <ChevronIcon direction={dir} size={16} />
+    </button>
+  )
   return (
-    <section className="bzp__division">
-      <div className="bzp__division-row">
-        <button type="button" className="bzp__step" aria-label={t.bzDivisionBelow} disabled={below == null}
-          onClick={() => { playClick(); onBrowse(below) }}>
-          <ChevronIcon direction="left" size={18} />
-        </button>
-        <span className="bzp__division-name">
+    <div className="bzp__division">
+      {arrows && step(below, 'left', t.bzDivisionBelow)}
+      <span className="bzp__division-name">
+        <span className="bzp__division-title">
           <span className="bzp__division-jp" lang="ja">{d.jp}</span>
           <span className="bzp__division-latin">{d.latin}</span>
         </span>
-        <button type="button" className="bzp__step" aria-label={t.bzDivisionAbove} disabled={above == null}
-          onClick={() => { playClick(); onBrowse(above) }}>
-          <ChevronIcon direction="right" size={18} />
-        </button>
-      </div>
-      {notes.length > 0 && <p className="bzp__division-notes">{notes.join(' · ')}</p>}
-      {division.index === division.mine && division.moved !== 0 && (
-        <p className="bzp__division-moved">{division.moved > 0 ? t.bzMovedUp : t.bzMovedDown}</p>
-      )}
-    </section>
+        {notes.length > 0 && <span className="bzp__division-notes">{notes.join(' · ')}</span>}
+      </span>
+      {arrows && step(above, 'right', t.bzDivisionAbove)}
+    </div>
   )
 }
 
-// The line where Monday's move up or down starts.
-function Zone({ dir, t }) {
+// The head of the rows Monday moves: its word and how many, on the
+// group's rail.
+function GroupHead({ zone, n, t }) {
   return (
-    <div className={`bzp__zone bzp__zone--${dir}`} role="separator" aria-label={dir === 'up' ? t.bzZoneUpLine : t.bzZoneDownLine}>
-      <span aria-hidden="true">{dir === 'up' ? '▲' : '▼'} {dir === 'up' ? t.bzZoneUpLine : t.bzZoneDownLine}</span>
+    <div className={`bzp__group bzp__group--${zone}`}>
+      <span><span aria-hidden="true">{zone === 'up' ? '▲' : '▼'} </span>{zone === 'up' ? t.bzUpHead : t.bzDownHead}</span>
+      <span className="bzp__group-n">{n}</span>
     </div>
+  )
+}
+
+// ── The desk's ladder of the six divisions ─────────────────────────
+// Top to foot, each with its size this week: the one on screen lit as a
+// choice, the learner's own marked by the pass's rail.
+function Ladder({ division, t, lang, onBrowse }) {
+  const rows = DIVISIONS.map((d, index) => ({ ...d, index, size: division.sizes?.[index] ?? 0 })).reverse()
+  return (
+    <nav className="banzuke bzp__ladder" aria-label={t.bzLadder}>
+      {rows.map(d => (
+        <button key={d.key} type="button"
+          className={`bzp__rung${d.index === division.index ? ' bzp__rung--on' : ''}${d.index === division.mine ? ' bzp__rung--mine' : ''}`}
+          aria-current={d.index === division.index ? 'true' : undefined}
+          onClick={() => { if (d.index !== division.index) { playClick(); onBrowse(d.index) } }}>
+          <span className="bzp__rung-jp" lang="ja">{d.jp}</span>
+          <span className="bzp__rung-latin">{d.latin}</span>
+          <span className="bzp__rung-n">{t.bzLearners(d.size.toLocaleString(lang))}</span>
+        </button>
+      ))}
+    </nav>
   )
 }

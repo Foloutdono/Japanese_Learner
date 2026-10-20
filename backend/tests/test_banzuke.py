@@ -196,6 +196,14 @@ def test_the_division_board_ranks_the_readers_division_with_its_zones(client, bo
     assert body["total"] == 6
     zones = {e["username"]: e["zone"] for e in body["entries"]}
     assert zones["Bz05"] == 1 and zones[body["me"]["username"]] == -1
+    # The reader, last of six at 50 XP: two go up (Bz05, Bz04), one goes
+    # down (the reader). What passes the last one going up (Bz04, 400),
+    # and what passes the last one staying (Bz01, 100).
+    assert body["division"]["upCount"] == 2 and body["division"]["downCount"] == 1
+    assert body["division"]["zone"] == -1
+    assert body["division"]["toUp"] == 400 - 50 + 1
+    assert body["division"]["toStay"] == 100 - 50 + 1
+    assert body["division"]["sizes"][2] == 6
     # The foot holds a new learner at nought, ranked.
     with acting_as(_learner(9)):
         foot = _get(client, period="division")

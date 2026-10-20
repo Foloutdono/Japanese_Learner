@@ -414,14 +414,37 @@ def read(srs, viewer: str, period: str = "all", scope: str = "all", *, limit: in
             out["near"] = [row(i) for i in range(max(0, index - around), min(len(ranked), index + around + 1))]
     if period == "division":
         n = len(ranked)
+        ups = [i for i, (uid, _) in enumerate(ranked) if marks.get(uid) == 1]
+        downs = [i for i, (uid, _) in enumerate(ranked) if marks.get(uid) == -1]
+        mine_zone = marks.get(viewer, 0) if index is not None else 0
+        # What it takes the reader to be in the week's move (plan 262's
+        # A1, the owner's pick of the canvas "Tsuji — the 番付 redesign"):
+        # the XP that passes the last learner going up, or, standing in
+        # the bottom, the last one staying.
+        to_up = to_stay = None
+        if index is not None and mine_zone != 1 and ups:
+            to_up = ranked[ups[-1]][1] - my_xp + 1
+        if index is not None and mine_zone == -1:
+            safe = [i for i in range(n) if marks.get(ranked[i][0], 0) != -1]
+            to_stay = max(1, ranked[safe[-1]][1] - my_xp + 1) if safe else 1
         out["division"] = {
             "index": division,
             "key": DIVISIONS[division],
             "count": len(DIVISIONS),
             "up": math.ceil(n * SHARE) if division < TOP else 0,
             "down": math.floor(n * SHARE) if division > 0 else 0,
+            # The rows marked, which the idle (sent down whatever their
+            # place) can make more than `down`.
+            "upCount": len(ups),
+            "downCount": len(downs),
             "mine": mine_div,
             "moved": moved if division == mine_div else 0,
+            "zone": mine_zone,
+            "toUp": to_up,
+            "toStay": to_stay,
+            # Each division's size this week, foot to top: the desk's
+            # ladder of the six.
+            "sizes": [len(_visible(srs, "division", None, False, d, names)) for d in range(len(DIVISIONS))],
         }
     if period == "week":
         out["champions"] = champions(srs, start, names)

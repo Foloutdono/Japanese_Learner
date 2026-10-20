@@ -15,7 +15,7 @@ import { LearnerSheet } from './LearnerSheet'
 // lifetime tab alone, so the board still says what it is.
 //
 // Since plan 262 the board is a window on the whole one: its top three,
-// the ⋯, and the learner between their two neighbours, so the board
+// a dashed hairline, and the learner between their two neighbours, so the board
 // says who is within reach rather than who is out of it
 // (domain/banzuke.boardRows). A row says how far it moved since the day
 // began, a name opens that learner's card (LearnerSheet), the learner's
@@ -58,10 +58,18 @@ export function Row({ e, isMe, lang, t, onPick, className = '', rowRef }) {
   )
 }
 
-// The learner's own gap to the next place, under the board.
+// The learner's own gap to the next place, at the board's foot: short,
+// "+19 XP → CalmTsuki880", so it holds one line beside the door, and the
+// sentence for a screen reader (plan 262's A1).
 function GapTo({ me, t, lang }) {
-  if (!me?.gap) return null
-  return <p className="bz__gap-to">{t.bzGapTo(me.gap.xp.toLocaleString(lang), me.gap.username)}</p>
+  if (!me?.gap) return <span className="bz__gap-to" />
+  const xp = me.gap.xp.toLocaleString(lang)
+  return (
+    <p className="bz__gap-to">
+      <span className="sr-only">{t.bzGapTo(xp, me.gap.username)}</span>
+      <span aria-hidden="true"><b className="bz__gap-xp">+{xp} XP</b> → {me.gap.username}</span>
+    </p>
+  )
 }
 
 // The board's foot: the door to the whole of it.
@@ -149,7 +157,7 @@ function BothBoard({ week, all, t, lang, onPick }) {
         <span className="desk-bz__period" role="columnheader">{t.periodAll}</span>
       </div>
       {lines.map((line, i) => {
-        if (line.gap) return <div key={`gap${i}`} className="desk-bz__gap" aria-hidden="true">⋯</div>
+        if (line.gap) return <div key={`gap${i}`} className="desk-bz__gap" aria-hidden="true" />
         const { rank } = line
         const medal = MEDAL[rank]
         return (
@@ -192,7 +200,7 @@ function Board({ board, guide, lang, t, onPick, children }) {
     <section className="banzuke" data-guide={guide}>
       <div className="bz__head">{children}</div>
       {boardRows(board).map((r, i) => (r.gap
-        ? <div key={`gap${i}`} className="leaderboard-row leaderboard-row__gap" aria-hidden="true">⋯</div>
+        ? <div key={`gap${i}`} className="bz__cut" aria-hidden="true" />
         : <Row key={r.e.rank} e={r.e} isMe={me != null && r.e.username === me.username} lang={lang} t={t} onPick={onPick} />
       ))}
       <div className="bz__foot">

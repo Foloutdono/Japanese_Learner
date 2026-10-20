@@ -20,7 +20,7 @@ vi.mock('./lib/api', async o => ({
     entries: Array.from({ length: 30 }, (_, i) => row(i + 1, { zone: i < 6 ? 1 : i >= 24 ? -1 : 0 })),
     me: { ...row(12), gap: { xp: 11, username: 'L11' } }, hidden: false,
     week: { start: new Date().toISOString(), end: new Date(Date.now() + 2 * 86_400_000).toISOString() },
-    division: { index: 3, key: 'makushita', count: 6, up: 6, down: 6, mine: 3, moved: 0 },
+    division: { index: 3, key: 'makushita', count: 6, up: 6, down: 6, upCount: 6, downCount: 6, mine: 3, moved: 0, zone: 0, toUp: 61, toStay: null, sizes: [40, 12, 11, 30, 6, 3] },
   })),
 }))
 vi.mock('./lib/cachedJson', async o => {
@@ -42,7 +42,7 @@ const $ = sel => document.querySelector(sel)
 const $$ = sel => [...document.querySelectorAll(sel)]
 
 describe('the whole board on the desk', () => {
-  it('stands the list beside the division, the gap and the switch', async () => {
+  it('stands the list beside the head, the learner’s place, the six divisions and the switch', async () => {
     document.body.innerHTML = ''
     await render(
       <LangProvider>
@@ -56,18 +56,33 @@ describe('the whole board on the desk', () => {
     $$('.bz__seg .seg__opt')[1].click()
     await settle()
     const list = $('.bzp__list').getBoundingClientRect()
-    const side = ['.bzp__controls', '.bzp__division', '.bzp__gap', '.bzp__seen'].map(sel => [sel, $(sel).getBoundingClientRect()])
+    const side = ['.bzp__controls', '.bzp__mine', '.bzp__ladder', '.bzp__seen'].map(sel => [sel, $(sel).getBoundingClientRect()])
     for (const [sel, r] of side) expect(r.left, sel).toBeGreaterThan(list.right)
     expect(list.width).toBeLessThanOrEqual(441)
     // The list starts with the side, and the side stays packed: no row
-    // of it is stretched by the list beside it (two gaps at most, where
-    // the week's end, a row of its own, is not drawn).
+    // of it is stretched by the list beside it.
     expect(side[0][1].top).toBeCloseTo(list.top, 0)
-    for (let i = 1; i < side.length; i++) expect(side[i][1].top - side[i - 1][1].bottom, side[i][0]).toBeLessThan(40)
-    // The division's lines: one after the sixth place, one before the twenty-fifth.
-    const zones = $$('.bzp__zone')
-    expect(zones).toHaveLength(2)
-    expect(zones[1].nextElementSibling.querySelector('.leaderboard-row__rank').textContent).toBe('25')
+    for (let i = 1; i < side.length; i++) expect(side[i][1].top - side[i - 1][1].bottom, side[i][0]).toBeLessThan(20)
+    // The learner's place and what going up takes; no pinned row, no
+    // arrows (the ladder browses), no line under the list.
+    expect($('.bzp__mine-rank').textContent).toBe('12')
+    expect($('.bzp__mine-lead').textContent).toBe('+61 XP pour monter lundi')
+    expect($('.bzp__mine-sub').textContent).toBe('11 XP pour dépasser L11')
+    expect($('.bzp__me')).toBeNull()
+    expect($('.bzp__step')).toBeNull()
+    expect($('.bzp__line')).toBeNull()
+    // The rows Monday moves, under their heads.
+    const heads = $$('.bzp__group')
+    expect(heads).toHaveLength(2)
+    expect(heads[1].nextElementSibling.querySelector('.leaderboard-row__rank').textContent).toBe('25')
+    // The ladder, top to foot, the one on screen lit and the learner's own marked.
+    const rungs = $$('.bzp__rung')
+    expect(rungs.map(r => r.querySelector('.bzp__rung-latin').textContent)).toEqual(['Makuuchi', 'Jūryō', 'Makushita', 'Sandanme', 'Jonidan', 'Jonokuchi'])
+    expect(rungs[2].classList.contains('bzp__rung--on')).toBe(true)
+    expect(rungs[2].classList.contains('bzp__rung--mine')).toBe(true)
+    expect(rungs[2].getAttribute('aria-current')).toBe('true')
+    expect(rungs[2].querySelector('.bzp__rung-n').textContent).toBe('30 apprenants')
+    for (const r of rungs) expect(r.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
   })
 })
 
@@ -98,7 +113,11 @@ describe('the profile’s one board with neighbours', () => {
     const foot = $('.desk-bz__foot').getBoundingClientRect()
     expect(foot.bottom).toBeLessThanOrEqual(board.bottom + 0.5)
     expect(foot.top).toBeGreaterThanOrEqual(rows.at(-1).getBoundingClientRect().bottom - 0.5)
-    expect($('.desk-bz__foot .bz__gap-to').textContent).toBe('3 XP to pass L1')
+    expect($('.desk-bz__foot .bz__gap-to [aria-hidden]').textContent).toBe('+3 XP → L1')
+    expect($('.desk-bz__foot .bz__gap-to .sr-only').textContent).toBe('3 XP to pass L1')
+    // The skipped places: a dashed hairline in place of the row's own.
+    expect(getComputedStyle($('.desk-bz__gap')).borderTopStyle).toBe('dashed')
+    expect(getComputedStyle(rows[4]).borderBottomWidth).toBe('0px')
     // Every row as tall as its neighbours: they share the board's height.
     const heights = rows.map(r => Math.round(r.getBoundingClientRect().height))
     for (const h of heights) expect(h).toBe(heights[0])

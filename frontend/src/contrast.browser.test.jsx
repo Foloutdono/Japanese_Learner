@@ -391,7 +391,8 @@ const Fixture = () => (
         <span className="leaderboard-row__name">Sora</span>
         <span className="leaderboard-row__xp">720 XP</span>
       </div>
-      <div className="leaderboard-row leaderboard-row__gap" aria-hidden="true">⋯</div>
+      <div className="bzp__group bzp__group--down"><span>▼ Descendent lundi</span><span className="bzp__group-n">2</span></div>
+      <div className="bz__foot"><p className="bz__gap-to"><span><b className="bz__gap-xp">+19 XP</b> → Mei</span></p></div>
     </div>
 
     {/* DecksScreen.jsx -- the shelf's card (plan 071): the count aside
@@ -1131,7 +1132,9 @@ const SITES = [
 
   // Settled by measurement rather than by reading a selector -- see the
   // comment beside their markup above.
-  ['.leaderboard-row__gap', 'leaderboard elision row'],
+  ['.bzp__group', 'board group head (plan 262)'],
+  ['.bz__gap-to', 'board foot gap'],
+  ['.bz__gap-xp', 'board foot gap figure (selection ink)'],
   ['.dk-glyph', 'deck card glyph (tinted roundel)'],
   ['.dk-due', 'deck card due (warning ink)'],
   ['.dk-count-cap', 'deck card count caption'],

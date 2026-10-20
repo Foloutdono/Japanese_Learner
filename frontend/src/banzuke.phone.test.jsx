@@ -69,7 +69,7 @@ function divisionBoard() {
     period: 'division', offset: 0, total: 5, entries, near: [],
     me: { ...entries[2], username: 'L3', gap: null }, hidden: false,
     week: { start: new Date().toISOString(), end: WEEK_END },
-    division: { index: 1, key: 'jonidan', count: 6, up: 1, down: 1, mine: 1, moved: 1 },
+    division: { index: 1, key: 'jonidan', count: 6, up: 1, down: 1, upCount: 1, downCount: 2, mine: 1, moved: 1, zone: 0, toUp: 21, toStay: null, sizes: [40, 5, 11, 9, 6, 3] },
   }
 }
 
@@ -109,8 +109,13 @@ describe('the whole board at 390×844', () => {
     expect($$('.bz__seg .seg__opt').map(o => o.textContent)).toEqual(['Semaine', 'Division', 'Au total'])
     expect($$('.bzp__list .leaderboard-row')).toHaveLength(50)
     expect($('.bzp__list .leaderboard-row .bz-move').getAttribute('aria-label')).toBe('2 places gagnées depuis hier')
-    expect($$('.bzp__champ .leaderboard-row__name').map(n => n.textContent)).toEqual(['Aoi', 'Mei', 'Sora'])
-    expect($('.bzp__ends').textContent).toBe('Se termine dans 3 jours')
+    // Last week's podium is the list's first line; the week's end, the
+    // head card's second (plan 262, A1).
+    const podium = $('.bzp__list > .bzp__podium')
+    expect(podium).toBe($('.bzp__list').firstElementChild)
+    expect(podium.querySelector('.bzp__podium-cap').textContent).toBe('Sem. dernière')
+    expect($$('.bzp__champ .bz-pick').map(n => n.textContent)).toEqual(['Aoi', 'Mei', 'Sora'])
+    expect($('.bzp__controls .bzp__sub .bzp__ends').textContent).toMatch(/^Fin dans 3 j \d+ h$/)
   })
 
   it('asks the next page at the foot, and the places run on', async () => {
@@ -129,7 +134,10 @@ describe('the whole board at 390×844', () => {
     expect(bar.querySelector('.leaderboard-row__name').textContent).toBe('Moi')
     expect(getComputedStyle(bar).position).toBe('sticky')
     expect(bar.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
-    expect($('.bzp__gap').textContent).toBe('11 XP pour dépasser L89')
+    // The gap rides the pinned row, short; its sentence is the screen reader's.
+    expect(bar.querySelector('.bzp__me-gap [aria-hidden]').textContent).toBe('+11 → L89')
+    expect(bar.querySelector('.bzp__me-gap .sr-only').textContent).toBe('11 XP pour dépasser L89')
+    expect(bar.querySelector('.bzp__jump').getAttribute('aria-label')).toBe('Ma place')
     $('.bzp__jump').click()
     await settle()
     expect(params(calls.at(-1).path).get('offset')).toBe('79')
@@ -137,11 +145,28 @@ describe('the whole board at 390×844', () => {
     expect($$('.bzp__list .leaderboard-row__rank')[0].textContent).toBe('80')
   })
 
+  it('keeps the learner’s name whole on the pinned row, the gap giving way', async () => {
+    const quick = answer
+    answer = (path, init) => {
+      const body = quick(path, init)
+      if (body?.me?.gap) body.me = { ...body.me, gap: { xp: 11, username: 'BrightKitsune398512345' } }
+      return body
+    }
+    await mount()
+    const name = $('.bzp__me .leaderboard-row__name')
+    expect(name.scrollWidth).toBeLessThanOrEqual(name.clientWidth)
+    const gap = $('.bzp__me-gap')
+    expect(getComputedStyle(gap).textOverflow).toBe('ellipsis')
+    expect(gap.getBoundingClientRect().right).toBeLessThanOrEqual($('.bzp__me .leaderboard-row__xp').getBoundingClientRect().left)
+  })
+
   it('narrows the week to the learner’s level', async () => {
     await mount()
-    const scope = $$('.bzp__scope .seg__opt')
-    expect(scope.map(o => o.textContent)).toEqual(['Tout le monde', 'Mon niveau · N4'])
-    scope[1].click()
+    const select = $('.bzp__scope select')
+    expect([...select.options].map(o => o.textContent)).toEqual(['Tout le monde', 'Mon niveau · N4'])
+    expect(select.closest('.bzp__controls')).not.toBeNull()
+    select.value = 'level'
+    select.dispatchEvent(new Event('change', { bubbles: true }))
     await settle()
     expect(params(calls.at(-1).path).get('scope')).toBe('level')
   })
@@ -152,13 +177,24 @@ describe('the whole board at 390×844', () => {
     await settle()
     expect($('.bzp__division-jp').textContent).toBe('序二段')
     expect($('.bzp__division-latin').textContent).toBe('Jonidan')
-    expect($('.bzp__division-notes').textContent).toContain('Le premier monte lundi · le dernier descend')
-    expect($('.bzp__division-moved').textContent).toBe('Promu lundi dernier')
-    const zones = $$('.bzp__zone')
-    expect(zones.map(z => z.getAttribute('aria-label'))).toEqual(['Promotion', 'Relégation'])
-    expect(zones[0].previousElementSibling.querySelector('.leaderboard-row__rank').textContent).toBe('1')
-    expect(zones[1].nextElementSibling.querySelector('.leaderboard-row__rank').textContent).toBe('4')
+    expect($('.bzp__division').closest('.bzp__controls')).not.toBeNull()
+    expect($('.bzp__division-notes').textContent).toMatch(/^Promu lundi dernier · Fin dans 3 j \d+ h$/)
+    // The rows Monday moves: a head over each group, its count, and the
+    // state's colour as the rows' rail.
+    const heads = $$('.bzp__group')
+    expect(heads.map(h => h.textContent)).toEqual(['▲ Montent lundi1', '▼ Descendent lundi2'])
+    expect(heads[0].nextElementSibling.querySelector('.leaderboard-row__rank').textContent).toBe('1')
+    expect(heads[1].nextElementSibling.querySelector('.leaderboard-row__rank').textContent).toBe('4')
+    const rail = el => getComputedStyle(el).boxShadow
+    const up = $('.bzp__row--up'), down = $('.bzp__row--down')
+    expect(rail(up)).toContain('inset')
+    expect(rail(up)).not.toBe(rail(down))
+    expect(rail(heads[0])).toBe(rail(up))
+    expect($$('.bzp__row--down')).toHaveLength(2)
+    // What going up takes, under the list.
+    expect($('.bzp__line').textContent).toBe('+21 XP pour monter lundi')
     expect($('.bzp__scope')).toBeNull()
+    expect($('.bzp__ladder')).toBeNull()
     $$('.bzp__step')[1].click()
     await settle()
     expect(params(calls.at(-1).path).get('division')).toBe('2')
@@ -189,7 +225,7 @@ describe('the whole board at 390×844', () => {
 
   it('opens a name’s card: its figures, its division and its decks', async () => {
     await mount()
-    $$('.bzp__list .bz-pick')[2].click()
+    $$('.bzp__list .leaderboard-row .bz-pick')[2].click()
     await settle()
     const sheet = $('.bz-card')
     expect(sheet.getAttribute('aria-label')).toBe('La carte de L3')
@@ -208,12 +244,23 @@ describe('the profile’s board at 390×844', () => {
     }
     await render(<LangProvider><MemoryRouter><div className="profile"><Banzuke all={board} week={board} t={t} lang="fr" /></div></MemoryRouter></LangProvider>)
     await settle()
-    const ranks = $$('.banzuke > .leaderboard-row').map(r => r.querySelector('.leaderboard-row__rank')?.textContent ?? '⋯')
+    const ranks = $$('.banzuke > .leaderboard-row, .banzuke > .bz__cut').map(r => r.querySelector('.leaderboard-row__rank')?.textContent ?? '⋯')
     expect(ranks).toEqual(['1', '2', '3', '⋯', '46', '47', '48'])
+    // The skipped places are a dashed hairline in place of the row's own.
+    const cut = $('.bz__cut')
+    expect(getComputedStyle(cut).borderTopStyle).toBe('dashed')
+    expect(getComputedStyle(cut.previousElementSibling).borderBottomWidth).toBe('0px')
     expect($('.leaderboard-row--me .leaderboard-row__name').textContent).toBe('Moi')
     expect($('.bz-move').getAttribute('aria-label')).toBe('1 place perdue depuis hier')
-    expect($('.bz__gap-to').textContent).toBe('31 XP pour dépasser L46')
+    // The foot holds one line: the gap, short, and the door.
+    const gap = $('.bz__gap-to')
+    expect(gap.querySelector('[aria-hidden]').textContent).toBe('+31 XP → L46')
+    expect(gap.querySelector('.sr-only').textContent).toBe('31 XP pour dépasser L46')
     const door = $('.bz__whole')
+    const g = gap.getBoundingClientRect(), d = door.getBoundingClientRect()
+    expect(g.top).toBeGreaterThanOrEqual(d.top)
+    expect(g.bottom).toBeLessThanOrEqual(d.bottom)
+    expect(door.textContent).toBe('Tout le classement')
     expect(door.getAttribute('href')).toBe('/profile/banzuke')
     expect(door.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
     for (const r of $$('.banzuke > .leaderboard-row')) expect(r.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
