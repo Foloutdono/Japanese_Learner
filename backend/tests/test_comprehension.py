@@ -378,7 +378,7 @@ def _checked(sentence: str, level: str = "N5"):
 
 
 def test_grammar_above_the_level_is_read_as_the_mock_papers_read_it():
-    """Feedback only, and the detector's (study/exam_levels, plan 260):
+    """Feedback only, and the detector's (study/exam_levels, plan 261):
     天気が is the weather, no 〜気がする, and ありがとうございます no
     〜でございます; a 〜んです an N5 reader has not met is named."""
     assert _checked("きょうは天気がいいです。").grammar_over == []

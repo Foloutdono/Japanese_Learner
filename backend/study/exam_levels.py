@@ -212,7 +212,7 @@ def _is_not_the_point(pattern: str, text: str, start: int, tokens=None) -> bool:
 def grammar_above(text: str, level: str) -> list[tuple[str, str]]:
     """(pattern, its level) for each catalogue point the text visibly uses
     that the catalogue files above `level` and the detector can really find.
-    Read for the mock papers (plan 257) and for comprehension (plan 260,
+    Read for the mock papers (plan 257) and for comprehension (plan 261,
     study/level_mix)."""
     return list(_grammar_above(text, level))
 

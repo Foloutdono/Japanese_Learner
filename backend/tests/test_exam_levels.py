@@ -127,8 +127,8 @@ def test_a_thing_there_is_is_not_ものがある():
     assert L.grammar_above("食べたいものがありますか。", "N5") == []
 
 
-# ── What comprehension's texts met (plan 260) ─────────────────────────
-# level_mix reads this gate for comprehension since plan 260, and diffed
+# ── What comprehension's texts met (plan 261) ─────────────────────────
+# level_mix reads this gate for comprehension since plan 261, and diffed
 # over every sentence the app teaches it named these readings of ordinary
 # words. Each rule leaves the point's own lessons found (below).
 

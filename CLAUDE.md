@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **261**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **262**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -126,7 +126,7 @@ runtime purpose.
   of ordinary text (noun と, 持って来る, ならんで) are named in
   `_NOT_THE_POINT` and pinned in `tests/test_exam_levels.py` with the
   sentence that must still be found; a new exemption brings its counter-case.
-  Comprehension is held to the same gate since plan 260 (`level_mix`'s
+  Comprehension is held to the same gate since plan 261 (`level_mix`'s
   `grammar_over`, a hard rule for the seeds), so a misreading is named once
   for both, and no rule may hide its point's own lessons
   (`test_every_rule_leaves_its_points_lessons_found`).

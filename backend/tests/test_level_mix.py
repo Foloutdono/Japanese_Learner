@@ -90,7 +90,7 @@ def test_ratio_is_the_same_rule_as_the_floor_count():
             assert by_ratio == by_floor, (n, count)
 
 
-# -- Grammar above the level (plan 260): the mock papers' reading,
+# -- Grammar above the level (plan 261): the mock papers' reading,
 # study/exam_levels.grammar_above, not the catalogue's patterns matched
 # as letters. What plan 259's writers had to write around, each a hit
 # of the old gate, and a real use of each point it was taken for.

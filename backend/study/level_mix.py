@@ -33,7 +33,7 @@ deliberately avoid the words "outside" and "allowed set", which route a
 message into that loop's kanji branch (exam_reading_gen._as_feedback).
 
 The grammar above the level is the mock papers' reading of it
-(study/exam_levels.grammar_above, plan 257), since plan 260: the points
+(study/exam_levels.grammar_above, plan 257), since plan 261: the points
 the detector finds, less the misreadings exam_levels names. It used to
 be difficulty.grammar_over_level, which matches the catalogue's patterns
 as letters: 天気が was 〜気がする, ありがとうございます 〜でございます,

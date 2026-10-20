@@ -43,7 +43,7 @@ def test_every_seed_passes_the_checks_a_model_answer_must(entry, lang):
     language: the breakdown reproduces the text, the vocabulary, the
     kanji and the grammar sit inside the level, and every seed pattern
     is found. Length and grammar are hard rules here where the generator
-    only feeds them back (grammar since plan 260 read it as the mock
+    only feeds them back (grammar since plan 261 read it as the mock
     papers do): a seed is written by hand and has no excuse."""
     data = reading._parse_comprehension(json.dumps(seed.render(entry, lang), ensure_ascii=False))
     verdict = reading._check_comprehension(data, entry["level"], _seed_points(entry))
