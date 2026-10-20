@@ -69,7 +69,8 @@ runtime purpose.
   `REV` in `frontend/scripts/today-print/build.py` (Today's print, plan 205),
   `REV` in `frontend/scripts/ambiance/build.py` (the ambiance, plan 219),
   `SORT_REV` in `study/lyrics_sort.py` (which lines of a song are sung,
-  plan 264).
+  plan 264), `CUT_REV` in `study/line_cut.py` (what a stored video
+  session's lines are cut into).
   An exam id's `generator_version` (`study/exam_catalogue.py`) is one too: a bump
   retires the papers it made without deleting them (plan 257 bumped `vocab-gen`).
   A change to what any of them produces bumps it, or learners keep the old.

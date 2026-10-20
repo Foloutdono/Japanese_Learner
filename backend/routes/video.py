@@ -39,7 +39,7 @@ from study.captions import (
     proxy_configured, CaptionParseError, CaptionFetchError,
 )
 from study.cue_sentences import sentences_from_cues
-from study.line_cut import MAX_LINE_WIDTH, cut_line, line_width
+from study.line_cut import CUT_REV, TARGET_LINE_WIDTH, cut_line, line_width
 from study.word_timing import align_cues
 from study.sentences import MAX_SENTENCES
 # _analyze_sentence already bundles local + optional-deep + per-user
@@ -403,6 +403,7 @@ def _materialize(session_id: int, cues: list[dict], translated: dict, timing: st
         if s.get("word_times"):
             analysis["word_times"] = s["word_times"]
         analysis["local_rev"] = LOCAL_REV
+        analysis["cut_rev"] = CUT_REV
         analyzed.append(analysis)
 
     conn = db_conn()
@@ -719,16 +720,19 @@ def _current(session_id: int, sentences: list[dict]) -> list[dict]:
     tokenizer nothing is remade -- "analysis unavailable" is no
     improvement on an older analysis.
 
-    A line wider than study/line_cut.MAX_LINE_WIDTH, stored before the
-    lines were held to it (plan 235), is cut as a new session's would
-    be, each piece analysed and timed on its own. The session's indices
-    move with it, which is why every route that reads a line by its
-    index reads it through here."""
+    A line wider than study/line_cut.TARGET_LINE_WIDTH, stored before
+    the lines were held to today's rule (plan 235, then two rows on a
+    phone, 2026-10-20), is cut as a new session's would be, each piece
+    analysed and timed on its own, and carries the rule's CUT_REV after,
+    cut or not, so a line with nowhere clean to cut is tried once. The
+    session's indices move with it, which is why every route that reads
+    a line by its index reads it through here."""
     if not morphology.MORPHOLOGY_AVAILABLE:
         return sentences
 
     def wide(s):
-        return not s.get("foreign") and line_width(s.get("text") or "") > MAX_LINE_WIDTH
+        return (not s.get("foreign") and s.get("cut_rev") != CUT_REV
+                and line_width(s.get("text") or "") > TARGET_LINE_WIDTH)
 
     if all(s.get("local_rev") == LOCAL_REV and not wide(s) for s in sentences):
         return sentences
@@ -741,7 +745,10 @@ def _current(session_id: int, sentences: list[dict]) -> list[dict]:
             continue
         pieces = cut_line(s["text"], s.get("cue_start"), s.get("cue_end"), s.get("word_times")) if wide(s) else None
         if s.get("local_rev") == LOCAL_REV and (pieces is None or len(pieces) == 1):
-            # Current, and nowhere to cut it.
+            # Current, and nowhere to cut it: kept, and marked tried.
+            if pieces is not None:
+                changed = True
+                s = {**s, "cut_rev": CUT_REV}
             fresh.append(s)
             continue
         changed = True
@@ -750,7 +757,7 @@ def _current(session_id: int, sentences: list[dict]) -> list[dict]:
             fresh.append({
                 **analyze_local(piece["text"]), "cue_start": piece["start"], "cue_end": piece["end"],
                 **({"word_times": piece["words"]} if piece.get("words") else {}),
-                "local_rev": LOCAL_REV,
+                "local_rev": LOCAL_REV, "cut_rev": CUT_REV,
             })
     if not changed:
         return sentences

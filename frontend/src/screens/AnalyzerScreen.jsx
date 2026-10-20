@@ -25,6 +25,7 @@ import { ExplainPanel, ExplainSheet } from '../components/analysis/ExplainPanel'
 import { GrammarPoints } from '../components/analysis/GrammarPoints'
 import { coversToken, numberedPointsOf } from '../components/analysis/grammarSpans'
 import { useLight } from '../components/analysis/useLight'
+import { useLineFit } from '../components/analysis/useLineFit'
 import { useStageClaim } from '../stores/stage'
 import { Dots } from '../components/ui/Loading'
 import { DictionaryLookupSheet, DictionaryLookupBody } from '../components/dictionary/DictionaryDetail'
@@ -1708,6 +1709,9 @@ export default function AnalyzerScreen({ session }) {
     )
     : <span className={`anl-m__line anl-m__line--${where} anl-m__line--none`} aria-hidden="true" />)
   const wordRows = readable ? wordTileRows(focused) : []
+  // The line and its translation, stepped down a rung where the stage
+  // would not hold them (useLineFit).
+  const subsRef = useRef(null)
   const mobileResult = focused && (
     <div
       ref={resultsRef}
@@ -1757,7 +1761,7 @@ export default function AnalyzerScreen({ session }) {
         </div>
       )}
 
-      <section className="anl-m__subs" data-furigana={furigana} data-romaji={display.romaji ? '' : undefined} aria-label={t.stopNumber(focusIndex + 1, sentences.length)}>
+      <section ref={subsRef} className="anl-m__subs" data-furigana={furigana} data-romaji={display.romaji ? '' : undefined} aria-label={t.stopNumber(focusIndex + 1, sentences.length)}>
         {sideLine(prevText, t.prevSentence, () => goToStop(focusIndex - 1), 'prev')}
         {focused.foreign ? (
           <p className="anl-m__note">
@@ -1862,6 +1866,10 @@ export default function AnalyzerScreen({ session }) {
 
   // The phone's result takes the stage: no HUD, no tab bar (plan 219).
   useStageClaim(Boolean(showResult && focused && !wide))
+  useLineFit(subsRef, [
+    showResult && !wide, focusIndex, focused?.text, translation, translationDue,
+    display.translation, display.romaji, furigana,
+  ].join('\u0000'))
 
   return (
     <main id="main-content" className="dictionary analyzer" style={{ '--line-color': KAISEKI }}>
