@@ -1059,9 +1059,10 @@ def files(deck: dict):
     yield "pictures.json", pictures(word_files, theme_file)
     lookalike_file = lookalikes(deck)
     yield "lookalikes.json", lookalike_file
-    dialogue_file = dialogues()
+    scenes = conversation()
+    dialogue_file = with_scenes(dialogues(), scenes)
     yield "dialogues.json", dialogue_file
-    yield "conversation.json", conversation()
+    yield "conversation.json", scenes
     yield "short.json", shorts()
     trap_file = traps()
     yield "traps.json", trap_file
@@ -1290,6 +1291,18 @@ def dialogues() -> dict:
             })
         out.append({"id": d["id"], "lv": d["lv"], "place": d["place"], "them": d["them"], "turns": turns})
     return {"rev": REV, "dialogues": out}
+
+
+def with_scenes(dialogue_file: dict, scenes: dict) -> dict:
+    """The carousel's conversations and the 会話 station's scenes, the
+    ones its reply videos ask (plan 265), as one list a carousel answers:
+    level by level, the hand-written ones first. A scene keeps its turns
+    as the station has them, its id marked as the station's (kaiwa-…,
+    clear of a hand-written id) and `kaiwa` set."""
+    station = [{**sc, "id": f"kaiwa-{sc['id']}", "kaiwa": True} for sc in scenes["scenes"]]
+    both = dialogue_file["dialogues"] + station
+    both.sort(key=lambda d: LEVELS.index(d["lv"]))
+    return {**dialogue_file, "dialogues": both}
 
 
 # ── The other register, and Read it's own sentences (plan 254) ────

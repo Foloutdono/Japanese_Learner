@@ -167,7 +167,9 @@ describe('the carousel studio', () => {
         expect(slides.length, `${src.id} ${id} ${type}`).toBeGreaterThan({ promo: 1, echo: 0 }[src.id] ?? 2)
         // A promo story ends on its own gate, not on a station (plan 231);
         // Read it on the app's call to action, in any look (plan 253).
-        expect(slides.at(-1).key, `${src.id} ${id} ${type}`).toBe(type === 'read' ? 'cta' : LAST[src.id]?.(id) ?? 'outro')
+        // A 会話 scene asked in Classic is drawn in Clarté (plan 265), and ends as it does.
+        const last = p.kaiwa ? deck(type, p, FORMATS.post, { ground: 'paper', design: 'clarte' }).at(-1).key : null
+        expect(slides.at(-1).key, `${src.id} ${id} ${type}`).toBe(last ?? (type === 'read' ? 'cta' : LAST[src.id]?.(id) ?? 'outro'))
         expect(new Set(slides.map(x => x.key)).size, `${src.id} ${id} ${type}`).toBe(slides.length)
       }
     }
@@ -1497,6 +1499,56 @@ describe('the conversion carousels (plan 234)', () => {
       expect(cta.texts.join(' '), where).not.toMatch(/Go to|Va sur/)
     }
   }))
+
+  it('answers the 会話 station’s own scenes beside the carousel’s conversations, every turn inside the frame (plan 265)', () => withPath2D(() => {
+    const D = bank('dialogues.json').dialogues
+    const scenes = bank('conversation.json').scenes
+    // Each scene the reply videos ask, whole, under an id of its own and marked as the station's.
+    for (const sc of scenes) {
+      const d = D.find(x => x.id === `kaiwa-${sc.id}`)
+      expect(d?.kaiwa, sc.id).toBe(true)
+      expect([d.lv, d.place, d.them, d.turns], sc.id).toEqual([sc.lv, sc.place, sc.them, sc.turns])
+    }
+    expect(D.filter(d => !d.kaiwa).length).toBe(JSON.parse(read('carousel/content/dialogues.json')).length)
+    expect(new Set(D.map(d => d.id)).size).toBe(D.length)
+    // Level by level, as one list; the station's named in it.
+    const LV = ['N5', 'N4', 'N3', 'N2', 'N1']
+    const order = D.map(d => LV.indexOf(d.lv))
+    expect(order).toEqual([...order].sort((a, b) => a - b))
+    const items = itemsOf('dialogue', { dialogues: D }, 'en')
+    for (const d of D) expect(items.find(x => x.id === d.id).tag, d.id).toBe(d.kaiwa ? `${d.lv} · 会話` : d.lv)
+    // The carousel's own conversations keep their Classic turns.
+    const own = plan('dialogue', { dialogues: D }, D.find(d => !d.kaiwa).id, OPTS)
+    expect(deck('plates', own, FORMATS.story, { design: 'classic' }).some(x => x.key.startsWith('turn')), own.id).toBe(true)
+    // The longest scene of each level: every turn asked, every line inside the 9:16 frame, uncut.
+    const fmt = FORMATS.story
+    for (const lv of LV) {
+      const sc = D.filter(d => d.kaiwa && d.lv === lv).reduce((a, b) => (b.turns.length > a.turns.length ? b : a))
+      for (const lang of ['en', 'fr']) {
+        const p = plan('dialogue', { dialogues: D }, sc.id, { ...OPTS, lang })
+        // The scene's own words, none cut (a label of the studio's is fitted by its own tests).
+        const words = sc.turns.flatMap(tu => [tu.them[lang], tu.reply[lang], tu.why[lang]])
+        const cut = t => t.endsWith('…') && words.some(w => w.includes(t.slice(0, -1).replace(/[\s,;:.]+$/, '')))
+        expect(p.slides.filter(s => s.kind === 'turn').length, sc.id).toBe(sc.turns.length * 2)
+        expect(p.funnel.turns.length, sc.id).toBe(sc.turns.length)
+        // Asked in Classic, a scene is drawn in Clarté, as Read it is: its N1 lines stand on no Classic question.
+        expect(deck('plates', p, fmt, { design: 'classic' }).map(x => x.key), sc.id).toEqual(deck('plates', p, fmt, { design: 'clarte' }).map(x => x.key))
+        for (const design of [...DESIGNS, 'classic']) {
+          // The call to action is every carousel's, its own test fits it (its cards' lines trimmed to their box).
+          for (const sl of deck('plates', p, fmt, { design }).filter(x => x.key !== 'cta')) {
+            const { ctx, texts } = placedTexts()
+            sl.draw(ctx)
+            for (const x of texts) {
+              const where = `${sc.id} ${lang} ${design} ${sl.key} ${x.t}`
+              expect(x.y - x.z * 0.85, where).toBeGreaterThanOrEqual(fmt.safe.t - 1)
+              expect(x.y + x.z * 0.25, where).toBeLessThanOrEqual(fmt.h - fmt.safe.b + 1)
+              expect(cut(x.t), where).toBe(false)
+            }
+          }
+        }
+      }
+    }
+  }), 120000)
 
   it('draws a conversation’s call to action as its run: one of its exchanges, every reply whole (plan 235)', () => withPath2D(() => {
     const joined = rows => rows.map(r => r.t).join('')

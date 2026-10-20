@@ -100,3 +100,24 @@ def test_a_picture_names_a_word_and_a_file_there(tmp_path, monkeypatch):
         spec.write_text(bad, encoding="utf-8")
         with pytest.raises(SystemExit):
             cb.pictures(words, themes)
+
+
+def test_the_stations_scenes_join_the_carousels_conversations():
+    # Plan 265: the 会話 station's scenes, the ones the reply videos ask,
+    # are answered as carousels too, beside the carousel's own.
+    own = {"rev": 3, "dialogues": [
+        {"id": "pharmacy", "lv": "N4", "turns": ["a"]},
+        {"id": "cafe", "lv": "N5", "turns": ["b"]},
+    ]}
+    scenes = {"rev": 3, "scenes": [
+        {"id": "pharmacy", "lv": "N4", "turns": ["c", "d"]},
+        {"id": "konbini", "lv": "N5", "turns": ["e"]},
+    ]}
+    out = cb.with_scenes(own, scenes)
+    # Level by level, the carousel's own first; a scene's id the station's, clear of a hand-written one.
+    assert [d["id"] for d in out["dialogues"]] == ["cafe", "kaiwa-konbini", "pharmacy", "kaiwa-pharmacy"]
+    assert [d.get("kaiwa", False) for d in out["dialogues"]] == [False, True, False, True]
+    assert out["dialogues"][3]["turns"] == ["c", "d"]
+    assert out["rev"] == 3
+    # The scenes as the reply videos read them are left as they were.
+    assert scenes["scenes"][0]["id"] == "pharmacy"

@@ -2876,6 +2876,13 @@ export function deck(type, plan, fmt, opts) {
   }
   // Read it is drawn in a look whatever the studio's: Clarté where it says Classic (plan 253).
   if (type === 'read') return funnelDeck(type, plan, fmt, { ...opts, design: DESIGNS.includes(opts.design) ? opts.design : 'clarte' })
+  // So is a 会話 scene (plan 265): its lines, longer than the carousel's
+  // own conversations and in furigana that never goes under a caption,
+  // stand on a Classic question slide at N2 and N1 no more.
+  if (plan.kaiwa && !DESIGNS.includes(opts.design)) {
+    const slides = funnelDeck(type, plan, fmt, { ...opts, design: 'clarte' })
+    if (slides.length) return slides
+  }
   // Plan 234: hook, answer, the feature, the detail, the key points.
   if (DESIGNS.includes(opts.design)) {
     const slides = funnelDeck(type, plan, fmt, opts)
