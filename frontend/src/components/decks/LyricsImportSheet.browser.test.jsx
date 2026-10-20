@@ -3,7 +3,7 @@ import { render } from 'vitest-browser-react'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../../LangContext'
 
-// ── 歌 — a song's lyrics into a deck, from the shelf (plan 263) ──
+// ── 歌 — a song's lyrics into a deck, from the shelf (plan 264) ──
 // The sheet opens a video session (the analyser's), waits for it, asks
 // the sort which lines are the song, shows the two piles -- the sung
 // ticked, the rest not -- and makes a lyrics deck of what stays ticked.

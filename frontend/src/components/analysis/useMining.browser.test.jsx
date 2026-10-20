@@ -167,7 +167,7 @@ describe('useMining', () => {
     expect((await getMining().ensureDeck('mixed', 'Lyrics')).id).toBe(8)
   })
 
-  // 歌 (plan 263): a lyrics deck, the song sheet's, holds what a mixed
+  // 歌 (plan 264): a lyrics deck, the song sheet's, holds what a mixed
   // one holds and is offered the same way: a word met in a song goes in
   // the song's deck.
   it('offers a lyrics deck for every kind, and makes the song sheet one', async () => {

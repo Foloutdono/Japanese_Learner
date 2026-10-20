@@ -413,7 +413,7 @@ def _parse_srv3(content: str) -> list[dict]:
     return cues
 
 
-# ── LRC and plain text: a song's lyrics (plan 263) ────────────────
+# ── LRC and plain text: a song's lyrics (plan 264) ────────────────
 # The two shapes lyrics are passed around in, beside a video's track:
 # an .lrc, each line behind the time it is sung at ([01:02.50], two of
 # them before a chorus sung twice), and a .txt of the lines alone. The
@@ -548,7 +548,7 @@ def parse_track(content: str, filename: str) -> list[dict]:
         raise CaptionParseError("No usable cues found in subtitle content", "no_cues")
 
     # Lyrics are written by hand, never a rolling window: a line sung
-    # twice in a row is sung twice (plan 263).
+    # twice in a row is sung twice (plan 264).
     if ext in _LYRIC_FORMATS:
         return cues
     return _merge_duplicate_consecutive(cues)

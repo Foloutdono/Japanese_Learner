@@ -53,7 +53,7 @@ import { LyricsImportSheet } from '../components/decks/LyricsImportSheet'
 // it changes. The bare shelf opens on its first deck. On a phone a deck
 // is a screen of its own, as it always was.
 //
-// ── 歌 — a song's lyrics, from the create form (plan 263) ──
+// ── 歌 — a song's lyrics, from the create form (plan 264) ──
 // A lyrics deck is made from its song: picking the type turns the
 // form's action into the import (components/decks/LyricsImportSheet.jsx:
 // a subtitle or lyrics file, a paste or a YouTube link, broken down into
@@ -161,7 +161,7 @@ function DecksShelf({ session, open }) {
       .finally(() => { makingRef.current = false; setMaking(false) })
   }
 
-  // A lyrics deck is made from its song (plan 263): the form gives way
+  // A lyrics deck is made from its song (plan 264): the form gives way
   // to the import, which the name typed, if any, goes along to.
   function importLyrics() {
     playUi('click-mode-selection')

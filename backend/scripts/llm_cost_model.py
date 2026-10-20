@@ -141,7 +141,7 @@ FEATURES = {
     ),
     "lyrics_sort": (
         4, 1400, 900,
-        "Which lines of a song are the song (plan 263): the lyrics import "
+        "Which lines of a song are the song (plan 264): the lyrics import "
         "on the deck shelf asks it once a song, every line numbered in one "
         "call (150 a call past that). In: a ~550-token system block "
         "(stable, cached) and ~50 lines. Out: a key and a word a line. "

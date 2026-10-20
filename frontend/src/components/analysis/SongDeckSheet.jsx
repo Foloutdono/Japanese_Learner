@@ -6,7 +6,8 @@ import { CheckIcon, ChevronIcon } from '../ui/Icons'
 import { Dots } from '../ui/Loading'
 import { track } from '../../lib/track'
 import { composing } from '../../lib/keyGuards'
-import { songWords, songLines, songDeckName, fillSongDeck } from './songDeck'
+import { songWords, songLines, songDeckName } from './songDeck'
+import { addWords, addLines } from './songDeckApi'
 
 // ── 歌 — make the song yours (plan 215) ──────────────────────────
 // The result's second door beside 保存: where keeping takes ONE line
@@ -15,15 +16,17 @@ import { songWords, songLines, songDeckName, fillSongDeck } from './songDeck'
 // to understand it, and its lines with their readings, to read it aloud
 // in time (songDeck.js says what each holds).
 //
-// One deck, of the lyrics type (plan 263; of the mixed type before it,
+// One deck, of the lyrics type (plan 264; of the mixed type before it,
 // routes/decks.py), which holds app cards beside written ones and
 // studies each in its own modes: the words as vocab, the lines as
 // front/back pairs. Nothing here is a new endpoint.
 // The deck is made the way the analyser's ＋ makes one (useMining's
 // ensureDeck, which reuses a deck of the same name rather than minting a
-// clone), and filled by songDeck.js's fillSongDeck, which the shelf's
-// lyrics import (components/decks/LyricsImportSheet.jsx) shares: pressed
-// a second time for the same song, it tops the deck up.
+// clone), the words go in as one batch of app cards, and the lines in
+// the import dialog's slices (songDeckApi.js, which the keep sheet and
+// the shelf's lyrics import share). Pressed a second time for the same
+// song, it tops the deck up: a word already there conflicts and counts
+// nothing on the server, and a line already there is not written again.
 
 export function SongDeckSheet({ session, mining, sentences, title, t, onClose }) {
   const words = useMemo(() => songWords(sentences), [sentences])
@@ -49,11 +52,8 @@ export function SongDeckSheet({ session, mining, sentences, title, t, onClose })
     let deck = null
     try {
       deck = await mining.ensureDeck('lyrics', name.trim(), { remember: false })
-      const refused = await fillSongDeck(session, deck.id, {
-        words: takes.words ? words : [],
-        lines: takes.lines ? lines : [],
-      })
-      if (refused) setError(t.songDeckLimit)
+      if (takes.words) await addWords(session, deck.id, words)
+      if (takes.lines && await addLines(session, deck.id, lines)) setError(t.songDeckLimit)
       // Counts only: the song's name is the learner's own words.
       track('song_deck', { words: takes.words ? words.length : 0, lines: takes.lines ? lines.length : 0 })
       setMade(deck)

@@ -89,7 +89,7 @@ class ParseTrackTests(unittest.TestCase):
             parse_track("this is not a subtitle file at all", "notes.doc")
         self.assertEqual(caught.exception.code, "unknown_format")
 
-    # ── Lyrics (plan 263) ──
+    # ── Lyrics (plan 264) ──
     def test_a_text_file_is_a_line_each_in_order(self) -> None:
         cues = parse_track("君の名前を\n\n呼ぶよ\n呼ぶよ\n", "song.txt")
         self.assertEqual([c["text"] for c in cues], ["君の名前を", "呼ぶよ", "呼ぶよ"])

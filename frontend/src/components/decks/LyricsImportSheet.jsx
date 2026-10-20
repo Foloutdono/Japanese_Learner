@@ -10,9 +10,10 @@ import { track } from '../../lib/track'
 import { composing } from '../../lib/keyGuards'
 import { parseVideoId } from '../../lib/youtube'
 import { videoErrorMessage } from '../analysis/videoErrors'
-import { songWords, songLines, songDeckName, fillSongDeck, lyricRows } from '../analysis/songDeck'
+import { songWords, songLines, songDeckName, lyricRows } from '../analysis/songDeck'
+import { addWords, addLines } from '../analysis/songDeckApi'
 
-// ── 歌 — a song's lyrics into a deck (plan 263) ───────────────────
+// ── 歌 — a song's lyrics into a deck (plan 264) ───────────────────
 // The owner (2026-10-20): the analyser's song sheet, from the shelf.
 // A subtitle or lyrics file (.srt, .vtt, .ass, .lrc, .txt), lyrics
 // pasted, or a YouTube link whose Japanese track the server fetches, is
@@ -191,7 +192,8 @@ export function LyricsImportSheet({ session, t, name: named = '', onClose, onMad
         method: 'POST',
         body: JSON.stringify({ name: name.trim(), type: 'lyrics' }),
       })
-      if (await fillSongDeck(session, deck.id, { words, lines })) setError(t.songDeckLimit)
+      await addWords(session, deck.id, words)
+      if (await addLines(session, deck.id, lines)) setError(t.songDeckLimit)
       // Counts only: the song's name is the learner's own words.
       track('song_deck', { words: words.length, lines: lines.length })
       setMade(deck)

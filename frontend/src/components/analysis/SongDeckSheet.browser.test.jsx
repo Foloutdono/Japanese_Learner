@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../../LangContext'
 
 // ── 歌 — the song sheet makes the song's deck (plan 215) ──
-// One lyrics deck (a mixed one before plan 263), through the endpoints the rest of the app already
+// One lyrics deck (a mixed one before plan 264), through the endpoints the rest of the app already
 // writes decks with: the deck made (or found) by name, the words as one
 // batch of app cards, the lines in the import dialog's slices. What a
 // second press for the same song writes is what the deck does not hold
