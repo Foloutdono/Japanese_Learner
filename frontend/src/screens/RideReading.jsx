@@ -24,6 +24,7 @@ import { useCredits } from '../stores/credits'
 import { startTally, countReview } from '../stores/runTally'
 import { EnterKey } from '../components/chrome/DeskKeys'
 import { useDesk } from '../hooks/useDesk'
+import { useErrorStep } from '../hooks/useErrorStep'
 import { useBackGuard } from '../hooks/useBackGuard'
 import { paceFactor } from '../domain/readingPace'
 import { useReadingPace } from '../stores/readingPace'
@@ -72,7 +73,8 @@ import { useProfileSummary } from '../stores/profileSummary'
 // the ride it had.
 const READING_COLOR = 'var(--line-reading)'
 // The steps, as ride_step names them: read, type, measure, pass; on the
-// desk graded between measure and pass.
+// desk graded between measure and pass (domain/flowSteps.js's
+// READING_STEPS).
 
 export default function RideReading({ session, onDone, first = false, dryRun = false, sentence: given = null }) {
   const navigate = useNavigate()
@@ -89,6 +91,7 @@ export default function RideReading({ session, onDone, first = false, dryRun = f
   // their ride goes from the cards straight to the plate.
   const plateOnly = useProfileSummary()?.kanaKnown === 'none'
   const step = plateOnly ? 'pass' : readStep
+  useErrorStep(step)
   // null until the sentence is up: a clock that starts at zero would
   // read as already run out, and cover the sentence before it showed.
   const [timeLeft, setTimeLeft] = useState(null)
