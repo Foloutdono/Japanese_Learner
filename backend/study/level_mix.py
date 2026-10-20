@@ -31,10 +31,17 @@ offenders, in the shape study/exam_validation.py's validators use, so
 exam_reading_gen's feedback loop can pass them through untouched. They
 deliberately avoid the words "outside" and "allowed set", which route a
 message into that loop's kanji branch (exam_reading_gen._as_feedback).
+
+The grammar above the level is the mock papers' reading of it
+(study/exam_levels.grammar_above, plan 257), since plan 261: the points
+the detector finds, less the misreadings exam_levels names. It used to
+be difficulty.grammar_over_level, which matches the catalogue's patterns
+as letters: 天気が was 〜気がする, ありがとうございます 〜でございます,
+となりに 〜なりに, and the comprehension seeds were written around them.
 """
 import logging
 
-from study import difficulty, morphology
+from study import difficulty, exam_levels, morphology
 from study.analysis import CONTENT_POS, analyze_local
 from study.card_lookup import find_segments_in_text, resolve_morpheme
 from study.llm_shared import is_kanji
@@ -85,9 +92,8 @@ def level_mix(text: str, level: str, allow_kanji: str = "") -> dict:
     Vocabulary is counted by OCCURRENCE over the content words (nouns,
     verbs, adjectives, adverbs -- study/analysis.py's CONTENT_POS), and
     kanji by occurrence over every kanji in the text. grammar_over is
-    reported for a caller's feedback and is never part of a verdict:
-    the substring matcher behind it has known false positives on
-    generated text (see tests/test_difficulty_points.py).
+    exam_levels.grammar_above's (see the module's doc), reported for a
+    caller's feedback and never part of a verdict here.
     """
     morphemes = morphology.tokenize(text)
     if morphemes is None:
@@ -151,7 +157,7 @@ def level_mix(text: str, level: str, allow_kanji: str = "") -> dict:
         "kanji_over": kanji_over,
         "kanji_over_count": kanji_over_count,
         "kanji_ratio": kanji_ratio,
-        "grammar_over": difficulty.grammar_over_level(text, level),
+        "grammar_over": exam_levels.grammar_above(text, level),
         "off_deck": off_deck,
     }
 

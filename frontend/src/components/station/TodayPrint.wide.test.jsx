@@ -15,8 +15,8 @@ describe('the print behind the gate', () => {
   it('lifts the sky, what lies behind and what stands in front, and keeps the train as it is', async () => {
     const box = { print: 'phone', u: 1, x: 0, y: 0 }
     const screen = await render(
-      <div className="tdy--print" style={{ ...printVars('dusk', 'phone', box), position: 'relative', width: 390, height: 746 }}>
-        <TodayPrint hour="dusk" device="phone" />
+      <div className="tdy--print" style={{ ...printVars('autumn-dusk', 'phone', box), position: 'relative', width: 390, height: 746 }}>
+        <TodayPrint look="autumn-dusk" device="phone" />
       </div>,
     )
     const el = screen.container

@@ -15,7 +15,8 @@ import { PRINT } from './usePrint'
 // read 25 to 49 on the day and night prints; the lift as it is reads 17
 // at most).
 
-const HOURS = ['dawn', 'day', 'dusk', 'night']
+// Every print the year shows (plan 261), each season's parts lifted.
+const PRINTS = Object.keys(PRINT.prints)
 const DEVICES = ['phone', 'desk']
 const LAYERS = ['sky', 'back', 'front']
 const SHAPES = 'path, rect, circle, ellipse, polygon, polyline, line'
@@ -85,11 +86,11 @@ function mount(doc) {
 const boxes = () => [...host.querySelectorAll(SHAPES)].map(s => s.getBoundingClientRect())
 
 describe('the print lifted', () => {
-  for (const hour of HOURS) {
+  for (const name of PRINTS) {
     for (const device of DEVICES) {
       // Two screenshots of a whole print: slow when every lane runs at once.
-      it(`${hour}, ${device}: every part lifted, every shape where it was, the same picture`, { timeout: 60_000 }, async () => {
-        const doc = await (await fetch(`/today/print/${PRINT.rev}/${hour}-${device}.json`)).json()
+      it(`${name}, ${device}: every part lifted, every shape where it was, the same picture`, { timeout: 60_000 }, async () => {
+        const doc = await (await fetch(`/today/print/${PRINT.rev}/${name}-${device}.json`)).json()
         const layers = mount(doc)
         const moving = host.querySelectorAll('svg [class*="tpr-"]').length
         // Each part's timing as drawn, in the order the print draws them:

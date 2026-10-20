@@ -619,7 +619,7 @@ function pass(t) {
 function footer(t, other) {
   const F = t.footer
   const links = [
-    `<a href="/privacy">${esc(F.privacy)}</a>`,
+    `<a href="/privacy?lang=${t.lang}">${esc(F.privacy)}</a>`,
     CONTACT ? `<a href="mailto:${esc(CONTACT)}">${esc(F.contact)}</a>` : '',
     `<a href="${PAGES[other].path}" hreflang="${other}" lang="${other}">${esc(F.other)}</a>`,
   ].join('')

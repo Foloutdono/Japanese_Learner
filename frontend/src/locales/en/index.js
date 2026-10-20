@@ -133,9 +133,19 @@ const nav = {
   gateEndsAt:        at => `done by ${at}`,
   gateAdjust:        'Adjust',
   // 浮世絵 (plan 205): the print's title slip, said whole -- the day and
-  // the hour's view, as the print's series would name it.
+  // the view of the print the hour and the season show (plan 261), as
+  // the print's series would name it.
   printTitle:        (day, view) => `${day} — ${view}`,
-  printViews:        { dawn: 'dawn', day: 'sails coming home', dusk: 'geese coming down', night: 'the autumn moon' },
+  printViews: {
+    'spring-dawn': 'the spring dawn', 'spring-day': 'the cherries in their haze',
+    'spring-dusk': 'the geese going home', 'spring-night': 'the hazy moon',
+    'summer-dawn': 'the south wind', 'summer-day': 'the cloud peaks',
+    'summer-dusk': 'the evening calm', 'summer-night': 'the fireflies', 'summer-hanabi': 'the fireworks',
+    'autumn-dawn': 'dawn', 'autumn-day': 'sails coming home',
+    'autumn-dusk': 'geese coming down', 'autumn-night': 'the autumn moon',
+    'winter-dawn': 'the cold dawn', 'winter-day': 'clear after snow',
+    'winter-dusk': 'the evening snow', 'winter-night': 'the winter moon',
+  },
   gateServicesN:     n => (n === 1 ? '1 service' : `${n} services`),
   gateLineModes:     name => `Modes: ${name}`,
   gateLineNone:      'No service today',
@@ -1499,6 +1509,9 @@ const dictionary = {
   level:             'Level',
   listen:            'Listen',
   displayedKanji:    'kanji displayed',
+  displayedEntries:  'entries displayed',
+  displayedWords:   'words displayed',
+  displayedPoints:  'points displayed',
   radical:           'Radical',
   // Additional dictionary keys used by screens
   dictAll:           'All',

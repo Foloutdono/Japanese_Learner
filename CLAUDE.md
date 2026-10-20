@@ -53,6 +53,15 @@ runtime purpose.
   through the renames module and its `migrate_*` script, never an edit in
   place. A card whose reading was wrong is retired (`RETIRED`) rather than
   moved, so its learners start the corrected card fresh.
+- **A card's level moves on two signals, and only down (plan 260).** The
+  community lists (`datas/vocab/sources/jlpt_tanos.json`, the deck's own
+  ancestor) must put the word lower, and the app must too: a lesson of
+  that level teaches it, or a sentence of that level has it, read by hand
+  (a breakdown's badge of a kana word as some kanji card is no evidence).
+  It goes to the level both support; a word the lists lack, to the lowest
+  level whose sentences use it, when its subtitle rank sits in that
+  level's range. One signal is the content audit's, not a move.
+  `docs/vocab-deck-review.md`, "260", has the rule and what it left.
 - **Bump the revision when the output changes.** Anything cached or stored
   per output carries a revision: `LOCAL_REV` in `study/analysis.py` (the
   breakdown), the `phrase_analysis_cache` version (the deep tier),
@@ -117,6 +126,10 @@ runtime purpose.
   of ordinary text (noun と, 持って来る, ならんで) are named in
   `_NOT_THE_POINT` and pinned in `tests/test_exam_levels.py` with the
   sentence that must still be found; a new exemption brings its counter-case.
+  Comprehension is held to the same gate since plan 261 (`level_mix`'s
+  `grammar_over`, a hard rule for the seeds), so a misreading is named once
+  for both, and no rule may hide its point's own lessons
+  (`test_every_rule_leaves_its_points_lessons_found`).
   A fill-in stem keeps its one ＿＿＿＿ and a paraphrase its underlined word
   (`item_shape_problems`): a stem edited by hand can lose either, and no
   other check notices.

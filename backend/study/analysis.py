@@ -416,7 +416,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 17: the content audit's second placement run (#360) -- そして, 取引,
 # 追いかける and とりあえず reach their cards, which wrote them 然して (at
 # N1), 取り引き, 追い掛ける and 取りあえず before.
-LOCAL_REV = 17
+# 18: plan 260 -- 95 cards down to the level two signals agree on (枚,
+# 冊, さん at N5, not N1), so a stored breakdown's badges read the new
+# levels, and また reaches its kana card, which wrote it 又 before.
+LOCAL_REV = 18
 
 
 def analyze_local(text: str, level: str | None = None) -> dict:

@@ -126,7 +126,7 @@ function LinkGoogleSlip() {
 }
 
 export function AccountPage({ session }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const guest = isGuest(session)
   // A guest is offered the whole account (ClaimSlip, Google included);
   // anyone else is offered only the identity they are missing.
@@ -152,13 +152,14 @@ export function AccountPage({ session }) {
         <Slip label={t.privacyPolicy}>
           {/* In the shell the policy opens in the system browser at the web
               origin (plan 076): the bundled copy would open inside the
-              WebView with no way back. */}
+              WebView with no way back. It opens in the app's language;
+              the page has its own switch. */}
           <a
             className="btn-secondary slip__act"
-            href="/privacy.html"
+            href={`/privacy.html?lang=${lang}`}
             target="_blank"
             rel="noreferrer"
-            onClick={e => { if (isNative()) { e.preventDefault(); openExternal(`${API_ORIGIN}/privacy.html`) } }}
+            onClick={e => { if (isNative()) { e.preventDefault(); openExternal(`${API_ORIGIN}/privacy.html?lang=${lang}`) } }}
           >
             {t.privacyPolicy}
           </a>
