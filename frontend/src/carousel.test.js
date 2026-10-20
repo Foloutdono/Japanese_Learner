@@ -1830,7 +1830,7 @@ describe('the reading challenges (plan 247)', () => {
         }
       }
     }
-  }))
+  }), 240000)
 
   it('ends on the way to the app, and writes the video’s page', () => withPath2D(() => {
     for (const lang of ['en', 'fr']) {
@@ -2076,8 +2076,10 @@ describe('the reply videos (plan 249)', () => {
       shorts.forEach((it, i) => {
         const pl = planFor(lv, it.id, 'short')
         expect(pl.items.filter(x => x.type === 'scene').map(x => x.id), it.id).toEqual([talks[i].id])
-        // Six questions a short: every scene of the station has six turns (plan 250).
-        expect(pl.items.filter(x => x.type === 'reply'), it.id).toHaveLength(6)
+        // The scene asked whole: its four to seven turns (the first 31 six each, plan 250).
+        expect(pl.items.filter(x => x.type === 'reply'), it.id).toHaveLength(talks[i].turns.length)
+        expect(talks[i].turns.length, it.id).toBeGreaterThanOrEqual(4)
+        expect(talks[i].turns.length, it.id).toBeLessThanOrEqual(7)
         expect(pl.title, it.id).toBe(`${talks[i].place.en} · JLPT ${lv}`)
       })
     }
@@ -2092,7 +2094,7 @@ describe('the reply videos (plan 249)', () => {
   it('says their line, then yours once the timer is out, a tick a second', () => {
     const pl = longPlan('reply', files, { level: 'N5', part: 1, tune: { 'reply.count': 6 } })
     const tl = timeline(pl)
-    expect(tl.of).toBe(12)
+    expect(tl.of).toBe(pl.items.filter(x => x.type === 'scene').reduce((n, d) => n + scenes.find(x => x.id === d.id).turns.length, 0))
     for (const sg of tl.segs.filter(x => x.type === 'reply')) {
       const it = sg.data
       const inSeg = x => x.at >= sg.start && x.at < sg.start + sg.dur
@@ -2173,6 +2175,8 @@ describe('the reply videos (plan 249)', () => {
         const pl = fitShort(pl0)
         expect(pl.items, it.id).toEqual(pl0.items)
         expect(timeline(pl).seconds, it.id).toBeLessThanOrEqual(REPLY_SHORT)
+        // Fitted by its timer alone, never under four seconds to answer.
+        expect(pl.tune?.['reply.count'] ?? 7, it.id).toBeGreaterThanOrEqual(4)
       }
     }
   })

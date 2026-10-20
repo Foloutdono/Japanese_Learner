@@ -185,8 +185,16 @@ function shorten(pl) {
  *  past the minute as Shorts, Reels and TikTok now allow, and well under
  *  three (Shorts' limit, a test holds it). */
 export const REPLY_SHORT = 179
+// A reply short asks its scene whole; a long one (N1's six long turns)
+// gives each question a second less on its timer, four at the least,
+// until it stands under Shorts' three minutes.
+const REPLY_LEAST = 4
 export function fitShort(plan, dur = null, seconds = SHORT.seconds) {
-  if (plan.kind === 'reply') return plan
+  if (plan.kind === 'reply') {
+    let pl = plan
+    for (let c = tuned(plan.tune, 'reply.count'); c > REPLY_LEAST && timeline(pl, dur).seconds > REPLY_SHORT; c--) pl = { ...pl, tune: { ...pl.tune, 'reply.count': c - 1 } }
+    return pl
+  }
   let pl = plan
   while (pl.items.length > 1 && timeline(pl, dur).seconds > seconds) pl = { ...pl, items: pl.items.slice(0, -1) }
   return pl
@@ -246,10 +254,11 @@ function planOf(kind, banks, { lang = 'en', level = 'N5', part = 1, theme = null
 
 // ── 返事 — what would you answer? (plan 249) ─────────────────────
 // A reply video asks the 会話 station's own scenes (plan 250: the app's
-// content/conversation, six turns each, bank/conversation.json): the
-// other person's line said, three replies, a timer, then yours said and
-// why it is right. Two scenes a 16:9 video, twelve questions; a short,
-// one scene, six (plan 249b).
+// content/conversation, bank/conversation.json): the other person's
+// line said, three replies, a timer, then yours said and why it is
+// right. Two scenes a 16:9 video; a short, one scene (plan 249b). A
+// scene is asked whole, its four to seven turns: the 31 first scenes
+// six each (plan 250), the bank's later ones as they were written.
 
 /** A level's scenes in parts of two; a last part under six questions
  *  rides with the one before it, so no video asks fewer. */
@@ -2079,15 +2088,19 @@ function threadLayout(ctx, p, S, it, g, peek) {
   if (it.romaji) for (const s of last) tries.push({ s, wider: true, lean: true, bare: true })
   for (const s of STEPS.filter(above)) tries.push({ s, wider: true, lean: true, bare: true, plain: 1 })
   for (const s of STEPS.filter(above)) tries.push({ s, wider: true, lean: true, bare: true, plain: 2 })
+  // A line long in both languages (N1's two sentences): what it means a
+  // fifth line, the bubbles drawn closer, and wide their column at its
+  // widest (standing, the replies keep the whole width).
+  for (const s of STEPS.filter(above)) tries.push({ s, wider: g.stack, lean: true, bare: true, plain: 2, tall: true })
   let q = null
-  for (const { s, foot = false, wider, lean = false, bare = false, plain = 0 } of tries) {
+  for (const { s, foot = false, wider, lean = false, bare = false, plain = 0, tall = false } of tries) {
     const { w, tw, rx, dw } = columns(g, wider)
     const top = foot ? PEEK : 0
-    const pad = lean ? SP[3] : s >= 0.84 ? SP[5] : SP[4]
-    const gap = lean ? SP[4] : SP[5]
+    const pad = tall ? SP[2] : lean ? SP[3] : s >= 0.84 ? SP[5] : SP[4]
+    const gap = tall ? SP[3] : lean ? SP[4] : SP[5]
     // Lean, what it means takes a fourth line, a size down, before anything is cut.
     const trSizes = (lean ? [FS.body, FS.sm, FS.caption] : [FS.body, FS.sm]).map(z => z * Math.max(0.85, s))
-    const them = bubbleOf(ctx, p, it.them.rows, { tr: it.them.tr, who: lean ? null : it.who, w: tw, z: zThem * s, min: READABLE, romaji: it.romaji && plain < 2, script: plain >= 2 ? 'kanji' : 'furigana', pad, trSizes, trLines: lean ? 4 : 3, lines: plain ? 4 : 3 })
+    const them = bubbleOf(ctx, p, it.them.rows, { tr: it.them.tr, who: lean ? null : it.who, w: tw, z: zThem * s, min: READABLE, romaji: it.romaji && plain < 2, script: plain >= 2 ? 'kanji' : 'furigana', pad, trSizes, trLines: tall ? 5 : lean ? 4 : 3, lines: plain ? 4 : 3 })
     const drafts = draftsOf(ctx, p, it.choices, { w: dw, z: zMine * s, min: READABLE, romaji: it.romaji && !bare, tight: lean, script: plain ? 'kanji' : 'furigana', lines: plain ? 3 : 2 })
     const total = g.stack ? top + gap + them.h + gap + drafts.h : Math.max(SP[6] + them.h, top + gap + askH + drafts.h)
     q = { s, foot, them, drafts, total, w, tw, rx, dw, top, gap, plain }

@@ -735,15 +735,19 @@ the screen.
 
 - **Reply** (返事, plans 249, 249b, 250): the 会話 station's own
   scenes (`backend/content/conversation`, exported as
-  `bank/conversation.json` by `scripts/carousel_bank.py`), six turns
-  each since plan 250, the right reply first in the file and dealt in
+  `bank/conversation.json` by `scripts/carousel_bank.py`), four to
+  seven turns a scene (the first 31 six each since plan 250, the
+  bank's later scenes as they were written), the right reply first in the file and dealt in
   the carousel's own order. Each line is cut into words as the studio's
   conversations are, its furigana taken from the bank's hand-written
   kana (the reading the app teaches: 何時 なんじ, 十分 じゅっぷん, never
   the cut's guess), and the export fails on a line that would read
-  otherwise. Two scenes to a 16:9 video, twelve questions; one to a
-  short, six, and the studio's list holds a short a scene when the 9:16
-  format is picked. Drawn as the thread the owner picked from three
+  otherwise. Two scenes to a 16:9 video; one to a short, asked whole,
+  and the studio's list holds a short a scene when the 9:16 format is
+  picked. A short past Shorts' three minutes (N1's six long turns) gives
+  each question a second less on its timer, four at the least
+  (`fitShort`), and a line long in both languages takes a last layout,
+  what it means on a fifth line, the bubbles drawn closer. Drawn as the thread the owner picked from three
   (plan 249b): the carousel's Fiche look on washi, the 会話 line's band
   carrying the scene's title and the question's number. A scene's card
   is the chat's head (a disc, the place, said, the scene's title, who
@@ -964,7 +968,7 @@ does not come leaves its card as it was. After adding pictures, run
 
 ## The reading challenges (plan 247)
 
-A comprehension text (the 30 of `comprehension.json`, six a level) read
+A comprehension text (the 150 of `comprehension.json`, thirty a level) read
 as a 9:16 video (`challenge.js`, the source 速読 "Reading challenge"),
 over Today's print of the hour, in one of two ways:
 
