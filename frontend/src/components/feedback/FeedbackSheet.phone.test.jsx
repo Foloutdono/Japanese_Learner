@@ -18,7 +18,7 @@ vi.mock('../../LangContext', () => ({ useLang: () => ({ t: fr, lang: 'fr' }) }))
 const apiJson = vi.fn()
 vi.mock('../../lib/api', async (o) => ({ ...(await o()), apiJson: (...a) => apiJson(...a) }))
 
-const { FeedbackSheet, CardFlag, ReportProblem, FeedbackHost } = await import('./FeedbackSheet')
+const { FeedbackSheet, CardFlag, ReportProblem, FeedbackHost, QuestionReport } = await import('./FeedbackSheet')
 const { closeFeedback } = await import('../../stores/feedbackSheet')
 // A run's doors raise their sheet in App's host, beside <Routes/>.
 const inApp = node => <MemoryRouter>{node}<FeedbackHost session={LEARNER} /></MemoryRouter>
@@ -196,5 +196,20 @@ describe('the flag on an answered card (door B)', () => {
     expect(box.height).toBeLessThanOrEqual(40)
     const hit = getComputedStyle($('.fb-flag'), '::after')
     expect(hit.position).toBe('absolute')
+  })
+})
+
+describe('the flag on a sat exam question', () => {
+  it('names the paper and the question, and offers a question\'s reasons', async () => {
+    await render(inApp(<QuestionReport examId="n5-listening-01" revision={2} question={{ id: 'm1_q9', number: 9 }} />))
+    await userEvent.click($('.fb-link'))
+    await settle()
+    // A question's reasons, not a card's: no reading or example.
+    expect([...document.querySelectorAll('.fb-reasons .chip')].map(c => c.textContent))
+      .toEqual([fr.questionReason.answer, fr.questionReason.ambiguous, fr.questionReason.audio, fr.questionReason.other])
+    await userEvent.click(document.querySelectorAll('.fb-reasons .chip')[1])
+    await userEvent.click($('.fb-form__send'))
+    await settle()
+    expect(sent()).toEqual({ kind: 'card', card_id: 'exam_n5-listening-01_r2_m1_q9', reasons: ['ambiguous'], text: '' })
   })
 })

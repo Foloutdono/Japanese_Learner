@@ -97,6 +97,18 @@ def test_a_status_without_an_area_is_not_kept(client):
     assert row["status"] is None
 
 
+def test_a_sat_exam_question_is_reported_by_the_id_of_its_paper(client):
+    r = client.post("/api/feedback", json={
+        "kind": "card", "card_id": "exam_n5-listening-01_r2_m1_q9",
+        "reasons": ["ambiguous", "answer"],
+    })
+    assert r.status_code == 200, r.text
+    [row] = _rows()
+    assert row["card_id"] == "exam_n5-listening-01_r2_m1_q9"
+    # In the closed list's order, whatever order they were sent in.
+    assert row["reasons"] == ["answer", "ambiguous"]
+
+
 def test_a_card_report_names_its_card_and_what_is_wrong(client):
     r = client.post("/api/feedback", json={
         "kind": "card", "card_id": "vocab_N5_先生_せんせい",

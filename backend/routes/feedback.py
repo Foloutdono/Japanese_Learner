@@ -4,8 +4,9 @@ POST /api/feedback — a learner writes to the people who make the app
 feedback door, new directions").
 
 Three doors open the one sheet (frontend/src/components/feedback/):
-Settings' "Nous écrire" row, the flag on an answered card and the link
-under a failure. What each sends:
+Settings' "Nous écrire" row, the flag on an answered card (or on a
+mock-exam question in the result's review) and the link under a
+failure. What each sends:
 
   kind     problem | idea | fault, or card for the card's own sheet
   text     the learner's words, at most TEXT_MAX characters
@@ -57,7 +58,9 @@ logger = logging.getLogger(__name__)
 KINDS = ("problem", "idea", "fault", "card")
 # What can be wrong with a card. Closed, as a deck's report is
 # (routes/decks.REPORT_REASONS): the words beside them are optional.
-CARD_REASONS = ("reading", "meaning", "audio", "example", "other")
+# `answer` and `ambiguous` are a mock-exam question's: its card id is
+# exam_{exam_id}_r{revision}_{question_id}, which names the paper to retire.
+CARD_REASONS = ("reading", "meaning", "audio", "example", "answer", "ambiguous", "other")
 # A message, not an essay. The sheet counts down to it (maxLength).
 TEXT_MAX = 1000
 # A day's messages per learner, a rolling 24 hours. Five is far past

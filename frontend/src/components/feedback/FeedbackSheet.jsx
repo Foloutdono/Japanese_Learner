@@ -5,8 +5,8 @@ import { Sheet } from '../chrome/Sheet'
 import { Seg, Chip } from '../chrome/Console'
 import { FlagIcon } from '../ui/Icons'
 import {
-  KINDS, CARD_REASONS, TEXT_MAX,
-  feedbackContext, contextWords, failureOf, cardFace, reportable, sendFeedback,
+  KINDS, CARD_ONLY_REASONS, QUESTION_REASONS, TEXT_MAX,
+  feedbackContext, contextWords, failureOf, cardFace, reportable, sendFeedback, questionReport,
 } from '../../lib/feedback'
 import { useFeedbackSheet, openFeedback, openCardReport, closeFeedback } from '../../stores/feedbackSheet'
 
@@ -176,6 +176,8 @@ function CardReport({ session, card, onClose }) {
   const [sent, setSent] = useState(null)
   const inFlight = useRef(false)
   const face = cardFace(card)
+  const exam = card.exam ?? null
+  const reasonKeys = exam ? QUESTION_REASONS : CARD_ONLY_REASONS
 
   if (sent) return <Sent at={sent} reply={false} onClose={onClose} />
 
@@ -197,17 +199,26 @@ function CardReport({ session, card, onClose }) {
 
   return (
     <form className="fb-form" onSubmit={submit}>
-      <div className="fb-card">
-        <span className="fb-card__face" lang="ja">{face.face}</span>
-        <span className="fb-card__names">
-          {face.reading && <span className="fb-card__reading" lang={card.kanji ? 'ja' : undefined}>{face.reading}</span>}
-          {face.meaning && <span className="fb-card__gloss">{face.meaning}</span>}
-        </span>
-        {face.level && <span className="fb-card__level">{face.level}</span>}
-      </div>
+      {exam ? (
+        <div className="fb-card">
+          <span className="fb-card__face">{t.examQuestionAbbrev}{exam.number}</span>
+          <span className="fb-card__names">
+            <span className="fb-card__gloss">{exam.examId}</span>
+          </span>
+        </div>
+      ) : (
+        <div className="fb-card">
+          <span className="fb-card__face" lang="ja">{face.face}</span>
+          <span className="fb-card__names">
+            {face.reading && <span className="fb-card__reading" lang={card.kanji ? 'ja' : undefined}>{face.reading}</span>}
+            {face.meaning && <span className="fb-card__gloss">{face.meaning}</span>}
+          </span>
+          {face.level && <span className="fb-card__level">{face.level}</span>}
+        </div>
+      )}
       <div className="fb-reasons" role="group" aria-label={t.cardReportReasons}>
-        {CARD_REASONS.map(r => (
-          <Chip key={r} on={reasons.includes(r)} onClick={() => toggle(r)}>{t.cardReason[r]}</Chip>
+        {reasonKeys.map(r => (
+          <Chip key={r} on={reasons.includes(r)} onClick={() => toggle(r)}>{(exam ? t.questionReason : t.cardReason)[r]}</Chip>
         ))}
       </div>
       <textarea
@@ -246,6 +257,22 @@ export function CardFlag({ card }) {
   )
 }
 
+/** "Signaler cette question" under a sat question in the result's review.
+ *  The sheet is FeedbackHost's, as the card flag's is. */
+export function QuestionReport({ examId, revision, question }) {
+  const { t } = useLang()
+  return (
+    <button
+      type="button"
+      className="fb-link"
+      aria-haspopup="dialog"
+      onClick={() => openCardReport(questionReport(examId, revision, question))}
+    >
+      {t.questionReport}
+    </button>
+  )
+}
+
 /** The sheets a run raises (stores/feedbackSheet), rendered once by App
  *  beside <Routes/> so that nothing on the screen can take them away
  *  mid-sentence. A navigation shuts them: they were about that screen. */
@@ -256,7 +283,7 @@ export function FeedbackHost({ session }) {
   useEffect(() => closeFeedback, [pathname])
   if (open?.card) {
     return (
-      <Sheet open onClose={closeFeedback} cap={t.cardReport} label={t.cardReport} className="fb-sheet" dismiss>
+      <Sheet open onClose={closeFeedback} cap={open.card.exam ? t.questionReport : t.cardReport} label={open.card.exam ? t.questionReport : t.cardReport} className="fb-sheet" dismiss>
         <CardReport session={session} card={open.card} onClose={closeFeedback} />
       </Sheet>
     )
