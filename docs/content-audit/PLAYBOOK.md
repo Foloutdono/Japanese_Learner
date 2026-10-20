@@ -70,6 +70,15 @@ and homophones, the JLPT lists are the deck's own ancestors, and a
 "missing" word is often present under another spelling. That is the
 point of auditing them rather than importing them.
 
+A level move survives only on two signals (plan 260,
+`docs/vocab-deck-review.md`): the lists put the word lower *and* the app
+does, by a lesson of that level or a sentence of that level that really
+has the word (not a breakdown's badge of a kana homophone). Name the
+lesson or quote the sentence, and propose the level both support. Since
+plan 260 the lists' affix rows (～枚, ～さん, 御～) are matched too, and a
+card that plan stopped short of the lists (階, 度, 台, 日 at N4) is on the
+list with its reason in that section: read it before proposing more.
+
 **A tours slice is a grammar point's written tour** (plan 187): the
 `twists`, one per notion the point has beyond its main meaning (plan
 189; each a `notion` name, a sentence, a question, three readings with
