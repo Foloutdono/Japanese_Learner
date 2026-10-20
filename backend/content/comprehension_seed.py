@@ -1,8 +1,8 @@
 """
 The seed pool: hand-written reading-comprehension exercises, one file
 per JLPT level, in both of the app's languages (plan 111; six per level
-since plan 230, ten since plan 258, drafted and reviewed with
-scripts/comprehension_seed_report).
+since plan 230, ten since plan 258, thirty since plan 259, drafted and
+reviewed with scripts/comprehension_seed_report).
 
 ── Why this exists ───────────────────────────────────────────
 理解 (reading comprehension, routes/reading.py) is the most expensive
@@ -80,11 +80,12 @@ LEVELS: tuple[str, ...] = ("N5", "N4", "N3", "N2", "N1")
 LANGS: tuple[str, ...] = ("en", "fr")
 
 # The smallest number of exercises each level's file may carry. A first
-# request at a level needs one; ten (plan 258, from six, from three in
-# plan 230) is a new learner's first ten sittings before the model is
-# ever asked for them, and _pool_take serves them before anything
-# generated. Raise it with the content that meets it, never ahead of it.
-MIN_PER_LEVEL = 10
+# request at a level needs one; thirty (plan 259, from ten in plan 258,
+# six in plan 230, three before) is a new learner's first thirty sittings
+# before the model is ever asked for them, and _pool_take serves them
+# before anything generated. Raise it with the content that meets it,
+# never ahead of it.
+MIN_PER_LEVEL = 30
 
 
 def _load(level: str) -> list[dict]:
