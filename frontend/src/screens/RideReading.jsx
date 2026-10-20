@@ -277,6 +277,8 @@ export default function RideReading({ session, onDone, first = false, dryRun = f
       color={READING_COLOR}
       onLeave={() => finish(true)}
       leaveLabel={t.rideSkip}
+      // A way out that skips rather than goes back keeps its word (StageHead).
+      leaveWord
       where={t.rideJp}
       sub={t.readingTitle}
       pass={false}

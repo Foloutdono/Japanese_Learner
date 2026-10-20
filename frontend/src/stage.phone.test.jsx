@@ -4,6 +4,7 @@ import { render } from 'vitest-browser-react'
 // markup — the same trick as layout.phone.test.jsx. The objects the
 // canvas draws for the stage and the gate, pinned by their real classes.
 import './index.css'
+import { StageHead } from './components/chrome/StageHead'
 
 describe('the stage at phone width', () => {
   it('carries the inset itself, docks the rating bar, and keeps the pass at pocket size', async () => {
@@ -30,6 +31,40 @@ describe('the stage at phone width', () => {
     // The pass at pocket size: the card's strip holding the balance alone (plan 173).
     expect(getComputedStyle(screen.container.querySelector('.hstrip--solo')).height).toBe('34px')
     expect(getComputedStyle(screen.container.querySelector('.today-remaining')).borderRadius).toBe('999px')
+  })
+
+  // 両端 (2026-10-20): the name stood wherever "‹ Niveaux" ended. The two
+  // ends grow alike, so it stands on the head's middle whatever each holds.
+  it('centres the name between the way out and the controls, the counts under it', async () => {
+    const screen = await render(
+      <main className="container stage">
+        <StageHead
+          onLeave={() => {}} leaveLabel="Niveaux" where="Compréhension écrite" sub="N5" remaining="2 / 5"
+          pass={false} aside={<button type="button" style={{ width: 'var(--sp-7)', height: 'var(--sp-7)' }}>A</button>}
+        />
+      </main>
+    )
+    const $ = sel => screen.container.querySelector(sel)
+    const mid = el => { const r = el.getBoundingClientRect(); return r.left + r.width / 2 }
+    expect(Math.abs(mid($('.stage__where-jp')) - mid($('.stage__head')))).toBeLessThan(1)
+    expect(Math.abs(mid($('.stage__where-line')) - mid($('.stage__head')))).toBeLessThan(1)
+    expect($('.stage__where-line .today-remaining').textContent).toBe('2 / 5')
+    // The way out is its chevron, its place its name and its tooltip.
+    const leave = $('.stage__leave')
+    expect(leave.getBoundingClientRect().width).toBeGreaterThanOrEqual(44)
+    expect(leave.getAttribute('title')).toBe('Niveaux')
+    expect(leave.querySelector('.sr-only').textContent).toBe('Niveaux')
+  })
+
+  it('prints the word of a way out that is not a way back', async () => {
+    const screen = await render(
+      <main className="container stage">
+        <StageHead onLeave={() => {}} leaveLabel="Passer" leaveWord where="試乗" pass={false} />
+      </main>
+    )
+    const leave = screen.container.querySelector('.stage__leave')
+    expect(leave.querySelector('.sr-only')).toBeNull()
+    expect(leave.textContent).toBe('Passer')
   })
 
   it('docks the level bar on the bottom edge and the rating bar on top of it', async () => {

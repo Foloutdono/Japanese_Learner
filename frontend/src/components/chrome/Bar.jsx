@@ -109,33 +109,36 @@ export function DeskCrumb({ leave }) {
 }
 
 // `keys` is the desk's (plan 115): the key that also takes this way
-// out (aria-keyshortcuts), when there is one — a run's Esc.
-export function Leave({ onClick, to, children, className = '', keys }) {
-  if (to !== undefined) return <LeaveTo to={to} className={className} keys={keys}>{children}</LeaveTo>
-  return <LeaveButton onClick={onClick} className={className} keys={keys}>{children}</LeaveButton>
+// out (aria-keyshortcuts), when there is one — a run's Esc. `bare` is
+// the run head's (2026-10-20): the chevron alone, a size up, the word
+// left to its children as a .sr-only and to `title`.
+export function Leave({ onClick, to, children, className = '', keys, bare = false, title }) {
+  const classes = `${bare ? 'stage__leave--bare ' : ''}${className}`.trim()
+  if (to !== undefined) return <LeaveTo to={to} className={classes} keys={keys} bare={bare} title={title}>{children}</LeaveTo>
+  return <LeaveButton onClick={onClick} className={classes} keys={keys} bare={bare} title={title}>{children}</LeaveButton>
 }
 
 // A way up to a place is a link on the desk (plan 123): the middle
 // click, "open in a new tab" and the URL under the pointer, as every
 // other place there. The phone keeps its button.
-function LeaveTo({ to, className, keys, children }) {
+function LeaveTo({ to, className, keys, bare, title, children }) {
   const navigate = useNavigate()
   const desk = useDesk()
   if (desk) {
     return (
-      <Link to={to} className={`stage__leave ${className}`.trim()} aria-keyshortcuts={keys} onClick={() => playClick()}>
-        <ChevronIcon direction="left" size={14} />
+      <Link to={to} className={`stage__leave ${className}`.trim()} aria-keyshortcuts={keys} title={title} onClick={() => playClick()}>
+        <ChevronIcon direction="left" size={bare ? 18 : 14} />
         <span>{children}</span>
       </Link>
     )
   }
-  return <LeaveButton onClick={() => navigate(to)} className={className} keys={keys}>{children}</LeaveButton>
+  return <LeaveButton onClick={() => navigate(to)} className={className} keys={keys} bare={bare} title={title}>{children}</LeaveButton>
 }
 
-function LeaveButton({ onClick, children, className, keys }) {
+function LeaveButton({ onClick, children, className, keys, bare, title }) {
   return (
-    <button type="button" className={`stage__leave ${className}`.trim()} aria-keyshortcuts={keys} onClick={() => { playClick(); onClick() }}>
-      <ChevronIcon direction="left" size={14} />
+    <button type="button" className={`stage__leave ${className}`.trim()} aria-keyshortcuts={keys} title={title} onClick={() => { playClick(); onClick() }}>
+      <ChevronIcon direction="left" size={bare ? 18 : 14} />
       <span>{children}</span>
     </button>
   )

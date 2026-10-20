@@ -292,6 +292,8 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
       color="var(--line-vocab)"
       onLeave={() => finish(true)}
       leaveLabel={t.rideSkip}
+      // A way out that skips rather than goes back keeps its word (StageHead).
+      leaveWord
       where={t.rideJp}
       sub={t.rideCap}
       remaining={step === 'done' ? undefined : remaining}

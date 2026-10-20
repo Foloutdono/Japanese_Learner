@@ -401,7 +401,7 @@ function Session({ session, level }) {
       // On the desk the score is the run panel's figures (plan 129).
       remaining={desk ? undefined : `${score.correct} / ${score.total}`}
       pass={false}
-      aside={<RunStreak />}
+      tally={<RunStreak />}
       toast={fare.toast}
       onToastDone={fare.toastDone}
       records
