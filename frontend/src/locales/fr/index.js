@@ -2888,7 +2888,7 @@ const onboarding = {
   fbFailure: (status, area) => `erreur ${status} (${area})`,
   fbDevice: { phone: 'téléphone', tablet: 'tablette', desk: 'ordinateur', wide: 'ordinateur' },
   fbPlatform: { web: 'web', native: 'application' },
-  fbReply: 'Me répondre à',
+  fbReply: 'Me répondre par e-mail, depuis',
   fbSend: 'Envoyer',
   fbSent: 'Reçu, merci.',
   fbSentNote: 'Chaque message est lu par une personne.',
