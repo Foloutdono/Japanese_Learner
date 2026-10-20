@@ -4,7 +4,7 @@ import { Sheet } from '../chrome/Sheet'
 import { Seg } from '../chrome/Console'
 import { deckTypeOf } from './deckTypes'
 import { ChevronIcon } from '../ui/Icons'
-import { Dots } from '../ui/Loading'
+import { Dots, Loading } from '../ui/Loading'
 import { apiJson, apiUpload } from '../../lib/api'
 import { track } from '../../lib/track'
 import { composing } from '../../lib/keyGuards'
@@ -244,9 +244,9 @@ export function LyricsImportSheet({ session, t, name: named = '', onClose, onMad
     )
   } else if (step === 'reading' || step === 'sorting') {
     body = (
-      <p className="lyr-wait" role="status">
-        {step === 'reading' ? t.lyricsReading : t.lyricsSorting}<Dots />
-      </p>
+      <div className="lyr-wait" role="status">
+        <Loading inline copy={step === 'reading' ? t.lyricsReading : t.lyricsSorting} />
+      </div>
     )
   } else if (step === 'review') {
     body = (

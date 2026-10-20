@@ -1850,14 +1850,20 @@ a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; t
   flex-direction: column;
   gap: var(--sp-2);
 }
-.lyr-note,
-.lyr-wait {
+.lyr-note {
   margin: 0;
   font-size: var(--fs-sm);
   line-height: 1.35;
   color: var(--text-secondary);
 }
-.lyr-wait { padding-block: var(--sp-6); text-align: center; }
+/* The wait: the dots and the sentence on one line, in the middle. */
+.lyr-wait {
+  display: flex;
+  justify-content: center;
+  padding-block: var(--sp-6);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
 .lyr-pile {
   display: flex;
   flex-direction: column;
@@ -8316,6 +8322,11 @@ textarea:focus-visible {
 .seg__opt:first-child { border-left: 0; }
 .seg__opt:hover,
 .seg__opt:focus-visible { color: var(--text-primary); filter: none; }
+/* The global ring, inset, as the analyser's pill's (.anl-seg__opt):
+   `.seg` clips, and the ring of the option a sheet focused on opening
+   showed as a gold edge on its neighbour's side, read as a border the
+   selected option does not have (plan 262). */
+.seg__opt:focus-visible { outline-offset: -2px; }
 .seg__opt--on { background: var(--sel-wash); color: var(--sel-ink); box-shadow: inset 0 -2px 0 var(--accent2); }
 /* The canvas's variants (plan 068): a plain-word option, the full-width
    form (the analyzer's Text / Photo / Video), the analyzer's pigment. */
