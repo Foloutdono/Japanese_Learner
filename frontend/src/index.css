@@ -33651,26 +33651,29 @@ button.brd-stn { cursor: pointer; }
   .desk-bz__cell--west .bz-pick { text-align: right; }
 
   /* ── /profile/banzuke on the desk (plan 262) ──
-     The list in the entry's width, the division's head, last week's
-     podium and the switch beside it in the side's. */
+     The list in the entry's width from the top of the page; beside it,
+     in the side's, the board's controls stacked: the tabs, the division's
+     head or last week's podium, when the week ends, the gap, the switch.
+     The list spans the side's rows down to a last one that takes what
+     it leaves (1fr), so the side stays packed at the top. */
   .phone__content > .bzp {
     display: grid;
     grid-template-columns: minmax(0, var(--desk-entry-w)) var(--desk-side-w);
-    grid-auto-flow: dense;
+    grid-template-rows: auto auto auto auto auto auto 1fr;
     place-content: start center;
     align-items: start;
-    gap: var(--sp-6) var(--sp-9);
+    gap: var(--sp-5) var(--sp-9);
     padding: 0 var(--sp-7) var(--sp-6);
   }
-  .bzp > .bar { grid-column: 1 / -1; }
-  .bzp__controls { grid-column: 1; grid-row: 2; }
-  .bzp__ends { grid-column: 1; grid-row: 3; }
-  .bzp__list { grid-column: 1; grid-row: 4 / span 3; }
-  .bzp__me { grid-column: 1; grid-row: 7; }
+  .bzp > .bar { grid-column: 1 / -1; grid-row: 1; }
+  .bzp__list { grid-column: 1; grid-row: 2 / 8; }
+  .bzp__me { grid-column: 1; grid-row: 8; }
+  .bzp__controls { grid-column: 2; grid-row: 2; }
   .bzp__division,
-  .bzp__podium { grid-column: 2; grid-row: 2 / span 2; }
-  .bzp__gap { grid-column: 2; grid-row: 4; text-align: left; }
-  .bzp__seen { grid-column: 2; grid-row: 5; }
+  .bzp__podium { grid-column: 2; grid-row: 3; }
+  .bzp__ends { grid-column: 2; grid-row: 4; }
+  .bzp__gap { grid-column: 2; grid-row: 5; text-align: left; }
+  .bzp__seen { grid-column: 2; grid-row: 6; }
 
   /* ── 教材 on the desk: the shelf beside the open deck (plan 154) ──
      The owner's pick B of four layouts drawn on the canvas "Tsuji — the

@@ -56,12 +56,14 @@ describe('the whole board on the desk', () => {
     $$('.bz__seg .seg__opt')[1].click()
     await settle()
     const list = $('.bzp__list').getBoundingClientRect()
-    for (const sel of ['.bzp__division', '.bzp__gap', '.bzp__seen']) {
-      const side = $(sel).getBoundingClientRect()
-      expect(side.left, sel).toBeGreaterThan(list.right)
-    }
+    const side = ['.bzp__controls', '.bzp__division', '.bzp__gap', '.bzp__seen'].map(sel => [sel, $(sel).getBoundingClientRect()])
+    for (const [sel, r] of side) expect(r.left, sel).toBeGreaterThan(list.right)
     expect(list.width).toBeLessThanOrEqual(441)
-    expect($('.bzp__controls').getBoundingClientRect().left).toBeCloseTo(list.left, 0)
+    // The list starts with the side, and the side stays packed: no row
+    // of it is stretched by the list beside it (two gaps at most, where
+    // the week's end, a row of its own, is not drawn).
+    expect(side[0][1].top).toBeCloseTo(list.top, 0)
+    for (let i = 1; i < side.length; i++) expect(side[i][1].top - side[i - 1][1].bottom, side[i][0]).toBeLessThan(40)
     // The division's lines: one after the sixth place, one before the twenty-fifth.
     const zones = $$('.bzp__zone')
     expect(zones).toHaveLength(2)
