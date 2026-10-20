@@ -4,10 +4,10 @@ import { Sheet } from '../chrome/Sheet'
 import { deckTypeOf } from '../decks/deckTypes'
 import { CheckIcon, ChevronIcon } from '../ui/Icons'
 import { Dots } from '../ui/Loading'
-import { apiJson } from '../../lib/api'
 import { track } from '../../lib/track'
 import { composing } from '../../lib/keyGuards'
 import { songWords, songLines, songDeckName } from './songDeck'
+import { addWords, addLines } from './songDeckApi'
 
 // ── 歌 — make the song yours (plan 215) ──────────────────────────
 // The result's second door beside 保存: where keeping takes ONE line
@@ -26,9 +26,6 @@ import { songWords, songLines, songDeckName } from './songDeck'
 // it tops the deck up: a word already there conflicts and counts nothing
 // on the server, and a line already there is not written again.
 
-// The written-card batch's ceiling (routes/decks.py's MAX_BATCH).
-const BATCH = 25
-
 export function SongDeckSheet({ session, mining, sentences, title, t, onClose }) {
   const words = useMemo(() => songWords(sentences), [sentences])
   const lines = useMemo(() => songLines(sentences), [sentences])
@@ -45,30 +42,6 @@ export function SongDeckSheet({ session, mining, sentences, title, t, onClose })
   }
   const ready = Boolean(name.trim()) && (takes.words || takes.lines) && !busy
 
-  async function addWords(deck) {
-    await apiJson(`/api/decks/${deck.id}/cards/app`, session, {
-      method: 'POST',
-      body: JSON.stringify({ cards: words }),
-    })
-  }
-
-  // Returns whether the free tier's card ceiling stopped a slice: the
-  // batch reports a refused row by its index rather than failing whole.
-  async function addLines(deck) {
-    const held = await apiJson(`/api/decks/${deck.id}/cards`, session)
-    const have = new Set((held?.cards ?? []).filter(c => c.origin === 'custom').map(c => c.front))
-    const fresh = lines.filter(line => !have.has(line.front))
-    let refused = false
-    for (let i = 0; i < fresh.length && !refused; i += BATCH) {
-      const result = await apiJson(`/api/decks/${deck.id}/cards/batch`, session, {
-        method: 'POST',
-        body: JSON.stringify({ cards: fresh.slice(i, i + BATCH) }),
-      })
-      refused = (result?.errors ?? []).some(e => e.limit)
-    }
-    return refused
-  }
-
   async function create(e) {
     e.preventDefault()
     if (!ready) return
@@ -77,8 +50,8 @@ export function SongDeckSheet({ session, mining, sentences, title, t, onClose })
     let deck = null
     try {
       deck = await mining.ensureDeck('mixed', name.trim(), { remember: false })
-      if (takes.words) await addWords(deck)
-      if (takes.lines && await addLines(deck)) setError(t.songDeckLimit)
+      if (takes.words) await addWords(session, deck.id, words)
+      if (takes.lines && await addLines(session, deck.id, lines)) setError(t.songDeckLimit)
       // Counts only: the song's name is the learner's own words.
       track('song_deck', { words: takes.words ? words.length : 0, lines: takes.lines ? lines.length : 0 })
       setMade(deck)

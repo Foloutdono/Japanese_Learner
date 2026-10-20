@@ -28025,10 +28025,10 @@ button.brd-stn { cursor: pointer; }
   letter-spacing: var(--tr-term);
   color: var(--text-secondary);
 }
-/* 歌 (plan 215) at the head: the Passage made a deck is about the
-   whole video, so it stands with the way back rather than in the dock,
-   and it is named, not a bare glyph -- the door a learner has to find. */
-.anl-m__song {
+/* 表示 (plan 263) at the head, where 歌 (plan 215) stood: the door to
+   what the stage prints around its line, named, not a bare glyph -- the
+   door a learner has to find. Open, it is lit as a choice is. */
+.anl-m__show {
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -28043,8 +28043,9 @@ button.brd-stn { cursor: pointer; }
   font-weight: 700;
   color: var(--text-primary);
 }
-.anl-m__song:hover,
-.anl-m__song:focus-visible { border-color: var(--text-secondary); }
+.anl-m__show:hover,
+.anl-m__show:focus-visible { border-color: var(--text-secondary); }
+.anl-m__show--open { background: var(--sel-wash); border-color: var(--sel-line); color: var(--sel-ink); }
 /* The video edge to edge: out of the column's gutter. */
 .anl-m__player {
   display: flex;
@@ -28095,6 +28096,11 @@ button.brd-stn { cursor: pointer; }
   color: var(--text-secondary);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+/* On a phone they go: the line at display size and its translation take
+   the room, and the transport's two skips walk the stops. */
+@media (max-width: 560px) {
+  .anl-m__line { display: none; }
 }
 .anl-m__subs .anl-subs__line {
   justify-content: center;
@@ -28374,6 +28380,422 @@ button.brd-stn { cursor: pointer; }
   align-self: stretch;
   margin-top: var(--sp-3);
 }
+
+/* ── 表示 and 保存 on a phone (plan 263) ──
+   The owner's picks of the canvas "Analyser stage — reading options":
+   B, the Affichage sheet, and K3·a redrawn, the keep sheet that puts
+   the line in a deck. */
+
+/* The rōmaji under each word, below the state's rule: the rule stays
+   the word's own, and the line's rows open to make room. */
+.anl-m__subs[data-romaji] .tok { position: relative; }
+.anl-m__subs[data-romaji] .anl-subs__line {
+  row-gap: var(--sp-8);
+  padding-bottom: var(--sp-6);
+}
+.tok__ro {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-top: var(--sp-1);
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: var(--tr-caption);
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+
+/* The Affichage sheet: a row a help, its name and its segment; low, so
+   the line it changes is seen changing over it. */
+.anl-show__rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.anl-show__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+}
+.anl-show__name {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+  font-size: var(--fs-body);
+  font-weight: 500;
+}
+.anl-show__note {
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text-secondary);
+}
+.anl-show__seg { flex: none; }
+.anl-show__seg.seg .seg__opt {
+  align-items: center;
+  min-height: 44px;
+}
+.anl-show__done { min-height: 44px; }
+
+/* The keep sheet: three faces in one panel. */
+.anl-keepsheet__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  min-height: 0;
+}
+.anl-keepsheet__cap {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+/* The deck it goes in: a row that is a door (Changer). */
+.anl-keepsheet__deck,
+.anl-keepsheet__opt {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 56px;
+  padding: var(--sp-2) var(--sp-4);
+  background: var(--bg-main);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.anl-keepsheet__deck:hover,
+.anl-keepsheet__deck:focus-visible { border-color: var(--text-secondary); }
+.anl-keepsheet__deckname {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.anl-keepsheet__deckname b {
+  overflow: hidden;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.anl-keepsheet__deckname small,
+.anl-keepsheet__title small {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.anl-keepsheet__change {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--sel-ink);
+}
+/* What goes in: the line and its words, each a card ticked as a whole,
+   lit in the selection's gold while it is in. */
+.anl-keepsheet__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  background: var(--bg-main);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.anl-keepsheet__item--on {
+  background: var(--sel-wash);
+  border-color: var(--sel-line);
+}
+.anl-keepsheet__tick {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  margin-block: calc(-1 * var(--sp-3));
+  font-size: var(--fs-body);
+  font-weight: 700;
+  cursor: pointer;
+}
+.anl-keepsheet__check {
+  flex: none;
+  width: var(--sp-5);
+  height: var(--sp-5);
+  margin: 0;
+  accent-color: var(--accent2);
+}
+.anl-keepsheet__note {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.anl-keepsheet__line {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  letter-spacing: var(--tr-term);
+}
+.anl-keepsheet__reading {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.anl-keepsheet__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  letter-spacing: var(--tr-term);
+}
+.anl-keepsheet__rest {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  letter-spacing: 0;
+  color: var(--text-secondary);
+}
+.anl-keepsheet__more {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  background: transparent;
+  border: 1px dashed var(--sel-line);
+  border-radius: var(--r-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--sel-ink);
+}
+.anl-keepsheet__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+/* A word out is dashed and quiet; a word in stands in the line's ink. */
+.anl-keepsheet__chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 44px;
+  padding: var(--sp-1) var(--sp-4);
+  background: transparent;
+  border: 1px dashed var(--surface-line);
+  border-radius: var(--r-card);
+  font-family: var(--font-jp);
+  color: var(--text-secondary);
+}
+.anl-keepsheet__chip b {
+  font-size: var(--fs-body);
+  font-weight: 500;
+  letter-spacing: var(--tr-term);
+}
+.anl-keepsheet__chip small {
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.anl-keepsheet__chip--on {
+  background: var(--bg-main);
+  border-style: solid;
+  border-color: var(--sel-line);
+  color: var(--text-primary);
+}
+.anl-keepsheet__chip--more {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--sel-ink);
+}
+.anl-keepsheet__chip:disabled { cursor: not-allowed; opacity: 0.45; }
+.anl-keepsheet__go { width: 100%; }
+.anl-keepsheet__pin {
+  align-self: center;
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  background: transparent;
+  border: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+/* A face past the first: the way back, its name, and what it acts on. */
+.anl-keepsheet__head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+}
+.anl-keepsheet__back {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-left: calc(-1 * var(--sp-3));
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--text-secondary);
+}
+.anl-keepsheet__title {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  font-size: var(--fs-body);
+}
+.anl-keepsheet__all { flex: none; min-height: 44px; }
+.anl-keepsheet__decks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.anl-keepsheet__opt--on {
+  background: var(--sel-wash);
+  border-color: var(--sel-line);
+}
+.anl-keepsheet__count {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.anl-keepsheet__tag {
+  flex: none;
+  padding: 0 var(--sp-2);
+  border: 1px solid var(--sel-line);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--sel-ink);
+}
+.anl-keepsheet__new {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  background: transparent;
+  border: 1px dashed var(--surface-line);
+  border-radius: var(--r-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.anl-keepsheet__name {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.anl-keepsheet__namerow {
+  display: flex;
+  gap: var(--sp-3);
+}
+.anl-keepsheet__namerow .field { flex: 1; min-width: 0; }
+/* The song a line a row: the shortcuts over it, the list scrolling
+   between the head and the action, the line in hand on the rail. */
+.anl-keepsheet__quick {
+  display: flex;
+  gap: var(--sp-2);
+}
+.anl-keepsheet__pick {
+  flex: 1 1 0;
+  min-height: 44px;
+  padding: 0 var(--sp-2);
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.anl-keepsheet__pick:hover,
+.anl-keepsheet__pick:focus-visible { border-color: var(--text-secondary); color: var(--text-primary); }
+.anl-keepsheet__pick:disabled { cursor: not-allowed; opacity: 0.45; }
+.anl-keepsheet__list {
+  display: flex;
+  flex-direction: column;
+  max-height: 50vh;
+  max-height: 50dvh;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  border-block: 1px solid var(--surface-line);
+}
+.anl-keepsheet__row {
+  display: grid;
+  flex: none;
+  grid-template-columns: var(--sp-5) var(--sp-7) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 48px;
+  padding: 0 var(--sp-3);
+  border-bottom: 1px solid var(--surface-line);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.anl-keepsheet__row:last-child { border-bottom: 0; }
+.anl-keepsheet__row--on { color: var(--text-primary); }
+.anl-keepsheet__row--here {
+  background: var(--sel-wash);
+  box-shadow: inset 3px 0 0 var(--accent2);
+  font-weight: 700;
+}
+.anl-keepsheet__n {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--text-secondary);
+}
+.anl-keepsheet__text {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  letter-spacing: var(--tr-term);
+}
+.anl-keepsheet__text small {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.anl-keepsheet__close { min-height: 44px; }
 
 /* ── 入門 — the introduction before the first card (plan 170) ──
    Six screens for a learner who answered « Pas encore » to the kana
