@@ -52,6 +52,7 @@ import PracticeScreen from './screens/PracticeScreen'
 import TodayScreen from './screens/TodayScreen'
 import TodayRun from './screens/TodayRun'
 import TicketsScreen from './screens/TicketsScreen'
+import BanzukeScreen from './screens/BanzukeScreen'
 import KanaScreen  from './screens/KanaScreen'
 import KanaRun from './screens/KanaRun'
 import VocabRun from './screens/VocabRun'
@@ -760,6 +761,7 @@ export default function App({ front = NO_FRONT }) {
             <Route path="/profile/stats"        element={<StatsScreen session={session} />} />
             {/* 記念切符 — the tickets a streak has earned (plan 191). */}
             <Route path="/profile/tickets"      element={<TicketsScreen session={session} />} />
+            <Route path="/profile/banzuke"      element={<BanzukeScreen session={session} />} />
             <Route path="/profile/settings"     element={<SettingsScreen session={session} />} />
             {/* The settings pages (plan 074): display, sound, learning,
                 destination, data, account — each its own page under
@@ -849,7 +851,7 @@ export default function App({ front = NO_FRONT }) {
         <NativeBridge />
 
         {/* 掲示 — the docked notes (plan 065): a new build waiting, a
-            release coming (plan 262), or no network. Beside <Routes/> for
+            release coming (plan 264), or no network. Beside <Routes/> for
             the same reason as the gate below: they must outlive the
             navigation that would unmount a screen. */}
         <UpdateToast />

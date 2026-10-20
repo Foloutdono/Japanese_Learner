@@ -34,7 +34,7 @@ import { WeekAhead } from '../journey/WeekAhead'
 import { TodayDial, FareKey, LineKeys, ThreadKey } from './TodayDial'
 import { TodayDay } from './TodayDay'
 import { TodayPrint, PrintTitle } from './TodayPrint'
-import { BELOW, PRINT, at, printHour, printVars, usePrintFrame, preloadPrint } from './print/usePrint'
+import { BELOW, PRINT, at, printHour, printName, printVars, usePrintFrame, preloadPrint } from './print/usePrint'
 
 // ── 改札 — the fare gate ─────────────────────────────────────
 // The day's reviews, first thing on Today, and the run's picker: each
@@ -324,12 +324,14 @@ function usePrint(layout, anchorRef, hourOverride = null) {
   const now = useMinute()
   // A month's finish is a night's, whatever the hour (plan 250, B3·b).
   const hour = hourOverride ?? printHour(now)
+  // The season's print at that hour (plan 261).
+  const look = printName(now, hour)
   const [frameRef, box] = usePrintFrame(layout, anchorRef)
   const print = box?.print ?? layout
   const frame = PRINT.frames[print]
   return {
-    now, hour, frame, frameRef, box, print: box?.print ?? null,
-    style: printVars(hour, print, box), dial: { frame, disc: PRINT.hours[hour].disc },
+    now, hour, look, frame, frameRef, box, print: box?.print ?? null,
+    style: printVars(look, print, box), dial: { frame, disc: PRINT.prints[look].disc },
   }
 }
 
@@ -342,9 +344,9 @@ function PrintWait({ desk, t, finishing = false }) {
   return (
     <div className={`tdy tdy--print tdy--${layout}`} style={p.style} data-hour={p.hour}>
       {finishing && !desk && <FinishGround />}
-      <TodayPrint hour={p.hour} device={p.print} frameRef={p.frameRef} />
+      <TodayPrint look={p.look} device={p.print} frameRef={p.frameRef} />
       <section className="tdy-hero tdy-hero--print tdy-wait" aria-busy="true" aria-label={t.fareGate}>
-        <PrintTitle now={p.now} hour={p.hour} />
+        <PrintTitle now={p.now} look={p.look} />
         <TodayDial parts={[]} print={p.dial} className="tpr-at" style={at(frame.cx, frame.cy)}><Loading tight /></TodayDial>
       </section>
     </div>
@@ -495,9 +497,9 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
   return (
     <div className={finishClass('tdy tdy--print tdy--phone', fin)} style={p.style} data-hour={p.hour}>
       {fin && <FinishGround />}
-      <TodayPrint hour={p.hour} device={p.print} frameRef={p.frameRef} />
+      <TodayPrint look={p.look} device={p.print} frameRef={p.frameRef} />
       <section className="tdy-hero tdy-hero--print" aria-label={t.fareGate}>
-        <PrintTitle now={p.now} hour={p.hour} />
+        <PrintTitle now={p.now} look={p.look} />
         <TodayDial parts={parts} fare={fare} thread={thread} print={p.dial} className="tpr-at" style={at(frame.cx, frame.cy)}>
           <span className="tdy-dial__gate" data-guide="today.gate" aria-hidden="true" />
           <DialCount run={run} t={t} roll={rollOf(run, fin)} />
@@ -575,9 +577,9 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
 
   return (
     <div className={finishClass('tdy-desk tdy--print tdy--desk', fin)} style={p.style} data-hour={p.hour}>
-      <TodayPrint hour={p.hour} device={p.print} frameRef={p.frameRef} />
+      <TodayPrint look={p.look} device={p.print} frameRef={p.frameRef} />
       <section className="tdy-hero tdy-hero--print" aria-label={t.fareGate}>
-        <PrintTitle now={p.now} hour={p.hour} />
+        <PrintTitle now={p.now} look={p.look} />
         <TodayDial parts={parts} fare={fare} thread={thread} print={p.dial} className="tpr-at" style={at(frame.cx, frame.cy)}>
           <span className="tdy-dial__gate" data-guide="today.gate" aria-hidden="true" />
           <DialCount run={run} t={t} roll={rollOf(run, fin)} />
@@ -765,9 +767,11 @@ function ClearedGate({ today, desk, finish = null }) {
   const p = usePrint(desk ? 'desk' : 'phone', desk ? heroRef : null, fin?.night ? 'night' : null)
   const { frame } = p
   const nightFalls = kind === 'month' && p.hour !== 'night'
+  // The night the finish turns to: the season's (plan 261).
+  const nightLook = printName(p.now, 'night')
   useEffect(() => {
-    if (kind === 'month' && p.print) preloadPrint('night', p.print)
-  }, [kind, p.print])
+    if (kind === 'month' && p.print) preloadPrint(nightLook, p.print)
+  }, [kind, p.print, nightLook])
   // ... and heard: the night's lake from the dusk on, for as long as the
   // print holds the night (plan 250b).
   useEffect(() => (kind === 'month' ? holdAmbianceHour('night') : undefined), [kind])
@@ -801,8 +805,8 @@ function ClearedGate({ today, desk, finish = null }) {
   const shake = kind === 'day' && live && came('LAND') ? ' clrk-shake' : ''
   const hero = (
     <section className={`tdy-hero tdy-hero--print tdy-hero--clear${shake}`} aria-label={t.fareGate}>
-      {live && nightFalls && came('DUSK') && !came('TICKET') && <NightVeil sky={printVars('night', p.print ?? (desk ? 'desk' : 'phone'), null)['--tpr-sky']} />}
-      <PrintTitle now={p.now} hour={p.hour} />
+      {live && nightFalls && came('DUSK') && !came('TICKET') && <NightVeil sky={printVars(nightLook, p.print ?? (desk ? 'desk' : 'phone'), null)['--tpr-sky']} />}
+      <PrintTitle now={p.now} look={p.look} />
       {kind === 'month' && came('LANTERNS') && (
         <Lanterns days={model.ticket.days} frame={frame} desk={p.print === 'desk'} play={!fin.reduced} label={t.finLanternsAria(model.ticket.days)} />
       )}
@@ -935,7 +939,7 @@ function ClearedGate({ today, desk, finish = null }) {
   if (desk) {
     return (
       <div className={finishClass('tdy-desk tdy--print tdy--desk tdy--clear', fin)} style={style} data-hour={p.hour}>
-        <TodayPrint hour={p.hour} device={p.print} frameRef={p.frameRef} train={false} />
+        <TodayPrint look={p.look} device={p.print} frameRef={p.frameRef} train={false} />
         {hero}
         <div className="tdy-desk__hero" ref={heroRef}>
           <div className="tdy-desk__go tdy-desk__go--clear" ref={footRef}>{foot}</div>
@@ -952,7 +956,7 @@ function ClearedGate({ today, desk, finish = null }) {
   return (
     <div className={finishClass('tdy tdy--print tdy--phone tdy--clear', fin)} style={style} data-hour={p.hour}>
       {fin && <FinishGround />}
-      <TodayPrint hour={p.hour} device={p.print} frameRef={p.frameRef} train={false} />
+      <TodayPrint look={p.look} device={p.print} frameRef={p.frameRef} train={false} />
       {hero}
       <span className="tdy__air" aria-hidden="true" />
       <div className="tdy__foot">{foot}</div>

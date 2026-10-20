@@ -1,4 +1,4 @@
-"""工事 -- the release a learner is warned of (plan 262).
+"""工事 -- the release a learner is warned of (plan 264).
 
 The daily release (.github/workflows/promote.yml) restarts this one
 process, and a learner using the app meanwhile meets requests that hang

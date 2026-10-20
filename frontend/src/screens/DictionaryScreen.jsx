@@ -1069,6 +1069,18 @@ export default function DictionaryScreen({ session }) {
 
 // ── Results grid + detail panel (shared by search mode and radical results) ──
 
+// What the footer counts: the one kind of entry on screen, else a neutral word,
+// so a vocabulary search never reads "kanji displayed".
+function displayedLabel(t, results) {
+	const kinds = new Set(results.map((e) => e.type))
+	if (kinds.size !== 1) return t.displayedEntries
+	const [kind] = kinds
+	if (kind === 'kanji') return t.displayedKanji
+	if (kind === 'vocab') return t.displayedWords
+	if (kind === 'grammar') return t.displayedPoints
+	return t.displayedEntries
+}
+
 // Cards get one gloss, not the whole list. This used to split on ';'
 // alone, which meant a vocab entry (comma-separated — see splitGlosses)
 // never matched and the card printed the entire packed string:
@@ -1385,7 +1397,7 @@ function ResultsSection({
 							)}
 							{!hasMore && results.length > 0 && (
 								<div className="dict-sentinel__text">
-									{total} {t.displayedKanji}
+									{total} {displayedLabel(t, results)}
 								</div>
 							)}
 						</div>

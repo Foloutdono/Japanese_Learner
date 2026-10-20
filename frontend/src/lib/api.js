@@ -94,7 +94,7 @@ async function send(path, init) {
     throw err
   }
   if (response.status >= 500) reportApiFailure(path, response.status)
-  // 工事 — whether a release is announced rides on every answer (plan 262).
+  // 工事 — whether a release is announced rides on every answer (plan 264).
   releaseNotice.seen(response)
   return response
 }

@@ -10,7 +10,7 @@ import { swUpdate } from '../../stores/swUpdate'
 import { refillClock } from '../../domain/credits'
 import '../../index.css'
 
-// ── 工事 — a release is coming (plan 262) ──
+// ── 工事 — a release is coming (plan 264) ──
 // The docked note the server's X-Release-At raises: the minute, then
 // "under way", one quiet action that closes it, and the new build's
 // toast held back while it speaks (one note at a time in one place).

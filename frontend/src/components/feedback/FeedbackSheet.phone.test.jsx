@@ -66,7 +66,8 @@ describe('the form, in its sheet', () => {
   it('sends no class once the box is unticked, and the reply when asked', async () => {
     await render(<FeedbackSheet open onClose={() => {}} session={LEARNER} />)
     const [join, reply] = document.querySelectorAll('.fb-check__box')
-    expect(reply.closest('label').textContent).toContain('aiko@example.com')
+    expect(reply.closest('label').textContent).toContain('contact.tsujijapanese@gmail.com')
+    expect(reply.closest('label').textContent).not.toContain('aiko@example.com')
     await userEvent.click(join)
     await userEvent.click(reply)
     await userEvent.type($('.fb-form__text'), 'Ça plante.')

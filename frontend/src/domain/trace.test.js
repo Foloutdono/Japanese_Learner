@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { TRACE, sampleCount, toLine, traceVerdict } from './trace'
+import { TRACE, beginTrace, followTrace, runLengths, sampleCount, traceDone, traceMiss, traceProgress } from './trace'
 
 // A stroke as a line of samples from (x0, y0) to (x1, y1).
 function line(x0, y0, x1, y1, n = 30) {
@@ -14,56 +14,98 @@ function arc(n = 40) {
   })
 }
 
-describe('traceVerdict (plan 216)', () => {
+// The hand drawing `drawn` on `guide`: 'start' where it cannot begin,
+// 'ok' once the ink reaches the ring, else what to fix when it lifts.
+function verdict(drawn, guide) {
+  let run = beginTrace(guide, drawn[0])
+  if (!run) return 'start'
+  for (const p of drawn.slice(1)) {
+    run = followTrace(run, guide, p)
+    if (traceDone(run, guide)) return 'ok'
+  }
+  return traceDone(run, guide) ? 'ok' : traceMiss(run)
+}
+
+describe('the ink follows the stroke (plans 216, 263)', () => {
   const stroke = line(20, 30, 90, 30)
 
   it('takes a line drawn from the dot to the ring along the stroke', () => {
-    expect(traceVerdict(line(22, 32, 88, 29, 12), stroke)).toBe('ok')
+    expect(verdict(line(22, 32, 88, 29, 12), stroke)).toBe('ok')
   })
 
-  it('allows a fingertip of slack at either end', () => {
-    expect(traceVerdict(line(20 + TRACE.reach - 2, 30, 90 - TRACE.reach + 2, 30), stroke)).toBe('ok')
+  it('allows a fingertip of slack at the dot and at the ring', () => {
+    expect(verdict(line(20 + TRACE.reach - 2, 30, 90, 30), stroke)).toBe('ok')
+    expect(verdict(line(20, 30 + TRACE.near - 2, 90, 30 + TRACE.near - 2), stroke)).toBe('ok')
   })
 
   it('refuses a line begun away from the dot', () => {
-    expect(traceVerdict(line(50, 30, 90, 30), stroke)).toBe('start')
+    expect(verdict(line(50, 30, 90, 30), stroke)).toBe('start')
   })
 
   it('refuses the stroke drawn the wrong way round', () => {
-    expect(traceVerdict(line(90, 30, 20, 30), stroke)).toBe('start')
+    expect(verdict(line(90, 30, 20, 30), stroke)).toBe('start')
   })
 
   it('refuses a line stopped short of the ring', () => {
-    expect(traceVerdict(line(20, 30, 60, 30), stroke)).toBe('end')
+    expect(verdict(line(20, 30, 60, 30), stroke)).toBe('end')
   })
 
   it('refuses a straight cut across a curved stroke', () => {
     const bowl = arc()
-    expect(traceVerdict(bowl.filter((_, i) => i % 3 === 0), bowl)).toBe('ok')
-    expect(traceVerdict(line(24, 50, 84, 50), bowl)).toBe('path')
+    expect(verdict(bowl.filter((_, i) => i % 3 === 0), bowl)).toBe('ok')
+    expect(verdict(line(24, 50, 84, 50), bowl)).toBe('path')
   })
 
   it('refuses a line that wanders off and back', () => {
     const wander = [...line(20, 30, 55, 80, 10), ...line(55, 80, 90, 30, 10)]
-    expect(traceVerdict(wander, stroke)).toBe('path')
+    expect(verdict(wander, stroke)).toBe('path')
   })
 
-  it('refuses a tap, or nothing at all', () => {
-    expect(traceVerdict([], stroke)).toBe('start')
-    expect(traceVerdict([[20, 30]], stroke)).toBe('end')
+  it('takes the ink on again only from where it stopped', () => {
+    let run = beginTrace(stroke, [20, 30])
+    run = followTrace(run, stroke, [50, 30])
+    run = followTrace(run, stroke, [50, 70])
+    expect(run.off).toBe(true)
+    // Back on the stroke further on than the ink: nothing.
+    run = followTrace(run, stroke, [75, 30])
+    expect(traceProgress(run, stroke)).toBeCloseTo(30 / 70, 1)
+    // Back where the ink stopped: it goes on, and reaches the ring.
+    run = followTrace(run, stroke, [50, 30])
+    expect(run.off).toBe(false)
+    run = followTrace(run, stroke, [90, 30])
+    expect(traceDone(run, stroke)).toBe(true)
+    expect(traceMiss(run)).toBe('path')
+  })
+
+  it('refuses a tap', () => {
+    expect(verdict([[20, 30]], stroke)).toBe('end')
+  })
+
+  it('follows a quick flick drawn in two points', () => {
+    expect(verdict([[20, 30], [90, 30]], stroke)).toBe('ok')
   })
 
   it('judges a short tick by its ends', () => {
     const tick = line(70, 20, 74, 26, 4)
-    expect(traceVerdict(line(70, 21, 75, 27, 3), tick)).toBe('ok')
+    expect(verdict(line(70, 21, 75, 27, 3), tick)).toBe('ok')
+  })
+
+  it('never takes the ink back, nor past the finger', () => {
+    let run = beginTrace(stroke, [20, 30])
+    run = followTrace(run, stroke, [55, 30])
+    expect(traceProgress(run, stroke)).toBeCloseTo(0.5, 1)
+    run = followTrace(run, stroke, [30, 30])
+    expect(traceProgress(run, stroke)).toBeCloseTo(0.5, 1)
+    // A finger that jumps ahead leaves the ink where it was.
+    run = followTrace(run, stroke, [55, 30])
+    run = followTrace({ ...run, last: [88, 30] }, stroke, [88, 30])
+    expect(traceProgress(run, stroke)).toBeCloseTo(0.5, 1)
   })
 })
 
 describe('the geometry', () => {
-  it('measures a point against a polyline', () => {
-    expect(toLine([5, 3], [[0, 0], [10, 0]])).toBe(3)
-    expect(toLine([13, 4], [[0, 0], [10, 0]])).toBe(5)
-    expect(toLine([1, 1], [[1, 4]])).toBe(3)
+  it('measures the guide as it goes', () => {
+    expect(runLengths([[0, 0], [3, 4], [3, 10]])).toEqual([0, 5, 11])
   })
 
   it('samples a stroke every couple of units, never under eight', () => {

@@ -3191,6 +3191,7 @@ button:focus-visible {
 .stage,
 .profile,
 .stats,
+.bzp,
 .settings {
   animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
 }
@@ -9114,6 +9115,21 @@ textarea:focus-visible {
 .tpr-scull { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: view-box; animation-name: tpr-scull; }
 .tpr-spark { animation-iteration-count: infinite; opacity: 0; animation-name: tpr-spark; animation-timing-function: ease-out; }
 .tpr-glitter { opacity: 0; animation-name: tpr-glitter; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+/* The seasons' own (plan 261): the snow's sway, the fireflies' wander
+   and blink, the fireworks opening. */
+.tpr-sway { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-sway; animation-direction: alternate; }
+.tpr-wander { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-wander; animation-direction: alternate; }
+.tpr-blink { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-blink; }
+.tpr-burst { transform-box: view-box; opacity: 0; animation-iteration-count: infinite; animation-name: tpr-burst; animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+/* The day's gulls (plan 261, round 4): a long glide, leaning into its
+   turns, then three slow beats. */
+.tpr-gwing, .tpr-ghand, .tpr-gbody { transform-box: view-box; transform-origin: 0 0; animation-duration: var(--cyc, 15s); animation-delay: var(--ph, 0s); animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+.tpr-gwing--r { animation-name: tpr-gbeat-r; }
+.tpr-gwing--l { animation-name: tpr-gbeat-l; }
+.tpr-ghand--r { animation-name: tpr-gflex-r; }
+.tpr-ghand--l { animation-name: tpr-gflex-l; }
+.tpr-gbody { animation-name: tpr-gbob; }
+.tpr-groll { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-groll; animation-direction: alternate; }
 @keyframes tpr-bird-bend { 0%, 100% { rotate: 14deg; } 42% { rotate: -22deg; } }
 @keyframes tpr-bird-bend-glide { 0%, 40%, 100% { rotate: 12deg; } 18%, 58% { rotate: -20deg; } 80% { rotate: 4deg; } }
 @keyframes tpr-bird-fold { 0% { scale: 1 1; animation-timing-function: cubic-bezier(0.55, 0, 0.7, 0.4); }
@@ -9181,6 +9197,16 @@ textarea:focus-visible {
 @keyframes tpr-scull { 0%, 100% { rotate: -5deg; } 50% { rotate: 6deg; } }
 @keyframes tpr-spark { 0% { opacity: 0; translate: 0 0; } 15% { opacity: 1; } 100% { opacity: 0; translate: 1.6px -7px; } }
 @keyframes tpr-glitter { 0%, 50%, 100% { opacity: 0; } 68% { opacity: 1; } }
+@keyframes tpr-sway { from { translate: calc(var(--sx, 0%) * -1) 0; } to { translate: var(--sx, 0%) 0; } }
+@keyframes tpr-wander { 0% { translate: 0 0; } 50% { translate: var(--wx, 0%) var(--wy, 0%); } 100% { translate: calc(var(--wx, 0%) * -0.6) calc(var(--wy, 0%) * 0.4); } }
+@keyframes tpr-blink { 0%, 100% { opacity: 0.12; } 30% { opacity: 1; } 55% { opacity: 0.85; } 75% { opacity: 0.08; } }
+@keyframes tpr-burst { 0% { opacity: 0; scale: 0.15; } 6% { opacity: 1; } 34% { opacity: 0.85; scale: 1; translate: 0 2px; } 52% { opacity: 0; scale: 1.05; translate: 0 6px; } 100% { opacity: 0; scale: 1.05; } }
+@keyframes tpr-gbeat-r { 0%, 55%, 100% { rotate: 0deg; } 61% { rotate: -30deg; } 67% { rotate: 18deg; } 73% { rotate: -30deg; } 79% { rotate: 18deg; } 85% { rotate: -30deg; } 92% { rotate: 6deg; } }
+@keyframes tpr-gbeat-l { 0%, 55%, 100% { rotate: 0deg; } 61% { rotate: 30deg; } 67% { rotate: -18deg; } 73% { rotate: 30deg; } 79% { rotate: -18deg; } 85% { rotate: 30deg; } 92% { rotate: -6deg; } }
+@keyframes tpr-gflex-r { 0%, 55%, 100% { rotate: 0deg; } 62% { rotate: 16deg; } 68% { rotate: -14deg; } 74% { rotate: 16deg; } 80% { rotate: -14deg; } 86% { rotate: 16deg; } 93% { rotate: -4deg; } }
+@keyframes tpr-gflex-l { 0%, 55%, 100% { rotate: 0deg; } 62% { rotate: -16deg; } 68% { rotate: 14deg; } 74% { rotate: -16deg; } 80% { rotate: 14deg; } 86% { rotate: -16deg; } 93% { rotate: 4deg; } }
+@keyframes tpr-gbob { 0%, 55%, 100% { translate: 0 0; } 64%, 76%, 88% { translate: 0 -0.5px; } 70%, 82% { translate: 0 0.4px; } }
+@keyframes tpr-groll { from { rotate: -9deg; } to { rotate: 9deg; } }
 
 @media (prefers-reduced-motion: reduce) {
   /* The still print: the moving parts at rest, the train halfway
@@ -9198,6 +9224,11 @@ textarea:focus-visible {
   .tpr-glint { opacity: 0.4; }
   .tpr-glitter { opacity: 0.6; }
   .tpr-puff { opacity: 0.25; }
+  /* The fireflies lit, the fireworks open; and the evening snow (暮雪)
+     is the view itself: still, it stays (plan 261). */
+  .tpr-blink { opacity: 0.9; }
+  .tpr-burst { opacity: 0.85; }
+  .tpr-flake { opacity: 0.9; }
 }
 
 /* The screen's one filled action. Gold, because Today is gold — and
@@ -17383,7 +17414,12 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   color: var(--text-primary);
 }
 
-.deckdetail-form { margin-bottom: 24px; }
+.deckdetail-form {
+  margin-bottom: 24px;
+  /* Scrolled to on a phone when a card's editor opens (DeckDetailScreen):
+     it lands under the sticky HUD, not behind it. */
+  scroll-margin-top: calc(var(--safe-top) + var(--hud-h) + var(--sp-4));
+}
 .deckdetail-form__fields { display: flex; flex-direction: column; gap: 10px; }
 /* DeckDetail.dc.html's `.field`: 12/16 and a 44px floor. It was
    `10px 14px` with no floor, which put the inputs at ~40px — two rungs
@@ -22475,7 +22511,417 @@ form.stage__foot > .btn-primary {
   font-variant-numeric: tabular-nums;
   color: var(--text-primary);
 }
-.leaderboard-row__gap { justify-content: center; color: var(--text-secondary); }
+
+/* ── 番付 — the board's window and the whole of it (plan 262) ──
+   Drawn as A1, the owner's pick of the canvas "Tsuji — the 番付
+   redesign". A row's move since the day began sits between the name and
+   the XP, in the secondary ink: the arrow says which way, so no state
+   colour is spent on it. A name that opens its learner's card is a bare
+   button that keeps the name's type. Where the board skips places a
+   dashed hairline stands, not a row. Its foot is one line: the gap to
+   the next place, short, and the door to the whole board. */
+.bz-move {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.bz-pick {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.bz-pick:hover,
+.bz-pick:focus-visible { text-decoration: underline; filter: none; }
+.bz__cut { margin: 0 var(--sp-5); border-top: 1px dashed var(--surface-line); }
+.leaderboard-row:has(+ .bz__cut) { border-bottom: 0; }
+.bz__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 0 var(--sp-5);
+}
+.bz__gap-to {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.bz__gap-xp { color: var(--sel-ink); }
+.bz__whole {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  min-height: 44px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.bz__whole svg { color: var(--text-secondary); }
+
+/* ── /profile/banzuke — the whole board (plan 262, A1) ──
+   One card heads the board: the tabs, then the level filter and the
+   week's end, or the division's name between its neighbours. Then the
+   list: on the week its first line is last week's podium; on a division
+   the rows Monday moves up and down ride a rail of their state's colour
+   (an edge, never a fill) under a head that names them and counts them,
+   in that colour mixed toward the ink. The phone's foot carries the learner's row
+   while it is off the list; the line under the list says what moving up
+   takes. The switch to keep off the board ends the page. */
+.bzp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: 0 var(--sp-5) var(--sp-6);
+}
+.bzp__sub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+}
+.bzp__scope {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-primary);
+}
+.bzp__scope select {
+  appearance: none;
+  height: 32px;
+  padding: 0 var(--sp-7) 0 var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  cursor: pointer;
+}
+.bzp__scope select:focus-visible { outline: 2px solid var(--sel-line); outline-offset: 2px; }
+.bzp__scope svg { position: absolute; right: var(--sp-4); pointer-events: none; color: var(--text-secondary); }
+.bzp__ends {
+  margin-left: auto;
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.bzp__division {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+}
+.bzp__step {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.bzp__step:disabled { opacity: 0.35; cursor: default; }
+.bzp__division-name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-2) 0;
+}
+.bzp__division-title { display: flex; align-items: baseline; gap: var(--sp-3); }
+.bzp__division-jp {
+  font-family: var(--font-serif);
+  font-size: var(--fs-title);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.bzp__division-latin,
+.bzp__podium-cap,
+.bzp__group {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.bzp__division-notes { font-size: var(--fs-caption); color: var(--text-secondary); text-align: center; }
+/* Last week's podium: the list's first line, the medals as numerals. */
+.bzp__podium {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-5);
+  border-bottom: 1px solid var(--surface-line);
+  background: var(--overlay-hover);
+}
+.bzp__podium-cap { flex: none; }
+.bzp__podium-names {
+  display: flex;
+  gap: var(--sp-4);
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.bzp__champ { display: inline-flex; align-items: baseline; gap: var(--sp-1); white-space: nowrap; }
+.bzp__champ .bz-pick { color: var(--text-primary); font-weight: 700; }
+.bzp__medal--gold { color: color-mix(in srgb, var(--medal-gold) 70%, var(--text-primary)); }
+.bzp__medal--silver { color: color-mix(in srgb, var(--medal-silver) 70%, var(--text-primary)); }
+.bzp__medal--bronze { color: color-mix(in srgb, var(--medal-bronze) 55%, var(--text-primary)); }
+/* The rows Monday moves, and their heads: the state's colour as a rail. */
+.bzp__group {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--sp-2) var(--sp-5);
+  border-bottom: 1px solid var(--surface-line);
+}
+.bzp__group-n { font-variant-numeric: tabular-nums; }
+/* The heads speak in their state's colour (the owner's call, after A1
+   was built): the colour mixed toward the ink, as the medals' figures
+   are, since --danger alone measured 2.5:1 on sumi. */
+.bzp__group--up { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.bzp__group--down { color: color-mix(in srgb, var(--danger) 55%, var(--text-primary)); }
+.bzp__group--up,
+.bzp__row--up { box-shadow: inset 3px 0 0 var(--success); }
+.bzp__group--down,
+.bzp__row--down { box-shadow: inset 3px 0 0 var(--danger); }
+.bzp__more {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: var(--sp-3) var(--sp-5);
+  border: 0;
+  border-bottom: 1px solid var(--surface-line);
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.bzp__more:last-child { border-bottom: 0; }
+.bzp__empty { margin: 0; padding: var(--sp-6) var(--sp-5); text-align: center; color: var(--text-secondary); }
+.bzp__me {
+  position: sticky;
+  bottom: var(--sp-3);
+  z-index: 2;
+  display: flex;
+  align-items: stretch;
+  background: var(--bg-card);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--surface-radius);
+  overflow: hidden;
+}
+.bzp__me-row { flex: 1; min-width: 0; border-bottom: 0; }
+/* The learner's own name keeps its width; the gap gives way to it. */
+.bzp__me-row .leaderboard-row__name { flex: 0 1 auto; }
+.bzp__me-gap {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--sel-ink);
+}
+.bzp__jump {
+  flex: none;
+  width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--surface-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.bzp__line { margin: 0; text-align: center; font-size: var(--fs-caption); color: var(--text-secondary); }
+/* The foot as F2, the owner's pick of the canvas's "le pied du
+   classement". The learner's card: their place in large figures, on the
+   pass's rail, and what it takes -- under a division's list on the
+   phone, in the desk's side. Keeping off the board: a settings row, its
+   sentence under its label, a switch at its right. */
+.bzp__mine {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  padding: var(--sp-4) var(--sp-5);
+  box-shadow: inset 3px 0 0 var(--pass-ink);
+}
+.bzp__mine-rank {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-heading);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.bzp__mine-ord { font-size: var(--fs-sm); color: var(--text-secondary); }
+.bzp__mine-lines { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.bzp__mine-lead { margin: 0; font-weight: 700; color: var(--text-primary); }
+.bzp__mine-fig { color: var(--sel-ink); font-variant-numeric: tabular-nums; }
+.bzp__mine-up { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.bzp__mine-sub { font-size: var(--fs-caption); color: var(--text-secondary); }
+.bzp__seen {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+}
+.bzp__seen-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
+.bzp__seen-label { font-size: var(--fs-sm); font-weight: 700; color: var(--text-primary); }
+.bzp__seen-hint { font-size: var(--fs-caption); color: var(--text-secondary); }
+/* The switch: a pill track, the knob riding to the side that is true;
+   on, the selection's gold (a choice the learner made). */
+.bz-switch {
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: var(--bg-main);
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+.bz-switch[aria-checked="true"] { background: var(--accent2); border-color: var(--accent2); }
+.bz-switch:focus-visible { outline: 2px solid var(--sel-line); outline-offset: 2px; filter: none; }
+.bz-switch:disabled { opacity: 0.6; cursor: default; }
+.bz-switch__knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-pill);
+  background: var(--text-secondary);
+  transition: transform 0.16s ease, background 0.16s ease;
+}
+.bz-switch[aria-checked="true"] .bz-switch__knob { transform: translateX(18px); background: var(--bg-main); }
+@media (prefers-reduced-motion: reduce) {
+  .bz-switch,
+  .bz-switch__knob { transition: none; }
+}
+.bzp__rung {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--sp-5);
+  border: 0;
+  border-bottom: 1px solid var(--surface-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+.bzp__rung:last-child { border-bottom: 0; }
+.bzp__rung:hover,
+.bzp__rung:focus-visible { background: var(--overlay-hover); filter: none; }
+.bzp__rung-jp { width: 64px; font-family: var(--font-serif); font-weight: 700; }
+.bzp__rung--on { background: var(--sel-wash); }
+.bzp__rung--on .bzp__rung-jp { color: var(--sel-ink); }
+.bzp__rung--mine { box-shadow: inset 3px 0 0 var(--pass-ink); }
+.bzp__rung-latin {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.bzp__rung-n { font-size: var(--fs-caption); font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+
+/* ── A row's card (LearnerSheet, plan 262) ──
+   Three figures three across, the division's name, the decks published. */
+.bz-card__figs {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-3);
+}
+.bz-card__fig {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.bz-card__fig dt {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.bz-card__fig dd {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+.bz-card__fig small { font-size: var(--fs-caption); color: var(--text-secondary); }
+.bz-card__division { margin: 0; display: flex; align-items: baseline; justify-content: center; gap: var(--sp-3); color: var(--text-secondary); }
+.bz-card__division-jp { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 700; color: var(--text-primary); }
+.bz-card__decks { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--surface-line); }
+.bz-card__deck {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  border-bottom: 1px solid var(--surface-line);
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.bz-card__wait { margin: 0; text-align: center; color: var(--text-secondary); }
 
 /* ── The status sheet (進捗が主役 round) ──
    The pass's back as a sumi sheet: the distance travelled, the ghost
@@ -26349,9 +26795,12 @@ button.brd-stn { cursor: pointer; }
    the middle takes the card's free height and the board the smaller of
    its two sides, so a miss's word never lands under the gate. Never
    under 200px, where the screen scrolls instead. The strokes are its
-   brush: traced ones in the brush's ink, the ones ahead faint, the one
-   asked in the line's pigment lit toward the ink so it reads on the
-   sumi, with a full dot where it starts and a ring where it ends. */
+   brush, at a brush's weight: traced ones in the brush's ink, the ones
+   ahead faint. The one asked is a hollow (plan 263) in the line's
+   pigment lit toward the ink so it reads on the sumi, drawn in from its
+   start, three chevrons walking its way inside it, a full dot with its
+   number where it starts and a ring where it ends; the ink fills it as
+   the hand goes (TraceBoard). */
 .gt-write {
   flex: 1 1 0;
   min-height: 200px;
@@ -26374,42 +26823,79 @@ button.brd-stn { cursor: pointer; }
 .gt-pen { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .gt-glyph,
 .gt-missed { pointer-events: none; }
-.gt-stroke {
+.gt-stroke,
+.gt-ink {
   fill: none;
   stroke: var(--brush-ink);
-  stroke-width: 4;
+  stroke-width: 6;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.gt-stroke--ahead,
-.gt-stroke--here { opacity: 0.2; }
-/* Drawn in along its way: the stroke asked (again after each miss),
-   a stroke the board traced for the learner, and « Montre-moi »'s,
-   one after the other. */
-.gt-stroke--now,
+.gt-stroke--ahead { opacity: 0.16; }
+/* A stroke the board traced for the learner, and « Montre-moi »'s, one
+   after the other, drawn in along their way. */
 .gt-stroke--given,
 .gt-stroke--shown { stroke-dasharray: 1; animation: gt-draw 600ms ease-in-out both; }
-.gt-stroke--now { stroke: var(--gt-now); }
 .gt-stroke--shown { animation-delay: calc(var(--i, 0) * 450ms); }
 @keyframes gt-draw {
   from { stroke-dashoffset: 1; }
   to   { stroke-dashoffset: 0; }
 }
+/* The hollow: an edge in the pigment, the slab inside it, drawn in from
+   the stroke's start (TraceBoard's INTRO_MS). The strokes already traced
+   stand over it, where two cross. */
+.gt-hollow path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  animation: gt-draw 520ms ease-out both;
+}
+.gt-hollow__edge { stroke: var(--gt-now); stroke-width: 10.4; }
+.gt-hollow__in { stroke: var(--bg-panel); stroke-width: 8; }
+/* The chevrons, placed and faded by the board as they walk. */
+.gt-chevron {
+  fill: none;
+  stroke: var(--gt-now);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+}
+/* The ink, filled to where the hand has come; lifted short, it drains
+   back along the stroke, then goes. */
+.gt-ink--drain { transition: stroke-dasharray 300ms ease-out, opacity 120ms linear 260ms; }
 .gt-start { fill: var(--gt-now); }
-.gt-end { fill: none; stroke: var(--gt-now); stroke-width: 1.5; }
+.gt-start__n {
+  fill: var(--bg-panel);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+/* A stroke begun away from the dot calls the dot. */
+.gt-start--call circle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: gt-call 1.2s ease-in-out infinite;
+}
+@keyframes gt-call {
+  50% { transform: scale(1.5); }
+}
+.gt-end { fill: transparent; stroke: var(--gt-now); stroke-width: 1.4; transition: fill 0.15s ease; }
+.gt-end--reached { fill: var(--gt-now); }
 /* The pen takes the pointer; a finger on it never scrolls the page. */
 .gt-pen { touch-action: none; cursor: crosshair; }
 .gt-pen--off { cursor: default; }
-.gt-pen polyline,
+/* A missed line -- the finger's own, as it went -- a moment in the
+   miss's ink, then gone. */
 .gt-missed polyline {
   fill: none;
-  stroke: var(--brush-ink);
-  stroke-width: 5;
+  stroke: var(--rating-wrong);
+  stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-/* A missed line, a moment in the miss's ink, then gone. */
-.gt-missed polyline { stroke: var(--rating-wrong); }
 .gt-missed { animation: gt-fade 700ms ease-out forwards; }
 @keyframes gt-fade {
   from { opacity: 0.9; }
@@ -26436,9 +26922,12 @@ button.brd-stn { cursor: pointer; }
 .gt-word__hit rt { color: var(--tour-ink); font-weight: 700; }
 .gt-word__gloss { font-size: var(--fs-body); line-height: 1.4; color: var(--text-secondary); text-align: end; text-wrap: pretty; }
 @media (prefers-reduced-motion: reduce) {
-  .gt-stroke--now,
   .gt-stroke--given,
-  .gt-stroke--shown { animation: none; stroke-dasharray: none; }
+  .gt-stroke--shown,
+  .gt-hollow path { animation: none; stroke-dasharray: none; }
+  .gt-start--call circle { animation: none; }
+  .gt-ink--drain,
+  .gt-end { transition: none; }
 }
 
 /* The register, in the plate's corner: a word in the caption register,
@@ -27579,10 +28068,10 @@ button.brd-stn { cursor: pointer; }
   letter-spacing: var(--tr-term);
   color: var(--text-secondary);
 }
-/* 歌 (plan 215) at the head: the Passage made a deck is about the
-   whole video, so it stands with the way back rather than in the dock,
-   and it is named, not a bare glyph -- the door a learner has to find. */
-.anl-m__song {
+/* 表示 (plan 263) at the head, where 歌 (plan 215) stood: the door to
+   what the stage prints around its line, named, not a bare glyph -- the
+   door a learner has to find. Open, it is lit as a choice is. */
+.anl-m__show {
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -27597,8 +28086,9 @@ button.brd-stn { cursor: pointer; }
   font-weight: 700;
   color: var(--text-primary);
 }
-.anl-m__song:hover,
-.anl-m__song:focus-visible { border-color: var(--text-secondary); }
+.anl-m__show:hover,
+.anl-m__show:focus-visible { border-color: var(--text-secondary); }
+.anl-m__show--open { background: var(--sel-wash); border-color: var(--sel-line); color: var(--sel-ink); }
 /* The video edge to edge: out of the column's gutter. */
 .anl-m__player {
   display: flex;
@@ -27649,6 +28139,11 @@ button.brd-stn { cursor: pointer; }
   color: var(--text-secondary);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+/* On a phone they go: the line at display size and its translation take
+   the room, and the transport's two skips walk the stops. */
+@media (max-width: 560px) {
+  .anl-m__line { display: none; }
 }
 .anl-m__subs .anl-subs__line {
   justify-content: center;
@@ -27928,6 +28423,422 @@ button.brd-stn { cursor: pointer; }
   align-self: stretch;
   margin-top: var(--sp-3);
 }
+
+/* ── 表示 and 保存 on a phone (plan 263) ──
+   The owner's picks of the canvas "Analyser stage — reading options":
+   B, the Affichage sheet, and K3·a redrawn, the keep sheet that puts
+   the line in a deck. */
+
+/* The rōmaji under each word, below the state's rule: the rule stays
+   the word's own, and the line's rows open to make room. */
+.anl-m__subs[data-romaji] .tok { position: relative; }
+.anl-m__subs[data-romaji] .anl-subs__line {
+  row-gap: var(--sp-8);
+  padding-bottom: var(--sp-6);
+}
+.tok__ro {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-top: var(--sp-1);
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: var(--tr-caption);
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+
+/* The Affichage sheet: a row a help, its name and its segment; low, so
+   the line it changes is seen changing over it. */
+.anl-show__rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.anl-show__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+}
+.anl-show__name {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+  font-size: var(--fs-body);
+  font-weight: 500;
+}
+.anl-show__note {
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text-secondary);
+}
+.anl-show__seg { flex: none; }
+.anl-show__seg.seg .seg__opt {
+  align-items: center;
+  min-height: 44px;
+}
+.anl-show__done { min-height: 44px; }
+
+/* The keep sheet: three faces in one panel. */
+.anl-keepsheet__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  min-height: 0;
+}
+.anl-keepsheet__cap {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+/* The deck it goes in: a row that is a door (Changer). */
+.anl-keepsheet__deck,
+.anl-keepsheet__opt {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 56px;
+  padding: var(--sp-2) var(--sp-4);
+  background: var(--bg-main);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.anl-keepsheet__deck:hover,
+.anl-keepsheet__deck:focus-visible { border-color: var(--text-secondary); }
+.anl-keepsheet__deckname {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.anl-keepsheet__deckname b {
+  overflow: hidden;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.anl-keepsheet__deckname small,
+.anl-keepsheet__title small {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.anl-keepsheet__change {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--sel-ink);
+}
+/* What goes in: the line and its words, each a card ticked as a whole,
+   lit in the selection's gold while it is in. */
+.anl-keepsheet__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  background: var(--bg-main);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.anl-keepsheet__item--on {
+  background: var(--sel-wash);
+  border-color: var(--sel-line);
+}
+.anl-keepsheet__tick {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  margin-block: calc(-1 * var(--sp-3));
+  font-size: var(--fs-body);
+  font-weight: 700;
+  cursor: pointer;
+}
+.anl-keepsheet__check {
+  flex: none;
+  width: var(--sp-5);
+  height: var(--sp-5);
+  margin: 0;
+  accent-color: var(--accent2);
+}
+.anl-keepsheet__note {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.anl-keepsheet__line {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  letter-spacing: var(--tr-term);
+}
+.anl-keepsheet__reading {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.anl-keepsheet__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  letter-spacing: var(--tr-term);
+}
+.anl-keepsheet__rest {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  letter-spacing: 0;
+  color: var(--text-secondary);
+}
+.anl-keepsheet__more {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  background: transparent;
+  border: 1px dashed var(--sel-line);
+  border-radius: var(--r-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--sel-ink);
+}
+.anl-keepsheet__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+/* A word out is dashed and quiet; a word in stands in the line's ink. */
+.anl-keepsheet__chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 44px;
+  padding: var(--sp-1) var(--sp-4);
+  background: transparent;
+  border: 1px dashed var(--surface-line);
+  border-radius: var(--r-card);
+  font-family: var(--font-jp);
+  color: var(--text-secondary);
+}
+.anl-keepsheet__chip b {
+  font-size: var(--fs-body);
+  font-weight: 500;
+  letter-spacing: var(--tr-term);
+}
+.anl-keepsheet__chip small {
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.anl-keepsheet__chip--on {
+  background: var(--bg-main);
+  border-style: solid;
+  border-color: var(--sel-line);
+  color: var(--text-primary);
+}
+.anl-keepsheet__chip--more {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--sel-ink);
+}
+.anl-keepsheet__chip:disabled { cursor: not-allowed; opacity: 0.45; }
+.anl-keepsheet__go { width: 100%; }
+.anl-keepsheet__pin {
+  align-self: center;
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  background: transparent;
+  border: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+/* A face past the first: the way back, its name, and what it acts on. */
+.anl-keepsheet__head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+}
+.anl-keepsheet__back {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-left: calc(-1 * var(--sp-3));
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--text-secondary);
+}
+.anl-keepsheet__title {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  font-size: var(--fs-body);
+}
+.anl-keepsheet__all { flex: none; min-height: 44px; }
+.anl-keepsheet__decks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.anl-keepsheet__opt--on {
+  background: var(--sel-wash);
+  border-color: var(--sel-line);
+}
+.anl-keepsheet__count {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.anl-keepsheet__tag {
+  flex: none;
+  padding: 0 var(--sp-2);
+  border: 1px solid var(--sel-line);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--sel-ink);
+}
+.anl-keepsheet__new {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  background: transparent;
+  border: 1px dashed var(--surface-line);
+  border-radius: var(--r-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.anl-keepsheet__name {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.anl-keepsheet__namerow {
+  display: flex;
+  gap: var(--sp-3);
+}
+.anl-keepsheet__namerow .field { flex: 1; min-width: 0; }
+/* The song a line a row: the shortcuts over it, the list scrolling
+   between the head and the action, the line in hand on the rail. */
+.anl-keepsheet__quick {
+  display: flex;
+  gap: var(--sp-2);
+}
+.anl-keepsheet__pick {
+  flex: 1 1 0;
+  min-height: 44px;
+  padding: 0 var(--sp-2);
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.anl-keepsheet__pick:hover,
+.anl-keepsheet__pick:focus-visible { border-color: var(--text-secondary); color: var(--text-primary); }
+.anl-keepsheet__pick:disabled { cursor: not-allowed; opacity: 0.45; }
+.anl-keepsheet__list {
+  display: flex;
+  flex-direction: column;
+  max-height: 50vh;
+  max-height: 50dvh;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  border-block: 1px solid var(--surface-line);
+}
+.anl-keepsheet__row {
+  display: grid;
+  flex: none;
+  grid-template-columns: var(--sp-5) var(--sp-7) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 48px;
+  padding: 0 var(--sp-3);
+  border-bottom: 1px solid var(--surface-line);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.anl-keepsheet__row:last-child { border-bottom: 0; }
+.anl-keepsheet__row--on { color: var(--text-primary); }
+.anl-keepsheet__row--here {
+  background: var(--sel-wash);
+  box-shadow: inset 3px 0 0 var(--accent2);
+  font-weight: 700;
+}
+.anl-keepsheet__n {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--text-secondary);
+}
+.anl-keepsheet__text {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  letter-spacing: var(--tr-term);
+}
+.anl-keepsheet__text small {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.anl-keepsheet__close { min-height: 44px; }
 
 /* ── 入門 — the introduction before the first card (plan 170) ──
    Six screens for a learner who answered « Pas encore » to the kana
@@ -33335,19 +34246,15 @@ button.brd-stn { cursor: pointer; }
      at the board's edge. Every row is a subgrid of the board's three
      columns, so the ranks stand in one column and both heads over their
      sides; the rows share the board's height either side of the
-     elision (--bz-top, --bz-out, Banzuke's counts), the head and the ⋯
+     elision (--bz-rows, Banzuke's template), the head, the ⋯ and the foot
      keep their own. The learner's own place is washed on its side, the
      pass ink's rail at the board's edge. */
   .desk-bz {
     flex: 1 0 auto;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    grid-template-rows: auto repeat(var(--bz-top, 5), minmax(min-content, 1fr));
-  }
-  .desk-bz--out {
-    grid-template-rows:
-      auto repeat(var(--bz-top, 5), minmax(min-content, 1fr))
-      auto repeat(var(--bz-out, 1), minmax(min-content, 1fr));
+    /* The head, a row per rank or ⋯, the foot (Banzuke's --bz-rows). */
+    grid-template-rows: var(--bz-rows, auto);
   }
   .desk-bz__head,
   .desk-bz__row {
@@ -33372,13 +34279,14 @@ button.brd-stn { cursor: pointer; }
     color: var(--sel-ink);
     box-shadow: inset 0 -2px 0 var(--accent2);
   }
+  /* Where the board skips places: a dashed hairline (plan 262's A1),
+     in place of the row's own. */
   .desk-bz__gap {
     grid-column: 1 / -1;
-    padding: var(--sp-2) 0;
-    text-align: center;
-    color: var(--text-secondary);
-    border-bottom: 1px solid var(--surface-line);
+    margin: 0 var(--sp-5);
+    border-top: 1px dashed var(--surface-line);
   }
+  .desk-bz__row:has(+ .desk-bz__gap) { border-bottom: 0; }
   .desk-bz__rank {
     display: flex;
     align-items: center;
@@ -33396,6 +34304,40 @@ button.brd-stn { cursor: pointer; }
   .desk-bz__cell--west .leaderboard-row__name { text-align: right; }
   .desk-bz__cell--me { background: var(--overlay-hover); box-shadow: inset -3px 0 0 var(--pass-ink); }
   .desk-bz__cell--west.desk-bz__cell--me { box-shadow: inset 3px 0 0 var(--pass-ink); }
+  /* The foot (plan 262): the gap to the next place, the door to the
+     whole board, across the three columns. */
+  .desk-bz__foot {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    padding: var(--sp-1) var(--sp-5);
+  }
+  .desk-bz__cell--west .bz-pick { text-align: right; }
+
+  /* ── /profile/banzuke on the desk (plan 262, A1) ──
+     The list in the entry's width from the top of the page; beside it,
+     in the side's, stacked: the board's head card, the learner's place
+     and what it takes, the six divisions (on a division), the switch.
+     The list spans the side's rows down to a last one that takes what
+     it leaves (1fr), so the side stays packed at the top. */
+  .phone__content > .bzp {
+    display: grid;
+    grid-template-columns: minmax(0, var(--desk-entry-w)) var(--desk-side-w);
+    grid-template-rows: auto auto auto auto auto 1fr;
+    place-content: start center;
+    align-items: start;
+    gap: var(--sp-5) var(--sp-9);
+    padding: 0 var(--sp-7) var(--sp-6);
+  }
+  .bzp > .bar { grid-column: 1 / -1; grid-row: 1; }
+  .bzp__list { grid-column: 1; grid-row: 2 / 7; }
+  .bzp__controls { grid-column: 2; grid-row: 2; }
+  .bzp__mine { grid-column: 2; grid-row: 3; }
+  .bzp__ladder { grid-column: 2; grid-row: 4; }
+  .bzp__seen { grid-column: 2; grid-row: 5; }
+  .bzp__division-name { padding: var(--sp-3) 0; }
+  .bzp__division-jp { font-size: var(--fs-heading); }
 
   /* ── 教材 on the desk: the shelf beside the open deck (plan 154) ──
      The owner's pick B of four layouts drawn on the canvas "Tsuji — the
@@ -33704,6 +34646,18 @@ button.brd-stn { cursor: pointer; }
   /* The phone's form spaces itself from the list under it; in the slot
      the page's own gap does. */
   .desk-deck__slot .deckdetail-form { margin-bottom: 0; }
+  /* An edit's form follows the table down: a card opened far down the
+     list has its form held at the scroller's top, the rows passing
+     under it on the page's ground. */
+  .desk-deck__slot--edit {
+    position: sticky;
+    /* Over the scroller's own gutter, so no row shows above it. */
+    top: calc(-1 * var(--sp-2));
+    z-index: 1;
+    margin-block: calc(-1 * var(--sp-2));
+    padding-block: var(--sp-2);
+    background: var(--bg-main);
+  }
   .dk-ways {
     display: flex;
     gap: var(--sp-3);

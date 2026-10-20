@@ -5,7 +5,7 @@ import { Sheet } from '../chrome/Sheet'
 import { Seg, Chip } from '../chrome/Console'
 import { FlagIcon } from '../ui/Icons'
 import {
-  KINDS, CARD_REASONS, QUESTION_REASONS, TEXT_MAX,
+  KINDS, CARD_REASONS, QUESTION_REASONS, TEXT_MAX, CONTACT,
   feedbackContext, contextWords, failureOf, cardFace, reportable, sendFeedback, questionReport,
 } from '../../lib/feedback'
 import { useFeedbackSheet, openFeedback, openCardReport, closeFeedback } from '../../stores/feedbackSheet'
@@ -21,8 +21,8 @@ import { useFeedbackSheet, openFeedback, openCardReport, closeFeedback } from '.
 // Nothing leaves the device unsaid: the classes joined to a message are
 // printed under their box before sending, and unticking it sends none.
 // The reply goes to the account's own address, read by the server
-// (routes/feedback.py); the sheet only names it, and offers none to a
-// guest, who has no address.
+// (routes/feedback.py); the sheet names the address it comes from,
+// Tsuji's, and offers none to a guest, who has no address.
 
 // The day a stamp prints, as a station's date stamp does: 16.10.26.
 function stampDate(at) {
@@ -131,7 +131,7 @@ export function FeedbackForm({ session, failure = null, onClose = null }) {
           <input type="checkbox" className="fb-check__box" checked={reply} onChange={e => setReply(e.target.checked)} />
           <span className="fb-check__words">
             {t.fbReply}
-            <b className="fb-check__what">{email}</b>
+            <b className="fb-check__what">{CONTACT}</b>
           </span>
         </label>
       )}

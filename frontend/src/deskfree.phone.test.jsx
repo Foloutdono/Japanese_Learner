@@ -599,11 +599,14 @@ describe('the keys and the boards (plan 115, P8)', () => {
   it('keeps a route one tab stop per row and the ranking behind its toggle', async () => {
     const { Banzuke } = await import('./components/profile/Banzuke')
     const { default: t } = await import('./locales/fr/index.js')
+    const { MemoryRouter } = await import('react-router-dom')
     const board = { entries: [{ rank: 1, username: 'a', xp: 100 }], me: null }
     await render(
       <LangProvider>
-        <RouteStops stops={[{ key: 'N5', code: 'N5', name: 'a' }, { key: 'N4', code: 'N4', name: 'b' }]} onSelect={() => {}} />
-        <Banzuke all={board} week={board} t={t} both={false} />
+        <MemoryRouter>
+          <RouteStops stops={[{ key: 'N5', code: 'N5', name: 'a' }, { key: 'N4', code: 'N4', name: 'b' }]} onSelect={() => {}} />
+          <Banzuke all={board} week={board} t={t} both={false} />
+        </MemoryRouter>
       </LangProvider>
     )
     await settle()

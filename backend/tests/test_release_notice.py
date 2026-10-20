@@ -1,4 +1,4 @@
-"""工事 -- the release the workflow announces (plan 262): the route only it
+"""工事 -- the release the workflow announces (plan 264): the route only it
 can call, and the header every /api answer carries meanwhile."""
 import pytest
 from fastapi import FastAPI

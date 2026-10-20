@@ -1,6 +1,6 @@
 """
 POST/DELETE /api/release/notice -- the release workflow announces itself
-(plan 262, core/release_notice.py).
+(plan 264, core/release_notice.py).
 
 Called by .github/workflows/promote.yml alone, before it pushes to
 `production` (POST, `in_minutes`) and when that push fails (DELETE). It

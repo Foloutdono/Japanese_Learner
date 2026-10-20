@@ -1,5 +1,5 @@
 {
-  "rev": 1,
+  "rev": 3,
   "frames": {
     "phone": {
       "w": 390,
@@ -22,9 +22,476 @@
       "horizon": 646
     }
   },
-  "hours": {
-    "dawn": {
+  "prints": {
+    "spring-dawn": {
+      "season": "spring",
+      "hour": "dawn",
+      "view": "春曙",
+      "viewKey": "spring-dawn",
+      "sky": [
+        [
+          0,
+          "#251f4a"
+        ],
+        [
+          0.22,
+          "#3b3366"
+        ],
+        [
+          0.42,
+          "#6f5b8f"
+        ],
+        [
+          0.54,
+          "#a9809f"
+        ],
+        [
+          0.66,
+          "#dca3ad"
+        ],
+        [
+          0.8,
+          "#efc2bb"
+        ],
+        [
+          0.92,
+          "#f6d8cc"
+        ],
+        [
+          1,
+          "#faeadd"
+        ]
+      ],
+      "band": "#16123a",
+      "ground": "#15111f",
+      "disc": {
+        "kind": "sun_red",
+        "fill": [
+          "#d4553a",
+          "#a8301f"
+        ],
+        "glow": "#f08c64",
+        "glowOp": 0.5,
+        "haloGlow": 0.42,
+        "maria": false,
+        "fare": "#fbeedd"
+      },
+      "ink": {
+        "text": "#1f1636",
+        "soft": "#3a2f52",
+        "discSoft": "#fff6ec",
+        "countA": "#fff6e4",
+        "countB": "#fde6c4"
+      }
+    },
+    "spring-day": {
+      "season": "spring",
+      "hour": "day",
+      "view": "花霞",
+      "viewKey": "spring-day",
+      "sky": [
+        [
+          0,
+          "#2f5a98"
+        ],
+        [
+          0.14,
+          "#3f6ba7"
+        ],
+        [
+          0.4,
+          "#7c9fcb"
+        ],
+        [
+          0.66,
+          "#b7cde2"
+        ],
+        [
+          0.86,
+          "#e6ecef"
+        ],
+        [
+          1,
+          "#f7f1ee"
+        ]
+      ],
+      "band": "#20457d",
+      "ground": "#29462a",
+      "disc": {
+        "kind": "sun",
+        "fill": [
+          "#fffbf1",
+          "#f4e7c4"
+        ],
+        "glow": "#fff3cf",
+        "glowOp": 0.6,
+        "haloGlow": 0.0,
+        "maria": false,
+        "fare": "#22345a"
+      },
+      "ink": {
+        "text": "#172748",
+        "soft": "#33466b",
+        "discSoft": "#6b5a3e",
+        "countA": "#8b6421",
+        "countB": "#5a3d0c"
+      }
+    },
+    "spring-dusk": {
+      "season": "spring",
+      "hour": "dusk",
+      "view": "帰雁",
+      "viewKey": "spring-dusk",
+      "sky": [
+        [
+          0,
+          "#1b2650"
+        ],
+        [
+          0.14,
+          "#283767"
+        ],
+        [
+          0.36,
+          "#46508a"
+        ],
+        [
+          0.5,
+          "#7f75a6"
+        ],
+        [
+          0.6,
+          "#bf9db8"
+        ],
+        [
+          0.72,
+          "#e6b7b0"
+        ],
+        [
+          0.85,
+          "#f0c3a0"
+        ],
+        [
+          0.93,
+          "#f2cba2"
+        ],
+        [
+          1,
+          "#f6dab2"
+        ]
+      ],
+      "band": "#101a40",
+      "ground": "#0a101b",
+      "disc": {
+        "kind": "moon",
+        "fill": [
+          "#fbf4df",
+          "#eadbb6"
+        ],
+        "glow": "#f6e7c4",
+        "glowOp": 0.42,
+        "haloGlow": 0.5,
+        "maria": true,
+        "fare": "#f6eed9"
+      },
+      "ink": {
+        "text": "#141b33",
+        "soft": "#303955",
+        "discSoft": "#6b5a3e",
+        "countA": "#91692a",
+        "countB": "#5a3c0c"
+      }
+    },
+    "spring-night": {
+      "season": "spring",
+      "hour": "night",
+      "view": "朧月",
+      "viewKey": "spring-night",
+      "sky": [
+        [
+          0,
+          "#0d1230"
+        ],
+        [
+          0.2,
+          "#161d40"
+        ],
+        [
+          0.5,
+          "#212a54"
+        ],
+        [
+          0.75,
+          "#313d6c"
+        ],
+        [
+          0.9,
+          "#465284"
+        ],
+        [
+          1,
+          "#566290"
+        ]
+      ],
+      "band": "#070a22",
+      "ground": "#090c18",
+      "disc": {
+        "kind": "moon",
+        "fill": [
+          "#fcf2d6",
+          "#e8d8b2"
+        ],
+        "glow": "#f2e6c8",
+        "glowOp": 0.5,
+        "haloGlow": 0.6,
+        "maria": true,
+        "fare": "#eef0e6"
+      },
+      "ink": {
+        "text": "#f3ede2",
+        "soft": "#dcd4c8",
+        "discSoft": "#6b5a3e",
+        "countA": "#91692a",
+        "countB": "#5a3c0c"
+      }
+    },
+    "summer-dawn": {
+      "season": "summer",
+      "hour": "dawn",
+      "view": "凱風",
+      "viewKey": "summer-dawn",
+      "sky": [
+        [
+          0,
+          "#1c3266"
+        ],
+        [
+          0.22,
+          "#2c4c86"
+        ],
+        [
+          0.42,
+          "#5a7fb2"
+        ],
+        [
+          0.56,
+          "#93afd0"
+        ],
+        [
+          0.7,
+          "#c8d3dc"
+        ],
+        [
+          0.82,
+          "#ecd6bf"
+        ],
+        [
+          0.92,
+          "#f5d3a9"
+        ],
+        [
+          1,
+          "#f8dfb8"
+        ]
+      ],
+      "band": "#13244e",
+      "ground": "#0f1c14",
+      "disc": {
+        "kind": "sun_red",
+        "fill": [
+          "#d4553a",
+          "#a8301f"
+        ],
+        "glow": "#f08c64",
+        "glowOp": 0.5,
+        "haloGlow": 0.42,
+        "maria": false,
+        "fare": "#fbeedd"
+      },
+      "ink": {
+        "text": "#15213f",
+        "soft": "#2f3d5e",
+        "discSoft": "#fff6ec",
+        "countA": "#fff6e4",
+        "countB": "#fde6c4"
+      }
+    },
+    "summer-day": {
+      "season": "summer",
+      "hour": "day",
+      "view": "雲峰",
+      "viewKey": "summer-day",
+      "sky": [
+        [
+          0,
+          "#123a80"
+        ],
+        [
+          0.14,
+          "#1c4a94"
+        ],
+        [
+          0.4,
+          "#4a82c2"
+        ],
+        [
+          0.66,
+          "#92b9df"
+        ],
+        [
+          0.86,
+          "#cfe2f1"
+        ],
+        [
+          1,
+          "#edf3f2"
+        ]
+      ],
+      "band": "#0c2b66",
+      "ground": "#163c22",
+      "disc": {
+        "kind": "sun",
+        "fill": [
+          "#fffbf1",
+          "#f4e7c4"
+        ],
+        "glow": "#fff3cf",
+        "glowOp": 0.6,
+        "haloGlow": 0.0,
+        "maria": false,
+        "fare": "#22345a"
+      },
+      "ink": {
+        "text": "#10203f",
+        "soft": "#22355a",
+        "discSoft": "#6b5a3e",
+        "countA": "#8b6421",
+        "countB": "#5a3d0c"
+      }
+    },
+    "summer-dusk": {
+      "season": "summer",
+      "hour": "dusk",
+      "view": "夕凪",
+      "viewKey": "summer-dusk",
+      "sky": [
+        [
+          0,
+          "#171b46"
+        ],
+        [
+          0.14,
+          "#25295d"
+        ],
+        [
+          0.36,
+          "#463f7e"
+        ],
+        [
+          0.5,
+          "#80609a"
+        ],
+        [
+          0.6,
+          "#bd7690"
+        ],
+        [
+          0.72,
+          "#e88e72"
+        ],
+        [
+          0.85,
+          "#f4a866"
+        ],
+        [
+          0.93,
+          "#f6b974"
+        ],
+        [
+          1,
+          "#f8cf98"
+        ]
+      ],
+      "band": "#0e1036",
+      "ground": "#0b1214",
+      "disc": {
+        "kind": "moon",
+        "fill": [
+          "#fbf4df",
+          "#eadbb6"
+        ],
+        "glow": "#f6e7c4",
+        "glowOp": 0.42,
+        "haloGlow": 0.5,
+        "maria": true,
+        "fare": "#f6eed9"
+      },
+      "ink": {
+        "text": "#12102c",
+        "soft": "#211e37",
+        "discSoft": "#6b5a3e",
+        "countA": "#91692a",
+        "countB": "#5a3c0c"
+      }
+    },
+    "summer-night": {
+      "season": "summer",
+      "hour": "night",
+      "view": "蛍",
+      "viewKey": "summer-night",
+      "sky": [
+        [
+          0,
+          "#030915"
+        ],
+        [
+          0.2,
+          "#071427"
+        ],
+        [
+          0.5,
+          "#0d223d"
+        ],
+        [
+          0.75,
+          "#163556"
+        ],
+        [
+          0.9,
+          "#1f4468"
+        ],
+        [
+          1,
+          "#284f74"
+        ]
+      ],
+      "band": "#01040f",
+      "ground": "#050c0e",
+      "disc": {
+        "kind": "moon",
+        "fill": [
+          "#fdf9ec",
+          "#e6ddc2"
+        ],
+        "glow": "#eef0e6",
+        "glowOp": 0.38,
+        "haloGlow": 0.55,
+        "maria": true,
+        "fare": "#eef0e6"
+      },
+      "ink": {
+        "text": "#ece5d8",
+        "soft": "#b9b2a8",
+        "discSoft": "#6b5a3e",
+        "countA": "#91692a",
+        "countB": "#5a3c0c"
+      }
+    },
+    "autumn-dawn": {
+      "season": "autumn",
+      "hour": "dawn",
       "view": "曙",
+      "viewKey": "autumn-dawn",
       "sky": [
         [
           0,
@@ -81,8 +548,11 @@
         "countB": "#fde6c4"
       }
     },
-    "day": {
+    "autumn-day": {
+      "season": "autumn",
+      "hour": "day",
       "view": "帰帆",
+      "viewKey": "autumn-day",
       "sky": [
         [
           0,
@@ -131,8 +601,11 @@
         "countB": "#5a3d0c"
       }
     },
-    "dusk": {
+    "autumn-dusk": {
+      "season": "autumn",
+      "hour": "dusk",
       "view": "落雁",
+      "viewKey": "autumn-dusk",
       "sky": [
         [
           0,
@@ -187,14 +660,17 @@
       },
       "ink": {
         "text": "#121b31",
-        "soft": "#2f3a55",
+        "soft": "#29334f",
         "discSoft": "#6b5a3e",
         "countA": "#91692a",
         "countB": "#5a3c0c"
       }
     },
-    "night": {
+    "autumn-night": {
+      "season": "autumn",
+      "hour": "night",
       "view": "秋月",
+      "viewKey": "autumn-night",
       "sky": [
         [
           0,
@@ -223,6 +699,576 @@
       ],
       "band": "#02061a",
       "ground": "#070b14",
+      "disc": {
+        "kind": "moon",
+        "fill": [
+          "#fdf9ec",
+          "#e6ddc2"
+        ],
+        "glow": "#eef0e6",
+        "glowOp": 0.38,
+        "haloGlow": 0.55,
+        "maria": true,
+        "fare": "#eef0e6"
+      },
+      "ink": {
+        "text": "#ece5d8",
+        "soft": "#b9b2a8",
+        "discSoft": "#6b5a3e",
+        "countA": "#91692a",
+        "countB": "#5a3c0c"
+      }
+    },
+    "winter-dawn": {
+      "season": "winter",
+      "hour": "dawn",
+      "view": "寒暁",
+      "viewKey": "winter-dawn",
+      "sky": [
+        [
+          0,
+          "#1b2448"
+        ],
+        [
+          0.22,
+          "#2c3a64"
+        ],
+        [
+          0.42,
+          "#566a92"
+        ],
+        [
+          0.56,
+          "#8e9cb8"
+        ],
+        [
+          0.68,
+          "#c3c3cc"
+        ],
+        [
+          0.8,
+          "#ead4c0"
+        ],
+        [
+          0.92,
+          "#f5dcb8"
+        ],
+        [
+          1,
+          "#f8e8cc"
+        ]
+      ],
+      "band": "#111836",
+      "ground": "#b4b8cc",
+      "disc": {
+        "kind": "sun_red",
+        "fill": [
+          "#d4553a",
+          "#a8301f"
+        ],
+        "glow": "#f08c64",
+        "glowOp": 0.5,
+        "haloGlow": 0.42,
+        "maria": false,
+        "fare": "#fbeedd"
+      },
+      "ink": {
+        "text": "#171d34",
+        "soft": "#33394f",
+        "discSoft": "#fff6ec",
+        "countA": "#fff6e4",
+        "countB": "#fde6c4"
+      }
+    },
+    "winter-day": {
+      "season": "winter",
+      "hour": "day",
+      "view": "雪晴",
+      "viewKey": "winter-day",
+      "sky": [
+        [
+          0,
+          "#0f3876"
+        ],
+        [
+          0.14,
+          "#1f4f92"
+        ],
+        [
+          0.4,
+          "#5b8cc6"
+        ],
+        [
+          0.66,
+          "#a7c7e6"
+        ],
+        [
+          0.86,
+          "#e2edf5"
+        ],
+        [
+          1,
+          "#f3f6f7"
+        ]
+      ],
+      "band": "#0a2a60",
+      "ground": "#e6ebf2",
+      "disc": {
+        "kind": "sun",
+        "fill": [
+          "#fffbf1",
+          "#f4e7c4"
+        ],
+        "glow": "#fff3cf",
+        "glowOp": 0.6,
+        "haloGlow": 0.0,
+        "maria": false,
+        "fare": "#22345a"
+      },
+      "ink": {
+        "text": "#132447",
+        "soft": "#2e4268",
+        "discSoft": "#6b5a3e",
+        "countA": "#8b6421",
+        "countB": "#5a3d0c"
+      }
+    },
+    "winter-dusk": {
+      "season": "winter",
+      "hour": "dusk",
+      "view": "暮雪",
+      "viewKey": "winter-dusk",
+      "sky": [
+        [
+          0,
+          "#262b46"
+        ],
+        [
+          0.14,
+          "#353b5c"
+        ],
+        [
+          0.36,
+          "#4e5476"
+        ],
+        [
+          0.5,
+          "#6c6e8e"
+        ],
+        [
+          0.6,
+          "#8e8aa2"
+        ],
+        [
+          0.72,
+          "#aca2b2"
+        ],
+        [
+          0.85,
+          "#c4b6bc"
+        ],
+        [
+          0.93,
+          "#cfc0c2"
+        ],
+        [
+          1,
+          "#d8cac8"
+        ]
+      ],
+      "band": "#1a1e36",
+      "ground": "#a6abbf",
+      "disc": {
+        "kind": "moon",
+        "fill": [
+          "#fbf4df",
+          "#eadbb6"
+        ],
+        "glow": "#ece4d4",
+        "glowOp": 0.28,
+        "haloGlow": 0.32,
+        "maria": true,
+        "fare": "#f6eed9"
+      },
+      "ink": {
+        "text": "#101326",
+        "soft": "#1f2338",
+        "discSoft": "#6b5a3e",
+        "countA": "#91692a",
+        "countB": "#5a3c0c"
+      }
+    },
+    "winter-night": {
+      "season": "winter",
+      "hour": "night",
+      "view": "寒月",
+      "viewKey": "winter-night",
+      "sky": [
+        [
+          0,
+          "#030817"
+        ],
+        [
+          0.2,
+          "#08132b"
+        ],
+        [
+          0.5,
+          "#102347"
+        ],
+        [
+          0.75,
+          "#1b3664"
+        ],
+        [
+          0.9,
+          "#26467a"
+        ],
+        [
+          1,
+          "#2f528a"
+        ]
+      ],
+      "band": "#01040f",
+      "ground": "#5a6a8c",
+      "disc": {
+        "kind": "moon",
+        "fill": [
+          "#fbfcff",
+          "#dfe6f0"
+        ],
+        "glow": "#e6eef8",
+        "glowOp": 0.42,
+        "haloGlow": 0.55,
+        "maria": true,
+        "fare": "#eef0e6"
+      },
+      "ink": {
+        "text": "#eef0f2",
+        "soft": "#bcc2cc",
+        "discSoft": "#6b5a3e",
+        "countA": "#91692a",
+        "countB": "#5a3c0c"
+      }
+    },
+    "summer-hanabi": {
+      "season": "summer",
+      "hour": "night",
+      "view": "花火",
+      "viewKey": "summer-hanabi",
+      "sky": [
+        [
+          0,
+          "#030915"
+        ],
+        [
+          0.2,
+          "#071427"
+        ],
+        [
+          0.5,
+          "#0d223d"
+        ],
+        [
+          0.75,
+          "#163556"
+        ],
+        [
+          0.9,
+          "#1f4468"
+        ],
+        [
+          1,
+          "#284f74"
+        ]
+      ],
+      "band": "#01040f",
+      "ground": "#050c0e",
+      "disc": {
+        "kind": "moon",
+        "fill": [
+          "#fdf9ec",
+          "#e6ddc2"
+        ],
+        "glow": "#eef0e6",
+        "glowOp": 0.38,
+        "haloGlow": 0.55,
+        "maria": true,
+        "fare": "#eef0e6"
+      },
+      "ink": {
+        "text": "#ece5d8",
+        "soft": "#b9b2a8",
+        "discSoft": "#6b5a3e",
+        "countA": "#91692a",
+        "countB": "#5a3c0c"
+      }
+    },
+    "summer-dawn-b": {
+      "season": "summer",
+      "hour": "dawn",
+      "view": "凱風",
+      "viewKey": "summer-dawn",
+      "sky": [
+        [
+          0,
+          "#1c3266"
+        ],
+        [
+          0.22,
+          "#2c4c86"
+        ],
+        [
+          0.42,
+          "#5a7fb2"
+        ],
+        [
+          0.56,
+          "#93afd0"
+        ],
+        [
+          0.7,
+          "#c8d3dc"
+        ],
+        [
+          0.82,
+          "#ecd6bf"
+        ],
+        [
+          0.92,
+          "#f5d3a9"
+        ],
+        [
+          1,
+          "#f8dfb8"
+        ]
+      ],
+      "band": "#13244e",
+      "ground": "#0f1c14",
+      "disc": {
+        "kind": "sun_red",
+        "fill": [
+          "#d4553a",
+          "#a8301f"
+        ],
+        "glow": "#f08c64",
+        "glowOp": 0.5,
+        "haloGlow": 0.42,
+        "maria": false,
+        "fare": "#fbeedd"
+      },
+      "ink": {
+        "text": "#15213f",
+        "soft": "#2f3d5e",
+        "discSoft": "#fff6ec",
+        "countA": "#fff6e4",
+        "countB": "#fde6c4"
+      }
+    },
+    "summer-day-b": {
+      "season": "summer",
+      "hour": "day",
+      "view": "雲峰",
+      "viewKey": "summer-day",
+      "sky": [
+        [
+          0,
+          "#123a80"
+        ],
+        [
+          0.14,
+          "#1c4a94"
+        ],
+        [
+          0.4,
+          "#4a82c2"
+        ],
+        [
+          0.66,
+          "#92b9df"
+        ],
+        [
+          0.86,
+          "#cfe2f1"
+        ],
+        [
+          1,
+          "#edf3f2"
+        ]
+      ],
+      "band": "#0c2b66",
+      "ground": "#163c22",
+      "disc": {
+        "kind": "sun",
+        "fill": [
+          "#fffbf1",
+          "#f4e7c4"
+        ],
+        "glow": "#fff3cf",
+        "glowOp": 0.6,
+        "haloGlow": 0.0,
+        "maria": false,
+        "fare": "#22345a"
+      },
+      "ink": {
+        "text": "#10203f",
+        "soft": "#22355a",
+        "discSoft": "#6b5a3e",
+        "countA": "#8b6421",
+        "countB": "#5a3d0c"
+      }
+    },
+    "summer-dusk-b": {
+      "season": "summer",
+      "hour": "dusk",
+      "view": "夕凪",
+      "viewKey": "summer-dusk",
+      "sky": [
+        [
+          0,
+          "#171b46"
+        ],
+        [
+          0.14,
+          "#25295d"
+        ],
+        [
+          0.36,
+          "#463f7e"
+        ],
+        [
+          0.5,
+          "#80609a"
+        ],
+        [
+          0.6,
+          "#bd7690"
+        ],
+        [
+          0.72,
+          "#e88e72"
+        ],
+        [
+          0.85,
+          "#f4a866"
+        ],
+        [
+          0.93,
+          "#f6b974"
+        ],
+        [
+          1,
+          "#f8cf98"
+        ]
+      ],
+      "band": "#0e1036",
+      "ground": "#0b1214",
+      "disc": {
+        "kind": "moon",
+        "fill": [
+          "#fbf4df",
+          "#eadbb6"
+        ],
+        "glow": "#f6e7c4",
+        "glowOp": 0.42,
+        "haloGlow": 0.5,
+        "maria": true,
+        "fare": "#f6eed9"
+      },
+      "ink": {
+        "text": "#12102c",
+        "soft": "#211e37",
+        "discSoft": "#6b5a3e",
+        "countA": "#91692a",
+        "countB": "#5a3c0c"
+      }
+    },
+    "summer-night-b": {
+      "season": "summer",
+      "hour": "night",
+      "view": "蛍",
+      "viewKey": "summer-night",
+      "sky": [
+        [
+          0,
+          "#030915"
+        ],
+        [
+          0.2,
+          "#071427"
+        ],
+        [
+          0.5,
+          "#0d223d"
+        ],
+        [
+          0.75,
+          "#163556"
+        ],
+        [
+          0.9,
+          "#1f4468"
+        ],
+        [
+          1,
+          "#284f74"
+        ]
+      ],
+      "band": "#01040f",
+      "ground": "#050c0e",
+      "disc": {
+        "kind": "moon",
+        "fill": [
+          "#fdf9ec",
+          "#e6ddc2"
+        ],
+        "glow": "#eef0e6",
+        "glowOp": 0.38,
+        "haloGlow": 0.55,
+        "maria": true,
+        "fare": "#eef0e6"
+      },
+      "ink": {
+        "text": "#ece5d8",
+        "soft": "#b9b2a8",
+        "discSoft": "#6b5a3e",
+        "countA": "#91692a",
+        "countB": "#5a3c0c"
+      }
+    },
+    "summer-hanabi-b": {
+      "season": "summer",
+      "hour": "night",
+      "view": "花火",
+      "viewKey": "summer-hanabi",
+      "sky": [
+        [
+          0,
+          "#030915"
+        ],
+        [
+          0.2,
+          "#071427"
+        ],
+        [
+          0.5,
+          "#0d223d"
+        ],
+        [
+          0.75,
+          "#163556"
+        ],
+        [
+          0.9,
+          "#1f4468"
+        ],
+        [
+          1,
+          "#284f74"
+        ]
+      ],
+      "band": "#01040f",
+      "ground": "#050c0e",
       "disc": {
         "kind": "moon",
         "fill": [

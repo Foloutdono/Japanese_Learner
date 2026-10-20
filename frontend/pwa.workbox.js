@@ -100,9 +100,11 @@ export const workbox = {
       handler: 'CacheFirst',
       options: { cacheName: 'media', expiration: { maxEntries: 200, maxAgeSeconds: 31536000 },
                  cacheableResponse: { statuses: [200] } } },
-    // The print behind Today's gate (plan 205): a file per hour and
-    // frame under a revision's folder (public/today/print/<rev>/), so a
-    // changed print is a new URL and the old one can be kept for good.
+    // The print behind Today's gate (plans 205, 261): a file per print
+    // (a season at an hour) and frame under a revision's folder
+    // (public/today/print/<rev>/), so a changed print is a new URL and
+    // the old one can be kept for good. A season shows four of them on a
+    // frame; the oldest give way as the year turns.
     { urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/today/print/'),
       handler: 'CacheFirst',
       options: { cacheName: 'print', expiration: { maxEntries: 16, maxAgeSeconds: 31536000 },

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { lineReading, songWords, songLines, songDeckName } from './songDeck'
+import { lineReading, songWords, songWordRows, songLines, songDeckName } from './songDeck'
 
 // ── 歌 — what the song sheet reads off a Passage (plan 215) ──
 const card = (raw_id, level = 'N5') => ({ raw_id, level, entry: {}, stats: { status: 'new' } })
@@ -94,5 +94,23 @@ describe('the name the sheet proposes', () => {
     const long = songDeckName('あ'.repeat(80), [])
     expect(long).toHaveLength(60)
     expect(long.endsWith('…')).toBe(true)
+  })
+})
+
+// ── The keep sheet's chips (plan 263) ──
+describe('the words the keep sheet offers', () => {
+  it('names each word by its dictionary spelling and reading, once', () => {
+    const mastered = { ...CALL, tokens: CALL.tokens.map(tk => (tk.surface === '名前'
+      ? { ...tk, vocab_match: { ...card('vocab_N5_名前_なまえ'), entry: { kanji: '名前', kana: 'なまえ' }, stats: { status: 'mastered' } } }
+      : tk)) }
+    const rows = songWordRows([mastered, mastered])
+    expect(rows.map(w => w.ref.raw_id)).toEqual(['vocab_N5_君_きみ', 'vocab_N5_名前_なまえ', 'vocab_N4_呼ぶ_よぶ'])
+    expect(rows[1]).toMatchObject({ name: '名前', reading: 'なまえ', known: true })
+    // A word the learner is still on is offered ticked.
+    expect(rows[0].known).toBe(false)
+  })
+
+  it('posts the same refs songWords does', () => {
+    expect(songWordRows([CALL, GUITAR]).map(w => w.ref)).toEqual(songWords([CALL, GUITAR]))
   })
 })
