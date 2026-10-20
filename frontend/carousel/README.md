@@ -1013,9 +1013,22 @@ text (the three of its words first shown before it are gone, at the
 owner's word); it ends on one of
 its questions (the one about what the text says, never its grammar),
 five seconds counted by the app's clicks and "Answer in the comments",
-its answer, then the way to the app: the title, "Texts like this one, N5
-to N1, each with its questions", "Free · in your browser" and the site's
-address in its bar (plan 245).
+its answer, then the way to the app (plan 263, the owner's pick of
+the drafts drawn): "Read it at your pace in the app" over the app's own
+reader (`RollingPassage`, plan 258) as the comprehension draws it, the
+text just read rolling up its card a sentence lit at its middle, its
+controls (pause, − speed +, ふ) and its foot (the level, "Reading
+comprehension"). At 2.2 s a tap on − slows it from the app's 3 char/s to
+2, at 3.2 s a tap on ふ shows its furigana, each heard as the app's
+button tick; under the card the run's three stops, Read, its N questions
+and Breakdown (the app's own words, `showBreakdown`; Japanese names for
+them were drawn and taken out at the owner's word), lit by the reader's
+dot from 4.2 s; and the site's address in its bar (plan 245). The card
+lasts 6.5 s (`challenge.cta`); tuned shorter, its beats (`CTA`) close up
+in proportion. It promises what the app does: the roll is a chip on the
+reading screen, its speeds 1 to 10 characters a second, its furigana a
+switch. The old card's "Free · in your browser" went with it, a claim
+nothing checked.
 
 **Easy to read** is its first rule: everything a viewer reads is light
 in ink on the washed print (the scroll, its hook, question and way to

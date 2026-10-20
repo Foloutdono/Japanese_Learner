@@ -44,7 +44,7 @@ group('Reading challenge', ['challenge'], [
   { key: 'challenge.ask', label: 'Question alone', unit: 's', def: 2.2, min: 1, max: 5, step: 0.1, hint: 'before the countdown starts' },
   { key: 'challenge.count', label: 'Countdown', unit: 's', def: 5, min: 0, max: 10, step: 1, hint: 'one click a second' },
   { key: 'challenge.answer', label: 'Answer shown', unit: 's', def: 3.6, min: 2, max: 8, step: 0.2 },
-  { key: 'challenge.cta', label: 'The app, last', unit: 's', def: 5.2, min: 3, max: 10, step: 0.2 },
+  { key: 'challenge.cta', label: 'The app, last', unit: 's', def: 6.5, min: 3, max: 10, step: 0.1 },
   { key: 'challenge.wash', label: 'Picture wash', unit: '×', def: 1, min: 0.6, max: 1.2, step: 0.05, hint: 'how much paper lies over the print (scroll)' },
 ])
 group('Music', ['challenge'], [

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { existsSync, readFileSync } from 'node:fs'
-import { FORMATS, FS, RATING_INKS, drawFeedHud, formatOf, layoutSentence, palette, reading } from '../carousel/draw.js'
+import { FORMATS, FS, METAL_H, RATING_INKS, drawFeedHud, formatOf, layoutSentence, palette, reading } from '../carousel/draw.js'
 import { LEVELS, SOURCES, TITLE_MAX, chunksOf, depsOf, itemsOf, lineRomaji, picked, plan, readingMisses, themePartOf, titleOf, unpack } from '../carousel/sources.js'
 import { ENDING_IDS, TYPES, available, deck, endingSlide } from '../carousel/slides.js'
 import { assemblyQ, kanjiQuizzes, overlaps, withoutGiveaways } from '../carousel/quizzes.js'
@@ -15,7 +15,7 @@ import { TUNABLES, tuned } from '../carousel/tune.js'
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf, readInks, readable, unstopped } from '../carousel/funnel.js'
 import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, TALL, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, stillAt, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
-import { CH as CHALLENGE, CPM, SCROLL, TRACK, TRACKS, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeQuestions, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
+import { CH as CHALLENGE, CPM, CTA as CHALLENGE_CTA, SCROLL, TRACK, TRACKS, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeQuestions, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
 import { CAPTION_MAX, FEEDS, HASHTAGS, pageFile } from '../carousel/feeds.js'
 import { COUNT as WORDS_COUNT, LIMIT as WORDS_LIMIT, STYLES as WORDS_STYLES, drawWords, loadPictures, shortSense, wordsCommand, wordsFiles, wordsItems, wordsPage, wordsPlan, wordsTimeline } from '../carousel/words.js'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
@@ -1734,7 +1734,8 @@ describe('the reading challenges (plan 247)', () => {
       tl.segs.forEach((s, i) => { if (i) expect(s.start, P.id).toBeCloseTo(tl.segs[i - 1].start + tl.segs[i - 1].dur, 2) })
       expect(tl.seconds, P.id).toBeCloseTo(tl.segs.at(-1).start + tl.segs.at(-1).dur, 2)
       expect(tl.cues, P.id).toEqual([])
-      expect(tl.sfx.map(x => x.key), P.id).toEqual(['board-flap', ...Array(CHALLENGE.count).fill('click'), 'correct', 'platform-chime'])
+      // The countdown's ticks, the answer, the chime, and the two taps on the reader's card (plan 263).
+      expect(tl.sfx.map(x => x.key), P.id).toEqual(['board-flap', ...Array(CHALLENGE.count).fill('click'), 'correct', 'platform-chime', 'click', 'click'])
     }
   })
 
@@ -1904,6 +1905,77 @@ describe('the reading challenges (plan 247)', () => {
     }
     expect(challengePage(challengePlan(data, 'n4-01', { lang: 'fr' }), challengeTimeline(challengePlan(data, 'n4-01', { lang: 'fr' })), 'x').title).toMatch(/^Tu arrives/)
   }))
+
+  it('ends on the app’s reader, the text rolling, slowed with −, its furigana shown with ふ, over the run’s three stops (plan 263)', () => withPath2D(() => {
+    const had = globalThis.OffscreenCanvas
+    const rolls = []
+    globalThis.OffscreenCanvas = class {
+      constructor(w, h) {
+        Object.assign(this, { width: w, height: h, d: drawn() })
+        rolls.push(this)
+      }
+      getContext() { return this.d.ctx }
+    }
+    try {
+      const foot = FORMATS.story.h - FORMATS.story.safe.b - METAL_H
+      for (const lang of ['en', 'fr']) {
+        const pl = challengePlan(data, 'n5-04', { lang })
+        const tl = challengeTimeline(pl)
+        const seg = tl.segs.find(s => s.key === 'cta')
+        expect(seg.dur).toBe(CHALLENGE.cta)
+        const frame = into => {
+          rolls.length = 0
+          const { ctx, at } = drawn()
+          drawChallenge(ctx, pl, tl, seg.start + into, null)
+          return { at, roll: rolls.at(-1)?.d.at || [] }
+        }
+        // The speed the app starts at, one step down at the tap on −, heard as a button.
+        const speed = lang === 'fr' ? v => `${v} car./s` : v => `${v} char/s`
+        expect(frame(CHALLENGE_CTA.minus - 0.1).at.map(x => x.t)).toContain(speed(3))
+        expect(frame(CHALLENGE_CTA.minus + 0.5).at.map(x => x.t)).toContain(speed(2))
+        const taps = tl.sfx.filter(x => x.at >= seg.start && x.key === 'click')
+        expect(taps.map(x => x.at)).toEqual([CHALLENGE_CTA.minus, CHALLENGE_CTA.furi].map(b => +(seg.start + b).toFixed(3)))
+        // The text rolls up its card at the app's pace: the characters over the speed, slower after the tap.
+        const first = pl.sents[2][0].t
+        const yOf = into => frame(into).roll.find(x => x.t === first).y
+        const before = (yOf(1.2) - yOf(2.0)) / 0.8
+        const after = (yOf(2.6) - yOf(3.0)) / 0.4
+        expect(before).toBeGreaterThan(0)
+        expect(after / before).toBeCloseTo(2 / 3, 1)
+        // The readings only once ふ is pressed.
+        const small = into => frame(into).roll.filter(x => x.alpha > 0.01 && x.size < FS.body * 0.8)
+        expect(small(CHALLENGE_CTA.furi - 0.1)).toEqual([])
+        expect(small(CHALLENGE_CTA.furi + 0.8).length).toBeGreaterThan(0)
+        // The run's stops, in the app's words, every one lit by the end; no Japanese names for them.
+        const end = frame(seg.dur - 0.05).at
+        const stops = lang === 'fr' ? ['Lire', `${pl.nq} questions`, 'Décomposition'] : ['Read', `${pl.nq} questions`, 'Breakdown']
+        for (const s of stops) expect(end.find(x => x.t === s)?.alpha, `${lang} ${s}`).toBeGreaterThan(0.99)
+        expect(end.filter(x => jp(x.t)).map(x => x.t)).toEqual(['ふ'])
+        expect(end.map(x => x.t)).toContain(lang === 'fr' ? 'Compréhension écrite' : 'Reading comprehension')
+      }
+      // Every text's card and stops above the address bar, for every text and either language.
+      for (const P of each) {
+        for (const lang of ['en', 'fr']) {
+          const pl = challengePlan(data, P.id, { lang })
+          const tl = challengeTimeline(pl)
+          const { ctx, at } = drawn()
+          drawChallenge(ctx, pl, tl, tl.seconds - 0.05, null)
+          for (const x of at.filter(x => x.alpha > 0.01 && x.t !== 'tsuji.app')) expect(x.y + x.size * 0.25, `${P.id} ${lang} ${x.t}`).toBeLessThanOrEqual(foot)
+        }
+      }
+      // Tuned shorter, the beats close up and the card still ends on the whole run.
+      const pl = challengePlan(data, 'n3-02', { tune: { 'challenge.cta': 3 } })
+      const tl = challengeTimeline(pl)
+      const seg = tl.segs.find(s => s.key === 'cta')
+      expect(seg.dur).toBe(3)
+      expect(tl.sfx.at(-1).at).toBeLessThan(seg.start + seg.dur)
+      const { ctx, at } = drawn()
+      drawChallenge(ctx, pl, tl, tl.seconds - 0.05, null)
+      expect(at.find(x => x.t === 'Breakdown')?.alpha).toBeGreaterThan(0.99)
+    } finally {
+      globalThis.OffscreenCanvas = had
+    }
+  }), 120000)
 
   // Last of the block: the strip it leaves behind is the stub's.
   it('draws the scroll’s text once and lays it between pixels, at sixty frames, so it glides', () => withPath2D(() => {

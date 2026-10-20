@@ -9,7 +9,8 @@
 // (Cool Vibes), one of the owner's, or nothing. Since plan 260 the
 // question is the maker's to choose (the first about what the text says
 // unless chosen), its four answers dealt in a seeded order, so the right
-// one stands at A, B, C or D alike across the bank.
+// one stands at A, B, C or D alike across the bank. Since plan 263 the
+// way to the app is the app's own reader, this text rolling up its card.
 //
 // Everything a viewer must read is set large, in ink on the washed print
 // (scroll) or light on the darkened one (along), so it reads at every
@@ -18,7 +19,7 @@
 // Pure but for the canvas it draws on: `challengeTimeline` times the
 // video (on the voice's own lengths and syllables where it is voiced,
 // else on a close guess), `drawChallenge` draws any second of it.
-import { FS, SP, R, METAL_H, RATING_INKS, FORMATS, address, alpha, drawSentence, fit, font, frame, layoutSentence, mark, measure, palette, reading, rrect, text } from './draw.js'
+import { FS, SP, R, METAL_H, RATING_INKS, FORMATS, address, alpha, drawSentence, fit, font, frame, layoutSentence, mark, measure, mix, palette, reading, rrect, text } from './draw.js'
 import { drawPrint } from './app.js'
 import { seeded, shuffle, unpack } from './common.js'
 import { SITE } from './strings.js'
@@ -59,7 +60,7 @@ export const CH = {
   into: 1, out: 4,
   // along: the voice starts LEAD after its sentence is due, a GAP between two.
   lead: 0.35, gap: 0.3, turn: 0.35,
-  ask: 2.2, count: 5, answer: 3.6, cta: 5.2,
+  ask: 2.2, count: 5, answer: 3.6, cta: 6.5,
 }
 
 const LIGHT = '#f3ecdf'
@@ -89,8 +90,11 @@ const W = {
     chars: n => `${n} characters`,
     comments: 'Answer in the comments',
     gotIt: 'Did you get it?',
-    more: 'Texts like this one, N5 to N1, each with its questions',
-    free: 'Free · in your browser',
+    // The way to the app (plan 263): the reader's card, then the run's stops.
+    reader: 'Read it at your pace in the app',
+    station: 'Reading comprehension',
+    speed: v => `${v} char/s`,
+    stops: n => ['Read', `${n} questions`, 'Breakdown'],
     voice: 'Voice · VOICEVOX Nemo',
     title: (lv, t) => `Can you read this Japanese text? JLPT ${lv} reading challenge: ${t}`,
     body: { scroll: 'Read the text as it scrolls up, then answer the question.', along: 'Read along with the voice, word by word, then answer the question.' },
@@ -106,8 +110,10 @@ const W = {
     chars: n => `${n} caractères`,
     comments: 'Réponds en commentaire',
     gotIt: 'Tu avais trouvé ?',
-    more: 'Des textes comme celui-ci, du N5 au N1, avec leurs questions',
-    free: 'Gratuit · dans ton navigateur',
+    reader: 'Lis-le à ton rythme dans l’app',
+    station: 'Compréhension écrite',
+    speed: v => `${v} car./s`,
+    stops: n => ['Lire', `${n} questions`, 'Décomposition'],
     voice: 'Voix · VOICEVOX Nemo',
     title: (lv, t) => `Tu arrives à lire ce texte japonais ? Défi lecture JLPT ${lv} : ${t}`,
     body: { scroll: 'Lis le texte pendant qu’il défile, puis réponds à la question.', along: 'Lis avec la voix, mot à mot, puis réponds à la question.' },
@@ -167,7 +173,7 @@ export function challengePlan(data, id, opts = {}) {
   const q = { n: qn, ask: Q.question[lang] || Q.question.en, choices: order.map(i => options[i]), right: order.indexOf(Q.correct) }
   return {
     source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, title: P.title, sents, q, chosen: qn !== askedFirst(P), music: opts.music === undefined ? TRACK : opts.music || null,
-    chars: sents.reduce((n, rows) => n + charsOf(rows), 0), cpm: Math.round((CPM[P.lv] || CPM.N3) * tuned(opts.tune, 'challenge.pace')), tune: opts.tune || {}, ruby: RUBY.has(P.lv), slow: SLOW.has(P.lv),
+    chars: sents.reduce((n, rows) => n + charsOf(rows), 0), nq: P.questions.length, cpm: Math.round((CPM[P.lv] || CPM.N3) * tuned(opts.tune, 'challenge.pace')), tune: opts.tune || {}, ruby: RUBY.has(P.lv), slow: SLOW.has(P.lv),
   }
 }
 
@@ -230,6 +236,9 @@ export function challengeTimeline(plan, voiced = null) {
   sfx.push({ at: +t.toFixed(3), key: 'correct' })
   seg('answer', beat(plan, 'answer'))
   sfx.push({ at: +(t + 0.5).toFixed(3), key: 'platform-chime' })
+  // The two taps on the reader's card, heard as the app's buttons are (plan 263).
+  const pace = ctaPace(beat(plan, 'cta'))
+  for (const key of ['minus', 'furi']) sfx.push({ at: +(t + CTA[key] * pace).toFixed(3), key: 'click', gain: 0.5 })
   seg('cta', beat(plan, 'cta'))
   segs.sort((a, b) => a.start - b.start)
   const reading = +(segs.find(s => s.key === 'reading').dur).toFixed(1)
@@ -379,7 +388,7 @@ export function drawChallenge(ctx, plan, tl, t, P = null) {
   else if (s.key === 'reading') (plan.style === 'scroll' ? scroll : along)(ctx, plan, tl, t, P)
   else if (s.key === 'question') question(ctx, plan, into, false, P, T)
   else if (s.key === 'answer') question(ctx, plan, into, true, P, T)
-  else cta(ctx, plan, into, P, T)
+  else cta(ctx, plan, into, P, T, s.dur)
   ctx.restore()
 }
 
@@ -639,23 +648,229 @@ function question(ctx, plan, into, answered, P, T) {
   }
 }
 
-function cta(ctx, plan, into, P, T) {
+// ── The way to the app (plan 263) ──
+// The app's reader (RollingPassage, plan 258) with the text just read
+// rolling up its card: a tap on − slows it, a tap on ふ shows its
+// furigana; under it the run's three stops, the reader's dot going along
+// them. Its beats, in seconds into the card at its default length,
+// squeezed when the card is tuned shorter.
+export const CTA = { go: 0.9, minus: 2.2, furi: 3.2, rail: 4.2 }
+const ctaPace = dur => Math.min(1, dur / CH.cta)
+const RIKAI = PAPER.line.rikai
+// The selection's gold, a chip switched on (.chip--on), in the paper theme.
+const SEL = { wash: alpha(PAPER.gold, 0.15), line: alpha(PAPER.gold, 0.6), ink: mix(PAPER.gold, PAPER.ink, 0.5) }
+const FLOOR = fr.bottom - METAL_H - SP[6]
+const READER_Z = FS.body
+// The roll's lines, laid out once a width and a script: a sentence an
+// entry, centred and balanced, as .roll__line sets them.
+const readerLays = new Map()
+function readerLay(ctx, plan, w, script) {
+  const key = `${plan.id}|${w}|${script}`
+  if (!readerLays.has(key)) {
+    const Ls = plan.sents.map(rows => layoutSentence(ctx, rows, { max: READER_Z, min: READER_Z * 0.8, maxW: w, maxLines: 6, fam: 'jp', weight: 500, script, rules: false, gap: 0.02 }))
+    const tops = []
+    let y = 0
+    for (const L of Ls) { tops.push(y); y += L.h + SP[5] }
+    readerLays.set(key, { Ls, tops, mids: Ls.map((L, i) => tops[i] + L.h / 2) })
+  }
+  return readerLays.get(key)
+}
+// How far the roll has gone, 0 to 1, at the app's pace: the text's
+// characters over the speed, the speed as the taps set it.
+function rolled(t, steps, chars) {
+  let n = 0
+  steps.forEach(([at, v], i) => {
+    const end = i + 1 < steps.length ? steps[i + 1][0] : Infinity
+    if (t > at) n += (Math.min(t, end) - at) * v
+  })
+  return n / chars
+}
+function drawRoll(ctx, plan, vx, vy, vw, vh, r, furi) {
+  const c = canvasOf(Math.ceil(vw), Math.ceil(vh))
+  if (!c) return
+  const x = c.getContext('2d')
+  // Furigana coming in: the two settings of the text, one fading into the other.
+  for (const [script, a] of [['kanji', 1 - furi], ['furigana', furi]]) {
+    if (a <= 0.001) continue
+    const R0 = readerLay(ctx, plan, vw - SP[4] * 2, script)
+    const at = R0.mids[0] + r * (R0.mids.at(-1) - R0.mids[0])
+    let q = 0
+    for (let i = 0; i < R0.mids.length - 1; i++) if (at >= R0.mids[i]) q = i + Math.min(1, (at - R0.mids[i]) / (R0.mids[i + 1] - R0.mids[i]))
+    R0.Ls.forEach((L, i) => {
+      const top = vh / 2 - at + R0.tops[i]
+      if (top > vh || top + L.h < 0) return
+      // Stepped back by its distance from the middle, as .roll__line's opacity.
+      x.globalAlpha = a * Math.max(0.12, 1 - Math.min(3, Math.abs(i - q)) * 0.35)
+      drawSentence(x, L, vw / 2, top, 'center', () => ({ ink: PAPER.ink, rule: null, ruby: PAPER.ink2 }))
+    })
+  }
+  // The card's mask: its top and bottom quarters fading the lines out.
+  x.globalAlpha = 1
+  x.globalCompositeOperation = 'destination-in'
+  const g = x.createLinearGradient(0, 0, 0, vh)
+  g.addColorStop(0, 'rgba(0,0,0,0)')
+  g.addColorStop(0.24, '#000')
+  g.addColorStop(0.76, '#000')
+  g.addColorStop(1, 'rgba(0,0,0,0)')
+  x.fillStyle = g
+  x.fillRect(0, 0, vw, vh)
+  ctx.drawImage(c, vx, vy)
+}
+// A tap: a finger's shade coming down, the chip pressed, a ring going out.
+const pressOf = (into, at) => (at == null ? -1 : (into - at) / 0.55)
+function readerChip(ctx, cx, cy, d, glyph, { on = false, press = -1 } = {}) {
+  const near = press > -0.5 && press < 0 ? 1 + press * 2 : press >= 0 && press < 1 ? 1 - press : 0
+  if (near > 0) {
+    ctx.fillStyle = alpha(PAPER.ink, 0.16 * near)
+    ctx.beginPath()
+    ctx.arc(cx, cy, d * 0.62, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  if (press >= 0 && press < 1) {
+    ctx.strokeStyle = alpha(PAPER.gold, 0.7 * (1 - press))
+    ctx.lineWidth = 5
+    ctx.beginPath()
+    ctx.arc(cx, cy, d / 2 + press * d * 0.55, 0, Math.PI * 2)
+    ctx.stroke()
+  }
+  const r = (d / 2) * (press >= 0 && press < 0.5 ? 1 - 0.1 * Math.sin(Math.PI * press * 2) : 1)
+  ctx.fillStyle = on ? SEL.wash : PAPER.surface
+  ctx.beginPath()
+  ctx.arc(cx, cy, r, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.strokeStyle = on ? SEL.line : PAPER.surfaceLine
+  ctx.lineWidth = 2.5
+  ctx.stroke()
+  const ink = on ? SEL.ink : PAPER.ink2
+  const u = d * 0.2
+  ctx.fillStyle = ink
+  if (glyph === 'pause') {
+    rrect(ctx, cx - u * 0.75, cy - u, u * 0.5, u * 2, 2)
+    ctx.fill()
+    rrect(ctx, cx + u * 0.25, cy - u, u * 0.5, u * 2, 2)
+    ctx.fill()
+  } else if (glyph === 'ふ') {
+    text(ctx, 'ふ', cx, cy + d * 0.15, { f: font(700, d * 0.42, 'jp'), color: ink, align: 'center' })
+  } else {
+    rrect(ctx, cx - u, cy - 2.5, u * 2, 5, 2.5)
+    ctx.fill()
+    if (glyph === '+') {
+      rrect(ctx, cx - 2.5, cy - u, 5, u * 2, 2.5)
+      ctx.fill()
+    }
+  }
+}
+// The comprehension's card, rolling: the lines, the row of controls
+// (pause, − speed +, ふ, as .roll-ctl), the foot (the level, the station).
+function readerCard(ctx, plan, box, into, beats) {
   const S = W[plan.lang]
+  const footH = 60
+  const d = 68
+  ctx.save()
+  ctx.shadowColor = 'rgba(40,30,15,0.2)'
+  ctx.shadowBlur = 34
+  ctx.shadowOffsetY = 12
+  ctx.fillStyle = PAPER.card
+  rrect(ctx, box.x, box.y, box.w, box.h, R.panel)
+  ctx.fill()
+  ctx.restore()
+  ctx.strokeStyle = PAPER.surfaceLine
+  ctx.lineWidth = 2
+  rrect(ctx, box.x, box.y, box.w, box.h, R.panel)
+  ctx.stroke()
+  const bodyH = box.h - footH
+  const vh = bodyH - SP[3] * 2 - d - SP[4]
+  const vw = box.w - SP[4] * 2
+  // The speed the taps set: the app's default, then one step down.
+  const steps = [[0, 3], [beats.minus, 2]]
+  // The roll starts with the text's second sentence at its middle, one read above it.
+  const start = readerLay(ctx, plan, vw - SP[4] * 2, 'kanji')
+  const from = (start.mids[Math.min(1, start.mids.length - 1)] - start.mids[0]) / Math.max(1, start.mids.at(-1) - start.mids[0])
+  const r = Math.min(1, from + rolled(Math.max(0, into - beats.go), steps.map(([at, v]) => [Math.max(0, at - beats.go), v]), plan.chars))
+  drawRoll(ctx, plan, box.x + SP[4], box.y + SP[3], vw, vh, r, ease((into - beats.furi - 0.15) / 0.45))
+  const speed = steps.filter(([at]) => into >= at).at(-1)[1]
+  const vf = font(700, FS.caption, 'latin')
+  const valueW = measure(ctx, S.speed(10), vf) * 1.12
+  const total = d * 4 + SP[4] * 2 + SP[3] * 2 + valueW
+  const cy = box.y + bodyH - SP[4] - d / 2
+  let x = box.x + box.w / 2 - total / 2
+  readerChip(ctx, x + d / 2, cy, d, 'pause')
+  x += d + SP[4]
+  readerChip(ctx, x + d / 2, cy, d, '−', { press: pressOf(into, beats.minus) })
+  x += d + SP[3]
+  // The speed just changed is lit a moment, as the eye goes to it.
+  const lit = into >= beats.minus ? Math.max(0, 1 - (into - beats.minus) / 0.9) : 0
+  ctx.save()
+  ctx.translate(x + valueW / 2, cy)
+  ctx.scale(1 + lit * 0.12, 1 + lit * 0.12)
+  text(ctx, S.speed(speed), 0, FS.caption * 0.36, { f: vf, color: lit > 0 ? mix(SEL.ink, PAPER.ink2, lit) : PAPER.ink2, align: 'center' })
+  ctx.restore()
+  x += valueW + SP[3]
+  readerChip(ctx, x + d / 2, cy, d, '+')
+  x += d + SP[4]
+  readerChip(ctx, x + d / 2, cy, d, 'ふ', { on: into >= beats.furi, press: pressOf(into, beats.furi) })
+  const fy = box.y + bodyH
+  ctx.fillStyle = PAPER.surfaceLine
+  ctx.fillRect(box.x, fy, box.w, 2)
+  const ff = font(500, FS.caption, 'latin')
+  text(ctx, plan.lv, box.x + SP[5], fy + footH / 2 + FS.caption * 0.36, { f: ff, color: PAPER.ink2 })
+  text(ctx, S.station, box.x + box.w - SP[5], fy + footH / 2 + FS.caption * 0.36, { f: ff, color: PAPER.ink2, align: 'right' })
+}
+function cta(ctx, plan, into, P, T, dur = CH.cta) {
+  const S = W[plan.lang]
+  const pace = ctaPace(dur)
+  const beats = Object.fromEntries(Object.entries(CTA).map(([k, v]) => [k, v * pace]))
   backdrop(ctx, P, T, 0.62, plan.hour, tuned(plan.tune, 'challenge.wash'))
   masthead(ctx, T)
-  let y = TOP + 70
-  y = lines(ctx, T, plan.title, y, [FS.display * 0.8, FS.heading], { weight: 900, fam: 'serif', maxLines: 2, lh: 1.08, k: ease(into / 0.6) })
-  y += SP[6]
-  y = lines(ctx, T, S.more, y, [FS.heading, FS.title], { weight: 700, maxLines: 3, k: ease((into - 0.3) / 0.6) })
-  y += SP[7]
-  ctx.save()
-  ctx.globalAlpha *= ease((into - 0.6) / 0.6)
-  chip(ctx, T, S.free, fr.cx, y, { align: 'center', z: FS.body })
-  ctx.restore()
-  // The way to the app, the call to action's address bar (plan 245).
-  const k = ease((into - 0.5) / 0.6)
+  let y = fr.y + 64 + SP[5]
+  y = lines(ctx, T, S.reader, y, [FS.heading, FS.title], { weight: 900, fam: 'serif', maxLines: 2, lh: 1.08, k: ease(into / 0.6) })
+  y += SP[4]
+  // The run's three stops, named as the app names them: the roll, the questions, the breakdown.
+  const labels = S.stops(plan.nq)
+  const railY = FLOOR - (34 + SP[3] + FS.body * 1.2)
+  const k = ease((into - 0.3) / 0.6)
   ctx.save()
   ctx.globalAlpha *= k
-  address(ctx, palette(T.ground), fr.x, fr.bottom - METAL_H + (1 - k) * 30, fr.w, SITE)
+  ctx.translate(0, (1 - k) * 30)
+  readerCard(ctx, plan, { x: fr.x, y, w: fr.w, h: railY - SP[5] - y }, into, beats)
+  ctx.restore()
+  // The line drawn in, then lit stop by stop as the reader's dot goes along it.
+  const xs = [1, 3, 5].map(m => fr.x + (fr.w * m) / 6)
+  const cy = railY + 17
+  const drawIn = ease((into - beats.go - 0.1) / 0.9)
+  const go = ease((into - beats.rail) / (1.4 * pace))
+  ctx.save()
+  ctx.globalAlpha *= ease((into - beats.go) / 0.4)
+  ctx.fillStyle = alpha(RIKAI, 0.25)
+  rrect(ctx, xs[0], cy - 5, (xs[2] - xs[0]) * drawIn, 10, 5)
+  ctx.fill()
+  ctx.fillStyle = RIKAI
+  rrect(ctx, xs[0], cy - 5, (xs[2] - xs[0]) * go, 10, 5)
+  ctx.fill()
+  labels.forEach((label, i) => {
+    const on = i === 0 || go >= i / 2 - 0.01
+    ctx.save()
+    ctx.globalAlpha *= ease((into - beats.go - 0.1 - i * 0.25) / 0.4)
+    ctx.fillStyle = on ? RIKAI : PAPER.bg
+    ctx.beginPath()
+    ctx.arc(xs[i], cy, 17, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.strokeStyle = RIKAI
+    ctx.lineWidth = 6
+    ctx.stroke()
+    const b = fit(ctx, label, { weight: 700, sizes: [FS.body, FS.sm, FS.caption], maxW: fr.w / 3 - SP[1], maxLines: 1 })
+    text(ctx, b.lines[0], xs[i], cy + 17 + SP[3] + b.size * 0.85, { f: b.f, color: on ? T.ink : T.soft, align: 'center' })
+    ctx.restore()
+  })
+  ctx.fillStyle = PAPER.gold
+  ctx.beginPath()
+  ctx.arc(xs[0] + (xs[2] - xs[0]) * go, cy, 9, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.restore()
+  // The way to the app, the call to action's address bar (plan 245).
+  const kb = ease((into - 0.5) / 0.6)
+  ctx.save()
+  ctx.globalAlpha *= kb
+  address(ctx, palette(T.ground), fr.x, fr.bottom - METAL_H + (1 - kb) * 30, fr.w, SITE)
   ctx.restore()
 }
