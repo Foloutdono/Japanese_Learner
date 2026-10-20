@@ -7,7 +7,8 @@ import '../../index.css'
 
 // ── 初見 — a kana or a kanji met before it is drilled (plan 216) ──
 // Read, write, use: the glyph and what it reads, its strokes traced in
-// turn from the dot to the ring -- a miss answered by what to fix, the
+// turn from the dot to the ring, the ink filling each as the hand goes
+// (plan 263) -- a miss answered by what to fix, the
 // stroke drawn for the learner after three, « Show me » drawing the rest
 // -- and a few words, each voiced. The fixture is the payload the
 // backend serves for あ and 日 in English (study/glyph_tour.py;
@@ -94,10 +95,14 @@ describe('a kana met for the first time', () => {
     expect(t.gate().disabled).toBe(true)
     expect(t.board().dataset.stroke).toBe('1')
     expect(t.root().querySelector('.tour__notion-count').textContent).toBe('Stroke 1 of 3')
-    // The stroke asked, its dot and its ring; the others faint.
-    expect(t.board().querySelector('.gt-stroke--now')).not.toBeNull()
-    expect(t.board().querySelector('.gt-start')).not.toBeNull()
+    // The stroke asked: its hollow, its dot with its number, its ring,
+    // the chevrons inside it and its ink, empty; the others faint.
+    expect(t.board().querySelector('.gt-hollow')).not.toBeNull()
+    expect(t.board().querySelector('.gt-start').textContent).toBe('1')
     expect(t.board().querySelector('.gt-end')).not.toBeNull()
+    expect(t.board().querySelectorAll('.gt-chevron')).toHaveLength(3)
+    expect(t.board().querySelector('.gt-ink').style.opacity).toBe('0')
+    expect(t.board().querySelectorAll('[data-state="ahead"]')).toHaveLength(2)
     await trace(t, 0)
     expect(t.board().dataset.stroke).toBe('2')
     expect(t.board().querySelector('[data-state="done"]')).not.toBeNull()
@@ -105,9 +110,55 @@ describe('a kana met for the first time', () => {
     await trace(t, 2)
     expect(t.board().dataset.stroke).toBeUndefined()
     expect(t.board().querySelectorAll('[data-state="done"]')).toHaveLength(3)
+    expect(t.board().querySelector('.gt-hollow')).toBeNull()
     expect(t.root().querySelector('.tour-said--ok').textContent).toContain('Traced first time.')
     expect(t.root().querySelector('[data-action="show"]')).toBeNull()
     expect(t.gate().disabled).toBe(false)
+  })
+
+  it('fills the stroke with ink as the hand goes, and drains it when lifted short', async () => {
+    const t = await mount()
+    t.gate().click()
+    await settle()
+    const pen = t.board().querySelector('.gt-pen')
+    const box = pen.getBoundingClientRect()
+    const at = ([x, y]) => ({
+      clientX: box.left + (x / 109) * box.width,
+      clientY: box.top + (y / 109) * box.height,
+      bubbles: true, pointerId: 7, button: 0,
+    })
+    const stroke = along(tours.kana.strokes[0])
+    pen.dispatchEvent(new PointerEvent('pointerdown', at(stroke[0])))
+    for (const p of stroke.slice(1, 13)) pen.dispatchEvent(new PointerEvent('pointermove', at(p)))
+    const ink = t.board().querySelector('.gt-ink')
+    // Half the stroke: the ink is the stroke's, filled half way along it.
+    expect(ink.style.opacity).toBe('1')
+    const half = parseFloat(ink.style.strokeDasharray)
+    expect(half).toBeCloseTo(0.5, 1)
+    // A finger off the stroke, then on past the ring, carries no ink further.
+    const off = [stroke[12][0], 100]
+    pen.dispatchEvent(new PointerEvent('pointermove', at(off)))
+    pen.dispatchEvent(new PointerEvent('pointermove', at(stroke[stroke.length - 1])))
+    expect(parseFloat(ink.style.strokeDasharray)).toBeLessThan(half + 0.05)
+    pen.dispatchEvent(new PointerEvent('pointerup', at(stroke[stroke.length - 1])))
+    await settle(30)
+    expect(ink.classList.contains('gt-ink--drain')).toBe(true)
+    expect(ink.style.opacity).toBe('0')
+    expect(t.root().querySelector('.tour-said--no').textContent).toContain('Follow the stroke.')
+    expect(t.board().dataset.stroke).toBe('1')
+  })
+
+  it('calls the dot after a stroke begun away from it', async () => {
+    const t = await mount()
+    t.gate().click()
+    await settle()
+    expect(t.board().querySelector('.gt-start--call')).toBeNull()
+    draw(t.board(), backwards(tours.kana.strokes[0]))
+    await settle(30)
+    expect(t.board().querySelector('.gt-start--call')).not.toBeNull()
+    await trace(t, 0)
+    expect(t.board().querySelector('.gt-start--call')).toBeNull()
+    expect(t.board().querySelector('.gt-start').textContent).toBe('2')
   })
 
   it('answers a miss with what to fix, and draws the stroke after three', async () => {
