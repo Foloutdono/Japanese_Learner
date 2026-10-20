@@ -1831,6 +1831,30 @@ describe('the reading challenges (plan 247)', () => {
     expect(challengeCommand(challengePlan(data, 'n5-03', {}))).not.toContain('--question')
   })
 
+  it('stands every question and its answers above the safe foot, the countdown too (plan 262)', () => withPath2D(() => {
+    const foot = FORMATS.story.h - FORMATS.story.safe.b
+    for (const P of each) {
+      for (const n of P.questions.map((_, i) => i + 1)) {
+        for (const lang of ['en', 'fr']) {
+          const pl = challengePlan(data, P.id, { question: n, lang })
+          const tl = challengeTimeline(pl)
+          const ask = tl.segs.find(s => s.key === 'question')
+          const answer = tl.segs.find(s => s.key === 'answer')
+          for (const t of [ask.start + ask.dur - 0.5, answer.start + answer.dur - 0.05]) {
+            const { ctx, at } = drawn()
+            drawChallenge(ctx, pl, tl, t, null)
+            for (const x of at.filter(x => x.alpha > 0.01)) {
+              const where = `${P.id} q${n} ${lang} ${t.toFixed(1)} ${x.t}`
+              expect(x.y + x.size * 0.25, where).toBeLessThanOrEqual(foot + 1)
+              // Cut, unless the text itself trails off ("If it's a bike shop you need, …").
+              expect(x.t.endsWith('…') && ![pl.q.ask, ...pl.q.choices].some(o => o.endsWith(x.t)), where).toBe(false)
+            }
+          }
+        }
+      }
+    }
+  }), 240000)
+
   it('sets what a viewer reads large, inside the frame, whole', () => withPath2D(() => {
     const fr = { x: FORMATS.story.safe.l, right: FORMATS.story.w - FORMATS.story.safe.r }
     for (const P of each) {

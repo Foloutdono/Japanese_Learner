@@ -1054,6 +1054,15 @@ both languages and the same in the studio and the render: the bank
 writes the right one first two times in five, and a viewer would learn
 to answer A. Over the bank the right one stands at A, B, C and D a
 quarter of the time each (a test holds each between 20% and 30%).
+The question's frame fits itself to the safe area whatever is chosen
+(plan 262): the question, its four answers and the countdown are laid
+out at the largest sizes at which the countdown, or "Did you get it?",
+stands above the feed's foot and nothing is cut, a step down at a time
+(the panels closer, the question a fifth line), the longest (a quote
+and four answers of three lines, in French at N2) with a smaller ring
+and the ask for the comments left to the post's caption. A test draws
+every question of the bank, in both languages, at its countdown and
+its answer.
 
 ```bash
 cd frontend

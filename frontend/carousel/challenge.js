@@ -560,15 +560,50 @@ function along(ctx, plan, tl, t, P) {
   ctx.restore()
 }
 
+// The question, its four answers and the countdown under them, at the
+// largest sizes at which the countdown (or "Did you get it?") still stands
+// above the frame's foot and nothing is cut: four answers of three lines
+// step the sizes down rather than push the countdown under the feed's
+// buttons (plan 262).
+const QUESTION_STEPS = [
+  { ask: [FS.heading, FS.title, FS.lead, FS.body], answer: [FS.lead, FS.body, FS.sm], gap: SP[4], least: 116, pad: SP[6] },
+  { ask: [FS.title, FS.lead, FS.body], answer: [FS.body, FS.sm], gap: SP[3], least: 104, pad: SP[6] },
+  { ask: [FS.lead, FS.body], answer: [FS.sm, FS.caption], gap: SP[3], least: 96, pad: SP[6] },
+  { ask: [FS.body, FS.sm], answer: [FS.caption], gap: SP[2], least: 88, pad: SP[4], askLines: 5 },
+  // The longest (a quote and four answers of three lines, in French at N2):
+  // a smaller ring, and the ask for the comments left to the post's caption.
+  { ask: [FS.body, FS.sm, FS.caption], answer: [FS.caption], gap: SP[2], least: 88, pad: SP[4], askLines: 5, ring: 40, quiet: true },
+]
+const RING = 54
+const questionLayouts = new Map()
+function questionLayout(ctx, plan) {
+  const key = `${plan.id}|${plan.lang}|${plan.q.n}`
+  if (questionLayouts.has(key)) return questionLayouts.get(key)
+  let L = null
+  for (const step of QUESTION_STEPS) {
+    const ring = step.ring || RING
+    const foot = Math.max(ring * 2 + (step.quiet ? 0 : SP[4] + FS.body * 1.15), FS.title * 1.15)
+    const ask = fit(ctx, plan.q.ask, { weight: 800, fam: 'latin', sizes: step.ask, maxW: fr.w, maxLines: step.askLines || 4, lh: 1.15 })
+    const answers = plan.q.choices.map(c => fit(ctx, c, { weight: 700, sizes: step.answer, maxW: fr.w - 150, maxLines: 3, lh: 1.15 }))
+    const hs = answers.map(b => Math.max(step.least, b.size * 1.15 * b.lines.length + step.pad))
+    const end = TOP + 30 + ask.size * 1.15 * ask.lines.length + SP[6] + hs.reduce((n, h) => n + h + step.gap, 0) + SP[6] + foot
+    L = { ask, answers, hs, gap: step.gap, ring, quiet: !!step.quiet, askLines: step.askLines || 4 }
+    // Whole, too: a question quoting a long sentence wraps only between phrases.
+    if (end <= fr.bottom && !ask.cut && !answers.some(b => b.cut)) break
+  }
+  questionLayouts.set(key, L)
+  return L
+}
 function question(ctx, plan, into, answered, P, T) {
   const S = W[plan.lang]
   backdrop(ctx, P, T, 0.5, plan.hour, tuned(plan.tune, 'challenge.wash'))
   masthead(ctx, T)
-  let y = lines(ctx, T, plan.q.ask, TOP + 30, [FS.heading, FS.title, FS.lead, FS.body], { maxLines: 4 }) + SP[6]
+  const L = questionLayout(ctx, plan)
+  let y = lines(ctx, T, plan.q.ask, TOP + 30, [L.ask.size], { maxLines: L.askLines }) + SP[6]
   plan.q.choices.forEach((c, i) => {
     const right = answered && i === plan.q.right
-    const b = fit(ctx, c, { weight: 700, sizes: [FS.lead, FS.body, FS.sm], maxW: fr.w - 150, maxLines: 3, lh: 1.15 })
-    const h = Math.max(116, b.size * 1.15 * b.lines.length + SP[6])
+    const b = L.answers[i]
+    const h = L.hs[i]
     const k = answered ? 1 : ease((into - 0.4 - i * 0.18) / 0.4)
     ctx.save()
     ctx.globalAlpha *= k * (answered && !right ? 0.45 : 1)
@@ -580,14 +615,14 @@ function question(ctx, plan, into, answered, P, T) {
     text(ctx, 'ABCD'[i], fr.x + 62, y + h / 2 + 14, { f: font(800, FS.lead, 'latin'), color: right ? CORRECT : T.ink, align: 'center' })
     b.lines.forEach((l, j) => text(ctx, l, fr.x + 120, y + h / 2 + b.size * (0.36 + (j - (b.lines.length - 1) / 2) * 1.15), { f: b.f, color: right ? '#10201f' : T.ink }))
     ctx.restore()
-    y += h + SP[4]
+    y += h + L.gap
   })
   y += SP[6]
   if (!answered) {
     // The seconds to answer, as the clicks count them (none when the countdown is tuned away).
     const count = beat(plan, 'count')
     const left = Math.max(0, count - Math.max(0, into - beat(plan, 'ask')))
-    const r = 54
+    const r = L.ring
     ctx.strokeStyle = T.track
     ctx.lineWidth = 10
     ctx.beginPath()
@@ -597,8 +632,8 @@ function question(ctx, plan, into, answered, P, T) {
     ctx.beginPath()
     ctx.arc(fr.cx, y + r, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (count ? left / count : 0))
     ctx.stroke()
-    text(ctx, String(Math.ceil(left) || ''), fr.cx, y + r + 18, { f: font(800, FS.heading, 'latin'), color: T.ink, align: 'center' })
-    lines(ctx, T, S.comments, y + r * 2 + SP[4], [FS.body], { weight: 600, maxLines: 1 })
+    text(ctx, String(Math.ceil(left) || ''), fr.cx, y + r + 18 * (r / RING), { f: font(800, FS.heading * (r / RING), 'latin'), color: T.ink, align: 'center' })
+    if (!L.quiet) lines(ctx, T, S.comments, y + r * 2 + SP[4], [FS.body], { weight: 600, maxLines: 1 })
   } else {
     lines(ctx, T, S.gotIt, y, [FS.title, FS.lead], { weight: 700, maxLines: 1, k: ease((into - 0.4) / 0.5) })
   }
