@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Sheet } from '../chrome/Sheet'
 import { Seg } from '../chrome/Console'
 import { deckTypeOf } from './deckTypes'
-import { ChevronIcon } from '../ui/Icons'
+import { ChevronIcon, SongIcon } from '../ui/Icons'
 import { Dots, Loading } from '../ui/Loading'
 import { apiJson, apiUpload } from '../../lib/api'
 import { track } from '../../lib/track'
@@ -354,7 +354,22 @@ export function LyricsImportSheet({ session, t, name: named = '', onClose, onMad
   }
 
   return (
-    <Sheet open onClose={onClose} jp="歌" cap={t.lyricsImportTitle} label={t.lyricsImportTitle} className="lyr-sheet" dismiss>
+    // The head (option A of three drawn, the owner's pick of 2026-10-20):
+    // the song's icon in the analyser's roundel and the title in words,
+    // where every other sheet prints a kanji and a caption.
+    <Sheet
+      open
+      onClose={onClose}
+      jp={(
+        <span className="wmap-roundel lyr-sheet__badge" aria-hidden="true">
+          <SongIcon size={20} />
+        </span>
+      )}
+      cap={t.lyricsImportTitle}
+      label={t.lyricsImportTitle}
+      className="lyr-sheet"
+      dismiss
+    >
       {body}
     </Sheet>
   )

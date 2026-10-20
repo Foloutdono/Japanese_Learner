@@ -7051,6 +7051,24 @@ textarea:focus-visible {
   text-transform: uppercase;
   color: var(--sheet-cap-ink);
 }
+/* 歌 — the lyrics import's head (plan 262; option A of three drawn,
+   the owner's pick of 2026-10-20): the song's icon in the analyser's
+   roundel, and the title in words at a card title's size, where every
+   other sheet prints a kanji over a caption. */
+.lyr-sheet .sheet__head { align-items: center; }
+.lyr-sheet .sheet__jp { display: inline-flex; line-height: 1; }
+/* Two classes: .wmap-roundel, later in the file, sets its own 30px. */
+.sheet__head .lyr-sheet__badge {
+  --line-color: var(--line-kaiseki);
+  width: 40px;
+  height: 40px;
+}
+.lyr-sheet .sheet__cap {
+  font-size: var(--fs-title);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-primary);
+}
 
 /* ── the console: chips over a field with a count ── */
 .console {

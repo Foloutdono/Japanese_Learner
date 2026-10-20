@@ -114,6 +114,10 @@ describe('the lyrics import', () => {
     const onMade = vi.fn()
     const screen = await renderSheet(onMade)
     expect(dialog().querySelector('.btn-primary').disabled).toBe(true)
+    // The head (option A): the song's icon in a roundel, the title in words.
+    expect(dialog().querySelector('.sheet__head .lyr-sheet__badge svg')).not.toBeNull()
+    expect(dialog().querySelector('.sheet__cap').textContent).toBe(en.lyricsImportTitle)
+    expect(dialog().querySelector('.sheet__head').textContent).not.toContain('歌')
     await choose(new File(['[00:01.00]君の名前を呼ぶよ\n'], 'YOASOBI - Yoru.lrc', { type: 'text/plain' }))
     dialog().querySelector('.btn-primary').click()
     await untilReview()
