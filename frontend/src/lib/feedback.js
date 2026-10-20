@@ -20,6 +20,9 @@ export function questionReport(examId, revision, question) {
   return { exam: { examId, revision, questionId: question.id, number: question.number } }
 }
 export const TEXT_MAX = 1000
+// The address an answer comes from, the one privacy.html gives. The
+// learner's own is read by the server (routes/feedback.py), never here.
+export const CONTACT = 'contact.tsujijapanese@gmail.com'
 
 const OS_NAMES = {
   ios: 'iOS', android: 'Android', windows: 'Windows', mac: 'macOS', linux: 'Linux', chromeos: 'ChromeOS',
