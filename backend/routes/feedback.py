@@ -4,13 +4,18 @@ POST /api/feedback — a learner writes to the people who make the app
 feedback door, new directions").
 
 Three doors open the one sheet (frontend/src/components/feedback/):
-Settings' "Nous écrire" row, the flag on an answered card and the link
-under a failure. What each sends:
+Settings' "Nous écrire" row, the flag on an answered card (or on a
+mock-exam question in the result's review) and the link under a
+failure. What each sends:
 
-  kind     problem | idea | fault, or card for the card's own sheet
+  kind     problem | idea | fault, or card / question for their own sheets
   text     the learner's words, at most TEXT_MAX characters
   reasons  a card's: what is wrong with it, from CARD_REASONS
   card_id  a card's: the unprefixed id, the content key the audit reads
+  exam_id, revision, question_id
+           a mock-exam question's: the paper (exam id and revision) and the
+           question in it, closed shapes naming what to retire, never any
+           of the question's text
   route    the screen, as the pattern App.jsx declared (never a path)
   area     a failure's: the API area that failed (`/api/today`), and
   status   its HTTP status
@@ -54,10 +59,16 @@ from core.rls import enable_rls
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-KINDS = ("problem", "idea", "fault", "card")
+KINDS = ("problem", "idea", "fault", "card", "question")
 # What can be wrong with a card. Closed, as a deck's report is
 # (routes/decks.REPORT_REASONS): the words beside them are optional.
 CARD_REASONS = ("reading", "meaning", "audio", "example", "other")
+# What can be wrong with a mock-exam question: `answer` is a wrong key.
+QUESTION_REASONS = ("answer", "ambiguous", "audio", "other")
+# An exam id (n5-listening-01) and a question id (listening_m1_q9): shapes
+# only, so nothing a learner typed can ride in them.
+EXAM_ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,39}$")
+QUESTION_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$")
 # A message, not an essay. The sheet counts down to it (maxLength).
 TEXT_MAX = 1000
 # A day's messages per learner, a rolling 24 hours. Five is far past
@@ -82,6 +93,9 @@ def _ensure_schema() -> None:
                     body       TEXT NOT NULL DEFAULT '',
                     reasons    TEXT[] NOT NULL DEFAULT '{}',
                     card_id    TEXT,
+                    exam_id    TEXT,
+                    revision   INT,
+                    question_id TEXT,
                     route      TEXT,
                     area       TEXT,
                     status     SMALLINT,
@@ -95,6 +109,10 @@ def _ensure_schema() -> None:
                 )
             """)
             enable_rls(cur, "feedback")
+            # A table that predates the question's flag (plan 258).
+            cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS exam_id TEXT")
+            cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS revision INT")
+            cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS question_id TEXT")
             cur.execute(
                 "CREATE INDEX IF NOT EXISTS feedback_user_at ON feedback (user_id, created_at)"
             )
@@ -114,6 +132,9 @@ class FeedbackPayload(BaseModel):
     text: str = Field(default="", max_length=TEXT_MAX)
     reasons: list[_Short] = Field(default_factory=list, max_length=len(CARD_REASONS))
     card_id: str | None = Field(default=None, max_length=160)
+    exam_id: str | None = Field(default=None, max_length=40)
+    revision: int | None = Field(default=None, ge=1, le=1_000_000)
+    question_id: str | None = Field(default=None, max_length=64)
     route: str | None = Field(default=None, max_length=64)
     area: str | None = Field(default=None, max_length=40)
     status: int | None = Field(default=None, ge=0, le=599)
@@ -171,7 +192,20 @@ def post_feedback(payload: FeedbackPayload, user_id: str = Depends(get_user_id))
     text = payload.text.strip()
     reasons: list[str] = []
     card_id = None
-    if payload.kind == "card":
+    exam_id = question_id = None
+    revision = None
+    if payload.kind == "question":
+        exam_id = (payload.exam_id or "").strip()
+        question_id = (payload.question_id or "").strip()
+        revision = payload.revision
+        if not (EXAM_ID_RE.match(exam_id) and QUESTION_ID_RE.match(question_id) and revision):
+            _refuse(400, "feedback_question", "A question's report names its paper and its question")
+        if any(r not in QUESTION_REASONS for r in payload.reasons):
+            _refuse(400, "feedback_reason", "Unknown reason")
+        reasons = [r for r in QUESTION_REASONS if r in payload.reasons]
+        if not reasons and not text:
+            _refuse(400, "feedback_empty", "Say what is wrong with the question")
+    elif payload.kind == "card":
         card_id = (payload.card_id or "").strip()
         if not CARD_ID_RE.match(card_id):
             _refuse(400, "feedback_card", "A card's report names its card")
@@ -207,13 +241,13 @@ def post_feedback(payload: FeedbackPayload, user_id: str = Depends(get_user_id))
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO feedback (user_id, kind, body, reasons, card_id, route, area, status,
-                                      platform, vp, os, lang, reply, reply_to)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO feedback (user_id, kind, body, reasons, card_id, exam_id, revision, question_id,
+                                      route, area, status, platform, vp, os, lang, reply, reply_to)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING created_at
                 """,
                 (
-                    user_id, payload.kind, text, reasons, card_id,
+                    user_id, payload.kind, text, reasons, card_id, exam_id, revision, question_id,
                     _shape("route", payload.route),
                     area,
                     payload.status if area else None,

@@ -2946,6 +2946,8 @@ const onboarding = {
   cardReport: 'Report this card',
   cardReportReasons: 'What is wrong',
   cardReason: { reading: 'Reading', meaning: 'Meaning', audio: 'Audio', example: 'Example', other: 'Other' },
+  questionReport: 'Report this question',
+  questionReason: { answer: 'Wrong answer', ambiguous: 'Ambiguous', audio: 'Audio', other: 'Other' },
   cardReportNote: 'A word more, if you like.',
   cardReportNoteLabel: 'A word more',
   reportProblem: 'Report this problem',

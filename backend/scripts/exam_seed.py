@@ -146,6 +146,9 @@ def replaying():
         swap(module, "llm_configured", lambda: True)
     swap(voice_engine, "ready", lambda timeout=2.0: True)
     swap(exam_listening_gen, "synthesize_dialogue", _clip)
+    # A seed's keys are Claude's own, read with the script: the blind reader
+    # of a generated paper (plan 258) is not a call a seed pays for.
+    swap(exam_listening_gen, "_keys_agree", lambda prepared: [True] * len(prepared))
 
     validate = exam_pipeline.validate_content
 
