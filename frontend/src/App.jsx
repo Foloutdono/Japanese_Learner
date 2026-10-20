@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from '
 import { DepartureGate } from './components/station/DepartureGate'
 import { TrainDoor } from './components/station/TrainDoor'
 import { TicketGate } from './components/station/TicketGate'
-import { UpdateToast, OfflineNote } from './components/ui/UpdateToast'
+import { UpdateToast, ReleaseNote, OfflineNote } from './components/ui/UpdateToast'
 import { BalanceSheet } from './components/credits/BalanceSheet'
 import { RunOutSheet } from './components/credits/RunOutSheet'
 import { ClaimSheet } from './components/credits/ClaimSheet'
@@ -848,11 +848,12 @@ export default function App({ front = NO_FRONT }) {
             the profile; nothing on the web. */}
         <NativeBridge />
 
-        {/* 掲示 — the docked notes (plan 065): a new build waiting, or
-            no network. Beside <Routes/> for the same reason as the gate
-            below: they must outlive the navigation that would unmount a
-            screen. */}
+        {/* 掲示 — the docked notes (plan 065): a new build waiting, a
+            release coming (plan 262), or no network. Beside <Routes/> for
+            the same reason as the gate below: they must outlive the
+            navigation that would unmount a screen. */}
         <UpdateToast />
+        <ReleaseNote />
         <OfflineNote />
 
         {/* 回数券 — the balance sheet off the HUD's pass, and the run-out

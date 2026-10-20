@@ -32,6 +32,11 @@ on:
         type: boolean
         default: false
         required: false
+      notice_minutes:
+        description: 'Minutes learners are warned before the push, 0-60 (0: push at once, no warning)'
+        type: number
+        default: 10
+        required: false
 
 concurrency:
   group: promote
@@ -46,6 +51,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
+      # Through the web origin, as every caller reaches the API (vercel.json).
+      NOTICE_URL: https://japanese-learner-seven.vercel.app/api/release/notice
     steps:
       - uses: actions/checkout@v5
         with:
@@ -111,9 +118,46 @@ jobs:
           echo "ship=true" >> "$GITHUB_OUTPUT"
           echo "sha=$pick" >> "$GITHUB_OUTPUT"
 
+      # 工事 (plan 262): learners are told before the restart, not left to
+      # wonder why the app stalls. The running backend is told the minute
+      # of the push and says it on every answer (core/release_notice.py,
+      # the docked note in UpdateToast.jsx); the restart clears it. Best
+      # effort: without the RELEASE_NOTICE_TOKEN secret (and the same
+      # variable on Render), or with the backend down, the release ships
+      # as before, at once.
+      - name: Warn learners
+        id: notice
+        if: steps.pick.outputs.ship == 'true'
+        continue-on-error: true
+        env:
+          RELEASE_NOTICE_TOKEN: ${{ secrets.RELEASE_NOTICE_TOKEN }}
+          # format(): a bare 0 would be falsy and fall through to the 10.
+          MINUTES: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.notice_minutes) || '10' }}
+        run: |
+          if [ -z "$RELEASE_NOTICE_TOKEN" ] || [ "$MINUTES" -le 0 ]; then
+            echo "No warning: $([ -z "$RELEASE_NOTICE_TOKEN" ] && echo 'RELEASE_NOTICE_TOKEN is not set' || echo 'notice_minutes is 0')."
+            exit 0
+          fi
+          curl -fsS --max-time 30 -X POST "$NOTICE_URL" \
+            -H "X-Release-Token: $RELEASE_NOTICE_TOKEN" -H 'Content-Type: application/json' \
+            -d "{\"in_minutes\": $MINUTES}"
+          echo
+          echo "announced=true" >> "$GITHUB_OUTPUT"
+          echo "Learners warned; pushing in $MINUTES minutes."
+          sleep $((MINUTES * 60))
+
       - name: Fast-forward production
         if: steps.pick.outputs.ship == 'true'
         run: |
           git push origin "${{ steps.pick.outputs.sha }}:refs/heads/production"
           echo "### Shipped" >> "$GITHUB_STEP_SUMMARY"
           echo "production is now at \`${{ steps.pick.outputs.sha }}\`." >> "$GITHUB_STEP_SUMMARY"
+
+      # The push failed after learners were warned: take the warning down
+      # rather than leave it standing until it expires.
+      - name: Take the warning down
+        if: failure() && steps.notice.outputs.announced == 'true'
+        env:
+          RELEASE_NOTICE_TOKEN: ${{ secrets.RELEASE_NOTICE_TOKEN }}
+        run: |
+          curl -fsS --max-time 30 -X DELETE "$NOTICE_URL" -H "X-Release-Token: $RELEASE_NOTICE_TOKEN" || true

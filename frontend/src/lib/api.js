@@ -28,6 +28,7 @@ import { supabase } from './supabase'
 export { api } from './origin'
 import { api } from './origin'
 import { reportApiFailure } from './apiFailure'
+import { releaseNotice } from '../stores/releaseNotice'
 
 // ── 401 recovery ──────────────────────────────────────────────
 // A session the backend rejects used to be invisible: supabase-js
@@ -93,6 +94,8 @@ async function send(path, init) {
     throw err
   }
   if (response.status >= 500) reportApiFailure(path, response.status)
+  // 工事 — whether a release is announced rides on every answer (plan 262).
+  releaseNotice.seen(response)
   return response
 }
 
