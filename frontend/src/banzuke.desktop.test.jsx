@@ -65,8 +65,9 @@ describe('the whole board on the desk', () => {
     for (let i = 1; i < side.length; i++) expect(side[i][1].top - side[i - 1][1].bottom, side[i][0]).toBeLessThan(20)
     // The learner's place and what going up takes; no pinned row, no
     // arrows (the ladder browses), no line under the list.
-    expect($('.bzp__mine-rank').textContent).toBe('12')
-    expect($('.bzp__mine-lead').textContent).toBe('+61 XP pour monter lundi')
+    expect($('.bzp__mine-rank').textContent).toBe('12e')
+    expect($('.bzp__mine-lead').textContent).toBe('▲ +61 XP pour monter lundi')
+    expect($('.bzp__seen .bz-switch').getAttribute('aria-checked')).toBe('true')
     expect($('.bzp__mine-sub').textContent).toBe('11 XP pour dépasser L11')
     expect($('.bzp__me')).toBeNull()
     expect($('.bzp__step')).toBeNull()

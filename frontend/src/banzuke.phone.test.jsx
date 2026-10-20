@@ -192,7 +192,15 @@ describe('the whole board at 390×844', () => {
     expect(rail(heads[0])).toBe(rail(up))
     expect($$('.bzp__row--down')).toHaveLength(2)
     // What going up takes, under the list.
-    expect($('.bzp__line').textContent).toBe('+21 XP pour monter lundi')
+    // The learner's card under the list (F2): the place, what going up
+    // takes in gold, the zone's arrow for the eye alone.
+    const card = $('.bzp__mine')
+    expect(card.previousElementSibling).toBe($('.bzp__list'))
+    expect(card.querySelector('.bzp__mine-rank').textContent).toBe('3e')
+    expect(card.querySelector('.bzp__mine-lead').textContent).toBe('▲ +21 XP pour monter lundi')
+    expect(card.querySelector('.bzp__mine-fig').textContent).toBe('+21 XP')
+    expect(card.querySelector('.bzp__mine-up').getAttribute('aria-hidden')).toBe('true')
+    expect($('.bzp__line')).toBeNull()
     expect($('.bzp__scope')).toBeNull()
     expect($('.bzp__ladder')).toBeNull()
     $$('.bzp__step')[1].click()
@@ -217,7 +225,16 @@ describe('the whole board at 390×844', () => {
 
   it('keeps the learner off the board on the account', async () => {
     await mount()
-    $$('.bzp__seen-seg .seg__opt')[1].click()
+    // A settings row: its label names the switch, which is on while the
+    // learner shows on the board, and a touch target either way.
+    const sw = $('.bzp__seen .bz-switch')
+    expect(sw.getAttribute('role')).toBe('switch')
+    expect(sw.getAttribute('aria-checked')).toBe('true')
+    expect(document.getElementById(sw.getAttribute('aria-labelledby')).textContent).toBe('Apparaître au classement')
+    expect($('.bzp__seen-hint').textContent).toBe('Les autres voient ton nom et tes XP.')
+    const r = sw.getBoundingClientRect()
+    expect(r.width).toBeGreaterThanOrEqual(44)
+    sw.click()
     await settle()
     const patch = calls.find(c => c.path === '/api/profile/learning')
     expect(JSON.parse(patch.init.body)).toEqual({ boardHidden: true })

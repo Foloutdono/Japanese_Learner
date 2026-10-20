@@ -276,33 +276,31 @@ export default function BanzukeScreen({ session }) {
           </button>
         </div>
       )}
-      {!desk && division && <ZoneLine division={division} t={t} lang={lang} className="bzp__line" />}
       {!desk && !division && !showBar && me?.gap && (
         <p className="bzp__line">{t.bzGapTo(me.gap.xp.toLocaleString(lang), me.gap.username)}</p>
       )}
 
-      {/* The desk's side: the learner's place and what it takes, and the
-          six divisions to browse. */}
-      {desk && board && me?.rank != null && (
-        <section className="banzuke bzp__mine">
-          <span className="bzp__mine-rank">{me.rank.toLocaleString(lang)}</span>
-          <span className="bzp__mine-lines">
-            {division ? <ZoneLine division={division} t={t} lang={lang} className="bzp__mine-lead" />
-              : me.gap && <span className="bzp__mine-lead">{t.bzGapTo(me.gap.xp.toLocaleString(lang), me.gap.username)}</span>}
-            {division && me.gap && <span className="bzp__mine-sub">{t.bzGapTo(me.gap.xp.toLocaleString(lang), me.gap.username)}</span>}
-          </span>
-        </section>
+      {/* The learner's card (F2, the owner's pick of the canvas's "le pied
+          du classement"): their place and what it takes -- under a
+          division's list on the phone, in the desk's side on every board. */}
+      {board && me?.rank != null && (desk || division) && (
+        <MineCard me={me} division={division} t={t} lang={lang} />
       )}
       {desk && division && (
         <Ladder division={division} t={t} lang={lang} onBrowse={index => setView(v => ({ ...v, division: index }))} />
       )}
 
+      {/* Keeping off the board: a settings row and its switch. */}
       {board && (
-        <section className="bzp__seen">
-          <Seg className="bzp__seen-seg" label={t.bzVisible} value={board.hidden ? 'hidden' : 'shown'}
-            onChange={key => setHidden(key === 'hidden')}
-            options={[{ key: 'shown', label: t.bzShown }, { key: 'hidden', label: t.bzHidden }]} />
-          <span className="bzp__seen-hint">{board.hidden ? t.bzHiddenHint : t.bzShownHint}</span>
+        <section className="banzuke bzp__seen">
+          <span className="bzp__seen-text">
+            <span className="bzp__seen-label" id="bzp-seen-label">{t.bzAppear}</span>
+            <span className="bzp__seen-hint">{board.hidden ? t.bzHiddenHint : t.bzShownHint}</span>
+          </span>
+          <button type="button" role="switch" className="bz-switch" aria-checked={!board.hidden}
+            aria-labelledby="bzp-seen-label" disabled={hiding} onClick={() => setHidden(!board.hidden)}>
+            <span className="bz-switch__knob" aria-hidden="true" />
+          </button>
         </section>
       )}
 
@@ -333,15 +331,38 @@ function GapShort({ gap, t, lang }) {
   )
 }
 
-// What the week's move asks of the learner in this division: the XP to
-// go up, the zone they stand in, or the XP to stay.
-function ZoneLine({ division, t, lang, className }) {
-  if (division.index !== division.mine) return null
-  let text = null
-  if (division.zone === 1) text = t.bzInUp
-  else if (division.toStay != null) text = t.bzToStay(division.toStay.toLocaleString(lang))
-  else if (division.toUp != null) text = t.bzToUp(division.toUp.toLocaleString(lang))
-  return text && <p className={className}>{text}</p>
+// The learner's card: their place, in large figures, and what it takes
+// -- on a division, the week's move (the XP to go up, the zone they stand
+// in, or the XP to stay) over the gap to the next place; elsewhere the gap.
+function MineCard({ me, division, t, lang }) {
+  const gap = me.gap && t.bzGapTo(me.gap.xp.toLocaleString(lang), me.gap.username)
+  const move = division && division.index === division.mine ? <ZoneLine division={division} t={t} lang={lang} /> : null
+  return (
+    <section className="banzuke bzp__mine">
+      <span className="bzp__mine-rank">
+        {me.rank.toLocaleString(lang)}<small className="bzp__mine-ord">{t.bzOrdinal(me.rank)}</small>
+      </span>
+      <span className="bzp__mine-lines">
+        {move ?? (gap && <span className="bzp__mine-lead">{gap}</span>)}
+        {move && gap && <span className="bzp__mine-sub">{gap}</span>}
+      </span>
+    </section>
+  )
+}
+
+// What the week's move asks of the learner in this division, its XP in
+// the selection's gold: the XP to go up, the zone they stand in, or the
+// XP to stay.
+function ZoneLine({ division, t, lang }) {
+  const xp = n => <span className="bzp__mine-fig">+{n.toLocaleString(lang)} XP</span>
+  if (division.zone === 1) {
+    return <span className="bzp__mine-lead"><span className="bzp__mine-up" aria-hidden="true">▲ </span>{t.bzInUp}</span>
+  }
+  if (division.toStay != null) return <span className="bzp__mine-lead">{xp(division.toStay)} {t.bzToStayRest}</span>
+  if (division.toUp != null) {
+    return <span className="bzp__mine-lead"><span className="bzp__mine-up" aria-hidden="true">▲ </span>{xp(division.toUp)} {t.bzToUpRest}</span>
+  }
+  return null
 }
 
 // ── 段 — the division's name in the board's head ────────────────────

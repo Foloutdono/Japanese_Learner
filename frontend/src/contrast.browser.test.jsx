@@ -394,6 +394,7 @@ const Fixture = () => (
       <div className="bzp__group bzp__group--up"><span>▲ Montent lundi</span><span className="bzp__group-n">2</span></div>
       <div className="bzp__group bzp__group--down"><span>▼ Descendent lundi</span><span className="bzp__group-n">2</span></div>
       <div className="bz__foot"><p className="bz__gap-to"><span><b className="bz__gap-xp">+19 XP</b> → Mei</span></p></div>
+      <div className="bzp__mine"><span className="bzp__mine-rank">3<small className="bzp__mine-ord">e</small></span><span className="bzp__mine-lines"><span className="bzp__mine-lead"><span className="bzp__mine-fig">+21 XP</span> pour monter lundi</span><span className="bzp__mine-sub">11 XP pour dépasser L2</span></span></div>
     </div>
 
     {/* DecksScreen.jsx -- the shelf's card (plan 071): the count aside
@@ -1137,6 +1138,9 @@ const SITES = [
   ['.bzp__group--down', 'board group head, down (danger mixed toward the ink)'],
   ['.bz__gap-to', 'board foot gap'],
   ['.bz__gap-xp', 'board foot gap figure (selection ink)'],
+  ['.bzp__mine-fig', 'board card figure (selection ink)'],
+  ['.bzp__mine-ord', 'board card ordinal'],
+  ['.bzp__mine-sub', 'board card gap line'],
   ['.dk-glyph', 'deck card glyph (tinted roundel)'],
   ['.dk-due', 'deck card due (warning ink)'],
   ['.dk-count-cap', 'deck card count caption'],
