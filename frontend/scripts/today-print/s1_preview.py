@@ -11,6 +11,8 @@ writes OUT/<season>-<hour>-<device>.png and prints, per print, the
 contrast of the hour's ink and its soft ink against the print where the
 lines stand (the minutes, the legend, the fare): round 9 held both to
 4.5:1. Needs Pillow and a Chromium (CHROME, or Playwright's)."""
+import importlib
+import json
 import os
 import subprocess
 import sys
@@ -20,8 +22,13 @@ from PIL import Image
 import build
 import s1_air
 import s1_inks
-import s1_scene
 from layouts import PHONE, DESK
+
+# the round drawn (SCENE=s2_scene for round 2), and an option (VARIANT,
+# as JSON: {"tree": "yanagi"}) whose stills are named with its TAG
+s1_scene = importlib.import_module(os.environ.get('SCENE', 's1_scene'))
+VARIANT = json.loads(os.environ.get('VARIANT', 'null'))
+TAG = os.environ.get('TAG', '')
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FRONTEND = os.path.normpath(os.path.join(HERE, '..', '..'))
@@ -64,11 +71,11 @@ html,body{{margin:0;background:#000}}
 
 
 def shoot(L, season, hour, out, css, device):
-    sky, back, train, front, run = s1_scene.scene(L, hour, season, with_disc=True)
+    sky, back, train, front, run = s1_scene.scene(L, hour, season, with_disc=True, variant=VARIANT)
     build.class_name = class_name
     seen = {}
     layers = build.rename_ids([build.rename_classes(build.lighter(build.tight(p)), seen) for p in (sky, back, train, front)])
-    name = f'{season}-{hour}-{device}'
+    name = f'{season}-{hour}-{device}' + (f'-{TAG}' if TAG else '')
     html = os.path.join(out, name + '.html')
     png = os.path.join(out, name + '.png')
     with open(html, 'w') as fh:

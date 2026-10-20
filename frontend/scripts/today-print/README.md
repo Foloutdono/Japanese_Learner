@@ -105,6 +105,20 @@ it yet, and the app shows the print as built.
 | `s1_canvas.py` | the canvas's artboards, from round 9's (read from "Tsuji — Today, the visit card") |
 | `s1_preview.py` | stills of the prints, and the contrast the lines under the dial keep on each |
 
+Round S² redraws what the owner asked for after round 1, and builds on it
+as the rounds before it did:
+
+| module | what it draws |
+| --- | --- |
+| `s2_inks.py` | round 1's inks with the cherry and the maple fuller, Fuji's summer inks, a tree for every season |
+| `s2_fuji.py` | Fuji without its snow: the cinder cone, the forest climbing the ravines, the gullies, the last streaks of snow |
+| `s2_air.py` | the cloud peak as a tower of the print's own cloud banks; fuller falls; a few petals or leaves close to the eye |
+| `s2_flora.py` | the season's tree: cherry, maple; for summer green maple, crape myrtle or willow; for winter red plum or the bare maple |
+| `s2_scene.py` | round 1's composition, drawn with round 2's parts |
+| `s2_canvas.py` | round 2's artboards |
+
 ```bash
-cd frontend && python3 scripts/today-print/s1_preview.py /tmp/seasons phone   # every season and hour
+cd frontend && python3 scripts/today-print/s1_preview.py /tmp/seasons phone   # round 1, every season and hour
+SCENE=s2_scene python3 scripts/today-print/s1_preview.py /tmp/seasons phone   # round 2
+SCENE=s2_scene VARIANT='{"tree": "yanagi"}' TAG=yanagi python3 scripts/today-print/s1_preview.py /tmp/seasons phone summer day
 ```
