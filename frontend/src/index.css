@@ -22545,7 +22545,7 @@ form.stage__foot > .btn-primary {
    list: on the week its first line is last week's podium; on a division
    the rows Monday moves up and down ride a rail of their state's colour
    (an edge, never a fill) under a head that names them and counts them,
-   in the caption's own ink. The phone's foot carries the learner's row
+   in that colour mixed toward the ink. The phone's foot carries the learner's row
    while it is off the list; the line under the list says what moving up
    takes. The switch to keep off the board ends the page. */
 .bzp {
@@ -22667,6 +22667,11 @@ form.stage__foot > .btn-primary {
   border-bottom: 1px solid var(--surface-line);
 }
 .bzp__group-n { font-variant-numeric: tabular-nums; }
+/* The heads speak in their state's colour (the owner's call, after A1
+   was built): the colour mixed toward the ink, as the medals' figures
+   are, since --danger alone measured 2.5:1 on sumi. */
+.bzp__group--up { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.bzp__group--down { color: color-mix(in srgb, var(--danger) 55%, var(--text-primary)); }
 .bzp__group--up,
 .bzp__row--up { box-shadow: inset 3px 0 0 var(--success); }
 .bzp__group--down,
