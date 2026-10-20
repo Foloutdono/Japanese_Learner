@@ -22,6 +22,7 @@ def test_an_n5_sentence_passes():
     assert mix["available"] is True
     assert mix["vocab_over"] == []
     assert mix["kanji_over"] == []
+    assert mix["grammar_over"] == []
     assert level_mix.validate_level_mix(N5, "N5") == []
 
 
@@ -87,6 +88,71 @@ def test_ratio_is_the_same_rule_as_the_floor_count():
             by_ratio = count / n > level_mix.MAX_RATIO
             by_floor = count > math.floor(level_mix.MAX_RATIO * n)
             assert by_ratio == by_floor, (n, count)
+
+
+# -- Grammar above the level (plan 260): the mock papers' reading,
+# study/exam_levels.grammar_above, not the catalogue's patterns matched
+# as letters. What plan 259's writers had to write around, each a hit
+# of the old gate, and a real use of each point it was taken for.
+WRITTEN_AROUND = [
+    ("N5", "きょうは天気がいいです。"), ("N5", "へやの電気がつきません。"),        # 〜気がする
+    ("N4", "山の空気がとてもきれいでした。"), ("N4", "友だちと話して、元気が出ました。"),
+    ("N5", "コートをもって出かけました。"), ("N5", "かさをもって来てください。"),    # 〜をもって
+    ("N5", "出かけるまえに、まどをしめました。"),                                   # 〜かける
+    ("N5", "ここはこうえんです。"), ("N5", "あそこはきっさてんです。"),             # 〜んです
+    ("N5", "こちらは田中さんです。"),
+    ("N5", "ありがとうございます。"),                                             # 〜でございます
+    ("N5", "父は銀行ではたらいています。"),                                       # 〜たらいい
+    ("N5", "六時にうちにかえります。"),                                           # 〜うちに
+    ("N5", "えきのとなりにぎんこうがあります。"),                                  # 〜なりに
+    ("N5", "りんごを一つだけ買いました。"), ("N5", "一つ一つ見てください。"),        # 〜一つ〜ない
+    ("N5", "一つ前の駅でおりました。"),
+    ("N5", "買いものの前に、メモを書きました。"),                                  # 〜ものの
+    ("N5", "わたしはりゅうがくせいです。"), ("N4", "わたしはこうこうせいでした。"),  # 〜せいで
+    ("N5", "三人ともなかがいいです。"),                                           # 〜ともなく
+    ("N4", "さとうを少なくしてください。"),                                        # 〜なくして
+    ("N4", "パーティーには十人以上来ました。"),          # 〜以上: 以上 is an N4 word, not "now that"
+    ("N5", "週末に友だちと会います。"),                                           # 〜末に
+    ("N4", "この家では、わたしはじゃまものだ。"),                                  # 〜ものだ
+    ("N4", "つくえの上はそのままにしてください。"),                                # 〜ままに
+    ("N5", "つくえの上はきれいです。"),                                           # 〜上は
+    ("N5", "しごとがたいへんでした。"),                                           # 〜がたい
+    ("N5", "あたらしいくつを買いました。"),                                        # 〜らしい
+    ("N5", "かばんがかるくてよかったです。"),            # 〜てよかった is a verb's: 来てよかった
+]
+STILL_CAUGHT = [
+    ("N4", "だれかに見られている気がする。", ("〜気がする", "N3")),
+    ("N3", "本日をもって、この店は閉店いたします。", ("〜をもって", "N2")),
+    ("N4", "言いかけてやめるのはよくない。", ("〜かける", "N3")),
+    ("N5", "時間がないんです。", ("〜んです／〜のです", "N4")),
+    ("N5", "こちらが店の入口でございます。", ("〜でございます", "N4")),
+    ("N5", "どうしたらいいですか。", ("〜といい／〜たらいい／〜ばいい", "N4")),
+    ("N4", "熱いうちに食べてください。", ("〜うちに", "N3")),
+    ("N2", "私なりに努力したつもりです。", ("〜なりに", "N1")),
+    ("N2", "部屋にはいす一つなかった。", ("〜一つ〜ない", "N1")),
+    ("N4", "大学は出たものの、まだ仕事が見つからない。", ("〜ものの", "N3")),
+    ("N4", "雨のせいで、試合は中止になりました。", ("〜せいで", "N3")),
+    ("N2", "見るともなく窓の外をながめていた。", ("〜ともなく", "N1")),
+    ("N2", "努力なくして成功はあり得ない。", ("〜なくして(は)", "N1")),
+    ("N4", "約束した以上、守らなければならない。", ("〜以上", "N3")),
+    ("N3", "長い間考えた末に、留学を決めました。", ("〜末に", "N2")),
+    ("N3", "子どものころ、よくこの川で泳いだものだ。", ("〜ものだ", "N2")),
+    ("N2", "彼は言われるままに、書類にサインした。", ("〜ままに", "N1")),
+    ("N3", "約束した上は、最後までやります。", ("〜上は", "N2")),
+    ("N3", "彼が犯人だとは信じがたい。", ("〜がたい", "N2")),
+    ("N5", "あの店の魚は安いらしいです。", ("〜らしい", "N4")),
+    ("N5", "日本に来てよかったです。", ("〜てよかった", "N4")),
+]
+
+
+def test_an_ordinary_word_is_no_grammar_point():
+    for level, text in WRITTEN_AROUND:
+        assert level_mix.level_mix(text, level)["grammar_over"] == [], (level, text)
+
+
+def test_a_real_point_above_the_level_is_still_named():
+    for level, text, point in STILL_CAUGHT:
+        assert point in level_mix.level_mix(text, level)["grammar_over"], (level, text)
 
 
 def test_messages_never_route_into_the_kanji_feedback_branch():
