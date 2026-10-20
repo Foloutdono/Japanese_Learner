@@ -523,7 +523,8 @@ function SessionView({
       // On the desk the score is the run panel's figures (plan 129).
       remaining={desk ? undefined : `${score.correct} / ${score.total}`}
       pass={false}
-      aside={<><RunStreak /><SpeakToggle variant="head" /></>}
+      tally={<RunStreak />}
+      aside={<SpeakToggle variant="head" />}
       toast={fare.toast}
       onToastDone={fare.toastDone}
       records

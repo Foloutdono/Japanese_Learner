@@ -371,8 +371,9 @@ panels' list.
 
 **線** (same round): a line's edge is 3px wherever it is drawn (a plate's
 stripe, a row's rail), and a figure on a plate is printed, never boxed — the
-count due on a Learn plate lost its border. **一戻**: the way back (`‹ Gate`
-in the stage head) is bare, a word and its chevron, never a button's box.
+count due on a Learn plate lost its border. **一戻**: the way back is bare,
+a word and its chevron (a bar's `‹ Learn`), or in a run's head the chevron
+alone (**両端**, below), never a button's box.
 
 ### Elevation is rationed
 
@@ -1709,6 +1710,18 @@ widths (`exam/ScoreReveal.jsx`, the `exam-score__*` rules).
   `‹ Gate` in the stage head is the way out. Everything docked reads
   `--dock-bottom` — the tab bar plus the safe-area inset under the shell, the
   level bar plus the inset on a stage — never a number of its own.
+- **The run's head is 両端, doors at the ends** (2026-10-20, the owner's
+  pick C of the canvas "Tsuji — the run's head, centred";
+  `components/chrome/StageHead.jsx`). Three slots: the way out at the
+  start, what the learner presses at the end (the screen's toggle, the
+  card's flag, the "?", the pass), and the place between them, on the
+  screen's middle — the two ends grow alike, so neither one's width moves
+  the name. Under the name sits everything that counts: the sub, the
+  remaining pill and the run's streak (`tally`, never `aside`). The way
+  out is its chevron alone, its place kept as its accessible name and its
+  tooltip (the desk's Esc cap stays beside it); a way out that is not a
+  way back keeps its word (the first ride's `Passer`, `leaveWord`). A
+  head drawn by hand (the exam's cover) uses the same three slots.
 - **One filled action per screen**, the metal, 52px, docked at the foot and
   rising with the keyboard; a selection is the selection's gold; disabled
   is the metal unlit (*The primary button*); loading is three gold dots, never a
