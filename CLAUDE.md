@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **260**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **261**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -53,6 +53,15 @@ runtime purpose.
   through the renames module and its `migrate_*` script, never an edit in
   place. A card whose reading was wrong is retired (`RETIRED`) rather than
   moved, so its learners start the corrected card fresh.
+- **A card's level moves on two signals, and only down (plan 260).** The
+  community lists (`datas/vocab/sources/jlpt_tanos.json`, the deck's own
+  ancestor) must put the word lower, and the app must too: a lesson of
+  that level teaches it, or a sentence of that level has it, read by hand
+  (a breakdown's badge of a kana word as some kanji card is no evidence).
+  It goes to the level both support; a word the lists lack, to the lowest
+  level whose sentences use it, when its subtitle rank sits in that
+  level's range. One signal is the content audit's, not a move.
+  `docs/vocab-deck-review.md`, "260", has the rule and what it left.
 - **Bump the revision when the output changes.** Anything cached or stored
   per output carries a revision: `LOCAL_REV` in `study/analysis.py` (the
   breakdown), the `phrase_analysis_cache` version (the deep tier),

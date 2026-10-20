@@ -186,7 +186,7 @@ class TheCardsPutRightTests(unittest.TestCase):
     def test_the_word_the_page_reads_has_its_card(self) -> None:
         for sentence, word, raw_id in (
             ("七時に学校へ行きます。", "時", "vocab_N5_時_じ"),
-            ("小さいとき、山によく行きました。", "とき", "vocab_N3_時_とき"),
+            ("小さいとき、山によく行きました。", "とき", "vocab_N5_時_とき"),
             ("その件については、お答えしかねます。", "件", "vocab_N3_件_けん"),
             ("若さゆえに、彼は大きな失敗をした。", "ゆえ", "vocab_N1_故_ゆえ"),
             ("この店は値段のわりに味がいい。", "わり", "vocab_N1_割_わり"),
