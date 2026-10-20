@@ -20,7 +20,7 @@
 // video (on the voice's own lengths and syllables where it is voiced,
 // else on a close guess), `drawChallenge` draws any second of it.
 import { FS, SP, R, METAL_H, RATING_INKS, FORMATS, address, alpha, drawSentence, fit, font, frame, layoutSentence, mark, measure, mix, palette, reading, rrect, text } from './draw.js'
-import { drawPrint } from './app.js'
+import { PRINT_SEASONS, drawPrint } from './app.js'
 import { seeded, shuffle, unpack } from './common.js'
 import { SITE } from './strings.js'
 import { tuneFlag, tuned } from './tune.js'
@@ -161,6 +161,8 @@ export function challengePlan(data, id, opts = {}) {
   const P = data.passages.find(x => x.id === id) ?? data.passages[0]
   const style = STYLES.includes(opts.style) ? opts.style : 'scroll'
   const hour = HOURS.includes(opts.hour) ? opts.hour : 'dusk'
+  // The print's season, if chosen (plan 264); else the date's, as the app's gate.
+  const season = PRINT_SEASONS.includes(opts.season) ? opts.season : null
   const sents = P.sents.map(unpack)
   const chosen = Number(opts.question)
   const qn = Number.isInteger(chosen) && chosen >= 1 && chosen <= P.questions.length ? chosen : askedFirst(P)
@@ -172,7 +174,7 @@ export function challengePlan(data, id, opts = {}) {
   const options = Q.options[lang] || Q.options.en
   const q = { n: qn, ask: Q.question[lang] || Q.question.en, choices: order.map(i => options[i]), right: order.indexOf(Q.correct) }
   return {
-    source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, title: P.title, sents, q, chosen: qn !== askedFirst(P), music: opts.music === undefined ? TRACK : opts.music || null,
+    source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, season, title: P.title, sents, q, chosen: qn !== askedFirst(P), music: opts.music === undefined ? TRACK : opts.music || null,
     chars: sents.reduce((n, rows) => n + charsOf(rows), 0), nq: P.questions.length, cpm: Math.round((CPM[P.lv] || CPM.N3) * tuned(opts.tune, 'challenge.pace')), tune: opts.tune || {}, ruby: RUBY.has(P.lv), slow: SLOW.has(P.lv),
   }
 }
@@ -260,7 +262,9 @@ export function challengeCommand(plan) {
   const music = plan.music === TRACK ? '' : !plan.music ? ' --music none' : TRACKS[plan.music] ? ` --music ${plan.music}` : ` --music "${plan.music}"`
   // The question is named where it is not the one asked unless chosen (plan 260).
   const question = plan.chosen ? ` --question ${plan.q.n}` : ''
-  return `${voice}node carousel/long/render.mjs --challenge ${plan.id} --style ${plan.style} --hour ${plan.hour} --lang ${plan.lang}${question}${music}${tuneFlag(plan.tune, 'challenge')}`
+  // The print's season where one is chosen, else the day's the render runs on (plan 264).
+  const season = plan.season ? ` --season ${plan.season}` : ''
+  return `${voice}node carousel/long/render.mjs --challenge ${plan.id} --style ${plan.style} --hour ${plan.hour}${season} --lang ${plan.lang}${question}${music}${tuneFlag(plan.tune, 'challenge')}`
 }
 
 /** The video's page: its title, its description, its tags. */

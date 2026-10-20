@@ -12,7 +12,8 @@ import { FITS, FONT_FACES, drawFeedHud, font, formatOf, palette } from './draw.j
 import { BONUS, LEVELS, MAX_QUESTIONS, OPTIONAL, SOURCES, TITLE_MAX, itemsOf, picked, plan, sampleText, sourceOf, titleOf } from './sources.js'
 import { STRINGS } from './strings.js'
 import { PROMO, STORIES } from './promo.js'
-import { PRINT_HOURS, loadPrint } from './app.js'
+import { PRINT_HOURS, PRINT_SEASONS, loadPrint } from './app.js'
+import { printSeason } from '../src/domain/printHour.js'
 import { RATE, clipAudio, decoded, loadVoices } from './sound.js'
 import { voiceSpan } from './echo.js'
 import { STYLES as CHALLENGE_STYLES, TRACK, TRACKS, challengeCommand, challengePage, challengePlan, challengeQuestions, challengeTimeline, drawChallenge } from './challenge.js'
@@ -41,7 +42,7 @@ const T = STRINGS.en
 const LIST_NAME = { long: 'Video', words: 'Short', challenge: 'Text', promo: 'Story', echo: 'Word', sentence: 'Sentence', short: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
 
 const DEFAULTS = {
-  source: 'sentence', level: 'N5', longFormat: 'long', kanaSet: 'hiragana', story: 'pitch', hour: 'day', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20' },
+  source: 'sentence', level: 'N5', longFormat: 'long', kanaSet: 'hiragana', story: 'pitch', hour: 'day', season: 'now', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20' },
   view: 'compare', type: 'plates', format: 'post', fit: 'tiktok', ground: 'paper',
   lang: 'en', script: 'kanji', romaji: false, bonus: 'kanji', kanji: '', handle: '', safe: false, slides: {},
   picks: {}, types: {}, ending: 'mark',
@@ -74,6 +75,7 @@ function load() {
     if (saved.ending && !ENDING_IDS.includes(saved.ending)) delete saved.ending
     if (saved.design && ![...DESIGNS, 'classic'].includes(saved.design)) delete saved.design
     if (saved.hour && !PRINT_HOURS.includes(saved.hour)) delete saved.hour
+    if (saved.season && saved.season !== 'now' && !PRINT_SEASONS.includes(saved.season)) delete saved.season
     if (saved.story && !STORIES.includes(saved.story)) delete saved.story
     if (saved.fit && !FITS.includes(saved.fit)) delete saved.fit
     if (saved.challengeStyle && !CHALLENGE_STYLES.includes(saved.challengeStyle)) delete saved.challengeStyle
@@ -126,11 +128,14 @@ const dataNow = () => (state.source === 'long' ? banksOf(longListFiles(state.lev
 
 // Where the app's own files are, as the page sees them: the print, the voices.
 const BASE = '../'
-// Today's print of the hour, for the promo stories: fetched once an hour.
+// Today's print of the hour, for the promo stories and the challenges:
+// fetched once an hour and a season, the day's own unless one is chosen (plan 264).
 const prints = new Map()
-function printFor(hour) {
-  if (!prints.has(hour)) prints.set(hour, loadPrint(hour, { base: BASE }).catch(e => { prints.delete(hour); throw e }))
-  return prints.get(hour)
+const seasonOf = () => (PRINT_SEASONS.includes(state.season) ? state.season : null)
+function printFor(hour, season = seasonOf()) {
+  const key = `${season || 'now'}|${hour}`
+  if (!prints.has(key)) prints.set(key, loadPrint(hour, { base: BASE, season }).catch(e => { prints.delete(key); throw e }))
+  return prints.get(key)
 }
 // A word echo's voice (plan 232): voices/index.json names each reading's
 // clip; the clip is decoded once, and where its voice starts and stops
@@ -825,7 +830,7 @@ async function renderChallenge(mine) {
   const data = await fetchJson('comprehension.json')
   if (mine !== token) return
   const id = currentId()
-  const pl = challengePlan(data, id, { lang: state.lang, style: state.challengeStyle, hour: state.hour, question: state.challengeQ[id], music: musicOf(), tune: state.tune })
+  const pl = challengePlan(data, id, { lang: state.lang, style: state.challengeStyle, hour: state.hour, season: seasonOf(), question: state.challengeQ[id], music: musicOf(), tune: state.tune })
   // The text's questions to choose from, the one asked selected (plan 260).
   const pick = $('#challenge-q')
   pick.replaceChildren(...challengeQuestions(data, id, state.lang).map(q => {
@@ -896,7 +901,7 @@ async function renderChallenge(mine) {
   chapters.className = 'chapters'
   row.append(head, screen, bar, note, chapters)
   stage.append(row)
-  const key = `challenge|${id}|${state.lang}|${state.challengeStyle}|${state.hour}|${pl.q.n}|${musicOf() || ''}`
+  const key = `challenge|${id}|${state.lang}|${state.challengeStyle}|${state.season}|${state.hour}|${pl.q.n}|${musicOf() || ''}`
   const reading = tl.segs.find(sg => sg.key === 'reading')
   player = { c, pl, tl, t: Math.min(player?.key === key ? player.t : reading.start + 12, tl.seconds), raf: 0, id, key, play, scrub, time }
   const draw = () => {
@@ -946,7 +951,7 @@ async function exportChallenge() {
   const { tl, P } = ch
   const plan = current.plan
   await encodeClip({
-    btn: '#export-video', name: `tsuji-challenge-${safeName(ch.id)}-${plan.hour}-${state.lang}`, said: 'reading challenge',
+    btn: '#export-video', name: `tsuji-challenge-${safeName(ch.id)}-${plan.season ? `${plan.season}-` : ''}${plan.hour}-${state.lang}`, said: 'reading challenge',
     fmt: FORMATS.story, fps: tl.fps, seconds: tl.seconds,
     // The track under it all, looped if it is shorter, coming in and going out.
     sounds: [...(music ? [{ at: 0, src: music.track ? TRACKS[music.track].file : music.url, gain: 0.7 * tuned(state.tune, 'music.volume'), loop: true, fade: tuned(state.tune, 'music.fade') }] : []), ...tl.sfx],
@@ -1385,6 +1390,7 @@ function sync() {
     el.setAttribute('aria-pressed', String(String(state[key]) === value))
   }
   $('#romaji').checked = state.romaji
+  $('#season-now').textContent = `As today · ${printSeason(new Date())}`
   $('#safe').checked = state.safe
   $('#handle').value = state.handle
   renderSources()

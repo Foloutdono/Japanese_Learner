@@ -7,7 +7,8 @@ import { assemblyQ, kanjiQuizzes, overlaps, withoutGiveaways } from '../carousel
 import { furiganaOf } from '../carousel/common.js'
 import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explain.js'
 import { STRINGS, weld, weldIf } from '../carousel/strings.js'
-import { APP_INKS } from '../carousel/app.js'
+import { APP_INKS, PRINT_HOURS, PRINT_SEASONS, printOf } from '../carousel/app.js'
+import { printName } from './domain/printHour.js'
 import { CLIP, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
 import { LIMIT, SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
@@ -1976,6 +1977,33 @@ describe('the reading challenges (plan 247)', () => {
       globalThis.OffscreenCanvas = had
     }
   }), 120000)
+
+  it('stands on the print of the season chosen, else the day’s, as the app’s gate does (plan 264)', () => {
+    const meta = JSON.parse(read('src/components/station/print/print.json'))
+    // Every season the studio offers, at every hour, is a print the app ships.
+    for (const season of PRINT_SEASONS) {
+      for (const hour of PRINT_HOURS) {
+        const name = printOf(season, hour)
+        expect(meta.prints[name], `${season} ${hour}`).toBeTruthy()
+        expect(existsSync(new URL(`../public/today/print/${meta.rev}/${name}-phone.json`, import.meta.url)), name).toBe(true)
+      }
+    }
+    expect(printOf('hanabi', 'night')).toBe('summer-hanabi')
+    expect(printOf('hanabi', 'dawn')).toBe('summer-dawn')
+    expect(printOf('winter', 'dusk')).toBe('winter-dusk')
+    // None chosen: the date's own print, the one the gate shows that day.
+    for (const at of [new Date(2026, 7, 15, 21), new Date(2026, 0, 10, 7), new Date(2026, 9, 20, 13)]) {
+      for (const hour of PRINT_HOURS) expect(printOf(null, hour, at)).toBe(printName(at, hour))
+    }
+    // The plan keeps a season it knows, and the command names it; none is the day's.
+    expect(challengePlan(data, 'n5-01', { season: 'winter' }).season).toBe('winter')
+    expect(challengePlan(data, 'n5-01', { season: 'monsoon' }).season).toBeNull()
+    expect(challengeCommand(challengePlan(data, 'n5-01', { season: 'hanabi', hour: 'night' }))).toContain('--hour night --season hanabi')
+    expect(challengeCommand(challengePlan(data, 'n5-01', {}))).not.toContain('--season')
+    // The studio offers each one, and the day's.
+    const html = read('carousel/index.html')
+    for (const season of ['now', ...PRINT_SEASONS]) expect(html, season).toContain(`data-set="season:${season}"`)
+  })
 
   // Last of the block: the strip it leaves behind is the stub's.
   it('draws the scroll’s text once and lays it between pixels, at sixty frames, so it glides', () => withPath2D(() => {

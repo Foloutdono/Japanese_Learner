@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **264**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **265**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -996,7 +996,9 @@ word's own picture where `frontend/carousel/content/pictures/` has one
 reading challenge asks the question chosen (`--question`), its answers
 dealt so the right one stands at A, B, C or D alike, and since plan 263
 ends on the app's own reader, the text rolling, slowed and its furigana
-shown, over the run's three stops. Since plan 248 every number a maker may set per
+shown, over the run's three stops; since plan 264 the studio's Today's
+print is the season's too, the day's as the app's gate shows it unless
+one is chosen (`--season`). Since plan 248 every number a maker may set per
 post (a video's timing and pace, the music's level, the export's
 quality) is one line of `tune.js`, set in the studio's Tune panel and
 written into the render command, so the video rendered is the one

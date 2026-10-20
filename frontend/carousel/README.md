@@ -572,14 +572,24 @@ colours come through `palette` and `APP_INKS`, which
 `src/carousel.test.js` holds to `index.css`.
 
 **Today's print is the app's own file.** `app.loadPrint` reads
-`public/today/print/<rev>/<hour>-phone.json`, its grain and its paper,
+`public/today/print/<rev>/<print>-phone.json`, its grain and its paper,
 and draws the layers still, as the app draws them with motion reduced
 (index.css's `.tpr-` rules and its reduced-motion block go into each
 layer): the train halfway across, the clouds at rest. The words on a Today
 frame stand on a plate of the title slip's washi, framed as the slip is,
 at the print's foot: the sky, the mountain and the birds behind them
 leave no ground to read on at every hour. The studio's
-"Today's print" picks the hour (曙 dawn, 帰帆 day, 落雁 dusk, 秋月 night).
+"Today's print" picks the hour (曙 dawn, 帰帆 day, 落雁 dusk, 秋月 night)
+and, since the app's print has its seasons (main's plan 261), the season
+(plan 264): "As today", the default, is the print the app's gate shows on
+the day it is drawn (`domain/printHour`'s `printName`: the season by the
+month, the summer's two crape myrtles a day each, August's night the
+fireworks); or spring, summer, fireworks (the summer, its night August's
+花火), autumn or winter, the app's print of that season at the hour
+(`app.printOf`). A reading challenge's command names a chosen season
+(`--season winter`) and, without one, is drawn on the day it is rendered.
+Every season at every hour was drawn under the challenge's three looks
+(the scroll, the read-along, the way to the app) and reads as it did.
 So the studio needs `public/today/print/`, `src/index.css` and the
 print's `print.json` beside it when it is served or published.
 
@@ -1081,6 +1091,7 @@ its answer.
 cd frontend
 node carousel/long/render.mjs --challenge n5-01 --style scroll --hour day --lang en
 node carousel/long/render.mjs --challenge n5-03 --style scroll --hour dawn --lang en --question 7
+node carousel/long/render.mjs --challenge n5-04 --style scroll --hour night --season hanabi --lang en
 node carousel/long/render.mjs --challenge n5-01 --style scroll --hour day --lang en --music ~/music/late-train.mp3
 VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --challenge n5-01 --style along --hour night --lang fr
 ```

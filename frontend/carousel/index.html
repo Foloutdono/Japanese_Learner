@@ -68,6 +68,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px
 
 .seg { display: flex; flex-wrap: wrap; gap: 6px; }
 .seg[hidden] { display: none; }
+.seg + .seg { margin-top: 6px; }
 .btn[hidden] { display: none; }
 .seg button, .chip { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 7px 14px; cursor: pointer; min-height: 36px; }
 .seg button[aria-pressed="true"], .chip[aria-pressed="true"] { background: var(--sel-wash); border-color: var(--sel-line); color: var(--sel-ink); }
@@ -247,12 +248,20 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
     </div>
 
     <div class="field" id="hour-field" hidden>
-      <div class="label">Today’s print <span>the hour it is drawn at</span></div>
+      <div class="label">Today’s print <span>the hour and the season it is drawn at</span></div>
       <div class="seg" role="group" aria-label="Hour">
         <button type="button" data-set="hour:dawn">Dawn 曙</button>
         <button type="button" data-set="hour:day">Day 帰帆</button>
         <button type="button" data-set="hour:dusk">Dusk 落雁</button>
         <button type="button" data-set="hour:night">Night 秋月</button>
+      </div>
+      <div class="seg" role="group" aria-label="Season">
+        <button type="button" data-set="season:now" id="season-now">As today</button>
+        <button type="button" data-set="season:spring">Spring 春</button>
+        <button type="button" data-set="season:summer">Summer 夏</button>
+        <button type="button" data-set="season:hanabi">Fireworks 花火</button>
+        <button type="button" data-set="season:autumn">Autumn 秋</button>
+        <button type="button" data-set="season:winter">Winter 冬</button>
       </div>
     </div>
 

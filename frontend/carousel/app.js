@@ -359,8 +359,17 @@ export function passCard(ctx, x, y, w, { name, level, meta, cls, brand = 'Pass',
 // moving parts at rest, the train halfway across. index.css's own .tpr-
 // rules and its reduced-motion block ride into each layer, so nothing of
 // the print is copied here. The hour picks it in today's season, as the
-// app's gate does (domain/printHour's printName, plan 261).
+// app's gate does (domain/printHour's printName, plan 261), unless a
+// season is chosen (plan 264): the app's print of that season at the
+// hour, `hanabi` the summer whose night is August's fireworks.
 export const PRINT_HOURS = ['dawn', 'day', 'dusk', 'night']
+export const PRINT_SEASONS = ['spring', 'summer', 'hanabi', 'autumn', 'winter']
+/** The print's name: the season's at the hour, or the date's as the app's gate picks it. */
+export function printOf(season, hour, now = new Date()) {
+  if (!PRINT_SEASONS.includes(season)) return printName(now, hour)
+  if (season === 'hanabi') return hour === 'night' ? 'summer-hanabi' : `summer-${hour}`
+  return `${season}-${hour}`
+}
 
 function stillCss(css) {
   const rules = css.match(/^\.tpr-[a-z-]+(?:\s*,\s*\.tpr-[a-z-]+)*\s*\{[^}\n]*\}$/gm) || []
@@ -401,16 +410,16 @@ function layerAt(markup, t) {
   return markup.replace(/animation-delay:\s*(-?[\d.]+)s/g, (_, d) => `animation-delay: ${(+d - t).toFixed(3)}s`)
 }
 
-/** The hour's print in today's season, its layers decoded: `base` is the
- *  frontend's root as the page sees it. */
-export async function loadPrint(hour, { base = '../', device = 'phone', now = new Date() } = {}) {
+/** The hour's print in today's season, or the one chosen, its layers
+ *  decoded: `base` is the frontend's root as the page sees it. */
+export async function loadPrint(hour, { base = '../', device = 'phone', now = new Date(), season = null } = {}) {
   const get = async (path, as = 'json') => {
     const r = await fetch(base + path)
     if (!r.ok) throw new Error(`print: ${path} ${r.status}`)
     return as === 'json' ? r.json() : r.text()
   }
   const meta = await get('src/components/station/print/print.json')
-  const name = printName(now, hour)
+  const name = printOf(season, hour, now)
   const scene = await get(`public/today/print/${meta.rev}/${name}-${device}.json`)
   const cssText = await get('src/index.css', 'text')
   const css = stillCss(cssText)
@@ -433,7 +442,7 @@ export async function loadPrint(hour, { base = '../', device = 'phone', now = ne
     const [s2, b2, f2] = await Promise.all([at('sky', t), at('back', t), at('front', t)])
     return { sky: s2, back: b2, front: f2 }
   }
-  return { hour, scene, frame: meta.frames[device], look: meta.prints[name], img: { sky, back, train, front, grain, paper }, moment }
+  return { hour, name, scene, frame: meta.frames[device], look: meta.prints[name], img: { sky, back, train, front, grain, paper }, moment }
 }
 
 /** The print with its top-left corner at (x, y), `u` pixels a unit; the
