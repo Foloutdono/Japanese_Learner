@@ -377,7 +377,7 @@ function StrokeSheet({ src, notAvailableLabel }) {
   // Stable, or StrokeOrderAnimation's parse effect re-runs every render.
   const onError = useCallback(() => setFailed(true), [])
   // Tapped, the drawing opens big, with the calque to trace it on
-  // (plan 267). A failed one has nothing to open.
+  // (plan 268). A failed one has nothing to open.
   if (failed) {
     return (
       <div className="dict-form__sheet">

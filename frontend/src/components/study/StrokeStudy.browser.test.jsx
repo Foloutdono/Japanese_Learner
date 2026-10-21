@@ -5,7 +5,7 @@ import { sampleStroke } from '../../domain/strokePath'
 import { strokesOf } from '../../domain/kanjivg'
 import '../../index.css'
 
-// ── 辻 — the stroke order, big, and the calque (plan 267) ──
+// ── 辻 — the stroke order, big, and the calque (plan 268) ──
 // A tap on the animation opens it at the width of the screen, and the
 // trace board beside it: the glyph's strokes, in the file's order, each
 // traced from its dot to its ring.

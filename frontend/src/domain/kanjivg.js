@@ -1,4 +1,4 @@
-// ── 辻 — what a KanjiVG file holds, as data (plan 267) ───────────
+// ── 辻 — what a KanjiVG file holds, as data (plan 268) ───────────
 // The stroke-order animation draws the file as it comes (StrokeOrderAnimation);
 // the trace board needs the strokes themselves, in their order, to judge a
 // hand against them (TraceBoard, as the glyph tour's backend sends them).

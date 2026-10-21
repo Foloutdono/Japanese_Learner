@@ -16335,7 +16335,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-align: center;
   color: var(--text-on-fill);
 }
-/* ── 辻 — the stroke order, big, and the calque (plan 267) ─────
+/* ── 辻 — the stroke order, big, and the calque (plan 268) ─────
    The animation is a door: a button laid over it (so what it holds is
    untouched), the whole box tappable, a lens in its corner in the ink
    a light fill takes (the sheet is washi in either theme). It opens a
@@ -27089,7 +27089,7 @@ button.brd-stn { cursor: pointer; }
 /* The pen takes the pointer; a finger on it never scrolls the page. */
 .gt-pen { touch-action: none; cursor: crosshair; }
 .gt-pen--off { cursor: default; }
-/* The same board in the stroke sheet (plan 267): the width of the sheet, as the
+/* The same board in the stroke sheet (plan 268): the width of the sheet, as the
    animation's paper, rather than the tour's card. */
 .ss-stage .gt-board { width: min(100%, 560px, 56dvh); }
 /* A missed line -- the finger's own, as it went -- a moment in the
@@ -42567,7 +42567,7 @@ button.brd-stn { cursor: pointer; }
   }
 }
 @media (min-width: 1100px) {
-  /* ── 辻 — the stroke sheet, big (plan 267) ──
+  /* ── 辻 — the stroke sheet, big (plan 268) ──
      The dialog is wider than a card and its board takes the height the
      window leaves under the head, the modes and the line at its foot
      (about 300px), never under 280px, where the sheet scrolls instead. */

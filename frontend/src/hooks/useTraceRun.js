@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-// ── The walk of a trace (plans 216, 267) ─────────────────────────
+// ── The walk of a trace (plans 216, 268) ─────────────────────────
 // What the glyph tour's writing stop and the stroke sheet's trace both
 // keep beside a TraceBoard: which stroke is asked (`at`), the misses so
 // far, the strokes the board drew for the learner after three misses on

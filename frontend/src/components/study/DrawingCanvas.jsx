@@ -249,7 +249,7 @@ function StrokeGlyph({ char }) {
   if (failed) {
     return <div className="stroke-ref__fallback" style={{ display: 'flex' }}>{t.notAvailable}</div>
   }
-  // A tap opens it big, with the calque to trace it on (plan 267).
+  // A tap opens it big, with the calque to trace it on (plan 268).
   return (
     <StrokeZoom src={charToSvgUrl(char)} glyph={char} className="stroke-ref__img">
       <StrokeOrderAnimation src={charToSvgUrl(char)} loop onError={onError} />

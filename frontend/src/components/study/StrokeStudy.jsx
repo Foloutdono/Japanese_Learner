@@ -9,7 +9,7 @@ import { useTraceRun } from '../../hooks/useTraceRun'
 import { StrokeOrderAnimation } from './StrokeOrderAnimation'
 import { TraceBoard } from './TraceBoard'
 
-// ── 辻 — a character's strokes, big, and traced over (plan 267) ──
+// ── 辻 — a character's strokes, big, and traced over (plan 268) ──
 // The stroke-order animation is small wherever it sits (the dictionary's
 // sheet, the writing practice's reference), so a tap on it opens this
 // sheet: the same animation at the width of the screen, and, beside it,
