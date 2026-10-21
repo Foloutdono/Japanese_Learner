@@ -610,11 +610,15 @@ yet, and the studio says so.
 (`promo.clips.end`; `clips.cover` is the cover's, also `clip`): the mark,
 the ask and its note come in one after another (on the pass story the
 three promises, one at a time), then the Depart button rises in and
-waits as the app's gate waits (`app.departButton` given `ready`): its
-halo breathes (`btn-gate-breathe`), two ripples leave the reader 1.1s
-apart (`btn-gate-rip`) and, four seconds untaken, the reader steps
-toward the way on twice (`btn-gate-nudge`), inside the seven seconds
-(`promo.END`). "Download the call-to-action clip" encodes it as the
+waits as the app's gate waits (`app.departButton` given `ready`): four
+seconds untaken, the reader steps toward the way on twice
+(`btn-gate-nudge`), inside the seven seconds (`promo.END`). The button is
+the app's gate button as `GateButton` draws it since its redraw (plan
+225): the gold pill lit from its crest, the sumi reader holding the card
+scanner's mark in the lamp's gold, the hairline, the word centred; its
+golds are `APP_INKS`, held to `index.css`. It ends the stories, the
+feature videos (plan 270), the long videos and the funnel's pictures,
+so when the app redraws it, it is redrawn here once. "Download the call-to-action clip" encodes it as the
 cover's is encoded. A part drawn inside a fading one multiplies its own
 shade into the fade (`globalAlpha *=`), never sets it, or it shows
 before the part around it.

@@ -10,11 +10,17 @@
 // equal to index.css by src/carousel.test.js.
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 import { printName } from '../src/domain/printHour.js'
-import { TR, alpha, font, measure, mix, rrect, shadow, text } from './draw.js'
+import { K, TR, alpha, font, measure, mix, rrect, shadow, text } from './draw.js'
 
 export const APP_INKS = {
   // The free card's band: one value in both themes (DESIGN.md, "The pass has two materials").
   '--pass-band': '#3f6d8e',
+  // The gate button's golds and its reader's lamp (GateButton, plan 225).
+  '--gate-gold-crest': '#f3cb68',
+  '--gate-gold-lit': '#e6bd62',
+  '--gate-gold': '#c99a3e',
+  '--gate-gold-deep': '#b0852f',
+  '--gate-lamp': '#e0b04f',
   // The print's paper, its ink and its seal red: the title slip's (TodayPrint).
   '--tpr-washi': '#efe3bf',
   '--tpr-sumi': '#1d1a16',
@@ -612,88 +618,129 @@ export function printTitle(ctx, x, y, u, { date, view }) {
   return { w, h }
 }
 
-/** The gate's Depart button: the gold pill, the reader's dark roundel at
- *  its left with the contactless mark in gold, the word centred. Still,
- *  its two ripples stand where they pass; with `ready` (seconds since the
- *  button came to rest) it moves as .btn-depart--gate does: the halo
- *  breathes (btn-gate-breathe, 2.8s), two ripples leave the reader 1.1s
- *  apart (btn-gate-rip, 2.2s), and after four seconds untaken the reader
- *  steps toward the way on twice (btn-gate-nudge, 720ms). */
+/** The gate button (components/ui/GateButton.jsx, .btn-depart--gate,
+ *  plan 225's): the gold pill lit from above, the sumi reader at its left
+ *  end holding the card scanner's mark in the lamp's gold, a hairline a
+ *  rung off the reader, the word centred on the pill. With `ready`
+ *  (seconds since the button came to rest) it moves as the app's does:
+ *  after four seconds untaken the reader steps toward the way on twice
+ *  (btn-gate-nudge, 720ms), its hairline with it. Its measures are CSS
+ *  pixels times `u`. */
 export function departButton(ctx, p, x, y, w, u, label, ready = null) {
   const h = 66 * u
-  const moving = ready != null
-  // Its own shades are of what it is given: a button coming in is faint whole.
-  const base = ctx.globalAlpha
-  if (moving) {
-    // The breath's peak, a layer under the fill: a 9px ring and a glow.
-    const b = 0.5 - 0.5 * Math.cos((2 * Math.PI * ready) / 2.8)
-    ctx.save()
-    ctx.globalAlpha *= b
-    shadow(ctx, `0px ${8 * u}px ${28 * u}px ${alpha(p.goldMid, 0.4)}`)
-    ctx.fillStyle = alpha(p.goldMid, 0.16)
-    rrect(ctx, x - 9 * u, y - 9 * u, w + 18 * u, h + 18 * u, h / 2 + 9 * u)
-    ctx.fill()
-    ctx.restore()
-  }
+  const css = v => v * u / K
+  // Each shape adds its own closed outline to the path in hand (insetShade cuts it from another).
+  const pill = () => ctx.roundRect(x, y, w, h, h / 2)
+  // The fill, under its two drops (--gate-drop): the gold from its crest.
   ctx.save()
-  shadow(ctx, `0px 4px 18px ${alpha(p.goldMid, 0.35)}`)
   const g = ctx.createLinearGradient(0, y, 0, y + h)
-  g.addColorStop(0, p.goldLit)
-  g.addColorStop(1, p.goldMid)
+  g.addColorStop(0, APP_INKS['--gate-gold-crest'])
+  g.addColorStop(0.45, APP_INKS['--gate-gold-lit'])
+  g.addColorStop(1, APP_INKS['--gate-gold'])
   ctx.fillStyle = g
-  rrect(ctx, x, y, w, h, h / 2)
-  ctx.fill()
-  ctx.restore()
-  const nudge = moving ? NUDGE(ready - 4) : 0
-  const rx = x + 8 * u + 24 * u + nudge * 6 * u
-  const ry = y + h / 2
-  ctx.fillStyle = '#100e13'
-  ctx.beginPath()
-  ctx.arc(rx, ry, 24 * u, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.save()
-  ctx.strokeStyle = alpha('#100e13', 0.55)
-  ctx.lineWidth = 2 * u
-  const rips = moving
-    ? [0, 1.1].filter(d => ready >= d).map(d => EASE_OUT(((ready - d) % 2.2) / 2.2)).map(e => [23 * (1 + 0.75 * e), 0.8 * (1 - e)])
-    : [[28.5, 1], [39, 1]]
-  for (const [rr, a] of rips) {
-    ctx.globalAlpha = base * a
+  for (const drop of [`0px ${css(6)}px ${css(14)}px rgba(90, 64, 20, 0.32)`, `0px ${css(1)}px ${css(2)}px rgba(60, 40, 10, 0.3)`]) {
+    shadow(ctx, drop)
     ctx.beginPath()
-    ctx.arc(rx, ry, rr * u, 0, Math.PI * 2)
-    ctx.stroke()
+    pill()
+    ctx.fill()
   }
-  ctx.globalAlpha = base
-  passWave(ctx, rx - 24 * u, ry, u)
   ctx.restore()
-  // The word centred on the pill, or in what the reader leaves of it
-  // when it is long, a size down rather than past its end.
-  const free = x + 8 * u + 48 * u + 16 * u
-  const room = x + w - 24 * u - free
+  // Its light and its weight, inside: a pale line along the top, a shade along the foot.
+  insetShade(ctx, pill, 0, u, 0, 'rgba(255, 244, 214, 0.55)')
+  insetShade(ctx, pill, 0, -2 * u, 3 * u, 'rgba(120, 80, 20, 0.25)')
+  // The reader, 48px across, 8px in; the nudge moves it and its hairline.
+  const nudge = ready != null ? NUDGE(ready - 4) : 0
+  const r = 24 * u
+  const rx = x + 8 * u + r + nudge * 6 * u
+  const ry = y + h / 2
+  const disc = () => { ctx.moveTo(rx + r, ry); ctx.arc(rx, ry, r, 0, Math.PI * 2) }
+  ctx.save()
+  const lit = ctx.createRadialGradient(rx - 4.8 * u, ry - 7.2 * u, 0, rx - 4.8 * u, ry - 7.2 * u, 42.5 * u)
+  lit.addColorStop(0, mix(p.panel, APP_INKS['--gate-gold-lit'], 0.86))
+  lit.addColorStop(0.7, p.panel)
+  lit.addColorStop(1, p.panel)
+  ctx.fillStyle = lit
+  ctx.beginPath()
+  disc()
+  ctx.fill()
+  ctx.restore()
+  insetShade(ctx, disc, 0, u, 2 * u, 'rgba(0, 0, 0, 0.5)')
+  scanMark(ctx, rx, ry, 26.88 * u, APP_INKS['--gate-lamp'])
+  // The hairline, a rung (12px) off the reader, half its height.
+  ctx.save()
+  ctx.strokeStyle = mix(APP_INKS['--gate-gold'], APP_INKS['--gate-gold-deep'], 0.6)
+  ctx.lineWidth = 1.3 * u
+  ctx.lineCap = 'round'
+  ctx.beginPath()
+  ctx.moveTo(rx + r + 12 * u, ry - 12.24 * u)
+  ctx.lineTo(rx + r + 12 * u, ry + 12.24 * u)
+  ctx.stroke()
+  ctx.restore()
+  // The word in the middle column (minmax(48px, 1fr) auto minmax(48px, 1fr),
+  // 12px gaps, 8px in): centred on the pill while both sides keep their
+  // 48px, a size down rather than past them when it is long.
+  const room = w - 2 * 8 * u - 2 * 48 * u - 2 * 12 * u
   let lz = 17.92 * u
   while (lz > 13 * u && measure(ctx, label, font(700, lz, 'latin')) > room) lz -= 0.5 * u
-  const lw = measure(ctx, label, font(700, lz, 'latin'))
-  const cx = Math.max(x + w / 2, free + lw / 2)
-  text(ctx, label, cx, ry + lz * 0.36, { f: font(700, lz, 'latin'), color: '#1c1811', align: 'center' })
+  text(ctx, label, x + w / 2, ry + lz * 0.36, { f: font(700, lz, 'latin'), color: '#1c1811', align: 'center' })
   return h
 }
 
-/** The pass's contactless mark as the reader wears it (.pass__wave.
- *  btn-depart__wave): three circles 8, 15 and 22px across, their left
- *  edges together 10px into the reader, each showing only its right
- *  border, 2px of the lamp's gold, cut where the box's diagonals cut it
- *  (±45°): a crescent, then two arcs. `x` is the reader's left, `y` its middle. */
-function passWave(ctx, x, y, u) {
-  ctx.fillStyle = '#dcad4e'
-  for (const d of [8, 15, 22]) {
-    const r = (d / 2) * u
-    const cx = x + (10 + d / 2) * u
+/** A box-shadow set inside a shape (inset dx dy blur color): the shape's
+ *  outside casts it, clipped to the shape. The outside is drawn a long way
+ *  off and its shadow sent back, so its own edge never shows. */
+function insetShade(ctx, shape, dx, dy, blur, color) {
+  const FAR = 2e4
+  ctx.save()
+  ctx.beginPath()
+  shape()
+  ctx.clip()
+  ctx.shadowOffsetX = dx + FAR
+  ctx.shadowOffsetY = dy
+  ctx.shadowBlur = blur
+  ctx.shadowColor = color
+  ctx.translate(-FAR, 0)
+  ctx.beginPath()
+  ctx.rect(-1e4, -1e4, 3e4, 3e4)
+  shape()
+  ctx.fillStyle = '#000'
+  ctx.fill('evenodd')
+  ctx.restore()
+}
+
+/** The card scanner's mark (GateButton's ScanMark, 24 units square): the
+ *  scanner's four corners, a card in it and its stripe, stroked 2 units
+ *  with round ends, `size` across, centred on (cx, cy). */
+function scanMark(ctx, cx, cy, size, color) {
+  const k = size / 24
+  const X = v => cx + (v - 12) * k
+  const Y = v => cy + (v - 12) * k
+  ctx.save()
+  ctx.strokeStyle = color
+  ctx.lineWidth = 2 * k
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  // Each corner (its path's own points): an arm, its quarter turn of 2.5, the other arm.
+  for (const [sx, sy, ox, oy, a0, ex, ey] of [
+    [3, 8, 5.5, 5.5, Math.PI, 8, 3],
+    [16, 3, 18.5, 5.5, -Math.PI / 2, 21, 8],
+    [21, 16, 18.5, 18.5, 0, 16, 21],
+    [8, 21, 5.5, 18.5, Math.PI / 2, 3, 16],
+  ]) {
     ctx.beginPath()
-    ctx.arc(cx, y, r, -Math.PI / 4, Math.PI / 4)
-    ctx.arc(cx, y, r - 2 * u, Math.PI / 4, -Math.PI / 4, true)
-    ctx.closePath()
-    ctx.fill()
+    ctx.moveTo(X(sx), Y(sy))
+    ctx.arc(X(ox), Y(oy), 2.5 * k, a0, a0 + Math.PI / 2)
+    ctx.lineTo(X(ex), Y(ey))
+    ctx.stroke()
   }
+  ctx.beginPath()
+  rrect(ctx, X(7), Y(8.5), 10 * k, 7 * k, 1.2 * k)
+  ctx.stroke()
+  ctx.beginPath()
+  ctx.moveTo(X(7), Y(11))
+  ctx.lineTo(X(17), Y(11))
+  ctx.stroke()
+  ctx.restore()
 }
 
 /** A CSS timing function (cubic-bezier(x1, y1, x2, y2)) as a function of
@@ -712,7 +759,6 @@ export function cssEase(x1, y1, x2, y2) {
     return at(y1, y2, (lo + hi) / 2)
   }
 }
-const EASE_OUT = cssEase(0, 0, 0.58, 1)
 const EASE_IN_OUT = cssEase(0.42, 0, 0.58, 1)
 // btn-gate-nudge over 720ms: out at 25% and 75%, home at 0, 50% and 100%.
 function NUDGE(s) {

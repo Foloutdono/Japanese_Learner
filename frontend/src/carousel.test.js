@@ -760,7 +760,7 @@ describe('explaining a point in its own sentence', () => {
   })
 
   // ── 宣伝, the promo stories (plan 231) ──────────────────────
-  it('draws the pass in the band index.css prints it in', () => {
+  it('draws the pass and the gate in the inks index.css prints them in', () => {
     const css = read('src/index.css')
     for (const [name, value] of Object.entries(APP_INKS)) expect(css, name).toMatch(new RegExp(`${name}:\\s*${value};`))
   })
