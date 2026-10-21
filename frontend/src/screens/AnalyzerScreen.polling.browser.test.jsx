@@ -462,8 +462,9 @@ describe('AnalyzerScreen polling', () => {
     // And the dock is still there to try again with, rather than a dead
     // end. Since plan 029 the intake is always mounted, so the check is
     // that the failure did not replace it: its file is one press away
-    // (plan 136).
-    expect(screen.container.querySelector('#anl-panel-video .anl-file')).not.toBeNull()
+    // (plan 136), behind its own door since plan 265 (the owner's pick B).
+    const doors = [...screen.container.querySelectorAll('#anl-panel-video .anl-doors .seg__opt')]
+    expect(doors.some(d => [en.doorFile, fr.doorFile].includes(d.textContent))).toBe(true)
   })
 
   // A Sentence CAN come back with no tokens -- an unavailable analysis,

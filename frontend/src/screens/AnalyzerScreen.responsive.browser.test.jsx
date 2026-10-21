@@ -266,7 +266,12 @@ describe('AnalyzerScreen structure', () => {
     expect(input).not.toBeNull()
     expect(input.getAttribute('accept')).toContain('.vtt')
     expect(input.getAttribute('accept')).toContain('text/')
-    expect(screen.container.querySelector('.anl-file')).not.toBeNull()
+    // The file has its own door (plan 265, the owner's pick B): one
+    // press across, where its button is the filled action.
+    const fileDoor = [...screen.container.querySelectorAll('.anl-doors .seg__opt')][1]
+    fileDoor.click()
+    await settle(30)
+    expect(screen.container.querySelector('.anl-file.btn-primary')).not.toBeNull()
   })
 
   it('opens the video on YouTube once the bookmark has brought a passage', async () => {
