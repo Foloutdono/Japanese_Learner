@@ -230,8 +230,11 @@ runtime purpose.
   (`daily_limit.claim_up_to`), the learner's and the app's. A URL a
   learner types that the server fetches goes through `study/podcast.py`'s
   guard (every address and redirect public, the connection pinned to the
-  address checked), never a bare `httpx.get`. A Passage heard rather than
-  read says so (`source` media/podcast).
+  address checked), never a bare `httpx.get`. A YouTube video with no
+  track is watched by Gemini from its address (`study/youtube_hearing.py`),
+  never fetched by the server; the minutes its window claimed past the last
+  line heard are given back. A Passage heard rather than read says so
+  (`source` media/podcast/youtube_heard).
 - **No learner can flood the server (plan 211).** The API is one worker:
   `core/concurrency.py` runs a learner's requests a few at a time, and
   both DB pools wait for a connection (`core/pool.py`) rather than fail.

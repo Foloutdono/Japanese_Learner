@@ -249,6 +249,37 @@ describe('AnalyzerScreen — while a recording is heard (the owner’s pick B)',
   })
 })
 
+describe('AnalyzerScreen — a YouTube video with no subtitles (2026-10-21)', () => {
+  it('sends the link to be heard, shows its two steps, then plays it on YouTube with the heard line', async () => {
+    let hearing = null
+    apiJson.mockImplementation(async (path, session, init) => {
+      if (path.startsWith('/api/video/capabilities')) return { ...CAPS, youtubeHear: true }
+      if (path === '/api/video/youtube-hear') { hearing = JSON.parse(init.body); return { sessionId: 12, status: 'generating' } }
+      if (path.startsWith('/api/video/session/12')) {
+        return hearing?.done
+          ? ready({ source: 'youtube_heard', sourceRef: 'dQw4w9WgXcQ', videoId: 'dQw4w9WgXcQ' })
+          : { status: 'generating' }
+      }
+      return {}
+    })
+    const screen = await renderScreen()
+    await goToVideo(screen)
+    setField(screen.container.querySelector('.anl-field'), 'https://youtu.be/dQw4w9WgXcQ')
+    await settle(60)
+    screen.container.querySelector('.anl-hear-link').click()
+    const card = await until(() => screen.container.querySelector('.anl-hear'))
+    expect(hearing).toEqual({ url: 'https://youtu.be/dQw4w9WgXcQ' })
+    expect([...card.querySelectorAll('.anl-hear__step')].map(li => li.className.split('--').pop())).toEqual(['done', 'now'])
+    expect(card.querySelector('.anl-hear__cancel')).toBeNull()
+
+    hearing.done = true
+    const player = await until(() => screen.container.querySelector('[data-testid="youtube"]'))
+    expect(player).not.toBeNull()
+    const said = screen.container.textContent
+    expect(said.includes(en.heardNotice) || said.includes(fr.heardNotice)).toBe(true)
+  })
+})
+
 describe('AnalyzerScreen — a page grab', () => {
   it('arrives with the page’s track and plays the page’s media file', async () => {
     const vtt = 'WEBVTT\n\n00:00:00.500 --> 00:00:03.000\n今日は暑いですね\n'

@@ -1312,6 +1312,8 @@ const video = {
   hearStepSend:        'Envoyer',
   hearStepHear:        'Écouter la parole',
   hearCancel:          'Annuler',
+  hearThisVideo:       'Pas de sous-titres ? Transcrire sa parole',
+  hearStepSendLink:    'Envoyer le lien',
   // Dans le cadre du lecteur d’un enregistrement sans image (le choix C)
   heardBy:             'Entendu par une reconnaissance vocale',
   mediaNotHere:        'Ce serveur ne sait pas écouter un enregistrement : choisis plutôt un fichier de sous-titres.',

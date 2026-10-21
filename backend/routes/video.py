@@ -34,7 +34,7 @@ from core.auth import get_user_id
 from core.history import HISTORY_LIMIT, trim_history
 from core.srs_instance import srs
 from core import daily_limit
-from study import line_translate, lyrics_sort, morphology, podcast, transcribe
+from study import line_translate, lyrics_sort, morphology, podcast, transcribe, youtube_hearing
 from study.llm_shared import LLMUnavailable
 from study.analysis import LOCAL_REV, analyze_local, attach_user_state
 from study.captions import (
@@ -282,8 +282,10 @@ def _fetch_refusal(user_id: str) -> tuple[str, str] | None:
 # spending), and the whole app's, summed from the sessions themselves
 # as the fetch budget is, so there is no second counter to drift.
 TRANSCRIBE_FEATURE = "transcription"
-# The sources whose lines a recogniser heard.
-_HEARD = ("media", "podcast")
+# The sources whose lines a recogniser heard: a recording the browser
+# kept the sound of, and since the 2026-10-21 amendment a YouTube video
+# Gemini watched (study/youtube_hearing.py).
+_HEARD = ("media", "podcast", "youtube_heard")
 
 
 def _app_minutes_today() -> float:
@@ -358,7 +360,8 @@ def _fail_session(session_id: int, message: str, code: str) -> None:
 def _video_worker(session_id: int, source: str, source_ref: str, content: str | None,
                    filename: str | None, window_start: float | None, window_end: float | None,
                    timing: str | None = None, tracks: dict | None = None,
-                   audio: bytes | None = None, offset: float = 0.0) -> None:
+                   audio: bytes | None = None, offset: float = 0.0,
+                   until: float | None = None) -> None:
     """Runs off-request. Parses/fetches the Track, reconstructs
     Sentences, analyzes each with the LOCAL tier only (never a model --
     see docs/adr/0001), and materializes the result. Owns the job row
@@ -375,6 +378,12 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
         # outright when none is configured. See study/captions.py.
         if source == "youtube":
             cues = fetch_youtube_track(source_ref, translated)
+        elif source == "youtube_heard":
+            # A video with no subtitles, watched by Gemini on Google's
+            # side between `offset` and `until`; the minutes the window
+            # claimed past what was said are given back.
+            cues = youtube_hearing.transcribe(source_ref, offset, until)
+            _settle_heard_minutes(session_id, offset, until, cues)
         elif source in _HEARD:
             # A recording (plan 265): the fourth road, and the second that
             # leaves this server -- to the speech recogniser, with the
@@ -530,11 +539,11 @@ def _with_translations(cues: list[dict], translated: dict) -> list[dict]:
 def _start_worker(session_id: int, source: str, source_ref: str, content: str | None,
                    filename: str | None, window_start: float | None, window_end: float | None,
                    timing: str | None = None, tracks: dict | None = None,
-                   audio: bytes | None = None, offset: float = 0.0) -> None:
+                   audio: bytes | None = None, offset: float = 0.0, until: float | None = None) -> None:
     threading.Thread(
         target=_video_worker,
         args=(session_id, source, source_ref, content, filename, window_start, window_end, timing, tracks,
-              audio, offset),
+              audio, offset, until),
         name=f"video-session:{session_id}", daemon=True,
     ).start()
 
@@ -552,14 +561,88 @@ def video_capabilities(user_id: str = Depends(get_user_id)):
     first cannot repeat it -- and the answer flips the moment the
     proxy credentials are set, with no deploy.
     """
-    caps = {"linkFetch": proxy_configured(), "transcribe": transcribe.configured()}
+    caps = {
+        "linkFetch": proxy_configured(),
+        "transcribe": transcribe.configured(),
+        # A YouTube video with no subtitles, watched by Gemini (the
+        # 2026-10-21 amendment): only where a Google key is set.
+        "youtubeHear": youtube_hearing.configured(),
+    }
     # A recording (plan 265): the longest one the server takes, and what
     # is left of the learner's day, so the intake refuses one past
     # either before the browser spends a minute encoding it.
-    if caps["transcribe"]:
+    if caps["transcribe"] or caps["youtubeHear"]:
         caps["transcribeMaxSeconds"] = transcribe.MAX_SECONDS
         caps["transcribeMinutesLeft"] = _minutes_left(user_id)
     return caps
+
+
+# ── A YouTube video with no subtitles (plan 265, 2026-10-21) ──────
+# Gemini watches it on Google's side (study/youtube_hearing.py); this
+# server sends the video's address and nothing else. The window bounds
+# what is claimed: without an end, a session's whole length is, and
+# what the video turns out not to say is given back once it is heard.
+class HearPayload(BaseModel):
+    url: str = Field(..., min_length=1, max_length=300)
+    start: float | None = Field(None, ge=0, le=86400)
+    end: float | None = Field(None, ge=0, le=86400)
+
+
+@router.post("/api/video/youtube-hear")
+def hear_youtube_video(payload: HearPayload, user_id: str = Depends(get_user_id)):
+    if not youtube_hearing.configured():
+        raise _refusal(400, "transcribe_disabled", "This server cannot hear a video.")
+    video_id = parse_video_id(payload.url)
+    if video_id is None:
+        raise _refusal(400, "not_youtube_url", "Not a recognized YouTube URL")
+    start = payload.start or 0.0
+    end = payload.end if payload.end is not None else start + transcribe.MAX_SECONDS
+    if end <= start:
+        raise _refusal(400, "end_before_start", "end must be after start")
+    seconds = end - start
+    if seconds > transcribe.MAX_SECONDS + 1:
+        raise _refusal(413, "media_too_long", "The window is longer than one session takes")
+    refusal = _transcribe_refusal(user_id, seconds)
+    if refusal:
+        raise _refusal(429, *refusal)
+    try:
+        session_id = _open_session(
+            user_id, "youtube_heard", video_id, start, payload.end, False, video_id,
+            {"seconds": round(seconds, 1)},
+        )
+    except HTTPException:
+        daily_limit.give_back(user_id, TRANSCRIBE_FEATURE, transcribe.minutes(seconds))
+        raise
+    _start_worker(session_id, "youtube_heard", video_id, None, None, start, payload.end,
+                  offset=start, until=end)
+    return JSONResponse(status_code=202, content={"sessionId": session_id, "status": "generating", "windowCapped": False})
+
+
+def _settle_heard_minutes(session_id: int, start: float, end: float, cues: list[dict]) -> None:
+    """Give back the minutes a window claimed past the last thing the
+    video says (a five-minute video heard with no end set claimed a
+    session's length), and keep the heard length on the session, which
+    the app's day is summed from. Best effort: a failure costs the
+    learner the difference, never the session."""
+    try:
+        heard = max(0.0, min(end, max(c["end"] for c in cues)) - start)
+        claimed = transcribe.minutes(end - start)
+        spare = claimed - transcribe.minutes(heard)
+        conn = db_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "UPDATE video_sessions SET media_seconds = %s WHERE id = %s RETURNING user_id",
+                    (round(heard, 1), session_id),
+                )
+                row = cur.fetchone()
+            conn.commit()
+        finally:
+            conn.close()
+        if row and spare > 0:
+            daily_limit.give_back(row[0], TRANSCRIBE_FEATURE, spare)
+    except Exception:
+        logger.warning("The heard minutes of session %s were not settled", session_id, exc_info=True)
 
 
 # ── A podcast (plan 265) ───────────────────────────────────────
@@ -1316,6 +1399,7 @@ _SOURCE_NAMES = {
     # recogniser's, which can mishear.
     "media": "a recording's speech, transcribed by a speech recogniser",
     "podcast": "a podcast episode's speech, transcribed by a speech recogniser",
+    "youtube_heard": "a YouTube video's speech, transcribed by a model listening to it",
 }
 
 
@@ -1455,7 +1539,7 @@ def sort_video_lyrics(session_id: int, user_id: str = Depends(get_user_id)):
     known = _stored_kinds(_load_lyrics_sort(session_id))
     # The file's name says which song it is more often than not
     # ("YOASOBI - 夜に駆ける.srt"); a link's video id says nothing.
-    about = session["source_ref"] if session["source"] in ("upload", *_HEARD) else ""
+    about = session["source_ref"] if session["source"] in ("upload", "media", "podcast") else ""
     try:
         kinds, fresh = lyrics_sort.sort_lines(user_id, sentences, known, about)
     except lyrics_sort.OverLimit:

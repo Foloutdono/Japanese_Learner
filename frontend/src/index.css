@@ -1151,6 +1151,9 @@
   .anl-hear__bar > span { transition: none; }
 }
 .anl-hear__cancel { align-self: stretch; }
+/* A video with no subtitles, heard instead (2026-10-21): quiet, under
+   the Lien door's one filled action. */
+.anl-hear-link { width: 100%; }
 
 /* 聴 — a podcast's feed (plan 265): the show's name over its episodes,
    each a row that opens it, the list held to the column and scrolled

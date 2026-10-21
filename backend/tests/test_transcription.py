@@ -150,6 +150,10 @@ def can_transcribe(monkeypatch):
     try:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM daily_usage WHERE feature = 'transcription'")
+            # A job another file left running on purpose (a worker it
+            # replaced) would hold one of the learner's two slots for
+            # fifteen minutes: a rerun soon after would be refused.
+            cur.execute("UPDATE video_session_jobs SET status = 'failed' WHERE status = 'running'")
         conn.commit()
     finally:
         conn.close()

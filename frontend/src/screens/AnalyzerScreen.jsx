@@ -71,6 +71,9 @@ function videoLinkIn(text) {
 // in a browser, so the browser is what remembers it. The history says
 // so too, by the name the arrival gives its file (see the grab arrival).
 const GRAB_USED_KEY = 'tsuji.grabUsed'
+// The sources whose lines a machine heard rather than read (plan 265):
+// a recording, a podcast's episode, a YouTube video Gemini watched.
+const HEARD = ['media', 'podcast', 'youtube_heard']
 function readGrabUsed() {
   try { return window.localStorage.getItem(GRAB_USED_KEY) === '1' } catch { return false }
 }
@@ -813,6 +816,14 @@ export default function AnalyzerScreen({ session }) {
     analyzer.startVideoFromFile(file, opts)
   }
 
+  // A YouTube video with no subtitles, heard by Gemini (the 2026-10-21
+  // amendment of docs/adr/0003).
+  function startVideoFromHearing(url, opts) {
+    clearFocus()
+    setSheet(null)
+    analyzer.startVideoFromHearing(url, { ...opts, caps: videoCaps }).then(readCaps)
+  }
+
   // A podcast's episode (plan 265), picked from its feed in the intake.
   function startVideoFromEpisode(episode, opts) {
     clearFocus()
@@ -1181,7 +1192,7 @@ export default function AnalyzerScreen({ session }) {
   // memorises what they are shown, so the Passage says where it came from
   // -- in the player's frame where it shows the recording's picture (the
   // owner's pick C), here for a film, whose frame is the film.
-  if (ready && (passage?.source === 'media' || passage?.source === 'podcast') && !passage?.soundOnly) {
+  if (ready && HEARD.includes(passage?.source) && !passage?.soundOnly) {
     notices.push({ id: 'heard', tone: 'info', text: t.heardNotice })
   }
   if (passage?.truncated > 0) notices.push({ id: 'truncated', tone: 'info', text: t.passageTruncated(sentences.length) })
@@ -1252,7 +1263,7 @@ export default function AnalyzerScreen({ session }) {
     }
     if (playerVideoId) return <VideoPlayer ref={playerRef} videoId={playerVideoId} {...common} />
     const title = passage?.mediaTitle || (passage?.sourceRef ?? '').replace(/\.[^.]+$/, '')
-    const heard = passage?.source === 'media' || passage?.source === 'podcast'
+    const heard = HEARD.includes(passage?.source)
     // A recording with no picture shows the episode's own (the owner's
     // pick C), its podcast, and the note that it was heard.
     const cover = passage?.soundOnly
@@ -1275,6 +1286,8 @@ export default function AnalyzerScreen({ session }) {
       session={session}
       transcribe={transcribeOn}
       minutesLeft={videoCaps?.transcribeMinutesLeft ?? null}
+      youtubeHear={Boolean(videoCaps?.youtubeHear)}
+      onHearLink={startVideoFromHearing}
       door={videoDoor}
       onDoorChange={setVideoDoor}
       feedInput={feedInput}

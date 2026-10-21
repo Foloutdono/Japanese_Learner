@@ -56,9 +56,16 @@ import { videoErrorMessage } from './videoErrors'
 // is the screen's hold on this panel's file ingest, for a file dropped
 // anywhere on the desk's page: it is cut to the window set here, as one
 // chosen here is. `minutesLeft` is the day's listening left.
+//
+// `youtubeHear` (the 2026-10-21 amendment of docs/adr/0003): a video
+// with no subtitle track at all can be heard instead, by Gemini watching
+// it on Google's side. Its button sits under the Lien door's filled
+// action, quiet, once a link names a video (`onHearLink`, cut to the
+// window).
 export function IntakeVideo({
   t, url, onUrlChange, onStartFromFile, onStartFromLink, onStartFromEpisode, session,
   transcribe = false, minutesLeft = null, linkFetch, grab, onTutorial, tutorialPopup, grabUsed = false, dropRef,
+  youtubeHear = false, onHearLink,
   door: heldDoor, onDoorChange, feedInput: heldFeed, onFeedInputChange,
 }) {
   // The Window is OPTIONAL and blank by default -- the whole Track is
@@ -236,6 +243,19 @@ export function IntakeVideo({
             <div className="anl-link">
               {openLink('btn-primary anl-grab__open', t.openOnYoutube)}
               <p className="anl-link__say">{t.grabThenSay}</p>
+            </div>
+          )}
+
+          {youtubeHear && parsedVideoId && (
+            <div className="anl-link">
+              <button
+                type="button"
+                className="btn-secondary anl-hear-link"
+                onClick={() => onHearLink?.(url, { start: startSec, end: endSec })}
+              >
+                {t.hearThisVideo}
+              </button>
+              {minutesLeft != null && <p className="anl-link__say">{t.podcastMinutesLeft(minutesLeft)}</p>}
             </div>
           )}
 

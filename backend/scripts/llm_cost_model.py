@@ -181,6 +181,18 @@ MINUTE_FEATURES = {
         "bounds the abuse row at ~$0.36 a day, and "
         "TRANSCRIBE_DAILY_MINUTES_TOTAL caps the whole app at 600 ($3.60).",
     ),
+    "youtube_hearing": (
+        20, 0.005,
+        "A YouTube video with no subtitles, watched by Gemini "
+        "(study/youtube_hearing.py): one ten-minute video every other week. "
+        "Billed by tokens, not minutes: at low media resolution a second of "
+        "video is ~100 input tokens (frames and sound), ~6k a minute, plus "
+        "~300 output tokens a minute of Japanese; at Flash-class prices that "
+        "is ~$0.005 a minute -- an ESTIMATE on unverified prices, to be "
+        "re-read off usageMetadata once it runs. The same day of listening "
+        "as a recording caps it (60 minutes a learner, 600 the app), "
+        "claimed before the call and given back past the last line heard.",
+    ),
 }
 
 

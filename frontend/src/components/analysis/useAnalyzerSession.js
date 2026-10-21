@@ -480,6 +480,42 @@ export function useAnalyzerSession(session) {
     })
   }
 
+  // A YouTube video with no subtitles (the 2026-10-21 amendment of
+  // docs/adr/0003): its address sent, and Gemini watches it on Google's
+  // side (backend/study/youtube_hearing.py). Nothing is kept or sent
+  // from here but the link and the window; the steps card has two
+  // steps, the second the model's, so nothing can be called off.
+  async function startVideoFromHearing(url, { start, end, caps } = {}) {
+    const trimmed = url?.trim()
+    if (!trimmed) return
+    countUse('analyzer', 'video')
+    const run = beginRun()
+    setProgress({
+      kind: 'link',
+      stage: 'hear',
+      title: trimmed.replace(/^https?:\/\/(www\.)?/, ''),
+      seconds: end != null ? end - (start ?? 0) : null,
+      minutesLeft: caps?.transcribeMinutesLeft ?? null,
+    })
+    try {
+      const data = await apiJson('/api/video/youtube-hear', session, {
+        method: 'POST',
+        body: JSON.stringify({
+          url: trimmed,
+          ...(start != null ? { start } : {}),
+          ...(end != null ? { end } : {}),
+        }),
+      })
+      if (run !== runIdRef.current) return
+      setVideoSessionId(data.sessionId)
+    } catch (e) {
+      if (run !== runIdRef.current) return
+      setProgress(null)
+      setError({ video: e })
+      setStatus('failed')
+    }
+  }
+
   // Called off before the sound is sent: nothing reached the server, so
   // nothing was spent, and the screen is back where it was.
   function cancelRecording() {
@@ -769,6 +805,7 @@ export function useAnalyzerSession(session) {
     startVideoFromFile,
     startVideoFromRecording,
     startVideoFromEpisode,
+    startVideoFromHearing,
     cancelRecording,
     startVideoFromLink,
     startVideoFromTranscript,

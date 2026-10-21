@@ -14,6 +14,9 @@ import { formatTimecode } from '../../lib/timecode'
 // else.
 const STEPS = ['keep', 'prepare', 'send', 'hear']
 const STEP_OF = { fetch: 0, read: 0, decode: 0, encode: 1, upload: 2, hear: 3 }
+// A YouTube video Gemini watches (`kind: 'link'`): the link is sent,
+// and the listening is the model's on Google's side.
+const LINK_STEPS = ['sendLink', 'hear']
 const JAPANESE = /[\u3040-\u30ff\u4e00-\u9fff]/
 
 function Ring({ state, n }) {
@@ -31,7 +34,9 @@ function Ring({ state, n }) {
 
 export function HearingSteps({ t, progress, onCancel }) {
   if (!progress) return null
-  const at = STEP_OF[progress.stage] ?? 3
+  const link = progress.kind === 'link'
+  const steps = link ? LINK_STEPS : STEPS
+  const at = link ? 1 : (STEP_OF[progress.stage] ?? 3)
   const pct = Math.round((progress.ratio ?? 0) * 100)
   const seconds = progress.seconds
   const left = progress.minutesLeft != null && seconds != null
@@ -48,7 +53,7 @@ export function HearingSteps({ t, progress, onCancel }) {
         {meta && <span className="anl-hear__meta">{meta}</span>}
       </div>
       <ol className="anl-hear__steps">
-        {STEPS.map((key, i) => {
+        {steps.map((key, i) => {
           const state = i < at ? 'done' : i === at ? 'now' : 'next'
           return (
             <li key={key} className={`anl-hear__step anl-hear__step--${state}`} aria-current={state === 'now' ? 'step' : undefined}>
@@ -68,7 +73,7 @@ export function HearingSteps({ t, progress, onCancel }) {
           )
         })}
       </ol>
-      {at < 3 && onCancel && (
+      {at < steps.length - 1 && onCancel && (
         <button type="button" className="btn-secondary anl-hear__cancel" onClick={onCancel}>{t.hearCancel}</button>
       )}
     </section>

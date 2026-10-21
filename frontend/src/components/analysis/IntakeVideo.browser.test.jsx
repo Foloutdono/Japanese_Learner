@@ -269,3 +269,29 @@ describe('IntakeVideo — three doors', () => {
     }
   })
 })
+
+// ── A video with no subtitles, heard by Gemini (2026-10-21) ─────
+describe('IntakeVideo — a video with no subtitles', () => {
+  it('offers to transcribe a video only where it can, and only once a link names one', async () => {
+    const off = await setup({ youtubeHear: false })
+    expect(off.screen.container.querySelector('.anl-hear-link')).toBeNull()
+  })
+
+  it('waits for a link that names a video', async () => {
+    const { screen } = await setup({ youtubeHear: true, url: 'https://example.com/nope' })
+    expect(screen.container.querySelector('.anl-hear-link')).toBeNull()
+  })
+
+  it('hands the link up, cut to the window, and stays quiet beside the one filled action', async () => {
+    const onHearLink = vi.fn()
+    const { screen } = await setup({ youtubeHear: true, onHearLink, minutesLeft: 41 })
+    const button = screen.container.querySelector('.anl-hear-link')
+    expect(button.classList.contains('btn-secondary')).toBe(true)
+    expect(screen.container.querySelectorAll('.btn-primary')).toHaveLength(1)
+    expect(screen.container.textContent).toContain(en.podcastMinutesLeft(41))
+    await screen.getByRole('button', { name: en.windowLabel }).click()
+    await screen.getByPlaceholder(en.windowWhole).first().fill('2:00')
+    await screen.getByRole('button', { name: en.hearThisVideo }).click()
+    expect(onHearLink).toHaveBeenCalledWith(YT, { start: 120, end: null })
+  })
+})

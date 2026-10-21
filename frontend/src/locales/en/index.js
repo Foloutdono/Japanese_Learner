@@ -1353,6 +1353,8 @@ const video = {
   hearStepSend:        'Send',
   hearStepHear:        'Listen to the speech',
   hearCancel:          'Cancel',
+  hearThisVideo:       'No subtitles? Transcribe its speech',
+  hearStepSendLink:    'Send the link',
   // In the player's frame of a recording with no picture (pick C)
   heardBy:             'Heard by speech recognition',
   mediaNotHere:        'This server cannot hear recordings: choose a subtitle file instead.',

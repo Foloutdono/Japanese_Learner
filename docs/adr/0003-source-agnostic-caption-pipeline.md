@@ -669,3 +669,34 @@ answers to each of three questions, and the owner picked B, C, B:
   share as a bar), send it, hear the speech. Until it is sent it can be called
   off and nothing is spent; once sent, the recogniser is paid and the card has
   no Cancel.
+
+---
+
+## Amendment, 2026-10-21 — a video with no subtitle track is watched by Gemini (plan 265)
+
+The owner, on a YouTube video with no subtitles at all: *"can't openai whisper do
+it?"*. Whisper could hear it; nothing can hand it the sound. The walls of
+2026-10-16 stand: YouTube's media answers 403 without its player's token, and
+the player's sound is a cross-origin iframe. What changed is that one model is
+given the video rather than its sound: **Google's Gemini API takes a public
+YouTube video's address** (`fileData.fileUri`) and watches it on Google's side.
+
+- **`study/youtube_hearing.py`, `POST /api/video/youtube-hear`.** The server
+  sends the video's address and the window (`videoMetadata` offsets) and
+  nothing else, and reads the model's JSON lines to a Track; the session
+  (`source` `youtube_heard`) plays on YouTube's own player, as a fetched or
+  grabbed track does. YouTube's owner does the reading, through its documented
+  API: our servers still never fetch YouTube.
+- **Heard, and less exactly than a recording.** A general model listening is
+  not a recogniser: it can miss a line or write one nobody said, and its times
+  are a second's, never a word's (the analyser spreads a line's words over it).
+  The Passage says it was heard, as a recording's does; a line repeated back to
+  back is the loop such a model falls into, kept once.
+- **The same day of listening.** The window's minutes (a session's length when
+  no end is set) are claimed before the call and given back past the last line
+  heard (`_settle_heard_minutes`), so a five-minute video costs five. Public
+  videos only; off without a Google key (`capabilities.youtubeHear`).
+- **Where it sits.** A quiet button under the Lien door's one filled action
+  once a link names a video, and a two-step card while it works (the link
+  sent, the speech heard). Built without a canvas, the owner having asked for
+  it directly; a different place for it is theirs to pick.
