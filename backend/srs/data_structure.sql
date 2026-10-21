@@ -280,7 +280,7 @@ CREATE TABLE user_profiles (
     -- 乗換 (plan 243b): when Today asked whether the learner studied
     -- elsewhere, or an import made it moot. routes/transfer.py.
     transfer_offered_at TIMESTAMPTZ,
-    -- Early access (plan 268): when Today asked how the learner finds the
+    -- Early access (plan 269): when Today asked how the learner finds the
     -- app, once 400 XP were earned. routes/feedback.py.
     feedback_asked_at TIMESTAMPTZ,
     -- 署名 (plan 247): the first name the card prints, in any script, up
@@ -1168,7 +1168,7 @@ ALTER TABLE event_daily ENABLE ROW LEVEL SECURITY;
 -- unprefixed (the content key), `reasons` a card's, from
 -- feedback.CARD_REASONS. `reply_to` is read from the account when the
 -- learner asks for an answer, never from the request. `rating` is the
--- early-access sheet's one to five (plan 268). Erased with the account
+-- early-access sheet's one to five (plan 269). Erased with the account
 -- (routes/account.py).
 CREATE TABLE feedback (
     id         BIGSERIAL PRIMARY KEY,

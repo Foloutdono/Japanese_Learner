@@ -8,7 +8,7 @@ import { Sheet } from '../chrome/Sheet'
 import { StarIcon } from '../ui/Icons'
 import { Sent } from './FeedbackSheet'
 
-// ── Early access: how the learner finds the app (plan 268) ─────────
+// ── Early access: how the learner finds the app (plan 269) ─────────
 // Once, over Today, when the learner has earned 400 XP: the app is young,
 // so they are asked to rate it from one to five and, if they like, to say
 // what they would change. The server decides who is asked (GET /api/profile's

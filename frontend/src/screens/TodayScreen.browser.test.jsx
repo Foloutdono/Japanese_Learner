@@ -400,7 +400,7 @@ describe('TodayScreen — the transfer sheet', () => {
   })
 })
 
-// Early access (plan 268): the sheet that asks a learner, once, from 400
+// Early access (plan 269): the sheet that asks a learner, once, from 400
 // XP, how they find the app -- on the transfer sheet's terms, and never
 // beside it.
 describe('TodayScreen — the early-access sheet', () => {

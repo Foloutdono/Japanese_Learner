@@ -5,7 +5,7 @@ import fr from '../../locales/fr/index.js'
 import { ApiError } from '../../lib/api'
 import '../../index.css'
 
-// ── The early-access sheet on a phone (plan 268) ─────────────────────
+// ── The early-access sheet on a phone (plan 269) ─────────────────────
 // Once, from 400 XP: five stars and a few words. Nothing is sent before a
 // star is chosen; what is sent is the rating and the words, no class of the
 // device; a rating sent ends on the 受付 stamp and tells the server nothing

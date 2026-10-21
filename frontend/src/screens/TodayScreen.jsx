@@ -56,7 +56,7 @@ import { startAmbiance, stopAmbiance } from '../lib/audio'
 // whether they studied in another app (TransferSheet), while the
 // profile says the offer is open (`transferOffer`).
 //
-// Early access (plan 268): once the learner has earned 400 XP, they are
+// Early access (plan 269): once the learner has earned 400 XP, they are
 // asked how they find the app (RatingSheet), on the same terms as the
 // offer above and never beside it, while the profile says it is open
 // (`feedbackOffer`). The finish comes first: the question follows a day

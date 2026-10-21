@@ -3067,7 +3067,7 @@ const onboarding = {
   fbSentReply: 'Every message is read by a person. The answer will come by e-mail.',
   fbErrLimit: 'Five messages a day: more tomorrow.',
   fbErrSend: 'The message did not go. Try again.',
-  // Early access (plan 268): asked once, from 400 XP.
+  // Early access (plan 269): asked once, from 400 XP.
   rateCap: 'Early access',
   rateQ: 'How would you rate Tsuji?',
   rateLead: 'The app is in early access. Is there something you would like us to change?',

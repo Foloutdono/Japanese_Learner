@@ -40,7 +40,7 @@ moment the learner asks for one, never taken from the request: a body
 naming an address would let anyone have the app's owner write to a
 stranger. A guest has none, and the sheet offers no reply.
 
-── The early-access sheet (plan 268) ────────────────────────
+── The early-access sheet (plan 269) ────────────────────────
 The app is young, so once a learner has earned OFFER_XP lifetime XP,
 Today asks them how they find it and what they would change
 (frontend/src/components/feedback/RatingSheet.jsx): a rating of one to
@@ -74,7 +74,7 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 KINDS = ("problem", "idea", "fault", "card", "question", "rating")
-# The early-access sheet (plan 268): the lifetime XP from which Today
+# The early-access sheet (plan 269): the lifetime XP from which Today
 # asks once how the learner finds the app, and the rating's bounds.
 OFFER_XP = 400
 RATING_MIN, RATING_MAX = 1, 5
@@ -131,7 +131,7 @@ def _ensure_schema() -> None:
             cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS exam_id TEXT")
             cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS revision INT")
             cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS question_id TEXT")
-            # The early-access sheet's rating (plan 268).
+            # The early-access sheet's rating (plan 269).
             cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS rating SMALLINT")
             cur.execute(
                 "CREATE INDEX IF NOT EXISTS feedback_user_at ON feedback (user_id, created_at)"

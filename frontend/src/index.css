@@ -32774,7 +32774,7 @@ button.brd-stn { cursor: pointer; }
 .fb-link:hover,
 .fb-link:focus-visible { color: var(--text-primary); filter: none; }
 
-/* The early-access sheet over Today (plan 268; components/feedback/
+/* The early-access sheet over Today (plan 269; components/feedback/
    RatingSheet.jsx): the question, a line, five stars lit in the
    selection's gold up to the one chosen, a few words, the send. */
 .fb-rate__q { margin: 0; text-wrap: balance; }

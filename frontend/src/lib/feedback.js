@@ -20,7 +20,7 @@ export function questionReport(examId, revision, question) {
   return { exam: { examId, revision, questionId: question.id, number: question.number } }
 }
 export const TEXT_MAX = 1000
-// The early-access sheet's rating, one to five (plan 268): the message of
+// The early-access sheet's rating, one to five (plan 269): the message of
 // kind `rating`, which has a sheet of its own and so is not in KINDS.
 export const RATINGS = [1, 2, 3, 4, 5]
 // The address an answer comes from, the one privacy.html gives. The

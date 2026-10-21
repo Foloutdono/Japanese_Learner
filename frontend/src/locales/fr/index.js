@@ -3006,7 +3006,7 @@ const onboarding = {
   fbSentReply: 'Chaque message est lu par une personne. La réponse arrive par e-mail.',
   fbErrLimit: 'Cinq messages par jour : la suite demain.',
   fbErrSend: 'Le message n’est pas parti. Réessaie.',
-  // Accès anticipé (plan 268) : demandé une fois, à partir de 400 XP.
+  // Accès anticipé (plan 269) : demandé une fois, à partir de 400 XP.
   rateCap: 'Accès anticipé',
   rateQ: 'Quelle note pour Tsuji ?',
   rateLead: 'L’app est en accès anticipé. Y a-t-il quelque chose que tu aimerais voir changer ?',

@@ -239,7 +239,7 @@ def test_the_messages_go_with_the_account():
     assert ("feedback", "user_id = %(user)s") in [(t, c) for t, c, _w in PLAN]
 
 
-# ── The early-access sheet (plan 268) ───────────────────────────────
+# ── The early-access sheet (plan 269) ───────────────────────────────
 
 def test_a_rating_is_kept_with_or_without_words(client):
     r = client.post("/api/feedback", json={"kind": "rating", "rating": 4, "text": "  Plus de dictées.  "})

@@ -169,7 +169,7 @@ def _init_db() -> None:
                 # yet; routes/transfer.py writes and reads it.
                 ("transfer_offered_at", "TIMESTAMPTZ"),
                 # When Today asked how the learner finds the app, once
-                # the XP was earned (plan 268): answered with a rating
+                # the XP was earned (plan 269): answered with a rating
                 # or shut. NULL is not asked yet; routes/feedback.py
                 # writes and reads it.
                 ("feedback_asked_at", "TIMESTAMPTZ"),
@@ -798,7 +798,7 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # 乗換 (plan 243b): whether Today asks, once, if the learner
         # studied elsewhere (routes/transfer.offer_open).
         "transferOffer": transfer_routes.offer_open(user_id, tutorial_at),
-        # Early access (plan 268): whether Today asks, once, how the
+        # Early access (plan 269): whether Today asks, once, how the
         # learner finds the app (routes/feedback.offer_open).
         "feedbackOffer": feedback_routes.offer_open(user_id, xp),
         # 足跡を残さない (plan 218): the account's answer, which App.jsx
