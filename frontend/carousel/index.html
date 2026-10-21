@@ -182,6 +182,9 @@ body[data-video="challenge"] [data-challenge="hide"] { display: none !important;
 /* The vocabulary shorts (plan 252): a look and a feed of their own. */
 body:not([data-video="words"]) [data-words="only"] { display: none !important; }
 body[data-video="words"] [data-words="hide"] { display: none !important; }
+/* The feature videos (plan 270): recorded in the app, posted to any feed. */
+body:not([data-video="feature"]) [data-feature="only"] { display: none !important; }
+body[data-video="feature"] [data-feature="hide"] { display: none !important; }
 /* A 9:16 video's post per feed (plan 251): Reels and TikTok take a caption alone. */
 body:not([data-feeds="on"]) [data-feeds="only"] { display: none !important; }
 body[data-post="caption"] [data-caption="hide"] { display: none !important; }
@@ -344,7 +347,16 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
       </div>
     </div>
 
-    <div class="field" data-long="only" data-challenge="hide" data-words="hide">
+    <div class="field" data-feature="only">
+      <div class="label">Where it is posted <span>the feed’s margins around the screen</span></div>
+      <div class="seg" role="group" aria-label="Where the feature video is posted">
+        <button type="button" data-set="fit:tiktok">For TikTok</button>
+        <button type="button" data-set="fit:instagram">For Instagram</button>
+        <button type="button" data-set="fit:normal">Normal</button>
+      </div>
+    </div>
+
+    <div class="field" data-long="only" data-challenge="hide" data-words="hide" data-feature="hide">
       <div class="label">Format <span>YouTube, or a short for any feed</span></div>
       <div class="seg" role="group" aria-label="Video format">
         <button type="button" data-set="longFormat:long">16:9 video</button>
@@ -451,7 +463,7 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
         <pre id="command" class="command" data-long="only"></pre>
       </div>
       <div class="export__actions">
-        <button id="export-thumb" type="button" class="btn btn--metal" data-long="only">Download the thumbnail (.png)</button>
+        <button id="export-thumb" type="button" class="btn btn--metal" data-long="only" data-feature="hide">Download the thumbnail (.png)</button>
         <button id="export-video" type="button" class="btn btn--metal" data-challenge="only">Download the video (.mp4)</button>
         <button id="copy-command" type="button" class="btn" data-long="only">Copy the command</button>
         <button id="export" type="button" class="btn btn--metal" data-long="hide" disabled>Download <span id="export-name"></span> (.zip)</button>

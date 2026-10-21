@@ -5,6 +5,11 @@
     "phrase": "七時に学校へ行きます。",
     "answer": "shichiji ni gakkou e ikimasu"
   },
+  "comprehension": {
+    "level": "N5",
+    "seed": "n5-01",
+    "wrong": 4
+  },
   "translation": {
     "level": "N5",
     "phrase": "この本を読んでください。",
@@ -13,16 +18,32 @@
       "en": {
         "verdict": "partial",
         "summary": "The request is right; the verb's て-form is not.",
-        "good": ["「〜てください」 asks someone politely to do something.", "「この本を」: the book to read, marked by を."],
-        "fix": [{"issue": "「読みて」 is no form of 読む: a verb in む makes its て-form in んで.", "fix": "読んで"}],
+        "good": [
+          "「〜てください」 asks someone politely to do something.",
+          "「この本を」: the book to read, marked by を."
+        ],
+        "fix": [
+          {
+            "issue": "「読みて」 is no form of 読む: a verb in む makes its て-form in んで.",
+            "fix": "読んで"
+          }
+        ],
         "grammar_used": true,
         "better": "この本を読んでください。"
       },
       "fr": {
         "verdict": "partial",
         "summary": "La demande est juste ; la forme en て du verbe ne l'est pas.",
-        "good": ["「〜てください」 demande poliment à quelqu'un de faire quelque chose.", "「この本を」 : le livre à lire, marqué par を."],
-        "fix": [{"issue": "「読みて」 n'est pas une forme de 読む : un verbe en む fait sa forme en て en んで.", "fix": "読んで"}],
+        "good": [
+          "「〜てください」 demande poliment à quelqu'un de faire quelque chose.",
+          "「この本を」 : le livre à lire, marqué par を."
+        ],
+        "fix": [
+          {
+            "issue": "「読みて」 n'est pas une forme de 読む : un verbe en む fait sa forme en て en んで.",
+            "fix": "読んで"
+          }
+        ],
         "grammar_used": true,
         "better": "この本を読んでください。"
       }
@@ -42,8 +63,15 @@
         "verdict": "partial",
         "summary": "The wish is right; たい does not take ます.",
         "meaning": "I want to eat cake.",
-        "good": ["「食べたい」 says what you want to do."],
-        "fix": [{"issue": "「〜たいます」 is no form: 〜たい ends as an い-adjective does, made polite with です.", "fix": "食べたいです"}],
+        "good": [
+          "「食べたい」 says what you want to do."
+        ],
+        "fix": [
+          {
+            "issue": "「〜たいます」 is no form: 〜たい ends as an い-adjective does, made polite with です.",
+            "fix": "食べたいです"
+          }
+        ],
         "grammar_used": true,
         "better": "ケーキを食べたいです。"
       },
@@ -51,11 +79,30 @@
         "verdict": "partial",
         "summary": "L'envie est bien dite ; たい ne prend pas ます.",
         "meaning": "Je veux manger du gâteau.",
-        "good": ["「食べたい」 dit ce que tu as envie de faire."],
-        "fix": [{"issue": "「〜たいます」 n'existe pas : 〜たい finit comme un adjectif en い, qu'on rend poli avec です.", "fix": "食べたいです"}],
+        "good": [
+          "「食べたい」 dit ce que tu as envie de faire."
+        ],
+        "fix": [
+          {
+            "issue": "「〜たいます」 n'existe pas : 〜たい finit comme un adjectif en い, qu'on rend poli avec です.",
+            "fix": "食べたいです"
+          }
+        ],
         "grammar_used": true,
         "better": "ケーキを食べたいです。"
       }
     }
+  },
+  "exam": {
+    "level": "N5",
+    "exam": "n5-vocab-01",
+    "wrong": [
+      4,
+      13
+    ],
+    "minutes_taken": 14
+  },
+  "conversation": {
+    "scenario": "konbini-lunch"
   }
 }

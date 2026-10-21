@@ -1018,7 +1018,16 @@ carousel's own conversations); since plan 269 a reply short of a scene
 the owner pictured (two pictures a turn, asked and answered,
 `frontend/carousel/content/pictures/scenes/`) draws each turn as a
 game's screen: the picture large, the line in a box, the replies a menu
-over it, the answer's picture only once the reply is said. Since plan 248 every number a maker may set per
+over it, the answer's picture only once the reply is said; since plan
+270 each feature of the Practice tab is a 9:16 video of the app itself
+doing one exercise (実践, `feature.js`): the real app recorded as it runs
+(`long/record.mjs`: Vite in the render's process, a phone-sized browser
+signed in, its API answered from `bank/promo.json`, which
+`carousel_bank.promo` makes from the backend's own functions on the
+banks' own content, only a tutor's reply written by hand), a caption a
+beat over it saying what the screen and the app's own description say,
+and the stories' gate at its end; when a screen it records changes, its
+script's selectors are what to check. Since plan 248 every number a maker may set per
 post (a video's timing and pace, the music's level, the export's
 quality) is one line of `tune.js`, set in the studio's Tune panel and
 written into the render command, so the video rendered is the one

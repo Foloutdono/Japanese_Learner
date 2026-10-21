@@ -54,6 +54,8 @@ export const SOURCES = [
   { id: 'words', jp: '語彙', line: 'vocab', name: { en: 'Word shorts', fr: 'Shorts de mots' }, file: lv => `words-${lv}.json`, video: true },
   // Plan 247: a comprehension text read as a 9:16 video, falling or read along (challenge.js).
   { id: 'challenge', jp: '速読', line: 'rikai', name: { en: 'Reading challenge', fr: 'Défi lecture' }, file: () => 'comprehension.json', byLevel: true, video: true },
+  // Plan 270: each feature of the Practice tab, the app itself recorded doing one exercise (feature.js).
+  { id: 'feature', jp: '実践', line: 'gold', name: { en: 'Feature videos', fr: 'Vidéos des fonctions' }, file: () => 'promo.json', noLevels: true, video: true },
 ]
 export const sourceOf = id => SOURCES.find(s => s.id === id) ?? SOURCES[0]
 

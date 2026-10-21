@@ -1695,17 +1695,22 @@ def _promo_spec() -> dict:
     return json.loads((CONTENT / "promo.json").read_text(encoding="utf-8"))
 
 
-def _reading_clock():
-    """routes/reading._display_seconds, its four numbers read from the
-    route's source (the route opens the database on import)."""
+def _reading_constants(*names: str) -> dict:
+    """Constants of routes/reading.py, read from its source (the route
+    opens the database on import)."""
     import ast
 
-    names = {"BASE_SECONDS", "SECONDS_PER_CHAR", "MIN_DISPLAY_SECONDS", "MAX_DISPLAY_SECONDS"}
     tree = ast.parse((BACKEND / "routes" / "reading.py").read_text(encoding="utf-8"))
     v = {n.targets[0].id: ast.literal_eval(n.value) for n in tree.body
          if isinstance(n, ast.Assign) and len(n.targets) == 1 and isinstance(n.targets[0], ast.Name) and n.targets[0].id in names}
-    if set(v) != names:
-        raise SystemExit("routes/reading.py: the reading clock's numbers moved")
+    if set(v) != set(names):
+        raise SystemExit(f"routes/reading.py: {', '.join(sorted(set(names) - set(v)))} moved")
+    return v
+
+
+def _reading_clock():
+    """routes/reading._display_seconds, from its four numbers."""
+    v = _reading_constants("BASE_SECONDS", "SECONDS_PER_CHAR", "MIN_DISPLAY_SECONDS", "MAX_DISPLAY_SECONDS")
     return lambda jp: max(v["MIN_DISPLAY_SECONDS"], min(v["MAX_DISPLAY_SECONDS"], round(v["BASE_SECONDS"] + v["SECONDS_PER_CHAR"] * len(jp), 1)))
 
 
@@ -1824,7 +1829,145 @@ def _promo_composition(spec: dict, lang: str) -> dict:
     }
 
 
-PROMO_FEATURES = {"reading": _promo_reading, "translation": _promo_translation, "dictation": _promo_dictation, "composition": _promo_composition}
+def _promo_comprehension(spec: dict, lang: str) -> dict:
+    """理解: a seed passage served as GET /api/reading/comprehension
+    serves it (comprehension_seed.render, its answers dealt by
+    balance_answers, each sentence analysed), and the result of the
+    answers the video gives: every one right but the `wrong` one."""
+    import random
+
+    from content import comprehension_seed
+    from study.analysis import analyze_with_glosses, attach_user_state
+    from study.answer_balance import balance_answers
+
+    level = spec["level"]
+    entry = next((e for e in comprehension_seed.by_level().get(level, []) if e["id"] == spec["seed"]), None)
+    if entry is None:
+        raise SystemExit(f"content/promo.json: {spec['seed']} is no {level} comprehension seed")
+    data = comprehension_seed.render(entry, lang)
+    # Dealt once, from the seed's id: the video answers the order it was served.
+    balance_answers(data["questions"], random.Random(spec["seed"]))
+    for part in data["breakdown"]:
+        part["analysis"] = attach_user_state(analyze_with_glosses(part["jp"], part.pop("words", None), level), {}, "promo")
+    v = _reading_constants("COMPREHENSION_SPECS", "READ_SECONDS_BY_LEVEL")
+    qs = data["questions"]
+    answers = [q["correct"] if i != spec["wrong"] else (q["correct"] + 1) % len(q["options"]) for i, q in enumerate(qs)]
+    right = [a == q["correct"] for q, a in zip(qs, answers)]
+    from srs.xp import BASE_XP_BY_QUALITY
+
+    return {
+        "level": level, "line": data["text"], "answers": answers, "wrong": spec["wrong"],
+        "mocks": {
+            "GET /api/reading/comprehension": {
+                "level": level, "text": data["text"], "translation": data["translation"], "breakdown": data["breakdown"],
+                "questions": qs, "grammar_points": data["grammar_points"], "read_seconds": v["READ_SECONDS_BY_LEVEL"][level],
+                "question_count": v["COMPREHENSION_SPECS"][level]["questions"], "repeat": False,
+            },
+            "POST /api/reading/comprehension/result": {
+                "xp_earned": sum(BASE_XP_BY_QUALITY.get(4 if ok else 1, 0) for ok in right), "leveled_up": False, "new_level": None,
+                "id": 1, "score": sum(right), "total": len(qs), "created_at": PROMO_AT,
+                "results": [{"type": q.get("type", "comprehension"), "question": q["question"], "options": q["options"], "correct": q["correct"], "user_answer": a, "is_correct": ok}
+                            for q, a, ok in zip(qs, answers, right)],
+            },
+        },
+    }
+
+
+def _promo_exam(spec: dict, lang: str) -> dict:
+    """模試: the catalogue as list_exams lists it for a learner who has sat
+    nothing (each exam id's first seed paper, at revision 1), the paper
+    opened, and the attempt scored by study/exam_scoring as the route
+    scores it: every answer right but the `wrong` ones."""
+    from study import exam_seed
+    from study.exam_blueprint import name_mondai
+    from study.exam_catalogue import EXAM_GENERATORS, KIND_META
+    from study.exam_scoring import flatten_questions, score_attempt
+    from srs.xp import BASE_XP_BY_QUALITY
+
+    def first(exam_id):
+        seeds = exam_seed.load(exam_id)
+        if not seeds or not seeds.get("papers"):
+            raise SystemExit(f"content/exam_seed/{exam_id}.json: no paper")
+        return seeds["papers"][0]["paper"]
+
+    catalogue = []
+    for exam_id, (_v, kind, level, _gen) in EXAM_GENERATORS.items():
+        paper = name_mondai(first(exam_id))
+        counts, names = {}, {}
+        for q in flatten_questions(paper):
+            counts[q["mondaiId"]] = counts.get(q["mondaiId"], 0) + 1
+        for section in paper.get("sections") or []:
+            for m in section.get("mondai") or []:
+                names.setdefault(m.get("id"), m.get("nameJp"))
+        catalogue.append({
+            "id": exam_id, "kind": kind, "level": paper["level"], "title": paper["title"], "titleJp": paper["titleJp"],
+            "questionCount": sum(counts.values()), "generated": True, "revision": 1,
+            "minutes": int(paper["sections"][0]["timeLimitMin"]),
+            "mondai": [names[m] for m in counts], "parts": [{"nameJp": names.get(m), "count": n} for m, n in counts.items()],
+            "last": None,
+        })
+    exam_id = spec["exam"]
+    paper = name_mondai(first(exam_id))
+    qs = flatten_questions(paper)
+    wrong = set(spec["wrong"])
+    answers = {}
+    for i, q in enumerate(qs):
+        ids = [c["id"] for c in q["choices"]]
+        answers[q["id"]] = q["answer"] if i not in wrong else ids[(ids.index(q["answer"]) + 1) % len(ids)]
+    summary = score_attempt(paper, answers)
+    xp = BASE_XP_BY_QUALITY.get(4, 0) * summary["correct"] + BASE_XP_BY_QUALITY.get(1, 0) * (summary["total"] - summary["correct"])
+    started = 1790845200000  # 2026-10-01 09:00 UTC
+    attempt = {
+        "xp_earned": xp, "leveled_up": False, "new_level": None, "attemptId": 1, "examId": exam_id, "revision": 1,
+        "startedAt": started, "finishedAt": started + spec["minutes_taken"] * 60000, **summary,
+    }
+    return {
+        "level": paper["level"], "line": paper["titleJp"], "exam": exam_id,
+        "answers": [{"id": q["id"], "slot": [c["id"] for c in q["choices"]].index(answers[q["id"]])} for q in qs],
+        "wrong": sorted(wrong),
+        "mocks": {
+            "GET /api/exams": catalogue,
+            f"GET /api/exams/{exam_id}": {**paper, "revision": 1},
+            f"POST /api/exams/{exam_id}/attempts": attempt,
+            f"GET /api/exams/{exam_id}/attempts/1": {
+                **{k: attempt[k] for k in ("attemptId", "examId", "revision", "review", "perSection", "correct", "total", "startedAt", "finishedAt")},
+                "sectionId": paper["sections"][0]["id"], "answers": answers,
+            },
+        },
+    }
+
+
+def _promo_conversation(spec: dict, lang: str) -> dict:
+    """会話: the station's scenarios (a learner who has ridden none) and
+    one scene, ridden in Choose, its choices dealt once from its id as
+    the route deals them per request, every pick the right one."""
+    import random
+
+    from study import conversation
+
+    bank = conversation.bank_lang(lang)
+    payload = conversation.scenario_payload(spec["scenario"], bank)
+    if payload is None:
+        raise SystemExit(f"content/promo.json: {spec['scenario']} is no scenario of the 会話 bank")
+    rng = random.Random(spec["scenario"])
+    turns = []
+    for turn in payload["turns"]:
+        choices = list(turn["choices"])
+        rng.shuffle(choices)
+        turns.append({**turn, "choices": choices})
+    return {
+        "level": payload["level"], "line": turns[0]["them"]["jp"], "scenario": spec["scenario"],
+        "picks": [next(i for i, c in enumerate(t["choices"]) if c.get("right")) for t in turns],
+        "said": [{"them": t["them"]["jp"], "me": t["me"]["jp"]} for t in turns],
+        "mocks": {
+            "GET /api/conversation/scenarios": {"scenarios": conversation.catalogue(bank), "record": {}},
+            f"GET /api/conversation/scenario/{spec['scenario']}": {**payload, "turns": turns},
+            "POST /api/conversation/result": {"correct": True, "quality": 4, **{k: v for k, v in _promo_fare(4).items() if k != "correct"}},
+        },
+    }
+
+
+PROMO_FEATURES = {"reading": _promo_reading, "comprehension": _promo_comprehension, "translation": _promo_translation, "dictation": _promo_dictation, "composition": _promo_composition, "exam": _promo_exam, "conversation": _promo_conversation}
 
 
 def promo() -> dict:

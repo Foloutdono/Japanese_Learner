@@ -23,6 +23,7 @@ import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
 import { arrivals as landingArrivals, readFacts, spanOf as landingSpan } from '../landing/content.mjs'
+import { APP as FEATURE_APP, FEATURE_IDS, FEATURES as FEATURE_SCRIPTS, SHOT, cropFor, drawFeature, featureCommand, featureItems, featurePage, featurePlan, featureSteps, featureTimeline, layoutOf, localeKeys } from '../carousel/feature.js'
 import EN from './locales/en/index.js'
 import FR from './locales/fr/index.js'
 
@@ -2859,3 +2860,118 @@ function placedTexts() {
   const ctx = new Proxy(state, { get: (o, k) => (k in methods ? methods[k] : k in o ? o[k] : () => {}), set: (o, k, v) => { o[k] = v; return true } })
   return { ctx, texts }
 }
+
+describe('the practice features, recorded in the app (plan 270)', () => {
+  const B = { 'promo.json': bank('promo.json') }
+  const LANGS = ['en', 'fr']
+  const LOCALES = { en: EN, fr: FR }
+  // record.mjs's shots for a script, without a browser: where a step shoots, a
+  // box for what it shows and one for what it taps, a typed run a shot a chunk,
+  // a clip a shot every 0.15 s of it.
+  const FOCUS = { x: 40, y: 600, w: 1000, h: 520 }
+  const TAP = { x: 120, y: 980, w: 300, h: 110 }
+  function shotsOf(steps) {
+    const shots = []
+    for (const st of steps) {
+      if (st.type) {
+        const n = [...st.text].length
+        for (let c = st.chunk || 3, i = 0; c - (st.chunk || 3) < n; c += st.chunk || 3, i++) shots.push({ name: st.shot, i, chars: Math.min(n, c), focus: FOCUS, tap: null })
+      } else if (st.play) {
+        for (let at = 0, i = 0; at < st.seconds + 0.3; at += 0.15, i++) shots.push({ name: st.shot, i, at, focus: FOCUS, tap: null })
+      } else if (st.shot) shots.push({ name: st.shot, i: 0, focus: FOCUS, tap: st.tap ? TAP : null })
+    }
+    return shots
+  }
+  const each = fn => { for (const id of FEATURE_IDS) for (const lang of LANGS) fn(id, lang, featurePlan(B, id, { lang })) }
+
+  it('films every feature of the Practice tab, in its order, named as the app names it', () => {
+    const tabs = read('src/config/tabs.js')
+    const order = [...tabs.matchAll(/path: '\/practice\/(\w+)'[^\n]*tab: 'practice'/g)].map(m => m[1])
+    expect(FEATURE_IDS).toEqual(order)
+    expect(Object.keys(FEATURE_SCRIPTS).sort()).toEqual([...FEATURE_IDS].sort())
+    for (const lang of LANGS) {
+      const A = FEATURE_APP[lang]
+      const T = LOCALES[lang]
+      expect(A.tab, lang).toBe(T.tabPractice)
+      for (const id of FEATURE_IDS) {
+        expect(weldIf(lang, A.title[id]), `${id} ${lang}`).toBe(T[localeKeys(id).title])
+        expect(weldIf(lang, A.desc[id]), `${id} ${lang}`).toBe(T[localeKeys(id).desc])
+      }
+      expect(featureItems(lang).map(x => x.id)).toEqual(FEATURE_IDS)
+    }
+  })
+
+  it('times every beat from the shots its script takes, its lines voiced in turn', () => {
+    each((id, lang, plan) => {
+      const at = `${id} ${lang}`
+      const steps = featureSteps(plan)
+      // Every part a beat shows is a shot its script takes.
+      const names = new Set(steps.map(st => st.shot).filter(Boolean))
+      for (const b of plan.beats) for (const p of b.parts) expect(names.has(p.shot || p.seq), `${at}: ${p.shot || p.seq}`).toBe(true)
+      const tl = featureTimeline(plan, shotsOf(steps))
+      expect(tl.segs.length, at).toBe(plan.beats.length + 1)
+      expect(tl.segs.at(-1).kind, at).toBe('end')
+      // A short: long enough to show the exercise, never past a Short's minute.
+      expect(tl.seconds, at).toBeGreaterThan(14)
+      expect(tl.seconds, at).toBeLessThan(45)
+      // Each line the video says is said once, and never two at once.
+      const voiced = plan.beats.flatMap(b => b.parts.flatMap(p => [p.hear, p.voice].filter(v => v != null)))
+      expect(tl.cues.length, at).toBe(voiced.length)
+      expect(new Set(voiced.map(v => (v === true ? 0 : v))).size, at).toBe(plan.cues.length)
+      const sorted = [...tl.cues].sort((a, b) => a.at - b.at)
+      for (let k = 1; k < sorted.length; k++) expect(sorted[k].at, at).toBeGreaterThan(sorted[k - 1].at + 0.5 + 0.13 * [...sorted[k - 1].text].length - 0.01)
+      // Beats follow each other, and every tap falls inside its beat.
+      for (const sg of tl.segs.filter(x => x.kind === 'beat')) for (const t of sg.taps) {
+        expect(t.t, at).toBeGreaterThan(sg.start)
+        expect(t.t, at).toBeLessThan(sg.start + sg.dur)
+      }
+    })
+  })
+
+  it('keeps what a part shows, and where the finger taps, inside the feed’s safe box', () => {
+    for (const fit of ['tiktok', 'instagram']) {
+      const L = layoutOf(fit)
+      const fits = (box, off) => box.y >= off - 1 && box.y + box.h <= off + L.safeRows + 1
+      // What fits is shown whole; a tap is never off the screen, however tall the rest.
+      expect(fits(FOCUS, cropFor(FOCUS, L))).toBe(true)
+      const low = { x: 40, y: 1950, w: 1000, h: 120 }
+      expect(fits(low, cropFor(low, L))).toBe(true)
+      const tall = { x: 40, y: 200, w: 1000, h: 1900 }
+      const tap = { x: 40, y: 2000, w: 300, h: 110 }
+      expect(fits(tap, cropFor(tall, L, tap))).toBe(true)
+      expect(cropFor(tall, L) ).toBe(176)
+      expect(cropFor(tall, L) + L.rows).toBeLessThanOrEqual(SHOT.h)
+      // The screen's foot stays on the frame, under the safe box by no more than its border.
+      expect(L.bottom).toBeLessThanOrEqual(L.fmt.h - 40)
+    }
+  })
+
+  it('says every caption whole, and nothing the app does not', () => {
+    const SALES = /€|\$|£|\d+ ?%|\bfree\b|gratuit|best\b|meilleur|#1|guarantee|garanti|fluent|couramment|in \d+ days|en \d+ jours/i
+    each((id, lang, plan) => {
+      const at = `${id} ${lang}`
+      for (const line of [plan.title, plan.end, ...plan.beats.map(b => b.say)]) expect(line, at).not.toMatch(SALES)
+      const tl = featureTimeline(plan, shotsOf(featureSteps(plan)))
+      for (const sg of tl.segs.filter(x => x.kind === 'beat')) {
+        const { ctx, texts } = stubContext()
+        drawFeature(ctx, plan, tl, sg.start + sg.dur / 2, [])
+        expect(texts.join(' '), `${at}: ${sg.say}`).not.toContain('…')
+        expect(texts.some(t => sg.say.includes(t.trim()) && t.trim().length > 2), `${at}: ${sg.say}`).toBe(true)
+      }
+    })
+  })
+
+  it('posts each video to the three feeds, credited where the app’s voices speak', () => {
+    each((id, lang, plan) => {
+      const at = `${id} ${lang}`
+      const tl = featureTimeline(plan, shotsOf(featureSteps(plan)))
+      const page = featurePage(plan, tl, SITE_ORIGIN)
+      expect([...page.title].length, at).toBeLessThanOrEqual(100)
+      expect(page.title, at).toMatch(/#shorts$/)
+      for (const line of weldIf(lang, FEATURE_APP[lang].desc[id]).split('\n')) expect(page.description, at).toContain(line)
+      expect(/VOICEVOX Nemo/.test(page.description), at).toBe(plan.cues.length > 0)
+      expectFeeds(page, SITE_ORIGIN, at)
+      expect(featureCommand(id, lang), at).toContain(`--feature ${id} --lang ${lang}`)
+    })
+  })
+})

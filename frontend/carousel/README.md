@@ -290,6 +290,7 @@ Every slide is drawn from the app's own data, written once into
 | `dialogues.json` | each conversation's turns, every line split into words with its furigana and romaji (お and ご joined to their word); since plan 268 the 会話 station's scenes after the carousel's own at each level, marked `kaiwa` | `frontend/carousel/content/dialogues.json`, `backend/content/conversation/` |
 | `traps.json` | every tour twist of kind "trap": its sentence, question, three readings, why, the pair, the point's "careful" step | `content/grammar/*.json` |
 | `short.json` | Read it's own sentences: each word's row, its card's gloss in both languages (the deck's sense the sentence picked, the particle's role written beside it), the sentence said politely and where | `frontend/carousel/content/short.json`, the deck, `study/plain_polite` |
+| `promo.json` | per practice feature and language, what the app's API answers in its video: the boot, and the feature's own routes, made by the backend's functions (plan 270) | `frontend/carousel/content/promo.json`, the reading, dictation and 会話 banks, the comprehension and exam seeds, `study/tutor_review` |
 | `index.json` | the figures the last slide quotes: sentences, points, words, kanji, kana, passages, themes, traps | all of the above |
 
 `frontend/carousel/content/` is the studio's own hand-written content:
@@ -639,6 +640,90 @@ equal); its words are the app's where the app says them (the ratings,
 the stages, "due", Depart, a test holds them to `locales/`). It says
 "start free", the kana line free for good, no ads and no trackers; it
 never prices a mode nor says "early access", and a test fails if it does.
+
+## The feature videos (plan 270)
+
+実践 shows the app itself doing what the Practice tab's features do: one
+9:16 video per feature, in the tab's order (読書 reading, 理解
+comprehension, 翻訳 translation, 書取 dictation, 作文 composition, 模試 the
+mock exam, 会話 conversation). It is the owner's pick of three drawn (the
+real screen, over a play-along and a pitch). Nothing in these videos is
+drawn to look like the app. **The app is recorded as it runs**
+(`long/record.mjs`):
+
+- Vite serves `frontend/` in the render's own process.
+- A phone-sized browser (400 CSS px at 2.7, so a shot is 1080 × 2322)
+  signs in as a learner who has boarded, on the free plan.
+- Each step of the feature's script is done as a learner does it: the
+  gate's plate tapped, the level, the run, the answer typed or picked.
+- A shot is taken where the video needs one. The box of what it shows
+  and the box of what a finger taps are read off the page.
+
+**Its API answers are the backend's own.** `bank/promo.json`, written by
+`python -m scripts.carousel_bank --only promo.json`, is what each route
+would answer, made by the functions the route calls on the banks' own
+content:
+
+| Feature | Source | How it is made |
+| --- | --- | --- |
+| 読書 | a reading-bank row | `_finish_phrase`'s fields, measured by `measure_forms` |
+| 理解 | an N5 seed | `comprehension_seed.render`, dealt by `balance_answers`, each sentence analysed |
+| 翻訳, 作文 | tutor replies | `tutor_review` |
+| 書取 | a line of the dictation bank | `dictation.measure` |
+| 模試 | the catalogue's first seed paper per exam id | `score_attempt` |
+| 会話 | a 会話 scene | `conversation.scenario_payload` |
+
+The boot is the profile, the free plan's credits from
+`credits._summary_of`, and Today, so no boarding or guide stands over the
+screen. Only a model's words are written by hand: the tutor's raw replies
+for translation and composition (`content/promo.json`, with each
+feature's sentence, the answer typed and the slips the video makes).
+`backend/tests/test_carousel_bank.py` holds the file to what `promo()`
+writes. It also checks that each exercise ends as its script says: the
+reading right, the dictation one slip short, the comprehension one
+question wrong, the exam's slips its own and the conversation's picks
+the right replies.
+
+**A video is beats** (`feature.js`, `FEATURES[id]`):
+
+- **The caption.** Each beat has a caption in the line's lightened ink
+  and a serif sentence, over the screen in a rounded frame on the sumi
+  ground. A caption says what the screen shows and the app's own
+  description says (`APP`, held to the locales). It carries no figure,
+  no price and no promise.
+- **Parts.** Each beat is made of parts: a shot held, or a typed or
+  played run of them.
+- **The screen's position.** The screen moves to what each part shows,
+  by the least that keeps its focus and its tap inside the feed's safe
+  box. A part taller than the box is scrolled slowly down to its foot,
+  the way a learner reads a review.
+- **Taps.** A finger shows before each tap and a ring follows it. A
+  `click` sound plays, and a softer one on each typed key.
+- **Voices.** The engine's voices speak where the app speaks: the clip
+  dictation plays, and in a conversation the clerk's line (`hear`, as it
+  appears) and the reply picked (`voice`, from the tap). Nothing taps or
+  moves on over a line still being said.
+- **The ending.** The video ends on the promo stories' gate
+  (`promo.gateClip`), its ask in the feature's words.
+
+Its page and its posts for Shorts, Reels and TikTok name the feature and
+quote the app's three lines about it. They credit VOICEVOX Nemo only
+where a voice speaks.
+
+```bash
+cd frontend
+VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --feature dictation --lang fr
+node carousel/long/render.mjs --feature exam --lang en --music none --fit instagram
+node carousel/long/render.mjs --feature reading --stills 1,5,9   # frames, no video
+```
+
+The studio lists the seven under 実践 with each video's page, posts and
+command. Its preview is the gate the video ends on: the rest is recorded
+where the command runs. When a screen of the app changes, its script's
+selectors are what to check (`plate`, `stop`, `.stage__foot`, the run's
+own classes). A step that finds nothing to tap says so in the render's
+log, and an API the app asks for and the bank does not answer gets `{}`,
+which is logged too.
 
 ## The word echo (plan 232)
 
@@ -1174,7 +1259,9 @@ what its video did before.
 | `long.js` | the long videos: what each says, when, each frame, their page, and the studio's list of them (plan 233) |
 | `short.js` | a carousel as a short video: its timing, its swipes, its line and page (plan 233) |
 | `challenge.js` | the reading challenges: a comprehension text in a credits scroll or read along, its timing on the voice, each frame, its page (plan 247) |
-| `long/render.mjs` | a long video, its short, a carousel's short or a reading challenge made: voiced, mixed, drawn and encoded (plans 233, 247) |
+| `long/render.mjs` | a long video, its short, a carousel's short or a reading challenge made: voiced, mixed, drawn and encoded (plans 233, 247); a feature video recorded and made (plan 270) |
+| `feature.js` | the feature videos: each feature's script (its steps in the app, its beats), their timing on the shots, each frame, their page (plan 270) |
+| `long/record.mjs` | the app served by Vite and run in a phone-sized browser, its API answered from `promo.json`, a feature's steps done and shot (plan 270) |
 | `tune.js` | what the Tune panel can set: each value's default, range, step and label, read by every module through `tuned()` (plan 248) |
 | `studio.js` | the page: the pickers, the previews, the export |
 
@@ -1240,6 +1327,12 @@ are written by hand and held by `src/carousel.test.js`:
   theme added here needs its impostor theme in `sources.IMPOSTOR_FROM`,
   and its new pictured words their voices
   (`python -m scripts.carousel_voices --yes`, with the voice engine).
+- **A feature video's exercise** (`content/promo.json`, plan 270) uses
+  the banks' own sentence, scene, seed or paper, named by its text or
+  id, so the bank refuses one that left them. The answer typed is a slip
+  a beginner makes. A tutor's reply is in the model's own shape, in both
+  languages, and is run through `study/tutor_review` as the route runs
+  it.
 
 The bank cuts every line through the analyser and mends what it gets
 wrong (plan 248): a word the page writes in kana (としょかん) is read as

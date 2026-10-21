@@ -155,3 +155,39 @@ def test_the_stations_scenes_join_the_carousels_conversations():
     assert out["rev"] == 3
     # The scenes as the reply videos read them are left as they were.
     assert scenes["scenes"][0]["id"] == "pharmacy"
+
+
+def test_the_feature_videos_are_answered_as_the_backend_answers():
+    """Plan 270: bank/promo.json is what promo() writes now (the app's own
+    answers for the banks' own content), and each video's exercise ends as
+    its script says: the slips marked, the right picks right."""
+    built = json.loads(cb.dump(cb.promo()))
+    assert json.loads((cb.OUT / "promo.json").read_text(encoding="utf-8")) == built, \
+        "bank/promo.json is stale: run python -m scripts.carousel_bank --only promo.json"
+    features = built["features"]
+    assert set(features) == {"reading", "comprehension", "translation", "dictation", "composition", "exam", "conversation"}
+    for name, langs in features.items():
+        assert set(langs) == {"en", "fr"}, name
+        for lang, f in langs.items():
+            # The shell's boot first: a learner who boarded, on the free plan.
+            assert f["mocks"]["GET /api/profile"]["onboardedAt"], (name, lang)
+            assert f["mocks"]["GET /api/credits"]["pending"] == 0, (name, lang)
+            if name == "reading":
+                assert f["mocks"]["POST /api/reading/check"]["accuracy"] == 100
+            if name == "dictation":
+                assert 0 < f["mocks"]["POST /api/dictation/check"]["accuracy"] < 100
+            if name in ("translation", "composition"):
+                review = f["mocks"][f"POST /api/{name}/{'analyze' if name == 'translation' else 'review'}"]["review"]
+                assert review["verdict"] == "partial" and review["fix"], (name, lang)
+            if name == "comprehension":
+                result = f["mocks"]["POST /api/reading/comprehension/result"]
+                assert result["score"] == result["total"] - 1
+                assert not result["results"][f["wrong"]]["is_correct"]
+            if name == "exam":
+                attempt = f["mocks"][f"POST /api/exams/{f['exam']}/attempts"]
+                assert attempt["correct"] == attempt["total"] - len(f["wrong"])
+                # The three questions the video shows are answered right.
+                assert all(r["isCorrect"] for r in attempt["review"][:3])
+            if name == "conversation":
+                turns = f["mocks"][f"GET /api/conversation/scenario/{f['scenario']}"]["turns"]
+                assert all(t["choices"][k]["right"] for t, k in zip(turns, f["picks"]))

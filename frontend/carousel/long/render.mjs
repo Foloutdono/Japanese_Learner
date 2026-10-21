@@ -199,9 +199,9 @@ if (args.challenge) {
   const { featurePage, featurePlan, featureStillAt, featureSteps, featureTimeline } = await import('../feature.js')
   const { appServer, record } = await import('./record.mjs')
   const plan = featurePlan(banks, String(args.feature), { lang, fit: opts.fit, music: args.music !== 'none', handle: typeof args.handle === 'string' ? args.handle : '' })
-  const dur = plan.cue ? voiceAll([plan.cue]) : null
-  // The clip the app plays is the line voiced, so the player runs as long as the voice.
-  const said = plan.cue ? dur(plan.cue) : null
+  const dur = plan.cues.length ? voiceAll(plan.cues) : null
+  // The clip the app plays is the first line voiced, so the player runs as long as the voice.
+  const said = plan.cues.length ? dur(plan.cues[0]) : null
   const app = await appServer(FRONT, typeof args.app === 'string' ? args.app : null)
   // The shots under the front end, where this page can load them.
   const shotDir = join(FRONT, 'carousel/long/out/.shots', `${process.pid}-${Date.now()}`)
@@ -209,7 +209,7 @@ if (args.challenge) {
   log(`recording ${plan.name} (${lang}) in the app at ${app.url}`)
   let shots
   try {
-    shots = await record(browser, { url: app.url, steps: featureSteps(plan, said || 2.5), mocks: plan.data.mocks, lang, audio: plan.cue ? dur.file(plan.cue) : null, dir: shotDir, log })
+    shots = await record(browser, { url: app.url, steps: featureSteps(plan, said || 2.5), mocks: plan.data.mocks, lang, audio: plan.cues.length ? dur.file(plan.cues[0]) : null, dir: shotDir, log })
   } finally { await app.close() }
   tl = featureTimeline(plan, shots, dur)
   SIZE = TALL

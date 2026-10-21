@@ -11,7 +11,7 @@
 //
 // A step is one of:
 //   { go: '/practice/dictation/N5', ready: SEL }   open a page, wait for SEL
-//   { shot: NAME, focus: SEL, tap: SEL }           a shot, and where SEL stands (all it matches)
+//   { shot: NAME, focus: SEL, tap: SEL }           a shot, and where SEL stands (all it matches; SEL or [SEL])
 //   { click: SEL, ready: SEL }                     a tap, then wait for SEL
 //   { type: SEL, text, shot: NAME, chunk: 3 }      typed a few keys at a time, a shot after each
 //   { play: SEL, shot: NAME, seconds: 2.5 }        tapped, then a shot every so often while it plays
@@ -78,10 +78,11 @@ export async function record(browser, { url, steps, mocks, lang, audio = null, d
   await page.goto(`${url}/practice`, { waitUntil: 'networkidle' }).catch(() => {})
   await page.waitForTimeout(1500)
   const S = PHONE.scale
-  // Where SEL stands: every element it matches, as one box.
+  // Where SEL stands: every element it matches (or each of a list matches), as one box.
   const box = async sel => {
     if (!sel) return null
-    const bs = (await Promise.all((await page.locator(sel).all()).map(l => l.boundingBox().catch(() => null)))).filter(b => b && b.width && b.height)
+    const locs = (await Promise.all([].concat(sel).map(one => page.locator(one).all()))).flat()
+    const bs = (await Promise.all(locs.map(l => l.boundingBox().catch(() => null)))).filter(b => b && b.width && b.height)
     if (!bs.length) return null
     const x = Math.min(...bs.map(b => b.x)), y = Math.min(...bs.map(b => b.y))
     const r = Math.max(...bs.map(b => b.x + b.width)), d = Math.max(...bs.map(b => b.y + b.height))
