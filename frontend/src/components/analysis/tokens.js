@@ -85,9 +85,13 @@ export function lineState(tok, grammar) {
 // carries both (study/analysis._deck_match) -- else nothing. A pool word
 // carries the same pair where the pool's French layer has its line
 // (plan 215, study/analysis._pool_match), its English alone otherwise.
+// A number or a name the course has no card for carries the local tier's
+// own line instead (plan 266, study/analysis._number_dict and
+// _NAME_GLOSS): 三十 is 30, 田中 a family name -- a row that said nothing.
 export function wordGloss(tok, lang) {
   if (tok?.meaning) return tok.meaning
   const entry = tok?.vocab_match?.entry
-  if (!entry) return ''
-  return (lang === 'fr' && entry.meaning_fr) || entry.meaning || ''
+  if (entry) return (lang === 'fr' && entry.meaning_fr) || entry.meaning || ''
+  const own = tok?.gloss
+  return (own && ((lang === 'fr' && own.fr) || own.en)) || ''
 }
