@@ -400,9 +400,9 @@ describe('TodayScreen — the transfer sheet', () => {
   })
 })
 
-// 本乗車券 (plan 269): a guest is asked to keep the card with an address
-// at most once a day, after the guide and the transfer offer, and may
-// always go on as a guest.
+// 本乗車券 (plan 269): a guest is asked to make the card an account
+// further and further apart, after the guide and the transfer offer, and
+// may always go on as a guest.
 describe('TodayScreen — asking a guest to keep the card', () => {
   const GUIDED = { today: '2026-10-17T00:00:00Z' }
   const guest = { access_token: 'tok', user: { id: 'g1', is_anonymous: true } }
@@ -426,7 +426,21 @@ describe('TodayScreen — asking a guest to keep the card', () => {
     summaryRef.current = { username: 'Aiko', week: [], streak: 0, level: 1, guided: GUIDED }
   })
 
-  it('asks a guest once a day, and « Continuer en invité » goes on', async () => {
+  it('waits out the gap since the last ask', async () => {
+    const day = d => { const at = new Date(); at.setDate(at.getDate() - d); return `${at.getFullYear()}-${String(at.getMonth() + 1).padStart(2, '0')}-${String(at.getDate()).padStart(2, '0')}` }
+    // Asked twice, the second time yesterday: the next gap is two days.
+    localStorage.setItem('tsuji.keepAsked', JSON.stringify({ g1: { n: 2, at: day(1) } }))
+    let screen = await mountAs(guest)
+    await settle(300)
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    localStorage.setItem('tsuji.keepAsked', JSON.stringify({ g1: { n: 2, at: day(2) } }))
+    screen = await mountAs(guest)
+    await arrives(sheet)
+    await screen.unmount()
+  })
+
+  it('asks a guest, and « Continuer en invité » goes on', async () => {
     let screen = await mountAs(guest)
     await arrives(sheet)
     expect(sheet().querySelector('[data-action="account-guest"]').textContent).toBe('Continuer en invité')

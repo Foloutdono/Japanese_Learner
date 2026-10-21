@@ -56,8 +56,8 @@ import { noteAskedToKeep } from '../lib/guest'
 // The boarding runs on a guest pass -- a real Supabase user with no
 // credentials on it (lib/guest.js) -- and the card's account sheet
 // offers to keep it on the very row the learner is filling in: Google,
-// or a link sent to an address. Nothing is migrated because nothing
-// moved; a learner who says « Plus tard » rides on as they were.
+// or an address and a password (plan 269). Nothing is migrated because
+// nothing moved; a learner who says « Plus tard » rides on as they were.
 // Since plan 269 the gate asks before it issues: a guest who has not
 // kept the card, pressing « Émettre ma carte », is shown that sheet
 // first, once, and « Continuer en invité » there issues the card as
@@ -191,8 +191,12 @@ export default function BoardingFlow({
   const [sheet, setSheet] = useState(() => (resumed?.sheet === 'account' && guest ? 'account' : null))
   const [edited, setEdited] = useState(() => ({ ...UNEDITED, ...(resumed?.edited ?? {}) }))
   // How the card was kept here: 'google' (the round trip, or the native
-  // sheet), 'link' (an address sent its link). null is not kept here.
+  // sheet), 'password' (an address and a password, plan 269), 'link' (an
+  // address waiting on its confirmation). null is not kept here.
   const [keptBy, setKeptBy] = useState(() => (!guest && resumed?.keeping === 'google' ? 'google' : null))
+  // The address an account was just made with here (plan 269), until the
+  // session that carries it arrives; and one waiting on its confirmation.
+  const [keptEmail, setKeptEmail] = useState(null)
   const [linkSent, setLinkSent] = useState(null)
   // Plan 269: whether the gate has asked for an address, and whether the
   // account sheet open now is that ask (its way past then issues).
@@ -540,17 +544,18 @@ export default function BoardingFlow({
   }
 
   // Where the card lives: an account the learner boarded with, or one
-  // kept here; a link on its way; or this device alone.
+  // kept here; an address waiting on its link; or this device alone.
   const user = session?.user ?? null
   const viaGoogle = keptBy === 'google'
     || user?.app_metadata?.provider === 'google'
     || (user?.identities ?? []).some(i => i.provider === 'google')
   const kept = !guest
     ? { state: viaGoogle ? 'google' : 'account', email: user?.email ?? null }
+    : keptBy === 'password' ? { state: 'account', email: keptEmail }
     : linkSent ? { state: 'sent', email: linkSent } : { state: 'device' }
 
-  // `by` is how the ask was just answered ('google', 'link', 'guest'),
-  // which this render's state does not hold yet.
+  // `by` is how the ask was just answered ('google', 'password', 'link',
+  // 'guest'), which this render's state does not hold yet.
   function complete(by = null) {
     if (busy) return
     // The gate asks first, once (plan 269): Today's ask then waits a day.
@@ -704,7 +709,7 @@ export default function BoardingFlow({
         onLeaveForAuth={() => stash({ answers, step: 'card', sheet: 'account', keeping: 'google', edited, history, askedKeep, asking })}
         // Raised by the gate, an answer issues the card (plan 269).
         onGuest={asking ? () => { close(); complete('guest') } : null}
-        onKept={by => { setKeptBy(by); close(); if (asking) complete(by) }}
+        onKept={(by, email = null) => { setKeptBy(by); setKeptEmail(email); close(); if (asking) complete(by) }}
         onSent={email => { setLinkSent(email); setKeptBy('link'); close(); if (asking) complete('link') }}
       />
     </>

@@ -164,38 +164,27 @@ export async function claimAccount({ email, password, lang }) {
   }
 }
 
-/**
- * 本乗車券 by a link (plan 247) — the card's account sheet: an address
- * and nothing else. Supabase mails it a link; followed, the address is
- * the account's, on the same id as everything else, so nothing moves.
- * No password is set, which is the point (the sign-in card mails a link
- * too, components/account/AuthCard.jsx). The project's "confirm email"
- * road is claimAccount's, above, refusals and all: `code` is carried out
- * for lib/authErrors.js.
- */
-export async function claimByLink({ email, lang }) {
-  try {
-    const { error } = await supabase.auth.updateUser({
-      email, ...(lang ? { data: { lang } } : {}),
-    }, { emailRedirectTo: emailRedirectTarget() })
-    if (error) return { ok: false, code: error.code, message: error.message }
-    return { ok: true }
-  } catch (err) {
-    return { ok: false, message: err?.message }
-  }
-}
-
 // ── Asked to keep the card (plan 269) ─────────────────────────────
-// A guest is asked for an address before the card is issued (the
-// boarding's gate) and again on Today, at most once a day, never told
-// they must: « Continuer en invité » is always the way past it. The
-// note is per user and per local day, on this device: cleared storage
-// costs one more ask, never a lost card.
+// A guest is asked to make the card an account before it is issued
+// (the boarding's gate), then on Today further and further apart: a
+// day after that, then two days, four, a week, two weeks and a month,
+// and never again -- never told they must: « Continuer en invité » is
+// always the way past it. The note is per user, on this device: the
+// asks so far and the local day of the last. Cleared storage costs one
+// more ask, never a lost card.
 const ASKED_KEY = 'tsuji.keepAsked'
 const ASKED_KEEP = 8
+/** Days to wait after the nth ask before the next; past the last, none. */
+export const KEEP_ASK_GAPS = [1, 2, 4, 7, 14, 30]
 
 const localDay = (now = new Date()) =>
   `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+
+// Whole days from one local day to another, both 'YYYY-MM-DD'.
+function daysBetween(from, to) {
+  const at = day => { const [y, m, d] = day.split('-').map(Number); return Date.UTC(y, m - 1, d) }
+  return Math.round((at(to) - at(from)) / 86400000)
+}
 
 function readAsked() {
   try {
@@ -206,22 +195,36 @@ function readAsked() {
   }
 }
 
+// One user's note, { n, at }, or none; anything unreadable is none.
+function askedOf(userId) {
+  const note = readAsked()[userId]
+  return note && Number.isInteger(note.n) && note.n > 0 && /^\d{4}-\d{2}-\d{2}$/.test(note.at ?? '') ? note : null
+}
+
 /**
  * Whether a session is one to ask: a guest whose address is not
- * already on its way (a link sent and not yet followed sits in
- * `new_email`), not yet asked today on this device.
+ * already on its way (an address waiting on its confirmation sits in
+ * `new_email`), never asked, or asked fewer times than the gaps allow
+ * and the last gap has passed.
  */
 export function shouldAskToKeep(session, now = new Date()) {
   const user = session?.user
   if (!isGuest(session) || !user?.id || user.new_email) return false
-  return readAsked()[user.id] !== localDay(now)
+  const note = askedOf(user.id)
+  if (!note) return true
+  if (note.n > KEEP_ASK_GAPS.length) return false
+  return daysBetween(note.at, localDay(now)) >= KEEP_ASK_GAPS[note.n - 1]
 }
 
-/** Note that `userId` was asked today. */
+/** Note that `userId` was asked today: one more ask, the gap restarts. */
 export function noteAskedToKeep(userId, now = new Date()) {
   if (!userId) return
+  const today = localDay(now)
+  const note = askedOf(userId)
+  // Asked twice in a day (the boarding, then Today) counts once.
+  const n = note && note.at === today ? note.n : (note?.n ?? 0) + 1
   const kept = Object.entries(readAsked()).filter(([id]) => id !== userId).slice(-(ASKED_KEEP - 1))
   try {
-    localStorage.setItem(ASKED_KEY, JSON.stringify(Object.fromEntries([...kept, [userId, localDay(now)]])))
+    localStorage.setItem(ASKED_KEY, JSON.stringify(Object.fromEntries([...kept, [userId, { n, at: today }]])))
   } catch { /* not persisted: asked again on the next visit */ }
 }

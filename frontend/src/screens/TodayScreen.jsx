@@ -58,10 +58,11 @@ import { startAmbiance, stopAmbiance } from '../lib/audio'
 // whether they studied in another app (TransferSheet), while the
 // profile says the offer is open (`transferOffer`).
 //
-// 本乗車券 (plan 269): a guest is asked to keep the card with an address
-// -- Google, or a link -- at most once a day (lib/guest.js), after the
-// guide and the transfer offer have had their turn and never over
-// another sheet. « Continuer en invité » is always the way past it.
+// 本乗車券 (plan 269): a guest is asked to make the card an account --
+// Google, or an address and a password -- further and further apart (a
+// day, two, four, a week, two weeks, a month, then never: lib/guest.js),
+// after the guide and the transfer offer have had their turn and never
+// over another sheet. « Continuer en invité » is always the way past it.
 //
 // Everything this screen reads is shared: /api/today from the store
 // the tab bar's badge already reads. One request, every consumer.
@@ -133,7 +134,7 @@ export default function TodayScreen({ session }) {
   const held = useGuideHeld()
   const showTransfer = Boolean(summary?.transferOffer) && !transferLeft && Boolean(today)
     && (summary.guided?.today || wasShown('today')) && !guide.open && !held && !showRest && !finishing
-  // Read once, at mount: asked once a day, the visit that asks keeps it up.
+  // Read once, at mount: the visit that asks keeps the sheet up.
   const [keepAsk] = useState(() => shouldAskToKeep(session))
   const [keepLeft, setKeepLeft] = useState(false)
   const [keepSent, setKeepSent] = useState(null)

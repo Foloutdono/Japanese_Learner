@@ -465,14 +465,22 @@ describe('issuing the card', () => {
 })
 
 describe('keeping the card', () => {
-  it('mends a link sent to a wrong address from the line under the card', async () => {
+  // With the project's "Confirm email" on, the address waits on its
+  // link (lib/guest.js claimAccount): the card says where it went, and
+  // the line under it mends a wrong one (plans 247, 269).
+  it('mends an address waiting on its link from the line under the card', async () => {
     updateUser.mockResolvedValue({ data: { user: {} }, error: null })
     const { screen } = await renderFlow({ guest: true })
     await toCardReader(screen, 'N4')
     await click(screen, '[data-action="keep"]')
     await settle(120)
-    type(inSheet('input[type="email"]'), 'aiko@exemple.fr')
-    await clickSheet('[data-action="account-link"]')
+    const fill = email => {
+      type(inSheet('input[type="email"]'), email)
+      type(inSheet('[data-field="password"]'), 'secret1')
+      type(inSheet('[data-field="password-again"]'), 'secret1')
+    }
+    fill('aiko@exemple.fr')
+    await clickSheet('[data-action="account-create"]')
     await settle(80)
     expect(q(screen, '.brd-keep-line').dataset.kept).toBe('sent')
     expect(q(screen, '.brd-keep-line').textContent).toContain('aiko@exemple.fr')
@@ -480,9 +488,9 @@ describe('keeping the card', () => {
     await click(screen, '[data-action="keep"]')
     await settle(120)
     expect(inSheet('input[type="email"]').value).toBe('aiko@exemple.fr')
-    expect(inSheet('[data-note="sent"]').textContent).toBe(fr.brdLinkSentNote('aiko@exemple.fr'))
-    type(inSheet('input[type="email"]'), 'aiko@example.fr')
-    await clickSheet('[data-action="account-link"]')
+    expect(inSheet('[data-note="sent"]').textContent).toBe(fr.brdAccountSentNote('aiko@exemple.fr'))
+    fill('aiko@example.fr')
+    await clickSheet('[data-action="account-create"]')
     await settle(80)
     expect(q(screen, '.brd-keep-line').textContent).toContain('aiko@example.fr')
     expect(updateUser.mock.calls.map(c => c[0].email)).toEqual(['aiko@exemple.fr', 'aiko@example.fr'])
