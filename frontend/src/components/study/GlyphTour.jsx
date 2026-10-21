@@ -23,9 +23,10 @@ import { firstGloss, formatGlossLine } from './gloss'
 //          kanji's on'yomi and kun'yomi), the other script's twin;
 //   write  the strokes traced in turn from the dot to the ring on the
 //          writing board (TraceBoard), each a hollow the ink fills as
-//          the hand goes (plan 263), a miss answered by what to fix,
-//          the stroke drawn for the learner after three; « Montre-moi »
-//          draws the rest;
+//          the hand goes (plan 263), a miss shown on the board alone
+//          (the line it left, the dot called) and never in words, the
+//          instruction already says it; the stroke drawn for the
+//          learner after three; « Montre-moi » draws the rest;
 //   use    a few simple words it is met in, each with its voice.
 //
 // `tour` is the card's `glyph_tour` (backend study/glyph_tour.py); a
@@ -100,18 +101,14 @@ function Write({ tour, trace, onVerdict }) {
     said = <Said kind="ok" head={t.glyphTraced(trace.misses)} />
   } else if (trace.last === 'given') {
     said = <Said kind="given" head={t.glyphGiven} />
-  } else if (trace.last && trace.last !== 'ok') {
-    said = <Said kind="no" head={t.glyphMiss[trace.last]} />
   }
+  // No head: the card is the board's. The stop is named on the track
+  // (plan 264), the stroke asked numbered on its dot and the way from the
+  // dot to the ring drawn, so the instruction is said to a screen reader
+  // alone, and how far by the board's label.
   return (
     <div className="tour-leaf">
-      <header className="tour-leaf__head">
-        {/* The stop is named on the track (plan 264); the card says how far. */}
-        {total > 1 && !traced && (
-          <p className="tour__notion"><span className="tour__notion-head">{t.glyphStrokeCount(n, total)}</span></p>
-        )}
-        <h2 className="tour__q" tabIndex={-1}>{t.glyphTraceQ}</h2>
-      </header>
+      <h2 className="tour__q sr-only" tabIndex={-1}>{t.glyphTraceQ}</h2>
       <div className="tour-leaf__mid gt-write">
         <TraceBoard
           strokes={tour.strokes}
