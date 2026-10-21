@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
-import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { SplitRow } from '../components/selection/SplitRow'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
@@ -19,6 +19,8 @@ import { useRadioWalk, radioTab } from '../hooks/useRadioWalk'
 import { useListWalk, useFollowFocus, WALK_KEYS } from '../hooks/useListWalk'
 import { StationSplit } from '../components/selection/StationSplit'
 import DeckDetailScreen from './DeckDetailScreen'
+import { LyricsImportSheet } from '../components/decks/LyricsImportSheet'
+import { LibraryCatalogue } from '../components/decks/LibraryCatalogue'
 
 // ── 教材 — the shelf (plan 071) ───────────────────────────────
 // /learn/decks on the canvas: the bar, the shelf's two doors under
@@ -51,6 +53,15 @@ import DeckDetailScreen from './DeckDetailScreen'
 // keeps the shelf's search, its chip and its focus while the deck beside
 // it changes. The bare shelf opens on its first deck. On a phone a deck
 // is a screen of its own, as it always was.
+//
+// ── 歌 — a song's lyrics, from the create form (plan 264) ──
+// A lyrics deck is made from its song: picking the type turns the
+// form's action into the import (components/decks/LyricsImportSheet.jsx:
+// a subtitle or lyrics file, a paste or a YouTube link, broken down into
+// the deck), on a sheet over the shelf at every width, the name typed
+// carried in. Not a third door beside the two: on a phone the pair is
+// already 304px of a 348px row (DecksScreen.phone.test.jsx). The deck it
+// makes joins the shelf when it is made.
 export default function DecksScreen({ session }) {
   const { deck_id } = useParams()
   const desk = useDesk()
@@ -78,6 +89,7 @@ function DecksShelf({ session, open }) {
   const [newType, setNewType]   = useState('standard')
   const [query, setQuery]       = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
+  const [importing, setImporting] = useState(false)
   const searchRef = useRef(null)
   // The deck's type, one tab stop walked with the arrows on the desk
   // (plan 123), where the form is a dialog.
@@ -150,6 +162,14 @@ function DecksShelf({ session, open }) {
       .finally(() => { makingRef.current = false; setMaking(false) })
   }
 
+  // A lyrics deck is made from its song (plan 264): the form gives way
+  // to the import, which the name typed, if any, goes along to.
+  function importLyrics() {
+    playUi('click-mode-selection')
+    setCreating(false)
+    setImporting(true)
+  }
+
   // Only the types actually on the shelf get a chip: a filter for a
   // structure you own no decks of can only ever return nothing.
   const presentTypes = useMemo(() => {
@@ -202,7 +222,7 @@ function DecksShelf({ session, open }) {
       <input
         value={newName}
         onChange={e => setNewName(e.target.value)}
-        onKeyDown={e => e.key === 'Enter' && !composing(e) && createDeck()}
+        onKeyDown={e => e.key === 'Enter' && !composing(e) && (newType === 'lyrics' ? importLyrics() : createDeck())}
         placeholder={t.deckNamePlaceholder}
         autoFocus
         className="field"
@@ -230,9 +250,15 @@ function DecksShelf({ session, open }) {
           )
         })}
       </div>
-      <button type="button" onClick={createDeck} className="btn-primary" disabled={!newName.trim() || making}>
-        {t.createDeck}
-      </button>
+      {newType === 'lyrics' ? (
+        <button type="button" onClick={importLyrics} className="btn-primary">
+          {t.lyricsImport}
+        </button>
+      ) : (
+        <button type="button" onClick={createDeck} className="btn-primary" disabled={!newName.trim() || making}>
+          {t.createDeck}
+        </button>
+      )}
     </div>
   )
 
@@ -326,6 +352,24 @@ function DecksShelf({ session, open }) {
     </Chip>
   )
 
+  // The deck the import made joins the shelf, clear of anything that
+  // would filter it out, as a deck made here does (plan 123).
+  const lyricsSheet = importing && (
+    <LyricsImportSheet
+      session={session}
+      t={t}
+      name={newName.trim()}
+      onClose={() => setImporting(false)}
+      onMade={() => {
+        setNewName('')
+        setNewType('standard')
+        setQuery('')
+        setTypeFilter('all')
+        fetchDecks({ quiet: true })
+      }}
+    />
+  )
+
   const createSheet = desk && (
     <Sheet open={creating} onClose={() => setCreating(false)} jp="教材" cap={t.createDeck} label={t.createDeck} dismiss>
       {createForm}
@@ -336,22 +380,28 @@ function DecksShelf({ session, open }) {
   // beside it, drawn as the owner's pick B: the index field over the
   // types as glyph chips with their counts, a row per deck -- its glyph,
   // its name, its cards (and whose it is), what it is due -- and the
-  // two doors at the list's foot. The bare shelf opens on its first
-  // deck. A shelf still loading, or with no deck on it, keeps the
-  // one-column page below: there is nothing to stand beside it.
-  if (desk && !loading && decks.length > 0) {
-    if (!open) return <Navigate replace to={`/learn/decks/${decks[0].id}`} />
+  // new deck's door at the list's foot.
+  //
+  // The bare shelf is the desk's Bibliothèque (plan 269, the owner's
+  // pick L1): the same list beside the library's catalogue, where it
+  // used to open its first deck for you, and the library a page of it
+  // rather than a door at the list's foot (the rail's Bibliothèque is
+  // the way back to it from a deck). With no deck yet, the list says so
+  // over the door, the catalogue beside it. A shelf still loading keeps
+  // the one-column page below.
+  if (desk && !loading) {
     const listed = shown.some(d => String(d.id) === String(open))
     const typeCount = type => decks.filter(d => d.type === type).length
     return (
       <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
-        <Bar code="KZ" color="var(--line-decks)" title={t.decks} />
+        <Bar code="KZ" color="var(--line-decks)" title={open ? t.decks : t.library} />
         <StationSplit
-          className="desk-split--decks"
+          className={open ? 'desk-split--decks' : 'desk-split--decks desk-split--library'}
           label={t.decks}
           list={(
             <>
-              <Console className="shelf-console">
+              {decks.length === 0 && <Empty icon={<BooksIcon size={40} />} message={t.noDecks} hint={t.createFirstDeck} />}
+              {decks.length > 0 && <Console className="shelf-console">
                 <ConsoleIndex
                   inputRef={searchRef}
                   value={query}
@@ -376,8 +426,8 @@ function DecksShelf({ session, open }) {
                     ))}
                   </Chips>
                 </ConsoleTop>
-              </Console>
-              {shown.length === 0 && noMatch}
+              </Console>}
+              {decks.length > 0 && shown.length === 0 && noMatch}
               {shown.length > 0 && (
                 <div className="shelf-rows" ref={shelfRef} onKeyDown={onShelfWalk} aria-keyshortcuts={WALK_KEYS}>
                   {shown.map((deck, i) => {
@@ -409,21 +459,23 @@ function DecksShelf({ session, open }) {
                   })}
                 </div>
               )}
-              {/* The shelf's two doors at its foot: the page beside it
-                  holds the screen's one filled action, so a new deck is
-                  a ghost here. */}
+              {/* The shelf's door at its foot: the page beside it holds
+                  the screen's one filled action, so a new deck is a
+                  ghost here. */}
               <div className="decks-doors">
                 <Chip className="decks-doors__create" onClick={() => { playUi('click-mode-selection'); setCreating(true) }}>
                   <PlusIcon size={14} />{t.createDeck}
                 </Chip>
-                {browseDoor}
               </div>
             </>
           )}
         >
-          <DeckDetailScreen session={session} deckId={open} pane onCount={onCount} onGone={onGone} onChanged={onChanged} />
+          {open
+            ? <DeckDetailScreen session={session} deckId={open} pane onCount={onCount} onGone={onGone} onChanged={onChanged} />
+            : <LibraryCatalogue session={session} />}
         </StationSplit>
         {createSheet}
+        {lyricsSheet}
       </main>
     )
   }
@@ -471,6 +523,7 @@ function DecksShelf({ session, open }) {
         </div>
       )}
       {createSheet}
+      {lyricsSheet}
     </main>
   )
 }

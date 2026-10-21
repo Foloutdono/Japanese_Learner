@@ -4,11 +4,8 @@ import json
 import logging
 import random
 import re
-import threading
-import time
 import unicodedata
 from datetime import datetime, timedelta, timezone
-from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import PlainTextResponse
@@ -23,7 +20,8 @@ from core.user_level import LEVELS, note_stored_level
 from core import credits, events, review_plan
 from core.lines import clean_lines
 from srs.xp import level_progress, next_milestone
-from study import level_fit, level_rule
+from study import banzuke, level_fit, level_rule
+from routes import feedback as feedback_routes
 from routes import transfer as transfer_routes
 
 router = APIRouter()
@@ -170,6 +168,11 @@ def _init_db() -> None:
                 # an import made the question moot. NULL is not asked
                 # yet; routes/transfer.py writes and reads it.
                 ("transfer_offered_at", "TIMESTAMPTZ"),
+                # When Today asked how the learner finds the app, once
+                # the XP was earned (plan 269): answered with a rating
+                # or shut. NULL is not asked yet; routes/feedback.py
+                # writes and reads it.
+                ("feedback_asked_at", "TIMESTAMPTZ"),
                 # 署名 — the first name the card prints (plan 247), in
                 # any script: not the username, which stays the public
                 # handle. NULL = never asked (an account boarded before
@@ -177,6 +180,10 @@ def _init_db() -> None:
                 # username); '' = asked and left empty, printed as no
                 # name. See clean_card_name below.
                 ("card_name", "TEXT"),
+                # 番付に載らない — the learner keeps off the board (plan
+                # 262): left out of every list another learner reads,
+                # still shown their own place. study/banzuke.py reads it.
+                ("board_hidden", "BOOLEAN NOT NULL DEFAULT FALSE"),
             ):
                 cur.execute(
                     f"ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS {col} {typ}"
@@ -520,6 +527,9 @@ class LearningPayload(BaseModel):
     # not to be counted, on every device and by the server too
     # (core/events.opted_out).
     analyticsOff: bool | None = None
+    # 番付に載らない (plan 262), from the board's own page: True keeps
+    # the learner off every board another learner reads.
+    boardHidden: bool | None = None
 
     @field_validator("lines")
     @classmethod
@@ -788,10 +798,17 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # 乗換 (plan 243b): whether Today asks, once, if the learner
         # studied elsewhere (routes/transfer.offer_open).
         "transferOffer": transfer_routes.offer_open(user_id, tutorial_at),
+        # Early access (plan 269): whether Today asks, once, how the
+        # learner finds the app (routes/feedback.offer_open).
+        "feedbackOffer": feedback_routes.offer_open(user_id, xp),
         # 足跡を残さない (plan 218): the account's answer, which App.jsx
         # copies onto this device's flag on boot so an opt-out made on
         # the phone also stops the desk.
         "analyticsOff": bool(analytics_off),
+        # 番付に載らない (plan 262): whether the learner keeps off the
+        # board. Read through the board's own roster, a minute old at
+        # most and dropped whenever the switch moves.
+        "boardHidden": banzuke.roster().get(user_id, ("", None, False))[2],
         "streak": streak["current"],
         "streakLongest": streak["longest"],
         "totalReviews": records["total_reviews"],
@@ -979,6 +996,9 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
     if payload.analyticsOff is not None:
         sets.append("analytics_off = %s")
         args.append(payload.analyticsOff)
+    if payload.boardHidden is not None:
+        sets.append("board_hidden = %s")
+        args.append(payload.boardHidden)
     if not sets:
         raise HTTPException(status_code=422, detail="Nothing to update")
     conn = db_conn()
@@ -995,6 +1015,9 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
         # Write-through so this worker's resolver answers with the new
         # level immediately rather than after its TTL.
         note_stored_level(user_id, payload.jlptLevel)
+    if payload.boardHidden is not None:
+        # Every board kept was ranked with the learner in or out.
+        banzuke.forget()
     if payload.tzOffsetMin is not None:
         # The learner's day moved with the clock; the cached state must
         # not outlive it.
@@ -1012,6 +1035,7 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
         "lines": payload.lines,
         "notifications": payload.notifications,
         "analyticsOff": payload.analyticsOff,
+        "boardHidden": payload.boardHidden,
         "levelRule": level_rule_result,
     }
 
@@ -1037,67 +1061,4 @@ def get_level_fit(user_id: str = Depends(get_user_id)):
     return level_fit.level_fit(srs, user_id, _profile_row(user_id)[1])
 
 
-# The 番付's sums, a minute old at most (plan 211). Each is an aggregate
-# over every learner's whole review_log, review_daily and xp_ledger,
-# and the board asked them afresh on every open -- and twice over for a
-# learner outside the top. The top list is the same for everyone; a
-# learner's own rank is kept per learner, the map dropped when it fills.
-_BOARD_TTL = 60.0
-_BOARD_RANKS_MAX = 2048
-_board_lock = threading.Lock()
-_board_tops: dict[tuple, tuple[float, list]] = {}
-_board_ranks: dict[tuple, tuple[float, dict]] = {}
-
-
-def _board_cached(store: dict, key: tuple, build, cap: int | None = None):
-    now = time.monotonic()
-    with _board_lock:
-        hit = store.get(key)
-    if hit is not None and now - hit[0] < _BOARD_TTL:
-        return hit[1]
-    value = build()
-    with _board_lock:
-        if cap is not None and len(store) >= cap:
-            store.clear()
-        store[key] = (now, value)
-    return value
-
-
-@router.get("/api/leaderboard")
-def get_leaderboard(
-    limit: int = Query(20, ge=1, le=200),
-    # 通算 or 今週 — the 番付's two sides of the same sums. A week is the
-    # one span a learner can actually move tonight; anything finer is
-    # noise and anything coarser is the lifetime board again.
-    period: Literal["all", "week"] = Query("all"),
-    user_id: str = Depends(get_user_id),
-):
-    days = 7 if period == "week" else None
-    top = _board_cached(_board_tops, (limit, days), lambda: srs.get_leaderboard(limit=limit, days=days))
-    names = usernames_for([e["user_id"] for e in top])
-
-    entries = [
-        {
-            "rank": i + 1,
-            "username": names.get(e["user_id"]) or _get_or_create_username(e["user_id"]),
-            "xp": e["xp"],
-            "level": level_progress(e["xp"])["level"],
-        }
-        for i, e in enumerate(top)
-    ]
-
-    # If the current user isn't already in the top N, tell the frontend
-    # their real rank/XP separately so the screen can still say "you're
-    # #47" instead of just omitting them.
-    me = next((e for e in entries if e["username"] == names.get(user_id)), None)
-    if me is None:
-        mine = _board_cached(_board_ranks, (user_id, days),
-                             lambda: srs.get_user_rank(user_id, days=days), cap=_BOARD_RANKS_MAX)
-        me = {
-            "rank": mine["rank"],
-            "username": _get_or_create_username(user_id),
-            "xp": mine["xp"],
-            "level": level_progress(mine["xp"])["level"],
-        }
-
-    return {"entries": entries, "me": me}
+# The 番付 is routes/banzuke.py since plan 262.

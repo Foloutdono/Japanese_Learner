@@ -61,12 +61,12 @@ class SentencesFromCuesTests(unittest.TestCase):
         # (plan 235, tests/test_line_cut.py), never one merged with its
         # neighbour.
         cues = [
-            {"start": 0.0, "end": 2.0, "text": "今日はみんなで駅前の喫茶店に行った"},
+            {"start": 0.0, "end": 2.0, "text": "今日はみんなで喫茶店に行った"},
             {"start": 2.0, "end": 4.0, "text": "そのあとで公園を散歩した"},
         ]
         result = sentences_from_cues(cues, 0.0, 10.0)
         self.assertEqual(len(result), 2)
-        self.assertEqual(result[0]["text"], "今日はみんなで駅前の喫茶店に行った")
+        self.assertEqual(result[0]["text"], "今日はみんなで喫茶店に行った")
         self.assertEqual(result[1]["cue_end"], 4.0)
 
     def test_cues_with_no_japanese_are_kept_and_flagged(self) -> None:

@@ -191,8 +191,11 @@ def test_explain_s_context_is_never_written_over_the_plain_entry(client, monkeyp
 @needs_tokenizer
 def test_a_wide_line_stored_before_the_cap_is_cut_on_opening(client, monkeypatch):
     wide = "今日はAyaseさんとバンドメンバーとそしてぷらそにかの合唱のみなさんがいてくれるので、"
+    # Three rows of a phone, with nowhere clean to cut (かもしれない is
+    # one point): stays whole, and is not tried again (2026-10-20).
+    whole = "好きになってしまっていたのかもしれない"
     session_id = _ready(client, _srt("こんにちは", "また明日"))
-    # The session as an older build stored it: the wide line whole.
+    # The session as an older build stored it: the wide lines whole.
     conn = db_conn()
     try:
         with conn.cursor() as cur:
@@ -200,24 +203,36 @@ def test_a_wide_line_stored_before_the_cap_is_cut_on_opening(client, monkeypatch
             (stored,) = cur.fetchone()
             old = {**video_module.analyze_local(wide), "cue_start": 10.0, "cue_end": 20.0,
                    "local_rev": video_module.LOCAL_REV}
+            kept = {**video_module.analyze_local(whole), "cue_start": 20.0, "cue_end": 24.0,
+                    "local_rev": video_module.LOCAL_REV}
             cur.execute("UPDATE video_sessions SET sentences = %s WHERE id = %s",
-                        (json.dumps([stored[0], old, stored[1]], ensure_ascii=False), session_id))
+                        (json.dumps([stored[0], old, kept, stored[1]], ensure_ascii=False), session_id))
         conn.commit()
     finally:
         conn.close()
 
     lines = client.get(f"/api/video/session/{session_id}").json()["sentences"]
     assert [s["text"] for s in lines] == [
-        "こんにちは", "今日はAyaseさんとバンドメンバーとそして", "ぷらそにかの合唱のみなさんがいてくれるので、", "また明日",
+        "こんにちは", "今日はAyaseさんと", "バンドメンバーとそして", "ぷらそにかの合唱のみなさんが",
+        "いてくれるので、", whole, "また明日",
     ]
-    assert (lines[1]["cue_start"], lines[2]["cue_end"]) == (10.0, 20.0)
-    assert lines[1]["cue_end"] == lines[2]["cue_start"]
+    assert (lines[1]["cue_start"], lines[4]["cue_end"]) == (10.0, 20.0)
+    assert all(a["cue_end"] == b["cue_start"] for a, b in zip(lines[1:4], lines[2:5]))
+    assert (lines[5]["cue_start"], lines[5]["cue_end"]) == (20.0, 24.0)
+
+    # Stored as cut, every line marked with the rule it was cut by: the
+    # next opening tries nothing again.
+    tried = []
+    monkeypatch.setattr(video_module, "cut_line", lambda *a: tried.append(a) or [])
+    again = client.get(f"/api/video/session/{session_id}").json()["sentences"]
+    assert [s["text"] for s in again] == [s["text"] for s in lines]
+    assert tried == []
 
     # Explain reads the line by the index the client was given.
     def chat(messages, **kwargs):
         return '{"words": [], "explanation": "Cut."}'
 
     monkeypatch.setattr("routes.phrase.chat", chat)
-    body = client.post(f"/api/video/session/{session_id}/sentence/3/explain",
+    body = client.post(f"/api/video/session/{session_id}/sentence/6/explain",
                        json={"lang": "en", "title": uuid.uuid4().hex}).json()
     assert body["text"] == "また明日"

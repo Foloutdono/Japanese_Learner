@@ -6,6 +6,7 @@ import { dialogOpen } from '../../lib/dialogOpen'
 import { composing, pressedByPointer, trackPresses } from '../../lib/keyGuards'
 import { GateButton } from '../ui/GateButton'
 import { SpeakerIcon } from '../ui/Icons'
+import { useTraceRun } from '../../hooks/useTraceRun'
 import { Said, Track } from './GrammarTour'
 import { FuriganaParts, Readings } from './Readings'
 import { CharDisplay } from './QuizComponents'
@@ -22,16 +23,17 @@ import { firstGloss, formatGlossLine } from './gloss'
 //          romaji and its sound) or what it means and its readings (a
 //          kanji's on'yomi and kun'yomi), the other script's twin;
 //   write  the strokes traced in turn from the dot to the ring on the
-//          writing board (TraceBoard), a miss answered by what to fix
-//          and the stroke drawn again, the stroke drawn for the learner
-//          after three; « Montre-moi » draws the rest;
+//          writing board (TraceBoard), each a hollow the ink fills as
+//          the hand goes (plan 263), a miss shown on the board alone
+//          (the line it left, the dot called) and never in words, the
+//          instruction already says it; the stroke drawn for the
+//          learner after three; « Montre-moi » draws the rest;
 //   use    a few simple words it is met in, each with its voice.
 //
 // `tour` is the card's `glyph_tour` (backend study/glyph_tour.py); a
 // stop with nothing to show (no strokes, no words) is not drawn. The
 // tour grades no card: `onBoard` hands the run how the trace went, and
 // the card's first exercise follows.
-const MISS_LIMIT = 3
 
 /** The stops a glyph's tour draws, in order. */
 function glyphStops(tour) {
@@ -99,25 +101,20 @@ function Write({ tour, trace, onVerdict }) {
     said = <Said kind="ok" head={t.glyphTraced(trace.misses)} />
   } else if (trace.last === 'given') {
     said = <Said kind="given" head={t.glyphGiven} />
-  } else if (trace.last && trace.last !== 'ok') {
-    said = <Said kind="no" head={t.glyphMiss[trace.last]} />
   }
+  // No head: the card is the board's. The stop is named on the track
+  // (plan 264), the stroke asked numbered on its dot and the way from the
+  // dot to the ring drawn, so the instruction is said to a screen reader
+  // alone, and how far by the board's label.
   return (
     <div className="tour-leaf">
-      <header className="tour-leaf__head">
-        <p className="tour__notion">
-          <span className="tour__notion-head">{t.glyphStops.write}</span>
-          {total > 1 && !traced && <span className="tour__notion-count">{t.glyphStrokeCount(n, total)}</span>}
-        </p>
-        <h2 className="tour__q" tabIndex={-1}>{t.glyphTraceQ}</h2>
-      </header>
+      <h2 className="tour__q sr-only" tabIndex={-1}>{t.glyphTraceQ}</h2>
       <div className="tour-leaf__mid gt-write">
         <TraceBoard
           strokes={tour.strokes}
           at={trace.at}
           given={trace.given}
           shownFrom={trace.shownFrom}
-          tries={trace.tries}
           label={t.glyphBoardAria(tour.glyph, n, total)}
           onVerdict={onVerdict}
         />
@@ -133,7 +130,6 @@ function Use({ tour }) {
   return (
     <div className="tour-leaf">
       <header className="tour-leaf__head">
-        <p className="tour__notion"><span className="tour__notion-head">{t.glyphStops.use}</span></p>
         <h2 className="tour__q sr-only" tabIndex={-1}>{t.glyphStops.use}</h2>
       </header>
       <ul className="tour-leaf__mid gt-words">
@@ -180,13 +176,11 @@ function useGateKey(ref, on) {
   }, [ref, on])
 }
 
-const FRESH = { at: 0, misses: 0, tries: 0, last: null, given: [], shownFrom: null }
-
 export function GlyphTour({ tour, onBoard, desk = false }) {
   const { t } = useLang()
   const stops = glyphStops(tour)
   const [at, setAt] = useState(0)
-  const [trace, setTrace] = useState(FRESH)
+  const { trace, verdict, show } = useTraceRun()
   const bodyRef = useRef(null)
   const rootRef = useRef(null)
   useGateKey(rootRef, desk)
@@ -210,19 +204,14 @@ export function GlyphTour({ tour, onBoard, desk = false }) {
 
   useEffect(() => () => stopSpeaking(), [])
 
-  function onVerdict(verdict) {
-    if (verdict === 'ok') playClick()
-    setTrace(s => {
-      if (verdict === 'ok') return { ...s, at: s.at + 1, tries: 0, last: 'ok' }
-      const tries = s.tries + 1
-      if (tries < MISS_LIMIT) return { ...s, misses: s.misses + 1, tries, last: verdict }
-      return { ...s, at: s.at + 1, misses: s.misses + 1, tries: 0, last: 'given', given: [...s.given, s.at] }
-    })
+  function onVerdict(v) {
+    if (v === 'ok') playClick()
+    verdict(v)
   }
 
   function showMe() {
     playClick()
-    setTrace(s => ({ ...s, shownFrom: s.at, last: 'shown' }))
+    show()
   }
 
   function go() {
@@ -249,7 +238,14 @@ export function GlyphTour({ tour, onBoard, desk = false }) {
       data-stop={stop}
       aria-label={t.glyphAria(tour.glyph)}
     >
-      {stops.length > 1 && <Track at={at} total={stops.length} />}
+      {stops.length > 1 && (
+        <Track
+          at={at}
+          total={stops.length}
+          label={t.glyphStops[stop]}
+          part={stop === 'write' && total ? (traced ? 1 : trace.at / total) : 0}
+        />
+      )}
       <div className="tour__body" ref={bodyRef} key={stop}>
         {stop === 'read' && <Read tour={tour} />}
         {stop === 'write' && <Write tour={tour} trace={trace} onVerdict={onVerdict} />}

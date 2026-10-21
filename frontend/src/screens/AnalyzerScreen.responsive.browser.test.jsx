@@ -143,6 +143,10 @@ async function startFromFile(screen) {
 }
 
 beforeEach(async () => {
+  // The furigana dial is remembered by the browser since plan 263
+  // (displayPrefs.js), and every file in this lane shares one: each test
+  // opens on the default, whatever the last one turned it to.
+  try { window.localStorage.removeItem('tsuji.anlDisplay') } catch { /* none kept */ }
   // The lane's iframe is 414px wide by default — a phone, in effect —
   // and since 2026-09-11 the working rail is built at 1100px and up
   // only (AnalyzerScreen's `wide`). This file's subject is the screen

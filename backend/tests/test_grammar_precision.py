@@ -1116,6 +1116,86 @@ GOLD = {
 
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class EveryPartTests(unittest.TestCase):
+    """Plan 266: the shapes a point's four lessons never wrote, which a
+    breakdown left saying nothing -- each rule with the sentence it must
+    find and the one it must not."""
+
+    def test_the_humble_progressive_is_te_imasu(self) -> None:
+        for sentence, written in (("厳しい状況が続いております。", "ており"), ("お待ちしております。", "ており"),
+                                  ("東京に住んでおります。", "でおり")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(("〜ています", written), keys(sentence))
+        # おる alone is the humble いる, no construction: 社長は今おりません.
+        self.assertNotIn("〜ています", found_in("社長は今おりません。"))
+
+    def test_the_na_before_no_is_the_constructions(self) -> None:
+        # noun / な-adjective + な + ので, のに, のは: the very lessons of
+        # 〜ので, 〜のに and 〜のは〜だ left their な saying nothing.
+        for sentence, pattern, written in (
+            ("今日は休みなので、ゆっくりねました。", "〜ので", "なので"),
+            ("春なのに、まださむいです。", "〜のに", "なのに"),
+            ("大切なのは毎日習うことだ。", "〜のは〜だ", "なのは"),
+        ):
+            with self.subTest(sentence=sentence):
+                hit = next(h for h in grammar_detect.hits(sentence) if h["pattern"] == pattern)
+                self.assertEqual(sentence[slice(*hit["segments"][0])], written)
+        # After a predicate there is no な to take: 大きいので is the ので.
+        self.assertEqual(found_in("大きいので、持てません。")["〜ので"], "ので")
+
+    def test_a_quotation_without_brackets(self) -> None:
+        for sentence in ("行きたくないと言う。", "面白いと感じた。", "彼の小説は評判がいいと聞いていた。",
+                         "「行く」と答えた。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn(("と", "と"), keys(sentence))
+        # Before a comma it is the conditional, and after a noun "with".
+        self.assertNotIn("と", found_in("話を聞くと、彼は出て行った。"))
+        self.assertEqual(found_in("友だちと話した。").get("と"), "と")
+        self.assertNotIn("と", found_in("春になると、さくらがさきます。"))
+
+    def test_a_compound_particle_said_politely(self) -> None:
+        for sentence, pattern, written in (
+            ("この件につきましては、改めて連絡します。", "〜について", "につきまして"),
+            ("この件に関しまして、ご説明します。", "〜に関して", "に関しまして"),
+            ("皆様に対しまして、お詫び申し上げます。", "〜に対して", "に対しまして"),
+            ("台風によりまして、運休となります。", "〜によって", "によりまして"),
+            ("先月末をもちまして、退職させていただきました。", "〜をもって", "をもちまして"),
+            ("学生としまして、参加します。", "〜として", "としまして"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(found_in(sentence).get(pattern), written)
+        # Held to the plain form's reading: 興味を持って is 持つ, so is
+        # 興味を持ちまして -- no 〜をもって.
+        self.assertNotIn("〜をもって", found_in("環境問題に興味を持ちまして、ドイツで勉強しました。"))
+
+    def test_the_topic_after_a_compound_particle(self) -> None:
+        for sentence in ("この件については、改めて連絡します。", "この件につきましては、改めて連絡します。",
+                         "私にとっては大切だ。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn(("は", "は"), keys(sentence))
+        # The は of ては is 〜てはいけません's.
+        self.assertNotIn("は", found_in("ここで話してはいけません。"))
+
+    def test_the_polite_ending_wherever_it_stands(self) -> None:
+        for sentence, written in (("申し訳ありませんが、明日は休みます。", "ません"),
+                                  ("風邪をひいてしまいまして、休みました。", "まし"),
+                                  ("払い戻しはいたしかねます。", "ます")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(("〜ます／〜ません", written), keys(sentence))
+        # ませんでした stays one ending, ましょう its own point.
+        self.assertNotIn(("〜ます／〜ません", "ません"), keys("昨日は行きませんでした。"))
+        self.assertNotIn("〜ます／〜ません", found_in("いっしょに行きましょう。"))
+
+    def test_no_compound_verb_opens_a_sentence_in_kana(self) -> None:
+        # はじめまして is a greeting: its はじめ, with no verb before it, is
+        # no 〜はじめる. Spelled as its own word, a point opens one still.
+        self.assertNotIn("〜はじめる／〜おわる／〜つづける", found_in("はじめまして。田中です。"))
+        self.assertIn("〜はじめる／〜おわる／〜つづける", found_in("雨がふりはじめました。"))
+        self.assertIn("〜一方で", found_in("一方で、全員が同じ日に来れば、席が足りなくなる。"))
+        self.assertIn("〜と思います", found_in("「行こう」と思った。"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class GoldSentenceTests(unittest.TestCase):
 
     def test_every_key_exactly(self) -> None:

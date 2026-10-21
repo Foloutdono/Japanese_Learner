@@ -13,3 +13,41 @@ export function printHour(now) {
   for (const [at, name] of FROM) if (m >= at) hour = name
   return hour
 }
+
+// ── 季 — the season of the print (plan 261) ─────────────────────
+// The owner's pick of the canvas "Tsuji — Today, the seasons": the
+// seasons by the month, as they are counted today. 春 March to May (the
+// cherry), 夏 June to August (the crape myrtle, the cloud peak), 秋
+// September to November (the maples), 冬 December to February (the red
+// plum, the snow); and the summer's night split by the month too, the
+// fireflies in June and July, the fireworks in August.
+const SEASONS = ['winter', 'winter', 'spring', 'spring', 'spring', 'summer', 'summer', 'summer',
+  'autumn', 'autumn', 'autumn', 'winter']
+const AUGUST = 7
+
+export function printSeason(now) {
+  return SEASONS[now.getMonth()]
+}
+
+// ── 百日紅 — the summer's two crape myrtles (plan 261, round 5) ──────
+// The owner kept both the canvas drew: A as the photo has it, B as the
+// kachō-e draws it, taking turns a day each, the same for every learner
+// on a given date. The print's day starts at its dawn, so a night shows
+// the tree its evening did.
+const DAWN = 5 * 3600e3
+
+function dayB(now) {
+  const d = new Date(now.getTime() - DAWN)
+  return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 864e5) % 2 === 1
+}
+
+/** The print the day and the hour show: the season's at the hour
+ *  (`spring-dawn` … `winter-night`), or August's night, the fireworks
+ *  (`summer-hanabi`); in summer, every other day, the same with the
+ *  other crape myrtle (`summer-day-b`). A finish that keeps the night
+ *  (plan 250) passes its hour. */
+export function printName(now, hour = printHour(now)) {
+  const season = printSeason(now)
+  const name = season === 'summer' && hour === 'night' && now.getMonth() === AUGUST ? 'summer-hanabi' : `${season}-${hour}`
+  return season === 'summer' && dayB(now) ? `${name}-b` : name
+}

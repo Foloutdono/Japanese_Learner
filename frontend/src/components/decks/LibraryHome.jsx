@@ -22,8 +22,14 @@ import { Loading } from '../ui/Loading'
 //
 // A deck opened from the list takes this place (PublicDeckPane); the
 // rail's Bibliothèque, or the list's own head, brings it back.
+//
+// `beside` (plan 269): drawn in the Bibliothèque's page, beside the
+// learner's own shelf, which already lists the decks they follow with
+// their authors. Abonnements is not drawn a second time there, and Tes
+// publications only when there is something to show: an empty section
+// above the catalogue only pushed the decks down.
 
-export function LibraryHome({ session }) {
+export function LibraryHome({ session, beside = false }) {
   const { t } = useLang()
   const [home, setHome] = useState(null)
   const [failed, setFailed] = useState(false)
@@ -57,8 +63,8 @@ export function LibraryHome({ session }) {
           : <p className="gate-panel__empty">{t.libraryEmptyHint}</p>}
       </section>
 
-      <div className="lib-home__pair">
-        <section className="gate-panel" aria-labelledby="lib-following-title">
+      {(!beside || published.length > 0) && <div className={beside ? 'lib-home__pair lib-home__pair--one' : 'lib-home__pair'}>
+        {!beside && <section className="gate-panel" aria-labelledby="lib-following-title">
           <header className="gate-panel__head">
             <span className="pf-line__roundel plate__roundel" aria-hidden="true">KZ</span>
             <span className="plate__names">
@@ -91,7 +97,7 @@ export function LibraryHome({ session }) {
                 </ul>
               )}
           </div>
-        </section>
+        </section>}
 
         <section className="gate-panel" aria-labelledby="lib-mine-title">
           <header className="gate-panel__head">
@@ -128,7 +134,7 @@ export function LibraryHome({ session }) {
               )}
           </div>
         </section>
-      </div>
+      </div>}
     </div>
   )
 }

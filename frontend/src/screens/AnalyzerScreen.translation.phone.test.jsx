@@ -138,7 +138,7 @@ describe('a video line\'s translation on a phone', () => {
     const screen = await openVideo()
     release()
     await vi.waitFor(() => expect(screen.container.querySelector('.anl-m__tr').textContent).toBe('La nuit vient'))
-    screen.container.querySelector('.anl-m__line--next').click()
+    screen.container.querySelector('.anl-m__dock button[aria-label="Phrase suivante"]').click()
     await vi.waitFor(() => expect(screen.container.querySelector('.anl-m__tr').textContent).toBe('Je t’appelle'))
     // One block, asked once.
     expect(calls('/api/video/session/7/translations')).toHaveLength(1)
@@ -157,7 +157,7 @@ describe('a video line\'s translation on a phone', () => {
     expect(screen.container.querySelector('.anl-m__tr').textContent.trim()).toBe('')
     expect(screen.container.querySelector('[role="alert"]')).toBeNull()
     // A refusal is an answer: the block is not asked again at every line.
-    screen.container.querySelector('.anl-m__line--next').click()
+    screen.container.querySelector('.anl-m__dock button[aria-label="Phrase suivante"]').click()
     await settle(100)
     expect(calls('/api/video/session/7/translations')).toHaveLength(1)
   })
@@ -179,7 +179,7 @@ describe('a video line\'s translation on a phone', () => {
     })
     const screen = await openVideo()
     expect(calls('/api/video/session/7/translations')).toHaveLength(1)
-    screen.container.querySelector('.anl-m__line--next').click()
+    screen.container.querySelector('.anl-m__dock button[aria-label="Phrase suivante"]').click()
     await vi.waitFor(() => expect(screen.container.querySelector('.anl-m__tr').textContent).toBe('Je t’appelle'))
     expect(calls('/api/video/session/7/translations')).toHaveLength(2)
   })
@@ -243,7 +243,7 @@ describe('a typed Passage on a phone', () => {
     await vi.waitFor(() => expect(screen.container.querySelector('.anl-m__tr').textContent).toBe('La nuit vient'))
     const [[, , opts]] = calls('/api/phrase/history/5/translations')
     expect(JSON.parse(opts.body)).toMatchObject({ lang: 'fr', index: 0 })
-    screen.container.querySelector('.anl-m__line--next').click()
+    screen.container.querySelector('.anl-m__dock button[aria-label="Phrase suivante"]').click()
     await vi.waitFor(() => expect(screen.container.querySelector('.anl-m__tr').textContent).toBe('Je t’appelle'))
   })
 

@@ -1851,6 +1851,41 @@ class SRSEngine:
                 rows = cur.fetchall()
         return [{"user_id": user_id, "xp": int(xp)} for user_id, xp in rows]
 
+    def xp_totals(self, since: datetime | None = None, until: datetime | None = None) -> dict[str, int]:
+        """Every learner's XP, lifetime or earned in [since, until): the
+        番付's one sum since plan 262 (study/banzuke.py), which ranks the
+        whole board from it rather than asking a top and a rank apart.
+        The rollup clips by whole day, as _xp_window's does."""
+        log_where, daily_where, ledger_where, params = [], [], [], []
+        for col, where in (("reviewed_at", log_where), ("day", daily_where), ("awarded_at", ledger_where)):
+            if since is not None:
+                where.append(f"{col} >= %s")
+            if until is not None:
+                where.append(f"{col} < %s")
+        bounds = [b for b in (since, until) if b is not None]
+        days = [b.date() for b in bounds]
+
+        def clause(parts):
+            return f" WHERE {' AND '.join(parts)}" if parts else ""
+
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = f"""
+                    SELECT user_id, SUM(xp) AS xp FROM (
+                        SELECT split_part(card_id, ':', 1) AS user_id, xp_earned AS xp FROM review_log{clause(log_where)}
+                        UNION ALL
+                        SELECT user_id, xp FROM review_daily{clause(daily_where)}
+                        UNION ALL
+                        SELECT user_id, xp FROM xp_ledger{clause(ledger_where)}
+                    ) all_xp
+                    GROUP BY user_id
+                """
+                params = (*bounds, *days, *bounds)
+                self._log_sql("xp_totals", sql, params)
+                cur.execute(sql, params)
+                rows = cur.fetchall()
+        return {user_id: int(xp) for user_id, xp in rows}
+
     def get_user_rank(self, user_id: str, days: int | None = None) -> dict[str, Any]:
         """This user's XP and 1-based rank among everyone with at least
         one review — lifetime, or within the last `days` days — used so

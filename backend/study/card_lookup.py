@@ -937,7 +937,10 @@ def resolve_morpheme(morphemes, i: int):
     thing everywhere. The neighbour before it is what resolve_kana's
     auxiliary admission needs: whether this token hangs off a
     conjunctive て/で."""
-    return _kana_verb(morphemes[i], _resolve_morpheme(morphemes, i))
+    hit = _resolve_morpheme(morphemes, i)
+    if hit is not None and _there_is(morphemes, i):
+        return hit
+    return _kana_verb(morphemes[i], hit)
 
 
 def _resolve_morpheme(morphemes, i: int):
@@ -951,10 +954,16 @@ def _resolve_morpheme(morphemes, i: int):
         # opens the point. The lemma path used to answer here anyway and
         # badged 食べてしまった with the N1 仕舞う card.
         return None
-    hit = resolve_lemma(m.lemma, m.lemma_reading, m.surface) or resolve_kana(
+    by_lemma = resolve_lemma(m.lemma, m.lemma_reading, m.surface)
+    hit = by_lemma or resolve_kana(
         m.lemma_reading, m.pos, m.auxiliary_use, after_conjunctive, m.surface, m.goshu,
     )
     if hit is not None and _kana_word_instead(m, hit[1]):
+        return None
+    if hit is not None and _foreign_name(m) and not _katakana_written(hit[1].get("kanji") or hit[1].get("kana") or ""):
+        # A person's name written in katakana is no word read the same
+        # way (plan 266): アンナ is Anna, not あんな "such"; トム is Tom,
+        # not 富む "to be rich"; the dog クロ no 黒 "black".
         return None
     if hit is not None and (_another_word(m, hit[1]) is not None or _read_otherwise(m, hit[1])):
         # The lemma's card in the page's spelling is read otherwise; the
@@ -963,8 +972,38 @@ def _resolve_morpheme(morphemes, i: int):
         again = resolve_lemma(m.lemma, m.lemma_reading)
         if again is None or again[2] == hit[2] or _another_word(m, again[1]) is not None \
                 or _read_otherwise(m, again[1]):
-            return None
+            return _read_as_written(m, by_lemma, hit, after_conjunctive)
         return again
+    return hit
+
+
+def _foreign_name(m) -> bool:
+    return m.name_kind in ("family", "given", "person", "other") and _katakana_written(m.surface)
+
+
+def _read_as_written(m, by_lemma, refused, after_conjunctive: bool):
+    """The card a token written in kana is read as, where its lemma's
+    card was refused as read otherwise (plan 266): UniDic files しお under
+    潮, and the card for 潮 is the N1 うしお, "tide" -- refused, and the
+    reading path that names the N5 塩 read しお, "salt", was never asked;
+    じゃあ、しおをお願いします glossed the pool's "tide; sea water". Only
+    where the lemma path answered (the reading path has had its say
+    otherwise) and the page wrote no kanji (a kanji spelling read
+    otherwise is another word, _read_otherwise's pool row).
+
+    And only for a plainer word than the one refused, filed at a lower
+    level, as _kana_verb keeps a rival only where it is the rarer word:
+    a kana spelling the tokenizer misread is a homophone at any level,
+    and the cut of けつあつ (血圧) into けつ + あつ is no 傑, "the best", at
+    N1 where 穴 read あな at N3 was refused. Never a verb's card for a word
+    that is not one: ゆう of ゆうがた is no 言う, "to say"."""
+    if by_lemma is None or refused is not by_lemma or any(is_kanji(c) for c in m.surface):
+        return None
+    hit = resolve_kana(m.lemma_reading, m.pos, m.auxiliary_use, after_conjunctive, m.surface, m.goshu)
+    if hit is None or hit[2] == refused[2] or _kana_word_instead(m, hit[1]) or _read_otherwise(m, hit[1]):
+        return None
+    if _level_rank(hit[0]) >= _level_rank(refused[0]) or (m.pos != "verb" and _a_verbs_card(hit[1])):
+        return None
     return hit
 
 
@@ -1078,6 +1117,20 @@ def _deck_verbs_spelled(m) -> list[tuple[str, dict, str]]:
                 if all(raw_id != r for _, _, r in out):
                     out.append((level, entry, raw_id))
     return out
+
+
+def _there_is(morphemes, i: int) -> bool:
+    """Whether morphemes[i], いる written in kana, says where someone is:
+    after に, には or にも (家にいる, この中にいるに違いない). 要る, "to
+    need", which いる also spells, takes what is needed with が, never a
+    place with に (plan 266)."""
+    m = morphemes[i]
+    if m.lemma != "居る" or m.lemma_reading != "いる" or any(is_kanji(c) for c in m.surface):
+        return False
+    k = i - 1
+    if k >= 0 and morphemes[k].pos == "particle" and morphemes[k].surface in ("は", "も"):
+        k -= 1
+    return k >= 0 and morphemes[k].pos == "particle" and morphemes[k].surface == "に"
 
 
 def _kana_verb(m, hit):
@@ -1232,7 +1285,8 @@ def resolve_phrase(morphemes, i: int, max_len: int = _PHRASE_MAX):
     and its endings: すみません is 済む + ませ + ん, and the breakdown
     glossed it "to finish" under a sentence that apologises. The run is
     folded only where it stands alone -- the sentence's start or a mark
-    before it, its end or a mark after it -- and holds a verb or an
+    before it, its end or a mark after it, or the が that joins it to the
+    next clause (_joins_on) -- and holds a verb or an
     ending, and its letters are exactly a kana-only card's: so the
     しまった of 食べてしまった, the でも of 学校でも and a noun run (that is
     resolve_compound's) are never taken for one."""
@@ -1241,9 +1295,12 @@ def resolve_phrase(morphemes, i: int, max_len: int = _PHRASE_MAX):
     longest = min(max_len, len(morphemes) - i)
     for n in range(longest, 1, -1):
         run = morphemes[i:i + n]
-        if i + n < len(morphemes) and morphemes[i + n].pos != "symbol":
+        if i + n < len(morphemes) and morphemes[i + n].pos != "symbol" and not _joins_on(morphemes, i + n):
             continue
-        if any(m.pos == "symbol" for m in run) or run[0].auxiliary_use:
+        # (A verb in auxiliary use may open it (plan 266): はじめまして is
+        # 始める + ます + て, and 始める is a 〜はじめる to UniDic wherever it
+        # stands. Its stand is what keeps 食べてしまった's しまった out.)
+        if any(m.pos == "symbol" for m in run):
             continue
         if not any(m.pos in ("verb", "auxiliary") for m in run):
             continue
@@ -1252,6 +1309,15 @@ def resolve_phrase(morphemes, i: int, max_len: int = _PHRASE_MAX):
             if not entry.get("kanji") and entry.get("kana") == surface:
                 return level, entry, vocab_to_id(entry, level), n
     return None
+
+
+def _joins_on(morphemes, k: int) -> bool:
+    """Whether morphemes[k] is the が or けど a set phrase joins the next
+    clause with, before a mark (plan 266): すみませんが、駅はどこですか --
+    the apology, then "but"."""
+    m = morphemes[k]
+    return (m.pos == "particle" and m.surface in ("が", "けど", "けれど", "けれども")
+            and (k + 1 >= len(morphemes) or morphemes[k + 1].pos == "symbol"))
 
 
 def resolve_compound(morphemes, i: int, max_len: int = _COMPOUND_MAX):
@@ -1415,7 +1481,15 @@ def _pool_affix(m, before=None, after=None) -> dict | None:
     affix, or None where it tags none (plan 151). An affix is a sense of
     a word, never the word's first sense by right: 水 read すい is
     "Wednesday" first, and no gloss is better than that under 化粧水."""
-    if not _has_kanji(m.surface) or _numeral(m.surface):
+    written = m.surface
+    if (m.pos == "suffix" and _hiragana(m.surface) and m.lemma in _PRODUCTIVE_SUFFIXES
+            and len(m.lemma) == 1):
+        # The suffixes that go on any noun, written in kana (plan 266):
+        # 子どもたち's たち is 達, "pluralizing suffix", 彼ら's ら 等. No
+        # other kana suffix: the しょ of じ + しょ is a dictionary the
+        # tokenizer cut in two, not 薯, "potato".
+        written = m.lemma
+    if not _has_kanji(written) or _numeral(written):
         return None
     # An affix goes on a word: a suffix after a noun (a counter after a
     # number), a prefix before one. 一軒家's 家 after the counter 軒 is
@@ -1430,7 +1504,7 @@ def _pool_affix(m, before=None, after=None) -> dict | None:
         if after is None or after.pos not in ("noun", "suffix"):
             return None
     for reading in dict.fromkeys(r for r in (m.reading, m.lemma_reading) if r):
-        row = jmdict_db.get_by_key(m.surface, morphology.kata_to_hira(reading))
+        row = jmdict_db.get_by_key(written, morphology.kata_to_hira(reading))
         if row is None:
             continue
         for sense in jmdict_db.get_senses(row.get("kanji", ""), row.get("kana", "")) or []:
@@ -1578,6 +1652,316 @@ def resolve_pool_compound(morphemes, i: int, deck_hits: list, max_len: int = _CO
             if hit is not None:
                 return hit, n
     return None
+
+
+# ── The words that hold a sentence together (plan 266) ────────
+# A breakdown is the learner's map of a sentence, and every part of it
+# should say what it is. Measured over the 7,651 sentences the app
+# teaches, 2,036 had a part that said nothing: no card, no point -- the
+# さん of たなかさん (121 times), the その of その本, the ほど of 二週間ほど,
+# the でも that opens a sentence, the じゃあ of じゃあ、何がおいしいですか
+# (176), はじめまして and どういたしまして, the 気をつける of 気をつけて,
+# 知らせる cut into 知ら + せ. The deck held a card for most of them,
+# written in kana, and the lookups never asked it: resolve_kana admits
+# the content words alone, and a set phrase only as the deck spells it.
+#
+# Like the pool's, these resolvers are the breakdown's alone, asked only
+# where the deck's own have answered None and no grammar point is
+# written on the word (study/analysis._tokens): the level a sentence is
+# graded at, the reading badges and the audit keep resolve_morpheme's
+# answer. So より, an N3 card, gives an N5 sentence's comparison its
+# meaning without making the sentence N3.
+
+# The parts of speech a function word's card may answer for.
+_FUNCTION_POS = frozenset({"suffix", "adnominal", "conjunction", "particle"})
+
+
+def _hiragana(text: str) -> bool:
+    return bool(text) and all("ぁ" <= c <= "ゟ" for c in text)
+
+
+@lru_cache(maxsize=1)
+def _catalogue_words() -> frozenset[str]:
+    """The grammar points written as one word, in kana and with no 〜:
+    the particles' markers (は, を, と, ね), だから, それから. Such a word
+    is its point's to explain, and where the detector refused it, the
+    reading it refused is no card's to give back -- the ね of ゆっくりねます
+    is 寝る misread, not "isn't it?"."""
+    from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
+    out = set()
+    for points in GRAMMAR_POINTS_BY_LEVEL.values():
+        for point in points:
+            pattern = point.get("pattern", "")
+            for alt in re.split(r"[／/]", pattern):
+                if alt and "〜" not in alt and _hiragana(alt):
+                    out.add(alt)
+    return frozenset(out)
+
+
+def _kana_cards(spelled: str) -> list[tuple[str, dict]]:
+    """The deck's cards written in kana alone and read exactly `spelled`,
+    hiragana for hiragana: ばん is not the card バン ("van"), which the
+    kana index folds in beside it."""
+    return [(level, entry) for level, entry in _VOCAB_BY_KANA.get(spelled, ())
+            if not entry.get("kanji") and spelled in _reading_variants(entry.get("kana") or "")]
+
+
+def _clause_start(morphemes, i: int) -> bool:
+    """Whether morphemes[i] opens a sentence or a quotation: nothing
+    before it, or a mark that ends a sentence or opens a quote."""
+    return i == 0 or (morphemes[i - 1].pos == "symbol"
+                      and morphemes[i - 1].surface in "。．！？!?「『（(…")
+
+
+def _a_verbs_card(entry: dict) -> bool:
+    return (entry.get("meaning") or "").startswith("to ")
+
+
+def resolve_function_word(morphemes, i: int):
+    """(level, entry, raw_id) for the deck card written in kana that a
+    function word is, or None (plan 266).
+
+    - a SUFFIX: たなかさん's さん is "Mr, Mrs, Ms" -- the course's N5
+      card, which no lookup reached, since resolve_kana admits content
+      words alone and the card has no kanji for the lemma path;
+    - an ADNOMINAL: その本's その (UniDic's 其の, which no card spells),
+      そんな, どんな -- never a verb's card, though: ある研究's ある is
+      或る, "a certain", not ある "to be";
+    - a CONJUNCTION opening a clause: じゃあ is UniDic's では, and its
+      lemma reads で;
+    - a PARTICLE no grammar point is written on, that is no point's own
+      word (_catalogue_words): 二週間ほど's ほど, いつもより's より,
+      など. A marker the detector refused is left to it.
+
+    Read off the token as written, never its lemma: one or two kana are
+    a sound many words share, and the page's own letters are the word."""
+    m = morphemes[i]
+    if m.pos not in _FUNCTION_POS or not _hiragana(m.surface) or len(m.surface) < 2:
+        return None
+    if m.pos == "particle" and m.surface in _catalogue_words():
+        return None
+    if m.pos == "conjunction" and not (_clause_start(morphemes, i)
+                                       or (i > 0 and morphemes[i - 1].surface in "、，,")):
+        # A conjunction opens its clause: the さて of きっさてん is three
+        # letters of a café the tokenizer cut wrong, not "well, now".
+        return None
+    cards = _kana_cards(m.surface)
+    if m.pos == "adnominal":
+        cards = [c for c in cards if not _a_verbs_card(c[1])]
+    if not cards:
+        return None
+    level, entry = min(cards, key=lambda c: _level_rank(c[0]))
+    return level, entry, vocab_to_id(entry, level)
+
+
+# What may follow a sentence-opening では or でも and leave it the copula's
+# or a particle's: ではない, でもある.
+_COPULA_TAILS = frozenset({"無い", "ない", "有る", "ある", "ござる", "御座る"})
+
+
+def resolve_opening(morphemes, i: int):
+    """(level, entry, raw_id, n) for a conjunction the tokenizer cut into
+    particles where it opens a sentence (plan 266): でも、まだ… is で + も
+    to UniDic, and the deck's でも, "but", stood beside it unasked; では is
+    "well then", だって "but, because". Only at a sentence's start or a
+    quotation's -- 学校でも is a noun's で and も -- and never where the
+    run is a catalogue point's word (だから, それで: the point explains it)
+    or the copula goes on (ではない)."""
+    if not _clause_start(morphemes, i):
+        return None
+    for n in (3, 2):
+        run = morphemes[i:i + n]
+        if len(run) < n or any(m.pos not in ("particle", "auxiliary") for m in run):
+            continue
+        surface = "".join(m.surface for m in run)
+        if not _hiragana(surface) or surface in _catalogue_words():
+            continue
+        nxt = morphemes[i + n] if i + n < len(morphemes) else None
+        if nxt is not None and nxt.lemma in _COPULA_TAILS:
+            continue
+        cards = _kana_cards(surface)
+        if cards:
+            level, entry = min(cards, key=lambda c: _level_rank(c[0]))
+            return level, entry, vocab_to_id(entry, level), n
+    return None
+
+
+# JMdict's tags for a set phrase: an expression, an interjection.
+_PHRASE_TAGS = frozenset({"exp", "int"})
+
+
+def _utterance_start(morphemes, i: int) -> bool:
+    """Whether morphemes[i] opens an utterance: a sentence's start or a
+    quotation's (_clause_start), or a comma after the word a reply opens
+    with -- いいえ、どういたしまして, はい、いってらっしゃい."""
+    if _clause_start(morphemes, i):
+        return True
+    return (i >= 2 and morphemes[i - 1].surface in "、，,"
+            and morphemes[i - 2].pos in ("interjection", "conjunction")
+            and _clause_start(morphemes, i - 2))
+
+
+def _utterance_end(morphemes, end: int) -> bool:
+    return end >= len(morphemes) or (morphemes[end].pos == "symbol"
+                                     and morphemes[end].surface in "。．！？!?」』）)…")
+
+
+def resolve_pool_phrase(morphemes, i: int, deck_hits: list, explained: list,
+                        max_len: int = _PHRASE_MAX):
+    """(row, n) for a set phrase said as a whole utterance that the deck
+    has no card for and the JMdict pool holds as one expression (plan
+    266): どういたしまして is どう + 致す + ます + て, いらっしゃいませ
+    いらっしゃる + ます, 申し訳ありません a noun and a verb's polite
+    negative -- and the まし, the て, the ませ and the ん said nothing.
+
+    Held to what makes it a phrase and not a clause its words explain:
+
+    - it is the whole utterance (_utterance_start, _utterance_end): the
+      雨が降る of 大事な日に限って、雨が降る is a clause, its words cards;
+    - no word of it is a greeting the deck teaches: ありがとうございます
+      keeps the N5 ありがとう card a learner studies;
+    - a part of it says nothing otherwise -- no card and no point
+      (`explained`, the caller's) -- or carries a card its spelling
+      contradicts: いってきます's いっ took 言う, "to say", where the row
+      is 行ってきます. そうですね, whose そう, です and ね are a card and two
+      points, is left to them;
+    - JMdict tags the row an expression or an interjection, and marks it
+      common (its ⭐)."""
+    if not _utterance_start(morphemes, i):
+        return None
+    longest = min(max_len, len(morphemes) - i)
+    for n in range(longest, 1, -1):
+        run = morphemes[i:i + n]
+        if not _utterance_end(morphemes, i + n):
+            continue
+        if any(m.pos == "symbol" for m in run) or not any(m.pos in ("verb", "auxiliary") for m in run):
+            continue
+        if any(deck_hits[i + k] and m.pos == "interjection" for k, m in enumerate(run)):
+            continue
+        surface = "".join(m.surface for m in run)
+        reading = morphology.kata_to_hira("".join(m.kana for m in run))
+        rows = ([jmdict_db.get_by_key(surface, reading)] if _has_kanji(surface)
+                else jmdict_db.by_kana(surface))
+        for row in rows:
+            if row is None or (_has_kanji(surface) and row.get("kanji") != surface):
+                continue
+            spelled = {c for c in row.get("kanji") or "" if is_kanji(c)}
+            silent = any(not explained[i + k] for k, m in enumerate(run) if m.pos != "symbol")
+            contradicted = bool(spelled) and any(
+                deck_hits[i + k] and _has_kanji(deck_hits[i + k][1].get("kanji") or "")
+                and not {c for c in deck_hits[i + k][1]["kanji"] if is_kanji(c)} & spelled
+                for k in range(n))
+            if not (silent or contradicted):
+                continue
+            senses = jmdict_db.get_senses(row.get("kanji", ""), row.get("kana", "")) or []
+            if any(_PHRASE_TAGS & set(s.get("tags") or ()) and "⭐" in (s.get("term_tags") or ())
+                   for s in senses):
+                return row, n
+    return None
+
+
+def resolve_adverb_tail(morphemes, i: int, hit) -> int:
+    """2 where the adverb at `i` and the particle after it are one word
+    its own card spells (plan 266) -- the N5 すぐ is written すぐ／すぐに,
+    ゆっくり ゆっくり／ゆっくりと, and the に and the と said nothing beside
+    them -- else 0. Only the card's own spellings: a に after any other
+    adverb is a particle's."""
+    if hit is None or i + 1 >= len(morphemes):
+        return 0
+    m, nxt = morphemes[i], morphemes[i + 1]
+    if m.pos != "adverb" or nxt.pos != "particle" or nxt.surface not in ("に", "と"):
+        return 0
+    return 2 if m.surface + nxt.surface in _reading_variants(hit[1].get("kana") or "") else 0
+
+
+# The particles an idiom the deck teaches is written with.
+_IDIOM_PARTICLES = frozenset({"を", "に", "が"})
+
+
+def resolve_idiom(morphemes, i: int, max_len: int = 4):
+    """(level, entry, raw_id, n) for a deck card written as a noun, a
+    particle and a verb -- 気を付ける, 役に立つ, 気に入る, 間に合う -- that a
+    run of `n` morphemes from `i` spells (plan 266). The tokenizer cuts
+    each into its words, and the breakdown glossed 気をつけて as "spirit"
+    + を + a verb with no card: the idiom's meaning, "to be careful", was
+    nowhere on the line. Matched on the nouns as written and the verb's
+    dictionary form, so every form of the verb reaches it (気をつけて,
+    役に立った); the verb's endings stay rows of their own."""
+    longest = min(max_len, len(morphemes) - i)
+    for n in range(longest, 2, -1):
+        run = morphemes[i:i + n]
+        head, particle, verb = run[:-2], run[-2], run[-1]
+        if (particle.pos != "particle" or particle.surface not in _IDIOM_PARTICLES
+                or verb.pos != "verb" or any(m.pos not in ("noun", "prefix") for m in head)):
+            continue
+        written = "".join(m.surface for m in run[:-1])
+        reading = morphology.kata_to_hira("".join(m.reading for m in run[:-1])) + verb.lemma_reading
+        hit = resolve_lemma(written + verb.lemma, reading)
+        if hit is not None:
+            level, entry, raw_id = hit
+            return level, entry, raw_id, n
+    return None
+
+
+# The endings a word the deck teaches whole can be cut from: 知らせる is
+# 知ら + せる to UniDic, 思わず 思わ + ず.
+_SPLIT_ENDINGS = frozenset({"せる", "させる", "ず"})
+
+
+def resolve_split_word(morphemes, i: int):
+    """(level, entry, raw_id, 2) for a deck word the tokenizer cut into a
+    verb and an ending (plan 266): 知らせる, "to notify", is 知る + the
+    causative せる to UniDic, and the breakdown read 知らせてください as
+    "to know" with a せ that said nothing; 思わず, "unintentionally", is
+    思う + ず. The deck's card written as the stem and the ending's
+    dictionary form (知ら + せる) or as the two together (思わ + ず) is
+    the word. A causative the deck does not teach as a word (書かせる)
+    stays a verb and its 使役形."""
+    if i + 1 >= len(morphemes):
+        return None
+    stem, ending = morphemes[i], morphemes[i + 1]
+    if stem.pos != "verb" or ending.pos != "auxiliary" or ending.lemma not in _SPLIT_ENDINGS:
+        return None
+    reading = morphology.kata_to_hira(stem.reading)
+    keys = ((stem.surface + ending.lemma, reading + morphology.kata_to_hira(ending.lemma_reading)),
+            (stem.surface + ending.surface, reading + morphology.kata_to_hira(ending.reading)))
+    for key, key_reading in keys:
+        hit = resolve_lemma(key, key_reading, key)
+        if hit is not None and hit[1].get("kanji") == key:
+            return (*hit, 2)
+    return None
+
+
+# ── Numbers (plan 266) ─────────────────────────────────────────
+_DIGIT_VALUES = {**{c: v for v, c in enumerate("〇一二三四五六七八九")},
+                 **{c: v for v, c in enumerate("0123456789")},
+                 **{c: v for v, c in enumerate("０１２３４５６７８９")}}
+_UNIT_VALUES = {"十": 10, "百": 100, "千": 1000}
+_MYRIAD_VALUES = {"万": 10 ** 4, "億": 10 ** 8, "兆": 10 ** 12}
+_KANJI_NUMERALS = frozenset("〇一二三四五六七八九十百千万億兆")
+
+
+def numeral_value(text: str) -> int | None:
+    """The number a numeral written in kanji says -- 三十 is 30, 九千三百五十
+    9350, 三万五千 35000, 二〇二六 2026 -- or None for any text that is
+    not one, or carries no kanji numeral to read (2026 says itself)."""
+    if not text or not any(c in _KANJI_NUMERALS for c in text):
+        return None
+    total = section = 0
+    digits = None
+    for c in text:
+        if c in _DIGIT_VALUES:
+            digits = _DIGIT_VALUES[c] if digits is None else digits * 10 + _DIGIT_VALUES[c]
+        elif c in _UNIT_VALUES:
+            section += (1 if digits is None else digits) * _UNIT_VALUES[c]
+            digits = None
+        elif c in _MYRIAD_VALUES:
+            section += digits or 0
+            total += (section or 1) * _MYRIAD_VALUES[c]
+            section, digits = 0, None
+        else:
+            return None
+    return total + section + (digits or 0)
 
 
 def _find_segments_morphological(text: str):

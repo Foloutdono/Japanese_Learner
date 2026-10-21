@@ -115,6 +115,8 @@ PLAN = [
     ("credit_stops",        "user_id = %(user)s",       "where the credits stopped a run: the offer's week"),
     ("event_log",           "user_id = %(user)s",       "足跡: which screens were opened, and when"),
     ("event_daily",         "user_id = %(user)s",       "the rolled-up half of that same trail"),
+    ("banzuke_division",    "user_id = %(user)s",       "the board's division, this week and the last (plan 262)"),
+    ("banzuke_rank",        "user_id = %(user)s",       "the board's place at the start of the day, for the moves"),
     ("feedback",            "user_id = %(user)s",       "the messages written to us: problems, ideas, cards reported (plan 222)"),
     ("user_profiles",       "user_id = %(user)s",       "identity: username, level, goal, preferences"),
 ]
@@ -127,6 +129,7 @@ SHARED = {
     "exam_translations":     "a sat question's translations, keyed by a hash of the text; shared across every caller",
     "grammar_sentences":     "generated content cache keyed by (level, pattern)",
     "phrase_analysis_cache": "keyed by a hash of the phrase; shared across every caller",
+    "banzuke_marks":         "which board week was settled and which day's places taken; no learner's rows",
 }
 
 

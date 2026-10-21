@@ -26,6 +26,8 @@ from content import jmdict_fr
 from study.card_lookup import (
     resolve_morpheme, resolve_compound, resolve_phrase, compound_reading,
     resolve_pool_morpheme, resolve_pool_compound, pool_gloss,
+    resolve_function_word, resolve_opening, resolve_pool_phrase, resolve_idiom,
+    resolve_split_word, resolve_adverb_tail, numeral_value,
     find_kanji_matches, find_segments_in_text, card_stats, serializable_entry,
     VOCAB_STATUS_MODES, KANJI_STATUS_MODES, GRAMMAR_STATUS_MODES,
 )
@@ -141,6 +143,38 @@ def _attach_grammar(tokens: list[dict], grammar: list[dict]) -> None:
         ]
 
 
+# The tokens a set phrase or a sentence-opening conjunction was folded
+# into (_tokens): one word each, whatever letters the detector read in it.
+_ONE_WORD_POS = frozenset({"interjection", "conjunction"})
+
+
+def _outside_set_phrases(tokens: list[dict], grammar: list[dict]) -> list[dict]:
+    """The markers not written inside a set phrase (plan 266): では opening
+    a sentence is "well then", not the で of a place and the は of a
+    topic; だが is "but", not the copula and a subject's が. A particle's
+    marker written wholly inside such a word, and shorter than it, is its
+    letters' -- as the detector leaves the か of 何か to 何か -- and so is
+    a part of a point in several. A pattern written in one piece there is
+    the phrase's own make (いらっしゃいませ is いらっしゃる told, すみません's
+    ません the polite negative) and stays, as does a point that IS the
+    word (しかし)."""
+    words = [(t["start"], t["end"]) for t in tokens if t.get("pos") in _ONE_WORD_POS]
+    if not words:
+        return grammar
+
+    def borrowed(g) -> bool:
+        if g.get("kind") == "marker":
+            return any(all(s <= a and b <= e for a, b in g["segments"]) and (g["start"], g["end"]) != (s, e)
+                       for s, e in words)
+        # A point in several parts that reads one of them in the word's
+        # letters: the は of では is no half of 〜は〜が, the も of でも no
+        # first も of 〜も〜も.
+        return len(g["segments"]) > 1 and any(
+            s <= a and b <= e and (a, b) != (s, e) for a, b in g["segments"] for s, e in words)
+
+    return [g for g in grammar if not borrowed(g)]
+
+
 def _pool_match(entry: dict) -> dict:
     """A JMdict pool word as a token's vocab_match (plan 148): the same
     shape as a deck word's, so every screen that glosses a word, opens
@@ -182,10 +216,25 @@ def _deck_match(level: str, entry: dict, raw_id: str) -> dict:
     return out
 
 
-def _token_dict(m: morphology.Morpheme, hit, pool=None) -> dict:
+# What a name the course has no card for is (plan 266), by the kind
+# UniDic files it under (morphology.Morpheme.name_kind). The analysis is
+# shared across learners, so the line carries both languages, as a
+# grammar point's gloss does, and the screen reads its own (frontend
+# tokens.js's wordGloss).
+_NAME_GLOSS = {
+    "family": {"en": "family name", "fr": "nom de famille"},
+    "given": {"en": "given name", "fr": "prénom"},
+    "person": {"en": "a person's name", "fr": "nom de personne"},
+    "place": {"en": "place name", "fr": "nom de lieu"},
+    "other": {"en": "a name", "fr": "un nom propre"},
+}
+
+
+def _token_dict(m: morphology.Morpheme, hit, pool=None, named: bool = False) -> dict:
     """`hit` is card_lookup.resolve_morpheme's answer for `m`, resolved
     by the caller, which has the neighbours the resolver reads; `pool`
-    is resolve_pool_morpheme's, asked only where `hit` is None."""
+    is resolve_pool_morpheme's, asked only where `hit` is None; `named`
+    is whether an honorific follows a name (_named)."""
     vocab_match = None
     if hit:
         level, entry, raw_id = hit
@@ -203,13 +252,82 @@ def _token_dict(m: morphology.Morpheme, hit, pool=None) -> dict:
     # dictionary form's reading and can differ from what's on the page.
     furigana = align_deck(m.surface, m.reading)
 
-    return {
+    token = {
         "surface": m.surface, "start": m.start, "end": m.end,
         "lemma": m.lemma, "reading": m.reading, "pos": m.pos,
         "furigana": furigana,
         "vocab_match": vocab_match,
         "kanji_matches": kanji_matches,
     }
+    if vocab_match is None and m.name_kind and (named or m.name_kind == "place" or not _hiragana(m.surface)):
+        # A name has no card, and its row said nothing: 田中 and マルタン
+        # read as a word the course does not teach (plan 266). Written in
+        # hiragana, a name is the tokenizer's guess unless an honorific
+        # says so (`named`): the ゆう of ゆうがた is 夕方 cut in two, no
+        # Yū. A place it knows (とうきょう, おおさか) it reads as one.
+        token["gloss"] = dict(_NAME_GLOSS[m.name_kind])
+    return token
+
+
+def _hiragana(text: str) -> bool:
+    return bool(text) and all("\u3041" <= c <= "\u309f" for c in text)
+
+
+def _number_dict(run: list, value: int) -> dict:
+    """One token for a number written in kanji (plan 266): 三十 had no
+    card and 九千三百五十 was three rows that said nothing, a number the
+    learner had to add up from the kanji's own cards (三, 千, 百). Its
+    gloss is the figure, written as each language writes it."""
+    surface = "".join(m.surface for m in run)
+    reading = "".join(m.reading for m in run)
+    return {
+        "surface": surface, "start": run[0].start, "end": run[-1].end,
+        "lemma": surface, "reading": reading, "pos": "noun",
+        "furigana": align_deck(surface, reading),
+        "vocab_match": None,
+        "kanji_matches": [
+            {"kanji": char, "level": lvl, "raw_id": rid, "entry": serializable_entry(e)}
+            for char, lvl, e, rid in find_kanji_matches(surface)
+        ],
+        "number": value,
+        "gloss": {"en": f"{value:,}", "fr": f"{value:,}".replace(",", " ")},
+    }
+
+
+def _numeral_run(morphemes: list, i: int, deck_hits: list) -> int:
+    """How many morphemes from `i` write one number in kanji, or 0: 九千 +
+    三百 + 五十, 三 + 万 + 五千, 三十 alone. A lone numeral the deck has a
+    card for (十, 千) keeps it, and a number in digits says itself. Folded
+    before the deck's date compounds can take its last digit: 十 + 八日 was
+    "ten" and "the eighth day", where 十八日 is the eighteenth."""
+    n = 0
+    while i + n < len(morphemes) and morphemes[i + n].pos == "noun" \
+            and all(c in _NUMERAL_CHARS for c in morphemes[i + n].surface):
+        n += 1
+    if n == 0 or (n == 1 and deck_hits[i]):
+        return 0
+    written = "".join(m.surface for m in morphemes[i:i + n])
+    if not any(c in _NUMERAL_UNITS for c in written) or numeral_value(written) is None:
+        # Digits read one by one are no number: 三四五六の七八一二番 is a
+        # telephone's, said digit by digit, and each keeps its card.
+        return 0
+    return n
+
+
+_NUMERAL_CHARS = frozenset("〇一二三四五六七八九十百千万億兆0123456789０１２３４５６７８９")
+_NUMERAL_UNITS = frozenset("十百千万億兆")
+
+
+# The suffixes a person's name takes: a token UniDic calls a name before
+# one of them is that name, whatever card its letters spell (ゆきさん is
+# Yuki, no 雪 "snow"; まりさん no 鞠 "ball").
+_HONORIFICS = frozenset({"さん", "ちゃん", "くん", "君", "様", "さま", "氏", "先生"})
+
+
+def _named(morphemes: list, i: int) -> bool:
+    m = morphemes[i]
+    return (m.name_kind in ("family", "given", "person") and i + 1 < len(morphemes)
+            and morphemes[i + 1].surface in _HONORIFICS)
 
 
 def _compound_dict(run: list, level: str, entry: dict, raw_id: str) -> dict:
@@ -309,10 +427,15 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     held = _in_grammar(morphemes, [g for g in grammar or [] if g.get("pattern") in no_good_points()])
     deck_hits = [None if j in held and morphemes[j].pos == "verb" and morphemes[j].lemma in NO_GOOD_VERBS else hit
                  for j, hit in enumerate(deck_hits)]
+    # A name before an honorific is the name, never the card its letters
+    # spell (plan 266): ゆきさん is no "snow".
+    deck_hits = [None if _named(morphemes, j) else hit for j, hit in enumerate(deck_hits)]
     # A pool run may not take in a morpheme a point is written on; a
     # deck hit stands in for "has a card" there, which is all
     # resolve_pool_compound asks of it.
     pool_hits = [hit or (j in ruled) for j, hit in enumerate(deck_hits)]
+    # What explains each morpheme before any fold: its card or a point.
+    explained = [bool(hit) or j in ruled for j, hit in enumerate(deck_hits)]
     tokens = []
     i = 0
     while i < len(morphemes):
@@ -324,11 +447,54 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             tokens.append(token)
             i += n
             continue
+        # The breakdown's own folds (plan 266, card_lookup's "words that
+        # hold a sentence together"): a set phrase the pool holds as one
+        # expression (どういたしまして), a conjunction cut into particles
+        # where it opens a sentence (でも、), a deck idiom (気をつける)
+        # and a deck word cut into a verb and an ending (知らせる).
+        said = resolve_pool_phrase(morphemes, i, deck_hits, explained)
+        if said:
+            entry, n = said
+            token = _pool_compound_dict(morphemes[i:i + n], entry)
+            token["pos"] = "interjection"
+            tokens.append(token)
+            i += n
+            continue
+        opening = resolve_opening(morphemes, i)
+        if opening:
+            level, entry, raw_id, n = opening
+            token = _compound_dict(morphemes[i:i + n], level, entry, raw_id)
+            token["pos"] = "conjunction"
+            tokens.append(token)
+            i += n
+            continue
         hit = resolve_compound(morphemes, i)
         if hit:
             level, entry, raw_id, n = hit
             tokens.append(_compound_dict(morphemes[i:i + n], level, entry, raw_id))
             i += n
+            continue
+        # (Never a word cut from an ending a point is written on: そう
+        # 思わずにはいられない is 思う and 〜ずにはいられない, no 思わず.)
+        hit = resolve_idiom(morphemes, i) or (None if i + 1 in ruled else resolve_split_word(morphemes, i))
+        if hit:
+            level, entry, raw_id, n = hit
+            run = morphemes[i:i + n]
+            token = _compound_dict(run, level, entry, raw_id)
+            # Read as the page writes it, 気をつけ and 知らせ: the entry's
+            # dictionary reading is another form's. A verb's endings
+            # follow it as a verb's do (frontend rows.js).
+            token["reading"] = "".join(m.reading for m in run)
+            token["furigana"] = align_deck(token["surface"], token["reading"])
+            token["pos"] = "adverb" if run[-1].lemma == "ず" else "verb"
+            tokens.append(token)
+            i += n
+            continue
+        counted_run = _numeral_run(morphemes, i, deck_hits)
+        if counted_run:
+            run = morphemes[i:i + counted_run]
+            tokens.append(_number_dict(run, numeral_value("".join(m.surface for m in run))))
+            i += counted_run
             continue
         pooled = None if i in ruled else resolve_pool_compound(morphemes, i, pool_hits)
         if pooled and not any(j in ruled for j in range(i, i + pooled[1])):
@@ -337,8 +503,17 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             i += n
             continue
         deck = deck_hits[i]
-        pool = None if deck or i in ruled else resolve_pool_morpheme(morphemes, i)
-        tokens.append(_token_dict(morphemes[i], deck, pool))
+        if i + 1 not in ruled and resolve_adverb_tail(morphemes, i, deck):
+            token = _compound_dict(morphemes[i:i + 2], *deck)
+            token["pos"] = "adverb"
+            tokens.append(token)
+            i += 2
+            continue
+        if deck is None and i not in ruled:
+            deck = resolve_function_word(morphemes, i)
+        named = _named(morphemes, i)
+        pool = None if deck or i in ruled or named else resolve_pool_morpheme(morphemes, i)
+        tokens.append(_token_dict(morphemes[i], deck, pool, named))
         i += 1
     return tokens
 
@@ -419,7 +594,14 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 18: plan 260 -- 95 cards down to the level two signals agree on (枚,
 # 冊, さん at N5, not N1), so a stored breakdown's badges read the new
 # levels, and また reaches its kana card, which wrote it 又 before.
-LOCAL_REV = 18
+# 19: plan 266 -- every part of a sentence says what it is: the function
+# words reach their kana cards (さん, その, ほど, じゃあ), a sentence's
+# opening でも and では, a set phrase said alone (どういたしまして), a deck
+# idiom (気をつける) and a word the tokenizer cut (知らせる) are one word;
+# a number carries its figure and a name says it is one; and the
+# detector reads 〜ております, the な of 休みなので, a quotation without
+# brackets, につきまして and the ません of ありませんが.
+LOCAL_REV = 19
 
 
 def analyze_local(text: str, level: str | None = None) -> dict:
@@ -443,6 +625,7 @@ def analyze_local(text: str, level: str | None = None) -> dict:
 
     grammar = _grammar_entries(text, morphemes)
     tokens = _tokens(morphemes, grammar)
+    grammar = _outside_set_phrases(tokens, grammar)
     _attach_grammar(tokens, grammar)
     # Segmented once for both: left to them, estimate_level and report
     # each segment the sentence again for every level they try.

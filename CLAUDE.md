@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **262**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **270**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -67,7 +67,10 @@ runtime purpose.
   breakdown), the `phrase_analysis_cache` version (the deep tier),
   `TOUR_REV` in `study/grammar_tour.py`, `VOICE_REV` and `KANA_REV` (audio),
   `REV` in `frontend/scripts/today-print/build.py` (Today's print, plan 205),
-  `REV` in `frontend/scripts/ambiance/build.py` (the ambiance, plan 219).
+  `REV` in `frontend/scripts/ambiance/build.py` (the ambiance, plan 219),
+  `SORT_REV` in `study/lyrics_sort.py` (which lines of a song are sung,
+  plan 264), `CUT_REV` in `study/line_cut.py` (what a stored video
+  session's lines are cut into).
   An exam id's `generator_version` (`study/exam_catalogue.py`) is one too: a bump
   retires the papers it made without deleting them (plan 257 bumped `vocab-gen`).
   A change to what any of them produces bumps it, or learners keep the old.
@@ -165,6 +168,19 @@ runtime purpose.
   A new rule or refusal there is pinned in `tests/test_plain_polite.py`
   with the sentence it reads both ways and the one it must not, and
   diffed over every sentence Construire asks.
+- **Every part of a breakdown says what it is (plan 266).** A word row
+  carries its card's meaning, a particle or an ending the point written
+  on it, a number its figure and a name the word "name" (the token's
+  `gloss`, `{en, fr}`); a part with none of these is a gap, and
+  `python -m scripts.breakdown_gaps` lists them over every sentence the
+  app teaches. A function word reaches the deck's kana card through
+  `card_lookup`'s breakdown-only resolvers ("the words that hold a
+  sentence together"), never through `resolve_morpheme`, so no card a
+  particle or a suffix gains grades a sentence's level; a set phrase is
+  folded only where it is a whole utterance and a part of it said
+  nothing, and a marker read inside a folded word is dropped. A missing
+  meaning still beats a guessed one: the copula's に after a noun and
+  〜らしい after one stay unlit (`test_grammar_precision.py` pins both).
 - **One progress number.** A card's progress is `srs._progress`, 0 (new) to
   1 (mastered); every `learned / total`, bar and figure sums it. Never add a
   second curve beside it.
@@ -202,6 +218,17 @@ runtime purpose.
   or serves the ration does too. A tour can always be skipped for its
   card; a run the learner boards on purpose (a grammar run, a unit) is
   not capped.
+- **A place on the 番付 is read off one list (plan 262).** `study/banzuke.py`
+  ranks each board (all time, the calendar week from Monday 00:00 UTC, a
+  division) from one sum, `srs.xp_totals`, a minute old at most, a tie
+  broken by the user id: a page, the learner's own place, the rows around
+  it, the gap to the next and the move since the day began are all read
+  off it, never off a second count. The divisions (序ノ口 … 幕内) are
+  settled lazily by the week's first board, once (`banzuke_marks`). A
+  learner who keeps off the board (`board_hidden`) is in no list another
+  learner reads and still sees their own place; a row's card shows what
+  the board already does (XP, level, places, division) and published
+  decks, never the streak, the JLPT level or the card's name.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.
@@ -847,6 +874,19 @@ Draft a scenario against it:
 cd backend
 python -m scripts.check_conversation            # every level; exit 1 on a problem
 python -m scripts.check_conversation --level N4
+```
+
+The breakdown has one too (plan 266): every part of the app's own
+sentences that says nothing -- a word row with no meaning, a particle no
+point is written on -- grouped by kind, each with a sentence that shows
+it. A reason to look; a gap is closed in the lookups or the detector by
+counter-case:
+
+```bash
+cd backend
+python -m scripts.breakdown_gaps                          # the gaps, by kind
+python -m scripts.breakdown_gaps --kind silent_particle   # one kind, longer
+python -m scripts.breakdown_gaps --json                   # every gap, as JSON
 ```
 
 One more read-only report measures the vocab deck itself (plan 103) —

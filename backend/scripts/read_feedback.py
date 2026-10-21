@@ -3,7 +3,7 @@ What learners wrote to us (plan 222), newest first, as markdown.
 
     python -m scripts.read_feedback                 # the last 7 days
     python -m scripts.read_feedback --days 30
-    python -m scripts.read_feedback --kind card     # problem | idea | fault | card
+    python -m scripts.read_feedback --kind card     # problem | idea | fault | card | rating
     python -m scripts.read_feedback --reply         # only those asking for an answer
 
 Read-only. There is no --yes because there is nothing to confirm.
@@ -30,7 +30,7 @@ import scripts._env  # noqa: F401  -- must precede core.db, which reads
 from core.db import db_conn
 
 DEFAULT_DAYS = 7
-KINDS = ("problem", "idea", "fault", "card")
+KINDS = ("problem", "idea", "fault", "card", "rating")
 # The most a run prints: a backlog is read a page at a time.
 LIMIT = 200
 
@@ -45,7 +45,7 @@ def fetch(cur, days: int, kind: str | None, reply: bool) -> list[dict]:
         where.append("reply")
     cur.execute(
         f"""
-        SELECT id, user_id, kind, body, reasons, card_id, exam_id, revision, question_id, route, area, status,
+        SELECT id, user_id, kind, body, reasons, card_id, exam_id, revision, question_id, rating, route, area, status,
                platform, vp, os, lang, reply, reply_to, created_at
           FROM feedback
          WHERE {' AND '.join(where)}
@@ -67,6 +67,8 @@ def render(row: dict) -> str:
     if row["card_id"]:
         reasons = ", ".join(row["reasons"]) if row["reasons"] else "—"
         facts.append(f"card `{row['card_id']}` · {reasons}")
+    if row.get("rating"):
+        facts.append(f"rating {row['rating']}/5")
     if row["area"]:
         facts.append(f"failed `{row['area']}` · {row['status']}")
     where = " · ".join(v for v in (row["route"], row["vp"], row["os"], row["platform"], row["lang"]) if v)

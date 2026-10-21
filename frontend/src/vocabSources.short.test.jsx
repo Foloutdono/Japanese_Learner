@@ -7,11 +7,11 @@ import '@fontsource/space-grotesk/latin-500.css'
 import '@fontsource/space-grotesk/latin-700.css'
 import './index.css'
 
-// ── 低 — the vocabulary's sources on a laptop's short window (plan 183) ──
-// A 600px window (plan 169): the first words give way, the strip's and
-// the line's, and the page shows whole -- the strip, the three plates to
-// the window's foot, JLPT's five rows each a row's height at least, the
-// gate and the air round it in its card.
+// ── 低 — the vocabulary's sources on a laptop's short window (plan 267) ──
+// A 600px window (plan 169): the doors' air gives way first, and what
+// the window cannot hold scrolls the page rather than crush a band --
+// every tier door a row's height and width at least, the themes' band
+// four rows' height at least, the gate and the air round it in its door.
 
 vi.mock('./lib/audio', async o => ({
   ...(await o()),
@@ -101,32 +101,34 @@ async function mount() {
   await settle()
 }
 const $ = s => document.querySelector(s)
-const strip = () => $('.desk-sources--resume > .desk-resume')
-const lead = () => strip().querySelector('.desk-resume__card--lead')
-const plates = () => [...document.querySelectorAll('.desk-sources__lower > .desk-source')]
-// The gate's breathing ring stands 9px out of its pill, and the reader's
-// ripples as far: all of it inside the card.
+const doors = () => [...document.querySelectorAll('.desk-linedoors__line .route-stop')]
+const gateCell = () => $('.desk-linedoors__gate')
+const tierBand = () => $('.desk-band--tiers')
+const themeBand = () => $('.desk-band--themes')
+const cells = () => [...tierBand().querySelectorAll('.desk-source__cells > a')]
+const near = (a, b) => Math.abs(a - b) < 2
+const box = el => el.getBoundingClientRect()
+// The gate's reader ripples as far as 9px out of its pill: all of it
+// inside its door.
 const RING = 9
-const gateInside = card => {
-  const c = card.getBoundingClientRect()
-  const g = card.querySelector('button.btn-depart--gate').getBoundingClientRect()
+const gateInside = () => {
+  const c = box(gateCell())
+  const g = box(gateCell().querySelector('button.btn-depart--gate'))
   return g.left - RING >= c.left && g.right + RING <= c.right && g.top - RING >= c.top && g.bottom + RING <= c.bottom
 }
-const rows = plate => [...plate.querySelectorAll('.desk-source__rows > a')]
 
-afterEach(() => { STATS.items.vocab.N4.started = 0 })
-
-describe('the vocabulary\'s sources on a short desk (plan 183)', () => {
-  it('shows the page whole: no first words, the plates down to the foot and no further', async () => {
+describe('the vocabulary\'s sources on a short desk (plan 267)', () => {
+  it('keeps every door at its floor and lets the page scroll for the rest', async () => {
     await mount()
-    expect(getComputedStyle(lead().querySelector('.desk-resume__sample')).display).toBe('none')
-    expect(getComputedStyle(plates()[0].querySelector('.desk-source__sample')).display).toBe('none')
-    for (const p of plates()) {
-      const r = p.getBoundingClientRect()
-      expect(r.bottom).toBeLessThanOrEqual(window.innerHeight)
-      expect(r.bottom).toBeGreaterThan(window.innerHeight - 60)
+    for (const c of cells()) {
+      const r = box(c)
+      expect(r.height).toBeGreaterThanOrEqual(43)
+      expect(r.width).toBeGreaterThanOrEqual(43)
     }
-    for (const r of rows(plates()[0])) expect(r.getBoundingClientRect().height).toBeGreaterThanOrEqual(43)
-    expect(gateInside(lead())).toBe(true)
+    expect(box(themeBand()).height).toBeGreaterThanOrEqual(4 * 44 - 1)
+    expect(gateInside()).toBe(true)
+    const ds = doors().map(box)
+    for (const d of ds) expect(near(d.height, ds[0].height)).toBe(true)
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
   })
 })

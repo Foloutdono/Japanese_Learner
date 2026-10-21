@@ -2,14 +2,16 @@
 
 study/line_cut.py cuts a cue wider than MAX_LINE_WIDTH into the fewest
 lines that fit, between two phrases, and shares the cue's time among
-them. The lines here are the owner's screenshots of 2026-10-16 and
-lines shaped like them.
+them; and a line still wider than TARGET_LINE_WIDTH, two rows of a
+phone, again where a cut loses nothing (2026-10-20). The lines here are
+the owner's screenshots of 2026-10-16 and 2026-10-20 and lines shaped
+like them.
 """
 import pytest
 
 from study import morphology
 from study.cue_sentences import sentences_from_cues
-from study.line_cut import MAX_LINE_WIDTH, cut_line, line_width
+from study.line_cut import MAX_LINE_WIDTH, TARGET_LINE_WIDTH, cut_line, line_width
 
 needs_tokenizer = pytest.mark.skipif(not morphology.MORPHOLOGY_AVAILABLE, reason="needs the tokenizer")
 
@@ -36,8 +38,10 @@ def test_the_owner_s_long_line_is_cut_where_it_breathes():
     line = "今日はAyaseさんとバンドメンバーとそしてぷらそにかの合唱のみなさんがいてくれるので、"
     pieces = cut_line(line, 10.0, 20.0)
     assert _texts(pieces) == [
-        "今日はAyaseさんとバンドメンバーとそして",
-        "ぷらそにかの合唱のみなさんがいてくれるので、",
+        "今日はAyaseさんと",
+        "バンドメンバーとそして",
+        "ぷらそにかの合唱のみなさんが",
+        "いてくれるので、",
     ]
     assert "".join(_texts(pieces)) == line
 
@@ -47,7 +51,8 @@ def test_a_line_is_cut_after_a_phrase_not_inside_one():
     line = "もう一人一人の全員の思いがこの一回のテイクで乗るといいですね！"
     assert _texts(cut_line(line, 0.0, 6.0)) == [
         "もう一人一人の全員の思いが",
-        "この一回のテイクで乗るといいですね！",
+        "この一回のテイクで",
+        "乗るといいですね！",
     ]
 
 
@@ -55,7 +60,49 @@ def test_a_line_is_cut_after_a_phrase_not_inside_one():
 def test_a_mark_already_in_the_line_is_a_cut_and_latin_words_stay_together():
     line = "そうですね、今日は前回THE HOME TAKEの時は私一人で歌わせていただいたんですけど"
     pieces = _texts(cut_line(line, 0.0, 8.0))
-    assert pieces == ["そうですね、今日は前回THE HOME TAKEの時は", "私一人で歌わせていただいたんですけど"]
+    assert pieces == ["そうですね、", "今日は前回THE HOME TAKEの時は", "私一人で", "歌わせていただいたんですけど"]
+
+
+@needs_tokenizer
+def test_a_line_of_three_rows_is_cut_in_two_where_it_breathes():
+    # The owner's screenshot of 2026-10-20: under the 22 the line was
+    # held to, it drew three rows of a phone, and its translation went
+    # under the dock.
+    line = "そうですね、今日は前回THE HOME TAKEの時は"
+    assert MAX_LINE_WIDTH >= line_width(line) > TARGET_LINE_WIDTH
+    pieces = cut_line(line, 2.0, 6.0)
+    assert _texts(pieces) == ["そうですね、", "今日は前回THE HOME TAKEの時は"]
+    assert pieces[0]["start"] == 2.0 and pieces[-1]["end"] == 6.0
+    assert pieces[0]["end"] == pieces[1]["start"]
+
+
+@needs_tokenizer
+@pytest.mark.parametrize("line, pieces", [
+    ("明日までにこのレポートを書かなければなりません", ["明日までにこのレポートを", "書かなければなりません"]),
+    ("雨が降っているかもしれないので傘を持って行きます", ["雨が降っているかもしれないので", "傘を持って行きます"]),
+    ("駅から家まで歩いて二十分ぐらいかかります", ["駅から家まで歩いて", "二十分ぐらいかかります"]),
+    ("嗚呼、いつもの様に過ぎる日々にあくびが出る", ["嗚呼、いつもの様に過ぎる日々に", "あくびが出る"]),
+])
+def test_a_line_over_two_rows_is_cut_where_no_point_is_lost(line, pieces):
+    assert _texts(cut_line(line, 0.0, 6.0)) == pieces
+
+
+@needs_tokenizer
+@pytest.mark.parametrize("line", [
+    # かもしれない is one point, and its も|しれ a phrase's end to the cut.
+    "好きになってしまっていたのかもしれない",
+    # 〜て、〜て from 起きて to 散歩して: cut after 起きて, neither line has it.
+    "私は毎朝早く起きて公園を散歩してから",
+])
+def test_a_line_over_two_rows_with_nowhere_clean_to_cut_stays_whole(line):
+    assert TARGET_LINE_WIDTH < line_width(line) <= MAX_LINE_WIDTH
+    assert _texts(cut_line(line, 0.0, 6.0)) == [line]
+
+
+def test_a_line_of_two_rows_is_left_as_it_came():
+    line = "今日はみんなで駅前に行った"
+    assert line_width(line) <= TARGET_LINE_WIDTH
+    assert _texts(cut_line(line, 0.0, 6.0)) == [line]
 
 
 @needs_tokenizer
@@ -81,7 +128,7 @@ def test_a_verb_s_chain_is_never_cut():
         ("ずっと前から君のことを好きになってしまっていたのかもしれない", "しまっていた"),
     ):
         pieces = _texts(cut_line(line, 0.0, 5.0))
-        assert len(pieces) == 2, pieces
+        assert len(pieces) >= 2, pieces
         assert any(chain in piece for piece in pieces), pieces
 
 
@@ -108,11 +155,14 @@ def test_a_time_the_track_measured_at_the_cut_is_where_the_next_line_starts():
     cut = line.index("この")
     take = line.index("テイク")
     words = [[0, 10.2], [cut, 13.5], [take, 14.6], [len(line), 16.8]]
-    first, second = cut_line(line, 10.0, 17.0, words)
+    first, second, third = cut_line(line, 10.0, 17.0, words)
     assert first["end"] == second["start"] == 13.5
+    # Between two measured times, a cut is placed by the beats.
+    assert second["end"] == third["start"] and 14.6 < third["start"] < 16.8
     # Each keeps the times that fall in it, on its own text.
     assert first["words"] == [[0, 10.2]]
-    assert second["words"] == [[0, 13.5], [take - cut, 14.6], [len(second["text"]), 16.8]]
+    assert second["words"] == [[0, 13.5], [take - cut, 14.6]]
+    assert third["words"] == [[len(third["text"]), 16.8]]
 
 
 def test_without_a_tokenizer_a_line_is_cut_only_where_it_breathes(monkeypatch):
@@ -143,10 +193,12 @@ def test_sentences_from_cues_cuts_a_wide_cue_and_keeps_its_neighbours_whole():
     result = sentences_from_cues(cues, None, None)
     assert [s["text"] for s in result] == [
         "こんにちは",
-        "今日はAyaseさんとバンドメンバーとそして",
-        "ぷらそにかの合唱のみなさんがいてくれるので、",
+        "今日はAyaseさんと",
+        "バンドメンバーとそして",
+        "ぷらそにかの合唱のみなさんが",
+        "いてくれるので、",
         "I miss you so much every single day and every single night",
     ]
-    assert result[1]["cue_start"] == 2.0 and result[2]["cue_end"] == 9.0
-    assert result[1]["cue_end"] == result[2]["cue_start"]
-    assert [s["japanese"] for s in result] == [True, True, True, False]
+    assert result[1]["cue_start"] == 2.0 and result[4]["cue_end"] == 9.0
+    assert all(a["cue_end"] == b["cue_start"] for a, b in zip(result[1:4], result[2:5]))
+    assert [s["japanese"] for s in result] == [True, True, True, True, True, False]

@@ -29,7 +29,7 @@ export function askWords(analysis) {
   const out = []
   for (const tok of tokens) {
     const surface = tok?.surface?.trim()
-    const meaning = (tok?.meaning ?? tok?.vocab_match?.entry?.meaning ?? '').trim()
+    const meaning = (tok?.meaning ?? tok?.vocab_match?.entry?.meaning ?? tok?.gloss?.en ?? '').trim()
     if (!surface || !meaning) continue
     const reading = tok.reading && tok.reading !== surface ? ` (${tok.reading})` : ''
     out.push(clip(`${surface}${reading}: ${meaning}`, MAX_WORD))
