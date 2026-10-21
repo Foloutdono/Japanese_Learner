@@ -3927,7 +3927,7 @@
    "〜とき",
    "もう〜ました"
   ],
-  "text": "けさはいい天気でしたから、かさをもたないで、うちを出ました。でも、午後、学校を出たとき、雨がふっていました。わたしは駅まで、はしりました。駅の前で、おなじクラスのたなかさんに会いました。たなかさんには大きいかさがありました。「いっしょにかえりましょう。」とたなかさんが言いました。わたしたちは一本のかさで、ゆっくりあるきました。たなかさんのうちは、わたしのうちのちかくです。とてもうれしかったです。あした、たなかさんに「ありがとう。」と言います。わたしはもう新しいかさを買いました。",
+  "text": "けさはいい天気でしたから、かさをもたないで、うちを出ました。でも、午後、学校を出たとき、雨がふっていました。わたしは駅まで、はしりました。駅の前で、おなじクラスのたなかさんに会いました。たなかさんには大きいかさがありました。「いっしょにかえりましょう。」とたなかさんが言いました。わたしたちは一本のかさで、ゆっくりあるきました。たなかさんのうちは、わたしのうちのちかくです。とてもうれしかったです。あした、たなかさんに「ありがとう。」と言います。わたしはもう、かばんに入る小さいかさを買いました。",
   "questions": [
    {
     "type": "grammar",
@@ -4064,21 +4064,21 @@
    {
     "type": "grammar",
     "question": {
-     "en": "What does 「もう新しいかさを買いました」 mean?",
-     "fr": "Que signifie 「もう新しいかさを買いました」 ?"
+     "en": "What does 「もう、かばんに入る小さいかさを買いました」 mean?",
+     "fr": "Que signifie 「もう、かばんに入る小さいかさを買いました」 ?"
     },
     "options": {
      "en": [
-      "I have already bought a new umbrella",
-      "I will buy a new umbrella soon",
-      "I have not bought a new umbrella yet",
-      "I want to buy one more new umbrella"
+      "I have already bought a small umbrella for my bag",
+      "I will soon buy a small umbrella for my bag",
+      "I have not yet bought a small umbrella for my bag",
+      "I want to buy another small umbrella for my bag"
      ],
      "fr": [
-      "J'ai déjà acheté un nouveau parapluie",
-      "J'achèterai bientôt un nouveau parapluie",
-      "Je n'ai pas encore acheté de nouveau parapluie",
-      "Je veux acheter encore un nouveau parapluie"
+      "J'ai déjà acheté un petit parapluie pour mon sac",
+      "J'achèterai bientôt un petit parapluie pour mon sac",
+      "Je n'ai pas encore acheté de petit parapluie pour mon sac",
+      "Je veux acheter un autre petit parapluie pour mon sac"
      ]
     },
     "correct": 0
@@ -4798,14 +4798,14 @@
     ]
    },
    {
-    "jp": "わたしはもう新しいかさを買いました。",
+    "jp": "わたしはもう、かばんに入る小さいかさを買いました。",
     "translation": {
-     "en": "I have already bought a new umbrella.",
-     "fr": "J'ai déjà acheté un nouveau parapluie."
+     "en": "I have already bought a small umbrella that fits in my bag.",
+     "fr": "J'ai déjà acheté un petit parapluie qui tient dans mon sac."
     },
     "note": {
-     "en": "The pattern 「もう〜ました」 says the action is already done.",
-     "fr": "La structure 「もう〜ました」 dit que l'action est déjà faite."
+     "en": "The pattern 「もう〜ました」 says the action is already done: next time, the writer will have an umbrella.",
+     "fr": "La structure 「もう〜ました」 dit que l'action est déjà faite : la prochaine fois, l'auteur aura un parapluie."
     },
     "words": [
      {
@@ -4830,10 +4830,31 @@
       }
      },
      {
-      "surface": "新しい",
+      "surface": "かばん",
       "meaning": {
-       "en": "new",
-       "fr": "nouveau"
+       "en": "bag",
+       "fr": "sac"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks where it goes",
+       "fr": "marque où il va"
+      }
+     },
+     {
+      "surface": "入る",
+      "meaning": {
+       "en": "fits in",
+       "fr": "tient dans"
+      }
+     },
+     {
+      "surface": "小さい",
+      "meaning": {
+       "en": "small",
+       "fr": "petit"
       }
      },
      {
@@ -7719,7 +7740,7 @@
    "〜が上手です／下手です",
    "〜と思います"
   ],
-  "text": "わたしは四月から高校生です。学校にはテニスとすいえいのクラブがあります。きのう、あにに「テニスとすいえいとどちらがいいですか。」と聞きました。あにはテニスが上手です。高校のとき、テニスのクラブにいました。でも、あには「すいえいのほうがいいと思います。」と言いました。わたしはなつがすきで、水の中であそぶのもすきだからです。わたしはテニスが下手です。ボールがはやくて、こわいです。だから、すいえいのクラブに入ります。来週から、毎日学校のプールでおよぎます。",
+  "text": "わたしは四月から高校生です。学校にはテニスとすいえいのクラブがあります。きのう、あにに「テニスとすいえいとどちらがいいですか。」と聞きました。あにはテニスが上手です。高校のとき、テニスのクラブにいました。でも、あには「すいえいのほうがいいと思います。」と言いました。わたしはなつがすきで、水の中であそぶのもすきだからです。わたしはテニスが下手です。ボールがはやくて、こわいです。だから、すいえいのクラブに入ります。なつから、毎日学校のプールでおよぎます。",
   "questions": [
    {
     "type": "comprehension",
@@ -7884,15 +7905,15 @@
     "options": {
      "en": [
       "From tomorrow",
-      "From next week",
+      "From the summer",
       "From April",
-      "From the summer"
+      "From next week"
      ],
      "fr": [
       "Demain",
-      "La semaine prochaine",
+      "Cet été",
       "En avril",
-      "Cet été"
+      "La semaine prochaine"
      ]
     },
     "correct": 1
@@ -8646,21 +8667,21 @@
     ]
    },
    {
-    "jp": "来週から、毎日学校のプールでおよぎます。",
+    "jp": "なつから、毎日学校のプールでおよぎます。",
     "translation": {
-     "en": "From next week, I will swim in the school pool every day.",
-     "fr": "À partir de la semaine prochaine, je nagerai tous les jours dans la piscine du lycée."
+     "en": "From the summer, I will swim in the school pool every day.",
+     "fr": "À partir de l'été, je nagerai tous les jours dans la piscine du lycée."
     },
     "note": {
-     "en": "The non-past 「およぎます」 with 「来週から」 speaks of the future.",
-     "fr": "Le non-passé 「およぎます」 avec 「来週から」 parle du futur."
+     "en": "The non-past 「およぎます」 with 「なつから」 speaks of the future.",
+     "fr": "Le non-passé 「およぎます」 avec 「なつから」 parle du futur."
     },
     "words": [
      {
-      "surface": "来週",
+      "surface": "なつ",
       "meaning": {
-       "en": "next week",
-       "fr": "la semaine prochaine"
+       "en": "summer",
+       "fr": "l'été"
       }
      },
      {

@@ -2379,7 +2379,7 @@
    "〜に至る",
    "〜ゆえに"
   ],
-  "text": "明治の初め、一人の女性が医師を志した。当時、女性が医学を学ぶ道は制度上閉ざされていたが、彼女は周囲の冷笑をものともせず、役所に通って受験の許可を求めたという。三年に及ぶ交渉の末、試験を受けることが認められ、彼女は日本で初めての女性医師となるに至った。注目すべきは、彼女がその後、自らの成功に満足しなかったことである。女性ゆえに学ぶ機会を奪われる者を一人でも減らそうと、私塾を開き、後進の教育に生涯を捧げた。今日、医学部の学生の半数近くを女性が占める。それを当然と感じられること自体が、彼女のような先人が切り開いた道の上に私たちが立っている証しなのだ。",
+  "text": "明治の初め、一人の女性が医師を志した。当時、女性が医学を学ぶ道は制度上閉ざされていたが、彼女は周囲の冷笑をものともせず、役所に通って受験の許可を求めたという。三年に及ぶ交渉の末、試験を受けることが認められ、彼女は日本で初めての女性医師となるに至った。注目すべきは、彼女がその後、自らの成功に満足しなかったことである。女性ゆえに学ぶ機会を奪われる者を一人でも減らそうと、私塾を開き、後進の教育に生涯を捧げた。今日、医学部の学生の三割以上を女性が占める。それを当然と感じられること自体が、彼女のような先人が切り開いた道の上に私たちが立っている証しなのだ。",
   "questions": [
    {
     "type": "comprehension",
@@ -2565,15 +2565,15 @@
     },
     "options": {
      "en": [
+      "More than 30%",
+      "About 10%",
       "Nearly half",
-      "About ten percent",
-      "A small minority",
       "Well over half"
      ],
      "fr": [
+      "Plus de 30 %",
+      "Environ 10 %",
       "Près de la moitié",
-      "Environ dix pour cent",
-      "Une petite minorité",
       "Bien plus de la moitié"
      ]
     },
@@ -3343,14 +3343,14 @@
     ]
    },
    {
-    "jp": "今日、医学部の学生の半数近くを女性が占める。",
+    "jp": "今日、医学部の学生の三割以上を女性が占める。",
     "translation": {
-     "en": "Today women make up nearly half of medical students.",
-     "fr": "Aujourd'hui, les femmes représentent près de la moitié des étudiants en médecine."
+     "en": "Today women make up more than thirty per cent of medical students.",
+     "fr": "Aujourd'hui, les femmes représentent plus de trente pour cent des étudiants en médecine."
     },
     "note": {
-     "en": "The verb 「占める」 with 「を」 means to account for a share; 「半数近く」 means nearly half.",
-     "fr": "Le verbe 「占める」 avec 「を」 signifie représenter une part ; 「半数近く」 signifie près de la moitié."
+     "en": "The verb 「占める」 with 「を」 means to account for a share; 「三割以上」 means thirty per cent or more.",
+     "fr": "Le verbe 「占める」 avec 「を」 signifie représenter une part ; 「三割以上」 signifie trente pour cent ou plus."
     },
     "words": [
      {
@@ -3389,10 +3389,17 @@
       }
      },
      {
-      "surface": "半数近く",
+      "surface": "三割",
       "meaning": {
-       "en": "nearly half",
-       "fr": "près de la moitié"
+       "en": "thirty per cent",
+       "fr": "trente pour cent"
+      }
+     },
+     {
+      "surface": "以上",
+      "meaning": {
+       "en": "or more",
+       "fr": "ou plus"
       }
      },
      {
