@@ -2312,6 +2312,15 @@ line here says otherwise.
   thumb's dock at the foot about the line alone (grammar, words, Explain,
   keep) over the transport. A screen under the shell takes the stage
   through `stores/stage.js`; the desk's rail never leaves.
+  **The line and its translation fit between the video and the dock**
+  (2026-10-20): the server cuts a line wider than two rows there where it
+  cuts clean (`study/line_cut.TARGET_LINE_WIDTH`), and a line it could
+  not cut, or a screen too short for two rows, is stepped down the rungs
+  until the stage holds it -- `--fs-display-fluid`, `--fs-heading`, then
+  `--fs-title`, the size of every other breakdown's words, its readings
+  and its translation a rung down with it (`useLineFit`). Measured, never
+  guessed from the line's length; past the floor the page scrolls behind
+  the dock, as a tall card does.
   A typed or photographed Passage has no video, and its sentence takes the
   video's place (plan 161, the owner's picks B and B′): the sumi object to
   the middle column's foot, the sentence at `--fs-display-fluid`, its

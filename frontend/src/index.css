@@ -1703,6 +1703,10 @@
 .tok-line[data-sung] .tok__furi {
   mask-image: linear-gradient(to right, #000 var(--said, 0%), rgb(0 0 0 / 40%) var(--said, 0%));
 }
+/* The phone stage's readings, a rung down with its line where the line
+   steps down to fit the stage (useLineFit). */
+.anl-m__subs[data-fit="1"] .tok__furi { font-size: var(--fs-caption); }
+.anl-m__subs[data-fit="2"] .tok__furi { font-size: var(--fs-caption-xs); }
 /* The furigana dial: readings over everything, only over the words
    the SRS has not mastered, or none. */
 :is(.anl-subs, .anl-m__subs)[data-furigana="none"] .tok__furi { visibility: hidden; }
@@ -28329,6 +28333,19 @@ button.brd-stn { cursor: pointer; }
   text-wrap: balance;
   color: var(--text-secondary);
 }
+/* The line stepped down where the stage would not hold it between the
+   video and the dock (useLineFit, 2026-10-20): a rung down, then the
+   floor, every breakdown's own size, its readings with it and the rows
+   closer; at the floor the translation steps down too, under the line
+   it translates. A rung, never a size between two. */
+.anl-m__subs[data-fit="1"] .anl-subs__line { row-gap: var(--sp-4); }
+.anl-m__subs[data-fit="1"] .tok { font-size: var(--fs-heading); }
+.anl-m__subs[data-fit="2"] .anl-subs__line { row-gap: var(--sp-3); }
+.anl-m__subs[data-fit="2"] .tok {
+  border-bottom-width: 2px;
+  font-size: var(--fs-title);
+}
+.anl-m__subs[data-fit="2"] .anl-m__tr { font-size: var(--fs-body); }
 .anl-m__note {
   display: flex;
   flex-direction: column;
